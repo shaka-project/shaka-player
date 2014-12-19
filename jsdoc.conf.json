@@ -1,0 +1,16 @@
+{
+  "tags": {
+    /* This reverses the preferred order of tag dictionaries so that
+     * closure's version of tag interpretation is used over jsdoc's. */
+    "dictionaries": [ "closure", "jsdoc" ]
+  },
+  "source": {
+    "include": [ "lib" ]
+  },
+  "opts": {
+    "private": true,
+    "recurse": true,
+    "tutorials": "tutorials",
+    "destination": "docs/api"
+  }
+}

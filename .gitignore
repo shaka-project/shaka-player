@@ -1,0 +1,7 @@
+*.pyc
+third_party/closure/goog/deps.js
+shaka-player.compiled.js
+shaka-player.compiled.debug.js
+shaka-player.compiled.debug.map
+docs/api
+docs/reference

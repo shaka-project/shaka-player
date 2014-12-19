@@ -1,0 +1,20 @@
+# Development-related files
+.tern-port
+coverage/
+node_modules/.bin
+node_modules/eslint
+node_modules/gulp*
+node_modules/istanbul
+
+# Node.js-only modules
+node_modules/requizzle
+
+# User-specific files
+conf.json
+
+# Generated files
+test/tutorials/out
+out/
+
+# Dotfile detritus
+.DS_Store

@@ -1,0 +1,44 @@
+closure/compiler.jar
+  The closure compiler, by Google.
+  Apache v2.0 license.
+  https://github.com/google/closure-compiler
+
+closure/goog
+  The closure library (modified), by Google.
+  Apache v2.0 license.
+  https://github.com/google/closure-library
+
+closure/deps
+  The closure dependency generator, part of the closure library, by Google.
+  Apache v2.0 license.
+  https://github.com/google/closure-library
+
+gjslint/closure_linter-2.3.13
+  The closure JavaScript linter, by Google.
+  Apache v2.0 license.
+  https://code.google.com/p/closure-linter/
+
+gjslint/python-gflags-2.0
+  A python command-line parser, needed by the closure linter, by Google.
+  BSD-style license (3-clause).
+  https://code.google.com/p/python-gflags/
+
+jasmine
+  The Jasmine JS testing framework, v2.1.3, by Pivotal Labs.
+  MIT license.
+  https://github.com/pivotal/jasmine
+
+jasmine/lib/jasmine-ajax-trunk
+  The Jasmine fake AJAX library, by Pivotal Labs.
+  MIT license.
+  https://github.com/pivotal/jasmine-ajax
+
+blanket_jasmine
+  Blanket JS coverage library (+ Jasmine adapter), v1.1.5, by Alex Seville.
+  MIT license.
+  https://github.com/alex-seville/blanket
+
+jsdoc
+  JSDoc 3 documentation generator (modified), by Michael Matthews.
+  Apache v2.0 license.
+  https://github.com/jsdoc3/jsdoc
