@@ -314,7 +314,8 @@ describe('Player', function() {
         var videoStream = source.streamsByType_['video'];
         expect(videoStream.state_).toBe(DashStream.State_.UPDATING);
 
-        var ok = player.selectVideoTrack(3);  // 480p stream
+        var track = getVideoTrackByHeight(480);
+        var ok = player.selectVideoTrack(track.id);
         expect(ok).toBe(true);
         expect(videoStream.state_).toBe(DashStream.State_.SWITCHING);
 
