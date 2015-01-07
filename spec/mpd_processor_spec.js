@@ -16,18 +16,29 @@
  * @fileoverview mpd_processor.js unit tests.
  */
 
-goog.require('shaka.dash.mpd');
 goog.require('shaka.dash.MpdProcessor');
+goog.require('shaka.dash.mpd');
+goog.require('shaka.player.Player');
 
 describe('MpdProcessor', function() {
-  var parser;
+  var mpd;
+  var processor;
 
-  beforeEach(function() {
-    parser = new shaka.dash.MpdProcessor(null);
+  beforeAll(function() {
+    // Hijack assertions and convert failed assertions into failed tests.
+    assertsToFailures.install();
   });
 
-  describe('validateSegmentInfo_()', function() {
-    var mpd = shaka.dash.mpd;
+  afterAll(function() {
+    assertsToFailures.uninstall();
+  });
+
+  beforeEach(function() {
+    mpd = shaka.dash.mpd;
+    processor = new shaka.dash.MpdProcessor(null);
+  });
+
+  describe('validateSegmentInfo_', function() {
     var m;
     var p;
     var as;
@@ -46,43 +57,43 @@ describe('MpdProcessor', function() {
       st = new mpd.SegmentTemplate();
     });
 
-    it('can handle a single SegmentBase.', function() {
+    it('handles a single SegmentBase', function() {
       r.segmentBase = sb;
       as.representations.push(r);
       p.adaptationSets.push(as);
       m.periods.push(p);
 
-      parser.validateSegmentInfo_(m);
+      processor.validateSegmentInfo_(m);
       expect(r.segmentBase).not.toBeNull();
       expect(r.segmentList).toBeNull();
       expect(r.segmentTemplate).toBeNull();
     });
 
-    it('can handle a single SegmentList.', function() {
+    it('handles a single SegmentList', function() {
       r.segmentList = sl;
       as.representations.push(r);
       p.adaptationSets.push(as);
       m.periods.push(p);
 
-      parser.validateSegmentInfo_(m);
+      processor.validateSegmentInfo_(m);
       expect(r.segmentBase).toBeNull();
       expect(r.segmentList).not.toBeNull();
       expect(r.segmentTemplate).toBeNull();
     });
 
-    it('can handle a single SegmentTemplate.', function() {
+    it('handles a single SegmentTemplate', function() {
       r.segmentTemplate = st;
       as.representations.push(r);
       p.adaptationSets.push(as);
       m.periods.push(p);
 
-      parser.validateSegmentInfo_(m);
+      processor.validateSegmentInfo_(m);
       expect(r.segmentBase).toBeNull();
       expect(r.segmentList).toBeNull();
       expect(r.segmentTemplate).not.toBeNull();
     });
 
-    it('can handle a SegmentBase and a SegmentList.', function() {
+    it('handles a SegmentBase and a SegmentList', function() {
       r.segmentBase = sb;
       r.segmentList = sl;
       as.representations.push(r);
@@ -90,13 +101,13 @@ describe('MpdProcessor', function() {
       m.periods.push(p);
 
       // SegmentList should be removed.
-      parser.validateSegmentInfo_(m);
+      processor.validateSegmentInfo_(m);
       expect(r.segmentBase).not.toBeNull();
       expect(r.segmentList).toBeNull();
       expect(r.segmentTemplate).toBeNull();
     });
 
-    it('can handle a SegmentBase and a SegmentTemplate.', function() {
+    it('handles a SegmentBase and a SegmentTemplate', function() {
       r.segmentBase = sb;
       r.segmentTemplate = st;
       as.representations.push(r);
@@ -104,13 +115,13 @@ describe('MpdProcessor', function() {
       m.periods.push(p);
 
       // SegmentTemplate should be removed.
-      parser.validateSegmentInfo_(m);
+      processor.validateSegmentInfo_(m);
       expect(r.segmentBase).not.toBeNull();
       expect(r.segmentList).toBeNull();
       expect(r.segmentTemplate).toBeNull();
     });
 
-    it('can handle a SegmentList and a SegmentTemplate.', function() {
+    it('handles a SegmentList and a SegmentTemplate', function() {
       r.segmentList = sl;
       r.segmentTemplate = st;
       as.representations.push(r);
@@ -118,14 +129,13 @@ describe('MpdProcessor', function() {
       m.periods.push(p);
 
       // SegmentTemplate should be removed.
-      parser.validateSegmentInfo_(m);
+      processor.validateSegmentInfo_(m);
       expect(r.segmentBase).toBeNull();
       expect(r.segmentList).not.toBeNull();
       expect(r.segmentTemplate).toBeNull();
     });
 
-    it('can handle a SegmentBase, a SegmentList, and a SegmentTemplate.',
-       function() {
+    it('handles SegmentBase, SegmentList, and SegmentTemplate', function() {
       r.segmentBase = sb;
       r.segmentList = sl;
       r.segmentTemplate = st;
@@ -134,26 +144,24 @@ describe('MpdProcessor', function() {
       m.periods.push(p);
 
       // SegmentList and SegmentTemplate should be removed.
-      parser.validateSegmentInfo_(m);
+      processor.validateSegmentInfo_(m);
       expect(r.segmentBase).not.toBeNull();
       expect(r.segmentList).toBeNull();
       expect(r.segmentTemplate).toBeNull();
     });
 
-    it('can handle no SegmentBase, SegmentList, or SegmentTemplate.',
-       function() {
+    it('handles no SegmentBase, SegmentList, or SegmentTemplate', function() {
       as.representations.push(r);
       p.adaptationSets.push(as);
       m.periods.push(p);
 
       // The Representation should be removed.
-      parser.validateSegmentInfo_(m);
+      processor.validateSegmentInfo_(m);
       expect(as.representations.length).toBe(0);
     });
   });
 
-  describe('processSegmentTemplates_()', function() {
-    var mpd = shaka.dash.mpd;
+  describe('processSegmentTemplates_', function() {
     var m;
     var p;
     var as;
@@ -181,20 +189,18 @@ describe('MpdProcessor', function() {
       m.periods.push(p);
     });
 
-    it('can generate a SegmentBase from a SegmentTemplate.', function() {
+    it('generates a SegmentBase from a SegmentTemplate', function() {
       st.mediaUrlTemplate = 'http://example.com/$Bandwidth$-media.mp4';
       st.indexUrlTemplate = 'http://example.com/$Bandwidth$-index.sidx';
       st.initializationUrlTemplate = 'http://example.com/$Bandwidth$-init.mp4';
 
       r1.bandwidth = 250000;
-      r1.baseUrl = new mpd.BaseUrl();
       r1.baseUrl = new goog.Uri('http://example.com/');
 
       r2.bandwidth = 500000;
-      r2.baseUrl = new mpd.BaseUrl();
       r2.baseUrl = new goog.Uri('http://example.com/');
 
-      parser.processSegmentTemplates_(m);
+      processor.processSegmentTemplates_(m);
 
       // Check |r1|.
       expect(r1.segmentBase).toBeTruthy();
@@ -237,7 +243,7 @@ describe('MpdProcessor', function() {
       expect(i2.range).toBeNull();
     });
 
-    it('can generate a SegmentList from a SegmentTemplate.', function() {
+    it('generates a SegmentList from a SegmentTemplate', function() {
       var tp1 = new mpd.SegmentTimePoint();
       tp1.duration = 10;
       tp1.repeat = 1;
@@ -260,14 +266,12 @@ describe('MpdProcessor', function() {
       st.timeline = timeline;
 
       r1.bandwidth = 250000;
-      r1.baseUrl = new mpd.BaseUrl();
       r1.baseUrl = new goog.Uri('http://example.com/');
 
       r2.bandwidth = 500000;
-      r2.baseUrl = new mpd.BaseUrl();
       r2.baseUrl = new goog.Uri('http://example.com/');
 
-      parser.processSegmentTemplates_(m);
+      processor.processSegmentTemplates_(m);
 
       // Check |r1|.
       expect(r1.segmentBase).toBeNull();
@@ -347,139 +351,234 @@ describe('MpdProcessor', function() {
     });
   });
 
-  describe('fillUrlTemplate_()', function() {
-    it('can handle a single RepresentationID identifier.', function() {
+  describe('fillUrlTemplate_', function() {
+    it('handles a single RepresentationID identifier', function() {
       expect(
-          parser.fillUrlTemplate_(
+          processor.fillUrlTemplate_(
               '/example/$RepresentationID$.mp4',
-              100, null, null, null).toString()).toBe('/example/100.mp4')
+              100, null, null, null).toString()).toBe('/example/100.mp4');
 
       // RepresentationID cannot use a width specifier.
       expect(
-          parser.fillUrlTemplate_(
+          processor.fillUrlTemplate_(
               '/example/$RepresentationID%01d$.mp4',
               100, null, null, null).toString()).toBe('/example/100.mp4');
 
       expect(
-          parser.fillUrlTemplate_(
+          processor.fillUrlTemplate_(
               '/example/$RepresentationID$.mp4',
               null, null, null, null).toString())
                   .toBe('/example/$RepresentationID$.mp4');
     });
 
-    it('can handle a single Number identifier.', function() {
+    it('handles a single Number identifier', function() {
       expect(
-          parser.fillUrlTemplate_(
+          processor.fillUrlTemplate_(
               '/example/$Number$.mp4',
-              null, 100, null, null).toString()).toBe('/example/100.mp4')
+              null, 100, null, null).toString()).toBe('/example/100.mp4');
 
       expect(
-          parser.fillUrlTemplate_(
+          processor.fillUrlTemplate_(
               '/example/$Number%05d$.mp4',
               null, 100, null, null).toString()).toBe('/example/00100.mp4');
 
       expect(
-          parser.fillUrlTemplate_(
+          processor.fillUrlTemplate_(
               '/example/$Number$.mp4',
               null, null, null, null).toString())
                   .toBe('/example/$Number$.mp4');
     });
 
-    it('can handle a single Bandwidth identifier.', function() {
+    it('handles a single Bandwidth identifier', function() {
       expect(
-          parser.fillUrlTemplate_(
+          processor.fillUrlTemplate_(
               '/example/$Bandwidth$.mp4',
-              null, null, 100, null).toString()).toBe('/example/100.mp4')
+              null, null, 100, null).toString()).toBe('/example/100.mp4');
 
       expect(
-          parser.fillUrlTemplate_(
+          processor.fillUrlTemplate_(
               '/example/$Bandwidth%05d$.mp4',
               null, null, 100, null).toString()).toBe('/example/00100.mp4');
 
       expect(
-          parser.fillUrlTemplate_(
+          processor.fillUrlTemplate_(
               '/example/$Bandwidth$.mp4',
               null, null, null, null).toString())
                   .toBe('/example/$Bandwidth$.mp4');
     });
 
-    it('can handle a single Time identifier.', function() {
+    it('handles a single Time identifier', function() {
       expect(
-          parser.fillUrlTemplate_(
+          processor.fillUrlTemplate_(
               '/example/$Time$.mp4',
-              null, null, null, 100).toString()).toBe('/example/100.mp4')
+              null, null, null, 100).toString()).toBe('/example/100.mp4');
 
       expect(
-          parser.fillUrlTemplate_(
+          processor.fillUrlTemplate_(
               '/example/$Time%05d$.mp4',
               null, null, null, 100).toString()).toBe('/example/00100.mp4');
 
       expect(
-          parser.fillUrlTemplate_(
+          processor.fillUrlTemplate_(
               '/example/$Time$.mp4',
               null, null, null, null).toString())
                   .toBe('/example/$Time$.mp4');
     });
 
-    it('can handle multiple identifiers.', function() {
+    it('handles multiple identifiers', function() {
       expect(
-          parser.fillUrlTemplate_(
+          processor.fillUrlTemplate_(
               '/example/$RepresentationID$_$Number$_$Bandwidth$_$Time$.mp4',
-              1, 2, 3, 4).toString()).toBe('/example/1_2_3_4.mp4')
+              1, 2, 3, 4).toString()).toBe('/example/1_2_3_4.mp4');
 
       // No spaces.
       expect(
-          parser.fillUrlTemplate_(
+          processor.fillUrlTemplate_(
               '/example/$RepresentationID$$Number$$Bandwidth$$Time$.mp4',
-              1, 2, 3, 4).toString()).toBe('/example/1234.mp4')
+              1, 2, 3, 4).toString()).toBe('/example/1234.mp4');
 
       // Different order.
       expect(
-          parser.fillUrlTemplate_(
+          processor.fillUrlTemplate_(
               '/example/$Bandwidth$_$Time$_$RepresentationID$_$Number$.mp4',
-              1, 2, 3, 4).toString()).toBe('/example/3_4_1_2.mp4')
+              1, 2, 3, 4).toString()).toBe('/example/3_4_1_2.mp4');
 
       // Single width.
       expect(
-          parser.fillUrlTemplate_(
+          processor.fillUrlTemplate_(
               '$RepresentationID$_$Number%01d$_$Bandwidth%01d$_$Time%01d$',
-              1, 2, 3, 400).toString()).toBe('1_2_3_400')
+              1, 2, 3, 400).toString()).toBe('1_2_3_400');
 
       // Different widths.
       expect(
-          parser.fillUrlTemplate_(
+          processor.fillUrlTemplate_(
               '$RepresentationID$_$Number%02d$_$Bandwidth%02d$_$Time%02d$',
-              1, 2, 3, 4).toString()).toBe('1_02_03_04')
+              1, 2, 3, 4).toString()).toBe('1_02_03_04');
 
       // Double $$.
       expect(
-          parser.fillUrlTemplate_(
+          processor.fillUrlTemplate_(
               '$$/$RepresentationID$$$$Number$$$$Bandwidth$$$$Time$$$.$$',
-              1, 2, 3, 4).toString()).toBe('$/1$2$3$4$.$')
+              1, 2, 3, 4).toString()).toBe('$/1$2$3$4$.$');
     });
 
-    it('can handle invalid identifiers.', function() {
+    it('handles invalid identifiers', function() {
       expect(
-          parser.fillUrlTemplate_(
+          processor.fillUrlTemplate_(
               '/example/$Garbage$.mp4',
               1, 2, 3, 4).toString()).toBe('/example/$Garbage$.mp4');
 
       expect(
-          parser.fillUrlTemplate_(
+          processor.fillUrlTemplate_(
               '/example/$RepresentationID%$',
               1, 2, 3, 4)).toBeNull();
     });
 
-    it('can handle partial identifiers.', function() {
+    it('handles partial identifiers', function() {
       expect(
-          parser.fillUrlTemplate_(
+          processor.fillUrlTemplate_(
               '/example/$Time.mp4',
               1, 2, 3, 4).toString()).toBe('/example/$Time.mp4');
 
       expect(
-          parser.fillUrlTemplate_(
+          processor.fillUrlTemplate_(
               '/example/$Time%.mp4',
               1, 2, 3, 4)).toBeNull();
+    });
+  });
+
+  describe('process', function() {
+    var m;
+    var p;
+    var as;
+    var r;
+    var st;
+
+    var originalIsTypeSupported;
+
+    beforeAll(function() {
+      // For the purposes of these tests, we will avoid querying the browser's
+      // format and codec support and pretend we support everything.  This way,
+      // we will do all processing other than removal of unsupported formats.
+      originalIsTypeSupported = shaka.player.Player.isTypeSupported;
+      shaka.player.Player.isTypeSupported = function() { return true; };
+    });
+
+    afterAll(function() {
+      // Restore isTypeSupported.
+      shaka.player.Player.isTypeSupported = originalIsTypeSupported;
+    });
+
+    beforeEach(function() {
+      m = new mpd.Mpd();
+      p = new mpd.Period();
+      as = new mpd.AdaptationSet();
+      r = new mpd.Representation();
+      st = new mpd.SegmentTemplate();
+
+      r.segmentTemplate = st;
+      r.bandwidth = 250000;
+
+      as.representations.push(r);
+
+      p.adaptationSets.push(as);
+
+      m.periods.push(p);
+    });
+
+    it('generates a SegmentList with MPD and segment durations', function() {
+      st.mediaUrlTemplate = '$Number$-$Bandwidth$-media.mp4';
+      st.timescale = 9000;
+      st.segmentDuration = 90000;
+
+      p.start = 0;
+      m.duration = 100;
+
+      processor.process(m);
+
+      expect(r.segmentList).not.toBe(null);
+      // The representation has not been removed as invalid.
+      expect(as.representations.length).toBe(1);
+    });
+
+    it('generates a SegmentList with period and segment durations', function() {
+      st.mediaUrlTemplate = '$Number$-$Bandwidth$-media.mp4';
+      st.timescale = 9000;
+      st.segmentDuration = 90000;
+
+      p.start = 0;
+      p.duration = 100;
+
+      processor.process(m);
+
+      expect(r.segmentList).not.toBe(null);
+      // The representation has not been removed as invalid.
+      expect(as.representations.length).toBe(1);
+    });
+
+    it('derives period duration from MPD', function() {
+      st.mediaUrlTemplate = '$Number$-$Bandwidth$-media.mp4';
+      st.segmentDuration = 90000;
+
+      p.start = 0;
+      m.duration = 100;
+
+      processor.process(m);
+
+      expect(p.duration).toBe(100);
+    });
+
+    it('derives period start from MPD type', function() {
+      st.mediaUrlTemplate = '$Number$-$Bandwidth$-media.mp4';
+      st.segmentDuration = 90000;
+
+      m.duration = 100;
+      m.type = 'static';
+
+      processor.process(m);
+
+      // Period start has been derived.
+      expect(p.start).not.toBe(null);
     });
   });
 });

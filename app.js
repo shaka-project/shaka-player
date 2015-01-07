@@ -512,6 +512,7 @@ app.interpretContentProtection_ = function(contentProtection) {
     var key = StringUtils.fromHex(child.getAttribute('key'));
     var keyObj = {
       kty: 'oct',
+      alg: 'A128KW',
       kid: StringUtils.toBase64(keyid, false),
       k: StringUtils.toBase64(key, false)
     };
@@ -527,6 +528,33 @@ app.interpretContentProtection_ = function(contentProtection) {
         'org.w3.clearkey', false, licenseServerUrl, false, initData, null);
   }
 
+  if (contentProtection.schemeIdUri == 'http://youtube.com/drm/2012/10/10') {
+    // This is another scheme used by YouTube.
+    var licenseServerUrl = null;
+    for (var i = 0; i < contentProtection.children.length; ++i) {
+      var child = contentProtection.children[i];
+      if (child.getAttribute('type') == 'widevine') {
+        licenseServerUrl = child.firstChild.nodeValue;
+        break;
+      }
+    }
+    if (licenseServerUrl) {
+      var initDataOverride = null;
+      if (contentProtection.pssh && contentProtection.pssh.psshBox) {
+        // Override the init data with the PSSH from the manifest.
+        initDataOverride = {
+          initData: contentProtection.pssh.psshBox,
+          initDataType: 'cenc'
+        };
+        console.info('Found overridden PSSH with system IDs:',
+                     contentProtection.pssh.parsedPssh.systemIds);
+      }
+      return new shaka.player.DrmSchemeInfo(
+          'com.widevine.alpha', true, licenseServerUrl, false, initDataOverride,
+          app.postProcessYouTubeLicenseResponse_);
+    }
+  }
+
   if (contentProtection.schemeIdUri ==
       'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed') {
     // This is the UUID which represents Widevine in the edash-packager.
@@ -537,6 +565,43 @@ app.interpretContentProtection_ = function(contentProtection) {
 
   console.warn('Unrecognized scheme: ' + contentProtection.schemeIdUri);
   return null;
+};
+
+
+/**
+ * Post-process the YouTube license server's response, which has headers before
+ * the actual license.
+ *
+ * @param {!Uint8Array} response
+ * @param {!shaka.player.DrmSchemeInfo.Restrictions} restrictions
+ * @return {!Uint8Array}
+ * @private
+ */
+app.postProcessYouTubeLicenseResponse_ = function(response, restrictions) {
+  var StringUtils = shaka.util.StringUtils;
+  var responseStr = StringUtils.fromUint8Array(response);
+  var index = responseStr.indexOf('\r\n\r\n');
+  if (index >= 0) {
+    // Strip off the headers.
+    var headers = responseStr.substr(0, index).split('\r\n');
+    responseStr = responseStr.substr(index + 4);
+    console.info('YT HEADERS:', headers);
+
+    // Check for restrictions on HD content.
+    for (var i = 0; i < headers.length; ++i) {
+      var k = headers[i].split(': ')[0];
+      var v = headers[i].split(': ')[1];
+      if (k == 'Authorized-Format-Types') {
+        var types = v.split(',');
+        if (types.indexOf('HD') == -1) {
+          // This license will not permit HD playback.
+          console.info('HD disabled.');
+          restrictions.maxHeight = 576;
+        }
+      }
+    }
+  }
+  return StringUtils.toUint8Array(responseStr);
 };
 
 

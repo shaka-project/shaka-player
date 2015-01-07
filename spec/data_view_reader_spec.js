@@ -47,7 +47,7 @@ describe('DataViewReader', function() {
         shaka.util.DataViewReader.Endianness.LITTLE_ENDIAN);
   });
 
-  it('is able to read a uint8 in big endian.', function() {
+  it('reads a uint8 in big endian', function() {
     var value1 = bigEndianReader.readUint8();
     expect(value1).toBe(0x00);
 
@@ -61,7 +61,7 @@ describe('DataViewReader', function() {
     expect(value4).toBe(0xad);
   });
 
-  it('is able to read a uint16 in big endian.', function() {
+  it('reads a uint16 in big endian', function() {
     var value1 = bigEndianReader.readUint16();
     expect(value1).toBe(0x0001);
 
@@ -75,7 +75,7 @@ describe('DataViewReader', function() {
     expect(value4).toBe(0xbeef);
   });
 
-  it('is able to read a uint32 in big endian.', function() {
+  it('reads a uint32 in big endian', function() {
     var value1 = bigEndianReader.readUint32();
     expect(value1).toBe(0x00010203);
 
@@ -89,12 +89,12 @@ describe('DataViewReader', function() {
     expect(value4).toBe(0xffff0100);
   });
 
-  it('is able to read a uint64 in big endian.', function() {
+  it('reads a uint64 in big endian', function() {
     var value = bigEndianReader.readUint64();
     expect(value).toBe(0x0001020304050607);
   });
 
-  it('is able to read a uint8 in little endian.', function() {
+  it('reads a uint8 in little endian', function() {
     var value1 = littleEndianReader.readUint8();
     expect(value1).toBe(0x00);
 
@@ -108,7 +108,7 @@ describe('DataViewReader', function() {
     expect(value4).toBe(0xad);
   });
 
-  it('is able to read a uint16 in little endian.', function() {
+  it('reads a uint16 in little endian', function() {
     var value1 = littleEndianReader.readUint16();
     expect(value1).toBe(0x0100);
 
@@ -122,7 +122,7 @@ describe('DataViewReader', function() {
     expect(value4).toBe(0xefbe);
   });
 
-  it('is able to read a uint32 in little endian.', function() {
+  it('reads a uint32 in little endian', function() {
     var value1 = littleEndianReader.readUint32();
     expect(value1).toBe(0x03020100);
 
@@ -136,18 +136,18 @@ describe('DataViewReader', function() {
     expect(value4).toBe(0x0001ffff);
   });
 
-  it('is able to read a uint64 in little endian.', function() {
+  it('reads a uint64 in little endian', function() {
     var value = littleEndianReader2.readUint64();
     expect(value).toBe(0x0001ffffefbeadde);
   });
 
-  it('is able to skip bytes.', function() {
+  it('skips bytes', function() {
     bigEndianReader.skip(1);
     var value = bigEndianReader.readUint8();
     expect(value).toBe(0x01);
   });
 
-  it('is able to determine the end of the data view.', function() {
+  it('determines the end of the data view', function() {
     bigEndianReader.skip(7);
     expect(bigEndianReader.hasMoreData()).toBe(true);
 
@@ -155,7 +155,7 @@ describe('DataViewReader', function() {
     expect(bigEndianReader.hasMoreData()).toBe(false);
   });
 
-  it('is able to get the byte position.', function() {
+  it('gets the byte position', function() {
     expect(bigEndianReader.getPosition()).toBe(0);
 
     bigEndianReader.skip(1);
@@ -165,7 +165,7 @@ describe('DataViewReader', function() {
     expect(bigEndianReader.getPosition()).toBe(8);
   });
 
-  it('is able to detect an error when reading a uint8.', function() {
+  it('detects end-of-stream when reading a uint8', function() {
     bigEndianReader.skip(7);
     bigEndianReader.readUint8();
 
@@ -181,7 +181,7 @@ describe('DataViewReader', function() {
     expect(exception instanceof RangeError).toBe(true);
   });
 
-  it('is able to detect an error when reading a uint16.', function() {
+  it('detects end-of-stream when reading a uint16', function() {
     bigEndianReader.skip(7);
 
     var exception = null;
@@ -196,7 +196,7 @@ describe('DataViewReader', function() {
     expect(exception instanceof RangeError).toBe(true);
   });
 
-  it('is able to detect an error when reading a uint32.', function() {
+  it('detects end-of-stream when reading a uint32', function() {
     bigEndianReader.skip(5);
 
     var exception = null;
@@ -211,7 +211,7 @@ describe('DataViewReader', function() {
     expect(exception instanceof RangeError).toBe(true);
   });
 
-  it('is able to detect an error when skipping bytes.', function() {
+  it('detects end-of-stream when skipping bytes', function() {
     bigEndianReader.skip(8);
 
     var exception = null;
@@ -226,7 +226,7 @@ describe('DataViewReader', function() {
     expect(exception instanceof RangeError).toBe(true);
   });
 
-  it('is able to detect an error when reading a large uint64.', function() {
+  it('detects uint64s too large for JavaScript', function() {
     var exception = null;
 
     try {

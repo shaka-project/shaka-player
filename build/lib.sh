@@ -67,6 +67,12 @@ function library_sources_0() {
     -name '*.js' -print0
 }
 
+function test_sources_0() {
+  find \
+    "$dir"/spec \
+    -name '*.js' -print0
+}
+
 function closure_sources_0() {
   find \
     "$dir"/third_party/closure \

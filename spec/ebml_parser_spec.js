@@ -23,7 +23,7 @@ describe('EbmlParser', function() {
     jasmine.addMatchers(customMatchers);
   });
 
-  it('is able to parse one element.', function() {
+  it('parses one element', function() {
     // Set ID to 0x1.
     // Set size to 4 bytes.
     // Set the data to [0x01, 0x02, 0x03, 0x04].
@@ -39,7 +39,7 @@ describe('EbmlParser', function() {
     expect(elem.dataView_.getUint8(3)).toBe(0x04);
   });
 
-  it('is able to parse two elements at the same level.', function() {
+  it('parses two elements at the same level', function() {
     // For the first element:
     // Set ID to 0x1.
     // Set size to 4 bytes.
@@ -48,8 +48,8 @@ describe('EbmlParser', function() {
     // Set ID to 0x2.
     // Set size to 4 bytes.
     // Set the data to [0x09, 0x08, 0x07, 0x06].
-    var data = new Uint8Array(
-      [0x81, 0x84, 0x01, 0x02, 0x03, 0x04, 0x82, 0x84, 0x09, 0x08, 0x07, 0x06]);
+    var data = new Uint8Array([0x81, 0x84, 0x01, 0x02, 0x03, 0x04, 0x82, 0x84,
+                               0x09, 0x08, 0x07, 0x06]);
     var parser = new shaka.util.EbmlParser(new DataView(data.buffer));
 
     var elem1 = parser.parseElement();
@@ -69,7 +69,7 @@ describe('EbmlParser', function() {
     expect(elem2.dataView_.getUint8(3)).toBe(0x06);
   });
 
-  it('is able to detect a dynamic size value within an element.', function() {
+  it('detects a dynamic size value within an element', function() {
     var exception;
 
     try {
@@ -86,7 +86,7 @@ describe('EbmlParser', function() {
     expect(exception instanceof RangeError).toBe(true);
   });
 
-  it('is able to parse a 1 byte vint.', function() {
+  it('parses a 1 byte vint', function() {
     // 7-bit value: 1|100 0001
     var data = new Uint8Array([0xc1]);
 
@@ -100,7 +100,7 @@ describe('EbmlParser', function() {
     expect(shaka.util.EbmlParser.getVintValue_(vint)).toBe(0x41);
   });
 
-  it('is able to parse a 2 byte vint.', function() {
+  it('parses a 2 byte vint', function() {
     // 14-bit: 01|10 0001, 0001 1001
     var data = new Uint8Array([0x61, 0x19]);
 
@@ -111,7 +111,7 @@ describe('EbmlParser', function() {
     expect(shaka.util.EbmlParser.getVintValue_(vint)).toBe(0x2119);
   });
 
-  it('is able to parse a 3 byte vint.', function() {
+  it('parses a 3 byte vint', function() {
     // 21-bit: 001|1 0001, 0010 0001, 0001 0011
     var data = new Uint8Array([0x31, 0x21, 0x13]);
 
@@ -122,7 +122,7 @@ describe('EbmlParser', function() {
     expect(shaka.util.EbmlParser.getVintValue_(vint)).toBe(0x112113);
   });
 
-  it('is able to parse a 4 byte vint.', function() {
+  it('parses a 4 byte vint', function() {
     // 28-bit: 0001 | 1000, 0001 0001, 0001 0001, 0001 0101
     var data = new Uint8Array([0x18, 0x11, 0x11, 0x15]);
 
@@ -133,7 +133,7 @@ describe('EbmlParser', function() {
     expect(shaka.util.EbmlParser.getVintValue_(vint)).toBe(0x8111115);
   });
 
-  it('is able to parse a 5 byte vint.', function() {
+  it('parses a 5 byte vint', function() {
     // 35-bit: 0000 1|100, 0001 0001, 0001 0001, 0001 0001, 0001 1001
     var data = new Uint8Array([0x0c, 0x11, 0x11, 0x11, 0x19]);
 
@@ -144,7 +144,7 @@ describe('EbmlParser', function() {
     expect(shaka.util.EbmlParser.getVintValue_(vint)).toBe(0x411111119);
   });
 
-  it('is able to parse a 6 byte vint.', function() {
+  it('parses a 6 byte vint', function() {
     // 42-bit: 0000 01|10, 0001 0010, 0001 0001, 0001 0001, 0001 0001,
     //                     0001 1000
     var data = new Uint8Array([0x06, 0x12, 0x11, 0x11, 0x11, 0x18]);
@@ -156,7 +156,7 @@ describe('EbmlParser', function() {
     expect(shaka.util.EbmlParser.getVintValue_(vint)).toBe(0x21211111118);
   });
 
-  it('is able to parse a 7 byte vint.', function() {
+  it('parses a 7 byte vint', function() {
     // 49-bit: 0000 001|1, 0001 0010, 0001 0001, 0001 0001, 0001 0001,
     //                     0001 0001, 1001 0001
     var data = new Uint8Array([0x03, 0x12, 0x11, 0x11, 0x11, 0x11, 0x91]);
@@ -168,7 +168,7 @@ describe('EbmlParser', function() {
     expect(shaka.util.EbmlParser.getVintValue_(vint)).toBe(0x1121111111191);
   });
 
-  it('is able to parse a 8 byte vint.', function() {
+  it('parses a 8 byte vint', function() {
     // 56-bit: 0000 0001 | 0001 0010, 0001 0100, 0001 1000, 0001 0001,
     //                     0001 0001, 0001 1001, 0011 0001
     var data = new Uint8Array([0x01, 0x12, 0x14, 0x18, 0x11, 0x11, 0x19, 0x31]);
@@ -180,7 +180,7 @@ describe('EbmlParser', function() {
     expect(shaka.util.EbmlParser.getVintValue_(vint)).toBe(0x12141811111931);
   });
 
-  it('is able to detect vints with too many bytes.', function() {
+  it('detects vints with too many bytes', function() {
     var exception = null;
 
     try {
@@ -199,13 +199,14 @@ describe('EbmlParser', function() {
     expect(exception instanceof RangeError).toBe(true);
   });
 
-  it('is able to detect vint values with too many bits.', function() {
+  it('detects vint values with too many bits', function() {
     var exception = null;
 
     try {
       // 56-bit: 0000 0001 | 1000 0001, 0001 0001, 0001 0001, 0001 0001,
       //                     0001 0001, 0001 0001, 0001 0001
-      var data = new Uint8Array([0x01, 0x81, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11]);
+      var data = new Uint8Array(
+          [0x01, 0x81, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11]);
       shaka.util.EbmlParser.getVintValue_(data);
     } catch (e) {
       exception = e;
@@ -219,7 +220,8 @@ describe('EbmlParser', function() {
     try {
       // 56-bit: 0000 0001 | 0100 0001, 0001 0001, 0001 0001, 0001 0001,
       //                     0001 0001, 0001 0001, 0001 0001
-      var data = new Uint8Array([0x01, 0x41, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11]);
+      var data = new Uint8Array(
+          [0x01, 0x41, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11]);
       shaka.util.EbmlParser.getVintValue_(data);
     } catch (e) {
       exception = e;
@@ -233,7 +235,8 @@ describe('EbmlParser', function() {
     try {
       // 56-bit: 0000 0001 | 0010 0001, 0001 0001, 0001 0001, 0001 0001,
       //                     0001 0001, 0001 0001, 0001 0001
-      var data = new Uint8Array([0x01, 0x21, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11]);
+      var data = new Uint8Array(
+          [0x01, 0x21, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11]);
       shaka.util.EbmlParser.getVintValue_(data);
     } catch (e) {
       exception = e;
@@ -243,7 +246,7 @@ describe('EbmlParser', function() {
     expect(exception instanceof RangeError).toBe(true);
   });
 
-  it('is able to detect the end of input while reading a vint.', function() {
+  it('detects the end of input while reading a vint', function() {
     // 14-bit: 01|10 0001, 0001 0001
     var data = new Uint8Array([0x61]);
     var parser = new shaka.util.EbmlParser(new DataView(data.buffer));
@@ -263,7 +266,7 @@ describe('EbmlParser', function() {
     expect(exception instanceof RangeError).toBe(true);
   });
 
-  it('is able to parse a uint.', function() {
+  it('parses a uint', function() {
     // Set ID to 0x1.
     // Set size to 4 bytes.
     // Set the data to [0x01, 0x02, 0x03, 0x04].
@@ -275,7 +278,7 @@ describe('EbmlParser', function() {
     expect(elem.getUint()).toBe(0x01020304);
   });
 
-  it('is able to detect uints with too many bytes.', function() {
+  it('detects uints with too many bytes', function() {
     // Set ID to 0x1.
     // Set size to 9 bytes.
     // Set the data to [0x01, 0x02, 0x03, ..., 0x09].
@@ -298,7 +301,7 @@ describe('EbmlParser', function() {
     expect(exception instanceof RangeError).toBe(true);
   });
 
-  it('is able to detect uints with too many bits.', function() {
+  it('detects uints with too many bits', function() {
     // Set ID to 0x1.
     // Set size to 8 bytes.
     // Set the data to [0x2f, 0xff, 0xff, ..., 0xff].
@@ -321,7 +324,7 @@ describe('EbmlParser', function() {
     expect(exception instanceof RangeError).toBe(true);
   });
 
-  it('is able to determine a dynamic size value', function() {
+  it('recognizes dynamic-sized values', function() {
     var dynamicSizes = [
       new Uint8Array([0xff]),
       new Uint8Array([0x7f, 0xff]),
@@ -330,7 +333,8 @@ describe('EbmlParser', function() {
       new Uint8Array([0x0f, 0xff, 0xff, 0xff, 0xff]),
       new Uint8Array([0x07, 0xff, 0xff, 0xff, 0xff, 0xff]),
       new Uint8Array([0x03, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
-      new Uint8Array([0x01, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]) ];
+      new Uint8Array([0x01, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff])
+    ];
 
     var isDynamicSizeValue_ = shaka.util.EbmlParser.isDynamicSizeValue_;
 

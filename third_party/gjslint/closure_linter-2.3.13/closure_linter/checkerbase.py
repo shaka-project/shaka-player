@@ -48,6 +48,8 @@ class LintRulesBase(object):
   def _HandleError(self, code, message, token, position=None,
                    fix_data=None):
     """Call the HandleError function for the checker we are associated with."""
+    if code in token.metadata.suppressions:
+      return
     if errorrules.ShouldReportError(code):
       self.__checker.HandleError(code, message, token, position, fix_data)
 

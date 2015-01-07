@@ -1,3 +1,51 @@
+## 1.1 (2015-01-14)
+
+Maintenance release.
+
+Bugfixes:
+  - The enabled flag for text tracks is now preserved when switching tracks.
+    Player.enableTextTrack() is no longer required after selectTextTrack().
+    - https://github.com/google/shaka-player/issues/1
+  - The documentation for Player methods enableTextTrack, setPreferredLanguage,
+    and getCurrentResolution has been corrected.
+    - https://github.com/google/shaka-player/issues/3
+    - https://github.com/google/shaka-player/issues/4
+    - https://github.com/google/shaka-player/issues/6
+  - The AbrManager class is now correctly destroyed.
+    - https://github.com/google/shaka-player/issues/5
+  - Clearkey support for Chrome 41+ has been fixed.
+    - https://github.com/google/shaka-player/issues/8
+  - A new polyfill has been added to compensate for Chrome 41+'s removal of
+    MediaKeys.isTypeSupported.
+    - https://github.com/google/shaka-player/issues/7
+  - Several unused internal methods have been removed from the codebase.
+  - Fixed a failing assertion in one of the MediaKeys polyfills.
+  - Fixed failing code coverage analysis and related parse errors in several
+    tests.
+  - Fixed support for MPDs with SegmentTemplate@duration and
+    MPD@mediaPresentationDuration, but no Period@duration attribute.
+    - https://github.com/google/shaka-player/issues/9
+
+Features:
+  - Tests are now checked for style.
+  - Tests have been expanded to increase coverage and exercise more Player
+    features:
+    - playback rate
+    - stats
+    - language preference
+    - license restrictions
+    - WebM/VP9
+    - error events
+  - Integration tests now run much faster.
+  - MediaKeys polyfills have received minor updates to improve compatibility
+    with Chrome 41.
+  - New sample assets and code in app.js to demonstrate how to use a PSSH from
+    an MPD to override what's in the content itself.
+
+Broken Compatibility:
+  - None!
+
+
 ## 1.0 (2014-12-19)
 
 First public release.

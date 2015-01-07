@@ -19,7 +19,11 @@
 goog.require('shaka.util.LanguageUtils');
 
 describe('LanguageUtils', function() {
-  var LanguageUtils = shaka.util.LanguageUtils;
+  var LanguageUtils;
+
+  beforeAll(function() {
+    LanguageUtils = shaka.util.LanguageUtils;
+  });
 
   describe('match with sublanguage preference', function() {
     it('matches exactly at fuzz level 0', function() {
@@ -58,6 +62,17 @@ describe('LanguageUtils', function() {
       expect(LanguageUtils.match(2, 'en', 'en-us')).toBeTruthy();
       expect(LanguageUtils.match(2, 'en', 'en-gb')).toBeTruthy();
       expect(LanguageUtils.match(2, 'en', 'en')).toBeTruthy();
+    });
+  });
+
+  describe('normalize', function() {
+    it('maps all three codes for Greek to the same value', function() {
+      var code1 = 'el';
+      var code2 = 'ell';
+      var code3 = 'gre';
+      expect(LanguageUtils.normalize(code1)).toBe(code1);
+      expect(LanguageUtils.normalize(code2)).toBe(code1);
+      expect(LanguageUtils.normalize(code3)).toBe(code1);
     });
   });
 });

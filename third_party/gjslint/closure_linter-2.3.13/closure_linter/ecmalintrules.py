@@ -288,6 +288,8 @@ class EcmaScriptLintRules(checkerbase.LintRulesBase):
 
     token_type = token.type
 
+    token.metadata.suppressions = state.GetSuppressions()
+
     # Process the line change.
     if not self._is_html and error_check.ShouldCheck(Rule.INDENTATION):
       # TODO(robbyw): Support checking indentation in HTML files.

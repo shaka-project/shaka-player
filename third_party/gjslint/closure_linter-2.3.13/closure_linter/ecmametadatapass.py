@@ -209,6 +209,7 @@ class EcmaMetaData(object):
     self.is_implied_block_close = False
     self.aliased_symbol = None
     self.is_alias_definition = False
+    self.suppressions = []
 
   def __repr__(self):
     """Returns a string representation of the context object."""

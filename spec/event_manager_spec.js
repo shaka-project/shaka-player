@@ -29,7 +29,7 @@ describe('EventManager', function() {
     eventManager.destroy();
   });
 
-  it('can listen for an event.', function() {
+  it('listens for an event', function() {
     var target = new FakeEventTarget();
     var listener = jasmine.createSpy('listener');
 
@@ -39,7 +39,7 @@ describe('EventManager', function() {
     expect(listener).toHaveBeenCalled();
   });
 
-  it('can listen for an event from mutiple targets.', function() {
+  it('listens for an event from mutiple targets', function() {
     var target1 = new FakeEventTarget();
     var target2 = new FakeEventTarget();
 
@@ -56,7 +56,7 @@ describe('EventManager', function() {
     expect(listener2).toHaveBeenCalled();
   });
 
-  it('can listen for multiple events.', function() {
+  it('listens for multiple events', function() {
     var target = new FakeEventTarget();
 
     var listener1 = jasmine.createSpy('listener1');
@@ -72,7 +72,7 @@ describe('EventManager', function() {
     expect(listener2).toHaveBeenCalled();
   });
 
-  it('can listen for multiple events from mutiple targets.', function() {
+  it('listens for multiple events from mutiple targets', function() {
     var target1 = new FakeEventTarget();
     var target2 = new FakeEventTarget();
 
@@ -89,7 +89,7 @@ describe('EventManager', function() {
     expect(listener2).toHaveBeenCalled();
   });
 
-  it('can listen for an event with multiple listeners.', function() {
+  it('listens for an event with multiple listeners', function() {
     var target = new FakeEventTarget();
 
     var listener1 = jasmine.createSpy('listener1');
@@ -105,7 +105,7 @@ describe('EventManager', function() {
     expect(listener2).toHaveBeenCalled();
   });
 
-  it('can stop listening to an event.', function() {
+  it('stops listening to an event', function() {
     var target = new FakeEventTarget();
     var listener = jasmine.createSpy('listener');
 
@@ -117,7 +117,7 @@ describe('EventManager', function() {
     expect(listener).not.toHaveBeenCalled();
   });
 
-  it('can stop listening to multiple events.', function() {
+  it('stops listening to multiple events', function() {
     var target = new FakeEventTarget();
 
     var listener1 = jasmine.createSpy('listener1');
@@ -135,7 +135,7 @@ describe('EventManager', function() {
     expect(listener2).not.toHaveBeenCalled();
   });
 
-  it('can stop listening for an event with multiple listeners.', function() {
+  it('stops listening for an event with multiple listeners', function() {
     var target = new FakeEventTarget();
 
     var listener1 = jasmine.createSpy('listener1');

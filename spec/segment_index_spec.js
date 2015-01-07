@@ -62,8 +62,9 @@ describe('SegmentIndex', function() {
   var getWebmData = function() {
     // Get the WebM header data if we haven't yet.
     if (webmData) return Promise.resolve();
-    return fetchArrayBuffer('assets/feelings_vp9-20130806-171.webm.headers').then(
-        function(data) { webmData = data; });
+    return fetchArrayBuffer(
+        'assets/feelings_vp9-20130806-171.webm.headers'
+    ).then(function(data) { webmData = data; });
   };
 
   var getCuesData = function() {
@@ -86,7 +87,7 @@ describe('SegmentIndex', function() {
     });
   });
 
-  it('is able to parse an ISO BMFF segment index.', function() {
+  it('parses an ISO BMFF segment index', function() {
     // The SIDX data was obtained from an MP4 file where the SIDX offset was
     // 708. We use this value here since the expected offsets for parsing this
     // SIDX are known.
@@ -95,26 +96,30 @@ describe('SegmentIndex', function() {
     expect(references).not.toBeNull();
 
     // These values are rounded.
+    /* gjslint: disable=0001,0006 */
     var expectedStartTimes = [
           0.000,   5.005,  10.010,  15.015,  20.020,  25.025,  30.030,
          35.035,  40.040,  45.045,  50.050,  55.055,  60.060,  65.065,
          70.070,  75.075,  80.080,  85.085,  90.090,  95.095, 100.100,
         105.105, 110.110, 115.115, 120.120, 125.125, 130.130, 135.135,
         140.140, 145.145, 150.150, 155.155, 160.160, 165.165, 170.170,
-        175.175, 180.180 ];
+        175.175, 180.180
+    ];
 
+    /* gjslint: disable=0001,0006 */
     var expectedStartBytes = [
           1184,   727647,  1450907,  2164185,  2605829,  3151190,  3854669,
        4574758,  5224472,  5931518,  6320466,  6801107,  7307570,  7697596,
        8336571,  8820074,  9268630,  9706572, 10137561, 10676341, 11384276,
       12089373, 12708006, 13111442, 13805201, 14361322, 14996946, 15676293,
       16273342, 16812658, 17465320, 18038404, 18634288, 18855907, 19386647,
-      19580549, 19700059 ];
+      19580549, 19700059
+    ];
 
     checkReferences(references, 0, expectedStartTimes, expectedStartBytes);
   });
 
-  it('correctly handles a non-zero start time.', function() {
+  it('correctly handles a non-zero start time', function() {
     // The SIDX data was obtained from an MP4 file where the SIDX offset was
     // 1322. We use this value here since the expected offsets for parsing this
     // SIDX are known.
@@ -124,38 +129,46 @@ describe('SegmentIndex', function() {
     expect(references).not.toBeNull();
 
     // These values are rounded.
+    /* gjslint: disable=0001,0006 */
     var expectedStartTimes = [
           0.040,   3.040,   6.040,   9.040,  11.780,  14.780,  17.460,
          20.460,  23.460,  26.460,  29.460,  32.460,  35.460,  38.460,
-         41.460,  44.460,  47.460,  50.460,  52.860,  55.860 ];
+         41.460,  44.460,  47.460,  50.460,  52.860,  55.860
+    ];
 
+    /* gjslint: disable=0001,0006 */
     var expectedStartBytes = [
           1594,  1175673,  1417937,  1665835,  1973789,  2294769,  2490199,
        2671008,  2954930,  3371950,  3778589,  4073258,  4527374,  5033136,
-       5532306,  5788871,  6025088,  6313961,  6642589,  6993868 ];
+       5532306,  5788871,  6025088,  6313961,  6642589,  6993868
+    ];
 
     checkReferences(references, 0, expectedStartTimes, expectedStartBytes);
   });
 
-  it('is able to parse a WebM segment index.', function() {
+  it('parses a WebM segment index', function() {
     var parser = new shaka.dash.WebmSegmentIndexParser();
     var references =
         parser.parse(new DataView(webmData), new DataView(cuesData), 0);
     expect(references).not.toBeNull();
 
     // These values are rounded.
+    /* gjslint: disable=0001,0006 */
     var expectedStartTimes = [
          0.000,  10.012,  20.026,  30.048,  40.067,  50.081,  60.100,
-        70.111,  80.116,  90.133, 100.136, 110.137, 120.156, 130.159 ];
+        70.111,  80.116,  90.133, 100.136, 110.137, 120.156, 130.159
+    ];
 
+    /* gjslint: disable=0001,0006 */
     var expectedStartBytes = [
            4687,  144903,  297659,  459957,  618640,  773028,  924089,
-        1069119, 1226240, 1387394, 1545708, 1699983, 1859342, 2009816 ];
+        1069119, 1226240, 1387394, 1545708, 1699983, 1859342, 2009816
+    ];
 
     checkReferences(references, 0, expectedStartTimes, expectedStartBytes);
   });
 
-  describe('getRangeForInterval()', function() {
+  describe('getRangeForInterval', function() {
     var index;
 
     beforeEach(function() {
@@ -167,7 +180,7 @@ describe('SegmentIndex', function() {
       index = new shaka.dash.SegmentIndex(references);
     });
 
-    it('can handle a regular interval.', function() {
+    it('handles a regular interval', function() {
       var range = index.getRangeForInterval(31, 40);
 
       // These values are rounded.
@@ -178,7 +191,7 @@ describe('SegmentIndex', function() {
           range.references, 3, expectedStartTimes, expectedStartBytes);
     });
 
-    it('can handle an interval starting at the first segment.', function() {
+    it('handles an interval starting at the first segment', function() {
       var range = index.getRangeForInterval(0, 40);
 
       // These values are rounded.
@@ -189,7 +202,7 @@ describe('SegmentIndex', function() {
           range.references, 0, expectedStartTimes, expectedStartBytes);
     });
 
-    it('can handle an interval starting before the first segment', function() {
+    it('handles an interval starting before the first segment', function() {
       var range = index.getRangeForInterval(-10, 21);
 
       // These values are rounded.
@@ -200,7 +213,7 @@ describe('SegmentIndex', function() {
           range.references, 0, expectedStartTimes, expectedStartBytes);
     });
 
-    it('can handle an interval starting at the last segment.', function() {
+    it('handles an interval starting at the last segment', function() {
       var range = index.getRangeForInterval(130.159, 10);
 
       // These values are rounded.
@@ -211,7 +224,7 @@ describe('SegmentIndex', function() {
           range.references, 13, expectedStartTimes, expectedStartBytes);
     });
 
-    it('can handle an interval starting after the last segment.', function() {
+    it('handles an interval starting after the last segment', function() {
       var range = index.getRangeForInterval(150, 10);
 
       // These values are rounded.
@@ -222,13 +235,14 @@ describe('SegmentIndex', function() {
           range.references, 13, expectedStartTimes, expectedStartBytes);
     });
 
-    it('can handle an interval ending with a null time.', function() {
+    it('handles an interval ending with a null time', function() {
       var url = new goog.Uri('http://example.com');
 
       var references = [
         new shaka.dash.SegmentReference(0, 0, 1, 0, 5, url),
         new shaka.dash.SegmentReference(1, 1, 2, 6, 9, url),
-        new shaka.dash.SegmentReference(2, 2, null, 10, null, url) ];
+        new shaka.dash.SegmentReference(2, 2, null, 10, null, url)
+      ];
 
       var index2 = new shaka.dash.SegmentIndex(references);
       var range = index2.getRangeForInterval(0, 2);
@@ -248,7 +262,7 @@ describe('SegmentIndex', function() {
           range.references, 0, expectedStartTimes, expectedStartBytes);
     });
 
-    it('can handle no segments.', function() {
+    it('handles no segments', function() {
       index = new shaka.dash.SegmentIndex([]);
       var range = index.getRangeForInterval(31, 40);
       expect(range).toBeNull();
@@ -266,10 +280,11 @@ describe('SegmentIndex', function() {
       expect(ref.startByte).toBe(expectedStartBytes[i]);
 
       if (i < expectedStartTimes.length - 1) {
-        expect(ref.endTime.toFixed(3)).toBe(expectedStartTimes[i + 1].toFixed(3));
+        expect(ref.endTime.toFixed(3)).toBe(
+            expectedStartTimes[i + 1].toFixed(3));
         expect(ref.endByte).toBe(expectedStartBytes[i + 1] - 1);
       }
     }
-  }
+  };
 });
 

@@ -32,6 +32,15 @@ sources, including the [Closure Compiler][], [gjslint][], [JSDoc][], and
 [Jasmine]: http://jasmine.github.io/2.1/introduction.html
 
 
+## Mailing list ##
+
+We have a [public mailing list][] for discussion and announcements.  To receive
+notifications about new versions, please join the list.  You can also use the
+list to ask questions or discuss Shaka Player development.
+
+[public mailing list]: https://groups.google.com/forum/#!forum/shaka-player-users
+
+
 ## Documentation ##
 
 We have detailed documentation which is generated from the sources using JSDoc.

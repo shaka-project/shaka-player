@@ -16,8 +16,8 @@
  * @fileoverview Player integration tests.
  */
 
-goog.require('shaka.player.Player');
 goog.require('shaka.player.DashVideoSource');
+goog.require('shaka.player.Player');
 goog.require('shaka.polyfill.MediaKeys');
 goog.require('shaka.polyfill.VideoPlaybackQuality');
 
@@ -27,12 +27,12 @@ describe('Player', function() {
   var video;
   var player;
 
-  function newSource(encrypted) {
-    var url = encrypted ?
-              'assets/car_cenc-20120827-manifest.mpd' :
-              'assets/car-20120827-manifest.mpd';
-    return new shaka.player.DashVideoSource(url, interpretContentProtection);
-  }
+  const plainManifest = 'assets/car-20120827-manifest.mpd';
+  const encryptedManifest = 'assets/car_cenc-20120827-manifest.mpd';
+  const languagesManifest = 'assets/angel_one.mpd';
+  const webmManifest = 'assets/feelings_vp9-20130806-manifest.mpd';
+  const bogusManifest = 'assets/does_not_exist';
+  const FUDGE_FACTOR = 0.3;
 
   beforeAll(function() {
     // Hijack assertions and convert failed assertions into failed tests.
@@ -49,6 +49,7 @@ describe('Player', function() {
     // Create a video tag.  This will be visible so that long tests do not
     // create the illusion of the test-runner being hung.
     video = document.createElement('video');
+    video.crossOrigin = 'anonymous';
     video.width = 600;
     video.height = 400;
     // Add it to the DOM.
@@ -58,14 +59,7 @@ describe('Player', function() {
   beforeEach(function() {
     // Create a new player.
     player = new shaka.player.Player(video);
-    player.addEventListener('error', function(event) {
-      // Treat all player errors as test failures.
-      var error = event.detail;
-      fail(error);
-    }, false);
-
-    // Create a new source.
-    source = newSource(false);
+    player.addEventListener('error', convertErrorToTestFailure, false);
 
     // Disable automatic adaptation unless it is needed for a test.
     // This makes test results more reproducible.
@@ -88,30 +82,17 @@ describe('Player', function() {
     assertsToFailures.uninstall();
   });
 
-  // Returns the Id of the track for the intended track height.
-  // -1 if the target height is not found.
-  function getTrackIdForTargetHeight(tracks, targetHeight) {
-    for (var i = 0; i < tracks.length; i++) {
-      if (tracks[i].height == targetHeight) {
-        return tracks[i].id;
-      }
-    }
-
-    return -1;
-  };
-
   describe('load', function() {
     // This covers basic player re-use.
     it('can be used multiple times without EME', function(done) {
-      player.load(source).then(function() {
+      player.load(newSource(plainManifest)).then(function() {
         player.play();
-        return delay(5.0);
+        return delay(3.0);
       }).then(function() {
-        source = newSource(false);
-        return player.load(source);
+        return player.load(newSource(plainManifest));
       }).then(function() {
         player.play();
-        return delay(5.0);
+        return delay(3.0);
       }).then(function() {
         expect(video.currentTime).toBeGreaterThan(0.0);
         done();
@@ -124,16 +105,14 @@ describe('Player', function() {
     // This covers bug #18614098.  A presumed bug in Chrome can cause mediaKeys
     // to be unset on the second use of a video tag.
     it('can be used multiple times with EME', function(done) {
-      source = newSource(true);
-      player.load(source).then(function() {
+      player.load(newSource(encryptedManifest)).then(function() {
         player.play();
-        return delay(5.0);
+        return delay(3.0);
       }).then(function() {
-        source = newSource(true);
-        return player.load(source);
+        return player.load(newSource(encryptedManifest));
       }).then(function() {
         player.play();
-        return delay(5.0);
+        return delay(3.0);
       }).then(function() {
         expect(video.currentTime).toBeGreaterThan(0.0);
         done();
@@ -144,20 +123,16 @@ describe('Player', function() {
     });
   });
 
-  describe('resize', function() {
-    // Tests video resizing at the time of initializing player.
-    it('can set resolution at time of initialization', function(done) {
-      player.load(source).then(function() {
-        var tracks = player.getVideoTracks();
-        var trackId = getTrackIdForTargetHeight(tracks, 720);
-        player.selectVideoTrack(trackId);
+  describe('selectVideoTrack', function() {
+    it('can set resolution before beginning playback', function(done) {
+      player.load(newSource(plainManifest)).then(function() {
+        var track = getVideoTrackByHeight(720);
+        player.selectVideoTrack(track.id);
         player.play();
         return delay(10.0);
       }).then(function() {
         var currentResolution = player.getCurrentResolution();
-        expect(currentResolution).not.toBe(null);
         expect(currentResolution.height).toEqual(720);
-        expect(currentResolution.width).toEqual(1280);
         done();
       }).catch(function(error) {
         fail(error);
@@ -165,30 +140,22 @@ describe('Player', function() {
       });
     });
 
-    // Tests player at different resolutions.
-    it('can be resized multiple times', function(done) {
-      player.load(source).then(function() {
-        var tracks = player.getVideoTracks();
-        var trackId = getTrackIdForTargetHeight(tracks, 720);
-        player.selectVideoTrack(trackId);
+    it('can be called multiple times', function(done) {
+      player.load(newSource(plainManifest)).then(function() {
+        var track = getVideoTrackByHeight(720);
+        player.selectVideoTrack(track.id);
         player.play();
         return delay(10.0);
       }).then(function() {
         var currentResolution = player.getCurrentResolution();
-        expect(currentResolution).not.toBe(null);
         expect(currentResolution.height).toEqual(720);
-        expect(currentResolution.width).toEqual(1280);
-        return delay(2.0);
-      }).then(function() {
-        var tracks = player.getVideoTracks();
-        var trackId = getTrackIdForTargetHeight(tracks, 360);
-        player.selectVideoTrack(trackId);
+
+        var track = getVideoTrackByHeight(360);
+        player.selectVideoTrack(track.id);
         return delay(10.0);
       }).then(function() {
         var currentResolution = player.getCurrentResolution();
-        expect(currentResolution).not.toBe(null);
         expect(currentResolution.height).toEqual(360);
-        expect(currentResolution.width).toEqual(640);
         done();
       }).catch(function(error) {
         fail(error);
@@ -197,28 +164,57 @@ describe('Player', function() {
     });
   });
 
-  describe('player-controls', function() {
-    // Tests various player controls.
-    it('test play and pause video controls', function(done) {
-      var timeStamp;
-      player.load(source).then(function() {
+  describe('pause', function() {
+    it('pauses playback', function(done) {
+      var timestamp;
+      player.load(newSource(plainManifest)).then(function() {
         player.play();
-        return delay(8.0);
-      }).then(function() {
-        expect(video.currentTime).toBeGreaterThan(3.0);
-        player.pause();
-        timeStamp = player.getCurrentTime();
-        return delay(5.0);
-      }).then(function() {
-        expect(video.paused).toBe(true);
-        expect(video.currentTime).toEqual(timeStamp);
-        expect(video.currentTime).toEqual(player.getCurrentTime());
-        timeStamp = player.getCurrentTime();
-        player.play();
-        return delay(5.0);
+        return delay(3.0);
       }).then(function() {
         expect(video.paused).toBe(false);
-        expect(video.currentTime).toBeGreaterThan(timeStamp);
+        player.pause();
+        timestamp = video.currentTime;
+        return delay(2.0);
+      }).then(function() {
+        expect(video.paused).toBe(true);
+        expect(video.currentTime).toEqual(timestamp);
+        player.play();
+        return delay(2.0);
+      }).then(function() {
+        expect(video.paused).toBe(false);
+        expect(video.currentTime).toBeGreaterThan(timestamp);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+  });
+
+  describe('setVolume', function() {
+    it('changes playback volume', function(done) {
+      player.load(newSource(plainManifest)).then(function() {
+        player.setVolume(0);
+        expect(video.volume).toEqual(0);
+
+        player.setVolume(0.5);
+        expect(video.volume).toEqual(0.5);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+  });
+
+  describe('setMuted', function() {
+    it('mutes playback', function(done) {
+      player.load(newSource(plainManifest)).then(function() {
+        player.setMuted(true);
+        expect(video.muted).toBe(true);
+
+        player.setMuted(false);
+        expect(video.muted).toBe(false);
         done();
       }).catch(function(error) {
         fail(error);
@@ -226,24 +222,16 @@ describe('Player', function() {
       });
     });
 
-    it('test volume control', function(done) {
-      var volume;
-      player.load(source).then(function() {
-        player.play();
-        volume = player.getVolume();
-        player.setVolume(0);
-        expect(player.getVolume()).toEqual(0);
-        player.setVolume(0.5);
-        expect(player.getVolume()).toEqual(0.5);
-        expect(video.volume).toEqual(0.5);
+    it('does not change volume', function(done) {
+      player.load(newSource(plainManifest)).then(function() {
+        player.setVolume(1);
+        expect(video.volume).toEqual(1);
+
         player.setMuted(true);
-        expect(player.getMuted()).toBe(true);
-        expect(video.muted).toBe(true);
+        expect(video.volume).toEqual(1);
+
         player.setMuted(false);
-        expect(player.getMuted()).toBe(false);
-        expect(video.muted).toBe(false);
-        expect(player.getVolume()).toEqual(0.5);
-        expect(video.volume).toEqual(0.5);
+        expect(video.volume).toEqual(1);
         done();
       }).catch(function(error) {
         fail(error);
@@ -257,7 +245,7 @@ describe('Player', function() {
     // can cause the media pipeline in Chrome to get stuck.  This seemed to
     // happen when certain seek intervals were used.
     it('does not lock up on segment boundaries', function(done) {
-      player.load(source).then(function() {
+      player.load(newSource(plainManifest)).then(function() {
         player.play();
         return delay(1.0);  // gets the player out of INIT state
       }).then(function() {
@@ -292,7 +280,7 @@ describe('Player', function() {
     // around this peculiar behavior from Chrome's SourceBuffer.  If this is
     // not done, playback gets "stuck" when the playhead enters such a gap.
     it('does not create unclosable gaps in the buffer', function(done) {
-      player.load(source).then(function() {
+      player.load(newSource(plainManifest)).then(function() {
         player.play();
         return delay(1.0);
       }).then(function() {
@@ -316,14 +304,14 @@ describe('Player', function() {
     });
 
     it('can be used during stream switching', function(done) {
-      var videoStream;
-      var DashStream = shaka.dash.DashStream;
+      var source = newSource(plainManifest);
 
       player.load(source).then(function() {
         player.play();
-        return delay(2.0);
+        return delay(3.0);
       }).then(function() {
-        videoStream = source.streamsByType_['video'];
+        var DashStream = shaka.dash.DashStream;
+        var videoStream = source.streamsByType_['video'];
         expect(videoStream.state_).toBe(DashStream.State_.UPDATING);
 
         var ok = player.selectVideoTrack(3);  // 480p stream
@@ -331,7 +319,7 @@ describe('Player', function() {
         expect(videoStream.state_).toBe(DashStream.State_.SWITCHING);
 
         player.seek(30.0);
-        return delay(10.0);
+        return delay(7.0);
       }).then(function() {
         expect(video.currentTime).toBeGreaterThan(35.0);
         done();
@@ -341,5 +329,372 @@ describe('Player', function() {
       });
     });
   });
+
+  describe('enableTextTrack', function() {
+    it('enables the active track', function(done) {
+      player.load(newSource(languagesManifest)).then(function() {
+        var activeTrack = getActiveTextTrack();
+        expect(activeTrack.enabled).toBe(false);
+
+        player.enableTextTrack(true);
+
+        activeTrack = getActiveTextTrack();
+        expect(activeTrack.enabled).toBe(true);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+  });
+
+  describe('selectTextTrack', function() {
+    it('activates the correct track', function(done) {
+      player.load(newSource(languagesManifest)).then(function() {
+        var tracks = player.getTextTracks();
+        var activeTrack = getActiveTextTrack();
+        // Ensure that it is the first track, so that we know our selection
+        // of the second track is affecting a real change.
+        expect(activeTrack.id).toBe(tracks[0].id);
+
+        player.selectTextTrack(tracks[1].id);
+        activeTrack = getActiveTextTrack();
+        expect(activeTrack.id).toBe(tracks[1].id);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+
+    it('does not disable subtitles', function(done) {
+      player.load(newSource(languagesManifest)).then(function() {
+        var tracks = player.getTextTracks();
+        player.selectTextTrack(tracks[0].id);
+        player.enableTextTrack(true);
+
+        var activeTrack = getActiveTextTrack();
+        expect(activeTrack.enabled).toBe(true);
+        expect(activeTrack.id).toBe(tracks[0].id);
+
+        player.selectTextTrack(tracks[1].id);
+
+        activeTrack = getActiveTextTrack();
+        expect(activeTrack.enabled).toBe(true);
+        expect(activeTrack.id).toBe(tracks[1].id);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+
+    it('does not re-enable subtitles', function(done) {
+      player.load(newSource(languagesManifest)).then(function() {
+        var tracks = player.getTextTracks();
+        player.selectTextTrack(tracks[0].id);
+        player.enableTextTrack(false);
+
+        var activeTrack = getActiveTextTrack();
+        expect(activeTrack.enabled).toBe(false);
+        expect(activeTrack.id).toBe(tracks[0].id);
+
+        player.selectTextTrack(tracks[1].id);
+
+        activeTrack = getActiveTextTrack();
+        expect(activeTrack.enabled).toBe(false);
+        expect(activeTrack.id).toBe(tracks[1].id);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+  });
+
+  describe('setPlaybackRate', function() {
+    it('plays faster for rates above 1', function(done) {
+      var timestamp;
+      player.load(newSource(plainManifest)).then(function() {
+        player.play();
+        return delay(3.0);
+      }).then(function() {
+        expect(video.currentTime).toBeGreaterThan(0.0);
+        timestamp = video.currentTime;
+        player.setPlaybackRate(2.0);
+        return delay(3.0);
+      }).then(function() {
+        expect(video.currentTime).toBeGreaterThan(
+            timestamp + 6.0 - FUDGE_FACTOR);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+
+    it('plays in reverse for negative rates', function(done) {
+      var timestamp;
+      player.load(newSource(plainManifest)).then(function() {
+        player.play();
+        return delay(6.0);
+      }).then(function() {
+        expect(video.currentTime).toBeGreaterThan(3.0);
+        timestamp = video.currentTime;
+        player.setPlaybackRate(-1.0);
+        return delay(2.0);
+      }).then(function() {
+        expect(video.currentTime).toBeLessThan(timestamp - 2.0 + FUDGE_FACTOR);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+  });
+
+  describe('getStats', function() {
+    it('updates playTime', function(done) {
+      var oldPlayTime;
+      player.load(newSource(plainManifest)).then(function() {
+        player.play();
+        return delay(2.0);
+      }).then(function() {
+        oldPlayTime = player.getStats().playTime;
+        return delay(1.0);
+      }).then(function() {
+        expect(player.getStats().playTime).toBeGreaterThan(
+            oldPlayTime + 1.0 - FUDGE_FACTOR);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+  });
+
+  describe('setPreferredLanguage', function() {
+    it('changes the default tracks', function(done) {
+      var originalAudioId;
+      var originalTextId;
+
+      player.load(newSource(languagesManifest)).then(function() {
+        var activeAudioTrack = getActiveAudioTrack();
+        expect(activeAudioTrack.lang).toBe('en');
+        originalAudioId = activeAudioTrack.id;
+
+        var activeTextTrack = getActiveTextTrack();
+        expect(activeTextTrack.lang).toBe('en');
+        originalTextId = activeTextTrack.id;
+
+        player.setPreferredLanguage('fr');
+        return player.load(newSource(languagesManifest));
+      }).then(function() {
+        var activeAudioTrack = getActiveAudioTrack();
+        expect(activeAudioTrack.lang).toBe('fr');
+        expect(activeAudioTrack.id).not.toBe(originalAudioId);
+
+        var activeTextTrack = getActiveTextTrack();
+        expect(activeTextTrack.lang).toBe('fr');
+        expect(activeTextTrack.id).not.toBe(originalTextId);
+
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+
+    it('enables text tracks when no matching audio is found', function(done) {
+      player.setPreferredLanguage('el');
+      player.load(newSource(languagesManifest)).then(function() {
+        var activeAudioTrack = getActiveAudioTrack();
+        expect(activeAudioTrack.lang).toBe('en');
+
+        var activeTextTrack = getActiveTextTrack();
+        expect(activeTextTrack.lang).toBe('el');
+        expect(activeTextTrack.enabled).toBe(true);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+
+    it('disables text tracks when matching audio is found', function(done) {
+      player.setPreferredLanguage('fr');
+      player.load(newSource(languagesManifest)).then(function() {
+        var activeAudioTrack = getActiveAudioTrack();
+        expect(activeAudioTrack.lang).toBe('fr');
+
+        var activeTextTrack = getActiveTextTrack();
+        expect(activeTextTrack.lang).toBe('fr');
+        expect(activeTextTrack.enabled).toBe(false);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+  });
+
+  describe('license restriction', function() {
+    it('ignores video tracks above the maximum height', function(done) {
+      player.load(newSource(encryptedManifest)).then(function() {
+        // Tiny delay to allow the license 'response' to be processed, and
+        // therefore restrictions to be applied.
+        return delay(0.1);
+      }).then(function() {
+        var hdVideoTrack = getVideoTrackByHeight(720);
+        var sdVideoTrack = getVideoTrackByHeight(480);
+        expect(hdVideoTrack).not.toBe(null);
+        expect(sdVideoTrack).not.toBe(null);
+
+        var callback = function(license, restrictions) {
+          restrictions.maxHeight = 480;
+          return license;
+        };
+        return player.load(newSource(encryptedManifest, callback));
+      }).then(function() {
+        // Tiny delay to allow the license 'response' to be processed, and
+        // therefore restrictions to be applied.
+        return delay(0.1);
+      }).then(function() {
+        var hdVideoTrack = getVideoTrackByHeight(720);
+        var sdVideoTrack = getVideoTrackByHeight(480);
+        expect(hdVideoTrack).toBe(null);
+        expect(sdVideoTrack).not.toBe(null);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+
+    it('ignores video tracks above the maximum width', function(done) {
+      player.load(newSource(encryptedManifest)).then(function() {
+        // Tiny delay to allow the license 'response' to be processed, and
+        // therefore restrictions to be applied.
+        return delay(0.1);
+      }).then(function() {
+        var hdVideoTrack = getVideoTrackByHeight(720);
+        var sdVideoTrack = getVideoTrackByHeight(480);
+        expect(hdVideoTrack).not.toBe(null);
+        expect(sdVideoTrack).not.toBe(null);
+
+        var callback = function(license, restrictions) {
+          restrictions.maxWidth = 854;
+          return license;
+        };
+        return player.load(newSource(encryptedManifest, callback));
+      }).then(function() {
+        // Tiny delay to allow the license 'response' to be processed, and
+        // therefore restrictions to be applied.
+        return delay(0.1);
+      }).then(function() {
+        var hdVideoTrack = getVideoTrackByHeight(720);
+        var sdVideoTrack = getVideoTrackByHeight(480);
+        expect(hdVideoTrack).toBe(null);
+        expect(sdVideoTrack).not.toBe(null);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+  });
+
+  it('plays VP9 WebM', function(done) {
+    player.load(newSource(webmManifest)).then(function() {
+      player.play();
+      return delay(3.0);
+    }).then(function() {
+      expect(video.currentTime).toBeGreaterThan(0.0);
+      done();
+    }).catch(function(error) {
+      fail(error);
+      done();
+    });
+  });
+
+  it('dispatches errors on failure', function(done) {
+    player.removeEventListener('error', convertErrorToTestFailure, false);
+    var onError = jasmine.createSpy('onError');
+    player.addEventListener('error', onError, false);
+
+    // Ignore any errors in the promise chain.
+    player.load(newSource(bogusManifest)).catch(function(error) {});
+
+    // Expect the error handler to have been called.
+    delay(1.0).then(function() {
+      expect(onError.calls.any()).toBe(true);
+      done();
+    });
+  });
+
+  // TODO(story 1970528): add tests which exercise PSSH parsing,
+  // SegmentTemplate resolution, and SegmentList generation.
+
+  /**
+   * @param {!Event} event
+   */
+  function convertErrorToTestFailure(event) {
+    // Treat all player errors as test failures.
+    var error = event.detail;
+    fail(error);
+  }
+
+  /**
+   * @param {string} manifest
+   * @param {shaka.player.DrmSchemeInfo.LicensePostProcessor=}
+   *     opt_licensePostProcessor
+   * @return {!shaka.player.DashVideoSource}
+   */
+  function newSource(manifest, opt_licensePostProcessor) {
+    var callback =
+        interpretContentProtection.bind(null, opt_licensePostProcessor);
+    return new shaka.player.DashVideoSource(manifest, callback);
+  }
+
+  /**
+   * @param {number} targetHeight
+   * @return {shaka.player.VideoTrack} or null if not found.
+   */
+  function getVideoTrackByHeight(targetHeight) {
+    var tracks = player.getVideoTracks();
+    for (var i = 0; i < tracks.length; i++) {
+      if (tracks[i].height == targetHeight) {
+        return tracks[i];
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * @return {shaka.player.TextTrack} or null if not found.
+   */
+  function getActiveTextTrack() {
+    var tracks = player.getTextTracks();
+    for (var i = 0; i < tracks.length; ++i) {
+      if (tracks[i].active) {
+        return tracks[i];
+      }
+    }
+    return null;
+  }
+
+  /**
+   * @return {shaka.player.AudioTrack} or null if not found.
+   */
+  function getActiveAudioTrack() {
+    var tracks = player.getAudioTracks();
+    for (var i = 0; i < tracks.length; ++i) {
+      if (tracks[i].active) {
+        return tracks[i];
+      }
+    }
+    return null;
+  }
 });
 

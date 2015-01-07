@@ -26,3 +26,12 @@ sessions, so you should not have to keep setting it as you browse the docs.
 
 If you're not sure where to go next, try the Tutorials on the right.  Enjoy!
 
+
+## Mailing List
+
+We have a [public mailing list][] for discussion and announcements.  To receive
+notifications about new versions, please join the list.  You can also use the
+list to ask questions or discuss Shaka Player development.
+
+[public mailing list]: https://groups.google.com/forum/#!forum/shaka-player-users
+

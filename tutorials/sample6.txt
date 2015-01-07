@@ -279,6 +279,9 @@
                                               null /* licensePostProcessor */);
       }
 
+      // See app.interpretContentProtection_() in app.js for more examples of
+      // what this callback can do.
+
       console.warn('Unrecognized scheme: ' + contentProtection.schemeIdUri);
       return null;
     }

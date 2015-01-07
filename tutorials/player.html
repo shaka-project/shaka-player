@@ -627,10 +627,13 @@ video will play back in an overlay on top of the thumbnails.
                                               null /* licensePostProcessor */);
       }
 
+<span class="newCode">      // See app.interpretContentProtection_() in app.js for more examples of</span>
+<span class="newCode">      // what this callback can do.</span>
+<span class="newCode"></span>
       console.warn('Unrecognized scheme: ' + contentProtection.schemeIdUri);
       return null;
-    }
-
+<span class="newCode">    }</span>
+<span class="newCode"></span>
 <span class="newCode">    function closeVideo() {</span>
 <span class="newCode">      // Unload the video source.</span>
 <span class="newCode">      player.unload();</span>
@@ -638,8 +641,8 @@ video will play back in an overlay on top of the thumbnails.
 <span class="newCode">      // Hide the video player overlay.</span>
 <span class="newCode">      var overlay = document.getElementById('videoOverlay');</span>
 <span class="newCode">      overlay.style.display = 'none';</span>
-<span class="newCode">    }</span>
-<span class="newCode"></span>
+    }
+
     document.addEventListener('DOMContentLoaded', initPlayer);
   &lt;/script&gt;
 &lt;/html&gt;
@@ -936,6 +939,9 @@ is being played. It also shows an error dialog if/when error events occur.
                                               null /* initData */,
                                               null /* licensePostProcessor */);
       }
+
+      // See app.interpretContentProtection_() in app.js for more examples of
+      // what this callback can do.
 
       console.warn('Unrecognized scheme: ' + contentProtection.schemeIdUri);
       return null;

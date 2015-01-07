@@ -23,7 +23,7 @@ describe('mpd', function() {
     jasmine.addMatchers(customMatchers);
   });
 
-  it('is able to parse an MPD time string.', function() {
+  it('parses an MPD time string', function() {
     var parseDuration = shaka.dash.mpd.parseDuration_;
 
     // Days only.
@@ -78,7 +78,7 @@ describe('mpd', function() {
     expect(parseDuration('')).toBeNull();
   });
 
-  it('is able to parse an MPD range string.', function() {
+  it('parses an MPD range string', function() {
     var parseRange = shaka.dash.mpd.parseRange_;
     var Range = shaka.dash.mpd.Range;
 
@@ -94,7 +94,7 @@ describe('mpd', function() {
     expect(parseRange('')).toBeNull();
   });
 
-  it('is able to parse basic MPD XML which has a SegmentBase.', function() {
+  it('parses basic MPD XML which has a SegmentBase', function() {
     var source = [
       '<MPD>',
       '  <Period id="1" duration="PT0H3M1.63S" start="PT0S">',
@@ -147,8 +147,7 @@ describe('mpd', function() {
     expect(initialization.range.end).toBe(999);
   });
 
-  it('is able to parse basic MPD XML which has a SegmentTemplate.',
-     function() {
+  it('parses basic MPD XML which has a SegmentTemplate', function() {
     var source = [
       '<MPD>',
       '  <Period id="1" duration="PT0H3M1.63S" start="PT0S">',
@@ -193,7 +192,8 @@ describe('mpd', function() {
     var segmentTemplate = adaptationSet.segmentTemplate;
     expect(segmentTemplate).toBeTruthy();
     expect(segmentTemplate.timescale).toBe(9000);
-    expect(segmentTemplate.initializationUrlTemplate).toBe('$Bandwidth$/init.mp4');
+    expect(segmentTemplate.initializationUrlTemplate).toBe(
+        '$Bandwidth$/init.mp4');
     expect(segmentTemplate.mediaUrlTemplate).toBe('$Bandwidth$/frames.mp4');
 
     var timeline = segmentTemplate.timeline;
@@ -221,7 +221,7 @@ describe('mpd', function() {
     expect(representation.codecs).toBe('mp4a.40.2');
   });
 
-  it('can inherit ContentComponent attributes in AdaptationSet.', function() {
+  it('inherits ContentComponent attributes in AdaptationSet', function() {
     var source = [
       '<MPD>',
       '  <Period id="1" duration="PT0H3M1.63S" start="PT0S">',
@@ -245,7 +245,7 @@ describe('mpd', function() {
     expect(adaptationSet.contentType).toBe('video');
   });
 
-  it('can override ContentComponent attributes in AdaptationSet.', function() {
+  it('overrides ContentComponent attributes in AdaptationSet', function() {
     var source = [
       '<MPD>',
       '  <Period id="1" duration="PT0H3M1.63S" start="PT0S">',
@@ -269,7 +269,7 @@ describe('mpd', function() {
     expect(adaptationSet.contentType).toBe('audio');
   });
 
-  it('can inherit a SegmentBase from a Period.', function() {
+  it('inherits a SegmentBase from a Period', function() {
     var source = [
       '<MPD>',
       '  <Period>',
@@ -282,7 +282,7 @@ describe('mpd', function() {
     checkSegmentBase(source, 100, 200);
   });
 
-  it('can inherit a SegmentBase from an AdaptationSet.', function() {
+  it('inherits a SegmentBase from an AdaptationSet', function() {
     var source = [
       '<MPD>',
       '  <Period>',
@@ -307,7 +307,7 @@ describe('mpd', function() {
     checkSegmentBase(source, 1000, 2000);
   });
 
-  it('can override a SegmentBase from a Period.', function() {
+  it('overrides a SegmentBase from a Period', function() {
     var source = [
       '<MPD>',
       '  <Period>',
@@ -322,7 +322,7 @@ describe('mpd', function() {
     checkSegmentBase(source, 1000, 2000);
   });
 
-  it('can override a SegmentBase from an AdaptationSet.', function() {
+  it('overrides a SegmentBase from an AdaptationSet', function() {
     var source = [
       '<MPD>',
       '  <Period>',
@@ -379,7 +379,7 @@ describe('mpd', function() {
     expect(segmentBase.indexRange.end).toBe(indexEnd);
   };
 
-  it('can inherit a ContentProtection from an AdaptationSet.', function() {
+  it('inherits a ContentProtection from an AdaptationSet', function() {
     var source = [
       '<MPD>',
       '  <Period>',
@@ -404,7 +404,7 @@ describe('mpd', function() {
     checkContentProtection(source, 'http://google.com');
   });
 
-  it('can override a ContentProtection from a Period.', function() {
+  it('overrides a ContentProtection from a Period', function() {
     var source = [
       '<MPD>',
       '  <Period>',
@@ -419,7 +419,7 @@ describe('mpd', function() {
     checkContentProtection(source, 'http://google.com');
   });
 
-  it('can override a ContentProtection from an AdaptationSet.', function() {
+  it('overrides a ContentProtection from an AdaptationSet', function() {
     var source = [
       '<MPD>',
       '  <Period>',
@@ -481,7 +481,7 @@ describe('mpd', function() {
     expect(foundMatch).toBeTruthy();
   };
 
-  it('can inherit a "mimeType" attribute from an AdaptationSet.', function() {
+  it('inherits a "mimeType" attribute from an AdaptationSet', function() {
     var source = [
       '<MPD>',
       '  <Period>',
@@ -494,7 +494,7 @@ describe('mpd', function() {
     checkRepresentationMimeType(source, 'video/mp4');
   });
 
-  it('can override a "mimeType" attribute from an AdaptationSet.', function() {
+  it('overrides a "mimeType" attribute from an AdaptationSet', function() {
     var source = [
       '<MPD>',
       '  <Period>',
@@ -529,7 +529,7 @@ describe('mpd', function() {
     expect(representation.mimeType).toBe(mimeType);
   };
 
-  it('can infer a "contentType" attribute from "mimeType".', function() {
+  it('infers a "contentType" attribute from "mimeType"', function() {
     var source = [
       '<MPD>',
       '  <Period>',
@@ -551,7 +551,7 @@ describe('mpd', function() {
     expect(adaptationSet.contentType).toBe('video');
   });
 
-  it('can infer a "mimeType" attribute from Representations.', function() {
+  it('infers a "mimeType" attribute from Representations', function() {
     var source = [
       '<MPD>',
       '  <Period>',
@@ -576,7 +576,7 @@ describe('mpd', function() {
     expect(adaptationSet.contentType).toBe('video');
   });
 
-  it('can inherit a "codecs" attribute from an AdaptationSet.', function() {
+  it('inherits a "codecs" attribute from an AdaptationSet', function() {
     var source = [
       '<MPD>',
       '  <Period>',
@@ -589,7 +589,7 @@ describe('mpd', function() {
     checkCodecs(source, 'vp8');
   });
 
-  it('can override a "codecs" attribute from an AdaptationSet.', function() {
+  it('overrides a "codecs" attribute from an AdaptationSet', function() {
     var source = [
       '<MPD>',
       '  <Period>',
@@ -624,7 +624,7 @@ describe('mpd', function() {
     expect(representation.codecs).toBe(codecs);
   };
 
-  it('can resolve relative and absolute URLs at every level.', function() {
+  it('resolves relative and absolute URLs at every level', function() {
     var source = [
       '<MPD>',
       '  <BaseURL>http://example.com/</BaseURL>',
@@ -706,7 +706,7 @@ describe('mpd', function() {
         toBe('http://foo.bar/multi/level?Representation5');
   });
 
-  it('can resolve relative URLs across levels.', function() {
+  it('resolves relative URLs across levels', function() {
     var source = [
       '<MPD>',
       '  <BaseURL>sub/</BaseURL>',
@@ -740,7 +740,7 @@ describe('mpd', function() {
     expect(r[1].baseUrl.toString()).toBe('sub/2.webm');
   });
 
-  it('can resolve relative URLs with respect to the MPD URL.', function() {
+  it('resolves relative URLs with respect to the MPD URL', function() {
     var source = [
       '<MPD>',
       '  <Period>',
@@ -770,7 +770,7 @@ describe('mpd', function() {
     expect(r.baseUrl.toString()).toBe('http://example.com/dash/1.webm');
   });
 
-  it('can parse namespaced elements.', function() {
+  it('parses namespaced elements', function() {
     var source = [
       '<MPD>',
       '  <Period id="1" duration="PT0H3M1.63S" start="PT0S">',

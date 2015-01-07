@@ -22,7 +22,6 @@ describe('LicenseRequest', function() {
   const SERVER_URL = 'http://localhost/test_drm_url';
   const REQUEST_BODY = 'test_request_body';
   const FAKE_RESPONSE = new Uint8Array(['0', '1', '2', '3']);
-  var LicenseRequest = shaka.util.LicenseRequest;
 
   beforeEach(function() {
     jasmine.addMatchers(customMatchers);
@@ -35,7 +34,8 @@ describe('LicenseRequest', function() {
     jasmine.clock().uninstall();
   });
 
-  it('is able to send successfully.', function(done) {
+  it('sends a request and receives a response', function(done) {
+    var LicenseRequest = shaka.util.LicenseRequest;
     var license_request = new LicenseRequest(SERVER_URL, REQUEST_BODY);
 
     license_request.send().then(function(response) {
@@ -60,7 +60,8 @@ describe('LicenseRequest', function() {
     });
   });
 
-  it('is able to retry sending.', function(done) {
+  it('retries on error', function(done) {
+    var LicenseRequest = shaka.util.LicenseRequest;
     var license_request = new LicenseRequest(SERVER_URL, REQUEST_BODY);
 
     license_request.send().then(function(response) {
@@ -101,7 +102,8 @@ describe('LicenseRequest', function() {
     });
   });
 
-  it('is able to handle repeated failures.', function(done) {
+  it('retries repeatedly on error', function(done) {
+    var LicenseRequest = shaka.util.LicenseRequest;
     var license_request = new LicenseRequest(SERVER_URL, REQUEST_BODY);
 
     license_request.send().then(function(response) {
@@ -130,7 +132,7 @@ describe('LicenseRequest', function() {
 
   it('parses data URIs with mime type and base64', function(done) {
     checkDataUri('data:text/plain;base64,SGVsbG8sIGRhdGEh',
-      'Hello, data!', done);
+        'Hello, data!', done);
   });
 
   it('parses data URIs with no mime type and base64', function(done) {
@@ -149,6 +151,7 @@ describe('LicenseRequest', function() {
   });
 
   function checkDataUri(uri, expectedData, done) {
+    var LicenseRequest = shaka.util.LicenseRequest;
     var license_request = new LicenseRequest(uri, null);
 
     license_request.send().then(function(response) {

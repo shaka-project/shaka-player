@@ -147,6 +147,7 @@ function mockXMLHttpRequestEventHandling(xhr) {
  * Returns a Promise which is resolved after the given delay.
  *
  * @param {number} seconds The delay in seconds.
+ * @return {!Promise}
  */
 function delay(seconds) {
   var p = new shaka.util.PublicPromise;
@@ -202,10 +203,11 @@ var assertsToFailures = {
 
 /**
  * Called to interpret ContentProtection elements from an MPD.
+ * @param {?shaka.player.DrmSchemeInfo.LicensePostProcessor} postProcessor
  * @param {!shaka.dash.mpd.ContentProtection} contentProtection
  * @return {shaka.player.DrmSchemeInfo} or null if the element is not supported.
  */
-function interpretContentProtection(contentProtection) {
+function interpretContentProtection(postProcessor, contentProtection) {
   var StringUtils = shaka.util.StringUtils;
 
   // This is the only scheme used in integration tests at the moment.
@@ -215,6 +217,7 @@ function interpretContentProtection(contentProtection) {
     var key = StringUtils.fromHex(child.getAttribute('key'));
     var keyObj = {
       kty: 'oct',
+      alg: 'A128KW',
       kid: StringUtils.toBase64(keyid, false),
       k: StringUtils.toBase64(key, false)
     };
@@ -227,7 +230,8 @@ function interpretContentProtection(contentProtection) {
     var licenseServerUrl = 'data:application/json;base64,' +
         StringUtils.toBase64(license);
     return new shaka.player.DrmSchemeInfo(
-        'org.w3.clearkey', false, licenseServerUrl, false, initData, null);
+        'org.w3.clearkey', false, licenseServerUrl, false, initData,
+        postProcessor);
   }
 
   return null;

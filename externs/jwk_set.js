@@ -40,14 +40,30 @@ function JWKSet() {
  */
 function JWK() {
   /**
-   * A key in hex.
-   * @type {string}
-   */
-  this.k = '';
-
-  /**
-   * A key ID in hex.
+   * A key ID.  Any ASCII string.
    * @type {string}
    */
   this.kid = '';
+
+  /**
+   * The algorithm used with the key.  Use "A128KW" for clearkey.
+   * @type {string}
+   */
+  this.alg = '';
+
+  /**
+   * A key type.  One of:
+   *   "oct" (symmetric key octect sequence)
+   *   "RSA" (RSA key)
+   *   "EC" (elliptical curve key)
+   * Use "oct" for clearkey.
+   * @type {string}
+   */
+  this.kty = '';
+
+  /**
+   * A key in base 64.  Used with kty="oct".
+   * @type {string}
+   */
+  this.k = '';
 }

@@ -684,6 +684,7 @@ class StateTracker(object):
 
   OBJECT_LITERAL = 'o'
   CODE = 'c'
+  SUPPRESS_COMMENT_LINE = re.compile(r' *gjslint: *disable=([0-9,]+) *')
 
   def __init__(self, doc_flag=DocFlag):
     """Initializes a JavaScript token stream state tracker.
@@ -703,6 +704,7 @@ class StateTracker(object):
     self._function_stack = []
     self._functions_by_name = {}
     self._last_comment = None
+    self._suppressions = []
     self._doc_comment = None
     self._cumulative_params = None
     self._block_types = []
@@ -899,6 +901,14 @@ class StateTracker(object):
     """
     return self._last_comment
 
+  def GetSuppressions(self):
+    """Return a list of suppressed error codes for the current position.
+
+    Returns:
+      A list of suppressed error codes for the current position.
+    """
+    return self._suppressions
+
   def GetDocComment(self):
     """Return the most recent applicable documentation comment.
 
@@ -1041,9 +1051,11 @@ class StateTracker(object):
 
     elif type == Type.COMMENT:
       self._last_comment = token.string
+      self._suppressions = self._ParseSuppressions(self._last_comment)
 
     elif type == Type.START_DOC_COMMENT:
       self._last_comment = None
+      self._suppressions = []
       self._doc_comment = DocComment(token)
 
     elif type == Type.END_DOC_COMMENT:
@@ -1165,6 +1177,26 @@ class StateTracker(object):
       if function:
         function.has_this = True
 
+  def _ParseSuppressions(self, comment):
+    """Parse a comment string for error suppressions.
+
+    Args:
+      comment: The comment string to parse.
+
+    Returns:
+      An array of error codes which should be suppressed.
+    """
+    m = StateTracker.SUPPRESS_COMMENT_LINE.match(comment)
+    if not m:
+      return []
+
+    suppressions = []
+    error_list = m.group(1).split(',')
+    for error in error_list:
+      suppressions.append(int(error))
+
+    return suppressions
+
   def HandleAfterToken(self, token):
     """Handle updating state after a token has been checked.
 
@@ -1183,10 +1215,12 @@ class StateTracker(object):
       # array indices so that we pick up manually exported identifiers.
       self._doc_comment = None
       self._last_comment = None
+      self._suppressions = []
 
     elif type == Type.END_BLOCK:
       self._doc_comment = None
       self._last_comment = None
+      self._suppressions = []
 
       if self.InFunction() and self.IsFunctionClose():
         # TODO(robbyw): Detect the function's name for better errors.
@@ -1205,6 +1239,7 @@ class StateTracker(object):
     elif type == Type.END_PARAMETERS and self._doc_comment:
       self._doc_comment = None
       self._last_comment = None
+      self._suppressions = []
 
     if not token.IsAnyType(Type.WHITESPACE, Type.BLANK_LINE):
       self._last_non_space_token = token
