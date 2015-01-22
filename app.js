@@ -561,7 +561,7 @@ app.interpretContentProtection_ = function(contentProtection) {
   if (contentProtection.schemeIdUri ==
       'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed') {
     // This is the UUID which represents Widevine in the edash-packager.
-    var licenseServerUrl = 'http://widevine-proxy.appspot.com/proxy';
+    var licenseServerUrl = '//widevine-proxy.appspot.com/proxy';
     return new shaka.player.DrmSchemeInfo(
         'com.widevine.alpha', true, licenseServerUrl, false, null, null);
   }

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <MPD xmlns="urn:mpeg:DASH:schema:MPD:2011" type="static" mediaPresentationDuration="PT59.994S" minBufferTime="PT1S" profiles="urn:webm:dash:profile:webm-on-demand:2012">
-  <BaseURL>http://shaka-player-demo.appspot.com/assets/angel_one/</BaseURL>
+  <BaseURL>//shaka-player-demo.appspot.com/assets/angel_one/</BaseURL>
   <Period id="0" start="PT0S" duration="PT59.994S">
     <AdaptationSet id="6" mimeType="audio/webm" codecs="vorbis" lang="en" audioSamplingRate="48000" subsegmentStartsWithSAP="1">
       <Representation id="6" bandwidth="112375">
