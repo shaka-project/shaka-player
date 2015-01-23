@@ -16,10 +16,10 @@
  * @fileoverview segment_index.js unit tests.
  */
 
-goog.require('shaka.dash.IsobmffSegmentIndexParser');
-goog.require('shaka.dash.SegmentIndex');
-goog.require('shaka.dash.SegmentReference');
-goog.require('shaka.dash.WebmSegmentIndexParser');
+goog.require('shaka.media.IsobmffSegmentIndexParser');
+goog.require('shaka.media.SegmentIndex');
+goog.require('shaka.media.SegmentReference');
+goog.require('shaka.media.WebmSegmentIndexParser');
 goog.require('shaka.util.PublicPromise');
 
 // TODO: Move IsobmffSegmentIndexParser and WebmSegmentIndexParser tests into
@@ -91,7 +91,7 @@ describe('SegmentIndex', function() {
     // The SIDX data was obtained from an MP4 file where the SIDX offset was
     // 708. We use this value here since the expected offsets for parsing this
     // SIDX are known.
-    var parser = new shaka.dash.IsobmffSegmentIndexParser();
+    var parser = new shaka.media.IsobmffSegmentIndexParser();
     var references = parser.parse(null, new DataView(sidxData), 708);
     expect(references).not.toBeNull();
 
@@ -123,7 +123,7 @@ describe('SegmentIndex', function() {
     // The SIDX data was obtained from an MP4 file where the SIDX offset was
     // 1322. We use this value here since the expected offsets for parsing this
     // SIDX are known.
-    var parser = new shaka.dash.IsobmffSegmentIndexParser();
+    var parser = new shaka.media.IsobmffSegmentIndexParser();
     var references =
         parser.parse(null, new DataView(sidxDataWithNonZeroStart), 1322);
     expect(references).not.toBeNull();
@@ -147,7 +147,7 @@ describe('SegmentIndex', function() {
   });
 
   it('parses a WebM segment index', function() {
-    var parser = new shaka.dash.WebmSegmentIndexParser();
+    var parser = new shaka.media.WebmSegmentIndexParser();
     var references =
         parser.parse(new DataView(webmData), new DataView(cuesData), 0);
     expect(references).not.toBeNull();
@@ -172,12 +172,12 @@ describe('SegmentIndex', function() {
     var index;
 
     beforeEach(function() {
-      var parser = new shaka.dash.WebmSegmentIndexParser();
+      var parser = new shaka.media.WebmSegmentIndexParser();
       var references =
           parser.parse(new DataView(webmData), new DataView(cuesData), 0);
       expect(references).not.toBeNull();
 
-      index = new shaka.dash.SegmentIndex(references);
+      index = new shaka.media.SegmentIndex(references);
     });
 
     it('handles a regular interval', function() {
@@ -239,12 +239,12 @@ describe('SegmentIndex', function() {
       var url = new goog.Uri('http://example.com');
 
       var references = [
-        new shaka.dash.SegmentReference(0, 0, 1, 0, 5, url),
-        new shaka.dash.SegmentReference(1, 1, 2, 6, 9, url),
-        new shaka.dash.SegmentReference(2, 2, null, 10, null, url)
+        new shaka.media.SegmentReference(0, 0, 1, 0, 5, url),
+        new shaka.media.SegmentReference(1, 1, 2, 6, 9, url),
+        new shaka.media.SegmentReference(2, 2, null, 10, null, url)
       ];
 
-      var index2 = new shaka.dash.SegmentIndex(references);
+      var index2 = new shaka.media.SegmentIndex(references);
       var range = index2.getRangeForInterval(0, 2);
 
       var expectedStartTimes = [0, 1, 2];
@@ -263,7 +263,7 @@ describe('SegmentIndex', function() {
     });
 
     it('handles no segments', function() {
-      index = new shaka.dash.SegmentIndex([]);
+      index = new shaka.media.SegmentIndex([]);
       var range = index.getRangeForInterval(31, 40);
       expect(range).toBeNull();
     });
