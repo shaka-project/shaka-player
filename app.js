@@ -65,6 +65,9 @@ app.polyfillsInstalled_ = false;
  * Initializes the application.
  */
 app.init = function() {
+  // Display the version number.
+  document.getElementById('version').innerText = shaka.player.Player.version;
+
   // Set default values.
   document.getElementById('forcePrefixed').checked = false;
   document.getElementById('preferredLanguage').value = 'en-US';

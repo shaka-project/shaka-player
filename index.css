@@ -37,6 +37,12 @@ tr {
   width: 50px;
 }
 
+#version {
+  color: #888;
+  text-align: right;
+  font-size: 80%;
+}
+
 .http {
   display: none;
 }
