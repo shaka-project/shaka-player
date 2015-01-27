@@ -285,7 +285,7 @@ app.loadDashStream = function() {
   var mediaUrl = document.getElementById('manifestUrlInput').value;
 
   app.load_(
-      new shaka.player.StreamVideoSource(
+      new shaka.player.DashVideoSource(
           mediaUrl,
           app.interpretContentProtection_));
 };

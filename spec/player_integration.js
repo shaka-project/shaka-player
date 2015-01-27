@@ -16,8 +16,8 @@
  * @fileoverview Player integration tests.
  */
 
+goog.require('shaka.player.DashVideoSource');
 goog.require('shaka.player.Player');
-goog.require('shaka.player.StreamVideoSource');
 goog.require('shaka.polyfill.MediaKeys');
 goog.require('shaka.polyfill.VideoPlaybackQuality');
 
@@ -311,7 +311,7 @@ describe('Player', function() {
         return delay(3.0);
       }).then(function() {
         var Stream = shaka.media.Stream;
-        var videoStream = source.streamsByType_['video'];
+        var videoStream = source.streamVideoSource_.streamsByType_['video'];
         expect(videoStream.state_).toBe(Stream.State_.UPDATING);
 
         var track = getVideoTrackByHeight(480);
@@ -649,12 +649,12 @@ describe('Player', function() {
    * @param {string} manifest
    * @param {shaka.player.DrmSchemeInfo.LicensePostProcessor=}
    *     opt_licensePostProcessor
-   * @return {!shaka.player.StreamVideoSource}
+   * @return {!shaka.player.DashVideoSource}
    */
   function newSource(manifest, opt_licensePostProcessor) {
     var callback =
         interpretContentProtection.bind(null, opt_licensePostProcessor);
-    return new shaka.player.StreamVideoSource(manifest, callback);
+    return new shaka.player.DashVideoSource(manifest, callback);
   }
 
   /**
