@@ -32,6 +32,8 @@ describe('Player', function() {
   const languagesManifest = 'assets/angel_one.mpd';
   const webmManifest = 'assets/feelings_vp9-20130806-manifest.mpd';
   const bogusManifest = 'assets/does_not_exist';
+  const highBitrateManifest =
+      'http://storage.googleapis.com/widevine-demo-media/sintel-1080p/dash.mpd';
   const FUDGE_FACTOR = 0.3;
 
   beforeAll(function() {
@@ -298,6 +300,65 @@ describe('Player', function() {
         expect(video.currentTime).toBeGreaterThan(35.0);
         done();
       }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+
+    // This covers github issue #15, in which seeking to evicted data hangs
+    // playback.
+    it('does not hang when seeking to evicted data', function(done) {
+      var source = newSource(highBitrateManifest);
+
+      // Create a temporary shim to intercept and modify manifest info.
+      var originalStreamVideoSource = shaka.player.StreamVideoSource;
+      shaka.player.StreamVideoSource = function(manifestInfo) {
+        // This should force Chrome to evict data quickly after it is played.
+        // At this asset's bitrate, Chrome should only have enough buffer for
+        // 310 seconds of data.  Tweak the buffer time for audio, since this
+        // will take much less time and bandwidth to buffer.
+        const minBufferTime = 300;
+        var sets = manifestInfo.periodInfos[0].streamSetInfos;
+        var audioSet = sets[0].contentType == 'audio' ? sets[0] : sets[1];
+        expect(audioSet.contentType).toBe('audio');
+        audioSet.streamInfos[0].minBufferTime = minBufferTime;
+        // Remove the video set to speed things up.
+        manifestInfo.periodInfos[0].streamSetInfos = [audioSet];
+        return new originalStreamVideoSource(manifestInfo);
+      };
+
+      var audioStreamBuffer;
+      player.load(source).then(function() {
+        // Replace the StreamVideoSource shim.
+        shaka.player.StreamVideoSource = originalStreamVideoSource;
+        // Locate the audio stream buffer.
+        var audioStream = source.streamVideoSource_.streamsByType_['audio'];
+        audioStreamBuffer = audioStream.sbm_.sourceBuffer_;
+        // Nothing has buffered yet.
+        expect(audioStreamBuffer.buffered.length).toBe(0);
+        // Give the audio time to buffer.
+        return delay(4.0);
+      }).then(function() {
+        // The content is now buffered.
+        expect(audioStreamBuffer.buffered.length).toBe(1);
+        // Power through and consume the audio data quickly.
+        player.play();
+        player.setPlaybackRate(8);
+        return delay(4.0);
+      }).then(function() {
+        // Ensure that the browser has evicted the beginning of the stream.
+        // Otherwise, this test hasn't reproduced the circumstances correctly.
+        expect(audioStreamBuffer.buffered.start(0)).toBeGreaterThan(0);
+        // Seek to the beginning, which is data we will have to re-download.
+        player.seek(0);
+        return delay(3.0);
+      }).then(function() {
+        // Expect that we've been able to play some.
+        expect(video.currentTime).toBeGreaterThan(1.0);
+        done();
+      }).catch(function(error) {
+        // Replace the StreamVideoSource shim.
+        shaka.player.StreamVideoSource = originalStreamVideoSource;
         fail(error);
         done();
       });
