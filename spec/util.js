@@ -18,6 +18,8 @@
 
 goog.require('shaka.asserts');
 goog.require('shaka.util.PublicPromise');
+goog.require('shaka.util.StringUtils');
+goog.require('shaka.util.Uint8ArrayUtils');
 
 
 var customMatchers = {};
@@ -208,27 +210,27 @@ var assertsToFailures = {
  * @return {shaka.player.DrmSchemeInfo} or null if the element is not supported.
  */
 function interpretContentProtection(postProcessor, contentProtection) {
-  var StringUtils = shaka.util.StringUtils;
+  var Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
 
   // This is the only scheme used in integration tests at the moment.
   if (contentProtection.schemeIdUri == 'com.youtube.clearkey') {
     var child = contentProtection.children[0];
-    var keyid = StringUtils.fromHex(child.getAttribute('keyid'));
-    var key = StringUtils.fromHex(child.getAttribute('key'));
+    var keyid = Uint8ArrayUtils.fromHex(child.getAttribute('keyid'));
+    var key = Uint8ArrayUtils.fromHex(child.getAttribute('key'));
     var keyObj = {
       kty: 'oct',
       alg: 'A128KW',
-      kid: StringUtils.toBase64(keyid, false),
-      k: StringUtils.toBase64(key, false)
+      kid: Uint8ArrayUtils.toBase64(keyid, false),
+      k: Uint8ArrayUtils.toBase64(key, false)
     };
     var jwkSet = {keys: [keyObj]};
     var license = JSON.stringify(jwkSet);
     var initData = {
-      initData: StringUtils.toUint8Array(keyid),
+      initData: keyid,
       initDataType: 'cenc'
     };
     var licenseServerUrl = 'data:application/json;base64,' +
-        StringUtils.toBase64(license);
+        shaka.util.StringUtils.toBase64(license);
     return new shaka.player.DrmSchemeInfo(
         'org.w3.clearkey', false, licenseServerUrl, false, initData,
         postProcessor);

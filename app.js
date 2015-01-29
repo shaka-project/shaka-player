@@ -497,7 +497,7 @@ app.onPlayerError_ = function(event) {
  * @private
  */
 app.interpretContentProtection_ = function(contentProtection) {
-  var StringUtils = shaka.util.StringUtils;
+  var Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
 
   var override = document.getElementById('wvLicenseServerUrlInput');
   if (override.value) {
@@ -511,22 +511,22 @@ app.interpretContentProtection_ = function(contentProtection) {
   if (contentProtection.schemeIdUri == 'com.youtube.clearkey') {
     // This is the scheme used by YouTube's MediaSource demo.
     var child = contentProtection.children[0];
-    var keyid = StringUtils.fromHex(child.getAttribute('keyid'));
-    var key = StringUtils.fromHex(child.getAttribute('key'));
+    var keyid = Uint8ArrayUtils.fromHex(child.getAttribute('keyid'));
+    var key = Uint8ArrayUtils.fromHex(child.getAttribute('key'));
     var keyObj = {
       kty: 'oct',
       alg: 'A128KW',
-      kid: StringUtils.toBase64(keyid, false),
-      k: StringUtils.toBase64(key, false)
+      kid: Uint8ArrayUtils.toBase64(keyid, false),
+      k: Uint8ArrayUtils.toBase64(key, false)
     };
     var jwkSet = {keys: [keyObj]};
     var license = JSON.stringify(jwkSet);
     var initData = {
-      initData: StringUtils.toUint8Array(keyid),
+      initData: keyid,
       initDataType: 'cenc'
     };
     var licenseServerUrl = 'data:application/json;base64,' +
-        StringUtils.toBase64(license);
+        window.btoa(license);
     return new shaka.player.DrmSchemeInfo(
         'org.w3.clearkey', false, licenseServerUrl, false, initData, null);
   }
@@ -581,8 +581,8 @@ app.interpretContentProtection_ = function(contentProtection) {
  * @private
  */
 app.postProcessYouTubeLicenseResponse_ = function(response, restrictions) {
-  var StringUtils = shaka.util.StringUtils;
-  var responseStr = StringUtils.fromUint8Array(response);
+  var Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
+  var responseStr = Uint8ArrayUtils.toString(response);
   var index = responseStr.indexOf('\r\n\r\n');
   if (index >= 0) {
     // Strip off the headers.
@@ -604,7 +604,7 @@ app.postProcessYouTubeLicenseResponse_ = function(response, restrictions) {
       }
     }
   }
-  return StringUtils.toUint8Array(responseStr);
+  return Uint8ArrayUtils.fromString(responseStr);
 };
 
 
