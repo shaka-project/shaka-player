@@ -189,7 +189,7 @@ describe('MpdProcessor', function() {
       m.periods.push(p);
     });
 
-    it('generates a SegmentBase from a SegmentTemplate', function() {
+    it('creates SegmentBase from SegmentTemplate', function() {
       st.mediaUrlTemplate = 'http://example.com/$Bandwidth$-media.mp4';
       st.indexUrlTemplate = 'http://example.com/$Bandwidth$-index.sidx';
       st.initializationUrlTemplate = 'http://example.com/$Bandwidth$-init.mp4';
@@ -243,7 +243,7 @@ describe('MpdProcessor', function() {
       expect(i2.range).toBeNull();
     });
 
-    it('generates a SegmentList from a SegmentTemplate', function() {
+    it('creates SegmentList from SegmentTemplate+SegmentTimeline', function() {
       var tp1 = new mpd.SegmentTimePoint();
       tp1.duration = 10;
       tp1.repeat = 1;
@@ -259,7 +259,7 @@ describe('MpdProcessor', function() {
       st.timescale = 9000;
       st.presentationTimeOffset = 0;
       st.segmentDuration = null;
-      st.firstSegmentNumber = 1;
+      st.startNumber = 1;
       st.mediaUrlTemplate = '$Number$-$Time$-$Bandwidth$-media.mp4';
       st.initializationUrlTemplate = '$Bandwidth$-init.mp4';
 
@@ -281,7 +281,7 @@ describe('MpdProcessor', function() {
       expect(sl1.timescale).toBe(9000);
       expect(sl1.presentationTimeOffset).toBe(0);
       expect(sl1.segmentDuration).toBe(null);
-      expect(sl1.firstSegmentNumber).toBe(1);
+      expect(sl1.startNumber).toBe(1);
 
       expect(sl1.initialization).toBeTruthy();
       expect(sl1.initialization.url).toBeTruthy();
@@ -319,7 +319,7 @@ describe('MpdProcessor', function() {
       expect(sl2.timescale).toBe(9000);
       expect(sl2.presentationTimeOffset).toBe(0);
       expect(sl2.segmentDuration).toBe(null);
-      expect(sl2.firstSegmentNumber).toBe(1);
+      expect(sl2.startNumber).toBe(1);
 
       expect(sl2.initialization).toBeTruthy();
       expect(sl2.initialization.url).toBeTruthy();
@@ -348,6 +348,101 @@ describe('MpdProcessor', function() {
       expect(sl2.segmentUrls[2].mediaRange).toBeNull();
       expect(sl2.segmentUrls[2].startTime).toBe(20);
       expect(sl2.segmentUrls[2].duration).toBe(20);
+    });
+
+    it('creates SegmentList from SegmentTemplate+segmentDuration', function() {
+      p.duration = 30;
+
+      st.timescale = 9000;
+      st.presentationTimeOffset = 0;
+      st.segmentDuration = 10;
+      st.startNumber = 5;  // Ensure startNumber > 1 works.
+      st.mediaUrlTemplate = '$Number$-$Time$-$Bandwidth$-media.mp4';
+      st.initializationUrlTemplate = '$Bandwidth$-init.mp4';
+
+      r1.bandwidth = 250000;
+      r1.baseUrl = new goog.Uri('http://example.com/');
+
+      r2.bandwidth = 500000;
+      r2.baseUrl = new goog.Uri('http://example.com/');
+
+      processor.processSegmentTemplates_(m);
+
+      // Check |r1|.
+      expect(r1.segmentBase).toBeNull();
+      expect(r1.segmentList).toBeTruthy();
+
+      var sl1 = r1.segmentList;
+      expect(sl1.timescale).toBe(9000);
+      expect(sl1.presentationTimeOffset).toBe(0);
+      expect(sl1.segmentDuration).toBe(10);
+      expect(sl1.startNumber).toBe(5);
+
+      expect(sl1.initialization).toBeTruthy();
+      expect(sl1.initialization.url).toBeTruthy();
+      expect(sl1.initialization.url.toString())
+          .toBe('http://example.com/250000-init.mp4');
+
+      expect(sl1.segmentUrls.length).toBe(3);
+
+      expect(sl1.segmentUrls[0].mediaUrl).toBeTruthy();
+      expect(sl1.segmentUrls[0].mediaUrl.toString())
+          .toBe('http://example.com/5-40-250000-media.mp4');
+      expect(sl1.segmentUrls[0].mediaRange).toBeNull();
+      expect(sl1.segmentUrls[0].startTime).toBe(40);
+      expect(sl1.segmentUrls[0].duration).toBe(10);
+
+      expect(sl1.segmentUrls[1].mediaUrl).toBeTruthy();
+      expect(sl1.segmentUrls[1].mediaUrl.toString())
+          .toBe('http://example.com/6-50-250000-media.mp4');
+      expect(sl1.segmentUrls[1].mediaRange).toBeNull();
+      expect(sl1.segmentUrls[1].startTime).toBe(50);
+      expect(sl1.segmentUrls[1].duration).toBe(10);
+
+      expect(sl1.segmentUrls[2].mediaUrl).toBeTruthy();
+      expect(sl1.segmentUrls[2].mediaUrl.toString())
+          .toBe('http://example.com/7-60-250000-media.mp4');
+      expect(sl1.segmentUrls[2].mediaRange).toBeNull();
+      expect(sl1.segmentUrls[2].startTime).toBe(60);
+      expect(sl1.segmentUrls[2].duration).toBe(10);
+
+      // Check |r2|.
+      expect(r2.segmentBase).toBeNull();
+      expect(r2.segmentList).toBeTruthy();
+
+      var sl2 = r2.segmentList;
+      expect(sl2.timescale).toBe(9000);
+      expect(sl2.presentationTimeOffset).toBe(0);
+      expect(sl2.segmentDuration).toBe(10);
+      expect(sl2.startNumber).toBe(5);
+
+      expect(sl2.initialization).toBeTruthy();
+      expect(sl2.initialization.url).toBeTruthy();
+      expect(sl2.initialization.url.toString())
+          .toBe('http://example.com/500000-init.mp4');
+
+      expect(sl2.segmentUrls.length).toBe(3);
+
+      expect(sl2.segmentUrls[0].mediaUrl).toBeTruthy();
+      expect(sl2.segmentUrls[0].mediaUrl.toString())
+          .toBe('http://example.com/5-40-500000-media.mp4');
+      expect(sl2.segmentUrls[0].mediaRange).toBeNull();
+      expect(sl2.segmentUrls[0].startTime).toBe(40);
+      expect(sl2.segmentUrls[0].duration).toBe(10);
+
+      expect(sl2.segmentUrls[1].mediaUrl).toBeTruthy();
+      expect(sl2.segmentUrls[1].mediaUrl.toString())
+          .toBe('http://example.com/6-50-500000-media.mp4');
+      expect(sl2.segmentUrls[1].mediaRange).toBeNull();
+      expect(sl2.segmentUrls[1].startTime).toBe(50);
+      expect(sl2.segmentUrls[1].duration).toBe(10);
+
+      expect(sl2.segmentUrls[2].mediaUrl).toBeTruthy();
+      expect(sl2.segmentUrls[2].mediaUrl.toString())
+          .toBe('http://example.com/7-60-500000-media.mp4');
+      expect(sl2.segmentUrls[2].mediaRange).toBeNull();
+      expect(sl2.segmentUrls[2].startTime).toBe(60);
+      expect(sl2.segmentUrls[2].duration).toBe(10);
     });
   });
 
