@@ -444,6 +444,122 @@ describe('MpdProcessor', function() {
       expect(sl2.segmentUrls[2].startTime).toBe(60);
       expect(sl2.segmentUrls[2].duration).toBe(10);
     });
+
+    it('can handle gaps within a SegmentTimeline', function() {
+      var tp1 = new mpd.SegmentTimePoint();
+      tp1.startTime = 10;
+      tp1.duration = 10;
+
+      var tp2 = new mpd.SegmentTimePoint();
+      tp2.startTime = 21;
+      tp2.duration = 10;
+
+      var tp3 = new mpd.SegmentTimePoint();
+      tp3.startTime = 32;
+      tp3.duration = 10;
+
+      var timeline = new mpd.SegmentTimeline();
+      timeline.timePoints.push(tp1);
+      timeline.timePoints.push(tp2);
+      timeline.timePoints.push(tp3);
+
+      st.timescale = 1;
+      st.presentationTimeOffset = 0;
+      st.segmentDuration = null;
+      st.startNumber = 1;
+      st.mediaUrlTemplate = '$Number$-$Time$-$Bandwidth$-media.mp4';
+
+      st.timeline = timeline;
+
+      r1.bandwidth = 250000;
+      r1.baseUrl = new goog.Uri('http://example.com/');
+
+      processor.processSegmentTemplates_(m);
+
+      // Check |r1|.
+      expect(r1.segmentList).toBeTruthy();
+
+      var sl1 = r1.segmentList;
+      expect(sl1.segmentUrls.length).toBe(3);
+
+      expect(sl1.segmentUrls[0].mediaUrl).toBeTruthy();
+      expect(sl1.segmentUrls[0].mediaUrl.toString())
+          .toBe('http://example.com/1-10-250000-media.mp4');
+      expect(sl1.segmentUrls[0].startTime).toBe(10);
+      // Duration should stretch to the beginning of the next segment.
+      expect(sl1.segmentUrls[0].duration).toBe(11);
+
+      expect(sl1.segmentUrls[1].mediaUrl).toBeTruthy();
+      expect(sl1.segmentUrls[1].mediaUrl.toString())
+          .toBe('http://example.com/2-21-250000-media.mp4');
+      expect(sl1.segmentUrls[1].startTime).toBe(21);
+      // Duration should stretch to the beginning of the next segment.
+      expect(sl1.segmentUrls[1].duration).toBe(11);
+
+      expect(sl1.segmentUrls[2].mediaUrl).toBeTruthy();
+      expect(sl1.segmentUrls[2].mediaUrl.toString())
+          .toBe('http://example.com/3-32-250000-media.mp4');
+      expect(sl1.segmentUrls[2].startTime).toBe(32);
+      expect(sl1.segmentUrls[2].duration).toBe(10);
+    });
+
+    it('can handle overlaps within a SegmentTimeline', function() {
+      var tp1 = new mpd.SegmentTimePoint();
+      tp1.startTime = 10;
+      tp1.duration = 11;
+
+      var tp2 = new mpd.SegmentTimePoint();
+      tp2.startTime = 20;
+      tp2.duration = 10;
+
+      var tp3 = new mpd.SegmentTimePoint();
+      tp3.startTime = 29;
+      tp3.duration = 10;
+
+      var timeline = new mpd.SegmentTimeline();
+      timeline.timePoints.push(tp1);
+      timeline.timePoints.push(tp2);
+      timeline.timePoints.push(tp3);
+
+      st.timescale = 1;
+      st.presentationTimeOffset = 0;
+      st.segmentDuration = null;
+      st.startNumber = 1;
+      st.mediaUrlTemplate = '$Number$-$Time$-$Bandwidth$-media.mp4';
+
+      st.timeline = timeline;
+
+      r1.bandwidth = 250000;
+      r1.baseUrl = new goog.Uri('http://example.com/');
+
+      processor.processSegmentTemplates_(m);
+
+      // Check |r1|.
+      expect(r1.segmentList).toBeTruthy();
+
+      var sl1 = r1.segmentList;
+      expect(sl1.segmentUrls.length).toBe(3);
+
+      expect(sl1.segmentUrls[0].mediaUrl).toBeTruthy();
+      expect(sl1.segmentUrls[0].mediaUrl.toString())
+          .toBe('http://example.com/1-10-250000-media.mp4');
+      expect(sl1.segmentUrls[0].startTime).toBe(10);
+      // Duration should compress to the beginning of the next segment.
+      expect(sl1.segmentUrls[0].duration).toBe(10);
+
+      expect(sl1.segmentUrls[1].mediaUrl).toBeTruthy();
+      expect(sl1.segmentUrls[1].mediaUrl.toString())
+          .toBe('http://example.com/2-20-250000-media.mp4');
+      expect(sl1.segmentUrls[1].startTime).toBe(20);
+      // Duration should compress to the beginning of the next segment.
+      expect(sl1.segmentUrls[1].duration).toBe(9);
+
+      expect(sl1.segmentUrls[2].mediaUrl).toBeTruthy();
+      expect(sl1.segmentUrls[2].mediaUrl.toString())
+          .toBe('http://example.com/3-29-250000-media.mp4');
+      expect(sl1.segmentUrls[2].startTime).toBe(29);
+      expect(sl1.segmentUrls[2].duration).toBe(10);
+    });
   });
 
   describe('fillUrlTemplate_', function() {
