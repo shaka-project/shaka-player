@@ -23,10 +23,6 @@
 var BufferSource;
 
 
-/** @typedef {!Object.<BufferSource, string>} */
-var MediaKeyStatuses;
-
-
 /**
  * @param {string} keySystem
  * @param {Array.<Object>=} opt_supportedConfigurations
@@ -41,14 +37,6 @@ Navigator.prototype.requestMediaKeySystemAccess =
  * @const
  */
 HTMLMediaElement.prototype.mediaKeys;
-
-
-/**
- * NOTE: Not yet implemented as of Chrome 40.  Type may be incorrect.
- * @type {string}
- * @const
- */
-HTMLMediaElement.prototype.waitingFor;
 
 
 /**
@@ -68,7 +56,6 @@ MediaKeySystemAccess.prototype.createMediaKeys = function() {};
 
 
 /**
- * NOTE: Not yet implemented as of Chrome 40.  Type may be incorrect.
  * @return {Object}
  */
 MediaKeySystemAccess.prototype.getConfiguration = function() {};
@@ -101,6 +88,60 @@ MediaKeys.prototype.setServerCertificate = function(serverCertificate) {};
 
 /**
  * @interface
+ */
+function MediaKeyStatusMap() {}
+
+
+/**
+ * @type {number}
+ * @const
+ */
+MediaKeyStatusMap.prototype.size;
+
+
+/**
+ * Array entry 0 is the key, 1 is the value.
+ * @return {Iterator.<Array.<!BufferSource|string>>}
+ */
+MediaKeyStatusMap.prototype.entries = function() {};
+
+
+/**
+ * The functor is called with each value.
+ * @param {function(string)} fn
+ */
+MediaKeyStatusMap.prototype.forEach = function(fn) {};
+
+
+/**
+ * @param {!BufferSource} keyId
+ * @return {string|undefined}
+ */
+MediaKeyStatusMap.prototype.get = function(keyId) {};
+
+
+/**
+ * @param {!BufferSource} keyId
+ * @return {boolean}
+ */
+MediaKeyStatusMap.prototype.has = function(keyId) {};
+
+
+/**
+ * @return {Iterator.<!BufferSource>}
+ */
+MediaKeyStatusMap.prototype.keys = function() {};
+
+
+/**
+ * @return {Iterator.<string>}
+ */
+MediaKeyStatusMap.prototype.values = function() {};
+
+
+
+/**
+ * @interface
  * @extends {EventTarget}
  */
 function MediaKeySession() {}
@@ -128,8 +169,7 @@ MediaKeySession.prototype.closed;
 
 
 /**
- * NOTE: Not yet implemented as of Chrome 40.  Type may be incorrect.
- * @type {!MediaKeyStatuses}
+ * @type {!MediaKeyStatusMap}
  * @const
  */
 MediaKeySession.prototype.keyStatuses;
