@@ -19,10 +19,6 @@
 goog.require('shaka.util.EbmlParser');
 
 describe('EbmlParser', function() {
-  beforeEach(function() {
-    jasmine.addMatchers(customMatchers);
-  });
-
   it('parses one element', function() {
     // Set ID to 0x1.
     // Set size to 4 bytes.
