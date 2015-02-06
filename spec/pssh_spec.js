@@ -22,50 +22,50 @@ goog.require('shaka.util.Uint8ArrayUtils');
 describe('Pssh', function() {
   var fromHex = shaka.util.Uint8ArrayUtils.fromHex;
 
-  const WIDEVINE_SYSTEM_ID = "edef8ba979d64acea3c827dcd51d21ed";
-  const PLAYREADY_SYSTEM_ID = "9a04f07998404286ab92e65be0885f95";
-  const GENERIC_SYSTEM_ID = "1077efecc0b24d02ace33c1e52e2fb4b";
+  const WIDEVINE_SYSTEM_ID = 'edef8ba979d64acea3c827dcd51d21ed';
+  const PLAYREADY_SYSTEM_ID = '9a04f07998404286ab92e65be0885f95';
+  const GENERIC_SYSTEM_ID = '1077efecc0b24d02ace33c1e52e2fb4b';
 
   const WIDEVINE_PSSH =
-      "00000028" +                          // atom size
-      "70737368" +                          // atom type="pssh"
-      "00000000" +                          // v0, flags=0
-      "edef8ba979d64acea3c827dcd51d21ed" +  // system id (Widevine)
-      "00000008" +                          // data size
-      "0102030405060708";                   // data
+      '00000028' +                          // atom size
+      '70737368' +                          // atom type='pssh'
+      '00000000' +                          // v0, flags=0
+      'edef8ba979d64acea3c827dcd51d21ed' +  // system id (Widevine)
+      '00000008' +                          // data size
+      '0102030405060708';                   // data
 
   const PLAYREADY_PSSH =
-      "00000028" +                          // atom size
-      "70737368" +                          // atom type "pssh"
-      "00000000" +                          // v0, flags=0
-      "9a04f07998404286ab92e65be0885f95" +  // system id (PlayReady)
-      "00000008" +                          // data size
-      "0102030405060708";                   // data
+      '00000028' +                          // atom size
+      '70737368' +                          // atom type 'pssh'
+      '00000000' +                          // v0, flags=0
+      '9a04f07998404286ab92e65be0885f95' +  // system id (PlayReady)
+      '00000008' +                          // data size
+      '0102030405060708';                   // data
 
   const GENERIC_PSSH =
-      "00000044" +                          // atom size
-      "70737368" +                          // atom type "pssh"
-      "01000000" +                          // v1, flags=0
-      "1077efecc0b24d02ace33c1e52e2fb4b" +  // system id (generic CENC)
-      "00000002" +                          // key ID count
-      "30313233343536373839303132333435" +  // key ID="0123456789012345"
-      "38393031323334354142434445464748" +  // key ID="ABCDEFGHIJKLMNOP"
-      "00000000";                           // data size=0
+      '00000044' +                          // atom size
+      '70737368' +                          // atom type 'pssh'
+      '01000000' +                          // v1, flags=0
+      '1077efecc0b24d02ace33c1e52e2fb4b' +  // system id (generic CENC)
+      '00000002' +                          // key ID count
+      '30313233343536373839303132333435' +  // key ID='0123456789012345'
+      '38393031323334354142434445464748' +  // key ID='ABCDEFGHIJKLMNOP'
+      '00000000';                           // data size=0
 
   const ZERO_SIZED_GENERIC_PSSH =
-      "00000000" +                          // atom size (whole buffer)
-      "70737368" +                          // atom type="pssh"
-      "01000000" +                          // v1, flags=0
-      "1077efecc0b24d02ace33c1e52e2fb4b" +  // system id (generic CENC)
-      "00000002" +                          // key ID count
-      "30313233343536373839303132333435" +  // key ID="0123456789012345"
-      "38393031323334354142434445464748" +  // key ID="ABCDEFGHIJKLMNOP"
-      "00000000";                           // data size=0
+      '00000000' +                          // atom size (whole buffer)
+      '70737368' +                          // atom type='pssh'
+      '01000000' +                          // v1, flags=0
+      '1077efecc0b24d02ace33c1e52e2fb4b' +  // system id (generic CENC)
+      '00000002' +                          // key ID count
+      '30313233343536373839303132333435' +  // key ID='0123456789012345'
+      '38393031323334354142434445464748' +  // key ID='ABCDEFGHIJKLMNOP'
+      '00000000';                           // data size=0
 
   const OTHER_BOX =
-      "00000018" +                          // atom size
-      "77686174" +                          // atom type "what"
-      "deadbeefdeadbeefdeadbeefdeadbeef";   // garbage box data
+      '00000018' +                          // atom size
+      '77686174' +                          // atom type 'what'
+      'deadbeefdeadbeefdeadbeefdeadbeef';   // garbage box data
 
   const TRUNCATED_WIDEVINE_PSSH =
       WIDEVINE_PSSH.substr(0, WIDEVINE_PSSH.length - 6);
