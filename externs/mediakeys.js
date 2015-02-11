@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  * @fileoverview MediaKey externs.
- * Based on the Dec 1, 2014 draft of the EME spec.
+ * Based on {@link http://goo.gl/5gifok EME draft 09 February 2015}.
  * @externs
  */
 
@@ -23,19 +23,30 @@
 var BufferSource;
 
 
+/** @typedef {{contentType: string, robustness: string}} */
+var MediaKeySystemMediaCapability;
+
+
+/** @typedef {{
+ *   initDataTypes: Array.<string>,
+ *   audioCapabilities: Array.<!MediaKeySystemMediaCapability>,
+ *   videoCapabilities: Array.<!MediaKeySystemMediaCapability>,
+ *   distinctiveIdentifier: string,
+ *   persistentState: string
+ * }} */
+var MediaKeySystemConfiguration;
+
+
 /**
  * @param {string} keySystem
- * @param {Array.<Object>=} opt_supportedConfigurations
+ * @param {!Array.<!MediaKeySystemConfiguration>} supportedConfigurations
  * @return {!Promise.<!MediaKeySystemAccess>}
  */
 Navigator.prototype.requestMediaKeySystemAccess =
-    function(keySystem, opt_supportedConfigurations) {};
+    function(keySystem, supportedConfigurations) {};
 
 
-/**
- * @type {MediaKeys}
- * @const
- */
+/** @const {MediaKeys} */
 HTMLMediaElement.prototype.mediaKeys;
 
 
@@ -55,13 +66,11 @@ function MediaKeySystemAccess() {}
 MediaKeySystemAccess.prototype.createMediaKeys = function() {};
 
 
-/**
- * @return {Object}
- */
+/** @return {!MediaKeySystemConfiguration} */
 MediaKeySystemAccess.prototype.getConfiguration = function() {};
 
 
-/** @type {string} */
+/** @const {string} */
 MediaKeySystemAccess.prototype.keySystem;
 
 
@@ -71,7 +80,7 @@ function MediaKeys() {}
 
 
 /**
- * @param {string=} opt_sessionType
+ * @param {string=} opt_sessionType defaults to "temporary"
  * @return {!MediaKeySession}
  * @throws {TypeError} if opt_sessionType is invalid.
  */
@@ -92,10 +101,7 @@ MediaKeys.prototype.setServerCertificate = function(serverCertificate) {};
 function MediaKeyStatusMap() {}
 
 
-/**
- * @type {number}
- * @const
- */
+/** @const {number} */
 MediaKeyStatusMap.prototype.size;
 
 
@@ -147,31 +153,19 @@ MediaKeyStatusMap.prototype.values = function() {};
 function MediaKeySession() {}
 
 
-/**
- * @type {string}
- * @const
- */
+/** @const {string} */
 MediaKeySession.prototype.sessionId;
 
 
-/**
- * @type {number}
- * @const
- */
+/** @const {number} */
 MediaKeySession.prototype.expiration;
 
 
-/**
- * @type {!Promise}
- * @const
- */
+/** @const {!Promise} */
 MediaKeySession.prototype.closed;
 
 
-/**
- * @type {!MediaKeyStatusMap}
- * @const
- */
+/** @const {!MediaKeyStatusMap} */
 MediaKeySession.prototype.keyStatuses;
 
 
@@ -197,9 +191,7 @@ MediaKeySession.prototype.load = function(sessionId) {};
 MediaKeySession.prototype.update = function(response) {};
 
 
-/**
- * @return {!Promise}
- */
+/** @return {!Promise} */
 MediaKeySession.prototype.close = function() {};
 
 
@@ -231,24 +223,15 @@ MediaKeySession.prototype.dispatchEvent = function(evt) {};
 function MediaKeyMessageEvent(type, opt_eventInitDict) {}
 
 
-/**
- * @type {string}
- * @const
- */
+/** @const {string} */
 MediaKeyMessageEvent.prototype.messageType;
 
 
-/**
- * @type {!ArrayBuffer}
- * @const
- */
+/** @const {!ArrayBuffer} */
 MediaKeyMessageEvent.prototype.message;
 
 
-/**
- * @type {!MediaKeySession}
- * @const
- */
+/** @const {!MediaKeySession} */
 MediaKeyMessageEvent.prototype.target;
 
 
@@ -262,16 +245,14 @@ MediaKeyMessageEvent.prototype.target;
 function MediaEncryptedEvent(type, opt_eventInitDict) {}
 
 
-/**
- * @type {string}
- * @const
- */
+/** @const {string} */
 MediaEncryptedEvent.prototype.initDataType;
 
 
-/**
- * @type {ArrayBuffer}
- * @const
- */
+/** @const {ArrayBuffer} */
 MediaEncryptedEvent.prototype.initData;
+
+
+/** @const {!HTMLMediaElement} */
+MediaEncryptedEvent.prototype.target;
 
