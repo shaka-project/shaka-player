@@ -265,7 +265,7 @@ app.loadHttpStream = function() {
   var drmSchemeInfo = null;
   if (keySystem) {
     drmSchemeInfo = new shaka.player.DrmSchemeInfo(
-        keySystem, false, licenseServerUrl, false, null, null);
+        keySystem, true, licenseServerUrl, false, null, null);
   }
 
   app.load_(new shaka.player.HttpVideoSource(mediaUrl, subtitlesUrl,
