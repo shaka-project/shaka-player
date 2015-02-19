@@ -270,13 +270,15 @@ describe('SegmentIndex', function() {
     });
   });
 
-  checkReferences = function(
-      references, expectedFirstIndex, expectedStartTimes, expectedStartBytes) {
+  checkReferences = function(references,
+                             expectedFirstSegmentNumber,
+                             expectedStartTimes,
+                             expectedStartBytes) {
     console.assert(expectedStartTimes.length == expectedStartBytes.length);
     expect(references.length).toBe(expectedStartTimes.length);
     for (var i = 0; i < expectedStartTimes.length; i++) {
       var ref = references[i];
-      expect(ref.index).toBe(expectedFirstIndex + i);
+      expect(ref.segmentNumber).toBe(expectedFirstSegmentNumber + i);
       expect(ref.startTime.toFixed(3)).toBe(expectedStartTimes[i].toFixed(3));
       expect(ref.startByte).toBe(expectedStartBytes[i]);
 

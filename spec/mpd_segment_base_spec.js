@@ -38,7 +38,7 @@ describe('mpd', function() {
           baseUrl: new goog.Uri('http://example.com'),
           mediaUrl: new goog.Uri('http://example.com'),
           timescale: 9000,
-          presentationTimeOffset: 0,
+          presentationTimeOffset: null,
           indexRange: new shaka.dash.mpd.Range(100, 200),
           representationIndex: null,
           initialization: /** shaka.dash.mpd.Initialization */ ({

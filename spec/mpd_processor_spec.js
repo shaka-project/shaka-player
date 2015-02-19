@@ -184,6 +184,7 @@ describe('MpdProcessor', function() {
       as.representations.push(r1);
       as.representations.push(r2);
 
+      p.start = 0;
       p.adaptationSets.push(as);
 
       m.periods.push(p);
@@ -408,7 +409,7 @@ describe('MpdProcessor', function() {
       expect(sl1.segmentUrls[2].duration).toBe(9000 * 20);
     });
 
-    it('creates SegmentList from segmentDuration attribute', function() {
+    it('creates SegmentList from segment duration', function() {
       p.duration = 30;
 
       st.timescale = 9000;
@@ -447,21 +448,21 @@ describe('MpdProcessor', function() {
       expect(sl1.segmentUrls[0].mediaUrl.toString())
           .toBe('http://example.com/5-360000-250000-media.mp4');
       expect(sl1.segmentUrls[0].mediaRange).toBeNull();
-      expect(sl1.segmentUrls[0].startTime).toBe(9000 * 40);
+      expect(sl1.segmentUrls[0].startTime).toBe(0);
       expect(sl1.segmentUrls[0].duration).toBe(9000 * 10);
 
       expect(sl1.segmentUrls[1].mediaUrl).toBeTruthy();
       expect(sl1.segmentUrls[1].mediaUrl.toString())
           .toBe('http://example.com/6-450000-250000-media.mp4');
       expect(sl1.segmentUrls[1].mediaRange).toBeNull();
-      expect(sl1.segmentUrls[1].startTime).toBe(9000 * 50);
+      expect(sl1.segmentUrls[1].startTime).toBe(9000 * 10);
       expect(sl1.segmentUrls[1].duration).toBe(9000 * 10);
 
       expect(sl1.segmentUrls[2].mediaUrl).toBeTruthy();
       expect(sl1.segmentUrls[2].mediaUrl.toString())
           .toBe('http://example.com/7-540000-250000-media.mp4');
       expect(sl1.segmentUrls[2].mediaRange).toBeNull();
-      expect(sl1.segmentUrls[2].startTime).toBe(9000 * 60);
+      expect(sl1.segmentUrls[2].startTime).toBe(9000 * 20);
       expect(sl1.segmentUrls[2].duration).toBe(9000 * 10);
 
       // Check |r2|.
@@ -485,22 +486,86 @@ describe('MpdProcessor', function() {
       expect(sl2.segmentUrls[0].mediaUrl.toString())
           .toBe('http://example.com/5-360000-500000-media.mp4');
       expect(sl2.segmentUrls[0].mediaRange).toBeNull();
-      expect(sl2.segmentUrls[0].startTime).toBe(9000 * 40);
+      expect(sl2.segmentUrls[0].startTime).toBe(0);
       expect(sl2.segmentUrls[0].duration).toBe(9000 * 10);
 
       expect(sl2.segmentUrls[1].mediaUrl).toBeTruthy();
       expect(sl2.segmentUrls[1].mediaUrl.toString())
           .toBe('http://example.com/6-450000-500000-media.mp4');
       expect(sl2.segmentUrls[1].mediaRange).toBeNull();
-      expect(sl2.segmentUrls[1].startTime).toBe(9000 * 50);
+      expect(sl2.segmentUrls[1].startTime).toBe(9000 * 10);
       expect(sl2.segmentUrls[1].duration).toBe(9000 * 10);
 
       expect(sl2.segmentUrls[2].mediaUrl).toBeTruthy();
       expect(sl2.segmentUrls[2].mediaUrl.toString())
           .toBe('http://example.com/7-540000-500000-media.mp4');
       expect(sl2.segmentUrls[2].mediaRange).toBeNull();
-      expect(sl2.segmentUrls[2].startTime).toBe(9000 * 60);
+      expect(sl2.segmentUrls[2].startTime).toBe(9000 * 20);
       expect(sl2.segmentUrls[2].duration).toBe(9000 * 10);
+    });
+
+    it('creates SegmentList from segment duration with AST', function() {
+      st.timescale = 9000;
+      st.presentationTimeOffset = 0;
+      st.segmentDuration = 9000 * 10;
+      st.startNumber = 5;  // Ensure startNumber > 1 works.
+      st.mediaUrlTemplate = '$Number$-$Time$-$Bandwidth$-media.mp4';
+      st.initializationUrlTemplate = '$Bandwidth$-init.mp4';
+
+      r1.bandwidth = 250000;
+      r1.baseUrl = new goog.Uri('http://example.com/');
+
+      var currentTime = Date.now() / 1000.0;
+      m.availabilityStartTime = currentTime - (60 * 60);
+      m.minUpdatePeriod = 30;
+      m.suggestedPresentationDelay = 0;
+
+      processor.processSegmentTemplates_(m);
+
+      var scaledSegmentDuration = st.segmentDuration / st.timescale;
+
+      // This is a specific implementation detail, see MpdProcessor.
+      var extraPresentationDelay = 5;
+
+      // Note that @timeShiftBufferDepth and @minBufferTime are both zero.
+      var lastSegmentNumber =
+          Math.floor((currentTime -
+                      m.availabilityStartTime -
+                      scaledSegmentDuration -
+                      extraPresentationDelay) /
+                     scaledSegmentDuration) + 1;
+
+      // At least @minimumUpdatePeriod worth of segments should be generated.
+      var expectedNumSegments =
+          Math.floor((m.minUpdatePeriod) / scaledSegmentDuration);
+
+      // Check |r1|.
+      expect(r1.segmentList).toBeTruthy();
+
+      var sl1 = r1.segmentList;
+      expect(sl1.segmentUrls.length).toBeGreaterThan(expectedNumSegments - 1);
+
+      for (var i = 0; i < expectedNumSegments; ++i) {
+        var expectedNumberReplacement =
+            (lastSegmentNumber + i - 1) + st.startNumber;
+        var expectedTimeReplacement =
+            ((lastSegmentNumber + i - 1) + (st.startNumber - 1)) *
+            st.segmentDuration;
+        var expectedUrl = 'http://example.com/' +
+            expectedNumberReplacement + '-' +
+            expectedTimeReplacement + '-250000-media.mp4';
+
+        var expectedSegmentNumber = lastSegmentNumber + i;
+        var expectedStartTime =
+            (lastSegmentNumber + i - 1) * st.segmentDuration;
+
+        expect(sl1.segmentUrls[i].mediaUrl).toBeTruthy();
+        expect(sl1.segmentUrls[i].mediaUrl.toString()).toBe(expectedUrl);
+        expect(sl1.segmentUrls[i].mediaRange).toBeNull();
+        expect(sl1.segmentUrls[i].segmentNumber).toBe(expectedSegmentNumber);
+        expect(sl1.segmentUrls[i].startTime).toBe(expectedStartTime);
+        expect(sl1.segmentUrls[i].duration).toBe(9000 * 10);
+      }
     });
 
     it('handles gaps within SegmentTimeline', function() {
@@ -802,7 +867,7 @@ describe('MpdProcessor', function() {
       st.segmentDuration = 90000;
 
       p.start = 0;
-      m.duration = 100;
+      m.mediaPresentationDuration = 100;
 
       processor.process(m);
 
@@ -831,7 +896,7 @@ describe('MpdProcessor', function() {
       st.segmentDuration = 90000;
 
       p.start = 0;
-      m.duration = 100;
+      m.mediaPresentationDuration = 100;
 
       processor.process(m);
 
@@ -842,7 +907,7 @@ describe('MpdProcessor', function() {
       st.mediaUrlTemplate = '$Number$-$Bandwidth$-media.mp4';
       st.segmentDuration = 90000;
 
-      m.duration = 100;
+      m.mediaPresentationDuration = 100;
       m.type = 'static';
 
       processor.process(m);
