@@ -24,6 +24,6 @@ import sys
 key_id = base64.b64encode(sys.argv[1]).rstrip("=")
 key = base64.b64encode(binascii.unhexlify(sys.argv[2])).rstrip("=")
 
-jwk = '{"kty":"oct","kid":"%s","k":"%s"}' % (key_id, key)
+jwk = '{"kty":"oct","alg":"A128KW","kid":"%s","k":"%s"}' % (key_id, key)
 jwk_set = '{"keys":[%s]}' % jwk
 sys.stdout.write(jwk_set)
