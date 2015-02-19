@@ -74,7 +74,7 @@ app.init = function() {
 
   document.getElementById('licenseServerUrlInput').value =
       'assets/test_license.json';
-  document.getElementById('mediaUrlInput').value = 'assets/bear-av-enc.mp4';
+  document.getElementById('mediaUrlInput').value = 'assets/bear-av-enc.webm';
   document.getElementById('subtitlesUrlInput').value = 'assets/test_subs.vtt';
 
   document.getElementById('mpdList').value =

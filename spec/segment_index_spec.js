@@ -45,7 +45,7 @@ describe('SegmentIndex', function() {
     // This file contains just the SIDX, which was extracted from an actual MP4
     // file.
     if (sidxData) return Promise.resolve();
-    return fetchArrayBuffer('assets/car-20120827-87.sidx').then(
+    return fetchArrayBuffer('assets/car-20120827-87.sidx.dat').then(
         function(data) { sidxData = data; });
   };
 
@@ -55,7 +55,7 @@ describe('SegmentIndex', function() {
     // file. It differs from the above SIDX in that it has a non-zero "earliest
     // presentation time" field.
     if (sidxDataWithNonZeroStart) return Promise.resolve();
-    return fetchArrayBuffer('assets/angel_one.sidx').then(
+    return fetchArrayBuffer('assets/angel_one.sidx.dat').then(
         function(data) { sidxDataWithNonZeroStart = data; });
   };
 
@@ -63,15 +63,16 @@ describe('SegmentIndex', function() {
     // Get the WebM header data if we haven't yet.
     if (webmData) return Promise.resolve();
     return fetchArrayBuffer(
-        'assets/feelings_vp9-20130806-171.webm.headers'
+        'assets/feelings_vp9-20130806-171.webm.headers.dat'
     ).then(function(data) { webmData = data; });
   };
 
   var getCuesData = function() {
     // Get the WebM cues data if we haven't yet.
     if (cuesData) return Promise.resolve();
-    return fetchArrayBuffer('assets/feelings_vp9-20130806-171.webm.cues').then(
-        function(data) { cuesData = data; });
+    return fetchArrayBuffer(
+        'assets/feelings_vp9-20130806-171.webm.cues.dat'
+    ).then(function(data) { cuesData = data; });
   };
 
   beforeEach(function(done) {
