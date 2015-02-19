@@ -566,6 +566,11 @@ app.interpretContentProtection_ = function(contentProtection) {
         'com.widevine.alpha', true, licenseServerUrl, false, null, null);
   }
 
+  if (contentProtection.schemeIdUri == 'urn:mpeg:dash:mp4protection:2011') {
+    // Ignore without a warning.
+    return null;
+  }
+
   console.warn('Unrecognized scheme: ' + contentProtection.schemeIdUri);
   return null;
 };
