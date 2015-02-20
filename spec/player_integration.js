@@ -33,7 +33,7 @@ describe('Player', function() {
   const webmManifest = 'assets/feelings_vp9-20130806-manifest.mpd';
   const bogusManifest = 'assets/does_not_exist';
   const highBitrateManifest =
-      'http://storage.googleapis.com/widevine-demo-media/sintel-1080p/dash.mpd';
+      '//storage.googleapis.com/widevine-demo-media/sintel-1080p/dash.mpd';
   const FUDGE_FACTOR = 0.3;
 
   beforeAll(function() {
