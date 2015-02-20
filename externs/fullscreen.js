@@ -18,4 +18,8 @@
  */
 
 
-HTMLMediaElement.prototype.mozRequestFullscreen = function() {};
+Document.prototype.msExitFullscreen = function() {};
+
+
+Document.prototype.webkitExitFullscreen = function() {};
+
