@@ -54,7 +54,7 @@ describe('ContentDatabase', function() {
     jasmine.addMatchers(customMatchers);
     // Change the timeout.
     originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;  // ms
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 15000;  // ms
 
     // Set up mock RangeRequest.
     originalRangeRequest = shaka.util.RangeRequest;

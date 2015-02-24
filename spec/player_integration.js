@@ -337,7 +337,7 @@ describe('Player', function() {
         // Nothing has buffered yet.
         expect(audioStreamBuffer.buffered.length).toBe(0);
         // Give the audio time to buffer.
-        return delay(4.0);
+        return delay(8.0);
       }).then(function() {
         // The content is now buffered.
         expect(audioStreamBuffer.buffered.length).toBe(1);
