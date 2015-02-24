@@ -364,6 +364,40 @@ describe('Player', function() {
       });
     });
 
+    // This covers github issue #26.
+    it('does not hang when seeking to pre-adaptation data', function(done) {
+      var targetTime;
+      var source = newSource(plainManifest);
+
+      player.load(source).then(function() {
+        player.play();
+        // Move quickly past the first two segments.
+        player.setPlaybackRate(5.0);
+        return delay(3.0);
+      }).then(function() {
+        var track = getVideoTrackByHeight(480);
+        expect(track.active).toBe(false);
+        var ok = source.selectVideoTrack(track.id, false);
+        expect(ok).toBe(true);
+
+        // This bug manifests within two segments of the adaptation point.  To
+        // prove that we are not hung, we need to get to a point two segments
+        // later than where we adapted.
+        targetTime = video.currentTime + 10.0;
+        return delay(3.0);
+      }).then(function() {
+        player.seek(0);
+        return delay(1.0 + (targetTime / 5.0));
+      }).then(function() {
+        // Expect that we've been able to play past our target point.
+        expect(video.currentTime).toBeGreaterThan(targetTime);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+
     it('can be used during stream switching', function(done) {
       var source = newSource(plainManifest);
 
