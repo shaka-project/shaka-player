@@ -1,3 +1,64 @@
+## 1.2.0 (2015-02-24)
+
+Lots of internal refactoring and bugfixes, and a few new features.
+
+Bugfixes:
+  - Buffer eviction no longer causes hangs on seek.
+    - https://github.com/google/shaka-player/issues/15
+  - Adaptation no longer causes hangs on looping and seeking backward.
+    - https://github.com/google/shaka-player/issues/26
+  - StreamStats no longer shows null for width and height before adaptation.
+    - https://github.com/google/shaka-player/issues/16
+  - Content with differing start times for the audio & video streams no longer
+    exhibits A/V sync issues.
+    - https://github.com/google/shaka-player/issues/17
+  - DrmSchemeInfo's suppressMultipleEncryptedEvents flag is now correctly
+    honored regardless of the timing of events.
+  - Calculations for the $Time$ placeholder in MPD SegmentTemplates has been
+    corrected.
+  - The test app no longer causes mixed-content errors when served over HTTPS.
+  - Small mistakes in URLs and asset names in the test app have been corrected.
+  - Windows checkouts now have consistent newline style.
+    - https://github.com/google/shaka-player/issues/12
+  - Windows build steps documented.
+    - https://github.com/google/shaka-player/issues/13
+
+Features:
+  - The isTypeSupported polyfill has been removed and all EME APIs have been
+    updated to the [Feb 9 2015 EME spec].
+    - https://github.com/google/shaka-player/issues/2
+  - Gaps and overlaps in SegmentTimeline are no longer treated as an error.
+    Large gaps/overlaps will still generate a warning.
+    - https://github.com/google/shaka-player/issues/24
+  - HDCP-related failures are now translated into error events in Chrome 42+.
+    - https://github.com/google/shaka-player/issues/14
+  - The MPD Role tag is now supported as a way of indicating the main
+    AdaptationSet for the purposes of language matching.
+    - https://github.com/google/shaka-player/issues/20
+  - More detail added to AJAX error events.
+    - https://github.com/google/shaka-player/issues/18
+  - The Player now dispatches buffering events.
+    - https://github.com/google/shaka-player/issues/25
+  - Parser support for the new v1 PSSH layout, including parsing of key IDs.
+    - https://github.com/google/shaka-player/issues/19
+  - The fullscreen polyfill has been updated and expanded.
+  - DashVideoSource refactored to split DASH-independent functionality into the
+    generic StreamVideoSource.  This should simplify the implementation of new
+    video sources for non-DASH manifest formats.  (Contributions welcome.)
+  - Automatic build numbering has been added, with version numbers appearing in
+    the test app UI.
+  - The library has been published on [npm] and [cdnjs].
+  - Release version numbering follows the [semantic versioning spec].
+
+Broken Compatibility:
+  - System IDs in PSSH objects are now hex strings instead of raw strings.
+
+[Feb 9 2015 EME spec]: http://goo.gl/5gifok
+[npm]: https://www.npmjs.com/package/shaka-player
+[cdnjs]: https://cdnjs.com/libraries/shaka-player
+[semantic versioning spec]: http://semver.org/
+
+
 ## 1.1 (2015-01-14)
 
 Maintenance release.
