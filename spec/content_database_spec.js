@@ -28,6 +28,9 @@ describe('ContentDatabase', function() {
 
   const url = 'http://example.com';
   const mime = 'video/phony';
+  const codecs = 'phony';
+  const duration = 100;
+  const initSegment = new ArrayBuffer(1024);
   const expectedReferences = [
     { index: 0, start_time: 0, end_time: 2 },
     { index: 1, start_time: 2, end_time: 4 },
@@ -54,7 +57,7 @@ describe('ContentDatabase', function() {
     jasmine.addMatchers(customMatchers);
     // Change the timeout.
     originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 15000;  // ms
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;  // ms
 
     // Set up mock RangeRequest.
     originalRangeRequest = shaka.util.RangeRequest;
@@ -79,8 +82,8 @@ describe('ContentDatabase', function() {
   });
 
   beforeEach(function() {
-    db = new shaka.util.ContentDatabase(null, null);
-    p = db.setUpDatabase(102);
+    db = new shaka.util.ContentDatabase(null);
+    p = db.setUpDatabase();
   });
 
   afterAll(function() {
@@ -117,7 +120,7 @@ describe('ContentDatabase', function() {
 
   it('stores a stream and retrieves its index', function(done) {
     p.then(function() {
-      return db.insertStream(testIndex, mime);
+      return db.insertStream(mime, codecs, duration, testIndex, initSegment);
     }).then(function(streamId) {
       return db.retrieveStreamIndex(streamId);
     }).then(function(streamIndex) {
@@ -137,12 +140,16 @@ describe('ContentDatabase', function() {
            0, 0, null, 6, null, new goog.Uri(url))];
         var index = new shaka.media.SegmentIndex(references);
         p.then(function() {
-          return db.insertStream(index, mime);
+          return db.insertStream(mime, codecs, duration, index, initSegment);
         }).then(function(streamId) {
           return db.retrieveStreamIndex(streamId);
         }).then(function(streamIndex) {
           expect(streamIndex.references[0]).toMatchReference(
               { index: 0, start_time: 0, end_time: null });
+          expect(streamIndex.codecs).toEqual(codecs);
+          expect(streamIndex.mime_type).toEqual(mime);
+          expect(streamIndex.duration).toEqual(duration);
+          expect(streamIndex.init_segment).toEqual(initSegment);
           done();
         }).catch(function(err) {
           fail(err);
@@ -152,7 +159,7 @@ describe('ContentDatabase', function() {
 
   it('throws an error when trying to store an invalid stream', function(done) {
     p.then(function() {
-      return db.insertStream(null, mime);
+      return db.insertStream(mime, codecs, duration, null, initSegment);
     }).then(function() {
       fail();
       done();
@@ -162,17 +169,31 @@ describe('ContentDatabase', function() {
     });
   });
 
-  it('deletes a stream index', function(done) {
+  it('deletes a stream index and throws error on retrieval', function(done) {
     var streamId;
     p.then(function() {
-      return db.insertStream(testIndex, mime);
+      return db.insertStream(mime, codecs, duration, testIndex, initSegment);
     }).then(function(data) {
       streamId = data;
       return db.deleteStream(streamId);
     }).then(function() {
       return db.retrieveStreamIndex(streamId);
     }).then(function(streamIndex) {
-      expect(streamIndex).toBeUndefined();
+      fail();
+      done();
+    }).catch(function(err) {
+      expect(err.type).toEqual('storage');
+      done();
+    });
+  });
+
+  it('retrieves a segment', function(done) {
+    p.then(function() {
+      return db.insertStream(mime, codecs, duration, testIndex, initSegment);
+    }).then(function(streamId) {
+      return db.retrieveSegment(streamId, 0);
+    }).then(function(data) {
+      expect(data).not.toBeUndefined();
       done();
     }).catch(function(err) {
       fail(err);
@@ -180,17 +201,98 @@ describe('ContentDatabase', function() {
     });
   });
 
-  it('retreives a segment', function(done) {
+  it('throws an error when non-existent segment requested', function(done) {
     p.then(function() {
-      return db.insertStream(testIndex, mime);
+      return db.retrieveSegment(-1, -1);
+    }).then(function(streamIndex) {
+      fail();
+      done();
+    }).catch(function(err) {
+      expect(err.type).toEqual('storage');
+      done();
+    });
+  });
+
+  it('retrieves streams initialization segment', function(done) {
+    p.then(function() {
+      return db.insertStream(mime, codecs, duration, testIndex, initSegment);
     }).then(function(streamId) {
-      return db.retrieveSegment(streamId, 0);
+      return db.retrieveInitSegment(streamId);
     }).then(function(data) {
-      expect(data.content).not.toBeNull;
-      expect(data.segment_id).toEqual(0);
+      expect(data).not.toBeUndefined();
       done();
     }).catch(function(err) {
       fail(err);
+      done();
+    });
+  });
+
+  it('throws an error when non-existent streams init segment requested',
+      function(done) {
+        p.then(function() {
+          return db.retrieveInitSegment(-1);
+        }).then(function(data) {
+          fail();
+          done();
+        }).catch(function(err) {
+          expect(err.type).toEqual('storage');
+          done();
+        });
+      });
+
+  it('stores and retrieves a group information', function(done) {
+    p.then(function() {
+      return db.insertGroup([1, 2, 3]);
+    }).then(function(groupId) {
+      return db.retrieveGroup(groupId);
+    }).then(function(groupInformation) {
+      expect(groupInformation.group_id).toEqual(jasmine.any(Number));
+      expect(groupInformation.stream_ids).toEqual([1, 2, 3]);
+      done();
+    }).catch(function(err) {
+      fail(err);
+      done();
+    });
+  });
+
+  it('deletes group information and throws error on retrieval', function(done) {
+    var streamIds = [];
+    var groupId;
+    p.then(function() {
+      return db.insertStream(mime, codecs, duration, testIndex, initSegment);
+    }).then(function(streamId) {
+      streamIds.push(streamId);
+      return db.insertGroup(streamIds);
+    }).then(function(resultingGroupId) {
+      groupId = resultingGroupId;
+      return db.deleteGroup(groupId);
+    }).then(function() {
+      return db.retrieveGroup(groupId);
+    }).then(function(groupInformation) {
+      fail();
+      done();
+    }).catch(function(err) {
+      expect(err.type).toEqual('storage');
+      done();
+    });
+  });
+
+  it('deletes streams in group and throws error on retrieval', function(done) {
+    var streamIds = [];
+    p.then(function() {
+      return db.insertStream(mime, codecs, duration, testIndex, initSegment);
+    }).then(function(streamId) {
+      streamIds.push(streamId);
+      return db.insertGroup(streamIds);
+    }).then(function(groupId) {
+      return db.deleteGroup(groupId);
+    }).then(function() {
+      return db.retrieveStreamIndex(streamIds[0]);
+    }).then(function(streamIndex) {
+      fail();
+      done();
+    }).catch(function(err) {
+      expect(err.type).toEqual('storage');
       done();
     });
   });
