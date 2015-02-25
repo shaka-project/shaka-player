@@ -377,7 +377,7 @@ describe('Player', function() {
       }).then(function() {
         var track = getVideoTrackByHeight(480);
         expect(track.active).toBe(false);
-        var ok = source.selectVideoTrack(track.id, false);
+        var ok = player.selectVideoTrack(track.id, false);
         expect(ok).toBe(true);
 
         // This bug manifests within two segments of the adaptation point.  To

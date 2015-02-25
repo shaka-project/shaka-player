@@ -129,6 +129,12 @@ app.init = function() {
     app.onStreamTypeChange();
     app.loadStream();
   }
+  if ('cycleVideo' in params) {
+    app.cycleVideo();
+  }
+  if ('cycleAudio' in params) {
+    app.cycleAudio();
+  }
 };
 
 
@@ -176,12 +182,14 @@ app.onMpdCustom = function() {
 
 /**
  * Called when a new video track is selected.
+ *
+ * @param {boolean=} opt_immediate
  */
-app.onVideoChange = function() {
+app.onVideoChange = function(opt_immediate) {
   var id = document.getElementById('videoTracks').value;
   document.getElementById('adaptationEnabled').checked = false;
   app.onAdaptationChange();
-  app.player_.selectVideoTrack(id);
+  app.player_.selectVideoTrack(id, opt_immediate);
 };
 
 
@@ -217,22 +225,76 @@ app.onTextChange = function() {
 
 
 /**
- * A very lazy demo function to cycle through audio tracks.
+ * A demo function to cycle through audio tracks.
  */
 app.cycleAudio = function() {
+  app.cycleTracks_('cycleAudio', 'audioTracks', 3, function() {
+    app.onAudioChange();
+  }, function() {});
+};
+
+
+/**
+ * A demo function to cycle through video tracks.
+ */
+app.cycleVideo = function() {
+  // Disable adaptation.
+  var adaptationEnabled = document.getElementById('adaptationEnabled');
+  var originalAdaptationEnabled = adaptationEnabled.checked;
+  adaptationEnabled.checked = false;
+  adaptationEnabled.disabled = true;
+  app.onAdaptationChange();
+
+  app.cycleTracks_('cycleVideo', 'videoTracks', 6, function() {
+    // Select video track with immediate == false.  This switches in the same
+    // smooth way as the AbrManager.
+    app.onVideoChange(false);
+  }, function() {
+    // Re-enable adaptation.
+    adaptationEnabled.disabled = false;
+    adaptationEnabled.checked = originalAdaptationEnabled;
+    app.onAdaptationChange();
+  });
+};
+
+
+/**
+ * Common functionality for cycling through tracks.
+ * @param {string} cycleButtonId
+ * @param {string} tracksId
+ * @param {number} seconds
+ * @param {function()} onSelect
+ * @param {function()} onComplete
+ * @private
+ */
+app.cycleTracks_ =
+    function(cycleButtonId, tracksId, seconds, onSelect, onComplete) {
+  // Indicate that we are busy cycling.
+  var cycleButton = document.getElementById(cycleButtonId);
+  var originalCycleText = cycleButton.textContent;
+  cycleButton.textContent = 'Cycling...';
+  cycleButton.disabled = true;
+  // Prevent the user from changing the settings while we are cycling.
+  var tracks = document.getElementById(tracksId);
+  tracks.disabled = true;
+
   var intervalId = window.setInterval(function() {
     // On EOF, the video goes into a paused state.
     if (app.video_.paused) {
       window.clearInterval(intervalId);
+      // Allow the user to change the settings again.
+      tracks.disabled = false;
+      cycleButton.disabled = false;
+      cycleButton.textContent = originalCycleText;
+      onComplete();
       return;
     }
 
-    var audioTracks = document.getElementById('audioTracks');
-    var option = audioTracks.selectedOptions[0];
-    option = option.nextElementSibling || audioTracks.firstElementChild;
-    audioTracks.value = option.value;
-    app.onAudioChange();
-  }, 3000);
+    var option = tracks.selectedOptions[0];
+    option = option.nextElementSibling || tracks.firstElementChild;
+    tracks.value = option.value;
+    onSelect();
+  }, seconds * 1000);
 };
 
 

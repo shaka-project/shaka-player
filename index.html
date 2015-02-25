@@ -123,17 +123,20 @@
         <td id="version"></td>
       </tr>
       <tr>
-        <td>Available video tracks:</td>
-        <td><select id="videoTracks" onchange="app.onVideoChange()"></select></td>
-        <td>
+        <td colspan="3">
           Enable adaptation?
           <input id="adaptationEnabled" type="checkbox" checked onchange="app.onAdaptationChange()"></input>
         </td>
       </tr>
       <tr>
+        <td>Available video tracks:</td>
+        <td><select id="videoTracks" onchange="app.onVideoChange()"></select></td>
+        <td><button id="cycleVideo" onclick="app.cycleVideo()">Cycle video tracks</button></td>
+      </tr>
+      <tr>
         <td>Available audio tracks:</td>
         <td><select id="audioTracks" onchange="app.onAudioChange()"></select></td>
-        <td><button onclick="app.cycleAudio()">Cycle audio tracks</button></td>
+        <td><button id="cycleAudio" onclick="app.cycleAudio()">Cycle audio tracks</button></td>
       </tr>
       <tr>
         <td>Available text tracks:</td>
