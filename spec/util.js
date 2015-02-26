@@ -238,3 +238,49 @@ function interpretContentProtection(postProcessor, contentProtection) {
 
   return null;
 }
+
+
+/**
+ * Checks that the given Range objects match.
+ * @param {shaka.dash.mpd.Range} actual
+ * @param {shaka.dash.mpd.Range} expected
+ */
+function checkRange(actual, expected) {
+  if (expected) {
+    expect(actual).toBeTruthy();
+    expect(actual.begin).toBe(expected.begin);
+    expect(actual.end).toBe(expected.end);
+  } else {
+    expect(actual).toBeNull();
+  }
+}
+
+
+/**
+ * Checks that the given "URL type objects" match.
+ * @param {shaka.dash.mpd.RepresentationIndex|
+ *         shaka.dash.mpd.Initialization} actual
+ * @param {shaka.dash.mpd.RepresentationIndex|
+ *         shaka.dash.mpd.Initialization} expected
+ */
+function checkUrlTypeObject(actual, expected) {
+  if (expected) {
+    if (expected.url) {
+      expect(actual.url).toBeTruthy();
+      expect(actual.url.toString()).toBe(expected.url.toString());
+    } else {
+      expect(actual.url).toBeNull();
+    }
+
+    if (expected.range) {
+      expect(actual.range).toBeTruthy();
+      expect(actual.range.begin).toBe(expected.range.begin);
+      expect(actual.range.end).toBe(expected.range.end);
+    } else {
+      expect(actual.range).toBeNull();
+    }
+  } else {
+    expect(actual).toBeNull();
+  }
+}
+

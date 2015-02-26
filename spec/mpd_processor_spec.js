@@ -787,6 +787,7 @@ describe('MpdProcessor', function() {
 
       r.segmentTemplate = st;
       r.bandwidth = 250000;
+      r.baseUrl = new goog.Uri('http://example.com');
 
       as.representations.push(r);
 
