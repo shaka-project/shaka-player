@@ -86,6 +86,10 @@ describe('ContentDatabase', function() {
     p = db.setUpDatabase();
   });
 
+  afterEach(function() {
+    db.closeDatabaseConnection();
+  });
+
   afterAll(function() {
     // Restore the timeout.
     jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;

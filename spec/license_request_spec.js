@@ -129,40 +129,5 @@ describe('LicenseRequest', function() {
       jasmine.clock().tick(license_request.lastDelayMs_);
     }
   });
-
-  it('parses data URIs with mime type and base64', function(done) {
-    checkDataUri('data:text/plain;base64,SGVsbG8sIGRhdGEh',
-        'Hello, data!', done);
-  });
-
-  it('parses data URIs with no mime type and base64', function(done) {
-    checkDataUri('data:base64,SGVsbG8sIGRhdGEh',
-        'Hello, data!', done);
-  });
-
-  it('parses data URIs with no mime type and no encoding', function(done) {
-    checkDataUri('data:Hello%2C%20data!',
-        'Hello, data!', done);
-  });
-
-  it('parses data URIs with mime type and no encoding', function(done) {
-    checkDataUri('data:text/plain;Hello%2C%20data!',
-        'Hello, data!', done);
-  });
-
-  function checkDataUri(uri, expectedData, done) {
-    var LicenseRequest = shaka.util.LicenseRequest;
-    var license_request = new LicenseRequest(uri, null);
-
-    license_request.send().then(function(response) {
-      // Convert the Uint8Array back to string.
-      var data = String.fromCharCode.apply(null, response);
-      expect(data).toBe(expectedData);
-      done();
-    }).catch(function(error) {
-      fail(error);
-      done();
-    });
-  }
 });
 
