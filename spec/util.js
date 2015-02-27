@@ -227,7 +227,7 @@ function interpretContentProtection(postProcessor, contentProtection) {
     var license = JSON.stringify(jwkSet);
     var initData = {
       initData: keyid,
-      initDataType: 'cenc'
+      initDataType: 'webm'
     };
     var licenseServerUrl = 'data:application/json;base64,' +
         shaka.util.StringUtils.toBase64(license);
