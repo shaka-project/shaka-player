@@ -46,7 +46,7 @@ describe('ContentDatabase', function() {
               util.equals(actual.index, expected.index) &&
               util.equals(actual.start_time, expected.start_time) &&
               util.equals(actual.end_time, expected.end_time) &&
-              actual.url.match(/idb\:\/\/.\/./);
+              actual.url.match(/idb\:\/\/.+\/.+/);
           return result;
         }
       };
@@ -79,6 +79,8 @@ describe('ContentDatabase', function() {
       new shaka.media.SegmentReference(4, 4, null, 20, null, testUrl)];
     testIndex = new shaka.media.SegmentIndex(testReferences);
 
+    // Start each test run with a clean slate.
+    (new shaka.util.ContentDatabase(null)).deleteDatabase();
   });
 
   beforeEach(function() {
@@ -102,17 +104,17 @@ describe('ContentDatabase', function() {
     p.then(function() {
       return db.deleteDatabase();
     }).then(function() {
-      var dbPromise = new shaka.util.PublicPromise();
+      var p = new shaka.util.PublicPromise();
       var request = window.indexedDB.open(shaka.util.ContentDatabase.DB_NAME_);
       // onupgradeneeded is only called if the database does not already exist.
       request.onupgradeneeded = function(e) {
         // Cancel the creation of a new database.
         e.target.transaction.abort();
-        dbPromise.resolve(true);
+        p.resolve(true);
       };
-      request.onsuccess = function() { dbPromise.resolve(false); };
-      request.onerror = function(e) { dbPromise.reject(request.error); };
-      return dbPromise;
+      request.onsuccess = function() { p.resolve(false); };
+      request.onerror = function(e) { p.reject(request.error); };
+      return p;
     }).then(function(isDatabaseDeleted) {
       expect(isDatabaseDeleted).toBe(true);
       done();
