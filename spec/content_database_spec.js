@@ -111,7 +111,7 @@ describe('ContentDatabase', function() {
         dbPromise.resolve(true);
       };
       request.onsuccess = function() { dbPromise.resolve(false); };
-      request.onerror = function(e) { dbPromise.reject(e); };
+      request.onerror = function(e) { dbPromise.reject(request.error); };
       return dbPromise;
     }).then(function(isDatabaseDeleted) {
       expect(isDatabaseDeleted).toBe(true);
