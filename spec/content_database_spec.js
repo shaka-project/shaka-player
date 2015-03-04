@@ -57,14 +57,14 @@ describe('ContentDatabase', function() {
     jasmine.addMatchers(customMatchers);
     // Change the timeout.
     originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;  // ms
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;  // ms
 
     // Set up mock RangeRequest.
     originalRangeRequest = shaka.util.RangeRequest;
     var mockRangeRequest = function(url, startByte, endByte) {
       return {
         send: function() {
-          return Promise.resolve(new ArrayBuffer(40 * 1024 * 1024));
+          return Promise.resolve(new ArrayBuffer(768 * 1024));
         }
       };
     };
