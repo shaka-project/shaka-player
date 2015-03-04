@@ -23,7 +23,6 @@ restrictions allow us to make simplifying assumptions in the code.
 <ul>
   <li>MPD Representations containing more than one of SegmentBase, SegmentList,
       or SegmentBase.</li>
-  <li>MPD SegmentTimelines which contain gaps between segments.</li>
   <li>MPD SegmentTimeline combined with an explicit segment index URL.</li>
   <li>Representations within an AdaptationSet where the MIME type varies.</li>
   <li>Changing DRM schemes across MPD Periods.</li>
@@ -34,11 +33,6 @@ restrictions allow us to make simplifying assumptions in the code.
   <li>Parsing EBML integers with more than 53 significant bits in WebM streams.
       *</li>
   <li>Parsing nested SIDX boxes in MP4 streams.</li>
-  <li>MP4 video AdaptationSet with WebM audio AdaptationSet, or vice-versa.
-    <ul><li>We support MPDs with both MP4 and WebM in the same manifest, but we
-            will choose either MP4 or WebM for both audio and video.  They will
-            never be mixed.</li></ul>
-  </li>
 </ul>
 
 * = JavaScript limitation
