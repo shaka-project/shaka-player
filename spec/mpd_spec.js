@@ -26,6 +26,14 @@ describe('mpd', function() {
   it('parses an MPD duration string', function() {
     var parseDuration = shaka.dash.mpd.parseDuration_;
 
+    // Years only. 1 year has 365 or 366 days.
+    expect(parseDuration('P3Y')).toBeLessThan(3 * (60 * 60 * 24 * 366) + 1);
+    expect(parseDuration('P3Y')).toBeGreaterThan(3 * (60 * 60 * 24 * 365) - 1);
+
+    // Months only. 1 month has 28 to 31 days.
+    expect(parseDuration('P2M')).toBeLessThan(2 * (60 * 60 * 24 * 31) + 1);
+    expect(parseDuration('P2M')).toBeGreaterThan(2 * (60 * 60 * 24 * 28) - 1);
+
     // Days only.
     expect(parseDuration('P7D')).toBe(604800);
 
@@ -64,14 +72,25 @@ describe('mpd', function() {
     expect(parseDuration('P1DT1H2M3S')).toBe(90123);
     expect(parseDuration('P1DT1H2M3.3S')).toBe(90123.3);
 
+    // Months, hours, minutes, and seconds.
+    expect(parseDuration('P1M1DT1H2M3S')).toBeLessThan(
+        (60 * 60 * 24 * 31) + 90123 + 1);
+    expect(parseDuration('P1M1DT1H2M3S')).toBeGreaterThan(
+        (60 * 60 * 24 * 28) + 90123 - 1);
+
+    // Years, Months, hours, minutes, and seconds.
+    expect(parseDuration('P1Y1M1DT1H2M3S')).toBeLessThan(
+        (60 * 60 * 24 * 366) + (60 * 60 * 24 * 31) + 90123 + 1);
+    expect(parseDuration('P1Y1M1DT1H2M3S')).toBeGreaterThan(
+        (60 * 60 * 24 * 365) + (60 * 60 * 24 * 28) + 90123 - 1);
+
+    expect(parseDuration('PT')).toBe(0);
+    expect(parseDuration('P')).toBe(0);
+
     // Error cases.
+    expect(parseDuration('-PT3S')).toBeNull();
+    expect(parseDuration('PT-3S')).toBeNull();
     expect(parseDuration('P1Sasdf')).toBeNull();
-    expect(parseDuration('P1Y')).toBeNull();
-    expect(parseDuration('P1YT1S')).toBeNull();
-    expect(parseDuration('P1M')).toBeNull();
-    expect(parseDuration('P1MT1S')).toBeNull();
-    expect(parseDuration('P1M1D')).toBeNull();
-    expect(parseDuration('P1M1DT1S')).toBeNull();
     expect(parseDuration('1H2M3S')).toBeNull();
     expect(parseDuration('123')).toBeNull();
     expect(parseDuration('abc')).toBeNull();
