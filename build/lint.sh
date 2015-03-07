@@ -19,4 +19,4 @@ dir=$(dirname $0)/..
 
 set -e
 
-(library_sources_0; test_sources_0) | lint_0 "$dir"/app.js
+(library_sources_0; test_sources_0) | lint_0 "$dir"/{app,controls}.js

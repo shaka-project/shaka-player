@@ -1,0 +1,213 @@
+/**
+ * Copyright 2015 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#videoContainer {
+  width: 600px;
+  height: 400px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  background-color: black;
+}
+
+#video {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#bufferingSpinner {
+  margin: auto;
+  z-index: 1;
+  width: 50px;
+  height: 50px;
+  background-size: 50px;
+  background-image: url('assets/controls/buffering.gif');
+
+  display: none;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+#videoControlsEnclosure {
+  width: 100%;
+  max-width: 800px;
+  height: 35px;
+  padding: 0 5px;
+  margin: 0 0 5px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+#videoControls {
+  position: relative;
+  height: 35px;
+  margin: 0;
+  padding: 0 0 0 7px;
+
+  background-color: rgba(20, 20, 20, 0.8);
+  border-radius: 5px;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+#videoContainer:hover #videoControls {
+  opacity: 1;
+}
+
+#playButton, #pauseButton, #muteButton, #unmuteButton, #fullscreenButton {
+  height: 32px;
+  width: 32px;
+  padding: 0;
+  margin: 0 7px 0 0;
+  background: transparent;
+  border: 0;
+  outline: none;
+}
+
+#playButton {
+  background-image: url('assets/controls/play.png');
+}
+
+#playButton:active {
+  background-image: url('assets/controls/play-active.png');
+}
+
+#pauseButton {
+  display: none;
+  background-image: url('assets/controls/pause.png');
+}
+
+#pauseButton:active {
+  background-image: url('assets/controls/pause-active.png');
+}
+
+#muteButton {
+  background-image: url('assets/controls/mute.png');
+}
+
+#muteButton:active {
+  background-image: url('assets/controls/mute-active.png');
+}
+
+#unmuteButton {
+  display: none;
+  background-image: url('assets/controls/unmute.png');
+}
+
+#unmuteButton:active {
+  background-image: url('assets/controls/unmute-active.png');
+}
+
+#fullscreenButton {
+  background-image: url('assets/controls/fullscreen.png');
+}
+
+#fullscreenButton:active {
+  background-image: url('assets/controls/fullscreen-active.png');
+}
+
+#currentTime {
+  display: flex;
+  flex-grow: 0;
+  margin: 0 9px 0 0;
+  font-family: sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  color: white;
+}
+
+/* NOTE: pseudo-elements for different browsers can't be combined with commas.
+ * Browsers will ignore styles if any pseudo-element in the list is unknown.
+ */
+
+/* main range element */
+#seekBar, #volumeBar {
+  display: flex;
+  height: 7px;
+  margin: 0 12px 0 0;
+  padding: 0;
+
+  /* removes webkit default styling */
+  -webkit-appearance: none;
+
+  border: 1px solid #666;
+  border-radius: 4px;
+  background-color: black;
+  outline: none;
+}
+/* removes mozilla default styling */
+#seekBar::-moz-range-track, #volumeBar::-moz-range-track {
+  background-color: transparent;
+  outline: none;
+}
+/* per-instance styles */
+#seekBar {
+  flex-grow: 1;
+}
+#volumeBar {
+  flex-grow: 0;
+  min-width: 15px;
+  max-width: 70px;
+}
+
+
+/* thumb pseudo-element, common style */
+#seekBar::-webkit-slider-thumb, #volumeBar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  background-color: white;
+  outline: none;
+}
+#seekBar::-moz-range-thumb, #volumeBar::-moz-range-thumb {
+  background-color: white;
+  outline: none;
+}
+
+/* thumb pseudo-element, seek style */
+#seekBar::-webkit-slider-thumb {
+  width: 18px;
+  height: 11px;
+  border-radius: 8px;
+}
+#seekBar::-moz-range-thumb {
+  width: 18px;
+  height: 11px;
+  border-radius: 8px;
+}
+
+/* thumb pseudo-element, volume style */
+#volumeBar::-webkit-slider-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 12px;
+}
+#volumeBar::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 12px;
+}
+

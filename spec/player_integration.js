@@ -133,8 +133,7 @@ describe('Player', function() {
         player.play();
         return delay(10.0);
       }).then(function() {
-        var currentResolution = player.getCurrentResolution();
-        expect(currentResolution.height).toEqual(720);
+        expect(video.videoHeight).toEqual(720);
         done();
       }).catch(function(error) {
         fail(error);
@@ -149,15 +148,13 @@ describe('Player', function() {
         player.play();
         return delay(10.0);
       }).then(function() {
-        var currentResolution = player.getCurrentResolution();
-        expect(currentResolution.height).toEqual(720);
+        expect(video.videoHeight).toEqual(720);
 
         var track = getVideoTrackByHeight(360);
         player.selectVideoTrack(track.id);
         return delay(10.0);
       }).then(function() {
-        var currentResolution = player.getCurrentResolution();
-        expect(currentResolution.height).toEqual(360);
+        expect(video.videoHeight).toEqual(360);
         done();
       }).catch(function(error) {
         fail(error);
@@ -185,55 +182,6 @@ describe('Player', function() {
       }).then(function() {
         expect(video.paused).toBe(false);
         expect(video.currentTime).toBeGreaterThan(timestamp);
-        done();
-      }).catch(function(error) {
-        fail(error);
-        done();
-      });
-    });
-  });
-
-  describe('setVolume', function() {
-    it('changes playback volume', function(done) {
-      player.load(newSource(plainManifest)).then(function() {
-        player.setVolume(0);
-        expect(video.volume).toEqual(0);
-
-        player.setVolume(0.5);
-        expect(video.volume).toEqual(0.5);
-        done();
-      }).catch(function(error) {
-        fail(error);
-        done();
-      });
-    });
-  });
-
-  describe('setMuted', function() {
-    it('mutes playback', function(done) {
-      player.load(newSource(plainManifest)).then(function() {
-        player.setMuted(true);
-        expect(video.muted).toBe(true);
-
-        player.setMuted(false);
-        expect(video.muted).toBe(false);
-        done();
-      }).catch(function(error) {
-        fail(error);
-        done();
-      });
-    });
-
-    it('does not change volume', function(done) {
-      player.load(newSource(plainManifest)).then(function() {
-        player.setVolume(1);
-        expect(video.volume).toEqual(1);
-
-        player.setMuted(true);
-        expect(video.volume).toEqual(1);
-
-        player.setMuted(false);
-        expect(video.volume).toEqual(1);
         done();
       }).catch(function(error) {
         fail(error);

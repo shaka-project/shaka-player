@@ -24,6 +24,7 @@ cd "$dir"
 grep --color=auto -Pr '(TODO|FIXME)(?!.*story)' \
   lib/ \
   app.js \
+  controls.js \
   load.js \
   index.* \
   spec/ \

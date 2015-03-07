@@ -26,13 +26,13 @@ rm -f "$dir"/lib.js{,.map}
 rm -f "$dir"/shaka-player.compiled.debug.{js,map}
 rm -f "$dir"/shaka-player.compiled.js
 
-# Compile once with app.js so that it gets checked.  Don't keep the output.
+# Compile once with app/controls.js so they get checked.  Don't keep the output.
 (library_sources_0; closure_sources_0) | compile_0 \
-  --summary_detail_level 3 "$dir"/app.js > /dev/null
+  --summary_detail_level 3 "$dir"/{app,controls}.js > /dev/null
 # NOTE: --js_output_file /dev/null results in a non-zero return value and
 # stops execution of this script.
 
-# Compile without app.js and output the minified library only.
+# Compile without app/controls.js and output the minified library only.
 (library_sources_0; closure_sources_0) | compile_0 \
   --create_source_map "$dir"/shaka-player.compiled.debug.map \
   --js_output_file "$dir"/shaka-player.compiled.debug.js

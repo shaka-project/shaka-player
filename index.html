@@ -20,7 +20,9 @@
     <title>Shaka Player Test</title>
     <link rel="shortcut icon" href="assets/favicon.ico"></link>
     <link rel="stylesheet" href="index.css"></link>
+    <link rel="stylesheet" href="controls.css"></link>
     <script src="load.js"></script>
+    <script src="controls.js"></script>
     <script src="app.js"></script>
   </head>
   <body>
@@ -148,19 +150,27 @@
       </tr>
       <tr>
         <td>Active resolution:</td>
-        <td id="videoResDebug"></td>
-        <td>
-          <button onclick="app.requestFullscreen();">Go fullscreen</button>
-        </td>
+        <td id="videoResDebug" colspan="2"></td>
+      </tr>
     </table>
 
     <br>
 
-    <div>
+    <div id="videoContainer">
       <video id="video" poster="assets/poster.jpg"
-             width="600" height="400"
              crossorigin="anonymous"
-             autoplay controls></video>
+             autoplay></video>
+      <div id="bufferingSpinner"></div>
+      <div id="videoControlsEnclosure"><div id="videoControls">
+        <input id="playButton" type="button"></input>
+        <input id="pauseButton" type="button"></input>
+        <input id="seekBar" type="range" step="any" min="0" max="1"></input>
+        <div id="currentTime">0:00</div>
+        <input id="muteButton" type="button"></input>
+        <input id="unmuteButton" type="button"></input>
+        <input id="volumeBar" type="range" step="any" min="0" max="1"></input>
+        <input id="fullscreenButton" type="button"></input>
+      </div></div>
     </div>
   </body>
 </html>
