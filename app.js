@@ -593,6 +593,17 @@ app.interpretContentProtection_ = function(contentProtection) {
         'org.w3.clearkey', false, licenseServerUrl, false, initData, null);
   }
 
+  var initDataOverride = null;
+  if (contentProtection.pssh && contentProtection.pssh.psshBox) {
+    // Override the init data with the PSSH from the manifest.
+    initDataOverride = {
+      initData: contentProtection.pssh.psshBox,
+      initDataType: 'cenc'
+    };
+    console.info('Found overridden PSSH with system IDs:',
+                 contentProtection.pssh.parsedPssh.systemIds);
+  }
+
   if (contentProtection.schemeIdUri == 'http://youtube.com/drm/2012/10/10') {
     // This is another scheme used by YouTube.
     var licenseServerUrl = null;
@@ -604,16 +615,6 @@ app.interpretContentProtection_ = function(contentProtection) {
       }
     }
     if (licenseServerUrl) {
-      var initDataOverride = null;
-      if (contentProtection.pssh && contentProtection.pssh.psshBox) {
-        // Override the init data with the PSSH from the manifest.
-        initDataOverride = {
-          initData: contentProtection.pssh.psshBox,
-          initDataType: 'cenc'
-        };
-        console.info('Found overridden PSSH with system IDs:',
-                     contentProtection.pssh.parsedPssh.systemIds);
-      }
       return new shaka.player.DrmSchemeInfo(
           'com.widevine.alpha', true, licenseServerUrl, false, initDataOverride,
           app.postProcessYouTubeLicenseResponse_);
@@ -625,7 +626,8 @@ app.interpretContentProtection_ = function(contentProtection) {
     // This is the UUID which represents Widevine in the edash-packager.
     var licenseServerUrl = '//widevine-proxy.appspot.com/proxy';
     return new shaka.player.DrmSchemeInfo(
-        'com.widevine.alpha', true, licenseServerUrl, false, null, null);
+        'com.widevine.alpha', true, licenseServerUrl, false, initDataOverride,
+        null);
   }
 
   if (contentProtection.schemeIdUri == 'urn:mpeg:dash:mp4protection:2011') {
