@@ -1,3 +1,23 @@
+## 1.2.1 (2015-03-10)
+
+A roll-up of recent bugfixes, plus a few minor additions to the test app.
+Branched from v1.2.0.
+
+Bugfixes:
+  - Try to recover from a streaming failure.
+    - https://github.com/google/shaka-player/issues/28
+  - Ignore spurious error events from the video tag.
+  - Update docs WRT content restrictions and folder organization.
+  - Fix clearkey errors in Chrome 42+.
+  - Fix computation of the number of segments in MpdProcessor.
+    - Only affects assets which use SegmentTemplate with a duration attribute.
+
+Test app features:
+  - Rename a confusing asset.
+  - Add a button to cycle video tracks.
+  - Support MPD init data overrides for all DRM schemes.
+
+
 ## 1.2.0 (2015-02-24)
 
 Lots of internal refactoring and bugfixes, and a few new features.
