@@ -14,6 +14,8 @@
 
 dir=$(dirname $0)/..
 
+GIT_VERSION=$(cd "$dir"; git describe --tags --dirty || echo unknown)
+
 closure_opts="
   --language_in ECMASCRIPT5
   --language_out ECMASCRIPT5
@@ -56,7 +58,7 @@ closure_opts="
   -D goog.ENABLE_DEBUG_LOADER=false
   -D shaka.asserts.ENABLE_ASSERTS=false
   -D shaka.log.MAX_LOG_LEVEL=0
-  -D GIT_VERSION='$(cd "$dir"; git describe --tags --dirty || echo unknown)'
+  -D GIT_VERSION='$GIT_VERSION'
 "
 
 set -e

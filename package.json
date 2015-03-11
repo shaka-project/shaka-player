@@ -25,6 +25,6 @@
     }
   ],
   "scripts": {
-    "prepublish": "./build/all.sh"
+    "prepublish": "./build/checkversion.sh && ./build/all.sh"
   }
 }
