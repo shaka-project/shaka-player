@@ -1,3 +1,16 @@
+## 1.2.2 (2015-03-11)
+
+Bugfixes:
+  - Version 1.2.1 had multiple issues with its version numbering.  These
+    are now corrected, but npm requires unique version numbers to publish.
+    Version 1.2.1 has been pulled from npm.
+    - https://github.com/google/shaka-player/issues/30
+
+Features:
+  - Added getAdaptationEnabled() to Player.
+    - https://github.com/google/shaka-player/issues/29
+
+
 ## 1.2.1 (2015-03-10)
 
 A roll-up of recent bugfixes, plus a few minor additions to the test app.
