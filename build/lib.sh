@@ -56,7 +56,7 @@ closure_opts="
   -D goog.ENABLE_DEBUG_LOADER=false
   -D shaka.asserts.ENABLE_ASSERTS=false
   -D shaka.log.MAX_LOG_LEVEL=0
-  -D GIT_VERSION='$(cd "$dir"; git describe --dirty || echo unknown)'
+  -D GIT_VERSION='$(cd "$dir"; git describe --tags --dirty || echo unknown)'
 "
 
 set -e
