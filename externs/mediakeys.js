@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  * @fileoverview MediaKey externs.
- * Based on {@link http://goo.gl/5gifok EME draft 09 February 2015}.
+ * Based on {@link http://goo.gl/blgtZZ EME draft 12 March 2015}.
  * @externs
  */
 
