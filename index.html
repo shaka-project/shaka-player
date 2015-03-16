@@ -18,9 +18,9 @@
   <head>
     <meta charset="utf-8">
     <title>Shaka Player Test</title>
-    <link rel="shortcut icon" href="assets/favicon.ico"></link>
-    <link rel="stylesheet" href="index.css"></link>
-    <link rel="stylesheet" href="controls.css"></link>
+    <link rel="shortcut icon" href="assets/favicon.ico">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="controls.css">
     <script src="load.js"></script>
     <script src="controls.js"></script>
     <script src="app.js"></script>
@@ -33,7 +33,7 @@
       </tr>
       <tr>
         <td>Force prefixed EME?</td>
-        <td><input id="forcePrefixed" type="checkbox"></input></td>
+        <td><input id="forcePrefixed" type="checkbox"></td>
       </tr>
       <tr>
         <td>Stream type:</td>
@@ -48,7 +48,7 @@
       <!-- HTTP stream rows -->
       <tr class="http">
         <td>Media URL:</td>
-        <td><input id="mediaUrlInput" type="text"></input></td>
+        <td><input id="mediaUrlInput" type="text"></td>
       </tr>
       <tr class="http">
         <td>Key system:</td>
@@ -63,17 +63,17 @@
       </tr>
       <tr class="http">
         <td>License server URL:</td>
-        <td><input id="licenseServerUrlInput" type="text"></input></td>
+        <td><input id="licenseServerUrlInput" type="text"></td>
       </tr>
       <tr class="http">
         <td>Subtitles URL:</td>
-        <td><input id="subtitlesUrlInput" type="text"></input></td>
+        <td><input id="subtitlesUrlInput" type="text"></td>
       </tr>
 
       <!-- DASH stream rows -->
       <tr class="dash">
         <td>Preferred language:</td>
-        <td><input id="preferredLanguage"></input></td>
+        <td><input id="preferredLanguage"></td>
       </tr>
       <tr class="dash">
         <td>Test manifest:</td>
@@ -96,7 +96,7 @@
       <tr class="dash">
         <td>Custom manifest URL:</td>
         <td>
-          <input id="manifestUrlInput" type="text" style="width: 98%;" oninput="app.onMpdCustom()"></input>
+          <input id="manifestUrlInput" type="text" style="width: 98%;" oninput="app.onMpdCustom()">
         </td>
       </tr>
       <tr class="dash">
@@ -105,7 +105,7 @@
           <span title="If specified, overrides interpretation of ContentProtection elements in the manifest. Implies the use of Widevine.">[?]</span>
         </td>
         <td>
-          <input id="wvLicenseServerUrlInput" type="text" style="width: 98%;"></input>
+          <input id="wvLicenseServerUrlInput" type="text" style="width: 98%;">
         </td>
       </tr>
 
@@ -127,7 +127,7 @@
       <tr>
         <td colspan="3">
           Enable adaptation?
-          <input id="adaptationEnabled" type="checkbox" checked onchange="app.onAdaptationChange()"></input>
+          <input id="adaptationEnabled" type="checkbox" checked onchange="app.onAdaptationChange()">
         </td>
       </tr>
       <tr>
@@ -145,7 +145,7 @@
         <td><select id="textTracks" onchange="app.onTextChange()"></select></td>
         <td>
           Enable subs?
-          <input id="textEnabled" type="checkbox" onchange="app.onTextChange()"></input>
+          <input id="textEnabled" type="checkbox" onchange="app.onTextChange()">
         </td>
       </tr>
       <tr>
@@ -162,14 +162,14 @@
              autoplay></video>
       <div id="bufferingSpinner"></div>
       <div id="videoControlsEnclosure"><div id="videoControls">
-        <input id="playButton" type="button"></input>
-        <input id="pauseButton" type="button"></input>
-        <input id="seekBar" type="range" step="any" min="0" max="1"></input>
+        <input id="playButton" type="button">
+        <input id="pauseButton" type="button">
+        <input id="seekBar" type="range" step="any" min="0" max="1">
         <div id="currentTime">0:00</div>
-        <input id="muteButton" type="button"></input>
-        <input id="unmuteButton" type="button"></input>
-        <input id="volumeBar" type="range" step="any" min="0" max="1"></input>
-        <input id="fullscreenButton" type="button"></input>
+        <input id="muteButton" type="button">
+        <input id="unmuteButton" type="button">
+        <input id="volumeBar" type="range" step="any" min="0" max="1">
+        <input id="fullscreenButton" type="button">
       </div></div>
     </div>
   </body>
