@@ -277,7 +277,7 @@ goog.Uri.prototype.resolve = function(relativeUri) {
   }
 
   if (overridden) {
-    absoluteUri.setQueryData(relativeUri.getDecodedQuery());
+    absoluteUri.setQueryData(relativeUri.getQueryData().clone());
   } else {
     overridden = relativeUri.hasFragment();
   }
