@@ -36,7 +36,6 @@ describe('mpd', function() {
         source,
         /** shaka.dash.mpd.SegmentBase */ ({
           baseUrl: new goog.Uri('http://example.com'),
-          mediaUrl: new goog.Uri('http://example.com'),
           timescale: 9000,
           presentationTimeOffset: null,
           indexRange: new shaka.dash.mpd.Range(100, 200),
@@ -66,7 +65,6 @@ describe('mpd', function() {
         source,
         /** shaka.dash.mpd.SegmentBase */ ({
           baseUrl: new goog.Uri('http://example.com'),
-          mediaUrl: new goog.Uri('http://example.com'),
           timescale: 1,
           presentationTimeOffset: 10,
           indexRange: null,
@@ -103,7 +101,6 @@ describe('mpd', function() {
         source,
         /** shaka.dash.mpd.SegmentBase */ ({
           baseUrl: new goog.Uri('http://example.com'),
-          mediaUrl: new goog.Uri('http://example.com'),
           timescale: 9000,
           presentationTimeOffset: 10,
           indexRange: null,
@@ -140,7 +137,6 @@ describe('mpd', function() {
         source,
         /** shaka.dash.mpd.SegmentBase */ ({
           baseUrl: new goog.Uri('http://example.com'),
-          mediaUrl: new goog.Uri('http://example.com'),
           timescale: 10,
           presentationTimeOffset: 20,
           indexRange: new shaka.dash.mpd.Range(30, 900),
@@ -180,12 +176,6 @@ describe('mpd', function() {
     if (expected.baseUrl) {
       expect(segmentBase.baseUrl).toBeTruthy();
       expect(segmentBase.baseUrl.toString()).toBe(expected.baseUrl.toString());
-    }
-
-    if (expected.mediaUrl) {
-      expect(segmentBase.mediaUrl).toBeTruthy();
-      expect(segmentBase.mediaUrl.toString()).toBe(
-          expected.mediaUrl.toString());
     }
 
     expect(segmentBase.timescale).toBe(expected.timescale);

@@ -56,15 +56,11 @@ describe('mpd', function() {
           segmentUrls: [
             /** shaka.dash.mpd.SegmentUrl */ ({
               mediaUrl: 'http://example.com/segment1.mp4',
-              mediaRange: null,
-              startTime: null,
-              duration: null
+              mediaRange: null
             }),
             /** shaka.dash.mpd.SegmentUrl */ ({
               mediaUrl: 'http://example.com/segment2.mp4',
-              mediaRange: new shaka.dash.mpd.Range(100, 200),
-              startTime: null,
-              duration: null
+              mediaRange: new shaka.dash.mpd.Range(100, 200)
             })]
         }));
   });
