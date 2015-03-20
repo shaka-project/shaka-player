@@ -548,10 +548,10 @@ describe('MpdProcessor', function() {
 
       var scaledSegmentDuration = st.segmentDuration / st.timescale;
 
-      // Note that @suggestedPresentationDelay and @minBufferTime are both
-      // zero.
+      // The fist segment is the earliest available one. Note that
+      // @timeShiftBufferDepth is 0.
       var firstSegmentNumber =
-          Math.floor((secondsSinceStart - scaledSegmentDuration) /
+          Math.floor((secondsSinceStart - (2 * scaledSegmentDuration)) /
                      scaledSegmentDuration) + 1;
 
       // At least @minimumUpdatePeriod worth of segments should be generated.
@@ -587,6 +587,13 @@ describe('MpdProcessor', function() {
             expectedUrl,
             expectedScaledStartTime, expectedScaledStartTime + 10);
       }
+
+      // Check best start time.
+      var currentSegmentNumber =
+          Math.floor((secondsSinceStart - scaledSegmentDuration) /
+                     scaledSegmentDuration) + 1;
+      expect(si1.bestStartTime).toBe(
+          (currentSegmentNumber - 1) * scaledSegmentDuration);
     });
 
     it('SegmentTimeline w/ gaps', function() {
