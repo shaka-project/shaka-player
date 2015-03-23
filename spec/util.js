@@ -205,11 +205,10 @@ var assertsToFailures = {
 
 /**
  * Called to interpret ContentProtection elements from an MPD.
- * @param {?shaka.player.DrmSchemeInfo.LicensePostProcessor} postProcessor
  * @param {!shaka.dash.mpd.ContentProtection} contentProtection
  * @return {shaka.player.DrmSchemeInfo} or null if the element is not supported.
  */
-function interpretContentProtection(postProcessor, contentProtection) {
+function interpretContentProtection(contentProtection) {
   var Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
 
   // This is the only scheme used in integration tests at the moment.
@@ -232,8 +231,7 @@ function interpretContentProtection(postProcessor, contentProtection) {
     var licenseServerUrl = 'data:application/json;base64,' +
         shaka.util.StringUtils.toBase64(license);
     return new shaka.player.DrmSchemeInfo(
-        'org.w3.clearkey', false, licenseServerUrl, false, initData,
-        postProcessor);
+        'org.w3.clearkey', false, licenseServerUrl, false, initData, null);
   }
 
   return null;

@@ -641,11 +641,10 @@ app.interpretContentProtection_ = function(contentProtection) {
  * the actual license.
  *
  * @param {!Uint8Array} response
- * @param {!shaka.player.DrmSchemeInfo.Restrictions} restrictions
  * @return {!Uint8Array}
  * @private
  */
-app.postProcessYouTubeLicenseResponse_ = function(response, restrictions) {
+app.postProcessYouTubeLicenseResponse_ = function(response) {
   var Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
   var responseStr = Uint8ArrayUtils.toString(response);
   var index = responseStr.indexOf('\r\n\r\n');
@@ -664,7 +663,9 @@ app.postProcessYouTubeLicenseResponse_ = function(response, restrictions) {
         if (types.indexOf('HD') == -1) {
           // This license will not permit HD playback.
           console.info('HD disabled.');
+          var restrictions = app.player_.getRestrictions();
           restrictions.maxHeight = 576;
+          app.player_.setRestrictions(restrictions);
         }
       }
     }

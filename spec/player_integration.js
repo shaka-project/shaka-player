@@ -583,30 +583,20 @@ describe('Player', function() {
     });
   });
 
-  describe('license restriction', function() {
+  describe('setRestrictions', function() {
     it('ignores video tracks above the maximum height', function(done) {
       player.load(newSource(encryptedManifest)).then(function() {
-        // Tiny delay to allow the license 'response' to be processed, and
-        // therefore restrictions to be applied.
-        return delay(0.1);
-      }).then(function() {
         var hdVideoTrack = getVideoTrackByHeight(720);
         var sdVideoTrack = getVideoTrackByHeight(480);
         expect(hdVideoTrack).not.toBe(null);
         expect(sdVideoTrack).not.toBe(null);
 
-        var callback = function(license, restrictions) {
-          restrictions.maxHeight = 480;
-          return license;
-        };
-        return player.load(newSource(encryptedManifest, callback));
-      }).then(function() {
-        // Tiny delay to allow the license 'response' to be processed, and
-        // therefore restrictions to be applied.
-        return delay(0.1);
-      }).then(function() {
-        var hdVideoTrack = getVideoTrackByHeight(720);
-        var sdVideoTrack = getVideoTrackByHeight(480);
+        var restrictions = player.getRestrictions();
+        restrictions.maxHeight = 480;
+        player.setRestrictions(restrictions);
+
+        hdVideoTrack = getVideoTrackByHeight(720);
+        sdVideoTrack = getVideoTrackByHeight(480);
         expect(hdVideoTrack).toBe(null);
         expect(sdVideoTrack).not.toBe(null);
         done();
@@ -618,28 +608,44 @@ describe('Player', function() {
 
     it('ignores video tracks above the maximum width', function(done) {
       player.load(newSource(encryptedManifest)).then(function() {
-        // Tiny delay to allow the license 'response' to be processed, and
-        // therefore restrictions to be applied.
-        return delay(0.1);
-      }).then(function() {
         var hdVideoTrack = getVideoTrackByHeight(720);
         var sdVideoTrack = getVideoTrackByHeight(480);
         expect(hdVideoTrack).not.toBe(null);
         expect(sdVideoTrack).not.toBe(null);
 
-        var callback = function(license, restrictions) {
-          restrictions.maxWidth = 854;
-          return license;
-        };
-        return player.load(newSource(encryptedManifest, callback));
-      }).then(function() {
-        // Tiny delay to allow the license 'response' to be processed, and
-        // therefore restrictions to be applied.
-        return delay(0.1);
-      }).then(function() {
+        var restrictions = player.getRestrictions();
+        restrictions.maxWidth = 854;
+        player.setRestrictions(restrictions);
+
+        hdVideoTrack = getVideoTrackByHeight(720);
+        sdVideoTrack = getVideoTrackByHeight(480);
+        expect(hdVideoTrack).toBe(null);
+        expect(sdVideoTrack).not.toBe(null);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+
+    it('takes effect before the source is loaded', function(done) {
+      var restrictions = player.getRestrictions();
+      restrictions.maxHeight = 480;
+      player.setRestrictions(restrictions);
+
+      player.load(newSource(encryptedManifest)).then(function() {
         var hdVideoTrack = getVideoTrackByHeight(720);
         var sdVideoTrack = getVideoTrackByHeight(480);
         expect(hdVideoTrack).toBe(null);
+        expect(sdVideoTrack).not.toBe(null);
+
+        var restrictions = player.getRestrictions();
+        restrictions.maxHeight = null;
+        player.setRestrictions(restrictions);
+
+        hdVideoTrack = getVideoTrackByHeight(720);
+        sdVideoTrack = getVideoTrackByHeight(480);
+        expect(hdVideoTrack).not.toBe(null);
         expect(sdVideoTrack).not.toBe(null);
         done();
       }).catch(function(error) {
@@ -691,14 +697,11 @@ describe('Player', function() {
 
   /**
    * @param {string} manifest
-   * @param {shaka.player.DrmSchemeInfo.LicensePostProcessor=}
-   *     opt_licensePostProcessor
    * @return {!shaka.player.DashVideoSource}
    */
-  function newSource(manifest, opt_licensePostProcessor) {
-    var callback =
-        interpretContentProtection.bind(null, opt_licensePostProcessor);
-    return new shaka.player.DashVideoSource(manifest, callback);
+  function newSource(manifest) {
+    return new shaka.player.DashVideoSource(manifest,
+                                            interpretContentProtection);
   }
 
   /**
