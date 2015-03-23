@@ -1049,21 +1049,5 @@ describe('MpdProcessor', function() {
       });
     });  // describe SegmentBase
   });  // describe process
-
-  /**
-   * @param {!shaka.media.SegmentReference} reference
-   * @param {string} url
-   * @param {number} start
-   * @param {number} end
-   */
-  var checkReference = function(reference, url, start, end) {
-    expect(reference).toBeTruthy();
-    expect(reference.url).toBeTruthy();
-    expect(reference.url.toString()).toBe(url);
-    expect(reference.startByte).toBe(0);
-    expect(reference.endByte).toBeNull();
-    expect(reference.startTime).toBe(start);
-    expect(reference.endTime).toBe(end);
-  };
 });
 

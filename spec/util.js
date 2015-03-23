@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @fileoverview Utility function for unit tests.
+ * @fileoverview Utility functions for unit tests.
  */
 
 goog.require('shaka.asserts');
+goog.require('shaka.media.SegmentReference');
 goog.require('shaka.util.PublicPromise');
 goog.require('shaka.util.StringUtils');
 goog.require('shaka.util.Uint8ArrayUtils');
@@ -280,5 +281,22 @@ function checkUrlTypeObject(actual, expected) {
   } else {
     expect(actual).toBeNull();
   }
+}
+
+
+/**
+ * @param {!shaka.media.SegmentReference} reference
+ * @param {string} url
+ * @param {number} start
+ * @param {number} end
+ */
+function checkReference(reference, url, start, end) {
+  expect(reference).toBeTruthy();
+  expect(reference.url).toBeTruthy();
+  expect(reference.url.toString()).toBe(url);
+  expect(reference.startByte).toBe(0);
+  expect(reference.endByte).toBeNull();
+  expect(reference.startTime).toBe(start);
+  expect(reference.endTime).toBe(end);
 }
 
