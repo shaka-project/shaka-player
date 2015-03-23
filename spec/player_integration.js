@@ -26,6 +26,7 @@ describe('Player', function() {
   var originalTimeout;
   var video;
   var player;
+  var eventManager;
 
   const plainManifest = 'assets/car-20120827-manifest.mpd';
   const encryptedManifest = 'assets/car_cenc-20120827-manifest.mpd';
@@ -66,9 +67,14 @@ describe('Player', function() {
     // Disable automatic adaptation unless it is needed for a test.
     // This makes test results more reproducible.
     player.enableAdaptation(false);
+
+    eventManager = new shaka.util.EventManager();
   });
 
   afterEach(function() {
+    eventManager.destroy();
+    eventManager = null;
+
     player.destroy();
     player = null;
   });
@@ -89,12 +95,12 @@ describe('Player', function() {
     it('can be used multiple times without EME', function(done) {
       player.load(newSource(plainManifest)).then(function() {
         player.play();
-        return delay(3.0);
+        return waitForMovement();
       }).then(function() {
         return player.load(newSource(plainManifest));
       }).then(function() {
         player.play();
-        return delay(3.0);
+        return waitForMovement();
       }).then(function() {
         expect(video.currentTime).toBeGreaterThan(0.0);
         done();
@@ -109,12 +115,12 @@ describe('Player', function() {
     it('can be used multiple times with EME', function(done) {
       player.load(newSource(encryptedManifest)).then(function() {
         player.play();
-        return delay(3.0);
+        return waitForMovement();
       }).then(function() {
         return player.load(newSource(encryptedManifest));
       }).then(function() {
         player.play();
-        return delay(3.0);
+        return waitForMovement();
       }).then(function() {
         expect(video.currentTime).toBeGreaterThan(0.0);
         done();
@@ -131,7 +137,9 @@ describe('Player', function() {
         var track = getVideoTrackByHeight(720);
         player.selectVideoTrack(track.id);
         player.play();
-        return delay(10.0);
+        return waitForMovement();
+      }).then(function() {
+        return delay(5.5);  // adapts when it crosses a segment boundary.
       }).then(function() {
         expect(video.videoHeight).toEqual(720);
         done();
@@ -146,13 +154,15 @@ describe('Player', function() {
         var track = getVideoTrackByHeight(720);
         player.selectVideoTrack(track.id);
         player.play();
-        return delay(10.0);
+        return waitForMovement();
+      }).then(function() {
+        return delay(5.5);  // adapts when it crosses a segment boundary.
       }).then(function() {
         expect(video.videoHeight).toEqual(720);
 
         var track = getVideoTrackByHeight(360);
         player.selectVideoTrack(track.id);
-        return delay(10.0);
+        return waitForMovement();
       }).then(function() {
         expect(video.videoHeight).toEqual(360);
         done();
@@ -168,17 +178,17 @@ describe('Player', function() {
       var timestamp;
       player.load(newSource(plainManifest)).then(function() {
         player.play();
-        return delay(3.0);
+        return waitForMovement();
       }).then(function() {
         expect(video.paused).toBe(false);
         player.pause();
         timestamp = video.currentTime;
-        return delay(2.0);
+        return delay(1.0);
       }).then(function() {
         expect(video.paused).toBe(true);
         expect(video.currentTime).toEqual(timestamp);
         player.play();
-        return delay(2.0);
+        return waitForMovement();
       }).then(function() {
         expect(video.paused).toBe(false);
         expect(video.currentTime).toBeGreaterThan(timestamp);
@@ -197,7 +207,7 @@ describe('Player', function() {
     it('does not lock up on segment boundaries', function(done) {
       player.load(newSource(plainManifest)).then(function() {
         player.play();
-        return delay(1.0);  // gets the player out of INIT state
+        return waitForMovement();  // gets the player out of INIT state
       }).then(function() {
         player.seek(40.0);  // <0.1s before end of segment N (5).
         return delay(2.0);
@@ -232,13 +242,17 @@ describe('Player', function() {
     it('does not create unclosable gaps in the buffer', function(done) {
       player.load(newSource(plainManifest)).then(function() {
         player.play();
-        return delay(1.0);
+        return waitForMovement();
       }).then(function() {
         player.seek(33.0);
-        return delay(2.0);
+        return waitForMovement();
+      }).then(function() {
+        return delay(1.0);
       }).then(function() {
         player.seek(28.0);
-        return delay(10.0);
+        return waitForMovement();
+      }).then(function() {
+        return delay(7.5);
       }).then(function() {
         // We don't expect 38.0 because of the uncertainty of network and other
         // delays.  This is a safe number which will not cause false failures.
@@ -300,10 +314,12 @@ describe('Player', function() {
         expect(audioStreamBuffer.buffered.start(0)).toBeGreaterThan(0);
         // Seek to the beginning, which is data we will have to re-download.
         player.seek(0);
-        return delay(3.0);
+        return waitForMovement();
+      }).then(function() {
+        return delay(1.0);
       }).then(function() {
         // Expect that we've been able to play some.
-        expect(video.currentTime).toBeGreaterThan(1.0);
+        expect(video.currentTime).toBeGreaterThan(0.5);
         done();
       }).catch(function(error) {
         // Replace the StreamVideoSource shim.
@@ -320,9 +336,11 @@ describe('Player', function() {
 
       player.load(source).then(function() {
         player.play();
+        return waitForMovement();
+      }).then(function() {
         // Move quickly past the first two segments.
         player.setPlaybackRate(5.0);
-        return delay(3.0);
+        return delay(2.5);
       }).then(function() {
         var track = getVideoTrackByHeight(480);
         expect(track.active).toBe(false);
@@ -333,10 +351,15 @@ describe('Player', function() {
         // prove that we are not hung, we need to get to a point two segments
         // later than where we adapted.
         targetTime = video.currentTime + 10.0;
-        return delay(3.0);
+        return waitForMovement();
       }).then(function() {
+        return delay(2.5);
+      }).then(function() {
+        expect(video.currentTime).toBeGreaterThan(targetTime);
         player.seek(0);
-        return delay(1.0 + (targetTime / 5.0));
+        return waitForMovement();
+      }).then(function() {
+        return delay(0.5 + (targetTime / 5.0));
       }).then(function() {
         // Expect that we've been able to play past our target point.
         expect(video.currentTime).toBeGreaterThan(targetTime);
@@ -352,7 +375,7 @@ describe('Player', function() {
 
       player.load(source).then(function() {
         player.play();
-        return delay(3.0);
+        return waitForMovement();
       }).then(function() {
         var Stream = shaka.media.Stream;
         var videoStream = source.streamsByType_['video'];
@@ -364,9 +387,11 @@ describe('Player', function() {
         expect(videoStream.state_).toBe(Stream.State_.SWITCHING);
 
         player.seek(30.0);
-        return delay(7.0);
+        return waitForMovement();
       }).then(function() {
-        expect(video.currentTime).toBeGreaterThan(35.0);
+        return delay(4.0);
+      }).then(function() {
+        expect(video.currentTime).toBeGreaterThan(33.0);
         done();
       }).catch(function(error) {
         fail(error);
@@ -462,7 +487,7 @@ describe('Player', function() {
       var timestamp;
       player.load(newSource(plainManifest)).then(function() {
         player.play();
-        return delay(3.0);
+        return waitForMovement();
       }).then(function() {
         expect(video.currentTime).toBeGreaterThan(0.0);
         timestamp = video.currentTime;
@@ -482,11 +507,15 @@ describe('Player', function() {
       var timestamp;
       player.load(newSource(plainManifest)).then(function() {
         player.play();
-        return delay(6.0);
+        return waitForMovement();
+      }).then(function() {
+        return delay(3.5);
       }).then(function() {
         expect(video.currentTime).toBeGreaterThan(3.0);
         timestamp = video.currentTime;
         player.setPlaybackRate(-1.0);
+        return waitForMovement();
+      }).then(function() {
         return delay(2.0);
       }).then(function() {
         expect(video.currentTime).toBeLessThan(timestamp - 2.0 + FUDGE_FACTOR);
@@ -503,7 +532,7 @@ describe('Player', function() {
       var oldPlayTime;
       player.load(newSource(plainManifest)).then(function() {
         player.play();
-        return delay(2.0);
+        return waitForMovement();
       }).then(function() {
         oldPlayTime = player.getStats().playTime;
         return delay(1.0);
@@ -658,7 +687,7 @@ describe('Player', function() {
   it('plays VP9 WebM', function(done) {
     player.load(newSource(webmManifest)).then(function() {
       player.play();
-      return delay(3.0);
+      return waitForMovement();
     }).then(function() {
       expect(video.currentTime).toBeGreaterThan(0.0);
       done();
@@ -677,7 +706,7 @@ describe('Player', function() {
     player.load(newSource(bogusManifest)).catch(function(error) {});
 
     // Expect the error handler to have been called.
-    delay(1.0).then(function() {
+    delay(0.5).then(function() {
       expect(onError.calls.any()).toBe(true);
       done();
     });
@@ -743,6 +772,21 @@ describe('Player', function() {
       }
     }
     return null;
+  }
+
+  /**
+   * @return {!Promise} resolved when the video's currentTime changes.
+   */
+  function waitForMovement() {
+    var promise = new shaka.util.PublicPromise;
+    var originalTime = video.currentTime;
+    eventManager.listen(video, 'timeupdate', function() {
+      if (video.currentTime != originalTime) {
+        eventManager.unlisten(video, 'timeupdate');
+        promise.resolve();
+      }
+    });
+    return promise;
   }
 });
 
