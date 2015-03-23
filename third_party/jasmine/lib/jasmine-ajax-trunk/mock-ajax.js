@@ -259,8 +259,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.responseHeaders = response.responseHeaders ||
           {"Content-Type": response.contentType || "application/json" };
 
-        this.onload();
         this.onreadystatechange();
+        this.onload();
       },
 
       responseTimeout: function() {
