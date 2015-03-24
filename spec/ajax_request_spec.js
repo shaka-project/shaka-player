@@ -18,6 +18,7 @@
 
 goog.require('shaka.media.SegmentIndex');
 goog.require('shaka.media.SegmentReference');
+goog.require('shaka.player.DrmSchemeInfo');
 goog.require('shaka.util.AjaxRequest');
 goog.require('shaka.util.ContentDatabase');
 
@@ -56,12 +57,20 @@ describe('AjaxRequest', function() {
     var testUrl = new goog.Uri('http://example.com');
     var testReferences = [
       new shaka.media.SegmentReference(0, 0, null, 0, null, testUrl)];
-    testIndex = new shaka.media.SegmentIndex(testReferences);
+    var testIndex = new shaka.media.SegmentIndex(testReferences);
+
+    var streamInfo = new shaka.media.StreamInfo();
+    streamInfo.mimeType = 'video/phony';
+    streamInfo.codecs = 'phony';
+    streamInfo.segmentInitializationData = new ArrayBuffer(1024);
+    streamInfo.segmentIndex = testIndex;
+
+    var drmSchemeInfo = new shaka.player.DrmSchemeInfo(
+        '', false, '', false, null);
 
     var db = new shaka.util.ContentDatabase(null);
     db.setUpDatabase().then(function() {
-      return db.insertStream(
-          'video/phony', 'phony', 100, testIndex, new ArrayBuffer(1024));
+      return db.insertStream(streamInfo, 100, drmSchemeInfo);
     }).then(function(streamId) {
       db.closeDatabaseConnection();
       var request = new shaka.util.AjaxRequest('idb://' + streamId + '/0');

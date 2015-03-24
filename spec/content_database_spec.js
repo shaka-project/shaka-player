@@ -19,23 +19,29 @@
 
 goog.require('shaka.media.SegmentIndex');
 goog.require('shaka.media.SegmentReference');
+goog.require('shaka.media.StreamInfo');
+goog.require('shaka.player.DrmSchemeInfo');
 goog.require('shaka.util.ContentDatabase');
 goog.require('shaka.util.PublicPromise');
 goog.require('shaka.util.RangeRequest');
 
 describe('ContentDatabase', function() {
-  var db, p, testIndex, originalTimeout, originalRangeRequest;
+  var db, p, testIndex, streamInfo, originalTimeout, originalRangeRequest;
 
   const url = 'http://example.com';
   const mime = 'video/phony';
   const codecs = 'phony';
   const duration = 100;
   const initSegment = new ArrayBuffer(1024);
+  const keySystem = 'test.widevine.com';
+  const licenseServerUrl = 'www.licenseServer.com';
   const expectedReferences = [
     { index: 0, start_time: 0, end_time: 2 },
     { index: 1, start_time: 2, end_time: 4 },
     { index: 2, start_time: 4, end_time: null }
   ];
+  const drmScheme = new shaka.player.DrmSchemeInfo(
+      keySystem, false, licenseServerUrl, false, null);
 
   var customMatchers = {
     toMatchReference: function(util) {
@@ -86,6 +92,12 @@ describe('ContentDatabase', function() {
   beforeEach(function() {
     db = new shaka.util.ContentDatabase(null);
     p = db.setUpDatabase();
+
+    streamInfo = new shaka.media.StreamInfo();
+    streamInfo.mimeType = mime;
+    streamInfo.codecs = codecs;
+    streamInfo.segmentInitializationData = initSegment;
+    streamInfo.segmentIndex = testIndex;
   });
 
   afterEach(function() {
@@ -126,7 +138,7 @@ describe('ContentDatabase', function() {
 
   it('stores a stream and retrieves its index', function(done) {
     p.then(function() {
-      return db.insertStream(mime, codecs, duration, testIndex, initSegment);
+      return db.insertStream(streamInfo, duration, drmScheme);
     }).then(function(streamId) {
       return db.retrieveStreamIndex(streamId);
     }).then(function(streamIndex) {
@@ -145,8 +157,9 @@ describe('ContentDatabase', function() {
         var references = [new shaka.media.SegmentReference(
            0, 0, null, 6, null, new goog.Uri(url))];
         var index = new shaka.media.SegmentIndex(references);
+        streamInfo.segmentIndex = index;
         p.then(function() {
-          return db.insertStream(mime, codecs, duration, index, initSegment);
+          return db.insertStream(streamInfo, duration, drmScheme);
         }).then(function(streamId) {
           return db.retrieveStreamIndex(streamId);
         }).then(function(streamIndex) {
@@ -156,6 +169,8 @@ describe('ContentDatabase', function() {
           expect(streamIndex.mime_type).toEqual(mime);
           expect(streamIndex.duration).toEqual(duration);
           expect(streamIndex.init_segment).toEqual(initSegment);
+          expect(streamIndex.key_system).toEqual(keySystem);
+          expect(streamIndex.license_server_url).toEqual(licenseServerUrl);
           done();
         }).catch(function(err) {
           fail(err);
@@ -165,7 +180,7 @@ describe('ContentDatabase', function() {
 
   it('throws an error when trying to store an invalid stream', function(done) {
     p.then(function() {
-      return db.insertStream(mime, codecs, duration, null, initSegment);
+      return db.insertStream(null, duration, drmScheme);
     }).then(function() {
       fail();
       done();
@@ -178,7 +193,7 @@ describe('ContentDatabase', function() {
   it('deletes a stream index and throws error on retrieval', function(done) {
     var streamId;
     p.then(function() {
-      return db.insertStream(mime, codecs, duration, testIndex, initSegment);
+      return db.insertStream(streamInfo, duration, drmScheme);
     }).then(function(data) {
       streamId = data;
       return db.deleteStream(streamId);
@@ -195,7 +210,7 @@ describe('ContentDatabase', function() {
 
   it('retrieves a segment', function(done) {
     p.then(function() {
-      return db.insertStream(mime, codecs, duration, testIndex, initSegment);
+      return db.insertStream(streamInfo, duration, drmScheme);
     }).then(function(streamId) {
       return db.retrieveSegment(streamId, 0);
     }).then(function(data) {
@@ -221,7 +236,7 @@ describe('ContentDatabase', function() {
 
   it('retrieves streams initialization segment', function(done) {
     p.then(function() {
-      return db.insertStream(mime, codecs, duration, testIndex, initSegment);
+      return db.insertStream(streamInfo, duration, drmScheme);
     }).then(function(streamId) {
       return db.retrieveInitSegment(streamId);
     }).then(function(data) {
@@ -248,12 +263,13 @@ describe('ContentDatabase', function() {
 
   it('stores and retrieves a group information', function(done) {
     p.then(function() {
-      return db.insertGroup([1, 2, 3]);
+      return db.insertGroup([1, 2, 3], ['ABCD', 'EFG']);
     }).then(function(groupId) {
       return db.retrieveGroup(groupId);
     }).then(function(groupInformation) {
       expect(groupInformation.group_id).toEqual(jasmine.any(Number));
       expect(groupInformation.stream_ids).toEqual([1, 2, 3]);
+      expect(groupInformation.session_ids).toEqual(['ABCD', 'EFG']);
       done();
     }).catch(function(err) {
       fail(err);
@@ -265,10 +281,10 @@ describe('ContentDatabase', function() {
     var streamIds = [];
     var groupId;
     p.then(function() {
-      return db.insertStream(mime, codecs, duration, testIndex, initSegment);
+      return db.insertStream(streamInfo, duration, drmScheme);
     }).then(function(streamId) {
       streamIds.push(streamId);
-      return db.insertGroup(streamIds);
+      return db.insertGroup(streamIds, []);
     }).then(function(resultingGroupId) {
       groupId = resultingGroupId;
       return db.deleteGroup(groupId);
@@ -286,10 +302,10 @@ describe('ContentDatabase', function() {
   it('deletes streams in group and throws error on retrieval', function(done) {
     var streamIds = [];
     p.then(function() {
-      return db.insertStream(mime, codecs, duration, testIndex, initSegment);
+      return db.insertStream(streamInfo, duration, drmScheme);
     }).then(function(streamId) {
       streamIds.push(streamId);
-      return db.insertGroup(streamIds);
+      return db.insertGroup(streamIds, []);
     }).then(function(groupId) {
       return db.deleteGroup(groupId);
     }).then(function() {
