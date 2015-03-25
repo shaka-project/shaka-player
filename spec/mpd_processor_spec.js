@@ -588,11 +588,11 @@ describe('MpdProcessor', function() {
             expectedScaledStartTime, expectedScaledStartTime + 10);
       }
 
-      // Check best start time.
+      // Check |currentSegmentStartTime|.
       var currentSegmentNumber =
           Math.floor((secondsSinceStart - scaledSegmentDuration) /
                      scaledSegmentDuration) + 1;
-      expect(si1.bestStartTime).toBe(
+      expect(si1.currentSegmentStartTime).toBe(
           (currentSegmentNumber - 1) * scaledSegmentDuration);
     });
 
