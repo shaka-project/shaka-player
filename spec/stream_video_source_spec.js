@@ -327,7 +327,7 @@ describe('StreamVideoSource', function() {
     for (var i = 0; i < references.length; ++i) {
       var r = references[i];
       cloned.push(new shaka.media.SegmentReference(
-          r.segmentNumber,
+          r.id,
           r.startTime,
           r.endTime,
           r.startByte,

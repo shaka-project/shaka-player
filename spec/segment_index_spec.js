@@ -92,7 +92,8 @@ describe('SegmentIndex', function() {
     // The SIDX data was obtained from an MP4 file where the SIDX offset was
     // 708. We use this value here since the expected offsets for parsing this
     // SIDX are known.
-    var parser = new shaka.media.IsobmffSegmentIndexParser();
+    var parser = new shaka.media.IsobmffSegmentIndexParser(
+        'http://example.com/video');
     var references = parser.parse(null, new DataView(sidxData), 708);
     expect(references).not.toBeNull();
 
@@ -124,7 +125,8 @@ describe('SegmentIndex', function() {
     // The SIDX data was obtained from an MP4 file where the SIDX offset was
     // 1322. We use this value here since the expected offsets for parsing this
     // SIDX are known.
-    var parser = new shaka.media.IsobmffSegmentIndexParser();
+    var parser = new shaka.media.IsobmffSegmentIndexParser(
+        'http://example.com/video');
     var references =
         parser.parse(null, new DataView(sidxDataWithNonZeroStart), 1322);
     expect(references).not.toBeNull();
@@ -148,7 +150,8 @@ describe('SegmentIndex', function() {
   });
 
   it('parses a WebM segment index', function() {
-    var parser = new shaka.media.WebmSegmentIndexParser();
+    var parser = new shaka.media.WebmSegmentIndexParser(
+        'http://example.com/video');
     var references =
         parser.parse(new DataView(webmData), new DataView(cuesData), 0);
     expect(references).not.toBeNull();
@@ -173,7 +176,8 @@ describe('SegmentIndex', function() {
     var index;
 
     beforeEach(function() {
-      var parser = new shaka.media.WebmSegmentIndexParser();
+      var parser = new shaka.media.WebmSegmentIndexParser(
+          'http://example.com/video');
       var references =
           parser.parse(new DataView(webmData), new DataView(cuesData), 0);
       expect(references).not.toBeNull();
@@ -237,7 +241,7 @@ describe('SegmentIndex', function() {
     });
 
     it('handles an interval ending with a null time', function() {
-      var url = new goog.Uri('http://example.com');
+      var url = new goog.Uri('http://example.com/video');
 
       var references = [
         new shaka.media.SegmentReference(0, 0, 1, 0, 5, url),
@@ -270,22 +274,38 @@ describe('SegmentIndex', function() {
     });
   });
 
-  checkReferences = function(references,
-                             expectedFirstSegmentNumber,
-                             expectedStartTimes,
-                             expectedStartBytes) {
+  /**
+   * @param {!Array.<!shaka.media.SegmentReference>} references
+   * @param {number} expectedFirstId
+   * @param {!Array.<number>} expectedStartTimes
+   * @param {!Array.<number>} expectedStartBytes
+   */
+  function checkReferences(
+      references, expectedFirstId, expectedStartTimes, expectedStartBytes) {
     console.assert(expectedStartTimes.length == expectedStartBytes.length);
     expect(references.length).toBe(expectedStartTimes.length);
     for (var i = 0; i < expectedStartTimes.length; i++) {
-      var ref = references[i];
-      expect(ref.segmentNumber).toBe(expectedFirstSegmentNumber + i);
-      expect(ref.startTime.toFixed(3)).toBe(expectedStartTimes[i].toFixed(3));
-      expect(ref.startByte).toBe(expectedStartBytes[i]);
+      var reference = references[i];
+      var expectedStartTime = expectedStartTimes[i];
+      var expectedStartByte = expectedStartBytes[i];
 
-      if (i < expectedStartTimes.length - 1) {
-        expect(ref.endTime.toFixed(3)).toBe(
-            expectedStartTimes[i + 1].toFixed(3));
-        expect(ref.endByte).toBe(expectedStartBytes[i + 1] - 1);
+      expect(reference).toBeTruthy();
+      expect(reference.url).toBeTruthy();
+      expect(reference.url.toString()).toBe('http://example.com/video');
+
+      expect(reference.id).toBe(i + expectedFirstId);
+
+      expect(reference.startTime.toFixed(3)).toBe(expectedStartTime.toFixed(3));
+      expect(reference.startByte).toBe(expectedStartByte);
+
+      // The final end time and final end byte are dependent on the specific
+      // content, so for simplicity just omit checking them.
+      var isLast = (i == expectedStartTimes.length - 1);
+      if (!isLast) {
+        var expectedEndTime = expectedStartTimes[i + 1];
+        var expectedEndByte = expectedStartBytes[i + 1] - 1;
+        expect(reference.endTime.toFixed(3)).toBe(expectedEndTime.toFixed(3));
+        expect(reference.endByte).toBe(expectedEndByte);
       }
     }
   };
