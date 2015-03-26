@@ -62,6 +62,14 @@ app.polyfillsInstalled_ = false;
 
 
 /**
+ * The list of streams currently stored for offline playback.
+ *
+ * @private {Array.<string>}
+ */
+app.offlineStreams_ = [];
+
+
+/**
  * Initializes the application.
  */
 app.init = function() {
@@ -130,7 +138,17 @@ app.init = function() {
     document.getElementById('streamTypeList').value = 'http';
     app.onStreamTypeChange();
     app.loadStream();
+  } else {
+    app.onStreamTypeChange();
   }
+
+  // Retrieve list of offline streams
+  for (var n = 0; n < window.localStorage.length; n++) {
+    var key = /** @type {string} */ (window.localStorage.key(n));
+    var value = /** @type {string} */ (window.localStorage.getItem(key));
+    app.addOfflineStream_(key, value);
+  }
+
   if ('cycleVideo' in params) {
     app.cycleVideo();
   }
@@ -147,13 +165,17 @@ app.onStreamTypeChange = function() {
   var type = document.getElementById('streamTypeList').value;
   var on;
   var off;
+  var slice = Array.prototype.slice;
 
   if (type == 'http') {
-    on = document.getElementsByClassName('http');
-    off = document.getElementsByClassName('dash');
+    on = document.querySelectorAll('.http');
+    off = document.querySelectorAll('.dash, .offline,  #storeButton');
+  } else if (type == 'dash') {
+    on = document.querySelectorAll('.dash, #storeButton');
+    off = document.querySelectorAll('.http, .offline');
   } else {
-    on = document.getElementsByClassName('dash');
-    off = document.getElementsByClassName('http');
+    on = document.querySelectorAll('.offline');
+    off = document.querySelectorAll('.dash, .http, #storeButton');
   }
 
   for (var i = 0; i < on.length; ++i) {
@@ -169,8 +191,14 @@ app.onStreamTypeChange = function() {
  * Called when a new MPD is selected.
  */
 app.onMpdChange = function() {
-  document.getElementById('manifestUrlInput').value =
-      document.getElementById('mpdList').value;
+  var mpd = document.getElementById('mpdList').value;
+  document.getElementById('manifestUrlInput').value = mpd;
+
+  if (app.offlineStreams_.indexOf(mpd) >= 0) {
+    app.updateStoreButton_(true, 'Stream already stored');
+  } else {
+    app.updateStoreButton_(false, 'Store stream offline');
+  }
 };
 
 
@@ -301,14 +329,88 @@ app.cycleTracks_ =
 
 
 /**
+ * Stores a DASH stream for offline playback.
+ */
+app.storeStream = function() {
+  app.updateStoreButton_(true, 'Storing...');
+
+  if (!app.player_) {
+    app.installPolyfills_();
+    app.initPlayer_();
+  }
+  var mediaUrl = document.getElementById('manifestUrlInput').value;
+  var preferredLanguage = document.getElementById('preferredLanguage').value;
+
+  var offlineSource = new shaka.player.OfflineVideoSource(null);
+  offlineSource.store(
+      mediaUrl, preferredLanguage, app.interpretContentProtection_
+  ).then(
+      function(groupId) {
+        window.localStorage.setItem(mediaUrl, groupId.toString());
+        app.addOfflineStream_(mediaUrl, groupId.toString());
+        app.updateStoreButton_(true, 'Stream already stored');
+        app.switchToOfflineStream_(groupId.toString());
+      }
+  ).catch(
+      function(e) {
+        console.error('Error storing stream', e);
+        app.updateStoreButton_(false, 'Store stream offline');
+      });
+};
+
+
+/**
+ * Updates the store button state.
+ * @param {boolean} disabled True if the button should be disabled.
+ * @param {string} text Text the button should display.
+ * @private
+ */
+app.updateStoreButton_ = function(disabled, text) {
+  var storeButton = document.getElementById('storeButton');
+  storeButton.disabled = disabled;
+  storeButton.innerText = text;
+};
+
+
+/**
+ * Switch to the Offline stream interface within the app, with the groupId's
+ * value targeted.
+ * @param {string} groupId The id assigned to this stream by storage.
+ * @private
+ */
+app.switchToOfflineStream_ = function(groupId) {
+  document.getElementById('streamTypeList').value = 'offline';
+  app.onStreamTypeChange();
+  document.getElementById('offlineStreamList').value = groupId;
+};
+
+
+/**
+ * Stores an offline streams information to the app.
+ * @param {string} text The text associated with this stream.
+ * @param {string} groupId The id assigned to this stream by storage.
+ * @private
+ */
+app.addOfflineStream_ = function(text, groupId) {
+  app.offlineStreams_.push(text);
+  var item = document.createElement('option');
+  item.textContent = text;
+  item.value = groupId;
+  document.getElementById('offlineStreamList').appendChild(item);
+};
+
+
+/**
  * Loads whatever stream type is selected.
  */
 app.loadStream = function() {
   var type = document.getElementById('streamTypeList').value;
   if (type == 'http') {
     app.loadHttpStream();
-  } else {
+  } else if (type == 'dash') {
     app.loadDashStream();
+  } else {
+    app.loadOfflineStream();
   }
 };
 
@@ -352,6 +454,20 @@ app.loadDashStream = function() {
       new shaka.player.DashVideoSource(
           mediaUrl,
           app.interpretContentProtection_));
+};
+
+
+/**
+ * Loads an offline stream.
+ */
+app.loadOfflineStream = function() {
+  if (!app.player_) {
+    app.installPolyfills_();
+    app.initPlayer_();
+  }
+  var groupId = parseInt(
+      document.getElementById('offlineStreamList').value, 10);
+  app.load_(new shaka.player.OfflineVideoSource(groupId));
 };
 
 
@@ -563,7 +679,7 @@ app.interpretContentProtection_ = function(contentProtection) {
     // This is useful to test external MPDs when no mapping is known in
     // advance.
     return new shaka.player.DrmSchemeInfo(
-        'com.widevine.alpha', true, override.value, false, null, null);
+        'com.widevine.alpha', false, override.value, false, null, null);
   }
 
   if (contentProtection.schemeIdUri == 'com.youtube.clearkey') {
@@ -612,7 +728,8 @@ app.interpretContentProtection_ = function(contentProtection) {
     }
     if (licenseServerUrl) {
       return new shaka.player.DrmSchemeInfo(
-          'com.widevine.alpha', true, licenseServerUrl, false, initDataOverride,
+          'com.widevine.alpha', false, licenseServerUrl, false,
+          initDataOverride,
           app.postProcessYouTubeLicenseResponse_);
     }
   }
@@ -622,7 +739,7 @@ app.interpretContentProtection_ = function(contentProtection) {
     // This is the UUID which represents Widevine in the edash-packager.
     var licenseServerUrl = '//widevine-proxy.appspot.com/proxy';
     return new shaka.player.DrmSchemeInfo(
-        'com.widevine.alpha', true, licenseServerUrl, false, initDataOverride,
+        'com.widevine.alpha', false, licenseServerUrl, false, initDataOverride,
         null);
   }
 

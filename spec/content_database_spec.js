@@ -170,7 +170,6 @@ describe('ContentDatabase', function() {
           expect(streamIndex.duration).toEqual(duration);
           expect(streamIndex.init_segment).toEqual(initSegment);
           expect(streamIndex.key_system).toEqual(keySystem);
-          expect(streamIndex.license_server_url).toEqual(licenseServerUrl);
           done();
         }).catch(function(err) {
           fail(err);

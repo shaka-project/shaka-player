@@ -41,6 +41,7 @@
           <select id="streamTypeList" onchange="app.onStreamTypeChange()">
             <option value="dash">DASH</option>
             <option value="http">HTTP</option>
+            <option value="offline">Offline</option>
           </select>
         </td>
       </tr>
@@ -109,10 +110,19 @@
         </td>
       </tr>
 
+      <!-- Offline rows -->
+      <tr class="offline">
+        <td>Offline Content:</td>
+        <td>
+          <select id="offlineStreamList"></select>
+        </td>
+      </tr>
+
       <!-- Common rows -->
       <tr>
         <td colspan="2">
           <button onclick="app.loadStream();">Load stream</button>
+          <button id="storeButton" onclick="app.storeStream();">Store stream offline</button>
         </td>
       </tr>
     </table>
