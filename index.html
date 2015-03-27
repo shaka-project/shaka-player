@@ -29,15 +29,15 @@
     <table>
       <!-- Common rows -->
       <tr>
-        <td colspan="2" class="heading">Stream Setup</td>
+        <td colspan="3" class="heading">Stream Setup</td>
       </tr>
       <tr>
         <td>Force prefixed EME?</td>
-        <td><input id="forcePrefixed" type="checkbox"></td>
+        <td colspan="2"><input id="forcePrefixed" type="checkbox"></td>
       </tr>
       <tr>
         <td>Stream type:</td>
-        <td>
+        <td colspan="2">
           <select id="streamTypeList" onchange="app.onStreamTypeChange()">
             <option value="dash">DASH</option>
             <option value="http">HTTP</option>
@@ -49,11 +49,11 @@
       <!-- HTTP stream rows -->
       <tr class="http">
         <td>Media URL:</td>
-        <td style="width: 400px;"><input id="mediaUrlInput" type="text" style="width: 98%;"></td>
+        <td colspan="2" style="width: 400px;"><input id="mediaUrlInput" type="text" style="width: 98%;"></td>
       </tr>
       <tr class="http">
         <td>Key system:</td>
-        <td>
+        <td colspan="2">
           <select id="keySystemList">
             <option value="org.w3.clearkey">org.w3.clearkey</option>
             <option value="com.widevine.alpha">com.widevine.alpha</option>
@@ -64,21 +64,21 @@
       </tr>
       <tr class="http">
         <td>License server URL:</td>
-        <td><input id="licenseServerUrlInput" type="text" style="width: 98%;"></td>
+        <td colspan="2"><input id="licenseServerUrlInput" type="text" style="width: 98%;"></td>
       </tr>
       <tr class="http">
         <td>Subtitles URL:</td>
-        <td><input id="subtitlesUrlInput" type="text" style="width: 98%;"></td>
+        <td colspan="2"><input id="subtitlesUrlInput" type="text" style="width: 98%;"></td>
       </tr>
 
       <!-- DASH stream rows -->
       <tr class="dash">
         <td>Preferred language:</td>
-        <td><input id="preferredLanguage"></td>
+        <td colspan="2"><input id="preferredLanguage"></td>
       </tr>
       <tr class="dash">
         <td>Test manifest:</td>
-        <td>
+        <td colspan="2">
           <select id="mpdList" onchange="app.onMpdChange()">
             <option value="assets/angel_one.mpd">"Angel One" (TNG clip) - multilingual, subtitles, VP8</option>
             <option value="assets/car-20120827-manifest.mpd">"Car" (YT DASH test) - MP4</option>
@@ -100,13 +100,16 @@
         <td>
           <input id="manifestUrlInput" type="text" style="width: 98%;" oninput="app.onMpdCustom()">
         </td>
+        <td>
+          <button id="storeButton" onclick="app.storeStream();">Store stream offline</button>
+        </td>
       </tr>
       <tr class="dash">
         <td>
           Custom WV license server URL:
           <span title="If specified, overrides interpretation of ContentProtection elements in the manifest. Implies the use of Widevine.">[?]</span>
         </td>
-        <td>
+        <td colspan="2">
           <input id="wvLicenseServerUrlInput" type="text" style="width: 98%;">
         </td>
       </tr>
@@ -117,13 +120,15 @@
         <td>
           <select id="offlineStreamList"></select>
         </td>
+        <td>
+          <button id="deleteButton" onclick="app.deleteStream();">Delete stream from storage</button>
+        </td>
       </tr>
 
       <!-- Common rows -->
       <tr>
-        <td colspan="2">
-          <button onclick="app.loadStream();">Load stream</button>
-          <button id="storeButton" onclick="app.storeStream();">Store stream offline</button>
+        <td colspan="3">
+          <button id="loadButton" onclick="app.loadStream();">Load stream</button>
         </td>
       </tr>
     </table>

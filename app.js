@@ -173,19 +173,23 @@ app.init = function() {
  */
 app.onStreamTypeChange = function() {
   var type = document.getElementById('streamTypeList').value;
-  var on;
-  var off;
-  var slice = Array.prototype.slice;
+  var on, off;
+  var enable = document.querySelectorAll('#loadButton, #deleteButton');
+  var disable = [];
 
   if (type == 'http') {
     on = document.querySelectorAll('.http');
-    off = document.querySelectorAll('.dash, .offline,  #storeButton');
+    off = document.querySelectorAll('.dash, .offline');
   } else if (type == 'dash') {
-    on = document.querySelectorAll('.dash, #storeButton');
+    on = document.querySelectorAll('.dash');
     off = document.querySelectorAll('.http, .offline');
-  } else {
+  } else if (type == 'offline') {
     on = document.querySelectorAll('.offline');
-    off = document.querySelectorAll('.dash, .http, #storeButton');
+    off = document.querySelectorAll('.dash, .http');
+    if (document.getElementById('offlineStreamList').options.length == 0) {
+      disable = enable;
+      enable = [];
+    }
   }
 
   for (var i = 0; i < on.length; ++i) {
@@ -193,6 +197,12 @@ app.onStreamTypeChange = function() {
   }
   for (var i = 0; i < off.length; ++i) {
     off[i].style.display = 'none';
+  }
+  for (var i = 0; i < disable.length; ++i) {
+    disable[i].disabled = true;
+  }
+  for (var i = 0; i < enable.length; ++i) {
+    enable[i].disabled = false;
   }
 };
 
@@ -345,6 +355,41 @@ app.cycleTracks_ =
     tracks.value = option.value;
     onSelect();
   }, seconds * 1000);
+};
+
+
+/**
+ * Deletes a group from storage.
+ */
+app.deleteStream = function() {
+  var deleteButton = document.getElementById('deleteButton');
+  deleteButton.disabled = true;
+  deleteButton.innerText = 'Deleting stream...';
+
+  var offlineList = document.getElementById('offlineStreamList');
+  var groupId = parseInt(offlineList.value, 10);
+  var text = offlineList.options[offlineList.selectedIndex].text;
+  console.assert(app.estimator_);
+  var estimator = /** @type {!shaka.util.IBandwidthEstimator} */(
+      app.estimator_);
+  var offlineSource = new shaka.player.OfflineVideoSource(groupId, estimator);
+  offlineSource.deleteGroup().then(
+      function() {
+        var deleted = app.offlineStreams_.indexOf(text);
+        app.offlineStreams_.splice(deleted, 1);
+        offlineList.removeChild(offlineList.childNodes[deleted]);
+        var groups = app.getOfflineGroups_();
+        delete groups[text];
+        app.setOfflineGroups_(groups);
+        deleteButton.innerText = 'Delete stream from storage';
+        app.onStreamTypeChange();
+        app.onMpdChange();
+      }
+  ).catch(
+      function(e) {
+        console.error('Error deleting stream', e);
+        deleteButton.innerText = 'Delete stream from storage';
+      });
 };
 
 
