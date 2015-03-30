@@ -143,9 +143,9 @@ app.init = function() {
   }
 
   // Retrieve list of offline streams
-  for (var n = 0; n < window.localStorage.length; n++) {
-    var key = /** @type {string} */ (window.localStorage.key(n));
-    var value = /** @type {string} */ (window.localStorage.getItem(key));
+  var groups = app.getOfflineGroups_();
+  for (var key in groups) {
+    var value = groups[key];
     app.addOfflineStream_(key, value);
   }
 
@@ -346,8 +346,10 @@ app.storeStream = function() {
       mediaUrl, preferredLanguage, app.interpretContentProtection_
   ).then(
       function(groupId) {
-        window.localStorage.setItem(mediaUrl, groupId.toString());
-        app.addOfflineStream_(mediaUrl, groupId.toString());
+        var groups = app.getOfflineGroups_();
+        groups[mediaUrl] = groupId;
+        app.setOfflineGroups_(groups);
+        app.addOfflineStream_(mediaUrl, groupId);
         app.updateStoreButton_(true, 'Stream already stored');
         app.switchToOfflineStream_(groupId.toString());
       }
@@ -356,6 +358,34 @@ app.storeStream = function() {
         console.error('Error storing stream', e);
         app.updateStoreButton_(false, 'Store stream offline');
       });
+};
+
+
+/**
+ * Get a map of MPD URLs to group IDs for all streams stored offline.
+ * @return {!Object.<string, number>}
+ * @private
+ */
+app.getOfflineGroups_ = function() {
+  try {
+    var data = window.localStorage.getItem('offlineGroups') || '{}';
+    // JSON.parse can throw if the data stored isn't valid JSON.
+    var groups = JSON.parse(data);
+    return /** @type {!Object.<string, number>} */(groups);
+  } catch (exception) {
+    console.debug('Disregarding stored offlineGroups.');
+    return {};
+  }
+};
+
+
+/**
+ * Store a map of MPD URLs to group IDs for all streams stored offline.
+ * @param {!Object.<string, number>} groups
+ * @private
+ */
+app.setOfflineGroups_ = function(groups) {
+  window.localStorage.setItem('offlineGroups', JSON.stringify(groups));
 };
 
 
@@ -388,7 +418,7 @@ app.switchToOfflineStream_ = function(groupId) {
 /**
  * Stores an offline streams information to the app.
  * @param {string} text The text associated with this stream.
- * @param {string} groupId The id assigned to this stream by storage.
+ * @param {number} groupId The id assigned to this stream by storage.
  * @private
  */
 app.addOfflineStream_ = function(text, groupId) {
