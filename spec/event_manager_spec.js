@@ -20,9 +20,17 @@ goog.require('shaka.util.EventManager');
 
 describe('EventManager', function() {
   var eventManager;
+  var event1;
+  var event2;
+  var target1;
+  var target2;
 
   beforeEach(function() {
     eventManager = new shaka.util.EventManager();
+    target1 = document.createElement('div');
+    target2 = document.createElement('div');
+    event1 = new Event('eventtype1');
+    event2 = new Event('eventtype2');
   });
 
   afterEach(function() {
@@ -30,124 +38,106 @@ describe('EventManager', function() {
   });
 
   it('listens for an event', function() {
-    var target = new FakeEventTarget();
     var listener = jasmine.createSpy('listener');
 
-    eventManager.listen(target, 'event', listener);
-    target.dispatchEvent('event');
+    eventManager.listen(target1, 'eventtype1', listener);
+    target1.dispatchEvent(event1);
 
     expect(listener).toHaveBeenCalled();
   });
 
   it('listens for an event from mutiple targets', function() {
-    var target1 = new FakeEventTarget();
-    var target2 = new FakeEventTarget();
-
     var listener1 = jasmine.createSpy('listener1');
     var listener2 = jasmine.createSpy('listener2');
 
-    eventManager.listen(target1, 'event', listener1);
-    eventManager.listen(target2, 'event', listener2);
+    eventManager.listen(target1, 'eventtype1', listener1);
+    eventManager.listen(target2, 'eventtype1', listener2);
 
-    target1.dispatchEvent('event');
-    target2.dispatchEvent('event');
+    target1.dispatchEvent(event1);
+    target2.dispatchEvent(event1);
 
     expect(listener1).toHaveBeenCalled();
     expect(listener2).toHaveBeenCalled();
   });
 
   it('listens for multiple events', function() {
-    var target = new FakeEventTarget();
-
     var listener1 = jasmine.createSpy('listener1');
     var listener2 = jasmine.createSpy('listener2');
 
-    eventManager.listen(target, 'event1', listener1);
-    eventManager.listen(target, 'event2', listener2);
+    eventManager.listen(target1, 'eventtype1', listener1);
+    eventManager.listen(target1, 'eventtype2', listener2);
 
-    target.dispatchEvent('event1');
-    target.dispatchEvent('event2');
+    target1.dispatchEvent(event1);
+    target1.dispatchEvent(event2);
 
     expect(listener1).toHaveBeenCalled();
     expect(listener2).toHaveBeenCalled();
   });
 
   it('listens for multiple events from mutiple targets', function() {
-    var target1 = new FakeEventTarget();
-    var target2 = new FakeEventTarget();
-
     var listener1 = jasmine.createSpy('listener1');
     var listener2 = jasmine.createSpy('listener2');
 
-    eventManager.listen(target1, 'event1', listener1);
-    eventManager.listen(target2, 'event2', listener2);
+    eventManager.listen(target1, 'eventtype1', listener1);
+    eventManager.listen(target2, 'eventtype2', listener2);
 
-    target1.dispatchEvent('event1');
-    target2.dispatchEvent('event2');
+    target1.dispatchEvent(event1);
+    target2.dispatchEvent(event2);
 
     expect(listener1).toHaveBeenCalled();
     expect(listener2).toHaveBeenCalled();
   });
 
   it('listens for an event with multiple listeners', function() {
-    var target = new FakeEventTarget();
-
     var listener1 = jasmine.createSpy('listener1');
     var listener2 = jasmine.createSpy('listener2');
 
-    eventManager.listen(target, 'event', listener1);
-    eventManager.listen(target, 'event', listener2);
+    eventManager.listen(target1, 'eventtype1', listener1);
+    eventManager.listen(target1, 'eventtype1', listener2);
 
-    target.dispatchEvent('event');
-    target.dispatchEvent('event');
+    target1.dispatchEvent(event1);
 
     expect(listener1).toHaveBeenCalled();
     expect(listener2).toHaveBeenCalled();
   });
 
   it('stops listening to an event', function() {
-    var target = new FakeEventTarget();
     var listener = jasmine.createSpy('listener');
 
-    eventManager.listen(target, 'event', listener);
-    eventManager.unlisten(target, 'event');
+    eventManager.listen(target1, 'eventtype1', listener);
+    eventManager.unlisten(target1, 'eventtype1');
 
-    target.dispatchEvent('event');
+    target1.dispatchEvent(event1);
 
     expect(listener).not.toHaveBeenCalled();
   });
 
   it('stops listening to multiple events', function() {
-    var target = new FakeEventTarget();
-
     var listener1 = jasmine.createSpy('listener1');
     var listener2 = jasmine.createSpy('listener2');
 
-    eventManager.listen(target, 'event1', listener1);
-    eventManager.listen(target, 'event2', listener2);
+    eventManager.listen(target1, 'eventtype1', listener1);
+    eventManager.listen(target1, 'eventtype2', listener2);
 
-    eventManager.removeAll(target);
+    eventManager.removeAll(target1);
 
-    target.dispatchEvent('event1');
-    target.dispatchEvent('event2');
+    target1.dispatchEvent(event1);
+    target1.dispatchEvent(event2);
 
     expect(listener1).not.toHaveBeenCalled();
     expect(listener2).not.toHaveBeenCalled();
   });
 
   it('stops listening for an event with multiple listeners', function() {
-    var target = new FakeEventTarget();
-
     var listener1 = jasmine.createSpy('listener1');
     var listener2 = jasmine.createSpy('listener2');
 
-    eventManager.listen(target, 'event', listener1);
-    eventManager.listen(target, 'event', listener2);
+    eventManager.listen(target1, 'eventtype1', listener1);
+    eventManager.listen(target1, 'eventtype1', listener2);
 
-    eventManager.removeAll(target);
+    eventManager.removeAll(target1);
 
-    target.dispatchEvent('event');
-    target.dispatchEvent('event');
+    target1.dispatchEvent(event1);
 
     expect(listener1).not.toHaveBeenCalled();
     expect(listener2).not.toHaveBeenCalled();
