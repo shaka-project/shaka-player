@@ -54,6 +54,16 @@ app.player_ = null;
 
 
 /**
+ * The app's bandwidth estimator, which will persist across playbacks.
+ * This will allow second and subsequent playbacks to benefit from earlier
+ * bandwidth estimations and avoid starting at a low-quality stream.
+ *
+ * @private {shaka.util.IBandwidthEstimator}
+ */
+app.estimator_ = null;
+
+
+/**
  * True if polyfills have been installed.
  *
  * @private {boolean}
@@ -341,7 +351,10 @@ app.storeStream = function() {
   var mediaUrl = document.getElementById('manifestUrlInput').value;
   var preferredLanguage = document.getElementById('preferredLanguage').value;
 
-  var offlineSource = new shaka.player.OfflineVideoSource(null);
+  console.assert(app.estimator_);
+  var estimator = /** @type {!shaka.util.IBandwidthEstimator} */(
+      app.estimator_);
+  var offlineSource = new shaka.player.OfflineVideoSource(null, estimator);
   offlineSource.store(
       mediaUrl, preferredLanguage, app.interpretContentProtection_
   ).then(
@@ -480,10 +493,20 @@ app.loadDashStream = function() {
 
   var mediaUrl = document.getElementById('manifestUrlInput').value;
 
+  console.assert(app.estimator_);
+  if (app.estimator_.getDataAge() >= 3600) {
+    // Disregard any bandwidth data older than one hour.  The user may have
+    // changed networks if they are on a laptop or mobile device.
+    app.estimator_ = new shaka.util.EWMABandwidthEstimator();
+  }
+
+  var estimator = /** @type {!shaka.util.IBandwidthEstimator} */(
+      app.estimator_);
   app.load_(
       new shaka.player.DashVideoSource(
           mediaUrl,
-          app.interpretContentProtection_));
+          app.interpretContentProtection_,
+          estimator));
 };
 
 
@@ -497,7 +520,10 @@ app.loadOfflineStream = function() {
   }
   var groupId = parseInt(
       document.getElementById('offlineStreamList').value, 10);
-  app.load_(new shaka.player.OfflineVideoSource(groupId));
+  console.assert(app.estimator_);
+  var estimator = /** @type {!shaka.util.IBandwidthEstimator} */(
+      app.estimator_);
+  app.load_(new shaka.player.OfflineVideoSource(groupId, estimator));
 };
 
 
@@ -677,6 +703,8 @@ app.initPlayer_ = function() {
       playerControls.onBuffering.bind(null, true));
   app.player_.addEventListener('bufferingEnd',
       playerControls.onBuffering.bind(null, false));
+
+  app.estimator_ = new shaka.util.EWMABandwidthEstimator();
 
   // Load the adaptation setting.
   app.onAdaptationChange();

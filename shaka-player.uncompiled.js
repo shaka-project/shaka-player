@@ -25,4 +25,5 @@ goog.require('shaka.player.StreamVideoSource');
 goog.require('shaka.polyfill.Fullscreen');
 goog.require('shaka.polyfill.MediaKeys');
 goog.require('shaka.polyfill.VideoPlaybackQuality');
+goog.require('shaka.util.EWMABandwidthEstimator');
 goog.require('shaka.util.Uint8ArrayUtils');

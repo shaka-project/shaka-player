@@ -38,8 +38,10 @@
       // Construct a DashVideoSource to represent the DASH manifest and provide
       // a callback to interpret the ContentProtection elements.
       var mpdUrl = 'http://turtle-tube.appspot.com/t/e6/dash.mpd';
+      var estimator = new shaka.util.EWMABandwidthEstimator();
       var source = new shaka.player.DashVideoSource(mpdUrl,
-                                                    interpretContentProtection);
+                                                    interpretContentProtection,
+                                                    estimator);
 
       // Load the source into the Player.
       player.load(source);

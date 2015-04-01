@@ -117,7 +117,8 @@ Here is a simple page which demonstrates basic DASH playback:
 
       // Construct a DashVideoSource to represent the DASH manifest.
       var mpdUrl = 'http://turtle-tube.appspot.com/t/t2/dash.mpd';
-      var source = new shaka.player.DashVideoSource(mpdUrl, null);
+      var estimator = new shaka.util.EWMABandwidthEstimator();
+      var source = new shaka.player.DashVideoSource(mpdUrl, null, estimator);
 
       // Load the source into the Player.
       player.load(source);
@@ -177,7 +178,8 @@ the {@link http://goo.gl/McU4Rh autoplay attribute} on the video tag.
 
       // Construct a DashVideoSource to represent the DASH manifest.
       var mpdUrl = 'http://turtle-tube.appspot.com/t/t2/dash.mpd';
-      var source = new shaka.player.DashVideoSource(mpdUrl, null);
+      var estimator = new shaka.util.EWMABandwidthEstimator();
+      var source = new shaka.player.DashVideoSource(mpdUrl, null, estimator);
 
       // Load the source into the Player.
       player.load(source);
@@ -234,7 +236,8 @@ is loaded.  You can execute any arbitrary code when load completes.
 
       // Construct a DashVideoSource to represent the DASH manifest.
       var mpdUrl = 'http://turtle-tube.appspot.com/t/t2/dash.mpd';
-      var source = new shaka.player.DashVideoSource(mpdUrl, null);
+      var estimator = new shaka.util.EWMABandwidthEstimator();
+      var source = new shaka.player.DashVideoSource(mpdUrl, null, estimator);
 
       // Load the source into the Player.
 <span class="newCode">      // Then query the video tracks to display in the videoTracks list element.</span>
@@ -357,8 +360,10 @@ used to enable encrypted content:
 <span class="newCode">      // Construct a DashVideoSource to represent the DASH manifest and provide</span>
 <span class="newCode">      // a callback to interpret the ContentProtection elements.</span>
 <span class="newCode">      var mpdUrl = 'http://turtle-tube.appspot.com/t/e6/dash.mpd';</span>
+      var estimator = new shaka.util.EWMABandwidthEstimator();
 <span class="newCode">      var source = new shaka.player.DashVideoSource(mpdUrl,</span>
-<span class="newCode">                                                    interpretContentProtection);</span>
+<span class="newCode">                                                    interpretContentProtection,</span>
+<span class="newCode">                                                    estimator);</span>
 
       // Load the source into the Player.
 <span class="newCode">      player.load(source);</span>
@@ -560,6 +565,7 @@ video will play back in an overlay on top of the thumbnails.
   &lt;script&gt;
 <span class="newCode">    var video;</span>
 <span class="newCode">    var player;</span>
+<span class="newCode">    var estimator;</span>
 <span class="newCode"></span>
     function initPlayer() {
       // Install polyfills.
@@ -580,17 +586,30 @@ video will play back in an overlay on top of the thumbnails.
       player.addEventListener('error', function(event) {
         console.error(event);
       });
+
+<span class="newCode">      // Construct a persistent bandwidth estimator to pass to video sources.</span>
+<span class="newCode">      // This will allow second and subsequent playbacks to benefit from</span>
+<span class="newCode">      // earlier bandwidth estimations and avoid starting at a low-quality</span>
+<span class="newCode">      // stream.</span>
+<span class="newCode">      estimator = new shaka.util.EWMABandwidthEstimator();</span>
 <span class="newCode">    }</span>
 <span class="newCode"></span>
 <span class="newCode">    /**</span>
 <span class="newCode">     * @param {!HTMLImageElement} image</span>
 <span class="newCode">     */</span>
 <span class="newCode">    function onImageClick(image) {</span>
+<span class="newCode">      // Disregard any bandwidth data older than one hour.  The user may have</span>
+<span class="newCode">      // changed networks if they are on a laptop or mobile device.</span>
+<span class="newCode">      if (estimator.getDataAge() &gt;= 3600) {</span>
+<span class="newCode">        estimator = new shaka.util.EWMABandwidthEstimator();</span>
+<span class="newCode">      }</span>
+<span class="newCode"></span>
       // Construct a DashVideoSource to represent the DASH manifest and provide
 <span class="newCode">      // a callback to interpret the ContentProtection elements (if any).</span>
 <span class="newCode">      var mpdUrl = 'http://turtle-tube.appspot.com/t/' + image.id + '/dash.mpd';</span>
       var source = new shaka.player.DashVideoSource(mpdUrl,
-                                                    interpretContentProtection);
+                                                    interpretContentProtection,
+                                                    estimator);
 <span class="newCode"></span>
 <span class="newCode">      // Show the video player overlay.</span>
 <span class="newCode">      var overlay = document.getElementById('videoOverlay');</span>
@@ -820,6 +839,7 @@ is being played. It also shows an error dialog if/when error events occur.
     var video;
 <span class="newCode">    var hd;</span>
     var player;
+    var estimator;
 
     function initPlayer() {
       // Install polyfills.
@@ -842,6 +862,12 @@ is being played. It also shows an error dialog if/when error events occur.
 <span class="newCode"></span>
       // Listen for errors from the Player.
 <span class="newCode">      player.addEventListener('error', onError);</span>
+
+      // Construct a persistent bandwidth estimator to pass to video sources.
+      // This will allow second and subsequent playbacks to benefit from
+      // earlier bandwidth estimations and avoid starting at a low-quality
+      // stream.
+      estimator = new shaka.util.EWMABandwidthEstimator();
 <span class="newCode">    }</span>
 <span class="newCode"></span>
 <span class="newCode">    /**</span>
@@ -899,11 +925,18 @@ is being played. It also shows an error dialog if/when error events occur.
      * @param {!HTMLImageElement} image
      */
     function onImageClick(image) {
+      // Disregard any bandwidth data older than one hour.  The user may have
+      // changed networks if they are on a laptop or mobile device.
+      if (estimator.getDataAge() &gt;= 3600) {
+        estimator = new shaka.util.EWMABandwidthEstimator();
+      }
+
       // Construct a DashVideoSource to represent the DASH manifest and provide
       // a callback to interpret the ContentProtection elements (if any).
       var mpdUrl = 'http://turtle-tube.appspot.com/t/' + image.id + '/dash.mpd';
       var source = new shaka.player.DashVideoSource(mpdUrl,
-                                                    interpretContentProtection);
+                                                    interpretContentProtection,
+                                                    estimator);
 
       // Show the video player overlay.
       var overlay = document.getElementById('videoOverlay');

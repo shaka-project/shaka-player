@@ -20,6 +20,7 @@ goog.require('shaka.player.DashVideoSource');
 goog.require('shaka.player.Player');
 goog.require('shaka.polyfill.MediaKeys');
 goog.require('shaka.polyfill.VideoPlaybackQuality');
+goog.require('shaka.util.EWMABandwidthEstimator');
 
 describe('Player', function() {
   var originalAsserts;
@@ -27,6 +28,7 @@ describe('Player', function() {
   var video;
   var player;
   var eventManager;
+  var estimator;
 
   const plainManifest = 'assets/car-20120827-manifest.mpd';
   const encryptedManifest = 'assets/car_cenc-20120827-manifest.mpd';
@@ -729,8 +731,10 @@ describe('Player', function() {
    * @return {!shaka.player.DashVideoSource}
    */
   function newSource(manifest) {
+    var estimator = new shaka.util.EWMABandwidthEstimator();
     return new shaka.player.DashVideoSource(manifest,
-                                            interpretContentProtection);
+                                            interpretContentProtection,
+                                            estimator);
   }
 
   /**
