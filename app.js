@@ -136,6 +136,13 @@ app.init = function() {
     shaka.log.setLevel(shaka.log.Level.V1);
   }
 
+  // Retrieve list of offline streams
+  var groups = app.getOfflineGroups_();
+  for (var key in groups) {
+    var value = groups[key];
+    app.addOfflineStream_(key, value);
+  }
+
   app.onMpdChange();
 
   playerControls.init(app.video_);
@@ -150,13 +157,6 @@ app.init = function() {
     app.loadStream();
   } else {
     app.onStreamTypeChange();
-  }
-
-  // Retrieve list of offline streams
-  var groups = app.getOfflineGroups_();
-  for (var key in groups) {
-    var value = groups[key];
-    app.addOfflineStream_(key, value);
   }
 
   if ('cycleVideo' in params) {
@@ -203,12 +203,7 @@ app.onStreamTypeChange = function() {
 app.onMpdChange = function() {
   var mpd = document.getElementById('mpdList').value;
   document.getElementById('manifestUrlInput').value = mpd;
-
-  if (app.offlineStreams_.indexOf(mpd) >= 0) {
-    app.updateStoreButton_(true, 'Stream already stored');
-  } else {
-    app.updateStoreButton_(false, 'Store stream offline');
-  }
+  app.checkMpdStorageStatus_();
 };
 
 
@@ -217,6 +212,21 @@ app.onMpdChange = function() {
  */
 app.onMpdCustom = function() {
   document.getElementById('mpdList').value = '';
+  app.checkMpdStorageStatus_();
+};
+
+
+/**
+ * Called when the MPD field changes to check the MPD's storage status.
+ * @private
+ */
+app.checkMpdStorageStatus_ = function() {
+  var mpd = document.getElementById('manifestUrlInput').value;
+  if (app.offlineStreams_.indexOf(mpd) >= 0) {
+    app.updateStoreButton_(true, 'Stream already stored');
+  } else {
+    app.updateStoreButton_(false, 'Store stream offline');
+  }
 };
 
 
