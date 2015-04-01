@@ -28,11 +28,11 @@ var MediaKeySystemMediaCapability;
 
 
 /** @typedef {{
- *   initDataTypes: Array.<string>,
- *   audioCapabilities: Array.<!MediaKeySystemMediaCapability>,
- *   videoCapabilities: Array.<!MediaKeySystemMediaCapability>,
- *   distinctiveIdentifier: string,
- *   persistentState: string
+ *   initDataTypes: (Array.<string>|undefined),
+ *   audioCapabilities: (Array.<!MediaKeySystemMediaCapability>|undefined),
+ *   videoCapabilities: (Array.<!MediaKeySystemMediaCapability>|undefined),
+ *   distinctiveIdentifier: (string|undefined),
+ *   persistentState: (string|undefined)
  * }} */
 var MediaKeySystemConfiguration;
 
