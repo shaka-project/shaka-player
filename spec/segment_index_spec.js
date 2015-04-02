@@ -525,6 +525,58 @@ describe('SegmentIndex', function() {
     });
   });
 
+  describe('evict', function() {
+    var index1;
+
+    function url(i) {
+      return 'http://example.com/video' + i;
+    };
+
+    beforeEach(function() {
+      var references = [
+        new shaka.media.SegmentReference(1, 10, 20, 0, null, url(1)),
+        new shaka.media.SegmentReference(2, 20, 30, 0, null, url(2)),
+        new shaka.media.SegmentReference(3, 30, 40, 0, null, url(3))
+      ];
+      index = new shaka.media.SegmentIndex(references);
+    });
+
+    it('zero references when minEndTime < the first end time', function() {
+      index.evict(19);
+      expect(index.length()).toBe(3);
+    });
+
+    it('one reference when minEndTime == the first end time', function() {
+      index.evict(20);
+      expect(index.length()).toBe(2);
+      checkReference(index.references_[0], url(2), 20, 30);
+      checkReference(index.references_[1], url(3), 30, 40);
+    });
+
+    it('one reference when minEndTime > the first end time', function() {
+      index.evict(21);
+      expect(index.length()).toBe(2);
+      checkReference(index.references_[0], url(2), 20, 30);
+      checkReference(index.references_[1], url(3), 30, 40);
+    });
+
+    it('all but one reference when minEndTime < the last end time', function() {
+      index.evict(39);
+      expect(index.length()).toBe(1);
+      checkReference(index.references_[0], url(3), 30, 40);
+    });
+
+    it('all references when minEndTime == the last end time', function() {
+      index.evict(40);
+      expect(index.length()).toBe(0);
+    });
+
+    it('all references when minEndTime > the last end time', function() {
+      index.evict(41);
+      expect(index.length()).toBe(0);
+    });
+  });
+
   /**
    * @param {!Array.<!shaka.media.SegmentReference>} references
    * @param {number} expectedFirstId
