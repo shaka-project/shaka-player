@@ -95,54 +95,20 @@ customMatchers.toMatchRange = function(util, customEqualityTesters) {
 
 
 /**
- * Adds fake event handling support to a Jasmine FakeXMLHttpRequest object.
+ * Jasmine-ajax doesn't send events as arguments when it calls event handlers.
+ * This binds very simple event stand-ins to all event handlers.
  *
  * @param {FakeXMLHttpRequest} xhr The FakeXMLHttpRequest object.
  */
 function mockXMLHttpRequestEventHandling(xhr) {
-  // Jasmine's FakeXMLHttpRequest class uses the attribute "response" as a
-  // method to set the fake response.  Our library uses it (correctly) to get
-  // the response itself.  We "fix" Jasmine's overloaded abuse of this by
-  // renaming this method to "fakeResponse" and adding a shim to handle
-  // the "response" field.
-  //
-  // Since Jasmine ignores the setting of "response", we will map it to
-  // "responseText" here, and map it back again in the "onload" spy below.
-  //
-  // Note that in a real request, with "responseType" set to "arraybuffer",
-  // "responseText" throws DOMException.  So our library does the right thing,
-  // and Jasmine's fake is deficient.
-  if (!xhr.fakeResponse) {
-    var originalResponseMethod = xhr.response;
-    console.assert(originalResponseMethod && originalResponseMethod.bind);
-    xhr.response = null;
-    xhr.fakeResponse = function(fields) {
-      if (fields.hasOwnProperty('response')) {
-        fields['responseText'] = fields['response'];
-      }
-      return originalResponseMethod.call(xhr, fields);
-    };
+  var fakeEvent = { 'target': xhr };
+
+  var events = ['onload', 'onerror', 'onreadystatechange'];
+  for (var i = 0; i < events.length; ++i) {
+    if (xhr[events[i]]) {
+      xhr[events[i]] = xhr[events[i]].bind(xhr, fakeEvent);
+    }
   }
-
-  // Mock out onload().
-  var onload = xhr.onload;
-  spyOn(xhr, 'onload').and.callFake(function() {
-    var fakeXMLHttpProgressEvent = {
-      'target': xhr
-    };
-    // After each load, overwrite "response" with "responseText".
-    xhr.response = xhr.responseText;
-    onload(fakeXMLHttpProgressEvent);
-  });
-
-  // Mock out onerror().
-  var onerror = xhr.onerror;
-  spyOn(xhr, 'onerror').and.callFake(function() {
-    var fakeXMLHttpProgressEvent = {
-      'target': xhr
-    };
-    onerror(fakeXMLHttpProgressEvent);
-  });
 }
 
 

@@ -53,7 +53,7 @@ describe('LicenseRequest', function() {
     expect(xhr.responseType).toBe('arraybuffer');
     expect(xhr.method).toMatch(new RegExp('post', 'i'));
 
-    xhr.fakeResponse({
+    xhr.respondWith({
       'status': 200,
       'contentType': 'arraybuffer',
       'response': FAKE_RESPONSE.buffer
@@ -80,7 +80,7 @@ describe('LicenseRequest', function() {
     expect(xhr.responseType).toBe('arraybuffer');
     expect(xhr.method).toMatch(new RegExp('post', 'i'));
 
-    xhr.fakeResponse({'status': 500});
+    xhr.respondWith({'status': 500});
 
     jasmine.clock().tick(license_request.lastDelayMs_);
 
@@ -95,7 +95,7 @@ describe('LicenseRequest', function() {
     expect(xhr.responseType).toBe('arraybuffer');
     expect(xhr.method).toMatch(new RegExp('post', 'i'));
 
-    xhr.fakeResponse({
+    xhr.respondWith({
       'status': 200,
       'contentType': 'arraybuffer',
       'response': FAKE_RESPONSE.buffer
@@ -125,7 +125,7 @@ describe('LicenseRequest', function() {
       expect(xhr.responseType).toBe('arraybuffer');
       expect(xhr.method).toMatch(new RegExp('post', 'i'));
 
-      xhr.fakeResponse({'status': 500});
+      xhr.respondWith({'status': 500});
       jasmine.clock().tick(license_request.lastDelayMs_);
     }
   });
