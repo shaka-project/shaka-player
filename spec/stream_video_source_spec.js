@@ -171,13 +171,13 @@ describe('StreamVideoSource', function() {
             checkReference(
                 mergedAudioReferences[2],
                 'http://example.com/audio-3.mp4',
-                50, 60);
+                50, 62);
 
             // The start time should get fixed-up.
             checkReference(
                 mergedAudioReferences[3],
                 'http://example.com/audio-4.mp4',
-                60, 70);
+                62, 70);
 
             checkReference(
                 mergedAudioReferences[4],
