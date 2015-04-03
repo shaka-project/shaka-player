@@ -39,6 +39,10 @@
     CLOSURE_IMPORT_SCRIPT = loadScript;
   </script>
 
+  <!-- This gives us more accurate code coverage numbers, since it requires
+       all exported classes, including those which are not tested directly. -->
+  <script src="shaka-player.uncompiled.js"></script>
+
   <!-- Source files: -->
   <script src="spec/util.js"></script>
 
