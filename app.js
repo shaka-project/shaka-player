@@ -366,7 +366,8 @@ app.storeStream = function() {
       app.estimator_);
   var offlineSource = new shaka.player.OfflineVideoSource(null, estimator);
   offlineSource.store(
-      mediaUrl, preferredLanguage, app.interpretContentProtection_
+      mediaUrl, preferredLanguage, app.interpretContentProtection_,
+      app.chooseOfflineTracks_.bind(null, offlineSource)
   ).then(
       function(groupId) {
         var groups = app.getOfflineGroups_();
@@ -856,6 +857,59 @@ app.postProcessYouTubeLicenseResponse_ = function(response) {
     }
   }
   return Uint8ArrayUtils.fromString(responseStr);
+};
+
+
+/**
+ * Called to choose tracks for offline storage.
+ * @param {!shaka.player.OfflineVideoSource} videoSource
+ * @return {!Promise.<!Array.<number>>} A promise to an array of track IDs.
+ * @private
+ */
+app.chooseOfflineTracks_ = function(videoSource) {
+  var ids = [];
+
+  var videoTracks = videoSource.getVideoTracks();
+  if (videoTracks.length) {
+    videoTracks.sort(shaka.player.VideoTrack.compare);
+    // Initially, choose the smallest track.
+    var track = videoTracks[0];
+    // Remove HD tracks (larger than 576p).
+    videoTracks = videoTracks.filter(function(track) {
+      return track.width <= 1024 && track.height <= 576;
+    });
+    // If there are any left, choose the largest one.
+    if (videoTracks.length) {
+      track = videoTracks.pop();
+    }
+    ids.push(track.id);
+  }
+
+  var audioTracks = videoSource.getAudioTracks();
+  if (audioTracks.length) {
+    // The video source gives you the preferred language first.
+    // Remove any tracks from other languages first.
+    var lang = audioTracks[0].lang;
+    audioTracks = audioTracks.filter(function(track) {
+      return track.lang == lang;
+    });
+    // From what's left, choose the middle stream.  If we have high, medium,
+    // and low quality audio, this is medium.  If we only have high and low,
+    // this is high.
+    var index = Math.floor(audioTracks.length / 2);
+    ids.push(audioTracks[index].id);
+  }
+
+  var textTracks = videoSource.getTextTracks();
+  if (textTracks.length) {
+    // Ask for all text tracks to be saved.
+    textTracks.forEach(function(track) {
+      ids.push(track.id);
+    });
+  }
+
+  // This could just as well be an asynchronous method that involves user input.
+  return Promise.resolve(ids);
 };
 
 
