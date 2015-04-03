@@ -568,6 +568,7 @@ app.load_ = function(videoSource) {
       function() {
         app.aspectRatioSet_ = false;
         app.displayMetadata_();
+        playerControls.setLive(app.player_.isLive());
       })
   ).catch(function() {});  // Error already handled through error event.
 };
@@ -714,6 +715,8 @@ app.initPlayer_ = function() {
       playerControls.onBuffering.bind(null, true));
   app.player_.addEventListener('bufferingEnd',
       playerControls.onBuffering.bind(null, false));
+  app.player_.addEventListener('seekrangechanged',
+      playerControls.updateTimeAndSeekRange);
 
   app.estimator_ = new shaka.util.EWMABandwidthEstimator();
 

@@ -21,6 +21,14 @@
 var playerControls = function() {};
 
 
+/** @private {boolean} */
+playerControls.isLive_;
+
+
+/** @private {HTMLVideoElement} */
+playerControls.video_;
+
+
 /**
  * Initializes the player controls.
  * @param {!HTMLVideoElement} video
@@ -33,10 +41,12 @@ playerControls.init = function(video) {
   var muteButton = document.getElementById('muteButton');
   var unmuteButton = document.getElementById('unmuteButton');
   var volumeBar = document.getElementById('volumeBar');
-  var currentTime = document.getElementById('currentTime');
   var fullscreenButton = document.getElementById('fullscreenButton');
 
   var seeking = false;
+
+  playerControls.isLive_ = false;
+  playerControls.video_ = video;
 
   // play
   playButton.addEventListener('click', function() {
@@ -65,7 +75,7 @@ playerControls.init = function(video) {
   });
   seekBar.addEventListener('input', function() {
     if (video.duration) {
-      video.currentTime = seekBar.value * video.duration;
+      video.currentTime = seekBar.value;
     }
   });
   seekBar.addEventListener('mouseup', function() {
@@ -111,29 +121,9 @@ playerControls.init = function(video) {
 
   // current time & seek bar updates
   video.addEventListener('timeupdate', function() {
-    var m = Math.floor(video.currentTime / 60);
-    var s = Math.floor(video.currentTime % 60);
-    if (s < 10) s = '0' + s;
-    currentTime.innerText = m + ':' + s;
-
-    // The fallback to 0 eliminates NaN.
-    seekBar.value = (video.currentTime / video.duration) || 0;
-
-    var gradient = ['to right'];
-    var buffered = video.buffered;
-    if (buffered.length == 0) {
-      gradient.push('#000 0%');
-    } else {
-      var bufferStart = buffered.start(0) / video.duration;
-      var bufferEnd = buffered.end(0) / video.duration;
-      gradient.push('#000 ' + (bufferStart * 100) + '%');
-      gradient.push('#ccc ' + (bufferStart * 100) + '%');
-      gradient.push('#ccc ' + (seekBar.value * 100) + '%');
-      gradient.push('#444 ' + (seekBar.value * 100) + '%');
-      gradient.push('#444 ' + (bufferEnd * 100) + '%');
-      gradient.push('#000 ' + (bufferEnd * 100) + '%');
+    if (!playerControls.isLive_) {
+      playerControls.updateTimeAndSeekRange(null);
     }
-    seekBar.style.background = 'linear-gradient(' + gradient.join(',') + ')';
   });
 
   // fullscreen
@@ -171,5 +161,78 @@ playerControls.init = function(video) {
 playerControls.onBuffering = function(bufferingState) {
   var bufferingSpinner = document.getElementById('bufferingSpinner');
   bufferingSpinner.style.display = bufferingState ? 'flex' : 'none';
+};
+
+
+/**
+ * Called by the application to set the live playback state.
+ * @param {boolean} liveState True if the stream is live.
+ */
+playerControls.setLive = function(liveState) {
+  playerControls.isLive_ = liveState;
+};
+
+
+/**
+ * Called by the application when the seek range changes for live content,
+ * or when the play head moves for non-live content.
+ * @param {Event|{start: number, end: number}} event
+ *     or null for non-live content.
+ */
+playerControls.updateTimeAndSeekRange = function(event) {
+  var video = playerControls.video_;
+  var currentTime = document.getElementById('currentTime');
+  var seekBar = document.getElementById('seekBar');
+
+  var displayTime = video.currentTime;
+  var prefix = '';
+  if (playerControls.isLive_) {
+    // The amount of time we are behind the live edge.
+    displayTime = Math.max(0, Math.floor(event.end - video.currentTime));
+    if (displayTime) prefix = '-';
+  }
+
+  var m = Math.floor(displayTime / 60);
+  var s = Math.floor(displayTime % 60);
+  if (s < 10) s = '0' + s;
+  currentTime.innerText = prefix + m + ':' + s;
+
+  if (playerControls.isLive_) {
+    seekBar.min = event.start;
+    seekBar.max = event.end;
+    seekBar.value = event.end - displayTime;
+  } else {
+    seekBar.min = 0;
+    seekBar.max = video.duration;
+    seekBar.value = video.currentTime;
+  }
+
+  var gradient = ['to right'];
+  var buffered = video.buffered;
+  if (buffered.length == 0) {
+    gradient.push('#000 0%');
+  } else {
+    // NOTE: the fallback to zero eliminates NaN.
+    var bufferStartFraction = (buffered.start(0) / video.duration) || 0;
+    var bufferEndFraction = (buffered.end(0) / video.duration) || 0;
+    var playheadFraction = (video.currentTime / video.duration) || 0;
+
+    if (playerControls.isLive_) {
+      var bufferStart = Math.max(buffered.start(0), event.start);
+      var bufferEnd = Math.min(buffered.end(0), event.end);
+      var seekRangeSize = event.end - event.start;
+      bufferStartFraction = (bufferStart / seekRangeSize) || 0;
+      bufferEndFraction = (bufferEnd / seekRangeSize) || 0;
+      playheadFraction = ((event.end - displayTime) / seekRangeSize) || 0;
+    }
+
+    gradient.push('#000 ' + (bufferStartFraction * 100) + '%');
+    gradient.push('#ccc ' + (bufferStartFraction * 100) + '%');
+    gradient.push('#ccc ' + (playheadFraction * 100) + '%');
+    gradient.push('#444 ' + (playheadFraction * 100) + '%');
+    gradient.push('#444 ' + (bufferEndFraction * 100) + '%');
+    gradient.push('#000 ' + (bufferEndFraction * 100) + '%');
+  }
+  seekBar.style.background = 'linear-gradient(' + gradient.join(',') + ')';
 };
 
