@@ -49,5 +49,25 @@ describe('FakeEventTarget', function() {
       'bubbles': true
     }));
   });
+
+  it('allows events to be re-dispatched', function(done) {
+    var targetHigh = new shaka.util.FakeEventTarget(null);
+    var targetLow = new shaka.util.FakeEventTarget(targetHigh);
+
+    targetLow.addEventListener('event', function(event) {
+      expect(event.target).toBe(targetLow);
+      targetHigh.dispatchEvent(event);
+    });
+
+    targetHigh.addEventListener('event', function(event) {
+      expect(event.target).toBe(targetHigh);
+      done();
+    });
+
+    targetLow.dispatchEvent(shaka.util.FakeEvent.create({
+      'type': 'event',
+      'bubbles': false
+    }));
+  });
 });
 
