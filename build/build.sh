@@ -37,11 +37,6 @@ rm -f "$dir"/shaka-player.compiled.js
   --create_source_map "$dir"/shaka-player.compiled.debug.map \
   --js_output_file "$dir"/shaka-player.compiled.debug.js
 
-# Compile minified library with module.exports output wrapper
-(library_sources_0; closure_sources_0) | compile_0 \
-  --output_wrapper='(function(){%output%}.bind(module.exports))()' \
-  --js_output_file "$dir"/index.js
-
 # Fork the non-debug version before appending debug info.
 cp "$dir"/shaka-player.compiled{.debug,}.js
 
