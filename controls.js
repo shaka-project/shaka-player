@@ -184,18 +184,26 @@ playerControls.updateTimeAndSeekRange = function(event) {
   var currentTime = document.getElementById('currentTime');
   var seekBar = document.getElementById('seekBar');
 
+  var showHour = video.duration >= 3600;
   var displayTime = video.currentTime;
   var prefix = '';
   if (playerControls.isLive_) {
     // The amount of time we are behind the live edge.
     displayTime = Math.max(0, Math.floor(event.end - video.currentTime));
     if (displayTime) prefix = '-';
+    showHour = (event.end - event.start) >= 3600;
   }
 
-  var m = Math.floor(displayTime / 60);
+  var h = Math.floor(displayTime / 3600);
+  var m = Math.floor((displayTime / 60) % 60);
   var s = Math.floor(displayTime % 60);
   if (s < 10) s = '0' + s;
-  currentTime.innerText = prefix + m + ':' + s;
+  var text = m + ':' + s;
+  if (showHour) {
+    if (m < 10) text = '0' + text;
+    text = h + ':' + text;
+  }
+  currentTime.innerText = prefix + text;
 
   if (playerControls.isLive_) {
     seekBar.min = event.start;
