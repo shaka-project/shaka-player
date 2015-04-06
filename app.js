@@ -136,12 +136,34 @@ app.init = function() {
     shaka.log.setLevel(shaka.log.Level.V1);
   }
 
-  // Retrieve list of offline streams
-  var groups = app.getOfflineGroups_();
-  for (var key in groups) {
-    var value = groups[key];
-    app.addOfflineStream_(key, value);
-  }
+  // Retrieve and verify list of offline streams
+  var storage = new shaka.util.ContentDatabase(null);
+  storage.setUpDatabase().then(
+      function() {
+        return storage.retrieveGroupIds();
+      }
+  ).then(
+      function(groupIds) {
+        var groups = app.getOfflineGroups_();
+        for (var i in groupIds) {
+          var id = groupIds[i];
+          var value = groups[id];
+          if (!value) {
+            value = 'Unknown Stream ID ' + id;
+          }
+          app.addOfflineStream_(value, id);
+        }
+      }
+  ).then(
+      function() {
+        storage.closeDatabaseConnection();
+      }
+  ).catch(
+      function(e) {
+        storage.closeDatabaseConnection();
+        console.error('Error retrieving stored data', e);
+      }
+  );
 
   app.onMpdChange();
 
@@ -149,15 +171,12 @@ app.init = function() {
 
   if ('dash' in params) {
     document.getElementById('streamTypeList').value = 'dash';
-    app.onStreamTypeChange();
     app.loadStream();
   } else if ('http' in params) {
     document.getElementById('streamTypeList').value = 'http';
-    app.onStreamTypeChange();
     app.loadStream();
-  } else {
-    app.onStreamTypeChange();
   }
+  app.onStreamTypeChange();
 
   if ('cycleVideo' in params) {
     app.cycleVideo();
@@ -362,6 +381,11 @@ app.cycleTracks_ =
  * Deletes a group from storage.
  */
 app.deleteStream = function() {
+  if (!app.player_) {
+    app.installPolyfills_();
+    app.initPlayer_();
+  }
+
   var deleteButton = document.getElementById('deleteButton');
   deleteButton.disabled = true;
   deleteButton.innerText = 'Deleting stream...';
@@ -379,7 +403,7 @@ app.deleteStream = function() {
         app.offlineStreams_.splice(deleted, 1);
         offlineList.removeChild(offlineList.childNodes[deleted]);
         var groups = app.getOfflineGroups_();
-        delete groups[text];
+        delete groups[groupId];
         app.setOfflineGroups_(groups);
         deleteButton.innerText = 'Delete stream from storage';
         app.onStreamTypeChange();
@@ -416,7 +440,7 @@ app.storeStream = function() {
   ).then(
       function(groupId) {
         var groups = app.getOfflineGroups_();
-        groups[mediaUrl] = groupId;
+        groups[groupId] = mediaUrl;
         app.setOfflineGroups_(groups);
         app.addOfflineStream_(mediaUrl, groupId);
         app.updateStoreButton_(true, 'Stream already stored');
@@ -432,7 +456,7 @@ app.storeStream = function() {
 
 /**
  * Get a map of MPD URLs to group IDs for all streams stored offline.
- * @return {!Object.<string, number>}
+ * @return {!Object.<number, string>}
  * @private
  */
 app.getOfflineGroups_ = function() {
@@ -440,7 +464,7 @@ app.getOfflineGroups_ = function() {
     var data = window.localStorage.getItem('offlineGroups') || '{}';
     // JSON.parse can throw if the data stored isn't valid JSON.
     var groups = JSON.parse(data);
-    return /** @type {!Object.<string, number>} */(groups);
+    return /** @type {!Object.<number, string>} */(groups);
   } catch (exception) {
     console.debug('Disregarding stored offlineGroups.');
     return {};
@@ -449,8 +473,8 @@ app.getOfflineGroups_ = function() {
 
 
 /**
- * Store a map of MPD URLs to group IDs for all streams stored offline.
- * @param {!Object.<string, number>} groups
+ * Store a map of group IDs to MPD URLs for all streams stored offline.
+ * @param {!Object.<number, string>} groups
  * @private
  */
 app.setOfflineGroups_ = function(groups) {

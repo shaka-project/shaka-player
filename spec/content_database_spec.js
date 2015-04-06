@@ -276,6 +276,24 @@ describe('ContentDatabase', function() {
     });
   });
 
+  it('retrieves a list of the stored group IDs', function(done) {
+    var initalGroupIdsLength = 0;
+    p.then(function() {
+      return db.retrieveGroupIds();
+    }).then(function(groupIds) {
+      initalGroupIdsLength = groupIds.length;
+      return db.insertGroup([4, 5, 6], ['HIJK', 'LMNO']);
+    }).then(function() {
+      return db.retrieveGroupIds();
+    }).then(function(groupIds) {
+      expect(groupIds.length - initalGroupIdsLength).toBe(1);
+      done();
+    }).catch(function(err) {
+      fail(err);
+      done();
+    });
+  });
+
   it('deletes group information and throws error on retrieval', function(done) {
     var streamIds = [];
     var groupId;
