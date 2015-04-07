@@ -1,3 +1,27 @@
+## 1.2.3 (2015-04-07)
+
+A roll-up of recent bugfixes.
+
+Bugfixes:
+  - Fixed consistency of setPlaybackRate(0).
+  - Fixed support for mp4a.40.5 audio content.
+  - Improved rewind accuracy.
+  - Fixed decode of query parameters in content URLs.
+    - https://github.com/google/shaka-player/pull/40
+  - Fixed FakeEventTarget for Chrome 43+.
+  - Removed flaky assertion in EME polyfill.
+  - Made AbrManager less aggressive.
+  - Fixed EME spec compatibility and encrypted playback in Chrome 43+.
+    - https://github.com/google/shaka-player/issues/45
+
+Features:
+  - Added support for module.exports.
+    - https://github.com/google/shaka-player/pull/35
+
+Test app features:
+  - Added a new 4k test asset.
+
+
 ## 1.2.2 (2015-03-11)
 
 Bugfixes:
