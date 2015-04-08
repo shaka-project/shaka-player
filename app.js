@@ -137,12 +137,8 @@ app.init = function() {
   }
 
   // Retrieve and verify list of offline streams
-  var storage = new shaka.util.ContentDatabase(null);
-  storage.setUpDatabase().then(
-      function() {
-        return storage.retrieveGroupIds();
-      }
-  ).then(
+  shaka.player.OfflineVideoSource.retrieveGroupIds().then(
+      /** @param {!Array.<number>} groupIds */
       function(groupIds) {
         var groups = app.getOfflineGroups_();
         for (var i in groupIds) {
@@ -154,14 +150,9 @@ app.init = function() {
           app.addOfflineStream_(value, id);
         }
       }
-  ).then(
-      function() {
-        storage.closeDatabaseConnection();
-      }
   ).catch(
       function(e) {
-        storage.closeDatabaseConnection();
-        console.error('Error retrieving stored data', e);
+        console.error('Failed to retrieve group IDs', e);
       }
   );
 
