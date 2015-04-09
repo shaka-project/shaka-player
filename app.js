@@ -776,7 +776,7 @@ app.initPlayer_ = function() {
   app.player_.addEventListener('bufferingEnd',
       playerControls.onBuffering.bind(null, false));
   app.player_.addEventListener('seekrangechanged',
-      playerControls.updateTimeAndSeekRange);
+      playerControls.onSeekRangeChanged);
 
   app.estimator_ = new shaka.util.EWMABandwidthEstimator();
 

@@ -25,8 +25,16 @@ var playerControls = function() {};
 playerControls.isLive_;
 
 
+/** @private {boolean} */
+playerControls.isSeeking_;
+
+
 /** @private {HTMLVideoElement} */
 playerControls.video_;
+
+
+/** @private {!{start: number, end: number}} */
+playerControls.seekRange_ = {start: 0, end: 0};
 
 
 /**
@@ -43,9 +51,8 @@ playerControls.init = function(video) {
   var volumeBar = document.getElementById('volumeBar');
   var fullscreenButton = document.getElementById('fullscreenButton');
 
-  var seeking = false;
-
   playerControls.isLive_ = false;
+  playerControls.isSeeking_ = false;
   playerControls.video_ = video;
 
   // play
@@ -63,23 +70,40 @@ playerControls.init = function(video) {
     video.pause();
   });
   video.addEventListener('pause', function() {
-    if (!seeking) {
+    if (!playerControls.isSeeking_) {
       pauseButton.style.display = 'none';
       playButton.style.display = 'block';
     }
   });
 
   // seek
+  var seekTimeoutId = null;
   seekBar.addEventListener('mousedown', function() {
-    seeking = true;
+    playerControls.isSeeking_ = true;
+    video.pause();
   });
   seekBar.addEventListener('input', function() {
-    if (video.duration) {
-      video.currentTime = seekBar.value;
+    if (!video.duration) {
+      // Can't seek.  Ignore.
+      return;
     }
+
+    // Update the UI right away.
+    playerControls.updateTimeAndSeekRange_();
+
+    // Collect input events and seek when things have been stable for 100ms.
+    if (seekTimeoutId) {
+      window.clearTimeout(seekTimeoutId);
+      seekTimeoutId = null;
+    }
+    seekTimeoutId = window.setTimeout(function() {
+      seekTimeoutId = null;
+      video.currentTime = seekBar.value;
+    }, 100);
   });
   seekBar.addEventListener('mouseup', function() {
-    seeking = false;
+    video.play();
+    playerControls.isSeeking_ = false;
   });
   // initialize seek bar with 0
   seekBar.value = 0;
@@ -122,7 +146,7 @@ playerControls.init = function(video) {
   // current time & seek bar updates
   video.addEventListener('timeupdate', function() {
     if (!playerControls.isLive_) {
-      playerControls.updateTimeAndSeekRange(null);
+      playerControls.updateTimeAndSeekRange_();
     }
   });
 
@@ -165,6 +189,17 @@ playerControls.onBuffering = function(bufferingState) {
 
 
 /**
+ * Called by the application when the seek range changes.
+ * @param {Event|{start: number, end: number}} event
+ */
+playerControls.onSeekRangeChanged = function(event) {
+  playerControls.seekRange_.start = event.start;
+  playerControls.seekRange_.end = event.end;
+  playerControls.updateTimeAndSeekRange_();
+};
+
+
+/**
  * Called by the application to set the live playback state.
  * @param {boolean} liveState True if the stream is live.
  */
@@ -174,24 +209,29 @@ playerControls.setLive = function(liveState) {
 
 
 /**
- * Called by the application when the seek range changes for live content,
- * or when the play head moves for non-live content.
- * @param {Event|{start: number, end: number}} event
- *     or null for non-live content.
+ * Called when the seek range or current time need to be updated.
+ * @private
  */
-playerControls.updateTimeAndSeekRange = function(event) {
+playerControls.updateTimeAndSeekRange_ = function() {
   var video = playerControls.video_;
+  var seekRange = playerControls.seekRange_;
   var currentTime = document.getElementById('currentTime');
   var seekBar = document.getElementById('seekBar');
 
   var showHour = video.duration >= 3600;
   var displayTime = video.currentTime;
   var prefix = '';
+
+  if (playerControls.isSeeking_) {
+    var seekBar = document.getElementById('seekBar');
+    displayTime = seekBar.value;
+  }
+
   if (playerControls.isLive_) {
     // The amount of time we are behind the live edge.
-    displayTime = Math.max(0, Math.floor(event.end - video.currentTime));
+    displayTime = Math.max(0, Math.floor(seekRange.end - displayTime));
     if (displayTime) prefix = '-';
-    showHour = (event.end - event.start) >= 3600;
+    showHour = (seekRange.end - seekRange.start) >= 3600;
   }
 
   var h = Math.floor(displayTime / 3600);
@@ -206,13 +246,13 @@ playerControls.updateTimeAndSeekRange = function(event) {
   currentTime.innerText = prefix + text;
 
   if (playerControls.isLive_) {
-    seekBar.min = event.start;
-    seekBar.max = event.end;
-    seekBar.value = event.end - displayTime;
+    seekBar.min = seekRange.start;
+    seekBar.max = seekRange.end;
+    seekBar.value = seekRange.end - displayTime;
   } else {
     seekBar.min = 0;
     seekBar.max = video.duration;
-    seekBar.value = video.currentTime;
+    seekBar.value = displayTime;
   }
 
   var gradient = ['to right'];
@@ -226,12 +266,12 @@ playerControls.updateTimeAndSeekRange = function(event) {
     var playheadFraction = (video.currentTime / video.duration) || 0;
 
     if (playerControls.isLive_) {
-      var bufferStart = Math.max(buffered.start(0), event.start);
-      var bufferEnd = Math.min(buffered.end(0), event.end);
-      var seekRangeSize = event.end - event.start;
-      var bufferStartDistance = bufferStart - event.start;
-      var bufferEndDistance = bufferEnd - event.start;
-      var playheadDistance = video.currentTime - event.start;
+      var bufferStart = Math.max(buffered.start(0), seekRange.start);
+      var bufferEnd = Math.min(buffered.end(0), seekRange.end);
+      var seekRangeSize = seekRange.end - seekRange.start;
+      var bufferStartDistance = bufferStart - seekRange.start;
+      var bufferEndDistance = bufferEnd - seekRange.start;
+      var playheadDistance = video.currentTime - seekRange.start;
       bufferStartFraction = (bufferStartDistance / seekRangeSize) || 0;
       bufferEndFraction = (bufferEndDistance / seekRangeSize) || 0;
       playheadFraction = (playheadDistance / seekRangeSize) || 0;
