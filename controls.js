@@ -229,9 +229,12 @@ playerControls.updateTimeAndSeekRange = function(event) {
       var bufferStart = Math.max(buffered.start(0), event.start);
       var bufferEnd = Math.min(buffered.end(0), event.end);
       var seekRangeSize = event.end - event.start;
-      bufferStartFraction = (bufferStart / seekRangeSize) || 0;
-      bufferEndFraction = (bufferEnd / seekRangeSize) || 0;
-      playheadFraction = ((event.end - displayTime) / seekRangeSize) || 0;
+      var bufferStartDistance = bufferStart - event.start;
+      var bufferEndDistance = bufferEnd - event.start;
+      var playheadDistance = video.currentTime - event.start;
+      bufferStartFraction = (bufferStartDistance / seekRangeSize) || 0;
+      bufferEndFraction = (bufferEndDistance / seekRangeSize) || 0;
+      playheadFraction = (playheadDistance / seekRangeSize) || 0;
     }
 
     gradient.push('#000 ' + (bufferStartFraction * 100) + '%');
