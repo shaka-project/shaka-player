@@ -3,5 +3,6 @@ third_party/closure/goog/deps.js
 shaka-player.compiled.js
 shaka-player.compiled.debug.js
 shaka-player.compiled.debug.map
+amd.js
 docs/api
 docs/reference
