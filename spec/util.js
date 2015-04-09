@@ -198,7 +198,7 @@ function interpretContentProtection(contentProtection) {
     var licenseServerUrl = 'data:application/json;base64,' +
         shaka.util.StringUtils.toBase64(license);
     return new shaka.player.DrmSchemeInfo(
-        'org.w3.clearkey', false, licenseServerUrl, false, initData, null);
+        'org.w3.clearkey', licenseServerUrl, false, initData, null);
   }
 
   return null;

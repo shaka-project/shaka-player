@@ -545,7 +545,7 @@ app.loadHttpStream = function() {
   var drmSchemeInfo = null;
   if (keySystem) {
     drmSchemeInfo = new shaka.player.DrmSchemeInfo(
-        keySystem, true, licenseServerUrl, false, null, null);
+        keySystem, licenseServerUrl, false, null, null);
   }
 
   app.load_(new shaka.player.HttpVideoSource(mediaUrl, subtitlesUrl,
@@ -811,7 +811,7 @@ app.interpretContentProtection_ = function(contentProtection) {
     // This is useful to test external MPDs when no mapping is known in
     // advance.
     return new shaka.player.DrmSchemeInfo(
-        'com.widevine.alpha', false, override.value, false, null, null);
+        'com.widevine.alpha', override.value, false, null, null);
   }
 
   if (contentProtection.schemeIdUri == 'com.youtube.clearkey') {
@@ -834,7 +834,7 @@ app.interpretContentProtection_ = function(contentProtection) {
     var licenseServerUrl = 'data:application/json;base64,' +
         window.btoa(license);
     return new shaka.player.DrmSchemeInfo(
-        'org.w3.clearkey', false, licenseServerUrl, false, initData, null);
+        'org.w3.clearkey', licenseServerUrl, false, initData, null);
   }
 
   var initDataOverride = null;
@@ -860,8 +860,7 @@ app.interpretContentProtection_ = function(contentProtection) {
     }
     if (licenseServerUrl) {
       return new shaka.player.DrmSchemeInfo(
-          'com.widevine.alpha', false, licenseServerUrl, false,
-          initDataOverride,
+          'com.widevine.alpha', licenseServerUrl, false, initDataOverride,
           app.postProcessYouTubeLicenseResponse_);
     }
   }
@@ -871,8 +870,7 @@ app.interpretContentProtection_ = function(contentProtection) {
     // This is the UUID which represents Widevine in the edash-packager.
     var licenseServerUrl = '//widevine-proxy.appspot.com/proxy';
     return new shaka.player.DrmSchemeInfo(
-        'com.widevine.alpha', false, licenseServerUrl, false, initDataOverride,
-        null);
+        'com.widevine.alpha', licenseServerUrl, false, initDataOverride, null);
   }
 
   if (contentProtection.schemeIdUri == 'urn:mpeg:dash:mp4protection:2011') {

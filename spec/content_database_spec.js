@@ -41,7 +41,7 @@ describe('ContentDatabase', function() {
     { index: 2, start_time: 4, end_time: null }
   ];
   const drmScheme = new shaka.player.DrmSchemeInfo(
-      keySystem, false, licenseServerUrl, false, null);
+      keySystem, licenseServerUrl, false, null);
 
   var customMatchers = {
     toMatchReference: function(util) {

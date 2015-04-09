@@ -65,8 +65,7 @@ describe('AjaxRequest', function() {
     streamInfo.segmentInitializationData = new ArrayBuffer(1024);
     streamInfo.segmentIndex = testIndex;
 
-    var drmSchemeInfo = new shaka.player.DrmSchemeInfo(
-        '', false, '', false, null);
+    var drmSchemeInfo = shaka.player.DrmSchemeInfo.createUnencrypted();
 
     var db = new shaka.util.ContentDatabase(null);
     db.setUpDatabase().then(function() {
