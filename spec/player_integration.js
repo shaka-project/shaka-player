@@ -158,7 +158,7 @@ describe('Player', function() {
         player.play();
         return waitForMovement();
       }).then(function() {
-        return delay(5.5);  // adapts when it crosses a segment boundary.
+        return delay(6.0);  // adapts when it crosses a segment boundary.
       }).then(function() {
         expect(video.videoHeight).toEqual(720);
 
@@ -361,7 +361,7 @@ describe('Player', function() {
         player.seek(0);
         return waitForMovement();
       }).then(function() {
-        return delay(0.5 + (targetTime / 5.0));
+        return delay(1.0 + (targetTime / 5.0));
       }).then(function() {
         // Expect that we've been able to play past our target point.
         expect(video.currentTime).toBeGreaterThan(targetTime);
@@ -394,6 +394,32 @@ describe('Player', function() {
         return delay(4.0);
       }).then(function() {
         expect(video.currentTime).toBeGreaterThan(33.0);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+
+    it('fires an event when seeking by zero ', function(done) {
+      // StreamVideoSource assumes that seeking by zero will fire a seek event.
+      var source = newSource(plainManifest);
+      var onSeeking = jasmine.createSpy('onSeeking');
+
+      player.load(source).then(function() {
+        player.play();
+        return waitForMovement();
+      }).then(function() {
+        video.addEventListener('seeking', onSeeking);
+        video.currentTime += 0;
+        expect(onSeeking.calls.count()).toEqual(0);
+        return delay(0.5);
+      }).then(function() {
+        video.currentTime -= 0;
+        expect(onSeeking.calls.count()).toEqual(1);
+        return delay(0.5);
+      }).then(function() {
+        expect(onSeeking.calls.count()).toEqual(2);
         done();
       }).catch(function(error) {
         fail(error);
