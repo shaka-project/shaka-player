@@ -26,7 +26,8 @@ goog.require('shaka.util.PublicPromise');
 goog.require('shaka.util.RangeRequest');
 
 describe('ContentDatabase', function() {
-  var db, p, testIndex, streamInfo, originalTimeout, originalRangeRequest;
+  var db, p, testIndex, streamInfo;
+  var originalTimeout, originalRangeRequest, originalName;
 
   const url = 'http://example.com';
   const mime = 'video/phony';
@@ -85,6 +86,9 @@ describe('ContentDatabase', function() {
       new shaka.media.SegmentReference(4, 4, null, 20, null, testUrl)];
     testIndex = new shaka.media.SegmentIndex(testReferences);
 
+    // Use a database name which will not affect the test app.
+    originalName = shaka.util.ContentDatabase.DB_NAME_;
+    shaka.util.ContentDatabase.DB_NAME_ += '_test';
     // Start each test run with a clean slate.
     (new shaka.util.ContentDatabase(null)).deleteDatabase();
   });
@@ -110,6 +114,9 @@ describe('ContentDatabase', function() {
 
     // Restore RangeRequest.
     shaka.util.RangeRequest = originalRangeRequest;
+
+    // Restore DB name.
+    shaka.util.ContentDatabase.DB_NAME_ = originalName;
   });
 
   it('deletes the database', function(done) {
