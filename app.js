@@ -396,6 +396,7 @@ app.deleteStream = function() {
         var groups = app.getOfflineGroups_();
         delete groups[groupId];
         app.setOfflineGroups_(groups);
+        app.removeOfflineStream_(groupId);
         deleteButton.innerText = 'Delete stream from storage';
         app.onStreamTypeChange();
         app.onMpdChange();
@@ -500,7 +501,7 @@ app.switchToOfflineStream_ = function(groupId) {
 
 
 /**
- * Stores an offline streams information to the app.
+ * Add an item to the list of offline streams in the test app UI.
  * @param {string} text The text associated with this stream.
  * @param {number} groupId The id assigned to this stream by storage.
  * @private
@@ -511,6 +512,23 @@ app.addOfflineStream_ = function(text, groupId) {
   item.textContent = text;
   item.value = groupId;
   document.getElementById('offlineStreamList').appendChild(item);
+};
+
+
+/**
+ * Remove an item from the list of offline streams in the test app UI.
+ * @param {number} groupId The id assigned to this stream by storage.
+ * @private
+ */
+app.removeOfflineStream_ = function(groupId) {
+  var list = document.getElementById('offlineStreamList');
+  var options = list.options;
+  for (var i = 0; i < options.length; ++i) {
+    if (options[i].value == groupId) {
+      list.removeChild(options[i]);
+      return;
+    }
+  }
 };
 
 
