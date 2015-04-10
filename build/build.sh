@@ -39,7 +39,7 @@ rm -f "$dir"/shaka-player.compiled.js
 
 # Compile with AMD module support
 (library_sources_0; closure_sources_0) | compile_0 \
-  --output_wrapper='var o = {}; (function(){%output% define(o.shaka);}.bind(o))()' \
+  --output_wrapper='(function(){%output% define(this.shaka);})()' \
   --js_output_file "$dir"/amd.js
 
 # Fork the non-debug version before appending debug info.
