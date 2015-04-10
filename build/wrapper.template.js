@@ -1,0 +1,6 @@
+(function(){var g={};
+(function(window){%output%}.bind(g,this))();
+if (typeof(module)!="undefined"&&module.exports)module.exports=g.shaka;
+else if (typeof(define)!="undefined")define(function(){return g.shaka});
+else this.shaka=g.shaka;
+})();

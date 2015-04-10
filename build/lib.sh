@@ -50,7 +50,7 @@ closure_opts="
 
   -O ADVANCED
   --generate_exports
-  --output_wrapper='(function(){%output%}.bind((typeof(module)!=\"undefined\"&&module.exports)?module.exports:window))()'
+  --output_wrapper_file="$dir"/build/wrapper.template.js
 
   -D COMPILED=true
   -D goog.DEBUG=false
