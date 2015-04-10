@@ -33,7 +33,11 @@ rm -f "$dir"/shaka-player.compiled.js
 # stops execution of this script.
 
 # Compile without app/controls.js and output the minified library only.
+# Including shaka-player.uncompiled makes sure that nothing gets stripped which
+# should be exported.  Otherwise, things unused internally may be seen as dead
+# code.
 (library_sources_0; closure_sources_0) | compile_0 \
+  "$dir"/shaka-player.uncompiled.js \
   --create_source_map "$dir"/shaka-player.compiled.debug.map \
   --js_output_file "$dir"/shaka-player.compiled.debug.js
 
