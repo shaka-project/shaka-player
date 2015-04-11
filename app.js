@@ -160,6 +160,11 @@ app.init = function() {
 
   playerControls.init(app.video_);
 
+  if ('asset' in params) {
+    document.getElementById('manifestUrlInput').value = params['asset'];
+    app.onMpdCustom();
+  }
+
   if ('dash' in params) {
     document.getElementById('streamTypeList').value = 'dash';
     app.loadStream();
