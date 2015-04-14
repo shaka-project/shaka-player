@@ -286,17 +286,6 @@ describe('Task', function() {
         done();
       });
     });
-
-    it('cannot be called from outside a stage', function() {
-      t.start();
-      var caught;
-      try {
-        t.end();
-      } catch (exception) {
-        caught = exception;
-      }
-      expect(caught).toBeTruthy();
-    });
   });
 });
 
