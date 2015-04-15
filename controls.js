@@ -218,38 +218,36 @@ playerControls.updateTimeAndSeekRange_ = function() {
   var currentTime = document.getElementById('currentTime');
   var seekBar = document.getElementById('seekBar');
 
-  var showHour = video.duration >= 3600;
   var displayTime = video.currentTime;
-  var prefix = '';
-
   if (playerControls.isSeeking_) {
     var seekBar = document.getElementById('seekBar');
     displayTime = seekBar.value;
   }
 
+  // Set |currentTime|.
   if (playerControls.isLive_) {
     // The amount of time we are behind the live edge.
     displayTime = Math.max(0, Math.floor(seekRange.end - displayTime));
-    if (displayTime) prefix = '-';
-    showHour = (seekRange.end - seekRange.start) >= 3600;
-  }
+    var showHour = (seekRange.end - seekRange.start) >= 3600;
 
-  var h = Math.floor(displayTime / 3600);
-  var m = Math.floor((displayTime / 60) % 60);
-  var s = Math.floor(displayTime % 60);
-  if (s < 10) s = '0' + s;
-  var text = m + ':' + s;
-  if (showHour) {
-    if (m < 10) text = '0' + text;
-    text = h + ':' + text;
-  }
-  currentTime.innerText = prefix + text;
+    // Consider "LIVE" when 1 second or less behind the live-edge.  Always show
+    // the full time string when seeking, including the leading '-'; otherwise,
+    // the time string "flickers" near the live-edge.
+    if ((displayTime > 1) || playerControls.isSeeking_) {
+      currentTime.innerText =
+          '- ' + playerControls.buildTimeString_(displayTime, showHour);
+    } else {
+      currentTime.innerText = 'LIVE';
+    }
 
-  if (playerControls.isLive_) {
     seekBar.min = seekRange.start;
     seekBar.max = seekRange.end;
     seekBar.value = seekRange.end - displayTime;
   } else {
+    var showHour = video.duration >= 3600;
+    currentTime.innerText =
+        playerControls.buildTimeString_(displayTime, showHour);
+
     seekBar.min = 0;
     seekBar.max = video.duration;
     seekBar.value = displayTime;
@@ -285,5 +283,27 @@ playerControls.updateTimeAndSeekRange_ = function() {
     gradient.push('#000 ' + (bufferEndFraction * 100) + '%');
   }
   seekBar.style.background = 'linear-gradient(' + gradient.join(',') + ')';
+};
+
+
+/**
+ * Builds a time string, e.g., 01:04:23, from |displayTime|.
+ *
+ * @param {number} displayTime
+ * @param {boolean} showHour
+ * @return {string}
+ * @private
+ */
+playerControls.buildTimeString_ = function(displayTime, showHour) {
+  var h = Math.floor(displayTime / 3600);
+  var m = Math.floor((displayTime / 60) % 60);
+  var s = Math.floor(displayTime % 60);
+  if (s < 10) s = '0' + s;
+  var text = m + ':' + s;
+  if (showHour) {
+    if (m < 10) text = '0' + text;
+    text = h + ':' + text;
+  }
+  return text;
 };
 
