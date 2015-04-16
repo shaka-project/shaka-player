@@ -304,6 +304,11 @@ function buildNav(members) {
         globalNav = '';
 
     if (members.tutorials.length) {
+        members.tutorials.sort(function(a, b) {
+          if (a.index < b.index) return -1;
+          if (a.index > b.index) return 1;
+          return 0;
+        });
         nav += '<h3>Tutorials</h3><ul>';
         members.tutorials.forEach(function(t) {
             nav += '<li>' + tutoriallink(t.name) + '</li>';

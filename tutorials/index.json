@@ -1,0 +1,9 @@
+[
+  { "intro": { "title": "Intro to DASH Streams" } },
+  { "player": { "title": "DASH Playback with the Shaka Player" } },
+  { "windows": { "title": "Building on Windows" } },
+  { "language": { "title": "Language Support" } },
+  { "dev": { "title": "Shaka Player Development" } },
+  { "polyfills": { "title": "Polyfills" } },
+  { "caveats": { "title": "Content Restrictions" } }
+]
