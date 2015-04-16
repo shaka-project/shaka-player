@@ -73,6 +73,7 @@ function addTutorialConf(name, meta) {
         if (hasOwnProp.call(conf, name)) {
             logger.warn('Metadata for the tutorial %s is defined more than once. Only the first definition will be used.', name );
         } else {
+            meta.index = Object.keys(conf).length;
             conf[name] = meta;
         }
     } else {
@@ -169,6 +170,7 @@ exports.resolve = function() {
         }
 
         item = conf[name];
+        current.index = item.index;
 
         // set title
         if (item.title) {
