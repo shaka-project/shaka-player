@@ -3,6 +3,7 @@
   <BaseURL>//shaka-player-demo.appspot.com/assets/angel_one/</BaseURL>
   <Period id="0" start="PT0S" duration="PT59.994S">
     <AdaptationSet id="6" mimeType="audio/webm" codecs="vorbis" lang="en" audioSamplingRate="48000" subsegmentStartsWithSAP="1">
+      <Role value="main" />
       <Representation id="6" bandwidth="112375">
         <BaseURL>a-en.webm</BaseURL>
         <SegmentBase indexRange="815951-816145">
@@ -69,6 +70,7 @@
       </Representation>
     </AdaptationSet>
     <AdaptationSet id="19" mimeType="text/vtt" lang="en">
+      <Role value="main" />
       <Representation id="19">
         <BaseURL>subs/s-en.vtt</BaseURL>
       </Representation>
