@@ -15,6 +15,54 @@
 -->
 
 <h3 class="tutorial-heading">
+Multi-lingual Content
+</h3>
+
+<p>
+Shaka Player supports multi-lingual content.  A multi-lingual manifest contains
+separate AdaptationSets for each audio or subtitle language.  For example:
+</p>
+
+<pre class="prettyprint source"><code id="mpd_sample1">&lt;AdaptationSet id="0" mimeType="video/webm" codecs="vp8"&gt;
+  ...
+&lt;/AdaptationSet&gt;
+&lt;AdaptationSet id="1" mimeType="audio/webm" codecs="vorbis" lang="en"&gt;
+  &lt;Role value="main" /&gt;
+  ...
+&lt;/AdaptationSet&gt;
+&lt;AdaptationSet id="2" mimeType="audio/webm" codecs="vorbis" lang="de"&gt;
+  ...
+&lt;/AdaptationSet&gt;
+&lt;AdaptationSet id="3" mimeType="audio/webm" codecs="vorbis" lang="es"&gt;
+  ...
+&lt;/AdaptationSet&gt;
+&lt;AdaptationSet id="4" mimeType="audio/webm" codecs="vorbis" lang="fr"&gt;
+  ...
+&lt;/AdaptationSet&gt;
+&lt;AdaptationSet id="5" mimeType="audio/webm" codecs="vorbis" lang="it"&gt;
+  ...
+&lt;/AdaptationSet&gt;
+&lt;AdaptationSet id="6" mimeType="text/vtt" lang="en"&gt;
+  &lt;Role value="main" /&gt;
+  ...
+&lt;/AdaptationSet&gt;
+&lt;AdaptationSet id="7" mimeType="text/vtt" lang="fr"&gt;
+  ...
+&lt;/AdaptationSet&gt;
+&lt;AdaptationSet id="8" mimeType="text/vtt" lang="pt-BR"&gt;
+  ...
+&lt;/AdaptationSet&gt;
+&lt;AdaptationSet id="9" mimeType="text/vtt" lang="el"&gt;
+  ...
+&lt;/AdaptationSet&gt;
+</code></pre>
+
+<p>
+See assets/angel_one.mpd in the sources for a full example.
+</p>
+
+
+<h3 class="tutorial-heading">
 Language Tags
 </h3>
 
@@ -99,5 +147,19 @@ The matching algorithm can be found in {@link shaka.util.LanguageUtils.match}.
 <p>
 The same matching algorithm is used to select both audio and text tracks.  When
 no audio track matches the user preference, text tracks are enabled by default.
+</p>
+
+<p>
+For example, if the user prefers French, and French is available for both audio
+and subtitles, then French is selected for both.  The subtitles are not enabled
+by default because the user's preferred audio language was found.
+</p>
+
+<p>
+Let's say, however, that the user prefers Portuguese. If Portuguese audio isn't
+available, the audio AdaptationSet tagged with &lt;Role value="main" /&gt; will
+be chosen.  If there is no set tagged with "main", then the first AdaptationSet
+in the MPD will be chosen.  Since there was no Portuguese audio, the Portuguese
+subtitles, if found, will be enabled.
 </p>
 
