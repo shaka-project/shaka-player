@@ -389,7 +389,6 @@ used to enable encrypted content:
 <span class="newCode">        var keySystem = 'com.widevine.alpha';</span>
 
 <span class="newCode">        return new shaka.player.DrmSchemeInfo(keySystem,</span>
-<span class="newCode">                                              true /* suppressMultipleEvents */,</span>
 <span class="newCode">                                              licenseServerUrl,</span>
 <span class="newCode">                                              false /* withCredentials */,</span>
 <span class="newCode">                                              null /* initData */,</span>
@@ -639,7 +638,6 @@ video will play back in an overlay on top of the thumbnails.
         var keySystem = 'com.widevine.alpha';
 
         return new shaka.player.DrmSchemeInfo(keySystem,
-                                              true /* suppressMultipleEvents */,
                                               licenseServerUrl,
                                               false /* withCredentials */,
                                               null /* initData */,
@@ -966,7 +964,6 @@ is being played. It also shows an error dialog if/when error events occur.
         var keySystem = 'com.widevine.alpha';
 
         return new shaka.player.DrmSchemeInfo(keySystem,
-                                              true /* suppressMultipleEvents */,
                                               licenseServerUrl,
                                               false /* withCredentials */,
                                               null /* initData */,
