@@ -1,3 +1,67 @@
+## 1.3.0 (2015-04-16)
+
+Feature release, introducing live streaming and offline playback.
+
+Bugfixes:
+  - Fixed playback and buffering of streams whose index is inaccurate.
+  - Fixed EME spec compliance.
+    - https://github.com/google/shaka-player/issues/45
+  - Fixed FakeEventTarget exception handling.
+  - Fixed aggressive dead code stripping by the compiler.
+  - Fixed a bug in which subtitles were enabled by default without a subtitle
+    language match.
+
+Features:
+  - Added offline playback support.
+    - https://github.com/google/shaka-player/issues/22
+  - Added offline support for encrypted content (on platforms which support
+    persistent licenses).
+    - https://github.com/google/shaka-player/issues/23
+  - Added live stream support.
+    - https://github.com/google/shaka-player/issues/21
+  - Added support for header-based clock synchronization.
+  - Added support for inheriting Segment{Base,List,Template} across levels in
+    MPDs.
+  - Add polyfill support for fullscreen events.
+  - Updated EME usage to the March 12 draft.
+  - Added Player.getAdaptationEnabled().
+    - https://github.com/google/shaka-player/pull/31
+  - Added support for bandwidth restrictions and restrictions not based on
+    license responses.
+    - https://github.com/google/shaka-player/pull/36
+  - Added support for requireJS and improved support for commonJS.
+  - Sped up integration tests and improved test robustness.
+  - Bandwidth estimates can now be persisted across playbacks.
+  - Custom bandwidth estimator objects can now be injected into the Player.
+  - Improved EME v0.1b polyfill consistency with native EME in Chrome.
+  - Improved buffering and underflow mechanisms.
+  - Improved error reporting if DRM info is missing.
+  - Improved robustness in the face of HTTP 404 and 410 errors during segment
+    fetch.
+  - Improved documentation for Role tags and multilingual assets.
+
+Test app features:
+  - Example player controls in the test app.
+
+Deprecated:
+  - The following methods on Player are deprecated.  They will be removed in
+    v1.4.0:
+    - getCurrentResolution() (replace with video.videoWidth & video.videoHeight)
+    - getCurrentTime()/seek() (replace with video.currentTime)
+    - getDuration() (replace with video.duration)
+    - getMuted()/setMuted() (replace with video.muted)
+    - getVolume()/setVolume() (replace with video.volume)
+    - play() (replace with video.play)
+    - pause() (replace with video.pause)
+    - requestFullscreen() (replace with video.requestFullscreen())
+
+Broken compatibility:
+  - The license postprocessor callback is no longer given a Restrictions
+    argument.  See Player.getRestrictions()/setRestrictions().
+  - The suppressMultipleEvents flag has been dropped from DrmSchemeInfo, which
+    changes the constructor signature.  This flag interfered with key rotation.
+
+
 ## 1.2.3 (2015-04-07)
 
 A roll-up of recent bugfixes.
