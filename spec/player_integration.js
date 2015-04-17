@@ -279,10 +279,10 @@ describe('Player', function() {
         // 310 seconds of data.  Tweak the buffer time for audio, since this
         // will take much less time and bandwidth to buffer.
         const minBufferTime = 300;
+        this.manifestInfo.minBufferTime = minBufferTime;
         var sets = this.manifestInfo.periodInfos[0].streamSetInfos;
         var audioSet = sets[0].contentType == 'audio' ? sets[0] : sets[1];
         expect(audioSet.contentType).toBe('audio');
-        audioSet.streamInfos[0].minBufferTime = minBufferTime;
         // Remove the video set to speed things up.
         this.manifestInfo.periodInfos[0].streamSetInfos = [audioSet];
         return originalLoad.call(this, preferredLanguage);
@@ -714,13 +714,12 @@ describe('Player', function() {
     player.addEventListener('error', onError, false);
 
     // Ignore any errors in the promise chain.
-    player.load(newSource(bogusManifest)).catch(function(error) {});
-
-    // Expect the error handler to have been called.
-    delay(0.5).then(function() {
-      expect(onError.calls.any()).toBe(true);
-      done();
-    });
+    player.load(newSource(bogusManifest)).catch(function(error) {}).then(
+        function() {
+          // Expect the error handler to have been called.
+          expect(onError.calls.any()).toBe(true);
+          done();
+        });
   });
 
   // TODO(story 1970528): add tests which exercise PSSH parsing,
