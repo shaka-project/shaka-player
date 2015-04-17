@@ -1,3 +1,18 @@
+## 1.2.4 (2015-04-16)
+
+Bugfixes backported from v1.3.0 to the v1.2.x branch.
+
+Bugfixes:
+  - Fixed FakeEventTarget exception handling.
+  - Fixed aggressive dead code stripping by the compiler.
+  - Fixed a bug in which subtitles were enabled by default without a subtitle
+    language match.
+
+Features:
+  - Added support for requireJS and improved support for commonJS.
+  - Improved documentation for Role tags and multilingual assets.
+
+
 ## 1.2.3 (2015-04-07)
 
 A roll-up of recent bugfixes.
