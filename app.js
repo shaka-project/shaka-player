@@ -431,6 +431,7 @@ app.storeStream = function() {
   var estimator = /** @type {!shaka.util.IBandwidthEstimator} */(
       app.estimator_);
   var offlineSource = new shaka.player.OfflineVideoSource(null, estimator);
+  offlineSource.addEventListener('progress', app.progressEventHandler_);
   offlineSource.store(
       mediaUrl, preferredLanguage, app.interpretContentProtection_,
       app.chooseOfflineTracks_.bind(null, offlineSource)
@@ -448,6 +449,16 @@ app.storeStream = function() {
         console.error('Error storing stream', e);
         app.updateStoreButton_(false, 'Store stream offline');
       });
+};
+
+
+/**
+ * Event handler for offline storage progress events.
+ * @param {!Event} e
+ * @private
+ */
+app.progressEventHandler_ = function(e) {
+  app.updateStoreButton_(true, e.detail.toFixed(2) + ' percent stored');
 };
 
 
