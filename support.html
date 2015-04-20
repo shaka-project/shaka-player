@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
- Copyright 2014 Google Inc.
+ Copyright 2015 Google Inc.
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -16,95 +16,9 @@
 -->
 <html>
   <head>
-    <script>
-
-var found = [];
-
-found.push(navigator.userAgent);
-
-var media = window.HTMLMediaElement;
-media && found.push('HTMLMediaElement');
-
-window.MediaSource && found.push('MediaSource');
-window.WebKitMediaSource && found.push('WebKitMediaSource');
-var ms = window.MediaSource || window.WebKitMediaSource;
-
-window.VTTCue && found.push('VTT');
-
-var webmType = 'video/webm; codecs="vp8"';
-var webm = ms && ms.isTypeSupported(webmType);
-webm && found.push('WebM');
-
-var mp4Type = 'video/mp4; codecs="avc1.42E01E"';
-var mp4 = ms && ms.isTypeSupported(mp4Type);
-mp4 && found.push('MP4');
-
-var tsType = 'video/mp2t; codecs="avc1.42E01E"';
-var ts = ms && ms.isTypeSupported(tsType);
-ts && found.push('TS');
-
-var promise = window.Promise;
-promise && found.push('Promise');
-
-var prefixed = window.HTMLMediaElement && HTMLMediaElement.prototype &&
-    HTMLMediaElement.prototype.webkitGenerateKeyRequest;
-prefixed && found.push('prefixed EME');
-
-window.MediaKeys && found.push('MediaKeys');
-window.MSMediaKeys && found.push('MSMediaKeys');
-window.WebKitMediaKeys && found.push('WebKitMediaKeys');
-var mk = window.MediaKeys || window.MSMediaKeys || window.WebKitMediaKeys;
-
-var v = document.createElement('video');
-var bogusKs = 'com.bogus.keysystem';
-
-function isKeySystemSupported(ks) {
-  return mk ? mk.isTypeSupported(ks) :
-         v.canPlayType(webmType, ks) ||
-         v.canPlayType(mp4Type, ks) ||
-         v.canPlayType(tsType, ks);
-}
-
-if (isKeySystemSupported(bogusKs)) {
-  // Clearly the browser doesn't understand two arguments to canPlayType.
-  // Don't trust any results from it.
-  isKeySystemSupported = function() { return false; };
-}
-
-window.MediaKeySession && found.push('MediaKeySession');
-window.MSMediaKeySession && found.push('MSMediaKeySession');
-window.WebKitMediaKeySession && found.push('WebKitMediaKeySession');
-
-var promise_mk = mk && mk.create;
-promise_mk && found.push('Promise-based MediaKeys');
-
-var clearkey = isKeySystemSupported('org.w3.clearkey') ||
-               isKeySystemSupported('webkit-org.w3.clearkey');
-clearkey && found.push('Clear Key');
-var widevine = isKeySystemSupported('com.widevine.alpha');
-widevine && found.push('Widevine');
-var playready = isKeySystemSupported('com.microsoft.playready');
-playready && found.push('PlayReady');
-var adobe = isKeySystemSupported('com.adobe.access');
-adobe && found.push('Adobe Access');
-var fairplay = isKeySystemSupported('com.apple.fairplay');
-fairplay && found.push('FairPlay');
-
-var pass = media && ms && (webm || mp4) && promise &&
-           (prefixed || mk) && widevine;
-pass && found.push('<font color="green">PASS</font>');
-pass || found.push('<font color="red">FAIL</font>');
-
-var no_polyfill = pass && promise_mk;
-no_polyfill && found.push('<font color="green">NO POLYFILL!</font>');
-
-document.addEventListener('DOMContentLoaded', function() {
-  document.body.innerHTML += '<H1>' + found.join('<br>\n') + '</H1>';
-});
-
-    </script>
+    <title>Shaka Player Browser Support Test</title>
+    <script src="support.js"></script>
   </head>
   <body>
-    Testing support... found:
   </body>
 </html>
