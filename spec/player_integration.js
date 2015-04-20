@@ -722,6 +722,36 @@ describe('Player', function() {
         });
   });
 
+  it('respects autoplay=true', function(done) {
+    video.autoplay = true;
+
+    player.load(newSource(plainManifest)).then(function() {
+      return waitForMovement();
+    }).then(function() {
+      expect(video.currentTime).toBeGreaterThan(0.0);
+      expect(video.paused).toBe(false);
+      done();
+    }).catch(function(error) {
+      fail(error);
+      done();
+    });
+  });
+
+  it('respects autoplay=false', function(done) {
+    video.autoplay = false;
+
+    player.load(newSource(plainManifest)).then(function() {
+      return delay(4);
+    }).then(function() {
+      expect(video.currentTime).toBe(0);
+      expect(video.paused).toBe(true);
+      done();
+    }).catch(function(error) {
+      fail(error);
+      done();
+    });
+  });
+
   // TODO(story 1970528): add tests which exercise PSSH parsing,
   // SegmentTemplate resolution, and SegmentList generation.
 
