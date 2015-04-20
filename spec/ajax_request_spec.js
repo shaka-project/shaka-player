@@ -69,7 +69,7 @@ describe('AjaxRequest', function() {
 
     var db = new shaka.util.ContentDatabase(null);
     db.setUpDatabase().then(function() {
-      return db.insertStream(streamInfo, 100, drmSchemeInfo);
+      return db.insertStream_(streamInfo, 100, drmSchemeInfo);
     }).then(function(streamId) {
       db.closeDatabaseConnection();
       var request = new shaka.util.AjaxRequest('idb://' + streamId + '/0');
