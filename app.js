@@ -766,9 +766,7 @@ app.installPolyfills_ = function() {
     Navigator.prototype['requestMediaKeySystemAccess'] = null;
   }
 
-  shaka.polyfill.Fullscreen.install();
-  shaka.polyfill.MediaKeys.install();
-  shaka.polyfill.VideoPlaybackQuality.install();
+  shaka.polyfill.installAll();
 
   app.polyfillsInstalled_ = true;
 };
