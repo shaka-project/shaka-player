@@ -186,7 +186,7 @@ playerControls.init = function(video) {
  */
 playerControls.onBuffering = function(bufferingState) {
   var bufferingSpinner = document.getElementById('bufferingSpinner');
-  bufferingSpinner.style.display = bufferingState ? 'flex' : 'none';
+  bufferingSpinner.style.display = bufferingState ? 'inherit' : 'none';
 };
 
 

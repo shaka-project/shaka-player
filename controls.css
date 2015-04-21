@@ -18,10 +18,16 @@
   width: 600px;
   height: 400px;
   position: relative;
+
+  display: -webkit-flex;
   display: flex;
+  -webkit-flex-direction: column;
   flex-direction: column;
+  -webkit-justify-content: flex-end;
   justify-content: flex-end;
+  -webkit-align-items: center;
   align-items: center;
+
   background-color: black;
 }
 
@@ -42,9 +48,12 @@
   background-image: url('assets/controls/buffering.gif');
 
   display: none;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
 }
 
 #videoControlsEnclosure {
@@ -53,6 +62,7 @@
   height: 35px;
   padding: 0 5px;
   margin: 0 0 5px;
+  -webkit-flex-shrink: 0;
   flex-shrink: 0;
   box-sizing: border-box;
 }
@@ -66,9 +76,14 @@
   background-color: rgba(20, 20, 20, 0.8);
   border-radius: 5px;
 
+  display: -webkit-flex;
   display: flex;
+
+  -webkit-flex-direction: row;
   flex-direction: row;
+  -webkit-justify-content: center;
   justify-content: center;
+  -webkit-align-items: center;
   align-items: center;
 
   opacity: 0;
@@ -132,7 +147,9 @@
 }
 
 #currentTime {
+  display: -webkit-flex;
   display: flex;
+  -webkit-flex-grow: 0;
   flex-grow: 0;
   margin: 0 9px 0 0;
   font-family: sans-serif;
@@ -147,6 +164,7 @@
 
 /* main range element */
 #seekBar, #volumeBar {
+  display: -webkit-flex;
   display: flex;
   height: 7px;
   margin: 0 12px 0 0;
@@ -167,9 +185,11 @@
 }
 /* per-instance styles */
 #seekBar {
+  -webkit-flex-grow: 1;
   flex-grow: 1;
 }
 #volumeBar {
+  -webkit-flex-grow: 0;
   flex-grow: 0;
   min-width: 15px;
   max-width: 70px;
