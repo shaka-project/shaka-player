@@ -26,7 +26,9 @@
 (function() {  // anonymous namespace
   // The sources may be in a different folder from the test app.
   // Compute the base URL for all library sources.
-  var loaderSrc = document.currentScript.src;
+  var currentScript = document.currentScript ||
+                      document.scripts[document.scripts.length - 1];
+  var loaderSrc = currentScript.src;
   var baseUrl = loaderSrc.split('/').slice(0, -1).join('/') + '/';
 
   function loadScript(src) {
