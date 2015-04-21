@@ -18,8 +18,7 @@
 
 goog.require('shaka.player.DashVideoSource');
 goog.require('shaka.player.Player');
-goog.require('shaka.polyfill.MediaKeys');
-goog.require('shaka.polyfill.VideoPlaybackQuality');
+goog.require('shaka.polyfill.installAll');
 goog.require('shaka.util.EWMABandwidthEstimator');
 
 describe('Player', function() {
@@ -48,8 +47,7 @@ describe('Player', function() {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;  // ms
 
     // Install polyfills.
-    shaka.polyfill.MediaKeys.install();
-    shaka.polyfill.VideoPlaybackQuality.install();
+    shaka.polyfill.installAll();
 
     // Create a video tag.  This will be visible so that long tests do not
     // create the illusion of the test-runner being hung.
