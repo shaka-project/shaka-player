@@ -117,13 +117,13 @@ playerControls.init = function(video) {
   });
 
   // volume
-  volumeBar.oninput = function() {
+  volumeBar.addEventListener('input', function() {
     video.volume = volumeBar.value;
     video.muted = false;
-  };
+  });
 
   // volume & mute updates
-  video.addEventListener('volumechange', function() {
+  var onVolumeChange = function() {
     if (video.muted) {
       muteButton.style.display = 'none';
       unmuteButton.style.display = 'block';
@@ -139,9 +139,11 @@ playerControls.init = function(video) {
     gradient.push('#000 100%');
     volumeBar.style.background =
         'linear-gradient(' + gradient.join(',') + ')';
-  });
+  };
+  video.addEventListener('volumechange', onVolumeChange);
+
   // initialize volume display with a fake event
-  video.dispatchEvent(new Event('volumechange'));
+  onVolumeChange();
 
   // current time & seek bar updates
   video.addEventListener('timeupdate', function() {
@@ -151,13 +153,13 @@ playerControls.init = function(video) {
   });
 
   // fullscreen
-  fullscreenButton.onclick = function() {
+  fullscreenButton.addEventListener('click', function() {
     if (document.fullscreenElement) {
       document.exitFullscreen();
     } else {
       videoContainer.requestFullscreen();
     }
-  };
+  });
 
   // fullscreen updates
   var normalSize = {};
