@@ -59,10 +59,13 @@ var found = {};
 var async = [];
 
 // Find an entry in the report by name, then change its status to "bad".
-function markAsBad(name) {
+function markAsBad(name, opt_newValue) {
   for (var i = 0; i < report.length; ++i) {
     if (report[i][0] == name) {
       report[i][1] = kBad;
+      if (opt_newValue !== undefined) {
+        report[i][2] = opt_newValue;
+      }
       return;
     }
   }
@@ -96,21 +99,38 @@ function testFor(parent, name, required, boolValue, prefixes, prefixFn) {
 function testForClass(parent, name, required) {
   testFor(parent, name, required, false, classPrefixes,
           function(prefix, name) {
-              return prefix + name;
+            return prefix + name;
           });
+}
+
+function testForClassUsable(parent, name, required, args) {
+  testForClass(parent, name, required);
+  var ctor = found[name];
+  if (ctor) {
+    try {
+      // Some native DOM object constructors cannot be called without new.
+      // So in order to apply args, they must be bound.
+      var bindArgs = [ null ].concat(args);
+      var boundCtor = ctor.bind.apply(ctor, bindArgs);
+      new boundCtor();
+    } catch (exception) {
+      found[name] = false;
+      markAsBad(name, '(not usable)');
+    }
+  }
 }
 
 function testForMethod(parent, name, required) {
   testFor(parent, name, required, false, propertyPrefixes,
           function(prefix, name) {
-              return prefix + name.charAt(0).toUpperCase() + name.slice(1);
+            return prefix + name.charAt(0).toUpperCase() + name.slice(1);
           });
 }
 
 function testForProperty(parent, name, required) {
   testFor(parent, name, required, true, propertyPrefixes,
           function(prefix, name) {
-              return prefix + name.charAt(0).toUpperCase() + name.slice(1);
+            return prefix + name.charAt(0).toUpperCase() + name.slice(1);
           });
 }
 
@@ -216,7 +236,9 @@ testForProperty(document, 'children', true);
 testForClass(window, 'VTTCue', false);
 testForProperty(document, 'fullscreenElement', false);
 testForProperty(document, 'fullScreenElement', false);
+testForClassUsable(window, 'CustomEvent', true, ['']);
 
+// Codecs:
 testForMimeType(vp8Type);
 testForMimeType(vp9Type);
 testForMimeType(mp4Type);
@@ -304,7 +326,7 @@ function onAsyncComplete() {
                       found[fairPlayId];
   var fullscreenApi = found['fullscreenElement'] || found['fullScreenElement'];
   var requiresPolyfills = !latestEme || !found['getVideoPlaybackQuality'] ||
-                          !document.fullscreenElement;
+                          !document.fullscreenElement || !found['CustomEvent'];
 
   var emeStatus, emeValue;
   if (emeApi && anyKeySystems) {
