@@ -230,7 +230,6 @@ function testForKeySystem(ks, required) {
 testForClass(window, 'HTMLMediaElement', true);
 testForClass(window, 'MediaSource', true);
 testForClass(window, 'Promise', true);
-testForProperty(document, 'children', true);
 
 // Optional:
 testForClass(window, 'VTTCue', false);
@@ -314,7 +313,7 @@ function onAsyncComplete() {
   // Synthesize a summary at the top from other properties.
   // Must be done after all async tasks are complete.
   var requiredFeatures = found['HTMLMediaElement'] && found['MediaSource'] &&
-                         found['Promise'] && found['children'];
+                         found['Promise'];
   var qoe = found['getVideoPlaybackQuality'] || found['droppedFrameCount'];
   var subtitles = found['VTTCue'];
   var emeApi = found['MediaKeys'] || found['generateKeyRequest'];
