@@ -180,9 +180,19 @@ function interpretContentProtection(contentProtection) {
 
   // This is the only scheme used in integration tests at the moment.
   if (contentProtection.schemeIdUri == 'com.youtube.clearkey') {
-    var child = contentProtection.children[0];
-    var keyid = Uint8ArrayUtils.fromHex(child.getAttribute('keyid'));
-    var key = Uint8ArrayUtils.fromHex(child.getAttribute('key'));
+    var license;
+    for (var i = 0; i < contentProtection.children.length; ++i) {
+      var child = contentProtection.children[i];
+      if (child.nodeName == 'ytdrm:License') {
+        license = child;
+        break;
+      }
+    }
+    if (!license) {
+      return null;
+    }
+    var keyid = Uint8ArrayUtils.fromHex(license.getAttribute('keyid'));
+    var key = Uint8ArrayUtils.fromHex(license.getAttribute('key'));
     var keyObj = {
       kty: 'oct',
       alg: 'A128KW',
