@@ -84,7 +84,7 @@ app.offlineStreams_ = [];
  */
 app.init = function() {
   // Display the version number.
-  document.getElementById('version').innerText = shaka.player.Player.version;
+  document.getElementById('version').textContent = shaka.player.Player.version;
 
   // Set default values.
   document.getElementById('forcePrefixed').checked = false;
@@ -379,7 +379,7 @@ app.deleteStream = function() {
 
   var deleteButton = document.getElementById('deleteButton');
   deleteButton.disabled = true;
-  deleteButton.innerText = 'Deleting stream...';
+  deleteButton.textContent = 'Deleting stream...';
 
   var offlineList = document.getElementById('offlineStreamList');
   var groupId = parseInt(offlineList.value, 10);
@@ -397,14 +397,14 @@ app.deleteStream = function() {
         delete groups[groupId];
         app.setOfflineGroups_(groups);
         app.removeOfflineStream_(groupId);
-        deleteButton.innerText = 'Delete stream from storage';
+        deleteButton.textContent = 'Delete stream from storage';
         app.onStreamTypeChange();
         app.onMpdChange();
       }
   ).catch(
       function(e) {
         console.error('Error deleting stream', e);
-        deleteButton.innerText = 'Delete stream from storage';
+        deleteButton.textContent = 'Delete stream from storage';
       });
 };
 
@@ -494,7 +494,7 @@ app.setOfflineGroups_ = function(groups) {
 app.updateStoreButton_ = function(disabled, text) {
   var storeButton = document.getElementById('storeButton');
   storeButton.disabled = disabled;
-  storeButton.innerText = text;
+  storeButton.textContent = text;
 };
 
 
@@ -750,7 +750,7 @@ app.updateVideoSize_ = function() {
     }
   }
 
-  app.videoResDebug_.innerText =
+  app.videoResDebug_.textContent =
       app.video_.videoWidth + ' x ' + app.video_.videoHeight;
 };
 

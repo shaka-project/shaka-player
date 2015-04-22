@@ -236,10 +236,10 @@ playerControls.updateTimeAndSeekRange_ = function() {
     // the full time string when seeking, including the leading '-'; otherwise,
     // the time string "flickers" near the live-edge.
     if ((displayTime > 1) || playerControls.isSeeking_) {
-      currentTime.innerText =
+      currentTime.textContent =
           '- ' + playerControls.buildTimeString_(displayTime, showHour);
     } else {
-      currentTime.innerText = 'LIVE';
+      currentTime.textContent = 'LIVE';
     }
 
     seekBar.min = seekRange.start;
@@ -247,7 +247,7 @@ playerControls.updateTimeAndSeekRange_ = function() {
     seekBar.value = seekRange.end - displayTime;
   } else {
     var showHour = video.duration >= 3600;
-    currentTime.innerText =
+    currentTime.textContent =
         playerControls.buildTimeString_(displayTime, showHour);
 
     seekBar.min = 0;
