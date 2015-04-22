@@ -832,9 +832,19 @@ app.interpretContentProtection_ = function(contentProtection) {
 
   if (contentProtection.schemeIdUri == 'com.youtube.clearkey') {
     // This is the scheme used by YouTube's MediaSource demo.
-    var child = contentProtection.children[0];
-    var keyid = Uint8ArrayUtils.fromHex(child.getAttribute('keyid'));
-    var key = Uint8ArrayUtils.fromHex(child.getAttribute('key'));
+    var license;
+    for (var i = 0; i < contentProtection.children.length; ++i) {
+      var child = contentProtection.children[i];
+      if (child.nodeName == 'ytdrm:License') {
+        license = child;
+        break;
+      }
+    }
+    if (!license) {
+      return null;
+    }
+    var keyid = Uint8ArrayUtils.fromHex(license.getAttribute('keyid'));
+    var key = Uint8ArrayUtils.fromHex(license.getAttribute('key'));
     var keyObj = {
       kty: 'oct',
       alg: 'A128KW',
@@ -869,8 +879,9 @@ app.interpretContentProtection_ = function(contentProtection) {
     var licenseServerUrl = null;
     for (var i = 0; i < contentProtection.children.length; ++i) {
       var child = contentProtection.children[i];
-      if (child.getAttribute('type') == 'widevine') {
-        licenseServerUrl = child.firstChild.nodeValue;
+      if (child.nodeName == 'yt:SystemURL' &&
+          child.getAttribute('type') == 'widevine') {
+        licenseServerUrl = child.textContent;
         break;
       }
     }
