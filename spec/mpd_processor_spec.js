@@ -535,7 +535,8 @@ describe('MpdProcessor', function() {
       m.timeShiftBufferDepth = 0;
       m.minBufferTime = 0;
 
-      // Set @minUpdatePeriod so that the MPD is treated as dynamic.
+      // Set @minUpdatePeriod and @type so that the MPD is treated as dynamic.
+      m.type = 'dynamic';
       m.minUpdatePeriod = 30;
 
       processor.createManifestInfo_(m);
