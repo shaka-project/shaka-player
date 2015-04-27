@@ -57,7 +57,7 @@
           text += ' ' + (track.bandwidth / 1024).toFixed(0) + ' kbits/s';
 
           var li = document.createElement('li');
-          li.innerText = text;
+          li.textContent = text;
           ul.appendChild(li);
         }
 
