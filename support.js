@@ -236,6 +236,7 @@ testForClass(window, 'VTTCue', false);
 testForProperty(document, 'fullscreenElement', false);
 testForProperty(document, 'fullScreenElement', false);
 testForClassUsable(window, 'CustomEvent', true, ['']);
+testForProperty(window, 'indexedDB', false);
 
 // Codecs:
 testForMimeType(vp8Type);
@@ -323,6 +324,7 @@ function onAsyncComplete() {
   var anyKeySystems = found[clearKeyId] || found[widevineId] ||
                       found[playReadyId] || found[adobeAccessId] ||
                       found[fairPlayId];
+  var offline = found['indexedDB'];
   var fullscreenApi = found['fullscreenElement'] || found['fullScreenElement'];
   var requiresPolyfills = !latestEme || !found['getVideoPlaybackQuality'] ||
                           !document.fullscreenElement || !found['CustomEvent'];
@@ -351,6 +353,7 @@ function onAsyncComplete() {
   summary.push(reportEntry('QoE Stats', qoe, false));
   summary.push(reportEntry('Subtitles', subtitles, false));
   summary.push(['Encrypted Content', emeStatus, emeValue]);
+  summary.push(reportEntry('Offline Content', offline, false));
   summary.push(['Requires Polyfills', requiresPolyfills ? kInfo : kGood,
                 'yes', 'natively supported!']);
   summary.push(reportDivider());
