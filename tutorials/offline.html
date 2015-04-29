@@ -82,9 +82,6 @@ Here is a simple page which demonstrates basic offline storage:
     function initialize() {
       if (!window.player)
         initPlayer();
-
-      if (!window.estimator)
-        window.estimator = new shaka.util.EWMABandwidthEstimator();
     }
 
     function chooseTracks(videoSource) {
@@ -121,7 +118,7 @@ Here is a simple page which demonstrates basic offline storage:
       // Construct an OfflineVideoSource.
       var offlineSource = new shaka.player.OfflineVideoSource(
           null, // groupId, not used when storing content.
-          window.estimator);
+          null); // estimator, optional parameter.
 
       // Listen for progress events from the OfflineVideoSource.
       offlineSource.addEventListener('progress', function(event) {
@@ -205,9 +202,6 @@ to be loaded into the {@link shaka.player.Player}.
     function initialize() {
       if (!window.player)
         initPlayer();
-
-      if (!window.estimator)
-        window.estimator = new shaka.util.EWMABandwidthEstimator();
     }
 
     function chooseTracks(videoSource) {
@@ -244,7 +238,7 @@ to be loaded into the {@link shaka.player.Player}.
       // Construct an OfflineVideoSource.
       var offlineSource = new shaka.player.OfflineVideoSource(
           null, // groupId, not used when storing content.
-          window.estimator);
+          null); // estimator, optional parameter.
 
       // Listen for progress events from the OfflineVideoSource.
       offlineSource.addEventListener('progress', function(event) {
@@ -272,7 +266,7 @@ to be loaded into the {@link shaka.player.Player}.
 <span class="newCode">    function playOfflineContent() {</span>
 <span class="newCode">      // Construct an OfflineVideoSource and load with player.</span>
 <span class="newCode">      var offlineSource =</span>
-<span class="newCode">          new shaka.player.OfflineVideoSource(window.groupId, window.estimator);</span>
+<span class="newCode">          new shaka.player.OfflineVideoSource(window.groupId, null);</span>
 <span class="newCode">      return window.player.load(offlineSource).then(</span>
 <span class="newCode">          function() {</span>
 <span class="newCode">            window.player.play();</span>
@@ -339,9 +333,6 @@ shaka.player.OfflineVideoSource} with a known group ID to delete content.
     function initialize() {
       if (!window.player)
         initPlayer();
-
-      if (!window.estimator)
-        window.estimator = new shaka.util.EWMABandwidthEstimator();
     }
 
     function chooseTracks(videoSource) {
@@ -378,7 +369,7 @@ shaka.player.OfflineVideoSource} with a known group ID to delete content.
       // Construct an OfflineVideoSource.
       var offlineSource = new shaka.player.OfflineVideoSource(
           null, // groupId, not used when storing content.
-          window.estimator);
+          null); // estimator, optional parameter.
 
       // Listen for progress events from the OfflineVideoSource.
       offlineSource.addEventListener('progress', function(event) {
@@ -406,7 +397,7 @@ shaka.player.OfflineVideoSource} with a known group ID to delete content.
     function playOfflineContent() {
       // Construct an OfflineVideoSource and load with player.
       var offlineSource =
-          new shaka.player.OfflineVideoSource(window.groupId, window.estimator);
+          new shaka.player.OfflineVideoSource(window.groupId, null);
       return window.player.load(offlineSource).then(
           function() {
             window.player.play();
@@ -417,7 +408,7 @@ shaka.player.OfflineVideoSource} with a known group ID to delete content.
 
 <span class="newCode">    function deleteOfflineContent() {</span>
 <span class="newCode">      var offlineSource =</span>
-<span class="newCode">          new shaka.player.OfflineVideoSource(window.groupId, window.estimator);</span>
+<span class="newCode">          new shaka.player.OfflineVideoSource(window.groupId, null);</span>
 <span class="newCode">      return offlineSource.deleteGroup().then(</span>
 <span class="newCode">          function() {</span>
 <span class="newCode">            console.log('Offline content with group ID ' + window.groupId +</span>
