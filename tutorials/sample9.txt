@@ -98,9 +98,31 @@
       );
     }
 
+    function playOfflineContent() {
+      // Construct an OfflineVideoSource and load with player.
+      var offlineSource =
+          new shaka.player.OfflineVideoSource(window.groupId, window.estimator);
+      return window.player.load(offlineSource).then(
+          function() {
+            window.player.play();
+            console.log('Offline content with group ID ' + window.groupId +
+                  ' ready for playback.');
+          });
+    }
+
+    function deleteOfflineContent() {
+      var offlineSource =
+          new shaka.player.OfflineVideoSource(window.groupId, window.estimator);
+      return offlineSource.deleteGroup().then(
+          function() {
+            console.log('Offline content with group ID ' + window.groupId +
+                        ' successfully deleted.');
+          });
+    }
+
     function test() {
       initialize();
-      storeContent().catch(
+      storeContent().then(deleteOfflineContent).catch(
           function(e) {
             console.error(e);
           });

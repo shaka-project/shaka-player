@@ -79,6 +79,14 @@ Here is a simple page which demonstrates basic offline storage:
       });
     }
 
+    function initialize() {
+      if (!window.player)
+        initPlayer();
+
+      if (!window.estimator)
+        window.estimator = new shaka.util.EWMABandwidthEstimator();
+    }
+
     function chooseTracks(videoSource) {
       var ids = [];
 
@@ -110,15 +118,10 @@ Here is a simple page which demonstrates basic offline storage:
     }
 
     function storeContent() {
-      if (!window.player) {
-        initPlayer();
-      }
-
       // Construct an OfflineVideoSource.
-      var estimator = new shaka.util.EWMABandwidthEstimator();
       var offlineSource = new shaka.player.OfflineVideoSource(
           null, // groupId, not used when storing content.
-          estimator);
+          window.estimator);
 
       // Listen for progress events from the OfflineVideoSource.
       offlineSource.addEventListener('progress', function(event) {
@@ -130,7 +133,7 @@ Here is a simple page which demonstrates basic offline storage:
       // Store content from MPD url.
       var mpdUrl = 'http://turtle-tube.appspot.com/t/t2/dash.mpd';
       var preferredLanguage = 'en-US';
-      offlineSource.store(
+      return offlineSource.store(
           mpdUrl,
           preferredLanguage,
           null, // interpretContentProtection, not needed for clear content.
@@ -138,15 +141,20 @@ Here is a simple page which demonstrates basic offline storage:
       ).then(
           function(groupId) {
             window.groupId = groupId;
-            console.log('Stored content under group ID ' + window.groupId);
+            console.log('Stored content under group ID ' + groupId);
           }
-      ).catch(
+      );
+    }
+
+    function test() {
+      initialize();
+      storeContent().catch(
           function(e) {
             console.error(e);
           });
     }
 
-    document.addEventListener('DOMContentLoaded', storeContent);
+    document.addEventListener('DOMContentLoaded', test);
   &lt;/script&gt;
 &lt;/html&gt;
 </code></pre>
@@ -156,16 +164,279 @@ Playing Stored Content
 </h3>
 
 <p>
-TODO
+In order to playback content, you need the group ID of the stored content. The
+group ID will be used to create a new {@link shaka.player.OfflineVideoSource}
+to be loaded into the {@link shaka.player.Player}.
 </p>
+
+<pre class="prettyprint source"><code id="sample8">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;title&gt;TurtleTube - Offline&lt;/title&gt;
+    &lt;!-- Load the Shaka Player library. --&gt;
+    &lt;script src="shaka-player.compiled.js"&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;video id="video"
+           width="640" height="480"
+           crossorigin="anonymous"
+           controls&gt;
+      Your browser does not support HTML5 video.
+    &lt;/video&gt;
+  &lt;/body&gt;
+  &lt;script&gt;
+    function initPlayer() {
+      // Install polyfills.
+      shaka.polyfill.installAll();
+
+      // Find the video element.
+      var video = document.getElementById('video');
+
+      // Attach the player to the window so that it can be easily debugged.
+      window.player = new shaka.player.Player(video);
+
+      // Listen for errors from the Player.
+      player.addEventListener('error', function(event) {
+        console.error(event);
+      });
+    }
+
+    function initialize() {
+      if (!window.player)
+        initPlayer();
+
+      if (!window.estimator)
+        window.estimator = new shaka.util.EWMABandwidthEstimator();
+    }
+
+    function chooseTracks(videoSource) {
+      var ids = [];
+
+      var videoTracks = videoSource.getVideoTracks();
+      if (videoTracks.length) {
+        videoTracks.sort(shaka.player.VideoTrack.compare);
+        // Choosing the smallest track.
+        var track = videoTracks[0];
+        ids.push(track.id);
+      }
+
+      var audioTracks = videoSource.getAudioTracks();
+      if (audioTracks.length) {
+        // The video source gives you the preferred language first.
+        // Remove any tracks from other languages first.
+        var lang = audioTracks[0].lang;
+        audioTracks = audioTracks.filter(function(track) {
+          return track.lang == lang;
+        });
+        // From what's left, choose the middle stream.  If we have high, medium,
+        // and low quality audio, this is medium.  If we only have high and low,
+        // this is high.
+        var index = Math.floor(audioTracks.length / 2);
+        ids.push(audioTracks[index].id);
+      }
+
+      // Return IDs of chosen tracks.
+      return Promise.resolve(ids);
+    }
+
+    function storeContent() {
+      // Construct an OfflineVideoSource.
+      var offlineSource = new shaka.player.OfflineVideoSource(
+          null, // groupId, not used when storing content.
+          window.estimator);
+
+      // Listen for progress events from the OfflineVideoSource.
+      offlineSource.addEventListener('progress', function(event) {
+        // Percentage complete is the detail field of the event.
+        console.log(
+            'Content storage is ' + event.detail.toFixed(2) + '% complete.');
+      });
+
+      // Store content from MPD url.
+      var mpdUrl = 'http://turtle-tube.appspot.com/t/t2/dash.mpd';
+      var preferredLanguage = 'en-US';
+      return offlineSource.store(
+          mpdUrl,
+          preferredLanguage,
+          null, // interpretContentProtection, not needed for clear content.
+          chooseTracks.bind(null, offlineSource)
+      ).then(
+          function(groupId) {
+            window.groupId = groupId;
+            console.log('Stored content under group ID ' + groupId);
+          }
+      );
+    }
+
+<span class="newCode">    function playOfflineContent() {</span>
+<span class="newCode">      // Construct an OfflineVideoSource and load with player.</span>
+<span class="newCode">      var offlineSource =</span>
+<span class="newCode">          new shaka.player.OfflineVideoSource(window.groupId, window.estimator);</span>
+<span class="newCode">      return window.player.load(offlineSource).then(</span>
+<span class="newCode">          function() {</span>
+<span class="newCode">            window.player.play();</span>
+<span class="newCode">            console.log('Offline content with group ID ' + window.groupId +</span>
+<span class="newCode">                  ' ready for playback.');</span>
+<span class="newCode">          });</span>
+<span class="newCode">    }</span>
+<span class="newCode"></span>
+    function test() {
+      initialize();
+<span class="newCode">      storeContent().then(playOfflineContent).catch(</span>
+          function(e) {
+            console.error(e);
+          });
+    }
+
+    document.addEventListener('DOMContentLoaded', test);
+  &lt;/script&gt;
+&lt;/html&gt;
+</code></pre>
 
 <h3 class="tutorial-heading">
 Deleting Stored Content
 </h3>
 
 <p>
-TODO
+Similar to playing stored content, you will create a new {@link
+shaka.player.OfflineVideoSource} with a known group ID to delete content.
 </p>
+
+<pre class="prettyprint source"><code id="sample9">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;title&gt;TurtleTube - Offline&lt;/title&gt;
+    &lt;!-- Load the Shaka Player library. --&gt;
+    &lt;script src="shaka-player.compiled.js"&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;video id="video"
+           width="640" height="480"
+           crossorigin="anonymous"
+           controls&gt;
+      Your browser does not support HTML5 video.
+    &lt;/video&gt;
+  &lt;/body&gt;
+  &lt;script&gt;
+    function initPlayer() {
+      // Install polyfills.
+      shaka.polyfill.installAll();
+
+      // Find the video element.
+      var video = document.getElementById('video');
+
+      // Attach the player to the window so that it can be easily debugged.
+      window.player = new shaka.player.Player(video);
+
+      // Listen for errors from the Player.
+      player.addEventListener('error', function(event) {
+        console.error(event);
+      });
+    }
+
+    function initialize() {
+      if (!window.player)
+        initPlayer();
+
+      if (!window.estimator)
+        window.estimator = new shaka.util.EWMABandwidthEstimator();
+    }
+
+    function chooseTracks(videoSource) {
+      var ids = [];
+
+      var videoTracks = videoSource.getVideoTracks();
+      if (videoTracks.length) {
+        videoTracks.sort(shaka.player.VideoTrack.compare);
+        // Choosing the smallest track.
+        var track = videoTracks[0];
+        ids.push(track.id);
+      }
+
+      var audioTracks = videoSource.getAudioTracks();
+      if (audioTracks.length) {
+        // The video source gives you the preferred language first.
+        // Remove any tracks from other languages first.
+        var lang = audioTracks[0].lang;
+        audioTracks = audioTracks.filter(function(track) {
+          return track.lang == lang;
+        });
+        // From what's left, choose the middle stream.  If we have high, medium,
+        // and low quality audio, this is medium.  If we only have high and low,
+        // this is high.
+        var index = Math.floor(audioTracks.length / 2);
+        ids.push(audioTracks[index].id);
+      }
+
+      // Return IDs of chosen tracks.
+      return Promise.resolve(ids);
+    }
+
+    function storeContent() {
+      // Construct an OfflineVideoSource.
+      var offlineSource = new shaka.player.OfflineVideoSource(
+          null, // groupId, not used when storing content.
+          window.estimator);
+
+      // Listen for progress events from the OfflineVideoSource.
+      offlineSource.addEventListener('progress', function(event) {
+        // Percentage complete is the detail field of the event.
+        console.log(
+            'Content storage is ' + event.detail.toFixed(2) + '% complete.');
+      });
+
+      // Store content from MPD url.
+      var mpdUrl = 'http://turtle-tube.appspot.com/t/t2/dash.mpd';
+      var preferredLanguage = 'en-US';
+      return offlineSource.store(
+          mpdUrl,
+          preferredLanguage,
+          null, // interpretContentProtection, not needed for clear content.
+          chooseTracks.bind(null, offlineSource)
+      ).then(
+          function(groupId) {
+            window.groupId = groupId;
+            console.log('Stored content under group ID ' + groupId);
+          }
+      );
+    }
+
+    function playOfflineContent() {
+      // Construct an OfflineVideoSource and load with player.
+      var offlineSource =
+          new shaka.player.OfflineVideoSource(window.groupId, window.estimator);
+      return window.player.load(offlineSource).then(
+          function() {
+            window.player.play();
+            console.log('Offline content with group ID ' + window.groupId +
+                  ' ready for playback.');
+          });
+    }
+
+<span class="newCode">    function deleteOfflineContent() {</span>
+<span class="newCode">      var offlineSource =</span>
+<span class="newCode">          new shaka.player.OfflineVideoSource(window.groupId, window.estimator);</span>
+<span class="newCode">      return offlineSource.deleteGroup().then(</span>
+<span class="newCode">          function() {</span>
+<span class="newCode">            console.log('Offline content with group ID ' + window.groupId +</span>
+<span class="newCode">                        ' successfully deleted.');</span>
+<span class="newCode">          });</span>
+<span class="newCode">    }</span>
+<span class="newCode"></span>
+    function test() {
+      initialize();
+<span class="newCode">      storeContent().then(deleteOfflineContent).catch(</span>
+          function(e) {
+            console.error(e);
+          });
+    }
+
+    document.addEventListener('DOMContentLoaded', test);
+  &lt;/script&gt;
+&lt;/html&gt;
+</code></pre>
 
 <h3 class="tutorial-heading">
 Offline Caveats

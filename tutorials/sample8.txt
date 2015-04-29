@@ -98,9 +98,21 @@
       );
     }
 
+    function playOfflineContent() {
+      // Construct an OfflineVideoSource and load with player.
+      var offlineSource =
+          new shaka.player.OfflineVideoSource(window.groupId, window.estimator);
+      return window.player.load(offlineSource).then(
+          function() {
+            window.player.play();
+            console.log('Offline content with group ID ' + window.groupId +
+                  ' ready for playback.');
+          });
+    }
+
     function test() {
       initialize();
-      storeContent().catch(
+      storeContent().then(playOfflineContent).catch(
           function(e) {
             console.error(e);
           });
