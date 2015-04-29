@@ -34,9 +34,6 @@
     function initialize() {
       if (!window.player)
         initPlayer();
-
-      if (!window.estimator)
-        window.estimator = new shaka.util.EWMABandwidthEstimator();
     }
 
     function chooseTracks(videoSource) {
@@ -73,7 +70,7 @@
       // Construct an OfflineVideoSource.
       var offlineSource = new shaka.player.OfflineVideoSource(
           null, // groupId, not used when storing content.
-          window.estimator);
+          null); // estimator, optional parameter.
 
       // Listen for progress events from the OfflineVideoSource.
       offlineSource.addEventListener('progress', function(event) {
