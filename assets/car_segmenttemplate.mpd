@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<MPD xmlns="urn:mpeg:DASH:schema:MPD:2011" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="urn:mpeg:DASH:schema:MPD:2011 DASH-MPD.xsd" minBufferTime="PT2S" type="dynamic" profiles="urn:mpeg:dash:profile:isoff-ondemand:2011" availabilityStartTime="2014-09-19T00:54:13" timeShiftBufferDepth="PT1800S">
+<MPD xmlns="urn:mpeg:DASH:schema:MPD:2011" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="urn:mpeg:DASH:schema:MPD:2011 DASH-MPD.xsd" minBufferTime="PT2S" type="static" profiles="urn:mpeg:dash:profile:isoff-ondemand:2011" availabilityStartTime="2014-09-19T00:54:13" timeShiftBufferDepth="PT1800S">
   <BaseURL>//storage.googleapis.com/gtv-videos-bucket/dash/CarWidevine/car.mpd</BaseURL>
   <Period start="PT0S">
     <AdaptationSet id="0">
