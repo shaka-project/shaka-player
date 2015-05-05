@@ -802,7 +802,7 @@ describe('Player', function() {
       video.autoplay = true;
       return player.load(newSource(plainManifest));
     }).then(function() {
-      return waitForMovement();
+      return waitForMovement(video, eventManager);
     }).then(function() {
       expect(video.currentTime).not.toBe(0);
       expect(player.getStats().bufferingHistory.length).toBe(0);

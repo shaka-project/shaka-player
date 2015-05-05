@@ -58,18 +58,17 @@ describe('AjaxRequest', function() {
     var testReferences = [
       new shaka.media.SegmentReference(0, 0, null, 0, null, testUrl)];
     var testIndex = new shaka.media.SegmentIndex(testReferences);
+    var testInitData = new ArrayBuffer(1024);
 
     var streamInfo = new shaka.media.StreamInfo();
     streamInfo.mimeType = 'video/phony';
     streamInfo.codecs = 'phony';
-    streamInfo.segmentInitializationData = new ArrayBuffer(1024);
-    streamInfo.segmentIndex = testIndex;
 
     var drmSchemeInfo = shaka.player.DrmSchemeInfo.createUnencrypted();
 
     var db = new shaka.util.ContentDatabase(null);
     db.setUpDatabase().then(function() {
-      return db.insertStream_(streamInfo, 1, 0);
+      return db.insertStream_(streamInfo, testIndex, testInitData, 1, 0);
     }).then(function(streamId) {
       db.closeDatabaseConnection();
       var request = new shaka.util.AjaxRequest('idb://' + streamId + '/0');

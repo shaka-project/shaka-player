@@ -162,7 +162,7 @@ describe('MpdProcessor', function() {
     });
   });
 
-  describe('buildStreamInfoFrom*', function() {
+  describe('createStreamInfoFromSegmentTemplate_', function() {
     var m;
     var p;
     var as;
@@ -191,20 +191,22 @@ describe('MpdProcessor', function() {
       m.periods.push(p);
     });
 
-    it('SegmentBase', function() {
+    it('index URL template', function() {
       st.mediaUrlTemplate = 'http://example.com/$Bandwidth$-media.mp4';
       st.indexUrlTemplate = 'http://example.com/$Bandwidth$-index.sidx';
       st.initializationUrlTemplate = 'http://example.com/$Bandwidth$-init.mp4';
 
       r1.baseUrl = new goog.Uri('http://example.com/');
       r1.bandwidth = 250000;
+      r1.mimeType = 'video/mp4';
 
       r2.baseUrl = new goog.Uri('http://example.com/');
       r2.bandwidth = 500000;
+      r2.mimeType = 'video/mp4';
 
-      processor.createManifestInfo_(m);
+      var manifestInfo = processor.createManifestInfo_(m, 1000);
 
-      var periodInfo = processor.manifestInfo.periodInfos[0];
+      var periodInfo = manifestInfo.periodInfos[0];
       expect(periodInfo).toBeTruthy();
 
       // Check the first StreamInfo.
@@ -213,24 +215,20 @@ describe('MpdProcessor', function() {
 
       expect(si1.bandwidth).toBe(250000);
 
-      expect(si1.mediaUrl).toBeTruthy();
-      expect(si1.mediaUrl.toString())
-          .toBe('http://example.com/250000-media.mp4');
-
-      var indexInfo1 = si1.segmentIndexInfo;
-      expect(indexInfo1).toBeTruthy();
-      expect(indexInfo1.url).toBeTruthy();
-      expect(indexInfo1.url.toString())
+      var indexMetadata1 = si1.segmentIndexSource.indexMetadata_;
+      expect(indexMetadata1).toBeTruthy();
+      expect(indexMetadata1.url).toBeTruthy();
+      expect(indexMetadata1.url.toString())
           .toBe('http://example.com/250000-index.sidx');
-      expect(indexInfo1.startByte).toBe(0);
-      expect(indexInfo1.endByte).toBeNull();
+      expect(indexMetadata1.startByte).toBe(0);
+      expect(indexMetadata1.endByte).toBeNull();
 
-      var initInfo1 = si1.segmentInitializationInfo;
-      expect(initInfo1.url).toBeTruthy();
-      expect(initInfo1.url.toString())
+      var initMetadata1 = si1.segmentInitSource.metadata_;
+      expect(initMetadata1.url).toBeTruthy();
+      expect(initMetadata1.url.toString())
           .toBe('http://example.com/250000-init.mp4');
-      expect(initInfo1.startByte).toBe(0);
-      expect(initInfo1.endByte).toBeNull();
+      expect(initMetadata1.startByte).toBe(0);
+      expect(initMetadata1.endByte).toBeNull();
 
       // Check the second StreamInfo.
       var si2 = periodInfo.streamSetInfos[0].streamInfos[1];
@@ -238,27 +236,23 @@ describe('MpdProcessor', function() {
 
       expect(si2.bandwidth).toBe(500000);
 
-      expect(si2.mediaUrl).toBeTruthy();
-      expect(si2.mediaUrl.toString())
-          .toBe('http://example.com/500000-media.mp4');
-
-      var indexInfo2 = si2.segmentIndexInfo;
-      expect(indexInfo2).toBeTruthy();
-      expect(indexInfo2.url).toBeTruthy();
-      expect(indexInfo2.url.toString())
+      var indexMetadata2 = si2.segmentIndexSource.indexMetadata_;
+      expect(indexMetadata2).toBeTruthy();
+      expect(indexMetadata2.url).toBeTruthy();
+      expect(indexMetadata2.url.toString())
           .toBe('http://example.com/500000-index.sidx');
-      expect(indexInfo2.startByte).toBe(0);
-      expect(indexInfo2.endByte).toBeNull();
+      expect(indexMetadata2.startByte).toBe(0);
+      expect(indexMetadata2.endByte).toBeNull();
 
-      var initInfo2 = si2.segmentInitializationInfo;
-      expect(initInfo2.url).toBeTruthy();
-      expect(initInfo2.url.toString())
+      var initMetadata2 = si2.segmentInitSource.metadata_;
+      expect(initMetadata2.url).toBeTruthy();
+      expect(initMetadata2.url.toString())
           .toBe('http://example.com/500000-init.mp4');
-      expect(initInfo2.startByte).toBe(0);
-      expect(initInfo2.endByte).toBeNull();
+      expect(initMetadata2.startByte).toBe(0);
+      expect(initMetadata2.endByte).toBeNull();
     });
 
-    it('SegmentTimeline w/o start times', function() {
+    it('SegmentTimeline w/o start times', function(done) {
       var tp1 = new mpd.SegmentTimePoint();
       tp1.duration = 9000 * 10;
       tp1.repeat = 1;
@@ -286,75 +280,81 @@ describe('MpdProcessor', function() {
       r2.baseUrl = new goog.Uri('http://example.com/');
       r2.bandwidth = 500000;
 
-      processor.createManifestInfo_(m);
+      var manifestInfo = processor.createManifestInfo_(m, 1000);
 
-      var periodInfo = processor.manifestInfo.periodInfos[0];
+      var periodInfo = manifestInfo.periodInfos[0];
       expect(periodInfo).toBeTruthy();
 
       // Check the first StreamInfo.
       var si1 = periodInfo.streamSetInfos[0].streamInfos[0];
       expect(si1).toBeTruthy();
 
-      var initInfo1 = si1.segmentInitializationInfo;
-      expect(initInfo1).toBeTruthy();
-      expect(initInfo1.url).toBeTruthy();
-      expect(initInfo1.url.toString())
+      var initMetadata1 = si1.segmentInitSource.metadata_;
+      expect(initMetadata1).toBeTruthy();
+      expect(initMetadata1.url).toBeTruthy();
+      expect(initMetadata1.url.toString())
           .toBe('http://example.com/250000-init.mp4');
-      expect(initInfo1.startByte).toBe(0);
-      expect(initInfo1.endByte).toBe(null);
+      expect(initMetadata1.startByte).toBe(0);
+      expect(initMetadata1.endByte).toBe(null);
 
-      var references1 = si1.segmentIndex.references_;
-      expect(references1).toBeTruthy();
-      expect(references1.length).toBe(3);
+      si1.segmentIndexSource.create().then(function(segmentIndex1) {
+        var references1 = segmentIndex1.references;
+        expect(references1).toBeTruthy();
+        expect(references1.length).toBe(3);
 
-      checkReference(
-          references1[0],
-          'http://example.com/1-0-250000-media.mp4',
-          0, 10);
+        checkReference(
+            references1[0],
+            'http://example.com/1-0-250000-media.mp4',
+            0, 10);
 
-      checkReference(
-          references1[1],
-          'http://example.com/2-90000-250000-media.mp4',
-          10, 20);
+        checkReference(
+            references1[1],
+            'http://example.com/2-90000-250000-media.mp4',
+            10, 20);
 
-      checkReference(
-          references1[2],
-          'http://example.com/3-180000-250000-media.mp4',
-          20, 40);
+        checkReference(
+            references1[2],
+            'http://example.com/3-180000-250000-media.mp4',
+            20, 40);
 
-      // Check the second StreamInfo.
-      var si2 = periodInfo.streamSetInfos[0].streamInfos[1];
-      expect(si2).toBeTruthy();
+        // Check the second StreamInfo.
+        var si2 = periodInfo.streamSetInfos[0].streamInfos[1];
+        expect(si2).toBeTruthy();
 
-      var initInfo2 = si2.segmentInitializationInfo;
-      expect(initInfo2).toBeTruthy();
-      expect(initInfo2.url).toBeTruthy();
-      expect(initInfo2.url.toString())
-          .toBe('http://example.com/500000-init.mp4');
-      expect(initInfo2.startByte).toBe(0);
-      expect(initInfo2.endByte).toBe(null);
+        var initMetadata2 = si2.segmentInitSource.metadata_;
+        expect(initMetadata2).toBeTruthy();
+        expect(initMetadata2.url).toBeTruthy();
+        expect(initMetadata2.url.toString())
+            .toBe('http://example.com/500000-init.mp4');
+        expect(initMetadata2.startByte).toBe(0);
+        expect(initMetadata2.endByte).toBe(null);
 
-      var references2 = si2.segmentIndex.references_;
-      expect(references2).toBeTruthy();
-      expect(references2.length).toBe(3);
+        return si2.segmentIndexSource.create();
+      }).then(function(segmentIndex2) {
+        var references2 = segmentIndex2.references;
+        expect(references2).toBeTruthy();
+        expect(references2.length).toBe(3);
 
-      checkReference(
-          references2[0],
-          'http://example.com/1-0-500000-media.mp4',
-          0, 10);
+        checkReference(
+            references2[0],
+            'http://example.com/1-0-500000-media.mp4',
+            0, 10);
 
-      checkReference(
-          references2[1],
-          'http://example.com/2-90000-500000-media.mp4',
-          10, 20);
+        checkReference(
+            references2[1],
+            'http://example.com/2-90000-500000-media.mp4',
+            10, 20);
 
-      checkReference(
-          references2[2],
-          'http://example.com/3-180000-500000-media.mp4',
-          20, 40);
+        checkReference(
+            references2[2],
+            'http://example.com/3-180000-500000-media.mp4',
+            20, 40);
+
+        done();
+      });
     });
 
-    it('SegmentTimeline w/ start times', function() {
+    it('SegmentTimeline w/ start times', function(done) {
       var tp1 = new mpd.SegmentTimePoint();
       tp1.startTime = 9000 * 100;
       tp1.duration = 9000 * 10;
@@ -384,44 +384,48 @@ describe('MpdProcessor', function() {
       // Only process the first Representation.
       as.representations.splice(1, 1);
 
-      processor.createManifestInfo_(m);
+      var manifestInfo = processor.createManifestInfo_(m, 1000);
 
-      var periodInfo = processor.manifestInfo.periodInfos[0];
+      var periodInfo = manifestInfo.periodInfos[0];
       expect(periodInfo).toBeTruthy();
 
       // Check the first StreamInfo.
       var si1 = periodInfo.streamSetInfos[0].streamInfos[0];
       expect(si1).toBeTruthy();
 
-      var initInfo1 = si1.segmentInitializationInfo;
-      expect(initInfo1).toBeTruthy();
-      expect(initInfo1.url).toBeTruthy();
-      expect(initInfo1.url.toString())
+      var initMetadata1 = si1.segmentInitSource.metadata_;
+      expect(initMetadata1).toBeTruthy();
+      expect(initMetadata1.url).toBeTruthy();
+      expect(initMetadata1.url.toString())
           .toBe('http://example.com/250000-init.mp4');
-      expect(initInfo1.startByte).toBe(0);
-      expect(initInfo1.endByte).toBe(null);
+      expect(initMetadata1.startByte).toBe(0);
+      expect(initMetadata1.endByte).toBe(null);
 
-      var references1 = si1.segmentIndex.references_;
-      expect(references1).toBeTruthy();
-      expect(references1.length).toBe(3);
+      si1.segmentIndexSource.create().then(function(segmentIndex1) {
+        var references1 = segmentIndex1.references;
+        expect(references1).toBeTruthy();
+        expect(references1.length).toBe(3);
 
-      checkReference(
-          references1[0],
-          'http://example.com/10-900000-250000-media.mp4',
-          100, 110);
+        checkReference(
+            references1[0],
+            'http://example.com/10-900000-250000-media.mp4',
+            100, 110);
 
-      checkReference(
-          references1[1],
-          'http://example.com/11-990000-250000-media.mp4',
-          110, 120);
+        checkReference(
+            references1[1],
+            'http://example.com/11-990000-250000-media.mp4',
+            110, 120);
 
-      checkReference(
-          references1[2],
-          'http://example.com/12-1080000-250000-media.mp4',
-          120, 140);
+        checkReference(
+            references1[2],
+            'http://example.com/12-1080000-250000-media.mp4',
+            120, 140);
+
+        done();
+      });
     });
 
-    it('segment duration w/o AST', function() {
+    it('segment duration w/o AST', function(done) {
       st.timescale = 9000;
       st.presentationTimeOffset = 0;
       st.segmentDuration = 9000 * 10;
@@ -439,75 +443,81 @@ describe('MpdProcessor', function() {
       // an explicit Period duration.
       p.duration = 30;
 
-      processor.createManifestInfo_(m);
+      var manifestInfo = processor.createManifestInfo_(m, 1000);
 
-      var periodInfo = processor.manifestInfo.periodInfos[0];
+      var periodInfo = manifestInfo.periodInfos[0];
       expect(periodInfo).toBeTruthy();
 
       // Check the first StreamInfo.
       var si1 = periodInfo.streamSetInfos[0].streamInfos[0];
       expect(si1).toBeTruthy();
 
-      var initInfo1 = si1.segmentInitializationInfo;
-      expect(initInfo1).toBeTruthy();
-      expect(initInfo1.url).toBeTruthy();
-      expect(initInfo1.url.toString())
+      var initMetadata1 = si1.segmentInitSource.metadata_;
+      expect(initMetadata1).toBeTruthy();
+      expect(initMetadata1.url).toBeTruthy();
+      expect(initMetadata1.url.toString())
           .toBe('http://example.com/250000-init.mp4');
-      expect(initInfo1.startByte).toBe(0);
-      expect(initInfo1.endByte).toBe(null);
+      expect(initMetadata1.startByte).toBe(0);
+      expect(initMetadata1.endByte).toBe(null);
 
-      var references1 = si1.segmentIndex.references_;
-      expect(references1).toBeTruthy();
-      expect(references1.length).toBe(3);
+      si1.segmentIndexSource.create().then(function(segmentIndex1) {
+        var references1 = segmentIndex1.references;
+        expect(references1).toBeTruthy();
+        expect(references1.length).toBe(3);
 
-      checkReference(
-          references1[0],
-          'http://example.com/5-360000-250000-media.mp4',
-          0, 10);
+        checkReference(
+            references1[0],
+            'http://example.com/5-360000-250000-media.mp4',
+            0, 10);
 
-      checkReference(
-          references1[1],
-          'http://example.com/6-450000-250000-media.mp4',
-          10, 20);
+        checkReference(
+            references1[1],
+            'http://example.com/6-450000-250000-media.mp4',
+            10, 20);
 
-      checkReference(
-          references1[2],
-          'http://example.com/7-540000-250000-media.mp4',
-          20, 30);
+        checkReference(
+            references1[2],
+            'http://example.com/7-540000-250000-media.mp4',
+            20, 30);
 
-      // Check the second StreamInfo.
-      var si2 = periodInfo.streamSetInfos[0].streamInfos[1];
-      expect(si2).toBeTruthy();
+        // Check the second StreamInfo.
+        var si2 = periodInfo.streamSetInfos[0].streamInfos[1];
+        expect(si2).toBeTruthy();
 
-      var initInfo2 = si2.segmentInitializationInfo;
-      expect(initInfo2).toBeTruthy();
-      expect(initInfo2.url).toBeTruthy();
-      expect(initInfo2.url.toString())
-          .toBe('http://example.com/500000-init.mp4');
-      expect(initInfo2.startByte).toBe(0);
-      expect(initInfo2.endByte).toBe(null);
+        var initMetadata2 = si2.segmentInitSource.metadata_;
+        expect(initMetadata2).toBeTruthy();
+        expect(initMetadata2.url).toBeTruthy();
+        expect(initMetadata2.url.toString())
+            .toBe('http://example.com/500000-init.mp4');
+        expect(initMetadata2.startByte).toBe(0);
+        expect(initMetadata2.endByte).toBe(null);
 
-      var references2 = si2.segmentIndex.references_;
-      expect(references2).toBeTruthy();
-      expect(references2.length).toBe(3);
+        return si2.segmentIndexSource.create();
+      }).then(function(segmentIndex2) {
+        var references2 = segmentIndex2.references;
+        expect(references2).toBeTruthy();
+        expect(references2.length).toBe(3);
 
-      checkReference(
-          references2[0],
-          'http://example.com/5-360000-500000-media.mp4',
-          0, 10);
+        checkReference(
+            references2[0],
+            'http://example.com/5-360000-500000-media.mp4',
+            0, 10);
 
-      checkReference(
-          references2[1],
-          'http://example.com/6-450000-500000-media.mp4',
-          10, 20);
+        checkReference(
+            references2[1],
+            'http://example.com/6-450000-500000-media.mp4',
+            10, 20);
 
-      checkReference(
-          references2[2],
-          'http://example.com/7-540000-500000-media.mp4',
-          20, 30);
+        checkReference(
+            references2[2],
+            'http://example.com/7-540000-500000-media.mp4',
+            20, 30);
+
+        done();
+      });
     });
 
-    it('segment duration w/ AST', function() {
+    it('segment duration w/ AST', function(done) {
       st.timescale = 9000;
       st.presentationTimeOffset = 0;
       st.segmentDuration = 9000 * 10;
@@ -523,81 +533,81 @@ describe('MpdProcessor', function() {
 
       // Hijack shaka.util.Clock.now()
       var originalNow = shaka.util.Clock.now;
-      var theTime = originalNow();
+      var manifestCreationTime = Math.round(originalNow() / 1000.0);
       shaka.util.Clock.now = function() {
-        return theTime;
+        return 1000.0 * manifestCreationTime;
       };
 
       var secondsSinceStart = 60 * 60;
 
-      m.availabilityStartTime = (theTime / 1000.0) - secondsSinceStart;
-      m.suggestedPresentationDelay = 0;
-      m.timeShiftBufferDepth = 0;
+      m.type = 'dynamic';
+      m.availabilityStartTime = manifestCreationTime - secondsSinceStart;
+      m.suggestedPresentationDelay =
+          shaka.dash.mpd.DEFAULT_SUGGESTED_PRESENTATION_DELAY_;
+      m.timeShiftBufferDepth = 60;
       m.minBufferTime = 0;
 
-      // Set @minUpdatePeriod and @type so that the MPD is treated as dynamic.
-      m.type = 'dynamic';
-      m.minUpdatePeriod = 30;
+      var manifestInfo = processor.createManifestInfo_(m, manifestCreationTime);
 
-      processor.createManifestInfo_(m);
-
-      // Replace fake now().
-      shaka.util.Clock.now = originalNow;
-
-      var periodInfo = processor.manifestInfo.periodInfos[0];
+      var periodInfo = manifestInfo.periodInfos[0];
       expect(periodInfo).toBeTruthy();
 
       var scaledSegmentDuration = st.segmentDuration / st.timescale;
 
-      // The fist segment is the earliest available one. Note that
-      // @timeShiftBufferDepth is 0.
-      var firstSegmentNumber =
-          Math.floor((secondsSinceStart - (2 * scaledSegmentDuration)) /
+      // The first segment is the earliest available one.
+      var earliestSegmentNumber =
+          Math.ceil((secondsSinceStart -
+                     (2 * scaledSegmentDuration) -
+                     m.timeShiftBufferDepth) / scaledSegmentDuration) + 1;
+
+      var latestAvailableTimestamp = secondsSinceStart - scaledSegmentDuration;
+      var latestAvailableSegmentStartTime =
+          Math.floor(latestAvailableTimestamp / scaledSegmentDuration) *
+          scaledSegmentDuration;
+      var currentSegmentNumber =
+          Math.floor((latestAvailableSegmentStartTime -
+                      m.suggestedPresentationDelay) /
                      scaledSegmentDuration) + 1;
 
-      // At least @minimumUpdatePeriod worth of segments should be generated.
       var expectedNumSegments =
-          Math.floor(m.minUpdatePeriod / scaledSegmentDuration);
+          currentSegmentNumber - earliestSegmentNumber + 1;
 
       // Check the first StreamInfo.
       var si1 = periodInfo.streamSetInfos[0].streamInfos[0];
       expect(si1).toBeTruthy();
 
-      var references = si1.segmentIndex.references_;
-      expect(references).toBeTruthy();
-      expect(references.length).toBeGreaterThan(expectedNumSegments - 1);
+      si1.segmentIndexSource.create().then(function(segmentIndex) {
+        var references = segmentIndex.references;
+        expect(references).toBeTruthy();
+        expect(references.length).toBe(expectedNumSegments);
 
-      for (var segmentNumber = firstSegmentNumber;
-           segmentNumber - firstSegmentNumber < expectedNumSegments;
-           ++segmentNumber) {
-        var expectedNumberReplacement =
-            (segmentNumber - 1) + st.startNumber;
-        var expectedTimeReplacement =
-            ((segmentNumber - 1) + (st.startNumber - 1)) *
-            st.segmentDuration;
-        var expectedUrl = 'http://example.com/' +
-            expectedNumberReplacement + '-' +
-            expectedTimeReplacement + '-250000-media.mp4';
+        for (var segmentNumber = earliestSegmentNumber;
+             segmentNumber - earliestSegmentNumber < expectedNumSegments;
+             ++segmentNumber) {
+          var expectedNumberReplacement = (segmentNumber - 1) + st.startNumber;
+          var expectedTimeReplacement =
+              ((segmentNumber - 1) + (st.startNumber - 1)) * st.segmentDuration;
+          var expectedUrl = 'http://example.com/' +
+              expectedNumberReplacement + '-' +
+              expectedTimeReplacement + '-250000-media.mp4';
 
-        var expectedStartTime =
-            (segmentNumber - 1) * st.segmentDuration;
-        var expectedScaledStartTime = expectedStartTime / st.timescale;
+          var expectedStartTime = (segmentNumber - 1) * st.segmentDuration;
+          var expectedScaledStartTime = expectedStartTime / st.timescale;
 
-        checkReference(
-            references[segmentNumber - firstSegmentNumber],
-            expectedUrl,
-            expectedScaledStartTime, expectedScaledStartTime + 10);
-      }
+          checkReference(
+              references[segmentNumber - earliestSegmentNumber],
+              expectedUrl,
+              expectedScaledStartTime, expectedScaledStartTime + 10);
+        }
 
-      // Check |currentSegmentStartTime|.
-      var currentSegmentNumber =
-          Math.floor((secondsSinceStart - scaledSegmentDuration) /
-                     scaledSegmentDuration) + 1;
-      expect(si1.currentSegmentStartTime).toBe(
-          (currentSegmentNumber - 1) * scaledSegmentDuration);
+        // Replace fake now().
+        shaka.util.Clock.now = originalNow;
+
+        done();
+      });
     });
 
-    it('SegmentTimeline w/ gaps', function() {
+    it('SegmentTimeline w/ gaps', function(done) {
       var tp1 = new mpd.SegmentTimePoint();
       tp1.startTime = 10;
       tp1.duration = 10;
@@ -629,38 +639,42 @@ describe('MpdProcessor', function() {
       // Only process the first Representation.
       as.representations.splice(1, 1);
 
-      processor.createManifestInfo_(m);
+      var manifestInfo = processor.createManifestInfo_(m, 1000);
 
-      var periodInfo = processor.manifestInfo.periodInfos[0];
+      var periodInfo = manifestInfo.periodInfos[0];
       expect(periodInfo).toBeTruthy();
 
       // Check the first StreamInfo.
       var si1 = periodInfo.streamSetInfos[0].streamInfos[0];
       expect(si1).toBeTruthy();
 
-      var references = si1.segmentIndex.references_;
-      expect(references).toBeTruthy();
-      expect(references.length).toBe(3);
+      si1.segmentIndexSource.create().then(function(segmentIndex) {
+        var references = segmentIndex.references;
+        expect(references).toBeTruthy();
+        expect(references.length).toBe(3);
 
-      // Duration should stretch to the beginning of the next segment.
-      checkReference(
-          references[0],
-          'http://example.com/1-10-250000-media.mp4',
-          10, 21);
+        // Duration should stretch to the beginning of the next segment.
+        checkReference(
+            references[0],
+            'http://example.com/1-10-250000-media.mp4',
+            10, 21);
 
-      // Duration should stretch to the beginning of the next segment.
-      checkReference(
-          references[1],
-          'http://example.com/2-21-250000-media.mp4',
-          21, 32);
+        // Duration should stretch to the beginning of the next segment.
+        checkReference(
+            references[1],
+            'http://example.com/2-21-250000-media.mp4',
+            21, 32);
 
-      checkReference(
-          references[2],
-          'http://example.com/3-32-250000-media.mp4',
-          32, 42);
+        checkReference(
+            references[2],
+            'http://example.com/3-32-250000-media.mp4',
+            32, 42);
+
+        done();
+      });
     });
 
-    it('SegmentTimeline w/ overlaps', function() {
+    it('SegmentTimeline w/ overlaps', function(done) {
       var tp1 = new mpd.SegmentTimePoint();
       tp1.startTime = 10;
       tp1.duration = 11;
@@ -692,171 +706,39 @@ describe('MpdProcessor', function() {
       // Only process the first Representation.
       as.representations.splice(1, 1);
 
-      processor.createManifestInfo_(m);
+      var manifestInfo = processor.createManifestInfo_(m, 1000);
 
-      var periodInfo = processor.manifestInfo.periodInfos[0];
+      var periodInfo = manifestInfo.periodInfos[0];
       expect(periodInfo).toBeTruthy();
 
       // Check the first StreamInfo.
       var si1 = periodInfo.streamSetInfos[0].streamInfos[0];
       expect(si1).toBeTruthy();
 
-      var references = si1.segmentIndex.references_;
-      expect(references).toBeTruthy();
-      expect(references.length).toBe(3);
+      si1.segmentIndexSource.create().then(function(segmentIndex) {
+        var references = segmentIndex.references;
+        expect(references).toBeTruthy();
+        expect(references.length).toBe(3);
 
-      // Duration should compress to the beginning of the next segment.
-      checkReference(
-          references[0],
-          'http://example.com/1-10-250000-media.mp4',
-          10, 20);
+        // Duration should compress to the beginning of the next segment.
+        checkReference(
+            references[0],
+            'http://example.com/1-10-250000-media.mp4',
+            10, 20);
 
-      // Duration should compress to the beginning of the next segment.
-      checkReference(
-          references[1],
-          'http://example.com/2-20-250000-media.mp4',
-          20, 29);
+        // Duration should compress to the beginning of the next segment.
+        checkReference(
+            references[1],
+            'http://example.com/2-20-250000-media.mp4',
+            20, 29);
 
-      checkReference(
-          references[2],
-          'http://example.com/3-29-250000-media.mp4',
-          29, 39);
-    });
-  });
+        checkReference(
+            references[2],
+            'http://example.com/3-29-250000-media.mp4',
+            29, 39);
 
-  describe('fillUrlTemplate_', function() {
-    it('handles a single RepresentationID identifier', function() {
-      expect(
-          processor.fillUrlTemplate_(
-              '/example/$RepresentationID$.mp4',
-              100, null, null, null).toString()).toBe('/example/100.mp4');
-
-      // RepresentationID cannot use a width specifier.
-      expect(
-          processor.fillUrlTemplate_(
-              '/example/$RepresentationID%01d$.mp4',
-              100, null, null, null).toString()).toBe('/example/100.mp4');
-
-      expect(
-          processor.fillUrlTemplate_(
-              '/example/$RepresentationID$.mp4',
-              null, null, null, null).toString())
-                  .toBe('/example/$RepresentationID$.mp4');
-    });
-
-    it('handles a single Number identifier', function() {
-      expect(
-          processor.fillUrlTemplate_(
-              '/example/$Number$.mp4',
-              null, 100, null, null).toString()).toBe('/example/100.mp4');
-
-      expect(
-          processor.fillUrlTemplate_(
-              '/example/$Number%05d$.mp4',
-              null, 100, null, null).toString()).toBe('/example/00100.mp4');
-
-      expect(
-          processor.fillUrlTemplate_(
-              '/example/$Number$.mp4',
-              null, null, null, null).toString())
-                  .toBe('/example/$Number$.mp4');
-    });
-
-    it('handles a single Bandwidth identifier', function() {
-      expect(
-          processor.fillUrlTemplate_(
-              '/example/$Bandwidth$.mp4',
-              null, null, 100, null).toString()).toBe('/example/100.mp4');
-
-      expect(
-          processor.fillUrlTemplate_(
-              '/example/$Bandwidth%05d$.mp4',
-              null, null, 100, null).toString()).toBe('/example/00100.mp4');
-
-      expect(
-          processor.fillUrlTemplate_(
-              '/example/$Bandwidth$.mp4',
-              null, null, null, null).toString())
-                  .toBe('/example/$Bandwidth$.mp4');
-    });
-
-    it('handles a single Time identifier', function() {
-      expect(
-          processor.fillUrlTemplate_(
-              '/example/$Time$.mp4',
-              null, null, null, 100).toString()).toBe('/example/100.mp4');
-
-      expect(
-          processor.fillUrlTemplate_(
-              '/example/$Time%05d$.mp4',
-              null, null, null, 100).toString()).toBe('/example/00100.mp4');
-
-      expect(
-          processor.fillUrlTemplate_(
-              '/example/$Time$.mp4',
-              null, null, null, null).toString())
-                  .toBe('/example/$Time$.mp4');
-    });
-
-    it('handles multiple identifiers', function() {
-      expect(
-          processor.fillUrlTemplate_(
-              '/example/$RepresentationID$_$Number$_$Bandwidth$_$Time$.mp4',
-              1, 2, 3, 4).toString()).toBe('/example/1_2_3_4.mp4');
-
-      // No spaces.
-      expect(
-          processor.fillUrlTemplate_(
-              '/example/$RepresentationID$$Number$$Bandwidth$$Time$.mp4',
-              1, 2, 3, 4).toString()).toBe('/example/1234.mp4');
-
-      // Different order.
-      expect(
-          processor.fillUrlTemplate_(
-              '/example/$Bandwidth$_$Time$_$RepresentationID$_$Number$.mp4',
-              1, 2, 3, 4).toString()).toBe('/example/3_4_1_2.mp4');
-
-      // Single width.
-      expect(
-          processor.fillUrlTemplate_(
-              '$RepresentationID$_$Number%01d$_$Bandwidth%01d$_$Time%01d$',
-              1, 2, 3, 400).toString()).toBe('1_2_3_400');
-
-      // Different widths.
-      expect(
-          processor.fillUrlTemplate_(
-              '$RepresentationID$_$Number%02d$_$Bandwidth%02d$_$Time%02d$',
-              1, 2, 3, 4).toString()).toBe('1_02_03_04');
-
-      // Double $$.
-      expect(
-          processor.fillUrlTemplate_(
-              '$$/$RepresentationID$$$$Number$$$$Bandwidth$$$$Time$$$.$$',
-              1, 2, 3, 4).toString()).toBe('$/1$2$3$4$.$');
-    });
-
-    it('handles invalid identifiers', function() {
-      expect(
-          processor.fillUrlTemplate_(
-              '/example/$Garbage$.mp4',
-              1, 2, 3, 4).toString()).toBe('/example/$Garbage$.mp4');
-
-      expect(
-          processor.fillUrlTemplate_(
-              '/example/$RepresentationID%$',
-              1, 2, 3, 4)).toBeNull();
-    });
-
-    it('handles partial identifiers', function() {
-      expect(
-          processor.fillUrlTemplate_(
-              '/example/$Time.mp4',
-              1, 2, 3, 4).toString()).toBe('/example/$Time.mp4');
-
-      expect(
-          processor.fillUrlTemplate_(
-              '/example/$Time%.mp4',
-              1, 2, 3, 4)).toBeNull();
+        done();
+      });
     });
   });
 
@@ -899,7 +781,7 @@ describe('MpdProcessor', function() {
         m.periods.push(p);
       });
 
-      it('allows MPD and segment duration', function() {
+      it('allows MPD and segment duration', function(done) {
         st.mediaUrlTemplate = '$Number$-$Bandwidth$-media.mp4';
         st.timescale = 9000;
         st.segmentDuration = 90000;
@@ -907,15 +789,19 @@ describe('MpdProcessor', function() {
         p.start = 0;
         m.mediaPresentationDuration = 100;
 
-        processor.process(m);
+        var manifestInfo = processor.process(m);
 
-        var periodInfo = processor.manifestInfo.periodInfos[0];
+        var periodInfo = manifestInfo.periodInfos[0];
         var si1 = periodInfo.streamSetInfos[0].streamInfos[0];
-        var references = si1.segmentIndex.references_;
-        expect(references.length).toBe(10);
+
+        si1.segmentIndexSource.create().then(function(segmentIndex) {
+          var references = segmentIndex.references;
+          expect(references.length).toBe(10);
+          done();
+        });
       });
 
-      it('allows Period and segment duration', function() {
+      it('allows Period and segment duration', function(done) {
         st.mediaUrlTemplate = '$Number$-$Bandwidth$-media.mp4';
         st.timescale = 9000;
         st.segmentDuration = 90000;
@@ -923,12 +809,16 @@ describe('MpdProcessor', function() {
         p.start = 0;
         p.duration = 100;
 
-        processor.process(m);
+        var manifestInfo = processor.process(m);
 
-        var periodInfo = processor.manifestInfo.periodInfos[0];
+        var periodInfo = manifestInfo.periodInfos[0];
         var si1 = periodInfo.streamSetInfos[0].streamInfos[0];
-        var references = si1.segmentIndex.references_;
-        expect(references.length).toBe(10);
+
+        si1.segmentIndexSource.create().then(function(segmentIndex) {
+          var references = segmentIndex.references;
+          expect(references.length).toBe(10);
+          done();
+        });
       });
 
       it('derives period duration from MPD', function() {
@@ -968,7 +858,7 @@ describe('MpdProcessor', function() {
         m.periods.push(p);
       });
 
-      it('allows no segment duration with one segment', function() {
+      it('allows no segment duration with one segment', function(done) {
         sl.timescale = 9000;
 
         // Add just one SegmentUrl.
@@ -978,18 +868,22 @@ describe('MpdProcessor', function() {
 
         p.start = 0;
 
-        processor.process(m);
+        var manifestInfo = processor.process(m);
 
-        var periodInfo = processor.manifestInfo.periodInfos[0];
+        var periodInfo = manifestInfo.periodInfos[0];
         var si1 = periodInfo.streamSetInfos[0].streamInfos[0];
 
-        var references = si1.segmentIndex.references_;
-        expect(references.length).toBe(1);
+        si1.segmentIndexSource.create().then(function(segmentIndex) {
+          var references = segmentIndex.references;
+          expect(references.length).toBe(1);
 
-        checkReference(
-            references[0],
-            'http://example.com/video.mp4',
-            0, null);
+          checkReference(
+              references[0],
+              'http://example.com/video.mp4',
+              0, null);
+
+          done();
+        });
       });
 
       it('disallows no segment duration with multiple segments', function() {
@@ -1007,9 +901,9 @@ describe('MpdProcessor', function() {
 
         p.start = 0;
 
-        processor.process(m);
+        var manifestInfo = processor.process(m);
 
-        var periodInfo = processor.manifestInfo.periodInfos[0];
+        var periodInfo = manifestInfo.periodInfos[0];
         expect(periodInfo.streamSetInfos[0].streamInfos.length).toBe(0);
       });
     });  // describe SegmentList
@@ -1029,8 +923,9 @@ describe('MpdProcessor', function() {
         sb = new mpd.SegmentBase();
 
         r.segmentBase = sb;
-        r.bandwidth = 250000;
         r.baseUrl = new goog.Uri('http://example.com');
+        r.bandwidth = 250000;
+        r.mimeType = 'video/mp4';
 
         as.representations.push(r);
         p.adaptationSets.push(as);
@@ -1040,9 +935,9 @@ describe('MpdProcessor', function() {
       it('disallows no segment metadata', function() {
         p.start = 0;
 
-        processor.process(m);
+        var manifestInfo = processor.process(m);
 
-        var periodInfo = processor.manifestInfo.periodInfos[0];
+        var periodInfo = manifestInfo.periodInfos[0];
         expect(periodInfo.streamSetInfos[0].streamInfos.length).toBe(0);
       });
 
@@ -1050,9 +945,9 @@ describe('MpdProcessor', function() {
         r.baseUrl = null;
         p.start = 0;
 
-        processor.process(m);
+        var manifestInfo = processor.process(m);
 
-        var periodInfo = processor.manifestInfo.periodInfos[0];
+        var periodInfo = manifestInfo.periodInfos[0];
         expect(periodInfo.streamSetInfos[0].streamInfos.length).toBe(0);
       });
     });  // describe SegmentBase

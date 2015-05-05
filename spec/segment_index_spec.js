@@ -16,14 +16,16 @@
  * @fileoverview segment_index.js unit tests.
  */
 
-goog.require('shaka.media.IsobmffSegmentIndexParser');
+goog.require('shaka.dash.LiveSegmentIndex');
+goog.require('shaka.media.Mp4SegmentIndexParser');
 goog.require('shaka.media.SegmentIndex');
 goog.require('shaka.media.SegmentReference');
 goog.require('shaka.media.WebmSegmentIndexParser');
 goog.require('shaka.util.PublicPromise');
 
-// TODO: Move IsobmffSegmentIndexParser and WebmSegmentIndexParser tests into
+// TODO: Move Mp4SegmentIndexParser and WebmSegmentIndexParser tests into
 // their own respective files.
+// TODO: Write tests for evict.
 describe('SegmentIndex', function() {
   var sidxData;
   var sidxDataWithNonZeroStart;
@@ -92,9 +94,9 @@ describe('SegmentIndex', function() {
     // The SIDX data was obtained from an MP4 file where the SIDX offset was
     // 708. We use this value here since the expected offsets for parsing this
     // SIDX are known.
-    var parser = new shaka.media.IsobmffSegmentIndexParser(
-        'http://example.com/video');
-    var references = parser.parse(null, new DataView(sidxData), 708);
+    var parser = new shaka.media.Mp4SegmentIndexParser();
+    var references = parser.parse(
+        new DataView(sidxData), 708, 'http://example.com/video');
     expect(references).not.toBeNull();
 
     // These values are rounded.
@@ -125,10 +127,11 @@ describe('SegmentIndex', function() {
     // The SIDX data was obtained from an MP4 file where the SIDX offset was
     // 1322. We use this value here since the expected offsets for parsing this
     // SIDX are known.
-    var parser = new shaka.media.IsobmffSegmentIndexParser(
-        'http://example.com/video');
-    var references =
-        parser.parse(null, new DataView(sidxDataWithNonZeroStart), 1322);
+    var parser = new shaka.media.Mp4SegmentIndexParser();
+
+    var references = parser.parse(new DataView(sidxDataWithNonZeroStart),
+                                  1322,
+                                  'http://example.com/video');
     expect(references).not.toBeNull();
 
     // These values are rounded.
@@ -150,10 +153,10 @@ describe('SegmentIndex', function() {
   });
 
   it('parses a WebM segment index', function() {
-    var parser = new shaka.media.WebmSegmentIndexParser(
-        'http://example.com/video');
-    var references =
-        parser.parse(new DataView(webmData), new DataView(cuesData), 0);
+    var parser = new shaka.media.WebmSegmentIndexParser();
+    var references = parser.parse(new DataView(cuesData),
+                                  new DataView(webmData),
+                                  'http://example.com/video');
     expect(references).not.toBeNull();
 
     // These values are rounded.
@@ -176,10 +179,10 @@ describe('SegmentIndex', function() {
     var index;
 
     beforeEach(function() {
-      var parser = new shaka.media.WebmSegmentIndexParser(
-          'http://example.com/video');
-      var references =
-          parser.parse(new DataView(webmData), new DataView(cuesData), 0);
+      var parser = new shaka.media.WebmSegmentIndexParser();
+      var references = parser.parse(new DataView(cuesData),
+                                    new DataView(webmData),
+                                    'http://example.com/video');
       expect(references).not.toBeNull();
 
       index = new shaka.media.SegmentIndex(references);
@@ -300,7 +303,7 @@ describe('SegmentIndex', function() {
       var index2 = new shaka.media.SegmentIndex(references2);
 
       index2.merge(index1);
-      var merged = index2.references_;
+      var merged = index2.references;
 
       // All new segments should be ignored.
       expect(merged.length).toBe(1);
@@ -317,7 +320,7 @@ describe('SegmentIndex', function() {
       var index2 = new shaka.media.SegmentIndex(references2);
 
       index2.merge(index1);
-      var merged = index2.references_;
+      var merged = index2.references;
 
       // All new segments should be ignored.
       expect(merged.length).toBe(1);
@@ -334,7 +337,7 @@ describe('SegmentIndex', function() {
       var index2 = new shaka.media.SegmentIndex(references2);
 
       index2.merge(index1);
-      var merged = index2.references_;
+      var merged = index2.references;
 
       // All new segments should be ignored.
       expect(merged.length).toBe(1);
@@ -351,7 +354,7 @@ describe('SegmentIndex', function() {
       var index2 = new shaka.media.SegmentIndex(references2);
 
       index2.merge(index1);
-      var merged = index2.references_;
+      var merged = index2.references;
 
       expect(merged.length).toBe(3);
       checkReference(merged[0], url(0), 0, 10);
@@ -370,7 +373,7 @@ describe('SegmentIndex', function() {
       var index2 = new shaka.media.SegmentIndex(references2);
 
       index2.merge(index1);
-      var merged = index2.references_;
+      var merged = index2.references;
 
       expect(merged.length).toBe(3);
       checkReference(merged[0], url(0), 0, 10);
@@ -389,7 +392,7 @@ describe('SegmentIndex', function() {
       var index2 = new shaka.media.SegmentIndex(references2);
 
       index2.merge(index1);
-      var merged = index2.references_;
+      var merged = index2.references;
 
       expect(merged.length).toBe(3);
       checkReference(merged[0], url(0), 0, 10);
@@ -409,7 +412,7 @@ describe('SegmentIndex', function() {
       var index2 = new shaka.media.SegmentIndex(references2);
 
       index1.merge(index2);
-      var merged = index1.references_;
+      var merged = index1.references;
 
       expect(merged.length).toBe(5);
       checkReference(merged[0], url(0), 0, 10);
@@ -431,7 +434,7 @@ describe('SegmentIndex', function() {
       var index2 = new shaka.media.SegmentIndex(references2);
 
       index1.merge(index2);
-      var merged = index1.references_;
+      var merged = index1.references;
 
       expect(merged.length).toBe(4);
       checkReference(merged[0], url(0), 0, 10);
@@ -452,7 +455,7 @@ describe('SegmentIndex', function() {
       var index2 = new shaka.media.SegmentIndex(references2);
 
       index1.merge(index2);
-      var merged = index1.references_;
+      var merged = index1.references;
 
       expect(merged.length).toBe(6);
       checkReference(merged[0], url(0), 0, 10);
@@ -475,7 +478,7 @@ describe('SegmentIndex', function() {
       var index2 = new shaka.media.SegmentIndex(references2);
 
       index1.merge(index2);
-      var merged = index1.references_;
+      var merged = index1.references;
 
       expect(merged.length).toBe(6);
       checkReference(merged[0], url(0), 0, 10);
@@ -497,7 +500,7 @@ describe('SegmentIndex', function() {
       var index2 = new shaka.media.SegmentIndex(references2);
 
       index1.merge(index2);
-      var merged = index1.references_;
+      var merged = index1.references;
 
       expect(merged.length).toBe(3);
       checkReference(merged[0], url(10), 10, 20);
@@ -516,64 +519,12 @@ describe('SegmentIndex', function() {
       var index2 = new shaka.media.SegmentIndex(references2);
 
       index2.merge(index1);
-      var merged = index2.references_;
+      var merged = index2.references;
 
       expect(merged.length).toBe(3);
       checkReference(merged[0], url(10), 10, 20);
       checkReference(merged[1], url(20), 20, 30);
       checkReference(merged[2], url(30), 30, 40);
-    });
-  });
-
-  describe('evict', function() {
-    var index1;
-
-    function url(i) {
-      return 'http://example.com/video' + i;
-    };
-
-    beforeEach(function() {
-      var references = [
-        new shaka.media.SegmentReference(1, 10, 20, 0, null, url(1)),
-        new shaka.media.SegmentReference(2, 20, 30, 0, null, url(2)),
-        new shaka.media.SegmentReference(3, 30, 40, 0, null, url(3))
-      ];
-      index = new shaka.media.SegmentIndex(references);
-    });
-
-    it('zero references when minEndTime < the first end time', function() {
-      index.evict(19);
-      expect(index.length()).toBe(3);
-    });
-
-    it('one reference when minEndTime == the first end time', function() {
-      index.evict(20);
-      expect(index.length()).toBe(2);
-      checkReference(index.references_[0], url(2), 20, 30);
-      checkReference(index.references_[1], url(3), 30, 40);
-    });
-
-    it('one reference when minEndTime > the first end time', function() {
-      index.evict(21);
-      expect(index.length()).toBe(2);
-      checkReference(index.references_[0], url(2), 20, 30);
-      checkReference(index.references_[1], url(3), 30, 40);
-    });
-
-    it('all but one reference when minEndTime < the last end time', function() {
-      index.evict(39);
-      expect(index.length()).toBe(1);
-      checkReference(index.references_[0], url(3), 30, 40);
-    });
-
-    it('all references when minEndTime == the last end time', function() {
-      index.evict(40);
-      expect(index.length()).toBe(0);
-    });
-
-    it('all references when minEndTime > the last end time', function() {
-      index.evict(41);
-      expect(index.length()).toBe(0);
     });
   });
 
@@ -611,6 +562,6 @@ describe('SegmentIndex', function() {
         expect(reference.endByte).toBe(expectedEndByte);
       }
     }
-  };
+  }
 });
 

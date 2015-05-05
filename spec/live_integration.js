@@ -31,11 +31,16 @@ describe('Player', function() {
 
   const segmentDurationManifestUrl =
       'http://vm2.dashif.org/livesim/testpic_6s/Manifest.mpd';
-  const segmentNumberManifestUrl = 'http://storage.googleapis.com/' +
-      'widevine-demo-media/oops-segment-timeline-number/oops_video.mpd';
-  const segmentTimeManifestUrl = 'http://storage.googleapis.com/' +
-      'widevine-demo-media/oops-segment-timeline-time/oops_video.mpd';
-  const FUDGE_FACTOR = 10;
+  const segmentNumberManifestUrl =
+      'http://storage.googleapis.com/' +
+      'widevine-demo-media/oops-segment-timeline-number/' +
+      'oops-segment-timeline-number-oops_video.mpd';
+  const segmentTimeManifestUrl =
+      'http://storage.googleapis.com/' +
+      'widevine-demo-media/oops-segment-timeline-time/' +
+      'oops-segment-timeline-time-oops_video.mpd';
+
+  const FUDGE_FACTOR = 2;
   const SMALL_FUDGE_FACTOR = 1;
   const SEEK_OFFSET = 10000;
 
@@ -99,20 +104,29 @@ describe('Player', function() {
     });
 
     it('plays two full segments of content', function(done) {
-      var originalOnStreamsStarted = videoSource.onStreamsStarted;
-      videoSource.onStreamsStarted = function() {
-        originalOnStreamsStarted.call(videoSource);
-        window.setTimeout(setTestExpectations, 0); // Do this async.
+      const SEGMENT_LENGTH = 6;
+
+      // Wait until onAllStreamsStarted() has been called because we need
+      // to have access to the corrected SegmentIndex.
+      var originalonAllStreamsStarted = videoSource.onAllStreamsStarted;
+      videoSource.onAllStreamsStarted = function(segmentIndexes) {
+        originalonAllStreamsStarted.call(videoSource, segmentIndexes);
+        // Do this async.
+        window.setTimeout(setTestExpectations.bind(null, segmentIndexes), 0);
       };
 
-      var setTestExpectations = function() {
-        var streamInfo = videoSource.streamsByType_['video'].streamInfo_;
-        var targetTime = streamInfo.currentSegmentStartTime +
-                         videoSource.maxTimestampCorrection_ +
-                         12; // Length of two segments.
-        var waitTime = videoSource.maxTimestampCorrection_ +
-                       12 + // Length of two segments.
-                       FUDGE_FACTOR;
+      var setTestExpectations = function(segmentIndexes) {
+        console.assert(segmentIndexes.length > 0);
+        var index1 = segmentIndexes[0];
+        var index2 = segmentIndexes[1];
+
+        var min = Math.min(index1.last().startTime, index2.last().startTime);
+        var streamStartTime =
+            Math.max(min - videoSource.manifestInfo.minBufferTime, 0);
+
+        var targetTime = streamStartTime + (2 * SEGMENT_LENGTH);
+        var waitTime = (2 * SEGMENT_LENGTH) + FUDGE_FACTOR;
+
         waitForTargetTime(
             video, eventManager, targetTime, waitTime).then(function() {
           done();
@@ -184,6 +198,8 @@ describe('Player', function() {
   function requestMpdUpdate(targetMpdUrl, videoSource, done) {
     player.load(videoSource).then(function() {
       video.play();
+      // Seek back to ensure there is enough video to get an update.
+      video.currentTime -= 10;
       return waitForMpdRequest(targetMpdUrl);
     }).then(function() {
       expect(video.currentTime).toBeGreaterThan(0.0);
