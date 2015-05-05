@@ -26,10 +26,18 @@ Most of the tools you need to work on the Shaka Player are included in the
 sources, including the [Closure Compiler][], [gjslint][], [JSDoc][], and
 [Jasmine][].
 
+The build scripts assume the presence of tools which are readily available on
+Linux and Mac, such as bash, python, git, and java.  For Windows, you can
+[use cygwin][].
+
+The Closure Compiler is built with Java JRE 7, so you must have JRE 7 or newer
+in order to compile Shaka Player.
+
 [Closure Compiler]: https://developers.google.com/closure/compiler/
 [gjslint]: https://developers.google.com/closure/utilities/docs/linter_howto
 [JSDoc]: http://usejsdoc.org/
 [Jasmine]: http://jasmine.github.io/2.1/introduction.html
+[use cygwin]: http://shaka-player-demo.appspot.com/docs/tutorial-windows.html
 
 
 ## Mailing list ##
@@ -69,6 +77,13 @@ The development process is documented in more detail [in our generated docs][],
 but in short, you can build the library by running:
 ```Shell
 ./build/all.sh
+```
+
+Compiling Shaka Player requires Java JRE 7 or greater, but you can use the
+library in uncompiled mode without Java.  Just generate the closure
+dependencies by running:
+```Shell
+./build/gendeps.sh
 ```
 
 [in our generated docs]: http://shaka-player-demo.appspot.com/docs/tutorial-dev.html
