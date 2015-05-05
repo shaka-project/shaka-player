@@ -17,6 +17,7 @@
  */
 
 goog.require('shaka.dash.MpdRequest');
+goog.require('shaka.media.Stream');
 goog.require('shaka.player.DashVideoSource');
 goog.require('shaka.player.Player');
 goog.require('shaka.polyfill.installAll');
@@ -694,6 +695,29 @@ describe('Player', function() {
         done();
       });
     });
+  });
+
+  it('sets buffer size on streams', function(done) {
+    player.setStreamBufferSize(5);
+    var mediaSource = new MediaSource();
+    video.src = window.URL.createObjectURL(mediaSource);
+    mediaSource.addEventListener('sourceopen', function() {
+      var buffer = mediaSource.addSourceBuffer(
+          'video/mp4; codecs="avc1.4d4015"');
+      var stream = new shaka.media.Stream(
+          player, video, mediaSource, buffer, estimator);
+      expect(stream.getBufferingGoal_()).toEqual(5);
+      video.src = '';
+      player.setStreamBufferSize(15);
+      done();
+    });
+  });
+
+  it('gets streams buffer size', function() {
+    player.setStreamBufferSize(5);
+    expect(player.getStreamBufferSize()).toEqual(5);
+    player.setStreamBufferSize(15);
+    expect(player.getStreamBufferSize()).toEqual(15);
   });
 
   it('sets timeout on LicenseRequests', function() {
