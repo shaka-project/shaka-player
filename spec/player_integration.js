@@ -16,10 +16,13 @@
  * @fileoverview Player integration tests.
  */
 
+goog.require('shaka.dash.MpdRequest');
 goog.require('shaka.player.DashVideoSource');
 goog.require('shaka.player.Player');
 goog.require('shaka.polyfill.installAll');
 goog.require('shaka.util.EWMABandwidthEstimator');
+goog.require('shaka.util.LicenseRequest');
+goog.require('shaka.util.RangeRequest');
 
 describe('Player', function() {
   var originalAsserts;
@@ -691,6 +694,28 @@ describe('Player', function() {
         done();
       });
     });
+  });
+
+  it('sets timeout on LicenseRequests', function() {
+    player.setLicenseRequestTimeout(5);
+    var request = new shaka.util.LicenseRequest(
+        'test.url.com', new ArrayBuffer(1024), false);
+    expect(request.parameters.requestTimeoutMs).toEqual(5);
+    player.setLicenseRequestTimeout(0);
+  });
+
+  it('sets timeout on MpdRequests', function() {
+    player.setMpdRequestTimeout(10);
+    var request = new shaka.dash.MpdRequest('test.url.com');
+    expect(request.parameters.requestTimeoutMs).toEqual(10);
+    player.setMpdRequestTimeout(0);
+  });
+
+  it('sets timeout on RangeRequests', function() {
+    player.setRangeRequestTimeout(13);
+    var request = new shaka.util.RangeRequest('test.url.com', 0, null);
+    expect(request.parameters.requestTimeoutMs).toEqual(13);
+    player.setRangeRequestTimeout(0);
   });
 
   it('plays VP9 WebM', function(done) {
