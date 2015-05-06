@@ -900,14 +900,19 @@ app.onPlayerError_ = function(event) {
 app.interpretContentProtection_ = function(contentProtection) {
   var Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
 
-  var override = document.getElementById('wvLicenseServerUrlInput');
-  if (override.value) {
-    // The user is using the test app's UI to override the MPD.
-    // This is useful to test external MPDs when no mapping is known in
-    // advance.
-    return new shaka.player.DrmSchemeInfo(
-        'com.widevine.alpha', override.value, false, null, null);
+  var initDataOverride = null;
+  if (contentProtection.pssh && contentProtection.pssh.psshBox) {
+    // Override the init data with the PSSH from the manifest.
+    initDataOverride = {
+      initData: contentProtection.pssh.psshBox,
+      initDataType: 'cenc'
+    };
+    console.info('Found overridden PSSH with system IDs:',
+                 contentProtection.pssh.parsedPssh.systemIds);
   }
+
+  var wvLicenseServerUrlOverride =
+      document.getElementById('wvLicenseServerUrlInput').value || null;
 
   if (contentProtection.schemeIdUri == 'com.youtube.clearkey') {
     // This is the scheme used by YouTube's MediaSource demo.
@@ -942,17 +947,6 @@ app.interpretContentProtection_ = function(contentProtection) {
         'org.w3.clearkey', licenseServerUrl, false, initData, null);
   }
 
-  var initDataOverride = null;
-  if (contentProtection.pssh && contentProtection.pssh.psshBox) {
-    // Override the init data with the PSSH from the manifest.
-    initDataOverride = {
-      initData: contentProtection.pssh.psshBox,
-      initDataType: 'cenc'
-    };
-    console.info('Found overridden PSSH with system IDs:',
-                 contentProtection.pssh.parsedPssh.systemIds);
-  }
-
   if (contentProtection.schemeIdUri == 'http://youtube.com/drm/2012/10/10') {
     // This is another scheme used by YouTube.
     var licenseServerUrl = null;
@@ -960,7 +954,7 @@ app.interpretContentProtection_ = function(contentProtection) {
       var child = contentProtection.children[i];
       if (child.nodeName == 'yt:SystemURL' &&
           child.getAttribute('type') == 'widevine') {
-        licenseServerUrl = child.textContent;
+        licenseServerUrl = wvLicenseServerUrlOverride || child.textContent;
         break;
       }
     }
@@ -974,7 +968,8 @@ app.interpretContentProtection_ = function(contentProtection) {
   if (contentProtection.schemeIdUri ==
       'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed') {
     // This is the UUID which represents Widevine in the edash-packager.
-    var licenseServerUrl = '//widevine-proxy.appspot.com/proxy';
+    var licenseServerUrl =
+        wvLicenseServerUrlOverride || '//widevine-proxy.appspot.com/proxy';
     return new shaka.player.DrmSchemeInfo(
         'com.widevine.alpha', licenseServerUrl, false, initDataOverride, null);
   }
