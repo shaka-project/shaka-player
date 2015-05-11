@@ -392,7 +392,9 @@ app.deleteStream = function() {
   console.assert(app.estimator_);
   var estimator = /** @type {!shaka.util.IBandwidthEstimator} */(
       app.estimator_);
-  var offlineSource = new shaka.player.OfflineVideoSource(groupId, estimator);
+  var abrManager = new shaka.media.SimpleAbrManager();
+  var offlineSource = new shaka.player.OfflineVideoSource(
+      groupId, estimator, abrManager);
   offlineSource.deleteGroup().then(
       function() {
         var deleted = app.offlineStreams_.indexOf(text);
@@ -430,7 +432,9 @@ app.storeStream = function() {
   console.assert(app.estimator_);
   var estimator = /** @type {!shaka.util.IBandwidthEstimator} */(
       app.estimator_);
-  var offlineSource = new shaka.player.OfflineVideoSource(null, estimator);
+  var abrManager = new shaka.media.SimpleAbrManager();
+  var offlineSource = new shaka.player.OfflineVideoSource(
+      null, estimator, abrManager);
   offlineSource.addEventListener('progress', app.progressEventHandler_);
   offlineSource.store(
       mediaUrl, preferredLanguage, app.interpretContentProtection_,
@@ -607,11 +611,13 @@ app.loadDashStream = function() {
 
   var estimator = /** @type {!shaka.util.IBandwidthEstimator} */(
       app.estimator_);
+  var abrManager = new shaka.media.SimpleAbrManager();
   app.load_(
       new shaka.player.DashVideoSource(
           mediaUrl,
           app.interpretContentProtection_,
-          estimator));
+          estimator,
+          abrManager));
 };
 
 
@@ -628,7 +634,9 @@ app.loadOfflineStream = function() {
   console.assert(app.estimator_);
   var estimator = /** @type {!shaka.util.IBandwidthEstimator} */(
       app.estimator_);
-  app.load_(new shaka.player.OfflineVideoSource(groupId, estimator));
+  var abrManager = new shaka.media.SimpleAbrManager();
+  app.load_(new shaka.player.OfflineVideoSource(
+      groupId, estimator, abrManager));
 };
 
 
