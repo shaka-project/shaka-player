@@ -18,6 +18,8 @@
 
 goog.require('shaka.asserts');
 goog.require('shaka.media.SegmentReference');
+goog.require('shaka.player.IVideoSource');
+goog.require('shaka.util.EventManager');
 goog.require('shaka.util.PublicPromise');
 goog.require('shaka.util.StringUtils');
 goog.require('shaka.util.Uint8ArrayUtils');
@@ -276,3 +278,44 @@ function checkReference(reference, url, start, end) {
   expect(reference.endTime).toBe(end);
 }
 
+
+/**
+ * Waits for a video time to increase.
+ * @param {!HTMLMediaElement} video The playing video.
+ * @param {!shaka.util.EventManager} eventManager
+ * @return {!Promise} resolved when the video's currentTime changes.
+ */
+function waitForMovement(video, eventManager) {
+  var promise = new shaka.util.PublicPromise;
+  var originalTime = video.currentTime;
+  eventManager.listen(video, 'timeupdate', function() {
+    if (video.currentTime != originalTime) {
+      eventManager.unlisten(video, 'timeupdate');
+      promise.resolve();
+    }
+  });
+  return promise;
+}
+
+
+/**
+ * Creates a new DashVideoSource out of the manifest.
+ * @param {string} manifest
+ * @return {!shaka.player.DashVideoSource}
+ */
+function newSource(manifest) {
+  var estimator = new shaka.util.EWMABandwidthEstimator();
+  return new shaka.player.DashVideoSource(manifest,
+                                          interpretContentProtection,
+                                          estimator);
+}
+
+
+/**
+ * @param {!Event} event
+ */
+function convertErrorToTestFailure(event) {
+  // Treat all player errors as test failures.
+  var error = event.detail;
+  fail(error);
+}

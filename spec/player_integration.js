@@ -99,12 +99,12 @@ describe('Player', function() {
     it('can be used multiple times without EME', function(done) {
       player.load(newSource(plainManifest)).then(function() {
         video.play();
-        return waitForMovement();
+        return waitForMovement(video, eventManager);
       }).then(function() {
         return player.load(newSource(plainManifest));
       }).then(function() {
         video.play();
-        return waitForMovement();
+        return waitForMovement(video, eventManager);
       }).then(function() {
         expect(video.currentTime).toBeGreaterThan(0.0);
         done();
@@ -119,12 +119,12 @@ describe('Player', function() {
     it('can be used multiple times with EME', function(done) {
       player.load(newSource(encryptedManifest)).then(function() {
         video.play();
-        return waitForMovement();
+        return waitForMovement(video, eventManager);
       }).then(function() {
         return player.load(newSource(encryptedManifest));
       }).then(function() {
         video.play();
-        return waitForMovement();
+        return waitForMovement(video, eventManager);
       }).then(function() {
         expect(video.currentTime).toBeGreaterThan(0.0);
         done();
@@ -183,7 +183,8 @@ describe('Player', function() {
     it('does not lock up on segment boundaries', function(done) {
       player.load(newSource(plainManifest)).then(function() {
         video.play();
-        return waitForMovement();  // gets the player out of INIT state
+        // gets the player out of INIT state
+        return waitForMovement(video, eventManager);
       }).then(function() {
         video.currentTime = 40.0;  // <0.1s before end of segment N (5).
         return delay(2.0);
@@ -218,10 +219,10 @@ describe('Player', function() {
     it('does not create unclosable gaps in the buffer', function(done) {
       player.load(newSource(plainManifest)).then(function() {
         video.play();
-        return waitForMovement();
+        return waitForMovement(video, eventManager);
       }).then(function() {
         video.currentTime = 33.0;
-        return waitForMovement();
+        return waitForMovement(video, eventManager);
       }).then(function() {
         return delay(1.0);
       }).then(function() {
@@ -278,7 +279,7 @@ describe('Player', function() {
         // The content is now buffered.
         expect(audioStreamBuffer.buffered.length).toBe(1);
         video.play();
-        return waitForMovement();
+        return waitForMovement(video, eventManager);
       }).then(function() {
         // Power through and consume the audio data quickly.
         player.setPlaybackRate(8);
@@ -307,7 +308,7 @@ describe('Player', function() {
 
       player.load(source).then(function() {
         video.play();
-        return waitForMovement();
+        return waitForMovement(video, eventManager);
       }).then(function() {
         // Move quickly past the first two segments.
         player.setPlaybackRate(3.0);
@@ -317,7 +318,7 @@ describe('Player', function() {
         expect(track.active).toBe(false);
         var ok = player.selectVideoTrack(track.id, false);
         expect(ok).toBe(true);
-        return waitForMovement();
+        return waitForMovement(video, eventManager);
       }).then(function() {
         // This bug manifests within two segments of the adaptation point.  To
         // prove that we are not hung, we need to get to a point two segments
@@ -325,7 +326,7 @@ describe('Player', function() {
         return waitForTargetTime(22.0, 6.0);
       }).then(function() {
         video.currentTime = 0;
-        return waitForMovement();
+        return waitForMovement(video, eventManager);
       }).then(function() {
         return waitForTargetTime(21.0, 12.0);
       }).then(function() {
@@ -341,7 +342,7 @@ describe('Player', function() {
 
       player.load(source).then(function() {
         video.play();
-        return waitForMovement();
+        return waitForMovement(video, eventManager);
       }).then(function() {
         var Stream = shaka.media.Stream;
         var videoStream = source.streamsByType_['video'];
@@ -369,7 +370,7 @@ describe('Player', function() {
 
       player.load(source).then(function() {
         video.play();
-        return waitForMovement();
+        return waitForMovement(video, eventManager);
       }).then(function() {
         video.addEventListener('seeking', onSeeking);
         video.currentTime += 0;
@@ -476,7 +477,7 @@ describe('Player', function() {
       var timestamp;
       player.load(newSource(plainManifest)).then(function() {
         video.play();
-        return waitForMovement();
+        return waitForMovement(video, eventManager);
       }).then(function() {
         expect(video.currentTime).toBeGreaterThan(0.0);
         timestamp = video.currentTime;
@@ -500,7 +501,7 @@ describe('Player', function() {
       }).then(function() {
         timestamp = video.currentTime;
         player.setPlaybackRate(-1.0);
-        return waitForMovement();
+        return waitForMovement(video, eventManager);
       }).then(function() {
         return delay(2.0);
       }).then(function() {
@@ -518,7 +519,7 @@ describe('Player', function() {
       var oldPlayTime;
       player.load(newSource(plainManifest)).then(function() {
         video.play();
-        return waitForMovement();
+        return waitForMovement(video, eventManager);
       }).then(function() {
         oldPlayTime = player.getStats().playTime;
         return delay(1.0);
@@ -731,7 +732,7 @@ describe('Player', function() {
   it('plays VP9 WebM', function(done) {
     player.load(newSource(webmManifest)).then(function() {
       video.play();
-      return waitForMovement();
+      return waitForMovement(video, eventManager);
     }).then(function() {
       expect(video.currentTime).toBeGreaterThan(0.0);
       done();
@@ -759,7 +760,7 @@ describe('Player', function() {
     video.autoplay = true;
 
     player.load(newSource(plainManifest)).then(function() {
-      return waitForMovement();
+      return waitForMovement(video, eventManager);
     }).then(function() {
       expect(video.currentTime).toBeGreaterThan(0.0);
       expect(video.paused).toBe(false);
@@ -787,26 +788,6 @@ describe('Player', function() {
 
   // TODO(story 1970528): add tests which exercise PSSH parsing,
   // SegmentTemplate resolution, and SegmentList generation.
-
-  /**
-   * @param {!Event} event
-   */
-  function convertErrorToTestFailure(event) {
-    // Treat all player errors as test failures.
-    var error = event.detail;
-    fail(error);
-  }
-
-  /**
-   * @param {string} manifest
-   * @return {!shaka.player.DashVideoSource}
-   */
-  function newSource(manifest) {
-    var estimator = new shaka.util.EWMABandwidthEstimator();
-    return new shaka.player.DashVideoSource(manifest,
-                                            interpretContentProtection,
-                                            estimator);
-  }
 
   /**
    * @param {number} targetHeight
@@ -847,21 +828,6 @@ describe('Player', function() {
       }
     }
     return null;
-  }
-
-  /**
-   * @return {!Promise} resolved when the video's currentTime changes.
-   */
-  function waitForMovement() {
-    var promise = new shaka.util.PublicPromise;
-    var originalTime = video.currentTime;
-    eventManager.listen(video, 'timeupdate', function() {
-      if (video.currentTime != originalTime) {
-        eventManager.unlisten(video, 'timeupdate');
-        promise.resolve();
-      }
-    });
-    return promise;
   }
 
   /**
