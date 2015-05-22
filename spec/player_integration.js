@@ -697,49 +697,62 @@ describe('Player', function() {
     });
   });
 
-  it('sets buffer size on streams', function(done) {
-    player.setStreamBufferSize(5);
-    var mediaSource = new MediaSource();
-    video.src = window.URL.createObjectURL(mediaSource);
-    mediaSource.addEventListener('sourceopen', function() {
-      var buffer = mediaSource.addSourceBuffer(
-          'video/mp4; codecs="avc1.4d4015"');
-      var stream = new shaka.media.Stream(
-          player, video, mediaSource, buffer, estimator);
-      expect(stream.getBufferingGoal_()).toEqual(5);
-      video.src = '';
-      player.setStreamBufferSize(15);
-      done();
+  describe('setStreamBufferSize', function() {
+    it('sets buffer size on streams', function(done) {
+      var original = shaka.media.Stream.bufferSizeSeconds;
+      player.setStreamBufferSize(5);
+      var mediaSource = new MediaSource();
+      video.src = window.URL.createObjectURL(mediaSource);
+      mediaSource.addEventListener('sourceopen', function() {
+        var buffer = mediaSource.addSourceBuffer(
+            'video/mp4; codecs="avc1.4d4015"');
+        var stream = new shaka.media.Stream(
+            player, video, mediaSource, buffer, estimator);
+        expect(stream.getBufferingGoal_()).toEqual(5);
+        video.src = '';
+        player.setStreamBufferSize(original);
+        done();
+      });
     });
   });
 
-  it('gets streams buffer size', function() {
-    player.setStreamBufferSize(5);
-    expect(player.getStreamBufferSize()).toEqual(5);
-    player.setStreamBufferSize(15);
-    expect(player.getStreamBufferSize()).toEqual(15);
+  describe('getStreamBufferSize', function() {
+    it('gets streams buffer size', function() {
+      var original = shaka.media.Stream.bufferSizeSeconds;
+      expect(player.getStreamBufferSize()).toEqual(original);
+      player.setStreamBufferSize(5);
+      expect(player.getStreamBufferSize()).toEqual(5);
+      player.setStreamBufferSize(original);
+      expect(player.getStreamBufferSize()).toEqual(original);
+    });
   });
 
-  it('sets timeout on LicenseRequests', function() {
-    player.setLicenseRequestTimeout(5);
-    var request = new shaka.util.LicenseRequest(
-        'test.url.com', new ArrayBuffer(1024), false);
-    expect(request.parameters.requestTimeoutMs).toEqual(5);
-    player.setLicenseRequestTimeout(0);
+  describe('setLicenseRequestTimeout', function() {
+    it('set timeout on LicenseRequests', function() {
+      player.setLicenseRequestTimeout(5);
+      var request = new shaka.util.LicenseRequest(
+          'test.url.com', new ArrayBuffer(1024), false);
+      expect(request.parameters.requestTimeoutMs).toEqual(5);
+      player.setLicenseRequestTimeout(0);
+    });
   });
 
-  it('sets timeout on MpdRequests', function() {
-    player.setMpdRequestTimeout(10);
-    var request = new shaka.dash.MpdRequest('test.url.com');
-    expect(request.parameters.requestTimeoutMs).toEqual(10);
-    player.setMpdRequestTimeout(0);
+  describe('setLicenseRequestTimeout', function() {
+    it('sets timeout on MpdRequests', function() {
+      player.setMpdRequestTimeout(10);
+      var request = new shaka.dash.MpdRequest('test.url.com');
+      expect(request.parameters.requestTimeoutMs).toEqual(10);
+      player.setMpdRequestTimeout(0);
+    });
   });
 
-  it('sets timeout on RangeRequests', function() {
-    player.setRangeRequestTimeout(13);
-    var request = new shaka.util.RangeRequest('test.url.com', 0, null);
-    expect(request.parameters.requestTimeoutMs).toEqual(13);
-    player.setRangeRequestTimeout(0);
+  describe('setLicenseRequestTimeout', function() {
+    it('sets timeout on RangeRequests', function() {
+      player.setRangeRequestTimeout(13);
+      var request = new shaka.util.RangeRequest('test.url.com', 0, null);
+      expect(request.parameters.requestTimeoutMs).toEqual(13);
+      player.setRangeRequestTimeout(0);
+    });
   });
 
   it('plays VP9 WebM', function(done) {
