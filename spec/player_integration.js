@@ -788,6 +788,54 @@ describe('Player', function() {
     });
   });
 
+  it('does not count buffering on startup', function(done) {
+    var eventFired = false;
+    player.addEventListener('bufferingStart', function() {
+      eventFired = true;
+    });
+
+    delay(1).then(function() {
+      expect(video.currentTime).toBe(0);
+      expect(player.getStats().bufferingHistory.length).toBe(0);
+      expect(eventFired).toBe(false);
+
+      video.autoplay = true;
+      return player.load(newSource(plainManifest));
+    }).then(function() {
+      return waitForMovement();
+    }).then(function() {
+      expect(video.currentTime).not.toBe(0);
+      expect(player.getStats().bufferingHistory.length).toBe(0);
+      expect(eventFired).toBe(false);
+
+      eventFired = false;
+      return player.load(newSource(plainManifest));
+    }).then(function() {
+      video.pause();
+      return delay(1);
+    }).then(function() {
+      expect(video.currentTime).toBe(0);
+      expect(player.getStats().bufferingHistory.length).toBe(0);
+      expect(eventFired).toBe(false);
+
+      eventFired = false;
+      video.autoplay = false;
+      return player.load(newSource(plainManifest));
+    }).then(function() {
+      return delay(1);
+    }).then(function() {
+      expect(video.currentTime).toBe(0);
+      expect(player.getStats().bufferingHistory.length).toBe(0);
+      expect(eventFired).toBe(false);
+
+      done();
+    }).catch(function(error) {
+      video.autoplay = false;
+      fail(error);
+      done();
+    });
+  });
+
   // TODO(story 1970528): add tests which exercise PSSH parsing,
   // SegmentTemplate resolution, and SegmentList generation.
 
