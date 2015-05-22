@@ -1,3 +1,45 @@
+## 1.3.1 (2015-05-22)
+
+A roll-up of recent bugfixes and small improvements.
+
+Bugfixes:
+  - Fixed some broken tests.
+  - Fixed buffering states.
+    - https://github.com/google/shaka-player/issues/61
+  - Fixed fullscreen polyfill installation.
+    - https://github.com/google/shaka-player/issues/81
+  - Fixed handling of live content with minimumUpdatePeriod of 0.
+    - https://github.com/google/shaka-player/pull/64
+  - Fixed selection of live content (type=dynamic).
+    - https://github.com/google/shaka-player/issues/69
+    - https://github.com/google/shaka-player/issues/70
+  - Fixed AJAX request timeouts.
+    - https://github.com/google/shaka-player/issues/78
+    - https://github.com/google/shaka-player/pull/79
+  - Fixed spec compliance for polyfilled session expiration.
+  - Fixed buffer time for offline playback.
+  - Fixed offline API consistency.
+    - https://github.com/google/shaka-player/issues/72
+
+Features:
+  - Refactored and updated support test page.
+    - http://shaka-player-demo.appspot.com/support.html
+  - Simplified polyfill installation. (shaka.polyfill.installAll)
+  - New polyfill for CustomEvent.
+  - Small improvements to browser compatibility.
+    - (node.childNodes, node.textContent, currentScript, CSS fixes, etc.)
+  - Documented clock sync and CORS issues with live content.
+    - https://github.com/google/shaka-player/issues/53
+  - Documented JRE requirements.
+  - Test app now accepts a URL parameter to make ChromeCast testing easier.
+    - https://github.com/google/shaka-player/issues/56
+  - Stopped using deprecated methods in tests and tutorials.
+    - https://github.com/google/shaka-player/issues/73
+  - Added progress events for storing offline content.
+  - Documented offline APIs.
+    - https://github.com/google/shaka-player/issues/60
+
+
 ## 1.3.0 (2015-04-16)
 
 Feature release, introducing live streaming and offline playback.
