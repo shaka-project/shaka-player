@@ -98,12 +98,12 @@ describe('Player', function() {
     // This covers basic player re-use.
     it('can be used multiple times without EME', function(done) {
       player.load(newSource(plainManifest)).then(function() {
-        player.play();
+        video.play();
         return waitForMovement();
       }).then(function() {
         return player.load(newSource(plainManifest));
       }).then(function() {
-        player.play();
+        video.play();
         return waitForMovement();
       }).then(function() {
         expect(video.currentTime).toBeGreaterThan(0.0);
@@ -118,12 +118,12 @@ describe('Player', function() {
     // to be unset on the second use of a video tag.
     it('can be used multiple times with EME', function(done) {
       player.load(newSource(encryptedManifest)).then(function() {
-        player.play();
+        video.play();
         return waitForMovement();
       }).then(function() {
         return player.load(newSource(encryptedManifest));
       }).then(function() {
-        player.play();
+        video.play();
         return waitForMovement();
       }).then(function() {
         expect(video.currentTime).toBeGreaterThan(0.0);
@@ -140,7 +140,7 @@ describe('Player', function() {
       player.load(newSource(plainManifest)).then(function() {
         var track = getVideoTrackByHeight(720);
         player.selectVideoTrack(track.id);
-        player.play();
+        video.play();
         // adapts by the time it crosses a segment boundary.
         return waitForTargetTime(6.0, 10.0);
       }).then(function() {
@@ -156,7 +156,7 @@ describe('Player', function() {
       player.load(newSource(plainManifest)).then(function() {
         var track = getVideoTrackByHeight(720);
         player.selectVideoTrack(track.id);
-        player.play();
+        video.play();
         // adapts by the time it crosses a segment boundary.
         return waitForTargetTime(6.0, 10.0);
       }).then(function() {
@@ -176,46 +176,19 @@ describe('Player', function() {
     });
   });
 
-  describe('pause', function() {
-    it('pauses playback', function(done) {
-      var timestamp;
-      player.load(newSource(plainManifest)).then(function() {
-        player.play();
-        return waitForMovement();
-      }).then(function() {
-        expect(video.paused).toBe(false);
-        player.pause();
-        timestamp = video.currentTime;
-        return delay(1.0);
-      }).then(function() {
-        expect(video.paused).toBe(true);
-        expect(video.currentTime).toEqual(timestamp);
-        player.play();
-        return waitForMovement();
-      }).then(function() {
-        expect(video.paused).toBe(false);
-        expect(video.currentTime).toBeGreaterThan(timestamp);
-        done();
-      }).catch(function(error) {
-        fail(error);
-        done();
-      });
-    });
-  });
-
   describe('seek', function() {
     // This covers bug #18597152.  Completely clearing the buffers after a seek
     // can cause the media pipeline in Chrome to get stuck.  This seemed to
     // happen when certain seek intervals were used.
     it('does not lock up on segment boundaries', function(done) {
       player.load(newSource(plainManifest)).then(function() {
-        player.play();
+        video.play();
         return waitForMovement();  // gets the player out of INIT state
       }).then(function() {
-        player.seek(40.0);  // <0.1s before end of segment N (5).
+        video.currentTime = 40.0;  // <0.1s before end of segment N (5).
         return delay(2.0);
       }).then(function() {
-        player.seek(30.0);  // <0.1s before end of segment N-2 (3).
+        video.currentTime = 30.0;  // <0.1s before end of segment N-2 (3).
         return delay(5.0);
       }).then(function() {
         // Typically this bug manifests with seeking == true.
@@ -244,15 +217,15 @@ describe('Player', function() {
     // not done, playback gets "stuck" when the playhead enters such a gap.
     it('does not create unclosable gaps in the buffer', function(done) {
       player.load(newSource(plainManifest)).then(function() {
-        player.play();
+        video.play();
         return waitForMovement();
       }).then(function() {
-        player.seek(33.0);
+        video.currentTime = 33.0;
         return waitForMovement();
       }).then(function() {
         return delay(1.0);
       }).then(function() {
-        player.seek(28.0);
+        video.currentTime = 28.0;
         // We don't expect 38.0 because of the uncertainty of network and other
         // delays.  This is a safe number which will not cause false failures.
         // When this bug manifests, the playhead typically gets stuck around
@@ -304,7 +277,7 @@ describe('Player', function() {
       }).then(function() {
         // The content is now buffered.
         expect(audioStreamBuffer.buffered.length).toBe(1);
-        player.play();
+        video.play();
         return waitForMovement();
       }).then(function() {
         // Power through and consume the audio data quickly.
@@ -315,7 +288,7 @@ describe('Player', function() {
         // Otherwise, this test hasn't reproduced the circumstances correctly.
         expect(audioStreamBuffer.buffered.start(0)).toBeGreaterThan(0);
         // Seek to the beginning, which is data we will have to re-download.
-        player.seek(0);
+        video.currentTime = 0;
         // Expect to play some.
         return waitForTargetTime(0.5, 2.0);
       }).then(function() {
@@ -333,7 +306,7 @@ describe('Player', function() {
       var source = newSource(plainManifest);
 
       player.load(source).then(function() {
-        player.play();
+        video.play();
         return waitForMovement();
       }).then(function() {
         // Move quickly past the first two segments.
@@ -351,7 +324,7 @@ describe('Player', function() {
         // later than where we adapted.
         return waitForTargetTime(22.0, 6.0);
       }).then(function() {
-        player.seek(0);
+        video.currentTime = 0;
         return waitForMovement();
       }).then(function() {
         return waitForTargetTime(21.0, 12.0);
@@ -367,7 +340,7 @@ describe('Player', function() {
       var source = newSource(plainManifest);
 
       player.load(source).then(function() {
-        player.play();
+        video.play();
         return waitForMovement();
       }).then(function() {
         var Stream = shaka.media.Stream;
@@ -379,7 +352,7 @@ describe('Player', function() {
         expect(ok).toBe(true);
         expect(videoStream.state_).toBe(Stream.State_.SWITCHING);
 
-        player.seek(30.0);
+        video.currentTime = 30.0;
         return waitForTargetTime(33.0, 5.0);
       }).then(function() {
         done();
@@ -395,7 +368,7 @@ describe('Player', function() {
       var onSeeking = jasmine.createSpy('onSeeking');
 
       player.load(source).then(function() {
-        player.play();
+        video.play();
         return waitForMovement();
       }).then(function() {
         video.addEventListener('seeking', onSeeking);
@@ -502,7 +475,7 @@ describe('Player', function() {
     it('plays faster for rates above 1', function(done) {
       var timestamp;
       player.load(newSource(plainManifest)).then(function() {
-        player.play();
+        video.play();
         return waitForMovement();
       }).then(function() {
         expect(video.currentTime).toBeGreaterThan(0.0);
@@ -522,7 +495,7 @@ describe('Player', function() {
     it('plays in reverse for negative rates', function(done) {
       var timestamp;
       player.load(newSource(plainManifest)).then(function() {
-        player.play();
+        video.play();
         return waitForTargetTime(3.0, 5.0);
       }).then(function() {
         timestamp = video.currentTime;
@@ -544,7 +517,7 @@ describe('Player', function() {
     it('updates playTime', function(done) {
       var oldPlayTime;
       player.load(newSource(plainManifest)).then(function() {
-        player.play();
+        video.play();
         return waitForMovement();
       }).then(function() {
         oldPlayTime = player.getStats().playTime;
@@ -757,7 +730,7 @@ describe('Player', function() {
 
   it('plays VP9 WebM', function(done) {
     player.load(newSource(webmManifest)).then(function() {
-      player.play();
+      video.play();
       return waitForMovement();
     }).then(function() {
       expect(video.currentTime).toBeGreaterThan(0.0);

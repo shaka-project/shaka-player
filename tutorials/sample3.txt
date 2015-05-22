@@ -70,7 +70,7 @@
         }
 
         // Begin playback, since autoplay is not enabled on the video tag.
-        player.play();
+        video.play();
       });
     }
     document.addEventListener('DOMContentLoaded', initPlayer);

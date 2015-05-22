@@ -63,12 +63,14 @@ Here is a simple page which demonstrates basic offline storage:
     &lt;/video&gt;
   &lt;/body&gt;
   &lt;script&gt;
+    var video;
+
     function initPlayer() {
       // Install polyfills.
       shaka.polyfill.installAll();
 
       // Find the video element.
-      var video = document.getElementById('video');
+      video = document.getElementById('video');
 
       // Attach the player to the window so that it can be easily debugged.
       window.player = new shaka.player.Player(video);
@@ -183,12 +185,14 @@ to be loaded into the {@link shaka.player.Player}.
     &lt;/video&gt;
   &lt;/body&gt;
   &lt;script&gt;
+    var video;
+
     function initPlayer() {
       // Install polyfills.
       shaka.polyfill.installAll();
 
       // Find the video element.
-      var video = document.getElementById('video');
+      video = document.getElementById('video');
 
       // Attach the player to the window so that it can be easily debugged.
       window.player = new shaka.player.Player(video);
@@ -269,7 +273,7 @@ to be loaded into the {@link shaka.player.Player}.
 <span class="newCode">          new shaka.player.OfflineVideoSource(window.groupId, null);</span>
 <span class="newCode">      return window.player.load(offlineSource).then(</span>
 <span class="newCode">          function() {</span>
-<span class="newCode">            window.player.play();</span>
+<span class="newCode">            video.play();</span>
 <span class="newCode">            console.log('Offline content with group ID ' + window.groupId +</span>
 <span class="newCode">                  ' ready for playback.');</span>
 <span class="newCode">          });</span>
@@ -314,12 +318,14 @@ shaka.player.OfflineVideoSource} with a known group ID to delete content.
     &lt;/video&gt;
   &lt;/body&gt;
   &lt;script&gt;
+    var video;
+
     function initPlayer() {
       // Install polyfills.
       shaka.polyfill.installAll();
 
       // Find the video element.
-      var video = document.getElementById('video');
+      video = document.getElementById('video');
 
       // Attach the player to the window so that it can be easily debugged.
       window.player = new shaka.player.Player(video);
@@ -400,7 +406,7 @@ shaka.player.OfflineVideoSource} with a known group ID to delete content.
           new shaka.player.OfflineVideoSource(window.groupId, null);
       return window.player.load(offlineSource).then(
           function() {
-            window.player.play();
+            video.play();
             console.log('Offline content with group ID ' + window.groupId +
                   ' ready for playback.');
           });

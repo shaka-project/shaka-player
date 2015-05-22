@@ -15,12 +15,14 @@
     </video>
   </body>
   <script>
+    var video;
+
     function initPlayer() {
       // Install polyfills.
       shaka.polyfill.installAll();
 
       // Find the video element.
-      var video = document.getElementById('video');
+      video = document.getElementById('video');
 
       // Attach the player to the window so that it can be easily debugged.
       window.player = new shaka.player.Player(video);
@@ -101,7 +103,7 @@
           new shaka.player.OfflineVideoSource(window.groupId, null);
       return window.player.load(offlineSource).then(
           function() {
-            window.player.play();
+            video.play();
             console.log('Offline content with group ID ' + window.groupId +
                   ' ready for playback.');
           });
