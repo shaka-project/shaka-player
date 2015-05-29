@@ -299,6 +299,44 @@ function waitForMovement(video, eventManager) {
 
 
 /**
+ * @param {!HTMLMediaElement} video The playing video.
+ * @param {!shaka.util.EventManager} eventManager
+ * @param {number} targetTime in seconds
+ * @param {number} timeout in seconds
+ * @return {!Promise} resolved when the video's currentTime >= |targetTime|.
+ */
+function waitForTargetTime(video, eventManager, targetTime, timeout) {
+  var promise = new shaka.util.PublicPromise;
+  var stack = (new Error('stacktrace')).stack.split('\n').slice(1).join('\n');
+
+  var timeoutId = window.setTimeout(function() {
+    // This expectation will fail, but will provide specific values to
+    // Jasmine to help us debug timeout issues.
+    expect(video.currentTime).toBeGreaterThan(targetTime);
+    eventManager.unlisten(video, 'timeupdate');
+    // Reject the promise, but replace the error's stack with the original
+    // call stack.  This timeout handler's stack is not helpful.
+    var error = new Error('Timeout waiting for video time ' + targetTime);
+    error.stack = stack;
+    promise.reject(error);
+  }, timeout * 1000);
+
+  eventManager.listen(video, 'timeupdate', function() {
+    if (video.currentTime > targetTime) {
+      // This expectation will pass, but will keep Jasmine from complaining
+      // about tests which have no expectations.  In practice, some tests
+      // only need to demonstrate that they have reached a certain target.
+      expect(video.currentTime).toBeGreaterThan(targetTime);
+      eventManager.unlisten(video, 'timeupdate');
+      window.clearTimeout(timeoutId);
+      promise.resolve();
+    }
+  });
+  return promise;
+}
+
+
+/**
  * Creates a new DashVideoSource out of the manifest.
  * @param {string} manifest
  * @return {!shaka.player.DashVideoSource}

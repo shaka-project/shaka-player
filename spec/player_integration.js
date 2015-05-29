@@ -144,7 +144,7 @@ describe('Player', function() {
         player.selectVideoTrack(track.id);
         video.play();
         // adapts by the time it crosses a segment boundary.
-        return waitForTargetTime(6.0, 10.0);
+        return waitForTargetTime(video, eventManager, 6.0, 10.0);
       }).then(function() {
         expect(video.videoHeight).toEqual(720);
         done();
@@ -160,14 +160,14 @@ describe('Player', function() {
         player.selectVideoTrack(track.id);
         video.play();
         // adapts by the time it crosses a segment boundary.
-        return waitForTargetTime(6.0, 10.0);
+        return waitForTargetTime(video, eventManager, 6.0, 10.0);
       }).then(function() {
         expect(video.videoHeight).toEqual(720);
 
         var track = getVideoTrackByHeight(360);
         player.selectVideoTrack(track.id);
         // adapts by the time it crosses a segment boundary.
-        return waitForTargetTime(11.0, 10.0);
+        return waitForTargetTime(video, eventManager, 11.0, 10.0);
       }).then(function() {
         expect(video.videoHeight).toEqual(360);
         done();
@@ -234,7 +234,7 @@ describe('Player', function() {
         // When this bug manifests, the playhead typically gets stuck around
         // 32.9, so we expect that 35.0 is a safe indication that the bug is
         // not manifesting.
-        return waitForTargetTime(35.0, 10.0);
+        return waitForTargetTime(video, eventManager, 35.0, 10.0);
       }).then(function() {
         done();
       }).catch(function(error) {
@@ -293,7 +293,7 @@ describe('Player', function() {
         // Seek to the beginning, which is data we will have to re-download.
         video.currentTime = 0;
         // Expect to play some.
-        return waitForTargetTime(0.5, 2.0);
+        return waitForTargetTime(video, eventManager, 0.5, 2.0);
       }).then(function() {
         done();
       }).catch(function(error) {
@@ -314,7 +314,7 @@ describe('Player', function() {
       }).then(function() {
         // Move quickly past the first two segments.
         player.setPlaybackRate(3.0);
-        return waitForTargetTime(11.0, 6.0);
+        return waitForTargetTime(video, eventManager, 11.0, 6.0);
       }).then(function() {
         var track = getVideoTrackByHeight(480);
         expect(track.active).toBe(false);
@@ -325,12 +325,12 @@ describe('Player', function() {
         // This bug manifests within two segments of the adaptation point.  To
         // prove that we are not hung, we need to get to a point two segments
         // later than where we adapted.
-        return waitForTargetTime(22.0, 6.0);
+        return waitForTargetTime(video, eventManager, 22.0, 6.0);
       }).then(function() {
         video.currentTime = 0;
         return waitForMovement(video, eventManager);
       }).then(function() {
-        return waitForTargetTime(21.0, 12.0);
+        return waitForTargetTime(video, eventManager, 21.0, 12.0);
       }).then(function() {
         done();
       }).catch(function(error) {
@@ -356,7 +356,7 @@ describe('Player', function() {
         expect(videoStream.state_).toBe(Stream.State_.SWITCHING);
 
         video.currentTime = 30.0;
-        return waitForTargetTime(33.0, 5.0);
+        return waitForTargetTime(video, eventManager, 33.0, 5.0);
       }).then(function() {
         done();
       }).catch(function(error) {
@@ -499,7 +499,7 @@ describe('Player', function() {
       var timestamp;
       player.load(newSource(plainManifest)).then(function() {
         video.play();
-        return waitForTargetTime(3.0, 5.0);
+        return waitForTargetTime(video, eventManager, 3.0, 5.0);
       }).then(function() {
         timestamp = video.currentTime;
         player.setPlaybackRate(-1.0);
@@ -830,41 +830,6 @@ describe('Player', function() {
       }
     }
     return null;
-  }
-
-  /**
-   * @param {number} targetTime in seconds
-   * @param {number} timeout in seconds
-   * @return {!Promise} resolved when the video's currentTime >= |targetTime|.
-   */
-  function waitForTargetTime(targetTime, timeout) {
-    var promise = new shaka.util.PublicPromise;
-    var stack = (new Error('stacktrace')).stack.split('\n').slice(1).join('\n');
-
-    var timeoutId = window.setTimeout(function() {
-      // This expectation will fail, but will provide specific values to
-      // Jasmine to help us debug timeout issues.
-      expect(video.currentTime).toBeGreaterThan(targetTime);
-      eventManager.unlisten(video, 'timeupdate');
-      // Reject the promise, but replace the error's stack with the original
-      // call stack.  This timeout handler's stack is not helpful.
-      var error = new Error('Timeout waiting for video time ' + targetTime);
-      error.stack = stack;
-      promise.reject(error);
-    }, timeout * 1000);
-
-    eventManager.listen(video, 'timeupdate', function() {
-      if (video.currentTime > targetTime) {
-        // This expectation will pass, but will keep Jasmine from complaining
-        // about tests which have no expectations.  In practice, some tests
-        // only need to demonstrate that they have reached a certain target.
-        expect(video.currentTime).toBeGreaterThan(targetTime);
-        eventManager.unlisten(video, 'timeupdate');
-        window.clearTimeout(timeoutId);
-        promise.resolve();
-      }
-    });
-    return promise;
   }
 });
 

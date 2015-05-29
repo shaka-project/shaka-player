@@ -29,8 +29,11 @@ describe('Player', function() {
   var player;
   var eventManager;
 
-  const liveManifestUrl =
+  const segmentDurationManifestUrl =
       'http://vm2.dashif.org/livesim/testpic_6s/Manifest.mpd';
+  const segmentNumberManifestUrl = 'http://storage.googleapis.com/' +
+      'widevine-demo-media/oops-segment-timeline-number/oops_video.mpd';
+  const FUDGE_FACTOR = 10;
 
   beforeAll(function() {
     // Hijack assertions and convert failed assertions into failed tests.
@@ -88,19 +91,69 @@ describe('Player', function() {
 
   describe('live support for segment duration template', function() {
     beforeEach(function() {
-      videoSource = newSource(liveManifestUrl);
+      videoSource = newSource(segmentDurationManifestUrl);
+    });
+
+    it('plays two full segments of content', function(done) {
+      var originalOnStreamsStarted = videoSource.onStreamsStarted;
+      videoSource.onStreamsStarted = function() {
+        originalOnStreamsStarted.call(videoSource);
+        window.setTimeout(setTestExpectations, 0); // Do this async.
+      };
+
+      var setTestExpectations = function() {
+        var streamInfo = videoSource.streamsByType_['video'].streamInfo_;
+        var targetTime = streamInfo.currentSegmentStartTime +
+                         videoSource.maxTimestampCorrection_ +
+                         12; // Length of two segments.
+        var waitTime = videoSource.maxTimestampCorrection_ +
+                       12 + // Length of two segments.
+                       FUDGE_FACTOR;
+        waitForTargetTime(
+            video, eventManager, targetTime, waitTime).then(function() {
+          done();
+        }).catch(function(error) {
+          fail(error);
+          done();
+        });
+      };
+
+      player.load(videoSource).then(function() {
+        video.play();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+
+    it('returns to seek range when seeking before start of range',
+        function(done) {
+          player.load(videoSource).then(function() {
+            video.play();
+            return waitForMovement(video, eventManager);
+          }).then(function() {
+            video.currentTime = videoSource.seekStartTime_ - 10000;
+            return waitForMovement(video, eventManager);
+          }).then(function() {
+            expect(videoSource.video.currentTime).toBeGreaterThan(
+                videoSource.seekStartTime_);
+            done();
+          }).catch(function(error) {
+            fail(error);
+            done();
+          });
+        });
+  });
+
+  describe('live support for segment number template', function() {
+    beforeEach(function() {
+      videoSource = newSource(segmentNumberManifestUrl);
     });
 
     it('requests MPD update in expected time', function(done) {
-      // Reduce amount of time between MPD updates to prevent long running test.
-      spyOn(videoSource, 'setUpdateTimer_').and.callFake(function() {
-        videoSource.updateTimer_ =
-            window.setTimeout(videoSource.onUpdate_.bind(videoSource), 1000);
-      });
-      // TODO: Update test to use a Timeline based stream.
       player.load(videoSource).then(function() {
         video.play();
-        return waitForMpdRequest(liveManifestUrl);
+        return waitForMpdRequest(segmentNumberManifestUrl);
       }).then(function() {
         expect(video.currentTime).toBeGreaterThan(0.0);
         done();
