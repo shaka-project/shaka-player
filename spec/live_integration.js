@@ -65,12 +65,14 @@ describe('Player', function() {
     eventManager = new shaka.util.EventManager();
   });
 
-  afterEach(function() {
+  afterEach(function(done) {
     eventManager.destroy();
     eventManager = null;
 
-    player.destroy();
-    player = null;
+    player.destroy().then(function() {
+      player = null;
+      done();
+    });
   });
 
   afterAll(function() {
