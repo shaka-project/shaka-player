@@ -263,19 +263,66 @@ function checkUrlTypeObject(actual, expected) {
 
 
 /**
+ * Checks that the given references have the correct times and byte ranges.
+ *
+ * @param {!Array.<!shaka.media.SegmentReference>} references
+ * @param {number} expectedFirstId
+ * @param {string} expectedUrl
+ * @param {!Array.<number>} expectedStartTimes
+ * @param {!Array.<number>} expectedStartBytes
+ */
+function checkReferences(
+    references,
+    expectedFirstId,
+    expectedUrl,
+    expectedStartTimes,
+    expectedStartBytes) {
+  console.assert(expectedStartTimes.length == expectedStartBytes.length);
+  expect(references.length).toBe(expectedStartTimes.length);
+  for (var i = 0; i < expectedStartTimes.length; i++) {
+    var reference = references[i];
+    var expectedStartTime = expectedStartTimes[i];
+    var expectedStartByte = expectedStartBytes[i];
+
+    expect(reference).toBeTruthy();
+    expect(reference.url).toBeTruthy();
+    expect(reference.url.toString()).toBe(expectedUrl);
+
+    expect(reference.id).toBe(i + expectedFirstId);
+
+    expect(reference.startTime.toFixed(3)).toBe(expectedStartTime.toFixed(3));
+    expect(reference.startByte).toBe(expectedStartByte);
+
+    // The final end time and final end byte are dependent on the specific
+    // content, so for simplicity just omit checking them.
+    var isLast = (i == expectedStartTimes.length - 1);
+    if (!isLast) {
+      var expectedEndTime = expectedStartTimes[i + 1];
+      var expectedEndByte = expectedStartBytes[i + 1] - 1;
+      expect(reference.endTime.toFixed(3)).toBe(expectedEndTime.toFixed(3));
+      expect(reference.endByte).toBe(expectedEndByte);
+    }
+  }
+}
+
+
+/**
+ * Checks the given reference, excluding its |id| field; expects its
+ * |startByte| and |endByte| fields to be 0 and null respectively.
+ *
  * @param {!shaka.media.SegmentReference} reference
  * @param {string} url
- * @param {number} start
- * @param {number} end
+ * @param {number} startTime
+ * @param {number} endTime
  */
-function checkReference(reference, url, start, end) {
+function checkReference(reference, url, startTime, endTime) {
   expect(reference).toBeTruthy();
   expect(reference.url).toBeTruthy();
   expect(reference.url.toString()).toBe(url);
   expect(reference.startByte).toBe(0);
   expect(reference.endByte).toBeNull();
-  expect(reference.startTime).toBe(start);
-  expect(reference.endTime).toBe(end);
+  expect(reference.startTime).toBe(startTime);
+  expect(reference.endTime).toBe(endTime);
 }
 
 
