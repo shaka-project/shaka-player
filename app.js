@@ -601,7 +601,10 @@ app.loadHttpStream = function() {
   var drmSchemeInfo = null;
   if (keySystem) {
     drmSchemeInfo = new shaka.player.DrmSchemeInfo(
-        keySystem, licenseServerUrl, false, null, null);
+        keySystem,
+        licenseServerUrl,
+        false /* withCredentials */,
+        null /* initData */);
   }
 
   app.load_(new shaka.player.HttpVideoSource(mediaUrl, subtitlesUrl,
@@ -944,7 +947,10 @@ app.interpretContentProtection_ = function(contentProtection) {
     var licenseServerUrl = 'data:application/json;base64,' +
         window.btoa(license);
     return new shaka.player.DrmSchemeInfo(
-        'org.w3.clearkey', licenseServerUrl, false, initData, null);
+        'org.w3.clearkey',
+        licenseServerUrl,
+        false /* withCredentials */,
+        initData);
   }
 
   if (contentProtection.schemeIdUri == 'http://youtube.com/drm/2012/10/10') {
@@ -960,7 +966,10 @@ app.interpretContentProtection_ = function(contentProtection) {
     }
     if (licenseServerUrl) {
       return new shaka.player.DrmSchemeInfo(
-          'com.widevine.alpha', licenseServerUrl, false, initDataOverride,
+          'com.widevine.alpha',
+          licenseServerUrl,
+          false /* withCredentials */,
+          initDataOverride,
           app.postProcessYouTubeLicenseResponse_);
     }
   }
@@ -971,7 +980,10 @@ app.interpretContentProtection_ = function(contentProtection) {
     var licenseServerUrl =
         wvLicenseServerUrlOverride || '//widevine-proxy.appspot.com/proxy';
     return new shaka.player.DrmSchemeInfo(
-        'com.widevine.alpha', licenseServerUrl, false, initDataOverride, null);
+        'com.widevine.alpha',
+        licenseServerUrl,
+        false /* withCredentials */,
+        initDataOverride);
   }
 
   if (contentProtection.schemeIdUri == 'urn:mpeg:dash:mp4protection:2011') {
