@@ -33,7 +33,11 @@ describe('Player', function() {
       'http://vm2.dashif.org/livesim/testpic_6s/Manifest.mpd';
   const segmentNumberManifestUrl = 'http://storage.googleapis.com/' +
       'widevine-demo-media/oops-segment-timeline-number/oops_video.mpd';
+  const segmentTimeManifestUrl = 'http://storage.googleapis.com/' +
+      'widevine-demo-media/oops-segment-timeline-time/oops_video.mpd';
   const FUDGE_FACTOR = 10;
+  const SMALL_FUDGE_FACTOR = 1;
+  const SEEK_OFFSET = 10000;
 
   beforeAll(function() {
     // Hijack assertions and convert failed assertions into failed tests.
@@ -126,23 +130,13 @@ describe('Player', function() {
       });
     });
 
-    it('returns to seek range when seeking before start of range',
-        function(done) {
-          player.load(videoSource).then(function() {
-            video.play();
-            return waitForMovement(video, eventManager);
-          }).then(function() {
-            video.currentTime = videoSource.seekStartTime_ - 10000;
-            return waitForMovement(video, eventManager);
-          }).then(function() {
-            expect(videoSource.video.currentTime).toBeGreaterThan(
-                videoSource.seekStartTime_);
-            done();
-          }).catch(function(error) {
-            fail(error);
-            done();
-          });
-        });
+    it('returns to seek range when seeking before start', function(done) {
+      seekBeforeRange(videoSource, done);
+    });
+
+    it('returns to end of seek range when after end', function(done) {
+      seekAfterRange(videoSource, done);
+    });
   });
 
   describe('live support for segment number template', function() {
@@ -151,36 +145,100 @@ describe('Player', function() {
     });
 
     it('requests MPD update in expected time', function(done) {
-      player.load(videoSource).then(function() {
-        video.play();
-        return waitForMpdRequest(segmentNumberManifestUrl);
-      }).then(function() {
-        expect(video.currentTime).toBeGreaterThan(0.0);
-        done();
-      }).catch(function(error) {
-        fail(error);
-        done();
-      });
+      requestMpdUpdate(segmentNumberManifestUrl, videoSource, done);
     });
 
-    it('returns to seek range when seeking before start of range',
-        function(done) {
-          player.load(videoSource).then(function() {
-            video.play();
-            return waitForMovement(video, eventManager);
-          }).then(function() {
-            video.currentTime = videoSource.seekStartTime_ - 10000;
-            return waitForMovement(video, eventManager);
-          }).then(function() {
-            expect(videoSource.video.currentTime).toBeGreaterThan(
-                videoSource.seekStartTime_);
-            done();
-          }).catch(function(error) {
-            fail(error);
-            done();
-          });
-        });
+    it('returns to seek range when seeking before start', function(done) {
+      seekBeforeRange(videoSource, done);
+    });
+
+    it('returns to end of seek range when after end', function(done) {
+      seekAfterRange(videoSource, done);
+    });
   });
+
+  describe('live support for segment time template', function() {
+    beforeEach(function() {
+      videoSource = newSource(segmentTimeManifestUrl);
+    });
+
+    it('requests MPD update in expected time', function(done) {
+      requestMpdUpdate(segmentTimeManifestUrl, videoSource, done);
+    });
+
+    it('returns to seek range when seeking before start', function(done) {
+      seekBeforeRange(videoSource, done);
+    });
+
+    it('returns to end of seek range when after end', function(done) {
+      seekAfterRange(videoSource, done);
+    });
+  });
+
+  /**
+   * Passes test when MpdRequest is sent.
+   * @param {string} targetMpdUrl The url that should be used in the MpdRequest.
+   * @param {!IVideoSource} videoSource
+   * @param {!done} done The done function, to signal the end of this test.
+   */
+  function requestMpdUpdate(targetMpdUrl, videoSource, done) {
+    player.load(videoSource).then(function() {
+      video.play();
+      return waitForMpdRequest(targetMpdUrl);
+    }).then(function() {
+      expect(video.currentTime).toBeGreaterThan(0.0);
+      done();
+    }).catch(function(error) {
+      fail(error);
+      done();
+    });
+  }
+
+  /**
+   * Seeks before the seek range start, then completes if video snaps back to
+   * seek range start or fails otherwise.
+   * @param {!IVideoSource} videoSource
+   * @param {!done} done The done function, to signal the end of this test.
+   */
+  function seekBeforeRange(videoSource, done) {
+    player.load(videoSource).then(function() {
+      video.play();
+      return waitForMovement(video, eventManager);
+    }).then(function() {
+      video.currentTime = videoSource.seekStartTime_ - SEEK_OFFSET;
+      return waitForMovement(video, eventManager);
+    }).then(function() {
+      expect(videoSource.video.currentTime).toBeGreaterThan(
+          videoSource.seekStartTime_);
+      done();
+    }).catch(function(error) {
+      fail(error);
+      done();
+    });
+  }
+
+  /**
+   * Seeks after the seek range end, then completes if video snaps back to seek
+   * range end or fails otherwise.
+   * @param {!IVideoSource} videoSource
+   * @param {!done} done The done function, to signal the end of this test.
+   */
+  function seekAfterRange(videoSource, done) {
+    player.load(videoSource).then(function() {
+      video.play();
+      return waitForMovement(video, eventManager);
+    }).then(function() {
+      video.currentTime = videoSource.seekEndTime_ + SEEK_OFFSET;
+      return waitForMovement(video, eventManager);
+    }).then(function() {
+      expect(videoSource.video.currentTime).toBeLessThan(
+          videoSource.seekEndTime_ + SMALL_FUDGE_FACTOR);
+      done();
+    }).catch(function(error) {
+      fail(error);
+      done();
+    });
+  }
 
   /**
    * @param {string} targetMpdUrl The url that should be used in the MpdRequest.
