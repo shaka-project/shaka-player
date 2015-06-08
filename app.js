@@ -38,6 +38,22 @@ app.videoResDebug_ = null;
 
 
 /**
+ * The buffered ahead debug element owned by the app.
+ *
+ * @private {Element}
+ */
+app.bufferedAheadDebug_ = null;
+
+
+/**
+ * The buffered behind debug element owned by the app.
+ *
+ * @private {Element}
+ */
+app.bufferedBehindDebug_ = null;
+
+
+/**
  * True if the aspect ratio has been set for this playback.
  *
  * @private {boolean}
@@ -101,7 +117,9 @@ app.init = function() {
   app.video_ =
       /** @type {!HTMLVideoElement} */ (document.getElementById('video'));
   app.videoResDebug_ = document.getElementById('videoResDebug');
-  window.setInterval(app.updateVideoSize_, 50);
+  app.bufferedAheadDebug_ = document.getElementById('bufferedAheadDebug');
+  app.bufferedBehindDebug_ = document.getElementById('bufferedBehindDebug');
+  window.setInterval(app.updateDebugInfo_, 50);
 
   var fields = location.search.split('?').pop();
   fields = fields ? fields.split(';') : [];
@@ -739,10 +757,22 @@ app.displayMetadata_ = function() {
 
 
 /**
- * Update video resolution information.
+ * Update the debug information.
  * @private
  */
-app.updateVideoSize_ = function() {
+app.updateDebugInfo_ = function() {
+  app.updateVideoResDebug_();
+  app.updateBufferDebug_();
+};
+
+
+/**
+ * Update the video resolution information.
+ * @private
+ */
+app.updateVideoResDebug_ = function() {
+  console.assert(app.videoResDebug_);
+
   if (app.aspectRatioSet_ == false) {
     var aspect = app.video_.videoWidth / app.video_.videoHeight;
     if (aspect) {
@@ -765,6 +795,31 @@ app.updateVideoSize_ = function() {
 
   app.videoResDebug_.textContent =
       app.video_.videoWidth + ' x ' + app.video_.videoHeight;
+};
+
+
+/**
+ * Update the buffer information.
+ * @private
+ */
+app.updateBufferDebug_ = function() {
+  console.assert(app.bufferedAheadDebug_ && app.bufferedBehindDebug_);
+
+  var currentTime = app.video_.currentTime;
+  var buffered = app.video_.buffered;
+  var ahead = 0;
+  var behind = 0;
+
+  for (var i = 0; i < buffered.length; ++i) {
+    if (buffered.start(i) <= currentTime && buffered.end(i) >= currentTime) {
+      ahead = buffered.end(i) - currentTime;
+      behind = currentTime - buffered.start(i);
+      break;
+    }
+  }
+
+  app.bufferedAheadDebug_.textContent = Math.round(ahead) + ' seconds';
+  app.bufferedBehindDebug_.textContent = Math.round(behind) + ' seconds';
 };
 
 
