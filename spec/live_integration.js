@@ -269,7 +269,9 @@ describe('Player', function() {
       var request = new MpdRequest(mpdUrl);
       spyOn(request, 'send').and.callFake(function() {
         requestStatus.resolve();
-        return Promise.reject();
+        var error = new Error();
+        error.type = 'fake';
+        return Promise.reject(error);
       });
       return request;
     });
