@@ -111,16 +111,8 @@ describe('Player', function() {
     it('plays two full segments of content', function(done) {
       const SEGMENT_LENGTH = 6;
 
-      var setTestExpectations = function(segmentIndexes) {
-        console.assert(segmentIndexes.length > 0);
-        var index1 = segmentIndexes[0];
-        var index2 = segmentIndexes[1];
-
-        var min = Math.min(index1.last().startTime, index2.last().startTime);
-        var streamStartTime =
-            Math.max(min - videoSource.manifestInfo.minBufferTime, 0);
-
-        var targetTime = streamStartTime + (2 * SEGMENT_LENGTH);
+      var setTestExpectations = function() {
+        var targetTime = video.currentTime + (2 * SEGMENT_LENGTH);
         var waitTime = (2 * SEGMENT_LENGTH) + FUDGE_FACTOR;
 
         waitForTargetTime(

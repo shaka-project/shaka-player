@@ -42,6 +42,26 @@ describe('Player', function() {
       '//storage.googleapis.com/widevine-demo-media/sintel-1080p/dash.mpd';
   const FUDGE_FACTOR = 0.3;
 
+  function createVideo() {
+    var video = document.createElement('video');
+    video.crossOrigin = 'anonymous';
+    video.width = 600;
+    video.height = 400;
+    return video;
+  }
+
+  function createPlayer(video) {
+    // Create a new player.
+    var player = new shaka.player.Player(video);
+    player.addEventListener('error', convertErrorToTestFailure, false);
+
+    // Disable automatic adaptation unless it is needed for a test.
+    // This makes test results more reproducible.
+    player.enableAdaptation(false);
+
+    return player;
+  }
+
   beforeAll(function() {
     // Hijack assertions and convert failed assertions into failed tests.
     assertsToFailures.install();
@@ -55,23 +75,12 @@ describe('Player', function() {
 
     // Create a video tag.  This will be visible so that long tests do not
     // create the illusion of the test-runner being hung.
-    video = document.createElement('video');
-    video.crossOrigin = 'anonymous';
-    video.width = 600;
-    video.height = 400;
-    // Add it to the DOM.
+    video = createVideo();
     document.body.appendChild(video);
   });
 
   beforeEach(function() {
-    // Create a new player.
-    player = new shaka.player.Player(video);
-    player.addEventListener('error', convertErrorToTestFailure, false);
-
-    // Disable automatic adaptation unless it is needed for a test.
-    // This makes test results more reproducible.
-    player.enableAdaptation(false);
-
+    player = createPlayer(video);
     eventManager = new shaka.util.EventManager();
   });
 
@@ -138,13 +147,26 @@ describe('Player', function() {
   });
 
   describe('selectVideoTrack', function() {
+    beforeEach(function(done) {
+      // On some browsers, using the same video tag for these test cause the
+      // tests to be flakely. So use a fresh video tag for each test.
+      player.destroy().then(function() {
+        document.body.removeChild(video);
+        video = createVideo();
+        document.body.appendChild(video);
+        player = createPlayer(video);
+        done();
+      });
+    });
+
     it('can set resolution before beginning playback', function(done) {
       player.load(newSource(plainManifest)).then(function() {
         var track = getVideoTrackByHeight(720);
         player.selectVideoTrack(track.id);
         video.play();
-        // adapts by the time it crosses a segment boundary.
-        return waitForTargetTime(video, eventManager, 6.0, 10.0);
+        return waitForMovement(video, eventManager);
+      }).then(function() {
+        return delay(1.0);
       }).then(function() {
         expect(video.videoHeight).toEqual(720);
         done();
@@ -159,15 +181,16 @@ describe('Player', function() {
         var track = getVideoTrackByHeight(720);
         player.selectVideoTrack(track.id);
         video.play();
-        // adapts by the time it crosses a segment boundary.
-        return waitForTargetTime(video, eventManager, 6.0, 10.0);
+        return waitForMovement(video, eventManager);
+      }).then(function() {
+        return delay(1.0);
       }).then(function() {
         expect(video.videoHeight).toEqual(720);
 
         var track = getVideoTrackByHeight(360);
         player.selectVideoTrack(track.id);
-        // adapts by the time it crosses a segment boundary.
-        return waitForTargetTime(video, eventManager, 11.0, 10.0);
+
+        return delay(3);
       }).then(function() {
         expect(video.videoHeight).toEqual(360);
         done();
@@ -192,7 +215,7 @@ describe('Player', function() {
         return delay(2.0);
       }).then(function() {
         video.currentTime = 30.0;  // <0.1s before end of segment N-2 (3).
-        return delay(5.0);
+        return delay(6.0);
       }).then(function() {
         // Typically this bug manifests with seeking == true.
         expect(video.seeking).toBe(false);
@@ -234,7 +257,7 @@ describe('Player', function() {
         // When this bug manifests, the playhead typically gets stuck around
         // 32.9, so we expect that 35.0 is a safe indication that the bug is
         // not manifesting.
-        return waitForTargetTime(video, eventManager, 35.0, 10.0);
+        return waitForTargetTime(video, eventManager, 35.0, 12.0);
       }).then(function() {
         done();
       }).catch(function(error) {
@@ -248,16 +271,16 @@ describe('Player', function() {
     it('does not hang when seeking to evicted data', function(done) {
       var source = newSource(highBitrateManifest);
 
+      // This should force Chrome to evict data quickly after it is played.
+      // At this asset's bitrate, Chrome should only have enough buffer for
+      // 310 seconds of data.  Tweak the buffer time for audio, since this
+      // will take much less time and bandwidth to buffer.
+      player.setStreamBufferSize(300);
+
       // Create a temporary shim to intercept and modify manifest info.
       var originalLoad = shaka.player.StreamVideoSource.prototype.load;
       shaka.player.StreamVideoSource.prototype.load = function(
           preferredLanguage) {
-        // This should force Chrome to evict data quickly after it is played.
-        // At this asset's bitrate, Chrome should only have enough buffer for
-        // 310 seconds of data.  Tweak the buffer time for audio, since this
-        // will take much less time and bandwidth to buffer.
-        const minBufferTime = 300;
-        this.manifestInfo.minBufferTime = minBufferTime;
         var sets = this.manifestInfo.periodInfos[0].streamSetInfos;
         var audioSet = sets[0].contentType == 'audio' ? sets[0] : sets[1];
         expect(audioSet.contentType).toBe('audio');
@@ -280,17 +303,20 @@ describe('Player', function() {
       }).then(function() {
         // The content is now buffered.
         expect(audioStreamBuffer.buffered.length).toBe(1);
+        expect(audioStreamBuffer.buffered.start(0)).toBe(0);
         video.play();
         return waitForMovement(video, eventManager);
       }).then(function() {
         // Power through and consume the audio data quickly.
         player.setPlaybackRate(8);
-        return delay(4.0);
+        return delay(3.0);
       }).then(function() {
         // Ensure that the browser has evicted the beginning of the stream.
         // Otherwise, this test hasn't reproduced the circumstances correctly.
         expect(audioStreamBuffer.buffered.start(0)).toBeGreaterThan(0);
         // Seek to the beginning, which is data we will have to re-download.
+        player.setStreamBufferSize(10);
+        player.setPlaybackRate(1.0);
         video.currentTime = 0;
         // Expect to play some.
         return waitForTargetTime(video, eventManager, 0.5, 2.0);
@@ -348,15 +374,13 @@ describe('Player', function() {
       }).then(function() {
         var Stream = shaka.media.Stream;
         var videoStream = source.streamsByType_['video'];
-        expect(videoStream.state_).toBe(Stream.State_.UPDATING);
 
         var track = getVideoTrackByHeight(480);
         var ok = player.selectVideoTrack(track.id);
         expect(ok).toBe(true);
-        expect(videoStream.state_).toBe(Stream.State_.SWITCHING);
 
         video.currentTime = 30.0;
-        return waitForTargetTime(video, eventManager, 33.0, 5.0);
+        return waitForTargetTime(video, eventManager, 33.0, 7.0);
       }).then(function() {
         done();
       }).catch(function(error) {
@@ -739,21 +763,11 @@ describe('Player', function() {
   });
 
   describe('setStreamBufferSize', function() {
-    it('sets buffer size on streams', function(done) {
+    it('sets buffer size on streams', function() {
       var original = shaka.media.Stream.bufferSizeSeconds;
       player.setStreamBufferSize(5);
-      var mediaSource = new MediaSource();
-      video.src = window.URL.createObjectURL(mediaSource);
-      mediaSource.addEventListener('sourceopen', function() {
-        var buffer = mediaSource.addSourceBuffer(
-            'video/mp4; codecs="avc1.4d4015"');
-        var stream = new shaka.media.Stream(
-            player, video, mediaSource, buffer, estimator);
-        expect(stream.getBufferingGoal_()).toEqual(5);
-        video.src = '';
-        player.setStreamBufferSize(original);
-        done();
-      });
+      expect(shaka.media.Stream.bufferSizeSeconds).toEqual(5);
+      player.setStreamBufferSize(original);
     });
   });
 

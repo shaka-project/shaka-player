@@ -83,7 +83,7 @@ describe('SegmentIndexParser', function() {
       19580549, 19700059
     ];
 
-    checkReferences(references, 0, url, expectedStartTimes, expectedStartBytes);
+    checkReferences(references, url, expectedStartTimes, expectedStartBytes);
   });
 
   it('correctly handles a non-zero start time', function() {
@@ -112,7 +112,7 @@ describe('SegmentIndexParser', function() {
        5532306,  5788871,  6025088,  6313961,  6642589,  6993868
     ];
 
-    checkReferences(references, 0, url, expectedStartTimes, expectedStartBytes);
+    checkReferences(references, url, expectedStartTimes, expectedStartBytes);
   });
 
   it('parses a WebM segment index', function() {
@@ -135,7 +135,7 @@ describe('SegmentIndexParser', function() {
         1069119, 1226240, 1387394, 1545708, 1699983, 1859342, 2009816
     ];
 
-    checkReferences(references, 0, url, expectedStartTimes, expectedStartBytes);
+    checkReferences(references, url, expectedStartTimes, expectedStartBytes);
   });
 });
 

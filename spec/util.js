@@ -266,14 +266,12 @@ function checkUrlTypeObject(actual, expected) {
  * Checks that the given references have the correct times and byte ranges.
  *
  * @param {!Array.<!shaka.media.SegmentReference>} references
- * @param {number} expectedFirstId
  * @param {string} expectedUrl
  * @param {!Array.<number>} expectedStartTimes
  * @param {!Array.<number>} expectedStartBytes
  */
 function checkReferences(
     references,
-    expectedFirstId,
     expectedUrl,
     expectedStartTimes,
     expectedStartBytes) {
@@ -287,8 +285,6 @@ function checkReferences(
     expect(reference).toBeTruthy();
     expect(reference.url).toBeTruthy();
     expect(reference.url.toString()).toBe(expectedUrl);
-
-    expect(reference.id).toBe(i + expectedFirstId);
 
     expect(reference.startTime.toFixed(3)).toBe(expectedStartTime.toFixed(3));
     expect(reference.startByte).toBe(expectedStartByte);
@@ -307,8 +303,8 @@ function checkReferences(
 
 
 /**
- * Checks the given reference, excluding its |id| field; expects its
- * |startByte| and |endByte| fields to be 0 and null respectively.
+ * Checks the given reference; expects its |startByte| and |endByte| fields to
+ * be 0 and null respectively.
  *
  * @param {!shaka.media.SegmentReference} reference
  * @param {string} url

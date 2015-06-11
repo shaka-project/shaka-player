@@ -822,7 +822,7 @@ describe('MpdProcessor', function() {
         st.timescale = 9000;
         st.segmentDuration = 90000;
 
-        p.start = 0
+        p.start = 0;
         p.duration = 100;
 
         manifestInfo = processor.process(m);

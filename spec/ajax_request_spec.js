@@ -56,7 +56,7 @@ describe('AjaxRequest', function() {
   it('retrieves a segment from offline storage', function(done) {
     var testUrl = new goog.Uri('http://example.com');
     var testReferences = [
-      new shaka.media.SegmentReference(0, 0, null, 0, null, testUrl)];
+      new shaka.media.SegmentReference(0, null, 0, null, testUrl)];
     var testIndex = new shaka.media.SegmentIndex(testReferences);
     var testInitData = new ArrayBuffer(1024);
 

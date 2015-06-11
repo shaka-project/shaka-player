@@ -38,9 +38,9 @@ describe('ContentDatabase', function() {
   const keySystem = 'test.widevine.com';
   const licenseServerUrl = 'www.licenseServer.com';
   const expectedReferences = [
-    { index: 0, start_time: 0, end_time: 2 },
-    { index: 1, start_time: 2, end_time: 4 },
-    { index: 2, start_time: 4, end_time: null }
+    { start_time: 0, end_time: 2 },
+    { start_time: 2, end_time: 4 },
+    { start_time: 4, end_time: null }
   ];
   const drmScheme = new shaka.player.DrmSchemeInfo(
       keySystem, licenseServerUrl, false, null);
@@ -50,8 +50,7 @@ describe('ContentDatabase', function() {
       return {
         compare: function(actual, expected) {
           var result = {};
-          result.pass = util.equals(actual.index, expected.index) &&
-              util.equals(actual.index, expected.index) &&
+          result.pass =
               util.equals(actual.start_time, expected.start_time) &&
               util.equals(actual.end_time, expected.end_time) &&
               actual.url.match(/idb\:\/\/.+\/.+/);
@@ -80,11 +79,11 @@ describe('ContentDatabase', function() {
 
     var testUrl = new goog.Uri(url);
     testReferences = [
-      new shaka.media.SegmentReference(0, 0, 1, 0, 5, testUrl),
-      new shaka.media.SegmentReference(1, 1, 2, 6, 9, testUrl),
-      new shaka.media.SegmentReference(2, 2, 3, 10, 15, testUrl),
-      new shaka.media.SegmentReference(3, 3, 4, 16, 19, testUrl),
-      new shaka.media.SegmentReference(4, 4, null, 20, null, testUrl)];
+      new shaka.media.SegmentReference(0, 1, 0, 5, testUrl),
+      new shaka.media.SegmentReference(1, 2, 6, 9, testUrl),
+      new shaka.media.SegmentReference(2, 3, 10, 15, testUrl),
+      new shaka.media.SegmentReference(3, 4, 16, 19, testUrl),
+      new shaka.media.SegmentReference(4, null, 20, null, testUrl)];
     testIndex = new shaka.media.SegmentIndex(testReferences);
 
     // Use a database name which will not affect the test app.
@@ -173,8 +172,9 @@ describe('ContentDatabase', function() {
 
   it('stores a stream with a single segment and retrieves its index',
       function(done) {
-        var references = [new shaka.media.SegmentReference(
-           0, 0, null, 6, null, new goog.Uri(url))];
+        var references = [
+          new shaka.media.SegmentReference(0, null, 6, null, new goog.Uri(url))
+        ];
         var index = new shaka.media.SegmentIndex(references);
         streamInfo.segmentIndexSource = {
           create: function() { return Promise.resolve(index); }
@@ -185,7 +185,7 @@ describe('ContentDatabase', function() {
           return db.retrieveStreamIndex(streamId);
         }).then(function(streamIndex) {
           expect(streamIndex.references[0]).toMatchReference(
-              { index: 0, start_time: 0, end_time: null });
+              { start_time: 0, end_time: null });
           expect(streamIndex.codecs).toEqual(codecs);
           expect(streamIndex.mime_type).toEqual(mime);
           expect(streamIndex.init_segment).toEqual(testInitData);
