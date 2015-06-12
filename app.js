@@ -98,9 +98,9 @@ app.offlineStreams_ = [];
 /**
  * Reference to the stats overlay
  *
- * {shaka.StatsOverlay}
+ * @private {shaka.StatsOverlay}
  */
-app.stats_overlay = null;
+app.stats_overlay_;
 
 
 /**
@@ -889,9 +889,9 @@ app.initPlayer_ = function() {
   // Load the adaptation setting.
   app.onAdaptationChange();
 
-  app.stats_overlay = new shaka.StatsOverlay();
-  app.stats_overlay.init(app.player_, document.getElementById('overlay'));
-  app.stats_overlay.refresh(true);
+  app.stats_overlay_ = new shaka.StatsOverlay();
+  app.stats_overlay_.init(app.player_, document.getElementById('overlay'));
+  app.stats_overlay_.refresh(true);
 };
 
 
