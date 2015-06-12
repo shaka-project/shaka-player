@@ -31,14 +31,19 @@ describe('Player', function() {
 
   const segmentDurationManifestUrl =
       'http://vm2.dashif.org/livesim/testpic_6s/Manifest.mpd';
-  const segmentNumberManifestUrl =
-      'http://storage.googleapis.com/' +
-      'widevine-demo-media/oops-segment-timeline-number/' +
-      'oops-segment-timeline-number-oops_video.mpd';
-  const segmentTimeManifestUrl =
-      'http://storage.googleapis.com/' +
-      'widevine-demo-media/oops-segment-timeline-time/' +
-      'oops-segment-timeline-time-oops_video.mpd';
+  const googleStorageUrl = 'http://storage.googleapis.com/';
+  const segmentTimeDir =
+      googleStorageUrl + 'widevine-demo-media/oops-segment-timeline-time/';
+  const segmentTimeMpd =
+      segmentTimeDir + 'oops-segment-timeline-time-oops_video.mpd';
+  const segmentNumberDir =
+      googleStorageUrl + 'widevine-demo-media/oops-segment-timeline-number/';
+  const segmentNumberMpd =
+      segmentNumberDir + 'oops-segment-timeline-number-oops_video.mpd';
+  const segmentNumberMinusFiveMpd =
+      segmentNumberDir + 'oops-segment-timeline-number-oops_video_minus_5.mpd';
+  const segmentNumberPlusFiveMpd =
+      segmentNumberDir + 'oops-segment-timeline-number-oops_video_plus_5.mpd';
 
   const FUDGE_FACTOR = 2;
   const SMALL_FUDGE_FACTOR = 1;
@@ -106,15 +111,6 @@ describe('Player', function() {
     it('plays two full segments of content', function(done) {
       const SEGMENT_LENGTH = 6;
 
-      // Wait until onAllStreamsStarted() has been called because we need
-      // to have access to the corrected SegmentIndex.
-      var originalonAllStreamsStarted = videoSource.onAllStreamsStarted;
-      videoSource.onAllStreamsStarted = function(segmentIndexes) {
-        originalonAllStreamsStarted.call(videoSource, segmentIndexes);
-        // Do this async.
-        window.setTimeout(setTestExpectations.bind(null, segmentIndexes), 0);
-      };
-
       var setTestExpectations = function(segmentIndexes) {
         console.assert(segmentIndexes.length > 0);
         var index1 = segmentIndexes[0];
@@ -136,6 +132,8 @@ describe('Player', function() {
         });
       };
 
+      waitForOnAllStreamsStarted(setTestExpectations);
+
       player.load(videoSource).then(function() {
         video.play();
       }).catch(function(error) {
@@ -155,11 +153,11 @@ describe('Player', function() {
 
   describe('live support for segment number template', function() {
     beforeEach(function() {
-      videoSource = newSource(segmentNumberManifestUrl);
+      videoSource = newSource(segmentNumberMpd);
     });
 
     it('requests MPD update in expected time', function(done) {
-      requestMpdUpdate(segmentNumberManifestUrl, videoSource, done);
+      requestMpdUpdate(segmentNumberMpd, videoSource, done);
     });
 
     it('returns to seek range when seeking before start', function(done) {
@@ -168,16 +166,24 @@ describe('Player', function() {
 
     it('returns to end of seek range when after end', function(done) {
       seekAfterRange(videoSource, done);
+    });
+
+    it('corrects a timestamp that is behind', function(done) {
+      correctTimestamp(segmentNumberMinusFiveMpd, 18, done);
+    });
+
+    it('corrects a timestamp that is ahead', function(done) {
+      correctTimestamp(segmentNumberPlusFiveMpd, 19, done);
     });
   });
 
   describe('live support for segment time template', function() {
     beforeEach(function() {
-      videoSource = newSource(segmentTimeManifestUrl);
+      videoSource = newSource(segmentTimeMpd);
     });
 
     it('requests MPD update in expected time', function(done) {
-      requestMpdUpdate(segmentTimeManifestUrl, videoSource, done);
+      requestMpdUpdate(segmentTimeMpd, videoSource, done);
     });
 
     it('returns to seek range when seeking before start', function(done) {
@@ -188,6 +194,37 @@ describe('Player', function() {
       seekAfterRange(videoSource, done);
     });
   });
+
+  /**
+   * Passes test if timestamp is corrected properly and playback starts.
+   * @param {string} manifestUrl
+   * @param {number} initalReference The reference at which playback will start.
+   * @param {!done} done The done function, to signal the end of this test.
+   */
+  function correctTimestamp(manifestUrl, initialReference, done) {
+    videoSource = newSource(manifestUrl);
+    var setTestExpectations = function(segmentIndexes) {
+      console.assert(segmentIndexes.length > 0);
+      var index = segmentIndexes[0];
+      expect(video.buffered.start(0)).toEqual(
+          index.references[initialReference].startTime);
+      waitForMovement(video, eventManager).then(function() {
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    };
+
+    waitForOnAllStreamsStarted(setTestExpectations);
+
+    player.load(videoSource).then(function() {
+      video.play();
+    }).catch(function(error) {
+      fail(error);
+      done();
+    });
+  }
 
   /**
    * Passes test when MpdRequest is sent.
@@ -277,5 +314,20 @@ describe('Player', function() {
     });
 
     return requestStatus;
+  }
+
+  /**
+   * Waits until onAllStreamsStarted() has been called to catch the corrected
+   * segmentIndexes, then bind it to the given function and set a Timeout to
+   * call asynchronously.
+   * @param {Function} fn The function to be called with the segmentIndexes.
+   */
+  function waitForOnAllStreamsStarted(fn) {
+    var originalonAllStreamsStarted = videoSource.onAllStreamsStarted;
+    videoSource.onAllStreamsStarted = function(segmentIndexes) {
+      originalonAllStreamsStarted.call(videoSource, segmentIndexes);
+      // Do this async.
+      window.setTimeout(fn.bind(null, segmentIndexes), 0);
+    };
   }
 });
