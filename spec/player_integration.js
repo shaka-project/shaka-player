@@ -673,6 +673,71 @@ describe('Player', function() {
     });
   });
 
+  describe('interpretContentProtection', function() {
+    function newSourceWithIcp(icp) {
+      var estimator = new shaka.util.EWMABandwidthEstimator();
+      return new shaka.player.DashVideoSource(encryptedManifest,
+                                              icp,
+                                              estimator);
+    }
+
+    it('calls the license post-processor', function(done) {
+      var licensePostProcessor = {
+        spy: function(response) { return response; }
+      };
+
+      function icp(contentProtection) {
+        // Call utility function from util.js.
+        var drmScheme = interpretContentProtection(contentProtection);
+        // Ensure we're not overwriting a post-processor that we need.
+        expect(drmScheme.licensePostProcessor).toBeNull();
+        drmScheme.licensePostProcessor = licensePostProcessor.spy;
+        return drmScheme;
+      }
+
+      spyOn(licensePostProcessor, 'spy').and.callThrough();
+
+      player.load(newSourceWithIcp(icp)).then(function() {
+        video.play();
+        delay(0.5);
+      }).then(function() {
+        expect(licensePostProcessor.spy).toHaveBeenCalled();
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+
+    it('calls the license pre-processor', function(done) {
+      var licensePreProcessor = {
+        spy: function(info) { return info; }
+      };
+
+      function icp(contentProtection) {
+        // Call utility function from util.js.
+        var drmScheme = interpretContentProtection(contentProtection);
+        // Ensure we're not overwriting a pre-processor that we need.
+        expect(drmScheme.licensePreProcessor).toBeNull();
+        drmScheme.licensePreProcessor = licensePreProcessor.spy;
+        return drmScheme;
+      }
+
+      spyOn(licensePreProcessor, 'spy').and.callThrough();
+
+      player.load(newSourceWithIcp(icp)).then(function() {
+        video.play();
+        delay(0.5);
+      }).then(function() {
+        expect(licensePreProcessor.spy).toHaveBeenCalled();
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+  });
+
   describe('setStreamBufferSize', function() {
     it('sets buffer size on streams', function(done) {
       var original = shaka.media.Stream.bufferSizeSeconds;
