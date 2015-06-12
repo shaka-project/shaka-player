@@ -25,9 +25,9 @@ grep --color=auto -Pr '(TODO|FIXME)(?!.*story)' \
   lib/ \
   app.js \
   controls.js \
+  stats_overlay.js \
   load.js \
   index.* \
   spec/ \
   spec_runner.html \
   support.html
-

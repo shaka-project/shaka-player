@@ -51,3 +51,6 @@ tr {
   display: none;
 }
 
+#overlay {
+  background: #eee;
+}
