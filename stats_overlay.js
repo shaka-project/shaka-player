@@ -1,3 +1,20 @@
+/**
+ * Copyright 2014 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @fileoverview A statistics visualiser.
+ */
 
 
 
@@ -10,23 +27,24 @@ shaka.StatsOverlay = function() {
   /** @private {?HTMLElement} */
   this.canvas_;
 
-  /** @protected {number} */
-  this.width = 200;
+  /** @private {number} */
+  this.width_ = 200;
 
-  /** @protected {number} */
-  this.height = 100;
+  /** @private {number} */
+  this.height_ = 100;
 
-  /** @private {?number} */
-  this.startTimestamp;
-
-  /** @private {?number} */
-  this.currentXOffset;
+  /** @private {number} */
+  this.maxY_ = 1;
 
   /** @private {?number} */
-  this.refreshIntervalId;
+  this.startTimestamp_;
 
-  /** @protected {number} */
-  this.maxY = 1000;
+  /** @private {?number} */
+  this.currentXOffset_;
+
+  /** @private {?number} */
+  this.refreshIntervalId_;
+
 };
 
 
@@ -40,8 +58,8 @@ shaka.StatsOverlay.prototype.init = function(player, canvas) {
   this.player_ = player;
   this.canvas_ = canvas;
 
-  this.width = canvas.width;
-  this.height = canvas.height - 5;
+  this.width_ = canvas.width;
+  this.height_ = canvas.height - 5;
 
   this.reset();
 };
@@ -49,34 +67,36 @@ shaka.StatsOverlay.prototype.init = function(player, canvas) {
 
 /**
  * Converts a timestamp to an x coordinate
+ * @private
  * @param {?number} timestamp
  * @return {number}
  */
-shaka.StatsOverlay.prototype.convertTimestampToXCoordinate = function(timestamp)
-    {
-  return Math.round(timestamp - this.startTimestamp + this.currentXOffset) +
+shaka.StatsOverlay.prototype.convertTimestampToXCoordinate_ =
+    function(timestamp) {
+  return Math.round(timestamp - this.startTimestamp_ + this.currentXOffset_) +
          0.5;
 };
 
 
 /**
  * Converts bits to the Y Coordinate
- * Updated the running maxY to calculate the correct scale
+ * Updated the running maxY_ to calculate the correct scale
+ * @private
  * @param {?number} bits
  * @return {number}
  */
-shaka.StatsOverlay.prototype.convertBitsToYCoordinate = function(bits) {
+shaka.StatsOverlay.prototype.convertBitsToYCoordinate_ = function(bits) {
 
   // update the running scale
-  if (bits && bits > this.maxY) {
-    this.maxY = bits;
+  if (bits && bits > this.maxY_) {
+    this.maxY_ = bits;
 
     // update the scaleY
-    this.scaleY = - (this.height / (this.maxY * 1.1));
+    this.scaleY_ = - (this.height_ / (this.maxY_ * 1.1));
   }
 
   // fudge the coordindate to ensure that the paths produce clean lines
-  return Math.round((bits * this.scaleY) + this.height) + 0.5;
+  return Math.round((bits * this.scaleY_) + this.height_) + 0.5;
 };
 
 
@@ -84,15 +104,16 @@ shaka.StatsOverlay.prototype.convertBitsToYCoordinate = function(bits) {
  * Reset the overlay
  */
 shaka.StatsOverlay.prototype.reset = function() {
-  this.maxY = 1000;
-  this.scaleY = - (this.height / this.maxY);
+  this.maxY_ = 1;
+  this.scaleY_ = - (this.height_ / this.maxY_);
 };
 
 
 /**
  * Draw stats to the overlay
+ * @private
  */
-shaka.StatsOverlay.prototype.draw = function() {
+shaka.StatsOverlay.prototype.draw_ = function() {
 
   var context = this.canvas_.getContext('2d');
   var stats = this.player_.getStats();
@@ -105,35 +126,36 @@ shaka.StatsOverlay.prototype.draw = function() {
   }
 
   // play start time is determined by the first bandwidth history
-  this.startTimestamp = stats.bandwidthHistory[0].timestamp;
+  this.startTimestamp_ = stats.bandwidthHistory[0].timestamp;
 
   // shift the output based on the size of the canvas and the elaspsed time
-  this.currentXOffset = - Math.max(0,
-      (shaka.util.Clock.now() / 1000) - this.startTimestamp - this.width);
+  this.currentXOffset_ = - Math.max(0,
+      (shaka.util.Clock.now() / 1000) - this.startTimestamp_ - this.width_);
 
   // clear the canvas
   this.canvas_.width = this.canvas_.width;
 
-  this.drawGraph(context, stats);
+  this.drawGraph_(context, stats);
 
-  this.drawStreamHistory(context, stats);
+  this.drawStreamHistory_(context, stats);
 
-  this.drawBandwidth(context, stats);
+  this.drawBandwidth_(context, stats);
 
-  this.drawBufferingHistory(context, stats);
+  this.drawBufferingHistory_(context, stats);
 };
 
 
 /**
  * Draw the bandwidth bands
+ * @private
  * @param {?Object} context
  * @param {!shaka.player.Stats} stats
  */
-shaka.StatsOverlay.prototype.drawGraph = function(context, stats) {
+shaka.StatsOverlay.prototype.drawGraph_ = function(context, stats) {
 
   context.beginPath();
-  context.moveTo(0, this.height + 0.5);
-  context.lineTo(this.width, this.height + 0.5);
+  context.moveTo(0, this.height_ + 0.5);
+  context.lineTo(this.width_, this.height_ + 0.5);
   context.strokeStyle = '#000';
   context.lineWidth = 0.5;
   context.stroke();
@@ -147,9 +169,9 @@ shaka.StatsOverlay.prototype.drawGraph = function(context, stats) {
   for (var i = 0; i < bitRateInfo.length; i++)
   {
     context.moveTo(0,
-        this.convertBitsToYCoordinate(bitRateInfo[i].bandwidth));
-    context.lineTo(this.width,
-        this.convertBitsToYCoordinate(bitRateInfo[i].bandwidth));
+        this.convertBitsToYCoordinate_(bitRateInfo[i].bandwidth));
+    context.lineTo(this.width_,
+        this.convertBitsToYCoordinate_(bitRateInfo[i].bandwidth));
   }
 
   context.stroke();
@@ -158,33 +180,34 @@ shaka.StatsOverlay.prototype.drawGraph = function(context, stats) {
 
 /**
  * Draw a blue square line to indicate the stream being played
+ * @private
  * @param {?Object} context
  * @param {!shaka.player.Stats} stats
  */
-shaka.StatsOverlay.prototype.drawStreamHistory = function(context, stats) {
+shaka.StatsOverlay.prototype.drawStreamHistory_ = function(context, stats) {
 
-  var py = this.height;
+  var py = this.height_;
   var px = 0;
 
   context.beginPath();
-  context.moveTo(px, this.height);
+  context.moveTo(px, this.height_);
 
   // graph historical stream changes - square graph
   for (var i = 0; i < stats.streamHistory.length; ++i) {
 
     // move to the new x
-    px = this.convertTimestampToXCoordinate(
+    px = this.convertTimestampToXCoordinate_(
         stats.streamHistory[i].timestamp);
     context.lineTo(px, py);
 
     // move to the new y - convert from bytes to bits
-    py = this.convertBitsToYCoordinate(
+    py = this.convertBitsToYCoordinate_(
         stats.streamHistory[i].value.videoBandwidth);
     context.lineTo(px, py);
   }
 
   // graph to current time
-  px = this.convertTimestampToXCoordinate(shaka.util.Clock.now() / 1000);
+  px = this.convertTimestampToXCoordinate_(shaka.util.Clock.now() / 1000);
   context.lineTo(px, py);
 
   context.strokeStyle = '#00b';
@@ -195,23 +218,24 @@ shaka.StatsOverlay.prototype.drawStreamHistory = function(context, stats) {
 
 /**
  * Draw the bandwidth history as a red line
+ * @private
  * @param {?Object} context
  * @param {!shaka.player.Stats} stats
  */
-shaka.StatsOverlay.prototype.drawBandwidth = function(context, stats) {
+shaka.StatsOverlay.prototype.drawBandwidth_ = function(context, stats) {
 
   var py = 0;
   var px = 0;
 
   context.beginPath();
-  context.moveTo(px, this.height);
+  context.moveTo(px, this.height_);
 
   // graph current bandwidth
   for (var i = 0; i < stats.bandwidthHistory.length; ++i) {
 
-    px = this.convertTimestampToXCoordinate(
+    px = this.convertTimestampToXCoordinate_(
         stats.bandwidthHistory[i].timestamp);
-    py = this.convertBitsToYCoordinate(
+    py = this.convertBitsToYCoordinate_(
         stats.bandwidthHistory[i].value);
 
     context.lineTo(px, py);
@@ -224,18 +248,19 @@ shaka.StatsOverlay.prototype.drawBandwidth = function(context, stats) {
 
 /**
  * Draw the buffering moments as a vertical green line
+ * @private
  * @param {?Object} context
  * @param {!shaka.player.Stats} stats
  */
-shaka.StatsOverlay.prototype.drawBufferingHistory = function(context, stats) {
+shaka.StatsOverlay.prototype.drawBufferingHistory_ = function(context, stats) {
 
   var py = 0;
   var px = 0;
 
   context.beginPath();
   for (var i = 0; i < stats.bufferingHistory.length; ++i) {
-    px = this.convertTimestampToXCoordinate(stats.bufferingHistory[i]);
-    context.moveTo(px, this.height);
+    px = this.convertTimestampToXCoordinate_(stats.bufferingHistory[i]);
+    context.moveTo(px, this.height_);
     context.lineTo(px, 0);
   }
   context.strokeStyle = '#0A0';
@@ -251,9 +276,9 @@ shaka.StatsOverlay.prototype.refresh = function(enable) {
 
   if (enable) {
     var overlay = this;
-    this.refreshIntervalId = setInterval(function() { overlay.draw(); }, 500);
+    this.refreshIntervalId_ = setInterval(function() { overlay.draw_(); }, 500);
   }
-  else if (this.refreshIntervalId) {
-    clearInterval(this.refreshIntervalId);
+  else if (this.refreshIntervalId_) {
+    clearInterval(this.refreshIntervalId_);
   }
 };
