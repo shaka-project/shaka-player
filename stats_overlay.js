@@ -27,11 +27,11 @@ shaka.StatsOverlay = function() {
   /** @private {?HTMLElement} */
   this.canvas_;
 
-  /** @private {number} */
-  this.width_ = 200;
+  /** @private {?number} */
+  this.width_;
 
-  /** @private {number} */
-  this.height_ = 100;
+  /** @private {?number} */
+  this.height_;
 
   /** @private {number} */
   this.maxY_ = 1;
@@ -132,8 +132,7 @@ shaka.StatsOverlay.prototype.draw_ = function() {
   this.currentXOffset_ = - Math.max(0,
       (shaka.util.Clock.now() / 1000) - this.startTimestamp_ - this.width_);
 
-  // clear the canvas
-  this.canvas_.width = this.canvas_.width;
+  context.clearRect(0, 0, this.canvas_.width, this.canvas_.height);
 
   this.drawGraph_(context, stats);
 
@@ -190,6 +189,8 @@ shaka.StatsOverlay.prototype.drawStreamHistory_ = function(context, stats) {
   var px = 0;
 
   context.beginPath();
+  context.strokeStyle = '#00b';
+  context.lineWidth = 0.5;
   context.moveTo(px, this.height_);
 
   // graph historical stream changes - square graph
@@ -209,9 +210,6 @@ shaka.StatsOverlay.prototype.drawStreamHistory_ = function(context, stats) {
   // graph to current time
   px = this.convertTimestampToXCoordinate_(shaka.util.Clock.now() / 1000);
   context.lineTo(px, py);
-
-  context.strokeStyle = '#00b';
-  context.lineWidth = 0.5;
   context.stroke();
 };
 
@@ -228,6 +226,8 @@ shaka.StatsOverlay.prototype.drawBandwidth_ = function(context, stats) {
   var px = 0;
 
   context.beginPath();
+  context.strokeStyle = '#F00';
+  context.lineWidth = 0.5;
   context.moveTo(px, this.height_);
 
   // graph current bandwidth
@@ -240,8 +240,7 @@ shaka.StatsOverlay.prototype.drawBandwidth_ = function(context, stats) {
 
     context.lineTo(px, py);
   }
-  context.strokeStyle = '#F00';
-  context.lineWidth = 0.5;
+
   context.stroke();
 };
 
@@ -258,12 +257,15 @@ shaka.StatsOverlay.prototype.drawBufferingHistory_ = function(context, stats) {
   var px = 0;
 
   context.beginPath();
+  context.strokeStyle = '#0A0';
+  context.lineWidth = 0.5;
+
   for (var i = 0; i < stats.bufferingHistory.length; ++i) {
     px = this.convertTimestampToXCoordinate_(stats.bufferingHistory[i]);
     context.moveTo(px, this.height_);
     context.lineTo(px, 0);
   }
-  context.strokeStyle = '#0A0';
+
   context.stroke();
 };
 
