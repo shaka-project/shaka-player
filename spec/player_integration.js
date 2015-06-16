@@ -314,6 +314,7 @@ describe('Player', function() {
         // Ensure that the browser has evicted the beginning of the stream.
         // Otherwise, this test hasn't reproduced the circumstances correctly.
         expect(audioStreamBuffer.buffered.start(0)).toBeGreaterThan(0);
+        expect(video.currentTime).toBeGreaterThan(0);
         // Seek to the beginning, which is data we will have to re-download.
         player.setStreamBufferSize(10);
         player.setPlaybackRate(1.0);
@@ -372,7 +373,6 @@ describe('Player', function() {
         video.play();
         return waitForMovement(video, eventManager);
       }).then(function() {
-        var Stream = shaka.media.Stream;
         var videoStream = source.streamsByType_['video'];
 
         var track = getVideoTrackByHeight(480);
@@ -435,15 +435,18 @@ describe('Player', function() {
   });
 
   describe('selectTextTrack', function() {
+    var tracks;
     it('activates the correct track', function(done) {
       player.load(newSource(languagesManifest)).then(function() {
-        var tracks = player.getTextTracks();
+        tracks = player.getTextTracks();
         var activeTrack = getActiveTextTrack();
         // Ensure that it is the first track, so that we know our selection
         // of the second track is affecting a real change.
         expect(activeTrack.id).toBe(tracks[0].id);
 
         player.selectTextTrack(tracks[1].id);
+        return delay(0.1);
+      }).then(function() {
         activeTrack = getActiveTextTrack();
         expect(activeTrack.id).toBe(tracks[1].id);
         done();
@@ -454,17 +457,20 @@ describe('Player', function() {
     });
 
     it('does not disable subtitles', function(done) {
+      var tracks;
       player.load(newSource(languagesManifest)).then(function() {
-        var tracks = player.getTextTracks();
+        tracks = player.getTextTracks();
         player.selectTextTrack(tracks[0].id);
         player.enableTextTrack(true);
-
+        return delay(0.1);
+      }).then(function() {
         var activeTrack = getActiveTextTrack();
         expect(activeTrack.enabled).toBe(true);
         expect(activeTrack.id).toBe(tracks[0].id);
 
         player.selectTextTrack(tracks[1].id);
-
+        return delay(0.1);
+      }).then(function() {
         activeTrack = getActiveTextTrack();
         expect(activeTrack.enabled).toBe(true);
         expect(activeTrack.id).toBe(tracks[1].id);
@@ -476,17 +482,20 @@ describe('Player', function() {
     });
 
     it('does not re-enable subtitles', function(done) {
+      var tracks;
       player.load(newSource(languagesManifest)).then(function() {
-        var tracks = player.getTextTracks();
+        tracks = player.getTextTracks();
         player.selectTextTrack(tracks[0].id);
         player.enableTextTrack(false);
-
+        return delay(0.1);
+      }).then(function() {
         var activeTrack = getActiveTextTrack();
         expect(activeTrack.enabled).toBe(false);
         expect(activeTrack.id).toBe(tracks[0].id);
 
         player.selectTextTrack(tracks[1].id);
-
+        return delay(0.1);
+      }).then(function() {
         activeTrack = getActiveTextTrack();
         expect(activeTrack.enabled).toBe(false);
         expect(activeTrack.id).toBe(tracks[1].id);
