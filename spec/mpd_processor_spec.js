@@ -789,12 +789,14 @@ describe('MpdProcessor', function() {
         st = new mpd.SegmentTemplate();
 
         r.segmentTemplate = st;
-        r.bandwidth = 250000;
         r.baseUrl = new goog.Uri('http://example.com');
+        r.bandwidth = 250000;
+        r.mimeType = 'video/mp4';
 
         as.representations.push(r);
         p.adaptationSets.push(as);
         m.periods.push(p);
+        m.url = new goog.Uri('http://example.com/mpd');
       });
 
       it('allows MPD and segment duration', function(done) {
@@ -849,6 +851,37 @@ describe('MpdProcessor', function() {
 
         expect(p.duration).toBe(100);
       });
+
+      // Live content is not dependent on using SegmentTemplate but it is the
+      // most common use case.
+      it('creates live manifest w/ Location element', function() {
+        m.type = 'dynamic';
+        m.minUpdatePeriod = 10;
+
+        var updateLocation = new shaka.dash.mpd.Location();
+        updateLocation.url = new goog.Uri('http://example.com/updated_mpd');
+
+        m.updateLocation = updateLocation;
+
+        manifestInfo = processor.process(m);
+
+        expect(manifestInfo.live).toBe(true);
+        expect(manifestInfo.updatePeriod).toBe(10);
+        expect(manifestInfo.updateLocation.toString()).toBe(
+            'http://example.com/updated_mpd');
+      });
+
+      it('creates live manifest w/o Location element', function() {
+        m.type = 'dynamic';
+        m.minUpdatePeriod = 10;
+
+        manifestInfo = processor.process(m);
+
+        expect(manifestInfo.live).toBe(true);
+        expect(manifestInfo.updatePeriod).toBe(10);
+        expect(manifestInfo.updateLocation.toString()).toBe(
+            'http://example.com/mpd');
+      });
     });  // describe SegmentTemplate
 
     describe('SegmentList', function() {
@@ -866,8 +899,9 @@ describe('MpdProcessor', function() {
         sl = new mpd.SegmentList();
 
         r.segmentList = sl;
-        r.bandwidth = 250000;
         r.baseUrl = new goog.Uri('http://example.com');
+        r.bandwidth = 250000;
+        r.mimeType = 'video/mp4';
 
         as.representations.push(r);
         p.adaptationSets.push(as);

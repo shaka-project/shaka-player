@@ -474,5 +474,28 @@ describe('mpd', function() {
     var mpd = shaka.dash.mpd.parseMpd(source, '');
     expect(mpd.minBufferTime).toBe(0);
   });
+
+  it('handles a Location element', function() {
+    var source = [
+      '<MPD>',
+      '  <Location>http://example.com/updated_mpd</Location>',
+      '</MPD>'].join('\n');
+
+    var mpd = shaka.dash.mpd.parseMpd(source, 'http://example.com/mpd');
+    expect(mpd.updateLocation.toString()).toBe(
+        'http://example.com/updated_mpd');
+  });
+
+  it('handles a Location element with a BaseURL', function() {
+    var source = [
+      '<MPD>',
+      '  <BaseURL>http://example.com</BaseURL>',
+      '  <Location>updated_mpd</Location>',
+      '</MPD>'].join('\n');
+
+    var mpd = shaka.dash.mpd.parseMpd(source, 'http://example.com/mpd');
+    expect(mpd.updateLocation.toString()).toBe(
+        'http://example.com/updated_mpd');
+  });
 });
 
