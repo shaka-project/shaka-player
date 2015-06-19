@@ -314,6 +314,18 @@ app.onVideoChange = function(opt_immediate) {
 
 
 /**
+ * Called when trick play is enabled or disabled.
+ */
+app.onTrickPlayChange = function() {
+  var enable = document.getElementById('trickPlayEnabled').checked;
+  playerControls.enableTrickPlayButtons(enable);
+  if (!enable && app.player_) {
+    app.player_.setPlaybackRate(1.0);
+  }
+};
+
+
+/**
  * Called when adaptation is enabled or disabled.
  */
 app.onAdaptationChange = function() {
@@ -917,6 +929,7 @@ app.initPlayer_ = function() {
       playerControls.onSeekRangeChanged);
 
   app.estimator_ = new shaka.util.EWMABandwidthEstimator();
+  playerControls.setPlayer(app.player_);
 
   // Load the adaptation setting.
   app.onAdaptationChange();

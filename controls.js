@@ -37,6 +37,10 @@ playerControls.video_;
 playerControls.seekRange_ = {start: 0, end: 0};
 
 
+/** @private {shaka.player.Player} */
+playerControls.player_ = null;
+
+
 /**
  * Initializes the player controls.
  * @param {!HTMLVideoElement} video
@@ -51,6 +55,8 @@ playerControls.init = function(video) {
   var volumeBar = document.getElementById('volumeBar');
   var fullscreenButton = document.getElementById('fullscreenButton');
   var currentTime = document.getElementById('currentTime');
+  var rewindButton = document.getElementById('rewindButton');
+  var fastForwardButton = document.getElementById('fastForwardButton');
 
   playerControls.isLive_ = false;
   playerControls.isSeeking_ = false;
@@ -179,12 +185,26 @@ playerControls.init = function(video) {
     }
   });
 
+
   // Jump to LIVE if the user clicks on the current time.
   currentTime.addEventListener('click', function() {
     if (playerControls.isLive_) {
       video.currentTime = seekBar.max;
     }
   });
+
+  // trick play
+  rewindButton.addEventListener('click', playerControls.onRewind);
+  fastForwardButton.addEventListener('click', playerControls.onFastForward);
+};
+
+
+/**
+ * Set the player. Is needed for trick play.
+ * @param {shaka.player.Player} player
+ */
+playerControls.setPlayer = function(player) {
+  playerControls.player_ = player;
 };
 
 
@@ -215,6 +235,44 @@ playerControls.onSeekRangeChanged = function(event) {
  */
 playerControls.setLive = function(liveState) {
   playerControls.isLive_ = liveState;
+};
+
+
+/**
+ * Called when rewind button is pressed. Will circle play between -1, -2, -4
+ * and -8 playback rates.
+ */
+playerControls.onRewind = function() {
+  if (!playerControls.player_) return;
+  var rate = playerControls.player_.getPlaybackRate();
+  playerControls.player_.setPlaybackRate(
+      rate > 0 || rate < -4 ? -1.0 : rate * 2);
+};
+
+
+/**
+ * Called when fastForward button is pressed. Will circle play between 1, 2,
+ * 4 and 8 playback rates.
+ */
+playerControls.onFastForward = function() {
+  if (!playerControls.player_) return;
+  var rate = playerControls.player_.getPlaybackRate();
+  playerControls.player_.setPlaybackRate(rate < 0 || rate > 4 ? 1.0 : rate * 2);
+};
+
+
+/**
+ * Called by the application to switch trick play controls and the seek bar.
+ * @param {boolean} enable True if trick play should be enabled, if false
+ *    seekbar will be enabled.
+ */
+playerControls.enableTrickPlayButtons = function(enable) {;
+  var seekBar = document.getElementById('seekBar');
+  var rewindButton = document.getElementById('rewindButton');
+  var fastForwardButton = document.getElementById('fastForwardButton');
+  rewindButton.style.display = enable ? 'block' : 'none';
+  fastForwardButton.style.display = enable ? 'block' : 'none';
+  seekBar.style.display = enable ? 'none' : 'block';
 };
 
 

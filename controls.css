@@ -94,7 +94,8 @@
   opacity: 1;
 }
 
-#playButton, #pauseButton, #muteButton, #unmuteButton, #fullscreenButton {
+#playButton, #pauseButton, #muteButton, #unmuteButton, #fullscreenButton,
+#rewindButton, #fastForwardButton {
   height: 32px;
   width: 32px;
   padding: 0;
@@ -144,6 +145,24 @@
 
 #fullscreenButton:active {
   background-image: url('assets/controls/fullscreen-active.png');
+}
+
+#rewindButton {
+  display: none;
+  background-image: url('assets/controls/rw.png');
+}
+
+#rewindButton:active {
+  background-image: url('assets/controls/rw-active.png');
+}
+
+#fastForwardButton {
+  display: none;
+  background-image: url('assets/controls/ff.png');
+}
+
+#fastForwardButton:active {
+  background-image: url('assets/controls/ff-active.png');
 }
 
 #currentTime {
