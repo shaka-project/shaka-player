@@ -50,6 +50,7 @@ playerControls.init = function(video) {
   var unmuteButton = document.getElementById('unmuteButton');
   var volumeBar = document.getElementById('volumeBar');
   var fullscreenButton = document.getElementById('fullscreenButton');
+  var currentTime = document.getElementById('currentTime');
 
   playerControls.isLive_ = false;
   playerControls.isSeeking_ = false;
@@ -175,6 +176,13 @@ playerControls.init = function(video) {
       // restore the previous size
       videoContainer.style.width = normalSize.w;
       videoContainer.style.height = normalSize.h;
+    }
+  });
+
+  // Jump to LIVE if the user clicks on the current time.
+  currentTime.addEventListener('click', function() {
+    if (playerControls.isLive_) {
+      video.currentTime = seekBar.max;
     }
   });
 };
