@@ -303,8 +303,9 @@ if (async.length) {
 }
 
 function onLoaded(fn) {
-  if (document.readyState == "loading") {
-    document.addEventListener('DOMContentLoaded', fn);
+  if (document.readyState == "loading" ||
+      document.readyState == "interactive") {
+    window.addEventListener('load', fn);
   } else {
     fn();
   }
