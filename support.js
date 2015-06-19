@@ -230,6 +230,7 @@ function testForKeySystem(ks, required) {
 testForClass(window, 'HTMLMediaElement', true);
 testForClass(window, 'MediaSource', true);
 testForClass(window, 'Promise', true);
+testForClass(window, 'Uint8Array', true);
 
 // Optional:
 testForClass(window, 'VTTCue', false);
