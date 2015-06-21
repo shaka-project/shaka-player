@@ -181,7 +181,34 @@
 
     <br>
 
-    <canvas id="overlay" width="600" height="100" ></canvas>
+    <table>
+      <tr>
+        <td colspan="2" class="heading">Playback Statistics</td>
+      </tr>
+      <tr>
+        <td id="statsPlayedBitrate">
+          Bitrate of played stream (bps)
+        </td>
+        <td id="statsEstimatedBitrate">
+          Estimated bitrate (bps)
+        </td>
+      </tr>
+      <tr>
+        <td id="statsBufferLength">
+          Buffer length (seconds)
+        </td>
+        <td id="statsBuffered">
+          Buffered (vertical line)
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <canvas id="overlay" width="600px"></canvas>
+        </td>
+      </tr>
+    </table>
+
+    <br>
 
     <div id="videoContainer">
       <video id="video" poster="assets/poster.jpg"

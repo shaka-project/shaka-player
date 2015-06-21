@@ -891,9 +891,9 @@ app.initPlayer_ = function() {
 
   app.stats_overlay_ = new shaka.StatsOverlay();
   app.stats_overlay_.init(
-    app.player_,
-    document.getElementById('overlay'),
-    /** @type {!HTMLVideoElement} */ (document.getElementById('video')));
+      app.player_,
+      document.getElementById('overlay'),
+      /** @type {!HTMLVideoElement} */ (document.getElementById('video')));
   app.stats_overlay_.refresh(true);
 };
 

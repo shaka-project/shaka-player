@@ -16,7 +16,9 @@
  * @fileoverview A statistics visualiser.
  */
 
- goog.provide('shaka.StatsOverlay');
+goog.provide('shaka.StatsOverlay');
+
+
 
 /** @constructor
  * @export
@@ -47,15 +49,20 @@ shaka.StatsOverlay = function() {
   /** @private {?number} */
   this.startTimestamp_;
 
-  /** @private {?number} */
-  this.currentXOffset_;
+  /** @private {number} */
+  this.currentXOffset_ = 0;
 
   /** @private {?number} */
   this.refreshIntervalId_;
 
-  /** @private {?Array} */
+  /** @private {Array.<Object>} */
   this.bufferLengthHistory_;
 
+  /** @private {?number} */
+  this.scaleBufferLengthY_;
+
+  /** @private {?number} */
+  this.scaleY_;
 };
 
 
@@ -67,13 +74,12 @@ shaka.StatsOverlay = function() {
  * @export
  */
 shaka.StatsOverlay.prototype.init = function(player, canvas, video) {
-
   this.player_ = player;
   this.canvas_ = canvas;
   this.video_ = video;
 
   this.width_ = canvas.width;
-  this.height_ = canvas.height - 5;
+  this.height_ = canvas.height;
 
   this.reset();
 };
@@ -100,18 +106,22 @@ shaka.StatsOverlay.prototype.convertTimestampToXCoordinate_ =
  * @return {number}
  */
 shaka.StatsOverlay.prototype.convertBitsToYCoordinate_ = function(bits) {
-
   // update the running scale
   if (bits && bits > this.maxY_) {
     this.maxY_ = bits;
 
+    // determine the largest number to feature on the y scale
+    var bitRateInfo = this.player_.getVideoTracks();
+    var maxValue = bitRateInfo[bitRateInfo.length - 1].bandwidth * 2;
+
     // update the scaleY
-    this.scaleY_ = - (this.height_ / (this.maxY_ * 1.1));
+    this.scaleY_ = - this.height_ / Math.min(maxValue, this.maxY_ * 1.1);
   }
 
   // fudge the coordindate to ensure that the paths produce clean lines
   return Math.round((bits * this.scaleY_) + this.height_) + 0.5;
 };
+
 
 /**
  * Converts bits to the Y Coordinate
@@ -120,8 +130,8 @@ shaka.StatsOverlay.prototype.convertBitsToYCoordinate_ = function(bits) {
  * @param {?number} bufferLength
  * @return {number}
  */
-shaka.StatsOverlay.prototype.convertBufferLengthToYCoordinate_ = function(bufferLength) {
-
+shaka.StatsOverlay.prototype.convertBufferLengthToYCoordinate_ =
+    function(bufferLength) {
   // update the running scale
   if (bufferLength && bufferLength > this.maxBufferLength_) {
     this.maxBufferLength_ = bufferLength;
@@ -131,8 +141,10 @@ shaka.StatsOverlay.prototype.convertBufferLengthToYCoordinate_ = function(buffer
   }
 
   // fudge the coordindate to ensure that the paths produce clean lines
-  return Math.round((bufferLength * this.scaleBufferLengthY_) + this.height_) + 0.5;
+  return Math.round((bufferLength * this.scaleBufferLengthY_) + this.height_) +
+      0.5;
 };
+
 
 /**
  * Reset the overlay
@@ -152,8 +164,7 @@ shaka.StatsOverlay.prototype.reset = function() {
  * Record buffer history
  * @private
  */
-shaka.StatsOverlay.prototype.recordBufferHistory_ = function(){
-
+shaka.StatsOverlay.prototype.recordBufferHistory_ = function() {
   if (!(this.player_ && this.video_))
     return;
 
@@ -161,7 +172,8 @@ shaka.StatsOverlay.prototype.recordBufferHistory_ = function(){
   var timestamp = Math.round(shaka.util.Clock.now() / 1000);
 
   // limit the recording rate
-  if (this.bufferLengthHistory_.length > 0 && this.bufferLengthHistory_[0].timestamp == timestamp)
+  if (this.bufferLengthHistory_.length > 0 &&
+      this.bufferLengthHistory_[0].timestamp == timestamp)
     return;
 
   // calculate the buffer size
@@ -180,7 +192,7 @@ shaka.StatsOverlay.prototype.recordBufferHistory_ = function(){
     timestamp: timestamp,
     value: ahead
   });
-}
+};
 
 
 /**
@@ -188,7 +200,6 @@ shaka.StatsOverlay.prototype.recordBufferHistory_ = function(){
  * @private
  */
 shaka.StatsOverlay.prototype.draw_ = function() {
-
   var context = this.canvas_.getContext('2d');
   var stats = this.player_.getStats();
 
@@ -219,8 +230,6 @@ shaka.StatsOverlay.prototype.draw_ = function() {
   this.drawBandwidth_(context, stats);
 
   this.drawBufferingHistory_(context, stats);
-
-
 };
 
 
@@ -231,10 +240,9 @@ shaka.StatsOverlay.prototype.draw_ = function() {
  * @param {!shaka.player.Stats} stats
  */
 shaka.StatsOverlay.prototype.drawGraph_ = function(context, stats) {
-
   context.beginPath();
-  context.moveTo(0, this.height_ + 0.5);
-  context.lineTo(this.width_, this.height_ + 0.5);
+  context.moveTo(0, this.height_);
+  context.lineTo(this.width_, this.height_);
   context.strokeStyle = '#000';
   context.lineWidth = 0.5;
   context.stroke();
@@ -264,7 +272,6 @@ shaka.StatsOverlay.prototype.drawGraph_ = function(context, stats) {
  * @param {!shaka.player.Stats} stats
  */
 shaka.StatsOverlay.prototype.drawStreamHistory_ = function(context, stats) {
-
   var py = this.height_;
   var px = 0;
 
@@ -301,7 +308,6 @@ shaka.StatsOverlay.prototype.drawStreamHistory_ = function(context, stats) {
  * @param {!shaka.player.Stats} stats
  */
 shaka.StatsOverlay.prototype.drawBandwidth_ = function(context, stats) {
-
   var py = 0;
   var px = 0;
 
@@ -332,7 +338,6 @@ shaka.StatsOverlay.prototype.drawBandwidth_ = function(context, stats) {
  * @param {!shaka.player.Stats} stats
  */
 shaka.StatsOverlay.prototype.drawBufferingHistory_ = function(context, stats) {
-
   var px = 0;
 
   context.beginPath();
@@ -350,25 +355,24 @@ shaka.StatsOverlay.prototype.drawBufferingHistory_ = function(context, stats) {
 
 
 /**
- * Draw the buffer level as a while line
+ * Draw the buffer level as a purple line
  * @private
  * @param {?Object} context
  */
 shaka.StatsOverlay.prototype.drawBufferLengthHistory_ = function(context) {
-
   var py = 0;
   var px = 0;
 
   context.beginPath();
-  context.strokeStyle = '#FFF';
+  context.strokeStyle = '#CC00FF';
   context.lineWidth = 0.5;
   context.moveTo(px, this.height_);
 
   for (var i = 0; i < this.bufferLengthHistory_.length; ++i) {
     px = this.convertTimestampToXCoordinate_(
-      this.bufferLengthHistory_[i].timestamp);
+        this.bufferLengthHistory_[i].timestamp);
     py = this.convertBufferLengthToYCoordinate_(
-      this.bufferLengthHistory_[i].value);
+        this.bufferLengthHistory_[i].value);
 
     context.lineTo(px, py);
   }
@@ -383,12 +387,10 @@ shaka.StatsOverlay.prototype.drawBufferLengthHistory_ = function(context) {
  * @export
  */
 shaka.StatsOverlay.prototype.refresh = function(enable) {
-
   if (enable) {
     var overlay = this;
     this.refreshIntervalId_ = setInterval(function() { overlay.draw_(); }, 500);
-  }
-  else if (this.refreshIntervalId_) {
+  } else if (this.refreshIntervalId_) {
     clearInterval(this.refreshIntervalId_);
   }
 };
