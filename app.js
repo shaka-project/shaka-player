@@ -104,6 +104,27 @@ app.stats_overlay_;
 
 
 /**
+ * @type {boolean} The state of adaptation before video cycling was started.
+ * @private
+ */
+app.originalAdaptationEnabled_ = true;
+
+
+/**
+ * @type {?number} The lastest audio cycle interval set.
+ * @private
+ */
+app.audioCycleInterval_ = null;
+
+
+/**
+ * @type {?number} The lastest video cycle interval set.
+ * @private
+ */
+app.videoCycleInterval_ = null;
+
+
+/**
  * Initializes the application.
  */
 app.init = function() {
@@ -201,11 +222,17 @@ app.init = function() {
   app.onStreamTypeChange();
 
   if ('cycleVideo' in params) {
+    document.getElementById('cycleVideo').checked = true;
     app.cycleVideo();
   }
   if ('cycleAudio' in params) {
+    document.getElementById('cycleAudio').checked = true;
     app.cycleAudio();
   }
+  app.video_.addEventListener('ended', function() {
+    app.resetCycleState_('videoTracks', 'cycleVideo', true);
+    app.resetCycleState_('audioTracks', 'cycleAudio', false);
+  });
 };
 
 
@@ -331,7 +358,7 @@ app.onTextChange = function() {
 app.cycleAudio = function() {
   app.cycleTracks_('cycleAudio', 'audioTracks', 3, function() {
     app.onAudioChange();
-  }, function() {});
+  }, false);
 };
 
 
@@ -339,63 +366,76 @@ app.cycleAudio = function() {
  * A demo function to cycle through video tracks.
  */
 app.cycleVideo = function() {
-  // Disable adaptation.
-  var adaptationEnabled = document.getElementById('adaptationEnabled');
-  var originalAdaptationEnabled = adaptationEnabled.checked;
-  adaptationEnabled.checked = false;
-  adaptationEnabled.disabled = true;
-  app.onAdaptationChange();
+  if (document.getElementById('cycleVideo').checked) {
+    // Disable adaptation.
+    var adaptationEnabled = document.getElementById('adaptationEnabled');
+    app.originalAdaptationEnabled_ = adaptationEnabled.checked;
+    adaptationEnabled.checked = false;
+    adaptationEnabled.disabled = true;
+    app.onAdaptationChange();
+  }
 
   app.cycleTracks_('cycleVideo', 'videoTracks', 6, function() {
     // Select video track with immediate == false.  This switches in the same
     // smooth way as the AbrManager.
     app.onVideoChange(false);
-  }, function() {
-    // Re-enable adaptation.
-    adaptationEnabled.disabled = false;
-    adaptationEnabled.checked = originalAdaptationEnabled;
-    app.onAdaptationChange();
-  });
+  }, true);
 };
 
 
 /**
  * Common functionality for cycling through tracks.
- * @param {string} cycleButtonId
+ * @param {string} checkboxId
  * @param {string} tracksId
  * @param {number} seconds
  * @param {function()} onSelect
- * @param {function()} onComplete
+ * @param {boolean} isVideo
  * @private
  */
-app.cycleTracks_ =
-    function(cycleButtonId, tracksId, seconds, onSelect, onComplete) {
-  // Indicate that we are busy cycling.
-  var cycleButton = document.getElementById(cycleButtonId);
-  var originalCycleText = cycleButton.textContent;
-  cycleButton.textContent = 'Cycling...';
-  cycleButton.disabled = true;
-  // Prevent the user from changing the settings while we are cycling.
+app.cycleTracks_ = function(checkboxId, tracksId, seconds, onSelect, isVideo) {
   var tracks = document.getElementById(tracksId);
-  tracks.disabled = true;
+  if (document.getElementById(checkboxId).checked) {
+    // Prevent the user from changing the settings while we are cycling.
+    tracks.disabled = true;
 
-  var intervalId = window.setInterval(function() {
-    // On EOF, the video goes into a paused state.
-    if (app.video_.paused) {
-      window.clearInterval(intervalId);
-      // Allow the user to change the settings again.
-      tracks.disabled = false;
-      cycleButton.disabled = false;
-      cycleButton.textContent = originalCycleText;
-      onComplete();
-      return;
-    }
+    var intervalId = window.setInterval(function() {
+      var option = tracks.selectedOptions[0];
+      if (option) {
+        option = option.nextElementSibling || tracks.firstElementChild;
+        tracks.value = option.value;
+        onSelect();
+      } else {
+        app.resetCycleState_(tracksId, checkboxId, isVideo);
+      }
+    }, seconds * 1000);
 
-    var option = tracks.selectedOptions[0];
-    option = option.nextElementSibling || tracks.firstElementChild;
-    tracks.value = option.value;
-    onSelect();
-  }, seconds * 1000);
+    isVideo ? app.videoCycleInterval_ = intervalId :
+        app.audioCycleInterval_ = intervalId;
+  } else {
+    app.resetCycleState_(tracksId, checkboxId, isVideo);
+  }
+};
+
+
+/**
+ * Resets the state of a cycle checkbox.
+ * @param {string} tracksId
+ * @param {string} checkboxId
+ * @param {boolean} isVideo
+ * @private
+ */
+app.resetCycleState_ = function(tracksId, checkboxId, isVideo) {
+  var intervalId = isVideo ? app.videoCycleInterval_ : app.audioCycleInterval_;
+  window.clearInterval(intervalId);
+  document.getElementById(tracksId).disabled = false;
+  document.getElementById(checkboxId).checked = false;
+  if (isVideo) {
+    // Re-enable adaptation.
+    var adaptationEnabled = document.getElementById('adaptationEnabled');
+    adaptationEnabled.disabled = false;
+    adaptationEnabled.checked = app.originalAdaptationEnabled_;
+    app.onAdaptationChange();
+  }
 };
 
 

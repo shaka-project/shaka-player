@@ -160,7 +160,7 @@ describe('MpdProcessor', function() {
       processor.validateSegmentInfo_(m);
       expect(as.representations.length).toBe(0);
     });
-  });
+  });  // describe validateSegmentInfo_
 
   describe('createStreamInfoFromSegmentTemplate_', function() {
     var m;
@@ -169,6 +169,7 @@ describe('MpdProcessor', function() {
     var r1;
     var r2;
     var st;
+    var manifestInfo;
 
     beforeEach(function() {
       m = new mpd.Mpd();
@@ -191,6 +192,13 @@ describe('MpdProcessor', function() {
       m.periods.push(p);
     });
 
+    afterEach(function() {
+      if (manifestInfo) {
+        manifestInfo.destroy();
+        manifestInfo = null;
+      }
+    });
+
     it('index URL template', function() {
       st.mediaUrlTemplate = 'http://example.com/$Bandwidth$-media.mp4';
       st.indexUrlTemplate = 'http://example.com/$Bandwidth$-index.sidx';
@@ -204,7 +212,7 @@ describe('MpdProcessor', function() {
       r2.bandwidth = 500000;
       r2.mimeType = 'video/mp4';
 
-      var manifestInfo = processor.createManifestInfo_(m, 1000);
+      manifestInfo = processor.createManifestInfo_(m, 1000);
 
       var periodInfo = manifestInfo.periodInfos[0];
       expect(periodInfo).toBeTruthy();
@@ -280,7 +288,7 @@ describe('MpdProcessor', function() {
       r2.baseUrl = new goog.Uri('http://example.com/');
       r2.bandwidth = 500000;
 
-      var manifestInfo = processor.createManifestInfo_(m, 1000);
+      manifestInfo = processor.createManifestInfo_(m, 1000);
 
       var periodInfo = manifestInfo.periodInfos[0];
       expect(periodInfo).toBeTruthy();
@@ -384,7 +392,7 @@ describe('MpdProcessor', function() {
       // Only process the first Representation.
       as.representations.splice(1, 1);
 
-      var manifestInfo = processor.createManifestInfo_(m, 1000);
+      manifestInfo = processor.createManifestInfo_(m, 1000);
 
       var periodInfo = manifestInfo.periodInfos[0];
       expect(periodInfo).toBeTruthy();
@@ -443,7 +451,7 @@ describe('MpdProcessor', function() {
       // an explicit Period duration.
       p.duration = 30;
 
-      var manifestInfo = processor.createManifestInfo_(m, 1000);
+      manifestInfo = processor.createManifestInfo_(m, 1000);
 
       var periodInfo = manifestInfo.periodInfos[0];
       expect(periodInfo).toBeTruthy();
@@ -547,7 +555,7 @@ describe('MpdProcessor', function() {
       m.timeShiftBufferDepth = 60;
       m.minBufferTime = 0;
 
-      var manifestInfo = processor.createManifestInfo_(m, manifestCreationTime);
+      manifestInfo = processor.createManifestInfo_(m, manifestCreationTime);
 
       var periodInfo = manifestInfo.periodInfos[0];
       expect(periodInfo).toBeTruthy();
@@ -639,7 +647,7 @@ describe('MpdProcessor', function() {
       // Only process the first Representation.
       as.representations.splice(1, 1);
 
-      var manifestInfo = processor.createManifestInfo_(m, 1000);
+      manifestInfo = processor.createManifestInfo_(m, 1000);
 
       var periodInfo = manifestInfo.periodInfos[0];
       expect(periodInfo).toBeTruthy();
@@ -706,7 +714,7 @@ describe('MpdProcessor', function() {
       // Only process the first Representation.
       as.representations.splice(1, 1);
 
-      var manifestInfo = processor.createManifestInfo_(m, 1000);
+      manifestInfo = processor.createManifestInfo_(m, 1000);
 
       var periodInfo = manifestInfo.periodInfos[0];
       expect(periodInfo).toBeTruthy();
@@ -740,10 +748,11 @@ describe('MpdProcessor', function() {
         done();
       });
     });
-  });
+  });  // describe createStreamInfoFromSegmentTemplate_
 
   describe('process', function() {
     var originalIsTypeSupported;
+    var manifestInfo;
 
     beforeAll(function() {
       // For the purposes of these tests, we will avoid querying the browser's
@@ -751,6 +760,13 @@ describe('MpdProcessor', function() {
       // we will do all processing other than removal of unsupported formats.
       originalIsTypeSupported = shaka.player.Player.isTypeSupported;
       shaka.player.Player.isTypeSupported = function() { return true; };
+    });
+
+    afterEach(function() {
+      if (manifestInfo) {
+        manifestInfo.destroy();
+        manifestInfo = null;
+      }
     });
 
     afterAll(function() {
@@ -789,7 +805,7 @@ describe('MpdProcessor', function() {
         p.start = 0;
         m.mediaPresentationDuration = 100;
 
-        var manifestInfo = processor.process(m);
+        manifestInfo = processor.process(m);
 
         var periodInfo = manifestInfo.periodInfos[0];
         var si1 = periodInfo.streamSetInfos[0].streamInfos[0];
@@ -809,7 +825,7 @@ describe('MpdProcessor', function() {
         p.start = 0;
         p.duration = 100;
 
-        var manifestInfo = processor.process(m);
+        manifestInfo = processor.process(m);
 
         var periodInfo = manifestInfo.periodInfos[0];
         var si1 = periodInfo.streamSetInfos[0].streamInfos[0];
@@ -868,7 +884,7 @@ describe('MpdProcessor', function() {
 
         p.start = 0;
 
-        var manifestInfo = processor.process(m);
+        manifestInfo = processor.process(m);
 
         var periodInfo = manifestInfo.periodInfos[0];
         var si1 = periodInfo.streamSetInfos[0].streamInfos[0];
@@ -901,7 +917,7 @@ describe('MpdProcessor', function() {
 
         p.start = 0;
 
-        var manifestInfo = processor.process(m);
+        manifestInfo = processor.process(m);
 
         var periodInfo = manifestInfo.periodInfos[0];
         expect(periodInfo.streamSetInfos[0].streamInfos.length).toBe(0);
@@ -935,7 +951,7 @@ describe('MpdProcessor', function() {
       it('disallows no segment metadata', function() {
         p.start = 0;
 
-        var manifestInfo = processor.process(m);
+        manifestInfo = processor.process(m);
 
         var periodInfo = manifestInfo.periodInfos[0];
         expect(periodInfo.streamSetInfos[0].streamInfos.length).toBe(0);
@@ -945,7 +961,7 @@ describe('MpdProcessor', function() {
         r.baseUrl = null;
         p.start = 0;
 
-        var manifestInfo = processor.process(m);
+        manifestInfo = processor.process(m);
 
         var periodInfo = manifestInfo.periodInfos[0];
         expect(periodInfo.streamSetInfos[0].streamInfos.length).toBe(0);
