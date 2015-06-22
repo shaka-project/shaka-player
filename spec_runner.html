@@ -30,13 +30,18 @@
   <script src="third_party/closure/goog/base.js"></script>
 
   <script>
-    // Add data-cover attribute to closure-loaded scripts so that they will be
-    // analyzed by blanket.js.
-    function loadScript(src) {
-      document.write('<script src="' + src + '" data-cover><'+'/script>');
-      return true;
+    // Enable code-coverage stats if requested in the URL.
+    var fields = location.search.split('?').pop();
+    fields = fields ? fields.split('&') : [];
+    if (fields.indexOf('enableCodeCoverage') >= 0) {
+      // Add data-cover attribute to closure-loaded scripts so that they will
+      // be analyzed by blanket.js.
+      function loadScript(src) {
+        document.write('<script src="' + src + '" data-cover><'+'/script>');
+        return true;
+      }
+      CLOSURE_IMPORT_SCRIPT = loadScript;
     }
-    CLOSURE_IMPORT_SCRIPT = loadScript;
   </script>
 
   <!-- This gives us more accurate code coverage numbers, since it requires
@@ -75,6 +80,7 @@
   <!-- Integration tests: -->
   <script src="spec/live_integration.js"></script>
   <script src="spec/player_integration.js"></script>
+
 </head>
 <body>
 </body>
