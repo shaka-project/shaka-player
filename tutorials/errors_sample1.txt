@@ -1,0 +1,8 @@
+var video = document.getElementById('video');
+var player = new shaka.player.Player(video);
+
+// DO listen for errors from the Player.
+player.addEventListener('error', function(event) { /* ... */ });
+
+// DO NOT listen for errors from the video element.
+//video.addEventListener('error', function(event) { /* ... */ });
