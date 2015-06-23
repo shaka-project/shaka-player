@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<!--
+ Copyright 2014 Google Inc.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="shortcut icon" type="image/png" href="third_party/jasmine/lib/jasmine-2.1.3/jasmine_favicon.png">
+  <link rel="stylesheet" type="text/css" href="third_party/jasmine/lib/jasmine-2.1.3/jasmine.css">
+
+  <!-- Libraries: -->
+  <script src="third_party/jasmine/lib/jasmine-2.1.3/jasmine.js"></script>
+  <script src="third_party/jasmine/lib/jasmine-2.1.3/jasmine-html.js"></script>
+  <script src="third_party/jasmine/lib/jasmine-2.1.3/boot.js"></script>
+  <script src="third_party/jasmine/lib/jasmine-ajax-3.1.0/mock-ajax.js"></script>
+  <script src="third_party/blanket_jasmine/blanket_jasmine.js"
+          data-cover-never="//\/(jasmine|closure|debug)\//"></script>
+  <script src="third_party/closure/goog/base.js"></script>
+
+  <script>
+    // Enable code-coverage stats if requested in the URL.
+    var fields = location.search.split('?').pop();
+    fields = fields ? fields.split('&') : [];
+    if (fields.indexOf('enableCodeCoverage') >= 0) {
+      // Add data-cover attribute to closure-loaded scripts so that they will
+      // be analyzed by blanket.js.
+      function loadScript(src) {
+        document.write('<script src="' + src + '" data-cover><'+'/script>');
+        return true;
+      }
+      CLOSURE_IMPORT_SCRIPT = loadScript;
+    }
+  </script>
+
+  <!-- This gives us more accurate code coverage numbers, since it requires
+       all exported classes, including those which are not tested directly. -->
+  <script src="shaka-player.uncompiled.js"></script>
+
+  <!-- Source files: -->
+  <script src="spec/util.js"></script>
+
+  <!-- Spec files: -->
+  <script src="spec/ajax_request_spec.js"></script>
+  <script src="spec/content_database_spec.js"></script>
+  <script src="spec/data_view_reader_spec.js"></script>
+  <script src="spec/ebml_parser_spec.js"></script>
+  <script src="spec/event_manager_spec.js"></script>
+  <script src="spec/fake_event_spec.js"></script>
+  <script src="spec/language_utils_spec.js"></script>
+  <script src="spec/license_request_spec.js"></script>
+  <script src="spec/manifest_updater_spec.js"></script>
+
+  <script src="spec/mpd_processor_spec.js"></script>
+  <script src="spec/mpd_utils_spec.js"></script>
+
+  <script src="spec/mpd_spec.js"></script>
+  <script src="spec/mpd_base_url_spec.js"></script>
+  <script src="spec/mpd_content_protection_spec.js"></script>
+  <script src="spec/mpd_segment_base_spec.js"></script>
+  <script src="spec/mpd_segment_list_spec.js"></script>
+  <script src="spec/mpd_segment_template_spec.js"></script>
+
+  <script src="spec/pssh_spec.js"></script>
+  <script src="spec/segment_index_spec.js"></script>
+  <script src="spec/segment_index_parser_spec.js"></script>
+  <script src="spec/task_spec.js"></script>
+
+</head>
+<body>
+</body>
+</html>
