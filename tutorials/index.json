@@ -3,6 +3,7 @@
   { "player": { "title": "DASH Playback with the Shaka Player" } },
   { "offline": { "title": "Offline Playback with the Shaka Player" } },
   { "live": { "title": "Live Streaming" } },
+  { "trickplay": { "title": "Trick Play" } },
   { "errors": { "title": "Listening for Errors" } },
   { "language": { "title": "Language Support" } },
   { "dev": { "title": "Shaka Player Development" } },

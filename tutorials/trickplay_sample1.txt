@@ -1,0 +1,8 @@
+var video = document.getElementById('video');
+var player = new shaka.player.Player(video);
+
+// Fast-Forward (2x).
+player.setPlaybackRate(2);
+
+// Rewind (-2x).
+player.setPlaybackRate(-2);

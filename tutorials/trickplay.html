@@ -1,0 +1,40 @@
+<!--
+ Copyright 2015 Google Inc.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<p>
+Shaka Player supports trick play, a rewind/fast-forward style of
+seeking. Trick play is supported through the {@link shaka.player.Player}
+method setPlaybackRate. The setPlaybackRate method should always be used
+instead of setting video.playbackRate directly as video.playbackRate does
+not support rewind (on any browser we have tested). Standard playback rate
+is 1 and paused is 0. To rewind, use a negative playback rate. To fast-forward,
+use a positive playback rate greater than 1.
+</p>
+
+<pre class="prettyprint source"><code id="trickplay_sample1">var video = document.getElementById('video');
+var player = new shaka.player.Player(video);
+
+// Fast-Forward (2x).
+player.setPlaybackRate(2);
+
+// Rewind (-2x).
+player.setPlaybackRate(-2);
+</code></pre>
+
+<p>
+See {@link https://goo.gl/X0bdwe control.js} for a fully functional sample
+implementation.
+</p>
