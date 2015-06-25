@@ -857,17 +857,13 @@ describe('MpdProcessor', function() {
       it('creates live manifest w/ Location element', function() {
         m.type = 'dynamic';
         m.minUpdatePeriod = 10;
-
-        var updateLocation = new shaka.dash.mpd.Location();
-        updateLocation.url = new goog.Uri('http://example.com/updated_mpd');
-
-        m.updateLocation = updateLocation;
+        m.updateLocation = new goog.Uri('http://example.com/updated_mpd');
 
         manifestInfo = processor.process(m);
 
         expect(manifestInfo.live).toBe(true);
         expect(manifestInfo.updatePeriod).toBe(10);
-        expect(manifestInfo.updateLocation.toString()).toBe(
+        expect(manifestInfo.updateUrl.toString()).toBe(
             'http://example.com/updated_mpd');
       });
 
@@ -879,7 +875,7 @@ describe('MpdProcessor', function() {
 
         expect(manifestInfo.live).toBe(true);
         expect(manifestInfo.updatePeriod).toBe(10);
-        expect(manifestInfo.updateLocation.toString()).toBe(
+        expect(manifestInfo.updateUrl.toString()).toBe(
             'http://example.com/mpd');
       });
     });  // describe SegmentTemplate
