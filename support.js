@@ -307,8 +307,8 @@ function onLoaded(fn) {
   // IE 9 fires DOMContentLoaded, and enters the "interactive"
   // readyState, before document.body has been initialized, so wait
   // for window.load
-  if (document.readyState == "loading" ||
-      document.readyState == "interactive") {
+  if (document.readyState == 'loading' ||
+      document.readyState == 'interactive') {
     window.addEventListener('load', fn);
   } else {
     fn();
