@@ -475,17 +475,17 @@ describe('MpdProcessor', function() {
 
         checkReference(
             references1[0],
-            'http://example.com/5-360000-250000-media.mp4',
+            'http://example.com/5-0-250000-media.mp4',
             0, 10);
 
         checkReference(
             references1[1],
-            'http://example.com/6-450000-250000-media.mp4',
+            'http://example.com/6-90000-250000-media.mp4',
             10, 20);
 
         checkReference(
             references1[2],
-            'http://example.com/7-540000-250000-media.mp4',
+            'http://example.com/7-180000-250000-media.mp4',
             20, 30);
 
         // Check the second StreamInfo.
@@ -508,17 +508,17 @@ describe('MpdProcessor', function() {
 
         checkReference(
             references2[0],
-            'http://example.com/5-360000-500000-media.mp4',
+            'http://example.com/5-0-500000-media.mp4',
             0, 10);
 
         checkReference(
             references2[1],
-            'http://example.com/6-450000-500000-media.mp4',
+            'http://example.com/6-90000-500000-media.mp4',
             10, 20);
 
         checkReference(
             references2[2],
-            'http://example.com/7-540000-500000-media.mp4',
+            'http://example.com/7-180000-500000-media.mp4',
             20, 30);
 
         done();
@@ -594,7 +594,7 @@ describe('MpdProcessor', function() {
              ++segmentNumber) {
           var expectedNumberReplacement = (segmentNumber - 1) + st.startNumber;
           var expectedTimeReplacement =
-              ((segmentNumber - 1) + (st.startNumber - 1)) * st.segmentDuration;
+              (segmentNumber - 1) * st.segmentDuration;
           var expectedUrl = 'http://example.com/' +
               expectedNumberReplacement + '-' +
               expectedTimeReplacement + '-250000-media.mp4';
