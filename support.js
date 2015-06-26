@@ -15,34 +15,34 @@
  */
 
 // Status values for the report entries.
-const kGood = 0;
-const kInfo = 1;
-const kBad = 2;
+var kGood = 0;
+var kInfo = 1;
+var kBad = 2;
 
-const vp8Type = 'video/webm; codecs="vp8"';
-const vp9Type = 'video/webm; codecs="vp9"';
-const mp4Type = 'video/mp4; codecs="avc1.42E01E"';
-const tsType = 'video/mp2t; codecs="avc1.42E01E"';
+var vp8Type = 'video/webm; codecs="vp8"';
+var vp9Type = 'video/webm; codecs="vp9"';
+var mp4Type = 'video/mp4; codecs="avc1.42E01E"';
+var tsType = 'video/mp2t; codecs="avc1.42E01E"';
 
-const clearKeyId = 'org.w3.clearkey';
-const widevineId = 'com.widevine.alpha';
-const playReadyId = 'com.microsoft.playready';
-const adobeAccessId = 'com.adobe.access';
-const fairPlayId = 'com.apple.fairplay';
+var clearKeyId = 'org.w3.clearkey';
+var widevineId = 'com.widevine.alpha';
+var playReadyId = 'com.microsoft.playready';
+var adobeAccessId = 'com.adobe.access';
+var fairPlayId = 'com.apple.fairplay';
 
-const classPrefixes = [
+var classPrefixes = [
   'WebKit',
   'MS',
   'Moz'
 ];
 
-const propertyPrefixes = [
+var propertyPrefixes = [
   'webkit',
   'ms',
   'moz'
 ];
 
-const keySystemPrefixes = [
+var keySystemPrefixes = [
   'webkit-'
 ];
 
@@ -230,6 +230,7 @@ function testForKeySystem(ks, required) {
 testForClass(window, 'HTMLMediaElement', true);
 testForClass(window, 'MediaSource', true);
 testForClass(window, 'Promise', true);
+testForClass(window, 'Uint8Array', true);
 
 // Optional:
 testForClass(window, 'VTTCue', false);
@@ -303,8 +304,12 @@ if (async.length) {
 }
 
 function onLoaded(fn) {
-  if (document.readyState == "loading") {
-    document.addEventListener('DOMContentLoaded', fn);
+  // IE 9 fires DOMContentLoaded, and enters the "interactive"
+  // readyState, before document.body has been initialized, so wait
+  // for window.load
+  if (document.readyState == 'loading' ||
+      document.readyState == 'interactive') {
+    window.addEventListener('load', fn);
   } else {
     fn();
   }
