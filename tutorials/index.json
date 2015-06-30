@@ -9,5 +9,6 @@
   { "dev": { "title": "Shaka Player Development" } },
   { "windows": { "title": "Building on Windows" } },
   { "polyfills": { "title": "Polyfills" } },
-  { "caveats": { "title": "Content Restrictions" } }
+  { "caveats": { "title": "Content Restrictions" } },
+  { "porting": { "title": "Porting and Browser Support" } }
 ]

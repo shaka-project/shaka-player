@@ -1,0 +1,265 @@
+<!--
+ Copyright 2015 Google Inc.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<h3 class="tutorial-heading">
+Philosophy
+</h3>
+
+<p>
+Shaka Player does not attempt to detect the browser vendor or version. Instead,
+we target certain standard or standards-track features and support the browsers
+that implement those features.  Where necessary, we use polyfills to supplement
+native browser support on a case-by-case basis.
+</p>
+
+<p>
+See the <a href="tutorial-polyfills.html">Polyfills tutorial</a> if you are not
+already familiar with the term.
+</p>
+
+
+<h3 class="tutorial-heading">
+Required Features
+</h3>
+
+<p>
+Some features are required for basic operation.
+<ul>
+  <li>HTML5 video
+  <li>MediaSource Extensions (MSE)
+  <li>Promises
+  <li>Uint8Array
+  <li>CustomEvent constructor
+    <ul>
+      <li>polyfill provided to fall back on createEvent and initCustomEvent
+    </ul>
+</ul>
+</p>
+
+
+<h3 class="tutorial-heading">
+Optional Features
+</h3>
+
+<p>
+Some features are optional, but enable the library to do more when present.
+<ul>
+  <li>Encrypted Media Extensions (EME)
+    <ul>
+      <li>required only for protected content
+      <li>EME v0.1b polyfill provided for Chrome &lt; 42
+      <li>no-op polyfill provided for browsers without EME
+    </ul>
+  <li>IndexedDB
+    <ul>
+      <li>required only for offline storage and playback
+    </ul>
+  <li>WebVTT
+    <ul>
+      <li>required for subtitles
+    </ul>
+  <li>getVideoPlaybackQuality
+    <ul>
+      <li>used by the library to collect QoE stats
+      <li>polyfill provided for webKit prefixed version
+      <li>no-op polyfill provided for browsers without
+    </ul>
+  <li>fullscreen API
+    <ul>
+      <li>not used directly by the library, but useful for app developers
+      <li>polyfill provided to unify major browser implementations
+    </ul>
+</ul>
+</p>
+
+
+<h3 class="tutorial-heading">
+Testing for Support in an Application
+</h3>
+
+<p>
+To test for browser support in an application:
+<ol>
+  <li>Load the library.
+  <li>Install all polyfills via {@link shaka.polyfill.installAll}
+  <li>Test for support via {@link shaka.player.isBrowserSupported}
+</ol>
+</p>
+
+
+<h3 class="tutorial-heading">
+Debugging Browser Support
+</h3>
+
+<p>
+We provide a support test page in the sources. This page does not rely on Shaka
+Player itself, and can be used as a standalone tool without compiling the code.
+Load support.html to see a detailed report for your browser. We host the latest
+release version of this page {@link http://goo.gl/RMTEGZ here}.
+</p>
+
+<p>
+This support report is a great place to start debugging browser support issues,
+and you should include it in any bug report about browser support. You can find
+the source for this report in {@link https://goo.gl/2MU5E0 support.js}.
+</p>
+
+
+<h3 class="tutorial-heading">
+Adding Support with a New Polyfill
+</h3>
+
+<p>
+If you want to add support for a new browser via a new polyfill, please file an
+{@link https://goo.gl/nR24qY issue on github} to track the work and discuss the
+implementation with us if need be.
+</p>
+
+<p>
+A polyfill should only implement, patch, or rename one feature.  In some cases,
+such as EME, this may be {@link https://goo.gl/jQgMeg large} with many parts to
+it.  In other cases, it may be a {@link https://goo.gl/baWIE8 fallback} to some
+equivalent functionality using a different API.  But please do not try to write
+a single polyfill to tackle many missing features at once.
+</p>
+
+
+<h3 class="tutorial-heading">
+Compatibility Tables
+</h3>
+
+<style>
+table.compat th, table.compat td {
+  border: 1px solid black;
+  padding: 5px;
+  text-align: center;
+}
+table.compat {
+  border: 1px solid black;
+}
+
+table.compat small { white-space: pre; }
+table.compat small:before { content: '\A'; }
+.yes { color: #0b0; white-space: pre; }
+.yes:before { content: "YES\A"; }
+.no { color: #b00; white-space: pre; }
+.no:before { content: "NO\A"; }
+.maybe { color: #00b; white-space: pre; }
+.maybe:before { content: "MAYBE\A"; }
+</style>
+
+<p>
+<table class="compat">
+  <caption>
+    Browser Support for Required Features
+    <small>(as of 2015-06-29)</small>
+  </caption>
+  <tr>
+    <th></th>
+    <th>HTML5 Video</th>
+    <th>MSE</th>
+    <th>Promises</th>
+    <th>Uint8Array</th>
+    <th>Runs Shaka Player</th>
+  </tr>
+  <tr>
+    <td>Chrome 43 <small>(except iOS)</small></td>
+    <td class="yes"></td>
+    <td class="yes"></td>
+    <td class="yes"></td>
+    <td class="yes"></td>
+    <td class="yes"></td>
+  </tr>
+  <tr>
+    <td>Firefox 38 <small>(except iOS)</small></td>
+    <td class="yes"></td>
+    <td class="maybe">(if enabled)</td>
+    <td class="yes"></td>
+    <td class="yes"></td>
+    <td class="maybe">(if MSE enabled)</td>
+  </tr>
+  <tr>
+    <td>Safari 8 <small>(OSX 10.10)</small></td>
+    <td class="yes"></td>
+    <td class="yes"></td>
+    <td class="yes"></td>
+    <td class="yes"></td>
+    <td class="yes"></td>
+  </tr>
+  <tr>
+    <td>IE 11 <small>(Windows 8.1)</small></td>
+    <td class="yes"></td>
+    <td class="yes"></td>
+    <td class="no"></td>
+    <td class="yes"></td>
+    <td class="no">(Promise polyfill needed!)</td>
+  </tr>
+</table>
+</p>
+
+<p>
+<table class="compat">
+  <caption>
+    Browser Support for Optional Features
+    <small>(as of 2015-06-29)</small>
+  </caption>
+  <tr>
+    <th></th>
+    <th>EME<small>(protected content)</small></th>
+    <th>IndexedDB<small>(offline content)</small></th>
+    <th>WebVTT<small>(subtitles)</small></th>
+    <th>getVideoPlaybackQuality<small>(QoE stats)</small></th>
+    <th>fullscreen API</th>
+    <th>persistent licenses<small>(protected content offline)</small></th>
+  </tr>
+  <tr>
+    <td>Chrome 43 <small>(except iOS)</small></td>
+    <td class="yes"></td>
+    <td class="yes"></td>
+    <td class="yes"></td>
+    <td class="yes"></td>
+    <td class="yes"></td>
+    <td class="maybe">(ChromeOS)</td>
+  </tr>
+  <tr>
+    <td>Firefox 38 <small>(except iOS)</small></td>
+    <td class="no"></td>
+    <td class="yes"></td>
+    <td class="yes"></td>
+    <td class="yes"></td>
+    <td class="yes"></td>
+    <td class="no">(EME missing)</td>
+  </tr>
+  <tr>
+    <td>Safari 8 <small>(OSX 10.10)</small></td>
+    <td class="maybe">(no known key system)</td>
+    <td class="maybe">(reportedly buggy)</td>
+    <td class="yes"></td>
+    <td class="yes"></td>
+    <td class="yes"></td>
+    <td class="maybe">(unknown)</td>
+  </tr>
+  <tr>
+    <td>IE 11 <small>(Windows 8.1)</small></td>
+    <td class="no">(EME polyfill needed!)</td>
+    <td class="maybe">(may depend on settings)<br>(reportedly incomplete)</td>
+    <td class="no"></td>
+    <td class="yes"></td>
+    <td class="yes"></td>
+    <td class="no">(EME polyfill needed!)</td>
+  </tr>
+</table>
+</p>
