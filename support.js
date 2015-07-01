@@ -136,7 +136,7 @@ function testForProperty(parent, name, required) {
 
 function testForMimeType(type) {
   var mse = found['MediaSource'];
-  if (mse && mse.isTypeSupported(type)) {
+  if (mse && mse.isTypeSupported && mse.isTypeSupported(type)) {
     report.push([type, kGood, '(supported)']);
     found[type] = true;
   } else {
