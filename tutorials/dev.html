@@ -159,9 +159,26 @@ Tests
 </h3>
 
 <p>
-Tests live in the "spec" folder and are run by spec_runner.html.  To run tests,
-just point your browser at this HTML file.  Do not do this using a file:// URL,
-but through a local web server.
+Tests live in the "spec" folder and are run by unit_tests.html and
+integration_tests.html.  To run tests, just point your browser at one of these
+HTML files.  Do not do this using a file:// URL, but through a local web server.
+</p>
+
+<p>
+You can also use karma to run the tests.  These node packages are recommended
+to use karma:
+
+<ul>
+  <li>karma
+  <li>karma-jasmine
+  <li>karma-jasmine-ajax
+  <li>karma-chrome-launcher
+  <li>jasmine
+  <li>jasmine-ajax
+  <li>jasmine-core
+</ul>
+
+Then run: karma start --single-run --browsers Chrome
 </p>
 
 
