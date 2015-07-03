@@ -142,12 +142,12 @@ app.init = function() {
   app.bufferedBehindDebug_ = document.getElementById('bufferedBehindDebug');
   window.setInterval(app.updateDebugInfo_, 50);
 
-  var fields = location.search.split('?').pop();
+  var fields = location.search.split('?').slice(1).join('?');
   fields = fields ? fields.split(';') : [];
   var params = {};
   for (var i = 0; i < fields.length; ++i) {
     var kv = fields[i].split('=');
-    params[kv[0]] = kv[1];
+    params[kv[0]] = kv.slice(1).join('=');
   }
 
   if ('prefixed' in params) {
@@ -202,6 +202,10 @@ app.init = function() {
   if ('asset' in params) {
     document.getElementById('manifestUrlInput').value = params['asset'];
     app.onMpdCustom();
+  }
+  if ('license' in params) {
+    document.getElementById('wvLicenseServerUrlInput').value =
+        params['license'];
   }
 
   if ('dash' in params) {
