@@ -1,3 +1,17 @@
+## 1.3.2 (2015-07-06)
+
+A roll-up of recent bugfixes.
+
+Bugfixes:
+  - Fixed case-sensitive scheme URI check in the test app.
+  - Fixed support-testing page for very old browsers.
+  - Fixed multi-lingual encrypted content.
+    - https://github.com/google/shaka-player/issues/112
+  - Fixed load-time exceptions in IE 9.
+    - https://github.com/google/shaka-player/issues/87
+    - https://github.com/google/shaka-player/pull/110
+
+
 ## 1.3.1 (2015-05-22)
 
 A roll-up of recent bugfixes and small improvements.
