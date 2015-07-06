@@ -1,3 +1,68 @@
+## 1.4.0 (2015-07-06)
+
+Code health release.  Major refactoring of streaming logic.
+
+Bugfixes:
+  - Overriding a license server URL in the test app no longer causes a PSSH
+    from the MPD to be ignored.
+  - Fixed possible event listener leak.
+    - https://github.com/google/shaka-player/issues/109
+
+Features:
+  - Player.destroy() now returns a Promise.
+  - DrmSchemeInfo now has distinctiveIdentifier, persistentState, and
+    robustness parameters.
+  - Clarified buffering event policies.
+    - https://github.com/google/shaka-player/issues/77
+  - Added a license pre-processor.
+    - https://github.com/google/shaka-player/issues/62
+  - Added support for the MPD Location element.
+    - https://github.com/google/shaka-player/issues/65
+  - Custom BandwidthEstimators can now allow XHR caching.
+    - https://github.com/google/shaka-player/issues/76
+  - Added support for startNumber of 0, per the recent DASH spec corrigendum.
+    - https://github.com/google/shaka-player/issues/10
+  - Added support for server certificate APIs through DrmSchemeInfo.
+    - https://github.com/google/shaka-player/issues/84
+  - Major refactor of streaming.  Switching representations is now faster and
+    more flexible.  Live stream seek ranges are more accurate.
+    - https://github.com/google/shaka-player/issues/51
+  - XHR timeout is now runtime-configurable.
+    - https://github.com/google/shaka-player/issues/50
+  - Buffering goals are now runtime-configurable.
+    - https://github.com/google/shaka-player/issues/49
+  - Alternative IAbrManager implementations can now be injected at runtime.
+    - https://github.com/google/shaka-player/issues/48
+
+Test app features:
+  - Added "buffered ahead" and "buffered behind" indicators.
+    - https://github.com/google/shaka-player/issues/47
+  - Converted cycle buttons into checkboxes so cycling can be stopped during
+    playback.
+    - https://github.com/google/shaka-player/issues/46
+  - Test app now jumps to live when the user clicks on the time code in a live
+    stream.
+  - Added an example of a trick-play UI built on the Player API.
+    - https://github.com/google/shaka-player/issues/54
+
+Testing:
+  - Disabled code coverage stats in unit tests by default.
+    - https://github.com/google/shaka-player/issues/105
+  - Split unit tests and integration tests into separate test runners.
+    - https://github.com/google/shaka-player/issues/104
+  - Added a Karma config file to make automated testing easier.
+  - Added checks for offline features to the support-testing page.
+
+Documentation:
+  - Documented the fact that autoplay does not work on mobile, and why.
+  - Documented error events and how to handle them.
+    - https://github.com/google/shaka-player/issues/106
+  - Documented browser support and porting.
+    - https://github.com/google/shaka-player/issues/66
+  - Documented Player APIs for trick play interface.
+    - https://github.com/google/shaka-player/issues/54
+
+
 ## 1.3.2 (2015-07-06)
 
 A roll-up of recent bugfixes.
