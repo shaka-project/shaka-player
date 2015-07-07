@@ -894,6 +894,8 @@ describe('MpdProcessor', function() {
         r = new mpd.Representation();
         sl = new mpd.SegmentList();
 
+        p.duration = 100;
+
         r.segmentList = sl;
         r.baseUrl = new goog.Uri('http://example.com');
         r.bandwidth = 250000;
@@ -926,7 +928,7 @@ describe('MpdProcessor', function() {
           checkReference(
               references[0],
               'http://example.com/video.mp4',
-              0, null);
+              0, 100);
 
           done();
         });
