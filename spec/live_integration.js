@@ -88,10 +88,31 @@ describe('Player', function() {
     };
   });
 
+  // FIXME: This is a workaround for http://crbug.com/507916 and should be
+  // removed once unit tests are no longer running against affected versions
+  // of Chrome.
+  var playerErrorHandler = function(event) {
+    if (event.detail.message ==
+        shaka.player.Player.MEDIA_ERROR_MAP_[MediaError.MEDIA_ERR_DECODE]) {
+      console.warn('http://crbug.com/507916', event.detail.message);
+
+      // Effectively, reboot the test.
+      videoSource = newSource(segmentDurationManifestUrl);
+      player.load(videoSource).then(function() {
+        video.play();
+      });
+
+      // Don't trigger this handler a second time.
+      playerErrorHandler = convertErrorToTestFailure;
+      return;
+    }
+    convertErrorToTestFailure(event);
+  }
+
   beforeEach(function() {
     // Create a new player.
     player = new shaka.player.Player(video);
-    player.addEventListener('error', convertErrorToTestFailure, false);
+    player.addEventListener('error', playerErrorHandler, false);
 
     // Disable automatic adaptation unless it is needed for a test.
     // This makes test results more reproducible.
@@ -131,24 +152,13 @@ describe('Player', function() {
 
     it('plays two full segments of content', function(done) {
       const SEGMENT_LENGTH = 6;
-
-      var setTestExpectations = function() {
-        var targetTime = video.currentTime + (2 * SEGMENT_LENGTH);
-        var waitTime = (2 * SEGMENT_LENGTH) + FUDGE_FACTOR;
-
-        waitForTargetTime(
-            video, eventManager, targetTime, waitTime).then(function() {
-          done();
-        }).catch(function(error) {
-          fail(error);
-          done();
-        });
-      };
-
-      waitForBeginPlayback(setTestExpectations);
-
       player.load(videoSource).then(function() {
         video.play();
+        var targetTime = video.currentTime + (2 * SEGMENT_LENGTH);
+        var waitTime = (2 * SEGMENT_LENGTH) + FUDGE_FACTOR;
+        return waitForTargetTime(video, eventManager, targetTime, waitTime);
+      }).then(function() {
+        done();
       }).catch(function(error) {
         fail(error);
         done();
