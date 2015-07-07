@@ -166,7 +166,7 @@ describe('Player', function() {
         video.play();
         return waitForMovement(video, eventManager);
       }).then(function() {
-        return delay(1.0);
+        return delay(6);
       }).then(function() {
         expect(video.videoHeight).toEqual(720);
         done();
@@ -183,14 +183,14 @@ describe('Player', function() {
         video.play();
         return waitForMovement(video, eventManager);
       }).then(function() {
-        return delay(1.0);
+        return delay(6);
       }).then(function() {
         expect(video.videoHeight).toEqual(720);
 
         var track = getVideoTrackByHeight(360);
         player.selectVideoTrack(track.id);
 
-        return delay(3);
+        return delay(6);
       }).then(function() {
         expect(video.videoHeight).toEqual(360);
         done();
@@ -308,8 +308,8 @@ describe('Player', function() {
         return waitForMovement(video, eventManager);
       }).then(function() {
         // Power through and consume the audio data quickly.
-        player.setPlaybackRate(8);
-        return delay(3.0);
+        player.setPlaybackRate(4);
+        return delay(5);
       }).then(function() {
         // Ensure that the browser has evicted the beginning of the stream.
         // Otherwise, this test hasn't reproduced the circumstances correctly.
