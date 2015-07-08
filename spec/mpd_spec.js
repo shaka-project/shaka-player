@@ -433,6 +433,45 @@ describe('mpd', function() {
     expect(representation.codecs).toBe(codecs);
   };
 
+  it('parses group attribute', function() {
+    var source = [
+      '<MPD>',
+      '  <Period id="1" duration="PT0H3M0S" start="PT0S">',
+      '    <AdaptationSet id="0" group="0" />',
+      '    <AdaptationSet id="1" group="1" />',
+      '    <AdaptationSet id="2" group="2" />',
+      '  </Period>',
+      '</MPD>'].join('\n');
+    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    expect(mpd.periods[0].adaptationSets[0].group).toBe(0);
+    expect(mpd.periods[0].adaptationSets[1].group).toBe(1);
+    expect(mpd.periods[0].adaptationSets[2].group).toBe(2);
+  });
+
+  it('defaults group to a unique non-zero value', function() {
+    var source = [
+      '<MPD>',
+      '  <Period id="1" duration="PT0H3M0S" start="PT0S">',
+      '    <AdaptationSet id="0" group="2" />',
+      '    <AdaptationSet id="1" />',
+      '    <AdaptationSet id="2" group="bogus" />',
+      '    <AdaptationSet id="3" group="1" />',
+      '    <AdaptationSet id="4" />',
+      '    <AdaptationSet id="5" group="3" />',
+      '  </Period>',
+      '</MPD>'].join('\n');
+    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    var groups = mpd.periods[0].adaptationSets.map(
+        function(set) { return set.group; });
+
+    for (var i = 0; i < groups.length; ++i) {
+      expect(groups[i]).not.toBe(0);
+      for (var j = i + 1; j < groups.length; ++j) {
+        expect(groups[i] != groups[j]).toBe(true);
+      }
+    }
+  });
+
   it('parses namespaced elements', function() {
     var source = [
       '<MPD>',
