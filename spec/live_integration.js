@@ -107,7 +107,7 @@ describe('Player', function() {
       return;
     }
     convertErrorToTestFailure(event);
-  }
+  };
 
   beforeEach(function() {
     // Create a new player.
