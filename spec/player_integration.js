@@ -215,14 +215,14 @@ describe('Player', function() {
         return delay(2.0);
       }).then(function() {
         video.currentTime = 30.0;  // <0.1s before end of segment N-2 (3).
-        return delay(6.0);
+        return delay(8.0);
       }).then(function() {
         // Typically this bug manifests with seeking == true.
         expect(video.seeking).toBe(false);
         // Typically this bug manifests with readyState == HAVE_METADATA.
         expect(video.readyState).not.toBe(HTMLVideoElement.HAVE_METADATA);
         expect(video.readyState).not.toBe(HTMLVideoElement.HAVE_NOTHING);
-        // We can't expect to get all the way to 35.0 unless the seek is
+        // We can't expect to get all the way to 38.0 unless the seek is
         // instantaneous.  We use 32.0 because it leaves plenty of wiggle room
         // for various delays (including network delay), and because in this
         // particular bug, the video gets stuck at exactly the seek time (30).
