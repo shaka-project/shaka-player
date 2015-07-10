@@ -380,6 +380,52 @@ function waitForTargetTime(video, eventManager, targetTime, timeout) {
 
 
 /**
+ * @param {!SourceBuffer} sourceBuffer
+ * @param {number} targetTime in seconds
+ * @param {number} timeout in seconds
+ * @return {!Promise} resolved when |sourceBuffer| has buffered at least
+ *     |targetTime| seconds of data.
+ */
+function waitUntilBuffered(sourceBuffer, targetTime, timeout) {
+  var promise = new shaka.util.PublicPromise;
+  var stack = (new Error('stacktrace')).stack.split('\n').slice(1).join('\n');
+
+  var pollIntervalId;
+
+  var timeoutId = window.setTimeout(function() {
+    var buffered = sourceBuffer.buffered;
+    expect(buffered.length).toBe(1);
+    var secondsBuffered = buffered.end(0) - buffered.start(0);
+    // This expectation will fail, but will provide specific values to
+    // Jasmine to help us debug timeout issues.
+    expect(secondsBuffered).toBeGreaterThan(targetTime);
+    window.clearInterval(pollIntervalId);
+    // Reject the promise, but replace the error's stack with the original
+    // call stack.  This timeout handler's stack is not helpful.
+    var error = new Error('Timeout waiting for buffered ' + targetTime);
+    error.stack = stack;
+    promise.reject(error);
+  }, timeout * 1000);
+
+  pollIntervalId = window.setInterval(function() {
+    var buffered = sourceBuffer.buffered;
+    expect(buffered.length).toBe(1);
+    var secondsBuffered = buffered.end(0) - buffered.start(0);
+    if (secondsBuffered > targetTime) {
+      // This expectation will pass, but will keep Jasmine from complaining
+      // about tests which have no expectations.  In practice, some tests
+      // only need to demonstrate that they have reached a certain target.
+      expect(secondsBuffered).toBeGreaterThan(targetTime);
+      window.clearTimeout(timeoutId);
+      window.clearInterval(pollIntervalId);
+      promise.resolve();
+    }
+  }, 1000);
+  return promise;
+}
+
+
+/**
  * Creates a new DashVideoSource out of the manifest.
  * @param {string} manifest
  * @return {!shaka.player.DashVideoSource}
