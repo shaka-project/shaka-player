@@ -335,7 +335,7 @@ app.onTrickPlayChange = function() {
 app.onAdaptationChange = function() {
   var enabled = document.getElementById('adaptationEnabled').checked;
   if (app.player_) {
-    app.player_.enableAdaptation(enabled);
+    app.player_.configure({'enableAdaptation': enabled});
   }
 };
 
@@ -741,7 +741,7 @@ app.load_ = function(videoSource) {
   console.assert(app.player_ != null);
 
   var preferredLanguage = document.getElementById('preferredLanguage').value;
-  app.player_.setPreferredLanguage(preferredLanguage);
+  app.player_.configure({'preferredLanguage': preferredLanguage});
 
   app.player_.load(videoSource).then(app.breakOutOfPromise_(
       function() {
@@ -1080,9 +1080,9 @@ app.postProcessYouTubeLicenseResponse_ = function(response) {
         if (types.indexOf('HD') == -1) {
           // This license will not permit HD playback.
           console.info('HD disabled.');
-          var restrictions = app.player_.getRestrictions();
+          var restrictions = app.player_.getConfiguration()['restrictions'];
           restrictions.maxHeight = 576;
-          app.player_.setRestrictions(restrictions);
+          app.player_.configure({'restrictions': restrictions});
         }
       }
     }

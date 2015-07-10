@@ -110,17 +110,18 @@ disable the selected subtitles.  See:
 
 <i>
 Please note that {@link shaka.player.Player#selectVideoTrack} is also provided,
-but can interfere with automatic bitrate adaptation. If you allow your users to
-choose video tracks manually, call {@link shaka.player.Player#enableAdaptation}
-(false) to disable automatic video adaptation when a manual choice is made.
+but it can interfere with automatic bitrate adaptation.  If you allow your
+users to choose video tracks manually, you should disable adaptation via
+{@link shaka.player.Player#configure} with the 'enableAdaptation' option
+set to false.
 </i>
 </p>
 
 <p>
 To avoid the necessity of choosing audio and text tracks manually, Shaka Player
-provides {@link shaka.player.Player#setPreferredLanguage an API to set a user's
-preferred language}.  The language preference defaults to "en" (English) if not
-set.
+provides a mechanism, via {@link shaka.player.Player#configure} with the
+'preferredLanguage' option, to set a user's preferred language.  The language
+preference defaults to "en" (English) if not set.
 </p>
 
 

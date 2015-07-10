@@ -57,7 +57,7 @@ describe('Player', function() {
 
     // Disable automatic adaptation unless it is needed for a test.
     // This makes test results more reproducible.
-    player.enableAdaptation(false);
+    player.configure({'enableAdaptation': false});
 
     return player;
   }
@@ -275,7 +275,7 @@ describe('Player', function() {
       // At this asset's bitrate, Chrome should only have enough buffer for
       // 310 seconds of data.  Tweak the buffer time for audio, since this
       // will take much less time and bandwidth to buffer.
-      player.setStreamBufferSize(300);
+      player.configure({'streamBufferSize': 300});
 
       // Create a temporary shim to intercept and modify manifest info.
       var originalLoad = shaka.player.StreamVideoSource.prototype.load;
@@ -316,7 +316,7 @@ describe('Player', function() {
         expect(audioStreamBuffer.buffered.start(0)).toBeGreaterThan(0);
         expect(video.currentTime).toBeGreaterThan(0);
         // Seek to the beginning, which is data we will have to re-download.
-        player.setStreamBufferSize(10);
+        player.configure({'streamBufferSize': 10});
         player.setPlaybackRate(1.0);
         video.currentTime = 0;
         // Expect to play some.
@@ -569,7 +569,7 @@ describe('Player', function() {
     });
   });
 
-  describe('setPreferredLanguage', function() {
+  describe('configuring the preferredLanguage', function() {
     it('changes the default tracks', function(done) {
       var originalAudioId;
       var originalTextId;
@@ -583,7 +583,7 @@ describe('Player', function() {
         expect(activeTextTrack.lang).toBe('en');
         originalTextId = activeTextTrack.id;
 
-        player.setPreferredLanguage('fr');
+        player.configure({'preferredLanguage': 'fr'});
         return player.load(newSource(languagesManifest));
       }).then(function() {
         var activeAudioTrack = getActiveAudioTrack();
@@ -602,7 +602,7 @@ describe('Player', function() {
     });
 
     it('enables text tracks when no matching audio is found', function(done) {
-      player.setPreferredLanguage('el');
+      player.configure({'preferredLanguage': 'el'});
       player.load(newSource(languagesManifest)).then(function() {
         var activeAudioTrack = getActiveAudioTrack();
         expect(activeAudioTrack.lang).toBe('en');
@@ -618,7 +618,7 @@ describe('Player', function() {
     });
 
     it('disables text tracks when matching audio is found', function(done) {
-      player.setPreferredLanguage('fr');
+      player.configure({'preferredLanguage': 'fr'});
       player.load(newSource(languagesManifest)).then(function() {
         var activeAudioTrack = getActiveAudioTrack();
         expect(activeAudioTrack.lang).toBe('fr');
@@ -634,7 +634,7 @@ describe('Player', function() {
     });
   });
 
-  describe('setRestrictions', function() {
+  describe('configuring restrictions', function() {
     it('ignores video tracks above the maximum height', function(done) {
       player.load(newSource(encryptedManifest)).then(function() {
         var hdVideoTrack = getVideoTrackByHeight(720);
@@ -642,9 +642,9 @@ describe('Player', function() {
         expect(hdVideoTrack).not.toBe(null);
         expect(sdVideoTrack).not.toBe(null);
 
-        var restrictions = player.getRestrictions();
+        var restrictions = player.getConfiguration()['restrictions'];
         restrictions.maxHeight = 480;
-        player.setRestrictions(restrictions);
+        player.configure({'restrictions': restrictions});
 
         hdVideoTrack = getVideoTrackByHeight(720);
         sdVideoTrack = getVideoTrackByHeight(480);
@@ -664,9 +664,9 @@ describe('Player', function() {
         expect(hdVideoTrack).not.toBe(null);
         expect(sdVideoTrack).not.toBe(null);
 
-        var restrictions = player.getRestrictions();
+        var restrictions = player.getConfiguration()['restrictions'];
         restrictions.maxWidth = 854;
-        player.setRestrictions(restrictions);
+        player.configure({'restrictions': restrictions});
 
         hdVideoTrack = getVideoTrackByHeight(720);
         sdVideoTrack = getVideoTrackByHeight(480);
@@ -680,9 +680,9 @@ describe('Player', function() {
     });
 
     it('takes effect before the source is loaded', function(done) {
-      var restrictions = player.getRestrictions();
+      var restrictions = player.getConfiguration()['restrictions'];
       restrictions.maxHeight = 480;
-      player.setRestrictions(restrictions);
+      player.configure({'restrictions': restrictions});
 
       player.load(newSource(encryptedManifest)).then(function() {
         var hdVideoTrack = getVideoTrackByHeight(720);
@@ -690,9 +690,9 @@ describe('Player', function() {
         expect(hdVideoTrack).toBe(null);
         expect(sdVideoTrack).not.toBe(null);
 
-        var restrictions = player.getRestrictions();
+        var restrictions = player.getConfiguration()['restrictions'];
         restrictions.maxHeight = null;
-        player.setRestrictions(restrictions);
+        player.configure({'restrictions': restrictions});
 
         hdVideoTrack = getVideoTrackByHeight(720);
         sdVideoTrack = getVideoTrackByHeight(480);
@@ -771,51 +771,153 @@ describe('Player', function() {
     });
   });
 
-  describe('setStreamBufferSize', function() {
-    it('sets buffer size on streams', function() {
-      var original = shaka.media.Stream.bufferSizeSeconds;
-      player.setStreamBufferSize(5);
-      expect(shaka.media.Stream.bufferSizeSeconds).toEqual(5);
-      player.setStreamBufferSize(original);
+  describe('configure and getConfiguration', function() {
+    it('rejects an invalid enableAdaptation', function() {
+      var exception;
+      try {
+        player.configure({'enableAdaptation': 2});
+        fail();
+      } catch (e) {
+        exception = e;
+      }
+      expect(exception instanceof TypeError).toBe(true);
     });
-  });
 
-  describe('getStreamBufferSize', function() {
-    it('gets streams buffer size', function() {
+    it('gets/sets stream buffer size', function() {
       var original = shaka.media.Stream.bufferSizeSeconds;
-      expect(player.getStreamBufferSize()).toEqual(original);
-      player.setStreamBufferSize(5);
-      expect(player.getStreamBufferSize()).toEqual(5);
-      player.setStreamBufferSize(original);
-      expect(player.getStreamBufferSize()).toEqual(original);
-    });
-  });
+      expect(original).not.toBe(5);
 
-  describe('setLicenseRequestTimeout', function() {
-    it('set timeout on LicenseRequests', function() {
-      player.setLicenseRequestTimeout(5);
+      expect(player.getConfiguration()['streamBufferSize']).toBe(original);
+
+      player.configure({'streamBufferSize': 5});
+      expect(shaka.media.Stream.bufferSizeSeconds).toBe(5);
+
+      player.configure({'streamBufferSize': original});
+      expect(shaka.media.Stream.bufferSizeSeconds).toBe(original);
+    });
+
+
+    it('rejects an invalid streamBufferSize', function() {
+      var exception;
+      try {
+        player.configure({'streamBufferSize': 'three seconds'});
+        fail();
+      } catch (e) {
+        exception = e;
+      }
+      expect(exception instanceof TypeError).toBe(true);
+    });
+
+    it('gets/sets LicenseRequest timeout', function() {
+      var original = shaka.util.LicenseRequest.requestTimeoutMs;
+      expect(original).not.toBe(5);
+
+      expect(player.getConfiguration()['licenseRequestTimeout']).toBe(original);
+
+      player.configure({'licenseRequestTimeout': 5});
       var request = new shaka.util.LicenseRequest(
-          'test.url.com', new ArrayBuffer(1024), false);
+          'http://example.com', new ArrayBuffer(1024), false);
       expect(request.parameters.requestTimeoutMs).toEqual(5);
-      player.setLicenseRequestTimeout(0);
-    });
-  });
 
-  describe('setLicenseRequestTimeout', function() {
-    it('sets timeout on MpdRequests', function() {
-      player.setMpdRequestTimeout(10);
-      var request = new shaka.dash.MpdRequest('test.url.com');
-      expect(request.parameters.requestTimeoutMs).toEqual(10);
-      player.setMpdRequestTimeout(0);
+      player.configure({'licenseRequestTimeout': original});
+      request = new shaka.util.LicenseRequest(
+          'http://example.com', new ArrayBuffer(1024), false);
+      expect(request.parameters.requestTimeoutMs).toBe(original);
     });
-  });
 
-  describe('setLicenseRequestTimeout', function() {
-    it('sets timeout on RangeRequests', function() {
-      player.setRangeRequestTimeout(13);
-      var request = new shaka.util.RangeRequest('test.url.com', 0, null);
-      expect(request.parameters.requestTimeoutMs).toEqual(13);
-      player.setRangeRequestTimeout(0);
+    it('rejects an invalid LicenseRequest timeout', function() {
+      var exception;
+      try {
+        player.configure({'licenseRequestTimeout': 'five seconds'});
+        fail();
+      } catch (e) {
+        exception = e;
+      }
+      expect(exception instanceof TypeError).toBe(true);
+    });
+
+    it('gets/sets MpdRequest timeout', function() {
+      var original = shaka.dash.MpdRequest.requestTimeoutMs;
+      expect(original).not.toBe(5);
+
+      expect(player.getConfiguration()['licenseRequestTimeout']).toBe(original);
+
+      player.configure({'mpdRequestTimeout': 5});
+      var request = new shaka.dash.MpdRequest(
+          'http://example.com', new ArrayBuffer(1024), false);
+      expect(request.parameters.requestTimeoutMs).toEqual(5);
+
+      player.configure({'mpdRequestTimeout': original});
+      request = new shaka.dash.MpdRequest(
+          'http://example.com', new ArrayBuffer(1024), false);
+      expect(request.parameters.requestTimeoutMs).toBe(original);
+    });
+
+    it('rejects an invalid MpdRequest timeout', function() {
+      var exception;
+      try {
+        player.configure({'mpdRequestTimeout': 'seven seconds'});
+        fail();
+      } catch (e) {
+        exception = e;
+      }
+      expect(exception instanceof TypeError).toBe(true);
+    });
+
+    it('gets/sets RangeRequest timeout', function() {
+      var original = shaka.util.RangeRequest.requestTimeoutMs;
+      expect(original).not.toBe(5);
+
+      expect(player.getConfiguration()['licenseRequestTimeout']).toBe(original);
+
+      player.configure({'rangeRequestTimeout': 5});
+      var request = new shaka.util.RangeRequest(
+          'http://example.com', new ArrayBuffer(1024), false);
+      expect(request.parameters.requestTimeoutMs).toEqual(5);
+
+      player.configure({'rangeRequestTimeout': original});
+      request = new shaka.util.RangeRequest(
+          'http://example.com', new ArrayBuffer(1024), false);
+      expect(request.parameters.requestTimeoutMs).toBe(original);
+    });
+
+    it('rejects an invalid RangeRequest timeout', function() {
+      var exception;
+      try {
+        player.configure({'rangeRequestTimeout': 'eleven seconds'});
+        fail();
+      } catch (e) {
+        exception = e;
+      }
+      expect(exception instanceof TypeError).toBe(true);
+    });
+
+    it('rejects an invalid preferredLanguage', function() {
+      var exception;
+      try {
+        player.configure({'preferredLanguage': 13});
+        fail();
+      } catch (e) {
+        exception = e;
+      }
+      expect(exception instanceof TypeError).toBe(true);
+    });
+
+    it('gets/sets multiple options at once', function() {
+      var restrictions = new shaka.player.DrmSchemeInfo.Restrictions();
+      restrictions.maxWidth = 1280;
+      var config = {
+        'enableAdaptation': true,
+        'streamBufferSize': 17,
+        'licenseRequestTimeout': 19,
+        'mpdRequestTimeout': 23,
+        'rangeRequestTimeout': 29,
+        'preferredLanguage': 'fr',
+        'restrictions': restrictions
+      };
+      player.configure(config);
+      expect(JSON.stringify(player.getConfiguration()))
+          .toBe(JSON.stringify(config));
     });
   });
 

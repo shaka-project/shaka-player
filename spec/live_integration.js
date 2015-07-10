@@ -116,7 +116,7 @@ describe('Player', function() {
 
     // Disable automatic adaptation unless it is needed for a test.
     // This makes test results more reproducible.
-    player.enableAdaptation(false);
+    player.configure({'enableAdaptation': false});
 
     eventManager = new shaka.util.EventManager();
   });
