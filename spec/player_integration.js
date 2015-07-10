@@ -68,7 +68,7 @@ describe('Player', function() {
 
     // Change the timeout.
     originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;  // ms
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 40000;  // ms
 
     // Install polyfills.
     shaka.polyfill.installAll();
@@ -299,9 +299,9 @@ describe('Player', function() {
         // Nothing has buffered yet.
         expect(audioStreamBuffer.buffered.length).toBe(0);
         // Give the audio time to buffer.
-        return delay(8.0);
+        return waitUntilBuffered(audioStreamBuffer, 290, 30);
       }).then(function() {
-        // The content is now buffered.
+        // The content is now buffered, and none has been evicted yet.
         expect(audioStreamBuffer.buffered.length).toBe(1);
         expect(audioStreamBuffer.buffered.start(0)).toBe(0);
         video.play();
@@ -314,6 +314,7 @@ describe('Player', function() {
         // Ensure that the browser has evicted the beginning of the stream.
         // Otherwise, this test hasn't reproduced the circumstances correctly.
         expect(audioStreamBuffer.buffered.start(0)).toBeGreaterThan(0);
+        expect(audioStreamBuffer.buffered.end(0)).toBeGreaterThan(310);
         expect(video.currentTime).toBeGreaterThan(0);
         // Seek to the beginning, which is data we will have to re-download.
         player.configure({'streamBufferSize': 10});

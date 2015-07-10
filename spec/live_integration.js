@@ -56,7 +56,7 @@ describe('Player', function() {
 
     // Change the timeout.
     originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;  // ms
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 40000;  // ms
 
     // Install polyfills.
     shaka.polyfill.installAll();
