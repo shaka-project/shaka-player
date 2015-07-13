@@ -19,7 +19,7 @@
 
 
 /**
- * @param {function(!Error)} fn
+ * @param {function(*)} fn
  * @return {!Promise}
  */
 Promise.prototype.catch = function(fn) {};
