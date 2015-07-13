@@ -1,5 +1,5 @@
 closure/compiler.jar
-  The closure compiler, by Google.
+  The closure compiler, v20150609, by Google.
   Apache v2.0 license.
   https://github.com/google/closure-compiler
 

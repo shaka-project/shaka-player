@@ -19,10 +19,6 @@
  */
 
 
-/** @typedef {!ArrayBufferView|!ArrayBuffer} */
-var BufferSource;
-
-
 /** @typedef {{contentType: string, robustness: string}} */
 var MediaKeySystemMediaCapability;
 

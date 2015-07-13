@@ -16,6 +16,11 @@ dir=$(dirname $0)/..
 
 GIT_VERSION=$(cd "$dir"; git describe --tags --dirty || echo unknown)
 
+# 'deprecatedAnnotations' controls complaints about @expose, but the new
+# @nocollapse annotation does not do the same job for properties.
+# So since we can't use the new annotations, we have to ignore complaints
+# about the old one.
+
 closure_opts="
   --language_in ECMASCRIPT5
   --language_out ECMASCRIPT5
@@ -45,6 +50,8 @@ closure_opts="
   --jscomp_error=unknownDefines
   --jscomp_error=uselessCode
   --jscomp_error=visibility
+
+  --jscomp_off=deprecatedAnnotations
 
   --extra_annotation_name=listens
 
