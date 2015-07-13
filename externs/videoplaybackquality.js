@@ -18,33 +18,18 @@
  */
 
 
-
 /**
- * @constructor
+ * @typedef {{
+ *    creationTime: number,
+ *    totalVideoFrames: number,
+ *    droppedVideoFrames: number,
+ *    corruptedVideoFrames: number,
+ *    totalFrameDelay: number
+ * }}
  */
-function VideoPlaybackQuality() {}
+var VideoPlaybackQuality;
 
 
-/** @type {number} */
-VideoPlaybackQuality.prototype.creationTime;
-
-
-/** @type {number} */
-VideoPlaybackQuality.prototype.corruptedVideoFrames;
-
-
-/** @type {number} */
-VideoPlaybackQuality.prototype.droppedVideoFrames;
-
-
-/** @type {number} */
-VideoPlaybackQuality.prototype.totalFrameDelay;
-
-
-/** @type {number} */
-VideoPlaybackQuality.prototype.totalVideoFrames;
-
-
-/** @return {VideoPlaybackQuality} */
+/** @return {!VideoPlaybackQuality} */
 HTMLVideoElement.prototype.getVideoPlaybackQuality = function() {};
 
