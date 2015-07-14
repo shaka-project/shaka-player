@@ -433,7 +433,7 @@ function waitUntilBuffered(sourceBuffer, targetTime, timeout) {
 function newSource(manifest) {
   var estimator = new shaka.util.EWMABandwidthEstimator();
   // These tests do not do ABR, so caching is a good thing here.
-  estimator.supportsCaching = function() { return true; }
+  estimator.supportsCaching = function() { return true; };
   return new shaka.player.DashVideoSource(manifest,
                                           interpretContentProtection,
                                           estimator);
