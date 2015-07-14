@@ -14,7 +14,17 @@
 
 dir=$(dirname $0)/..
 
-GIT_VERSION=$(cd "$dir"; git describe --tags --dirty || echo unknown)
+function calculate_version() {
+  cd "$dir"
+  # Check git tags for a version number, noting if the sources are dirty.
+  if ! git describe --tags --dirty 2>/dev/null; then
+    # Fall back to NPM's installed package version, and assume the sources
+    # are dirty since the build scripts are being run at all after install.
+    npm ls | grep shaka-player | sed -e 's/.*@\(.*\?\) .*/\1-npm-dirty/'
+  fi
+}
+
+GIT_VERSION=$(calculate_version)
 
 # 'deprecatedAnnotations' controls complaints about @expose, but the new
 # @nocollapse annotation does not do the same job for properties.
