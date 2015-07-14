@@ -32,13 +32,15 @@ describe('SegmentIndexParser', function() {
     var async = [
       // This file contains just the SIDX, which was extracted from an actual
       // MP4 file.
-      new Metadata('assets/car-20120827-87.sidx.dat').fetch(),
+      new Metadata('assets/car-20120827-87.sidx.dat', 0, null).fetch(),
       // This file contains just the SIDX, which was extracted from an actual
       // MP4 file. It differs from the above SIDX in that it has a non-zero
       // "earliest presentation time" field.
-      new Metadata('assets/angel_one.sidx.dat').fetch(),
-      new Metadata('assets/feelings_vp9-20130806-171.webm.cues.dat').fetch(),
-      new Metadata('assets/feelings_vp9-20130806-171.webm.headers.dat').fetch()
+      new Metadata('assets/angel_one.sidx.dat', 0, null).fetch(),
+      new Metadata('assets/feelings_vp9-20130806-171.webm.cues.dat', 0,
+                   null).fetch(),
+      new Metadata('assets/feelings_vp9-20130806-171.webm.headers.dat', 0,
+                   null).fetch()
     ];
 
     Promise.all(async).then(
