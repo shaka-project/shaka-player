@@ -921,17 +921,47 @@ describe('Player', function() {
                                               estimator);
     }
 
+    it('can still use the old-style ContentProtectionCallback', function(done) {
+      function icp(contentProtection) {
+        // Call utility function from util.js.
+        var configs = interpretContentProtection(
+            contentProtection.schemeIdUri, contentProtection);
+        var c = configs[0];
+        // Translate to DrmSchemeInfo.
+        var drmSchemeInfo = new shaka.player.DrmSchemeInfo(
+            c['keySystem'],
+            c['licenseServerUrl'],
+            c['withCredentials'],
+            c['initData']);
+        return drmSchemeInfo;
+      }
+
+      player.load(newSourceWithIcp(icp)).then(function() {
+        video.play();
+        return waitForMovement(video, eventManager);
+      }).then(function() {
+        return delay(0.5);
+      }).then(function() {
+        expect(video.currentTime).toBeGreaterThan(0.0);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+
     it('calls the license post-processor', function(done) {
       var licensePostProcessor;
 
-      function icp(contentProtection) {
+      function icp(schemeIdUri, contentProtection) {
         // Call utility function from util.js.
-        var drmScheme = interpretContentProtection(contentProtection);
+        var configs =
+            interpretContentProtection(schemeIdUri, contentProtection);
         // Ensure we're not overwriting a post-processor that we need.
         expect(licensePostProcessor.spy).toBeTruthy();
-        expect(drmScheme.licensePostProcessor).toBeNull();
-        drmScheme.licensePostProcessor = licensePostProcessor.spy;
-        return drmScheme;
+        expect(configs[0]['licensePostProcessor']).toBeFalsy();
+        configs[0]['licensePostProcessor'] = licensePostProcessor.spy;
+        return configs;
       }
 
       var licensePostProcessor = {
@@ -942,7 +972,7 @@ describe('Player', function() {
 
       player.load(newSourceWithIcp(icp)).then(function() {
         video.play();
-        delay(0.5);
+        return delay(0.5);
       }).then(function() {
         expect(licensePostProcessor.spy).toHaveBeenCalled();
         done();
@@ -956,17 +986,17 @@ describe('Player', function() {
       var originalLicenseServerUrl;
       var licensePreProcessor;
 
-      function icp(contentProtection) {
+      function icp(schemeIdUri, contentProtection) {
         // Call utility function from util.js.
-        var drmScheme = interpretContentProtection(contentProtection);
+        var configs =
+            interpretContentProtection(schemeIdUri, contentProtection);
         // Save the license server URL so that we can check that it gets passed
         // to the pre-processor.
-        originalLicenseServerUrl = drmScheme.licenseServerUrl;
+        originalLicenseServerUrl = configs[0]['licenseServerUrl'];
         // Ensure we're not overwriting a pre-processor that we need.
-        expect(licensePreProcessor.spy).toBeTruthy();
-        expect(drmScheme.licensePreProcessor).toBeNull();
-        drmScheme.licensePreProcessor = licensePreProcessor.spy;
-        return drmScheme;
+        expect(configs[0]['licensePreProcessor']).toBeFalsy();
+        configs[0]['licensePreProcessor'] = licensePreProcessor.spy;
+        return configs;
       }
 
       var licensePreProcessor = {
@@ -1023,7 +1053,7 @@ describe('Player', function() {
 
       player.load(newSourceWithIcp(icp)).then(function() {
         video.play();
-        delay(0.5);
+        return delay(0.5);
       }).then(function() {
         expect(licensePreProcessor.spy).toHaveBeenCalled();
         // done() is called from the LicenseRequest.send() spy above.
@@ -1195,7 +1225,7 @@ describe('Player', function() {
     });
 
     it('gets/sets multiple options at once', function() {
-      var restrictions = new shaka.player.DrmSchemeInfo.Restrictions();
+      var restrictions = new shaka.player.Restrictions();
       restrictions.maxWidth = 1280;
       var originalConfig = player.getConfiguration();
       var config = {

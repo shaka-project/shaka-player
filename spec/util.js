@@ -173,15 +173,16 @@ var assertsToFailures = {
 
 
 /**
- * Called to interpret ContentProtection elements from an MPD.
- * @param {!shaka.dash.mpd.ContentProtection} contentProtection
- * @return {shaka.player.DrmSchemeInfo} or null if the element is not supported.
+ * Called to interpret ContentProtection elements from the MPD.
+ * @param {!string} schemeIdUri
+ * @param {!Node} contentProtection The ContentProtection XML element.
+ * @return {Array.<shaka.player.DrmInfo.Config>}
  */
-function interpretContentProtection(contentProtection) {
+function interpretContentProtection(schemeIdUri, contentProtection) {
   var Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
 
   // This is the only scheme used in integration tests at the moment.
-  if (contentProtection.schemeIdUri == 'com.youtube.clearkey') {
+  if (schemeIdUri == 'com.youtube.clearkey') {
     var license;
     for (var i = 0; i < contentProtection.children.length; ++i) {
       var child = contentProtection.children[i];
@@ -203,13 +204,16 @@ function interpretContentProtection(contentProtection) {
     var jwkSet = {keys: [keyObj]};
     var license = JSON.stringify(jwkSet);
     var initData = {
-      initData: keyid,
-      initDataType: 'webm'
+      'initData': keyid,
+      'initDataType': 'webm'
     };
     var licenseServerUrl = 'data:application/json;base64,' +
         shaka.util.StringUtils.toBase64(license);
-    return new shaka.player.DrmSchemeInfo(
-        'org.w3.clearkey', licenseServerUrl, false, initData, null);
+    return [{
+      'keySystem': 'org.w3.clearkey',
+      'licenseServerUrl': licenseServerUrl,
+      'initData': initData
+    }];
   }
 
   return null;
