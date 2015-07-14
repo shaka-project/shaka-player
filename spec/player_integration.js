@@ -907,6 +907,7 @@ describe('Player', function() {
     it('gets/sets multiple options at once', function() {
       var restrictions = new shaka.player.DrmSchemeInfo.Restrictions();
       restrictions.maxWidth = 1280;
+      var originalConfig = player.getConfiguration();
       var config = {
         'enableAdaptation': true,
         'streamBufferSize': 17,
@@ -919,6 +920,7 @@ describe('Player', function() {
       player.configure(config);
       expect(JSON.stringify(player.getConfiguration()))
           .toBe(JSON.stringify(config));
+      player.configure(originalConfig);
     });
   });
 
