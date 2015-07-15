@@ -800,6 +800,7 @@ describe('Player', function() {
 
     it('rejects an invalid streamBufferSize', function() {
       var exception;
+
       try {
         player.configure({'streamBufferSize': 'three seconds'});
         fail();
@@ -807,6 +808,14 @@ describe('Player', function() {
         exception = e;
       }
       expect(exception instanceof TypeError).toBe(true);
+
+      try {
+        player.configure({'streamBufferSize': -1});
+        fail();
+      } catch (e) {
+        exception = e;
+      }
+      expect(exception instanceof RangeError).toBe(true);
     });
 
     it('gets/sets LicenseRequest timeout', function() {
@@ -828,6 +837,7 @@ describe('Player', function() {
 
     it('rejects an invalid LicenseRequest timeout', function() {
       var exception;
+
       try {
         player.configure({'licenseRequestTimeout': 'five seconds'});
         fail();
@@ -835,6 +845,14 @@ describe('Player', function() {
         exception = e;
       }
       expect(exception instanceof TypeError).toBe(true);
+
+      try {
+        player.configure({'licenseRequestTimeout': NaN});
+        fail();
+      } catch (e) {
+        exception = e;
+      }
+      expect(exception instanceof RangeError).toBe(true);
     });
 
     it('gets/sets MpdRequest timeout', function() {
@@ -856,6 +874,7 @@ describe('Player', function() {
 
     it('rejects an invalid MpdRequest timeout', function() {
       var exception;
+
       try {
         player.configure({'mpdRequestTimeout': 'seven seconds'});
         fail();
@@ -863,6 +882,14 @@ describe('Player', function() {
         exception = e;
       }
       expect(exception instanceof TypeError).toBe(true);
+
+      try {
+        player.configure({'mpdRequestTimeout': Number.NEGATIVE_INFINITY});
+        fail();
+      } catch (e) {
+        exception = e;
+      }
+      expect(exception instanceof RangeError).toBe(true);
     });
 
     it('gets/sets RangeRequest timeout', function() {
@@ -884,6 +911,7 @@ describe('Player', function() {
 
     it('rejects an invalid RangeRequest timeout', function() {
       var exception;
+
       try {
         player.configure({'rangeRequestTimeout': 'eleven seconds'});
         fail();
@@ -891,6 +919,14 @@ describe('Player', function() {
         exception = e;
       }
       expect(exception instanceof TypeError).toBe(true);
+
+      try {
+        player.configure({'rangeRequestTimeout': Number.POSITIVE_INFINITY});
+        fail();
+      } catch (e) {
+        exception = e;
+      }
+      expect(exception instanceof RangeError).toBe(true);
     });
 
     it('rejects an invalid preferredLanguage', function() {
