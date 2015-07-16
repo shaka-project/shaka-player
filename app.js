@@ -307,13 +307,14 @@ app.checkMpdStorageStatus_ = function() {
 /**
  * Called when a new video track is selected.
  *
- * @param {boolean=} opt_immediate
+ * @param {boolean=} opt_clearBuffer If true (and by default), removes the
+ *     previous stream's content before switching to the new stream.
  */
-app.onVideoChange = function(opt_immediate) {
+app.onVideoChange = function(opt_clearBuffer) {
   var id = document.getElementById('videoTracks').value;
   document.getElementById('adaptationEnabled').checked = false;
   app.onAdaptationChange();
-  app.player_.selectVideoTrack(id, opt_immediate);
+  app.player_.selectVideoTrack(id, opt_clearBuffer);
 };
 
 
@@ -342,10 +343,13 @@ app.onAdaptationChange = function() {
 
 /**
  * Called when a new audio track is selected.
+ *
+ * @param {boolean=} opt_clearBuffer If true (and by default), removes the
+ *     previous stream's content before switching to the new stream.
  */
-app.onAudioChange = function() {
+app.onAudioChange = function(opt_clearBuffer) {
   var id = document.getElementById('audioTracks').value;
-  app.player_.selectAudioTrack(id);
+  app.player_.selectAudioTrack(id, opt_clearBuffer);
 };
 
 
@@ -365,7 +369,7 @@ app.onTextChange = function() {
  */
 app.cycleAudio = function() {
   app.cycleTracks_('cycleAudio', 'audioTracks', 3, function() {
-    app.onAudioChange();
+    app.onAudioChange(false);
   }, false);
 };
 
