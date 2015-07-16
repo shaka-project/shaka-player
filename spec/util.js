@@ -432,8 +432,11 @@ function waitUntilBuffered(sourceBuffer, targetTime, timeout) {
  */
 function newSource(manifest) {
   var estimator = new shaka.util.EWMABandwidthEstimator();
-  // These tests do not do ABR, so caching is a good thing here.
-  estimator.supportsCaching = function() { return true; };
+  // FIXME: We should enable caching because the tests do not use bitrate
+  // adaptation, but Chrome's xhr.send() produces net::ERR_<unknown> for some
+  // range requests when caching is enabled, so disable caching for now as it
+  // breaks many of the integration tests.
+  estimator.supportsCaching = function() { return false; };
   return new shaka.player.DashVideoSource(manifest,
                                           interpretContentProtection,
                                           estimator);
