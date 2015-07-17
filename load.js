@@ -40,10 +40,10 @@
     document.write('<script src="' + baseUrl + src + '"></script>');
   }
 
-  var params = location.search.split('?').pop();
-  params = params ? params.split(';') : [];
+  var fields = location.search.split('?').slice(1).join('?');
+  fields = fields ? fields.split(';') : [];
 
-  var compiledMode = (params.indexOf('compiled') >= 0);
+  var compiledMode = (fields.indexOf('compiled') >= 0);
 
   if (compiledMode) {
     // This contains the entire library, compiled in debug mode.
