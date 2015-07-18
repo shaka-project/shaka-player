@@ -48,7 +48,7 @@ describe('mpd', function() {
   });
 
   it('ignores ContentProtection from Period', function() {
-    source = [
+    var source = [
       '<MPD>',
       '  <Period>',
       '    <ContentProtection schemeIdUri="http://example.com" />',
@@ -97,4 +97,23 @@ describe('mpd', function() {
     }
     expect(foundMatch).toBeTruthy();
   };
+
+  it('parses cenc:default_KID attribute', function() {
+    var source = [
+      '<MPD xmlns:cenc="urn:mpeg:cenc:2013">',
+      '  <Period>',
+      '    <AdaptationSet>',
+      '      <ContentProtection',
+      '          schemeIdUri="http://example.com"',
+      '          cenc:default_KID="21EC2020-3AEA-4069-A2DD-08002B30309D" />',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'].join('\n');
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover('').urls);
+    var period = mpd.periods[0];
+    var adaptationSet = period.adaptationSets[0];
+    expect(adaptationSet.contentProtections[0].defaultKeyId).toBe(
+        '21EC20203AEA4069A2DD08002B30309D');
+  });
 });
+
