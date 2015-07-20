@@ -928,6 +928,7 @@ app.initPlayer_ = function() {
       playerControls.onBuffering.bind(null, false));
   app.player_.addEventListener('seekrangechanged',
       playerControls.onSeekRangeChanged);
+  app.player_.addEventListener('trackschanged', app.displayMetadata_);
 
   app.estimator_ = new shaka.util.EWMABandwidthEstimator();
   playerControls.setPlayer(app.player_);
