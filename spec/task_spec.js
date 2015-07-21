@@ -287,5 +287,32 @@ describe('Task', function() {
       });
     });
   });
+
+  describe('getPromise', function() {
+    it('is rejected when a stage fails', function(done) {
+      var p = new shaka.util.PublicPromise();
+      t.append(function() { return [p]; });
+      t.start();
+
+      var timer = setTimeout(function() {
+        p.resolve();
+      }, 1500);
+
+      setTimeout(function() {
+        clearTimeout(timer);
+        var error = new Error('This is a test error.');
+        error.type = 'test';
+        p.reject(error);
+      }, 500);
+
+      t.getPromise().then(function() {
+        // The first stage should never complete.
+        fail();
+      }).catch(function(error) {
+        expect(error.type).toBe('test');
+        done();
+      });
+    });
+  });
 });
 
