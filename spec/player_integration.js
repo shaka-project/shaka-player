@@ -144,6 +144,28 @@ describe('Player', function() {
         done();
       });
     });
+
+    // Before playback begins there may be an intial seek to the stream start
+    // time if one of the streams doesn't start at 0, and there may be another
+    // seek from applying a timestamp correction. So, if the streams all start
+    // at 0 and have no timestamp correction then there should be no 'seeking'
+    // events.
+    it('doesn\'t fire unnecessary \'seeking\' events.', function(done) {
+      var source = newSource(plainManifest);
+      eventManager.listen(video, 'seeking', function() { fail(); });
+
+      player.load(source).then(function() {
+        video.play();
+        return waitForMovement(video, eventManager);
+      }).then(function() {
+        // Add an "expect" just so Jasmine doesn't complain.
+        expect(true).toBeTruthy();
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
   });
 
   describe('selectVideoTrack', function() {
@@ -381,7 +403,7 @@ describe('Player', function() {
         expect(ok).toBe(true);
 
         video.currentTime = 30.0;
-        return waitForTargetTime(video, eventManager, 33.0, 7.0);
+        return waitForTargetTime(video, eventManager, 33.0, 8.0);
       }).then(function() {
         done();
       }).catch(function(error) {
@@ -390,31 +412,78 @@ describe('Player', function() {
       });
     });
 
-    it('fires an event when seeking by zero ', function(done) {
-      // StreamVideoSource assumes that seeking by zero will fire a seek event.
+    // Starts the video 25 seconds in and then seeks back near the beginning
+    // before stream startup (initial buffering) has completed. Playback should
+    // begin from the seeked-to location and not hang.
+    it('can be used during stream startup w/ large < 0 seek', function(done) {
+      streamStartupTest(25, 3, done);
+    });
+
+    // The same as the above test, but tests on the boundary.
+    it('can be used during stream startup w/ small < 0 seek)', function(done) {
+      var tolerance = shaka.player.StreamVideoSource.SEEK_TOLERANCE_;
+      streamStartupTest(25, 25 - (tolerance / 2), done);
+    });
+
+    it('can be used during stream startup w/ large > 0 seek', function(done) {
+      streamStartupTest(25, 35, done);
+    });
+
+    function streamStartupTest(playbackStartTime, seekTarget, done) {
       var source = newSource(plainManifest);
-      var onSeeking = jasmine.createSpy('onSeeking');
+
+      player.configure({'streamBufferSize': 80});
+      player.setPlaybackStartTime(playbackStartTime);
+
+      // Force @minBufferTime to a large value so we have enough time to seek
+      // during startup.
+      var originalLoad = shaka.player.StreamVideoSource.prototype.load;
+      shaka.player.StreamVideoSource.load = function(preferredLanguage) {
+        expect(this.manifestInfo).not.toBe(null);
+        this.manifestInfo.minBufferTime = 80;
+        return this.originalLoad(preferredLanguage);
+      };
+
+      var pollTimer = null;
 
       player.load(source).then(function() {
         video.play();
-        return waitForMovement(video, eventManager);
+
+        // Continue once we've buffered at least one segment.
+        var p = shaka.util.PublicPromise();
+        var pollBuffer = function() {
+          if (video && video.buffered.length == 1) {
+            window.clearInterval(pollTimer);
+            p.resolve();
+          }
+        };
+        pollTimer = window.setInterval(pollBuffer, 25);
+        return p;
       }).then(function() {
-        video.addEventListener('seeking', onSeeking);
-        video.currentTime += 0;
-        expect(onSeeking.calls.count()).toEqual(0);
-        return delay(0.5);
+        // Ensure we have buffered at least one segment but have not yet
+        // started playback.
+        expect(video.buffered.length).toBe(1);
+        expect(video.playbackRate).toBe(0);
+        // Now seek back near the beginning.
+        video.currentTime = seekTarget;
+        return delay(3);
       }).then(function() {
-        video.currentTime -= 0;
-        expect(onSeeking.calls.count()).toEqual(1);
-        return delay(0.5);
-      }).then(function() {
-        expect(onSeeking.calls.count()).toEqual(2);
+        expect(video.buffered.length).toBe(1);
+        expect(video.playbackRate).toBe(1);
+        expect(video.currentTime > seekTarget);
+        shaka.player.StreamVideoSource.load = originalLoad;
         done();
       }).catch(function(error) {
+        shaka.player.StreamVideoSource.load = originalLoad;
+
+        if (pollTimer != null) {
+          window.clearTimeout(pollTimer);
+        }
+
         fail(error);
         done();
       });
-    });
+    }
   });
 
   describe('enableTextTrack', function() {
