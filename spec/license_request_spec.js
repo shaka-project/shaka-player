@@ -36,9 +36,9 @@ describe('LicenseRequest', function() {
 
   it('sends a request and receives a response', function(done) {
     var LicenseRequest = shaka.util.LicenseRequest;
-    var license_request = new LicenseRequest(SERVER_URL, REQUEST_BODY);
+    var licenseRequest = new LicenseRequest(SERVER_URL, REQUEST_BODY, 'POST');
 
-    license_request.send().then(function(response) {
+    licenseRequest.send().then(function(response) {
       expect(response).toMatchUint8Array(FAKE_RESPONSE);
       done();
     }).catch(function(error) {
@@ -60,11 +60,38 @@ describe('LicenseRequest', function() {
     });
   });
 
+  it('sends a request and receives a response using GET', function(done) {
+    var LicenseRequest = shaka.util.LicenseRequest;
+    var url = SERVER_URL + '?license=bogus';
+    var licenseRequest = new LicenseRequest(url, null, 'GET');
+
+    licenseRequest.send().then(function(response) {
+      expect(response).toMatchUint8Array(FAKE_RESPONSE);
+      done();
+    }).catch(function(error) {
+      fail(error);
+      done();
+    });
+
+    var xhr = jasmine.Ajax.requests.mostRecent();
+    mockXMLHttpRequestEventHandling(xhr);
+
+    expect(xhr.url).toBe(url);
+    expect(xhr.responseType).toBe('arraybuffer');
+    expect(xhr.method).toMatch(new RegExp('get', 'i'));
+
+    xhr.respondWith({
+      'status': 200,
+      'contentType': 'arraybuffer',
+      'response': FAKE_RESPONSE.buffer
+    });
+  });
+
   it('retries on error', function(done) {
     var LicenseRequest = shaka.util.LicenseRequest;
-    var license_request = new LicenseRequest(SERVER_URL, REQUEST_BODY);
+    var licenseRequest = new LicenseRequest(SERVER_URL, REQUEST_BODY, 'POST');
 
-    license_request.send().then(function(response) {
+    licenseRequest.send().then(function(response) {
       expect(response).toMatchUint8Array(FAKE_RESPONSE);
       done();
     }).catch(function(error) {
@@ -82,7 +109,7 @@ describe('LicenseRequest', function() {
 
     xhr.respondWith({'status': 500});
 
-    jasmine.clock().tick(license_request.lastDelayMs_);
+    jasmine.clock().tick(licenseRequest.lastDelayMs_);
 
     // Make the second request succeed.
     xhr = jasmine.Ajax.requests.mostRecent();
@@ -104,9 +131,9 @@ describe('LicenseRequest', function() {
 
   it('retries repeatedly on error', function(done) {
     var LicenseRequest = shaka.util.LicenseRequest;
-    var license_request = new LicenseRequest(SERVER_URL, REQUEST_BODY);
+    var licenseRequest = new LicenseRequest(SERVER_URL, REQUEST_BODY, 'POST');
 
-    license_request.send().then(function(response) {
+    licenseRequest.send().then(function(response) {
       fail(new Error('Should not receive a response.'));
       done();
     }).catch(function(error) {
@@ -114,7 +141,7 @@ describe('LicenseRequest', function() {
       done();
     });
 
-    for (var i = 0; i < license_request.parameters.maxAttempts; ++i) {
+    for (var i = 0; i < licenseRequest.parameters.maxAttempts; ++i) {
       var xhr = jasmine.Ajax.requests.mostRecent();
       mockXMLHttpRequestEventHandling(xhr);
 
@@ -126,7 +153,7 @@ describe('LicenseRequest', function() {
       expect(xhr.method).toMatch(new RegExp('post', 'i'));
 
       xhr.respondWith({'status': 500});
-      jasmine.clock().tick(license_request.lastDelayMs_);
+      jasmine.clock().tick(licenseRequest.lastDelayMs_);
     }
   });
 });

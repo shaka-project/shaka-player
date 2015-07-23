@@ -716,18 +716,21 @@ describe('Player', function() {
     }
 
     it('calls the license post-processor', function(done) {
-      var licensePostProcessor = {
-        spy: function(response) { return response; }
-      };
+      var licensePostProcessor;
 
       function icp(contentProtection) {
         // Call utility function from util.js.
         var drmScheme = interpretContentProtection(contentProtection);
         // Ensure we're not overwriting a post-processor that we need.
+        expect(licensePostProcessor.spy).toBeTruthy();
         expect(drmScheme.licensePostProcessor).toBeNull();
         drmScheme.licensePostProcessor = licensePostProcessor.spy;
         return drmScheme;
       }
+
+      var licensePostProcessor = {
+        spy: function(response) { return response; }
+      };
 
       spyOn(licensePostProcessor, 'spy').and.callThrough();
 
@@ -744,18 +747,60 @@ describe('Player', function() {
     });
 
     it('calls the license pre-processor', function(done) {
-      var licensePreProcessor = {
-        spy: function(info) { return info; }
-      };
+      var originalLicenseServerUrl;
+      var licensePreProcessor;
 
       function icp(contentProtection) {
         // Call utility function from util.js.
         var drmScheme = interpretContentProtection(contentProtection);
+        // Save the license server URL so that we can check that it gets passed
+        // to the pre-processor.
+        originalLicenseServerUrl = drmScheme.licenseServerUrl;
         // Ensure we're not overwriting a pre-processor that we need.
+        expect(licensePreProcessor.spy).toBeTruthy();
         expect(drmScheme.licensePreProcessor).toBeNull();
         drmScheme.licensePreProcessor = licensePreProcessor.spy;
         return drmScheme;
       }
+
+      var licensePreProcessor = {
+        spy: function(info) {
+          expect(info.url).toBe(originalLicenseServerUrl);
+
+          expect(info.body instanceof ArrayBuffer);
+          expect(info.body.length).not.toBe(0);
+
+          expect(info.method).toBe('POST');
+
+          expect(info.headers).toBeTruthy();
+          expect(info.headers instanceof Object);
+
+          // Override the values so that we can check that they get passed
+          // to a LicenseRequest.
+          info.url = info.url + '?arbitrary_data';
+          info.body = 'invalid_body';
+          info.method = 'GET';
+          info.headers['extra_header'] = 'extra_header_value';
+
+          return info;
+        }
+      };
+
+      // Hi-jack the LicenseRequest constructor to ensure that it gets called
+      // correctly.
+      var originalLicenseRequestConstructor = shaka.util.LicenseRequest;
+      shaka.util.LicenseRequest = function(
+          url, body, method, withCredentials, opt_extraHeaders) {
+        expect(originalLicenseServerUrl).toBeTruthy();
+        expect(url).toBe(originalLicenseServerUrl + '?arbitrary_data');
+        expect(body).toBe('invalid_body');
+        expect(method).toBe('GET');
+        expect(opt_extraHeaders['extra_header']).toBe('extra_header_value');
+
+        shaka.util.LicenseRequest = originalLicenseRequestConstructor;
+
+        done();
+      };
 
       spyOn(licensePreProcessor, 'spy').and.callThrough();
 
@@ -764,8 +809,9 @@ describe('Player', function() {
         delay(0.5);
       }).then(function() {
         expect(licensePreProcessor.spy).toHaveBeenCalled();
-        done();
+        // done() is called from the LicenseRequest callback above.
       }).catch(function(error) {
+        shaka.util.LicenseRequest = originalLicenseRequestConstructor;
         fail(error);
         done();
       });
@@ -826,12 +872,12 @@ describe('Player', function() {
 
       player.configure({'licenseRequestTimeout': 5});
       var request = new shaka.util.LicenseRequest(
-          'http://example.com', new ArrayBuffer(1024), false);
+          'http://example.com', new ArrayBuffer(1024), 'POST', false);
       expect(request.parameters.requestTimeoutMs).toEqual(5);
 
       player.configure({'licenseRequestTimeout': original});
       request = new shaka.util.LicenseRequest(
-          'http://example.com', new ArrayBuffer(1024), false);
+          'http://example.com', new ArrayBuffer(1024), 'POST', false);
       expect(request.parameters.requestTimeoutMs).toBe(original);
     });
 
