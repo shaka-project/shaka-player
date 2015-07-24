@@ -65,6 +65,7 @@ playerControls.init = function(video) {
   // play
   playButton.addEventListener('click', function() {
     if (!video.src) return;
+    playerControls.player_.setPlaybackRate(1);
     video.play();
   });
   video.addEventListener('play', function() {
@@ -247,6 +248,7 @@ playerControls.onRewind = function() {
   var rate = playerControls.player_.getPlaybackRate();
   playerControls.player_.setPlaybackRate(
       rate > 0 || rate < -4 ? -1.0 : rate * 2);
+  playerControls.video_.play();
 };
 
 
@@ -258,6 +260,7 @@ playerControls.onFastForward = function() {
   if (!playerControls.player_) return;
   var rate = playerControls.player_.getPlaybackRate();
   playerControls.player_.setPlaybackRate(rate < 0 || rate > 4 ? 1.0 : rate * 2);
+  playerControls.video_.play();
 };
 
 
