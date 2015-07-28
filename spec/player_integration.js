@@ -19,6 +19,7 @@
 goog.require('shaka.dash.MpdRequest');
 goog.require('shaka.media.Stream');
 goog.require('shaka.player.DashVideoSource');
+goog.require('shaka.player.Defaults');
 goog.require('shaka.player.Player');
 goog.require('shaka.polyfill.installAll');
 goog.require('shaka.util.EWMABandwidthEstimator');
@@ -948,16 +949,17 @@ describe('Player', function() {
     });
 
     it('gets/sets stream buffer size', function() {
-      var original = shaka.media.Stream.bufferSizeSeconds;
+      var original = player.getConfiguration()['streamBufferSize'];
       expect(original).not.toBe(5);
+      expect(original).toBe(shaka.player.Defaults.STREAM_BUFFER_SIZE);
 
       expect(player.getConfiguration()['streamBufferSize']).toBe(original);
 
       player.configure({'streamBufferSize': 5});
-      expect(shaka.media.Stream.bufferSizeSeconds).toBe(5);
+      expect(player.getConfiguration()['streamBufferSize']).toBe(5);
 
       player.configure({'streamBufferSize': original});
-      expect(shaka.media.Stream.bufferSizeSeconds).toBe(original);
+      expect(player.getConfiguration()['streamBufferSize']).toBe(original);
     });
 
 
@@ -982,20 +984,17 @@ describe('Player', function() {
     });
 
     it('gets/sets LicenseRequest timeout', function() {
-      var original = shaka.util.LicenseRequest.requestTimeoutMs;
+      var original = player.getConfiguration()['licenseRequestTimeout'];
       expect(original).not.toBe(5);
+      expect(original).toBe(shaka.player.Defaults.LICENSE_REQUEST_TIMEOUT);
 
       expect(player.getConfiguration()['licenseRequestTimeout']).toBe(original);
 
       player.configure({'licenseRequestTimeout': 5});
-      var request = new shaka.util.LicenseRequest(
-          'http://example.com', new ArrayBuffer(1024), 'POST', false);
-      expect(request.parameters.requestTimeoutMs).toEqual(5);
+      expect(player.getConfiguration()['licenseRequestTimeout']).toBe(5);
 
       player.configure({'licenseRequestTimeout': original});
-      request = new shaka.util.LicenseRequest(
-          'http://example.com', new ArrayBuffer(1024), 'POST', false);
-      expect(request.parameters.requestTimeoutMs).toBe(original);
+      expect(player.getConfiguration()['licenseRequestTimeout']).toBe(original);
     });
 
     it('rejects an invalid LicenseRequest timeout', function() {
@@ -1019,20 +1018,17 @@ describe('Player', function() {
     });
 
     it('gets/sets MpdRequest timeout', function() {
-      var original = shaka.dash.MpdRequest.requestTimeoutMs;
+      var original = player.getConfiguration()['mpdRequestTimeout'];
       expect(original).not.toBe(5);
+      expect(original).toBe(shaka.player.Defaults.MPD_REQUEST_TIMEOUT);
 
-      expect(player.getConfiguration()['licenseRequestTimeout']).toBe(original);
+      expect(player.getConfiguration()['mpdRequestTimeout']).toBe(original);
 
       player.configure({'mpdRequestTimeout': 5});
-      var request = new shaka.dash.MpdRequest(
-          'http://example.com', new ArrayBuffer(1024), false);
-      expect(request.parameters.requestTimeoutMs).toEqual(5);
+      expect(player.getConfiguration()['mpdRequestTimeout']).toBe(5);
 
       player.configure({'mpdRequestTimeout': original});
-      request = new shaka.dash.MpdRequest(
-          'http://example.com', new ArrayBuffer(1024), false);
-      expect(request.parameters.requestTimeoutMs).toBe(original);
+      expect(player.getConfiguration()['mpdRequestTimeout']).toBe(original);
     });
 
     it('rejects an invalid MpdRequest timeout', function() {
@@ -1056,20 +1052,17 @@ describe('Player', function() {
     });
 
     it('gets/sets RangeRequest timeout', function() {
-      var original = shaka.util.RangeRequest.requestTimeoutMs;
+      var original = player.getConfiguration()['rangeRequestTimeout'];
       expect(original).not.toBe(5);
+      expect(original).toBe(shaka.player.Defaults.RANGE_REQUEST_TIMEOUT);
 
-      expect(player.getConfiguration()['licenseRequestTimeout']).toBe(original);
+      expect(player.getConfiguration()['rangeRequestTimeout']).toBe(original);
 
       player.configure({'rangeRequestTimeout': 5});
-      var request = new shaka.util.RangeRequest(
-          'http://example.com', new ArrayBuffer(1024), false);
-      expect(request.parameters.requestTimeoutMs).toEqual(5);
+      expect(player.getConfiguration()['rangeRequestTimeout']).toBe(5);
 
       player.configure({'rangeRequestTimeout': original});
-      request = new shaka.util.RangeRequest(
-          'http://example.com', new ArrayBuffer(1024), false);
-      expect(request.parameters.requestTimeoutMs).toBe(original);
+      expect(player.getConfiguration()['rangeRequestTimeout']).toBe(original);
     });
 
     it('rejects an invalid RangeRequest timeout', function() {
