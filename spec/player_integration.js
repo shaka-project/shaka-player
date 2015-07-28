@@ -42,6 +42,8 @@ describe('Player', function() {
       '//storage.googleapis.com/widevine-demo-media/sintel-1080p/dash.mpd';
   const FUDGE_FACTOR = 0.3;
 
+  const captionFile = 'assets/test_subs.vtt';
+
   function createVideo() {
     var video = document.createElement('video');
     video.crossOrigin = 'anonymous';
@@ -409,6 +411,27 @@ describe('Player', function() {
         return delay(0.5);
       }).then(function() {
         expect(onSeeking.calls.count()).toEqual(2);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+  });
+
+  describe('addExternalCaptions', function() {
+    it('can be enabled', function(done) {
+      var source = newSource(plainManifest);
+      source.addExternalCaptions(captionFile);
+
+      player.load(source).then(function() {
+        var activeTrack = getActiveTextTrack();
+        expect(activeTrack.enabled).toBe(false);
+
+        player.enableTextTrack(true);
+
+        activeTrack = getActiveTextTrack();
+        expect(activeTrack.enabled).toBe(true);
         done();
       }).catch(function(error) {
         fail(error);

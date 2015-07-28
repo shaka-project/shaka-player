@@ -570,5 +570,26 @@ describe('mpd', function() {
     expect(mpd.updateLocation.toString()).toBe(
         'http://example.com/updated_mpd');
   });
-});
 
+  it('handles adding external captions', function() {
+    var source = [
+      '<MPD>',
+      '  <Period id="1" duration="PT0H1M0.00S">',
+      '  </Period>',
+      '</MPD>'].join('\n');
+
+    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    mpd.addExternalCaptions('http://example.com/');
+
+    var period = mpd.periods[0];
+    expect(period.adaptationSets.length).toBe(1);
+
+    var adaptationSet = period.adaptationSets[0];
+    expect(adaptationSet.contentType).toBe('text');
+    expect(adaptationSet.lang).toBe('en');
+    expect(adaptationSet.representations.length).toBe(1);
+
+    var representation = adaptationSet.representations[0];
+    expect(representation.baseUrl.toString()).toBe('http://example.com/');
+  });
+});
