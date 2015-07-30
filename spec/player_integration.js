@@ -438,6 +438,21 @@ describe('Player', function() {
         done();
       });
     });
+
+    it('can be called multiple times', function(done) {
+      var source = newSource(plainManifest);
+      source.addExternalCaptions(captionFile);
+      source.addExternalCaptions(captionFile, 'es');
+
+      player.load(source).then(function() {
+        var tracks = player.getTextTracks();
+        expect(tracks.length).toBe(2);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
   });
 
   describe('enableTextTrack', function() {

@@ -592,4 +592,35 @@ describe('mpd', function() {
     var representation = adaptationSet.representations[0];
     expect(representation.baseUrl.toString()).toBe('http://example.com/');
   });
+
+  it('handles adding multiple external captions', function() {
+    var source = [
+      '<MPD>',
+      '  <Period id="1" duration="PT0H1M0.00S">',
+      '  </Period>',
+      '</MPD>'].join('\n');
+
+    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    mpd.addExternalCaptions('http://example.com/');
+    mpd.addExternalCaptions('http://example.com/', 'es');
+
+    var period = mpd.periods[0];
+    expect(period.adaptationSets.length).toBe(2);
+
+    var adaptationSet = period.adaptationSets[0];
+    expect(adaptationSet.contentType).toBe('text');
+    expect(adaptationSet.lang).toBe('en');
+    expect(adaptationSet.representations.length).toBe(1);
+
+    var representation = adaptationSet.representations[0];
+    expect(representation.baseUrl.toString()).toBe('http://example.com/');
+
+    var adaptationSet2 = period.adaptationSets[1];
+    expect(adaptationSet2.contentType).toBe('text');
+    expect(adaptationSet2.lang).toBe('es');
+    expect(adaptationSet2.representations.length).toBe(1);
+
+    var representation2 = adaptationSet2.representations[0];
+    expect(representation.baseUrl.toString()).toBe('http://example.com/');
+  });
 });
