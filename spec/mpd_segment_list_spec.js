@@ -65,6 +65,58 @@ describe('mpd', function() {
         }));
   });
 
+  it('merges and supports SegmentationTimeline in SegmentList', function() {
+    var source = [
+      '<MPD>',
+      '  <Period>',
+      '    <BaseURL>http://example.com</BaseURL>',
+      '    <SegmentList>',
+      '      <SegmentTimeline>',
+      '        <S d="123" />',
+      '        <S d="4" />',
+      '      </SegmentTimeline>',
+      '    </SegmentList>',
+      '    <AdaptationSet>',
+      '      <Representation>',
+      '        <SegmentList>',
+      '          <SegmentURL media="segment1.mp4" />',
+      '          <SegmentURL media="segment2.mp4" mediaRange="100-200" />',
+      '        </SegmentList>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'].join('\n');
+    checkSegmentList(
+        source,
+        /** shaka.dash.mpd.SegmentList */ ({
+          baseUrl: new goog.Uri('http://example.com'),
+          timescale: 1,
+          presentationTimeOffset: null,
+          segmentDuration: null,
+          startNumber: 1,
+          segmentUrls: [
+            /** shaka.dash.mpd.SegmentUrl */ ({
+              mediaUrl: 'http://example.com/segment1.mp4',
+              mediaRange: null
+            }),
+            /** shaka.dash.mpd.SegmentUrl */ ({
+              mediaUrl: 'http://example.com/segment2.mp4',
+              mediaRange: new shaka.dash.mpd.Range(100, 200)
+            })
+          ],
+          timeline: {
+            timePoints: [
+              /** shaka.dash.mpd.SegmentTimePoint */ ({
+                duration: 123
+              }),
+              /** shaka.dash.mpd.SegmentTimePoint */ ({
+                duration: 4
+              })
+            ]
+          }
+        }));
+  });
+
   /**
    * Checks that the first Representation in |source| contains a SegmentList
    * that matches |expected|.
@@ -107,6 +159,16 @@ describe('mpd', function() {
         expected.segmentUrls.length);
     for (var i = 0; i < expected.segmentUrls.length; ++i) {
       checkSegmentUrl(segmentList.segmentUrls[i], expected.segmentUrls[i]);
+    }
+
+    if (expected.timeline) {
+      expect(segmentList.timeline).toBeTruthy();
+      expect(segmentList.timeline.timePoints.length)
+          .toBe(expected.timeline.timePoints.length);
+      for (var i = 0; i < expected.timeline.timePoints.length; ++i) {
+        expect(segmentList.timeline.timePoints[i].duration)
+            .toBe(expected.timeline.timePoints[i].duration);
+      }
     }
   };
 
