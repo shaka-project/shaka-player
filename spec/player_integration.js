@@ -814,7 +814,7 @@ describe('Player', function() {
           expect(info.headers instanceof Object);
 
           // Override the values so that we can check that they get passed
-          // to a LicenseRequest.
+          // to the LicenseRequest constructor.
           info.url = info.url + '?arbitrary_data';
           info.body = 'invalid_body';
           info.method = 'GET';
@@ -824,21 +824,32 @@ describe('Player', function() {
         }
       };
 
-      // Hi-jack the LicenseRequest constructor to ensure that it gets called
-      // correctly.
-      var originalLicenseRequestConstructor = shaka.util.LicenseRequest;
-      shaka.util.LicenseRequest = function(
-          url, body, method, withCredentials, opt_extraHeaders) {
-        expect(originalLicenseServerUrl).toBeTruthy();
-        expect(url).toBe(originalLicenseServerUrl + '?arbitrary_data');
-        expect(body).toBe('invalid_body');
-        expect(method).toBe('GET');
-        expect(opt_extraHeaders['extra_header']).toBe('extra_header_value');
+      var LicenseRequest = shaka.util.LicenseRequest;
 
-        shaka.util.LicenseRequest = originalLicenseRequestConstructor;
+      spyOn(window.shaka.util, 'LicenseRequest').and.callFake(
+          function(url, body, method, withCredentials, opt_extraHeaders) {
+            expect(originalLicenseServerUrl).toBeTruthy();
+            expect(url).toBe(originalLicenseServerUrl + '?arbitrary_data');
+            expect(body).toBe('invalid_body');
+            expect(method).toBe('GET');
+            expect(opt_extraHeaders['extra_header']).toBe('extra_header_value');
 
-        done();
-      };
+            var request = new LicenseRequest(
+                url, body, method, withCredentials, opt_extraHeaders);
+
+            spyOn(request, 'send').and.callFake(function() {
+              // EmeManager will call send(); pass the test but fail the call
+              // since the modified request will fail anyways. Note that
+              // because done() is called here, the rejected promise will not
+              // trigger a test failure.
+              done();
+              var error = new Error();
+              error.type = 'fake';
+              return Promise.reject(error);
+            });
+
+            return request;
+          });
 
       spyOn(licensePreProcessor, 'spy').and.callThrough();
 
@@ -847,9 +858,8 @@ describe('Player', function() {
         delay(0.5);
       }).then(function() {
         expect(licensePreProcessor.spy).toHaveBeenCalled();
-        // done() is called from the LicenseRequest callback above.
+        // done() is called from the LicenseRequest.send() spy above.
       }).catch(function(error) {
-        shaka.util.LicenseRequest = originalLicenseRequestConstructor;
         fail(error);
         done();
       });
