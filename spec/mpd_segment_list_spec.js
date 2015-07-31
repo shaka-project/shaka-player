@@ -18,176 +18,206 @@
 
 goog.require('shaka.dash.mpd');
 
-// TODO: Write more tests.
-describe('mpd', function() {
-  it('merges and overrides SegmentList across levels', function() {
-    var source = [
-      '<MPD>',
-      '  <Period>',
-      '    <BaseURL>http://example.com</BaseURL>',
-      '    <SegmentList timescale="9000" presentationTimeOffset="100">',
-      '      <SegmentURL media="default.mp4" />',
-      '    </SegmentList>',
-      '    <AdaptationSet>',
-      '      <SegmentList presentationTimeOffset="200" startNumber="5">',
-      '        <Initialization sourceURL="init.mp4" range="201-300" />',
-      '      </SegmentList>',
-      '      <Representation>',
-      '        <SegmentList startNumber="9" duration="10">',
-      '          <SegmentURL media="segment1.mp4" />',
-      '          <SegmentURL media="segment2.mp4" mediaRange="100-200" />',
-      '        </SegmentList>',
-      '      </Representation>',
-      '    </AdaptationSet>',
-      '  </Period>',
-      '</MPD>'].join('\n');
-    checkSegmentList(
-        source,
-        /** shaka.dash.mpd.SegmentList */ ({
-          baseUrl: new goog.Uri('http://example.com'),
-          timescale: 9000,
-          presentationTimeOffset: 200,
-          segmentDuration: 10,
-          startNumber: 9,
-          initialization: /** shaka.dash.mpd.Initialization */ ({
-            url: new goog.Uri('http://example.com/init.mp4'),
-            range: new shaka.dash.mpd.Range(201, 300)
-          }),
-          segmentUrls: [
-            /** shaka.dash.mpd.SegmentUrl */ ({
-              mediaUrl: 'http://example.com/segment1.mp4',
-              mediaRange: null
-            }),
-            /** shaka.dash.mpd.SegmentUrl */ ({
-              mediaUrl: 'http://example.com/segment2.mp4',
-              mediaRange: new shaka.dash.mpd.Range(100, 200)
-            })]
-        }));
+describe('mpd.SegmentList', function() {
+
+  /* @const {string} */
+  var completeSource = [
+    '<MPD>',
+    '  <Period>',
+    '    <BaseURL>http://example.com</BaseURL>',
+    '    <SegmentList timescale="9000" ',
+    '     presentationTimeOffset="10" startNumber="5">',
+    '      <SegmentURL media="default.mp4" />',
+    '      <SegmentTimeline>',
+    '        <S d="12" t="34" />',
+    '        <S d="34" />',
+    '        <S d="23" r="2" />',
+    '        <S d="452" />',
+    '      </SegmentTimeline>',
+    '    </SegmentList>',
+    '    <AdaptationSet>',
+    '      <SegmentList presentationTimeOffset="5">',
+    '        <Initialization sourceURL="init.mp4" range="201-300" />',
+    '      </SegmentList>',
+    '      <Representation>',
+    '        <SegmentList startNumber="9" duration="10">',
+    '          <SegmentURL media="segment1.mp4" />',
+    '          <SegmentURL media="segment2.mp4" mediaRange="100-200" />',
+    '        </SegmentList>',
+    '      </Representation>',
+    '      <Representation>',
+    '        <BaseURL>http://google.com</BaseURL>',
+    '        <SegmentList startNumber="27" duration="7">',
+    '          <SegmentURL media="segment3.mp4" />',
+    '          <SegmentURL media="segment4.mp4"  />',
+    '        </SegmentList>',
+    '      </Representation>',
+    '    </AdaptationSet>',
+    '    <AdaptationSet>',
+    '      <Representation>',
+    '      </Representation>',
+    '    </AdaptationSet>',
+    '  </Period>',
+    '</MPD>'].join('\n');
+
+  /* {shaka.dash.mpd.Mpd} */
+  var mpd;
+
+  beforeAll(function() {
+    // Hijack assertions and convert failed assertions into failed tests.
+    assertsToFailures.install();
   });
 
-  it('merges and supports SegmentationTimeline in SegmentList', function() {
-    var source = [
-      '<MPD>',
-      '  <Period>',
-      '    <BaseURL>http://example.com</BaseURL>',
-      '    <SegmentList>',
-      '      <SegmentTimeline>',
-      '        <S d="123" />',
-      '        <S d="4" />',
-      '      </SegmentTimeline>',
-      '    </SegmentList>',
-      '    <AdaptationSet>',
-      '      <Representation>',
-      '        <SegmentList>',
-      '          <SegmentURL media="segment1.mp4" />',
-      '          <SegmentURL media="segment2.mp4" mediaRange="100-200" />',
-      '        </SegmentList>',
-      '      </Representation>',
-      '    </AdaptationSet>',
-      '  </Period>',
-      '</MPD>'].join('\n');
-    checkSegmentList(
-        source,
-        /** shaka.dash.mpd.SegmentList */ ({
-          baseUrl: new goog.Uri('http://example.com'),
-          timescale: 1,
-          presentationTimeOffset: null,
-          segmentDuration: null,
-          startNumber: 1,
-          segmentUrls: [
-            /** shaka.dash.mpd.SegmentUrl */ ({
-              mediaUrl: 'http://example.com/segment1.mp4',
-              mediaRange: null
-            }),
-            /** shaka.dash.mpd.SegmentUrl */ ({
-              mediaUrl: 'http://example.com/segment2.mp4',
-              mediaRange: new shaka.dash.mpd.Range(100, 200)
-            })
-          ],
-          timeline: {
-            timePoints: [
-              /** shaka.dash.mpd.SegmentTimePoint */ ({
-                duration: 123
-              }),
-              /** shaka.dash.mpd.SegmentTimePoint */ ({
-                duration: 4
-              })
-            ]
-          }
-        }));
+  beforeEach(function() {
+    mpd = shaka.dash.mpd.parseMpd(completeSource, '');
   });
 
-  /**
-   * Checks that the first Representation in |source| contains a SegmentList
-   * that matches |expected|.
-   * @param {string} source
-   * @param {!shaka.dash.mpd.SegmentList} expected
-   */
-  var checkSegmentList = function(source, expected) {
-    var mpd = shaka.dash.mpd.parseMpd(source, '');
+  afterAll(function() {
+    // Restore normal assertion behavior.
+    assertsToFailures.uninstall();
+  });
+
+  it('parses SegmentLists', function() {
     expect(mpd).toBeTruthy();
+    expect(mpd.periods).toBeTruthy();
     expect(mpd.periods.length).toBe(1);
 
     var period = mpd.periods[0];
     expect(period).toBeTruthy();
-    expect(period.adaptationSets.length).toBe(1);
+    expect(period.segmentList).toBeTruthy();
+    expect(period.adaptationSets).toBeTruthy();
+    expect(period.adaptationSets.length).toBe(2);
 
-    var adaptationSet = period.adaptationSets[0];
-    expect(adaptationSet).toBeTruthy();
-    expect(adaptationSet.representations.length).toBe(1);
+    for (var i = 0; i < period.adaptationSets.length; i++) {
+      var as = period.adaptationSets[i];
+      expect(as).toBeTruthy();
+      expect(as.segmentList).toBeTruthy();
+      expect(as.representations).toBeTruthy();
+      expect(as.representations.length).toBe(2 - i);
 
-    var representation = adaptationSet.representations[0];
-    expect(representation).toBeTruthy();
-
-    var segmentList = representation.segmentList;
-    expect(segmentList).toBeTruthy();
-
-    if (expected.baseUrl) {
-      expect(segmentList.baseUrl).toBeTruthy();
-      expect(segmentList.baseUrl.toString()).toBe(expected.baseUrl.toString());
-    }
-
-    expect(segmentList.timescale).toBe(expected.timescale);
-    expect(segmentList.presentationTimeOffset).toBe(
-        expected.presentationTimeOffset);
-    expect(segmentList.segmentDuration).toBe(expected.segmentDuration);
-    expect(segmentList.startNumber).toBe(expected.startNumber);
-
-    checkUrlTypeObject(segmentList.initialization, expected.initialization);
-
-    expect(segmentList.segmentUrls.length).toBe(
-        expected.segmentUrls.length);
-    for (var i = 0; i < expected.segmentUrls.length; ++i) {
-      checkSegmentUrl(segmentList.segmentUrls[i], expected.segmentUrls[i]);
-    }
-
-    if (expected.timeline) {
-      expect(segmentList.timeline).toBeTruthy();
-      expect(segmentList.timeline.timePoints.length)
-          .toBe(expected.timeline.timePoints.length);
-      for (var i = 0; i < expected.timeline.timePoints.length; ++i) {
-        expect(segmentList.timeline.timePoints[i].duration)
-            .toBe(expected.timeline.timePoints[i].duration);
+      for (var j = 0; j < as.representations.length; j++) {
+        var representation = as.representations[j];
+        expect(representation).toBeTruthy();
+        expect(representation.segmentList).toBeTruthy();
       }
     }
+  });
+
+  it('parses SegmentTimeline', function() {
+    checkSegmentTimeline(mpd.periods[0].segmentList.timeline);
+  });
+
+  it('inherits SegmentTimeline', function() {
+    for (var i = 0; i < 2; i++) {
+      var as = mpd.periods[0].adaptationSets[i];
+      checkSegmentTimeline(as.segmentList.timeline);
+
+      var representation = as.representations[0];
+      checkSegmentTimeline(representation.segmentList.timeline);
+    }
+  });
+
+  it('inherits attributes', function() {
+    var as0 = mpd.periods[0].adaptationSets[0];
+    expect(as0.segmentList.timescale).toBe(9000);
+    expect(as0.segmentList.startNumber).toBe(5);
+
+    for (var i = 0; i < 2; i++) {
+      var as0_repr = as0.representations[i];
+      expect(as0_repr.segmentList.presentationTimeOffset).toBe(5);
+      expect(as0_repr.segmentList.timescale).toBe(9000);
+    }
+
+    var as1_repr = mpd.periods[0].adaptationSets[1].representations[0];
+    expect(as1_repr.segmentList.timescale).toBe(9000);
+    expect(as1_repr.segmentList.presentationTimeOffset).toBe(10);
+    expect(as1_repr.segmentList.startNumber).toBe(5);
+  });
+
+  it('overrides attributes', function() {
+    var as0 = mpd.periods[0].adaptationSets[0];
+    expect(as0.segmentList.presentationTimeOffset).toBe(5);
+
+    var as0_repr0 = as0.representations[0];
+    expect(as0_repr0.segmentList.startNumber).toBe(9);
+    expect(as0_repr0.segmentList.segmentDuration).toBe(10);
+
+    var as0_repr1 = as0.representations[1];
+    expect(as0_repr1.segmentList.startNumber).toBe(27);
+    expect(as0_repr1.segmentList.segmentDuration).toBe(7);
+  });
+
+  it('handles media urls', function() {
+    var repr0 = mpd.periods[0].adaptationSets[0].representations[0];
+    var segmentList = repr0.segmentList;
+
+    expect(segmentList.segmentUrls.length).toBe(2);
+    expect(segmentList.segmentUrls[0].mediaUrl.toString()).toBe(
+        'http://example.com/segment1.mp4');
+    expect(segmentList.segmentUrls[0].mediaRange).toBeFalsy();
+    expect(segmentList.segmentUrls[1].mediaUrl.toString()).toBe(
+        'http://example.com/segment2.mp4');
+    expect(segmentList.segmentUrls[1].mediaRange.begin).toBe(100);
+    expect(segmentList.segmentUrls[1].mediaRange.end).toBe(200);
+
+    var repr1 = mpd.periods[0].adaptationSets[0].representations[1];
+    var segmentList1 = repr1.segmentList;
+
+    expect(segmentList1.segmentUrls.length).toBe(2);
+    expect(segmentList1.segmentUrls[0].mediaUrl.toString()).toBe(
+        'http://google.com/segment3.mp4');
+    expect(segmentList1.segmentUrls[0].mediaRange).toBeFalsy();
+    expect(segmentList1.segmentUrls[1].mediaUrl.toString()).toBe(
+        'http://google.com/segment4.mp4');
+    expect(segmentList1.segmentUrls[1].mediaRange).toBeFalsy();
+  });
+
+  it('handles initialization', function() {
+    var as = mpd.periods[0].adaptationSets[0];
+    checkSegmentInitialization(as.segmentList.initialization);
+  });
+
+  it('inherits initialization', function() {
+    var repr0 = mpd.periods[0].adaptationSets[0].representations[0];
+    checkSegmentInitialization(repr0.segmentList.initialization);
+
+    var repr1 = mpd.periods[0].adaptationSets[0].representations[1];
+    checkSegmentInitialization(repr1.segmentList.initialization);
+  });
+
+  /**
+   * Checks that the given |timeline| matches the expected value.
+   * @param {shaka.dash.mpd.SegmentTimeline} timeline
+   */
+  var checkSegmentTimeline = function(timeline) {
+    expect(timeline).toBeTruthy();
+
+    var timepoints = timeline.timePoints;
+    expect(timepoints).toBeTruthy();
+    expect(timepoints.length).toBe(4);
+
+    expect(timepoints[0].startTime).toBe(34);
+    expect(timepoints[0].duration).toBe(12);
+
+    expect(timepoints[1].duration).toBe(34);
+
+    expect(timepoints[2].duration).toBe(23);
+    expect(timepoints[2].repeat).toBe(2);
+
+    expect(timepoints[3].duration).toBe(452);
   };
 
   /**
-   * @param {!shaka.dash.mpd.SegmentUrl} actual
-   * @param {!shaka.dash.mpd.SegmentUrl} expected
+   * Checks that the given |initialization| matches the expected value.
+   * @param {shaka.dash.mpd.Initialization} initialization
    */
-  var checkSegmentUrl = function(actual, expected) {
-    if (expected.mediaUrl) {
-      expect(actual.mediaUrl).toBeTruthy();
-      expect(actual.mediaUrl.toString()).toBe(expected.mediaUrl.toString());
-    } else {
-      expect(actual.mediaUrl).toBeNull();
-    }
+  var checkSegmentInitialization = function(initialization) {
+    expect(initialization).toBeTruthy();
 
-    checkRange(actual.mediaRange, expected.mediaRange);
-
-    expect(actual.startTime).toBe(expected.startTime);
-    expect(actual.duration).toBe(expected.duration);
+    expect(initialization.url.toString()).toBe('http://example.com/init.mp4');
+    expect(initialization.range).toBeTruthy();
+    expect(initialization.range.begin).toBe(201);
+    expect(initialization.range.end).toBe(300);
   };
 });
 
