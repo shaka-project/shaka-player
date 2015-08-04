@@ -167,7 +167,7 @@ MediaKeySession.prototype.keyStatuses;
 
 /**
  * @param {string} initDataType
- * @param {?BufferSource} initData
+ * @param {!BufferSource} initData
  * @return {!Promise}
  */
 MediaKeySession.prototype.generateRequest = function(initDataType, initData) {};
