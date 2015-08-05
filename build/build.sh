@@ -28,7 +28,7 @@ rm -f "$dir"/shaka-player.compiled.js
 
 # Compile once with app/controls.js so they get checked.  Don't keep the output.
 (library_sources_0; closure_sources_0) | compile_0 \
-  --summary_detail_level 3 "$dir"/{app,controls}.js > /dev/null
+  --summary_detail_level 3 "$dir"/{stats_overlay,app,controls}.js > /dev/null
 # NOTE: --js_output_file /dev/null results in a non-zero return value and
 # stops execution of this script.
 
@@ -49,4 +49,3 @@ cp "$dir"/shaka-player.compiled{.debug,}.js
 # locations.
 echo "//# sourceMappingURL=shaka-player.compiled.debug.map" >> \
   "$dir"/shaka-player.compiled.debug.js
-

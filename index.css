@@ -51,3 +51,22 @@ tr {
   display: none;
 }
 
+#overlay {
+  background: #eee;
+}
+
+#statsPlayedBitrate {
+  color: #00b;
+}
+
+#statsEstimatedBitrate {
+  color: #f00;
+}
+
+#statsBufferLength {
+  color: #cc00ff;
+}
+
+#statsBuffered {
+  color: #0a0;
+}

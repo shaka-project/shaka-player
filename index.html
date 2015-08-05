@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="index.css">
     <link rel="stylesheet" href="controls.css">
     <script src="load.js"></script>
+    <script src="stats_overlay.js"></script>
     <script src="controls.js"></script>
     <script src="app.js"></script>
   </head>
@@ -181,6 +182,35 @@
       <tr>
         <td>Buffered behind:</td>
         <td id="bufferedBehindDebug" colspan="2"></td>
+      </tr>
+    </table>
+
+    <br>
+
+    <table>
+      <tr>
+        <td colspan="2" class="heading">Playback Statistics</td>
+      </tr>
+      <tr>
+        <td id="statsPlayedBitrate">
+          Bitrate of played stream (bps)
+        </td>
+        <td id="statsEstimatedBitrate">
+          Estimated bitrate (bps)
+        </td>
+      </tr>
+      <tr>
+        <td id="statsBufferLength">
+          Buffer length (seconds)
+        </td>
+        <td id="statsBuffered">
+          Buffered (vertical line)
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <canvas id="overlay" width="600px"></canvas>
+        </td>
       </tr>
     </table>
 
