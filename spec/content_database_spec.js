@@ -22,12 +22,14 @@ goog.require('shaka.media.SegmentReference');
 goog.require('shaka.media.StreamInfo');
 goog.require('shaka.player.DrmSchemeInfo');
 goog.require('shaka.util.ContentDatabase');
+goog.require('shaka.util.ContentDatabaseReader');
+goog.require('shaka.util.ContentDatabaseWriter');
 goog.require('shaka.util.PublicPromise');
 goog.require('shaka.util.RangeRequest');
 
 describe('ContentDatabase', function() {
   var fakeIndexSource, fakeInitSource;
-  var db, p, testIndex, testReferences, streamInfo;
+  var reader, writer, p, testIndex, testReferences, streamInfo;
   var originalTimeout, originalRangeRequest, originalName;
 
   const url = 'http://example.com';
@@ -87,10 +89,10 @@ describe('ContentDatabase', function() {
     testIndex = new shaka.media.SegmentIndex(testReferences);
 
     // Use a database name which will not affect the test app.
-    originalName = shaka.util.ContentDatabase.DB_NAME_;
-    shaka.util.ContentDatabase.DB_NAME_ += '_test';
+    originalName = shaka.util.ContentDatabase.DB_NAME;
+    shaka.util.ContentDatabase.DB_NAME += '_test';
     // Start each test run with a clean slate.
-    (new shaka.util.ContentDatabase(null)).deleteDatabase();
+    (new shaka.util.ContentDatabase('readwrite', null)).deleteDatabase();
 
     fakeIndexSource = {
       destroy: function() {},
@@ -104,8 +106,12 @@ describe('ContentDatabase', function() {
   });
 
   beforeEach(function() {
-    db = new shaka.util.ContentDatabase(null);
-    p = db.setUpDatabase();
+    reader = new shaka.util.ContentDatabaseReader();
+    writer = new shaka.util.ContentDatabaseWriter(null, null);
+    p = reader.setUpDatabase().then(
+        function() {
+          return writer.setUpDatabase();
+        });
 
     streamInfo = new shaka.media.StreamInfo();
     streamInfo.mimeType = mime;
@@ -115,7 +121,8 @@ describe('ContentDatabase', function() {
   });
 
   afterEach(function() {
-    db.closeDatabaseConnection();
+    reader.closeDatabaseConnection();
+    writer.closeDatabaseConnection();
   });
 
   afterAll(function() {
@@ -126,15 +133,16 @@ describe('ContentDatabase', function() {
     shaka.util.RangeRequest = originalRangeRequest;
 
     // Restore DB name.
-    shaka.util.ContentDatabase.DB_NAME_ = originalName;
+    shaka.util.ContentDatabase.DB_NAME = originalName;
   });
 
   it('deletes the database', function(done) {
     p.then(function() {
-      return db.deleteDatabase();
+      reader.closeDatabaseConnection();
+      return writer.deleteDatabase();
     }).then(function() {
       var p = new shaka.util.PublicPromise();
-      var request = window.indexedDB.open(shaka.util.ContentDatabase.DB_NAME_);
+      var request = window.indexedDB.open(shaka.util.ContentDatabase.DB_NAME);
       // onupgradeneeded is only called if the database does not already exist.
       request.onupgradeneeded = function(e) {
         // Cancel the creation of a new database.
@@ -155,10 +163,10 @@ describe('ContentDatabase', function() {
 
   it('stores a stream and retrieves its index', function(done) {
     p.then(function() {
-      return db.insertStream_(
+      return writer.insertStream_(
           streamInfo, testIndex, testInitData, testReferences.length, 0);
     }).then(function(streamId) {
-      return db.retrieveStreamIndex(streamId);
+      return reader.retrieveStreamIndex(streamId);
     }).then(function(streamIndex) {
       expect(streamIndex.references[0]).toMatchReference(expectedReferences[0]);
       expect(streamIndex.references[1]).toMatchReference(expectedReferences[1]);
@@ -180,9 +188,9 @@ describe('ContentDatabase', function() {
           create: function() { return Promise.resolve(index); }
         };
         p.then(function() {
-          return db.insertStream_(streamInfo, index, testInitData, 1, 0);
+          return writer.insertStream_(streamInfo, index, testInitData, 1, 0);
         }).then(function(streamId) {
-          return db.retrieveStreamIndex(streamId);
+          return reader.retrieveStreamIndex(streamId);
         }).then(function(streamIndex) {
           expect(streamIndex.references[0]).toMatchReference(
               { start_time: 0, end_time: null });
@@ -198,7 +206,7 @@ describe('ContentDatabase', function() {
 
   it('throws an error when trying to store an invalid stream', function(done) {
     p.then(function() {
-      return db.insertStream_(null, null, null, 0, 0);
+      return writer.insertStream_(null, null, null, 0, 0);
     }).then(function() {
       fail();
       done();
@@ -211,13 +219,13 @@ describe('ContentDatabase', function() {
   it('deletes a stream index and throws error on retrieval', function(done) {
     var streamId;
     p.then(function() {
-      return db.insertStream_(
+      return writer.insertStream_(
           streamInfo, testIndex, testInitData, testReferences.length, 0);
     }).then(function(data) {
       streamId = data;
-      return db.deleteStream(streamId);
+      return writer.deleteStream_(streamId);
     }).then(function() {
-      return db.retrieveStreamIndex(streamId);
+      return reader.retrieveStreamIndex(streamId);
     }).then(function(streamIndex) {
       fail();
       done();
@@ -229,10 +237,10 @@ describe('ContentDatabase', function() {
 
   it('retrieves a segment', function(done) {
     p.then(function() {
-      return db.insertStream_(
+      return writer.insertStream_(
           streamInfo, testIndex, testInitData, testReferences.length, 0);
     }).then(function(streamId) {
-      return db.retrieveSegment(streamId, 0);
+      return reader.retrieveSegment(streamId, 0);
     }).then(function(data) {
       expect(data).not.toBeUndefined();
       done();
@@ -244,7 +252,7 @@ describe('ContentDatabase', function() {
 
   it('throws an error when non-existent segment requested', function(done) {
     p.then(function() {
-      return db.retrieveSegment(-1, -1);
+      return reader.retrieveSegment(-1, -1);
     }).then(function(streamIndex) {
       fail();
       done();
@@ -254,39 +262,12 @@ describe('ContentDatabase', function() {
     });
   });
 
-  it('retrieves streams initialization segment', function(done) {
-    p.then(function() {
-      return db.insertStream_(
-          streamInfo, testIndex, testInitData, testReferences.length, 0);
-    }).then(function(streamId) {
-      return db.retrieveInitSegment(streamId);
-    }).then(function(data) {
-      expect(data).not.toBeUndefined();
-      done();
-    }).catch(function(err) {
-      fail(err);
-      done();
-    });
-  });
-
-  it('throws an error when non-existent streams init segment requested',
-      function(done) {
-        p.then(function() {
-          return db.retrieveInitSegment(-1);
-        }).then(function(data) {
-          fail();
-          done();
-        }).catch(function(err) {
-          expect(err.type).toEqual('storage');
-          done();
-        });
-      });
-
   it('stores and retrieves a group information', function(done) {
     p.then(function() {
-      return db.insertGroup([streamInfo], ['ABCD', 'EFG'], duration, drmScheme);
+      return writer.insertGroup(
+          [streamInfo], ['ABCD', 'EFG'], duration, drmScheme);
     }).then(function(groupId) {
-      return db.retrieveGroup(groupId);
+      return reader.retrieveGroup(groupId);
     }).then(function(groupInformation) {
       expect(groupInformation.group_id).toEqual(jasmine.any(Number));
       expect(groupInformation.stream_ids.length).toEqual(1);
@@ -303,12 +284,12 @@ describe('ContentDatabase', function() {
   it('retrieves a list of the stored group IDs', function(done) {
     var initalGroupIdsLength = 0;
     p.then(function() {
-      return db.retrieveGroupIds();
+      return reader.retrieveGroupIds();
     }).then(function(groupIds) {
       initalGroupIdsLength = groupIds.length;
-      return db.insertGroup([streamInfo], ['HIJK'], duration, drmScheme);
+      return writer.insertGroup([streamInfo], ['HIJK'], duration, drmScheme);
     }).then(function() {
-      return db.retrieveGroupIds();
+      return reader.retrieveGroupIds();
     }).then(function(groupIds) {
       expect(groupIds.length - initalGroupIdsLength).toBe(1);
       done();
@@ -321,12 +302,12 @@ describe('ContentDatabase', function() {
   it('deletes group information and throws error on retrieval', function(done) {
     var groupId;
     p.then(function() {
-      return db.insertGroup([streamInfo], [], duration, drmScheme);
+      return writer.insertGroup([streamInfo], [], duration, drmScheme);
     }).then(function(resultingGroupId) {
       groupId = resultingGroupId;
-      return db.deleteGroup(groupId);
+      return writer.deleteGroup(groupId);
     }).then(function() {
-      return db.retrieveGroup(groupId);
+      return reader.retrieveGroup(groupId);
     }).then(function(groupInformation) {
       fail();
       done();
@@ -339,15 +320,15 @@ describe('ContentDatabase', function() {
   it('deletes streams in group and throws error on retrieval', function(done) {
     var streamIds, groupId;
     p.then(function() {
-      return db.insertGroup([streamInfo], [], duration, drmScheme);
+      return writer.insertGroup([streamInfo], [], duration, drmScheme);
     }).then(function(id) {
       groupId = id;
-      return db.retrieveGroup(groupId);
+      return reader.retrieveGroup(groupId);
     }).then(function(data) {
       streamIds = data['stream_ids'];
-      return db.deleteGroup(groupId);
+      return writer.deleteGroup(groupId);
     }).then(function() {
-      return db.retrieveStreamIndex(streamIds[0]);
+      return reader.retrieveStreamIndex(streamIds[0]);
     }).then(function(streamIndex) {
       fail();
       done();
@@ -360,33 +341,33 @@ describe('ContentDatabase', function() {
   it('converts old format of data to new format', function(done) {
     var streamId, groupId;
     p.then(function() {
-      return db.insertGroup([streamInfo], [], duration, drmScheme);
+      return writer.insertGroup([streamInfo], [], duration, drmScheme);
     }).then(function(currentGroupId) {
       groupId = currentGroupId;
-      return db.retrieveGroup(currentGroupId);
+      return reader.retrieveGroup(currentGroupId);
     }).then(function(groupInfo) {
       var p = shaka.util.PublicPromise();
       delete groupInfo.duration;
       delete groupInfo.key_system;
       streamId = groupInfo.stream_ids[0];
-      var groupStore = db.getGroupStore_();
+      var groupStore = writer.getGroupStore();
       var request = groupStore.put(groupInfo);
       request.onsuccess = function() { p.resolve(); };
       request.onerror = function(e) { p.reject(request.error); };
       return p;
     }).then(function() {
-      return db.retrieveStreamIndex(streamId);
+      return reader.retrieveStreamIndex(streamId);
     }).then(function(streamIndex) {
       var p = shaka.util.PublicPromise();
       streamIndex.duration = 25;
       streamIndex.key_system = 'test.key.system';
-      var indexStore = db.getIndexStore_();
+      var indexStore = writer.getIndexStore();
       var request = indexStore.put(streamIndex);
       request.onsuccess = function() { p.resolve(); };
       request.onerror = function(e) { p.reject(request.error); };
       return p;
     }).then(function() {
-      return db.retrieveGroup(groupId);
+      return reader.retrieveGroup(groupId);
     }).then(function(groupInfo) {
       expect(groupInfo.duration).toEqual(25);
       expect(groupInfo.key_system).toEqual('test.key.system');

@@ -20,7 +20,7 @@ goog.require('shaka.media.SegmentIndex');
 goog.require('shaka.media.SegmentReference');
 goog.require('shaka.player.DrmSchemeInfo');
 goog.require('shaka.util.AjaxRequest');
-goog.require('shaka.util.ContentDatabase');
+goog.require('shaka.util.ContentDatabaseWriter');
 
 describe('AjaxRequest', function() {
   var originalTimeout, originalRangeRequest;
@@ -66,7 +66,7 @@ describe('AjaxRequest', function() {
 
     var drmSchemeInfo = shaka.player.DrmSchemeInfo.createUnencrypted();
 
-    var db = new shaka.util.ContentDatabase(null);
+    var db = new shaka.util.ContentDatabaseWriter(null, null);
     db.setUpDatabase().then(function() {
       return db.insertStream_(streamInfo, testIndex, testInitData, 1, 0);
     }).then(function(streamId) {
