@@ -25,12 +25,11 @@ goog.require('shaka.util.ContentDatabase');
 goog.require('shaka.util.ContentDatabaseReader');
 goog.require('shaka.util.ContentDatabaseWriter');
 goog.require('shaka.util.PublicPromise');
-goog.require('shaka.util.RangeRequest');
 
 describe('ContentDatabase', function() {
   var fakeIndexSource, fakeInitSource;
   var reader, writer, p, testIndex, testReferences, streamInfo;
-  var originalTimeout, originalRangeRequest, originalName;
+  var originalTimeout, originalFailoverUri, originalName;
 
   const url = 'http://example.com';
   const mime = 'video/phony';
@@ -55,7 +54,7 @@ describe('ContentDatabase', function() {
           result.pass =
               util.equals(actual.start_time, expected.start_time) &&
               util.equals(actual.end_time, expected.end_time) &&
-              actual.url.match(/idb\:\/\/.+\/.+/);
+              actual.url.toString().match(/idb\:\/\/.+\/.+/);
           return result;
         }
       };
@@ -68,24 +67,24 @@ describe('ContentDatabase', function() {
     originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;  // ms
 
-    // Set up mock RangeRequest.
-    originalRangeRequest = shaka.util.RangeRequest;
-    var mockRangeRequest = function(url, startByte, endByte) {
+    // Set up mock FailoverUri.
+    originalFailoverUri = shaka.util.FailoverUri;
+    var mockFailoverUri = function(url, startByte, endByte) {
       return {
-        send: function() {
+        fetch: function() {
           return Promise.resolve(new ArrayBuffer(768 * 1024));
         }
       };
     };
-    shaka.util.RangeRequest = mockRangeRequest;
+    shaka.util.FailoverUri = mockFailoverUri;
 
-    var testUrl = new goog.Uri(url);
     testReferences = [
-      new shaka.media.SegmentReference(0, 1, 0, 5, testUrl),
-      new shaka.media.SegmentReference(1, 2, 6, 9, testUrl),
-      new shaka.media.SegmentReference(2, 3, 10, 15, testUrl),
-      new shaka.media.SegmentReference(3, 4, 16, 19, testUrl),
-      new shaka.media.SegmentReference(4, null, 20, null, testUrl)];
+      new shaka.media.SegmentReference(0, 1, createFailover(url, 0, 5)),
+      new shaka.media.SegmentReference(1, 2, createFailover(url, 6, 9)),
+      new shaka.media.SegmentReference(2, 3, createFailover(url, 10, 15)),
+      new shaka.media.SegmentReference(3, 4, createFailover(url, 16, 19)),
+      new shaka.media.SegmentReference(4, null, createFailover(url, 20, null))
+    ];
     testIndex = new shaka.media.SegmentIndex(testReferences);
 
     // Use a database name which will not affect the test app.
@@ -129,8 +128,8 @@ describe('ContentDatabase', function() {
     // Restore the timeout.
     jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
 
-    // Restore RangeRequest.
-    shaka.util.RangeRequest = originalRangeRequest;
+    // Restore FailoverUri.
+    shaka.util.FailoverUri = originalFailoverUri;
 
     // Restore DB name.
     shaka.util.ContentDatabase.DB_NAME = originalName;
@@ -181,7 +180,7 @@ describe('ContentDatabase', function() {
   it('stores a stream with a single segment and retrieves its index',
       function(done) {
         var references = [
-          new shaka.media.SegmentReference(0, null, 6, null, new goog.Uri(url))
+          new shaka.media.SegmentReference(0, null, createFailover(url, 6))
         ];
         var index = new shaka.media.SegmentIndex(references);
         streamInfo.segmentIndexSource = {

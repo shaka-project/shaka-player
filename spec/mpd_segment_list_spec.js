@@ -69,7 +69,7 @@ describe('mpd.SegmentList', function() {
   });
 
   beforeEach(function() {
-    mpd = shaka.dash.mpd.parseMpd(completeSource, '');
+    mpd = shaka.dash.mpd.parseMpd(completeSource, createFailover('').urls);
   });
 
   afterAll(function() {

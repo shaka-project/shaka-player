@@ -17,7 +17,6 @@
  */
 
 goog.require('shaka.media.Mp4SegmentIndexParser');
-goog.require('shaka.media.SegmentMetadata');
 goog.require('shaka.media.WebmSegmentIndexParser');
 
 describe('SegmentIndexParser', function() {
@@ -28,19 +27,17 @@ describe('SegmentIndexParser', function() {
   var initData;
 
   beforeAll(function(done) {
-    var Metadata = shaka.media.SegmentMetadata;
     var async = [
       // This file contains just the SIDX, which was extracted from an actual
       // MP4 file.
-      new Metadata('assets/car-20120827-87.sidx.dat', 0, null).fetch(),
+      createFailover('assets/car-20120827-87.sidx.dat').fetch(),
       // This file contains just the SIDX, which was extracted from an actual
       // MP4 file. It differs from the above SIDX in that it has a non-zero
       // "earliest presentation time" field.
-      new Metadata('assets/angel_one.sidx.dat', 0, null).fetch(),
-      new Metadata('assets/feelings_vp9-20130806-171.webm.cues.dat', 0,
-                   null).fetch(),
-      new Metadata('assets/feelings_vp9-20130806-171.webm.headers.dat', 0,
-                   null).fetch()
+      createFailover('assets/angel_one.sidx.dat').fetch(),
+      createFailover('assets/feelings_vp9-20130806-171.webm.cues.dat').fetch(),
+      createFailover('assets/feelings_vp9-20130806-171.webm.headers.dat'
+                 ).fetch()
     ];
 
     Promise.all(async).then(
@@ -61,7 +58,7 @@ describe('SegmentIndexParser', function() {
     var parser = new shaka.media.Mp4SegmentIndexParser();
     var references = parser.parse(new DataView(sidxData),
                                   708,
-                                  new goog.Uri(url));
+                                  [new goog.Uri(url)]);
     expect(references).not.toBeNull();
 
     // These values are rounded.
@@ -96,7 +93,7 @@ describe('SegmentIndexParser', function() {
 
     var references = parser.parse(new DataView(sidxDataWithNonZeroStart),
                                   1322,
-                                  'http://example.com/video');
+                                  [new goog.Uri('http://example.com/video')]);
     expect(references).not.toBeNull();
 
     // These values are rounded.
@@ -121,7 +118,7 @@ describe('SegmentIndexParser', function() {
     var parser = new shaka.media.WebmSegmentIndexParser();
     var references = parser.parse(new DataView(cuesData),
                                   new DataView(initData),
-                                  'http://example.com/video');
+                                  [new goog.Uri('http://example.com/video')]);
     expect(references).not.toBeNull();
 
     // These values are rounded.

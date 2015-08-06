@@ -80,7 +80,7 @@ describe('Player', function() {
     shaka.dash.MpdRequest.prototype.send = function() {
       return originalSend.call(this).then(
           function(mpd) {
-            if (this.url.toString().indexOf(googleStorageUrl) >= 0) {
+            if (this.url_.toString().indexOf(googleStorageUrl) >= 0) {
               mpd.availabilityStartTime = availabilityStartTime;
             }
             return Promise.resolve(mpd);
@@ -346,14 +346,14 @@ describe('Player', function() {
 
   /**
    * @param {string} targetMpdUrl The url that should be used in the MpdRequest.
-   * {!Promise} resolved when an MpdRequest has been sent.
+   * @return {!Promise} resolved when an MpdRequest has been sent.
    */
   function waitForMpdRequest(targetMpdUrl) {
     var requestStatus = new shaka.util.PublicPromise();
     var MpdRequest = shaka.dash.MpdRequest;
 
     spyOn(window.shaka.dash, 'MpdRequest').and.callFake(function(mpdUrl) {
-      expect(mpdUrl).toEqual(targetMpdUrl);
+      expect(mpdUrl.toString()).toEqual(targetMpdUrl);
       var request = new MpdRequest(mpdUrl);
       spyOn(request, 'send').and.callFake(function() {
         requestStatus.resolve();

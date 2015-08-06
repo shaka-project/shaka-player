@@ -24,7 +24,6 @@ goog.require('shaka.player.Player');
 goog.require('shaka.polyfill.installAll');
 goog.require('shaka.util.EWMABandwidthEstimator');
 goog.require('shaka.util.LicenseRequest');
-goog.require('shaka.util.RangeRequest');
 
 describe('Player', function() {
   var originalAsserts;
@@ -38,6 +37,7 @@ describe('Player', function() {
   const encryptedManifest = 'assets/car_cenc-20120827-manifest.mpd';
   const languagesManifest = 'assets/angel_one.mpd';
   const webmManifest = 'assets/feelings_vp9-20130806-manifest.mpd';
+  const failoverManifest = 'assets/angel_one_failover.mpd';
   const bogusManifest = 'assets/does_not_exist';
   const highBitrateManifest =
       '//storage.googleapis.com/widevine-demo-media/sintel-1080p/dash.mpd';
@@ -444,7 +444,7 @@ describe('Player', function() {
       shaka.player.StreamVideoSource.load = function(preferredLanguage) {
         expect(this.manifestInfo).not.toBe(null);
         this.manifestInfo.minBufferTime = 80;
-        return this.originalLoad(preferredLanguage);
+        return originalLoad.call(this, preferredLanguage);
       };
 
       var pollTimer = null;
@@ -522,6 +522,19 @@ describe('Player', function() {
         fail(error);
         done();
       });
+    });
+  });
+
+  it('supports failover', function(done) {
+    player.load(newSource(failoverManifest)).then(function() {
+      video.play();
+      return waitForMovement(video, eventManager);
+    }).then(function() {
+      expect(video.currentTime).toBeGreaterThan(0.0);
+      done();
+    }).catch(function(error) {
+      fail(error);
+      done();
     });
   });
 

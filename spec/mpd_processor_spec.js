@@ -205,11 +205,11 @@ describe('MpdProcessor', function() {
       st.indexUrlTemplate = 'http://example.com/$Bandwidth$-index.sidx';
       st.initializationUrlTemplate = 'http://example.com/$Bandwidth$-init.mp4';
 
-      r1.baseUrl = new goog.Uri('http://example.com/');
+      r1.baseUrl = [new goog.Uri('http://example.com/')];
       r1.bandwidth = 250000;
       r1.mimeType = 'video/mp4';
 
-      r2.baseUrl = new goog.Uri('http://example.com/');
+      r2.baseUrl = [new goog.Uri('http://example.com/')];
       r2.bandwidth = 500000;
       r2.mimeType = 'video/mp4';
 
@@ -226,15 +226,15 @@ describe('MpdProcessor', function() {
 
       var indexMetadata1 = si1.segmentIndexSource.indexMetadata_;
       expect(indexMetadata1).toBeTruthy();
-      expect(indexMetadata1.url).toBeTruthy();
-      expect(indexMetadata1.url.toString())
+      expect(indexMetadata1.urls).toBeTruthy();
+      expect(indexMetadata1.urls[0].toString())
           .toBe('http://example.com/250000-index.sidx');
       expect(indexMetadata1.startByte).toBe(0);
       expect(indexMetadata1.endByte).toBeNull();
 
       var initMetadata1 = si1.segmentInitSource.metadata_;
-      expect(initMetadata1.url).toBeTruthy();
-      expect(initMetadata1.url.toString())
+      expect(initMetadata1.urls).toBeTruthy();
+      expect(initMetadata1.urls[0].toString())
           .toBe('http://example.com/250000-init.mp4');
       expect(initMetadata1.startByte).toBe(0);
       expect(initMetadata1.endByte).toBeNull();
@@ -247,15 +247,15 @@ describe('MpdProcessor', function() {
 
       var indexMetadata2 = si2.segmentIndexSource.indexMetadata_;
       expect(indexMetadata2).toBeTruthy();
-      expect(indexMetadata2.url).toBeTruthy();
-      expect(indexMetadata2.url.toString())
+      expect(indexMetadata2.urls).toBeTruthy();
+      expect(indexMetadata2.urls[0].toString())
           .toBe('http://example.com/500000-index.sidx');
       expect(indexMetadata2.startByte).toBe(0);
       expect(indexMetadata2.endByte).toBeNull();
 
       var initMetadata2 = si2.segmentInitSource.metadata_;
-      expect(initMetadata2.url).toBeTruthy();
-      expect(initMetadata2.url.toString())
+      expect(initMetadata2.urls).toBeTruthy();
+      expect(initMetadata2.urls[0].toString())
           .toBe('http://example.com/500000-init.mp4');
       expect(initMetadata2.startByte).toBe(0);
       expect(initMetadata2.endByte).toBeNull();
@@ -283,10 +283,10 @@ describe('MpdProcessor', function() {
 
       st.timeline = timeline;
 
-      r1.baseUrl = new goog.Uri('http://example.com/');
+      r1.baseUrl = [new goog.Uri('http://example.com/')];
       r1.bandwidth = 250000;
 
-      r2.baseUrl = new goog.Uri('http://example.com/');
+      r2.baseUrl = [new goog.Uri('http://example.com/')];
       r2.bandwidth = 500000;
 
       manifestInfo = processor.createManifestInfo_(m, 1000);
@@ -300,8 +300,8 @@ describe('MpdProcessor', function() {
 
       var initMetadata1 = si1.segmentInitSource.metadata_;
       expect(initMetadata1).toBeTruthy();
-      expect(initMetadata1.url).toBeTruthy();
-      expect(initMetadata1.url.toString())
+      expect(initMetadata1.urls).toBeTruthy();
+      expect(initMetadata1.urls[0].toString())
           .toBe('http://example.com/250000-init.mp4');
       expect(initMetadata1.startByte).toBe(0);
       expect(initMetadata1.endByte).toBe(null);
@@ -332,8 +332,8 @@ describe('MpdProcessor', function() {
 
         var initMetadata2 = si2.segmentInitSource.metadata_;
         expect(initMetadata2).toBeTruthy();
-        expect(initMetadata2.url).toBeTruthy();
-        expect(initMetadata2.url.toString())
+        expect(initMetadata2.urls).toBeTruthy();
+        expect(initMetadata2.urls[0].toString())
             .toBe('http://example.com/500000-init.mp4');
         expect(initMetadata2.startByte).toBe(0);
         expect(initMetadata2.endByte).toBe(null);
@@ -387,7 +387,7 @@ describe('MpdProcessor', function() {
 
       st.timeline = timeline;
 
-      r1.baseUrl = new goog.Uri('http://example.com/');
+      r1.baseUrl = [new goog.Uri('http://example.com/')];
       r1.bandwidth = 250000;
 
       // Only process the first Representation.
@@ -404,8 +404,8 @@ describe('MpdProcessor', function() {
 
       var initMetadata1 = si1.segmentInitSource.metadata_;
       expect(initMetadata1).toBeTruthy();
-      expect(initMetadata1.url).toBeTruthy();
-      expect(initMetadata1.url.toString())
+      expect(initMetadata1.urls).toBeTruthy();
+      expect(initMetadata1.urls[0].toString())
           .toBe('http://example.com/250000-init.mp4');
       expect(initMetadata1.startByte).toBe(0);
       expect(initMetadata1.endByte).toBe(null);
@@ -442,10 +442,10 @@ describe('MpdProcessor', function() {
       st.mediaUrlTemplate = '$Number$-$Time$-$Bandwidth$-media.mp4';
       st.initializationUrlTemplate = '$Bandwidth$-init.mp4';
 
-      r1.baseUrl = new goog.Uri('http://example.com/');
+      r1.baseUrl = [new goog.Uri('http://example.com/')];
       r1.bandwidth = 250000;
 
-      r2.baseUrl = new goog.Uri('http://example.com/');
+      r2.baseUrl = [new goog.Uri('http://example.com/')];
       r2.bandwidth = 500000;
 
       // If the MPD is static and uses segment duration then there must be
@@ -463,8 +463,8 @@ describe('MpdProcessor', function() {
 
       var initMetadata1 = si1.segmentInitSource.metadata_;
       expect(initMetadata1).toBeTruthy();
-      expect(initMetadata1.url).toBeTruthy();
-      expect(initMetadata1.url.toString())
+      expect(initMetadata1.urls).toBeTruthy();
+      expect(initMetadata1.urls[0].toString())
           .toBe('http://example.com/250000-init.mp4');
       expect(initMetadata1.startByte).toBe(0);
       expect(initMetadata1.endByte).toBe(null);
@@ -495,8 +495,8 @@ describe('MpdProcessor', function() {
 
         var initMetadata2 = si2.segmentInitSource.metadata_;
         expect(initMetadata2).toBeTruthy();
-        expect(initMetadata2.url).toBeTruthy();
-        expect(initMetadata2.url.toString())
+        expect(initMetadata2.urls).toBeTruthy();
+        expect(initMetadata2.urls[0].toString())
             .toBe('http://example.com/500000-init.mp4');
         expect(initMetadata2.startByte).toBe(0);
         expect(initMetadata2.endByte).toBe(null);
@@ -534,7 +534,7 @@ describe('MpdProcessor', function() {
       st.mediaUrlTemplate = '$Number$-$Time$-$Bandwidth$-media.mp4';
       st.initializationUrlTemplate = '$Bandwidth$-init.mp4';
 
-      r1.baseUrl = new goog.Uri('http://example.com/');
+      r1.baseUrl = [new goog.Uri('http://example.com/')];
       r1.bandwidth = 250000;
 
       // Only process the first Representation.
@@ -550,6 +550,7 @@ describe('MpdProcessor', function() {
       var secondsSinceStart = 60 * 60;
 
       m.type = 'dynamic';
+      m.url = [new goog.Uri('http://example.com/')];
       m.availabilityStartTime = manifestCreationTime - secondsSinceStart;
       m.suggestedPresentationDelay =
           shaka.dash.mpd.DEFAULT_SUGGESTED_PRESENTATION_DELAY_;
@@ -642,7 +643,7 @@ describe('MpdProcessor', function() {
 
       st.timeline = timeline;
 
-      r1.baseUrl = new goog.Uri('http://example.com/');
+      r1.baseUrl = [new goog.Uri('http://example.com/')];
       r1.bandwidth = 250000;
 
       // Only process the first Representation.
@@ -709,7 +710,7 @@ describe('MpdProcessor', function() {
 
       st.timeline = timeline;
 
-      r1.baseUrl = new goog.Uri('http://example.com/');
+      r1.baseUrl = [new goog.Uri('http://example.com/')];
       r1.bandwidth = 250000;
 
       // Only process the first Representation.
@@ -790,7 +791,7 @@ describe('MpdProcessor', function() {
         st = new mpd.SegmentTemplate();
 
         r.segmentTemplate = st;
-        r.baseUrl = new goog.Uri('http://example.com');
+        r.baseUrl = [new goog.Uri('http://example.com')];
         r.bandwidth = 250000;
         r.mimeType = 'video/mp4';
 
@@ -799,7 +800,7 @@ describe('MpdProcessor', function() {
 
         p.adaptationSets.push(as);
         m.periods.push(p);
-        m.url = new goog.Uri('http://example.com/mpd');
+        m.url = [new goog.Uri('http://example.com/mpd')];
       });
 
       it('allows MPD and segment duration', function(done) {
@@ -860,7 +861,7 @@ describe('MpdProcessor', function() {
       it('creates live manifest w/ Location element', function() {
         m.type = 'dynamic';
         m.minUpdatePeriod = 10;
-        m.updateLocation = new goog.Uri('http://example.com/updated_mpd');
+        m.updateLocation = [new goog.Uri('http://example.com/updated_mpd')];
 
         manifestInfo = processor.process(m);
 
@@ -900,7 +901,7 @@ describe('MpdProcessor', function() {
         p.duration = 100;
 
         r.segmentList = sl;
-        r.baseUrl = new goog.Uri('http://example.com');
+        r.baseUrl = [new goog.Uri('http://example.com')];
         r.bandwidth = 250000;
         r.mimeType = 'video/mp4';
 
@@ -916,7 +917,7 @@ describe('MpdProcessor', function() {
 
         // Add just one SegmentUrl.
         var segmentUrl = new shaka.dash.mpd.SegmentUrl();
-        segmentUrl.mediaUrl = 'http://example.com/video.mp4';
+        segmentUrl.mediaUrl = [new goog.Uri('http://example.com/video.mp4')];
         sl.segmentUrls.push(segmentUrl);
 
         p.start = 0;
@@ -944,10 +945,10 @@ describe('MpdProcessor', function() {
 
         // Add two SegmentUrls, which isn't allowed.
         var segmentUrl1 = new shaka.dash.mpd.SegmentUrl();
-        segmentUrl1.mediaUrl = 'http://example.com/video-1.mp4';
+        segmentUrl1.mediaUrl = [new goog.Uri('http://example.com/video-1.mp4')];
 
         var segmentUrl2 = new shaka.dash.mpd.SegmentUrl();
-        segmentUrl2.mediaUrl = 'http://example.com/video-2.mp4';
+        segmentUrl2.mediaUrl = [new goog.Uri('http://example.com/video-2.mp4')];
 
         sl.segmentUrls.push(segmentUrl1);
         sl.segmentUrls.push(segmentUrl2);
@@ -976,7 +977,7 @@ describe('MpdProcessor', function() {
         sb = new mpd.SegmentBase();
 
         r.segmentBase = sb;
-        r.baseUrl = new goog.Uri('http://example.com');
+        r.baseUrl = [new goog.Uri('http://example.com')];
         r.bandwidth = 250000;
         r.mimeType = 'video/mp4';
 

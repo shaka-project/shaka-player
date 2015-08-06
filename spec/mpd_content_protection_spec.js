@@ -57,7 +57,7 @@ describe('mpd', function() {
       '    </AdaptationSet>',
       '  </Period>',
       '</MPD>'].join('\n');
-    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover('').urls);
     var period = mpd.periods[0];
     var adaptationSet = period.adaptationSets[0];
     var representation = adaptationSet.representations[0];
@@ -71,7 +71,7 @@ describe('mpd', function() {
    * @param {string} schemeIdUri
    */
   var checkContentProtection = function(source, schemeIdUri) {
-    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover('').urls);
     expect(mpd).toBeTruthy();
     expect(mpd.periods.length).toBe(1);
 

@@ -128,7 +128,7 @@ describe('mpd', function() {
       '  </Period>',
       '</MPD>'].join('\n');
 
-    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover('').urls);
     expect(mpd).toBeTruthy();
     expect(mpd.periods.length).toBe(1);
 
@@ -186,7 +186,7 @@ describe('mpd', function() {
       '  </Period>',
       '</MPD>'].join('\n');
 
-    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover('').urls);
     expect(mpd).toBeTruthy();
     expect(mpd.periods.length).toBe(1);
 
@@ -250,7 +250,7 @@ describe('mpd', function() {
       '  </Period>',
       '</MPD>'].join('\n');
 
-    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover('').urls);
     expect(mpd).toBeTruthy();
     expect(mpd.periods.length).toBe(1);
 
@@ -274,7 +274,7 @@ describe('mpd', function() {
       '  </Period>',
       '</MPD>'].join('\n');
 
-    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover('').urls);
     expect(mpd).toBeTruthy();
     expect(mpd.periods.length).toBe(1);
 
@@ -320,7 +320,7 @@ describe('mpd', function() {
    * @param {string} mimeType
    */
   var checkRepresentationMimeType = function(source, mimeType) {
-    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover('').urls);
     expect(mpd).toBeTruthy();
     expect(mpd.periods.length).toBe(1);
 
@@ -346,7 +346,7 @@ describe('mpd', function() {
       '  </Period>',
       '</MPD>'].join('\n');
 
-    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover('').urls);
     expect(mpd).toBeTruthy();
     expect(mpd.periods.length).toBe(1);
 
@@ -370,7 +370,7 @@ describe('mpd', function() {
       '  </Period>',
       '</MPD>'].join('\n');
 
-    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover('').urls);
     expect(mpd).toBeTruthy();
     expect(mpd.periods.length).toBe(1);
 
@@ -416,7 +416,7 @@ describe('mpd', function() {
    * @param {string} codecs
    */
   var checkCodecs = function(source, codecs) {
-    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover('').urls);
     expect(mpd).toBeTruthy();
     expect(mpd.periods.length).toBe(1);
 
@@ -442,7 +442,7 @@ describe('mpd', function() {
       '    <AdaptationSet id="2" group="2" />',
       '  </Period>',
       '</MPD>'].join('\n');
-    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover('').urls);
     expect(mpd.periods[0].adaptationSets[0].group).toBe(0);
     expect(mpd.periods[0].adaptationSets[1].group).toBe(1);
     expect(mpd.periods[0].adaptationSets[2].group).toBe(2);
@@ -460,7 +460,7 @@ describe('mpd', function() {
       '    <AdaptationSet id="5" group="3" />',
       '  </Period>',
       '</MPD>'].join('\n');
-    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover('').urls);
     var groups = mpd.periods[0].adaptationSets.map(
         function(set) { return set.group; });
 
@@ -484,7 +484,7 @@ describe('mpd', function() {
       '  </Period>',
       '</MPD>'].join('\n');
 
-    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover('').urls);
     expect(mpd).toBeTruthy();
   });
 
@@ -498,7 +498,7 @@ describe('mpd', function() {
       '  </Period>',
       '</MPD>'].join('\n');
 
-    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover('').urls);
     var period = mpd.periods[0];
     var adaptationSet = period.adaptationSets[0];
     var segmentTemplate = adaptationSet.segmentTemplate;
@@ -515,7 +515,7 @@ describe('mpd', function() {
       '  </Period>',
       '</MPD>'].join('\n');
 
-    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover('').urls);
     var period = mpd.periods[0];
     var adaptationSet = period.adaptationSets[0];
     var segmentTemplate = adaptationSet.segmentTemplate;
@@ -532,7 +532,7 @@ describe('mpd', function() {
       '  </Period>',
       '</MPD>'].join('\n');
 
-    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover('').urls);
     var period = mpd.periods[0];
     var adaptationSet = period.adaptationSets[0];
     var segmentTemplate = adaptationSet.segmentTemplate;
@@ -544,7 +544,7 @@ describe('mpd', function() {
       '<MPD minBufferTime="PT0S">',
       '</MPD>'].join('\n');
 
-    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover('').urls);
     expect(mpd.minBufferTime).toBe(0);
   });
 
@@ -554,7 +554,8 @@ describe('mpd', function() {
       '  <Location>http://example.com/updated_mpd</Location>',
       '</MPD>'].join('\n');
 
-    var mpd = shaka.dash.mpd.parseMpd(source, 'http://example.com/mpd');
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover(
+        'http://example.com/mpd').urls);
     expect(mpd.updateLocation.toString()).toBe(
         'http://example.com/updated_mpd');
   });
@@ -566,7 +567,8 @@ describe('mpd', function() {
       '  <Location>updated_mpd</Location>',
       '</MPD>'].join('\n');
 
-    var mpd = shaka.dash.mpd.parseMpd(source, 'http://example.com/mpd');
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover(
+        'http://example.com/mpd').urls);
     expect(mpd.updateLocation.toString()).toBe(
         'http://example.com/updated_mpd');
   });
@@ -578,7 +580,7 @@ describe('mpd', function() {
       '  </Period>',
       '</MPD>'].join('\n');
 
-    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover('').urls);
     mpd.addExternalCaptions('http://example.com/');
 
     var period = mpd.periods[0];
@@ -600,7 +602,7 @@ describe('mpd', function() {
       '  </Period>',
       '</MPD>'].join('\n');
 
-    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover('').urls);
     mpd.addExternalCaptions('http://example.com/');
     mpd.addExternalCaptions('http://example.com/', 'es');
 
@@ -624,3 +626,4 @@ describe('mpd', function() {
     expect(representation.baseUrl.toString()).toBe('http://example.com/');
   });
 });
+

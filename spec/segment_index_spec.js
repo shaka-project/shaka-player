@@ -18,7 +18,6 @@
 
 goog.require('goog.Uri');
 goog.require('shaka.media.SegmentIndex');
-goog.require('shaka.media.SegmentMetadata');
 goog.require('shaka.media.SegmentReference');
 goog.require('shaka.media.WebmSegmentIndexParser');
 
@@ -33,9 +32,9 @@ describe('SegmentIndex', function() {
 
     beforeEach(function() {
       var references1 = [
-        new shaka.media.SegmentReference(0, 10, 0, null, url(0)),
-        new shaka.media.SegmentReference(10, 20, 0, null, url(1)),
-        new shaka.media.SegmentReference(20, 30, 0, null, url(2))
+        createReference(0, 10, url(0)),
+        createReference(10, 20, url(1)),
+        createReference(20, 30, url(2))
       ];
       index1 = new shaka.media.SegmentIndex(references1);
     });
@@ -45,7 +44,7 @@ describe('SegmentIndex', function() {
       //    New: |====|====|====|
       // Merged:                 |----|
       var references2 = [
-        new shaka.media.SegmentReference(31, 41, 0, null, url(31))
+        createReference(31, 41, url(31))
       ];
       var index2 = new shaka.media.SegmentIndex(references2);
 
@@ -62,7 +61,7 @@ describe('SegmentIndex', function() {
       //    New: |====|====|====|
       // Merged:                |----|
       var references2 = [
-        new shaka.media.SegmentReference(30, 40, 0, null, url(30))
+        createReference(30, 40, url(30))
       ];
       var index2 = new shaka.media.SegmentIndex(references2);
 
@@ -79,7 +78,7 @@ describe('SegmentIndex', function() {
       //    New: |====|====|====|
       // Merged:            |----|
       var references2 = [
-        new shaka.media.SegmentReference(21, 31, 0, null, url(21))
+        createReference(21, 31, url(21))
       ];
       var index2 = new shaka.media.SegmentIndex(references2);
 
@@ -96,7 +95,7 @@ describe('SegmentIndex', function() {
       //    New: |====|====|====|
       // Merged: |====|====|====|
       var references2 = [
-        new shaka.media.SegmentReference(20, 30, 0, null, url(20))
+        createReference(20, 30, url(20))
       ];
       var index2 = new shaka.media.SegmentIndex(references2);
 
@@ -114,8 +113,8 @@ describe('SegmentIndex', function() {
       //    New: |====|====|====|
       // Merged: |====|====|====|
       var references2 = [
-        new shaka.media.SegmentReference(5, 15, 0, null, url(5)),
-        new shaka.media.SegmentReference(15, 25, 0, null, url(15))
+        createReference(5, 15, url(5)),
+        createReference(15, 25, url(15))
       ];
       var index2 = new shaka.media.SegmentIndex(references2);
 
@@ -133,8 +132,8 @@ describe('SegmentIndex', function() {
       //    New: |====|====|====|
       // Merged: |====|====|====|
       var references2 = [
-        new shaka.media.SegmentReference(0, 10, 0, null, url(100)),
-        new shaka.media.SegmentReference(10, 20, 0, null, url(110))
+        createReference(0, 10, url(100)),
+        createReference(10, 20, url(110))
       ];
       var index2 = new shaka.media.SegmentIndex(references2);
 
@@ -152,9 +151,9 @@ describe('SegmentIndex', function() {
       //    New:         |====|====|====|
       // Merged: |----|--|====|====|====|
       var references2 = [
-        new shaka.media.SegmentReference(15, 25, 0, null, url(15)),
-        new shaka.media.SegmentReference(25, 35, 0, null, url(25)),
-        new shaka.media.SegmentReference(35, 45, 0, null, url(35))
+        createReference(15, 25, url(15)),
+        createReference(25, 35, url(25)),
+        createReference(35, 45, url(35))
       ];
       var index2 = new shaka.media.SegmentIndex(references2);
 
@@ -174,9 +173,9 @@ describe('SegmentIndex', function() {
       //    New:      |====|====|====|
       // Merged: |----|====|====|====|
       var references2 = [
-        new shaka.media.SegmentReference(10, 20, 0, null, url(10)),
-        new shaka.media.SegmentReference(20, 30, 0, null, url(20)),
-        new shaka.media.SegmentReference(30, 40, 0, null, url(30))
+        createReference(10, 20, url(10)),
+        createReference(20, 30, url(20)),
+        createReference(30, 40, url(30))
       ];
       var index2 = new shaka.media.SegmentIndex(references2);
 
@@ -195,9 +194,9 @@ describe('SegmentIndex', function() {
       //    New:                |====|====|====|
       // Merged: |----|----|----|====|====|====|
       var references2 = [
-        new shaka.media.SegmentReference(30, 40, 0, null, url(30)),
-        new shaka.media.SegmentReference(40, 50, 0, null, url(40)),
-        new shaka.media.SegmentReference(50, 60, 0, null, url(50))
+        createReference(30, 40, url(30)),
+        createReference(40, 50, url(40)),
+        createReference(50, 60, url(50))
       ];
       var index2 = new shaka.media.SegmentIndex(references2);
 
@@ -218,9 +217,9 @@ describe('SegmentIndex', function() {
       //    New:                 |====|====|====|
       // Merged: |----|----|-----|====|====|====|
       var references2 = [
-        new shaka.media.SegmentReference(31, 41, 0, null, url(31)),
-        new shaka.media.SegmentReference(41, 51, 0, null, url(41)),
-        new shaka.media.SegmentReference(51, 61, 0, null, url(51))
+        createReference(31, 41, url(31)),
+        createReference(41, 51, url(41)),
+        createReference(51, 61, url(51))
       ];
       var index2 = new shaka.media.SegmentIndex(references2);
 
@@ -240,9 +239,9 @@ describe('SegmentIndex', function() {
       index1 = new shaka.media.SegmentIndex([]);
 
       var references2 = [
-        new shaka.media.SegmentReference(10, 20, 0, null, url(10)),
-        new shaka.media.SegmentReference(20, 30, 0, null, url(20)),
-        new shaka.media.SegmentReference(30, 40, 0, null, url(30))
+        createReference(10, 20, url(10)),
+        createReference(20, 30, url(20)),
+        createReference(30, 40, url(30))
       ];
       var index2 = new shaka.media.SegmentIndex(references2);
 
@@ -259,9 +258,9 @@ describe('SegmentIndex', function() {
       index1 = new shaka.media.SegmentIndex([]);
 
       var references2 = [
-        new shaka.media.SegmentReference(10, 20, 0, null, url(10)),
-        new shaka.media.SegmentReference(20, 30, 0, null, url(20)),
-        new shaka.media.SegmentReference(30, 40, 0, null, url(30))
+        createReference(10, 20, url(10)),
+        createReference(20, 30, url(20)),
+        createReference(30, 40, url(30))
       ];
       var index2 = new shaka.media.SegmentIndex(references2);
 

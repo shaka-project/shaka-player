@@ -109,7 +109,7 @@ describe('LicenseRequest', function() {
 
     xhr.respondWith({'status': 500});
 
-    jasmine.clock().tick(licenseRequest.lastDelayMs_);
+    jasmine.clock().tick(licenseRequest.url_.request_.lastDelayMs_);
 
     // Make the second request succeed.
     xhr = jasmine.Ajax.requests.mostRecent();
@@ -141,7 +141,7 @@ describe('LicenseRequest', function() {
       done();
     });
 
-    for (var i = 0; i < licenseRequest.parameters.maxAttempts; ++i) {
+    for (var i = 0; i < licenseRequest.parameters_.maxAttempts; ++i) {
       var xhr = jasmine.Ajax.requests.mostRecent();
       mockXMLHttpRequestEventHandling(xhr);
 
@@ -153,7 +153,7 @@ describe('LicenseRequest', function() {
       expect(xhr.method).toMatch(new RegExp('post', 'i'));
 
       xhr.respondWith({'status': 500});
-      jasmine.clock().tick(licenseRequest.lastDelayMs_);
+      jasmine.clock().tick(licenseRequest.url_.request_.lastDelayMs_);
     }
   });
 });

@@ -23,7 +23,7 @@ goog.require('shaka.util.AjaxRequest');
 goog.require('shaka.util.ContentDatabaseWriter');
 
 describe('AjaxRequest', function() {
-  var originalTimeout, originalRangeRequest;
+  var originalTimeout, originalFailoverUri;
 
   const bufferSize = 40 * 1024 * 1024;
 
@@ -32,31 +32,31 @@ describe('AjaxRequest', function() {
     originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;  // ms
 
-    // Set up mock RangeRequest. The mock RangeRequest is used to insert a
+    // Set up mock FailoverUri. The mock FailoverUri is used to insert a
     // stream into the database.
-    originalRangeRequest = shaka.util.RangeRequest;
-    var mockRangeRequest = function(url, startByte, endByte) {
+    originalFailoverUri = shaka.util.FailoverUri;
+    var mockFailoverUri = function(url, startByte, endByte) {
       return {
-        send: function() {
+        fetch: function() {
           return Promise.resolve(new ArrayBuffer(bufferSize));
         }
       };
     };
-    shaka.util.RangeRequest = mockRangeRequest;
+    shaka.util.FailoverUri = mockFailoverUri;
   });
 
   afterAll(function() {
     // Restore the timeout.
     jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
 
-    // Restore RangeRequest.
-    shaka.util.RangeRequest = originalRangeRequest;
+    // Restore FailoverUri.
+    shaka.util.FailoverUri = originalFailoverUri;
   });
 
   it('retrieves a segment from offline storage', function(done) {
-    var testUrl = new goog.Uri('http://example.com');
+    var testUrl = createFailover('http://example.com');
     var testReferences = [
-      new shaka.media.SegmentReference(0, null, 0, null, testUrl)];
+      new shaka.media.SegmentReference(0, null, testUrl)];
     var testIndex = new shaka.media.SegmentIndex(testReferences);
     var testInitData = new ArrayBuffer(1024);
 
@@ -72,7 +72,7 @@ describe('AjaxRequest', function() {
     }).then(function(streamId) {
       db.closeDatabaseConnection();
       var request = new shaka.util.AjaxRequest('idb://' + streamId + '/0');
-      return request.sendInternal();
+      return request.send();
     }).then(function(xhr) {
       expect(xhr.response).toEqual(jasmine.any(ArrayBuffer));
       expect(xhr.response.byteLength).toEqual(bufferSize);
@@ -106,7 +106,7 @@ describe('AjaxRequest', function() {
   function checkDataUri(uri, expectedData, done) {
     var ajaxRequest = new shaka.util.AjaxRequest(uri);
 
-    ajaxRequest.sendInternal().then(function(xhr) {
+    ajaxRequest.send().then(function(xhr) {
       var response = new Uint8Array(xhr.response);
       // Convert the Uint8Array back to string.
       var data = String.fromCharCode.apply(null, response);

@@ -18,7 +18,7 @@
 
 goog.require('shaka.dash.mpd');
 
-describe('mpd', function() {
+describe('mpd.BaseUrl', function() {
   it('resolves relative and absolute URLs at every level', function() {
     var source = [
       '<MPD>',
@@ -64,7 +64,7 @@ describe('mpd', function() {
       '  </Period>',
       '</MPD>'].join('\n');
 
-    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover('').urls);
     expect(mpd).toBeTruthy();
     expect(mpd.baseUrl.toString()).toBe('http://example.com/');
     expect(mpd.periods.length).toBe(3);
@@ -117,7 +117,7 @@ describe('mpd', function() {
       '  </Period>',
       '</MPD>'].join('\n');
 
-    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover('').urls);
     expect(mpd).toBeTruthy();
     expect(mpd.baseUrl.toString()).toBe('sub/');
     expect(mpd.periods.length).toBe(1);
@@ -148,7 +148,7 @@ describe('mpd', function() {
       '</MPD>'].join('\n');
     var mpdUrl = 'http://example.com/dash/test.mpd';
 
-    var mpd = shaka.dash.mpd.parseMpd(source, mpdUrl);
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover(mpdUrl).urls);
     expect(mpd).toBeTruthy();
     expect(mpd.baseUrl.toString()).toBe(mpdUrl);
     expect(mpd.periods.length).toBe(1);
@@ -164,4 +164,123 @@ describe('mpd', function() {
     var r = as.representations[0];
     expect(r.baseUrl.toString()).toBe('http://example.com/dash/1.webm');
   });
+
+  it('supports multiple Base URLs', function() {
+    var source = [
+      '<MPD>',
+      '  <BaseURL>http://www.example.com/</BaseURL>',
+      '    <Period>',
+      '    <AdaptationSet>',
+      '      <Representation>',
+      '        <BaseURL>1.webm</BaseURL>',
+      '        <BaseURL>2.webm</BaseURL>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'].join('\n');
+    var mpdUrl = createFailover('').urls;
+
+    var mpd = shaka.dash.mpd.parseMpd(source, mpdUrl);
+    expect(mpd).toBeTruthy();
+    expect(mpd.periods.length).toBe(1);
+
+    var p = mpd.periods[0];
+    expect(p.adaptationSets.length).toBe(1);
+
+    var as = p.adaptationSets[0];
+    expect(as.representations.length).toBe(1);
+
+    var r = as.representations[0];
+    expect(r.baseUrl).toBeTruthy();
+    expect(r.baseUrl.length).toBe(2);
+    expect(r.baseUrl[0].toString()).toBe('http://www.example.com/1.webm');
+    expect(r.baseUrl[1].toString()).toBe('http://www.example.com/2.webm');
+  });
+
+  it('overrides multiple Base URLs', function() {
+    var source = [
+      '<MPD>',
+      '  <BaseURL>http://www.example.com/</BaseURL>',
+      '  <BaseURL>http://www.google.com/</BaseURL>',
+      '    <Period>',
+      '    <AdaptationSet>',
+      '      <Representation>',
+      '        <BaseURL>1.webm</BaseURL>',
+      '        <BaseURL>2.webm</BaseURL>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'].join('\n');
+    var mpdUrl = createFailover('').urls;
+
+    var mpd = shaka.dash.mpd.parseMpd(source, mpdUrl);
+    expect(mpd).toBeTruthy();
+    expect(mpd.periods.length).toBe(1);
+
+    var p = mpd.periods[0];
+    expect(p.adaptationSets.length).toBe(1);
+
+    var as = p.adaptationSets[0];
+    expect(as.representations.length).toBe(1);
+
+    var r = as.representations[0];
+    expect(r.baseUrl).toBeTruthy();
+    expect(r.baseUrl.length).toBe(2);
+    expect(r.baseUrl[0].toString()).toBe('http://www.example.com/1.webm');
+    expect(r.baseUrl[1].toString()).toBe('http://www.example.com/2.webm');
+  });
+
+  it('handles multiple Base URLs in media urls', function() {
+    var source = [
+      '<MPD>',
+      '  <BaseURL>http://www.example.com/</BaseURL>',
+      '  <Period>',
+      '    <AdaptationSet>',
+      '      <Representation>',
+      '        <BaseURL>cat/</BaseURL>',
+      '        <BaseURL>dog/</BaseURL>',
+      '        <SegmentList>',
+      '          <SegmentURL media="a/1.webm"/>',
+      '          <SegmentURL media="a/2.webm"/>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'].join('\n');
+    var mpdUrl = createFailover('').urls;
+
+    var mpd = shaka.dash.mpd.parseMpd(source, mpdUrl);
+    expect(mpd).toBeTruthy();
+    expect(mpd.periods.length).toBe(1);
+
+    var p = mpd.periods[0];
+    expect(p.adaptationSets.length).toBe(1);
+
+    var as = p.adaptationSets[0];
+    expect(as.representations.length).toBe(1);
+
+    var r = as.representations[0];
+    expect(r.baseUrl).toBeTruthy();
+    expect(r.baseUrl.length).toBe(2);
+    expect(r.baseUrl[0].toString()).toBe('http://www.example.com/cat/');
+    expect(r.baseUrl[1].toString()).toBe('http://www.example.com/dog/');
+
+    var sl = r.segmentList;
+    expect(sl).toBeTruthy();
+    expect(sl.segmentUrls.length).toBe(2);
+
+    var url1 = sl.segmentUrls[0];
+    expect(url1.mediaUrl.length).toBe(2);
+    expect(url1.mediaUrl[0].toString()).toBe(
+        'http://www.example.com/cat/a/1.webm');
+    expect(url1.mediaUrl[1].toString()).toBe(
+        'http://www.example.com/dog/a/1.webm');
+
+    var url2 = sl.segmentUrls[1];
+    expect(url2.mediaUrl.length).toBe(2);
+    expect(url2.mediaUrl[0].toString()).toBe(
+        'http://www.example.com/cat/a/2.webm');
+    expect(url2.mediaUrl[1].toString()).toBe(
+        'http://www.example.com/dog/a/2.webm');
+  });
 });
+

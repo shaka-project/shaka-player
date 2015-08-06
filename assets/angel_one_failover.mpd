@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+<MPD xmlns="urn:mpeg:DASH:schema:MPD:2011" type="static" mediaPresentationDuration="PT59.994S" minBufferTime="PT1S" profiles="urn:webm:dash:profile:webm-on-demand:2012">
+  <BaseURL>//shaka-player-demo.appspot.com/assets/angel_one/</BaseURL>
+  <Period id="0" start="PT0S" duration="PT59.994S">
+    <AdaptationSet id="6" mimeType="audio/webm" codecs="vorbis" lang="en" audioSamplingRate="48000" subsegmentStartsWithSAP="1">
+      <Role value="main" />
+      <Representation id="6" bandwidth="112375">
+        <BaseURL>does_not_exist.webm</BaseURL>
+        <BaseURL>a-en.webm</BaseURL>
+        <SegmentBase indexRange="815951-816145">
+          <Initialization range="0-4521"/>
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet id="7" mimeType="audio/webm" codecs="vorbis" lang="de" audioSamplingRate="48000" subsegmentStartsWithSAP="1">
+      <Representation id="7" bandwidth="91060">
+        <BaseURL>does_not_exist.webm</BaseURL>
+        <BaseURL>a-de.webm</BaseURL>
+        <SegmentBase indexRange="682068-682263">
+          <Initialization range="0-4521"/>
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet id="8" mimeType="audio/webm" codecs="vorbis" lang="es" audioSamplingRate="48000" subsegmentStartsWithSAP="1">
+      <Representation id="8" bandwidth="96408">
+        <BaseURL>does_not_exist.webm</BaseURL>
+        <BaseURL>a-es.webm</BaseURL>
+        <SegmentBase indexRange="728008-728202">
+          <Initialization range="0-4521"/>
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet id="9" mimeType="audio/webm" codecs="vorbis" lang="fr" audioSamplingRate="48000" subsegmentStartsWithSAP="1">
+      <Representation id="9" bandwidth="94640">
+        <BaseURL>does_not_exist.webm</BaseURL>
+        <BaseURL>a-fr.webm</BaseURL>
+        <SegmentBase indexRange="721029-721223">
+          <Initialization range="0-4521"/>
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet id="10" mimeType="audio/webm" codecs="vorbis" lang="it" audioSamplingRate="48000" subsegmentStartsWithSAP="1">
+      <Representation id="10" bandwidth="94290">
+        <BaseURL>does_not_exist.webm</BaseURL>
+        <BaseURL>a-it.webm</BaseURL>
+        <SegmentBase indexRange="723532-723726">
+          <Initialization range="0-4521"/>
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet id="15" mimeType="video/webm" codecs="vp8" subsegmentAlignment="true" subsegmentStartsWithSAP="1" bitstreamSwitching="true">
+      <Representation id="15" bandwidth="1018197" width="768" height="576">
+        <BaseURL>does_not_exist.webm</BaseURL>
+        <BaseURL>v-768x576-1M.webm</BaseURL>
+        <SegmentBase indexRange="7575534-7575696">
+          <Initialization range="0-249"/>
+        </SegmentBase>
+      </Representation>
+      <Representation id="16" bandwidth="514685" width="768" height="576">
+        <BaseURL>does_not_exist.webm</BaseURL>
+        <BaseURL>v-768x576-500k.webm</BaseURL>
+        <SegmentBase indexRange="3796169-3796331">
+          <Initialization range="0-249"/>
+        </SegmentBase>
+      </Representation>
+      <Representation id="17" bandwidth="265431" width="576" height="432">
+        <BaseURL>does_not_exist.webm</BaseURL>
+        <BaseURL>v-576x432-250k.webm</BaseURL>
+        <SegmentBase indexRange="1909141-1909303">
+          <Initialization range="0-249"/>
+        </SegmentBase>
+      </Representation>
+      <Representation id="18" bandwidth="137319" width="432" height="324">
+        <BaseURL>does_not_exist.webm</BaseURL>
+        <BaseURL>v-432x324-125k.webm</BaseURL>
+        <SegmentBase indexRange="980929-981091">
+          <Initialization range="0-249"/>
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet id="19" mimeType="text/vtt" lang="en">
+      <Role value="main" />
+      <Representation id="19">
+        <BaseURL>subs/s-en.vtt</BaseURL>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet id="20" mimeType="text/vtt" lang="fr">
+      <Representation id="20">
+        <BaseURL>subs/s-fr.vtt</BaseURL>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet id="21" mimeType="text/vtt" lang="pt-BR">
+      <Representation id="21">
+        <BaseURL>subs/s-pt-BR.vtt</BaseURL>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet id="22" mimeType="text/vtt" lang="el">
+      <Representation id="22">
+        <BaseURL>subs/s-el.vtt</BaseURL>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>

@@ -31,28 +31,28 @@ describe('ManifestUpdater', function() {
 
   beforeEach(function() {
     initialVideoReferences1 = [];
-    initialVideoReferences1.push(new shaka.media.SegmentReference(
-        30, 40, 0, null, 'http://example.com/video-sd-100.mp4'));
-    initialVideoReferences1.push(new shaka.media.SegmentReference(
-        40, 50, 0, null, 'http://example.com/video-sd-101.mp4'));
-    initialVideoReferences1.push(new shaka.media.SegmentReference(
-        50, 60, 0, null, 'http://example.com/video-sd-102.mp4'));
+    initialVideoReferences1.push(createReference(
+        30, 40, 'http://example.com/video-sd-100.mp4'));
+    initialVideoReferences1.push(createReference(
+        40, 50, 'http://example.com/video-sd-101.mp4'));
+    initialVideoReferences1.push(createReference(
+        50, 60, 'http://example.com/video-sd-102.mp4'));
 
     initialVideoReferences2 = [];
-    initialVideoReferences2.push(new shaka.media.SegmentReference(
-        30, 40, 0, null, 'http://example.com/video-hd-100.mp4'));
-    initialVideoReferences2.push(new shaka.media.SegmentReference(
-        40, 50, 0, null, 'http://example.com/video-hd-101.mp4'));
-    initialVideoReferences2.push(new shaka.media.SegmentReference(
-        50, 60, 0, null, 'http://example.com/video-hd-102.mp4'));
+    initialVideoReferences2.push(createReference(
+        30, 40, 'http://example.com/video-hd-100.mp4'));
+    initialVideoReferences2.push(createReference(
+        40, 50, 'http://example.com/video-hd-101.mp4'));
+    initialVideoReferences2.push(createReference(
+        50, 60, 'http://example.com/video-hd-102.mp4'));
 
     initialAudioReferences = [];
-    initialAudioReferences.push(new shaka.media.SegmentReference(
-        30, 40, 0, null, 'http://example.com/audio-1.mp4'));
-    initialAudioReferences.push(new shaka.media.SegmentReference(
-        40, 50, 0, null, 'http://example.com/audio-2.mp4'));
-    initialAudioReferences.push(new shaka.media.SegmentReference(
-        50, 60, 0, null, 'http://example.com/audio-3.mp4'));
+    initialAudioReferences.push(createReference(
+        30, 40, 'http://example.com/audio-1.mp4'));
+    initialAudioReferences.push(createReference(
+        40, 50, 'http://example.com/audio-2.mp4'));
+    initialAudioReferences.push(createReference(
+        50, 60, 'http://example.com/audio-3.mp4'));
 
     currentManifest = createLiveManifest(initialVideoReferences1,
                                          initialVideoReferences2,
@@ -63,12 +63,12 @@ describe('ManifestUpdater', function() {
     // Repeat the last reference from |initialVideoReferences1| so we can
     // check that it doesn't get duplicated after merging.
     var newVideoReferences1 = [];
-    newVideoReferences1.push(new shaka.media.SegmentReference(
-        50, 60, 0, null, 'http://example.com/video-sd-102.mp4'));
-    newVideoReferences1.push(new shaka.media.SegmentReference(
-        60, 70, 0, null, 'http://example.com/video-sd-103.mp4'));
-    newVideoReferences1.push(new shaka.media.SegmentReference(
-        70, 80, 0, null, 'http://example.com/video-sd-104.mp4'));
+    newVideoReferences1.push(createReference(
+        50, 60, 'http://example.com/video-sd-102.mp4'));
+    newVideoReferences1.push(createReference(
+        60, 70, 'http://example.com/video-sd-103.mp4'));
+    newVideoReferences1.push(createReference(
+        70, 80, 'http://example.com/video-sd-104.mp4'));
 
     // Don't update the HD SegmentIndex so we can check that it doesn't
     // get modified after merging.
@@ -77,10 +77,10 @@ describe('ManifestUpdater', function() {
     // Create a gap between the last reference from |initialAudioReferences|
     // and the next one so we can check that the new reference gets fixed-up.
     var newAudioReferences = [];
-    newAudioReferences.push(new shaka.media.SegmentReference(
-        62, 70, 0, null, 'http://example.com/audio-4.mp4'));
-    newAudioReferences.push(new shaka.media.SegmentReference(
-        70, 80, 0, null, 'http://example.com/audio-5.mp4'));
+    newAudioReferences.push(createReference(
+        62, 70, 'http://example.com/audio-4.mp4'));
+    newAudioReferences.push(createReference(
+        70, 80, 'http://example.com/audio-5.mp4'));
 
     var newManifest = createLiveManifest(newVideoReferences1,
                                          newVideoReferences2,
@@ -362,9 +362,7 @@ describe('ManifestUpdater', function() {
       cloned.push(new shaka.media.SegmentReference(
           r.startTime,
           r.endTime,
-          r.startByte,
-          r.endByte,
-          r.url ? new goog.Uri(r.url) : null));
+          r.url ? r.url.clone() : null));
     }
     return cloned;
   }

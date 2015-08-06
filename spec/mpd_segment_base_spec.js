@@ -155,7 +155,7 @@ describe('mpd', function() {
    * @param {!shaka.dash.mpd.SegmentBase} expected
    */
   var checkSegmentBase = function(source, expected) {
-    var mpd = shaka.dash.mpd.parseMpd(source, '');
+    var mpd = shaka.dash.mpd.parseMpd(source, createFailover('').urls);
     expect(mpd).toBeTruthy();
     expect(mpd.periods.length).toBe(1);
 

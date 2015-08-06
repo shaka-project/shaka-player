@@ -287,7 +287,7 @@ function checkReferences(
     expect(reference.url.toString()).toBe(expectedUrl);
 
     expect(reference.startTime.toFixed(3)).toBe(expectedStartTime.toFixed(3));
-    expect(reference.startByte).toBe(expectedStartByte);
+    expect(reference.url.startByte).toBe(expectedStartByte);
 
     // The final end time and final end byte are dependent on the specific
     // content, so for simplicity just omit checking them.
@@ -296,7 +296,7 @@ function checkReferences(
       var expectedEndTime = expectedStartTimes[i + 1];
       var expectedEndByte = expectedStartBytes[i + 1] - 1;
       expect(reference.endTime.toFixed(3)).toBe(expectedEndTime.toFixed(3));
-      expect(reference.endByte).toBe(expectedEndByte);
+      expect(reference.url.endByte).toBe(expectedEndByte);
     }
   }
 }
@@ -314,11 +314,41 @@ function checkReferences(
 function checkReference(reference, url, startTime, endTime) {
   expect(reference).toBeTruthy();
   expect(reference.url).toBeTruthy();
-  expect(reference.url.toString()).toBe(url);
-  expect(reference.startByte).toBe(0);
-  expect(reference.endByte).toBeNull();
+  expect(reference.url.urls[0].toString()).toBe(url);
+  expect(reference.url.startByte).toBe(0);
+  expect(reference.url.endByte).toBeNull();
   expect(reference.startTime).toBe(startTime);
   expect(reference.endTime).toBe(endTime);
+}
+
+
+/**
+ * Creates a FailoverUri with the given info.
+ *
+ * @param {!string} url
+ * @param {number=} opt_start
+ * @param {?number=} opt_end
+ * @return {!shaka.util.FailoverUri}
+ */
+function createFailover(url, opt_start, opt_end) {
+  return new shaka.util.FailoverUri(
+      [new goog.Uri(url)], opt_start || 0, opt_end || null);
+}
+
+
+/**
+ * Creates a reference object using the given values.
+ *
+ * @param {number} startTime
+ * @param {number} endTime
+ * @param {string} url
+ * @param {number=} opt_startByte
+ * @param {?number=} opt_endByte
+ * @return {!shaka.media.SegmentReference}
+ */
+function createReference(startTime, endTime, url, opt_startByte, opt_endByte) {
+  var failover = createFailover(url, opt_startByte, opt_endByte);
+  return new shaka.media.SegmentReference(startTime, endTime, failover);
 }
 
 
