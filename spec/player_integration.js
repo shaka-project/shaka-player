@@ -1064,25 +1064,25 @@ describe('Player', function() {
       expect(exception instanceof RangeError).toBe(true);
     });
 
-    it('gets/sets RangeRequest timeout', function() {
-      var original = player.getConfiguration()['rangeRequestTimeout'];
+    it('gets/sets SegmentRequest timeout', function() {
+      var original = player.getConfiguration()['segmentRequestTimeout'];
       expect(original).not.toBe(5);
-      expect(original).toBe(shaka.player.Defaults.RANGE_REQUEST_TIMEOUT);
+      expect(original).toBe(shaka.player.Defaults.SEGMENT_REQUEST_TIMEOUT);
 
-      expect(player.getConfiguration()['rangeRequestTimeout']).toBe(original);
+      expect(player.getConfiguration()['segmentRequestTimeout']).toBe(original);
 
-      player.configure({'rangeRequestTimeout': 5});
-      expect(player.getConfiguration()['rangeRequestTimeout']).toBe(5);
+      player.configure({'segmentRequestTimeout': 5});
+      expect(player.getConfiguration()['segmentRequestTimeout']).toBe(5);
 
-      player.configure({'rangeRequestTimeout': original});
-      expect(player.getConfiguration()['rangeRequestTimeout']).toBe(original);
+      player.configure({'segmentRequestTimeout': original});
+      expect(player.getConfiguration()['segmentRequestTimeout']).toBe(original);
     });
 
-    it('rejects an invalid RangeRequest timeout', function() {
+    it('rejects an invalid SegmentRequest timeout', function() {
       var exception;
 
       try {
-        player.configure({'rangeRequestTimeout': 'eleven seconds'});
+        player.configure({'segmentRequestTimeout': 'eleven seconds'});
         fail();
       } catch (e) {
         exception = e;
@@ -1090,7 +1090,7 @@ describe('Player', function() {
       expect(exception instanceof TypeError).toBe(true);
 
       try {
-        player.configure({'rangeRequestTimeout': Number.POSITIVE_INFINITY});
+        player.configure({'segmentRequestTimeout': Number.POSITIVE_INFINITY});
         fail();
       } catch (e) {
         exception = e;
@@ -1118,7 +1118,7 @@ describe('Player', function() {
         'streamBufferSize': 17,
         'licenseRequestTimeout': 19,
         'mpdRequestTimeout': 23,
-        'rangeRequestTimeout': 29,
+        'segmentRequestTimeout': 29,
         'preferredLanguage': 'fr',
         'restrictions': restrictions
       };
