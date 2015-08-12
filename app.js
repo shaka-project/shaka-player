@@ -995,7 +995,6 @@ app.interpretContentProtection_ = function(contentProtection) {
     var key = Uint8ArrayUtils.fromHex(license.getAttribute('key'));
     var keyObj = {
       kty: 'oct',
-      alg: 'A128KW',
       kid: Uint8ArrayUtils.toBase64(keyid, false),
       k: Uint8ArrayUtils.toBase64(key, false)
     };

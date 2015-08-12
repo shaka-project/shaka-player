@@ -46,12 +46,6 @@ function JWK() {
   this.kid = '';
 
   /**
-   * The algorithm used with the key.  Use "A128KW" for clearkey.
-   * @type {string}
-   */
-  this.alg = '';
-
-  /**
    * A key type.  One of:
    *   "oct" (symmetric key octect sequence)
    *   "RSA" (RSA key)
