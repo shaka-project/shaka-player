@@ -779,6 +779,12 @@ var closureTags = exports.closureTags = {
             doclet.visibility = 'export';
         }
     },
+    exportDoc: {
+        mustNotHaveValue: true,
+        onTagged: function(doclet, tag) {
+            doclet.visibility = 'export';
+        }
+    },
     expose: {
         onTagged: function(doclet, tag) {
             doclet.visibility = 'expose';

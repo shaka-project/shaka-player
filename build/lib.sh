@@ -64,6 +64,7 @@ closure_opts="
   --jscomp_off=deprecatedAnnotations
 
   --extra_annotation_name=listens
+  --extra_annotation_name=exportDoc
 
   -O ADVANCED
   --generate_exports
@@ -106,7 +107,7 @@ function compile_0() {
 function lint_0() {
   # Allow JSDoc3 tags not normally recognized by the linter, but be strict
   # otherwise.
-  jsdoc3_tags=static,summary,namespace,event,description,property,fires,listens,example
+  jsdoc3_tags=static,summary,namespace,event,description,property,fires,listens,example,exportDoc
   xargs -0 "$dir"/third_party/gjslint/gjslint \
     --custom_jsdoc_tags $jsdoc3_tags \
     --strict "$@" 1>&2

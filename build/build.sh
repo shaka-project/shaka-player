@@ -19,15 +19,49 @@ dir=$(dirname $0)/..
 
 set -e
 
+name=
+arguments=
+function argsHelper() {
+  local arg=$1
+  shift
+
+  while [[ $# -ne 0 ]]; do
+    if [[ $1 == $arg ]]; then
+      arguments="$arguments -D shaka.features.$2=false"
+      return 0
+    fi
+    shift 2
+  done
+
+  if [[ -z $name ]] && [[ $arg != -* ]]; then
+    name=$arg
+  else
+    echo "Usage: build.sh [--disable-dash] [--disable-offline] [--disable-http] [name]"
+    exit 1 # Exit here
+  fi
+}
+
+while [[ $# -ne 0 ]]; do
+  argsHelper "$1" --disable-dash "Dash" \
+      --disable-offline "Offline" \
+      --disable-http "Http"
+  shift
+done
+
+if [[ -z $name ]]; then
+  name=compiled
+fi
+
 # This was the old name.
 rm -f "$dir"/lib.js{,.map}
 
 # These are the new names.
-rm -f "$dir"/shaka-player.compiled.debug.{js,map}
-rm -f "$dir"/shaka-player.compiled.js
+rm -f "$dir"/shaka-player.${name}.debug.{js,map}
+rm -f "$dir"/shaka-player.${name}.js
 
 # Compile once with app/controls.js so they get checked.  Don't keep the output.
 (library_sources_0; closure_sources_0) | compile_0 \
+  $arguments \
   --summary_detail_level 3 "$dir"/{app,controls}.js > /dev/null
 # NOTE: --js_output_file /dev/null results in a non-zero return value and
 # stops execution of this script.
@@ -37,16 +71,17 @@ rm -f "$dir"/shaka-player.compiled.js
 # should be exported.  Otherwise, things unused internally may be seen as dead
 # code.
 (library_sources_0; closure_sources_0) | compile_0 \
+  $arguments \
   "$dir"/shaka-player.uncompiled.js \
-  --create_source_map "$dir"/shaka-player.compiled.debug.map \
-  --js_output_file "$dir"/shaka-player.compiled.debug.js
+  --create_source_map "$dir"/shaka-player.${name}.debug.map \
+  --js_output_file "$dir"/shaka-player.${name}.debug.js
 
 # Fork the non-debug version before appending debug info.
-cp "$dir"/shaka-player.compiled{.debug,}.js
+cp "$dir"/shaka-player.${name}{.debug,}.js
 
 # Add a special source-mapping comment so that Chrome and Firefox can map line
 # and character numbers from the compiled library back to the original source
 # locations.
-echo "//# sourceMappingURL=shaka-player.compiled.debug.map" >> \
-  "$dir"/shaka-player.compiled.debug.js
+echo "//# sourceMappingURL=shaka-player.${name}.debug.map" >> \
+  "$dir"/shaka-player.${name}.debug.js
 
