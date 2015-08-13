@@ -1262,6 +1262,85 @@ describe('Player', function() {
     });
   });
 
+  describe('end-of-stream behavior', function(done) {
+    // The "exact" duration of the content specified by |plainManifest|.
+    var plainManifestDuration = 181.43107777777777;
+
+    it('permits looping', function(done) {
+      video.loop = true;
+      player.load(newSource(plainManifest)).then(function() {
+        video.play();
+        return waitForMovement(video, eventManager);
+      }).then(function() {
+        video.currentTime = video.duration - 2;
+        return delay(6);
+      }).then(function() {
+        expect(video.currentTime).toBeGreaterThan(0);
+        expect(video.currentTime).toBeLessThan(5);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+
+    it('permits looping with playbackStartTime', function(done) {
+      video.autoplay = true;
+      video.loop = true;
+      player.setPlaybackStartTime(plainManifestDuration - 1);
+      player.load(newSource(plainManifest)).then(function() {
+        // Ensure playback has started near |plainManifestDuration| - 1.
+        expect(video.currentTime).toBeGreaterThan(
+            plainManifestDuration - 1 - 0.1);
+        expect(video.currentTime).toBeLessThan(
+            plainManifestDuration - 1 + 0.1);
+        return delay(5);
+      }).then(function() {
+        expect(video.currentTime).toBeGreaterThan(0);
+        expect(video.currentTime).toBeLessThan(5);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+
+    it('permits looping without initial buffering', function(done) {
+      video.autoplay = true;
+      video.loop = true;
+      player.load(newSource(plainManifest)).then(function() {
+        // Note: the browser does not immediately set the video's duration.
+        video.currentTime = plainManifestDuration;
+        return delay(5);
+      }).then(function() {
+        expect(video.currentTime).toBeGreaterThan(0);
+        expect(video.currentTime).toBeLessThan(5);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+
+    it('permits looping if the playhead is past the duration', function(done) {
+      video.loop = true;
+      player.load(newSource(plainManifest)).then(function() {
+        video.play();
+        return waitForMovement(video, eventManager);
+      }).then(function() {
+        video.currentTime = video.duration + 10;
+        return delay(4);
+      }).then(function() {
+        expect(video.currentTime).toBeGreaterThan(0);
+        expect(video.currentTime).toBeLessThan(5);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+  });
+
   // TODO(story 1970528): add tests which exercise PSSH parsing,
   // SegmentTemplate resolution, and SegmentList generation.
 

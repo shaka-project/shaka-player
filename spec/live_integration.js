@@ -375,10 +375,10 @@ describe('Player', function() {
    */
   function waitForBeginPlayback(fn) {
     var originalBeginPlayback = videoSource.beginPlayback_;
-    videoSource.beginPlayback_ = function(segmentIndexes) {
-      originalBeginPlayback.call(videoSource, segmentIndexes);
+    videoSource.beginPlayback_ = function(segmentIndexes, tsc) {
+      originalBeginPlayback.call(videoSource, segmentIndexes, tsc);
       // Do this async.
-      window.setTimeout(fn.bind(null, segmentIndexes), 0);
+      window.setTimeout(fn.bind(null, segmentIndexes, tsc), 0);
     };
   }
 });
