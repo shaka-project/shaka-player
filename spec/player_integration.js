@@ -578,6 +578,34 @@ describe('Player', function() {
       });
     });
 
+    it('fires an adaptation event', function(done) {
+      var onAdaptation = jasmine.createSpy('onAdaptation');
+      player.load(newSource(languagesManifest)).then(function() {
+        player.addEventListener('adaptation', onAdaptation, false);
+
+        tracks = player.getTextTracks();
+        player.selectTextTrack(tracks[1].id);
+        return delay(0.1);
+      }).then(function() {
+        activeTrack = getActiveTextTrack();
+        expect(activeTrack.id).toBe(tracks[1].id);
+
+        var found = false;
+        var max = onAdaptation.calls.count();
+        for (var i = 0; i < max; i++) {
+          if (onAdaptation.calls.argsFor(i)[0].contentType === 'text') {
+            found = true;
+          }
+        }
+        expect(found).toBe(true);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+
+
     it('does not disable subtitles', function(done) {
       var tracks;
       player.load(newSource(languagesManifest)).then(function() {
