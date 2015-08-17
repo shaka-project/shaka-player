@@ -109,6 +109,7 @@ function lint_0() {
   # otherwise.
   jsdoc3_tags=static,summary,namespace,event,description,property,fires,listens,example,exportDoc
   xargs -0 "$dir"/third_party/gjslint/gjslint \
+    --nobeep \
     --custom_jsdoc_tags $jsdoc3_tags \
     --strict "$@" 1>&2
 }
