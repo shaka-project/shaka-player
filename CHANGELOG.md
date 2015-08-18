@@ -1,3 +1,51 @@
+## 1.4.1 (2015-08-18)
+
+A roll-up of recent bugfixes and small improvements.
+
+Bugfixes:
+  - An exception is no longer thrown from StreamVideoSource in uncompiled mode
+    when the stream limits cannot be computed.
+  - Fixed support for multiple encrypted audio tracks.
+    - https://github.com/google/shaka-player/issues/112
+  - Fixed support for manifests that use SegmentList with a single URL.
+  - Fixed support for audio and video robustness settings in compiled mode.
+  - The MPD 'main' property is now defined in the correct class.
+  - The same initialization segment is no longer inserted multiple times into
+    the SourceBuffer.
+  - Removed a race in Stream that could stop AdaptationEvents from firing.
+  - Stopped the compiler from renaming PersistentState and DistinctiveIdentifier
+    enum values.
+  - Removed a race in Player.getStats() that could cause NaN stats.
+  - Fixed support to recover from failed segment requests.
+    - https://github.com/google/shaka-player/issues/131
+  - Made rewind, pause, play, and fast-forward consistent with normal video
+    element behavior, the UI, and Player.setPlaybackRate().
+    - https://github.com/google/shaka-player/issues/130
+    - https://github.com/google/shaka-player/issues/138
+  - Improved seek handling during stream startup.
+    - https://github.com/google/shaka-player/issues/136
+  - Unnecessary seeking events during stream startup are no longer fired.
+    - https://github.com/google/shaka-player/issues/132
+  - Segment fetches are no longer retried if the Stream has been destroyed.
+    - https://github.com/google/shaka-player/issues/156
+  - Fixed support for offline in compiled mode.
+
+Features:
+  - The version indicator on the demo page now displays the NPM version (if
+    available) when the git version is unavailable.
+  - Added support to clear the the audio buffer when switching tracks.
+    - https://github.com/google/shaka-player/issues/119
+  - Added the ability to detect and recover from multiple buffered ranges.
+    - https://github.com/google/shaka-player/issues/121
+  - Improved error messages when persistent licenses are not supported.
+    - https://github.com/google/shaka-player/issues/85
+
+Testing:
+  - Reduced test flakiness overall.
+  - Certain (unavoidable) decode errors are now suppressed on Chrome Linux.
+  - Added waitUntilBuffered() function to help reduce test flakiness.
+
+
 ## 1.4.0 (2015-07-06)
 
 Code health release.  Major refactoring of streaming logic.
