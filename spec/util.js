@@ -331,7 +331,7 @@ function checkReference(reference, url, startTime, endTime) {
  */
 function createFailover(url, opt_start, opt_end) {
   return new shaka.util.FailoverUri(
-      [new goog.Uri(url)], opt_start || 0, opt_end || null);
+      null, [new goog.Uri(url)], opt_start || 0, opt_end || null);
 }
 
 

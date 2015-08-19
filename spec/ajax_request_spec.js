@@ -35,7 +35,7 @@ describe('AjaxRequest', function() {
     // Set up mock FailoverUri. The mock FailoverUri is used to insert a
     // stream into the database.
     originalFailoverUri = shaka.util.FailoverUri;
-    var mockFailoverUri = function(url, startByte, endByte) {
+    var mockFailoverUri = function(callback, url, startByte, endByte) {
       return {
         fetch: function() {
           return Promise.resolve(new ArrayBuffer(bufferSize));

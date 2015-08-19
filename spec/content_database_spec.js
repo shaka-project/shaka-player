@@ -69,7 +69,7 @@ describe('ContentDatabase', function() {
 
     // Set up mock FailoverUri.
     originalFailoverUri = shaka.util.FailoverUri;
-    var mockFailoverUri = function(url, startByte, endByte) {
+    var mockFailoverUri = function(callback, url, startByte, endByte) {
       return {
         fetch: function() {
           return Promise.resolve(new ArrayBuffer(768 * 1024));

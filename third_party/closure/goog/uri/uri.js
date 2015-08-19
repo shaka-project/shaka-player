@@ -222,6 +222,10 @@ goog.Uri.prototype.toString = function() {
 goog.Uri.prototype.resolve = function(relativeUri) {
 
   var absoluteUri = this.clone();
+  if (absoluteUri.scheme_ === 'data') {
+    // Cannot have a relative URI to a data URI.
+    absoluteUri = new goog.Uri();
+  }
 
   // we satisfy these conditions by looking for the first part of relativeUri
   // that is not blank and applying defaults to the rest

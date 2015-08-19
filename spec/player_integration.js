@@ -525,6 +525,63 @@ describe('Player', function() {
     });
   });
 
+  describe('setNetworkCallback', function() {
+    it('intercepts network calls', function(done) {
+      var callback = jasmine.createSpy('network').and.callFake(
+          function(url, parameters) {
+            expect(url).toBeTruthy();
+            expect(parameters).toBeTruthy();
+            return null;
+          });
+      var source = newSource(plainManifest);
+      source.setNetworkCallback(callback);
+
+      player.load(source).then(function() {
+        video.play();
+        return waitForMovement(video, eventManager);
+      }).then(function() {
+        expect(callback.calls.any()).toBe(true);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+
+    it('changes urls', function(done) {
+      var callback = jasmine.createSpy('network').and.callFake(
+          function(url, parameters) {
+            expect(url).toBeTruthy();
+            expect(parameters).toBeTruthy();
+            return url.replace('example', 'appspot');
+          });
+
+      // Load the angel manifest and edit the urls to point to an
+      // invalid location.
+      var url = new shaka.util.FailoverUri(null,
+                                           [new goog.Uri(languagesManifest)]);
+      var params = new shaka.util.AjaxRequest.Parameters();
+      params.responseType = 'text';
+      url.fetch(params).then(function(data) {
+        var dummy = data.replace('appspot', 'example');
+        dummy = 'data:text/plain,' + window.encodeURIComponent(dummy);
+
+        var source = newSource(dummy);
+        source.setNetworkCallback(callback);
+        return player.load(source);
+      }).then(function() {
+        video.play();
+        return waitForMovement(video, eventManager);
+      }).then(function() {
+        expect(callback.calls.any()).toBe(true);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+  });
+
   it('supports failover', function(done) {
     player.load(newSource(failoverManifest)).then(function() {
       video.play();
