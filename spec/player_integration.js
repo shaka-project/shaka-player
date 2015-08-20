@@ -71,7 +71,7 @@ describe('Player', function() {
 
     // Change the timeout.
     originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 40000;  // ms
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 55000;  // ms
 
     // Install polyfills.
     shaka.polyfill.installAll();
@@ -83,6 +83,7 @@ describe('Player', function() {
   });
 
   beforeEach(function() {
+    video.autoplay = false;
     player = createPlayer(video);
     eventManager = new shaka.util.EventManager();
   });
@@ -324,7 +325,7 @@ describe('Player', function() {
         // Nothing has buffered yet.
         expect(audioStreamBuffer.buffered.length).toBe(0);
         // Give the audio time to buffer.
-        return waitUntilBuffered(audioStreamBuffer, 290, 30);
+        return waitUntilBuffered(audioStreamBuffer, 290, 50);
       }).then(function() {
         // The content is now buffered, and none has been evicted yet.
         expect(audioStreamBuffer.buffered.length).toBe(1);
@@ -435,16 +436,15 @@ describe('Player', function() {
     function streamStartupTest(playbackStartTime, seekTarget, done) {
       var source = newSource(plainManifest);
 
-      player.configure({'streamBufferSize': 80});
       player.setPlaybackStartTime(playbackStartTime);
 
       // Force @minBufferTime to a large value so we have enough time to seek
       // during startup.
       var originalLoad = shaka.player.StreamVideoSource.prototype.load;
-      shaka.player.StreamVideoSource.load = function(preferredLanguage) {
+      shaka.player.StreamVideoSource.prototype.load = function() {
         expect(this.manifestInfo).not.toBe(null);
-        this.manifestInfo.minBufferTime = 80;
-        return originalLoad.call(this, preferredLanguage);
+        this.manifestInfo.minBufferTime = 15;
+        return originalLoad.call(this);
       };
 
       var pollTimer = null;
@@ -474,10 +474,10 @@ describe('Player', function() {
         expect(video.buffered.length).toBe(1);
         expect(video.playbackRate).toBe(1);
         expect(video.currentTime > seekTarget);
-        shaka.player.StreamVideoSource.load = originalLoad;
+        shaka.player.StreamVideoSource.prototype.load = originalLoad;
         done();
       }).catch(function(error) {
-        shaka.player.StreamVideoSource.load = originalLoad;
+        shaka.player.StreamVideoSource.prototype.load = originalLoad;
 
         if (pollTimer != null) {
           window.clearTimeout(pollTimer);
