@@ -23,6 +23,7 @@ name=
 arguments=
 function argsHelper() {
   local arg=$1
+  local choices=
   shift
 
   while [[ $# -ne 0 ]]; do
@@ -30,13 +31,15 @@ function argsHelper() {
       arguments="$arguments -D shaka.features.$2=false"
       return 0
     fi
+    choices="$choices [$1]"
     shift 2
   done
 
   if [[ -z $name ]] && [[ $arg != -* ]]; then
     name=$arg
   else
-    echo "Usage: build.sh [--disable-dash] [--disable-offline] [--disable-http] [name]"
+    # There is an extra space at the beginning of $choices
+    echo "Usage: build.sh$choices [name]"
     exit 1 # Exit here
   fi
 }
@@ -44,7 +47,8 @@ function argsHelper() {
 while [[ $# -ne 0 ]]; do
   argsHelper "$1" --disable-dash "Dash" \
       --disable-offline "Offline" \
-      --disable-http "Http"
+      --disable-http "Http" \
+      --disable-live "Live"
   shift
 done
 
