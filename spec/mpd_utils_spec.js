@@ -167,5 +167,92 @@ describe('MpdUtils', function() {
               1, 2, 3, 4)).toBeNull();
     });
   });
+
+  // TODO: Create more unit tests for this.
+  describe('createTimeline', function() {
+    it('supports negative repetitions', function() {
+      var timepoints = [
+        createTimepoint(0, 10, 0),
+        createTimepoint(10, 10, -1),
+        createTimepoint(40, 10, 0)
+      ];
+      var result = [
+        { start: 0, end: 10 },
+        { start: 10, end: 20 },
+        { start: 20, end: 30 },
+        { start: 30, end: 40 },
+        { start: 40, end: 50 }
+      ];
+      checkTimepoints(timepoints, result, 1, 0);
+    });
+
+    it('supports negative repetitions with uneven border', function() {
+      var timepoints = [
+        createTimepoint(0, 10, 0),
+        createTimepoint(10, 10, -1),
+        createTimepoint(45, 5, 0)
+      ];
+      var result = [
+        { start: 0, end: 10 },
+        { start: 10, end: 20 },
+        { start: 20, end: 30 },
+        { start: 30, end: 40 },
+        { start: 40, end: 45 },
+        { start: 45, end: 50 }
+      ];
+      checkTimepoints(timepoints, result, 1, 0);
+    });
+
+    it('supports negative repetitions at end', function() {
+      var timepoints = [
+        createTimepoint(0, 10, 0),
+        createTimepoint(10, 5, -1)
+      ];
+      var result = [
+        { start: 0, end: 10 },
+        { start: 10, end: 15 },
+        { start: 15, end: 20 },
+        { start: 20, end: 25 }
+      ];
+      checkTimepoints(timepoints, result, 1, 25);
+    });
+
+    /**
+     * Creates a new timepoint.
+     *
+     * @param {number} start
+     * @param {number} dur
+     * @param {number} rep
+     */
+    function createTimepoint(start, dur, rep) {
+      var ret = new shaka.dash.mpd.SegmentTimePoint();
+      ret.startTime = start;
+      ret.duration = dur;
+      ret.repeat = rep;
+      return ret;
+    }
+
+    /**
+     * Checks that the createTimeline works with the given timepoints and the
+     * given expected results.
+     *
+     * @param {!Array.<!shaka.dash.mpd.TimePoint>} points
+     * @param {!Array.<{start: number, end: number}} expected
+     * @param {number} scale
+     * @param {number} duration
+     */
+    function checkTimepoints(points, expected, scale, duration) {
+      var timeline = new shaka.dash.mpd.SegmentTimeline();
+      timeline.timePoints = points;
+
+      var data = MpdUtils.createTimeline(timeline, scale, duration);
+      expect(data).toBeTruthy();
+      expect(data.length).toBe(expected.length);
+      for (var i = 0; i < expected.length; i++) {
+        expect(data[i].start).toBe(expected[i].start);
+        expect(data[i].end).toBe(expected[i].end);
+      }
+    }
+  });
 });
 
