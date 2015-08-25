@@ -1452,6 +1452,101 @@ describe('Player', function() {
     });
   });
 
+  describe('buffering', function() {
+    // Tests that using a streamBufferSize < minBufferTime does not cause
+    // the player to hang after re-buffering. Issue #166.
+    it('does not stop playback after re-buffering', function(done) {
+      // Don't fail from fake errors.
+      player.removeEventListener('error', convertErrorToTestFailure, false);
+      player.addEventListener(
+          'error',
+          function(event) {
+            if (event.detail.message != 'Fake network failure.') {
+              fail(event.detail);
+            }
+          },
+          false);
+
+      // Set the initial streamBufferSize to be less than the default (so we
+      // can run the test faster) but larger than minBufferTime (so we don't
+      // potentially trigger a separate bug, see the test below).
+      player.configure({'streamBufferSize': 8});
+
+      var originalLoad = shaka.player.StreamVideoSource.prototype.load;
+      shaka.player.StreamVideoSource.prototype.load = function() {
+        expect(this.manifestInfo).not.toBe(null);
+        this.manifestInfo.minBufferTime = 7;
+        return originalLoad.call(this);
+      };
+
+      var originalSend = shaka.util.AjaxRequest.prototype.send;
+
+      player.load(newSource(plainManifest)).then(function() {
+        shaka.player.StreamVideoSource.prototype.load = originalLoad;
+        video.play();
+        return waitForMovement(video, eventManager);
+      }).then(function() {
+        player.configure({'streamBufferSize': 2});
+
+        // Start blocking network requests.
+        shaka.util.AjaxRequest.prototype.send = function() {
+          shaka.asserts.assert(this.xhr_ == null);
+          this.xhr_ = new XMLHttpRequest();
+          var error = new Error('Fake network failure.');
+          error.type = 'net';
+          error.status = 0;
+          error.url = this.url;
+          error.method = this.parameters.method;
+          error.body = this.parameters.body;
+          error.xhr = this.xhr_;
+          this.promise_.reject(error);
+          return this.promise_;
+        };
+        return delay(12);
+      }).then(function() {
+        // Ensure the player is in a buffering state.
+        expect(video.paused).toBe(true);
+        // Start allowing network requests again.
+        shaka.util.AjaxRequest.prototype.send = originalSend;
+        return waitForMovement(video, eventManager);
+      }).then(function() {
+        expect(video.paused).toBe(false);
+        done();
+      }).catch(function(error) {
+        shaka.player.StreamVideoSource.prototype.load = originalLoad;
+        shaka.util.AjaxRequest.prototype.send = originalSend;
+
+        fail(error);
+        done();
+      });
+    });
+
+    // Tests that using a streamBufferSize < minBufferTime does not cause
+    // the player to hang during startup. Issue #166.
+    it('does not stop playback during startup', function(done) {
+      player.configure({'streamBufferSize': 5});
+
+      var originalLoad = shaka.player.StreamVideoSource.prototype.load;
+      shaka.player.StreamVideoSource.prototype.load = function() {
+        expect(this.manifestInfo).not.toBe(null);
+        this.manifestInfo.minBufferTime = 7;
+        return originalLoad.call(this);
+      };
+
+      player.load(newSource(plainManifest)).then(function() {
+        video.play();
+        return waitForMovement(video, eventManager);
+      }).then(function() {
+        done();
+      }).catch(function(error) {
+        shaka.player.StreamVideoSource.prototype.load = originalLoad;
+
+        fail(error);
+        done();
+      });
+    });
+  });
+
   // TODO(story 1970528): add tests which exercise PSSH parsing,
   // SegmentTemplate resolution, and SegmentList generation.
 
