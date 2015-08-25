@@ -168,9 +168,105 @@ describe('MpdUtils', function() {
     });
   });
 
-  // TODO: Create more unit tests for this.
   describe('createTimeline', function() {
-    it('supports negative repetitions', function() {
+    it('works in normal case', function() {
+      var timepoints = [
+        createTimepoint(0, 10, 0),
+        createTimepoint(10, 10, 0),
+        createTimepoint(20, 10, 0)
+      ];
+      var result = [
+        { start: 0, end: 10 },
+        { start: 10, end: 20 },
+        { start: 20, end: 30 }
+      ];
+      checkTimepoints(timepoints, result, 1, 0);
+    });
+
+    it('handles null start time', function() {
+      var timepoints = [
+        createTimepoint(0, 10, 0),
+        createTimepoint(null, 10, 0),
+        createTimepoint(null, 10, 0)
+      ];
+      var result = [
+        { start: 0, end: 10 },
+        { start: 10, end: 20 },
+        { start: 20, end: 30 }
+      ];
+      checkTimepoints(timepoints, result, 1, 0);
+    });
+
+    it('handles gaps', function() {
+      var timepoints = [
+        createTimepoint(0, 10, 0),
+        createTimepoint(15, 10, 0)
+      ];
+      var result = [
+        { start: 0, end: 15 },
+        { start: 15, end: 25 }
+      ];
+      checkTimepoints(timepoints, result, 1, 0);
+    });
+
+    it('handles overlap', function() {
+      var timepoints = [
+        createTimepoint(0, 15, 0),
+        createTimepoint(10, 10, 0)
+      ];
+      var result = [
+        { start: 0, end: 10 },
+        { start: 10, end: 20 }
+      ];
+      checkTimepoints(timepoints, result, 1, 0);
+    });
+
+    it('handles repetitions', function() {
+      var timepoints = [
+        createTimepoint(0, 10, 5),
+        createTimepoint(60, 10, 0)
+      ];
+      var result = [
+        { start: 0, end: 10 },
+        { start: 10, end: 20 },
+        { start: 20, end: 30 },
+        { start: 30, end: 40 },
+        { start: 40, end: 50 },
+        { start: 50, end: 60 },
+        { start: 60, end: 70 }
+      ];
+      checkTimepoints(timepoints, result, 1, 0);
+    });
+
+    it('handles null repeat', function() {
+      var timepoints = [
+        createTimepoint(0, 10, 0),
+        createTimepoint(10, 10, null),
+        createTimepoint(20, 10, 0)
+      ];
+      var result = [
+        { start: 0, end: 10 },
+        { start: 10, end: 20 },
+        { start: 20, end: 30 }
+      ];
+      checkTimepoints(timepoints, result, 1, 0);
+    });
+
+    it('handles repetitions with gap', function() {
+      var timepoints = [
+        createTimepoint(0, 10, 2),
+        createTimepoint(35, 10, 0)
+      ];
+      var result = [
+        { start: 0, end: 10 },
+        { start: 10, end: 20 },
+        { start: 20, end: 35 },
+        { start: 35, end: 45 }
+      ];
+      checkTimepoints(timepoints, result, 1, 0);
+    });
+
+    it('handles negative repetitions', function() {
       var timepoints = [
         createTimepoint(0, 10, 0),
         createTimepoint(10, 10, -1),
@@ -186,7 +282,7 @@ describe('MpdUtils', function() {
       checkTimepoints(timepoints, result, 1, 0);
     });
 
-    it('supports negative repetitions with uneven border', function() {
+    it('handles negative repetitions with uneven border', function() {
       var timepoints = [
         createTimepoint(0, 10, 0),
         createTimepoint(10, 10, -1),
@@ -203,7 +299,7 @@ describe('MpdUtils', function() {
       checkTimepoints(timepoints, result, 1, 0);
     });
 
-    it('supports negative repetitions at end', function() {
+    it('handles negative repetitions at end', function() {
       var timepoints = [
         createTimepoint(0, 10, 0),
         createTimepoint(10, 5, -1)
@@ -217,12 +313,27 @@ describe('MpdUtils', function() {
       checkTimepoints(timepoints, result, 1, 25);
     });
 
+    it('ignores elements after null duration', function() {
+      var timepoints = [
+        createTimepoint(0, 10, 0),
+        createTimepoint(10, 10, 0),
+        createTimepoint(20, null, 0),
+        createTimepoint(30, 10, 0),
+        createTimepoint(40, 10, 0)
+      ];
+      var result = [
+        { start: 0, end: 10 },
+        { start: 10, end: 20 }
+      ];
+      checkTimepoints(timepoints, result, 1, 0);
+    });
+
     /**
      * Creates a new timepoint.
      *
-     * @param {number} start
-     * @param {number} dur
-     * @param {number} rep
+     * @param {?number} start
+     * @param {?number} dur
+     * @param {?number} rep
      */
     function createTimepoint(start, dur, rep) {
       var ret = new shaka.dash.mpd.SegmentTimePoint();
