@@ -21,6 +21,7 @@
     <link rel="shortcut icon" href="assets/favicon.ico">
     <link rel="stylesheet" href="index.css">
     <link rel="stylesheet" href="controls.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.33.1/es6-shim.js"></script>
     <script src="load.js"></script>
     <script src="controls.js"></script>
     <script src="app.js"></script>
@@ -80,6 +81,7 @@
         <td>Test manifest:</td>
         <td colspan="2">
           <select id="mpdList" onchange="app.onMpdChange()">
+            <option value="https://dh6k29wyubylk.cloudfront.net/120/1201440413100/Manifest.mpd">Magine magic</option>
             <option value="assets/angel_one.mpd">"Angel One" (TNG clip) - multilingual, subtitles, VP8</option>
             <option value="assets/car-20120827-manifest.mpd">"Car" (YT DASH test) - MP4</option>
             <option value="assets/car_cenc-20120827-manifest.mpd">"Car/CENC" (YT DASH EME test) - MP4, ClearKey</option>
