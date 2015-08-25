@@ -1046,6 +1046,20 @@ app.interpretContentProtection_ = function(contentProtection) {
         initDataOverride);
   }
 
+  if (contentProtection.schemeIdUri.toLowerCase() ==
+    'urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95') {
+    var licenseServerUrl =
+      wvLicenseServerUrlOverride ||
+      'http://dev-playready-magine.elasticbeanstalk.com/drm/v1/playready/license';
+
+    return new shaka.player.DrmSchemeInfo(
+      'com.microsoft.playready',
+      licenseServerUrl,
+      false,
+      initDataOverride
+    );
+  }
+
   if (contentProtection.schemeIdUri == 'urn:mpeg:dash:mp4protection:2011') {
     // Ignore without a warning.
     return null;
