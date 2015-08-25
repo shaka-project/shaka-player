@@ -548,6 +548,30 @@ describe('Player', function() {
       });
     });
 
+    it('intercepts mpd requests', function(done) {
+      var hadMpd = false;
+      var callback = jasmine.createSpy('network').and.callFake(
+          function(url, parameters) {
+            expect(url).toBeTruthy();
+            expect(parameters).toBeTruthy();
+            if (url.indexOf('mpd') != -1) {
+              hadMpd = true;
+            }
+            return null;
+          });
+      var source = newSource(plainManifest);
+      source.setNetworkCallback(callback);
+
+      player.load(source).then(function() {
+        expect(callback.calls.any()).toBe(true);
+        expect(hadMpd).toBe(true);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+
     it('changes urls', function(done) {
       var callback = jasmine.createSpy('network').and.callFake(
           function(url, parameters) {
