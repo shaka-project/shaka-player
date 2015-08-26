@@ -203,6 +203,30 @@ describe('ContentDatabase', function() {
         });
       });
 
+  // Bug #157:
+  it('stores a stream with an explicit end time', function(done) {
+    var references = [
+      new shaka.media.SegmentReference(0, 100, createFailover(url))
+    ];
+    var index = new shaka.media.SegmentIndex(references);
+    streamInfo.segmentIndexSource = {
+      create: function() { return Promise.resolve(index); }
+    };
+    p.then(function() {
+      return writer.insertStream_(streamInfo, index, testInitData, 1, 0);
+    }).then(function(streamId) {
+      return reader.retrieveStreamIndex(streamId);
+    }).then(function(streamIndex) {
+      expect(streamIndex.references.length).toEqual(1);
+      expect(streamIndex.references[0]).toMatchReference(
+          { start_time: 0, end_time: 100 });
+      done();
+    }).catch(function(err) {
+      fail(err);
+      done();
+    });
+  });
+
   it('throws an error when trying to store an invalid stream', function(done) {
     p.then(function() {
       return writer.insertStream_(null, null, null, 0, 0);
