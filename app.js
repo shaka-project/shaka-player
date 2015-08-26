@@ -681,24 +681,41 @@ app.loadDashStream = function() {
     app.initPlayer_();
   }
 
+  var loadDash = function () {
+    console.assert(app.estimator_);
+    if (app.estimator_.getDataAge() >= 3600) {
+      // Disregard any bandwidth data older than one hour.  The user may have
+      // changed networks if they are on a laptop or mobile device.
+      app.estimator_ = new shaka.util.EWMABandwidthEstimator();
+    }
+
+    var estimator = /** @type {!shaka.util.IBandwidthEstimator} */(
+      app.estimator_);
+    var abrManager = new shaka.media.SimpleAbrManager();
+    app.load_(
+      new shaka.player.DashVideoSource(
+        mediaUrl,
+        app.interpretContentProtection_,
+        estimator,
+        abrManager));
+  };
+
   var mediaUrl = document.getElementById('manifestUrlInput').value;
 
-  console.assert(app.estimator_);
-  if (app.estimator_.getDataAge() >= 3600) {
-    // Disregard any bandwidth data older than one hour.  The user may have
-    // changed networks if they are on a laptop or mobile device.
-    app.estimator_ = new shaka.util.EWMABandwidthEstimator();
-  }
+  var deconstructedIds = mediaUrl.split('/').filter(function(partialUrl) {
+    return Number(partialUrl);
+  });
 
-  var estimator = /** @type {!shaka.util.IBandwidthEstimator} */(
-      app.estimator_);
-  var abrManager = new shaka.media.SimpleAbrManager();
-  app.load_(
-      new shaka.player.DashVideoSource(
-          mediaUrl,
-          app.interpretContentProtection_,
-          estimator,
-          abrManager));
+  app.channelId = deconstructedIds[0];
+  app.programId = deconstructedIds[1];
+
+
+  app.getViewingToken(programId, channelId, clientId)
+    .then(function(viewingToken) {
+      app.viewingToken = viewingToken.token;
+      loadDash();
+    });
+
 };
 
 
@@ -954,6 +971,27 @@ app.onPlayerError_ = function(event) {
 };
 
 
+app.getViewingToken = function(programId, channelId, clientId) {
+  return new Promise(function(resolve, reject) {
+    var viewingTokenPath = 'https://beta.tvoli.com/api/drm/v3/viewingtoken';
+    var request = new XMLHttpRequest();
+    request.open('POST', viewingTokenPath, true);
+    request.setRequestHeader
+      ('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+    request.setRequestHeader
+      ('Authorization', 'Bearer ' + app.sessionId);
+    request.onload = function() {
+      resolve(JSON.parse(request.responseText));
+    };
+    request.send({
+      pid: app.programId,
+      channelId: app.channelId,
+      clientId: app.clientId
+    });
+  });
+};
+
+
 /**
  * Called to interpret ContentProtection elements from the MPD.
  * @param {!shaka.dash.mpd.ContentProtection} contentProtection The MPD element.
@@ -1047,16 +1085,23 @@ app.interpretContentProtection_ = function(contentProtection) {
   }
 
   if (contentProtection.schemeIdUri.toLowerCase() ==
-    'urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95') {
+      'urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95') {
     var licenseServerUrl =
-      wvLicenseServerUrlOverride ||
-      'http://dev-playready-magine.elasticbeanstalk.com/drm/v1/playready/license';
+        wvLicenseServerUrlOverride ||
+        'http://dev-playready-magine.elasticbeanstalk.com/drm/v1/playready/license';
 
     return new shaka.player.DrmSchemeInfo(
       'com.microsoft.playready',
       licenseServerUrl,
       false,
-      initDataOverride
+      initDataOverride,
+      null,
+      function(info) {
+        shaka.util.PlayReadyUtils.playReadyLicensePreProcessor(info);
+        shaka.util.PlayReadyUtils.playReadyCustomDataPreProcessor(info, {
+          viewingToken: ''
+        });
+      }
     );
   }
 
