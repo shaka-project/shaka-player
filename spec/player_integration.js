@@ -75,15 +75,15 @@ describe('Player', function() {
 
     // Install polyfills.
     shaka.polyfill.installAll();
-
-    // Create a video tag.  This will be visible so that long tests do not
-    // create the illusion of the test-runner being hung.
-    video = createVideo();
-    document.body.appendChild(video);
   });
 
   beforeEach(function() {
+    // Create a video tag.  This will be visible so that long tests do not
+    // create the illusion of the test-runner being hung.
+    video = createVideo();
     video.autoplay = false;
+    document.body.appendChild(video);
+
     player = createPlayer(video);
     eventManager = new shaka.util.EventManager();
   });
@@ -96,12 +96,12 @@ describe('Player', function() {
       player = null;
       done();
     });
+
+    // Remove the video tag from the DOM.
+    document.body.removeChild(video);
   });
 
   afterAll(function() {
-    // Remove the video tag from the DOM.
-    document.body.removeChild(video);
-
     // Restore the timeout.
     jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
 
@@ -173,18 +173,6 @@ describe('Player', function() {
   });
 
   describe('selectVideoTrack', function() {
-    beforeEach(function(done) {
-      // On some browsers, using the same video tag for these test cause the
-      // tests to be flakely. So use a fresh video tag for each test.
-      player.destroy().then(function() {
-        document.body.removeChild(video);
-        video = createVideo();
-        document.body.appendChild(video);
-        player = createPlayer(video);
-        done();
-      });
-    });
-
     it('can set resolution before beginning playback', function(done) {
       player.load(newSource(plainManifest)).then(function() {
         var track = getVideoTrackByHeight(720);
@@ -305,14 +293,13 @@ describe('Player', function() {
 
       // Create a temporary shim to intercept and modify manifest info.
       var originalLoad = shaka.player.StreamVideoSource.prototype.load;
-      shaka.player.StreamVideoSource.prototype.load = function(
-          preferredLanguage) {
+      shaka.player.StreamVideoSource.prototype.load = function() {
         var sets = this.manifestInfo.periodInfos[0].streamSetInfos;
         var audioSet = sets[0].contentType == 'audio' ? sets[0] : sets[1];
         expect(audioSet.contentType).toBe('audio');
         // Remove the video set to speed things up.
         this.manifestInfo.periodInfos[0].streamSetInfos = [audioSet];
-        return originalLoad.call(this, preferredLanguage);
+        return originalLoad.call(this);
       };
 
       var audioStreamBuffer;
@@ -335,7 +322,7 @@ describe('Player', function() {
       }).then(function() {
         // Power through and consume the audio data quickly.
         player.setPlaybackRate(4);
-        return delay(5);
+        return waitForTargetTime(video, eventManager, 30, 30);
       }).then(function() {
         // Ensure that the browser has evicted the beginning of the stream.
         // Otherwise, this test hasn't reproduced the circumstances correctly.
@@ -435,6 +422,7 @@ describe('Player', function() {
 
     function streamStartupTest(playbackStartTime, seekTarget, done) {
       var source = newSource(plainManifest);
+      video.autoplay = true;
 
       player.setPlaybackStartTime(playbackStartTime);
 
@@ -443,25 +431,13 @@ describe('Player', function() {
       var originalLoad = shaka.player.StreamVideoSource.prototype.load;
       shaka.player.StreamVideoSource.prototype.load = function() {
         expect(this.manifestInfo).not.toBe(null);
-        this.manifestInfo.minBufferTime = 15;
+        this.manifestInfo.minBufferTime = 80;
         return originalLoad.call(this);
       };
 
-      var pollTimer = null;
-
       player.load(source).then(function() {
-        video.play();
-
         // Continue once we've buffered at least one segment.
-        var p = shaka.util.PublicPromise();
-        var pollBuffer = function() {
-          if (video && video.buffered.length == 1) {
-            window.clearInterval(pollTimer);
-            p.resolve();
-          }
-        };
-        pollTimer = window.setInterval(pollBuffer, 25);
-        return p;
+        return waitFor(30, function() { return video.buffered.length == 1; });
       }).then(function() {
         // Ensure we have buffered at least one segment but have not yet
         // started playback.
@@ -469,19 +445,21 @@ describe('Player', function() {
         expect(video.playbackRate).toBe(0);
         // Now seek back near the beginning.
         video.currentTime = seekTarget;
-        return delay(3);
+
+        // Once it seeks to the beginning, it will buffer the video and then
+        // start playing once it reaches its buffer goal.
+        return waitFor(30, function() { return video.playbackRate != 0; });
+      }).then(function() {
+        // Ensure that the video is actually moving.
+        return delay(1);
       }).then(function() {
         expect(video.buffered.length).toBe(1);
         expect(video.playbackRate).toBe(1);
-        expect(video.currentTime > seekTarget);
+        expect(video.currentTime).toBeGreaterThan(seekTarget);
         shaka.player.StreamVideoSource.prototype.load = originalLoad;
         done();
       }).catch(function(error) {
         shaka.player.StreamVideoSource.prototype.load = originalLoad;
-
-        if (pollTimer != null) {
-          window.clearTimeout(pollTimer);
-        }
 
         fail(error);
         done();
@@ -964,8 +942,6 @@ describe('Player', function() {
         video.play();
         return waitForMovement(video, eventManager);
       }).then(function() {
-        return delay(0.5);
-      }).then(function() {
         expect(video.currentTime).toBeGreaterThan(0.0);
         done();
       }).catch(function(error) {
@@ -996,7 +972,7 @@ describe('Player', function() {
 
       player.load(newSourceWithIcp(icp)).then(function() {
         video.play();
-        return delay(0.5);
+        return waitForMovement(video, eventManager);
       }).then(function() {
         expect(licensePostProcessor.spy).toHaveBeenCalled();
         done();
@@ -1077,7 +1053,7 @@ describe('Player', function() {
 
       player.load(newSourceWithIcp(icp)).then(function() {
         video.play();
-        return delay(0.5);
+        return waitForMovement(video, eventManager);
       }).then(function() {
         expect(licensePreProcessor.spy).toHaveBeenCalled();
         // done() is called from the LicenseRequest.send() spy above.
@@ -1384,7 +1360,9 @@ describe('Player', function() {
         return waitForMovement(video, eventManager);
       }).then(function() {
         video.currentTime = video.duration - 2;
-        return delay(6);
+        return waitFor(30, function() {
+          return video.currentTime > 0 && video.currentTime < 5;
+        });
       }).then(function() {
         expect(video.currentTime).toBeGreaterThan(0);
         expect(video.currentTime).toBeLessThan(5);
@@ -1405,7 +1383,9 @@ describe('Player', function() {
             plainManifestDuration - 1 - 0.1);
         expect(video.currentTime).toBeLessThan(
             plainManifestDuration - 1 + 0.1);
-        return delay(5);
+        return waitFor(30, function() {
+          return video.currentTime > 0 && video.currentTime < 5;
+        });
       }).then(function() {
         expect(video.currentTime).toBeGreaterThan(0);
         expect(video.currentTime).toBeLessThan(5);
@@ -1422,7 +1402,9 @@ describe('Player', function() {
       player.load(newSource(plainManifest)).then(function() {
         // Note: the browser does not immediately set the video's duration.
         video.currentTime = plainManifestDuration;
-        return delay(5);
+        return waitFor(30, function() {
+          return video.currentTime > 0 && video.currentTime < 5;
+        });
       }).then(function() {
         expect(video.currentTime).toBeGreaterThan(0);
         expect(video.currentTime).toBeLessThan(5);
@@ -1440,7 +1422,9 @@ describe('Player', function() {
         return waitForMovement(video, eventManager);
       }).then(function() {
         video.currentTime = video.duration + 10;
-        return delay(4);
+        return waitFor(30, function() {
+          return video.currentTime > 0 && video.currentTime < 5;
+        });
       }).then(function() {
         expect(video.currentTime).toBeGreaterThan(0);
         expect(video.currentTime).toBeLessThan(5);
