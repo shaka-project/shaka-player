@@ -265,17 +265,16 @@
     }
 
     /**
-     * @param {!shaka.dash.mpd.ContentProtection} contentProtection The
-     *     ContentProtection element from the MPD.
-     * @return {shaka.player.DrmSchemeInfo} or null if the element is not
-     *     understood by this application.
+     * @param {string} schemeIdUri The ContentProtection's scheme ID URI.
+     * @param {!Element} contentProtection The ContentProtection element.
+     * @return {!Array.<shaka.player.DrmInfo.Config>} An array of Config
+     *     objects or null if the element is not understood by this application.
      */
-    function interpretContentProtection(contentProtection) {
+    function interpretContentProtection(schemeIdUri, contentProtection) {
       // This is the UUID which is used by edash-packager to represent
       // Widevine.  This is the only scheme we are expecting for this
       // application.
-      if (contentProtection.schemeIdUri ==
-          'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed') {
+      if (schemeIdUri == 'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed') {
         // We will use Widevine's testing license server.  In a real app,
         // you would run your own front-end service for this.
         var licenseServerUrl = 'http://widevine-proxy.appspot.com/proxy';
@@ -283,17 +282,16 @@
         // The EME key system identifier for Widevine.
         var keySystem = 'com.widevine.alpha';
 
-        return new shaka.player.DrmSchemeInfo(keySystem,
-                                              licenseServerUrl,
-                                              false /* withCredentials */,
-                                              null /* initData */,
-                                              null /* licensePostProcessor */);
+        return [{
+          'keySystem': keySystem,
+          'licenseServerUrl': licenseServerUrl
+        }];
       }
 
       // See app.interpretContentProtection_() in app.js for more examples of
       // what this callback can do.
 
-      console.warn('Unrecognized scheme: ' + contentProtection.schemeIdUri);
+      console.warn('Unrecognized scheme: ' + schemeIdUri);
       return null;
     }
 

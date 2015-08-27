@@ -309,11 +309,12 @@ its contents and interpretation are application-specific.
 
 <p>
 To bridge the gap between DASH and EME with application-specific details, Shaka
-uses a callback to the application to interpret ContentProtection elements from
-the DASH manifest.  The application receives a parsed element from the manifest
-in the form of a {@link shaka.dash.mpd.ContentProtection} object.  The app then
-returns a {@link shaka.player.DrmSchemeInfo} object which has important details
-in a consistent structure.
+makes a callback to the application to interpret ContentProtection elements
+from the DASH manifest.  The application receives the ContentProtection's
+scheme ID URI (a string) and the entire ContentProtection element, and the app
+then returns one or more {@link shaka.player.DrmInfo.Config} objects, which
+each specify DRM configuration options (e.g., the key system and license server
+URL).
 </p>
 
 <p>
@@ -369,17 +370,16 @@ used to enable encrypted content:
 <span class="newCode">    }</span>
 
 <span class="newCode">    /**</span>
-<span class="newCode">     * @param {!shaka.dash.mpd.ContentProtection} contentProtection The</span>
-<span class="newCode">     *     ContentProtection element from the MPD.</span>
-<span class="newCode">     * @return {shaka.player.DrmSchemeInfo} or null if the element is not</span>
-<span class="newCode">     *     understood by this application.</span>
+<span class="newCode">     * @param {string} schemeIdUri The ContentProtection's scheme ID URI.</span>
+<span class="newCode">     * @param {!Element} contentProtection The ContentProtection element.</span>
+<span class="newCode">     * @return {!Array.&lt;shaka.player.DrmInfo.Config&gt;} An array of Config</span>
+<span class="newCode">     *     objects or null if the element is not understood by this application.</span>
 <span class="newCode">     */</span>
-<span class="newCode">    function interpretContentProtection(contentProtection) {</span>
+<span class="newCode">    function interpretContentProtection(schemeIdUri, contentProtection) {</span>
 <span class="newCode">      // This is the UUID which is used by edash-packager to represent</span>
 <span class="newCode">      // Widevine.  This is the only scheme we are expecting for this</span>
 <span class="newCode">      // application.</span>
-<span class="newCode">      if (contentProtection.schemeIdUri ==</span>
-<span class="newCode">          'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed') {</span>
+<span class="newCode">      if (schemeIdUri == 'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed') {</span>
 <span class="newCode">        // We will use Widevine's testing license server.  In a real app,</span>
 <span class="newCode">        // you would run your own front-end service for this.</span>
 <span class="newCode">        var licenseServerUrl = 'http://widevine-proxy.appspot.com/proxy';</span>
@@ -387,14 +387,13 @@ used to enable encrypted content:
 <span class="newCode">        // The EME key system identifier for Widevine.</span>
 <span class="newCode">        var keySystem = 'com.widevine.alpha';</span>
 
-<span class="newCode">        return new shaka.player.DrmSchemeInfo(keySystem,</span>
-<span class="newCode">                                              licenseServerUrl,</span>
-<span class="newCode">                                              false /* withCredentials */,</span>
-<span class="newCode">                                              null /* initData */,</span>
-<span class="newCode">                                              null /* licensePostProcessor */);</span>
+<span class="newCode">        return [{</span>
+<span class="newCode">          'keySystem': keySystem,</span>
+<span class="newCode">          'licenseServerUrl': licenseServerUrl</span>
+<span class="newCode">        }];</span>
 <span class="newCode">      }</span>
 
-<span class="newCode">      console.warn('Unrecognized scheme: ' + contentProtection.schemeIdUri);</span>
+<span class="newCode">      console.warn('Unrecognized scheme: ' + schemeIdUri);</span>
 <span class="newCode">      return null;</span>
 <span class="newCode">    }</span>
 
@@ -409,9 +408,9 @@ find out what key systems are supported.  So you should be able to protect your
 content with multiple key systems for different browsers.  The only requirement
 is that the browser has a standards compliant implementation of EME.  If that's
 the case, you can put multiple ContentProtection tags in your MPD, and once the
-tags are resolved as DrmSchemeInfo objects, the player will discard those which
-cannot be used by the browser.  This way, there's no need to detect the browser
-vendor and serve different content based on that.
+tags are resolved as DrmInfo.Config objects, the player will discard those
+which cannot be used by the browser.  This way, there's no need to detect the
+browser vendor and serve different content based on that.
 </p>
 
 
@@ -616,17 +615,16 @@ video will play back in an overlay on top of the thumbnails.
     }
 
     /**
-     * @param {!shaka.dash.mpd.ContentProtection} contentProtection The
-     *     ContentProtection element from the MPD.
-     * @return {shaka.player.DrmSchemeInfo} or null if the element is not
-     *     understood by this application.
+     * @param {string} schemeIdUri The ContentProtection's scheme ID URI.
+     * @param {!Element} contentProtection The ContentProtection element.
+     * @return {!Array.&lt;shaka.player.DrmInfo.Config&gt;} An array of Config
+     *     objects or null if the element is not understood by this application.
      */
-    function interpretContentProtection(contentProtection) {
+    function interpretContentProtection(schemeIdUri, contentProtection) {
       // This is the UUID which is used by edash-packager to represent
       // Widevine.  This is the only scheme we are expecting for this
       // application.
-      if (contentProtection.schemeIdUri ==
-          'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed') {
+      if (schemeIdUri == 'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed') {
         // We will use Widevine's testing license server.  In a real app,
         // you would run your own front-end service for this.
         var licenseServerUrl = 'http://widevine-proxy.appspot.com/proxy';
@@ -634,20 +632,16 @@ video will play back in an overlay on top of the thumbnails.
         // The EME key system identifier for Widevine.
         var keySystem = 'com.widevine.alpha';
 
-        return new shaka.player.DrmSchemeInfo(keySystem,
-                                              licenseServerUrl,
-                                              false /* withCredentials */,
-                                              null /* initData */,
-                                              null /* licensePostProcessor */);
+        return [{
+          'keySystem': keySystem,
+          'licenseServerUrl': licenseServerUrl
+        }];
       }
 
-<span class="newCode">      // See app.interpretContentProtection_() in app.js for more examples of</span>
-<span class="newCode">      // what this callback can do.</span>
-<span class="newCode"></span>
-      console.warn('Unrecognized scheme: ' + contentProtection.schemeIdUri);
+      console.warn('Unrecognized scheme: ' + schemeIdUri);
       return null;
-<span class="newCode">    }</span>
-<span class="newCode"></span>
+    }
+
 <span class="newCode">    function closeVideo() {</span>
 <span class="newCode">      // Unload the video source.</span>
 <span class="newCode">      player.unload();</span>
@@ -655,8 +649,8 @@ video will play back in an overlay on top of the thumbnails.
 <span class="newCode">      // Hide the video player overlay.</span>
 <span class="newCode">      var overlay = document.getElementById('videoOverlay');</span>
 <span class="newCode">      overlay.style.display = 'none';</span>
-    }
-
+<span class="newCode">    }</span>
+<span class="newCode"></span>
     document.addEventListener('DOMContentLoaded', initPlayer);
   &lt;/script&gt;
 &lt;/html&gt;
@@ -940,17 +934,16 @@ is being played. It also shows an error dialog if/when error events occur.
     }
 
     /**
-     * @param {!shaka.dash.mpd.ContentProtection} contentProtection The
-     *     ContentProtection element from the MPD.
-     * @return {shaka.player.DrmSchemeInfo} or null if the element is not
-     *     understood by this application.
+     * @param {string} schemeIdUri The ContentProtection's scheme ID URI.
+     * @param {!Element} contentProtection The ContentProtection element.
+     * @return {!Array.&lt;shaka.player.DrmInfo.Config&gt;} An array of Config
+     *     objects or null if the element is not understood by this application.
      */
-    function interpretContentProtection(contentProtection) {
+    function interpretContentProtection(schemeIdUri, contentProtection) {
       // This is the UUID which is used by edash-packager to represent
       // Widevine.  This is the only scheme we are expecting for this
       // application.
-      if (contentProtection.schemeIdUri ==
-          'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed') {
+      if (schemeIdUri == 'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed') {
         // We will use Widevine's testing license server.  In a real app,
         // you would run your own front-end service for this.
         var licenseServerUrl = 'http://widevine-proxy.appspot.com/proxy';
@@ -958,17 +951,16 @@ is being played. It also shows an error dialog if/when error events occur.
         // The EME key system identifier for Widevine.
         var keySystem = 'com.widevine.alpha';
 
-        return new shaka.player.DrmSchemeInfo(keySystem,
-                                              licenseServerUrl,
-                                              false /* withCredentials */,
-                                              null /* initData */,
-                                              null /* licensePostProcessor */);
+        return [{
+          'keySystem': keySystem,
+          'licenseServerUrl': licenseServerUrl
+        }];
       }
 
-      // See app.interpretContentProtection_() in app.js for more examples of
-      // what this callback can do.
-
-      console.warn('Unrecognized scheme: ' + contentProtection.schemeIdUri);
+<span class="newCode">      // See app.interpretContentProtection_() in app.js for more examples of</span>
+<span class="newCode">      // what this callback can do.</span>
+<span class="newCode"></span>
+      console.warn('Unrecognized scheme: ' + schemeIdUri);
       return null;
     }
 
