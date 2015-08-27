@@ -363,13 +363,17 @@ describe('MpdProcessor', function() {
     });
 
     it('SegmentTimeline w/ start times', function(done) {
+      // A non-zero PTO should affect the segment URLs but not the segments'
+      // start and end times.
+      var pto = 9000;
+
       var tp1 = new mpd.SegmentTimePoint();
-      tp1.startTime = 9000 * 100;
+      tp1.startTime = 9000 * 100 + pto;
       tp1.duration = 9000 * 10;
       tp1.repeat = 1;
 
       var tp2 = new mpd.SegmentTimePoint();
-      tp2.startTime = (9000 * 100) + (9000 * 20);
+      tp2.startTime = (9000 * 100) + (9000 * 20) + pto;
       tp2.duration = 9000 * 20;
       tp2.repeat = 0;
 
@@ -378,7 +382,7 @@ describe('MpdProcessor', function() {
       timeline.timePoints.push(tp2);
 
       st.timescale = 9000;
-      st.presentationTimeOffset = 0;
+      st.presentationTimeOffset = pto;
       st.segmentDuration = null;
       st.startNumber = 10;
       st.mediaUrlTemplate = '$Number$-$Time$-$Bandwidth$-media.mp4';
@@ -416,17 +420,17 @@ describe('MpdProcessor', function() {
 
         checkReference(
             references1[0],
-            'http://example.com/10-900000-250000-media.mp4',
+            'http://example.com/10-909000-250000-media.mp4',
             100, 110);
 
         checkReference(
             references1[1],
-            'http://example.com/11-990000-250000-media.mp4',
+            'http://example.com/11-999000-250000-media.mp4',
             110, 120);
 
         checkReference(
             references1[2],
-            'http://example.com/12-1080000-250000-media.mp4',
+            'http://example.com/12-1089000-250000-media.mp4',
             120, 140);
 
         done();
