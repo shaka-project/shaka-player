@@ -1362,6 +1362,9 @@ describe('Player', function() {
         video.currentTime = video.duration - 2;
         return waitFor(30, function() {
           return video.currentTime > 0 && video.currentTime < 5;
+        }, function(error) {
+          error.message = 'Timeout waiting for loop, currentTime = ' +
+                          video.currentTime;
         });
       }).then(function() {
         expect(video.currentTime).toBeGreaterThan(0);
