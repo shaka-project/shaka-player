@@ -1058,8 +1058,10 @@ describe('Player', function() {
         expect(licensePreProcessor.spy).toHaveBeenCalled();
         // done() is called from the LicenseRequest.send() spy above.
       }).catch(function(error) {
-        fail(error);
-        done();
+        if (error.type != 'destroy') {
+          fail(error);
+          done();
+        }
       });
     });
   });
@@ -1532,6 +1534,48 @@ describe('Player', function() {
         done();
       });
     });
+  });
+
+  describe('destroy', function() {
+    it('does not cause exceptions after load', function(done) {
+      // Satisfy Jasmine, which complains if tests have no expectations.
+      expect(true).toBe(true);
+      // Load the manifest, then wait.
+      player.load(newSource(encryptedManifest)).then(function() {
+        player.destroy();
+        // Wait 1 second for async exceptions.
+        // Jasmine will convert them to test failures.
+        delay(1).then(done);
+      });
+    });
+
+    it('does not cause exceptions immediately', function(done) {
+      // Satisfy Jasmine, which complains if tests have no expectations.
+      expect(true).toBe(true);
+      // Chrome complains if you don't catch all failed Promises.
+      player.load(newSource(encryptedManifest)).catch(function() {});
+      // Now destroy the player without letting it finish loading.
+      player.destroy();
+      // Wait 1 second for async exceptions.
+      // Jasmine will convert them to test failures.
+      delay(1).then(done);
+    });
+
+    for (var ms = 1; ms <= 1000; ms *= 5) {
+      it('does not cause exceptions after ' + ms + ' ms', function(ms, done) {
+        // Satisfy Jasmine, which complains if tests have no expectations.
+        expect(true).toBe(true);
+        // Chrome complains if you don't catch all failed Promises.
+        player.load(newSource(encryptedManifest)).catch(function() {});
+        // Now destroy the player after the specified delay.
+        delay(ms / 1000).then(function() {
+          player.destroy();
+          // Wait 1 additional second for async exceptions.
+          // Jasmine will convert them to test failures.
+          delay(1).then(done);
+        });
+      }.bind(this, ms));
+    }
   });
 
   // TODO(story 1970528): add tests which exercise PSSH parsing,
