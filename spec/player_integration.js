@@ -1464,7 +1464,7 @@ describe('Player', function() {
       var originalLoad = shaka.player.StreamVideoSource.prototype.load;
       shaka.player.StreamVideoSource.prototype.load = function() {
         expect(this.manifestInfo).not.toBe(null);
-        this.manifestInfo.minBufferTime = 7;
+        this.manifestInfo.minBufferTime = 2;
         return originalLoad.call(this);
       };
 
