@@ -544,6 +544,29 @@ describe('Player', function() {
         done();
       });
     });
+
+    it('plays in reverse past the buffered area', function(done) {
+      var timestamp = 10;
+      // Start in the second segment.
+      player.load(newSource(plainManifest)).then(function() {
+        video.currentTime = timestamp;
+        video.play();
+        return waitForMovement(video, eventManager);
+      }).then(function() {
+        expect(video.buffered.length).toBe(1);
+        expect(video.buffered.start(0)).toBeGreaterThan(5);
+        player.setPlaybackRate(-3.0);
+        return waitForMovement(video, eventManager);
+      }).then(function() {
+        return delay(4.0);
+      }).then(function() {
+        expect(video.currentTime).toBeLessThan(0.1);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
   });
 
   describe('getStats', function() {
