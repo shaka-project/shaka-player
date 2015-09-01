@@ -188,6 +188,11 @@ app.init = function() {
           }
           app.addOfflineStream_(value, id);
         }
+
+        if ('offline' in params) {
+          app.loadStream();
+          app.onStreamTypeChange();
+        }
       }
   ).catch(
       function(e) {
@@ -214,6 +219,9 @@ app.init = function() {
   } else if ('http' in params) {
     document.getElementById('streamTypeList').value = 'http';
     app.loadStream();
+  } else if ('offline' in params) {
+    document.getElementById('streamTypeList').value = 'offline';
+    // loadStream() deferred until group IDs loaded
   }
   app.onStreamTypeChange();
 
