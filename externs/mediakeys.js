@@ -28,7 +28,8 @@ var MediaKeySystemMediaCapability;
  *   audioCapabilities: (Array.<!MediaKeySystemMediaCapability>|undefined),
  *   videoCapabilities: (Array.<!MediaKeySystemMediaCapability>|undefined),
  *   distinctiveIdentifier: (string|undefined),
- *   persistentState: (string|undefined)
+ *   persistentState: (string|undefined),
+ *   sessionTypes: (Array.<string>|undefined)
  * }} */
 var MediaKeySystemConfiguration;
 
