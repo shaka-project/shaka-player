@@ -147,6 +147,30 @@
   background-image: url('assets/controls/fullscreen-active.png');
 }
 
+#castButton {
+  background-image: url('assets/controls/cast.png');
+}
+
+#castButton:active {
+  background-image: url('assets/controls/cast-active.png');
+}
+
+/* animated frames while connecting */
+#castButton.a0 {
+  background-image: url('assets/controls/cast-a0.png');
+}
+#castButton.a1 {
+  background-image: url('assets/controls/cast-a1.png');
+}
+#castButton.a2 {
+  background-image: url('assets/controls/cast-a2.png');
+}
+
+/* connected and casting */
+#castButton.connected {
+  background-image: url('assets/controls/cast-connected.png');
+}
+
 #rewindButton {
   display: none;
   background-image: url('assets/controls/rw.png');
