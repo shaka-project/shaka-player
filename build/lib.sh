@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-dir=$(dirname $0)/..
+dir=$(dirname "$BASH_SOURCE")/..
 
 function calculate_version() {
   cd "$dir"
