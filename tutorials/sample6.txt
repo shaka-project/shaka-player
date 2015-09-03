@@ -95,14 +95,14 @@
       <div class="thumbRow">
         <div class="thumbCell">
           <img id="t1"
-               src="http://turtle-tube.appspot.com/t/t1/thumb.png"
+               src="https://turtle-tube.appspot.com/t/t1/thumb.png"
                onclick="onImageClick(this)"><br>
           <i>cute green sea turtle in Ko'olina Hawai'i</i><br>
           (MP4, WebM)
         </div>
         <div class="thumbCell">
           <img id="t2"
-               src="http://turtle-tube.appspot.com/t/t2/thumb.png"
+               src="https://turtle-tube.appspot.com/t/t2/thumb.png"
                onclick="onImageClick(this)"><br>
           <i>Endangered Ocean: Sea Turtles</i><br>
           (MP4, WebM)
@@ -111,14 +111,14 @@
       <div class="thumbRow">
         <div class="thumbCell">
           <img id="t3"
-               src="http://turtle-tube.appspot.com/t/t3/thumb.png"
+               src="https://turtle-tube.appspot.com/t/t3/thumb.png"
                onclick="onImageClick(this)"><br>
           <i>sea turtles exercise: bent arms</i><br>
           (WebM only)
         </div>
         <div class="thumbCell">
           <img id="t4"
-               src="http://turtle-tube.appspot.com/t/t4/thumb.png"
+               src="https://turtle-tube.appspot.com/t/t4/thumb.png"
                onclick="onImageClick(this)"><br>
           <i>sea turtles exercise: straight arms</i><br>
           (WebM only)
@@ -127,14 +127,14 @@
       <div class="thumbRow">
         <div class="thumbCell">
           <img id="t5"
-               src="http://turtle-tube.appspot.com/t/t5/thumb.png"
+               src="https://turtle-tube.appspot.com/t/t5/thumb.png"
                onclick="onImageClick(this)"><br>
           <i>Using robots to reveal secrets of walking baby sea turtles</i><br>
           (MP4, WebM)
         </div>
         <div class="thumbCell">
           <img id="e6"
-               src="http://turtle-tube.appspot.com/t/e6/thumb.png"
+               src="https://turtle-tube.appspot.com/t/e6/thumb.png"
                onclick="onImageClick(this)"><br>
           <i>kitten vs sea turtle</i><br>
           (MP4 only, encrypted)
@@ -144,12 +144,12 @@
     <div id="videoOverlay">
       <div id="vcenterWrapper">
         <video id="video"
-               poster="http://turtle-tube.appspot.com/poster.jpg"
+               poster="https://turtle-tube.appspot.com/poster.jpg"
                crossorigin="anonymous"
                controls autoplay>
           Your browser does not support HTML5 video.
         </video>
-        <img id="hd" src="http://turtle-tube.appspot.com/hd.png">
+        <img id="hd" src="https://turtle-tube.appspot.com/hd.png">
         <div id="errorOverlay"></div>
       </div>
       <button id="closeButton" onclick="closeVideo()">Close Video</button>
@@ -251,7 +251,7 @@
 
       // Construct a DashVideoSource to represent the DASH manifest and provide
       // a callback to interpret the ContentProtection elements (if any).
-      var mpdUrl = 'http://turtle-tube.appspot.com/t/' + image.id + '/dash.mpd';
+      var mpdUrl = 'https://turtle-tube.appspot.com/t/' + image.id + '/dash.mpd';
       var source = new shaka.player.DashVideoSource(mpdUrl,
                                                     interpretContentProtection,
                                                     estimator);
@@ -277,7 +277,7 @@
       if (schemeIdUri == 'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed') {
         // We will use Widevine's testing license server.  In a real app,
         // you would run your own front-end service for this.
-        var licenseServerUrl = 'http://widevine-proxy.appspot.com/proxy';
+        var licenseServerUrl = 'https://widevine-proxy.appspot.com/proxy';
 
         // The EME key system identifier for Widevine.
         var keySystem = 'com.widevine.alpha';

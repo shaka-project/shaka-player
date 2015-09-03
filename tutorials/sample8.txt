@@ -82,7 +82,7 @@
       });
 
       // Store content from MPD url.
-      var mpdUrl = 'http://turtle-tube.appspot.com/t/t2/dash.mpd';
+      var mpdUrl = 'https://turtle-tube.appspot.com/t/t2/dash.mpd';
       var preferredLanguage = 'en-US';
       return offlineSource.store(
           mpdUrl,
