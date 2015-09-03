@@ -35,7 +35,7 @@
 
       // Construct a DashVideoSource to represent the DASH manifest and provide
       // a callback to interpret the ContentProtection elements.
-      var mpdUrl = 'http://turtle-tube.appspot.com/t/e6/dash.mpd';
+      var mpdUrl = 'https://turtle-tube.appspot.com/t/e6/dash.mpd';
       var estimator = new shaka.util.EWMABandwidthEstimator();
       var source = new shaka.player.DashVideoSource(mpdUrl,
                                                     interpretContentProtection,
@@ -59,7 +59,7 @@
           'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed') {
         // We will use Widevine's testing license server.  In a real app,
         // you would run your own front-end service for this.
-        var licenseServerUrl = 'http://widevine-proxy.appspot.com/proxy';
+        var licenseServerUrl = 'https://widevine-proxy.appspot.com/proxy';
 
         // The EME key system identifier for Widevine.
         var keySystem = 'com.widevine.alpha';

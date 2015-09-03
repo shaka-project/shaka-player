@@ -114,7 +114,7 @@ Here is a simple page which demonstrates basic DASH playback:
       });
 
       // Construct a DashVideoSource to represent the DASH manifest.
-      var mpdUrl = 'http://turtle-tube.appspot.com/t/t2/dash.mpd';
+      var mpdUrl = 'https://turtle-tube.appspot.com/t/t2/dash.mpd';
       var estimator = new shaka.util.EWMABandwidthEstimator();
       var source = new shaka.player.DashVideoSource(mpdUrl, null, estimator);
 
@@ -173,7 +173,7 @@ the {@link http://goo.gl/McU4Rh autoplay attribute} on the video tag.
       });
 
       // Construct a DashVideoSource to represent the DASH manifest.
-      var mpdUrl = 'http://turtle-tube.appspot.com/t/t2/dash.mpd';
+      var mpdUrl = 'https://turtle-tube.appspot.com/t/t2/dash.mpd';
       var estimator = new shaka.util.EWMABandwidthEstimator();
       var source = new shaka.player.DashVideoSource(mpdUrl, null, estimator);
 
@@ -229,7 +229,7 @@ is loaded.  You can execute any arbitrary code when load completes.
       });
 
       // Construct a DashVideoSource to represent the DASH manifest.
-      var mpdUrl = 'http://turtle-tube.appspot.com/t/t2/dash.mpd';
+      var mpdUrl = 'https://turtle-tube.appspot.com/t/t2/dash.mpd';
       var estimator = new shaka.util.EWMABandwidthEstimator();
       var source = new shaka.player.DashVideoSource(mpdUrl, null, estimator);
 
@@ -358,7 +358,7 @@ used to enable encrypted content:
 
 <span class="newCode">      // Construct a DashVideoSource to represent the DASH manifest and provide</span>
 <span class="newCode">      // a callback to interpret the ContentProtection elements.</span>
-<span class="newCode">      var mpdUrl = 'http://turtle-tube.appspot.com/t/e6/dash.mpd';</span>
+<span class="newCode">      var mpdUrl = 'https://turtle-tube.appspot.com/t/e6/dash.mpd';</span>
       var estimator = new shaka.util.EWMABandwidthEstimator();
 <span class="newCode">      var source = new shaka.player.DashVideoSource(mpdUrl,</span>
 <span class="newCode">                                                    interpretContentProtection,</span>
@@ -382,7 +382,7 @@ used to enable encrypted content:
 <span class="newCode">          'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed') {</span>
 <span class="newCode">        // We will use Widevine's testing license server.  In a real app,</span>
 <span class="newCode">        // you would run your own front-end service for this.</span>
-<span class="newCode">        var licenseServerUrl = 'http://widevine-proxy.appspot.com/proxy';</span>
+<span class="newCode">        var licenseServerUrl = 'https://widevine-proxy.appspot.com/proxy';</span>
 
 <span class="newCode">        // The EME key system identifier for Widevine.</span>
 <span class="newCode">        var keySystem = 'com.widevine.alpha';</span>
@@ -502,14 +502,14 @@ video will play back in an overlay on top of the thumbnails.
 <span class="newCode">      &lt;div class="thumbRow"&gt;</span>
 <span class="newCode">        &lt;div class="thumbCell"&gt;</span>
 <span class="newCode">          &lt;img id="t1"</span>
-<span class="newCode">               src="http://turtle-tube.appspot.com/t/t1/thumb.png"</span>
+<span class="newCode">               src="https://turtle-tube.appspot.com/t/t1/thumb.png"</span>
 <span class="newCode">               onclick="onImageClick(this)"&gt;&lt;br&gt;</span>
 <span class="newCode">          &lt;i&gt;cute green sea turtle in Ko'olina Hawai'i&lt;/i&gt;&lt;br&gt;</span>
 <span class="newCode">          (MP4, WebM)</span>
 <span class="newCode">        &lt;/div&gt;</span>
 <span class="newCode">        &lt;div class="thumbCell"&gt;</span>
 <span class="newCode">          &lt;img id="t2"</span>
-<span class="newCode">               src="http://turtle-tube.appspot.com/t/t2/thumb.png"</span>
+<span class="newCode">               src="https://turtle-tube.appspot.com/t/t2/thumb.png"</span>
 <span class="newCode">               onclick="onImageClick(this)"&gt;&lt;br&gt;</span>
 <span class="newCode">          &lt;i&gt;Endangered Ocean: Sea Turtles&lt;/i&gt;&lt;br&gt;</span>
 <span class="newCode">          (MP4, WebM)</span>
@@ -518,14 +518,14 @@ video will play back in an overlay on top of the thumbnails.
 <span class="newCode">      &lt;div class="thumbRow"&gt;</span>
 <span class="newCode">        &lt;div class="thumbCell"&gt;</span>
 <span class="newCode">          &lt;img id="t3"</span>
-<span class="newCode">               src="http://turtle-tube.appspot.com/t/t3/thumb.png"</span>
+<span class="newCode">               src="https://turtle-tube.appspot.com/t/t3/thumb.png"</span>
 <span class="newCode">               onclick="onImageClick(this)"&gt;&lt;br&gt;</span>
 <span class="newCode">          &lt;i&gt;sea turtles exercise: bent arms&lt;/i&gt;&lt;br&gt;</span>
 <span class="newCode">          (WebM only)</span>
 <span class="newCode">        &lt;/div&gt;</span>
 <span class="newCode">        &lt;div class="thumbCell"&gt;</span>
 <span class="newCode">          &lt;img id="t4"</span>
-<span class="newCode">               src="http://turtle-tube.appspot.com/t/t4/thumb.png"</span>
+<span class="newCode">               src="https://turtle-tube.appspot.com/t/t4/thumb.png"</span>
 <span class="newCode">               onclick="onImageClick(this)"&gt;&lt;br&gt;</span>
 <span class="newCode">          &lt;i&gt;sea turtles exercise: straight arms&lt;/i&gt;&lt;br&gt;</span>
 <span class="newCode">          (WebM only)</span>
@@ -534,14 +534,14 @@ video will play back in an overlay on top of the thumbnails.
 <span class="newCode">      &lt;div class="thumbRow"&gt;</span>
 <span class="newCode">        &lt;div class="thumbCell"&gt;</span>
 <span class="newCode">          &lt;img id="t5"</span>
-<span class="newCode">               src="http://turtle-tube.appspot.com/t/t5/thumb.png"</span>
+<span class="newCode">               src="https://turtle-tube.appspot.com/t/t5/thumb.png"</span>
 <span class="newCode">               onclick="onImageClick(this)"&gt;&lt;br&gt;</span>
 <span class="newCode">          &lt;i&gt;Using robots to reveal secrets of walking baby sea turtles&lt;/i&gt;&lt;br&gt;</span>
 <span class="newCode">          (MP4, WebM)</span>
 <span class="newCode">        &lt;/div&gt;</span>
 <span class="newCode">        &lt;div class="thumbCell"&gt;</span>
 <span class="newCode">          &lt;img id="e6"</span>
-<span class="newCode">               src="http://turtle-tube.appspot.com/t/e6/thumb.png"</span>
+<span class="newCode">               src="https://turtle-tube.appspot.com/t/e6/thumb.png"</span>
 <span class="newCode">               onclick="onImageClick(this)"&gt;&lt;br&gt;</span>
 <span class="newCode">          &lt;i&gt;kitten vs sea turtle&lt;/i&gt;&lt;br&gt;</span>
 <span class="newCode">          (MP4 only, encrypted)</span>
@@ -551,7 +551,7 @@ video will play back in an overlay on top of the thumbnails.
 <span class="newCode">    &lt;div id="videoOverlay"&gt;</span>
 <span class="newCode">      &lt;div id="vcenterWrapper"&gt;</span>
 <span class="newCode">        &lt;video id="video"</span>
-<span class="newCode">               poster="http://turtle-tube.appspot.com/poster.jpg"</span>
+<span class="newCode">               poster="https://turtle-tube.appspot.com/poster.jpg"</span>
 <span class="newCode">               crossorigin="anonymous"</span>
 <span class="newCode">               controls autoplay&gt;</span>
 <span class="newCode">          Your browser does not support HTML5 video.</span>
@@ -602,7 +602,7 @@ video will play back in an overlay on top of the thumbnails.
 <span class="newCode"></span>
       // Construct a DashVideoSource to represent the DASH manifest and provide
 <span class="newCode">      // a callback to interpret the ContentProtection elements (if any).</span>
-<span class="newCode">      var mpdUrl = 'http://turtle-tube.appspot.com/t/' + image.id + '/dash.mpd';</span>
+<span class="newCode">      var mpdUrl = 'https://turtle-tube.appspot.com/t/' + image.id + '/dash.mpd';</span>
       var source = new shaka.player.DashVideoSource(mpdUrl,
                                                     interpretContentProtection,
                                                     estimator);
@@ -629,7 +629,7 @@ video will play back in an overlay on top of the thumbnails.
           'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed') {
         // We will use Widevine's testing license server.  In a real app,
         // you would run your own front-end service for this.
-        var licenseServerUrl = 'http://widevine-proxy.appspot.com/proxy';
+        var licenseServerUrl = 'https://widevine-proxy.appspot.com/proxy';
 
         // The EME key system identifier for Widevine.
         var keySystem = 'com.widevine.alpha';
@@ -770,14 +770,14 @@ is being played. It also shows an error dialog if/when error events occur.
       &lt;div class="thumbRow"&gt;
         &lt;div class="thumbCell"&gt;
           &lt;img id="t1"
-               src="http://turtle-tube.appspot.com/t/t1/thumb.png"
+               src="https://turtle-tube.appspot.com/t/t1/thumb.png"
                onclick="onImageClick(this)"&gt;&lt;br&gt;
           &lt;i&gt;cute green sea turtle in Ko'olina Hawai'i&lt;/i&gt;&lt;br&gt;
           (MP4, WebM)
         &lt;/div&gt;
         &lt;div class="thumbCell"&gt;
           &lt;img id="t2"
-               src="http://turtle-tube.appspot.com/t/t2/thumb.png"
+               src="https://turtle-tube.appspot.com/t/t2/thumb.png"
                onclick="onImageClick(this)"&gt;&lt;br&gt;
           &lt;i&gt;Endangered Ocean: Sea Turtles&lt;/i&gt;&lt;br&gt;
           (MP4, WebM)
@@ -786,14 +786,14 @@ is being played. It also shows an error dialog if/when error events occur.
       &lt;div class="thumbRow"&gt;
         &lt;div class="thumbCell"&gt;
           &lt;img id="t3"
-               src="http://turtle-tube.appspot.com/t/t3/thumb.png"
+               src="https://turtle-tube.appspot.com/t/t3/thumb.png"
                onclick="onImageClick(this)"&gt;&lt;br&gt;
           &lt;i&gt;sea turtles exercise: bent arms&lt;/i&gt;&lt;br&gt;
           (WebM only)
         &lt;/div&gt;
         &lt;div class="thumbCell"&gt;
           &lt;img id="t4"
-               src="http://turtle-tube.appspot.com/t/t4/thumb.png"
+               src="https://turtle-tube.appspot.com/t/t4/thumb.png"
                onclick="onImageClick(this)"&gt;&lt;br&gt;
           &lt;i&gt;sea turtles exercise: straight arms&lt;/i&gt;&lt;br&gt;
           (WebM only)
@@ -802,14 +802,14 @@ is being played. It also shows an error dialog if/when error events occur.
       &lt;div class="thumbRow"&gt;
         &lt;div class="thumbCell"&gt;
           &lt;img id="t5"
-               src="http://turtle-tube.appspot.com/t/t5/thumb.png"
+               src="https://turtle-tube.appspot.com/t/t5/thumb.png"
                onclick="onImageClick(this)"&gt;&lt;br&gt;
           &lt;i&gt;Using robots to reveal secrets of walking baby sea turtles&lt;/i&gt;&lt;br&gt;
           (MP4, WebM)
         &lt;/div&gt;
         &lt;div class="thumbCell"&gt;
           &lt;img id="e6"
-               src="http://turtle-tube.appspot.com/t/e6/thumb.png"
+               src="https://turtle-tube.appspot.com/t/e6/thumb.png"
                onclick="onImageClick(this)"&gt;&lt;br&gt;
           &lt;i&gt;kitten vs sea turtle&lt;/i&gt;&lt;br&gt;
           (MP4 only, encrypted)
@@ -819,12 +819,12 @@ is being played. It also shows an error dialog if/when error events occur.
     &lt;div id="videoOverlay"&gt;
       &lt;div id="vcenterWrapper"&gt;
         &lt;video id="video"
-               poster="http://turtle-tube.appspot.com/poster.jpg"
+               poster="https://turtle-tube.appspot.com/poster.jpg"
                crossorigin="anonymous"
                controls autoplay&gt;
           Your browser does not support HTML5 video.
         &lt;/video&gt;
-<span class="newCode">        &lt;img id="hd" src="http://turtle-tube.appspot.com/hd.png"&gt;</span>
+<span class="newCode">        &lt;img id="hd" src="https://turtle-tube.appspot.com/hd.png"&gt;</span>
 <span class="newCode">        &lt;div id="errorOverlay"&gt;&lt;/div&gt;</span>
       &lt;/div&gt;
       &lt;button id="closeButton" onclick="closeVideo()"&gt;Close Video&lt;/button&gt;
@@ -926,7 +926,7 @@ is being played. It also shows an error dialog if/when error events occur.
 
       // Construct a DashVideoSource to represent the DASH manifest and provide
       // a callback to interpret the ContentProtection elements (if any).
-      var mpdUrl = 'http://turtle-tube.appspot.com/t/' + image.id + '/dash.mpd';
+      var mpdUrl = 'https://turtle-tube.appspot.com/t/' + image.id + '/dash.mpd';
       var source = new shaka.player.DashVideoSource(mpdUrl,
                                                     interpretContentProtection,
                                                     estimator);
@@ -953,7 +953,7 @@ is being played. It also shows an error dialog if/when error events occur.
           'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed') {
         // We will use Widevine's testing license server.  In a real app,
         // you would run your own front-end service for this.
-        var licenseServerUrl = 'http://widevine-proxy.appspot.com/proxy';
+        var licenseServerUrl = 'https://widevine-proxy.appspot.com/proxy';
 
         // The EME key system identifier for Widevine.
         var keySystem = 'com.widevine.alpha';
