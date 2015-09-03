@@ -4,6 +4,7 @@
   { "offline": { "title": "Offline Playback with the Shaka Player" } },
   { "live": { "title": "Live Streaming" } },
   { "trickplay": { "title": "Trick Play" } },
+  { "network": { "title": "Custom Request and Response Processing" } },
   { "errors": { "title": "Listening for Errors" } },
   { "language": { "title": "Language Support" } },
   { "dev": { "title": "Shaka Player Development" } },

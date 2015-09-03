@@ -1,0 +1,57 @@
+/**
+ * @param {string} schemeIdUri The ContentProtection's scheme ID URI.
+ * @param {!Element} contentProtection The ContentProtection element.
+ * @return {Array.<shaka.player.DrmInfo.Config>} An array of Config
+ *     objects or null if the element is not understood by this application.
+ */
+function interpretContentProtection(schemeIdUri, contentProtection) {
+  if (schemeIdUri != App.APP_SPECIFIC_SCHEME_ID_URI) {
+    console.warn('Unrecognized scheme: ' + schemeIdUri);
+    return null;
+  }
+
+  /**
+   * @param {!shaka.player.DrmInfo.LicenseRequestInfo} requestInfo
+   */
+  var preProcessor = function(requestInfo) {
+    // Encode the license request message as base64.
+    var message = window.btoa(
+        String.fromCharCode.apply(null, new Uint8Array(requestInfo.body)));
+
+    // Encode the payload as JSON.
+    var obj = {
+      'app_data': App.clientData,  // Provide some arbitrary data.
+      'message', message
+    };
+    requestInfo.body = JSON.stringify(obj);
+    requestInfo.headers['Content-Type'] = 'application/json';
+  };
+
+  /**
+   * @param {!Uint8Array} serverResponse
+   * @return {!Uint8Array}
+   */
+  var postProcessor = function(serverResponse) {
+    // serverResponse is a Uint8Array, so decode it into an object.
+    var json = String.fromCharCode.apply(null, serverResponse);
+    var obj = JSON.parse(json);
+
+    // Update our arbitrary data.
+    App.clientData = obj['app_data'];
+
+    // obj['license'] is base64, so decode it into a string and then encode it
+    // into a Uint8Array.
+    var licenseString = window.atob(obj['license']);
+    var license = new Uint8Array(licenseString.split('').map(
+        function(ch) { return ch.charCodeAt(0); }));
+    return license;
+  };
+
+  return [{
+    'keySystem': 'com.widevine.alpha',
+    'licenseServerUrl': App.APP_SPECIFIC_LICENSE_SERVER_URL,
+    'licensePreProcessor': preProcessor,
+    'licensePostProcessor': postProcessor
+  }];
+}
+

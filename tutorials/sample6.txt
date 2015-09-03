@@ -267,7 +267,7 @@
     /**
      * @param {string} schemeIdUri The ContentProtection's scheme ID URI.
      * @param {!Element} contentProtection The ContentProtection element.
-     * @return {!Array.<shaka.player.DrmInfo.Config>} An array of Config
+     * @return {Array.<shaka.player.DrmInfo.Config>} An array of Config
      *     objects or null if the element is not understood by this application.
      */
     function interpretContentProtection(schemeIdUri, contentProtection) {

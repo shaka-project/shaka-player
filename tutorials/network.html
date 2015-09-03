@@ -1,0 +1,125 @@
+<!--
+ Copyright 2015 Google Inc.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<h3 class="tutorial-heading">
+License Request Pre-processing and License Response Post-processing.
+</h3>
+
+<p>
+Shaka Player supports pre-processing license requests and post-processing
+license responses. Applications may require pre and post processing when
+interacting with certain license servers.
+</p>
+
+<p>
+By default Shaka Player assumes the license server accepts raw license request
+messages from the key system and assumes the license server responds with raw
+licenses that Shaka Player can pass directly to the key system. If your license
+server does not work this way then you must provide a license request
+pre-processor, a license request post-processor, or both.
+</p>
+
+<p>
+Suppose your application uses the Widevine key system, but the license server
+has a front-end which expects a JSON-based request and responds with a
+JSON-based response, as defined below:
+
+<pre>
+License request format:
+  {"app_data": app_data_string,
+   "message": base64_message_string}
+
+License response format:
+  {"app_data": app_data_string,
+   "license": base64_license_string}
+</pre>
+
+where 'app_data' is some arbitrary application-specific data.
+</p>
+
+Below we show a {@link shaka.player.DashVideoSource#ContentProtectionCallback}
+that interprets the Widevine ContentProtection element and provides pre and
+post processors for our hypothetical license server.
+</p>
+
+<pre class="prettyprint source"><code id="network_sample1">/**
+ * @param {string} schemeIdUri The ContentProtection's scheme ID URI.
+ * @param {!Element} contentProtection The ContentProtection element.
+ * @return {!Array.&lt;shaka.player.DrmInfo.Config&gt;} An array of Config
+ *     objects or null if the element is not understood by this application.
+ */
+function interpretContentProtection(schemeIdUri, contentProtection) {
+  // edash-packager uses this UUID to represent the Widevine key system.
+  // This is the only scheme we are expecting for this application.
+  if (schemeIdUri != 'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed') {
+    console.warn('Unrecognized scheme: ' + schemeIdUri);
+    return null;
+  }
+
+  /**
+   * @param {!shaka.player.DrmInfo.LicenseRequestInfo} requestInfo
+   */
+  var preProcessor = function(requestInfo) {
+    // Encode the license request message as base64.
+    var message = window.btoa(
+        String.fromCharCode.apply(null, new Uint8Array(requestInfo.body)));
+
+    // Encode the payload as JSON.
+    var obj = {
+      'app_data': App.clientData,  // Provide some arbitrary data.
+      'message': message
+    };
+    requestInfo.body = JSON.stringify(obj);
+  };
+
+  /**
+   * @param {!Uint8Array} serverResponse
+   * @return {!Uint8Array}
+   */
+  var postProcessor = function(serverResponse) {
+    // serverResponse is a Uint8Array, so decode it into an object.
+    var json = String.fromCharCode.apply(null, serverResponse);
+    var obj = JSON.parse(json);
+
+    // Update our arbitrary data.
+    App.clientData = obj['app_data'];
+
+    // obj['license'] is base64, so decode it into a string and then encode it
+    // into a Uint8Array.
+    var licenseString = window.atob(obj['license']);
+    var license = new Uint8Array(licenseString.split('').map(
+        function(ch) { return ch.charCodeAt(0); }));
+    return license;
+  };
+
+  return [{
+    'keySystem': 'com.widevine.alpha',
+    'licenseServerUrl': App.LICENSE_SERVER_URL,
+    'licensePreProcessor': preProcessor,
+    'licensePostProcessor': postProcessor
+  }];
+}
+
+</code></pre>
+
+<p>
+For more information and more examples, see
+{@link shaka.player.DashVideoSource.ContentProtectionCallback},
+{@link shaka.player.DrmInfo.Config},
+{@link shaka.player.DrmInfo.LicensePostProcessor},
+{@link shaka.player.DrmInfo.LicenseRequestInfo}, and
+{@link shaka.player.DrmInfo.LicensePreProcessor}.
+</p>
