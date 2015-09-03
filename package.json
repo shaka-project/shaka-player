@@ -22,7 +22,7 @@
   "licenses": [
     {
       "type": "Apache",
-      "url": "https://github.com/google/shaka-player/blob/master/LICENSE.txt"
+      "url": "https://github.com/google/shaka-player/blob/master/LICENSE"
     }
   ],
   "scripts": {
