@@ -1,3 +1,26 @@
+## 1.4.2 (2015-09-04)
+
+A roll-up of recent bugfixes.
+
+Bugfixes:
+  - Fix storage of duplicate session IDs for encrypted offline content.
+  - Specify EME sessionTypes, required in newer EME draft.
+    - https://github.com/google/shaka-player/issues/128
+  - Fix regression in rewind support, once more working outside buffered range.
+    - https://github.com/google/shaka-player/issues/165
+  - Support renamed output protection errors from newer EME draft.
+  - Fix seeking in custom controls on Android.
+    - https://github.com/google/shaka-player/issues/164
+  - Fix missing final chunk when storing certain videos for offline playback.
+    - https://github.com/google/shaka-player/issues/157
+  - Prevent crashing of module loaders which use 'define' but are not full AMD
+    loaders.
+    - https://github.com/google/shaka-player/issues/163
+
+Test app features:
+  - Added 'offline' URL param.
+
+
 ## 1.4.1 (2015-08-18)
 
 A roll-up of recent bugfixes and small improvements.
