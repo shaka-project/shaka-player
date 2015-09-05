@@ -95,7 +95,7 @@
 }
 
 #playButton, #pauseButton, #muteButton, #unmuteButton, #fullscreenButton,
-#rewindButton, #fastForwardButton {
+#rewindButton, #fastForwardButton, #castButton, #castConnectedButton {
   height: 32px;
   width: 32px;
   padding: 0;
@@ -148,26 +148,17 @@
 }
 
 #castButton {
+  display: none;
   background-image: url('assets/controls/cast.png');
 }
 
-#castButton:active {
+#castButton:active,  #castConnectedButton:active {
   background-image: url('assets/controls/cast-active.png');
 }
 
-/* animated frames while connecting */
-#castButton.a0 {
-  background-image: url('assets/controls/cast-a0.png');
-}
-#castButton.a1 {
-  background-image: url('assets/controls/cast-a1.png');
-}
-#castButton.a2 {
-  background-image: url('assets/controls/cast-a2.png');
-}
-
 /* connected and casting */
-#castButton.connected {
+#castConnectedButton {
+  display: none;
   background-image: url('assets/controls/cast-connected.png');
 }
 

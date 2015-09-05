@@ -66,7 +66,7 @@ rm -f "$dir"/shaka-player.${name}.js
 # Compile once with app/controls.js so they get checked.  Don't keep the output.
 (library_sources_0; closure_sources_0) | compile_0 \
   $arguments \
-  --summary_detail_level 3 "$dir"/{app,controls}.js > /dev/null
+  --summary_detail_level 3 "$dir"/{app,controls,sender,receiver,receiverApp,appUtils}.js > /dev/null
 # NOTE: --js_output_file /dev/null results in a non-zero return value and
 # stops execution of this script.
 

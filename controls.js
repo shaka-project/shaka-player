@@ -59,6 +59,8 @@ playerControls.init = function(video) {
   var currentTime = document.getElementById('currentTime');
   var rewindButton = document.getElementById('rewindButton');
   var fastForwardButton = document.getElementById('fastForwardButton');
+  var castButton = document.getElementById('castButton');
+  var castConnectedButton = document.getElementById('castConnectedButton');
 
   playerControls.isLive_ = false;
   playerControls.isSeeking_ = false;
@@ -66,23 +68,29 @@ playerControls.init = function(video) {
 
   // play
   playButton.addEventListener('click', function() {
-    if (!video.src) return;
-    playerControls.player_.setPlaybackRate(1);
-    video.play();
+    if (sender.state == sender.states.CAST_CONNECTED) {
+      sender.play();
+    } else {
+      if (!video.src) return;
+      playerControls.player_.setPlaybackRate(1);
+      video.play();
+    }
   });
   video.addEventListener('play', function() {
-    playButton.style.display = 'none';
-    pauseButton.style.display = 'block';
+    playerControls.displayPlayButton(false);
   });
 
   // pause
   pauseButton.addEventListener('click', function() {
-    video.pause();
+    if (sender.state == sender.states.CAST_CONNECTED) {
+      sender.pause();
+    } else {
+      video.pause();
+    }
   });
   video.addEventListener('pause', function() {
     if (!playerControls.isSeeking_) {
-      pauseButton.style.display = 'none';
-      playButton.style.display = 'block';
+      playerControls.displayPlayButton(true);
     }
   });
 
@@ -90,20 +98,30 @@ playerControls.init = function(video) {
   var seekTimeoutId = null;
   var onSeekStart = function() {
     playerControls.isSeeking_ = true;
-    video.pause();
+    if (sender.state == sender.states.CAST_CONNECTED) {
+      sender.pause();
+    } else {
+      video.pause();
+    }
   };
   var onSeekInputTimeout = function() {
     seekTimeoutId = null;
-    video.currentTime = seekBar.value;
+    if (sender.state == sender.states.CAST_CONNECTED) {
+      sender.setCurrentTime(seekBar.value);
+    } else {
+      video.currentTime = seekBar.value;
+    }
   };
   var onSeekInput = function() {
-    if (!video.duration) {
+    if (sender.state == sender.states.CAST_CONNECTED) {
+      if (!sender.currentMediaDuration) return;
+    } else if (!video.duration) {
       // Can't seek.  Ignore.
       return;
     }
 
     // Update the UI right away.
-    playerControls.updateTimeAndSeekRange_();
+    playerControls.updateTimeAndSeekRange();
 
     // Collect input events and seek when things have been stable for 100ms.
     if (seekTimeoutId) {
@@ -116,8 +134,13 @@ playerControls.init = function(video) {
       window.clearTimeout(seekTimeoutId);
       onSeekInputTimeout();
     }
-    video.play();
+
     playerControls.isSeeking_ = false;
+    if (sender.state == sender.states.CAST_CONNECTED) {
+      sender.play();
+    } else {
+      video.play();
+    }
   };
   seekBar.addEventListener('mousedown', onSeekStart);
   seekBar.addEventListener('touchstart', onSeekStart);
@@ -129,45 +152,40 @@ playerControls.init = function(video) {
 
   // mute/unmute
   muteButton.addEventListener('click', function() {
-    video.muted = true;
+    if (sender.state == sender.states.CAST_CONNECTED) {
+      sender.mute(true);
+    } else {
+      video.muted = true;
+    }
   });
   unmuteButton.addEventListener('click', function() {
-    video.muted = false;
+    if (sender.state == sender.states.CAST_CONNECTED) {
+      sender.mute(false);
+    } else {
+      video.muted = false;
+    }
   });
 
   // volume
   volumeBar.addEventListener('input', function() {
-    video.volume = volumeBar.value;
-    video.muted = false;
+    if (sender.state == sender.states.CAST_CONNECTED) {
+      sender.setVolume(volumeBar.value);
+      sender.mute(false);
+    } else {
+      video.volume = volumeBar.value;
+      video.muted = false;
+    }
   });
 
-  // volume & mute updates
-  var onVolumeChange = function() {
-    if (video.muted) {
-      muteButton.style.display = 'none';
-      unmuteButton.style.display = 'block';
-    } else {
-      unmuteButton.style.display = 'none';
-      muteButton.style.display = 'block';
-    }
-
-    volumeBar.value = video.muted ? 0 : video.volume;
-    var gradient = ['to right'];
-    gradient.push('#ccc ' + (volumeBar.value * 100) + '%');
-    gradient.push('#000 ' + (volumeBar.value * 100) + '%');
-    gradient.push('#000 100%');
-    volumeBar.style.background =
-        'linear-gradient(' + gradient.join(',') + ')';
-  };
-  video.addEventListener('volumechange', onVolumeChange);
+  video.addEventListener('volumechange', playerControls.onVolumeChange);
 
   // initialize volume display with a fake event
-  onVolumeChange();
+  playerControls.onVolumeChange();
 
   // current time & seek bar updates
   video.addEventListener('timeupdate', function() {
     if (!playerControls.isLive_) {
-      playerControls.updateTimeAndSeekRange_();
+      playerControls.updateTimeAndSeekRange();
     }
   });
 
@@ -208,6 +226,11 @@ playerControls.init = function(video) {
   // trick play
   rewindButton.addEventListener('click', playerControls.onRewind);
   fastForwardButton.addEventListener('click', playerControls.onFastForward);
+
+  // cast
+  castButton.addEventListener('click', sender.launch);
+  // stop casting
+  castConnectedButton.addEventListener('click', sender.stop);
 };
 
 
@@ -217,6 +240,64 @@ playerControls.init = function(video) {
  */
 playerControls.setPlayer = function(player) {
   playerControls.player_ = player;
+};
+
+
+/**
+ * Changes the play/pause button display.
+ * @param {boolean} play True if play should be displayed, false if pause.
+ */
+playerControls.displayPlayButton = function(play) {
+  document.getElementById('pauseButton').style.display =
+      play ? 'none' : 'block';
+  document.getElementById('playButton').style.display = play ? 'block' : 'none';
+};
+
+
+/**
+ * Updates the controls to display whether cast is connected.
+ * @param {boolean} connected True if cast is connected.
+ */
+playerControls.displayCastConnection = function(connected) {
+  document.getElementById('castButton').style.display =
+      connected ? 'none' : 'block';
+  document.getElementById('castConnectedButton').style.display =
+      connected ? 'block' : 'none';
+  document.getElementById('fullscreenButton').style.display =
+      connected ? 'none' : 'block';
+};
+
+
+/**
+ * Updates the controls to reflect volume changes.
+ */
+playerControls.onVolumeChange = function() {
+  var muted, volume;
+  var muteButton = document.getElementById('muteButton');
+  var unmuteButton = document.getElementById('unmuteButton');
+  var volumeBar = document.getElementById('volumeBar');
+  if (sender.state == sender.states.CAST_CONNECTED) {
+    muted = sender.currentMediaMuted;
+    volume = sender.currentMediaVolume;
+  } else {
+    var video = playerControls.video_;
+    muted = video.muted;
+    volume = video.volume;
+  }
+  if (muted) {
+    muteButton.style.display = 'none';
+    unmuteButton.style.display = 'block';
+  } else {
+    unmuteButton.style.display = 'none';
+    muteButton.style.display = 'block';
+  }
+
+  volumeBar.value = muted ? 0 : volume;
+  var gradient = ['to right'];
+  gradient.push('#ccc ' + (volumeBar.value * 100) + '%');
+  gradient.push('#000 ' + (volumeBar.value * 100) + '%');
+  gradient.push('#000 100%');
+  volumeBar.style.background = 'linear-gradient(' + gradient.join(',') + ')';
 };
 
 
@@ -237,7 +318,7 @@ playerControls.onBuffering = function(bufferingState) {
 playerControls.onSeekRangeChanged = function(event) {
   playerControls.seekRange_.start = event.start;
   playerControls.seekRange_.end = event.end;
-  playerControls.updateTimeAndSeekRange_();
+  playerControls.updateTimeAndSeekRange();
 };
 
 
@@ -292,15 +373,28 @@ playerControls.enableTrickPlayButtons = function(enable) {;
 
 /**
  * Called when the seek range or current time need to be updated.
- * @private
  */
-playerControls.updateTimeAndSeekRange_ = function() {
-  var video = playerControls.video_;
+playerControls.updateTimeAndSeekRange = function() {
+  var displayTime, duration, bufferedLength, bufferedStart, bufferedEnd;
+  if (sender.state == sender.states.CAST_CONNECTED) {
+    displayTime = sender.currentMediaTime;
+    duration = sender.currentMediaDuration;
+    bufferedLength = sender.currentMediaBuffered.length;
+    bufferedStart = sender.currentMediaBuffered.start;
+    bufferedEnd = sender.currentMediaBuffered.end;
+  } else {
+    var video = playerControls.video_;
+    displayTime = video.currentTime;
+    duration = video.duration;
+    bufferedLength = video.buffered.length;
+    bufferedStart = bufferedLength ? video.buffered.start(0) : 0;
+    bufferedEnd = bufferedLength ? video.buffered.end(0) : 0;
+  }
+
   var seekRange = playerControls.seekRange_;
   var currentTime = document.getElementById('currentTime');
   var seekBar = document.getElementById('seekBar');
 
-  var displayTime = video.currentTime;
   if (playerControls.isSeeking_) {
     displayTime = seekBar.value;
   }
@@ -327,34 +421,33 @@ playerControls.updateTimeAndSeekRange_ = function() {
       seekBar.value = seekRange.end - displayTime;
     }
   } else {
-    var showHour = video.duration >= 3600;
+    var showHour = duration >= 3600;
     currentTime.textContent =
         playerControls.buildTimeString_(displayTime, showHour);
 
     seekBar.min = 0;
-    seekBar.max = video.duration;
+    seekBar.max = duration;
     if (!playerControls.isSeeking_) {
       seekBar.value = displayTime;
     }
   }
 
   var gradient = ['to right'];
-  var buffered = video.buffered;
-  if (buffered.length == 0) {
+  if (bufferedLength == 0) {
     gradient.push('#000 0%');
   } else {
     // NOTE: the fallback to zero eliminates NaN.
-    var bufferStartFraction = (buffered.start(0) / video.duration) || 0;
-    var bufferEndFraction = (buffered.end(0) / video.duration) || 0;
-    var playheadFraction = (video.currentTime / video.duration) || 0;
+    var bufferStartFraction = (bufferedStart / duration) || 0;
+    var bufferEndFraction = (bufferedEnd / duration) || 0;
+    var playheadFraction = (displayTime / duration) || 0;
 
     if (playerControls.isLive_) {
-      var bufferStart = Math.max(buffered.start(0), seekRange.start);
-      var bufferEnd = Math.min(buffered.end(0), seekRange.end);
+      var bufferStart = Math.max(bufferedStart, seekRange.start);
+      var bufferEnd = Math.min(bufferedEnd, seekRange.end);
       var seekRangeSize = seekRange.end - seekRange.start;
       var bufferStartDistance = bufferStart - seekRange.start;
       var bufferEndDistance = bufferEnd - seekRange.start;
-      var playheadDistance = video.currentTime - seekRange.start;
+      var playheadDistance = displayTime - seekRange.start;
       bufferStartFraction = (bufferStartDistance / seekRangeSize) || 0;
       bufferEndFraction = (bufferEndDistance / seekRangeSize) || 0;
       playheadFraction = (playheadDistance / seekRangeSize) || 0;

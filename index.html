@@ -21,8 +21,11 @@
     <link rel="shortcut icon" href="assets/favicon.ico">
     <link rel="stylesheet" href="index.css">
     <link rel="stylesheet" href="controls.css">
+    <script src="//www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
+    <script src="sender.js"></script>
     <script src="load.js"></script>
     <script src="controls.js"></script>
+    <script src="appUtils.js"></script>
     <script src="app.js"></script>
   </head>
   <body>
@@ -33,7 +36,7 @@
       </tr>
       <tr>
         <td>Force prefixed EME?</td>
-        <td colspan="2"><input id="forcePrefixed" type="checkbox"></td>
+        <td colspan="2"><input id="forcePrefixed"  class="streamOption" type="checkbox"></td>
       </tr>
       <tr>
         <td>Stream type:</td>
@@ -143,31 +146,31 @@
       <tr>
         <td colspan="3">
           Enable trick play?
-          <input id="trickPlayEnabled" type="checkbox" onchange="app.onTrickPlayChange()">
+          <input id="trickPlayEnabled" class="streamOption" type="checkbox" onchange="app.onTrickPlayChange()">
         </td>
       </tr>
       <tr>
         <td colspan="3">
           Enable adaptation?
-          <input id="adaptationEnabled" type="checkbox" checked onchange="app.onAdaptationChange()">
+          <input id="adaptationEnabled" class="streamOption" type="checkbox" checked onchange="app.onAdaptationChange()">
         </td>
       </tr>
       <tr>
         <td>Available video tracks:</td>
-        <td><select id="videoTracks" onchange="app.onVideoChange()"></select></td>
-        <td><input type ="checkbox" id="cycleVideo" onchange="app.cycleVideo()">Cycle video tracks</button></td>
+        <td><select id="videoTracks" class="streamOption" onchange="app.onVideoChange()"></select></td>
+        <td><input type ="checkbox" id="cycleVideo" class="streamOption" onchange="app.cycleVideo()">Cycle video tracks</button></td>
       </tr>
       <tr>
         <td>Available audio tracks:</td>
-        <td><select id="audioTracks" onchange="app.onAudioChange()"></select></td>
-        <td><input type ="checkbox" id="cycleAudio" onchange="app.cycleAudio()">Cycle audio tracks</button></td>
+        <td><select id="audioTracks" class="streamOption" onchange="app.onAudioChange()"></select></td>
+        <td><input type ="checkbox" id="cycleAudio" class="streamOption" onchange="app.cycleAudio()">Cycle audio tracks</button></td>
       </tr>
       <tr>
         <td>Available text tracks:</td>
-        <td><select id="textTracks" onchange="app.onTextChange()"></select></td>
+        <td><select id="textTracks" class="streamOption" onchange="app.onTextChange()"></select></td>
         <td>
           Enable subs?
-          <input id="textEnabled" type="checkbox" onchange="app.onTextChange()">
+          <input id="textEnabled" class="streamOption" type="checkbox" onchange="app.onTextChange()">
         </td>
       </tr>
       <tr>
@@ -201,6 +204,8 @@
         <input id="muteButton" type="button">
         <input id="unmuteButton" type="button">
         <input id="volumeBar" type="range" step="any" min="0" max="1">
+        <input id="castButton" type="button">
+        <input id="castConnectedButton" type="button">
         <input id="fullscreenButton" type="button">
       </div></div>
     </div>
