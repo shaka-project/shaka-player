@@ -1,5 +1,6 @@
 /**
- * Copyright 2014 Google Inc.
+ * @license
+ * Copyright 2015 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +13,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ */
+
+/**
+ * Loads the library.  Chooses compiled or debug version of the library based
+ * on the presence or absence of the URL parameter "compiled".
  *
- * @fileoverview Loads the library.  Chooses compiled or debug version of the
- * library based on the presence or absence of the URL parameter "compiled".
  * This dynamic loading process is not necessary in a production environment,
  * but greatly simplifies the process of switching between compiled and
  * uncompiled mode during development.
@@ -22,7 +26,6 @@
  * This is used in the provided test app, but can also be used to load the
  * uncompiled version of the library into your own application environment.
  */
-
 (function() {  // anonymous namespace
   // The sources may be in a different folder from the test app.
   // Compute the base URL for all library sources.
