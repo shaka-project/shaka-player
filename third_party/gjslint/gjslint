@@ -23,8 +23,8 @@ dir = os.path.dirname(__file__)
 gflags_path = os.path.join(dir, 'python-gflags-2.0')
 linter_path = os.path.join(dir, 'closure_linter-2.3.13')
 
-sys.path.append(gflags_path)
-sys.path.append(linter_path)
+sys.path.insert(0, gflags_path)
+sys.path.insert(0, linter_path)
 
 from closure_linter import gjslint
 
