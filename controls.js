@@ -300,7 +300,6 @@ playerControls.updateTimeAndSeekRange_ = function() {
 
   var displayTime = video.currentTime;
   if (playerControls.isSeeking_) {
-    var seekBar = document.getElementById('seekBar');
     displayTime = seekBar.value;
   }
 

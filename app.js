@@ -990,7 +990,7 @@ app.interpretContentProtection_ = function(schemeIdUri, contentProtection) {
       k: Uint8ArrayUtils.toBase64(key, false)
     };
     var jwkSet = {keys: [keyObj]};
-    var license = JSON.stringify(jwkSet);
+    license = JSON.stringify(jwkSet);
     var initData = {
       'initData': keyid,
       'initDataType': 'webm'
