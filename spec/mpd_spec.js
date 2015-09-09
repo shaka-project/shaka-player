@@ -471,22 +471,6 @@ describe('mpd', function() {
     }
   });
 
-  it('parses namespaced elements', function() {
-    var source = [
-      '<MPD>',
-      '  <Period id="1" duration="PT0H3M1.63S" start="PT0S">',
-      '    <AdaptationSet id="1" lang="fr" contentType="audio">',
-      '      <ContentProtection schemeIdUri="com.bogus">',
-      '        <prefix:TagName keyid="0" key="1"/>',
-      '      </ContentProtection>',
-      '    </AdaptationSet>',
-      '  </Period>',
-      '</MPD>'].join('\n');
-
-    var mpd = shaka.dash.mpd.parseMpd(source, createFailover('').urls);
-    expect(mpd).toBeTruthy();
-  });
-
   it('defaults startNumber to 1 when missing', function() {
     var source = [
       '<MPD>',
