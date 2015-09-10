@@ -257,5 +257,3 @@ MediaEncryptedEvent.prototype.initData;
 /** @const {!HTMLMediaElement} */
 MediaEncryptedEvent.prototype.target;
 
-
-

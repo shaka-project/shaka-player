@@ -253,9 +253,9 @@ describe('Pssh', function() {
   it('extracts boundaries for concatenated boxes', function() {
     var psshData = fromHex(
         GENERIC_PSSH +
-            WIDEVINE_PSSH +
-            OTHER_BOX +
-            PLAYREADY_PSSH);
+        WIDEVINE_PSSH +
+        OTHER_BOX +
+        PLAYREADY_PSSH);
 
     var pssh = new shaka.util.Pssh(psshData);
 

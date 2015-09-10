@@ -1,5 +1,6 @@
 /**
- * Copyright 2014 Google Inc.
+ * @license
+ * Copyright 2015 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,8 +13,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * @fileoverview Externs for prefixed EME v20140218
+ */
+
+/**
+ * @fileoverview Externs for prefixed EME v20140218 as supported by IE11/Edge
  * (http://www.w3.org/TR/2014/WD-encrypted-media-20140218).
  * @externs
  */
@@ -37,7 +40,7 @@ MSMediaKeys.isTypeSupported = function(keySystem, contentType) {};
 
 /**
  * @param {string} contentType
- * @param {!ArrayBuffer|ArrayBufferView|null} initData
+ * @param {?BufferSource} initData
  * @return {MSMediaKeySession}
  */
 MSMediaKeys.prototype.createSession = function(contentType, initData) {};
@@ -46,23 +49,36 @@ MSMediaKeys.prototype.createSession = function(contentType, initData) {};
 
 /**
  * @interface
+ * @extends {EventTarget}
  */
 function MSMediaKeySession() {}
 
 
 /**
- * @param {ArrayBuffer|ArrayBufferView|null} message
+ * @param {?BufferSource} message
  */
 MSMediaKeySession.prototype.update = function(message) {};
+
 
 MSMediaKeySession.prototype.close = function() {};
 
 
-/**
- * @param {string} eventType
- * @param {Function} callback
- */
-MSMediaKeySession.prototype.addEventListener = function(eventType, callback) {};
+/** @type {MSMediaKeyError} */
+MSMediaKeySession.prototype.error;
+
+
+/** @override */
+MSMediaKeySession.prototype.addEventListener =
+    function(type, listener, useCapture) {};
+
+
+/** @override */
+MSMediaKeySession.prototype.removeEventListener =
+    function(type, listener, useCapture) {};
+
+
+/** @override */
+MSMediaKeySession.prototype.dispatchEvent = function(evt) {};
 
 
 /**
