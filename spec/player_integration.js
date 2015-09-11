@@ -779,6 +779,78 @@ describe('Player', function() {
         done();
       });
     });
+
+    it('pauses while rewinding', function(done) {
+      var timestamp;
+      player.setPlaybackStartTime(45);
+      player.load(newSource(plainManifest)).then(function() {
+        video.play();
+        return waitForTargetTime(video, eventManager, 49, 6);
+      }).then(function() {
+        player.setPlaybackRate(-1.0);
+        return delay(2.0);
+      }).then(function() {
+        video.pause();
+        timestamp = video.currentTime;
+        return delay(3.0);
+      }).then(function() {
+        expect(video.paused).toBe(true);
+        expect(video.currentTime).toBe(timestamp);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+
+    it('does not rewind while paused', function(done) {
+      var timestamp;
+      player.setPlaybackStartTime(45);
+      player.load(newSource(plainManifest)).then(function() {
+        video.play();
+        return waitForTargetTime(video, eventManager, 49, 6);
+      }).then(function() {
+        video.pause();
+        timestamp = video.currentTime;
+        return delay(3.0);
+      }).then(function() {
+        player.setPlaybackRate(-1.0);
+        return delay(2.0);
+      }).then(function() {
+        expect(video.paused).toBe(true);
+        expect(video.currentTime).toBe(timestamp);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+
+    it('rewinds after pausing', function(done) {
+      var timestamp;
+      player.setPlaybackStartTime(45);
+      player.load(newSource(plainManifest)).then(function() {
+        video.play();
+        return waitForMovement(video, eventManager);
+      }).then(function() {
+        player.setPlaybackRate(-1.0);
+        return delay(2.0);
+      }).then(function() {
+        video.pause();
+        timestamp = video.currentTime;
+        return delay(3.0);
+      }).then(function() {
+        video.play();
+        return delay(2.0);
+      }).then(function() {
+        expect(video.paused).toBe(false);
+        expect(video.currentTime).toBeLessThan(timestamp);
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
   });
 
   describe('getStats', function() {
