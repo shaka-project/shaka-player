@@ -1008,6 +1008,45 @@ describe('Player', function() {
         done();
       });
     });
+
+    it('fires error if all tracks restricted while playing', function(done) {
+      player.removeEventListener('error', convertErrorToTestFailure, false);
+      var onError = jasmine.createSpy('onError');
+      player.addEventListener('error', onError, false);
+
+      player.load(newSource(plainManifest)).then(function() {
+        waitForMovement(video, eventManager);
+      }).then(function() {
+        var restrictions = player.getConfiguration()['restrictions'];
+        restrictions.maxBandwidth = 10000;
+        player.configure({'restrictions': restrictions});
+
+        expect(onError.calls.any()).toBe(true);
+        expect(player.getVideoTracks().length).toBe(0);
+
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
+
+    it('fires error if all tracks restricted before playing', function(done) {
+      player.removeEventListener('error', convertErrorToTestFailure, false);
+      var onError = jasmine.createSpy('onError');
+      player.addEventListener('error', onError, false);
+
+      var restrictions = player.getConfiguration()['restrictions'];
+      restrictions.maxBandwidth = 10000;
+      player.configure({'restrictions': restrictions});
+
+      player.load(newSource(encryptedManifest)).then(function() {
+        fail();
+      }).catch(function(error) {
+        expect(onError.calls.any()).toBe(true);
+        done();
+      });
+    });
   });
 
   describe('interpretContentProtection', function() {
