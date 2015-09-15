@@ -936,6 +936,22 @@ describe('Player', function() {
         done();
       });
     });
+
+    it('respects the \'main\' attribute', function(done) {
+      // There are no Thai audio AdaptationSets in the MPD, but the English
+      // audio AdaptationSet is marked as main, so even though it is not the
+      // first AdaptationSet, it should be preferred.
+      player.configure({'preferredLanguage': 'th'});
+
+      player.load(newSource(languagesManifest)).then(function() {
+        var activeAudioTrack = getActiveAudioTrack();
+        expect(activeAudioTrack.lang).toBe('en');
+        done();
+      }).catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
   });
 
   describe('configuring restrictions', function() {

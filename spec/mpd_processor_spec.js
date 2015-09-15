@@ -779,6 +779,126 @@ describe('MpdProcessor', function() {
       shaka.player.Player.isTypeSupported = originalIsTypeSupported;
     });
 
+    describe('creates StreamSetInfos from multiple AdaptationSets', function() {
+      var m;
+      var p;
+      var as1;
+      var as2;
+      var r1;
+      var r2;
+      var st1;
+      var st2;
+
+      beforeEach(function() {
+        m = new mpd.Mpd();
+        p = new mpd.Period();
+        as1 = new mpd.AdaptationSet();
+        as2 = new mpd.AdaptationSet();
+        r1 = new mpd.Representation();
+        r2 = new mpd.Representation();
+        st1 = new mpd.SegmentTemplate();
+        st2 = new mpd.SegmentTemplate();
+
+        r1.segmentTemplate = st1;
+        r1.baseUrl = [new goog.Uri('http://example.com')];
+        r1.bandwidth = 250000;
+
+        r2.segmentTemplate = st2;
+        r2.baseUrl = [new goog.Uri('http://example.com')];
+        r2.bandwidth = 500000;
+
+        as1.representations.push(r1);
+        as2.representations.push(r2);
+
+        p.start = 0;
+        p.adaptationSets.push(as1);
+        p.adaptationSets.push(as2);
+
+        m.periods.push(p);
+        m.url = [new goog.Uri('http://example.com/mpd')];
+      });
+
+      it('by merging ones with the same type, group, and language', function() {
+        as1.contentType = 'video';
+        as2.contentType = 'video';
+        as1.group = 1;
+        as2.group = 1;
+        as1.lang = 'en-US';
+        as2.lang = 'en-US';
+
+        r1.mimeType = 'video/mp4';
+        r2.mimeType = 'video/mp4';
+
+        var periodInfo = processor.process(m).periodInfos[0];
+        expect(periodInfo.streamSetInfos.length).toBe(1);
+        expect(periodInfo.streamSetInfos[0].contentType).toBe('video');
+        expect(periodInfo.streamSetInfos[0].lang).toBe('en-US');
+      });
+
+      it('by separating ones with different types', function() {
+        as1.contentType = 'audio';
+        as2.contentType = 'video';
+        as1.group = 1;
+        as2.group = 1;
+        as1.lang = 'en-US';
+        as2.lang = 'en-US';
+
+        r1.mimeType = 'audio/mp4';
+        r2.mimeType = 'video/mp4';
+
+        var periodInfo = processor.process(m).periodInfos[0];
+        expect(periodInfo.streamSetInfos.length).toBe(2);
+
+        expect(periodInfo.streamSetInfos[0].contentType).toBe('audio');
+        expect(periodInfo.streamSetInfos[0].lang).toBe('en-US');
+
+        expect(periodInfo.streamSetInfos[1].contentType).toBe('video');
+        expect(periodInfo.streamSetInfos[1].lang).toBe('en-US');
+      });
+
+      it('by separating ones with different groups', function() {
+        as1.contentType = 'audio';
+        as2.contentType = 'audio';
+        as1.group = 1;
+        as2.group = 2;
+        as1.lang = 'en-US';
+        as2.lang = 'en-US';
+
+        r1.mimeType = 'audio/mp4';
+        r2.mimeType = 'audio/mp4';
+
+        var periodInfo = processor.process(m).periodInfos[0];
+        expect(periodInfo.streamSetInfos.length).toBe(2);
+
+        expect(periodInfo.streamSetInfos[0].contentType).toBe('audio');
+        expect(periodInfo.streamSetInfos[0].lang).toBe('en-US');
+
+        expect(periodInfo.streamSetInfos[1].contentType).toBe('audio');
+        expect(periodInfo.streamSetInfos[1].lang).toBe('en-US');
+      });
+
+      it('by separating ones with different languages', function() {
+        as1.contentType = 'audio';
+        as2.contentType = 'audio';
+        as1.group = 1;
+        as2.group = 1;
+        as1.lang = 'en-US';
+        as2.lang = 'fr';
+
+        r1.mimeType = 'audio/mp4';
+        r2.mimeType = 'audio/mp4';
+
+        var periodInfo = processor.process(m).periodInfos[0];
+        expect(periodInfo.streamSetInfos.length).toBe(2);
+
+        expect(periodInfo.streamSetInfos[0].contentType).toBe('audio');
+        expect(periodInfo.streamSetInfos[0].lang).toBe('en-US');
+
+        expect(periodInfo.streamSetInfos[1].contentType).toBe('audio');
+        expect(periodInfo.streamSetInfos[1].lang).toBe('fr');
+      });
+    });
+
     describe('SegmentTemplate', function() {
       var m;
       var p;

@@ -2,7 +2,15 @@
 <MPD xmlns="urn:mpeg:DASH:schema:MPD:2011" type="static" mediaPresentationDuration="PT59.994S" minBufferTime="PT1S" profiles="urn:webm:dash:profile:webm-on-demand:2012">
   <BaseURL>//shaka-player-demo.appspot.com/assets/angel_one/</BaseURL>
   <Period id="0" start="PT0S" duration="PT59.994S">
-    <AdaptationSet id="6" mimeType="audio/webm" codecs="vorbis" lang="en" audioSamplingRate="48000" subsegmentStartsWithSAP="1">
+    <AdaptationSet id="7" mimeType="audio/webm" codecs="vorbis" lang="de" audioSamplingRate="48000" subsegmentStartsWithSAP="1" group="1">
+      <Representation id="7" bandwidth="91060">
+        <BaseURL>a-de.webm</BaseURL>
+        <SegmentBase indexRange="682068-682263">
+          <Initialization range="0-4521"/>
+        </SegmentBase>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet id="6" mimeType="audio/webm" codecs="vorbis" lang="en" audioSamplingRate="48000" subsegmentStartsWithSAP="1" group="1">
       <Role value="main" />
       <Representation id="6" bandwidth="112375">
         <BaseURL>a-en.webm</BaseURL>
@@ -11,15 +19,7 @@
         </SegmentBase>
       </Representation>
     </AdaptationSet>
-    <AdaptationSet id="7" mimeType="audio/webm" codecs="vorbis" lang="de" audioSamplingRate="48000" subsegmentStartsWithSAP="1">
-      <Representation id="7" bandwidth="91060">
-        <BaseURL>a-de.webm</BaseURL>
-        <SegmentBase indexRange="682068-682263">
-          <Initialization range="0-4521"/>
-        </SegmentBase>
-      </Representation>
-    </AdaptationSet>
-    <AdaptationSet id="8" mimeType="audio/webm" codecs="vorbis" lang="es" audioSamplingRate="48000" subsegmentStartsWithSAP="1">
+    <AdaptationSet id="8" mimeType="audio/webm" codecs="vorbis" lang="es" audioSamplingRate="48000" subsegmentStartsWithSAP="1" group="1">
       <Representation id="8" bandwidth="96408">
         <BaseURL>a-es.webm</BaseURL>
         <SegmentBase indexRange="728008-728202">
@@ -27,7 +27,7 @@
         </SegmentBase>
       </Representation>
     </AdaptationSet>
-    <AdaptationSet id="9" mimeType="audio/webm" codecs="vorbis" lang="fr" audioSamplingRate="48000" subsegmentStartsWithSAP="1">
+    <AdaptationSet id="9" mimeType="audio/webm" codecs="vorbis" lang="fr" audioSamplingRate="48000" subsegmentStartsWithSAP="1" group="1">
       <Representation id="9" bandwidth="94640">
         <BaseURL>a-fr.webm</BaseURL>
         <SegmentBase indexRange="721029-721223">
@@ -35,7 +35,7 @@
         </SegmentBase>
       </Representation>
     </AdaptationSet>
-    <AdaptationSet id="10" mimeType="audio/webm" codecs="vorbis" lang="it" audioSamplingRate="48000" subsegmentStartsWithSAP="1">
+    <AdaptationSet id="10" mimeType="audio/webm" codecs="vorbis" lang="it" audioSamplingRate="48000" subsegmentStartsWithSAP="1" group="1">
       <Representation id="10" bandwidth="94290">
         <BaseURL>a-it.webm</BaseURL>
         <SegmentBase indexRange="723532-723726">
