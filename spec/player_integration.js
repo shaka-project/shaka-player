@@ -879,6 +879,9 @@ describe('Player', function() {
       var originalTextId;
 
       player.load(newSource(languagesManifest)).then(function() {
+        video.play();
+        return waitForMovement(video, eventManager);
+      }).then(function() {
         var activeAudioTrack = getActiveAudioTrack();
         expect(activeAudioTrack.lang).toBe('en');
         originalAudioId = activeAudioTrack.id;
@@ -908,6 +911,9 @@ describe('Player', function() {
     it('enables text tracks when no matching audio is found', function(done) {
       player.configure({'preferredLanguage': 'el'});
       player.load(newSource(languagesManifest)).then(function() {
+        video.play();
+        return waitForMovement(video, eventManager);
+      }).then(function() {
         var activeAudioTrack = getActiveAudioTrack();
         expect(activeAudioTrack.lang).toBe('en');
 
@@ -924,6 +930,9 @@ describe('Player', function() {
     it('disables text tracks when matching audio is found', function(done) {
       player.configure({'preferredLanguage': 'fr'});
       player.load(newSource(languagesManifest)).then(function() {
+        video.play();
+        return waitForMovement(video, eventManager);
+      }).then(function() {
         var activeAudioTrack = getActiveAudioTrack();
         expect(activeAudioTrack.lang).toBe('fr');
 
@@ -944,6 +953,9 @@ describe('Player', function() {
       player.configure({'preferredLanguage': 'th'});
 
       player.load(newSource(languagesManifest)).then(function() {
+        video.play();
+        return waitForMovement(video, eventManager);
+      }).then(function() {
         var activeAudioTrack = getActiveAudioTrack();
         expect(activeAudioTrack.lang).toBe('en');
         done();
