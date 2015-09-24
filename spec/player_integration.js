@@ -893,6 +893,9 @@ describe('Player', function() {
         player.configure({'preferredLanguage': 'fr'});
         return player.load(newSource(languagesManifest));
       }).then(function() {
+        video.play();
+        return waitForMovement(video, eventManager);
+      }).then(function() {
         var activeAudioTrack = getActiveAudioTrack();
         expect(activeAudioTrack.lang).toBe('fr');
         expect(activeAudioTrack.id).not.toBe(originalAudioId);
