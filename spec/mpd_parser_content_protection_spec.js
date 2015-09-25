@@ -17,7 +17,7 @@
 
 goog.require('shaka.dash.mpd');
 
-describe('mpd', function() {
+describe('mpd.ContentProtection', function() {
   it('inherits ContentProtection from AdaptationSet', function() {
     var source = [
       '<MPD>',

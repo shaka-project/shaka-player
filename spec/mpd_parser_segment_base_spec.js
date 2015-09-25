@@ -17,7 +17,7 @@
 
 goog.require('shaka.dash.mpd');
 
-describe('mpd', function() {
+describe('mpd.SegmentBase', function() {
   it('inherits SegmentBase from Period', function() {
     var source = [
       '<MPD>',

@@ -18,7 +18,7 @@
 goog.require('shaka.dash.mpd');
 
 // TODO: Write more tests.
-describe('mpd', function() {
+describe('mpd.SegmentTemplate', function() {
   it('merges and overrides SegmentTemplate across levels', function() {
     var source = [
       '<MPD>',
