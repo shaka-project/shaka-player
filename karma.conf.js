@@ -15,6 +15,10 @@ module.exports = function(config) {
       // closure base
       'third_party/closure/goog/base.js',
 
+      // include the utils files first
+      'spec/util.js',
+      'spec/integration_util.js',
+
       // included files - tests
       'spec/*.js',
 
@@ -38,7 +42,7 @@ module.exports = function(config) {
     browserNoActivityTimeout: 60000,
 
     // don't capture the client's console logs
-    client: { captureConsole: false },
+    client: { captureConsole: true },
 
     // web server port
     port: 9876,

@@ -21,7 +21,7 @@ goog.require('shaka.player.Player');
 goog.require('shaka.polyfill.installAll');
 goog.require('shaka.util.EventManager');
 
-describe('Player', function() {
+describe('Live', function() {
   var originalTimeout;
   var originalSend;
   var video;
