@@ -374,74 +374,92 @@ describe('MpdProcessor.SegmentTemplate', function() {
         return 1000.0 * manifestCreationTime;
       };
 
-      var secondsSinceStart = 60 * 60;
+      var secondsSinceStart = 60 * 60;  // 1 hour.
 
       m.type = 'dynamic';
       m.url = [new goog.Uri('http://example.com/')];
       m.availabilityStartTime = manifestCreationTime - secondsSinceStart;
-      m.suggestedPresentationDelay =
-          shaka.dash.mpd.DEFAULT_SUGGESTED_PRESENTATION_DELAY_;
+      m.suggestedPresentationDelay = 11;
       m.timeShiftBufferDepth = 60;
       m.minBufferTime = 0;
 
+      // The start time of the earliest available segment is given by
+      // T0 = CurrentPresentationTime - 2*SegmentDuration - TimeShiftBufferDepth
+      //    = (60 * 60) - 2*10 - 60
+      //    = 3520 (or 31680000 unscaled)
+      //
+      // The segment index of this segment is
+      // I0 = CEIL(T0 / SegmentDuration)
+      //    = CEIL(3520 / 10)
+      //    = 352
+      //
+      // and the segment number is thus
+      // N0 = I0 + StartNumber
+      //    = 352 + 5
+      //    = 357
+      //
+      // The start time of the latest available segment is given by
+      // T1 = CurrentPresentationTime - SegmentDuration -
+      //      SuggestedPresentationDelay
+      //    = (60 * 60) - 10 - 11
+      //    = 3579
+      //
+      // The segment index of this segment is
+      // I1 = FLOOR(T1 / SegmentDuration) =
+      //    = FLOOR(3589 / 10)
+      //    = 357
+      //
+      // and the segment number is thus
+      // N1 = I1 + StartNumber
+      //    = 357 + 5
+      //    = 362
+
       manifestInfo = processor.createManifestInfo_(m, manifestCreationTime);
-
-      var periodInfo = manifestInfo.periodInfos[0];
-      expect(periodInfo).toBeTruthy();
-
-      var scaledSegmentDuration = st.segmentDuration / st.timescale;
-
-      // The first segment is the earliest available one.
-      var earliestSegmentNumber =
-          Math.ceil((secondsSinceStart -
-                     (2 * scaledSegmentDuration) -
-                     m.timeShiftBufferDepth) / scaledSegmentDuration) + 1;
-
-      var latestAvailableTimestamp = secondsSinceStart - scaledSegmentDuration;
-      var latestAvailableSegmentStartTime =
-          Math.floor(latestAvailableTimestamp / scaledSegmentDuration) *
-          scaledSegmentDuration;
-      var currentSegmentNumber =
-          Math.floor((latestAvailableSegmentStartTime -
-                      m.suggestedPresentationDelay) /
-                     scaledSegmentDuration) + 1;
-
-      var expectedNumSegments =
-          currentSegmentNumber - earliestSegmentNumber + 1;
-
-      // Check the first StreamInfo.
-      var si1 = periodInfo.streamSetInfos[0].streamInfos[0];
-      expect(si1).toBeTruthy();
-
-      si1.segmentIndexSource.create().then(function(segmentIndex) {
-        var references = segmentIndex.references;
-        expect(references).toBeTruthy();
-        expect(references.length).toBe(expectedNumSegments);
-
-        for (var segmentNumber = earliestSegmentNumber;
-             segmentNumber - earliestSegmentNumber < expectedNumSegments;
-             ++segmentNumber) {
-          var expectedNumberReplacement = (segmentNumber - 1) + st.startNumber;
-          var expectedTimeReplacement =
-              (segmentNumber - 1) * st.segmentDuration;
-          var expectedUrl = 'http://example.com/' +
-              expectedNumberReplacement + '-' +
-              expectedTimeReplacement + '-250000-media.mp4';
-
-          var expectedStartTime = (segmentNumber - 1) * st.segmentDuration;
-          var expectedScaledStartTime = expectedStartTime / st.timescale;
-
-          checkReference(
-              references[segmentNumber - earliestSegmentNumber],
-              expectedUrl,
-              expectedScaledStartTime, expectedScaledStartTime + 10);
+      validateManifest(manifestInfo, done, [
+        {
+          'bandwidth': 250000,
+          'init': {
+            'url': 'http://example.com/250000-init.mp4',
+            'start': 0,
+            'end': null
+          },
+          'references': [
+            {
+              'url': 'http://example.com/357-31680000-250000-media.mp4',
+              'start': 3520,
+              'end': 3530
+            },
+            {
+              'url': 'http://example.com/358-31770000-250000-media.mp4',
+              'start': 3530,
+              'end': 3540
+            },
+            {
+              'url': 'http://example.com/359-31860000-250000-media.mp4',
+              'start': 3540,
+              'end': 3550
+            },
+            {
+              'url': 'http://example.com/360-31950000-250000-media.mp4',
+              'start': 3550,
+              'end': 3560
+            },
+            {
+              'url': 'http://example.com/361-32040000-250000-media.mp4',
+              'start': 3560,
+              'end': 3570
+            },
+            {
+              'url': 'http://example.com/362-32130000-250000-media.mp4',
+              'start': 3570,
+              'end': 3580
+            }
+          ]
         }
+      ]);
 
-        // Replace fake now().
-        shaka.util.Clock.now = originalNow;
-
-        done();
-      });
+      // Replace fake now().
+      shaka.util.Clock.now = originalNow;
     });
 
     it('SegmentTimeline w/ gaps', function(done) {
