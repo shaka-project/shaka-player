@@ -425,6 +425,7 @@ describe('Configuration', function() {
       var config = {
         'enableAdaptation': true,
         'streamBufferSize': 17,
+        'liveStreamEndTimeout': 20,
         'licenseRequestTimeout': 19,
         'mpdRequestTimeout': 23,
         'segmentRequestTimeout': 29,
