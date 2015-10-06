@@ -644,6 +644,11 @@ app.removeOfflineStream_ = function(groupId) {
  * Loads whatever stream type is selected.
  */
 app.loadStream = function() {
+  // Set the cross-origin flag to anonymous to allow loading subtitle tracks
+  // cross-origin, as in the Angel One clip.
+  // TODO: Remove this when subtitles no longer use the track element.
+  app.video_.crossOrigin = 'anonymous';
+
   var type = document.getElementById('streamTypeList').value;
   if (type == 'http') {
     app.loadHttpStream();
