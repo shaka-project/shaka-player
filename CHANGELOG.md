@@ -14,6 +14,8 @@ Bugfixes:
   - Key status error reporting is now more consistent and provides more
     information.
   - Reduced flakiness in some tests.
+  - Requests used for clock sync no longer allow caching.
+    - https://github.com/google/shaka-player/issues/191
 
 
 ## 1.5.0 (2015-09-17)
