@@ -1,3 +1,21 @@
+## 1.5.1 (2015-10-07)
+
+A roll-up of recent bugfixes.
+
+Bugfixes:
+  - Fixed a major memory leak introduced in 1.5.0.
+    - https://github.com/google/shaka-player/issues/184
+  - Deleting encrypted offline content now deletes persistent sessions.
+    - https://github.com/google/shaka-player/issues/171
+  - Static content using SegmentTemplate is now truncated at the Period's
+    duration.
+    - https://github.com/google/shaka-player/issues/187
+    - https://github.com/google/shaka-player/issues/173
+  - Key status error reporting is now more consistent and provides more
+    information.
+  - Reduced flakiness in some tests.
+
+
 ## 1.5.0 (2015-09-17)
 
 Features:
