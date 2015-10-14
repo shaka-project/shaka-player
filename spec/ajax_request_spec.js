@@ -17,7 +17,6 @@
 
 goog.require('shaka.media.SegmentIndex');
 goog.require('shaka.media.SegmentReference');
-goog.require('shaka.player.DrmSchemeInfo');
 goog.require('shaka.util.AjaxRequest');
 goog.require('shaka.util.ContentDatabaseWriter');
 
@@ -62,8 +61,6 @@ describe('AjaxRequest', function() {
     var streamInfo = new shaka.media.StreamInfo();
     streamInfo.mimeType = 'video/phony';
     streamInfo.codecs = 'phony';
-
-    var drmSchemeInfo = shaka.player.DrmSchemeInfo.createUnencrypted();
 
     var db = new shaka.util.ContentDatabaseWriter(null, null);
     db.setUpDatabase().then(function() {

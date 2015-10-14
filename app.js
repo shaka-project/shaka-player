@@ -966,7 +966,7 @@ app.onPlayerError_ = function(event) {
 /**
  * Called to interpret ContentProtection elements from the MPD.
  * @param {!string} schemeIdUri
- * @param {!Element} contentProtection The ContentProtection XML element.
+ * @param {!Node} contentProtection The ContentProtection XML element.
  * @return {Array.<shaka.player.DrmInfo.Config>}
  * @private
  */

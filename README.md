@@ -111,10 +111,10 @@ git pull --rebase
 ## Design Overview ##
 
 The main entities you care about are [shaka.player.Player][],
-[shaka.player.DashVideoSource][], and [shaka.player.DrmSchemeInfo][].
+[shaka.player.DashVideoSource][], and [shaka.player.DrmInfo.Config][].
 In short, you construct a player and give it a \<video\> tag, then you
 construct a DASH video source and give it a manifest URL and an optional DRM
-callback.  Your DRM callback returns DrmSchemeInfo objects to describe your
+callback.  Your DRM callback returns DrmInfo.Config objects to describe your
 DRM setup.  You load this video source into the player to begin playback.
 
 The player handles high-level playback and DRM, while the video source deals
@@ -127,7 +127,7 @@ can be found in [the tutorials][].
 
 [shaka.player.Player]: http://shaka-player-demo.appspot.com/docs/shaka.player.Player.html
 [shaka.player.DashVideoSource]: http://shaka-player-demo.appspot.com/docs/shaka.player.DashVideoSource.html
-[shaka.player.DrmSchemeInfo]: http://shaka-player-demo.appspot.com/docs/shaka.player.DrmSchemeInfo.html
+[shaka.player.DrmInfo.Config]: http://shaka-player-demo.appspot.com/docs/shaka.player.DrmInfo.html#Config
 [the tutorials]: http://shaka-player-demo.appspot.com/docs/tutorial-player.html
 
 

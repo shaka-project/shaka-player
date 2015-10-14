@@ -19,7 +19,7 @@
 goog.require('shaka.media.SegmentIndex');
 goog.require('shaka.media.SegmentReference');
 goog.require('shaka.media.StreamInfo');
-goog.require('shaka.player.DrmSchemeInfo');
+goog.require('shaka.player.DrmInfo');
 goog.require('shaka.util.ContentDatabase');
 goog.require('shaka.util.ContentDatabaseReader');
 goog.require('shaka.util.ContentDatabaseWriter');
@@ -42,8 +42,10 @@ describe('ContentDatabase', function() {
     { start_time: 2, end_time: 4 },
     { start_time: 4, end_time: null }
   ];
-  const drmScheme = new shaka.player.DrmSchemeInfo(
-      keySystem, licenseServerUrl, false, null);
+  const drmInfo = shaka.player.DrmInfo.createFromConfig({
+    'keySystem': keySystem,
+    'licenseServerUrl': licenseServerUrl
+  });
 
   var customMatchers = {
     toMatchReference: function(util) {
@@ -287,7 +289,7 @@ describe('ContentDatabase', function() {
   it('stores and retrieves a group information', function(done) {
     p.then(function() {
       return writer.insertGroup(
-          [streamInfo], ['ABCD', 'EFG'], duration, drmScheme);
+          [streamInfo], ['ABCD', 'EFG'], duration, drmInfo);
     }).then(function(groupId) {
       return reader.retrieveGroup(groupId);
     }).then(function(groupInformation) {
@@ -309,7 +311,7 @@ describe('ContentDatabase', function() {
       return reader.retrieveGroupIds();
     }).then(function(groupIds) {
       initalGroupIdsLength = groupIds.length;
-      return writer.insertGroup([streamInfo], ['HIJK'], duration, drmScheme);
+      return writer.insertGroup([streamInfo], ['HIJK'], duration, drmInfo);
     }).then(function() {
       return reader.retrieveGroupIds();
     }).then(function(groupIds) {
@@ -324,7 +326,7 @@ describe('ContentDatabase', function() {
   it('deletes group information and throws error on retrieval', function(done) {
     var groupId;
     p.then(function() {
-      return writer.insertGroup([streamInfo], [], duration, drmScheme);
+      return writer.insertGroup([streamInfo], [], duration, drmInfo);
     }).then(function(resultingGroupId) {
       groupId = resultingGroupId;
       return writer.deleteGroup(groupId);
@@ -342,7 +344,7 @@ describe('ContentDatabase', function() {
   it('deletes streams in group and throws error on retrieval', function(done) {
     var streamIds, groupId;
     p.then(function() {
-      return writer.insertGroup([streamInfo], [], duration, drmScheme);
+      return writer.insertGroup([streamInfo], [], duration, drmInfo);
     }).then(function(id) {
       groupId = id;
       return reader.retrieveGroup(groupId);
@@ -363,7 +365,7 @@ describe('ContentDatabase', function() {
   it('converts old format of data to new format', function(done) {
     var streamId, groupId;
     p.then(function() {
-      return writer.insertGroup([streamInfo], [], duration, drmScheme);
+      return writer.insertGroup([streamInfo], [], duration, drmInfo);
     }).then(function(currentGroupId) {
       groupId = currentGroupId;
       return reader.retrieveGroup(currentGroupId);

@@ -16,7 +16,6 @@
  */
 
 goog.require('shaka.player.DashVideoSource');
-goog.require('shaka.player.DrmSchemeInfo');
 goog.require('shaka.player.Player');
 goog.require('shaka.util.AjaxRequest');
 goog.require('shaka.util.EWMABandwidthEstimator');
@@ -240,33 +239,6 @@ describe('Player', function() {
                                               icp,
                                               estimator);
     }
-
-    it('can still use the old-style ContentProtectionCallback', function(done) {
-      function icp(contentProtection) {
-        // Call utility function from util.js.
-        var configs = interpretContentProtection(
-            contentProtection.schemeIdUri, contentProtection);
-        var c = configs[0];
-        // Translate to DrmSchemeInfo.
-        var drmSchemeInfo = new shaka.player.DrmSchemeInfo(
-            c['keySystem'],
-            c['licenseServerUrl'],
-            c['withCredentials'],
-            c['initData']);
-        return drmSchemeInfo;
-      }
-
-      player.load(newSourceWithIcp(icp)).then(function() {
-        video.play();
-        return waitForMovement(video, eventManager);
-      }).then(function() {
-        expect(video.currentTime).toBeGreaterThan(0.0);
-        done();
-      }).catch(function(error) {
-        fail(error);
-        done();
-      });
-    });
 
     it('calls the license post-processor', function(done) {
       var licensePostProcessor;
