@@ -30,8 +30,8 @@ describe('Player', function() {
   var eventManager;
 
   const segmentDurationManifestUrl =
-      'http://vm2.dashif.org/livesim/testpic_6s/Manifest.mpd';
-  const googleStorageUrl = 'http://storage.googleapis.com/';
+      '//vm2.dashif.org/livesim/testpic_6s/Manifest.mpd';
+  const googleStorageUrl = '//storage.googleapis.com/';
   const segmentTimeDir =
       googleStorageUrl + 'widevine-demo-media/oops-segment-timeline-time/';
   const segmentTimeMpd =
