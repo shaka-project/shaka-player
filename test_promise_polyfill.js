@@ -26,4 +26,8 @@ var adapter = {
 // Player.  Tests related to thenables (2.3.3.*) are therefore ignored.
 var opts = { 'grep': /^2.3.3/, 'invert': true };
 var promisesAplusTests = require('promises-aplus-tests');
-promisesAplusTests(adapter, opts);
+promisesAplusTests(adapter, opts, function(err) {
+  var failures = err ? err.failures : 0;
+  console.log('FAILURES:', failures);
+  process.exit(failures ? 1 : 0);
+});
