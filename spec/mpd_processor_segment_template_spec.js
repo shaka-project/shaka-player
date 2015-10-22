@@ -280,186 +280,465 @@ describe('MpdProcessor.SegmentTemplate', function() {
       ]);
     });
 
-    it('segment duration w/o AST', function(done) {
-      st.timescale = 9000;
-      st.presentationTimeOffset = 0;
-      st.segmentDuration = 9000 * 10;
-      st.startNumber = 5;
-      st.mediaUrlTemplate = '$Number$-$Time$-$Bandwidth$-media.mp4';
-      st.initializationUrlTemplate = '$Bandwidth$-init.mp4';
+    describe('segment duration w/o AST', function() {
+      beforeEach(function() {
+        st.timescale = 9000;
+        st.presentationTimeOffset = 0;
+        st.segmentDuration = 9000 * 10;
+        st.mediaUrlTemplate = '$Number$-$Time$-$Bandwidth$-media.mp4';
+        st.initializationUrlTemplate = '$Bandwidth$-init.mp4';
 
-      r1.baseUrl = [new goog.Uri('http://example.com/')];
-      r1.bandwidth = 250000;
+        r1.baseUrl = [new goog.Uri('http://example.com/')];
+        r1.bandwidth = 250000;
 
-      r2.baseUrl = [new goog.Uri('http://example.com/')];
-      r2.bandwidth = 500000;
+        r2.baseUrl = [new goog.Uri('http://example.com/')];
+        r2.bandwidth = 500000;
+      });
 
-      // If the MPD is static and uses segment duration then there must be
-      // an explicit Period duration.
-      p.duration = 30;
+      it('and w/ @startNumber == 1', function(done) {
+        st.startNumber = 1;
 
-      manifestInfo = processor.createManifestInfo_(m, 1000);
-      validateManifest(manifestInfo, done, [
-        {
-          'bandwidth': 250000,
-          'init': {
-            'url': 'http://example.com/250000-init.mp4',
-            'start': 0,
-            'end': null
-          },
-          'references': [
-            {
-              'url': 'http://example.com/5-0-250000-media.mp4',
+        // If the MPD is static and uses segment duration then there must be
+        // an explicit Period duration.
+        p.duration = 30;
+
+        var manifestInfo = processor.createManifestInfo_(m, 1000);
+        validateManifest(manifestInfo, done, [
+          {
+            'bandwidth': 250000,
+            'init': {
+              'url': 'http://example.com/250000-init.mp4',
               'start': 0,
-              'end': 10
+              'end': null
             },
-            {
-              'url': 'http://example.com/6-90000-250000-media.mp4',
-              'start': 10,
-              'end': 20
-            },
-            {
-              'url': 'http://example.com/7-180000-250000-media.mp4',
-              'start': 20,
-              'end': 30
-            }
-          ]
-        },
-        {
-          'bandwidth': 500000,
-          'init': {
-            'url': 'http://example.com/500000-init.mp4',
-            'start': 0,
-            'end': null
+            'references': [
+              {
+                'url': 'http://example.com/1-0-250000-media.mp4',
+                'start': 0,
+                'end': 10
+              },
+              {
+                'url': 'http://example.com/2-90000-250000-media.mp4',
+                'start': 10,
+                'end': 20
+              },
+              {
+                'url': 'http://example.com/3-180000-250000-media.mp4',
+                'start': 20,
+                'end': 30
+              }
+            ]
           },
-          'references': [
-            {
-              'url': 'http://example.com/5-0-500000-media.mp4',
+          {
+            'bandwidth': 500000,
+            'init': {
+              'url': 'http://example.com/500000-init.mp4',
               'start': 0,
-              'end': 10
+              'end': null
             },
-            {
-              'url': 'http://example.com/6-90000-500000-media.mp4',
-              'start': 10,
-              'end': 20
+            'references': [
+              {
+                'url': 'http://example.com/1-0-500000-media.mp4',
+                'start': 0,
+                'end': 10
+              },
+              {
+                'url': 'http://example.com/2-90000-500000-media.mp4',
+                'start': 10,
+                'end': 20
+              },
+              {
+                'url': 'http://example.com/3-180000-500000-media.mp4',
+                'start': 20,
+                'end': 30
+              }
+            ]
+          }
+        ]);
+      });
+
+      it('and w/ @startNumber > 1', function(done) {
+        st.startNumber = 5;
+        p.duration = 70;
+
+        var manifestInfo = processor.createManifestInfo_(m, 1000);
+        validateManifest(manifestInfo, done, [
+          {
+            'bandwidth': 250000,
+            'init': {
+              'url': 'http://example.com/250000-init.mp4',
+              'start': 0,
+              'end': null
             },
-            {
-              'url': 'http://example.com/7-180000-500000-media.mp4',
-              'start': 20,
-              'end': 30
-            }
-          ]
-        }
-      ]);
+            'references': [
+              {
+                'url': 'http://example.com/5-360000-250000-media.mp4',
+                'start': 40,
+                'end': 50
+              },
+              {
+                'url': 'http://example.com/6-450000-250000-media.mp4',
+                'start': 50,
+                'end': 60
+              },
+              {
+                'url': 'http://example.com/7-540000-250000-media.mp4',
+                'start': 60,
+                'end': 70
+              }
+            ]
+          },
+          {
+            'bandwidth': 500000,
+            'init': {
+              'url': 'http://example.com/500000-init.mp4',
+              'start': 0,
+              'end': null
+            },
+            'references': [
+              {
+                'url': 'http://example.com/5-360000-500000-media.mp4',
+                'start': 40,
+                'end': 50
+              },
+              {
+                'url': 'http://example.com/6-450000-500000-media.mp4',
+                'start': 50,
+                'end': 60
+              },
+              {
+                'url': 'http://example.com/7-540000-500000-media.mp4',
+                'start': 60,
+                'end': 70
+              }
+            ]
+          }
+        ]);
+      });
+
+      it('and w/ @startNumber == 0', function(done) {
+        // The parser converts @startNumber=0 to startNumber=1 and
+        // zeroBasedSegmentNumbers=true.
+        st.startNumber = 1;
+        st.zeroBasedSegmentNumbers = true;
+
+        // If the MPD is static and uses segment duration then there must be
+        // an explicit Period duration.
+        p.duration = 30;
+
+        var manifestInfo = processor.createManifestInfo_(m, 1000);
+        validateManifest(manifestInfo, done, [
+          {
+            'bandwidth': 250000,
+            'init': {
+              'url': 'http://example.com/250000-init.mp4',
+              'start': 0,
+              'end': null
+            },
+            'references': [
+              {
+                'url': 'http://example.com/0-0-250000-media.mp4',
+                'start': 0,
+                'end': 10
+              },
+              {
+                'url': 'http://example.com/1-90000-250000-media.mp4',
+                'start': 10,
+                'end': 20
+              },
+              {
+                'url': 'http://example.com/2-180000-250000-media.mp4',
+                'start': 20,
+                'end': 30
+              }
+            ]
+          },
+          {
+            'bandwidth': 500000,
+            'init': {
+              'url': 'http://example.com/500000-init.mp4',
+              'start': 0,
+              'end': null
+            },
+            'references': [
+              {
+                'url': 'http://example.com/0-0-500000-media.mp4',
+                'start': 0,
+                'end': 10
+              },
+              {
+                'url': 'http://example.com/1-90000-500000-media.mp4',
+                'start': 10,
+                'end': 20
+              },
+              {
+                'url': 'http://example.com/2-180000-500000-media.mp4',
+                'start': 20,
+                'end': 30
+              }
+            ]
+          }
+        ]);
+      });
     });
 
-    it('segment duration w/ AST', function(done) {
-      st.timescale = 9000;
-      st.presentationTimeOffset = 0;
-      st.segmentDuration = 9000 * 10;
-      st.startNumber = 5;  // Ensure startNumber > 1 works.
-      st.mediaUrlTemplate = '$Number$-$Time$-$Bandwidth$-media.mp4';
-      st.initializationUrlTemplate = '$Bandwidth$-init.mp4';
+    describe('segment duration w/ AST', function() {
+      var originalNow;
+      var manifestCreationTime;
 
-      r1.baseUrl = [new goog.Uri('http://example.com/')];
-      r1.bandwidth = 250000;
+      beforeEach(function() {
+        st.timescale = 9000;
+        st.presentationTimeOffset = 0;
+        st.segmentDuration = 9000 * 10;
+        st.mediaUrlTemplate = '$Number$-$Time$-$Bandwidth$-media.mp4';
+        st.initializationUrlTemplate = '$Bandwidth$-init.mp4';
 
-      // Only process the first Representation.
-      as.representations.splice(1, 1);
+        r1.baseUrl = [new goog.Uri('http://example.com/')];
+        r1.bandwidth = 250000;
 
-      // Hijack shaka.util.Clock.now()
-      var originalNow = shaka.util.Clock.now;
-      var manifestCreationTime = Math.round(originalNow() / 1000.0);
-      shaka.util.Clock.now = function() {
-        return 1000.0 * manifestCreationTime;
-      };
+        // Only process the first Representation.
+        as.representations.splice(1, 1);
 
-      var secondsSinceStart = 60 * 60;  // 1 hour.
+        // Hijack shaka.util.Clock.now()
+        originalNow = shaka.util.Clock.now;
+        manifestCreationTime = Math.round(originalNow() / 1000.0);
+        shaka.util.Clock.now = function() {
+          return 1000.0 * manifestCreationTime;
+        };
 
-      m.type = 'dynamic';
-      m.url = [new goog.Uri('http://example.com/')];
-      m.availabilityStartTime = manifestCreationTime - secondsSinceStart;
-      m.suggestedPresentationDelay = 11;
-      m.timeShiftBufferDepth = 60;
-      m.minBufferTime = 0;
+        var secondsSinceStart = 60 * 60;  // 1 hour.
 
-      // The start time of the earliest available segment is given by
-      // T0 = CurrentPresentationTime - 2*SegmentDuration - TimeShiftBufferDepth
-      //    = (60 * 60) - 2*10 - 60
-      //    = 3520 (or 31680000 unscaled)
-      //
-      // The segment index of this segment is
-      // I0 = CEIL(T0 / SegmentDuration)
-      //    = CEIL(3520 / 10)
-      //    = 352
-      //
-      // and the segment number is thus
-      // N0 = I0 + StartNumber
-      //    = 352 + 5
-      //    = 357
-      //
-      // The start time of the latest available segment is given by
-      // T1 = CurrentPresentationTime - SegmentDuration -
-      //      SuggestedPresentationDelay
-      //    = (60 * 60) - 10 - 11
-      //    = 3579
-      //
-      // The segment index of this segment is
-      // I1 = FLOOR(T1 / SegmentDuration) =
-      //    = FLOOR(3589 / 10)
-      //    = 357
-      //
-      // and the segment number is thus
-      // N1 = I1 + StartNumber
-      //    = 357 + 5
-      //    = 362
+        m.type = 'dynamic';
+        m.url = [new goog.Uri('http://example.com/')];
+        m.availabilityStartTime = manifestCreationTime - secondsSinceStart;
+        m.suggestedPresentationDelay = 11;
+        m.timeShiftBufferDepth = 60;
+        m.minBufferTime = 0;
+      });
 
-      manifestInfo = processor.createManifestInfo_(m, manifestCreationTime);
-      validateManifest(manifestInfo, done, [
-        {
-          'bandwidth': 250000,
-          'init': {
-            'url': 'http://example.com/250000-init.mp4',
-            'start': 0,
-            'end': null
-          },
-          'references': [
-            {
-              'url': 'http://example.com/357-31680000-250000-media.mp4',
-              'start': 3520,
-              'end': 3530
+      afterEach(function() {
+        // Replace fake now().
+        shaka.util.Clock.now = originalNow;
+      });
+
+      it('and w/ @startNumber == 1', function(done) {
+        st.startNumber = 1;
+
+        // The start time of the earliest available segment is given by
+        // T0 = CurrentPresentationTime - 2*SegmentDuration -
+        //      TimeShiftBufferDepth
+        //    = (60 * 60) - 2*10 - 60
+        //    = 3520 (or 31680000 unscaled)
+        //
+        // The segment index of this segment is
+        // I0 = CEIL(T0 / SegmentDuration)
+        //    = CEIL(3520 / 10)
+        //    = 352
+        //
+        // so $Number$ is thus
+        // N0 = I0 + StartNumber
+        //    = 352 + 1
+        //    = 353
+        //
+        // The start time of the latest available segment is given by
+        // T1 = CurrentPresentationTime - SegmentDuration -
+        //      SuggestedPresentationDelay
+        //    = (60 * 60) - 10 - 11
+        //    = 3579
+        //
+        // The segment index of this segment is
+        // I1 = FLOOR(T1 / SegmentDuration) =
+        //    = FLOOR(3589 / 10)
+        //    = 357
+        //
+        // so $Number$ is thus
+        // N1 = I1 + StartNumber
+        //    = 357 + 1
+        //    = 358
+
+        var manifestInfo =
+            processor.createManifestInfo_(m, manifestCreationTime);
+        validateManifest(manifestInfo, done, [
+          {
+            'bandwidth': 250000,
+            'init': {
+              'url': 'http://example.com/250000-init.mp4',
+              'start': 0,
+              'end': null
             },
-            {
-              'url': 'http://example.com/358-31770000-250000-media.mp4',
-              'start': 3530,
-              'end': 3540
-            },
-            {
-              'url': 'http://example.com/359-31860000-250000-media.mp4',
-              'start': 3540,
-              'end': 3550
-            },
-            {
-              'url': 'http://example.com/360-31950000-250000-media.mp4',
-              'start': 3550,
-              'end': 3560
-            },
-            {
-              'url': 'http://example.com/361-32040000-250000-media.mp4',
-              'start': 3560,
-              'end': 3570
-            },
-            {
-              'url': 'http://example.com/362-32130000-250000-media.mp4',
-              'start': 3570,
-              'end': 3580
-            }
-          ]
-        }
-      ]);
+            'references': [
+              {
+                'url': 'http://example.com/353-31680000-250000-media.mp4',
+                'start': 3520,
+                'end': 3530
+              },
+              {
+                'url': 'http://example.com/354-31770000-250000-media.mp4',
+                'start': 3530,
+                'end': 3540
+              },
+              {
+                'url': 'http://example.com/355-31860000-250000-media.mp4',
+                'start': 3540,
+                'end': 3550
+              },
+              {
+                'url': 'http://example.com/356-31950000-250000-media.mp4',
+                'start': 3550,
+                'end': 3560
+              },
+              {
+                'url': 'http://example.com/357-32040000-250000-media.mp4',
+                'start': 3560,
+                'end': 3570
+              },
+              {
+                'url': 'http://example.com/358-32130000-250000-media.mp4',
+                'start': 3570,
+                'end': 3580
+              }
+            ]
+          }
+        ]);
+      });
 
-      // Replace fake now().
-      shaka.util.Clock.now = originalNow;
+      // When AST is present and @startNumber > 1. @startNumber effectively
+      // indicates the number of segments that are missing from the beginning
+      // of the Period and nothing else.
+      it('and w/ @startNumber > 1', function(done) {
+        st.startNumber = 5;
+
+        // The start time of the earliest available segment is given by
+        // T0 = CurrentPresentationTime - 2*SegmentDuration -
+        //      TimeShiftBufferDepth
+        //    = (60 * 60) - 2*10 - 60
+        //    = 3520 (or 31680000 unscaled)
+        //
+        // The segment index of this segment is
+        // I0 = CEIL(T0 / SegmentDuration) - (StartNumber - 1)
+        //    = CEIL(3520 / 10) - (5 - 1)
+        //    = 352 - 4
+        //    = 348
+        //
+        // so $Number$ is thus
+        // N0 = I0 + StartNumber
+        //    = 348 + 5
+        //    = 353
+        //
+        // The start time of the latest available segment is given by
+        // T1 = CurrentPresentationTime - SegmentDuration -
+        //      SuggestedPresentationDelay
+        //    = (60 * 60) - 10 - 11
+        //    = 3579
+        //
+        // The segment index of this segment is
+        // I1 = FLOOR(T1 / SegmentDuration) - (StartNumber - 1) =
+        //    = FLOOR(3589 / 10) - (5 - 1)
+        //    = 357 - 4
+        //    = 353
+        //
+        // so $Number$ is thus
+        // N1 = I1 + StartNumber
+        //    = 353 + 5
+        //    = 358
+
+        var manifestInfo =
+            processor.createManifestInfo_(m, manifestCreationTime);
+        validateManifest(manifestInfo, done, [
+          {
+            'bandwidth': 250000,
+            'init': {
+              'url': 'http://example.com/250000-init.mp4',
+              'start': 0,
+              'end': null
+            },
+            'references': [
+              {
+                'url': 'http://example.com/353-31680000-250000-media.mp4',
+                'start': 3520,
+                'end': 3530
+              },
+              {
+                'url': 'http://example.com/354-31770000-250000-media.mp4',
+                'start': 3530,
+                'end': 3540
+              },
+              {
+                'url': 'http://example.com/355-31860000-250000-media.mp4',
+                'start': 3540,
+                'end': 3550
+              },
+              {
+                'url': 'http://example.com/356-31950000-250000-media.mp4',
+                'start': 3550,
+                'end': 3560
+              },
+              {
+                'url': 'http://example.com/357-32040000-250000-media.mp4',
+                'start': 3560,
+                'end': 3570
+              },
+              {
+                'url': 'http://example.com/358-32130000-250000-media.mp4',
+                'start': 3570,
+                'end': 3580
+              }
+            ]
+          }
+        ]);
+      });
+
+      it('and w/ @startNumber == 0', function(done) {
+        // The parser converts @startNumber=0 to startNumber=1 and
+        // zeroBasedSegmentNumbers=true.
+        st.startNumber = 1;
+        st.zeroBasedSegmentNumbers = true;
+
+        var manifestInfo =
+            processor.createManifestInfo_(m, manifestCreationTime);
+        validateManifest(manifestInfo, done, [
+          {
+            'bandwidth': 250000,
+            'init': {
+              'url': 'http://example.com/250000-init.mp4',
+              'start': 0,
+              'end': null
+            },
+            'references': [
+              {
+                'url': 'http://example.com/352-31680000-250000-media.mp4',
+                'start': 3520,
+                'end': 3530
+              },
+              {
+                'url': 'http://example.com/353-31770000-250000-media.mp4',
+                'start': 3530,
+                'end': 3540
+              },
+              {
+                'url': 'http://example.com/354-31860000-250000-media.mp4',
+                'start': 3540,
+                'end': 3550
+              },
+              {
+                'url': 'http://example.com/355-31950000-250000-media.mp4',
+                'start': 3550,
+                'end': 3560
+              },
+              {
+                'url': 'http://example.com/356-32040000-250000-media.mp4',
+                'start': 3560,
+                'end': 3570
+              },
+              {
+                'url': 'http://example.com/357-32130000-250000-media.mp4',
+                'start': 3570,
+                'end': 3580
+              }
+            ]
+          }
+        ]);
+      });
     });
 
     it('SegmentTimeline w/ gaps', function(done) {

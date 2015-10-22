@@ -77,6 +77,45 @@ describe('MpdProcessor.SegmentList', function() {
     shaka.player.Player.isTypeSupported = originalIsTypeSupported;
   });
 
+  it('uses @startNumber correctly', function(done) {
+    sl.timescale = 9000;
+    sl.startNumber = 5;
+    sl.segmentDuration = 9000 * 10;
+
+    var segmentUrl1 = new shaka.dash.mpd.SegmentUrl();
+    segmentUrl1.mediaUrl = [new goog.Uri('http://example.com/video_5.mp4')];
+
+    var segmentUrl2 = new shaka.dash.mpd.SegmentUrl();
+    segmentUrl2.mediaUrl = [new goog.Uri('http://example.com/video_6.mp4')];
+
+    sl.segmentUrls.push(segmentUrl1);
+    sl.segmentUrls.push(segmentUrl2);
+
+    p.start = 0;
+
+    manifestInfo = processor.process(m);
+
+    var periodInfo = manifestInfo.periodInfos[0];
+    var si1 = periodInfo.streamSetInfos[0].streamInfos[0];
+
+    si1.segmentIndexSource.create().then(function(segmentIndex) {
+      var references = segmentIndex.references;
+      expect(references.length).toBe(2);
+
+      checkReference(
+          references[0],
+          'http://example.com/video_5.mp4',
+          40, 50);
+
+      checkReference(
+          references[1],
+          'http://example.com/video_6.mp4',
+          50, 60);
+
+      done();
+    });
+  });
+
   it('allows no segment duration with one segment', function(done) {
     sl.timescale = 9000;
 

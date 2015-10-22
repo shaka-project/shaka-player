@@ -486,6 +486,7 @@ describe('mpd', function() {
     var adaptationSet = period.adaptationSets[0];
     var segmentTemplate = adaptationSet.segmentTemplate;
     expect(segmentTemplate.startNumber).toBe(1);
+    expect(segmentTemplate.zeroBasedSegmentNumbers).toBe(false);
   });
 
   it('defaults startNumber to 1 when invalid', function() {
@@ -503,6 +504,7 @@ describe('mpd', function() {
     var adaptationSet = period.adaptationSets[0];
     var segmentTemplate = adaptationSet.segmentTemplate;
     expect(segmentTemplate.startNumber).toBe(1);
+    expect(segmentTemplate.zeroBasedSegmentNumbers).toBe(false);
   });
 
   it('allows startNumber to be 0', function() {
@@ -519,7 +521,8 @@ describe('mpd', function() {
     var period = mpd.periods[0];
     var adaptationSet = period.adaptationSets[0];
     var segmentTemplate = adaptationSet.segmentTemplate;
-    expect(segmentTemplate.startNumber).toBe(0);
+    expect(segmentTemplate.startNumber).toBe(1);
+    expect(segmentTemplate.zeroBasedSegmentNumbers).toBe(true);
   });
 
   it('does not override valid zeros with defaults', function() {
