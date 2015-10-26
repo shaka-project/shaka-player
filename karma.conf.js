@@ -1,5 +1,15 @@
 // Karma configuration
 
+// Required modules:
+//   karma
+//   karma-jasmine
+//   karma-jasmine-ajax
+//   jasmine
+//   jasmine-ajax
+//   jasmine-core
+// Optional modules:
+//   karma-coverage
+
 module.exports = function(config) {
   config.set({
 
@@ -17,7 +27,6 @@ module.exports = function(config) {
 
       // include the utils files first
       'spec/util.js',
-      'spec/integration_util.js',
 
       // included files - tests
       'spec/*.js',
@@ -26,9 +35,6 @@ module.exports = function(config) {
       {pattern: 'lib/*/*.js', included: false},
       {pattern: 'third_party/closure/goog/*/*.js', included: false},
 
-      // additional assets
-      {pattern: 'assets/*', included: false},
-
       // closure's generated deps file
       {pattern: 'third_party/closure/goog/deps.js', included: false}
     ],
@@ -36,6 +42,14 @@ module.exports = function(config) {
     // handle requests for /assets
     proxies: {
       '/assets/': '/base/assets/'
+    },
+
+    preprocessors: {
+      'lib/*/*.js': 'coverage'
+    },
+
+    coverageReporter: {
+      'type': 'text',
     },
 
     // do not panic about "no activity" unless a test takes longer than 60s.

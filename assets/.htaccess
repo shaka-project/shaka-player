@@ -1,4 +1,0 @@
-AddType text/vtt .vtt
-AddCharset utf-8 .vtt
-Header set Access-Control-Allow-Origin "*"
-Header set Access-Control-Allow-Headers "Range"
