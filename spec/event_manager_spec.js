@@ -142,4 +142,3 @@ describe('EventManager', function() {
     expect(listener2).not.toHaveBeenCalled();
   });
 });
-

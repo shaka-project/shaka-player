@@ -17,8 +17,6 @@
 
 goog.require('shaka.util.DataViewReader');
 
-// TODO(story 2544737): Add tests that use a data view that views only a slice
-// of an array.
 describe('DataViewReader', function() {
   // |data| as interpreted as a 64 bit integer must not be larger than 2^53-1.
   // decimal digits.
@@ -249,4 +247,3 @@ describe('DataViewReader', function() {
     expect(exception instanceof RangeError).toBe(true);
   });
 });
-
