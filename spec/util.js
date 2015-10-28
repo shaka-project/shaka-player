@@ -132,3 +132,8 @@ var assertsToFailures = {
     console.assert = jasmineAssert;
   }
 };
+
+
+// Make sure assertions are converted into failures for all tests.
+beforeEach(assertsToFailures.install);
+afterEach(assertsToFailures.uninstall);
