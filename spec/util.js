@@ -16,7 +16,6 @@
  */
 
 goog.require('shaka.asserts');
-goog.require('shaka.util.PublicPromise');
 
 
 var customMatchers = {};
@@ -83,9 +82,9 @@ function mockXMLHttpRequestEventHandling(xhr) {
  * @return {!Promise}
  */
 function delay(seconds) {
-  var p = new shaka.util.PublicPromise;
-  setTimeout(p.resolve, seconds * 1000.0);
-  return p;
+  return new Promise(function(resolve, reject) {
+    setTimeout(resolve, seconds * 1000.0);
+  });
 }
 
 
