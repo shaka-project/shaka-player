@@ -48,7 +48,9 @@ while [[ $# -ne 0 ]]; do
   argsHelper "$1" --disable-dash "Dash" \
       --disable-offline "Offline" \
       --disable-http "Http" \
-      --disable-live "Live"
+      --disable-live "Live" \
+      --disable-containers "Containers" \
+      --disable-webm "Webm"
   shift
 done
 
