@@ -65,14 +65,7 @@ rm -f "$dir"/lib.js{,.map}
 rm -f "$dir"/shaka-player.${name}.debug.{js,map}
 rm -f "$dir"/shaka-player.${name}.js
 
-# Compile once with app/controls.js so they get checked.  Don't keep the output.
-(library_sources_0; closure_sources_0) | compile_0 \
-  $arguments \
-  --summary_detail_level 3 "$dir"/{app,controls,sender,receiver,receiverApp,appUtils}.js > /dev/null
-# NOTE: --js_output_file /dev/null results in a non-zero return value and
-# stops execution of this script.
-
-# Compile without app/controls.js and output the minified library only.
+# Compile without demo app files and output the minified library only.
 # Including shaka-player.uncompiled makes sure that nothing gets stripped which
 # should be exported.  Otherwise, things unused internally may be seen as dead
 # code.
@@ -90,4 +83,3 @@ cp "$dir"/shaka-player.${name}{.debug,}.js
 # locations.
 echo "//# sourceMappingURL=shaka-player.${name}.debug.map" >> \
   "$dir"/shaka-player.${name}.debug.js
-

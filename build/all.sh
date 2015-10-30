@@ -15,9 +15,25 @@
 # limitations under the License.
 
 dir=$(dirname $0)/..
+. "$dir"/build/lib.sh
 
 set -e
 
 "$dir"/build/gendeps.sh
-"$dir"/build/build.sh
 "$dir"/build/lint.sh
+
+# Compile once with demo app files so they get checked.  Don't keep the output.
+(library_sources_0; closure_sources_0) | compile_0 \
+  $arguments \
+  --summary_detail_level 3 \
+  "$dir"/{app,controls,sender,receiver,receiverApp,appUtils}.js \
+  > /dev/null
+# NOTE: --js_output_file /dev/null results in a non-zero return value and
+# stops execution of this script.
+
+# Default build, all features enabled
+"$dir"/build/build.sh
+# MP4 VOD content only, no offline, live, or WebM
+"$dir"/build/build.sh vod --disable-http --disable-offline --disable-webm --disable-live
+# MP4 live content only, no offline, WebM, or SIDX
+"$dir"/build/build.sh live --disable-http --disable-offline --disable-webm --disable-containers

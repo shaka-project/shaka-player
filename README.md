@@ -79,6 +79,14 @@ but in short, you can build the library by running:
 ./build/all.sh
 ```
 
+By default, we create three builds:
+* shaka-player.compiled.js (full build)
+* shaka-player.vod.js (DASH MP4 VOD content w/ SegmentBase only)
+* shaka-player.live.js (DASH MP4 live content w/ Segment{Template,List} only)
+
+You can create custom builds by passing arguments to build/build.sh.  See
+build/all.sh and build/build.sh for details.
+
 Compiling Shaka Player requires Java JRE 7 or greater, but you can use the
 library in uncompiled mode without Java.  Just generate the closure
 dependencies by running:
