@@ -20,6 +20,7 @@ goog.require('shaka.util.Uint8ArrayUtils');
 
 describe('Pssh', function() {
   var fromHex = shaka.util.Uint8ArrayUtils.fromHex;
+  var toHex = shaka.util.Uint8ArrayUtils.toHex;
 
   const WIDEVINE_SYSTEM_ID = 'edef8ba979d64acea3c827dcd51d21ed';
   const PLAYREADY_SYSTEM_ID = '9a04f07998404286ab92e65be0885f95';
@@ -247,6 +248,34 @@ describe('Pssh', function() {
     expect(pssh.systemIds.length).toBe(1);
     expect(pssh.systemIds[0]).toBe(GENERIC_SYSTEM_ID);
     expect(pssh.cencKeyIds.length).toBe(2);
+  });
+
+  it('extracts boundaries for concatenated boxes', function() {
+    var psshData = fromHex(
+        GENERIC_PSSH +
+        WIDEVINE_PSSH +
+        OTHER_BOX +
+        PLAYREADY_PSSH);
+
+    var pssh = new shaka.util.Pssh(psshData);
+
+    expect(pssh.dataBoundaries.length).toBe(3);
+
+    var data1 = psshData.subarray(
+        pssh.dataBoundaries[0].start,
+        pssh.dataBoundaries[0].end + 1);
+
+    var data2 = psshData.subarray(
+        pssh.dataBoundaries[1].start,
+        pssh.dataBoundaries[1].end + 1);
+
+    var data3 = psshData.subarray(
+        pssh.dataBoundaries[2].start,
+        pssh.dataBoundaries[2].end + 1);
+
+    expect(toHex(data1)).toEqual(GENERIC_PSSH);
+    expect(toHex(data2)).toEqual(WIDEVINE_PSSH);
+    expect(toHex(data3)).toEqual(PLAYREADY_PSSH);
   });
 });
 
