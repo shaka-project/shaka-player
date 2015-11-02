@@ -41,7 +41,7 @@ MSMediaKeys.isTypeSupported = function(keySystem, contentType) {};
 /**
  * @param {string} contentType
  * @param {?BufferSource} initData
- * @return {MSMediaKeySession}
+ * @return {!MSMediaKeySession}
  */
 MSMediaKeys.prototype.createSession = function(contentType, initData) {};
 
