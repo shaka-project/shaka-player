@@ -118,7 +118,6 @@ app.init = function() {
   document.getElementById('version').textContent = shaka.player.Player.version;
 
   // Set default values.
-  document.getElementById('forcePrefixed').checked = false;
   document.getElementById('preferredLanguage').value = 'en-US';
 
   document.getElementById('licenseServerUrlInput').value =
@@ -129,12 +128,32 @@ app.init = function() {
   document.getElementById('mpdList').value =
       'assets/car_cenc-20120827-manifest.mpd';
 
+  shaka.polyfill.installAll();
+
   app.video_ =
       /** @type {!HTMLVideoElement} */ (document.getElementById('video'));
   app.videoResDebug_ = document.getElementById('videoResDebug');
   app.bufferedAheadDebug_ = document.getElementById('bufferedAheadDebug');
   app.bufferedBehindDebug_ = document.getElementById('bufferedBehindDebug');
   window.setInterval(app.updateDebugInfo_, 50);
+
+  app.player_ =
+      new shaka.player.Player(/** @type {!HTMLVideoElement} */ (app.video_));
+  app.player_.addEventListener('error', app.onPlayerError_);
+  app.player_.addEventListener('adaptation', app.displayMetadata_);
+  app.player_.addEventListener('bufferingStart',
+      playerControls.onBuffering.bind(null, true));
+  app.player_.addEventListener('bufferingEnd',
+      playerControls.onBuffering.bind(null, false));
+  app.player_.addEventListener('seekrangechanged',
+      playerControls.onSeekRangeChanged);
+  app.player_.addEventListener('trackschanged', app.displayMetadata_);
+
+  app.estimator_ = new shaka.util.EWMABandwidthEstimator();
+  playerControls.setPlayer(app.player_);
+
+  // Load the adaptation setting.
+  app.onAdaptationChange();
 
   var fields = location.search.split('?').slice(1).join('?');
   fields = fields ? fields.split(';') : [];
@@ -144,9 +163,6 @@ app.init = function() {
     params[kv[0]] = kv.slice(1).join('=');
   }
 
-  if ('prefixed' in params) {
-    document.getElementById('forcePrefixed').checked = true;
-  }
   if ('lang' in params) {
     document.getElementById('preferredLanguage').value = params['lang'];
   }
@@ -484,11 +500,6 @@ app.resetCycleState_ = function(tracksId, checkboxId, isVideo) {
  * Deletes a group from storage.
  */
 app.deleteStream = function() {
-  if (!app.player_) {
-    app.installPolyfills_();
-    app.initPlayer_();
-  }
-
   var deleteButton = document.getElementById('deleteButton');
   deleteButton.disabled = true;
   deleteButton.textContent = 'Deleting stream...';
@@ -529,10 +540,6 @@ app.deleteStream = function() {
 app.storeStream = function() {
   app.updateStoreButton_(true, 'Storing...');
 
-  if (!app.player_) {
-    app.installPolyfills_();
-    app.initPlayer_();
-  }
   var mediaUrl = document.getElementById('manifestUrlInput').value;
   var preferredLanguage = document.getElementById('preferredLanguage').value;
 
@@ -686,11 +693,6 @@ app.loadStream = function() {
  * Loads an http stream.
  */
 app.loadHttpStream = function() {
-  if (!app.player_) {
-    app.installPolyfills_();
-    app.initPlayer_();
-  }
-
   var mediaUrl = document.getElementById('mediaUrlInput').value;
   var keySystem = document.getElementById('keySystemList').value;
   var licenseServerUrl = document.getElementById('licenseServerUrlInput').value;
@@ -706,11 +708,6 @@ app.loadHttpStream = function() {
  * Loads a dash stream.
  */
 app.loadDashStream = function() {
-  if (!app.player_) {
-    app.installPolyfills_();
-    app.initPlayer_();
-  }
-
   var mediaUrl = document.getElementById('manifestUrlInput').value;
   app.streamState_.manifest = mediaUrl;
   if (sender.state == sender.states.CAST_CONNECTED) {
@@ -742,10 +739,6 @@ app.loadDashStream = function() {
  * Loads an offline stream.
  */
 app.loadOfflineStream = function() {
-  if (!app.player_) {
-    app.installPolyfills_();
-    app.initPlayer_();
-  }
   var groupId = parseInt(
       document.getElementById('offlineStreamList').value, 10);
   console.assert(app.estimator_);
@@ -879,53 +872,6 @@ app.updateBufferDebug_ = function() {
     app.bufferedAheadDebug_.textContent = bufferInfo[0];
     app.bufferedBehindDebug_.textContent = bufferInfo[1];
   }
-};
-
-
-/**
- * Installs the polyfills if the have not yet been installed.
- * @private
- */
-app.installPolyfills_ = function() {
-  var forcePrefixedElement = document.getElementById('forcePrefixed');
-  var forcePrefixed = forcePrefixedElement.checked;
-
-  // Once the setting is applied, it cannot be changed.
-  forcePrefixedElement.disabled = true;
-  forcePrefixedElement.title = 'EME choice locked in for this browser session.';
-
-  appUtils.installPolyfills(forcePrefixed);
-};
-
-
-/**
- * Initializes the Player instance.
- * If the Player instance already exists then it is reinitialized.
- * @private
- */
-app.initPlayer_ = function() {
-  console.assert(app.player_ == null);
-  if (app.player_) {
-    return;
-  }
-
-  app.player_ =
-      new shaka.player.Player(/** @type {!HTMLVideoElement} */ (app.video_));
-  app.player_.addEventListener('error', app.onPlayerError_);
-  app.player_.addEventListener('adaptation', app.displayMetadata_);
-  app.player_.addEventListener('bufferingStart',
-      playerControls.onBuffering.bind(null, true));
-  app.player_.addEventListener('bufferingEnd',
-      playerControls.onBuffering.bind(null, false));
-  app.player_.addEventListener('seekrangechanged',
-      playerControls.onSeekRangeChanged);
-  app.player_.addEventListener('trackschanged', app.displayMetadata_);
-
-  app.estimator_ = new shaka.util.EWMABandwidthEstimator();
-  playerControls.setPlayer(app.player_);
-
-  // Load the adaptation setting.
-  app.onAdaptationChange();
 };
 
 

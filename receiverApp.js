@@ -77,7 +77,6 @@ receiverApp.estimator_ = null;
  * The current video configuration.
  */
 receiverApp.config = {
-  'forcePrefixed' : false,
   'preferredLanguage': 'en-US',
   'wvLicenseServerUrlInput' : null
 };
@@ -87,8 +86,16 @@ receiverApp.config = {
  * Initializes the receiverApplication.
  */
 receiverApp.init = function() {
+  shaka.polyfill.installAll();
+
   receiverApp.video_ =
       /** @type {!HTMLVideoElement} */ (document.getElementById('video'));
+
+  receiverApp.player_ = new shaka.player.Player(
+      /** @type {!HTMLVideoElement} */ (receiverApp.video_));
+  receiverApp.player_.addEventListener('error', receiverApp.onPlayerError_);
+
+  receiverApp.estimator_ = new shaka.util.EWMABandwidthEstimator();
 
   window.setInterval(receiverApp.updateDebugInfo_, 50);
 
@@ -131,10 +138,6 @@ receiverApp.init = function() {
  */
 receiverApp.loadDashStream = function(streamInfo) {
   receiverApp.onBuffering(true);
-  if (!receiverApp.player_) {
-    receiverApp.installPolyfills_();
-    receiverApp.initPlayer_();
-  }
 
   console.assert(receiverApp.estimator_);
   if (receiverApp.estimator_.getDataAge() >= 3600) {
@@ -242,34 +245,6 @@ receiverApp.updateDebugInfo_ = function() {
     'bufferedBehindDebug': bufferInfo[1]
   };
   receiver.broadcast('debugInfo', debugInfo);
-};
-
-
-/**
- * Installs the polyfills if the have not yet been installed.
- * @private
- */
-receiverApp.installPolyfills_ = function() {
-  appUtils.installPolyfills(receiverApp.config.forcePrefixed);
-};
-
-
-/**
- * Initializes the Player instance.
- * If the Player instance already exists then it is reinitialized.
- * @private
- */
-receiverApp.initPlayer_ = function() {
-  console.assert(receiverApp.player_ == null);
-  if (receiverApp.player_) {
-    return;
-  }
-
-  receiverApp.player_ = new shaka.player.Player(
-      /** @type {!HTMLVideoElement} */ (receiverApp.video_));
-  receiverApp.player_.addEventListener('error', receiverApp.onPlayerError_);
-
-  receiverApp.estimator_ = new shaka.util.EWMABandwidthEstimator();
 };
 
 

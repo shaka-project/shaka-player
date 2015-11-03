@@ -41,14 +41,6 @@ appUtils.aspectRatioSet_ = false;
 
 
 /**
- * True if polyfills have been installed.
- *
- * @private {boolean}
- */
-appUtils.polyfillsInstalled_ = false;
-
-
-/**
  * Exceptions thrown in 'then' handlers are not seen until catch.
  * Promises can therefore mask what would otherwise be uncaught exceptions.
  * As a utility to work around this, wrap the function in setTimeout so that
@@ -111,27 +103,6 @@ appUtils.getVideoResDebug = function(video) {
     }
   }
   return video.videoWidth + ' x ' + video.videoHeight;
-};
-
-
-/**
- * Installs the polyfills if the have not yet been installed.
- * @param {boolean} forcePrefixed True to force use of prefixed EME.
- */
-appUtils.installPolyfills = function(forcePrefixed) {
-  if (appUtils.polyfillsInstalled_)
-    return;
-
-  if (forcePrefixed) {
-    window['MediaKeys'] = null;
-    window['MediaKeySession'] = null;
-    HTMLMediaElement.prototype['setMediaKeys'] = null;
-    Navigator.prototype['requestMediaKeySystemAccess'] = null;
-  }
-
-  shaka.polyfill.installAll();
-
-  appUtils.polyfillsInstalled_ = true;
 };
 
 
