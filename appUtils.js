@@ -158,23 +158,32 @@ appUtils.interpretContentProtection = function(
 
   if (schemeIdUri == 'http://youtube.com/drm/2012/10/10') {
     // This is another scheme used by YouTube.
-    var licenseServerUrl = null;
+    var configs = [];
+    var postProcessor =
+        appUtils.postProcessYouTubeLicenseResponse_.bind(null, player);
+    var playReadyPreProcessor = appUtils.preProcessYouTubePlayReadyRequest_;
+
     for (var i = 0; i < contentProtection.childNodes.length; ++i) {
       var child = contentProtection.childNodes[i];
-      if (child.nodeName == 'yt:SystemURL' &&
-          child.getAttribute('type') == 'widevine') {
-        licenseServerUrl = wvLicenseServerUrlOverride || child.textContent;
-        break;
+      if (child.nodeName == 'yt:SystemURL') {
+        var licenseServerUrl = wvLicenseServerUrlOverride || child.textContent;
+        if (child.getAttribute('type') == 'widevine') {
+          configs.push({
+            'keySystem': 'com.widevine.alpha',
+            'licenseServerUrl': licenseServerUrl,
+            'licensePostProcessor': postProcessor
+          });
+        } else if (child.getAttribute('type') == 'playready') {
+          configs.push({
+            'keySystem': 'com.microsoft.playready',
+            'licenseServerUrl': licenseServerUrl,
+            'licensePostProcessor': postProcessor,
+            'licensePreProcessor': playReadyPreProcessor
+          });
+        }
       }
     }
-    if (licenseServerUrl) {
-      return [{
-        'keySystem': 'com.widevine.alpha',
-        'licenseServerUrl': licenseServerUrl,
-        'licensePostProcessor':
-            appUtils.postProcessYouTubeLicenseResponse_.bind(null, player)
-      }];
-    }
+    return configs;
   }
 
   if (schemeIdUri.toLowerCase() ==
@@ -233,4 +242,16 @@ appUtils.postProcessYouTubeLicenseResponse_ = function(player, response) {
     }
   }
   return Uint8ArrayUtils.fromString(responseStr);
+};
+
+
+/**
+ * Pre-process YouTube PlayReady license requests.
+ * @param {!shaka.player.DrmInfo.LicenseRequestInfo} info
+ * @private
+ */
+appUtils.preProcessYouTubePlayReadyRequest_ = function(info) {
+  // The headers added by the standard pre-processor are not accepted by the YT
+  // frontend.
+  info.headers = {};
 };
