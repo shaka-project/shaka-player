@@ -65,20 +65,16 @@ describe('EbmlParser', function() {
   });
 
   it('detects a dynamic size value within an element', function() {
-    var exception;
+    // Set ID to 0x1.
+    // Set size to a dynamic size value.
+    // The size should be 5 bytes.
+    // Set the data to [0xaa, 0xbb, 0xcc, 0xdd, 0xee].
+    var data = new Uint8Array([0x81, 0xff, 0xaa, 0xbb, 0xcc, 0xdd, 0xee]);
+    var parser = new shaka.util.EbmlParser(new DataView(data.buffer));
+    var element = parser.parseElement();
 
-    try {
-      // Set ID to 0x1.
-      // Set size to a dynamic size value.
-      var data = new Uint8Array([0x81, 0xff]);
-      var parser = new shaka.util.EbmlParser(new DataView(data.buffer));
-      parser.parseElement();
-    } catch (e) {
-      exception = e;
-    }
-
-    expect(exception).not.toBe(undefined);
-    expect(exception instanceof RangeError).toBe(true);
+    expect(element).toBeTruthy();
+    expect(element.dataView_.byteLength).toBe(5);
   });
 
   it('parses a 1 byte vint', function() {
