@@ -173,6 +173,20 @@ describe('NetworkingEngine', function() {
           })
           .then(done);
     });
+
+    it('uses multiple URIs', function(done) {
+      var request = {
+        uri: ['reject://foo', 'resolve://foo'],
+        retryParameters: {maxAttempts: 3}
+      };
+      networkingEngine.request(requestType, request)
+          .catch(fail)
+          .then(function() {
+            expect(rejectScheme.calls.count()).toBe(1);
+            expect(resolveScheme.calls.count()).toBe(1);
+            done();
+          });
+    });
   });
 
   describe('request', function() {
@@ -200,20 +214,6 @@ describe('NetworkingEngine', function() {
           .then(done);
     });
 
-    it('uses multiple URIs', function(done) {
-      var request = {
-        uri: ['reject://foo', 'resolve://foo'],
-        retryParameters: {maxAttempts: 3}
-      };
-      networkingEngine.request(requestType, request)
-          .catch(fail)
-          .then(function() {
-            expect(rejectScheme.calls.count()).toBe(1);
-            expect(resolveScheme.calls.count()).toBe(1);
-            done();
-          });
-    });
-
     it('returns the response object', function(done) {
       networkingEngine.request(requestType, createRequest('resolve://foo'))
           .catch(fail)
@@ -224,6 +224,16 @@ describe('NetworkingEngine', function() {
             expect(response.headers).toBeTruthy();
             done();
           });
+    });
+
+    it('passes correct arguments to plugin', function(done) {
+      var request = {uri: ['resolve://foo'], method: 'POST'};
+      resolveScheme.and.callFake(function(uri, request) {
+        expect(uri).toBe(request.uri[0]);
+        expect(request).toBe(request);
+        return Promise.resolve();
+      });
+      networkingEngine.request(requestType, request).catch(fail).then(done);
     });
   });
 
@@ -288,7 +298,7 @@ describe('NetworkingEngine', function() {
           .then(function() {
             expect(filter).toHaveBeenCalled();
             expect(resolveScheme).toHaveBeenCalled();
-            expect(resolveScheme.calls.argsFor(0)[0].allowCrossSiteCredentials)
+            expect(resolveScheme.calls.argsFor(0)[1].allowCrossSiteCredentials)
                 .toBe(true);
             done();
           });
