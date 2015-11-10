@@ -305,6 +305,101 @@ describe('MpdProcessor', function() {
       });
     });
 
+    describe('PSSHs in the manifest', function() {
+      var m;
+      var p;
+      var as;
+      var r1;
+      var r2;
+      var st1;
+      var st2;
+      var cp1;
+      var cp2;
+      var pssh1;
+      var pssh2;
+      var initData1;
+      var initData2;
+
+      beforeEach(function() {
+        m = new mpd.Mpd();
+        p = new mpd.Period();
+        as = new mpd.AdaptationSet();
+        r1 = new mpd.Representation();
+        r2 = new mpd.Representation();
+        st1 = new mpd.SegmentTemplate();
+        st2 = new mpd.SegmentTemplate();
+        cp1 = new mpd.ContentProtection();
+        cp2 = new mpd.ContentProtection();
+        pssh1 = new mpd.CencPssh();
+        pssh2 = new mpd.CencPssh();
+        initData1 = new Uint8Array([0, 1, 2, 3, 4]);
+        initData2 = new Uint8Array([5, 6, 7, 8, 9]);
+
+        pssh1.psshBox = initData1;
+        pssh2.psshBox = initData2;
+
+        cp1.pssh = pssh1;
+        cp2.pssh = pssh2;
+
+        st1.segmentDuration = 5;
+        st1.mediaUrlTemplate = 'asdf';
+
+        st2.segmentDuration = 5;
+        st2.mediaUrlTemplate = 'asdf';
+
+        r1.segmentTemplate = st1;
+        r1.baseUrl = [new goog.Uri('http://example.com')];
+        r1.bandwidth = 250000;
+        r1.mimeType = 'video/mp4';
+        r1.contentProtections = [cp1];
+
+        r2.segmentTemplate = st2;
+        r2.baseUrl = [new goog.Uri('http://example.com')];
+        r2.bandwidth = 500000;
+        r2.mimeType = 'video/mp4';
+        r2.contentProtections = [cp2];
+
+        as.contentType = 'video';
+        as.representations.push(r1);
+        as.representations.push(r2);
+
+        p.start = 0;
+        p.duration = 10;
+        p.adaptationSets.push(as);
+
+        m.periods.push(p);
+        m.url = [new goog.Uri('http://example.com/mpd')];
+
+        processor.interpretContentProtection_ = function(schemeIdUri, cp) {
+          return [{ 'keySystem': 'com.foo', 'licenseServerUrl': 'http://foo' }];
+        };
+      });
+
+      it('are preserved when different', function() {
+        var periodInfo = processor.process(m).periodInfos[0];
+        expect(periodInfo.streamSetInfos.length).toBe(1);
+
+        var ssi = periodInfo.streamSetInfos[0];
+        expect(ssi.drmInfos.length).toBe(1);
+        expect(ssi.drmInfos[0].initDatas.length).toBe(2);
+        expect(ssi.drmInfos[0].initDatas[0].initData).toEqual(initData1);
+        expect(ssi.drmInfos[0].initDatas[1].initData).toEqual(initData2);
+      });
+
+      it('are not duplicated when the same', function() {
+        // Both init datas are now the same.
+        pssh2.psshBox = initData1.slice(0);
+
+        var periodInfo = processor.process(m).periodInfos[0];
+        expect(periodInfo.streamSetInfos.length).toBe(1);
+
+        var ssi = periodInfo.streamSetInfos[0];
+        expect(ssi.drmInfos.length).toBe(1);
+        expect(ssi.drmInfos[0].initDatas.length).toBe(1);
+        expect(ssi.drmInfos[0].initDatas[0].initData).toEqual(initData1);
+      });
+    });
+
     describe('SegmentBase', function() {
       var m;
       var p;
