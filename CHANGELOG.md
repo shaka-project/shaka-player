@@ -1,3 +1,30 @@
+## 1.5.2 (2015-10-12)
+
+A roll-up of recent bugfixes.
+
+Bugfixes:
+  - Fixed timestamp correction for some live streams from Elemental.
+    - https://github.com/google/shaka-player/issues/200
+  - Fixed support for manifests with different PSSHs per Representation.
+    - https://github.com/google/shaka-player/issues/229
+  - Fixed support for ContentProtection elements at both AdaptationSet and
+    Representation level in the same manifest.
+    - https://github.com/google/shaka-player/issues/230
+  - Fixed support for bound DrmInfo callbacks.
+    - https://github.com/google/shaka-player/issues/227
+  - Fixed the 'enabled' flag of text tracks when manipulated directly by the
+    video element.
+    - https://github.com/google/shaka-player/issues/214
+  - Fixed buffering to use the correct goal (minBufferTime) when re-buffering.
+    - https://github.com/google/shaka-player/issues/190
+  - Fixed a broken link in the documentation.  (Thanks, Leandro.)
+    - https://github.com/google/shaka-player/issues/217
+    - https://github.com/google/shaka-player/pull/218
+
+Test app features:
+  - Added a Widevine-encrypted version of the Sintel 4k test asset.
+
+
 ## 1.5.1 (2015-10-07)
 
 A roll-up of recent bugfixes.
