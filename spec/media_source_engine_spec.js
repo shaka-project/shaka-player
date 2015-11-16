@@ -737,13 +737,4 @@ describe('MediaSourceEngine', function() {
       }
     });
   }
-
-  function capturePromiseStatus(promise) {
-    promise.status = 'pending';
-    promise.then(function() {
-      promise.status = 'resolved';
-    }, function() {
-      promise.status = 'rejected';
-    });
-  }
 });

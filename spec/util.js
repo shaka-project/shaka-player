@@ -18,60 +18,17 @@
 goog.require('shaka.asserts');
 
 
-var customMatchers = {};
-
-
 /**
- * Creates a new Jasmine matcher object for comparing two Uint8Array objects.
- *
- * @param {Object} util
- * @param {Object} customEqualityTesters
- *
- * @return {Object} A Jasmine matcher object.
+ * Capture a Promise's status and attach it to the Promise.
+ * @param {!Promise} promise
  */
-customMatchers.toMatchUint8Array = function(util, customEqualityTesters) {
-  var matcher = {};
-
-  matcher.compare = function(actual, opt_expected) {
-    var expected = opt_expected || new Uint8Array();
-
-    var result = {};
-
-    if (actual.length != expected.length) {
-      result.pass = false;
-      return result;
-    }
-
-    for (var i = 0; i < expected.length; i++) {
-      if (actual[i] == expected[i])
-        continue;
-      result.pass = false;
-      return result;
-    }
-
-    result.pass = true;
-    return result;
-  };
-
-  return matcher;
-};
-
-
-/**
- * Jasmine-ajax doesn't send events as arguments when it calls event handlers.
- * This binds very simple event stand-ins to all event handlers.
- *
- * @param {FakeXMLHttpRequest} xhr The FakeXMLHttpRequest object.
- */
-function mockXMLHttpRequestEventHandling(xhr) {
-  var fakeEvent = { 'target': xhr };
-
-  var events = ['onload', 'onerror', 'onreadystatechange'];
-  for (var i = 0; i < events.length; ++i) {
-    if (xhr[events[i]]) {
-      xhr[events[i]] = xhr[events[i]].bind(xhr, fakeEvent);
-    }
-  }
+function capturePromiseStatus(promise) {
+  promise.status = 'pending';
+  promise.then(function() {
+    promise.status = 'resolved';
+  }, function() {
+    promise.status = 'rejected';
+  });
 }
 
 

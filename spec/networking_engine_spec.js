@@ -16,6 +16,7 @@
  */
 
 goog.require('shaka.net.NetworkingEngine');
+goog.require('shaka.util.PublicPromise');
 
 describe('NetworkingEngine', function() {
   var networkingEngine;
@@ -420,8 +421,143 @@ describe('NetworkingEngine', function() {
     });
   });
 
+  describe('destroy', function() {
+    it('waits for all operations to complete', function(done) {
+      var request = {uri: ['resolve://foo']};
+      var p = new shaka.util.PublicPromise();
+      resolveScheme.and.returnValue(p);
+
+      var r1 = networkingEngine.request(requestType, request);
+      var r2 = networkingEngine.request(requestType, request);
+      capturePromiseStatus(r1);
+      capturePromiseStatus(r2);
+
+      expect(r1.status).toBe('pending');
+      expect(r2.status).toBe('pending');
+
+      var d = networkingEngine.destroy();
+      capturePromiseStatus(d);
+      expect(d.status).toBe('pending');
+
+      delay(0.1).then(function() {
+        expect(d.status).toBe('pending');
+        p.resolve();
+        return delay(0.1);
+      }).then(function() {
+        expect(r1.status).toBe('resolved');
+        expect(r2.status).toBe('resolved');
+        expect(d.status).toBe('resolved');
+        done();
+      });
+    });
+
+    it('resolves even when a request fails', function(done) {
+      var request = {uri: ['reject://foo']};
+      var p = new shaka.util.PublicPromise();
+      rejectScheme.and.returnValue(p);
+
+      var r1 = networkingEngine.request(requestType, request);
+      var r2 = networkingEngine.request(requestType, request);
+      capturePromiseStatus(r1);
+      capturePromiseStatus(r2);
+
+      expect(r1.status).toBe('pending');
+      expect(r2.status).toBe('pending');
+
+      var d = networkingEngine.destroy();
+      capturePromiseStatus(d);
+      expect(d.status).toBe('pending');
+
+      delay(0.1).then(function() {
+        expect(d.status).toBe('pending');
+        p.reject();
+        return delay(0.1);
+      }).then(function() {
+        expect(r1.status).toBe('rejected');
+        expect(r2.status).toBe('rejected');
+        expect(d.status).toBe('resolved');
+        done();
+      });
+    });
+
+    it('prevents new requests', function(done) {
+      var request = {uri: ['resolve://foo']};
+      var p = new shaka.util.PublicPromise();
+      resolveScheme.and.returnValue(p);
+
+      var r1 = networkingEngine.request(requestType, request);
+      capturePromiseStatus(r1);
+      expect(r1.status).toBe('pending');
+      // The request has already been made.
+      expect(resolveScheme.calls.count()).toBe(1);
+
+      var d = networkingEngine.destroy();
+      capturePromiseStatus(d);
+      expect(d.status).toBe('pending');
+
+      var r2 = networkingEngine.request(requestType, request);
+      capturePromiseStatus(r2);
+      expect(r2.status).toBe('pending');
+      // A new request has not been made.
+      expect(resolveScheme.calls.count()).toBe(1);
+
+      delay(0.1).then(function() {
+        expect(r1.status).toBe('pending');
+        expect(r2.status).toBe('rejected');
+        expect(d.status).toBe('pending');
+        p.resolve();
+        return delay(0.1);
+      }).then(function() {
+        expect(r1.status).toBe('resolved');
+        expect(r2.status).toBe('rejected');
+        expect(d.status).toBe('resolved');
+        expect(resolveScheme.calls.count()).toBe(1);
+        done();
+      });
+    });
+
+    it('does not allow further retries', function(done) {
+      var request = {
+        uri: ['reject://foo'],
+        retryParameters: {maxAttempts: 3, baseDelay: 0}
+      };
+
+      var p1 = new shaka.util.PublicPromise();
+      var p2 = new shaka.util.PublicPromise();
+      rejectScheme.and.callFake(function() {
+        return (rejectScheme.calls.count() == 1) ? p1 : p2;
+      });
+
+      var r1 = networkingEngine.request(requestType, request);
+      capturePromiseStatus(r1);
+      expect(r1.status).toBe('pending');
+      expect(rejectScheme.calls.count()).toBe(1);
+
+      var d = networkingEngine.destroy();
+      capturePromiseStatus(d);
+      expect(d.status).toBe('pending');
+
+      delay(0.1).then(function() {
+        expect(r1.status).toBe('pending');
+        expect(d.status).toBe('pending');
+        expect(rejectScheme.calls.count()).toBe(1);
+        // Reject the initial request.
+        p1.reject();
+        // Resolve any retry, but since we have already been destroyed, this
+        // promise should not be used.
+        p2.resolve();
+        return delay(0.1);
+      }).then(function() {
+        expect(d.status).toBe('resolved');
+        // The request was never retried.
+        expect(r1.status).toBe('rejected');
+        expect(rejectScheme.calls.count()).toBe(1);
+        done();
+      });
+    });
+  });
+
   function createRequest(uri) {
     return { uri: [uri] };
   }
 });
-
