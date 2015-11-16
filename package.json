@@ -10,6 +10,20 @@
       "email": "joeyparrish@google.com"
     }
   ],
+  "devDependencies": {
+    "karma": ">=0.13.9",
+    "karma-coverage": "",
+    "karma-jasmine": "",
+    "karma-jasmine-ajax": "",
+    "karma-chrome-launcher": "",
+    "karma-opera-launcher": "",
+    "karma-firefox-launcher": "",
+    "karma-ie-launcher": "",
+    "karma-safari-launcher": "",
+    "jasmine": ">=2.3.2",
+    "jasmine-ajax": ">=3.2.0",
+    "jasmine-core": ">=2.3.4"
+  },
   "main": "shaka-player.compiled.js",
   "repository": {
     "type": "git",
