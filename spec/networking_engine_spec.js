@@ -46,18 +46,6 @@ describe('NetworkingEngine', function() {
   });
 
   describe('retry', function() {
-    var oldRandom;
-
-    beforeAll(function() {
-      // Use fake random to get an accurate test.
-      oldRandom = Math.random;
-      Math.random = function() { return 0.75; };
-    });
-
-    afterAll(function() {
-      Math.random = oldRandom;
-    });
-
     it('will retry', function(done) {
       var request = {
         uri: ['reject://foo'],
@@ -107,72 +95,92 @@ describe('NetworkingEngine', function() {
           .then(done);
     });
 
-    it('uses retry delay', function(done) {
-      var request = {
-        uri: ['reject://foo'],
-        retryParameters: {maxAttempts: 2, baseDelay: 200, fuzzFactor: 0}
-      };
-      var tolerance = 50;
-      var start = Date.now();
-      networkingEngine.request(requestType, request)
-          .then(fail)
-          .catch(function() {
-            var end = Date.now();
-            var delta = end - start;
-            expect(delta).toBeGreaterThan(199);
-            expect(delta).toBeLessThan(200 + tolerance);
-          })
-          .then(done);
-    });
+    describe('backoff', function() {
+      var baseDelay = 200;
+      var realSetTimeout;
+      var realRandom;
 
-    it('uses retry backoff factor', function(done) {
-      var request = {
-        uri: ['reject://foo'],
-        retryParameters: {
-          maxAttempts: 3,
-          baseDelay: 200,
-          fuzzFactor: 0,
-          backoffFactor: 2
-        }
-      };
-      var tolerance = 50;
-      var start = Date.now();
-      networkingEngine.request(requestType, request)
-          .then(fail)
-          .catch(function() {
-            var end = Date.now();
-            var delta = end - start;
-            // 200 for the first try, 400 for the second.
-            expect(delta).toBeGreaterThan(599);
-            expect(delta).toBeLessThan(600 + tolerance);
-          })
-          .then(done);
-    });
+      beforeAll(function() {
+        realSetTimeout = window.setTimeout;
+        window.setTimeout = jasmine.createSpy('setTimeout');
+        window.setTimeout.and.callFake(realSetTimeout);
+        realRandom = Math.random;
+        Math.random = function() { return 0.75; };
+      });
 
-    it('uses retry fuzz factor', function(done) {
-      var request = {
-        uri: ['reject://foo'],
-        retryParameters: {
-          maxAttempts: 2,
-          baseDelay: 200,
-          fuzzFactor: 1,
-          backoffFactor: 1
-        }
-      };
-      var tolerance = 50;
-      var start = Date.now();
-      networkingEngine.request(requestType, request)
-          .then(fail)
-          .catch(function() {
-            var end = Date.now();
-            var delta = end - start;
-            // (rand * 2.0) - 1.0 = (0.75 * 2.0) - 1.0 = 0.5
-            // 0.5 * fuzzFactor = 0.5 * 1 = 0.5
-            // delay * (1 + 0.5) = 200 * (1 + 0.5) = 300
-            expect(delta).toBeGreaterThan(299);
-            expect(delta).toBeLessThan(300 + tolerance);
-          })
-          .then(done);
+      afterAll(function() {
+        Math.random = realRandom;
+        window.setTimeout = realSetTimeout;
+      });
+
+      beforeEach(function() {
+        window.setTimeout.calls.reset();
+      });
+
+      it('uses baseDelay', function(done) {
+        var request = {
+          uri: ['reject://foo'],
+          retryParameters: {
+            maxAttempts: 2,
+            baseDelay: baseDelay,
+            fuzzFactor: 0,
+            backoffFactor: 2
+          }
+        };
+        networkingEngine.request(requestType, request)
+            .then(fail)
+            .catch(function() {
+              expect(window.setTimeout.calls.count()).toBe(1);
+              expect(window.setTimeout)
+                  .toHaveBeenCalledWith(jasmine.any(Function), baseDelay);
+            })
+            .then(done);
+      });
+
+      it('uses backoffFactor', function(done) {
+        var request = {
+          uri: ['reject://foo'],
+          retryParameters: {
+            maxAttempts: 3,
+            baseDelay: baseDelay,
+            fuzzFactor: 0,
+            backoffFactor: 2
+          }
+        };
+        networkingEngine.request(requestType, request)
+            .then(fail)
+            .catch(function() {
+              expect(window.setTimeout.calls.count()).toBe(2);
+              expect(window.setTimeout)
+                  .toHaveBeenCalledWith(jasmine.any(Function), baseDelay);
+              expect(window.setTimeout)
+                  .toHaveBeenCalledWith(jasmine.any(Function), baseDelay * 2);
+            })
+            .then(done);
+      });
+
+      it('uses fuzzFactor', function(done) {
+        var request = {
+          uri: ['reject://foo'],
+          retryParameters: {
+            maxAttempts: 2,
+            baseDelay: baseDelay,
+            fuzzFactor: 1,
+            backoffFactor: 1
+          }
+        };
+        networkingEngine.request(requestType, request)
+            .then(fail)
+            .catch(function() {
+              // (rand * 2.0) - 1.0 = (0.75 * 2.0) - 1.0 = 0.5
+              // 0.5 * fuzzFactor = 0.5 * 1 = 0.5
+              // delay * (1 + 0.5) = baseDelay * (1 + 0.5)
+              expect(window.setTimeout.calls.count()).toBe(1);
+              expect(window.setTimeout)
+                  .toHaveBeenCalledWith(jasmine.any(Function), baseDelay * 1.5);
+            })
+            .then(done);
+      });
     });
 
     it('uses multiple URIs', function(done) {
