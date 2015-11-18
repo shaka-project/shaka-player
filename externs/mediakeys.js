@@ -114,8 +114,8 @@ MediaKeyStatusMap.prototype.entries = function() {};
 
 
 /**
- * The functor is called with each value.
- * @param {function(string)} fn
+ * The functor is called with each value and key.
+ * @param {function(string, BufferSource)} fn
  */
 MediaKeyStatusMap.prototype.forEach = function(fn) {};
 
