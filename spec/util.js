@@ -16,6 +16,8 @@
  */
 
 goog.require('shaka.asserts');
+goog.require('shaka.polyfill.CustomEvent');
+goog.require('shaka.polyfill.Promise');
 
 
 /**
@@ -93,3 +95,11 @@ var assertsToFailures = {
 // Make sure assertions are converted into failures for all tests.
 beforeEach(assertsToFailures.install);
 afterEach(assertsToFailures.uninstall);
+
+// The library cannot function without certain browser features, and therefore
+// neither can many of our tests.  If needed, install the Promise and
+// CustomEvent polyfills.  In particular, this is needed on IE11.
+beforeAll(function() {
+  shaka.polyfill.Promise.install();
+  shaka.polyfill.CustomEvent.install();
+});

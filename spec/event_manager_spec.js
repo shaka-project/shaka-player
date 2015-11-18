@@ -28,8 +28,8 @@ describe('EventManager', function() {
     eventManager = new shaka.util.EventManager();
     target1 = document.createElement('div');
     target2 = document.createElement('div');
-    event1 = new Event('eventtype1');
-    event2 = new Event('eventtype2');
+    event1 = new CustomEvent('eventtype1');
+    event2 = new CustomEvent('eventtype2');
   });
 
   afterEach(function() {

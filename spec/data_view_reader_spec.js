@@ -175,7 +175,7 @@ describe('DataViewReader', function() {
     }
 
     expect(exception).not.toBeNull();
-    expect(exception instanceof RangeError).toBe(true);
+    expect(isRangeErrorish(exception));
   });
 
   it('detects end-of-stream when reading a uint16', function() {
@@ -190,7 +190,7 @@ describe('DataViewReader', function() {
     }
 
     expect(exception).not.toBeNull();
-    expect(exception instanceof RangeError).toBe(true);
+    expect(isRangeErrorish(exception));
   });
 
   it('detects end-of-stream when reading a uint32', function() {
@@ -205,7 +205,7 @@ describe('DataViewReader', function() {
     }
 
     expect(exception).not.toBeNull();
-    expect(exception instanceof RangeError).toBe(true);
+    expect(isRangeErrorish(exception));
   });
 
   it('detects end-of-stream when skipping bytes', function() {
@@ -220,7 +220,7 @@ describe('DataViewReader', function() {
     }
 
     expect(exception).not.toBeNull();
-    expect(exception instanceof RangeError).toBe(true);
+    expect(isRangeErrorish(exception));
   });
 
   it('detects uint64s too large for JavaScript', function() {
@@ -246,4 +246,13 @@ describe('DataViewReader', function() {
     expect(exception).not.toBe(null);
     expect(exception instanceof RangeError).toBe(true);
   });
+
+  function isRangeErrorish(exception) {
+    // For most browsers, DataView throws RangeError.
+    if (exception instanceof RangeError) {
+      return true;
+    }
+    // IE11 throws a TypeError with this numeric code.
+    return exception.number == 0x800A13E1;
+  }
 });
