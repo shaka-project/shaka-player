@@ -38,11 +38,13 @@ function capturePromiseStatus(promise) {
  * Returns a Promise which is resolved after the given delay.
  *
  * @param {number} seconds The delay in seconds.
+ * @param {function(function(), number)=} opt_setTimeout
  * @return {!Promise}
  */
-function delay(seconds) {
+function delay(seconds, opt_setTimeout) {
   return new Promise(function(resolve, reject) {
-    setTimeout(resolve, seconds * 1000.0);
+    var timeout = opt_setTimeout || setTimeout;
+    timeout(resolve, seconds * 1000.0);
   });
 }
 
