@@ -21,6 +21,7 @@ goog.provide('shaka.test.IStreamGenerator');
 goog.provide('shaka.test.StreamGenerator');
 
 goog.require('shaka.asserts');
+goog.require('shaka.log');
 goog.require('shaka.util.DataViewReader');
 
 
@@ -181,7 +182,7 @@ shaka.test.DashVodStreamGenerator.prototype.getSegment = function(
   var numSegments = Math.ceil(this.mediaPresentationDuration_ /
                               this.segmentDuration_);
   if (segmentNumber > numSegments) {
-    console.debug('segmentNumber > numSegments');
+    shaka.log.debug('segmentNumber > numSegments');
     return null;
   }
 
@@ -326,10 +327,10 @@ shaka.test.DashLiveStreamGenerator.prototype.getSegment = function(
                                   this.timeShiftBufferDepth_;
 
   if (wallClockTime < segmentAvailabilityStartTime) {
-    console.debug('wallClockTime < segmentAvailabilityStartTime');
+    shaka.log.debug('wallClockTime < segmentAvailabilityStartTime');
     return null;
   } else if (wallClockTime > segmentAvailabiltyEndTime) {
-    console.debug('wallClockTime > segmentAvailabiltyEndTime');
+    shaka.log.debug('wallClockTime > segmentAvailabiltyEndTime');
     return null;
   }
 
@@ -404,7 +405,7 @@ shaka.test.StreamGenerator.getTimescale_ = function(
 
   var largesizePresent = size == 1;
   if (largesizePresent) {
-    console.debug('\'largesize\' field is present.');
+    shaka.log.debug('\'largesize\' field is present.');
     reader.skip(8);  // Skip 'largesize' field.
   }
 
@@ -413,10 +414,10 @@ shaka.test.StreamGenerator.getTimescale_ = function(
 
   // Skip 'creation_time' and 'modification_time' fields.
   if (version == 0) {
-    console.debug('mvhd box is version 0.');
+    shaka.log.debug('mvhd box is version 0.');
     reader.skip(8);
   } else {
-    console.debug('mvhd box is version 1.');
+    shaka.log.debug('mvhd box is version 1.');
     reader.skip(16);
   }
 
@@ -458,7 +459,7 @@ shaka.test.StreamGenerator.setBaseMediaDecodeTime_ = function(
 
   var largesizePresent = size == 1;
   if (largesizePresent) {
-    console.debug('\'largesize\' field is present.');
+    shaka.log.debug('\'largesize\' field is present.');
     reader.skip(8);  // Skip 'largesize' field.
   }
 
@@ -467,10 +468,10 @@ shaka.test.StreamGenerator.setBaseMediaDecodeTime_ = function(
 
   var pos = reader.getPosition();
   if (version == 0) {
-    console.debug('tfdt box is version 0.');
+    shaka.log.debug('tfdt box is version 0.');
     dataView.setUint32(pos, baseMediaDecodeTime * timescale);
   } else {
-    console.debug('tfdt box is version 1.');
+    shaka.log.debug('tfdt box is version 1.');
     // tfdt box version 1 supports 64-bit 'baseMediaDecodeTime' fields;
     // however, we restrict the intput to 32 bits above.
     dataView.setUint32(pos, 0);
