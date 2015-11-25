@@ -16,11 +16,11 @@ system=$(uname -s)
 if [[ "$system" == Linux ]]; then
   # If we are running tests on Linux, run inside a virtual framebuffer.
   wrapper="xvfb-run --auto-servernum"
-  browsers="Chrome,Firefox,Opera"
+  browsers="Chrome,FirefoxWithMSE,Opera"
 elif [[ "$system" == Darwin ]]; then
-  browsers="Chrome,Firefox,Safari"
+  browsers="Chrome,FirefoxWithMSE,Safari"
 elif [[ "$system" == CYGWIN* ]]; then
-  browsers="Chrome,Firefox,IE"
+  browsers="Chrome,FirefoxWithMSE,IE"
 fi
 
 # Run tests in all available browsers.

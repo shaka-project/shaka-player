@@ -72,5 +72,21 @@ module.exports = function(config) {
 
     // do not execute tests whenever any file changes
     autoWatch: false,
+
+    customLaunchers: {
+      // Firefox doesn't enable MediaSource Extensions or MP4 by default yet:
+      FirefoxWithMSE: {
+        base: 'Firefox',
+        prefs: {
+          'media.fragmented-mp4.exposed': true,
+          'media.fragmented-mp4.ffmpeg.enabled': true,
+          'media.mediasource.enabled': true,
+          'media.mediasource.format-reader': true,
+          'media.mediasource.webm.enabled': true,
+          'media.mediasource.whitelist': false,
+          'media.mediasource.youtubeonly': false,
+        }
+      }
+    }
   });
 };
