@@ -45,8 +45,8 @@ module.exports = function(config) {
     },
 
     preprocessors: {
-      // Don't compute coverage over lib/debug/
-      'lib/!(debug)/*.js': 'coverage',
+      // Don't compute coverage over lib/debug/ or lib/polyfill/
+      'lib/!(debug|polyfill)/*.js': 'coverage',
     },
 
     coverageReporter: {
