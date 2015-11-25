@@ -101,11 +101,13 @@ shaka.test.DashVodStreamGenerator = function(
     segmentDuration,
     presentationTimeOffset,
     mediaPresentationDuration) {
-  shaka.asserts.assert(mvhdOffset >= 0);
-  shaka.asserts.assert(tfdtOffset >= 0);
-  shaka.asserts.assert(segmentDuration > 0);
-  shaka.asserts.assert(presentationTimeOffset >= 0);
-  shaka.asserts.assert(mediaPresentationDuration > 0);
+  shaka.asserts.assert(mvhdOffset >= 0, 'mvhd offset invalid');
+  shaka.asserts.assert(tfdtOffset >= 0, 'tfdt offset invalid');
+  shaka.asserts.assert(segmentDuration > 0, 'segment duration invalid');
+  shaka.asserts.assert(presentationTimeOffset >= 0,
+      'presentation time offset invalid');
+  shaka.asserts.assert(mediaPresentationDuration > 0,
+      'presentation duration invalid');
 
   /** @private {string} */
   this.initSegmentUrl_ = initSegmentUrl;
@@ -149,7 +151,8 @@ shaka.test.DashVodStreamGenerator.prototype.init = function() {
 
   return Promise.all(async).then(
       function(results) {
-        shaka.asserts.assert(results.length == 2);
+        shaka.asserts.assert(results.length == 2,
+                             'did not load both segments');
         this.initSegment_ = results[0];
         this.segmentTemplate_ = results[1];
         this.timescale_ = shaka.test.StreamGenerator.getTimescale_(
@@ -176,7 +179,8 @@ shaka.test.DashVodStreamGenerator.prototype.getSegment = function(
   if (!this.segmentTemplate_) return null;
 
   // |segmentNumber| must be an integer and >= 1.
-  shaka.asserts.assert((segmentNumber % 1 === 0) && (segmentNumber >= 1));
+  shaka.asserts.assert((segmentNumber % 1 === 0) && (segmentNumber >= 1),
+                       'segment number must be an integer >= 1');
 
   var numSegments = Math.ceil(this.mediaPresentationDuration_ /
                               this.segmentDuration_);
@@ -232,14 +236,19 @@ shaka.test.DashLiveStreamGenerator = function(
     broadcastStartTime,
     availabilityStartTime,
     timeShiftBufferDepth) {
-  shaka.asserts.assert(mvhdOffset >= 0);
-  shaka.asserts.assert(tfdtOffset >= 0);
-  shaka.asserts.assert(segmentDuration > 0);
-  shaka.asserts.assert(presentationTimeOffset >= 0);
-  shaka.asserts.assert(broadcastStartTime >= 0);
-  shaka.asserts.assert(availabilityStartTime >= 0);
-  shaka.asserts.assert(timeShiftBufferDepth >= 0);
-  shaka.asserts.assert(broadcastStartTime >= availabilityStartTime);
+  shaka.asserts.assert(mvhdOffset >= 0, 'mvhd offset invalid');
+  shaka.asserts.assert(tfdtOffset >= 0, 'tfdt offset invalid');
+  shaka.asserts.assert(segmentDuration > 0, 'segment duration invalid');
+  shaka.asserts.assert(presentationTimeOffset >= 0,
+      'presentation time offset invalid');
+  shaka.asserts.assert(broadcastStartTime >= 0,
+      'broadcast start time invalid');
+  shaka.asserts.assert(availabilityStartTime >= 0,
+      'availability start time invalid');
+  shaka.asserts.assert(timeShiftBufferDepth >= 0,
+      'time shift buffer depth invalid');
+  shaka.asserts.assert(broadcastStartTime >= availabilityStartTime,
+      'broadcast start time before availability start time');
 
   /** @private {string} */
   this.initSegmentUrl_ = initSegmentUrl;
@@ -283,7 +292,8 @@ shaka.test.DashLiveStreamGenerator.prototype.init = function() {
 
   return Promise.all(async).then(
       function(results) {
-        shaka.asserts.assert(results.length == 2);
+        shaka.asserts.assert(results.length == 2,
+                             'did not load both segments');
         this.initSegment_ = results[0];
         this.segmentTemplate_ = results[1];
         this.timescale_ = shaka.test.StreamGenerator.getTimescale_(
@@ -311,7 +321,8 @@ shaka.test.DashLiveStreamGenerator.prototype.getSegment = function(
   if (!this.initSegment_) return null;
 
   // |segmentNumber| must be an integer and >= 1.
-  shaka.asserts.assert((segmentNumber % 1 === 0) && (segmentNumber >= 1));
+  shaka.asserts.assert((segmentNumber % 1 === 0) && (segmentNumber >= 1),
+                       'segment number must be an integer >= 1');
 
   var segmentStartTime = (segmentNumber - 1) * this.segmentDuration_;
 
@@ -364,12 +375,12 @@ shaka.test.fetch_ = function(url) {
           !!xhr.response) {
         resolve(/** @type {!ArrayBuffer} */(xhr.response));
       } else {
-        reject();
+        reject(xhr.status);
       }
     };
 
     xhr.onerror = function(event) {
-      reject();
+      reject('error');
     };
 
     xhr.send(null /* body */);
