@@ -94,8 +94,8 @@ var assertsToFailures = {
 
 
 // Make sure assertions are converted into failures for all tests.
-beforeEach(assertsToFailures.install);
-afterEach(assertsToFailures.uninstall);
+beforeAll(assertsToFailures.install);
+afterAll(assertsToFailures.uninstall);
 
 // The library cannot function without certain browser features, and therefore
 // neither can many of our tests.  If needed, install the Promise and

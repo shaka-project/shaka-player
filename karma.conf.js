@@ -32,6 +32,7 @@ module.exports = function(config) {
       'spec/*.js',
 
       // source files - these are only watched and served
+      {pattern: 'spec/assets/*', included: false},
       {pattern: 'lib/*/*.js', included: false},
       {pattern: 'third_party/closure/goog/*/*.js', included: false},
 
@@ -39,9 +40,9 @@ module.exports = function(config) {
       {pattern: 'third_party/closure/goog/deps.js', included: false}
     ],
 
-    // handle requests for /assets
+    // handle requests for /spec/assets
     proxies: {
-      '/assets/': '/base/assets/'
+      '/spec/assets/': '/base/spec/assets/'
     },
 
     preprocessors: {

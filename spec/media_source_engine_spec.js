@@ -473,6 +473,7 @@ describe('MediaSourceEngine', function() {
 
   describe('setDuration', function() {
     beforeEach(function() {
+      mockMediaSource.durationGetter_.and.returnValue(0);
       captureEvents(audioSourceBuffer, ['updateend', 'error']);
       captureEvents(videoSourceBuffer, ['updateend', 'error']);
       mediaSourceEngine.init({'audio': 'audio/foo', 'video': 'video/foo'});
