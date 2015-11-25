@@ -16,7 +16,9 @@ system=$(uname -s)
 if [[ "$system" == Linux ]]; then
   # If we are running tests on Linux, run inside a virtual framebuffer.
   wrapper="xvfb-run --auto-servernum"
-  browsers="Chrome,FirefoxWithMSE,Opera"
+  # FIXME: Avoid Opera on Linux until we can figure out how to run with MP4
+  # enabled.
+  browsers="Chrome,FirefoxWithMSE"
 elif [[ "$system" == Darwin ]]; then
   browsers="Chrome,FirefoxWithMSE,Safari"
 elif [[ "$system" == CYGWIN* ]]; then
