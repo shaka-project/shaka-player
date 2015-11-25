@@ -11,7 +11,7 @@
     }
   ],
   "devDependencies": {
-    "karma": ">=0.13.9",
+    "karma": ">=0.13.9 <= 0.13.14",
     "karma-coverage": "",
     "karma-jasmine": "",
     "karma-jasmine-ajax": "",
