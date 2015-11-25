@@ -67,6 +67,7 @@ var assertsToFailures = {
       realAssert(condition, opt_message);
       if (!condition) {
         var message = opt_message || 'Assertion failed.';
+        console.error(message);
         try {
           throw new Error(message);
         } catch (exception) {
