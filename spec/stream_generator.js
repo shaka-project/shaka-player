@@ -147,15 +147,14 @@ shaka.test.DashVodStreamGenerator.prototype.init = function() {
     shaka.test.fetch_(this.segmentTemplateUrl_)
   ];
 
-  return Promise.all(async).then(shaka.util.TypedBind(this,
-      /** @param {!Array.<!ArrayBuffer>} results */
+  return Promise.all(async).then(
       function(results) {
         shaka.asserts.assert(results.length == 2);
         this.initSegment_ = results[0];
         this.segmentTemplate_ = results[1];
         this.timescale_ = shaka.test.StreamGenerator.getTimescale_(
             this.initSegment_, this.mvhdOffset_);
-      }));
+      }.bind(this));
 };
 
 
@@ -282,15 +281,14 @@ shaka.test.DashLiveStreamGenerator.prototype.init = function() {
     shaka.test.fetch_(this.segmentTemplateUrl_)
   ];
 
-  return Promise.all(async).then(shaka.util.TypedBind(this,
-      /** @param {!Array.<!ArrayBuffer>} results */
+  return Promise.all(async).then(
       function(results) {
         shaka.asserts.assert(results.length == 2);
         this.initSegment_ = results[0];
         this.segmentTemplate_ = results[1];
         this.timescale_ = shaka.test.StreamGenerator.getTimescale_(
             this.initSegment_, this.mvhdOffset_);
-      }));
+      }.bind(this));
 };
 
 
