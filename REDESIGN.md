@@ -178,17 +178,14 @@ shaka.net.NetworkingEngine.prototype.configure({})
 
 shaka.media.TextSourceBuffer.registerParser(mimeType, parserCallback)
 
-shaka.manifest.ManifestParser.registerParser(mimeType, fileExt, parserCallback)
+shaka.manifest.ManifestParser.registerParser(mimeType, fileExt, parser)
 
 ## TODO
 
   * Internal manifest format needs to be specified.
-  * NetworkingEngine needs implementation.  <em>(in progress)</em>
-  * StreamingEngine needs implementation.  <em>(blocked on NetworkingEngine)</em>
-  * TextParser for WebVTT needs implementation.
-  * Manifest parser callback needs to be specified.
-  * DashManifestParser needs implementation.  <em>(blocked on manifest format & callback)</em>
+  * StreamingEngine needs implementation.  <em>(blocked on manifest format)</em>
+  * Manifest parser needs to be specified.
+  * DashManifestParser needs implementation.  <em>(blocked on manifest format & parser interface)</em>
   * DrmEngine needs design work.
   * Player needs implementation.  <em>(blocked on everything else)</em>
-  * Preview branch needs to be created on github.
 
