@@ -17,8 +17,15 @@
 
 goog.require('shaka.media.SegmentIndex');
 goog.require('shaka.media.SegmentReference');
+goog.require('shaka.util.Error');
 
 describe('SegmentIndex', function() {
+  var Code;
+
+  beforeAll(function() {
+    Code = shaka.util.Error.Code;
+  });
+
   describe('get', function() {
     var actual1, actual2, actual3;
 
@@ -59,7 +66,8 @@ describe('SegmentIndex', function() {
         index.get(0);
         fail();
       } catch (exception) {
-        expect(exception instanceof RangeError).toBeTruthy();
+        expect(exception instanceof shaka.util.Error).toBe(true);
+        expect(exception.code).toBe(Code.SEGMENT_OUT_OF_RANGE);
       }
     });
 
@@ -70,7 +78,8 @@ describe('SegmentIndex', function() {
         index.get(-1);
         fail();
       } catch (exception) {
-        expect(exception instanceof RangeError).toBeTruthy();
+        expect(exception instanceof shaka.util.Error).toBe(true);
+        expect(exception.code).toBe(Code.SEGMENT_OUT_OF_RANGE);
       }
     });
 
@@ -81,7 +90,8 @@ describe('SegmentIndex', function() {
         index.get(3);
         fail();
       } catch (exception) {
-        expect(exception instanceof RangeError).toBeTruthy();
+        expect(exception instanceof shaka.util.Error).toBe(true);
+        expect(exception.code).toBe(Code.SEGMENT_OUT_OF_RANGE);
       }
     });
   });

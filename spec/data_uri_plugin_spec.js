@@ -78,10 +78,14 @@ describe('DataUriPlugin', function() {
   }
 
   function testFails(uri, done) {
+    shaka.log.setLevel(shaka.log.Level.NONE);
     shaka.net.DataUriPlugin(uri, {})
         .then(fail)
         .catch(function() { expect(true).toBe(true); })
-        .then(done);
+        .then(function() {
+          shaka.log.setLevel(shaka.log.MAX_LOG_LEVEL);
+          done();
+        });
   }
 });
 

@@ -16,6 +16,7 @@
  */
 
 goog.require('shaka.media.VttTextParser');
+goog.require('shaka.util.Error');
 goog.require('shaka.util.Uint8ArrayUtils');
 
 describe('VttTextParser', function() {
@@ -127,19 +128,29 @@ describe('VttTextParser', function() {
   });
 
   it('requires header', function() {
-    errorHelper('');
-    errorHelper('00:00:00.000 --> 00:00:00.020\nTest');
+    errorHelper(shaka.util.Error.Code.INVALID_TEXT_HEADER,
+                '');
+    errorHelper(shaka.util.Error.Code.INVALID_TEXT_HEADER,
+                '00:00:00.000 --> 00:00:00.020\nTest');
   });
 
   it('invalid time values', function() {
-    errorHelper('WEBVTT\n\n00.020    --> 0:00.040\nTest');
-    errorHelper('WEBVTT\n\n0:00.020  --> 0:00.040\nTest');
-    errorHelper('WEBVTT\n\n00:00.20  --> 0:00.040\nTest');
-    errorHelper('WEBVTT\n\n00:100.20 --> 0:00.040\nTest');
-    errorHelper('WEBVTT\n\n00:00.020 --> 0:00.040\nTest');
-    errorHelper('WEBVTT\n\n00:00:00:00.020 --> 0:00.040\nTest');
-    errorHelper('WEBVTT\n\n00:61.020 --> 0:00.040\nTest');
-    errorHelper('WEBVTT\n\n61:00.020 --> 0:00.040\nTest');
+    errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+                'WEBVTT\n\n00.020    --> 0:00.040\nTest');
+    errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+                'WEBVTT\n\n0:00.020  --> 0:00.040\nTest');
+    errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+                'WEBVTT\n\n00:00.20  --> 0:00.040\nTest');
+    errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+                'WEBVTT\n\n00:100.20 --> 0:00.040\nTest');
+    errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+                'WEBVTT\n\n00:00.020 --> 0:00.040\nTest');
+    errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+                'WEBVTT\n\n00:00:00:00.020 --> 0:00.040\nTest');
+    errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+                'WEBVTT\n\n00:61.020 --> 0:00.040\nTest');
+    errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+                'WEBVTT\n\n61:00.020 --> 0:00.040\nTest');
   });
 
   it('supports vertical setting', function() {
@@ -216,14 +227,22 @@ describe('VttTextParser', function() {
   });
 
   it('invalid settings', function() {
-    errorHelper('WEBVTT\n\n00:00.000 --> 00:00.010 vertical:es\nTest');
-    errorHelper('WEBVTT\n\n00:00.000 --> 00:00.010 vertical:\nTest');
-    errorHelper('WEBVTT\n\n00:00.000 --> 00:00.010 vertical\nTest');
-    errorHelper('WEBVTT\n\n00:00.000 --> 00:00.010 line:-3%\nTest');
-    errorHelper('WEBVTT\n\n00:00.000 --> 00:00.010 line:105%\nTest');
-    errorHelper('WEBVTT\n\n00:00.000 --> 00:00.010 line:45%%\nTest');
-    errorHelper('WEBVTT\n\n00:00.000 --> 00:00.010 align:10\nTest');
-    errorHelper('WEBVTT\n\n00:00.000 --> 00:00.010 align:foo\nTest');
+    errorHelper(shaka.util.Error.Code.INVALID_TEXT_SETTINGS,
+                'WEBVTT\n\n00:00.000 --> 00:00.010 vertical:es\nTest');
+    errorHelper(shaka.util.Error.Code.INVALID_TEXT_SETTINGS,
+                'WEBVTT\n\n00:00.000 --> 00:00.010 vertical:\nTest');
+    errorHelper(shaka.util.Error.Code.INVALID_TEXT_SETTINGS,
+                'WEBVTT\n\n00:00.000 --> 00:00.010 vertical\nTest');
+    errorHelper(shaka.util.Error.Code.INVALID_TEXT_SETTINGS,
+                'WEBVTT\n\n00:00.000 --> 00:00.010 line:-3%\nTest');
+    errorHelper(shaka.util.Error.Code.INVALID_TEXT_SETTINGS,
+                'WEBVTT\n\n00:00.000 --> 00:00.010 line:105%\nTest');
+    errorHelper(shaka.util.Error.Code.INVALID_TEXT_SETTINGS,
+                'WEBVTT\n\n00:00.000 --> 00:00.010 line:45%%\nTest');
+    errorHelper(shaka.util.Error.Code.INVALID_TEXT_SETTINGS,
+                'WEBVTT\n\n00:00.000 --> 00:00.010 align:10\nTest');
+    errorHelper(shaka.util.Error.Code.INVALID_TEXT_SETTINGS,
+                'WEBVTT\n\n00:00.000 --> 00:00.010 align:foo\nTest');
   });
 
   function verifyHelper(cues, string) {
@@ -251,14 +270,15 @@ describe('VttTextParser', function() {
     }
   }
 
-  function errorHelper(string) {
+  function errorHelper(code, string) {
     var data = shaka.util.Uint8ArrayUtils.fromString(string).buffer;
     try {
       var result = shaka.media.VttTextParser(data);
       fail('Invalid WebVTT file supported');
     } catch (e) {
-      expect(e instanceof Error).toBe(true);
-      expect(e.message).toBe('Invalid WebVTT file.');
+      expect(e instanceof shaka.util.Error).toBe(true);
+      expect(e.category).toBe(shaka.util.Error.Category.TEXT);
+      expect(e.code).toBe(code);
     }
   }
 });

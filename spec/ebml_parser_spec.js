@@ -16,8 +16,15 @@
  */
 
 goog.require('shaka.util.EbmlParser');
+goog.require('shaka.util.Error');
 
 describe('EbmlParser', function() {
+  var Code;
+
+  beforeAll(function() {
+    Code = shaka.util.Error.Code;
+  });
+
   it('parses one element', function() {
     // Set ID to 0x1.
     // Set size to 4 bytes.
@@ -187,7 +194,8 @@ describe('EbmlParser', function() {
     }
 
     expect(exception).not.toBeNull();
-    expect(exception instanceof RangeError).toBe(true);
+    expect(exception instanceof shaka.util.Error).toBe(true);
+    expect(exception.code).toBe(Code.EBML_OVERFLOW);
   });
 
   it('detects vint values with too many bits', function() {
@@ -204,7 +212,8 @@ describe('EbmlParser', function() {
     }
 
     expect(exception).not.toBeNull();
-    expect(exception instanceof RangeError).toBe(true);
+    expect(exception instanceof shaka.util.Error).toBe(true);
+    expect(exception.code).toBe(Code.JS_INTEGER_OVERFLOW);
 
     exception = null;
 
@@ -219,7 +228,8 @@ describe('EbmlParser', function() {
     }
 
     expect(exception).not.toBeNull();
-    expect(exception instanceof RangeError).toBe(true);
+    expect(exception instanceof shaka.util.Error).toBe(true);
+    expect(exception.code).toBe(Code.JS_INTEGER_OVERFLOW);
 
     exception = null;
 
@@ -234,7 +244,8 @@ describe('EbmlParser', function() {
     }
 
     expect(exception).not.toBeNull();
-    expect(exception instanceof RangeError).toBe(true);
+    expect(exception instanceof shaka.util.Error).toBe(true);
+    expect(exception.code).toBe(Code.JS_INTEGER_OVERFLOW);
   });
 
   it('detects the end of input while reading a vint', function() {
@@ -245,16 +256,14 @@ describe('EbmlParser', function() {
     var exception = null;
 
     try {
-      var data = new Uint8Array(
-          [0x00, 0xc1, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11]);
-      var parser = new shaka.util.EbmlParser(new DataView(data.buffer));
       parser.parseVint_();
     } catch (e) {
       exception = e;
     }
 
     expect(exception).not.toBeNull();
-    expect(exception instanceof RangeError).toBe(true);
+    expect(exception instanceof shaka.util.Error).toBe(true);
+    expect(exception.code).toBe(Code.BUFFER_READ_OUT_OF_BOUNDS);
   });
 
   it('parses a uint', function() {
@@ -289,7 +298,8 @@ describe('EbmlParser', function() {
     }
 
     expect(exception).not.toBeNull();
-    expect(exception instanceof RangeError).toBe(true);
+    expect(exception instanceof shaka.util.Error).toBe(true);
+    expect(exception.code).toBe(Code.EBML_OVERFLOW);
   });
 
   it('detects uints with too many bits', function() {
@@ -312,7 +322,8 @@ describe('EbmlParser', function() {
     }
 
     expect(exception).not.toBeNull();
-    expect(exception instanceof RangeError).toBe(true);
+    expect(exception instanceof shaka.util.Error).toBe(true);
+    expect(exception.code).toBe(Code.JS_INTEGER_OVERFLOW);
   });
 
   it('recognizes dynamic-sized values', function() {

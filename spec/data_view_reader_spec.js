@@ -16,6 +16,7 @@
  */
 
 goog.require('shaka.util.DataViewReader');
+goog.require('shaka.util.Error');
 
 describe('DataViewReader', function() {
   // |data| as interpreted as a 64 bit integer must not be larger than 2^53-1.
@@ -28,6 +29,12 @@ describe('DataViewReader', function() {
 
   var bigEndianReader;
   var littleEndianReader;
+
+  var Code;
+
+  beforeAll(function() {
+    Code = shaka.util.Error.Code;
+  });
 
   beforeEach(function() {
     bigEndianReader = new shaka.util.DataViewReader(
@@ -175,7 +182,8 @@ describe('DataViewReader', function() {
     }
 
     expect(exception).not.toBeNull();
-    expect(isRangeErrorish(exception));
+    expect(exception instanceof shaka.util.Error).toBe(true);
+    expect(exception.code).toBe(Code.BUFFER_READ_OUT_OF_BOUNDS);
   });
 
   it('detects end-of-stream when reading a uint16', function() {
@@ -190,7 +198,8 @@ describe('DataViewReader', function() {
     }
 
     expect(exception).not.toBeNull();
-    expect(isRangeErrorish(exception));
+    expect(exception instanceof shaka.util.Error).toBe(true);
+    expect(exception.code).toBe(Code.BUFFER_READ_OUT_OF_BOUNDS);
   });
 
   it('detects end-of-stream when reading a uint32', function() {
@@ -205,7 +214,8 @@ describe('DataViewReader', function() {
     }
 
     expect(exception).not.toBeNull();
-    expect(isRangeErrorish(exception));
+    expect(exception instanceof shaka.util.Error).toBe(true);
+    expect(exception.code).toBe(Code.BUFFER_READ_OUT_OF_BOUNDS);
   });
 
   it('detects end-of-stream when skipping bytes', function() {
@@ -220,7 +230,8 @@ describe('DataViewReader', function() {
     }
 
     expect(exception).not.toBeNull();
-    expect(isRangeErrorish(exception));
+    expect(exception instanceof shaka.util.Error).toBe(true);
+    expect(exception.code).toBe(Code.BUFFER_READ_OUT_OF_BOUNDS);
   });
 
   it('detects uint64s too large for JavaScript', function() {
@@ -233,7 +244,8 @@ describe('DataViewReader', function() {
     }
 
     expect(exception).not.toBe(null);
-    expect(exception instanceof RangeError).toBe(true);
+    expect(exception instanceof shaka.util.Error).toBe(true);
+    expect(exception.code).toBe(Code.JS_INTEGER_OVERFLOW);
 
     exception = null;
 
@@ -244,15 +256,7 @@ describe('DataViewReader', function() {
     }
 
     expect(exception).not.toBe(null);
-    expect(exception instanceof RangeError).toBe(true);
+    expect(exception instanceof shaka.util.Error).toBe(true);
+    expect(exception.code).toBe(Code.JS_INTEGER_OVERFLOW);
   });
-
-  function isRangeErrorish(exception) {
-    // For most browsers, DataView throws RangeError.
-    if (exception instanceof RangeError) {
-      return true;
-    }
-    // IE11 throws a TypeError with this numeric code.
-    return exception.number == 0x800A13E1;
-  }
 });
