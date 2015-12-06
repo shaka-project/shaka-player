@@ -1,3 +1,12 @@
+## 1.6.1 (2015-12-07)
+
+Bugfixes:
+  - Fixed handling when all streams are removed in a manifest update.
+  - Fixed annotation mistakes in preparation for a new compiler release.
+  - Fixed Promise polyfill errors in compiled mode.
+    - https://github.com/google/shaka-player/issues/236
+
+
 ## 1.6.0 (2015-11-17)
 
 Features:
