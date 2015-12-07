@@ -24,7 +24,7 @@ NPM_VERSION=$(
     cut -f 2 -d : | sed -e 's/.*"\(.*\)".*/\1/'
 )
 PLAYER_VERSION=$(
-  grep GIT_VERSION "$dir"/lib/player/player.js | grep goog.define |
+  grep GIT_VERSION "$dir"/lib/player.js | grep goog.define |
     cut -f 2 -d , | sed -e "s/.*'\\(.*\\)'.*/\\1/"
 )
 CHANGELOG_VERSION=$(

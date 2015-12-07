@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<!--
+ Copyright 2015 Google Inc.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<html>
+  <head>
+    <title>Shaka Player Browser Support Test</title>
+    <script src="shaka-player.compiled.js"></script>
+  </head>
+  <body><pre id="output"></pre></body>
+  <script>
+    function whenLoaded(fn) {
+      // IE 9 fires DOMContentLoaded, and enters the "interactive"
+      // readyState, before document.body has been initialized, so wait
+      // for window.load
+      if (document.readyState == 'loading' ||
+          document.readyState == 'interactive') {
+        if (window.attachEvent) {
+          // IE8
+          window.attachEvent('onload', fn);
+        } else {
+          window.addEventListener('load', fn);
+        }
+      } else {
+        fn();
+      }
+    }
+
+    function doTest() {
+      shaka.polyfill.installAll();
+      shaka.Player.support().then(function(support) {
+        var userAgent = navigator.userAgent;
+        var formatted = userAgent + '\n\n';
+
+        var indent = '    ';
+        formatted += '{\n';
+        for (var topLevelKey in support) {
+          formatted += indent + topLevelKey + ': ';
+          if (typeof(support[topLevelKey]) == 'boolean') {
+            formatted += support[topLevelKey].toString();
+          } else {
+            var obj = support[topLevelKey];
+            formatted += '{\n';
+            for (var subKey in obj) {
+              formatted += indent + indent + subKey + ': ';
+              formatted += obj[subKey].toString();
+              formatted += '\n';
+            }
+            formatted += indent + '}';
+          }
+          formatted += '\n';
+        }
+        formatted += '}\n';
+
+        var output = document.getElementById('output');
+
+        if (output.textContent === undefined) {
+          // IE8 and other very old browsers don't have textContent.
+          output.innerText = formatted;
+        } else {
+          output.textContent = formatted;
+        }
+      });
+    }
+
+    whenLoaded(doTest);
+  </script>
+</html>
