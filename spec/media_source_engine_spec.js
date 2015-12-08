@@ -76,6 +76,47 @@ describe('MediaSourceEngine', function() {
     });
   });
 
+  describe('bufferStart and bufferEnd', function() {
+    beforeEach(function() {
+      mediaSourceEngine.init({'audio': 'audio/foo'});
+    });
+
+    it('returns correct timestamps for one range', function() {
+      audioSourceBuffer.buffered.length = 1;
+      audioSourceBuffer.buffered.start.and.returnValue(0);
+      audioSourceBuffer.buffered.end.and.returnValue(10);
+
+      expect(mediaSourceEngine.bufferStart('audio', 0)).toBeCloseTo(0);
+      expect(mediaSourceEngine.bufferEnd('audio', 0)).toBeCloseTo(10);
+    });
+
+    it('returns correct timestamps for multiple ranges', function() {
+      audioSourceBuffer.buffered.length = 2;
+
+      audioSourceBuffer.buffered.start.and.callFake(function(i) {
+        if (i == 0) return 5;
+        if (i == 1) return 20;
+        throw new Error('Unexpected index');
+      });
+
+      audioSourceBuffer.buffered.end.and.callFake(function(i) {
+        if (i == 0) return 10;
+        if (i == 1) return 30;
+        throw new Error('Unexpected index');
+      });
+
+      expect(mediaSourceEngine.bufferStart('audio', 0)).toBeCloseTo(5);
+      expect(mediaSourceEngine.bufferEnd('audio', 0)).toBeCloseTo(30);
+    });
+
+    it('returns null if there are no ranges', function() {
+      audioSourceBuffer.buffered.length = 0;
+
+      expect(mediaSourceEngine.bufferStart('audio', 0)).toBeNull();
+      expect(mediaSourceEngine.bufferEnd('audio', 0)).toBeNull();
+    });
+  });
+
   describe('bufferedAheadOf', function() {
     beforeEach(function() {
       mediaSourceEngine.init({'audio': 'audio/foo'});
@@ -249,7 +290,7 @@ describe('MediaSourceEngine', function() {
     });
   });
 
-  describe('remove', function() {
+  describe('remove and clear', function() {
     beforeEach(function() {
       captureEvents(audioSourceBuffer, ['updateend', 'error']);
       captureEvents(videoSourceBuffer, ['updateend', 'error']);
@@ -370,6 +411,31 @@ describe('MediaSourceEngine', function() {
         expect(p1.status).toBe('resolved');
         expect(p2.status).toBe('rejected');
         expect(p3.status).toBe('resolved');
+        done();
+      });
+    });
+
+    it('clears the given data', function(done) {
+      mockMediaSource.durationGetter_.and.returnValue(20);
+      mediaSourceEngine.clear('audio').then(function() {
+        expect(audioSourceBuffer.remove.calls.count()).toBe(1);
+        expect(audioSourceBuffer.remove.calls.argsFor(0)[0]).toBe(0);
+        expect(audioSourceBuffer.remove.calls.argsFor(0)[1] >= 20).toBeTruthy();
+        done();
+      });
+      audioSourceBuffer.updateend();
+    });
+  });
+
+  describe('setTimestampOffset', function() {
+    beforeEach(function() {
+      mediaSourceEngine.init({'audio': 'audio/foo'});
+    });
+
+    it('sets the timestamp offset', function(done) {
+      expect(audioSourceBuffer.timestampOffset).toBe(0);
+      mediaSourceEngine.setTimestampOffset('audio', 10).then(function() {
+        expect(audioSourceBuffer.timestampOffset).toBe(10);
         done();
       });
     });
@@ -719,7 +785,8 @@ describe('MediaSourceEngine', function() {
         length: 0,
         start: jasmine.createSpy('buffered.start'),
         end: jasmine.createSpy('buffered.end')
-      }
+      },
+      timestampOffset: 0
     };
   }
 

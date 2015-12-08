@@ -171,50 +171,26 @@ describe('PresentationTimeline', function() {
     });
   });
 
-  describe('hasEnded', function() {
-    var longDuration = 5 * 365 * 24 * 60 * 60;  // 5 years.
-
-    it('returns false for VOD', function() {
+  describe('getDuration', function() {
+    it('returns the correct value for VOD', function() {
       setElapsed(0);
-      var timeline1 = new shaka.media.PresentationTimeline(60, null, null);
-      expect(timeline1.hasEnded()).toBe(false);
+      var timeline = new shaka.media.PresentationTimeline(60, null, null);
+      expect(timeline.getDuration()).toBe(60);
 
-      setElapsed(longDuration);
-      expect(timeline1.hasEnded()).toBe(false);
-
-      setElapsed(0);
-      var timeline2 = new shaka.media.PresentationTimeline(
+      timeline = new shaka.media.PresentationTimeline(
           Number.POSITIVE_INFINITY, null, null);
-      expect(timeline2.hasEnded()).toBe(false);
-
-      setElapsed(longDuration);
-      expect(timeline2.hasEnded()).toBe(false);
+      expect(timeline.getDuration()).toBe(Number.POSITIVE_INFINITY);
     });
 
-    it('returns the correct value for live without duration', function() {
-      setElapsed(0);
-      var timeline = new shaka.media.PresentationTimeline(
-          Number.POSITIVE_INFINITY, Date.now() / 1000.0, 20);
-      expect(timeline.hasEnded()).toBe(false);
-
-      setElapsed(longDuration);
-      expect(timeline.hasEnded()).toBe(false);
-    });
-
-    it('returns the correct value for live with duration', function() {
+    it('returns the correct value for live', function() {
       setElapsed(0);
       var timeline = new shaka.media.PresentationTimeline(
           60, Date.now() / 1000.0, 20);
-      expect(timeline.hasEnded()).toBe(false);
+      expect(timeline.getDuration()).toBe(60);
 
-      setElapsed(59);
-      expect(timeline.hasEnded()).toBe(false);
-
-      setElapsed(60);
-      expect(timeline.hasEnded()).toBe(true);
-
-      setElapsed(61);
-      expect(timeline.hasEnded()).toBe(true);
+      timeline = new shaka.media.PresentationTimeline(
+          Number.POSITIVE_INFINITY, Date.now() / 1000.0, 20);
+      expect(timeline.getDuration()).toBe(Number.POSITIVE_INFINITY);
     });
   });
 
@@ -232,14 +208,33 @@ describe('PresentationTimeline', function() {
       setElapsed(0);
       var timeline = new shaka.media.PresentationTimeline(
           Number.POSITIVE_INFINITY, Date.now() / 1000.0, 20);
-      expect(timeline.hasEnded()).toBe(false);
 
-      setElapsed(61);
-      expect(timeline.hasEnded()).toBe(false);
+      setElapsed(30);
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(30);
+
+      setElapsed(90);
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(90);
 
       timeline.setDuration(60);
-      expect(timeline.hasEnded()).toBe(true);
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(60);
     });
+  });
+
+  it('getSegmentAvailabilityDuration', function() {
+    setElapsed(0);
+    var timeline = new shaka.media.PresentationTimeline(60, null, null);
+    expect(timeline.getSegmentAvailabilityDuration()).toBeNull();
+
+    timeline = new shaka.media.PresentationTimeline(
+        Number.POSITIVE_INFINITY, Date.now() / 1000.0, 20);
+    expect(timeline.getSegmentAvailabilityDuration()).toBe(20);
+
+    timeline = new shaka.media.PresentationTimeline(
+        Number.POSITIVE_INFINITY,
+        Date.now() / 1000.0,
+        Number.POSITIVE_INFINITY);
+    expect(timeline.getSegmentAvailabilityDuration()).toBe(
+        Number.POSITIVE_INFINITY);
   });
 });
 
