@@ -33,7 +33,7 @@ GIT_VERSION=$(calculate_version)
 
 closure_opts="
   --language_in ECMASCRIPT5
-  --language_out ECMASCRIPT5
+  --language_out ECMASCRIPT3
 
   --jscomp_error=accessControls
   --jscomp_error=ambiguousFunctionDecl
