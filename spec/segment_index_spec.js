@@ -17,22 +17,96 @@
 
 goog.require('shaka.media.SegmentIndex');
 goog.require('shaka.media.SegmentReference');
-goog.require('shaka.util.Error');
 
 describe('SegmentIndex', function() {
-  var Code;
+  describe('find', function() {
+    it('finds the correct references', function() {
+      var actual1 = makeReference(0, 0, 10, uri(0));
+      var actual2 = makeReference(1, 10, 20, uri(10));
+      var actual3 = makeReference(2, 20, 30, uri(20));
 
-  beforeAll(function() {
-    Code = shaka.util.Error.Code;
+      var index, pos1, pos2, pos3;
+
+      // One reference.
+      index = new shaka.media.SegmentIndex([actual1]);
+      pos1 = index.find(5);
+      expect(pos1).toBe(actual1.position);
+
+      // Two references.
+      index = new shaka.media.SegmentIndex([actual1, actual2]);
+      pos1 = index.find(5);
+      pos2 = index.find(15);
+      expect(pos1).toBe(actual1.position);
+      expect(pos2).toBe(actual2.position);
+
+      // Three references.
+      index = new shaka.media.SegmentIndex([actual1, actual2, actual3]);
+      pos1 = index.find(5);
+      pos2 = index.find(15);
+      pos3 = index.find(25);
+      expect(pos1).toBe(actual1.position);
+      expect(pos2).toBe(actual2.position);
+      expect(pos3).toBe(actual3.position);
+    });
+
+    it('works if time == first start time', function() {
+      var actual = makeReference(1, 10, 20, uri(10));
+      var index = new shaka.media.SegmentIndex([actual]);
+
+      var pos = index.find(10);
+      expect(pos).toBe(actual.position);
+    });
+
+    it('works with two references if time == second start time', function() {
+      var actual1 = makeReference(1, 10, 20, uri(10));
+      var actual2 = makeReference(2, 20, 30, uri(20));
+      var index = new shaka.media.SegmentIndex([actual1, actual2]);
+
+      var pos = index.find(20);
+      expect(pos).toBe(actual2.position);
+    });
+
+    it('returns null if time < first start time', function() {
+      var actual = makeReference(1, 10, 20, uri(10));
+      var index = new shaka.media.SegmentIndex([actual]);
+
+      var pos = index.find(5);
+      expect(pos).toBeNull();
+    });
+
+    it('returns null if time == last end time', function() {
+      var actual = makeReference(1, 10, 20, uri(10));
+      var index = new shaka.media.SegmentIndex([actual]);
+
+      var pos = index.find(20);
+      expect(pos).toBeNull();
+    });
+
+    it('returns null if time > last end time', function() {
+      var actual = makeReference(1, 10, 20, uri(10));
+      var index = new shaka.media.SegmentIndex([actual]);
+
+      var pos = index.find(21);
+      expect(pos).toBeNull();
+    });
+
+    it('returns null if time is within a gap', function() {
+      var actual1 = makeReference(1, 10, 20, uri(10));
+      var actual2 = makeReference(2, 25, 30, uri(25));
+      var index = new shaka.media.SegmentIndex([actual1, actual2]);
+
+      var pos = index.find(23);
+      expect(pos).toBeNull();
+    });
   });
 
   describe('get', function() {
     var actual1, actual2, actual3;
 
     beforeEach(function() {
-      actual1 = makeReference(0, 10, uri(0));
-      actual2 = makeReference(10, 20, uri(10));
-      actual3 = makeReference(20, 30, uri(20));
+      actual1 = makeReference(0, 0, 10, uri(0));
+      actual2 = makeReference(1, 10, 20, uri(10));
+      actual3 = makeReference(2, 20, 30, uri(20));
     });
 
     it('returns the correct references', function() {
@@ -58,232 +132,201 @@ describe('SegmentIndex', function() {
       expect(r1).toEqual(actual1);
       expect(r2).toEqual(actual2);
       expect(r3).toEqual(actual3);
-    });
 
-    it('throws RangeError with zero references', function() {
-      var index = new shaka.media.SegmentIndex([]);
-      try {
-        index.get(0);
-        fail();
-      } catch (exception) {
-        expect(exception instanceof shaka.util.Error).toBe(true);
-        expect(exception.code).toBe(Code.SEGMENT_OUT_OF_RANGE);
-      }
-    });
-
-    it('throws RangeError if index < 0', function() {
-      var index = new shaka.media.SegmentIndex([actual1, actual2, actual3]);
-
-      try {
-        index.get(-1);
-        fail();
-      } catch (exception) {
-        expect(exception instanceof shaka.util.Error).toBe(true);
-        expect(exception.code).toBe(Code.SEGMENT_OUT_OF_RANGE);
-      }
-    });
-
-    it('throws RangeError if index > number of references', function() {
-      var index = new shaka.media.SegmentIndex([actual1, actual2, actual3]);
-
-      try {
-        index.get(3);
-        fail();
-      } catch (exception) {
-        expect(exception instanceof shaka.util.Error).toBe(true);
-        expect(exception.code).toBe(Code.SEGMENT_OUT_OF_RANGE);
-      }
-    });
-  });
-
-  describe('find', function() {
-    var actual1, actual2, actual3;
-
-    beforeEach(function() {
-      actual1 = makeReference(0, 10, uri(0));
-      actual2 = makeReference(10, 20, uri(10));
-      actual3 = makeReference(20, 30, uri(20));
-    });
-
-    it('finds the correct references', function() {
-      var index, r1, r2, r3;
-
-      // One reference.
-      index = new shaka.media.SegmentIndex([actual1]);
-      r1 = index.find(5);
-      expect(r1).toEqual(actual1);
-
-      // Two references.
-      index = new shaka.media.SegmentIndex([actual1, actual2]);
-      r1 = index.find(5);
-      r2 = index.find(15);
-      expect(r1).toEqual(actual1);
+      // Two references with offset.
+      index = new shaka.media.SegmentIndex([actual2, actual3]);
+      r2 = index.get(1);
+      r3 = index.get(2);
       expect(r2).toEqual(actual2);
+      expect(r3).toEqual(actual3);
 
-      // Three references.
-      index = new shaka.media.SegmentIndex([actual1, actual2, actual3]);
-      r1 = index.find(5);
-      r2 = index.find(15);
-      r3 = index.find(25);
-      expect(r1).toEqual(actual1);
-      expect(r2).toEqual(actual2);
+      // One reference with offset.
+      index = new shaka.media.SegmentIndex([actual3]);
+      r3 = index.get(2);
       expect(r3).toEqual(actual3);
     });
 
-    it('works if time == first start time', function() {
-      var actual = makeReference(10, 20, uri(10));
-      var index = new shaka.media.SegmentIndex([actual]);
-
-      var r = index.find(10);
-      expect(r).toEqual(actual);
+    it('returns null with zero references', function() {
+      var index = new shaka.media.SegmentIndex([]);
+      expect(index.get(0)).toBeNull();
     });
 
-    it('works with two references if time == second start time', function() {
-      var actual1 = makeReference(10, 20, uri(10));
-      var actual2 = makeReference(20, 30, uri(20));
-      var index = new shaka.media.SegmentIndex([actual1, actual2]);
-
-      var r = index.find(20);
-      expect(r).toEqual(actual2);
+    it('returns null if position < 0', function() {
+      var index = new shaka.media.SegmentIndex([actual1, actual2, actual3]);
+      expect(index.get(-1)).toBeNull();
     });
 
-    it('returns null if time < first start time', function() {
-      var actual = makeReference(10, 20, uri(10));
-      var index = new shaka.media.SegmentIndex([actual]);
+    it('returns null for unknown positions', function() {
+      var index1 = new shaka.media.SegmentIndex([actual1, actual2, actual3]);
+      expect(index1.get(3)).toBeNull();
 
-      var r = index.find(5);
-      expect(r).toBeNull();
-    });
-
-    it('returns null if time == last end time', function() {
-      var actual = makeReference(10, 20, uri(10));
-      var index = new shaka.media.SegmentIndex([actual]);
-
-      var r = index.find(20);
-      expect(r).toBeNull();
-    });
-
-    it('returns null if time > last end time', function() {
-      var actual = makeReference(10, 20, uri(10));
-      var index = new shaka.media.SegmentIndex([actual]);
-
-      var r = index.find(21);
-      expect(r).toBeNull();
-    });
-
-    it('returns null if time is within a gap', function() {
-      var actual1 = makeReference(10, 20, uri(10));
-      var actual2 = makeReference(25, 30, uri(25));
-      var index = new shaka.media.SegmentIndex([actual1, actual2]);
-
-      var r = index.find(23);
-      expect(r).toBeNull();
+      var index2 = new shaka.media.SegmentIndex([actual2, actual3]);
+      expect(index2.get(0)).toBeNull();
     });
   });
 
   describe('merge', function() {
-    var references1, index1;
+    it('three references into zero references', function() {
+      var index1 = new shaka.media.SegmentIndex([]);
 
-    beforeEach(function() {
-      references1 = [
-        makeReference(4, 7, uri(4)),
-        makeReference(7, 10, uri(7)),
-        makeReference(10, 13, uri(10))
-      ];
-      index1 = new shaka.media.SegmentIndex(references1);
-    });
-
-    it('in no new references', function() {
-      var index2 = new shaka.media.SegmentIndex([]);
-
-      index1.merge(index2.references_);
-      expect(index1.references_.length).toBe(3);
-      checkReferences(index1.references_);
-    });
-
-    it('into no existing references', function() {
-      var index2 = new shaka.media.SegmentIndex([]);
-
-      index2.merge(index1.references_);
-      expect(index2.references_.length).toBe(3);
-      checkReferences(index2.references_);
-    });
-
-    describe('three references into three references', function() {
-      for (var i = 0; i <= 14; ++i) {
-        it('start=' + i + ', end=' + (i + 6), function() {
-          var references2 = [
-            makeReference(i, i + 3, uri('new_' + i)),
-            makeReference(i + 3, i + 6, uri('new_' + (i + 3))),
-            makeReference(i + 6, i + 9, uri('new_' + (i + 6)))
-          ];
-          var index2 = new shaka.media.SegmentIndex(references2);
-
-          index1.merge(index2.references_);
-          expect(index1.references_.length).toBe(6);
-          checkReferences(index1.references_);
-        });
-      }  // for i
-    });
-
-    describe('one reference into three references', function() {
-      for (var i = 6; i <= 11; ++i) {
-        // Vary the length of the segment.
-        for (var d = 2; d <= 4; ++d) {
-          it('start=' + i + ', end=' + (i + d), function() {
-            var references2 = [
-              makeReference(i, i + d, uri('new_' + i))
-            ];
-            var index2 = new shaka.media.SegmentIndex(references2);
-
-            index1.merge(index2.references_);
-            expect(index1.references_.length).toBe(4);
-            checkReferences(index1.references_);
-          });
-        }  // for d
-      }  // for i
-    });
-
-    it('doesn\'t mangle references', function() {
       var references2 = [
-        makeReference(5, 8, uri('new_5')),
-        makeReference(8, 11, uri('new_8')),
-        makeReference(11, 14, uri('new_11'))
+        makeReference(0, 0, 10, uri(0)),
+        makeReference(1, 10, 20, uri(10)),
+        makeReference(2, 20, 30, uri(20))
       ];
-      var index2 = new shaka.media.SegmentIndex(references2);
 
-      index1.merge(index2.references_);
-      expect(index1.references_.length).toBe(6);
+      index1.merge(references2);
+      expect(index1.references_.length).toBe(3);
+      expect(index1.references_).toEqual(references2);
+    });
 
+    it('zero references into three references', function() {
+      var references1 = [
+        makeReference(0, 0, 10, uri(0)),
+        makeReference(1, 10, 20, uri(10)),
+        makeReference(2, 20, 30, uri(20))
+      ];
+      var index1 = new shaka.media.SegmentIndex(references1);
+
+      index1.merge([]);
+      expect(index1.references_.length).toBe(3);
+      expect(index1.references_).toEqual(references1);
+    });
+
+    it('one reference into one reference at start', function() {
+      var references1 = [makeReference(1, 10, 20, uri(10))];
+      var index1 = new shaka.media.SegmentIndex(references1);
+
+      var references2 = [makeReference(0, 0, 10, uri(0))];
+
+      index1.merge(references2);
+      expect(index1.references_.length).toBe(2);
+      expect(index1.references_[0]).toEqual(references2[0]);
+      expect(index1.references_[1]).toEqual(references1[0]);
+    });
+
+    it('one reference into one reference at end', function() {
+      var references1 = [makeReference(1, 10, 20, uri(10))];
+      var index1 = new shaka.media.SegmentIndex(references1);
+
+      var references2 = [makeReference(2, 20, 30, uri(20))];
+
+      index1.merge(references2);
+      expect(index1.references_.length).toBe(2);
       expect(index1.references_[0]).toEqual(references1[0]);
       expect(index1.references_[1]).toEqual(references2[0]);
-      expect(index1.references_[2]).toEqual(references1[1]);
-      expect(index1.references_[3]).toEqual(references2[1]);
-      expect(index1.references_[4]).toEqual(references1[2]);
-      expect(index1.references_[5]).toEqual(references2[2]);
     });
 
-    function checkReferences(references) {
-      for (var i = 0; i < references.length; ++i) {
-        if (i == 0) continue;
+    it('one reference into two references at start', function() {
+      var references1 = [
+        makeReference(1, 10, 20, uri(10)),
+        makeReference(2, 20, 30, uri(20))
+      ];
+      var index1 = new shaka.media.SegmentIndex(references1);
 
-        var r1 = references[i - 1];
-        var r2 = references[i];
+      var references2 = [makeReference(0, 0, 10, uri(0))];
 
-        expect((r1.startTime < r2.startTime) ||
-               (r1.startTime == r2.startTime &&
-                r1.endTime <= r2.endTime)).toBeTruthy();
-      }
-    }
+      index1.merge(references2);
+      expect(index1.references_.length).toBe(3);
+      expect(index1.references_[0]).toEqual(references2[0]);
+      expect(index1.references_[1]).toEqual(references1[0]);
+      expect(index1.references_[2]).toEqual(references1[1]);
+    });
+
+    it('one reference into two references at end', function() {
+      var references1 = [
+        makeReference(1, 10, 20, uri(10)),
+        makeReference(2, 20, 30, uri(20))
+      ];
+      var index1 = new shaka.media.SegmentIndex(references1);
+
+      var references2 = [makeReference(3, 30, 40, uri(30))];
+
+      index1.merge(references2);
+      expect(index1.references_.length).toBe(3);
+      expect(index1.references_[0]).toEqual(references1[0]);
+      expect(index1.references_[1]).toEqual(references1[1]);
+      expect(index1.references_[2]).toEqual(references2[0]);
+    });
+
+    it('two references into one reference at start', function() {
+      var references1 = [makeReference(2, 20, 30, uri(20))];
+      var index1 = new shaka.media.SegmentIndex(references1);
+
+      var references2 = [
+        makeReference(0, 0, 10, uri(0)),
+        makeReference(1, 10, 20, uri(10))
+      ];
+
+      index1.merge(references2);
+      expect(index1.references_.length).toBe(3);
+      expect(index1.references_[0]).toEqual(references2[0]);
+      expect(index1.references_[1]).toEqual(references2[1]);
+      expect(index1.references_[2]).toEqual(references1[0]);
+    });
+
+    it('two references into one reference at end', function() {
+      var references1 = [makeReference(2, 20, 30, uri(20))];
+      var index1 = new shaka.media.SegmentIndex(references1);
+
+      var references2 = [
+        makeReference(3, 30, 40, uri(30)),
+        makeReference(4, 40, 50, uri(40))
+      ];
+
+      index1.merge(references2);
+      expect(index1.references_.length).toBe(3);
+      expect(index1.references_[0]).toEqual(references1[0]);
+      expect(index1.references_[1]).toEqual(references2[0]);
+      expect(index1.references_[2]).toEqual(references2[1]);
+    });
+
+    it('two references into two references at start with overlap', function() {
+      var references1 = [
+        makeReference(1, 10, 20, uri(10)),
+        makeReference(2, 20, 30, uri(20))
+      ];
+      var index1 = new shaka.media.SegmentIndex(references1);
+
+      var references2 = [
+        makeReference(0, 0, 10, uri('new_0')),
+        makeReference(1, 10, 20, uri('new_10'))
+      ];
+
+      index1.merge(references2);
+      expect(index1.references_.length).toBe(3);
+      expect(index1.references_[0]).toEqual(references2[0]);
+      expect(index1.references_[1]).toEqual(references2[1]);
+      expect(index1.references_[2]).toEqual(references1[1]);
+    });
+
+    it('two references into two references at end with overlap', function() {
+      var references1 = [
+        makeReference(1, 10, 20, uri(10)),
+        makeReference(2, 20, 30, uri(20))
+      ];
+      var index1 = new shaka.media.SegmentIndex(references1);
+
+      var references2 = [
+        makeReference(2, 20, 30, uri('new_20')),
+        makeReference(3, 30, 40, uri('new_30'))
+      ];
+
+      index1.merge(references2);
+      expect(index1.references_.length).toBe(3);
+      expect(index1.references_[0]).toEqual(references1[0]);
+      expect(index1.references_[1]).toEqual(references2[0]);
+      expect(index1.references_[2]).toEqual(references2[1]);
+    });
   });
 
   describe('evict', function() {
     var actual1, actual2, actual3, index1;
 
     beforeEach(function() {
-      actual1 = makeReference(0, 10, uri(0));
-      actual2 = makeReference(10, 20, uri(10));
-      actual3 = makeReference(20, 30, uri(20));
+      actual1 = makeReference(0, 0, 10, uri(0));
+      actual2 = makeReference(1, 10, 20, uri(10));
+      actual3 = makeReference(2, 20, 30, uri(20));
       index1 = new shaka.media.SegmentIndex([actual1, actual2, actual3]);
     });
 
@@ -336,13 +379,15 @@ describe('SegmentIndex', function() {
   /**
    * Creates a new SegmentReference.
    *
+   * @param {number} position
    * @param {number} startTime
    * @param {number} endTime
    * @param {string} uri
    * @return {!shaka.media.SegmentReference}
    */
-  function makeReference(startTime, endTime, uri) {
-    return new shaka.media.SegmentReference(startTime, endTime, [uri], 0, null);
+  function makeReference(position, startTime, endTime, uri) {
+    return new shaka.media.SegmentReference(
+        position, startTime, endTime, [uri], 0, null);
   }
 
   /**
