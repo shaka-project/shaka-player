@@ -77,14 +77,6 @@ describe('Pssh', function() {
   const TRUNCATED_GENERIC_PSSH =
       GENERIC_PSSH.substr(0, GENERIC_PSSH.length - 6);
 
-  beforeAll(function() {
-    shaka.log.setLevel(shaka.log.Level.ERROR);
-  });
-
-  afterAll(function() {
-    shaka.log.setLevel(shaka.log.MAX_LOG_LEVEL);
-  });
-
   it('parses a Widevine PSSH', function() {
     var pssh = new shaka.util.Pssh(fromHex(WIDEVINE_PSSH));
     expect(pssh.systemIds.length).toBe(1);

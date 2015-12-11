@@ -24,12 +24,7 @@ describe('MpdUtils', function() {
   var MpdUtils;
 
   beforeAll(function() {
-    shaka.log.setLevel(shaka.log.Level.ERROR);
     MpdUtils = shaka.dash.MpdUtils;
-  });
-
-  afterAll(function() {
-    shaka.log.setLevel(shaka.log.MAX_LOG_LEVEL);
   });
 
   describe('fillUriTemplate', function() {

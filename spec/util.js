@@ -101,6 +101,9 @@ afterAll(assertsToFailures.uninstall);
 // neither can many of our tests.  If needed, install the Promise and
 // CustomEvent polyfills.  In particular, this is needed on IE11.
 beforeAll(function() {
+  shaka.log.MAX_LOG_LEVEL = shaka.log.Level.ERROR;
+  shaka.log.setLevel(shaka.log.MAX_LOG_LEVEL);
+
   shaka.polyfill.Promise.install();
   shaka.polyfill.CustomEvent.install();
 });
