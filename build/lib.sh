@@ -31,37 +31,18 @@ GIT_VERSION=$(calculate_version)
 # So since we can't use the new annotations, we have to ignore complaints
 # about the old one.
 
+# 'lintChecks' complains about countless instances of implicitly nullable
+# types, plus a few other issues.  Even the closure library doesn't pass
+# these checks, and the implicit nullability check in particular is over-
+# zealous and unhelpful.  So we disable the whole category of 'lintChecks'.
+
 closure_opts="
   --language_in ECMASCRIPT5
   --language_out ECMASCRIPT3
 
-  --jscomp_error=accessControls
-  --jscomp_error=ambiguousFunctionDecl
-  --jscomp_error=checkDebuggerStatement
-  --jscomp_error=checkRegExp
-  --jscomp_error=checkTypes
-  --jscomp_error=checkVars
-  --jscomp_error=const
-  --jscomp_error=constantProperty
-  --jscomp_error=deprecated
-  --jscomp_error=duplicate
-  --jscomp_error=es5Strict
-  --jscomp_error=externsValidation
-  --jscomp_error=fileoverviewTags
-  --jscomp_error=globalThis
-  --jscomp_error=internetExplorerChecks
-  --jscomp_error=invalidCasts
-  --jscomp_error=missingProperties
-  --jscomp_error=nonStandardJsDocs
-  --jscomp_error=strictModuleDepCheck
-  --jscomp_error=suspiciousCode
-  --jscomp_error=undefinedNames
-  --jscomp_error=undefinedVars
-  --jscomp_error=unknownDefines
-  --jscomp_error=uselessCode
-  --jscomp_error=visibility
-
+  --jscomp_error='*'
   --jscomp_off=deprecatedAnnotations
+  --jscomp_off=lintChecks
 
   --extra_annotation_name=listens
   --extra_annotation_name=exportDoc

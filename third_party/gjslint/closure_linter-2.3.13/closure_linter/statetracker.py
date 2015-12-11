@@ -139,6 +139,7 @@ class DocFlag(object):
       'undefinedVars',
       'underscore',
       'unknownDefines',
+      'unnecessaryCasts',
       'unusedPrivateMembers',
       'uselessCode',
       'visibility',
