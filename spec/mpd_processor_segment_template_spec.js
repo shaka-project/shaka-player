@@ -372,17 +372,37 @@ describe('MpdProcessor.SegmentTemplate', function() {
             },
             'references': [
               {
-                'url': 'http://example.com/5-360000-250000-media.mp4',
+                'url': 'http://example.com/5-0-250000-media.mp4',
+                'start': 0,
+                'end': 10
+              },
+              {
+                'url': 'http://example.com/6-90000-250000-media.mp4',
+                'start': 10,
+                'end': 20
+              },
+              {
+                'url': 'http://example.com/7-180000-250000-media.mp4',
+                'start': 20,
+                'end': 30
+              },
+              {
+                'url': 'http://example.com/8-270000-250000-media.mp4',
+                'start': 30,
+                'end': 40
+              },
+              {
+                'url': 'http://example.com/9-360000-250000-media.mp4',
                 'start': 40,
                 'end': 50
               },
               {
-                'url': 'http://example.com/6-450000-250000-media.mp4',
+                'url': 'http://example.com/10-450000-250000-media.mp4',
                 'start': 50,
                 'end': 60
               },
               {
-                'url': 'http://example.com/7-540000-250000-media.mp4',
+                'url': 'http://example.com/11-540000-250000-media.mp4',
                 'start': 60,
                 'end': 70
               }
@@ -397,17 +417,37 @@ describe('MpdProcessor.SegmentTemplate', function() {
             },
             'references': [
               {
-                'url': 'http://example.com/5-360000-500000-media.mp4',
+                'url': 'http://example.com/5-0-500000-media.mp4',
+                'start': 0,
+                'end': 10
+              },
+              {
+                'url': 'http://example.com/6-90000-500000-media.mp4',
+                'start': 10,
+                'end': 20
+              },
+              {
+                'url': 'http://example.com/7-180000-500000-media.mp4',
+                'start': 20,
+                'end': 30
+              },
+              {
+                'url': 'http://example.com/8-270000-500000-media.mp4',
+                'start': 30,
+                'end': 40
+              },
+              {
+                'url': 'http://example.com/9-360000-500000-media.mp4',
                 'start': 40,
                 'end': 50
               },
               {
-                'url': 'http://example.com/6-450000-500000-media.mp4',
+                'url': 'http://example.com/10-450000-500000-media.mp4',
                 'start': 50,
                 'end': 60
               },
               {
-                'url': 'http://example.com/7-540000-500000-media.mp4',
+                'url': 'http://example.com/11-540000-500000-media.mp4',
                 'start': 60,
                 'end': 70
               }
@@ -417,10 +457,7 @@ describe('MpdProcessor.SegmentTemplate', function() {
       });
 
       it('and w/ @startNumber == 0', function(done) {
-        // The parser converts @startNumber=0 to startNumber=1 and
-        // zeroBasedSegmentNumbers=true.
-        st.startNumber = 1;
-        st.zeroBasedSegmentNumbers = true;
+        st.startNumber = 0;
 
         // If the MPD is static and uses segment duration then there must be
         // an explicit Period duration.
@@ -547,7 +584,7 @@ describe('MpdProcessor.SegmentTemplate', function() {
         //    = 3579
         //
         // The segment index of this segment is
-        // I1 = FLOOR(T1 / SegmentDuration) =
+        // I1 = FLOOR(T1 / SegmentDuration)
         //    = FLOOR(3589 / 10)
         //    = 357
         //
@@ -615,15 +652,14 @@ describe('MpdProcessor.SegmentTemplate', function() {
         //    = 3520 (or 31680000 unscaled)
         //
         // The segment index of this segment is
-        // I0 = CEIL(T0 / SegmentDuration) - (StartNumber - 1)
-        //    = CEIL(3520 / 10) - (5 - 1)
-        //    = 352 - 4
-        //    = 348
+        // I0 = CEIL(T0 / SegmentDuration)
+        //    = CEIL(3520 / 10)
+        //    = 352
         //
         // so $Number$ is thus
         // N0 = I0 + StartNumber
-        //    = 348 + 5
-        //    = 353
+        //    = 352 + 5
+        //    = 357
         //
         // The start time of the latest available segment is given by
         // T1 = CurrentPresentationTime - SegmentDuration -
@@ -632,15 +668,14 @@ describe('MpdProcessor.SegmentTemplate', function() {
         //    = 3579
         //
         // The segment index of this segment is
-        // I1 = FLOOR(T1 / SegmentDuration) - (StartNumber - 1) =
-        //    = FLOOR(3589 / 10) - (5 - 1)
-        //    = 357 - 4
-        //    = 353
+        // I1 = FLOOR(T1 / SegmentDuration)
+        //    = FLOOR(3589 / 10)
+        //    = 357
         //
         // so $Number$ is thus
         // N1 = I1 + StartNumber
-        //    = 353 + 5
-        //    = 358
+        //    = 357 + 5
+        //    = 362
 
         var manifestInfo =
             processor.createManifestInfo_(m, manifestCreationTime);
@@ -654,32 +689,32 @@ describe('MpdProcessor.SegmentTemplate', function() {
             },
             'references': [
               {
-                'url': 'http://example.com/353-31680000-250000-media.mp4',
+                'url': 'http://example.com/357-31680000-250000-media.mp4',
                 'start': 3520,
                 'end': 3530
               },
               {
-                'url': 'http://example.com/354-31770000-250000-media.mp4',
+                'url': 'http://example.com/358-31770000-250000-media.mp4',
                 'start': 3530,
                 'end': 3540
               },
               {
-                'url': 'http://example.com/355-31860000-250000-media.mp4',
+                'url': 'http://example.com/359-31860000-250000-media.mp4',
                 'start': 3540,
                 'end': 3550
               },
               {
-                'url': 'http://example.com/356-31950000-250000-media.mp4',
+                'url': 'http://example.com/360-31950000-250000-media.mp4',
                 'start': 3550,
                 'end': 3560
               },
               {
-                'url': 'http://example.com/357-32040000-250000-media.mp4',
+                'url': 'http://example.com/361-32040000-250000-media.mp4',
                 'start': 3560,
                 'end': 3570
               },
               {
-                'url': 'http://example.com/358-32130000-250000-media.mp4',
+                'url': 'http://example.com/362-32130000-250000-media.mp4',
                 'start': 3570,
                 'end': 3580
               }
@@ -689,10 +724,7 @@ describe('MpdProcessor.SegmentTemplate', function() {
       });
 
       it('and w/ @startNumber == 0', function(done) {
-        // The parser converts @startNumber=0 to startNumber=1 and
-        // zeroBasedSegmentNumbers=true.
-        st.startNumber = 1;
-        st.zeroBasedSegmentNumbers = true;
+        st.startNumber = 0;
 
         var manifestInfo =
             processor.createManifestInfo_(m, manifestCreationTime);
