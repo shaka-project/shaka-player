@@ -16,26 +16,24 @@
  */
 
 describe('MediaSourceEngine', function() {
-  var originalMediaSource;
+  var originalIsTypeSupported;
   var originalTextSourceBuffer;
   var audioSourceBuffer;
   var videoSourceBuffer;
   var mockMediaSource;
-  var dummyData = new ArrayBuffer();
+  var dummyData = new ArrayBuffer(0);
   var mediaSourceEngine;
   var Util;
 
   beforeAll(function() {
     Util = shaka.test.Util;
-    originalMediaSource = window.MediaSource;
+    originalIsTypeSupported = window.MediaSource.prototype.isTypeSupported;
     // Since this is not an integration test, we don't want MediaSourceEngine to
     // fail assertions based on browser support for types.  Pretend that all
     // video and audio types are supported.
-    window.MediaSource = {
-      isTypeSupported: function(mimeType) {
-        var contentType = mimeType.split('/')[0];
-        return contentType == 'video' || contentType == 'audio';
-      }
+    window.MediaSource.prototype.isTypeSupported = function(mimeType) {
+      var contentType = mimeType.split('/')[0];
+      return contentType == 'video' || contentType == 'audio';
     };
 
     originalTextSourceBuffer = shaka.media.TextSourceBuffer;
@@ -43,7 +41,7 @@ describe('MediaSourceEngine', function() {
   });
 
   afterAll(function() {
-    window.MediaSource = originalMediaSource;
+    window.MediaSource.prototype.isTypeSupported = originalIsTypeSupported;
     shaka.media.TextSourceBuffer = originalTextSourceBuffer;
   });
 
@@ -785,7 +783,9 @@ describe('MediaSourceEngine', function() {
         start: jasmine.createSpy('buffered.start'),
         end: jasmine.createSpy('buffered.end')
       },
-      timestampOffset: 0
+      timestampOffset: 0,
+      updateend: function() {},
+      error: function() {}
     };
   }
 

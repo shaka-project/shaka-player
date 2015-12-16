@@ -87,7 +87,7 @@ shaka.test.IStreamGenerator.prototype.getSegment = function(
  *
  * @constructor
  * @struct
- * @extends {shaka.test.IStreamGenerator}
+ * @implements {shaka.test.IStreamGenerator}
  */
 shaka.test.DashVodStreamGenerator = function(
     initSegmentUri,
@@ -135,7 +135,6 @@ shaka.test.DashVodStreamGenerator = function(
   /** @private {number} */
   this.timescale_ = 1;
 };
-goog.inherits(shaka.test.DashVodStreamGenerator, shaka.test.IStreamGenerator);
 
 
 /** @override */
@@ -152,7 +151,7 @@ shaka.test.DashVodStreamGenerator.prototype.init = function() {
         this.initSegment_ = results[0];
         this.segmentTemplate_ = results[1];
         this.timescale_ = shaka.test.StreamGenerator.getTimescale_(
-            this.initSegment_, this.mvhdOffset_);
+            /** @type {!ArrayBuffer} */ (this.initSegment_), this.mvhdOffset_);
       }.bind(this));
 };
 
@@ -220,7 +219,7 @@ shaka.test.DashVodStreamGenerator.prototype.getSegment = function(
  *
  * @constructor
  * @struct
- * @extends {shaka.test.IStreamGenerator}
+ * @implements {shaka.test.IStreamGenerator}
  */
 shaka.test.DashLiveStreamGenerator = function(
     initSegmentUri,
@@ -275,8 +274,13 @@ shaka.test.DashLiveStreamGenerator = function(
 
   /** @private {number} */
   this.timescale_ = 1;
+
+  /** @private {ArrayBuffer} */
+  this.initSegment_ = null;
+
+  /** @private {ArrayBuffer} */
+  this.segmentTemplate_ = null;
 };
-goog.inherits(shaka.test.DashLiveStreamGenerator, shaka.test.IStreamGenerator);
 
 
 /** @override */
@@ -293,7 +297,7 @@ shaka.test.DashLiveStreamGenerator.prototype.init = function() {
         this.initSegment_ = results[0];
         this.segmentTemplate_ = results[1];
         this.timescale_ = shaka.test.StreamGenerator.getTimescale_(
-            this.initSegment_, this.mvhdOffset_);
+            /** @type {!ArrayBuffer} */ (this.initSegment_), this.mvhdOffset_);
       }.bind(this));
 };
 
@@ -348,7 +352,8 @@ shaka.test.DashLiveStreamGenerator.prototype.getSegment = function(
                        artificialPresentationTimeOffset;
 
   return shaka.test.StreamGenerator.setBaseMediaDecodeTime_(
-      this.segmentTemplate_, this.tfdtOffset_, mediaTimestamp, this.timescale_);
+      /** @type {!ArrayBuffer} */ (this.segmentTemplate_), this.tfdtOffset_,
+      mediaTimestamp, this.timescale_);
 };
 
 

@@ -25,9 +25,10 @@ describe('DashParser.SegmentBase', function() {
   });
 
   beforeEach(function() {
+    var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = new shaka.dash.DashParser(
-        fakeNetEngine, {}, function() {}, function() {});
+        fakeNetEngine, retry, function() {}, function() {});
   });
 
   it('requests init data for WebM', function(done) {

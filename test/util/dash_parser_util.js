@@ -21,7 +21,7 @@ goog.provide('shaka.test.Dash');
 /**
  * Verifies the segment references in a manifest.
  *
- * @param {shaka.media.Manifest} manifest
+ * @param {shakaExtern.Manifest} manifest
  * @param {!Array.<shaka.media.SegmentReference>} references
  */
 shaka.test.Dash.verifySegmentIndex = function(manifest, references) {
@@ -39,7 +39,8 @@ shaka.test.Dash.verifySegmentIndex = function(manifest, references) {
     var expectedRef = references[i];
     var position = stream.findSegmentPosition(expectedRef.startTime);
     expect(position).not.toBe(null);
-    var actualRef = stream.getSegmentReference(position);
+    var actualRef =
+        stream.getSegmentReference(/** @type {number} */ (position));
     expect(actualRef).toEqual(expectedRef);
   }
 
@@ -57,12 +58,13 @@ shaka.test.Dash.verifySegmentIndex = function(manifest, references) {
  * @param {string} manifestText
  * @param {!Array.<shaka.media.SegmentReference>} references
  */
-shaka.test.Dash.testSegmentIndex =
-    function(done, manifestText, references) {
+shaka.test.Dash.testSegmentIndex = function(done, manifestText, references) {
+  var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
   var buffer = shaka.util.Uint8ArrayUtils.fromString(manifestText).buffer;
   var fakeNetEngine =
       new shaka.test.FakeNetworkingEngine({'dummy://foo': buffer});
-  var dashParser = new shaka.dash.DashParser(fakeNetEngine, {}, function() {});
+  var dashParser = new shaka.dash.DashParser(
+      fakeNetEngine, retry, function() {}, function() {});
   dashParser.start('dummy://foo')
       .then(function(manifest) {
         shaka.test.Dash.verifySegmentIndex(manifest, references);
@@ -80,15 +82,17 @@ shaka.test.Dash.testSegmentIndex =
  * @param {!shaka.util.Error} expectedError
  */
 shaka.test.Dash.testFails = function(done, manifestText, expectedError) {
+  var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
   var manifestData = shaka.util.Uint8ArrayUtils.fromString(manifestText).buffer;
   var fakeNetEngine =
       new shaka.test.FakeNetworkingEngine({'dummy://foo': manifestData});
-  var dashParser = new shaka.dash.DashParser(fakeNetEngine, {}, function() {});
+  var dashParser = new shaka.dash.DashParser(
+      fakeNetEngine, retry, function() {}, function() {});
   shaka.log.setLevel(shaka.log.Level.NONE);
   dashParser.start('dummy://foo')
       .then(fail)
       .catch(function(error) { expect(error).toEqual(expectedError); })
-      .then(function() { shaka.log.setLevel(shaka.log.MAX_LEVEL); })
+      .then(function() { shaka.log.setLevel(shaka.log.MAX_LOG_LEVEL); })
       .then(done);
 };
 
@@ -130,17 +134,17 @@ shaka.test.Dash.makeSimpleManifestText =
  * Makes a simple manifest object for jasmine.toEqual; this does not do any
  * checking.  This only constructs one period with the given stream sets.
  *
- * @param {!Array.<shaka.media.StreamSet>} streamSets
- * @return {shaka.media.Manifest}
+ * @param {!Array.<shakaExtern.StreamSet>} streamSets
+ * @return {shakaExtern.Manifest}
  */
 shaka.test.Dash.makeManifestFromStreamSets = function(streamSets) {
-  return jasmine.objectContaining({
+  return /** @type {shakaExtern.Manifest} */ (jasmine.objectContaining({
     periods: [
       jasmine.objectContaining({
         streamSets: streamSets
       })
     ]
-  });
+  }));
 };
 
 
@@ -153,7 +157,7 @@ shaka.test.Dash.makeManifestFromStreamSets = function(streamSets) {
  * @param {number} startByte
  * @param {?number} endByte
  * @param {number=} opt_pto The presentationTimeOffset of the stream.
- * @return {shaka.media.Manifest}
+ * @return {shakaExtern.Manifest}
  */
 shaka.test.Dash.makeManifestFromInit = function(
     uri, startByte, endByte, opt_pto) {
@@ -174,7 +178,7 @@ shaka.test.Dash.makeManifestFromInit = function(
  * returning fake data, the parser will fail to parse the segment index; we
  * swallow the error and return a promise that will resolve.
  *
- * @param {shaka.media.Manifest} manifest
+ * @param {shakaExtern.Manifest} manifest
  * @return {!Promise}
  */
 shaka.test.Dash.callCreateSegmentIndex = function(manifest) {

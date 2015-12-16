@@ -43,7 +43,7 @@ describe('PresentationTimeline', function() {
 
       setElapsed(0);
       var timeline2 = new shaka.media.PresentationTimeline(
-          Number.POSITIVE_INFINITY, null, null);
+          Number.POSITIVE_INFINITY, null, null, 0);
       expect(timeline2.getSegmentAvailabilityStart()).toBe(0);
     });
 

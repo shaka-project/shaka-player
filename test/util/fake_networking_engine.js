@@ -92,7 +92,7 @@ shaka.test.FakeNetworkingEngine.prototype.expectRangeRequest = function(
 /**
  * Sets the response map.
  *
- * @param {Object.<string, !ArrayBuffer>} responseMap
+ * @param {!Object.<string, !ArrayBuffer>} responseMap
  */
 shaka.test.FakeNetworkingEngine.prototype.setResponseMap = function(
     responseMap) {

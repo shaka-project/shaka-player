@@ -48,8 +48,13 @@ describe('NetworkingEngine', function() {
 
   describe('retry', function() {
     it('will retry', function(done) {
-      var request =
-          createRequest('reject://foo', {maxAttempts: 2, baseDelay: 0});
+      var request = createRequest('reject://foo', {
+        maxAttempts: 2,
+        baseDelay: 0,
+        backoffFactor: 0,
+        fuzzFactor: 0,
+        timeout: 0
+      });
       rejectScheme.and.callFake(function() {
         if (rejectScheme.calls.count() == 1)
           return Promise.reject();
@@ -67,8 +72,13 @@ describe('NetworkingEngine', function() {
     });
 
     it('will retry twice', function(done) {
-      var request =
-          createRequest('reject://foo', {maxAttempts: 3, baseDelay: 0});
+      var request = createRequest('reject://foo', {
+        maxAttempts: 3,
+        baseDelay: 0,
+        backoffFactor: 0,
+        fuzzFactor: 0,
+        timeout: 0
+      });
       rejectScheme.and.callFake(function() {
         if (rejectScheme.calls.count() < 3)
           return Promise.reject();
@@ -86,8 +96,13 @@ describe('NetworkingEngine', function() {
     });
 
     it('will fail overall', function(done) {
-      var request =
-          createRequest('reject://foo', {maxAttempts: 3, baseDelay: 0});
+      var request = createRequest('reject://foo', {
+        maxAttempts: 3,
+        baseDelay: 0,
+        backoffFactor: 0,
+        fuzzFactor: 0,
+        timeout: 0
+      });
       networkingEngine.request(requestType, request)
           .then(fail)
           .catch(function() { expect(rejectScheme.calls.count()).toBe(3); })
@@ -97,12 +112,14 @@ describe('NetworkingEngine', function() {
     describe('backoff', function() {
       var baseDelay = 200;
       var realSetTimeout;
+      var setTimeoutSpy;
       var realRandom;
 
       beforeAll(function() {
         realSetTimeout = window.setTimeout;
-        window.setTimeout = jasmine.createSpy('setTimeout');
-        window.setTimeout.and.callFake(realSetTimeout);
+        setTimeoutSpy = jasmine.createSpy('setTimeout');
+        setTimeoutSpy.and.callFake(realSetTimeout);
+        window.setTimeout = setTimeoutSpy;
         realRandom = Math.random;
         Math.random = function() { return 0.75; };
       });
@@ -113,7 +130,7 @@ describe('NetworkingEngine', function() {
       });
 
       beforeEach(function() {
-        window.setTimeout.calls.reset();
+        setTimeoutSpy.calls.reset();
       });
 
       it('uses baseDelay', function(done) {
@@ -121,13 +138,14 @@ describe('NetworkingEngine', function() {
           maxAttempts: 2,
           baseDelay: baseDelay,
           fuzzFactor: 0,
-          backoffFactor: 2
+          backoffFactor: 2,
+          timeout: 0
         });
         networkingEngine.request(requestType, request)
             .then(fail)
             .catch(function() {
-              expect(window.setTimeout.calls.count()).toBe(1);
-              expect(window.setTimeout)
+              expect(setTimeoutSpy.calls.count()).toBe(1);
+              expect(setTimeoutSpy)
                   .toHaveBeenCalledWith(jasmine.any(Function), baseDelay);
             })
             .then(done);
@@ -138,15 +156,16 @@ describe('NetworkingEngine', function() {
           maxAttempts: 3,
           baseDelay: baseDelay,
           fuzzFactor: 0,
-          backoffFactor: 2
+          backoffFactor: 2,
+          timeout: 0
         });
         networkingEngine.request(requestType, request)
             .then(fail)
             .catch(function() {
-              expect(window.setTimeout.calls.count()).toBe(2);
-              expect(window.setTimeout)
+              expect(setTimeoutSpy.calls.count()).toBe(2);
+              expect(setTimeoutSpy)
                   .toHaveBeenCalledWith(jasmine.any(Function), baseDelay);
-              expect(window.setTimeout)
+              expect(setTimeoutSpy)
                   .toHaveBeenCalledWith(jasmine.any(Function), baseDelay * 2);
             })
             .then(done);
@@ -157,7 +176,8 @@ describe('NetworkingEngine', function() {
           maxAttempts: 2,
           baseDelay: baseDelay,
           fuzzFactor: 1,
-          backoffFactor: 1
+          backoffFactor: 1,
+          timeout: 0
         });
         networkingEngine.request(requestType, request)
             .then(fail)
@@ -165,8 +185,8 @@ describe('NetworkingEngine', function() {
               // (rand * 2.0) - 1.0 = (0.75 * 2.0) - 1.0 = 0.5
               // 0.5 * fuzzFactor = 0.5 * 1 = 0.5
               // delay * (1 + 0.5) = baseDelay * (1 + 0.5)
-              expect(window.setTimeout.calls.count()).toBe(1);
-              expect(window.setTimeout)
+              expect(setTimeoutSpy.calls.count()).toBe(1);
+              expect(setTimeoutSpy)
                   .toHaveBeenCalledWith(jasmine.any(Function), baseDelay * 1.5);
             })
             .then(done);
@@ -174,7 +194,13 @@ describe('NetworkingEngine', function() {
     });
 
     it('uses multiple URIs', function(done) {
-      var request = createRequest('', {maxAttempts: 3});
+      var request = createRequest('', {
+        maxAttempts: 3,
+        baseDelay: 0,
+        backoffFactor: 0,
+        fuzzFactor: 0,
+        timeout: 0
+      });
       request.uris = ['reject://foo', 'resolve://foo'];
       networkingEngine.request(requestType, request)
           .catch(fail)
@@ -304,8 +330,13 @@ describe('NetworkingEngine', function() {
     });
 
     it('if throws will stop requests', function(done) {
-      var request =
-          createRequest('resolve://foo', {maxAttempts: 3, baseRetryDelay: 0});
+      var request = createRequest('resolve://foo', {
+        maxAttempts: 3,
+        baseDelay: 0,
+        backoffFactor: 0,
+        fuzzFactor: 0,
+        timeout: 0
+      });
       filter.and.throwError(new Error());
       networkingEngine.request(requestType, request)
           .then(fail)
@@ -402,8 +433,13 @@ describe('NetworkingEngine', function() {
     });
 
     it('if throws will retry', function(done) {
-      var request =
-          createRequest('resolve://foo', {maxAttempts: 2, baseRetryDelay: 0});
+      var request = createRequest('resolve://foo', {
+        maxAttempts: 2,
+        baseDelay: 0,
+        backoffFactor: 0,
+        fuzzFactor: 0,
+        timeout: 0
+      });
       filter.and.callFake(function() {
         if (filter.calls.count() == 1) throw new Error();
       });
@@ -513,8 +549,13 @@ describe('NetworkingEngine', function() {
     });
 
     it('does not allow further retries', function(done) {
-      var request =
-          createRequest('reject://foo', {maxAttempts: 3, baseDelay: 0});
+      var request = createRequest('reject://foo', {
+        maxAttempts: 3,
+        baseDelay: 0,
+        backoffFactor: 0,
+        fuzzFactor: 0,
+        timeout: 0
+      });
 
       var p1 = new shaka.util.PublicPromise();
       var p2 = new shaka.util.PublicPromise();
@@ -551,6 +592,11 @@ describe('NetworkingEngine', function() {
     });
   });
 
+  /**
+   * @param {string} uri
+   * @param {shakaExtern.RetryParameters=} opt_retryParameters
+   * @return {shakaExtern.Request}
+   */
   function createRequest(uri, opt_retryParameters) {
     var retryParameters = opt_retryParameters ||
                           shaka.net.NetworkingEngine.defaultRetryParameters();

@@ -26,6 +26,8 @@ describe('DataViewReader', function() {
 
   var bigEndianReader;
   var littleEndianReader;
+  var bigEndianReader2;
+  var littleEndianReader2;
 
   var Code;
 

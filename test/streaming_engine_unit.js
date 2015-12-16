@@ -42,6 +42,7 @@ describe('StreamingEngine', function() {
   var videoStream2;
   var textStream2;
 
+  /** @type {shakaExtern.Manifest} */
   var manifest;
 
   // Dummy sizes for media segments.
@@ -96,20 +97,20 @@ describe('StreamingEngine', function() {
 
     // Create dummy init segments.
     dummyInitSegments = {
-      audio: [new ArrayBuffer(), new ArrayBuffer()],
-      video: [new ArrayBuffer(), new ArrayBuffer()],
+      audio: [new ArrayBuffer(0), new ArrayBuffer(0)],
+      video: [new ArrayBuffer(0), new ArrayBuffer(0)],
       text: []
     };
 
     // Create dummy media segments. The first two ArrayBuffers in each row are
     // for the first Period, and the last two, for the second Period.
     dummySegments = {
-      audio: [new ArrayBuffer(), new ArrayBuffer(),
-              new ArrayBuffer(), new ArrayBuffer()],
-      video: [new ArrayBuffer(), new ArrayBuffer(),
-              new ArrayBuffer(), new ArrayBuffer()],
-      text: [new ArrayBuffer(), new ArrayBuffer(),
-             new ArrayBuffer(), new ArrayBuffer()]
+      audio: [new ArrayBuffer(0), new ArrayBuffer(0),
+              new ArrayBuffer(0), new ArrayBuffer(0)],
+      video: [new ArrayBuffer(0), new ArrayBuffer(0),
+              new ArrayBuffer(0), new ArrayBuffer(0)],
+      text: [new ArrayBuffer(0), new ArrayBuffer(0),
+             new ArrayBuffer(0), new ArrayBuffer(0)]
     };
 
     // Setup Playhead.
@@ -245,8 +246,10 @@ describe('StreamingEngine', function() {
 
     // Create Manifest.
     manifest = {
-      presentationTimeline: timeline,
-      periods: [
+      presentationTimeline:
+          /** @type {!shaka.media.PresentationTimeline} */ (timeline),
+      minBufferTime: 5,
+      periods: /** @type {!Array.<shakaExtern.StreamSet>} */ ([
         {
           startTime: 0,
           streamSets: [
@@ -263,7 +266,7 @@ describe('StreamingEngine', function() {
             {type: 'text', streams: [textStream2]}
           ]
         }
-      ]
+      ])
     };
 
     // Setup real StreamingEngine.
@@ -917,7 +920,7 @@ describe('StreamingEngine', function() {
     }
 
     // Set media segment.
-    var i = dummySegments[type].indexOf(data);
+    i = dummySegments[type].indexOf(data);
     if (i < 0) throw new Error('unexpected data');
 
     segments[type][i] = true;

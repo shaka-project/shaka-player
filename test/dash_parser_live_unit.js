@@ -28,11 +28,12 @@ describe('DashParser.Live', function() {
   var Util;
 
   beforeEach(function() {
+    var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     newPeriod = jasmine.createSpy('newPeriod');
     errorCallback = jasmine.createSpy('error callback');
     parser = new shaka.dash.DashParser(
-        fakeNetEngine, {}, newPeriod, errorCallback);
+        fakeNetEngine, retry, newPeriod, errorCallback);
   });
 
   beforeAll(function() {
@@ -103,9 +104,9 @@ describe('DashParser.Live', function() {
    * SegmentTemplate.
    *
    * @param {!Array.<string>} basicLines
-   * @param {!Array.<!shaka.media.SegmentReference} basicRefs
+   * @param {!Array.<!shaka.media.SegmentReference>} basicRefs
    * @param {!Array.<string>} updateLines
-   * @param {!Array.<!shaka.media.SegmentReference} updateRefs
+   * @param {!Array.<!shaka.media.SegmentReference>} updateRefs
    * @param {!Array.<string>} partialUpdateLines
    */
   function testCommonBehaviors(
@@ -116,12 +117,12 @@ describe('DashParser.Live', function() {
      * @param {function()} done
      * @param {!Array.<string>} firstLines The Representation contents for the
      *   first manifest.
-     * @param {!Array.<!shaka.media.SegmentReference} firstReferences The media
+     * @param {!Array.<!shaka.media.SegmentReference>} firstReferences The media
      *   references for the first parse.
      * @param {!Array.<string>} secondLines The Representation contents for the
      *   updated manifest.
-     * @param {!Array.<!shaka.media.SegmentReference} secondReferences The media
-     *   references for the updated manifest.
+     * @param {!Array.<!shaka.media.SegmentReference>} secondReferences The
+     *   media references for the updated manifest.
      */
     function testBasicUpdate(
         done, firstLines, firstReferences, secondLines, secondReferences) {

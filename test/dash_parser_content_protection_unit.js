@@ -28,10 +28,11 @@ xdescribe('DashParser.ContentProtection', function() {
    * @param {(function(!Node):?shakaExtern.DrmInfo)=} opt_callback
    */
   function testDashParser(done, manifestText, expected, opt_callback) {
+    var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
     var netEngine = new shaka.test.FakeNetworkingEngine();
     netEngine.setDefaultText(manifestText);
     var dashParser = new shaka.dash.DashParser(
-        netEngine, {}, function() {}, function() {});
+        netEngine, retry, function() {}, function() {});
     // TODO: define how opt_callback gets passed to the dashParser
     dashParser.start('http://example.com')
         .then(function(actual) { expect(actual).toEqual(expected); })

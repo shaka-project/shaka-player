@@ -374,7 +374,7 @@ describe('MpdUtils', function() {
      * given expected results.
      *
      * @param {!Array.<{t: ?number, d: ?number, r: ?number}>} points
-     * @param {!Array.<{start: number, end: number}} expected
+     * @param {!Array.<{start: number, end: number}>} expected
      * @param {number} timescale
      * @param {number} periodDuration
      */
@@ -392,8 +392,8 @@ describe('MpdUtils', function() {
       xmlLines.push('</SegmentTimeline>');
       var parser = new DOMParser();
       var xml = parser.parseFromString(xmlLines.join('\n'), 'application/xml');
-      var segmentTimeline =
-          shaka.util.XmlUtils.findChild(xml, 'SegmentTimeline');
+      var segmentTimeline = shaka.util.XmlUtils.findChild(
+          /** @type {!Node} */ (xml), 'SegmentTimeline');
       console.assert(segmentTimeline);
 
       var timeline = MpdUtils.createTimeline(

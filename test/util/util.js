@@ -120,12 +120,18 @@ shaka.test.Util.delay = function(seconds, opt_setTimeout) {
  */
 var assertsToFailures = {
   uninstall: function() {
-    shaka.asserts = assertsToFailures.originalShakaAsserts_;
+    shaka.asserts.assert = assertsToFailures.originalShakaAssert_;
+    shaka.asserts.notImplemented =
+        assertsToFailures.originalShakaNotImplemented_;
+    shaka.asserts.unreachable = assertsToFailures.originalShakaUnreachable_;
     console.assert = assertsToFailures.originalConsoleAssert_;
   },
 
   install: function() {
-    assertsToFailures.originalShakaAsserts_ = shaka.asserts;
+    assertsToFailures.originalShakaAssert_ = shaka.asserts.assert;
+    assertsToFailures.originalShakaNotImplemented_ =
+        shaka.asserts.notImplemented;
+    assertsToFailures.originalShakaUnreachable_ = shaka.asserts.unreachable;
     assertsToFailures.originalConsoleAssert_ = console.assert;
 
     var realAssert = console.assert.bind(console);
@@ -143,19 +149,17 @@ var assertsToFailures = {
       }
     };
 
-    shaka.asserts = {
-      assert: function(condition, opt_message) {
-        jasmineAssert(condition, opt_message);
-      },
-      notImplemented: function() {
-        jasmineAssert(false, 'Not implemented.');
-      },
-      unreachable: function() {
-        jasmineAssert(false, 'Unreachable reached.');
-      }
+    shaka.asserts.assert = function(condition, opt_message) {
+      jasmineAssert(condition, opt_message);
+    };
+    shaka.asserts.notImplemented = function() {
+      jasmineAssert(false, 'Not implemented.');
+    };
+    shaka.asserts.unreachable = function() {
+      jasmineAssert(false, 'Unreachable reached.');
     };
 
-    console.assert = jasmineAssert;
+    console.assert = /** @type {?} */ (jasmineAssert);
   }
 };
 
@@ -168,7 +172,7 @@ afterAll(assertsToFailures.uninstall);
 // neither can many of our tests.  If needed, install the Promise and
 // CustomEvent polyfills.  In particular, this is needed on IE11.
 beforeAll(function() {
-  shaka.log.MAX_LOG_LEVEL = shaka.log.Level.ERROR;
+  shaka.log['MAX_LOG_LEVEL'] = shaka.log.Level.ERROR;
   shaka.log.setLevel(shaka.log.MAX_LOG_LEVEL);
 
   shaka.polyfill.Promise.install();

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('EbmlParser', function() {
+describe('EbmlParser', /** @suppress {accessControls} */ function() {
   var Code;
 
   beforeAll(function() {

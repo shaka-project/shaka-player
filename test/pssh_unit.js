@@ -19,11 +19,15 @@ describe('Pssh', function() {
   var fromHex = shaka.util.Uint8ArrayUtils.fromHex;
   var toHex = shaka.util.Uint8ArrayUtils.toHex;
 
-  const WIDEVINE_SYSTEM_ID = 'edef8ba979d64acea3c827dcd51d21ed';
-  const PLAYREADY_SYSTEM_ID = '9a04f07998404286ab92e65be0885f95';
-  const GENERIC_SYSTEM_ID = '1077efecc0b24d02ace33c1e52e2fb4b';
+  /** @const {string} */
+  var WIDEVINE_SYSTEM_ID = 'edef8ba979d64acea3c827dcd51d21ed';
+  /** @const {string} */
+  var PLAYREADY_SYSTEM_ID = '9a04f07998404286ab92e65be0885f95';
+  /** @const {string} */
+  var GENERIC_SYSTEM_ID = '1077efecc0b24d02ace33c1e52e2fb4b';
 
-  const WIDEVINE_PSSH =
+  /** @const {string} */
+  var WIDEVINE_PSSH =
       '00000028' +                          // atom size
       '70737368' +                          // atom type='pssh'
       '00000000' +                          // v0, flags=0
@@ -31,7 +35,8 @@ describe('Pssh', function() {
       '00000008' +                          // data size
       '0102030405060708';                   // data
 
-  const PLAYREADY_PSSH =
+  /** @const {string} */
+  var PLAYREADY_PSSH =
       '00000028' +                          // atom size
       '70737368' +                          // atom type 'pssh'
       '00000000' +                          // v0, flags=0
@@ -39,7 +44,8 @@ describe('Pssh', function() {
       '00000008' +                          // data size
       '0102030405060708';                   // data
 
-  const GENERIC_PSSH =
+  /** @const {string} */
+  var GENERIC_PSSH =
       '00000044' +                          // atom size
       '70737368' +                          // atom type 'pssh'
       '01000000' +                          // v1, flags=0
@@ -49,7 +55,8 @@ describe('Pssh', function() {
       '38393031323334354142434445464748' +  // key ID='ABCDEFGHIJKLMNOP'
       '00000000';                           // data size=0
 
-  const ZERO_SIZED_GENERIC_PSSH =
+  /** @const {string} */
+  var ZERO_SIZED_GENERIC_PSSH =
       '00000000' +                          // atom size (whole buffer)
       '70737368' +                          // atom type='pssh'
       '01000000' +                          // v1, flags=0
@@ -59,18 +66,22 @@ describe('Pssh', function() {
       '38393031323334354142434445464748' +  // key ID='ABCDEFGHIJKLMNOP'
       '00000000';                           // data size=0
 
-  const OTHER_BOX =
+  /** @const {string} */
+  var OTHER_BOX =
       '00000018' +                          // atom size
       '77686174' +                          // atom type 'what'
       'deadbeefdeadbeefdeadbeefdeadbeef';   // garbage box data
 
-  const TRUNCATED_WIDEVINE_PSSH =
+  /** @const {string} */
+  var TRUNCATED_WIDEVINE_PSSH =
       WIDEVINE_PSSH.substr(0, WIDEVINE_PSSH.length - 6);
 
-  const TRUNCATED_PLAYREADY_PSSH =
+  /** @const {string} */
+  var TRUNCATED_PLAYREADY_PSSH =
       PLAYREADY_PSSH.substr(0, PLAYREADY_PSSH.length - 6);
 
-  const TRUNCATED_GENERIC_PSSH =
+  /** @const {string} */
+  var TRUNCATED_GENERIC_PSSH =
       GENERIC_PSSH.substr(0, GENERIC_PSSH.length - 6);
 
   it('parses a Widevine PSSH', function() {

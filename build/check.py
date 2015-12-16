@@ -17,7 +17,8 @@
 """This is used to validate that the library is correct.
 
 This checks:
- * All files in lib/ appear when compiling +@complete"""
+ * All files in lib/ appear when compiling +@complete
+ * Runs a compiler pass over the test code to check for type errors"""
 
 import build
 import os
@@ -54,6 +55,25 @@ def checkComplete():
     return False
   return True
 
+def checkTests():
+  """Runs an extra compile pass over the test code to check for type errors.
+
+  Returns:
+    True on success, False on failure.
+  """
+  match = re.compile(r'.*\.js$')
+  base = shakaBuildHelpers.getSourceBase()
+  def get(*args):
+    return shakaBuildHelpers.getAllFiles(os.path.join(base, *args), match)
+  files = (get('lib') + get('externs') + get('test') +
+      get('third_party', 'closure'))
+  testBuild = build.Build(set(files))
+
+  # Ignore missing goog.require since we assume the whole library is
+  # already included.
+  opts = ['--jscomp_off=missingRequire', '--checks-only', '-O', 'SIMPLE']
+  return testBuild.buildRaw(opts)
+
 def usage():
   print 'Usage:', sys.argv[0]
   print
@@ -69,6 +89,8 @@ def main(args):
       usage()
       return 1
   if not checkComplete():
+    return 1
+  elif not checkTests():
     return 1
   else:
     return 0

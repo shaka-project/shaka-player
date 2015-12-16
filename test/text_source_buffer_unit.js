@@ -17,7 +17,7 @@
 
 describe('TextSourceBuffer', function() {
   var TextSourceBuffer;
-  var dummyData = new ArrayBuffer();
+  var dummyData = new ArrayBuffer(0);
   var dummyMimeType = 'text/fake';
 
   beforeAll(function() {
@@ -81,7 +81,7 @@ describe('TextSourceBuffer', function() {
       });
     });
 
-    it('adds cues to the track', function() {
+    it('adds cues to the track', function(done) {
       expect(mockParser).not.toHaveBeenCalled();
       expect(mockTrack.addCue).not.toHaveBeenCalled();
       expect(mockTrack.removeCue).not.toHaveBeenCalled();
@@ -131,7 +131,6 @@ describe('TextSourceBuffer', function() {
       sourceBuffer = null;
       TextSourceBuffer.unregisterParser(dummyMimeType);
       mockTrack = null;
-      mockParser = null;
       eventManager.destroy();
       eventManager = null;
     });

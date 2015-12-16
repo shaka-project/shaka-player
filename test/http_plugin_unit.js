@@ -97,6 +97,11 @@ describe('HttpPlugin', function() {
     testFails('https://foo.bar/error', done);
   });
 
+  /**
+   * @param {string} uri
+   * @param {function()} done
+   * @param {string=} opt_overrideUri
+   */
   function testSucceeds(uri, done, opt_overrideUri) {
     var request = shaka.net.NetworkingEngine.makeRequest(
         [uri], retryParameters);
@@ -115,6 +120,10 @@ describe('HttpPlugin', function() {
         .then(done);
   }
 
+  /**
+   * @param {string} uri
+   * @param {function()} done
+   */
   function testFails(uri, done) {
     var request = shaka.net.NetworkingEngine.makeRequest(
         [uri], retryParameters);

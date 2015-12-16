@@ -22,9 +22,10 @@ describe('DashParser.Manifest', function() {
   var parser;
 
   beforeEach(function() {
+    var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = new shaka.dash.DashParser(
-        fakeNetEngine, {}, function() {}, function() {});
+        fakeNetEngine, retry, function() {}, function() {});
   });
 
   beforeAll(function() {
@@ -36,7 +37,7 @@ describe('DashParser.Manifest', function() {
    *
    * @param {!Array.<string>} startLines
    * @param {!Array.<string>} endLines
-   * @param {shaka.media.Manifest} expected
+   * @param {shakaExtern.Manifest} expected
    */
   function makeTestsForEach(startLines, endLines, expected) {
     /**
@@ -121,7 +122,7 @@ describe('DashParser.Manifest', function() {
           '  </Period>',
           '</MPD>'
         ],
-        {
+        /** @type {shakaExtern.Manifest} */ ({
           minBufferTime: 75,
           presentationTimeline: jasmine.any(shaka.media.PresentationTimeline),
           periods: [
@@ -207,7 +208,7 @@ describe('DashParser.Manifest', function() {
               ]
             }
           ]
-        });
+        }));
   });
 
   describe('squashes stream sets by @group', function() {
@@ -597,7 +598,8 @@ describe('DashParser.Manifest', function() {
 
     it('failed network requests', function(done) {
       var expectedError = new shaka.util.Error(
-          shaka.util.Error.Category.NETWORK, shaka.util.Error.Code.HTTP_STATUS);
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.BAD_HTTP_STATUS);
 
       fakeNetEngine.request.and.returnValue(Promise.reject(expectedError));
       parser.start('')

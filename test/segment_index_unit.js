@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('SegmentIndex', function() {
+describe('SegmentIndex', /** @suppress {accessControls} */ function() {
   describe('find', function() {
     it('finds the correct references', function() {
       var actual1 = makeReference(0, 0, 10, uri(0));
