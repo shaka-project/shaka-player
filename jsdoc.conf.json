@@ -10,7 +10,6 @@
   "opts": {
     "private": true,
     "recurse": true,
-    "tutorials": "tutorials",
     "destination": "docs/api"
   }
 }

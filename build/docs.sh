@@ -15,12 +15,10 @@
 # limitations under the License.
 
 dir=$(dirname $0)/..
+. "$dir"/build/lib.sh
 
 set -e
 
 cd "$dir"
-mkdir -p "$dir"/dist
-python third_party/closure/deps/depswriter.py \
-  --root_with_prefix="lib ../../../lib" \
-  --root_with_prefix="third_party/closure ../../../third_party/closure" \
-  > dist/deps.js
+rm -rf docs/api
+./third_party/jsdoc/jsdoc -c jsdoc.conf.json

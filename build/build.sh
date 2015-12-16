@@ -20,19 +20,19 @@ dir=$(dirname $0)/..
 set -e
 
 name=compiled
-rm -f "$dir"/shaka-player.${name}.debug.{js,map}
-rm -f "$dir"/shaka-player.${name}.js
+rm -f "$dir"/dist/shaka-player.${name}.*
+mkdir -p "$dir"/dist
 
 (library_sources_0; closure_sources_0) | compile_0 \
   $arguments \
-  --create_source_map "$dir"/shaka-player.${name}.debug.map \
-  --js_output_file "$dir"/shaka-player.${name}.debug.js
+  --create_source_map "$dir"/dist/shaka-player.${name}.debug.map \
+  --js_output_file "$dir"/dist/shaka-player.${name}.debug.js
 
 # Fork the non-debug version before appending debug info.
-cp "$dir"/shaka-player.${name}{.debug,}.js
+cp "$dir"/dist/shaka-player.${name}{.debug,}.js
 
 # Add a special source-mapping comment so that Chrome and Firefox can map line
 # and character numbers from the compiled library back to the original source
 # locations.
 echo "//# sourceMappingURL=shaka-player.${name}.debug.map" >> \
-  "$dir"/shaka-player.${name}.debug.js
+  "$dir"/dist/shaka-player.${name}.debug.js

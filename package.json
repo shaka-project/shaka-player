@@ -25,7 +25,7 @@
     "jasmine-ajax": ">=3.2.0",
     "jasmine-core": ">=2.3.4"
   },
-  "main": "shaka-player.compiled.js",
+  "main": "dist/shaka-player.compiled.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/google/shaka-player.git"

@@ -13,27 +13,26 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      // closure base
+      // closure base first
       'third_party/closure/goog/base.js',
 
-      // include the utils files first
-      'spec/util.js',
+      // deps next
+      'dist/deps.js',
 
-      // included files - tests
+      // test utils next
+      'spec/*util.js',
+
+      // actual tests last
       'spec/*.js',
 
       // source files - these are only watched and served
+      {pattern: 'lib/**/*.js', included: false},
       {pattern: 'spec/assets/*', included: false},
-      {pattern: 'lib/*/*.js', included: false},
-      {pattern: 'third_party/closure/goog/*/*.js', included: false},
-
-      // closure's generated deps file
-      {pattern: 'third_party/closure/goog/deps.js', included: false}
+      {pattern: 'third_party/closure/goog/**/*.js', included: false},
     ],
 
-    // handle requests for /spec/assets
     proxies: {
-      '/spec/assets/': '/base/spec/assets/'
+      '/spec/assets/': '/base/spec/assets/',
     },
 
     preprocessors: {
