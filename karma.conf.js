@@ -1,14 +1,5 @@
 // Karma configuration
-
-// Required modules:
-//   karma
-//   karma-jasmine
-//   karma-jasmine-ajax
-//   jasmine
-//   jasmine-ajax
-//   jasmine-core
-// Optional modules:
-//   karma-coverage
+// Install required modules by running "npm install"
 
 module.exports = function(config) {
   config.set({
