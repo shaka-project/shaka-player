@@ -48,16 +48,16 @@ describe('HttpPlugin', function() {
 
   it('sets the correct fields', function(done) {
     var request = {
-      uri: ['https://foo.bar/'],
+      uris: ['https://foo.bar/'],
       allowCrossSiteCredentials: true,
       method: 'POST',
       headers: {'FOO': 'BAR'}
     };
-    shaka.net.HttpPlugin(request.uri[0], request)
+    shaka.net.HttpPlugin(request.uris[0], request)
         .then(function() {
           var actual = jasmine.Ajax.requests.mostRecent();
           expect(actual).toBeTruthy();
-          expect(actual.url).toBe(request.uri[0]);
+          expect(actual.url).toBe(request.uris[0]);
           expect(actual.method).toBe(request.method);
           expect(actual.withCredentials).toBe(true);
           expect(actual.requestHeaders['FOO']).toBe('BAR');
@@ -83,7 +83,7 @@ describe('HttpPlugin', function() {
   });
 
   function testSucceeds(uri, done) {
-    var request = {uri: [uri]};
+    var request = {uris: [uri]};
     shaka.net.HttpPlugin(uri, request)
         .catch(fail)
         .then(function(response) {
@@ -98,7 +98,7 @@ describe('HttpPlugin', function() {
   }
 
   function testFails(uri, done) {
-    var request = {uri: [uri]};
+    var request = {uris: [uri]};
     shaka.net.HttpPlugin(uri, request)
         .then(fail)
         .catch(function() {

@@ -78,10 +78,10 @@ shaka.test.IStreamGenerator.prototype.getSegment = function(
  *
  * The StreamGenerator loops a single segment.
  *
- * @param {string} initSegmentUrl The URL of the initialization segment.
+ * @param {string} initSegmentUri The URI of the initialization segment.
  * @param {number} mvhdOffset The offset of the initialization segment's
  *     mvhd box.
- * @param {string} segmentTemplateUrl The URL of the segment to loop.
+ * @param {string} segmentTemplateUri The URI of the segment to loop.
  * @param {number} tfdtOffset The offset of the segment's tfdt box.
  * @param {number} segmentDuration The duration of a single segment in seconds.
  * @param {number} presentationTimeOffset The presentation time offset
@@ -94,9 +94,9 @@ shaka.test.IStreamGenerator.prototype.getSegment = function(
  * @extends {shaka.test.IStreamGenerator}
  */
 shaka.test.DashVodStreamGenerator = function(
-    initSegmentUrl,
+    initSegmentUri,
     mvhdOffset,
-    segmentTemplateUrl,
+    segmentTemplateUri,
     tfdtOffset,
     segmentDuration,
     presentationTimeOffset,
@@ -110,13 +110,13 @@ shaka.test.DashVodStreamGenerator = function(
       'presentation duration invalid');
 
   /** @private {string} */
-  this.initSegmentUrl_ = initSegmentUrl;
+  this.initSegmentUri_ = initSegmentUri;
 
   /** @private {number} */
   this.mvhdOffset_ = mvhdOffset;
 
   /** @private {string} */
-  this.segmentTemplateUrl_ = segmentTemplateUrl;
+  this.segmentTemplateUri_ = segmentTemplateUri;
 
   /** @private {number} */
   this.tfdtOffset_ = tfdtOffset;
@@ -145,8 +145,8 @@ goog.inherits(shaka.test.DashVodStreamGenerator, shaka.test.IStreamGenerator);
 /** @override */
 shaka.test.DashVodStreamGenerator.prototype.init = function() {
   var async = [
-    shaka.test.fetch_(this.initSegmentUrl_),
-    shaka.test.fetch_(this.segmentTemplateUrl_)
+    shaka.test.fetch_(this.initSegmentUri_),
+    shaka.test.fetch_(this.segmentTemplateUri_)
   ];
 
   return Promise.all(async).then(
@@ -203,10 +203,10 @@ shaka.test.DashVodStreamGenerator.prototype.getSegment = function(
 /**
  * Creates a DashLiveStreamGenerator, which simulates a DASH, live, MP4 stream.
  *
- * @param {string} initSegmentUrl The URL of the initialization segment.
+ * @param {string} initSegmentUri The URI of the initialization segment.
  * @param {number} mvhdOffset The offset of the initialization segment's
  *     mvhd box.
- * @param {string} segmentTemplateUrl The URL of the segment to loop.
+ * @param {string} segmentTemplateUri The URI of the segment to loop.
  * @param {number} tfdtOffset The offset of the segment's TFDT box.
  * @param {number} segmentDuration The duration of a single segment in seconds.
  * @param {number} presentationTimeOffset The presentation time offset
@@ -227,9 +227,9 @@ shaka.test.DashVodStreamGenerator.prototype.getSegment = function(
  * @extends {shaka.test.IStreamGenerator}
  */
 shaka.test.DashLiveStreamGenerator = function(
-    initSegmentUrl,
+    initSegmentUri,
     mvhdOffset,
-    segmentTemplateUrl,
+    segmentTemplateUri,
     tfdtOffset,
     segmentDuration,
     presentationTimeOffset,
@@ -251,13 +251,13 @@ shaka.test.DashLiveStreamGenerator = function(
       'broadcast start time before availability start time');
 
   /** @private {string} */
-  this.initSegmentUrl_ = initSegmentUrl;
+  this.initSegmentUri_ = initSegmentUri;
 
   /** @private {number} */
   this.mvhdOffset_ = mvhdOffset;
 
   /** @private {string} */
-  this.segmentTemplateUrl_ = segmentTemplateUrl;
+  this.segmentTemplateUri_ = segmentTemplateUri;
 
   /** @private {number} */
   this.tfdtOffset_ = tfdtOffset;
@@ -286,8 +286,8 @@ goog.inherits(shaka.test.DashLiveStreamGenerator, shaka.test.IStreamGenerator);
 /** @override */
 shaka.test.DashLiveStreamGenerator.prototype.init = function() {
   var async = [
-    shaka.test.fetch_(this.initSegmentUrl_),
-    shaka.test.fetch_(this.segmentTemplateUrl_)
+    shaka.test.fetch_(this.initSegmentUri_),
+    shaka.test.fetch_(this.segmentTemplateUri_)
   ];
 
   return Promise.all(async).then(
@@ -357,16 +357,16 @@ shaka.test.DashLiveStreamGenerator.prototype.getSegment = function(
 
 
 /**
- * Fetches the resource at the given URL.
+ * Fetches the resource at the given URI.
  *
- * @param {string} url
+ * @param {string} uri
  * @return {!Promise.<!ArrayBuffer>}
  * @private
  */
-shaka.test.fetch_ = function(url) {
+shaka.test.fetch_ = function(uri) {
   return new Promise(function(resolve, reject) {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', url, true /* asynchronous */);
+    xhr.open('GET', uri, true /* asynchronous */);
     xhr.responseType = 'arraybuffer';
 
     xhr.onload = function(event) {

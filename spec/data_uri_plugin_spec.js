@@ -24,7 +24,7 @@ describe('DataUriPlugin', function() {
     testSucceeds('data:text/plain,Hello', 'Hello', done);
   });
 
-  it('supports URL encoded text', function(done) {
+  it('supports URI encoded text', function(done) {
     testSucceeds(
         'data:text/html,%3Ch1%3EHello%2C%20World!%3C%2Fh1%3E',
         '<h1>Hello, World!</h1>',
