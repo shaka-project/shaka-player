@@ -5,7 +5,10 @@
     "dictionaries": [ "closure", "jsdoc" ]
   },
   "source": {
-    "include": [ "lib" ]
+    "include": [
+      "lib",
+      "externs/shaka"
+    ]
   },
   "opts": {
     "private": true,

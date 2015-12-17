@@ -23,18 +23,22 @@
  */
 
 
-/** @typedef {{contentType: string, robustness: string}} */
+/**
+ * @typedef {{contentType: string, robustness: string}}
+ */
 var MediaKeySystemMediaCapability;
 
 
-/** @typedef {{
+/**
+ * @typedef {{
  *   initDataTypes: (Array.<string>|undefined),
  *   audioCapabilities: (Array.<!MediaKeySystemMediaCapability>|undefined),
  *   videoCapabilities: (Array.<!MediaKeySystemMediaCapability>|undefined),
  *   distinctiveIdentifier: (string|undefined),
  *   persistentState: (string|undefined),
  *   sessionTypes: (Array.<string>|undefined)
- * }} */
+ * }}
+ */
 var MediaKeySystemConfiguration;
 
 

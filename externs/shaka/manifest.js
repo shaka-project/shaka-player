@@ -15,16 +15,18 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.media.Manifest');
-goog.provide('shaka.media.Period');
-goog.provide('shaka.media.Stream');
-goog.provide('shaka.media.StreamSet');
 
-goog.require('shaka.media.InitSegmentReference');
-goog.require('shaka.media.SegmentReference');
+/** @externs */
 
 
 /**
+ * @typedef {{
+ *   presentationTimeline: !shaka.media.PresentationTimeline,
+ *   periods: !Array.<!shakaExtern.Period>,
+ *   minBufferTime: number
+ * }}
+ *
+ * @description
  * <p>
  * A Manifest object describes a collection of streams (segmented audio, video,
  * or text data) that share a common timeline. We call the collection of
@@ -58,111 +60,82 @@ goog.require('shaka.media.SegmentReference');
  * streams which have the same logical content to adapt to network conditions.
  * </p>
  *
- * A Manifest contains the following fields:
- * <ul>
- * <li>
- *   <b>presentationTimeline</b>: !shaka.media.PresentationTimeline
- *   (required) <br>
+ * @property {!shaka.media.PresentationTimeline} presentationTimeline
+ *   <i>Required.</i> <br>
  *   The presentation timeline.
- *
- * <li>
- *   <b>periods</b>: Array.&lt!shaka.media.Period&gt (required) <br>
+ * @property {!Array.<!shakaExtern.Period>} periods
+ *   <i>Required.</i> <br>
  *   The presentation's Periods. There must be at least one Period.
-
- * <li>
- *   <b>minBufferTime</b>: number
+ * @property {number} minBufferTime
+ *   <i>Defaults to 0.</i> <br>
  *   The minimum number of seconds of content that must be buffered before
  *   playback can begin.  Can be overridden by a higher value from the Player
  *   configuration.
- *   <br>
- *   Defaults to 0.
- * </ul>
  *
- * @typedef {{
- *   presentationTimeline: !shaka.media.PresentationTimeline,
- *   periods: !Array.<!shaka.media.Period>,
- *   minBufferTime: number
- * }}
  * @exportDoc
  */
-shaka.media.Manifest;
+shakaExtern.Manifest;
 
 
 /**
- * <p>
- * A Period object contains the Streams for part of the presentation.
- * </p>
+ * @typedef {{
+ *   startTime: number,
+ *   streamSets: !Array.<shakaExtern.StreamSet>
+ * }}
  *
- * A Period contains the following fields:
- * <ul>
- * <li>
- *   <b>startTime</b>: number (required) <br>
+ * @description
+ * A Period object contains the Streams for part of the presentation.
+ *
+ * @property {number} startTime
+ *   <i>Required.</i> <br>
  *   The Period's start time, in seconds, relative to the start of the
  *   presentation. The first Period must begin at the start of the
  *   presentation. The Period ends immediately before the next Period's start
  *   time or exactly at the end of the presentation timeline. Periods which
  *   begin after the end of the presentation timeline are ignored.
- *   <br>
- *   Defaults to 0.
- *
- * <li>
- *   <b>streamSets</b>: Array.&lt!shaka.media.StreamSet&gt (required) <br>
+ * @property {!Array.<shakaExtern.StreamSet>} streamSets
+ *   <i>Required.</i> <br>
  *   The Period's StreamSets. There must be at least one StreamSet.
- * </ul>
  *
- * @typedef {{
- *   startTime: number,
- *   streamSets: !Array.<shaka.media.StreamSet>
- * }}
  * @exportDoc
  */
-shaka.media.Period;
+shakaExtern.Period;
 
 
 /**
- * <p>
- * A StreamSet object contains a set of Streams which have the same type,
- * container/format, and logical content. A StreamSet's type and
- * container/format define its MIME type.
- * </p>
- *
- * A StreamSet contains the following fields:
- * <ul>
- * <li>
- *   <b>language</b>: string <br>
- *   The Streams' language, specified as a language code. <br>
- *   See {@link https://tools.ietf.org/html/rfc5646} <br>
- *   See {@link http://www.iso.org/iso/home/standards/language_codes.htm} <br>
- *   <br>
- *   Defaults to '' (i.e., unknown).
- *
- * <li>
- *   <b>type</b>: string (required) <br>
- *   The Streams' type, e.g., 'audio', 'video', or 'text'.
- *
- * <li>
- *   <b>primary</b>: boolean <br>
- *   True indicates that the player should use this StreamSet over others of
- *   the same type in the same Period. However, the player may use another
- *   StreamSet to meet application preferences, or to achieve better MIME type
- *   or DRM compatibility among other StreamSets. <br>
- *   <br>
- *   Defaults to false.
- *
- * <li>
- *   <b>streams</b>: Array.&lt!shaka.media.Stream&gt (required)
- *   The StreamSets's Streams. There must be at least one Stream.
- * </ul>
- *
  * @typedef {{
  *   language: string,
  *   type: string,
  *   primary: boolean,
- *   streams: !Array.<!shaka.media.Stream>
+ *   streams: !Array.<!shakaExtern.Stream>
  * }}
+ *
+ * @description
+ * A StreamSet object contains a set of Streams which have the same type,
+ * container/format, and logical content. A StreamSet's type and
+ * container/format define its MIME type.
+ *
+ * @property {string} language
+ *   <i>Defaults to '' (i.e., unknown).</i> <br>
+ *   The Streams' language, specified as a language code. <br>
+ *   See {@link https://tools.ietf.org/html/rfc5646} <br>
+ *   See {@link http://www.iso.org/iso/home/standards/language_codes.htm}
+ * @property {string} type
+ *   <i>Required.</i> <br>
+ *   The Streams' type, e.g., 'audio', 'video', or 'text'.
+ * @property {boolean} primary
+ *   <i>Defaults to false.</i> <br>
+ *   True indicates that the player should use this StreamSet over others of
+ *   the same type in the same Period. However, the player may use another
+ *   StreamSet to meet application preferences, or to achieve better MIME type
+ *   or DRM compatibility among other StreamSets.
+ * @property {!Array.<!shakaExtern.Stream>} streams
+ *   <i>Required.</i> <br>
+ *   The StreamSets's Streams. There must be at least one Stream.
+ *
  * @exportDoc
  */
-shaka.media.StreamSet;
+shakaExtern.StreamSet;
 
 
 /**
@@ -172,7 +145,7 @@ shaka.media.StreamSet;
  * @typedef {function(): !Promise}
  * @exportDoc
  */
-shaka.media.CreateSegmentIndexFunction;
+shakaExtern.CreateSegmentIndexFunction;
 
 
 /**
@@ -184,7 +157,7 @@ shaka.media.CreateSegmentIndexFunction;
  * @typedef {function(number): ?number}
  * @exportDoc
  */
-shaka.media.FindSegmentPositionFunction;
+shakaExtern.FindSegmentPositionFunction;
 
 
 /**
@@ -195,99 +168,15 @@ shaka.media.FindSegmentPositionFunction;
  * @typedef {function(number): shaka.media.SegmentReference}
  * @exportDoc
  */
-shaka.media.GetSegmentReferenceFunction;
+shakaExtern.GetSegmentReferenceFunction;
 
 
 /**
- * <p>
- * A Stream object describes a single stream (segmented media data).
- * </p>
- *
- * A Stream contains the following fields.
- * <ul>
- * <li>
- *   <b>id</b>: number (required) <br>
- *   A unique ID among all Stream objects within the same Manifest.
- *
- * <li>
- *   <b>createSegmentIndex</b>:
- *   shaka.media.CreateSegmentIndexFunction (required) <br>
- *   Creates the Stream's SegmentIndex (asynchronously).
- *
- * <li>
- *   <b>findSegmentPosition</b>:
- *   shaka.media.FindSegmentPositionFunction (required) <br>
- *   Finds the position of the segment for the given time. The caller must call
- *   createSegmentIndex() and wait until the returned Promise resolves before
- *   calling this function.
- *
- * <li>
- *   <b>getSegmentReference</b>:
- *   shaka.media.GetSegmentReferenceFunction (required) <br>
- *   Gets the SegmentReference for the segment at the given position. The
- *   caller must call createSegmentIndex() and wait until the returned Promise
- *   resolves before calling this function.
- *
- * <li>
- *   <b>initSegmentReference</b>: shaka.media.InitSegmentReference <br>
- *   The Stream's initialization segment metadata. null if the Stream is self
- *   initializing.
- *
- * <li>
- *   <b>presentationTimeOffset</b>: number <br>
- *   The amount of time, in seconds, that the stream's presentation timestamps
- *   are offset from the start of the Stream's Period, i.e., this value should
- *   equal the first presentation timestamp of the first frame/sample in the
- *   period. <br>
- *   <br>
- *   For example, for MP4 based streams, this value should equal the first
- *   segment's tfdt box's 'baseMediaDecodeTime' field (after it has been
- *   converted to seconds). <br>
- *   <br>
- *   Defaults to 0.
- *
- * <li>
- *   <b>mimeType</b>: string (required) <br>
- *   The Stream's MIME type, e.g., 'audio/mp4', 'video/webm', or 'text/vtt'.
- *
- * <li>
- *   <b>codecs</b>: string <br>
- *   The Stream's codecs, e.g., 'avc1.4d4015' or 'vp9', which must be
- *   compatible with the Stream's MIME type. <br>
- *   See {@link https://tools.ietf.org/html/rfc6381} <br>
- *   <br>
- *   Defaults to '' (i.e., unknown / not required).
- *
- * <li>
- *   <b>bandwidth</b>: number <i>audio and video</i> <br>
- *   The stream's required bandwidth in bits per second.
- *
- * <li>
- *   <b>width</b>: number <i>video only</i> <br>
- *   The stream's width in pixels.
- *
- * <li>
- *   <b>height</b>: number <i>video only</i> <br>
- *   The stream's height in pixels.
- *
- * <li>
- *   <b>kind</b>: string <i>text only</i> <br>
- *   The kind of text stream.  For example, 'captions' or 'subtitles'.
- *   @see https://goo.gl/k1HWA6
- *
- * <li>
- *   <b>keyIds</b>: Array.&lt;string&gt; <br>
- *   The stream's key IDs as hex strings. These key IDs identify the encryption
- *   keys that the browser (key system) can use to decrypt the stream. <br>
- *   <br>
- *   Defaults to [] (i.e., unencrypted / unknown).
- * </ul>
- *
  * @typedef {{
  *   id: number,
- *   createSegmentIndex: shaka.media.CreateSegmentIndexFunction,
- *   findSegmentPosition: shaka.media.FindSegmentPositionFunction,
- *   getSegmentReference: shaka.media.GetSegmentReferenceFunction,
+ *   createSegmentIndex: shakaExtern.CreateSegmentIndexFunction,
+ *   findSegmentPosition: shakaExtern.FindSegmentPositionFunction,
+ *   getSegmentReference: shakaExtern.GetSegmentReferenceFunction,
  *   initSegmentReference: shaka.media.InitSegmentReference,
  *   presentationTimeOffset: (number|undefined),
  *   mimeType: string,
@@ -298,7 +187,65 @@ shaka.media.GetSegmentReferenceFunction;
  *   kind: (string|undefined),
  *   keyIds: !Array.<string>
  * }}
+ *
+ * @description
+ * A Stream object describes a single stream (segmented media data).
+ *
+ * @property {number} id
+ *   <i>Required.</i> <br>
+ *   A unique ID among all Stream objects within the same Manifest.
+ * @property {shakaExtern.CreateSegmentIndexFunction} createSegmentIndex
+ *   <i>Required.</i> <br>
+ *   Creates the Stream's SegmentIndex (asynchronously).
+ * @property {shakaExtern.FindSegmentPositionFunction} findSegmentPosition
+ *   <i>Required.</i> <br>
+ *   Finds the position of the segment for the given time. The caller must call
+ *   createSegmentIndex() and wait until the returned Promise resolves before
+ *   calling this function.
+ * @property {shakaExtern.GetSegmentReferenceFunction} getSegmentReference
+ *   <i>Required.</i> <br>
+ *   Gets the SegmentReference for the segment at the given position. The
+ *   caller must call createSegmentIndex() and wait until the returned Promise
+ *   resolves before calling this function.
+ * @property {shaka.media.InitSegmentReference} initSegmentReference
+ *   The Stream's initialization segment metadata, or null if the segments are
+ *   self-initializing.
+ * @property {(number|undefined)} presentationTimeOffset
+ *   <i>Defaults to 0.</i> <br>
+ *   The amount of time, in seconds, that the stream's presentation timestamps
+ *   are offset from the start of the Stream's Period, i.e., this value should
+ *   equal the first presentation timestamp of the first frame/sample in the
+ *   period. <br>
+ *   <br>
+ *   For example, for MP4 based streams, this value should equal the first
+ *   segment's tfdt box's 'baseMediaDecodeTime' field (after it has been
+ *   converted to seconds).
+ * @property {string} mimeType
+ *   <i>Required.</i> <br>
+ *   The Stream's MIME type, e.g., 'audio/mp4', 'video/webm', or 'text/vtt'.
+ * @property {string} codecs
+ *   <i>Defaults to '' (i.e., unknown / not needed).</i> <br>
+ *   The Stream's codecs, e.g., 'avc1.4d4015' or 'vp9', which must be
+ *   compatible with the Stream's MIME type. <br>
+ *   See {@link https://tools.ietf.org/html/rfc6381}
+ * @property {(number|undefined)} bandwidth
+ *   <i>Audio and video streams only.</i> <br>
+ *   The stream's required bandwidth in bits per second.
+ * @property {(number|undefined)} width
+ *   <i>Video streams only.</i> <br>
+ *   The stream's width in pixels.
+ * @property {(number|undefined)} height
+ *   <i>Video streams only.</i> <br>
+ *   The stream's height in pixels.
+ * @property {(string|undefined)} kind
+ *   <i>Text streams only.</i> <br>
+ *   The kind of text stream.  For example, 'captions' or 'subtitles'.
+ *   @see https://goo.gl/k1HWA6
+ * @property {!Array.<string>} keyIds
+ *   <i>Defaults to [] (i.e., unencrypted / unknown).</i> <br>
+ *   The stream's key IDs as hex strings. These key IDs identify the encryption
+ *   keys that the browser (key system) can use to decrypt the stream.
+ *
  * @exportDoc
  */
-shaka.media.Stream;
-
+shakaExtern.Stream;
