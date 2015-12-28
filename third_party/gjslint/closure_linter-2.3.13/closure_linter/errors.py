@@ -118,6 +118,9 @@ MALFORMED_END_OF_SCOPE_COMMENT = 501
 INVALID_USE_OF_GOOG_SCOPE = 600
 EXTRA_GOOG_SCOPE_USAGE = 601
 
+# Added by Shaka Player devs
+MISMATCHED_PROPERTY_DOCUMENTATION = 900
+
 # ActionScript specific errors:
 # TODO(user): move these errors to their own file and move all JavaScript
 # specific errors to their own file as well.

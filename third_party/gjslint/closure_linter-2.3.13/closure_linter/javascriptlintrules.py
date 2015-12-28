@@ -210,6 +210,13 @@ class JavaScriptLintRules(ecmalintrules.EcmaScriptLintRules):
 
     elif token.type == Type.END_DOC_COMMENT:
       doc_comment = state.GetDocComment()
+      if doc_comment.HasFlag('typedef'):
+        # The target token hasn't been checked yet, so its suppressions haven't
+        # been set.
+        target_token = doc_comment.GetTargetToken()
+        if target_token:
+          target_token.metadata.suppressions = state.GetSuppressions()
+        self._EnforceTypedefProperties(doc_comment)
 
       # When @externs appears in a @fileoverview comment, it should trigger
       # the same limited doc checks as a special filename like externs.js.
@@ -724,6 +731,171 @@ class JavaScriptLintRules(ecmalintrules.EcmaScriptLintRules):
           first_require_token,
           position=Position.AtBeginning(),
           fix_data=first_require_token)
+
+  def _ExtractTypedefTokens(self, doc_comment):
+    """Yields typedef tokens from a DocComment."""
+    found_doc_flag = False
+    found_doc_start_brace = False
+    num_braces = 0
+
+    # We are looking for a @typedef token followed by an opening brace.
+    # We only emit from the opening brace to the last balanced closing brace.
+    for token in tokenutil.GetTokenRange(
+        doc_comment.start_token, doc_comment.end_token):
+
+      if token.type == Type.DOC_FLAG:
+        if token.string == '@typedef':
+          found_doc_flag = True
+
+      if not found_doc_flag:
+        continue
+
+      if token.type == Type.DOC_START_BRACE:
+        found_doc_start_brace = True
+        num_braces += 1
+
+      if not found_doc_start_brace:
+        continue
+
+      if token.type == Type.DOC_PREFIX:
+        continue
+
+      if token.type == Type.DOC_END_BRACE:
+        num_braces -= 1
+        if num_braces == 0:
+          yield token  # Make sure we yield the final closing brace
+          return
+
+      yield token
+
+  def _ParseRecordTypedef(self, record_typedef):
+    """Parse a record typedef.
+
+    This is used to re-parse a typedef after combining the tokens from its jsdoc
+    comment.
+
+    The typedef tokens from the original parse are all type COMMENT and each one
+    contains a complete line of the typedef annotation.  To handle multi-line
+    fields and multi-field lines, we need to put the entire typedef string back
+    together and retokenize it outside the context of a jsdoc comment.  Then we
+    parse the fields and build a dictionary to represent the typedef.
+
+    Args:
+      record_typedef: A single string with everything between the record
+                      typedef's curly braces.
+    Returns:
+      A dictionary whose keys are field names and whose values are field types.
+    """
+
+    typedef = {}
+
+    # Retokenize the line.
+    tokenizer = javascripttokenizer.JavaScriptTokenizer()
+    next_token = tokenizer.TokenizeFile([record_typedef])
+
+    # Strip out whitespace tokens.
+    tokens = []
+    while next_token:
+      if next_token.type != Type.WHITESPACE:
+        tokens.append(next_token.string)
+      next_token = next_token.next
+
+    # We now have a list of JS tokens (as strings, not Token objects).
+    # For example:
+    #   "x: string, y: Object.<string, boolean>"
+    # becomes:
+    #   [
+    #     "x", ":", "string", ",",
+    #     "y", ":", "Object.", "<", "string", ",", "boolean", ">"
+    #   ]
+
+    # Parse the typedef.
+    while len(tokens):
+      field = tokens.pop(0)
+      if not tokens: raise TypeError('malformed typedef')
+      colon = tokens.pop(0)
+      if colon != ':': raise TypeError('malformed typedef')
+
+      num_angle_brackets = 0
+      type_pieces = []
+      while len(tokens):
+        next_type_piece = tokens.pop(0)
+
+        if next_type_piece == '<':
+          num_angle_brackets += 1
+        if next_type_piece == '>':
+          num_angle_brackets -= 1
+
+        if next_type_piece == '{':
+          raise TypeError('sub-record types not allowed within record typedefs')
+
+        if next_type_piece == ',' and num_angle_brackets == 0:
+          break
+        type_pieces.append(next_type_piece)
+
+      if num_angle_brackets != 0: raise TypeError('malformed typedef')
+      field_type = ''.join(type_pieces)
+      typedef[field] = field_type
+
+    return typedef
+
+  def _EnforceTypedefProperties(self, doc_comment):
+    """Checks record typedefs for @property annotations.
+       Also requires that properties not contain nested records."""
+
+    typedef_tokens = list(self._ExtractTypedefTokens(doc_comment))
+    if (len(typedef_tokens) < 2 or
+        typedef_tokens[0].type != Type.DOC_START_BRACE or
+        typedef_tokens[1].type != Type.DOC_START_BRACE or
+        typedef_tokens[-2].type != Type.DOC_END_BRACE or
+        typedef_tokens[-1].type != Type.DOC_END_BRACE):
+      # Not a record typedef.  Ignore.
+      return
+
+    target_token = doc_comment.GetTargetToken() or token
+    identifier = doc_comment.GetTargetIdentifier()
+
+    # The typedef tokens are not directly usable or parseable as they come to
+    # us from doc_comment.  We get one per line of the doc comment, and they
+    # have not been fully tokenized for us.  So we recombine and reparse.
+    # See _ParseRecordTypedef for more details.
+    record_typedef = ' '.join([token.string for token in typedef_tokens[2:-2]])
+    try:
+      typedef_fields = self._ParseRecordTypedef(record_typedef)
+    except TypeError, e:
+      self._HandleError(
+          errors.MISMATCHED_PROPERTY_DOCUMENTATION,
+          'Cannot parse typedef for "%s": %s' % (identifier, e.message),
+          target_token)
+      return
+
+    # Extract the property names and types from the @property annotations.
+    property_fields = {}
+    for flag in doc_comment.GetDocFlags():
+      if flag.flag_type == 'property':
+        # The parsed typedef tag has no whitespace in it.
+        # Remove newlines from both name and type, and remove internal
+        # whitespace from the type so that a direct match is possible.
+        stripped_name = flag.name.strip()
+        stripped_type = flag.type.strip().replace(' ', '')
+        property_fields[stripped_name] = stripped_type
+
+    if not property_fields:
+      self._HandleError(
+          errors.MISMATCHED_PROPERTY_DOCUMENTATION,
+          'Property docs missing for "%s"' % identifier,
+          target_token)
+      return
+
+    if typedef_fields != property_fields:
+      self._HandleError(
+          errors.MISMATCHED_PROPERTY_DOCUMENTATION,
+          ('Property docs for "%s" do not match the typedef:' % identifier) +
+          ('\ntypedef:    %s' % str(typedef_fields)) +
+          ('\nproperties: %s' % str(property_fields)) +
+          '\n',
+          target_token)
+      return
 
   def GetLongLineExceptions(self):
     """Gets a list of regexps for lines which can be longer than the limit.

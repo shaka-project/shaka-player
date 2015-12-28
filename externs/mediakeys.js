@@ -25,6 +25,7 @@
 
 /**
  * @typedef {{contentType: string, robustness: string}}
+ * gjslint: disable=900
  */
 var MediaKeySystemMediaCapability;
 
@@ -38,6 +39,7 @@ var MediaKeySystemMediaCapability;
  *   persistentState: (string|undefined),
  *   sessionTypes: (Array.<string>|undefined)
  * }}
+ * gjslint: disable=900
  */
 var MediaKeySystemConfiguration;
 
