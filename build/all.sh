@@ -20,4 +20,5 @@ set -e
 
 "$dir"/build/gendeps.sh
 "$dir"/build/lint.sh
-"$dir"/build/build.sh
+"$dir"/build/check.py
+"$dir"/build/build.py --name compiled +@complete

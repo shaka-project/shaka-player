@@ -26,40 +26,6 @@ function calculate_version() {
 
 GIT_VERSION=$(calculate_version)
 
-# 'deprecatedAnnotations' controls complaints about @expose, but the new
-# @nocollapse annotation does not do the same job for properties.
-# So since we can't use the new annotations, we have to ignore complaints
-# about the old one.
-
-# 'lintChecks' complains about countless instances of implicitly nullable
-# types, plus a few other issues.  Even the closure library doesn't pass
-# these checks, and the implicit nullability check in particular is over-
-# zealous and unhelpful.  So we disable the whole category of 'lintChecks'.
-
-closure_opts="
-  --language_in ECMASCRIPT5
-  --language_out ECMASCRIPT3
-
-  --jscomp_error='*'
-  --jscomp_off=deprecatedAnnotations
-  --jscomp_off=lintChecks
-
-  --extra_annotation_name=listens
-  --extra_annotation_name=exportDoc
-
-  -O ADVANCED
-  --generate_exports
-  --output_wrapper_file="$dir"/build/wrapper.template.js
-
-  -D COMPILED=true
-  -D goog.DEBUG=false
-  -D goog.STRICT_MODE_COMPATIBLE=true
-  -D goog.ENABLE_DEBUG_LOADER=false
-  -D shaka.asserts.ENABLE_ASSERTS=false
-  -D shaka.log.MAX_LOG_LEVEL=0
-"
-#  -D GIT_VERSION='$GIT_VERSION' # FIXME
-
 set -e
 
 function library_sources_0() {
@@ -73,16 +39,6 @@ function test_sources_0() {
   find \
     "$dir"/test \
     -name '*.js' -print0
-}
-
-function closure_sources_0() {
-  find \
-    "$dir"/third_party/closure \
-    -name '*.js' -print0
-}
-
-function compile_0() {
-  xargs -0 java -jar "$dir"/third_party/closure/compiler.jar $closure_opts "$@"
 }
 
 function lint_0() {

@@ -1,0 +1,4 @@
+# All standard networking scheme plugins.
+
++../../lib/net/http_plugin.js
++../../lib/net/data_uri_plugin.js
