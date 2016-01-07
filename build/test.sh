@@ -25,8 +25,13 @@ elif [[ "$system" == CYGWIN* ]]; then
   browsers="Chrome,FirefoxWithMSE,IE"
 fi
 
-# Run tests in all available browsers.
-$wrapper karma start --single-run --browsers "$browsers"
+if [ $# -eq 0 ]; then
+  # Run tests in all available browsers.
+  $wrapper karma start --single-run --browsers "$browsers"
 
-# Run a coverage report in Chrome only.
-$wrapper karma start --single-run --reporters coverage --browsers Chrome
+  # Run a basic coverage report in Chrome only.
+  $wrapper karma start --single-run --reporters coverage
+else
+  # Run with command-line arguments from the user.
+  $wrapper karma start --single-run "$@"
+fi

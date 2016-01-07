@@ -41,7 +41,9 @@ module.exports = function(config) {
     },
 
     coverageReporter: {
-      'type': 'text',
+      reporters: [
+        { type: 'text' },
+      ],
     },
 
     // do not panic about "no activity" unless a test takes longer than 60s.
@@ -76,8 +78,31 @@ module.exports = function(config) {
           'media.mediasource.webm.enabled': true,
           'media.mediasource.whitelist': false,
           'media.mediasource.youtubeonly': false,
-        }
-      }
-    }
+        },
+      },
+    },
+
+    // By default, use Chrome only, unless command-line arguments override.
+    browsers: ['Chrome'],
   });
+
+  // Process custom command-line flags.
+  function flagPresent(name) {
+    return process.argv.indexOf('--' + name) >= 0;
+  }
+
+  if (flagPresent('html-coverage-report')) {
+    // Wipe out any old coverage reports to avoid confusion.
+    var rimraf = require('rimraf');
+    rimraf.sync('coverage', {});  // Like rm -rf
+
+    config.set({
+      reporters: [ 'coverage' ],
+      coverageReporter: {
+        reporters: [
+          { type: 'html', dir: 'coverage' },
+        ],
+      },
+    });
+  }
 };
