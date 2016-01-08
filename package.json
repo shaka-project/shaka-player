@@ -24,6 +24,7 @@
     "jasmine": ">=2.3.2",
     "jasmine-ajax": ">=3.2.0",
     "jasmine-core": ">=2.3.4",
+    "sprintf-js": "",
     "rimraf": ""
   },
   "main": "dist/shaka-player.compiled.js",

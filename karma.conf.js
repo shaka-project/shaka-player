@@ -3,13 +3,20 @@
 
 module.exports = function(config) {
   config.set({
-
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '.',
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['jasmine-ajax', 'jasmine'],
+    frameworks: [
+      'jasmine-ajax', 'jasmine',
+      'sprintf-js',
+    ],
+
+    plugins: [
+      'karma-*',  // default
+      frameworkPluginForModule('sprintf-js'),
+    ],
 
     // list of files / patterns to load in the browser
     files: [
@@ -86,11 +93,6 @@ module.exports = function(config) {
     browsers: ['Chrome'],
   });
 
-  // Process custom command-line flags.
-  function flagPresent(name) {
-    return process.argv.indexOf('--' + name) >= 0;
-  }
-
   if (flagPresent('html-coverage-report')) {
     // Wipe out any old coverage reports to avoid confusion.
     var rimraf = require('rimraf');
@@ -106,3 +108,37 @@ module.exports = function(config) {
     });
   }
 };
+
+// Find custom command-line flags.
+function flagPresent(name) {
+  return process.argv.indexOf('--' + name) >= 0;
+}
+
+// Construct framework plugins on-the-fly for arbitrary node modules.
+// A call to this must be placed in the config in the 'plugins' array,
+// and the module name must be added to the config in the 'frameworks' array.
+function frameworkPluginForModule(name) {
+  // The framework injects files into the client which runs the tests.
+  var framework = function(files) {
+    // Locate the main file for the node module.
+    var path = require('path');
+    var mainFile = path.resolve(require.resolve(name));
+
+    // Add a file entry to the list of files to be served.
+    // This follows the same syntax as above in config.set({files: ...}).
+    files.unshift({
+      pattern: mainFile, included: true, served: true, watched: false
+    });
+  };
+
+  // The framework factory function takes one argument, which is the list of
+  // files from the karma config.
+  framework.$inject = ['config.files'];
+
+  // This is the plugin interface to register a new framework.  Adding this to
+  // the list of plugins makes the named module available as a framework.  That
+  // framework then injects the module into the client.
+  var obj = {};
+  obj['framework:' + name] = ['factory', framework];
+  return obj;
+}
