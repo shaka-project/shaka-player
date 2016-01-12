@@ -33,6 +33,12 @@ describe('HttpPlugin', function() {
       'status': 204,
       'responseHeaders': { 'FOO': 'BAR' }
     });
+    jasmine.Ajax.stubRequest('https://foo.bar/302').andReturn({
+      'response': new ArrayBuffer(10),
+      'status': 200,
+      'responseHeaders': { 'FOO': 'BAR' },
+      'responseURL': 'https://foo.bar/after/302'
+    });
     jasmine.Ajax.stubRequest('https://foo.bar/404').andReturn({
       'response': new ArrayBuffer(0),
       'status': 404
@@ -70,6 +76,14 @@ describe('HttpPlugin', function() {
     testSucceeds('https://foo.bar/204', done);
   });
 
+  // Disabled until responseURL patch is accepted in jasmine-ajax.
+  // Until then, we can't mock responseURL.
+  // See jasmine/jasmine-ajax#145
+  xit('gets redirect URLs with 302 status', function(done) {
+    testSucceeds('https://foo.bar/302', done,
+                 'https://foo.bar/after/302');
+  });
+
   it('fails if non-2xx status', function(done) {
     testFails('https://foo.bar/404', done);
   });
@@ -82,13 +96,14 @@ describe('HttpPlugin', function() {
     testFails('https://foo.bar/error', done);
   });
 
-  function testSucceeds(uri, done) {
+  function testSucceeds(uri, done, opt_overrideUri) {
     var request = {uris: [uri]};
     shaka.net.HttpPlugin(uri, request)
         .catch(fail)
         .then(function(response) {
           expect(jasmine.Ajax.requests.mostRecent().url).toBe(uri);
           expect(response).toBeTruthy();
+          expect(response.uri).toBe(opt_overrideUri || uri);
           expect(response.data).toBeTruthy();
           expect(response.data.byteLength).toBe(10);
           expect(response.headers).toBeTruthy();

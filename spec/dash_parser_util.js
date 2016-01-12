@@ -112,14 +112,7 @@ function verifySegmentIndex(manifest, references) {
  */
 function dashTestSegmentIndex(done, manifestText, references) {
   var dummyUri = 'dummy://foo';
-  var buffer = shaka.util.Uint8ArrayUtils.fromString(manifestText).buffer;
-  var fakeNetEngine = {
-    request: function(type, request) {
-      expect(request.uris.length).toBe(1);
-      expect(request.uris[0]).toBe(dummyUri);
-      return Promise.resolve({data: buffer});
-    }
-  };
+  var fakeNetEngine = new dashFakeNetEngine(manifestText);
   var dashParser = new shaka.dash.DashParser(fakeNetEngine, {}, function() {});
   dashParser.start(dummyUri)
       .then(function(manifest) { verifySegmentIndex(manifest, references); })

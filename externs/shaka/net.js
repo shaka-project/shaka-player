@@ -85,6 +85,7 @@ shakaExtern.Request;
 
 /**
  * @typedef {{
+ *   uri: string,
  *   data: ArrayBuffer,
  *   headers: !Object.<string, string>
  * }}
@@ -94,6 +95,9 @@ shakaExtern.Request;
  * This is given back from the scheme plugin.  This is passed to a response
  * filter before being returned from the request call.
  *
+ * @property {string} uri
+ *   The URI which was loaded.  Request filters and server redirects can cause
+ *   this to be different from the original request URIs.
  * @property {ArrayBuffer} data
  *   The body of the response.
  * @property {!Object.<string, string>} headers

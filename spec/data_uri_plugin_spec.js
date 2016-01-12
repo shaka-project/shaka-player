@@ -68,6 +68,7 @@ describe('DataUriPlugin', function() {
     shaka.net.DataUriPlugin(uri, {})
         .then(function(response) {
           expect(response).toBeTruthy();
+          expect(response.uri).toBe(uri);
           expect(response.data).toBeTruthy();
           var array = new Uint8Array(response.data);
           var data = shaka.util.Uint8ArrayUtils.toString(array);

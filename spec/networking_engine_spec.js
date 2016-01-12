@@ -32,7 +32,9 @@ describe('NetworkingEngine', function() {
     networkingEngine = new shaka.net.NetworkingEngine();
     resolveScheme = jasmine.createSpy('resolve scheme').and.callFake(
         function() {
-          return Promise.resolve({data: new ArrayBuffer(5), headers: {}});
+          return Promise.resolve({
+            uri: '', data: new ArrayBuffer(5), headers: {}
+          });
         });
     rejectScheme = jasmine.createSpy('reject scheme')
         .and.callFake(function() { return Promise.reject(); });
@@ -55,7 +57,9 @@ describe('NetworkingEngine', function() {
         if (rejectScheme.calls.count() == 1)
           return Promise.reject();
         else
-          return Promise.resolve({data: new ArrayBuffer(0), headers: {}});
+          return Promise.resolve({
+            uri: '', data: new ArrayBuffer(0), headers: {}
+          });
       });
       networkingEngine.request(requestType, request)
           .catch(fail)
@@ -74,7 +78,9 @@ describe('NetworkingEngine', function() {
         if (rejectScheme.calls.count() < 3)
           return Promise.reject();
         else
-          return Promise.resolve({data: new ArrayBuffer(0), headers: {}});
+          return Promise.resolve({
+            uri: '', data: new ArrayBuffer(0), headers: {}
+          });
       });
       networkingEngine.request(requestType, request)
           .catch(fail)
@@ -336,7 +342,9 @@ describe('NetworkingEngine', function() {
       filter = jasmine.createSpy('response filter');
       networkingEngine.registerResponseFilter(filter);
       resolveScheme.and.callFake(function(request) {
-        var response = {data: new ArrayBuffer(100), headers: {}};
+        var response = {
+          uri: '', data: new ArrayBuffer(100), headers: {}
+        };
         return Promise.resolve(response);
       });
     });
