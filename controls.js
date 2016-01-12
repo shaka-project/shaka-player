@@ -62,6 +62,16 @@ playerControls.init = function(video) {
   var castButton = document.getElementById('castButton');
   var castConnectedButton = document.getElementById('castConnectedButton');
 
+  // IE11 doesn't treat the 'input' event correctly.
+  // https://connect.microsoft.com/IE/Feedback/Details/856998
+  // If you know a better way than a userAgent check to handle this, please
+  // send a patch.
+  var sliderInputEvent = 'input';
+  // This matches IE11, but not Edge.  Edge does not have this problem.
+  if (navigator.userAgent.indexOf('Trident/') >= 0) {
+    sliderInputEvent = 'change';
+  }
+
   playerControls.isLive_ = false;
   playerControls.isSeeking_ = false;
   playerControls.video_ = video;
@@ -144,7 +154,7 @@ playerControls.init = function(video) {
   };
   seekBar.addEventListener('mousedown', onSeekStart);
   seekBar.addEventListener('touchstart', onSeekStart);
-  seekBar.addEventListener('input', onSeekInput);
+  seekBar.addEventListener(sliderInputEvent, onSeekInput);
   seekBar.addEventListener('mouseup', onSeekEnd);
   seekBar.addEventListener('touchend', onSeekEnd);
   // initialize seek bar with 0
@@ -167,7 +177,7 @@ playerControls.init = function(video) {
   });
 
   // volume
-  volumeBar.addEventListener('input', function() {
+  volumeBar.addEventListener(sliderInputEvent, function() {
     if (sender.state == sender.states.CAST_CONNECTED) {
       sender.setVolume(volumeBar.value);
       sender.mute(false);
