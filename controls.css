@@ -265,3 +265,7 @@
   border-radius: 12px;
 }
 
+/* turn off tooltips for the seekBar on IE */
+#seekBar::-ms-tooltip {
+  display: none;
+}
