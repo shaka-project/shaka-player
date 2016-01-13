@@ -42,7 +42,7 @@ module.exports = function(config) {
     browserNoActivityTimeout: 60000,
 
     // don't capture the client's console logs
-    client: { captureConsole: true },
+    client: { captureConsole: false },
 
     // web server port
     port: 9876,
