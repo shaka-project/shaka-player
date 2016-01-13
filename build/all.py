@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/python
 #
-# Copyright 2014 Google Inc.
+# Copyright 2015 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,13 +14,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-dir=$(dirname $0)/..
+import check
+import build
+import gendeps
+import shakaBuildHelpers
 
-set -e
+def main(_):
+  code = gendeps.genDeps([])
+  if code != 0:
+    return code
 
-cd "$dir"
-mkdir -p "$dir"/dist
-python third_party/closure/deps/depswriter.py \
-  --root_with_prefix="lib ../../../lib" \
-  --root_with_prefix="third_party/closure ../../../third_party/closure" \
-  > dist/deps.js
+  code = check.main([])
+  if code != 0:
+    return code
+
+  return build.main(['--name', 'compiled', '+@complete'])
+
+if __name__ == '__main__':
+  shakaBuildHelpers.runMain(main)

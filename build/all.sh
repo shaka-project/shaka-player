@@ -17,8 +17,4 @@
 dir=$(dirname $0)/..
 
 set -e
-
-"$dir"/build/gendeps.sh
-"$dir"/build/lint.sh
-"$dir"/build/check.py
-"$dir"/build/build.py --name compiled +@complete
+"$dir"/build/all.py

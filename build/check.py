@@ -18,13 +18,41 @@
 
 This checks:
  * All files in lib/ appear when compiling +@complete
- * Runs a compiler pass over the test code to check for type errors"""
+ * Runs a compiler pass over the test code to check for type errors
+ * Run the linter to check for style violations."""
 
 import build
 import os
 import re
 import shakaBuildHelpers
+import subprocess
 import sys
+
+def getLintFiles():
+  """Returns an array of absolute paths to all the files to run the linter
+  over.
+  """
+  match = re.compile(r'.*\.js$')
+  base = shakaBuildHelpers.getSourceBase()
+  def get(arg):
+    return shakaBuildHelpers.getAllFiles(os.path.join(base, arg), match)
+  return get('test') + get('lib') + get('externs')
+
+def checkLint():
+  """Runs the linter over the library files."""
+  jsdoc3_tags = ','.join([
+      'static', 'summary', 'namespace', 'event', 'description', 'property',
+      'fires', 'listens', 'example', 'exportDoc'])
+  args = ['--nobeep', '--custom_jsdoc_tags', jsdoc3_tags, '--strict']
+  base = shakaBuildHelpers.getSourceBase()
+  cmd = os.path.join(base, 'third_party', 'gjslint', 'gjslint')
+
+  # Even though this is python, don't import and execute since gjslint expects
+  # command-line arguments using argv.  Have to explicitly execute python so
+  # it works on Windows.
+  cmdLine = ['python', cmd] + args + getLintFiles()
+  shakaBuildHelpers.printCmdLine(cmdLine)
+  return (subprocess.call(cmdLine) == 0)
 
 def checkComplete():
   """Checks whether the 'complete' build references every file.  This is used
@@ -88,7 +116,10 @@ def main(args):
       print >> sys.stderr, 'Unknown option', arg
       usage()
       return 1
-  if not checkComplete():
+
+  if not checkLint():
+    return 1
+  elif not checkComplete():
     return 1
   elif not checkTests():
     return 1

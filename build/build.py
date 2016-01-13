@@ -68,7 +68,7 @@ closure_opts = [
   '-O', 'ADVANCED',
   '--generate_exports',
   '--output_wrapper_file=%s/build/wrapper.template.js' % \
-      shakaBuildHelpers.getSourceBase(),
+      shakaBuildHelpers.cygwinSafePath(shakaBuildHelpers.getSourceBase()),
 
   '-D', 'COMPILED=true',
   '-D', 'goog.DEBUG=false',
@@ -223,10 +223,13 @@ class Build:
     """
     jar = os.path.join(shakaBuildHelpers.getSourceBase(),
         'third_party', 'closure', 'compiler.jar')
+    jar = shakaBuildHelpers.cygwinSafePath(jar)
+    files = map(shakaBuildHelpers.cygwinSafePath, list(self.include))
+
     try:
-      subprocess.check_call(
-          ['java', '-jar', jar] + closure_opts + extra_opts +
-              list(self.include))
+      cmdLine = ['java', '-jar', jar] + closure_opts + extra_opts + files
+      shakaBuildHelpers.printCmdLine(cmdLine)
+      subprocess.check_call(cmdLine)
       return True
     except subprocess.CalledProcessError:
       print >> sys.stderr, 'Build failed'
@@ -244,7 +247,8 @@ class Build:
     self._addCore()
 
     sourceBase = shakaBuildHelpers.getSourceBase()
-    resultPrefix = os.path.join(sourceBase, 'dist', 'shaka-player.' + name)
+    resultPrefix = shakaBuildHelpers.cygwinSafePath(
+        os.path.join(sourceBase, 'dist', 'shaka-player.' + name))
     resultFile = resultPrefix + '.js'
     resultDebug = resultPrefix + '.debug.js'
     resultMap = resultPrefix + '.debug.map'
