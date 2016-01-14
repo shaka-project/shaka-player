@@ -147,7 +147,9 @@ describe('mpd.BaseUrl', function() {
       '</MPD>'].join('\n');
     var mpdUrl = 'http://example.com/dash/test.mpd';
 
-    var mpd = shaka.dash.mpd.parseMpd(source, createFailover(mpdUrl).urls);
+    var mpd = shaka.dash.mpd.parseMpd(source,
+        createFailover(mpdUrl).urls,
+        createFailover(mpdUrl).urls);
     expect(mpd).toBeTruthy();
     expect(mpd.baseUrl.toString()).toBe(mpdUrl);
     expect(mpd.periods.length).toBe(1);
