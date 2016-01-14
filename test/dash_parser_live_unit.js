@@ -27,6 +27,14 @@ describe('DashParser.Live', function() {
   var updateTime = 5;
   var Util;
 
+  beforeEach(function() {
+    fakeNetEngine = new shaka.test.FakeNetworkingEngine();
+    newPeriod = jasmine.createSpy('newPeriod');
+    errorCallback = jasmine.createSpy('error callback');
+    parser = new shaka.dash.DashParser(
+        fakeNetEngine, {}, newPeriod, errorCallback);
+  });
+
   beforeAll(function() {
     Dash = shaka.test.Dash;
     Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
@@ -38,27 +46,15 @@ describe('DashParser.Live', function() {
     oldNow = Date.now;
   });
 
-  beforeEach(function() {
-    fakeNetEngine = { request: jasmine.createSpy('request') };
-    newPeriod = jasmine.createSpy('newPeriod');
-    errorCallback = jasmine.createSpy('error callback');
-    parser = new shaka.dash.DashParser(
-        fakeNetEngine, {}, newPeriod, errorCallback);
+  afterEach(function() {
+    // Dash parser stop is synchronous.
+    parser.stop();
   });
 
   afterAll(function() {
     jasmine.clock().uninstall();
     Date.now = oldNow;
   });
-
-  /**
-   * Sets the return value of the fake networking engine.
-   *
-   * @param {!ArrayBuffer} data
-   */
-  function setNetEngineReturnValue(data) {
-    fakeNetEngine.request.and.returnValue(Promise.resolve({data: data}));
-  }
 
   /**
    * Returns a promise that waits until manifest updates.
@@ -78,7 +74,7 @@ describe('DashParser.Live', function() {
    * @param {!Array.<string>} lines
    * @param {number} updatePeriod
    * @param {number=} opt_duration
-   * @return {!ArrayBuffer}
+   * @return {string}
    */
   function makeSimpleLiveManifestText(lines, updatePeriod, opt_duration) {
     var attr = opt_duration ? 'duration="PT' + opt_duration + 'S"' : '';
@@ -99,7 +95,7 @@ describe('DashParser.Live', function() {
       contents: lines.join('\n'),
       updatePeriod: updatePeriod
     });
-    return Uint8ArrayUtils.fromString(text).buffer;
+    return text;
   }
 
   /**
@@ -132,12 +128,12 @@ describe('DashParser.Live', function() {
       var firstManifest = makeSimpleLiveManifestText(firstLines, updateTime);
       var secondManifest = makeSimpleLiveManifestText(secondLines, updateTime);
 
-      setNetEngineReturnValue(firstManifest);
-      parser.start('')
+      fakeNetEngine.setResponseMapAsText({'dummy://foo': firstManifest});
+      parser.start('dummy://foo')
           .then(function(manifest) {
             Dash.verifySegmentIndex(manifest, firstReferences);
 
-            setNetEngineReturnValue(secondManifest);
+            fakeNetEngine.setResponseMapAsText({'dummy://foo': secondManifest});
             return waitForManifestUpdate().then(function() {
               Dash.verifySegmentIndex(manifest, secondReferences);
             });
@@ -172,11 +168,10 @@ describe('DashParser.Live', function() {
       ].join('\n');
       var text = sprintf(
           template, {updateTime: updateTime, contents: basicLines.join('\n')});
-      var manifest = Uint8ArrayUtils.fromString(text).buffer;
 
-      setNetEngineReturnValue(manifest);
+      fakeNetEngine.setResponseMapAsText({'dummy://foo': text});
       Date.now = function() { return 0; };
-      parser.start('')
+      parser.start('dummy://foo')
           .then(function(manifest) {
             expect(manifest).toBeTruthy();
             var stream = manifest.periods[0].streamSets[0].streams[0];
@@ -216,18 +211,17 @@ describe('DashParser.Live', function() {
       '  </Period>',
       '</MPD>'
     ].join('\n');
-    var text =
+    var secondManifest =
         sprintf(template, {updateTime: updateTime, contents: lines.join('\n')});
     var firstManifest = makeSimpleLiveManifestText(lines, updateTime);
-    var secondManifest = Uint8ArrayUtils.fromString(text).buffer;
 
-    setNetEngineReturnValue(firstManifest);
-    parser.start('')
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': firstManifest});
+    parser.start('dummy://foo')
         .then(function(manifest) {
           expect(manifest.periods.length).toBe(1);
           expect(newPeriod.calls.count()).toBe(1);
 
-          setNetEngineReturnValue(secondManifest);
+          fakeNetEngine.setResponseMapAsText({'dummy://foo': secondManifest});
           return waitForManifestUpdate().then(function() {
             // Should update the same manifest object.
             expect(manifest.periods.length).toBe(2);
@@ -307,8 +301,8 @@ describe('DashParser.Live', function() {
     ];
     var manifest = makeSimpleLiveManifestText(lines, updateTime);
 
-    setNetEngineReturnValue(manifest);
-    parser.start('')
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifest});
+    parser.start('dummy://foo')
         .then(function(manifest) {
           expect(fakeNetEngine.request.calls.count()).toBe(1);
 
@@ -332,8 +326,8 @@ describe('DashParser.Live', function() {
     ];
     var manifest = makeSimpleLiveManifestText(lines, updateTime);
 
-    setNetEngineReturnValue(manifest);
-    parser.start('')
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifest});
+    parser.start('dummy://foo')
         .then(function(manifest) {
           expect(fakeNetEngine.request.calls.count()).toBe(1);
 
@@ -353,8 +347,8 @@ describe('DashParser.Live', function() {
     // updateTime parameter sets @minimumUpdatePeriod in the manifest.
     var manifest = makeSimpleLiveManifestText(lines, updateTime);
 
-    setNetEngineReturnValue(manifest);
-    parser.start('')
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifest});
+    parser.start('dummy://foo')
         .then(function(manifest) {
           expect(fakeNetEngine.request.calls.count()).toBe(1);
           expect(manifest).toBeTruthy();

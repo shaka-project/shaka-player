@@ -17,9 +17,17 @@
 
 describe('DashParser.SegmentBase', function() {
   var Dash;
+  var fakeNetEngine;
+  var parser;
 
   beforeAll(function() {
     Dash = shaka.test.Dash;
+  });
+
+  beforeEach(function() {
+    fakeNetEngine = new shaka.test.FakeNetworkingEngine();
+    parser = new shaka.dash.DashParser(
+        fakeNetEngine, {}, function() {}, function() {});
   });
 
   it('requests init data for WebM', function(done) {
@@ -36,19 +44,23 @@ describe('DashParser.SegmentBase', function() {
       '    </AdaptationSet>',
       '  </Period>',
       '</MPD>'].join('\n');
-    var engine = new dashFakeNetEngine(source);
-    var parser = new shaka.dash.DashParser(engine, {}, function() {});
 
-    parser.start('')
+    fakeNetEngine.setResponseMapAsText({
+      'dummy://foo': source,
+      'http://example.com': '',
+      'http://example.com/init.webm': ''
+    });
+    parser.start('dummy://foo')
         .then(function(manifest) {
           expect(manifest).toEqual(
               Dash.makeManifestFromInit('init.webm', 201, 300));
           return Dash.callCreateSegmentIndex(manifest);
         })
         .then(function() {
-          expect(engine.request.calls.count()).toBe(3);
-          engine.expectRangeRequest('http://example.com', 100, 200);
-          engine.expectRangeRequest('http://example.com/init.webm', 201, 300);
+          expect(fakeNetEngine.request.calls.count()).toBe(3);
+          fakeNetEngine.expectRangeRequest('http://example.com', 100, 200);
+          fakeNetEngine.expectRangeRequest(
+              'http://example.com/init.webm', 201, 300);
         })
         .catch(fail)
         .then(done);
@@ -67,18 +79,20 @@ describe('DashParser.SegmentBase', function() {
       '    </AdaptationSet>',
       '  </Period>',
       '</MPD>'].join('\n');
-    var engine = new dashFakeNetEngine(source);
-    var parser = new shaka.dash.DashParser(engine, {}, function() {});
 
-    parser.start('')
+    fakeNetEngine.setResponseMapAsText({
+      'dummy://foo': source,
+      'http://example.com': ''
+    });
+    parser.start('dummy://foo')
         .then(function(manifest) {
           expect(manifest).toEqual(
               Dash.makeManifestFromInit('init.mp4', 201, 300));
           return Dash.callCreateSegmentIndex(manifest);
         })
         .then(function() {
-          expect(engine.request.calls.count()).toBe(2);
-          engine.expectRangeRequest('http://example.com', 100, 200);
+          expect(fakeNetEngine.request.calls.count()).toBe(2);
+          fakeNetEngine.expectRangeRequest('http://example.com', 100, 200);
         })
         .catch(fail)
         .then(done);
@@ -97,18 +111,20 @@ describe('DashParser.SegmentBase', function() {
       '    </AdaptationSet>',
       '  </Period>',
       '</MPD>'].join('\n');
-    var engine = new dashFakeNetEngine(source);
-    var parser = new shaka.dash.DashParser(engine, {}, function() {});
 
-    parser.start('')
+    fakeNetEngine.setResponseMapAsText({
+      'dummy://foo': source,
+      'http://example.com': ''
+    });
+    parser.start('dummy://foo')
         .then(function(manifest) {
           expect(manifest).toEqual(
               Dash.makeManifestFromInit('init.mp4', 201, 300));
           return Dash.callCreateSegmentIndex(manifest);
         })
         .then(function() {
-          expect(engine.request.calls.count()).toBe(2);
-          engine.expectRangeRequest('http://example.com', 100, 200);
+          expect(fakeNetEngine.request.calls.count()).toBe(2);
+          fakeNetEngine.expectRangeRequest('http://example.com', 100, 200);
         })
         .catch(fail)
         .then(done);
@@ -134,18 +150,21 @@ describe('DashParser.SegmentBase', function() {
       '    </AdaptationSet>',
       '  </Period>',
       '</MPD>'].join('\n');
-    var engine = new dashFakeNetEngine(source);
-    var parser = new shaka.dash.DashParser(engine, {}, function() {});
 
-    parser.start('')
+    fakeNetEngine.setResponseMapAsText({
+      'dummy://foo': source,
+      'http://example.com/index.mp4': ''
+    });
+    parser.start('dummy://foo')
         .then(function(manifest) {
           expect(manifest).toEqual(
               Dash.makeManifestFromInit('init.mp4', 201, 300, 10));
           return Dash.callCreateSegmentIndex(manifest);
         })
         .then(function() {
-          expect(engine.request.calls.count()).toBe(2);
-          engine.expectRangeRequest('http://example.com/index.mp4', 5, 2000);
+          expect(fakeNetEngine.request.calls.count()).toBe(2);
+          fakeNetEngine.expectRangeRequest(
+              'http://example.com/index.mp4', 5, 2000);
         })
         .catch(fail)
         .then(done);
@@ -169,18 +188,20 @@ describe('DashParser.SegmentBase', function() {
       '    </AdaptationSet>',
       '  </Period>',
       '</MPD>'].join('\n');
-    var engine = new dashFakeNetEngine(source);
-    var parser = new shaka.dash.DashParser(engine, {}, function() {});
 
-    parser.start('')
+    fakeNetEngine.setResponseMapAsText({
+      'dummy://foo': source,
+      'http://example.com': ''
+    });
+    parser.start('dummy://foo')
         .then(function(manifest) {
           expect(manifest).toEqual(
               Dash.makeManifestFromInit('special.mp4', 0, null, 20));
           return Dash.callCreateSegmentIndex(manifest);
         })
         .then(function() {
-          expect(engine.request.calls.count()).toBe(2);
-          engine.expectRangeRequest('http://example.com', 30, 900);
+          expect(fakeNetEngine.request.calls.count()).toBe(2);
+          fakeNetEngine.expectRangeRequest('http://example.com', 30, 900);
         })
         .catch(fail)
         .then(done);

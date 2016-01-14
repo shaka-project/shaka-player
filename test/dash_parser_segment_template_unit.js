@@ -17,9 +17,17 @@
 
 describe('DashParser.SegmentTemplate', function() {
   var Dash;
+  var fakeNetEngine;
+  var parser;
 
   beforeAll(function() {
     Dash = shaka.test.Dash;
+  });
+
+  beforeEach(function() {
+    fakeNetEngine = new shaka.test.FakeNetworkingEngine();
+    parser = new shaka.dash.DashParser(
+        fakeNetEngine, {}, function() {}, function() {});
   });
 
   shaka.test.Dash.makeTimelineTests(
@@ -62,18 +70,20 @@ describe('DashParser.SegmentTemplate', function() {
         '<SegmentTemplate startNumber="1" index="index-$Bandwidth$.mp4"',
         '    initialization="init-$Bandwidth$.mp4" />'
       ]);
-      var engine = new dashFakeNetEngine(source);
-      var parser = new shaka.dash.DashParser(engine, {}, function() {});
 
-      parser.start('')
+      fakeNetEngine.setResponseMapAsText({
+        'dummy://foo': source,
+        'http://example.com/index-500.mp4': ''
+      });
+      parser.start('dummy://foo')
           .then(function(manifest) {
             expect(manifest).toEqual(
                 Dash.makeManifestFromInit('init-500.mp4', 0, null));
             return Dash.callCreateSegmentIndex(manifest);
           })
           .then(function() {
-            expect(engine.request.calls.count()).toBe(2);
-            engine.expectRangeRequest(
+            expect(fakeNetEngine.request.calls.count()).toBe(2);
+            fakeNetEngine.expectRangeRequest(
                 'http://example.com/index-500.mp4', 0, null);
           })
           .catch(fail)
@@ -89,18 +99,20 @@ describe('DashParser.SegmentTemplate', function() {
         '  </SegmentTimeline>',
         '</SegmentTemplate>'
       ]);
-      var engine = new dashFakeNetEngine(source);
-      var parser = new shaka.dash.DashParser(engine, {}, function() {});
 
-      parser.start('')
+      fakeNetEngine.setResponseMapAsText({
+        'dummy://foo': source,
+        'http://example.com/index-500.mp4': ''
+      });
+      parser.start('dummy://foo')
           .then(function(manifest) {
             expect(manifest).toEqual(
                 Dash.makeManifestFromInit('init-500.mp4', 0, null));
             return Dash.callCreateSegmentIndex(manifest);
           })
           .then(function() {
-            expect(engine.request.calls.count()).toBe(2);
-            engine.expectRangeRequest(
+            expect(fakeNetEngine.request.calls.count()).toBe(2);
+            fakeNetEngine.expectRangeRequest(
                 'http://example.com/index-500.mp4', 0, null);
           })
           .catch(fail)
@@ -122,20 +134,23 @@ describe('DashParser.SegmentTemplate', function() {
         '  </Period>',
         '</MPD>'
       ].join('\n');
-      var engine = new dashFakeNetEngine(source);
-      var parser = new shaka.dash.DashParser(engine, {}, function() {});
 
-      parser.start('')
+      fakeNetEngine.setResponseMapAsText({
+        'dummy://foo': source,
+        'http://example.com/index-500.webm': '',
+        'http://example.com/init-500.webm': ''
+      });
+      parser.start('dummy://foo')
           .then(function(manifest) {
             expect(manifest).toEqual(
                 Dash.makeManifestFromInit('init-500.webm', 0, null));
             return Dash.callCreateSegmentIndex(manifest);
           })
           .then(function() {
-            expect(engine.request.calls.count()).toBe(3);
-            engine.expectRangeRequest(
+            expect(fakeNetEngine.request.calls.count()).toBe(3);
+            fakeNetEngine.expectRangeRequest(
                 'http://example.com/init-500.webm', 0, null);
-            engine.expectRangeRequest(
+            fakeNetEngine.expectRangeRequest(
                 'http://example.com/index-500.webm', 0, null);
           })
           .catch(fail)
@@ -155,18 +170,20 @@ describe('DashParser.SegmentTemplate', function() {
         '  </Period>',
         '</MPD>'
       ].join('\n');
-      var engine = new dashFakeNetEngine(source);
-      var parser = new shaka.dash.DashParser(engine, {}, function() {});
 
-      parser.start('')
+      fakeNetEngine.setResponseMapAsText({
+        'dummy://foo': source,
+        'http://example.com/index-500.mp4': ''
+      });
+      parser.start('dummy://foo')
           .then(function(manifest) {
             expect(manifest).toEqual(
                 Dash.makeManifestFromInit('init-500.mp4', 0, null));
             return Dash.callCreateSegmentIndex(manifest);
           })
           .then(function() {
-            expect(engine.request.calls.count()).toBe(2);
-            engine.expectRangeRequest(
+            expect(fakeNetEngine.request.calls.count()).toBe(2);
+            fakeNetEngine.expectRangeRequest(
                 'http://example.com/index-500.mp4', 0, null);
           })
           .catch(fail)
@@ -186,18 +203,20 @@ describe('DashParser.SegmentTemplate', function() {
         '  </Period>',
         '</MPD>'
       ].join('\n');
-      var engine = new dashFakeNetEngine(source);
-      var parser = new shaka.dash.DashParser(engine, {}, function() {});
 
-      parser.start('')
+      fakeNetEngine.setResponseMapAsText({
+        'dummy://foo': source,
+        'http://example.com/index-500.mp4': ''
+      });
+      parser.start('dummy://foo')
           .then(function(manifest) {
             expect(manifest).toEqual(
                 Dash.makeManifestFromInit('init-500.mp4', 0, null));
             return Dash.callCreateSegmentIndex(manifest);
           })
           .then(function() {
-            expect(engine.request.calls.count()).toBe(2);
-            engine.expectRangeRequest(
+            expect(fakeNetEngine.request.calls.count()).toBe(2);
+            fakeNetEngine.expectRangeRequest(
                 'http://example.com/index-500.mp4', 0, null);
           })
           .catch(fail)
@@ -290,13 +309,9 @@ describe('DashParser.SegmentTemplate', function() {
         '  </Period>',
         '</MPD>'
       ].join('\n');
-      var buffer = shaka.util.Uint8ArrayUtils.fromString(source).buffer;
-      var fakeNetEngine = {
-        request: function() { return Promise.resolve({data: buffer}); }
-      };
-      var dashParser =
-          new shaka.dash.DashParser(fakeNetEngine, {}, function() {});
-      dashParser.start('').then(function(actual) {
+
+      fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+      parser.start('dummy://foo').then(function(actual) {
         expect(actual).toBeTruthy();
 
         var streamSet = actual.periods[0].streamSets[0];

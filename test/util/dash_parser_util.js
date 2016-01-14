@@ -18,56 +18,6 @@
 goog.provide('shaka.test.Dash');
 
 
-
-/**
- * A helper test type used to fake networking requests and check the correct
- * requests are made.
- *
- * @param {string} text The data to be returned on each request.
- *
- * @constructor
- * @struct
- * @extends {shaka.net.NetworkingEngine}
- * @suppress {missingProvide}
- */
-function dashFakeNetEngine(text) {
-  var data = shaka.util.Uint8ArrayUtils.fromString(text).buffer;
-  var request = jasmine.createSpy('request').and.callFake(function() {
-    return Promise.resolve({headers: {}, data: data});
-  });
-
-  return {
-    // Since we are returning an object, the prototype will not be applied.
-    expectRangeRequest: dashFakeNetEngine.prototype.expectRangeRequest,
-    request: request
-  };
-}
-
-
-/**
- * Expects that a request for the given URI has occurred.  This is a prototype
- * method to work with the compiler.  Manually added to the object in the
- * constructor.
- *
- * @param {string} uri
- * @param {number} startByte
- * @param {?number} endByte
- */
-dashFakeNetEngine.prototype.expectRangeRequest = function(
-    uri, startByte, endByte) {
-  var range = 'bytes=' + startByte + '-';
-  if (endByte != null) range += endByte;
-
-  expect(this.request)
-      .toHaveBeenCalledWith(
-          shaka.net.NetworkingEngine.RequestType.SEGMENT,
-          jasmine.objectContaining({
-            uris: [uri],
-            headers: jasmine.objectContaining({'Range': range})
-          }));
-};
-
-
 /**
  * Verifies the segment references in a manifest.
  *
@@ -109,10 +59,11 @@ shaka.test.Dash.verifySegmentIndex = function(manifest, references) {
  */
 shaka.test.Dash.testSegmentIndex =
     function(done, manifestText, references) {
-  var dummyUri = 'dummy://foo';
-  var fakeNetEngine = new dashFakeNetEngine(manifestText);
+  var buffer = shaka.util.Uint8ArrayUtils.fromString(manifestText).buffer;
+  var fakeNetEngine =
+      new shaka.test.FakeNetworkingEngine({'dummy://foo': buffer});
   var dashParser = new shaka.dash.DashParser(fakeNetEngine, {}, function() {});
-  dashParser.start(dummyUri)
+  dashParser.start('dummy://foo')
       .then(function(manifest) {
         shaka.test.Dash.verifySegmentIndex(manifest, references);
       })
@@ -129,10 +80,12 @@ shaka.test.Dash.testSegmentIndex =
  * @param {!shaka.util.Error} expectedError
  */
 shaka.test.Dash.testFails = function(done, manifestText, expectedError) {
-  var fakeNetEngine = new dashFakeNetEngine(manifestText);
+  var manifestData = shaka.util.Uint8ArrayUtils.fromString(manifestText).buffer;
+  var fakeNetEngine =
+      new shaka.test.FakeNetworkingEngine({'dummy://foo': manifestData});
   var dashParser = new shaka.dash.DashParser(fakeNetEngine, {}, function() {});
   shaka.log.setLevel(shaka.log.Level.NONE);
-  dashParser.start('')
+  dashParser.start('dummy://foo')
       .then(fail)
       .catch(function(error) { expect(error).toEqual(expectedError); })
       .then(function() { shaka.log.setLevel(shaka.log.MAX_LEVEL); })

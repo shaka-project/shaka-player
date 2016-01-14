@@ -22,7 +22,7 @@ describe('DashParser.Manifest', function() {
   var parser;
 
   beforeEach(function() {
-    fakeNetEngine = {request: jasmine.createSpy('request')};
+    fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = new shaka.dash.DashParser(
         fakeNetEngine, {}, function() {}, function() {});
   });
@@ -30,17 +30,6 @@ describe('DashParser.Manifest', function() {
   beforeAll(function() {
     Dash = shaka.test.Dash;
   });
-
-  /**
-   * Sets the return value of the fake networking engine.
-   *
-   * @param {string} value
-   */
-  function setNetEngineReturnValue(value) {
-    var data = shaka.util.Uint8ArrayUtils.fromString(value).buffer;
-    var promise = Promise.resolve({data: data});
-    fakeNetEngine.request.and.returnValue(promise);
-  }
 
   /**
    * Makes a series of tests for the given manifest type.
@@ -67,9 +56,8 @@ describe('DashParser.Manifest', function() {
      * @param {string} manifestText
      */
     function testDashParser(done, manifestText) {
-      var netEngine = new dashFakeNetEngine(manifestText);
-      var dashParser = new shaka.dash.DashParser(netEngine, {}, function() {});
-      dashParser.start('dummy://foo')
+      fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
+      parser.start('dummy://foo')
           .then(function(actual) { expect(actual).toEqual(expected); })
           .catch(fail)
           .then(done);
@@ -392,8 +380,8 @@ describe('DashParser.Manifest', function() {
     ].join('\n');
     var source = sprintf(template, {periodContents: periodContents});
 
-    setNetEngineReturnValue(source);
-    parser.start('')
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+    parser.start('dummy://foo')
         .then(function(manifest) {
           expect(manifest.periods.length).toBe(1);
         })
@@ -426,8 +414,8 @@ describe('DashParser.Manifest', function() {
     ].join('\n');
     var source = sprintf(template, {periodContents: periodContents});
 
-    setNetEngineReturnValue(source);
-    parser.start('')
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+    parser.start('dummy://foo')
         .then(function(manifest) {
           expect(manifest.periods.length).toBe(3);
           expect(manifest.periods[0].startTime).toBe(10);
@@ -449,8 +437,8 @@ describe('DashParser.Manifest', function() {
       '</SegmentList>'
     ]);
 
-    setNetEngineReturnValue(source);
-    parser.start('')
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+    parser.start('dummy://foo')
         .then(function(manifest) {
           var stream = manifest.periods[0].streamSets[0].streams[0];
           expect(stream.presentationTimeOffset).toBe(1);
@@ -474,8 +462,8 @@ describe('DashParser.Manifest', function() {
       '</SegmentTemplate>'
     ]);
 
-    setNetEngineReturnValue(source);
-    parser.start('')
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+    parser.start('dummy://foo')
         .then(function(manifest) {
           var stream = manifest.periods[0].streamSets[0].streams[0];
           expect(stream.presentationTimeOffset).toBe(2);
@@ -496,14 +484,9 @@ describe('DashParser.Manifest', function() {
     it('failed network requests', function(done) {
       var expectedError = new shaka.util.Error(
           shaka.util.Error.Category.NETWORK, shaka.util.Error.Code.HTTP_STATUS);
-      var promise = Promise.reject(expectedError);
-      var fakeNetEngine = {
-        request: jasmine.createSpy('request').and.returnValue(promise)
-      };
 
-      var dashParser =
-          new shaka.dash.DashParser(fakeNetEngine, {}, function() {});
-      dashParser.start('')
+      fakeNetEngine.request.and.returnValue(Promise.reject(expectedError));
+      parser.start('')
           .then(fail)
           .catch(function(error) { expect(error).toEqual(expectedError); })
           .then(done);
