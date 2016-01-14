@@ -550,8 +550,9 @@ describe('mpd', function() {
       '  <Location>updated_mpd</Location>',
       '</MPD>'].join('\n');
 
-    var mpd = shaka.dash.mpd.parseMpd(source, createFailover(
-        'http://example.com/mpd').urls);
+    var mpd = shaka.dash.mpd.parseMpd(source,
+        createFailover('http://example.com/mpd').urls,
+        createFailover('http://example.com/mpd').urls);
     expect(mpd.updateLocation.toString()).toBe(
         'http://example.com/updated_mpd');
   });
