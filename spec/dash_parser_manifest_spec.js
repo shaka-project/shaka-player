@@ -144,6 +144,7 @@ describe('DashParser.Manifest', function() {
                   language: 'en',
                   type: 'video',
                   primary: false,
+                  drmInfos: [],
                   streams: [
                     jasmine.objectContaining({
                       id: 1,
@@ -179,6 +180,7 @@ describe('DashParser.Manifest', function() {
                   language: 'es',
                   type: 'text',
                   primary: false,
+                  drmInfos: [],
                   streams: [
                     jasmine.objectContaining({
                       id: 3,
@@ -199,6 +201,7 @@ describe('DashParser.Manifest', function() {
                   language: '',
                   type: 'audio',
                   primary: true,
+                  drmInfos: [],
                   streams: [
                     jasmine.objectContaining({
                       id: 4,
@@ -241,6 +244,7 @@ describe('DashParser.Manifest', function() {
             language: 'en',
             type: 'video',
             primary: false,
+            drmInfos: [],
             streams: [
               jasmine.objectContaining({bandwidth: 100}),
               jasmine.objectContaining({bandwidth: 200})
@@ -271,6 +275,7 @@ describe('DashParser.Manifest', function() {
             language: 'en',
             type: 'video',
             primary: false,
+            drmInfos: [],
             streams: [
               jasmine.objectContaining({bandwidth: 100})
             ]
@@ -279,6 +284,7 @@ describe('DashParser.Manifest', function() {
             language: 'en',
             type: 'video',
             primary: false,
+            drmInfos: [],
             streams: [
               jasmine.objectContaining({bandwidth: 200})
             ]
@@ -308,6 +314,7 @@ describe('DashParser.Manifest', function() {
             language: 'en',
             type: 'video',
             primary: false,
+            drmInfos: [],
             streams: [
               jasmine.objectContaining({bandwidth: 100})
             ]
@@ -316,6 +323,7 @@ describe('DashParser.Manifest', function() {
             language: 'es',
             type: 'video',
             primary: false,
+            drmInfos: [],
             streams: [
               jasmine.objectContaining({bandwidth: 200})
             ]
@@ -345,6 +353,7 @@ describe('DashParser.Manifest', function() {
             language: 'en',
             type: 'video',
             primary: false,
+            drmInfos: [],
             streams: [
               jasmine.objectContaining({bandwidth: 100})
             ]
@@ -353,6 +362,7 @@ describe('DashParser.Manifest', function() {
             language: 'en',
             type: 'audio',
             primary: false,
+            drmInfos: [],
             streams: [
               jasmine.objectContaining({bandwidth: 200})
             ]
