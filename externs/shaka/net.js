@@ -102,6 +102,7 @@ shakaExtern.Request;
  *   The body of the response.
  * @property {!Object.<string, string>} headers
  *   A map of response headers, if supported by the underlying protocol.
+ *   All keys should be lowercased.
  *   For HTTP/HTTPS, may not be available cross-origin.
  *
  * @exportDoc

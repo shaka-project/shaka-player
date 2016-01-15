@@ -107,7 +107,8 @@ describe('HttpPlugin', function() {
           expect(response.data).toBeTruthy();
           expect(response.data.byteLength).toBe(10);
           expect(response.headers).toBeTruthy();
-          expect(response.headers['FOO']).toBe('BAR');
+          // Returned header names are in lowercase.
+          expect(response.headers['foo']).toBe('BAR');
         })
         .then(done);
   }
