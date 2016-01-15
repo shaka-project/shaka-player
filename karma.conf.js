@@ -27,19 +27,19 @@ module.exports = function(config) {
       'dist/deps.js',
 
       // test utils next
-      'spec/*util.js',
+      'test/*util.js',
 
       // actual tests last
-      'spec/*.js',
+      'test/*.js',
 
       // source files - these are only watched and served
       {pattern: 'lib/**/*.js', included: false},
-      {pattern: 'spec/assets/*', included: false},
+      {pattern: 'test/assets/*', included: false},
       {pattern: 'third_party/closure/goog/**/*.js', included: false},
     ],
 
     proxies: {
-      '/spec/assets/': '/base/spec/assets/',
+      '/test/assets/': '/base/test/assets/',
     },
 
     preprocessors: {

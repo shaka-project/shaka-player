@@ -20,9 +20,9 @@ goog.require('shaka.media.MediaSourceEngine');
 describe('MediaSourceEngine', function() {
   var metadata = {
     video: {
-      initSegmentUri: 'spec/assets/sintel-video-init.mp4',
+      initSegmentUri: 'test/assets/sintel-video-init.mp4',
       mvhdOffset: 0x24,
-      segmentUri: 'spec/assets/sintel-video-segment.mp4',
+      segmentUri: 'test/assets/sintel-video-segment.mp4',
       tfdtOffset: 0x34,
       segmentDuration: 12,
       presentationTimeOffset: 0,
@@ -30,9 +30,9 @@ describe('MediaSourceEngine', function() {
       generator: null
     },
     audio: {
-      initSegmentUri: 'spec/assets/sintel-audio-init.mp4',
+      initSegmentUri: 'test/assets/sintel-audio-init.mp4',
       mvhdOffset: 0x20,
-      segmentUri: 'spec/assets/sintel-audio-segment.mp4',
+      segmentUri: 'test/assets/sintel-audio-segment.mp4',
       tfdtOffset: 0x38,
       segmentDuration: 10.005333,
       presentationTimeOffset: 0,

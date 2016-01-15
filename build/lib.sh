@@ -71,7 +71,7 @@ function library_sources_0() {
 
 function test_sources_0() {
   find \
-    "$dir"/spec \
+    "$dir"/test \
     -name '*.js' -print0
 }
 
