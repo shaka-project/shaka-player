@@ -315,9 +315,10 @@ shakaExtern.GetSegmentReferenceFunction;
  *   The kind of text stream.  For example, 'captions' or 'subtitles'.
  *   @see https://goo.gl/k1HWA6
  * @property {!Array.<string>} keyIds
- *   <i>Defaults to [] (i.e., unencrypted / unknown).</i> <br>
- *   The stream's key IDs as hex strings. These key IDs identify the encryption
- *   keys that the browser (key system) can use to decrypt the stream.
+ *   <i>Defaults to [] (i.e., unencrypted or key IDs unknown).</i> <br>
+ *   The stream's key IDs as lowercase hex strings. These key IDs identify the
+ *   encryption keys that the browser (key system) can use to decrypt the
+ *   stream.
  *
  * @exportDoc
  */

@@ -136,7 +136,7 @@ shaka.test.FakeNetworkingEngine.prototype.setDefaultValue = function(
 shaka.test.FakeNetworkingEngine.prototype.setDefaultText = function(
     defaultText) {
   var data = null;
-  if (value) {
+  if (defaultText) {
     data = shaka.util.Uint8ArrayUtils.fromString(defaultText).buffer;
   }
   this.defaultResponse_ = data;
