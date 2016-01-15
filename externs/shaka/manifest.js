@@ -129,7 +129,8 @@ shakaExtern.InitDataOverride;
  *   licenseServerUri: string,
  *   distinctiveIdentifierRequired: boolean,
  *   persistentStateRequired: boolean,
- *   robustness: string,
+ *   audioRobustness: string,
+ *   videoRobustness: string,
  *   serverCertificate: Uint8Array,
  *   initData: Array.<!shakaExtern.InitDataOverride>
  * }}
@@ -141,22 +142,27 @@ shakaExtern.InitDataOverride;
  *   <i>Required.</i> <br>
  *   The key system, e.g., "com.widevine.alpha".
  * @property {string} licenseServerUri
- *   <i>Required.</i> <br>
+ *   <i>Filled in by DRM config if missing.</i> <br>
  *   The license server URI.
  * @property {boolean} distinctiveIdentifierRequired
- *   <i>Defaults to false.</i> <br>
+ *   <i>Defaults to false.  Can be filled in by advanced DRM config.</i> <br>
  *   True if the application requires the key system to support distinctive
  *   identifiers.
  * @property {boolean} persistentStateRequired
- *   <i>Defaults to false.</i> <br>
+ *   <i>Defaults to false.  Can be filled in by advanced DRM config.</i> <br>
  *   True if the application requires the key system to support persistent
  *   state, e.g., for persistent license storage.
- * @property {string} robustness
+ * @property {string} audioRobustness
+ *   <i>Defaults to '', e.g., no specific robustness required.  Can be filled in
+ *   by advanced DRM config.</i> <br>
  *   A key-system-specific string that specifies a required security level.
- *   <i>Defaults to '', e.g., no specific robustness required.</i> <br>
+ * @property {string} videoRobustness
+ *   <i>Defaults to '', e.g., no specific robustness required.  Can be filled in
+ *   by advanced DRM config.</i> <br>
+ *   A key-system-specific string that specifies a required security level.
  * @property {Uint8Array} serverCertificate
  *   <i>Defaults to null, e.g., certificate will be requested from the license
- *   server if required.</i> <br>
+ *   server if required.  Can be filled in by advanced DRM config.</i> <br>
  *   A key-system-specific server certificate used to encrypt license requests.
  *   Its use is optional and is meant as an optimization to avoid a round-trip
  *   to request a certificate.

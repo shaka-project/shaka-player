@@ -91,18 +91,18 @@ shakaExtern.AdvancedDrmConfiguration;
 /**
  * @typedef {{
  *   retryParameters: shakaExtern.RetryParameters,
- *   servers: Object.<string, string>,
- *   clearKeys: Object.<string, string>,
+ *   servers: !Object.<string, string>,
+ *   clearKeys: !Object.<string, string>,
  *   advanced: Object.<string, shakaExtern.AdvancedDrmConfiguration>
  * }}
  *
  * @property {shakaExtern.RetryParameters} retryParameters
  *   Retry parameters for license requests.
- * @property {Object.<string, string>} servers
+ * @property {!Object.<string, string>} servers
  *   <i>Required for all but the clear key CDM.</i> <br>
  *   A dictionary which maps key system IDs to their license servers.
  *   For example, {'com.widevine.alpha': 'http://example.com/drm'}.
- * @property {Object.<string, string>} clearKeys
+ * @property {!Object.<string, string>} clearKeys
  *   <i>Only usable by the clear key CDM.</i> <br>
  *   A map of key IDs (hex) to keys (hex).
  * @property {Object.<string, shakaExtern.AdvancedDrmConfiguration>} advanced

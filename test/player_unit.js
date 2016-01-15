@@ -38,7 +38,11 @@ describe('Player', function() {
     logErrorSpy.calls.reset();
     logErrorSpy.and.callFake(fail);
 
-    player = new shaka.Player();
+    // TODO: video element mock
+    /** @type {!HTMLMediaElement} */
+    var video;
+
+    player = new shaka.Player(video);
   });
 
   afterAll(function() {

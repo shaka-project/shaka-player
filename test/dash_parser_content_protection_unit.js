@@ -414,7 +414,8 @@ describe('DashParser.ContentProtection', function() {
           licenseServerUri: '',
           distinctiveIdentifierRequired: false,
           persistentStateRequired: false,
-          robustness: '',
+          videoRobustness: '',
+          audioRobustness: '',
           serverCertificate: null,
           initData: []
         }];
@@ -424,7 +425,8 @@ describe('DashParser.ContentProtection', function() {
           licenseServerUri: '',
           distinctiveIdentifierRequired: false,
           persistentStateRequired: false,
-          robustness: '',
+          videoRobustness: '',
+          audioRobustness: '',
           serverCertificate: null,
           initData: []
         }];

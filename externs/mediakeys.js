@@ -51,7 +51,8 @@ var MediaKeySystemMediaCapability;
  *   videoCapabilities: (Array.<!MediaKeySystemMediaCapability>|undefined),
  *   distinctiveIdentifier: (MediaKeysRequirement|undefined),
  *   persistentState: (MediaKeysRequirement|undefined),
- *   sessionTypes: (Array.<MediaKeySessionType>|undefined)
+ *   sessionTypes: (Array.<MediaKeySessionType>|undefined),
+ *   label: (string|undefined)
  * }}
  * gjslint: disable=900
  */
