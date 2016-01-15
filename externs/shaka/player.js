@@ -31,16 +31,16 @@
  * An object detailing browser support for various features.
  *
  * @property {Object.<string, boolean>} manifest
- *     A map of supported manifest types.
- *     The keys are manifest MIME types and file extensions.
+ *   A map of supported manifest types.
+ *   The keys are manifest MIME types and file extensions.
  * @property {Object.<string, boolean>} media
- *     A map of supported media types.
- *     The keys are media MIME types.
+ *   A map of supported media types.
+ *   The keys are media MIME types.
  * @property {Object.<string, boolean>} drm
- *     A map of DRM support.
- *     The keys are well-known key system IDs.
+ *   A map of DRM support.
+ *   The keys are well-known key system IDs.
  * @property {boolean} supported
- *     True if the library is usable at all.
+ *   True if the library is usable at all.
  *
  * @exportDoc
  */

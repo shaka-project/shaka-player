@@ -74,7 +74,7 @@ shakaExtern.RetryParameters;
  *   A mapping of headers for the request.  e.g.: {'HEADER': 'VALUE'}
  * @property {boolean} allowCrossSiteCredentials
  *   Make requests with credentials.  This will allow cookies in cross-site
- *   requests.  See <a href="http://goo.gl/YBRKPe">http://goog.gl/YBRKPe</a>.
+ *   requests.  See <a href="http://goo.gl/YBRKPe">http://goo.gl/YBRKPe</a>.
  * @property {!shakaExtern.RetryParameters} retryParameters
  *   An object used to define how often to make retries.
  *
