@@ -15,9 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.media.Playhead');
-goog.require('shaka.media.PresentationTimeline');
-
 describe('Playhead', function() {
   var video;
   var timeline;

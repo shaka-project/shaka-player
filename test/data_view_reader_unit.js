@@ -15,9 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.util.DataViewReader');
-goog.require('shaka.util.Error');
-
 describe('DataViewReader', function() {
   // |data| as interpreted as a 64 bit integer must not be larger than 2^53-1.
   // decimal digits.

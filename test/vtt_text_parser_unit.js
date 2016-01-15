@@ -15,10 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.media.VttTextParser');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.Uint8ArrayUtils');
-
 describe('VttTextParser', function() {
   var mockCue = false;
 

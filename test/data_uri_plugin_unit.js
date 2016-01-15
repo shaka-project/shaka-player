@@ -15,10 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.net.DataUriPlugin');
-goog.require('shaka.net.NetworkingEngine');
-goog.require('shaka.util.Uint8ArrayUtils');
-
 describe('DataUriPlugin', function() {
   it('supports MIME types', function(done) {
     testSucceeds('data:text/plain,Hello', 'Hello', done);

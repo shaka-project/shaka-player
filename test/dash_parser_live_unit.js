@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.dash.DashParser');
-
 describe('DashParser.Live', function() {
   var errorCallback;
   var fakeNetEngine;

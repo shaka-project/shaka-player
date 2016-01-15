@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.util.TextParser');
-
 describe('TextParser', function() {
   var textParser;
 

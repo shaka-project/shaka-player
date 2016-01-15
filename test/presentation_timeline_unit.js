@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.media.PresentationTimeline');
-
 describe('PresentationTimeline', function() {
   var originalDateNow;
   var baseTime;

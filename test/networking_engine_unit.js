@@ -15,9 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.net.NetworkingEngine');
-goog.require('shaka.util.PublicPromise');
-
 describe('NetworkingEngine', function() {
   var networkingEngine;
   var resolveScheme;

@@ -15,9 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.util.FakeEvent');
-goog.require('shaka.util.FakeEventTarget');
-
 describe('FakeEventTarget', function() {
   it('sets target on dispatched events', function(done) {
     var target = new shaka.util.FakeEventTarget(null);

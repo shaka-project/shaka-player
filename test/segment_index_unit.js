@@ -15,9 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.media.SegmentIndex');
-goog.require('shaka.media.SegmentReference');
-
 describe('SegmentIndex', function() {
   describe('find', function() {
     it('finds the correct references', function() {

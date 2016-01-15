@@ -15,11 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.media.StreamingEngine');
-goog.require('shaka.media.TextSourceBuffer');
-goog.require('shaka.net.NetworkingEngine');
-goog.require('shaka.util.PublicPromise');
-
 describe('StreamingEngine', function() {
   var originalSetTimeout;
   var currentTime;

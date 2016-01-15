@@ -15,9 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.net.HttpPlugin');
-goog.require('shaka.net.NetworkingEngine');
-
 describe('HttpPlugin', function() {
   beforeAll(function() {
     jasmine.Ajax.install();

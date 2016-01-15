@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.dash.MpdUtils');
-
 describe('MpdUtils', function() {
   // A number that cannot be represented as a Javascript number.
   var HUGE_NUMBER_STRING = new Array(500).join('7');

@@ -15,10 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.asserts');
-goog.require('shaka.polyfill.CustomEvent');
-goog.require('shaka.polyfill.Promise');
-
 
 /**
  * Capture a Promise's status and attach it to the Promise.

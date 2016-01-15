@@ -15,9 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.media.TextSourceBuffer');
-goog.require('shaka.util.EventManager');
-
 describe('TextSourceBuffer', function() {
   var TextSourceBuffer;
   var dummyData = new ArrayBuffer();

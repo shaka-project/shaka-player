@@ -25,9 +25,10 @@ module.exports = function(config) {
 
       // deps next
       'dist/deps.js',
+      'shaka-player.uncompiled.js',
 
       // test utils next
-      'test/*util.js',
+      'test/util/*.js',
 
       // actual tests last
       'test/*.js',

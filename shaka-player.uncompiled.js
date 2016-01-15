@@ -24,11 +24,14 @@ goog.require('shaka.polyfill.installAll');
 goog.require('shaka.util.Error');
 goog.require('shaka.util.StringUtils');
 goog.require('shaka.util.Uint8ArrayUtils');
+// TODO: Remove once player uses StreamingEngine.
+goog.require('shaka.media.StreamingEngine');
 
 // Require logging.
 goog.require('shaka.log');
 
 // Require standard plugins.
+goog.require('shaka.dash.DashParser');
 goog.require('shaka.media.VttTextParser');
 goog.require('shaka.net.DataUriPlugin');
 goog.require('shaka.net.HttpPlugin');

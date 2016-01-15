@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.media.MediaSourceEngine');
-
 describe('MediaSourceEngine', function() {
   var metadata = {
     video: {

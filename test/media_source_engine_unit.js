@@ -15,9 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.media.MediaSourceEngine');
-goog.require('shaka.media.TextSourceBuffer');
-
 describe('MediaSourceEngine', function() {
   var originalMediaSource;
   var originalTextSourceBuffer;

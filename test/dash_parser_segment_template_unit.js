@@ -15,11 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.dash.DashParser');
-goog.require('shaka.log');
-goog.require('shaka.media.SegmentReference');
-goog.require('shaka.util.Uint8ArrayUtils');
-
 describe('DashParser.SegmentTemplate', function() {
   dashMakeTimelineTests('SegmentTemplate', 'media="s$Number$.mp4"', []);
 

@@ -15,11 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.dash.DashParser');
-goog.require('shaka.media.PresentationTimeline');
-goog.require('shaka.media.SegmentReference');
-goog.require('shaka.util.Uint8ArrayUtils');
-
 // Test basic manifest parsing functionality.
 describe('DashParser.Manifest', function() {
   var fakeNetEngine;

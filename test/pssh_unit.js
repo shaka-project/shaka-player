@@ -15,10 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.util.Error');
-goog.require('shaka.util.Pssh');
-goog.require('shaka.util.Uint8ArrayUtils');
-
 describe('Pssh', function() {
   var fromHex = shaka.util.Uint8ArrayUtils.fromHex;
   var toHex = shaka.util.Uint8ArrayUtils.toHex;

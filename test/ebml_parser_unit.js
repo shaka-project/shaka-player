@@ -15,9 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.util.EbmlParser');
-goog.require('shaka.util.Error');
-
 describe('EbmlParser', function() {
   var Code;
 

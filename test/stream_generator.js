@@ -20,10 +20,6 @@ goog.provide('shaka.test.DashVodStreamGenerator');
 goog.provide('shaka.test.IStreamGenerator');
 goog.provide('shaka.test.StreamGenerator');
 
-goog.require('shaka.asserts');
-goog.require('shaka.log');
-goog.require('shaka.util.DataViewReader');
-
 
 
 /**

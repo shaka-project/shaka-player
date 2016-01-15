@@ -15,9 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.dash.DashParser');
-goog.require('shaka.util.Uint8ArrayUtils');
-
 describe('DashParser.SegmentBase', function() {
   it('requests init data for WebM', function(done) {
     var source = [

@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.util.EventManager');
-
 describe('EventManager', function() {
   var eventManager;
   var event1;
