@@ -15,6 +15,7 @@ digraph shaka2_ownership {
   Player -> ManifestParser
   Player -> StreamingEngine
   Player -> DrmEngine
+  Player -> Manifest [ style=dotted ]
 
   NetworkingEngine -> HttpRequest
 

@@ -15,8 +15,7 @@ digraph shaka2_data {
 
   Player -> ManifestParser [ label="URL => Manifest" dir=both arrowtail=onormal style=dashed ]
   Player -> StreamingEngine [ label=Manifest ]
-  # FIXME: DrmEngine specifics are not nailed down yet
-  Player -> DrmEngine [ label="???" style=dotted ]
+  Player -> DrmEngine [ label=Manifest ]
 
   ManifestParser -> NetworkingEngine [ label="Request(MANIFEST) => Response" dir=both arrowtail=onormal style=dashed ]
   StreamingEngine -> NetworkingEngine [ label="Request(SEGMENT) => Response" dir=both arrowtail=onormal style=dashed ]

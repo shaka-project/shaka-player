@@ -1,6 +1,6 @@
 # Shaka v2.0 Redesign
 
-last update: 2015-12-04
+last update: 2016-01-15
 
 by: [joeyparrish@google.com](mailto:joeyparrish@google.com)
 
@@ -221,7 +221,7 @@ shaka.Player.prototype.configure({})
 
 shaka.Player.prototype.getConfiguration() => {}
 
-shaka.Player.prototype.load(manifestUri, opt\_startTime, opt\_manifestParser) => Promise
+shaka.Player.prototype.load(manifestUri, opt\_startTime, opt\_manifestParserFactory) => Promise
 
 shaka.Player.prototype.unload() => Promise
 
@@ -274,9 +274,8 @@ shaka.media.ManifestParser.registerParserByExtension(fileExt, parser)
 
 
 ## TODO
-  - StreamingEngine needs implementation.
-  - DashManifestParser needs implementation.
-  - DrmEngine needs design work.
+  - StreamingEngine is a WIP.
+  - DashManifestParser needs DRM support.
   - A new cache-detecting bandwidth estimation algorithm is needed.
-  - Player needs implementation.  *(blocked on everything else)*
+  - Player needs implementation.
 
