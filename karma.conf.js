@@ -46,6 +46,8 @@ module.exports = function(config) {
     preprocessors: {
       // Don't compute coverage over lib/debug/ or lib/polyfill/
       'lib/!(debug|polyfill)/*.js': 'coverage',
+      // Player is not matched by the above, so add it explicitly
+      'lib/player.js': 'coverage',
     },
 
     coverageReporter: {

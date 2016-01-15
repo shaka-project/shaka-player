@@ -24,7 +24,7 @@ describe('DashParser.ContentProtection', function() {
    * @param {string} manifestText
    * @param {Object} expected A Manifest-like object.  The parser output is
    *     expected to match this.
-   * @param {(function(!Node):?shakaExtern.DrmInfo)=} opt_callback
+   * @param {shakaExtern.DashContentProtectionCallback=} opt_callback
    */
   function testDashParser(done, manifestText, expected, opt_callback) {
     var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
@@ -388,12 +388,12 @@ describe('DashParser.ContentProtection', function() {
 
     /**
      * @param {!Node} contentProtection
-     * @return {?shakaExtern.DrmInfo}
+     * @return {Array.<shakaExtern.DrmInfo>}
      */
     var callback = function(contentProtection) {
       var schemeIdUri = contentProtection.getAttribute('schemeIdUri');
       if (schemeIdUri == 'urn:uuid:feedbaad-f00d-2bee-baad-d00d00000000') {
-        return {
+        return [{
           keySystem: 'com.custom.baadd00d',
           licenseServerUri: '',
           distinctiveIdentifierRequired: false,
@@ -401,9 +401,9 @@ describe('DashParser.ContentProtection', function() {
           robustness: '',
           serverCertificate: null,
           initData: []
-        };
+        }];
       } else if (schemeIdUri == 'http://example.com/drm') {
-        return {
+        return [{
           keySystem: 'com.example.drm',
           licenseServerUri: '',
           distinctiveIdentifierRequired: false,
@@ -411,7 +411,7 @@ describe('DashParser.ContentProtection', function() {
           robustness: '',
           serverCertificate: null,
           initData: []
-        };
+        }];
       } else {
         return null;
       }
