@@ -17,6 +17,7 @@
 
 describe('StreamingEngine', function() {
   var originalSetTimeout;
+  var Util;
 
   var dummyInitSegments;
   var dummySegments;
@@ -60,11 +61,12 @@ describe('StreamingEngine', function() {
       }
     }
     // No test should require more than 60 seconds of simulated time.
-    return fakeEventLoop(60, originalSetTimeout, onTick);
+    return Util.fakeEventLoop(60, originalSetTimeout, onTick);
   }
 
   beforeAll(function() {
     originalSetTimeout = window.setTimeout;
+    Util = shaka.test.Util;
   });
 
   beforeEach(function() {

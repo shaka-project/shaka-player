@@ -16,6 +16,7 @@
  */
 
 describe('DashParser.Live', function() {
+  var Dash;
   var errorCallback;
   var fakeNetEngine;
   var newPeriod;
@@ -24,9 +25,13 @@ describe('DashParser.Live', function() {
   var realTimeout;
   var Uint8ArrayUtils;
   var updateTime = 5;
+  var Util;
 
   beforeAll(function() {
+    Dash = shaka.test.Dash;
     Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
+    Util = shaka.test.Util;
+
     realTimeout = window.setTimeout;
     jasmine.clock().install();
 
@@ -64,7 +69,7 @@ describe('DashParser.Live', function() {
     // Tick the virtual clock to trigger an update.
     jasmine.clock().tick(updateTime * 1000);
     // Resolve all Promises.
-    return processInstantaneousOperations(5, realTimeout);
+    return Util.processInstantaneousOperations(5, realTimeout);
   }
 
   /**
@@ -130,11 +135,11 @@ describe('DashParser.Live', function() {
       setNetEngineReturnValue(firstManifest);
       parser.start('')
           .then(function(manifest) {
-            verifySegmentIndex(manifest, firstReferences);
+            Dash.verifySegmentIndex(manifest, firstReferences);
 
             setNetEngineReturnValue(secondManifest);
             return waitForManifestUpdate().then(function() {
-              verifySegmentIndex(manifest, secondReferences);
+              Dash.verifySegmentIndex(manifest, secondReferences);
             });
           })
           .catch(fail)
@@ -179,7 +184,7 @@ describe('DashParser.Live', function() {
 
             expect(stream.findSegmentPosition).toBeTruthy();
             expect(stream.findSegmentPosition(0)).not.toBe(null);
-            verifySegmentIndex(manifest, basicRefs);
+            Dash.verifySegmentIndex(manifest, basicRefs);
 
             // 15 seconds for @timeShiftBufferDepth and the first segment
             // duration.
@@ -187,7 +192,7 @@ describe('DashParser.Live', function() {
             return waitForManifestUpdate().then(function() {
               // The first reference should have been evicted.
               expect(stream.findSegmentPosition(0)).toBe(null);
-              verifySegmentIndex(manifest, basicRefs.slice(1));
+              Dash.verifySegmentIndex(manifest, basicRefs.slice(1));
             });
           })
           .catch(fail)
@@ -357,12 +362,12 @@ describe('DashParser.Live', function() {
           var partialTime = updateTime * 1000 * 3 / 4;
           var remainingTime = updateTime * 1000 - partialTime;
           jasmine.clock().tick(partialTime);
-          return delay(0.01, realTimeout)
+          return Util.delay(0.01, realTimeout)
               .then(function() {
                 // Update period has not passed yet.
                 expect(fakeNetEngine.request.calls.count()).toBe(1);
                 jasmine.clock().tick(remainingTime);
-                return delay(0.01, realTimeout);
+                return Util.delay(0.01, realTimeout);
               })
               .then(function() {
                 // Update period has passed.
@@ -384,9 +389,9 @@ describe('DashParser.Live', function() {
       '</SegmentTemplate>'
     ];
     var basicRefs = [
-      makeReference('s1.mp4', 1, 0, 10),
-      makeReference('s2.mp4', 2, 10, 15),
-      makeReference('s3.mp4', 3, 15, 30)
+      shaka.test.Dash.makeReference('s1.mp4', 1, 0, 10),
+      shaka.test.Dash.makeReference('s2.mp4', 2, 10, 15),
+      shaka.test.Dash.makeReference('s3.mp4', 3, 15, 30)
     ];
     var updateLines = [
       '<SegmentTemplate startNumber="1" media="s$Number$.mp4">',
@@ -399,10 +404,10 @@ describe('DashParser.Live', function() {
       '</SegmentTemplate>'
     ];
     var updateRefs = [
-      makeReference('s1.mp4', 1, 0, 10),
-      makeReference('s2.mp4', 2, 10, 15),
-      makeReference('s3.mp4', 3, 15, 30),
-      makeReference('s4.mp4', 4, 30, 40)
+      shaka.test.Dash.makeReference('s1.mp4', 1, 0, 10),
+      shaka.test.Dash.makeReference('s2.mp4', 2, 10, 15),
+      shaka.test.Dash.makeReference('s3.mp4', 3, 15, 30),
+      shaka.test.Dash.makeReference('s4.mp4', 4, 30, 40)
     ];
     var partialUpdateLines = [
       '<SegmentTemplate startNumber="3" media="s$Number$.mp4">',
@@ -431,9 +436,9 @@ describe('DashParser.Live', function() {
       '</SegmentList>'
     ];
     var basicRefs = [
-      makeReference('s1.mp4', 1, 0, 10),
-      makeReference('s2.mp4', 2, 10, 15),
-      makeReference('s3.mp4', 3, 15, 30)
+      shaka.test.Dash.makeReference('s1.mp4', 1, 0, 10),
+      shaka.test.Dash.makeReference('s2.mp4', 2, 10, 15),
+      shaka.test.Dash.makeReference('s3.mp4', 3, 15, 30)
     ];
     var updateLines = [
       '<SegmentList>',
@@ -450,10 +455,10 @@ describe('DashParser.Live', function() {
       '</SegmentList>'
     ];
     var updateRefs = [
-      makeReference('s1.mp4', 1, 0, 10),
-      makeReference('s2.mp4', 2, 10, 15),
-      makeReference('s3.mp4', 3, 15, 30),
-      makeReference('s4.mp4', 4, 30, 40)
+      shaka.test.Dash.makeReference('s1.mp4', 1, 0, 10),
+      shaka.test.Dash.makeReference('s2.mp4', 2, 10, 15),
+      shaka.test.Dash.makeReference('s3.mp4', 3, 15, 30),
+      shaka.test.Dash.makeReference('s4.mp4', 4, 30, 40)
     ];
     var partialUpdateLines = [
       '<SegmentList startNumber="3">',
@@ -479,9 +484,9 @@ describe('DashParser.Live', function() {
       '</SegmentList>'
     ];
     var basicRefs = [
-      makeReference('s1.mp4', 1, 0, 10),
-      makeReference('s2.mp4', 2, 10, 20),
-      makeReference('s3.mp4', 3, 20, 30)
+      shaka.test.Dash.makeReference('s1.mp4', 1, 0, 10),
+      shaka.test.Dash.makeReference('s2.mp4', 2, 10, 20),
+      shaka.test.Dash.makeReference('s3.mp4', 3, 20, 30)
     ];
     var updateLines = [
       '<SegmentList duration="10">',
@@ -492,10 +497,10 @@ describe('DashParser.Live', function() {
       '</SegmentList>'
     ];
     var updateRefs = [
-      makeReference('s1.mp4', 1, 0, 10),
-      makeReference('s2.mp4', 2, 10, 20),
-      makeReference('s3.mp4', 3, 20, 30),
-      makeReference('s4.mp4', 4, 30, 40)
+      shaka.test.Dash.makeReference('s1.mp4', 1, 0, 10),
+      shaka.test.Dash.makeReference('s2.mp4', 2, 10, 20),
+      shaka.test.Dash.makeReference('s3.mp4', 3, 20, 30),
+      shaka.test.Dash.makeReference('s4.mp4', 4, 30, 40)
     ];
     var partialUpdateLines = [
       '<SegmentList startNumber="3" duration="10">',

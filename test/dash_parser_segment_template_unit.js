@@ -16,42 +16,49 @@
  */
 
 describe('DashParser.SegmentTemplate', function() {
-  dashMakeTimelineTests('SegmentTemplate', 'media="s$Number$.mp4"', []);
+  var Dash;
+
+  beforeAll(function() {
+    Dash = shaka.test.Dash;
+  });
+
+  shaka.test.Dash.makeTimelineTests(
+      'SegmentTemplate', 'media="s$Number$.mp4"', []);
 
   describe('duration', function() {
     it('basic support', function(done) {
-      var source = makeSimpleManifestText([
+      var source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="1" media="s$Number$.mp4"',
         '  duration="10" />'
       ], 60 /* duration */);
       var references = [
-        makeReference('s1.mp4', 0, 0, 10),
-        makeReference('s2.mp4', 1, 10, 20),
-        makeReference('s3.mp4', 2, 20, 30),
-        makeReference('s4.mp4', 3, 30, 40),
-        makeReference('s5.mp4', 4, 40, 50),
-        makeReference('s6.mp4', 5, 50, 60)
+        Dash.makeReference('s1.mp4', 0, 0, 10),
+        Dash.makeReference('s2.mp4', 1, 10, 20),
+        Dash.makeReference('s3.mp4', 2, 20, 30),
+        Dash.makeReference('s4.mp4', 3, 30, 40),
+        Dash.makeReference('s5.mp4', 4, 40, 50),
+        Dash.makeReference('s6.mp4', 5, 50, 60)
       ];
-      dashTestSegmentIndex(done, source, references);
+      Dash.testSegmentIndex(done, source, references);
     });
 
     it('with @startNumber > 1', function(done) {
-      var source = makeSimpleManifestText([
+      var source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="10" media="s$Number$.mp4"',
         '   duration="10" />'
       ], 30 /* duration */);
       var references = [
-        makeReference('s10.mp4', 0, 0, 10),
-        makeReference('s11.mp4', 1, 10, 20),
-        makeReference('s12.mp4', 2, 20, 30)
+        Dash.makeReference('s10.mp4', 0, 0, 10),
+        Dash.makeReference('s11.mp4', 1, 10, 20),
+        Dash.makeReference('s12.mp4', 2, 20, 30)
       ];
-      dashTestSegmentIndex(done, source, references);
+      Dash.testSegmentIndex(done, source, references);
     });
   });
 
   describe('index', function() {
     it('basic support', function(done) {
-      var source = makeSimpleManifestText([
+      var source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="1" index="index-$Bandwidth$.mp4"',
         '    initialization="init-$Bandwidth$.mp4" />'
       ]);
@@ -61,8 +68,8 @@ describe('DashParser.SegmentTemplate', function() {
       parser.start('')
           .then(function(manifest) {
             expect(manifest).toEqual(
-                makeManifestFromInit('init-500.mp4', 0, null));
-            return callCreateSegmentIndex(manifest);
+                Dash.makeManifestFromInit('init-500.mp4', 0, null));
+            return Dash.callCreateSegmentIndex(manifest);
           })
           .then(function() {
             expect(engine.request.calls.count()).toBe(2);
@@ -74,7 +81,7 @@ describe('DashParser.SegmentTemplate', function() {
     });
 
     it('defaults to index with multiple segment sources', function(done) {
-      var source = makeSimpleManifestText([
+      var source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="1" index="index-$Bandwidth$.mp4"',
         '    initialization="init-$Bandwidth$.mp4">',
         '  <SegmentTimeline>',
@@ -88,8 +95,8 @@ describe('DashParser.SegmentTemplate', function() {
       parser.start('')
           .then(function(manifest) {
             expect(manifest).toEqual(
-                makeManifestFromInit('init-500.mp4', 0, null));
-            return callCreateSegmentIndex(manifest);
+                Dash.makeManifestFromInit('init-500.mp4', 0, null));
+            return Dash.callCreateSegmentIndex(manifest);
           })
           .then(function() {
             expect(engine.request.calls.count()).toBe(2);
@@ -121,8 +128,8 @@ describe('DashParser.SegmentTemplate', function() {
       parser.start('')
           .then(function(manifest) {
             expect(manifest).toEqual(
-                makeManifestFromInit('init-500.webm', 0, null));
-            return callCreateSegmentIndex(manifest);
+                Dash.makeManifestFromInit('init-500.webm', 0, null));
+            return Dash.callCreateSegmentIndex(manifest);
           })
           .then(function() {
             expect(engine.request.calls.count()).toBe(3);
@@ -154,8 +161,8 @@ describe('DashParser.SegmentTemplate', function() {
       parser.start('')
           .then(function(manifest) {
             expect(manifest).toEqual(
-                makeManifestFromInit('init-500.mp4', 0, null));
-            return callCreateSegmentIndex(manifest);
+                Dash.makeManifestFromInit('init-500.mp4', 0, null));
+            return Dash.callCreateSegmentIndex(manifest);
           })
           .then(function() {
             expect(engine.request.calls.count()).toBe(2);
@@ -185,8 +192,8 @@ describe('DashParser.SegmentTemplate', function() {
       parser.start('')
           .then(function(manifest) {
             expect(manifest).toEqual(
-                makeManifestFromInit('init-500.mp4', 0, null));
-            return callCreateSegmentIndex(manifest);
+                Dash.makeManifestFromInit('init-500.mp4', 0, null));
+            return Dash.callCreateSegmentIndex(manifest);
           })
           .then(function() {
             expect(engine.request.calls.count()).toBe(2);
@@ -200,7 +207,7 @@ describe('DashParser.SegmentTemplate', function() {
 
   describe('media template', function() {
     it('defaults to timeline when also has duration', function(done) {
-      var source = makeSimpleManifestText([
+      var source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="0" duration="10"',
         '    media="$Number$-$Time$-$Bandwidth$.mp4">',
         '  <SegmentTimeline>',
@@ -209,63 +216,63 @@ describe('DashParser.SegmentTemplate', function() {
         '</SegmentTemplate>'
       ], 45 /* duration */);
       var references = [
-        makeReference('0-0-500.mp4', 0, 0, 15),
-        makeReference('1-15-500.mp4', 1, 15, 30),
-        makeReference('2-30-500.mp4', 2, 30, 45)
+        Dash.makeReference('0-0-500.mp4', 0, 0, 15),
+        Dash.makeReference('1-15-500.mp4', 1, 15, 30),
+        Dash.makeReference('2-30-500.mp4', 2, 30, 45)
       ];
-      dashTestSegmentIndex(done, source, references);
+      Dash.testSegmentIndex(done, source, references);
     });
 
     it('with @startnumber = 0', function(done) {
-      var source = makeSimpleManifestText([
+      var source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="0" duration="10"',
         '    media="$Number$-$Time$-$Bandwidth$.mp4" />'
       ], 30 /* duration */);
       var references = [
-        makeReference('0-0-500.mp4', 0, 0, 10),
-        makeReference('1-10-500.mp4', 1, 10, 20),
-        makeReference('2-20-500.mp4', 2, 20, 30)
+        Dash.makeReference('0-0-500.mp4', 0, 0, 10),
+        Dash.makeReference('1-10-500.mp4', 1, 10, 20),
+        Dash.makeReference('2-20-500.mp4', 2, 20, 30)
       ];
-      dashTestSegmentIndex(done, source, references);
+      Dash.testSegmentIndex(done, source, references);
     });
 
     it('with @startNumber = 1', function(done) {
-      var source = makeSimpleManifestText([
+      var source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="1" duration="10"',
         '    media="$Number$-$Time$-$Bandwidth$.mp4" />'
       ], 30 /* duration */);
       var references = [
-        makeReference('1-0-500.mp4', 0, 0, 10),
-        makeReference('2-10-500.mp4', 1, 10, 20),
-        makeReference('3-20-500.mp4', 2, 20, 30)
+        Dash.makeReference('1-0-500.mp4', 0, 0, 10),
+        Dash.makeReference('2-10-500.mp4', 1, 10, 20),
+        Dash.makeReference('3-20-500.mp4', 2, 20, 30)
       ];
-      dashTestSegmentIndex(done, source, references);
+      Dash.testSegmentIndex(done, source, references);
     });
 
     it('with @startNumber > 1', function(done) {
-      var source = makeSimpleManifestText([
+      var source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="10" duration="10"',
         '    media="$Number$-$Time$-$Bandwidth$.mp4" />'
       ], 30 /* duration */);
       var references = [
-        makeReference('10-0-500.mp4', 0, 0, 10),
-        makeReference('11-10-500.mp4', 1, 10, 20),
-        makeReference('12-20-500.mp4', 2, 20, 30)
+        Dash.makeReference('10-0-500.mp4', 0, 0, 10),
+        Dash.makeReference('11-10-500.mp4', 1, 10, 20),
+        Dash.makeReference('12-20-500.mp4', 2, 20, 30)
       ];
-      dashTestSegmentIndex(done, source, references);
+      Dash.testSegmentIndex(done, source, references);
     });
 
     it('with @timescale > 1', function(done) {
-      var source = makeSimpleManifestText([
+      var source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="1" timescale="9000" duration="9000"',
         '    media="$Number$-$Time$-$Bandwidth$.mp4" />'
       ], 3 /* duration */);
       var references = [
-        makeReference('1-0-500.mp4', 0, 0, 1),
-        makeReference('2-9000-500.mp4', 1, 1, 2),
-        makeReference('3-18000-500.mp4', 2, 2, 3)
+        Dash.makeReference('1-0-500.mp4', 0, 0, 1),
+        Dash.makeReference('2-9000-500.mp4', 1, 1, 2),
+        Dash.makeReference('3-18000-500.mp4', 2, 2, 3)
       ];
-      dashTestSegmentIndex(done, source, references);
+      Dash.testSegmentIndex(done, source, references);
     });
 
     it('across representations', function(done) {
@@ -298,22 +305,22 @@ describe('DashParser.SegmentTemplate', function() {
 
         expect(streamSet.streams[0].findSegmentPosition(0)).toBe(0);
         expect(streamSet.streams[0].getSegmentReference(0)).toEqual(
-            makeReference('1-0-100.mp4', 0, 0, 10));
+            Dash.makeReference('1-0-100.mp4', 0, 0, 10));
         expect(streamSet.streams[0].findSegmentPosition(12)).toBe(1);
         expect(streamSet.streams[0].getSegmentReference(1)).toEqual(
-            makeReference('2-10-100.mp4', 1, 10, 20));
+            Dash.makeReference('2-10-100.mp4', 1, 10, 20));
         expect(streamSet.streams[1].findSegmentPosition(0)).toBe(0);
         expect(streamSet.streams[1].getSegmentReference(0)).toEqual(
-            makeReference('1-0-200.mp4', 0, 0, 10));
+            Dash.makeReference('1-0-200.mp4', 0, 0, 10));
         expect(streamSet.streams[1].findSegmentPosition(12)).toBe(1);
         expect(streamSet.streams[1].getSegmentReference(1)).toEqual(
-            makeReference('2-10-200.mp4', 1, 10, 20));
+            Dash.makeReference('2-10-200.mp4', 1, 10, 20));
         expect(streamSet.streams[2].findSegmentPosition(0)).toBe(0);
         expect(streamSet.streams[2].getSegmentReference(0)).toEqual(
-            makeReference('1-0-300.mp4', 0, 0, 10));
+            Dash.makeReference('1-0-300.mp4', 0, 0, 10));
         expect(streamSet.streams[2].findSegmentPosition(12)).toBe(1);
         expect(streamSet.streams[2].getSegmentReference(1)).toEqual(
-            makeReference('2-10-300.mp4', 1, 10, 20));
+            Dash.makeReference('2-10-300.mp4', 1, 10, 20));
       }).catch(fail).then(done);
     });
   });
@@ -337,7 +344,7 @@ describe('DashParser.SegmentTemplate', function() {
       var error = new shaka.util.Error(
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_UNSUPPORTED_CONTAINER);
-      dashTestFails(done, source, error);
+      Dash.testFails(done, source, error);
     });
 
     it('no init data with webm', function(done) {
@@ -357,21 +364,21 @@ describe('DashParser.SegmentTemplate', function() {
       var error = new shaka.util.Error(
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_WEBM_MISSING_INIT);
-      dashTestFails(done, source, error);
+      Dash.testFails(done, source, error);
     });
 
     it('not enough segment info', function(done) {
-      var source = makeSimpleManifestText([
+      var source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="1" />'
       ]);
       var error = new shaka.util.Error(
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_NO_SEGMENT_INFO);
-      dashTestFails(done, source, error);
+      Dash.testFails(done, source, error);
     });
 
     it('no media template', function(done) {
-      var source = makeSimpleManifestText([
+      var source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="1">',
         '  <SegmentTimeline>',
         '    <S d="10" />',
@@ -381,18 +388,18 @@ describe('DashParser.SegmentTemplate', function() {
       var error = new shaka.util.Error(
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_NO_SEGMENT_INFO);
-      dashTestFails(done, source, error);
+      Dash.testFails(done, source, error);
     });
 
     it('no period duration with static content', function(done) {
-      var source = makeSimpleManifestText([
+      var source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="1" media="s$Number$.mp4"',
         '    duration="30" />'
       ]);
       var error = new shaka.util.Error(
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_NO_SEGMENT_INFO);
-      dashTestFails(done, source, error);
+      Dash.testFails(done, source, error);
     });
   });
 });

@@ -17,6 +17,7 @@
 
 // Test basic manifest parsing functionality.
 describe('DashParser.Manifest', function() {
+  var Dash;
   var fakeNetEngine;
   var parser;
 
@@ -24,6 +25,10 @@ describe('DashParser.Manifest', function() {
     fakeNetEngine = {request: jasmine.createSpy('request')};
     parser = new shaka.dash.DashParser(
         fakeNetEngine, {}, function() {}, function() {});
+  });
+
+  beforeAll(function() {
+    Dash = shaka.test.Dash;
   });
 
   /**
@@ -234,7 +239,7 @@ describe('DashParser.Manifest', function() {
           '  </Period>',
           '</MPD>'
         ],
-        makeManifestFromStreamSets([
+        shaka.test.Dash.makeManifestFromStreamSets([
           {
             language: 'en',
             type: 'video',
@@ -265,7 +270,7 @@ describe('DashParser.Manifest', function() {
           '  </Period>',
           '</MPD>'
         ],
-        makeManifestFromStreamSets([
+        shaka.test.Dash.makeManifestFromStreamSets([
           {
             language: 'en',
             type: 'video',
@@ -304,7 +309,7 @@ describe('DashParser.Manifest', function() {
           '  </Period>',
           '</MPD>'
         ],
-        makeManifestFromStreamSets([
+        shaka.test.Dash.makeManifestFromStreamSets([
           {
             language: 'en',
             type: 'video',
@@ -343,7 +348,7 @@ describe('DashParser.Manifest', function() {
           '  </Period>',
           '</MPD>'
         ],
-        makeManifestFromStreamSets([
+        shaka.test.Dash.makeManifestFromStreamSets([
           {
             language: 'en',
             type: 'video',
@@ -434,7 +439,7 @@ describe('DashParser.Manifest', function() {
   });
 
   it('defaults to SegmentBase with multiple Segment*', function(done) {
-    var source = makeSimpleManifestText([
+    var source = Dash.makeSimpleManifestText([
       '<SegmentBase presentationTimeOffset="1" indexRange="100-200">',
       '  <Initialization sourceURL="init.mp4" range="201-300" />',
       '</SegmentBase>',
@@ -455,7 +460,7 @@ describe('DashParser.Manifest', function() {
   });
 
   it('defaults to SegmentList with SegmentTemplate', function(done) {
-    var source = makeSimpleManifestText([
+    var source = Dash.makeSimpleManifestText([
       '<SegmentList presentationTimeOffset="2" duration="10">',
       '  <Initialization sourceURL="init.mp4" range="201-300" />',
       '  <SegmentURL media="s1.mp4" />',
@@ -485,7 +490,7 @@ describe('DashParser.Manifest', function() {
       var error = new shaka.util.Error(
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_INVALID_XML);
-      dashTestFails(done, source, error);
+      Dash.testFails(done, source, error);
     });
 
     it('failed network requests', function(done) {
@@ -509,7 +514,7 @@ describe('DashParser.Manifest', function() {
       var error = new shaka.util.Error(
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_INVALID_XML);
-      dashTestFails(done, source, error);
+      Dash.testFails(done, source, error);
     });
 
     it('empty Representation', function(done) {
@@ -525,7 +530,7 @@ describe('DashParser.Manifest', function() {
       var error = new shaka.util.Error(
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_NO_SEGMENT_INFO);
-      dashTestFails(done, source, error);
+      Dash.testFails(done, source, error);
     });
 
     it('empty AdaptationSet', function(done) {
@@ -539,7 +544,7 @@ describe('DashParser.Manifest', function() {
       var error = new shaka.util.Error(
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_EMPTY_ADAPTATION_SET);
-      dashTestFails(done, source, error);
+      Dash.testFails(done, source, error);
     });
 
     it('empty Period', function(done) {
@@ -551,7 +556,7 @@ describe('DashParser.Manifest', function() {
       var error = new shaka.util.Error(
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_EMPTY_PERIOD);
-      dashTestFails(done, source, error);
+      Dash.testFails(done, source, error);
     });
   });
 });

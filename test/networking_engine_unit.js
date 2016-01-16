@@ -20,8 +20,10 @@ describe('NetworkingEngine', function() {
   var resolveScheme;
   var rejectScheme;
   var requestType;
+  var Util;
 
   beforeAll(function() {
+    Util = shaka.test.Util;
     requestType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
   });
 
@@ -442,20 +444,20 @@ describe('NetworkingEngine', function() {
 
       var r1 = networkingEngine.request(requestType, request);
       var r2 = networkingEngine.request(requestType, request);
-      capturePromiseStatus(r1);
-      capturePromiseStatus(r2);
+      Util.capturePromiseStatus(r1);
+      Util.capturePromiseStatus(r2);
 
       expect(r1.status).toBe('pending');
       expect(r2.status).toBe('pending');
 
       var d = networkingEngine.destroy();
-      capturePromiseStatus(d);
+      Util.capturePromiseStatus(d);
       expect(d.status).toBe('pending');
 
-      delay(0.1).then(function() {
+      Util.delay(0.1).then(function() {
         expect(d.status).toBe('pending');
         p.resolve();
-        return delay(0.1);
+        return Util.delay(0.1);
       }).then(function() {
         expect(r1.status).toBe('resolved');
         expect(r2.status).toBe('resolved');
@@ -471,20 +473,20 @@ describe('NetworkingEngine', function() {
 
       var r1 = networkingEngine.request(requestType, request);
       var r2 = networkingEngine.request(requestType, request);
-      capturePromiseStatus(r1);
-      capturePromiseStatus(r2);
+      Util.capturePromiseStatus(r1);
+      Util.capturePromiseStatus(r2);
 
       expect(r1.status).toBe('pending');
       expect(r2.status).toBe('pending');
 
       var d = networkingEngine.destroy();
-      capturePromiseStatus(d);
+      Util.capturePromiseStatus(d);
       expect(d.status).toBe('pending');
 
-      delay(0.1).then(function() {
+      Util.delay(0.1).then(function() {
         expect(d.status).toBe('pending');
         p.reject();
-        return delay(0.1);
+        return Util.delay(0.1);
       }).then(function() {
         expect(r1.status).toBe('rejected');
         expect(r2.status).toBe('rejected');
@@ -499,27 +501,27 @@ describe('NetworkingEngine', function() {
       resolveScheme.and.returnValue(p);
 
       var r1 = networkingEngine.request(requestType, request);
-      capturePromiseStatus(r1);
+      Util.capturePromiseStatus(r1);
       expect(r1.status).toBe('pending');
       // The request has already been made.
       expect(resolveScheme.calls.count()).toBe(1);
 
       var d = networkingEngine.destroy();
-      capturePromiseStatus(d);
+      Util.capturePromiseStatus(d);
       expect(d.status).toBe('pending');
 
       var r2 = networkingEngine.request(requestType, request);
-      capturePromiseStatus(r2);
+      Util.capturePromiseStatus(r2);
       expect(r2.status).toBe('pending');
       // A new request has not been made.
       expect(resolveScheme.calls.count()).toBe(1);
 
-      delay(0.1).then(function() {
+      Util.delay(0.1).then(function() {
         expect(r1.status).toBe('pending');
         expect(r2.status).toBe('rejected');
         expect(d.status).toBe('pending');
         p.resolve();
-        return delay(0.1);
+        return Util.delay(0.1);
       }).then(function() {
         expect(r1.status).toBe('resolved');
         expect(r2.status).toBe('rejected');
@@ -542,15 +544,15 @@ describe('NetworkingEngine', function() {
       });
 
       var r1 = networkingEngine.request(requestType, request);
-      capturePromiseStatus(r1);
+      Util.capturePromiseStatus(r1);
       expect(r1.status).toBe('pending');
       expect(rejectScheme.calls.count()).toBe(1);
 
       var d = networkingEngine.destroy();
-      capturePromiseStatus(d);
+      Util.capturePromiseStatus(d);
       expect(d.status).toBe('pending');
 
-      delay(0.1).then(function() {
+      Util.delay(0.1).then(function() {
         expect(r1.status).toBe('pending');
         expect(d.status).toBe('pending');
         expect(rejectScheme.calls.count()).toBe(1);
@@ -559,7 +561,7 @@ describe('NetworkingEngine', function() {
         // Resolve any retry, but since we have already been destroyed, this
         // promise should not be used.
         p2.resolve();
-        return delay(0.1);
+        return Util.delay(0.1);
       }).then(function() {
         expect(d.status).toBe('resolved');
         // The request was never retried.

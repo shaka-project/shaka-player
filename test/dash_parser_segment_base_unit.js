@@ -16,6 +16,12 @@
  */
 
 describe('DashParser.SegmentBase', function() {
+  var Dash;
+
+  beforeAll(function() {
+    Dash = shaka.test.Dash;
+  });
+
   it('requests init data for WebM', function(done) {
     var source = [
       '<MPD>',
@@ -35,8 +41,9 @@ describe('DashParser.SegmentBase', function() {
 
     parser.start('')
         .then(function(manifest) {
-          expect(manifest).toEqual(makeManifestFromInit('init.webm', 201, 300));
-          return callCreateSegmentIndex(manifest);
+          expect(manifest).toEqual(
+              Dash.makeManifestFromInit('init.webm', 201, 300));
+          return Dash.callCreateSegmentIndex(manifest);
         })
         .then(function() {
           expect(engine.request.calls.count()).toBe(3);
@@ -65,8 +72,9 @@ describe('DashParser.SegmentBase', function() {
 
     parser.start('')
         .then(function(manifest) {
-          expect(manifest).toEqual(makeManifestFromInit('init.mp4', 201, 300));
-          return callCreateSegmentIndex(manifest);
+          expect(manifest).toEqual(
+              Dash.makeManifestFromInit('init.mp4', 201, 300));
+          return Dash.callCreateSegmentIndex(manifest);
         })
         .then(function() {
           expect(engine.request.calls.count()).toBe(2);
@@ -94,8 +102,9 @@ describe('DashParser.SegmentBase', function() {
 
     parser.start('')
         .then(function(manifest) {
-          expect(manifest).toEqual(makeManifestFromInit('init.mp4', 201, 300));
-          return callCreateSegmentIndex(manifest);
+          expect(manifest).toEqual(
+              Dash.makeManifestFromInit('init.mp4', 201, 300));
+          return Dash.callCreateSegmentIndex(manifest);
         })
         .then(function() {
           expect(engine.request.calls.count()).toBe(2);
@@ -131,8 +140,8 @@ describe('DashParser.SegmentBase', function() {
     parser.start('')
         .then(function(manifest) {
           expect(manifest).toEqual(
-              makeManifestFromInit('init.mp4', 201, 300, 10));
-          return callCreateSegmentIndex(manifest);
+              Dash.makeManifestFromInit('init.mp4', 201, 300, 10));
+          return Dash.callCreateSegmentIndex(manifest);
         })
         .then(function() {
           expect(engine.request.calls.count()).toBe(2);
@@ -166,8 +175,8 @@ describe('DashParser.SegmentBase', function() {
     parser.start('')
         .then(function(manifest) {
           expect(manifest).toEqual(
-              makeManifestFromInit('special.mp4', 0, null, 20));
-          return callCreateSegmentIndex(manifest);
+              Dash.makeManifestFromInit('special.mp4', 0, null, 20));
+          return Dash.callCreateSegmentIndex(manifest);
         })
         .then(function() {
           expect(engine.request.calls.count()).toBe(2);
@@ -194,7 +203,7 @@ describe('DashParser.SegmentBase', function() {
       var error = new shaka.util.Error(
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_UNSUPPORTED_CONTAINER);
-      dashTestFails(done, source, error);
+      Dash.testFails(done, source, error);
     });
 
     it('missing init segment for WebM', function(done) {
@@ -213,7 +222,7 @@ describe('DashParser.SegmentBase', function() {
       var error = new shaka.util.Error(
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_WEBM_MISSING_INIT);
-      dashTestFails(done, source, error);
+      Dash.testFails(done, source, error);
     });
 
     it('no @indexRange nor RepresentationIndex', function(done) {
@@ -234,7 +243,7 @@ describe('DashParser.SegmentBase', function() {
       var error = new shaka.util.Error(
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_NO_SEGMENT_INFO);
-      dashTestFails(done, source, error);
+      Dash.testFails(done, source, error);
     });
   });
 });

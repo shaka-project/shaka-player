@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+goog.provide('shaka.test.Dash');
+
 
 
 /**
@@ -72,7 +74,7 @@ dashFakeNetEngine.prototype.expectRangeRequest = function(
  * @param {shaka.media.Manifest} manifest
  * @param {!Array.<shaka.media.SegmentReference>} references
  */
-function verifySegmentIndex(manifest, references) {
+shaka.test.Dash.verifySegmentIndex = function(manifest, references) {
   expect(manifest).toBeTruthy();
   var stream = manifest.periods[0].streamSets[0].streams[0];
   expect(stream).toBeTruthy();
@@ -95,7 +97,7 @@ function verifySegmentIndex(manifest, references) {
   var positionAfterEnd =
       stream.findSegmentPosition(references[references.length - 1].endTime);
   expect(positionAfterEnd).toBe(null);
-}
+};
 
 
 /**
@@ -105,15 +107,18 @@ function verifySegmentIndex(manifest, references) {
  * @param {string} manifestText
  * @param {!Array.<shaka.media.SegmentReference>} references
  */
-function dashTestSegmentIndex(done, manifestText, references) {
+shaka.test.Dash.testSegmentIndex =
+    function(done, manifestText, references) {
   var dummyUri = 'dummy://foo';
   var fakeNetEngine = new dashFakeNetEngine(manifestText);
   var dashParser = new shaka.dash.DashParser(fakeNetEngine, {}, function() {});
   dashParser.start(dummyUri)
-      .then(function(manifest) { verifySegmentIndex(manifest, references); })
+      .then(function(manifest) {
+        shaka.test.Dash.verifySegmentIndex(manifest, references);
+      })
       .catch(fail)
       .then(done);
-}
+};
 
 
 /**
@@ -123,7 +128,7 @@ function dashTestSegmentIndex(done, manifestText, references) {
  * @param {string} manifestText
  * @param {!shaka.util.Error} expectedError
  */
-function dashTestFails(done, manifestText, expectedError) {
+shaka.test.Dash.testFails = function(done, manifestText, expectedError) {
   var fakeNetEngine = new dashFakeNetEngine(manifestText);
   var dashParser = new shaka.dash.DashParser(fakeNetEngine, {}, function() {});
   shaka.log.setLevel(shaka.log.Level.NONE);
@@ -132,7 +137,7 @@ function dashTestFails(done, manifestText, expectedError) {
       .catch(function(error) { expect(error).toEqual(expectedError); })
       .then(function() { shaka.log.setLevel(shaka.log.MAX_LEVEL); })
       .then(done);
-}
+};
 
 
 /**
@@ -143,7 +148,8 @@ function dashTestFails(done, manifestText, expectedError) {
  * @param {number=} opt_start
  * @return {string}
  */
-function makeSimpleManifestText(lines, opt_duration, opt_start) {
+shaka.test.Dash.makeSimpleManifestText =
+    function(lines, opt_duration, opt_start) {
   var attr = '';
   if (opt_duration)
     attr = 'duration="PT' + opt_duration + 'S"';
@@ -164,7 +170,7 @@ function makeSimpleManifestText(lines, opt_duration, opt_start) {
     '</MPD>'
   ];
   return start.concat(lines, end).join('\n');
-}
+};
 
 
 /**
@@ -174,7 +180,7 @@ function makeSimpleManifestText(lines, opt_duration, opt_start) {
  * @param {!Array.<shaka.media.StreamSet>} streamSets
  * @return {shaka.media.Manifest}
  */
-function makeManifestFromStreamSets(streamSets) {
+shaka.test.Dash.makeManifestFromStreamSets = function(streamSets) {
   return jasmine.objectContaining({
     periods: [
       jasmine.objectContaining({
@@ -182,7 +188,7 @@ function makeManifestFromStreamSets(streamSets) {
       })
     ]
   });
-}
+};
 
 
 /**
@@ -196,8 +202,9 @@ function makeManifestFromStreamSets(streamSets) {
  * @param {number=} opt_pto The presentationTimeOffset of the stream.
  * @return {shaka.media.Manifest}
  */
-function makeManifestFromInit(uri, startByte, endByte, opt_pto) {
-  return makeManifestFromStreamSets([jasmine.objectContaining({
+shaka.test.Dash.makeManifestFromInit = function(
+    uri, startByte, endByte, opt_pto) {
+  return shaka.test.Dash.makeManifestFromStreamSets([jasmine.objectContaining({
     streams: [jasmine.objectContaining({
       presentationTimeOffset: (opt_pto || 0),
       createSegmentIndex: jasmine.any(Function),
@@ -206,7 +213,7 @@ function makeManifestFromInit(uri, startByte, endByte, opt_pto) {
           ['http://example.com/' + uri], startByte, endByte)
     })]
   })]);
-}
+};
 
 
 /**
@@ -217,13 +224,13 @@ function makeManifestFromInit(uri, startByte, endByte, opt_pto) {
  * @param {shaka.media.Manifest} manifest
  * @return {!Promise}
  */
-function callCreateSegmentIndex(manifest) {
+shaka.test.Dash.callCreateSegmentIndex = function(manifest) {
   var stream = manifest.periods[0].streamSets[0].streams[0];
   shaka.log.setLevel(shaka.log.Level.NONE);
   return stream.createSegmentIndex().then(fail).catch(function() {
     shaka.log.setLevel(shaka.log.MAX_LOG_LEVEL);
   });
-}
+};
 
 
 /**
@@ -237,13 +244,14 @@ function callCreateSegmentIndex(manifest) {
  * @param {?number=} opt_endByte
  * @return {!shaka.media.SegmentReference}
  */
-function makeReference(uri, position, start, end, opt_startByte, opt_endByte) {
+shaka.test.Dash.makeReference =
+    function(uri, position, start, end, opt_startByte, opt_endByte) {
   var base = 'http://example.com/';
   var startByte = opt_startByte || 0;
   var endByte = opt_endByte || null;
   return new shaka.media.SegmentReference(
       position, start, end, [base + uri], startByte, endByte);
-}
+};
 
 
 /**
@@ -255,8 +263,10 @@ function makeReference(uri, position, start, end, opt_startByte, opt_endByte) {
  * @param {string} extraAttrs
  * @param {!Array.<string>} extraChildren
  */
-function dashMakeTimelineTests(type, extraAttrs, extraChildren) {
+shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
   describe('SegmentTimeline', function() {
+    var Dash = shaka.test.Dash;
+
     /**
      * @param {!Array.<string>} timeline
      * @param {string} testAttrs
@@ -268,7 +278,7 @@ function dashMakeTimelineTests(type, extraAttrs, extraChildren) {
       var start = '<' + type + ' ' + extraAttrs + ' ' + testAttrs + '>';
       var end = '</' + type + '>';
       var lines = [].concat(start, extraChildren, timeline, end);
-      return makeSimpleManifestText(lines, opt_dur, opt_start);
+      return Dash.makeSimpleManifestText(lines, opt_dur, opt_start);
     };
 
     // All tests should have 5 segments and have the relative URIs:
@@ -285,13 +295,13 @@ function dashMakeTimelineTests(type, extraAttrs, extraChildren) {
       ];
       var source = makeManifestText(timeline, '');
       var references = [
-        makeReference('s1.mp4', 1, 34, 46),
-        makeReference('s2.mp4', 2, 46, 67),
-        makeReference('s3.mp4', 3, 67, 111),
-        makeReference('s4.mp4', 4, 111, 121),
-        makeReference('s5.mp4', 5, 121, 131)
+        Dash.makeReference('s1.mp4', 1, 34, 46),
+        Dash.makeReference('s2.mp4', 2, 46, 67),
+        Dash.makeReference('s3.mp4', 3, 67, 111),
+        Dash.makeReference('s4.mp4', 4, 111, 121),
+        Dash.makeReference('s5.mp4', 5, 121, 131)
       ];
-      dashTestSegmentIndex(done, source, references);
+      Dash.testSegmentIndex(done, source, references);
     });
 
     it('supports repetitions', function(done) {
@@ -304,13 +314,13 @@ function dashMakeTimelineTests(type, extraAttrs, extraChildren) {
       ];
       var source = makeManifestText(timeline, '');
       var references = [
-        makeReference('s1.mp4', 1, 34, 46),
-        makeReference('s2.mp4', 2, 46, 56),
-        makeReference('s3.mp4', 3, 56, 66),
-        makeReference('s4.mp4', 4, 66, 76),
-        makeReference('s5.mp4', 5, 76, 120)
+        Dash.makeReference('s1.mp4', 1, 34, 46),
+        Dash.makeReference('s2.mp4', 2, 46, 56),
+        Dash.makeReference('s3.mp4', 3, 56, 66),
+        Dash.makeReference('s4.mp4', 4, 66, 76),
+        Dash.makeReference('s5.mp4', 5, 76, 120)
       ];
-      dashTestSegmentIndex(done, source, references);
+      Dash.testSegmentIndex(done, source, references);
     });
 
     it('supports negative repetitions', function(done) {
@@ -324,13 +334,13 @@ function dashMakeTimelineTests(type, extraAttrs, extraChildren) {
       ];
       var source = makeManifestText(timeline, '');
       var references = [
-        makeReference('s1.mp4', 1, 22, 30),
-        makeReference('s2.mp4', 2, 30, 40),
-        makeReference('s3.mp4', 3, 40, 50),
-        makeReference('s4.mp4', 4, 50, 62),
-        makeReference('s5.mp4', 5, 62, 72)
+        Dash.makeReference('s1.mp4', 1, 22, 30),
+        Dash.makeReference('s2.mp4', 2, 30, 40),
+        Dash.makeReference('s3.mp4', 3, 40, 50),
+        Dash.makeReference('s4.mp4', 4, 50, 62),
+        Dash.makeReference('s5.mp4', 5, 62, 72)
       ];
-      dashTestSegmentIndex(done, source, references);
+      Dash.testSegmentIndex(done, source, references);
     });
 
     it('supports negative repetitions at end', function(done) {
@@ -342,13 +352,13 @@ function dashMakeTimelineTests(type, extraAttrs, extraChildren) {
       ];
       var source = makeManifestText(timeline, '', 50 /* duration */);
       var references = [
-        makeReference('s1.mp4', 1, 5, 10),
-        makeReference('s2.mp4', 2, 10, 20),
-        makeReference('s3.mp4', 3, 20, 30),
-        makeReference('s4.mp4', 4, 30, 40),
-        makeReference('s5.mp4', 5, 40, 50)
+        Dash.makeReference('s1.mp4', 1, 5, 10),
+        Dash.makeReference('s2.mp4', 2, 10, 20),
+        Dash.makeReference('s3.mp4', 3, 20, 30),
+        Dash.makeReference('s4.mp4', 4, 30, 40),
+        Dash.makeReference('s5.mp4', 5, 40, 50)
       ];
-      dashTestSegmentIndex(done, source, references);
+      Dash.testSegmentIndex(done, source, references);
     });
 
     it('gives times relative to period', function(done) {
@@ -360,13 +370,13 @@ function dashMakeTimelineTests(type, extraAttrs, extraChildren) {
       var source =
           makeManifestText(timeline, '', 50 /* duration */, 30 /* start */);
       var references = [
-        makeReference('s1.mp4', 1, 0, 10),
-        makeReference('s2.mp4', 2, 10, 20),
-        makeReference('s3.mp4', 3, 20, 30),
-        makeReference('s4.mp4', 4, 30, 40),
-        makeReference('s5.mp4', 5, 40, 50)
+        Dash.makeReference('s1.mp4', 1, 0, 10),
+        Dash.makeReference('s2.mp4', 2, 10, 20),
+        Dash.makeReference('s3.mp4', 3, 20, 30),
+        Dash.makeReference('s4.mp4', 4, 30, 40),
+        Dash.makeReference('s5.mp4', 5, 40, 50)
       ];
-      dashTestSegmentIndex(done, source, references);
+      Dash.testSegmentIndex(done, source, references);
     });
 
     it('supports @timescale', function(done) {
@@ -381,13 +391,13 @@ function dashMakeTimelineTests(type, extraAttrs, extraChildren) {
       ];
       var source = makeManifestText(timeline, 'timescale="9000"');
       var references = [
-        makeReference('s1.mp4', 1, 2, 2.5),
-        makeReference('s2.mp4', 2, 2.5, 3.5),
-        makeReference('s3.mp4', 3, 3.5, 7),
-        makeReference('s4.mp4', 4, 7, 8),
-        makeReference('s5.mp4', 5, 8, 9)
+        Dash.makeReference('s1.mp4', 1, 2, 2.5),
+        Dash.makeReference('s2.mp4', 2, 2.5, 3.5),
+        Dash.makeReference('s3.mp4', 3, 3.5, 7),
+        Dash.makeReference('s4.mp4', 4, 7, 8),
+        Dash.makeReference('s5.mp4', 5, 8, 9)
       ];
-      dashTestSegmentIndex(done, source, references);
+      Dash.testSegmentIndex(done, source, references);
     });
   });
-}
+};

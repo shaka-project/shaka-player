@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+goog.provide('shaka.test.Util');
+
 
 /**
  * Processes some number of "instantaneous" operations.
@@ -46,13 +48,13 @@
  * @return {!Promise}
  * TODO: Cleanup with patch to jasmine-core.
  */
-function processInstantaneousOperations(n, opt_setTimeout) {
+shaka.test.Util.processInstantaneousOperations = function(n, opt_setTimeout) {
   if (n <= 0) return Promise.resolve();
-  return delay(0.001, opt_setTimeout).then(function() {
+  return shaka.test.Util.delay(0.001, opt_setTimeout).then(function() {
     jasmine.clock().tick(0);
-    return processInstantaneousOperations(--n, opt_setTimeout);
+    return shaka.test.Util.processInstantaneousOperations(--n, opt_setTimeout);
   });
-}
+};
 
 
 /**
@@ -66,12 +68,12 @@ function processInstantaneousOperations(n, opt_setTimeout) {
  * @return {!Promise} A promise which resolves after |duration| seconds of
  *     simulated time.
  */
-function fakeEventLoop(duration, opt_setTimeout, opt_onTick) {
+shaka.test.Util.fakeEventLoop = function(duration, opt_setTimeout, opt_onTick) {
   var async = Promise.resolve();
   for (var time = 0; time < duration; ++time) {
     async = async.then(function() {
       // We shouldn't need more than 5 rounds.
-      return processInstantaneousOperations(5, opt_setTimeout);
+      return shaka.test.Util.processInstantaneousOperations(5, opt_setTimeout);
     }).then(function(currentTime) {
       if (opt_onTick)
         opt_onTick(currentTime);
@@ -80,21 +82,21 @@ function fakeEventLoop(duration, opt_setTimeout, opt_onTick) {
     }.bind(null, time));
   }
   return async;
-}
+};
 
 
 /**
  * Capture a Promise's status and attach it to the Promise.
  * @param {!Promise} promise
  */
-function capturePromiseStatus(promise) {
+shaka.test.Util.capturePromiseStatus = function(promise) {
   promise.status = 'pending';
   promise.then(function() {
     promise.status = 'resolved';
   }, function() {
     promise.status = 'rejected';
   });
-}
+};
 
 
 /**
@@ -104,12 +106,12 @@ function capturePromiseStatus(promise) {
  * @param {function(function(), number)=} opt_setTimeout
  * @return {!Promise}
  */
-function delay(seconds, opt_setTimeout) {
+shaka.test.Util.delay = function(seconds, opt_setTimeout) {
   return new Promise(function(resolve, reject) {
     var timeout = opt_setTimeout || setTimeout;
     timeout(resolve, seconds * 1000.0);
   });
-}
+};
 
 
 /**

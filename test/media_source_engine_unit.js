@@ -23,8 +23,10 @@ describe('MediaSourceEngine', function() {
   var mockMediaSource;
   var dummyData = new ArrayBuffer();
   var mediaSourceEngine;
+  var Util;
 
   beforeAll(function() {
+    Util = shaka.test.Util;
     originalMediaSource = window.MediaSource;
     // Since this is not an integration test, we don't want MediaSourceEngine to
     // fail assertions based on browser support for types.  Pretend that all
@@ -202,8 +204,8 @@ describe('MediaSourceEngine', function() {
     it('queues operations on a single SourceBuffer', function(done) {
       var p1 = mediaSourceEngine.appendBuffer('audio', 1);
       var p2 = mediaSourceEngine.appendBuffer('audio', 2);
-      capturePromiseStatus(p1);
-      capturePromiseStatus(p2);
+      Util.capturePromiseStatus(p1);
+      Util.capturePromiseStatus(p2);
 
       expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
       expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalledWith(2);
@@ -228,9 +230,9 @@ describe('MediaSourceEngine', function() {
       var p1 = mediaSourceEngine.appendBuffer('audio', 1);
       var p2 = mediaSourceEngine.appendBuffer('audio', 2);
       var p3 = mediaSourceEngine.appendBuffer('video', 3);
-      capturePromiseStatus(p1);
-      capturePromiseStatus(p2);
-      capturePromiseStatus(p3);
+      Util.capturePromiseStatus(p1);
+      Util.capturePromiseStatus(p2);
+      Util.capturePromiseStatus(p3);
 
       expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
       expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalledWith(2);
@@ -271,11 +273,11 @@ describe('MediaSourceEngine', function() {
       var p1 = mediaSourceEngine.appendBuffer('audio', 1);
       var p2 = mediaSourceEngine.appendBuffer('audio', 2);
       var p3 = mediaSourceEngine.appendBuffer('audio', 3);
-      capturePromiseStatus(p1);
-      capturePromiseStatus(p2);
-      capturePromiseStatus(p3);
+      Util.capturePromiseStatus(p1);
+      Util.capturePromiseStatus(p2);
+      Util.capturePromiseStatus(p3);
 
-      delay(0.1).then(function() {
+      Util.delay(0.1).then(function() {
         expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
         expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(2);
         expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(3);
@@ -328,8 +330,8 @@ describe('MediaSourceEngine', function() {
     it('queues operations on a single SourceBuffer', function(done) {
       var p1 = mediaSourceEngine.remove('audio', 1, 5);
       var p2 = mediaSourceEngine.remove('audio', 6, 10);
-      capturePromiseStatus(p1);
-      capturePromiseStatus(p2);
+      Util.capturePromiseStatus(p1);
+      Util.capturePromiseStatus(p2);
 
       expect(audioSourceBuffer.remove).toHaveBeenCalledWith(1, 5);
       expect(audioSourceBuffer.remove).not.toHaveBeenCalledWith(6, 10);
@@ -354,9 +356,9 @@ describe('MediaSourceEngine', function() {
       var p1 = mediaSourceEngine.remove('audio', 1, 5);
       var p2 = mediaSourceEngine.remove('audio', 6, 10);
       var p3 = mediaSourceEngine.remove('video', 3, 8);
-      capturePromiseStatus(p1);
-      capturePromiseStatus(p2);
-      capturePromiseStatus(p3);
+      Util.capturePromiseStatus(p1);
+      Util.capturePromiseStatus(p2);
+      Util.capturePromiseStatus(p3);
 
       expect(audioSourceBuffer.remove).toHaveBeenCalledWith(1, 5);
       expect(audioSourceBuffer.remove).not.toHaveBeenCalledWith(6, 10);
@@ -397,11 +399,11 @@ describe('MediaSourceEngine', function() {
       var p1 = mediaSourceEngine.remove('audio', 1, 2);
       var p2 = mediaSourceEngine.remove('audio', 2, 3);
       var p3 = mediaSourceEngine.remove('audio', 3, 4);
-      capturePromiseStatus(p1);
-      capturePromiseStatus(p2);
-      capturePromiseStatus(p3);
+      Util.capturePromiseStatus(p1);
+      Util.capturePromiseStatus(p2);
+      Util.capturePromiseStatus(p3);
 
-      delay(0.1).then(function() {
+      Util.delay(0.1).then(function() {
         expect(audioSourceBuffer.remove).toHaveBeenCalledWith(1, 2);
         expect(audioSourceBuffer.remove).toHaveBeenCalledWith(2, 3);
         expect(audioSourceBuffer.remove).toHaveBeenCalledWith(3, 4);
@@ -456,9 +458,9 @@ describe('MediaSourceEngine', function() {
       var p1 = mediaSourceEngine.appendBuffer('audio', 1);
       var p2 = mediaSourceEngine.appendBuffer('video', 1);
       var p3 = mediaSourceEngine.endOfStream();
-      capturePromiseStatus(p1);
-      capturePromiseStatus(p2);
-      capturePromiseStatus(p3);
+      Util.capturePromiseStatus(p1);
+      Util.capturePromiseStatus(p2);
+      Util.capturePromiseStatus(p3);
 
       expect(mockMediaSource.endOfStream).not.toHaveBeenCalled();
       expect(p1.status).toBe('pending');
@@ -524,7 +526,7 @@ describe('MediaSourceEngine', function() {
         done();
       }).catch(function() {
         expect(mockMediaSource.endOfStream).toHaveBeenCalled();
-        return delay(0.1);
+        return Util.delay(0.1);
       }).then(function() {
         expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
         audioSourceBuffer.updateend();
@@ -553,9 +555,9 @@ describe('MediaSourceEngine', function() {
       var p1 = mediaSourceEngine.appendBuffer('audio', 1);
       var p2 = mediaSourceEngine.appendBuffer('video', 1);
       var p3 = mediaSourceEngine.setDuration(100);
-      capturePromiseStatus(p1);
-      capturePromiseStatus(p2);
-      capturePromiseStatus(p3);
+      Util.capturePromiseStatus(p1);
+      Util.capturePromiseStatus(p2);
+      Util.capturePromiseStatus(p3);
 
       expect(mockMediaSource.durationSetter_).not.toHaveBeenCalled();
       expect(p1.status).toBe('pending');
@@ -621,7 +623,7 @@ describe('MediaSourceEngine', function() {
         done();
       }).catch(function() {
         expect(mockMediaSource.durationSetter_).toHaveBeenCalled();
-        return delay(0.1);
+        return Util.delay(0.1);
       }).then(function() {
         expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
         audioSourceBuffer.updateend();
@@ -643,17 +645,17 @@ describe('MediaSourceEngine', function() {
       mediaSourceEngine.appendBuffer('video', 1);
 
       var p = mediaSourceEngine.destroy();
-      capturePromiseStatus(p);
+      Util.capturePromiseStatus(p);
 
       expect(p.status).toBe('pending');
-      delay(0.1).then(function() {
+      Util.delay(0.1).then(function() {
         expect(p.status).toBe('pending');
         audioSourceBuffer.updateend();
-        return delay(0.1);
+        return Util.delay(0.1);
       }).then(function() {
         expect(p.status).toBe('pending');
         videoSourceBuffer.updateend();
-        return delay(0.1);
+        return Util.delay(0.1);
       }).then(function() {
         expect(p.status).toBe('resolved');
         done();
@@ -663,12 +665,12 @@ describe('MediaSourceEngine', function() {
     it('resolves even when a pending operation fails', function(done) {
       var p1 = mediaSourceEngine.appendBuffer('audio', 1);
       var p2 = mediaSourceEngine.destroy();
-      capturePromiseStatus(p1);
-      capturePromiseStatus(p2);
+      Util.capturePromiseStatus(p1);
+      Util.capturePromiseStatus(p2);
 
       audioSourceBuffer.error();
       audioSourceBuffer.updateend();
-      delay(0.1).then(function() {
+      Util.delay(0.1).then(function() {
         expect(p1.status).toBe('rejected');
         expect(p2.status).toBe('resolved');
         done();
@@ -678,14 +680,14 @@ describe('MediaSourceEngine', function() {
     it('waits for blocking operations to complete', function(done) {
       var p1 = mediaSourceEngine.endOfStream();
       var p2 = mediaSourceEngine.destroy();
-      capturePromiseStatus(p1);
-      capturePromiseStatus(p2);
+      Util.capturePromiseStatus(p1);
+      Util.capturePromiseStatus(p2);
 
       expect(p1.status).toBe('pending');
       expect(p2.status).toBe('pending');
       p1.then(function() {
         expect(p2.status).toBe('pending');
-        return delay(0.1);
+        return Util.delay(0.1);
       }).then(function() {
         expect(p2.status).toBe('resolved');
         done();
@@ -695,22 +697,22 @@ describe('MediaSourceEngine', function() {
     it('cancels operations that have not yet started', function(done) {
       mediaSourceEngine.appendBuffer('audio', 1);
       var rejected = mediaSourceEngine.appendBuffer('audio', 2);
-      capturePromiseStatus(rejected);
+      Util.capturePromiseStatus(rejected);
 
       expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
       expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalledWith(2);
 
       var p = mediaSourceEngine.destroy();
-      capturePromiseStatus(p);
+      Util.capturePromiseStatus(p);
 
       expect(p.status).toBe('pending');
-      delay(0.1).then(function() {
+      Util.delay(0.1).then(function() {
         expect(p.status).toBe('pending');
         expect(rejected.status).toBe('rejected');
         expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
         expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalledWith(2);
         audioSourceBuffer.updateend();
-        return delay(0.1);
+        return Util.delay(0.1);
       }).then(function() {
         expect(p.status).toBe('resolved');
         expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalledWith(2);
@@ -722,18 +724,18 @@ describe('MediaSourceEngine', function() {
       var p1 = mediaSourceEngine.appendBuffer('audio', 1);
       var p2 = mediaSourceEngine.endOfStream();
       var p3 = mediaSourceEngine.destroy();
-      capturePromiseStatus(p1);
-      capturePromiseStatus(p2);
-      capturePromiseStatus(p3);
+      Util.capturePromiseStatus(p1);
+      Util.capturePromiseStatus(p2);
+      Util.capturePromiseStatus(p3);
 
       expect(p1.status).toBe('pending');
       expect(p2.status).toBe('pending');
       expect(p3.status).toBe('pending');
       audioSourceBuffer.updateend();
-      delay(0.1).then(function() {
+      Util.delay(0.1).then(function() {
         expect(p1.status).toBe('resolved');
         expect(p2.status).toBe('rejected');
-        return delay(0.1);
+        return Util.delay(0.1);
       }).then(function() {
         expect(p3.status).toBe('resolved');
         done();
@@ -743,7 +745,7 @@ describe('MediaSourceEngine', function() {
     it('prevents new operations from being added', function(done) {
       var p = mediaSourceEngine.destroy();
       var rejected = mediaSourceEngine.appendBuffer('audio', 1);
-      capturePromiseStatus(rejected);
+      Util.capturePromiseStatus(rejected);
 
       // The promise has already been rejected, but our capture requires 1 tick.
       Promise.resolve().then(function() {
