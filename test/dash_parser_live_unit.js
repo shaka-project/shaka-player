@@ -63,8 +63,8 @@ describe('DashParser.Live', function() {
   function waitForManifestUpdate() {
     // Tick the virtual clock to trigger an update.
     jasmine.clock().tick(updateTime * 1000);
-    // Further delay since updates use Promises.
-    return delay(0.1, realTimeout);
+    // Resolve all Promises.
+    return processInstantaneousOperations(5, realTimeout);
   }
 
   /**

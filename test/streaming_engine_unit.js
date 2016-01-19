@@ -17,7 +17,6 @@
 
 describe('StreamingEngine', function() {
   var originalSetTimeout;
-  var currentTime;
 
   var dummyInitSegments;
   var dummySegments;
@@ -54,89 +53,19 @@ describe('StreamingEngine', function() {
   var onStartupComplete;
   var streamingEngine;
 
+  function runTest() {
+    function onTick(currentTime) {
+      if (playing) {
+        playheadTime++;
+      }
+    }
+    // No test should require more than 60 seconds of simulated time.
+    return fakeEventLoop(60, originalSetTimeout, onTick);
+  }
+
   beforeAll(function() {
     originalSetTimeout = window.setTimeout;
   });
-
-  /**
-   * Processes some number of "instantaneous" operations.
-   *
-   * Instantaneous operations include Promise resolution (e.g.,
-   * Promise.resolve()) and 0 second timeouts. This recursively processes
-   * these operations, so if for example, one wrote
-   *
-   * Promise.resolve().then(function() {
-   *   var callback = function() {
-   *     Promise.resolve().then(function() {
-   *       console.log('Hello world!');
-   *     });
-   *   }
-   *   window.setTimeout(callback, 0);
-   * });
-   *
-   * var p = processInstantaneousOperations(10);
-   *
-   * After |p| resolves, "Hello world!" will be written to the console.
-   *
-   * The parameter |n| controls the number of rounds to perform. This is
-   * necessary since we cannot determine when there are no timeouts remaining
-   * at the current time; to determine this we would require access to hidden
-   * variables in Jasmine's Clock implementation.
-   *
-   * @param {number} n The number of rounds to perform.
-   * @return {!Promise}
-   * TODO: Move to separate file.
-   * TODO: Cleanup with patch to jasmine-core.
-   */
-  function processInstantaneousOperations(n) {
-    if (n <= 0) return Promise.resolve();
-    return realDelay(0.001).then(function() {
-      jasmine.clock().tick(0);
-      return processInstantaneousOperations(--n);
-    });
-  }
-
-  /**
-   * Calls the real window.setTimeout().
-   * @param {number} seconds
-   * TODO: Move to separate file.
-   */
-  function realDelay(seconds) {
-    return new Promise(function(resolve, reject) {
-      originalSetTimeout(resolve, seconds * 1000);
-    });
-  }
-
-  /**
-   * Fakes an event loop. Each tick processes some number of instantaneous
-   * operations and advances the simulated clock forward by 1 second.  If
-   * |playing| is true then each tick also advances the fake playhead forward
-   * by 1 second as well.
-   *
-   * @return {!Promise} A promise which resolves after 60 seconds of simulated
-   *     time.
-   * TODO: Move to separate file.
-   */
-  function fakeEventLoop() {
-    // Simulate 60 seconds. No test will require more than this amount of
-    // simulated time.
-    var async = Promise.resolve();
-    for (var i = 0; i < 60; ++i) {
-      async = async.then(function() {
-        // We shouldn't need more than 5 rounds.
-        return processInstantaneousOperations(5);
-      }).then(function() {
-        currentTime++;
-        if (playing) {
-          playheadTime++;
-        }
-        jasmine.clock().tick(1000);
-        return Promise.resolve();
-      });
-    }
-
-    return async;
-  }
 
   beforeEach(function() {
     jasmine.clock().install();
@@ -162,8 +91,6 @@ describe('StreamingEngine', function() {
     // follow the pattern PERIOD_TYPE_POSITION, e.g., "1_text_2" or
     // "2_video_1". The first segment in each Period has position 1, the second
     // segment, position 2.
-
-    currentTime = 0;
 
     // Create dummy init segments.
     dummyInitSegments = {
@@ -404,8 +331,6 @@ describe('StreamingEngine', function() {
     });
 
     onStartupComplete.and.callFake(function() {
-      expect(currentTime).toBe(0);
-
       // Verify buffers.
       expect(initSegments.audio).toEqual([true, false]);
       expect(initSegments.video).toEqual([true, false]);
@@ -469,7 +394,7 @@ describe('StreamingEngine', function() {
     };
     streamingEngine.init(streamsByType);
 
-    fakeEventLoop().then(function() {
+    runTest().then(function() {
       expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
 
       // Verify buffers.
@@ -492,7 +417,6 @@ describe('StreamingEngine', function() {
      *     the presentation timeline.
      */
     function setupFakeGetTime(startTime) {
-      expect(currentTime).toBe(0);
       playheadTime = startTime;
       playing = true;
       playhead.getTime.and.callFake(function() {
@@ -533,7 +457,7 @@ describe('StreamingEngine', function() {
       };
       streamingEngine.init(streamsByType);
 
-      fakeEventLoop().then(function() {
+      runTest().then(function() {
         expect(onBufferNewPeriod).not.toHaveBeenCalled();
         expect(mediaSourceEngine.appendBuffer).not.toHaveBeenCalled();
         expect(mediaSourceEngine.remove).not.toHaveBeenCalled();
@@ -590,7 +514,7 @@ describe('StreamingEngine', function() {
       };
       streamingEngine.init(streamsByType);
 
-      fakeEventLoop().then(function() {
+      runTest().then(function() {
         // Already buffered to the end of the presentation so neither of these
         // should have been called again.
         expect(onBufferNewPeriod).not.toHaveBeenCalled();
@@ -651,7 +575,7 @@ describe('StreamingEngine', function() {
       };
       streamingEngine.init(streamsByType);
 
-      fakeEventLoop().then(function() {
+      runTest().then(function() {
         expect(mediaSourceEngine.appendBuffer).not.toHaveBeenCalled();
         expect(mediaSourceEngine.remove).not.toHaveBeenCalled();
         expect(mediaSourceEngine.clear).not.toHaveBeenCalled();
@@ -733,7 +657,7 @@ describe('StreamingEngine', function() {
       };
       streamingEngine.init(streamsByType);
 
-      fakeEventLoop().then(function() {
+      runTest().then(function() {
         expect(mediaSourceEngine.appendBuffer).not.toHaveBeenCalled();
         expect(mediaSourceEngine.remove).not.toHaveBeenCalled();
         expect(mediaSourceEngine.clear).not.toHaveBeenCalled();
@@ -771,7 +695,7 @@ describe('StreamingEngine', function() {
       };
       streamingEngine.init(streamsByType);
 
-      fakeEventLoop();
+      runTest();
     });
 
     it('from post startup Stream setup', function(done) {
@@ -794,7 +718,7 @@ describe('StreamingEngine', function() {
       };
       streamingEngine.init(streamsByType);
 
-      fakeEventLoop();
+      runTest();
     });
 
     it('from failed init segment append during startup', function(done) {
@@ -823,7 +747,7 @@ describe('StreamingEngine', function() {
       };
       streamingEngine.init(streamsByType);
 
-      fakeEventLoop();
+      runTest();
     });
 
     it('from failed media segment append during startup', function(done) {
@@ -852,7 +776,7 @@ describe('StreamingEngine', function() {
       };
       streamingEngine.init(streamsByType);
 
-      fakeEventLoop();
+      runTest();
     });
   });
 

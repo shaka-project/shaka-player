@@ -17,6 +17,73 @@
 
 
 /**
+ * Processes some number of "instantaneous" operations.
+ *
+ * Instantaneous operations include Promise resolution (e.g.,
+ * Promise.resolve()) and 0 second timeouts. This recursively processes
+ * these operations, so if for example, one wrote
+ *
+ * Promise.resolve().then(function() {
+ *   var callback = function() {
+ *     Promise.resolve().then(function() {
+ *       console.log('Hello world!');
+ *     });
+ *   }
+ *   window.setTimeout(callback, 0);
+ * });
+ *
+ * var p = processInstantaneousOperations(10);
+ *
+ * After |p| resolves, "Hello world!" will be written to the console.
+ *
+ * The parameter |n| controls the number of rounds to perform. This is
+ * necessary since we cannot determine when there are no timeouts remaining
+ * at the current time; to determine this we would require access to hidden
+ * variables in Jasmine's Clock implementation.
+ *
+ * @param {number} n The number of rounds to perform.
+ * @param {function(function(), number)=} opt_setTimeout
+ * @return {!Promise}
+ * TODO: Cleanup with patch to jasmine-core.
+ */
+function processInstantaneousOperations(n, opt_setTimeout) {
+  if (n <= 0) return Promise.resolve();
+  return delay(0.001, opt_setTimeout).then(function() {
+    jasmine.clock().tick(0);
+    return processInstantaneousOperations(--n, opt_setTimeout);
+  });
+}
+
+
+/**
+ * Fakes an event loop. Each tick processes some number of instantaneous
+ * operations and advances the simulated clock forward by 1 second. Calls
+ * opt_onTick just before each tick if it's specified.
+ *
+ * @param {number} duration The number of seconds of simulated time.
+ * @param {function(function(), number)=} opt_setTimeout
+ * @param {function(number)=} opt_onTick
+ * @return {!Promise} A promise which resolves after |duration| seconds of
+ *     simulated time.
+ */
+function fakeEventLoop(duration, opt_setTimeout, opt_onTick) {
+  var async = Promise.resolve();
+  for (var time = 0; time < duration; ++time) {
+    async = async.then(function() {
+      // We shouldn't need more than 5 rounds.
+      return processInstantaneousOperations(5, opt_setTimeout);
+    }).then(function(currentTime) {
+      if (opt_onTick)
+        opt_onTick(currentTime);
+      jasmine.clock().tick(1000);
+      return Promise.resolve();
+    }.bind(null, time));
+  }
+  return async;
+}
+
+
+/**
  * Capture a Promise's status and attach it to the Promise.
  * @param {!Promise} promise
  */
