@@ -50,12 +50,11 @@ describe('HttpPlugin', function() {
   });
 
   it('sets the correct fields', function(done) {
-    var request = {
-      uris: ['https://foo.bar/'],
-      allowCrossSiteCredentials: true,
-      method: 'POST',
-      headers: {'FOO': 'BAR'}
-    };
+    var request = shaka.net.NetworkingEngine.makeRequest(['https://foo.bar/']);
+    request.allowCrossSiteCredentials = true;
+    request.method = 'POST';
+    request.headers['BAZ'] = '123';
+
     shaka.net.HttpPlugin(request.uris[0], request)
         .then(function() {
           var actual = jasmine.Ajax.requests.mostRecent();
@@ -63,7 +62,7 @@ describe('HttpPlugin', function() {
           expect(actual.url).toBe(request.uris[0]);
           expect(actual.method).toBe(request.method);
           expect(actual.withCredentials).toBe(true);
-          expect(actual.requestHeaders['FOO']).toBe('BAR');
+          expect(actual.requestHeaders['BAZ']).toBe('123');
         })
         .catch(fail)
         .then(done);
@@ -94,7 +93,7 @@ describe('HttpPlugin', function() {
   });
 
   function testSucceeds(uri, done, opt_overrideUri) {
-    var request = {uris: [uri]};
+    var request = shaka.net.NetworkingEngine.makeRequest([uri]);
     shaka.net.HttpPlugin(uri, request)
         .catch(fail)
         .then(function(response) {
@@ -111,7 +110,7 @@ describe('HttpPlugin', function() {
   }
 
   function testFails(uri, done) {
-    var request = {uris: [uri]};
+    var request = shaka.net.NetworkingEngine.makeRequest([uri]);
     shaka.net.HttpPlugin(uri, request)
         .then(fail)
         .catch(function() {

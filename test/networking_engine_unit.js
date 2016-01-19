@@ -48,10 +48,8 @@ describe('NetworkingEngine', function() {
 
   describe('retry', function() {
     it('will retry', function(done) {
-      var request = {
-        uris: ['reject://foo'],
-        retryParameters: {maxAttempts: 2, baseDelay: 0}
-      };
+      var request =
+          createRequest('reject://foo', {maxAttempts: 2, baseDelay: 0});
       rejectScheme.and.callFake(function() {
         if (rejectScheme.calls.count() == 1)
           return Promise.reject();
@@ -69,10 +67,8 @@ describe('NetworkingEngine', function() {
     });
 
     it('will retry twice', function(done) {
-      var request = {
-        uris: ['reject://foo'],
-        retryParameters: {maxAttempts: 3, baseDelay: 0}
-      };
+      var request =
+          createRequest('reject://foo', {maxAttempts: 3, baseDelay: 0});
       rejectScheme.and.callFake(function() {
         if (rejectScheme.calls.count() < 3)
           return Promise.reject();
@@ -90,10 +86,8 @@ describe('NetworkingEngine', function() {
     });
 
     it('will fail overall', function(done) {
-      var request = {
-        uris: ['reject://foo'],
-        retryParameters: {maxAttempts: 3, baseDelay: 0}
-      };
+      var request =
+          createRequest('reject://foo', {maxAttempts: 3, baseDelay: 0});
       networkingEngine.request(requestType, request)
           .then(fail)
           .catch(function() { expect(rejectScheme.calls.count()).toBe(3); })
@@ -123,15 +117,12 @@ describe('NetworkingEngine', function() {
       });
 
       it('uses baseDelay', function(done) {
-        var request = {
-          uris: ['reject://foo'],
-          retryParameters: {
-            maxAttempts: 2,
-            baseDelay: baseDelay,
-            fuzzFactor: 0,
-            backoffFactor: 2
-          }
-        };
+        var request = createRequest('reject://foo', {
+          maxAttempts: 2,
+          baseDelay: baseDelay,
+          fuzzFactor: 0,
+          backoffFactor: 2
+        });
         networkingEngine.request(requestType, request)
             .then(fail)
             .catch(function() {
@@ -143,15 +134,12 @@ describe('NetworkingEngine', function() {
       });
 
       it('uses backoffFactor', function(done) {
-        var request = {
-          uris: ['reject://foo'],
-          retryParameters: {
-            maxAttempts: 3,
-            baseDelay: baseDelay,
-            fuzzFactor: 0,
-            backoffFactor: 2
-          }
-        };
+        var request = createRequest('reject://foo', {
+          maxAttempts: 3,
+          baseDelay: baseDelay,
+          fuzzFactor: 0,
+          backoffFactor: 2
+        });
         networkingEngine.request(requestType, request)
             .then(fail)
             .catch(function() {
@@ -165,15 +153,12 @@ describe('NetworkingEngine', function() {
       });
 
       it('uses fuzzFactor', function(done) {
-        var request = {
-          uris: ['reject://foo'],
-          retryParameters: {
-            maxAttempts: 2,
-            baseDelay: baseDelay,
-            fuzzFactor: 1,
-            backoffFactor: 1
-          }
-        };
+        var request = createRequest('reject://foo', {
+          maxAttempts: 2,
+          baseDelay: baseDelay,
+          fuzzFactor: 1,
+          backoffFactor: 1
+        });
         networkingEngine.request(requestType, request)
             .then(fail)
             .catch(function() {
@@ -189,10 +174,8 @@ describe('NetworkingEngine', function() {
     });
 
     it('uses multiple URIs', function(done) {
-      var request = {
-        uris: ['reject://foo', 'resolve://foo'],
-        retryParameters: {maxAttempts: 3}
-      };
+      var request = createRequest('', {maxAttempts: 3});
+      request.uris = ['reject://foo', 'resolve://foo'];
       networkingEngine.request(requestType, request)
           .catch(fail)
           .then(function() {
@@ -241,10 +224,12 @@ describe('NetworkingEngine', function() {
     });
 
     it('passes correct arguments to plugin', function(done) {
-      var request = {uris: ['resolve://foo'], method: 'POST'};
+      var request = createRequest('resolve://foo');
+      request.method = 'POST';
+
       resolveScheme.and.callFake(function(uri, request) {
         expect(uri).toBe(request.uris[0]);
-        expect(request).toBe(request);
+        expect(request).toEqual(request);
         return Promise.resolve();
       });
       networkingEngine.request(requestType, request).catch(fail).then(done);
@@ -280,7 +265,7 @@ describe('NetworkingEngine', function() {
     });
 
     it('is given correct arguments', function(done) {
-      var request = {uris: ['resolve://foo']};
+      var request = createRequest('resolve://foo');
       networkingEngine.request(requestType, request)
           .catch(fail)
           .then(function() {
@@ -319,10 +304,8 @@ describe('NetworkingEngine', function() {
     });
 
     it('if throws will stop requests', function(done) {
-      var request = {
-        uris: ['resolve://foo'],
-        retryParameters: {maxAttempts: 3, baseRetryDelay: 0}
-      };
+      var request =
+          createRequest('resolve://foo', {maxAttempts: 3, baseRetryDelay: 0});
       filter.and.throwError(new Error());
       networkingEngine.request(requestType, request)
           .then(fail)
@@ -369,7 +352,7 @@ describe('NetworkingEngine', function() {
     });
 
     it('is given correct arguments', function(done) {
-      var request = {uris: ['resolve://foo']};
+      var request = createRequest('resolve://foo');
       networkingEngine.request(requestType, request)
           .catch(fail)
           .then(function() {
@@ -419,10 +402,8 @@ describe('NetworkingEngine', function() {
     });
 
     it('if throws will retry', function(done) {
-      var request = {
-        uris: ['resolve://foo'],
-        retryParameters: {maxAttempts: 2, baseRetryDelay: 0}
-      };
+      var request =
+          createRequest('resolve://foo', {maxAttempts: 2, baseRetryDelay: 0});
       filter.and.callFake(function() {
         if (filter.calls.count() == 1) throw new Error();
       });
@@ -438,7 +419,7 @@ describe('NetworkingEngine', function() {
 
   describe('destroy', function() {
     it('waits for all operations to complete', function(done) {
-      var request = {uris: ['resolve://foo']};
+      var request = createRequest('resolve://foo');
       var p = new shaka.util.PublicPromise();
       resolveScheme.and.returnValue(p);
 
@@ -467,7 +448,7 @@ describe('NetworkingEngine', function() {
     });
 
     it('resolves even when a request fails', function(done) {
-      var request = {uris: ['reject://foo']};
+      var request = createRequest('reject://foo');
       var p = new shaka.util.PublicPromise();
       rejectScheme.and.returnValue(p);
 
@@ -496,7 +477,7 @@ describe('NetworkingEngine', function() {
     });
 
     it('prevents new requests', function(done) {
-      var request = {uris: ['resolve://foo']};
+      var request = createRequest('resolve://foo');
       var p = new shaka.util.PublicPromise();
       resolveScheme.and.returnValue(p);
 
@@ -532,10 +513,8 @@ describe('NetworkingEngine', function() {
     });
 
     it('does not allow further retries', function(done) {
-      var request = {
-        uris: ['reject://foo'],
-        retryParameters: {maxAttempts: 3, baseDelay: 0}
-      };
+      var request =
+          createRequest('reject://foo', {maxAttempts: 3, baseDelay: 0});
 
       var p1 = new shaka.util.PublicPromise();
       var p2 = new shaka.util.PublicPromise();
@@ -572,7 +551,7 @@ describe('NetworkingEngine', function() {
     });
   });
 
-  function createRequest(uri) {
-    return { uris: [uri] };
+  function createRequest(uri, opt_retryParameters) {
+    return shaka.net.NetworkingEngine.makeRequest([uri], opt_retryParameters);
   }
 });

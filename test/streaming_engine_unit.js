@@ -276,7 +276,7 @@ describe('StreamingEngine', function() {
     var config = {
       rebufferingGoal: 2,
       bufferingGoal: 5,
-      retryParameters: {}
+      retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters()
     };
     streamingEngine = new shaka.media.StreamingEngine(
         config, playhead, mediaSourceEngine, netEngine, manifest,
@@ -794,8 +794,7 @@ describe('StreamingEngine', function() {
         jasmine.objectContaining({
           uris: [period + '_audio_init'],
           method: 'GET',
-          headers: {},
-          retryParameters: {}
+          headers: {}
         }));
 
     expect(netEngine.request).toHaveBeenCalledWith(
@@ -803,8 +802,7 @@ describe('StreamingEngine', function() {
         jasmine.objectContaining({
           uris: [period + '_video_init'],
           method: 'GET',
-          headers: {},
-          retryParameters: {}
+          headers: {}
         }));
 
     expect(netEngine.request).toHaveBeenCalledWith(
@@ -812,8 +810,7 @@ describe('StreamingEngine', function() {
         jasmine.objectContaining({
           uris: [period + '_audio_1'],
           method: 'GET',
-          headers: {'Range': 'bytes=0-' + segmentSizes.audio},
-          retryParameters: {}
+          headers: {'Range': 'bytes=0-' + segmentSizes.audio}
         }));
 
     expect(netEngine.request).toHaveBeenCalledWith(
@@ -821,8 +818,7 @@ describe('StreamingEngine', function() {
         jasmine.objectContaining({
           uris: [period + '_video_1'],
           method: 'GET',
-          headers: {'Range': 'bytes=0-' + segmentSizes.video},
-          retryParameters: {}
+          headers: {'Range': 'bytes=0-' + segmentSizes.video}
         }));
 
     expect(netEngine.request).toHaveBeenCalledWith(
@@ -830,8 +826,7 @@ describe('StreamingEngine', function() {
         jasmine.objectContaining({
           uris: [period + '_text_1'],
           method: 'GET',
-          headers: {'Range': 'bytes=0-' + segmentSizes.text},
-          retryParameters: {}
+          headers: {'Range': 'bytes=0-' + segmentSizes.text}
         }));
 
     expect(netEngine.request).toHaveBeenCalledWith(
@@ -839,8 +834,7 @@ describe('StreamingEngine', function() {
         jasmine.objectContaining({
           uris: [period + '_audio_2'],
           method: 'GET',
-          headers: {'Range': 'bytes=0-' + segmentSizes.audio},
-          retryParameters: {}
+          headers: {'Range': 'bytes=0-' + segmentSizes.audio}
         }));
 
     expect(netEngine.request).toHaveBeenCalledWith(
@@ -848,8 +842,7 @@ describe('StreamingEngine', function() {
         jasmine.objectContaining({
           uris: [period + '_video_2'],
           method: 'GET',
-          headers: {'Range': 'bytes=0-' + segmentSizes.video},
-          retryParameters: {}
+          headers: {'Range': 'bytes=0-' + segmentSizes.video}
         }));
 
     expect(netEngine.request).toHaveBeenCalledWith(
@@ -857,8 +850,7 @@ describe('StreamingEngine', function() {
         jasmine.objectContaining({
           uris: [period + '_text_2'],
           method: 'GET',
-          headers: {'Range': 'bytes=0-' + segmentSizes.text},
-          retryParameters: {}
+          headers: {'Range': 'bytes=0-' + segmentSizes.text}
         }));
 
     netEngine.request.calls.reset();
