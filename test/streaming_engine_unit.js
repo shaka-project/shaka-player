@@ -55,8 +55,14 @@ describe('StreamingEngine', function() {
   var onStartupComplete;
   var streamingEngine;
 
-  function runTest() {
+  /**
+   * Runs the fake event loop.
+   * @param {function()=} opt_callback An optional callback that is executed
+   *     each time the clock ticks.
+   */
+  function runTest(opt_callback) {
     function onTick(currentTime) {
+      if (opt_callback) opt_callback();
       if (playing) {
         playheadTime++;
       }
@@ -105,12 +111,12 @@ describe('StreamingEngine', function() {
     // Create dummy media segments. The first two ArrayBuffers in each row are
     // for the first Period, and the last two, for the second Period.
     dummySegments = {
-      audio: [new ArrayBuffer(0), new ArrayBuffer(0),
-              new ArrayBuffer(0), new ArrayBuffer(0)],
-      video: [new ArrayBuffer(0), new ArrayBuffer(0),
-              new ArrayBuffer(0), new ArrayBuffer(0)],
-      text: [new ArrayBuffer(0), new ArrayBuffer(0),
-             new ArrayBuffer(0), new ArrayBuffer(0)]
+      audio: [makeBuffer(segmentSizes.audio), makeBuffer(segmentSizes.audio),
+              makeBuffer(segmentSizes.audio), makeBuffer(segmentSizes.audio)],
+      video: [makeBuffer(segmentSizes.video), makeBuffer(segmentSizes.video),
+              makeBuffer(segmentSizes.video), makeBuffer(segmentSizes.video)],
+      text: [makeBuffer(segmentSizes.text), makeBuffer(segmentSizes.text),
+             makeBuffer(segmentSizes.text), makeBuffer(segmentSizes.text)]
     };
 
     // Setup Playhead.
@@ -279,7 +285,8 @@ describe('StreamingEngine', function() {
     var config = {
       rebufferingGoal: 2,
       bufferingGoal: 5,
-      retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters()
+      retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+      byteLimit: Number.POSITIVE_INFINITY
     };
     streamingEngine = new shaka.media.StreamingEngine(
         config, playhead, mediaSourceEngine, netEngine, manifest,
@@ -313,6 +320,8 @@ describe('StreamingEngine', function() {
   it('initializes and plays', function(done) {
     playhead.getTime.and.returnValue(0);
     setupFakeMediaSourceEngine(0 /* expectedTimestampOffset */);
+
+    onError.and.callFake(fail);
 
     onInitialStreamsSetup.and.callFake(function() {
       expect(mediaSourceEngine.init).toHaveBeenCalledWith(
@@ -416,20 +425,8 @@ describe('StreamingEngine', function() {
   });
 
   describe('handles seeks', function() {
-    /**
-     * Sets up a fake Playhead.getTime() method.
-     * @param {number} startTime the playhead's starting time with respect to
-     *     the presentation timeline.
-     */
-    function setupFakeGetTime(startTime) {
-      playheadTime = startTime;
-      playing = true;
-      playhead.getTime.and.callFake(function() {
-        return playheadTime;
-      });
-    }
-
     beforeEach(function() {
+      onError.and.callFake(fail);
       onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
     });
 
@@ -441,9 +438,9 @@ describe('StreamingEngine', function() {
         expect(period).toBe(manifest.periods[1]);
 
         // Seek backwards to a buffered region in the first Period. Note that
-        // since the buffering goal is 5 seconds and each segment is 10 seconds
-        // long, the last segment in the first Period will be appended when the
-        // playhead is at the 16 second mark.
+        // since the buffering goal is 5 seconds and each segment is 10
+        // seconds long, the last segment in the first Period should be
+        // appended when the playhead is at the 16 second mark.
         expect(playhead.getTime()).toBe(16);
         playheadTime -= 5;
         streamingEngine.seeked();
@@ -495,12 +492,12 @@ describe('StreamingEngine', function() {
         streamingEngine.switch('text', textStream2);
 
         mediaSourceEngine.endOfStream.and.callFake(function() {
-          // Seek backwards to a buffered region in the first Period. Note that
-          // since the buffering goal is 5 seconds and each segment is 10
-          // seconds long, the last segment in the second Period will be
-          // appended when the playhead is at the 26 second mark.
-          expect(playhead.getTime()).toBe(26);
-          playheadTime -= 15;
+          // Seek backwards to a buffered region in the first Period. Note
+          // that since the buffering goal is 5 seconds and each segment is
+          // 10 seconds long, endOfStream() should be called at the 36 second
+          // mark.
+          expect(playhead.getTime()).toBe(36);
+          playheadTime -= 20;
           streamingEngine.seeked();
 
           // Allow the fake event loop to finish. Note that onBufferNewPeriod()
@@ -613,12 +610,12 @@ describe('StreamingEngine', function() {
         expect(segments.video).toEqual([false, false, true, true]);
         expect(segments.text).toEqual([false, false, true, true]);
 
-        // Seek backwards to an unbuffered region in the first Period. Note
-        // that since the buffering goal is 5 seconds and each segment is 10
-        // seconds long, the last segment in the second Period will be appended
-        // when the playhead is at the 26 second mark.
-        expect(playhead.getTime()).toBe(26);
-        playheadTime -= 10;
+        // Seek backwards to a buffered region in the first Period. Note that
+        // since the buffering goal is 5 seconds and each segment is 10
+        // seconds long, endOfStream() should be called at the 36 second
+        // mark.
+        expect(playhead.getTime()).toBe(36);
+        playheadTime -= 20;
         streamingEngine.seeked();
 
         onBufferNewPeriod.and.callFake(function(period) {
@@ -785,6 +782,83 @@ describe('StreamingEngine', function() {
     });
   });
 
+  // TODO: Add more tests, specifically one that ensures single segments are
+  // never removed.
+  describe('eviction', function() {
+    beforeEach(function() {
+      onError.and.callFake(fail);
+      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+    });
+
+    it('removes segments when byte limit is reached', function(done) {
+      playhead.getTime.and.returnValue(0);
+      setupFakeMediaSourceEngine(0 /* expectedTimestampOffset */);
+
+      onBufferNewPeriod.and.callFake(function(period) {
+        expect(period).toBe(manifest.periods[1]);
+
+        // Switch to the second Period.
+        setupFakeMediaSourceEngine(20 /* expectedTimestampOffset */);
+
+        streamingEngine.switch('audio', audioStream2);
+        streamingEngine.switch('video', videoStream2);
+        streamingEngine.switch('text', textStream2);
+      });
+
+      // Reconfigure with the lowest possible byte limit.
+      var byteLimit =
+          segmentSizes.audio + (2 * segmentSizes.video) + segmentSizes.text;
+      var config = {
+        rebufferingGoal: 1,
+        bufferingGoal: 1,
+        retryParameters: {},
+        byteLimit: byteLimit
+      };
+      streamingEngine.configure(config);
+
+      // Here we go!
+      var streamsByType = {
+        'audio': audioStream1, 'video': videoStream1, 'text': textStream1
+      };
+      streamingEngine.init(streamsByType);
+
+      // Since StreamingEngine is free to peform audio, video, and text updates
+      // in any order, there are many valid ways in which StreamingEngine can
+      // evict segments. So, instead of verifying the exact, final buffer
+      // configuration, ensure the byte limit is never exceeded and at least
+      // one segment of each type is buffered at the end of the test.
+      var checkByteLimitOnTick = function() {
+        var bufferSize = Object.keys(segments).reduce(function(total, type) {
+          return total + segments[type].reduce(function(subTotal, inserted) {
+            return subTotal + (inserted ? segmentSizes[type] : 0);
+          }, 0);
+        }, 0);
+        expect(bufferSize <= byteLimit).toBeTruthy();
+      };
+
+      runTest(checkByteLimitOnTick).then(function() {
+        expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+
+        expect(mediaSourceEngine.remove).toHaveBeenCalledWith('audio', 0, 10);
+        expect(mediaSourceEngine.remove).toHaveBeenCalledWith('audio', 10, 20);
+
+        expect(mediaSourceEngine.remove).toHaveBeenCalledWith('video', 0, 10);
+        expect(mediaSourceEngine.remove).toHaveBeenCalledWith('video', 10, 20);
+
+        expect(mediaSourceEngine.remove).toHaveBeenCalledWith('text', 0, 10);
+        expect(mediaSourceEngine.remove).toHaveBeenCalledWith('text', 10, 20);
+
+        expect(initSegments.audio).toEqual([false, true]);
+        expect(initSegments.video).toEqual([false, true]);
+        expect(segments.audio[3]).toBeTruthy();
+        expect(segments.video[3]).toBeTruthy();
+        expect(segments.text[3]).toBeTruthy();
+
+        return streamingEngine.destroy();
+      }).catch(fail).then(done);
+    });
+  });
+
   /**
    * Verifies calls to NetworkingEngine.request().
    * @param {number} period The Period number (one-based).
@@ -860,6 +934,21 @@ describe('StreamingEngine', function() {
   }
 
   /**
+   * Makes the mock Playhead object behave as a fake Playhead object which
+   * begins playback at the given time.
+   *
+   * @param {number} startTime the playhead's starting time with respect to
+   *     the presentation timeline.
+   */
+  function setupFakeGetTime(startTime) {
+    playheadTime = startTime;
+    playing = true;
+    playhead.getTime.and.callFake(function() {
+      return playheadTime;
+    });
+  }
+
+  /**
    * Makes the mock MediaSourceEngine object behave as a fake MediaSourceEngine
    * object that keeps track of the segments that have been appended.
    *
@@ -883,27 +972,37 @@ describe('StreamingEngine', function() {
     mediaSourceEngine.setDuration.and.returnValue(Promise.resolve());
   }
 
-  function fakeBufferStart(type, time) {
+  function fakeBufferStart(type) {
     if (segments[type] === undefined) throw new Error('unexpected type');
     var first = segments[type].indexOf(true);
     return first >= 0 ? first * 10 : null;
   }
 
-  function fakeBufferEnd(type, time) {
+  function fakeBufferEnd(type) {
     if (segments[type] === undefined) throw new Error('unexpected type');
     var last = segments[type].lastIndexOf(true);
     return last >= 0 ? (last + 1) * 10 : null;
   }
 
-  function fakeBufferedAheadOf(type, time) {
+  function fakeBufferedAheadOf(type, startTime) {
     if (segments[type] === undefined) throw new Error('unexpected type');
-    var start = Math.floor(time / 10);
-    if (!segments[type][start]) return 0;  // Unbuffered.
-    var last = segments[type].indexOf(false, start);  // Find first gap.
-    if (last < 0) last = segments[type].length - 1;
+
+    // Note: startTime may equal the presentation's duration, so |first|
+    // may equal segments[type].length
+    var first = Math.floor(startTime / 10);
+    if (first < 0 || first > segments[type].length)
+      throw new Error('unexpected startTime');
+
+    if (!segments[type][first])
+      return 0;  // Unbuffered.
+
+    // Find the first gap.
+    var last = segments[type].indexOf(false, first);
+    if (last < 0)
+      last = segments[type].length;
+
     var endTime = last * 10;
-    shaka.asserts.assert(endTime >= time, 'unexpected end');
-    return endTime - time;
+    return endTime - startTime;
   }
 
   function fakeAppendBuffer(type, data) {
@@ -928,19 +1027,31 @@ describe('StreamingEngine', function() {
   }
 
   function fakeSetTimestampOffset(expectedTimestampOffset, type, offset) {
-    if (segments[type] === undefined)
-      throw new Error('unexpected type');
+    if (segments[type] === undefined) throw new Error('unexpected type');
+
     if (offset != expectedTimestampOffset)
       throw new Error('unexpected timestamp offset');
+
     return Promise.resolve();
   }
 
   function fakeRemove(type, start, end) {
     if (segments[type] === undefined) throw new Error('unexpected type');
-    if (start != 0) throw new Error('unexpected start');
-    if (end < 40) throw new Error('unexpected end');
 
-    for (var i = 0; i < segments[type].length; ++i) {
+    var first = Math.floor(start / 10);
+    if (first < 0 || first >= segments[type].length)
+      throw new Error('unexpected start');
+
+    // Note: |end| is exclusive, so subtract a very small amount from it to get
+    // the correct index.
+    var last = Math.ceil((end - 0.000001) / 10);
+    if (last < 0)
+      throw new Error('unexpected end');
+
+    if (first >= last)
+      throw new Error('unexpected start and end');
+
+    for (var i = first; i < last; ++i) {
       segments[type][i] = false;
     }
 
@@ -963,6 +1074,10 @@ describe('StreamingEngine', function() {
     } else {
       return null;
     }
+  }
+
+  function makeBuffer(size) {
+    return new ArrayBuffer(size);
   }
 
   function createMockPlayhead() {
