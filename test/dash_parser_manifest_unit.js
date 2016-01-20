@@ -472,6 +472,120 @@ describe('DashParser.Manifest', function() {
         .then(done);
   });
 
+  describe('supports UTCTiming', function() {
+    var originalNow;
+
+    beforeAll(function() {
+      originalNow = Date.now;
+      Date.now = function() { return 10 * 1000; };
+    });
+
+    afterAll(function() {
+      Date.now = originalNow;
+    });
+
+    /**
+     * @param {!Array.<string>} lines
+     * @return {string}
+     */
+    function makeManifest(lines) {
+      var template = [
+        '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z">',
+        '  %s',
+        '  <Period duration="PT30M">',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation bandwidth="500">',
+        '        <BaseURL>http://example.com</BaseURL>',
+        '        <SegmentTemplate media="2.mp4" duration="1" />',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>'
+      ].join('\n');
+      return sprintf(template, lines.join('\n'));
+    }
+
+    /**
+     * @param {function()} done
+     * @param {number} expectedTime
+     */
+    function runTest(done, expectedTime) {
+      parser.start('http://foo.bar/manifest')
+          .then(function(manifest) {
+            expect(manifest.presentationTimeline).toBeTruthy();
+            expect(manifest.presentationTimeline.getSegmentAvailabilityEnd())
+                .toBe(expectedTime);
+          })
+          .catch(fail)
+          .then(done);
+    }
+
+    it('with direct', function(done) {
+      var source = makeManifest([
+        '<UTCTiming schemeIdUri="urn:mpeg:dash:utc:direct:2014"',
+        '    value="1970-01-01T00:00:30Z" />'
+      ]);
+
+      fakeNetEngine.setResponseMapAsText({'http://foo.bar/manifest': source});
+      runTest(done, 30);
+    });
+
+    it('does not produce errors', function(done) {
+      var source = makeManifest([
+        '<UTCTiming schemeIdUri="unknown scheme" value="foobar" />'
+      ]);
+
+      fakeNetEngine.setResponseMapAsText({'http://foo.bar/manifest': source});
+      runTest(done, 10);
+    });
+
+    it('tries multiple sources', function(done) {
+      var source = makeManifest([
+        '<UTCTiming schemeIdUri="unknown scheme" value="foobar" />',
+        '<UTCTiming schemeIdUri="urn:mpeg:dash:utc:direct:2014"',
+        '    value="1970-01-01T00:00:55Z" />'
+      ]);
+
+      fakeNetEngine.setResponseMapAsText({'http://foo.bar/manifest': source});
+      runTest(done, 55);
+    });
+
+    it('with HEAD', function(done) {
+      var source = makeManifest([
+        '<UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-head:2014"',
+        '    value="http://foo.bar/date" />'
+      ]);
+
+      fakeNetEngine.request.and.callFake(function(type, request) {
+        if (request.uris[0] == 'http://foo.bar/manifest') {
+          var data = shaka.util.Uint8ArrayUtils.fromString(source).buffer;
+          return Promise.resolve({data: data, headers: {}, uri: ''});
+        } else {
+          expect(request.uris[0]).toBe('http://foo.bar/date');
+          return Promise.resolve({
+            data: new ArrayBuffer(0),
+            headers: {'date': '1970-01-01T00:00:40Z'},
+            uri: ''
+          });
+        }
+      });
+      runTest(done, 40);
+    });
+
+    it('with xsdate', function(done) {
+      var source = makeManifest([
+        '<UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-xsdate:2014"',
+        '    value="http://foo.bar/date" />'
+      ]);
+
+      fakeNetEngine.setResponseMapAsText({
+        'http://foo.bar/manifest': source,
+        'http://foo.bar/date': '1970-01-01T00:00:50Z'
+      });
+      runTest(done, 50);
+    });
+  });
+
   describe('fails for', function() {
     it('invalid XML', function(done) {
       var source = '<not XML';
