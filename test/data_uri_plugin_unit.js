@@ -16,6 +16,12 @@
  */
 
 describe('DataUriPlugin', function() {
+  var retryParameters;
+
+  beforeAll(function() {
+    retryParameters = shaka.net.NetworkingEngine.defaultRetryParameters();
+  });
+
   it('supports MIME types', function(done) {
     testSucceeds('data:text/plain,Hello', 'Hello', done);
   });
@@ -61,7 +67,8 @@ describe('DataUriPlugin', function() {
   });
 
   function testSucceeds(uri, text, done) {
-    var request = shaka.net.NetworkingEngine.makeRequest([uri]);
+    var request =
+        shaka.net.NetworkingEngine.makeRequest([uri], retryParameters);
     shaka.net.DataUriPlugin(uri, request)
         .then(function(response) {
           expect(response).toBeTruthy();
@@ -76,7 +83,8 @@ describe('DataUriPlugin', function() {
   }
 
   function testFails(uri, done) {
-    var request = shaka.net.NetworkingEngine.makeRequest([uri]);
+    var request =
+        shaka.net.NetworkingEngine.makeRequest([uri], retryParameters);
     shaka.log.setLevel(shaka.log.Level.NONE);
     shaka.net.DataUriPlugin(uri, request)
         .then(fail)

@@ -552,6 +552,8 @@ describe('NetworkingEngine', function() {
   });
 
   function createRequest(uri, opt_retryParameters) {
-    return shaka.net.NetworkingEngine.makeRequest([uri], opt_retryParameters);
+    var retryParameters = opt_retryParameters ||
+                          shaka.net.NetworkingEngine.defaultRetryParameters();
+    return shaka.net.NetworkingEngine.makeRequest([uri], retryParameters);
   }
 });

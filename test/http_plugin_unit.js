@@ -16,6 +16,8 @@
  */
 
 describe('HttpPlugin', function() {
+  var retryParameters;
+
   beforeAll(function() {
     jasmine.Ajax.install();
     jasmine.clock().install();
@@ -42,6 +44,8 @@ describe('HttpPlugin', function() {
     });
     jasmine.Ajax.stubRequest('https://foo.bar/timeout').andTimeout();
     jasmine.Ajax.stubRequest('https://foo.bar/error').andError();
+
+    retryParameters = shaka.net.NetworkingEngine.defaultRetryParameters();
   });
 
   afterAll(function() {
@@ -50,7 +54,8 @@ describe('HttpPlugin', function() {
   });
 
   it('sets the correct fields', function(done) {
-    var request = shaka.net.NetworkingEngine.makeRequest(['https://foo.bar/']);
+    var request = shaka.net.NetworkingEngine.makeRequest(
+        ['https://foo.bar/'], retryParameters);
     request.allowCrossSiteCredentials = true;
     request.method = 'POST';
     request.headers['BAZ'] = '123';
@@ -93,7 +98,8 @@ describe('HttpPlugin', function() {
   });
 
   function testSucceeds(uri, done, opt_overrideUri) {
-    var request = shaka.net.NetworkingEngine.makeRequest([uri]);
+    var request = shaka.net.NetworkingEngine.makeRequest(
+        [uri], retryParameters);
     shaka.net.HttpPlugin(uri, request)
         .catch(fail)
         .then(function(response) {
@@ -110,7 +116,8 @@ describe('HttpPlugin', function() {
   }
 
   function testFails(uri, done) {
-    var request = shaka.net.NetworkingEngine.makeRequest([uri]);
+    var request = shaka.net.NetworkingEngine.makeRequest(
+        [uri], retryParameters);
     shaka.net.HttpPlugin(uri, request)
         .then(fail)
         .catch(function() {
