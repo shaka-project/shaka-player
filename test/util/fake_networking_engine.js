@@ -68,7 +68,23 @@ shaka.test.FakeNetworkingEngine.prototype.request = function(type, request) {
 
 
 /**
- * Expects that a request for the given URI has occurred.
+ * Expects that a request for the given segment has occurred.
+ *
+ * @param {string} uri
+ */
+shaka.test.FakeNetworkingEngine.prototype.expectSegmentRequest = function(uri) {
+  expect(this.request)
+      .toHaveBeenCalledWith(
+          shaka.net.NetworkingEngine.RequestType.SEGMENT,
+          jasmine.objectContaining({
+            uris: [uri],
+            headers: {}
+          }));
+};
+
+
+/**
+ * Expects that a range request for the given segment has occurred.
  *
  * @param {string} uri
  * @param {number} startByte

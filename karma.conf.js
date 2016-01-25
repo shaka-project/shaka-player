@@ -59,8 +59,8 @@ module.exports = function(config) {
       ],
     },
 
-    // do not panic about "no activity" unless a test takes longer than 60s.
-    browserNoActivityTimeout: 60000,
+    // do not panic about "no activity" unless a test takes longer than 90s.
+    browserNoActivityTimeout: 90000,
 
     // don't capture the client's console logs
     client: { captureConsole: true },

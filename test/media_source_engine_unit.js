@@ -438,6 +438,20 @@ describe('MediaSourceEngine', function() {
     });
   });
 
+  describe('setAppendWindowEnd', function() {
+    beforeEach(function() {
+      mediaSourceEngine.init({'audio': 'audio/foo'});
+    });
+
+    it('sets the append window end', function(done) {
+      expect(audioSourceBuffer.appendWindowEnd).toBe(Number.POSITIVE_INFINITY);
+      mediaSourceEngine.setAppendWindowEnd('audio', 10).then(function() {
+        expect(audioSourceBuffer.appendWindowEnd).toBe(10);
+        done();
+      });
+    });
+  });
+
   describe('endOfStream', function() {
     beforeEach(function() {
       captureEvents(audioSourceBuffer, ['updateend', 'error']);
@@ -784,6 +798,7 @@ describe('MediaSourceEngine', function() {
         end: jasmine.createSpy('buffered.end')
       },
       timestampOffset: 0,
+      appendWindowEnd: Number.POSITIVE_INFINITY,
       updateend: function() {},
       error: function() {}
     };
