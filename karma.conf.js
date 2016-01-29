@@ -99,6 +99,14 @@ module.exports = function(config) {
         os: 'Windows',
         os_version: '8.1',
       },
+
+      BrowserStack_Safari: {
+        base: 'BrowserStack',
+        browser: 'safari',
+        browser_version: '8.0',
+        os: 'OS X',
+        os_version: 'Yosemite',
+      },
     },
 
     // By default, use Chrome only, unless command-line arguments override.
