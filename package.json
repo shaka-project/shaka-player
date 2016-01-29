@@ -21,6 +21,7 @@
     "karma-firefox-launcher": "",
     "karma-ie-launcher": "",
     "karma-safari-launcher": "",
+    "karma-browserstack-launcher": "",
     "jasmine": ">=2.3.2",
     "jasmine-ajax": ">=3.2.0",
     "jasmine-core": ">=2.3.4",

@@ -88,6 +88,17 @@ module.exports = function(config) {
           'media.mediasource.youtubeonly': false,
         },
       },
+
+      // BrowserStack launchers require login information in the form of
+      // the environment variables BROWSER_STACK_USERNAME and
+      // BROWSER_STACK_ACCESS_KEY.
+      BrowserStack_IE11: {
+        base: 'BrowserStack',
+        browser: 'ie',
+        browser_version: '11.0',
+        os: 'Windows',
+        os_version: '8.1',
+      },
     },
 
     // By default, use Chrome only, unless command-line arguments override.
