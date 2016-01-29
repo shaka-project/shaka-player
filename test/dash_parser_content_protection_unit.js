@@ -16,8 +16,7 @@
  */
 
 // Test DRM-related parsing.
-// TODO: re-enable
-xdescribe('DashParser.ContentProtection', function() {
+describe('DashParser.ContentProtection', function() {
   /**
    * Tests that the parser produces the correct results.
    *
@@ -32,8 +31,7 @@ xdescribe('DashParser.ContentProtection', function() {
     var netEngine = new shaka.test.FakeNetworkingEngine();
     netEngine.setDefaultText(manifestText);
     var dashParser = new shaka.dash.DashParser(
-        netEngine, retry, function() {}, function() {});
-    // TODO: define how opt_callback gets passed to the dashParser
+        netEngine, retry, function() {}, function() {}, opt_callback || null);
     dashParser.start('http://example.com')
         .then(function(actual) { expect(actual).toEqual(expected); })
         .catch(fail)
@@ -117,7 +115,7 @@ xdescribe('DashParser.ContentProtection', function() {
     var initData = base64Psshs.map(function(base64) {
       return {
         initDataType: 'cenc',
-        initData: shaka.util.Uint8ArrayUtils.fromBase64(base64).buffer
+        initData: shaka.util.Uint8ArrayUtils.fromBase64(base64)
       };
     });
     return jasmine.objectContaining({keySystem: keySystem, initData: initData});
@@ -176,6 +174,52 @@ xdescribe('DashParser.ContentProtection', function() {
           'com.microsoft.playready',
           'com.adobe.primetime'
         ]);
+  });
+
+  it('squashs encrypted sets in same group', function(done) {
+    var source = [
+      '<MPD xmlns="urn:mpeg:DASH:schema:MPD:2011"',
+      '    xmlns:cenc="urn:mpeg:cenc:2013">',
+      '  <Period duration="PT30S">',
+      '    <SegmentTemplate media="s.mp4" duration="2" />',
+      '    <AdaptationSet mimeType="video/mp4" group="1">',
+      '      <ContentProtection',
+      '         schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
+      '      <ContentProtection',
+      '          schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
+      '          cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
+      '      <Representation bandwidth="100" />',
+      '    </AdaptationSet>',
+      '    <AdaptationSet mimeType="video/mp4" group="1">',
+      '      <ContentProtection',
+      '         schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
+      '      <ContentProtection',
+      '          schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
+      '          cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />',
+      '      <Representation bandwidth="200" />',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'
+    ].join('\n');
+    var expected = shaka.test.Dash.makeManifestFromStreamSets([
+      jasmine.objectContaining({
+        drmInfos: [
+          buildDrmInfo('com.widevine.alpha'),
+          buildDrmInfo('com.widevine.alpha')
+        ],
+        streams: [
+          jasmine.objectContaining({
+            bandwidth: 100,
+            keyIds: ['deadbeeffeedbaadf00d000008675309']
+          }),
+          jasmine.objectContaining({
+            bandwidth: 200,
+            keyIds: ['baadf00dfeeddeafbeef000004390116']
+          })
+        ]
+      })
+    ]);
+    testDashParser(done, source, expected);
   });
 
   it('inherits key IDs from AdaptationSet to Representation', function(done) {

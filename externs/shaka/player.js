@@ -45,3 +45,8 @@
  * @exportDoc
  */
 shakaExtern.SupportType;
+
+
+/** @typedef {function(!Node):?shakaExtern.DrmInfo} */
+shakaExtern.ContentProtectionCallback;
+

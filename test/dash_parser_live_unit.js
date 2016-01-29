@@ -33,7 +33,7 @@ describe('DashParser.Live', function() {
     newPeriod = jasmine.createSpy('newPeriod');
     errorCallback = jasmine.createSpy('error callback');
     parser = new shaka.dash.DashParser(
-        fakeNetEngine, retry, newPeriod, errorCallback);
+        fakeNetEngine, retry, newPeriod, errorCallback, null);
   });
 
   beforeAll(function() {

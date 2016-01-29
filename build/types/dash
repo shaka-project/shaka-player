@@ -1,5 +1,6 @@
 # The DASH manifest parser plugin.
 
++../../lib/dash/content_protection.js
 +../../lib/dash/dash_parser.js
 +../../lib/dash/mpd_utils.js
 +../../lib/dash/segment_base.js

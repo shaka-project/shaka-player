@@ -28,7 +28,7 @@ describe('DashParser.SegmentTemplate', function() {
     var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = new shaka.dash.DashParser(
-        fakeNetEngine, retry, function() {}, function() {});
+        fakeNetEngine, retry, function() {}, function() {}, null);
   });
 
   shaka.test.Dash.makeTimelineTests(
