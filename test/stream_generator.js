@@ -455,7 +455,12 @@ shaka.test.StreamGenerator.setBaseMediaDecodeTime_ = function(
   shaka.asserts.assert(baseMediaDecodeTime * timescale < Math.pow(2, 32),
                        'Specied baseMediaDecodeTime is too big.');
 
-  var buffer = segment.slice(0);
+  // NOTE from Microsoft on the lack of ArrayBuffer.prototype.slice in IE11:
+  // "At this time we do not plan to fix this issue." ~ https://goo.gl/pTQN1K
+  // This is the best replacement for segment.slice(0) I could come up with:
+  var buffer = new ArrayBuffer(segment.byteLength);
+  (new Uint8Array(buffer)).set(new Uint8Array(segment));
+
   var dataView = new DataView(buffer);
   var reader = new shaka.util.DataViewReader(
       dataView, shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
