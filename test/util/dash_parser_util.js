@@ -91,7 +91,9 @@ shaka.test.Dash.testFails = function(done, manifestText, expectedError) {
   shaka.log.setLevel(shaka.log.Level.NONE);
   dashParser.start('dummy://foo')
       .then(fail)
-      .catch(function(error) { expect(error).toEqual(expectedError); })
+      .catch(function(error) {
+        shaka.test.Util.expectToEqualError(error, expectedError);
+      })
       .then(function() { shaka.log.setLevel(shaka.log.MAX_LOG_LEVEL); })
       .then(done);
 };

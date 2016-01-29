@@ -115,6 +115,17 @@ shaka.test.Util.delay = function(seconds, opt_setTimeout) {
 
 
 /**
+ * @param {*} actual
+ * @param {!Object} expected
+ */
+shaka.test.Util.expectToEqualError = function(actual, expected) {
+  // NOTE: Safari will add extra properties to any thrown object, so we
+  // wrap expectedError in jasmine.objectContaining to ignore them.
+  expect(actual).toEqual(jasmine.objectContaining(expected));
+};
+
+
+/**
  * Replace shaka.asserts and console.assert with a version which hooks into
  * jasmine.  This converts all failed assertions into failed tests.
  */
