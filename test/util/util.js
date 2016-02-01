@@ -130,6 +130,19 @@ shaka.test.Util.expectToEqualError = function(actual, expected) {
 
 
 /**
+ * Gets the value of an argument passed from karma.
+ * @param {string} name
+ * @return {?string}
+ */
+shaka.test.Util.getClientArg = function(name) {
+  if (window.__karma__ && __karma__.config.args.length)
+    return __karma__.config.args[0][name] || null;
+  else
+    return null;
+};
+
+
+/**
  * Replace shaka.asserts and console.assert with a version which hooks into
  * jasmine.  This converts all failed assertions into failed tests.
  */
@@ -207,8 +220,11 @@ beforeAll(assertsToFailures.install);
 afterAll(assertsToFailures.uninstall);
 
 beforeAll(function() {
-  shaka.log['MAX_LOG_LEVEL'] = shaka.log.Level.ERROR;
-  shaka.log.setLevel(shaka.log.MAX_LOG_LEVEL);
+  var logLevel = shaka.test.Util.getClientArg('logLevel');
+  if (logLevel)
+    shaka.log.setLevel(Number(logLevel));
+  else
+    shaka.log.setLevel(shaka.log.Level.INFO);
 
   shaka.polyfill.installAll();
 

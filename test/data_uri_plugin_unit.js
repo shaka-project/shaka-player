@@ -86,12 +86,10 @@ describe('DataUriPlugin', function() {
   function testFails(uri, done, code) {
     var request =
         shaka.net.NetworkingEngine.makeRequest([uri], retryParameters);
-    shaka.log.setLevel(shaka.log.Level.NONE);
     shaka.net.DataUriPlugin(uri, request)
         .then(fail)
         .catch(function(error) { expect(error.code).toBe(code); })
         .then(function() {
-          shaka.log.setLevel(shaka.log.MAX_LOG_LEVEL);
           done();
         });
   }

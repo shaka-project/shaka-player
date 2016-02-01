@@ -103,13 +103,11 @@ shaka.test.Dash.testFails = function(done, manifestText, expectedError) {
   var fakeNetEngine =
       new shaka.test.FakeNetworkingEngine({'dummy://foo': manifestData});
   var dashParser = shaka.test.Dash.makeDashParser(fakeNetEngine);
-  shaka.log.setLevel(shaka.log.Level.NONE);
   dashParser.start('dummy://foo')
       .then(fail)
       .catch(function(error) {
         shaka.test.Util.expectToEqualError(error, expectedError);
       })
-      .then(function() { shaka.log.setLevel(shaka.log.MAX_LOG_LEVEL); })
       .then(done);
 };
 
@@ -200,10 +198,7 @@ shaka.test.Dash.makeManifestFromInit = function(
  */
 shaka.test.Dash.callCreateSegmentIndex = function(manifest) {
   var stream = manifest.periods[0].streamSets[0].streams[0];
-  shaka.log.setLevel(shaka.log.Level.NONE);
-  return stream.createSegmentIndex().then(fail).catch(function() {
-    shaka.log.setLevel(shaka.log.MAX_LOG_LEVEL);
-  });
+  return stream.createSegmentIndex().then(fail).catch(function() {});
 };
 
 

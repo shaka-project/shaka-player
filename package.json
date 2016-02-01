@@ -23,6 +23,7 @@
     "karma-safari-launcher": "",
     "karma-browserstack-launcher": "",
     "karma-webdriver-launcher": "~1.0.4",
+    "karma-spec-reporter": "",
     "jasmine": ">=2.3.2",
     "jasmine-ajax": ">=3.2.0",
     "jasmine-core": ">=2.3.4",

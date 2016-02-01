@@ -130,11 +130,6 @@ describe('DashParser.ContentProtection', function() {
 
   beforeAll(function() {
     Dash = shaka.test.Dash;
-    shaka.log.setLevel(shaka.log.Level.NONE);
-  });
-
-  afterAll(function() {
-    shaka.log.setLevel(shaka.log.MAX_LOG_LEVEL);
   });
 
   it('handles clear content', function(done) {

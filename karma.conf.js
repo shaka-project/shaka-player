@@ -66,8 +66,13 @@ module.exports = function(config) {
     // in test cases. (eg. 90s in test/streaming_engine_integration.js)
     browserNoActivityTimeout: 120000,
 
-    // don't capture the client's console logs
-    client: { captureConsole: true },
+    client: {
+      // don't capture the client's console logs
+      captureConsole: false,
+      // |args| must be an array; pass a key-value map as the sole client
+      // argument.
+      args: [{}],
+    },
 
     // web server port
     port: 9876,
@@ -159,11 +164,50 @@ module.exports = function(config) {
     files.push('test/*_integration.js');
     // We just modified the config in-place.  No need for config.set().
   }
+
+  var logLevel = getFlagValue('enable-logging');
+  if (logLevel !== null) {
+    if (logLevel === '')
+      logLevel = 3;  // INFO
+
+    config.set({
+      reporters: ['spec'],
+    });
+    // Setting |config.client| using config.set will remove the
+    // |config.client.args| member.
+    config.client.captureConsole = true;
+    setClientArg(config, 'logLevel', logLevel);
+  }
 };
+
+// Sets the value of an argument passed to the client.
+function setClientArg(config, name, value) {
+  config.client.args[0][name] = value;
+}
+
+// Find a custom command-line flag that has a value (e.g. --option=12).
+// Returns:
+// * string value  --option=12
+// * empty string  --option= or --option
+// * null          not present
+function getFlagValue(name) {
+  var re = /^--([^=]+)(?:=(.*))?$/;
+  for (var i = 0; i < process.argv.length; i++) {
+    var match = re.exec(process.argv[i]);
+    if (match && match[1] == name) {
+      if (match[2] !== undefined)
+        return match[2];
+      else
+        return '';
+    }
+  }
+
+  return null;
+}
 
 // Find custom command-line flags.
 function flagPresent(name) {
-  return process.argv.indexOf('--' + name) >= 0;
+  return getFlagValue(name) !== null;
 }
 
 // Construct framework plugins on-the-fly for arbitrary node modules.
