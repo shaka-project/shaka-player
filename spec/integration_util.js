@@ -20,7 +20,6 @@ goog.require('shaka.player.AudioTrack');
 goog.require('shaka.player.Player');
 goog.require('shaka.player.TextTrack');
 goog.require('shaka.player.VideoTrack');
-goog.require('shaka.polyfill.installAll');
 
 
 var manifests = {
@@ -48,9 +47,6 @@ var integration = {
     // Change the timeout.
     integration.originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 55000;  // ms
-
-    // Install polyfills.
-    shaka.polyfill.installAll();
   },
   'tearDown': function() {
     // Restore the timeout.

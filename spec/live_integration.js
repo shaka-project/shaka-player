@@ -18,7 +18,6 @@
 goog.require('shaka.dash.MpdRequest');
 goog.require('shaka.media.Stream');
 goog.require('shaka.player.Player');
-goog.require('shaka.polyfill.installAll');
 goog.require('shaka.util.EventManager');
 
 describe('Live', function() {
@@ -56,9 +55,6 @@ describe('Live', function() {
     // Change the timeout.
     originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 40000;  // ms
-
-    // Install polyfills.
-    shaka.polyfill.installAll();
 
     // Create a video tag.  This will be visible so that long tests do not
     // create the illusion of the test-runner being hung.

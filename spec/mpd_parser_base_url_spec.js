@@ -243,6 +243,7 @@ describe('mpd.BaseUrl', function() {
       '        <SegmentList>',
       '          <SegmentURL media="a/1.webm"/>',
       '          <SegmentURL media="a/2.webm"/>',
+      '        </SegmentList>',
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',

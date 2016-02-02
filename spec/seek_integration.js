@@ -105,7 +105,7 @@ describe('Seek', function() {
       // When this bug manifests, the playhead typically gets stuck around
       // 32.9, so we expect that 35.0 is a safe indication that the bug is
       // not manifesting.
-      return waitForTargetTime(video, eventManager, 35.0, 12.0);
+      return waitForTargetTime(video, eventManager, 35.0, 14.0);
     }).then(function() {
       done();
     }).catch(function(error) {
@@ -189,7 +189,7 @@ describe('Seek', function() {
     }).then(function() {
       // Move quickly past the first two segments.
       player.setPlaybackRate(3.0);
-      return waitForTargetTime(video, eventManager, 11.0, 6.0);
+      return waitForTargetTime(video, eventManager, 11.0, 8.0);
     }).then(function() {
       var track = getVideoTrackByHeight(player, 480);
       expect(track.active).toBe(false);
@@ -200,12 +200,12 @@ describe('Seek', function() {
       // This bug manifests within two segments of the adaptation point.  To
       // prove that we are not hung, we need to get to a point two segments
       // later than where we adapted.
-      return waitForTargetTime(video, eventManager, 22.0, 6.0);
+      return waitForTargetTime(video, eventManager, 22.0, 8.0);
     }).then(function() {
       video.currentTime = 0;
       return waitForMovement(video, eventManager);
     }).then(function() {
-      return waitForTargetTime(video, eventManager, 21.0, 12.0);
+      return waitForTargetTime(video, eventManager, 21.0, 16.0);
     }).then(function() {
       done();
     }).catch(function(error) {
@@ -228,7 +228,7 @@ describe('Seek', function() {
       expect(ok).toBe(true);
 
       video.currentTime = 30.0;
-      return waitForTargetTime(video, eventManager, 33.0, 8.0);
+      return waitForTargetTime(video, eventManager, 33.0, 10.0);
     }).then(function() {
       done();
     }).catch(function(error) {

@@ -388,7 +388,8 @@ describe('MpdProcessor', function() {
 
       it('are not duplicated when the same', function() {
         // Both init datas are now the same.
-        pssh2.psshBox = initData1.slice(0);
+        pssh2.psshBox = new Uint8Array(initData1.length);
+        pssh2.psshBox.set(initData1);
 
         var periodInfo = processor.process(m).periodInfos[0];
         expect(periodInfo.streamSetInfos.length).toBe(1);

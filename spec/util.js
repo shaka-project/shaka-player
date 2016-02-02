@@ -18,6 +18,7 @@
 goog.require('shaka.asserts');
 goog.require('shaka.media.SegmentReference');
 goog.require('shaka.player.IVideoSource');
+goog.require('shaka.polyfill.installAll');
 goog.require('shaka.util.EventManager');
 goog.require('shaka.util.PublicPromise');
 goog.require('shaka.util.StringUtils');
@@ -183,8 +184,8 @@ function interpretContentProtection(schemeIdUri, contentProtection) {
   // This is the only scheme used in integration tests at the moment.
   if (schemeIdUri == 'com.youtube.clearkey') {
     var license;
-    for (var i = 0; i < contentProtection.children.length; ++i) {
-      var child = contentProtection.children[i];
+    for (var i = 0; i < contentProtection.childNodes.length; ++i) {
+      var child = contentProtection.childNodes[i];
       if (child.nodeName == 'ytdrm:License') {
         license = child;
         break;
@@ -383,7 +384,12 @@ function waitForMovement(video, eventManager) {
  */
 function waitFor(timeout, callback, opt_timeoutCallback) {
   var promise = new shaka.util.PublicPromise();
-  var stack = (new Error('stacktrace')).stack.split('\n').slice(1).join('\n');
+  var stack;
+  try {
+    throw new Error('stacktrace');
+  } catch (error) {
+    stack = error.stack.split('\n').slice(1).join('\n');
+  }
   var pollId;
 
   var timeoutId = window.setTimeout(function() {
@@ -421,7 +427,12 @@ function waitFor(timeout, callback, opt_timeoutCallback) {
  */
 function waitForTargetTime(video, eventManager, targetTime, timeout) {
   var promise = new shaka.util.PublicPromise;
-  var stack = (new Error('stacktrace')).stack.split('\n').slice(1).join('\n');
+  var stack;
+  try {
+    throw new Error('stacktrace');
+  } catch (error) {
+    stack = error.stack.split('\n').slice(1).join('\n');
+  }
 
   var timeoutId = window.setTimeout(function() {
     // This expectation will fail, but will provide specific values to
@@ -510,3 +521,7 @@ function convertErrorToTestFailure(event) {
   var error = event.detail;
   fail(error);
 }
+
+beforeAll(function() {
+  shaka.polyfill.installAll();
+});

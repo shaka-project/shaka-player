@@ -30,6 +30,9 @@ describe('DataViewReader', function() {
 
   var bigEndianReader;
   var littleEndianReader;
+  // IE11 does not follow spec and use RangeError:
+  var DataViewError =
+      /Trident\/.*rv:11/.exec(navigator.userAgent) ? TypeError : RangeError;
 
   beforeEach(function() {
     bigEndianReader = new shaka.util.DataViewReader(
@@ -177,7 +180,7 @@ describe('DataViewReader', function() {
     }
 
     expect(exception).not.toBeNull();
-    expect(exception instanceof RangeError).toBe(true);
+    expect(exception instanceof DataViewError).toBe(true);
   });
 
   it('detects end-of-stream when reading a uint16', function() {
@@ -192,7 +195,7 @@ describe('DataViewReader', function() {
     }
 
     expect(exception).not.toBeNull();
-    expect(exception instanceof RangeError).toBe(true);
+    expect(exception instanceof DataViewError).toBe(true);
   });
 
   it('detects end-of-stream when reading a uint32', function() {
@@ -207,7 +210,7 @@ describe('DataViewReader', function() {
     }
 
     expect(exception).not.toBeNull();
-    expect(exception instanceof RangeError).toBe(true);
+    expect(exception instanceof DataViewError).toBe(true);
   });
 
   it('detects end-of-stream when skipping bytes', function() {

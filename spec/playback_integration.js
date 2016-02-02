@@ -203,7 +203,7 @@ describe('Playback', function() {
     });
   });
 
-  describe('end-of-stream behavior', function(done) {
+  describe('end-of-stream behavior', function() {
     // The "exact" duration of the content specified by |plainManifest|.
     var plainManifestDuration = 181.43107777777777;
 
