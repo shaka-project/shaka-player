@@ -125,30 +125,30 @@ describe('Task', function() {
 
       setTimeout(function() {
         expect(stages).toEqual([0]);
-      }, 10);
+      }, 15);
       setTimeout(function() {
         expect(stages).toEqual([0]);
         p0.resolve();
-      }, 20);
+      }, 30);
 
       setTimeout(function() {
         expect(stages).toEqual([0, 1]);
-      }, 30);
+      }, 45);
       setTimeout(function() {
         expect(stages).toEqual([0, 1]);
         p1.resolve();
-      }, 40);
+      }, 60);
 
       setTimeout(function() {
         expect(stages).toEqual([0, 1, 2]);
         // We've run the final stage, but it's not done until p2 is resolved.
         expect(complete).toBe(false);
-      }, 50);
+      }, 75);
       setTimeout(function() {
         expect(stages).toEqual([0, 1, 2]);
         expect(complete).toBe(false);
         p2.resolve();
-      }, 60);
+      }, 90);
 
       t.getPromise().then(function() {
         complete = true;
