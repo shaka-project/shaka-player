@@ -29,10 +29,10 @@ just a few small guidelines you need to follow.
    functionality in your patch.  For bug fixes, try to write a regression test
    that fails without your patch and passes with it.
 
-7. Test all changes in both the compiler and linter with ./build/all.sh.
+7. Test all changes in both the compiler and linter with ./build/all.py.
    Patches that do not compile or pass linter checks will not be accepted.
 
-8. Test all changes in the unit and integration tests with ./build/test.sh.
+8. Test all changes in the unit and integration tests with ./build/test.py.
    Patches that do not pass unit and integration tests will not be accepted.
 
 9. Finally, push the commits to your fork and submit a [pull request][].
