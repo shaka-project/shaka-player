@@ -265,6 +265,40 @@ describe('Task', function() {
         if (aborted) done();
       });
     });
+
+    it('runs clean-up tasks before completing the abort', function(done) {
+      var order = [];
+
+      // This simulates the chain used in SBM.fetch():
+      var taskOperation = new shaka.util.PublicPromise();
+      var task = new shaka.util.Task();
+      task.append(function() { return [taskOperation]; });
+      var simulatedFetch = task.getPromise()
+          .then(fail)  // shouldn't happen
+          .catch(function() {
+            return Promise.reject('aborted');
+          });
+
+      // This simulates what Stream does with SBM.fetch()'s return value:
+      var doneFetching = simulatedFetch
+          .then(fail)  // shouldn't happen
+          .catch(function() {
+            order.push('CLEANUP');
+          });
+
+      task.start();
+
+      var abort = task.abort().then(function() {
+        // We expect cleanup tasks above to run before now.
+        order.push('COMPLETE');
+      });
+      taskOperation.resolve();
+
+      Promise.all([doneFetching, abort]).then(function() {
+        expect(order).toEqual(['CLEANUP', 'COMPLETE']);
+        done();
+      });
+    });
   });
 
   describe('end', function() {
