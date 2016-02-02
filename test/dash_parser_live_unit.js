@@ -33,7 +33,11 @@ describe('DashParser.Live', function() {
     newPeriod = jasmine.createSpy('newPeriod');
     errorCallback = jasmine.createSpy('error callback');
     parser = new shaka.dash.DashParser(
-        fakeNetEngine, retry, newPeriod, errorCallback, null);
+        fakeNetEngine, newPeriod, errorCallback);
+    parser.configure({
+      retryParameters: retry,
+      dash: { customScheme: null }
+    });
   });
 
   beforeAll(function() {

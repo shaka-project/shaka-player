@@ -22,10 +22,8 @@ describe('DashParser.Manifest', function() {
   var parser;
 
   beforeEach(function() {
-    var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
-    parser = new shaka.dash.DashParser(
-        fakeNetEngine, retry, function() {}, function() {}, null);
+    parser = shaka.test.Dash.makeDashParser(fakeNetEngine);
   });
 
   beforeAll(function() {

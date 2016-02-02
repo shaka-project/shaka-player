@@ -19,6 +19,23 @@ goog.provide('shaka.test.Dash');
 
 
 /**
+ * Constructs and configures a very simple DASH parser.
+ * @param {!shaka.test.FakeNetworkingEngine} fakeNetEngine
+ * @return {!shaka.dash.DashParser}
+ */
+shaka.test.Dash.makeDashParser = function(fakeNetEngine) {
+  var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
+  var parser = new shaka.dash.DashParser(
+      fakeNetEngine, function() {}, function() {});
+  parser.configure({
+    retryParameters: retry,
+    dash: { customScheme: null }
+  });
+  return parser;
+};
+
+
+/**
  * Verifies the segment references in a manifest.
  *
  * @param {shakaExtern.Manifest} manifest
@@ -63,8 +80,7 @@ shaka.test.Dash.testSegmentIndex = function(done, manifestText, references) {
   var buffer = shaka.util.Uint8ArrayUtils.fromString(manifestText).buffer;
   var fakeNetEngine =
       new shaka.test.FakeNetworkingEngine({'dummy://foo': buffer});
-  var dashParser = new shaka.dash.DashParser(
-      fakeNetEngine, retry, function() {}, function() {}, null);
+  var dashParser = shaka.test.Dash.makeDashParser(fakeNetEngine);
   dashParser.start('dummy://foo')
       .then(function(manifest) {
         shaka.test.Dash.verifySegmentIndex(manifest, references);
@@ -86,8 +102,7 @@ shaka.test.Dash.testFails = function(done, manifestText, expectedError) {
   var manifestData = shaka.util.Uint8ArrayUtils.fromString(manifestText).buffer;
   var fakeNetEngine =
       new shaka.test.FakeNetworkingEngine({'dummy://foo': manifestData});
-  var dashParser = new shaka.dash.DashParser(
-      fakeNetEngine, retry, function() {}, function() {}, null);
+  var dashParser = shaka.test.Dash.makeDashParser(fakeNetEngine);
   shaka.log.setLevel(shaka.log.Level.NONE);
   dashParser.start('dummy://foo')
       .then(fail)

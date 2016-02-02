@@ -31,7 +31,11 @@ describe('DashParser.ContentProtection', function() {
     var netEngine = new shaka.test.FakeNetworkingEngine();
     netEngine.setDefaultText(manifestText);
     var dashParser = new shaka.dash.DashParser(
-        netEngine, retry, function() {}, function() {}, opt_callback || null);
+        netEngine, function() {}, function() {});
+    dashParser.configure({
+      retryParameters: retry,
+      dash: { customScheme: opt_callback || null }
+    });
     dashParser.start('http://example.com')
         .then(function(actual) { expect(actual).toEqual(expected); })
         .catch(fail)
