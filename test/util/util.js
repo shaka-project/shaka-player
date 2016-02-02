@@ -186,6 +186,5 @@ beforeAll(function() {
   shaka.log['MAX_LOG_LEVEL'] = shaka.log.Level.ERROR;
   shaka.log.setLevel(shaka.log.MAX_LOG_LEVEL);
 
-  shaka.polyfill.Promise.install();
-  shaka.polyfill.CustomEvent.install();
+  shaka.polyfill.installAll();
 });

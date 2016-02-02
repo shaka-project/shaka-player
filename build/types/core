@@ -23,15 +23,6 @@
 +../../lib/player.js
 
 +../../lib/polyfill/all.js
-# TODO: Move to different file once polyfills can register as plugins.
-+../../lib/polyfill/customevent.js
-+../../lib/polyfill/fullscreen.js
-+../../lib/polyfill/mediakeys.js
-+../../lib/polyfill/patchedmediakeys_20140218.js
-+../../lib/polyfill/patchedmediakeys_nop.js
-+../../lib/polyfill/patchedmediakeys_v01b.js
-+../../lib/polyfill/promise.js
-+../../lib/polyfill/videoplaybackquality.js
 
 +../../lib/util/array_utils.js
 +../../lib/util/data_view_reader.js
