@@ -41,20 +41,13 @@ def runTests(args):
 
   cmd = [karma_path, 'start']
 
-  # Determine the system.
-  system = platform.uname()[0]
-  if system == 'Linux':
+  if shakaBuildHelpers.isLinux():
     # If we are running tests on Linux, run inside a virtual framebuffer.
     cmd = ['xvfb-run', '--auto-servernum'] + cmd
-    # For MP4 support on Linux Firefox, install gstreamer1.0-libav.
-    # Opera on Linux only supports MP4 for Ubuntu 15.04+, so it is not in the
-    # default list of browsers for Linux at this time.
-    browsers = 'Chrome,Firefox'
-  elif system == 'Darwin':
-    browsers = 'Chrome,Firefox,Safari'
-  elif shakaBuildHelpers.isWindows() or shakaBuildHelpers.isCygwin():
-    browsers = 'Chrome,Firefox,IE'
-  else:
+
+  # Get the browsers supported on the local system.
+  browsers = _GetBrowsers()
+  if not browsers:
     print >> sys.stderr, 'Unrecognized system', system
     return 1
 
@@ -75,6 +68,22 @@ def runTests(args):
     cmdLine = cmd + args
     shakaBuildHelpers.printCmdLine(cmdLine)
     return subprocess.call(cmdLine)
+
+
+def _GetBrowsers():
+  """Uses the platform name to configure which browsers will be tested."""
+  browsers = None
+  if shakaBuildHelpers.isLinux():
+    # For MP4 support on Linux Firefox, install gstreamer1.0-libav.
+    # Opera on Linux only supports MP4 for Ubuntu 15.04+, so it is not in the
+    # default list of browsers for Linux at this time.
+    browsers = 'Chrome,Firefox'
+  elif shakaBuildHelpers.isDarwin():
+    browsers = 'Chrome,Firefox,Safari'
+  elif shakaBuildHelpers.isWindows() or shakaBuildHelpers.isCygwin():
+    browsers = 'Chrome,Firefox,IE'
+  return browsers
+
 
 if __name__ == '__main__':
   shakaBuildHelpers.runMain(runTests)

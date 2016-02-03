@@ -30,6 +30,14 @@ def getSourceBase():
   """Returns the absolute path to the source code base."""
   return os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
+def isLinux():
+  """Determines if the system is Linux."""
+  return platform.uname()[0] == 'Linux'
+
+def isDarwin():
+  """Determines if the system is a Mac."""
+  return platform.uname()[0] == 'Darwin'
+
 def isWindows():
   """Determines if the system is native Windows (i.e. not Cygwin)."""
   return platform.uname()[0] == 'Windows'

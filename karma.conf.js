@@ -61,8 +61,10 @@ module.exports = function(config) {
       ],
     },
 
-    // do not panic about "no activity" unless a test takes longer than 90s.
-    browserNoActivityTimeout: 90000,
+    // do not panic about "no activity" unless a test takes longer than 120s.
+    // this value must be greater than any jasmine.DEFAULT_TIMEOUT_INTERVAL used
+    // in test cases. (eg. 90s in test/streaming_engine_integration.js)
+    browserNoActivityTimeout: 120000,
 
     // don't capture the client's console logs
     client: { captureConsole: true },
@@ -110,6 +112,20 @@ module.exports = function(config) {
         browser_version: '9.0',
         os: 'OS X',
         os_version: 'El Capitan',
+      },
+
+      WebDriver_Safari8: {
+          base: 'WebDriver',
+          config: {hostname: 'localhost', port: 4444},
+          browserName: 'safari',
+          pseudoActivityInterval: 20000
+      },
+
+      WebDriver_IE11: {
+          base: 'WebDriver',
+          config: {hostname: 'localhost', port: 4445},
+          browserName: 'internet explorer',
+          pseudoActivityInterval: 20000
       },
     },
 
