@@ -29,7 +29,7 @@ shaka.test.Dash.makeDashParser = function(fakeNetEngine) {
       fakeNetEngine, function() {}, function() {});
   parser.configure({
     retryParameters: retry,
-    dash: { customScheme: null }
+    dash: { customScheme: function(node) { return null; } }
   });
   return parser;
 };

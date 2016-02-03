@@ -36,7 +36,7 @@ describe('DashParser.Live', function() {
         fakeNetEngine, newPeriod, errorCallback);
     parser.configure({
       retryParameters: retry,
-      dash: { customScheme: null }
+      dash: { customScheme: function(node) { return null; } }
     });
   });
 

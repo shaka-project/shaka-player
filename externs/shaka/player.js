@@ -117,10 +117,10 @@ shakaExtern.DrmConfiguration;
 
 /**
  * @typedef {{
- *   customScheme: ?shakaExtern.DashContentProtectionCallback
+ *   customScheme: shakaExtern.DashContentProtectionCallback
  * }}
  *
- * @property {?shakaExtern.DashContentProtectionCallback} customScheme
+ * @property {shakaExtern.DashContentProtectionCallback} customScheme
  *   If given, invoked by a DASH manifest parser to interpret custom or
  *   non-standard DRM schemes found in the manifest.  The argument is a
  *   ContentProtection node.  Return null if not recognized.

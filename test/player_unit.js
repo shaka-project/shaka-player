@@ -217,6 +217,54 @@ describe('Player', function() {
       newConfig = player.getConfiguration();
       expect(newConfig.drm.servers).toEqual({});
     });
+
+    it('checks the number of arguments to functions', function() {
+      logErrorSpy.and.stub();
+      var goodCustomScheme = function(node) {};
+      var badCustomScheme1 = function() {};  // too few args
+      var badCustomScheme2 = function(x, y) {};  // too many args
+
+      // Takes good callback.
+      player.configure({
+        manifest: { dash: { customScheme: goodCustomScheme } }
+      });
+
+      var newConfig = player.getConfiguration();
+      expect(newConfig.manifest.dash.customScheme).toBe(goodCustomScheme);
+      expect(logErrorSpy).not.toHaveBeenCalled();
+
+      // Doesn't take bad callback #1, refuses to overwrite good callback.
+      logErrorSpy.calls.reset();
+      player.configure({
+        manifest: { dash: { customScheme: badCustomScheme1 } }
+      });
+
+      newConfig = player.getConfiguration();
+      expect(newConfig.manifest.dash.customScheme).toBe(goodCustomScheme);
+      expect(logErrorSpy).toHaveBeenCalledWith(
+          stringContaining('.manifest.dash.customScheme'));
+
+      // Doesn't take bad callback #2, refuses to overwrite good callback.
+      logErrorSpy.calls.reset();
+      player.configure({
+        manifest: { dash: { customScheme: badCustomScheme2 } }
+      });
+
+      newConfig = player.getConfiguration();
+      expect(newConfig.manifest.dash.customScheme).toBe(goodCustomScheme);
+      expect(logErrorSpy).toHaveBeenCalledWith(
+          stringContaining('.manifest.dash.customScheme'));
+
+      // Resets to default if undefined.
+      logErrorSpy.calls.reset();
+      player.configure({
+        manifest: { dash: { customScheme: undefined } }
+      });
+
+      newConfig = player.getConfiguration();
+      expect(newConfig.manifest.dash.customScheme).not.toBe(goodCustomScheme);
+      expect(logErrorSpy).not.toHaveBeenCalled();
+    });
   });
 
   /**

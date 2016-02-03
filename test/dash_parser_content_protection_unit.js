@@ -32,9 +32,10 @@ describe('DashParser.ContentProtection', function() {
     netEngine.setDefaultText(manifestText);
     var dashParser = new shaka.dash.DashParser(
         netEngine, function() {}, function() {});
+    var callback = opt_callback || function(node) { return null; };
     dashParser.configure({
       retryParameters: retry,
-      dash: { customScheme: opt_callback || null }
+      dash: { customScheme: callback }
     });
     dashParser.start('http://example.com')
         .then(function(actual) { expect(actual).toEqual(expected); })
