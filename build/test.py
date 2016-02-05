@@ -43,7 +43,7 @@ def runTests(args):
     # Modify the environment path to include the local karma installation.
     nodeBin = os.path.join(base, 'node_modules', '.bin')
     env = os.environ
-    env['PATH'] = env['PATH'] + ':' + nodeBin
+    env['PATH'] = nodeBin + ':' + env['PATH']
     cmd = ['karma', 'start', '--single-run']
 
   # Determine the system.
