@@ -77,20 +77,6 @@ module.exports = function(config) {
     autoWatch: false,
 
     customLaunchers: {
-      // Firefox doesn't enable MediaSource Extensions or MP4 by default yet:
-      FirefoxWithMSE: {
-        base: 'Firefox',
-        prefs: {
-          'media.fragmented-mp4.exposed': true,
-          'media.fragmented-mp4.ffmpeg.enabled': true,
-          'media.mediasource.enabled': true,
-          'media.mediasource.format-reader': true,
-          'media.mediasource.webm.enabled': true,
-          'media.mediasource.whitelist': false,
-          'media.mediasource.youtubeonly': false,
-        },
-      },
-
       // BrowserStack launchers require login information in the form of
       // the environment variables BROWSER_STACK_USERNAME and
       // BROWSER_STACK_ACCESS_KEY.

@@ -52,13 +52,14 @@ def runTests(args):
   if system == 'Linux':
     # If we are running tests on Linux, run inside a virtual framebuffer.
     cmd = ['xvfb-run', '--auto-servernum'] + cmd
-    # FIXME: Avoid Opera on Linux until we can figure out how to run with MP4
-    # enabled.
-    browsers = 'Chrome,FirefoxWithMSE'
+    # For MP4 support on Linux Firefox, install gstreamer1.0-libav.
+    # Opera on Linux only supports MP4 for Ubuntu 15.04+, so it is not in the
+    # default list of browsers for Linux at this time.
+    browsers = 'Chrome,Firefox'
   elif system == 'Darwin':
-    browsers = 'Chrome,FirefoxWithMSE,Safari'
+    browsers = 'Chrome,Firefox,Safari'
   elif shakaBuildHelpers.isWindows() or shakaBuildHelpers.isCygwin():
-    browsers = 'Chrome,FirefoxWithMSE,IE'
+    browsers = 'Chrome,Firefox,IE'
   else:
     print >> sys.stderr, 'Unrecognized system', system
     return 1
