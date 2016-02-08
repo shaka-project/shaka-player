@@ -76,6 +76,9 @@ module.exports = function(config) {
     // do not execute tests whenever any file changes
     autoWatch: false,
 
+    // do a single run of the tests on captured browsers and then quit
+    singleRun: true,
+
     customLaunchers: {
       // BrowserStack launchers require login information in the form of
       // the environment variables BROWSER_STACK_USERNAME and

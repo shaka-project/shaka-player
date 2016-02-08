@@ -28,26 +28,20 @@ def runTests(args):
     return 1
 
   base = shakaBuildHelpers.getSourceBase()
+  karma_command_name = 'karma'
   if shakaBuildHelpers.isWindows():
-    # Windows karma program has a different name; plus subprocess on Windows
-    # ignores ENV so we cannot use it to help find karma.  So, we need to find
-    # it manually.
-    env = None
-    path = os.path.join(base, 'node_modules', '.bin', 'karma.cmd')
-    if os.path.isfile(path):
-      cmd = [path, 'start', '--single-run']
-    else:
-      # Not found locally, assume it can be found in PATH.
-      cmd = ['karma.cmd', 'start', '--single-run']
-  else:
-    # Modify the environment path to include the local karma installation.
-    nodeBin = os.path.join(base, 'node_modules', '.bin')
-    env = os.environ
-    env['PATH'] = nodeBin + ':' + env['PATH']
-    cmd = ['karma', 'start', '--single-run']
+    # Windows karma program has a different name
+    karma_command_name = 'karma.cmd'
+
+  # Try local modules first.
+  karma_path = os.path.join(base, 'node_modules', '.bin', karma_command_name)
+  if not os.path.isfile(karma_path):
+    # Not found locally, assume it can be found in os.environ['PATH'].
+    karma_path = karma_command_name
+
+  cmd = [karma_path, 'start']
 
   # Determine the system.
-  browsers = None
   system = platform.uname()[0]
   if system == 'Linux':
     # If we are running tests on Linux, run inside a virtual framebuffer.
@@ -68,19 +62,19 @@ def runTests(args):
     # Run tests in all available browsers.
     cmdLine = cmd + ['--browsers', browsers]
     shakaBuildHelpers.printCmdLine(cmdLine)
-    code = subprocess.call(cmdLine, env=env)
+    code = subprocess.call(cmdLine)
     if code != 0:
       return code
 
     # Run a basic coverage report in Chrome only.
     cmdLine = cmd + ['--reporters', 'coverage']
     shakaBuildHelpers.printCmdLine(cmdLine)
-    return subprocess.call(cmdLine, env=env)
+    return subprocess.call(cmdLine)
   else:
     # Run with command-line arguments from the user.
     cmdLine = cmd + args
     shakaBuildHelpers.printCmdLine(cmdLine)
-    return subprocess.call(cmdLine, env=env)
+    return subprocess.call(cmdLine)
 
 if __name__ == '__main__':
   shakaBuildHelpers.runMain(runTests)
