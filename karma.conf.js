@@ -100,6 +100,12 @@ module.exports = function(config) {
       },
     },
 
+    browserStack: {
+      // Always start a tunnel if using BrowserStack.  This used to be default,
+      // but is now required as an explicit parameter.
+      startTunnel: true
+    },
+
     // By default, use Chrome only, unless command-line arguments override.
     browsers: ['Chrome'],
   });
