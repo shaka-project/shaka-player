@@ -1,3 +1,28 @@
+## 1.6.3 (2016-02-08)
+
+Features:
+  - Added opt\_clearBufferOffset for audio  (Thanks, Itay)
+    - https://github.com/google/shaka-player/pull/254
+  - Fetch segments from new location after manifest redirect  (Thanks, Rob)
+    - https://github.com/google/shaka-player/pull/266
+
+Bugfixes:
+  - Several IE11 stability issues and race conditions fixed
+    - Fixed incompatibilities when clearing the SourceBuffer
+    - Ignore spurious 'updateend' events
+    - Added stack-based messages to all assertions
+    - Fixed some unit test compatibility issues
+    - Fixed race conditions caused by Promise polyfill
+    - https://github.com/google/shaka-player/issues/251
+
+Docs:
+  - Update browser support docs with regard to IE & Firefox
+
+Test app fixes:
+  - Fixed slider controls for IE11
+  - Turned off seek bar tooltips for IE11
+
+
 ## 1.6.2 (2015-12-14)
 
 Features:
