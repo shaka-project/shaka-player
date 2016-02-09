@@ -75,7 +75,6 @@ describe('MediaSourceEngine', function() {
 
     var onMediaSourceOpen = function() {
       mediaSource.removeEventListener('sourceopen', onMediaSourceOpen);
-      mediaSource.duration = 0;
       mediaSourceEngine = new shaka.media.MediaSourceEngine(mediaSource, null);
       done();
     };
@@ -162,7 +161,9 @@ describe('MediaSourceEngine', function() {
 
   it('extends the duration', function(done) {
     mediaSourceEngine.init({'video': metadata.video.mimeType});
-    appendInit('video').then(function() {
+    mediaSourceEngine.setDuration(0).then(function() {
+      return appendInit('video');
+    }).then(function() {
       return mediaSourceEngine.setDuration(20);
     }).then(function() {
       expect(mediaSource.duration).toBeCloseTo(20);
