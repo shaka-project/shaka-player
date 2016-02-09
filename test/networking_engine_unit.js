@@ -15,16 +15,24 @@
  * limitations under the License.
  */
 
-describe('NetworkingEngine', function() {
+describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
   var networkingEngine;
   var resolveScheme;
   var rejectScheme;
   var requestType;
   var Util;
+  var originalGetLocationProtocol;
+  var fakeProtocol;
 
   beforeAll(function() {
     Util = shaka.test.Util;
     requestType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+
+    originalGetLocationProtocol =
+        shaka.net.NetworkingEngine.getLocationProtocol_;
+    shaka.net.NetworkingEngine.getLocationProtocol_ = function() {
+      return fakeProtocol;
+    };
   });
 
   beforeEach(function() {
@@ -44,6 +52,11 @@ describe('NetworkingEngine', function() {
   afterEach(function() {
     shaka.net.NetworkingEngine.unregisterScheme('resolve');
     shaka.net.NetworkingEngine.unregisterScheme('reject');
+  });
+
+  afterAll(function() {
+    shaka.net.NetworkingEngine.getLocationProtocol_ =
+        originalGetLocationProtocol;
   });
 
   describe('retry', function() {
@@ -259,6 +272,17 @@ describe('NetworkingEngine', function() {
         return Promise.resolve();
       });
       networkingEngine.request(requestType, request).catch(fail).then(done);
+    });
+
+    it('infers a scheme for // URIs', function(done) {
+      fakeProtocol = 'resolve:';
+      networkingEngine.request(requestType, createRequest('//foo'))
+          .catch(fail)
+          .then(function() {
+            expect(resolveScheme).toHaveBeenCalled();
+            expect(resolveScheme.calls.argsFor(0)[0]).toBe('resolve://foo');
+            done();
+          });
     });
   });
 
