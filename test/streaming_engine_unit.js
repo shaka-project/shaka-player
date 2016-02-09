@@ -289,9 +289,10 @@ describe('StreamingEngine', function() {
       byteLimit: Number.POSITIVE_INFINITY
     };
     streamingEngine = new shaka.media.StreamingEngine(
-        config, playhead, mediaSourceEngine, netEngine, manifest,
+        playhead, mediaSourceEngine, netEngine, manifest,
         onCanSwitch, onBufferNewPeriod, onError,
         onInitialStreamsSetup, onStartupComplete);
+    streamingEngine.configure(config);
   });  // beforeEach()
 
   afterEach(function() {
