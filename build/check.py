@@ -36,7 +36,7 @@ def getLintFiles():
   base = shakaBuildHelpers.getSourceBase()
   def get(arg):
     return shakaBuildHelpers.getAllFiles(os.path.join(base, arg), match)
-  return get('test') + get('lib') + get('externs')
+  return get('test') + get('lib') + get('externs') + get('demo')
 
 def checkLint():
   """Runs the linter over the library files."""
@@ -93,7 +93,7 @@ def checkTests():
   base = shakaBuildHelpers.getSourceBase()
   def get(*args):
     return shakaBuildHelpers.getAllFiles(os.path.join(base, *args), match)
-  files = (get('lib') + get('externs') + get('test') +
+  files = (get('lib') + get('externs') + get('test') + get('demo') +
       get('third_party', 'closure'))
   testBuild = build.Build(set(files))
 
