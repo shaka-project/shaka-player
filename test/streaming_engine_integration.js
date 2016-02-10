@@ -67,8 +67,8 @@ describe('StreamingEngine', function() {
 
   var manifest;
 
+  var onChooseStreams;
   var onCanSwitch;
-  var onBufferNewPeriod;
   var onError;
   var onInitialStreamsSetup;
   var onStartupComplete;
@@ -149,6 +149,9 @@ describe('StreamingEngine', function() {
     setupNetworkingEngine();
     setupManifest();
     createStreamingEngine();
+
+    onError = jasmine.createSpy('onError');
+    onError.and.callFake(fail);
   }
 
   function setupNetworkingEngine() {
@@ -247,9 +250,8 @@ describe('StreamingEngine', function() {
   }  // setupManifest()
 
   function createStreamingEngine() {
+    onChooseStreams = jasmine.createSpy('onChooseStreams');
     onCanSwitch = jasmine.createSpy('onCanSwitch');
-    onBufferNewPeriod = jasmine.createSpy('onBufferNewPeriod');
-    onError = jasmine.createSpy('onError');
     onInitialStreamsSetup = jasmine.createSpy('onInitialStreamsSetup');
     onStartupComplete = jasmine.createSpy('onStartupComplete');
 
@@ -261,7 +263,7 @@ describe('StreamingEngine', function() {
     };
     streamingEngine = new shaka.media.StreamingEngine(
         playhead, mediaSourceEngine, netEngine, manifest,
-        onCanSwitch, onBufferNewPeriod, onError,
+        onChooseStreams, onCanSwitch, onError,
         onInitialStreamsSetup, onStartupComplete);
     streamingEngine.configure(config);
   }
@@ -287,12 +289,6 @@ describe('StreamingEngine', function() {
       video.play();
     });
 
-    onBufferNewPeriod.and.callFake(function(period) {
-      expect(period).toBe(manifest.periods[1]);
-      streamingEngine.switch('audio', audioStream2);
-      streamingEngine.switch('video', videoStream2);
-    });
-
     var onEnded = function() {
       // Some browsers may not end at exactly 60 seconds.
       expect(Math.round(video.currentTime)).toBe(60);
@@ -301,8 +297,8 @@ describe('StreamingEngine', function() {
     eventManager.listen(video, 'ended', onEnded);
 
     // Let's go!
-    var streamsByType = {'audio': audioStream1, 'video': videoStream1};
-    streamingEngine.init(streamsByType);
+    onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+    streamingEngine.init();
   });
 
   it('plays at high playback rates', function(done) {
@@ -320,12 +316,6 @@ describe('StreamingEngine', function() {
       }
     });
 
-    onBufferNewPeriod.and.callFake(function(period) {
-      expect(period).toBe(manifest.periods[1]);
-      streamingEngine.switch('audio', audioStream2);
-      streamingEngine.switch('video', videoStream2);
-    });
-
     var onEnded = function() {
       // Some browsers may not end at exactly 60 seconds.
       expect(Math.round(video.currentTime)).toBe(60);
@@ -334,23 +324,13 @@ describe('StreamingEngine', function() {
     eventManager.listen(video, 'ended', onEnded);
 
     // Let's go!
-    var streamsByType = {'audio': audioStream1, 'video': videoStream1};
-    streamingEngine.init(streamsByType);
+    onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+    streamingEngine.init();
   });
 
   it('can handle buffered seeks', function(done) {
     onStartupComplete.and.callFake(function() {
       video.play();
-    });
-
-    onBufferNewPeriod.and.callFake(function(period) {
-      if (period == manifest.periods[0]) {
-        streamingEngine.switch('audio', audioStream1);
-        streamingEngine.switch('video', videoStream1);
-      } else {
-        streamingEngine.switch('audio', audioStream2);
-        streamingEngine.switch('video', videoStream2);
-      }
     });
 
     // After 35 seconds seek back 10 seconds into the first Period.
@@ -370,19 +350,13 @@ describe('StreamingEngine', function() {
     eventManager.listen(video, 'ended', onEnded);
 
     // Let's go!
-    var streamsByType = {'audio': audioStream1, 'video': videoStream1};
-    streamingEngine.init(streamsByType);
+    onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+    streamingEngine.init();
   });
 
   it('can handle unbuffered seeks', function(done) {
     onStartupComplete.and.callFake(function() {
       video.play();
-    });
-
-    onBufferNewPeriod.and.callFake(function(period) {
-      expect(period).toBe(manifest.periods[1]);
-      streamingEngine.switch('audio', audioStream2);
-      streamingEngine.switch('video', videoStream2);
     });
 
     // After 20 seconds seek 10 seconds into the second Period.
@@ -402,9 +376,24 @@ describe('StreamingEngine', function() {
     eventManager.listen(video, 'ended', onEnded);
 
     // Let's go!
-    var streamsByType = {'audio': audioStream1, 'video': videoStream1};
-    streamingEngine.init(streamsByType);
+    onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+    streamingEngine.init();
   });
+
+  /**
+   * Initializes or switches to the given period.
+   *
+   * @param {shakaExtern.Period} period
+   */
+  function defaultOnChooseStreams(period) {
+    if (period == manifest.periods[0]) {
+      return {'audio': audioStream1, 'video': videoStream1};
+    } else if (period == manifest.periods[1]) {
+      return {'audio': audioStream2, 'video': videoStream2};
+    } else {
+      throw new Error();
+    }
+  }
 
   /**
    * Constructs a SegmentReference with a test URI.
