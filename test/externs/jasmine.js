@@ -26,7 +26,26 @@ var jasmine = {};
 
 
 /** @typedef {function()|function(function())} */
+jasmine.Callback;
+
+
+
+/**
+ * @constructor
+ * @struct
+ */
 jasmine.Spec;
+
+
+/** @param {string=} opt_message */
+jasmine.Spec.prototype.pend = function(opt_message) {};
+
+
+/**
+ * @type {{failedExpectations: !Array}}
+ * gjslint: disable=900
+ */
+jasmine.Spec.prototype.result;
 
 
 
@@ -297,19 +316,19 @@ jasmine.stringMatching = function(value) {};
 jasmine.arrayContaining = function(value) {};
 
 
-/** @param {jasmine.Spec} callback */
+/** @param {jasmine.Callback} callback */
 var beforeEach = function(callback) {};
 
 
-/** @param {jasmine.Spec} callback */
+/** @param {jasmine.Callback} callback */
 var beforeAll = function(callback) {};
 
 
-/** @param {jasmine.Spec} callback */
+/** @param {jasmine.Callback} callback */
 var afterEach = function(callback) {};
 
 
-/** @param {jasmine.Spec} callback */
+/** @param {jasmine.Callback} callback */
 var afterAll = function(callback) {};
 
 
@@ -319,44 +338,60 @@ var fail = function(opt_reason) {};
 
 /**
  * @param {string} name
- * @param {jasmine.Spec} callback
+ * @param {jasmine.Callback} callback
  */
 var describe = function(name, callback) {};
 
 
 /**
  * @param {string} name
- * @param {jasmine.Spec} callback
+ * @param {jasmine.Callback} callback
  */
 var fdescribe = function(name, callback) {};
 
 
 /**
  * @param {string} name
- * @param {jasmine.Spec} callback
+ * @param {jasmine.Callback} callback
  */
 var xdescribe = function(name, callback) {};
 
 
 /**
  * @param {string} name
- * @param {jasmine.Spec} callback
+ * @param {jasmine.Callback} callback
  */
 var it = function(name, callback) {};
 
 
 /**
  * @param {string} name
- * @param {jasmine.Spec} callback
+ * @param {jasmine.Callback} callback
  */
 var fit = function(name, callback) {};
 
 
 /**
  * @param {string} name
- * @param {jasmine.Spec} callback
+ * @param {jasmine.Callback} callback
  */
 var xit = function(name, callback) {};
+
+
+
+/**
+ * @constructor
+ * @struct
+ */
+jasmine.Env = function() {};
+
+
+/** @param {jasmine.Spec} spec */
+jasmine.Env.prototype.specFilter = function(spec) {};
+
+
+/** @return {!jasmine.Env} */
+jasmine.getEnv = function() {};
 
 
 

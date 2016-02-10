@@ -30,6 +30,9 @@ module.exports = function(config) {
       // test utils next
       'test/util/*.js',
 
+      // support test first
+      'test/support_check.js',
+
       // actual tests last
       'test/*.js',
 

@@ -179,13 +179,33 @@ var assertsToFailures = {
 };
 
 
+(function() {  // Isolate access to specs.
+  // Collect all specs.
+  var allSpecs = [];
+  jasmine.getEnv().specFilter = function(spec) {
+    allSpecs.push(spec);
+    return true;
+  };
+
+  shaka.test.Util.cancelAllRemainingSpecs = function() {
+    allSpecs.forEach(function(spec) {
+      if (spec.result.failedExpectations.length) {
+        // Don't disable any specs which have already failed.
+        return;
+      }
+
+      // You prevent a jasmine spec from running by marking it "pending".
+      // This seems to be a misnomer, as it effectively cancels a spec.
+      spec.pend();
+    });
+  };
+})();
+
+
 // Make sure assertions are converted into failures for all tests.
 beforeAll(assertsToFailures.install);
 afterAll(assertsToFailures.uninstall);
 
-// The library cannot function without certain browser features, and therefore
-// neither can many of our tests.  If needed, install the Promise and
-// CustomEvent polyfills.  In particular, this is needed on IE11.
 beforeAll(function() {
   shaka.log['MAX_LOG_LEVEL'] = shaka.log.Level.ERROR;
   shaka.log.setLevel(shaka.log.MAX_LOG_LEVEL);
