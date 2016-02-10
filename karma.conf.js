@@ -116,7 +116,7 @@ module.exports = function(config) {
     rimraf.sync('coverage', {});  // Like rm -rf
 
     config.set({
-      reporters: [ 'coverage' ],
+      reporters: [ 'coverage', 'progress' ],
       coverageReporter: {
         reporters: [
           { type: 'html', dir: 'coverage' },
