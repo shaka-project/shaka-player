@@ -430,4 +430,143 @@ describe('DashParser.ContentProtection', function() {
 
     testDashParser(done, source, expected, callback);
   });
+
+  xit('inserts a placeholder for unrecognized schemes', function(done) {
+    var source = buildManifestText([
+      // AdaptationSet lines
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:feedbaad-f00d-2bee-baad-d00d00000000" />',
+      '<ContentProtection',
+      '  schemeIdUri="http://example.com/drm" />',
+      '<ContentProtection',
+      '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
+      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />'
+    ], [], []);
+    var expected = buildExpectedManifest(
+        [buildDrmInfo('')],  // placeholder: only unrecognized schemes found
+        // Representation 1 key IDs
+        ['deadbeeffeedbaadf00d000008675309'],
+        // Representation 2 key IDs
+        ['deadbeeffeedbaadf00d000008675309']);
+    testDashParser(done, source, expected);
+  });
+
+  xit('can specify ContentProtection in Representation only', function(done) {
+    var source = buildManifestText([
+      // AdaptationSet lines
+    ], [
+      // Representation 1 lines
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />'
+    ], [
+      // Representation 2 lines
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />'
+    ]);
+    var expected = buildExpectedManifest(
+        [buildDrmInfo('com.widevine.alpha')],
+        [], []);
+    testDashParser(done, source, expected);
+  });
+
+  xit('only keeps key systems common to all Representations', function(done) {
+    var source = buildManifestText([
+      // AdaptationSet lines
+    ], [
+      // Representation 1 lines
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95" />',
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />'
+    ], [
+      // Representation 2 lines
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />'
+    ]);
+    var expected = buildExpectedManifest(
+        [buildDrmInfo('com.widevine.alpha')],
+        [], []);
+    testDashParser(done, source, expected);
+  });
+
+  xit('still keeps per-Representation key IDs when merging', function(done) {
+    var source = buildManifestText([
+      // AdaptationSet lines
+    ], [
+      // Representation 1 lines
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
+      '<ContentProtection',
+      '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
+      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />'
+    ], [
+      // Representation 2 lines
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
+      '<ContentProtection',
+      '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
+      '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />'
+    ]);
+    var expected = buildExpectedManifest(
+        [buildDrmInfo('com.widevine.alpha')],
+        // Representation 1 key IDs
+        ['deadbeeffeedbaadf00d000008675309'],
+        // Representation 2 key IDs
+        ['baadf00dfeeddeafbeef000004390116']);
+    testDashParser(done, source, expected);
+  });
+
+  xit('parses key IDs from non-cenc in Representation', function(done) {
+    var source = buildManifestText([
+      // AdaptationSet lines
+    ], [
+      // Representation 1 lines
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95"',
+      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"',
+      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />'
+    ], [
+      // Representation 2 lines
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95"',
+      '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />',
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"',
+      '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />'
+    ]);
+    var expected = buildExpectedManifest(
+        [
+          buildDrmInfo('com.microsoft.playready'),
+          buildDrmInfo('com.widevine.alpha')
+        ],
+        // Representation 1 key IDs
+        ['deadbeeffeedbaadf00d000008675309'],
+        // Representation 2 key IDs
+        ['baadf00dfeeddeafbeef000004390116']);
+    testDashParser(done, source, expected);
+  });
+
+  xit('parses key IDs from non-cenc in AdaptationSet', function(done) {
+    var source = buildManifestText([
+      // AdaptationSet lines
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95"',
+      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"',
+      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />'
+    ], [], []);
+    var expected = buildExpectedManifest(
+        [
+          buildDrmInfo('com.microsoft.playready'),
+          buildDrmInfo('com.widevine.alpha')
+        ],
+        // Representation 1 key IDs
+        ['deadbeeffeedbaadf00d000008675309'],
+        // Representation 2 key IDs
+        ['deadbeeffeedbaadf00d000008675309']);
+    testDashParser(done, source, expected);
+  });
 });
