@@ -35,8 +35,10 @@
 +../../lib/util/event_manager.js
 +../../lib/util/fake_event.js
 +../../lib/util/fake_event_target.js
++../../lib/util/functional.js
 +../../lib/util/i_destroyable.js
 +../../lib/util/language_utils.js
++../../lib/util/map_utils.js
 +../../lib/util/multi_map.js
 +../../lib/util/pssh.js
 +../../lib/util/public_promise.js
