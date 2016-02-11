@@ -47,7 +47,7 @@
 shakaExtern.SupportType;
 
 
-/** @typedef {function(!Node):Array.<shakaExtern.DrmInfo>} */
+/** @typedef {function(!Element):Array.<shakaExtern.DrmInfo>} */
 shakaExtern.DashContentProtectionCallback;
 
 

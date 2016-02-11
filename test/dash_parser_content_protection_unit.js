@@ -392,7 +392,7 @@ describe('DashParser.ContentProtection', function() {
     ], [], []);
 
     /**
-     * @param {!Node} contentProtection
+     * @param {!Element} contentProtection
      * @return {Array.<shakaExtern.DrmInfo>}
      */
     var callback = function(contentProtection) {

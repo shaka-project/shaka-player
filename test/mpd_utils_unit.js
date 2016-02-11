@@ -392,8 +392,7 @@ describe('MpdUtils', function() {
       xmlLines.push('</SegmentTimeline>');
       var parser = new DOMParser();
       var xml = parser.parseFromString(xmlLines.join('\n'), 'application/xml');
-      var segmentTimeline = shaka.util.XmlUtils.findChild(
-          /** @type {!Node} */ (xml), 'SegmentTimeline');
+      var segmentTimeline = xml.documentElement;
       console.assert(segmentTimeline);
 
       var timeline = MpdUtils.createTimeline(
