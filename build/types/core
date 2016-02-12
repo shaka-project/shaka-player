@@ -14,7 +14,7 @@
 +../../lib/media/segment_index.js
 +../../lib/media/segment_reference.js
 +../../lib/media/streaming_engine.js
-+../../lib/media/text_source_buffer.js
++../../lib/media/text_engine.js
 +../../lib/media/time_ranges_utils.js
 +../../lib/media/webm_segment_index_parser.js
 

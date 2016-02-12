@@ -37,6 +37,7 @@ describe('MediaSourceEngine', function() {
       mimeType: 'audio/mp4; codecs="mp4a.40.2"',
       generator: null
     }
+    // TODO: add text streams to MSE integration tests
   };
   var presentationDuration = 840;
 
@@ -95,13 +96,13 @@ describe('MediaSourceEngine', function() {
 
   function appendInit(type) {
     var segment = metadata[type].generator.getInitSegment(Date.now() / 1000);
-    return mediaSourceEngine.appendBuffer(type, segment);
+    return mediaSourceEngine.appendBuffer(type, segment, null, null);
   }
 
   function append(type, segmentNumber) {
     var segment = metadata[type].generator.
         getSegment(segmentNumber, Date.now() / 1000);
-    return mediaSourceEngine.appendBuffer(type, segment);
+    return mediaSourceEngine.appendBuffer(type, segment, null, null);
   }
 
   function buffered(type, time) {

@@ -19,7 +19,7 @@
 goog.require('shaka.Player');
 goog.require('shaka.media.ManifestParser');
 goog.require('shaka.media.PresentationTimeline');
-goog.require('shaka.media.TextSourceBuffer');
+goog.require('shaka.media.TextEngine');
 goog.require('shaka.polyfill.installAll');
 goog.require('shaka.util.Error');
 goog.require('shaka.util.StringUtils');

@@ -23,9 +23,9 @@ digraph shaka2_data {
 
   StreamingEngine -> MediaSourceEngine [ label="ArrayBuffer" ]
   MediaSourceEngine -> SourceBuffer [ label="ArrayBuffer" ]
-  MediaSourceEngine -> TextSourceBuffer [ label="ArrayBuffer" ]
-  TextSourceBuffer -> TextParser [ label="ArrayBuffer => TextCues" dir=both arrowtail=onormal ]
-  TextSourceBuffer -> TextTrack [ label="TextCues" ]
+  MediaSourceEngine -> TextEngine [ label="ArrayBuffer" ]
+  TextEngine -> TextParser [ label="ArrayBuffer => TextCues" dir=both arrowtail=onormal ]
+  TextEngine -> TextTrack [ label="TextCues" ]
 
   NetworkingEngine -> RequestFilter [ label="Request => Request" dir=both arrowtail=onormal ]
   NetworkingEngine -> ResponseFilter [ label="Response => Response" dir=both arrowtail=onormal ]

@@ -30,10 +30,10 @@ digraph shaka2_ownership {
   MediaSourceEngine -> MediaSource
   MediaSourceEngine -> SourceBuffer
   MediaSourceEngine -> SourceBuffer
-  MediaSourceEngine -> TextSourceBuffer
+  MediaSourceEngine -> TextEngine
 
-  TextSourceBuffer -> TextTrack
-  TextSourceBuffer -> TextParser
+  TextEngine -> TextTrack
+  TextEngine -> TextParser
 
   subgraph cluster_legend {
     style=rounded

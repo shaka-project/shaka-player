@@ -1,6 +1,6 @@
 # Shaka v2.0 Redesign
 
-last update: 2016-01-15
+last update: 2016-02-12
 
 by: [joeyparrish@google.com](mailto:joeyparrish@google.com)
 
@@ -10,8 +10,8 @@ by: [joeyparrish@google.com](mailto:joeyparrish@google.com)
 We are redesigning Shaka Player to reduce overall complexity, increase
 modularity, and make it easier to introduce new features that would be too
 messy in Shaka Player v1.x.  We posted code to the preview branch on github
-at the end of November 2015 and *hope* to have a fully-functional public beta
-release some time in January 2016.
+at the end of November 2015 and *hope* to have a public beta release by the
+end of February 2016.
 
 
 ## Background
@@ -175,11 +175,10 @@ StreamingEngine will own MediaSourceEngine, and will be responsible for reading
 an internal representation of a manifest, fetching content, and feeding content
 to MediaSourceEngine.
 
-**[Simplicity]** To simplify segmented text and non-native text formats, we will create a
-work-alike for SourceBuffer called TextSourceBuffer.  MediaSourceEngine and the
-layers above it will not have to know the details of how text is handled, and
-segmented text can be streamed exactly the same way as segmented audio and
-video.
+**[Simplicity]** To simplify segmented text and non-native text formats, we
+will create TextEngine.  MediaSourceEngine and the layers above it will not
+have to know the details of how text is handled, and segmented text can be
+streamed exactly the same way as segmented audio and video.
 
 **[Extensibility]** Text parsers will be plugin-based, allowing new text formats to be supported
 without modifying the library.
@@ -247,7 +246,7 @@ shaka.net.NetworkingEngine.prototype.registerRequestFilter(filterCallback)
 
 shaka.net.NetworkingEngine.prototype.registerResponseFilter(filterCallback)
 
-shaka.media.TextSourceBuffer.registerParser(mimeType, parserCallback)
+shaka.media.TextEngine.registerParser(mimeType, parserCallback)
 
 shaka.media.ManifestParser.registerParserByMime(mimeType, parser)
 
