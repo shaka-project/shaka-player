@@ -99,6 +99,18 @@ describe('MpdUtils', function() {
                   .toBe('/example/$Time$.mp4');
     });
 
+    it('handles rounding errors for calculated Times', function() {
+      expect(
+          MpdUtils.fillUriTemplate(
+              '/example/$Time$.mp4',
+              null, null, null, 100.0001).toString()).toBe('/example/100.mp4');
+
+      expect(
+          MpdUtils.fillUriTemplate(
+              '/example/$Time%05d$.mp4',
+              null, null, null, 99.9999).toString()).toBe('/example/00100.mp4');
+    });
+
     it('handles multiple identifiers', function() {
       expect(
           MpdUtils.fillUriTemplate(
