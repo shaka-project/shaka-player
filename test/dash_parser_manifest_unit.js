@@ -145,7 +145,7 @@ describe('DashParser.Manifest', function() {
                       bandwidth: 100,
                       width: 768,
                       height: 576,
-                      keyIds: []
+                      keyId: null
                     }),
                     jasmine.objectContaining({
                       id: 2,
@@ -159,7 +159,7 @@ describe('DashParser.Manifest', function() {
                       bandwidth: 50,
                       width: 576,
                       height: 432,
-                      keyIds: []
+                      keyId: null
                     })
                   ]
                 },
@@ -179,7 +179,7 @@ describe('DashParser.Manifest', function() {
                       mimeType: 'text/vtt',
                       codecs: 'mp4a.40.29',
                       bandwidth: 100,
-                      keyIds: [],
+                      keyId: null,
                       kind: 'caption'
                     })
                   ]
@@ -199,7 +199,7 @@ describe('DashParser.Manifest', function() {
                           jasmine.any(shaka.media.InitSegmentReference),
                       mimeType: 'audio/mp4',
                       codecs: '',
-                      keyIds: []
+                      keyId: null
                     })
                   ]
                 }
