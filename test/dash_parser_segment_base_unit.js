@@ -129,6 +129,40 @@ describe('DashParser.SegmentBase', function() {
         .then(done);
   });
 
+  it('does not require sourceURL in Initialization', function(done) {
+    var source = [
+      '<MPD>',
+      '  <Period>',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation>',
+      '        <BaseURL>http://example.com/stream.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" timescale="9000">',
+      '          <Initialization range="201-300" />',
+      '        </SegmentBase>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'].join('\n');
+
+    fakeNetEngine.setResponseMapAsText({
+      'dummy://foo': source,
+      'http://example.com/stream.mp4': ''
+    });
+    parser.start('dummy://foo')
+        .then(function(manifest) {
+          expect(manifest).toEqual(
+              Dash.makeManifestFromInit('stream.mp4', 201, 300));
+          return Dash.callCreateSegmentIndex(manifest);
+        })
+        .then(function() {
+          expect(fakeNetEngine.request.calls.count()).toBe(2);
+          fakeNetEngine.expectRangeRequest(
+              'http://example.com/stream.mp4', 100, 200);
+        })
+        .catch(fail)
+        .then(done);
+  });
+
   it('merges across levels', function(done) {
     var source = [
       '<MPD>',
