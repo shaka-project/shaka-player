@@ -471,6 +471,38 @@ describe('DashParser.Manifest', function() {
         .then(done);
   });
 
+  xit('generates a correct index for non-segmented text', function(done) {
+    var source = [
+      '<MPD mediaPresentationDuration="PT30S">',
+      '  <Period>',
+      '    <AdaptationSet mimeType="text/vtt" lang="de">',
+      '      <Representation>',
+      '        <BaseURL>http://example.com/de.vtt</BaseURL>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'
+    ].join('\n');
+
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+
+    var stream;
+    parser.start('dummy://foo').then(function(manifest) {
+      stream = manifest.periods[0].streamSets[0].streams[0];
+      return stream.createSegmentIndex();
+    }).then(function() {
+      expect(stream.initSegmentReference).toBe(null);
+      expect(stream.findSegmentPosition(0)).toBe(1);
+      expect(stream.getSegmentReference(1)).toBe(jasmine.objectContaining({
+        startTime: 0,
+        endTime: 30,
+        uris: ['http://example.com/de.vtt'],
+        startByte: 0,
+        endByte: null
+      }));
+    }).catch(fail).then(done);
+  });
+
   describe('supports UTCTiming', function() {
     var originalNow;
 
