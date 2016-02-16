@@ -71,8 +71,11 @@ jasmine.Matchers.prototype.not;
 jasmine.Matchers.prototype.toBe = function(value) {};
 
 
-/** @param {*} value */
-jasmine.Matchers.prototype.toBeCloseTo = function(value) {};
+/**
+ * @param {number} value
+ * @param {number=} opt_precision
+ */
+jasmine.Matchers.prototype.toBeCloseTo = function(value, opt_precision) {};
 
 
 jasmine.Matchers.prototype.toBeDefined = function() {};
