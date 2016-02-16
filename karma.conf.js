@@ -94,12 +94,20 @@ module.exports = function(config) {
         os_version: '8.1',
       },
 
-      BrowserStack_Safari: {
+      BrowserStack_Safari8: {
         base: 'BrowserStack',
         browser: 'safari',
         browser_version: '8.0',
         os: 'OS X',
         os_version: 'Yosemite',
+      },
+
+      BrowserStack_Safari9: {
+        base: 'BrowserStack',
+        browser: 'safari',
+        browser_version: '9.0',
+        os: 'OS X',
+        os_version: 'El Capitan',
       },
     },
 
