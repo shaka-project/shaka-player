@@ -503,6 +503,32 @@ describe('DashParser.Manifest', function() {
     }).catch(fail).then(done);
   });
 
+  it('correctly parses UTF-8', function(done) {
+    var source = [
+      '<MPD>',
+      '  <Period duration="PT30M">',
+      '    <AdaptationSet mimeType="video/mp4" lang="\u2603">',
+      '      <Representation bandwidth="500">',
+      '        <BaseURL>http://example.com</BaseURL>',
+      '        <SegmentTemplate media="2.mp4" duration="1"',
+      '            initialization="\u0227.mp4" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'
+    ].join('\n');
+
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+
+    parser.start('dummy://foo').then(function(manifest) {
+      var streamSet = manifest.periods[0].streamSets[0];
+      var stream = streamSet.streams[0];
+      expect(stream.initSegmentReference.uris[0])
+          .toBe('http://example.com/%C8%A7.mp4');
+      expect(streamSet.language).toBe('\u2603');
+    }).catch(fail).then(done);
+  });
+
   describe('supports UTCTiming', function() {
     var originalNow;
 
@@ -589,7 +615,7 @@ describe('DashParser.Manifest', function() {
 
       fakeNetEngine.request.and.callFake(function(type, request) {
         if (request.uris[0] == 'http://foo.bar/manifest') {
-          var data = shaka.util.Uint8ArrayUtils.fromString(source).buffer;
+          var data = shaka.util.StringUtils.toUTF8(source);
           return Promise.resolve({data: data, headers: {}, uri: ''});
         } else {
           expect(request.uris[0]).toBe('http://foo.bar/date');

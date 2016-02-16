@@ -22,8 +22,6 @@ goog.require('shaka.media.PresentationTimeline');
 goog.require('shaka.media.TextEngine');
 goog.require('shaka.polyfill.installAll');
 goog.require('shaka.util.Error');
-goog.require('shaka.util.StringUtils');
-goog.require('shaka.util.Uint8ArrayUtils');
 // TODO: Remove once player uses StreamingEngine.
 goog.require('shaka.media.StreamingEngine');
 

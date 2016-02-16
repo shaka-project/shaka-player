@@ -23,7 +23,6 @@ describe('DashParser.Live', function() {
   var oldNow;
   var parser;
   var realTimeout;
-  var Uint8ArrayUtils;
   var updateTime = 5;
   var Util;
 
@@ -42,7 +41,6 @@ describe('DashParser.Live', function() {
 
   beforeAll(function() {
     Dash = shaka.test.Dash;
-    Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
     Util = shaka.test.Util;
 
     realTimeout = window.setTimeout;
@@ -256,7 +254,7 @@ describe('DashParser.Live', function() {
       '</MPD>'
     ].join('\n');
     var manifestText = sprintf(template, {updatePeriod: updateTime});
-    var manifestData = Uint8ArrayUtils.fromString(manifestText).buffer;
+    var manifestData = shaka.util.StringUtils.toUTF8(manifestText);
     var originalUri = 'http://example.com/';
     var redirectedUri = 'http://redirected.com/';
 

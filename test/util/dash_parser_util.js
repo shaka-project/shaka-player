@@ -77,7 +77,7 @@ shaka.test.Dash.verifySegmentIndex = function(manifest, references) {
  */
 shaka.test.Dash.testSegmentIndex = function(done, manifestText, references) {
   var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
-  var buffer = shaka.util.Uint8ArrayUtils.fromString(manifestText).buffer;
+  var buffer = shaka.util.StringUtils.toUTF8(manifestText);
   var fakeNetEngine =
       new shaka.test.FakeNetworkingEngine({'dummy://foo': buffer});
   var dashParser = shaka.test.Dash.makeDashParser(fakeNetEngine);
@@ -99,7 +99,7 @@ shaka.test.Dash.testSegmentIndex = function(done, manifestText, references) {
  */
 shaka.test.Dash.testFails = function(done, manifestText, expectedError) {
   var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
-  var manifestData = shaka.util.Uint8ArrayUtils.fromString(manifestText).buffer;
+  var manifestData = shaka.util.StringUtils.toUTF8(manifestText);
   var fakeNetEngine =
       new shaka.test.FakeNetworkingEngine({'dummy://foo': manifestData});
   var dashParser = shaka.test.Dash.makeDashParser(fakeNetEngine);

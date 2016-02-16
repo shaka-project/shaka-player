@@ -872,8 +872,8 @@ describe('DrmEngine', function() {
       }).then(function() {
         expect(session1.update.calls.count()).toBe(1);
         var licenseBuffer = session1.update.calls.argsFor(0)[0];
-        var licenseArray = new Uint8Array(licenseBuffer);
-        var licenseJson = shaka.util.Uint8ArrayUtils.toString(licenseArray);
+        var licenseJson =
+            shaka.util.StringUtils.fromBytesAutoDetect(licenseBuffer);
         var license = JSON.parse(licenseJson);
         expect(license).toEqual({
           keys: [

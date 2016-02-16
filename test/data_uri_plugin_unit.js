@@ -75,8 +75,7 @@ describe('DataUriPlugin', function() {
           expect(response).toBeTruthy();
           expect(response.uri).toBe(uri);
           expect(response.data).toBeTruthy();
-          var array = new Uint8Array(response.data);
-          var data = shaka.util.Uint8ArrayUtils.toString(array);
+          var data = shaka.util.StringUtils.fromBytesAutoDetect(response.data);
           expect(data).toBe(text);
         })
         .catch(fail)

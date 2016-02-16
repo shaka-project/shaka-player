@@ -17,7 +17,7 @@
 
 goog.provide('shaka.test.FakeNetworkingEngine');
 
-goog.require('shaka.util.Uint8ArrayUtils');
+goog.require('shaka.util.StringUtils');
 
 
 
@@ -124,7 +124,7 @@ shaka.test.FakeNetworkingEngine.prototype.setResponseMap = function(
 shaka.test.FakeNetworkingEngine.prototype.setResponseMapAsText = function(
     textMap) {
   this.responseMap_ = Object.keys(textMap).reduce(function(obj, key) {
-    var data = shaka.util.Uint8ArrayUtils.fromString(textMap[key]).buffer;
+    var data = shaka.util.StringUtils.toUTF8(textMap[key]);
     obj[key] = data;
     return obj;
   }, {});
@@ -153,7 +153,7 @@ shaka.test.FakeNetworkingEngine.prototype.setDefaultText = function(
     defaultText) {
   var data = null;
   if (defaultText) {
-    data = shaka.util.Uint8ArrayUtils.fromString(defaultText).buffer;
+    data = shaka.util.StringUtils.toUTF8(defaultText);
   }
   this.defaultResponse_ = data;
 };
