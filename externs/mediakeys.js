@@ -107,15 +107,8 @@ MediaKeyStatusMap.prototype.size;
 
 
 /**
- * Array entry 0 is the key, 1 is the value.
- * @return {Iterator.<Array.<BufferSource|string>>}
- */
-MediaKeyStatusMap.prototype.entries = function() {};
-
-
-/**
- * The functor is called with each value and key.
- * @param {function(string, BufferSource)} fn
+ * The functor is called with each key ID and status.
+ * @param {function(BufferSource, string)} fn
  */
 MediaKeyStatusMap.prototype.forEach = function(fn) {};
 
@@ -132,18 +125,6 @@ MediaKeyStatusMap.prototype.get = function(keyId) {};
  * @return {boolean}
  */
 MediaKeyStatusMap.prototype.has = function(keyId) {};
-
-
-/**
- * @return {Iterator.<BufferSource>}
- */
-MediaKeyStatusMap.prototype.keys = function() {};
-
-
-/**
- * @return {Iterator.<string>}
- */
-MediaKeyStatusMap.prototype.values = function() {};
 
 
 

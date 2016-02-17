@@ -40,10 +40,12 @@ MSMediaKeys.isTypeSupported = function(keySystem, contentType) {};
 
 /**
  * @param {string} contentType
- * @param {?BufferSource} initData
+ * @param {Uint8Array} initData
+ * @param {Uint8Array=} opt_cdmData
  * @return {!MSMediaKeySession}
  */
-MSMediaKeys.prototype.createSession = function(contentType, initData) {};
+MSMediaKeys.prototype.createSession =
+    function(contentType, initData, opt_cdmData) {};
 
 
 
@@ -55,7 +57,7 @@ function MSMediaKeySession() {}
 
 
 /**
- * @param {?BufferSource} message
+ * @param {Uint8Array} message
  */
 MSMediaKeySession.prototype.update = function(message) {};
 
