@@ -63,6 +63,10 @@ jasmine.Matchers = function() {};
 var expect = function(value) {};
 
 
+/** @param {string=} opt_message */
+var pending = function(opt_message) {};
+
+
 /** @const {!jasmine.Matchers} */
 jasmine.Matchers.prototype.not;
 

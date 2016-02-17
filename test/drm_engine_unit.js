@@ -22,6 +22,7 @@ describe('DrmEngine', function() {
   var requestMediaKeySystemAccessSpy;
   var logErrorSpy;
   var onErrorSpy;
+  var onKeyStatusSpy;
 
   var fakeNetEngine;
   var drmEngine;
@@ -51,6 +52,7 @@ describe('DrmEngine', function() {
     shaka.log.error = logErrorSpy;
 
     onErrorSpy = jasmine.createSpy('onError');
+    onKeyStatusSpy = jasmine.createSpy('onKeyStatus');
   });
 
   beforeEach(function() {
@@ -84,6 +86,7 @@ describe('DrmEngine', function() {
     requestMediaKeySystemAccessSpy.calls.reset();
     onErrorSpy.calls.reset();
     logErrorSpy.calls.reset();
+    onKeyStatusSpy.calls.reset();
 
     // By default, error logs and callbacks result in failure.
     onErrorSpy.and.callFake(fail);
@@ -115,7 +118,8 @@ describe('DrmEngine', function() {
     license = (new Uint8Array(0)).buffer;
     fakeNetEngine.setResponseMap({ 'http://abc.drm/license': license });
 
-    drmEngine = new shaka.media.DrmEngine(fakeNetEngine, onErrorSpy);
+    drmEngine = new shaka.media.DrmEngine(
+        fakeNetEngine, onErrorSpy, onKeyStatusSpy);
     config = {
       retryParameters: retryParameters,
       servers: {
@@ -818,9 +822,39 @@ describe('DrmEngine', function() {
       });
     });  // describe('message')
 
-    xdescribe('keystatuseschange', function() {
-      it('TODO: test keystatuseschange after implementation', function(done) {
-        done();
+    describe('keystatuseschange', function() {
+      it('is listened for', function(done) {
+        initAndAttach().then(function() {
+          var initData = new Uint8Array(0);
+          mockVideo.on['encrypted'](
+              { initDataType: 'webm', initData: initData });
+
+          expect(session1.addEventListener).toHaveBeenCalledWith(
+              'keystatuseschange', jasmine.any(Function), false);
+        }).catch(fail).then(done);
+      });
+
+      it('triggers callback', function(done) {
+        initAndAttach().then(function() {
+          var initData = new Uint8Array(0);
+          mockVideo.on['encrypted'](
+              { initDataType: 'webm', initData: initData });
+
+          var keyId1 = (new Uint8Array(1)).buffer;
+          var keyId2 = (new Uint8Array(2)).buffer;
+          var status1 = 'usable';
+          var status2 = 'expired';
+          session1.keyStatuses.forEach.and.callFake(function(callback) {
+            callback(keyId1, status1);
+            callback(keyId2, status2);
+          });
+          session1.on['keystatuseschange']({ target: session1 });
+
+          expect(onKeyStatusSpy).toHaveBeenCalledWith({
+            '00': status1,
+            '0000': status2
+          });
+        }).catch(fail).then(done);
       });
     });  // describe('keystatuseschange')
   });  // describe('events')
@@ -1284,6 +1318,9 @@ describe('DrmEngine', function() {
     var session = {
       expiration: NaN,
       closed: new shaka.util.PublicPromise(),  // TODO: use in DrmEngine?
+      keyStatuses: {
+        forEach: jasmine.createSpy('forEach')
+      },
       generateRequest: jasmine.createSpy('generateRequest'),
       load: jasmine.createSpy('load'),
       update: jasmine.createSpy('update'),

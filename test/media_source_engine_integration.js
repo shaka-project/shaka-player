@@ -46,7 +46,7 @@ describe('MediaSourceEngine', function() {
   var mediaSource;
   var mediaSourceEngine;
 
-  function createStreamGenerator(type, metadata) {
+  function createStreamGenerator(metadata) {
     var generator = new shaka.test.DashVodStreamGenerator(
         metadata.initSegmentUri, metadata.mvhdOffset,
         metadata.segmentUri, metadata.tfdtOffset, metadata.segmentDuration,
@@ -65,8 +65,8 @@ describe('MediaSourceEngine', function() {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;  // ms
 
     Promise.all([
-      createStreamGenerator('video', metadata.video),
-      createStreamGenerator('audio', metadata.audio)
+      createStreamGenerator(metadata.video),
+      createStreamGenerator(metadata.audio)
     ]).catch(fail).then(done);
   });
 
