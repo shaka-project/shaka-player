@@ -95,12 +95,31 @@ module.exports = function(config) {
       // BrowserStack launchers require login information in the form of
       // the environment variables BROWSER_STACK_USERNAME and
       // BROWSER_STACK_ACCESS_KEY.
+
+      // NOTE: PlayReady not working on BrowserStack IE11.  We are waiting for
+      // a response from BrowserStack support.
       BrowserStack_IE11: {
         base: 'BrowserStack',
         browser: 'ie',
         browser_version: '11.0',
         os: 'Windows',
         os_version: '8.1',
+      },
+
+      BrowserStack_Edge12: {
+        base: 'BrowserStack',
+        browser: 'edge',
+        browser_version: '12.0',
+        os: 'Windows',
+        os_version: '10',
+      },
+
+      BrowserStack_Edge13: {
+        base: 'BrowserStack',
+        browser: 'edge',
+        browser_version: '13.0',
+        os: 'Windows',
+        os_version: '10',
       },
 
       BrowserStack_Safari8: {
