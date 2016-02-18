@@ -471,7 +471,7 @@ describe('DashParser.Manifest', function() {
         .then(done);
   });
 
-  xit('generates a correct index for non-segmented text', function(done) {
+  it('generates a correct index for non-segmented text', function(done) {
     var source = [
       '<MPD mediaPresentationDuration="PT30S">',
       '  <Period>',
@@ -493,7 +493,7 @@ describe('DashParser.Manifest', function() {
     }).then(function() {
       expect(stream.initSegmentReference).toBe(null);
       expect(stream.findSegmentPosition(0)).toBe(1);
-      expect(stream.getSegmentReference(1)).toBe(jasmine.objectContaining({
+      expect(stream.getSegmentReference(1)).toEqual(jasmine.objectContaining({
         startTime: 0,
         endTime: 30,
         uris: ['http://example.com/de.vtt'],
