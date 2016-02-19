@@ -51,19 +51,20 @@ describe('DataUriPlugin', function() {
   });
 
   it('fails for empty URI', function(done) {
-    testFails('', done);
+    testFails('', done, shaka.util.Error.Code.MALFORMED_DATA_URI);
   });
 
   it('fails for non-data URIs', function(done) {
-    testFails('http://google.com/', done);
+    testFails('http://google.com/', done,
+        shaka.util.Error.Code.MALFORMED_DATA_URI);
   });
 
   it('fails for decoding errors', function(done) {
-    testFails('data:Bad%', done);
+    testFails('data:Bad%', done, shaka.util.Error.Code.MALFORMED_DATA_URI);
   });
 
   it('fails if missing comma', function(done) {
-    testFails('data:Bad', done);
+    testFails('data:Bad', done, shaka.util.Error.Code.MALFORMED_DATA_URI);
   });
 
   function testSucceeds(uri, text, done) {
@@ -82,13 +83,13 @@ describe('DataUriPlugin', function() {
         .then(done);
   }
 
-  function testFails(uri, done) {
+  function testFails(uri, done, code) {
     var request =
         shaka.net.NetworkingEngine.makeRequest([uri], retryParameters);
     shaka.log.setLevel(shaka.log.Level.NONE);
     shaka.net.DataUriPlugin(uri, request)
         .then(fail)
-        .catch(function() { expect(true).toBe(true); })
+        .catch(function(error) { expect(error.code).toBe(code); })
         .then(function() {
           shaka.log.setLevel(shaka.log.MAX_LOG_LEVEL);
           done();
