@@ -33,8 +33,10 @@ module.exports = function(config) {
       // support test first
       'test/support_check.js',
 
-      // actual tests last
-      'test/*.js',
+      // unit tests last
+      'test/*_unit.js',
+
+      // if --quick is not present, we will add integration tests.
 
       // source files - these are only watched and served
       {pattern: 'lib/**/*.js', included: false},
@@ -134,6 +136,12 @@ module.exports = function(config) {
         ],
       },
     });
+  }
+
+  if (!flagPresent('quick')) {
+    var files = config.files;
+    files.push('test/*_integration.js');
+    // We just modified the config in-place.  No need for config.set().
   }
 };
 
