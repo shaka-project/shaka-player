@@ -498,13 +498,14 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
       Util.delay(0.1).then(function() {
         expect(d.status).toBe('pending');
         p.resolve();
+        return d;
+      }).then(function() {
         return Util.delay(0.1);
       }).then(function() {
         expect(r1.status).toBe('resolved');
         expect(r2.status).toBe('resolved');
         expect(d.status).toBe('resolved');
-        done();
-      });
+      }).catch(fail).then(done);
     });
 
     it('resolves even when a request fails', function(done) {
@@ -527,13 +528,14 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
       Util.delay(0.1).then(function() {
         expect(d.status).toBe('pending');
         p.reject();
+        return d;
+      }).then(function() {
         return Util.delay(0.1);
       }).then(function() {
         expect(r1.status).toBe('rejected');
         expect(r2.status).toBe('rejected');
         expect(d.status).toBe('resolved');
-        done();
-      });
+      }).catch(fail).then(done);
     });
 
     it('prevents new requests', function(done) {
@@ -562,14 +564,15 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         expect(r2.status).toBe('rejected');
         expect(d.status).toBe('pending');
         p.resolve();
+        return d;
+      }).then(function() {
         return Util.delay(0.1);
       }).then(function() {
         expect(r1.status).toBe('resolved');
         expect(r2.status).toBe('rejected');
         expect(d.status).toBe('resolved');
         expect(resolveScheme.calls.count()).toBe(1);
-        done();
-      });
+      }).catch(fail).then(done);
     });
 
     it('does not allow further retries', function(done) {
@@ -605,14 +608,15 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         // Resolve any retry, but since we have already been destroyed, this
         // promise should not be used.
         p2.resolve();
+        return d;
+      }).then(function() {
         return Util.delay(0.1);
       }).then(function() {
         expect(d.status).toBe('resolved');
         // The request was never retried.
         expect(r1.status).toBe('rejected');
         expect(rejectScheme.calls.count()).toBe(1);
-        done();
-      });
+      }).catch(fail).then(done);
     });
   });
 
