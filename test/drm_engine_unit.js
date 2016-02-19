@@ -993,7 +993,7 @@ describe('DrmEngine', function() {
       // This chain should still return "success" when DrmEngine is destroyed.
       drmEngine.init(manifest, /* offline */ false).catch(fail);
 
-      shaka.test.Util.delay(0.1).then(function() {
+      shaka.test.Util.delay(0.3).then(function() {
         // The first query has been made, which we are blocking.
         expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
         expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledWith(
@@ -1017,7 +1017,7 @@ describe('DrmEngine', function() {
       // This chain should still return "success" when DrmEngine is destroyed.
       drmEngine.init(manifest, /* offline */ false).catch(fail);
 
-      shaka.test.Util.delay(0.1).then(function() {
+      shaka.test.Util.delay(0.3).then(function() {
         // The first query has been made, which we are blocking.
         expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
         expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledWith(
@@ -1041,7 +1041,7 @@ describe('DrmEngine', function() {
       // This chain should still return "success" when DrmEngine is destroyed.
       drmEngine.init(manifest, /* offline */ false).catch(fail);
 
-      shaka.test.Util.delay(0.1).then(function() {
+      shaka.test.Util.delay(0.3).then(function() {
         // We are blocked on createMediaKeys:
         expect(mockMediaKeySystemAccess.createMediaKeys).toHaveBeenCalled();
         return drmEngine.destroy();
@@ -1062,7 +1062,7 @@ describe('DrmEngine', function() {
       // This chain should still return "success" when DrmEngine is destroyed.
       initAndAttach().catch(fail);
 
-      shaka.test.Util.delay(0.1).then(function() {
+      shaka.test.Util.delay(0.3).then(function() {
         // We are now blocked on setMediaKeys:
         expect(mockVideo.setMediaKeys.calls.count()).toBe(1);
         // DrmEngine also calls setMediaKeys.
@@ -1083,7 +1083,7 @@ describe('DrmEngine', function() {
       // This chain should still return "success" when DrmEngine is destroyed.
       initAndAttach().catch(fail);
 
-      shaka.test.Util.delay(0.1).then(function() {
+      shaka.test.Util.delay(0.3).then(function() {
         // We are now blocked on setMediaKeys:
         expect(mockVideo.setMediaKeys.calls.count()).toBe(1);
         // DrmEngine also calls setMediaKeys.
@@ -1111,7 +1111,7 @@ describe('DrmEngine', function() {
       // This chain should still return "success" when DrmEngine is destroyed.
       initAndAttach().catch(fail);
 
-      shaka.test.Util.delay(0.1).then(function() {
+      shaka.test.Util.delay(0.3).then(function() {
         // We are now blocked on setServerCertificate:
         expect(mockMediaKeys.setServerCertificate.calls.count()).toBe(1);
         return drmEngine.destroy();
@@ -1133,7 +1133,7 @@ describe('DrmEngine', function() {
       // This chain should still return "success" when DrmEngine is destroyed.
       initAndAttach().catch(fail);
 
-      shaka.test.Util.delay(0.1).then(function() {
+      shaka.test.Util.delay(0.3).then(function() {
         // We are now blocked on setServerCertificate:
         expect(mockMediaKeys.setServerCertificate.calls.count()).toBe(1);
         return drmEngine.destroy();
