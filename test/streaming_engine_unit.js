@@ -165,6 +165,7 @@ describe('StreamingEngine', function() {
     timeline.getSegmentAvailabilityDuration.and.throwError(
         new Error('unexpected call to getSegmentAvailabilityDuration()'));
 
+    onError = jasmine.createSpy('onError');
     onError.and.callFake(fail);
   });  // beforeEach()
 
@@ -292,7 +293,6 @@ describe('StreamingEngine', function() {
   function createStreamingEngine(opt_config) {
     onChooseStreams = jasmine.createSpy('onChooseStreams');
     onCanSwitch = jasmine.createSpy('onCanSwitch');
-    onError = jasmine.createSpy('onError');
     onInitialStreamsSetup = jasmine.createSpy('onInitialStreamsSetup');
     onStartupComplete = jasmine.createSpy('onStartupComplete');
 
