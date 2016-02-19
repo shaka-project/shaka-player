@@ -149,9 +149,6 @@ describe('StreamingEngine', function() {
     setupNetworkingEngine();
     setupManifest();
     createStreamingEngine();
-
-    onError = jasmine.createSpy('onError');
-    onError.and.callFake(fail);
   }
 
   function setupNetworkingEngine() {
@@ -254,6 +251,8 @@ describe('StreamingEngine', function() {
     onCanSwitch = jasmine.createSpy('onCanSwitch');
     onInitialStreamsSetup = jasmine.createSpy('onInitialStreamsSetup');
     onStartupComplete = jasmine.createSpy('onStartupComplete');
+    onError = jasmine.createSpy('onError');
+    onError.and.callFake(fail);
 
     var config = {
       rebufferingGoal: 2,

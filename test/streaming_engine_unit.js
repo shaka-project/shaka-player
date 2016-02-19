@@ -164,9 +164,6 @@ describe('StreamingEngine', function() {
         new Error('unexpected call to setDuration()'));
     timeline.getSegmentAvailabilityDuration.and.throwError(
         new Error('unexpected call to getSegmentAvailabilityDuration()'));
-
-    onError = jasmine.createSpy('onError');
-    onError.and.callFake(fail);
   });  // beforeEach()
 
   function setupNetworkingEngine() {
@@ -295,6 +292,8 @@ describe('StreamingEngine', function() {
     onCanSwitch = jasmine.createSpy('onCanSwitch');
     onInitialStreamsSetup = jasmine.createSpy('onInitialStreamsSetup');
     onStartupComplete = jasmine.createSpy('onStartupComplete');
+    onError = jasmine.createSpy('onError');
+    onError.and.callFake(fail);
 
     var config;
     if (opt_config) {
