@@ -211,4 +211,12 @@ beforeAll(function() {
   shaka.log.setLevel(shaka.log.MAX_LOG_LEVEL);
 
   shaka.polyfill.installAll();
+
+  // Jasmine's clock mocks seem to interfere with Edge's Promise implementation.
+  // This is only the case if Promises are first used after installing the mock.
+  // As long as a then() callback on a Promise has happened once beforehand, it
+  // seems to be OK.  I suspect Edge's Promise implementation is actually not in
+  // native code, but rather something like a polyfill that binds to timer calls
+  // the first time it needs to schedule something.
+  Promise.resolve().then(function() {});
 });
