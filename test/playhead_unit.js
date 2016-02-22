@@ -18,6 +18,7 @@
 describe('Playhead', function() {
   var video;
   var timeline;
+  var playhead;
 
   // Callback to Playhead to simulate 'loadedmetadata' event from |video|.
   var videoOnLoadedMetadata;
@@ -60,9 +61,14 @@ describe('Playhead', function() {
     timeline.setDuration.and.throwError(new Error());
   });
 
+  afterEach(function(done) {
+    playhead.destroy().then(done);
+    playhead = null;
+  });
+
   describe('getTime', function() {
     it('returns the correct time when readyState starts at 0', function() {
-      var playhead = new shaka.media.Playhead(
+      playhead = new shaka.media.Playhead(
           video,
           timeline,
           10 /* minBufferTime */,
@@ -101,7 +107,7 @@ describe('Playhead', function() {
     it('returns the correct time when readyState starts at 1', function() {
       video.readyState = HTMLMediaElement.HAVE_METADATA;
 
-      var playhead = new shaka.media.Playhead(
+      playhead = new shaka.media.Playhead(
           video,
           timeline,
           10 /* minBufferTime */,
@@ -118,7 +124,7 @@ describe('Playhead', function() {
 
 
   it('sets/unsets buffering state', function() {
-    var playhead = new shaka.media.Playhead(
+    playhead = new shaka.media.Playhead(
         video,
         timeline,
         10 /* minBufferTime */,
@@ -166,7 +172,7 @@ describe('Playhead', function() {
 
     var onBuffering = jasmine.createSpy('onBuffering');
     var onSeek = jasmine.createSpy('onSeek');
-    var playhead = new shaka.media.Playhead(
+    playhead = new shaka.media.Playhead(
         video,
         timeline,
         10 /* minBufferTime */,
