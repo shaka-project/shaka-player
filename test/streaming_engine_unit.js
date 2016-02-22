@@ -1220,7 +1220,7 @@ describe('StreamingEngine', function() {
       onError.and.callFake(function(error) {
         expect(error.category).toBe(shaka.util.Error.Category.MEDIA);
         expect(error.code).toBe(
-            shaka.util.Error.Code.STREAMING_CANNOT_SATISFY_BYTE_LIMIT);
+            shaka.util.Error.Code.CANNOT_SATISFY_BYTE_LIMIT);
       });
 
       onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
@@ -1258,13 +1258,13 @@ describe('StreamingEngine', function() {
       onError.and.callFake(function(error) {
         expect(error.category).toBe(shaka.util.Error.Category.MEDIA);
         expect(error.code).toBe(
-            shaka.util.Error.Code.STREAMING_SEGMENT_DOES_NOT_EXIST);
+            shaka.util.Error.Code.SEGMENT_DOES_NOT_EXIST);
 
         var reportedContentType = error.data[0];
         var reportedPeriodIndex = error.data[1];
         var reportedTimestampNeeded = error.data[2];
 
-        // Expect six STREAMING_SEGMENT_DOES_NOT_EXIST errors as the playhead
+        // Expect six SEGMENT_DOES_NOT_EXIST errors as the playhead
         // will be outside the drifted segment availability window at the
         // beginning of each Period for each content type.
         if (onError.calls.count() <= 3) {
