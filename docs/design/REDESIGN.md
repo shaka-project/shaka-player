@@ -1,6 +1,6 @@
 # Shaka v2.0 Redesign
 
-last update: 2016-02-12
+last update: 2016-03-10
 
 by: [joeyparrish@google.com](mailto:joeyparrish@google.com)
 
@@ -232,11 +232,19 @@ shaka.Player.prototype.cancelTrickPlay()
 
 shaka.Player.prototype.isLive() => boolean
 
+shaka.Player.prototype.isBuffering() => boolean
+
 shaka.Player.prototype.getTracks() => []
 
 shaka.Player.prototype.selectTrack(Track)
 
 shaka.Player.prototype.getNetworkingEngine() => NetworkingEngine
+
+shaka.Player.prototype.isTextTrackVisible => boolean
+
+shaka.Player.prototype.setTextTrackVisibility(boolean)
+
+shaka.Player.prototype.getStats => Stats
 
 shaka.Player.support() => {}
 
@@ -254,8 +262,9 @@ shaka.media.ManifestParser.registerParserByExtension(fileExt, parser)
 
 
 ## Sketch of Player configuration
-  - preferredLanguage: string
-  - enableAdaptation: string
+  - preferredAudioLanguage: string
+  - preferredTextLanguage: string
+  - enableAdaptation: boolean
   - manifest
     - retryParameters: NetworkingEngine.RetryParameters
   - drm

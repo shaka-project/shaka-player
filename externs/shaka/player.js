@@ -186,6 +186,7 @@ shakaExtern.StreamingConfiguration;
  *   manifest: shakaExtern.ManifestConfiguration,
  *   streaming: shakaExtern.StreamingConfiguration,
  *   abrManager: shakaExtern.AbrManager,
+ *   enableAdaptation: boolean,
  *   preferredAudioLanguage: string,
  *   preferredTextLanguage: string
  * }}
@@ -198,16 +199,15 @@ shakaExtern.StreamingConfiguration;
  *   Streaming configuration and settings.
  * @property {shakaExtern.AbrManager} abrManager
  *   The AbrManager instance.
+ * @property {boolean} enableAdaptation
+ *   If true, enable adaptation by the current AbrManager.  Defaults to true.
  * @property {string} preferredAudioLanguage
  *   The preferred language to use for audio tracks.  If not given it will use
- *   the 'main' track.  If the audio and text tracks have different languages
- *   the text track will be enabled.
+ *   the 'main' track.
  * @property {string} preferredTextLanguage
- *   The preferred language to use for text tracks, see
- *   |preferredAudioLanguage|.
+ *   The preferred language to use for text tracks.  If the audio and text
+ *   tracks have different languages, the text track will be enabled.
  *
  * @exportDoc
  */
 shakaExtern.PlayerConfiguration;
-// TODO: language settings.
-
