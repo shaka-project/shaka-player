@@ -139,17 +139,24 @@ module.exports = function(config) {
       },
 
       WebDriver_Safari8: {
-          base: 'WebDriver',
-          config: {hostname: 'localhost', port: 4444},
-          browserName: 'safari',
-          pseudoActivityInterval: 20000
+        base: 'WebDriver',
+        config: {hostname: 'localhost', port: 4444},
+        browserName: 'safari',
+        pseudoActivityInterval: 20000
+      },
+
+      WebDriver_Safari9: {
+        base: 'WebDriver',
+        config: {hostname: 'localhost', port: 4445},
+        browserName: 'safari',
+        pseudoActivityInterval: 20000
       },
 
       WebDriver_IE11: {
-          base: 'WebDriver',
-          config: {hostname: 'localhost', port: 4445},
-          browserName: 'internet explorer',
-          pseudoActivityInterval: 20000
+        base: 'WebDriver',
+        config: {hostname: 'localhost', port: 4446},
+        browserName: 'internet explorer',
+        pseudoActivityInterval: 20000
       },
     },
 
