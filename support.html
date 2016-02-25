@@ -42,7 +42,7 @@
       shaka.polyfill.installAll();
       shaka.Player.support().then(function(support) {
         var userAgent = navigator.userAgent;
-        var formatted = userAgent + '\n\n';
+        var formatted = userAgent + '\n' + shaka.Player.version + '\n\n';
 
         var indent = '    ';
         formatted += '{\n';
