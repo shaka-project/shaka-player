@@ -31,8 +31,7 @@ describe('DashParser.Live', function() {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     newPeriod = jasmine.createSpy('newPeriod');
     errorCallback = jasmine.createSpy('error callback');
-    parser = new shaka.dash.DashParser(
-        fakeNetEngine, newPeriod, errorCallback);
+    parser = new shaka.dash.DashParser();
     parser.configure({
       retryParameters: retry,
       dash: { customScheme: function(node) { return null; } }
@@ -132,7 +131,7 @@ describe('DashParser.Live', function() {
       var secondManifest = makeSimpleLiveManifestText(secondLines, updateTime);
 
       fakeNetEngine.setResponseMapAsText({'dummy://foo': firstManifest});
-      parser.start('dummy://foo')
+      parser.start('dummy://foo', fakeNetEngine, newPeriod, errorCallback)
           .then(function(manifest) {
             Dash.verifySegmentIndex(manifest, firstReferences);
 
@@ -174,7 +173,7 @@ describe('DashParser.Live', function() {
 
       fakeNetEngine.setResponseMapAsText({'dummy://foo': text});
       Date.now = function() { return 0; };
-      parser.start('dummy://foo')
+      parser.start('dummy://foo', fakeNetEngine, newPeriod, errorCallback)
           .then(function(manifest) {
             expect(manifest).toBeTruthy();
             var stream = manifest.periods[0].streamSets[0].streams[0];
@@ -219,7 +218,7 @@ describe('DashParser.Live', function() {
     var firstManifest = makeSimpleLiveManifestText(lines, updateTime);
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': firstManifest});
-    parser.start('dummy://foo')
+    parser.start('dummy://foo', fakeNetEngine, newPeriod, errorCallback)
         .then(function(manifest) {
           expect(manifest.periods.length).toBe(1);
           expect(newPeriod.calls.count()).toBe(1);
@@ -262,7 +261,7 @@ describe('DashParser.Live', function() {
     fakeNetEngine.request.and.returnValue(
         Promise.resolve({uri: redirectedUri, data: manifestData}));
 
-    parser.start(originalUri)
+    parser.start(originalUri, fakeNetEngine, newPeriod, errorCallback)
         .then(function(manifest) {
           // The manifest request was made to the original URL.
           expect(fakeNetEngine.request.calls.count()).toBe(1);
@@ -305,7 +304,7 @@ describe('DashParser.Live', function() {
     var manifest = makeSimpleLiveManifestText(lines, updateTime);
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': manifest});
-    parser.start('dummy://foo')
+    parser.start('dummy://foo', fakeNetEngine, newPeriod, errorCallback)
         .then(function(manifest) {
           expect(fakeNetEngine.request.calls.count()).toBe(1);
 
@@ -330,7 +329,7 @@ describe('DashParser.Live', function() {
     var manifest = makeSimpleLiveManifestText(lines, updateTime);
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': manifest});
-    parser.start('dummy://foo')
+    parser.start('dummy://foo', fakeNetEngine, newPeriod, errorCallback)
         .then(function(manifest) {
           expect(fakeNetEngine.request.calls.count()).toBe(1);
 
@@ -351,7 +350,7 @@ describe('DashParser.Live', function() {
     var manifest = makeSimpleLiveManifestText(lines, updateTime);
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': manifest});
-    parser.start('dummy://foo')
+    parser.start('dummy://foo', fakeNetEngine, newPeriod, errorCallback)
         .then(function(manifest) {
           expect(fakeNetEngine.request.calls.count()).toBe(1);
           expect(manifest).toBeTruthy();

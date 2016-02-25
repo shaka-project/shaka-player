@@ -20,10 +20,11 @@ describe('DashParser.Manifest', function() {
   var Dash;
   var fakeNetEngine;
   var parser;
+  var filterPeriod = function() {};
 
   beforeEach(function() {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
-    parser = shaka.test.Dash.makeDashParser(fakeNetEngine);
+    parser = shaka.test.Dash.makeDashParser();
   });
 
   beforeAll(function() {
@@ -56,7 +57,7 @@ describe('DashParser.Manifest', function() {
      */
     function testDashParser(done, manifestText) {
       fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
-      parser.start('dummy://foo')
+      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
           .then(function(actual) { expect(actual).toEqual(expected); })
           .catch(fail)
           .then(done);
@@ -380,7 +381,7 @@ describe('DashParser.Manifest', function() {
     var source = sprintf(template, {periodContents: periodContents});
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
-    parser.start('dummy://foo')
+    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
         .then(function(manifest) {
           expect(manifest.periods.length).toBe(1);
         })
@@ -414,7 +415,7 @@ describe('DashParser.Manifest', function() {
     var source = sprintf(template, {periodContents: periodContents});
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
-    parser.start('dummy://foo')
+    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
         .then(function(manifest) {
           expect(manifest.periods.length).toBe(3);
           expect(manifest.periods[0].startTime).toBe(10);
@@ -437,7 +438,7 @@ describe('DashParser.Manifest', function() {
     ]);
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
-    parser.start('dummy://foo')
+    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
         .then(function(manifest) {
           var stream = manifest.periods[0].streamSets[0].streams[0];
           expect(stream.presentationTimeOffset).toBe(1);
@@ -462,7 +463,7 @@ describe('DashParser.Manifest', function() {
     ]);
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
-    parser.start('dummy://foo')
+    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
         .then(function(manifest) {
           var stream = manifest.periods[0].streamSets[0].streams[0];
           expect(stream.presentationTimeOffset).toBe(2);
@@ -487,20 +488,22 @@ describe('DashParser.Manifest', function() {
     fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
 
     var stream;
-    parser.start('dummy://foo').then(function(manifest) {
-      stream = manifest.periods[0].streamSets[0].streams[0];
-      return stream.createSegmentIndex();
-    }).then(function() {
-      expect(stream.initSegmentReference).toBe(null);
-      expect(stream.findSegmentPosition(0)).toBe(1);
-      expect(stream.getSegmentReference(1)).toEqual(jasmine.objectContaining({
-        startTime: 0,
-        endTime: 30,
-        uris: ['http://example.com/de.vtt'],
-        startByte: 0,
-        endByte: null
-      }));
-    }).catch(fail).then(done);
+    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+        .then(function(manifest) {
+          stream = manifest.periods[0].streamSets[0].streams[0];
+          return stream.createSegmentIndex();
+        }).then(function() {
+          expect(stream.initSegmentReference).toBe(null);
+          expect(stream.findSegmentPosition(0)).toBe(1);
+          expect(stream.getSegmentReference(1)).toEqual(
+              jasmine.objectContaining({
+                startTime: 0,
+                endTime: 30,
+                uris: ['http://example.com/de.vtt'],
+                startByte: 0,
+                endByte: null
+              }));
+        }).catch(fail).then(done);
   });
 
   it('correctly parses UTF-8', function(done) {
@@ -520,13 +523,14 @@ describe('DashParser.Manifest', function() {
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
 
-    parser.start('dummy://foo').then(function(manifest) {
-      var streamSet = manifest.periods[0].streamSets[0];
-      var stream = streamSet.streams[0];
-      expect(stream.initSegmentReference.uris[0])
-          .toBe('http://example.com/%C8%A7.mp4');
-      expect(streamSet.language).toBe('\u2603');
-    }).catch(fail).then(done);
+    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+        .then(function(manifest) {
+          var streamSet = manifest.periods[0].streamSets[0];
+          var stream = streamSet.streams[0];
+          expect(stream.initSegmentReference.uris[0])
+              .toBe('http://example.com/%C8%A7.mp4');
+          expect(streamSet.language).toBe('\u2603');
+        }).catch(fail).then(done);
   });
 
   describe('supports UTCTiming', function() {
@@ -567,7 +571,7 @@ describe('DashParser.Manifest', function() {
      * @param {number} expectedTime
      */
     function runTest(done, expectedTime) {
-      parser.start('http://foo.bar/manifest')
+      parser.start('http://foo.bar/manifest', fakeNetEngine, filterPeriod, fail)
           .then(function(manifest) {
             expect(manifest.presentationTimeline).toBeTruthy();
             expect(manifest.presentationTimeline.getSegmentAvailabilityEnd())
@@ -658,7 +662,7 @@ describe('DashParser.Manifest', function() {
           shaka.util.Error.Code.BAD_HTTP_STATUS);
 
       fakeNetEngine.request.and.returnValue(Promise.reject(expectedError));
-      parser.start('')
+      parser.start('', fakeNetEngine, filterPeriod, fail)
           .then(fail)
           .catch(function(error) { expect(error).toEqual(expectedError); })
           .then(done);

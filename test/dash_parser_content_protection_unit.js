@@ -18,6 +18,7 @@
 // Test DRM-related parsing.
 describe('DashParser.ContentProtection', function() {
   var Dash;
+  var filterPeriod = function() {};
 
   /**
    * Tests that the parser produces the correct results.
@@ -32,14 +33,13 @@ describe('DashParser.ContentProtection', function() {
     var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
     var netEngine = new shaka.test.FakeNetworkingEngine();
     netEngine.setDefaultText(manifestText);
-    var dashParser = new shaka.dash.DashParser(
-        netEngine, function() {}, function() {});
+    var dashParser = new shaka.dash.DashParser();
     var callback = opt_callback || function(node) { return null; };
     dashParser.configure({
       retryParameters: retry,
       dash: { customScheme: callback }
     });
-    dashParser.start('http://example.com')
+    dashParser.start('http://example.com', netEngine, filterPeriod, fail)
         .then(function(actual) { expect(actual).toEqual(expected); })
         .catch(fail)
         .then(done);

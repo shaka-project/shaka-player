@@ -19,6 +19,7 @@ describe('DashParser.SegmentTemplate', function() {
   var Dash;
   var fakeNetEngine;
   var parser;
+  var filterPeriod = function() {};
 
   beforeAll(function() {
     Dash = shaka.test.Dash;
@@ -26,7 +27,7 @@ describe('DashParser.SegmentTemplate', function() {
 
   beforeEach(function() {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
-    parser = shaka.test.Dash.makeDashParser(fakeNetEngine);
+    parser = shaka.test.Dash.makeDashParser();
   });
 
   shaka.test.Dash.makeTimelineTests(
@@ -74,7 +75,7 @@ describe('DashParser.SegmentTemplate', function() {
         'dummy://foo': source,
         'http://example.com/index-500.mp4': ''
       });
-      parser.start('dummy://foo')
+      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
           .then(function(manifest) {
             expect(manifest).toEqual(
                 Dash.makeManifestFromInit('init-500.mp4', 0, null));
@@ -103,7 +104,7 @@ describe('DashParser.SegmentTemplate', function() {
         'dummy://foo': source,
         'http://example.com/index-500.mp4': ''
       });
-      parser.start('dummy://foo')
+      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
           .then(function(manifest) {
             expect(manifest).toEqual(
                 Dash.makeManifestFromInit('init-500.mp4', 0, null));
@@ -139,7 +140,7 @@ describe('DashParser.SegmentTemplate', function() {
         'http://example.com/index-500.webm': '',
         'http://example.com/init-500.webm': ''
       });
-      parser.start('dummy://foo')
+      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
           .then(function(manifest) {
             expect(manifest).toEqual(
                 Dash.makeManifestFromInit('init-500.webm', 0, null));
@@ -174,7 +175,7 @@ describe('DashParser.SegmentTemplate', function() {
         'dummy://foo': source,
         'http://example.com/index-500.mp4': ''
       });
-      parser.start('dummy://foo')
+      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
           .then(function(manifest) {
             expect(manifest).toEqual(
                 Dash.makeManifestFromInit('init-500.mp4', 0, null));
@@ -207,7 +208,7 @@ describe('DashParser.SegmentTemplate', function() {
         'dummy://foo': source,
         'http://example.com/index-500.mp4': ''
       });
-      parser.start('dummy://foo')
+      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
           .then(function(manifest) {
             expect(manifest).toEqual(
                 Dash.makeManifestFromInit('init-500.mp4', 0, null));
@@ -310,32 +311,33 @@ describe('DashParser.SegmentTemplate', function() {
       ].join('\n');
 
       fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
-      parser.start('dummy://foo').then(function(actual) {
-        expect(actual).toBeTruthy();
+      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+          .then(function(actual) {
+            expect(actual).toBeTruthy();
 
-        var streamSet = actual.periods[0].streamSets[0];
-        expect(streamSet).toBeTruthy();
-        expect(streamSet.streams.length).toBe(3);
+            var streamSet = actual.periods[0].streamSets[0];
+            expect(streamSet).toBeTruthy();
+            expect(streamSet.streams.length).toBe(3);
 
-        expect(streamSet.streams[0].findSegmentPosition(0)).toBe(0);
-        expect(streamSet.streams[0].getSegmentReference(0)).toEqual(
-            Dash.makeReference('1-0-100.mp4', 0, 0, 10));
-        expect(streamSet.streams[0].findSegmentPosition(12)).toBe(1);
-        expect(streamSet.streams[0].getSegmentReference(1)).toEqual(
-            Dash.makeReference('2-10-100.mp4', 1, 10, 20));
-        expect(streamSet.streams[1].findSegmentPosition(0)).toBe(0);
-        expect(streamSet.streams[1].getSegmentReference(0)).toEqual(
-            Dash.makeReference('1-0-200.mp4', 0, 0, 10));
-        expect(streamSet.streams[1].findSegmentPosition(12)).toBe(1);
-        expect(streamSet.streams[1].getSegmentReference(1)).toEqual(
-            Dash.makeReference('2-10-200.mp4', 1, 10, 20));
-        expect(streamSet.streams[2].findSegmentPosition(0)).toBe(0);
-        expect(streamSet.streams[2].getSegmentReference(0)).toEqual(
-            Dash.makeReference('1-0-300.mp4', 0, 0, 10));
-        expect(streamSet.streams[2].findSegmentPosition(12)).toBe(1);
-        expect(streamSet.streams[2].getSegmentReference(1)).toEqual(
-            Dash.makeReference('2-10-300.mp4', 1, 10, 20));
-      }).catch(fail).then(done);
+            expect(streamSet.streams[0].findSegmentPosition(0)).toBe(0);
+            expect(streamSet.streams[0].getSegmentReference(0)).toEqual(
+                Dash.makeReference('1-0-100.mp4', 0, 0, 10));
+            expect(streamSet.streams[0].findSegmentPosition(12)).toBe(1);
+            expect(streamSet.streams[0].getSegmentReference(1)).toEqual(
+                Dash.makeReference('2-10-100.mp4', 1, 10, 20));
+            expect(streamSet.streams[1].findSegmentPosition(0)).toBe(0);
+            expect(streamSet.streams[1].getSegmentReference(0)).toEqual(
+                Dash.makeReference('1-0-200.mp4', 0, 0, 10));
+            expect(streamSet.streams[1].findSegmentPosition(12)).toBe(1);
+            expect(streamSet.streams[1].getSegmentReference(1)).toEqual(
+                Dash.makeReference('2-10-200.mp4', 1, 10, 20));
+            expect(streamSet.streams[2].findSegmentPosition(0)).toBe(0);
+            expect(streamSet.streams[2].getSegmentReference(0)).toEqual(
+                Dash.makeReference('1-0-300.mp4', 0, 0, 10));
+            expect(streamSet.streams[2].findSegmentPosition(12)).toBe(1);
+            expect(streamSet.streams[2].getSegmentReference(1)).toEqual(
+                Dash.makeReference('2-10-300.mp4', 1, 10, 20));
+          }).catch(fail).then(done);
     });
   });
 
