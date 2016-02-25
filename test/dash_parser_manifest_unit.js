@@ -135,7 +135,7 @@ describe('DashParser.Manifest', function() {
                   drmInfos: [],
                   streams: [
                     jasmine.objectContaining({
-                      id: 1,
+                      id: jasmine.any(Number),
                       createSegmentIndex: jasmine.any(Function),
                       findSegmentPosition: jasmine.any(Function),
                       getSegmentReference: jasmine.any(Function),
@@ -149,7 +149,7 @@ describe('DashParser.Manifest', function() {
                       keyId: null
                     }),
                     jasmine.objectContaining({
-                      id: 2,
+                      id: jasmine.any(Number),
                       createSegmentIndex: jasmine.any(Function),
                       findSegmentPosition: jasmine.any(Function),
                       getSegmentReference: jasmine.any(Function),
@@ -171,7 +171,7 @@ describe('DashParser.Manifest', function() {
                   drmInfos: [],
                   streams: [
                     jasmine.objectContaining({
-                      id: 3,
+                      id: jasmine.any(Number),
                       createSegmentIndex: jasmine.any(Function),
                       findSegmentPosition: jasmine.any(Function),
                       getSegmentReference: jasmine.any(Function),
@@ -192,7 +192,7 @@ describe('DashParser.Manifest', function() {
                   drmInfos: [],
                   streams: [
                     jasmine.objectContaining({
-                      id: 4,
+                      id: jasmine.any(Number),
                       createSegmentIndex: jasmine.any(Function),
                       findSegmentPosition: jasmine.any(Function),
                       getSegmentReference: jasmine.any(Function),
@@ -210,7 +210,7 @@ describe('DashParser.Manifest', function() {
         }));
   });
 
-  describe('squashes stream sets by @group', function() {
+  describe('squashes stream sets by AdaptationSetSwitching', function() {
     makeTestsForEach(
         [
           '<MPD minBufferTime="PT75S">',
@@ -218,10 +218,12 @@ describe('DashParser.Manifest', function() {
           '    <BaseURL>http://example.com</BaseURL>'
         ],
         [
-          '    <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
+          '    <AdaptationSet id="1" mimeType="video/mp4" lang="en">',
+          '      <SupplementalProperty value="2"',
+          'schemeIdURI="http://dashif.org/descriptor/AdaptationSetSwitching"/>',
           '      <Representation bandwidth="100" />',
           '    </AdaptationSet>',
-          '    <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
+          '    <AdaptationSet id="2" mimeType="video/mp4" lang="en">',
           '      <Representation bandwidth="200" />',
           '    </AdaptationSet>',
           '  </Period>',
@@ -241,7 +243,7 @@ describe('DashParser.Manifest', function() {
         ]));
   });
 
-  describe('does not squash different @group', function() {
+  describe('ignores unrecognized IDs in AdaptationSetSwitching', function() {
     makeTestsForEach(
         [
           '<MPD minBufferTime="PT75S">',
@@ -249,10 +251,12 @@ describe('DashParser.Manifest', function() {
           '    <BaseURL>http://example.com</BaseURL>'
         ],
         [
-          '    <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
+          '    <AdaptationSet mimeType="video/mp4" lang="en" id="1">',
+          '      <SupplementalProperty value="4"',
+          'schemeIdURI="http://dashif.org/descriptor/AdaptationSetSwitching"/>',
           '      <Representation bandwidth="100" />',
           '    </AdaptationSet>',
-          '    <AdaptationSet mimeType="video/mp4" lang="en" group="2">',
+          '    <AdaptationSet mimeType="video/mp4" lang="en" id="2">',
           '      <Representation bandwidth="200" />',
           '    </AdaptationSet>',
           '  </Period>',
@@ -288,10 +292,14 @@ describe('DashParser.Manifest', function() {
           '    <BaseURL>http://example.com</BaseURL>'
         ],
         [
-          '    <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
+          '    <AdaptationSet mimeType="video/mp4" lang="en" id="1">',
+          '      <SupplementalProperty value="2"',
+          'schemeIdURI="http://dashif.org/descriptor/AdaptationSetSwitching"/>',
           '      <Representation bandwidth="100" />',
           '    </AdaptationSet>',
-          '    <AdaptationSet mimeType="video/mp4" lang="es" group="1">',
+          '    <AdaptationSet mimeType="video/mp4" lang="es" id="2">',
+          '      <SupplementalProperty value="1"',
+          'schemeIdURI="http://dashif.org/descriptor/AdaptationSetSwitching"/>',
           '      <Representation bandwidth="200" />',
           '    </AdaptationSet>',
           '  </Period>',
@@ -327,10 +335,14 @@ describe('DashParser.Manifest', function() {
           '    <BaseURL>http://example.com</BaseURL>'
         ],
         [
-          '    <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
+          '    <AdaptationSet mimeType="video/mp4" lang="en" id="1">',
+          '      <SupplementalProperty value="2"',
+          'schemeIdURI="http://dashif.org/descriptor/AdaptationSetSwitching"/>',
           '      <Representation bandwidth="100" />',
           '    </AdaptationSet>',
-          '    <AdaptationSet mimeType="audio/mp4" lang="en" group="1">',
+          '    <AdaptationSet mimeType="audio/mp4" lang="en" id="2">',
+          '      <SupplementalProperty value="1"',
+          'schemeIdURI="http://dashif.org/descriptor/AdaptationSetSwitching"/>',
           '      <Representation bandwidth="200" />',
           '    </AdaptationSet>',
           '  </Period>',
