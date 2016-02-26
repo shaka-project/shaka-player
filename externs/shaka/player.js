@@ -184,7 +184,8 @@ shakaExtern.StreamingConfiguration;
  * @typedef {{
  *   drm: shakaExtern.DrmConfiguration,
  *   manifest: shakaExtern.ManifestConfiguration,
- *   streaming: shakaExtern.StreamingConfiguration
+ *   streaming: shakaExtern.StreamingConfiguration,
+ *   abrManager: shakaExtern.AbrManager
  * }}
  *
  * @property {shakaExtern.DrmConfiguration} drm
@@ -193,8 +194,11 @@ shakaExtern.StreamingConfiguration;
  *   Manifest configuration and settings.
  * @property {shakaExtern.StreamingConfiguration} streaming
  *   Streaming configuration and settings.
+ * @property {shakaExtern.AbrManager} abrManager
+ *   The AbrManager instance.
  *
  * @exportDoc
  */
 shakaExtern.PlayerConfiguration;
-// TODO: language settings, adaptation
+// TODO: language settings.
+
