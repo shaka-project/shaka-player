@@ -55,12 +55,6 @@ module.exports = function(config) {
       'lib/player.js': 'coverage',
     },
 
-    coverageReporter: {
-      reporters: [
-        { type: 'text' },
-      ],
-    },
-
     // do not panic about "no activity" unless a test takes longer than 120s.
     // this value must be greater than any jasmine.DEFAULT_TIMEOUT_INTERVAL used
     // in test cases. (eg. 90s in test/streaming_engine_integration.js)
@@ -90,6 +84,9 @@ module.exports = function(config) {
 
     // do a single run of the tests on captured browsers and then quit
     singleRun: true,
+
+    // By default, use Chrome only, unless command-line arguments override.
+    browsers: ['Chrome'],
 
     customLaunchers: {
       // BrowserStack launchers require login information in the form of
@@ -166,8 +163,15 @@ module.exports = function(config) {
       startTunnel: true
     },
 
-    // By default, use Chrome only, unless command-line arguments override.
-    browsers: ['Chrome'],
+    coverageReporter: {
+      reporters: [
+        { type: 'text' },
+      ],
+    },
+
+    specReporter: {
+      suppressSkipped: true,
+    },
   });
 
   if (flagPresent('html-coverage-report')) {
