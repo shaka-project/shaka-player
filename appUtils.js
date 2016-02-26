@@ -118,7 +118,6 @@ appUtils.getVideoResDebug = function(video) {
 appUtils.interpretContentProtection = function(
     player, wvLicenseServerUrl, schemeIdUri, contentProtection) {
   var Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
-
   var wvLicenseServerUrlOverride = wvLicenseServerUrl || null;
 
   if (schemeIdUri == 'com.youtube.clearkey') {
@@ -199,6 +198,14 @@ appUtils.interpretContentProtection = function(
 
   if (schemeIdUri == 'urn:mpeg:dash:mp4protection:2011') {
     // Ignore without a warning.
+    var isOnlyProtection =
+      !!contentProtection.parentNode.querySelectorAll('ContentProtection').length;
+    if (isOnlyProtection) {
+      return [{
+        'keySystem': 'com.microsoft.playready',
+        'licenseServerUrl': 'http://playready.directtaps.net/pr/svc/rightsmanager.asmx?PlayRight=1&UseSimpleNonPersistentLicense=1',
+      }];
+    }
     return null;
   }
 
