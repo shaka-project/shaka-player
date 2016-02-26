@@ -77,14 +77,14 @@ def npmVersion(isDirty=False):
   try:
     base = cygwinSafePath(getSourceBase())
     cmd = 'npm.cmd' if isWindows() else 'npm'
-    cmdLine = [cmd, '--prefix', base, 'ls']
+    cmdLine = [cmd, '--prefix', base, 'ls', 'shaka-player']
     printCmdLine(cmdLine)
     text = subprocess.check_output(cmdLine)
-    match = re.search(r'shaka-player@(.*) ', text)
-    if match:
-      return match.group(1) + ('-npm-dirty' if isDirty else '')
-  except subprocess.CalledProcessError:
-    pass
+  except subprocess.CalledProcessError as e:
+    text = e.output
+  match = re.search(r'shaka-player@(.*) ', text)
+  if match:
+    return match.group(1) + ('-npm-dirty' if isDirty else '')
   raise RuntimeError('Unable to determine library version!')
 
 def calculateVersion():
