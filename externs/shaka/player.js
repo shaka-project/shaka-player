@@ -47,7 +47,11 @@
 shakaExtern.SupportType;
 
 
-/** @typedef {function(!Element):Array.<shakaExtern.DrmInfo>} */
+/**
+ * @typedef {function(!Element):Array.<shakaExtern.DrmInfo>}
+ * @see shakaExtern.DashManifestConfiguration
+ * @exportDoc
+ */
 shakaExtern.DashContentProtectionCallback;
 
 
@@ -170,6 +174,8 @@ shakaExtern.ManifestConfiguration;
  * @property {number} byteLimit
  *   The maximum number of bytes that can be buffered across all content types.
  *   Segments will be dropped to meet this limit.
+ *
+ * @exportDoc
  */
 shakaExtern.StreamingConfiguration;
 

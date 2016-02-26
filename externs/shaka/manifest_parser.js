@@ -30,6 +30,7 @@
  * background timers to update the same Manifest object.
  *
  * @interface
+ * @exportDoc
  */
 shakaExtern.ManifestParser = function() {};
 
@@ -40,6 +41,7 @@ shakaExtern.ManifestParser = function() {};
  * instances.
  *
  * @typedef {function(new:shakaExtern.ManifestParser)}
+ * @exportDoc
  */
 shakaExtern.ManifestParser.Factory;
 
@@ -49,6 +51,7 @@ shakaExtern.ManifestParser.Factory;
  * configuration changes.  Will be called at least once before start().
  *
  * @param {shakaExtern.ManifestConfiguration} config
+ * @exportDoc
  */
 shakaExtern.ManifestParser.prototype.configure = function(config) {};
 
@@ -65,6 +68,7 @@ shakaExtern.ManifestParser.prototype.configure = function(config) {};
  * @param {function(!shaka.util.Error)} onError A callback to be invoked on
  *     errors.
  * @return {!Promise.<shakaExtern.Manifest>}
+ * @exportDoc
  */
 shakaExtern.ManifestParser.prototype.start =
     function(uri, networkingEngine, filterPeriod, onError) {};
@@ -76,5 +80,6 @@ shakaExtern.ManifestParser.prototype.start =
  * be called once.
  *
  * @return {!Promise}
+ * @exportDoc
  */
 shakaExtern.ManifestParser.prototype.stop = function() {};
