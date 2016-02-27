@@ -1,3 +1,15 @@
+## 1.6.4 (2016-03-01)
+
+Bugfixes:
+  - Updated Promise polyfill with fixes backported from v2
+  - Fixed Edge EME compatibility & InvalidStateErrors
+    - https://github.com/google/shaka-player/issues/282
+  - Fixed HttpVideoSource use with clear content (Thanks, Sanborn!)
+    - https://github.com/google/shaka-player/pull/292
+  - Fixed uncompiled-mode performance regression introduced in v1.6.3
+    - https://github.com/google/shaka-player/issues/288
+
+
 ## 1.6.3 (2016-02-08)
 
 Features:
