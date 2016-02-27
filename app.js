@@ -699,7 +699,7 @@ app.loadHttpStream = function() {
   var subtitlesUrl = document.getElementById('subtitlesUrlInput').value;
   var config = keySystem ?
                {'keySystem': keySystem, 'licenseServerUrl': licenseServerUrl} :
-               {};
+               {'keySystem': ''};
   app.load_(new shaka.player.HttpVideoSource(mediaUrl, subtitlesUrl, config));
 };
 
