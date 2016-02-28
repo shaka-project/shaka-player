@@ -32,7 +32,6 @@ goog.require('shaka.media.VttTextParser');
 goog.require('shaka.net.DataUriPlugin');
 goog.require('shaka.net.HttpPlugin');
 
-goog.require('shaka.polyfill.CustomEvent');
 goog.require('shaka.polyfill.Fullscreen');
 goog.require('shaka.polyfill.MediaKeys');
 goog.require('shaka.polyfill.Promise');

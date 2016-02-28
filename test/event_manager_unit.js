@@ -26,8 +26,12 @@ describe('EventManager', function() {
     eventManager = new shaka.util.EventManager();
     target1 = document.createElement('div');
     target2 = document.createElement('div');
-    event1 = new CustomEvent('eventtype1');
-    event2 = new CustomEvent('eventtype2');
+
+    // new Event() is current, but document.createEvent() works back to IE11.
+    event1 = document.createEvent('Event');
+    event1.initEvent('eventtype1', false, false);
+    event2 = document.createEvent('Event');
+    event2.initEvent('eventtype2', false, false);
   });
 
   afterEach(function() {
