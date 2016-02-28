@@ -1218,7 +1218,7 @@ describe('StreamingEngine', function() {
       playhead.getTime.and.returnValue(0);
 
       onError.and.callFake(function(error) {
-        expect(error.category).toBe(shaka.util.Error.Category.MEDIA);
+        expect(error.category).toBe(shaka.util.Error.Category.STREAMING);
         expect(error.code).toBe(
             shaka.util.Error.Code.CANNOT_SATISFY_BYTE_LIMIT);
       });
@@ -1256,7 +1256,7 @@ describe('StreamingEngine', function() {
       onStartupComplete.and.callFake(setupFakeGetTime.bind(null, drift));
 
       onError.and.callFake(function(error) {
-        expect(error.category).toBe(shaka.util.Error.Category.MEDIA);
+        expect(error.category).toBe(shaka.util.Error.Category.STREAMING);
         expect(error.code).toBe(
             shaka.util.Error.Code.SEGMENT_DOES_NOT_EXIST);
 
