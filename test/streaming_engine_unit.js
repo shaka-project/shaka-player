@@ -1360,13 +1360,14 @@ describe('StreamingEngine', function() {
         initSegmentRanges.video[0],
         initSegmentRanges.video[1]);
 
-    netEngine.expectSegmentRequest(period + '_audio_1');
-    netEngine.expectSegmentRequest(period + '_video_1');
-    netEngine.expectSegmentRequest(period + '_text_1');
+    var segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+    netEngine.expectRequest(period + '_audio_1', segmentType);
+    netEngine.expectRequest(period + '_video_1', segmentType);
+    netEngine.expectRequest(period + '_text_1', segmentType);
 
-    netEngine.expectSegmentRequest(period + '_audio_2');
-    netEngine.expectSegmentRequest(period + '_video_2');
-    netEngine.expectSegmentRequest(period + '_text_2');
+    netEngine.expectRequest(period + '_audio_2', segmentType);
+    netEngine.expectRequest(period + '_video_2', segmentType);
+    netEngine.expectRequest(period + '_text_2', segmentType);
 
     netEngine.request.calls.reset();
   }

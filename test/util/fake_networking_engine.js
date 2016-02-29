@@ -43,6 +43,9 @@ shaka.test.FakeNetworkingEngine = function(
   /** @private {ArrayBuffer} */
   this.defaultResponse_ = opt_defaultResponse || null;
 
+  /** @private {?shaka.util.PublicPromise} */
+  this.delayNextRequestPromise_ = null;
+
   // The prototype has already been applied; create a spy for the request
   // method but still call it by default.
   spyOn(this, 'request').and.callThrough();
@@ -63,7 +66,25 @@ shaka.test.FakeNetworkingEngine.prototype.request = function(type, request) {
 
   /** @type {shakaExtern.Response} */
   var response = {uri: request.uris[0], data: result, headers: {}};
-  return Promise.resolve(response);
+
+  if (this.delayNextRequestPromise_) {
+    var delay = this.delayNextRequestPromise_;
+    this.delayNextRequestPromise_ = null;
+    return delay.then(function() { return response; });
+  }
+  else
+    return Promise.resolve(response);
+};
+
+
+/**
+ * Delays the next response until the returned PublicPromise resolves.
+ * @return {!shaka.util.PublicPromise}
+ */
+shaka.test.FakeNetworkingEngine.prototype.delayNextRequest = function() {
+  if (!this.delayNextRequestPromise_)
+    this.delayNextRequestPromise_ = new shaka.util.PublicPromise();
+  return this.delayNextRequestPromise_;
 };
 
 
@@ -71,15 +92,11 @@ shaka.test.FakeNetworkingEngine.prototype.request = function(type, request) {
  * Expects that a request for the given segment has occurred.
  *
  * @param {string} uri
+ * @param {shaka.net.NetworkingEngine.RequestType} type
  */
-shaka.test.FakeNetworkingEngine.prototype.expectSegmentRequest = function(uri) {
+shaka.test.FakeNetworkingEngine.prototype.expectRequest = function(uri, type) {
   expect(this.request)
-      .toHaveBeenCalledWith(
-          shaka.net.NetworkingEngine.RequestType.SEGMENT,
-          jasmine.objectContaining({
-            uris: [uri],
-            headers: {}
-          }));
+      .toHaveBeenCalledWith(type, jasmine.objectContaining({uris: [uri]}));
 };
 
 

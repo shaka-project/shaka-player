@@ -63,7 +63,7 @@ describe('DashParser.Live', function() {
    *
    * @return {!Promise}
    */
-  function waitForManifestUpdate() {
+  function delayForUpdatePeriod() {
     // Tick the virtual clock to trigger an update.
     jasmine.clock().tick(updateTime * 1000);
     // Resolve all Promises.
@@ -136,7 +136,7 @@ describe('DashParser.Live', function() {
             Dash.verifySegmentIndex(manifest, firstReferences);
 
             fakeNetEngine.setResponseMapAsText({'dummy://foo': secondManifest});
-            return waitForManifestUpdate().then(function() {
+            return delayForUpdatePeriod().then(function() {
               Dash.verifySegmentIndex(manifest, secondReferences);
             });
           })
@@ -186,7 +186,7 @@ describe('DashParser.Live', function() {
             // 15 seconds for @timeShiftBufferDepth and the first segment
             // duration.
             Date.now = function() { return 15 * 1000; };
-            return waitForManifestUpdate().then(function() {
+            return delayForUpdatePeriod().then(function() {
               // The first reference should have been evicted.
               expect(stream.findSegmentPosition(0)).toBe(null);
               Dash.verifySegmentIndex(manifest, basicRefs.slice(1));
@@ -224,7 +224,7 @@ describe('DashParser.Live', function() {
           expect(newPeriod.calls.count()).toBe(1);
 
           fakeNetEngine.setResponseMapAsText({'dummy://foo': secondManifest});
-          return waitForManifestUpdate().then(function() {
+          return delayForUpdatePeriod().then(function() {
             // Should update the same manifest object.
             expect(manifest.periods.length).toBe(2);
             expect(newPeriod.calls.count()).toBe(2);
@@ -278,7 +278,7 @@ describe('DashParser.Live', function() {
           fakeNetEngine.request.and.returnValue(
               Promise.resolve({uri: originalUri, data: manifestData}));
           fakeNetEngine.request.calls.reset();
-          return waitForManifestUpdate().then(function() {
+          return delayForUpdatePeriod().then(function() {
             // The update request was made to the original URL.
             expect(fakeNetEngine.request.calls.count()).toBe(1);
             var netRequest = fakeNetEngine.request.calls.argsFor(0)[1];
@@ -314,28 +314,8 @@ describe('DashParser.Live', function() {
           var promise = Promise.reject(error);
           fakeNetEngine.request.and.returnValue(promise);
 
-          return waitForManifestUpdate().then(function() {
+          return delayForUpdatePeriod().then(function() {
             expect(errorCallback.calls.count()).toBe(1);
-          });
-        })
-        .catch(fail)
-        .then(done);
-  });
-
-  it('stop method stops updates', function(done) {
-    var lines = [
-      '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />'
-    ];
-    var manifest = makeSimpleLiveManifestText(lines, updateTime);
-
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifest});
-    parser.start('dummy://foo', fakeNetEngine, newPeriod, errorCallback)
-        .then(function(manifest) {
-          expect(fakeNetEngine.request.calls.count()).toBe(1);
-
-          parser.stop();
-          return waitForManifestUpdate().then(function() {
-            expect(fakeNetEngine.request.calls.count()).toBe(1);
           });
         })
         .catch(fail)
@@ -372,6 +352,157 @@ describe('DashParser.Live', function() {
         })
         .catch(fail)
         .then(done);
+  });
+
+  describe('stop', function() {
+    var manifest;
+    var manifestUri;
+    var dateUri;
+    var manifestRequestType;
+    var dateRequestType;
+
+    beforeAll(function() {
+      manifestUri = 'dummy://foo';
+      dateUri = 'http://foo.bar/date';
+      manifestRequestType = shaka.net.NetworkingEngine.RequestType.MANIFEST;
+      dateRequestType = shaka.net.NetworkingEngine.RequestType.MANIFEST;
+    });
+
+    beforeEach(function() {
+      var manifest = [
+        '<MPD type="dynamic" minimumUpdatePeriod="PT' + updateTime + 'S">',
+        '  <UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-xsdate:2014"',
+        '      value="http://foo.bar/date" />',
+        '  <UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-xsdate:2014"',
+        '      value="http://foo.bar/date" />',
+        '  <Period id="1">',
+        '    <AdaptationSet id="2" mimeType="video/mp4">',
+        '      <Representation id="3" bandwidth="500">',
+        '        <BaseURL>http://example.com</BaseURL>',
+        '        <SegmentTemplate startNumber="1" media="s$Number$.mp4"',
+        '            duration="2" />',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>'
+      ].join('\n');
+      fakeNetEngine.setResponseMapAsText({
+        'http://foo.bar/date': '1970-01-01T00:00:30Z',
+        'dummy://foo': manifest
+      });
+    });
+
+    it('stops updates', function(done) {
+      parser.start(manifestUri, fakeNetEngine, newPeriod, errorCallback)
+          .then(function(manifest) {
+            fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
+            fakeNetEngine.request.calls.reset();
+
+            parser.stop();
+            return delayForUpdatePeriod().then(function() {
+              expect(fakeNetEngine.request).not.toHaveBeenCalled();
+            });
+          })
+          .catch(fail)
+          .then(done);
+    });
+
+    it('stops initial parsing', function(done) {
+      parser.start('dummy://foo', fakeNetEngine, newPeriod, errorCallback)
+          .then(function(manifest) {
+            expect(manifest).toBe(null);
+            fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
+            fakeNetEngine.request.calls.reset();
+            return delayForUpdatePeriod();
+          })
+          .then(function() {
+            // An update should not occur.
+            expect(fakeNetEngine.request).not.toHaveBeenCalled();
+          })
+          .catch(fail)
+          .then(done);
+
+      // start will only begin the network request, calling stop here will be
+      // after the request has started but before any parsing has been done.
+      expect(fakeNetEngine.request.calls.count()).toBe(1);
+      parser.stop();
+    });
+
+    it('interrupts manifest updates', function(done) {
+      parser.start('dummy://foo', fakeNetEngine, newPeriod, errorCallback)
+          .then(function(manifest) {
+            expect(manifest).toBeTruthy();
+            fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
+            fakeNetEngine.request.calls.reset();
+            var delay = fakeNetEngine.delayNextRequest();
+
+            return delayForUpdatePeriod().then(function() {
+              // The request was made but should not be resolved yet.
+              expect(fakeNetEngine.request.calls.count()).toBe(1);
+              fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
+              fakeNetEngine.request.calls.reset();
+              parser.stop();
+              delay.resolve();
+              return Util.delay(0.1, realTimeout);
+            }).then(function() {
+              // Wait for another update period.
+              return delayForUpdatePeriod();
+            }).then(function() {
+              // A second update should not occur.
+              expect(fakeNetEngine.request).not.toHaveBeenCalled();
+            });
+          })
+          .catch(fail)
+          .then(done);
+    });
+
+    it('interrupts UTCTiming requests', function(done) {
+      parser.start('dummy://foo', fakeNetEngine, newPeriod, errorCallback)
+          .then(function(manifest) {
+            expect(manifest).toBeTruthy();
+            fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
+            fakeNetEngine.request.calls.reset();
+            var delay = fakeNetEngine.delayNextRequest();
+
+            return delayForUpdatePeriod().then(function() {
+              // Resolve the manifest request and wait on the UTCTiming
+              // request.
+              expect(fakeNetEngine.request.calls.count()).toBe(1);
+              fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
+              fakeNetEngine.request.calls.reset();
+
+              delay.resolve();
+              delay = fakeNetEngine.delayNextRequest();
+              return Util.delay(0.2, realTimeout);
+            }).then(function() {
+              // This is the first UTCTiming request.  Reject it so it makes
+              // the second request.
+              expect(fakeNetEngine.request.calls.count()).toBe(1);
+              fakeNetEngine.expectRequest(dateUri, dateRequestType);
+              fakeNetEngine.request.calls.reset();
+
+              delay.reject();
+              delay = fakeNetEngine.delayNextRequest();
+              return Util.delay(0.2, realTimeout);
+            }).then(function() {
+              expect(fakeNetEngine.request.calls.count()).toBe(1);
+              fakeNetEngine.expectRequest(dateUri, dateRequestType);
+              fakeNetEngine.request.calls.reset();
+
+              parser.stop();
+              delay.resolve();
+              return Util.delay(0.1, realTimeout);
+            }).then(function() {
+              // Wait for another update period.
+              return delayForUpdatePeriod();
+            }).then(function() {
+              // A second update should not occur.
+              expect(fakeNetEngine.request).not.toHaveBeenCalled();
+            });
+          })
+          .catch(fail)
+          .then(done);
+    });
   });
 
   describe('SegmentTemplate w/ SegmentTimeline', function() {
