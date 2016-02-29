@@ -155,6 +155,13 @@ module.exports = function(config) {
         browserName: 'internet explorer',
         pseudoActivityInterval: 20000
       },
+
+      WebDriver_Edge13: {
+        base: 'WebDriver',
+        config: {hostname: 'localhost', port: 4446},
+        browserName: 'MicrosoftEdge',
+        pseudoActivityInterval: 20000
+      },
     },
 
     browserStack: {
