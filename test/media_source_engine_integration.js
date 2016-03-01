@@ -300,4 +300,21 @@ describe('MediaSourceEngine', function() {
       expect(mediaSource.duration).toBeCloseTo(60.031999);
     }).catch(fail).then(done);
   });
+
+  it('trims content at appendWindowEnd', function(done) {
+    mediaSourceEngine.init({'video': metadata.video.mimeType});
+    mediaSourceEngine.setDuration(presentationDuration).then(function() {
+      return appendInit('video');
+    }).then(function() {
+      return mediaSourceEngine.setAppendWindowEnd('video', 20);
+    }).then(function() {
+      expect(buffered('video', 0)).toBe(0);
+      return append('video', 1);
+    }).then(function() {
+      expect(buffered('video', 0)).toBeCloseTo(12);
+      return append('video', 2);
+    }).then(function() {
+      expect(buffered('video', 0)).toBeCloseTo(20, 0);
+    }).catch(fail).then(done);
+  });
 });
