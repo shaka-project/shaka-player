@@ -270,11 +270,13 @@ describe('StreamingEngine', function() {
   afterEach(function(done) {
     // Note: each test is responsible for destroying the StreamingEngine
     // instance.
-    mediaSourceEngine.destroy().then(function() {
+    streamingEngine.destroy().then(function() {
       video.src = '';
-      return playhead.destroy();
-    }).then(function() {
-      return eventManager.destroy();
+      return Promise.all([
+        mediaSourceEngine.destroy(),
+        playhead.destroy(),
+        eventManager.destroy()
+      ]);
     }).catch(fail).then(done);
   });
 
@@ -291,7 +293,7 @@ describe('StreamingEngine', function() {
     var onEnded = function() {
       // Some browsers may not end at exactly 60 seconds.
       expect(Math.round(video.currentTime)).toBe(60);
-      streamingEngine.destroy().catch(fail).then(done);
+      done();
     };
     eventManager.listen(video, 'ended', onEnded);
 
@@ -318,7 +320,7 @@ describe('StreamingEngine', function() {
     var onEnded = function() {
       // Some browsers may not end at exactly 60 seconds.
       expect(Math.round(video.currentTime)).toBe(60);
-      streamingEngine.destroy().catch(fail).then(done);
+      done();
     };
     eventManager.listen(video, 'ended', onEnded);
 
@@ -344,7 +346,7 @@ describe('StreamingEngine', function() {
     var onEnded = function() {
       // Some browsers may not end at exactly 60 seconds.
       expect(Math.round(video.currentTime)).toBe(60);
-      streamingEngine.destroy().catch(fail).then(done);
+      done();
     };
     eventManager.listen(video, 'ended', onEnded);
 
@@ -370,7 +372,7 @@ describe('StreamingEngine', function() {
     var onEnded = function() {
       // Some browsers may not end at exactly 60 seconds.
       expect(Math.round(video.currentTime)).toBe(60);
-      streamingEngine.destroy().catch(fail).then(done);
+      done();
     };
     eventManager.listen(video, 'ended', onEnded);
 
