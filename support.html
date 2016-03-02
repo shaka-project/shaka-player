@@ -18,63 +18,63 @@
   <head>
     <title>Shaka Player Browser Support Test</title>
     <script src="dist/shaka-player.compiled.js"></script>
+    <script>
+      function whenLoaded(fn) {
+        // IE 9 fires DOMContentLoaded, and enters the "interactive"
+        // readyState, before document.body has been initialized, so wait
+        // for window.load
+        if (document.readyState == 'loading' ||
+            document.readyState == 'interactive') {
+          if (window.attachEvent) {
+            // IE8
+            window.attachEvent('onload', fn);
+          } else {
+            window.addEventListener('load', fn);
+          }
+        } else {
+          fn();
+        }
+      }
+
+      function doTest() {
+        shaka.polyfill.installAll();
+        shaka.Player.support().then(function(support) {
+          var userAgent = navigator.userAgent;
+          var formatted = userAgent + '\n' + shaka.Player.version + '\n\n';
+
+          var indent = '    ';
+          formatted += '{\n';
+          for (var topLevelKey in support) {
+            formatted += indent + topLevelKey + ': ';
+            if (typeof(support[topLevelKey]) == 'boolean') {
+              formatted += support[topLevelKey].toString();
+            } else {
+              var obj = support[topLevelKey];
+              formatted += '{\n';
+              for (var subKey in obj) {
+                formatted += indent + indent + subKey + ': ';
+                formatted += obj[subKey].toString();
+                formatted += '\n';
+              }
+              formatted += indent + '}';
+            }
+            formatted += '\n';
+          }
+          formatted += '}\n';
+
+          var output = document.getElementById('output');
+
+          if (output.textContent === undefined) {
+            // IE8 and other very old browsers don't have textContent.
+            output.innerText = formatted;
+          } else {
+            output.textContent = formatted;
+          }
+        });
+      }
+
+      whenLoaded(doTest);
+    </script>
   </head>
   <body><pre id="output"></pre></body>
-  <script>
-    function whenLoaded(fn) {
-      // IE 9 fires DOMContentLoaded, and enters the "interactive"
-      // readyState, before document.body has been initialized, so wait
-      // for window.load
-      if (document.readyState == 'loading' ||
-          document.readyState == 'interactive') {
-        if (window.attachEvent) {
-          // IE8
-          window.attachEvent('onload', fn);
-        } else {
-          window.addEventListener('load', fn);
-        }
-      } else {
-        fn();
-      }
-    }
-
-    function doTest() {
-      shaka.polyfill.installAll();
-      shaka.Player.support().then(function(support) {
-        var userAgent = navigator.userAgent;
-        var formatted = userAgent + '\n' + shaka.Player.version + '\n\n';
-
-        var indent = '    ';
-        formatted += '{\n';
-        for (var topLevelKey in support) {
-          formatted += indent + topLevelKey + ': ';
-          if (typeof(support[topLevelKey]) == 'boolean') {
-            formatted += support[topLevelKey].toString();
-          } else {
-            var obj = support[topLevelKey];
-            formatted += '{\n';
-            for (var subKey in obj) {
-              formatted += indent + indent + subKey + ': ';
-              formatted += obj[subKey].toString();
-              formatted += '\n';
-            }
-            formatted += indent + '}';
-          }
-          formatted += '\n';
-        }
-        formatted += '}\n';
-
-        var output = document.getElementById('output');
-
-        if (output.textContent === undefined) {
-          // IE8 and other very old browsers don't have textContent.
-          output.innerText = formatted;
-        } else {
-          output.textContent = formatted;
-        }
-      });
-    }
-
-    whenLoaded(doTest);
-  </script>
 </html>
