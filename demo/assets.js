@@ -28,7 +28,8 @@ shaka.demo.Assets.Encoder = {
   WOWZA: 'Wowza',
   BITCODIN: 'Bitcodin',
   NIMBLE_STREAMER: 'Nimble Streamer',
-  AZURE_MEDIA_SERVICES: 'Azure Media Services'
+  AZURE_MEDIA_SERVICES: 'Azure Media Services',
+  MP4BOX: 'MP4Box'
 };
 
 
@@ -42,7 +43,8 @@ shaka.demo.Assets.Source = {
   WOWZA: 'Wowza',
   BITCODIN: 'Bitcodin',
   NIMBLE_STREAMER: 'Nimble Streamer',
-  AZURE_MEDIA_SERVICES: 'Azure Media Services'
+  AZURE_MEDIA_SERVICES: 'Azure Media Services',
+  GPAC: 'GPAC'
 };
 
 
@@ -233,7 +235,7 @@ shaka.demo.Assets.YouTubeCallback = function(node) {
 
 /** @const {!Array.<shaka.demo.Assets.AssetInfo>} */
 shaka.demo.Assets.TestAssets = [
-  // Shaka v1 assets (hosted on demo site). {{{
+  // Shaka assets {{{
   {
     name: 'Angel One',
     manifestUri: '//shaka-player-demo.appspot.com/assets/angel_one.mpd',
@@ -295,6 +297,19 @@ shaka.demo.Assets.TestAssets = [
     licenseServers: {
       'com.widevine.alpha': '//widevine-proxy.appspot.com/proxy'
     }
+  },
+  {
+    name: 'Heliocentrism',
+    manifestUri: '//storage.googleapis.com/widevine-demo-media/heliocentrism/heliocentrism.mpd',  // gjslint: disable=110
+
+    encoder: shaka.demo.Assets.Encoder.EDASH_PACKAGER,
+    source: shaka.demo.Assets.Source.SHAKA,
+    drm: [],
+    features: [
+      shaka.demo.Assets.Feature.MP4,
+      shaka.demo.Assets.Feature.MULTIPERIOD,
+      shaka.demo.Assets.Feature.SEGMENT_BASE
+    ]
   },
   // }}}
 
@@ -361,7 +376,7 @@ shaka.demo.Assets.TestAssets = [
   },
   // }}}
 
-  // Axinom assets. {{{
+  // Axinom assets {{{
   // Src: https://github.com/Axinom/dash-test-vectors
   {
     name: 'Multi-DRM',
@@ -516,7 +531,7 @@ shaka.demo.Assets.TestAssets = [
   },
   // }}}
 
-  // DASH-IF assets. {{{
+  // DASH-IF assets {{{
   // Src: http://dashif.org/test-vectors/
   {
     name: 'Big Buck Bunny',
@@ -558,7 +573,7 @@ shaka.demo.Assets.TestAssets = [
   },
   // }}}
 
-  // Wowza assets. {{{
+  // Wowza assets {{{
   // Src: http://www.dash-player.com/demo/streaming-server-and-encoder-support/
   {
     name: 'Big Buck Bunny',
@@ -575,7 +590,7 @@ shaka.demo.Assets.TestAssets = [
   },
   // }}}
 
-  // bitcodin assets. {{{
+  // bitcodin assets {{{
   // Src: http://www.dash-player.com/demo/streaming-server-and-encoder-support/
   {
     name: 'Art of Motion',
@@ -591,7 +606,7 @@ shaka.demo.Assets.TestAssets = [
   },
   // }}}
 
-  // Nimble Streamer assets. {{{
+  // Nimble Streamer assets {{{
   // Src: http://www.dash-player.com/demo/streaming-server-and-encoder-support/
   {
     name: 'Big Buck Bunny',
@@ -671,6 +686,76 @@ shaka.demo.Assets.TestAssets = [
       shaka.demo.Assets.Feature.SUBTITLES,
       shaka.demo.Assets.Feature.WEBVTT
     ]
+  },
+  // }}}
+
+  // GPAC assets {{{
+  // Src: https://gpac.wp.mines-telecom.fr/2012/02/23/dash-sequences/
+  // NOTE: The assets here using the "live profile" are not actually
+  // "live streams".  The content is still static, as is the timeline.
+  {
+    name: 'live profile',
+    manifestUri: '//download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-live/mp4-live-mpd-AV-BS.mpd',  // gjslint: disable=110
+
+    encoder: shaka.demo.Assets.Encoder.MP4BOX,
+    source: shaka.demo.Assets.Source.GPAC,
+    drm: [],
+    features: [
+      shaka.demo.Assets.Feature.MP4,
+      shaka.demo.Assets.Feature.SEGMENT_TEMPLATE_DURATION
+    ]
+  },
+  {
+    name: 'live profile with five periods',
+    manifestUri: '//download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-live-periods/mp4-live-periods-mpd.mpd',  // gjslint: disable=110
+
+    encoder: shaka.demo.Assets.Encoder.MP4BOX,
+    source: shaka.demo.Assets.Source.GPAC,
+    drm: [],
+    features: [
+      shaka.demo.Assets.Feature.MP4,
+      shaka.demo.Assets.Feature.MULTIPERIOD,
+      shaka.demo.Assets.Feature.SEGMENT_TEMPLATE_DURATION
+    ]
+  },
+  {
+    name: 'main profile, single file',
+    manifestUri: '//download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-main-single/mp4-main-single-mpd-AV-NBS.mpd',  // gjslint: disable=110
+
+    encoder: shaka.demo.Assets.Encoder.MP4BOX,
+    source: shaka.demo.Assets.Source.GPAC,
+    drm: [],
+    features: [
+      shaka.demo.Assets.Feature.MP4,
+      shaka.demo.Assets.Feature.SEGMENT_LIST_DURATION
+    ]
+  },
+  {
+    name: 'main profile, mutiple files',
+    manifestUri: '//download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-main-multi/mp4-main-multi-mpd-AV-BS.mpd',  // gjslint: disable=110
+
+    encoder: shaka.demo.Assets.Encoder.MP4BOX,
+    source: shaka.demo.Assets.Source.GPAC,
+    drm: [],
+    features: [
+      shaka.demo.Assets.Feature.MP4,
+      shaka.demo.Assets.Feature.SEGMENT_LIST_DURATION
+    ]
+  },
+  {
+    name: 'onDemand profile',
+    manifestUri: '//download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-onDemand/mp4-onDemand-mpd-AV.mpd',  // gjslint: disable=110
+
+    encoder: shaka.demo.Assets.Encoder.MP4BOX,
+    source: shaka.demo.Assets.Source.GPAC,
+    drm: [],
+    features: [
+      shaka.demo.Assets.Feature.MP4,
+      shaka.demo.Assets.Feature.SEGMENT_BASE
+    ]
   }
+  // TODO: Add open GOP and gradual decoding refresh assets once
+  // https://crbug.com/229412 is resolved.  These assets have segments that
+  // do not start with keyframes.
   // }}}
 ];
