@@ -355,7 +355,6 @@ describe('DashParser.Live', function() {
   });
 
   describe('stop', function() {
-    var manifest;
     var manifestUri;
     var dateUri;
     var manifestRequestType;

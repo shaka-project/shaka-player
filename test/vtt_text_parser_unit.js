@@ -269,7 +269,7 @@ describe('VttTextParser', function() {
   function errorHelper(code, string) {
     var data = shaka.util.StringUtils.toUTF8(string);
     try {
-      var result = shaka.media.VttTextParser(data);
+      shaka.media.VttTextParser(data);
       fail('Invalid WebVTT file supported');
     } catch (e) {
       expect(e instanceof shaka.util.Error).toBe(true);

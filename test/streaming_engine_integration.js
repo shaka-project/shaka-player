@@ -52,7 +52,6 @@ describe('StreamingEngine', function() {
 
   var playhead;
   var onBuffering;
-  var onSeek;
 
   var mediaSource;
   var mediaSourceEngine;

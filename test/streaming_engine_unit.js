@@ -1260,8 +1260,6 @@ describe('StreamingEngine', function() {
         expect(error.code).toBe(
             shaka.util.Error.Code.SEGMENT_DOES_NOT_EXIST);
 
-        var reportedContentType = error.data[0];
-        var reportedPeriodIndex = error.data[1];
         var reportedTimestampNeeded = error.data[2];
 
         // Expect six SEGMENT_DOES_NOT_EXIST errors as the playhead
@@ -1537,7 +1535,6 @@ describe('StreamingEngine', function() {
    */
   function makeSegmentReference(period, contentType, position) {
     if (position > 2) return null;
-    var size = segmentSizes[contentType];
     var duration = segmentDurations[contentType];
     return new shaka.media.SegmentReference(
         position, (position - 1) * duration, position * duration,

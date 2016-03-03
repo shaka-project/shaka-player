@@ -21,7 +21,6 @@ describe('MediaSourceEngine', function() {
   var audioSourceBuffer;
   var videoSourceBuffer;
   var mockMediaSource;
-  var dummyData = new ArrayBuffer(0);
   var mediaSourceEngine;
   var Util;
 
@@ -501,9 +500,9 @@ describe('MediaSourceEngine', function() {
 
     it('makes subsequent operations wait', function(done) {
       var p1 = mediaSourceEngine.endOfStream();
-      var p2 = mediaSourceEngine.appendBuffer('audio', 1, null, null);
-      var p3 = mediaSourceEngine.appendBuffer('video', 1, null, null);
-      var p4 = mediaSourceEngine.appendBuffer('video', 2, null, null);
+      mediaSourceEngine.appendBuffer('audio', 1, null, null);
+      mediaSourceEngine.appendBuffer('video', 1, null, null);
+      mediaSourceEngine.appendBuffer('video', 2, null, null);
 
       // endOfStream hasn't been called yet because blocking multiple queues
       // takes an extra tick, even when they are empty.
@@ -532,7 +531,7 @@ describe('MediaSourceEngine', function() {
     it('runs subsequent operations if this operation throws', function(done) {
       mockMediaSource.endOfStream.and.throwError(new Error());
       var p1 = mediaSourceEngine.endOfStream();
-      var p2 = mediaSourceEngine.appendBuffer('audio', 1, null, null);
+      mediaSourceEngine.appendBuffer('audio', 1, null, null);
 
       expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalled();
 
@@ -598,9 +597,9 @@ describe('MediaSourceEngine', function() {
 
     it('makes subsequent operations wait', function(done) {
       var p1 = mediaSourceEngine.setDuration(100);
-      var p2 = mediaSourceEngine.appendBuffer('audio', 1, null, null);
-      var p3 = mediaSourceEngine.appendBuffer('video', 1, null, null);
-      var p4 = mediaSourceEngine.appendBuffer('video', 2, null, null);
+      mediaSourceEngine.appendBuffer('audio', 1, null, null);
+      mediaSourceEngine.appendBuffer('video', 1, null, null);
+      mediaSourceEngine.appendBuffer('video', 2, null, null);
 
       // The setter hasn't been called yet because blocking multiple queues
       // takes an extra tick, even when they are empty.
@@ -629,7 +628,7 @@ describe('MediaSourceEngine', function() {
     it('runs subsequent operations if this operation throws', function(done) {
       mockMediaSource.durationSetter_.and.throwError(new Error());
       var p1 = mediaSourceEngine.setDuration(100);
-      var p2 = mediaSourceEngine.appendBuffer('audio', 1, null, null);
+      mediaSourceEngine.appendBuffer('audio', 1, null, null);
 
       expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalled();
 

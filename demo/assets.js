@@ -165,8 +165,6 @@ shaka.demo.Assets.YouTubePostProcessor = function(type, response) {
   var index = responseStr.indexOf('\r\n\r\n');
   if (responseStr.startsWith('GLS/1.0') && index >= 0) {
     // Strip off the headers.
-    var headers = responseStr.substr(0, index).split('\r\n');
-
     // Create a new buffer to store the stripped data.  We have to create a new
     // Uint8Array and set so we can get the buffer.  When using subarray, the
     // buffer of the subarray still points to the original data.

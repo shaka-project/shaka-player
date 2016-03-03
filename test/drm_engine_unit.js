@@ -380,9 +380,6 @@ describe('DrmEngine', function() {
     });
 
     it('does not use config if DrmInfo already filled out', function(done) {
-      var cert1 = new Uint8Array(0);
-      var cert2 = new Uint8Array(0);
-
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, []));
 

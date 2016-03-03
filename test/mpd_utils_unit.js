@@ -16,9 +16,6 @@
  */
 
 describe('MpdUtils', function() {
-  // A number that cannot be represented as a Javascript number.
-  var HUGE_NUMBER_STRING = new Array(500).join('7');
-
   var MpdUtils;
 
   beforeAll(function() {
