@@ -1,5 +1,6 @@
 closure/compiler.jar
-  The closure compiler, v20150609, by Google.
+  The closure compiler, v20160208 + patches, by Google.
+  Cherry-picked 3734b26b to remove bogus arguments checks.
   Apache v2.0 license.
   https://github.com/google/closure-compiler
 

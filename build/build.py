@@ -56,11 +56,12 @@ closure_opts = [
   # about the old one.
   '--jscomp_off=deprecatedAnnotations',
 
-  # 'lintChecks' complains about countless instances of implicitly nullable
+  # 'analyzerChecks' complains about countless instances of implicitly nullable
   # types, plus a few other issues.  Even the closure library doesn't pass
   # these checks, and the implicit nullability check in particular is over-
-  # zealous and unhelpful.  So we disable the whole category of 'lintChecks'.
-  '--jscomp_off=lintChecks',
+  # zealous and unhelpful.  So we disable the whole category of
+  # 'analyzerChecks'.
+  '--jscomp_off=analyzerChecks',
 
   '--extra_annotation_name=listens',
   '--extra_annotation_name=exportDoc',
