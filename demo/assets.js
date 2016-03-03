@@ -656,7 +656,7 @@ shaka.demo.Assets.TestAssets = [
       shaka.demo.Assets.Feature.SEGMENT_TEMPLATE_TIMELINE
     ],
 
-    liceneServers: {
+    licenseServers: {
       'com.widevine.alpha': '//amssamples.keydelivery.mediaservices.windows.net/Widevine/?KID=1ab45440-532c-4399-94dc-5c5ad9584bac',  // gjslint: disable=110
       'com.microsoft.playready': '//amssamples.keydelivery.mediaservices.windows.net/PlayReady/'  // gjslint: disable=110
     }
