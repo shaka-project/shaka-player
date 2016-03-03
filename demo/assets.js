@@ -114,6 +114,7 @@ shaka.demo.Assets.ExtraText;
  *
  *   licenseServers: (!Object.<string, string>|undefined),
  *   licenseRequestHeaders: (!Object.<string, string>|undefined),
+ *   licenseProcessor: (shaka.net.NetworkingEngine.ResponseFilter|undefined),
  *   drmCallback: (shakaExtern.DashContentProtectionCallback|undefined),
  *   clearKeys: (!Object.<string, string>|undefined)
  * }}
@@ -137,6 +138,9 @@ shaka.demo.Assets.ExtraText;
  *   (optional) A map of key-system to license server.
  * @property {(!Object.<string, string>|undefined)} licenseRequestHeaders
  *   (optional) A map of headers to add to license requests.
+ * @property {(shaka.net.NetworkingEngine.ResponseFilter|undefined)}
+ *     licenseProcessor
+ *   A callback to process license responses before they are passed to the CDM.
  * @property {(shakaExtern.DashContentProtectionCallback|undefined)} drmCallback
  *   A callback to use to interpret ContentProtection elements.
  * @property {(!Object.<string, string>|undefined)} clearKeys
@@ -147,7 +151,6 @@ shaka.demo.Assets.AssetInfo;
 
 /**
  * A license post-processor to process YouTube license repsponses.
- * TODO: Register this with the networking engine.
  * @param {shaka.net.NetworkingEngine.RequestType} type
  * @param {shakaExtern.Response} response
  */
@@ -191,14 +194,13 @@ shaka.demo.Assets.YouTubeCallback = function(node) {
         var licenseServerUri = child.textContent;
         var typeAttr = child.getAttribute('type');
         var keySystem;
+        // NOTE: Ignoring clearkey type here because this YT demo content does
+        // not contain PSSHs appropriate for the clearkey CDM.
         if (typeAttr == 'widevine') {
           keySystem = 'com.widevine.alpha';
         } else if (typeAttr == 'playready') {
           keySystem = 'com.microsoft.playready';
-        } else if (typeAttr == 'clearkey') {
-          keySystem = 'org.w3.clearkey';
         } else {
-          console.warn('Unknown YouTube key-system type', typeAttr);
           continue;
         }
 
@@ -374,7 +376,8 @@ shaka.demo.Assets.TestAssets = [
       shaka.demo.Assets.Feature.SEGMENT_BASE
     ],
 
-    drmCallback: shaka.demo.Assets.YouTubeCallback
+    drmCallback: shaka.demo.Assets.YouTubeCallback,
+    licenseProcessor: shaka.demo.Assets.YouTubePostProcessor
   },
   // }}}
 
