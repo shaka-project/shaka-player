@@ -188,7 +188,7 @@ shaka.demo.Assets.YouTubeCallback = function(node) {
     for (var i = 0; i < node.childNodes.length; ++i) {
       var child = node.childNodes[i];
       if (child.nodeName == 'yt:SystemURL') {
-        var licenseServerUrl = child.textContent;
+        var licenseServerUri = child.textContent;
         var typeAttr = child.getAttribute('type');
         var keySystem;
         if (typeAttr == 'widevine') {
@@ -203,13 +203,14 @@ shaka.demo.Assets.YouTubeCallback = function(node) {
         }
 
         configs.push({
-          'keySystem': keySystem,
-          'licenseServerUrl': licenseServerUrl,
-          'distinctiveIdentifierRequired': false,
-          'persistentStateRequired': false,
-          'robustness': '',
-          'serverCertificate': null,
-          'initData': null
+          keySystem: keySystem,
+          licenseServerUri: licenseServerUri,
+          distinctiveIdentifierRequired: false,
+          persistentStateRequired: false,
+          audioRobustness: '',
+          videoRobustness: '',
+          serverCertificate: null,
+          initData: null
         });
       }
     }
@@ -219,13 +220,14 @@ shaka.demo.Assets.YouTubeCallback = function(node) {
     // DrmEngine will then use them to replace |licesneServerUrl| and
     // |initData|.
     return [{
-      'keySystem': 'org.w3.clearkey',
-      'licenseServerUrl': '',
-      'distinctiveIdentifierRequired': false,
-      'persistentStateRequired': false,
-      'robustness': '',
-      'serverCertificate': null,
-      'initData': null
+      keySystem: 'org.w3.clearkey',
+      licenseServerUri: '',
+      distinctiveIdentifierRequired: false,
+      persistentStateRequired: false,
+      audioRobustness: '',
+      videoRobustness: '',
+      serverCertificate: null,
+      initData: null
     }];
   }
 
