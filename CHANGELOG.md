@@ -1,4 +1,4 @@
-## 1.6.4 (2016-03-01)
+## 1.6.4 (2016-03-03)
 
 Bugfixes:
   - Updated Promise polyfill with fixes backported from v2
