@@ -354,6 +354,47 @@ describe('DashParser.Live', function() {
         .then(done);
   });
 
+  it('uses Mpd.Location', function(done) {
+    var manifest = [
+      '<MPD type="dynamic" minimumUpdatePeriod="PT' + updateTime + 'S">',
+      '  <Location>http://foobar</Location>',
+      '  <Location>http://foobar2</Location>',
+      '  <Period id="1" duration="PT10S">',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <Representation id="3" bandwidth="500">',
+      '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'
+    ].join('\n');
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifest});
+
+    var manifestRequest = shaka.net.NetworkingEngine.RequestType.MANIFEST;
+    parser.start('dummy://foo', fakeNetEngine, newPeriod, errorCallback)
+        .then(function(manifest) {
+          expect(fakeNetEngine.request.calls.count()).toBe(1);
+          fakeNetEngine.expectRequest('dummy://foo', manifestRequest);
+          fakeNetEngine.request.calls.reset();
+
+          // Create a mock so we can verify it gives two URIs.
+          fakeNetEngine.request.and.callFake(function(type, request) {
+            expect(type).toBe(manifestRequest);
+            expect(request.uris).toEqual(['http://foobar', 'http://foobar2']);
+            var data = shaka.util.StringUtils.toUTF8(manifest);
+            return Promise.resolve(
+                {uri: request.uris[0], data: data, headers: {}});
+          });
+
+          return delayForUpdatePeriod();
+        })
+        .then(function() {
+          expect(fakeNetEngine.request.calls.count()).toBe(1);
+        })
+        .catch(fail)
+        .then(done);
+  });
+
   describe('stop', function() {
     var manifestUri;
     var dateUri;
