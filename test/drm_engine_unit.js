@@ -243,7 +243,7 @@ describe('DrmEngine', function() {
             .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
               audioCapabilities: undefined,
               videoCapabilities: [jasmine.objectContaining({
-                contentType: 'video/foo; codecs="vbar"'
+                contentType: 'video/foo'
               })],
               distinctiveIdentifier: 'optional',
               persistentState: 'optional',
@@ -252,7 +252,7 @@ describe('DrmEngine', function() {
         expect(requestMediaKeySystemAccessSpy)
             .toHaveBeenCalledWith('drm.def', [jasmine.objectContaining({
               audioCapabilities: [jasmine.objectContaining({
-                contentType: 'audio/foo; codecs="abar"'
+                contentType: 'audio/foo'
               })],
               videoCapabilities: undefined,
               distinctiveIdentifier: 'optional',
@@ -338,10 +338,10 @@ describe('DrmEngine', function() {
         expect(requestMediaKeySystemAccessSpy)
             .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
               videoCapabilities: [jasmine.objectContaining({
-                contentType: 'video/foo; codecs="vbar"'
+                contentType: 'video/foo'
               })],
               audioCapabilities: [jasmine.objectContaining({
-                contentType: 'audio/foo; codecs="abar"'
+                contentType: 'audio/foo'
               })],
               distinctiveIdentifier: 'required'
             })]);
