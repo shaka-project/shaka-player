@@ -101,7 +101,8 @@ function closure_sources_0() {
 }
 
 function compile_0() {
-  xargs -0 java -jar "$dir"/third_party/closure/compiler.jar $closure_opts "$@"
+  sort -z | xargs -0 \
+    java -jar "$dir"/third_party/closure/compiler.jar $closure_opts "$@"
 }
 
 function lint_0() {
