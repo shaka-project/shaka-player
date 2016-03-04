@@ -76,7 +76,8 @@ describe('MediaSourceEngine', function() {
 
     var onMediaSourceOpen = function() {
       mediaSource.removeEventListener('sourceopen', onMediaSourceOpen);
-      mediaSourceEngine = new shaka.media.MediaSourceEngine(mediaSource, null);
+      mediaSourceEngine = new shaka.media.MediaSourceEngine(
+          video, mediaSource, null);
       done();
     };
     mediaSource.addEventListener('sourceopen', onMediaSourceOpen);

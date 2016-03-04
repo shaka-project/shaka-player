@@ -140,7 +140,8 @@ describe('DrmEngine', function() {
 
     var onMediaSourceOpen = function() {
       mediaSource.removeEventListener('sourceopen', onMediaSourceOpen);
-      mediaSourceEngine = new shaka.media.MediaSourceEngine(mediaSource, null);
+      mediaSourceEngine = new shaka.media.MediaSourceEngine(
+          video, mediaSource, null);
       mediaSourceEngine.init({
         'video': 'video/mp4; codecs="avc1.640015"',
         'audio': 'audio/mp4; codecs="mp4a.40.2"'

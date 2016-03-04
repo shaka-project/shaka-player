@@ -117,7 +117,8 @@ describe('StreamingEngine', function() {
     var onMediaSourceOpen = function() {
       eventManager.unlisten(mediaSource, 'sourceopen');
       mediaSource.duration = 0;
-      mediaSourceEngine = new shaka.media.MediaSourceEngine(mediaSource, null);
+      mediaSourceEngine = new shaka.media.MediaSourceEngine(
+          video, mediaSource, null);
       p.resolve();
     };
     eventManager.listen(mediaSource, 'sourceopen', onMediaSourceOpen);

@@ -20,6 +20,7 @@ describe('MediaSourceEngine', function() {
   var originalTextEngine;
   var audioSourceBuffer;
   var videoSourceBuffer;
+  var mockVideo;
   var mockMediaSource;
   var mediaSourceEngine;
   var Util;
@@ -44,7 +45,7 @@ describe('MediaSourceEngine', function() {
     shaka.media.TextEngine = originalTextEngine;
   });
 
-  beforeEach(function() {
+  beforeEach(/** @suppress {invalidCasts} */ function() {
     audioSourceBuffer = createMockSourceBuffer();
     videoSourceBuffer = createMockSourceBuffer();
     mockMediaSource = createMockMediaSource();
@@ -53,8 +54,12 @@ describe('MediaSourceEngine', function() {
       return contentType == 'audio' ? audioSourceBuffer : videoSourceBuffer;
     });
 
+    // MediaSourceEngine only uses video to read error codes when operations
+    // fail.
+    mockVideo = { error: null };
+    var video = /** @type {HTMLMediaElement} */(mockVideo);
     mediaSourceEngine =
-        new shaka.media.MediaSourceEngine(mockMediaSource, null);
+        new shaka.media.MediaSourceEngine(video, mockMediaSource, null);
   });
 
   describe('init', function() {
@@ -176,21 +181,30 @@ describe('MediaSourceEngine', function() {
     });
 
     it('rejects the promise if this operation throws', function(done) {
-      audioSourceBuffer.appendBuffer.and.throwError(new Error());
+      audioSourceBuffer.appendBuffer.and.throwError('fail!');
+      mockVideo.error = { code: 5 };
       mediaSourceEngine.appendBuffer('audio', 1, null, null).then(function() {
         fail('not reached');
         done();
-      }, function() {
+      }, function(error) {
+        expect(error.code).toBe(
+            shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_THREW);
+        expect(error.data).toEqual(
+            [jasmine.objectContaining({message: 'fail!'})]);
         expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
         done();
       });
     });
 
     it('rejects the promise if this operation fails async', function(done) {
+      mockVideo.error = { code: 5 };
       mediaSourceEngine.appendBuffer('audio', 1, null, null).then(function() {
         fail('not reached');
         done();
-      }, function() {
+      }, function(error) {
+        expect(error.code).toBe(
+            shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_FAILED);
+        expect(error.data).toEqual([5]);
         expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
         done();
       });
@@ -302,21 +316,30 @@ describe('MediaSourceEngine', function() {
     });
 
     it('rejects the promise if this operation throws', function(done) {
-      audioSourceBuffer.remove.and.throwError(new Error());
+      audioSourceBuffer.remove.and.throwError('fail!');
+      mockVideo.error = { code: 5 };
       mediaSourceEngine.remove('audio', 1, 5).then(function() {
         fail('not reached');
         done();
-      }, function() {
+      }, function(error) {
+        expect(error.code).toBe(
+            shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_THREW);
+        expect(error.data).toEqual(
+            [jasmine.objectContaining({message: 'fail!'})]);
         expect(audioSourceBuffer.remove).toHaveBeenCalledWith(1, 5);
         done();
       });
     });
 
     it('rejects the promise if this operation fails async', function(done) {
+      mockVideo.error = { code: 5 };
       mediaSourceEngine.remove('audio', 1, 5).then(function() {
         fail('not reached');
         done();
-      }, function() {
+      }, function(error) {
+        expect(error.code).toBe(
+            shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_FAILED);
+        expect(error.data).toEqual([5]);
         expect(audioSourceBuffer.remove).toHaveBeenCalledWith(1, 5);
         done();
       });
