@@ -114,6 +114,7 @@ def getAllFiles(dirPath, exp):
     for f in files:
       if not exp or exp.match(f):
         ret.append(os.path.join(root, f))
+  ret.sort()
   return ret
 
 def runMain(main):
