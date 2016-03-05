@@ -365,7 +365,6 @@ shaka.demo.Assets.TestAssets = [
     encoder: shaka.demo.Assets.Encoder.YOUTUBE,
     source: shaka.demo.Assets.Source.YOUTUBE,
     drm: [
-      shaka.demo.Assets.KeySystem.CLEAR_KEY,
       shaka.demo.Assets.KeySystem.WIDEVINE,
       shaka.demo.Assets.KeySystem.PLAYREADY
     ],
@@ -499,8 +498,9 @@ shaka.demo.Assets.TestAssets = [
     encoder: shaka.demo.Assets.Encoder.UNIFIED_STREAMING,
     source: shaka.demo.Assets.Source.UNIFIED_STREAMING,
     drm: [
-      shaka.demo.Assets.KeySystem.WIDEVINE,
-      shaka.demo.Assets.KeySystem.PLAYREADY
+      // TODO: The PlayReady version of this is being rejected by Edge & IE.
+      // shaka.demo.Assets.KeySystem.PLAYREADY,
+      shaka.demo.Assets.KeySystem.WIDEVINE
     ],
     features: [
       shaka.demo.Assets.Feature.HIGH_DEFINITION,
@@ -761,4 +761,6 @@ shaka.demo.Assets.TestAssets = [
   // https://crbug.com/229412 is resolved.  These assets have segments that
   // do not start with keyframes.
   // }}}
+
+  // TODO: Add a stable live stream with multiple periods.
 ];
