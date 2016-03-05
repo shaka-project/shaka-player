@@ -395,6 +395,44 @@ describe('DashParser.Live', function() {
         .then(done);
   });
 
+  it('uses @suggestedPresentationDelay', function(done) {
+    var manifest = [
+      '<MPD type="dynamic" suggestedPresentationDelay="PT60S"',
+      '    minimumUpdatePeriod="PT%(updateTime)dS"',
+      '    timeShiftBufferDepth="PT2M"',
+      '    availabilityStartTime="1970-01-01T00:05:00Z">',
+      '  <Period id="1">',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <Representation id="3" bandwidth="500">',
+      '        <BaseURL>http://example.com</BaseURL>',
+      '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'
+    ].join('\n');
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifest});
+
+    Date.now = function() { return 600000; /* 10 minutes */ };
+    parser.start('dummy://foo', fakeNetEngine, newPeriod, errorCallback)
+        .then(function(manifest) {
+          expect(manifest).toBeTruthy();
+          var timeline = manifest.presentationTimeline;
+          expect(timeline).toBeTruthy();
+
+          //  We are 5 minutes into the presentation, with a
+          //  @timeShiftBufferDepth of 120 seconds, then the normal start will
+          //  be 3 minutes; but with a 60 @suggestedPresentationDelay it should
+          //  be 2 minutes.
+          expect(timeline.getSegmentAvailabilityStart()).toBe(120);
+          // Similarly, normally the end should be 5 minutes; but with the delay
+          // it will be 4 minutes.
+          expect(timeline.getSegmentAvailabilityEnd()).toBe(240);
+        })
+        .catch(fail)
+        .then(done);
+  });
+
   describe('stop', function() {
     var manifestUri;
     var dateUri;
