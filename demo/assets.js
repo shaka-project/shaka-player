@@ -239,13 +239,14 @@ shaka.demo.Assets.YouTubeCallback = function(node) {
 shaka.demo.Assets.TestAssets = [
   // Shaka assets {{{
   {
-    name: 'Angel One',
-    manifestUri: '//shaka-player-demo.appspot.com/assets/angel_one.mpd',
+    name: 'Angel One (multicodec, multilingual)',
+    manifestUri: '//storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd',  // gjslint: disable=110
 
     encoder: shaka.demo.Assets.Encoder.EDASH_PACKAGER,
     source: shaka.demo.Assets.Source.SHAKA,
     drm: [],
     features: [
+      shaka.demo.Assets.Feature.MP4,
       shaka.demo.Assets.Feature.MULTIPLE_LANGUAGES,
       shaka.demo.Assets.Feature.SEGMENT_BASE,
       shaka.demo.Assets.Feature.SUBTITLES,
@@ -254,21 +255,8 @@ shaka.demo.Assets.TestAssets = [
     ]
   },
   {
-    name: 'Sintel 1080p',
-    manifestUri: '//storage.googleapis.com/widevine-demo-media/sintel-1080p/dash.mpd',  // gjslint: disable=110
-
-    encoder: shaka.demo.Assets.Encoder.EDASH_PACKAGER,
-    source: shaka.demo.Assets.Source.SHAKA,
-    drm: [],
-    features: [
-      shaka.demo.Assets.Feature.HIGH_DEFINITION,
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.SEGMENT_BASE
-    ]
-  },
-  {
-    name: 'Sintel 4k multicodec',
-    manifestUri: '//storage.googleapis.com/widevine-demo-media/sintel-multicodec-4k/dash.mpd',  // gjslint: disable=110
+    name: 'Sintel 4k (multicodec)',
+    manifestUri: '//storage.googleapis.com/shaka-demo-assets/sintel/dash.mpd',  // gjslint: disable=110
 
     encoder: shaka.demo.Assets.Encoder.EDASH_PACKAGER,
     source: shaka.demo.Assets.Source.SHAKA,
@@ -277,13 +265,15 @@ shaka.demo.Assets.TestAssets = [
       shaka.demo.Assets.Feature.HIGH_DEFINITION,
       shaka.demo.Assets.Feature.MP4,
       shaka.demo.Assets.Feature.SEGMENT_BASE,
+      shaka.demo.Assets.Feature.SUBTITLES,
       shaka.demo.Assets.Feature.ULTRA_HIGH_DEFINITION,
-      shaka.demo.Assets.Feature.WEBM
+      shaka.demo.Assets.Feature.WEBM,
+      shaka.demo.Assets.Feature.WEBVTT
     ]
   },
   {
-    name: 'Sintel 4k Widevine',
-    manifestUri: '//storage.googleapis.com/widevine-demo-media/sintel-4k-widevine/sintel.mpd',  // gjslint: disable=110
+    name: 'Sintel 4k (multicodec, Widevine)',
+    manifestUri: '//storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd',  // gjslint: disable=110
 
     encoder: shaka.demo.Assets.Encoder.EDASH_PACKAGER,
     source: shaka.demo.Assets.Source.SHAKA,
@@ -293,7 +283,10 @@ shaka.demo.Assets.TestAssets = [
       shaka.demo.Assets.Feature.MP4,
       shaka.demo.Assets.Feature.PSSH,
       shaka.demo.Assets.Feature.SEGMENT_BASE,
-      shaka.demo.Assets.Feature.ULTRA_HIGH_DEFINITION
+      shaka.demo.Assets.Feature.SUBTITLES,
+      shaka.demo.Assets.Feature.ULTRA_HIGH_DEFINITION,
+      shaka.demo.Assets.Feature.WEBM,
+      shaka.demo.Assets.Feature.WEBVTT
     ],
 
     licenseServers: {
@@ -301,8 +294,8 @@ shaka.demo.Assets.TestAssets = [
     }
   },
   {
-    name: 'Heliocentrism',
-    manifestUri: '//storage.googleapis.com/widevine-demo-media/heliocentrism/heliocentrism.mpd',  // gjslint: disable=110
+    name: 'Heliocentrism (multicodec, multiperiod)',
+    manifestUri: '//storage.googleapis.com/shaka-demo-assets/heliocentrism/heliocentrism.mpd',  // gjslint: disable=110
 
     encoder: shaka.demo.Assets.Encoder.EDASH_PACKAGER,
     source: shaka.demo.Assets.Source.SHAKA,
@@ -310,7 +303,8 @@ shaka.demo.Assets.TestAssets = [
     features: [
       shaka.demo.Assets.Feature.MP4,
       shaka.demo.Assets.Feature.MULTIPERIOD,
-      shaka.demo.Assets.Feature.SEGMENT_BASE
+      shaka.demo.Assets.Feature.SEGMENT_BASE,
+      shaka.demo.Assets.Feature.WEBM
     ]
   },
   // }}}
