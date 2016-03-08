@@ -1349,6 +1349,10 @@ describe('StreamingEngine', function() {
       setupManifest();
     });
 
+    /**
+     * @param {number} drift
+     * @param {function()} done
+     */
     function testPositiveDrift(drift, done) {
       mediaSourceEngine =
           new shaka.test.FakeMediaSourceEngine(segmentData, drift);
@@ -1422,6 +1426,10 @@ describe('StreamingEngine', function() {
     }
 
     // TODO: Add tests for live presentations with large negative drift.
+    /**
+     * @param {number} drift
+     * @param {function()} done
+     */
     function testNegativeDrift(drift, done) {
       mediaSourceEngine =
           new shaka.test.FakeMediaSourceEngine(segmentData, drift);
