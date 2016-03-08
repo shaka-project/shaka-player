@@ -185,7 +185,9 @@ shakaExtern.StreamingConfiguration;
  *   drm: shakaExtern.DrmConfiguration,
  *   manifest: shakaExtern.ManifestConfiguration,
  *   streaming: shakaExtern.StreamingConfiguration,
- *   abrManager: shakaExtern.AbrManager
+ *   abrManager: shakaExtern.AbrManager,
+ *   preferredAudioLanguage: string,
+ *   preferredTextLanguage: string
  * }}
  *
  * @property {shakaExtern.DrmConfiguration} drm
@@ -196,6 +198,13 @@ shakaExtern.StreamingConfiguration;
  *   Streaming configuration and settings.
  * @property {shakaExtern.AbrManager} abrManager
  *   The AbrManager instance.
+ * @property {string} preferredAudioLanguage
+ *   The preferred language to use for audio tracks.  If not given it will use
+ *   the 'main' track.  If the audio and text tracks have different languages
+ *   the text track will be enabled.
+ * @property {string} preferredTextLanguage
+ *   The preferred language to use for text tracks, see
+ *   |preferredAudioLanguage|.
  *
  * @exportDoc
  */

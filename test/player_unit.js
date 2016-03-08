@@ -268,6 +268,85 @@ describe('Player', function() {
     });
   });
 
+  describe('chooseStreams_', function() {
+    beforeEach(function() {
+      // This fake AbrManager will return a map of the stream set language
+      // instead of actual streams.
+      var chooseStreams = function(streamSets) {
+        var ret = {};
+        Object.keys(streamSets).forEach(function(key) {
+          ret[key] = streamSets[key].language;
+        });
+        return ret;
+      };
+      var abrManager = /** @type {shakaExtern.AbrManager} */ (
+          {chooseStreams: chooseStreams, init: function(period) {}});
+      player.configure({abrManager: abrManager});
+    });
+
+    it('chooses the first as default', function() {
+      runTest(['es', 'en'], 'pt', 'es');
+    });
+
+    it('chooses the primary track', function() {
+      runTest(['es', 'en', '*fr'], 'pt', 'fr');
+    });
+
+    it('chooses exact match for main language', function() {
+      runTest(['pt-BR', 'pt'], 'pt', 'pt');
+    });
+
+    it('chooses exact match for subtags', function() {
+      runTest(['pt-BR', 'pt'], 'pt-BR', 'pt-BR');
+    });
+
+    it('chooses base language if exact does not exist', function() {
+      runTest(['en', 'pt'], 'pt-BR', 'pt');
+    });
+
+    it('chooses different subtags if base language does not exist', function() {
+      runTest(['pt-BR', 'en'], 'pt-PT', 'pt-BR');
+    });
+
+    it('enables text track if audio and text are different language',
+       /** @suppress {accessControls} */ function() {
+         player.configure(
+             {preferredAudioLanguage: 'en', preferredTextLanguage: 'es'});
+         var streamSets = [
+           {language: 'en', type: 'audio', streams: ['en']},
+           {language: 'es', type: 'text', streams: ['es']}
+         ];
+         var period = {streamSets: streamSets};
+
+         expect(player.textTrack_.mode).toBe('hidden');
+         var result = player.chooseStreams_(period);
+         expect(player.textTrack_.mode).toBe('showing');
+         expect(result['audio']).toBe('en');
+         expect(result['text']).toBe('es');
+       });
+
+    /**
+     * @param {!Array.<string>} languages
+     * @param {string} preference
+     * @param {string} expected
+     * @suppress {accessControls}
+     */
+    function runTest(languages, preference, expected) {
+      player.configure({preferredAudioLanguage: preference});
+      var streamSets = languages.map(function(lang) {
+        if (lang.startsWith('*'))
+          return {language: lang.substr(1), type: 'audio', primary: true};
+        else
+          return {language: lang, type: 'audio'};
+      });
+      var period = {streamSets: streamSets};
+      var result = player.chooseStreams_(period);
+      // Normally this is a stream, but because of the AbrManager above, it
+      // will be the language of the stream set it came from.
+      expect(result['audio']).toBe(expected);
+    }
+  });
+
   /**
    * A Jasmine asymmetric matcher for substring matches.
    * @param {string} substring
