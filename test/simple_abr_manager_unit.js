@@ -105,7 +105,7 @@ describe('SimpleAbrManager', function() {
     var description = 'picks correct Stream at ' + bandwidthKbps + ' kbps';
 
     it(description, function(done) {
-      var streamsByType = abrManager.chooseStreams(streamSetsByType);
+      abrManager.chooseStreams(streamSetsByType);
 
       abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
       abrManager.segmentDownloaded(1000, 2000, bytesPerSecond);
@@ -133,7 +133,7 @@ describe('SimpleAbrManager', function() {
     var videoBandwidth = 2e6;
     var bytesPerSecond = 1.1 * (audioBandwidth + videoBandwidth) / 8.0;
 
-    var streamsByType = abrManager.chooseStreams(streamSetsByType);
+    abrManager.chooseStreams(streamSetsByType);
 
     abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
     abrManager.segmentDownloaded(2000, 3000, bytesPerSecond);
@@ -154,7 +154,7 @@ describe('SimpleAbrManager', function() {
     var videoBandwidth = 2e6;
     var bytesPerSecond = 1.1 * (audioBandwidth + videoBandwidth) / 8.0;
 
-    var streamsByType = abrManager.chooseStreams(streamSetsByType);
+    abrManager.chooseStreams(streamSetsByType);
 
     abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
     abrManager.segmentDownloaded(2000, 3000, bytesPerSecond);
@@ -185,7 +185,7 @@ describe('SimpleAbrManager', function() {
     var videoBandwidth = 3e6;
     var bytesPerSecond = 1.1 * (audioBandwidth + videoBandwidth) / 8.0;
 
-    var streamsByType = abrManager.chooseStreams(streamSetsByType);
+    abrManager.chooseStreams(streamSetsByType);
 
     abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
     abrManager.segmentDownloaded(2000, 3000, bytesPerSecond);
