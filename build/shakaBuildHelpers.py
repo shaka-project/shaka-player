@@ -117,6 +117,23 @@ def getAllFiles(dirPath, exp):
   ret.sort()
   return ret
 
+def getNodeBinaryPath(name):
+  # Try local modules first.
+  base = getSourceBase()
+  path = os.path.join(base, 'node_modules', '.bin', name)
+  if os.path.isfile(path):
+    return path
+
+  # Not found locally, assume it can be found in os.environ['PATH'].
+  return name
+
+def updateNodeModules():
+  base = cygwinSafePath(getSourceBase())
+  cmd = 'npm.cmd' if isWindows() else 'npm'
+  cmdLine = [cmd, '--prefix', base, 'update']
+  printCmdLine(cmdLine)
+  subprocess.check_call(cmdLine)
+
 def runMain(main):
   """Executes the given function with the current command-line arguments,
   calling exit with the return value.  This ignores keyboard interrupts."""

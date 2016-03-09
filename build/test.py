@@ -23,6 +23,9 @@ import sys
 
 def runTests(args):
   """Runs all the karma tests."""
+  # Update node modules if needed.
+  shakaBuildHelpers.updateNodeModules()
+
   # Generate dependencies required for the tests.
   if gendeps.genDeps([]) != 0:
     return 1
@@ -33,12 +36,7 @@ def runTests(args):
     # Windows karma program has a different name
     karma_command_name = 'karma.cmd'
 
-  # Try local modules first.
-  karma_path = os.path.join(base, 'node_modules', '.bin', karma_command_name)
-  if not os.path.isfile(karma_path):
-    # Not found locally, assume it can be found in os.environ['PATH'].
-    karma_path = karma_command_name
-
+  karma_path = shakaBuildHelpers.getNodeBinaryPath(karma_command_name)
   cmd = [karma_path, 'start']
 
   if shakaBuildHelpers.isLinux():
