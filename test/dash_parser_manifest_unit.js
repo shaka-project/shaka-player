@@ -563,7 +563,9 @@ describe('DashParser.Manifest', function() {
      */
     function makeManifest(lines) {
       var template = [
-        '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z">',
+        '<MPD type="dynamic"',
+        '      availabilityStartTime="1970-01-01T00:00:00Z"',
+        '      suggestedPresentationDelay="PT0S">',
         '  %s',
         '  <Period duration="PT30M">',
         '    <AdaptationSet mimeType="video/mp4">',
