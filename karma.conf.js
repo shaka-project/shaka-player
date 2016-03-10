@@ -85,9 +85,6 @@ module.exports = function(config) {
     // do a single run of the tests on captured browsers and then quit
     singleRun: true,
 
-    // By default, use Chrome only, unless command-line arguments override.
-    browsers: ['Chrome'],
-
     customLaunchers: {
       // BrowserStack launchers require login information in the form of
       // the environment variables BROWSER_STACK_USERNAME and

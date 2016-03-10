@@ -53,13 +53,6 @@ def runTests(args):
     # Run tests in all available browsers.
     cmdLine = cmd + ['--browsers', browsers]
     shakaBuildHelpers.printCmdLine(cmdLine)
-    code = subprocess.call(cmdLine)
-    if code != 0:
-      return code
-
-    # Run a basic coverage report in Chrome only.
-    cmdLine = cmd + ['--reporters', 'coverage']
-    shakaBuildHelpers.printCmdLine(cmdLine)
     return subprocess.call(cmdLine)
   else:
     # Run with command-line arguments from the user.
