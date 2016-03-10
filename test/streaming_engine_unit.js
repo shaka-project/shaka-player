@@ -400,7 +400,7 @@ describe('StreamingEngine', function() {
     manifest = {
       presentationTimeline:
           /** @type {!shaka.media.PresentationTimeline} */ (timeline),
-      minBufferTime: 5,
+      minBufferTime: 2,
       periods: [
         {
           startTime: 0,
@@ -1424,6 +1424,8 @@ describe('StreamingEngine', function() {
     it('removes segments when the byte limit is reached', function(done) {
       setupVod();
 
+      manifest.minBufferTime = 1;
+
       // Create StreamingEngine.
       var byteLimit =
           segmentSizes.audio + (2 * segmentSizes.video) + segmentSizes.text;
@@ -1486,6 +1488,8 @@ describe('StreamingEngine', function() {
 
     it('never removes a single segment', function(done) {
       setupVod();
+
+      manifest.minBufferTime = 1;
 
       // Re-setup SegmentData.
       segmentData.text.segments =
@@ -1580,6 +1584,8 @@ describe('StreamingEngine', function() {
 
     it('raises an error when eviction is impossible', function(done) {
       setupVod();
+
+      manifest.minBufferTime = 1;
 
       // Create StreamingEngine.
       var byteLimit = segmentSizes.audio + segmentSizes.video;
@@ -1885,6 +1891,7 @@ describe('StreamingEngine', function() {
   function createMockPlayhead() {
     return {
       destroy: jasmine.createSpy('destroy'),
+      setRebufferingGoal: jasmine.createSpy('setRebufferingGoal'),
       getTime: jasmine.createSpy('getTime'),
       setBuffering: jasmine.createSpy('setBuffering')
     };
