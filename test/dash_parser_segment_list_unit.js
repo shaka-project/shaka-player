@@ -43,7 +43,7 @@ describe('DashParser.SegmentList', function() {
       '    <S d="5" />',
       '  </SegmentTimeline>',
       '</SegmentList>'
-    ], 30 /* duration */);
+    ], 65 /* duration */);
     var references = [
       Dash.makeReference('s1.mp4', 1, 50, 60),
       Dash.makeReference('s2.mp4', 2, 60, 65)

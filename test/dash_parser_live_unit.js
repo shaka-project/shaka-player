@@ -237,7 +237,7 @@ describe('DashParser.Live', function() {
   it('uses redirect URL for manifest BaseURL', function(done) {
     var template = [
       '<MPD type="dynamic" minimumUpdatePeriod="PT%(updatePeriod)dS">',
-      '  <Period id="1" duration="PT10S">',
+      '  <Period id="1" duration="PT30S">',
       '    <AdaptationSet id="2" mimeType="video/mp4">',
       '      <Representation id="3" bandwidth="500">',
       '        <SegmentTemplate startNumber="1" media="s$Number$.mp4">',
