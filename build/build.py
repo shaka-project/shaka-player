@@ -75,7 +75,7 @@ closure_opts = [
   '-D', 'goog.DEBUG=false',
   '-D', 'goog.STRICT_MODE_COMPATIBLE=true',
   '-D', 'goog.ENABLE_DEBUG_LOADER=false',
-  '-D', 'shaka.asserts.ENABLE_ASSERTS=false',
+  '-D', 'goog.asserts.ENABLE_ASSERTS=false',
   '-D', 'shaka.log.MAX_LOG_LEVEL=0',
   '-D', 'GIT_VERSION="%s"' % shakaBuildHelpers.calculateVersion()
 ]

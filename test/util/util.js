@@ -143,23 +143,17 @@ shaka.test.Util.getClientArg = function(name) {
 
 
 /**
- * Replace shaka.asserts and console.assert with a version which hooks into
+ * Replace goog.asserts and console.assert with a version which hooks into
  * jasmine.  This converts all failed assertions into failed tests.
  */
 var assertsToFailures = {
   uninstall: function() {
-    shaka.asserts.assert = assertsToFailures.originalShakaAssert_;
-    shaka.asserts.notImplemented =
-        assertsToFailures.originalShakaNotImplemented_;
-    shaka.asserts.unreachable = assertsToFailures.originalShakaUnreachable_;
+    goog.asserts.assert = assertsToFailures.originalGoogAssert_;
     console.assert = assertsToFailures.originalConsoleAssert_;
   },
 
   install: function() {
-    assertsToFailures.originalShakaAssert_ = shaka.asserts.assert;
-    assertsToFailures.originalShakaNotImplemented_ =
-        shaka.asserts.notImplemented;
-    assertsToFailures.originalShakaUnreachable_ = shaka.asserts.unreachable;
+    assertsToFailures.originalGoogAssert_ = goog.asserts.assert;
     assertsToFailures.originalConsoleAssert_ = console.assert;
 
     var realAssert = console.assert.bind(console);
@@ -177,14 +171,8 @@ var assertsToFailures = {
       }
     };
 
-    shaka.asserts.assert = function(condition, opt_message) {
+    goog.asserts.assert = function(condition, opt_message) {
       jasmineAssert(condition, opt_message);
-    };
-    shaka.asserts.notImplemented = function() {
-      jasmineAssert(false, 'Not implemented.');
-    };
-    shaka.asserts.unreachable = function() {
-      jasmineAssert(false, 'Unreachable reached.');
     };
 
     console.assert = /** @type {?} */ (jasmineAssert);

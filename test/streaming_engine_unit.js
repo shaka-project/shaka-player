@@ -169,9 +169,8 @@ describe('StreamingEngine', function() {
 
     var segmentsInFirstPeriod = 12;
     var segmentsInSecondPeriod = 2;
-    shaka.asserts.assert(
-        firstAvailableSegmentPosition <= segmentsInFirstPeriod,
-        'firstAvailableSegmentPosition must be within the first Period');
+    expect(firstAvailableSegmentPosition)
+        .not.toBeGreaterThan(segmentsInFirstPeriod);
 
     // Create SegmentData map for FakeMediaSourceEngine.
     var initSegmentSizeAudio =

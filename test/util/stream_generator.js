@@ -97,12 +97,12 @@ shaka.test.DashVodStreamGenerator = function(
     segmentDuration,
     presentationTimeOffset,
     mediaPresentationDuration) {
-  shaka.asserts.assert(mvhdOffset >= 0, 'mvhd offset invalid');
-  shaka.asserts.assert(tfdtOffset >= 0, 'tfdt offset invalid');
-  shaka.asserts.assert(segmentDuration > 0, 'segment duration invalid');
-  shaka.asserts.assert(presentationTimeOffset >= 0,
+  goog.asserts.assert(mvhdOffset >= 0, 'mvhd offset invalid');
+  goog.asserts.assert(tfdtOffset >= 0, 'tfdt offset invalid');
+  goog.asserts.assert(segmentDuration > 0, 'segment duration invalid');
+  goog.asserts.assert(presentationTimeOffset >= 0,
       'presentation time offset invalid');
-  shaka.asserts.assert(mediaPresentationDuration > 0,
+  goog.asserts.assert(mediaPresentationDuration > 0,
       'presentation duration invalid');
 
   /** @private {string} */
@@ -146,8 +146,8 @@ shaka.test.DashVodStreamGenerator.prototype.init = function() {
 
   return Promise.all(async).then(
       function(results) {
-        shaka.asserts.assert(results.length == 2,
-                             'did not load both segments');
+        goog.asserts.assert(results.length == 2,
+                            'did not load both segments');
         this.initSegment_ = results[0];
         this.segmentTemplate_ = results[1];
         this.timescale_ = shaka.test.StreamGenerator.getTimescale_(
@@ -158,7 +158,7 @@ shaka.test.DashVodStreamGenerator.prototype.init = function() {
 
 /** @override */
 shaka.test.DashVodStreamGenerator.prototype.getInitSegment = function(time) {
-  shaka.asserts.assert(
+  goog.asserts.assert(
       this.initSegment_,
       'init() must be called before getInitSegment().');
   return this.initSegment_;
@@ -168,14 +168,14 @@ shaka.test.DashVodStreamGenerator.prototype.getInitSegment = function(time) {
 /** @override */
 shaka.test.DashVodStreamGenerator.prototype.getSegment = function(
     segmentNumber, wallClockTime) {
-  shaka.asserts.assert(
+  goog.asserts.assert(
       this.segmentTemplate_,
       'init() must be called before getSegment().');
   if (!this.segmentTemplate_) return null;
 
   // |segmentNumber| must be an integer and >= 1.
-  shaka.asserts.assert((segmentNumber % 1 === 0) && (segmentNumber >= 1),
-                       'segment number must be an integer >= 1');
+  goog.asserts.assert((segmentNumber % 1 === 0) && (segmentNumber >= 1),
+                      'segment number must be an integer >= 1');
 
   var numSegments = Math.ceil(this.mediaPresentationDuration_ /
                               this.segmentDuration_);
@@ -231,18 +231,18 @@ shaka.test.DashLiveStreamGenerator = function(
     broadcastStartTime,
     availabilityStartTime,
     timeShiftBufferDepth) {
-  shaka.asserts.assert(mvhdOffset >= 0, 'mvhd offset invalid');
-  shaka.asserts.assert(tfdtOffset >= 0, 'tfdt offset invalid');
-  shaka.asserts.assert(segmentDuration > 0, 'segment duration invalid');
-  shaka.asserts.assert(presentationTimeOffset >= 0,
+  goog.asserts.assert(mvhdOffset >= 0, 'mvhd offset invalid');
+  goog.asserts.assert(tfdtOffset >= 0, 'tfdt offset invalid');
+  goog.asserts.assert(segmentDuration > 0, 'segment duration invalid');
+  goog.asserts.assert(presentationTimeOffset >= 0,
       'presentation time offset invalid');
-  shaka.asserts.assert(broadcastStartTime >= 0,
+  goog.asserts.assert(broadcastStartTime >= 0,
       'broadcast start time invalid');
-  shaka.asserts.assert(availabilityStartTime >= 0,
+  goog.asserts.assert(availabilityStartTime >= 0,
       'availability start time invalid');
-  shaka.asserts.assert(timeShiftBufferDepth >= 0,
+  goog.asserts.assert(timeShiftBufferDepth >= 0,
       'time shift buffer depth invalid');
-  shaka.asserts.assert(broadcastStartTime >= availabilityStartTime,
+  goog.asserts.assert(broadcastStartTime >= availabilityStartTime,
       'broadcast start time before availability start time');
 
   /** @private {string} */
@@ -292,8 +292,8 @@ shaka.test.DashLiveStreamGenerator.prototype.init = function() {
 
   return Promise.all(async).then(
       function(results) {
-        shaka.asserts.assert(results.length == 2,
-                             'did not load both segments');
+        goog.asserts.assert(results.length == 2,
+                            'did not load both segments');
         this.initSegment_ = results[0];
         this.segmentTemplate_ = results[1];
         this.timescale_ = shaka.test.StreamGenerator.getTimescale_(
@@ -305,7 +305,7 @@ shaka.test.DashLiveStreamGenerator.prototype.init = function() {
 /** @override */
 shaka.test.DashLiveStreamGenerator.prototype.getInitSegment = function(
     wallClockTime) {
-  shaka.asserts.assert(
+  goog.asserts.assert(
       this.initSegment_,
       'init() must be called before getInitSegment().');
   return this.initSegment_;
@@ -315,14 +315,14 @@ shaka.test.DashLiveStreamGenerator.prototype.getInitSegment = function(
 /** @override */
 shaka.test.DashLiveStreamGenerator.prototype.getSegment = function(
     segmentNumber, wallClockTime) {
-  shaka.asserts.assert(
+  goog.asserts.assert(
       this.initSegment_,
       'init() must be called before getSegment().');
   if (!this.initSegment_) return null;
 
   // |segmentNumber| must be an integer and >= 1.
-  shaka.asserts.assert((segmentNumber % 1 === 0) && (segmentNumber >= 1),
-                       'segment number must be an integer >= 1');
+  goog.asserts.assert((segmentNumber % 1 === 0) && (segmentNumber >= 1),
+                      'segment number must be an integer >= 1');
 
   var segmentStartTime = (segmentNumber - 1) * this.segmentDuration_;
 
@@ -409,7 +409,7 @@ shaka.test.StreamGenerator.getTimescale_ = function(
 
   var size = reader.readUint32();
   var type = reader.readUint32();
-  shaka.asserts.assert(
+  goog.asserts.assert(
       type == 0x6d766864 /* mvhd */,
       'initSegment does not contain an mvhd box at the specified offset.');
 
@@ -452,8 +452,8 @@ shaka.test.StreamGenerator.getTimescale_ = function(
  */
 shaka.test.StreamGenerator.setBaseMediaDecodeTime_ = function(
     segment, tfdtOffset, baseMediaDecodeTime, timescale) {
-  shaka.asserts.assert(baseMediaDecodeTime * timescale < Math.pow(2, 32),
-                       'Specied baseMediaDecodeTime is too big.');
+  goog.asserts.assert(baseMediaDecodeTime * timescale < Math.pow(2, 32),
+                      'Specied baseMediaDecodeTime is too big.');
 
   // NOTE from Microsoft on the lack of ArrayBuffer.prototype.slice in IE11:
   // "At this time we do not plan to fix this issue." ~ https://goo.gl/pTQN1K
@@ -468,7 +468,7 @@ shaka.test.StreamGenerator.setBaseMediaDecodeTime_ = function(
 
   var size = reader.readUint32();
   var type = reader.readUint32();
-  shaka.asserts.assert(
+  goog.asserts.assert(
       type == 0x74666474 /* tfdt */,
       'segment does not contain a tfdt box at the specified offset.');
 

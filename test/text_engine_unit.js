@@ -298,7 +298,7 @@ describe('TextEngine', function() {
     });
     track.removeCue.and.callFake(function(cue) {
       var idx = track.cues.indexOf(cue);
-      shaka.asserts.assert(idx >= 0, 'cue does not exist');
+      expect(idx).not.toBeLessThan(0);
       track.cues.splice(idx, 1);
     });
     return track;
