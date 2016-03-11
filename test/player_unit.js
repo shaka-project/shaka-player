@@ -268,20 +268,84 @@ describe('Player', function() {
     });
   });
 
+  describe('AbrManager', function() {
+    var abrManager;
+
+    beforeEach(function() {
+      abrManager = createMockAbrManager();
+      player.configure({abrManager: abrManager});
+    });
+
+    it('sets through configure', function() {
+      var config = player.getConfiguration();
+      expect(config.abrManager).toBe(abrManager);
+      expect(abrManager.init).toHaveBeenCalled();
+    });
+
+    it('calls chooseStreams', function() {
+      expect(abrManager.chooseStreams).not.toHaveBeenCalled();
+      chooseStreams();
+      expect(abrManager.chooseStreams).toHaveBeenCalled();
+    });
+
+    it('does not enable before stream startup', function() {
+      chooseStreams();
+      expect(abrManager.enable).not.toHaveBeenCalled();
+      canSwitch();
+      expect(abrManager.enable).toHaveBeenCalled();
+    });
+
+    it('does not enable if adaptation is disabled', function() {
+      player.configure({enableAdaptation: false});
+      chooseStreams();
+      canSwitch();
+      expect(abrManager.enable).not.toHaveBeenCalled();
+    });
+
+    it('enables/disables though configure', function() {
+      chooseStreams();
+      canSwitch();
+      abrManager.enable.calls.reset();
+      abrManager.disable.calls.reset();
+
+      player.configure({enableAdaptation: false});
+      expect(abrManager.disable).toHaveBeenCalled();
+
+      player.configure({enableAdaptation: true});
+      expect(abrManager.enable).toHaveBeenCalled();
+    });
+
+    it('waits to enable if in-between Periods', function() {
+      player.configure({enableAdaptation: false});
+      chooseStreams();
+      player.configure({enableAdaptation: true});
+      expect(abrManager.enable).not.toHaveBeenCalled();
+      canSwitch();
+      expect(abrManager.enable).toHaveBeenCalled();
+    });
+
+    it('still disables if called after chooseStreams', function() {
+      chooseStreams();
+      player.configure({enableAdaptation: false});
+      canSwitch();
+      expect(abrManager.enable).not.toHaveBeenCalled();
+    });
+
+    /** @suppress {accessControls} */
+    function chooseStreams() {
+      var period = {streamSets: []};
+      player.chooseStreams_(period);
+    }
+
+    /** @suppress {accessControls} */
+    function canSwitch() {
+      player.canSwitch_();
+    }
+  });
+
   describe('chooseStreams_', function() {
     beforeEach(function() {
-      // This fake AbrManager will return a map of the stream set language
-      // instead of actual streams.
-      var chooseStreams = function(streamSets) {
-        var ret = {};
-        Object.keys(streamSets).forEach(function(key) {
-          ret[key] = streamSets[key].language;
-        });
-        return ret;
-      };
-      var abrManager = /** @type {shakaExtern.AbrManager} */ (
-          {chooseStreams: chooseStreams, init: function(period) {}});
-      player.configure({abrManager: abrManager});
+      player.configure({abrManager: createMockAbrManager()});
     });
 
     it('chooses the first as default', function() {
@@ -384,5 +448,25 @@ describe('Player', function() {
   function createMockTextTrack() {
     // TODO: mock TextTrack, if/when Player starts directly accessing it.
     return {};
+  }
+
+  function createMockAbrManager() {
+    // This AbrManager will return fake streams that are the language of the
+    // stream set it came from.
+    var manager = {
+      init: jasmine.createSpy('AbrManager.init'),
+      stop: jasmine.createSpy('AbrManager.stop'),
+      enable: jasmine.createSpy('AbrManager.enable'),
+      disable: jasmine.createSpy('AbrManager.disable'),
+      chooseStreams: jasmine.createSpy('AbrManager.chooseStreams')
+    };
+    manager.chooseStreams.and.callFake(function(streamSets) {
+      var ret = {};
+      Object.keys(streamSets).forEach(function(key) {
+        ret[key] = streamSets[key].language;
+      });
+      return ret;
+    });
+    return manager;
   }
 });
