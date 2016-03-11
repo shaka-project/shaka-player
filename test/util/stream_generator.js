@@ -34,7 +34,7 @@ shaka.test.IStreamGenerator = function() {};
  * Initializes the IStreamGenerator.
  *
  * @return {!Promise} A Promise that resolves after the IStreamGenerator has
- *     initialized itself.
+ *   initialized itself.
  */
 shaka.test.IStreamGenerator.prototype.init = function() {};
 
@@ -46,7 +46,7 @@ shaka.test.IStreamGenerator.prototype.init = function() {};
  * @param {number} wallClockTime The wall-clock time in seconds.
  *
  * @return {ArrayBuffer} The initialization segment if the stream has started;
- *     otherwise, return null.
+ *   otherwise, return null.
  */
 shaka.test.IStreamGenerator.prototype.getInitSegment = function(
     wallClockTime) {};
@@ -57,11 +57,11 @@ shaka.test.IStreamGenerator.prototype.getInitSegment = function(
  * The IStreamGenerator must be initialized.
  *
  * @param {number} segmentNumber The number of the stream's segment to get,
- *     where segment number one refers to the first segment in the Period.
+ *   where segment number one refers to the first segment in the Period.
  * @param {number} wallClockTime The wall-clock time in seconds.
  *
  * @return {ArrayBuffer} The segment if the stream has started, and the segment
- *     exists and is available; otherwise, return null.
+ *   exists and is available; otherwise, return null.
  */
 shaka.test.IStreamGenerator.prototype.getSegment = function(
     segmentNumber, wallClockTime) {};
@@ -76,14 +76,14 @@ shaka.test.IStreamGenerator.prototype.getSegment = function(
  *
  * @param {string} initSegmentUri The URI of the initialization segment.
  * @param {number} mvhdOffset The offset of the initialization segment's
- *     mvhd box.
+ *   mvhd box.
  * @param {string} segmentTemplateUri The URI of the segment to loop.
  * @param {number} tfdtOffset The offset of the segment's tfdt box.
  * @param {number} segmentDuration The duration of a single segment in seconds.
  * @param {number} presentationTimeOffset The presentation time offset
- *     in seconds.
+ *   in seconds.
  * @param {number} mediaPresentationDuration The duration of the stream
- *     in seconds.
+ *   in seconds.
  *
  * @constructor
  * @struct
@@ -200,22 +200,22 @@ shaka.test.DashVodStreamGenerator.prototype.getSegment = function(
  *
  * @param {string} initSegmentUri The URI of the initialization segment.
  * @param {number} mvhdOffset The offset of the initialization segment's
- *     mvhd box.
+ *   mvhd box.
  * @param {string} segmentTemplateUri The URI of the segment to loop.
  * @param {number} tfdtOffset The offset of the segment's TFDT box.
  * @param {number} segmentDuration The duration of a single segment in seconds.
  * @param {number} presentationTimeOffset The presentation time offset
- *     in seconds.
+ *   in seconds.
  * @param {number} broadcastStartTime The wall-clock time in seconds when the
- *     stream began or will begin to broadcast.
+ *   stream began or will begin to broadcast.
  * @param {number} availabilityStartTime The wall-clock time in seconds when
- *    the stream began or will begin to be available. |broadcastStartTime| and
- *    |availabilityStartTime| should typically be equal; however,
- *    |availabilityStartTime| may be less than |broadcastStartTime| to
- *    align the stream if the Period's first segment's first timestamp does not
- *    equal 0.
+ *   the stream began or will begin to be available. |broadcastStartTime| and
+ *   |availabilityStartTime| should typically be equal; however,
+ *   |availabilityStartTime| may be less than |broadcastStartTime| to
+ *   align the stream if the Period's first segment's first timestamp does not
+ *   equal 0.
  * @param {number} timeShiftBufferDepth The duration of the stream's time-shift
- *     buffer in seconds.
+ *   buffer in seconds.
  *
  * @constructor
  * @struct
@@ -395,7 +395,7 @@ shaka.test.fetch_ = function(uri) {
  *
  * @param {!ArrayBuffer} initSegment
  * @param {number} mvhdOffset The byte offset of the initialization segment's
- *     mvhd box.
+ *   mvhd box.
  * @return {number} The timescale parameter.
  * @throws RangeError
  * @private
@@ -443,8 +443,8 @@ shaka.test.StreamGenerator.getTimescale_ = function(
  * @param {!ArrayBuffer} segment
  * @param {number} tfdtOffset The byte offset of the segment's tfdt box.
  * @param {number} baseMediaDecodeTime The baseMediaDecodeTime in seconds, this
- *     value is the first presentation timestamp of the first frame/sample in
- *     the segment.
+ *   value is the first presentation timestamp of the first frame/sample in
+ *   the segment.
  * @param {number} timescale
  * @return {!ArrayBuffer} The modified segment.
  * @throws RangeError

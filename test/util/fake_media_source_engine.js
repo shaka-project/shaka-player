@@ -27,7 +27,7 @@ goog.provide('shaka.test.FakeMediaSourceEngine');
  * gaps or overlaps are within the buffers).
  *
  * @param {!Object.<string, shaka.test.FakeMediaSourceEngine.SegmentData>}
- *     segmentData
+ *   segmentData
  * @param {number=} opt_drift Optional drift. Defaults to 0.
  *
  * @constructor
@@ -90,15 +90,15 @@ shaka.test.FakeMediaSourceEngine = function(segmentData, opt_drift) {
  * }}
  *
  * @property {!Array.<!BufferSource>} initSegments
- *     The stream's initialization segments (for all periods).
+ *   The stream's initialization segments (for all periods).
  * @property {!Array.<!BufferSource>} segments
- *     The stream's media segments (for all periods).
+ *   The stream's media segments (for all periods).
  * @property {!Array.<number>} segmentStartTimes
- *     The start time of each media segment as they would appear within a
- *     segment index. These values plus drift simulate the segments'
- *     baseMediaDecodeTime (or equivalent) values.
+ *   The start time of each media segment as they would appear within a
+ *   segment index. These values plus drift simulate the segments'
+ *   baseMediaDecodeTime (or equivalent) values.
  * @property {number} segmentDuration
- *     The duration of each media segment.
+ *   The duration of each media segment.
  */
 shaka.test.FakeMediaSourceEngine.SegmentData;
 

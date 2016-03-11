@@ -60,7 +60,7 @@ describe('StreamingEngine', function() {
   /**
    * Runs the fake event loop.
    * @param {function()=} opt_callback An optional callback that is executed
-   *     each time the clock ticks.
+   *   each time the clock ticks.
    */
   function runTest(opt_callback) {
     function onTick(currentTime) {
@@ -297,7 +297,7 @@ describe('StreamingEngine', function() {
      * @param {number} periodNumber
      * @param {number} position
      * @return {?number} |position| if it's within the given Period's bounds;
-     *     otherwise, return null.
+     *   otherwise, return null.
      */
     function boundsCheckPosition(periodNumber, position) {
       if (position < 1)
@@ -427,7 +427,7 @@ describe('StreamingEngine', function() {
    * Creates the StreamingEngine.
    **
    * @param {shakaExtern.StreamingConfiguration=} opt_config Optional
-   *     configuration object which overrides the default one.
+   *   configuration object which overrides the default one.
    */
   function createStreamingEngine(opt_config) {
     onChooseStreams = jasmine.createSpy('onChooseStreams');
@@ -1864,7 +1864,7 @@ describe('StreamingEngine', function() {
    * begins playback at the given time.
    *
    * @param {number} startTime the playhead's starting time with respect to
-   *     the presentation timeline.
+   *   the presentation timeline.
    */
   function setupFakeGetTime(startTime) {
     playheadTime = startTime;

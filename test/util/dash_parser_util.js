@@ -226,7 +226,7 @@ shaka.test.Dash.makeReference =
  * SegmentTimeline within both SegmentList and SegmentTemplate.
  *
  * @param {string} type The type of manifest being tested; either
- *     'SegmentTemplate' or 'SegmentList'.
+ *   'SegmentTemplate' or 'SegmentList'.
  * @param {string} extraAttrs
  * @param {!Array.<string>} extraChildren
  */

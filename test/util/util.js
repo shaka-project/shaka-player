@@ -66,7 +66,7 @@ shaka.test.Util.processInstantaneousOperations = function(n, opt_setTimeout) {
  * @param {function(function(), number)=} opt_setTimeout
  * @param {function(number)=} opt_onTick
  * @return {!Promise} A promise which resolves after |duration| seconds of
- *     simulated time.
+ *   simulated time.
  */
 shaka.test.Util.fakeEventLoop = function(duration, opt_setTimeout, opt_onTick) {
   var async = Promise.resolve();

@@ -26,7 +26,7 @@ describe('DashParser.ContentProtection', function() {
    * @param {function()} done
    * @param {string} manifestText
    * @param {Object} expected A Manifest-like object.  The parser output is
-   *     expected to match this.
+   *   expected to match this.
    * @param {shakaExtern.DashContentProtectionCallback=} opt_callback
    */
   function testDashParser(done, manifestText, expected, opt_callback) {
