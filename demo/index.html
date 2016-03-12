@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<!--
+ Copyright 2016 Google Inc.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="description" content="Shaka Player Demo">
+    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#ffffff">
+
+    <base target="_blank">
+
+    <title>Shaka Player Demo</title>
+
+    <link rel="icon" href="favicon.ico">
+    <link rel="stylesheet" href="demo.css">
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet" type="text/css">
+
+    <script src="//www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
+    <script src="load.js"></script>
+    <script src="assets.js"></script>
+    <script src="main.js"></script>
+    <script src="asset_section.js"></script>
+    <script src="configuration_section.js"></script>
+    <script src="info_section.js"></script>
+    <script src="log_section.js"></script>
+  </head>
+  <body>
+    <div id="container">
+      <h1>Shaka Player <span id="version"></span></h1>
+
+      <p>This is a demo of Google's Shaka Player, a JavaScript library for
+         adaptive video streaming.</p>
+
+      <p class="borderBelow">Choose an asset and tap <strong>Load</strong>.
+         (On Android, you'll also need to press the play button on the video.)</p>
+
+      <p class="borderBelow">
+        <a href="../docs/api/index.html">API documentation</a> |
+        <a href="https://github.com/google/shaka-player">Repo</a> |
+        <a href="https://www.npmjs.com/package/shaka-player">NPM</a> |
+        <a href="https://cdnjs.com/libraries/shaka-player">CDNJS</a>
+      </p>
+
+      <div class="flex">
+        <label for="assetList">Asset:</label>
+        <select id="assetList" class="flex-grow"></select>
+      </div>
+      <div id="customAsset">
+        <div class="flex">
+          <label for="manifestInput">Custom manifest:</label>
+          <input id="manifestInput" type="text" class="flex-grow">
+        </div>
+        <div class="flex">
+          <label for="licenseServerInput">Custom license server:</label>
+          <input id="licenseServerInput" type="text" class="flex-grow">
+        </div>
+      </div>
+
+      <div>
+        <button id="loadButton">Load</button>
+      </div>
+
+      <details>
+        <summary>Configuration</summary>
+        <div class="flex">
+          <label for="preferredAudioLanguage">Preferred audio language:</label>
+          <input id="preferredAudioLanguage" class="flex-grow" type="text">
+        </div>
+        <div class="flex">
+          <label for="preferredTextLanguage">Preferred text language:</label>
+          <input id="preferredTextLanguage" class="flex-grow" type="text">
+        </div>
+        <!-- TODO: trick play, depends on custom controls -->
+        <div>
+          <label for="enableAdaptation">Enable adaptation:</label>
+          <input id="enableAdaptation" type="checkbox" checked>
+        </div>
+        <div>
+          <label for="logToScreen">Log to the screen:</label>
+          <input id="logToScreen" type="checkbox">
+        </div>
+      </details>
+
+      <!-- TODO: section for offline storage and retrieval -->
+
+      <details>
+        <summary>Info</summary>
+        <div class="flex">
+          <label for="videoTracks">Video tracks:</label>
+          <select id="videoTracks" class="flex-grow"></select>
+        </div>
+
+        <div class="flex">
+          <label for="audioTracks">Audio tracks:</label>
+          <select id="audioTracks" class="flex-grow"></select>
+        </div>
+
+        <div class="flex">
+          <label for="textTracks">Text tracks:</label>
+          <select id="textTracks" class="flex-grow"></select>
+        </div>
+
+        <div>
+          <label for="videoResDebug">Active resolution:</label>
+          <span id="videoResDebug"></span>
+        </div>
+
+        <div>
+          <label for="bufferedDebug">Buffered:</label>
+          <span id="bufferedDebug"></span>
+        </div>
+      </details>
+
+      <details id="logSection">
+        <summary>Logs</summary>
+        <div id="log"></div>
+      </details>
+
+      <div id="errorDisplay"></div>
+      <div id="videoContainer">
+        <video id="video"
+               controls
+               poster="//shaka-player-demo.appspot.com/assets/poster.jpg"
+               autoplay></video>
+        <!-- TODO: redesign demo controls -->
+      </div>
+    </div>
+  </body>
+</html>

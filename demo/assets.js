@@ -134,9 +134,11 @@ shakaAssets.ExtraText;
  * @property {string} manifestUri
  *   The URI of the manifest.
  * @property {(boolean|undefined)} focus
- *   (optional) If true, focuses the integration test for this asset.
+ *   (optional) If true, focuses the integration test for this asset and selects
+ *   this asset in the demo app.
  * @property {(boolean|undefined)} disabled
- *   (optional) If true, disables tests for this asset.
+ *   (optional) If true, disables tests for this asset and hides it in the demo
+ *   app.
  * @property {(!Array.<shakaAssets.ExtraText>|undefined)} extraText
  *   (optional) An array of extra text sources (e.g. external captions).
  *

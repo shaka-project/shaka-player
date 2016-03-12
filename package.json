@@ -11,6 +11,7 @@
     }
   ],
   "devDependencies": {
+    "htmlhint": "0.9.x",
     "in-publish": "2.x",
     "jasmine-ajax": "3.2.x",
     "jasmine-core": "2.4.x",

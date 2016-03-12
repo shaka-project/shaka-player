@@ -54,6 +54,16 @@ def checkLint():
   shakaBuildHelpers.printCmdLine(cmdLine)
   return (subprocess.call(cmdLine) == 0)
 
+def checkHtmlLint():
+  """Runs the HTML linter over the HTML files."""
+  htmlhint_path = shakaBuildHelpers.getNodeBinaryPath('htmlhint')
+  base = shakaBuildHelpers.getSourceBase()
+  files = ['index.html', 'demo/index.html', 'support.html']
+  file_paths = [os.path.join(base, x) for x in files]
+  cmdLine = [htmlhint_path] + file_paths
+  shakaBuildHelpers.printCmdLine(cmdLine)
+  return (subprocess.call(cmdLine) == 0)
+
 def checkComplete():
   """Checks whether the 'complete' build references every file.  This is used
   by the build script to ensure that every file is included in at least one
@@ -117,7 +127,12 @@ def main(args):
       usage()
       return 1
 
+  # Update node modules if needed.
+  shakaBuildHelpers.updateNodeModules()
+
   if not checkLint():
+    return 1
+  elif not checkHtmlLint():
     return 1
   elif not checkComplete():
     return 1
