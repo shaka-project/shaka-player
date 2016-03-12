@@ -28,6 +28,7 @@ describe('DrmEngine', function() {
   var drmEngine;
   var mediaSourceEngine;
   var networkingEngine;
+  var eventManager;
 
   var videoInitSegment;
   var audioInitSegment;
@@ -138,8 +139,10 @@ describe('DrmEngine', function() {
       }]
     };
 
-    var onMediaSourceOpen = function() {
-      mediaSource.removeEventListener('sourceopen', onMediaSourceOpen);
+    eventManager = new shaka.util.EventManager();
+
+    eventManager.listen(mediaSource, 'sourceopen', function() {
+      eventManager.unlisten(mediaSource, 'sourceopen');
       mediaSourceEngine = new shaka.media.MediaSourceEngine(
           video, mediaSource, null);
       mediaSourceEngine.init({
@@ -147,8 +150,18 @@ describe('DrmEngine', function() {
         'audio': 'audio/mp4; codecs="mp4a.40.2"'
       });
       done();
-    };
-    mediaSource.addEventListener('sourceopen', onMediaSourceOpen);
+    });
+  });
+
+  afterEach(function(done) {
+    video.removeAttribute('src');
+    video.load();
+    Promise.all([
+      eventManager.destroy(),
+      mediaSourceEngine.destroy(),
+      networkingEngine.destroy(),
+      drmEngine.destroy()
+    ]).then(done);
   });
 
   afterAll(function() {
@@ -186,11 +199,19 @@ describe('DrmEngine', function() {
       networkingEngine.request = requestSpy;
 
       var encryptedEventSeen = new shaka.util.PublicPromise();
-      var onEncrypted = function() {
-        video.removeEventListener('encrypted', onEncrypted);
+      eventManager.listen(video, 'encrypted', function() {
         encryptedEventSeen.resolve();
-      };
-      video.addEventListener('encrypted', onEncrypted);
+      });
+      eventManager.listen(video, 'error', function() {
+        fail('MediaError code ' + video.error.code);
+        var extended = video.error.msExtendedCode;
+        if (extended) {
+          if (extended < 0) {
+            extended += Math.pow(2, 32);
+          }
+          fail('MediaError msExtendedCode ' + extended.toString(16));
+        }
+      });
 
       var keyStatusEventSeen = new shaka.util.PublicPromise();
       onKeyStatusSpy.and.callFake(function() {
@@ -239,6 +260,7 @@ describe('DrmEngine', function() {
         return shaka.test.Util.delay(5);
       }).then(function() {
         // Something should have played by now.
+        expect(video.readyState).toBeGreaterThan(1);
         expect(video.currentTime).toBeGreaterThan(0);
       }).catch(fail).then(done);
     });
