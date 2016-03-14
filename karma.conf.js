@@ -27,10 +27,16 @@ module.exports = function(config) {
       'dist/deps.js',
       'shaka-player.uncompiled.js',
 
+      // requirejs next
+      'node_modules/requirejs/require.js',
+
       // test utils next
       'test/util/*.js',
 
-      // support test first
+      // list of test assets next
+      'demo/assets.js',
+
+      // support test before other tests
       'test/support_check.js',
 
       // unit tests last
@@ -40,12 +46,14 @@ module.exports = function(config) {
 
       // source files - these are only watched and served
       {pattern: 'lib/**/*.js', included: false},
-      {pattern: 'test/assets/*', included: false},
       {pattern: 'third_party/closure/goog/**/*.js', included: false},
+      {pattern: 'test/assets/*', included: false},
+      {pattern: 'dist/shaka-player.compiled.js', included: false},
     ],
 
     proxies: {
       '/test/assets/': '/base/test/assets/',
+      '/dist/': '/base/dist/',
     },
 
     preprocessors: {
@@ -191,6 +199,7 @@ module.exports = function(config) {
   }
 
   if (!flagPresent('quick')) {
+    // If --quick is present, we don't serve integration tests.
     var files = config.files;
     files.push('test/*_integration.js');
     // We just modified the config in-place.  No need for config.set().
@@ -208,6 +217,17 @@ module.exports = function(config) {
     // |config.client.args| member.
     config.client.captureConsole = true;
     setClientArg(config, 'logLevel', logLevel);
+  }
+
+  if (flagPresent('external')) {
+    // Run Player integration tests against external assets.
+    // Skipped by default.
+    setClientArg(config, 'external', true);
+  }
+
+  if (flagPresent('uncompiled')) {
+    // Run Player integration tests with uncompiled code for debugging.
+    setClientArg(config, 'uncompiled', true);
   }
 };
 

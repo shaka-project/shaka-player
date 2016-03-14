@@ -1,0 +1,215 @@
+/**
+ * @license
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+describe('Player', function() {
+  var Util;
+  var onErrorSpy;
+  var Feature;
+
+  /** @type {shakaExtern.SupportType} */
+  var support;
+  /** @type {!HTMLVideoElement} */
+  var video;
+  /** @type {shaka.Player} */
+  var player;
+  /** @type {shaka.util.EventManager} */
+  var eventManager;
+
+  var shaka;
+
+  beforeAll(function(done) {
+    video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
+    video.width = '600';
+    video.height = '400';
+    video.muted = true;
+    document.body.appendChild(video);
+
+    // Load test utils from outside the compiled library.
+    Util = window.shaka.test.Util;
+    // Load asset features from outside the compiled library.
+    Feature = window.shakaAssets.Feature;
+
+    var loaded = window.shaka.util.PublicPromise();
+    if (window.shaka.test.Util.getClientArg('uncompiled')) {
+      // For debugging purposes, use the uncompiled library.
+      shaka = window.shaka;
+      loaded.resolve();
+    } else {
+      // Load the compiled library as a module.
+      // All tests in this suite will use the compiled library.
+      require(['../dist/shaka-player.compiled.js'], function(shakaModule) {
+        shaka = shakaModule;
+        loaded.resolve();
+      });
+    }
+
+    loaded.then(function() {
+      return shaka.Player.support();
+    }).then(function(supportResults) {
+      support = supportResults;
+      done();
+    });
+  });
+
+  beforeEach(function() {
+    player = new shaka.Player(video);
+
+    // Grab event manager from the uncompiled library:
+    eventManager = new window.shaka.util.EventManager();
+
+    onErrorSpy = jasmine.createSpy('onError');
+    onErrorSpy.and.callFake(function(event) { fail(event.detail); });
+    eventManager.listen(player, 'error', onErrorSpy);
+  });
+
+  afterEach(function(done) {
+    Promise.all([
+      eventManager.destroy(),
+      player.destroy()
+    ]).catch(fail).then(done);
+  });
+
+  afterAll(function() {
+    document.body.removeChild(video);
+  });
+
+  describe('plays', function() {
+    window.shakaAssets.testAssets.forEach(function(asset) {
+      var testName =
+          asset.source + ' / ' + asset.name + ' : ' + asset.manifestUri;
+
+      var wit = asset.focus ? fit : it;
+      wit(testName, function(done) {
+        if (!window.shaka.test.Util.getClientArg('external')) {
+          pending('Skipping tests that use external assets.');
+        }
+
+        if (asset.drm.length && !asset.drm.some(
+            function(keySystem) { return support.drm[keySystem]; })) {
+          pending('None of the required key systems are supported.');
+        }
+
+        var mimeTypes = [];
+        if (asset.features.indexOf(Feature.WEBM) >= 0)
+          mimeTypes.push('video/webm');
+        if (asset.features.indexOf(Feature.MP4) >= 0)
+          mimeTypes.push('video/mp4');
+        if (!mimeTypes.some(
+            function(type) { return support.media[type]; })) {
+          pending('None of the required MIME types are supported.');
+        }
+
+        var isLive = asset.features.indexOf(Feature.LIVE) >= 0;
+
+        var config = { drm: {}, manifest: { dash: {} } };
+        config.enableAdaptation = false;
+        if (asset.licenseServers)
+          config.drm.servers = asset.licenseServers;
+        if (asset.drmCallback)
+          config.manifest.dash.customScheme = asset.drmCallback;
+        if (asset.clearKeys)
+          config.drm.clearKeys = asset.clearKeys;
+        player.configure(/** @type {shakaExtern.PlayerConfiguration} */(
+            config));
+
+        if (asset.licenseRequestHeaders) {
+          player.getNetworkingEngine().registerRequestFilter(
+              addLicenseRequestHeaders.bind(null, asset.licenseRequestHeaders));
+        }
+
+        if (asset.licenseProcessor) {
+          player.getNetworkingEngine().registerResponseFilter(
+              asset.licenseProcessor);
+        }
+
+        player.load(asset.manifestUri).then(function() {
+          expect(player.isLive()).toEqual(isLive);
+          video.play();
+          return waitForEvent(video, 'timeupdate', 10);
+        }).then(function() {
+          // 30 seconds or video ended, whichever comes first.
+          return waitForTimeOrEnd(video, 30);
+        }).then(function() {
+          if (video.ended) {
+            expect(video.currentTime).toBeCloseTo(video.duration);
+          } else {
+            expect(video.currentTime).toBeGreaterThan(20);
+            // If it were very close to duration, why !video.ended?
+            expect(video.currentTime).not.toBeCloseTo(video.duration);
+
+            if (!player.isLive()) {
+              // Seek and play out the end.
+              video.currentTime = video.duration - 15;
+              // 30 seconds or video ended, whichever comes first.
+              return waitForTimeOrEnd(video, 30).then(function() {
+                expect(video.ended).toBe(true);
+                expect(video.currentTime).toBeCloseTo(video.duration);
+              });
+            }
+          }
+        }).catch(fail).then(done);
+      }, 90000 /* ms timeout */);
+    });
+  });
+
+  /**
+   * @param {!EventTarget} target
+   * @param {string} eventName
+   * @param {number} timeout in seconds, after which the Promise fails
+   * @return {!Promise}
+   */
+  function waitForEvent(target, eventName, timeout) {
+    return new Promise(function(resolve, reject) {
+      eventManager.listen(target, eventName, function() {
+        resolve();
+        eventManager.unlisten(target, eventName);
+      });
+      Util.delay(timeout).then(function() {
+        reject('Timeout waiting for ' + eventName);
+        eventManager.unlisten(target, eventName);
+      });
+    });
+  }
+
+  /**
+   * @param {!EventTarget} target
+   * @param {number} timeout in seconds, after which the Promise succeeds
+   * @return {!Promise}
+   */
+  function waitForTimeOrEnd(target, timeout) {
+    return Promise.race([
+      Util.delay(timeout),
+      waitForEvent(target, 'ended', timeout + 1)
+    ]);
+  }
+
+  /**
+   * @param {!Object.<string, string>} headers
+   * @param {shaka.net.NetworkingEngine.RequestType} requestType
+   * @param {shakaExtern.Request} request
+   */
+  function addLicenseRequestHeaders(headers, requestType, request) {
+    var RequestType = shaka.net.NetworkingEngine.RequestType;
+    if (requestType != RequestType.LICENSE) return;
+
+    // Add these to the existing headers.  Do not clobber them!
+    // For PlayReady, there will already be headers in the request.
+    for (var k in headers) {
+      request.headers[k] = headers[k];
+    }
+  }
+});

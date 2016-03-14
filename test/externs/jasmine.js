@@ -367,22 +367,25 @@ var xdescribe = function(name, callback) {};
 /**
  * @param {string} name
  * @param {jasmine.Callback} callback
+ * @param {number=} opt_timeout
  */
-var it = function(name, callback) {};
+var it = function(name, callback, opt_timeout) {};
 
 
 /**
  * @param {string} name
  * @param {jasmine.Callback} callback
+ * @param {number=} opt_timeout
  */
-var fit = function(name, callback) {};
+var fit = function(name, callback, opt_timeout) {};
 
 
 /**
  * @param {string} name
  * @param {jasmine.Callback} callback
+ * @param {number=} opt_timeout
  */
-var xit = function(name, callback) {};
+var xit = function(name, callback, opt_timeout) {};
 
 
 

@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import build
 import gendeps
 import os
 import platform
@@ -26,8 +27,13 @@ def runTests(args):
   # Update node modules if needed.
   shakaBuildHelpers.updateNodeModules()
 
-  # Generate dependencies required for the tests.
+  # Generate dependencies and compile library.
+  # This is required for the tests.
+  print 'Generating dependencies...'
   if gendeps.genDeps([]) != 0:
+    return 1
+  print 'Compiling the library...'
+  if build.main([]) != 0:
     return 1
 
   base = shakaBuildHelpers.getSourceBase()
@@ -45,13 +51,18 @@ def runTests(args):
     print >> sys.stderr, 'Unrecognized system', system
     return 1
 
+  print 'Starting tests...'
   if len(args) == 0:
     # Run tests in all available browsers.
+    print 'Running with platform default:', '--browsers', browsers
     cmdLine = cmd + ['--browsers', browsers]
     shakaBuildHelpers.printCmdLine(cmdLine)
     return subprocess.call(cmdLine)
   else:
     # Run with command-line arguments from the user.
+    if '--browsers' not in args:
+      print 'No --browsers specified.'
+      print 'In this mode, browsers must be manually connected to karma.'
     cmdLine = cmd + args
     shakaBuildHelpers.printCmdLine(cmdLine)
     return subprocess.call(cmdLine)

@@ -112,6 +112,7 @@ shakaAssets.ExtraText;
  * @typedef {{
  *   name: string,
  *   manifestUri: string,
+ *   focus: (boolean|undefined),
  *   extraText: (!Array.<shakaAssets.ExtraText>|undefined),
  *
  *   encoder: shakaAssets.Encoder,
@@ -131,6 +132,8 @@ shakaAssets.ExtraText;
  *   same if the asset is encoded different ways (or by different encoders).
  * @property {string} manifestUri
  *   The URI of the manifest.
+ * @property {(boolean|undefined)} focus
+ *   (optional) If true, focuses the integration test for this asset.
  * @property {(!Array.<shakaAssets.ExtraText>|undefined)} extraText
  *   (optional) An array of extra text sources (e.g. external captions).
  *
@@ -556,7 +559,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Live sim (2s segments)',
-    manifestUri: '//vm2.dashif.org/livesim/modulo_10/testpic_2s/Manifest.mpd',
+    manifestUri: '//vm2.dashif.org/livesim/testpic_2s/Manifest.mpd',
 
     encoder: shakaAssets.Encoder.UNKNOWN,
     source: shakaAssets.Source.DASH_IF,
@@ -569,7 +572,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Live sim (6s segments)',
-    manifestUri: '//vm2.dashif.org/livesim/modulo_10/testpic_6s/Manifest.mpd',
+    manifestUri: '//vm2.dashif.org/livesim/testpic_6s/Manifest.mpd',
 
     encoder: shakaAssets.Encoder.UNKNOWN,
     source: shakaAssets.Source.DASH_IF,
