@@ -330,17 +330,200 @@ describe('Player', function() {
       canSwitch();
       expect(abrManager.enable).not.toHaveBeenCalled();
     });
+  });
 
-    /** @suppress {accessControls} */
-    function chooseStreams() {
-      var period = {streamSets: []};
-      player.chooseStreams_(period);
-    }
+  describe('tracks', function() {
+    var period;
+    var streamingEngine;
+    var tracks;
 
-    /** @suppress {accessControls} */
-    function canSwitch() {
-      player.canSwitch_();
-    }
+    beforeAll(function() {
+      period = {
+        streamSets: [
+          {
+            language: 'en',
+            type: 'audio',
+            streams: [
+              {
+                id: 1,
+                bandwidth: 100
+              },
+              {
+                id: 2,
+                bandwidth: 100
+              }
+            ]
+          },
+          {
+            language: '',
+            type: 'video',
+            streams: [
+              {
+                id: 4,
+                bandwidth: 100,
+                width: 100,
+                height: 200
+              },
+              {
+                id: 5,
+                bandwidth: 200,
+                width: 200,
+                height: 400
+              }
+            ]
+          },
+          {
+            language: 'es',
+            type: 'text',
+            streams: [
+              {
+                id: 6,
+                bandwidth: 100,
+                kind: 'captions'
+              }
+            ]
+          }
+        ]
+      };
+      tracks = [
+        {
+          id: 1,
+          active: true,
+          type: 'audio',
+          bandwidth: 100,
+          language: 'en',
+          kind: null,
+          width: null,
+          height: null
+        },
+        {
+          id: 2,
+          active: false,
+          type: 'audio',
+          bandwidth: 100,
+          language: 'en',
+          kind: null,
+          width: null,
+          height: null
+        },
+        {
+          id: 4,
+          active: true,
+          type: 'video',
+          bandwidth: 100,
+          language: '',
+          kind: null,
+          width: 100,
+          height: 200
+        },
+        {
+          id: 5,
+          active: false,
+          type: 'video',
+          bandwidth: 200,
+          language: '',
+          kind: null,
+          width: 200,
+          height: 400
+        },
+        {
+          id: 6,
+          active: true,
+          type: 'text',
+          bandwidth: 100,
+          language: 'es',
+          kind: 'captions',
+          width: null,
+          height: null
+        }
+      ];
+    });
+
+    beforeEach(/** @suppress {accessControls,invalidCasts} */ function() {
+      streamingEngine = {
+        configure: jasmine.createSpy('configure'),
+        getCurrentPeriod: function() { return period; },
+        getActiveStreams: function() {
+          return [
+            period.streamSets[0].streams[0],
+            period.streamSets[1].streams[0],
+            period.streamSets[2].streams[0]
+          ];
+        },
+        switch: jasmine.createSpy('switch')
+      };
+      player.streamingEngine_ =
+          /** @type {shaka.media.StreamingEngine} */ (streamingEngine);
+    });
+
+    it('returns the correct tracks', function() {
+      var actual = player.getTracks();
+      expect(actual).toEqual(tracks);
+    });
+
+    it('disables AbrManager if switching audio or video', function() {
+      var config = player.getConfiguration();
+      expect(config.enableAdaptation).toBe(true);
+
+      expect(tracks[1].type).toBe('audio');
+      player.selectTrack(tracks[1]);
+
+      config = player.getConfiguration();
+      expect(config.enableAdaptation).toBe(false);
+
+      // Test again with video.
+      player.configure({enableAdaptation: true});
+
+      expect(tracks[3].type).toBe('video');
+      player.selectTrack(tracks[3]);
+
+      config = player.getConfiguration();
+      expect(config.enableAdaptation).toBe(false);
+    });
+
+    it('doesn\'t disables AbrManager if switching text', function() {
+      var config = player.getConfiguration();
+      expect(config.enableAdaptation).toBe(true);
+
+      expect(tracks[4].type).toBe('text');
+      player.selectTrack(tracks[4]);
+
+      config = player.getConfiguration();
+      expect(config.enableAdaptation).toBe(true);
+    });
+
+    it('switches streams', function() {
+      chooseStreams();
+      canSwitch();
+
+      var stream = period.streamSets[0].streams[1];
+      expect(tracks[1].id).toBe(stream.id);
+      player.selectTrack(tracks[1]);
+      expect(streamingEngine.switch)
+          .toHaveBeenCalledWith('audio', stream, undefined);
+    });
+
+    it('still switches streams if called during startup', function() {
+      player.selectTrack(tracks[1]);
+      expect(streamingEngine.switch).not.toHaveBeenCalled();
+
+      // Does not call switch, just overrides the choices made in AbrManager.
+      var chosen = chooseStreams();
+      var stream = period.streamSets[0].streams[1];
+      expect(chosen).toEqual(jasmine.objectContaining({'audio': stream}));
+    });
+
+    it('still switches streams if called while switching Periods', function() {
+      chooseStreams();
+
+      player.selectTrack(tracks[1]);
+      expect(streamingEngine.switch).not.toHaveBeenCalled();
+
+      canSwitch();
+
+      var stream = period.streamSets[0].streams[1];
+      expect(streamingEngine.switch).toHaveBeenCalledWith('audio', stream);
+    });
   });
 
   describe('chooseStreams_', function() {
@@ -410,6 +593,15 @@ describe('Player', function() {
       expect(result['audio']).toBe(expected);
     }
   });
+
+  /** @suppress {accessControls} */
+  function chooseStreams() {
+    var period = {streamSets: []};
+    return player.chooseStreams_(period);
+  }
+
+  /** @suppress {accessControls} */
+  function canSwitch() { player.canSwitch_(); }
 
   /**
    * A Jasmine asymmetric matcher for substring matches.

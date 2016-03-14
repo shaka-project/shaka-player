@@ -21,6 +21,50 @@
 
 /**
  * @typedef {{
+ *   id: number,
+ *   active: boolean,
+ *
+ *   type: string,
+ *   bandwidth: number,
+ *
+ *   language: string,
+ *   kind: ?string,
+ *   width: ?number,
+ *   height: ?number
+ * }}
+ *
+ * @description
+ * An object describing a media track.  This object should be treated as
+ * read-only as changing any values does not have any effect.  This is the
+ * public view of the Stream type.
+ *
+ * @property {number} id
+ *   The unique ID of the track.
+ * @property {boolean} active
+ *   If true, this is the track is being streamed (another track may be
+ *   visible/audible in the buffer).
+ *
+ * @property {string} type
+ *   The type of track, one of 'audio', 'text', or 'video'.
+ * @property {number} bandwidth
+ *   The bandwidth required to play the track, in bits/sec.
+ *
+ * @property {string} language
+ *   The language of the track, or '' for video tracks.  This is the exact
+ *   value provided in the manifest; it may need to be normalized.
+ * @property {?string} kind
+ *   (only for text tracks) The kind of text track, either 'captions' or
+ *   'subtitles'.
+ * @property {?number} width
+ *   (only for video tracks) The width of the track in pixels.
+ * @property {?number} height
+ *   (only for video tracks) The height of the track in pixels.
+ */
+shakaExtern.Track;
+
+
+/**
+ * @typedef {{
  *   manifest: Object.<string, boolean>,
  *   media: Object.<string, boolean>,
  *   drm: Object.<string, boolean>,
