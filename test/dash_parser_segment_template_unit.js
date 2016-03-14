@@ -406,17 +406,6 @@ describe('DashParser.SegmentTemplate', function() {
           shaka.util.Error.Code.DASH_NO_SEGMENT_INFO);
       Dash.testFails(done, source, error);
     });
-
-    it('no period duration with static content', function(done) {
-      var source = Dash.makeSimpleManifestText([
-        '<SegmentTemplate startNumber="1" media="s$Number$.mp4"',
-        '    duration="30" />'
-      ]);
-      var error = new shaka.util.Error(
-          shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.DASH_NO_SEGMENT_INFO);
-      Dash.testFails(done, source, error);
-    });
   });
 });
 
