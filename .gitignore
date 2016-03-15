@@ -1,13 +1,5 @@
 *.pyc
-third_party/closure/goog/deps.js
-shaka-player.compiled.js
-shaka-player.compiled.debug.js
-shaka-player.compiled.debug.map
-shaka-player.live.js
-shaka-player.live.debug.js
-shaka-player.live.debug.map
-shaka-player.vod.js
-shaka-player.vod.debug.js
-shaka-player.vod.debug.map
-docs/api
-docs/reference
+node_modules
+dist/
+docs/api/
+coverage/

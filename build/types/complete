@@ -1,0 +1,6 @@
+# The complete library, containing every available plugin.
+
++@networking
++@manifests
++@polyfill
++@text

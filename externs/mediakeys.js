@@ -23,18 +23,39 @@
  */
 
 
-/** @typedef {{contentType: string, robustness: string}} */
+/**
+ * @typedef {string}
+ * 'optional', 'required', 'not-allowed'
+ */
+var MediaKeysRequirement;
+
+
+/**
+ * @typedef {string}
+ * 'temporary', 'persistent-license', 'persistent-usage-record'
+ */
+var MediaKeySessionType;
+
+
+/**
+ * @typedef {{contentType: string, robustness: string}}
+ * gjslint: disable=900
+ */
 var MediaKeySystemMediaCapability;
 
 
-/** @typedef {{
+/**
+ * @typedef {{
  *   initDataTypes: (Array.<string>|undefined),
  *   audioCapabilities: (Array.<!MediaKeySystemMediaCapability>|undefined),
  *   videoCapabilities: (Array.<!MediaKeySystemMediaCapability>|undefined),
- *   distinctiveIdentifier: (string|undefined),
- *   persistentState: (string|undefined),
- *   sessionTypes: (Array.<string>|undefined)
- * }} */
+ *   distinctiveIdentifier: (MediaKeysRequirement|undefined),
+ *   persistentState: (MediaKeysRequirement|undefined),
+ *   sessionTypes: (Array.<MediaKeySessionType>|undefined),
+ *   label: (string|undefined)
+ * }}
+ * gjslint: disable=900
+ */
 var MediaKeySystemConfiguration;
 
 
@@ -81,7 +102,7 @@ function MediaKeys() {}
 
 
 /**
- * @param {string=} opt_sessionType defaults to "temporary"
+ * @param {MediaKeySessionType=} opt_sessionType defaults to "temporary"
  * @return {!MediaKeySession}
  * @throws {TypeError} if opt_sessionType is invalid.
  */

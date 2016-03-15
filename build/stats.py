@@ -33,6 +33,7 @@ programs to display a visual layout of the dependencies.
 
 import json
 import math
+import shakaBuildHelpers
 import string
 import sys
 import os
@@ -376,7 +377,7 @@ def processDeps(tokens, lines, isClass):
     an array of FunctionDependencies.
   """
   class State:
-    def __init__(self, token, index):
+    def __init__(self, token, _):
       self.deps = []
       self.name, self.parts = self._createParts(token)
 
@@ -398,7 +399,7 @@ def processDeps(tokens, lines, isClass):
 
       return (name, parts)
 
-    def add(self, token, index):
+    def add(self, token, _):
       # Ignore symbols outside a function.  Only care about function
       # references and only those that reference our code.
       if not self.name or not token.name or not token.name.startswith('shaka.'):
@@ -457,13 +458,13 @@ def processSizes(tokens, lines):
     an array of FunctionSizes sorted on name.
   """
   class State:
-    def __init__(self, token, index):
+    def __init__(self, token, _):
       self.name = token.name if token else None
       self.size = 0
       self.start = token.dstCol if token else None
       self.line = token.dstLine if token else None
 
-    def add(self, token, index):
+    def add(self, token, _):
       # Ignore outside a function
       if not self.name:
         return
@@ -670,7 +671,9 @@ def process(text, options):
 
   # Decode the JSON data and get the parts we need.
   data = json.loads(text)
-  fileLines = open(data['file']).readlines()
+  # Paths are relative to the source code root.
+  base = shakaBuildHelpers.getSourceBase()
+  fileLines = open(os.path.join(base, data['file'])).readlines()
   names = data['names']
   mappings = data['mappings']
   tokens = decodeMappings(mappings, names)
@@ -690,6 +693,9 @@ def printHelp():
   """
 
   print 'Usage:', sys.argv[0], """[options] [--] [source_map]
+
+source_map must be either the path to the source map, or the name of the build
+type.  You must build Shaka first.
 
 Types(must include exactly one):
  -c --class-deps         : Prints the class dependencies
@@ -749,6 +755,27 @@ def main(args):
       printHelp()
       return 1
 
+  # Try to find the file
+  if not os.path.isfile(name):
+    # Get the source code base directory
+    base = shakaBuildHelpers.getSourceBase()
+
+    # Supports the following searches:
+    # * File name given, map in dist/
+    # * Type given, map in working directory
+    # * Type given, map in dist/
+    if os.path.isfile(os.path.join(base, 'dist' , name)):
+      name = os.path.join(base, 'dist', name)
+    elif os.path.isfile(
+          os.path.join('shaka-player.' + name + '.debug.map')):
+      name = os.path.join('shaka-player.' + name + '.debug.map')
+    elif os.path.isfile(
+          os.path.join(base, 'dist', 'shaka-player.' + name + '.debug.map')):
+      name = os.path.join(base, 'dist', 'shaka-player.' + name + '.debug.map')
+    else:
+      print >> sys.stderr, name, 'not found; build Shaka first.'
+      return 1
+
   # Verify arguments are correct.
   if (options.printSizes + options.printDeps + options.printTokens +
       options.isClass) != 1:
@@ -759,13 +786,10 @@ def main(args):
     print >> sys.stderr, '--dot-format only valid with --function-deps or \
 --class-deps.'
     return 1
-  elif not os.path.isfile(name):
-    print >> sys.stderr, name, 'not found; build Shaka first.'
-    return 1
   else:
     process(open(name).read(), options)
     return 0
 
 if __name__ == '__main__':
-  sys.exit(main(sys.argv[1:]))
+  shakaBuildHelpers.runMain(main)
 

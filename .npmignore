@@ -1,5 +1,6 @@
 .git
+.gitattributes
 .gitignore
 *.pyc
-docs/api
-docs/reference
+docs/api/
+coverage/

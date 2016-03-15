@@ -1,0 +1,9 @@
+# Polyfills used to emulate missing browsers features.
+
++../../lib/polyfill/fullscreen.js
++../../lib/polyfill/mediakeys.js
++../../lib/polyfill/patchedmediakeys_20140218.js
++../../lib/polyfill/patchedmediakeys_nop.js
++../../lib/polyfill/patchedmediakeys_v01b.js
++../../lib/polyfill/promise.js
++../../lib/polyfill/videoplaybackquality.js

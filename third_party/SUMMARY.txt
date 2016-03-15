@@ -1,5 +1,6 @@
 closure/compiler.jar
-  The closure compiler, v20150609, by Google.
+  The closure compiler, v20160208 + patches, by Google.
+  Cherry-picked 3734b26b to remove bogus arguments checks.
   Apache v2.0 license.
   https://github.com/google/closure-compiler
 
@@ -22,21 +23,6 @@ gjslint/python-gflags-2.0
   A python command-line parser, needed by the closure linter, by Google.
   BSD-style license (3-clause).
   https://code.google.com/p/python-gflags/
-
-jasmine
-  The Jasmine JS testing framework, v2.1.3, by Pivotal Labs.
-  MIT license.
-  https://github.com/pivotal/jasmine
-
-jasmine/lib/jasmine-ajax-trunk
-  The Jasmine fake AJAX library, by Pivotal Labs.
-  MIT license.
-  https://github.com/pivotal/jasmine-ajax
-
-blanket_jasmine
-  Blanket JS coverage library (+ Jasmine adapter), v1.1.5, by Alex Seville.
-  MIT license.
-  https://github.com/alex-seville/blanket
 
 jsdoc
   JSDoc 3 documentation generator (modified), by Michael Matthews.

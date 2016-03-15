@@ -124,3 +124,7 @@ MSMediaKeyError.MS_MEDIA_KEYERR_HARDWARECHANGE;
 
 /** @type {number} */
 MSMediaKeyError.MS_MEDIA_KEYERR_DOMAIN;
+
+
+/** @type {number} */
+MediaError.prototype.msExtendedCode;

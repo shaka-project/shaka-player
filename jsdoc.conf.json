@@ -5,12 +5,14 @@
     "dictionaries": [ "closure", "jsdoc" ]
   },
   "source": {
-    "include": [ "lib" ]
+    "include": [
+      "lib",
+      "externs/shaka"
+    ]
   },
   "opts": {
     "private": true,
     "recurse": true,
-    "tutorials": "tutorials",
     "destination": "docs/api"
   }
 }

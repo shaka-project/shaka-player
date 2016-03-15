@@ -1,0 +1,60 @@
+digraph shaka2_ownership {
+  label=<<u>Shaka 2 Ownership Diagram</u>>
+  labelloc=t
+  node [ shape=rectangle ]
+
+  MediaSource [ shape=oval ]
+  SourceBuffer [ shape=oval ]
+  TextTrack [ shape=oval ]
+
+  HttpRequest [ shape=trapezium ]
+  ManifestParser [ shape=trapezium ]
+  TextParser [ shape=trapezium ]
+
+  Player -> NetworkingEngine
+  Player -> ManifestParser
+  Player -> StreamingEngine
+  Player -> DrmEngine
+  Player -> Manifest [ style=dotted ]
+
+  NetworkingEngine -> HttpRequest
+
+  ManifestParser -> NetworkingEngine [ style=dotted ]
+
+  DrmEngine -> NetworkingEngine [ style=dotted ]
+
+  StreamingEngine -> MediaSourceEngine
+  StreamingEngine -> Manifest
+  StreamingEngine -> NetworkingEngine [ style=dotted ]
+
+  MediaSourceEngine -> MediaSource
+  MediaSourceEngine -> SourceBuffer
+  MediaSourceEngine -> SourceBuffer
+  MediaSourceEngine -> TextEngine
+
+  TextEngine -> TextTrack
+  TextEngine -> TextParser
+
+  subgraph cluster_legend {
+    style=rounded
+    color="#444444"
+    label=<<u>Legend</u>>
+    fontsize=12
+    fontcolor="#444444"
+
+    node [ shape=plaintext color="#444444" fontsize=10 fontcolor="#444444" ]
+    edge [ color="#444444" ]
+
+    blank1 [ label="" fixedsize=true height=0 ]
+    blank2 [ label="" fixedsize=true height=0 ]
+    "weak reference" -> blank2 [ style=dotted ]
+    ownership -> blank1
+
+    plugin [ shape=trapezium ]
+    "browser built-in" [ shape=oval ]
+    "internal class" [ shape=rectangle ]
+  }
+
+  # Hack to move the legend beneath the main graph:
+  HttpRequest -> "internal class" [ style=invisible arrowhead=none ]
+}

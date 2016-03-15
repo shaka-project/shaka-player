@@ -465,10 +465,13 @@ goog.global.CLOSURE_BASE_PATH;
 
 
 /**
- * Whether to write out Closure's deps file. By default, the deps are written.
+ * Whether to load Closure's deps file automatically.
+ * Shaka sets this to true since we are placing deps.js in a non-standard
+ * location.  Running Shaka in uncompiled mode will require loading deps.js
+ * explicitly.
  * @type {boolean|undefined}
  */
-goog.global.CLOSURE_NO_DEPS;
+goog.global.CLOSURE_NO_DEPS = true;
 
 
 /**

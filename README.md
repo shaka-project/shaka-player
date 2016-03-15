@@ -1,147 +1,108 @@
 # Shaka Player #
 
-The Shaka Player is a JavaScript library which implements a [DASH][] client.
-It relies on [HTML5 video][], [MediaSource Extensions][], and [Encrypted Media
-Extensions][] for playback.
+Shaka Player is a JavaScript library for adaptive video streaming.
+It plays [DASH][] content without plugins using [MediaSource Extensions][] and
+[Encrypted Media Extensions][].
 
-A generic DASH client can be difficult to implement, and the DASH standard does
-not always align well with the new browser APIs that DASH clients are built on.
-Our goal is to reduce this friction and make it easier to adopt these emerging
-web standards for streaming, without falling back to plugins.
+We are currently testing on the latest stable releases of Chrome, Firefox, and
+Edge, as well as IE 11 and Safari 9. We test using both Widevine and PlayReady,
+but any browser-supported DRM system available through EME should work.
 
-We support both ISO BMFF (MP4) and WebM files (even in the same manifest),
-WebVTT for subtitles and captions, both clear and encrypted content, and
-multiple audio and subtitle languages (even in the same manifest).
-And best of all, it's free!
+Our main goal is to make it as easy as possible to stream adaptive bitrate
+video using modern browser technologies. We try to keep the library light and
+simple, and it has no third-party dependencies. Everything you need to build
+and deploy is in the sources.
+
+We support both ISO BMFF (MP4) and WebM content (even in the same
+manifest), WebVTT for subtitles and captions, both clear and encrypted content,
+and multilingual content. And best of all, it's free!
 
 [DASH]: http://dashif.org/
-[HTML5 video]: http://www.html5rocks.com/en/tutorials/video/basics/
 [MediaSource Extensions]: http://w3c.github.io/media-source/
 [Encrypted Media Extensions]: https://w3c.github.io/encrypted-media/
 
 
-## Dependencies ##
+## Important Links ##
 
-Most of the tools you need to work on the Shaka Player are included in the
-sources, including the [Closure Compiler][], [gjslint][], [JSDoc][], and
-[Jasmine][].
+ * [hosted demo](http://shaka-player-demo.appspot.com) (sources in `demo/`)
+ * [hosted builds on cdnjs](https://cdnjs.com/libraries/shaka-player)
+ * [mailing list](https://groups.google.com/forum/#!forum/shaka-player-users)
+     (join for release announcements or to discuss development)
+ * [hosted API docs](http://shaka-player-demo.appspot.com/docs/api/index.html)
+     *__(HOSTED DOCS FOR v2 COMING SOON)__*
+ * [tutorials](http://shaka-player-demo.appspot.com/docs/tutorials/index.html)
+     *__(HOSTED DOCS FOR v2 COMING SOON)__*
 
-The build scripts assume the presence of tools which are readily available on
-Linux and Mac, such as bash, python, git, and java.  For Windows, you can
-[use cygwin][].
 
-The Closure Compiler is built with Java JRE 7, so you must have JRE 7 or newer
-in order to compile Shaka Player.
+## Compiled Mode ##
+
+Shaka Player is meant to be deployed after being compiled. The tools you need
+to compile the sources and documentation are included in the sources:
+[Closure Compiler][], [Closure Linter][], and [JSDoc][].
+
+If you installed Shaka Player via npm, the sources have already been compiled
+for you.
+
+In order to build, you simply need python (for the build scripts) and JRE 7+
+(for the compiler). Just run `./build/all.py` and look for the output in
+`dist/shaka-player.compiled.js`. The output can be included directly in a
+`<script>` tag or loaded via a number of JavaScript module loaders.
+
+To build the documentation, you will also need nodejs. Just run
+`./build/docs.py` and look for the output in `docs/api/`.
 
 [Closure Compiler]: https://developers.google.com/closure/compiler/
-[gjslint]: https://developers.google.com/closure/utilities/docs/linter_howto
+[Closure Linter]: https://developers.google.com/closure/utilities/docs/linter_howto
 [JSDoc]: http://usejsdoc.org/
-[Jasmine]: http://jasmine.github.io/2.1/introduction.html
-[use cygwin]: http://shaka-player-demo.appspot.com/docs/tutorial-windows.html
 
 
-## Mailing list ##
+## Uncompiled Mode ##
 
-We have a [public mailing list][] for discussion and announcements.  To receive
-notifications about new versions, please join the list.  You can also use the
-list to ask questions or discuss Shaka Player development.
+Shaka Player can also be run in uncompiled mode. This is very useful for
+development purposes.
 
-[public mailing list]: https://groups.google.com/forum/#!forum/shaka-player-users
+To load the library without compiling, you will need to generate a Closure
+"deps file" by running `./build/gendeps.py`. Then, you'll need to bootstrap
+your application with three `<script>` tags:
 
-
-## Documentation ##
-
-We have detailed documentation which is generated from the sources using JSDoc.
-A pre-rendered version of this documentation is available on the web at
-http://shaka-player-demo.appspot.com/docs/index.html .  This will be updated
-with each release, but you can generate the same docs yourself at any time:
-```Shell
-./build/docs.sh
+```html
+  <script src="third_party/closure/goog/base.js"></script>
+  <script src="dist/deps.js"></script>
+  <script src="shaka-player.uncompiled.js"></script>
 ```
 
-If you are new to the project, we recommend you start by browsing the docs,
-in particular [the tutorials][].  This landing page is very brief, and only
-covers the most basic information about the project.
-
-[the tutorials]: http://shaka-player-demo.appspot.com/docs/tutorial-player.html
+If you installed Shaka Player via npm, the deps file has already been generated
+for you.
 
 
-## Getting Sources ##
+## Testing ##
 
-Up-to-date sources can be obtained from http://github.com/google/shaka-player .
+You will need a few third-party dependencies to run automated tests. These
+dependencies are managed through `npm` and Shaka's `package.json`. If you
+cloned Shaka from github, simply run `npm install` from your git working
+directory to install these dependencies locally.
 
+Run the tests in your platform's browsers using `./build/test.py`. If you are
+familiar with the [karma][] test runner, you can pass additional arguments
+to karma from `build/test.py`. For example:
 
-## Building ##
-
-The development process is documented in more detail [in our generated docs][],
-but in short, you can build the library by running:
-```Shell
-./build/all.sh
+```
+./build/test.py --browsers Opera
 ```
 
-By default, we create three builds:
-* shaka-player.compiled.js (full build)
-* shaka-player.vod.js (DASH MP4 VOD content w/ SegmentBase only)
-* shaka-player.live.js (DASH MP4 live content w/ Segment{Template,List} only)
+Or:
 
-You can create custom builds by passing arguments to build/build.sh.  See
-build/all.sh and build/build.sh for details.
-
-Compiling Shaka Player requires Java JRE 7 or greater, but you can use the
-library in uncompiled mode without Java.  Just generate the closure
-dependencies by running:
-```Shell
-./build/gendeps.sh
+```
+./build/test.py --browsers Chrome,Firefox --reporters coverage
 ```
 
-[in our generated docs]: http://shaka-player-demo.appspot.com/docs/tutorial-dev.html
+You can skip slow-running integration tests with `--quick`.
 
-
-## Running ##
-
-The library comes with a test app that can be used to tinker with all of the
-library's basic functionality.  The test app (index.html and app.js in the
-sources) is meant to be used by making the source folder available to a local
-web server and pointing your browser at it.
-
-A hosted version of the test app is also available at
-http://shaka-player-demo.appspot.com/ for your convenience.
-
-
-## Updating ##
-
-Simply pull new sources from github and enjoy!
-```Shell
-git pull --rebase
-```
-
-
-## Design Overview ##
-
-The main entities you care about are [shaka.player.Player][],
-[shaka.player.DashVideoSource][], and [shaka.player.DrmInfo.Config][].
-In short, you construct a player and give it a \<video\> tag, then you
-construct a DASH video source and give it a manifest URL and an optional DRM
-callback.  Your DRM callback returns DrmInfo.Config objects to describe your
-DRM setup.  You load this video source into the player to begin playback.
-
-The player handles high-level playback and DRM, while the video source deals
-with streaming and all of the low-level parts of adaptive playback.  The DRM
-scheme info is an explicit set of parameters for DRM, and contains everything
-the library can't glean from a DASH manifest.
-
-More detailed information and walkthroughs with fully-functional sample code
-can be found in [the tutorials][].
-
-[shaka.player.Player]: http://shaka-player-demo.appspot.com/docs/shaka.player.Player.html
-[shaka.player.DashVideoSource]: http://shaka-player-demo.appspot.com/docs/shaka.player.DashVideoSource.html
-[shaka.player.DrmInfo.Config]: http://shaka-player-demo.appspot.com/docs/shaka.player.DrmInfo.html#Config
-[the tutorials]: http://shaka-player-demo.appspot.com/docs/tutorial-player.html
+[karma]: https://karma-runner.github.io/
 
 
 ## Contributing ##
 
 If you have improvements or fixes, we would love to have your contributions.
-Please read CONTRIBUTIONS.md for more information on the process we would like
+Please read CONTRIBUTING.md for more information on the process we would like
 contributors to follow.
-

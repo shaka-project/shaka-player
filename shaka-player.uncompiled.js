@@ -15,13 +15,24 @@
  * limitations under the License.
  */
 
-// Require all exported classes from the library.
-goog.require('shaka.player.DashVideoSource');
-goog.require('shaka.player.HttpVideoSource');
-goog.require('shaka.player.OfflineVideoSource');
-goog.require('shaka.player.Player');
-goog.require('shaka.player.StreamVideoSource');
+// Require all exported classes.
+goog.require('shaka.Player');
+goog.require('shaka.media.ManifestParser');
+goog.require('shaka.media.PresentationTimeline');
+goog.require('shaka.media.TextEngine');
 goog.require('shaka.polyfill.installAll');
-goog.require('shaka.util.EWMABandwidthEstimator');
-goog.require('shaka.util.FakeEventTarget');
-goog.require('shaka.util.Uint8ArrayUtils');
+goog.require('shaka.util.Error');
+
+// Require logging.
+goog.require('shaka.log');
+
+// Require standard plugins.
+goog.require('shaka.dash.DashParser');
+goog.require('shaka.media.VttTextParser');
+goog.require('shaka.net.DataUriPlugin');
+goog.require('shaka.net.HttpPlugin');
+
+goog.require('shaka.polyfill.Fullscreen');
+goog.require('shaka.polyfill.MediaKeys');
+goog.require('shaka.polyfill.Promise');
+goog.require('shaka.polyfill.VideoPlaybackQuality');

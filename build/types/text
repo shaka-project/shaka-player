@@ -1,0 +1,3 @@
+# All standard text parsing plugins.
+
++../../lib/media/vtt_text_parser.js

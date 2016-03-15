@@ -51,3 +51,7 @@ HTMLTrackElement.prototype.default;
 
 /** @const {TextTrack} */
 HTMLTrackElement.prototype.track;
+
+
+/** @const {string} */
+TextTrack.prototype.id;

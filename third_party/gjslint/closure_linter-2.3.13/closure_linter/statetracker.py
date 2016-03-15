@@ -81,6 +81,7 @@ class DocFlag(object):
       'param',
       'preserve',
       'private',
+      'property',
       'protected',
       'public',
       'return',
@@ -139,6 +140,7 @@ class DocFlag(object):
       'undefinedVars',
       'underscore',
       'unknownDefines',
+      'unnecessaryCasts',
       'unusedPrivateMembers',
       'uselessCode',
       'visibility',
@@ -146,16 +148,16 @@ class DocFlag(object):
 
   HAS_DESCRIPTION = frozenset([
       'define', 'deprecated', 'desc', 'fileoverview', 'license', 'param',
-      'preserve', 'return', 'supported'])
+      'preserve', 'return', 'supported', 'property'])
 
   HAS_TYPE = frozenset([
       'define', 'enum', 'extends', 'implements', 'param', 'return', 'type',
-      'suppress', 'const'])
+      'suppress', 'const', 'property'])
 
   TYPE_ONLY = frozenset(['enum', 'extends', 'implements', 'suppress', 'type',
                          'const'])
 
-  HAS_NAME = frozenset(['param'])
+  HAS_NAME = frozenset(['param', 'property'])
 
   EMPTY_COMMENT_LINE = re.compile(r'^\s*\*?\s*$')
   EMPTY_STRING = re.compile(r'^\s*$')
@@ -408,17 +410,13 @@ class DocComment(object):
       if token.type in target_types:
         return token
 
-      # Handles the case of a comment on "var foo = ...'
+      # Handles the case of a comment on "var foo = ..." or "var foo;"
       if token.IsKeyword('var'):
         next_code_token = tokenutil.CustomSearch(
             token,
             lambda t: t.type not in Type.NON_CODE_TYPES)
 
-        if (next_code_token and
-            next_code_token.IsType(Type.SIMPLE_LVALUE)):
-          return next_code_token
-
-        return
+        return next_code_token
 
       # Handles the case of a comment on "function foo () {}"
       if token.type is Type.FUNCTION_DECLARATION:
@@ -1051,7 +1049,7 @@ class StateTracker(object):
 
     elif type == Type.COMMENT:
       self._last_comment = token.string
-      self._suppressions = self._ParseSuppressions(self._last_comment)
+      self._suppressions += self._ParseSuppressions(self._last_comment)
 
     elif type == Type.START_DOC_COMMENT:
       self._last_comment = None
