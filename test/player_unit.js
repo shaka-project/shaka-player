@@ -398,7 +398,7 @@ describe('Player', function() {
     function runTest(languages, preference, expected) {
       player.configure({preferredAudioLanguage: preference});
       var streamSets = languages.map(function(lang) {
-        if (lang.startsWith('*'))
+        if (lang.charAt(0) == '*')
           return {language: lang.substr(1), type: 'audio', primary: true};
         else
           return {language: lang, type: 'audio'};
