@@ -86,59 +86,9 @@ module.exports = function(config) {
     singleRun: true,
 
     customLaunchers: {
-      // BrowserStack launchers require login information in the form of
-      // the environment variables BROWSER_STACK_USERNAME and
-      // BROWSER_STACK_ACCESS_KEY.
+      // These entries are specific to Shaka team's internal test lab:
 
-      // NOTE: PlayReady not working on BrowserStack IE11.  We are waiting for
-      // a response from BrowserStack support.
-      BrowserStack_IE11: {
-        base: 'BrowserStack',
-        browser: 'ie',
-        browser_version: '11.0',
-        os: 'Windows',
-        os_version: '8.1',
-      },
-
-      BrowserStack_Edge12: {
-        base: 'BrowserStack',
-        browser: 'edge',
-        browser_version: '12.0',
-        os: 'Windows',
-        os_version: '10',
-      },
-
-      BrowserStack_Edge13: {
-        base: 'BrowserStack',
-        browser: 'edge',
-        browser_version: '13.0',
-        os: 'Windows',
-        os_version: '10',
-      },
-
-      BrowserStack_Safari8: {
-        base: 'BrowserStack',
-        browser: 'safari',
-        browser_version: '8.0',
-        os: 'OS X',
-        os_version: 'Yosemite',
-      },
-
-      BrowserStack_Safari9: {
-        base: 'BrowserStack',
-        browser: 'safari',
-        browser_version: '9.0',
-        os: 'OS X',
-        os_version: 'El Capitan',
-      },
-
-      WebDriver_Safari8: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4444},
-        browserName: 'safari',
-        pseudoActivityInterval: 20000
-      },
-
+      // OS X El Capitan {{{
       WebDriver_Safari9: {
         base: 'WebDriver',
         config: {hostname: 'localhost', port: 4445},
@@ -146,6 +96,38 @@ module.exports = function(config) {
         pseudoActivityInterval: 20000
       },
 
+      WebDriver_ChromeMac: {
+        base: 'WebDriver',
+        config: {hostname: 'localhost', port: 4445},
+        browserName: 'chrome',
+        pseudoActivityInterval: 20000
+      },
+      // }}}
+
+      // OS X Yosemite {{{
+      WebDriver_Safari8: {
+        base: 'WebDriver',
+        config: {hostname: 'localhost', port: 4444},
+        browserName: 'safari',
+        pseudoActivityInterval: 20000
+      },
+
+      WebDriver_FirefoxMac: {
+        base: 'WebDriver',
+        config: {hostname: 'localhost', port: 4444},
+        browserName: 'firefox',
+        pseudoActivityInterval: 20000
+      },
+
+      WebDriver_OperaMac: {
+        base: 'WebDriver',
+        config: {hostname: 'localhost', port: 4444},
+        browserName: 'opera',
+        pseudoActivityInterval: 20000
+      },
+      // }}}
+
+      // Windows {{{
       WebDriver_IE11: {
         base: 'WebDriver',
         config: {hostname: 'localhost', port: 4446},
@@ -153,18 +135,27 @@ module.exports = function(config) {
         pseudoActivityInterval: 20000
       },
 
-      WebDriver_Edge13: {
+      WebDriver_Edge: {
         base: 'WebDriver',
         config: {hostname: 'localhost', port: 4446},
         browserName: 'MicrosoftEdge',
         pseudoActivityInterval: 20000
       },
-    },
 
-    browserStack: {
-      // Always start a tunnel if using BrowserStack.  This used to be default,
-      // but is now required as an explicit parameter.
-      startTunnel: true
+      WebDriver_ChromeWin: {
+        base: 'WebDriver',
+        config: {hostname: 'localhost', port: 4446},
+        browserName: 'chrome',
+        pseudoActivityInterval: 20000
+      },
+
+      WebDriver_FirefoxWin: {
+        base: 'WebDriver',
+        config: {hostname: 'localhost', port: 4446},
+        browserName: 'firefox',
+        pseudoActivityInterval: 20000
+      },
+      // }}}
     },
 
     coverageReporter: {

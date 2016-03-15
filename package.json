@@ -15,7 +15,6 @@
     "jasmine-ajax": "3.2.x",
     "jasmine-core": "2.4.x",
     "karma": "~0.13.19",
-    "karma-browserstack-launcher": "~0.1.9",
     "karma-chrome-launcher": "~0.2.2",
     "karma-coverage": "~0.5.3",
     "karma-firefox-launcher": "~0.1.7",

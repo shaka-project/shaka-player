@@ -39,10 +39,6 @@ def runTests(args):
   karma_path = shakaBuildHelpers.getNodeBinaryPath(karma_command_name)
   cmd = [karma_path, 'start']
 
-  if shakaBuildHelpers.isLinux():
-    # If we are running tests on Linux, run inside a virtual framebuffer.
-    cmd = ['xvfb-run', '--auto-servernum'] + cmd
-
   # Get the browsers supported on the local system.
   browsers = _GetBrowsers()
   if not browsers:
