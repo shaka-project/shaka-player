@@ -229,13 +229,21 @@ describe('DrmEngine', function() {
       }).then(function() {
         return encryptedEventSeen;
       }).then(function() {
-        return requestMade;
+        // With PlayReady, a persistent license policy can cause a different
+        // chain of events.  In particular, the request is bypassed and we get
+        // a usable key right away.
+        return Promise.race([requestMade, keyStatusEventSeen]);
       }).then(function() {
-        // Only one request should have been made.
-        expect(requestSpy.calls.count()).toBe(1);
-        // So it's reasonable to assume that this requestComplete Promise is
-        // waiting on the correct request.
-        return requestComplete;
+        if (requestSpy.calls.count()) {
+          // We made a license request.
+          // Only one request should have been made.
+          expect(requestSpy.calls.count()).toBe(1);
+          // So it's reasonable to assume that this requestComplete Promise is
+          // waiting on the correct request.
+          return requestComplete;
+        } else {
+          // This was probably a PlayReady persistent license.
+        }
       }).then(function() {
         return keyStatusEventSeen;
       }).then(function() {
