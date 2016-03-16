@@ -50,10 +50,10 @@ describe('Player', function() {
   describe('getConfiguration', function() {
     it('returns a copy of the configuration', function() {
       var config1 = player.getConfiguration();
-      config1.streaming.byteLimit = -99;
+      config1.streaming.bufferBehind = -99;
       var config2 = player.getConfiguration();
-      expect(config1.streaming.byteLimit).not.toEqual(
-          config2.streaming.byteLimit);
+      expect(config1.streaming.bufferBehind).not.toEqual(
+          config2.streaming.bufferBehind);
     });
   });
 
@@ -80,13 +80,13 @@ describe('Player', function() {
       player.configure({
         streaming: {
           retryParameters: { backoffFactor: 5 },
-          byteLimit: 7
+          bufferBehind: 7
         }
       });
 
       var newConfig = player.getConfiguration();
       expect(newConfig.streaming.retryParameters.backoffFactor).toBe(5);
-      expect(newConfig.streaming.byteLimit).toBe(7);
+      expect(newConfig.streaming.bufferBehind).toBe(7);
 
       player.configure({
         streaming: {
@@ -96,26 +96,26 @@ describe('Player', function() {
 
       newConfig = player.getConfiguration();
       expect(newConfig.streaming.retryParameters.backoffFactor).not.toBe(5);
-      expect(newConfig.streaming.byteLimit).toBe(7);
+      expect(newConfig.streaming.bufferBehind).toBe(7);
 
       player.configure({streaming: undefined});
       newConfig = player.getConfiguration();
-      expect(newConfig.streaming.byteLimit).not.toBe(7);
+      expect(newConfig.streaming.bufferBehind).not.toBe(7);
     });
 
     it('restricts the types of config values', function() {
       logErrorSpy.and.stub();
       var defaultConfig = player.getConfiguration();
 
-      // Try a bogus byteLimit (string instead of number)
+      // Try a bogus bufferBehind (string instead of number)
       player.configure({
-        streaming: { byteLimit: '77' }
+        streaming: { bufferBehind: '77' }
       });
 
       var newConfig = player.getConfiguration();
       expect(newConfig).toEqual(defaultConfig);
       expect(logErrorSpy).toHaveBeenCalledWith(
-          stringContaining('.streaming.byteLimit'));
+          stringContaining('.streaming.bufferBehind'));
 
       // Try a bogus streaming config (number instead of Object)
       logErrorSpy.calls.reset();

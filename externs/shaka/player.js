@@ -155,7 +155,7 @@ shakaExtern.ManifestConfiguration;
  *   retryParameters: shakaExtern.RetryParameters,
  *   rebufferingGoal: number,
  *   bufferingGoal: number,
- *   byteLimit: number
+ *   bufferBehind: number
  * }}
  *
  * @description
@@ -164,16 +164,18 @@ shakaExtern.ManifestConfiguration;
  * @property {shakaExtern.RetryParameters} retryParameters
  *   Retry parameters for segment requests.
  * @property {number} rebufferingGoal
- *   The minimum number of seconds of content that must be buffered before
- *   playback can begin at startup or can continue after entering a
- *   rebuffering state.
+ *   The minimum number of seconds of content that the StreamingEngine must
+ *   buffer before it can begin playback or can continue playback after it has
+ *   entered into a buffering state (i.e., after it has depleted one more
+ *   more of its buffers).
  * @property {number} bufferingGoal
  *   The number of seconds of content that the StreamingEngine will attempt to
- *   keep in buffer at all times (for each content type). This value must be
- *   greater than or equal to the rebuffering goal.
- * @property {number} byteLimit
- *   The maximum number of bytes that can be buffered across all content types.
- *   Segments will be dropped to meet this limit.
+ *   buffer ahead of the playhead. This value must be greater than or equal to
+ *   the rebuffering goal.
+ * @property {number} bufferBehind
+ *   The maximum number of seconds of content that the StreamingEngine will keep
+ *   in buffer behind the playhead when it appends a new media segment.
+ *   The StreamingEngine will evict content to meet this limit.
  *
  * @exportDoc
  */

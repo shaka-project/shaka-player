@@ -444,7 +444,7 @@ describe('StreamingEngine', function() {
         rebufferingGoal: 2,
         bufferingGoal: 5,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        byteLimit: Number.POSITIVE_INFINITY
+        bufferBehind: Number.POSITIVE_INFINITY
       };
     }
 
@@ -772,8 +772,8 @@ describe('StreamingEngine', function() {
 
           // Seek backwards to a buffered region in the first Period. Note that
           // since the buffering goal is 5 seconds and each segment is 10
-          // seconds long, the last segment in the first Period should be
-          // appended when the playhead is at the 16 second mark.
+          // seconds long, the first segment of the second Period should be
+          // required when the playhead is at the 16 second mark.
           expect(playhead.getTime()).toBe(16);
           playheadTime -= 5;
           streamingEngine.seeked();
@@ -1411,29 +1411,17 @@ describe('StreamingEngine', function() {
   });
 
   describe('eviction', function() {
-    function checkByteLimitOnTick(byteLimit) {
-      var segments = mediaSourceEngine.segments;
-      var bufferSize = Object.keys(segments).reduce(function(total, type) {
-        return total + segments[type].reduce(function(subTotal, inserted) {
-          return subTotal + (inserted ? segmentSizes[type] : 0);
-        }, 0);
-      }, 0);
-      expect(bufferSize).toBeLessThan(byteLimit + 1);
-    }
-
-    it('removes segments when the byte limit is reached', function(done) {
+    it('evicts media to meet the max buffer tail limit', function(done) {
       setupVod();
 
       manifest.minBufferTime = 1;
 
       // Create StreamingEngine.
-      var byteLimit =
-          segmentSizes.audio + (2 * segmentSizes.video) + segmentSizes.text;
       var config = {
         rebufferingGoal: 1,
         bufferingGoal: 1,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        byteLimit: byteLimit
+        bufferBehind: 10
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -1442,6 +1430,29 @@ describe('StreamingEngine', function() {
       playhead.getTime.and.returnValue(0);
 
       onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+
+      var originalRemove = shaka.test.FakeMediaSourceEngine.prototype.remove;
+      // NOTE: Closure cannot type check spy's correctly. Here we have to
+      // explicitly re-create remove()'s spy.
+      var removeSpy = jasmine.createSpy('remove');
+      mediaSourceEngine.remove = removeSpy;
+
+      removeSpy.and.callFake(function(type, start, end) {
+        expect(playheadTime).toBe(20);
+        expect(start).toBe(0);
+        expect(end).toBe(10);
+
+        if (removeSpy.calls.count() == 3) {
+          removeSpy.and.callFake(function(type, start, end) {
+            expect(playheadTime).toBe(30);
+            expect(start).toBe(10);
+            expect(end).toBe(20);
+            return originalRemove.call(this, type, start, end);
+          });
+        }
+
+        return originalRemove.call(this, type, start, end);
+      });
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
@@ -1452,7 +1463,7 @@ describe('StreamingEngine', function() {
       // evict segments. So, instead of verifying the exact, final buffer
       // configuration, ensure the byte limit is never exceeded and at least
       // one segment of each type is buffered at the end of the test.
-      runTest(checkByteLimitOnTick.bind(null, byteLimit)).then(function() {
+      runTest().then(function() {
         expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
 
         expect(mediaSourceEngine.remove).toHaveBeenCalledWith('audio', 0, 10);
@@ -1464,162 +1475,16 @@ describe('StreamingEngine', function() {
         expect(mediaSourceEngine.remove).toHaveBeenCalledWith('text', 0, 10);
         expect(mediaSourceEngine.remove).toHaveBeenCalledWith('text', 10, 20);
 
+        // Verify buffers.
         expect(mediaSourceEngine.initSegments).toEqual({
           audio: [false, true],
           video: [false, true],
           text: []
         });
-
-        expect(mediaSourceEngine.segments.audio[0]).toBeFalsy();
-        expect(mediaSourceEngine.segments.video[0]).toBeFalsy();
-        expect(mediaSourceEngine.segments.text[0]).toBeFalsy();
-
-        expect(mediaSourceEngine.segments.audio[1]).toBeFalsy();
-        expect(mediaSourceEngine.segments.video[1]).toBeFalsy();
-        expect(mediaSourceEngine.segments.text[1]).toBeFalsy();
-
-        expect(mediaSourceEngine.segments.audio[3]).toBeTruthy();
-        expect(mediaSourceEngine.segments.video[3]).toBeTruthy();
-        expect(mediaSourceEngine.segments.text[3]).toBeTruthy();
-
-        return streamingEngine.destroy();
-      }).catch(fail).then(done);
-    });
-
-    it('never removes a single segment', function(done) {
-      setupVod();
-
-      manifest.minBufferTime = 1;
-
-      // Re-setup SegmentData.
-      segmentData.text.segments =
-          [new ArrayBuffer(segmentSizes.text),
-           new ArrayBuffer(segmentSizes.text)];
-      segmentData.text.segmentStartTimes = [0, 0];
-      segmentData.text.segmentDuration = 20;
-
-      // Re-setup NetworkingEngine.
-      var responseMap = {
-        '1_audio_init': segmentData.audio.initSegments[0],
-        '1_video_init': segmentData.video.initSegments[0],
-
-        '1_audio_1': segmentData.audio.segments[0],
-        '1_audio_2': segmentData.audio.segments[1],
-        '1_video_1': segmentData.video.segments[0],
-        '1_video_2': segmentData.video.segments[1],
-        '1_text_1': segmentData.text.segments[0],
-
-        '2_audio_init': segmentData.audio.initSegments[1],
-        '2_video_init': segmentData.video.initSegments[1],
-
-        '2_audio_1': segmentData.audio.segments[2],
-        '2_audio_2': segmentData.audio.segments[3],
-        '2_video_1': segmentData.video.segments[2],
-        '2_video_2': segmentData.video.segments[3],
-        '2_text_1': segmentData.text.segments[1]
-      };
-      netEngine = new shaka.test.FakeNetworkingEngine(responseMap);
-
-      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
-
-      // Create StreamingEngine.
-      var byteLimit =
-          segmentSizes.audio + (2 * segmentSizes.video) + segmentSizes.text;
-      var config = {
-        rebufferingGoal: 1,
-        bufferingGoal: 1,
-        retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        byteLimit: byteLimit
-      };
-      createStreamingEngine(config);
-
-      playhead.getTime.and.returnValue(0);
-
-      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
-
-      onChooseStreams.and.callFake(function(period) {
-        expect(period).toBe(manifest.periods[0]);
-
-        onChooseStreams.and.callFake(function(period) {
-          expect(period).toBe(manifest.periods[1]);
-
-          expect(mediaSourceEngine.remove).not.toHaveBeenCalledWith(
-              'text', 0, 20);
-          expect(mediaSourceEngine.segments.text[0]).toBeTruthy();
-
-          // Switch to the second Period.
-          return defaultOnChooseStreams(period);
-        });
-
-        // Init the first Period.
-        return defaultOnChooseStreams(period);
-      });
-
-      // Here we go!
-      streamingEngine.init();
-
-      runTest(checkByteLimitOnTick.bind(null, byteLimit)).then(function() {
-        expect(mediaSourceEngine.remove).not.toHaveBeenCalledWith(
-            'text', 20, 40);
-
-        expect(mediaSourceEngine.initSegments).toEqual({
-          audio: [false, true],
-          video: [false, true],
-          text: []
-        });
-
-        expect(mediaSourceEngine.segments.audio[0]).toBeFalsy();
-        expect(mediaSourceEngine.segments.video[0]).toBeFalsy();
-        expect(mediaSourceEngine.segments.audio[1]).toBeFalsy();
-        expect(mediaSourceEngine.segments.video[1]).toBeFalsy();
-        expect(mediaSourceEngine.segments.audio[3]).toBeTruthy();
-        expect(mediaSourceEngine.segments.video[3]).toBeTruthy();
-
-        expect(mediaSourceEngine.segments.text[0]).toBeFalsy();
-        expect(mediaSourceEngine.segments.text[1]).toBeTruthy();
-
-        return streamingEngine.destroy();
-      }).catch(fail).then(done);
-    });
-
-    it('raises an error when eviction is impossible', function(done) {
-      setupVod();
-
-      manifest.minBufferTime = 1;
-
-      // Create StreamingEngine.
-      var byteLimit = segmentSizes.audio + segmentSizes.video;
-      var config = {
-        rebufferingGoal: 1,
-        bufferingGoal: 1,
-        retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        byteLimit: byteLimit
-      };
-
-      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
-      createStreamingEngine(config);
-
-      playhead.getTime.and.returnValue(0);
-
-      onError.and.callFake(function(error) {
-        expect(error.category).toBe(shaka.util.Error.Category.STREAMING);
-        expect(error.code).toBe(
-            shaka.util.Error.Code.CANNOT_SATISFY_BYTE_LIMIT);
-      });
-
-      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
-
-      // Here we go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
-
-      runTest(checkByteLimitOnTick.bind(null, byteLimit)).then(function() {
-        expect(onError).toHaveBeenCalled();
-
-        expect(mediaSourceEngine.initSegments).toEqual({
-          audio: [true, false],
-          video: [true, false],
-          text: []
+        expect(mediaSourceEngine.segments).toEqual({
+          audio: [false, false, true, true],
+          video: [false, false, true, true],
+          text: [false, false, true, true]
         });
 
         return streamingEngine.destroy();

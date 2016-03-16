@@ -274,11 +274,9 @@ shaka.media.ManifestParser.registerParserByExtension(fileExt, parser)
   - streaming
     - retryParameters: NetworkingEngine.RetryParameters
     - restrictions: Restrictions
-    - buffer
-      - startupGoal: number in seconds
-      - streamingGoal: number in seconds
-      - byteLimit: number in bytes, to enforce memory limits and avoid eviction
-      - behind: number in seconds, amount kept behind the playhead
+    - rebufferingGoal: number in seconds, amount to buffer ahead at startup
+    - bufferingGoal: number in seconds, amount to keep ahead after startup
+    - bufferBehind: number in seconds, amount kept behind the playhead
 
 
 ## TODO
