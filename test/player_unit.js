@@ -500,7 +500,7 @@ describe('Player', function() {
       expect(tracks[1].id).toBe(stream.id);
       player.selectTrack(tracks[1]);
       expect(streamingEngine.switch)
-          .toHaveBeenCalledWith('audio', stream, undefined);
+          .toHaveBeenCalledWith('audio', stream, false);
     });
 
     it('still switches streams if called during startup', function() {
@@ -566,7 +566,7 @@ describe('Player', function() {
          var period = {streamSets: streamSets};
 
          expect(player.textTrack_.mode).toBe('hidden');
-         var result = player.chooseStreams_(period);
+         var result = chooseStreams(period);
          expect(player.textTrack_.mode).toBe('showing');
          expect(result['audio']).toBe('en');
          expect(result['text']).toBe('es');
@@ -576,7 +576,6 @@ describe('Player', function() {
      * @param {!Array.<string>} languages
      * @param {string} preference
      * @param {string} expected
-     * @suppress {accessControls}
      */
     function runTest(languages, preference, expected) {
       player.configure({preferredAudioLanguage: preference});
@@ -587,17 +586,20 @@ describe('Player', function() {
           return {language: lang, type: 'audio'};
       });
       var period = {streamSets: streamSets};
-      var result = player.chooseStreams_(period);
+      var result = chooseStreams(period);
       // Normally this is a stream, but because of the AbrManager above, it
       // will be the language of the stream set it came from.
       expect(result['audio']).toBe(expected);
     }
   });
 
-  /** @suppress {accessControls} */
-  function chooseStreams() {
-    var period = {streamSets: []};
-    return player.chooseStreams_(period);
+  /**
+   * @param {!Object=} opt_period
+   * @suppress {accessControls}
+   */
+  function chooseStreams(opt_period) {
+    var period = opt_period || {streamSets: []};
+    return player.onChooseStreams_(period);
   }
 
   /** @suppress {accessControls} */
