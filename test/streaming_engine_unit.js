@@ -31,11 +31,7 @@ describe('StreamingEngine', function() {
   var playing;
 
   var mediaSourceEngine;
-
   var netEngine;
-
-  var availabilityStart;
-  var availabilityEnd;
   var timeline;
 
   var audioStream1;
@@ -47,7 +43,6 @@ describe('StreamingEngine', function() {
   var videoStream2;
   var textStream2;
 
-  /** @type {shakaExtern.Manifest} */
   var manifest;
 
   var onChooseStreams;
@@ -139,19 +134,22 @@ describe('StreamingEngine', function() {
     playheadTime = 0;
     playing = false;
 
-    setupNetworkingEngine(2 /* segmentsInFirstPeriod */,
-                          2 /* segmentsInSecondPeriod */);
+    setupNetworkingEngine(
+        2 /* segmentsInFirstPeriod */,
+        2 /* segmentsInSecondPeriod */);
 
-    availabilityStart = 0;
-    availabilityEnd = 40;
-    setupPresentationTimeline();
+    timeline = shaka.test.StreamingEngineUtil.createFakePresentationTimeline(
+        0 /* segmentAvailabilityStart */,
+        40 /* segmentAvailabilityEnd */,
+        40 /* presentationDuration */);
 
-    setupManifest(2 /* segmentsInFirstPeriod */,
-                  2 /* segmentsInSecondPeriod */,
-                  20 /* secondPeriodStartTime */);
+    setupManifest(
+        0 /* firstPeriodStartTime */,
+        20 /* secondPeriodStartTime */,
+        40 /* presentationDuration */);
   }
 
-  function setupLive(firstAvailableSegmentPosition) {
+  function setupLive() {
     // For live, we fake a presentation that has 2 Periods of different
     // durations (120 seconds and 20 seconds respectively), where each Period
     // has 1 StreamSet. The first Period has 1 audio Stream, 2 video Streams,
@@ -164,13 +162,8 @@ describe('StreamingEngine', function() {
     // first Period, and 2 audio, 2 video, and 2 text for the second Period.
     // All media segments are (by default) 10 seconds long.
     //
-    // The segment availability window starts at the given segment of the first
-    // Period and extends for 2 segments.
-
-    var segmentsInFirstPeriod = 12;
-    var segmentsInSecondPeriod = 2;
-    expect(firstAvailableSegmentPosition)
-        .not.toBeGreaterThan(segmentsInFirstPeriod);
+    // The segment availability window starts at t=100 (segment 11) and extends
+    // to t=120 (segment 13).
 
     // Create SegmentData map for FakeMediaSourceEngine.
     var initSegmentSizeAudio =
@@ -204,6 +197,7 @@ describe('StreamingEngine', function() {
       }
     };
 
+    var segmentsInFirstPeriod = 12;
     for (var i = 0; i < segmentsInFirstPeriod; ++i) {
       segmentData.audio.segments.push(makeBuffer(segmentSizes.audio));
       segmentData.video.segments.push(makeBuffer(segmentSizes.video));
@@ -214,6 +208,7 @@ describe('StreamingEngine', function() {
       segmentData.text.segmentStartTimes.push(i * 10);
     }
 
+    var segmentsInSecondPeriod = 2;
     for (var i = 0; i < segmentsInSecondPeriod; ++i) {
       segmentData.audio.segments.push(makeBuffer(segmentSizes.audio));
       segmentData.video.segments.push(makeBuffer(segmentSizes.video));
@@ -225,202 +220,95 @@ describe('StreamingEngine', function() {
     }
 
     playhead = createMockPlayhead();
-    playheadTime = firstAvailableSegmentPosition * 10;
+    playheadTime = 110;
     playing = false;
 
-    setupNetworkingEngine(segmentsInFirstPeriod, segmentsInSecondPeriod);
+    setupNetworkingEngine(
+        12 /* segmentsInFirstPeriod */,
+        2 /* segmentsInSecondPeriod */);
 
-    availabilityStart = (firstAvailableSegmentPosition - 1) * 10;
-    availabilityEnd = ((firstAvailableSegmentPosition - 1) * 10) + 20;
-    setupPresentationTimeline();
+    timeline = shaka.test.StreamingEngineUtil.createFakePresentationTimeline(
+        100 /* segmentAvailabilityStart */,
+        120 /* segmentAvailabilityEnd */,
+        140 /* presentationDuration */);
 
-    setupManifest(segmentsInFirstPeriod,
-                  segmentsInSecondPeriod,
-                  120 /* secondPeriodStartTime */);
+    setupManifest(
+        0 /* firstPeriodStartTime */,
+        120 /* secondPeriodStartTime */,
+        140 /* presentationDuration */);
   }
 
   function setupNetworkingEngine(
       segmentsInFirstPeriod, segmentsInSecondPeriod) {
-    // Note: init segment URIs follow the pattern PERIOD_TYPE_init, e.g.,
-    // "1_audio_init" or "2_video_init", and media segment URIs follow the
-    // pattern PERIOD_TYPE_POSITION, e.g., "1_text_2" or "2_video_1". The first
-    // segment in each Period has position 1, the second segment, position 2,
-    // etc.
 
-    var responseMap = {
-      '1_audio_init': segmentData.audio.initSegments[0],
-      '1_video_init': segmentData.video.initSegments[0],
-      '2_audio_init': segmentData.audio.initSegments[1],
-      '2_video_init': segmentData.video.initSegments[1]
-    };
-
-    for (var i = 0; i < segmentsInFirstPeriod; ++i) {
-      responseMap['1_audio_' + (i + 1)] = segmentData.audio.segments[i];
-      responseMap['1_video_' + (i + 1)] = segmentData.video.segments[i];
-      responseMap['1_text_' + (i + 1)] = segmentData.text.segments[i];
-    }
-
-    for (var i = 0; i < segmentsInSecondPeriod; ++i) {
-      var j = segmentsInFirstPeriod + i;
-      responseMap['2_audio_' + (i + 1)] = segmentData.audio.segments[j];
-      responseMap['2_video_' + (i + 1)] = segmentData.video.segments[j];
-      responseMap['2_text_' + (i + 1)] = segmentData.text.segments[j];
-    }
-
-    netEngine = new shaka.test.FakeNetworkingEngine(responseMap);
-  }
-
-  function setupPresentationTimeline() {
-    timeline = createMockPresentationTimeline();
-
-    timeline.getDuration.and.returnValue(availabilityStart + 40);
-
-    timeline.getSegmentAvailabilityStart.and.callFake(function() {
-      return availabilityStart;
-    });
-
-    timeline.getSegmentAvailabilityEnd.and.callFake(function() {
-      return availabilityEnd;
-    });
-
-    // These methods should not be invoked.
-    timeline.setDuration.and.throwError(
-        new Error('unexpected call to setDuration()'));
-    timeline.getSegmentAvailabilityDuration.and.throwError(
-        new Error('unexpected call to getSegmentAvailabilityDuration()'));
+    // Create the fake NetworkingEngine. Note: the StreamingEngine should never
+    // request a segment that does not exist.
+    netEngine = shaka.test.StreamingEngineUtil.createFakeNetworkingEngine(
+        // Init segment generator:
+        function(type, periodNumber) {
+          expect((periodNumber == 1) || (periodNumber == 2));
+          return segmentData[type].initSegments[periodNumber - 1];
+        },
+        // Media segment generator:
+        function(type, periodNumber, position) {
+          expect(position).toBeGreaterThan(0);
+          expect((periodNumber == 1 && position <= segmentsInFirstPeriod) ||
+                 (periodNumber == 2 && position <= segmentsInSecondPeriod));
+          var i = (segmentsInFirstPeriod * (periodNumber - 1)) + (position - 1);
+          return segmentData[type].segments[i];
+        });
   }
 
   function setupManifest(
-      segmentsInFirstPeriod, segmentsInSecondPeriod, secondPeriodStartTime) {
-    /**
-     * @param {number} periodNumber
-     * @param {number} position
-     * @return {?number} |position| if it's within the given Period's bounds;
-     *   otherwise, return null.
-     */
-    function boundsCheckPosition(periodNumber, position) {
-      if (position < 1)
-        return null;
-      else if ((periodNumber == 1) && (position > segmentsInFirstPeriod))
-        return null;
-      else if ((periodNumber == 2) && (position > segmentsInSecondPeriod))
-        return null;
-      return position;
-    }
+      firstPeriodStartTime, secondPeriodStartTime, presentationDuration) {
+    manifest = shaka.test.StreamingEngineUtil.createManifest(
+        [firstPeriodStartTime, secondPeriodStartTime], presentationDuration,
+        { audio: segmentData.audio.segmentDuration,
+          video: segmentData.video.segmentDuration,
+          text: segmentData.text.segmentDuration});
 
-    /**
-     * @param {number} periodNumber
-     * @param {string} type
-     * @param {number} time
-     * @return {?number} A segment position.
-     */
-    var find = function(periodNumber, type, time) {
-      // Note: |time| is relative to a Period's start time.
-      var position = Math.floor(time / segmentData[type].segmentDuration) + 1;
-      return boundsCheckPosition(periodNumber, position);
-    };
+    manifest.presentationTimeline = timeline;
+    manifest.minBufferTime = 2;
 
-    /**
-     * @param {number} periodNumber
-     * @param {string} type
-     * @param {number} position
-     * @return {shaka.media.SegmentReference} A SegmentReference.
-     */
-    var get = function(periodNumber, type, position) {
-      if (boundsCheckPosition(periodNumber, position) == null)
-        return null;
+    // Create InitSegmentReferences.
+    manifest.periods[0].streamSetsByType.audio.streams[0].initSegmentReference =
+        new shaka.media.InitSegmentReference(
+            ['1_audio_init'],
+            initSegmentRanges.audio[0],
+            initSegmentRanges.audio[1]);
+    manifest.periods[0].streamSetsByType.video.streams[0].initSegmentReference =
+        new shaka.media.InitSegmentReference(
+            ['1_video_init'],
+            initSegmentRanges.video[0],
+            initSegmentRanges.video[1]);
+    manifest.periods[1].streamSetsByType.audio.streams[0].initSegmentReference =
+        new shaka.media.InitSegmentReference(
+            ['2_audio_init'],
+            initSegmentRanges.audio[0],
+            initSegmentRanges.audio[1]);
+    manifest.periods[1].streamSetsByType.video.streams[0].initSegmentReference =
+        new shaka.media.InitSegmentReference(
+            ['2_video_init'],
+            initSegmentRanges.video[0],
+            initSegmentRanges.video[1]);
 
-      var duration = segmentData[type].segmentDuration;
-      return new shaka.media.SegmentReference(
-          position, (position - 1) * duration, position * duration,
-          ['' + periodNumber + '_' + type + '_' + position],
-          0, null);
-    };
-
-    audioStream1 = createMockAudioStream(0);
-    videoStream1 = createMockVideoStream(1);
-    textStream1 = createMockTextStream(2);
+    audioStream1 = manifest.periods[0].streamSets[0].streams[0];
+    videoStream1 = manifest.periods[0].streamSets[1].streams[0];
+    textStream1 = manifest.periods[0].streamSets[2].streams[0];
 
     // This Stream is only used to verify that StreamingEngine can setup
     // Streams correctly. It does not have init or media segments.
-    alternateVideoStream1 = createMockVideoStream(3);
-
-    // Setup first Period.
-    audioStream1.createSegmentIndex.and.returnValue(Promise.resolve());
-    videoStream1.createSegmentIndex.and.returnValue(Promise.resolve());
-    textStream1.createSegmentIndex.and.returnValue(Promise.resolve());
+    alternateVideoStream1 =
+        shaka.test.StreamingEngineUtil.createMockVideoStream(6);
     alternateVideoStream1.createSegmentIndex.and.returnValue(Promise.resolve());
-
-    audioStream1.findSegmentPosition.and.callFake(find.bind(null, 1, 'audio'));
-    videoStream1.findSegmentPosition.and.callFake(find.bind(null, 1, 'video'));
-    textStream1.findSegmentPosition.and.callFake(find.bind(null, 1, 'text'));
     alternateVideoStream1.findSegmentPosition.and.returnValue(null);
-
-    audioStream1.getSegmentReference.and.callFake(get.bind(null, 1, 'audio'));
-    videoStream1.getSegmentReference.and.callFake(get.bind(null, 1, 'video'));
-    textStream1.getSegmentReference.and.callFake(get.bind(null, 1, 'text'));
     alternateVideoStream1.getSegmentReference.and.returnValue(null);
+    manifest.periods[0].streamSets[1].streams.push(alternateVideoStream1);
 
-    audioStream1.initSegmentReference = new shaka.media.InitSegmentReference(
-        ['1_audio_init'],
-        initSegmentRanges.audio[0],
-        initSegmentRanges.audio[1]);
-    videoStream1.initSegmentReference = new shaka.media.InitSegmentReference(
-        ['1_video_init'],
-        initSegmentRanges.video[0],
-        initSegmentRanges.video[1]);
-
-    // Setup second Period.
-    audioStream2 = createMockAudioStream(4);
-    videoStream2 = createMockVideoStream(5);
-    textStream2 = createMockTextStream(6);
-
-    audioStream2.createSegmentIndex.and.returnValue(Promise.resolve());
-    videoStream2.createSegmentIndex.and.returnValue(Promise.resolve());
-    textStream2.createSegmentIndex.and.returnValue(Promise.resolve());
-
-    audioStream2.findSegmentPosition.and.callFake(find.bind(null, 2, 'audio'));
-    videoStream2.findSegmentPosition.and.callFake(find.bind(null, 2, 'video'));
-    textStream2.findSegmentPosition.and.callFake(find.bind(null, 2, 'text'));
-
-    audioStream2.getSegmentReference.and.callFake(get.bind(null, 2, 'audio'));
-    videoStream2.getSegmentReference.and.callFake(get.bind(null, 2, 'video'));
-    textStream2.getSegmentReference.and.callFake(get.bind(null, 2, 'text'));
-
-    audioStream2.initSegmentReference = new shaka.media.InitSegmentReference(
-        ['2_audio_init'],
-        initSegmentRanges.audio[0],
-        initSegmentRanges.audio[1]);
-    videoStream2.initSegmentReference = new shaka.media.InitSegmentReference(
-        ['2_video_init'],
-        initSegmentRanges.video[0],
-        initSegmentRanges.video[1]);
-
-    // Create Manifest.
-    manifest = {
-      presentationTimeline:
-          /** @type {!shaka.media.PresentationTimeline} */ (timeline),
-      minBufferTime: 2,
-      periods: [
-        {
-          startTime: 0,
-          streamSets: [
-            {type: 'audio', streams: [audioStream1]},
-            {type: 'video', streams: [videoStream1, alternateVideoStream1]},
-            {type: 'text', streams: [textStream1]}
-          ]
-        },
-        {
-          startTime: secondPeriodStartTime,
-          streamSets: [
-            {type: 'audio', streams: [audioStream2]},
-            {type: 'video', streams: [videoStream2]},
-            {type: 'text', streams: [textStream2]}
-          ]
-        }
-      ]
-    };
-  }  // setupManifest()
+    audioStream2 = manifest.periods[1].streamSets[0].streams[0];
+    videoStream2 = manifest.periods[1].streamSets[1].streams[0];
+    textStream2 = manifest.periods[1].streamSets[2].streams[0];
+  }
 
   /**
    * Creates the StreamingEngine.
@@ -449,7 +337,10 @@ describe('StreamingEngine', function() {
     }
 
     streamingEngine = new shaka.media.StreamingEngine(
-        playhead, mediaSourceEngine, netEngine, manifest,
+        playhead,
+        mediaSourceEngine,
+        /** @type {!shaka.net.NetworkingEngine} */(netEngine),
+        /** @type {shakaExtern.Manifest} */(manifest),
         onChooseStreams, onCanSwitch, onError,
         onInitialStreamsSetup, onStartupComplete);
     streamingEngine.configure(config);
@@ -567,8 +458,8 @@ describe('StreamingEngine', function() {
     onInitialStreamsSetup.and.callFake(function() {
       expect(mediaSourceEngine.init).toHaveBeenCalledWith(
           {
-            'audio': 'audio/mp4; codecs="aac"',
-            'video': 'video/mp4; codecs="avc"',
+            'audio': 'audio/mp4; codecs="mp4a.40.2"',
+            'video': 'video/mp4; codecs="avc1.42c01e"',
             'text': 'text/vtt'
           });
       expect(mediaSourceEngine.init.calls.count()).toBe(1);
@@ -612,7 +503,8 @@ describe('StreamingEngine', function() {
 
   it('initializes and plays live', function(done) {
     var loop;
-    setupLive(11 /* firstAvailableSegmentPosition */);
+
+    setupLive();
     mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
     createStreamingEngine();
 
@@ -1236,7 +1128,7 @@ describe('StreamingEngine', function() {
 
   describe('handles seeks (live)', function() {
     beforeEach(function() {
-      setupLive(11 /* firstAvailableSegmentPosition */);
+      setupLive();
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData, 0);
       createStreamingEngine();
 
@@ -1675,7 +1567,7 @@ describe('StreamingEngine', function() {
 
   describe('live drift', function() {
     beforeEach(function() {
-      setupLive(11 /* firstAvailableSegmentPosition */);
+      setupLive();
     });
 
     /**
@@ -1808,8 +1700,8 @@ describe('StreamingEngine', function() {
    * Slides the segment availability window forward by 1 second.
    */
   var slideSegmentAvailabilityWindow = function() {
-    availabilityStart++;
-    availabilityEnd++;
+    timeline.segmentAvailabilityStart++;
+    timeline.segmentAvailabilityEnd++;
   };
 
   function createMockPlayhead() {
@@ -1818,69 +1710,6 @@ describe('StreamingEngine', function() {
       setRebufferingGoal: jasmine.createSpy('setRebufferingGoal'),
       getTime: jasmine.createSpy('getTime'),
       setBuffering: jasmine.createSpy('setBuffering')
-    };
-  }
-
-  function createMockNetworkingEngine() {
-    return {
-      destroy: jasmine.createSpy('destroy'),
-      request: jasmine.createSpy('request')
-    };
-  }
-
-  function createMockPresentationTimeline() {
-    return {
-      getDuration: jasmine.createSpy('getDuration'),
-      setDuration: jasmine.createSpy('setDuration'),
-      getSegmentAvailabilityDuration:
-          jasmine.createSpy('getSegmentAvailabilityDuration'),
-      getSegmentAvailabilityStart:
-          jasmine.createSpy('getSegmentAvailabilityStart'),
-      getSegmentAvailabilityEnd:
-          jasmine.createSpy('getSegmentAvailabilityEnd')
-    };
-  }
-
-  function createMockAudioStream(id) {
-    return {
-      id: id,
-      createSegmentIndex: jasmine.createSpy('createSegmentIndex'),
-      findSegmentPosition: jasmine.createSpy('findSegmentPosition'),
-      getSegmentReference: jasmine.createSpy('getSegmentReference'),
-      initSegmentReference: null,
-      presentationTimeOffset: 0,
-      mimeType: 'audio/mp4',
-      codecs: 'aac',
-      bandwidth: 192000
-    };
-  }
-
-  function createMockVideoStream(id) {
-    return {
-      id: id,
-      createSegmentIndex: jasmine.createSpy('createSegmentIndex'),
-      findSegmentPosition: jasmine.createSpy('findSegmentPosition'),
-      getSegmentReference: jasmine.createSpy('getSegmentReference'),
-      initSegmentReference: null,
-      presentationTimeOffset: 0,
-      mimeType: 'video/mp4',
-      codecs: 'avc',
-      bandwidth: 5000000,
-      width: 1280,
-      height: 720
-    };
-  }
-
-  function createMockTextStream(id) {
-    return {
-      id: id,
-      createSegmentIndex: jasmine.createSpy('createSegmentIndex'),
-      findSegmentPosition: jasmine.createSpy('findSegmentPosition'),
-      getSegmentReference: jasmine.createSpy('getSegmentReference'),
-      initSegmentReference: null,
-      presentationTimeOffset: 0,
-      mimeType: 'text/vtt',
-      kind: 'subtitles'
     };
   }
 });

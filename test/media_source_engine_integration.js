@@ -102,7 +102,7 @@ describe('MediaSourceEngine', function() {
 
   function append(type, segmentNumber) {
     var segment = metadata[type].generator.
-        getSegment(segmentNumber, Date.now() / 1000);
+        getSegment(segmentNumber, 0, Date.now() / 1000);
     return mediaSourceEngine.appendBuffer(type, segment, null, null);
   }
 

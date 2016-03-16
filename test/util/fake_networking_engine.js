@@ -52,6 +52,42 @@ shaka.test.FakeNetworkingEngine = function(
 };
 
 
+/**
+ * Expects that a request for the given segment has occurred.
+ *
+ * @param {!Object} requestSpy
+ * @param {string} uri
+ * @param {shaka.net.NetworkingEngine.RequestType} type
+ */
+shaka.test.FakeNetworkingEngine.expectRequest = function(
+    requestSpy, uri, type) {
+  expect(requestSpy).toHaveBeenCalledWith(
+      type, jasmine.objectContaining({uris: [uri]}));
+};
+
+
+/**
+ * Expects that a range request for the given segment has occurred.
+ *
+ * @param {!Object} requestSpy
+ * @param {string} uri
+ * @param {number} startByte
+ * @param {?number} endByte
+ */
+shaka.test.FakeNetworkingEngine.expectRangeRequest = function(
+    requestSpy, uri, startByte, endByte) {
+  var range = 'bytes=' + startByte + '-';
+  if (endByte != null) range += endByte;
+
+  expect(requestSpy).toHaveBeenCalledWith(
+      shaka.net.NetworkingEngine.RequestType.SEGMENT,
+      jasmine.objectContaining({
+        uris: [uri],
+        headers: jasmine.objectContaining({'Range': range})
+      }));
+};
+
+
 /** @override */
 shaka.test.FakeNetworkingEngine.prototype.request = function(type, request) {
   expect(request).toBeTruthy();
@@ -95,8 +131,7 @@ shaka.test.FakeNetworkingEngine.prototype.delayNextRequest = function() {
  * @param {shaka.net.NetworkingEngine.RequestType} type
  */
 shaka.test.FakeNetworkingEngine.prototype.expectRequest = function(uri, type) {
-  expect(this.request)
-      .toHaveBeenCalledWith(type, jasmine.objectContaining({uris: [uri]}));
+  shaka.test.FakeNetworkingEngine.expectRequest(this.request, uri, type);
 };
 
 
@@ -109,16 +144,8 @@ shaka.test.FakeNetworkingEngine.prototype.expectRequest = function(uri, type) {
  */
 shaka.test.FakeNetworkingEngine.prototype.expectRangeRequest = function(
     uri, startByte, endByte) {
-  var range = 'bytes=' + startByte + '-';
-  if (endByte != null) range += endByte;
-
-  expect(this.request)
-      .toHaveBeenCalledWith(
-          shaka.net.NetworkingEngine.RequestType.SEGMENT,
-          jasmine.objectContaining({
-            uris: [uri],
-            headers: jasmine.objectContaining({'Range': range})
-          }));
+  shaka.test.FakeNetworkingEngine.expectRangeRequest(
+      this.request, uri, startByte, endByte);
 };
 
 

@@ -56,15 +56,19 @@ shaka.test.IStreamGenerator.prototype.getInitSegment = function(
  * Gets one of the stream's segments.
  * The IStreamGenerator must be initialized.
  *
- * @param {number} segmentNumber The number of the stream's segment to get,
- *   where segment number one refers to the first segment in the Period.
+ * @param {number} position The segment's position within a particular Period p.
+ * @param {number} segmentOffset The number of segments in all Periods that
+ *   came before Period p.
  * @param {number} wallClockTime The wall-clock time in seconds.
+ * @example getSegment(1, 0) gets the 1st segment in the stream,
+ *   and getSegment(2, 5) gets the 2nd segment in a Period that starts
+ *   at the 6th segment (relative to the very start of the stream).
  *
  * @return {ArrayBuffer} The segment if the stream has started, and the segment
  *   exists and is available; otherwise, return null.
  */
 shaka.test.IStreamGenerator.prototype.getSegment = function(
-    segmentNumber, wallClockTime) {};
+    position, segmentOffset, wallClockTime) {};
 
 
 
@@ -167,24 +171,24 @@ shaka.test.DashVodStreamGenerator.prototype.getInitSegment = function(time) {
 
 /** @override */
 shaka.test.DashVodStreamGenerator.prototype.getSegment = function(
-    segmentNumber, wallClockTime) {
+    position, segmentOffset, wallClockTime) {
   goog.asserts.assert(
       this.segmentTemplate_,
       'init() must be called before getSegment().');
   if (!this.segmentTemplate_) return null;
 
-  // |segmentNumber| must be an integer and >= 1.
-  goog.asserts.assert((segmentNumber % 1 === 0) && (segmentNumber >= 1),
+  // |position| must be an integer and >= 1.
+  goog.asserts.assert((position % 1 === 0) && (position >= 1),
                       'segment number must be an integer >= 1');
 
-  var numSegments = Math.ceil(this.mediaPresentationDuration_ /
-                              this.segmentDuration_);
-  if (segmentNumber > numSegments) {
-    shaka.log.debug('segmentNumber > numSegments');
-    return null;
-  }
+  var segmentStartTime = (position - 1) * this.segmentDuration_;
 
-  var segmentStartTime = (segmentNumber - 1) * this.segmentDuration_;
+  // Bounds check.
+  goog.asserts.assert(
+      segmentStartTime + (segmentOffset * this.segmentDuration_) <=
+          this.mediaPresentationDuration_,
+      'segment cannot end after the presentation end time');
+
   var mediaTimestamp = segmentStartTime + this.presentationTimeOffset_;
 
   // TODO: If |segmentDuration_| does not divide |mediaPresentationDuration_|
@@ -314,32 +318,39 @@ shaka.test.DashLiveStreamGenerator.prototype.getInitSegment = function(
 
 /** @override */
 shaka.test.DashLiveStreamGenerator.prototype.getSegment = function(
-    segmentNumber, wallClockTime) {
+    position, segmentOffset, wallClockTime) {
   goog.asserts.assert(
       this.initSegment_,
       'init() must be called before getSegment().');
   if (!this.initSegment_) return null;
 
-  // |segmentNumber| must be an integer and >= 1.
-  goog.asserts.assert((segmentNumber % 1 === 0) && (segmentNumber >= 1),
+  // |position| must be an integer and >= 1.
+  goog.asserts.assert((position % 1 === 0) && (position >= 1),
                       'segment number must be an integer >= 1');
 
-  var segmentStartTime = (segmentNumber - 1) * this.segmentDuration_;
+  var segmentStartTime = (position - 1) * this.segmentDuration_;
 
   // Compute the segment's availability start time and end time.
   // (See section 5.3.9.5.3 of the DASH spec.)
   var segmentAvailabilityStartTime = this.availabilityStartTime_ +
                                      segmentStartTime +
+                                     (segmentOffset * this.segmentDuration_) +
                                      this.segmentDuration_;
   var segmentAvailabiltyEndTime = segmentAvailabilityStartTime +
                                   this.segmentDuration_ +
                                   this.timeShiftBufferDepth_;
 
   if (wallClockTime < segmentAvailabilityStartTime) {
-    shaka.log.debug('wallClockTime < segmentAvailabilityStartTime');
+    shaka.log.debug(
+        'wallClockTime < segmentAvailabilityStartTime:',
+        'wallClockTime=' + wallClockTime,
+        'segmentAvailabilityStartTime=', segmentAvailabilityStartTime);
     return null;
   } else if (wallClockTime > segmentAvailabiltyEndTime) {
-    shaka.log.debug('wallClockTime > segmentAvailabiltyEndTime');
+    shaka.log.debug(
+        'wallClockTime > segmentAvailabiltyEndTime',
+        'wallClockTime=' + wallClockTime,
+        'segmentAvailabiltyEndTime=' + segmentAvailabiltyEndTime);
     return null;
   }
 
