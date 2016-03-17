@@ -77,7 +77,7 @@ describe('StreamingEngine', function() {
     originalSetTimeout = window.setTimeout;
     Util = shaka.test.Util;
     originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;  // ms
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 35000;  // ms
   });
 
   beforeEach(function() {

@@ -44,16 +44,23 @@ goog.provide('shaka.test.Util');
  * variables in Jasmine's Clock implementation.
  *
  * @param {number} n The number of rounds to perform.
- * @param {function(function(), number)=} opt_setTimeout
+ * @param {function(function(), number)} setTimeout
  * @return {!Promise}
  * TODO: Cleanup with patch to jasmine-core.
  */
-shaka.test.Util.processInstantaneousOperations = function(n, opt_setTimeout) {
-  if (n <= 0) return Promise.resolve();
-  return shaka.test.Util.delay(0.001, opt_setTimeout).then(function() {
+shaka.test.Util.processInstantaneousOperations = function(n, setTimeout) {
+  var p = new shaka.util.PublicPromise();
+  var inner = function() {
     jasmine.clock().tick(0);
-    return shaka.test.Util.processInstantaneousOperations(--n, opt_setTimeout);
-  });
+    n -= 1;
+    if (n <= 0) {
+      p.resolve();
+    } else {
+      setTimeout(inner, 100);
+    }
+  };
+  inner();
+  return p;
 };
 
 
@@ -63,22 +70,22 @@ shaka.test.Util.processInstantaneousOperations = function(n, opt_setTimeout) {
  * opt_onTick just before each tick if it's specified.
  *
  * @param {number} duration The number of seconds of simulated time.
- * @param {function(function(), number)=} opt_setTimeout
+ * @param {function(function(), number)} setTimeout
  * @param {function(number)=} opt_onTick
  * @return {!Promise} A promise which resolves after |duration| seconds of
  *   simulated time.
  */
-shaka.test.Util.fakeEventLoop = function(duration, opt_setTimeout, opt_onTick) {
+shaka.test.Util.fakeEventLoop = function(duration, setTimeout, opt_onTick) {
   var async = Promise.resolve();
   for (var time = 0; time < duration; ++time) {
-    async = async.then(function() {
-      // We shouldn't need more than 5 rounds.
-      return shaka.test.Util.processInstantaneousOperations(5, opt_setTimeout);
-    }).then(function(currentTime) {
-      if (opt_onTick)
-        opt_onTick(currentTime);
-      jasmine.clock().tick(1000);
-      return Promise.resolve();
+    async = async.then(function(currentTime) {
+      // We shouldn't need more than 6 rounds.
+      var p = shaka.test.Util.processInstantaneousOperations(6, setTimeout);
+      return p.then(function() {
+        if (opt_onTick)
+          opt_onTick(currentTime);
+        jasmine.clock().tick(1000);
+      });
     }.bind(null, time));
   }
   return async;

@@ -16,6 +16,7 @@
  */
 
 describe('SimpleAbrManager', function() {
+  var originalTimeout;
   var originalSetTimeout;
   var startupInterval;
   var switchCallback;
@@ -27,6 +28,9 @@ describe('SimpleAbrManager', function() {
   beforeAll(function() {
     originalSetTimeout = window.setTimeout;
     startupInterval = shaka.abr.SimpleAbrManager.STARTUP_INTERVAL_MS / 1000.0;
+
+    originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 15000;  // ms
   });
 
   beforeEach(function() {
@@ -67,6 +71,10 @@ describe('SimpleAbrManager', function() {
   afterEach(function() {
     abrManager.stop();
     jasmine.clock().uninstall();
+  });
+
+  afterAll(function() {
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
   });
 
   it('can choose audio and video Streams right away', function() {
