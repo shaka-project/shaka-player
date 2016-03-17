@@ -545,23 +545,24 @@ describe('DrmEngine', function() {
       };
       drmEngine.configure(config);
 
-      var session1 = createMockSession();
-      var session2 = createMockSession();
+      var session = createMockSession();
       mockMediaKeys.createSession.and.callFake(function() {
-        var index = mockMediaKeys.createSession.calls.count() - 1;
-        return [session1, session2][index];
+        expect(mockMediaKeys.createSession.calls.count()).toBe(1);
+        return session;
       });
 
       initAndAttach().then(function() {
-        expect(mockMediaKeys.createSession.calls.count()).toBe(2);
-        expect(session1.generateRequest).
-            toHaveBeenCalledWith('webm', jasmine.any(ArrayBuffer));
-        expect(session2.generateRequest).
-            toHaveBeenCalledWith('webm', jasmine.any(ArrayBuffer));
-        var keyId1 = shaka.util.Uint8ArrayUtils.toHex(
-            new Uint8Array(session1.generateRequest.calls.argsFor(0)[1]));
-        var keyId2 = shaka.util.Uint8ArrayUtils.toHex(
-            new Uint8Array(session2.generateRequest.calls.argsFor(0)[1]));
+        var Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
+
+        expect(session.generateRequest).
+            toHaveBeenCalledWith('keyids', jasmine.any(ArrayBuffer));
+
+        var initData = JSON.parse(shaka.util.StringUtils.fromUTF8(
+            session.generateRequest.calls.argsFor(0)[1]));
+        var keyId1 = Uint8ArrayUtils.toHex(
+            Uint8ArrayUtils.fromBase64(initData.kids[0]));
+        var keyId2 = Uint8ArrayUtils.toHex(
+            Uint8ArrayUtils.fromBase64(initData.kids[1]));
         expect(keyId1).toBe('deadbeefdeadbeefdeadbeefdeadbeef');
         expect(keyId2).toBe('02030507011013017019023029031037');
       }).catch(fail).then(done);
