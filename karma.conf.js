@@ -122,7 +122,13 @@ module.exports = function(config) {
       WebDriver_OperaMac: {
         base: 'WebDriver',
         config: {hostname: 'localhost', port: 4444},
-        browserName: 'opera',
+        // This is not obvious, but as of 2016-03-17, operadriver responds to
+        // browserName 'chrome', not 'opera'.  It still launches opera.  This
+        // should be solveable once operachromiumdriver releases sources.
+        // See:
+        //   https://github.com/operasoftware/operachromiumdriver/issues/8
+        //   http://stackoverflow.com/a/27387949
+        browserName: 'chrome',
         pseudoActivityInterval: 20000
       },
       // }}}
