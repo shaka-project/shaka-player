@@ -317,6 +317,7 @@ describe('DashParser.ContentProtection', function() {
     var expected = buildExpectedManifest(
         // The order does not matter here, so use arrayContaining.
         /** @type {!Array.<!Object>} */(jasmine.arrayContaining([
+          buildDrmInfo('org.w3.clearkey'),
           buildDrmInfo('com.widevine.alpha'),
           buildDrmInfo('com.microsoft.playready'),
           buildDrmInfo('com.adobe.primetime')

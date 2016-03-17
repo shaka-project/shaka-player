@@ -576,8 +576,7 @@ describe('DrmEngine', function() {
         expect(logErrorSpy).toHaveBeenCalled();
         shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
             shaka.util.Error.Category.DRM,
-            shaka.util.Error.Code.NO_LICENSE_SERVER_SPECIFIED,
-            'drm.abc'));
+            shaka.util.Error.Code.REQUESTED_KEY_SYSTEMS_UNAVAILABLE));
       }).then(done);
     });
 
