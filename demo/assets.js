@@ -15,11 +15,17 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.demo.Assets');
+
+// Types and enums {{{
+/**
+ * A container for demo assets.
+ * @class
+ */
+var shakaAssets = {};
 
 
 /** @enum {string} */
-shaka.demo.Assets.Encoder = {
+shakaAssets.Encoder = {
   UNKNOWN: 'Unknown',
   EDASH_PACKAGER: 'eDash packager',
   YOUTUBE: 'YouTube',
@@ -34,7 +40,7 @@ shaka.demo.Assets.Encoder = {
 
 
 /** @enum {string} */
-shaka.demo.Assets.Source = {
+shakaAssets.Source = {
   SHAKA: 'Shaka',
   YOUTUBE: 'YouTube',
   AXINOM: 'Axinom',
@@ -49,7 +55,7 @@ shaka.demo.Assets.Source = {
 
 
 /** @enum {string} */
-shaka.demo.Assets.KeySystem = {
+shakaAssets.KeySystem = {
   CLEAR_KEY: 'org.w3.clearkey',
   WIDEVINE: 'com.widevine.alpha',
   PLAYREADY: 'com.microsoft.playready'
@@ -57,7 +63,7 @@ shaka.demo.Assets.KeySystem = {
 
 
 /** @enum {string} */
-shaka.demo.Assets.Feature = {
+shakaAssets.Feature = {
   SEGMENT_BASE: 'SegmentBase',
   SEGMENT_LIST_DURATION: 'SegmentList w/ @duration',
   SEGMENT_LIST_TIMELINE: 'SegmentList w/ SegmentTimeline',
@@ -99,18 +105,19 @@ shaka.demo.Assets.Feature = {
  * @property {string} lang
  *   The language of the text (e.g. 'en').
  */
-shaka.demo.Assets.ExtraText;
+shakaAssets.ExtraText;
 
 
 /**
  * @typedef {{
  *   name: string,
  *   manifestUri: string,
- *   extraText: (!Array.<shaka.demo.Assets.ExtraText>|undefined),
+ *   extraText: (!Array.<shakaAssets.ExtraText>|undefined),
  *
- *   encoder: shaka.demo.Assets.Encoder,
- *   drm: !Array.<shaka.demo.Assets.KeySystem>,
- *   features: !Array.<shaka.demo.Assets.Feature>,
+ *   encoder: shakaAssets.Encoder,
+ *   source: shakaAssets.Source,
+ *   drm: !Array.<shakaAssets.KeySystem>,
+ *   features: !Array.<shakaAssets.Feature>,
  *
  *   licenseServers: (!Object.<string, string>|undefined),
  *   licenseRequestHeaders: (!Object.<string, string>|undefined),
@@ -124,14 +131,16 @@ shaka.demo.Assets.ExtraText;
  *   same if the asset is encoded different ways (or by different encoders).
  * @property {string} manifestUri
  *   The URI of the manifest.
- * @property {(!Array.<shaka.demo.Assets.ExtraText>|undefined)} extraText
+ * @property {(!Array.<shakaAssets.ExtraText>|undefined)} extraText
  *   (optional) An array of extra text sources (e.g. external captions).
  *
- * @property {shaka.demo.Assets.Encoder} encoder
+ * @property {shakaAssets.Encoder} encoder
  *   The encoder that created the asset.
- * @property {!Array.<shaka.demo.Assets.KeySystem>} drm
+ * @property {shakaAssets.Source} source
+ *   The source of the asset.
+ * @property {!Array.<shakaAssets.KeySystem>} drm
  *   An array of key-systems that the asset uses.
- * @property {!Array.<shaka.demo.Assets.Feature>} features
+ * @property {!Array.<shakaAssets.Feature>} features
  *   An array of features that this asset has.
  *
  * @property {(!Object.<string, string>|undefined)} licenseServers
@@ -146,15 +155,17 @@ shaka.demo.Assets.ExtraText;
  * @property {(!Object.<string, string>|undefined)} clearKeys
  *   A map of key-id to key to use with clear-key encryption.
  */
-shaka.demo.Assets.AssetInfo;
+shakaAssets.AssetInfo;
+// }}}
 
 
+// Custom callbacks {{{
 /**
  * A license post-processor to process YouTube license repsponses.
  * @param {shaka.net.NetworkingEngine.RequestType} type
  * @param {shakaExtern.Response} response
  */
-shaka.demo.Assets.YouTubePostProcessor = function(type, response) {
+shakaAssets.YouTubePostProcessor = function(type, response) {
   if (type != shaka.net.NetworkingEngine.RequestType.LICENSE)
     return;
 
@@ -180,7 +191,7 @@ shaka.demo.Assets.YouTubePostProcessor = function(type, response) {
  * @param {!Node} node
  * @return {Array.<shakaExtern.DrmInfo>}
  */
-shaka.demo.Assets.YouTubeCallback = function(node) {
+shakaAssets.YouTubeCallback = function(node) {
   var schemeIdUri = node.getAttribute('schemeIdUri');
   if (schemeIdUri == 'http://youtube.com/drm/2012/10/10') {
     /** @type {!Array.<shakaExtern.DrmInfo>} */
@@ -233,60 +244,61 @@ shaka.demo.Assets.YouTubeCallback = function(node) {
 
   return null;
 };
+// }}}
 
 
-/** @const {!Array.<shaka.demo.Assets.AssetInfo>} */
-shaka.demo.Assets.TestAssets = [
+/** @const {!Array.<shakaAssets.AssetInfo>} */
+shakaAssets.testAssets = [
   // Shaka assets {{{
   {
     name: 'Angel One (multicodec, multilingual)',
     manifestUri: '//storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd',  // gjslint: disable=110
 
-    encoder: shaka.demo.Assets.Encoder.EDASH_PACKAGER,
-    source: shaka.demo.Assets.Source.SHAKA,
+    encoder: shakaAssets.Encoder.EDASH_PACKAGER,
+    source: shakaAssets.Source.SHAKA,
     drm: [],
     features: [
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.MULTIPLE_LANGUAGES,
-      shaka.demo.Assets.Feature.SEGMENT_BASE,
-      shaka.demo.Assets.Feature.SUBTITLES,
-      shaka.demo.Assets.Feature.WEBM,
-      shaka.demo.Assets.Feature.WEBVTT
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.MULTIPLE_LANGUAGES,
+      shakaAssets.Feature.SEGMENT_BASE,
+      shakaAssets.Feature.SUBTITLES,
+      shakaAssets.Feature.WEBM,
+      shakaAssets.Feature.WEBVTT
     ]
   },
   {
     name: 'Sintel 4k (multicodec)',
     manifestUri: '//storage.googleapis.com/shaka-demo-assets/sintel/dash.mpd',  // gjslint: disable=110
 
-    encoder: shaka.demo.Assets.Encoder.EDASH_PACKAGER,
-    source: shaka.demo.Assets.Source.SHAKA,
+    encoder: shakaAssets.Encoder.EDASH_PACKAGER,
+    source: shakaAssets.Source.SHAKA,
     drm: [],
     features: [
-      shaka.demo.Assets.Feature.HIGH_DEFINITION,
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.SEGMENT_BASE,
-      shaka.demo.Assets.Feature.SUBTITLES,
-      shaka.demo.Assets.Feature.ULTRA_HIGH_DEFINITION,
-      shaka.demo.Assets.Feature.WEBM,
-      shaka.demo.Assets.Feature.WEBVTT
+      shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_BASE,
+      shakaAssets.Feature.SUBTITLES,
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
+      shakaAssets.Feature.WEBM,
+      shakaAssets.Feature.WEBVTT
     ]
   },
   {
     name: 'Sintel 4k (multicodec, Widevine)',
     manifestUri: '//storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd',  // gjslint: disable=110
 
-    encoder: shaka.demo.Assets.Encoder.EDASH_PACKAGER,
-    source: shaka.demo.Assets.Source.SHAKA,
-    drm: [shaka.demo.Assets.KeySystem.WIDEVINE],
+    encoder: shakaAssets.Encoder.EDASH_PACKAGER,
+    source: shakaAssets.Source.SHAKA,
+    drm: [shakaAssets.KeySystem.WIDEVINE],
     features: [
-      shaka.demo.Assets.Feature.HIGH_DEFINITION,
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.PSSH,
-      shaka.demo.Assets.Feature.SEGMENT_BASE,
-      shaka.demo.Assets.Feature.SUBTITLES,
-      shaka.demo.Assets.Feature.ULTRA_HIGH_DEFINITION,
-      shaka.demo.Assets.Feature.WEBM,
-      shaka.demo.Assets.Feature.WEBVTT
+      shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.PSSH,
+      shakaAssets.Feature.SEGMENT_BASE,
+      shakaAssets.Feature.SUBTITLES,
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
+      shakaAssets.Feature.WEBM,
+      shakaAssets.Feature.WEBVTT
     ],
 
     licenseServers: {
@@ -297,14 +309,14 @@ shaka.demo.Assets.TestAssets = [
     name: 'Heliocentrism (multicodec, multiperiod)',
     manifestUri: '//storage.googleapis.com/shaka-demo-assets/heliocentrism/heliocentrism.mpd',  // gjslint: disable=110
 
-    encoder: shaka.demo.Assets.Encoder.EDASH_PACKAGER,
-    source: shaka.demo.Assets.Source.SHAKA,
+    encoder: shakaAssets.Encoder.EDASH_PACKAGER,
+    source: shakaAssets.Source.SHAKA,
     drm: [],
     features: [
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.MULTIPERIOD,
-      shaka.demo.Assets.Feature.SEGMENT_BASE,
-      shaka.demo.Assets.Feature.WEBM
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.MULTIPERIOD,
+      shakaAssets.Feature.SEGMENT_BASE,
+      shakaAssets.Feature.WEBM
     ]
   },
   // }}}
@@ -315,27 +327,27 @@ shaka.demo.Assets.TestAssets = [
     name: 'Car',
     manifestUri: '//yt-dash-mse-test.commondatastorage.googleapis.com/media/car-20120827-manifest.mpd',  // gjslint: disable=110
 
-    encoder: shaka.demo.Assets.Encoder.YOUTUBE,
-    source: shaka.demo.Assets.Source.YOUTUBE,
+    encoder: shakaAssets.Encoder.YOUTUBE,
+    source: shakaAssets.Source.YOUTUBE,
     drm: [],
     features: [
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.SEGMENT_BASE
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_BASE
     ]
   },
   {
     name: 'Car ClearKey',
     manifestUri: '//yt-dash-mse-test.commondatastorage.googleapis.com/media/car_cenc-20120827-manifest.mpd',  // gjslint: disable=110
 
-    encoder: shaka.demo.Assets.Encoder.YOUTUBE,
-    source: shaka.demo.Assets.Source.YOUTUBE,
-    drm: [shaka.demo.Assets.KeySystem.CLEAR_KEY],
+    encoder: shakaAssets.Encoder.YOUTUBE,
+    source: shakaAssets.Source.YOUTUBE,
+    drm: [shakaAssets.KeySystem.CLEAR_KEY],
     features: [
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.SEGMENT_BASE
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_BASE
     ],
 
-    drmCallback: shaka.demo.Assets.YouTubeCallback,
+    drmCallback: shakaAssets.YouTubeCallback,
     clearKeys: {
       '60061e017e477e877e57d00d1ed00d1e': '1a8a2095e4deb2d29ec816ac7bae2082'
     }
@@ -344,31 +356,31 @@ shaka.demo.Assets.TestAssets = [
     name: 'Feelings',
     manifestUri: '//yt-dash-mse-test.commondatastorage.googleapis.com/media/feelings_vp9-20130806-manifest.mpd',  // gjslint: disable=110
 
-    encoder: shaka.demo.Assets.Encoder.YOUTUBE,
-    source: shaka.demo.Assets.Source.YOUTUBE,
+    encoder: shakaAssets.Encoder.YOUTUBE,
+    source: shakaAssets.Source.YOUTUBE,
     drm: [],
     features: [
-      shaka.demo.Assets.Feature.SEGMENT_BASE,
-      shaka.demo.Assets.Feature.WEBM
+      shakaAssets.Feature.SEGMENT_BASE,
+      shakaAssets.Feature.WEBM
     ]
   },
   {
     name: 'Oops multi-DRM',
     manifestUri: '//yt-dash-mse-test.commondatastorage.googleapis.com/media/oops_cenc-20121114-signedlicenseurl-manifest.mpd',  // gjslint: disable=110
 
-    encoder: shaka.demo.Assets.Encoder.YOUTUBE,
-    source: shaka.demo.Assets.Source.YOUTUBE,
+    encoder: shakaAssets.Encoder.YOUTUBE,
+    source: shakaAssets.Source.YOUTUBE,
     drm: [
-      shaka.demo.Assets.KeySystem.WIDEVINE,
-      shaka.demo.Assets.KeySystem.PLAYREADY
+      shakaAssets.KeySystem.WIDEVINE,
+      shakaAssets.KeySystem.PLAYREADY
     ],
     features: [
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.SEGMENT_BASE
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_BASE
     ],
 
-    drmCallback: shaka.demo.Assets.YouTubeCallback,
-    licenseProcessor: shaka.demo.Assets.YouTubePostProcessor
+    drmCallback: shakaAssets.YouTubeCallback,
+    licenseProcessor: shakaAssets.YouTubePostProcessor
   },
   // }}}
 
@@ -378,17 +390,17 @@ shaka.demo.Assets.TestAssets = [
     name: 'Multi-DRM',
     manifestUri: '//media.axprod.net/TestVectors/v6-MultiDRM/Manifest.mpd',
 
-    encoder: shaka.demo.Assets.Encoder.AXINOM,
-    source: shaka.demo.Assets.Source.AXINOM,
+    encoder: shakaAssets.Encoder.AXINOM,
+    source: shakaAssets.Source.AXINOM,
     drm: [
-      shaka.demo.Assets.KeySystem.WIDEVINE,
-      shaka.demo.Assets.KeySystem.PLAYREADY
+      shakaAssets.KeySystem.WIDEVINE,
+      shakaAssets.KeySystem.PLAYREADY
     ],
     features: [
-      shaka.demo.Assets.Feature.HIGH_DEFINITION,
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.SEGMENT_TEMPLATE_DURATION,
-      shaka.demo.Assets.Feature.ULTRA_HIGH_DEFINITION
+      shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION
     ],
 
     licenseServers: {
@@ -403,18 +415,18 @@ shaka.demo.Assets.TestAssets = [
     name: 'Multi-DRM, multi-key',
     manifestUri: '//media.axprod.net/TestVectors/v6-MultiDRM-MultiKey/Manifest.mpd',  // gjslint: disable=110
 
-    encoder: shaka.demo.Assets.Encoder.AXINOM,
-    source: shaka.demo.Assets.Source.AXINOM,
+    encoder: shakaAssets.Encoder.AXINOM,
+    source: shakaAssets.Source.AXINOM,
     drm: [
-      shaka.demo.Assets.KeySystem.WIDEVINE,
-      shaka.demo.Assets.KeySystem.PLAYREADY
+      shakaAssets.KeySystem.WIDEVINE,
+      shakaAssets.KeySystem.PLAYREADY
     ],
     features: [
-      shaka.demo.Assets.Feature.HIGH_DEFINITION,
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.MULTIKEY,
-      shaka.demo.Assets.Feature.SEGMENT_TEMPLATE_DURATION,
-      shaka.demo.Assets.Feature.ULTRA_HIGH_DEFINITION
+      shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.MULTIKEY,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION
     ],
 
     licenseServers: {
@@ -429,19 +441,19 @@ shaka.demo.Assets.TestAssets = [
     name: 'Multi-DRM, multi-key, multi-Period',
     manifestUri: '//media.axprod.net/TestVectors/v6-MultiDRM-MultiKey-MultiPeriod/Manifest.mpd',  // gjslint: disable=110
 
-    encoder: shaka.demo.Assets.Encoder.AXINOM,
-    source: shaka.demo.Assets.Source.AXINOM,
+    encoder: shakaAssets.Encoder.AXINOM,
+    source: shakaAssets.Source.AXINOM,
     drm: [
-      shaka.demo.Assets.KeySystem.WIDEVINE,
-      shaka.demo.Assets.KeySystem.PLAYREADY
+      shakaAssets.KeySystem.WIDEVINE,
+      shakaAssets.KeySystem.PLAYREADY
     ],
     features: [
-      shaka.demo.Assets.Feature.HIGH_DEFINITION,
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.MULTIKEY,
-      shaka.demo.Assets.Feature.MULTIPERIOD,
-      shaka.demo.Assets.Feature.SEGMENT_TEMPLATE_DURATION,
-      shaka.demo.Assets.Feature.ULTRA_HIGH_DEFINITION
+      shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.MULTIKEY,
+      shakaAssets.Feature.MULTIPERIOD,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION
     ],
 
     licenseServers: {
@@ -456,15 +468,15 @@ shaka.demo.Assets.TestAssets = [
     name: 'Multi-Period',
     manifestUri: '//media.axprod.net/TestVectors/v6-Clear/MultiPeriod_Manifest.mpd',  // gjslint: disable=110
 
-    encoder: shaka.demo.Assets.Encoder.AXINOM,
-    source: shaka.demo.Assets.Source.AXINOM,
+    encoder: shakaAssets.Encoder.AXINOM,
+    source: shakaAssets.Source.AXINOM,
     drm: [],
     features: [
-      shaka.demo.Assets.Feature.HIGH_DEFINITION,
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.MULTIPERIOD,
-      shaka.demo.Assets.Feature.SEGMENT_TEMPLATE_DURATION,
-      shaka.demo.Assets.Feature.ULTRA_HIGH_DEFINITION
+      shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.MULTIPERIOD,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION
     ]
   },
   // }}}
@@ -475,32 +487,32 @@ shaka.demo.Assets.TestAssets = [
     name: 'Tears of Steel',
     manifestUri: '//demo.unified-streaming.com/video/tears-of-steel/tears-of-steel.ism/.mpd',  // gjslint: disable=110
 
-    encoder: shaka.demo.Assets.Encoder.UNIFIED_STREAMING,
-    source: shaka.demo.Assets.Source.UNIFIED_STREAMING,
+    encoder: shakaAssets.Encoder.UNIFIED_STREAMING,
+    source: shakaAssets.Source.UNIFIED_STREAMING,
     drm: [],
     features: [
-      shaka.demo.Assets.Feature.HIGH_DEFINITION,
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.SEGMENT_TEMPLATE_TIMELINE,
-      shaka.demo.Assets.Feature.ULTRA_HIGH_DEFINITION
+      shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION
     ]
   },
   {
     name: 'Tears of Steel (encrypted)',
     manifestUri: '//demo.unified-streaming.com/video/tears-of-steel/tears-of-steel-dash-widevine.ism/.mpd',  // gjslint: disable=110
 
-    encoder: shaka.demo.Assets.Encoder.UNIFIED_STREAMING,
-    source: shaka.demo.Assets.Source.UNIFIED_STREAMING,
+    encoder: shakaAssets.Encoder.UNIFIED_STREAMING,
+    source: shakaAssets.Source.UNIFIED_STREAMING,
     drm: [
       // TODO: The PlayReady version of this is being rejected by Edge & IE.
-      // shaka.demo.Assets.KeySystem.PLAYREADY,
-      shaka.demo.Assets.KeySystem.WIDEVINE
+      // shakaAssets.KeySystem.PLAYREADY,
+      shakaAssets.KeySystem.WIDEVINE
     ],
     features: [
-      shaka.demo.Assets.Feature.HIGH_DEFINITION,
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.SEGMENT_TEMPLATE_TIMELINE,
-      shaka.demo.Assets.Feature.ULTRA_HIGH_DEFINITION
+      shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION
     ],
 
     licenseServers: {
@@ -512,18 +524,18 @@ shaka.demo.Assets.TestAssets = [
     name: 'Tears of Steel (subtitles)',
     manifestUri: '//demo.unified-streaming.com/video/tears-of-steel/tears-of-steel-ru.ism/.mpd',  // gjslint: disable=110
 
-    encoder: shaka.demo.Assets.Encoder.UNIFIED_STREAMING,
-    source: shaka.demo.Assets.Source.UNIFIED_STREAMING,
+    encoder: shakaAssets.Encoder.UNIFIED_STREAMING,
+    source: shakaAssets.Source.UNIFIED_STREAMING,
     drm: [],
     features: [
-      shaka.demo.Assets.Feature.EMBEDDED_TEXT,
-      shaka.demo.Assets.Feature.HIGH_DEFINITION,
-      shaka.demo.Assets.Feature.SEGMENT_TEMPLATE_TIMELINE,
-      shaka.demo.Assets.Feature.SEGMENTED_TEXT,
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.SUBTITLES,
-      shaka.demo.Assets.Feature.TTML,
-      shaka.demo.Assets.Feature.ULTRA_HIGH_DEFINITION
+      shakaAssets.Feature.EMBEDDED_TEXT,
+      shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
+      shakaAssets.Feature.SEGMENTED_TEXT,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SUBTITLES,
+      shakaAssets.Feature.TTML,
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION
     ]
   },
   // }}}
@@ -534,38 +546,38 @@ shaka.demo.Assets.TestAssets = [
     name: 'Big Buck Bunny',
     manifestUri: '//dash.edgesuite.net/dash264/TestCases/1c/qualcomm/2/MultiRate.mpd',  // gjslint: disable=110
 
-    encoder: shaka.demo.Assets.Encoder.UNKNOWN,
-    source: shaka.demo.Assets.Source.DASH_IF,
+    encoder: shakaAssets.Encoder.UNKNOWN,
+    source: shakaAssets.Source.DASH_IF,
     drm: [],
     features: [
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.SEGMENT_TEMPLATE_TIMELINE
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE
     ]
   },
   {
     name: 'Live sim (2s segments)',
     manifestUri: '//vm2.dashif.org/livesim/modulo_10/testpic_2s/Manifest.mpd',
 
-    encoder: shaka.demo.Assets.Encoder.UNKNOWN,
-    source: shaka.demo.Assets.Source.DASH_IF,
+    encoder: shakaAssets.Encoder.UNKNOWN,
+    source: shakaAssets.Source.DASH_IF,
     drm: [],
     features: [
-      shaka.demo.Assets.Feature.LIVE,
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.SEGMENT_TEMPLATE_TIMELINE
+      shakaAssets.Feature.LIVE,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE
     ]
   },
   {
     name: 'Live sim (6s segments)',
     manifestUri: '//vm2.dashif.org/livesim/modulo_10/testpic_6s/Manifest.mpd',
 
-    encoder: shaka.demo.Assets.Encoder.UNKNOWN,
-    source: shaka.demo.Assets.Source.DASH_IF,
+    encoder: shakaAssets.Encoder.UNKNOWN,
+    source: shakaAssets.Source.DASH_IF,
     drm: [],
     features: [
-      shaka.demo.Assets.Feature.LIVE,
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.SEGMENT_TEMPLATE_TIMELINE
+      shakaAssets.Feature.LIVE,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE
     ]
   },
   // }}}
@@ -576,13 +588,13 @@ shaka.demo.Assets.TestAssets = [
     name: 'Big Buck Bunny',
     manifestUri: '//wowzaec2demo.streamlock.net/live/bigbuckbunny/manifest_mpm4sav_mvtime.mpd',  // gjslint: disable=110
 
-    encoder: shaka.demo.Assets.Encoder.WOWZA,
-    source: shaka.demo.Assets.Encoder.WOWZA,
+    encoder: shakaAssets.Encoder.WOWZA,
+    source: shakaAssets.Encoder.WOWZA,
     drm: [],
     features: [
-      shaka.demo.Assets.Feature.LIVE,
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.SEGMENT_TEMPLATE_TIMELINE
+      shakaAssets.Feature.LIVE,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE
     ]
   },
   // }}}
@@ -593,12 +605,12 @@ shaka.demo.Assets.TestAssets = [
     name: 'Art of Motion',
     manifestUri: '//bitdash-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd',  // gjslint: disable=110
 
-    encoder: shaka.demo.Assets.Encoder.BITCODIN,
-    source: shaka.demo.Assets.Source.BITCODIN,
+    encoder: shakaAssets.Encoder.BITCODIN,
+    source: shakaAssets.Source.BITCODIN,
     drm: [],
     features: [
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.SEGMENT_TEMPLATE_DURATION
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION
     ]
   },
   // }}}
@@ -609,12 +621,12 @@ shaka.demo.Assets.TestAssets = [
     name: 'Big Buck Bunny',
     manifestUri: '//video.wmspanel.com/local/raw/BigBuckBunny_320x180.mp4/manifest.mpd',  // gjslint: disable=110
 
-    encoder: shaka.demo.Assets.Encoder.NIMBLE_STREAMER,
-    source: shaka.demo.Assets.Source.NIMBLE_STREAMER,
+    encoder: shakaAssets.Encoder.NIMBLE_STREAMER,
+    source: shakaAssets.Source.NIMBLE_STREAMER,
     drm: [],
     features: [
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.SEGMENT_TEMPLATE_TIMELINE
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE
     ]
   },
   // }}}
@@ -625,27 +637,27 @@ shaka.demo.Assets.TestAssets = [
     name: 'Azure Trailer',
     manifestUri: '//amssamples.streaming.mediaservices.windows.net/91492735-c523-432b-ba01-faba6c2206a2/AzureMediaServicesPromo.ism/manifest(format=mpd-time-csf)',  // gjslint: disable=110
 
-    encoder: shaka.demo.Assets.Encoder.AZURE_MEDIA_SERVICES,
-    source: shaka.demo.Assets.Source.AZURE_MEDIA_SERVICES,
+    encoder: shakaAssets.Encoder.AZURE_MEDIA_SERVICES,
+    source: shakaAssets.Source.AZURE_MEDIA_SERVICES,
     drm: [],
     features: [
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.SEGMENT_TEMPLATE_TIMELINE
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE
     ]
   },
   {
     name: 'Big Buck Bunny',
     manifestUri: '//amssamples.streaming.mediaservices.windows.net/622b189f-ec39-43f2-93a2-201ac4e31ce1/BigBuckBunny.ism/manifest(format=mpd-time-csf)',  // gjslint: disable=110
 
-    encoder: shaka.demo.Assets.Encoder.AZURE_MEDIA_SERVICES,
-    source: shaka.demo.Assets.Source.AZURE_MEDIA_SERVICES,
+    encoder: shakaAssets.Encoder.AZURE_MEDIA_SERVICES,
+    source: shakaAssets.Source.AZURE_MEDIA_SERVICES,
     drm: [
-      shaka.demo.Assets.KeySystem.WIDEVINE,
-      shaka.demo.Assets.KeySystem.PLAYREADY
+      shakaAssets.KeySystem.WIDEVINE,
+      shakaAssets.KeySystem.PLAYREADY
     ],
     features: [
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.SEGMENT_TEMPLATE_TIMELINE
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE
     ],
 
     licenseServers: {
@@ -674,14 +686,14 @@ shaka.demo.Assets.TestAssets = [
       }
     ],
 
-    encoder: shaka.demo.Assets.Encoder.AZURE_MEDIA_SERVICES,
-    source: shaka.demo.Assets.Source.AZURE_MEDIA_SERVICES,
+    encoder: shakaAssets.Encoder.AZURE_MEDIA_SERVICES,
+    source: shakaAssets.Source.AZURE_MEDIA_SERVICES,
     drm: [],
     features: [
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.SEGMENT_TEMPLATE_TIMELINE,
-      shaka.demo.Assets.Feature.SUBTITLES,
-      shaka.demo.Assets.Feature.WEBVTT
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
+      shakaAssets.Feature.SUBTITLES,
+      shakaAssets.Feature.WEBVTT
     ]
   },
   // }}}
@@ -694,61 +706,61 @@ shaka.demo.Assets.TestAssets = [
     name: 'live profile',
     manifestUri: '//download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-live/mp4-live-mpd-AV-BS.mpd',  // gjslint: disable=110
 
-    encoder: shaka.demo.Assets.Encoder.MP4BOX,
-    source: shaka.demo.Assets.Source.GPAC,
+    encoder: shakaAssets.Encoder.MP4BOX,
+    source: shakaAssets.Source.GPAC,
     drm: [],
     features: [
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.SEGMENT_TEMPLATE_DURATION
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION
     ]
   },
   {
     name: 'live profile with five periods',
     manifestUri: '//download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-live-periods/mp4-live-periods-mpd.mpd',  // gjslint: disable=110
 
-    encoder: shaka.demo.Assets.Encoder.MP4BOX,
-    source: shaka.demo.Assets.Source.GPAC,
+    encoder: shakaAssets.Encoder.MP4BOX,
+    source: shakaAssets.Source.GPAC,
     drm: [],
     features: [
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.MULTIPERIOD,
-      shaka.demo.Assets.Feature.SEGMENT_TEMPLATE_DURATION
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.MULTIPERIOD,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION
     ]
   },
   {
     name: 'main profile, single file',
     manifestUri: '//download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-main-single/mp4-main-single-mpd-AV-NBS.mpd',  // gjslint: disable=110
 
-    encoder: shaka.demo.Assets.Encoder.MP4BOX,
-    source: shaka.demo.Assets.Source.GPAC,
+    encoder: shakaAssets.Encoder.MP4BOX,
+    source: shakaAssets.Source.GPAC,
     drm: [],
     features: [
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.SEGMENT_LIST_DURATION
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_LIST_DURATION
     ]
   },
   {
     name: 'main profile, mutiple files',
     manifestUri: '//download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-main-multi/mp4-main-multi-mpd-AV-BS.mpd',  // gjslint: disable=110
 
-    encoder: shaka.demo.Assets.Encoder.MP4BOX,
-    source: shaka.demo.Assets.Source.GPAC,
+    encoder: shakaAssets.Encoder.MP4BOX,
+    source: shakaAssets.Source.GPAC,
     drm: [],
     features: [
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.SEGMENT_LIST_DURATION
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_LIST_DURATION
     ]
   },
   {
     name: 'onDemand profile',
     manifestUri: '//download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-onDemand/mp4-onDemand-mpd-AV.mpd',  // gjslint: disable=110
 
-    encoder: shaka.demo.Assets.Encoder.MP4BOX,
-    source: shaka.demo.Assets.Source.GPAC,
+    encoder: shakaAssets.Encoder.MP4BOX,
+    source: shakaAssets.Source.GPAC,
     drm: [],
     features: [
-      shaka.demo.Assets.Feature.MP4,
-      shaka.demo.Assets.Feature.SEGMENT_BASE
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_BASE
     ]
   }
   // TODO: Add open GOP and gradual decoding refresh assets once
