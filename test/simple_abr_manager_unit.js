@@ -30,7 +30,7 @@ describe('SimpleAbrManager', function() {
     startupInterval = shaka.abr.SimpleAbrManager.STARTUP_INTERVAL_MS / 1000.0;
 
     originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 15000;  // ms
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;  // ms
   });
 
   beforeEach(function() {

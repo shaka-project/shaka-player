@@ -72,13 +72,18 @@ shaka.test.Util.processInstantaneousOperations = function(n, setTimeout) {
  * @param {number} duration The number of seconds of simulated time.
  * @param {function(function(), number)} setTimeout
  * @param {function(number)=} opt_onTick
- * @return {!Promise} A promise which resolves after |duration| seconds of
- *   simulated time.
+ * @return {{ then: function(Function, Function=),
+ *            stop: function() }}
+ * Call stop() on the returned value to stop the loop early.  Call then()
+ * to chain to the end of the loop like a Promise.
  */
 shaka.test.Util.fakeEventLoop = function(duration, setTimeout, opt_onTick) {
   var async = Promise.resolve();
+  var endLoop = false;
   for (var time = 0; time < duration; ++time) {
     async = async.then(function(currentTime) {
+      if (endLoop) return;
+
       // We shouldn't need more than 6 rounds.
       var p = shaka.test.Util.processInstantaneousOperations(6, setTimeout);
       return p.then(function() {
@@ -88,7 +93,10 @@ shaka.test.Util.fakeEventLoop = function(duration, setTimeout, opt_onTick) {
       });
     }.bind(null, time));
   }
-  return async;
+  return {
+    then: function(f, g) { return async.then(f, g); },
+    stop: function() { endLoop = true; }
+  };
 };
 
 
