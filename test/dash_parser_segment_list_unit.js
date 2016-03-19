@@ -272,26 +272,34 @@ describe('DashParser.SegmentList', function() {
     it('shoud be adjusted with presentationTimeOffset', function(done) {
       var source = [
         '<MPD>',
-        ' <Period id="0" start="PT0.000S">',
-        '  <AdaptationSet mimeType="audio/mp4" segmentAlignment="true">',
-        '   <Representation id="1" bandwidth="49000" codecs="mp4a.40.5">',
-        '    <BaseURL>http://example.com</BaseURL>',
-        '    <SegmentList presentationTimeOffset="120" duration="10"' +
-            ' startNumber="1">',
-        '     <SegmentURL media="s-120.mp4" />',
-        '     <SegmentURL media="s-130.mp4" />',
-        '     <SegmentURL media="s-140.mp4" />',
-        '     <SegmentURL media="s-150.mp4" />',
+        '  <Period>',
+        '    <SegmentList>',
+        '      <SegmentURL media="s1.mp4" />',
+        '      <SegmentURL media="s2.mp4" />',
+        '      <SegmentURL media="s3.mp4" />',
+        '      <SegmentURL media="s4.mp4" />',
         '    </SegmentList>',
-        '   </Representation>',
-        '  </AdaptationSet>',
-        ' </Period>',
-        '</MPD>'];
+        '    <AdaptationSet mimeType="video/webm">',
+        '      <Representation>',
+        '        <BaseURL>http://example.com</BaseURL>',
+        '        <SegmentList presentationTimeOffset="10" startNumber="1">',
+        '          <SegmentTimeline>',
+        '            <S d="10" t="50" />',
+        '            <S d="5" />',
+        '            <S d="8" />',
+        '            <S d="7" />',
+        '          </SegmentTimeline>',
+        '        </SegmentList>',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>'
+      ].join('\n');
       var references = [
-        Dash.makeReference('s-120.mp4', 1, 120, 130),
-        Dash.makeReference('s-130.mp4', 2, 130, 140),
-        Dash.makeReference('s-140.mp4', 3, 140, 150),
-        Dash.makeReference('s-150.mp4', 4, 150, 160)
+        Dash.makeReference('s1.mp4', 1, 40, 50),
+        Dash.makeReference('s2.mp4', 2, 50, 55),
+        Dash.makeReference('s3.mp4', 3, 55, 63),
+        Dash.makeReference('s4.mp4', 4, 63, 70)
       ];
 
       Dash.testSegmentIndex(done, source, references);
