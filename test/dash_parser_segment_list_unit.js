@@ -267,5 +267,35 @@ describe('DashParser.SegmentList', function() {
       Dash.testSegmentIndex(done, source, references);
     });
   });
+
+  describe('Segment start', function() {
+    it('shoud be adjusted with presentationTimeOffset', function(done) {
+      var source = [
+        '<MPD>',
+        ' <Period id="0" start="PT0.000S">',
+        '  <AdaptationSet mimeType="audio/mp4" segmentAlignment="true">',
+        '   <Representation id="1" bandwidth="49000" codecs="mp4a.40.5">',
+        '    <BaseURL>http://example.com</BaseURL>',
+        '    <SegmentList presentationTimeOffset="120" duration="10"' +
+            ' startNumber="1">',
+        '     <SegmentURL media="s-120.m4a" />',
+        '     <SegmentURL media="s-130.m4a" />',
+        '     <SegmentURL media="s-140.m4a" />',
+        '     <SegmentURL media="s-150.m4a" />',
+        '    </SegmentList>',
+        '   </Representation>',
+        '  </AdaptationSet>',
+        ' </Period>',
+        '</MPD>'];
+      var references = [
+        Dash.makeReference('s-120.mp4', 1, 120, 130),
+        Dash.makeReference('s-130.mp4', 2, 130, 140),
+        Dash.makeReference('s-140.mp4', 3, 140, 150),
+        Dash.makeReference('s-150.mp4', 4, 150, 160)
+      ];
+
+      Dash.testSegmentIndex(done, source, references);
+    });
+  });
 });
 
