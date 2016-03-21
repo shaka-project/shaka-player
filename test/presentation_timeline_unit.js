@@ -38,69 +38,70 @@ describe('PresentationTimeline', function() {
   describe('getSegmentAvailabilityStart', function() {
     it('returns 0 for VOD', function() {
       setElapsed(0);
-      var timeline1 = new shaka.media.PresentationTimeline(60, null, null, 0);
+      var timeline1 = new shaka.media.PresentationTimeline(
+          60, null, null, 10, 0);
       expect(timeline1.getSegmentAvailabilityStart()).toBe(0);
 
       setElapsed(0);
       var timeline2 = new shaka.media.PresentationTimeline(
-          Number.POSITIVE_INFINITY, null, null, 0);
+          Number.POSITIVE_INFINITY, null, null, 10, 0);
       expect(timeline2.getSegmentAvailabilityStart()).toBe(0);
     });
 
     it('returns the correct time for live without duration', function() {
       setElapsed(0);
       var timeline = new shaka.media.PresentationTimeline(
-          Number.POSITIVE_INFINITY, Date.now() / 1000.0, 20, 0);
+          Number.POSITIVE_INFINITY, Date.now() / 1000.0, 20, 10, 0);
       expect(timeline.getSegmentAvailabilityStart()).toBe(0);
 
-      setElapsed(19);
+      setElapsed(29);
       expect(timeline.getSegmentAvailabilityStart()).toBe(0);
 
-      setElapsed(20);
+      setElapsed(30);
       expect(timeline.getSegmentAvailabilityStart()).toBe(0);
 
-      setElapsed(21);
+      setElapsed(31);
       expect(timeline.getSegmentAvailabilityStart()).toBe(1);
 
-      setElapsed(59);
+      setElapsed(69);
       expect(timeline.getSegmentAvailabilityStart()).toBe(39);
 
-      setElapsed(60);
+      setElapsed(70);
       expect(timeline.getSegmentAvailabilityStart()).toBe(40);
 
-      setElapsed(61);
+      setElapsed(71);
       expect(timeline.getSegmentAvailabilityStart()).toBe(41);
     });
 
     it('returns the correct time for live with duration', function() {
       setElapsed(0);
       var timeline = new shaka.media.PresentationTimeline(
-          60, Date.now() / 1000.0, 20, 0);
+          60, Date.now() / 1000.0, 20, 10, 0);
       expect(timeline.getSegmentAvailabilityStart()).toBe(0);
 
-      setElapsed(19);
+      setElapsed(29);
       expect(timeline.getSegmentAvailabilityStart()).toBe(0);
 
-      setElapsed(20);
+      setElapsed(30);
       expect(timeline.getSegmentAvailabilityStart()).toBe(0);
 
-      setElapsed(21);
+      setElapsed(31);
       expect(timeline.getSegmentAvailabilityStart()).toBe(1);
 
-      setElapsed(59);
+      setElapsed(69);
       expect(timeline.getSegmentAvailabilityStart()).toBe(39);
 
-      setElapsed(60);
+      setElapsed(70);
       expect(timeline.getSegmentAvailabilityStart()).toBe(40);
 
-      setElapsed(61);
+      setElapsed(71);
       expect(timeline.getSegmentAvailabilityStart()).toBe(40);
     });
 
     it('returns the correct time for live with inf. availability', function() {
       setElapsed(0);
       var timeline = new shaka.media.PresentationTimeline(
-          60, Date.now() / 1000.0, Number.POSITIVE_INFINITY, 0);
+          60, Date.now() / 1000.0, Number.POSITIVE_INFINITY, 10, 0);
       expect(timeline.getSegmentAvailabilityStart()).toBe(0);
 
       setElapsed(59);
@@ -117,12 +118,13 @@ describe('PresentationTimeline', function() {
   describe('getSegmentAvailabilityEnd', function() {
     it('returns duration for VOD', function() {
       setElapsed(0);
-      var timeline1 = new shaka.media.PresentationTimeline(60, null, null, 0);
+      var timeline1 = new shaka.media.PresentationTimeline(
+          60, null, null, 10, 0);
       expect(timeline1.getSegmentAvailabilityEnd()).toBe(60);
 
       setElapsed(0);
       var timeline2 = new shaka.media.PresentationTimeline(
-          Number.POSITIVE_INFINITY, null, null, 0);
+          Number.POSITIVE_INFINITY, null, null, 10, 0);
       expect(timeline2.getSegmentAvailabilityEnd()).toBe(
           Number.POSITIVE_INFINITY);
     });
@@ -130,41 +132,50 @@ describe('PresentationTimeline', function() {
     it('returns the correct time for live without duration', function() {
       setElapsed(0);
       var timeline = new shaka.media.PresentationTimeline(
-          Number.POSITIVE_INFINITY, Date.now() / 1000.0, 20, 0);
+          Number.POSITIVE_INFINITY, Date.now() / 1000.0, 20, 10, 0);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(0);
 
-      setElapsed(1);
+      setElapsed(0);
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(0);
+
+      setElapsed(10);
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(0);
+
+      setElapsed(11);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(1);
 
-      setElapsed(59);
+      setElapsed(69);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(59);
 
-      setElapsed(60);
+      setElapsed(70);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(60);
 
-      setElapsed(61);
+      setElapsed(71);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(61);
     });
 
     it('returns the correct time for live with duration', function() {
       setElapsed(0);
       var timeline = new shaka.media.PresentationTimeline(
-          60, Date.now() / 1000.0, 20, 0);
+          60, Date.now() / 1000.0, 20, 10, 0);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(0);
 
-      setElapsed(1);
+      setElapsed(0);
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(0);
+
+      setElapsed(11);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(1);
 
-      setElapsed(59);
+      setElapsed(69);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(59);
 
-      setElapsed(60);
+      setElapsed(70);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(60);
 
       // The seek window should stop.
       // TODO: Check if real encoders serve the end of a live stream
       // indefinitely or close the availability window entirely.
-      setElapsed(61);
+      setElapsed(71);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(60);
     });
   });
@@ -172,22 +183,23 @@ describe('PresentationTimeline', function() {
   describe('getDuration', function() {
     it('returns the correct value for VOD', function() {
       setElapsed(0);
-      var timeline = new shaka.media.PresentationTimeline(60, null, null, 0);
+      var timeline = new shaka.media.PresentationTimeline(
+          60, null, null, 10, 0);
       expect(timeline.getDuration()).toBe(60);
 
       timeline = new shaka.media.PresentationTimeline(
-          Number.POSITIVE_INFINITY, null, null, 0);
+          Number.POSITIVE_INFINITY, null, null, 10, 0);
       expect(timeline.getDuration()).toBe(Number.POSITIVE_INFINITY);
     });
 
     it('returns the correct value for live', function() {
       setElapsed(0);
       var timeline = new shaka.media.PresentationTimeline(
-          60, Date.now() / 1000.0, 20, 0);
+          60, Date.now() / 1000.0, 20, 10, 0);
       expect(timeline.getDuration()).toBe(60);
 
       timeline = new shaka.media.PresentationTimeline(
-          Number.POSITIVE_INFINITY, Date.now() / 1000.0, 20, 0);
+          Number.POSITIVE_INFINITY, Date.now() / 1000.0, 20, 10, 0);
       expect(timeline.getDuration()).toBe(Number.POSITIVE_INFINITY);
     });
   });
@@ -195,7 +207,8 @@ describe('PresentationTimeline', function() {
   describe('setDuration', function() {
     it('affects VOD', function() {
       setElapsed(0);
-      var timeline = new shaka.media.PresentationTimeline(60, null, null, 0);
+      var timeline = new shaka.media.PresentationTimeline(
+          60, null, null, 10, 0);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(60);
 
       timeline.setDuration(90);
@@ -205,12 +218,12 @@ describe('PresentationTimeline', function() {
     it('affects live', function() {
       setElapsed(0);
       var timeline = new shaka.media.PresentationTimeline(
-          Number.POSITIVE_INFINITY, Date.now() / 1000.0, 20, 0);
+          Number.POSITIVE_INFINITY, Date.now() / 1000.0, 20, 10, 0);
 
-      setElapsed(30);
+      setElapsed(40);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(30);
 
-      setElapsed(90);
+      setElapsed(100);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(90);
 
       timeline.setDuration(60);
@@ -220,17 +233,18 @@ describe('PresentationTimeline', function() {
 
   it('getSegmentAvailabilityDuration', function() {
     setElapsed(0);
-    var timeline = new shaka.media.PresentationTimeline(60, null, null, 0);
+    var timeline = new shaka.media.PresentationTimeline(60, null, null, 10, 0);
     expect(timeline.getSegmentAvailabilityDuration()).toBeNull();
 
     timeline = new shaka.media.PresentationTimeline(
-        Number.POSITIVE_INFINITY, Date.now() / 1000.0, 20, 0);
+        Number.POSITIVE_INFINITY, Date.now() / 1000.0, 20, 10, 0);
     expect(timeline.getSegmentAvailabilityDuration()).toBe(20);
 
     timeline = new shaka.media.PresentationTimeline(
         Number.POSITIVE_INFINITY,
         Date.now() / 1000.0,
         Number.POSITIVE_INFINITY,
+        10,
         0);
     expect(timeline.getSegmentAvailabilityDuration()).toBe(
         Number.POSITIVE_INFINITY);
@@ -241,8 +255,8 @@ describe('PresentationTimeline', function() {
     // should return 10.
     setElapsed(0);
     var timeline = new shaka.media.PresentationTimeline(
-        Number.POSITIVE_INFINITY, Date.now() / 1000.0, 10, 10000);
-    expect(timeline.getSegmentAvailabilityEnd()).toBeCloseTo(10);
+        Number.POSITIVE_INFINITY, Date.now() / 1000.0, 10, 5, 10000);
+    expect(timeline.getSegmentAvailabilityEnd()).toBeCloseTo(5);
   });
 });
 

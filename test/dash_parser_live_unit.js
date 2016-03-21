@@ -185,7 +185,7 @@ describe('DashParser.Live', function() {
 
             // 15 seconds for @timeShiftBufferDepth and the first segment
             // duration.
-            Date.now = function() { return 15 * 1000; };
+            Date.now = function() { return (2 * 15) * 1000; };
             return delayForUpdatePeriod().then(function() {
               // The first reference should have been evicted.
               expect(stream.findSegmentPosition(0)).toBe(null);
@@ -463,8 +463,9 @@ describe('DashParser.Live', function() {
   it('uses @suggestedPresentationDelay', function(done) {
     var manifest = [
       '<MPD type="dynamic" suggestedPresentationDelay="PT60S"',
-      '    minimumUpdatePeriod="PT%(updateTime)dS"',
+      '    minimumUpdatePeriod="PT5S"',
       '    timeShiftBufferDepth="PT2M"',
+      '    maxSegmentDuration="PT10S"',
       '    availabilityStartTime="1970-01-01T00:05:00Z">',
       '  <Period id="1">',
       '    <AdaptationSet mimeType="video/mp4">',
@@ -486,13 +487,84 @@ describe('DashParser.Live', function() {
           expect(timeline).toBeTruthy();
 
           //  We are 5 minutes into the presentation, with a
-          //  @timeShiftBufferDepth of 120 seconds, then the normal start will
-          //  be 3 minutes; but with a 60 @suggestedPresentationDelay it should
-          //  be 2 minutes.
-          expect(timeline.getSegmentAvailabilityStart()).toBe(120);
-          // Similarly, normally the end should be 5 minutes; but with the delay
-          // it will be 4 minutes.
-          expect(timeline.getSegmentAvailabilityEnd()).toBe(240);
+          //  @timeShiftBufferDepth of 120 seconds and a @maxSegmentDuration of
+          //  10 seconds, the normal start will be 2:50; but with a 60
+          //  @suggestedPresentationDelay it should be 1:50.
+          expect(timeline.getSegmentAvailabilityStart()).toBe(110);
+          // Similarly, normally the end should be 4:50; but with the delay
+          // it will be 3:50 minutes.
+          expect(timeline.getSegmentAvailabilityEnd()).toBe(230);
+        })
+        .catch(fail)
+        .then(done);
+  });
+
+  it('uses @maxSegmentDuration', function(done) {
+    var manifest = [
+      '<MPD type="dynamic" suggestedPresentationDelay="PT0S"',
+      '    minimumUpdatePeriod="PT5S"',
+      '    timeShiftBufferDepth="PT2M"',
+      '    maxSegmentDuration="PT15S"',
+      '    availabilityStartTime="1970-01-01T00:05:00Z">',
+      '  <Period id="1">',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <Representation id="3" bandwidth="500">',
+      '        <BaseURL>http://example.com</BaseURL>',
+      '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'
+    ].join('\n');
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifest});
+
+    Date.now = function() { return 600000; /* 10 minutes */ };
+    parser.start('dummy://foo', fakeNetEngine, newPeriod, errorCallback)
+        .then(function(manifest) {
+          expect(manifest).toBeTruthy();
+          var timeline = manifest.presentationTimeline;
+          expect(timeline).toBeTruthy();
+          expect(timeline.getSegmentAvailabilityStart()).toBe(165);
+          expect(timeline.getSegmentAvailabilityEnd()).toBe(285);
+        })
+        .catch(fail)
+        .then(done);
+  });
+
+  it('derives @maxSegmentDuration if omitted', function(done) {
+    var manifest = [
+      '<MPD type="dynamic" suggestedPresentationDelay="PT0S"',
+      '    minimumUpdatePeriod="PT5S"',
+      '    timeShiftBufferDepth="PT2M"',
+      '    availabilityStartTime="1970-01-01T00:05:00Z">',
+      '  <Period id="1">',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <Representation id="3" bandwidth="500">',
+      '        <BaseURL>http://example.com</BaseURL>',
+      '<SegmentTemplate startNumber="1" media="s$Number$.mp4">',
+      '  <SegmentTimeline>',
+      '    <S t="0" d="7" />',
+      '    <S d="8" />',
+      '    <S d="6" />',
+      '  </SegmentTimeline>',
+      '</SegmentTemplate>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'
+    ].join('\n');
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifest});
+
+    Date.now = function() { return 600000; /* 10 minutes */ };
+    parser.start('dummy://foo', fakeNetEngine, newPeriod, errorCallback)
+        .then(function(manifest) {
+          expect(manifest).toBeTruthy();
+          var timeline = manifest.presentationTimeline;
+          expect(timeline).toBeTruthy();
+
+          // NOTE: the largest segment is 8 seconds long.
+          expect(timeline.getSegmentAvailabilityStart()).toBe(172);
+          expect(timeline.getSegmentAvailabilityEnd()).toBe(292);
         })
         .catch(fail)
         .then(done);

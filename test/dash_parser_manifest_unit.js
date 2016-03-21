@@ -565,6 +565,7 @@ describe('DashParser.Manifest', function() {
       var template = [
         '<MPD type="dynamic"',
         '      availabilityStartTime="1970-01-01T00:00:00Z"',
+        '      maxSegmentDuration="PT5S"',
         '      suggestedPresentationDelay="PT0S">',
         '  %s',
         '  <Period duration="PT30M">',
@@ -602,7 +603,7 @@ describe('DashParser.Manifest', function() {
       ]);
 
       fakeNetEngine.setResponseMapAsText({'http://foo.bar/manifest': source});
-      runTest(done, 30);
+      runTest(done, 25);
     });
 
     it('does not produce errors', function(done) {
@@ -611,7 +612,7 @@ describe('DashParser.Manifest', function() {
       ]);
 
       fakeNetEngine.setResponseMapAsText({'http://foo.bar/manifest': source});
-      runTest(done, 10);
+      runTest(done, 5);
     });
 
     it('tries multiple sources', function(done) {
@@ -622,7 +623,7 @@ describe('DashParser.Manifest', function() {
       ]);
 
       fakeNetEngine.setResponseMapAsText({'http://foo.bar/manifest': source});
-      runTest(done, 55);
+      runTest(done, 50);
     });
 
     it('with HEAD', function(done) {
@@ -644,7 +645,7 @@ describe('DashParser.Manifest', function() {
           });
         }
       });
-      runTest(done, 40);
+      runTest(done, 35);
     });
 
     it('with xsdate', function(done) {
@@ -657,7 +658,7 @@ describe('DashParser.Manifest', function() {
         'http://foo.bar/manifest': source,
         'http://foo.bar/date': '1970-01-01T00:00:50Z'
       });
-      runTest(done, 50);
+      runTest(done, 45);
     });
   });
 
