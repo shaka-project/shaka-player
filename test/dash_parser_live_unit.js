@@ -195,6 +195,71 @@ describe('DashParser.Live', function() {
           .catch(fail)
           .then(done);
     });
+
+    it('sets infinite duration for single-period live streams', function(done) {
+      var template = [
+        '<MPD type="dynamic" minimumUpdatePeriod="PT%(updateTime)dS"',
+        '    timeShiftBufferDepth="PT1S"',
+        '    availabilityStartTime="1970-01-01T00:00:00Z">',
+        '  <Period id="1">',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation id="3" bandwidth="500">',
+        '        <BaseURL>http://example.com</BaseURL>',
+        '%(contents)s',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>'
+      ].join('\n');
+      var text = sprintf(
+          template, {updateTime: updateTime, contents: basicLines.join('\n')});
+
+      fakeNetEngine.setResponseMapAsText({'dummy://foo': text});
+      Date.now = function() { return 0; };
+      parser.start('dummy://foo', fakeNetEngine, newPeriod, errorCallback)
+          .then(function(manifest) {
+            expect(manifest.periods.length).toBe(1);
+            var timeline = manifest.presentationTimeline;
+            expect(timeline.getDuration()).toBe(Number.POSITIVE_INFINITY);
+          }).catch(fail).then(done);
+    });
+
+    it('sets infinite duration for multi-period live streams', function(done) {
+      var template = [
+        '<MPD type="dynamic" minimumUpdatePeriod="PT%(updateTime)dS"',
+        '    timeShiftBufferDepth="PT1S"',
+        '    availabilityStartTime="1970-01-01T00:00:00Z">',
+        '  <Period id="1">',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation id="3" bandwidth="500">',
+        '        <BaseURL>http://example.com</BaseURL>',
+        '%(contents)s',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '  <Period id="2" start="PT60S">',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation id="4" bandwidth="500">',
+        '        <BaseURL>http://example.com</BaseURL>',
+        '%(contents)s',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>'
+      ].join('\n');
+      var text = sprintf(
+          template, {updateTime: updateTime, contents: basicLines.join('\n')});
+
+      fakeNetEngine.setResponseMapAsText({'dummy://foo': text});
+      Date.now = function() { return 0; };
+      parser.start('dummy://foo', fakeNetEngine, newPeriod, errorCallback)
+          .then(function(manifest) {
+            expect(manifest.periods.length).toBe(2);
+            expect(manifest.periods[1].startTime).toBe(60);
+            var timeline = manifest.presentationTimeline;
+            expect(timeline.getDuration()).toBe(Number.POSITIVE_INFINITY);
+          }).catch(fail).then(done);
+    });
   }
 
   it('can add Periods', function(done) {
