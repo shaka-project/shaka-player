@@ -170,7 +170,7 @@ describe('MpdUtils', function() {
         { start: 10, end: 20 },
         { start: 20, end: 30 }
       ];
-      checkTimePoints(timePoints, result, 1, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
     });
 
     it('handles null start time', function() {
@@ -184,7 +184,7 @@ describe('MpdUtils', function() {
         { start: 10, end: 20 },
         { start: 20, end: 30 }
       ];
-      checkTimePoints(timePoints, result, 1, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
     });
 
     it('handles gaps', function() {
@@ -196,7 +196,7 @@ describe('MpdUtils', function() {
         { start: 0, end: 15 },
         { start: 15, end: 25 }
       ];
-      checkTimePoints(timePoints, result, 1, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
     });
 
     it('handles overlap', function() {
@@ -208,7 +208,7 @@ describe('MpdUtils', function() {
         { start: 0, end: 10 },
         { start: 10, end: 20 }
       ];
-      checkTimePoints(timePoints, result, 1, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
     });
 
     it('handles repetitions', function() {
@@ -225,7 +225,7 @@ describe('MpdUtils', function() {
         { start: 50, end: 60 },
         { start: 60, end: 70 }
       ];
-      checkTimePoints(timePoints, result, 1, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
     });
 
     it('handles null repeat', function() {
@@ -239,7 +239,7 @@ describe('MpdUtils', function() {
         { start: 10, end: 20 },
         { start: 20, end: 30 }
       ];
-      checkTimePoints(timePoints, result, 1, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
     });
 
     it('handles repetitions with gap', function() {
@@ -253,7 +253,7 @@ describe('MpdUtils', function() {
         { start: 20, end: 35 },
         { start: 35, end: 45 }
       ];
-      checkTimePoints(timePoints, result, 1, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
     });
 
     it('handles negative repetitions', function() {
@@ -269,7 +269,7 @@ describe('MpdUtils', function() {
         { start: 30, end: 40 },
         { start: 40, end: 50 }
       ];
-      checkTimePoints(timePoints, result, 1, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
     });
 
     it('handles negative repetitions with uneven border', function() {
@@ -286,7 +286,7 @@ describe('MpdUtils', function() {
         { start: 40, end: 45 },
         { start: 45, end: 50 }
       ];
-      checkTimePoints(timePoints, result, 1, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
     });
 
     it('handles negative repetitions w/ bad next start time', function() {
@@ -298,7 +298,7 @@ describe('MpdUtils', function() {
       var result = [
         { start: 0, end: 10 }
       ];
-      checkTimePoints(timePoints, result, 1, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
     });
 
     it('handles negative repetitions w/ null next start time', function() {
@@ -310,7 +310,7 @@ describe('MpdUtils', function() {
       var result = [
         { start: 0, end: 10 }
       ];
-      checkTimePoints(timePoints, result, 1, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
     });
 
     it('handles negative repetitions at end', function() {
@@ -324,7 +324,7 @@ describe('MpdUtils', function() {
         { start: 15, end: 20 },
         { start: 20, end: 25 }
       ];
-      checkTimePoints(timePoints, result, 1, 25);
+      checkTimePoints(timePoints, result, 1, 0, 25);
     });
 
     it('handles negative repetitions at end w/o Period length', function() {
@@ -335,7 +335,7 @@ describe('MpdUtils', function() {
       var result = [
         { start: 0, end: 10 }
       ];
-      checkTimePoints(timePoints, result, 1, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
     });
 
     it('handles negative repetitions at end w/ bad Period length', function() {
@@ -348,7 +348,7 @@ describe('MpdUtils', function() {
         { start: 0, end: 10 },
         { start: 10, end: 20 }
       ];
-      checkTimePoints(timePoints, result, 1, 20);
+      checkTimePoints(timePoints, result, 1, 0, 20);
     });
 
     it('ignores elements after null duration', function() {
@@ -363,9 +363,24 @@ describe('MpdUtils', function() {
         { start: 0, end: 10 },
         { start: 10, end: 20 }
       ];
-      checkTimePoints(timePoints, result, 1, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
     });
 
+    it('adjust start with presentationTimeOffset', function() {
+      var timePoints = [
+        createTimePoint(10, 10, 0),
+        createTimePoint(20, 10, 0),
+        createTimePoint(30, 10, 0),
+        createTimePoint(40, 10, 0)
+      ];
+      var result = [
+        { start: 0, end: 10 },
+        { start: 10, end: 20 },
+        { start: 20, end: 30 },
+        { start: 30, end: 40 }
+      ];
+      checkTimePoints(timePoints, result, 1, 10, Number.POSITIVE_INFINITY);
+    });
     /**
      * Creates a new TimePoint.
      *
@@ -385,9 +400,11 @@ describe('MpdUtils', function() {
      * @param {!Array.<{t: ?number, d: ?number, r: ?number}>} points
      * @param {!Array.<{start: number, end: number}>} expected
      * @param {number} timescale
+     * @param {number} presentationTimeOffset
      * @param {number} periodDuration
      */
-    function checkTimePoints(points, expected, timescale, periodDuration) {
+    function checkTimePoints(points, expected, timescale,
+        presentationTimeOffset, periodDuration) {
       // Construct a SegmentTimeline Node object.
       var xmlLines = ['<?xml version="1.0"?>', '<SegmentTimeline>'];
       for (var i = 0; i < points.length; i++) {
@@ -405,7 +422,7 @@ describe('MpdUtils', function() {
       console.assert(segmentTimeline);
 
       var timeline = MpdUtils.createTimeline(
-          segmentTimeline, timescale, periodDuration);
+          segmentTimeline, timescale, presentationTimeOffset, periodDuration);
 
       expect(timeline).toBeTruthy();
       expect(timeline.length).toBe(expected.length);

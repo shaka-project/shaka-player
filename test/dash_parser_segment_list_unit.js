@@ -267,5 +267,43 @@ describe('DashParser.SegmentList', function() {
       Dash.testSegmentIndex(done, source, references);
     });
   });
+
+  describe('Segment start', function() {
+    it('shoud be adjusted with presentationTimeOffset', function(done) {
+      var source = [
+        '<MPD>',
+        '  <Period>',
+        '    <SegmentList>',
+        '      <SegmentURL media="s1.mp4" />',
+        '      <SegmentURL media="s2.mp4" />',
+        '      <SegmentURL media="s3.mp4" />',
+        '      <SegmentURL media="s4.mp4" />',
+        '    </SegmentList>',
+        '    <AdaptationSet mimeType="video/webm">',
+        '      <Representation>',
+        '        <BaseURL>http://example.com</BaseURL>',
+        '        <SegmentList presentationTimeOffset="10" startNumber="1">',
+        '          <SegmentTimeline>',
+        '            <S d="10" t="50" />',
+        '            <S d="5" />',
+        '            <S d="8" />',
+        '            <S d="7" />',
+        '          </SegmentTimeline>',
+        '        </SegmentList>',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>'
+      ].join('\n');
+      var references = [
+        Dash.makeReference('s1.mp4', 1, 40, 50),
+        Dash.makeReference('s2.mp4', 2, 50, 55),
+        Dash.makeReference('s3.mp4', 3, 55, 63),
+        Dash.makeReference('s4.mp4', 4, 63, 70)
+      ];
+
+      Dash.testSegmentIndex(done, source, references);
+    });
+  });
 });
 
