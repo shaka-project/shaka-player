@@ -338,25 +338,6 @@ describe('DashParser.Live', function() {
           var stream = manifest.periods[0].streamSets[0].streams[0];
           var segmentUri = stream.getSegmentReference(1).uris[0];
           expect(segmentUri).toBe(redirectedUri + 's1.mp4');
-
-          // The update request will not redirect.
-          fakeNetEngine.request.and.returnValue(
-              Promise.resolve({uri: originalUri, data: manifestData}));
-          fakeNetEngine.request.calls.reset();
-          return delayForUpdatePeriod().then(function() {
-            // The update request was made to the original URL.
-            expect(fakeNetEngine.request.calls.count()).toBe(1);
-            var netRequest = fakeNetEngine.request.calls.argsFor(0)[1];
-            expect(netRequest.uris).toEqual([originalUri]);
-
-            // Since the update was not redirected, the segment refers to
-            // the original base again.
-            var stream = manifest.periods[0].streamSets[0].streams[0];
-            var segmentUri = stream.getSegmentReference(1).uris[0];
-            expect(segmentUri).toBe(originalUri + 's1.mp4');
-            // NOTE: the bases of segment references are never updated for
-            // SegmentTemplate+duration.
-          });
         })
         .catch(fail)
         .then(done);

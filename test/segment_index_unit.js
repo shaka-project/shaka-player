@@ -190,18 +190,6 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
       expect(index1.references_).toEqual(references1);
     });
 
-    it('one reference into one reference at start', function() {
-      var references1 = [makeReference(1, 10, 20, uri(10))];
-      var index1 = new shaka.media.SegmentIndex(references1);
-
-      var references2 = [makeReference(0, 0, 10, uri(0))];
-
-      index1.merge(references2);
-      expect(index1.references_.length).toBe(2);
-      expect(index1.references_[0]).toEqual(references2[0]);
-      expect(index1.references_[1]).toEqual(references1[0]);
-    });
-
     it('one reference into one reference at end', function() {
       var references1 = [makeReference(1, 10, 20, uri(10))];
       var index1 = new shaka.media.SegmentIndex(references1);
@@ -212,22 +200,6 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
       expect(index1.references_.length).toBe(2);
       expect(index1.references_[0]).toEqual(references1[0]);
       expect(index1.references_[1]).toEqual(references2[0]);
-    });
-
-    it('one reference into two references at start', function() {
-      var references1 = [
-        makeReference(1, 10, 20, uri(10)),
-        makeReference(2, 20, 30, uri(20))
-      ];
-      var index1 = new shaka.media.SegmentIndex(references1);
-
-      var references2 = [makeReference(0, 0, 10, uri(0))];
-
-      index1.merge(references2);
-      expect(index1.references_.length).toBe(3);
-      expect(index1.references_[0]).toEqual(references2[0]);
-      expect(index1.references_[1]).toEqual(references1[0]);
-      expect(index1.references_[2]).toEqual(references1[1]);
     });
 
     it('one reference into two references at end', function() {
@@ -246,22 +218,6 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
       expect(index1.references_[2]).toEqual(references2[0]);
     });
 
-    it('two references into one reference at start', function() {
-      var references1 = [makeReference(2, 20, 30, uri(20))];
-      var index1 = new shaka.media.SegmentIndex(references1);
-
-      var references2 = [
-        makeReference(0, 0, 10, uri(0)),
-        makeReference(1, 10, 20, uri(10))
-      ];
-
-      index1.merge(references2);
-      expect(index1.references_.length).toBe(3);
-      expect(index1.references_[0]).toEqual(references2[0]);
-      expect(index1.references_[1]).toEqual(references2[1]);
-      expect(index1.references_[2]).toEqual(references1[0]);
-    });
-
     it('two references into one reference at end', function() {
       var references1 = [makeReference(2, 20, 30, uri(20))];
       var index1 = new shaka.media.SegmentIndex(references1);
@@ -269,44 +225,6 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
       var references2 = [
         makeReference(3, 30, 40, uri(30)),
         makeReference(4, 40, 50, uri(40))
-      ];
-
-      index1.merge(references2);
-      expect(index1.references_.length).toBe(3);
-      expect(index1.references_[0]).toEqual(references1[0]);
-      expect(index1.references_[1]).toEqual(references2[0]);
-      expect(index1.references_[2]).toEqual(references2[1]);
-    });
-
-    it('two references into two references at start with overlap', function() {
-      var references1 = [
-        makeReference(1, 10, 20, uri(10)),
-        makeReference(2, 20, 30, uri(20))
-      ];
-      var index1 = new shaka.media.SegmentIndex(references1);
-
-      var references2 = [
-        makeReference(0, 0, 10, uri('new_0')),
-        makeReference(1, 10, 20, uri('new_10'))
-      ];
-
-      index1.merge(references2);
-      expect(index1.references_.length).toBe(3);
-      expect(index1.references_[0]).toEqual(references2[0]);
-      expect(index1.references_[1]).toEqual(references2[1]);
-      expect(index1.references_[2]).toEqual(references1[1]);
-    });
-
-    it('two references into two references at end with overlap', function() {
-      var references1 = [
-        makeReference(1, 10, 20, uri(10)),
-        makeReference(2, 20, 30, uri(20))
-      ];
-      var index1 = new shaka.media.SegmentIndex(references1);
-
-      var references2 = [
-        makeReference(2, 20, 30, uri('new_20')),
-        makeReference(3, 30, 40, uri('new_30'))
       ];
 
       index1.merge(references2);
