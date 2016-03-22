@@ -21,6 +21,74 @@
 
 /**
  * @typedef {{
+ *   timestamp: number,
+ *   id: number,
+ *   type: string,
+ *   fromAdaptation: boolean
+ * }}
+ *
+ * @property {number} timestamp
+ *   The timestamp the choice was made, in seconds since 1970
+ *   (i.e. Date.now() / 1000).
+ * @property {number} id
+ *   The id of the stream that was chosen.
+ * @property {string} type
+ *   The type of stream chosen ('audio', 'text', or 'video')
+ * @property {boolean} fromAdaptation
+ *   True if the choice was made by AbrManager for adaptation; false if it
+ *   was made by the application through selectTrack.
+ */
+shakaExtern.StreamChoice;
+
+
+/**
+ * @typedef {{
+ *   width: number,
+ *   height: number,
+ *   streamBandwidth: number,
+ *
+ *   decodedFrames: number,
+ *   droppedFrames: number,
+ *   estimatedBandwidth: number,
+ *   playTime: number,
+ *   bufferingTime: number,
+ *
+ *   switchHistory: !Array.<shakaExtern.StreamChoice>
+ * }}
+ *
+ * @description
+ * Contains statistics and information about the current state of the player.
+ * This is meant for applications that want to log quality-of-experience (QoE)
+ * or other stats.  These values will reset when load() is called again.
+ *
+ * @property {number} width
+ *   The width of the current video track.
+ * @property {number} height
+ *   The height of the current video track.
+ * @property {number} streamBandwidth
+ *   The bandwidth required for the current streams (total, in kbit/sec).
+ *
+ * @property {number} decodedFrames
+ *   The total number of frames decoded by the Player.  This may be NaN if this
+ *   is not supported by the browser.
+ * @property {number} droppedFrames
+ *   The total number of frames dropped by the Player.  This may be NaN if this
+ *   is not supported by the browser.
+ * @property {number} estimatedBandwidth
+ *   The current estimated network bandwidth (in kbit/sec).
+ * @property {number} playTime
+ *   The total time spent in a playing state in seconds.
+ * @property {number} bufferingTime
+ *   The total time spent in a buffering state in seconds.
+ *
+ * @property {!Array.<shakaExtern.StreamChoice>} switchHistory
+ *   A history of the stream changes.
+ */
+shakaExtern.Stats;
+
+
+/**
+ * @typedef {{
  *   id: number,
  *   active: boolean,
  *
