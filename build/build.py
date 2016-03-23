@@ -236,11 +236,12 @@ class Build:
       print >> sys.stderr, 'Build failed'
       return False
 
-  def buildLibrary(self, name):
+  def buildLibrary(self, name, rebuild):
     """Builds Shaka Player using the files in |self.include|.
 
     Arguments:
       name - The name of the build.
+      rebuild - True to rebuild, False to ignore if no changes are detected.
 
     Returns:
       True on success; False on failure.
@@ -253,6 +254,19 @@ class Build:
     resultFile = resultPrefix + '.js'
     resultDebug = resultPrefix + '.debug.js'
     resultMap = resultPrefix + '.debug.map'
+
+    # Detect changes to the library and only build if changes have been made.
+    if not rebuild and os.path.isfile(resultFile):
+      buildTime = os.path.getmtime(resultFile)
+      completeBuild = Build()
+      if completeBuild.parseBuild(['+@complete'], os.getcwd()):
+        completeBuild._addCore()
+        # Get a list of files modified since the build file was.
+        editedFiles = filter(lambda x: os.path.getmtime(x) > buildTime,
+                             completeBuild.include)
+        if len(editedFiles) == 0:
+          print 'No changes detected, not building.  Use --force to override.'
+          return True
 
     opts = ['--create_source_map', resultMap, '--js_output_file', resultDebug]
     if not self.buildRaw(opts):
@@ -272,6 +286,7 @@ def usage():
   print 'Usage:', sys.argv[0], """[options] [commands]
 
 Options:
+ --force          : Build the library even if no changes are detected.
  --help           : Prints this help page.
  --name           : Sets the name of the build, uses 'compiled' if not given.
 """
@@ -280,6 +295,7 @@ Options:
 def main(args):
   name = 'compiled'
   lines = []
+  rebuild = False
   i = 0
   while i < len(args):
     if args[i] == '--name':
@@ -288,6 +304,8 @@ def main(args):
         print >> sys.stderr, '--name requires an argument'
         return 1
       name = args[i]
+    elif args[i] == '--force':
+      rebuild = True
     elif args[i] == '--help':
       usage()
       return 0
@@ -305,7 +323,7 @@ def main(args):
   customBuild = Build()
   if not customBuild.parseBuild(lines, os.getcwd()):
     return 1
-  return 0 if customBuild.buildLibrary(name) else 1
+  return 0 if customBuild.buildLibrary(name, rebuild) else 1
 
 if __name__ == '__main__':
   shakaBuildHelpers.runMain(main)
