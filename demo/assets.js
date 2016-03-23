@@ -113,6 +113,7 @@ shakaAssets.ExtraText;
  *   name: string,
  *   manifestUri: string,
  *   focus: (boolean|undefined),
+ *   disabled: (boolean|undefined),
  *   extraText: (!Array.<shakaAssets.ExtraText>|undefined),
  *
  *   encoder: shakaAssets.Encoder,
@@ -134,6 +135,8 @@ shakaAssets.ExtraText;
  *   The URI of the manifest.
  * @property {(boolean|undefined)} focus
  *   (optional) If true, focuses the integration test for this asset.
+ * @property {(boolean|undefined)} disabled
+ *   (optional) If true, disables tests for this asset.
  * @property {(!Array.<shakaAssets.ExtraText>|undefined)} extraText
  *   (optional) An array of extra text sources (e.g. external captions).
  *
@@ -443,6 +446,8 @@ shakaAssets.testAssets = [
   {
     name: 'Multi-DRM, multi-key, multi-Period',
     manifestUri: '//media.axprod.net/TestVectors/v6-MultiDRM-MultiKey-MultiPeriod/Manifest.mpd',  // gjslint: disable=110
+    // FIXME: Chrome fails as of 50: http://crbug.com/597443
+    disabled: true,
 
     encoder: shakaAssets.Encoder.AXINOM,
     source: shakaAssets.Source.AXINOM,
@@ -651,6 +656,8 @@ shakaAssets.testAssets = [
   {
     name: 'Big Buck Bunny',
     manifestUri: '//amssamples.streaming.mediaservices.windows.net/622b189f-ec39-43f2-93a2-201ac4e31ce1/BigBuckBunny.ism/manifest(format=mpd-time-csf)',  // gjslint: disable=110
+    // FIXME: License servers are timing out as of 2016-03-23
+    disabled: true,
 
     encoder: shakaAssets.Encoder.AZURE_MEDIA_SERVICES,
     source: shakaAssets.Source.AZURE_MEDIA_SERVICES,

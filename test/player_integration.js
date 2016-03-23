@@ -89,6 +89,8 @@ describe('Player', function() {
 
   describe('plays', function() {
     window.shakaAssets.testAssets.forEach(function(asset) {
+      if (asset.disabled) return;
+
       var testName =
           asset.source + ' / ' + asset.name + ' : ' + asset.manifestUri;
 
