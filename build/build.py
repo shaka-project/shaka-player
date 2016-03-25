@@ -66,6 +66,9 @@ closure_opts = [
   '--extra_annotation_name=listens',
   '--extra_annotation_name=exportDoc',
 
+  '--conformance_configs', '%s/build/conformance.textproto' % \
+      shakaBuildHelpers.cygwinSafePath(shakaBuildHelpers.getSourceBase()),
+
   '-O', 'ADVANCED',
   '--generate_exports',
   '--output_wrapper_file=%s/build/wrapper.template.js' % \
