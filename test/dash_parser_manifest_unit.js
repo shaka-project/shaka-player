@@ -116,98 +116,49 @@ describe('DashParser.Manifest', function() {
           '    </AdaptationSet>',
           '    <AdaptationSet mimeType="audio/mp4">',
           '      <Role value="main" />',
-          '      <Representation />',
+          '      <Representation bandwidth="100" />',
           '    </AdaptationSet>',
           '  </Period>',
           '</MPD>'
         ],
-        /** @type {shakaExtern.Manifest} */ ({
-          minBufferTime: 75,
-          presentationTimeline: jasmine.any(shaka.media.PresentationTimeline),
-          periods: [
-            {
-              startTime: 0,
-              streamSets: [
-                {
-                  language: 'en',
-                  type: 'video',
-                  primary: false,
-                  drmInfos: [],
-                  streams: [
-                    jasmine.objectContaining({
-                      id: jasmine.any(Number),
-                      createSegmentIndex: jasmine.any(Function),
-                      findSegmentPosition: jasmine.any(Function),
-                      getSegmentReference: jasmine.any(Function),
-                      initSegmentReference:
-                          jasmine.any(shaka.media.InitSegmentReference),
-                      mimeType: 'video/mp4',
-                      codecs: 'avc1.4d401f',
-                      bandwidth: 100,
-                      width: 768,
-                      height: 576,
-                      keyId: null
-                    }),
-                    jasmine.objectContaining({
-                      id: jasmine.any(Number),
-                      createSegmentIndex: jasmine.any(Function),
-                      findSegmentPosition: jasmine.any(Function),
-                      getSegmentReference: jasmine.any(Function),
-                      initSegmentReference:
-                          jasmine.any(shaka.media.InitSegmentReference),
-                      mimeType: 'video/mp4',
-                      codecs: 'avc1.4d401f',
-                      bandwidth: 50,
-                      width: 576,
-                      height: 432,
-                      keyId: null
-                    })
-                  ]
-                },
-                {
-                  language: 'es',
-                  type: 'text',
-                  primary: false,
-                  drmInfos: [],
-                  streams: [
-                    jasmine.objectContaining({
-                      id: jasmine.any(Number),
-                      createSegmentIndex: jasmine.any(Function),
-                      findSegmentPosition: jasmine.any(Function),
-                      getSegmentReference: jasmine.any(Function),
-                      initSegmentReference:
-                          jasmine.any(shaka.media.InitSegmentReference),
-                      mimeType: 'text/vtt',
-                      codecs: 'mp4a.40.29',
-                      bandwidth: 100,
-                      keyId: null,
-                      kind: 'caption'
-                    })
-                  ]
-                },
-                {
-                  language: '',
-                  type: 'audio',
-                  primary: true,
-                  drmInfos: [],
-                  streams: [
-                    jasmine.objectContaining({
-                      id: jasmine.any(Number),
-                      createSegmentIndex: jasmine.any(Function),
-                      findSegmentPosition: jasmine.any(Function),
-                      getSegmentReference: jasmine.any(Function),
-                      initSegmentReference:
-                          jasmine.any(shaka.media.InitSegmentReference),
-                      mimeType: 'audio/mp4',
-                      codecs: '',
-                      keyId: null
-                    })
-                  ]
-                }
-              ]
-            }
-          ]
-        }));
+        new shaka.test.ManifestGenerator()
+          .anyTimeline()
+          .minBufferTime(75)
+          .addPeriod(0)
+            .addStreamSet('video')
+              .language('en')
+              .addStream(jasmine.any(Number))
+                .anySegmentFunctions()
+                .anyInitSegment()
+                .presentationTimeOffset(0)
+                .mime('video/mp4', 'avc1.4d401f')
+                .bandwidth(100)
+                .size(768, 576)
+              .addStream(jasmine.any(Number))
+                .anySegmentFunctions()
+                .anyInitSegment()
+                .presentationTimeOffset(0)
+                .mime('video/mp4', 'avc1.4d401f')
+                .bandwidth(50)
+                .size(576, 432)
+            .addStreamSet('text')
+              .language('es')
+              .addStream(jasmine.any(Number))
+                .anySegmentFunctions()
+                .anyInitSegment()
+                .presentationTimeOffset(0)
+                .mime('text/vtt', 'mp4a.40.29')
+                .bandwidth(100)
+                .kind('caption')
+            .addStreamSet('audio')
+              .primary()
+              .addStream(jasmine.any(Number))
+                .anySegmentFunctions()
+                .anyInitSegment()
+                .bandwidth(100)
+                .presentationTimeOffset(0)
+                .mime('audio/mp4')
+          .build());
   });
 
   describe('squashes stream sets by AdaptationSetSwitching', function() {
@@ -229,18 +180,15 @@ describe('DashParser.Manifest', function() {
           '  </Period>',
           '</MPD>'
         ],
-        shaka.test.Dash.makeManifestFromStreamSets([
-          {
-            language: 'en',
-            type: 'video',
-            primary: false,
-            drmInfos: [],
-            streams: [
-              jasmine.objectContaining({bandwidth: 100}),
-              jasmine.objectContaining({bandwidth: 200})
-            ]
-          }
-        ]));
+        new shaka.test.ManifestGenerator()
+          .anyTimeline()
+          .minBufferTime(75)
+          .addPeriod(0)
+            .addStreamSet('video')
+              .language('en')
+              .addPartialStream().bandwidth(100)
+              .addPartialStream().bandwidth(200)
+          .build());
   });
 
   describe('ignores unrecognized IDs in AdaptationSetSwitching', function() {
@@ -262,26 +210,17 @@ describe('DashParser.Manifest', function() {
           '  </Period>',
           '</MPD>'
         ],
-        shaka.test.Dash.makeManifestFromStreamSets([
-          {
-            language: 'en',
-            type: 'video',
-            primary: false,
-            drmInfos: [],
-            streams: [
-              jasmine.objectContaining({bandwidth: 100})
-            ]
-          },
-          {
-            language: 'en',
-            type: 'video',
-            primary: false,
-            drmInfos: [],
-            streams: [
-              jasmine.objectContaining({bandwidth: 200})
-            ]
-          }
-        ]));
+        new shaka.test.ManifestGenerator()
+          .anyTimeline()
+          .minBufferTime(75)
+          .addPeriod(0)
+            .addStreamSet('video')
+              .language('en')
+              .addPartialStream().bandwidth(100)
+            .addStreamSet('video')
+              .language('en')
+              .addPartialStream().bandwidth(200)
+          .build());
   });
 
   describe('does not squash different languages', function() {
@@ -305,26 +244,17 @@ describe('DashParser.Manifest', function() {
           '  </Period>',
           '</MPD>'
         ],
-        shaka.test.Dash.makeManifestFromStreamSets([
-          {
-            language: 'en',
-            type: 'video',
-            primary: false,
-            drmInfos: [],
-            streams: [
-              jasmine.objectContaining({bandwidth: 100})
-            ]
-          },
-          {
-            language: 'es',
-            type: 'video',
-            primary: false,
-            drmInfos: [],
-            streams: [
-              jasmine.objectContaining({bandwidth: 200})
-            ]
-          }
-        ]));
+        new shaka.test.ManifestGenerator()
+          .anyTimeline()
+          .minBufferTime(75)
+          .addPeriod(0)
+            .addStreamSet('video')
+              .language('en')
+              .addPartialStream().bandwidth(100)
+            .addStreamSet('video')
+              .language('es')
+              .addPartialStream().bandwidth(200)
+          .build());
   });
 
   describe('does not squash different content types', function() {
@@ -348,26 +278,17 @@ describe('DashParser.Manifest', function() {
           '  </Period>',
           '</MPD>'
         ],
-        shaka.test.Dash.makeManifestFromStreamSets([
-          {
-            language: 'en',
-            type: 'video',
-            primary: false,
-            drmInfos: [],
-            streams: [
-              jasmine.objectContaining({bandwidth: 100})
-            ]
-          },
-          {
-            language: 'en',
-            type: 'audio',
-            primary: false,
-            drmInfos: [],
-            streams: [
-              jasmine.objectContaining({bandwidth: 200})
-            ]
-          }
-        ]));
+        new shaka.test.ManifestGenerator()
+          .anyTimeline()
+          .minBufferTime(75)
+          .addPeriod(0)
+            .addStreamSet('video')
+              .language('en')
+              .addPartialStream().bandwidth(100)
+            .addStreamSet('audio')
+              .language('en')
+              .addPartialStream().bandwidth(200)
+          .build());
   });
 
   it('skips any periods after one without duration', function(done) {
