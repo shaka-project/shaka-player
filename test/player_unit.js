@@ -16,18 +16,15 @@
  */
 
 describe('Player', function() {
-  var originalNetworkingEngine;
   var originalLogError;
   var logErrorSpy;
+  var manifest;
   var player;
+  var streamingEngine;
+  var video;
 
   beforeAll(function() {
-    originalNetworkingEngine = shaka.net.NetworkingEngine;
     originalLogError = shaka.log.error;
-
-    shaka.net.NetworkingEngine = function() {};
-    shaka.net.NetworkingEngine.defaultRetryParameters =
-        originalNetworkingEngine.defaultRetryParameters;
 
     logErrorSpy = jasmine.createSpy('shaka.log.error');
     shaka.log.error = logErrorSpy;
@@ -38,12 +35,29 @@ describe('Player', function() {
     logErrorSpy.calls.reset();
     logErrorSpy.and.callFake(fail);
 
-    var video = createMockVideo();
+    video = createMockVideo();
+    var netEngine = new shaka.test.FakeNetworkingEngine({}, new ArrayBuffer(0));
     player = new shaka.Player(video);
+    player.setNetworkingEngine(netEngine);
+
+    player.createDrmEngine = function() {
+      return new shaka.test.FakeDrmEngine();
+    };
+    player.createPlayhead = function() { return {destroy: function() {}}; };
+    player.createMediaSource = function() { return Promise.resolve(); };
+    player.createMediaSourceEngine = function() {
+      return {destroy: function() {}};
+    };
+    player.createStreamingEngine = function() {
+      // This captures the variable |manifest| so this should only be used after
+      // the manifest has been set.
+      var period = manifest.periods[0];
+      streamingEngine = new shaka.test.FakeStreamingEngine(period);
+      return streamingEngine;
+    };
   });
 
   afterAll(function() {
-    shaka.net.NetworkingEngine = originalNetworkingEngine;
     shaka.log.error = originalLogError;
   });
 
@@ -272,7 +286,7 @@ describe('Player', function() {
     var abrManager;
 
     beforeEach(function() {
-      abrManager = createMockAbrManager();
+      abrManager = new shaka.test.FakeAbrManager();
       player.configure({abrManager: abrManager});
     });
 
@@ -333,12 +347,10 @@ describe('Player', function() {
   });
 
   describe('tracks', function() {
-    var period;
-    var streamingEngine;
     var tracks;
 
     beforeAll(function() {
-      var manifest = new shaka.test.ManifestGenerator()
+      manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addStreamSet('audio')
             .language('en')
@@ -349,9 +361,8 @@ describe('Player', function() {
             .addStream(5).bandwidth(200).size(200, 400)
           .addStreamSet('text')
             .language('es')
-            .addStream(6).bandwidth(100).kind('captions')
+            .addStream(6).bandwidth(100).kind('caption')
         .build();
-      period = manifest.periods[0];
 
       tracks = [
         {
@@ -400,28 +411,16 @@ describe('Player', function() {
           type: 'text',
           bandwidth: 100,
           language: 'es',
-          kind: 'captions',
+          kind: 'caption',
           width: null,
           height: null
         }
       ];
     });
 
-    beforeEach(/** @suppress {accessControls,invalidCasts} */ function() {
-      streamingEngine = {
-        configure: jasmine.createSpy('configure'),
-        getCurrentPeriod: function() { return period; },
-        getActiveStreams: function() {
-          return {
-            'audio': period.streamSets[0].streams[0],
-            'video': period.streamSets[1].streams[0],
-            'text': period.streamSets[2].streams[0]
-          };
-        },
-        switch: jasmine.createSpy('switch')
-      };
-      player.streamingEngine_ =
-          /** @type {shaka.media.StreamingEngine} */ (streamingEngine);
+    beforeEach(function(done) {
+      var factory = shaka.test.FakeManifestParser.createFactory(manifest);
+      player.load('', 0, factory).catch(fail).then(done);
     });
 
     it('returns the correct tracks', function() {
@@ -464,6 +463,7 @@ describe('Player', function() {
       chooseStreams();
       canSwitch();
 
+      var period = manifest.periods[0];
       var stream = period.streamSets[0].streams[1];
       expect(tracks[1].id).toBe(stream.id);
       player.selectTrack(tracks[1]);
@@ -477,6 +477,7 @@ describe('Player', function() {
 
       // Does not call switch, just overrides the choices made in AbrManager.
       var chosen = chooseStreams();
+      var period = manifest.periods[0];
       var stream = period.streamSets[0].streams[1];
       expect(chosen).toEqual(jasmine.objectContaining({'audio': stream}));
     });
@@ -489,75 +490,100 @@ describe('Player', function() {
 
       canSwitch();
 
+      var period = manifest.periods[0];
       var stream = period.streamSets[0].streams[1];
       expect(streamingEngine.switch).toHaveBeenCalledWith('audio', stream);
     });
   });
 
-  describe('chooseStreams_', function() {
+  describe('languages', function() {
     beforeEach(function() {
-      player.configure({abrManager: createMockAbrManager()});
+      player.configure({abrManager: new shaka.test.FakeAbrManager()});
     });
 
-    it('chooses the first as default', function() {
-      runTest(['es', 'en'], 'pt', 'es');
+    it('chooses the first as default', function(done) {
+      runTest(['en', 'es'], 'pt', 0, done);
     });
 
-    it('chooses the primary track', function() {
-      runTest(['es', 'en', '*fr'], 'pt', 'fr');
+    it('chooses the primary track', function(done) {
+      runTest(['en', 'es', '*fr'], 'pt', 2, done);
     });
 
-    it('chooses exact match for main language', function() {
-      runTest(['pt-BR', 'pt'], 'pt', 'pt');
+    it('chooses exact match for main language', function(done) {
+      runTest(['en', 'pt', 'pt-BR'], 'pt', 1, done);
     });
 
-    it('chooses exact match for subtags', function() {
-      runTest(['pt-BR', 'pt'], 'pt-BR', 'pt-BR');
+    it('chooses exact match for subtags', function(done) {
+      runTest(['en', 'pt', 'pt-BR'], 'PT-BR', 2, done);
     });
 
-    it('chooses base language if exact does not exist', function() {
-      runTest(['en', 'pt'], 'pt-BR', 'pt');
+    it('chooses base language if exact does not exist', function(done) {
+      runTest(['en', 'es', 'pt'], 'pt-BR', 2, done);
     });
 
-    it('chooses different subtags if base language does not exist', function() {
-      runTest(['pt-BR', 'en'], 'pt-PT', 'pt-BR');
-    });
+    it('chooses different subtags if base language does not exist',
+       function(done) {
+         runTest(['en', 'es', 'pt-BR'], 'pt-PT', 2, done);
+       });
 
     it('enables text track if audio and text are different language',
-       /** @suppress {accessControls} */ function() {
-         player.configure(
-             {preferredAudioLanguage: 'en', preferredTextLanguage: 'es'});
-         var streamSets = [
-           {language: 'en', type: 'audio', streams: ['en']},
-           {language: 'es', type: 'text', streams: ['es']}
-         ];
-         var period = {streamSets: streamSets};
+       function(done) {
+         manifest = new shaka.test.ManifestGenerator()
+           .addPeriod(0)
+             .addStreamSet('audio').language('pt').addStream(0)
+             .addStreamSet('audio').language('en').addStream(1)
+             .addStreamSet('text').language('pt').addStream(2)
+             .addStreamSet('text').language('fr').addStream(3)
+          .build();
 
-         expect(player.textTrack_.mode).toBe('hidden');
-         var result = chooseStreams(period);
-         expect(player.textTrack_.mode).toBe('showing');
-         expect(result['audio']).toBe('en');
-         expect(result['text']).toBe('es');
+         var factory = shaka.test.FakeManifestParser.createFactory(manifest);
+         player.load('', 0, factory)
+             .then(function() {
+               expect(player.isTextTrackVisible()).toBe(false);
+               player.configure(
+                   {preferredAudioLanguage: 'en', preferredTextLanguage: 'fr'});
+               expect(player.isTextTrackVisible()).toBe(true);
+             })
+             .catch(fail)
+             .then(done);
        });
 
     /**
      * @param {!Array.<string>} languages
      * @param {string} preference
-     * @param {string} expected
+     * @param {number} expectedIndex
+     * @param {function()} done
      */
-    function runTest(languages, preference, expected) {
-      player.configure({preferredAudioLanguage: preference});
-      var streamSets = languages.map(function(lang) {
-        if (lang.charAt(0) == '*')
-          return {language: lang.substr(1), type: 'audio', primary: true};
-        else
-          return {language: lang, type: 'audio'};
-      });
-      var period = {streamSets: streamSets};
-      var result = chooseStreams(period);
-      // Normally this is a stream, but because of the AbrManager above, it
-      // will be the language of the stream set it came from.
-      expect(result['audio']).toBe(expected);
+    function runTest(languages, preference, expectedIndex, done) {
+      var generator = new shaka.test.ManifestGenerator().addPeriod(0);
+
+      for (var i = 0; i < languages.length; i++) {
+        var lang = languages[i];
+        if (lang.charAt(0) == '*') {
+          generator
+            .addStreamSet('audio')
+              .primary()
+              .language(lang.substr(1))
+              .addStream(i);
+        } else {
+          generator.addStreamSet('audio').language(lang).addStream(i);
+        }
+      }
+      manifest = generator.build();
+
+      var factory = shaka.test.FakeManifestParser.createFactory(manifest);
+      player.load('', 0, factory)
+          .then(function() {
+            player.configure({
+              preferredAudioLanguage: preference,
+              preferredTextLanguage: preference
+            });
+
+            var chosen = chooseStreams(manifest.periods[0]);
+            expect(chosen['audio'].id).toBe(expectedIndex);
+          })
+          .catch(fail)
+          .then(done);
     }
   });
 
@@ -566,7 +592,8 @@ describe('Player', function() {
    * @suppress {accessControls}
    */
   function chooseStreams(opt_period) {
-    var period = opt_period || {streamSets: []};
+    var period =
+        opt_period || (manifest && manifest.periods[0]) || {streamSets: []};
     return player.onChooseStreams_(period);
   }
 
@@ -593,6 +620,8 @@ describe('Player', function() {
       addTextTrack: jasmine.createSpy('addTextTrack'),
       addEventListener: jasmine.createSpy('addEventListener'),
       removeEventListener: jasmine.createSpy('removeEventListener'),
+      removeAttribute: jasmine.createSpy('removeAttribute'),
+      load: jasmine.createSpy('load'),
       dispatchEvent: jasmine.createSpy('dispatchEvent'),
       on: {}  // event listeners
     };
@@ -610,25 +639,5 @@ describe('Player', function() {
   function createMockTextTrack() {
     // TODO: mock TextTrack, if/when Player starts directly accessing it.
     return {};
-  }
-
-  function createMockAbrManager() {
-    // This AbrManager will return fake streams that are the language of the
-    // stream set it came from.
-    var manager = {
-      init: jasmine.createSpy('AbrManager.init'),
-      stop: jasmine.createSpy('AbrManager.stop'),
-      enable: jasmine.createSpy('AbrManager.enable'),
-      disable: jasmine.createSpy('AbrManager.disable'),
-      chooseStreams: jasmine.createSpy('AbrManager.chooseStreams')
-    };
-    manager.chooseStreams.and.callFake(function(streamSets) {
-      var ret = {};
-      Object.keys(streamSets).forEach(function(key) {
-        ret[key] = streamSets[key].language;
-      });
-      return ret;
-    });
-    return manager;
   }
 });
