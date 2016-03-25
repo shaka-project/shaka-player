@@ -338,53 +338,21 @@ describe('Player', function() {
     var tracks;
 
     beforeAll(function() {
-      period = {
-        streamSets: [
-          {
-            language: 'en',
-            type: 'audio',
-            streams: [
-              {
-                id: 1,
-                bandwidth: 100
-              },
-              {
-                id: 2,
-                bandwidth: 100
-              }
-            ]
-          },
-          {
-            language: '',
-            type: 'video',
-            streams: [
-              {
-                id: 4,
-                bandwidth: 100,
-                width: 100,
-                height: 200
-              },
-              {
-                id: 5,
-                bandwidth: 200,
-                width: 200,
-                height: 400
-              }
-            ]
-          },
-          {
-            language: 'es',
-            type: 'text',
-            streams: [
-              {
-                id: 6,
-                bandwidth: 100,
-                kind: 'captions'
-              }
-            ]
-          }
-        ]
-      };
+      var manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addStreamSet('audio')
+            .language('en')
+            .addStream(1).bandwidth(100)
+            .addStream(2).bandwidth(100)
+          .addStreamSet('video')
+            .addStream(4).bandwidth(100).size(100, 200)
+            .addStream(5).bandwidth(200).size(200, 400)
+          .addStreamSet('text')
+            .language('es')
+            .addStream(6).bandwidth(100).kind('captions')
+        .build();
+      period = manifest.periods[0];
+
       tracks = [
         {
           id: 1,
