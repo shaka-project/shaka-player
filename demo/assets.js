@@ -446,7 +446,9 @@ shakaAssets.testAssets = [
   {
     name: 'Multi-DRM, multi-key, multi-Period',
     manifestUri: '//media.axprod.net/TestVectors/v6-MultiDRM-MultiKey-MultiPeriod/Manifest.mpd',  // gjslint: disable=110
-    // FIXME: Chrome fails as of 50: http://crbug.com/597443
+    // NOTE: Some of period 1's audio is encrypted, and some of period 2's
+    // audio is unencrypted.  This is something Chrome does not support at
+    // this time.  See http://crbug.com/597443 for discussion and history.
     disabled: true,
 
     encoder: shakaAssets.Encoder.AXINOM,
