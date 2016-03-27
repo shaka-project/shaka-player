@@ -444,11 +444,11 @@ describe('Player', function() {
         configure: jasmine.createSpy('configure'),
         getCurrentPeriod: function() { return period; },
         getActiveStreams: function() {
-          return [
-            period.streamSets[0].streams[0],
-            period.streamSets[1].streams[0],
-            period.streamSets[2].streams[0]
-          ];
+          return {
+            'audio': period.streamSets[0].streams[0],
+            'video': period.streamSets[1].streams[0],
+            'text': period.streamSets[2].streams[0]
+          };
         },
         switch: jasmine.createSpy('switch')
       };
