@@ -36,7 +36,6 @@ def runTests(args):
   if build.main([]) != 0:
     return 1
 
-  base = shakaBuildHelpers.getSourceBase()
   karma_command_name = 'karma'
   if shakaBuildHelpers.isWindows():
     # Windows karma program has a different name
@@ -48,7 +47,7 @@ def runTests(args):
   # Get the browsers supported on the local system.
   browsers = _GetBrowsers()
   if not browsers:
-    print >> sys.stderr, 'Unrecognized system', system
+    print >> sys.stderr, 'Unrecognized system "%s"' % platform.uname()[0]
     return 1
 
   print 'Starting tests...'
