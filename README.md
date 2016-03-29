@@ -43,9 +43,9 @@ to compile the sources and documentation are included in the sources:
 If you installed Shaka Player via npm, the sources have already been compiled
 for you.
 
-In order to build, you simply need python (for the build scripts) and JRE 7+
-(for the compiler). Just run `./build/all.py` and look for the output in
-`dist/shaka-player.compiled.js`. The output can be included directly in a
+In order to build, you simply need python v2.7+ (for the build scripts) and
+JRE 7+ (for the compiler). Just run `./build/all.py` and look for the output
+in `dist/shaka-player.compiled.js`. The output can be included directly in a
 `<script>` tag or loaded via a number of JavaScript module loaders.
 
 To build the documentation, you will also need nodejs. Just run
