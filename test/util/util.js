@@ -49,6 +49,12 @@ goog.provide('shaka.test.Util');
  * TODO: Cleanup with patch to jasmine-core.
  */
 shaka.test.Util.processInstantaneousOperations = function(n, setTimeout) {
+  // This is not something we would do in the library, but this tiny hack is
+  // needed here for testing.  On Edge, the delay needed here for Promises to
+  // resolve is ~100ms.  On Safari, such a large delay is not only not needed,
+  // it causes tests to timeout.  So we choose the delay based on the browser.
+  var isEdge = navigator.userAgent.indexOf(' Edge/') >= 0;
+  var delay = isEdge ? 100 : 5;
   var p = new shaka.util.PublicPromise();
   var inner = function() {
     jasmine.clock().tick(0);
@@ -56,7 +62,7 @@ shaka.test.Util.processInstantaneousOperations = function(n, setTimeout) {
     if (n <= 0) {
       p.resolve();
     } else {
-      setTimeout(inner, 100);
+      setTimeout(inner, delay);
     }
   };
   inner();
