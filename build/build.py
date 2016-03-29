@@ -281,7 +281,7 @@ class Build:
     # line and character numbers from the compiled library back to the original
     # source locations.
     with open(resultDebug, 'a') as f:
-      f.write('//# sourceMappingURL=shaka-player.' + name + '.debug.js')
+      f.write('//# sourceMappingURL=shaka-player.' + name + '.debug.map')
 
     return True
 
