@@ -122,7 +122,6 @@ describe('Playhead', function() {
     });
   });
 
-
   it('sets/unsets buffering state', function() {
     playhead = new shaka.media.Playhead(
         video,
@@ -153,29 +152,29 @@ describe('Playhead', function() {
     expect(video.playbackRate).toBe(2);
   });
 
-  it('clamps seeks', function() {
+  it('clamps seeks for live', function() {
     video.readyState = HTMLMediaElement.HAVE_METADATA;
 
     video.buffered = {
       length: 1,
       start: function(i) {
-        if (i == 0) return 5;
+        if (i == 0) return 25;
         throw new Error('Unexpected index');
       },
       end: function(i) {
-        if (i == 0) return 25;
+        if (i == 0) return 55;
         throw new Error('Unexpected index');
       }
     };
 
+    timeline.getSegmentAvailabilityStart.and.returnValue(5);
+    timeline.getSegmentAvailabilityEnd.and.returnValue(60);
     timeline.getSegmentAvailabilityDuration.and.returnValue(30);
 
-    var onBuffering = jasmine.createSpy('onBuffering');
-    var onSeek = jasmine.createSpy('onSeek');
     playhead = new shaka.media.Playhead(
         video,
         timeline,
-        10 /* minBufferTime */,
+        10 /* rebufferingGoal */,
         5 /* startTime */,
         onBuffering, onSeek);
 
@@ -183,87 +182,174 @@ describe('Playhead', function() {
     expect(video.currentTime).toBe(5);
 
     // Calling videoOnSeeking() is like dispatching a 'seeking' event. So, each
-    // time we change the video's current or Playhead changes the video's
-    // current time time we must call videoOnSeeking(),
+    // time we change the video's current time or Playhead changes the video's
+    // current time we must call videoOnSeeking(),
 
-    video.currentTime = 6;
+    // left = start + 1 = 5 + 1 = 6
+    // safe = left + rebufferingGoal = 6 + 10 = 16
+
+    // Seek in safe region & in buffered region.
+    video.currentTime = 26;
     videoOnSeeking();
-    expect(video.currentTime).toBe(6);
-    expect(playhead.getTime()).toBe(6);
+    expect(video.currentTime).toBe(26);
+    expect(playhead.getTime()).toBe(26);
     expect(onSeek).toHaveBeenCalled();
 
     onSeek.calls.reset();
 
-    video.currentTime = 120;
+    // Seek in safe region & in unbuffered region.
+    video.currentTime = 24;
     videoOnSeeking();
-    expect(video.currentTime).toBe(60);
-    expect(playhead.getTime()).toBe(60);
-    expect(onSeek).not.toHaveBeenCalledWith();
-    videoOnSeeking();
+    expect(video.currentTime).toBe(24);
+    expect(playhead.getTime()).toBe(24);
     expect(onSeek).toHaveBeenCalled();
 
     onSeek.calls.reset();
 
-    video.currentTime = 0;
+    // Seek before left (treated like seek before start even though in buffered
+    // region).
+    video.currentTime = 5.5;
     videoOnSeeking();
-    expect(video.currentTime).toBe(5);
-    expect(playhead.getTime()).toBe(5);
-    expect(onSeek).not.toHaveBeenCalledWith();
+    expect(video.currentTime).toBe(18);
+    expect(playhead.getTime()).toBe(18);
+    expect(onSeek).not.toHaveBeenCalled();
     videoOnSeeking();
     expect(onSeek).toHaveBeenCalled();
 
-    onSeek.calls.reset();
-
-    video.currentTime = 20;
-    videoOnSeeking();
-    expect(video.currentTime).toBe(20);
-    expect(playhead.getTime()).toBe(20);
-    expect(onSeek).toHaveBeenCalled();
-
-    // Now remove start of buffer so we can check that current time is
-    // adjusted to take into account buffering. Note segment availability
-    // window is set so the presentation is live.
     video.buffered = {
       length: 1,
       start: function(i) {
-        if (i == 0) return 20;
+        if (i == 0) return 10;
         throw new Error('Unexpected index');
       },
       end: function(i) {
-        if (i == 0) return 35;  // Like one segment.
+        if (i == 0) return 40;
         throw new Error('Unexpected index');
       }
     };
 
+    // Seek outside safe region & in buffered region.
+    video.currentTime = 15;
+    videoOnSeeking();
+    expect(video.currentTime).toBe(15);
+    expect(playhead.getTime()).toBe(15);
+    expect(onSeek).toHaveBeenCalled();
+
     onSeek.calls.reset();
 
-    video.currentTime = 0;
+    // Seek outside safe region & in unbuffered region.
+    video.currentTime = 9;
     videoOnSeeking();
-    expect(video.currentTime).toBe(5 + 10);
-    expect(playhead.getTime()).toBe(5 + 10);
-    expect(onSeek).not.toHaveBeenCalledWith();
+    expect(video.currentTime).toBe(18);
+    expect(playhead.getTime()).toBe(18);
+    expect(onSeek).not.toHaveBeenCalled();
     videoOnSeeking();
     expect(onSeek).toHaveBeenCalled();
 
     onSeek.calls.reset();
 
-    video.currentTime = 6;
+    // Seek past end.
+    video.currentTime = 120;
     videoOnSeeking();
-    expect(video.currentTime).toBe(5 + 10);
-    expect(playhead.getTime()).toBe(5 + 10);
-    expect(onSeek).not.toHaveBeenCalledWith();
+    expect(video.currentTime).toBe(60);
+    expect(playhead.getTime()).toBe(60);
+    expect(onSeek).not.toHaveBeenCalled();
     videoOnSeeking();
     expect(onSeek).toHaveBeenCalled();
 
-    // Now do the same thing but for VOD.
+    onSeek.calls.reset();
+
+    // Seek before start.
+    video.currentTime = 1;
+    videoOnSeeking();
+    expect(video.currentTime).toBe(18);
+    expect(playhead.getTime()).toBe(18);
+    expect(onSeek).not.toHaveBeenCalled();
+    videoOnSeeking();
+    expect(onSeek).toHaveBeenCalled();
+
+    onSeek.calls.reset();
+
+    // Seek with end < safe (note: safe == 16).
+    timeline.getSegmentAvailabilityEnd.and.returnValue(12);
+
+    // Seek before start
+    video.currentTime = 4;
+    videoOnSeeking();
+    expect(video.currentTime).toBe(12);
+    expect(playhead.getTime()).toBe(12);
+    expect(onSeek).not.toHaveBeenCalled();
+    videoOnSeeking();
+    expect(onSeek).toHaveBeenCalled();
+
+    onSeek.calls.reset();
+
+    // Seek in window.
+    video.currentTime = 8;
+    videoOnSeeking();
+    expect(video.currentTime).toBe(8);
+    expect(playhead.getTime()).toBe(8);
+    expect(onSeek).toHaveBeenCalled();
+
+    onSeek.calls.reset();
+
+    // Seek past end.
+    video.currentTime = 13;
+    videoOnSeeking();
+    expect(video.currentTime).toBe(12);
+    expect(playhead.getTime()).toBe(12);
+    expect(onSeek).not.toHaveBeenCalled();
+    videoOnSeeking();
+    expect(onSeek).toHaveBeenCalled();
+  });
+
+  it('clamps seeks for VOD', function() {
+    video.readyState = HTMLMediaElement.HAVE_METADATA;
+
+    video.buffered = {
+      length: 1,
+      start: function(i) {
+        if (i == 0) return 25;
+        throw new Error('Unexpected index');
+      },
+      end: function(i) {
+        if (i == 0) return 55;
+        throw new Error('Unexpected index');
+      }
+    };
+
+    timeline.getSegmentAvailabilityStart.and.returnValue(5);
+    timeline.getSegmentAvailabilityEnd.and.returnValue(60);
     timeline.getSegmentAvailabilityDuration.and.returnValue(null);
 
+    playhead = new shaka.media.Playhead(
+        video,
+        timeline,
+        10 /* rebufferingGoal */,
+        5 /* startTime */,
+        onBuffering, onSeek);
+
+    expect(playhead.getTime()).toBe(5);
+    expect(video.currentTime).toBe(5);
+
+    // Seek past end.
+    video.currentTime = 120;
+    videoOnSeeking();
+    expect(video.currentTime).toBe(60);
+    expect(playhead.getTime()).toBe(60);
+    expect(onSeek).not.toHaveBeenCalled();
+    videoOnSeeking();
+    expect(onSeek).toHaveBeenCalled();
+
     onSeek.calls.reset();
 
-    video.currentTime = 6;
+    // Seek before start.
+    video.currentTime = 1;
     videoOnSeeking();
-    expect(video.currentTime).toBe(6);
-    expect(playhead.getTime()).toBe(6);
+    expect(video.currentTime).toBe(5);
+    expect(playhead.getTime()).toBe(5);
+    expect(onSeek).not.toHaveBeenCalled();
+    videoOnSeeking();
     expect(onSeek).toHaveBeenCalled();
   });
 
