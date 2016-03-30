@@ -250,6 +250,28 @@ describe('PresentationTimeline', function() {
         Number.POSITIVE_INFINITY);
   });
 
+  it('setSegmentAvailabiliyDuration', function() {
+    setElapsed(0);
+    var timeline = new shaka.media.PresentationTimeline(60, null, null, 10, 0);
+    expect(timeline.getSegmentAvailabilityDuration()).toBeNull();
+
+    timeline = new shaka.media.PresentationTimeline(
+        Number.POSITIVE_INFINITY, Date.now() / 1000.0, 20, 10, 0);
+    timeline.setSegmentAvailabiliyDuration(7);
+    expect(timeline.getSegmentAvailabilityDuration()).toBe(7);
+
+    timeline = new shaka.media.PresentationTimeline(
+        Number.POSITIVE_INFINITY, Date.now() / 1000.0, 20, 10, 0);
+    timeline.setSegmentAvailabiliyDuration(Number.POSITIVE_INFINITY);
+    expect(timeline.getSegmentAvailabilityDuration()).toBe(
+        Number.POSITIVE_INFINITY);
+
+    timeline = new shaka.media.PresentationTimeline(
+        60, null, null, 10, 0);
+    timeline.setSegmentAvailabiliyDuration(null);
+    expect(timeline.getSegmentAvailabilityDuration()).toBe(null);
+  });
+
   it('clockOffset', function() {
     // setElapsed sets the local clock.  The server is 10 seconds ahead so it
     // should return 10.
