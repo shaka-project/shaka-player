@@ -431,6 +431,10 @@ describe('StreamingEngine', function() {
       }).catch(fail).then(done);
     });
 
+    afterEach(function() {
+      window.clearInterval(slideSegmentAvailabilityWindow);
+    });
+
     it('plays through Period transition', function(done) {
       onStartupComplete.and.callFake(function() {
         // firstSegmentNumber =
@@ -445,7 +449,6 @@ describe('StreamingEngine', function() {
         if (video.currentTime >= 305) {
           // We've played through the Period transition!
           eventManager.unlisten(video, 'timeupdate');
-          window.clearInterval(slideSegmentAvailabilityWindow);
           done();
         }
       };
@@ -469,7 +472,6 @@ describe('StreamingEngine', function() {
         if (video.currentTime >= 305) {
           // We've played through the Period transition!
           eventManager.unlisten(video, 'timeupdate');
-          window.clearInterval(slideSegmentAvailabilityWindow);
           done();
         }
       };
@@ -494,7 +496,6 @@ describe('StreamingEngine', function() {
         if (video.currentTime >= 305) {
           // We've played through the Period transition!
           eventManager.unlisten(video, 'timeupdate');
-          window.clearInterval(slideSegmentAvailabilityWindow);
           done();
         }
       };
