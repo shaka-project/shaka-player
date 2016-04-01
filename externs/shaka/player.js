@@ -318,10 +318,14 @@ shakaExtern.StreamingConfiguration;
  * @property {string} preferredAudioLanguage
  *   The preferred language to use for audio tracks.  If not given it will use
  *   the 'main' track.
+ *   Changing this during playback will cause the language selection algorithm
+ *   to run again, and may change the active audio track.
  * @property {string} preferredTextLanguage
- *   The preferred language to use for text tracks.  If the audio and text
- *   tracks have different languages, the text track will be enabled.
- *
+ *   The preferred language to use for text tracks.  If a matching text track
+ *   is found, and the selected audio and text tracks have different languages,
+ *   the text track will be shown.
+ *   Changing this during playback will cause the language selection algorithm
+ *   to run again, and may change the active text track.
  * @exportDoc
  */
 shakaExtern.PlayerConfiguration;

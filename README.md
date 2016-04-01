@@ -1,8 +1,8 @@
 # Shaka Player #
 
 Shaka Player is a JavaScript library for adaptive video streaming.
-It plays [DASH][] content without plugins using [MediaSource Extensions][] and
-[Encrypted Media Extensions][].
+It plays [DASH][] content without browser plugins using
+[MediaSource Extensions][] and [Encrypted Media Extensions][].
 
 We are currently testing on the latest stable releases of Chrome, Firefox, and
 Edge, as well as IE 11 and Safari 9. We test using both Widevine and PlayReady,
@@ -29,9 +29,7 @@ and multilingual content. And best of all, it's free!
  * [mailing list](https://groups.google.com/forum/#!forum/shaka-player-users)
      (join for release announcements or to discuss development)
  * [hosted API docs](http://shaka-player-demo.appspot.com/docs/api/index.html)
-     *__(HOSTED DOCS FOR v2 COMING SOON)__*
- * [tutorials](http://shaka-player-demo.appspot.com/docs/tutorials/index.html)
-     *__(HOSTED DOCS FOR v2 COMING SOON)__*
+ * [tutorials](http://shaka-player-demo.appspot.com/docs/api/tutorial-welcome.html)
 
 
 ## Compiled Mode ##
@@ -43,7 +41,7 @@ to compile the sources and documentation are included in the sources:
 If you installed Shaka Player via npm, the sources have already been compiled
 for you.
 
-In order to build, you simply need python v2.7+ (for the build scripts) and
+In order to build, you simply need python v2.7 (for the build scripts) and
 JRE 7+ (for the compiler). Just run `./build/all.py` and look for the output
 in `dist/shaka-player.compiled.js`. The output can be included directly in a
 `<script>` tag or loaded via a number of JavaScript module loaders.

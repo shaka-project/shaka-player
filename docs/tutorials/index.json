@@ -1,0 +1,15 @@
+[
+  { "welcome": { "title": "Welcome to Shaka Player" } },
+  { "basic-usage": { "title": "Basic Usage" } },
+  { "debugging": { "title": "Debugging the Uncompiled Library" } },
+  { "config": { "title": "Configuration" } },
+  { "network-and-buffering-config": { "title": "Network and Buffering Configuration" } },
+  { "drm-config": { "title": "DRM Configuration" } },
+  { "license-server-auth": { "title": "License Server Authentication" } },
+  { "Coming Soon": { "children": [
+    { "license-headers": { "title": "License Headers and Track Restrictions" } },
+    { "live": { "title": "Special Considerations for Live Streaming" } },
+    { "offline": { "title": "Offline Storage and Playback" } }
+  ] } },
+  { "plugins": { "title": "Plugins and Customizing the Build" } }
+]

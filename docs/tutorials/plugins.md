@@ -1,0 +1,153 @@
+# Plugins and Customizing the Build
+
+Shaka has a plugin system to make it easier to extend and customize the
+library.  Plugins can be written outside the library (in your application), or
+they can be built into the library to take advantage of the [Closure compiler].
+
+[Closure compiler]: https://github.com/google/closure-compiler
+
+Manifest parsing, subtitle and caption parsing, networking, ABR, and polyfills
+are all done through plugins.  Even our "built-in" parsers, such as DASH and
+WebVTT, are actually just default plugins.
+
+
+#### Plugins
+
+A plugin registers itself with a "core" component.  These are the various
+plugin interfaces and the default plugins that Shaka provides:
+
+__Manifest parsers__
+  - Selected by file extension, with a fall back to manifest MIME type
+  - Register with {@link shaka.media.ManifestParser.registerParserByExtension}
+    and {@link shaka.media.ManifestParser.registerParserByMime}
+  - Default manifest parser plugins:
+    - DASH: {@link shaka.dash.DashParser}
+
+__Subtitle/caption parsers__
+  - Selected by MIME type
+  - Register with {@link shaka.media.TextEngine.registerParser}
+  - Default text parser plugins:
+    - WebVTT: {@link shaka.media.VttTextParser}
+
+__Networking plugins__
+  - Selected by URI scheme (http, https, etc.)
+  - Register with {@link shaka.net.NetworkingEngine.registerScheme}
+  - Default networking plugins:
+    - HTTP(S): {@link shaka.net.HttpPlugin}
+    - data URIs: {@link shaka.net.DataUriPlugin}
+
+__ABR plugins__
+  - Configured at runtime on a Player instance
+  - Use {@link player.configure} and set the `abrManager` field
+  - Must implement the {@link shakaExtern.AbrManager} interface
+  - Default AbrManager implementation: {@link shaka.abr.SimpleAbrManager}
+
+__Polyfills__
+  - All polyfills are installed by {@link shaka.polyfill.installAll}
+  - Register with {@link shaka.polyfill.register}
+  - Default polyfills:
+    - prefixed fullscreen implementations: {@link shaka.polyfill.Fullscreen}
+    - prefixed video QoE metrics: {@link shaka.polyfill.VideoPlaybackQuality}
+    - prefixed EME implementations for IE 11 and very old versions of embedded
+      Chrome/Chromium: {@link shaka.polyfill.MediaKeys}
+    - Promise implementation for IE 11: {@link shaka.polyfill.Promise}
+
+
+#### Excluding Default Plugins
+
+Core components cannot be removed from the build, but everything else is
+technically optional.  For example, if you don't need WebVTT, you can exclude
+our VTT parser from the build to save space.  Any VTT text streams found in a
+manifest would then be ignored.
+
+*(At the time of this writing, our default plugins account for 43% of the size
+of our compiled library.)*
+
+Because each plugin's source file ends with a call to register itself with the
+core system, a plugin can simply be excluded from the build without changing
+any of the source code.
+
+You can start with the complete library (`+@complete`) and exclude any
+individual source file with a minus sign and a path:
+
+```sh
+python build/build.py +@complete -lib/net/data_uri_plugin.js
+```
+
+You can also exclude an entire category of plugins:
+
+```sh
+# Build without polyfills:
+python build/build.py +@complete -@polyfill
+# Build without polyfills or text parsers:
+python build/build.py +@complete -@polyfill -@text
+```
+
+
+#### Build Configs
+
+Each of these arguments that starts with an '@' sign is a build config file in
+`build/types/` containing a list sources or other configs to include.  Each
+line in these files is treated as an argument to `build.py`.  For example,
+this is what `build/types/networking` looks like:
+
+```sh
+# All standard networking scheme plugins.
++../../lib/net/http_plugin.js
++../../lib/net/data_uri_plugin.js
+```
+
+
+#### Adding Your Own Plugins
+
+If you want to take advantage of the [Closure compiler], you can add your own
+sources to the build.  Your plugins, like ours, should register themselves at
+the bottom of the source file.
+
+To add a single source file, prefix it with a plus sign:
+
+```sh
+python build/build.py +@complete +my_plugin.js
+```
+
+You can add multiple sources as well:
+
+```sh
+python build/build.py +@complete +my_plugin.js +/path/to/my_other_plugin.js
+```
+
+
+#### Custom Build Configs
+
+If you have a long list of customizations, you may want to create your own
+group file.  For example:
+
+```sh
+# Start with a complete library
++@complete
+# Drop subtitle support
+-@text
+# Remove default networking plugins
+-@networking
+# Add my custom HTTP implementation
++/path/to/my_http_plugin.js
+# Add an additional polyfill for some odd platform I'm targetting
++/path/to/my_platform_polyfill.js
+```
+
+
+#### Plugins in Your Application
+
+Every plugin interface is exported from the compiled library so that you don't
+have to customize the build to create a plugin.  Just register your plugins
+with the appropriate interfaces after the library is loaded.
+
+
+#### Giving Back
+
+If you have a great plugin that you'd like to contribute back to the community,
+we'd love to hear from you.  You can get in touch via our [mailing list][] to
+discuss it, and once it's ready, you can send a [pull request][] on github.
+
+[mailing list]: https://groups.google.com/forum/#!forum/shaka-player-users
+[pull request]: https://github.com/google/shaka-player/pull/new/master
