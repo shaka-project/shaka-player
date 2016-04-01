@@ -530,11 +530,11 @@ describe('DrmEngine', function() {
       }).catch(fail).then(done);
     });
 
-    it('uses clearKeys config for clearkey content', function(done) {
+    it('uses clearKeys config to override DrmInfo', function(done) {
       manifest.periods[0].streamSets[0].drmInfos[0].keySystem =
-          'org.w3.clearkey';
+          'com.fake.NOT.clearkey';
       manifest.periods[0].streamSets[1].drmInfos[0].keySystem =
-          'org.w3.clearkey';
+          'com.fake.NOT.clearkey';
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, ['org.w3.clearkey']));
 
@@ -553,6 +553,13 @@ describe('DrmEngine', function() {
 
       initAndAttach().then(function() {
         var Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
+
+        expect(manifest.periods[0].streamSets[0].drmInfos.length).toBe(1);
+        expect(manifest.periods[0].streamSets[0].drmInfos[0].keySystem).
+            toBe('org.w3.clearkey');
+        expect(manifest.periods[0].streamSets[1].drmInfos.length).toBe(1);
+        expect(manifest.periods[0].streamSets[1].drmInfos[0].keySystem).
+            toBe('org.w3.clearkey');
 
         expect(session.generateRequest).
             toHaveBeenCalledWith('keyids', jasmine.any(ArrayBuffer));
@@ -876,9 +883,9 @@ describe('DrmEngine', function() {
       }).catch(fail).then(done);
     });
 
-    it('uses clearKeys config for clearkey content', function(done) {
+    it('uses clearKeys config to override DrmInfo', function(done) {
       manifest.periods[0].streamSets[0].drmInfos[0].keySystem =
-          'org.w3.clearkey';
+          'com.fake.NOT.clearkey';
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, ['org.w3.clearkey']));
 

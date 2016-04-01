@@ -219,7 +219,7 @@ shakaExtern.AdvancedDrmConfiguration;
  *   A dictionary which maps key system IDs to their license servers.
  *   For example, {'com.widevine.alpha': 'http://example.com/drm'}.
  * @property {!Object.<string, string>} clearKeys
- *   <i>Only usable by the clear key CDM.</i> <br>
+ *   <i>Forces the use of the Clear Key CDM.</i>
  *   A map of key IDs (hex) to keys (hex).
  * @property {Object.<string, shakaExtern.AdvancedDrmConfiguration>} advanced
  *   <i>Optional.</i> <br>

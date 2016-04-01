@@ -234,20 +234,6 @@ shakaAssets.YouTubeCallback = function(node) {
       }
     }
     return configs;
-  } else if (schemeIdUri == 'com.youtube.clearkey') {
-    // The keys are given in the asset definition and passed to DrmEngine.
-    // DrmEngine will then use them to replace |licesneServerUrl| and
-    // |initData|.
-    return [{
-      keySystem: 'org.w3.clearkey',
-      licenseServerUri: '',
-      distinctiveIdentifierRequired: false,
-      persistentStateRequired: false,
-      audioRobustness: '',
-      videoRobustness: '',
-      serverCertificate: null,
-      initData: null
-    }];
   }
 
   return null;
@@ -355,7 +341,6 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_BASE
     ],
 
-    drmCallback: shakaAssets.YouTubeCallback,
     clearKeys: {
       '60061e017e477e877e57d00d1ed00d1e': '1a8a2095e4deb2d29ec816ac7bae2082'
     }
