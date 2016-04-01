@@ -182,6 +182,7 @@ describe('StreamingEngine', function() {
   function createLiveStreamGenerator(metadata, timeShiftBufferDepth) {
     // Set the generator's AST to 295 seconds in the past so the
     // StreamingEngine begins streaming close to the end of the first Period.
+    var now = Date.now() / 1000;
     var generator = new shaka.test.DashLiveStreamGenerator(
         metadata.initSegmentUri,
         metadata.mvhdOffset,
@@ -189,8 +190,8 @@ describe('StreamingEngine', function() {
         metadata.tfdtOffset,
         metadata.segmentDuration,
         metadata.presentationTimeOffset,
-        (Date.now() / 1000) - 295 /* broadcastStartTime */,
-        (Date.now() / 1000) - 295 /* availabilityStartTime */,
+        now - 295 /* broadcastStartTime */,
+        now - 295 /* availabilityStartTime */,
         timeShiftBufferDepth);
     metadata.generator = generator;
     return generator.init();
