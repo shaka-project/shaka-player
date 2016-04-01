@@ -55,8 +55,12 @@ def checkLint():
   return (subprocess.call(cmdLine) == 0)
 
 def checkHtmlLint():
-  """Runs the HTML linter over the HTML files."""
+  """Runs the HTML linter over the HTML files.
+  Skipped if htmlhint is not available.
+  """
   htmlhint_path = shakaBuildHelpers.getNodeBinaryPath('htmlhint')
+  if not os.path.exists(htmlhint_path):
+    return 0
   base = shakaBuildHelpers.getSourceBase()
   files = ['index.html', 'demo/index.html', 'support.html']
   file_paths = [os.path.join(base, x) for x in files]
@@ -126,9 +130,6 @@ def main(args):
       print >> sys.stderr, 'Unknown option', arg
       usage()
       return 1
-
-  # Update node modules if needed.
-  shakaBuildHelpers.updateNodeModules()
 
   if not checkLint():
     return 1
