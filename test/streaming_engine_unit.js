@@ -663,6 +663,41 @@ describe('StreamingEngine', function() {
     }).catch(fail).then(done);
   });
 
+  it('plays when a small gap is present at the beginning', function(done) {
+    var loop;
+    var drift = 0.050;  // 50 ms
+
+    setupVod();
+    mediaSourceEngine =
+        new shaka.test.FakeMediaSourceEngine(segmentData, drift);
+    createStreamingEngine();
+
+    playhead.getTime.and.returnValue(0);
+
+    onStartupComplete.and.callFake(function() {
+      expect(playhead.setBuffering).toHaveBeenCalledWith(true);
+      expect(playhead.setBuffering).not.toHaveBeenCalledWith(false);
+      playhead.setBuffering.calls.reset();
+
+      playhead.setBuffering.and.callFake(function(buffering) {
+        if (!buffering) {
+          // Success!  We have left the buffering state!
+          loop.stop();
+        }
+      });
+    });
+
+    // Here we go!
+    onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+    streamingEngine.init();
+
+    loop = runTest();
+    loop.then(function() {
+      expect(playhead.setBuffering).toHaveBeenCalledWith(false);
+      return streamingEngine.destroy();
+    }).catch(fail).then(done);
+  });
+
   describe('handles seeks (VOD)', function() {
     beforeEach(function() {
       setupVod();
@@ -1457,45 +1492,7 @@ describe('StreamingEngine', function() {
 
       playhead.getTime.and.returnValue(0);
 
-      // Note: this happens after onError().
       onStartupComplete.and.callFake(setupFakeGetTime.bind(null, drift));
-
-      onError.and.callFake(function(error) {
-        expect(error.category).toBe(shaka.util.Error.Category.STREAMING);
-        expect(error.code).toBe(
-            shaka.util.Error.Code.SEGMENT_DOES_NOT_EXIST);
-
-        var reportedTimestampNeeded = error.data[2];
-
-        // Expect six SEGMENT_DOES_NOT_EXIST errors as the playhead
-        // will be outside the drifted segment availability window at the
-        // beginning of each Period for each content type.
-        if (onError.calls.count() <= 3) {
-          expect(reportedTimestampNeeded).toBe(0);
-
-          if (onError.calls.count() < 3) {
-            // Simulate stuck playhead.
-            playing = false;
-          } else {
-            // Jump the gap: StreamingEngine should recover.
-            expect(onStartupComplete).not.toHaveBeenCalled();
-            setupFakeGetTime(drift);
-            streamingEngine.seeked();
-          }
-        } else {
-          expect(reportedTimestampNeeded).toBe(20);
-
-          if (onError.calls.count() < 6) {
-            // Simulate stuck playhead.
-            playing = false;
-          } else {
-            // Jump the gap: StreamingEngine should recover.
-            playing = true;
-            playheadTime = 20 + drift;
-            streamingEngine.seeked();
-          }
-        }
-      });
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
@@ -1503,8 +1500,6 @@ describe('StreamingEngine', function() {
 
       var loop = runTest();
       loop.then(function() {
-        expect(onError.calls.count()).toBe(6);
-
         expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
 
         // Verify buffers.
@@ -1514,9 +1509,9 @@ describe('StreamingEngine', function() {
           text: []
         });
         expect(mediaSourceEngine.segments).toEqual({
-          audio: [false, false, true, true],
-          video: [false, false, true, true],
-          text: [false, false, true, true]
+          audio: [true, true, true, true],
+          video: [true, true, true, true],
+          text: [true, true, true, true]
         });
 
         return streamingEngine.destroy();

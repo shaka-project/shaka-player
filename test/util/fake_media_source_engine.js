@@ -139,12 +139,17 @@ shaka.test.FakeMediaSourceEngine.prototype.bufferEnd = function(type) {
 
 /** @override */
 shaka.test.FakeMediaSourceEngine.prototype.bufferedAheadOf = function(
-    type, start) {
+    type, start, opt_tolerance) {
   if (this.segments[type] === undefined) throw new Error('unexpected type');
 
+  var tolerance = 0;
   // Note: |start| may equal the end of the last segment, so |first|
   // may equal segments[type].length
   var first = this.toIndex_(type, start);
+  if (!this.segments[type][first] && opt_tolerance) {
+    first = this.toIndex_(type, start + opt_tolerance);
+    tolerance = opt_tolerance;
+  }
   if (!this.segments[type][first])
     return 0;  // Unbuffered.
 
@@ -153,7 +158,7 @@ shaka.test.FakeMediaSourceEngine.prototype.bufferedAheadOf = function(
   if (last < 0)
     last = this.segments[type].length;  // Buffered everything.
 
-  return this.toTime_(type, last) - start;
+  return this.toTime_(type, last) - start + tolerance;
 };
 
 
