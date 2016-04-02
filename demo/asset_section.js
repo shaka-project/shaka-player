@@ -166,6 +166,10 @@ shakaDemo.load = function() {
 
   // Load the manifest.
   player.load(asset.manifestUri).then(function() {
+    (asset.extraText || []).forEach(function(extraText) {
+      player.addTextTrack(extraText.uri, extraText.language, extraText.kind,
+                          extraText.mime, extraText.codecs);
+    });
   }, function(reason) {
     var error = /** @type {!shaka.util.Error} */(reason);
     shakaDemo.onError_(error);

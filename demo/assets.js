@@ -94,16 +94,22 @@ shakaAssets.Feature = {
 /**
  * @typedef {{
  *   uri: string,
+ *   language: string,
  *   kind: string,
- *   lang: string
+ *   mime: string,
+ *   codecs: (string|undefined)
  * }}
  *
  * @property {string} uri
  *   The URI of the text.
+ * @property {string} language
+ *   The language of the text (e.g. 'en').
  * @property {string} kind
  *   The kind of text (e.g. 'subtitles').
- * @property {string} lang
- *   The language of the text (e.g. 'en').
+ * @property {string} mime
+ *   The MIME type of the text (e.g. 'text/vtt')
+ * @property {(string|undefined)} codecs
+ *   (optional) The codecs string, if needed to refine the MIME type.
  */
 shakaAssets.ExtraText;
 
@@ -688,23 +694,26 @@ shakaAssets.testAssets = [
     }
   },
   {
-    name: 'Tears Of Steel',
+    name: 'Tears Of Steel (external text)',
     manifestUri: '//ams-samplescdn.streaming.mediaservices.windows.net/11196e3d-2f40-4835-9a4d-fc52751b0323/TearsOfSteel_WAMEH264SmoothStreaming720p.ism/manifest(format=mpd-time-csf)',  // gjslint: disable=110
     extraText: [
       {
         uri: '//ams-samplescdn.streaming.mediaservices.windows.net/11196e3d-2f40-4835-9a4d-fc52751b0323/TOS-en.vtt',  // gjslint: disable=110
+        language: 'en',
         kind: 'subtitle',
-        lang: 'en'
+        mime: 'text/vtt'
       },
       {
         uri: '//ams-samplescdn.streaming.mediaservices.windows.net/11196e3d-2f40-4835-9a4d-fc52751b0323/TOS-es.vtt',  // gjslint: disable=110
+        language: 'es',
         kind: 'subtitle',
-        lang: 'es'
+        mime: 'text/vtt'
       },
       {
         uri: '//ams-samplescdn.streaming.mediaservices.windows.net/11196e3d-2f40-4835-9a4d-fc52751b0323/TOS-fr.vtt',  // gjslint: disable=110
+        language: 'fr',
         kind: 'subtitle',
-        lang: 'fr'
+        mime: 'text/vtt'
       }
     ],
 
