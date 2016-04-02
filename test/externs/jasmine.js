@@ -293,7 +293,7 @@ var spyOn = function(obj, name) {};
 
 /**
  * @param {Function} factory
- * @return {?}
+ * @return {!Object}
  */
 jasmine.any = function(factory) {};
 
