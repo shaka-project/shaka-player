@@ -115,7 +115,7 @@ shaka.test.ManifestGenerator.prototype.addStreamSet = function(type) {
   this.finishPartialStream_();
   var period = this.currentPeriod_();
   period.streamSets.push(
-      {language: '', type: type, primary: false, drmInfos: [], streams: []});
+      {language: 'und', type: type, primary: false, drmInfos: [], streams: []});
   return this;
 };
 

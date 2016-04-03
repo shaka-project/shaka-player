@@ -390,7 +390,7 @@ describe('Player', function() {
           active: true,
           type: 'video',
           bandwidth: 100,
-          language: '',
+          language: 'und',
           kind: null,
           width: 100,
           height: 200
@@ -400,7 +400,7 @@ describe('Player', function() {
           active: false,
           type: 'video',
           bandwidth: 200,
-          language: '',
+          language: 'und',
           kind: null,
           width: 200,
           height: 400
