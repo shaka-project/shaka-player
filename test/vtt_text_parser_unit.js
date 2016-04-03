@@ -222,6 +222,16 @@ describe('VttTextParser', function() {
         'Test');
   });
 
+  it('handles a blank line at the end of the file', function() {
+    verifyHelper(
+        [
+          {start: 20, end: 40, text: 'Test'}
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        'Test\n\n');
+  });
+
   it('invalid settings', function() {
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_SETTINGS,
                 'WEBVTT\n\n00:00.000 --> 00:00.010 vertical:es\nTest');
