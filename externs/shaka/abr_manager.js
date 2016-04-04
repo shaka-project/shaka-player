@@ -94,7 +94,7 @@ shakaExtern.AbrManager.prototype.stop = function() {};
 
 
 /**
- * Gets an estimate of the current bandwidth in kbit/sec.  This is used by the
+ * Gets an estimate of the current bandwidth in bit/sec.  This is used by the
  * Player to generate stats.
  *
  * @return {number}

@@ -317,8 +317,9 @@ jasmine.stringMatching = function(value) {};
 
 
 /**
- * @param {!Object} value
- * @return {!Object}
+ * @param {!Array.<T>} value
+ * @return {!Array.<T>}
+ * @template T
  */
 jasmine.arrayContaining = function(value) {};
 

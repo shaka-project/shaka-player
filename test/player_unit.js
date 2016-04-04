@@ -16,6 +16,7 @@
  */
 
 describe('Player', function() {
+  var abrManager;
   var originalLogError;
   var logErrorSpy;
   var manifest;
@@ -39,6 +40,10 @@ describe('Player', function() {
     var netEngine = new shaka.test.FakeNetworkingEngine({}, new ArrayBuffer(0));
     player = new shaka.Player(video);
     player.setNetworkingEngine(netEngine);
+    abrManager = new shaka.test.FakeAbrManager();
+    player.configure(
+        /** @type {shakaExtern.PlayerConfiguration} */ (
+            {abrManager: abrManager}));
 
     player.createDrmEngine = function() {
       return new shaka.test.FakeDrmEngine();
@@ -283,13 +288,6 @@ describe('Player', function() {
   });
 
   describe('AbrManager', function() {
-    var abrManager;
-
-    beforeEach(function() {
-      abrManager = new shaka.test.FakeAbrManager();
-      player.configure({abrManager: abrManager});
-    });
-
     it('sets through configure', function() {
       var config = player.getConfiguration();
       expect(config.abrManager).toBe(abrManager);
@@ -497,10 +495,6 @@ describe('Player', function() {
   });
 
   describe('languages', function() {
-    beforeEach(function() {
-      player.configure({abrManager: new shaka.test.FakeAbrManager()});
-    });
-
     it('chooses the first as default', function(done) {
       runTest(['en', 'es'], 'pt', 0, done);
     });
@@ -585,6 +579,212 @@ describe('Player', function() {
           .catch(fail)
           .then(done);
     }
+  });
+
+  describe('getStats', function() {
+    beforeAll(function() {
+      jasmine.clock().install();
+      jasmine.clock().mockDate();
+
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addStreamSet('audio')
+            .language('en')
+            .addStream(1).bandwidth(100)
+            .addStream(2).bandwidth(200)
+          .addStreamSet('video')
+            .addStream(4).bandwidth(100).size(100, 200)
+            .addStream(5).bandwidth(200).size(200, 400)
+        .build();
+    });
+
+    beforeEach(function(done) {
+      var factory = shaka.test.FakeManifestParser.createFactory(manifest);
+      player.load('', 0, factory)
+          .then(function() {
+            // "initialize" the current period.
+            chooseStreams(manifest.periods[0]);
+            canSwitch();
+          })
+          .catch(fail)
+          .then(done);
+    });
+
+    afterAll(function() {
+      jasmine.clock().uninstall();
+    });
+
+    it('tracks estimated bandwidth', function() {
+      abrManager.getBandwidthEstimate.and.returnValue(25);
+      var stats = player.getStats();
+      expect(stats.estimatedBandwidth).toBe(25);
+    });
+
+    it('tracks info about current stream', function() {
+      var stats = player.getStats();
+      // Should have chosen the first of each type of stream.
+      expect(stats.width).toBe(100);
+      expect(stats.height).toBe(200);
+      expect(stats.streamBandwidth).toBe(200);
+    });
+
+    it('tracks frame info', function() {
+      // getVideoPlaybackQuality does not exist yet.
+      var stats = player.getStats();
+      expect(stats.decodedFrames).toBeNaN();
+      expect(stats.droppedFrames).toBeNaN();
+
+      video.getVideoPlaybackQuality = function() {
+        return {totalVideoFrames: 75, droppedVideoFrames: 125};
+      };
+
+      // Now that it exists, theses stats should exist.
+      stats = player.getStats();
+      expect(stats.decodedFrames).toBe(75);
+      expect(stats.droppedFrames).toBe(125);
+    });
+
+    describe('buffer/play times', function() {
+      it('tracks play time', function() {
+        var stats = player.getStats();
+        expect(stats.playTime).toBeCloseTo(0);
+        expect(stats.bufferingTime).toBeCloseTo(0);
+
+        jasmine.clock().tick(5000);
+
+        stats = player.getStats();
+        expect(stats.playTime).toBeCloseTo(5);
+        expect(stats.bufferingTime).toBeCloseTo(0);
+      });
+
+      it('tracks buffering time', function() {
+        var stats = player.getStats();
+        expect(stats.playTime).toBeCloseTo(0);
+        expect(stats.bufferingTime).toBeCloseTo(0);
+
+        buffering(true);
+        jasmine.clock().tick(5000);
+
+        stats = player.getStats();
+        expect(stats.playTime).toBeCloseTo(0);
+        expect(stats.bufferingTime).toBeCloseTo(5);
+      });
+
+      it('tracks correct time when switching states', function() {
+        // buffering(false)
+        jasmine.clock().tick(3000);
+        buffering(true);
+        jasmine.clock().tick(5000);
+        buffering(true);
+        jasmine.clock().tick(9000);
+        buffering(false);
+        jasmine.clock().tick(1000);
+
+        var stats = player.getStats();
+        expect(stats.playTime).toBeCloseTo(4);
+        expect(stats.bufferingTime).toBeCloseTo(14);
+      });
+
+      /**
+       * @param {boolean} buffering
+       * @suppress {accessControls}
+       */
+      function buffering(buffering) {
+        player.onBuffering_(buffering);
+      }
+    });
+
+    describe('.switchHistory', function() {
+      it('includes original choices', function() {
+        checkHistory([]);
+      });
+
+      it('includes selectTrack choices', function() {
+        var track = player.getTracks()[1];
+        player.selectTrack(track);
+
+        checkHistory([{
+          // We are using a mock date, so this is not a race.
+          timestamp: Date.now() / 1000,
+          id: track.id,
+          type: track.type,
+          fromAdaptation: false
+        }]);
+      });
+
+      it('includes adaptation choices', function() {
+        var choices = {
+          'audio': manifest.periods[0].streamSets[0].streams[1],
+          'video': manifest.periods[0].streamSets[1].streams[1]
+        };
+
+        switch_(choices);
+        checkHistory(jasmine.arrayContaining([
+          {
+            timestamp: Date.now() / 1000,
+            id: choices['audio'].id,
+            type: 'audio',
+            fromAdaptation: true
+          },
+          {
+            timestamp: Date.now() / 1000,
+            id: choices['video'].id,
+            type: 'video',
+            fromAdaptation: true
+          }
+        ]));
+      });
+
+      it('ignores adaptation if stream is already active', function() {
+        var choices = {
+          // This audio stream is already active.
+          'audio': manifest.periods[0].streamSets[0].streams[0],
+          'video': manifest.periods[0].streamSets[1].streams[1]
+        };
+
+        switch_(choices);
+        checkHistory([{
+          timestamp: Date.now() / 1000,
+          id: choices['video'].id,
+          type: 'video',
+          fromAdaptation: true
+        }]);
+      });
+
+      /**
+       * Checks that the switch history is correct.
+       * @param {!Array.<shakaExtern.StreamChoice>} additional
+       */
+      function checkHistory(additional) {
+        var prefix = [
+          {
+            timestamp: jasmine.any(Number),
+            id: 1,
+            type: 'audio',
+            fromAdaptation: true
+          },
+          {
+            timestamp: jasmine.any(Number),
+            id: 4,
+            type: 'video',
+            fromAdaptation: true
+          }
+        ];
+
+        var stats = player.getStats();
+        expect(stats.switchHistory.slice(0, 2))
+            .toEqual(jasmine.arrayContaining(prefix));
+        expect(stats.switchHistory.slice(2)).toEqual(additional);
+      }
+
+      /**
+       * @param {!Object.<string, !shakaExtern.Stream>} streamsByType
+       * @suppress {accessControls}
+       */
+      function switch_(streamsByType) {
+        player.switch_(streamsByType);
+      }
+    });
   });
 
   /**

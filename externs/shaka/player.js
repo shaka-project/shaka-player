@@ -66,7 +66,7 @@ shakaExtern.StreamChoice;
  * @property {number} height
  *   The height of the current video track.
  * @property {number} streamBandwidth
- *   The bandwidth required for the current streams (total, in kbit/sec).
+ *   The bandwidth required for the current streams (total, in bit/sec).
  *
  * @property {number} decodedFrames
  *   The total number of frames decoded by the Player.  This may be NaN if this
@@ -75,7 +75,7 @@ shakaExtern.StreamChoice;
  *   The total number of frames dropped by the Player.  This may be NaN if this
  *   is not supported by the browser.
  * @property {number} estimatedBandwidth
- *   The current estimated network bandwidth (in kbit/sec).
+ *   The current estimated network bandwidth (in bit/sec).
  * @property {number} playTime
  *   The total time spent in a playing state in seconds.
  * @property {number} bufferingTime
