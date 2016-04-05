@@ -26,6 +26,9 @@ import re
 import subprocess
 import sys
 
+def _parseVersion(s):
+  return tuple([int(i) for i in s.split('.')])
+
 def getSourceBase():
   """Returns the absolute path to the source code base."""
   return os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -130,9 +133,21 @@ def getNodeBinaryPath(name):
 def updateNodeModules():
   base = cygwinSafePath(getSourceBase())
   cmd = 'npm.cmd' if isWindows() else 'npm'
+
+  # Check the version of npm.
+  cmdLine = [cmd, '-v']
+  printCmdLine(cmdLine)
+  version = subprocess.check_output(cmdLine)
+  if _parseVersion(version) < _parseVersion('1.3.12'):
+    print >> sys.stderr, 'npm version is too old, please upgrade.  e.g.:'
+    print >> sys.stderr, '  npm install -g npm'
+    return False
+
+  # Update the modules.
   cmdLine = [cmd, '--prefix', base, 'update']
   printCmdLine(cmdLine)
   subprocess.check_call(cmdLine)
+  return True
 
 def runMain(main):
   """Executes the given function with the current command-line arguments,

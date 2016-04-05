@@ -25,7 +25,8 @@ import sys
 def runTests(args):
   """Runs all the karma tests."""
   # Update node modules if needed.
-  shakaBuildHelpers.updateNodeModules()
+  if not shakaBuildHelpers.updateNodeModules():
+    return 1
 
   # Generate dependencies and compile library.
   # This is required for the tests.
