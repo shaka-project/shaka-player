@@ -11,5 +11,6 @@
     { "live": { "title": "Special Considerations for Live Streaming" } },
     { "offline": { "title": "Offline Storage and Playback" } }
   ] } },
-  { "plugins": { "title": "Plugins and Customizing the Build" } }
+  { "plugins": { "title": "Plugins and Customizing the Build" } },
+  { "upgrade": { "title": "Shaka v2 Upgrade Guide" } }
 ]

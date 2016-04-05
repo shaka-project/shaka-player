@@ -37,6 +37,7 @@
  * @property {boolean} fromAdaptation
  *   True if the choice was made by AbrManager for adaptation; false if it
  *   was made by the application through selectTrack.
+ * @exportDoc
  */
 shakaExtern.StreamChoice;
 
@@ -83,6 +84,7 @@ shakaExtern.StreamChoice;
  *
  * @property {!Array.<shakaExtern.StreamChoice>} switchHistory
  *   A history of the stream changes.
+ * @exportDoc
  */
 shakaExtern.Stats;
 
@@ -127,6 +129,7 @@ shakaExtern.Stats;
  *   (only for video tracks) The width of the track in pixels.
  * @property {?number} height
  *   (only for video tracks) The height of the track in pixels.
+ * @exportDoc
  */
 shakaExtern.Track;
 
@@ -308,6 +311,7 @@ shakaExtern.StreamingConfiguration;
  * @property {number} defaultBandwidthEstimate
  *   The default bandwidth estimate to use if there is not enough data, in
  *   bit/sec.
+ * @exportDoc
  */
 shakaExtern.AbrConfiguration;
 
