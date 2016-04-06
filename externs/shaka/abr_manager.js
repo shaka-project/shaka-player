@@ -102,3 +102,12 @@ shakaExtern.AbrManager.prototype.stop = function() {};
  */
 shakaExtern.AbrManager.prototype.getBandwidthEstimate = function() {};
 
+
+/**
+ * Sets the default bandwidth estimate to use if there is not enough data.
+ *
+ * @param {number} estimate The default bandwidth estimate, in bit/sec.
+ * @exportDoc
+ */
+shakaExtern.AbrManager.prototype.setDefaultEstimate = function(estimate) {};
+

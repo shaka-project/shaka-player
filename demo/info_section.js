@@ -134,7 +134,7 @@ shakaDemo.onTrackSelected_ = function(event) {
 
   // Adaptation might have been changed by calling selectTrack().
   // Update the adaptation checkbox.
-  var enableAdaptation = player.getConfiguration().enableAdaptation;
+  var enableAdaptation = player.getConfiguration().abr.enabled;
   document.getElementById('enableAdaptation').checked = enableAdaptation;
 };
 

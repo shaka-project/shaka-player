@@ -22,7 +22,10 @@ the JS console:
 player.getConfiguration();
 
 => Object
-     abrManager: SimpleAbrManager
+     abr: Object
+       defaultBandwidthEstimate: 500000
+       enabled: true
+       manager: SimpleAbrManager
      drm: Object
        advanced: Object
        clearKeys: Object
@@ -33,7 +36,6 @@ player.getConfiguration();
          maxAttempts: 1
          timeout: 0
        servers: Object
-     enableAdaptation: true
      manifest: Object
        dash: Object
        retryParameters: Object

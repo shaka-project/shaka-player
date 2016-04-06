@@ -296,11 +296,28 @@ shakaExtern.StreamingConfiguration;
 
 /**
  * @typedef {{
+ *   manager: shakaExtern.AbrManager,
+ *   enabled: boolean,
+ *   defaultBandwidthEstimate: number
+ * }}
+ *
+ * @property {shakaExtern.AbrManager} manager
+ *   The AbrManager instance.
+ * @property {boolean} enabled
+ *   If true, enable adaptation by the current AbrManager.  Defaults to true.
+ * @property {number} defaultBandwidthEstimate
+ *   The default bandwidth estimate to use if there is not enough data, in
+ *   bit/sec.
+ */
+shakaExtern.AbrConfiguration;
+
+
+/**
+ * @typedef {{
  *   drm: shakaExtern.DrmConfiguration,
  *   manifest: shakaExtern.ManifestConfiguration,
  *   streaming: shakaExtern.StreamingConfiguration,
- *   abrManager: shakaExtern.AbrManager,
- *   enableAdaptation: boolean,
+ *   abr: shakaExtern.AbrConfiguration,
  *   preferredAudioLanguage: string,
  *   preferredTextLanguage: string
  * }}
@@ -311,10 +328,8 @@ shakaExtern.StreamingConfiguration;
  *   Manifest configuration and settings.
  * @property {shakaExtern.StreamingConfiguration} streaming
  *   Streaming configuration and settings.
- * @property {shakaExtern.AbrManager} abrManager
- *   The AbrManager instance.
- * @property {boolean} enableAdaptation
- *   If true, enable adaptation by the current AbrManager.  Defaults to true.
+ * @property {shakaExtern.AbrConfiguration} abr
+ *   ABR configuration and settings.
  * @property {string} preferredAudioLanguage
  *   The preferred language to use for audio tracks.  If not given it will use
  *   the 'main' track.

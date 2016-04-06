@@ -38,7 +38,7 @@ __Networking plugins__
 
 __ABR plugins__
   - Configured at runtime on a Player instance
-  - Use {@link player.configure} and set the `abrManager` field
+  - Use {@link player.configure} and set the `abr.manager` field
   - Must implement the {@link shakaExtern.AbrManager} interface
   - Default AbrManager implementation: {@link shaka.abr.SimpleAbrManager}
 

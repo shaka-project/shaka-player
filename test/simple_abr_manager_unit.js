@@ -84,6 +84,12 @@ describe('SimpleAbrManager', function() {
     expect(streamsByType['video']).toBeTruthy();
   });
 
+  it('uses custom default estimate', function() {
+    abrManager.setDefaultEstimate(3e6);
+    var streamsByType = abrManager.chooseStreams(streamSetsByType);
+    expect(streamsByType['video'].bandwidth).toBe(2e6);
+  });
+
   it('can choose just an audio Stream right away', function() {
     delete streamSetsByType['video'];
     var streamsByType = abrManager.chooseStreams(streamSetsByType);

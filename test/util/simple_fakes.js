@@ -40,6 +40,7 @@ shaka.test.FakeAbrManager = function() {
   spyOn(this, 'disable');
   spyOn(this, 'segmentDownloaded');
   spyOn(this, 'getBandwidthEstimate');
+  spyOn(this, 'setDefaultEstimate');
 };
 
 
@@ -65,6 +66,10 @@ shaka.test.FakeAbrManager.prototype.segmentDownloaded = function() {};
 
 /** @override */
 shaka.test.FakeAbrManager.prototype.getBandwidthEstimate = function() {};
+
+
+/** @override */
+shaka.test.FakeAbrManager.prototype.setDefaultEstimate = function() {};
 
 
 /** @override */

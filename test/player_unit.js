@@ -43,7 +43,7 @@ describe('Player', function() {
     abrManager = new shaka.test.FakeAbrManager();
     player.configure(
         /** @type {shakaExtern.PlayerConfiguration} */ (
-            {abrManager: abrManager}));
+            {abr: {manager: abrManager}}));
 
     player.createDrmEngine = function() {
       return new shaka.test.FakeDrmEngine();
@@ -290,7 +290,7 @@ describe('Player', function() {
   describe('AbrManager', function() {
     it('sets through configure', function() {
       var config = player.getConfiguration();
-      expect(config.abrManager).toBe(abrManager);
+      expect(config.abr.manager).toBe(abrManager);
       expect(abrManager.init).toHaveBeenCalled();
     });
 
@@ -308,7 +308,7 @@ describe('Player', function() {
     });
 
     it('does not enable if adaptation is disabled', function() {
-      player.configure({enableAdaptation: false});
+      player.configure({abr: {enabled: false}});
       chooseStreams();
       canSwitch();
       expect(abrManager.enable).not.toHaveBeenCalled();
@@ -320,17 +320,17 @@ describe('Player', function() {
       abrManager.enable.calls.reset();
       abrManager.disable.calls.reset();
 
-      player.configure({enableAdaptation: false});
+      player.configure({abr: {enabled: false}});
       expect(abrManager.disable).toHaveBeenCalled();
 
-      player.configure({enableAdaptation: true});
+      player.configure({abr: {enabled: true}});
       expect(abrManager.enable).toHaveBeenCalled();
     });
 
     it('waits to enable if in-between Periods', function() {
-      player.configure({enableAdaptation: false});
+      player.configure({abr: {enabled: false}});
       chooseStreams();
-      player.configure({enableAdaptation: true});
+      player.configure({abr: {enabled: true}});
       expect(abrManager.enable).not.toHaveBeenCalled();
       canSwitch();
       expect(abrManager.enable).toHaveBeenCalled();
@@ -338,9 +338,16 @@ describe('Player', function() {
 
     it('still disables if called after chooseStreams', function() {
       chooseStreams();
-      player.configure({enableAdaptation: false});
+      player.configure({abr: {enabled: false}});
       canSwitch();
       expect(abrManager.enable).not.toHaveBeenCalled();
+    });
+
+    it('sets the default bandwidth estimate', function() {
+      chooseStreams();
+      canSwitch();
+      player.configure({abr: {defaultBandwidthEstimate: 2000}});
+      expect(abrManager.setDefaultEstimate).toHaveBeenCalledWith(2000);
     });
   });
 
@@ -428,33 +435,33 @@ describe('Player', function() {
 
     it('disables AbrManager if switching audio or video', function() {
       var config = player.getConfiguration();
-      expect(config.enableAdaptation).toBe(true);
+      expect(config.abr.enabled).toBe(true);
 
       expect(tracks[1].type).toBe('audio');
       player.selectTrack(tracks[1]);
 
       config = player.getConfiguration();
-      expect(config.enableAdaptation).toBe(false);
+      expect(config.abr.enabled).toBe(false);
 
       // Test again with video.
-      player.configure({enableAdaptation: true});
+      player.configure({abr: {enabled: true}});
 
       expect(tracks[3].type).toBe('video');
       player.selectTrack(tracks[3]);
 
       config = player.getConfiguration();
-      expect(config.enableAdaptation).toBe(false);
+      expect(config.abr.enabled).toBe(false);
     });
 
     it('doesn\'t disables AbrManager if switching text', function() {
       var config = player.getConfiguration();
-      expect(config.enableAdaptation).toBe(true);
+      expect(config.abr.enabled).toBe(true);
 
       expect(tracks[4].type).toBe('text');
       player.selectTrack(tracks[4]);
 
       config = player.getConfiguration();
-      expect(config.enableAdaptation).toBe(true);
+      expect(config.abr.enabled).toBe(true);
     });
 
     it('switches streams', function() {
