@@ -49,11 +49,24 @@ def isCygwin():
   """Determines if the system is Cygwin (i.e. not native Windows)."""
   return 'CYGWIN' in platform.uname()[0]
 
+def quoteArgument(arg):
+  """Quotes shell arguments so that printCmdLine output can be copied and pasted
+  into a shell."""
+  if '"' in arg:
+    assert "'" not in arg
+    return "'" + arg + "'"
+  if "'" in arg:
+    assert '"' not in arg
+    return '"' + arg + '"'
+  if ' ' in arg:
+    return '"' + arg + '"'
+  return arg
+
 def printCmdLine(args):
   """Prints the given command line if the environment variable PRINT_ARGUMENTS
   is set."""
   if os.environ.get('PRINT_ARGUMENTS'):
-    print args
+    print ' '.join([quoteArgument(x) for x in args])
 
 def cygwinSafePath(path):
   """If the system is Cygwin, converts the given Cygwin path to a Windows path;
