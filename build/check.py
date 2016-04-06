@@ -60,7 +60,7 @@ def checkHtmlLint():
   """
   htmlhint_path = shakaBuildHelpers.getNodeBinaryPath('htmlhint')
   if not os.path.exists(htmlhint_path):
-    return 0
+    return True
   base = shakaBuildHelpers.getSourceBase()
   files = ['index.html', 'demo/index.html', 'support.html']
   file_paths = [os.path.join(base, x) for x in files]
