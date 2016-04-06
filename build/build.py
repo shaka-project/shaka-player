@@ -324,6 +324,7 @@ def main(args):
   if len(lines) == 0:
     lines = ['+@complete']
 
+  print 'Compiling the library...'
   customBuild = Build()
   if not customBuild.parseBuild(lines, os.getcwd()):
     return 1

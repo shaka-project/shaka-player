@@ -30,10 +30,8 @@ def runTests(args):
 
   # Generate dependencies and compile library.
   # This is required for the tests.
-  print 'Generating dependencies...'
   if gendeps.genDeps([]) != 0:
     return 1
-  print 'Compiling the library...'
   if build.main([]) != 0:
     return 1
 

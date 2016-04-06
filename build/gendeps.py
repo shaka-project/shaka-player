@@ -28,6 +28,8 @@ depsArgs = [
 ]
 
 def genDeps(_):
+  print 'Generating Closure dependencies...'
+
   # Make the dist/ folder, ignore errors.
   base = shakaBuildHelpers.getSourceBase()
   try:

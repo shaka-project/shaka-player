@@ -40,6 +40,8 @@ def getLintFiles():
 
 def checkLint():
   """Runs the linter over the library files."""
+  print 'Running Closure linter...'
+
   jsdoc3_tags = ','.join([
       'static', 'summary', 'namespace', 'event', 'description', 'property',
       'fires', 'listens', 'example', 'exportDoc'])
@@ -61,6 +63,8 @@ def checkHtmlLint():
   htmlhint_path = shakaBuildHelpers.getNodeBinaryPath('htmlhint')
   if not os.path.exists(htmlhint_path):
     return True
+  print 'Running htmlhint...'
+
   base = shakaBuildHelpers.getSourceBase()
   files = ['index.html', 'demo/index.html', 'support.html']
   file_paths = [os.path.join(base, x) for x in files]
@@ -76,6 +80,8 @@ def checkComplete():
   Returns:
     True on success, False on failure.
   """
+  print 'Checking that the build files are complete...'
+
   complete = build.Build()
   # Normally we don't need to include @core, but because we look at the build
   # object directly, we need to include it here.  When using main(), it will
@@ -103,6 +109,8 @@ def checkTests():
   Returns:
     True on success, False on failure.
   """
+  print 'Checking the tests for type errors...'
+
   match = re.compile(r'.*\.js$')
   base = shakaBuildHelpers.getSourceBase()
   def get(*args):

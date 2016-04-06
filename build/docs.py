@@ -25,6 +25,8 @@ import subprocess
 import sys
 
 def buildDocs(_):
+  print 'Building the docs...'
+
   base = shakaBuildHelpers.getSourceBase()
   shutil.rmtree(os.path.join(base, 'docs', 'api'), ignore_errors=True)
   os.chdir(base)
