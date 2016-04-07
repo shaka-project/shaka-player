@@ -21,7 +21,6 @@ describe('DrmEngine', function() {
   var video;
   var mediaSource;
   var manifest;
-  var config;
 
   var onErrorSpy;
   var onKeyStatusSpy;
@@ -102,7 +101,7 @@ describe('DrmEngine', function() {
 
     drmEngine = new shaka.media.DrmEngine(
         networkingEngine, onErrorSpy, onKeyStatusSpy);
-    config = {
+    var config = {
       retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
       clearKeys: {},
       advanced: {},
@@ -115,29 +114,17 @@ describe('DrmEngine', function() {
     };
     drmEngine.configure(config);
 
-    var drmInfos = [{
-      keySystem: 'com.widevine.alpha',
-      distinctiveIdentifierRequired: false,
-      persistentStateRequired: false
-    },{
-      keySystem: 'com.microsoft.playready',
-      distinctiveIdentifierRequired: false,
-      persistentStateRequired: false
-    }];
-
-    manifest = {
-      periods: [{
-        streamSets: [{
-          type: 'video',
-          drmInfos: drmInfos,
-          streams: [{mimeType: 'video/mp4', codecs: 'avc1.640015'}]
-        },{
-          type: 'audio',
-          drmInfos: drmInfos,
-          streams: [{mimeType: 'audio/mp4', codecs: 'mp4a.40.2'}]
-        }]
-      }]
-    };
+    manifest = new shaka.test.ManifestGenerator()
+      .addPeriod(0)
+        .addStreamSet('video')
+          .addDrmInfo('com.widevine.alpha')
+          .addDrmInfo('com.microsoft.playready')
+          .addStream(1).mime('video/mp4', 'avc1.640015')
+        .addStreamSet('audio')
+          .addDrmInfo('com.widevine.alpha')
+          .addDrmInfo('com.microsoft.playready')
+          .addStream(1).mime('audio/mp4', 'mp4a.40.2')
+      .build();
 
     eventManager = new shaka.util.EventManager();
 
@@ -168,17 +155,6 @@ describe('DrmEngine', function() {
     document.body.removeChild(video);
     jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
   });
-
-  function checkKeySystems() {
-    // Our test asset for this suite can use any of these key systems:
-    if (!support['com.widevine.alpha'] &&
-        !support['com.microsoft.playready']) {
-      // pending() throws a special exception that Jasmine uses to skip a test.
-      // It can only be used from inside it(), not describe() or beforeEach().
-      pending('Skipping DrmEngine tests.');
-      // The rest of the test will not run.
-    }
-  }
 
   describe('basic flow', function() {
     it('gets a license and can play encrypted segments', function(done) {
@@ -272,5 +248,158 @@ describe('DrmEngine', function() {
         expect(video.currentTime).toBeGreaterThan(0);
       }).catch(fail).then(done);
     });
-  });
+  });  // describe('basic flow')
+
+  describe('missing keys error', function() {
+    it('fires when manifest PSSH does not match key ID', function(done) {
+      setBadManifestData();
+      runMissingKeyTest(done);
+    });
+
+    it('fires even if the license request is delayed', function(done) {
+      setBadManifestData();
+
+      // Delay the license request by 3 seconds.
+      var originalRequest = networkingEngine.request;
+      networkingEngine.request = jasmine.createSpy('request');
+      networkingEngine.request.and.callFake(function(type, request) {
+        return shaka.test.Util.delay(3).then(function() {
+          return originalRequest.call(networkingEngine, type, request);
+        });
+      });
+
+      runMissingKeyTest(done);
+    });
+
+    it('fires when license server returns wrong key ID', function(done) {
+      // TODO: Update once we get a PlayReady license server that will return
+      // the wrong key IDs.
+      if (!support['com.widevine.alpha']) {
+        pending('Skipping DrmEngine tests.');
+      }
+
+      var config = {
+        retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+        clearKeys: {},
+        advanced: {},
+        servers: {
+          'com.widevine.alpha': '//widevine-proxy.appspot.com/proxy'
+        }
+      };
+      drmEngine.configure(config);
+      networkingEngine.clearAllRequestFilters();
+
+      runMissingKeyTest(done);
+    });
+
+    function setBadManifestData() {
+      // Override the init data from the media.  This is from Axinom's other
+      // test asset so we get a key response but for the wrong key ID.
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addStreamSet('video')
+            .addDrmInfo('com.widevine.alpha')
+              .addCencInitData(
+                  'AAAANHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAABQIARIQFTDToGkE' +
+                  'RGqRoTOhFaqMQQ==')
+            .addDrmInfo('com.microsoft.playready')
+              .addCencInitData(
+                  'AAAB5HBzc2gAAAAAmgTweZhAQoarkuZb4IhflQAAAcTEAQAAAQABALoB' +
+                  'PABXAFIATQBIAEUAQQBEAEUAUgAgAHgAbQBsAG4AcwA9ACIAaAB0AHQA' +
+                  'cAA6AC8ALwBzAGMAaABlAG0AYQBzAC4AbQBpAGMAcgBvAHMAbwBmAHQA' +
+                  'LgBjAG8AbQAvAEQAUgBNAC8AMgAwADAANwAvADAAMwAvAFAAbABhAHkA' +
+                  'UgBlAGEAZAB5AEgAZQBhAGQAZQByACIAIAB2AGUAcgBzAGkAbwBuAD0A' +
+                  'IgA0AC4AMAAuADAALgAwACIAPgA8AEQAQQBUAEEAPgA8AFAAUgBPAFQA' +
+                  'RQBDAFQASQBOAEYATwA+ADwASwBFAFkATABFAE4APgAxADYAPAAvAEsA' +
+                  'RQBZAEwARQBOAD4APABBAEwARwBJAEQAPgBBAEUAUwBDAFQAUgA8AC8A' +
+                  'QQBMAEcASQBEAD4APAAvAFAAUgBPAFQARQBDAFQASQBOAEYATwA+ADwA' +
+                  'SwBJAEQAPgBvAE4ATQB3AEYAUQBSAHAAYQBrAFMAUgBvAFQATwBoAEYA' +
+                  'YQBxAE0AUQBRAD0APQA8AC8ASwBJAEQAPgA8AC8ARABBAFQAQQA+ADwA' +
+                  'LwBXAFIATQBIAEUAQQBEAEUAUgA+AA==')
+            .addStream(1).mime('video/mp4', 'avc1.640015')
+          .addStreamSet('audio')
+            .addDrmInfo('com.widevine.alpha')
+            .addDrmInfo('com.microsoft.playready')
+          .addStream(1).mime('audio/mp4', 'mp4a.40.2')
+        .build();
+
+      networkingEngine.clearAllRequestFilters();
+      networkingEngine.registerRequestFilter(function(type, request) {
+        if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) return;
+
+        request.headers['X-AxDRM-Message'] = [
+          'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V',
+          '5X2lkIjoiNjllNTQwODgtZTllMC00NTMwLThjMWEtMWViNmRjZDBkMTRlIiwibWV',
+          'zc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7Iml',
+          'kIjoiMTUzMGQzYTAtNjkwNC00NDZhLTkxYTEtMzNhMTE1YWE4YzQxIn0seyJpZCI',
+          '6ImM4M2ViNjM5LWU2NjQtNDNmOC1hZTk4LTQwMzliMGMxM2IyZCJ9LHsiaWQiOiI',
+          'zZDhjYzc2Mi0yN2FjLTQwMGYtOTg5Zi04YWI1ZGM3ZDc3NzUifSx7ImlkIjoiYmQ',
+          '4ZGFkNTgtMDMyZC00YzI1LTg5ZmEtYzdiNzEwZTgyYWMyIn1dfX0.9t18lFmZFVH',
+          'MzpoZxYDyqOS0Bk_evGhTBw_F2JnAK2k'
+        ].join('');
+      });
+    }
+
+    function runMissingKeyTest(done) {
+      checkKeySystems();
+
+      // The only error should be key ID not found.
+      var onErrorCalled = new shaka.util.PublicPromise();
+      onErrorSpy.and.callFake(function(error) {
+        onErrorCalled.resolve();
+        shaka.test.Util.expectToEqualError(
+            error,
+            new shaka.util.Error(
+                shaka.util.Error.Category.DRM,
+                shaka.util.Error.Code.WRONG_KEYS));
+      });
+
+      eventManager.listen(video, 'error', function() {
+        fail('MediaError code ' + video.error.code);
+        var extended = video.error.msExtendedCode;
+        if (extended) {
+          if (extended < 0) {
+            extended += Math.pow(2, 32);
+          }
+          fail('MediaError msExtendedCode ' + extended.toString(16));
+        }
+      });
+
+      drmEngine.init(manifest, /* offline */ false).then(function() {
+        return drmEngine.attach(video);
+      }).then(function() {
+        return mediaSourceEngine.appendBuffer(
+            'video', videoInitSegment, null, null);
+      }).then(function() {
+        return mediaSourceEngine.appendBuffer(
+            'audio', audioInitSegment, null, null);
+      }).then(function() {
+        // waitingforkeys only fires once we are trying to play.
+        return mediaSourceEngine.appendBuffer(
+            'video', videoSegment, null, null);
+      }).then(function() {
+        return mediaSourceEngine.appendBuffer(
+            'audio', audioSegment, null, null);
+      }).then(function() {
+        video.play();
+        // Try to play for 6 seconds.
+        return Promise.race([shaka.test.Util.delay(6), onErrorCalled]);
+      }).then(function() {
+        // There should have been an error and the video should not play.
+        expect(video.currentTime).toBe(0);
+        expect(onErrorSpy).toHaveBeenCalled();
+      }).catch(fail).then(done);
+    }
+  });  // describe('missing keys')
+
+  function checkKeySystems() {
+    // Our test asset for this suite can use any of these key systems:
+    if (!support['com.widevine.alpha'] &&
+        !support['com.microsoft.playready']) {
+      // pending() throws a special exception that Jasmine uses to skip a test.
+      // It can only be used from inside it(), not describe() or beforeEach().
+      pending('Skipping DrmEngine tests.');
+      // The rest of the test will not run.
+    }
+  }
 });

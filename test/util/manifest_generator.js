@@ -242,7 +242,26 @@ shaka.test.ManifestGenerator.prototype.videoRobustness = function(robustness) {
  */
 shaka.test.ManifestGenerator.prototype.addInitData = function(type, buffer) {
   var drmInfo = this.currentDrmInfo_();
+  if (!drmInfo.initData)
+    drmInfo.initData = [];
   drmInfo.initData.push({initData: buffer, initDataType: type});
+  return this;
+};
+
+
+/**
+ * Adds a new 'cenc' init data to the current DRM info.
+ *
+ * @param {string} base64
+ * @return {!shaka.test.ManifestGenerator}
+ */
+shaka.test.ManifestGenerator.prototype.addCencInitData = function(base64) {
+  var drmInfo = this.currentDrmInfo_();
+  if (!drmInfo.initData)
+    drmInfo.initData = [];
+
+  var buffer = shaka.util.Uint8ArrayUtils.fromBase64(base64);
+  drmInfo.initData.push({initData: buffer, initDataType: 'cenc'});
   return this;
 };
 // }}}

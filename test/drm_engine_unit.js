@@ -56,31 +56,15 @@ describe('DrmEngine', function() {
   });
 
   beforeEach(function() {
-    manifest = {
-      periods: [{
-        streamSets: [{
-          type: 'video',
-          drmInfos: [{
-            keySystem: 'drm.abc',
-            distinctiveIdentifierRequired: false,
-            persistentStateRequired: false
-          }],
-          streams: [
-            {mimeType: 'video/foo', codecs: 'vbar'}
-          ]
-        },{
-          type: 'audio',
-          drmInfos: [{
-            keySystem: 'drm.def',
-            distinctiveIdentifierRequired: false,
-            persistentStateRequired: false
-          }],
-          streams: [
-            {mimeType: 'audio/foo', codecs: 'abar'}
-          ]
-        }]
-      }]
-    };
+    manifest = new shaka.test.ManifestGenerator()
+      .addPeriod(0)
+        .addStreamSet('video')
+          .addDrmInfo('drm.abc')
+          .addStream(0).mime('video/foo', 'vbar')
+        .addStreamSet('audio')
+          .addDrmInfo('drm.def')
+          .addStream(1).mime('audio/foo', 'abar')
+      .build();
 
     // Reset spies.
     requestMediaKeySystemAccessSpy.calls.reset();
