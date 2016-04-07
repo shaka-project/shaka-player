@@ -1,3 +1,5 @@
+# Generate png with: dot -Tpng -O dataflow.gv
+
 digraph shaka2_ownership {
   label=<<u>Shaka 2 Ownership Diagram</u>>
   labelloc=t
@@ -13,9 +15,12 @@ digraph shaka2_ownership {
 
   Player -> NetworkingEngine
   Player -> ManifestParser
+  Player -> MediaSourceEngine
   Player -> StreamingEngine
   Player -> DrmEngine
-  Player -> Manifest [ style=dotted ]
+  Player -> Manifest
+  Player -> MediaSource
+  Player -> TextTrack
 
   NetworkingEngine -> HttpRequest
 
@@ -23,16 +28,18 @@ digraph shaka2_ownership {
 
   DrmEngine -> NetworkingEngine [ style=dotted ]
 
-  StreamingEngine -> MediaSourceEngine
-  StreamingEngine -> Manifest
+  StreamingEngine -> MediaSourceEngine [ style=dotted ]
+  StreamingEngine -> Manifest [ style=dotted ]
   StreamingEngine -> NetworkingEngine [ style=dotted ]
 
-  MediaSourceEngine -> MediaSource
+  MediaSourceEngine -> MediaSource [ style=dotted ]
+  # MediaSourceEngine owns multiple SourceBuffers, so we represent that here
+  # with two edges:
   MediaSourceEngine -> SourceBuffer
   MediaSourceEngine -> SourceBuffer
   MediaSourceEngine -> TextEngine
 
-  TextEngine -> TextTrack
+  TextEngine -> TextTrack [ style=dotted ]
   TextEngine -> TextParser
 
   subgraph cluster_legend {
@@ -56,5 +63,5 @@ digraph shaka2_ownership {
   }
 
   # Hack to move the legend beneath the main graph:
-  HttpRequest -> "internal class" [ style=invisible arrowhead=none ]
+  TextTrack -> "internal class" [ style=invisible arrowhead=none ]
 }

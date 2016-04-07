@@ -1,17 +1,16 @@
 # Shaka v2.0 Redesign
 
-last update: 2016-03-10
+last update: 2016-04-07
 
 by: [joeyparrish@google.com](mailto:joeyparrish@google.com)
 
 
 ## Objective
 
-We are redesigning Shaka Player to reduce overall complexity, increase
+Shaka Player has been redesigned to reduce overall complexity, increase
 modularity, and make it easier to introduce new features that would be too
-messy in Shaka Player v1.x.  We posted code to the preview branch on github
-at the end of November 2015 and *hope* to have a public beta release by the
-end of February 2016.
+messy in Shaka Player v1.x.  We posted a code preview on github at the end
+of November 2015, and released a public beta in April 2016.
 
 
 ## Background
@@ -207,9 +206,7 @@ separate browser support test in Shaka 1.
 
 ## Architecture Diagrams
 
-![Shaka ownership diagram](ownership.gv.png)
-
-![Shaka data flow diagram](dataflow.gv.png)
+See [architecture.md](architecture.md).
 
 
 ## Rough Sample APIs
@@ -264,24 +261,23 @@ shaka.media.ManifestParser.registerParserByExtension(fileExt, parser)
 ## Sketch of Player configuration
   - preferredAudioLanguage: string
   - preferredTextLanguage: string
-  - enableAdaptation: boolean
+  - abr
+    - enable: boolean
+    - manager: AbrManager
+    - defaultBandwidthEstimate: number
   - manifest
     - retryParameters: NetworkingEngine.RetryParameters
+    - dash
+      - customScheme: function(ContentProtection) => !Array.&lt;\!DrmInfo&gt;
   - drm
     - retryParameters: NetworkingEngine.RetryParameters
     - servers: Object.&lt;key system string, license server url string&gt;
-    - customScheme: function(\*) => !Array.&lt;\!DrmInfo&gt;
+    - clearKeys: Object.&lt;key id hex string, content key hex string&gt;
+    - advanced: Object.&lt;key system string, advanced settings&gt;
   - streaming
     - retryParameters: NetworkingEngine.RetryParameters
     - restrictions: Restrictions
     - rebufferingGoal: number in seconds, amount to buffer ahead at startup
     - bufferingGoal: number in seconds, amount to keep ahead after startup
     - bufferBehind: number in seconds, amount kept behind the playhead
-
-
-## TODO
-  - StreamingEngine is a WIP.
-  - DashManifestParser needs DRM support.
-  - A new cache-detecting bandwidth estimation algorithm is needed.
-  - Player needs implementation.
 

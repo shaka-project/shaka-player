@@ -1,3 +1,5 @@
+# Generate png with: dot -Tpng -O dataflow.gv
+
 digraph shaka2_data {
   label=<<u>Shaka 2 Data Flow Diagram</u>>
   labelloc=t
@@ -54,5 +56,5 @@ digraph shaka2_data {
   }
 
   # Hack to move the legend beneath the main graph:
-  ResponseFilter -> plugin [ style=invisible arrowhead=none ]
+  TextTrack -> "internal class" [ style=invisible arrowhead=none ]
 }
