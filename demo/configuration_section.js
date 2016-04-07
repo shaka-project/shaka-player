@@ -55,6 +55,6 @@ shakaDemo.onConfigKeyUp_ = function(event) {
 shakaDemo.onAdaptationChange_ = function(event) {
   // Update adaptation config.
   shakaDemo.player_.configure(/** @type {shakaExtern.PlayerConfiguration} */({
-    enableAdaptation: event.target.checked
+    abr: { enabled: event.target.checked }
   }));
 };

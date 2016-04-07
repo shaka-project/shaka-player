@@ -151,8 +151,8 @@ describe('Player', function() {
 
         var isLive = asset.features.indexOf(Feature.LIVE) >= 0;
 
-        var config = { drm: {}, manifest: { dash: {} } };
-        config.enableAdaptation = false;
+        var config = { abr: {}, drm: {}, manifest: { dash: {} } };
+        config.abr.enabled = false;
         if (asset.licenseServers)
           config.drm.servers = asset.licenseServers;
         if (asset.drmCallback)

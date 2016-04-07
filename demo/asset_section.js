@@ -111,7 +111,7 @@ shakaDemo.load = function() {
   var asset = option.asset;
   var player = shakaDemo.player_;
 
-  var config = { drm: {}, manifest: { dash: {} } };
+  var config = { abr: {}, drm: {}, manifest: { dash: {} } };
 
   if (!asset) {
     // Use the custom fields.
@@ -142,7 +142,7 @@ shakaDemo.load = function() {
       document.getElementById('preferredAudioLanguage').value;
   config.preferredTextLanguage =
       document.getElementById('preferredTextLanguage').value;
-  config.enableAdaptation =
+  config.abr.enabled =
       document.getElementById('enableAdaptation').checked;
 
   player.configure(/** @type {shakaExtern.PlayerConfiguration} */(
