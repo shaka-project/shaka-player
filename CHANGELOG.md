@@ -1,3 +1,63 @@
+## 2.0.0-beta (2016-04-07)
+
+New Features:
+  - DASH support for:
+    - Multi-Period content
+      - https://github.com/google/shaka-player/issues/186
+    - Location elements
+      - https://github.com/google/shaka-player/issues/298
+    - UTCTiming elements (for clock synchronization)
+      - https://github.com/google/shaka-player/issues/241
+  - Better browser compatibility
+    - Testing on Safari 9, IE 11, Edge, Firefox 45+, Opera, Chrome
+    - https://github.com/google/shaka-player/issues/101
+  - New plugin and build system to extend Shaka
+    - Networking plugins
+      - https://github.com/google/shaka-player/issues/228
+      - https://github.com/google/shaka-player/issues/198
+  - Cache-friendly networking
+    - https://github.com/google/shaka-player/issues/76
+    - https://github.com/google/shaka-player/issues/191
+    - https://github.com/google/shaka-player/issues/235
+  - Limit memory usage by clearing old data from buffer
+    - https://github.com/google/shaka-player/issues/247
+  - Simpler, more mobile-friendly demo app
+  - New test assets
+    - https://github.com/google/shaka-player/issues/224
+  - Made play()/pause() independent of buffering
+    - https://github.com/google/shaka-player/issues/233
+  - Numerical error code system
+    - https://github.com/google/shaka-player/issues/201
+  - Distinguish between subtitle and caption tracks
+    - https://github.com/google/shaka-player/issues/206
+  - Separate audio & text language preferences
+    - https://github.com/google/shaka-player/issues/207
+  - Update timeShiftBufferDepth when updating the manifest
+    - https://github.com/google/shaka-player/issues/295
+  - Simplified clearkey setup using configure()
+  - Initial bandwidth is now configurable:
+    - https://github.com/google/shaka-player/issues/268
+
+Bugfixes:
+  - Stopped using Date headers for clock sync
+    - https://github.com/google/shaka-player/issues/205
+    - https://github.com/google/shaka-player/issues/241
+
+Docs:
+  - New tutorials!
+
+Missing Features from v1 (to be added later):
+  - Custom controls demo for live streams
+    - https://github.com/google/shaka-player/issues/322
+  - Chromecast demo
+  - Trick play demo
+  - Track restrictions based on key status
+  - Offline support
+
+Broken Compatibility:
+  - Almost everything! (v2 upgrade guide coming soon)
+
+
 ## 1.6.4 (2016-03-03)
 
 Bugfixes:
