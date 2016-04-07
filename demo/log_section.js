@@ -51,6 +51,11 @@ shakaDemo.setupLogging_ = function() {
     return;
   }
 
+  if (!Object.keys || !window.console || !console.log || !console.log.bind) {
+    // This may be a very old browser that we can't support anyway.
+    return;
+  }
+
   // Store the original and to-screen versions of logging methods.
   Object.keys(shakaDemo.originalConsoleMethods_).forEach(function(k) {
     var original = console[k].bind(console);

@@ -47,7 +47,14 @@
   var fields = location.search.split('?').slice(1).join('?');
   fields = fields ? fields.split(';') : [];
 
-  var compiledMode = (fields.indexOf('compiled') >= 0);
+  // Very old browsers do not have Array.prototype.indexOf.
+  var compiledMode = false;
+  for (var i = 0; i < fields.length; ++i) {
+    if (fields[i] == 'compiled') {
+      compiledMode = true;
+      break;
+    }
+  }
 
   if (compiledMode) {
     // This contains the entire library, compiled in debug mode.

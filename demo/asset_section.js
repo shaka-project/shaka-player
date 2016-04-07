@@ -164,7 +164,8 @@ shakaDemo.load = function() {
   }
 
   // Load the manifest.
-  player.load(asset.manifestUri).catch(function(reason) {
+  player.load(asset.manifestUri).then(function() {
+  }, function(reason) {
     var error = /** @type {!shaka.util.Error} */(reason);
     shakaDemo.onError_(error);
   });
