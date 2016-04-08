@@ -178,12 +178,13 @@ describe('Playhead', function() {
         5 /* startTime */,
         onBuffering, onSeek);
 
-    expect(playhead.getTime()).toBe(5);
-    expect(video.currentTime).toBe(5);
-
     // Calling videoOnSeeking() is like dispatching a 'seeking' event. So, each
     // time we change the video's current time or Playhead changes the video's
     // current time we must call videoOnSeeking(),
+
+    videoOnSeeking();
+    expect(video.currentTime).toBe(5);
+    expect(playhead.getTime()).toBe(5);
 
     // left = start + 1 = 5 + 1 = 6
     // safe = left + rebufferingGoal = 6 + 10 = 16
@@ -329,8 +330,9 @@ describe('Playhead', function() {
         5 /* startTime */,
         onBuffering, onSeek);
 
-    expect(playhead.getTime()).toBe(5);
+    videoOnSeeking();
     expect(video.currentTime).toBe(5);
+    expect(playhead.getTime()).toBe(5);
 
     // Seek past end.
     video.currentTime = 120;
