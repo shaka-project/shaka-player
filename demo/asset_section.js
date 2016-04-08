@@ -111,7 +111,8 @@ shakaDemo.load = function() {
   var asset = option.asset;
   var player = shakaDemo.player_;
 
-  var config = { abr: {}, drm: {}, manifest: { dash: {} } };
+  var config = /** @type {shakaExtern.PlayerConfiguration} */(
+      { abr: {}, drm: {}, manifest: { dash: {} } });
 
   if (!asset) {
     // Use the custom fields.
@@ -145,8 +146,8 @@ shakaDemo.load = function() {
   config.abr.enabled =
       document.getElementById('enableAdaptation').checked;
 
-  player.configure(/** @type {shakaExtern.PlayerConfiguration} */(
-      config));
+  player.resetConfiguration();
+  player.configure(config);
 
   // Configure network filters.
   var networkingEngine = player.getNetworkingEngine();
