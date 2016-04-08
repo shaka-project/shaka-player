@@ -1,3 +1,12 @@
+## 1.6.5 (2016-04-08)
+
+Bugfixes:
+  - Always build the same input files to a stable output
+    - https://github.com/google/shaka-player/pull/299
+  - Properly extern the 'xhr' property of HTTP errors
+    - https://github.com/google/shaka-player/pull/319
+
+
 ## 2.0.0-beta (2016-04-07)
 
 New Features:
