@@ -495,26 +495,49 @@ shakaAssets.testAssets = [
     ]
   },
   {
-    name: 'Tears of Steel (encrypted)',
+    name: 'Tears of Steel (Widevine)',
     manifestUri: '//demo.unified-streaming.com/video/tears-of-steel/tears-of-steel-dash-widevine.ism/.mpd',  // gjslint: disable=110
 
     encoder: shakaAssets.Encoder.UNIFIED_STREAMING,
     source: shakaAssets.Source.UNIFIED_STREAMING,
     drm: [
-      // TODO: The PlayReady version of this is being rejected by Edge & IE.
-      // shakaAssets.KeySystem.PLAYREADY,
       shakaAssets.KeySystem.WIDEVINE
     ],
     features: [
+      shakaAssets.Feature.EMBEDDED_TEXT,
       shakaAssets.Feature.HIGH_DEFINITION,
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
+      shakaAssets.Feature.SUBTITLES,
+      shakaAssets.Feature.TTML,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION
     ],
 
     licenseServers: {
       'com.widevine.alpha': '//widevine-proxy.appspot.com/proxy'
-      // TODO: Locate PlayReady server URI.
+    }
+  },
+  {
+    name: 'Tears of Steel (PlayReady)',
+    manifestUri: '//demo.unified-streaming.com/video/tears-of-steel/tears-of-steel-dash-playready.ism/.mpd',  // gjslint: disable=110
+
+    encoder: shakaAssets.Encoder.UNIFIED_STREAMING,
+    source: shakaAssets.Source.UNIFIED_STREAMING,
+    drm: [
+      shakaAssets.KeySystem.PLAYREADY
+    ],
+    features: [
+      shakaAssets.Feature.EMBEDDED_TEXT,
+      shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
+      shakaAssets.Feature.SUBTITLES,
+      shakaAssets.Feature.TTML,
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION
+    ],
+
+    licenseServers: {
+      'com.microsoft.playready': '//playready.directtaps.net/pr/svc/rightsmanager.asmx?PlayRight=1&UseSimpleNonPersistentLicense=1'  // gjslint: disable=110
     }
   },
   {
