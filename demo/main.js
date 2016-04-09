@@ -32,6 +32,10 @@ shakaDemo.player_ = null;
 shakaDemo.support_;
 
 
+/** @private {ShakaControls} */
+shakaDemo.controls_ = null;
+
+
 /**
  * Initialize the application.
  */
@@ -105,6 +109,9 @@ shakaDemo.init = function() {
       shakaDemo.setupAssets_();
       shakaDemo.setupConfiguration_();
       shakaDemo.setupInfo_();
+
+      shakaDemo.controls_ = new ShakaControls();
+      shakaDemo.controls_.init(shakaDemo.video_, shakaDemo.player_);
 
       // If a custom asset was given in the URL, select it now.
       if ('asset' in params) {

@@ -605,7 +605,7 @@ shakaAssets.testAssets = [
   // Wowza assets {{{
   // Src: http://www.dash-player.com/demo/streaming-server-and-encoder-support/
   {
-    name: 'Big Buck Bunny',
+    name: 'Big Buck Bunny (Live)',
     manifestUri: '//wowzaec2demo.streamlock.net/live/bigbuckbunny/manifest_mpm4sav_mvtime.mpd',  // gjslint: disable=110
 
     encoder: shakaAssets.Encoder.WOWZA,

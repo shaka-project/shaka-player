@@ -131,18 +131,6 @@ summary {
   margin: 0 0 1em 0;
 }
 
-video {
-  width: 100%;
-}
-
-.flex {
-  display: flex;
-}
-
-.flex-grow {
-  flex-grow: 1;
-}
-
 #assetList, #customAsset div {
   margin: 0 0 1.2em 0;
 }
@@ -194,6 +182,17 @@ video {
   white-space: pre-wrap;
 }
 
+#videoContainer {
+  background-color: transparent;
+}
+
+#video {
+  /* height and margin needed in fullscreen mode */
+  width: 100%;
+  height: 100%;
+  margin: auto;
+}
+
 .errorLog {
   background-color: #fee;
   color: #f00;
@@ -205,6 +204,24 @@ video {
 
 .infoLog {
   background-color: #eff;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-grow {
+  flex-grow: 1;
+}
+
+.overlay-parent {
+  /* Makes this a positioned ancestor of .overlay */
+  position: relative;
+}
+
+.overlay {
+  /* Allows this to be positioned relative to a containing .overlay-parent */
+  position: absolute;
 }
 
 @media screen and (max-width: 650px) {

@@ -28,9 +28,11 @@
 
     <link rel="icon" href="favicon.ico">
     <link rel="stylesheet" href="demo.css">
+    <link rel="stylesheet" href="controls.css">
 
-    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
     <script src="//www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
     <script src="load.js"></script>
@@ -40,6 +42,7 @@
     <script src="configuration_section.js"></script>
     <script src="info_section.js"></script>
     <script src="log_section.js"></script>
+    <script src="controls.js"></script>
   </head>
   <body>
     <div id="container">
@@ -87,7 +90,10 @@
           <label for="preferredTextLanguage">Preferred text language:</label>
           <input id="preferredTextLanguage" class="flex-grow" type="text">
         </div>
-        <!-- TODO: trick play, depends on custom controls -->
+        <div>
+          <label for="showTrickPlay">Show trick play controls:</label>
+          <input id="showTrickPlay" type="checkbox">
+        </div>
         <div>
           <label for="enableAdaptation">Enable adaptation:</label>
           <input id="enableAdaptation" type="checkbox" checked>
@@ -134,12 +140,31 @@
       </details>
 
       <div id="errorDisplay"></div>
-      <div id="videoContainer">
+      <div id="videoContainer" class="overlay-parent">
         <video id="video"
-               controls
                poster="//shaka-player-demo.appspot.com/assets/poster.jpg"
                autoplay></video>
-        <!-- TODO: redesign demo controls -->
+        <div id="giantPlayButtonContainer" class="overlay">
+          <button id="giantPlayButton" class="material-icons">play_arrow</button>
+        </div>
+        <div id="bufferingSpinner" class="overlay">
+          <svg class="spinnerSvg" viewBox="25 25 50 50">
+            <circle class="spinnerPath" cx="50" cy="50" r="20"
+                    fill="none" stroke-width="2" stroke-miterlimit="10" />
+          </svg>
+        </div>
+        <div id="controlsContainer" class="overlay"><div id="controls">
+          <button id="playPauseButton" class="material-icons">play_arrow</button>
+          <input id="seekBar" type="range" step="any" min="0" max="1" value="0">
+          <button id="rewindButton" class="material-icons">fast_rewind</button>
+          <div id="currentTime">0:00</div>
+          <button id="fastForwardButton" class="material-icons">fast_forward</button>
+          <button id="muteButton" class="material-icons">volume_up</button>
+          <input id="volumeBar" type="range" step="any" min="0" max="1" value="0">
+          <button id="castButton" class="material-icons">cast</button>
+          <button id="captionButton" class="material-icons">closed_caption</button>
+          <button id="fullscreenButton" class="material-icons">fullscreen</button>
+        </div></div>
       </div>
     </div>
   </body>
