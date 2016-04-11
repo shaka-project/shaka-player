@@ -464,9 +464,13 @@ describe('StreamingEngine', function() {
       onStartupComplete.and.callFake(function() {
         video.play();
 
-        // Seek outside the availability window right away. The playhead
-        // should adjust the video's current time.
-        video.currentTime = timeline.segmentAvailabilityEnd + 120;
+        // Use setTimeout to ensure the playhead has performed it's initial
+        // seeking.
+        setTimeout(function() {
+          // Seek outside the availability window right away. The playhead
+          // should adjust the video's current time.
+          video.currentTime = timeline.segmentAvailabilityEnd + 120;
+        }, 50);
       });
 
       var onTimeUpdate = function() {
@@ -487,10 +491,14 @@ describe('StreamingEngine', function() {
       onStartupComplete.and.callFake(function() {
         video.play();
 
-        // Seek outside the availability window right away. The playhead
-        // should adjust the video's current time.
-        video.currentTime = timeline.segmentAvailabilityStart - 120;
-        expect(video.currentTime).toBeGreaterThan(0);
+        // Use setTimeout to ensure the playhead has performed it's initial
+        // seeking.
+        setTimeout(function() {
+          // Seek outside the availability window right away. The playhead
+          // should adjust the video's current time.
+          video.currentTime = timeline.segmentAvailabilityStart - 120;
+          expect(video.currentTime).toBeGreaterThan(0);
+        }, 50);
       });
 
       var onTimeUpdate = function() {
