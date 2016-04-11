@@ -250,25 +250,25 @@ describe('PresentationTimeline', function() {
         Number.POSITIVE_INFINITY);
   });
 
-  it('setSegmentAvailabiliyDuration', function() {
+  it('setSegmentAvailabilityDuration', function() {
     setElapsed(0);
     var timeline = new shaka.media.PresentationTimeline(60, null, null, 10, 0);
     expect(timeline.getSegmentAvailabilityDuration()).toBeNull();
 
     timeline = new shaka.media.PresentationTimeline(
         Number.POSITIVE_INFINITY, Date.now() / 1000.0, 20, 10, 0);
-    timeline.setSegmentAvailabiliyDuration(7);
+    timeline.setSegmentAvailabilityDuration(7);
     expect(timeline.getSegmentAvailabilityDuration()).toBe(7);
 
     timeline = new shaka.media.PresentationTimeline(
         Number.POSITIVE_INFINITY, Date.now() / 1000.0, 20, 10, 0);
-    timeline.setSegmentAvailabiliyDuration(Number.POSITIVE_INFINITY);
+    timeline.setSegmentAvailabilityDuration(Number.POSITIVE_INFINITY);
     expect(timeline.getSegmentAvailabilityDuration()).toBe(
         Number.POSITIVE_INFINITY);
 
     timeline = new shaka.media.PresentationTimeline(
         60, null, null, 10, 0);
-    timeline.setSegmentAvailabiliyDuration(null);
+    timeline.setSegmentAvailabilityDuration(null);
     expect(timeline.getSegmentAvailabilityDuration()).toBe(null);
   });
 
