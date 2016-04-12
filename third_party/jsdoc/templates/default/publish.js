@@ -560,6 +560,8 @@ exports.publish = function(taffyData, opts, tutorials) {
             docletPath = sourceFiles[docletPath].shortened;
             if (docletPath) {
                 doclet.meta.shortpath = docletPath;
+                helper.registerSourceLink(doclet.longname, docletPath,
+                                          doclet.meta.lineno);
             }
         }
     });

@@ -9,9 +9,8 @@ segment request.
 
 The three separate retry settings are found under `drm.retryParameters` (for
 license requests), `manifest.retryParameters` (for manifest requests), and
-`streaming.retryParameters` (for segment requests).
-
-They all look the same, though:
+`streaming.retryParameters` (for segment requests).  All three structures are
+identical:
 
 ```js
 retryParameters: {

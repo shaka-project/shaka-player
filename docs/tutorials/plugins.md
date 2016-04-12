@@ -1,17 +1,23 @@
 # Plugins and Customizing the Build
 
 Shaka has a plugin system to make it easier to extend and customize the
-library.  Plugins can be written outside the library (in your application), or
+library. The plugin interfaces are here to allow you extend or customize Shaka
+Player in one of these areas: manifest parsing, subtitle and caption parsing,
+networking, ABR, and polyfills.  Each of these parts of the system has its own
+plugin interface. Even our "built-in" parsers, such as DASH and WebVTT, are
+actually just plugins we build by default.
+
+Plugins can be written outside the library (in your application), or
 they can be built into the library to take advantage of the [Closure compiler].
 
 [Closure compiler]: https://github.com/google/closure-compiler
 
-Manifest parsing, subtitle and caption parsing, networking, ABR, and polyfills
-are all done through plugins.  Even our "built-in" parsers, such as DASH and
-WebVTT, are actually just default plugins.
-
 
 #### Plugins
+
+We will only cover plugin concepts at a high level here and will not go into
+detailed examples of plugin development.  If you are interested in customizing
+or extending Shaka in one of these areas, please see the links below.
 
 A plugin registers itself with a "core" component.  These are the various
 plugin interfaces and the default plugins that Shaka provides:
@@ -21,36 +27,38 @@ __Manifest parsers__
   - Register with {@link shaka.media.ManifestParser.registerParserByExtension}
     and {@link shaka.media.ManifestParser.registerParserByMime}
   - Default manifest parser plugins:
-    - DASH: {@link shaka.dash.DashParser}
+    - DASH: {@linksource shaka.dash.DashParser}
 
 __Subtitle/caption parsers__
   - Selected by MIME type
   - Register with {@link shaka.media.TextEngine.registerParser}
   - Default text parser plugins:
-    - WebVTT: {@link shaka.media.VttTextParser}
+    - WebVTT: {@linksource shaka.media.VttTextParser}
 
 __Networking plugins__
   - Selected by URI scheme (http, https, etc.)
   - Register with {@link shaka.net.NetworkingEngine.registerScheme}
   - Default networking plugins:
-    - HTTP(S): {@link shaka.net.HttpPlugin}
-    - data URIs: {@link shaka.net.DataUriPlugin}
+    - HTTP(S): {@linksource shaka.net.HttpPlugin}
+    - data URIs: {@linksource shaka.net.DataUriPlugin}
 
 __ABR plugins__
   - Configured at runtime on a Player instance
   - Use {@link player.configure} and set the `abr.manager` field
   - Must implement the {@link shakaExtern.AbrManager} interface
-  - Default AbrManager implementation: {@link shaka.abr.SimpleAbrManager}
+  - Default AbrManager implementation: {@linksource shaka.abr.SimpleAbrManager}
 
 __Polyfills__
   - All polyfills are installed by {@link shaka.polyfill.installAll}
   - Register with {@link shaka.polyfill.register}
   - Default polyfills:
-    - prefixed fullscreen implementations: {@link shaka.polyfill.Fullscreen}
-    - prefixed video QoE metrics: {@link shaka.polyfill.VideoPlaybackQuality}
+    - prefixed fullscreen implementations:
+      {@linksource shaka.polyfill.Fullscreen}
+    - prefixed video QoE metrics:
+      {@linksource shaka.polyfill.VideoPlaybackQuality}
     - prefixed EME implementations for IE 11 and very old versions of embedded
-      Chrome/Chromium: {@link shaka.polyfill.MediaKeys}
-    - Promise implementation for IE 11: {@link shaka.polyfill.Promise}
+      Chrome/Chromium: {@linksource shaka.polyfill.MediaKeys}
+    - Promise implementation for IE 11: {@linksource shaka.polyfill.Promise}
 
 
 #### Excluding Default Plugins

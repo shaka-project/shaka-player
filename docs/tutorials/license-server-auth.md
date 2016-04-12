@@ -2,7 +2,7 @@
 
 Your application's license server may require some form of authentication so
 that it only delivers licenses to paying users.  In this tutorial, we're going
-to use different license server endpoints that require different forms of
+to use various license server endpoints that require various forms of
 authentication.
 
 *Please note that the license server we are using in this tutorial is a

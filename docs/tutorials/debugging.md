@@ -12,7 +12,7 @@ First, let's make `manifestUri` blank.
 var manifestUri = '';
 ```
 
-This causes an alert that says "Error code 4000".  What now?
+This causes an error in the console that says "Error code 4000".  What now?
 
 
 #### Use the JS console
@@ -49,13 +49,17 @@ need to load the uncompiled library.
 Instead of the single-file compiled library, we need to load three scripts in
 our HTML file:
 
-1. Closure's base library
-2. A dependency file which maps Shaka's class names to source files
-3. The uncompiled library's bootstrap file, "shaka-player.uncompiled.js"
+1. Closure's base library.  (This is a small JavaScript library related to the
+   Closure compiler used when we build Shaka.)  This is what loads Shaka without
+   requiring you to list all 50+ source files.
+2. A dependency file which maps Shaka's class names to source files.  This is
+   how Closure's base library can locate all of Shaka's individual source files.
+3. The uncompiled Shaka library's bootstrap file, "shaka-player.uncompiled.js".
+   This uses Closure to load the top-level parts of the library.  Each of those
+   files in turn load their internal dependencies.
 
-The uncompiled library's bootstrap file will use Closure to "require" each of
-the exported classes in the library.  This causes the entire library to be
-loaded, one uncompiled source file at a time.
+Once we're using the uncompiled library, we will be able to see detailed logs
+and line numbers for errors.  It is difficult to debug without this.
 
 ```html
   <head>
@@ -77,7 +81,7 @@ Reload the page and look in the JavaScript console.  Now we see:
 Unable to guess manifest type by file extension or by MIME type.
     undefined text/html    player.js:297
 
-s…a.u…l.Error {category: 4, code: 4000, data: Array[1],
+Error {category: 4, code: 4000, data: Array[1],
     message: "Shaka Error MANIFEST.UNABLE_TO_GUESS_MANIFEST_TYPE ()",
     stack: "Error: Shaka Error…   at http://localhost/shaka/lib/player.js:300:35"}
 ```
@@ -85,7 +89,10 @@ s…a.u…l.Error {category: 4, code: 4000, data: Array[1],
 So much more information!  The uncompiled library includes a log from Player
 (player.js, line 297) right before the error was dispatched, and the error
 includes a message that gives the full human-readable name of the error:
-`MANIFEST.UNABLE_TO_GUESS_MANIFEST_TYPE`.
+`MANIFEST.UNABLE_TO_GUESS_MANIFEST_TYPE`.  The `MANIFEST` part is the textual
+name for category: 4, and `UNABLE_TO_GUESS_MANIFEST_TYPE` is the textual name
+for code: 4000.  (A full list can be found in the docs for
+{@link shaka.util.Error}).
 
 There's also a `stack` field showing the context in which it was generated:
 
@@ -125,7 +132,7 @@ To keep the API simple, Shaka tries to guess what type of manifest you want to
 load.  It does this first based on extension, and if that fails, it makes a HEAD
 request and checks the MIME type.
 
-A request for "" is interpretted as a relative URL.  What we actually requested
+A request for "" is interpreted as a relative URL.  What we actually requested
 was the index page for the folder the HTML is in.
 
 Since the file extension of "" was `undefined`, and the MIME type was

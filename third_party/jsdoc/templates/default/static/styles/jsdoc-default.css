@@ -141,10 +141,6 @@ footer {
     font-size: 90%;
 }
 
-p {
-    margin-bottom: 24px;
-}
-
 h1, h2, h3, h4 {
     font-weight: 200;
     margin: 0;
@@ -155,7 +151,7 @@ h1
     font-family: 'Open Sans Light', sans-serif;
     font-size: 48px;
     letter-spacing: -2px;
-    margin: 12px 24px 20px;
+    margin-bottom: 20px;
 }
 
 h2, h3
@@ -170,7 +166,7 @@ h4
 {
     font-size: 18px;
     letter-spacing: -0.33px;
-    margin-bottom: 12px;
+    margin-top: 32px;
     color: #4d4e53;
 }
 
@@ -179,14 +175,14 @@ h5, .container-overview .subsection-title
     font-size: 120%;
     font-weight: bold;
     letter-spacing: -0.01em;
-    margin: 8px 0 3px -16px;
+    margin: 8px 0 3px;
 }
 
 h6
 {
     font-size: 100%;
     letter-spacing: -0.01em;
-    margin: 6px 0 3px 0;
+    margin: 6px 0 3px;
     font-style: italic;
 }
 

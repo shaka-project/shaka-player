@@ -5,16 +5,11 @@ Basic usage of Shaka Player is very easy:
 1. Start with {@tutorial welcome} and compile the library.
 2. Create a simple HTML page with a video element.
 3. In your application's JavaScript:
-  1. Install polyfills.
+  1. Install Shaka's polyfills.
   2. Check for browser support.
   3. Create a Player object to wrap the video element.
   4. Listen for errors.
   5. Load a manifest.
-
-*NOTE: For simplicity, we will use `alert()` for errors in this tutorial.
-In a real application, you would want a more appropriate mechanism to display
-errors to your users.*
-
 
 ```html
 <!DOCTYPE html>
@@ -44,13 +39,15 @@ function initApp() {
   shaka.polyfill.installAll();
 
   // Check to see if the browser supports the basic APIs Shaka needs.
+  // This is an asynchronous check.
   shaka.Player.support().then(function(support) {
+    // This executes when the asynchronous check is complete.
     if (support.supported) {
       // Everything looks good!
       initPlayer();
     } else {
       // This browser does not have the minimum set of APIs we need.
-      alert('Browser not supported!');
+      console.error('Browser not supported!');
     }
   });
 }
@@ -67,9 +64,11 @@ function initPlayer() {
   player.addEventListener('error', onErrorEvent);
 
   // Try to load a manifest.
+  // This is an asynchronous process.
   player.load(manifestUri).then(function() {
-    // The video has now been loaded!
-  }).catch(onError);
+    // This runs if the asynchronous load is successful.
+    console.log('The video has now been loaded!');
+  }).catch(onError);  // onError is executed if the asynchronous load fails.
 }
 
 function onErrorEvent(event) {
@@ -79,8 +78,7 @@ function onErrorEvent(event) {
 
 function onError(error) {
   // Log the error.
-  console.error(error);
-  alert('Error code ' + error.code);
+  console.error('Error code', error.code, 'object', error);
 }
 
 document.addEventListener('DOMContentLoaded', initApp);

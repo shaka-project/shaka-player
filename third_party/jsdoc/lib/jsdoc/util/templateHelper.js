@@ -139,6 +139,7 @@ var getUniqueId = exports.getUniqueId = makeUniqueId;
 // two-way lookup
 var linkMap = {
     longnameToUrl: {},
+    longnameToSource: {},
     urlToLongname: {}
 };
 
@@ -393,6 +394,15 @@ var toTutorial = exports.toTutorial = function(tutorial, content, missingOpts) {
 exports.resolveLinks = function(str) {
     var replaceInlineTags = require('jsdoc/tag/inline').replaceInlineTags;
 
+    var longnameToSourceUrl = {};
+    for (var name in linkMap.longnameToSource) {
+      var data = linkMap.longnameToSource[name];
+      var path = data[0];
+      var lineno = data[1];
+      var html = longnameToUrl[path];
+      longnameToSourceUrl[name] = html + '#line' + lineno;
+    }
+
     function extractLeadingText(string, completeTag) {
         var tagIndex = string.indexOf(completeTag);
         var leadingText = null;
@@ -443,10 +453,30 @@ exports.resolveLinks = function(str) {
         return string.replace( tagInfo.completeTag, toTutorial(tagInfo.text, leading.leadingText) );
     }
 
+    function processSource(string, tagInfo) {
+        var leading = extractLeadingText(string, tagInfo.completeTag);
+        var linkText = leading.leadingText;
+        var split;
+        var target;
+        string = leading.string;
+
+        split = splitLinkText(tagInfo.text);
+        target = split.target;
+        linkText = linkText || split.linkText;
+
+        monospace = useMonospace(tagInfo.tag, tagInfo.text);
+
+        return string.replace( tagInfo.completeTag, buildLink(target, linkText, {
+            linkMap: longnameToSourceUrl,
+            monospace: monospace
+        }) );
+    }
+
     var replacers = {
         link: processLink,
         linkcode: processLink,
         linkplain: processLink,
+        linksource: processSource,
         tutorial: processTutorial
     };
 
@@ -774,6 +804,11 @@ var registerLink = exports.registerLink = function(longname, url) {
     linkMap.longnameToUrl[longname] = url;
     linkMap.urlToLongname[url] = longname;
 };
+
+exports.registerSourceLink = function(longname, path, lineno) {
+    linkMap.longnameToSource[longname] = [path, lineno];
+};
+
 
 /**
  * Get a longname's filename if one has been registered; otherwise, generate a unique filename, then

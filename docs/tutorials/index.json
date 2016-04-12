@@ -12,5 +12,6 @@
     { "offline": { "title": "Offline Storage and Playback" } }
   ] } },
   { "plugins": { "title": "Plugins and Customizing the Build" } },
+  { "architecture": { "title": "Architecture Diagrams" } },
   { "upgrade": { "title": "Shaka v2 Upgrade Guide" } }
 ]
