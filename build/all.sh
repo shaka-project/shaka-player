@@ -20,7 +20,7 @@ dir=$(dirname $0)/..
 set -e
 
 "$dir"/build/gendeps.sh
-"$dir"/build/lint.sh
+#"$dir"/build/lint.sh
 
 # Compile once with demo app files so they get checked.  Don't keep the output.
 (library_sources_0; closure_sources_0) | compile_0 \

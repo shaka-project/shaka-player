@@ -3,4 +3,4 @@ third_party/closure/goog/deps.js
 docs/api
 docs/reference
 npm-debug.log
-
+shaka-player.compiled.*
