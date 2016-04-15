@@ -33,17 +33,17 @@ describe('StringUtils', function() {
   it('parses fromUTF16 big-endian', function() {
     // This is big-endian pairs of 16-bit numbers.  This translates into 3
     // Unicode characters where the last is split into a surrogate pair.
-    var arr = [0x00, 0x46, 0x38, 0x01, 0xdc, 0x37, 0x5d, 0x00];
+    var arr = [0x00, 0x46, 0x38, 0x01, 0xd8, 0x01, 0xdc, 0x37];
     var buffer = new Uint8Array(arr).buffer;
-    expect(StringUtils.fromUTF16(buffer, false)).toBe('F\u3801\udc37\u5d00');
+    expect(StringUtils.fromUTF16(buffer, false)).toBe('F\u3801\ud801\udc37');
   });
 
   it('parses fromUTF16 little-endian', function() {
     // This is little-endian pairs of 16-bit numbers.  This translates into 3
     // Unicode characters where the last is split into a surrogate pair.
-    var arr = [0x46, 0x00, 0x01, 0x38, 0x37, 0xdc, 0x00, 0x5d];
+    var arr = [0x46, 0x00, 0x01, 0x38, 0x01, 0xd8, 0x37, 0xdc];
     var buffer = new Uint8Array(arr).buffer;
-    expect(StringUtils.fromUTF16(buffer, true)).toBe('F\u3801\udc37\u5d00');
+    expect(StringUtils.fromUTF16(buffer, true)).toBe('F\u3801\ud801\udc37');
   });
 
   describe('fromBytesAutoDetect', function() {
@@ -101,5 +101,12 @@ describe('StringUtils', function() {
     var arr = [0x58, 0x65, 0xe4, 0x94, 0xa4, 0xe1, 0xa5, 0x92];
     var buffer = StringUtils.toUTF8(str);
     expect(new Uint8Array(buffer)).toEqual(new Uint8Array(arr));
+  });
+
+  it('does not cause stack overflow, #335', function() {
+    var buffer = new Uint8Array(8e5).buffer;  // Well above arg count limit.
+    expect(StringUtils.fromUTF8(buffer).length).toBe(buffer.byteLength);
+    expect(StringUtils.fromUTF16(buffer, true).length)
+        .toBe(buffer.byteLength / 2);
   });
 });
