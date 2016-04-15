@@ -40,25 +40,26 @@ describe('SimpleAbrManager', function() {
     switchCallback = jasmine.createSpy('switchCallback');
 
     // Keep unsorted.
-    audioStreamSet = /** @type {shakaExtern.StreamSet} */({
-      streams: /** @type {!Array.<shakaExtern.Stream>} */([
-        {bandwidth: 4e5},  // 400 kbps
-        {bandwidth: 6e5},
-        {bandwidth: 5e5},
-        {bandwidth: null}
-      ])
-    });
+    audioStreamSet = new shaka.test.ManifestGenerator()
+      .addPeriod(0)
+        .addStreamSet('audio')
+          .addStream(0).bandwidth(4e5)  // 400 kbps
+          .addStream(1).bandwidth(6e5)
+          .addStream(2).bandwidth(5e5)
+      .build()
+      .periods[0].streamSets[0];
 
     // Keep unsorted.
-    videoStreamSet = /** @type {shakaExtern.StreamSet} */({
-      streams: /** @type {!Array.<shakaExtern.Stream>} */([
-        {bandwidth: 5e5},  // 500 kbps, initial selection
-        {bandwidth: 1e6},  // 1000 kbps
-        {bandwidth: 3e6},
-        {bandwidth: 2e6},
-        {bandwidth: 2e6}  // Identical on purpose.
-      ])
-    });
+    videoStreamSet = new shaka.test.ManifestGenerator()
+      .addPeriod(0)
+        .addStreamSet('video')
+          .addStream(1).bandwidth(5e5)  // 500 kbps, initial selection
+          .addStream(2).bandwidth(1e6)  // 1000 kbps
+          .addStream(3).bandwidth(3e6)
+          .addStream(4).bandwidth(2e6)
+          .addStream(5).bandwidth(2e6)  // Identical on purpose.
+      .build()
+      .periods[0].streamSets[0];
 
     streamSetsByType = {
       'audio': audioStreamSet,
@@ -104,6 +105,20 @@ describe('SimpleAbrManager', function() {
     expect(streamsByType['video']).toBeTruthy();
   });
 
+  it('won\'t choose restricted streams', function() {
+    // No available audio streams.
+    audioStreamSet.streams[0].allowedByKeySystem = false;
+    audioStreamSet.streams[1].allowedByApplication = false;
+    audioStreamSet.streams[2].allowedByApplication = false;
+    // Disallow the initial guess.
+    videoStreamSet.streams[0].allowedByApplication = false;
+
+    var streamsByType = abrManager.chooseStreams(streamSetsByType);
+    expect(streamsByType['audio']).toBeFalsy();
+    expect(streamsByType['video']).toBeTruthy();
+    expect(streamsByType['video'].bandwidth).toBe(1e6);
+  });
+
   it('can handle empty StreamSets', function() {
     var streamsByType = abrManager.chooseStreams({});
     expect(Object.keys(streamsByType).length).toBe(0);
@@ -135,10 +150,10 @@ describe('SimpleAbrManager', function() {
         // called.
         abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
 
-        expect(switchCallback).toHaveBeenCalledWith(jasmine.objectContaining({
-          'audio': {bandwidth: audioBandwidth},
-          'video': {bandwidth: videoBandwidth}
-        }));
+        expect(switchCallback).toHaveBeenCalledWith({
+          'audio': jasmine.objectContaining({bandwidth: audioBandwidth}),
+          'video': jasmine.objectContaining({bandwidth: videoBandwidth})
+        });
       }).catch(fail).then(done);
     });
   });
@@ -188,10 +203,10 @@ describe('SimpleAbrManager', function() {
     }).then(function() {
       abrManager.segmentDownloaded(6000, 7000, bytesPerSecond);
 
-      expect(switchCallback).toHaveBeenCalledWith(jasmine.objectContaining({
-        'audio': {bandwidth: audioBandwidth},
-        'video': {bandwidth: videoBandwidth}
-      }));
+      expect(switchCallback).toHaveBeenCalledWith({
+        'audio': jasmine.objectContaining({bandwidth: audioBandwidth}),
+        'video': jasmine.objectContaining({bandwidth: videoBandwidth})
+      });
     }).catch(fail).then(done);
   });
 
@@ -238,10 +253,10 @@ describe('SimpleAbrManager', function() {
     }).then(function() {
       abrManager.segmentDownloaded(12000, 13000, bytesPerSecond);
 
-      expect(switchCallback).toHaveBeenCalledWith(jasmine.objectContaining({
-        'audio': {bandwidth: audioBandwidth},
-        'video': {bandwidth: videoBandwidth}
-      }));
+      expect(switchCallback).toHaveBeenCalledWith({
+        'audio': jasmine.objectContaining({bandwidth: audioBandwidth}),
+        'video': jasmine.objectContaining({bandwidth: videoBandwidth})
+      });
     }).catch(fail).then(done);
   });
 
