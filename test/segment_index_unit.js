@@ -238,7 +238,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
       var references1 = [
         makeReference(1, 10, 20, uri(10)),
         makeReference(2, 20, 30, uri(20)),
-        makeReference(3, 30, 49.987, uri(30))
+        makeReference(3, 30, 49.887, uri(30))
       ];
       var index1 = new shaka.media.SegmentIndex(references1);
 

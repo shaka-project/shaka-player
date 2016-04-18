@@ -183,9 +183,9 @@ describe('DashParser.Live', function() {
             expect(stream.findSegmentPosition(0)).not.toBe(null);
             Dash.verifySegmentIndex(manifest, basicRefs);
 
-            // 15 seconds for @timeShiftBufferDepth and the first segment
-            // duration.
-            Date.now = function() { return (2 * 15) * 1000; };
+            // 15 seconds for @timeShiftBufferDepth, the first segment duration,
+            // and the @suggestedPresentationDuration.
+            Date.now = function() { return (2 * 15 + 5) * 1000; };
             return delayForUpdatePeriod().then(function() {
               // The first reference should have been evicted.
               expect(stream.findSegmentPosition(0)).toBe(null);
