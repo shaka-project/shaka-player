@@ -19,7 +19,7 @@ import build
 import gendeps
 import shakaBuildHelpers
 
-def main(_):
+def main(args):
   code = gendeps.genDeps([])
   if code != 0:
     return code
@@ -28,7 +28,12 @@ def main(_):
   if code != 0:
     return code
 
-  return build.main(['--name', 'compiled', '+@complete'])
+  build_args = ['--name', 'compiled', '+@complete']
+
+  if '--force' in args:
+    build_args.append('--force')
+
+  return build.main(build_args)
 
 if __name__ == '__main__':
   shakaBuildHelpers.runMain(main)

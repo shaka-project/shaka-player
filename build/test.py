@@ -32,7 +32,13 @@ def runTests(args):
   # This is required for the tests.
   if gendeps.genDeps([]) != 0:
     return 1
-  if build.main([]) != 0:
+
+  build_args = []
+  if '--force' in args:
+    build_args.append('--force')
+    args.remove('--force')
+
+  if build.main(build_args) != 0:
     return 1
 
   karma_command_name = 'karma'
