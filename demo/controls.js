@@ -494,7 +494,7 @@ ShakaControls.prototype.updateTimeAndSeekRange_ = function() {
     var bufferEndFraction = (bufferedEnd / duration) || 0;
     var playheadFraction = (displayTime / duration) || 0;
 
-    if (this.isLive_) {
+    if (this.player_.isLive()) {
       var bufferStart = Math.max(bufferedStart, seekRange.start);
       var bufferEnd = Math.min(bufferedEnd, seekRange.end);
       var seekRangeSize = seekRange.end - seekRange.start;
