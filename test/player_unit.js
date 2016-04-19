@@ -794,6 +794,165 @@ describe('Player', function() {
     });
   });
 
+  describe('restrictions', function() {
+    beforeEach(function(done) {
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addStreamSet('audio')
+            .addStream(1).bandwidth(500)
+            .addStream(2).disallowByKeySystem()
+            .addStream(3).bandwidth(1500)
+          .addStreamSet('video')
+            .addStream(4).size(100, 100).bandwidth(300).keyId('abc')
+            .addStream(5).size(200, 1500)
+            .addStream(6).size(5, 5)
+            .addStream(7).size(100, 100).bandwidth(1500)
+            .addStream(8).size(1500, 200)
+            .addStream(9).size(900, 900)
+            .addStream(10).size(100, 100).bandwidth(10)
+        .build();
+
+      var factory = shaka.test.FakeManifestParser.createFactory(manifest);
+      player.load('', 0, factory).then(function() {
+        // "initialize" the current period.
+        chooseStreams(manifest.periods[0]);
+        canSwitch();
+      }).catch(fail).then(done);
+    });
+
+    it('switches if active is restricted by application', function() {
+      var activeVideo = getActiveTrack('video');
+      expect(activeVideo.id).toBe(4);
+
+      // AbrManager should choose the second track since the first is
+      // restricted.
+      abrManager.chooseIndex = 1;
+      abrManager.chooseStreams.calls.reset();
+      player.configure({restrictions: {maxVideoBandwidth: 200}});
+      expect(abrManager.chooseStreams).toHaveBeenCalled();
+      expect(manifest.periods[0].streamSets[1].streams[0].id).toBe(4);
+      expect(manifest.periods[0].streamSets[1].streams[0].allowedByApplication)
+          .toBe(false);
+
+      activeVideo = getActiveTrack('video');
+      expect(activeVideo.id).toBe(5);
+    });
+
+    it('switches if active is restricted by key status', function() {
+      var activeVideo = getActiveTrack('video');
+      expect(activeVideo.id).toBe(4);
+
+      // AbrManager should choose the second track since the first is
+      // restricted.
+      abrManager.chooseIndex = 1;
+      abrManager.chooseStreams.calls.reset();
+      onKeyStatus({'abc': 'expired'});
+      expect(abrManager.chooseStreams).toHaveBeenCalled();
+      expect(manifest.periods[0].streamSets[1].streams[0].id).toBe(4);
+      expect(manifest.periods[0].streamSets[1].streams[0].allowedByKeySystem)
+          .toBe(false);
+
+      activeVideo = getActiveTrack('video');
+      expect(activeVideo.id).toBe(5);
+    });
+
+    it('removes based on key status', function() {
+      expect(player.getTracks().length).toBe(9);
+
+      onKeyStatus({'abc': 'expired'});
+
+      var tracks = player.getTracks();
+      expect(tracks.length).toBe(8);
+      expectDoesNotInclude(tracks, 4);
+    });
+
+    it('removes based on bandwidth', function() {
+      player.configure(
+          {restrictions: {minVideoBandwidth: 100, maxVideoBandwidth: 1000}});
+
+      var tracks = player.getTracks();
+      expect(tracks.length).toBe(7);
+      expectDoesNotInclude(tracks, 7);
+      expectDoesNotInclude(tracks, 10);
+    });
+
+    it('removes based on pixels', function() {
+      player.configure({restrictions: {minPixels: 100, maxPixels: 800 * 800}});
+
+      var tracks = player.getTracks();
+      expect(tracks.length).toBe(7);
+      expectDoesNotInclude(tracks, 6);
+      expectDoesNotInclude(tracks, 9);
+    });
+
+    it('removes based on width', function() {
+      player.configure({restrictions: {minWidth: 100, maxWidth: 1000}});
+
+      var tracks = player.getTracks();
+      expect(tracks.length).toBe(7);
+      expectDoesNotInclude(tracks, 6);
+      expectDoesNotInclude(tracks, 8);
+    });
+
+    it('removes based on height', function() {
+      player.configure({restrictions: {minHeight: 100, maxHeight: 1000}});
+
+      var tracks = player.getTracks();
+      expect(tracks.length).toBe(7);
+      expectDoesNotInclude(tracks, 5);
+      expectDoesNotInclude(tracks, 6);
+    });
+
+    it('issues error if no streams are playable', function() {
+      var onError = jasmine.createSpy('error event');
+      onError.and.callFake(function(e) {
+        var error = e.detail;
+        shaka.test.Util.expectToEqualError(
+            error,
+            new shaka.util.Error(
+                shaka.util.Error.Category.MANIFEST,
+                shaka.util.Error.Code.ALL_STREAMS_RESTRICTED));
+      });
+      player.addEventListener('error', onError);
+
+      player.configure(
+          {restrictions: {maxAudioBandwidth: 0, maxVideoBandwidth: 0}});
+      expect(onError).toHaveBeenCalled();
+    });
+
+    /**
+     * Gets the currently active track.
+     * @param {string} type
+     * @return {shakaExtern.Track}
+     */
+    function getActiveTrack(type) {
+      var activeTracks = player.getTracks().filter(function(track) {
+        return track.type == type && track.active;
+      });
+      expect(activeTracks.length).toBe(1);
+      return activeTracks[0];
+    }
+
+    /**
+     * Expects that the given track list does not include a track with the
+     * given ID.
+     * @param {!Array.<shakaExtern.Track>} tracks
+     * @param {number} id
+     */
+    function expectDoesNotInclude(tracks, id) {
+      var containsId = tracks.some(function(track) { return track.id == id; });
+      expect(containsId).toBe(false);
+    }
+
+    /**
+     * @param {!Object.<string, string>} keyStatusMap
+     * @suppress {accessControls}
+     */
+    function onKeyStatus(keyStatusMap) {
+      player.onKeyStatus_(keyStatusMap);
+    }
+  });
+
   /**
    * @param {!Object=} opt_period
    * @suppress {accessControls}

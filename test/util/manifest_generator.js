@@ -291,7 +291,9 @@ shaka.test.ManifestGenerator.prototype.addStream = function(id) {
     width: undefined,
     height: undefined,
     kind: undefined,
-    keyId: null
+    keyId: null,
+    allowedByApplication: true,
+    allowedByKeySystem: true
   };
   stream.createSegmentIndex.and.callFake(
       function() { return Promise.resolve(); });
@@ -443,6 +445,30 @@ shaka.test.ManifestGenerator.prototype.kind = function(kind) {
 shaka.test.ManifestGenerator.prototype.keyId = function(keyId) {
   var stream = this.currentStream_();
   stream.keyId = keyId;
+  return this;
+};
+
+
+/**
+ * Sets that the current stream is disallowed by the application.
+ *
+ * @return {!shaka.test.ManifestGenerator}
+ */
+shaka.test.ManifestGenerator.prototype.disallowByApplication = function() {
+  var stream = this.currentStream_();
+  stream.allowedByApplication = false;
+  return this;
+};
+
+
+/**
+ * Sets that the current stream is disallowed by the key system.
+ *
+ * @return {!shaka.test.ManifestGenerator}
+ */
+shaka.test.ManifestGenerator.prototype.disallowByKeySystem = function() {
+  var stream = this.currentStream_();
+  stream.allowedByKeySystem = false;
   return this;
 };
 // }}}

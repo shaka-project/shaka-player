@@ -145,7 +145,7 @@ shakaDemo.onErrorEvent_ = function(event) {
  */
 shakaDemo.onError_ = function(error) {
   console.error('Player error', error);
-  var message = 'Error code ' + error.code;
+  var message = error.message || ('Error code ' + error.code);
   var errorDisplay = document.getElementById('errorDisplay');
   errorDisplay.textContent = message;
 };
