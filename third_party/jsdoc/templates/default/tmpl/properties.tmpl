@@ -33,7 +33,7 @@
             props.hasName = true;
         }
 
-        if (typeof prop.defaultvalue !== 'undefined' && !data.isEnum) {
+        if (typeof prop.defaultvalue !== 'undefined') {
             props.hasDefault = true;
         }
     });
@@ -46,13 +46,17 @@
         <th>Name</th>
         <?js } ?>
 
+        <?js if (props.hasDefault && data.isEnum) {?>
+        <th>Value</th>
+        <?js } ?>
+
         <th>Type</th>
 
         <?js if (props.hasAttributes) {?>
         <th>Attributes</th>
         <?js } ?>
 
-        <?js if (props.hasDefault) {?>
+        <?js if (props.hasDefault && !data.isEnum) {?>
         <th>Default</th>
         <?js } ?>
 
@@ -70,6 +74,14 @@
         <tr>
             <?js if (props.hasName) {?>
                 <td class="name"><code><?js= prop.name ?></code></td>
+            <?js } ?>
+
+            <?js if (props.hasDefault && data.isEnum) {?>
+                <td class="default">
+                <?js if (typeof prop.defaultvalue !== 'undefined') { ?>
+                    <?js= self.htmlsafe(prop.defaultvalue) ?>
+                <?js } ?>
+                </td>
             <?js } ?>
 
             <td class="type">
@@ -90,7 +102,7 @@
                 </td>
             <?js } ?>
 
-            <?js if (props.hasDefault) {?>
+            <?js if (props.hasDefault && !data.isEnum) {?>
                 <td class="default">
                 <?js if (typeof prop.defaultvalue !== 'undefined') { ?>
                     <?js= self.htmlsafe(prop.defaultvalue) ?>
