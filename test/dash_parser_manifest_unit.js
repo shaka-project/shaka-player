@@ -486,6 +486,7 @@ describe('DashParser.Manifest', function() {
       var template = [
         '<MPD type="dynamic"',
         '      availabilityStartTime="1970-01-01T00:00:00Z"',
+        '      timeShiftBufferDepth="PT60S"',
         '      maxSegmentDuration="PT5S"',
         '      suggestedPresentationDelay="PT0S">',
         '  %s',
