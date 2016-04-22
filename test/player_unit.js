@@ -497,7 +497,8 @@ describe('Player', function() {
 
       var period = manifest.periods[0];
       var stream = period.streamSets[0].streams[1];
-      expect(streamingEngine.switch).toHaveBeenCalledWith('audio', stream);
+      expect(streamingEngine.switch)
+          .toHaveBeenCalledWith('audio', stream, false);
     });
   });
 
