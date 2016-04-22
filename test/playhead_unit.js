@@ -26,6 +26,9 @@ describe('Playhead', function() {
   // Callback to Playhead to simulate 'seeking' event from |video|.
   var videoOnSeeking;
 
+  // Callback to Playhead to simulate 'ratechange' event from |video|.
+  var videoOnRateChange;
+
   // Callback to us from Playhead when the buffering state changes.
   var onBuffering;
 
@@ -47,6 +50,8 @@ describe('Playhead', function() {
         videoOnLoadedMetadata = f;
       } else if (eventName == 'seeking') {
         videoOnSeeking = f;
+      } else if (eventName == 'ratechange') {
+        videoOnRateChange = f;
       } else {
         throw new Error('Unexpected event:' + eventName);
       }
@@ -77,7 +82,7 @@ describe('Playhead', function() {
 
       expect(video.addEventListener).toHaveBeenCalledWith(
           'loadedmetadata', videoOnLoadedMetadata, false);
-      expect(video.addEventListener.calls.count()).toBe(1);
+      expect(video.addEventListener.calls.count()).toBe(2);
 
       expect(playhead.getTime()).toBe(5);
       expect(video.currentTime).toBe(0);
@@ -87,7 +92,7 @@ describe('Playhead', function() {
 
       expect(video.addEventListener).toHaveBeenCalledWith(
           'seeking', videoOnSeeking, false);
-      expect(video.addEventListener.calls.count()).toBe(2);
+      expect(video.addEventListener.calls.count()).toBe(3);
 
       expect(playhead.getTime()).toBe(5);
       expect(video.currentTime).toBe(5);
@@ -132,6 +137,7 @@ describe('Playhead', function() {
 
     // Set to 2 to ensure Playhead restores the correct rate.
     video.playbackRate = 2;
+    videoOnRateChange();
 
     playhead.setBuffering(false);
     expect(onBuffering).not.toHaveBeenCalled();
