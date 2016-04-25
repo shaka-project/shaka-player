@@ -38,8 +38,11 @@ def runTests(args):
     build_args.append('--force')
     args.remove('--force')
 
-  if build.main(build_args) != 0:
-    return 1
+  if '--no-build' in args:
+    args.remove('--no-build')
+  else:
+    if build.main(build_args) != 0:
+      return 1
 
   karma_command_name = 'karma'
   if shakaBuildHelpers.isWindows():
