@@ -143,6 +143,18 @@ describe('DrmEngine', function() {
       }).catch(fail).then(done);
     });
 
+    it('detects content type capabilities of key system', function(done) {
+      requestMediaKeySystemAccessSpy.and.callFake(
+          fakeRequestMediaKeySystemAccess.bind(null, ['drm.abc']));
+
+      drmEngine.init(manifest, /* offline */ false).then(function() {
+        expect(drmEngine.initialized()).toBe(true);
+        expect(drmEngine.getSupportedTypes()).toEqual([
+          'audio/webm', 'video/mp4; codecs="fake"'
+        ]);
+      }).catch(fail).then(done);
+    });
+
     it('tries the second key system if the first fails', function(done) {
       // Accept drm.def, but not drm.abc.
       requestMediaKeySystemAccessSpy.and.callFake(
@@ -1286,9 +1298,15 @@ describe('DrmEngine', function() {
   function createMockMediaKeySystemAccess() {
     var mksa = {
       keySystem: '',
-      getConfiguration: function() {},
+      getConfiguration: jasmine.createSpy('getConfiguration'),
       createMediaKeys: jasmine.createSpy('createMediaKeys')
     };
+    mksa.getConfiguration.and.callFake(function() {
+      return {
+        audioCapabilities: [{contentType: 'audio/webm'}],
+        videoCapabilities: [{contentType: 'video/mp4; codecs="fake"'}]
+      };
+    });
     mksa.createMediaKeys.and.callFake(function() {
       return Promise.resolve(mockMediaKeys);
     });

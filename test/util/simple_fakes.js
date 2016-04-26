@@ -94,14 +94,18 @@ shaka.test.FakeAbrManager.prototype.chooseStreams = function(
 shaka.test.FakeDrmEngine = function() {
   var resolve = Promise.resolve.bind(Promise);
 
-  var ret = jasmine.createSpyObj(
-      'FakeDrmEngine',
-      ['destroy', 'configure', 'init', 'attach', 'initialized', 'keySystem']);
+  var ret = jasmine.createSpyObj('FakeDrmEngine', [
+    'destroy', 'configure', 'init', 'attach', 'initialized', 'keySystem',
+    'getSupportedTypes'
+  ]);
   ret.destroy.and.callFake(resolve);
   ret.init.and.callFake(resolve);
   ret.attach.and.callFake(resolve);
   ret.initialized.and.returnValue(true);
   ret.keySystem.and.returnValue('com.example.fake');
+  // See shaka.test.ManifestGenerator.protototype.createStream.
+  ret.getSupportedTypes.and.returnValue(
+      ['video/mp4; codecs="avc1.4d401f"']);
   return ret;
 };
 

@@ -811,6 +811,7 @@ describe('Player', function() {
             .addStream(8).size(1500, 200)
             .addStream(9).size(900, 900)
             .addStream(10).size(100, 100).bandwidth(10)
+            .addStream(11).bandwidth(200).mime('video/webm')
         .build();
 
       var factory = shaka.test.FakeManifestParser.createFactory(manifest);
@@ -865,6 +866,13 @@ describe('Player', function() {
       var tracks = player.getTracks();
       expect(tracks.length).toBe(8);
       expectDoesNotInclude(tracks, 4);
+    });
+
+    it('removes if key system does not support codec', function() {
+      // Should already be removed from filterPeriod_
+      var tracks = player.getTracks();
+      expect(tracks.length).toBe(9);
+      expectDoesNotInclude(tracks, 11);
     });
 
     it('removes based on bandwidth', function() {
