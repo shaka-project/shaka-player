@@ -1,0 +1,3 @@
+# The offline storage system and manifest parser plugin.
+
++../../lib/offline/db_engine.js
