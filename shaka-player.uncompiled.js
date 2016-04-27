@@ -37,4 +37,6 @@ goog.require('shaka.polyfill.MediaKeys');
 goog.require('shaka.polyfill.Promise');
 goog.require('shaka.polyfill.VideoPlaybackQuality');
 
-goog.require('shaka.offline.DBEngine');
+goog.require('shaka.offline.OfflineManifestParser');
+goog.require('shaka.offline.OfflineScheme');
+goog.require('shaka.offline.Storage');

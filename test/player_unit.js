@@ -1291,32 +1291,4 @@ describe('Player', function() {
       }
     };
   }
-
-  function createMockVideo() {
-    var video = {
-      src: '',
-      textTracks: [],
-      addTextTrack: jasmine.createSpy('addTextTrack'),
-      addEventListener: jasmine.createSpy('addEventListener'),
-      removeEventListener: jasmine.createSpy('removeEventListener'),
-      removeAttribute: jasmine.createSpy('removeAttribute'),
-      load: jasmine.createSpy('load'),
-      dispatchEvent: jasmine.createSpy('dispatchEvent'),
-      on: {}  // event listeners
-    };
-    video.addTextTrack.and.callFake(function(kind, id) {
-      var track = createMockTextTrack();
-      video.textTracks.push(track);
-      return track;
-    });
-    video.addEventListener.and.callFake(function(name, callback) {
-      video.on[name] = callback;
-    });
-    return video;
-  }
-
-  function createMockTextTrack() {
-    // TODO: mock TextTrack, if/when Player starts directly accessing it.
-    return {};
-  }
 });
