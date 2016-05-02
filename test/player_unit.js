@@ -45,8 +45,12 @@ describe('Player', function() {
         /** @type {shakaExtern.PlayerConfiguration} */ (
             {abr: {manager: abrManager}}));
 
-    player.createDrmEngine = function() {
-      return new shaka.test.FakeDrmEngine();
+    player.loadInternal = function() {
+      return Promise.resolve({
+        drmEngine: new shaka.test.FakeDrmEngine(),
+        manifest: manifest,
+        manifestParser: null
+      });
     };
     player.createPlayhead = function() { return {destroy: function() {}}; };
     player.createMediaSource = function() { return Promise.resolve(); };
