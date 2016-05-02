@@ -264,6 +264,7 @@ shakaExtern.GetSegmentReferenceFunction;
  *   width: (number|undefined),
  *   height: (number|undefined),
  *   kind: (string|undefined),
+ *   encrypted: boolean,
  *   keyId: ?string,
  *   allowedByApplication: boolean,
  *   allowedByKeySystem: boolean
@@ -322,6 +323,9 @@ shakaExtern.GetSegmentReferenceFunction;
  *   <i>Text streams only.</i> <br>
  *   The kind of text stream.  For example, 'captions' or 'subtitles'.
  *   @see https://goo.gl/k1HWA6
+ * @property {boolean} encrypted
+ *   <i>Defaults to false.</i><br>
+ *   True if the stream is encrypted.
  * @property {?string} keyId
  *   <i>Defaults to null (i.e., unencrypted or key ID unknown).</i> <br>
  *   The stream's key ID as a lowercase hex string. This key ID identifies the

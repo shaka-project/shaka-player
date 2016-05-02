@@ -119,11 +119,11 @@ describe('DrmEngine', function() {
         .addStreamSet('video')
           .addDrmInfo('com.widevine.alpha')
           .addDrmInfo('com.microsoft.playready')
-          .addStream(1).mime('video/mp4', 'avc1.640015')
+          .addStream(1).mime('video/mp4', 'avc1.640015').encrypted(true)
         .addStreamSet('audio')
           .addDrmInfo('com.widevine.alpha')
           .addDrmInfo('com.microsoft.playready')
-          .addStream(1).mime('audio/mp4', 'mp4a.40.2')
+          .addStream(1).mime('audio/mp4', 'mp4a.40.2').encrypted(true)
       .build();
 
     eventManager = new shaka.util.EventManager();
@@ -316,11 +316,11 @@ describe('DrmEngine', function() {
                   'SwBJAEQAPgBvAE4ATQB3AEYAUQBSAHAAYQBrAFMAUgBvAFQATwBoAEYA' +
                   'YQBxAE0AUQBRAD0APQA8AC8ASwBJAEQAPgA8AC8ARABBAFQAQQA+ADwA' +
                   'LwBXAFIATQBIAEUAQQBEAEUAUgA+AA==')
-            .addStream(1).mime('video/mp4', 'avc1.640015')
+            .addStream(1).mime('video/mp4', 'avc1.640015').encrypted(true)
           .addStreamSet('audio')
             .addDrmInfo('com.widevine.alpha')
             .addDrmInfo('com.microsoft.playready')
-          .addStream(1).mime('audio/mp4', 'mp4a.40.2')
+          .addStream(1).mime('audio/mp4', 'mp4a.40.2').encrypted(true)
         .build();
 
       networkingEngine.clearAllRequestFilters();

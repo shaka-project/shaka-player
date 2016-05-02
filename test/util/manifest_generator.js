@@ -289,6 +289,7 @@ shaka.test.ManifestGenerator.prototype.addStream = function(id) {
     width: undefined,
     height: undefined,
     kind: undefined,
+    encrypted: false,
     keyId: null,
     allowedByApplication: true,
     allowedByKeySystem: true
@@ -430,6 +431,19 @@ shaka.test.ManifestGenerator.prototype.size = function(width, height) {
 shaka.test.ManifestGenerator.prototype.kind = function(kind) {
   var stream = this.currentStream_();
   stream.kind = kind;
+  return this;
+};
+
+
+/**
+ * Sets the encrypted flag of the current stream.
+ *
+ * @param {boolean} encrypted
+ * @return {!shaka.test.ManifestGenerator}
+ */
+shaka.test.ManifestGenerator.prototype.encrypted = function(encrypted) {
+  var stream = this.currentStream_();
+  stream.encrypted = encrypted;
   return this;
 };
 

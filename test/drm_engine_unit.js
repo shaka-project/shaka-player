@@ -60,10 +60,10 @@ describe('DrmEngine', function() {
       .addPeriod(0)
         .addStreamSet('video')
           .addDrmInfo('drm.abc')
-          .addStream(0).mime('video/foo', 'vbar')
+          .addStream(0).mime('video/foo', 'vbar').encrypted(true)
         .addStreamSet('audio')
           .addDrmInfo('drm.def')
-          .addStream(1).mime('audio/foo', 'abar')
+          .addStream(1).mime('audio/foo', 'abar').encrypted(true)
       .build();
 
     // Reset spies.

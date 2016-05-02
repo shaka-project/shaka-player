@@ -319,6 +319,27 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.WEBM
     ]
   },
+  {
+    name: '"Dig the Uke" by Stefan Kartenberg (audio only, multicodec, Widevine)',  // gjslint: disable=110
+    // From: http://dig.ccmixter.org/files/JeffSpeed68/53327
+    // Licensed under Creative Commons BY-NC 3.0.
+    // Free for non-commercial use with attribution.
+    // http://creativecommons.org/licenses/by-nc/3.0/
+    manifestUri: '//storage.googleapis.com/shaka-demo-assets/dig-the-uke/dash.mpd',  // gjslint: disable=110
+
+    encoder: shakaAssets.Encoder.EDASH_PACKAGER,
+    source: shakaAssets.Source.SHAKA,
+    drm: [shakaAssets.KeySystem.WIDEVINE],
+    features: [
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_BASE,
+      shakaAssets.Feature.WEBM
+    ],
+
+    licenseServers: {
+      'com.widevine.alpha': '//widevine-proxy.appspot.com/proxy'
+    }
+  },
   // }}}
 
   // YouTube assets {{{
