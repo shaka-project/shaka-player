@@ -582,7 +582,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Live sim (2s segments)',
-    manifestUri: '//vm2.dashif.org/livesim/testpic_2s/Manifest.mpd',
+    manifestUri: '//vm2.dashif.org/livesim/utc_head/testpic_2s/Manifest.mpd',
 
     encoder: shakaAssets.Encoder.UNKNOWN,
     source: shakaAssets.Source.DASH_IF,
@@ -595,7 +595,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Live sim (6s segments)',
-    manifestUri: '//vm2.dashif.org/livesim/testpic_6s/Manifest.mpd',
+    manifestUri: '//vm2.dashif.org/livesim/utc_head/testpic_6s/Manifest.mpd',
 
     encoder: shakaAssets.Encoder.UNKNOWN,
     source: shakaAssets.Source.DASH_IF,
