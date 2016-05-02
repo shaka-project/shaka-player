@@ -26,6 +26,9 @@ describe('Playhead', function() {
   // Callback to Playhead to simulate 'seeking' event from |video|.
   var videoOnSeeking;
 
+  // Callback to Playhead to simulate 'playing' event from |video|.
+  var videoOnPlaying;
+
   // Callback to Playhead to simulate 'ratechange' event from |video|.
   var videoOnRateChange;
 
@@ -41,6 +44,7 @@ describe('Playhead', function() {
 
     videoOnLoadedMetadata = undefined;
     videoOnSeeking = undefined;
+    videoOnPlaying = undefined;
 
     onBuffering = jasmine.createSpy('onBuffering');
     onSeek = jasmine.createSpy('onSeek');
@@ -50,6 +54,8 @@ describe('Playhead', function() {
         videoOnLoadedMetadata = f;
       } else if (eventName == 'seeking') {
         videoOnSeeking = f;
+      } else if (eventName == 'playing') {
+        videoOnPlaying = f;
       } else if (eventName == 'ratechange') {
         videoOnRateChange = f;
       } else {
@@ -160,7 +166,7 @@ describe('Playhead', function() {
     expect(video.playbackRate).toBe(2);
   });
 
-  it('clamps seeks for live', function() {
+  it('clamps playhead after seeking for live', function() {
     video.readyState = HTMLMediaElement.HAVE_METADATA;
 
     video.buffered = {
@@ -314,7 +320,7 @@ describe('Playhead', function() {
     expect(onSeek).toHaveBeenCalled();
   });
 
-  it('clamps seeks for VOD', function() {
+  it('clamps playhead after seeking for VOD', function() {
     video.readyState = HTMLMediaElement.HAVE_METADATA;
 
     video.buffered = {
@@ -364,6 +370,83 @@ describe('Playhead', function() {
     expect(playhead.getTime()).toBe(5);
     expect(onSeek).not.toHaveBeenCalled();
     videoOnSeeking();
+    expect(onSeek).toHaveBeenCalled();
+  });
+
+  it('clamps playhead after resuming', function() {
+    video.readyState = HTMLMediaElement.HAVE_METADATA;
+
+    video.buffered = {
+      length: 1,
+      start: function(i) {
+        if (i == 0) return 5;
+        throw new Error('Unexpected index');
+      },
+      end: function(i) {
+        if (i == 0) return 35;
+        throw new Error('Unexpected index');
+      }
+    };
+
+    // Live case:
+    timeline.isLive.and.returnValue(true);
+    timeline.getEarliestStart.and.returnValue(5);
+    timeline.getSegmentAvailabilityStart.and.returnValue(5);
+    timeline.getSegmentAvailabilityEnd.and.returnValue(60);
+    timeline.getSegmentAvailabilityDuration.and.returnValue(30);
+
+    playhead = new shaka.media.Playhead(
+        video,
+        timeline,
+        10 /* rebufferingGoal */,
+        5 /* startTime */,
+        onBuffering, onSeek);
+
+    videoOnSeeking();
+    expect(video.currentTime).toBe(5);
+    expect(playhead.getTime()).toBe(5);
+
+    // Simulate pausing.
+    timeline.getEarliestStart.and.returnValue(10);
+    timeline.getSegmentAvailabilityStart.and.returnValue(10);
+    timeline.getSegmentAvailabilityEnd.and.returnValue(70);
+    timeline.getSegmentAvailabilityDuration.and.returnValue(30);
+
+    // left = start + 1 = 10 + 1 = 11
+    // safe = left + rebufferingGoal = 11 + 10 = 21
+
+    // The playhead should move to 23 (safe + 2) after resuming, which will
+    // cause a 'seeking' event.
+    videoOnPlaying();
+    expect(video.currentTime).toBe(23);
+    videoOnSeeking();
+    expect(playhead.getTime()).toBe(23);
+    expect(onSeek).toHaveBeenCalled();
+
+    // VOD case:
+    timeline.isLive.and.returnValue(false);
+    timeline.getEarliestStart.and.returnValue(5);
+    timeline.getSegmentAvailabilityStart.and.returnValue(5);
+    timeline.getSegmentAvailabilityEnd.and.returnValue(60);
+    timeline.getSegmentAvailabilityDuration.and.returnValue(30);
+
+    playhead = new shaka.media.Playhead(
+        video,
+        timeline,
+        10 /* rebufferingGoal */,
+        5 /* startTime */,
+        onBuffering, onSeek);
+
+    // Simulate pausing.
+    timeline.getEarliestStart.and.returnValue(10);
+    timeline.getSegmentAvailabilityStart.and.returnValue(10);
+    timeline.getSegmentAvailabilityEnd.and.returnValue(70);
+    timeline.getSegmentAvailabilityDuration.and.returnValue(30);
+
+    videoOnPlaying();
+    expect(video.currentTime).toBe(10);
+    videoOnSeeking();
+    expect(playhead.getTime()).toBe(10);
     expect(onSeek).toHaveBeenCalled();
   });
 
