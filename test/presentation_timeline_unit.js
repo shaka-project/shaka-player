@@ -18,11 +18,13 @@
 describe('PresentationTimeline', function() {
   var originalDateNow;
   var baseTime;
+  var infinity;
 
   beforeEach(function() {
     baseTime = new Date(2015, 11, 30);
     originalDateNow = Date.now;
     Date.now = function() { return baseTime.getTime(); };
+    infinity = Number.POSITIVE_INFINITY;
   });
 
   afterEach(function() {
@@ -35,6 +37,17 @@ describe('PresentationTimeline', function() {
     };
   }
 
+  /**
+   * Creates a PresentationTimeline.
+   *
+   * @param {number} duration
+   * @param {?number} presentationStartTime
+   * @param {number} segmentAvailabilityDuration
+   * @param {number} maxSegmentDuration
+   * @param {number} clockOffset
+   *
+   * @return {shaka.media.PresentationTimeline}
+   */
   function makePresentationTimeline(
       duration,
       presentationStartTime,
@@ -42,7 +55,7 @@ describe('PresentationTimeline', function() {
       maxSegmentDuration,
       clockOffset) {
     var timeline = new shaka.media.PresentationTimeline(presentationStartTime);
-    timeline.setDuration(duration);
+    timeline.setDuration(duration || infinity);
     timeline.setSegmentAvailabilityDuration(segmentAvailabilityDuration);
     timeline.notifyMaxSegmentDuration(maxSegmentDuration);
     timeline.setClockOffset(clockOffset);
@@ -53,19 +66,19 @@ describe('PresentationTimeline', function() {
     it('returns 0 for VOD', function() {
       setElapsed(0);
       var timeline1 = makePresentationTimeline(
-          60, null, null, 10, 0);
+          60, null, infinity, 10, 0);
       expect(timeline1.getSegmentAvailabilityStart()).toBe(0);
 
       setElapsed(0);
       var timeline2 = makePresentationTimeline(
-          Number.POSITIVE_INFINITY, null, null, 10, 0);
+          infinity, null, infinity, 10, 0);
       expect(timeline2.getSegmentAvailabilityStart()).toBe(0);
     });
 
     it('returns the correct time for live without duration', function() {
       setElapsed(0);
       var timeline = makePresentationTimeline(
-          Number.POSITIVE_INFINITY, Date.now() / 1000.0, 20, 10, 0);
+          infinity, Date.now() / 1000.0, 20, 10, 0);
       expect(timeline.getSegmentAvailabilityStart()).toBe(0);
 
       setElapsed(29);
@@ -115,7 +128,7 @@ describe('PresentationTimeline', function() {
     it('returns the correct time for live with inf. availability', function() {
       setElapsed(0);
       var timeline = makePresentationTimeline(
-          60, Date.now() / 1000.0, Number.POSITIVE_INFINITY, 10, 0);
+          60, Date.now() / 1000.0, infinity, 10, 0);
       expect(timeline.getSegmentAvailabilityStart()).toBe(0);
 
       setElapsed(59);
@@ -133,20 +146,19 @@ describe('PresentationTimeline', function() {
     it('returns duration for VOD', function() {
       setElapsed(0);
       var timeline1 = makePresentationTimeline(
-          60, null, null, 10, 0);
+          60, null, infinity, 10, 0);
       expect(timeline1.getSegmentAvailabilityEnd()).toBe(60);
 
       setElapsed(0);
       var timeline2 = makePresentationTimeline(
-          Number.POSITIVE_INFINITY, null, null, 10, 0);
-      expect(timeline2.getSegmentAvailabilityEnd()).toBe(
-          Number.POSITIVE_INFINITY);
+          infinity, null, infinity, 10, 0);
+      expect(timeline2.getSegmentAvailabilityEnd()).toBe(infinity);
     });
 
     it('returns the correct time for live without duration', function() {
       setElapsed(0);
       var timeline = makePresentationTimeline(
-          Number.POSITIVE_INFINITY, Date.now() / 1000.0, 20, 10, 0);
+          infinity, Date.now() / 1000.0, 20, 10, 0);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(0);
 
       setElapsed(0);
@@ -198,12 +210,12 @@ describe('PresentationTimeline', function() {
     it('returns the correct value for VOD', function() {
       setElapsed(0);
       var timeline = makePresentationTimeline(
-          60, null, null, 10, 0);
+          60, null, infinity, 10, 0);
       expect(timeline.getDuration()).toBe(60);
 
       timeline = makePresentationTimeline(
-          Number.POSITIVE_INFINITY, null, null, 10, 0);
-      expect(timeline.getDuration()).toBe(Number.POSITIVE_INFINITY);
+          infinity, null, infinity, 10, 0);
+      expect(timeline.getDuration()).toBe(infinity);
     });
 
     it('returns the correct value for live', function() {
@@ -213,8 +225,8 @@ describe('PresentationTimeline', function() {
       expect(timeline.getDuration()).toBe(60);
 
       timeline = makePresentationTimeline(
-          Number.POSITIVE_INFINITY, Date.now() / 1000.0, 20, 10, 0);
-      expect(timeline.getDuration()).toBe(Number.POSITIVE_INFINITY);
+          infinity, Date.now() / 1000.0, 20, 10, 0);
+      expect(timeline.getDuration()).toBe(infinity);
     });
   });
 
@@ -222,7 +234,7 @@ describe('PresentationTimeline', function() {
     it('affects VOD', function() {
       setElapsed(0);
       var timeline = makePresentationTimeline(
-          60, null, null, 10, 0);
+          60, null, infinity, 10, 0);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(60);
 
       timeline.setDuration(90);
@@ -232,7 +244,7 @@ describe('PresentationTimeline', function() {
     it('affects live', function() {
       setElapsed(0);
       var timeline = makePresentationTimeline(
-          Number.POSITIVE_INFINITY, Date.now() / 1000.0, 20, 10, 0);
+          infinity, Date.now() / 1000.0, 20, 10, 0);
 
       setElapsed(40);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(30);
@@ -247,43 +259,39 @@ describe('PresentationTimeline', function() {
 
   it('getSegmentAvailabilityDuration', function() {
     setElapsed(0);
-    var timeline = makePresentationTimeline(60, null, null, 10, 0);
-    expect(timeline.getSegmentAvailabilityDuration()).toBeNull();
+    var timeline = makePresentationTimeline(
+        60, null, infinity, 10, 0);
+    expect(timeline.getSegmentAvailabilityDuration()).toBe(infinity);
 
     timeline = makePresentationTimeline(
-        Number.POSITIVE_INFINITY, Date.now() / 1000.0, 20, 10, 0);
+        infinity, Date.now() / 1000.0, 20, 10, 0);
     expect(timeline.getSegmentAvailabilityDuration()).toBe(20);
 
     timeline = makePresentationTimeline(
-        Number.POSITIVE_INFINITY,
-        Date.now() / 1000.0,
-        Number.POSITIVE_INFINITY,
-        10,
-        0);
-    expect(timeline.getSegmentAvailabilityDuration()).toBe(
-        Number.POSITIVE_INFINITY);
+        infinity, Date.now() / 1000.0, infinity, 10, 0);
+    expect(timeline.getSegmentAvailabilityDuration()).toBe(infinity);
   });
 
   it('setSegmentAvailabilityDuration', function() {
     setElapsed(0);
-    var timeline = makePresentationTimeline(60, null, null, 10, 0);
-    expect(timeline.getSegmentAvailabilityDuration()).toBeNull();
+    var timeline = makePresentationTimeline(
+        60, null, infinity, 10, 0);
+    expect(timeline.getSegmentAvailabilityDuration()).toBe(infinity);
 
     timeline = makePresentationTimeline(
-        Number.POSITIVE_INFINITY, Date.now() / 1000.0, 20, 10, 0);
+        infinity, Date.now() / 1000.0, 20, 10, 0);
     timeline.setSegmentAvailabilityDuration(7);
     expect(timeline.getSegmentAvailabilityDuration()).toBe(7);
 
     timeline = makePresentationTimeline(
-        Number.POSITIVE_INFINITY, Date.now() / 1000.0, 20, 10, 0);
-    timeline.setSegmentAvailabilityDuration(Number.POSITIVE_INFINITY);
-    expect(timeline.getSegmentAvailabilityDuration()).toBe(
-        Number.POSITIVE_INFINITY);
+        infinity, Date.now() / 1000.0, 20, 10, 0);
+    timeline.setSegmentAvailabilityDuration(infinity);
+    expect(timeline.getSegmentAvailabilityDuration()).toBe(infinity);
 
     timeline = makePresentationTimeline(
-        60, null, null, 10, 0);
-    timeline.setSegmentAvailabilityDuration(null);
-    expect(timeline.getSegmentAvailabilityDuration()).toBe(null);
+        60, null, infinity, 10, 0);
+    timeline.setSegmentAvailabilityDuration(infinity);
+    expect(timeline.getSegmentAvailabilityDuration()).toBe(infinity);
   });
 
   it('clockOffset', function() {
@@ -291,7 +299,7 @@ describe('PresentationTimeline', function() {
     // should return 10.
     setElapsed(0);
     var timeline = makePresentationTimeline(
-        Number.POSITIVE_INFINITY, Date.now() / 1000.0, 10, 5, 10000);
+        infinity, Date.now() / 1000.0, 10, 5, 10000);
     expect(timeline.getSegmentAvailabilityEnd()).toBeCloseTo(5);
   });
 });

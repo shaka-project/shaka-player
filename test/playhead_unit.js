@@ -57,6 +57,7 @@ describe('Playhead', function() {
       }
     });
 
+    timeline.isLive.and.returnValue(false);
     timeline.getEarliestStart.and.returnValue(5);
     timeline.getSegmentAvailabilityStart.and.returnValue(5);
     timeline.getSegmentAvailabilityEnd.and.returnValue(60);
@@ -174,6 +175,7 @@ describe('Playhead', function() {
       }
     };
 
+    timeline.isLive.and.returnValue(true);
     timeline.getEarliestStart.and.returnValue(5);
     timeline.getSegmentAvailabilityStart.and.returnValue(5);
     timeline.getSegmentAvailabilityEnd.and.returnValue(60);
@@ -327,6 +329,7 @@ describe('Playhead', function() {
       }
     };
 
+    timeline.isLive.and.returnValue(false);
     timeline.getEarliestStart.and.returnValue(5);
     timeline.getSegmentAvailabilityStart.and.returnValue(5);
     timeline.getSegmentAvailabilityEnd.and.returnValue(60);
@@ -382,6 +385,7 @@ describe('Playhead', function() {
       setDuration: jasmine.createSpy('setDuration'),
       getSegmentAvailabilityDuration:
           jasmine.createSpy('getSegmentAvailabilityDuration'),
+      isLive: jasmine.createSpy('isLive'),
       getEarliestStart: jasmine.createSpy('getEarliestStart'),
       getSegmentAvailabilityStart:
           jasmine.createSpy('getSegmentAvailabilityStart'),
