@@ -111,7 +111,7 @@ shakaExtern.Period;
  * @description
  * Explicit initialization data, which override any initialization data in the
  * content. The initDataType values and the formats that they correspond to
- * are specified {@link http://goo.gl/hKBdff here}.
+ * are specified {@link https://goo.gl/TNjYwn here}.
  *
  * @property {!Uint8Array} initData
  *   Initialization data in the format indicated by initDataType.
