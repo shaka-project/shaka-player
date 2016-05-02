@@ -1,3 +1,74 @@
+## 2.0.0-beta2 (2016-05-04)
+
+Restored Features from v1 Missing in v2.0.0-beta:
+  - Track restrictions API
+    - https://github.com/google/shaka-player/issues/326
+    - https://github.com/google/shaka-player/issues/327
+  - Custom controls demo for live
+    - https://github.com/google/shaka-player/issues/322
+  - Trick play demo
+    - https://github.com/google/shaka-player/issues/328
+
+
+New features:
+  - Reduced startup latency
+  - Added player.resetConfiguration()
+  - Added response text to HTTP errors
+    - https://github.com/google/shaka-player/issues/319
+  - Demo controls redesigned with material design icons
+  - Emit an error if the wrong keys are retrieved
+    - https://github.com/google/shaka-player/issues/301
+  - Human-readable errors shown in demo app
+  - Cache-friendly bandwidth estimation
+    - https://github.com/google/shaka-player/issues/324
+  - Improved trick play and playbackRate support
+    - https://github.com/google/shaka-player/issues/344
+  - Allow apps to reset ABR manager estimates
+    - https://github.com/google/shaka-player/issues/355
+  - Support non-zero start times for VOD
+    - https://github.com/google/shaka-player/issues/341
+    - https://github.com/google/shaka-player/issues/348
+    - https://github.com/google/shaka-player/issues/357
+
+
+Bugfixes:
+  - Fix playback of DASH with unaligned Representations
+  - Fixed race conditions on seek
+    - https://github.com/google/shaka-player/issues/334
+  - Improved drift handling
+    - https://github.com/google/shaka-player/issues/330
+  - Fixed stack overflow in StringUtils
+    - https://github.com/google/shaka-player/issues/335
+  - Improved live support
+    - https://github.com/google/shaka-player/issues/331
+    - https://github.com/google/shaka-player/issues/339
+    - https://github.com/google/shaka-player/issues/340
+    - https://github.com/google/shaka-player/issues/351
+  - Fixed player.addTextTrack
+  - Handle CDMs which don't support the same types MSE does
+    - https://github.com/google/shaka-player/issues/342
+  - Fix audio-only encrypted playback
+    - https://github.com/google/shaka-player/issues/360
+  - Fix renaming of event properties
+    - https://github.com/google/shaka-player/issues/361
+  - Warn about missing clock sync elements in live manfiests
+    - https://github.com/google/shaka-player/issues/290
+  - Add option for default clock sync URI
+    - https://github.com/google/shaka-player/issues/290
+  - Fix crash in TextEngine when subs are turned off
+
+
+Docs:
+  - Shaka v2 upgrade guide
+    - http://shaka-player-demo.appspot.com/docs/api/tutorial-upgrade.html
+  - Added enum values (not just names) to generated docs
+    - https://github.com/google/shaka-player/issues/337
+
+
+Broken Compatibility compared to v2.0.0-beta:
+  - None!
+
+
 ## 1.6.5 (2016-04-08)
 
 Bugfixes:
