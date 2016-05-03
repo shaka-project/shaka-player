@@ -27,7 +27,10 @@ shaka.test.Dash.makeDashParser = function() {
   var parser = new shaka.dash.DashParser();
   parser.configure({
     retryParameters: retry,
-    dash: { customScheme: function(node) { return null; } }
+    dash: {
+      customScheme: function(node) { return null; },
+      clockSyncUri: ''
+    }
   });
   return parser;
 };

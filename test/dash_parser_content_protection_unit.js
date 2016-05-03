@@ -37,7 +37,7 @@ describe('DashParser.ContentProtection', function() {
     var callback = opt_callback || function(node) { return null; };
     dashParser.configure({
       retryParameters: retry,
-      dash: { customScheme: callback }
+      dash: { clockSyncUri: '', customScheme: callback }
     });
     dashParser.start('http://example.com', netEngine, filterPeriod, fail)
         .then(function(actual) { expect(actual).toEqual(expected); })

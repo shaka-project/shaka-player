@@ -113,6 +113,8 @@ shakaDemo.load = function() {
 
   var config = /** @type {shakaExtern.PlayerConfiguration} */(
       { abr: {}, drm: {}, manifest: { dash: {} } });
+  config.manifest.dash.clockSyncUri =
+      '//shaka-player-demo.appspot.com/time.txt';
 
   if (!asset) {
     // Use the custom fields.

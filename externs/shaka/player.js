@@ -283,13 +283,18 @@ shakaExtern.DrmConfiguration;
 
 /**
  * @typedef {{
- *   customScheme: shakaExtern.DashContentProtectionCallback
+ *   customScheme: shakaExtern.DashContentProtectionCallback,
+ *   clockSyncUri: string
  * }}
  *
  * @property {shakaExtern.DashContentProtectionCallback} customScheme
  *   If given, invoked by a DASH manifest parser to interpret custom or
  *   non-standard DRM schemes found in the manifest.  The argument is a
  *   ContentProtection node.  Return null if not recognized.
+ * @property {string} clockSyncUri
+ *   A default clock sync URI to be used with live streams which do not
+ *   contain any clock sync information.  The "Date" header from this URI
+ *   will be used to determine the current time.
  *
  * @exportDoc
  */

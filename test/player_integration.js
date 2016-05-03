@@ -183,6 +183,8 @@ describe('Player', function() {
 
         var config = { abr: {}, drm: {}, manifest: { dash: {} } };
         config.abr.enabled = false;
+        config.manifest.dash.clockSyncUri =
+            '//shaka-player-demo.appspot.com/time.txt';
         if (asset.licenseServers)
           config.drm.servers = asset.licenseServers;
         if (asset.drmCallback)

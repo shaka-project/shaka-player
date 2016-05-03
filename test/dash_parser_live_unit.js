@@ -34,7 +34,7 @@ describe('DashParser.Live', function() {
     parser = new shaka.dash.DashParser();
     parser.configure({
       retryParameters: retry,
-      dash: { customScheme: function(node) { return null; } }
+      dash: { clockSyncUri: '', customScheme: function(node) { return null; } }
     });
   });
 
