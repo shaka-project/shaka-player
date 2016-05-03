@@ -124,6 +124,33 @@ describe('Player', function() {
     });
   });
 
+  describe('setTextTrackVisibility', function() {
+    // Using mode='disabled' on TextTrack causes cues to go null, which leads
+    // to a crash in TextEngine.  This validates that we do not trigger this
+    // behavior when changing visibility of text.
+    it('does not cause cues to be null', function(done) {
+      var asset =
+          '//storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd';
+      var textTrack = video.textTracks[0];
+
+      player.load(asset).then(function() {
+        video.play();
+        return waitForEvent(video, 'timeupdate', 10);
+      }).then(function() {
+        // This should not be null initially.
+        expect(textTrack.cues).not.toBe(null);
+
+        player.setTextTrackVisibility(true);
+        // This should definitely not be null when visible.
+        expect(textTrack.cues).not.toBe(null);
+
+        player.setTextTrackVisibility(false);
+        // This should not transition to null when invisible.
+        expect(textTrack.cues).not.toBe(null);
+      }).catch(fail).then(done);
+    });
+  });
+
   describe('plays', function() {
     window.shakaAssets.testAssets.forEach(function(asset) {
       if (asset.disabled) return;
