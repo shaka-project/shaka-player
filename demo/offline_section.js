@@ -194,3 +194,22 @@ shakaDemo.refreshAssetList_ = function() {
 
   shakaDemo.setupOfflineAssets_();
 };
+
+
+/**
+ * @param {boolean} connected
+ * @private
+ */
+shakaDemo.onCastStatusChange_ = function(connected) {
+  // When we are casting, offline assets become unavailable.
+  shakaDemo.offlineOptGroup_.disabled = connected;
+
+  if (connected) {
+    var assetList = document.getElementById('assetList');
+    var option = assetList.options[assetList.selectedIndex];
+    if (option.storedContent) {
+      // This is an offline asset.  Select something else.
+      assetList.selectedIndex = 0;
+    }
+  }
+};

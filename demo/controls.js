@@ -23,7 +23,16 @@
  * @suppress {missingProvide}
  */
 function ShakaControls() {
-  /** @private {HTMLVideoElement} */
+  /** @private {shaka.cast.CastProxy} */
+  this.castProxy_ = null;
+
+  /** @private {boolean} */
+  this.castAllowed_ = true;
+
+  /** @private {?function(!shaka.util.Error)} */
+  this.onError_ = null;
+
+  /** @private {HTMLMediaElement} */
   this.video_ = null;
 
   /** @private {shaka.Player} */
@@ -88,15 +97,15 @@ function ShakaControls() {
 
 /**
  * Initializes the player controls.
- * @param {HTMLVideoElement} video
- * @param {shaka.Player} player
+ * @param {shaka.cast.CastProxy} castProxy
+ * @param {function(!shaka.util.Error)} onError
+ * @param {function(boolean)} notifyCastStatus
  */
-ShakaControls.prototype.init = function(video, player) {
-  // TODO: Make these resettable for switching to/from Chromecast
-  this.video_ = video;
-  this.player_ = player;
-  // TODO: Method to tear these down
-  // TODO: Event manager?
+ShakaControls.prototype.init = function(castProxy, onError, notifyCastStatus) {
+  this.castProxy_ = castProxy;
+  this.onError_ = onError;
+  this.notifyCastStatus_ = notifyCastStatus;
+  this.initMinimal(castProxy.getVideo(), castProxy.getPlayer());
 
   // IE11 doesn't treat the 'input' event correctly.
   // https://connect.microsoft.com/IE/Feedback/Details/856998
@@ -146,8 +155,6 @@ ShakaControls.prototype.init = function(video, player) {
   this.fullscreenButton_.addEventListener(
       'click', this.onFullscreenClick_.bind(this));
 
-  window.setInterval(this.updateTimeAndSeekRange_.bind(this), 125);
-
   this.currentTime_.addEventListener(
       'click', this.onCurrentTimeClick_.bind(this));
 
@@ -158,9 +165,6 @@ ShakaControls.prototype.init = function(video, player) {
 
   this.castButton_.addEventListener(
       'click', this.onCastClick_.bind(this));
-
-  this.player_.addEventListener(
-      'buffering', this.onBufferingStateChange_.bind(this));
 
   this.videoContainer_.addEventListener(
       'click', this.onPlayPauseClick_.bind(this));
@@ -180,6 +184,35 @@ ShakaControls.prototype.init = function(video, player) {
       'mousemove', this.onMouseMove_.bind(this));
   this.videoContainer_.addEventListener(
       'mouseout', this.onMouseOut_.bind(this));
+
+  this.castProxy_.addEventListener(
+      'caststatuschanged', this.onCastStatusChange_.bind(this));
+};
+
+
+/**
+ * Initializes minimal player controls.  Used on both sender (indirectly) and
+ * receiver (directly).
+ * @param {HTMLMediaElement} video
+ * @param {shaka.Player} player
+ */
+ShakaControls.prototype.initMinimal = function(video, player) {
+  this.video_ = video;
+  this.player_ = player;
+  this.player_.addEventListener(
+      'buffering', this.onBufferingStateChange_.bind(this));
+  window.setInterval(this.updateTimeAndSeekRange_.bind(this), 125);
+};
+
+
+/**
+ * This allows the application to inhibit casting.
+ *
+ * @param {boolean} allow
+ */
+ShakaControls.prototype.allowCast = function(allow) {
+  this.castAllowed_ = allow;
+  this.onCastStatusChange_(null);
 };
 
 
@@ -291,7 +324,7 @@ ShakaControls.prototype.onSeekInput_ = function() {
 /** @private */
 ShakaControls.prototype.onSeekInputTimeout_ = function() {
   this.seekTimeoutId_ = null;
-  this.video_.currentTime = this.seekBar_.value;
+  this.video_.currentTime = parseFloat(this.seekBar_.value);
 };
 
 
@@ -338,7 +371,7 @@ ShakaControls.prototype.onVolumeStateChange_ = function() {
 
 /** @private */
 ShakaControls.prototype.onVolumeInput_ = function() {
-  this.video_.volume = this.volumeBar_.value;
+  this.video_.volume = parseFloat(this.volumeBar_.value);
   this.video_.muted = false;
 };
 
@@ -411,7 +444,33 @@ ShakaControls.prototype.onFastForwardClick_ = function() {
 
 /** @private */
 ShakaControls.prototype.onCastClick_ = function() {
-  // TODO: cast, cast_connected
+  if (this.castProxy_.isCasting()) {
+    this.castProxy_.disconnect();
+  } else {
+    // TODO: disable other controls while connecting?
+    this.castProxy_.cast().then(function() {
+      // Success!
+    }, function(error) {
+      if (error.code != shaka.util.Error.Code.CAST_CANCELED_BY_USER) {
+        this.onError_(error);
+      }
+    }.bind(this));
+  }
+};
+
+
+/**
+ * @param {Event} event
+ * @private
+ */
+ShakaControls.prototype.onCastStatusChange_ = function(event) {
+  var canCast = this.castProxy_.canCast() && this.castAllowed_;
+  var isCasting = this.castProxy_.isCasting();
+
+  this.notifyCastStatus_(isCasting);
+  this.castButton_.style.display = canCast ? 'inherit' : 'none';
+  this.castButton_.textContent = isCasting ? 'cast_connected' : 'cast';
+  this.controls_.classList.toggle('casting', this.castProxy_.isCasting());
 };
 
 

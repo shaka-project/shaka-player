@@ -117,7 +117,7 @@ shakaDemo.preparePlayer_ = function(asset) {
   var player = shakaDemo.player_;
 
   var config = /** @type {shakaExtern.PlayerConfiguration} */(
-      { abr: {}, drm: {}, manifest: { dash: {} } });
+      { abr: {}, manifest: { dash: {} } });
   config.manifest.dash.clockSyncUri =
       '//shaka-player-demo.appspot.com/time.txt';
 
@@ -137,13 +137,14 @@ shakaDemo.preparePlayer_ = function(asset) {
     });
   }
 
+  player.resetConfiguration();
+
   // Add config from this asset.
-  if (asset.licenseServers)
-    config.drm.servers = asset.licenseServers;
-  if (asset.drmCallback)
-    config.manifest.dash.customScheme = asset.drmCallback;
-  if (asset.clearKeys)
-    config.drm.clearKeys = asset.clearKeys;
+  ShakaDemoUtils.setupAssetMetadata(asset, player);
+  shakaDemo.castProxy_.setAppData({
+    'asset': asset,
+    'isYtDrm': asset.drmCallback == shakaAssets.YouTubeCallback
+  });
 
   // Add configuration from the UI.
   config.preferredAudioLanguage =
@@ -153,23 +154,8 @@ shakaDemo.preparePlayer_ = function(asset) {
   config.abr.enabled =
       document.getElementById('enableAdaptation').checked;
 
-  player.resetConfiguration();
   player.configure(config);
 
-  // Configure network filters.
-  var networkingEngine = player.getNetworkingEngine();
-  networkingEngine.clearAllRequestFilters();
-  networkingEngine.clearAllResponseFilters();
-
-  if (asset.licenseRequestHeaders) {
-    var filter = shakaDemo.addLicenseRequestHeaders_.bind(
-        null, asset.licenseRequestHeaders);
-    networkingEngine.registerRequestFilter(filter);
-  }
-
-  if (asset.licenseProcessor) {
-    networkingEngine.registerResponseFilter(asset.licenseProcessor);
-  }
   return asset;
 };
 
@@ -184,6 +170,10 @@ shakaDemo.load = function() {
 
   // Load the manifest.
   player.load(asset.manifestUri).then(function() {
+    // Disallow casting of offline content.
+    var isOffline = asset.manifestUri.indexOf('offline:') == 0;
+    shakaDemo.controls_.allowCast(!isOffline);
+
     (asset.extraText || []).forEach(function(extraText) {
       player.addTextTrack(extraText.uri, extraText.language, extraText.kind,
                           extraText.mime, extraText.codecs);
@@ -196,21 +186,4 @@ shakaDemo.load = function() {
       shakaDemo.onError_(error);
     }
   });
-};
-
-
-/**
- * @param {!Object.<string, string>} headers
- * @param {shaka.net.NetworkingEngine.RequestType} requestType
- * @param {shakaExtern.Request} request
- * @private
- */
-shakaDemo.addLicenseRequestHeaders_ = function(headers, requestType, request) {
-  if (requestType != shaka.net.NetworkingEngine.RequestType.LICENSE) return;
-
-  // Add these to the existing headers.  Do not clobber them!
-  // For PlayReady, there will already be headers in the request.
-  for (var k in headers) {
-    request.headers[k] = headers[k];
-  }
 };

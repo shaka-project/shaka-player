@@ -22,7 +22,7 @@
  */
 
 
-/** @const */
+/** @type {function(boolean)} */
 var __onGCastApiAvailable;
 
 
@@ -38,39 +38,79 @@ cast.receiver = {};
 cast.receiver.system = {};
 
 
-cast.receiver.system.DisconnectReason = {
-  REQUESTED_BY_SENDER: 'requested by sender',
-  ERROR: 'error',
-  UNKNOWN: 'unknown'
-};
-
-
 
 /**
- * @param {string} namespace
- * @param {string} ipcChannel
- * @param {Array.<string>} senders
- * @param {string=} opt_messageType
  * @constructor
+ * @struct
  */
-cast.receiver.CastMessageBus = function(
-    namespace, ipcChannel, senders, opt_messageType) {};
+cast.receiver.system.SystemVolumeData = function() {};
+
+
+/** @type {number} */
+cast.receiver.system.SystemVolumeData.prototype.level;
+
+
+/** @type {boolean} */
+cast.receiver.system.SystemVolumeData.prototype.muted;
+
 
 
 /**
- * @param {*} message
+ * @constructor
+ * @struct
  */
+cast.receiver.CastMessageBus = function() {};
+
+
+/** @param {*} message */
 cast.receiver.CastMessageBus.prototype.broadcast = function(message) {};
 
 
+/**
+ * @param {string} senderId
+ * @return {!cast.receiver.CastChannel}
+ */
+cast.receiver.CastMessageBus.prototype.getCastChannel = function(senderId) {};
 
-/** @constructor */
+
+/** @type {Function} */
+cast.receiver.CastMessageBus.prototype.onMessage;
+
+
+
+/**
+ * @constructor
+ * @struct
+ */
+cast.receiver.CastMessageBus.Event = function() {};
+
+
+/** @type {?} */
+cast.receiver.CastMessageBus.Event.prototype.data;
+
+
+/** @type {string} */
+cast.receiver.CastMessageBus.Event.prototype.senderId;
+
+
+
+/**
+ * @constructor
+ * @struct
+ */
+cast.receiver.CastChannel = function() {};
+
+
+/** @param {*} message */
+cast.receiver.CastChannel.prototype.send = function(message) {};
+
+
+
+/**
+ * @constructor
+ * @struct
+ */
 cast.receiver.CastReceiverManager = function() {};
-
-
-
-/** @constructor */
-cast.receiver.CastReceiverManager.Config = function() {};
 
 
 /** @return {cast.receiver.CastReceiverManager} */
@@ -90,14 +130,48 @@ cast.receiver.CastReceiverManager.prototype.getCastMessageBus = function(
 cast.receiver.CastReceiverManager.prototype.getSenders = function() {};
 
 
-/**
- * @param {cast.receiver.CastReceiverManager.Config=} opt_config
- */
-cast.receiver.CastReceiverManager.prototype.start = function(opt_config) {};
+cast.receiver.CastReceiverManager.prototype.start = function() {};
+
+
+cast.receiver.CastReceiverManager.prototype.stop = function() {};
+
+
+/** @return {?cast.receiver.system.SystemVolumeData} */
+cast.receiver.CastReceiverManager.prototype.getSystemVolume = function() {};
+
+
+/** @param {number} level */
+cast.receiver.CastReceiverManager.prototype.setSystemVolumeLevel =
+    function(level) {};
+
+
+/** @param {number} muted */
+cast.receiver.CastReceiverManager.prototype.setSystemVolumeMuted =
+    function(muted) {};
+
+
+/** @return {boolean} */
+cast.receiver.CastReceiverManager.prototype.isSystemReady = function() {};
+
+
+/** @type {Function} */
+cast.receiver.CastReceiverManager.prototype.onSenderConnected;
+
+
+/** @type {Function} */
+cast.receiver.CastReceiverManager.prototype.onSenderDisconnected;
+
+
+/** @type {Function} */
+cast.receiver.CastReceiverManager.prototype.onSystemVolumeChanged;
 
 
 /** @const */
 chrome.cast = {};
+
+
+/** @type {boolean} */
+chrome.cast.isAvailable;
 
 
 /**
@@ -122,9 +196,10 @@ chrome.cast.requestSession = function(
  * @param {chrome.cast.SessionRequest} sessionRequest
  * @param {Function} sessionListener
  * @param {Function} receiverListener
- * @param {Object=} opt_autoJoinPolicy
- * @param {Object=} opt_defaultActionPolicy
+ * @param {string=} opt_autoJoinPolicy
+ * @param {string=} opt_defaultActionPolicy
  * @constructor
+ * @struct
  */
 chrome.cast.ApiConfig = function(
     sessionRequest,
@@ -134,45 +209,43 @@ chrome.cast.ApiConfig = function(
     opt_defaultActionPolicy) {};
 
 
-/** @typedef {string} */
-chrome.cast.Capability;
+
+/**
+ * @param {string} code
+ * @param {string=} opt_description
+ * @param {Object=} opt_details
+ * @constructor
+ * @struct
+ */
+chrome.cast.Error = function(code, opt_description, opt_details) {};
+
+
+/** @type {string} */
+chrome.cast.Error.prototype.code;
+
+
+/** @type {?string} */
+chrome.cast.Error.prototype.description;
+
+
+/** @type {Object} */
+chrome.cast.Error.prototype.details;
 
 
 
 /**
- * @param {string} url
  * @constructor
+ * @struct
  */
-chrome.cast.Image = function(url) {};
-
-
-
-/**
- * @param {string} label
- * @param {string} friendlyName
- * @param {Array.<chrome.cast.Capability>=} opt_capabilities
- * @param {chrome.cast.Volume=} opt_volume
- * @constructor
- */
-chrome.cast.Receiver = function(
-    label, friendlyName, opt_capabilities, opt_volume) {};
-
-
-
-/**
- * @param {string} sessionId
- * @param {string} appId
- * @param {string} displayName
- * @param {chrome.cast.Image} appImages
- * @param {chrome.cast.Receiver} receiver
- * @constructor
- */
-chrome.cast.Session = function(
-    sessionId, appId, displayName, appImages, receiver) {};
+chrome.cast.Session = function() {};
 
 
 /** @type {string} */
 chrome.cast.Session.prototype.sessionId;
+
+
+/** @type {string} */
+chrome.cast.Session.prototype.status;
 
 
 /**
@@ -210,17 +283,7 @@ chrome.cast.Session.prototype.stop = function(
 
 /**
  * @param {string} appId
- * @param {Array.<chrome.cast.Capability>=} opt_capabilities
- * @param {number=} opt_timeout
  * @constructor
+ * @struct
  */
-chrome.cast.SessionRequest = function(appId, opt_capabilities, opt_timeout) {};
-
-
-
-/**
- * @param {number=} opt_level
- * @param {boolean=} opt_muted
- * @constructor
- */
-chrome.cast.Volume = function(opt_level, opt_muted) {};
+chrome.cast.SessionRequest = function(appId) {};

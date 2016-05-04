@@ -144,8 +144,8 @@ shaka.test.DashVodStreamGenerator = function(
 /** @override */
 shaka.test.DashVodStreamGenerator.prototype.init = function() {
   var async = [
-    shaka.test.fetch_(this.initSegmentUri_),
-    shaka.test.fetch_(this.segmentTemplateUri_)
+    shaka.test.Util.fetch(this.initSegmentUri_),
+    shaka.test.Util.fetch(this.segmentTemplateUri_)
   ];
 
   return Promise.all(async).then(
@@ -290,8 +290,8 @@ shaka.test.DashLiveStreamGenerator = function(
 /** @override */
 shaka.test.DashLiveStreamGenerator.prototype.init = function() {
   var async = [
-    shaka.test.fetch_(this.initSegmentUri_),
-    shaka.test.fetch_(this.segmentTemplateUri_)
+    shaka.test.Util.fetch(this.initSegmentUri_),
+    shaka.test.Util.fetch(this.segmentTemplateUri_)
   ];
 
   return Promise.all(async).then(
@@ -365,38 +365,6 @@ shaka.test.DashLiveStreamGenerator.prototype.getSegment = function(
   return shaka.test.StreamGenerator.setBaseMediaDecodeTime_(
       /** @type {!ArrayBuffer} */ (this.segmentTemplate_), this.tfdtOffset_,
       mediaTimestamp, this.timescale_);
-};
-
-
-/**
- * Fetches the resource at the given URI.
- *
- * @param {string} uri
- * @return {!Promise.<!ArrayBuffer>}
- * @private
- */
-shaka.test.fetch_ = function(uri) {
-  return new Promise(function(resolve, reject) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', uri, true /* asynchronous */);
-    xhr.responseType = 'arraybuffer';
-
-    xhr.onload = function(event) {
-      if (xhr.status >= 200 &&
-          xhr.status <= 299 &&
-          !!xhr.response) {
-        resolve(/** @type {!ArrayBuffer} */(xhr.response));
-      } else {
-        reject(xhr.status);
-      }
-    };
-
-    xhr.onerror = function(event) {
-      reject('error');
-    };
-
-    xhr.send(null /* body */);
-  });
 };
 
 

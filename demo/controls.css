@@ -76,6 +76,7 @@
 #videoContainer:-ms-fullscreen { width: 100%; height: 100%; }
 
 #controls button {
+  color: white;
   height: 32px;
   width: 32px;
   padding: 0;
@@ -139,6 +140,17 @@
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+}
+
+
+/* Always show controls while casting */
+#controls.casting {
+  opacity: 1;
+}
+
+/* Hide fullscreen button while casting */
+#controls.casting #fullscreenButton {
+  display: none;
 }
 
 

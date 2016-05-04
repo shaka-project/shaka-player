@@ -224,6 +224,37 @@ shaka.test.Util.compareReferences = function(first, second) {
 
 
 /**
+ * Fetches the resource at the given URI.
+ *
+ * @param {string} uri
+ * @return {!Promise.<!ArrayBuffer>}
+ */
+shaka.test.Util.fetch = function(uri) {
+  return new Promise(function(resolve, reject) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', uri, true /* asynchronous */);
+    xhr.responseType = 'arraybuffer';
+
+    xhr.onload = function(event) {
+      if (xhr.status >= 200 &&
+          xhr.status <= 299 &&
+          !!xhr.response) {
+        resolve(/** @type {!ArrayBuffer} */(xhr.response));
+      } else {
+        reject(xhr.status);
+      }
+    };
+
+    xhr.onerror = function(event) {
+      reject('error');
+    };
+
+    xhr.send(null /* body */);
+  });
+};
+
+
+/**
  * Replace goog.asserts and console.assert with a version which hooks into
  * jasmine.  This converts all failed assertions into failed tests.
  */

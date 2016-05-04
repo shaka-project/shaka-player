@@ -20,7 +20,11 @@
 var shakaDemo = shakaDemo || {};
 
 
-/** @private {HTMLVideoElement} */
+/** @private {shaka.cast.CastProxy} */
+shakaDemo.castProxy_ = null;
+
+
+/** @private {HTMLMediaElement} */
 shakaDemo.video_ = null;
 
 
@@ -34,6 +38,14 @@ shakaDemo.support_;
 
 /** @private {ShakaControls} */
 shakaDemo.controls_ = null;
+
+
+/**
+ * The registered ID of the v2 Chromecast receiver demo.
+ * @const {string}
+ * @private
+ */
+shakaDemo.CC_APP_ID_ = '4E839F3A';
 
 
 /**
@@ -112,9 +124,14 @@ shakaDemo.init = function() {
     shaka.Player.probeSupport().then(function(support) {
       shakaDemo.support_ = support;
 
-      shakaDemo.video_ =
+      var localVideo =
           /** @type {!HTMLVideoElement} */(document.getElementById('video'));
-      shakaDemo.player_ = new shaka.Player(shakaDemo.video_);
+      var localPlayer = new shaka.Player(localVideo);
+      shakaDemo.castProxy_ = new shaka.cast.CastProxy(
+          localVideo, localPlayer, shakaDemo.CC_APP_ID_);
+
+      shakaDemo.video_ = shakaDemo.castProxy_.getVideo();
+      shakaDemo.player_ = shakaDemo.castProxy_.getPlayer();
       shakaDemo.player_.addEventListener('error', shakaDemo.onErrorEvent_);
 
       shakaDemo.setupAssets_();
@@ -123,7 +140,8 @@ shakaDemo.init = function() {
       shakaDemo.setupInfo_();
 
       shakaDemo.controls_ = new ShakaControls();
-      shakaDemo.controls_.init(shakaDemo.video_, shakaDemo.player_);
+      shakaDemo.controls_.init(shakaDemo.castProxy_, shakaDemo.onError_,
+                               shakaDemo.onCastStatusChange_);
 
       // If a custom asset was given in the URL, select it now.
       if ('asset' in params) {

@@ -1,0 +1,146 @@
+/**
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* Experimentation has revealed that unless html, body, and videoContainer are
+ * width and height 100%, video can force all its parents to grow larger than
+ * window.innerHeight, causing things to be cut off for some content.
+ */
+html {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: Roboto, sans-serif;
+  font-weight: 300;
+  background-color: black;
+  color: white;
+}
+
+#videoContainer {
+  width: 100%;
+  height: 100%;
+}
+
+#video {
+  width: 100%;
+  height: 100%;
+  margin: auto;
+}
+
+#controlsContainer {
+  padding: 0 3%;
+  height: auto;
+}
+
+#controls {
+  height: 100%;
+  max-width: initial;
+}
+
+#controls * {
+  font-size: 35px;
+}
+
+#controls button {
+  width: 50px;
+  height: 50px;
+}
+
+#seekBar {
+  height: 12px;
+  border-radius: 12px;
+}
+
+#seekBar::-webkit-slider-thumb {
+  width: 30px;
+  height: 30px;
+  border-radius: 30px;
+  opacity: 0.5;
+}
+
+#bufferingSpinner {
+  transform: scale(2.0);
+}
+
+.overlay-parent {
+  /* Makes this a positioned ancestor of .overlay */
+  position: relative;
+}
+
+.overlay {
+  /* Allows this to be positioned relative to a containing .overlay-parent */
+  position: absolute;
+}
+
+#idle {
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+
+  padding-top: 60px;
+  padding-left: 0;
+  background-color: black;
+
+  /* To make it easier to view in a browser in some non-Chromecast size: */
+  background-repeat: no-repeat;
+
+  /* Chromecast receiver guidelines say to change the screen every 30-60s */
+  animation: bg-change 90s linear infinite;
+}
+
+#idle h1 {
+  margin-left: 100px;
+}
+
+#idle h2 {
+  font-weight: normal;
+  margin-left: 100px;
+  width: 550px;
+}
+
+/* Preload the background images for idle mode */
+body:after {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  z-index: -1;
+  content: url(idle1.jpg) url(idle2.jpg) url(idle3.jpg);
+}
+
+@keyframes bg-change {
+  0%   { background-image: url('idle1.jpg'); padding-left: 0; }
+  32%  { background-image: url('idle1.jpg'); padding-left: 0; }
+
+  34%  { background-image: url('idle2.jpg'); padding-left: 0; }
+  49%  { background-image: url('idle2.jpg'); padding-left: 0; }
+  50%  { background-image: url('idle2.jpg'); padding-left: 400px; }
+  65%  { background-image: url('idle2.jpg'); padding-left: 400px; }
+
+  67%  { background-image: url('idle3.jpg'); padding-left: 400px; }
+  87%  { background-image: url('idle3.jpg'); padding-left: 400px; }
+  88%  { background-image: url('idle3.jpg'); padding-left: 0; }
+  98%  { background-image: url('idle3.jpg'); padding-left: 0; }
+
+  100% { background-image: url('idle1.jpg'); padding-left: 0; }
+}

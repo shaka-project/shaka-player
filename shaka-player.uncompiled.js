@@ -17,6 +17,8 @@
 
 // Require all exported classes.
 goog.require('shaka.Player');
+goog.require('shaka.cast.CastProxy');
+goog.require('shaka.cast.CastReceiver');
 goog.require('shaka.media.ManifestParser');
 goog.require('shaka.media.PresentationTimeline');
 goog.require('shaka.media.TextEngine');
