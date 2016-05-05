@@ -382,7 +382,8 @@ describe('Player', function() {
           language: 'en',
           kind: null,
           width: null,
-          height: null
+          height: null,
+          hasOutputRestrictions: false
         },
         {
           id: 2,
@@ -392,7 +393,8 @@ describe('Player', function() {
           language: 'en',
           kind: null,
           width: null,
-          height: null
+          height: null,
+          hasOutputRestrictions: false
         },
         {
           id: 4,
@@ -402,7 +404,8 @@ describe('Player', function() {
           language: 'und',
           kind: null,
           width: 100,
-          height: 200
+          height: 200,
+          hasOutputRestrictions: false
         },
         {
           id: 5,
@@ -412,7 +415,8 @@ describe('Player', function() {
           language: 'und',
           kind: null,
           width: 200,
-          height: 400
+          height: 400,
+          hasOutputRestrictions: false
         },
         {
           id: 6,
@@ -422,7 +426,8 @@ describe('Player', function() {
           language: 'es',
           kind: 'caption',
           width: null,
-          height: null
+          height: null,
+          hasOutputRestrictions: false
         }
       ];
     });
@@ -870,6 +875,22 @@ describe('Player', function() {
       var tracks = player.getTracks();
       expect(tracks.length).toBe(8);
       expectDoesNotInclude(tracks, 4);
+    });
+
+    it('sets hasOutputRestrictions', function() {
+      // Restricted tracks may still be playable.
+      var activeVideo = getActiveTrack('video');
+      expect(activeVideo.id).toBe(4);
+
+      onKeyStatus({'abc': 'output-restricted'});
+      expect(manifest.periods[0].streamSets[1].streams[0].id).toBe(4);
+      expect(manifest.periods[0].streamSets[1].streams[0].allowedByKeySystem)
+          .toBe(true);
+      expect(manifest.periods[0].streamSets[1].streams[0].hasOutputRestrictions)
+          .toBe(true);
+
+      activeVideo = getActiveTrack('video');
+      expect(activeVideo.id).toBe(4);
     });
 
     it('removes if key system does not support codec', function() {

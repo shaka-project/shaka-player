@@ -292,7 +292,8 @@ shaka.test.ManifestGenerator.prototype.addStream = function(id) {
     encrypted: false,
     keyId: null,
     allowedByApplication: true,
-    allowedByKeySystem: true
+    allowedByKeySystem: true,
+    hasOutputRestrictions: false
   };
   stream.createSegmentIndex.and.callFake(
       function() { return Promise.resolve(); });

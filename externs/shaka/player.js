@@ -100,7 +100,9 @@ shakaExtern.Stats;
  *   language: string,
  *   kind: ?string,
  *   width: ?number,
- *   height: ?number
+ *   height: ?number,
+ *
+ *   hasOutputRestrictions: boolean
  * }}
  *
  * @description
@@ -129,6 +131,12 @@ shakaExtern.Stats;
  *   (only for video tracks) The width of the track in pixels.
  * @property {?number} height
  *   (only for video tracks) The height of the track in pixels.
+ * @property {boolean} hasOutputRestrictions
+ *   True if this media track is encrypted and has output restrictions (e.g.,
+ *   resolution constraints) set by the key system. If true, the key system may
+ *   prohibit playback of this track. Applications must know beforehand if a
+ *   particular track with output restrictions is actually playable (based on
+ *   their own business rules).
  * @exportDoc
  */
 shakaExtern.Track;
