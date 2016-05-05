@@ -1478,6 +1478,140 @@ describe('StreamingEngine', function() {
     });
   });
 
+  describe('QuotaExceededError', function() {
+    it('does not fail immediately', function(done) {
+      setupVod();
+
+      manifest.minBufferTime = 1;
+
+      // Create StreamingEngine.
+      var config = {
+        rebufferingGoal: 1,
+        bufferingGoal: 1,
+        retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+        bufferBehind: 10
+      };
+
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      createStreamingEngine(config);
+
+      playhead.getTime.and.returnValue(0);
+
+      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+
+      var originalAppendBuffer =
+          shaka.test.FakeMediaSourceEngine.prototype.appendBuffer;
+      var appendBufferSpy = jasmine.createSpy('appendBuffer');
+      mediaSourceEngine.appendBuffer = appendBufferSpy;
+
+      // Throw two QuotaExceededErrors at different times.
+      var numErrorsThrown = 0;
+      appendBufferSpy.and.callFake(
+          function(type, data, startTime, endTime) {
+            var throwError = (numErrorsThrown == 0 && startTime == 10) ||
+                             (numErrorsThrown == 1 && startTime == 20);
+            if (throwError) {
+              numErrorsThrown++;
+              throw new shaka.util.Error(
+                  shaka.util.Error.Category.MEDIA,
+                  shaka.util.Error.Code.QUOTA_EXCEEDED_ERROR,
+                  type);
+            } else {
+              var p = originalAppendBuffer.call(
+                  mediaSourceEngine, type, data, startTime, endTime);
+              return p;
+            }
+          });
+
+      // Here we go!
+      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      streamingEngine.init();
+
+      var loop = runTest();
+      loop.then(function() {
+        expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+
+        // Verify buffers.
+        expect(mediaSourceEngine.initSegments).toEqual({
+          audio: [false, true],
+          video: [false, true],
+          text: []
+        });
+        expect(mediaSourceEngine.segments).toEqual({
+          audio: [false, false, true, true],
+          video: [false, false, true, true],
+          text: [false, false, true, true]
+        });
+
+        return streamingEngine.destroy();
+      }).catch(fail).then(done);
+    });
+
+    it('fails after multiple QuotaExceededError', function(done) {
+      setupVod();
+
+      manifest.minBufferTime = 1;
+
+      // Create StreamingEngine.
+      var config = {
+        rebufferingGoal: 1,
+        bufferingGoal: 1,
+        retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+        bufferBehind: 10
+      };
+
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      createStreamingEngine(config);
+
+      playhead.getTime.and.returnValue(0);
+
+      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+
+      var originalAppendBuffer =
+          shaka.test.FakeMediaSourceEngine.prototype.appendBuffer;
+      var appendBufferSpy = jasmine.createSpy('appendBuffer');
+      mediaSourceEngine.appendBuffer = appendBufferSpy;
+
+      // Throw QuotaExceededError multiple times after at least one segment of
+      // each type has been appended.
+      appendBufferSpy.and.callFake(
+          function(type, data, startTime, endTime) {
+            if (startTime >= 10) {
+              throw new shaka.util.Error(
+                  shaka.util.Error.Category.MEDIA,
+                  shaka.util.Error.Code.QUOTA_EXCEEDED_ERROR,
+                  type);
+            } else {
+              var p = originalAppendBuffer.call(
+                  mediaSourceEngine, type, data, startTime, endTime);
+              return p;
+            }
+          });
+
+      onError.and.callFake(function(error) {
+        expect(error.code).toBe(shaka.util.Error.Code.QUOTA_EXCEEDED_ERROR);
+        expect(error.data[0] == 'audio' ||
+               error.data[0] == 'video' ||
+               error.data[0] == 'text').toBe(true);
+        loop.stop();
+      });
+
+      // Here we go!
+      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      streamingEngine.init();
+
+      // Stop the playhead after 10 seconds since will not append any
+      // segments after this time.
+      var stopPlayhead = function() { playing = playheadTime < 10; };
+
+      var loop = runTest(stopPlayhead);
+      loop.then(function() {
+        expect(mediaSourceEngine.endOfStream).not.toHaveBeenCalled();
+        return streamingEngine.destroy();
+      }).catch(fail).then(done);
+    });
+  });
+
   describe('VOD drift', function() {
     beforeEach(function() {
       setupVod();

@@ -180,7 +180,7 @@ describe('MediaSourceEngine', function() {
       audioSourceBuffer.updateend();
     });
 
-    it('rejects the promise if this operation throws', function(done) {
+    it('rejects promise when operation throws', function(done) {
       audioSourceBuffer.appendBuffer.and.throwError('fail!');
       mockVideo.error = { code: 5 };
       mediaSourceEngine.appendBuffer('audio', 1, null, null).then(function() {
@@ -191,6 +191,23 @@ describe('MediaSourceEngine', function() {
             shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_THREW);
         expect(error.data).toEqual(
             [jasmine.objectContaining({message: 'fail!'})]);
+        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
+        done();
+      });
+    });
+
+    it('rejects promise when op. throws QuotaExceededError', function(done) {
+      var fakeDOMException = { name: 'QuotaExceededError' };
+      audioSourceBuffer.appendBuffer.and.callFake(function() {
+        throw fakeDOMException;
+      });
+      mockVideo.error = { code: 5 };
+      mediaSourceEngine.appendBuffer('audio', 1, null, null).then(function() {
+        fail('not reached');
+        done();
+      }, function(error) {
+        expect(error.code).toBe(shaka.util.Error.Code.QUOTA_EXCEEDED_ERROR);
+        expect(error.data).toEqual(['audio']);
         expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
         done();
       });
@@ -315,7 +332,7 @@ describe('MediaSourceEngine', function() {
       audioSourceBuffer.updateend();
     });
 
-    it('rejects the promise if this operation throws', function(done) {
+    it('rejects promise when operation throws', function(done) {
       audioSourceBuffer.remove.and.throwError('fail!');
       mockVideo.error = { code: 5 };
       mediaSourceEngine.remove('audio', 1, 5).then(function() {

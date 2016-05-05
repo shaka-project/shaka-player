@@ -24,6 +24,7 @@ requirement: {
       'com.google.javascript.jscomp.ConformanceRules$BanThrowOfNonErrorTypes'
   error_message: 'Throwing non-Error types or Error itself is not allowed: '
                  'throw shaka.util.Error instead.'
+  whitelist_regexp: 'test/*'
 }
 
 requirement: {
