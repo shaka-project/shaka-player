@@ -116,9 +116,22 @@ appUtils.getVideoResDebug = function(video) {
  * @return {Array.<shaka.player.DrmInfo.Config>}
  */
 appUtils.interpretContentProtection = function(
-    player, wvLicenseServerUrl, schemeIdUri, contentProtection) {
+    player, wvLicenseServerUrl, sessionId, schemeIdUri, contentProtection) {
   var Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
   var wvLicenseServerUrlOverride = wvLicenseServerUrl || null;
+
+  if (wvLicenseServerUrl.indexOf('localhost') !== -1) {
+    if (schemeIdUri.toLowerCase() == 'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed') {
+      return [{
+        'keySystem': 'com.widevine.alpha',
+        'licenseServerUrl': wvLicenseServerUrl,
+        licensePreProcessor: function(licenseRequest) {
+          licenseRequest.headers['Authorization'] =
+            'Bearer ' + sessionId;
+        }
+      }];
+    }
+  }
 
   if (schemeIdUri == 'com.youtube.clearkey') {
     // This is the scheme used by YouTube's MediaSource demo.

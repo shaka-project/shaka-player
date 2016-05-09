@@ -130,6 +130,8 @@ app.init = function() {
 
   shaka.polyfill.installAll();
 
+  app.sessionId_ = null;
+
   app.video_ =
       /** @type {!HTMLVideoElement} */ (document.getElementById('video'));
   app.videoResDebug_ = document.getElementById('videoResDebug');
@@ -183,6 +185,10 @@ app.init = function() {
   }
   if ('v' in params && shaka.log) {
     shaka.log.setLevel(shaka.log.Level.V1);
+  }
+
+  if ('sessionId' in params) {
+    app.sessionId_ = params['sessionId'];
   }
 
   // Retrieve and verify list of offline streams
@@ -554,7 +560,7 @@ app.storeStream = function() {
   offlineSource.store(
       mediaUrl,
       preferredLanguage,
-      appUtils.interpretContentProtection.bind(null, app.player_, wvServerUrl),
+      appUtils.interpretContentProtection.bind(null, app.player_, wvServerUrl, app.sessionId_),
       app.chooseOfflineTracks_.bind(null, offlineSource)
   ).then(
       function(groupId) {
@@ -728,7 +734,7 @@ app.loadDashStream = function() {
         new shaka.player.DashVideoSource(
             mediaUrl,
             appUtils.interpretContentProtection.bind(
-                null, app.player_, wvServerUrl),
+                null, app.player_, wvServerUrl, app.sessionId_),
             estimator,
             abrManager));
   }
