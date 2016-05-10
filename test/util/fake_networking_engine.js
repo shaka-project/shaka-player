@@ -52,6 +52,12 @@ shaka.test.FakeNetworkingEngine = function(
 };
 
 
+/** @override */
+shaka.test.FakeNetworkingEngine.prototype.destroy = function() {
+  return Promise.resolve();
+};
+
+
 /**
  * Expects that a request for the given segment has occurred.
  *

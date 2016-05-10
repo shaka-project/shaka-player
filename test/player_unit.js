@@ -36,38 +36,131 @@ describe('Player', function() {
     logErrorSpy.calls.reset();
     logErrorSpy.and.callFake(fail);
 
+    function dependencyInjector(player) {
+      player.createDrmEngine = function() {
+        return new shaka.test.FakeDrmEngine();
+      };
+      player.createNetworkingEngine = function() {
+        return new shaka.test.FakeNetworkingEngine({}, new ArrayBuffer(0));
+      };
+      player.createPlayhead = function() { return {destroy: function() {}}; };
+      player.createMediaSource = function() { return Promise.resolve(); };
+      player.createMediaSourceEngine = function() {
+        return {destroy: function() {}};
+      };
+      player.createStreamingEngine = function() {
+        // This captures the variable |manifest| so this should only be used
+        // after the manifest has been set.
+        var period = manifest.periods[0];
+        streamingEngine = new shaka.test.FakeStreamingEngine(period);
+        return streamingEngine;
+      };
+    }
+
     video = createMockVideo();
-    var netEngine = new shaka.test.FakeNetworkingEngine({}, new ArrayBuffer(0));
-    player = new shaka.Player(video);
-    player.setNetworkingEngine(netEngine);
+    player = new shaka.Player(video, dependencyInjector);
+
     abrManager = new shaka.test.FakeAbrManager();
     player.configure(
         /** @type {shakaExtern.PlayerConfiguration} */ (
             {abr: {manager: abrManager}}));
-
-    player.loadInternal = function() {
-      return Promise.resolve({
-        drmEngine: new shaka.test.FakeDrmEngine(),
-        manifest: manifest,
-        manifestParser: null
-      });
-    };
-    player.createPlayhead = function() { return {destroy: function() {}}; };
-    player.createMediaSource = function() { return Promise.resolve(); };
-    player.createMediaSourceEngine = function() {
-      return {destroy: function() {}};
-    };
-    player.createStreamingEngine = function() {
-      // This captures the variable |manifest| so this should only be used after
-      // the manifest has been set.
-      var period = manifest.periods[0];
-      streamingEngine = new shaka.test.FakeStreamingEngine(period);
-      return streamingEngine;
-    };
   });
 
   afterAll(function() {
     shaka.log.error = originalLogError;
+  });
+
+  describe('load/unload', function() {
+    beforeEach(function() {
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addStreamSet('audio')
+          .addStreamSet('video')
+        .build();
+    });
+
+    it('handles repeated load/unload', function(done) {
+      var factory = shaka.test.FakeManifestParser.createFactory(manifest);
+      player.load('', 0, factory).then(function() {
+        shaka.log.debug('finished load 1');
+        return player.unload();
+      }).then(function() {
+        shaka.log.debug('finished unload 1');
+        return player.load('', 0, factory);
+      }).then(function() {
+        shaka.log.debug('finished load 2');
+        return player.unload();
+      }).catch(fail).then(done);
+    });
+
+    it('handles repeated loads', function(done) {
+      var factory = shaka.test.FakeManifestParser.createFactory(manifest);
+      player.load('', 0, factory).then(function() {
+        return player.load('', 0, factory);
+      }).then(function() {
+        return player.load('', 0, factory);
+      }).catch(fail).then(done);
+    });
+
+    it('handles load interrupting load', function(done) {
+      var factory = shaka.test.FakeManifestParser.createFactory(manifest);
+
+      var checkError = jasmine.createSpy('checkError');
+      checkError.and.callFake(function(error) {
+        expect(error.code).toBe(shaka.util.Error.Code.LOAD_INTERRUPTED);
+      });
+
+      player.load('', 0, factory).then(fail).catch(checkError);
+      player.load('', 0, factory).then(fail).catch(checkError);
+
+      player.load('', 0, factory).catch(fail).then(function() {
+        // Delay so the interrupted calls have time to reject themselves.
+        return shaka.test.Util.delay(0.1);
+      }).then(function() {
+        expect(checkError.calls.count()).toBe(2);
+        done();
+      });
+    });
+
+    it('handles unload interrupting load', function(done) {
+      var factory = shaka.test.FakeManifestParser.createFactory(manifest);
+
+      var checkError = jasmine.createSpy('checkError');
+      checkError.and.callFake(function(error) {
+        expect(error.code).toBe(shaka.util.Error.Code.LOAD_INTERRUPTED);
+      });
+
+      player.load('', 0, factory).then(fail).catch(checkError);
+      player.unload();
+      player.load('', 0, factory).then(fail).catch(checkError);
+      player.unload();
+
+      player.load('', 0, factory).catch(fail).then(function() {
+        // Delay so the interrupted calls have time to reject themselves.
+        return shaka.test.Util.delay(0.1);
+      }).then(function() {
+        expect(checkError.calls.count()).toBe(2);
+        done();
+      });
+    });
+
+    it('handles destroy interrupting load', function(done) {
+      var factory = shaka.test.FakeManifestParser.createFactory(manifest);
+
+      var checkError = jasmine.createSpy('checkError');
+      checkError.and.callFake(function(error) {
+        expect(error.code).toBe(shaka.util.Error.Code.LOAD_INTERRUPTED);
+      });
+
+      player.load('', 0, factory).then(fail).catch(checkError);
+      player.destroy().catch(fail).then(function() {
+        // Delay so the interrupted calls have time to reject themselves.
+        return shaka.test.Util.delay(0.1);
+      }).then(function() {
+        expect(checkError.calls.count()).toBe(1);
+        done();
+      });
+    });
   });
 
   describe('getConfiguration', function() {

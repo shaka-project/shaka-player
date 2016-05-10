@@ -174,7 +174,11 @@ shakaDemo.load = function() {
     });
   }, function(reason) {
     var error = /** @type {!shaka.util.Error} */(reason);
-    shakaDemo.onError_(error);
+    if (error.code == shaka.util.Error.Code.LOAD_INTERRUPTED) {
+      shaka.log.debug('load() interrupted');
+    } else {
+      shakaDemo.onError_(error);
+    }
   });
 };
 
