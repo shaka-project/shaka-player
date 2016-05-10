@@ -8,7 +8,7 @@ authentication.
 *Please note that the license server we are using in this tutorial is a
 Widevine license server, so you will need to use Chrome to follow along.*
 
-To start, we're going to use the code from {@link basic-usage}, but use this
+To start, we're going to use the code from {@tutorial basic-usage}, but use this
 manifest and license server:
 
 ```js
@@ -172,4 +172,4 @@ therefore not allowed access.
 
 #### Continue the Tutorials
 
-Next, check out {@tutorial plugins}.
+Next, check out {@tutorial license-wrapping}.

@@ -6,8 +6,8 @@
   { "network-and-buffering-config": { "title": "Network and Buffering Configuration" } },
   { "drm-config": { "title": "DRM Configuration" } },
   { "license-server-auth": { "title": "License Server Authentication" } },
+  { "license-wrapping": { "title": "License Wrapping" } },
   { "Coming Soon": { "children": [
-    { "license-headers": { "title": "License Headers and Track Restrictions" } },
     { "live": { "title": "Special Considerations for Live Streaming" } },
     { "offline": { "title": "Offline Storage and Playback" } }
   ] } },
