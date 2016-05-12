@@ -611,6 +611,90 @@ describe('DashParser.Manifest', function() {
     });
   });
 
+  it('handles missing Segment* elements', function(done) {
+    var source = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
+      '      <Representation bandwidth="100" />',
+      '      <Representation bandwidth="200">',
+      '        <SegmentTemplate media="1.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'
+    ].join('\n');
+
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+
+    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+        .then(function(manifest) {
+          // First Representation should be dropped.
+          var period = manifest.periods[0];
+          expect(period.streamSets[0].streams.length).toBe(1);
+          expect(period.streamSets[0].streams[0].bandwidth).toBe(200);
+        }).catch(fail).then(done);
+  });
+
+  describe('allows missing Segment* elements for text', function() {
+    it('specified via AdaptationSet@contentType', function(done) {
+      var source = [
+        '<MPD minBufferTime="PT75S">',
+        '  <Period id="1" duration="PT30S">',
+        '    <AdaptationSet contentType="text" lang="en" group="1">',
+        '      <Representation />',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>'
+      ].join('\n');
+
+      fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+
+      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+          .then(function(manifest) {
+            expect(manifest.periods[0].streamSets[0].streams.length).toBe(1);
+          }).catch(fail).then(done);
+    });
+
+    it('specified via AdaptationSet@mimeType', function(done) {
+      var source = [
+        '<MPD minBufferTime="PT75S">',
+        '  <Period id="1" duration="PT30S">',
+        '    <AdaptationSet mimeType="text/vtt" lang="en" group="1">',
+        '      <Representation />',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>'
+      ].join('\n');
+
+      fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+
+      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+          .then(function(manifest) {
+            expect(manifest.periods[0].streamSets[0].streams.length).toBe(1);
+          }).catch(fail).then(done);
+    });
+
+    it('specified via Representation@mimeType', function(done) {
+      var source = [
+        '<MPD minBufferTime="PT75S">',
+        '  <Period id="1" duration="PT30S">',
+        '    <AdaptationSet>',
+        '      <Representation mimeType="text/vtt" />',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>'
+      ].join('\n');
+
+      fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+
+      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+          .then(function(manifest) {
+            expect(manifest.periods[0].streamSets[0].streams.length).toBe(1);
+          }).catch(fail).then(done);
+    });
+  });
+
   describe('fails for', function() {
     it('invalid XML', function(done) {
       var source = '<not XML';
@@ -637,22 +721,6 @@ describe('DashParser.Manifest', function() {
       var error = new shaka.util.Error(
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_INVALID_XML);
-      Dash.testFails(done, source, error);
-    });
-
-    it('empty Representation', function(done) {
-      var source = [
-        '<MPD minBufferTime="PT75S">',
-        '  <Period id="1" duration="PT30S">',
-        '    <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
-        '      <Representation bandwidth="100" />',
-        '    </AdaptationSet>',
-        '  </Period>',
-        '</MPD>'
-      ].join('\n');
-      var error = new shaka.util.Error(
-          shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.DASH_NO_SEGMENT_INFO);
       Dash.testFails(done, source, error);
     });
 
