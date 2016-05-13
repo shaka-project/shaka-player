@@ -93,10 +93,12 @@ shaka.test.FakeAbrManager.prototype.chooseStreams = function(
  */
 shaka.test.FakeDrmEngine = function() {
   var resolve = Promise.resolve.bind(Promise);
+  var offlineSessionIds = [];
+  var drmInfo = null;
 
   var ret = jasmine.createSpyObj('FakeDrmEngine', [
     'destroy', 'configure', 'init', 'attach', 'initialized', 'keySystem',
-    'getSupportedTypes'
+    'getSupportedTypes', 'getDrmInfo', 'getSessionIds'
   ]);
   ret.destroy.and.callFake(resolve);
   ret.init.and.callFake(resolve);
@@ -106,8 +108,26 @@ shaka.test.FakeDrmEngine = function() {
   // See shaka.test.ManifestGenerator.protototype.createStream.
   ret.getSupportedTypes.and.returnValue(
       ['video/mp4; codecs="avc1.4d401f"']);
+
+  ret.setSessionIds = function(sessions) {
+    offlineSessionIds = sessions;
+  };
+  ret.setDrmInfo = function(info) { drmInfo = info; };
+  ret.getDrmInfo.and.callFake(function() { return drmInfo; });
+  ret.getSessionIds.and.callFake(function() {
+    return offlineSessionIds;
+  });
+
   return ret;
 };
+
+
+/** @param {?shakaExtern.DrmInfo} info */
+shaka.test.FakeDrmEngine.prototype.setDrmInfo;
+
+
+/** @param {!Array.<string>} sessions */
+shaka.test.FakeDrmEngine.prototype.setSessionIds;
 
 
 

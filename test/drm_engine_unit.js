@@ -1281,6 +1281,38 @@ describe('DrmEngine', function() {
     });
   });  // describe('destroy')
 
+  describe('getDrmInfo', function() {
+    it('includes correct info', function(done) {
+      requestMediaKeySystemAccessSpy.and.callFake(
+          fakeRequestMediaKeySystemAccess.bind(null, ['drm.abc']));
+      // Both audio and video with the same key system now:
+      manifest.periods[0].streamSets[1].drmInfos[0].keySystem = 'drm.abc';
+
+      config.advanced['drm.abc'] = {
+        audioRobustness: 'good',
+        videoRobustness: 'really_really_ridiculously_good',
+        distinctiveIdentifierRequired: true,
+        persistentStateRequired: true
+      };
+      drmEngine.configure(config);
+
+      drmEngine.init(manifest, /* offline */ false).then(function() {
+        expect(drmEngine.initialized()).toBe(true);
+        var drmInfo = drmEngine.getDrmInfo();
+        expect(drmInfo).toEqual({
+          keySystem: 'drm.abc',
+          licenseServerUri: 'http://abc.drm/license',
+          distinctiveIdentifierRequired: true,
+          persistentStateRequired: true,
+          audioRobustness: 'good',
+          videoRobustness: 'really_really_ridiculously_good',
+          serverCertificate: undefined,
+          initData: []
+        });
+      }).catch(fail).then(done);
+    });
+  });  // describe('getDrmInfo')
+
   function initAndAttach() {
     return drmEngine.init(manifest, /* offline */ false).then(function() {
       return drmEngine.attach(mockVideo);
