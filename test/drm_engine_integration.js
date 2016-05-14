@@ -44,9 +44,9 @@ describe('DrmEngine', function() {
   var originalTimeout;
 
   beforeAll(function(done) {
-    var supportTest = shaka.media.DrmEngine.support().then(function(result) {
-      support = result;
-    }).catch(fail);
+    var supportTest = shaka.media.DrmEngine.support(false)
+        .then(function(result) { support = result; })
+        .catch(fail);
 
     originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;  // ms
