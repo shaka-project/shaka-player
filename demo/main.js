@@ -107,6 +107,7 @@ shakaDemo.init = function() {
       shakaDemo.player_.addEventListener('error', shakaDemo.onErrorEvent_);
 
       shakaDemo.setupAssets_();
+      shakaDemo.setupOffline_();
       shakaDemo.setupConfiguration_();
       shakaDemo.setupInfo_();
 

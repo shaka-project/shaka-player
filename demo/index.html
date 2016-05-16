@@ -42,6 +42,7 @@
     <script src="configuration_section.js"></script>
     <script src="info_section.js"></script>
     <script src="log_section.js"></script>
+    <script src="offline_section.js"></script>
     <script src="controls.js"></script>
   </head>
   <body>
@@ -104,7 +105,15 @@
         </div>
       </details>
 
-      <!-- TODO: section for offline storage and retrieval -->
+      <details id="offlineSection">
+        <summary>Offline</summary>
+        <button id="storeOffline">Store</button>
+        <button id="deleteOffline" disabled>Delete</button>
+        <div>
+          <label for="progress">Progress:</label>
+          <span id="progress">0</span>%
+        </div>
+      </details>
 
       <details>
         <summary>Info</summary>

@@ -69,6 +69,8 @@ shakaDemo.setupAssets_ = function() {
     first.selected = true;
   }
 
+  shakaDemo.setupOfflineAssets_();
+
   // Add an extra option for custom assets.
   var option = document.createElement('option');
   option.textContent = '(custom asset)';
@@ -101,14 +103,18 @@ shakaDemo.onAssetKeyUp_ = function(event) {
 };
 
 
-/** Load the selected asset. */
-shakaDemo.load = function() {
+/**
+ * Prepares the Player to load the given assets by setting the configuration
+ * values.  This does not load the asset.
+ *
+ * @param {?shakaAssets.AssetInfo} asset
+ * @return {shakaAssets.AssetInfo}
+ * @private
+ */
+shakaDemo.preparePlayer_ = function(asset) {
   var errorDisplay = document.getElementById('errorDisplay');
   errorDisplay.textContent = '';
 
-  var assetList = document.getElementById('assetList');
-  var option = assetList.options[assetList.selectedIndex];
-  var asset = option.asset;
   var player = shakaDemo.player_;
 
   var config = /** @type {shakaExtern.PlayerConfiguration} */(
@@ -119,7 +125,7 @@ shakaDemo.load = function() {
   if (!asset) {
     // Use the custom fields.
     var licenseServer = document.getElementById('licenseServerInput').value;
-    asset = {
+    asset = /** @type {shakaAssets.AssetInfo} */ ({
       manifestUri: document.getElementById('manifestInput').value,
       // Use the custom license server for all key systems.
       // This simplifies configuration for the user.
@@ -129,7 +135,7 @@ shakaDemo.load = function() {
         'com.microsoft.playready': licenseServer,
         'com.adobe.primetime': licenseServer
       }
-    };
+    });
   }
 
   // Add config from this asset.
@@ -165,6 +171,17 @@ shakaDemo.load = function() {
   if (asset.licenseProcessor) {
     networkingEngine.registerResponseFilter(asset.licenseProcessor);
   }
+  return asset;
+};
+
+
+/** Load the selected asset. */
+shakaDemo.load = function() {
+  var assetList = document.getElementById('assetList');
+  var option = assetList.options[assetList.selectedIndex];
+  var player = shakaDemo.player_;
+
+  var asset = shakaDemo.preparePlayer_(option.asset);
 
   // Load the manifest.
   player.load(asset.manifestUri).then(function() {
