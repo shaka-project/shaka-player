@@ -18,7 +18,9 @@
 describe('Player', function() {
   var abrManager;
   var originalLogError;
+  var originalLogWarn;
   var logErrorSpy;
+  var logWarnSpy;
   var manifest;
   var player;
   var streamingEngine;
@@ -26,9 +28,12 @@ describe('Player', function() {
 
   beforeAll(function() {
     originalLogError = shaka.log.error;
+    originalLogWarn = shaka.log.warning;
 
     logErrorSpy = jasmine.createSpy('shaka.log.error');
     shaka.log.error = logErrorSpy;
+    logWarnSpy = jasmine.createSpy('shaka.log.warning');
+    shaka.log.warning = logWarnSpy;
   });
 
   beforeEach(function() {
@@ -68,6 +73,7 @@ describe('Player', function() {
 
   afterAll(function() {
     shaka.log.error = originalLogError;
+    shaka.log.warning = originalLogWarn;
   });
 
   describe('load/unload', function() {
@@ -336,7 +342,6 @@ describe('Player', function() {
     });
 
     it('checks the number of arguments to functions', function() {
-      logErrorSpy.and.stub();
       var goodCustomScheme = function(node) {};
       var badCustomScheme1 = function() {};  // too few args
       var badCustomScheme2 = function(x, y) {};  // too many args
@@ -348,39 +353,39 @@ describe('Player', function() {
 
       var newConfig = player.getConfiguration();
       expect(newConfig.manifest.dash.customScheme).toBe(goodCustomScheme);
-      expect(logErrorSpy).not.toHaveBeenCalled();
+      expect(logWarnSpy).not.toHaveBeenCalled();
 
-      // Doesn't take bad callback #1, refuses to overwrite good callback.
-      logErrorSpy.calls.reset();
+      // Warns about bad callback #1, still takes it.
+      logWarnSpy.calls.reset();
       player.configure({
         manifest: { dash: { customScheme: badCustomScheme1 } }
       });
 
       newConfig = player.getConfiguration();
-      expect(newConfig.manifest.dash.customScheme).toBe(goodCustomScheme);
-      expect(logErrorSpy).toHaveBeenCalledWith(
+      expect(newConfig.manifest.dash.customScheme).toBe(badCustomScheme1);
+      expect(logWarnSpy).toHaveBeenCalledWith(
           stringContaining('.manifest.dash.customScheme'));
 
-      // Doesn't take bad callback #2, refuses to overwrite good callback.
-      logErrorSpy.calls.reset();
+      // Warns about bad callback #2, still takes it.
+      logWarnSpy.calls.reset();
       player.configure({
         manifest: { dash: { customScheme: badCustomScheme2 } }
       });
 
       newConfig = player.getConfiguration();
-      expect(newConfig.manifest.dash.customScheme).toBe(goodCustomScheme);
-      expect(logErrorSpy).toHaveBeenCalledWith(
+      expect(newConfig.manifest.dash.customScheme).toBe(badCustomScheme2);
+      expect(logWarnSpy).toHaveBeenCalledWith(
           stringContaining('.manifest.dash.customScheme'));
 
       // Resets to default if undefined.
-      logErrorSpy.calls.reset();
+      logWarnSpy.calls.reset();
       player.configure({
         manifest: { dash: { customScheme: undefined } }
       });
 
       newConfig = player.getConfiguration();
-      expect(newConfig.manifest.dash.customScheme).not.toBe(goodCustomScheme);
-      expect(logErrorSpy).not.toHaveBeenCalled();
+      expect(newConfig.manifest.dash.customScheme).not.toBe(badCustomScheme2);
+      expect(logWarnSpy).not.toHaveBeenCalled();
     });
   });
 
