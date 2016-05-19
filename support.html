@@ -37,31 +37,34 @@
         }
       }
 
+      /**
+       * Converts the given object to a formatted string that can be printed.
+       * It uses the given indent to indent each line.
+       *
+       * We cannot simply use JSON.stringify since it is not supported on older
+       * browsers; so this is a version that is supported on all browsers.
+       */
+      function stringify(obj, indent) {
+        var ret = '{\n';
+        for (var key in obj) {
+          var val = obj[key];
+          ret += indent + '    ' + key + ': ';
+          if (typeof(val) == 'object')
+            ret += stringify(val, indent + '    ');
+          else
+            ret += val.toString();
+          ret += ',\n';
+        }
+        ret += indent + '}';
+        return ret;
+      }
+
       function doTest() {
         shaka.polyfill.installAll();
         shaka.Player.support().then(function(support) {
           var userAgent = navigator.userAgent;
           var formatted = userAgent + '\n' + shaka.Player.version + '\n\n';
-
-          var indent = '    ';
-          formatted += '{\n';
-          for (var topLevelKey in support) {
-            formatted += indent + topLevelKey + ': ';
-            if (typeof(support[topLevelKey]) == 'boolean') {
-              formatted += support[topLevelKey].toString();
-            } else {
-              var obj = support[topLevelKey];
-              formatted += '{\n';
-              for (var subKey in obj) {
-                formatted += indent + indent + subKey + ': ';
-                formatted += obj[subKey].toString();
-                formatted += '\n';
-              }
-              formatted += indent + '}';
-            }
-            formatted += '\n';
-          }
-          formatted += '}\n';
+          formatted += stringify(support, '');
 
           var output = document.getElementById('output');
 
