@@ -23,6 +23,7 @@
  * @typedef {{
  *   presentationTimeline: !shaka.media.PresentationTimeline,
  *   periods: !Array.<!shakaExtern.Period>,
+ *   offlineSessionIds: !Array.<string>,
  *   minBufferTime: number
  * }}
  *
@@ -66,6 +67,9 @@
  * @property {!Array.<!shakaExtern.Period>} periods
  *   <i>Required.</i> <br>
  *   The presentation's Periods. There must be at least one Period.
+ * @property {!Array.<string>} offlineSessionIds
+ *   <i>Defaults to [].</i> <br>
+ *   An array of EME sessions to load for offline playback.
  * @property {number} minBufferTime
  *   <i>Defaults to 0.</i> <br>
  *   The minimum number of seconds of content that must be buffered before

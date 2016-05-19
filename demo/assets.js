@@ -267,6 +267,26 @@ shakaAssets.testAssets = [
     ]
   },
   {
+    name: 'Angel One (multicodec, multilingual, Widevine)',
+    manifestUri: '//storage.googleapis.com/shaka-demo-assets/angel-one-widevine/dash.mpd',  // gjslint: disable=110
+
+    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
+    source: shakaAssets.Source.SHAKA,
+    drm: [shakaAssets.KeySystem.WIDEVINE],
+    features: [
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.MULTIPLE_LANGUAGES,
+      shakaAssets.Feature.SEGMENT_BASE,
+      shakaAssets.Feature.SUBTITLES,
+      shakaAssets.Feature.WEBM,
+      shakaAssets.Feature.WEBVTT
+    ],
+
+    licenseServers: {
+      'com.widevine.alpha': '//widevine-proxy.appspot.com/proxy'
+    }
+  },
+  {
     name: 'Sintel 4k (multicodec)',
     manifestUri: '//storage.googleapis.com/shaka-demo-assets/sintel/dash.mpd',  // gjslint: disable=110
 

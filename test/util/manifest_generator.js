@@ -37,6 +37,7 @@ shaka.test.ManifestGenerator = function() {
   this.manifest_ = {
     presentationTimeline: timeline,
     periods: [],
+    offlineSessionIds: [],
     minBufferTime: 0
   };
 

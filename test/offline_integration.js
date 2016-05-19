@@ -17,9 +17,11 @@
 
 describe('Offline', function() {
   var originalName;
+  var dbEngine;
   var storage;
   var player;
   var video;
+  var support;
 
   beforeAll(/** @suppress {accessControls} */ function(done) {
     video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
@@ -28,19 +30,30 @@ describe('Offline', function() {
     video.muted = true;
     document.body.appendChild(video);
 
+    var supportPromise = shaka.Player.probeSupport()
+        .then(function(data) {
+          support = data;
+        });
+
     originalName = shaka.offline.DBEngine.DB_NAME_;
     shaka.offline.DBEngine.DB_NAME_ += '_test';
     // Ensure we start with a clean slate.
-    shaka.offline.DBEngine.deleteDatabase().catch(fail).then(done);
+    Promise.all([shaka.offline.DBEngine.deleteDatabase(), supportPromise])
+        .catch(fail)
+        .then(done);
   });
 
-  beforeEach(function() {
+  beforeEach(function(done) {
     player = new shaka.Player(video);
     storage = new shaka.offline.Storage(player);
+    dbEngine = new shaka.offline.DBEngine();
+    dbEngine.init(shaka.offline.Storage.DB_SCHEME).catch(fail).then(done);
   });
 
   afterEach(function(done) {
-    Promise.all([storage.destroy(), player.destroy()]).catch(fail).then(done);
+    Promise.all([storage.destroy(), player.destroy(), dbEngine.destroy()])
+        .catch(fail)
+        .then(done);
   });
 
   afterAll(/** @suppress {accessControls} */ function() {
@@ -49,6 +62,10 @@ describe('Offline', function() {
   });
 
   it('stores and plays clear content', function(done) {
+    if (!support['offline']) {
+      pending('Offline storage not supported');
+    }
+
     var uri = '//storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd';
     var storedContent;
     storage.store(uri)
@@ -67,6 +84,76 @@ describe('Offline', function() {
         })
         .then(function() {
           return storage.remove(storedContent);
+        })
+        .catch(fail)
+        .then(done);
+  }, 30000);
+
+  it('stores, plays, and deletes protected content', function(done) {
+    // TODO: Add a PlayReady version once Edge supports offline.
+    if (!support['offline'] ||
+        !support.drm['com.widevine.alpha'] ||
+        !support.drm['com.widevine.alpha'].persistentState) {
+      pending('Persistent licenses not supported');
+    }
+
+    var uri = '//storage.googleapis.com/shaka-demo-assets/' +
+              'angel-one-widevine/dash.mpd';
+    player.configure({
+      drm: {
+        servers: {
+          'com.widevine.alpha': '//widevine-proxy.appspot.com/proxy'
+        }
+      }
+    });
+
+    var onError = function(e) {
+      // We should only get a not-found error.
+      var expected = new shaka.util.Error(
+          shaka.util.Error.Category.DRM,
+          shaka.util.Error.Code.OFFLINE_SESSION_REMOVED);
+      shaka.test.Util.expectToEqualError(e, expected);
+    };
+
+    var storedContent;
+    var sessionId;
+    var drmEngine;
+    storage.store(uri)
+        .then(function(content) {
+          storedContent = content;
+          expect(storedContent.offlineUri).toBe('offline:0');
+          return player.load(storedContent.offlineUri);
+        })
+        .then(function() {
+          video.play();
+          return shaka.test.Util.delay(5);
+        })
+        .then(function() { return dbEngine.get('manifest', 0); })
+        .then(function(manifestDb) {
+          expect(manifestDb.sessionIds.length).toBeGreaterThan(0);
+          sessionId = manifestDb.sessionIds[0];
+
+          // Create a DrmEngine so we can try to load the session later.
+          var OfflineManifestParser = shaka.offline.OfflineManifestParser;
+          var manifest = OfflineManifestParser.reconstructManifest(manifestDb);
+          drmEngine = new shaka.media.DrmEngine(
+              player.getNetworkingEngine(), onError, function() {});
+          drmEngine.configure(player.getConfiguration().drm);
+          return drmEngine.init(manifest, true /* isOffline */);
+        })
+        .then(function() {
+          expect(video.currentTime).toBeGreaterThan(3);
+          expect(video.ended).toBe(false);
+          return player.unload();
+        })
+        .then(function() { return storage.remove(storedContent); })
+        .then(/** @suppress {accessControls} */ function() {
+          // Should fail, will call |onError| and resolve with null.
+          return drmEngine.loadOfflineSession_(sessionId);
+        })
+        .then(function(session) {
+          expect(session).toBeFalsy();
+          return drmEngine.destroy();
         })
         .catch(fail)
         .then(done);

@@ -227,6 +227,7 @@ describe('Storage', function() {
         audioRobustness: 'HARDY'
       };
       drmEngine.setDrmInfo(drmInfo);
+      drmEngine.setSessionIds(['abcd']);
       storage.store('')
           .then(function(data) {
             expect(data.offlineUri).toBe('offline:0');
@@ -493,7 +494,7 @@ describe('Storage', function() {
       var manifestId = 0;
       createAndInsertSegments(manifestId, 5)
           .then(function(refs) {
-            var manifest = {key: manifestId, periods: [{streams: []}]};
+            var manifest = createManifest(manifestId);
             manifest.periods[0].streams.push({segments: refs});
             return fakeDbEngine.insert('manifest', manifest);
           })
@@ -514,7 +515,7 @@ describe('Storage', function() {
             createAndInsertSegments(manifestId, 1)
           ])
           .then(function(data) {
-            var manifest = {key: manifestId, periods: [{streams: []}]};
+            var manifest = createManifest(manifestId);
             manifest.periods[0].streams.push(
                 {initSegmentUri: data[1][0].uri, segments: data[0]});
             return fakeDbEngine.insert('manifest', manifest);
@@ -536,7 +537,7 @@ describe('Storage', function() {
             createAndInsertSegments(manifestId, 3)
           ])
           .then(function(data) {
-            var manifest = {key: manifestId, periods: [{streams: []}]};
+            var manifest = createManifest(manifestId);
             manifest.periods[0].streams.push({segments: data[0]});
             manifest.periods[0].streams.push({segments: data[1]});
             return fakeDbEngine.insert('manifest', manifest);
@@ -558,9 +559,11 @@ describe('Storage', function() {
             createAndInsertSegments(manifestId, 3)
           ])
           .then(function(data) {
-            var manifest = {key: manifestId, periods: []};
-            manifest.periods.push({streams: [{segments: data[0]}]});
-            manifest.periods.push({streams: [{segments: data[1]}]});
+            var manifest = createManifest(manifestId);
+            manifest.periods = [
+              {streams: [{segments: data[0]}]},
+              {streams: [{segments: data[1]}]}
+            ];
             return fakeDbEngine.insert('manifest', manifest);
           })
           .then(function() {
@@ -581,9 +584,9 @@ describe('Storage', function() {
             createAndInsertSegments(manifestId2, 3)
           ])
           .then(function(data) {
-            var manifest1 = {key: manifestId1, periods: [{streams: []}]};
+            var manifest1 = createManifest(manifestId1);
             manifest1.periods[0].streams.push({segments: data[0]});
-            var manifest2 = {key: manifestId2, periods: [{streams: []}]};
+            var manifest2 = createManifest(manifestId2);
             manifest2.periods[0].streams.push({segments: data[1]});
             return Promise.all([
               fakeDbEngine.insert('manifest', manifest1),
@@ -607,7 +610,7 @@ describe('Storage', function() {
       var manifestId = 1;
       createAndInsertSegments(manifestId, 5)
           .then(function(data) {
-            var manifest = {key: manifestId, periods: [{streams: []}]};
+            var manifest = createManifest(manifestId);
             data[0].uri = 'offline:0/0/1253';
             manifest.periods[0].streams.push({segments: data});
             return fakeDbEngine.insert('manifest', manifest);
@@ -657,6 +660,15 @@ describe('Storage', function() {
       return storage.remove({offlineUri: 'offline:' + manifestId});
     }
 
+    function createManifest(manifestId) {
+      return {
+        key: manifestId,
+        periods: [{streams: []}],
+        sessionIds: [],
+        duration: 10
+      };
+    }
+
     /**
      * @param {number} manifestId
      * @param {number} count
@@ -672,8 +684,12 @@ describe('Storage', function() {
             return fakeDbEngine.insert('segment', segment);
           }))
           .then(function() {
-            return ret.map(function(segment) {
-              return {uri: 'offline:' + manifestId + '/0/' + segment.key};
+            return ret.map(function(segment, i) {
+              return {
+                uri: 'offline:' + manifestId + '/0/' + segment.key,
+                startTime: i,
+                endTime: (i + 1)
+              };
             });
           });
     }

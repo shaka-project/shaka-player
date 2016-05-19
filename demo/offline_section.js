@@ -30,12 +30,18 @@ shakaDemo.updateButtons_ = function() {
 
   var option = assetList.options[assetList.selectedIndex];
   var storedContent = option.storedContent;
-  var hasDrm = option.asset && option.asset.drm && option.asset.drm.length;
+  // True if there is no DRM or if the browser supports persistent licenses for
+  // any given DRM system.
+  var supportsDrm = !option.asset || !option.asset.drm ||
+      !option.asset.drm.length || option.asset.drm.some(function(drm) {
+        return shakaDemo.support_.drm[drm] &&
+            shakaDemo.support_.drm[drm].persistentState;
+      });
 
   var storeBtn = document.getElementById('storeOffline');
-  storeBtn.disabled = (hasDrm || storedContent != null);
-  storeBtn.title = hasDrm ?
-      'Storing protected content is not supported' :
+  storeBtn.disabled = (!supportsDrm || storedContent != null);
+  storeBtn.title = !supportsDrm ?
+      'This browser does not support persistent licenses' :
       (storeBtn.disabled ? 'Selected asset is already stored offline' : '');
   var deleteBtn = document.getElementById('deleteOffline');
   deleteBtn.disabled = (storedContent == null);

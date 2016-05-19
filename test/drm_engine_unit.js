@@ -1355,7 +1355,7 @@ describe('DrmEngine', function() {
   function createMockSession() {
     var session = {
       expiration: NaN,
-      closed: new shaka.util.PublicPromise(),  // TODO: use in DrmEngine?
+      closed: Promise.resolve(),
       keyStatuses: {
         forEach: jasmine.createSpy('forEach')
       },
