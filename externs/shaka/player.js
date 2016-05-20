@@ -191,26 +191,35 @@ shakaExtern.Restrictions;
 
 /**
  * @typedef {{
- *   manifest: Object.<string, boolean>,
- *   media: Object.<string, boolean>,
- *   drm: Object.<string, boolean>,
- *   supported: boolean
+ *   persistentState: boolean
+ * }}
+ *
+ * @property {boolean} persistentState
+ *   Whether this key system supports persistent state.
+ */
+shakaExtern.DrmSupportType;
+
+
+/**
+ * @typedef {{
+ *   manifest: !Object.<string, boolean>,
+ *   media: !Object.<string, boolean>,
+ *   drm: !Object.<string, ?shakaExtern.DrmSupportType>
  * }}
  *
  * @description
  * An object detailing browser support for various features.
  *
- * @property {Object.<string, boolean>} manifest
+ * @property {!Object.<string, boolean>} manifest
  *   A map of supported manifest types.
  *   The keys are manifest MIME types and file extensions.
- * @property {Object.<string, boolean>} media
+ * @property {!Object.<string, boolean>} media
  *   A map of supported media types.
  *   The keys are media MIME types.
- * @property {Object.<string, boolean>} drm
- *   A map of DRM support.
- *   The keys are well-known key system IDs.
- * @property {boolean} supported
- *   True if the library is usable at all.
+ * @property {!Object.<string, ?shakaExtern.DrmSupportType>} drm
+ *   A map of supported key systems.
+ *   The keys are the key system names.  The value is null if it is not
+ *   supported.  Key systems not probed will not be in this dictionary.
  *
  * @exportDoc
  */

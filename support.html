@@ -37,44 +37,30 @@
         }
       }
 
-      /**
-       * Converts the given object to a formatted string that can be printed.
-       * It uses the given indent to indent each line.
-       *
-       * We cannot simply use JSON.stringify since it is not supported on older
-       * browsers; so this is a version that is supported on all browsers.
-       */
-      function stringify(obj, indent) {
-        var ret = '{\n';
-        for (var key in obj) {
-          var val = obj[key];
-          ret += indent + '    ' + key + ': ';
-          if (typeof(val) == 'object')
-            ret += stringify(val, indent + '    ');
-          else
-            ret += val.toString();
-          ret += ',\n';
+      function printSupport(support) {
+        var userAgent = navigator.userAgent;
+        var formatted = userAgent + '\n' + shaka.Player.version + '\n\n';
+        formatted += support;
+
+        var output = document.getElementById('output');
+
+        if (output.textContent === undefined) {
+          // IE8 and other very old browsers don't have textContent.
+          output.innerText = formatted;
+        } else {
+          output.textContent = formatted;
         }
-        ret += indent + '}';
-        return ret;
       }
 
       function doTest() {
         shaka.polyfill.installAll();
-        shaka.Player.support().then(function(support) {
-          var userAgent = navigator.userAgent;
-          var formatted = userAgent + '\n' + shaka.Player.version + '\n\n';
-          formatted += stringify(support, '');
-
-          var output = document.getElementById('output');
-
-          if (output.textContent === undefined) {
-            // IE8 and other very old browsers don't have textContent.
-            output.innerText = formatted;
-          } else {
-            output.textContent = formatted;
-          }
-        });
+        if (shaka.Player.isBrowserSupported()) {
+          shaka.Player.probeSupport().then(function(support) {
+            printSupport(JSON.stringify(support, null, '  '));
+          });
+        } else {
+          printSupport('This browser is not supported.');
+        }
       }
 
       whenLoaded(doTest);

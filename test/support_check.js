@@ -15,14 +15,11 @@
  * limitations under the License.
  */
 
-describe('Basic support', function() {
-  it('must be true', function(done) {
-    shaka.Player.support().then(function(result) {
-      if (!result.supported) {
-        fail('Browser not supported!  Tests cannot run.');
-        shaka.test.Util.cancelAllRemainingSpecs();
-      }
-      done();
-    });
+describe('isBrowserSupported()', function() {
+  it('must be true', function() {
+    if (!shaka.Player.isBrowserSupported()) {
+      fail('Browser not supported!  Tests cannot run.');
+      shaka.test.Util.cancelAllRemainingSpecs();
+    }
   });
 });

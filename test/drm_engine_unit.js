@@ -237,7 +237,7 @@ describe('DrmEngine', function() {
         expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
         expect(requestMediaKeySystemAccessSpy)
             .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
-              audioCapabilities: undefined,
+              // audioCapabilities not present.
               videoCapabilities: [jasmine.objectContaining({
                 contentType: 'video/foo; codecs="vbar"'
               })],
@@ -250,7 +250,7 @@ describe('DrmEngine', function() {
               audioCapabilities: [jasmine.objectContaining({
                 contentType: 'audio/foo; codecs="abar"'
               })],
-              videoCapabilities: undefined,
+              // videoCapabilities not present.
               distinctiveIdentifier: 'optional',
               persistentState: 'optional',
               sessionTypes: ['temporary']

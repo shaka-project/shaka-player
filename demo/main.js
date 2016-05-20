@@ -80,27 +80,27 @@ shakaDemo.init = function() {
 
   shaka.polyfill.installAll();
 
-  shaka.Player.support().then(function(support) {
-    shakaDemo.support_ = support;
+  if (!shaka.Player.isBrowserSupported()) {
+    var errorDisplay = document.getElementById('errorDisplay');
+    var error = 'Your browser is not supported!';
 
-    if (shakaDemo.support_.supported == false) {
-      var errorDisplay = document.getElementById('errorDisplay');
-      var error = 'Your browser is not supported!';
-
-      // IE8 and other very old browsers don't have textContent.
-      if (errorDisplay.textContent === undefined) {
-        errorDisplay.innerText = error;
-      } else {
-        errorDisplay.textContent = error;
-      }
-
-      // Disable the load button.
-      var loadButton = document.getElementById('loadButton');
-      loadButton.disabled = true;
-
-      // Make sure the error is seen.
-      errorDisplay.style.fontSize = '250%';
+    // IE8 and other very old browsers don't have textContent.
+    if (errorDisplay.textContent === undefined) {
+      errorDisplay.innerText = error;
     } else {
+      errorDisplay.textContent = error;
+    }
+
+    // Disable the load button.
+    var loadButton = document.getElementById('loadButton');
+    loadButton.disabled = true;
+
+    // Make sure the error is seen.
+    errorDisplay.style.fontSize = '250%';
+  } else {
+    shaka.Player.probeSupport().then(function(support) {
+      shakaDemo.support_ = support;
+
       shakaDemo.video_ =
           /** @type {!HTMLVideoElement} */(document.getElementById('video'));
       shakaDemo.player_ = new shaka.Player(shakaDemo.video_);
@@ -124,8 +124,8 @@ shakaDemo.init = function() {
       if ('play' in params) {
         shakaDemo.load();
       }
-    }
-  });
+    });
+  }
 };
 
 

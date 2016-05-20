@@ -44,7 +44,7 @@ describe('DrmEngine', function() {
   var originalTimeout;
 
   beforeAll(function(done) {
-    var supportTest = shaka.media.DrmEngine.support(false)
+    var supportTest = shaka.media.DrmEngine.probeSupport()
         .then(function(result) { support = result; })
         .catch(fail);
 
@@ -394,8 +394,7 @@ describe('DrmEngine', function() {
 
   function checkKeySystems() {
     // Our test asset for this suite can use any of these key systems:
-    if (!support['com.widevine.alpha'] &&
-        !support['com.microsoft.playready']) {
+    if (!support['com.widevine.alpha'] && !support['com.microsoft.playready']) {
       // pending() throws a special exception that Jasmine uses to skip a test.
       // It can only be used from inside it(), not describe() or beforeEach().
       pending('Skipping DrmEngine tests.');

@@ -58,7 +58,7 @@ describe('Player', function() {
     }
 
     loaded.then(function() {
-      return shaka.Player.support();
+      return shaka.Player.probeSupport();
     }).then(function(supportResults) {
       support = supportResults;
       done();
