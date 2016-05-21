@@ -582,6 +582,33 @@ describe('DashParser.Manifest', function() {
       });
       runTest(done, 45);
     });
+
+    it('with relative paths', function(done) {
+      var source = makeManifest([
+        '<UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-xsdate:2014"',
+        '    value="/date" />'
+      ]);
+
+      fakeNetEngine.setResponseMapAsText({
+        'http://foo.bar/manifest': source,
+        'http://foo.bar/date': '1970-01-01T00:00:50Z'
+      });
+      runTest(done, 45);
+    });
+
+    it('with paths relative to BaseURLs', function(done) {
+      var source = makeManifest([
+        '<BaseURL>http://example.com</BaseURL>',
+        '<UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-xsdate:2014"',
+        '    value="/date" />'
+      ]);
+
+      fakeNetEngine.setResponseMapAsText({
+        'http://foo.bar/manifest': source,
+        'http://example.com/date': '1970-01-01T00:00:50Z'
+      });
+      runTest(done, 45);
+    });
   });
 
   describe('fails for', function() {
