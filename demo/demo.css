@@ -133,6 +133,8 @@ summary {
 
 #assetList, #customAsset div {
   margin: 0 0 1.2em 0;
+  /* Otherwise, this causes horizontal scrolling on narrow screens */
+  max-width: 80%;
 }
 
 #container {
@@ -142,6 +144,11 @@ summary {
 
 #customAsset {
   display: none;
+}
+
+#customAsset input {
+  /* Otherwise, this becomes a two lines tall on narrow screens */
+  height: 1.4em;
 }
 
 #errorDisplay {
