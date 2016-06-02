@@ -189,7 +189,7 @@ describe('DrmEngine', function() {
             .toHaveBeenCalledWith('drm.def', jasmine.any(Object));
         shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
             shaka.util.Error.Category.DRM,
-            shaka.util.Error.Code.REQUESTED_KEY_SYSTEMS_UNAVAILABLE));
+            shaka.util.Error.Code.REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE));
       }).then(done);
     });
 
@@ -580,7 +580,7 @@ describe('DrmEngine', function() {
         expect(logErrorSpy).toHaveBeenCalled();
         shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
             shaka.util.Error.Category.DRM,
-            shaka.util.Error.Code.REQUESTED_KEY_SYSTEMS_UNAVAILABLE));
+            shaka.util.Error.Code.NO_LICENSE_SERVER_GIVEN));
       }).then(done);
     });
 
