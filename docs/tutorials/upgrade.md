@@ -466,10 +466,17 @@ level of the configuration hierarchy):
   - `segmentRequestTimeout` => `streaming.retryParameters.timeout`
   - `preferredLanguage` => split into `preferredAudioLanguage` and
       `preferredTextLanguage`
-  - `restrictions` => (coming soon in v2)
+  - `restrictions` => (same name, see below)
   - `liveStreamEndTimeout` => (not needed in v2)
   - `disableCacheBustingEvenThoughItMayAffectBandwidthEstimation` =>
       (not needed, always cache-friendly)
+
+The `shaka.player.Restriction` type was replaced by a simple record type.  So
+instead of constructing an object, simply create an anonymous JavaScript object.
+`minPixels`/`maxPixels` were added to limit total pixels. Also `minBandwidth`
+and `maxBandwidth` were split into `minAudioBandwidth`, `maxAudioBandwidth`,
+`minVideoBandwidth`, and `maxVideoBandwidth`, see
+{@link shakaExtern.Restrictions}.
 
 For more information on configuration in v2, see {@tutorial config},
 {@tutorial network-and-buffering-config}, and {@tutorial drm-config}.
