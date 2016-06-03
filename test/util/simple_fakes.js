@@ -181,17 +181,6 @@ shaka.test.FakeManifestParser = function(manifest) {
 };
 
 
-/**
- * Creates a factory function that creates a fake manifest parser.
- *
- * @param {shakaExtern.Manifest} manifest
- * @return {shakaExtern.ManifestParser.Factory}
- */
-shaka.test.FakeManifestParser.createFactory = function(manifest) {
-  return function() { return new shaka.test.FakeManifestParser(manifest); };
-};
-
-
 /** @override */
 shaka.test.FakeManifestParser.prototype.start = function() {
   return Promise.resolve(this.manifest_);

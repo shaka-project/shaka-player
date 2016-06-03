@@ -77,93 +77,104 @@ describe('Player', function() {
   });
 
   describe('load/unload', function() {
+    var parser1;
+    var parser2;
+    var factory1;
+    var factory2;
+
     beforeEach(function() {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addStreamSet('audio')
           .addStreamSet('video')
         .build();
+
+      parser1 = new shaka.test.FakeManifestParser(manifest);
+      parser2 = new shaka.test.FakeManifestParser(manifest);
+      factory1 = function() { return parser1; };
+      factory2 = function() { return parser2; };
     });
 
     it('handles repeated load/unload', function(done) {
-      var factory = shaka.test.FakeManifestParser.createFactory(manifest);
-      player.load('', 0, factory).then(function() {
+      player.load('', 0, factory1).then(function() {
         shaka.log.debug('finished load 1');
         return player.unload();
       }).then(function() {
         shaka.log.debug('finished unload 1');
-        return player.load('', 0, factory);
+        expect(parser1.stop).toHaveBeenCalled();
+        return player.load('', 0, factory2);
       }).then(function() {
         shaka.log.debug('finished load 2');
         return player.unload();
+      }).then(function() {
+        shaka.log.debug('finished unload 2');
+        expect(parser2.stop).toHaveBeenCalled();
       }).catch(fail).then(done);
     });
 
     it('handles repeated loads', function(done) {
-      var factory = shaka.test.FakeManifestParser.createFactory(manifest);
-      player.load('', 0, factory).then(function() {
-        return player.load('', 0, factory);
+      player.load('', 0, factory1).then(function() {
+        return player.load('', 0, factory1);
       }).then(function() {
-        return player.load('', 0, factory);
+        return player.load('', 0, factory2);
+      }).then(function() {
+        expect(parser1.stop.calls.count()).toBe(2);
       }).catch(fail).then(done);
     });
 
     it('handles load interrupting load', function(done) {
-      var factory = shaka.test.FakeManifestParser.createFactory(manifest);
-
       var checkError = jasmine.createSpy('checkError');
       checkError.and.callFake(function(error) {
         expect(error.code).toBe(shaka.util.Error.Code.LOAD_INTERRUPTED);
       });
 
-      player.load('', 0, factory).then(fail).catch(checkError);
-      player.load('', 0, factory).then(fail).catch(checkError);
+      player.load('', 0, factory1).then(fail).catch(checkError);
+      player.load('', 0, factory1).then(fail).catch(checkError);
 
-      player.load('', 0, factory).catch(fail).then(function() {
+      player.load('', 0, factory2).catch(fail).then(function() {
         // Delay so the interrupted calls have time to reject themselves.
         return shaka.test.Util.delay(0.1);
       }).then(function() {
         expect(checkError.calls.count()).toBe(2);
+        expect(parser1.stop.calls.count()).toEqual(parser1.start.calls.count());
         done();
       });
     });
 
     it('handles unload interrupting load', function(done) {
-      var factory = shaka.test.FakeManifestParser.createFactory(manifest);
-
       var checkError = jasmine.createSpy('checkError');
       checkError.and.callFake(function(error) {
         expect(error.code).toBe(shaka.util.Error.Code.LOAD_INTERRUPTED);
       });
 
-      player.load('', 0, factory).then(fail).catch(checkError);
+      player.load('', 0, factory1).then(fail).catch(checkError);
       player.unload();
-      player.load('', 0, factory).then(fail).catch(checkError);
+      player.load('', 0, factory1).then(fail).catch(checkError);
       player.unload();
 
-      player.load('', 0, factory).catch(fail).then(function() {
+      player.load('', 0, factory2).catch(fail).then(function() {
         // Delay so the interrupted calls have time to reject themselves.
         return shaka.test.Util.delay(0.1);
       }).then(function() {
         expect(checkError.calls.count()).toBe(2);
+        expect(parser1.stop.calls.count()).toEqual(parser1.start.calls.count());
         done();
       });
     });
 
     it('handles destroy interrupting load', function(done) {
-      var factory = shaka.test.FakeManifestParser.createFactory(manifest);
-
       var checkError = jasmine.createSpy('checkError');
       checkError.and.callFake(function(error) {
         expect(error.code).toBe(shaka.util.Error.Code.LOAD_INTERRUPTED);
       });
 
-      player.load('', 0, factory).then(fail).catch(checkError);
+      player.load('', 0, factory1).then(fail).catch(checkError);
       player.destroy().catch(fail).then(function() {
         // Delay so the interrupted calls have time to reject themselves.
         return shaka.test.Util.delay(0.1);
       }).then(function() {
         expect(checkError.calls.count()).toBe(1);
+        expect(parser1.stop.calls.count()).toEqual(parser1.start.calls.count());
         done();
       });
     });
@@ -531,7 +542,8 @@ describe('Player', function() {
     });
 
     beforeEach(function(done) {
-      var factory = shaka.test.FakeManifestParser.createFactory(manifest);
+      var parser = new shaka.test.FakeManifestParser(manifest);
+      var factory = function() { return parser; };
       player.load('', 0, factory).catch(fail).then(done);
     });
 
@@ -636,26 +648,27 @@ describe('Player', function() {
        });
 
     it('enables text track if audio and text are different language',
-       function(done) {
-         manifest = new shaka.test.ManifestGenerator()
-           .addPeriod(0)
-             .addStreamSet('audio').language('pt').addStream(0)
-             .addStreamSet('audio').language('en').addStream(1)
-             .addStreamSet('text').language('pt').addStream(2)
-             .addStreamSet('text').language('fr').addStream(3)
-          .build();
+        function(done) {
+          manifest = new shaka.test.ManifestGenerator()
+            .addPeriod(0)
+              .addStreamSet('audio').language('pt').addStream(0)
+              .addStreamSet('audio').language('en').addStream(1)
+              .addStreamSet('text').language('pt').addStream(2)
+              .addStreamSet('text').language('fr').addStream(3)
+           .build();
 
-         var factory = shaka.test.FakeManifestParser.createFactory(manifest);
-         player.load('', 0, factory)
-             .then(function() {
-               expect(player.isTextTrackVisible()).toBe(false);
-               player.configure(
-                   {preferredAudioLanguage: 'en', preferredTextLanguage: 'fr'});
-               expect(player.isTextTrackVisible()).toBe(true);
-             })
-             .catch(fail)
-             .then(done);
-       });
+          var parser = new shaka.test.FakeManifestParser(manifest);
+          var factory = function() { return parser; };
+          player.load('', 0, factory)
+              .then(function() {
+                expect(player.isTextTrackVisible()).toBe(false);
+                player.configure(
+                    {preferredAudioLanguage: 'en', preferredTextLanguage: 'fr'});
+                expect(player.isTextTrackVisible()).toBe(true);
+              })
+              .catch(fail)
+              .then(done);
+        });
 
     /**
      * @param {!Array.<string>} languages
@@ -680,7 +693,8 @@ describe('Player', function() {
       }
       manifest = generator.build();
 
-      var factory = shaka.test.FakeManifestParser.createFactory(manifest);
+      var parser = new shaka.test.FakeManifestParser(manifest);
+      var factory = function() { return parser; };
       player.load('', 0, factory)
           .then(function() {
             player.configure({
@@ -714,7 +728,8 @@ describe('Player', function() {
     });
 
     beforeEach(function(done) {
-      var factory = shaka.test.FakeManifestParser.createFactory(manifest);
+      var parser = new shaka.test.FakeManifestParser(manifest);
+      var factory = function() { return parser; };
       player.load('', 0, factory)
           .then(function() {
             // "initialize" the current period.
@@ -921,7 +936,8 @@ describe('Player', function() {
             .addStream(11).bandwidth(200).mime('video/webm')
         .build();
 
-      var factory = shaka.test.FakeManifestParser.createFactory(manifest);
+      var parser = new shaka.test.FakeManifestParser(manifest);
+      var factory = function() { return parser; };
       player.load('', 0, factory).then(function() {
         // "initialize" the current period.
         chooseStreams(manifest.periods[0]);
