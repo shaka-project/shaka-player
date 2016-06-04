@@ -122,6 +122,14 @@ shaka.test.FakeDrmEngine = function() {
 };
 
 
+/** @type {jasmine.Spy} */
+shaka.test.FakeDrmEngine.prototype.init;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakeDrmEngine.prototype.attach;
+
+
 /** @param {?shakaExtern.DrmInfo} info */
 shaka.test.FakeDrmEngine.prototype.setDrmInfo;
 
@@ -160,6 +168,10 @@ shaka.test.FakeStreamingEngine = function(period) {
   });
   return ret;
 };
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakeStreamingEngine.prototype.init;
 
 
 

@@ -23,6 +23,7 @@ describe('Player', function() {
   var logWarnSpy;
   var manifest;
   var player;
+  var networkingEngine;
   var streamingEngine;
   var video;
 
@@ -42,11 +43,14 @@ describe('Player', function() {
     logErrorSpy.and.callFake(fail);
 
     function dependencyInjector(player) {
+      networkingEngine =
+          new shaka.test.FakeNetworkingEngine({}, new ArrayBuffer(0));
+
       player.createDrmEngine = function() {
         return new shaka.test.FakeDrmEngine();
       };
       player.createNetworkingEngine = function() {
-        return new shaka.test.FakeNetworkingEngine({}, new ArrayBuffer(0));
+        return networkingEngine;
       };
       player.createPlayhead = function() { return {destroy: function() {}}; };
       player.createMediaSource = function() { return Promise.resolve(); };
@@ -81,6 +85,7 @@ describe('Player', function() {
     var parser2;
     var factory1;
     var factory2;
+    var checkError;
 
     beforeEach(function() {
       manifest = new shaka.test.ManifestGenerator()
@@ -93,6 +98,11 @@ describe('Player', function() {
       parser2 = new shaka.test.FakeManifestParser(manifest);
       factory1 = function() { return parser1; };
       factory2 = function() { return parser2; };
+
+      checkError = jasmine.createSpy('checkError');
+      checkError.and.callFake(function(error) {
+        expect(error.code).toBe(shaka.util.Error.Code.LOAD_INTERRUPTED);
+      });
     });
 
     it('handles repeated load/unload', function(done) {
@@ -123,11 +133,6 @@ describe('Player', function() {
     });
 
     it('handles load interrupting load', function(done) {
-      var checkError = jasmine.createSpy('checkError');
-      checkError.and.callFake(function(error) {
-        expect(error.code).toBe(shaka.util.Error.Code.LOAD_INTERRUPTED);
-      });
-
       player.load('', 0, factory1).then(fail).catch(checkError);
       player.load('', 0, factory1).then(fail).catch(checkError);
 
@@ -142,15 +147,10 @@ describe('Player', function() {
     });
 
     it('handles unload interrupting load', function(done) {
-      var checkError = jasmine.createSpy('checkError');
-      checkError.and.callFake(function(error) {
-        expect(error.code).toBe(shaka.util.Error.Code.LOAD_INTERRUPTED);
-      });
-
       player.load('', 0, factory1).then(fail).catch(checkError);
-      player.unload();
+      player.unload().catch(fail);
       player.load('', 0, factory1).then(fail).catch(checkError);
-      player.unload();
+      player.unload().catch(fail);
 
       player.load('', 0, factory2).catch(fail).then(function() {
         // Delay so the interrupted calls have time to reject themselves.
@@ -163,11 +163,6 @@ describe('Player', function() {
     });
 
     it('handles destroy interrupting load', function(done) {
-      var checkError = jasmine.createSpy('checkError');
-      checkError.and.callFake(function(error) {
-        expect(error.code).toBe(shaka.util.Error.Code.LOAD_INTERRUPTED);
-      });
-
       player.load('', 0, factory1).then(fail).catch(checkError);
       player.destroy().catch(fail).then(function() {
         // Delay so the interrupted calls have time to reject themselves.
@@ -176,6 +171,174 @@ describe('Player', function() {
         expect(checkError.calls.count()).toBe(1);
         expect(parser1.stop.calls.count()).toEqual(parser1.start.calls.count());
         done();
+      });
+    });
+
+    it('handles multiple unloads interrupting load', function(done) {
+      player.load('', 0, factory1).then(fail).catch(checkError);
+      player.unload().catch(fail);
+      player.unload().catch(fail);
+      player.load('', 0, factory1).then(fail).catch(checkError);
+      player.unload().catch(fail);
+      player.unload().catch(fail);
+      player.unload().catch(fail);
+
+      player.load('', 0, factory2).catch(fail).then(function() {
+        // Delay so the interrupted calls have time to reject themselves.
+        return shaka.test.Util.delay(0.1);
+      }).then(function() {
+        expect(checkError.calls.count()).toBe(2);
+        expect(parser1.stop.calls.count()).toEqual(parser1.start.calls.count());
+        done();
+      });
+    });
+
+    it('handles multiple destroys interrupting load', function(done) {
+      player.load('', 0, factory1).then(fail).catch(checkError);
+      player.destroy().catch(fail);
+      player.destroy().catch(fail);
+      player.destroy().catch(fail).then(function() {
+        // Delay so the interrupted calls have time to reject themselves.
+        return shaka.test.Util.delay(0.1);
+      }).then(function() {
+        expect(checkError.calls.count()).toBe(1);
+        expect(parser1.stop.calls.count()).toEqual(parser1.start.calls.count());
+        done();
+      });
+    });
+
+    it('handles unload, then destroy interrupting load', function(done) {
+      player.load('', 0, factory1).then(fail).catch(checkError);
+      player.unload().catch(fail);
+      player.unload().catch(fail);
+      player.destroy().catch(fail).then(function() {
+        // Delay so the interrupted calls have time to reject themselves.
+        return shaka.test.Util.delay(0.1);
+      }).then(function() {
+        expect(checkError.calls.count()).toBe(1);
+        expect(parser1.stop.calls.count()).toEqual(parser1.start.calls.count());
+        done();
+      });
+    });
+
+    it('handles destroy, then unload interrupting load', function(done) {
+      player.load('', 0, factory1).then(fail).catch(checkError);
+      player.destroy().catch(fail).then(function() {
+        // Delay so the interrupted calls have time to reject themselves.
+        return shaka.test.Util.delay(0.1);
+      }).then(function() {
+        expect(checkError.calls.count()).toBe(1);
+        expect(parser1.stop.calls.count()).toEqual(parser1.start.calls.count());
+        done();
+      });
+      player.unload().catch(fail);
+      player.unload().catch(fail);
+    });
+
+    describe('interruption during', function() {
+      beforeEach(function() {
+        checkError.and.callFake(function(error) {
+          expect(error.code).toBe(shaka.util.Error.Code.LOAD_INTERRUPTED);
+          expect(parser1.stop.calls.count())
+              .toEqual(parser1.start.calls.count());
+          expect(parser2.stop.calls.count())
+              .toEqual(parser2.start.calls.count());
+        });
+      });
+
+      it('manifest type check', function(done) {
+        // Block the network request.
+        var p = networkingEngine.delayNextRequest();
+        // Give the stage a factory so that it can succeed and get canceled.
+        shaka.media.ManifestParser.registerParserByMime('undefined', factory1);
+
+        player.load('', 0).then(fail).catch(checkError).then(function() {
+          // Unregister our parser factory.
+          delete shaka.media.ManifestParser.parsersByMime['undefined'];
+          done();
+        });
+
+        shaka.test.Util.delay(0.1).then(function() {
+          // Make sure we're blocked.
+          var requestType = shaka.net.NetworkingEngine.RequestType.MANIFEST;
+          networkingEngine.expectRequest('', requestType);
+          // Interrupt load().
+          player.unload();
+          p.resolve();
+        });
+      });
+
+      it('parser startup', function(done) {
+        // Block parser startup.
+        var p = new shaka.util.PublicPromise();
+        parser1.start.and.returnValue(p);
+
+        player.load('', 0, factory1).then(fail).catch(checkError).then(done);
+
+        shaka.test.Util.delay(0.1).then(function() {
+          // Make sure we're blocked.
+          expect(parser1.start).toHaveBeenCalled();
+          // Interrupt load().
+          player.unload();
+          p.resolve();
+        });
+      });
+
+      it('DrmEngine init', function(done) {
+        // Block DrmEngine init.
+        var p = new shaka.util.PublicPromise();
+        var drmEngine = new shaka.test.FakeDrmEngine();
+        drmEngine.init.and.returnValue(p);
+        player.createDrmEngine = function() { return drmEngine; };
+
+        player.load('', 0, factory1).then(fail).catch(checkError).then(done);
+
+        shaka.test.Util.delay(0.1).then(function() {
+          // Make sure we're blocked.
+          expect(drmEngine.init).toHaveBeenCalled();
+          // Interrupt load().
+          player.unload();
+          p.resolve();
+        });
+      });
+
+      it('DrmEngine attach', function(done) {
+        // Block DrmEngine attach.
+        var p = new shaka.util.PublicPromise();
+        var drmEngine = new shaka.test.FakeDrmEngine();
+        drmEngine.attach.and.returnValue(p);
+        player.createDrmEngine = function() { return drmEngine; };
+
+        player.load('', 0, factory1).then(fail).catch(checkError).then(done);
+
+        shaka.test.Util.delay(0.1).then(function() {
+          // Make sure we're blocked.
+          expect(drmEngine.attach).toHaveBeenCalled();
+          // Interrupt load().
+          player.unload();
+          p.resolve();
+        });
+      });
+
+      it('StreamingEngine init', function(done) {
+        // Block StreamingEngine init.
+        var p = new shaka.util.PublicPromise();
+        player.createStreamingEngine = function() {
+          var period = manifest.periods[0];
+          streamingEngine = new shaka.test.FakeStreamingEngine(period);
+          streamingEngine.init.and.returnValue(p);
+          return streamingEngine;
+        };
+
+        player.load('', 0, factory1).then(fail).catch(checkError).then(done);
+
+        shaka.test.Util.delay(0.1).then(function() {
+          // Make sure we're blocked.
+          expect(streamingEngine.init).toHaveBeenCalled();
+          // Interrupt load().
+          player.unload();
+          p.resolve();
+        });
       });
     });
   });

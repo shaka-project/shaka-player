@@ -38,6 +38,3 @@ goog.require('shaka.polyfill.Promise');
 goog.require('shaka.polyfill.VideoPlaybackQuality');
 
 goog.require('shaka.offline.DBEngine');
-
-// Temporary: this will be removed once shaka.Player requires CancelableChain:
-goog.require('shaka.util.CancelableChain');
