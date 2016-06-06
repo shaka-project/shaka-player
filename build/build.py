@@ -20,7 +20,7 @@ prefixed with a -.  After the character, there is a name of a file or a @ sign
 and the name of a build file.
 
 Build files are the files found in build/types.  These files are simply a
-new-line separated list of commands to execute.  So if the "+@complete" command
+newline separated list of commands to execute.  So if the "+@complete" command
 is given, it will open the complete file and run it (which may in turn open
 other build files).  Subtracting a build file will reverse all actions applied
 by the given file.  So "-@networking" will remove all the networking plugins.
