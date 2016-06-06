@@ -39,17 +39,13 @@ function initApp() {
   shaka.polyfill.installAll();
 
   // Check to see if the browser supports the basic APIs Shaka needs.
-  // This is an asynchronous check.
-  shaka.Player.support().then(function(support) {
-    // This executes when the asynchronous check is complete.
-    if (support.supported) {
-      // Everything looks good!
-      initPlayer();
-    } else {
-      // This browser does not have the minimum set of APIs we need.
-      console.error('Browser not supported!');
-    }
-  });
+  if (shaka.Player.isBrowserSupported()) {
+    // Everything looks good!
+    initPlayer();
+  } else {
+    // This browser does not have the minimum set of APIs we need.
+    console.error('Browser not supported!');
+  }
 }
 
 function initPlayer() {
