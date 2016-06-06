@@ -662,8 +662,10 @@ describe('Player', function() {
           player.load('', 0, factory)
               .then(function() {
                 expect(player.isTextTrackVisible()).toBe(false);
-                player.configure(
-                    {preferredAudioLanguage: 'en', preferredTextLanguage: 'fr'});
+                player.configure({
+                  preferredAudioLanguage: 'en',
+                  preferredTextLanguage: 'fr'
+                });
                 expect(player.isTextTrackVisible()).toBe(true);
               })
               .catch(fail)
