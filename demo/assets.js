@@ -27,7 +27,7 @@ var shakaAssets = {};
 /** @enum {string} */
 shakaAssets.Encoder = {
   UNKNOWN: 'Unknown',
-  EDASH_PACKAGER: 'eDash packager',
+  SHAKA_PACKAGER: 'Shaka packager',
   YOUTUBE: 'YouTube',
   AXINOM: 'Axinom',
   UNIFIED_STREAMING: 'Unified Streaming',
@@ -254,7 +254,7 @@ shakaAssets.testAssets = [
     name: 'Angel One (multicodec, multilingual)',
     manifestUri: '//storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd',  // gjslint: disable=110
 
-    encoder: shakaAssets.Encoder.EDASH_PACKAGER,
+    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [],
     features: [
@@ -270,7 +270,7 @@ shakaAssets.testAssets = [
     name: 'Sintel 4k (multicodec)',
     manifestUri: '//storage.googleapis.com/shaka-demo-assets/sintel/dash.mpd',  // gjslint: disable=110
 
-    encoder: shakaAssets.Encoder.EDASH_PACKAGER,
+    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [],
     features: [
@@ -287,7 +287,7 @@ shakaAssets.testAssets = [
     name: 'Sintel 4k (multicodec, Widevine)',
     manifestUri: '//storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd',  // gjslint: disable=110
 
-    encoder: shakaAssets.Encoder.EDASH_PACKAGER,
+    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [shakaAssets.KeySystem.WIDEVINE],
     features: [
@@ -309,7 +309,7 @@ shakaAssets.testAssets = [
     name: 'Heliocentrism (multicodec, multiperiod)',
     manifestUri: '//storage.googleapis.com/shaka-demo-assets/heliocentrism/heliocentrism.mpd',  // gjslint: disable=110
 
-    encoder: shakaAssets.Encoder.EDASH_PACKAGER,
+    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [],
     features: [
@@ -327,7 +327,7 @@ shakaAssets.testAssets = [
     // http://creativecommons.org/licenses/by-nc/3.0/
     manifestUri: '//storage.googleapis.com/shaka-demo-assets/dig-the-uke/dash.mpd',  // gjslint: disable=110
 
-    encoder: shakaAssets.Encoder.EDASH_PACKAGER,
+    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [shakaAssets.KeySystem.WIDEVINE],
     features: [
