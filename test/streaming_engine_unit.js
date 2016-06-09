@@ -1395,6 +1395,175 @@ describe('StreamingEngine', function() {
     });
   });
 
+  describe('handles network errors', function() {
+    function testRecoverableError(targetUri, code, done) {
+      var loop;
+
+      setupVod();
+
+      // Wrap the NetworkingEngine to perform errors.
+      var originalNetEngine = netEngine;
+      netEngine = {
+        request: jasmine.createSpy('request')
+      };
+      var attempts = 0;
+      netEngine.request.and.callFake(function(requestType, request) {
+        if (request.uris[0] == targetUri) {
+          ++attempts;
+          if (attempts == 1) {
+            var data = [targetUri];
+
+            if (code == shaka.util.Error.Code.BAD_HTTP_STATUS) {
+              data.push(404);
+              data.push('');
+            }
+
+            return Promise.reject(new shaka.util.Error(
+                shaka.util.Error.Category.NETWORK, code, data));
+          }
+        }
+        return originalNetEngine.request(requestType, request);
+      });
+
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      createStreamingEngine();
+
+      playhead.getTime.and.returnValue(0);
+      onStartupComplete.and.callFake(function() {
+        setupFakeGetTime(0);
+        mediaSourceEngine.endOfStream.and.callFake(loop.stop);
+      });
+
+      onError.and.callFake(function(error) {
+        expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
+        expect(error.code).toBe(code);
+      });
+
+      // Here we go!
+      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      streamingEngine.init();
+
+      loop = runTest();
+      loop.then(function() {
+        expect(onError.calls.count()).toBe(1);
+        expect(attempts).toBe(2);
+        expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+        return streamingEngine.destroy();
+      }).catch(fail).then(done);
+    }
+
+    it('from missing init, first Period',
+        testRecoverableError.bind(
+            null, '1_audio_init', shaka.util.Error.Code.BAD_HTTP_STATUS));
+    it('from missing init, second Period',
+       testRecoverableError.bind(
+            null, '2_video_init', shaka.util.Error.Code.BAD_HTTP_STATUS));
+    it('from missing media, first Period',
+       testRecoverableError.bind(
+            null, '1_video_1', shaka.util.Error.Code.BAD_HTTP_STATUS));
+    it('from missing media, second Period',
+       testRecoverableError.bind(
+            null, '2_audio_2', shaka.util.Error.Code.BAD_HTTP_STATUS));
+
+    it('from missing init, first Period',
+        testRecoverableError.bind(
+            null, '1_video_init', shaka.util.Error.Code.HTTP_ERROR));
+    it('from missing init, second Period',
+       testRecoverableError.bind(
+            null, '2_audio_init', shaka.util.Error.Code.HTTP_ERROR));
+    it('from missing media, first Period',
+       testRecoverableError.bind(
+            null, '1_audio_1', shaka.util.Error.Code.HTTP_ERROR));
+    it('from missing media, second Period',
+       testRecoverableError.bind(
+            null, '2_video_2', shaka.util.Error.Code.HTTP_ERROR));
+
+    it('from missing init, first Period',
+        testRecoverableError.bind(
+            null, '1_audio_init', shaka.util.Error.Code.TIMEOUT));
+    it('from missing init, second Period',
+       testRecoverableError.bind(
+            null, '2_video_init', shaka.util.Error.Code.TIMEOUT));
+    it('from missing media, first Period',
+       testRecoverableError.bind(
+            null, '1_video_2', shaka.util.Error.Code.TIMEOUT));
+    it('from missing media, second Period',
+       testRecoverableError.bind(
+            null, '2_audio_1', shaka.util.Error.Code.TIMEOUT));
+
+    function testNonRecoverableError(targetUri, code, done) {
+      var loop;
+
+      setupVod();
+
+      // Wrap the NetworkingEngine to perform 404 Not Found errors.
+      var originalNetEngine = netEngine;
+      netEngine = {
+        request: jasmine.createSpy('request')
+      };
+      netEngine.request.and.callFake(function(requestType, request) {
+        if (request.uris[0] == targetUri) {
+          return Promise.reject(new shaka.util.Error(
+              shaka.util.Error.Category.NETWORK, code, [targetUri]));
+        }
+        return originalNetEngine.request(requestType, request);
+      });
+
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      createStreamingEngine();
+
+      playhead.getTime.and.returnValue(0);
+      onStartupComplete.and.callFake(function() {
+        setupFakeGetTime(0);
+        mediaSourceEngine.endOfStream.and.callFake(loop.stop);
+      });
+
+      onError.and.callFake(function(error) {
+        expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
+        expect(error.code).toBe(code);
+      });
+
+      // Here we go!
+      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      streamingEngine.init();
+
+      loop = runTest();
+      loop.then(function() {
+        expect(onError.calls.count()).toBe(1);
+        expect(mediaSourceEngine.endOfStream).not.toHaveBeenCalled();
+        return streamingEngine.destroy();
+      }).catch(fail).then(done);
+    }
+
+    it('from unsupported scheme, init',
+        testNonRecoverableError.bind(
+            null, '1_audio_init', shaka.util.Error.Code.UNSUPPORTED_SCHEME));
+
+    it('from unsupported scheme, media',
+        testNonRecoverableError.bind(
+            null, '1_video_2', shaka.util.Error.Code.UNSUPPORTED_SCHEME));
+
+    it('from malformed data URI, init',
+        testNonRecoverableError.bind(
+            null, '1_video_init', shaka.util.Error.Code.MALFORMED_DATA_URI));
+
+    it('from malformed data URI, media',
+        testNonRecoverableError.bind(
+            null, '1_audio_2', shaka.util.Error.Code.MALFORMED_DATA_URI));
+
+    it('from unknown data URI encoding, init',
+        testNonRecoverableError.bind(
+            null,
+            '1_video_init',
+            shaka.util.Error.Code.UNKNOWN_DATA_URI_ENCODING));
+
+    it('from unknown data URI encoding, media',
+        testNonRecoverableError.bind(
+            null,
+            '1_audio_2',
+            shaka.util.Error.Code.UNKNOWN_DATA_URI_ENCODING));
+  });
+
   describe('eviction', function() {
     it('evicts media to meet the max buffer tail limit', function(done) {
       setupVod();
