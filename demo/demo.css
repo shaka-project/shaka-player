@@ -153,12 +153,33 @@ summary {
 
 #errorDisplay {
   background-color: #d84a38;
-  color: white;
   margin: 0;
   padding: 0;
   line-height: 2em;
   text-align: center;
   width: 100%;
+  display: none;
+}
+
+#errorDisplayText {
+  background-color: #d84a38;
+  color: white;
+  margin-left: 2em;
+  margin-right: 2em;
+  float: center;
+}
+
+#errorDisplayCloseButton {
+  background-color: #d84a38;
+  color: white;
+  position: relative;
+  padding: 0 0;
+  top: 0em;
+  right: 0.5em;
+  float: right;
+  font-weight: bold;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 #logSection {

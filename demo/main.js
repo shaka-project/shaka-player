@@ -40,6 +40,9 @@ shakaDemo.controls_ = null;
  * Initialize the application.
  */
 shakaDemo.init = function() {
+  document.getElementById('errorDisplayCloseButton').addEventListener(
+      'click', shakaDemo.closeError);
+
   // Display the version number.
   document.getElementById('version').textContent = shaka.Player.version;
 
@@ -81,14 +84,14 @@ shakaDemo.init = function() {
   shaka.polyfill.installAll();
 
   if (!shaka.Player.isBrowserSupported()) {
-    var errorDisplay = document.getElementById('errorDisplay');
+    var errorDisplayText = document.getElementById('errorDisplayText');
     var error = 'Your browser is not supported!';
 
     // IE8 and other very old browsers don't have textContent.
-    if (errorDisplay.textContent === undefined) {
-      errorDisplay.innerText = error;
+    if (errorDisplayText.textContent === undefined) {
+      errorDisplayText.innerText = error;
     } else {
-      errorDisplay.textContent = error;
+      errorDisplayText.textContent = error;
     }
 
     // Disable the load button.
@@ -96,7 +99,10 @@ shakaDemo.init = function() {
     loadButton.disabled = true;
 
     // Make sure the error is seen.
-    errorDisplay.style.fontSize = '250%';
+    errorDisplayText.style.fontSize = '250%';
+
+    var errorDisplay = document.getElementById('errorDisplay');
+    errorDisplay.style.display = 'block';
   } else {
     shaka.Player.probeSupport().then(function(support) {
       shakaDemo.support_ = support;
@@ -147,8 +153,17 @@ shakaDemo.onErrorEvent_ = function(event) {
 shakaDemo.onError_ = function(error) {
   console.error('Player error', error);
   var message = error.message || ('Error code ' + error.code);
-  var errorDisplay = document.getElementById('errorDisplay');
-  errorDisplay.textContent = message;
+  document.getElementById('errorDisplay').style.display = 'block';
+  document.getElementById('errorDisplayText').textContent = message;
+};
+
+
+/**
+ * Closes the error bar.
+ */
+shakaDemo.closeError = function() {
+  document.getElementById('errorDisplay').style.display = 'none';
+  document.getElementById('errorDisplayText').textContent = '';
 };
 
 

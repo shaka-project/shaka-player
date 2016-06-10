@@ -112,8 +112,7 @@ shakaDemo.onAssetKeyUp_ = function(event) {
  * @private
  */
 shakaDemo.preparePlayer_ = function(asset) {
-  var errorDisplay = document.getElementById('errorDisplay');
-  errorDisplay.textContent = '';
+  shakaDemo.closeError();
 
   var player = shakaDemo.player_;
 

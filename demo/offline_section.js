@@ -102,7 +102,8 @@ shakaDemo.setupOfflineAssets_ = function() {
 
 /** @private */
 shakaDemo.storeAsset_ = function() {
-  var errorDisplay = document.getElementById('errorDisplay');
+  shakaDemo.closeError();
+
   var assetList = document.getElementById('assetList');
   var progress = document.getElementById('progress');
   var storeBtn = document.getElementById('storeOffline');
@@ -114,7 +115,6 @@ shakaDemo.storeAsset_ = function() {
   progress.textContent = '0';
   storeBtn.disabled = true;
   deleteBtn.disabled = true;
-  errorDisplay.textContent = '';
 
   var metadata = {name: asset.name || asset.manifestUri};
   var storage = new shaka.offline.Storage(shakaDemo.player_);
@@ -139,7 +139,8 @@ shakaDemo.storeAsset_ = function() {
 
 /** @private */
 shakaDemo.deleteAsset_ = function() {
-  var errorDisplay = document.getElementById('errorDisplay');
+  shakaDemo.closeError();
+
   var assetList = document.getElementById('assetList');
   var storeBtn = document.getElementById('storeOffline');
   var deleteBtn = document.getElementById('deleteOffline');
@@ -147,7 +148,6 @@ shakaDemo.deleteAsset_ = function() {
 
   storeBtn.disabled = true;
   deleteBtn.disabled = true;
-  errorDisplay.textContent = '';
 
   var storage = new shaka.offline.Storage(shakaDemo.player_);
   storage.configure(/** @type {shakaExtern.OfflineConfiguration} */ ({
