@@ -474,7 +474,8 @@ describe('DashParser.Live', function() {
           expect(timeline.getSegmentAvailabilityStart()).toBe(110);
           // Similarly, normally the end should be 4:50; but with the delay
           // it will be 3:50 minutes.
-          expect(timeline.getSegmentAvailabilityEnd()).toBe(230);
+          expect(timeline.getSegmentAvailabilityEnd()).toBe(290);
+          expect(timeline.getSeekRangeEnd()).toBe(230);
         })
         .catch(fail)
         .then(done);

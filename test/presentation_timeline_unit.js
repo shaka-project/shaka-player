@@ -54,7 +54,8 @@ describe('PresentationTimeline', function() {
       segmentAvailabilityDuration,
       maxSegmentDuration,
       clockOffset) {
-    var timeline = new shaka.media.PresentationTimeline(presentationStartTime);
+    var timeline =
+        new shaka.media.PresentationTimeline(presentationStartTime, 0);
     timeline.setDuration(duration || infinity);
     timeline.setSegmentAvailabilityDuration(segmentAvailabilityDuration);
     timeline.notifyMaxSegmentDuration(maxSegmentDuration);

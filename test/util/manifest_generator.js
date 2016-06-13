@@ -29,7 +29,7 @@ goog.provide('shaka.test.ManifestGenerator');
  * @struct
  */
 shaka.test.ManifestGenerator = function() {
-  var timeline = new shaka.media.PresentationTimeline(0);
+  var timeline = new shaka.media.PresentationTimeline(0, 0);
   timeline.setSegmentAvailabilityDuration(Number.POSITIVE_INFINITY);
   timeline.notifyMaxSegmentDuration(10);
 
