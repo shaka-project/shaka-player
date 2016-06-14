@@ -1,3 +1,5 @@
 # All standard text parsing plugins.
 
++../../lib/media/ttml_text_parser.js
 +../../lib/media/vtt_text_parser.js
+
