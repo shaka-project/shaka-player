@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# Copyright 2016 Google Inc.
+# Copyright 2016 Google Inc.  All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,13 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import check
+"""Builds the dependencies, runs the checks, and compiles the library."""
+
 import build
+import check
 import gendeps
 import shakaBuildHelpers
 
+
 def main(args):
-  code = gendeps.genDeps([])
+  code = gendeps.gen_deps([])
   if code != 0:
     return code
 
@@ -36,4 +39,4 @@ def main(args):
   return build.main(build_args)
 
 if __name__ == '__main__':
-  shakaBuildHelpers.runMain(main)
+  shakaBuildHelpers.run_main(main)

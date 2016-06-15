@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# Copyright 2016 Google Inc.
+# Copyright 2016 Google Inc.  All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,10 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Creates a build from the given commands.  A command is either an addition or
-a subtraction.  An addition is prefixed with a +; a subtraction is when
-prefixed with a -.  After the character, there is a name of a file or a @ sign
-and the name of a build file.
+"""Creates a build from the given commands.
+
+A command is either an addition or a subtraction.  An addition is prefixed with
+a +; a subtraction is when prefixed with a -.  After the character, there is a
+name of a file or a @ sign and the name of a build file.
 
 Build files are the files found in build/types.  These files are simply a
 newline separated list of commands to execute.  So if the "+@complete" command
@@ -35,58 +36,64 @@ Examples:
 
   build.py +@complete
   build.py +@complete -@networking
-  build.py --name custom +@manifests +@networking +../my_plugin.js"""
+  build.py --name custom +@manifests +@networking +../my_plugin.js
+"""
 
 import os
 import re
-import shakaBuildHelpers
 import shutil
 import subprocess
 import sys
 
+import shakaBuildHelpers
+
+
 closure_opts = [
-  '--language_in', 'ECMASCRIPT5',
-  '--language_out', 'ECMASCRIPT3',
+    '--language_in', 'ECMASCRIPT5',
+    '--language_out', 'ECMASCRIPT3',
 
-  '--jscomp_error=*',
+    '--jscomp_error=*',
 
-  # 'deprecatedAnnotations' controls complains about @expose, but the new
-  # @nocollapse annotation does not do the same job for properties.
-  # So since we can't use the new annotations, we have to ignore complaints
-  # about the old one.
-  '--jscomp_off=deprecatedAnnotations',
+    # 'deprecatedAnnotations' controls complains about @expose, but the new
+    # @nocollapse annotation does not do the same job for properties.
+    # So since we can't use the new annotations, we have to ignore complaints
+    # about the old one.
+    '--jscomp_off=deprecatedAnnotations',
 
-  # 'analyzerChecks' complains about countless instances of implicitly nullable
-  # types, plus a few other issues.  Even the closure library doesn't pass
-  # these checks, and the implicit nullability check in particular is over-
-  # zealous and unhelpful.  So we disable the whole category of
-  # 'analyzerChecks'.
-  '--jscomp_off=analyzerChecks',
+    # 'analyzerChecks' complains about countless instances of implicitly
+    # nullable types, plus a few other issues.  Even the closure library doesn't
+    # pass these checks, and the implicit nullability check in particular is
+    # over-zealous and unhelpful.  So we disable the whole category of
+    # 'analyzerChecks'.
+    '--jscomp_off=analyzerChecks',
 
-  '--extra_annotation_name=listens',
-  '--extra_annotation_name=exportDoc',
+    '--extra_annotation_name=listens',
+    '--extra_annotation_name=exportDoc',
 
-  '--conformance_configs', '%s/build/conformance.textproto' % \
-      shakaBuildHelpers.cygwinSafePath(shakaBuildHelpers.getSourceBase()),
+    '--conformance_configs',
+    ('%s/build/conformance.textproto' %
+     shakaBuildHelpers.cygwin_safe_path(shakaBuildHelpers.get_source_base())),
 
-  '-O', 'ADVANCED',
-  '--generate_exports',
-  '--output_wrapper_file=%s/build/wrapper.template.js' % \
-      shakaBuildHelpers.cygwinSafePath(shakaBuildHelpers.getSourceBase()),
+    '-O', 'ADVANCED',
+    '--generate_exports',
+    ('--output_wrapper_file=%s/build/wrapper.template.js' %
+     shakaBuildHelpers.cygwin_safe_path(shakaBuildHelpers.get_source_base())),
 
-  '-D', 'COMPILED=true',
-  '-D', 'goog.DEBUG=false',
-  '-D', 'goog.STRICT_MODE_COMPATIBLE=true',
-  '-D', 'goog.ENABLE_DEBUG_LOADER=false',
-  '-D', 'goog.asserts.ENABLE_ASSERTS=false',
-  '-D', 'shaka.log.MAX_LOG_LEVEL=0',
-  '-D', 'GIT_VERSION="%s"' % shakaBuildHelpers.calculateVersion()
+    '-D', 'COMPILED=true',
+    '-D', 'goog.DEBUG=false',
+    '-D', 'goog.STRICT_MODE_COMPATIBLE=true',
+    '-D', 'goog.ENABLE_DEBUG_LOADER=false',
+    '-D', 'goog.asserts.ENABLE_ASSERTS=false',
+    '-D', 'shaka.log.MAX_LOG_LEVEL=0',
+    '-D', 'GIT_VERSION="%s"' % shakaBuildHelpers.calculate_version()
 ]
 
-class Build:
-  """Defines a build that has been parsed from a build file.  This has
-  exclude files even though it will not be used at the top-level.  This allows
-  combining builds.  A file will only exist in at most one set.
+
+class Build(object):
+  """Defines a build that has been parsed from a build file.
+
+  This has exclude files even though it will not be used at the top-level.  This
+  allows combining builds.  A file will only exist in at most one set.
 
   Members:
     include - A set of files to include.
@@ -97,65 +104,67 @@ class Build:
     self.include = include or set()
     self.exclude = exclude or set()
 
-  def _getBuildFilePath(self, name, root):
-    """Gets the full path to a build file, if it exists.  Returns None if not.
+  def _get_build_file_path(self, name, root):
+    """Gets the full path to a build file, if it exists.
 
-    Arguments:
-      name - The string name to check.
+    Args:
+      name: The string name to check.
+      root: The full path to the base directory.
 
     Returns:
-      The full path to the build file.
+      The full path to the build file, or None if not found.
     """
-    sourceBase = shakaBuildHelpers.getSourceBase()
-    localPath = os.path.join(root, name)
-    buildPath = os.path.join(sourceBase, 'build', 'types', name)
-    if (os.path.isfile(localPath) and os.path.isfile(buildPath)
-        and localPath != buildPath):
+    source_base = shakaBuildHelpers.get_source_base()
+    local_path = os.path.join(root, name)
+    build_path = os.path.join(source_base, 'build', 'types', name)
+    if (os.path.isfile(local_path) and os.path.isfile(build_path)
+        and local_path != build_path):
       print >> sys.stderr, 'Build file "%s" is ambiguous' % name
       return None
-    elif os.path.isfile(localPath):
-      return localPath
-    elif os.path.isfile(buildPath):
-      return buildPath
+    elif os.path.isfile(local_path):
+      return local_path
+    elif os.path.isfile(build_path):
+      return build_path
     else:
       print >> sys.stderr, 'Build file not found: ' + name
       return None
 
-  def _reverse(self):
+  def _combine(self, other):
+    include_all = self.include | other.include
+    exclude_all = self.exclude | other.exclude
+    self.include = include_all - exclude_all
+    self.exclude = exclude_all - include_all
+
+  def reverse(self):
     return Build(self.exclude, self.include)
 
-  def _combine(self, other):
-    includeAll = self.include | other.include
-    excludeAll = self.exclude | other.exclude
-    self.include = includeAll - excludeAll
-    self.exclude = excludeAll - includeAll
-
-  def _addCore(self):
+  def add_core(self):
     """Adds the core library."""
     # Add externs and closure dependencies.
-    sourceBase = shakaBuildHelpers.getSourceBase()
+    source_base = shakaBuildHelpers.get_source_base()
     match = re.compile(r'.*\.js$')
-    self.include = self.include | set(
-        shakaBuildHelpers.getAllFiles(
-            os.path.join(sourceBase, 'externs'), match) +
-        shakaBuildHelpers.getAllFiles(
-            os.path.join(sourceBase, 'third_party', 'closure'), match))
+    self.include |= set(
+        shakaBuildHelpers.get_all_files(
+            os.path.join(source_base, 'externs'), match) +
+        shakaBuildHelpers.get_all_files(
+            os.path.join(source_base, 'third_party', 'closure'), match))
 
     # Check that there are no files in 'core' that are removed
-    coreBuild = Build()
-    coreBuild.parseBuild(['+@core'], os.getcwd())
-    coreFiles = coreBuild.include
-    if len(self.exclude & coreFiles) > 0:
+    core_build = Build()
+    core_build.parse_build(['+@core'], os.getcwd())
+    core_files = core_build.include
+    if self.exclude & core_files:
       print >> sys.stderr, 'Cannot exclude files from core'
-    self.include = self.include | coreFiles
+    self.include |= core_files
 
-  def parseBuild(self, lines, root):
-    """Parses a Build object from the given lines of commands.  This will
-    recursively read and parse builds.
+  def parse_build(self, lines, root):
+    """Parses a Build object from the given lines of commands.
 
-    Arguments:
-      lines - An array of strings defining commands.
-      root - The full path to the base directory.
+    This will recursively read and parse builds.
+
+    Args:
+      lines: An array of strings defining commands.
+      root: The full path to the base directory.
 
     Returns:
       True on success, False otherwise.
@@ -172,11 +181,11 @@ class Build:
       if not line:
         continue
 
-      isNeg = False
       if line[0] == '+':
+        is_neg = False
         line = line[1:].strip()
       elif line[0] == '-':
-        isNeg = True
+        is_neg = True
         line = line[1:].strip()
       else:
         print >> sys.stderr, 'Operation (+/-) required'
@@ -185,21 +194,21 @@ class Build:
       if line[0] == '@':
         line = line[1:].strip()
 
-        buildPath = self._getBuildFilePath(line, root)
-        if not buildPath:
+        build_path = self._get_build_file_path(line, root)
+        if not build_path:
           return False
-        lines = open(buildPath).readlines()
-        subRoot = os.path.dirname(buildPath)
+        lines = open(build_path).readlines()
+        sub_root = os.path.dirname(build_path)
 
         # If this is a build file, then recurse and combine the builds.
-        subBuild = Build()
-        if not subBuild.parseBuild(lines, subRoot):
+        sub_build = Build()
+        if not sub_build.parse_build(lines, sub_root):
           return False
 
-        if isNeg:
-          self._combine(subBuild._reverse())
+        if is_neg:
+          self._combine(sub_build.reverse())
         else:
-          self._combine(subBuild)
+          self._combine(sub_build)
       else:
         if not os.path.isabs(line):
           line = os.path.abspath(os.path.join(root, line))
@@ -207,7 +216,7 @@ class Build:
           print >> sys.stderr, 'Unable to find file ' + line
           return False
 
-        if isNeg:
+        if is_neg:
           self.include.discard(line)
           self.exclude.add(line)
         else:
@@ -216,79 +225,80 @@ class Build:
 
     return True
 
-  def buildRaw(self, extra_opts):
+  def build_raw(self, extra_opts):
     """Builds the files in |self.include| using the given extra Closure options.
 
-    Arguments:
-      extra_opts - An array of extra options to give to Closure.
+    Args:
+      extra_opts: An array of extra options to give to Closure.
 
     Returns:
       True on success; False on failure.
     """
-    jar = os.path.join(shakaBuildHelpers.getSourceBase(),
-        'third_party', 'closure', 'compiler.jar')
-    jar = shakaBuildHelpers.cygwinSafePath(jar)
-    files = map(shakaBuildHelpers.cygwinSafePath, list(self.include))
+    jar = os.path.join(shakaBuildHelpers.get_source_base(),
+                       'third_party', 'closure', 'compiler.jar')
+    jar = shakaBuildHelpers.cygwin_safe_path(jar)
+    files = [shakaBuildHelpers.cygwin_safe_path(f) for f in self.include]
 
     try:
-      cmdLine = ['java', '-jar', jar] + closure_opts + extra_opts + files
-      shakaBuildHelpers.printCmdLine(cmdLine)
-      subprocess.check_call(cmdLine)
+      cmd_line = ['java', '-jar', jar] + closure_opts + extra_opts + files
+      shakaBuildHelpers.print_cmd_line(cmd_line)
+      subprocess.check_call(cmd_line)
       return True
     except subprocess.CalledProcessError:
       print >> sys.stderr, 'Build failed'
       return False
 
-  def buildLibrary(self, name, rebuild):
+  def build_library(self, name, rebuild):
     """Builds Shaka Player using the files in |self.include|.
 
-    Arguments:
-      name - The name of the build.
-      rebuild - True to rebuild, False to ignore if no changes are detected.
+    Args:
+      name: The name of the build.
+      rebuild: True to rebuild, False to ignore if no changes are detected.
 
     Returns:
       True on success; False on failure.
     """
-    self._addCore()
+    self.add_core()
 
     # In the build files, we use '/' in the paths, however Windows uses '\'.
     # Although Windows supports both, the source mapping will not work.  So
     # use Linux-style paths for arguments.
-    sourceBase = shakaBuildHelpers.getSourceBase().replace('\\', '/')
+    source_base = shakaBuildHelpers.get_source_base().replace('\\', '/')
 
-    resultPrefix = shakaBuildHelpers.cygwinSafePath(
-        os.path.join(sourceBase, 'dist', 'shaka-player.' + name))
-    resultFile = resultPrefix + '.js'
-    resultDebug = resultPrefix + '.debug.js'
-    resultMap = resultPrefix + '.debug.map'
+    result_prefix = shakaBuildHelpers.cygwin_safe_path(
+        os.path.join(source_base, 'dist', 'shaka-player.' + name))
+    result_file = result_prefix + '.js'
+    result_debug = result_prefix + '.debug.js'
+    result_map = result_prefix + '.debug.map'
 
     # Detect changes to the library and only build if changes have been made.
-    if not rebuild and os.path.isfile(resultFile):
-      buildTime = os.path.getmtime(resultFile)
-      completeBuild = Build()
-      if completeBuild.parseBuild(['+@complete'], os.getcwd()):
-        completeBuild._addCore()
+    if not rebuild and os.path.isfile(result_file):
+      build_time = os.path.getmtime(result_file)
+      complete_build = Build()
+      if complete_build.parse_build(['+@complete'], os.getcwd()):
+        complete_build.add_core()
         # Get a list of files modified since the build file was.
-        editedFiles = filter(lambda x: os.path.getmtime(x) > buildTime,
-                             completeBuild.include)
-        if len(editedFiles) == 0:
+        edited_files = [f for f in complete_build.include
+                        if os.path.getmtime(f) > build_time]
+        if not edited_files:
           print 'No changes detected, not building.  Use --force to override.'
           return True
 
-    opts = ['--create_source_map', resultMap, '--js_output_file', resultDebug,
-            '--source_map_location_mapping', sourceBase + '|..']
-    if not self.buildRaw(opts):
+    opts = ['--create_source_map', result_map, '--js_output_file', result_debug,
+            '--source_map_location_mapping', source_base + '|..']
+    if not self.build_raw(opts):
       return False
 
-    shutil.copyfile(resultDebug, resultFile)
+    shutil.copyfile(result_debug, result_file)
 
     # Add a special source-mapping comment so that Chrome and Firefox can map
     # line and character numbers from the compiled library back to the original
     # source locations.
-    with open(resultDebug, 'a') as f:
+    with open(result_debug, 'a') as f:
       f.write('//# sourceMappingURL=shaka-player.' + name + '.debug.map')
 
     return True
+
 
 def usage():
   print 'Usage:', sys.argv[0], """[options] [commands]
@@ -300,6 +310,7 @@ Options:
 """
   print __doc__
 
+
 def main(args):
   name = 'compiled'
   lines = []
@@ -307,7 +318,7 @@ def main(args):
   i = 0
   while i < len(args):
     if args[i] == '--name':
-      i = i + 1
+      i += 1
       if i == len(args):
         print >> sys.stderr, '--name requires an argument'
         return 1
@@ -323,17 +334,17 @@ def main(args):
       return 1
     else:
       lines.append(args[i])
-    i = i + 1
+    i += 1
 
-  if len(lines) == 0:
+  if not lines:
     lines = ['+@complete']
 
   print 'Compiling the library...'
-  customBuild = Build()
-  if not customBuild.parseBuild(lines, os.getcwd()):
+  custom_build = Build()
+  if not custom_build.parse_build(lines, os.getcwd()):
     return 1
-  return 0 if customBuild.buildLibrary(name, rebuild) else 1
+  return 0 if custom_build.build_library(name, rebuild) else 1
 
 if __name__ == '__main__':
-  shakaBuildHelpers.runMain(main)
+  shakaBuildHelpers.run_main(main)
 
