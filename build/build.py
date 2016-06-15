@@ -251,7 +251,11 @@ class Build:
     """
     self._addCore()
 
-    sourceBase = shakaBuildHelpers.getSourceBase()
+    # In the build files, we use '/' in the paths, however Windows uses '\'.
+    # Although Windows supports both, the source mapping will not work.  So
+    # use Linux-style paths for arguments.
+    sourceBase = shakaBuildHelpers.getSourceBase().replace('\\', '/')
+
     resultPrefix = shakaBuildHelpers.cygwinSafePath(
         os.path.join(sourceBase, 'dist', 'shaka-player.' + name))
     resultFile = resultPrefix + '.js'
