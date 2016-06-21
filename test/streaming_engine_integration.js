@@ -23,8 +23,8 @@ describe('StreamingEngine', function() {
       initSegmentUri: 'test/assets/sintel-video-init.mp4',
       mvhdOffset: 0x24,
       segmentUri: 'test/assets/sintel-video-segment.mp4',
-      tfdtOffset: 0x34,
-      segmentDuration: 12,
+      tfdtOffset: 0x38,
+      segmentDuration: 10,
       presentationTimeOffset: 0,
       mimeType: 'video/mp4; codecs="avc1.42c01e"',
       generator: null
@@ -33,8 +33,8 @@ describe('StreamingEngine', function() {
       initSegmentUri: 'test/assets/sintel-audio-init.mp4',
       mvhdOffset: 0x20,
       segmentUri: 'test/assets/sintel-audio-segment.mp4',
-      tfdtOffset: 0x38,
-      segmentDuration: 10.005333,
+      tfdtOffset: 0x3c,
+      segmentDuration: 10,
       presentationTimeOffset: 0,
       mimeType: 'audio/mp4; codecs="mp4a.40.2"',
       generator: null
@@ -142,11 +142,11 @@ describe('StreamingEngine', function() {
           20 /* timeShiftBufferDepth */)
     ]).then(function() {
       // The generator's AST is set to 295 seconds in the past, so the live-edge
-      // is at 295 - 12 seconds.
-      // -12 to account for maxSegmentDuration.
+      // is at 295 - 10 seconds.
+      // -10 to account for maxSegmentDuration.
       timeline = shaka.test.StreamingEngineUtil.createFakePresentationTimeline(
-          275 - 12 /* segmentAvailabilityStart */,
-          295 - 12 /* segmentAvailabilityEnd */,
+          275 - 10 /* segmentAvailabilityStart */,
+          295 - 10 /* segmentAvailabilityEnd */,
           Number.POSITIVE_INFINITY /* presentationDuration */);
       setupPlayhead();
 
@@ -442,7 +442,7 @@ describe('StreamingEngine', function() {
         //   [(segmentAvailabilityEnd - rebufferingGoal) / segmentDuration] + 1
         // Then -1 to account for drift safe buffering.
         var segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
-        netEngine.expectRequest('1_video_23', segmentType);
+        netEngine.expectRequest('1_video_28', segmentType);
         netEngine.expectRequest('1_audio_28', segmentType);
         video.play();
       });

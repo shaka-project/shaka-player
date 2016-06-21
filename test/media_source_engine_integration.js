@@ -21,8 +21,8 @@ describe('MediaSourceEngine', function() {
       initSegmentUri: 'test/assets/sintel-video-init.mp4',
       mvhdOffset: 0x24,
       segmentUri: 'test/assets/sintel-video-segment.mp4',
-      tfdtOffset: 0x34,
-      segmentDuration: 12,
+      tfdtOffset: 0x38,
+      segmentDuration: 10,
       presentationTimeOffset: 0,
       mimeType: 'video/mp4; codecs="avc1.42c01e"',
       generator: null
@@ -31,8 +31,8 @@ describe('MediaSourceEngine', function() {
       initSegmentUri: 'test/assets/sintel-audio-init.mp4',
       mvhdOffset: 0x20,
       segmentUri: 'test/assets/sintel-audio-segment.mp4',
-      tfdtOffset: 0x38,
-      segmentDuration: 10.005333,
+      tfdtOffset: 0x3c,
+      segmentDuration: 10,
       presentationTimeOffset: 0,
       mimeType: 'audio/mp4; codecs="mp4a.40.2"',
       generator: null
@@ -124,13 +124,13 @@ describe('MediaSourceEngine', function() {
       expect(buffered('video', 0)).toBe(0);
       return append('video', 1);
     }).then(function() {
-      expect(buffered('video', 0)).toBeCloseTo(12);
+      expect(buffered('video', 0)).toBeCloseTo(10);
       return append('video', 2);
     }).then(function() {
-      expect(buffered('video', 0)).toBeCloseTo(24);
+      expect(buffered('video', 0)).toBeCloseTo(20);
       return append('video', 3);
     }).then(function() {
-      expect(buffered('video', 0)).toBeCloseTo(36);
+      expect(buffered('video', 0)).toBeCloseTo(30);
     }).catch(fail).then(done);
   });
 
@@ -145,19 +145,19 @@ describe('MediaSourceEngine', function() {
         append('video', 3)
       ]);
     }).then(function() {
-      expect(buffered('video', 0)).toBeCloseTo(36);
+      expect(buffered('video', 0)).toBeCloseTo(30);
       return remove('video', 1);
     }).then(function() {
       expect(buffered('video', 0)).toBe(0);
-      expect(buffered('video', 12)).toBeCloseTo(24);
+      expect(buffered('video', 10)).toBeCloseTo(20);
       return remove('video', 2);
     }).then(function() {
       expect(buffered('video', 0)).toBe(0);
-      expect(buffered('video', 12)).toBe(0);
-      expect(buffered('video', 24)).toBeCloseTo(12);
+      expect(buffered('video', 10)).toBe(0);
+      expect(buffered('video', 20)).toBeCloseTo(10);
       return remove('video', 3);
     }).then(function() {
-      expect(buffered('video', 24)).toBe(0);
+      expect(buffered('video', 20)).toBe(0);
     }).catch(fail).then(done);
   });
 
@@ -172,16 +172,16 @@ describe('MediaSourceEngine', function() {
       return append('video', 1);
     }).then(function() {
       expect(mediaSource.duration).toBeCloseTo(20);
-      return mediaSourceEngine.setDuration(40);
+      return mediaSourceEngine.setDuration(35);
     }).then(function() {
-      expect(mediaSource.duration).toBeCloseTo(40);
+      expect(mediaSource.duration).toBeCloseTo(35);
       return Promise.all([
         append('video', 2),
         append('video', 3),
         append('video', 4)
       ]);
     }).then(function() {
-      expect(mediaSource.duration).toBeCloseTo(48);
+      expect(mediaSource.duration).toBeCloseTo(40);
       return mediaSourceEngine.setDuration(60);
     }).then(function() {
       expect(mediaSource.duration).toBeCloseTo(60);
@@ -201,7 +201,7 @@ describe('MediaSourceEngine', function() {
     }).then(function() {
       return mediaSourceEngine.endOfStream();
     }).then(function() {
-      expect(mediaSource.duration).toBeCloseTo(36);
+      expect(mediaSource.duration).toBeCloseTo(30);
     }).catch(fail).then(done);
   });
 
@@ -238,13 +238,13 @@ describe('MediaSourceEngine', function() {
       expect(buffered('audio', 0)).toBe(0);
       return append('audio', 1);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(10.005333);
+      expect(buffered('audio', 0)).toBeCloseTo(10, 0.1);
       return append('audio', 2);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(20.010666);
+      expect(buffered('audio', 0)).toBeCloseTo(20, 0.1);
       return append('audio', 3);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(30.015999);
+      expect(buffered('audio', 0)).toBeCloseTo(30, 0.1);
     }).catch(fail).then(done);
   });
 
@@ -259,38 +259,41 @@ describe('MediaSourceEngine', function() {
     var audioStreaming = appendInit('audio').then(function() {
       return append('audio', 1);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(10.005333);
+      expect(buffered('audio', 0)).toBeCloseTo(10, 0.1);
       return append('audio', 2);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(20.010666);
+      expect(buffered('audio', 0)).toBeCloseTo(20, 0.1);
       return append('audio', 3);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(30.015999);
+      expect(buffered('audio', 0)).toBeCloseTo(30, 0.1);
       return append('audio', 4);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(40.021333);
+      expect(buffered('audio', 0)).toBeCloseTo(40, 0.1);
       return append('audio', 5);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(50.026666);
+      expect(buffered('audio', 0)).toBeCloseTo(50, 0.1);
       return append('audio', 6);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(60.031999);
+      expect(buffered('audio', 0)).toBeCloseTo(60, 0.1);
     }).catch(fail);
 
     var videoStreaming = appendInit('video').then(function() {
       return append('video', 1);
     }).then(function() {
-      expect(buffered('video', 0)).toBeCloseTo(12);
+      expect(buffered('video', 0)).toBeCloseTo(10);
       return append('video', 2);
     }).then(function() {
-      expect(buffered('video', 0)).toBeCloseTo(24);
+      expect(buffered('video', 0)).toBeCloseTo(20);
       return append('video', 3);
     }).then(function() {
-      expect(buffered('video', 0)).toBeCloseTo(36);
+      expect(buffered('video', 0)).toBeCloseTo(30);
       return append('video', 4);
     }).then(function() {
-      expect(buffered('video', 0)).toBeCloseTo(48);
+      expect(buffered('video', 0)).toBeCloseTo(40);
       return append('video', 5);
+    }).then(function() {
+      expect(buffered('video', 0)).toBeCloseTo(50);
+      return append('video', 6);
     }).then(function() {
       expect(buffered('video', 0)).toBeCloseTo(60);
     }).catch(fail);
@@ -298,7 +301,7 @@ describe('MediaSourceEngine', function() {
     Promise.all([audioStreaming, videoStreaming]).then(function() {
       return mediaSourceEngine.endOfStream();
     }).then(function() {
-      expect(mediaSource.duration).toBeCloseTo(60.031999);
+      expect(mediaSource.duration).toBeCloseTo(60, 0.1);
     }).catch(fail).then(done);
   });
 
@@ -307,15 +310,15 @@ describe('MediaSourceEngine', function() {
     mediaSourceEngine.setDuration(presentationDuration).then(function() {
       return appendInit('video');
     }).then(function() {
-      return mediaSourceEngine.setAppendWindowEnd('video', 20);
+      return mediaSourceEngine.setAppendWindowEnd('video', 18);
     }).then(function() {
       expect(buffered('video', 0)).toBe(0);
       return append('video', 1);
     }).then(function() {
-      expect(buffered('video', 0)).toBeCloseTo(12);
+      expect(buffered('video', 0)).toBeCloseTo(10);
       return append('video', 2);
     }).then(function() {
-      expect(buffered('video', 0)).toBeCloseTo(20, 0);
+      expect(buffered('video', 0)).toBeCloseTo(18, 0);
     }).catch(fail).then(done);
   });
 });
