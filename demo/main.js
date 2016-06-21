@@ -98,6 +98,11 @@ shakaDemo.init = function() {
     var loadButton = document.getElementById('loadButton');
     loadButton.disabled = true;
 
+    // Hide the error message's close button.
+    var errorDisplayCloseButton =
+        document.getElementById('errorDisplayCloseButton');
+    errorDisplayCloseButton.style.display = 'none';
+
     // Make sure the error is seen.
     errorDisplayText.style.fontSize = '250%';
 
