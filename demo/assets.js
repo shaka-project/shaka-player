@@ -360,6 +360,22 @@ shakaAssets.testAssets = [
       'com.widevine.alpha': '//widevine-proxy.appspot.com/proxy'
     }
   },
+  {
+    name: 'Tears of Steel (multicodec, TTML)',
+    manifestUri: '//storage.googleapis.com/shaka-demo-assets/tos-ttml/dash.mpd',
+    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
+    source: shakaAssets.Source.SHAKA,
+    drm: [],
+    features: [
+      shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.PSSH,
+      shakaAssets.Feature.SEGMENT_BASE,
+      shakaAssets.Feature.SUBTITLES,
+      shakaAssets.Feature.TTML,
+      shakaAssets.Feature.WEBM
+    ]
+  },
   // }}}
 
   // YouTube assets {{{
@@ -597,9 +613,9 @@ shakaAssets.testAssets = [
     features: [
       shakaAssets.Feature.EMBEDDED_TEXT,
       shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
       shakaAssets.Feature.SEGMENTED_TEXT,
-      shakaAssets.Feature.MP4,
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.TTML,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION
