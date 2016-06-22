@@ -251,10 +251,10 @@ describe('Storage', function() {
         });
 
         stream1Index.merge([
-          new SegmentReference(0, 0, 1, ['fake:0'], 0, 53),
-          new SegmentReference(1, 1, 2, ['fake:1'], 31, 43),
-          new SegmentReference(2, 2, 3, ['fake:2'], 291, 356),
-          new SegmentReference(3, 3, 4, ['fake:3'], 11, 27)
+          new SegmentReference(0, 0, 1, makeUris('fake:0'), 0, 53),
+          new SegmentReference(1, 1, 2, makeUris('fake:1'), 31, 43),
+          new SegmentReference(2, 2, 3, makeUris('fake:2'), 291, 356),
+          new SegmentReference(3, 3, 4, makeUris('fake:3'), 11, 27)
         ]);
 
         var originalUri = 'fake:123';
@@ -303,10 +303,12 @@ describe('Storage', function() {
         });
 
         stream1Index.merge([
-          new SegmentReference(0, 0, 1, ['fake:0'], 0, 53),
-          new SegmentReference(1, 1, 2, ['fake:1'], 0, null),  // Estimate: 10
-          new SegmentReference(2, 2, 4, ['fake:2'], 0, null),  // Estimate: 20
-          new SegmentReference(3, 4, 5, ['fake:3'], 11, 27)
+          new SegmentReference(0, 0, 1, makeUris('fake:0'), 0, 53),
+          // Estimate: 10
+          new SegmentReference(1, 1, 2, makeUris('fake:1'), 0, null),
+          // Estimate: 20
+          new SegmentReference(2, 2, 4, makeUris('fake:2'), 0, null),
+          new SegmentReference(3, 4, 5, makeUris('fake:3'), 11, 27)
         ]);
 
         var originalUri = 'fake:123';
@@ -359,14 +361,14 @@ describe('Storage', function() {
         });
 
         stream1Index.merge([
-          new SegmentReference(0, 0, 1, ['fake:0'], 0, null),
-          new SegmentReference(1, 1, 2, ['fake:0'], 0, null),
-          new SegmentReference(2, 2, 3, ['fake:1'], 0, null),
-          new SegmentReference(3, 3, 4, ['fake:0'], 0, null),
-          new SegmentReference(4, 4, 5, ['fake:1'], 0, null)
+          new SegmentReference(0, 0, 1, makeUris('fake:0'), 0, null),
+          new SegmentReference(1, 1, 2, makeUris('fake:0'), 0, null),
+          new SegmentReference(2, 2, 3, makeUris('fake:1'), 0, null),
+          new SegmentReference(3, 3, 4, makeUris('fake:0'), 0, null),
+          new SegmentReference(4, 4, 5, makeUris('fake:1'), 0, null)
         ]);
         stream2Index.merge([
-          new SegmentReference(0, 0, 1, ['fake:0'], 0, null)
+          new SegmentReference(0, 0, 1, makeUris('fake:0'), 0, null)
         ]);
 
         storage.store('')
@@ -407,7 +409,7 @@ describe('Storage', function() {
 
         var stream = manifest.periods[0].streamSets[0].streams[0];
         stream.initSegmentReference =
-            new shaka.media.InitSegmentReference(['fake:0'], 0, null);
+            new shaka.media.InitSegmentReference(makeUris('fake:0'), 0, null);
 
         storage.store('')
             .then(function(manifest) {
@@ -436,9 +438,9 @@ describe('Storage', function() {
         netEngine.setResponseMap({'fake:0': new ArrayBuffer(5)});
 
         var refs = [
-          new SegmentReference(0, 10, 11, ['fake:0'], 0, null),
-          new SegmentReference(1, 11, 12, ['fake:0'], 0, null),
-          new SegmentReference(2, 12, 13, ['fake:0'], 0, null)
+          new SegmentReference(0, 10, 11, makeUris('fake:0'), 0, null),
+          new SegmentReference(1, 11, 12, makeUris('fake:0'), 0, null),
+          new SegmentReference(2, 12, 13, makeUris('fake:0'), 0, null)
         ];
         stream1Index.merge(refs);
         manifest.presentationTimeline.notifySegments(0, refs);
@@ -463,9 +465,9 @@ describe('Storage', function() {
         netEngine.setResponseMap({'fake:0': new ArrayBuffer(5)});
 
         stream1Index.merge([
-          new SegmentReference(0, 0, 1, ['fake:0'], 0, null),
-          new SegmentReference(1, 1, 2, ['fake:0'], 0, null),
-          new SegmentReference(2, 2, 3, ['fake:0'], 0, null)
+          new SegmentReference(0, 0, 1, makeUris('fake:0'), 0, null),
+          new SegmentReference(1, 1, 2, makeUris('fake:0'), 0, null),
+          new SegmentReference(2, 2, 3, makeUris('fake:0'), 0, null)
         ]);
 
         var delay = netEngine.delayNextRequest();
@@ -694,4 +696,8 @@ describe('Storage', function() {
           });
     }
   });
+
+  function makeUris(uri) {
+    return function() { return [uri]; };
+  }
 });

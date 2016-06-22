@@ -336,7 +336,7 @@ describe('DashParser.Live', function() {
           // Since the manifest request was redirected, the segment refers to
           // the redirected base.
           var stream = manifest.periods[0].streamSets[0].streams[0];
-          var segmentUri = stream.getSegmentReference(1).uris[0];
+          var segmentUri = stream.getSegmentReference(1).getUris()[0];
           expect(segmentUri).toBe(redirectedUri + 's1.mp4');
         })
         .catch(fail)

@@ -405,6 +405,10 @@ jasmine.Env.prototype.specFilter = function(spec) {};
 jasmine.getEnv = function() {};
 
 
+/** @param {function(*, *)} comparer */
+jasmine.addCustomEqualityTester;
+
+
 
 /**
  * @constructor

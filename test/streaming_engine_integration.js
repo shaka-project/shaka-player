@@ -263,14 +263,15 @@ describe('StreamingEngine', function() {
     manifest.minBufferTime = 2;
 
     // Create InitSegmentReferences.
+    function makeUris(uri) { return function() { return [uri]; }; };
     manifest.periods[0].streamSetsByType.audio.streams[0].initSegmentReference =
-        new shaka.media.InitSegmentReference(['1_audio_init'], 0, null);
+        new shaka.media.InitSegmentReference(makeUris('1_audio_init'), 0, null);
     manifest.periods[0].streamSetsByType.video.streams[0].initSegmentReference =
-        new shaka.media.InitSegmentReference(['1_video_init'], 0, null);
+        new shaka.media.InitSegmentReference(makeUris('1_video_init'), 0, null);
     manifest.periods[1].streamSetsByType.audio.streams[0].initSegmentReference =
-        new shaka.media.InitSegmentReference(['2_audio_init'], 0, null);
+        new shaka.media.InitSegmentReference(makeUris('2_audio_init'), 0, null);
     manifest.periods[1].streamSetsByType.video.streams[0].initSegmentReference =
-        new shaka.media.InitSegmentReference(['2_video_init'], 0, null);
+        new shaka.media.InitSegmentReference(makeUris('2_video_init'), 0, null);
 
     audioStream1 = manifest.periods[0].streamSets[0].streams[0];
     videoStream1 = manifest.periods[0].streamSets[1].streams[0];

@@ -324,7 +324,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
    */
   function makeReference(position, startTime, endTime, uri) {
     return new shaka.media.SegmentReference(
-        position, startTime, endTime, [uri], 0, null);
+        position, startTime, endTime, function() { return [uri]; }, 0, null);
   }
 
   /**

@@ -428,14 +428,10 @@ describe('DashParser.Manifest', function() {
         }).then(function() {
           expect(stream.initSegmentReference).toBe(null);
           expect(stream.findSegmentPosition(0)).toBe(1);
-          expect(stream.getSegmentReference(1)).toEqual(
-              jasmine.objectContaining({
-                startTime: 0,
-                endTime: 30,
-                uris: ['http://example.com/de.vtt'],
-                startByte: 0,
-                endByte: null
-              }));
+          expect(stream.getSegmentReference(1))
+              .toEqual(new shaka.media.SegmentReference(1, 0, 30, function() {
+                return ['http://example.com/de.vtt'];
+              }, 0, null));
         }).catch(fail).then(done);
   });
 
@@ -460,7 +456,7 @@ describe('DashParser.Manifest', function() {
         .then(function(manifest) {
           var streamSet = manifest.periods[0].streamSets[0];
           var stream = streamSet.streams[0];
-          expect(stream.initSegmentReference.uris[0])
+          expect(stream.initSegmentReference.getUris()[0])
               .toBe('http://example.com/%C8%A7.mp4');
           expect(streamSet.language).toBe('\u2603');
         }).catch(fail).then(done);

@@ -273,22 +273,22 @@ describe('StreamingEngine', function() {
     // Create InitSegmentReferences.
     manifest.periods[0].streamSetsByType.audio.streams[0].initSegmentReference =
         new shaka.media.InitSegmentReference(
-            ['1_audio_init'],
+            function() { return ['1_audio_init']; },
             initSegmentRanges.audio[0],
             initSegmentRanges.audio[1]);
     manifest.periods[0].streamSetsByType.video.streams[0].initSegmentReference =
         new shaka.media.InitSegmentReference(
-            ['1_video_init'],
+            function() { return ['1_video_init']; },
             initSegmentRanges.video[0],
             initSegmentRanges.video[1]);
     manifest.periods[1].streamSetsByType.audio.streams[0].initSegmentReference =
         new shaka.media.InitSegmentReference(
-            ['2_audio_init'],
+            function() { return ['2_audio_init']; },
             initSegmentRanges.audio[0],
             initSegmentRanges.audio[1]);
     manifest.periods[1].streamSetsByType.video.streams[0].initSegmentReference =
         new shaka.media.InitSegmentReference(
-            ['2_video_init'],
+            function() { return ['2_video_init']; },
             initSegmentRanges.video[0],
             initSegmentRanges.video[1]);
 

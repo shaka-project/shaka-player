@@ -201,10 +201,11 @@ shaka.test.StreamingEngineUtil.createManifest = function(
       return null;
 
     var d = segmentDurations[type];
+    var getUris = function() {
+      return ['' + periodNumber + '_' + type + '_' + position];
+    };
     return new shaka.media.SegmentReference(
-        position, (position - 1) * d, position * d,
-        ['' + periodNumber + '_' + type + '_' + position],
-        0, null);
+        position, (position - 1) * d, position * d, getUris, 0, null);
   }
 
   var manifest = {

@@ -164,6 +164,43 @@ shaka.test.Util.getClientArg = function(name) {
 
 
 /**
+ * Custom comparer for segment references.
+ * @param {*} first
+ * @param {*} second
+ * @return {boolean|undefined}
+ */
+shaka.test.Util.compareReferences = function(first, second) {
+  var isSegment = first instanceof shaka.media.SegmentReference &&
+      second instanceof shaka.media.SegmentReference;
+  var isInit = first instanceof shaka.media.InitSegmentReference &&
+      second instanceof shaka.media.InitSegmentReference;
+  if (isSegment || isInit) {
+    var a = first.getUris();
+    var b = second.getUris();
+    if (typeof a !== 'object' || typeof b !== 'object' ||
+        typeof a.length != 'number' || typeof b.length !== 'number') {
+      return false;
+    }
+    if (a.length != b.length ||
+        !a.every(function(x, i) { return x == b[i]; })) {
+      return false;
+    }
+  }
+  if (isSegment) {
+    return first.position == second.position &&
+        first.startTime == second.startTime &&
+        first.endTime == second.endTime &&
+        first.startByte == second.startByte &&
+        first.endByte == second.endByte;
+  }
+  if (isInit) {
+    return first.startByte == second.startByte &&
+        first.endByte == second.endByte;
+  }
+};
+
+
+/**
  * Replace goog.asserts and console.assert with a version which hooks into
  * jasmine.  This converts all failed assertions into failed tests.
  */
@@ -227,6 +264,10 @@ var assertsToFailures = {
 // Make sure assertions are converted into failures for all tests.
 beforeAll(assertsToFailures.install);
 afterAll(assertsToFailures.uninstall);
+
+beforeEach(function() {
+  jasmine.addCustomEqualityTester(shaka.test.Util.compareReferences);
+});
 
 beforeAll(function() {
   var logLevel = shaka.test.Util.getClientArg('logLevel');

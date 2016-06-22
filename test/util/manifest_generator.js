@@ -362,8 +362,9 @@ shaka.test.ManifestGenerator.prototype.anyInitSegment = function() {
 shaka.test.ManifestGenerator.prototype.initSegmentReference = function(
     uris, startByte, endByte) {
   var stream = this.currentStream_();
+  var getUris = function() { return uris; };
   stream.initSegmentReference =
-      new shaka.media.InitSegmentReference(uris, startByte, endByte);
+      new shaka.media.InitSegmentReference(getUris, startByte, endByte);
   return this;
 };
 
