@@ -36,9 +36,6 @@ module.exports = function(config) {
       // list of test assets next
       'demo/assets.js',
 
-      // support test before other tests
-      'test/support_check.js',
-
       // unit tests last
       'test/**/*_unit.js',
 

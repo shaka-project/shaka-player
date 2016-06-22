@@ -409,7 +409,10 @@ var xit = function(name, callback, opt_timeout) {};
 jasmine.Env = function() {};
 
 
-/** @param {jasmine.Spec} spec */
+/**
+ * @param {jasmine.Spec} spec
+ * @return {boolean}
+ */
 jasmine.Env.prototype.specFilter = function(spec) {};
 
 

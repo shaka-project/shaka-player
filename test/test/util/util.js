@@ -292,27 +292,16 @@ var assertsToFailures = {
 };
 
 
-(function() {  // Isolate access to specs.
-  // Collect all specs.
-  var allSpecs = [];
-  jasmine.getEnv().specFilter = function(spec) {
-    allSpecs.push(spec);
-    return true;
-  };
-
-  shaka.test.Util.cancelAllRemainingSpecs = function() {
-    allSpecs.forEach(function(spec) {
-      if (spec.result.failedExpectations.length) {
-        // Don't disable any specs which have already failed.
-        return;
-      }
-
-      // You prevent a jasmine spec from running by marking it "pending".
-      // This seems to be a misnomer, as it effectively cancels a spec.
-      spec.pend();
-    });
-  };
-})();
+/**
+ * @param {jasmine.Spec} spec
+ * @return {boolean}
+ */
+jasmine.getEnv().specFilter = (function(spec) {
+  // If the browser is not supported, don't run the tests.  Running zero tests
+  // is considered an error so the overall test will fail on unsupported
+  // browsers.
+  return shaka.Player.isBrowserSupported();
+});
 
 
 // Make sure assertions are converted into failures for all tests.
