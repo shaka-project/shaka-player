@@ -150,5 +150,6 @@ contributors to follow.
 - Allow custom seek range for LIVE video from 0, e.g. [0, 230], see [Link](https://github.com/tvoli/shaka-player/commit/8edb8065d5f85e2edbbc0aca2cc46a1b7abf894d)
 
 - Segmented subtitles, see [Link](https://github.com/tvoli/shaka-player/commit/dd039febf156aa7ae41ca55f15c1791c0334d1b9), [Link](https://github.com/tvoli/shaka-player/commit/e176266bb2322d46e612ff1d89c7df2a692782be), [Fix](https://github.com/tvoli/shaka-player/commit/e6b7e389da630858b58434217b2bdf6708b3bdf2), [Addon](https://github.com/tvoli/shaka-player/commit/231820debb5825a197745d3f46a004b9dc8b382f)
+[Fix](https://github.com/tvoli/shaka-player/commit/5c89df3e9840236514f5ee5798e6a85bcccf99a9)
 
 - Mpd PreProcessor, see [Link](https://github.com/tvoli/shaka-player/commit/b96d6c7a6c9a80d7a0f15a94a18af4378e6850d1)
