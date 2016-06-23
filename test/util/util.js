@@ -45,18 +45,24 @@ goog.provide('shaka.test.Util');
  *
  * @param {number} n The number of rounds to perform.
  * @param {function(function(), number)} setTimeout
+ * @param {{stop: boolean}} loopController
  * @return {!Promise}
  * TODO: Cleanup with patch to jasmine-core.
  */
-shaka.test.Util.processInstantaneousOperations = function(n, setTimeout) {
+shaka.test.Util.processInstantaneousOperations = function(
+    n, setTimeout, loopController) {
   // This is not something we would do in the library, but this tiny hack is
   // needed here for testing.  On Edge, the delay needed here for Promises to
   // resolve is ~100ms.  On Safari, such a large delay is not only not needed,
   // it causes tests to timeout.  So we choose the delay based on the browser.
   var isEdge = navigator.userAgent.indexOf(' Edge/') >= 0;
-  var delay = isEdge ? 100 : 5;
+  var delay = isEdge ? 100 : 2;
   var p = new shaka.util.PublicPromise();
   var inner = function() {
+    if (loopController.stop) {
+      p.resolve();
+      return;
+    }
     jasmine.clock().tick(0);
     n -= 1;
     if (n <= 0) {
@@ -79,29 +85,46 @@ shaka.test.Util.processInstantaneousOperations = function(n, setTimeout) {
  * @param {function(function(), number)} setTimeout
  * @param {function(number)=} opt_onTick
  * @return {{ then: function(Function, Function=),
- *            stop: function() }}
+ *            stop: function(),
+ *            abort: function() }}
  * Call stop() on the returned value to stop the loop early.  Call then()
  * to chain to the end of the loop like a Promise.
  */
 shaka.test.Util.fakeEventLoop = function(duration, setTimeout, opt_onTick) {
+  var loopController = {stop: false};
+  var aborted = false;
+
   var async = Promise.resolve();
-  var endLoop = false;
   for (var time = 0; time < duration; ++time) {
     async = async.then(function(currentTime) {
-      if (endLoop) return;
+      if (loopController.stop) return;
 
       // We shouldn't need more than 6 rounds.
-      var p = shaka.test.Util.processInstantaneousOperations(6, setTimeout);
+      var p = shaka.test.Util.processInstantaneousOperations(
+          6, setTimeout, loopController);
       return p.then(function() {
+        if (loopController.stop) return;
         if (opt_onTick)
           opt_onTick(currentTime);
         jasmine.clock().tick(1000);
       });
     }.bind(null, time));
   }
+
+  // By not resolving or rejecting |deferred| when the loop is aborted, we
+  // ensure test code is not executed after the test prematurely exits.
+  var deferred = new shaka.util.PublicPromise();
+
+  async.then(function() {
+    if (!aborted) deferred.resolve();
+  }).catch(function() {
+    if (!aborted) deferred.reject();
+  });
+
   return {
-    then: function(f, g) { return async.then(f, g); },
-    stop: function() { endLoop = true; }
+    then: function(f, g) { return deferred.then(f, g); },
+    stop: function() { loopController.stop = true; },
+    abort: function() { loopController.stop = true; aborted = true; }
   };
 };
 

@@ -25,8 +25,10 @@ describe('DashParser.Live', function() {
   var realTimeout;
   var updateTime = 5;
   var Util;
+  var loop;
 
   beforeEach(function() {
+    jasmine.clock().install();
     var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     newPeriod = jasmine.createSpy('newPeriod');
@@ -41,20 +43,21 @@ describe('DashParser.Live', function() {
   beforeAll(function() {
     Dash = shaka.test.Dash;
     Util = shaka.test.Util;
-
     realTimeout = window.setTimeout;
-    jasmine.clock().install();
-
     oldNow = Date.now;
   });
 
   afterEach(function() {
+    if (loop) {
+      loop.abort();
+      loop = null;
+    }
     // Dash parser stop is synchronous.
     parser.stop();
+    jasmine.clock().uninstall();
   });
 
   afterAll(function() {
-    jasmine.clock().uninstall();
     Date.now = oldNow;
   });
 
@@ -64,10 +67,9 @@ describe('DashParser.Live', function() {
    * @return {!Promise}
    */
   function delayForUpdatePeriod() {
-    // Tick the virtual clock to trigger an update.
-    jasmine.clock().tick(updateTime * 1000);
-    // Resolve all Promises.
-    return Util.processInstantaneousOperations(5, realTimeout);
+    // Tick the virtual clock to trigger an update and resolve all Promises.
+    loop = Util.fakeEventLoop(updateTime, realTimeout);
+    return loop;
   }
 
   /**

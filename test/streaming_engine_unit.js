@@ -52,6 +52,8 @@ describe('StreamingEngine', function() {
   var onStartupComplete;
   var streamingEngine;
 
+  var loop;
+
   /**
    * Runs the fake event loop.
    * @param {function()=} opt_callback An optional callback that is executed
@@ -72,7 +74,7 @@ describe('StreamingEngine', function() {
     originalSetTimeout = window.setTimeout;
     Util = shaka.test.Util;
     originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 45000;  // ms
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 50000;  // ms
   });
 
   beforeEach(function() {
@@ -347,6 +349,10 @@ describe('StreamingEngine', function() {
   }
 
   afterEach(function() {
+    if (loop) {
+      loop.abort();
+      loop = null;
+    }
     jasmine.clock().uninstall();
   });
 
@@ -377,8 +383,6 @@ describe('StreamingEngine', function() {
   //      should not be at the end of the presentation, but the test will be
   //      effectively over since SE will have nothing else to do.
   it('initializes and plays VOD', function(done) {
-    var loop;
-
     setupVod();
     mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
     createStreamingEngine();
@@ -502,8 +506,6 @@ describe('StreamingEngine', function() {
   });
 
   it('initializes and plays live', function(done) {
-    var loop;
-
     setupLive();
     mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
     createStreamingEngine();
@@ -552,8 +554,6 @@ describe('StreamingEngine', function() {
   // Start the playhead in the first Period but pass init() Streams from the
   // second Period.
   it('plays from 1st Period when passed Streams from 2nd', function(done) {
-    var loop;
-
     setupVod();
     mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
     createStreamingEngine();
@@ -611,8 +611,6 @@ describe('StreamingEngine', function() {
   // Start the playhead in the second Period but pass init() Streams from the
   // first Period.
   it('plays from 2nd Period when passed Streams from 1st', function(done) {
-    var loop;
-
     setupVod();
     mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
     createStreamingEngine();
@@ -664,7 +662,6 @@ describe('StreamingEngine', function() {
   });
 
   it('plays when a small gap is present at the beginning', function(done) {
-    var loop;
     var drift = 0.050;  // 50 ms
 
     setupVod();
@@ -758,7 +755,7 @@ describe('StreamingEngine', function() {
       // Here we go!
       streamingEngine.init();
 
-      var loop = runTest();
+      loop = runTest();
       mediaSourceEngine.endOfStream.and.callFake(loop.stop);
       loop.then(function() {
         // Verify buffers.
@@ -778,8 +775,6 @@ describe('StreamingEngine', function() {
     });
 
     it('into buffered regions across Periods', function(done) {
-      var loop;
-
       playhead.getTime.and.returnValue(0);
 
       onChooseStreams.and.callFake(function(period) {
@@ -881,7 +876,7 @@ describe('StreamingEngine', function() {
       // Here we go!
       streamingEngine.init();
 
-      var loop = runTest();
+      loop = runTest();
       mediaSourceEngine.endOfStream.and.callFake(loop.stop);
       loop.then(function() {
         // Verify buffers.
@@ -901,8 +896,6 @@ describe('StreamingEngine', function() {
     });
 
     it('into unbuffered regions across Periods', function(done) {
-      var loop;
-
       // Start from the second Period.
       playhead.getTime.and.returnValue(20);
 
@@ -1043,7 +1036,7 @@ describe('StreamingEngine', function() {
       // Here we go!
       streamingEngine.init();
 
-      var loop = runTest();
+      loop = runTest();
       mediaSourceEngine.endOfStream.and.callFake(loop.stop);
       loop.then(function() {
         // Verify buffers.
@@ -1065,8 +1058,6 @@ describe('StreamingEngine', function() {
     // If we seek back into an unbuffered region but do not called seeked(),
     // StreamingEngine should wait for seeked() to be called.
     it('back into unbuffered regions without seeked() ', function(done) {
-      var loop;
-
       // Start from the second segment in the second Period.
       playhead.getTime.and.returnValue(30);
 
@@ -1141,7 +1132,7 @@ describe('StreamingEngine', function() {
       // Here we go!
       streamingEngine.init();
 
-      var loop = runTest();
+      loop = runTest();
       mediaSourceEngine.endOfStream.and.callFake(loop.stop);
       loop.then(function() {
         // Verify buffers.
@@ -1228,7 +1219,7 @@ describe('StreamingEngine', function() {
       // Here we go!
       streamingEngine.init();
 
-      var loop = runTest(slideSegmentAvailabilityWindow);
+      loop = runTest(slideSegmentAvailabilityWindow);
       mediaSourceEngine.endOfStream.and.callFake(loop.stop);
       loop.then(function() {
         // Verify buffers.
@@ -1265,8 +1256,6 @@ describe('StreamingEngine', function() {
     });
 
     it('from initial Stream setup', function(done) {
-      var loop;
-
       playhead.getTime.and.returnValue(0);
 
       videoStream1.createSegmentIndex.and.returnValue(
@@ -1289,8 +1278,6 @@ describe('StreamingEngine', function() {
     });
 
     it('from post startup Stream setup', function(done) {
-      var loop;
-
       playhead.getTime.and.returnValue(0);
 
       alternateVideoStream1.createSegmentIndex.and.returnValue(
@@ -1313,8 +1300,6 @@ describe('StreamingEngine', function() {
     });
 
     it('from failed init segment append during startup', function(done) {
-      var loop;
-
       playhead.getTime.and.returnValue(0);
 
       onError.and.callFake(function(error) {
@@ -1354,8 +1339,6 @@ describe('StreamingEngine', function() {
     });
 
     it('from failed media segment append during startup', function(done) {
-      var loop;
-
       playhead.getTime.and.returnValue(0);
 
       onError.and.callFake(function(error) {
@@ -1397,8 +1380,6 @@ describe('StreamingEngine', function() {
 
   describe('handles network errors', function() {
     function testRecoverableError(targetUri, code, done) {
-      var loop;
-
       setupVod();
 
       // Wrap the NetworkingEngine to perform errors.
@@ -1492,8 +1473,6 @@ describe('StreamingEngine', function() {
             null, '2_audio_1', shaka.util.Error.Code.TIMEOUT));
 
     function testNonRecoverableError(targetUri, code, done) {
-      var loop;
-
       setupVod();
 
       // Wrap the NetworkingEngine to perform 404 Not Found errors.
@@ -1617,7 +1596,7 @@ describe('StreamingEngine', function() {
       // evict segments. So, instead of verifying the exact, final buffer
       // configuration, ensure the byte limit is never exceeded and at least
       // one segment of each type is buffered at the end of the test.
-      var loop = runTest();
+      loop = runTest();
       loop.then(function() {
         expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
 
@@ -1696,7 +1675,7 @@ describe('StreamingEngine', function() {
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
       streamingEngine.init();
 
-      var loop = runTest();
+      loop = runTest();
       loop.then(function() {
         expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
 
@@ -1773,7 +1752,7 @@ describe('StreamingEngine', function() {
       // segments after this time.
       var stopPlayhead = function() { playing = playheadTime < 10; };
 
-      var loop = runTest(stopPlayhead);
+      loop = runTest(stopPlayhead);
       loop.then(function() {
         expect(mediaSourceEngine.endOfStream).not.toHaveBeenCalled();
         return streamingEngine.destroy();
@@ -1803,7 +1782,7 @@ describe('StreamingEngine', function() {
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
       streamingEngine.init();
 
-      var loop = runTest();
+      loop = runTest();
       loop.then(function() {
         expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
 
@@ -1840,7 +1819,7 @@ describe('StreamingEngine', function() {
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
       streamingEngine.init();
 
-      var loop = runTest();
+      loop = runTest();
       loop.then(function() {
         expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
 
@@ -1887,7 +1866,7 @@ describe('StreamingEngine', function() {
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
       streamingEngine.init();
 
-      var loop = runTest(slideSegmentAvailabilityWindow);
+      loop = runTest(slideSegmentAvailabilityWindow);
       loop.then(function() {
         expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
 

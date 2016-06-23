@@ -24,6 +24,7 @@ describe('SimpleAbrManager', function() {
   var audioStreamSet;
   var videoStreamSet;
   var streamSetsByType;
+  var loop;
 
   beforeAll(function() {
     originalSetTimeout = window.setTimeout;
@@ -71,6 +72,10 @@ describe('SimpleAbrManager', function() {
   });
 
   afterEach(function() {
+    if (loop) {
+      loop.abort();
+      loop = null;
+    }
     abrManager.stop();
     jasmine.clock().uninstall();
   });
@@ -143,9 +148,9 @@ describe('SimpleAbrManager', function() {
       abrManager.enable();
 
       // Move outside the startup interval.
-      var delay = shaka.test.Util.fakeEventLoop(
+      loop = shaka.test.Util.fakeEventLoop(
           startupInterval + 1, originalSetTimeout);
-      delay.then(function() {
+      loop.then(function() {
         // Make another call to segmentDownloaded() so switchCallback() is
         // called.
         abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
@@ -171,9 +176,9 @@ describe('SimpleAbrManager', function() {
     // Don't enable AbrManager.
 
     // Move outside the startup interval.
-    var delay = shaka.test.Util.fakeEventLoop(
+    loop = shaka.test.Util.fakeEventLoop(
         startupInterval + 1, originalSetTimeout);
-    delay.then(function() {
+    loop.then(function() {
       abrManager.segmentDownloaded(4000, 5000, bytesPerSecond);
       expect(switchCallback).not.toHaveBeenCalled();
     }).catch(fail).then(done);
@@ -192,14 +197,15 @@ describe('SimpleAbrManager', function() {
     abrManager.enable();
 
     // Stay inside startup interval
-    var delay = shaka.test.Util.fakeEventLoop(
+    loop = shaka.test.Util.fakeEventLoop(
         startupInterval - 2, originalSetTimeout);
-    delay.then(function() {
+    loop.then(function() {
       abrManager.segmentDownloaded(4000, 5000, bytesPerSecond);
       expect(switchCallback).not.toHaveBeenCalled();
 
       // Move outside startup interval.
-      return shaka.test.Util.fakeEventLoop(3, originalSetTimeout);
+      loop = shaka.test.Util.fakeEventLoop(3, originalSetTimeout);
+      return loop;
     }).then(function() {
       abrManager.segmentDownloaded(6000, 7000, bytesPerSecond);
 
@@ -223,9 +229,9 @@ describe('SimpleAbrManager', function() {
     abrManager.enable();
 
     // Move outside the startup interval.
-    var delay = shaka.test.Util.fakeEventLoop(
+    loop = shaka.test.Util.fakeEventLoop(
         startupInterval + 1, originalSetTimeout);
-    delay.then(function() {
+    loop.then(function() {
       abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
 
       expect(switchCallback).toHaveBeenCalled();
@@ -240,16 +246,18 @@ describe('SimpleAbrManager', function() {
       abrManager.segmentDownloaded(7000, 8000, bytesPerSecond);
 
       // Stay inside switch interval.
-      return shaka.test.Util.fakeEventLoop(
+      loop = shaka.test.Util.fakeEventLoop(
           (shaka.abr.SimpleAbrManager.SWITCH_INTERVAL_MS / 1000.0) - 2,
           originalSetTimeout);
+      return loop;
     }).then(function() {
       abrManager.segmentDownloaded(10000, 11000, bytesPerSecond);
 
       expect(switchCallback).not.toHaveBeenCalled();
 
       // Move outside switch interval.
-      return shaka.test.Util.fakeEventLoop(3, originalSetTimeout);
+      loop = shaka.test.Util.fakeEventLoop(3, originalSetTimeout);
+      return loop;
     }).then(function() {
       abrManager.segmentDownloaded(12000, 13000, bytesPerSecond);
 
@@ -275,9 +283,9 @@ describe('SimpleAbrManager', function() {
     abrManager.enable();
 
     // Move outside the startup interval.
-    var delay = shaka.test.Util.fakeEventLoop(
+    loop = shaka.test.Util.fakeEventLoop(
         startupInterval + 1, originalSetTimeout);
-    delay.then(function() {
+    loop.then(function() {
       // Make another call to segmentDownloaded(). switchCallback() will not be
       // called because the best streams for the available bandwidth are already
       // active.
