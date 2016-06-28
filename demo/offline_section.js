@@ -50,33 +50,28 @@ shakaDemo.updateButtons_ = function(canHide) {
             shakaDemo.support_.drm[drm].persistentState;
       });
 
-  var storeBtn = document.getElementById('storeOffline');
-  storeBtn.disabled = (inProgress || !supportsDrm || storedContent != null);
+  // Only show when the custom asset option is selected.
+  document.getElementById('offlineNameDiv').style.display =
+      option.asset ? 'none' : 'block';
+
+  var button = document.getElementById('storeDelete');
+  button.disabled = (inProgress || !supportsDrm || option.isStored);
+  button.innerText = storedContent ? 'Delete' : 'Store';
   if (inProgress)
-    storeBtn.title = 'There is already an operation in progress';
+    button.title = 'There is already an operation in progress';
   else if (!supportsDrm)
-    storeBtn.title = 'This browser does not support persistent licenses';
-  else if (storeBtn.disabled)
-    storeBtn.title = 'Selected asset is already stored offline';
+    button.title = 'This browser does not support persistent licenses';
+  else if (button.disabled)
+    button.title = 'Selected asset is already stored offline';
   else
-    storeBtn.title = '';
-  var deleteBtn = document.getElementById('deleteOffline');
-  deleteBtn.disabled = (inProgress || storedContent == null);
-  if (inProgress)
-    deleteBtn.title = 'There is already an operation in progress';
-  else if (deleteBtn.disabled)
-    deleteBtn.title = 'Selected asset is not stored offline';
-  else
-    deleteBtn.title = '';
+    button.title = '';
 };
 
 
 /** @private */
 shakaDemo.setupOffline_ = function() {
-  document.getElementById('storeOffline')
-      .addEventListener('click', shakaDemo.storeAsset_);
-  document.getElementById('deleteOffline')
-      .addEventListener('click', shakaDemo.deleteAsset_);
+  document.getElementById('storeDelete')
+      .addEventListener('click', shakaDemo.storeDeleteAsset_);
   document.getElementById('assetList')
       .addEventListener('change', shakaDemo.updateButtons_.bind(null, true));
   shakaDemo.updateButtons_(true);
@@ -97,8 +92,8 @@ shakaDemo.setupOfflineAssets_ = function() {
 
   /** @type {!HTMLOptGroupElement} */
   var group;
+  var assetList = document.getElementById('assetList');
   if (!shakaDemo.offlineOptGroup_) {
-    var assetList = document.getElementById('assetList');
     group =
         /** @type {!HTMLOptGroupElement} */ (
             document.createElement('optgroup'));
@@ -112,6 +107,14 @@ shakaDemo.setupOfflineAssets_ = function() {
   var db = new Storage(shakaDemo.player_);
   return db.list().then(function(storedContents) {
     storedContents.forEach(function(storedContent) {
+      for (var i = 0; i < assetList.options.length; i++) {
+        var option = assetList.options[i];
+        if (option.asset &&
+            option.asset.manifestUri == storedContent.originalManifestUri) {
+          option.isStored = true;
+          break;
+        }
+      }
       var asset = {manifestUri: storedContent.offlineUri};
 
       var option = document.createElement('option');
@@ -122,13 +125,14 @@ shakaDemo.setupOfflineAssets_ = function() {
       group.appendChild(option);
     });
 
+    shakaDemo.updateButtons_(true);
     return db.destroy();
   });
 };
 
 
 /** @private */
-shakaDemo.storeAsset_ = function() {
+shakaDemo.storeDeleteAsset_ = function() {
   shakaDemo.closeError();
   shakaDemo.offlineOperationInProgress_ = true;
   shakaDemo.updateButtons_(false);
@@ -137,11 +141,8 @@ shakaDemo.storeAsset_ = function() {
   var progress = document.getElementById('progress');
   var option = assetList.options[assetList.selectedIndex];
 
-  var asset = shakaDemo.preparePlayer_(option.asset);
-
   progress.textContent = '0';
 
-  var metadata = {name: asset.name || asset.manifestUri};
   var storage = new shaka.offline.Storage(shakaDemo.player_);
   storage.configure(/** @type {shakaExtern.OfflineConfiguration} */ ({
     progressCallback: function(data, percent) {
@@ -149,39 +150,30 @@ shakaDemo.storeAsset_ = function() {
     }
   }));
 
-  storage.store(asset.manifestUri, metadata).then(function() {
-    shakaDemo.refreshAssetList_();
-  }, function(reason) {
-    var error = /** @type {!shaka.util.Error} */(reason);
-    shakaDemo.onError_(error);
-  }).then(function() {
-    shakaDemo.offlineOperationInProgress_ = false;
-    shakaDemo.updateButtons_(false);
-    return storage.destroy();
-  });
-};
+  var p;
+  if (option.storedContent) {
+    var originalManifestUri = option.storedContent.originalManifestUri;
+    p = storage.remove(option.storedContent).then(function() {
+      for (var i = 0; i < assetList.options.length; i++) {
+        var option = assetList.options[i];
+        if (option.asset && option.asset.manifestUri == originalManifestUri)
+          option.isStored = false;
+      }
+      shakaDemo.refreshAssetList_();
+    });
+  } else {
+    var asset = shakaDemo.preparePlayer_(option.asset);
+    var nameField = document.getElementById('offlineName').value;
+    var assetName = asset.name ? asset.name + ' (offline)' : null;
+    var metadata = {name: assetName || nameField || asset.manifestUri};
+    p = storage.store(asset.manifestUri, metadata).then(function() {
+      shakaDemo.refreshAssetList_();
+      if (option.asset)
+        option.isStored = true;
+    });
+  }
 
-
-/** @private */
-shakaDemo.deleteAsset_ = function() {
-  shakaDemo.closeError();
-  shakaDemo.offlineOperationInProgress_ = true;
-  shakaDemo.updateButtons_(false);
-
-  var assetList = document.getElementById('assetList');
-  var option = assetList.options[assetList.selectedIndex];
-
-  var storage = new shaka.offline.Storage(shakaDemo.player_);
-  storage.configure(/** @type {shakaExtern.OfflineConfiguration} */ ({
-    progressCallback: function(data, percent) {
-      var progress = document.getElementById('progress');
-      progress.textContent = (percent * 100).toFixed(2);
-    }
-  }));
-
-  storage.remove(option.storedContent).then(function() {
-    shakaDemo.refreshAssetList_();
-  }, function(reason) {
+  p.catch(function(reason) {
     var error = /** @type {!shaka.util.Error} */(reason);
     shakaDemo.onError_(error);
   }).then(function() {

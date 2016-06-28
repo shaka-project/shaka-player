@@ -182,7 +182,7 @@ summary {
   cursor: pointer;
 }
 
-#progressDiv {
+#progressDiv, #offlineNameDiv {
   display: none;
 }
 
