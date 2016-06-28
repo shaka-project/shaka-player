@@ -695,7 +695,7 @@ describe('DashParser.Live', function() {
           })
           .catch(fail)
           .then(done);
-    });
+    }, /* timeout ms */ 10000);
 
     it('interrupts UTCTiming requests', function(done) {
       var delay = fakeNetEngine.delayNextRequest();
