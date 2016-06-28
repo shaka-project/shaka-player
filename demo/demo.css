@@ -182,6 +182,10 @@ summary {
   cursor: pointer;
 }
 
+#progressDiv {
+  display: none;
+}
+
 #logSection {
   display: none;
 }

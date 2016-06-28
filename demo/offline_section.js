@@ -24,9 +24,21 @@ var shakaDemo = shakaDemo || {};
 shakaDemo.offlineOptGroup_ = null;
 
 
-/** @private */
-shakaDemo.updateButtons_ = function() {
+/** @private {boolean} */
+shakaDemo.offlineOperationInProgress_ = false;
+
+
+/**
+ * @param {boolean} canHide True to hide the progress value if there isn't an
+ *   operation going.
+ * @private
+ */
+shakaDemo.updateButtons_ = function(canHide) {
   var assetList = document.getElementById('assetList');
+  var inProgress = shakaDemo.offlineOperationInProgress_;
+
+  document.getElementById('progressDiv').style.display =
+      canHide && !inProgress ? 'none' : 'block';
 
   var option = assetList.options[assetList.selectedIndex];
   var storedContent = option.storedContent;
@@ -39,14 +51,23 @@ shakaDemo.updateButtons_ = function() {
       });
 
   var storeBtn = document.getElementById('storeOffline');
-  storeBtn.disabled = (!supportsDrm || storedContent != null);
-  storeBtn.title = !supportsDrm ?
-      'This browser does not support persistent licenses' :
-      (storeBtn.disabled ? 'Selected asset is already stored offline' : '');
+  storeBtn.disabled = (inProgress || !supportsDrm || storedContent != null);
+  if (inProgress)
+    storeBtn.title = 'There is already an operation in progress';
+  else if (!supportsDrm)
+    storeBtn.title = 'This browser does not support persistent licenses';
+  else if (storeBtn.disabled)
+    storeBtn.title = 'Selected asset is already stored offline';
+  else
+    storeBtn.title = '';
   var deleteBtn = document.getElementById('deleteOffline');
-  deleteBtn.disabled = (storedContent == null);
-  deleteBtn.title =
-      deleteBtn.disabled ? 'Selected asset is not stored offline' : '';
+  deleteBtn.disabled = (inProgress || storedContent == null);
+  if (inProgress)
+    deleteBtn.title = 'There is already an operation in progress';
+  else if (deleteBtn.disabled)
+    deleteBtn.title = 'Selected asset is not stored offline';
+  else
+    deleteBtn.title = '';
 };
 
 
@@ -57,8 +78,8 @@ shakaDemo.setupOffline_ = function() {
   document.getElementById('deleteOffline')
       .addEventListener('click', shakaDemo.deleteAsset_);
   document.getElementById('assetList')
-      .addEventListener('change', shakaDemo.updateButtons_);
-  shakaDemo.updateButtons_();
+      .addEventListener('change', shakaDemo.updateButtons_.bind(null, true));
+  shakaDemo.updateButtons_(true);
 };
 
 
@@ -109,24 +130,21 @@ shakaDemo.setupOfflineAssets_ = function() {
 /** @private */
 shakaDemo.storeAsset_ = function() {
   shakaDemo.closeError();
+  shakaDemo.offlineOperationInProgress_ = true;
+  shakaDemo.updateButtons_(false);
 
   var assetList = document.getElementById('assetList');
   var progress = document.getElementById('progress');
-  var storeBtn = document.getElementById('storeOffline');
-  var deleteBtn = document.getElementById('deleteOffline');
   var option = assetList.options[assetList.selectedIndex];
 
   var asset = shakaDemo.preparePlayer_(option.asset);
 
   progress.textContent = '0';
-  storeBtn.disabled = true;
-  deleteBtn.disabled = true;
 
   var metadata = {name: asset.name || asset.manifestUri};
   var storage = new shaka.offline.Storage(shakaDemo.player_);
   storage.configure(/** @type {shakaExtern.OfflineConfiguration} */ ({
     progressCallback: function(data, percent) {
-      var progress = document.getElementById('progress');
       progress.textContent = (percent * 100).toFixed(2);
     }
   }));
@@ -137,7 +155,8 @@ shakaDemo.storeAsset_ = function() {
     var error = /** @type {!shaka.util.Error} */(reason);
     shakaDemo.onError_(error);
   }).then(function() {
-    shakaDemo.updateButtons_();
+    shakaDemo.offlineOperationInProgress_ = false;
+    shakaDemo.updateButtons_(false);
     return storage.destroy();
   });
 };
@@ -146,14 +165,11 @@ shakaDemo.storeAsset_ = function() {
 /** @private */
 shakaDemo.deleteAsset_ = function() {
   shakaDemo.closeError();
+  shakaDemo.offlineOperationInProgress_ = true;
+  shakaDemo.updateButtons_(false);
 
   var assetList = document.getElementById('assetList');
-  var storeBtn = document.getElementById('storeOffline');
-  var deleteBtn = document.getElementById('deleteOffline');
   var option = assetList.options[assetList.selectedIndex];
-
-  storeBtn.disabled = true;
-  deleteBtn.disabled = true;
 
   var storage = new shaka.offline.Storage(shakaDemo.player_);
   storage.configure(/** @type {shakaExtern.OfflineConfiguration} */ ({
@@ -169,7 +185,8 @@ shakaDemo.deleteAsset_ = function() {
     var error = /** @type {!shaka.util.Error} */(reason);
     shakaDemo.onError_(error);
   }).then(function() {
-    shakaDemo.updateButtons_();
+    shakaDemo.offlineOperationInProgress_ = false;
+    shakaDemo.updateButtons_(false);
     return storage.destroy();
   });
 };
