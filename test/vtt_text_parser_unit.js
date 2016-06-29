@@ -277,14 +277,13 @@ describe('VttTextParser', function() {
   }
 
   function errorHelper(code, string) {
+    var error = new shaka.util.Error(shaka.util.Error.Category.TEXT, code);
     var data = shaka.util.StringUtils.toUTF8(string);
     try {
       shaka.media.VttTextParser(data);
       fail('Invalid WebVTT file supported');
     } catch (e) {
-      expect(e instanceof shaka.util.Error).toBe(true);
-      expect(e.category).toBe(shaka.util.Error.Category.TEXT);
-      expect(e.code).toBe(code);
+      shaka.test.Util.expectToEqualError(e, error);
     }
   }
 });

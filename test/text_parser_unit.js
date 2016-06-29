@@ -237,17 +237,5 @@ describe('TextParser', function() {
       expect(parser.parseTime(timeHMSFormat))
                             .toBe(null);
     });
-
-    it('returns null if minutes > 59', function() {
-      var parser = new shaka.util.TextParser('01:70');
-      expect(parser.parseTime(timeColonFormat))
-                          .toBe(null);
-    });
-
-    it('returns null if seconds > 59', function() {
-      var parser = new shaka.util.TextParser('01:00:70');
-      expect(parser.parseTime(timeColonFormat))
-                          .toBe(null);
-    });
   });
 });
