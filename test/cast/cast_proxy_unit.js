@@ -100,6 +100,15 @@ describe('CastProxy', function() {
     });
   });
 
+  describe('receiverName', function() {
+    it('delegates directly to the sender', function() {
+      mockSender.receiverName.and.returnValue('abc');
+      expect(proxy.receiverName()).toBe('abc');
+      mockSender.receiverName.and.returnValue('xyz');
+      expect(proxy.receiverName()).toBe('xyz');
+    });
+  });
+
   describe('setAppData', function() {
     it('delegates directly to the sender', function() {
       var fakeAppData = {key: 'value'};
@@ -645,6 +654,7 @@ describe('CastProxy', function() {
       apiReady: jasmine.createSpy('apiReady'),
       hasReceivers: jasmine.createSpy('hasReceivers'),
       isCasting: jasmine.createSpy('isCasting'),
+      receiverName: jasmine.createSpy('receiverName'),
       hasRemoteProperties: jasmine.createSpy('hasRemoteProperties'),
       setAppData: jasmine.createSpy('setAppData'),
       disconnect: jasmine.createSpy('disconnect'),

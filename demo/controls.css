@@ -100,6 +100,21 @@
   cursor: pointer;
 }
 
+#castReceiverName {
+  display: none;
+
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  font-size: 150%;
+  padding: 5px;
+
+  bottom: 50px;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: max-content;
+}
+
 #giantPlayButtonContainer {
   margin: auto;
   width: 200px;

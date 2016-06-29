@@ -75,6 +75,9 @@ function ShakaControls() {
   this.castButton_ = document.getElementById('castButton');
 
   /** @private {Element} */
+  this.castReceiverName_ = document.getElementById('castReceiverName');
+
+  /** @private {Element} */
   this.bufferingSpinner_ = document.getElementById('bufferingSpinner');
 
   /** @private {Element} */
@@ -477,6 +480,10 @@ ShakaControls.prototype.onCastStatusChange_ = function(event) {
   this.notifyCastStatus_(isCasting);
   this.castButton_.style.display = canCast ? 'inherit' : 'none';
   this.castButton_.textContent = isCasting ? 'cast_connected' : 'cast';
+  this.castReceiverName_.style.display =
+      isCasting ? 'inherit' : 'none';
+  this.castReceiverName_.textContent =
+      isCasting ? 'Casting to ' + this.castProxy_.receiverName() : '';
   this.controls_.classList.toggle('casting', this.castProxy_.isCasting());
 };
 

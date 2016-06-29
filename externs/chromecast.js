@@ -237,6 +237,18 @@ chrome.cast.Error.prototype.details;
  * @constructor
  * @struct
  */
+chrome.cast.Receiver = function() {};
+
+
+/** @const {string} */
+chrome.cast.Receiver.prototype.friendlyName;
+
+
+
+/**
+ * @constructor
+ * @struct
+ */
 chrome.cast.Session = function() {};
 
 
@@ -246,6 +258,10 @@ chrome.cast.Session.prototype.sessionId;
 
 /** @type {string} */
 chrome.cast.Session.prototype.status;
+
+
+/** @type {chrome.cast.Receiver} */
+chrome.cast.Session.prototype.receiver;
 
 
 /**

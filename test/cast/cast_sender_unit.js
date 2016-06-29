@@ -619,6 +619,7 @@ describe('CastSender', function() {
     var session = {
       messages: [],
       status: 'connected',
+      receiver: { friendlyName: 'SomeDevice' },
       addUpdateListener: jasmine.createSpy('Session.addUpdateListener'),
       addMessageListener: jasmine.createSpy('Session.addMessageListener'),
       sendMessage: jasmine.createSpy('Session.sendMessage'),
