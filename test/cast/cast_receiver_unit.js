@@ -133,21 +133,53 @@ describe('CastReceiver', function() {
   });
 
   describe('"caststatuschanged" event', function() {
-    it('is triggered when senders connect or disconnect', function() {
+    it('is triggered when senders connect or disconnect', function(done) {
       checkChromeOrChromecast();
-      fakeConnectedSenders(0);
-
       var listener = jasmine.createSpy('listener');
       receiver.addEventListener('caststatuschanged', listener);
-      expect(listener).not.toHaveBeenCalled();
 
-      mockReceiverManager.onSenderConnected();
-      expect(listener).toHaveBeenCalled();
-
-      listener.calls.reset();
-      mockReceiverManager.onSenderDisconnected();
-      expect(listener).toHaveBeenCalled();
+      shaka.test.Util.delay(0.2).then(function() {
+        expect(listener).not.toHaveBeenCalled();
+        fakeConnectedSenders(1);
+        return shaka.test.Util.delay(0.2);
+      }).then(function() {
+        expect(listener).toHaveBeenCalled();
+        listener.calls.reset();
+        mockReceiverManager.onSenderDisconnected();
+        return shaka.test.Util.delay(0.2);
+      }).then(function() {
+        expect(listener).toHaveBeenCalled();
+      }).catch(fail).then(done);
     });
+
+    it('is triggered when idle state changes', function(done) {
+      checkChromeOrChromecast();
+      var listener = jasmine.createSpy('listener');
+      receiver.addEventListener('caststatuschanged', listener);
+
+      var fakeLoadingEvent = {type: 'loading'};
+      var fakeUnloadingEvent = {type: 'unloading'};
+      var fakeEndedEvent = {type: 'ended'};
+
+      shaka.test.Util.delay(0.2).then(function() {
+        expect(listener).not.toHaveBeenCalled();
+        mockPlayer.listeners['loading'](fakeLoadingEvent);
+        return shaka.test.Util.delay(0.2);
+      }).then(function() {
+        expect(listener).toHaveBeenCalled();
+        listener.calls.reset();
+        mockPlayer.listeners['unloading'](fakeUnloadingEvent);
+        return shaka.test.Util.delay(0.2);
+      }).then(function() {
+        expect(listener).toHaveBeenCalled();
+        listener.calls.reset();
+        mockVideo.ended = true;
+        mockVideo.listeners['ended'](fakeEndedEvent);
+        return shaka.test.Util.delay(5.2);  // There is a long delay for 'ended'
+      }).then(function() {
+        expect(listener).toHaveBeenCalled();
+      }).catch(fail).then(done);
+    }, /* timeout ms */ 8000);
   });
 
   describe('local events', function() {

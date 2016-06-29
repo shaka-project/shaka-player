@@ -85,13 +85,6 @@ ShakaReceiver.prototype.init = function() {
   this.video_.addEventListener(
       'emptied', this.onPlayStateChange_.bind(this));
 
-  this.video_.addEventListener(
-      'canplay', this.checkIdle_.bind(this));
-  this.video_.addEventListener(
-      'emptied', this.checkIdle_.bind(this));
-  this.video_.addEventListener(
-      'ended', this.checkIdle_.bind(this));
-
   this.receiver_ = new shaka.cast.CastReceiver(
       this.video_, this.player_, this.appDataCallback_.bind(this));
   this.receiver_.addEventListener(
@@ -121,29 +114,15 @@ ShakaReceiver.prototype.appDataCallback_ = function(appData) {
 
 /** @private */
 ShakaReceiver.prototype.checkIdle_ = function() {
-  var connected = this.receiver_.isConnected();
-  var loaded = this.video_.readyState > 0;
-  var ended = this.video_.ended;
-
-  var idle = !loaded || (!connected && ended);
-
   console.debug('status changed',
-                'connected=', connected,
-                'loaded=', loaded,
-                'ended=', ended,
-                'idle=', idle);
+                'idle=', this.receiver_.isIdle());
 
-  // If something is loaded, but we've just gone idle, unload the content, show
-  // the idle card, and set a timer to close the app.
-  if (idle && loaded) {
-    this.player_.unload();
+  // If the app is idle, show the idle card and set a timer to close the app.
+  // Otherwise, hide the idle card and cancel the timer.
+  if (this.receiver_.isIdle()) {
     this.idle_.style.display = 'block';
     this.startIdleTimer_();
-  }
-
-  // If we are no longer idle, hide the idle card, and make sure we cancel any
-  // timers that would close the app.
-  if (!idle) {
+  } else {
     this.idle_.style.display = 'none';
     this.cancelIdleTimer_();
   }
