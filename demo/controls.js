@@ -452,10 +452,12 @@ ShakaControls.prototype.onCastClick_ = function() {
   if (this.castProxy_.isCasting()) {
     this.castProxy_.disconnect();
   } else {
-    // TODO: disable other controls while connecting?
+    this.castButton_.disabled = true;
     this.castProxy_.cast().then(function() {
+      this.castButton_.disabled = false;
       // Success!
-    }, function(error) {
+    }.bind(this), function(error) {
+      this.castButton_.disabled = false;
       if (error.code != shaka.util.Error.Code.CAST_CANCELED_BY_USER) {
         this.onError_(error);
       }

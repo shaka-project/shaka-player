@@ -92,6 +92,10 @@
   background: rgba(100, 100, 100, 0.4);
 }
 
+#controls button:disabled {
+  color: rgba(255, 255, 255, 0.3);
+}
+
 #controls input[type="range"] {
   cursor: pointer;
 }
