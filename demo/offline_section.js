@@ -104,7 +104,7 @@ shakaDemo.setupOfflineAssets_ = function() {
     group = shakaDemo.offlineOptGroup_;
   }
 
-  var db = new Storage(shakaDemo.player_);
+  var db = new Storage(shakaDemo.localPlayer_);
   return db.list().then(function(storedContents) {
     storedContents.forEach(function(storedContent) {
       for (var i = 0; i < assetList.options.length; i++) {

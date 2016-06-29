@@ -32,6 +32,10 @@ shakaDemo.video_ = null;
 shakaDemo.player_ = null;
 
 
+/** @private {shaka.Player} */
+shakaDemo.localPlayer_ = null;
+
+
 /** @private {shakaExtern.SupportType} */
 shakaDemo.support_;
 
@@ -133,6 +137,7 @@ shakaDemo.init = function() {
       shakaDemo.video_ = shakaDemo.castProxy_.getVideo();
       shakaDemo.player_ = shakaDemo.castProxy_.getPlayer();
       shakaDemo.player_.addEventListener('error', shakaDemo.onErrorEvent_);
+      shakaDemo.localPlayer_ = localPlayer;
 
       shakaDemo.setupAssets_();
       shakaDemo.setupOffline_();
