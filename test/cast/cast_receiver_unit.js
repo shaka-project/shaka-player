@@ -104,6 +104,12 @@ describe('CastReceiver', function() {
       expect(Object.keys(mockPlayer.listeners).length).toBeGreaterThan(0);
     });
 
+    it('limits streams to 1080p', function() {
+      checkChromeOrChromecast();
+      expect(mockPlayer.setMaxHardwareResolution).
+          toHaveBeenCalledWith(1920, 1080);
+    });
+
     it('starts polling', function(done) {
       checkChromeOrChromecast();
       var fakeConfig = {key: 'value'};
@@ -592,6 +598,7 @@ describe('CastReceiver', function() {
       seekRange: jasmine.createSpy('seekRange'),
       configure: jasmine.createSpy('configure'),
       setTextTrackVisibility: jasmine.createSpy('setTextTrackVisibility'),
+      setMaxHardwareResolution: jasmine.createSpy('setMaxHardwareResolution'),
       load: jasmine.createSpy('load'),
       destroy: jasmine.createSpy('destroy'),
       addEventListener: function(eventName, listener) {
