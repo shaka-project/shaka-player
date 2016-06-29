@@ -69,7 +69,8 @@ function ShakaControls() {
   this.bufferingSpinner_ = document.getElementById('bufferingSpinner');
 
   /** @private {Element} */
-  this.giantPlayButton_ = document.getElementById('giantPlayButton');
+  this.giantPlayButtonContainer_ =
+      document.getElementById('giantPlayButtonContainer');
 
   /** @private {boolean} */
   this.isSeeking_ = false;
@@ -253,10 +254,10 @@ ShakaControls.prototype.onPlayStateChange_ = function() {
   // Video is paused during seek, so don't show the play arrow while seeking:
   if (this.video_.paused && !this.isSeeking_) {
     this.playPauseButton_.textContent = 'play_arrow';
-    this.giantPlayButton_.style.display = 'inline';
+    this.giantPlayButtonContainer_.style.display = 'inline';
   } else {
     this.playPauseButton_.textContent = 'pause';
-    this.giantPlayButton_.style.display = 'none';
+    this.giantPlayButtonContainer_.style.display = 'none';
   }
 };
 

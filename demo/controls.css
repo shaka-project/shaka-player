@@ -121,7 +121,7 @@
 #pauseButton, #unmuteButton,
 #castButton, #castConnectedButton,
 #rewindButton, #fastForwardButton,
-#giantPlayButton, #bufferingSpinner {
+#giantPlayButtonContainer, #bufferingSpinner {
   display: none;
 }
 
