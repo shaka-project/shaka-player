@@ -110,25 +110,10 @@ describe('CastReceiver', function() {
           toHaveBeenCalledWith(1920, 1080);
     });
 
-    it('starts polling', function(done) {
+    it('does not start polling', function() {
       checkChromeOrChromecast();
-      var fakeConfig = {key: 'value'};
-      mockPlayer.getConfiguration.and.returnValue(fakeConfig);
-
-      fakeConnectedSenders(1);
-
-      mockPlayer.getConfiguration.calls.reset();
-      shaka.test.Util.delay(1).then(function() {
-        expect(mockPlayer.getConfiguration).toHaveBeenCalled();
-        expect(mockMessageBus.messages).toContain(jasmine.objectContaining({
-          type: 'update',
-          update: jasmine.objectContaining({
-            player: jasmine.objectContaining({
-              getConfiguration: fakeConfig
-            })
-          })
-        }));
-      }).catch(fail).then(done);
+      expect(mockPlayer.getConfiguration).not.toHaveBeenCalled();
+      expect(mockMessageBus.messages.length).toBe(0);
     });
   });
 
@@ -239,6 +224,33 @@ describe('CastReceiver', function() {
         expect(mockVideo.playbackRate).toEqual(
             fakeInitState.video.playbackRate);
       }).catch(fail).then(done);
+    });
+
+    it('starts polling', function() {
+      checkChromeOrChromecast();
+      var fakeConfig = {key: 'value'};
+      mockPlayer.getConfiguration.and.returnValue(fakeConfig);
+
+      fakeConnectedSenders(1);
+
+      mockPlayer.getConfiguration.calls.reset();
+
+      expect(mockMessageBus.messages.length).toBe(0);
+      fakeIncomingMessage({
+        type: 'init',
+        initState: fakeInitState,
+        appData: fakeAppData
+      });
+
+      expect(mockPlayer.getConfiguration).toHaveBeenCalled();
+      expect(mockMessageBus.messages).toContain(jasmine.objectContaining({
+        type: 'update',
+        update: jasmine.objectContaining({
+          player: jasmine.objectContaining({
+            getConfiguration: fakeConfig
+          })
+        })
+      }));
     });
 
     it('loads the manifest', function() {
@@ -505,6 +517,13 @@ describe('CastReceiver', function() {
 
     it('stops polling', function(done) {
       checkChromeOrChromecast();
+      // Start polling:
+      fakeIncomingMessage({
+        type: 'init',
+        initState: {},
+        appData: {}
+      });
+
       mockPlayer.getConfiguration.calls.reset();
       shaka.test.Util.delay(1).then(function() {
         // We have polled at least once, so this getter has been called.
