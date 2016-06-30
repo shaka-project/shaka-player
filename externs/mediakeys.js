@@ -128,8 +128,8 @@ MediaKeyStatusMap.prototype.size;
 
 
 /**
- * The functor is called with each key ID and status.
- * @param {function(BufferSource, string)} fn
+ * The functor is called with each status and key ID.
+ * @param {function(string, BufferSource)} fn
  */
 MediaKeyStatusMap.prototype.forEach = function(fn) {};
 
