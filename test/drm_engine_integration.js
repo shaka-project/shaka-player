@@ -251,6 +251,16 @@ describe('DrmEngine', function() {
   });  // describe('basic flow')
 
   describe('missing keys error', function() {
+    beforeEach(function() {
+      // TODO: Update once we get a PlayReady license server that will return
+      // the wrong key IDs and accept requests for the wrong key IDs.
+      // As of 06-29, Axinom's server rejects our requests for the wrong keys
+      // when sent from IE11, but not Edge.
+      if (!support['com.widevine.alpha']) {
+        pending('Skipping DrmEngine tests.');
+      }
+    });
+
     it('fires when manifest PSSH does not match key ID', function(done) {
       setBadManifestData();
       runMissingKeyTest(done);
@@ -272,12 +282,6 @@ describe('DrmEngine', function() {
     });
 
     it('fires when license server returns wrong key ID', function(done) {
-      // TODO: Update once we get a PlayReady license server that will return
-      // the wrong key IDs.
-      if (!support['com.widevine.alpha']) {
-        pending('Skipping DrmEngine tests.');
-      }
-
       var config = {
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
         clearKeys: {},
