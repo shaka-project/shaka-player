@@ -47,7 +47,7 @@ describe('Offline', function() {
     player = new shaka.Player(video);
     storage = new shaka.offline.Storage(player);
     dbEngine = new shaka.offline.DBEngine();
-    dbEngine.init(shaka.offline.Storage.DB_SCHEME).catch(fail).then(done);
+    dbEngine.init(shaka.offline.OfflineUtils.DB_SCHEME).catch(fail).then(done);
   });
 
   afterEach(function(done) {

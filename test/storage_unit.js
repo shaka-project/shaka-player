@@ -39,7 +39,7 @@ describe('Storage', function() {
     storage = new shaka.offline.Storage(player);
     storage.setDbEngine(fakeDbEngine);
 
-    fakeDbEngine.init(shaka.offline.Storage.DB_SCHEME)
+    fakeDbEngine.init(shaka.offline.OfflineUtils.DB_SCHEME)
         .catch(fail)
         .then(done);
   });
