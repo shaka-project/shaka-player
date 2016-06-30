@@ -53,7 +53,7 @@ describe('CancelableChain', function() {
     }).then(function(data) {
       var delay = Date.now() - delayStart;
       expect(data).toEqual('delayed');
-      expect(delay).toBeGreaterThan(199);
+      expect(delay).toBeGreaterThan(198);
     }).finalize().catch(fail).then(done);
   });
 
