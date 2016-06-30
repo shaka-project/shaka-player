@@ -66,29 +66,88 @@ describe('TtmlTextParser', function() {
   it('supports time in 0.00h 0.00m 0.00s format', function() {
     verifyHelper(
         [
-          {start: 3567, end: 5402.3, text: 'Test'}
+          {start: 3567.03, end: 5402.3, text: 'Test'}
         ],
-        '<tt><body><p begin="59.45m" ' +
+        '<tt><body><p begin="59.45m30ms" ' +
         'end="1.5h2.3s">Test</p></body></tt>');
   });
 
   it('supports time with frame rate', function() {
     verifyHelper(
         [
-          {start: 615.05, end: 662.103, text: 'Test'}
+          {start: 615.5, end: 663, text: 'Test'}
         ],
         '<tt xmlns:ttp="ttml#parameter" ' +
-        'ttp:frameRate="10"> ' +
+        'ttp:frameRate="30"> ' +
         '<body>' +
-        '<p begin="00:10:15:05" end="00:11:02:10.3">Test</p>' +
+        '<p begin="00:10:15:15" end="00:11:02:30">Test</p>' +
         '</body>' +
         '</tt>');
   });
 
-  it('error on no time frame provided for frame-formatted time', function() {
-    errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
-        '<tt><body><p begin="00:10:15:05" end="00:11:02:10.3">Test</p>' +
-        '</body></tt>');
+  it('supports time with frame rate multiplier', function() {
+    verifyHelper(
+        [
+          {start: 615.5, end: 663, text: 'Test'}
+        ],
+        '<tt xmlns:ttp="ttml#parameter" ' +
+        'ttp:frameRate="60" ' +
+        'ttp:frameRateMultiplier="1 2"> ' +
+        '<body>' +
+        '<p begin="00:10:15:15" end="00:11:02:30">Test</p>' +
+        '</body>' +
+        '</tt>');
+  });
+
+  it('supports time with subframes', function() {
+    verifyHelper(
+        [
+          {start: 615.517, end: 663, text: 'Test'}
+        ],
+        '<tt xmlns:ttp="ttml#parameter" ' +
+        'ttp:frameRate="30" ' +
+        'ttp:subFrameRate="2"> ' +
+        '<body>' +
+        '<p begin="00:10:15:15.1" end="00:11:02:29.2">Test</p>' +
+        '</body>' +
+        '</tt>');
+  });
+
+  it('supports time in frame format', function() {
+    verifyHelper(
+        [
+          {start: 2.5, end: 10.01, text: 'Test'}
+        ],
+        '<tt xmlns:ttp="ttml#parameter" ' +
+        'ttp:frameRate="60" ' +
+        'ttp:frameRateMultiplier="1 2">' +
+        '<body>' +
+        '<p begin="75f" end="300.3f">Test</p>' +
+        '</body>' +
+        '</tt>');
+  });
+
+  it('supports time in tick format', function() {
+    verifyHelper(
+        [
+          {start: 5, end: 6.02, text: 'Test'}
+        ],
+        '<tt xmlns:ttp="ttml#parameter" ' +
+        'ttp:frameRate="60" ' +
+        'ttp:tickRate="10">' +
+        '<body>' +
+        '<p begin="50t" end="60.2t">Test</p>' +
+        '</body>' +
+        '</tt>');
+  });
+
+  it('supports time with duration', function() {
+    verifyHelper(
+        [
+          {start: 62.05, end: 67.05, text: 'Test'}
+        ],
+        '<tt><body><p begin="01:02.05" ' +
+        'dur="5s">Test</p></body></tt>');
   });
 
   it('parses alignment from textAlign attribute of a region', function() {
@@ -131,8 +190,8 @@ describe('TtmlTextParser', function() {
     expect(result).toBeTruthy();
     expect(result.length).toBe(cues.length);
     for (var i = 0; i < cues.length; i++) {
-      expect(result[i].startTime).toBe(cues[i].start);
-      expect(result[i].endTime).toBe(cues[i].end);
+      expect(result[i].startTime).toBeCloseTo(cues[i].start, 3);
+      expect(result[i].endTime).toBeCloseTo(cues[i].end, 3);
       expect(result[i].text).toBe(cues[i].text);
 
       if (cues[i].lineAlign)
