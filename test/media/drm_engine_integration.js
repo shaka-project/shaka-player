@@ -251,16 +251,6 @@ describe('DrmEngine', function() {
   });  // describe('basic flow')
 
   describe('missing keys error', function() {
-    beforeEach(function() {
-      // TODO: Update once we get a PlayReady license server that will return
-      // the wrong key IDs and accept requests for the wrong key IDs.
-      // As of 06-29, Axinom's server rejects our requests for the wrong keys
-      // when sent from IE11, but not Edge.
-      if (!support['com.widevine.alpha']) {
-        pending('Skipping DrmEngine tests.');
-      }
-    });
-
     it('fires when manifest PSSH does not match key ID', function(done) {
       setBadManifestData();
       runMissingKeyTest(done);
@@ -345,7 +335,7 @@ describe('DrmEngine', function() {
     }
 
     function runMissingKeyTest(done) {
-      checkKeySystems();
+      checkWidevineOnly();
 
       // The only error should be key ID not found.
       var onErrorCalled = new shaka.util.PublicPromise();
@@ -403,6 +393,16 @@ describe('DrmEngine', function() {
       // It can only be used from inside it(), not describe() or beforeEach().
       pending('Skipping DrmEngine tests.');
       // The rest of the test will not run.
+    }
+  }
+
+  function checkWidevineOnly() {
+    // TODO: Remove once we get a PlayReady license server that will return
+    // the wrong key IDs and accept requests for the wrong key IDs.
+    // As of 06-29, Axinom's server rejects our requests for the wrong keys
+    // when sent from IE11, but not Edge.
+    if (!support['com.widevine.alpha']) {
+      pending('Skipping DrmEngine tests that can only use Widevine.');
     }
   }
 });
