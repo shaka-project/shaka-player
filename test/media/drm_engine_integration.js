@@ -36,10 +36,10 @@ describe('DrmEngine', function() {
 
   // These come from Axinom and use the Axinom license server.
   // TODO: Do not rely on third-party services long-term.
-  var videoInitSegmentUri = 'test/assets/multidrm-video-init.mp4';
-  var videoSegmentUri = 'test/assets/multidrm-video-segment.mp4';
-  var audioInitSegmentUri = 'test/assets/multidrm-audio-init.mp4';
-  var audioSegmentUri = 'test/assets/multidrm-audio-segment.mp4';
+  var videoInitSegmentUri = 'test/test/assets/multidrm-video-init.mp4';
+  var videoSegmentUri = 'test/test/assets/multidrm-video-segment.mp4';
+  var audioInitSegmentUri = 'test/test/assets/multidrm-audio-init.mp4';
+  var audioSegmentUri = 'test/test/assets/multidrm-audio-segment.mp4';
 
   var originalTimeout;
 
