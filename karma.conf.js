@@ -40,7 +40,7 @@ module.exports = function(config) {
       'test/support_check.js',
 
       // unit tests last
-      'test/**/*_unit.js', //am I skipping player???
+      'test/**/*_unit.js',
 
       // if --quick is not present, we will add integration tests.
 
