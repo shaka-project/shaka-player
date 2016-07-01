@@ -31,7 +31,7 @@ module.exports = function(config) {
       'node_modules/requirejs/require.js',
 
       // test utils next
-      'test/util/*.js',
+      'test/test/util/*.js',
 
       // list of test assets next
       'demo/assets.js',
@@ -40,19 +40,19 @@ module.exports = function(config) {
       'test/support_check.js',
 
       // unit tests last
-      'test/*_unit.js',
+      'test/**/*_unit.js',
 
       // if --quick is not present, we will add integration tests.
 
       // source files - these are only watched and served
       {pattern: 'lib/**/*.js', included: false},
       {pattern: 'third_party/closure/goog/**/*.js', included: false},
-      {pattern: 'test/assets/*', included: false},
+      {pattern: 'test/test/assets/*', included: false},
       {pattern: 'dist/shaka-player.compiled.js', included: false},
     ],
 
     proxies: {
-      '/test/assets/': '/base/test/assets/',
+      '/test/test/assets/': '/base/test/test/assets/',
       '/dist/': '/base/dist/',
     },
 
@@ -201,7 +201,7 @@ module.exports = function(config) {
   if (!flagPresent('quick')) {
     // If --quick is present, we don't serve integration tests.
     var files = config.files;
-    files.push('test/*_integration.js');
+    files.push('test/**/*_integration.js');
     // We just modified the config in-place.  No need for config.set().
   }
 
