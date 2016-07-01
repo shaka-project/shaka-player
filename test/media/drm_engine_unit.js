@@ -143,6 +143,42 @@ describe('DrmEngine', function() {
       }).catch(fail).then(done);
     });
 
+    it('tries systems in the order they appear in', function(done) {
+      // Fail both key systems.
+      requestMediaKeySystemAccessSpy.and.callFake(
+          fakeRequestMediaKeySystemAccess.bind(null, []));
+
+      drmEngine.init(manifest, /* offline */ false).then(fail, function() {
+        expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
+        // These should be in the same order as the key systems appear in the
+        // manifest.
+        var calls = requestMediaKeySystemAccessSpy.calls;
+        expect(calls.argsFor(0)[0]).toBe('drm.abc');
+        expect(calls.argsFor(1)[0]).toBe('drm.def');
+      }).then(done);
+    });
+
+    it('tries systems with configured license servers first', function(done) {
+      // Fail both key systems.
+      requestMediaKeySystemAccessSpy.and.callFake(
+          fakeRequestMediaKeySystemAccess.bind(null, []));
+
+      // Remove the server URI for drm.abc, which appears first in the manifest.
+      delete config.servers['drm.abc'];
+      drmEngine.configure(config);
+      // Ignore error logs, which we expect to occur due to the missing server.
+      logErrorSpy.and.stub();
+
+      drmEngine.init(manifest, /* offline */ false).then(fail, function() {
+        expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
+        // Although drm.def appears second in the manifest, it is queried first
+        // because it has a server configured.
+        var calls = requestMediaKeySystemAccessSpy.calls;
+        expect(calls.argsFor(0)[0]).toBe('drm.def');
+        expect(calls.argsFor(1)[0]).toBe('drm.abc');
+      }).then(done);
+    });
+
     it('detects content type capabilities of key system', function(done) {
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, ['drm.abc']));
@@ -417,31 +453,19 @@ describe('DrmEngine', function() {
       }).then(done);
     });
 
-    it('logs an error if license server is not configured', function(done) {
+    it('fails if license server is not configured', function(done) {
       requestMediaKeySystemAccessSpy.and.callFake(
-          fakeRequestMediaKeySystemAccess.bind(null, []));
+          fakeRequestMediaKeySystemAccess.bind(null, ['drm.abc']));
 
       logErrorSpy.and.stub();
       config.servers = {};
       drmEngine.configure(config);
 
-      drmEngine.init(manifest, /* offline */ false).then(fail, function() {
+      drmEngine.init(manifest, /* offline */ false).then(fail, function(error) {
         expect(logErrorSpy).toHaveBeenCalled();
-      }).then(done);
-    });
-
-    it('logs an error if clear keys are not configured', function(done) {
-      requestMediaKeySystemAccessSpy.and.callFake(
-          fakeRequestMediaKeySystemAccess.bind(null, []));
-
-      logErrorSpy.and.stub();
-      manifest.periods[0].streamSets[0].drmInfos[0].keySystem =
-          'org.w3.clearkey';
-      manifest.periods[0].streamSets[1].drmInfos[0].keySystem =
-          'org.w3.clearkey';
-
-      drmEngine.init(manifest, /* offline */ false).then(fail, function() {
-        expect(logErrorSpy).toHaveBeenCalled();
+        shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+            shaka.util.Error.Category.DRM,
+            shaka.util.Error.Code.NO_LICENSE_SERVER_GIVEN));
       }).then(done);
     });
   });  // describe('init')
@@ -569,19 +593,6 @@ describe('DrmEngine', function() {
         expect(keyId1).toBe('deadbeefdeadbeefdeadbeefdeadbeef');
         expect(keyId2).toBe('02030507011013017019023029031037');
       }).catch(fail).then(done);
-    });
-
-    it('fails with an error if there is no license server', function(done) {
-      delete config.servers['drm.abc'];
-      drmEngine.configure(config);
-      logErrorSpy.and.stub();
-
-      initAndAttach().then(fail).catch(function(error) {
-        expect(logErrorSpy).toHaveBeenCalled();
-        shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
-            shaka.util.Error.Category.DRM,
-            shaka.util.Error.Code.NO_LICENSE_SERVER_GIVEN));
-      }).then(done);
     });
 
     it('fails with an error if setMediaKeys fails', function(done) {

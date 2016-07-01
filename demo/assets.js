@@ -287,6 +287,26 @@ shakaAssets.testAssets = [
     }
   },
   {
+    name: 'Angel One (multicodec, multilingual, ClearKey server)',
+    manifestUri: '//storage.googleapis.com/shaka-demo-assets/angel-one-clearkey/dash.mpd',  // gjslint: disable=110
+
+    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
+    source: shakaAssets.Source.SHAKA,
+    drm: [shakaAssets.KeySystem.CLEAR_KEY],
+    features: [
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.MULTIPLE_LANGUAGES,
+      shakaAssets.Feature.SEGMENT_BASE,
+      shakaAssets.Feature.SUBTITLES,
+      shakaAssets.Feature.WEBM,
+      shakaAssets.Feature.WEBVTT
+    ],
+
+    licenseServers: {
+      'org.w3.clearkey': '//cwip-shaka-proxy.appspot.com/clearkey?_u3wDe7erb7v8Lqt8A3QDQ=ABEiM0RVZneImaq7zN3u_w'  // gjslint: disable=110
+    }
+  },
+  {
     name: 'Sintel 4k (multicodec)',
     manifestUri: '//storage.googleapis.com/shaka-demo-assets/sintel/dash.mpd',  // gjslint: disable=110
 
