@@ -169,13 +169,6 @@ ShakaControls.prototype.init = function(castProxy, onError, notifyCastStatus) {
   this.videoContainer_.addEventListener(
       'click', this.onPlayPauseClick_.bind(this));
 
-  // This gets play-pause state corrected for non-autoplaying systems like
-  // Android by recomputing state as soon as the video is loaded.  If autoplay
-  // is enabled, video.paused will be false when this event fires, so this is
-  // the right event for this.
-  this.video_.addEventListener(
-      'loadeddata', this.onPlayStateChange_.bind(this));
-
   // Clicks in the controls should not propagate up to the video container.
   this.controls_.addEventListener(
       'click', function(event) { event.stopPropagation(); });
@@ -213,6 +206,18 @@ ShakaControls.prototype.initMinimal = function(video, player) {
 ShakaControls.prototype.allowCast = function(allow) {
   this.castAllowed_ = allow;
   this.onCastStatusChange_(null);
+};
+
+
+/**
+ * Used by the application to notify the controls that a load operation is
+ * complete.  This allows the controls to recalculate play/paused state, which
+ * is important for platforms like Android where autoplay is disabled.
+ */
+ShakaControls.prototype.loadComplete = function() {
+  // If we are on Android or if autoplay is false, video.paused should be true.
+  // Otherwise, video.paused is false and the content is autoplaying.
+  this.onPlayStateChange_();
 };
 
 

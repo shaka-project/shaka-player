@@ -170,6 +170,9 @@ shakaDemo.load = function() {
 
   // Load the manifest.
   player.load(asset.manifestUri).then(function() {
+    // Update control state in case autoplay is disabled.
+    shakaDemo.controls_.loadComplete();
+
     // Disallow casting of offline content.
     var isOffline = asset.manifestUri.indexOf('offline:') == 0;
     shakaDemo.controls_.allowCast(!isOffline);
