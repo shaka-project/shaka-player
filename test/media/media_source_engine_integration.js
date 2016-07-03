@@ -62,7 +62,7 @@ describe('MediaSourceEngine', function() {
     document.body.appendChild(video);
 
     originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;  // ms
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 12000;  // ms
 
     Promise.all([
       createStreamGenerator(metadata.video),

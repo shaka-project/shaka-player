@@ -49,7 +49,7 @@ describe('DrmEngine', function() {
         .catch(fail);
 
     originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;  // ms
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 12000;  // ms
 
     video = /** @type {HTMLVideoElement} */ (document.createElement('video'));
     video.width = '600';

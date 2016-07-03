@@ -63,7 +63,7 @@ describe('Player', function() {
       support = supportResults;
       done();
     });
-  });
+  }, /* timeout ms */ 10000);
 
   beforeEach(function() {
     player = new shaka.Player(video);
@@ -121,7 +121,7 @@ describe('Player', function() {
         };
         expect(stats).toEqual(expected);
       }).catch(fail).then(done);
-    });
+    }, /* timeout ms */ 15000);
   });
 
   describe('setTextTrackVisibility', function() {
@@ -148,7 +148,7 @@ describe('Player', function() {
         // This should not transition to null when invisible.
         expect(textTrack.cues).not.toBe(null);
       }).catch(fail).then(done);
-    });
+    }, /* timeout ms */ 15000);
   });
 
   describe('plays', function() {

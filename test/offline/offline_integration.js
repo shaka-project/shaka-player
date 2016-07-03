@@ -75,7 +75,7 @@ describe('Offline', function() {
         })
         .then(function() {
           video.play();
-          return shaka.test.Util.delay(5);
+          return shaka.test.Util.delay(10);
         })
         .then(function() {
           expect(video.currentTime).toBeGreaterThan(3);

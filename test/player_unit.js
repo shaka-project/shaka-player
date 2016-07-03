@@ -138,7 +138,7 @@ describe('Player', function() {
 
       player.load('', 0, factory2).catch(fail).then(function() {
         // Delay so the interrupted calls have time to reject themselves.
-        return shaka.test.Util.delay(0.2);
+        return shaka.test.Util.delay(0.5);
       }).then(function() {
         expect(checkError.calls.count()).toBe(2);
         expect(parser1.stop.calls.count()).toEqual(parser1.start.calls.count());
@@ -154,7 +154,7 @@ describe('Player', function() {
 
       player.load('', 0, factory2).catch(fail).then(function() {
         // Delay so the interrupted calls have time to reject themselves.
-        return shaka.test.Util.delay(0.2);
+        return shaka.test.Util.delay(0.5);
       }).then(function() {
         expect(checkError.calls.count()).toBe(2);
         expect(parser1.stop.calls.count()).toEqual(parser1.start.calls.count());
@@ -166,7 +166,7 @@ describe('Player', function() {
       player.load('', 0, factory1).then(fail).catch(checkError);
       player.destroy().catch(fail).then(function() {
         // Delay so the interrupted calls have time to reject themselves.
-        return shaka.test.Util.delay(0.2);
+        return shaka.test.Util.delay(0.5);
       }).then(function() {
         expect(checkError.calls.count()).toBe(1);
         expect(parser1.stop.calls.count()).toEqual(parser1.start.calls.count());
@@ -185,7 +185,7 @@ describe('Player', function() {
 
       player.load('', 0, factory2).catch(fail).then(function() {
         // Delay so the interrupted calls have time to reject themselves.
-        return shaka.test.Util.delay(0.2);
+        return shaka.test.Util.delay(0.5);
       }).then(function() {
         expect(checkError.calls.count()).toBe(2);
         expect(parser1.stop.calls.count()).toEqual(parser1.start.calls.count());
@@ -199,7 +199,7 @@ describe('Player', function() {
       player.destroy().catch(fail);
       player.destroy().catch(fail).then(function() {
         // Delay so the interrupted calls have time to reject themselves.
-        return shaka.test.Util.delay(0.2);
+        return shaka.test.Util.delay(0.5);
       }).then(function() {
         expect(checkError.calls.count()).toBe(1);
         expect(parser1.stop.calls.count()).toEqual(parser1.start.calls.count());
@@ -213,7 +213,7 @@ describe('Player', function() {
       player.unload().catch(fail);
       player.destroy().catch(fail).then(function() {
         // Delay so the interrupted calls have time to reject themselves.
-        return shaka.test.Util.delay(0.2);
+        return shaka.test.Util.delay(0.5);
       }).then(function() {
         expect(checkError.calls.count()).toBe(1);
         expect(parser1.stop.calls.count()).toEqual(parser1.start.calls.count());
@@ -225,7 +225,7 @@ describe('Player', function() {
       player.load('', 0, factory1).then(fail).catch(checkError);
       player.destroy().catch(fail).then(function() {
         // Delay so the interrupted calls have time to reject themselves.
-        return shaka.test.Util.delay(0.2);
+        return shaka.test.Util.delay(0.5);
       }).then(function() {
         expect(checkError.calls.count()).toBe(1);
         expect(parser1.stop.calls.count()).toEqual(parser1.start.calls.count());
@@ -258,7 +258,7 @@ describe('Player', function() {
           done();
         });
 
-        shaka.test.Util.delay(0.2).then(function() {
+        shaka.test.Util.delay(0.5).then(function() {
           // Make sure we're blocked.
           var requestType = shaka.net.NetworkingEngine.RequestType.MANIFEST;
           networkingEngine.expectRequest('', requestType);
@@ -275,7 +275,7 @@ describe('Player', function() {
 
         player.load('', 0, factory1).then(fail).catch(checkError).then(done);
 
-        shaka.test.Util.delay(0.2).then(function() {
+        shaka.test.Util.delay(0.5).then(function() {
           // Make sure we're blocked.
           expect(parser1.start).toHaveBeenCalled();
           // Interrupt load().
@@ -293,7 +293,7 @@ describe('Player', function() {
 
         player.load('', 0, factory1).then(fail).catch(checkError).then(done);
 
-        shaka.test.Util.delay(0.2).then(function() {
+        shaka.test.Util.delay(1.0).then(function() {
           // Make sure we're blocked.
           expect(drmEngine.init).toHaveBeenCalled();
           // Interrupt load().
@@ -311,7 +311,7 @@ describe('Player', function() {
 
         player.load('', 0, factory1).then(fail).catch(checkError).then(done);
 
-        shaka.test.Util.delay(0.2).then(function() {
+        shaka.test.Util.delay(1.0).then(function() {
           // Make sure we're blocked.
           expect(drmEngine.attach).toHaveBeenCalled();
           // Interrupt load().
@@ -332,7 +332,7 @@ describe('Player', function() {
 
         player.load('', 0, factory1).then(fail).catch(checkError).then(done);
 
-        shaka.test.Util.delay(0.5).then(function() {
+        shaka.test.Util.delay(1.5).then(function() {
           // Make sure we're blocked.
           expect(streamingEngine.init).toHaveBeenCalled();
           // Interrupt load().

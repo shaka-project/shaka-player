@@ -324,20 +324,32 @@ jasmine.stringMatching = function(value) {};
 jasmine.arrayContaining = function(value) {};
 
 
-/** @param {jasmine.Callback} callback */
-var beforeEach = function(callback) {};
+/**
+ * @param {jasmine.Callback} callback
+ * @param {number=} opt_timeout
+ */
+var beforeEach = function(callback, opt_timeout) {};
 
 
-/** @param {jasmine.Callback} callback */
-var beforeAll = function(callback) {};
+/**
+ * @param {jasmine.Callback} callback
+ * @param {number=} opt_timeout
+ */
+var beforeAll = function(callback, opt_timeout) {};
 
 
-/** @param {jasmine.Callback} callback */
-var afterEach = function(callback) {};
+/**
+ * @param {jasmine.Callback} callback
+ * @param {number=} opt_timeout
+ */
+var afterEach = function(callback, opt_timeout) {};
 
 
-/** @param {jasmine.Callback} callback */
-var afterAll = function(callback) {};
+/**
+ * @param {jasmine.Callback} callback
+ * @param {number=} opt_timeout
+ */
+var afterAll = function(callback, opt_timeout) {};
 
 
 /** @param {*=} opt_reason */

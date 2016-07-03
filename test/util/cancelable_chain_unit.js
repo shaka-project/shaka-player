@@ -72,7 +72,7 @@ describe('CancelableChain', function() {
 
   it('stops accepting new stages after being finalized', function(done) {
     chain.then(function() {
-      return shaka.test.Util.delay(0.1);
+      return shaka.test.Util.delay(0.5);
     });
 
     var p = chain.finalize();
@@ -163,7 +163,7 @@ describe('CancelableChain', function() {
         finalComplete = true;
       }).catch(fail);
 
-      shaka.test.Util.delay(0.1).then(function() {
+      shaka.test.Util.delay(0.5).then(function() {
         // The whole chain is done before we cancel.
         expect(stageComplete).toBe(true);
         expect(finalComplete).toBe(true);
@@ -182,7 +182,7 @@ describe('CancelableChain', function() {
         finalComplete = true;
       });
 
-      shaka.test.Util.delay(0.1).then(function() {
+      shaka.test.Util.delay(0.5).then(function() {
         // The whole chain is done before we cancel.
         expect(stageComplete).toBe(true);
         expect(finalComplete).toBe(true);
