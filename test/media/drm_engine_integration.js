@@ -336,6 +336,7 @@ describe('DrmEngine', function() {
 
     function runMissingKeyTest(done) {
       checkWidevineOnly();
+      checkNotFirefox();
 
       // The only error should be key ID not found.
       var onErrorCalled = new shaka.util.PublicPromise();
@@ -403,6 +404,16 @@ describe('DrmEngine', function() {
     // when sent from IE11, but not Edge.
     if (!support['com.widevine.alpha']) {
       pending('Skipping DrmEngine tests that can only use Widevine.');
+    }
+  }
+
+  function checkNotFirefox() {
+    // TODO: Remove once Firefox sends the 'waitingforkey' event.
+    // Note that feature detection is not possible because there is no video
+    // attribute called 'onwaitingforkey'.
+    // Bug filed: https://goo.gl/7SCMwb
+    if (navigator.userAgent.indexOf('Firefox/') >= 0) {
+      pending('Skipping DrmEngine tests that Firefox cannot yet run.');
     }
   }
 });
