@@ -77,7 +77,7 @@ jasmine.Matchers.prototype.toBe = function(value) {};
 
 /**
  * @param {number} value
- * @param {number=} opt_precision
+ * @param {number=} opt_precision A number of decimal places, default 2.
  */
 jasmine.Matchers.prototype.toBeCloseTo = function(value, opt_precision) {};
 

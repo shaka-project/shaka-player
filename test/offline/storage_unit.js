@@ -156,13 +156,17 @@ describe('Storage', function() {
           .setPresentationDuration(20)
           .addPeriod(0)
             .addStreamSet('video')
-              .addStream(0).size(100, 200).bandwidth(0)
+              .addStream(0).size(100, 200).bandwidth(80)
             .addStreamSet('audio')
               .language('en')
-              .addStream(1).bandwidth(0)
+              .addStream(1).bandwidth(80)
           .build();
+      // Get the original tracks from the manifest.
       var getTracks = shaka.util.StreamUtils.getTracks;
       tracks = getTracks(manifest.periods[0], {});
+      // The expected tracks we get back from the stored version of the content
+      // will have 0 for bandwidth, so adjust the tracks list to match.
+      tracks.forEach(function(t) { t.bandwidth = 0; });
 
       storage.loadInternal = function() {
         return Promise.resolve({
@@ -271,16 +275,16 @@ describe('Storage', function() {
 
           switch (progress.calls.count()) {
             case 1:
-              expect(percent).toBeCloseTo(54 / 150, 0.01);
+              expect(percent).toBeCloseTo(54 / 150);
               break;
             case 2:
-              expect(percent).toBeCloseTo(67 / 150, 0.01);
+              expect(percent).toBeCloseTo(67 / 150);
               break;
             case 3:
-              expect(percent).toBeCloseTo(133 / 150, 0.01);
+              expect(percent).toBeCloseTo(133 / 150);
               break;
             default:
-              expect(percent).toBeCloseTo(1, 0.01);
+              expect(percent).toBeCloseTo(1);
               break;
           }
         });
@@ -325,19 +329,19 @@ describe('Storage', function() {
 
           switch (progress.calls.count()) {
             case 1:
-              expect(percent).toBeCloseTo(54 / 101, 0.01);
+              expect(percent).toBeCloseTo(54 / 101);
               expect(storedContent.size).toBe(71);
               break;
             case 2:
-              expect(percent).toBeCloseTo(64 / 101, 0.01);
+              expect(percent).toBeCloseTo(64 / 101);
               expect(storedContent.size).toBe(84);
               break;
             case 3:
-              expect(percent).toBeCloseTo(84 / 101, 0.01);
+              expect(percent).toBeCloseTo(84 / 101);
               expect(storedContent.size).toBe(150);
               break;
             default:
-              expect(percent).toBeCloseTo(1, 0.01);
+              expect(percent).toBeCloseTo(1);
               expect(storedContent.size).toBe(150);
               break;
           }

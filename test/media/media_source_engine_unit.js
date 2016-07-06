@@ -488,7 +488,7 @@ describe('MediaSourceEngine', function() {
         // MediaSourceEngine adds a fudge factor to deal with edge cases where
         // the last desired frame in a period could be chopped off.  Expect a
         // tolerance of at most 0.1.
-        expect(audioSourceBuffer.appendWindowEnd).toBeCloseTo(10, 0.1);
+        expect(audioSourceBuffer.appendWindowEnd).toBeCloseTo(10, 1);
         done();
       });
     });

@@ -238,13 +238,13 @@ describe('MediaSourceEngine', function() {
       expect(buffered('audio', 0)).toBe(0);
       return append('audio', 1);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(10, 0.1);
+      expect(buffered('audio', 0)).toBeCloseTo(10, 1);
       return append('audio', 2);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(20, 0.1);
+      expect(buffered('audio', 0)).toBeCloseTo(20, 1);
       return append('audio', 3);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(30, 0.1);
+      expect(buffered('audio', 0)).toBeCloseTo(30, 1);
     }).catch(fail).then(done);
   });
 
@@ -259,22 +259,22 @@ describe('MediaSourceEngine', function() {
     var audioStreaming = appendInit('audio').then(function() {
       return append('audio', 1);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(10, 0.1);
+      expect(buffered('audio', 0)).toBeCloseTo(10, 1);
       return append('audio', 2);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(20, 0.1);
+      expect(buffered('audio', 0)).toBeCloseTo(20, 1);
       return append('audio', 3);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(30, 0.1);
+      expect(buffered('audio', 0)).toBeCloseTo(30, 1);
       return append('audio', 4);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(40, 0.1);
+      expect(buffered('audio', 0)).toBeCloseTo(40, 1);
       return append('audio', 5);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(50, 0.1);
+      expect(buffered('audio', 0)).toBeCloseTo(50, 1);
       return append('audio', 6);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(60, 0.1);
+      expect(buffered('audio', 0)).toBeCloseTo(60, 1);
     }).catch(fail);
 
     var videoStreaming = appendInit('video').then(function() {
@@ -301,7 +301,7 @@ describe('MediaSourceEngine', function() {
     Promise.all([audioStreaming, videoStreaming]).then(function() {
       return mediaSourceEngine.endOfStream();
     }).then(function() {
-      expect(mediaSource.duration).toBeCloseTo(60, 0.1);
+      expect(mediaSource.duration).toBeCloseTo(60, 1);
     }).catch(fail).then(done);
   });
 
@@ -318,7 +318,7 @@ describe('MediaSourceEngine', function() {
       expect(buffered('video', 0)).toBeCloseTo(10);
       return append('video', 2);
     }).then(function() {
-      expect(buffered('video', 0)).toBeCloseTo(18, 0);
+      expect(buffered('video', 0)).toBeCloseTo(18, 1);
     }).catch(fail).then(done);
   });
 });

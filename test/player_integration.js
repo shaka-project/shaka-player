@@ -213,7 +213,7 @@ describe('Player', function() {
           return waitForTimeOrEnd(video, 30);
         }).then(function() {
           if (video.ended) {
-            expect(video.currentTime).toBeCloseTo(video.duration, 0.1);
+            expect(video.currentTime).toBeCloseTo(video.duration, 1);
           } else {
             expect(video.currentTime).toBeGreaterThan(20);
             // If it were very close to duration, why !video.ended?
@@ -225,7 +225,7 @@ describe('Player', function() {
               // 30 seconds or video ended, whichever comes first.
               return waitForTimeOrEnd(video, 30).then(function() {
                 expect(video.ended).toBe(true);
-                expect(video.currentTime).toBeCloseTo(video.duration, 0.1);
+                expect(video.currentTime).toBeCloseTo(video.duration, 1);
               });
             }
           }
