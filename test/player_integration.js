@@ -53,11 +53,19 @@ describe('Player', function() {
       // All tests in this suite will use the compiled library.
       require(['../dist/shaka-player.compiled.js'], function(shakaModule) {
         shaka = shakaModule;
+        shaka.net.NetworkingEngine.registerScheme(
+            'test', window.shaka.test.TestScheme);
+        shaka.media.ManifestParser.registerParserByMime(
+            'application/x-test-manifest',
+            window.shaka.test.TestScheme.ManifestParser);
+
         loaded.resolve();
       });
     }
 
     loaded.then(function() {
+      return window.shaka.test.TestScheme.createManifests(shaka, '_compiled');
+    }).then(function() {
       return shaka.Player.probeSupport();
     }).then(function(supportResults) {
       support = supportResults;
@@ -91,10 +99,7 @@ describe('Player', function() {
     it('gives stats about current stream', function(done) {
       // This is tested more in player_unit.js.  This is here to test the public
       // API and to check for renaming.
-      var asset =
-          '//storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd';
-
-      player.load(asset).then(function() {
+      player.load('test:sintel_compiled').then(function() {
         video.play();
         return waitForEvent(video, 'timeupdate', 10);
       }).then(function() {
@@ -129,11 +134,8 @@ describe('Player', function() {
     // to a crash in TextEngine.  This validates that we do not trigger this
     // behavior when changing visibility of text.
     it('does not cause cues to be null', function(done) {
-      var asset =
-          '//storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd';
       var textTrack = video.textTracks[0];
-
-      player.load(asset).then(function() {
+      player.load('test:sintel_compiled').then(function() {
         video.play();
         return waitForEvent(video, 'timeupdate', 10);
       }).then(function() {

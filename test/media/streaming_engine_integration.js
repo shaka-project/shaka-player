@@ -20,9 +20,9 @@ describe('StreamingEngine', function() {
 
   var metadata = {
     video: {
-      initSegmentUri: 'test/test/assets/sintel-video-init.mp4',
+      initSegmentUri: '/base/test/test/assets/sintel-video-init.mp4',
       mvhdOffset: 0x24,
-      segmentUri: 'test/test/assets/sintel-video-segment.mp4',
+      segmentUri: '/base/test/test/assets/sintel-video-segment.mp4',
       tfdtOffset: 0x38,
       segmentDuration: 10,
       presentationTimeOffset: 0,
@@ -30,9 +30,9 @@ describe('StreamingEngine', function() {
       generator: null
     },
     audio: {
-      initSegmentUri: 'test/test/assets/sintel-audio-init.mp4',
+      initSegmentUri: '/base/test/test/assets/sintel-audio-init.mp4',
       mvhdOffset: 0x20,
-      segmentUri: 'test/test/assets/sintel-audio-segment.mp4',
+      segmentUri: '/base/test/test/assets/sintel-audio-segment.mp4',
       tfdtOffset: 0x3c,
       segmentDuration: 10,
       presentationTimeOffset: 0,

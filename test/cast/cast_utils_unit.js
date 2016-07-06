@@ -158,8 +158,8 @@ describe('CastUtils', function() {
 
         var mediaSource = new MediaSource();
         var mimeType = 'video/mp4; codecs="avc1.42c01e"';
-        var initSegmentUrl = 'test/test/assets/sintel-video-init.mp4';
-        var videoSegmentUrl = 'test/test/assets/sintel-video-segment.mp4';
+        var initSegmentUrl = '/base/test/test/assets/sintel-video-init.mp4';
+        var videoSegmentUrl = '/base/test/test/assets/sintel-video-segment.mp4';
 
         // Wait for the media source to be open.
         eventManager = new shaka.util.EventManager();

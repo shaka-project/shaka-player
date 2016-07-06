@@ -45,6 +45,7 @@ describe('Offline', function() {
 
   beforeEach(function(done) {
     player = new shaka.Player(video);
+    player.addEventListener('error', fail);
     storage = new shaka.offline.Storage(player);
     dbEngine = new shaka.offline.DBEngine();
     dbEngine.init(shaka.offline.OfflineUtils.DB_SCHEME).catch(fail).then(done);
@@ -66,9 +67,8 @@ describe('Offline', function() {
       pending('Offline storage not supported');
     }
 
-    var uri = '//storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd';
     var storedContent;
-    storage.store(uri)
+    storage.store('test:sintel')
         .then(function(content) {
           storedContent = content;
           return player.load(storedContent.offlineUri);
@@ -97,16 +97,7 @@ describe('Offline', function() {
       pending('Persistent licenses not supported');
     }
 
-    var uri = '//storage.googleapis.com/shaka-demo-assets/' +
-              'angel-one-widevine/dash.mpd';
-    player.configure({
-      drm: {
-        servers: {
-          'com.widevine.alpha': '//widevine-proxy.appspot.com/proxy'
-        }
-      }
-    });
-
+    shaka.test.TestScheme.setupPlayer(player, 'sintel-enc');
     var onError = function(e) {
       // We should only get a not-found error.
       var expected = new shaka.util.Error(
@@ -118,7 +109,7 @@ describe('Offline', function() {
     var storedContent;
     var sessionId;
     var drmEngine;
-    storage.store(uri)
+    storage.store('test:sintel-enc')
         .then(function(content) {
           storedContent = content;
           expect(storedContent.offlineUri).toBe('offline:0');

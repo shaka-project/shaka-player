@@ -36,10 +36,10 @@ describe('DrmEngine', function() {
 
   // These come from Axinom and use the Axinom license server.
   // TODO: Do not rely on third-party services long-term.
-  var videoInitSegmentUri = 'test/test/assets/multidrm-video-init.mp4';
-  var videoSegmentUri = 'test/test/assets/multidrm-video-segment.mp4';
-  var audioInitSegmentUri = 'test/test/assets/multidrm-audio-init.mp4';
-  var audioSegmentUri = 'test/test/assets/multidrm-audio-segment.mp4';
+  var videoInitSegmentUri = '/base/test/test/assets/multidrm-video-init.mp4';
+  var videoSegmentUri = '/base/test/test/assets/multidrm-video-segment.mp4';
+  var audioInitSegmentUri = '/base/test/test/assets/multidrm-audio-init.mp4';
+  var audioSegmentUri = '/base/test/test/assets/multidrm-audio-segment.mp4';
 
   var originalTimeout;
 
@@ -57,25 +57,17 @@ describe('DrmEngine', function() {
     video.muted = true;
     document.body.appendChild(video);
 
-    var dummyRequest = {
-      allowCrossSiteCredentials: false,
-      body: null,
-      method: 'GET',
-      headers: {},
-      retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-      uris: []  // specific URI passed to the plugin is used, not this
-    };
     Promise.all([
       supportTest,
-      shaka.net.HttpPlugin(videoInitSegmentUri, dummyRequest),
-      shaka.net.HttpPlugin(videoSegmentUri, dummyRequest),
-      shaka.net.HttpPlugin(audioInitSegmentUri, dummyRequest),
-      shaka.net.HttpPlugin(audioSegmentUri, dummyRequest)
+      shaka.test.Util.fetch(videoInitSegmentUri),
+      shaka.test.Util.fetch(videoSegmentUri),
+      shaka.test.Util.fetch(audioInitSegmentUri),
+      shaka.test.Util.fetch(audioSegmentUri)
     ]).then(function(responses) {
-      videoInitSegment = responses[1].data;
-      videoSegment = responses[2].data;
-      audioInitSegment = responses[3].data;
-      audioSegment = responses[4].data;
+      videoInitSegment = responses[1];
+      videoSegment = responses[2];
+      audioInitSegment = responses[3];
+      audioSegment = responses[4];
     }).catch(fail).then(done);
   });
 

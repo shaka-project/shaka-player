@@ -246,7 +246,7 @@ shaka.test.Util.fetch = function(uri) {
     };
 
     xhr.onerror = function(event) {
-      reject('error');
+      reject('shaka.test.Util.fetch failed: ' + uri);
     };
 
     xhr.send(null /* body */);
