@@ -170,6 +170,22 @@ module.exports = function(config) {
         pseudoActivityInterval: 20000
       },
       // }}}
+
+      // Linux {{{
+      WebDriver_ChromeLinux: {
+        base: 'WebDriver',
+        config: {hostname: 'localhost', port: 4447},
+        browserName: 'chrome',
+        pseudoActivityInterval: 20000
+      },
+
+      WebDriver_FirefoxLinux: {
+        base: 'WebDriver',
+        config: {hostname: 'localhost', port: 4447},
+        browserName: 'firefox',
+        pseudoActivityInterval: 20000
+      },
+      // }}}
     },
 
     coverageReporter: {
