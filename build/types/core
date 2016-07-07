@@ -47,5 +47,6 @@
 +../../lib/util/stream_utils.js
 +../../lib/util/string_utils.js
 +../../lib/util/text_parser.js
++../../lib/util/timer.js
 +../../lib/util/uint8array_utils.js
 +../../lib/util/xml_utils.js

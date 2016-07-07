@@ -859,13 +859,118 @@ describe('DrmEngine', function() {
             callback(keyId1, status1);
             callback(keyId2, status2);
           });
-          session1.on['keystatuseschange']({ target: session1 });
 
-          expect(onKeyStatusSpy).toHaveBeenCalledWith({
-            '00': status1,
-            '0000': status2
+          onKeyStatusSpy.and.callFake(function(statusMap) {
+            expect(statusMap).toEqual({
+              '00': status1,
+              '0000': status2
+            });
+            done();
           });
-        }).catch(fail).then(done);
+
+          session1.on['keystatuseschange']({ target: session1 });
+        }).catch(fail);
+      });
+
+      it('causes an EXPIRED error when all keys expire', function(done) {
+        onErrorSpy.and.stub();
+
+        initAndAttach().then(function() {
+          expect(onErrorSpy).not.toHaveBeenCalled();
+
+          var initData = new Uint8Array(0);
+          mockVideo.on['encrypted'](
+              { initDataType: 'webm', initData: initData });
+
+          var keyId1 = (new Uint8Array(1)).buffer;
+          var keyId2 = (new Uint8Array(2)).buffer;
+
+          // Expire one key.
+          session1.keyStatuses.forEach.and.callFake(function(callback) {
+            callback(keyId1, 'usable');
+            callback(keyId2, 'expired');
+          });
+
+          onKeyStatusSpy.and.callFake(function(statusMap) {
+            // One key is still usable.
+            expect(onErrorSpy).not.toHaveBeenCalled();
+
+            // Expire both keys.
+            session1.keyStatuses.forEach.and.callFake(function(callback) {
+              callback(keyId1, 'expired');
+              callback(keyId2, 'expired');
+            });
+
+            onKeyStatusSpy.and.callFake(function(statusMap) {
+              // Both keys are expired, so we should have an error.
+              expect(onErrorSpy).toHaveBeenCalled();
+              // There should be exactly one error.
+              expect(onErrorSpy.calls.count()).toEqual(1);
+              var error = onErrorSpy.calls.argsFor(0)[0];
+              shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+                  shaka.util.Error.Category.DRM,
+                  shaka.util.Error.Code.EXPIRED));
+
+              // Trigger a 'waitingforkey' event and wait for processing.
+              // No further errors should fire.
+              onErrorSpy.calls.reset();
+              mockVideo.on['waitingforkey']({});
+              shaka.test.Util.delay(1).then(function() {
+                expect(onErrorSpy).not.toHaveBeenCalled();
+                done();
+              });
+            });
+
+            session1.on['keystatuseschange']({ target: session1 });
+          });
+
+          session1.on['keystatuseschange']({ target: session1 });
+        }).catch(fail);
+      });
+
+      it('causes only one error when two keys expire at once', function(done) {
+        onErrorSpy.and.stub();
+
+        initAndAttach().then(function() {
+          expect(onErrorSpy).not.toHaveBeenCalled();
+
+          var initData = new Uint8Array(0);
+          mockVideo.on['encrypted'](
+              { initDataType: 'webm', initData: initData });
+
+          var keyId1 = (new Uint8Array(1)).buffer;
+          var keyId2 = (new Uint8Array(2)).buffer;
+
+          // Expire both keys at once.
+          session1.keyStatuses.forEach.and.callFake(function(callback) {
+            callback(keyId1, 'expired');
+            callback(keyId2, 'expired');
+          });
+
+          onKeyStatusSpy.and.callFake(function(statusMap) {
+            // Both keys are expired, so we should have an error.
+            expect(onErrorSpy).toHaveBeenCalled();
+            // There should be exactly one error.
+            expect(onErrorSpy.calls.count()).toEqual(1);
+            var error = onErrorSpy.calls.argsFor(0)[0];
+            shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+                shaka.util.Error.Category.DRM,
+                shaka.util.Error.Code.EXPIRED));
+
+            // Ignore the next key status event, sleep for one second, then
+            // check to see if another error fired.
+            onKeyStatusSpy.and.stub();
+            shaka.test.Util.delay(1).then(function() {
+              // Still only one error.
+              expect(onErrorSpy.calls.count()).toEqual(1);
+              done();
+            });
+          });
+
+          // Fire change events for both keys.
+          session1.on['keystatuseschange']({ target: session1 });
+          session1.on['keystatuseschange']({ target: session1 });
+        }).catch(fail);
       });
     });  // describe('keystatuseschange')
   });  // describe('events')

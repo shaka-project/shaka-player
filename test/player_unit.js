@@ -1131,7 +1131,7 @@ describe('Player', function() {
       // restricted.
       abrManager.chooseIndex = 1;
       abrManager.chooseStreams.calls.reset();
-      onKeyStatus({'abc': 'expired'});
+      onKeyStatus({'abc': 'output-restricted'});
       expect(abrManager.chooseStreams).toHaveBeenCalled();
       expect(manifest.periods[0].streamSets[1].streams[0].id).toBe(4);
       expect(manifest.periods[0].streamSets[1].streams[0].allowedByKeySystem)
@@ -1144,7 +1144,7 @@ describe('Player', function() {
     it('removes based on key status', function() {
       expect(player.getTracks().length).toBe(9);
 
-      onKeyStatus({'abc': 'expired'});
+      onKeyStatus({'abc': 'output-restricted'});
 
       var tracks = player.getTracks();
       expect(tracks.length).toBe(8);
