@@ -55,6 +55,9 @@ describe('CastReceiver', function() {
     CastReceiver = shaka.cast.CastReceiver;
     CastUtils = shaka.cast.CastUtils;
 
+    // Don't do any more work here if the tests will not end up running.
+    if (!isChromecast && !isChrome) return;
+
     originalCast = window.cast;
     originalUserAgent = navigator.userAgent;
 
