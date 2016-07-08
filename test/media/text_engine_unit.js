@@ -56,14 +56,14 @@ describe('TextEngine', function() {
   describe('appendBuffer', function() {
     it('works asynchronously', function(done) {
       mockParser.and.returnValue([1, 2, 3]);
-      textEngine.appendBuffer(dummyData, 0, 3).catch(fail).then(done);
+      textEngine.appendBuffer(dummyData, 0, 3, 0).catch(fail).then(done);
       expect(mockTrack.addCue).not.toHaveBeenCalled();
     });
 
     it('adds cues to the track', function(done) {
       mockParser.and.returnValue([1, 2, 3]);
 
-      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+      textEngine.appendBuffer(dummyData, 0, 3, 0).then(function() {
         expect(mockParser).toHaveBeenCalledWith(dummyData);
         expect(mockTrack.addCue).toHaveBeenCalledWith(1);
         expect(mockTrack.addCue).toHaveBeenCalledWith(2);
@@ -74,7 +74,7 @@ describe('TextEngine', function() {
         mockParser.calls.reset();
 
         mockParser.and.returnValue([4, 5]);
-        return textEngine.appendBuffer(dummyData, 3, 5);
+        return textEngine.appendBuffer(dummyData, 3, 5, 0);
       }).then(function() {
         expect(mockParser).toHaveBeenCalledWith(dummyData);
         expect(mockTrack.addCue).toHaveBeenCalledWith(4);
@@ -96,7 +96,7 @@ describe('TextEngine', function() {
     });
 
     it('works asynchronously', function(done) {
-      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+      textEngine.appendBuffer(dummyData, 0, 3, 0).then(function() {
         var p = textEngine.remove(0, 1);
         expect(mockTrack.removeCue).not.toHaveBeenCalled();
         return p;
@@ -104,7 +104,7 @@ describe('TextEngine', function() {
     });
 
     it('removes cues which overlap the range', function(done) {
-      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+      textEngine.appendBuffer(dummyData, 0, 3, 0).then(function() {
         return textEngine.remove(0, 1);
       }).then(function() {
         expect(mockTrack.removeCue.calls.allArgs()).toEqual([[cue1]]);
@@ -139,13 +139,13 @@ describe('TextEngine', function() {
         return [createFakeCue(0, 1), createFakeCue(2, 3)];
       });
 
-      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+      textEngine.appendBuffer(dummyData, 0, 3, 0).then(function() {
         expect(mockTrack.addCue).toHaveBeenCalledWith(createFakeCue(0, 1));
         expect(mockTrack.addCue).toHaveBeenCalledWith(createFakeCue(2, 3));
 
         mockTrack.addCue.calls.reset();
         textEngine.setTimestampOffset(4);
-        return textEngine.appendBuffer(dummyData, 0, 3);
+        return textEngine.appendBuffer(dummyData, 0, 3, 0);
       }).then(function() {
         expect(mockTrack.addCue).toHaveBeenCalledWith(createFakeCue(4, 5));
         expect(mockTrack.addCue).toHaveBeenCalledWith(createFakeCue(6, 7));
@@ -166,49 +166,45 @@ describe('TextEngine', function() {
     });
 
     it('reflect newly-added cues', function(done) {
-      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
-        expect(textEngine.bufferStart()).toBe(0);
-        expect(textEngine.bufferEnd()).toBe(3);
+      textEngine.appendBuffer(dummyData, 0, 3, 10).then(function() {
+        expect(textEngine.bufferStart()).toBe(10);
+        expect(textEngine.bufferEnd()).toBe(13);
 
-        textEngine.setTimestampOffset(3);
-        return textEngine.appendBuffer(dummyData, 0, 3);
+        return textEngine.appendBuffer(dummyData, 0, 3, 13);
       }).then(function() {
-        expect(textEngine.bufferStart()).toBe(0);
-        expect(textEngine.bufferEnd()).toBe(6);
+        expect(textEngine.bufferStart()).toBe(10);
+        expect(textEngine.bufferEnd()).toBe(16);
 
-        textEngine.setTimestampOffset(7);
-        return textEngine.appendBuffer(dummyData, 0, 3);
+        return textEngine.appendBuffer(dummyData, 0, 3, 16);
       }).then(function() {
-        expect(textEngine.bufferStart()).toBe(0);
-        expect(textEngine.bufferEnd()).toBe(10);
+        expect(textEngine.bufferStart()).toBe(10);
+        expect(textEngine.bufferEnd()).toBe(19);
       }).catch(fail).then(done);
     });
 
     it('reflect newly-removed cues', function(done) {
-      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
-        textEngine.setTimestampOffset(3);
-        return textEngine.appendBuffer(dummyData, 0, 3);
+      textEngine.appendBuffer(dummyData, 0, 3, 10).then(function() {
+        return textEngine.appendBuffer(dummyData, 0, 3, 10);
       }).then(function() {
-        textEngine.setTimestampOffset(7);
-        return textEngine.appendBuffer(dummyData, 0, 3);
+        return textEngine.appendBuffer(dummyData, 0, 3, 13);
       }).then(function() {
-        expect(textEngine.bufferStart()).toBe(0);
-        expect(textEngine.bufferEnd()).toBe(10);
+        expect(textEngine.bufferStart()).toBe(10);
+        expect(textEngine.bufferEnd()).toBe(16);
 
-        return textEngine.remove(0, 3);
+        return textEngine.remove(10, 13);
       }).then(function() {
-        expect(textEngine.bufferStart()).toBe(3);
-        expect(textEngine.bufferEnd()).toBe(10);
+        expect(textEngine.bufferStart()).toBe(13);
+        expect(textEngine.bufferEnd()).toBe(16);
 
-        return textEngine.remove(8, 11);
+        return textEngine.remove(15, 20);
       }).then(function() {
-        expect(textEngine.bufferStart()).toBe(3);
-        expect(textEngine.bufferEnd()).toBe(8);
+        expect(textEngine.bufferStart()).toBe(13);
+        expect(textEngine.bufferEnd()).toBe(15);
 
-        return textEngine.remove(11, 20);
+        return textEngine.remove(17, 20);
       }).then(function() {
-        expect(textEngine.bufferStart()).toBe(3);
-        expect(textEngine.bufferEnd()).toBe(8);
+        expect(textEngine.bufferStart()).toBe(13);
+        expect(textEngine.bufferEnd()).toBe(15);
 
         return textEngine.remove(0, Number.POSITIVE_INFINITY);
       }).then(function() {
@@ -230,15 +226,14 @@ describe('TextEngine', function() {
     });
 
     it('returns 0 if |t| is not buffered', function(done) {
-      textEngine.setTimestampOffset(3);
-      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+      textEngine.appendBuffer(dummyData, 0, 3, 3).then(function() {
         expect(textEngine.bufferedAheadOf(2.9)).toBe(0);
         expect(textEngine.bufferedAheadOf(6.1)).toBe(0);
       }).catch(fail).then(done);
     });
 
     it('returns the distance to the end if |t| is buffered', function(done) {
-      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+      textEngine.appendBuffer(dummyData, 0, 3, 0).then(function() {
         expect(textEngine.bufferedAheadOf(0)).toBe(3);
         expect(textEngine.bufferedAheadOf(1)).toBe(2);
         expect(textEngine.bufferedAheadOf(2.5)).toBeCloseTo(0.5);
@@ -255,13 +250,13 @@ describe('TextEngine', function() {
 
     it('limits appended cues', function(done) {
       textEngine.setAppendWindowEnd(1.9);
-      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+      textEngine.appendBuffer(dummyData, 0, 3, 0).then(function() {
         expect(mockTrack.addCue).toHaveBeenCalledWith(createFakeCue(0, 1));
         expect(mockTrack.addCue).toHaveBeenCalledWith(createFakeCue(1, 2));
 
         mockTrack.addCue.calls.reset();
         textEngine.setAppendWindowEnd(2.1);
-        return textEngine.appendBuffer(dummyData, 0, 3);
+        return textEngine.appendBuffer(dummyData, 0, 3, 0);
       }).then(function() {
         expect(mockTrack.addCue).toHaveBeenCalledWith(createFakeCue(0, 1));
         expect(mockTrack.addCue).toHaveBeenCalledWith(createFakeCue(1, 2));
@@ -271,16 +266,16 @@ describe('TextEngine', function() {
 
     it('limits bufferEnd', function(done) {
       textEngine.setAppendWindowEnd(1.9);
-      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+      textEngine.appendBuffer(dummyData, 0, 3, 0).then(function() {
         expect(textEngine.bufferEnd()).toBe(1.9);
 
         textEngine.setAppendWindowEnd(2.1);
-        return textEngine.appendBuffer(dummyData, 0, 3);
+        return textEngine.appendBuffer(dummyData, 0, 3, 0);
       }).then(function() {
         expect(textEngine.bufferEnd()).toBe(2.1);
 
         textEngine.setAppendWindowEnd(4.1);
-        return textEngine.appendBuffer(dummyData, 0, 3);
+        return textEngine.appendBuffer(dummyData, 0, 3, 0);
       }).then(function() {
         expect(textEngine.bufferEnd()).toBe(3);
       }).catch(fail).then(done);
