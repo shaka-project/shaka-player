@@ -86,6 +86,7 @@ shaka.test.FakeMediaSourceEngine = function(segmentData, opt_drift) {
  *   initSegments: !Array.<!BufferSource>,
  *   segments: !Array.<!BufferSource>,
  *   segmentStartTimes: !Array.<number>,
+ *   segmentPeriodTimes: !Array.<number>,
  *   segmentDuration: number
  * }}
  *
@@ -97,6 +98,9 @@ shaka.test.FakeMediaSourceEngine = function(segmentData, opt_drift) {
  *   The start time of each media segment as they would appear within a
  *   segment index. These values plus drift simulate the segments'
  *   baseMediaDecodeTime (or equivalent) values.
+ * @property {!Array.<number>} segmentPeriodTimes
+ *   The start time of the period of the associated segment.  These are the same
+ *   segments as in |segmentStartTimes|.
  * @property {number} segmentDuration
  *   The duration of each media segment.
  */
@@ -184,7 +188,9 @@ shaka.test.FakeMediaSourceEngine.prototype.appendBuffer = function(
   if (i < 0)
     throw new Error('unexpected data');
 
-  expect(startTime).toBe(this.segmentData[type].segmentStartTimes[i]);
+  expect(startTime).toBe(
+      this.segmentData[type].segmentStartTimes[i] +
+      this.segmentData[type].segmentPeriodTimes[i]);
   expect(endTime).toBe(startTime + this.segmentData[type].segmentDuration);
 
   // Verify that the segment is aligned.

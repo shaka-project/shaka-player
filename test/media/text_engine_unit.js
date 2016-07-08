@@ -170,14 +170,12 @@ describe('TextEngine', function() {
         expect(textEngine.bufferStart()).toBe(0);
         expect(textEngine.bufferEnd()).toBe(3);
 
-        textEngine.setTimestampOffset(3);
-        return textEngine.appendBuffer(dummyData, 0, 3);
+        return textEngine.appendBuffer(dummyData, 3, 6);
       }).then(function() {
         expect(textEngine.bufferStart()).toBe(0);
         expect(textEngine.bufferEnd()).toBe(6);
 
-        textEngine.setTimestampOffset(7);
-        return textEngine.appendBuffer(dummyData, 0, 3);
+        return textEngine.appendBuffer(dummyData, 6, 10);
       }).then(function() {
         expect(textEngine.bufferStart()).toBe(0);
         expect(textEngine.bufferEnd()).toBe(10);
@@ -186,11 +184,9 @@ describe('TextEngine', function() {
 
     it('reflect newly-removed cues', function(done) {
       textEngine.appendBuffer(dummyData, 0, 3).then(function() {
-        textEngine.setTimestampOffset(3);
-        return textEngine.appendBuffer(dummyData, 0, 3);
+        return textEngine.appendBuffer(dummyData, 3, 6);
       }).then(function() {
-        textEngine.setTimestampOffset(7);
-        return textEngine.appendBuffer(dummyData, 0, 3);
+        return textEngine.appendBuffer(dummyData, 6, 10);
       }).then(function() {
         expect(textEngine.bufferStart()).toBe(0);
         expect(textEngine.bufferEnd()).toBe(10);
@@ -230,8 +226,7 @@ describe('TextEngine', function() {
     });
 
     it('returns 0 if |t| is not buffered', function(done) {
-      textEngine.setTimestampOffset(3);
-      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+      textEngine.appendBuffer(dummyData, 3, 6).then(function() {
         expect(textEngine.bufferedAheadOf(2.9)).toBe(0);
         expect(textEngine.bufferedAheadOf(6.1)).toBe(0);
       }).catch(fail).then(done);

@@ -110,6 +110,7 @@ describe('StreamingEngine', function() {
             [makeBuffer(segmentSizes.audio), makeBuffer(segmentSizes.audio),
              makeBuffer(segmentSizes.audio), makeBuffer(segmentSizes.audio)],
         segmentStartTimes: [0, 10, 0, 10],
+        segmentPeriodTimes: [0, 0, 20, 20],
         segmentDuration: 10
       },
       video: {
@@ -120,6 +121,7 @@ describe('StreamingEngine', function() {
             [makeBuffer(segmentSizes.video), makeBuffer(segmentSizes.video),
              makeBuffer(segmentSizes.video), makeBuffer(segmentSizes.video)],
         segmentStartTimes: [0, 10, 0, 10],
+        segmentPeriodTimes: [0, 0, 20, 20],
         segmentDuration: 10
       },
       text: {
@@ -128,6 +130,7 @@ describe('StreamingEngine', function() {
             [makeBuffer(segmentSizes.text), makeBuffer(segmentSizes.text),
              makeBuffer(segmentSizes.text), makeBuffer(segmentSizes.text)],
         segmentStartTimes: [0, 10, 0, 10],
+        segmentPeriodTimes: [0, 0, 20, 20],
         segmentDuration: 10
       }
     };
@@ -181,6 +184,7 @@ describe('StreamingEngine', function() {
              makeBuffer(initSegmentSizeAudio)],
         segments: [],
         segmentStartTimes: [],
+        segmentPeriodTimes: [],
         segmentDuration: 10
       },
       video: {
@@ -189,12 +193,14 @@ describe('StreamingEngine', function() {
              makeBuffer(initSegmentSizeVideo)],
         segments: [],
         segmentStartTimes: [],
+        segmentPeriodTimes: [],
         segmentDuration: 10
       },
       text: {
         initSegments: [],
         segments: [],
         segmentStartTimes: [],
+        segmentPeriodTimes: [],
         segmentDuration: 10
       }
     };
@@ -208,6 +214,10 @@ describe('StreamingEngine', function() {
       segmentData.audio.segmentStartTimes.push(i * 10);
       segmentData.video.segmentStartTimes.push(i * 10);
       segmentData.text.segmentStartTimes.push(i * 10);
+
+      segmentData.audio.segmentPeriodTimes.push(0);
+      segmentData.video.segmentPeriodTimes.push(0);
+      segmentData.text.segmentPeriodTimes.push(0);
     }
 
     var segmentsInSecondPeriod = 2;
@@ -219,6 +229,10 @@ describe('StreamingEngine', function() {
       segmentData.audio.segmentStartTimes.push(i * 10);
       segmentData.video.segmentStartTimes.push(i * 10);
       segmentData.text.segmentStartTimes.push(i * 10);
+
+      segmentData.audio.segmentPeriodTimes.push(segmentsInFirstPeriod * 10);
+      segmentData.video.segmentPeriodTimes.push(segmentsInFirstPeriod * 10);
+      segmentData.text.segmentPeriodTimes.push(segmentsInFirstPeriod * 10);
     }
 
     playhead = createMockPlayhead();
