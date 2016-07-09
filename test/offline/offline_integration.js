@@ -87,7 +87,7 @@ describe('Offline', function() {
         })
         .catch(fail)
         .then(done);
-  }, 30000);
+  });
 
   it('stores, plays, and deletes protected content', function(done) {
     // TODO: Add a PlayReady version once Edge supports offline.
@@ -154,5 +154,5 @@ describe('Offline', function() {
         })
         .catch(fail)
         .then(done);
-  }, 30000);
+  });
 });

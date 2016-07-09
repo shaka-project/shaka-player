@@ -16,8 +16,6 @@
  */
 
 describe('StreamingEngine', function() {
-  var originalTimeout;
-
   var metadata = {
     video: {
       initSegmentUri: '/base/test/test/assets/sintel-video-init.mp4',
@@ -68,9 +66,6 @@ describe('StreamingEngine', function() {
   var streamingEngine;
 
   beforeAll(function() {
-    originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 90000;  // ms
-
     video = /** @type {HTMLVideoElement} */ (document.createElement('video'));
     video.width = 600;
     video.height = 400;
@@ -316,7 +311,6 @@ describe('StreamingEngine', function() {
 
   afterAll(function() {
     document.body.removeChild(video);
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
   });
 
   describe('VOD', function() {

@@ -16,7 +16,6 @@
  */
 
 describe('StreamingEngine', function() {
-  var originalTimeout;
   var originalSetTimeout;
   var Util;
 
@@ -74,8 +73,6 @@ describe('StreamingEngine', function() {
   beforeAll(function() {
     originalSetTimeout = window.setTimeout;
     Util = shaka.test.Util;
-    originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 50000;  // ms
   });
 
   beforeEach(function() {
@@ -369,10 +366,6 @@ describe('StreamingEngine', function() {
       loop = null;
     }
     jasmine.clock().uninstall();
-  });
-
-  afterAll(function() {
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
   });
 
   // This test initializes the StreamingEngine (SE) and allows it to play

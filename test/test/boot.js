@@ -49,6 +49,9 @@
   // the first time it needs to schedule something.
   Promise.resolve().then(function() {});
 
+  // Set the default timeout to 120s for all asynchronous tests.
+  jasmine.DEFAULT_TIMEOUT_INTERVAL = 120 * 1000;
+
   // This references test.Util, which isn't loaded yet, so defer to beforeAll:
   beforeAll(function() {
     var logLevel = shaka.test.Util.getClientArg('logLevel');

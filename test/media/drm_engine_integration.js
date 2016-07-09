@@ -41,15 +41,10 @@ describe('DrmEngine', function() {
   var audioInitSegmentUri = '/base/test/test/assets/multidrm-audio-init.mp4';
   var audioSegmentUri = '/base/test/test/assets/multidrm-audio-segment.mp4';
 
-  var originalTimeout;
-
   beforeAll(function(done) {
     var supportTest = shaka.media.DrmEngine.probeSupport()
         .then(function(result) { support = result; })
         .catch(fail);
-
-    originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 12000;  // ms
 
     video = /** @type {HTMLVideoElement} */ (document.createElement('video'));
     video.width = 600;
@@ -145,7 +140,6 @@ describe('DrmEngine', function() {
 
   afterAll(function() {
     document.body.removeChild(video);
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
   });
 
   describe('basic flow', function() {

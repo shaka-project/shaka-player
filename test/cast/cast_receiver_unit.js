@@ -185,7 +185,7 @@ describe('CastReceiver', function() {
       }).then(function() {
         expect(listener).toHaveBeenCalled();
       }).catch(fail).then(done);
-    }, /* timeout ms */ 8000);
+    });
   });
 
   describe('local events', function() {
