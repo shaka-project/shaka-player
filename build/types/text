@@ -1,5 +1,7 @@
 # All standard text parsing plugins.
 
++../../lib/media/mp4_ttml_parser.js
 +../../lib/media/ttml_text_parser.js
 +../../lib/media/vtt_text_parser.js
+
 
