@@ -304,6 +304,11 @@ jasmine.getEnv().specFilter = (function(spec) {
 });
 
 
+// The spec filter callback occurs before calls to beforeAll, so we need to
+// install polyfills here to ensure that browser support is correctly detected.
+shaka.polyfill.installAll();
+
+
 // Make sure assertions are converted into failures for all tests.
 beforeAll(assertsToFailures.install);
 afterAll(assertsToFailures.uninstall);
@@ -318,8 +323,6 @@ beforeAll(function() {
     shaka.log.setLevel(Number(logLevel));
   else
     shaka.log.setLevel(shaka.log.Level.INFO);
-
-  shaka.polyfill.installAll();
 
   // Jasmine's clock mocks seem to interfere with Edge's Promise implementation.
   // This is only the case if Promises are first used after installing the mock.
