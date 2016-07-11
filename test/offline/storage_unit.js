@@ -408,6 +408,42 @@ describe('Storage', function() {
             .then(done);
       });
 
+      it('downloads different content types in parallel', function(done) {
+        netEngine.setResponseMap({
+          'fake:0': new ArrayBuffer(5),
+          'fake:1': new ArrayBuffer(7)
+        });
+
+        stream1Index.merge([
+          new SegmentReference(0, 0, 1, makeUris('fake:0'), 0, null),
+          new SegmentReference(1, 1, 2, makeUris('fake:1'), 0, null),
+          new SegmentReference(2, 2, 3, makeUris('fake:1'), 0, null)
+        ]);
+        stream2Index.merge([
+          new SegmentReference(0, 0, 1, makeUris('fake:1'), 0, null),
+          new SegmentReference(1, 1, 2, makeUris('fake:0'), 0, null),
+          new SegmentReference(2, 2, 3, makeUris('fake:1'), 0, null)
+        ]);
+
+        // Delay the next segment download.  This will stall either audio or
+        // video, but the other should continue.
+        var req1 = netEngine.delayNextRequest();
+
+        storage.store('')
+            .then(function(manifest) {
+              expect(manifest).toBeTruthy();
+            })
+            .catch(fail)
+            .then(done);
+
+        shaka.test.Util.delay(1).then(function() {
+          // Should have downloaded all of the segments from either audio/video
+          // and a single (pending) request for the other.
+          expect(netEngine.request.calls.count()).toBe(4);
+          req1.resolve();
+        });
+      });
+
       it('stores init segment', function(done) {
         netEngine.setResponseMap({'fake:0': new ArrayBuffer(5)});
 
