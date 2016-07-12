@@ -144,11 +144,16 @@ describe('Storage', function() {
   });
 
   describe('store', function() {
+    var originalWarning;
     var manifest;
     var tracks;
     var drmEngine;
     var stream1Index;
     var stream2Index;
+
+    beforeAll(function() {
+      originalWarning = shaka.log.warning;
+    });
 
     beforeEach(function() {
       drmEngine = new shaka.test.FakeDrmEngine();
@@ -189,6 +194,10 @@ describe('Storage', function() {
       stream2.getSegmentReference = stream2Index.get.bind(stream2Index);
     });
 
+    afterAll(function() {
+      shaka.log.warning = originalWarning;
+    });
+
     it('stores basic manifests', function(done) {
       var originalUri = 'fake://foobar';
       var appData = {tools: ['Google', 'StackOverflow'], volume: 11};
@@ -202,6 +211,36 @@ describe('Storage', function() {
             expect(data.size).toEqual(0);
             expect(data.tracks).toEqual(tracks);
             expect(data.appMetadata).toEqual(appData);
+          })
+          .catch(fail)
+          .then(done);
+    });
+
+    it('gives warning if storing tracks with the same type', function(done) {
+      manifest = new shaka.test.ManifestGenerator()
+          .setPresentationDuration(20)
+          .addPeriod(0)
+            .addStreamSet('audio')
+              .language('en')
+              .addStream(0).bandwidth(80)
+            .addStreamSet('audio')
+              .language('en')
+              .addStream(1).bandwidth(160)
+          .build();
+
+      // Store every stream.
+      storage.configure({
+        trackSelectionCallback: function(tracks) {
+          return tracks;
+        }
+      });
+
+      var warning = jasmine.createSpy('shaka.log.warning');
+      shaka.log.warning = warning;
+      storage.store('')
+          .then(function(data) {
+            expect(data).toBeTruthy();
+            expect(warning).toHaveBeenCalled();
           })
           .catch(fail)
           .then(done);
