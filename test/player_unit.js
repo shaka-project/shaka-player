@@ -755,7 +755,7 @@ describe('Player', function() {
       expect(tracks[1].id).toBe(stream.id);
       player.selectTrack(tracks[1]);
       expect(streamingEngine.switch)
-          .toHaveBeenCalledWith('audio', stream, false);
+          .toHaveBeenCalledWith('audio', stream, undefined);
     });
 
     it('still switches streams if called during startup', function() {
@@ -780,7 +780,7 @@ describe('Player', function() {
       var period = manifest.periods[0];
       var stream = period.streamSets[0].streams[1];
       expect(streamingEngine.switch)
-          .toHaveBeenCalledWith('audio', stream, false);
+          .toHaveBeenCalledWith('audio', stream, undefined);
     });
   });
 

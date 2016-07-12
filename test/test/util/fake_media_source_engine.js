@@ -50,6 +50,9 @@ shaka.test.FakeMediaSourceEngine = function(segmentData, opt_drift) {
   /** @private {!Object.<string, number>} */
   this.timestampOffsets_ = {};
 
+  /** @private {number} */
+  this.duration_ = Infinity;
+
   for (var type in segmentData) {
     var data = segmentData[type];
 
@@ -78,6 +81,7 @@ shaka.test.FakeMediaSourceEngine = function(segmentData, opt_drift) {
   spyOn(this, 'setTimestampOffset').and.callThrough();
   spyOn(this, 'setAppendWindowEnd').and.callThrough();
   spyOn(this, 'setDuration').and.callThrough();
+  spyOn(this, 'getDuration').and.callThrough();
 };
 
 
@@ -270,7 +274,14 @@ shaka.test.FakeMediaSourceEngine.prototype.endOfStream = function(opt_reason) {
 
 /** @override */
 shaka.test.FakeMediaSourceEngine.prototype.setDuration = function(duration) {
+  this.duration_ = duration;
   return Promise.resolve();
+};
+
+
+/** @override */
+shaka.test.FakeMediaSourceEngine.prototype.getDuration = function() {
+  return this.duration_;
 };
 
 

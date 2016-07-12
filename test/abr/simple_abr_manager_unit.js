@@ -155,7 +155,8 @@ describe('SimpleAbrManager', function() {
         // called.
         abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
 
-        expect(switchCallback).toHaveBeenCalledWith({
+        expect(switchCallback).toHaveBeenCalled();
+        expect(switchCallback.calls.argsFor(0)[0]).toEqual({
           'audio': jasmine.objectContaining({bandwidth: audioBandwidth}),
           'video': jasmine.objectContaining({bandwidth: videoBandwidth})
         });
@@ -209,7 +210,8 @@ describe('SimpleAbrManager', function() {
     }).then(function() {
       abrManager.segmentDownloaded(6000, 7000, bytesPerSecond);
 
-      expect(switchCallback).toHaveBeenCalledWith({
+      expect(switchCallback).toHaveBeenCalled();
+      expect(switchCallback.calls.argsFor(0)[0]).toEqual({
         'audio': jasmine.objectContaining({bandwidth: audioBandwidth}),
         'video': jasmine.objectContaining({bandwidth: videoBandwidth})
       });
@@ -261,7 +263,8 @@ describe('SimpleAbrManager', function() {
     }).then(function() {
       abrManager.segmentDownloaded(12000, 13000, bytesPerSecond);
 
-      expect(switchCallback).toHaveBeenCalledWith({
+      expect(switchCallback).toHaveBeenCalled();
+      expect(switchCallback.calls.argsFor(0)[0]).toEqual({
         'audio': jasmine.objectContaining({bandwidth: audioBandwidth}),
         'video': jasmine.objectContaining({bandwidth: videoBandwidth})
       });
@@ -292,6 +295,65 @@ describe('SimpleAbrManager', function() {
       abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
 
       expect(switchCallback).not.toHaveBeenCalled();
+    }).catch(fail).then(done);
+  });
+
+  it('clears ahead on upgrade', function(done) {
+    // Simulate some segments being downloaded at a high rate, to trigger an
+    // upgrade.
+    var audioBandwidth = 5e5;
+    var videoBandwidth = 4e6;
+    var bytesPerSecond = 1.1 * (audioBandwidth + videoBandwidth) / 8.0;
+
+    abrManager.chooseStreams(streamSetsByType);
+
+    abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, 2000, bytesPerSecond);
+
+    abrManager.enable();
+
+    // Move outside the startup interval.
+    loop = shaka.test.Util.fakeEventLoop(
+        startupInterval + 1, originalSetTimeout);
+    loop.then(function() {
+      // Make another call to segmentDownloaded(). switchCallback() will be
+      // called to upgrade.
+      abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
+
+      // The second parameter is the number of seconds to leave in buffer.
+      expect(switchCallback).toHaveBeenCalledWith(
+          jasmine.any(Object), jasmine.any(Number));
+    }).catch(fail).then(done);
+  });
+
+  it('does not clear ahead on downgrade', function(done) {
+    // Simulate some segments being downloaded at a low rate, to trigger a
+    // downgrade.
+    var audioBandwidth = 5e5;
+    var videoBandwidth = 5e5;
+    var bytesPerSecond = 1.1 * (audioBandwidth + videoBandwidth) / 8.0;
+
+    // Set the default high so that the initial choice will be high-quality.
+    abrManager.setDefaultEstimate(4e6);
+    abrManager.chooseStreams(streamSetsByType);
+
+    abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, 2000, bytesPerSecond);
+
+    abrManager.enable();
+
+    // Move outside the startup interval.
+    loop = shaka.test.Util.fakeEventLoop(
+        startupInterval + 1, originalSetTimeout);
+    loop.then(function() {
+      // Make another call to segmentDownloaded(). switchCallback() will be
+      // called to upgrade.
+      abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
+
+      // The second parameter is undefined to indicate that the buffer should
+      // not be cleared
+      expect(switchCallback).toHaveBeenCalledWith(
+          jasmine.any(Object), undefined);
     }).catch(fail).then(done);
   });
 });

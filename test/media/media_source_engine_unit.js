@@ -241,15 +241,13 @@ describe('MediaSourceEngine', function() {
       expect(p2.status).toBe('pending');
 
       audioSourceBuffer.updateend();
-      // Wait a tick between each updateend() and the status check that follows.
-      Promise.resolve().then(function() {
-        expect(p1.status).toBe('resolved');
+      p1.then(function() {
         expect(p2.status).toBe('pending');
         expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(2);
 
         audioSourceBuffer.updateend();
+        return p2;
       }).then(function() {
-        expect(p2.status).toBe('resolved');
         done();
       });
     });
@@ -272,15 +270,15 @@ describe('MediaSourceEngine', function() {
       audioSourceBuffer.updateend();
       videoSourceBuffer.updateend();
       // Wait a tick between each updateend() and the status check that follows.
-      Promise.resolve().then(function() {
-        expect(p1.status).toBe('resolved');
+      p1.then(function() {
         expect(p2.status).toBe('pending');
-        expect(p3.status).toBe('resolved');
         expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(2);
 
-        audioSourceBuffer.updateend();
+        return p3;
       }).then(function() {
-        expect(p2.status).toBe('resolved');
+        audioSourceBuffer.updateend();
+        return p2;
+      }).then(function() {
         done();
       });
     });
@@ -376,15 +374,13 @@ describe('MediaSourceEngine', function() {
       expect(p2.status).toBe('pending');
 
       audioSourceBuffer.updateend();
-      // Wait a tick between each updateend() and the status check that follows.
-      Promise.resolve().then(function() {
-        expect(p1.status).toBe('resolved');
+      p1.then(function() {
         expect(p2.status).toBe('pending');
         expect(audioSourceBuffer.remove).toHaveBeenCalledWith(6, 10);
 
         audioSourceBuffer.updateend();
+        return p2;
       }).then(function() {
-        expect(p2.status).toBe('resolved');
         done();
       });
     });
@@ -406,16 +402,14 @@ describe('MediaSourceEngine', function() {
 
       audioSourceBuffer.updateend();
       videoSourceBuffer.updateend();
-      // Wait a tick between each updateend() and the status check that follows.
-      Promise.resolve().then(function() {
-        expect(p1.status).toBe('resolved');
+      p1.then(function() {
         expect(p2.status).toBe('pending');
-        expect(p3.status).toBe('resolved');
         expect(audioSourceBuffer.remove).toHaveBeenCalledWith(6, 10);
-
-        audioSourceBuffer.updateend();
+        return p3;
       }).then(function() {
-        expect(p2.status).toBe('resolved');
+        audioSourceBuffer.updateend();
+        return p2;
+      }).then(function() {
         done();
       });
     });
@@ -522,18 +516,15 @@ describe('MediaSourceEngine', function() {
       expect(p3.status).toBe('pending');
 
       audioSourceBuffer.updateend();
-      // Wait a tick between each updateend() and the status check that follows.
-      Promise.resolve().then(function() {
-        expect(p1.status).toBe('resolved');
+      p1.then(function() {
         expect(p2.status).toBe('pending');
         expect(p3.status).toBe('pending');
         videoSourceBuffer.updateend();
+        return p2;
       }).then(function() {
-        expect(p2.status).toBe('resolved');
-        // blocking multiple queues takes an extra tick to process:
+        return p3;
       }).then(function() {}).then(function() {
         expect(mockMediaSource.endOfStream).toHaveBeenCalled();
-        expect(p3.status).toBe('resolved');
         done();
       });
     });
@@ -619,18 +610,15 @@ describe('MediaSourceEngine', function() {
       expect(p3.status).toBe('pending');
 
       audioSourceBuffer.updateend();
-      // Wait a tick between each updateend() and the status check that follows.
-      Promise.resolve().then(function() {
-        expect(p1.status).toBe('resolved');
+      p1.then(function() {
         expect(p2.status).toBe('pending');
         expect(p3.status).toBe('pending');
         videoSourceBuffer.updateend();
+        return p2;
       }).then(function() {
-        expect(p2.status).toBe('resolved');
-        // blocking multiple queues takes an extra tick to process:
+        return p3;
       }).then(function() {}).then(function() {
         expect(mockMediaSource.durationSetter_).toHaveBeenCalledWith(100);
-        expect(p3.status).toBe('resolved');
         done();
       });
     });
@@ -829,6 +817,7 @@ describe('MediaSourceEngine', function() {
 
   function createMockSourceBuffer() {
     return {
+      abort: jasmine.createSpy('abort'),
       appendBuffer: jasmine.createSpy('appendBuffer'),
       remove: jasmine.createSpy('remove'),
       updating: false,
