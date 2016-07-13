@@ -184,6 +184,17 @@ module.exports = function(config) {
         pseudoActivityInterval: 20000
       },
       // }}}
+
+      // Android 6.0.1 {{{
+      // Note this is tethered to the Linux machine.
+      WebDriver_ChromeAndroid: {
+        base: 'WebDriver',
+        config: {hostname: 'localhost', port: 4447},
+        browserName: 'chrome',
+        pseudoActivityInterval: 20000,
+        chromeOptions: {'androidPackage': 'com.android.chrome'}
+      },
+      // }}}
     },
 
     coverageReporter: {
