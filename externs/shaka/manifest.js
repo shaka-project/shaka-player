@@ -271,8 +271,7 @@ shakaExtern.GetSegmentReferenceFunction;
  *   encrypted: boolean,
  *   keyId: ?string,
  *   allowedByApplication: boolean,
- *   allowedByKeySystem: boolean,
- *   hasOutputRestrictions: boolean
+ *   allowedByKeySystem: boolean
  * }}
  *
  * @description
@@ -344,10 +343,6 @@ shakaExtern.GetSegmentReferenceFunction;
  *   <i>Defaults to true.</i><br>
  *   Set by the Player to indicate whether the stream is allowed to be played
  *   by the key system.
- * @property {boolean} hasOutputRestrictions
- *   <i>Defaults to false.</i><br>
- *   Set by the Player to indicate whether the stream has output restrictions
- *   set by the key system.
  *
  * @exportDoc
  */

@@ -62,8 +62,7 @@ describe('Storage', function() {
             kind: undefined,
             language: '',
             width: 1920,
-            height: 1080,
-            hasOutputRestrictions: false
+            height: 1080
           },
           {
             id: 1,
@@ -71,8 +70,7 @@ describe('Storage', function() {
             kind: undefined,
             language: 'en',
             width: null,
-            height: null,
-            hasOutputRestrictions: false
+            height: null
           }
         ]
       }],
@@ -102,8 +100,7 @@ describe('Storage', function() {
         language: '',
         kind: null,
         width: 1920,
-        height: 1080,
-        hasOutputRestrictions: false
+        height: 1080
       },
       {
         id: 1,
@@ -113,8 +110,7 @@ describe('Storage', function() {
         language: 'en',
         kind: null,
         width: null,
-        height: null,
-        hasOutputRestrictions: false
+        height: null
       }
     ];
     Promise
