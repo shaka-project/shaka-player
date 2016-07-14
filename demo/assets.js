@@ -346,6 +346,24 @@ shakaAssets.testAssets = [
     }
   },
   {
+    name: 'Sintel 4k (multicodec, VTT in MP4)',
+    manifestUri: '//storage.googleapis.com/shaka-demo-assets/sintel-mp4-wvtt/dash.mpd',  // gjslint: disable=110
+
+    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
+    source: shakaAssets.Source.SHAKA,
+    drm: [shakaAssets.KeySystem.WIDEVINE],
+    features: [
+      shakaAssets.Feature.EMBEDDED_TEXT,
+      shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_BASE,
+      shakaAssets.Feature.SUBTITLES,
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
+      shakaAssets.Feature.WEBM,
+      shakaAssets.Feature.WEBVTT
+    ]
+  },
+  {
     name: 'Heliocentrism (multicodec, multiperiod)',
     manifestUri: '//storage.googleapis.com/shaka-demo-assets/heliocentrism/heliocentrism.mpd',  // gjslint: disable=110
 
