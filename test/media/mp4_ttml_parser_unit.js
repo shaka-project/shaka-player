@@ -40,14 +40,16 @@ describe('Mp4TtmlParser', function() {
 
 
   it('parses init segment', function() {
+    // two last parameters are only used by mp4 vtt parser,
+    // so passing arbitrary values
+    var ret = shaka.media.Mp4TtmlParser(ttmlInitSegment, null, null);
     // init segment doesn't have the subtitles. The code should verify
     // their declaration and proceed to the next segment.
-    var ret = shaka.media.Mp4TtmlParser(ttmlInitSegment);
     expect(ret).toEqual([]);
   });
 
   it('parses media segment', function() {
-    var ret = shaka.media.Mp4TtmlParser(ttmlSegment);
+    var ret = shaka.media.Mp4TtmlParser(ttmlSegment, null, null);
     expect(ret.length).toBeGreaterThan(0);
   });
 
@@ -55,7 +57,7 @@ describe('Mp4TtmlParser', function() {
     var error = new shaka.util.Error(shaka.util.Error.Category.TEXT,
         shaka.util.Error.Code.INVALID_MP4_TTML);
     try {
-      shaka.media.Mp4TtmlParser(audioInitSegment);
+      shaka.media.Mp4TtmlParser(audioInitSegment, null, null);
       fail('Mp4 file with no ttml supported');
     } catch (e) {
       shaka.test.Util.expectToEqualError(e, error);

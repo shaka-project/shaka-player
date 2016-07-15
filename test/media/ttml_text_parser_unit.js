@@ -329,7 +329,10 @@ describe('TtmlTextParser', function() {
 
   function verifyHelper(cues, string) {
     var data = shaka.util.StringUtils.toUTF8(string);
-    var result = shaka.media.TtmlTextParser(data);
+
+    // two last parameters are only used by mp4 vtt parser,
+    // so passing arbitrary values
+    var result = shaka.media.TtmlTextParser(data, null, null);
     expect(result).toBeTruthy();
     expect(result.length).toBe(cues.length);
     for (var i = 0; i < cues.length; i++) {
@@ -354,7 +357,7 @@ describe('TtmlTextParser', function() {
     var error = new shaka.util.Error(shaka.util.Error.Category.TEXT, code);
     var data = shaka.util.StringUtils.toUTF8(string);
     try {
-      shaka.media.TtmlTextParser(data);
+      shaka.media.TtmlTextParser(data, null, null);
       fail('Invalid TTML file supported');
     } catch (e) {
       shaka.test.Util.expectToEqualError(e, error);

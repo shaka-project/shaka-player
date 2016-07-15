@@ -30,8 +30,9 @@ goog.require('shaka.log');
 
 // Require standard plugins.
 goog.require('shaka.dash.DashParser');
-goog.require('shaka.media.TtmlTextParser');
 goog.require('shaka.media.Mp4TtmlParser');
+goog.require('shaka.media.Mp4VttParser');
+goog.require('shaka.media.TtmlTextParser');
 goog.require('shaka.media.VttTextParser');
 goog.require('shaka.net.DataUriPlugin');
 goog.require('shaka.net.HttpPlugin');
