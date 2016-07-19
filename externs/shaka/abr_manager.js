@@ -55,7 +55,8 @@ shakaExtern.AbrManager.prototype.init = function(switchCallback) {};
 
 /**
  * Chooses one Stream from each StreamSet to switch to. All StreamSets must be
- * from the same Period.
+ * from the same Period. Some StreamSets may be absent in the case of language
+ * changes.
  *
  * @param {!Object.<string, !shakaExtern.StreamSet>} streamSetsByType
  * @return {!Object.<string, shakaExtern.Stream>}
