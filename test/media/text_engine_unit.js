@@ -64,7 +64,7 @@ describe('TextEngine', function() {
       mockParser.and.returnValue([1, 2, 3]);
 
       textEngine.appendBuffer(dummyData, 0, 3).then(function() {
-        expect(mockParser).toHaveBeenCalledWith(dummyData);
+        expect(mockParser).toHaveBeenCalledWith(dummyData, 0, 3);
         expect(mockTrack.addCue).toHaveBeenCalledWith(1);
         expect(mockTrack.addCue).toHaveBeenCalledWith(2);
         expect(mockTrack.addCue).toHaveBeenCalledWith(3);
@@ -76,7 +76,7 @@ describe('TextEngine', function() {
         mockParser.and.returnValue([4, 5]);
         return textEngine.appendBuffer(dummyData, 3, 5);
       }).then(function() {
-        expect(mockParser).toHaveBeenCalledWith(dummyData);
+        expect(mockParser).toHaveBeenCalledWith(dummyData, 3, 5);
         expect(mockTrack.addCue).toHaveBeenCalledWith(4);
         expect(mockTrack.addCue).toHaveBeenCalledWith(5);
       }).catch(fail).then(done);
