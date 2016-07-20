@@ -131,6 +131,7 @@ shaka.test.ManifestGenerator.prototype.addStreamSet = function(type) {
 shaka.test.ManifestGenerator.prototype.language = function(language) {
   var streamSet = this.currentStreamSet_();
   streamSet.language = language;
+  streamSet.streams.forEach(function(s) { s.language = language; });
   return this;
 };
 
@@ -295,6 +296,7 @@ shaka.test.ManifestGenerator.prototype.addStream = function(id) {
     kind: undefined,
     encrypted: false,
     keyId: null,
+    language: streamSet.language,
     allowedByApplication: true,
     allowedByKeySystem: true
   };

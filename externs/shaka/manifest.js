@@ -270,6 +270,7 @@ shakaExtern.GetSegmentReferenceFunction;
  *   kind: (string|undefined),
  *   encrypted: boolean,
  *   keyId: ?string,
+ *   language: string,
  *   allowedByApplication: boolean,
  *   allowedByKeySystem: boolean
  * }}
@@ -335,6 +336,9 @@ shakaExtern.GetSegmentReferenceFunction;
  *   The stream's key ID as a lowercase hex string. This key ID identifies the
  *   encryption key that the browser (key system) can use to decrypt the
  *   stream.
+ * @property {string} language
+ *   The Stream's language, specified as a language code. <br>
+ *   Must be identical to the language of the containing StreamSet.
  * @property {boolean} allowedByApplication
  *   <i>Defaults to true.</i><br>
  *   Set by the Player to indicate whether the stream is allowed to be played
