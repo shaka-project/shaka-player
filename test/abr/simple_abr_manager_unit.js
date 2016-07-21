@@ -271,33 +271,6 @@ describe('SimpleAbrManager', function() {
     }).catch(fail).then(done);
   });
 
-  it('does not call switchCallback() if no changes are needed', function(done) {
-    // Simulate some segments being downloaded just above the needed bandwidth
-    // for the least stream.
-    var audioBandwidth = 5e5;
-    var videoBandwidth = 5e5;
-    var bytesPerSecond = 1.1 * (audioBandwidth + videoBandwidth) / 8.0;
-
-    abrManager.chooseStreams(streamSetsByType);
-
-    abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
-    abrManager.segmentDownloaded(1000, 2000, bytesPerSecond);
-
-    abrManager.enable();
-
-    // Move outside the startup interval.
-    loop = shaka.test.Util.fakeEventLoop(
-        startupInterval + 1, originalSetTimeout);
-    loop.then(function() {
-      // Make another call to segmentDownloaded(). switchCallback() will not be
-      // called because the best streams for the available bandwidth are already
-      // active.
-      abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
-
-      expect(switchCallback).not.toHaveBeenCalled();
-    }).catch(fail).then(done);
-  });
-
   it('clears ahead on upgrade', function(done) {
     // Simulate some segments being downloaded at a high rate, to trigger an
     // upgrade.
