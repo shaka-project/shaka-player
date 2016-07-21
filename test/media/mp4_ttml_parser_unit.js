@@ -38,7 +38,6 @@ describe('Mp4TtmlParser', function() {
     }).catch(fail).then(done);
   });
 
-
   it('parses init segment', function() {
     // two last parameters are only used by mp4 vtt parser,
     // so passing arbitrary values
