@@ -70,16 +70,11 @@ describe('CastReceiver', function() {
                           'userAgent', {value: 'CrKey'});
   });
 
-  afterAll(function() {
-    if (originalUserAgent) {
-      window['cast'] = originalCast;
-      Object.defineProperty(window['navigator'],
-                            'userAgent', {value: originalUserAgent});
-    }
-  });
-
   beforeEach(function() {
     mockReceiverApi = createMockReceiverApi();
+    // We're using quotes to access window.cast because the compiler
+    // knows about lots of Cast-specific APIs we aren't mocking.  We
+    // don't need this mock strictly type-checked.
     window['cast'] = { receiver: mockReceiverApi };
 
     mockReceiverManager = createMockReceiverManager();
@@ -93,6 +88,14 @@ describe('CastReceiver', function() {
 
   afterEach(function(done) {
     receiver.destroy().catch(fail).then(done);
+  });
+
+  afterAll(function() {
+    if (originalUserAgent) {
+      window['cast'] = originalCast;
+      Object.defineProperty(window['navigator'],
+                            'userAgent', {value: originalUserAgent});
+    }
   });
 
   describe('constructor', function() {

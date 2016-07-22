@@ -330,7 +330,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
   /**
    * Creates a URI string.
    *
-   * @param {string|number} x
+   * @param {number} x
    * @return {string}
    */
   function uri(x) {

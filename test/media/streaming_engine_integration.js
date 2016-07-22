@@ -337,7 +337,7 @@ describe('StreamingEngine', function() {
       eventManager.listen(video, 'ended', onEnded);
 
       // Let's go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      onChooseStreams.and.callFake(defaultOnChooseStreams);
       streamingEngine.init();
     });
 
@@ -364,7 +364,7 @@ describe('StreamingEngine', function() {
       eventManager.listen(video, 'ended', onEnded);
 
       // Let's go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      onChooseStreams.and.callFake(defaultOnChooseStreams);
       streamingEngine.init();
     });
 
@@ -390,7 +390,7 @@ describe('StreamingEngine', function() {
       eventManager.listen(video, 'ended', onEnded);
 
       // Let's go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      onChooseStreams.and.callFake(defaultOnChooseStreams);
       streamingEngine.init();
     });
 
@@ -416,7 +416,7 @@ describe('StreamingEngine', function() {
       eventManager.listen(video, 'ended', onEnded);
 
       // Let's go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      onChooseStreams.and.callFake(defaultOnChooseStreams);
       streamingEngine.init();
     });
   });
@@ -458,7 +458,7 @@ describe('StreamingEngine', function() {
       eventManager.listen(video, 'timeupdate', onTimeUpdate);
 
       // Let's go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      onChooseStreams.and.callFake(defaultOnChooseStreams);
       streamingEngine.init();
     });
 
@@ -485,7 +485,7 @@ describe('StreamingEngine', function() {
       eventManager.listen(video, 'timeupdate', onTimeUpdate);
 
       // Let's go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      onChooseStreams.and.callFake(defaultOnChooseStreams);
       streamingEngine.init();
     });
 
@@ -513,7 +513,7 @@ describe('StreamingEngine', function() {
       eventManager.listen(video, 'timeupdate', onTimeUpdate);
 
       // Let's go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      onChooseStreams.and.callFake(defaultOnChooseStreams);
       streamingEngine.init();
     });
   });

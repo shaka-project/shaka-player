@@ -77,6 +77,17 @@ shaka.test.Util.processInstantaneousOperations = function(
 
 
 /**
+ * @typedef {{
+ *   then: function(Function, Function=),
+ *   stop: function(),
+ *   abort: function()
+ * }}
+ * gjslint: disable=900
+ */
+shaka.test.Util.EventLoop;
+
+
+/**
  * Fakes an event loop. Each tick processes some number of instantaneous
  * operations and advances the simulated clock forward by 1 second. Calls
  * opt_onTick just before each tick if it's specified.
@@ -84,9 +95,7 @@ shaka.test.Util.processInstantaneousOperations = function(
  * @param {number} duration The number of seconds of simulated time.
  * @param {function(function(), number)} setTimeout
  * @param {function(number)=} opt_onTick
- * @return {{ then: function(Function, Function=),
- *            stop: function(),
- *            abort: function() }}
+ * @return {shaka.test.Util.EventLoop}
  * Call stop() on the returned value to stop the loop early.  Call then()
  * to chain to the end of the loop like a Promise.
  */

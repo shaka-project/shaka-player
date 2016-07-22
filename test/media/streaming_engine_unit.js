@@ -58,7 +58,7 @@ describe('StreamingEngine', function() {
    * Runs the fake event loop.
    * @param {function()=} opt_callback An optional callback that is executed
    *   each time the clock ticks.
-   * @return {{ then: function(Function, Function=), stop: function() }}
+   * @return {shaka.test.Util.EventLoop}
    */
   function runTest(opt_callback) {
     function onTick(currentTime) {

@@ -46,16 +46,15 @@ describe('CastSender', function() {
     originalChrome = window['chrome'];
   });
 
-  afterAll(function() {
-    window['chrome'] = originalChrome;
-  });
-
   beforeEach(function() {
     onStatusChanged = jasmine.createSpy('onStatusChanged');
     onRemoteEvent = jasmine.createSpy('onRemoteEvent');
     onResumeLocal = jasmine.createSpy('onResumeLocal');
 
     mockCastApi = createMockCastApi();
+    // We're using quotes to access window.chrome because the compiler
+    // knows about lots of Chrome-specific APIs we aren't mocking.  We
+    // don't need this mock strictly type-checked.
     window['chrome'] = { cast: mockCastApi };
     mockSession = null;
 
@@ -66,6 +65,10 @@ describe('CastSender', function() {
   afterEach(function(done) {
     delete window.__onGCastApiAvailable;
     sender.destroy().catch(fail).then(done);
+  });
+
+  afterAll(function() {
+    window['chrome'] = originalChrome;
   });
 
   describe('init', function() {
