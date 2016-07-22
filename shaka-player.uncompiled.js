@@ -19,8 +19,11 @@
 goog.require('shaka.Player');
 goog.require('shaka.cast.CastProxy');
 goog.require('shaka.cast.CastReceiver');
+goog.require('shaka.media.InitSegmentReference');
 goog.require('shaka.media.ManifestParser');
 goog.require('shaka.media.PresentationTimeline');
+goog.require('shaka.media.SegmentIndex');
+goog.require('shaka.media.SegmentReference');
 goog.require('shaka.media.TextEngine');
 goog.require('shaka.polyfill.installAll');
 goog.require('shaka.util.Error');
@@ -29,6 +32,7 @@ goog.require('shaka.util.Error');
 goog.require('shaka.log');
 
 // Require standard plugins.
+goog.require('shaka.abr.SimpleAbrManager');
 goog.require('shaka.dash.DashParser');
 goog.require('shaka.media.Mp4TtmlParser');
 goog.require('shaka.media.Mp4VttParser');
