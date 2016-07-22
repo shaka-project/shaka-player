@@ -42,6 +42,16 @@ describe('Player', function() {
     logErrorSpy.calls.reset();
     logErrorSpy.and.callFake(fail);
 
+    // Many tests assume the existence of a manifest, so create a basic one.
+    // Test suites can override this with more specific manifests.
+    manifest = new shaka.test.ManifestGenerator()
+      .addPeriod(0)
+        .addStreamSet('audio')
+          .addStream(1)
+        .addStreamSet('video')
+          .addStream(2)
+      .build();
+
     function dependencyInjector(player) {
       networkingEngine =
           new shaka.test.FakeNetworkingEngine({}, new ArrayBuffer(0));
@@ -75,6 +85,14 @@ describe('Player', function() {
             {abr: {manager: abrManager}}));
   });
 
+  afterEach(function(done) {
+    player.destroy().catch(fail).then(function() {
+      manifest = null;
+      player = null;
+      done();
+    });
+  });
+
   afterAll(function() {
     shaka.log.error = originalLogError;
     shaka.log.warning = originalLogWarn;
@@ -88,12 +106,7 @@ describe('Player', function() {
     var checkError;
 
     beforeEach(function() {
-      manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addStreamSet('audio')
-          .addStreamSet('video')
-        .build();
-
+      goog.asserts.assert(manifest, 'manifest must be non-null');
       parser1 = new shaka.test.FakeManifestParser(manifest);
       parser2 = new shaka.test.FakeManifestParser(manifest);
       factory1 = function() { return parser1; };
@@ -630,7 +643,8 @@ describe('Player', function() {
   describe('tracks', function() {
     var tracks;
 
-    beforeAll(function() {
+    beforeEach(function() {
+      // A manifest we can use to test track expectations.
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addStreamSet('audio')
@@ -700,6 +714,7 @@ describe('Player', function() {
     });
 
     beforeEach(function(done) {
+      goog.asserts.assert(manifest, 'manifest must be non-null');
       var parser = new shaka.test.FakeManifestParser(manifest);
       var factory = function() { return parser; };
       player.load('', 0, factory).catch(fail).then(done);
@@ -807,6 +822,7 @@ describe('Player', function() {
 
     it('enables text track if audio and text are different language',
         function(done) {
+          // A manifest we can use to test text visibility.
           manifest = new shaka.test.ManifestGenerator()
             .addPeriod(0)
               .addStreamSet('audio').language('pt').addStream(0)
@@ -851,6 +867,7 @@ describe('Player', function() {
           generator.addStreamSet('audio').language(lang).addStream(i);
         }
       }
+      // A manifest we can use to test language selection.
       manifest = generator.build();
 
       var parser = new shaka.test.FakeManifestParser(manifest);
@@ -862,7 +879,7 @@ describe('Player', function() {
               preferredTextLanguage: preference
             });
 
-            var chosen = chooseStreams(manifest.periods[0]);
+            var chosen = chooseStreams();
             expect(chosen['audio'].id).toBe(expectedIndex);
           })
           .catch(fail)
@@ -874,7 +891,10 @@ describe('Player', function() {
     beforeAll(function() {
       jasmine.clock().install();
       jasmine.clock().mockDate();
+    });
 
+    beforeEach(function(done) {
+      // A manifest we can use to test stats.
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addStreamSet('audio')
@@ -885,15 +905,13 @@ describe('Player', function() {
             .addStream(4).bandwidth(100).size(100, 200)
             .addStream(5).bandwidth(200).size(200, 400)
         .build();
-    });
 
-    beforeEach(function(done) {
       var parser = new shaka.test.FakeManifestParser(manifest);
       var factory = function() { return parser; };
       player.load('', 0, factory)
           .then(function() {
             // "initialize" the current period.
-            chooseStreams(manifest.periods[0]);
+            chooseStreams();
             canSwitch();
           })
           .catch(fail)
@@ -1079,6 +1097,7 @@ describe('Player', function() {
 
   describe('restrictions', function() {
     beforeEach(function(done) {
+      // A manifest for testing restrictions.
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addStreamSet('audio')
@@ -1100,7 +1119,7 @@ describe('Player', function() {
       var factory = function() { return parser; };
       player.load('', 0, factory).then(function() {
         // "initialize" the current period.
-        chooseStreams(manifest.periods[0]);
+        chooseStreams();
         canSwitch();
       }).catch(fail).then(done);
     });
@@ -1246,12 +1265,10 @@ describe('Player', function() {
   });
 
   /**
-   * @param {!Object=} opt_period
    * @suppress {accessControls}
    */
-  function chooseStreams(opt_period) {
-    var period =
-        opt_period || (manifest && manifest.periods[0]) || {streamSets: []};
+  function chooseStreams() {
+    var period = manifest.periods[0];
     return player.onChooseStreams_(period);
   }
 
