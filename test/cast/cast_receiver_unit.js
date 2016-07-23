@@ -604,7 +604,7 @@ describe('CastReceiver', function() {
       getSystemVolume: function() { return { level: 1, muted: false }; },
       getCastMessageBus: function() { return mockMessageBus; }
     };
-  };
+  }
 
   function createMockMessageBus() {
     var bus = {

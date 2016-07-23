@@ -252,7 +252,7 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
       var end = '</' + type + '>';
       var lines = [].concat(start, extraChildren, timeline, end);
       return Dash.makeSimpleManifestText(lines, opt_dur, opt_start);
-    };
+    }
 
     // All tests should have 5 segments and have the relative URIs:
     // s1.mp4  s2.mp4  s3.mp4  s4.mp4  s5.mp4

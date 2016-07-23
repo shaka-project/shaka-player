@@ -124,5 +124,5 @@ describe('Mp4vttParser', function() {
       if (expected[i].position)
         expect(actual[i].position).toBe(expected[i].position);
     }
-  };
+  }
 });

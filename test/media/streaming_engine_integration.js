@@ -263,7 +263,7 @@ describe('StreamingEngine', function() {
     manifest.minBufferTime = 2;
 
     // Create InitSegmentReferences.
-    function makeUris(uri) { return function() { return [uri]; }; };
+    function makeUris(uri) { return function() { return [uri]; }; }
     manifest.periods[0].streamSetsByType.audio.streams[0].initSegmentReference =
         new shaka.media.InitSegmentReference(makeUris('1_audio_init'), 0, null);
     manifest.periods[0].streamSetsByType.video.streams[0].initSegmentReference =
