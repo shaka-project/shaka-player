@@ -58,6 +58,7 @@ describe('StreamingEngine', function() {
    * Runs the fake event loop.
    * @param {function()=} opt_callback An optional callback that is executed
    *   each time the clock ticks.
+   * @return {{ then: function(Function, Function=), stop: function() }}
    */
   function runTest(opt_callback) {
     function onTick(currentTime) {
@@ -1940,9 +1941,10 @@ describe('StreamingEngine', function() {
   }
 
   /**
-   * Initializes or switches to the given period.
+   * Choose streams for the given period.
    *
    * @param {shakaExtern.Period} period
+   * @return {!Object.<string, !shakaExtern.Stream>}
    */
   function defaultOnChooseStreams(period) {
     if (period == manifest.periods[0]) {

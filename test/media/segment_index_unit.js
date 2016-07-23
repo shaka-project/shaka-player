@@ -331,6 +331,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
    * Creates a URI string.
    *
    * @param {string|number} x
+   * @return {string}
    */
   function uri(x) {
     return 'http://example.com/video_' + x + '.m4s';

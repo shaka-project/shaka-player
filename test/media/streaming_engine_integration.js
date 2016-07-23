@@ -519,9 +519,10 @@ describe('StreamingEngine', function() {
   });
 
   /**
-   * Initializes or switches to the given period.
+   * Choose streams for the given period.
    *
    * @param {shakaExtern.Period} period
+   * @return {!Object.<string, !shakaExtern.Stream>}
    */
   function defaultOnChooseStreams(period) {
     if (period == manifest.periods[0]) {
