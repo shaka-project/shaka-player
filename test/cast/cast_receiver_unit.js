@@ -58,7 +58,7 @@ describe('CastReceiver', function() {
     // Don't do any more work here if the tests will not end up running.
     if (!isChromecast && !isChrome) return;
 
-    originalCast = window.cast;
+    originalCast = window['cast'];
     originalUserAgent = navigator.userAgent;
 
     // In uncompiled mode, there is a UA check for Chromecast in order to make
@@ -72,7 +72,7 @@ describe('CastReceiver', function() {
 
   afterAll(function() {
     if (originalUserAgent) {
-      window.cast = originalCast;
+      window['cast'] = originalCast;
       Object.defineProperty(window['navigator'],
                             'userAgent', {value: originalUserAgent});
     }
@@ -80,7 +80,7 @@ describe('CastReceiver', function() {
 
   beforeEach(function() {
     mockReceiverApi = createMockReceiverApi();
-    window.cast = { receiver: mockReceiverApi };
+    window['cast'] = { receiver: mockReceiverApi };
 
     mockReceiverManager = createMockReceiverManager();
     mockMessageBus = createMockMessageBus();

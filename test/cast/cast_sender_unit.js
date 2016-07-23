@@ -43,11 +43,11 @@ describe('CastSender', function() {
     CastSender = shaka.cast.CastSender;
     CastUtils = shaka.cast.CastUtils;
 
-    originalChrome = window.chrome;
+    originalChrome = window['chrome'];
   });
 
   afterAll(function() {
-    window.chrome = originalChrome;
+    window['chrome'] = originalChrome;
   });
 
   beforeEach(function() {
@@ -56,7 +56,7 @@ describe('CastSender', function() {
     onResumeLocal = jasmine.createSpy('onResumeLocal');
 
     mockCastApi = createMockCastApi();
-    window.chrome = { cast: mockCastApi };
+    window['chrome'] = { cast: mockCastApi };
     mockSession = null;
 
     sender = new CastSender(fakeAppId, onStatusChanged, onRemoteEvent,
@@ -71,7 +71,7 @@ describe('CastSender', function() {
   describe('init', function() {
     it('installs a callback if the cast API is not available', function() {
       // Remove the mock cast API.
-      delete window.chrome.cast;
+      delete window['chrome'].cast;
       // This shouldn't exist yet.
       expect(window.__onGCastApiAvailable).toBe(undefined);
 
@@ -82,7 +82,7 @@ describe('CastSender', function() {
       expect(onStatusChanged).not.toHaveBeenCalled();
 
       // Restore the mock cast API.
-      window.chrome.cast = mockCastApi;
+      window['chrome'].cast = mockCastApi;
       window.__onGCastApiAvailable(true);
       // Expect the API to be ready and initialized.
       expect(sender.apiReady()).toBe(true);
