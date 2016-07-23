@@ -72,8 +72,8 @@ describe('StreamingEngine', function() {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 90000;  // ms
 
     video = /** @type {HTMLVideoElement} */ (document.createElement('video'));
-    video.width = '600';
-    video.height = '400';
+    video.width = 600;
+    video.height = 400;
     video.muted = true;
     document.body.appendChild(video);
   });

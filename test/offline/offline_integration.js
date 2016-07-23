@@ -25,8 +25,8 @@ describe('Offline', function() {
 
   beforeAll(/** @suppress {accessControls} */ function(done) {
     video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
-    video.width = '600';
-    video.height = '400';
+    video.width = 600;
+    video.height = 400;
     video.muted = true;
     document.body.appendChild(video);
 
