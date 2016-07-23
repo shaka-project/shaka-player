@@ -57,8 +57,8 @@ describe('MediaSourceEngine', function() {
 
   beforeAll(function(done) {
     video = /** @type {HTMLVideoElement} */ (document.createElement('video'));
-    video.width = '600';
-    video.height = '400';
+    video.width = 600;
+    video.height = 400;
     document.body.appendChild(video);
 
     originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
