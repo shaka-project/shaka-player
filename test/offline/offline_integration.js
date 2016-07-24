@@ -138,10 +138,16 @@ describe('Offline', function() {
           return player.unload();
         })
         .then(function() { return storage.remove(storedContent); })
-        .then(/** @suppress {accessControls} */ function() {
-          // Should fail, will call |onError| and resolve with null.
-          return drmEngine.loadOfflineSession_(sessionId);
-        })
+        .then(
+            /**
+             * @suppress {accessControls}
+             * @return {!Promise.<MediaKeySession>}
+             */
+            function() {
+              // Should fail, will call |onError| and resolve with null.
+              return drmEngine.loadOfflineSession_(sessionId);
+            }
+        )
         .then(function(session) {
           expect(session).toBeFalsy();
           return drmEngine.destroy();
