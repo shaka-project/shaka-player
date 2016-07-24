@@ -1265,7 +1265,10 @@ describe('Player', function() {
   });
 
   /**
+   * Choose streams for the given period.
+   *
    * @suppress {accessControls}
+   * @return {!Object.<string, !shakaExtern.Stream>}
    */
   function chooseStreams() {
     var period = manifest.periods[0];

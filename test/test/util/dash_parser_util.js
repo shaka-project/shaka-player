@@ -245,7 +245,7 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
      * @param {string} testAttrs
      * @param {number=} opt_dur
      * @param {number=} opt_start
-     * return {string}
+     * @return {string}
      */
     function makeManifestText(timeline, testAttrs, opt_dur, opt_start) {
       var start = '<' + type + ' ' + extraAttrs + ' ' + testAttrs + '>';

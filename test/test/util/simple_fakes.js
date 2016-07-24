@@ -90,6 +90,7 @@ shaka.test.FakeAbrManager.prototype.chooseStreams = function(
  * @constructor
  * @struct
  * @extends {shaka.media.DrmEngine}
+ * @return {!Object}
  */
 shaka.test.FakeDrmEngine = function() {
   var resolve = Promise.resolve.bind(Promise);
@@ -146,6 +147,7 @@ shaka.test.FakeDrmEngine.prototype.setSessionIds;
  * @param {shakaExtern.Period} period
  * @struct
  * @extends {shaka.media.StreamingEngine}
+ * @return {!Object}
  */
 shaka.test.FakeStreamingEngine = function(period) {
   var resolve = Promise.resolve.bind(Promise);

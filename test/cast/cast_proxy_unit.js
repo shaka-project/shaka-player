@@ -643,6 +643,7 @@ describe('CastProxy', function() {
    * @param {Function} onCastStatusChanged
    * @param {Function} onRemoteEvent
    * @param {Function} onResumeLocal
+   * @return {!Object}
    */
   function createMockCastSender(
       appId, onCastStatusChanged, onRemoteEvent, onResumeLocal) {
