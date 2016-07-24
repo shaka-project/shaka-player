@@ -800,7 +800,7 @@ goog.exportProperty = function(object, publicName, symbol) {
  */
 goog.inherits = function(childCtor, parentCtor) {
   /** @constructor */
-  function tempCtor() {};
+  function tempCtor() {}
   tempCtor.prototype = parentCtor.prototype;
   childCtor.superClass_ = parentCtor.prototype;
   childCtor.prototype = new tempCtor();

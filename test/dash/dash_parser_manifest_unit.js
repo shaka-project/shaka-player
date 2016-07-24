@@ -47,7 +47,7 @@ describe('DashParser.Manifest', function() {
      */
     function makeTestManifest(lines) {
       return startLines.concat(lines, endLines).join('\n');
-    };
+    }
 
     /**
      * Tests that the parser produces the correct results.
@@ -61,7 +61,7 @@ describe('DashParser.Manifest', function() {
           .then(function(actual) { expect(actual).toEqual(expected); })
           .catch(fail)
           .then(done);
-    };
+    }
 
     it('with SegmentBase', function(done) {
       var source = makeTestManifest([
@@ -94,7 +94,7 @@ describe('DashParser.Manifest', function() {
       ]);
       testDashParser(done, source);
     });
-  };
+  }
 
   describe('parses and inherits attributes', function() {
     makeTestsForEach(
