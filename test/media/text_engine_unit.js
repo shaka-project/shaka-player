@@ -60,6 +60,22 @@ describe('TextEngine', function() {
       expect(mockTrack.addCue).not.toHaveBeenCalled();
     });
 
+    it('considers empty cues buffered', function(done) {
+      mockParser.and.returnValue([]);
+
+      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+        expect(mockParser).toHaveBeenCalledWith(dummyData, 0, 3);
+        expect(mockTrack.addCue).not.toHaveBeenCalled();
+        expect(mockTrack.removeCue).not.toHaveBeenCalled();
+
+        expect(textEngine.bufferStart()).toBe(0);
+        expect(textEngine.bufferEnd()).toBe(3);
+
+        mockTrack.addCue.calls.reset();
+        mockParser.calls.reset();
+      }).catch(fail).then(done);
+    });
+
     it('adds cues to the track', function(done) {
       mockParser.and.returnValue([1, 2, 3]);
 
