@@ -1222,7 +1222,7 @@ describe('Player', function() {
             error,
             new shaka.util.Error(
                 shaka.util.Error.Category.MANIFEST,
-                shaka.util.Error.Code.ALL_STREAMS_RESTRICTED));
+                shaka.util.Error.Code.RESTRICTIONS_CANNOT_BE_MET));
       });
       player.addEventListener('error', onError);
 
