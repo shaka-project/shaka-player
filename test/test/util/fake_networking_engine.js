@@ -46,9 +46,13 @@ shaka.test.FakeNetworkingEngine = function(
   /** @private {?shaka.util.PublicPromise} */
   this.delayNextRequestPromise_ = null;
 
-  // The prototype has already been applied; create a spy for the request
-  // method but still call it by default.
+  // The prototype has already been applied; create spies for the
+  // methods but still call it by default.
   spyOn(this, 'request').and.callThrough();
+
+  spyOn(this, 'registerResponseFilter').and.callThrough();
+
+  spyOn(this, 'unregisterResponseFilter').and.callThrough();
 };
 
 
@@ -116,6 +120,20 @@ shaka.test.FakeNetworkingEngine.prototype.request = function(type, request) {
   }
   else
     return Promise.resolve(response);
+};
+
+
+/** @override */
+shaka.test.FakeNetworkingEngine.prototype.registerResponseFilter =
+    function(filter) {
+  expect(filter).toEqual(jasmine.any(Function));
+};
+
+
+/** @override */
+shaka.test.FakeNetworkingEngine.prototype.unregisterResponseFilter =
+    function(filter) {
+  expect(filter).toEqual(jasmine.any(Function));
 };
 
 

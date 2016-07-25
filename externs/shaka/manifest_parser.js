@@ -67,11 +67,13 @@ shakaExtern.ManifestParser.prototype.configure = function(config) {};
  *     on all new Periods so that they can be filtered.
  * @param {function(!shaka.util.Error)} onError A callback to be invoked on
  *     errors.
+ * @param {function(!shaka.util.FakeEvent)} onEvent A callback to be invoked to
+ * dispatch events to application.
  * @return {!Promise.<shakaExtern.Manifest>}
  * @exportDoc
  */
 shakaExtern.ManifestParser.prototype.start =
-    function(uri, networkingEngine, filterPeriod, onError) {};
+    function(uri, networkingEngine, filterPeriod, onError, onEvent) {};
 
 
 /**

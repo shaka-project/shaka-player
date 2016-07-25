@@ -82,7 +82,7 @@ shaka.test.Dash.testSegmentIndex = function(done, manifestText, references) {
       new shaka.test.FakeNetworkingEngine({'dummy://foo': buffer});
   var dashParser = shaka.test.Dash.makeDashParser();
   var filterPeriod = function() {};
-  dashParser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+  dashParser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, fail)
       .then(function(manifest) {
         shaka.test.Dash.verifySegmentIndex(manifest, references);
       })
@@ -104,7 +104,7 @@ shaka.test.Dash.testFails = function(done, manifestText, expectedError) {
       new shaka.test.FakeNetworkingEngine({'dummy://foo': manifestData});
   var dashParser = shaka.test.Dash.makeDashParser();
   var filterPeriod = function() {};
-  dashParser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+  dashParser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, fail)
       .then(fail)
       .catch(function(error) {
         shaka.test.Util.expectToEqualError(error, expectedError);
