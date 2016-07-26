@@ -131,7 +131,8 @@ def check_tests():
 
   # Ignore missing goog.require since we assume the whole library is
   # already included.
-  opts = ['--jscomp_off=missingRequire', '--checks-only', '-O', 'SIMPLE']
+  opts = ['--jscomp_off=missingRequire', '--jscomp_off=strictMissingRequire',
+          '--checks-only', '-O', 'SIMPLE']
   return test_build.build_raw(opts)
 
 

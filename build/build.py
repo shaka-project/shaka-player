@@ -60,13 +60,6 @@ closure_opts = [
     # about the old one.
     '--jscomp_off=deprecatedAnnotations',
 
-    # 'analyzerChecks' complains about countless instances of implicitly
-    # nullable types, plus a few other issues.  Even the closure library doesn't
-    # pass these checks, and the implicit nullability check in particular is
-    # over-zealous and unhelpful.  So we disable the whole category of
-    # 'analyzerChecks'.
-    '--jscomp_off=analyzerChecks',
-
     '--extra_annotation_name=listens',
     '--extra_annotation_name=exportDoc',
 
@@ -238,6 +231,7 @@ class Build(object):
                        'third_party', 'closure', 'compiler.jar')
     jar = shakaBuildHelpers.cygwin_safe_path(jar)
     files = [shakaBuildHelpers.cygwin_safe_path(f) for f in self.include]
+    files.sort()
 
     try:
       cmd_line = ['java', '-jar', jar] + closure_opts + extra_opts + files
