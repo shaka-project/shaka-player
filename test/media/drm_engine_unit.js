@@ -910,15 +910,7 @@ describe('DrmEngine', function() {
               shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
                   shaka.util.Error.Category.DRM,
                   shaka.util.Error.Code.EXPIRED));
-
-              // Trigger a 'waitingforkey' event and wait for processing.
-              // No further errors should fire.
-              onErrorSpy.calls.reset();
-              mockVideo.on['waitingforkey']({});
-              shaka.test.Util.delay(1).then(function() {
-                expect(onErrorSpy).not.toHaveBeenCalled();
-                done();
-              });
+              done();
             });
 
             session1.on['keystatuseschange']({ target: session1 });
