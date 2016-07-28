@@ -63,14 +63,14 @@ describe('Playhead', function() {
       }
     });
 
-    timeline.getDuration.and.returnValue(60);
+    timeline.isLive.and.returnValue(false);
     timeline.getEarliestStart.and.returnValue(5);
     timeline.getSegmentAvailabilityStart.and.returnValue(5);
     timeline.getSegmentAvailabilityEnd.and.returnValue(60);
 
     // These tests should not cause these methods to be invoked.
-    timeline.isLive.and.throwError(new Error());
     timeline.getSegmentAvailabilityDuration.and.throwError(new Error());
+    timeline.getDuration.and.throwError(new Error());
     timeline.setDuration.and.throwError(new Error());
   });
 
@@ -181,7 +181,7 @@ describe('Playhead', function() {
       }
     };
 
-    timeline.getDuration.and.returnValue(Number.POSITIVE_INFINITY);
+    timeline.isLive.and.returnValue(true);
     timeline.getEarliestStart.and.returnValue(5);
     timeline.getSegmentAvailabilityStart.and.returnValue(5);
     timeline.getSegmentAvailabilityEnd.and.returnValue(60);
@@ -335,7 +335,7 @@ describe('Playhead', function() {
       }
     };
 
-    timeline.getDuration.and.returnValue(30);
+    timeline.isLive.and.returnValue(false);
     timeline.getEarliestStart.and.returnValue(5);
     timeline.getSegmentAvailabilityStart.and.returnValue(5);
     timeline.getSegmentAvailabilityEnd.and.returnValue(60);
@@ -389,7 +389,7 @@ describe('Playhead', function() {
     };
 
     // Live case:
-    timeline.getDuration.and.returnValue(Number.POSITIVE_INFINITY);
+    timeline.isLive.and.returnValue(true);
     timeline.getEarliestStart.and.returnValue(5);
     timeline.getSegmentAvailabilityStart.and.returnValue(5);
     timeline.getSegmentAvailabilityEnd.and.returnValue(60);
@@ -424,7 +424,7 @@ describe('Playhead', function() {
     expect(onSeek).toHaveBeenCalled();
 
     // VOD case:
-    timeline.getDuration.and.returnValue(30);
+    timeline.isLive.and.returnValue(false);
     timeline.getEarliestStart.and.returnValue(5);
     timeline.getSegmentAvailabilityStart.and.returnValue(5);
     timeline.getSegmentAvailabilityEnd.and.returnValue(60);

@@ -45,7 +45,6 @@ describe('PresentationTimeline', function() {
    * @param {number} segmentAvailabilityDuration
    * @param {number} maxSegmentDuration
    * @param {number} clockOffset
-   * @param {number} presentationDelay
    *
    * @return {shaka.media.PresentationTimeline}
    */
@@ -54,10 +53,9 @@ describe('PresentationTimeline', function() {
       presentationStartTime,
       segmentAvailabilityDuration,
       maxSegmentDuration,
-      clockOffset,
-      presentationDelay) {
-    var timeline = new shaka.media.PresentationTimeline(presentationStartTime,
-        presentationDelay);
+      clockOffset) {
+    var timeline =
+        new shaka.media.PresentationTimeline(presentationStartTime, 0);
     timeline.setDuration(duration || infinity);
     timeline.setSegmentAvailabilityDuration(segmentAvailabilityDuration);
     timeline.notifyMaxSegmentDuration(maxSegmentDuration);
@@ -69,19 +67,19 @@ describe('PresentationTimeline', function() {
     it('returns 0 for VOD', function() {
       setElapsed(0);
       var timeline1 = makePresentationTimeline(
-          60, null, infinity, 10, 0, 0);
+          60, null, infinity, 10, 0);
       expect(timeline1.getSegmentAvailabilityStart()).toBe(0);
 
       setElapsed(0);
       var timeline2 = makePresentationTimeline(
-          infinity, null, infinity, 10, 0, 0);
+          infinity, null, infinity, 10, 0);
       expect(timeline2.getSegmentAvailabilityStart()).toBe(0);
     });
 
     it('returns the correct time for live without duration', function() {
       setElapsed(0);
       var timeline = makePresentationTimeline(
-          infinity, Date.now() / 1000.0, 20, 10, 0, 0);
+          infinity, Date.now() / 1000.0, 20, 10, 0);
       expect(timeline.getSegmentAvailabilityStart()).toBe(0);
 
       setElapsed(29);
@@ -106,7 +104,7 @@ describe('PresentationTimeline', function() {
     it('returns the correct time for live with duration', function() {
       setElapsed(0);
       var timeline = makePresentationTimeline(
-          60, Date.now() / 1000.0, 20, 10, 0, 0);
+          60, Date.now() / 1000.0, 20, 10, 0);
       expect(timeline.getSegmentAvailabilityStart()).toBe(0);
 
       setElapsed(29);
@@ -131,7 +129,7 @@ describe('PresentationTimeline', function() {
     it('returns the correct time for live with inf. availability', function() {
       setElapsed(0);
       var timeline = makePresentationTimeline(
-          60, Date.now() / 1000.0, infinity, 10, 0, 0);
+          60, Date.now() / 1000.0, infinity, 10, 0);
       expect(timeline.getSegmentAvailabilityStart()).toBe(0);
 
       setElapsed(59);
@@ -149,19 +147,19 @@ describe('PresentationTimeline', function() {
     it('returns duration for VOD', function() {
       setElapsed(0);
       var timeline1 = makePresentationTimeline(
-          60, null, infinity, 10, 0, 0);
+          60, null, infinity, 10, 0);
       expect(timeline1.getSegmentAvailabilityEnd()).toBe(60);
 
       setElapsed(0);
       var timeline2 = makePresentationTimeline(
-          infinity, null, infinity, 10, 0, 0);
+          infinity, null, infinity, 10, 0);
       expect(timeline2.getSegmentAvailabilityEnd()).toBe(infinity);
     });
 
     it('returns the correct time for live without duration', function() {
       setElapsed(0);
       var timeline = makePresentationTimeline(
-          infinity, Date.now() / 1000.0, 20, 10, 0, 0);
+          infinity, Date.now() / 1000.0, 20, 10, 0);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(0);
 
       setElapsed(0);
@@ -186,7 +184,7 @@ describe('PresentationTimeline', function() {
     it('returns the correct time for live with duration', function() {
       setElapsed(0);
       var timeline = makePresentationTimeline(
-          60, Date.now() / 1000.0, 20, 10, 0, 0);
+          60, Date.now() / 1000.0, 20, 10, 0);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(0);
 
       setElapsed(0);
@@ -213,22 +211,22 @@ describe('PresentationTimeline', function() {
     it('returns the correct value for VOD', function() {
       setElapsed(0);
       var timeline = makePresentationTimeline(
-          60, null, infinity, 10, 0, 0);
+          60, null, infinity, 10, 0);
       expect(timeline.getDuration()).toBe(60);
 
       timeline = makePresentationTimeline(
-          infinity, null, infinity, 10, 0, 0);
+          infinity, null, infinity, 10, 0);
       expect(timeline.getDuration()).toBe(infinity);
     });
 
     it('returns the correct value for live', function() {
       setElapsed(0);
       var timeline = makePresentationTimeline(
-          60, Date.now() / 1000.0, 20, 10, 0, 0);
+          60, Date.now() / 1000.0, 20, 10, 0);
       expect(timeline.getDuration()).toBe(60);
 
       timeline = makePresentationTimeline(
-          infinity, Date.now() / 1000.0, 20, 10, 0, 0);
+          infinity, Date.now() / 1000.0, 20, 10, 0);
       expect(timeline.getDuration()).toBe(infinity);
     });
   });
@@ -237,7 +235,7 @@ describe('PresentationTimeline', function() {
     it('affects VOD', function() {
       setElapsed(0);
       var timeline = makePresentationTimeline(
-          60, null, infinity, 10, 0, 0);
+          60, null, infinity, 10, 0);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(60);
 
       timeline.setDuration(90);
@@ -247,7 +245,7 @@ describe('PresentationTimeline', function() {
     it('affects live', function() {
       setElapsed(0);
       var timeline = makePresentationTimeline(
-          infinity, Date.now() / 1000.0, 20, 10, 0, 0);
+          infinity, Date.now() / 1000.0, 20, 10, 0);
 
       setElapsed(40);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(30);
@@ -260,73 +258,39 @@ describe('PresentationTimeline', function() {
     });
   });
 
-  describe('getSeekRangeEnd', function() {
-    it('uses duration for vod', function() {
-      var timeline = makePresentationTimeline(
-          60, null, infinity, 5, 0, 10);
-      expect(timeline.getSeekRangeEnd()).toBe(60);
-    });
-
-    it('applies presentation delay to live', function() {
-      setElapsed(0);
-      var timeline = makePresentationTimeline(
-          infinity, Date.now() / 1000.0, 20, 5, 0, 10);
-      setElapsed(20);
-      expect(timeline.getSeekRangeEnd()).toBe(5);
-    });
-
-    it('applies presentation delay to in-progress vod start', function() {
-      setElapsed(0);
-      var timeline = makePresentationTimeline(
-          100, Date.now() / 1000.0, 20, 5, 0, 10);
-      setElapsed(20);
-      expect(timeline.getSeekRangeEnd()).toBe(5);
-
-    });
-
-    it('works for end of in-progress vod', function() {
-      setElapsed(0);
-      var timeline = makePresentationTimeline(
-          100, Date.now() / 1000.0, 20, 5, 0, 10);
-      setElapsed(100);
-      // availabilityEnd will be 95 ; the delay will be 5
-      expect(timeline.getSeekRangeEnd()).toBe(90);
-    });
-  });
-
   it('getSegmentAvailabilityDuration', function() {
     setElapsed(0);
     var timeline = makePresentationTimeline(
-        60, null, infinity, 10, 0, 0);
+        60, null, infinity, 10, 0);
     expect(timeline.getSegmentAvailabilityDuration()).toBe(infinity);
 
     timeline = makePresentationTimeline(
-        infinity, Date.now() / 1000.0, 20, 10, 0, 0);
+        infinity, Date.now() / 1000.0, 20, 10, 0);
     expect(timeline.getSegmentAvailabilityDuration()).toBe(20);
 
     timeline = makePresentationTimeline(
-        infinity, Date.now() / 1000.0, infinity, 10, 0, 0);
+        infinity, Date.now() / 1000.0, infinity, 10, 0);
     expect(timeline.getSegmentAvailabilityDuration()).toBe(infinity);
   });
 
   it('setSegmentAvailabilityDuration', function() {
     setElapsed(0);
     var timeline = makePresentationTimeline(
-        60, null, infinity, 10, 0, 0);
+        60, null, infinity, 10, 0);
     expect(timeline.getSegmentAvailabilityDuration()).toBe(infinity);
 
     timeline = makePresentationTimeline(
-        infinity, Date.now() / 1000.0, 20, 10, 0, 0);
+        infinity, Date.now() / 1000.0, 20, 10, 0);
     timeline.setSegmentAvailabilityDuration(7);
     expect(timeline.getSegmentAvailabilityDuration()).toBe(7);
 
     timeline = makePresentationTimeline(
-        infinity, Date.now() / 1000.0, 20, 10, 0, 0);
+        infinity, Date.now() / 1000.0, 20, 10, 0);
     timeline.setSegmentAvailabilityDuration(infinity);
     expect(timeline.getSegmentAvailabilityDuration()).toBe(infinity);
 
     timeline = makePresentationTimeline(
-        60, null, infinity, 10, 0, 0);
+        60, null, infinity, 10, 0);
     timeline.setSegmentAvailabilityDuration(infinity);
     expect(timeline.getSegmentAvailabilityDuration()).toBe(infinity);
   });
@@ -336,7 +300,7 @@ describe('PresentationTimeline', function() {
     // should return 10.
     setElapsed(0);
     var timeline = makePresentationTimeline(
-        infinity, Date.now() / 1000.0, 10, 5, 10000, 0);
+        infinity, Date.now() / 1000.0, 10, 5, 10000);
     expect(timeline.getSegmentAvailabilityEnd()).toBeCloseTo(5);
   });
 });
