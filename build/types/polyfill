@@ -2,6 +2,7 @@
 
 +../../lib/polyfill/fullscreen.js
 +../../lib/polyfill/mediakeys.js
++../../lib/polyfill/mediasource.js
 +../../lib/polyfill/patchedmediakeys_ms.js
 +../../lib/polyfill/patchedmediakeys_nop.js
 +../../lib/polyfill/patchedmediakeys_webkit.js
