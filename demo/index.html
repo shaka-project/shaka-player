@@ -53,10 +53,10 @@
       <p>This is a demo of Google's Shaka Player, a JavaScript library for
          adaptive video streaming.</p>
 
-      <p class="borderBelow">Choose an asset and tap <strong>Load</strong>.
+      <p>Choose an asset and tap <strong>Load</strong>.
          (On Android, you'll also need to press the play button on the video.)</p>
 
-      <p class="borderBelow">
+      <p class="links">
         <a href="../docs/api/index.html">Documentation</a> |
         <a href="https://github.com/google/shaka-player">Repo</a> |
         <a href="https://www.npmjs.com/package/shaka-player">NPM</a> |
@@ -80,6 +80,38 @@
 
       <div>
         <button id="loadButton">Load</button>
+      </div>
+
+      <div id="errorDisplay">
+        <div id="errorDisplayCloseButton">x</div>
+        <div id="errorDisplayText"></div>
+      </div>
+      <div id="videoContainer" class="overlay-parent">
+        <video id="video"
+               poster="//shaka-player-demo.appspot.com/assets/poster.jpg"
+               autoplay></video>
+        <div id="giantPlayButtonContainer" class="overlay">
+          <button id="giantPlayButton" class="material-icons">play_arrow</button>
+        </div>
+        <div id="bufferingSpinner" class="overlay">
+          <svg class="spinnerSvg" viewBox="25 25 50 50">
+            <circle class="spinnerPath" cx="50" cy="50" r="20"
+                    fill="none" stroke-width="2" stroke-miterlimit="10" />
+          </svg>
+        </div>
+        <div id="castReceiverName" class="overlay"></div>
+        <div id="controlsContainer" class="overlay"><div id="controls">
+          <button id="playPauseButton" class="material-icons">play_arrow</button>
+          <input id="seekBar" type="range" step="any" min="0" max="1" value="0">
+          <button id="rewindButton" class="material-icons">fast_rewind</button>
+          <div id="currentTime">0:00</div>
+          <button id="fastForwardButton" class="material-icons">fast_forward</button>
+          <button id="muteButton" class="material-icons">volume_up</button>
+          <input id="volumeBar" type="range" step="any" min="0" max="1" value="0">
+          <button id="castButton" class="material-icons">cast</button>
+          <button id="captionButton" class="material-icons">closed_caption</button>
+          <button id="fullscreenButton" class="material-icons">fullscreen</button>
+        </div></div>
       </div>
 
       <details>
@@ -108,7 +140,9 @@
 
       <details id="offlineSection">
         <summary>Offline</summary>
-        <button id="storeDelete">Store</button>
+        <div>
+          <button id="storeDelete">Store</button>
+        </div>
         <div id="progressDiv">
           <label for="progress">Progress:</label>
           <span id="progress">0</span>%
@@ -151,38 +185,6 @@
         <summary>Logs</summary>
         <div id="log"></div>
       </details>
-
-      <div id="errorDisplay">
-        <div id="errorDisplayCloseButton">x</div>
-        <div id="errorDisplayText"></div>
-      </div>
-      <div id="videoContainer" class="overlay-parent">
-        <video id="video"
-               poster="//shaka-player-demo.appspot.com/assets/poster.jpg"
-               autoplay></video>
-        <div id="giantPlayButtonContainer" class="overlay">
-          <button id="giantPlayButton" class="material-icons">play_arrow</button>
-        </div>
-        <div id="bufferingSpinner" class="overlay">
-          <svg class="spinnerSvg" viewBox="25 25 50 50">
-            <circle class="spinnerPath" cx="50" cy="50" r="20"
-                    fill="none" stroke-width="2" stroke-miterlimit="10" />
-          </svg>
-        </div>
-        <div id="castReceiverName" class="overlay"></div>
-        <div id="controlsContainer" class="overlay"><div id="controls">
-          <button id="playPauseButton" class="material-icons">play_arrow</button>
-          <input id="seekBar" type="range" step="any" min="0" max="1" value="0">
-          <button id="rewindButton" class="material-icons">fast_rewind</button>
-          <div id="currentTime">0:00</div>
-          <button id="fastForwardButton" class="material-icons">fast_forward</button>
-          <button id="muteButton" class="material-icons">volume_up</button>
-          <input id="volumeBar" type="range" step="any" min="0" max="1" value="0">
-          <button id="castButton" class="material-icons">cast</button>
-          <button id="captionButton" class="material-icons">closed_caption</button>
-          <button id="fullscreenButton" class="material-icons">fullscreen</button>
-        </div></div>
-      </div>
     </div>
   </body>
 </html>
