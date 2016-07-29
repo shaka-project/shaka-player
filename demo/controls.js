@@ -170,6 +170,8 @@ ShakaControls.prototype.init = function(castProxy, onError, notifyCastStatus) {
       'click', this.onCastClick_.bind(this));
 
   this.videoContainer_.addEventListener(
+      'touchstart', this.onContainerTouch_.bind(this));
+  this.videoContainer_.addEventListener(
       'click', this.onPlayPauseClick_.bind(this));
 
   // Clicks in the controls should not propagate up to the video container.
@@ -269,6 +271,28 @@ ShakaControls.prototype.onMouseStill_ = function() {
   // Revert opacity control to CSS.  Hovering directly over the controls will
   // keep them showing, even in fullscreen mode.
   this.controls_.style.opacity = '';
+};
+
+
+/**
+ * @param {!Event} event
+ * @private
+ */
+ShakaControls.prototype.onContainerTouch_ = function(event) {
+  if (!this.video_.duration) {
+    // Can't play yet.  Ignore.
+    return;
+  }
+
+  if (this.controls_.style.opacity == 1) {
+    // The controls are showing.
+    // Let this event continue and become a click.
+  } else {
+    // The controls are hidden, so show them.
+    this.onMouseMove_();
+    // Stop this event from becoming a click event.
+    event.preventDefault();
+  }
 };
 
 
