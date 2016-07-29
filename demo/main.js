@@ -86,6 +86,9 @@ shakaDemo.init = function() {
   if ('license' in params) {
     document.getElementById('licenseServerInput').value = params['license'];
   }
+  if ('logtoscreen' in params) {
+    document.getElementById('logToScreen').checked = true;
+  }
 
   if ('vv' in params && shaka.log) {
     shaka.log.setLevel(shaka.log.Level.V2);

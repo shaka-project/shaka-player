@@ -114,6 +114,11 @@
         </div></div>
       </div>
 
+      <details id="logSection">
+        <summary>Logs</summary>
+        <div id="log"></div>
+      </details>
+
       <details>
         <summary>Configuration</summary>
         <div class="flex">
@@ -135,21 +140,6 @@
         <div>
           <label for="logToScreen">Log to the screen:</label>
           <input id="logToScreen" type="checkbox">
-        </div>
-      </details>
-
-      <details id="offlineSection">
-        <summary>Offline</summary>
-        <div>
-          <button id="storeDelete">Store</button>
-        </div>
-        <div id="progressDiv">
-          <label for="progress">Progress:</label>
-          <span id="progress">0</span>%
-        </div>
-        <div id="offlineNameDiv">
-          <label for="offlineName">Name:</label>
-          <input id="offlineName" class="flex-grow" type="text">
         </div>
       </details>
 
@@ -181,9 +171,19 @@
         </div>
       </details>
 
-      <details id="logSection">
-        <summary>Logs</summary>
-        <div id="log"></div>
+      <details id="offlineSection">
+        <summary>Offline</summary>
+        <div>
+          <button id="storeDelete">Store</button>
+        </div>
+        <div id="progressDiv">
+          <label for="progress">Progress:</label>
+          <span id="progress">0</span>%
+        </div>
+        <div id="offlineNameDiv">
+          <label for="offlineName">Name:</label>
+          <input id="offlineName" class="flex-grow" type="text">
+        </div>
       </details>
     </div>
   </body>
