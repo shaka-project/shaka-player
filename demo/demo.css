@@ -15,15 +15,26 @@
  */
 
 html {
-  /* avoid page width changes caused by scroll bars */
-  overflow-y: scroll;
+  /* this allows containers inside this to be constrained by percent height */
+  height: 100%;
 }
 
 body {
+  margin: 0.5em;
+  padding: 0.5em 1em;
+
   font-family: Roboto, sans-serif;
   font-weight: 300;
-  padding: 0.5em 1em;
   word-wrap: break-word;
+}
+
+body.noinput {
+  /* noinput mode: constrain the body to its size minus margin and padding, so
+     that nested elements can constrain to body */
+  width: 100%;
+  width: calc(100% - 3em);
+  height: 100%;
+  height: calc(100% - 2em);
 }
 
 a {
@@ -140,6 +151,42 @@ summary {
 #container {
   margin: 0 auto 0 auto;
   max-width: 40em;
+}
+
+#container.noinput {
+  /* noinput mode: use all available space */
+  max-width: 100%;
+  max-height: 100%;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#container.noinput .input {
+  /* noinput mode: hide all input fields */
+  display: none;
+}
+
+#container.noinput h1 {
+  /* noinput mode: restrict h1 to 50px tall, center it */
+  height: 50px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  text-align: center;
+}
+
+#container.noinput #videoContainer {
+  /* noinput mode: use all available space,
+     but also constrain to the screen size */
+  max-width: 100%;
+  max-height: 100%;
+  width: 100%;
+  height: 100%;
+  height: calc(100% - 50px);
+  margin: 0;
+  padding: 0;
 }
 
 #customAsset {

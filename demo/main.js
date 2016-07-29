@@ -89,6 +89,11 @@ shakaDemo.init = function() {
   if ('logtoscreen' in params) {
     document.getElementById('logToScreen').checked = true;
   }
+  if ('noinput' in params) {
+    // Both the content container and body need different styles in this mode.
+    document.getElementById('container').className = 'noinput';
+    document.body.className = 'noinput';
+  }
 
   if ('vv' in params && shaka.log) {
     shaka.log.setLevel(shaka.log.Level.V2);
