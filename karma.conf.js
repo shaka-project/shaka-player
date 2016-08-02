@@ -64,10 +64,12 @@ module.exports = function(config) {
       'lib/player.js': 'coverage',
     },
 
-    // do not panic about "no activity" unless a test takes longer than 120s.
-    // this value must be greater than any jasmine.DEFAULT_TIMEOUT_INTERVAL used
-    // in test cases. (eg. 90s in test/streaming_engine_integration.js)
-    browserNoActivityTimeout: 120000,
+    // to avoid DISCONNECTED messages on Safari:
+    browserDisconnectTimeout: 10 * 1000,  // 10s to reconnect
+    browserDisconnectTolerance: 1,  // max of 1 disconnect is OK
+    browserNoActivityTimeout: 5 * 60 * 1000,  // disconnect after 5m silence
+    captureTimeout: 1 * 60 * 1000,  // give up if startup takes 1m
+    // https://support.saucelabs.com/customer/en/portal/articles/2440724
 
     client: {
       // don't capture the client's console logs
