@@ -337,6 +337,40 @@ shakaAssets.testAssets = [
     ]
   },
   {
+    name: 'Sintel 4k (WebM only)',
+    manifestUri: '//storage.googleapis.com/shaka-demo-assets/sintel-webm-only/dash.mpd',  // gjslint: disable=110
+    // NOTE: hanging in Firefox
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=1291451
+
+    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
+    source: shakaAssets.Source.SHAKA,
+    drm: [],
+    features: [
+      shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.SEGMENT_BASE,
+      shakaAssets.Feature.SUBTITLES,
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
+      shakaAssets.Feature.WEBM,
+      shakaAssets.Feature.WEBVTT
+    ]
+  },
+  {
+    name: 'Sintel 4k (MP4 only)',
+    manifestUri: '//storage.googleapis.com/shaka-demo-assets/sintel-mp4-only/dash.mpd',  // gjslint: disable=110
+
+    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
+    source: shakaAssets.Source.SHAKA,
+    drm: [],
+    features: [
+      shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.SEGMENT_BASE,
+      shakaAssets.Feature.SUBTITLES,
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
+      shakaAssets.Feature.WEBM,
+      shakaAssets.Feature.WEBVTT
+    ]
+  },
+  {
     name: 'Sintel 4k (multicodec, Widevine)',
     manifestUri: '//storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd',  // gjslint: disable=110
 
