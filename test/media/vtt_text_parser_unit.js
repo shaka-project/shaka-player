@@ -175,6 +175,19 @@ describe('VttTextParser', function() {
         'Test2');
   });
 
+  it('supports line setting with optional part', function() {
+    verifyHelper(
+        [
+          {start: 20, end: 40, text: 'Test', line: 10},
+          {start: 40, end: 50, text: 'Test2', line: -1}
+        ] ,
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000 line:10%,start\n' +
+        'Test\n\n' +
+        '00:00:40.000 --> 00:00:50.000 line:-1,center\n' +
+        'Test2');
+  });
+
   it('supports position setting', function() {
     verifyHelper(
         [
@@ -182,6 +195,16 @@ describe('VttTextParser', function() {
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000 position:45%\n' +
+        'Test2');
+  });
+
+  it('supports position setting with optional part', function() {
+    verifyHelper(
+        [
+          {start: 20, end: 40, text: 'Test2', position: 45}
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000 position:45%,line-left\n' +
         'Test2');
   });
 
