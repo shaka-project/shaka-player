@@ -129,7 +129,8 @@ shakaAssets.ExtraText;
  *
  *   licenseServers: (!Object.<string, string>|undefined),
  *   licenseRequestHeaders: (!Object.<string, string>|undefined),
- *   licenseProcessor: (shaka.net.NetworkingEngine.ResponseFilter|undefined),
+ *   requestFilter: (shaka.net.NetworkingEngine.RequestFilter|undefined),
+ *   responseFilter: (shaka.net.NetworkingEngine.ResponseFilter|undefined),
  *   drmCallback: (shakaExtern.DashContentProtectionCallback|undefined),
  *   clearKeys: (!Object.<string, string>|undefined)
  * }}
@@ -161,9 +162,12 @@ shakaAssets.ExtraText;
  *   (optional) A map of key-system to license server.
  * @property {(!Object.<string, string>|undefined)} licenseRequestHeaders
  *   (optional) A map of headers to add to license requests.
+ * @property {(shaka.net.NetworkingEngine.RequestFilter|undefined)}
+ *     requestFilter
+ *   A filter on license requests before they are passed to the server.
  * @property {(shaka.net.NetworkingEngine.ResponseFilter|undefined)}
- *     licenseProcessor
- *   A callback to process license responses before they are passed to the CDM.
+ *     responseFilter
+ *   A filter on license responses before they are passed to the CDM.
  * @property {(shakaExtern.DashContentProtectionCallback|undefined)} drmCallback
  *   A callback to use to interpret ContentProtection elements.
  * @property {(!Object.<string, string>|undefined)} clearKeys
@@ -175,11 +179,26 @@ shakaAssets.AssetInfo;
 
 // Custom callbacks {{{
 /**
- * A license post-processor to process YouTube license repsponses.
+ * A license request filter for YouTube license requests.
+ * @param {shaka.net.NetworkingEngine.RequestType} type
+ * @param {shakaExtern.Request} request
+ */
+shakaAssets.YouTubeRequestFilter = function(type, request) {
+  if (type != shaka.net.NetworkingEngine.RequestType.LICENSE)
+    return;
+
+  // The Playready endpoint does not allow cross-origin requests that include
+  // the headers we extracted from the Playready XML.  Remove them.
+  request.headers = {};
+};
+
+
+/**
+ * A license response filter for YouTube license responses.
  * @param {shaka.net.NetworkingEngine.RequestType} type
  * @param {shakaExtern.Response} response
  */
-shakaAssets.YouTubePostProcessor = function(type, response) {
+shakaAssets.YouTubeResponseFilter = function(type, response) {
   if (type != shaka.net.NetworkingEngine.RequestType.LICENSE)
     return;
 
@@ -187,16 +206,10 @@ shakaAssets.YouTubePostProcessor = function(type, response) {
   // of the license thereafter, so this conversion is safe.
   var responseArray = new Uint8Array(response.data);
   var responseStr = String.fromCharCode.apply(null, responseArray);
-  var index = responseStr.indexOf('\r\n\r\n');
-  if (responseStr.startsWith('GLS/1.0') && index >= 0) {
+  var headerIndex = responseStr.indexOf('\r\n\r\n');
+  if (responseStr.indexOf('GLS/1.0') == 0 && headerIndex >= 0) {
     // Strip off the headers.
-    // Create a new buffer to store the stripped data.  We have to create a new
-    // Uint8Array and set so we can get the buffer.  When using subarray, the
-    // buffer of the subarray still points to the original data.
-    var subarray = responseArray.subarray(index + 4);
-    var resultData = new Uint8Array(subarray.byteLength);
-    resultData.set(subarray);
-    response.data = resultData.buffer;
+    response.data = response.data.slice(headerIndex + 4);
   }
 };
 
@@ -482,6 +495,7 @@ shakaAssets.testAssets = [
     source: shakaAssets.Source.YOUTUBE,
     drm: [
       shakaAssets.KeySystem.WIDEVINE,
+      // TODO: Still failing on PlayReady, investigate
       shakaAssets.KeySystem.PLAYREADY
     ],
     features: [
@@ -490,7 +504,8 @@ shakaAssets.testAssets = [
     ],
 
     drmCallback: shakaAssets.YouTubeCallback,
-    licenseProcessor: shakaAssets.YouTubePostProcessor
+    requestFilter: shakaAssets.YouTubeRequestFilter,
+    responseFilter: shakaAssets.YouTubeResponseFilter
   },
   // }}}
 

@@ -48,9 +48,10 @@ ShakaDemoUtils.setupAssetMetadata = function(asset, player) {
     networkingEngine.registerRequestFilter(filter);
   }
 
-  if (asset.licenseProcessor) {
-    networkingEngine.registerResponseFilter(asset.licenseProcessor);
-  }
+  if (asset.requestFilter)
+    networkingEngine.registerRequestFilter(asset.requestFilter);
+  if (asset.responseFilter)
+    networkingEngine.registerResponseFilter(asset.responseFilter);
 };
 
 
