@@ -785,7 +785,8 @@ shakaAssets.testAssets = [
   {
     name: 'Big Buck Bunny',
     manifestUri: '//amssamples.streaming.mediaservices.windows.net/622b189f-ec39-43f2-93a2-201ac4e31ce1/BigBuckBunny.ism/manifest(format=mpd-time-csf)',  // gjslint: disable=110
-    // FIXME: License servers are timing out as of 2016-03-23
+    // NOTE: License servers are timing out as of 2016-03-23.
+    // NOTE: Still timing out as of 2016-08-02.
     disabled: true,
 
     encoder: shakaAssets.Encoder.AZURE_MEDIA_SERVICES,
@@ -847,6 +848,11 @@ shakaAssets.testAssets = [
   {
     name: 'live profile',
     manifestUri: '//download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-live/mp4-live-mpd-AV-BS.mpd',  // gjslint: disable=110
+    // NOTE: Multiple SPS/PPS in init segment, no sample duration
+    // NOTE: Decoder errors on Mac
+    // https://github.com/gpac/gpac/issues/600
+    // https://bugs.webkit.org/show_bug.cgi?id=160459
+    disabled: true,
 
     encoder: shakaAssets.Encoder.MP4BOX,
     source: shakaAssets.Source.GPAC,
@@ -884,6 +890,11 @@ shakaAssets.testAssets = [
   {
     name: 'main profile, mutiple files',
     manifestUri: '//download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-main-multi/mp4-main-multi-mpd-AV-BS.mpd',  // gjslint: disable=110
+    // NOTE: Multiple SPS/PPS in init segment, no sample duration
+    // NOTE: Decoder errors on Mac
+    // https://github.com/gpac/gpac/issues/600
+    // https://bugs.webkit.org/show_bug.cgi?id=160459
+    disabled: true,
 
     encoder: shakaAssets.Encoder.MP4BOX,
     source: shakaAssets.Source.GPAC,
@@ -904,10 +915,39 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_BASE
     ]
+  },
+  {
+    name: 'main profile, open GOP',
+    manifestUri: '//download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-main-ogop/mp4-main-ogop-mpd-AV-BS.mpd',  // gjslint: disable=110
+    // NOTE: Segments do not start with keyframes
+    // NOTE: Decoder errors on Safari
+    // https://bugs.webkit.org/show_bug.cgi?id=160460
+    disabled: true,
+
+    encoder: shakaAssets.Encoder.MP4BOX,
+    source: shakaAssets.Source.GPAC,
+    drm: [],
+    features: [
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION
+    ]
+  },
+  {
+    name: 'full profile, gradual decoding refresh',
+    manifestUri: '//download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-full-gdr/mp4-full-gdr-mpd-AV-BS.mpd',  // gjslint: disable=110
+    // NOTE: segments do not start with keyframes
+    // NOTE: Decoder errors on Safari
+    // https://bugs.webkit.org/show_bug.cgi?id=160460
+    disabled: true,
+
+    encoder: shakaAssets.Encoder.MP4BOX,
+    source: shakaAssets.Source.GPAC,
+    drm: [],
+    features: [
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION
+    ]
   }
-  // TODO: Add open GOP and gradual decoding refresh assets once
-  // https://crbug.com/229412 is resolved.  These assets have segments that
-  // do not start with keyframes.
   // }}}
 
   // TODO: Add a stable live stream with multiple periods.
