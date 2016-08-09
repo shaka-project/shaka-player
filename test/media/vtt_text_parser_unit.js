@@ -201,10 +201,13 @@ describe('VttTextParser', function() {
   it('supports position setting with optional part', function() {
     verifyHelper(
         [
+          {start: 20, end: 40, text: 'Test', position: 45},
           {start: 20, end: 40, text: 'Test2', position: 45}
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000 position:45%,line-left\n' +
+        'Test\n\n' +
+        '00:00:20.000 --> 00:00:40.000 position:45%,start\n' +
         'Test2');
   });
 
