@@ -30,6 +30,9 @@ module.exports = function(config) {
       // requirejs next
       'node_modules/requirejs/require.js',
 
+      // bootstrapping for the test suite
+      'test/test/boot.js',
+
       // test utils next
       'test/test/util/*.js',
 
