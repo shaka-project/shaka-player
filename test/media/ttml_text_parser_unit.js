@@ -165,7 +165,7 @@ describe('TtmlTextParser', function() {
         '</tt>');
   });
 
-  it('parses alignment from <style> block', function() {
+  it('parses alignment from <style> block with id on region', function() {
     verifyHelper(
         [
           {start: 62.05, end: 3723.2, text: 'Test', lineAlign: 'end'}
@@ -179,6 +179,24 @@ describe('TtmlTextParser', function() {
         '</layout>' +
         '<body region="subtitleArea">' +
         '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '</body>' +
+        '</tt>');
+  });
+
+  it('parses alignment from <style> block with id on p', function() {
+    verifyHelper(
+        [
+          {start: 62.05, end: 3723.2, text: 'Test', lineAlign: 'end'}
+        ],
+        '<tt xmlns:tts="ttml#styling">' +
+        '<styling>' +
+        '<style xml:id="s1" tts:textAlign="end"/>' +
+        '</styling>' +
+        '<layout xmlns:tts="ttml#styling">' +
+        '<region xml:id="subtitleArea" />' +
+        '</layout>' +
+        '<body region="subtitleArea">' +
+        '<p begin="01:02.05" end="01:02:03.200" style="s1">Test</p>' +
         '</body>' +
         '</tt>');
   });
