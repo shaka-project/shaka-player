@@ -41,13 +41,20 @@ shaka.test.Dash.makeDashParser = function() {
  *
  * @param {shakaExtern.Manifest} manifest
  * @param {!Array.<shaka.media.SegmentReference>} references
+ * @param {number} periodIndex
  */
-shaka.test.Dash.verifySegmentIndex = function(manifest, references) {
+shaka.test.Dash.verifySegmentIndex = function(
+    manifest, references, periodIndex) {
   expect(manifest).toBeTruthy();
-  var stream = manifest.periods[0].streamSets[0].streams[0];
+  var stream = manifest.periods[periodIndex].streamSets[0].streams[0];
   expect(stream).toBeTruthy();
   expect(stream.findSegmentPosition).toBeTruthy();
   expect(stream.getSegmentReference).toBeTruthy();
+
+  if (references.length == 0) {
+    expect(stream.findSegmentPosition(0)).toBe(null);
+    return;
+  }
 
   var positionBeforeFirst =
       stream.findSegmentPosition(references[0].startTime - 1);
@@ -84,7 +91,7 @@ shaka.test.Dash.testSegmentIndex = function(done, manifestText, references) {
   var filterPeriod = function() {};
   dashParser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, fail)
       .then(function(manifest) {
-        shaka.test.Dash.verifySegmentIndex(manifest, references);
+        shaka.test.Dash.verifySegmentIndex(manifest, references, 0);
       })
       .catch(fail)
       .then(done);
