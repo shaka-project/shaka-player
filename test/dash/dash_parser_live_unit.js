@@ -135,11 +135,11 @@ describe('DashParser.Live', function() {
       fakeNetEngine.setResponseMapAsText({'dummy://foo': firstManifest});
       parser.start('dummy://foo', fakeNetEngine, newPeriod, errorCallback)
           .then(function(manifest) {
-            Dash.verifySegmentIndex(manifest, firstReferences);
+            Dash.verifySegmentIndex(manifest, firstReferences, 0);
 
             fakeNetEngine.setResponseMapAsText({'dummy://foo': secondManifest});
             return delayForUpdatePeriod().then(function() {
-              Dash.verifySegmentIndex(manifest, secondReferences);
+              Dash.verifySegmentIndex(manifest, secondReferences, 0);
             });
           })
           .catch(fail)
@@ -155,7 +155,7 @@ describe('DashParser.Live', function() {
           done, basicLines, basicRefs, partialUpdateLines, updateRefs);
     });
 
-    it('evicts old references', function(done) {
+    it('evicts old references for single-period live stream', function(done) {
       var template = [
         '<MPD type="dynamic" minimumUpdatePeriod="PT%(updateTime)dS"',
         '    timeShiftBufferDepth="PT1S"',
@@ -183,7 +183,7 @@ describe('DashParser.Live', function() {
 
             expect(stream.findSegmentPosition).toBeTruthy();
             expect(stream.findSegmentPosition(0)).not.toBe(null);
-            Dash.verifySegmentIndex(manifest, basicRefs);
+            Dash.verifySegmentIndex(manifest, basicRefs, 0);
 
             // 15 seconds for @timeShiftBufferDepth, the first segment duration,
             // and the @suggestedPresentationDuration.
@@ -191,7 +191,67 @@ describe('DashParser.Live', function() {
             return delayForUpdatePeriod().then(function() {
               // The first reference should have been evicted.
               expect(stream.findSegmentPosition(0)).toBe(null);
-              Dash.verifySegmentIndex(manifest, basicRefs.slice(1));
+              Dash.verifySegmentIndex(manifest, basicRefs.slice(1), 0);
+            });
+          })
+          .catch(fail)
+          .then(done);
+    });
+
+    it('evicts old references for multi-period live stream', function(done) {
+      var template = [
+        '<MPD type="dynamic" minimumUpdatePeriod="PT%(updateTime)dS"',
+        '    timeShiftBufferDepth="PT1S"',
+        '    availabilityStartTime="1970-01-01T00:00:00Z">',
+        '  <Period id="1">',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation id="3" bandwidth="500">',
+        '        <BaseURL>http://example.com</BaseURL>',
+        '%(contents)s',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '  <Period id="2" start="PT%(pStart)dS">',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation id="4" bandwidth="500">',
+        '        <BaseURL>http://example.com</BaseURL>',
+        '%(contents)s',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>'
+      ].join('\n');
+      // Set the period start to the sum of the durations of the references
+      // in the previous period.
+      var durs = basicRefs.map(function(r) { return r.endTime - r.startTime });
+      var pStart = durs.reduce(function(p, d) { return p + d}, 0);
+      var args = {
+        updateTime: updateTime,
+        pStart: pStart,
+        contents: basicLines.join('\n')
+      };
+      var text = sprintf(template, args);
+
+      fakeNetEngine.setResponseMapAsText({'dummy://foo': text});
+      Date.now = function() { return 0; };
+      parser.start('dummy://foo', fakeNetEngine, newPeriod, errorCallback)
+          .then(function(manifest) {
+            Dash.verifySegmentIndex(manifest, basicRefs, 0);
+            Dash.verifySegmentIndex(manifest, basicRefs, 1);
+
+            // 15 seconds for @timeShiftBufferDepth, the first segment duration,
+            // and the @suggestedPresentationDuration.
+            Date.now = function() { return (2 * 15 + 5) * 1000; };
+            return delayForUpdatePeriod().then(function() {
+              // The first reference should have been evicted.
+              Dash.verifySegmentIndex(manifest, basicRefs.slice(1), 0);
+              Dash.verifySegmentIndex(manifest, basicRefs, 1);
+              // Same as above, but 1 period length later
+              Date.now = function() { return (2 * 15 + 5 + pStart) * 1000; };
+              return delayForUpdatePeriod();
+            }).then(function() {
+              Dash.verifySegmentIndex(manifest, [], 0);
+              Dash.verifySegmentIndex(manifest, basicRefs.slice(1), 1);
             });
           })
           .catch(fail)
