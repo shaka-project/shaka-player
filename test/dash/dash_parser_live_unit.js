@@ -25,10 +25,18 @@ describe('DashParser.Live', function() {
   var realTimeout;
   var updateTime = 5;
   var Util;
-  var loop;
+
+  beforeAll(function() {
+    Dash = shaka.test.Dash;
+    Util = shaka.test.Util;
+    realTimeout = window.setTimeout;
+    oldNow = Date.now;
+    jasmine.clock().install();
+    // This polyfill is required for fakeEventLoop.
+    shaka.polyfill.Promise.install(/* force */ true);
+  });
 
   beforeEach(function() {
-    jasmine.clock().install();
     var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     newPeriod = jasmine.createSpy('newPeriod');
@@ -40,36 +48,22 @@ describe('DashParser.Live', function() {
     });
   });
 
-  beforeAll(function() {
-    Dash = shaka.test.Dash;
-    Util = shaka.test.Util;
-    realTimeout = window.setTimeout;
-    oldNow = Date.now;
-  });
-
   afterEach(function() {
-    if (loop) {
-      loop.abort();
-      loop = null;
-    }
     // Dash parser stop is synchronous.
     parser.stop();
-    jasmine.clock().uninstall();
   });
 
   afterAll(function() {
     Date.now = oldNow;
+    jasmine.clock().uninstall();
   });
 
   /**
-   * Returns a promise that waits until manifest updates.
-   *
-   * @return {!Promise}
+   * Simulate time to trigger a manifest update.
    */
   function delayForUpdatePeriod() {
     // Tick the virtual clock to trigger an update and resolve all Promises.
-    loop = Util.fakeEventLoop(updateTime, realTimeout);
-    return loop;
+    Util.fakeEventLoop(updateTime);
   }
 
   /**
@@ -138,12 +132,10 @@ describe('DashParser.Live', function() {
             Dash.verifySegmentIndex(manifest, firstReferences, 0);
 
             fakeNetEngine.setResponseMapAsText({'dummy://foo': secondManifest});
-            return delayForUpdatePeriod().then(function() {
-              Dash.verifySegmentIndex(manifest, secondReferences, 0);
-            });
-          })
-          .catch(fail)
-          .then(done);
+            delayForUpdatePeriod();
+            Dash.verifySegmentIndex(manifest, secondReferences, 0);
+          }).catch(fail).then(done);
+      shaka.polyfill.Promise.flush();
     }
 
     it('basic support', function(done) {
@@ -188,14 +180,12 @@ describe('DashParser.Live', function() {
             // 15 seconds for @timeShiftBufferDepth, the first segment duration,
             // and the @suggestedPresentationDuration.
             Date.now = function() { return (2 * 15 + 5) * 1000; };
-            return delayForUpdatePeriod().then(function() {
-              // The first reference should have been evicted.
-              expect(stream.findSegmentPosition(0)).toBe(null);
-              Dash.verifySegmentIndex(manifest, basicRefs.slice(1), 0);
-            });
-          })
-          .catch(fail)
-          .then(done);
+            delayForUpdatePeriod();
+            // The first reference should have been evicted.
+            expect(stream.findSegmentPosition(0)).toBe(null);
+            Dash.verifySegmentIndex(manifest, basicRefs.slice(1), 0);
+          }).catch(fail).then(done);
+      shaka.polyfill.Promise.flush();
     });
 
     it('evicts old references for multi-period live stream', function(done) {
@@ -242,20 +232,18 @@ describe('DashParser.Live', function() {
             // 15 seconds for @timeShiftBufferDepth, the first segment duration,
             // and the @suggestedPresentationDuration.
             Date.now = function() { return (2 * 15 + 5) * 1000; };
-            return delayForUpdatePeriod().then(function() {
-              // The first reference should have been evicted.
-              Dash.verifySegmentIndex(manifest, basicRefs.slice(1), 0);
-              Dash.verifySegmentIndex(manifest, basicRefs, 1);
-              // Same as above, but 1 period length later
-              Date.now = function() { return (2 * 15 + 5 + pStart) * 1000; };
-              return delayForUpdatePeriod();
-            }).then(function() {
-              Dash.verifySegmentIndex(manifest, [], 0);
-              Dash.verifySegmentIndex(manifest, basicRefs.slice(1), 1);
-            });
-          })
-          .catch(fail)
-          .then(done);
+            delayForUpdatePeriod();
+            // The first reference should have been evicted.
+            Dash.verifySegmentIndex(manifest, basicRefs.slice(1), 0);
+            Dash.verifySegmentIndex(manifest, basicRefs, 1);
+
+            // Same as above, but 1 period length later
+            Date.now = function() { return (2 * 15 + 5 + pStart) * 1000; };
+            delayForUpdatePeriod();
+            Dash.verifySegmentIndex(manifest, [], 0);
+            Dash.verifySegmentIndex(manifest, basicRefs.slice(1), 1);
+          }).catch(fail).then(done);
+      shaka.polyfill.Promise.flush();
     });
 
     it('sets infinite duration for single-period live streams', function(done) {
@@ -284,6 +272,7 @@ describe('DashParser.Live', function() {
             var timeline = manifest.presentationTimeline;
             expect(timeline.getDuration()).toBe(Number.POSITIVE_INFINITY);
           }).catch(fail).then(done);
+      shaka.polyfill.Promise.flush();
     });
 
     it('sets infinite duration for multi-period live streams', function(done) {
@@ -321,6 +310,7 @@ describe('DashParser.Live', function() {
             var timeline = manifest.presentationTimeline;
             expect(timeline.getDuration()).toBe(Number.POSITIVE_INFINITY);
           }).catch(fail).then(done);
+      shaka.polyfill.Promise.flush();
     });
   }
 
@@ -351,14 +341,13 @@ describe('DashParser.Live', function() {
           expect(newPeriod.calls.count()).toBe(1);
 
           fakeNetEngine.setResponseMapAsText({'dummy://foo': secondManifest});
-          return delayForUpdatePeriod().then(function() {
-            // Should update the same manifest object.
-            expect(manifest.periods.length).toBe(2);
-            expect(newPeriod.calls.count()).toBe(2);
-          });
-        })
-        .catch(fail)
-        .then(done);
+          delayForUpdatePeriod();
+
+          // Should update the same manifest object.
+          expect(manifest.periods.length).toBe(2);
+          expect(newPeriod.calls.count()).toBe(2);
+        }).catch(fail).then(done);
+    shaka.polyfill.Promise.flush();
   });
 
   it('uses redirect URL for manifest BaseURL', function(done) {
@@ -400,9 +389,8 @@ describe('DashParser.Live', function() {
           var stream = manifest.periods[0].streamSets[0].streams[0];
           var segmentUri = stream.getSegmentReference(1).getUris()[0];
           expect(segmentUri).toBe(redirectedUri + 's1.mp4');
-        })
-        .catch(fail)
-        .then(done);
+        }).catch(fail).then(done);
+    shaka.polyfill.Promise.flush();
   });
 
   it('failures in update call error callback', function(done) {
@@ -422,12 +410,10 @@ describe('DashParser.Live', function() {
           var promise = Promise.reject(error);
           fakeNetEngine.request.and.returnValue(promise);
 
-          return delayForUpdatePeriod().then(function() {
-            expect(errorCallback.calls.count()).toBe(1);
-          });
-        })
-        .catch(fail)
-        .then(done);
+          delayForUpdatePeriod();
+          expect(errorCallback.calls.count()).toBe(1);
+        }).catch(fail).then(done);
+    shaka.polyfill.Promise.flush();
   });
 
   it('uses @minimumUpdatePeriod', function(done) {
@@ -446,20 +432,17 @@ describe('DashParser.Live', function() {
           var partialTime = updateTime * 1000 * 3 / 4;
           var remainingTime = updateTime * 1000 - partialTime;
           jasmine.clock().tick(partialTime);
-          return Util.delay(0.01, realTimeout)
-              .then(function() {
-                // Update period has not passed yet.
-                expect(fakeNetEngine.request.calls.count()).toBe(1);
-                jasmine.clock().tick(remainingTime);
-                return Util.delay(0.01, realTimeout);
-              })
-              .then(function() {
-                // Update period has passed.
-                expect(fakeNetEngine.request.calls.count()).toBe(2);
-              });
-        })
-        .catch(fail)
-        .then(done);
+          shaka.polyfill.Promise.flush();
+
+          // Update period has not passed yet.
+          expect(fakeNetEngine.request.calls.count()).toBe(1);
+          jasmine.clock().tick(remainingTime);
+          shaka.polyfill.Promise.flush();
+
+          // Update period has passed.
+          expect(fakeNetEngine.request.calls.count()).toBe(2);
+        }).catch(fail).then(done);
+    shaka.polyfill.Promise.flush();
   });
 
   it('uses Mpd.Location', function(done) {
@@ -494,13 +477,10 @@ describe('DashParser.Live', function() {
                 {uri: request.uris[0], data: data, headers: {}});
           });
 
-          return delayForUpdatePeriod();
-        })
-        .then(function() {
+          delayForUpdatePeriod();
           expect(fakeNetEngine.request.calls.count()).toBe(1);
-        })
-        .catch(fail)
-        .then(done);
+        }).catch(fail).then(done);
+    shaka.polyfill.Promise.flush();
   });
 
   it('uses @suggestedPresentationDelay', function(done) {
@@ -538,9 +518,8 @@ describe('DashParser.Live', function() {
           // it will be 3:50 minutes.
           expect(timeline.getSegmentAvailabilityEnd()).toBe(290);
           expect(timeline.getSeekRangeEnd()).toBe(230);
-        })
-        .catch(fail)
-        .then(done);
+        }).catch(fail).then(done);
+    shaka.polyfill.Promise.flush();
   });
 
   describe('maxSegmentDuration', function() {
@@ -571,9 +550,8 @@ describe('DashParser.Live', function() {
             expect(timeline).toBeTruthy();
             expect(timeline.getSegmentAvailabilityStart()).toBe(165);
             expect(timeline.getSegmentAvailabilityEnd()).toBe(285);
-          })
-          .catch(fail)
-          .then(done);
+          }).catch(fail).then(done);
+      shaka.polyfill.Promise.flush();
     });
 
     it('derived from SegmentTemplate w/ SegmentTimeline', function(done) {
@@ -650,9 +628,8 @@ describe('DashParser.Live', function() {
             // NOTE: the largest segment is 8 seconds long in each test.
             expect(timeline.getSegmentAvailabilityStart()).toBe(172);
             expect(timeline.getSegmentAvailabilityEnd()).toBe(292);
-          })
-          .catch(fail)
-          .then(done);
+          }).catch(fail).then(done);
+      shaka.polyfill.Promise.flush();
     }
   });
 
@@ -700,12 +677,10 @@ describe('DashParser.Live', function() {
             fakeNetEngine.request.calls.reset();
 
             parser.stop();
-            return delayForUpdatePeriod().then(function() {
-              expect(fakeNetEngine.request).not.toHaveBeenCalled();
-            });
-          })
-          .catch(fail)
-          .then(done);
+            delayForUpdatePeriod();
+            expect(fakeNetEngine.request).not.toHaveBeenCalled();
+          }).catch(fail).then(done);
+      shaka.polyfill.Promise.flush();
     });
 
     it('stops initial parsing', function(done) {
@@ -714,19 +689,16 @@ describe('DashParser.Live', function() {
             expect(manifest).toBe(null);
             fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
             fakeNetEngine.request.calls.reset();
-            return delayForUpdatePeriod();
-          })
-          .then(function() {
+            delayForUpdatePeriod();
             // An update should not occur.
             expect(fakeNetEngine.request).not.toHaveBeenCalled();
-          })
-          .catch(fail)
-          .then(done);
+          }).catch(fail).then(done);
 
       // start will only begin the network request, calling stop here will be
       // after the request has started but before any parsing has been done.
       expect(fakeNetEngine.request.calls.count()).toBe(1);
       parser.stop();
+      shaka.polyfill.Promise.flush();
     });
 
     it('interrupts manifest updates', function(done) {
@@ -737,24 +709,21 @@ describe('DashParser.Live', function() {
             fakeNetEngine.request.calls.reset();
             var delay = fakeNetEngine.delayNextRequest();
 
-            return delayForUpdatePeriod().then(function() {
-              // The request was made but should not be resolved yet.
-              expect(fakeNetEngine.request.calls.count()).toBe(1);
-              fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
-              fakeNetEngine.request.calls.reset();
-              parser.stop();
-              delay.resolve();
-              return Util.delay(0.1, realTimeout);
-            }).then(function() {
-              // Wait for another update period.
-              return delayForUpdatePeriod();
-            }).then(function() {
-              // A second update should not occur.
-              expect(fakeNetEngine.request).not.toHaveBeenCalled();
-            });
-          })
-          .catch(fail)
-          .then(done);
+            delayForUpdatePeriod();
+            // The request was made but should not be resolved yet.
+            expect(fakeNetEngine.request.calls.count()).toBe(1);
+            fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
+            fakeNetEngine.request.calls.reset();
+            parser.stop();
+            delay.resolve();
+            shaka.polyfill.Promise.flush();
+
+            // Wait for another update period.
+            delayForUpdatePeriod();
+            // A second update should not occur.
+            expect(fakeNetEngine.request).not.toHaveBeenCalled();
+          }).catch(fail).then(done);
+      shaka.polyfill.Promise.flush();
     });
 
     it('interrupts UTCTiming requests', function(done) {
@@ -779,14 +748,15 @@ describe('DashParser.Live', function() {
         return Util.delay(0.1, realTimeout);
       }).then(function() {
         // Wait for another update period.
-        return delayForUpdatePeriod();
-      }).then(function() {
+        delayForUpdatePeriod();
+
         // No more updates should occur.
         expect(fakeNetEngine.request).not.toHaveBeenCalled();
       }).catch(fail).then(done);
 
       parser.start('dummy://foo', fakeNetEngine, newPeriod, errorCallback)
           .catch(fail);
+      shaka.polyfill.Promise.flush();
     });
   });
 
