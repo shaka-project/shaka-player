@@ -1269,7 +1269,8 @@ describe('StreamingEngine', function() {
       videoStream1.createSegmentIndex.and.returnValue(
           Promise.reject('FAKE_ERROR'));
 
-      onError.and.callFake(function(error) {
+      var onInitError = jasmine.createSpy('onInitError');
+      onInitError.and.callFake(function(error) {
         expect(onInitialStreamsSetup).not.toHaveBeenCalled();
         expect(onStartupComplete).not.toHaveBeenCalled();
         expect(error).toBe('FAKE_ERROR');
@@ -1278,9 +1279,12 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.init().then(fail).catch(onInitError);
+
       loop = runTest();
       loop.then(function() {
+        expect(onInitError).toHaveBeenCalled();
+        expect(onError).not.toHaveBeenCalled();
         return streamingEngine.destroy();
       }).catch(fail).then(done);
     });
@@ -1300,9 +1304,10 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.init().catch(fail);
       loop = runTest();
       loop.then(function() {
+        expect(onError).toHaveBeenCalled();
         return streamingEngine.destroy();
       }).catch(fail).then(done);
     });
@@ -1339,9 +1344,10 @@ describe('StreamingEngine', function() {
       });
 
       // Here we go!
-      streamingEngine.init();
+      streamingEngine.init().catch(fail);
       loop = runTest();
       loop.then(function() {
+        expect(onError).toHaveBeenCalled();
         return streamingEngine.destroy();
       }).catch(fail).then(done);
     });
@@ -1378,9 +1384,10 @@ describe('StreamingEngine', function() {
       });
 
       // Here we go!
-      streamingEngine.init();
+      streamingEngine.init().catch(fail);
       loop = runTest();
       loop.then(function() {
+        expect(onError).toHaveBeenCalled();
         return streamingEngine.destroy();
       }).catch(fail).then(done);
     });
