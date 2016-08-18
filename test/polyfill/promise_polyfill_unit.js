@@ -105,18 +105,16 @@ describe('Promise polyfill', function() {
     // 2.2.2.2: it must not be called before `promise` is fulfilled
     it('onFulfilled not called before resolved', function(done) {
       var p = deferred();
-      var fulfilled = jasmine.createSpy('onFulfilled');
-      p.then(fulfilled);
-
-      expect(fulfilled).not.toHaveBeenCalled();
+      var resolved = false;
       setTimeout(function() {
-        expect(fulfilled).not.toHaveBeenCalled();
+        resolved = true;
         p.resolve(dummy);
       }, 50);
-      setTimeout(function() {
-        expect(fulfilled.calls.count()).toBe(1);
+
+      p.then(function() {
+        expect(resolved).toBe(true);
         done();
-      }, 100);
+      });
     });
 
     // 2.2.2.3: it must not be called more than once.
@@ -143,18 +141,16 @@ describe('Promise polyfill', function() {
     // 2.2.3.2: it must not be called before `promise` is rejected
     it('onRejected not called before rejected', function(done) {
       var p = deferred();
-      var rejected = jasmine.createSpy('onRejected');
-      p.then(function() {}, rejected);
-
-      expect(rejected).not.toHaveBeenCalled();
+      var rejected = false;
       setTimeout(function() {
-        expect(rejected).not.toHaveBeenCalled();
+        rejected = true;
         p.reject(dummy);
       }, 50);
-      setTimeout(function() {
-        expect(rejected.calls.count()).toBe(1);
+
+      p.then(fail, function() {
+        expect(rejected).toBe(true);
         done();
-      }, 100);
+      });
     });
 
     // 2.2.3.3: it must not be called more than once.
