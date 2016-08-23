@@ -340,7 +340,8 @@ describe('StreamingEngine', function() {
         rebufferingGoal: 2,
         bufferingGoal: 5,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        bufferBehind: Number.POSITIVE_INFINITY
+        bufferBehind: Number.POSITIVE_INFINITY,
+        ignoreTextStreamFailures: false
       };
     }
 
@@ -1458,6 +1459,39 @@ describe('StreamingEngine', function() {
             null,
             '1_audio_2',
             shaka.util.Error.Code.UNKNOWN_DATA_URI_ENCODING));
+
+    it('ignores text stream failures if configured to', function() {
+      setupVod();
+      var textUri = '1_text_1';
+      var originalNetEngine = netEngine;
+      netEngine = {
+        request: jasmine.createSpy('request')
+      };
+      netEngine.request.and.callFake(function(requestType, request) {
+        if (request.uris[0] == textUri) {
+          return Promise.reject(new shaka.util.Error(
+              shaka.util.Error.Category.NETWORK,
+              shaka.util.Error.Code.BAD_HTTP_STATUS, textUri, 404));
+        }
+        return originalNetEngine.request(requestType, request);
+      });
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      createStreamingEngine();
+
+      playhead.getTime.and.returnValue(0);
+      onStartupComplete.and.callFake(function() {
+        setupFakeGetTime(0);
+      });
+
+      // Here we go!
+      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      streamingEngine.init();
+      streamingEngine.configure({ignoreTextStreamFailures: true});
+
+      runTest();
+      expect(onError.calls.count()).toBe(0);
+      expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+    });
   });
 
   describe('eviction', function() {
@@ -1471,7 +1505,8 @@ describe('StreamingEngine', function() {
         rebufferingGoal: 1,
         bufferingGoal: 1,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        bufferBehind: 10
+        bufferBehind: 10,
+        ignoreTextStreamFailures: false
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -1550,7 +1585,8 @@ describe('StreamingEngine', function() {
         rebufferingGoal: 1,
         bufferingGoal: 1,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        bufferBehind: 10
+        bufferBehind: 10,
+        ignoreTextStreamFailures: false
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -1614,7 +1650,8 @@ describe('StreamingEngine', function() {
         rebufferingGoal: 1,
         bufferingGoal: 1,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        bufferBehind: 10
+        bufferBehind: 10,
+        ignoreTextStreamFailures: false
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);

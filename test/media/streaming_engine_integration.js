@@ -286,7 +286,8 @@ describe('StreamingEngine', function() {
       rebufferingGoal: 2,
       bufferingGoal: 5,
       retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-      bufferBehind: 15
+      bufferBehind: 15,
+      ignoreTextStreamFailures: false
     };
     streamingEngine = new shaka.media.StreamingEngine(
         playhead,
