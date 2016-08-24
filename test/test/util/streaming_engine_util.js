@@ -117,6 +117,7 @@ shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
         jasmine.createSpy('getSegmentAvailabilityStart'),
     getSegmentAvailabilityEnd:
         jasmine.createSpy('getSegmentAvailabilityEnd'),
+    getSeekRangeEnd: jasmine.createSpy('getSeekRangeEnd'),
     segmentAvailabilityStart: segmentAvailabilityStart,
     segmentAvailabilityEnd: segmentAvailabilityEnd
   };
@@ -137,6 +138,10 @@ shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
 
   timeline.getSegmentAvailabilityEnd.and.callFake(function() {
     return timeline.segmentAvailabilityEnd;
+  });
+
+  timeline.getSeekRangeEnd.and.callFake(function() {
+    return timeline.getSegmentAvailabilityEnd();
   });
 
   timeline.getSegmentAvailabilityDuration.and.callFake(function() {
