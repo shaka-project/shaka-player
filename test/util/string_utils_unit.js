@@ -30,6 +30,14 @@ describe('StringUtils', function() {
     expect(StringUtils.fromUTF8(buffer)).toBe('F\u20ac \ud800\udf48');
   });
 
+  it('strips the BOM in fromUTF8', function() {
+    // This is 4 Unicode characters, the last will be split into a surrogate
+    // pair.
+    var arr = [0xef, 0xbb, 0xbf, 0x74, 0x65, 0x78, 0x74];
+    var buffer = new Uint8Array(arr).buffer;
+    expect(StringUtils.fromUTF8(buffer)).toBe('text');
+  });
+
   it('parses fromUTF16 big-endian', function() {
     // This is big-endian pairs of 16-bit numbers.  This translates into 3
     // Unicode characters where the last is split into a surrogate pair.
