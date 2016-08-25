@@ -52,6 +52,9 @@ ShakaDemoUtils.setupAssetMetadata = function(asset, player) {
     networkingEngine.registerRequestFilter(asset.requestFilter);
   if (asset.responseFilter)
     networkingEngine.registerResponseFilter(asset.responseFilter);
+  if (asset.extraConfig)
+    player.configure(/** @type {shakaExtern.PlayerConfiguration} */(
+        asset.extraConfig));
 };
 
 

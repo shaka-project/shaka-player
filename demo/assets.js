@@ -57,8 +57,8 @@ shakaAssets.Source = {
 /** @enum {string} */
 shakaAssets.KeySystem = {
   CLEAR_KEY: 'org.w3.clearkey',
-  WIDEVINE: 'com.widevine.alpha',
-  PLAYREADY: 'com.microsoft.playready'
+  PLAYREADY: 'com.microsoft.playready',
+  WIDEVINE: 'com.widevine.alpha'
 };
 
 
@@ -132,7 +132,9 @@ shakaAssets.ExtraText;
  *   requestFilter: (shaka.net.NetworkingEngine.RequestFilter|undefined),
  *   responseFilter: (shaka.net.NetworkingEngine.ResponseFilter|undefined),
  *   drmCallback: (shakaExtern.DashContentProtectionCallback|undefined),
- *   clearKeys: (!Object.<string, string>|undefined)
+ *   clearKeys: (!Object.<string, string>|undefined),
+ *
+ *   extraConfig: (Object|undefined)
  * }}
  *
  * @property {string} name
@@ -172,6 +174,9 @@ shakaAssets.ExtraText;
  *   A callback to use to interpret ContentProtection elements.
  * @property {(!Object.<string, string>|undefined)} clearKeys
  *   A map of key-id to key to use with clear-key encryption.
+ *
+ * @property {(Object|undefined)} extraConfig
+ *   Arbitrary player config to be applied after all other settings.
  */
 shakaAssets.AssetInfo;
 // }}}
@@ -528,9 +533,9 @@ shakaAssets.testAssets = [
     encoder: shakaAssets.Encoder.YOUTUBE,
     source: shakaAssets.Source.YOUTUBE,
     drm: [
-      shakaAssets.KeySystem.WIDEVINE,
-      // TODO: Still failing on PlayReady, investigate
-      shakaAssets.KeySystem.PLAYREADY
+      // TODO: Failing on PlayReady with error 8004b896, investigate
+      //shakaAssets.KeySystem.PLAYREADY,
+      shakaAssets.KeySystem.WIDEVINE
     ],
     features: [
       shakaAssets.Feature.MP4,
@@ -552,14 +557,16 @@ shakaAssets.testAssets = [
     encoder: shakaAssets.Encoder.AXINOM,
     source: shakaAssets.Source.AXINOM,
     drm: [
-      shakaAssets.KeySystem.WIDEVINE,
-      shakaAssets.KeySystem.PLAYREADY
+      shakaAssets.KeySystem.PLAYREADY,
+      shakaAssets.KeySystem.WIDEVINE
     ],
     features: [
+      shakaAssets.Feature.EMBEDDED_TEXT,
       shakaAssets.Feature.HIGH_DEFINITION,
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
-      shakaAssets.Feature.ULTRA_HIGH_DEFINITION
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
+      shakaAssets.Feature.WEBVTT
     ],
 
     licenseServers: {
@@ -568,7 +575,10 @@ shakaAssets.testAssets = [
     },
     licenseRequestHeaders: {
       'X-AxDRM-Message': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiNjllNTQwODgtZTllMC00NTMwLThjMWEtMWViNmRjZDBkMTRlIiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIjoiNmU1YTFkMjYtMjc1Ny00N2Q3LTgwNDYtZWFhNWQxZDM0YjVhIn1dfX0.yF7PflOPv9qHnu3ZWJNZ12jgkqTabmwXbDWk_47tLNE'  // gjslint: disable=110
-    }
+    },
+
+    // See https://github.com/Axinom/dash-test-vectors/issues/1
+    extraConfig: { streaming: { ignoreTextStreamFailures: true } }
   },
   {
     name: 'Multi-DRM, multi-key',
@@ -577,15 +587,17 @@ shakaAssets.testAssets = [
     encoder: shakaAssets.Encoder.AXINOM,
     source: shakaAssets.Source.AXINOM,
     drm: [
-      shakaAssets.KeySystem.WIDEVINE,
-      shakaAssets.KeySystem.PLAYREADY
+      shakaAssets.KeySystem.PLAYREADY,
+      shakaAssets.KeySystem.WIDEVINE
     ],
     features: [
+      shakaAssets.Feature.EMBEDDED_TEXT,
       shakaAssets.Feature.HIGH_DEFINITION,
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.MULTIKEY,
       shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
-      shakaAssets.Feature.ULTRA_HIGH_DEFINITION
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
+      shakaAssets.Feature.WEBVTT
     ],
 
     licenseServers: {
@@ -594,7 +606,10 @@ shakaAssets.testAssets = [
     },
     licenseRequestHeaders: {
       'X-AxDRM-Message': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiNjllNTQwODgtZTllMC00NTMwLThjMWEtMWViNmRjZDBkMTRlIiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIjoiMTUzMGQzYTAtNjkwNC00NDZhLTkxYTEtMzNhMTE1YWE4YzQxIn0seyJpZCI6ImM4M2ViNjM5LWU2NjQtNDNmOC1hZTk4LTQwMzliMGMxM2IyZCJ9LHsiaWQiOiIzZDhjYzc2Mi0yN2FjLTQwMGYtOTg5Zi04YWI1ZGM3ZDc3NzUifSx7ImlkIjoiYmQ4ZGFkNTgtMDMyZC00YzI1LTg5ZmEtYzdiNzEwZTgyYWMyIn1dfX0.9t18lFmZFVHMzpoZxYDyqOS0Bk_evGhTBw_F2JnAK2k'  // gjslint: disable=110
-    }
+    },
+
+    // See https://github.com/Axinom/dash-test-vectors/issues/1
+    extraConfig: { streaming: { ignoreTextStreamFailures: true } }
   },
   {
     name: 'Multi-DRM, multi-key, multi-Period',
@@ -607,16 +622,18 @@ shakaAssets.testAssets = [
     encoder: shakaAssets.Encoder.AXINOM,
     source: shakaAssets.Source.AXINOM,
     drm: [
-      shakaAssets.KeySystem.WIDEVINE,
-      shakaAssets.KeySystem.PLAYREADY
+      shakaAssets.KeySystem.PLAYREADY,
+      shakaAssets.KeySystem.WIDEVINE
     ],
     features: [
+      shakaAssets.Feature.EMBEDDED_TEXT,
       shakaAssets.Feature.HIGH_DEFINITION,
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.MULTIKEY,
       shakaAssets.Feature.MULTIPERIOD,
       shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
-      shakaAssets.Feature.ULTRA_HIGH_DEFINITION
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
+      shakaAssets.Feature.WEBVTT
     ],
 
     licenseServers: {
@@ -625,7 +642,10 @@ shakaAssets.testAssets = [
     },
     licenseRequestHeaders: {
       'X-AxDRM-Message': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiNjllNTQwODgtZTllMC00NTMwLThjMWEtMWViNmRjZDBkMTRlIiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIjoiNTNiZTc3NTctNzI4OC00YjZiLWIyMGEtZjA1YjY0YTRlZjc5In0seyJpZCI6IjBlZDgyMWE4LTgwZWQtNDBhYy1hODA0LTkyN2M5ZmRhZGJlOSJ9LHsiaWQiOiJlNDdkNzhjYS05NGRjLTQ1ZmItOWUzZC0yYTc3M2FlZjc0YjIifSx7ImlkIjoiMzJhMTQxZTktMjNhYi00NGZmLWE2YzctNTM0OWM4OTQ1MWNmIn0seyJpZCI6IjhkMDkxOTY2LTQ0YjUtNGNmOC04YTQ1LWVkMTJmZGIxOGQzNSJ9XX19.9YSK6QsDr4SYR7Q74ftq9mVtsT0ZkP3STE0zI-3mVIA'  // gjslint: disable=110
-    }
+    },
+
+    // See https://github.com/Axinom/dash-test-vectors/issues/1
+    extraConfig: { streaming: { ignoreTextStreamFailures: true } }
   },
   {
     name: 'Multi-Period',
@@ -635,12 +655,17 @@ shakaAssets.testAssets = [
     source: shakaAssets.Source.AXINOM,
     drm: [],
     features: [
+      shakaAssets.Feature.EMBEDDED_TEXT,
       shakaAssets.Feature.HIGH_DEFINITION,
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.MULTIPERIOD,
       shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
-      shakaAssets.Feature.ULTRA_HIGH_DEFINITION
-    ]
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
+      shakaAssets.Feature.WEBVTT
+    ],
+
+    // See https://github.com/Axinom/dash-test-vectors/issues/1
+    extraConfig: { streaming: { ignoreTextStreamFailures: true } }
   },
   // }}}
 
@@ -841,8 +866,8 @@ shakaAssets.testAssets = [
     encoder: shakaAssets.Encoder.AZURE_MEDIA_SERVICES,
     source: shakaAssets.Source.AZURE_MEDIA_SERVICES,
     drm: [
-      shakaAssets.KeySystem.WIDEVINE,
-      shakaAssets.KeySystem.PLAYREADY
+      shakaAssets.KeySystem.PLAYREADY,
+      shakaAssets.KeySystem.WIDEVINE
     ],
     features: [
       shakaAssets.Feature.MP4,

@@ -201,10 +201,13 @@ describe('Player', function() {
               addLicenseRequestHeaders.bind(null, asset.licenseRequestHeaders));
         }
 
-        if (asset.licenseProcessor) {
-          player.getNetworkingEngine().registerResponseFilter(
-              asset.licenseProcessor);
-        }
+        var networkingEngine = player.getNetworkingEngine();
+        if (asset.requestFilter)
+          networkingEngine.registerRequestFilter(asset.requestFilter);
+        if (asset.responseFilter)
+          networkingEngine.registerResponseFilter(asset.responseFilter);
+        if (asset.extraConfig)
+          player.configure(asset.extraConfig);
 
         player.load(asset.manifestUri).then(function() {
           expect(player.isLive()).toEqual(isLive);
