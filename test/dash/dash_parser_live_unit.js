@@ -271,7 +271,7 @@ describe('DashParser.Live', function() {
           .then(function(manifest) {
             expect(manifest.periods.length).toBe(1);
             var timeline = manifest.presentationTimeline;
-            expect(timeline.getDuration()).toBe(Number.POSITIVE_INFINITY);
+            expect(timeline.getDuration()).toBe(Infinity);
           }).catch(fail).then(done);
       shaka.polyfill.Promise.flush();
     });
@@ -309,7 +309,7 @@ describe('DashParser.Live', function() {
             expect(manifest.periods.length).toBe(2);
             expect(manifest.periods[1].startTime).toBe(60);
             var timeline = manifest.presentationTimeline;
-            expect(timeline.getDuration()).toBe(Number.POSITIVE_INFINITY);
+            expect(timeline.getDuration()).toBe(Infinity);
           }).catch(fail).then(done);
       shaka.polyfill.Promise.flush();
     });

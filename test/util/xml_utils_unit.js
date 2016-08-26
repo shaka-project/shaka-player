@@ -361,8 +361,8 @@ describe('XmlUtils', function() {
     expect(parseFloat('4e2')).toBeCloseTo(4e2);
     expect(parseFloat('4e-2')).toBeCloseTo(4e-2);
 
-    expect(parseFloat(HUGE_NUMBER_STRING)).toBe(Number.POSITIVE_INFINITY);
-    expect(parseFloat('-' + HUGE_NUMBER_STRING)).toBe(Number.NEGATIVE_INFINITY);
+    expect(parseFloat(HUGE_NUMBER_STRING)).toBe(Infinity);
+    expect(parseFloat('-' + HUGE_NUMBER_STRING)).toBe(-Infinity);
   });
 });
 

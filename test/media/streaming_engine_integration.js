@@ -142,20 +142,20 @@ describe('StreamingEngine', function() {
       timeline = shaka.test.StreamingEngineUtil.createFakePresentationTimeline(
           275 - 10 /* segmentAvailabilityStart */,
           295 - 10 /* segmentAvailabilityEnd */,
-          Number.POSITIVE_INFINITY /* presentationDuration */);
+          Infinity /* presentationDuration */);
       setupPlayhead();
 
       setupNetworkingEngine(
           0 /* firstPeriodStartTime */,
           300 /* secondPeriodStartTime */,
-          Number.POSITIVE_INFINITY /* presentationDuration */,
+          Infinity /* presentationDuration */,
           { audio: metadata.audio.segmentDuration,
             video: metadata.video.segmentDuration });
 
       setupManifest(
           0 /* firstPeriodStartTime */,
           300 /* secondPeriodStartTime */,
-          Number.POSITIVE_INFINITY /* presentationDuration */);
+          Infinity /* presentationDuration */);
 
       createStreamingEngine();
     });

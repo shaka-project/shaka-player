@@ -340,7 +340,7 @@ describe('StreamingEngine', function() {
         rebufferingGoal: 2,
         bufferingGoal: 5,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        bufferBehind: Number.POSITIVE_INFINITY,
+        bufferBehind: Infinity,
         ignoreTextStreamFailures: false
       };
     }

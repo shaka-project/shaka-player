@@ -136,7 +136,7 @@ describe('TextEngine', function() {
         expect(mockTrack.removeCue).not.toHaveBeenCalled();
 
         mockTrack.removeCue.calls.reset();
-        return textEngine.remove(2.9999, Number.POSITIVE_INFINITY);
+        return textEngine.remove(2.9999, Infinity);
       }).then(function() {
         expect(mockTrack.removeCue.calls.allArgs()).toEqual([[cue3]]);
       }).catch(fail).then(done);
@@ -222,7 +222,7 @@ describe('TextEngine', function() {
         expect(textEngine.bufferStart()).toBe(3);
         expect(textEngine.bufferEnd()).toBe(8);
 
-        return textEngine.remove(0, Number.POSITIVE_INFINITY);
+        return textEngine.remove(0, Infinity);
       }).then(function() {
         expect(textEngine.bufferStart()).toBe(null);
         expect(textEngine.bufferEnd()).toBe(null);
