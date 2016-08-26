@@ -130,15 +130,18 @@ shaka.test.Dash.testFails = function(done, manifestText, expectedError) {
  */
 shaka.test.Dash.makeSimpleManifestText =
     function(lines, opt_duration, opt_start) {
-  var attr = '';
-  if (opt_duration)
-    attr = 'duration="PT' + opt_duration + 'S"';
+  var periodAttr = '';
+  var mpdAttr = 'type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"';
+  if (opt_duration) {
+    periodAttr = 'duration="PT' + opt_duration + 'S"';
+    mpdAttr = 'type="static"';
+  }
   if (opt_start)
-    attr += ' start="PT' + opt_start + 'S"';
+    periodAttr += ' start="PT' + opt_start + 'S"';
 
   var start = [
-    '<MPD>',
-    '  <Period ' + attr + '>',
+    '<MPD ' + mpdAttr + '>',
+    '  <Period ' + periodAttr + '>',
     '    <AdaptationSet mimeType="video/mp4">',
     '      <Representation bandwidth="500">',
     '        <BaseURL>http://example.com</BaseURL>'

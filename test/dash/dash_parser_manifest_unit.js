@@ -304,7 +304,7 @@ describe('DashParser.Manifest', function() {
       '    </AdaptationSet>'
     ].join('\n');
     var template = [
-      '<MPD minBufferTime="PT75S">',
+      '<MPD mediaPresentationDuration="PT75S">',
       '  <Period id="1">',
       '%(periodContents)s',
       '  </Period>',
@@ -483,12 +483,12 @@ describe('DashParser.Manifest', function() {
     function makeManifest(lines) {
       var template = [
         '<MPD type="dynamic"',
-        '      availabilityStartTime="1970-01-01T00:00:00Z"',
-        '      timeShiftBufferDepth="PT60S"',
-        '      maxSegmentDuration="PT5S"',
-        '      suggestedPresentationDelay="PT0S">',
+        '     availabilityStartTime="1970-01-01T00:00:00Z"',
+        '     timeShiftBufferDepth="PT60S"',
+        '     maxSegmentDuration="PT5S"',
+        '     suggestedPresentationDelay="PT0S">',
         '  %s',
-        '  <Period duration="PT30M">',
+        '  <Period>',
         '    <AdaptationSet mimeType="video/mp4">',
         '      <Representation bandwidth="500">',
         '        <BaseURL>http://example.com</BaseURL>',

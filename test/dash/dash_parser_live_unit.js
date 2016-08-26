@@ -70,14 +70,15 @@ describe('DashParser.Live', function() {
    * Makes a simple live manifest with the given representation contents.
    *
    * @param {!Array.<string>} lines
-   * @param {number} updatePeriod
+   * @param {number} updateTime
    * @param {number=} opt_duration
    * @return {string}
    */
-  function makeSimpleLiveManifestText(lines, updatePeriod, opt_duration) {
+  function makeSimpleLiveManifestText(lines, updateTime, opt_duration) {
     var attr = opt_duration ? 'duration="PT' + opt_duration + 'S"' : '';
     var template = [
-      '<MPD type="dynamic" minimumUpdatePeriod="PT%(updatePeriod)dS">',
+      '<MPD type="dynamic" minimumUpdatePeriod="PT%(updateTime)dS"',
+      '    availabilityStartTime="1970-01-01T00:00:00Z">',
       '  <Period id="1" %(attr)s>',
       '    <AdaptationSet mimeType="video/mp4">',
       '      <Representation id="3" bandwidth="500">',
@@ -91,7 +92,7 @@ describe('DashParser.Live', function() {
     var text = sprintf(template, {
       attr: attr,
       contents: lines.join('\n'),
-      updatePeriod: updatePeriod
+      updateTime: updateTime
     });
     return text;
   }
@@ -319,7 +320,8 @@ describe('DashParser.Live', function() {
       '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />'
     ];
     var template = [
-      '<MPD type="dynamic" minimumUpdatePeriod="PT%(updateTime)dS">',
+      '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
+      '    minimumUpdatePeriod="PT%(updateTime)dS">',
       '  <Period id="4">',
       '    <AdaptationSet mimeType="video/mp4">',
       '      <Representation id="6" bandwidth="500">',
@@ -352,7 +354,8 @@ describe('DashParser.Live', function() {
 
   it('uses redirect URL for manifest BaseURL', function(done) {
     var template = [
-      '<MPD type="dynamic" minimumUpdatePeriod="PT%(updatePeriod)dS">',
+      '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
+      '    minimumUpdatePeriod="PT%(updateTime)dS">',
       '  <Period id="1" duration="PT30S">',
       '    <AdaptationSet mimeType="video/mp4">',
       '      <Representation id="3" bandwidth="500">',
@@ -368,7 +371,7 @@ describe('DashParser.Live', function() {
       '  </Period>',
       '</MPD>'
     ].join('\n');
-    var manifestText = sprintf(template, {updatePeriod: updateTime});
+    var manifestText = sprintf(template, {updateTime: updateTime});
     var manifestData = shaka.util.StringUtils.toUTF8(manifestText);
     var originalUri = 'http://example.com/';
     var redirectedUri = 'http://redirected.com/';
@@ -447,7 +450,8 @@ describe('DashParser.Live', function() {
 
   it('uses Mpd.Location', function(done) {
     var manifest = [
-      '<MPD type="dynamic" minimumUpdatePeriod="PT' + updateTime + 'S">',
+      '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
+      '    minimumUpdatePeriod="PT' + updateTime + 'S">',
       '  <Location>http://foobar</Location>',
       '  <Location>http://foobar2</Location>',
       '  <Period id="1" duration="PT10S">',
@@ -648,7 +652,8 @@ describe('DashParser.Live', function() {
 
     beforeEach(function() {
       var manifest = [
-        '<MPD type="dynamic" minimumUpdatePeriod="PT' + updateTime + 'S">',
+        '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
+        '    minimumUpdatePeriod="PT' + updateTime + 'S">',
         '  <UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-xsdate:2014"',
         '      value="http://foo.bar/date" />',
         '  <UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-xsdate:2014"',
