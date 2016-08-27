@@ -547,10 +547,11 @@ ShakaControls.prototype.updateTimeAndSeekRange_ = function() {
   var bufferedEnd = bufferedLength ? this.video_.buffered.end(0) : 0;
   var seekRange = this.player_.seekRange();
 
-  this.seekBar_.min = seekRange.start;
-  this.seekBar_.max = seekRange.end;
-
   if (this.player_.isLive()) {
+    // For live, the seek bar size is the seek range.
+    this.seekBar_.min = seekRange.start;
+    this.seekBar_.max = seekRange.end;
+
     // The amount of time we are behind the live edge.
     var behindLive = Math.floor(seekRange.end - displayTime);
     displayTime = Math.max(0, behindLive);
@@ -572,6 +573,10 @@ ShakaControls.prototype.updateTimeAndSeekRange_ = function() {
       this.seekBar_.value = seekRange.end - displayTime;
     }
   } else {
+    // For VOD and IPR, the seek bar size is from 0 to duration.
+    this.seekBar_.min = 0;
+    this.seekBar_.max = duration;
+
     var showHour = duration >= 3600;
     this.currentTime_.textContent =
         this.buildTimeString_(displayTime, showHour);

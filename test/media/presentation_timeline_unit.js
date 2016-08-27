@@ -88,8 +88,9 @@ describe('PresentationTimeline', function() {
    * @return {shaka.media.PresentationTimeline}
    */
   function makeIprTimeline(duration) {
+    var now = Date.now() / 1000;
     var timeline = makePresentationTimeline(
-        /* static */ false, duration, /* start time */ null,
+        /* static */ false, duration, /* start time */ now,
         /* availability */ Infinity, /* max seg dur */ 10,
         /* clock offset */ 0);
     expect(timeline.isLive()).toBe(false);
@@ -170,17 +171,36 @@ describe('PresentationTimeline', function() {
   });
 
   describe('getSegmentAvailabilityEnd', function() {
-    it('returns duration for VOD and IPR', function() {
-      var timeline1 = makeVodTimeline(/* duration */ 60);
-      var timeline2 = makeIprTimeline(/* duration */ 60);
+    it('returns duration for VOD', function() {
+      var timeline = makeVodTimeline(/* duration */ 60);
 
       setElapsed(0);
-      expect(timeline1.getSegmentAvailabilityEnd()).toBe(60);
-      expect(timeline2.getSegmentAvailabilityEnd()).toBe(60);
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(60);
 
       setElapsed(100);
-      expect(timeline1.getSegmentAvailabilityEnd()).toBe(60);
-      expect(timeline2.getSegmentAvailabilityEnd()).toBe(60);
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(60);
+    });
+
+    it('calculates time for IPR', function() {
+      var timeline = makeIprTimeline(/* duration */ 60);
+
+      setElapsed(0);
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(0);
+
+      setElapsed(10);
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(0);
+
+      setElapsed(11);
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(1);
+
+      setElapsed(69);
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(59);
+
+      setElapsed(70);
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(60);
+
+      setElapsed(100);
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(60);
     });
 
     it('calculates time for live', function() {
@@ -228,17 +248,23 @@ describe('PresentationTimeline', function() {
   });
 
   describe('setDuration', function() {
-    it('affects availability end for VOD and IPR', function() {
+    it('affects availability end for VOD', function() {
       setElapsed(0);
-      var timeline1 = makeVodTimeline(/* duration */ 60);
-      var timeline2 = makeIprTimeline(/* duration */ 60);
-      expect(timeline1.getSegmentAvailabilityEnd()).toBe(60);
-      expect(timeline2.getSegmentAvailabilityEnd()).toBe(60);
+      var timeline = makeVodTimeline(/* duration */ 60);
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(60);
 
-      timeline1.setDuration(90);
-      timeline2.setDuration(90);
-      expect(timeline1.getSegmentAvailabilityEnd()).toBe(90);
-      expect(timeline2.getSegmentAvailabilityEnd()).toBe(90);
+      timeline.setDuration(90);
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(90);
+    });
+
+    it('affects availability end for IPR', function() {
+      var timeline = makeIprTimeline(/* duration */ 60);
+
+      setElapsed(85);
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(60);
+
+      timeline.setDuration(90);
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(75);
     });
   });
 
