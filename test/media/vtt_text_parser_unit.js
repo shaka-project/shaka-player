@@ -60,6 +60,36 @@ describe('VttTextParser', function() {
         'This is a comment block');
   });
 
+  it('handles a blank line at the end of the file', function() {
+    verifyHelper(
+        [
+          {start: 20, end: 40, text: 'Test'}
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        'Test\n\n');
+  });
+
+  it('handles no blank line at the end of the file', function() {
+    verifyHelper(
+        [
+          {start: 20, end: 40, text: 'Test'}
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        'Test\n');
+  });
+
+  it('handles no newline after the final text payload', function() {
+    verifyHelper(
+        [
+          {start: 20, end: 40, text: 'Test'}
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        'Test');
+  });
+
   it('supports cues with no settings', function() {
     verifyHelper(
         [
@@ -130,7 +160,7 @@ describe('VttTextParser', function() {
                 '00:00:00.000 --> 00:00:00.020\nTest');
   });
 
-  it('invalid time values', function() {
+  it('rejects invalid time values', function() {
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
                 'WEBVTT\n\n00.020    --> 0:00.040\nTest');
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
@@ -248,17 +278,7 @@ describe('VttTextParser', function() {
         'Test');
   });
 
-  it('handles a blank line at the end of the file', function() {
-    verifyHelper(
-        [
-          {start: 20, end: 40, text: 'Test'}
-        ],
-        'WEBVTT\n\n' +
-        '00:00:20.000 --> 00:00:40.000\n' +
-        'Test\n\n');
-  });
-
-  it('invalid settings', function() {
+  it('rejects invalid settings', function() {
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_SETTINGS,
                 'WEBVTT\n\n00:00.000 --> 00:00.010 vertical:es\nTest');
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_SETTINGS,
