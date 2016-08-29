@@ -44,6 +44,7 @@ describe('PresentationTimeline', function() {
    * @param {number} segmentAvailabilityDuration
    * @param {number} maxSegmentDuration
    * @param {number} clockOffset
+   * @param {number} presentationDelay
    *
    * @return {shaka.media.PresentationTimeline}
    */
@@ -53,9 +54,10 @@ describe('PresentationTimeline', function() {
       presentationStartTime,
       segmentAvailabilityDuration,
       maxSegmentDuration,
-      clockOffset) {
-    var timeline =
-        new shaka.media.PresentationTimeline(presentationStartTime, 0);
+      clockOffset,
+      presentationDelay) {
+    var timeline = new shaka.media.PresentationTimeline(
+        presentationStartTime, presentationDelay);
     timeline.setStatic(isStatic);
     timeline.setDuration(duration || Infinity);
     timeline.setSegmentAvailabilityDuration(segmentAvailabilityDuration);
@@ -75,7 +77,7 @@ describe('PresentationTimeline', function() {
     var timeline = makePresentationTimeline(
         /* static */ true, duration, /* start time */ null,
         /* availability */ Infinity, /* max seg dur */ 10,
-        /* clock offset */ 0);
+        /* clock offset */ 0, /* presentation delay */ 0);
     expect(timeline.isLive()).toBe(false);
     expect(timeline.isInProgress()).toBe(false);
     return timeline;
@@ -85,14 +87,15 @@ describe('PresentationTimeline', function() {
    * Creates a IPR PresentationTimeline.
    *
    * @param {number} duration
+   * @param {number=} opt_delay
    * @return {shaka.media.PresentationTimeline}
    */
-  function makeIprTimeline(duration) {
+  function makeIprTimeline(duration, opt_delay) {
     var now = Date.now() / 1000;
     var timeline = makePresentationTimeline(
         /* static */ false, duration, /* start time */ now,
         /* availability */ Infinity, /* max seg dur */ 10,
-        /* clock offset */ 0);
+        /* clock offset */ 0, opt_delay || 0);
     expect(timeline.isLive()).toBe(false);
     expect(timeline.isInProgress()).toBe(true);
     return timeline;
@@ -102,13 +105,15 @@ describe('PresentationTimeline', function() {
    * Creates a live PresentationTimeline.
    *
    * @param {number} availability
+   * @param {number=} opt_delay
    * @return {shaka.media.PresentationTimeline}
    */
-  function makeLiveTimeline(availability) {
+  function makeLiveTimeline(availability, opt_delay) {
     var now = Date.now() / 1000;
     var timeline = makePresentationTimeline(
         /* static */ false, /* duration */ Infinity, /* start time */ now,
-        availability, /* max seg dur */ 10, /* clock offset */ 0);
+        availability, /* max seg dur */ 10,
+        /* clock offset */ 0, opt_delay || 0);
     expect(timeline.isLive()).toBe(true);
     expect(timeline.isInProgress()).toBe(false);
     return timeline;
@@ -307,6 +312,25 @@ describe('PresentationTimeline', function() {
 
       timeline.setClockOffset(5000 /* ms */);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(6);
+    });
+  });
+
+  describe('getSeekRangeEnd', function() {
+    it('accounts for delay for live and IPR', function() {
+      var timeline1 = makeIprTimeline(/* duration */ 60, /* delay */ 7);
+      var timeline2 = makeLiveTimeline(/* duration */ 60, /* delay */ 7);
+
+      setElapsed(11);
+      expect(timeline1.getSeekRangeEnd()).toBe(0);
+      expect(timeline2.getSeekRangeEnd()).toBe(0);
+
+      setElapsed(18);
+      expect(timeline1.getSeekRangeEnd()).toBe(1);
+      expect(timeline2.getSeekRangeEnd()).toBe(1);
+
+      setElapsed(37);
+      expect(timeline1.getSeekRangeEnd()).toBe(20);
+      expect(timeline2.getSeekRangeEnd()).toBe(20);
     });
   });
 });
