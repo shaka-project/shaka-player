@@ -553,7 +553,7 @@ shakaAssets.testAssets = [
   // Src: https://github.com/Axinom/dash-test-vectors
   {
     name: 'Multi-DRM',
-    manifestUri: '//media.axprod.net/TestVectors/v6-MultiDRM/Manifest.mpd',
+    manifestUri: '//media.axprod.net/TestVectors/v7-MultiDRM-SingleKey/Manifest.mpd',  // gjslint: disable=110
 
     encoder: shakaAssets.Encoder.AXINOM,
     source: shakaAssets.Source.AXINOM,
@@ -566,6 +566,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.HIGH_DEFINITION,
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
+      shakaAssets.Feature.TTML,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
       shakaAssets.Feature.WEBVTT
     ],
@@ -575,15 +576,12 @@ shakaAssets.testAssets = [
       'com.microsoft.playready': '//drm-playready-licensing.axtest.net/AcquireLicense'  // gjslint: disable=110
     },
     licenseRequestHeaders: {
-      'X-AxDRM-Message': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiNjllNTQwODgtZTllMC00NTMwLThjMWEtMWViNmRjZDBkMTRlIiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIjoiNmU1YTFkMjYtMjc1Ny00N2Q3LTgwNDYtZWFhNWQxZDM0YjVhIn1dfX0.yF7PflOPv9qHnu3ZWJNZ12jgkqTabmwXbDWk_47tLNE'  // gjslint: disable=110
-    },
-
-    // See https://github.com/Axinom/dash-test-vectors/issues/1
-    extraConfig: { streaming: { ignoreTextStreamFailures: true } }
+      'X-AxDRM-Message': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYjMzNjRlYjUtNTFmNi00YWUzLThjOTgtMzNjZWQ1ZTMxYzc4IiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIjoiOWViNDA1MGQtZTQ0Yi00ODAyLTkzMmUtMjdkNzUwODNlMjY2IiwiZW5jcnlwdGVkX2tleSI6ImxLM09qSExZVzI0Y3Iya3RSNzRmbnc9PSJ9XX19.4lWwW46k-oWcah8oN18LPj5OLS5ZU-_AQv7fe0JhNjA'  // gjslint: disable=110
+    }
   },
   {
     name: 'Multi-DRM, multi-key',
-    manifestUri: '//media.axprod.net/TestVectors/v6-MultiDRM-MultiKey/Manifest.mpd',  // gjslint: disable=110
+    manifestUri: '//media.axprod.net/TestVectors/v7-MultiDRM-MultiKey/Manifest.mpd',  // gjslint: disable=110
 
     encoder: shakaAssets.Encoder.AXINOM,
     source: shakaAssets.Source.AXINOM,
@@ -597,6 +595,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.MULTIKEY,
       shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
+      shakaAssets.Feature.TTML,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
       shakaAssets.Feature.WEBVTT
     ],
@@ -606,15 +605,12 @@ shakaAssets.testAssets = [
       'com.microsoft.playready': '//drm-playready-licensing.axtest.net/AcquireLicense'  // gjslint: disable=110
     },
     licenseRequestHeaders: {
-      'X-AxDRM-Message': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiNjllNTQwODgtZTllMC00NTMwLThjMWEtMWViNmRjZDBkMTRlIiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIjoiMTUzMGQzYTAtNjkwNC00NDZhLTkxYTEtMzNhMTE1YWE4YzQxIn0seyJpZCI6ImM4M2ViNjM5LWU2NjQtNDNmOC1hZTk4LTQwMzliMGMxM2IyZCJ9LHsiaWQiOiIzZDhjYzc2Mi0yN2FjLTQwMGYtOTg5Zi04YWI1ZGM3ZDc3NzUifSx7ImlkIjoiYmQ4ZGFkNTgtMDMyZC00YzI1LTg5ZmEtYzdiNzEwZTgyYWMyIn1dfX0.9t18lFmZFVHMzpoZxYDyqOS0Bk_evGhTBw_F2JnAK2k'  // gjslint: disable=110
-    },
-
-    // See https://github.com/Axinom/dash-test-vectors/issues/1
-    extraConfig: { streaming: { ignoreTextStreamFailures: true } }
+      'X-AxDRM-Message': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYjMzNjRlYjUtNTFmNi00YWUzLThjOTgtMzNjZWQ1ZTMxYzc4IiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIjoiODAzOTliZjUtOGEyMS00MDE0LTgwNTMtZTI3ZTc0OGU5OGMwIiwiZW5jcnlwdGVkX2tleSI6ImxpTkpxVmFZa05oK01LY3hKRms3SWc9PSJ9LHsiaWQiOiI5MDk1M2UwOS02Y2IyLTQ5YTMtYTI2MC03YTVmZWZlYWQ0OTkiLCJlbmNyeXB0ZWRfa2V5Ijoia1l0SEh2cnJmQ01lVmRKNkxrYmtuZz09In0seyJpZCI6IjBlNGRhOTJiLWQwZTgtNGE2Ni04YzNmLWMyNWE5N2ViNjUzMiIsImVuY3J5cHRlZF9rZXkiOiI3dzdOWkhITE1nSjRtUUtFSzVMVE1RPT0ifSx7ImlkIjoiNTg1ZjIzM2YtMzA3Mi00NmYxLTlmYTQtNmRjMjJjNjZhMDE0IiwiZW5jcnlwdGVkX2tleSI6IkFjNFVVbVl0Qko1blBROU4xNXJjM2c9PSJ9LHsiaWQiOiI0MjIyYmQ3OC1iYzQ1LTQxYmYtYjYzZS02ZjgxNGRjMzkxZGYiLCJlbmNyeXB0ZWRfa2V5IjoiTzZGTzBmcVNXb3BwN2JqYy9ENGxNQT09In1dfX0.uF6YlKAREOmbniAeYiH070HSJhV0YS7zSKjlCtiDR5Y'  // gjslint: disable=110
+    }
   },
   {
     name: 'Multi-DRM, multi-key, multi-Period',
-    manifestUri: '//media.axprod.net/TestVectors/v6-MultiDRM-MultiKey-MultiPeriod/Manifest.mpd',  // gjslint: disable=110
+    manifestUri: '//media.axprod.net/TestVectors/v7-MultiDRM-MultiKey-MultiPeriod/Manifest.mpd',  // gjslint: disable=110
     // NOTE: Some of period 1's audio is encrypted, and some of period 2's
     // audio is unencrypted.  This is something Chrome does not support at
     // this time.  See http://crbug.com/597443 for discussion and history.
@@ -633,6 +629,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.MULTIKEY,
       shakaAssets.Feature.MULTIPERIOD,
       shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
+      shakaAssets.Feature.TTML,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
       shakaAssets.Feature.WEBVTT
     ],
@@ -642,15 +639,29 @@ shakaAssets.testAssets = [
       'com.microsoft.playready': '//drm-playready-licensing.axtest.net/AcquireLicense'  // gjslint: disable=110
     },
     licenseRequestHeaders: {
-      'X-AxDRM-Message': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiNjllNTQwODgtZTllMC00NTMwLThjMWEtMWViNmRjZDBkMTRlIiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIjoiNTNiZTc3NTctNzI4OC00YjZiLWIyMGEtZjA1YjY0YTRlZjc5In0seyJpZCI6IjBlZDgyMWE4LTgwZWQtNDBhYy1hODA0LTkyN2M5ZmRhZGJlOSJ9LHsiaWQiOiJlNDdkNzhjYS05NGRjLTQ1ZmItOWUzZC0yYTc3M2FlZjc0YjIifSx7ImlkIjoiMzJhMTQxZTktMjNhYi00NGZmLWE2YzctNTM0OWM4OTQ1MWNmIn0seyJpZCI6IjhkMDkxOTY2LTQ0YjUtNGNmOC04YTQ1LWVkMTJmZGIxOGQzNSJ9XX19.9YSK6QsDr4SYR7Q74ftq9mVtsT0ZkP3STE0zI-3mVIA'  // gjslint: disable=110
-    },
-
-    // See https://github.com/Axinom/dash-test-vectors/issues/1
-    extraConfig: { streaming: { ignoreTextStreamFailures: true } }
+      'X-AxDRM-Message': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYjMzNjRlYjUtNTFmNi00YWUzLThjOTgtMzNjZWQ1ZTMxYzc4IiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIjoiMDg3Mjc4NmUtZjllNy00NjVmLWEzYTItNGU1YjBlZjhmYTQ1IiwiZW5jcnlwdGVkX2tleSI6IlB3NitlRVlOY3ZqWWJmc2gzWDNmbWc9PSJ9LHsiaWQiOiJjMTRmMDcwOS1mMmI5LTQ0MjctOTE2Yi02MWI1MjU4NjUwNmEiLCJlbmNyeXB0ZWRfa2V5IjoiLzErZk5paDM4bXFSdjR5Y1l6bnQvdz09In0seyJpZCI6IjhiMDI5ZTUxLWQ1NmEtNDRiZC05MTBmLWQ0YjVmZDkwZmJhMiIsImVuY3J5cHRlZF9rZXkiOiJrcTBKdVpFanBGTjhzYVRtdDU2ME9nPT0ifSx7ImlkIjoiMmQ2ZTkzODctNjBjYS00MTQ1LWFlYzItYzQwODM3YjRiMDI2IiwiZW5jcnlwdGVkX2tleSI6IlRjUlFlQld4RW9IT0tIcmFkNFNlVlE9PSJ9LHsiaWQiOiJkZTAyZjA3Zi1hMDk4LTRlZTAtYjU1Ni05MDdjMGQxN2ZiYmMiLCJlbmNyeXB0ZWRfa2V5IjoicG9lbmNTN0dnbWVHRmVvSjZQRUFUUT09In0seyJpZCI6IjkxNGU2OWY0LTBhYjMtNDUzNC05ZTlmLTk4NTM2MTVlMjZmNiIsImVuY3J5cHRlZF9rZXkiOiJlaUkvTXNsbHJRNHdDbFJUL0xObUNBPT0ifSx7ImlkIjoiZGE0NDQ1YzItZGI1ZS00OGVmLWIwOTYtM2VmMzQ3YjE2YzdmIiwiZW5jcnlwdGVkX2tleSI6IjJ3K3pkdnFycERWM3hSMGJKeTR1Z3c9PSJ9LHsiaWQiOiIyOWYwNWU4Zi1hMWFlLTQ2ZTQtODBlOS0yMmRjZDQ0Y2Q3YTEiLCJlbmNyeXB0ZWRfa2V5IjoiL3hsU0hweHdxdTNnby9nbHBtU2dhUT09In0seyJpZCI6IjY5ZmU3MDc3LWRhZGQtNGI1NS05NmNkLWMzZWRiMzk5MTg1MyIsImVuY3J5cHRlZF9rZXkiOiJ6dTZpdXpOMnBzaTBaU3hRaUFUa1JRPT0ifV19fQ.BXr93Et1krYMVs-CUnf7F3ywJWFRtxYdkR7Qn4w3-to'  // gjslint: disable=110
+    }
   },
   {
-    name: 'Multi-Period',
-    manifestUri: '//media.axprod.net/TestVectors/v6-Clear/MultiPeriod_Manifest.mpd',  // gjslint: disable=110
+    name: 'Clear, single-Period',
+    manifestUri: '//media.axprod.net/TestVectors/v7-Clear/Manifest.mpd',
+
+    encoder: shakaAssets.Encoder.AXINOM,
+    source: shakaAssets.Source.AXINOM,
+    drm: [],
+    features: [
+      shakaAssets.Feature.EMBEDDED_TEXT,
+      shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
+      shakaAssets.Feature.TTML,
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
+      shakaAssets.Feature.WEBVTT
+    ]
+  },
+  {
+    name: 'Clear, multi-Period',
+    manifestUri: '//media.axprod.net/TestVectors/v7-Clear/Manifest_MultiPeriod.mpd',  // gjslint: disable=110
 
     encoder: shakaAssets.Encoder.AXINOM,
     source: shakaAssets.Source.AXINOM,
@@ -661,12 +672,10 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.MULTIPERIOD,
       shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
+      shakaAssets.Feature.TTML,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
       shakaAssets.Feature.WEBVTT
-    ],
-
-    // See https://github.com/Axinom/dash-test-vectors/issues/1
-    extraConfig: { streaming: { ignoreTextStreamFailures: true } }
+    ]
   },
   // }}}
 
