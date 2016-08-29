@@ -114,6 +114,7 @@ describe('DashParser.Manifest', function() {
           '    <AdaptationSet mimeType="text/vtt" codecs="mp4a.40.29"',
           '        lang="es">',
           '      <Role value="caption" />',
+          '      <Role value="main" />',
           '      <Representation bandwidth="100" />',
           '    </AdaptationSet>',
           '    <AdaptationSet mimeType="audio/mp4">',
@@ -145,6 +146,7 @@ describe('DashParser.Manifest', function() {
                 .size(576, 432)
             .addStreamSet('text')
               .language('es')
+              .primary()
               .addStream(jasmine.any(Number))
                 .anySegmentFunctions()
                 .anyInitSegment()
