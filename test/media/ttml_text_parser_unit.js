@@ -63,6 +63,16 @@ describe('TtmlTextParser', function() {
         'end="01:02:03.200">Test</p></body></tt>');
   });
 
+  it('accounts for offset', function() {
+    verifyHelper(
+        [
+          {start: 69.05, end: 3730.2, text: 'Test'}
+        ],
+        '<tt><body><p begin="01:02.05" ' +
+        'end="01:02:03.200">Test</p></body></tt>',
+        /* offset */ 7);
+  });
+
   it('supports time in 0.00h 0.00m 0.00s format', function() {
     verifyHelper(
         [
@@ -345,12 +355,15 @@ describe('TtmlTextParser', function() {
       });
 
 
-  function verifyHelper(cues, string) {
-    var data = shaka.util.StringUtils.toUTF8(string);
-
-    // two last parameters are only used by mp4 vtt parser,
-    // so passing arbitrary values
-    var result = shaka.media.TtmlTextParser(data, null, null);
+  /**
+   * @param {!Array} cues
+   * @param {string} text
+   * @param {number=} opt_offset
+   */
+  function verifyHelper(cues, text, opt_offset) {
+    var data = shaka.util.StringUtils.toUTF8(text);
+    // Last two parameters are only used by mp4 vtt parser.
+    var result = shaka.media.TtmlTextParser(data, opt_offset || 0, null, null);
     expect(result).toBeTruthy();
     expect(result.length).toBe(cues.length);
     for (var i = 0; i < cues.length; i++) {
@@ -371,11 +384,15 @@ describe('TtmlTextParser', function() {
     }
   }
 
-  function errorHelper(code, string) {
+  /**
+   * @param {shaka.util.Error.Code} code
+   * @param {string} text
+   */
+  function errorHelper(code, text) {
     var error = new shaka.util.Error(shaka.util.Error.Category.TEXT, code);
-    var data = shaka.util.StringUtils.toUTF8(string);
+    var data = shaka.util.StringUtils.toUTF8(text);
     try {
-      shaka.media.TtmlTextParser(data, null, null);
+      shaka.media.TtmlTextParser(data, 0, null, null);
       fail('Invalid TTML file supported');
     } catch (e) {
       shaka.test.Util.expectToEqualError(e, error);

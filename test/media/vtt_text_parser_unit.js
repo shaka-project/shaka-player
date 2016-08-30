@@ -90,6 +90,17 @@ describe('VttTextParser', function() {
         'Test');
   });
 
+  it('accounts for offset', function() {
+    verifyHelper(
+        [
+          {start: 27, end: 47, text: 'Test'}
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        'Test',
+        /* offset */ 7);
+  });
+
   it('supports cues with no settings', function() {
     verifyHelper(
         [
@@ -297,11 +308,16 @@ describe('VttTextParser', function() {
                 'WEBVTT\n\n00:00.000 --> 00:00.010 align:foo\nTest');
   });
 
-  function verifyHelper(cues, string) {
-    var data = shaka.util.StringUtils.toUTF8(string);
-    // two last parameters are only used by mp4 vtt parser,
-    // so passing arbitrary values
-    var result = shaka.media.VttTextParser(data, null, null);
+
+  /**
+   * @param {!Array} cues
+   * @param {string} text
+   * @param {number=} opt_offset
+   */
+  function verifyHelper(cues, text, opt_offset) {
+    var data = shaka.util.StringUtils.toUTF8(text);
+    // Last two parameters are only used by mp4 vtt parser.
+    var result = shaka.media.VttTextParser(data, opt_offset || 0, null, null);
     expect(result).toBeTruthy();
     expect(result.length).toBe(cues.length);
     for (var i = 0; i < cues.length; i++) {
@@ -324,11 +340,15 @@ describe('VttTextParser', function() {
     }
   }
 
-  function errorHelper(code, string) {
+  /**
+   * @param {shaka.util.Error.Code} code
+   * @param {string} text
+   */
+  function errorHelper(code, text) {
     var error = new shaka.util.Error(shaka.util.Error.Category.TEXT, code);
-    var data = shaka.util.StringUtils.toUTF8(string);
+    var data = shaka.util.StringUtils.toUTF8(text);
     try {
-      shaka.media.VttTextParser(data, null, null);
+      shaka.media.VttTextParser(data, 0, null, null);
       fail('Invalid WebVTT file supported');
     } catch (e) {
       shaka.test.Util.expectToEqualError(e, error);

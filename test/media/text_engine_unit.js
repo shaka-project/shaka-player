@@ -64,7 +64,7 @@ describe('TextEngine', function() {
       mockParser.and.returnValue([]);
 
       textEngine.appendBuffer(dummyData, 0, 3).then(function() {
-        expect(mockParser).toHaveBeenCalledWith(dummyData, 0, 3);
+        expect(mockParser).toHaveBeenCalledWith(dummyData, 0, 0, 3);
         expect(mockTrack.addCue).not.toHaveBeenCalled();
         expect(mockTrack.removeCue).not.toHaveBeenCalled();
 
@@ -80,7 +80,7 @@ describe('TextEngine', function() {
       mockParser.and.returnValue([1, 2, 3]);
 
       textEngine.appendBuffer(dummyData, 0, 3).then(function() {
-        expect(mockParser).toHaveBeenCalledWith(dummyData, 0, 3);
+        expect(mockParser).toHaveBeenCalledWith(dummyData, 0, 0, 3);
         expect(mockTrack.addCue).toHaveBeenCalledWith(1);
         expect(mockTrack.addCue).toHaveBeenCalledWith(2);
         expect(mockTrack.addCue).toHaveBeenCalledWith(3);
@@ -92,7 +92,7 @@ describe('TextEngine', function() {
         mockParser.and.returnValue([4, 5]);
         return textEngine.appendBuffer(dummyData, 3, 5);
       }).then(function() {
-        expect(mockParser).toHaveBeenCalledWith(dummyData, 3, 5);
+        expect(mockParser).toHaveBeenCalledWith(dummyData, 0, 3, 5);
         expect(mockTrack.addCue).toHaveBeenCalledWith(4);
         expect(mockTrack.addCue).toHaveBeenCalledWith(5);
       }).catch(fail).then(done);
@@ -150,12 +150,16 @@ describe('TextEngine', function() {
   });
 
   describe('setTimestampOffset', function() {
-    it('affects the timestamps of parsed cues', function(done) {
-      mockParser.and.callFake(function() {
-        return [createFakeCue(0, 1), createFakeCue(2, 3)];
+    it('passes the offset to the parser', function(done) {
+      mockParser.and.callFake(function(data, offset) {
+        return [
+          createFakeCue(offset + 0, offset + 1),
+          createFakeCue(offset + 2, offset + 3)
+        ];
       });
 
       textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+        expect(mockParser).toHaveBeenCalledWith(dummyData, 0, 0, 3);
         expect(mockTrack.addCue).toHaveBeenCalledWith(createFakeCue(0, 1));
         expect(mockTrack.addCue).toHaveBeenCalledWith(createFakeCue(2, 3));
 
@@ -163,6 +167,7 @@ describe('TextEngine', function() {
         textEngine.setTimestampOffset(4);
         return textEngine.appendBuffer(dummyData, 0, 3);
       }).then(function() {
+        expect(mockParser).toHaveBeenCalledWith(dummyData, 4, 0, 3);
         expect(mockTrack.addCue).toHaveBeenCalledWith(createFakeCue(4, 5));
         expect(mockTrack.addCue).toHaveBeenCalledWith(createFakeCue(6, 7));
       }).catch(fail).then(done);
