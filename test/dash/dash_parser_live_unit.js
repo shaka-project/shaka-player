@@ -152,6 +152,7 @@ describe('DashParser.Live', function() {
       var template = [
         '<MPD type="dynamic" minimumUpdatePeriod="PT%(updateTime)dS"',
         '    timeShiftBufferDepth="PT1S"',
+        '    suggestedPresentationDelay="PT5S"',
         '    availabilityStartTime="1970-01-01T00:00:00Z">',
         '  <Period id="1">',
         '    <AdaptationSet mimeType="video/mp4">',
@@ -179,7 +180,7 @@ describe('DashParser.Live', function() {
             Dash.verifySegmentIndex(manifest, basicRefs, 0);
 
             // 15 seconds for @timeShiftBufferDepth, the first segment duration,
-            // and the @suggestedPresentationDuration.
+            // and the @suggestedPresentationDelay.
             Date.now = function() { return (2 * 15 + 5) * 1000; };
             delayForUpdatePeriod();
             // The first reference should have been evicted.
@@ -193,6 +194,7 @@ describe('DashParser.Live', function() {
       var template = [
         '<MPD type="dynamic" minimumUpdatePeriod="PT%(updateTime)dS"',
         '    timeShiftBufferDepth="PT1S"',
+        '    suggestedPresentationDelay="PT5S"',
         '    availabilityStartTime="1970-01-01T00:00:00Z">',
         '  <Period id="1">',
         '    <AdaptationSet mimeType="video/mp4">',
@@ -231,7 +233,7 @@ describe('DashParser.Live', function() {
             Dash.verifySegmentIndex(manifest, basicRefs, 1);
 
             // 15 seconds for @timeShiftBufferDepth, the first segment duration,
-            // and the @suggestedPresentationDuration.
+            // and the @suggestedPresentationDelay.
             Date.now = function() { return (2 * 15 + 5) * 1000; };
             delayForUpdatePeriod();
             // The first reference should have been evicted.
@@ -251,6 +253,7 @@ describe('DashParser.Live', function() {
       var template = [
         '<MPD type="dynamic" minimumUpdatePeriod="PT%(updateTime)dS"',
         '    timeShiftBufferDepth="PT1S"',
+        '    suggestedPresentationDelay="PT5S"',
         '    availabilityStartTime="1970-01-01T00:00:00Z">',
         '  <Period id="1">',
         '    <AdaptationSet mimeType="video/mp4">',
@@ -280,6 +283,7 @@ describe('DashParser.Live', function() {
       var template = [
         '<MPD type="dynamic" minimumUpdatePeriod="PT%(updateTime)dS"',
         '    timeShiftBufferDepth="PT1S"',
+        '    suggestedPresentationDelay="PT5S"',
         '    availabilityStartTime="1970-01-01T00:00:00Z">',
         '  <Period id="1">',
         '    <AdaptationSet mimeType="video/mp4">',
@@ -321,6 +325,7 @@ describe('DashParser.Live', function() {
     ];
     var template = [
       '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
+      '    suggestedPresentationDelay="PT5S"',
       '    minimumUpdatePeriod="PT%(updateTime)dS">',
       '  <Period id="4">',
       '    <AdaptationSet mimeType="video/mp4">',
@@ -355,6 +360,7 @@ describe('DashParser.Live', function() {
   it('uses redirect URL for manifest BaseURL', function(done) {
     var template = [
       '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
+      '    suggestedPresentationDelay="PT5S"',
       '    minimumUpdatePeriod="PT%(updateTime)dS">',
       '  <Period id="1" duration="PT30S">',
       '    <AdaptationSet mimeType="video/mp4">',
@@ -451,6 +457,7 @@ describe('DashParser.Live', function() {
   it('uses Mpd.Location', function(done) {
     var manifest = [
       '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
+      '    suggestedPresentationDelay="PT5S"',
       '    minimumUpdatePeriod="PT' + updateTime + 'S">',
       '  <Location>http://foobar</Location>',
       '  <Location>http://foobar2</Location>',
