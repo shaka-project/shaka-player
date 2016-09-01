@@ -32,6 +32,7 @@ describe('CastSender', function() {
   var onStatusChanged;
   var onRemoteEvent;
   var onResumeLocal;
+  var onInitStateRequired;
 
   var mockCastApi;
   var mockSession;
@@ -50,6 +51,8 @@ describe('CastSender', function() {
     onStatusChanged = jasmine.createSpy('onStatusChanged');
     onRemoteEvent = jasmine.createSpy('onRemoteEvent');
     onResumeLocal = jasmine.createSpy('onResumeLocal');
+    onInitStateRequired = jasmine.createSpy('onInitStateRequired')
+                          .and.returnValue(fakeInitState);
 
     mockCastApi = createMockCastApi();
     // We're using quotes to access window.chrome because the compiler
@@ -59,7 +62,7 @@ describe('CastSender', function() {
     mockSession = null;
 
     sender = new CastSender(fakeAppId, onStatusChanged, onRemoteEvent,
-                            onResumeLocal);
+                            onResumeLocal, onInitStateRequired);
   });
 
   afterEach(function(done) {
@@ -224,6 +227,11 @@ describe('CastSender', function() {
     shaka.test.Util.delay(0.1).then(function() {
       expect(onStatusChanged).toHaveBeenCalled();
       expect(sender.isCasting()).toBe(true);
+      expect(onInitStateRequired).toHaveBeenCalled();
+      expect(mockSession.messages).toContain(jasmine.objectContaining({
+        type: 'init',
+        initState: fakeInitState
+      }));
     }).catch(fail).then(done);
   });
 
