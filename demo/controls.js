@@ -152,6 +152,8 @@ ShakaControls.prototype.init = function(castProxy, onError, notifyCastStatus) {
       'click', this.onCaptionClick_.bind(this));
   this.player_.addEventListener(
       'texttrackvisibility', this.onCaptionStateChange_.bind(this));
+  this.player_.addEventListener(
+      'trackschanged', this.onTracksChange_.bind(this));
   // initialize caption state with a fake event
   this.onCaptionStateChange_();
 
@@ -411,6 +413,15 @@ ShakaControls.prototype.onVolumeInput_ = function() {
 /** @private */
 ShakaControls.prototype.onCaptionClick_ = function() {
   this.player_.setTextTrackVisibility(!this.player_.isTextTrackVisible());
+};
+
+
+/** @private */
+ShakaControls.prototype.onTracksChange_ = function() {
+  var hasText = this.player_.getTracks().some(function(track) {
+    return track.type == 'text';
+  });
+  this.captionButton_.style.display = hasText ? 'inherit' : 'none';
 };
 
 
