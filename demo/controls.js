@@ -477,7 +477,7 @@ ShakaControls.prototype.onFastForwardClick_ = function() {
 /** @private */
 ShakaControls.prototype.onCastClick_ = function() {
   if (this.castProxy_.isCasting()) {
-    this.castProxy_.disconnect();
+    this.castProxy_.suggestDisconnect();
   } else {
     this.castButton_.disabled = true;
     this.castProxy_.cast().then(function() {

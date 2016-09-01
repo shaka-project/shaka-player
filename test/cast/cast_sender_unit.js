@@ -325,8 +325,8 @@ describe('CastSender', function() {
         expect(sender.isCasting()).toBe(true);
         expect(mockSession.stop).not.toHaveBeenCalled();
 
-        sender.disconnect();
-        expect(mockSession.stop).toHaveBeenCalled();
+        sender.showDisconnectDialog();
+        expect(mockCastApi.requestSession).toHaveBeenCalled();
         fakeRemoteDisconnect();
       }).catch(fail).then(done);
       fakeSessionConnection();
@@ -471,27 +471,6 @@ describe('CastSender', function() {
           expect(p.status).toBe('rejected');
           return p.catch(function(error) {
             shaka.test.Util.expectToEqualError(error, originalError);
-          });
-        }).catch(fail).then(done);
-      });
-
-      it('reject when disconnected by the user', function(done) {
-        var p = method(123, 'abc');
-        shaka.test.Util.capturePromiseStatus(p);
-
-        // Wait a tick for the Promise status to be set.
-        shaka.test.Util.delay(0.1).then(function() {
-          expect(p.status).toBe('pending');
-          sender.disconnect();
-
-          // Wait a tick for the Promise status to change.
-          return shaka.test.Util.delay(0.1);
-        }).then(function() {
-          expect(p.status).toBe('rejected');
-          return p.catch(function(error) {
-            shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
-                shaka.util.Error.Category.PLAYER,
-                shaka.util.Error.Code.LOAD_INTERRUPTED));
           });
         }).catch(fail).then(done);
       });
