@@ -311,48 +311,84 @@ describe('TtmlTextParser', function() {
            '</tt>');
       });
 
-  it('supports vertical setting',
-     function() {
-       verifyHelper(
-           [
-             {start: 62.05, end: 3723.2, text: 'Test', vertical: 'lr'}
-           ],
-           '<tt xmlns:tts="ttml#styling">' +
-           '<layout>' +
-           '<region xml:id="subtitleArea" ' +
-           'tts:writingMode="tb" />' +
-           '</layout>' +
-           '<body region="subtitleArea">' +
-           '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
-           '</body>' +
-           '</tt>');
-        verifyHelper(
-           [
-             {start: 62.05, end: 3723.2, text: 'Test', vertical: 'rl'}
-           ],
-           '<tt xmlns:tts="ttml#styling">' +
-           '<layout>' +
-           '<region xml:id="subtitleArea" ' +
-           'tts:writingMode="tbrl" />' +
-           '</layout>' +
-           '<body region="subtitleArea">' +
-           '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
-           '</body>' +
-           '</tt>');
-        verifyHelper(
-           [
-             {start: 62.05, end: 3723.2, text: 'Test', vertical: 'lr'}
-           ],
-           '<tt xmlns:tts="ttml#styling">' +
-           '<layout>' +
-           '<region xml:id="subtitleArea" ' +
-           'tts:writingMode="tblr" />' +
-           '</layout>' +
-           '<body region="subtitleArea">' +
-           '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
-           '</body>' +
-           '</tt>');
-      });
+  it('supports vertical setting', function() {
+    verifyHelper(
+        [
+          {start: 62.05, end: 3723.2, text: 'Test', vertical: 'lr'}
+        ],
+        '<tt xmlns:tts="ttml#styling">' +
+        '<layout>' +
+        '<region xml:id="subtitleArea" ' +
+        'tts:writingMode="tb" />' +
+        '</layout>' +
+        '<body region="subtitleArea">' +
+        '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '</body>' +
+        '</tt>');
+    verifyHelper(
+        [
+          {start: 62.05, end: 3723.2, text: 'Test', vertical: 'rl'}
+        ],
+        '<tt xmlns:tts="ttml#styling">' +
+        '<layout>' +
+        '<region xml:id="subtitleArea" ' +
+        'tts:writingMode="tbrl" />' +
+        '</layout>' +
+        '<body region="subtitleArea">' +
+        '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '</body>' +
+        '</tt>');
+    verifyHelper(
+        [
+          {start: 62.05, end: 3723.2, text: 'Test', vertical: 'lr'}
+        ],
+        '<tt xmlns:tts="ttml#styling">' +
+        '<layout>' +
+        '<region xml:id="subtitleArea" ' +
+        'tts:writingMode="tblr" />' +
+        '</layout>' +
+        '<body region="subtitleArea">' +
+        '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '</body>' +
+        '</tt>');
+  });
+
+  it('disregards empty divs and ps', function() {
+    verifyHelper(
+        [
+          {start: 62.05, end: 3723.2, text: 'Test'}
+        ],
+        '<tt>' +
+        '<body>' +
+        '<div>' +
+        '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '</div>' +
+        '<div></div>' +
+        '</body>' +
+        '</tt>');
+    verifyHelper(
+        [
+          {start: 62.05, end: 3723.2, text: 'Test'}
+        ],
+        '<tt>' +
+        '<body>' +
+        '<div>' +
+        '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '<p></p>' +
+        '</div>' +
+        '</body>' +
+        '</tt>');
+    verifyHelper(
+        [],
+        '<tt>' +
+        '<body>' +
+        '<div>' +
+        '<p></p>' +
+        '</div>' +
+        '<div></div>' +
+        '</body>' +
+        '</tt>');
+  });
 
 
   /**
