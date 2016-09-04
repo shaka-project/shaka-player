@@ -1,3 +1,53 @@
+## 2.0.0 (2016-09-07)
+
+The first full release of v2!
+
+New features:
+  - Improved Chromecast support
+    - Cast from the built-in Chrome dialog as well as the video controls
+    - Use the built-in Chrome dialog to disconnect
+  - Support for in-progress recordings (IPR)
+    - https://github.com/google/shaka-player/issues/477
+  - Can be configured to tolerate text stream failures
+    - https://github.com/google/shaka-player/issues/474
+  - Ignore small gaps in the timeline
+    - https://github.com/google/shaka-player/issues/472
+  - Added EMSG box support
+    - https://github.com/google/shaka-player/issues/259
+  - Reduced test flakiness and improved test speed
+  - Improved VTT parsing
+    - https://github.com/google/shaka-player/issues/469
+  - Improved EME error reporting
+    - https://github.com/google/shaka-player/issues/468
+  - Improved demo app UI for touch screens
+  - Smaller demo app UI (video element above the fold on Nexus 5X)
+
+Bugfixes:
+  - Fixed text-related issues in IE11
+    - https://github.com/google/shaka-player/issues/501
+    - https://github.com/google/shaka-player/issues/502
+  - Fixed a few live edge corner cases
+    - https://github.com/google/shaka-player/issues/490
+    - https://github.com/google/shaka-player/issues/504
+  - Fixed TTML parsing exceptions
+    - https://github.com/google/shaka-player/issues/473
+    - https://github.com/google/shaka-player/issues/506
+  - Fixed text encoding issues with subs
+  - Fixed issues with multi-period eviction
+    - https://github.com/google/shaka-player/pull/483
+  - Defined order of AdaptationSet preference (prefer high quality, low bw)
+    - https://github.com/google/shaka-player/issues/476
+  - Fixed support for manifests with multiple text formats
+  - Fixed support for DASH Representations with multiple Roles
+    - https://github.com/google/shaka-player/issues/500
+  - Fixed CSP compliance for Chrome apps
+    - https://github.com/google/shaka-player/issues/487
+
+Planned features we cut:
+  - Cache-detecting bandwidth estimation
+    - https://github.com/google/shaka-player/issues/324
+
+
 ## 2.0.0-beta3 (2016-07-29)
 
 Restored Features from v1 Missing in v2.0.0-beta2:
