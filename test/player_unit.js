@@ -657,6 +657,9 @@ describe('Player', function() {
           .addStreamSet('text')
             .language('es')
             .addStream(6).bandwidth(100).kind('caption')
+          .addStreamSet('text')
+            .language('en')
+            .addStream(7).bandwidth(100).kind('caption')
         .build();
 
       tracks = [
@@ -709,6 +712,16 @@ describe('Player', function() {
           kind: 'caption',
           width: null,
           height: null
+        },
+        {
+          id: 7,
+          active: false,
+          type: 'text',
+          bandwidth: 100,
+          language: 'en',
+          kind: 'caption',
+          width: null,
+          height: null
         }
       ];
     });
@@ -745,7 +758,7 @@ describe('Player', function() {
       expect(config.abr.enabled).toBe(false);
     });
 
-    it('doesn\'t disables AbrManager if switching text', function() {
+    it('doesn\'t disable AbrManager if switching text', function() {
       var config = player.getConfiguration();
       expect(config.abr.enabled).toBe(true);
 
@@ -791,6 +804,33 @@ describe('Player', function() {
       var stream = period.streamSets[0].streams[1];
       expect(streamingEngine.switch)
           .toHaveBeenCalledWith('audio', stream, undefined);
+    });
+
+    it('switching audio doesn\'t change selected text track', function() {
+      chooseStreams();
+      canSwitch();
+      player.configure({
+        preferredTextLanguage: 'es'
+      });
+
+      expect(tracks[5].type).toBe('text');
+      expect(tracks[5].language).toBe('en');
+      player.selectTrack(tracks[5]);
+      var period = manifest.periods[0];
+      var textStream = period.streamSets[3].streams[0];
+
+      expect(streamingEngine.switch)
+          .toHaveBeenCalledWith('text', textStream, 0);
+
+      streamingEngine.switch.calls.reset();
+
+      var audioStream = period.streamSets[0].streams[1];
+      expect(tracks[1].id).toBe(audioStream.id);
+      player.selectTrack(tracks[1]);
+      expect(streamingEngine.switch)
+          .toHaveBeenCalledWith('text', textStream, 0);
+      expect(streamingEngine.switch)
+          .toHaveBeenCalledWith('audio', audioStream, undefined);
     });
   });
 
