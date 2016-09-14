@@ -289,6 +289,57 @@ describe('VttTextParser', function() {
         'Test');
   });
 
+  it('supports timestamps with one-digit hour at start time', function() {
+    verifyHelper(
+        [
+          {
+            start: 20,
+            end: 40,
+            text: 'Test',
+            align: 'middle',
+            size: 56,
+            vertical: 'lr'
+          }
+        ],
+        'WEBVTT\n\n' +
+        '0:00:20.000 --> 00:00:40.000 align:middle size:56% vertical:lr\n' +
+        'Test');
+  });
+
+  it('supports timestamps with one-digit hour at end time', function() {
+    verifyHelper(
+        [
+          {
+            start: 20,
+            end: 40,
+            text: 'Test',
+            align: 'middle',
+            size: 56,
+            vertical: 'lr'
+          }
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 0:00:40.000 align:middle size:56% vertical:lr\n' +
+        'Test');
+  });
+
+  it('supports timestamps with one-digit hours at both start end time', function() {
+    verifyHelper(
+        [
+          {
+            start: 20,
+            end: 40,
+            text: 'Test',
+            align: 'middle',
+            size: 56,
+            vertical: 'lr'
+          }
+        ],
+        'WEBVTT\n\n' +
+        '0:00:20.000 --> 0:00:40.000 align:middle size:56% vertical:lr\n' +
+        'Test');
+  });
+
   it('rejects invalid settings', function() {
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_SETTINGS,
                 'WEBVTT\n\n00:00.000 --> 00:00.010 vertical:es\nTest');
