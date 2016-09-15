@@ -323,7 +323,7 @@ describe('VttTextParser', function() {
         'Test');
   });
 
-  it('supports timestamps with one-digit hours at both start end time', function() {
+  it('supports stamps with one-digit hours at start & end time', function() {
     verifyHelper(
         [
           {
