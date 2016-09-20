@@ -129,8 +129,8 @@ shakaAssets.ExtraText;
  *
  *   licenseServers: (!Object.<string, string>|undefined),
  *   licenseRequestHeaders: (!Object.<string, string>|undefined),
- *   requestFilter: (shaka.net.NetworkingEngine.RequestFilter|undefined),
- *   responseFilter: (shaka.net.NetworkingEngine.ResponseFilter|undefined),
+ *   requestFilter: (shakaExtern.RequestFilter|undefined),
+ *   responseFilter: (shakaExtern.ResponseFilter|undefined),
  *   drmCallback: (shakaExtern.DashContentProtectionCallback|undefined),
  *   clearKeys: (!Object.<string, string>|undefined),
  *
@@ -164,10 +164,10 @@ shakaAssets.ExtraText;
  *   (optional) A map of key-system to license server.
  * @property {(!Object.<string, string>|undefined)} licenseRequestHeaders
  *   (optional) A map of headers to add to license requests.
- * @property {(shaka.net.NetworkingEngine.RequestFilter|undefined)}
+ * @property {(shakaExtern.RequestFilter|undefined)}
  *     requestFilter
  *   A filter on license requests before they are passed to the server.
- * @property {(shaka.net.NetworkingEngine.ResponseFilter|undefined)}
+ * @property {(shakaExtern.ResponseFilter|undefined)}
  *     responseFilter
  *   A filter on license responses before they are passed to the CDM.
  * @property {(shakaExtern.DashContentProtectionCallback|undefined)} drmCallback
