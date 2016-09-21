@@ -218,8 +218,7 @@ shaka.test.TestScheme.setupPlayer = function(player, name) {
         });
   }
   if (asset.licenseServers) {
-    var config = /** @type {shakaExtern.PlayerConfiguration} */ (
-        {drm: {servers: asset.licenseServers}});
+    var config = {drm: {servers: asset.licenseServers}};
     player.configure(config);
   }
 };

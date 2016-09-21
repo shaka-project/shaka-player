@@ -83,9 +83,7 @@ describe('Player', function() {
     player = new shaka.Player(video, dependencyInjector);
 
     abrManager = new shaka.test.FakeAbrManager();
-    player.configure(
-        /** @type {shakaExtern.PlayerConfiguration} */ (
-            {abr: {manager: abrManager}}));
+    player.configure({abr: {manager: abrManager}});
   });
 
   afterEach(function(done) {

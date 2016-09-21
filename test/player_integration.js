@@ -193,8 +193,7 @@ describe('Player', function() {
           config.manifest.dash.customScheme = asset.drmCallback;
         if (asset.clearKeys)
           config.drm.clearKeys = asset.clearKeys;
-        player.configure(/** @type {shakaExtern.PlayerConfiguration} */(
-            config));
+        player.configure(config);
 
         if (asset.licenseRequestHeaders) {
           player.getNetworkingEngine().registerRequestFilter(
