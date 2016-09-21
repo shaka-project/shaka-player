@@ -54,7 +54,7 @@ def check_lint():
   # Even though this is python, don't import and execute since gjslint expects
   # command-line arguments using argv.  Have to explicitly execute python so
   # it works on Windows.
-  cmd_line = [sys.executable, cmd] + args + get_lint_files()
+  cmd_line = [sys.executable or 'python', cmd] + args + get_lint_files()
   shakaBuildHelpers.print_cmd_line(cmd_line)
   return subprocess.call(cmd_line) == 0
 
