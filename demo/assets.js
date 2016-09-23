@@ -254,7 +254,7 @@ shakaAssets.YouTubeCallback = function(node) {
           videoRobustness: '',
           serverCertificate: null,
           initData: null,
-          defaultKID: null
+          keyIds: []
         });
       }
     }
