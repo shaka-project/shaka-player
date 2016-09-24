@@ -264,6 +264,7 @@ shakaExtern.GetSegmentReferenceFunction;
  *   presentationTimeOffset: (number|undefined),
  *   mimeType: string,
  *   codecs: string,
+ *   frameRate: (number|undefined),
  *   bandwidth: (number|undefined),
  *   width: (number|undefined),
  *   height: (number|undefined),
@@ -315,6 +316,9 @@ shakaExtern.GetSegmentReferenceFunction;
  *   The Stream's codecs, e.g., 'avc1.4d4015' or 'vp9', which must be
  *   compatible with the Stream's MIME type. <br>
  *   See {@link https://tools.ietf.org/html/rfc6381}
+ * @property {(number|undefined)} frameRate
+ *   <i>Video streams only.</i> <br>
+ *   The Stream's framerate in frames per second
  * @property {(number|undefined)} bandwidth
  *   <i>Audio and video streams only.</i> <br>
  *   The stream's required bandwidth in bits per second.

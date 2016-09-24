@@ -290,6 +290,7 @@ shaka.test.ManifestGenerator.prototype.addStream = function(id) {
     presentationTimeOffset: 0,
     mimeType: 'video/mp4',
     codecs: 'avc1.4d401f',
+    frameRate: undefined,
     bandwidth: 100,
     width: undefined,
     height: undefined,
@@ -511,6 +512,17 @@ shaka.test.ManifestGenerator.prototype.encrypted = function(encrypted) {
   return this;
 };
 
+/**
+ * Sets the framerate of the current stream.
+ *
+ * @param {number} frameRate
+ * @return {!shaka.test.ManifestGenerator}
+ */
+shaka.test.ManifestGenerator.prototype.frameRate = function(frameRate) {
+  var stream = this.currentStream_();
+  stream.frameRate = frameRate;
+  return this;
+};
 
 /**
  * Sets the key ID of the current stream.
