@@ -512,6 +512,7 @@ shaka.test.ManifestGenerator.prototype.encrypted = function(encrypted) {
   return this;
 };
 
+
 /**
  * Sets the framerate of the current stream.
  *
@@ -523,6 +524,7 @@ shaka.test.ManifestGenerator.prototype.frameRate = function(frameRate) {
   stream.frameRate = frameRate;
   return this;
 };
+
 
 /**
  * Sets the key ID of the current stream.
