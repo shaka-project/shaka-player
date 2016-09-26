@@ -152,6 +152,8 @@ ShakaControls.prototype.init = function(castProxy, onError, notifyCastStatus) {
       'click', this.onCaptionClick_.bind(this));
   this.player_.addEventListener(
       'texttrackvisibility', this.onCaptionStateChange_.bind(this));
+  this.player_.addEventListener(
+      'trackschanged', this.onTracksChange_.bind(this));
   // initialize caption state with a fake event
   this.onCaptionStateChange_();
 
@@ -169,6 +171,8 @@ ShakaControls.prototype.init = function(castProxy, onError, notifyCastStatus) {
   this.castButton_.addEventListener(
       'click', this.onCastClick_.bind(this));
 
+  this.videoContainer_.addEventListener(
+      'touchstart', this.onContainerTouch_.bind(this));
   this.videoContainer_.addEventListener(
       'click', this.onPlayPauseClick_.bind(this));
 
@@ -269,6 +273,28 @@ ShakaControls.prototype.onMouseStill_ = function() {
   // Revert opacity control to CSS.  Hovering directly over the controls will
   // keep them showing, even in fullscreen mode.
   this.controls_.style.opacity = '';
+};
+
+
+/**
+ * @param {!Event} event
+ * @private
+ */
+ShakaControls.prototype.onContainerTouch_ = function(event) {
+  if (!this.video_.duration) {
+    // Can't play yet.  Ignore.
+    return;
+  }
+
+  if (this.controls_.style.opacity == 1) {
+    // The controls are showing.
+    // Let this event continue and become a click.
+  } else {
+    // The controls are hidden, so show them.
+    this.onMouseMove_();
+    // Stop this event from becoming a click event.
+    event.preventDefault();
+  }
 };
 
 
@@ -391,6 +417,15 @@ ShakaControls.prototype.onCaptionClick_ = function() {
 
 
 /** @private */
+ShakaControls.prototype.onTracksChange_ = function() {
+  var hasText = this.player_.getTracks().some(function(track) {
+    return track.type == 'text';
+  });
+  this.captionButton_.style.display = hasText ? 'inherit' : 'none';
+};
+
+
+/** @private */
 ShakaControls.prototype.onCaptionStateChange_ = function() {
   if (this.player_.isTextTrackVisible()) {
     this.captionButton_.style.color = 'white';
@@ -453,7 +488,7 @@ ShakaControls.prototype.onFastForwardClick_ = function() {
 /** @private */
 ShakaControls.prototype.onCastClick_ = function() {
   if (this.castProxy_.isCasting()) {
-    this.castProxy_.disconnect();
+    this.castProxy_.suggestDisconnect();
   } else {
     this.castButton_.disabled = true;
     this.castProxy_.cast().then(function() {

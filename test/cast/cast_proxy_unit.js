@@ -120,9 +120,9 @@ describe('CastProxy', function() {
 
   describe('disconnect', function() {
     it('delegates directly to the sender', function() {
-      expect(mockSender.disconnect).not.toHaveBeenCalled();
-      proxy.disconnect();
-      expect(mockSender.disconnect).toHaveBeenCalled();
+      expect(mockSender.showDisconnectDialog).not.toHaveBeenCalled();
+      proxy.suggestDisconnect();
+      expect(mockSender.showDisconnectDialog).toHaveBeenCalled();
     });
   });
 
@@ -643,6 +643,7 @@ describe('CastProxy', function() {
    * @param {Function} onCastStatusChanged
    * @param {Function} onRemoteEvent
    * @param {Function} onResumeLocal
+   * @return {!Object}
    */
   function createMockCastSender(
       appId, onCastStatusChanged, onRemoteEvent, onResumeLocal) {
@@ -657,7 +658,7 @@ describe('CastProxy', function() {
       receiverName: jasmine.createSpy('receiverName'),
       hasRemoteProperties: jasmine.createSpy('hasRemoteProperties'),
       setAppData: jasmine.createSpy('setAppData'),
-      disconnect: jasmine.createSpy('disconnect'),
+      showDisconnectDialog: jasmine.createSpy('showDisconnectDialog'),
       cast: jasmine.createSpy('cast'),
       get: jasmine.createSpy('get'),
       set: jasmine.createSpy('set'),

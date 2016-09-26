@@ -163,6 +163,23 @@ describe('MediaSourceEngine', function() {
       expect(mediaSourceEngine.bufferedAheadOf('audio', 6)).toBeCloseTo(4);
       expect(mediaSourceEngine.bufferedAheadOf('audio', 9.9)).toBeCloseTo(0.1);
     });
+
+    it('jumps small gaps in media', function() {
+      audioSourceBuffer.buffered.length = 4;
+      audioSourceBuffer.buffered.start.and.callFake(function(i) {
+        return [1, 3.03, 7, 9.02][i];
+      });
+      audioSourceBuffer.buffered.end.and.callFake(function(i) {
+        return [3, 6, 9, 11][i];
+      });
+
+      expect(mediaSourceEngine.bufferedAheadOf('audio', 3.02))
+                                              .toBeCloseTo(2.98);
+      expect(mediaSourceEngine.bufferedAheadOf('audio', 2)).toBeCloseTo(4);
+      expect(mediaSourceEngine.bufferedAheadOf('audio', 6)).toBeCloseTo(0);
+      expect(mediaSourceEngine.bufferedAheadOf('audio', 6.98))
+                                              .toBeCloseTo(4.02);
+    });
   });
 
   describe('appendBuffer', function() {
@@ -477,7 +494,7 @@ describe('MediaSourceEngine', function() {
     });
 
     it('sets the append window end', function(done) {
-      expect(audioSourceBuffer.appendWindowEnd).toBe(Number.POSITIVE_INFINITY);
+      expect(audioSourceBuffer.appendWindowEnd).toBe(Infinity);
       mediaSourceEngine.setAppendWindowEnd('audio', 10).then(function() {
         // MediaSourceEngine adds a fudge factor to deal with edge cases where
         // the last desired frame in a period could be chopped off.  Expect a
@@ -829,7 +846,7 @@ describe('MediaSourceEngine', function() {
         end: jasmine.createSpy('buffered.end')
       },
       timestampOffset: 0,
-      appendWindowEnd: Number.POSITIVE_INFINITY,
+      appendWindowEnd: Infinity,
       updateend: function() {},
       error: function() {}
     };

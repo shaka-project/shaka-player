@@ -117,6 +117,7 @@ shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
         jasmine.createSpy('getSegmentAvailabilityStart'),
     getSegmentAvailabilityEnd:
         jasmine.createSpy('getSegmentAvailabilityEnd'),
+    getSeekRangeEnd: jasmine.createSpy('getSeekRangeEnd'),
     segmentAvailabilityStart: segmentAvailabilityStart,
     segmentAvailabilityEnd: segmentAvailabilityEnd
   };
@@ -124,7 +125,7 @@ shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
   timeline.getDuration.and.returnValue(presentationDuration);
 
   timeline.isLive.and.callFake(function() {
-    return presentationDuration == Number.POSITIVE_INFINITY;
+    return presentationDuration == Infinity;
   });
 
   timeline.getEarliestStart.and.callFake(function() {
@@ -139,10 +140,14 @@ shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
     return timeline.segmentAvailabilityEnd;
   });
 
+  timeline.getSeekRangeEnd.and.callFake(function() {
+    return timeline.getSegmentAvailabilityEnd();
+  });
+
   timeline.getSegmentAvailabilityDuration.and.callFake(function() {
-    return presentationDuration == Number.POSITIVE_INFINITY ?
+    return presentationDuration == Infinity ?
            timeline.segmentAvailabilityEnd - timeline.segmentAvailabilityStart :
-           Number.POSITIVE_INFINITY;
+           Infinity;
   });
 
   // These methods should not be invoked.

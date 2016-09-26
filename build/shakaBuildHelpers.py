@@ -164,6 +164,10 @@ def get_all_files(dir_path, exp=None):
 
 
 def get_node_binary_path(name):
+  # Windows binaries go by a different name.
+  if is_windows():
+    name += '.cmd'
+
   # Try local modules first.
   base = get_source_base()
   path = os.path.join(base, 'node_modules', '.bin', name)

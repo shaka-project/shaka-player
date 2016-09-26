@@ -275,10 +275,17 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
         }
       }
     });
+
+    // This seems to be necessary.  Otherwise, we end up with a URL like
+    // "http:/base/..." which then fails to load on Safari for some reason.
+    var locationUri = new goog.Uri(location.href);
+    var partialUri = new goog.Uri(data.text.uri);
+    var absoluteUri = locationUri.resolve(partialUri);
+
     gen.addStreamSet('text')
         .addStream(2)
           .mime(data.text.mimeType, data.text.codec)
-          .textStream(data.text.uri);
+          .textStream(absoluteUri.toString());
 
     MANIFESTS[name + suffix] = gen.build();
   }

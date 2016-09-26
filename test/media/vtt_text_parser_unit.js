@@ -60,6 +60,47 @@ describe('VttTextParser', function() {
         'This is a comment block');
   });
 
+  it('handles a blank line at the end of the file', function() {
+    verifyHelper(
+        [
+          {start: 20, end: 40, text: 'Test'}
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        'Test\n\n');
+  });
+
+  it('handles no blank line at the end of the file', function() {
+    verifyHelper(
+        [
+          {start: 20, end: 40, text: 'Test'}
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        'Test\n');
+  });
+
+  it('handles no newline after the final text payload', function() {
+    verifyHelper(
+        [
+          {start: 20, end: 40, text: 'Test'}
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        'Test');
+  });
+
+  it('accounts for offset', function() {
+    verifyHelper(
+        [
+          {start: 27, end: 47, text: 'Test'}
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        'Test',
+        /* offset */ 7);
+  });
+
   it('supports cues with no settings', function() {
     verifyHelper(
         [
@@ -130,7 +171,7 @@ describe('VttTextParser', function() {
                 '00:00:00.000 --> 00:00:00.020\nTest');
   });
 
-  it('invalid time values', function() {
+  it('rejects invalid time values', function() {
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
                 'WEBVTT\n\n00.020    --> 0:00.040\nTest');
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
@@ -175,6 +216,19 @@ describe('VttTextParser', function() {
         'Test2');
   });
 
+  it('supports line setting with optional part', function() {
+    verifyHelper(
+        [
+          {start: 20, end: 40, text: 'Test', line: 10},
+          {start: 40, end: 50, text: 'Test2', line: -1}
+        ] ,
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000 line:10%,start\n' +
+        'Test\n\n' +
+        '00:00:40.000 --> 00:00:50.000 line:-1,center\n' +
+        'Test2');
+  });
+
   it('supports position setting', function() {
     verifyHelper(
         [
@@ -182,6 +236,19 @@ describe('VttTextParser', function() {
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000 position:45%\n' +
+        'Test2');
+  });
+
+  it('supports position setting with optional part', function() {
+    verifyHelper(
+        [
+          {start: 20, end: 40, text: 'Test', position: 45},
+          {start: 20, end: 40, text: 'Test2', position: 45}
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000 position:45%,line-left\n' +
+        'Test\n\n' +
+        '00:00:20.000 --> 00:00:40.000 position:45%,start\n' +
         'Test2');
   });
 
@@ -222,17 +289,58 @@ describe('VttTextParser', function() {
         'Test');
   });
 
-  it('handles a blank line at the end of the file', function() {
+  it('supports timestamps with one-digit hour at start time', function() {
     verifyHelper(
         [
-          {start: 20, end: 40, text: 'Test'}
+          {
+            start: 20,
+            end: 40,
+            text: 'Test',
+            align: 'middle',
+            size: 56,
+            vertical: 'lr'
+          }
         ],
         'WEBVTT\n\n' +
-        '00:00:20.000 --> 00:00:40.000\n' +
-        'Test\n\n');
+        '0:00:20.000 --> 00:00:40.000 align:middle size:56% vertical:lr\n' +
+        'Test');
   });
 
-  it('invalid settings', function() {
+  it('supports timestamps with one-digit hour at end time', function() {
+    verifyHelper(
+        [
+          {
+            start: 20,
+            end: 40,
+            text: 'Test',
+            align: 'middle',
+            size: 56,
+            vertical: 'lr'
+          }
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 0:00:40.000 align:middle size:56% vertical:lr\n' +
+        'Test');
+  });
+
+  it('supports stamps with one-digit hours at start & end time', function() {
+    verifyHelper(
+        [
+          {
+            start: 20,
+            end: 40,
+            text: 'Test',
+            align: 'middle',
+            size: 56,
+            vertical: 'lr'
+          }
+        ],
+        'WEBVTT\n\n' +
+        '0:00:20.000 --> 0:00:40.000 align:middle size:56% vertical:lr\n' +
+        'Test');
+  });
+
+  it('rejects invalid settings', function() {
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_SETTINGS,
                 'WEBVTT\n\n00:00.000 --> 00:00.010 vertical:es\nTest');
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_SETTINGS,
@@ -251,11 +359,16 @@ describe('VttTextParser', function() {
                 'WEBVTT\n\n00:00.000 --> 00:00.010 align:foo\nTest');
   });
 
-  function verifyHelper(cues, string) {
-    var data = shaka.util.StringUtils.toUTF8(string);
-    // two last parameters are only used by mp4 vtt parser,
-    // so passing arbitrary values
-    var result = shaka.media.VttTextParser(data, null, null);
+
+  /**
+   * @param {!Array} cues
+   * @param {string} text
+   * @param {number=} opt_offset
+   */
+  function verifyHelper(cues, text, opt_offset) {
+    var data = shaka.util.StringUtils.toUTF8(text);
+    // Last two parameters are only used by mp4 vtt parser.
+    var result = shaka.media.VttTextParser(data, opt_offset || 0, null, null);
     expect(result).toBeTruthy();
     expect(result.length).toBe(cues.length);
     for (var i = 0; i < cues.length; i++) {
@@ -278,11 +391,15 @@ describe('VttTextParser', function() {
     }
   }
 
-  function errorHelper(code, string) {
+  /**
+   * @param {shaka.util.Error.Code} code
+   * @param {string} text
+   */
+  function errorHelper(code, text) {
     var error = new shaka.util.Error(shaka.util.Error.Category.TEXT, code);
-    var data = shaka.util.StringUtils.toUTF8(string);
+    var data = shaka.util.StringUtils.toUTF8(text);
     try {
-      shaka.media.VttTextParser(data, null, null);
+      shaka.media.VttTextParser(data, 0, null, null);
       fail('Invalid WebVTT file supported');
     } catch (e) {
       shaka.test.Util.expectToEqualError(e, error);

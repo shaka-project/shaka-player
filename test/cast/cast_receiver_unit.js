@@ -58,7 +58,7 @@ describe('CastReceiver', function() {
     // Don't do any more work here if the tests will not end up running.
     if (!isChromecast && !isChrome) return;
 
-    originalCast = window.cast;
+    originalCast = window['cast'];
     originalUserAgent = navigator.userAgent;
 
     // In uncompiled mode, there is a UA check for Chromecast in order to make
@@ -70,17 +70,12 @@ describe('CastReceiver', function() {
                           'userAgent', {value: 'CrKey'});
   });
 
-  afterAll(function() {
-    if (originalUserAgent) {
-      window.cast = originalCast;
-      Object.defineProperty(window['navigator'],
-                            'userAgent', {value: originalUserAgent});
-    }
-  });
-
   beforeEach(function() {
     mockReceiverApi = createMockReceiverApi();
-    window.cast = { receiver: mockReceiverApi };
+    // We're using quotes to access window.cast because the compiler
+    // knows about lots of Cast-specific APIs we aren't mocking.  We
+    // don't need this mock strictly type-checked.
+    window['cast'] = { receiver: mockReceiverApi };
 
     mockReceiverManager = createMockReceiverManager();
     mockMessageBus = createMockMessageBus();
@@ -93,6 +88,14 @@ describe('CastReceiver', function() {
 
   afterEach(function(done) {
     receiver.destroy().catch(fail).then(done);
+  });
+
+  afterAll(function() {
+    if (originalUserAgent) {
+      window['cast'] = originalCast;
+      Object.defineProperty(window['navigator'],
+                            'userAgent', {value: originalUserAgent});
+    }
   });
 
   describe('constructor', function() {
@@ -182,7 +185,7 @@ describe('CastReceiver', function() {
       }).then(function() {
         expect(listener).toHaveBeenCalled();
       }).catch(fail).then(done);
-    }, /* timeout ms */ 8000);
+    });
   });
 
   describe('local events', function() {
@@ -604,7 +607,7 @@ describe('CastReceiver', function() {
       getSystemVolume: function() { return { level: 1, muted: false }; },
       getCastMessageBus: function() { return mockMessageBus; }
     };
-  };
+  }
 
   function createMockMessageBus() {
     var bus = {

@@ -18,6 +18,7 @@
 
 import os
 import subprocess
+import sys
 
 import shakaBuildHelpers
 
@@ -42,7 +43,7 @@ def gen_deps(_):
   deps_writer = os.path.join('third_party', 'closure', 'deps', 'depswriter.py')
 
   try:
-    cmd_line = ['python', deps_writer] + deps_args
+    cmd_line = [sys.executable or 'python', deps_writer] + deps_args
     shakaBuildHelpers.print_cmd_line(cmd_line)
     deps = subprocess.check_output(cmd_line)
     with open(os.path.join(base, 'dist', 'deps.js'), 'w') as f:

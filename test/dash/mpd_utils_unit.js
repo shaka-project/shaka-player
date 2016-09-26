@@ -170,7 +170,7 @@ describe('MpdUtils', function() {
         { start: 10, end: 20 },
         { start: 20, end: 30 }
       ];
-      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
     it('handles null start time', function() {
@@ -184,7 +184,7 @@ describe('MpdUtils', function() {
         { start: 10, end: 20 },
         { start: 20, end: 30 }
       ];
-      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
     it('handles gaps', function() {
@@ -196,7 +196,7 @@ describe('MpdUtils', function() {
         { start: 0, end: 15 },
         { start: 15, end: 25 }
       ];
-      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
     it('handles overlap', function() {
@@ -208,7 +208,7 @@ describe('MpdUtils', function() {
         { start: 0, end: 10 },
         { start: 10, end: 20 }
       ];
-      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
     it('handles repetitions', function() {
@@ -225,7 +225,7 @@ describe('MpdUtils', function() {
         { start: 50, end: 60 },
         { start: 60, end: 70 }
       ];
-      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
     it('handles null repeat', function() {
@@ -239,7 +239,7 @@ describe('MpdUtils', function() {
         { start: 10, end: 20 },
         { start: 20, end: 30 }
       ];
-      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
     it('handles repetitions with gap', function() {
@@ -253,7 +253,7 @@ describe('MpdUtils', function() {
         { start: 20, end: 35 },
         { start: 35, end: 45 }
       ];
-      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
     it('handles negative repetitions', function() {
@@ -269,7 +269,7 @@ describe('MpdUtils', function() {
         { start: 30, end: 40 },
         { start: 40, end: 50 }
       ];
-      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
     it('handles negative repetitions with uneven border', function() {
@@ -286,7 +286,7 @@ describe('MpdUtils', function() {
         { start: 40, end: 45 },
         { start: 45, end: 50 }
       ];
-      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
     it('handles negative repetitions w/ bad next start time', function() {
@@ -298,7 +298,7 @@ describe('MpdUtils', function() {
       var result = [
         { start: 0, end: 10 }
       ];
-      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
     it('handles negative repetitions w/ null next start time', function() {
@@ -310,7 +310,7 @@ describe('MpdUtils', function() {
       var result = [
         { start: 0, end: 10 }
       ];
-      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
     it('handles negative repetitions at end', function() {
@@ -335,7 +335,7 @@ describe('MpdUtils', function() {
       var result = [
         { start: 0, end: 10 }
       ];
-      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
     it('handles negative repetitions at end w/ bad Period length', function() {
@@ -363,7 +363,7 @@ describe('MpdUtils', function() {
         { start: 0, end: 10 },
         { start: 10, end: 20 }
       ];
-      checkTimePoints(timePoints, result, 1, 0, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
     it('adjust start with presentationTimeOffset', function() {
@@ -379,7 +379,7 @@ describe('MpdUtils', function() {
         { start: 20, end: 30 },
         { start: 30, end: 40 }
       ];
-      checkTimePoints(timePoints, result, 1, 10, Number.POSITIVE_INFINITY);
+      checkTimePoints(timePoints, result, 1, 10, Infinity);
     });
     /**
      * Creates a new TimePoint.

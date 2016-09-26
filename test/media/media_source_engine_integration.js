@@ -41,7 +41,6 @@ describe('MediaSourceEngine', function() {
   };
   var presentationDuration = 840;
 
-  var originalTimeout;
   var video;
   var mediaSource;
   var mediaSourceEngine;
@@ -57,12 +56,9 @@ describe('MediaSourceEngine', function() {
 
   beforeAll(function(done) {
     video = /** @type {HTMLVideoElement} */ (document.createElement('video'));
-    video.width = '600';
-    video.height = '400';
+    video.width = 600;
+    video.height = 400;
     document.body.appendChild(video);
-
-    originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 12000;  // ms
 
     Promise.all([
       createStreamGenerator(metadata.video),
@@ -92,7 +88,6 @@ describe('MediaSourceEngine', function() {
 
   afterAll(function() {
     document.body.removeChild(video);
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
   });
 
   function appendInit(type) {

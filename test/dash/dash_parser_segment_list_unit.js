@@ -221,7 +221,7 @@ describe('DashParser.SegmentList', function() {
   describe('inherits', function() {
     it('attributes', function(done) {
       var source = [
-        '<MPD>',
+        '<MPD mediaPresentationDuration="PT200S">',
         '  <Period>',
         '    <SegmentList startNumber="40" />',
         '    <AdaptationSet mimeType="video/webm">',
@@ -250,7 +250,7 @@ describe('DashParser.SegmentList', function() {
 
     it('SegmentTimeline', function(done) {
       var source = [
-        '<MPD>',
+        '<MPD mediaPresentationDuration="PT73S">',
         '  <Period>',
         '    <SegmentList>',
         '      <SegmentTimeline>',
@@ -282,7 +282,7 @@ describe('DashParser.SegmentList', function() {
 
     it('SegmentURL', function(done) {
       var source = [
-        '<MPD>',
+        '<MPD mediaPresentationDuration="PT73S">',
         '  <Period>',
         '    <SegmentList>',
         '      <SegmentURL media="s1.mp4" />',
@@ -316,7 +316,7 @@ describe('DashParser.SegmentList', function() {
   describe('Segment start', function() {
     it('shoud be adjusted with presentationTimeOffset', function(done) {
       var source = [
-        '<MPD>',
+        '<MPD mediaPresentationDuration="PT70S">',
         '  <Period>',
         '    <SegmentList>',
         '      <SegmentURL media="s1.mp4" />',

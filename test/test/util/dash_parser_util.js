@@ -41,13 +41,20 @@ shaka.test.Dash.makeDashParser = function() {
  *
  * @param {shakaExtern.Manifest} manifest
  * @param {!Array.<shaka.media.SegmentReference>} references
+ * @param {number} periodIndex
  */
-shaka.test.Dash.verifySegmentIndex = function(manifest, references) {
+shaka.test.Dash.verifySegmentIndex = function(
+    manifest, references, periodIndex) {
   expect(manifest).toBeTruthy();
-  var stream = manifest.periods[0].streamSets[0].streams[0];
+  var stream = manifest.periods[periodIndex].streamSets[0].streams[0];
   expect(stream).toBeTruthy();
   expect(stream.findSegmentPosition).toBeTruthy();
   expect(stream.getSegmentReference).toBeTruthy();
+
+  if (references.length == 0) {
+    expect(stream.findSegmentPosition(0)).toBe(null);
+    return;
+  }
 
   var positionBeforeFirst =
       stream.findSegmentPosition(references[0].startTime - 1);
@@ -82,9 +89,9 @@ shaka.test.Dash.testSegmentIndex = function(done, manifestText, references) {
       new shaka.test.FakeNetworkingEngine({'dummy://foo': buffer});
   var dashParser = shaka.test.Dash.makeDashParser();
   var filterPeriod = function() {};
-  dashParser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+  dashParser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, fail)
       .then(function(manifest) {
-        shaka.test.Dash.verifySegmentIndex(manifest, references);
+        shaka.test.Dash.verifySegmentIndex(manifest, references, 0);
       })
       .catch(fail)
       .then(done);
@@ -104,7 +111,7 @@ shaka.test.Dash.testFails = function(done, manifestText, expectedError) {
       new shaka.test.FakeNetworkingEngine({'dummy://foo': manifestData});
   var dashParser = shaka.test.Dash.makeDashParser();
   var filterPeriod = function() {};
-  dashParser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+  dashParser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, fail)
       .then(fail)
       .catch(function(error) {
         shaka.test.Util.expectToEqualError(error, expectedError);
@@ -123,15 +130,18 @@ shaka.test.Dash.testFails = function(done, manifestText, expectedError) {
  */
 shaka.test.Dash.makeSimpleManifestText =
     function(lines, opt_duration, opt_start) {
-  var attr = '';
-  if (opt_duration)
-    attr = 'duration="PT' + opt_duration + 'S"';
+  var periodAttr = '';
+  var mpdAttr = 'type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"';
+  if (opt_duration) {
+    periodAttr = 'duration="PT' + opt_duration + 'S"';
+    mpdAttr = 'type="static"';
+  }
   if (opt_start)
-    attr += ' start="PT' + opt_start + 'S"';
+    periodAttr += ' start="PT' + opt_start + 'S"';
 
   var start = [
-    '<MPD>',
-    '  <Period ' + attr + '>',
+    '<MPD ' + mpdAttr + '>',
+    '  <Period ' + periodAttr + '>',
     '    <AdaptationSet mimeType="video/mp4">',
     '      <Representation bandwidth="500">',
     '        <BaseURL>http://example.com</BaseURL>'
@@ -245,14 +255,14 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
      * @param {string} testAttrs
      * @param {number=} opt_dur
      * @param {number=} opt_start
-     * return {string}
+     * @return {string}
      */
     function makeManifestText(timeline, testAttrs, opt_dur, opt_start) {
       var start = '<' + type + ' ' + extraAttrs + ' ' + testAttrs + '>';
       var end = '</' + type + '>';
       var lines = [].concat(start, extraChildren, timeline, end);
       return Dash.makeSimpleManifestText(lines, opt_dur, opt_start);
-    };
+    }
 
     // All tests should have 5 segments and have the relative URIs:
     // s1.mp4  s2.mp4  s3.mp4  s4.mp4  s5.mp4

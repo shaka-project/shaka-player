@@ -32,6 +32,7 @@ describe('CastSender', function() {
   var onStatusChanged;
   var onRemoteEvent;
   var onResumeLocal;
+  var onInitStateRequired;
 
   var mockCastApi;
   var mockSession;
@@ -43,24 +44,25 @@ describe('CastSender', function() {
     CastSender = shaka.cast.CastSender;
     CastUtils = shaka.cast.CastUtils;
 
-    originalChrome = window.chrome;
-  });
-
-  afterAll(function() {
-    window.chrome = originalChrome;
+    originalChrome = window['chrome'];
   });
 
   beforeEach(function() {
     onStatusChanged = jasmine.createSpy('onStatusChanged');
     onRemoteEvent = jasmine.createSpy('onRemoteEvent');
     onResumeLocal = jasmine.createSpy('onResumeLocal');
+    onInitStateRequired = jasmine.createSpy('onInitStateRequired')
+                          .and.returnValue(fakeInitState);
 
     mockCastApi = createMockCastApi();
-    window.chrome = { cast: mockCastApi };
+    // We're using quotes to access window.chrome because the compiler
+    // knows about lots of Chrome-specific APIs we aren't mocking.  We
+    // don't need this mock strictly type-checked.
+    window['chrome'] = { cast: mockCastApi };
     mockSession = null;
 
     sender = new CastSender(fakeAppId, onStatusChanged, onRemoteEvent,
-                            onResumeLocal);
+                            onResumeLocal, onInitStateRequired);
   });
 
   afterEach(function(done) {
@@ -68,10 +70,14 @@ describe('CastSender', function() {
     sender.destroy().catch(fail).then(done);
   });
 
+  afterAll(function() {
+    window['chrome'] = originalChrome;
+  });
+
   describe('init', function() {
     it('installs a callback if the cast API is not available', function() {
       // Remove the mock cast API.
-      delete window.chrome.cast;
+      delete window['chrome'].cast;
       // This shouldn't exist yet.
       expect(window.__onGCastApiAvailable).toBe(undefined);
 
@@ -82,7 +88,7 @@ describe('CastSender', function() {
       expect(onStatusChanged).not.toHaveBeenCalled();
 
       // Restore the mock cast API.
-      window.chrome.cast = mockCastApi;
+      window['chrome'].cast = mockCastApi;
       window.__onGCastApiAvailable(true);
       // Expect the API to be ready and initialized.
       expect(sender.apiReady()).toBe(true);
@@ -221,6 +227,11 @@ describe('CastSender', function() {
     shaka.test.Util.delay(0.1).then(function() {
       expect(onStatusChanged).toHaveBeenCalled();
       expect(sender.isCasting()).toBe(true);
+      expect(onInitStateRequired).toHaveBeenCalled();
+      expect(mockSession.messages).toContain(jasmine.objectContaining({
+        type: 'init',
+        initState: fakeInitState
+      }));
     }).catch(fail).then(done);
   });
 
@@ -314,8 +325,8 @@ describe('CastSender', function() {
         expect(sender.isCasting()).toBe(true);
         expect(mockSession.stop).not.toHaveBeenCalled();
 
-        sender.disconnect();
-        expect(mockSession.stop).toHaveBeenCalled();
+        sender.showDisconnectDialog();
+        expect(mockCastApi.requestSession).toHaveBeenCalled();
         fakeRemoteDisconnect();
       }).catch(fail).then(done);
       fakeSessionConnection();
@@ -460,27 +471,6 @@ describe('CastSender', function() {
           expect(p.status).toBe('rejected');
           return p.catch(function(error) {
             shaka.test.Util.expectToEqualError(error, originalError);
-          });
-        }).catch(fail).then(done);
-      });
-
-      it('reject when disconnected by the user', function(done) {
-        var p = method(123, 'abc');
-        shaka.test.Util.capturePromiseStatus(p);
-
-        // Wait a tick for the Promise status to be set.
-        shaka.test.Util.delay(0.1).then(function() {
-          expect(p.status).toBe('pending');
-          sender.disconnect();
-
-          // Wait a tick for the Promise status to change.
-          return shaka.test.Util.delay(0.1);
-        }).then(function() {
-          expect(p.status).toBe('rejected');
-          return p.catch(function(error) {
-            shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
-                shaka.util.Error.Category.PLAYER,
-                shaka.util.Error.Code.LOAD_INTERRUPTED));
           });
         }).catch(fail).then(done);
       });

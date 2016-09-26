@@ -331,7 +331,8 @@ shakaExtern.ManifestConfiguration;
  *   retryParameters: shakaExtern.RetryParameters,
  *   rebufferingGoal: number,
  *   bufferingGoal: number,
- *   bufferBehind: number
+ *   bufferBehind: number,
+ *   ignoreTextStreamFailures: boolean
  * }}
  *
  * @description
@@ -352,7 +353,9 @@ shakaExtern.ManifestConfiguration;
  *   The maximum number of seconds of content that the StreamingEngine will keep
  *   in buffer behind the playhead when it appends a new media segment.
  *   The StreamingEngine will evict content to meet this limit.
- *
+ * @property {boolean} ignoreTextStreamFailures
+ *   If true, the player will ignore text stream failures and proceed to play
+ *   other streams.
  * @exportDoc
  */
 shakaExtern.StreamingConfiguration;

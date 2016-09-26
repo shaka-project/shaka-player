@@ -50,107 +50,40 @@
     <div id="container">
       <h1>Shaka Player <span id="version"></span></h1>
 
-      <p>This is a demo of Google's Shaka Player, a JavaScript library for
-         adaptive video streaming.</p>
+      <div class="input">
+        <p>This is a demo of Google's Shaka Player, a JavaScript library for
+           adaptive video streaming.</p>
 
-      <p class="borderBelow">Choose an asset and tap <strong>Load</strong>.
-         (On Android, you'll also need to press the play button on the video.)</p>
+        <p>Choose an asset and tap <strong>Load</strong>.
+           (On Android, you'll also need to press the play button on the
+            video.)</p>
 
-      <p class="borderBelow">
-        <a href="../docs/api/index.html">Documentation</a> |
-        <a href="https://github.com/google/shaka-player">Repo</a> |
-        <a href="https://www.npmjs.com/package/shaka-player">NPM</a> |
-        <a href="https://cdnjs.com/libraries/shaka-player">CDNJS</a>
-      </p>
+        <p class="links">
+          <a href="../docs/api/index.html">Documentation</a> |
+          <a href="https://github.com/google/shaka-player">Repo</a> |
+          <a href="https://www.npmjs.com/package/shaka-player">NPM</a> |
+          <a href="https://cdnjs.com/libraries/shaka-player">CDNJS</a>
+        </p>
 
-      <div class="flex">
-        <label for="assetList">Asset:</label>
-        <select id="assetList" class="flex-grow"></select>
+        <div class="flex">
+          <label for="assetList">Asset:</label>
+          <select id="assetList" class="flex-grow"></select>
+        </div>
+        <div id="customAsset">
+          <div class="flex">
+            <label for="manifestInput">Custom manifest:</label>
+            <input id="manifestInput" type="text" class="flex-grow">
+          </div>
+          <div class="flex">
+            <label for="licenseServerInput">Custom license server:</label>
+            <input id="licenseServerInput" type="text" class="flex-grow">
+          </div>
+        </div>
+
+        <div>
+          <button id="loadButton">Load</button>
+        </div>
       </div>
-      <div id="customAsset">
-        <div class="flex">
-          <label for="manifestInput">Custom manifest:</label>
-          <input id="manifestInput" type="text" class="flex-grow">
-        </div>
-        <div class="flex">
-          <label for="licenseServerInput">Custom license server:</label>
-          <input id="licenseServerInput" type="text" class="flex-grow">
-        </div>
-      </div>
-
-      <div>
-        <button id="loadButton">Load</button>
-      </div>
-
-      <details>
-        <summary>Configuration</summary>
-        <div class="flex">
-          <label for="preferredAudioLanguage">Preferred audio language:</label>
-          <input id="preferredAudioLanguage" class="flex-grow" type="text">
-        </div>
-        <div class="flex">
-          <label for="preferredTextLanguage">Preferred text language:</label>
-          <input id="preferredTextLanguage" class="flex-grow" type="text">
-        </div>
-        <div>
-          <label for="showTrickPlay">Show trick play controls:</label>
-          <input id="showTrickPlay" type="checkbox">
-        </div>
-        <div>
-          <label for="enableAdaptation">Enable adaptation:</label>
-          <input id="enableAdaptation" type="checkbox" checked>
-        </div>
-        <div>
-          <label for="logToScreen">Log to the screen:</label>
-          <input id="logToScreen" type="checkbox">
-        </div>
-      </details>
-
-      <details id="offlineSection">
-        <summary>Offline</summary>
-        <button id="storeDelete">Store</button>
-        <div id="progressDiv">
-          <label for="progress">Progress:</label>
-          <span id="progress">0</span>%
-        </div>
-        <div id="offlineNameDiv">
-          <label for="offlineName">Name:</label>
-          <input id="offlineName" class="flex-grow" type="text">
-        </div>
-      </details>
-
-      <details>
-        <summary>Info</summary>
-        <div class="flex">
-          <label for="videoTracks">Video tracks:</label>
-          <select id="videoTracks" class="flex-grow"></select>
-        </div>
-
-        <div class="flex">
-          <label for="audioTracks">Audio tracks:</label>
-          <select id="audioTracks" class="flex-grow"></select>
-        </div>
-
-        <div class="flex">
-          <label for="textTracks">Text tracks:</label>
-          <select id="textTracks" class="flex-grow"></select>
-        </div>
-
-        <div>
-          <label for="videoResDebug">Active resolution:</label>
-          <span id="videoResDebug"></span>
-        </div>
-
-        <div>
-          <label for="bufferedDebug">Buffered:</label>
-          <span id="bufferedDebug"></span>
-        </div>
-      </details>
-
-      <details id="logSection">
-        <summary>Logs</summary>
-        <div id="log"></div>
-      </details>
 
       <div id="errorDisplay">
         <div id="errorDisplayCloseButton">x</div>
@@ -183,6 +116,78 @@
           <button id="fullscreenButton" class="material-icons">fullscreen</button>
         </div></div>
       </div>
+
+      <details id="logSection">
+        <summary>Logs</summary>
+        <div id="log"></div>
+      </details>
+
+      <details class="input">
+        <summary>Configuration</summary>
+        <div class="flex">
+          <label for="preferredAudioLanguage">Preferred audio language:</label>
+          <input id="preferredAudioLanguage" class="flex-grow" type="text">
+        </div>
+        <div class="flex">
+          <label for="preferredTextLanguage">Preferred text language:</label>
+          <input id="preferredTextLanguage" class="flex-grow" type="text">
+        </div>
+        <div>
+          <label for="showTrickPlay">Show trick play controls:</label>
+          <input id="showTrickPlay" type="checkbox">
+        </div>
+        <div>
+          <label for="enableAdaptation">Enable adaptation:</label>
+          <input id="enableAdaptation" type="checkbox" checked>
+        </div>
+        <div>
+          <label for="logToScreen">Log to the screen:</label>
+          <input id="logToScreen" type="checkbox">
+        </div>
+      </details>
+
+      <details class="input">
+        <summary>Info</summary>
+        <div class="flex">
+          <label for="videoTracks">Video tracks:</label>
+          <select id="videoTracks" class="flex-grow"></select>
+        </div>
+
+        <div class="flex">
+          <label for="audioTracks">Audio tracks:</label>
+          <select id="audioTracks" class="flex-grow"></select>
+        </div>
+
+        <div class="flex">
+          <label for="textTracks">Text tracks:</label>
+          <select id="textTracks" class="flex-grow"></select>
+        </div>
+
+        <div>
+          <label for="videoResDebug">Active resolution:</label>
+          <span id="videoResDebug"></span>
+        </div>
+
+        <div>
+          <label for="bufferedDebug">Buffered:</label>
+          <span id="bufferedDebug"></span>
+        </div>
+      </details>
+
+      <details id="offlineSection" class="input">
+        <summary>Offline</summary>
+        <div>
+          <button id="storeDelete">Store</button>
+        </div>
+        <div id="progressDiv">
+          <label for="progress">Progress:</label>
+          <span id="progress">0</span>%
+        </div>
+        <div id="offlineNameDiv">
+          <label for="offlineName">Name:</label>
+          <input id="offlineName" class="flex-grow" type="text">
+        </div>
+      </details>
     </div>
   </body>
 </html>
