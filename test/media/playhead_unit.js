@@ -450,6 +450,132 @@ describe('Playhead', function() {
     expect(onSeek).toHaveBeenCalled();
   });
 
+  describe('enters/leaves buffering state', function() {
+    it('enters buffering state when out of buffered content', function(done) {
+      video.readyState = HTMLMediaElement.HAVE_METADATA;
+
+      video.buffered = {
+        length: 1,
+        start: function(i) {
+          if (i == 0) return 5;
+          throw new Error('Unexpected index');
+        },
+        end: function(i) {
+          if (i == 0) return 10;
+          throw new Error('Unexpected index');
+        }
+      };
+
+      video.duration = 20;
+
+      playhead = new shaka.media.Playhead(
+          video,
+          timeline,
+          10 /* rebufferingGoal */,
+          5 /* startTime */,
+          onBuffering, onSeek);
+
+      videoOnSeeking();
+      expect(video.currentTime).toBe(5);
+      expect(playhead.getTime()).toBe(5);
+
+      video.currentTime = 11;
+
+      onBuffering.and.callFake(function(buffering) {
+        expect(buffering).toEqual(true);
+        done();
+      });
+    });
+
+    it('does not enter buffering state when has buffered content',
+        function(done) {
+          video.readyState = HTMLMediaElement.HAVE_METADATA;
+
+          video.buffered = {
+            length: 1,
+            start: function(i) {
+              if (i == 0) return 5;
+              throw new Error('Unexpected index');
+            },
+            end: function(i) {
+              if (i == 0) return 10;
+              throw new Error('Unexpected index');
+            }
+          };
+
+          video.duration = 20;
+
+         playhead = new shaka.media.Playhead(
+              video,
+              timeline,
+              10 /* rebufferingGoal */,
+              5 /* startTime */,
+              onBuffering, onSeek);
+
+          videoOnSeeking();
+          expect(video.currentTime).toBe(5);
+          expect(playhead.getTime()).toBe(5);
+
+          // wait for the buffer checking event to fire
+          shaka.test.Util.delay(0.5).then(function() {
+            expect(onBuffering).not.toHaveBeenCalled();
+            done();
+          });
+        });
+
+    it('leaves buffering state if content got buffered', function(done) {
+      video.readyState = HTMLMediaElement.HAVE_METADATA;
+
+      video.buffered = {
+        length: 1,
+        start: function(i) {
+          if (i == 0) return 5;
+          throw new Error('Unexpected index');
+        },
+        end: function(i) {
+          if (i == 0) return 10;
+          throw new Error('Unexpected index');
+        }
+      };
+
+      video.duration = 20;
+
+      playhead = new shaka.media.Playhead(
+          video,
+          timeline,
+          10 /* rebufferingGoal */,
+          5 /* startTime */,
+          onBuffering, onSeek);
+
+      videoOnSeeking();
+      expect(video.currentTime).toBe(5);
+      expect(playhead.getTime()).toBe(5);
+
+      video.currentTime = 11;
+
+      onBuffering.and.callFake(function(buffering) {
+        expect(buffering).toEqual(true);
+
+        video.buffered = {
+          length: 1,
+          start: function(i) {
+            if (i == 0) return 10;
+            throw new Error('Unexpected index');
+          },
+          end: function(i) {
+            if (i == 0) return 25;
+            throw new Error('Unexpected index');
+          }
+        };
+
+        onBuffering.and.callFake(function(buffering) {
+          expect(buffering).toEqual(false);
+          done();
+        });
+      });
+    });
+  });
+
   function createMockVideo() {
     return {
       currentTime: 0,

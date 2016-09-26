@@ -407,13 +407,6 @@ describe('StreamingEngine', function() {
         text: [true, false, false, false]
       });
 
-      // During startup each Stream will require buffering, so there should
-      // be at least 3 calls to setBuffering(true).
-      expect(playhead.setBuffering).toHaveBeenCalledWith(true);
-      expect(playhead.setBuffering).not.toHaveBeenCalledWith(false);
-      expect(playhead.setBuffering.calls.count()).toBeGreaterThan(2);
-      playhead.setBuffering.calls.reset();
-
       setupFakeGetTime(0);
     });
 
@@ -428,11 +421,6 @@ describe('StreamingEngine', function() {
       // For second Period.
       onChooseStreams.and.callFake(function(period) {
         expect(period).toBe(manifest.periods[1]);
-
-        // If we need to buffer the second Period then we must have reached our
-        // buffering goal.
-        expect(playhead.setBuffering).toHaveBeenCalledWith(false);
-        playhead.setBuffering.calls.reset();
 
         // Verify buffers.
         expect(mediaSourceEngine.initSegments).toEqual({
@@ -656,18 +644,12 @@ describe('StreamingEngine', function() {
 
     playhead.getTime.and.returnValue(0);
 
-    onStartupComplete.and.callFake(function() {
-      expect(playhead.setBuffering).toHaveBeenCalledWith(true);
-      expect(playhead.setBuffering).not.toHaveBeenCalledWith(false);
-    });
-
     // Here we go!
     onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
     streamingEngine.init();
 
     runTest();
     expect(onStartupComplete).toHaveBeenCalled();
-    expect(playhead.setBuffering).toHaveBeenCalledWith(false);
   });
 
   describe('handles seeks (VOD)', function() {
