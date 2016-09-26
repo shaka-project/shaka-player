@@ -1,4 +1,4 @@
-# Debugging the Uncompiled Library
+# Debugging
 
 #### Create an error
 
@@ -6,45 +6,33 @@ Let's say that we have some kind of error, and we want to debug it.
 To simulate this, we'll start with the code from {@tutorial basic-usage}
 and make a bad change.
 
-First, let's make `manifestUri` blank.
+First, let's change `manifestUri` by removing the last letter.
 
 ```js
-var manifestUri = '';
+var manifestUri = '//storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mp';
 ```
 
-This causes an error in the console that says "Error code 4000".  What now?
+Now reload the page.  This causes an error in the JS console that says "Error
+code 1001".
 
 
-#### Use the JS console
+#### Looking up error codes
 
-Open the JavaScript console and look at the shaka.util.Error object we logged.
-It has `category: 4`, `code: 4000`, and `data: [""]`.  To find out what that
-means, let's open lib/util/error.js and search for the error code:
+Look at the Error we just logged.  It has `category: 1`, `code: 1001`.  To find
+out what that means, check the docs for {@link shaka.util.Error}.  There we find
+that `1001` means `BAD_HTTP_STATUS`:
 
-```js
-  /**
-   * The Player was unable to guess the manifest type based on file extension
-   * or MIME type.  To fix, try one of the following:
-   * <br><ul>
-   *   <li>Rename the manifest so that the URI ends in a well-known extension.
-   *   <li>Configure the server to send a recognizable Content-Type header.
-   *   <li>Configure the server to accept a HEAD request for the manifest.
-   * </ul>
-   * <br> error.data[0] is the manifest URI.
-   */
-  'UNABLE_TO_GUESS_MANIFEST_TYPE': 4000,
-```
+> An HTTP network request returned an HTTP status that indicated a failure.
+> error.data[0] is the URI.
+> ...
 
-So the player could not determine what type of manifest that is, and `data[0]`
-is the manifest URI.  Looking at `data[0]`, we see a blank string, which is
-what we told the player to load.
-
-But it's still not clear *why* that error code is being sent.  To find out more,
-we should look at the logs.  Logging is turned off during compilation, so we
-need to load the uncompiled library.
+So some HTTP request failed, and we can see the failed URI in `data[0]`.
 
 
 #### Loading the uncompiled library
+
+The compiled library has no usable stack traces and no logging.  So to get more
+information, we need to switch to the uncompiled library.
 
 Instead of the single-file compiled library, we need to load three scripts in
 our HTML file:
@@ -59,7 +47,7 @@ our HTML file:
    files in turn load their internal dependencies.
 
 Once we're using the uncompiled library, we will be able to see detailed logs
-and line numbers for errors.  It is difficult to debug without this.
+and line numbers for errors.
 
 ```html
   <head>
@@ -78,39 +66,65 @@ and line numbers for errors.  It is difficult to debug without this.
 Reload the page and look in the JavaScript console.  Now we see:
 
 ```js
-Unable to guess manifest type by file extension or by MIME type.
-    undefined text/html    player.js:297
+Failed to load resource: the server responded with a status of 404 (Not Found)
+  http://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mp
 
-Error {category: 4, code: 4000, data: Array[1],
-    message: "Shaka Error MANIFEST.UNABLE_TO_GUESS_MANIFEST_TYPE ()",
-    stack: "Error: Shaka Error…   at http://localhost/shaka/lib/player.js:300:35"}
+Unable to find byte-order-mark, making an educated guess.  string_utils.js:130
+
+HTTP error text:  http_plugin.js:67
+
+Failed to load resource: the server responded with a status of 404 (Not Found)
+  http://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mp
+
+Unable to find byte-order-mark, making an educated guess.  string_utils.js:130
+
+HTTP error text:  http_plugin.js:67
+
+HEAD request to guess manifest type failed! shaka.util.Error  manifest_parser.js:179
+
+load() failed: shaka.util.Error  player.js:448
+
+Error code 1001 object shaka.util.Error  myapp.js:55
 ```
 
-So much more information!  The uncompiled library includes a log from Player
-(player.js, line 297) right before the error was dispatched, and the error
-includes a message that gives the full human-readable name of the error:
-`MANIFEST.UNABLE_TO_GUESS_MANIFEST_TYPE`.  The `MANIFEST` part is the textual
-name for category: 4, and `UNABLE_TO_GUESS_MANIFEST_TYPE` is the textual name
-for code: 4000.  (A full list can be found in the docs for
-{@link shaka.util.Error}).
+So much more information!  We have several logs from the library now.  We can
+see the player tried to use a HEAD request to guess the manifest type, but that
+failed, which caused load() to fail.
 
-There's also a `stack` field showing the context in which it was generated:
 
+We can also expand the Error object and see a human-readable message and a stack
+trace:
+
+```js
+shaka.util.Error
+  category: 1
+  code: 1001
+  data: Array[3]
+    0: "http://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mp"
+    1: 404
+    2: ""
+    length: 3
+  message:
+    "Shaka Error NETWORK.BAD_HTTP_STATUS (...)"
+  stack: "Error: Shaka Error NETWORK.BAD_HTTP_STATUS (http://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mp,404,)
+    at new shaka.util.Error (http://horcrux.kir.corp.google.com/shaka/lib/util/error.js:77:13)
+    at XMLHttpRequest.xhr.onload (http://horcrux.kir.corp.google.com/shaka/lib/net/http_plugin.js:68:16)"
 ```
-Error: Shaka Error MANIFEST.UNABLE_TO_GUESS_MANIFEST_TYPE ()
-  at new shaka.util.Error (http://localhost/shaka/lib/util/error.js:77:13)
-  at http://localhost/shaka/lib/player.js:300:35
-```
 
-So now we know player.js line 300 is the source of the error.
+With the information from the uncompiled library, we have the error name as well
+as the code.  So we could avoid looking up the number in the documentation.  The
+stack trace gives us clues about where the error was generated, so we can look
+more closely at the source code if we need to.
 
 
 #### Setting the log level
 
 Sometimes the error and stack trace isn't enough.  Sometimes you need to see a
-long sequence of events leading up to an error.  For this, you want to set the
-log level.  The log level lets you control what logs are shown by the uncompiled
-library.  To set the log level:
+long sequence of events leading up to an error.  You may also be asked to attach
+logs as part of a bug report to help the Shaka Player team understand your bug.
+
+For this, you want to set the log level.  The log level lets you control what
+logs are shown by the uncompiled library.  To set the log level:
 
 ```js
 // Debug logs, when the default of INFO isn't enough:
@@ -124,19 +138,6 @@ shaka.log.setLevel(shaka.log.Level.V2);
 ```
 
 Please note that this method is not available from the compiled library.
-
-
-#### Okay, but why *that* error?
-
-To keep the API simple, Shaka tries to guess what type of manifest you want to
-load.  It does this first based on extension, and if that fails, it makes a HEAD
-request and checks the MIME type.
-
-A request for "" is interpreted as a relative URL.  What we actually requested
-was the index page for the folder the HTML is in.
-
-Since the file extension of "" was `undefined`, and the MIME type was
-`text/html`, neither of those matched a registered manifest parser.
 
 
 #### Continue the Tutorials
