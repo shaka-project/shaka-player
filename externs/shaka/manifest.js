@@ -136,7 +136,8 @@ shakaExtern.InitDataOverride;
  *   audioRobustness: string,
  *   videoRobustness: string,
  *   serverCertificate: Uint8Array,
- *   initData: Array.<!shakaExtern.InitDataOverride>
+ *   initData: Array.<!shakaExtern.InitDataOverride>,
+ *   keyIds: Array.<string>
  * }}
  *
  * @description
@@ -174,7 +175,9 @@ shakaExtern.InitDataOverride;
  *   <i>Defaults to [], e.g., no override.</i> <br>
  *   A list of initialization data which override any initialization data found
  *   in the content.  See also shakaExtern.InitDataOverride.
- *
+ * @property {Array.<string>} keyIds
+ *   <i>Defaults to []</i> <br>
+ *   If not empty, contains the default key IDs for this key system.
  * @exportDoc
  */
 shakaExtern.DrmInfo;

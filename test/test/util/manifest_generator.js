@@ -166,7 +166,8 @@ shaka.test.ManifestGenerator.prototype.addDrmInfo = function(keySystem) {
     audioRobustness: '',
     videoRobustness: '',
     serverCertificate: null,
-    initData: null
+    initData: null,
+    keyIds: []
   });
   return this;
 };
