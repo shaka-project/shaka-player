@@ -1440,6 +1440,9 @@ describe('DrmEngine', function() {
           fakeRequestMediaKeySystemAccess.bind(null, ['drm.abc']));
       // Both audio and video with the same key system now:
       manifest.periods[0].streamSets[1].drmInfos[0].keySystem = 'drm.abc';
+      // Key IDs in manifest
+      manifest.periods[0].streamSets[1].drmInfos[0].keyIds[0] =
+          'deadbeefdeadbeefdeadbeefdeadbeef';
 
       config.advanced['drm.abc'] = {
         audioRobustness: 'good',
@@ -1460,7 +1463,8 @@ describe('DrmEngine', function() {
           audioRobustness: 'good',
           videoRobustness: 'really_really_ridiculously_good',
           serverCertificate: undefined,
-          initData: []
+          initData: [],
+          keyIds: ['deadbeefdeadbeefdeadbeefdeadbeef']
         });
       }).catch(fail).then(done);
     });
