@@ -263,9 +263,8 @@ describe('SimpleAbrManager', function() {
     // called to upgrade.
     abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
 
-    // The second parameter is the number of seconds to leave in buffer.
     expect(switchCallback).toHaveBeenCalledWith(
-        jasmine.any(Object), jasmine.any(Number));
+        jasmine.any(Object), shaka.Player.ClearMethod.MOST);
   });
 
   it('does not clear ahead on downgrade', function() {
@@ -293,6 +292,6 @@ describe('SimpleAbrManager', function() {
     // The second parameter is undefined to indicate that the buffer should
     // not be cleared
     expect(switchCallback).toHaveBeenCalledWith(
-        jasmine.any(Object), undefined);
+        jasmine.any(Object), shaka.Player.ClearMethod.NONE);
   });
 });

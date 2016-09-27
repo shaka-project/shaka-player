@@ -131,7 +131,7 @@ shakaDemo.onTrackSelected_ = function(event) {
   var track = option.track;
   var player = shakaDemo.player_;
 
-  player.selectTrack(track, /* clearBuffer */ true);
+  player.selectTrack(track, shaka.Player.ClearMethod.ALL);
 
   // Adaptation might have been changed by calling selectTrack().
   // Update the adaptation checkbox.

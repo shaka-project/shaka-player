@@ -30,16 +30,20 @@ shakaExtern.AbrManager = function() {};
 
 
 /**
- * @typedef {function(!Object.<string, !shakaExtern.Stream>, number=)}
- *   A callback which implementations call to switch streams.
+ * A callback which implementations call to switch streams.
  *
- *   The first argument is a map of content types to chosen streams.
+ * The first argument is a map of content types to chosen streams.
  *
- *   The second argument is an optional number of seconds of content to leave in
- *   the buffer ahead of the playhead.  Anything beyond that will be cleared.
- *   This is used to make a resolution change take effect sooner, at the cost of
- *   wasting previously downloaded segments.  If undefined, nothing will be
- *   cleared.
+ * The second argument is an optional clear method as defined by the player.
+ * (Clear none, clear all, leave one segment, etc.)
+ *
+ * @typedef {function(
+ *     !Object.<string, !shakaExtern.Stream>,
+ *     shaka.Player.ClearMethod=
+ * )}
+ *
+ * @see {shaka.Player.ClearMethod}
+ * @exportDoc
  */
 shakaExtern.AbrManager.SwitchCallback;
 
