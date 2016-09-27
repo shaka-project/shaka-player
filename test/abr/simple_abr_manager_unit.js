@@ -16,7 +16,6 @@
  */
 
 describe('SimpleAbrManager', function() {
-  var startupInterval;
   var switchCallback;
   var abrManager;
   var audioStreamSet;
@@ -24,7 +23,6 @@ describe('SimpleAbrManager', function() {
   var streamSetsByType;
 
   beforeAll(function() {
-    startupInterval = shaka.abr.SimpleAbrManager.STARTUP_INTERVAL_MS / 1000.0;
     jasmine.clock().install();
     jasmine.clock().mockDate();
     // This polyfill is required for fakeEventLoop.
@@ -137,9 +135,6 @@ describe('SimpleAbrManager', function() {
 
       abrManager.enable();
 
-      // Move outside the startup interval.
-      shaka.test.Util.fakeEventLoop(startupInterval + 1);
-
       // Make another call to segmentDownloaded() so switchCallback() is
       // called.
       abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
@@ -159,43 +154,11 @@ describe('SimpleAbrManager', function() {
 
     abrManager.chooseStreams(streamSetsByType);
 
-    abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
-    abrManager.segmentDownloaded(2000, 3000, bytesPerSecond);
-
     // Don't enable AbrManager.
-
-    // Move outside the startup interval.
-    shaka.test.Util.fakeEventLoop(startupInterval + 1);
-    abrManager.segmentDownloaded(4000, 5000, bytesPerSecond);
-    expect(switchCallback).not.toHaveBeenCalled();
-  });
-
-  it('does not call switchCallback() until startup', function() {
-    var audioBandwidth = 5e5;
-    var videoBandwidth = 2e6;
-    var bytesPerSecond = 1.1 * (audioBandwidth + videoBandwidth) / 8.0;
-
-    abrManager.chooseStreams(streamSetsByType);
-
     abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
     abrManager.segmentDownloaded(2000, 3000, bytesPerSecond);
-
-    abrManager.enable();
-
-    // Stay inside startup interval
-    shaka.test.Util.fakeEventLoop(startupInterval - 2);
     abrManager.segmentDownloaded(4000, 5000, bytesPerSecond);
     expect(switchCallback).not.toHaveBeenCalled();
-
-    // Move outside startup interval.
-    shaka.test.Util.fakeEventLoop(3);
-    abrManager.segmentDownloaded(6000, 7000, bytesPerSecond);
-
-    expect(switchCallback).toHaveBeenCalled();
-    expect(switchCallback.calls.argsFor(0)[0]).toEqual({
-      'audio': jasmine.objectContaining({bandwidth: audioBandwidth}),
-      'video': jasmine.objectContaining({bandwidth: videoBandwidth})
-    });
   });
 
   it('does not call switchCallback() in switch interval', function() {
@@ -210,10 +173,7 @@ describe('SimpleAbrManager', function() {
 
     abrManager.enable();
 
-    // Move outside the startup interval.
-    shaka.test.Util.fakeEventLoop(startupInterval + 1);
     abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
-
     expect(switchCallback).toHaveBeenCalled();
     switchCallback.calls.reset();
 
@@ -257,8 +217,6 @@ describe('SimpleAbrManager', function() {
 
     abrManager.enable();
 
-    // Move outside the startup interval.
-    shaka.test.Util.fakeEventLoop(startupInterval + 1);
     // Make another call to segmentDownloaded(). switchCallback() will be
     // called to upgrade.
     abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
@@ -284,8 +242,6 @@ describe('SimpleAbrManager', function() {
 
     abrManager.enable();
 
-    // Move outside the startup interval.
-    shaka.test.Util.fakeEventLoop(startupInterval + 1);
     // Make another call to segmentDownloaded(). switchCallback() will be
     // called to upgrade.
     abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
