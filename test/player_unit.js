@@ -653,6 +653,7 @@ describe('Player', function() {
             .addStream(2).bandwidth(100)
           .addStreamSet('video')
             .addStream(4).bandwidth(100).size(100, 200)
+            .frameRate(1000000 / 42000)
             .addStream(5).bandwidth(200).size(200, 400).frameRate(24)
           .addStreamSet('text')
             .language('es')
@@ -696,7 +697,7 @@ describe('Player', function() {
           kind: null,
           width: 100,
           height: 200,
-          frameRate: null,
+          frameRate: 23.80952380952380952380,
           codecs: 'avc1.4d401f'
         },
         {

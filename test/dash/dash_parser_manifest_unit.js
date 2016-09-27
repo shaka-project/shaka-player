@@ -107,7 +107,7 @@ describe('DashParser.Manifest', function() {
         ],
         [
           '    <AdaptationSet contentType="video" mimeType="video/mp4"',
-          '        codecs="avc1.4d401f" lang="en">',
+          '        codecs="avc1.4d401f" frameRate="1000000/42000" lang="en">',
           '      <Representation bandwidth="100" width="768" height="576" />',
           '      <Representation bandwidth="50" width="576" height="432" />',
           '    </AdaptationSet>',
@@ -136,6 +136,7 @@ describe('DashParser.Manifest', function() {
                 .presentationTimeOffset(0)
                 .mime('video/mp4', 'avc1.4d401f')
                 .bandwidth(100)
+                .frameRate(23.80952380952380952380)
                 .size(768, 576)
               .addStream(jasmine.any(Number))
                 .anySegmentFunctions()
@@ -143,6 +144,7 @@ describe('DashParser.Manifest', function() {
                 .presentationTimeOffset(0)
                 .mime('video/mp4', 'avc1.4d401f')
                 .bandwidth(50)
+                .frameRate(23.80952380952380952380)
                 .size(576, 432)
             .addStreamSet('text')
               .language('es')
