@@ -673,7 +673,7 @@ describe('Player', function() {
           kind: null,
           width: null,
           height: null,
-          frameRate: null,
+          frameRate: undefined,
           codecs: 'avc1.4d401f'
         },
         {
@@ -685,7 +685,7 @@ describe('Player', function() {
           kind: null,
           width: null,
           height: null,
-          frameRate: null,
+          frameRate: undefined,
           codecs: 'avc1.4d401f'
         },
         {
@@ -721,7 +721,7 @@ describe('Player', function() {
           kind: 'caption',
           width: null,
           height: null,
-          frameRate: null,
+          frameRate: undefined,
           codecs: 'avc1.4d401f'
         },
         {
@@ -733,7 +733,7 @@ describe('Player', function() {
           kind: 'caption',
           width: null,
           height: null,
-          frameRate: null,
+          frameRate: undefined,
           codecs: 'avc1.4d401f'
         }
       ];

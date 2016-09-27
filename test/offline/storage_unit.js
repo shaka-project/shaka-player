@@ -73,7 +73,7 @@ describe('Storage', function() {
             language: 'en',
             width: null,
             height: null,
-            frameRate: null,
+            frameRate: undefined,
             codecs: 'vorbis'
           }
         ]
@@ -117,7 +117,7 @@ describe('Storage', function() {
         kind: null,
         width: null,
         height: null,
-        frameRate: null,
+        frameRate: undefined,
         codecs: 'vorbis'
       }
     ];
