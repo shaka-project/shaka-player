@@ -789,7 +789,7 @@ describe('Player', function() {
       expect(tracks[1].id).toBe(stream.id);
       player.selectTrack(tracks[1]);
       expect(streamingEngine.switch)
-          .toHaveBeenCalledWith('audio', stream, undefined);
+          .toHaveBeenCalledWith('audio', stream, false);
     });
 
     it('still switches streams if called during startup', function() {
@@ -814,7 +814,7 @@ describe('Player', function() {
       var period = manifest.periods[0];
       var stream = period.streamSets[0].streams[1];
       expect(streamingEngine.switch)
-          .toHaveBeenCalledWith('audio', stream, undefined);
+          .toHaveBeenCalledWith('audio', stream, false);
     });
 
     it('switching audio doesn\'t change selected text track', function() {
@@ -831,7 +831,7 @@ describe('Player', function() {
       var textStream = period.streamSets[3].streams[0];
 
       expect(streamingEngine.switch)
-          .toHaveBeenCalledWith('text', textStream, 0);
+          .toHaveBeenCalledWith('text', textStream, true);
 
       streamingEngine.switch.calls.reset();
 
@@ -839,9 +839,9 @@ describe('Player', function() {
       expect(tracks[1].id).toBe(audioStream.id);
       player.selectTrack(tracks[1]);
       expect(streamingEngine.switch)
-          .toHaveBeenCalledWith('text', textStream, 0);
+          .toHaveBeenCalledWith('text', textStream, true);
       expect(streamingEngine.switch)
-          .toHaveBeenCalledWith('audio', audioStream, undefined);
+          .toHaveBeenCalledWith('audio', audioStream, false);
     });
   });
 
