@@ -132,10 +132,9 @@ shakaExtern.Stats;
  * @property {?number} height
  *   (only for video tracks) The height of the track in pixels.
  * @property {?number} frameRate
- *   (only for video tracks) The video framerate provided in the manifest.
+ *   The video framerate provided in the manifest, if present.
  * @property {?string} codecs
- *   (only for audio and video tracks) The audio/video codecs string provided
- *   in the manifest.
+ *   The audio/video codecs string provided in the manifest, if present.
  * @exportDoc
  */
 shakaExtern.Track;
