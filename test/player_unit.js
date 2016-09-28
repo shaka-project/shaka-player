@@ -697,7 +697,7 @@ describe('Player', function() {
           kind: null,
           width: 100,
           height: 200,
-          frameRate: 23.80952380952380952380,
+          frameRate: 1000000 / 42000,
           codecs: 'avc1.4d401f'
         },
         {
