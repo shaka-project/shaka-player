@@ -136,6 +136,7 @@ describe('DashParser.Manifest', function() {
                 .presentationTimeOffset(0)
                 .mime('video/mp4', 'avc1.4d401f')
                 .bandwidth(100)
+                // TODO: get Jasmine to match with less precision here
                 .frameRate(23.80952380952380952380)
                 .size(768, 576)
               .addStream(jasmine.any(Number))
