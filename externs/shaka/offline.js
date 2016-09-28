@@ -135,6 +135,7 @@ shakaExtern.PeriodDB;
  *   contentType: string,
  *   mimeType: string,
  *   codecs: string,
+ *   frameRate: (number|undefined),
  *   kind: (string|undefined),
  *   language: string,
  *   width: ?number,
@@ -157,6 +158,8 @@ shakaExtern.PeriodDB;
  *   The MIME type of the stream.
  * @property {string} codecs
  *   The codecs of the stream.
+ * @property {(number|undefined)} frameRate
+ *   The Stream's framerate in frames per second
  * @property {(string|undefined)} kind
  *   The kind of text stream; undefined for audio/video.
  * @property {string} language
