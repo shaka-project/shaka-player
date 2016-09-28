@@ -100,7 +100,9 @@ shakaExtern.Stats;
  *   language: string,
  *   kind: ?string,
  *   width: ?number,
- *   height: ?number
+ *   height: ?number,
+ *   frameRate: ?number,
+ *   codecs: ?string
  * }}
  *
  * @description
@@ -129,6 +131,10 @@ shakaExtern.Stats;
  *   (only for video tracks) The width of the track in pixels.
  * @property {?number} height
  *   (only for video tracks) The height of the track in pixels.
+ * @property {?number} frameRate
+ *   The video framerate provided in the manifest, if present.
+ * @property {?string} codecs
+ *   The audio/video codecs string provided in the manifest, if present.
  * @exportDoc
  */
 shakaExtern.Track;
