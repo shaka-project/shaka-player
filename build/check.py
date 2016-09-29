@@ -46,7 +46,7 @@ def check_lint():
 
   jsdoc3_tags = ','.join([
       'static', 'summary', 'namespace', 'event', 'description', 'property',
-      'fires', 'listens', 'example', 'exportDoc'])
+      'fires', 'listens', 'example', 'exportDoc', 'tutorial'])
   args = ['--nobeep', '--custom_jsdoc_tags', jsdoc3_tags, '--strict']
   base = shakaBuildHelpers.get_source_base()
   cmd = os.path.join(base, 'third_party', 'gjslint', 'gjslint')
