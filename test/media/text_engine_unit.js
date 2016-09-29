@@ -97,6 +97,12 @@ describe('TextEngine', function() {
         expect(mockTrack.addCue).toHaveBeenCalledWith(5);
       }).catch(fail).then(done);
     });
+
+    it('does not throw if called right before destroy', function(done) {
+      mockParser.and.returnValue([1, 2, 3]);
+      textEngine.appendBuffer(dummyData, 0, 3).catch(fail).then(done);
+      textEngine.destroy();
+    });
   });
 
   describe('remove', function() {
@@ -146,6 +152,11 @@ describe('TextEngine', function() {
       textEngine.remove(0, 1).then(function() {
         expect(mockTrack.removeCue).not.toHaveBeenCalled();
       }).catch(fail).then(done);
+    });
+
+    it('does not throw if called right before destroy', function(done) {
+      textEngine.remove(0, 1).catch(fail).then(done);
+      textEngine.destroy();
     });
   });
 
