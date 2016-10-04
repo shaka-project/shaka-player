@@ -269,6 +269,14 @@
   display: none;
 }
 
+/* hide volume and mute buttons on mobile-sized screens */
+@media screen and (max-width: 700px) {
+  #volumeBar, #muteButton {
+    display: none;
+  }
+}
+
+
 /*
 The SVG/CSS buffering spinner is based on http://codepen.io/jczimm/pen/vEBpoL
 Some local modifications have been made.
