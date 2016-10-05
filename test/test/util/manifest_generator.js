@@ -57,6 +57,18 @@ shaka.test.ManifestGenerator.prototype.build = function() {
 
 
 /**
+ * Sets a specified presentation timeline.
+ *
+ * @param {!shaka.media.PresentationTimeline} timeline
+ * @return {!shaka.test.ManifestGenerator}
+ */
+shaka.test.ManifestGenerator.prototype.setTimeline = function(timeline) {
+  this.manifest_.presentationTimeline = timeline;
+  return this;
+};
+
+
+/**
  * Sets the duration of the presentation timeline.
  *
  * @param {number} duration

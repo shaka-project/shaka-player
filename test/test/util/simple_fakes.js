@@ -213,13 +213,15 @@ shaka.test.FakeManifestParser.prototype.configure = function() {};
 
 /**
  * Creates a fake video element.
+ * @param {number=} opt_currentTime
  * @return {!HTMLVideoElement}
  * @suppress {invalidCasts}
  */
-function createMockVideo() {
+function createMockVideo(opt_currentTime) {
   var video = {
     src: '',
     textTracks: [],
+    currentTime: opt_currentTime || 0,
     addTextTrack: jasmine.createSpy('addTextTrack'),
     addEventListener: jasmine.createSpy('addEventListener'),
     removeEventListener: jasmine.createSpy('removeEventListener'),

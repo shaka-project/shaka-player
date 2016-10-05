@@ -79,7 +79,7 @@ describe('Player', function() {
       };
     }
 
-    video = createMockVideo();
+    video = createMockVideo(20);
     player = new shaka.Player(video, dependencyInjector);
 
     abrManager = new shaka.test.FakeAbrManager();
@@ -1316,6 +1316,26 @@ describe('Player', function() {
     function onKeyStatus(keyStatusMap) {
       player.onKeyStatus_(keyStatusMap);
     }
+  });
+
+  describe('getPlayheadTimeAsDate()', function() {
+    beforeEach(function(done) {
+      var timeline = new shaka.media.PresentationTimeline(300, 0);
+      timeline.setStatic(false);
+      manifest = new shaka.test.ManifestGenerator()
+                      .setTimeline(timeline)
+                      .addPeriod(0)
+                      .build();
+      goog.asserts.assert(manifest, 'manifest must be non-null');
+      var parser = new shaka.test.FakeManifestParser(manifest);
+      var factory = function() { return parser; };
+      player.load('', 0, factory).catch(fail).then(done);
+    });
+
+    it('gets current wall clock time in UTC', function() {
+      var liveTimeUtc = player.getPlayheadTimeAsDate();
+      expect(liveTimeUtc).toEqual(new Date(320000));
+    });
   });
 
   /**
