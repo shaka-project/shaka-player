@@ -17,6 +17,7 @@
 
 describe('VttTextParser', function() {
   var mockCue = false;
+  var logWarningSpy;
 
   beforeAll(function() {
     // Mock out VTTCue if not supported.  These tests don't actually need
@@ -29,6 +30,9 @@ describe('VttTextParser', function() {
         this.text = text;
       };
     }
+
+    logWarningSpy = jasmine.createSpy('shaka.log.warning');
+    shaka.log.warning = logWarningSpy;
   });
 
   afterAll(function() {
@@ -340,23 +344,66 @@ describe('VttTextParser', function() {
         'Test');
   });
 
-  it('rejects invalid settings', function() {
-    errorHelper(shaka.util.Error.Code.INVALID_TEXT_SETTINGS,
-                'WEBVTT\n\n00:00.000 --> 00:00.010 vertical:es\nTest');
-    errorHelper(shaka.util.Error.Code.INVALID_TEXT_SETTINGS,
-                'WEBVTT\n\n00:00.000 --> 00:00.010 vertical:\nTest');
-    errorHelper(shaka.util.Error.Code.INVALID_TEXT_SETTINGS,
-                'WEBVTT\n\n00:00.000 --> 00:00.010 vertical\nTest');
-    errorHelper(shaka.util.Error.Code.INVALID_TEXT_SETTINGS,
-                'WEBVTT\n\n00:00.000 --> 00:00.010 line:-3%\nTest');
-    errorHelper(shaka.util.Error.Code.INVALID_TEXT_SETTINGS,
-                'WEBVTT\n\n00:00.000 --> 00:00.010 line:105%\nTest');
-    errorHelper(shaka.util.Error.Code.INVALID_TEXT_SETTINGS,
-                'WEBVTT\n\n00:00.000 --> 00:00.010 line:45%%\nTest');
-    errorHelper(shaka.util.Error.Code.INVALID_TEXT_SETTINGS,
-                'WEBVTT\n\n00:00.000 --> 00:00.010 align:10\nTest');
-    errorHelper(shaka.util.Error.Code.INVALID_TEXT_SETTINGS,
-                'WEBVTT\n\n00:00.000 --> 00:00.010 align:foo\nTest');
+  it('ignores and logs invalid settings', function() {
+    expect(logWarningSpy.calls.count()).toBe(0);
+
+    verifyHelper(
+        [
+          {start: 20, end: 40, text: 'Test'}
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000 vertical:es\n' +
+        'Test\n\n');
+
+    verifyHelper(
+        [
+          {start: 20, end: 40, text: 'Test'}
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000 vertical:\n' +
+        'Test\n\n');
+
+    verifyHelper(
+        [
+          {start: 20, end: 40, text: 'Test'}
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000 vertical\n' +
+        'Test\n\n');
+
+    verifyHelper(
+        [
+          {start: 20, end: 40, text: 'Test'}
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000 line:-3%\n' +
+        'Test\n\n');
+
+    verifyHelper(
+        [
+          {start: 20, end: 40, text: 'Test'}
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000 line:45%%\n' +
+        'Test\n\n');
+
+    verifyHelper(
+        [
+          {start: 20, end: 40, text: 'Test'}
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000 align:10\n' +
+        'Test\n\n');
+
+    verifyHelper(
+        [
+          {start: 20, end: 40, text: 'Test'}
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000 align:foo\n' +
+        'Test\n\n');
+
+    expect(logWarningSpy.calls.count()).toBe(7);
   });
 
 
