@@ -119,10 +119,20 @@ describe('DrmEngine', function() {
       eventManager.unlisten(mediaSource, 'sourceopen');
       mediaSourceEngine = new shaka.media.MediaSourceEngine(
           video, mediaSource, null);
+
+      var streamingConfig = {
+        rebufferingGoal: 2,
+        bufferingGoal: 5,
+        retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+        bufferBehind: Infinity,
+        ignoreTextStreamFailures: false,
+        useRelativeCueTimestamps: false
+      };
+
       mediaSourceEngine.init({
         'video': 'video/mp4; codecs="avc1.640015"',
         'audio': 'audio/mp4; codecs="mp4a.40.2"'
-      });
+      }, streamingConfig);
       done();
     });
   });

@@ -341,7 +341,8 @@ describe('StreamingEngine', function() {
         bufferingGoal: 5,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
         bufferBehind: Infinity,
-        ignoreTextStreamFailures: false
+        ignoreTextStreamFailures: false,
+        useRelativeCueTimestamps: false
       };
     }
 
@@ -1488,7 +1489,8 @@ describe('StreamingEngine', function() {
         bufferingGoal: 1,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
         bufferBehind: 10,
-        ignoreTextStreamFailures: false
+        ignoreTextStreamFailures: false,
+        useRelativeCueTimestamps: false
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -1568,7 +1570,8 @@ describe('StreamingEngine', function() {
         bufferingGoal: 1,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
         bufferBehind: 10,
-        ignoreTextStreamFailures: false
+        ignoreTextStreamFailures: false,
+        useRelativeCueTimestamps: false
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -1633,7 +1636,8 @@ describe('StreamingEngine', function() {
         bufferingGoal: 1,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
         bufferBehind: 10,
-        ignoreTextStreamFailures: false
+        ignoreTextStreamFailures: false,
+        useRelativeCueTimestamps: false
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);

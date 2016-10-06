@@ -22,6 +22,7 @@ describe('TextEngine', function() {
 
   var mockParser;
   var mockTrack;
+  var mockConfig;
   var textEngine;
 
   beforeAll(function() {
@@ -31,8 +32,16 @@ describe('TextEngine', function() {
   beforeEach(function() {
     mockParser = jasmine.createSpy('mockParser');
     mockTrack = createMockTrack();
+    mockConfig = {
+      rebufferingGoal: 2,
+      bufferingGoal: 5,
+      retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+      bufferBehind: Infinity,
+      ignoreTextStreamFailures: false,
+      useRelativeCueTimestamps: false
+    };
     TextEngine.registerParser(dummyMimeType, mockParser);
-    textEngine = new TextEngine(mockTrack, dummyMimeType);
+    textEngine = new TextEngine(mockTrack, dummyMimeType, mockConfig);
   });
 
   afterEach(function() {

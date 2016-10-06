@@ -167,7 +167,17 @@ describe('CastUtils', function() {
         function onSourceOpen() {
           mediaSourceEngine = new shaka.media.MediaSourceEngine(
               video, mediaSource, /* TextTrack */ null);
-          mediaSourceEngine.init({'video': mimeType});
+
+          var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
+          var config = {
+            rebufferingGoal: 2,
+            bufferingGoal: 5,
+            retryParameters: retry,
+            bufferBehind: Infinity,
+            ignoreTextStreamFailures: false,
+            useRelativeCueTimestamps: false
+          };
+          mediaSourceEngine.init({'video': mimeType}, config);
           shaka.test.Util.fetch(initSegmentUrl).then(function(data) {
             return mediaSourceEngine.appendBuffer('video', data, null, null);
           }).then(function() {
