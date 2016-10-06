@@ -920,51 +920,6 @@ describe('DrmEngine', function() {
         }).catch(fail);
       });
 
-      it('internal-error key status causes an INTERNAL_ERROR_KEY_STATUS error',
-         function(done) {
-           onErrorSpy.and.stub();
-
-           initAndAttach().then(function() {
-             expect(onErrorSpy).not.toHaveBeenCalled();
-
-             var initData = new Uint8Array(0);
-             mockVideo.on['encrypted'](
-                 { initDataType: 'webm', initData: initData });
-
-             var keyId1 = (new Uint8Array(1)).buffer;
-             var keyId2 = (new Uint8Array(2)).buffer;
-             var keyId3 = (new Uint8Array(3)).buffer;
-
-             session1.keyStatuses.forEach.and.callFake(function(callback) {
-               callback(keyId1, 'internal-error');
-               callback(keyId2, 'internal-error');
-               callback(keyId3, 'usable');
-             });
-
-             onKeyStatusSpy.and.callFake(function(statusMap) {
-               expect(onErrorSpy).toHaveBeenCalled();
-               // There should be as many errors as the key ids
-               // with 'internal-error' status. Two in this case
-               expect(onErrorSpy.calls.count()).toEqual(2);
-               var errorKey1 = onErrorSpy.calls.argsFor(0)[0];
-               shaka.test.Util.expectToEqualError(
-                   errorKey1, new shaka.util.Error(
-                   shaka.util.Error.Category.DRM,
-                   shaka.util.Error.Code.INTERNAL_ERROR_KEY_STATUS,
-                   shaka.util.Uint8ArrayUtils.toHex(new Uint8Array(keyId1))));
-               var errorKey2 = onErrorSpy.calls.argsFor(1)[0];
-               shaka.test.Util.expectToEqualError(
-                   errorKey2, new shaka.util.Error(
-                   shaka.util.Error.Category.DRM,
-                   shaka.util.Error.Code.INTERNAL_ERROR_KEY_STATUS,
-                   shaka.util.Uint8ArrayUtils.toHex(new Uint8Array(keyId2))));
-               done();
-             });
-
-             session1.on['keystatuseschange']({ target: session1 });
-           }).catch(fail);
-         });
-
       it('causes only one error when two keys expire at once', function(done) {
         onErrorSpy.and.stub();
 
