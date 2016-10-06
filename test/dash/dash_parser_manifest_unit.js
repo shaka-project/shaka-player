@@ -906,4 +906,33 @@ describe('DashParser.Manifest', function() {
           }).catch(fail).then(done);
     });
   });
+
+  it('ignores trickmode tracks', function(done) {
+    var manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1">',
+      '      <Representation>',
+      '        <SegmentTemplate media="1.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="2">',
+      '      <EssentialProperty value="1" ',
+      '        schemeIdUri="http://dashif.org/guidelines/trickmode" />',
+      '      <Representation>',
+      '        <SegmentTemplate media="2.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'
+    ].join('\n');
+
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
+    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, onEventSpy)
+        .then(function(manifest) {
+          expect(manifest.periods.length).toBe(1);
+          expect(manifest.periods[0].streamSets.length).toBe(1);
+          expect(manifest.periods[0].streamSets[0].streams.length).toBe(1);
+        }).catch(fail).then(done);
+  });
 });
