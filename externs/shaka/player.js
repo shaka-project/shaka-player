@@ -274,6 +274,7 @@ shakaExtern.AdvancedDrmConfiguration;
  *   retryParameters: shakaExtern.RetryParameters,
  *   servers: !Object.<string, string>,
  *   clearKeys: !Object.<string, string>,
+ *   delayLicenseRequestUntilPlayed: boolean,
  *   advanced: Object.<string, shakaExtern.AdvancedDrmConfiguration>
  * }}
  *
@@ -286,6 +287,10 @@ shakaExtern.AdvancedDrmConfiguration;
  * @property {!Object.<string, string>} clearKeys
  *   <i>Forces the use of the Clear Key CDM.</i>
  *   A map of key IDs (hex) to keys (hex).
+ * @property {boolean} delayLicenseRequestUntilPlayed
+ *   <i>Defaults to false.</i> <br>
+ *   True to configure drm to delay sending a license request until a user
+ *   actually starts playing content.
  * @property {Object.<string, shakaExtern.AdvancedDrmConfiguration>} advanced
  *   <i>Optional.</i> <br>
  *   A dictionary which maps key system IDs to advanced DRM configuration for

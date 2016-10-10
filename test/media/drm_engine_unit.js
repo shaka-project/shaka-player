@@ -106,6 +106,7 @@ describe('DrmEngine', function() {
         fakeNetEngine, onErrorSpy, onKeyStatusSpy);
     config = {
       retryParameters: retryParameters,
+      delayLicenseRequestUntilPlayed: false,
       servers: {
         'drm.abc': 'http://abc.drm/license',
         'drm.def': 'http://def.drm/license'
@@ -1424,6 +1425,78 @@ describe('DrmEngine', function() {
       }).catch(fail).then(done);
     });
   });  // describe('getDrmInfo')
+
+  describe('configure', function() {
+    it('delays initial license requests if configured to', function(done) {
+      config.delayLicenseRequestUntilPlayed = true;
+      drmEngine.configure(config);
+      mockVideo.paused = true;
+
+      initAndAttach().then(function() {
+        var initData = new Uint8Array(0);
+        mockVideo.on['encrypted'](
+            { initDataType: 'webm', initData: initData });
+
+        fakeNetEngine.request.and.returnValue(new shaka.util.PublicPromise());
+        var message = new Uint8Array(0);
+        session1.on['message']({ message: message });
+
+        expect(fakeNetEngine.request).not.toHaveBeenCalled();
+
+        mockVideo.on['play']();
+
+        expect(fakeNetEngine.request).toHaveBeenCalledWith(
+            shaka.net.NetworkingEngine.RequestType.LICENSE,
+            jasmine.objectContaining({
+              uris: ['http://abc.drm/license'],
+              method: 'POST',
+              body: message
+            }));
+      }).catch(fail).then(done);
+    });
+
+    it('does not delay license renewal requests', function(done) {
+      config.delayLicenseRequestUntilPlayed = true;
+      drmEngine.configure(config);
+      mockVideo.paused = true;
+
+      initAndAttach().then(function() {
+        var initData = new Uint8Array(0);
+        mockVideo.on['encrypted'](
+            { initDataType: 'webm', initData: initData });
+
+        fakeNetEngine.request.and.returnValue(new shaka.util.PublicPromise());
+        var message = new Uint8Array(0);
+        session1.on['message']({ message: message });
+
+        expect(fakeNetEngine.request).not.toHaveBeenCalled();
+
+        mockVideo.on['play']();
+
+        expect(fakeNetEngine.request).toHaveBeenCalledWith(
+            shaka.net.NetworkingEngine.RequestType.LICENSE,
+            jasmine.objectContaining({
+              uris: ['http://abc.drm/license'],
+              method: 'POST',
+              body: message
+            }));
+
+        fakeNetEngine.request.calls.reset();
+
+        mockVideo.paused = true;
+        session1.on['message']({ message: message });
+
+        expect(fakeNetEngine.request).toHaveBeenCalledWith(
+            shaka.net.NetworkingEngine.RequestType.LICENSE,
+            jasmine.objectContaining({
+              uris: ['http://abc.drm/license'],
+              method: 'POST',
+              body: message
+            }));
+        expect(fakeNetEngine.request.calls.count()).toBe(1);
+      }).catch(fail).then(done);
+    });
+  }); // describe('configure')
 
   function initAndAttach() {
     return drmEngine.init(manifest, /* offline */ false).then(function() {

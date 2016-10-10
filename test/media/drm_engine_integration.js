@@ -91,6 +91,7 @@ describe('DrmEngine', function() {
     var config = {
       retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
       clearKeys: {},
+      delayLicenseRequestUntilPlayed: false,
       advanced: {},
       servers: {
         'com.widevine.alpha':
