@@ -168,16 +168,7 @@ describe('CastUtils', function() {
           mediaSourceEngine = new shaka.media.MediaSourceEngine(
               video, mediaSource, /* TextTrack */ null);
 
-          var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
-          var config = {
-            rebufferingGoal: 2,
-            bufferingGoal: 5,
-            retryParameters: retry,
-            bufferBehind: Infinity,
-            ignoreTextStreamFailures: false,
-            useRelativeCueTimestamps: false
-          };
-          mediaSourceEngine.init({'video': mimeType}, config);
+          mediaSourceEngine.init({'video': mimeType}, false);
           shaka.test.Util.fetch(initSegmentUrl).then(function(data) {
             return mediaSourceEngine.appendBuffer('video', data, null, null);
           }).then(function() {

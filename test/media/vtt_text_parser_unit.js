@@ -369,7 +369,7 @@ describe('VttTextParser', function() {
     var data = shaka.util.StringUtils.toUTF8(text);
     // Last two parameters are only used by mp4 vtt parser.
     var result =
-        shaka.media.VttTextParser(data, opt_offset || 0, null, null, null);
+        shaka.media.VttTextParser(data, opt_offset || 0, null, null, false);
     expect(result).toBeTruthy();
     expect(result.length).toBe(cues.length);
     for (var i = 0; i < cues.length; i++) {
@@ -400,7 +400,7 @@ describe('VttTextParser', function() {
     var error = new shaka.util.Error(shaka.util.Error.Category.TEXT, code);
     var data = shaka.util.StringUtils.toUTF8(text);
     try {
-      shaka.media.VttTextParser(data, 0, null, null, null);
+      shaka.media.VttTextParser(data, 0, null, null, false);
       fail('Invalid WebVTT file supported');
     } catch (e) {
       shaka.test.Util.expectToEqualError(e, error);
