@@ -96,7 +96,7 @@ input[type=text] {
   padding: 1px 2px 3px 6px;
 }
 
-label {
+label, .label {
   color: #444;
   display: inline-block;
   font-family: 'Roboto Condensed';
@@ -307,6 +307,16 @@ summary {
   position: absolute;
 }
 
+.for-screen-readers {
+  /* Hide the content from sighted users, but not screen readers */
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
 @media screen and (max-width: 650px) {
   h1 {
     font-size: 1.5em;
@@ -335,7 +345,7 @@ summary {
     font-size: 0.8em;
   }
 
-  label {
+  label, .label {
     font-weight: 500;
     margin: 0 0 0.4em 0;
   }
