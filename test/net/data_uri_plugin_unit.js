@@ -23,31 +23,32 @@ describe('DataUriPlugin', function() {
   });
 
   it('supports MIME types', function(done) {
-    testSucceeds('data:text/plain,Hello', 'Hello', done);
+    testSucceeds('data:text/plain,Hello', 'text/plain', 'Hello', done);
   });
 
   it('supports URI encoded text', function(done) {
     testSucceeds(
         'data:text/html,%3Ch1%3EHello%2C%20World!%3C%2Fh1%3E',
+        'text/html',
         '<h1>Hello, World!</h1>',
         done);
   });
 
   it('supports base64 encoded text', function(done) {
     testSucceeds(
-        'data:;base64,SGVsbG8sIFdvcmxkIQ%3D%3D', 'Hello, World!', done);
+        'data:;base64,SGVsbG8sIFdvcmxkIQ%3D%3D', '', 'Hello, World!', done);
   });
 
   it('supports extra colin', function(done) {
-    testSucceeds('data:,Hello:', 'Hello:', done);
+    testSucceeds('data:,Hello:', '', 'Hello:', done);
   });
 
   it('supports extra semi-colin', function(done) {
-    testSucceeds('data:,Hello;', 'Hello;', done);
+    testSucceeds('data:,Hello;', '', 'Hello;', done);
   });
 
   it('supports extra comma', function(done) {
-    testSucceeds('data:,Hello,', 'Hello,', done);
+    testSucceeds('data:,Hello,', '', 'Hello,', done);
   });
 
   it('fails for empty URI', function(done) {
@@ -67,7 +68,7 @@ describe('DataUriPlugin', function() {
     testFails('data:Bad', done, shaka.util.Error.Code.MALFORMED_DATA_URI);
   });
 
-  function testSucceeds(uri, text, done) {
+  function testSucceeds(uri, contentType, text, done) {
     var request =
         shaka.net.NetworkingEngine.makeRequest([uri], retryParameters);
     shaka.net.DataUriPlugin(uri, request)
@@ -75,6 +76,7 @@ describe('DataUriPlugin', function() {
           expect(response).toBeTruthy();
           expect(response.uri).toBe(uri);
           expect(response.data).toBeTruthy();
+          expect(response.headers['content-type']).toBe(contentType);
           var data = shaka.util.StringUtils.fromBytesAutoDetect(response.data);
           expect(data).toBe(text);
         })
