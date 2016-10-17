@@ -340,6 +340,26 @@ describe('VttTextParser', function() {
         'Test');
   });
 
+  it('uses relative timestamps if configured to', function() {
+    verifyHelper(
+        [
+          {
+            start: 40, // Note these are 20s off of the cue
+            end: 60,   // because using relative timestamps
+            text: 'Test',
+            align: 'middle',
+            size: 56,
+            vertical: 'lr'
+          }
+        ],
+        'WEBVTT\n\n' +
+        '0:00:20.000 --> 0:00:40.000 align:middle size:56% vertical:lr\n' +
+        'Test',
+        undefined,
+        20,
+        true);
+  });
+
   it('rejects invalid settings', function() {
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_SETTINGS,
                 'WEBVTT\n\n00:00.000 --> 00:00.010 vertical:es\nTest');
@@ -359,17 +379,22 @@ describe('VttTextParser', function() {
                 'WEBVTT\n\n00:00.000 --> 00:00.010 align:foo\nTest');
   });
 
-
   /**
    * @param {!Array} cues
    * @param {string} text
    * @param {number=} opt_offset
+   * @param {number=} opt_startTime
+   * @param {boolean=} opt_useRelativeCueTimestamps
    */
-  function verifyHelper(cues, text, opt_offset) {
+  function verifyHelper(cues, text, opt_offset,
+                        opt_startTime, opt_useRelativeCueTimestamps) {
     var data = shaka.util.StringUtils.toUTF8(text);
-    // Last two parameters are only used by mp4 vtt parser.
     var result =
-        shaka.media.VttTextParser(data, opt_offset || 0, null, null, false);
+        shaka.media.VttTextParser(data,
+                                  opt_offset || 0,
+                                  opt_startTime || 0,
+                                  null,
+                                  opt_useRelativeCueTimestamps || false);
     expect(result).toBeTruthy();
     expect(result.length).toBe(cues.length);
     for (var i = 0; i < cues.length; i++) {
