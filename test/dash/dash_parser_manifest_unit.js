@@ -177,7 +177,7 @@ describe('DashParser.Manifest', function() {
         [
           '    <AdaptationSet id="1" mimeType="video/mp4" lang="en">',
           '      <SupplementalProperty value="2"',
-          'schemeIdURI="http://dashif.org/descriptor/AdaptationSetSwitching"/>',
+          'schemeIdUri="http://dashif.org/guidelines/AdaptationSetSwitching"/>',
           '      <Representation bandwidth="100" />',
           '    </AdaptationSet>',
           '    <AdaptationSet id="2" mimeType="video/mp4" lang="en">',
@@ -207,7 +207,7 @@ describe('DashParser.Manifest', function() {
         [
           '    <AdaptationSet mimeType="video/mp4" lang="en" id="1">',
           '      <SupplementalProperty value="4"',
-          'schemeIdURI="http://dashif.org/descriptor/AdaptationSetSwitching"/>',
+          'schemeIdUri="http://dashif.org/descriptor/AdaptationSetSwitching"/>',
           '      <Representation bandwidth="100" />',
           '    </AdaptationSet>',
           '    <AdaptationSet mimeType="video/mp4" lang="en" id="2">',
@@ -239,12 +239,12 @@ describe('DashParser.Manifest', function() {
         [
           '    <AdaptationSet mimeType="video/mp4" lang="en" id="1">',
           '      <SupplementalProperty value="2"',
-          'schemeIdURI="http://dashif.org/descriptor/AdaptationSetSwitching"/>',
+          'schemeIdUri="urn:mpeg:dash:adaptation-set-switching:2016"/>',
           '      <Representation bandwidth="100" />',
           '    </AdaptationSet>',
           '    <AdaptationSet mimeType="video/mp4" lang="es" id="2">',
           '      <SupplementalProperty value="1"',
-          'schemeIdURI="http://dashif.org/descriptor/AdaptationSetSwitching"/>',
+          'schemeIdUri="http://dashif.org/guidelines/AdaptationSetSwitching"/>',
           '      <Representation bandwidth="200" />',
           '    </AdaptationSet>',
           '  </Period>',
@@ -273,12 +273,12 @@ describe('DashParser.Manifest', function() {
         [
           '    <AdaptationSet mimeType="video/mp4" lang="en" id="1">',
           '      <SupplementalProperty value="2"',
-          'schemeIdURI="http://dashif.org/descriptor/AdaptationSetSwitching"/>',
+          'schemeIdUri="http://dashif.org/descriptor/AdaptationSetSwitching"/>',
           '      <Representation bandwidth="100" />',
           '    </AdaptationSet>',
           '    <AdaptationSet mimeType="audio/mp4" lang="en" id="2">',
           '      <SupplementalProperty value="1"',
-          'schemeIdURI="http://dashif.org/descriptor/AdaptationSetSwitching"/>',
+          'schemeIdUri="urn:mpeg:dash:adaptation-set-switching:2016"/>',
           '      <Representation bandwidth="200" />',
           '    </AdaptationSet>',
           '  </Period>',
@@ -905,5 +905,34 @@ describe('DashParser.Manifest', function() {
             expect(onEventSpy).not.toHaveBeenCalled();
           }).catch(fail).then(done);
     });
+  });
+
+  it('ignores trickmode tracks', function(done) {
+    var manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1">',
+      '      <Representation>',
+      '        <SegmentTemplate media="1.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="2">',
+      '      <EssentialProperty value="1" ',
+      '        schemeIdUri="http://dashif.org/guidelines/trickmode" />',
+      '      <Representation>',
+      '        <SegmentTemplate media="2.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'
+    ].join('\n');
+
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
+    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, onEventSpy)
+        .then(function(manifest) {
+          expect(manifest.periods.length).toBe(1);
+          expect(manifest.periods[0].streamSets.length).toBe(1);
+          expect(manifest.periods[0].streamSets[0].streams.length).toBe(1);
+        }).catch(fail).then(done);
   });
 });

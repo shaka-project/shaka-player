@@ -79,7 +79,7 @@ describe('Player', function() {
       };
     }
 
-    video = createMockVideo();
+    video = createMockVideo(20);
     player = new shaka.Player(video, dependencyInjector);
 
     abrManager = new shaka.test.FakeAbrManager();
@@ -1196,7 +1196,7 @@ describe('Player', function() {
       expect(activeVideo.id).toBe(5);
     });
 
-    it('switches if active is restricted by key status', function() {
+    it('switches if active key status is "output-restricted"', function() {
       var activeVideo = getActiveTrack('video');
       expect(activeVideo.id).toBe(4);
 
@@ -1214,10 +1214,38 @@ describe('Player', function() {
       expect(activeVideo.id).toBe(5);
     });
 
-    it('removes based on key status', function() {
+    it('switches if active key status is "internal-error"', function() {
+      var activeVideo = getActiveTrack('video');
+      expect(activeVideo.id).toBe(4);
+
+      // AbrManager should choose the second track since the first is
+      // restricted.
+      abrManager.chooseIndex = 1;
+      abrManager.chooseStreams.calls.reset();
+      onKeyStatus({'abc': 'internal-error'});
+      expect(abrManager.chooseStreams).toHaveBeenCalled();
+      expect(manifest.periods[0].streamSets[1].streams[0].id).toBe(4);
+      expect(manifest.periods[0].streamSets[1].streams[0].allowedByKeySystem)
+          .toBe(false);
+
+      activeVideo = getActiveTrack('video');
+      expect(activeVideo.id).toBe(5);
+    });
+
+    it('removes if key status is "output-restricted"', function() {
       expect(player.getTracks().length).toBe(9);
 
       onKeyStatus({'abc': 'output-restricted'});
+
+      var tracks = player.getTracks();
+      expect(tracks.length).toBe(8);
+      expectDoesNotInclude(tracks, 4);
+    });
+
+    it('removes if key status is "internal-error"', function() {
+      expect(player.getTracks().length).toBe(9);
+
+      onKeyStatus({'abc': 'internal-error'});
 
       var tracks = player.getTracks();
       expect(tracks.length).toBe(8);
@@ -1316,6 +1344,26 @@ describe('Player', function() {
     function onKeyStatus(keyStatusMap) {
       player.onKeyStatus_(keyStatusMap);
     }
+  });
+
+  describe('getPlayheadTimeAsDate()', function() {
+    beforeEach(function(done) {
+      var timeline = new shaka.media.PresentationTimeline(300, 0);
+      timeline.setStatic(false);
+      manifest = new shaka.test.ManifestGenerator()
+                      .setTimeline(timeline)
+                      .addPeriod(0)
+                      .build();
+      goog.asserts.assert(manifest, 'manifest must be non-null');
+      var parser = new shaka.test.FakeManifestParser(manifest);
+      var factory = function() { return parser; };
+      player.load('', 0, factory).catch(fail).then(done);
+    });
+
+    it('gets current wall clock time in UTC', function() {
+      var liveTimeUtc = player.getPlayheadTimeAsDate();
+      expect(liveTimeUtc).toEqual(new Date(320000));
+    });
   });
 
   /**

@@ -166,7 +166,9 @@ module.exports = function(config) {
         base: 'WebDriver',
         config: {hostname: 'localhost', port: 4446},
         browserName: 'internet explorer',
-        pseudoActivityInterval: 20000
+        pseudoActivityInterval: 20000,
+        ignoreZoomSetting: true,
+        ignoreProtectedModeSettings: true
       },
 
       WebDriver_Edge: {
