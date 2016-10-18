@@ -365,7 +365,7 @@ describe('VttTextParser', function() {
   });
 
   it('ignores and logs invalid settings', function() {
-    expect(logWarningSpy.calls.count()).toBe(0);
+    expect(logWarningSpy.calls.count()).toBe(1); // From test above
 
     verifyHelper(
         [
@@ -423,7 +423,7 @@ describe('VttTextParser', function() {
         '00:00:20.000 --> 00:00:40.000 align:foo\n' +
         'Test\n\n');
 
-    expect(logWarningSpy.calls.count()).toBe(7);
+    expect(logWarningSpy.calls.count()).toBe(8);
   });
 
   /**
