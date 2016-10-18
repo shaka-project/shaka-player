@@ -317,16 +317,24 @@ describe('CastSender', function() {
     });
   });
 
-  describe('disconnect', function() {
-    it('stops the session if we are casting', function(done) {
+  describe('showDisconnectDialog', function() {
+    it('opens the dialog if we are casting', function(done) {
       sender.init();
       fakeReceiverAvailability(true);
       sender.cast(fakeInitState).then(function() {
         expect(sender.isCasting()).toBe(true);
+        expect(mockSession.leave).not.toHaveBeenCalled();
         expect(mockSession.stop).not.toHaveBeenCalled();
+        mockCastApi.requestSession.calls.reset();
 
         sender.showDisconnectDialog();
+
+        // this call opens the dialog:
         expect(mockCastApi.requestSession).toHaveBeenCalled();
+        // these were not used:
+        expect(mockSession.leave).not.toHaveBeenCalled();
+        expect(mockSession.stop).not.toHaveBeenCalled();
+
         fakeRemoteDisconnect();
       }).catch(fail).then(done);
       fakeSessionConnection();
@@ -562,12 +570,48 @@ describe('CastSender', function() {
     });
   });
 
-  describe('destroy', function() {
+  describe('forceDisconnect', function() {
     it('disconnects and cancels all async operations', function(done) {
       sender.init();
       fakeReceiverAvailability(true);
       sender.cast(fakeInitState).then(function() {
         expect(sender.isCasting()).toBe(true);
+        expect(mockSession.leave).not.toHaveBeenCalled();
+        expect(mockSession.stop).not.toHaveBeenCalled();
+
+        var method = sender.get('player', 'load');
+        var p = method();
+        shaka.test.Util.capturePromiseStatus(p);
+
+        // Wait a tick for the Promise status to be set.
+        return shaka.test.Util.delay(0.1).then(function() {
+          expect(p.status).toBe('pending');
+          sender.forceDisconnect();
+          expect(mockSession.leave).not.toHaveBeenCalled();
+          expect(mockSession.stop).toHaveBeenCalled();
+
+          // Wait a tick for the Promise status to change.
+          return shaka.test.Util.delay(0.1);
+        }).then(function() {
+          expect(p.status).toBe('rejected');
+          return p.catch(function(error) {
+            shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+                shaka.util.Error.Category.PLAYER,
+                shaka.util.Error.Code.LOAD_INTERRUPTED));
+          });
+        });
+      }).catch(fail).then(done);
+      fakeSessionConnection();
+    });
+  });
+
+  describe('destroy', function() {
+    it('leaves the session and cancels all async operations', function(done) {
+      sender.init();
+      fakeReceiverAvailability(true);
+      sender.cast(fakeInitState).then(function() {
+        expect(sender.isCasting()).toBe(true);
+        expect(mockSession.leave).not.toHaveBeenCalled();
         expect(mockSession.stop).not.toHaveBeenCalled();
 
         var method = sender.get('player', 'load');
@@ -578,7 +622,8 @@ describe('CastSender', function() {
         return shaka.test.Util.delay(0.1).then(function() {
           expect(p.status).toBe('pending');
           sender.destroy().catch(fail);
-          expect(mockSession.stop).toHaveBeenCalled();
+          expect(mockSession.leave).toHaveBeenCalled();
+          expect(mockSession.stop).not.toHaveBeenCalled();
 
           // Wait a tick for the Promise status to change.
           return shaka.test.Util.delay(0.1);
@@ -612,6 +657,7 @@ describe('CastSender', function() {
       receiver: { friendlyName: 'SomeDevice' },
       addUpdateListener: jasmine.createSpy('Session.addUpdateListener'),
       addMessageListener: jasmine.createSpy('Session.addMessageListener'),
+      leave: jasmine.createSpy('Session.leave'),
       sendMessage: jasmine.createSpy('Session.sendMessage'),
       stop: jasmine.createSpy('Session.stop')
     };

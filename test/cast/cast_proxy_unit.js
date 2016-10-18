@@ -630,11 +630,23 @@ describe('CastProxy', function() {
     it('destroys the local player and the sender', function(done) {
       expect(mockPlayer.destroy).not.toHaveBeenCalled();
       expect(mockSender.destroy).not.toHaveBeenCalled();
+      expect(mockSender.forceDisconnect).not.toHaveBeenCalled();
 
       proxy.destroy().catch(fail).then(done);
 
       expect(mockPlayer.destroy).toHaveBeenCalled();
       expect(mockSender.destroy).toHaveBeenCalled();
+      expect(mockSender.forceDisconnect).not.toHaveBeenCalled();
+    });
+
+    it('optionally forces the sender to disconnect', function(done) {
+      expect(mockSender.destroy).not.toHaveBeenCalled();
+      expect(mockSender.forceDisconnect).not.toHaveBeenCalled();
+
+      proxy.destroy(true).catch(fail).then(done);
+
+      expect(mockSender.destroy).toHaveBeenCalled();
+      expect(mockSender.forceDisconnect).toHaveBeenCalled();
     });
   });
 
@@ -658,6 +670,7 @@ describe('CastProxy', function() {
       receiverName: jasmine.createSpy('receiverName'),
       hasRemoteProperties: jasmine.createSpy('hasRemoteProperties'),
       setAppData: jasmine.createSpy('setAppData'),
+      forceDisconnect: jasmine.createSpy('forceDisconnect'),
       showDisconnectDialog: jasmine.createSpy('showDisconnectDialog'),
       cast: jasmine.createSpy('cast'),
       get: jasmine.createSpy('get'),
