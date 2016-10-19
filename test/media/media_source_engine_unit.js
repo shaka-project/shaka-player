@@ -54,9 +54,17 @@ describe('MediaSourceEngine', function() {
       return contentType == 'audio' ? audioSourceBuffer : videoSourceBuffer;
     });
 
-    // MediaSourceEngine only uses video to read error codes when operations
-    // fail.
-    mockVideo = { error: null };
+    // MediaSourceEngine uses video to:
+    //  - read error codes when operations fail
+    //  - seek to flush the pipeline on some platforms
+    //  - check buffered.length to assert that flushing the pipeline is okay
+    mockVideo = {
+      error: null,
+      currentTime: 0,
+      buffered: {
+        length: 0
+      }
+    };
     var video = /** @type {HTMLMediaElement} */(mockVideo);
     mediaSourceEngine =
         new shaka.media.MediaSourceEngine(video, mockMediaSource, null);
