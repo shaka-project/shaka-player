@@ -203,7 +203,7 @@ describe('SimpleAbrManager', function() {
     });
   });
 
-  it('clears ahead on upgrade', function() {
+  it('does not clear the buffer on upgrade', function() {
     // Simulate some segments being downloaded at a high rate, to trigger an
     // upgrade.
     var audioBandwidth = 5e5;
@@ -221,11 +221,12 @@ describe('SimpleAbrManager', function() {
     // called to upgrade.
     abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
 
-    expect(switchCallback).toHaveBeenCalledWith(
-        jasmine.any(Object), shaka.Player.ClearMethod.MOST);
+    // The second parameter is missing to indicate that the buffer should not be
+    // cleared.
+    expect(switchCallback).toHaveBeenCalledWith(jasmine.any(Object));
   });
 
-  it('does not clear ahead on downgrade', function() {
+  it('does not clear the buffer on downgrade', function() {
     // Simulate some segments being downloaded at a low rate, to trigger a
     // downgrade.
     var audioBandwidth = 5e5;
@@ -242,12 +243,11 @@ describe('SimpleAbrManager', function() {
     abrManager.enable();
 
     // Make another call to segmentDownloaded(). switchCallback() will be
-    // called to upgrade.
+    // called to downgrade.
     abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
 
-    // The second parameter is undefined to indicate that the buffer should
-    // not be cleared
-    expect(switchCallback).toHaveBeenCalledWith(
-        jasmine.any(Object), shaka.Player.ClearMethod.NONE);
+    // The second parameter is missing to indicate that the buffer should not be
+    // cleared.
+    expect(switchCallback).toHaveBeenCalledWith(jasmine.any(Object));
   });
 });

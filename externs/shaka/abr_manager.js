@@ -34,15 +34,10 @@ shakaExtern.AbrManager = function() {};
  *
  * The first argument is a map of content types to chosen streams.
  *
- * The second argument is an optional clear method as defined by the player.
- * (Clear none, clear all, leave one segment, etc.)
+ * The second argument is an optional boolean.  If true, all data will be
+ * from the buffer, which will result in a buffering event.
  *
- * @typedef {function(
- *     !Object.<string, !shakaExtern.Stream>,
- *     shaka.Player.ClearMethod=
- * )}
- *
- * @see {shaka.Player.ClearMethod}
+ * @typedef {function(!Object.<string, !shakaExtern.Stream>, boolean=)}
  * @exportDoc
  */
 shakaExtern.AbrManager.SwitchCallback;

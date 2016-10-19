@@ -26,7 +26,6 @@ describe('Player', function() {
   var networkingEngine;
   var streamingEngine;
   var video;
-  var ClearMethod;
 
   beforeAll(function() {
     originalLogError = shaka.log.error;
@@ -36,8 +35,6 @@ describe('Player', function() {
     shaka.log.error = logErrorSpy;
     logWarnSpy = jasmine.createSpy('shaka.log.warning');
     shaka.log.warning = logWarnSpy;
-
-    ClearMethod = shaka.Player.ClearMethod;
   });
 
   beforeEach(function() {
@@ -792,7 +789,7 @@ describe('Player', function() {
       expect(tracks[1].id).toBe(stream.id);
       player.selectTrack(tracks[1]);
       expect(streamingEngine.switch)
-          .toHaveBeenCalledWith('audio', stream, ClearMethod.NONE);
+          .toHaveBeenCalledWith('audio', stream, false);
     });
 
     it('still switches streams if called during startup', function() {
@@ -817,7 +814,7 @@ describe('Player', function() {
       var period = manifest.periods[0];
       var stream = period.streamSets[0].streams[1];
       expect(streamingEngine.switch)
-          .toHaveBeenCalledWith('audio', stream, ClearMethod.NONE);
+          .toHaveBeenCalledWith('audio', stream, false);
     });
 
     it('switching audio doesn\'t change selected text track', function() {
@@ -834,7 +831,7 @@ describe('Player', function() {
       var textStream = period.streamSets[3].streams[0];
 
       expect(streamingEngine.switch)
-          .toHaveBeenCalledWith('text', textStream, ClearMethod.ALL);
+          .toHaveBeenCalledWith('text', textStream, true);
 
       streamingEngine.switch.calls.reset();
 
@@ -842,9 +839,9 @@ describe('Player', function() {
       expect(tracks[1].id).toBe(audioStream.id);
       player.selectTrack(tracks[1]);
       expect(streamingEngine.switch)
-          .toHaveBeenCalledWith('text', textStream, ClearMethod.ALL);
+          .toHaveBeenCalledWith('text', textStream, true);
       expect(streamingEngine.switch)
-          .toHaveBeenCalledWith('audio', audioStream, ClearMethod.NONE);
+          .toHaveBeenCalledWith('audio', audioStream, false);
     });
   });
 
