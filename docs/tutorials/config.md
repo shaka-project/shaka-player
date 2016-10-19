@@ -44,7 +44,7 @@ player.getConfiguration();
      restrictions: Object
      streaming: Object
        bufferBehind: 30
-       bufferingGoal: 30
+       bufferingGoal: 10
        ignoreTextStreamFailures: false
        rebufferingGoal: 2
        retryParameters: Object
