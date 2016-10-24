@@ -343,7 +343,8 @@ shakaExtern.ManifestConfiguration;
  *   rebufferingGoal: number,
  *   bufferingGoal: number,
  *   bufferBehind: number,
- *   ignoreTextStreamFailures: boolean
+ *   ignoreTextStreamFailures: boolean,
+ *   useRelativeCueTimestamps: boolean
  * }}
  *
  * @description
@@ -367,6 +368,9 @@ shakaExtern.ManifestConfiguration;
  * @property {boolean} ignoreTextStreamFailures
  *   If true, the player will ignore text stream failures and proceed to play
  *   other streams.
+ * @property {boolean} useRelativeCueTimestamps
+ *   If true, WebVTT cue timestamps will be treated as relative to the start
+ *   time of the VTT segment. Defaults to false.
  * @exportDoc
  */
 shakaExtern.StreamingConfiguration;

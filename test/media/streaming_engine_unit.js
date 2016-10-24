@@ -341,7 +341,8 @@ describe('StreamingEngine', function() {
         bufferingGoal: 5,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
         bufferBehind: Infinity,
-        ignoreTextStreamFailures: false
+        ignoreTextStreamFailures: false,
+        useRelativeCueTimestamps: false
       };
     }
 
@@ -457,7 +458,7 @@ describe('StreamingEngine', function() {
             'audio': 'audio/mp4; codecs="mp4a.40.2"',
             'video': 'video/mp4; codecs="avc1.42c01e"',
             'text': 'text/vtt'
-          });
+          }, false);
       expect(mediaSourceEngine.init.calls.count()).toBe(1);
       mediaSourceEngine.init.calls.reset();
 
@@ -1488,7 +1489,8 @@ describe('StreamingEngine', function() {
         bufferingGoal: 1,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
         bufferBehind: 10,
-        ignoreTextStreamFailures: false
+        ignoreTextStreamFailures: false,
+        useRelativeCueTimestamps: false
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -1568,7 +1570,8 @@ describe('StreamingEngine', function() {
         bufferingGoal: 1,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
         bufferBehind: 10,
-        ignoreTextStreamFailures: false
+        ignoreTextStreamFailures: false,
+        useRelativeCueTimestamps: false
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -1633,7 +1636,8 @@ describe('StreamingEngine', function() {
         bufferingGoal: 1,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
         bufferBehind: 10,
-        ignoreTextStreamFailures: false
+        ignoreTextStreamFailures: false,
+        useRelativeCueTimestamps: false
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);

@@ -65,7 +65,7 @@ describe('Mp4vttParser', function() {
   it('parses init segment', function() {
     // init segment doesn't have the subtitles. The code should verify
     // their declaration and proceed to the next segment.
-    var ret = shaka.media.Mp4VttParser(vttInitSegment, 0, null, null);
+    var ret = shaka.media.Mp4VttParser(vttInitSegment, 0, null, null, false);
     expect(ret).toEqual([]);
   });
 
@@ -76,7 +76,7 @@ describe('Mp4vttParser', function() {
          {start: 20, end: 40, text:
            'You\'re a fool for traveling alone,\nso completely unprepared.\n'}
         ];
-    var result = shaka.media.Mp4VttParser(vttSegment, 0, 20, 40);
+    var result = shaka.media.Mp4VttParser(vttSegment, 0, 20, 40, false);
     verifyHelper(cues, result);
   });
 
@@ -89,7 +89,7 @@ describe('Mp4vttParser', function() {
            'You\'re a fool for traveling alone,\nso completely unprepared.\n',
            vertical: 'lr', line: 1}
         ];
-    var result = shaka.media.Mp4VttParser(vttSegSettings, 0, 20, 40);
+    var result = shaka.media.Mp4VttParser(vttSegSettings, 0, 20, 40, false);
     verifyHelper(cues, result);
   });
 
@@ -100,7 +100,7 @@ describe('Mp4vttParser', function() {
          {start: 27, end: 47, text:
            'You\'re a fool for traveling alone,\nso completely unprepared.\n'}
         ];
-    var result = shaka.media.Mp4VttParser(vttSegment, 7, 20, 40);
+    var result = shaka.media.Mp4VttParser(vttSegment, 7, 20, 40, false);
     verifyHelper(cues, result);
   });
 
@@ -108,7 +108,7 @@ describe('Mp4vttParser', function() {
     var error = new shaka.util.Error(shaka.util.Error.Category.TEXT,
         shaka.util.Error.Code.INVALID_MP4_VTT);
     try {
-      shaka.media.Mp4VttParser(audioInitSegment, 0, 20, 40);
+      shaka.media.Mp4VttParser(audioInitSegment, 0, 20, 40, false);
       fail('Mp4 file with no vtt supported');
     } catch (e) {
       shaka.test.Util.expectToEqualError(e, error);
