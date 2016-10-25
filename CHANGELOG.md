@@ -1,3 +1,62 @@
+## 2.0.1 (2016-10-26)
+
+New features:
+  - Faster ABR decisions
+  - Add config option for using segment relative timestamps for VTT
+    - https://github.com/google/shaka-player/issues/480
+    - https://github.com/google/shaka-player/pull/542
+  - Log and ignore non-standard WebVTT settings instead of failing
+    - https://github.com/google/shaka-player/issues/509
+  - Make key IDs from the manifest available through DrmInfo
+    - https://github.com/google/shaka-player/pull/529
+  - Provide framerate and codecs information on video tracks
+    - https://github.com/google/shaka-player/issues/516
+    - https://github.com/google/shaka-player/pull/533
+  - Dispatch more useful network error when HEAD request fails
+
+Bugfixes:
+  - Fix ABR quality issues when switching tracks (stutters, glitches, etc.)
+    - https://github.com/google/shaka-player/issues/520
+  - Keep user selected text track when switching audio
+    - https://github.com/google/shaka-player/issues/514
+  - Fix vtt with one digit hour
+    - https://github.com/google/shaka-player/pull/522
+  - Fix build scripts for Windows
+    - https://github.com/google/shaka-player/issues/526
+  - Fix buffering event delay
+    - https://github.com/google/shaka-player/issues/511
+  - Workaround bug in Edge buffered ranges
+    - https://github.com/google/shaka-player/issues/530
+  - Fix handling of internal-error key status
+    - https://github.com/google/shaka-player/issues/539
+  - Ignore trick mode tracks
+    - https://github.com/google/shaka-player/issues/538
+  - Fix AdaptationSetSwitching support
+  - Fix buffering logic when switching periods
+    - https://github.com/google/shaka-player/issues/537
+    - https://github.com/google/shaka-player/issues/545
+  - Use data URI content-type for manifest type detection
+    - https://github.com/google/shaka-player/pull/550
+  - Fix audio language changes on Chromecast
+    - https://github.com/google/shaka-player/issues/544
+  - Fix Chromecast receiver idle behavior when looping or replaying
+    - https://github.com/google/shaka-player/issues/558
+  - Fix exception-causing race when TextEngine is destroyed
+
+Demo app improvements:
+  - Hide volume & mute buttons on mobile-sized screens
+  - Probe both MP4 and WebM support in DrmEngine
+    - https://github.com/google/shaka-player/issues/540
+  - Update Axinom test assets to v7
+  - Fix accessibility issues in the demo app
+    - https://github.com/google/shaka-player/issues/552
+
+Docs:
+  - Rewrote the debugging tutorial
+  - Misc docs cleanup
+    - https://github.com/google/shaka-player/pull/536
+
+
 ## 2.0.0 (2016-09-07)
 
 The first full release of v2!
