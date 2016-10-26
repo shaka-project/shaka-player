@@ -121,7 +121,7 @@ def npm_version(is_dirty=False):
     cmd = 'npm.cmd' if is_windows() else 'npm'
     cmd_line = [cmd, '--prefix', base, 'ls', 'shaka-player']
     print_cmd_line(cmd_line)
-    text = subprocess.check_output(cmd_line)
+    text = subprocess.check_output(cmd_line, stderr=subprocess.STDOUT)
   except subprocess.CalledProcessError as e:
     text = e.output
   match = re.search(r'shaka-player@(.*) ', text)
