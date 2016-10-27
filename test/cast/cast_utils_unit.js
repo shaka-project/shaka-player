@@ -18,17 +18,10 @@
 describe('CastUtils', function() {
   var CastUtils;
   var FakeEvent;
-  var originalTimeout;
 
   beforeAll(function() {
     CastUtils = shaka.cast.CastUtils;
     FakeEvent = shaka.util.FakeEvent;
-    originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 15000;
-  });
-
-  afterAll(function() {
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
   });
 
   describe('serialize/deserialize', function() {
@@ -174,7 +167,8 @@ describe('CastUtils', function() {
         function onSourceOpen() {
           mediaSourceEngine = new shaka.media.MediaSourceEngine(
               video, mediaSource, /* TextTrack */ null);
-          mediaSourceEngine.init({'video': mimeType});
+
+          mediaSourceEngine.init({'video': mimeType}, false);
           shaka.test.Util.fetch(initSegmentUrl).then(function(data) {
             return mediaSourceEngine.appendBuffer('video', data, null, null);
           }).then(function() {

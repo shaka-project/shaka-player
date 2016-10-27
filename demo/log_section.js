@@ -69,6 +69,8 @@ shakaDemo.setupLogging_ = function() {
   });
 
   logToScreen.addEventListener('change', shakaDemo.onLogChange_);
+  // Set the initial state.
+  shakaDemo.onLogChange_();
 };
 
 

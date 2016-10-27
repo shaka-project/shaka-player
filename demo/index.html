@@ -14,7 +14,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="description" content="Shaka Player Demo">
@@ -50,39 +50,81 @@
     <div id="container">
       <h1>Shaka Player <span id="version"></span></h1>
 
-      <p>This is a demo of Google's Shaka Player, a JavaScript library for
-         adaptive video streaming.</p>
+      <div class="input">
+        <p>This is a demo of Google's Shaka Player, a JavaScript library for
+           adaptive video streaming.</p>
 
-      <p class="borderBelow">Choose an asset and tap <strong>Load</strong>.
-         (On Android, you'll also need to press the play button on the video.)</p>
+        <p>Choose an asset and tap <strong>Load</strong>.
+           (On Android, you'll also need to press the play button on the
+            video.)</p>
 
-      <p class="borderBelow">
-        <a href="../docs/api/index.html">Documentation</a> |
-        <a href="https://github.com/google/shaka-player">Repo</a> |
-        <a href="https://www.npmjs.com/package/shaka-player">NPM</a> |
-        <a href="https://cdnjs.com/libraries/shaka-player">CDNJS</a>
-      </p>
+        <p class="links">
+          <a href="../docs/api/index.html">Documentation</a> |
+          <a href="https://github.com/google/shaka-player">Repo</a> |
+          <a href="https://www.npmjs.com/package/shaka-player">NPM</a> |
+          <a href="https://cdnjs.com/libraries/shaka-player">CDNJS</a>
+        </p>
 
-      <div class="flex">
-        <label for="assetList">Asset:</label>
-        <select id="assetList" class="flex-grow"></select>
-      </div>
-      <div id="customAsset">
         <div class="flex">
-          <label for="manifestInput">Custom manifest:</label>
-          <input id="manifestInput" type="text" class="flex-grow">
+          <label for="assetList">Asset:</label>
+          <select id="assetList" class="flex-grow"></select>
         </div>
-        <div class="flex">
-          <label for="licenseServerInput">Custom license server:</label>
-          <input id="licenseServerInput" type="text" class="flex-grow">
+        <div id="customAsset">
+          <div class="flex">
+            <label for="manifestInput">Custom manifest:</label>
+            <input id="manifestInput" type="text" class="flex-grow">
+          </div>
+          <div class="flex">
+            <label for="licenseServerInput">Custom license server:</label>
+            <input id="licenseServerInput" type="text" class="flex-grow">
+          </div>
+        </div>
+
+        <div>
+          <button id="loadButton">Load</button>
         </div>
       </div>
 
-      <div>
-        <button id="loadButton">Load</button>
+      <div id="errorDisplay">
+        <div id="errorDisplayCloseButton">x</div>
+        <div id="errorDisplayText"></div>
+      </div>
+      <div id="videoContainer" class="overlay-parent">
+        <video id="video"
+               poster="//shaka-player-demo.appspot.com/assets/poster.jpg"
+               autoplay></video>
+        <div id="giantPlayButtonContainer" class="overlay">
+          <button id="giantPlayButton" class="material-icons">play_arrow</button>
+        </div>
+        <div id="bufferingSpinner" class="overlay">
+          <svg class="spinnerSvg" viewBox="25 25 50 50">
+            <circle class="spinnerPath" cx="50" cy="50" r="20"
+                    fill="none" stroke-width="2" stroke-miterlimit="10" />
+          </svg>
+        </div>
+        <div id="castReceiverName" class="overlay"></div>
+        <div id="controlsContainer" class="overlay"><div id="controls">
+          <button id="playPauseButton" class="material-icons">play_arrow</button>
+          <label for="seekBar" class="for-screen-readers">seek</label>
+          <input id="seekBar" type="range" step="any" min="0" max="1" value="0">
+          <button id="rewindButton" class="material-icons">fast_rewind</button>
+          <div id="currentTime">0:00</div>
+          <button id="fastForwardButton" class="material-icons">fast_forward</button>
+          <button id="muteButton" class="material-icons">volume_up</button>
+          <label for="volumeBar" class="for-screen-readers">volume</label>
+          <input id="volumeBar" type="range" step="any" min="0" max="1" value="0">
+          <button id="castButton" class="material-icons">cast</button>
+          <button id="captionButton" class="material-icons">closed_caption</button>
+          <button id="fullscreenButton" class="material-icons">fullscreen</button>
+        </div></div>
       </div>
 
-      <details>
+      <details id="logSection">
+        <summary>Logs</summary>
+        <div id="log"></div>
+      </details>
+
+      <details class="input">
         <summary>Configuration</summary>
         <div class="flex">
           <label for="preferredAudioLanguage">Preferred audio language:</label>
@@ -106,20 +148,7 @@
         </div>
       </details>
 
-      <details id="offlineSection">
-        <summary>Offline</summary>
-        <button id="storeDelete">Store</button>
-        <div id="progressDiv">
-          <label for="progress">Progress:</label>
-          <span id="progress">0</span>%
-        </div>
-        <div id="offlineNameDiv">
-          <label for="offlineName">Name:</label>
-          <input id="offlineName" class="flex-grow" type="text">
-        </div>
-      </details>
-
-      <details>
+      <details class="input">
         <summary>Info</summary>
         <div class="flex">
           <label for="videoTracks">Video tracks:</label>
@@ -137,52 +166,30 @@
         </div>
 
         <div>
-          <label for="videoResDebug">Active resolution:</label>
+          <span class="label">Active resolution:</span>
           <span id="videoResDebug"></span>
         </div>
 
         <div>
-          <label for="bufferedDebug">Buffered:</label>
+          <span class="label">Buffered:</span>
           <span id="bufferedDebug"></span>
         </div>
       </details>
 
-      <details id="logSection">
-        <summary>Logs</summary>
-        <div id="log"></div>
+      <details id="offlineSection" class="input">
+        <summary>Offline</summary>
+        <div>
+          <button id="storeDelete">Store</button>
+        </div>
+        <div id="progressDiv">
+          <span class="label">Progress:</span>
+          <span id="progress">0</span>%
+        </div>
+        <div id="offlineNameDiv">
+          <label for="offlineName">Name:</label>
+          <input id="offlineName" class="flex-grow" type="text">
+        </div>
       </details>
-
-      <div id="errorDisplay">
-        <div id="errorDisplayCloseButton">x</div>
-        <div id="errorDisplayText"></div>
-      </div>
-      <div id="videoContainer" class="overlay-parent">
-        <video id="video"
-               poster="//shaka-player-demo.appspot.com/assets/poster.jpg"
-               autoplay></video>
-        <div id="giantPlayButtonContainer" class="overlay">
-          <button id="giantPlayButton" class="material-icons">play_arrow</button>
-        </div>
-        <div id="bufferingSpinner" class="overlay">
-          <svg class="spinnerSvg" viewBox="25 25 50 50">
-            <circle class="spinnerPath" cx="50" cy="50" r="20"
-                    fill="none" stroke-width="2" stroke-miterlimit="10" />
-          </svg>
-        </div>
-        <div id="castReceiverName" class="overlay"></div>
-        <div id="controlsContainer" class="overlay"><div id="controls">
-          <button id="playPauseButton" class="material-icons">play_arrow</button>
-          <input id="seekBar" type="range" step="any" min="0" max="1" value="0">
-          <button id="rewindButton" class="material-icons">fast_rewind</button>
-          <div id="currentTime">0:00</div>
-          <button id="fastForwardButton" class="material-icons">fast_forward</button>
-          <button id="muteButton" class="material-icons">volume_up</button>
-          <input id="volumeBar" type="range" step="any" min="0" max="1" value="0">
-          <button id="castButton" class="material-icons">cast</button>
-          <button id="captionButton" class="material-icons">closed_caption</button>
-          <button id="fullscreenButton" class="material-icons">fullscreen</button>
-        </div></div>
-      </div>
     </div>
   </body>
 </html>

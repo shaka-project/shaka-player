@@ -121,7 +121,7 @@ describe('DashParser.SegmentTemplate', function() {
 
     it('requests init data for WebM', function(done) {
       var source = [
-        '<MPD>',
+        '<MPD mediaPresentationDuration="PT75S">',
         '  <Period>',
         '    <BaseURL>http://example.com</BaseURL>',
         '    <AdaptationSet mimeType="video/webm">',
@@ -159,7 +159,7 @@ describe('DashParser.SegmentTemplate', function() {
 
     it('inherits from Period', function(done) {
       var source = [
-        '<MPD>',
+        '<MPD mediaPresentationDuration="PT75S">',
         '  <Period>',
         '    <BaseURL>http://example.com</BaseURL>',
         '    <SegmentTemplate startNumber="1" index="index-$Bandwidth$.mp4"',
@@ -192,7 +192,7 @@ describe('DashParser.SegmentTemplate', function() {
 
     it('inherits from AdaptationSet', function(done) {
       var source = [
-        '<MPD>',
+        '<MPD mediaPresentationDuration="PT75S">',
         '  <Period>',
         '    <AdaptationSet mimeType="video/mp4">',
         '      <BaseURL>http://example.com</BaseURL>',
@@ -379,7 +379,7 @@ describe('DashParser.SegmentTemplate', function() {
   describe('rejects streams with', function() {
     it('bad container type', function(done) {
       var source = [
-        '<MPD>',
+        '<MPD mediaPresentationDuration="PT75S">',
         '  <Period>',
         '    <BaseURL>http://example.com</BaseURL>',
         '    <AdaptationSet mimeType="video/cats">',

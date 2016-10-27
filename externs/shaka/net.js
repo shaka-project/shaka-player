@@ -43,6 +43,8 @@
  * @property {number} timeout
  *   The request timeout, in milliseconds.  Zero means "unlimited".
  *
+ * @tutorial network-and-buffering-config
+ *
  * @exportDoc
  */
 shakaExtern.RetryParameters;

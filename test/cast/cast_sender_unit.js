@@ -32,6 +32,7 @@ describe('CastSender', function() {
   var onStatusChanged;
   var onRemoteEvent;
   var onResumeLocal;
+  var onInitStateRequired;
 
   var mockCastApi;
   var mockSession;
@@ -43,24 +44,25 @@ describe('CastSender', function() {
     CastSender = shaka.cast.CastSender;
     CastUtils = shaka.cast.CastUtils;
 
-    originalChrome = window.chrome;
-  });
-
-  afterAll(function() {
-    window.chrome = originalChrome;
+    originalChrome = window['chrome'];
   });
 
   beforeEach(function() {
     onStatusChanged = jasmine.createSpy('onStatusChanged');
     onRemoteEvent = jasmine.createSpy('onRemoteEvent');
     onResumeLocal = jasmine.createSpy('onResumeLocal');
+    onInitStateRequired = jasmine.createSpy('onInitStateRequired')
+                          .and.returnValue(fakeInitState);
 
     mockCastApi = createMockCastApi();
-    window.chrome = { cast: mockCastApi };
+    // We're using quotes to access window.chrome because the compiler
+    // knows about lots of Chrome-specific APIs we aren't mocking.  We
+    // don't need this mock strictly type-checked.
+    window['chrome'] = { cast: mockCastApi };
     mockSession = null;
 
     sender = new CastSender(fakeAppId, onStatusChanged, onRemoteEvent,
-                            onResumeLocal);
+                            onResumeLocal, onInitStateRequired);
   });
 
   afterEach(function(done) {
@@ -68,10 +70,14 @@ describe('CastSender', function() {
     sender.destroy().catch(fail).then(done);
   });
 
+  afterAll(function() {
+    window['chrome'] = originalChrome;
+  });
+
   describe('init', function() {
     it('installs a callback if the cast API is not available', function() {
       // Remove the mock cast API.
-      delete window.chrome.cast;
+      delete window['chrome'].cast;
       // This shouldn't exist yet.
       expect(window.__onGCastApiAvailable).toBe(undefined);
 
@@ -82,7 +88,7 @@ describe('CastSender', function() {
       expect(onStatusChanged).not.toHaveBeenCalled();
 
       // Restore the mock cast API.
-      window.chrome.cast = mockCastApi;
+      window['chrome'].cast = mockCastApi;
       window.__onGCastApiAvailable(true);
       // Expect the API to be ready and initialized.
       expect(sender.apiReady()).toBe(true);
@@ -221,6 +227,11 @@ describe('CastSender', function() {
     shaka.test.Util.delay(0.1).then(function() {
       expect(onStatusChanged).toHaveBeenCalled();
       expect(sender.isCasting()).toBe(true);
+      expect(onInitStateRequired).toHaveBeenCalled();
+      expect(mockSession.messages).toContain(jasmine.objectContaining({
+        type: 'init',
+        initState: fakeInitState
+      }));
     }).catch(fail).then(done);
   });
 
@@ -306,16 +317,24 @@ describe('CastSender', function() {
     });
   });
 
-  describe('disconnect', function() {
-    it('stops the session if we are casting', function(done) {
+  describe('showDisconnectDialog', function() {
+    it('opens the dialog if we are casting', function(done) {
       sender.init();
       fakeReceiverAvailability(true);
       sender.cast(fakeInitState).then(function() {
         expect(sender.isCasting()).toBe(true);
+        expect(mockSession.leave).not.toHaveBeenCalled();
+        expect(mockSession.stop).not.toHaveBeenCalled();
+        mockCastApi.requestSession.calls.reset();
+
+        sender.showDisconnectDialog();
+
+        // this call opens the dialog:
+        expect(mockCastApi.requestSession).toHaveBeenCalled();
+        // these were not used:
+        expect(mockSession.leave).not.toHaveBeenCalled();
         expect(mockSession.stop).not.toHaveBeenCalled();
 
-        sender.disconnect();
-        expect(mockSession.stop).toHaveBeenCalled();
         fakeRemoteDisconnect();
       }).catch(fail).then(done);
       fakeSessionConnection();
@@ -464,27 +483,6 @@ describe('CastSender', function() {
         }).catch(fail).then(done);
       });
 
-      it('reject when disconnected by the user', function(done) {
-        var p = method(123, 'abc');
-        shaka.test.Util.capturePromiseStatus(p);
-
-        // Wait a tick for the Promise status to be set.
-        shaka.test.Util.delay(0.1).then(function() {
-          expect(p.status).toBe('pending');
-          sender.disconnect();
-
-          // Wait a tick for the Promise status to change.
-          return shaka.test.Util.delay(0.1);
-        }).then(function() {
-          expect(p.status).toBe('rejected');
-          return p.catch(function(error) {
-            shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
-                shaka.util.Error.Category.PLAYER,
-                shaka.util.Error.Code.LOAD_INTERRUPTED));
-          });
-        }).catch(fail).then(done);
-      });
-
       it('reject when disconnected remotely', function(done) {
         var p = method(123, 'abc');
         shaka.test.Util.capturePromiseStatus(p);
@@ -572,12 +570,48 @@ describe('CastSender', function() {
     });
   });
 
-  describe('destroy', function() {
+  describe('forceDisconnect', function() {
     it('disconnects and cancels all async operations', function(done) {
       sender.init();
       fakeReceiverAvailability(true);
       sender.cast(fakeInitState).then(function() {
         expect(sender.isCasting()).toBe(true);
+        expect(mockSession.leave).not.toHaveBeenCalled();
+        expect(mockSession.stop).not.toHaveBeenCalled();
+
+        var method = sender.get('player', 'load');
+        var p = method();
+        shaka.test.Util.capturePromiseStatus(p);
+
+        // Wait a tick for the Promise status to be set.
+        return shaka.test.Util.delay(0.1).then(function() {
+          expect(p.status).toBe('pending');
+          sender.forceDisconnect();
+          expect(mockSession.leave).not.toHaveBeenCalled();
+          expect(mockSession.stop).toHaveBeenCalled();
+
+          // Wait a tick for the Promise status to change.
+          return shaka.test.Util.delay(0.1);
+        }).then(function() {
+          expect(p.status).toBe('rejected');
+          return p.catch(function(error) {
+            shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+                shaka.util.Error.Category.PLAYER,
+                shaka.util.Error.Code.LOAD_INTERRUPTED));
+          });
+        });
+      }).catch(fail).then(done);
+      fakeSessionConnection();
+    });
+  });
+
+  describe('destroy', function() {
+    it('leaves the session and cancels all async operations', function(done) {
+      sender.init();
+      fakeReceiverAvailability(true);
+      sender.cast(fakeInitState).then(function() {
+        expect(sender.isCasting()).toBe(true);
+        expect(mockSession.leave).not.toHaveBeenCalled();
         expect(mockSession.stop).not.toHaveBeenCalled();
 
         var method = sender.get('player', 'load');
@@ -588,7 +622,8 @@ describe('CastSender', function() {
         return shaka.test.Util.delay(0.1).then(function() {
           expect(p.status).toBe('pending');
           sender.destroy().catch(fail);
-          expect(mockSession.stop).toHaveBeenCalled();
+          expect(mockSession.leave).toHaveBeenCalled();
+          expect(mockSession.stop).not.toHaveBeenCalled();
 
           // Wait a tick for the Promise status to change.
           return shaka.test.Util.delay(0.1);
@@ -622,6 +657,7 @@ describe('CastSender', function() {
       receiver: { friendlyName: 'SomeDevice' },
       addUpdateListener: jasmine.createSpy('Session.addUpdateListener'),
       addMessageListener: jasmine.createSpy('Session.addMessageListener'),
+      leave: jasmine.createSpy('Session.leave'),
       sendMessage: jasmine.createSpy('Session.sendMessage'),
       stop: jasmine.createSpy('Session.stop')
     };

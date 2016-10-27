@@ -33,8 +33,8 @@ describe('Player', function() {
 
   beforeAll(function(done) {
     video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
-    video.width = '600';
-    video.height = '400';
+    video.width = 600;
+    video.height = 400;
     video.muted = true;
     document.body.appendChild(video);
 
@@ -71,7 +71,7 @@ describe('Player', function() {
       support = supportResults;
       done();
     });
-  }, /* timeout ms */ 10000);
+  });
 
   beforeEach(function() {
     player = new shaka.Player(video);
@@ -126,7 +126,7 @@ describe('Player', function() {
         };
         expect(stats).toEqual(expected);
       }).catch(fail).then(done);
-    }, /* timeout ms */ 15000);
+    });
   });
 
   describe('setTextTrackVisibility', function() {
@@ -150,7 +150,7 @@ describe('Player', function() {
         // This should not transition to null when invisible.
         expect(textTrack.cues).not.toBe(null);
       }).catch(fail).then(done);
-    }, /* timeout ms */ 15000);
+    });
   });
 
   describe('plays', function() {
@@ -193,18 +193,20 @@ describe('Player', function() {
           config.manifest.dash.customScheme = asset.drmCallback;
         if (asset.clearKeys)
           config.drm.clearKeys = asset.clearKeys;
-        player.configure(/** @type {shakaExtern.PlayerConfiguration} */(
-            config));
+        player.configure(config);
 
         if (asset.licenseRequestHeaders) {
           player.getNetworkingEngine().registerRequestFilter(
               addLicenseRequestHeaders.bind(null, asset.licenseRequestHeaders));
         }
 
-        if (asset.licenseProcessor) {
-          player.getNetworkingEngine().registerResponseFilter(
-              asset.licenseProcessor);
-        }
+        var networkingEngine = player.getNetworkingEngine();
+        if (asset.requestFilter)
+          networkingEngine.registerRequestFilter(asset.requestFilter);
+        if (asset.responseFilter)
+          networkingEngine.registerResponseFilter(asset.responseFilter);
+        if (asset.extraConfig)
+          player.configure(asset.extraConfig);
 
         player.load(asset.manifestUri).then(function() {
           expect(player.isLive()).toEqual(isLive);
@@ -232,7 +234,7 @@ describe('Player', function() {
             }
           }
         }).catch(fail).then(done);
-      }, 90000 /* ms timeout */);
+      });
     });
   });
 

@@ -326,30 +326,26 @@ jasmine.arrayContaining = function(value) {};
 
 /**
  * @param {jasmine.Callback} callback
- * @param {number=} opt_timeout
  */
-var beforeEach = function(callback, opt_timeout) {};
+var beforeEach = function(callback) {};
 
 
 /**
  * @param {jasmine.Callback} callback
- * @param {number=} opt_timeout
  */
-var beforeAll = function(callback, opt_timeout) {};
+var beforeAll = function(callback) {};
 
 
 /**
  * @param {jasmine.Callback} callback
- * @param {number=} opt_timeout
  */
-var afterEach = function(callback, opt_timeout) {};
+var afterEach = function(callback) {};
 
 
 /**
  * @param {jasmine.Callback} callback
- * @param {number=} opt_timeout
  */
-var afterAll = function(callback, opt_timeout) {};
+var afterAll = function(callback) {};
 
 
 /** @param {*=} opt_reason */
@@ -380,25 +376,22 @@ var xdescribe = function(name, callback) {};
 /**
  * @param {string} name
  * @param {jasmine.Callback} callback
- * @param {number=} opt_timeout
  */
-var it = function(name, callback, opt_timeout) {};
+var it = function(name, callback) {};
 
 
 /**
  * @param {string} name
  * @param {jasmine.Callback} callback
- * @param {number=} opt_timeout
  */
-var fit = function(name, callback, opt_timeout) {};
+var fit = function(name, callback) {};
 
 
 /**
  * @param {string} name
  * @param {jasmine.Callback} callback
- * @param {number=} opt_timeout
  */
-var xit = function(name, callback, opt_timeout) {};
+var xit = function(name, callback) {};
 
 
 

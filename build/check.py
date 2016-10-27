@@ -46,7 +46,7 @@ def check_lint():
 
   jsdoc3_tags = ','.join([
       'static', 'summary', 'namespace', 'event', 'description', 'property',
-      'fires', 'listens', 'example', 'exportDoc'])
+      'fires', 'listens', 'example', 'exportDoc', 'tutorial'])
   args = ['--nobeep', '--custom_jsdoc_tags', jsdoc3_tags, '--strict']
   base = shakaBuildHelpers.get_source_base()
   cmd = os.path.join(base, 'third_party', 'gjslint', 'gjslint')
@@ -54,7 +54,7 @@ def check_lint():
   # Even though this is python, don't import and execute since gjslint expects
   # command-line arguments using argv.  Have to explicitly execute python so
   # it works on Windows.
-  cmd_line = ['python', cmd] + args + get_lint_files()
+  cmd_line = [sys.executable or 'python', cmd] + args + get_lint_files()
   shakaBuildHelpers.print_cmd_line(cmd_line)
   return subprocess.call(cmd_line) == 0
 
@@ -75,7 +75,8 @@ def check_html_lint():
   base = shakaBuildHelpers.get_source_base()
   files = ['index.html', 'demo/index.html', 'support.html']
   file_paths = [os.path.join(base, x) for x in files]
-  cmd_line = [htmlhint_path] + file_paths
+  config_path = os.path.join(base, '.htmlhintrc')
+  cmd_line = [htmlhint_path, '--config=' + config_path] + file_paths
   shakaBuildHelpers.print_cmd_line(cmd_line)
   return subprocess.call(cmd_line) == 0
 
@@ -131,7 +132,8 @@ def check_tests():
 
   # Ignore missing goog.require since we assume the whole library is
   # already included.
-  opts = ['--jscomp_off=missingRequire', '--checks-only', '-O', 'SIMPLE']
+  opts = ['--jscomp_off=missingRequire', '--jscomp_off=strictMissingRequire',
+          '--checks-only', '-O', 'SIMPLE']
   return test_build.build_raw(opts)
 
 

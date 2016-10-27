@@ -33,7 +33,7 @@ shaka.test.ManifestGenerator = function(opt_shaka) {
   this.shaka_ = opt_shaka || window.shaka;
 
   var timeline = new this.shaka_.media.PresentationTimeline(0, 0);
-  timeline.setSegmentAvailabilityDuration(Number.POSITIVE_INFINITY);
+  timeline.setSegmentAvailabilityDuration(Infinity);
   timeline.notifyMaxSegmentDuration(10);
 
   /** @private {shakaExtern.Manifest} */
@@ -53,6 +53,18 @@ shaka.test.ManifestGenerator = function(opt_shaka) {
 shaka.test.ManifestGenerator.prototype.build = function() {
   this.finishPartialStream_();
   return this.manifest_;
+};
+
+
+/**
+ * Sets a specified presentation timeline.
+ *
+ * @param {!shaka.media.PresentationTimeline} timeline
+ * @return {!shaka.test.ManifestGenerator}
+ */
+shaka.test.ManifestGenerator.prototype.setTimeline = function(timeline) {
+  this.manifest_.presentationTimeline = timeline;
+  return this;
 };
 
 
@@ -166,7 +178,8 @@ shaka.test.ManifestGenerator.prototype.addDrmInfo = function(keySystem) {
     audioRobustness: '',
     videoRobustness: '',
     serverCertificate: null,
-    initData: null
+    initData: null,
+    keyIds: []
   });
   return this;
 };
@@ -290,6 +303,7 @@ shaka.test.ManifestGenerator.prototype.addStream = function(id) {
     presentationTimeOffset: 0,
     mimeType: 'video/mp4',
     codecs: 'avc1.4d401f',
+    frameRate: undefined,
     bandwidth: 100,
     width: undefined,
     height: undefined,
@@ -508,6 +522,19 @@ shaka.test.ManifestGenerator.prototype.kind = function(kind) {
 shaka.test.ManifestGenerator.prototype.encrypted = function(encrypted) {
   var stream = this.currentStream_();
   stream.encrypted = encrypted;
+  return this;
+};
+
+
+/**
+ * Sets the framerate of the current stream.
+ *
+ * @param {number} frameRate
+ * @return {!shaka.test.ManifestGenerator}
+ */
+shaka.test.ManifestGenerator.prototype.frameRate = function(frameRate) {
+  var stream = this.currentStream_();
+  stream.frameRate = frameRate;
   return this;
 };
 

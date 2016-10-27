@@ -32,7 +32,7 @@ describe('DashParser.SegmentBase', function() {
 
   it('requests init data for WebM', function(done) {
     var source = [
-      '<MPD>',
+      '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <AdaptationSet mimeType="video/webm">',
       '      <Representation>',
@@ -68,7 +68,7 @@ describe('DashParser.SegmentBase', function() {
 
   it('inherits from Period', function(done) {
     var source = [
-      '<MPD>',
+      '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <BaseURL>http://example.com</BaseURL>',
       '    <SegmentBase indexRange="100-200" timescale="9000">',
@@ -100,7 +100,7 @@ describe('DashParser.SegmentBase', function() {
 
   it('inherits from AdaptationSet', function(done) {
     var source = [
-      '<MPD>',
+      '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <AdaptationSet mimeType="video/mp4">',
       '      <BaseURL>http://example.com</BaseURL>',
@@ -132,7 +132,7 @@ describe('DashParser.SegmentBase', function() {
 
   it('does not require sourceURL in Initialization', function(done) {
     var source = [
-      '<MPD>',
+      '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <AdaptationSet mimeType="video/mp4">',
       '      <Representation>',
@@ -166,7 +166,7 @@ describe('DashParser.SegmentBase', function() {
 
   it('merges across levels', function(done) {
     var source = [
-      '<MPD>',
+      '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <BaseURL>http://example.com</BaseURL>',
       '    <SegmentBase timescale="9000">',
@@ -206,7 +206,7 @@ describe('DashParser.SegmentBase', function() {
 
   it('merges and overrides across levels', function(done) {
     var source = [
-      '<MPD>',
+      '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <BaseURL>http://example.com</BaseURL>',
       '    <SegmentBase indexRange="0-10" timescale="9000">',
@@ -244,7 +244,7 @@ describe('DashParser.SegmentBase', function() {
   describe('fails for', function() {
     it('unsupported container', function(done) {
       var source = [
-        '<MPD>',
+        '<MPD mediaPresentationDuration="PT75S">',
         '  <Period>',
         '    <BaseURL>http://example.com</BaseURL>',
         '    <AdaptationSet mimeType="video/cat">',
@@ -263,7 +263,7 @@ describe('DashParser.SegmentBase', function() {
 
     it('missing init segment for WebM', function(done) {
       var source = [
-        '<MPD>',
+        '<MPD mediaPresentationDuration="PT75S">',
         '  <Period>',
         '    <BaseURL>http://example.com</BaseURL>',
         '    <AdaptationSet mimeType="video/webm">',
@@ -282,7 +282,7 @@ describe('DashParser.SegmentBase', function() {
 
     it('no @indexRange nor RepresentationIndex', function(done) {
       var source = [
-        '<MPD>',
+        '<MPD mediaPresentationDuration="PT75S">',
         '  <Period>',
         '    <BaseURL>http://example.com</BaseURL>',
         '    <AdaptationSet mimeType="video/webm">',

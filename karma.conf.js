@@ -1,3 +1,20 @@
+/**
+ * @license
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 // Karma configuration
 // Install required modules by running "npm install"
 
@@ -30,6 +47,9 @@ module.exports = function(config) {
       // requirejs next
       'node_modules/requirejs/require.js',
 
+      // bootstrapping for the test suite
+      'test/test/boot.js',
+
       // test utils next
       'test/test/util/*.js',
 
@@ -61,10 +81,12 @@ module.exports = function(config) {
       'lib/player.js': 'coverage',
     },
 
-    // do not panic about "no activity" unless a test takes longer than 120s.
-    // this value must be greater than any jasmine.DEFAULT_TIMEOUT_INTERVAL used
-    // in test cases. (eg. 90s in test/streaming_engine_integration.js)
-    browserNoActivityTimeout: 120000,
+    // to avoid DISCONNECTED messages on Safari:
+    browserDisconnectTimeout: 10 * 1000,  // 10s to reconnect
+    browserDisconnectTolerance: 1,  // max of 1 disconnect is OK
+    browserNoActivityTimeout: 5 * 60 * 1000,  // disconnect after 5m silence
+    captureTimeout: 1 * 60 * 1000,  // give up if startup takes 1m
+    // https://support.saucelabs.com/customer/en/portal/articles/2440724
 
     client: {
       // don't capture the client's console logs
@@ -144,7 +166,9 @@ module.exports = function(config) {
         base: 'WebDriver',
         config: {hostname: 'localhost', port: 4446},
         browserName: 'internet explorer',
-        pseudoActivityInterval: 20000
+        pseudoActivityInterval: 20000,
+        ignoreZoomSetting: true,
+        ignoreProtectedModeSettings: true
       },
 
       WebDriver_Edge: {

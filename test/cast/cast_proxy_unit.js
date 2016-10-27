@@ -120,9 +120,9 @@ describe('CastProxy', function() {
 
   describe('disconnect', function() {
     it('delegates directly to the sender', function() {
-      expect(mockSender.disconnect).not.toHaveBeenCalled();
-      proxy.disconnect();
-      expect(mockSender.disconnect).toHaveBeenCalled();
+      expect(mockSender.showDisconnectDialog).not.toHaveBeenCalled();
+      proxy.suggestDisconnect();
+      expect(mockSender.showDisconnectDialog).toHaveBeenCalled();
     });
   });
 
@@ -630,11 +630,23 @@ describe('CastProxy', function() {
     it('destroys the local player and the sender', function(done) {
       expect(mockPlayer.destroy).not.toHaveBeenCalled();
       expect(mockSender.destroy).not.toHaveBeenCalled();
+      expect(mockSender.forceDisconnect).not.toHaveBeenCalled();
 
       proxy.destroy().catch(fail).then(done);
 
       expect(mockPlayer.destroy).toHaveBeenCalled();
       expect(mockSender.destroy).toHaveBeenCalled();
+      expect(mockSender.forceDisconnect).not.toHaveBeenCalled();
+    });
+
+    it('optionally forces the sender to disconnect', function(done) {
+      expect(mockSender.destroy).not.toHaveBeenCalled();
+      expect(mockSender.forceDisconnect).not.toHaveBeenCalled();
+
+      proxy.destroy(true).catch(fail).then(done);
+
+      expect(mockSender.destroy).toHaveBeenCalled();
+      expect(mockSender.forceDisconnect).toHaveBeenCalled();
     });
   });
 
@@ -643,6 +655,7 @@ describe('CastProxy', function() {
    * @param {Function} onCastStatusChanged
    * @param {Function} onRemoteEvent
    * @param {Function} onResumeLocal
+   * @return {!Object}
    */
   function createMockCastSender(
       appId, onCastStatusChanged, onRemoteEvent, onResumeLocal) {
@@ -657,7 +670,8 @@ describe('CastProxy', function() {
       receiverName: jasmine.createSpy('receiverName'),
       hasRemoteProperties: jasmine.createSpy('hasRemoteProperties'),
       setAppData: jasmine.createSpy('setAppData'),
-      disconnect: jasmine.createSpy('disconnect'),
+      forceDisconnect: jasmine.createSpy('forceDisconnect'),
+      showDisconnectDialog: jasmine.createSpy('showDisconnectDialog'),
       cast: jasmine.createSpy('cast'),
       get: jasmine.createSpy('get'),
       set: jasmine.createSpy('set'),

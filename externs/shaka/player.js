@@ -100,7 +100,9 @@ shakaExtern.Stats;
  *   language: string,
  *   kind: ?string,
  *   width: ?number,
- *   height: ?number
+ *   height: ?number,
+ *   frameRate: ?number,
+ *   codecs: ?string
  * }}
  *
  * @description
@@ -129,6 +131,10 @@ shakaExtern.Stats;
  *   (only for video tracks) The width of the track in pixels.
  * @property {?number} height
  *   (only for video tracks) The height of the track in pixels.
+ * @property {?number} frameRate
+ *   The video framerate provided in the manifest, if present.
+ * @property {?string} codecs
+ *   The audio/video codecs string provided in the manifest, if present.
  * @exportDoc
  */
 shakaExtern.Track;
@@ -268,6 +274,7 @@ shakaExtern.AdvancedDrmConfiguration;
  *   retryParameters: shakaExtern.RetryParameters,
  *   servers: !Object.<string, string>,
  *   clearKeys: !Object.<string, string>,
+ *   delayLicenseRequestUntilPlayed: boolean,
  *   advanced: Object.<string, shakaExtern.AdvancedDrmConfiguration>
  * }}
  *
@@ -280,6 +287,10 @@ shakaExtern.AdvancedDrmConfiguration;
  * @property {!Object.<string, string>} clearKeys
  *   <i>Forces the use of the Clear Key CDM.</i>
  *   A map of key IDs (hex) to keys (hex).
+ * @property {boolean} delayLicenseRequestUntilPlayed
+ *   <i>Defaults to false.</i> <br>
+ *   True to configure drm to delay sending a license request until a user
+ *   actually starts playing content.
  * @property {Object.<string, shakaExtern.AdvancedDrmConfiguration>} advanced
  *   <i>Optional.</i> <br>
  *   A dictionary which maps key system IDs to advanced DRM configuration for
@@ -331,7 +342,9 @@ shakaExtern.ManifestConfiguration;
  *   retryParameters: shakaExtern.RetryParameters,
  *   rebufferingGoal: number,
  *   bufferingGoal: number,
- *   bufferBehind: number
+ *   bufferBehind: number,
+ *   ignoreTextStreamFailures: boolean,
+ *   useRelativeCueTimestamps: boolean
  * }}
  *
  * @description
@@ -352,7 +365,12 @@ shakaExtern.ManifestConfiguration;
  *   The maximum number of seconds of content that the StreamingEngine will keep
  *   in buffer behind the playhead when it appends a new media segment.
  *   The StreamingEngine will evict content to meet this limit.
- *
+ * @property {boolean} ignoreTextStreamFailures
+ *   If true, the player will ignore text stream failures and proceed to play
+ *   other streams.
+ * @property {boolean} useRelativeCueTimestamps
+ *   If true, WebVTT cue timestamps will be treated as relative to the start
+ *   time of the VTT segment. Defaults to false.
  * @exportDoc
  */
 shakaExtern.StreamingConfiguration;

@@ -90,6 +90,7 @@ shaka.test.FakeAbrManager.prototype.chooseStreams = function(
  * @constructor
  * @struct
  * @extends {shaka.media.DrmEngine}
+ * @return {!Object}
  */
 shaka.test.FakeDrmEngine = function() {
   var resolve = Promise.resolve.bind(Promise);
@@ -146,6 +147,7 @@ shaka.test.FakeDrmEngine.prototype.setSessionIds;
  * @param {shakaExtern.Period} period
  * @struct
  * @extends {shaka.media.StreamingEngine}
+ * @return {!Object}
  */
 shaka.test.FakeStreamingEngine = function(period) {
   var resolve = Promise.resolve.bind(Promise);
@@ -211,13 +213,15 @@ shaka.test.FakeManifestParser.prototype.configure = function() {};
 
 /**
  * Creates a fake video element.
+ * @param {number=} opt_currentTime
  * @return {!HTMLVideoElement}
  * @suppress {invalidCasts}
  */
-function createMockVideo() {
+function createMockVideo(opt_currentTime) {
   var video = {
     src: '',
     textTracks: [],
+    currentTime: opt_currentTime || 0,
     addTextTrack: jasmine.createSpy('addTextTrack'),
     addEventListener: jasmine.createSpy('addEventListener'),
     removeEventListener: jasmine.createSpy('removeEventListener'),

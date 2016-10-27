@@ -58,7 +58,7 @@ describe('CastReceiver', function() {
     // Don't do any more work here if the tests will not end up running.
     if (!isChromecast && !isChrome) return;
 
-    originalCast = window.cast;
+    originalCast = window['cast'];
     originalUserAgent = navigator.userAgent;
 
     // In uncompiled mode, there is a UA check for Chromecast in order to make
@@ -70,17 +70,12 @@ describe('CastReceiver', function() {
                           'userAgent', {value: 'CrKey'});
   });
 
-  afterAll(function() {
-    if (originalUserAgent) {
-      window.cast = originalCast;
-      Object.defineProperty(window['navigator'],
-                            'userAgent', {value: originalUserAgent});
-    }
-  });
-
   beforeEach(function() {
     mockReceiverApi = createMockReceiverApi();
-    window.cast = { receiver: mockReceiverApi };
+    // We're using quotes to access window.cast because the compiler
+    // knows about lots of Cast-specific APIs we aren't mocking.  We
+    // don't need this mock strictly type-checked.
+    window['cast'] = { receiver: mockReceiverApi };
 
     mockReceiverManager = createMockReceiverManager();
     mockMessageBus = createMockMessageBus();
@@ -93,6 +88,14 @@ describe('CastReceiver', function() {
 
   afterEach(function(done) {
     receiver.destroy().catch(fail).then(done);
+  });
+
+  afterAll(function() {
+    if (originalUserAgent) {
+      window['cast'] = originalCast;
+      Object.defineProperty(window['navigator'],
+                            'userAgent', {value: originalUserAgent});
+    }
   });
 
   describe('constructor', function() {
@@ -163,26 +166,41 @@ describe('CastReceiver', function() {
       var fakeLoadingEvent = {type: 'loading'};
       var fakeUnloadingEvent = {type: 'unloading'};
       var fakeEndedEvent = {type: 'ended'};
+      var fakePlayingEvent = {type: 'playing'};
 
       shaka.test.Util.delay(0.2).then(function() {
         expect(listener).not.toHaveBeenCalled();
+        expect(receiver.isIdle()).toBe(true);
+
         mockPlayer.listeners['loading'](fakeLoadingEvent);
         return shaka.test.Util.delay(0.2);
       }).then(function() {
         expect(listener).toHaveBeenCalled();
+        expect(receiver.isIdle()).toBe(false);
         listener.calls.reset();
+
         mockPlayer.listeners['unloading'](fakeUnloadingEvent);
         return shaka.test.Util.delay(0.2);
       }).then(function() {
         expect(listener).toHaveBeenCalled();
+        expect(receiver.isIdle()).toBe(true);
         listener.calls.reset();
+
         mockVideo.ended = true;
         mockVideo.listeners['ended'](fakeEndedEvent);
         return shaka.test.Util.delay(5.2);  // There is a long delay for 'ended'
       }).then(function() {
         expect(listener).toHaveBeenCalled();
+        listener.calls.reset();
+        expect(receiver.isIdle()).toBe(true);
+
+        mockVideo.ended = false;
+        mockVideo.listeners['playing'](fakePlayingEvent);
+      }).then(function() {
+        expect(listener).toHaveBeenCalled();
+        expect(receiver.isIdle()).toBe(false);
       }).catch(fail).then(done);
-    }, /* timeout ms */ 8000);
+    });
   });
 
   describe('local events', function() {
@@ -604,7 +622,7 @@ describe('CastReceiver', function() {
       getSystemVolume: function() { return { level: 1, muted: false }; },
       getCastMessageBus: function() { return mockMessageBus; }
     };
-  };
+  }
 
   function createMockMessageBus() {
     var bus = {

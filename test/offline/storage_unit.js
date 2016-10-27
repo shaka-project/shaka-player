@@ -62,7 +62,9 @@ describe('Storage', function() {
             kind: undefined,
             language: '',
             width: 1920,
-            height: 1080
+            height: 1080,
+            frameRate: 24,
+            codecs: 'avc1.4d401f'
           },
           {
             id: 1,
@@ -70,7 +72,9 @@ describe('Storage', function() {
             kind: undefined,
             language: 'en',
             width: null,
-            height: null
+            height: null,
+            frameRate: undefined,
+            codecs: 'vorbis'
           }
         ]
       }],
@@ -100,7 +104,9 @@ describe('Storage', function() {
         language: '',
         kind: null,
         width: 1920,
-        height: 1080
+        height: 1080,
+        frameRate: 24,
+        codecs: 'avc1.4d401f'
       },
       {
         id: 1,
@@ -110,7 +116,9 @@ describe('Storage', function() {
         language: 'en',
         kind: null,
         width: null,
-        height: null
+        height: null,
+        frameRate: undefined,
+        codecs: 'vorbis'
       }
     ];
     Promise

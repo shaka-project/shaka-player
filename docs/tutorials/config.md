@@ -33,7 +33,7 @@ player.getConfiguration();
          backoffFactor: 2
          baseDelay: 1000
          fuzzFactor: 0.5
-         maxAttempts: 1
+         maxAttempts: 2
          timeout: 0
        servers: Object
      manifest: Object
@@ -41,10 +41,12 @@ player.getConfiguration();
        retryParameters: Object
      preferredAudioLanguage: ""
      preferredTextLanguage: ""
+     restrictions: Object
      streaming: Object
        bufferBehind: 30
-       bufferingGoal: 30
-       rebufferingGoal: 15
+       bufferingGoal: 10
+       ignoreTextStreamFailures: false
+       rebufferingGoal: 2
        retryParameters: Object
 
 
@@ -65,14 +67,14 @@ player.getConfiguration().preferredAudioLanguage
 // check buffering goal, which is 2 minutes:
 player.getConfiguration().streaming.bufferingGoal
 
-// check rebuffering goal, which is still the default of 15 seconds:
+// check rebuffering goal, which is still the default of 2 seconds:
 player.getConfiguration().streaming.rebufferingGoal
 
-// set the rebuffering goal to 2 seconds and revert buffering goal to default:
+// set the rebuffering goal to 15 seconds and revert buffering goal to default:
 player.configure({
   streaming: {
     bufferingGoal: undefined,
-    rebufferingGoal: 2
+    rebufferingGoal: 15
   }
 });
 ```

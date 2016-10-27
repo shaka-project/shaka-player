@@ -29,6 +29,7 @@
  *   True if offline is usable at all.
  * @property {!Object.<string, boolean>} encrypted
  *   A map of key system name to whether it supports offline playback.
+ * @exportDoc
  */
 shakaExtern.OfflineSupport;
 
@@ -49,6 +50,7 @@ shakaExtern.OfflineSupport;
  * @property {function(shakaExtern.StoredContent,number)} progressCallback
  *   Called inside store() to give progress info back to the app.  It is given
  *   the current manifest being stored and the progress of it being stored.
+ * @exportDoc
  */
 shakaExtern.OfflineConfiguration;
 
@@ -77,6 +79,7 @@ shakaExtern.OfflineConfiguration;
  *   Period.
  * @property {Object} appMetadata
  *   The metadata passed to store().
+ * @exportDoc
  */
 shakaExtern.StoredContent;
 
@@ -135,6 +138,7 @@ shakaExtern.PeriodDB;
  *   contentType: string,
  *   mimeType: string,
  *   codecs: string,
+ *   frameRate: (number|undefined),
  *   kind: (string|undefined),
  *   language: string,
  *   width: ?number,
@@ -157,6 +161,8 @@ shakaExtern.PeriodDB;
  *   The MIME type of the stream.
  * @property {string} codecs
  *   The codecs of the stream.
+ * @property {(number|undefined)} frameRate
+ *   The Stream's framerate in frames per second
  * @property {(string|undefined)} kind
  *   The kind of text stream; undefined for audio/video.
  * @property {string} language

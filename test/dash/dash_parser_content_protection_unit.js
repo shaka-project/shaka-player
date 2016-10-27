@@ -39,7 +39,7 @@ describe('DashParser.ContentProtection', function() {
       retryParameters: retry,
       dash: { clockSyncUri: '', customScheme: callback }
     });
-    dashParser.start('http://example.com', netEngine, filterPeriod, fail)
+    dashParser.start('http://example.com', netEngine, filterPeriod, fail, fail)
         .then(function(actual) { expect(actual).toEqual(expected); })
         .catch(fail)
         .then(done);
@@ -187,7 +187,7 @@ describe('DashParser.ContentProtection', function() {
         ]);
   });
 
-  it('squashs encrypted sets in same group', function(done) {
+  it('squashes encrypted sets in same group', function(done) {
     var source = [
       '<MPD xmlns="urn:mpeg:DASH:schema:MPD:2011"',
       '    xmlns:cenc="urn:mpeg:cenc:2013">',
@@ -195,7 +195,7 @@ describe('DashParser.ContentProtection', function() {
       '    <SegmentTemplate media="s.mp4" duration="2" />',
       '    <AdaptationSet mimeType="video/mp4" id="1">',
       '      <SupplementalProperty value="2"',
-      'schemeIdURI="http://dashif.org/descriptor/AdaptationSetSwitching" />',
+      'schemeIdUri="http://dashif.org/guidelines/AdaptationSetSwitching" />',
       '      <ContentProtection',
       '         schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
       '      <ContentProtection',
@@ -205,7 +205,7 @@ describe('DashParser.ContentProtection', function() {
       '    </AdaptationSet>',
       '    <AdaptationSet mimeType="video/mp4" id="2">',
       '      <SupplementalProperty value="1"',
-      'schemeIdURI="http://dashif.org/descriptor/AdaptationSetSwitching" />',
+      'schemeIdUri="http://dashif.org/descriptor/AdaptationSetSwitching" />',
       '      <ContentProtection',
       '         schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
       '      <ContentProtection',

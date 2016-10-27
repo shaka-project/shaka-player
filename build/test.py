@@ -47,12 +47,7 @@ def run_tests(args):
     if build.main(build_args) != 0:
       return 1
 
-  karma_command_name = 'karma'
-  if shakaBuildHelpers.is_windows():
-    # Windows karma program has a different name
-    karma_command_name = 'karma.cmd'
-
-  karma_path = shakaBuildHelpers.get_node_binary_path(karma_command_name)
+  karma_path = shakaBuildHelpers.get_node_binary_path('karma')
   cmd = [karma_path, 'start']
 
   # Get the browsers supported on the local system.

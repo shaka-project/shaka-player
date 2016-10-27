@@ -25,8 +25,8 @@ describe('Offline', function() {
 
   beforeAll(/** @suppress {accessControls} */ function(done) {
     video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
-    video.width = '600';
-    video.height = '400';
+    video.width = 600;
+    video.height = 400;
     video.muted = true;
     document.body.appendChild(video);
 
@@ -87,7 +87,7 @@ describe('Offline', function() {
         })
         .catch(fail)
         .then(done);
-  }, 30000);
+  });
 
   it('stores, plays, and deletes protected content', function(done) {
     // TODO: Add a PlayReady version once Edge supports offline.
@@ -138,15 +138,21 @@ describe('Offline', function() {
           return player.unload();
         })
         .then(function() { return storage.remove(storedContent); })
-        .then(/** @suppress {accessControls} */ function() {
-          // Should fail, will call |onError| and resolve with null.
-          return drmEngine.loadOfflineSession_(sessionId);
-        })
+        .then(
+            /**
+             * @suppress {accessControls}
+             * @return {!Promise.<MediaKeySession>}
+             */
+            function() {
+              // Should fail, will call |onError| and resolve with null.
+              return drmEngine.loadOfflineSession_(sessionId);
+            }
+        )
         .then(function(session) {
           expect(session).toBeFalsy();
           return drmEngine.destroy();
         })
         .catch(fail)
         .then(done);
-  }, 30000);
+  });
 });

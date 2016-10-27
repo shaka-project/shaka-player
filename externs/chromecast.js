@@ -279,6 +279,14 @@ chrome.cast.Session.prototype.addUpdateListener = function(listener) {};
 
 
 /**
+ * @param {Function} successCallback
+ * @param {Function} errorCallback
+ */
+chrome.cast.Session.prototype.leave = function(
+    successCallback, errorCallback) {};
+
+
+/**
  * @param {string} namespace
  * @param {!Object|string} message
  * @param {Function} successCallback

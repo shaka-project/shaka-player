@@ -16,28 +16,21 @@
  */
 
 describe('SimpleAbrManager', function() {
-  var originalTimeout;
-  var originalSetTimeout;
-  var startupInterval;
   var switchCallback;
   var abrManager;
   var audioStreamSet;
   var videoStreamSet;
   var streamSetsByType;
-  var loop;
+  var sufficientBWMultiplier = 1.06;
 
   beforeAll(function() {
-    originalSetTimeout = window.setTimeout;
-    startupInterval = shaka.abr.SimpleAbrManager.STARTUP_INTERVAL_MS / 1000.0;
-
-    originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;  // ms
+    jasmine.clock().install();
+    jasmine.clock().mockDate();
+    // This polyfill is required for fakeEventLoop.
+    shaka.polyfill.Promise.install(/* force */ true);
   });
 
   beforeEach(function() {
-    jasmine.clock().mockDate();
-    jasmine.clock().install();
-
     switchCallback = jasmine.createSpy('switchCallback');
 
     // Keep unsorted.
@@ -72,16 +65,12 @@ describe('SimpleAbrManager', function() {
   });
 
   afterEach(function() {
-    if (loop) {
-      loop.abort();
-      loop = null;
-    }
     abrManager.stop();
-    jasmine.clock().uninstall();
   });
 
   afterAll(function() {
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
+    shaka.polyfill.Promise.uninstall();
+    jasmine.clock().uninstall();
   });
 
   it('can choose audio and video Streams right away', function() {
@@ -134,12 +123,14 @@ describe('SimpleAbrManager', function() {
 
     // Simulate some segments being downloaded just above the desired
     // bandwidth.
-    var bytesPerSecond = 1.1 * (audioBandwidth + videoBandwidth) / 8.0;
+    var bytesPerSecond =
+        sufficientBWMultiplier * (audioBandwidth + videoBandwidth) / 8.0;
 
     var bandwidthKbps = (audioBandwidth + videoBandwidth) / 1000.0;
-    var description = 'picks correct Stream at ' + bandwidthKbps + ' kbps';
+    var description =
+        'picks correct video Stream at ' + bandwidthKbps + ' kbps';
 
-    it(description, function(done) {
+    it(description, function() {
       abrManager.chooseStreams(streamSetsByType);
 
       abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
@@ -147,10 +138,69 @@ describe('SimpleAbrManager', function() {
 
       abrManager.enable();
 
-      // Move outside the startup interval.
-      loop = shaka.test.Util.fakeEventLoop(
-          startupInterval + 1, originalSetTimeout);
-      loop.then(function() {
+      // Make another call to segmentDownloaded() so switchCallback() is
+      // called.
+      abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
+
+      expect(switchCallback).toHaveBeenCalled();
+      expect(switchCallback.calls.argsFor(0)[0]).toEqual({
+        'audio': jasmine.objectContaining({bandwidth: audioBandwidth}),
+        'video': jasmine.objectContaining({bandwidth: videoBandwidth})
+      });
+    });
+  });
+
+  [5e5, 6e5].forEach(function(audioBandwidth) {
+    var videoBandwidth = 1e6;
+
+    // Simulate some segments being downloaded just above the desired
+    // bandwidth.
+    var bytesPerSecond =
+        sufficientBWMultiplier * (audioBandwidth + videoBandwidth) / 8.0;
+
+    var bandwidthKbps = (audioBandwidth + videoBandwidth) / 1000.0;
+    var description =
+        'picks correct audio Stream at ' + bandwidthKbps + ' kbps';
+
+    it(description, function() {
+      abrManager.chooseStreams(streamSetsByType);
+
+      abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
+      abrManager.segmentDownloaded(1000, 2000, bytesPerSecond);
+
+      abrManager.enable();
+
+      // Make another call to segmentDownloaded() so switchCallback() is
+      // called.
+      abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
+
+      expect(switchCallback).toHaveBeenCalled();
+      expect(switchCallback.calls.argsFor(0)[0]).toEqual({
+        'audio': jasmine.objectContaining({bandwidth: audioBandwidth}),
+        'video': jasmine.objectContaining({bandwidth: videoBandwidth})
+      });
+    });
+  });
+
+  it('picks lowest audio Stream when there is insufficient bandwidth',
+      function() {
+        // The lowest audio track will only be chosen if needed to fit the
+        // the lowest video track.
+        var audioBandwidth = 4e5;
+        var videoBandwidth = 5e5;
+
+        // Simulate some segments being downloaded just above the desired
+        // bandwidth.
+        var bytesPerSecond =
+            sufficientBWMultiplier * (audioBandwidth + videoBandwidth) / 8.0;
+
+        abrManager.chooseStreams(streamSetsByType);
+
+        abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
+        abrManager.segmentDownloaded(1000, 2000, bytesPerSecond);
+
+        abrManager.enable();
+
         // Make another call to segmentDownloaded() so switchCallback() is
         // called.
         abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
@@ -160,150 +210,79 @@ describe('SimpleAbrManager', function() {
           'audio': jasmine.objectContaining({bandwidth: audioBandwidth}),
           'video': jasmine.objectContaining({bandwidth: videoBandwidth})
         });
-      }).catch(fail).then(done);
+      });
+
+  it('does not call switchCallback() if not enabled', function() {
+    var audioBandwidth = 5e5;
+    var videoBandwidth = 2e6;
+    var bytesPerSecond =
+        sufficientBWMultiplier * (audioBandwidth + videoBandwidth) / 8.0;
+
+    abrManager.chooseStreams(streamSetsByType);
+
+    // Don't enable AbrManager.
+    abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
+    abrManager.segmentDownloaded(2000, 3000, bytesPerSecond);
+    abrManager.segmentDownloaded(4000, 5000, bytesPerSecond);
+    expect(switchCallback).not.toHaveBeenCalled();
+  });
+
+  it('does not call switchCallback() in switch interval', function() {
+    var audioBandwidth = 5e5;
+    var videoBandwidth = 3e6;
+    var bytesPerSecond =
+        sufficientBWMultiplier * (audioBandwidth + videoBandwidth) / 8.0;
+
+    abrManager.chooseStreams(streamSetsByType);
+
+    abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
+    abrManager.segmentDownloaded(2000, 3000, bytesPerSecond);
+
+    abrManager.enable();
+
+    abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
+    expect(switchCallback).toHaveBeenCalled();
+    switchCallback.calls.reset();
+
+    // Simulate drop in bandwidth.
+    audioBandwidth = 5e5;
+    videoBandwidth = 1e6;
+    bytesPerSecond =
+        sufficientBWMultiplier * (audioBandwidth + videoBandwidth) / 8.0;
+
+    abrManager.segmentDownloaded(4000, 5000, bytesPerSecond);
+    abrManager.segmentDownloaded(5000, 6000, bytesPerSecond);
+    abrManager.segmentDownloaded(6000, 7000, bytesPerSecond);
+    abrManager.segmentDownloaded(7000, 8000, bytesPerSecond);
+    abrManager.segmentDownloaded(8000, 9000, bytesPerSecond);
+    abrManager.segmentDownloaded(9000, 10000, bytesPerSecond);
+    abrManager.segmentDownloaded(10000, 11000, bytesPerSecond);
+
+    // Stay inside switch interval.
+    shaka.test.Util.fakeEventLoop(
+        (shaka.abr.SimpleAbrManager.SWITCH_INTERVAL_MS / 1000.0) - 2);
+    abrManager.segmentDownloaded(10000, 11000, bytesPerSecond);
+
+    expect(switchCallback).not.toHaveBeenCalled();
+
+    // Move outside switch interval.
+    shaka.test.Util.fakeEventLoop(3);
+    abrManager.segmentDownloaded(12000, 13000, bytesPerSecond);
+
+    expect(switchCallback).toHaveBeenCalled();
+    expect(switchCallback.calls.argsFor(0)[0]).toEqual({
+      'audio': jasmine.objectContaining({bandwidth: audioBandwidth}),
+      'video': jasmine.objectContaining({bandwidth: videoBandwidth})
     });
   });
 
-  it('does not call switchCallback() if not enabled', function(done) {
-    var audioBandwidth = 5e5;
-    var videoBandwidth = 2e6;
-    var bytesPerSecond = 1.1 * (audioBandwidth + videoBandwidth) / 8.0;
-
-    abrManager.chooseStreams(streamSetsByType);
-
-    abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
-    abrManager.segmentDownloaded(2000, 3000, bytesPerSecond);
-
-    // Don't enable AbrManager.
-
-    // Move outside the startup interval.
-    loop = shaka.test.Util.fakeEventLoop(
-        startupInterval + 1, originalSetTimeout);
-    loop.then(function() {
-      abrManager.segmentDownloaded(4000, 5000, bytesPerSecond);
-      expect(switchCallback).not.toHaveBeenCalled();
-    }).catch(fail).then(done);
-  });
-
-  it('does not call switchCallback() until startup', function(done) {
-    var audioBandwidth = 5e5;
-    var videoBandwidth = 2e6;
-    var bytesPerSecond = 1.1 * (audioBandwidth + videoBandwidth) / 8.0;
-
-    abrManager.chooseStreams(streamSetsByType);
-
-    abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
-    abrManager.segmentDownloaded(2000, 3000, bytesPerSecond);
-
-    abrManager.enable();
-
-    // Stay inside startup interval
-    loop = shaka.test.Util.fakeEventLoop(
-        startupInterval - 2, originalSetTimeout);
-    loop.then(function() {
-      abrManager.segmentDownloaded(4000, 5000, bytesPerSecond);
-      expect(switchCallback).not.toHaveBeenCalled();
-
-      // Move outside startup interval.
-      loop = shaka.test.Util.fakeEventLoop(3, originalSetTimeout);
-      return loop;
-    }).then(function() {
-      abrManager.segmentDownloaded(6000, 7000, bytesPerSecond);
-
-      expect(switchCallback).toHaveBeenCalled();
-      expect(switchCallback.calls.argsFor(0)[0]).toEqual({
-        'audio': jasmine.objectContaining({bandwidth: audioBandwidth}),
-        'video': jasmine.objectContaining({bandwidth: videoBandwidth})
-      });
-    }).catch(fail).then(done);
-  });
-
-  it('does not call switchCallback() in switch interval', function(done) {
-    var audioBandwidth = 5e5;
-    var videoBandwidth = 3e6;
-    var bytesPerSecond = 1.1 * (audioBandwidth + videoBandwidth) / 8.0;
-
-    abrManager.chooseStreams(streamSetsByType);
-
-    abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
-    abrManager.segmentDownloaded(2000, 3000, bytesPerSecond);
-
-    abrManager.enable();
-
-    // Move outside the startup interval.
-    loop = shaka.test.Util.fakeEventLoop(
-        startupInterval + 1, originalSetTimeout);
-    loop.then(function() {
-      abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
-
-      expect(switchCallback).toHaveBeenCalled();
-      switchCallback.calls.reset();
-
-      // Simulate drop in bandwidth.
-      audioBandwidth = 5e5;
-      videoBandwidth = 1e6;
-      bytesPerSecond = 0.9 * (audioBandwidth + videoBandwidth) / 8.0;
-
-      abrManager.segmentDownloaded(5000, 6000, bytesPerSecond);
-      abrManager.segmentDownloaded(7000, 8000, bytesPerSecond);
-
-      // Stay inside switch interval.
-      loop = shaka.test.Util.fakeEventLoop(
-          (shaka.abr.SimpleAbrManager.SWITCH_INTERVAL_MS / 1000.0) - 2,
-          originalSetTimeout);
-      return loop;
-    }).then(function() {
-      abrManager.segmentDownloaded(10000, 11000, bytesPerSecond);
-
-      expect(switchCallback).not.toHaveBeenCalled();
-
-      // Move outside switch interval.
-      loop = shaka.test.Util.fakeEventLoop(3, originalSetTimeout);
-      return loop;
-    }).then(function() {
-      abrManager.segmentDownloaded(12000, 13000, bytesPerSecond);
-
-      expect(switchCallback).toHaveBeenCalled();
-      expect(switchCallback.calls.argsFor(0)[0]).toEqual({
-        'audio': jasmine.objectContaining({bandwidth: audioBandwidth}),
-        'video': jasmine.objectContaining({bandwidth: videoBandwidth})
-      });
-    }).catch(fail).then(done);
-  });
-
-  it('does not call switchCallback() if no changes are needed', function(done) {
-    // Simulate some segments being downloaded just above the needed bandwidth
-    // for the least stream.
-    var audioBandwidth = 5e5;
-    var videoBandwidth = 5e5;
-    var bytesPerSecond = 1.1 * (audioBandwidth + videoBandwidth) / 8.0;
-
-    abrManager.chooseStreams(streamSetsByType);
-
-    abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
-    abrManager.segmentDownloaded(1000, 2000, bytesPerSecond);
-
-    abrManager.enable();
-
-    // Move outside the startup interval.
-    loop = shaka.test.Util.fakeEventLoop(
-        startupInterval + 1, originalSetTimeout);
-    loop.then(function() {
-      // Make another call to segmentDownloaded(). switchCallback() will not be
-      // called because the best streams for the available bandwidth are already
-      // active.
-      abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
-
-      expect(switchCallback).not.toHaveBeenCalled();
-    }).catch(fail).then(done);
-  });
-
-  it('clears ahead on upgrade', function(done) {
+  it('does not clear the buffer on upgrade', function() {
     // Simulate some segments being downloaded at a high rate, to trigger an
     // upgrade.
     var audioBandwidth = 5e5;
     var videoBandwidth = 4e6;
-    var bytesPerSecond = 1.1 * (audioBandwidth + videoBandwidth) / 8.0;
+    var bytesPerSecond =
+        sufficientBWMultiplier * (audioBandwidth + videoBandwidth) / 8.0;
 
     abrManager.chooseStreams(streamSetsByType);
 
@@ -312,26 +291,22 @@ describe('SimpleAbrManager', function() {
 
     abrManager.enable();
 
-    // Move outside the startup interval.
-    loop = shaka.test.Util.fakeEventLoop(
-        startupInterval + 1, originalSetTimeout);
-    loop.then(function() {
-      // Make another call to segmentDownloaded(). switchCallback() will be
-      // called to upgrade.
-      abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
+    // Make another call to segmentDownloaded(). switchCallback() will be
+    // called to upgrade.
+    abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
 
-      // The second parameter is the number of seconds to leave in buffer.
-      expect(switchCallback).toHaveBeenCalledWith(
-          jasmine.any(Object), jasmine.any(Number));
-    }).catch(fail).then(done);
+    // The second parameter is missing to indicate that the buffer should not be
+    // cleared.
+    expect(switchCallback).toHaveBeenCalledWith(jasmine.any(Object));
   });
 
-  it('does not clear ahead on downgrade', function(done) {
+  it('does not clear the buffer on downgrade', function() {
     // Simulate some segments being downloaded at a low rate, to trigger a
     // downgrade.
     var audioBandwidth = 5e5;
     var videoBandwidth = 5e5;
-    var bytesPerSecond = 1.1 * (audioBandwidth + videoBandwidth) / 8.0;
+    var bytesPerSecond =
+        sufficientBWMultiplier * (audioBandwidth + videoBandwidth) / 8.0;
 
     // Set the default high so that the initial choice will be high-quality.
     abrManager.setDefaultEstimate(4e6);
@@ -342,18 +317,12 @@ describe('SimpleAbrManager', function() {
 
     abrManager.enable();
 
-    // Move outside the startup interval.
-    loop = shaka.test.Util.fakeEventLoop(
-        startupInterval + 1, originalSetTimeout);
-    loop.then(function() {
-      // Make another call to segmentDownloaded(). switchCallback() will be
-      // called to upgrade.
-      abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
+    // Make another call to segmentDownloaded(). switchCallback() will be
+    // called to downgrade.
+    abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
 
-      // The second parameter is undefined to indicate that the buffer should
-      // not be cleared
-      expect(switchCallback).toHaveBeenCalledWith(
-          jasmine.any(Object), undefined);
-    }).catch(fail).then(done);
+    // The second parameter is missing to indicate that the buffer should not be
+    // cleared.
+    expect(switchCallback).toHaveBeenCalledWith(jasmine.any(Object));
   });
 });
