@@ -390,6 +390,14 @@ describe('TtmlTextParser', function() {
         '</tt>');
   });
 
+  it('inserts a newline on br in a p block', function() {
+    verifyHelper(
+        [
+          {start: 62.05, end: 3723.2, text: 'Line1\nLine2'}
+        ],
+        '<tt><body><p begin="01:02.05" ' +
+        'end="01:02:03.200">Line1<br/>Line2</p></body></tt>');
+  });
 
   /**
    * @param {!Array} cues
