@@ -418,6 +418,25 @@ describe('TtmlTextParser', function() {
         '</tt>');
   });
 
+  it('aligns center when textAlign is center', function() {
+    verifyHelper(
+        [
+          {start: 62.05, end: 3723.2, text: 'Test', lineAlign: 'center',
+            align: 'middle', position: 'auto'}
+        ],
+        '<tt xmlns:tts="ttml#styling">' +
+        '<styling>' +
+        '<style xml:id="s1" tts:textAlign="center"/>' +
+        '</styling>' +
+        '<layout xmlns:tts="ttml#styling">' +
+        '<region xml:id="subtitleArea" />' +
+        '</layout>' +
+        '<body region="subtitleArea">' +
+        '<p begin="01:02.05" end="01:02:03.200" style="s1">Test</p>' +
+        '</body>' +
+        '</tt>');
+  });
+
   /**
    * @param {!Array} cues
    * @param {string} text
