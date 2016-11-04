@@ -399,6 +399,25 @@ describe('TtmlTextParser', function() {
         'end="01:02:03.200">Line1<br/>Line2</p></body></tt>');
   });
 
+  it('aligns left when textAlign is left', function() {
+    verifyHelper(
+        [
+          {start: 62.05, end: 3723.2, text: 'Test', lineAlign: 'start',
+            align: 'left'}
+        ],
+        '<tt xmlns:tts="ttml#styling">' +
+        '<styling>' +
+        '<style xml:id="s1" tts:textAlign="left"/>' +
+        '</styling>' +
+        '<layout xmlns:tts="ttml#styling">' +
+        '<region xml:id="subtitleArea" />' +
+        '</layout>' +
+        '<body region="subtitleArea">' +
+        '<p begin="01:02.05" end="01:02:03.200" style="s1">Test</p>' +
+        '</body>' +
+        '</tt>');
+  });
+
   /**
    * @param {!Array} cues
    * @param {string} text
@@ -416,6 +435,8 @@ describe('TtmlTextParser', function() {
       expect(result[i].endTime).toBeCloseTo(cues[i].end, 3);
       expect(result[i].text).toBe(cues[i].text);
 
+      if (cues[i].align)
+        expect(result[i].align).toBe(cues[i].align);
       if (cues[i].lineAlign)
         expect(result[i].lineAlign).toBe(cues[i].lineAlign);
       if (cues[i].size)
