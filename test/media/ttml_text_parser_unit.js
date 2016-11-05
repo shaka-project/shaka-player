@@ -399,7 +399,7 @@ describe('TtmlTextParser', function() {
         'end="01:02:03.200">Line1<br/>Line2</p></body></tt>');
   });
 
-  it('aligns left when textAlign is left', function() {
+  it('parses cue alignment from textAlign attribute', function() {
     verifyHelper(
         [
           {start: 62.05, end: 3723.2, text: 'Test', lineAlign: 'start',
@@ -416,9 +416,6 @@ describe('TtmlTextParser', function() {
         '<p begin="01:02.05" end="01:02:03.200" style="s1">Test</p>' +
         '</body>' +
         '</tt>');
-  });
-
-  it('aligns center when textAlign is center', function() {
     verifyHelper(
         [
           {start: 62.05, end: 3723.2, text: 'Test', lineAlign: 'center',
@@ -436,6 +433,7 @@ describe('TtmlTextParser', function() {
         '</body>' +
         '</tt>');
   });
+
 
   /**
    * @param {!Array} cues
