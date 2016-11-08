@@ -16,26 +16,22 @@
  */
 
 describe('TtmlTextParser', function() {
-  var mockCue = false;
+  var originalCueConstructor;
 
   beforeAll(function() {
-    // Mock out VTTCue if not supported.  These tests don't actually need
-    // VTTCue to do anything, this simply verifies the value of its members.
-    if (!window.VTTCue) {
-      mockCue = true;
-      window.VTTCue = function(start, end, text) {
-        this.startTime = start;
-        this.endTime = end;
-        this.text = text;
-      };
-    }
+    originalCueConstructor = shaka.media.TextEngine.CueConstructor;
   });
 
   afterAll(function() {
-    // Delete our mock.
-    if (mockCue) {
-      delete window.VTTCue;
-    }
+    shaka.media.TextEngine.CueConstructor = originalCueConstructor;
+  });
+
+  beforeEach(function() {
+    shaka.media.TextEngine.CueConstructor = function(start, end, text) {
+      this.startTime = start;
+      this.endTime = end;
+      this.text = text;
+    };
   });
 
   it('supports no cues', function() {
@@ -416,6 +412,23 @@ describe('TtmlTextParser', function() {
         '<p begin="01:02.05" end="01:02:03.200" style="s1">Test</p>' +
         '</body>' +
         '</tt>');
+  });
+
+
+  it('uses a workaround for browsers not supporting align=center', function() {
+
+    shaka.media.TextEngine.CueConstructor = function(start, end, text) {
+      var align = 'middle';
+      Object.defineProperty(this, 'align', {
+        get: function() { return align; },
+        set: function(newValue) { if (newValue != 'center') align = newValue; }
+      });
+      this.startTime = start;
+      this.endTime = end;
+      this.text = text;
+    };
+
+
     verifyHelper(
         [
           {start: 62.05, end: 3723.2, text: 'Test', lineAlign: 'center',
