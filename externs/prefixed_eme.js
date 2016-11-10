@@ -51,6 +51,7 @@ HTMLMediaElement.prototype.webkitGenerateKeyRequest =
  * @param {string} mimeType
  * @param {string=} opt_keySystem
  * @return {string} '', 'maybe', or 'probably'
+ * @override the standard one-argument version
  */
 HTMLVideoElement.prototype.canPlayType =
     function(mimeType, opt_keySystem) {};
