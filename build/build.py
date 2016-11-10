@@ -60,6 +60,9 @@ closure_opts = [
     # about the old one.
     '--jscomp_off=deprecatedAnnotations',
 
+    # Analyzer checks require explicit nullability, which is a pain.
+    '--jscomp_off=analyzerChecksInternal',
+
     '--extra_annotation_name=listens',
     '--extra_annotation_name=exportDoc',
 
