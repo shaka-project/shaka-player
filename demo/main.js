@@ -108,14 +108,14 @@ shakaDemo.init = function() {
   shaka.polyfill.installAll();
 
   if (!shaka.Player.isBrowserSupported()) {
-    var errorDisplayText = document.getElementById('errorDisplayText');
+    var errorDisplayLink = document.getElementById('errorDisplayLink');
     var error = 'Your browser is not supported!';
 
     // IE8 and other very old browsers don't have textContent.
-    if (errorDisplayText.textContent === undefined) {
-      errorDisplayText.innerText = error;
+    if (errorDisplayLink.textContent === undefined) {
+      errorDisplayLink.innerText = error;
     } else {
-      errorDisplayText.textContent = error;
+      errorDisplayLink.textContent = error;
     }
 
     // Disable the load button.
@@ -128,7 +128,16 @@ shakaDemo.init = function() {
     errorDisplayCloseButton.style.display = 'none';
 
     // Make sure the error is seen.
-    errorDisplayText.style.fontSize = '250%';
+    errorDisplayLink.style.fontSize = '250%';
+
+    // TODO: Link to docs about browser support.  For now, disable link.
+    errorDisplayLink.href = '#';
+    // Disable for newer browsers:
+    errorDisplayLink.style.pointerEvents = 'none';
+    // Disable for older browsers:
+    errorDisplayLink.style.textDecoration = 'none';
+    errorDisplayLink.style.cursor = 'default';
+    errorDisplayLink.onclick = function() { return false; };
 
     var errorDisplay = document.getElementById('errorDisplay');
     errorDisplay.style.display = 'block';
@@ -189,8 +198,12 @@ shakaDemo.onErrorEvent_ = function(event) {
 shakaDemo.onError_ = function(error) {
   console.error('Player error', error);
   var message = error.message || ('Error code ' + error.code);
+  var link = document.getElementById('errorDisplayLink');
+  link.href = '../docs/api/shaka.util.Error.html#value:' + error.code;
+  link.textContent = message;
+  // Make the link clickable only if we have an error code.
+  link.style.pointerEvents = error.code ? 'auto' : 'none';
   document.getElementById('errorDisplay').style.display = 'block';
-  document.getElementById('errorDisplayText').textContent = message;
 };
 
 
@@ -199,7 +212,9 @@ shakaDemo.onError_ = function(error) {
  */
 shakaDemo.closeError = function() {
   document.getElementById('errorDisplay').style.display = 'none';
-  document.getElementById('errorDisplayText').textContent = '';
+  var link = document.getElementById('errorDisplayLink');
+  link.href = '';
+  link.textContent = '';
 };
 
 
