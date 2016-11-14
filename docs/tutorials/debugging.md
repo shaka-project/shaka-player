@@ -19,8 +19,8 @@ code 1001".
 #### Looking up error codes
 
 Look at the Error we just logged.  It has `category: 1`, `code: 1001`.  To find
-out what that means, check the docs for {@link shaka.util.Error}.  There we find
-that `1001` means `BAD_HTTP_STATUS`:
+out what that means, click on the error, which takes you to the docs for
+{@link shaka.util.Error}.  There we find that `1001` means `BAD_HTTP_STATUS`:
 
 > An HTTP network request returned an HTTP status that indicated a failure.
 > error.data[0] is the URI.

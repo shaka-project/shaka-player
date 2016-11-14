@@ -201,19 +201,15 @@ summary {
 #errorDisplay {
   background-color: #d84a38;
   margin: 0;
-  padding: 0;
+  padding: 1em;
   line-height: 2em;
   text-align: center;
   width: 100%;
   display: none;
 }
 
-#errorDisplayText {
-  background-color: #d84a38;
+#errorDisplayLink {
   color: white;
-  margin-left: 2em;
-  margin-right: 2em;
-  float: center;
 }
 
 #errorDisplayCloseButton {
