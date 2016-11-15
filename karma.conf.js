@@ -272,6 +272,12 @@ module.exports = function(config) {
     // Run Player integration tests with uncompiled code for debugging.
     setClientArg(config, 'uncompiled', true);
   }
+
+  var hostname = getFlagValue('hostname');
+  if (hostname !== null) {
+    // Point the browsers to a hostname other than localhost.
+    config.set({hostname: hostname});
+  }
 };
 
 // Sets the value of an argument passed to the client.
