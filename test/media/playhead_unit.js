@@ -574,6 +574,51 @@ describe('Playhead', function() {
         });
       });
     });
+
+    it('leaves buffering state with small non-zero start time', function(done) {
+      video.readyState = HTMLMediaElement.HAVE_METADATA;
+
+      video.buffered = {
+        length: 0
+      };
+
+      video.duration = 60;
+      timeline.getDuration.and.returnValue(60);
+      timeline.getEarliestStart.and.returnValue(0);
+      timeline.getSegmentAvailabilityStart.and.returnValue(0);
+
+      playhead = new shaka.media.Playhead(
+          video,
+          timeline,
+          2 /* rebufferingGoal */,
+          0 /* startTime */,
+          onBuffering, onSeek);
+
+      videoOnSeeking();
+      expect(video.currentTime).toBe(0);
+      expect(playhead.getTime()).toBe(0);
+
+      onBuffering.and.callFake(function(buffering) {
+        expect(buffering).toEqual(true);
+
+        video.buffered = {
+          length: 1,
+          start: function(i) {
+            if (i == 0) return 0.2;
+            throw new Error('Unexpected index');
+          },
+          end: function(i) {
+            if (i == 0) return 5;
+            throw new Error('Unexpected index');
+          }
+        };
+
+        onBuffering.and.callFake(function(buffering) {
+          expect(buffering).toEqual(false);
+          done();
+        });
+      });
+    });
   });
 
   function createMockVideo() {
