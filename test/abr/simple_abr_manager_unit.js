@@ -200,9 +200,9 @@ describe('SimpleAbrManager', function() {
 
     expect(switchCallback).toHaveBeenCalled();
     expect(switchCallback.calls.argsFor(0)[0]).toEqual({
-          'audio': jasmine.objectContaining({bandwidth: audioBandwidth}),
-          'video': jasmine.objectContaining({bandwidth: videoBandwidth})
-        });
+      'audio': jasmine.objectContaining({bandwidth: audioBandwidth}),
+      'video': jasmine.objectContaining({bandwidth: videoBandwidth})
+    });
   });
 
   it('picks lowest audio Stream when there is insufficient bandwidth',
