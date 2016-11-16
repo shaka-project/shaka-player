@@ -399,7 +399,7 @@ describe('TtmlTextParser', function() {
     verifyHelper(
         [
           {start: 62.05, end: 3723.2, text: 'Test', lineAlign: 'start',
-            align: 'left'}
+            align: 'left', positionAlign: 'line-left'}
         ],
         '<tt xmlns:tts="ttml#styling">' +
         '<styling>' +
@@ -432,7 +432,7 @@ describe('TtmlTextParser', function() {
     verifyHelper(
         [
           {start: 62.05, end: 3723.2, text: 'Test', lineAlign: 'center',
-            align: 'middle', position: 'auto'}
+            align: 'middle', position: 'auto', positionAlign: 'center'}
         ],
         '<tt xmlns:tts="ttml#styling">' +
         '<styling>' +
@@ -469,6 +469,8 @@ describe('TtmlTextParser', function() {
         expect(result[i].align).toBe(cues[i].align);
       if (cues[i].lineAlign)
         expect(result[i].lineAlign).toBe(cues[i].lineAlign);
+      if (cues[i].positionAlign)
+        expect(result[i].positionAlign).toBe(cues[i].positionAlign);
       if (cues[i].size)
         expect(result[i].size).toBe(cues[i].size);
       if (cues[i].line)
