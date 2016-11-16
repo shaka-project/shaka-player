@@ -411,11 +411,15 @@ describe('StreamingEngine', function() {
       setupFakeGetTime(0);
     });
 
+    expect(mediaSourceEngine.reinitText).not.toHaveBeenCalled();
+
     onChooseStreams.and.callFake(function(period) {
       expect(period).toBe(manifest.periods[0]);
 
       onCanSwitch.and.callFake(function() {
         expect(alternateVideoStream1.createSegmentIndex).toHaveBeenCalled();
+        expect(mediaSourceEngine.reinitText).not.toHaveBeenCalled();
+        mediaSourceEngine.reinitText.calls.reset();
         onCanSwitch.and.throwError(new Error());
       });
 
@@ -441,6 +445,8 @@ describe('StreamingEngine', function() {
           expect(audioStream2.createSegmentIndex).toHaveBeenCalled();
           expect(videoStream2.createSegmentIndex).toHaveBeenCalled();
           expect(textStream2.createSegmentIndex).toHaveBeenCalled();
+          expect(mediaSourceEngine.reinitText).toHaveBeenCalled();
+          mediaSourceEngine.reinitText.calls.reset();
           onCanSwitch.and.throwError(new Error());
         });
 

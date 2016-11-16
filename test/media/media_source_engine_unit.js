@@ -863,6 +863,7 @@ describe('MediaSourceEngine', function() {
   function createMockTextEngineCtor() {
     var ctor = jasmine.createSpy('TextEngine');
     ctor.isTypeSupported = function() { return true; };
+    ctor.prototype.initParser = function() {};
     ctor.prototype.addEventListener = function() {};
     ctor.prototype.removeEventListener = function() {};
     return ctor;

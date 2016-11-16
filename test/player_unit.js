@@ -656,9 +656,12 @@ describe('Player', function() {
           .addStreamSet('text')
             .language('es')
             .addStream(6).bandwidth(100).kind('caption')
+                         .mime('text/vtt')
           .addStreamSet('text')
             .language('en')
             .addStream(7).bandwidth(100).kind('caption')
+                         .mime('application/ttml+xml')
+          // Both text tracks should remain, even with different MIME types.
         .build();
 
       tracks = [
@@ -672,7 +675,7 @@ describe('Player', function() {
           width: null,
           height: null,
           frameRate: undefined,
-          codecs: 'avc1.4d401f'
+          codecs: 'mp4a.40.2'
         },
         {
           id: 2,
@@ -684,7 +687,7 @@ describe('Player', function() {
           width: null,
           height: null,
           frameRate: undefined,
-          codecs: 'avc1.4d401f'
+          codecs: 'mp4a.40.2'
         },
         {
           id: 4,
@@ -720,7 +723,7 @@ describe('Player', function() {
           width: null,
           height: null,
           frameRate: undefined,
-          codecs: 'avc1.4d401f'
+          codecs: null
         },
         {
           id: 7,
@@ -732,7 +735,7 @@ describe('Player', function() {
           width: null,
           height: null,
           frameRate: undefined,
-          codecs: 'avc1.4d401f'
+          codecs: null
         }
       ];
     });
