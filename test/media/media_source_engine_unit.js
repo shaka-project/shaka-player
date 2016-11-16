@@ -340,7 +340,7 @@ describe('MediaSourceEngine', function() {
     });
   });
 
-  describe('remove and clear', function() {
+  describe('remove', function() {
     beforeEach(function() {
       captureEvents(audioSourceBuffer, ['updateend', 'error']);
       captureEvents(videoSourceBuffer, ['updateend', 'error']);
@@ -469,6 +469,14 @@ describe('MediaSourceEngine', function() {
         done();
       });
     });
+  });
+
+  describe('clear', function() {
+    beforeEach(function() {
+      captureEvents(audioSourceBuffer, ['updateend', 'error']);
+      captureEvents(videoSourceBuffer, ['updateend', 'error']);
+      mediaSourceEngine.init({'audio': 'audio/foo', 'video': 'video/foo'});
+    });
 
     it('clears the given data', function(done) {
       mockMediaSource.durationGetter_.and.returnValue(20);
@@ -476,6 +484,40 @@ describe('MediaSourceEngine', function() {
         expect(audioSourceBuffer.remove.calls.count()).toBe(1);
         expect(audioSourceBuffer.remove.calls.argsFor(0)[0]).toBe(0);
         expect(audioSourceBuffer.remove.calls.argsFor(0)[1] >= 20).toBeTruthy();
+        done();
+      });
+      audioSourceBuffer.updateend();
+    });
+
+    it('does not seek', function(done) {
+      // We had a bug in which we got into a seek loop. Seeking caused
+      // StreamingEngine to call clear().  Clearing triggered a pipeline flush
+      // which was implemented by seeking.  See issue #569.
+
+      // This loop is difficult to test for directly.
+
+      // A unit test on StreamingEngine would not suffice, since reproduction of
+      // the bug would involve making the mock MediaSourceEngine seek on clear.
+      // Since the fix was to remove the implicit seek, this behavior would then
+      // be removed from the mock, which would render the test useless.
+
+      // An integration test involving both StreamingEngine and MediaSourcEngine
+      // would also be problematic.  The bug involved a race, so it would be
+      // difficult to reproduce the necessary timing.  And if we succeeded, it
+      // would be tough to detect that we were definitely in a seek loop, since
+      // nothing was mocked.
+
+      // So the best option seems to be to enforce that clear() does not result
+      // in a seek.  This can be done here, in a unit test on MediaSourceEngine.
+      // It does not reproduce the seek loop, but it does ensure that the test
+      // would fail if we ever reintroduced this behavior.
+
+      var originalTime = 10;
+      mockVideo.currentTime = originalTime;
+
+      mockMediaSource.durationGetter_.and.returnValue(20);
+      mediaSourceEngine.clear('audio').then(function() {
+        expect(mockVideo.currentTime).toBe(originalTime);
         done();
       });
       audioSourceBuffer.updateend();
