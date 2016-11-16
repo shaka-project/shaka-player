@@ -16,8 +16,8 @@
  */
 
 /**
- * @fileoverview Externs for TextTrack which are missing from the closure
- * compiler.
+ * @fileoverview Externs for TextTrack and TextTrackCue which are
+ * missing from the closure compiler.
  *
  * @externs
  */
@@ -25,3 +25,23 @@
 
 /** @type {string} */
 TextTrack.prototype.label;
+
+
+/** @type {string} */
+TextTrackCue.prototype.positionAlign;
+
+
+/** @type {string} */
+TextTrackCue.prototype.lineAlign;
+
+
+/** @type {number|null|string} */
+TextTrackCue.prototype.line;
+
+
+/** @type {string} */
+TextTrackCue.prototype.vertical;
+
+
+/** @type {boolean} */
+TextTrackCue.prototype.snapToLines;
