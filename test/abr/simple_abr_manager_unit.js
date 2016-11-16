@@ -250,4 +250,27 @@ describe('SimpleAbrManager', function() {
     // cleared.
     expect(switchCallback).toHaveBeenCalledWith(jasmine.any(Object));
   });
+
+  it('can handle 0 duration segments', function() {
+    var audioBandwidth = 5e5;
+    var videoBandwidth = 2e6;
+    var bytesPerSecond =
+        sufficientBWMultiplier * (audioBandwidth + videoBandwidth) / 8.0;
+
+    abrManager.chooseStreams(streamSetsByType);
+
+    // 0 duration segment shouldn't cause us to get stuck on the lowest variant
+    abrManager.segmentDownloaded(1000, 1000, bytesPerSecond);
+    abrManager.segmentDownloaded(2000, 3000, bytesPerSecond);
+
+    abrManager.enable();
+
+    abrManager.segmentDownloaded(4000, 5000, bytesPerSecond);
+
+    expect(switchCallback).toHaveBeenCalled();
+    expect(switchCallback.calls.argsFor(0)[0]).toEqual({
+      'audio': jasmine.objectContaining({bandwidth: audioBandwidth}),
+      'video': jasmine.objectContaining({bandwidth: videoBandwidth})
+    });
+  });
 });
