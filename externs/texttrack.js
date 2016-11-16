@@ -27,9 +27,21 @@
 TextTrack.prototype.label;
 
 
-/** @type {string} */
+/** @type {string} */
 TextTrackCue.prototype.positionAlign;
 
 
-/** @type {string} */
+/** @type {string} */
 TextTrackCue.prototype.lineAlign;
+
+
+/** @type {number|null|string} */
+TextTrackCue.prototype.line;
+
+
+/** @type {string} */
+TextTrackCue.prototype.vertical;
+
+
+/** @type {boolean} */
+TextTrackCue.prototype.snapToLines;
