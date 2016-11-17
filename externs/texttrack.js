@@ -45,3 +45,36 @@ TextTrackCue.prototype.vertical;
 
 /** @type {boolean} */
 TextTrackCue.prototype.snapToLines;
+
+
+/** @type {VTTRegion} */
+TextTrackCue.prototype.region;
+
+
+/** @type {number} */
+VTTRegion.prototype.width;
+
+
+/** @type {number} */
+VTTRegion.prototype.lines;
+
+
+/** @type {number} */
+VTTRegion.prototype.regionAnchorX;
+
+
+/** @type {number} */
+VTTRegion.prototype.regionAnchorY;
+
+
+/** @type {number} */
+VTTRegion.prototype.viewportAnchorX;
+
+
+/** @type {number} */
+VTTRegion.prototype.viewportAnchorX;
+
+
+/** @type {string} */
+VTTRegion.prototype.scroll;
+
