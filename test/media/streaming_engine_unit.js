@@ -496,7 +496,7 @@ describe('StreamingEngine', function() {
             'audio': 'audio/mp4; codecs="mp4a.40.2"',
             'video': 'video/mp4; codecs="avc1.42c01e"',
             'text': 'text/vtt'
-          }, false);
+          }, false, null);
       expect(mediaSourceEngine.init.calls.count()).toBe(1);
       mediaSourceEngine.init.calls.reset();
 
