@@ -32,7 +32,7 @@ describe('TextEngine', function() {
     mockParser = jasmine.createSpy('mockParser');
     mockTrack = createMockTrack();
     TextEngine.registerParser(dummyMimeType, mockParser);
-    textEngine = new TextEngine(mockTrack, false);
+    textEngine = new TextEngine(mockTrack, false, null);
     textEngine.initParser(dummyMimeType);
   });
 

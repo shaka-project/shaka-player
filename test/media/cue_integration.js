@@ -65,6 +65,7 @@ describe('Cue', function() {
    */
   function parseVtt(text, opt_offset) {
     var data = shaka.util.StringUtils.toUTF8(text);
-    return shaka.media.VttTextParser(data, opt_offset || 0, null, null, false);
+    return shaka.media.VttTextParser(data, opt_offset || 0, null, null, false,
+        null);
   }
 });
