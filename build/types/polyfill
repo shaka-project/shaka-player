@@ -8,3 +8,4 @@
 +../../lib/polyfill/patchedmediakeys_webkit.js
 +../../lib/polyfill/promise.js
 +../../lib/polyfill/videoplaybackquality.js
++../../lib/polyfill/vttcue.js
