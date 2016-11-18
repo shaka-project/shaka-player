@@ -216,6 +216,7 @@ module.exports = function(config) {
     },
 
     coverageReporter: {
+      includeAllSources: true,
       reporters: [
         { type: 'text' },
       ],
@@ -236,6 +237,7 @@ module.exports = function(config) {
       coverageReporter: {
         reporters: [
           { type: 'html', dir: 'coverage' },
+          { type: 'cobertura', dir: 'coverage', file: 'coverage.xml' },
         ],
       },
     });
