@@ -91,10 +91,10 @@ describe('VttTextParser', function() {
         'Test');
   });
 
-  it('accounts for offset', function() {
+  it('ignores offset', function() {
     verifyHelper(
         [
-          {start: 27, end: 47, text: 'Test'}
+          {start: 20, end: 40, text: 'Test'}
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000\n' +
