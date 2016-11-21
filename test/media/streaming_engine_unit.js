@@ -654,12 +654,18 @@ describe('StreamingEngine', function() {
   });
 
   describe('handles seeks (VOD)', function() {
+    var onTick;
+    var stub = function() {};
+
     beforeEach(function() {
       setupVod();
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
       createStreamingEngine();
 
       onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+
+      onTick = jasmine.createSpy('onTick');
+      onTick.and.callFake(stub);
     });
 
     it('into buffered regions', function() {
@@ -793,13 +799,16 @@ describe('StreamingEngine', function() {
         playheadTime += 15;
         streamingEngine.seeked();
 
-        onChooseStreams.and.callFake(function(period) {
-          expect(period).toBe(manifest.periods[1]);
-
+        onTick.and.callFake(function() {
           // Verify that all buffers have been cleared.
           expect(mediaSourceEngine.clear).toHaveBeenCalledWith('audio');
           expect(mediaSourceEngine.clear).toHaveBeenCalledWith('video');
           expect(mediaSourceEngine.clear).toHaveBeenCalledWith('text');
+          onTick.and.callFake(stub);
+        });
+
+        onChooseStreams.and.callFake(function(period) {
+          expect(period).toBe(manifest.periods[1]);
 
           // Verify buffers.
           expect(mediaSourceEngine.initSegments).toEqual({
@@ -823,7 +832,7 @@ describe('StreamingEngine', function() {
       // Here we go!
       streamingEngine.init();
 
-      runTest();
+      runTest(onTick);
       // Verify buffers.
       expect(mediaSourceEngine.initSegments).toEqual({
         audio: [false, true],
@@ -872,13 +881,16 @@ describe('StreamingEngine', function() {
         playheadTime -= 20;
         streamingEngine.seeked();
 
-        onChooseStreams.and.callFake(function(period) {
-          expect(period).toBe(manifest.periods[0]);
-
+        onTick.and.callFake(function() {
           // Verify that all buffers have been cleared.
           expect(mediaSourceEngine.clear).toHaveBeenCalledWith('audio');
           expect(mediaSourceEngine.clear).toHaveBeenCalledWith('video');
           expect(mediaSourceEngine.clear).toHaveBeenCalledWith('text');
+          onTick.and.callFake(stub);
+        });
+
+        onChooseStreams.and.callFake(function(period) {
+          expect(period).toBe(manifest.periods[0]);
 
           onChooseStreams.and.callFake(function(period) {
             expect(period).toBe(manifest.periods[1]);
@@ -911,7 +923,7 @@ describe('StreamingEngine', function() {
       // Here we go!
       streamingEngine.init();
 
-      runTest();
+      runTest(onTick);
       // Verify buffers.
       expect(mediaSourceEngine.initSegments).toEqual({
         audio: [false, true],
@@ -943,10 +955,14 @@ describe('StreamingEngine', function() {
         playhead.getTime.and.returnValue(15);
         streamingEngine.seeked();
 
+        onTick.and.callFake(function() {
+          // Nothing should have been cleared.
+          expect(mediaSourceEngine.clear).not.toHaveBeenCalled();
+          onTick.and.callFake(stub);
+        });
+
         onChooseStreams.and.callFake(function(period) {
           expect(period).toBe(manifest.periods[1]);
-
-          expect(mediaSourceEngine.clear).not.toHaveBeenCalled();
 
           // Verify buffers.
           expect(mediaSourceEngine.initSegments).toEqual({
@@ -974,7 +990,7 @@ describe('StreamingEngine', function() {
       // Here we go!
       streamingEngine.init();
 
-      runTest();
+      runTest(onTick);
       // Verify buffers.
       expect(mediaSourceEngine.initSegments).toEqual({
         audio: [false, true],
