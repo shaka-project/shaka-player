@@ -270,6 +270,12 @@ module.exports = function(config) {
     setClientArg(config, 'external', true);
   }
 
+  if (flagPresent('quarantined')) {
+    // Run quarantined tests which do not consistently pass.
+    // Skipped by default.
+    setClientArg(config, 'quarantined', true);
+  }
+
   if (flagPresent('uncompiled')) {
     // Run Player integration tests with uncompiled code for debugging.
     setClientArg(config, 'uncompiled', true);

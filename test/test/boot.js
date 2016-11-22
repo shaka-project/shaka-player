@@ -122,4 +122,15 @@
     it(name, filterShim(callback, 'external',
         'Skipping tests that use external resources.'));
   };
+
+  /**
+   * Run a test that has been quarantined.
+   *
+   * @param {string} name
+   * @param {jasmine.Callback} callback
+   */
+  window.quarantined_it = function(name, callback) {
+    it(name, filterShim(callback, 'quarantined',
+        'Skipping tests that are quarantined.'));
+  };
 })();
