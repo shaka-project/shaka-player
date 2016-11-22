@@ -146,7 +146,8 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         setTimeoutSpy.calls.reset();
       });
 
-      it('uses baseDelay', function(done) {
+      // QUARANTINED: this test does not pass 100% of the time on IE11.
+      quarantined_it('uses baseDelay', function(done) {
         var request = createRequest('reject://foo', {
           maxAttempts: 2,
           baseDelay: baseDelay,
@@ -164,7 +165,8 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
             .then(done);
       });
 
-      it('uses backoffFactor', function(done) {
+      // QUARANTINED: this test does not pass 100% of the time on IE11.
+      quarantined_it('uses backoffFactor', function(done) {
         var request = createRequest('reject://foo', {
           maxAttempts: 3,
           baseDelay: baseDelay,
@@ -184,7 +186,8 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
             .then(done);
       });
 
-      it('uses fuzzFactor', function(done) {
+      // QUARANTINED: this test does not pass 100% of the time on IE11.
+      quarantined_it('uses fuzzFactor', function(done) {
         var request = createRequest('reject://foo', {
           maxAttempts: 2,
           baseDelay: baseDelay,
