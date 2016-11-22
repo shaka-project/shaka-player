@@ -145,97 +145,98 @@ describe('DrmEngine', function() {
   });
 
   describe('basic flow', function() {
-    it('gets a license and can play encrypted segments', function(done) {
-      checkKeySystems();
+    external_it('gets a license and can play encrypted segments',
+        function(done) {
+          checkKeySystems();
 
-      // The error callback should not be invoked.
-      onErrorSpy.and.callFake(fail);
+          // The error callback should not be invoked.
+          onErrorSpy.and.callFake(fail);
 
-      var originalRequest = networkingEngine.request;
-      var requestComplete;
-      var requestSpy = jasmine.createSpy('request');
-      var requestMade = new shaka.util.PublicPromise();
-      requestSpy.and.callFake(function() {
-        requestMade.resolve();
-        requestComplete = originalRequest.apply(this, arguments);
-        return requestComplete;
-      });
-      networkingEngine.request = requestSpy;
+          var originalRequest = networkingEngine.request;
+          var requestComplete;
+          var requestSpy = jasmine.createSpy('request');
+          var requestMade = new shaka.util.PublicPromise();
+          requestSpy.and.callFake(function() {
+            requestMade.resolve();
+            requestComplete = originalRequest.apply(this, arguments);
+            return requestComplete;
+          });
+          networkingEngine.request = requestSpy;
 
-      var encryptedEventSeen = new shaka.util.PublicPromise();
-      eventManager.listen(video, 'encrypted', function() {
-        encryptedEventSeen.resolve();
-      });
-      eventManager.listen(video, 'error', function() {
-        fail('MediaError code ' + video.error.code);
-        var extended = video.error.msExtendedCode;
-        if (extended) {
-          if (extended < 0) {
-            extended += Math.pow(2, 32);
-          }
-          fail('MediaError msExtendedCode ' + extended.toString(16));
-        }
-      });
+          var encryptedEventSeen = new shaka.util.PublicPromise();
+          eventManager.listen(video, 'encrypted', function() {
+            encryptedEventSeen.resolve();
+          });
+          eventManager.listen(video, 'error', function() {
+            fail('MediaError code ' + video.error.code);
+            var extended = video.error.msExtendedCode;
+            if (extended) {
+              if (extended < 0) {
+                extended += Math.pow(2, 32);
+              }
+              fail('MediaError msExtendedCode ' + extended.toString(16));
+            }
+          });
 
-      var keyStatusEventSeen = new shaka.util.PublicPromise();
-      onKeyStatusSpy.and.callFake(function() {
-        keyStatusEventSeen.resolve();
-      });
+          var keyStatusEventSeen = new shaka.util.PublicPromise();
+          onKeyStatusSpy.and.callFake(function() {
+            keyStatusEventSeen.resolve();
+          });
 
-      drmEngine.init(manifest, /* offline */ false).then(function() {
-        return drmEngine.attach(video);
-      }).then(function() {
-        return mediaSourceEngine.appendBuffer('video', videoInitSegment,
-                                              null, null);
-      }).then(function() {
-        return mediaSourceEngine.appendBuffer('audio', audioInitSegment,
-                                              null, null);
-      }).then(function() {
-        return encryptedEventSeen;
-      }).then(function() {
-        // With PlayReady, a persistent license policy can cause a different
-        // chain of events.  In particular, the request is bypassed and we get
-        // a usable key right away.
-        return Promise.race([requestMade, keyStatusEventSeen]);
-      }).then(function() {
-        if (requestSpy.calls.count()) {
-          // We made a license request.
-          // Only one request should have been made.
-          expect(requestSpy.calls.count()).toBe(1);
-          // So it's reasonable to assume that this requestComplete Promise is
-          // waiting on the correct request.
-          return requestComplete;
-        } else {
-          // This was probably a PlayReady persistent license.
-        }
-      }).then(function() {
-        return keyStatusEventSeen;
-      }).then(function() {
-        var call = onKeyStatusSpy.calls.mostRecent();
-        if (call) {
-          var map = call.args[0];
-          expect(Object.keys(map).length).not.toBe(0);
-          for (var k in map) {
-            expect(map[k]).toBe('usable');
-          }
-        }
+          drmEngine.init(manifest, /* offline */ false).then(function() {
+            return drmEngine.attach(video);
+          }).then(function() {
+            return mediaSourceEngine.appendBuffer('video', videoInitSegment,
+                                                  null, null);
+          }).then(function() {
+            return mediaSourceEngine.appendBuffer('audio', audioInitSegment,
+                                                  null, null);
+          }).then(function() {
+            return encryptedEventSeen;
+          }).then(function() {
+            // With PlayReady, a persistent license policy can cause a different
+            // chain of events.  In particular, the request is bypassed and we
+            // get a usable key right away.
+            return Promise.race([requestMade, keyStatusEventSeen]);
+          }).then(function() {
+            if (requestSpy.calls.count()) {
+              // We made a license request.
+              // Only one request should have been made.
+              expect(requestSpy.calls.count()).toBe(1);
+              // So it's reasonable to assume that this requestComplete Promise
+              // is waiting on the correct request.
+              return requestComplete;
+            } else {
+              // This was probably a PlayReady persistent license.
+            }
+          }).then(function() {
+            return keyStatusEventSeen;
+          }).then(function() {
+            var call = onKeyStatusSpy.calls.mostRecent();
+            if (call) {
+              var map = call.args[0];
+              expect(Object.keys(map).length).not.toBe(0);
+              for (var k in map) {
+                expect(map[k]).toBe('usable');
+              }
+            }
 
-        return mediaSourceEngine.appendBuffer('video', videoSegment,
-                                              null, null);
-      }).then(function() {
-        return mediaSourceEngine.appendBuffer('audio', audioSegment,
-                                              null, null);
-      }).then(function() {
-        expect(video.buffered.end(0)).toBeGreaterThan(0);
-        video.play();
-        // Try to play for 5 seconds.
-        return shaka.test.Util.delay(5);
-      }).then(function() {
-        // Something should have played by now.
-        expect(video.readyState).toBeGreaterThan(1);
-        expect(video.currentTime).toBeGreaterThan(0);
-      }).catch(fail).then(done);
-    });
+            return mediaSourceEngine.appendBuffer('video', videoSegment,
+                                                  null, null);
+          }).then(function() {
+            return mediaSourceEngine.appendBuffer('audio', audioSegment,
+                                                  null, null);
+          }).then(function() {
+            expect(video.buffered.end(0)).toBeGreaterThan(0);
+            video.play();
+            // Try to play for 5 seconds.
+            return shaka.test.Util.delay(5);
+          }).then(function() {
+            // Something should have played by now.
+            expect(video.readyState).toBeGreaterThan(1);
+            expect(video.currentTime).toBeGreaterThan(0);
+          }).catch(fail).then(done);
+        });
   });  // describe('basic flow')
 
   function checkKeySystems() {

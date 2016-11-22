@@ -25,7 +25,7 @@
 var jasmine = {};
 
 
-/** @typedef {function(function())} */
+/** @typedef {(function(function())|function())} */
 jasmine.Callback;
 
 
