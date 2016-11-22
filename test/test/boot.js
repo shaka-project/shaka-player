@@ -78,4 +78,48 @@
       shaka.log.setLevel(shaka.log.Level.INFO);
     }
   });
+
+  /**
+   * Returns a Jasmine callback which shims the real callback and checks for
+   * a certain client arg.  The test will only be run if that argument is
+   * specified on the command-line.
+   *
+   * @param {jasmine.Callback} callback  The test callback.
+   * @param {string} clientArg  The command-line arg that must be present.
+   * @param {string} skipMessage  The message used when skipping a test.
+   * @return {jasmine.Callback}
+   */
+  function filterShim(callback, clientArg, skipMessage) {
+    if (callback.length) {
+      // This callback is for an async test.  Replace it with an async shim.
+      return function(done) {
+        if (shaka.test.Util.getClientArg(clientArg)) {
+          callback(done);
+        } else {
+          pending(skipMessage);
+          done();
+        }
+      };
+    } else {
+      // This callback is for a synchronous test.  Use a synchronous shim.
+      return function() {
+        if (shaka.test.Util.getClientArg(clientArg)) {
+          callback();
+        } else {
+          pending(skipMessage);
+        }
+      };
+    }
+  }
+
+  /**
+   * Run a test that uses external resources.
+   *
+   * @param {string} name
+   * @param {jasmine.Callback} callback
+   */
+  window.external_it = function(name, callback) {
+    it(name, filterShim(callback, 'external',
+        'Skipping tests that use external resources.'));
+  };
 })();
