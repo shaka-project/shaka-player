@@ -45,6 +45,7 @@ describe('Playhead', function() {
     videoOnLoadedMetadata = undefined;
     videoOnSeeking = undefined;
     videoOnPlaying = undefined;
+    videoOnRateChange = undefined;
 
     onBuffering = jasmine.createSpy('onBuffering');
     onSeek = jasmine.createSpy('onSeek');
@@ -373,81 +374,89 @@ describe('Playhead', function() {
     expect(onSeek).toHaveBeenCalled();
   });
 
-  it('clamps playhead after resuming', function() {
-    video.readyState = HTMLMediaElement.HAVE_METADATA;
+  describe('clamps playhead after resuming', function() {
+    beforeEach(function() {
+      video.readyState = HTMLMediaElement.HAVE_METADATA;
 
-    video.buffered = {
-      length: 1,
-      start: function(i) {
-        if (i == 0) return 5;
-        throw new Error('Unexpected index');
-      },
-      end: function(i) {
-        if (i == 0) return 35;
-        throw new Error('Unexpected index');
-      }
-    };
+      video.buffered = {
+        length: 1,
+        start: function(i) {
+          if (i == 0) return 5;
+          throw new Error('Unexpected index');
+        },
+        end: function(i) {
+          if (i == 0) return 35;
+          throw new Error('Unexpected index');
+        }
+      };
+    });
 
-    // Live case:
-    timeline.isLive.and.returnValue(true);
-    timeline.getEarliestStart.and.returnValue(5);
-    timeline.getSegmentAvailabilityStart.and.returnValue(5);
-    timeline.getSegmentAvailabilityEnd.and.returnValue(60);
-    timeline.getSegmentAvailabilityDuration.and.returnValue(30);
+    it('(live case)', function() {
+      timeline.isLive.and.returnValue(true);
+      timeline.getEarliestStart.and.returnValue(5);
+      timeline.getSegmentAvailabilityStart.and.returnValue(5);
+      timeline.getSegmentAvailabilityEnd.and.returnValue(60);
+      timeline.getSegmentAvailabilityDuration.and.returnValue(30);
 
-    playhead = new shaka.media.Playhead(
-        video,
-        timeline,
-        10 /* rebufferingGoal */,
-        5 /* startTime */,
-        onBuffering, onSeek);
+      playhead = new shaka.media.Playhead(
+          video,
+          timeline,
+          10 /* rebufferingGoal */,
+          5 /* startTime */,
+          onBuffering, onSeek);
 
-    videoOnSeeking();
-    expect(video.currentTime).toBe(5);
-    expect(playhead.getTime()).toBe(5);
+      videoOnSeeking();
+      expect(video.currentTime).toBe(5);
+      expect(playhead.getTime()).toBe(5);
 
-    // Simulate pausing.
-    timeline.getEarliestStart.and.returnValue(10);
-    timeline.getSegmentAvailabilityStart.and.returnValue(10);
-    timeline.getSegmentAvailabilityEnd.and.returnValue(70);
-    timeline.getSegmentAvailabilityDuration.and.returnValue(30);
+      // Simulate pausing.
+      timeline.getEarliestStart.and.returnValue(10);
+      timeline.getSegmentAvailabilityStart.and.returnValue(10);
+      timeline.getSegmentAvailabilityEnd.and.returnValue(70);
+      timeline.getSegmentAvailabilityDuration.and.returnValue(30);
 
-    // left = start + 1 = 10 + 1 = 11
-    // safe = left + rebufferingGoal = 11 + 10 = 21
+      // left = start + 1 = 10 + 1 = 11
+      // safe = left + rebufferingGoal = 11 + 10 = 21
 
-    // The playhead should move to 23 (safe + 2) after resuming, which will
-    // cause a 'seeking' event.
-    videoOnPlaying();
-    expect(video.currentTime).toBe(23);
-    videoOnSeeking();
-    expect(playhead.getTime()).toBe(23);
-    expect(onSeek).toHaveBeenCalled();
+      // The playhead should move to 23 (safe + 2) after resuming, which will
+      // cause a 'seeking' event.
+      videoOnPlaying();
+      expect(video.currentTime).toBe(23);
+      videoOnSeeking();
+      expect(playhead.getTime()).toBe(23);
+      expect(onSeek).toHaveBeenCalled();
+    });
 
-    // VOD case:
-    timeline.isLive.and.returnValue(false);
-    timeline.getEarliestStart.and.returnValue(5);
-    timeline.getSegmentAvailabilityStart.and.returnValue(5);
-    timeline.getSegmentAvailabilityEnd.and.returnValue(60);
-    timeline.getSegmentAvailabilityDuration.and.returnValue(30);
+    it('(VOD case)', function() {
+      timeline.isLive.and.returnValue(false);
+      timeline.getEarliestStart.and.returnValue(5);
+      timeline.getSegmentAvailabilityStart.and.returnValue(5);
+      timeline.getSegmentAvailabilityEnd.and.returnValue(60);
+      timeline.getSegmentAvailabilityDuration.and.returnValue(30);
 
-    playhead = new shaka.media.Playhead(
-        video,
-        timeline,
-        10 /* rebufferingGoal */,
-        5 /* startTime */,
-        onBuffering, onSeek);
+      playhead = new shaka.media.Playhead(
+          video,
+          timeline,
+          10 /* rebufferingGoal */,
+          5 /* startTime */,
+          onBuffering, onSeek);
 
-    // Simulate pausing.
-    timeline.getEarliestStart.and.returnValue(10);
-    timeline.getSegmentAvailabilityStart.and.returnValue(10);
-    timeline.getSegmentAvailabilityEnd.and.returnValue(70);
-    timeline.getSegmentAvailabilityDuration.and.returnValue(30);
+      videoOnSeeking();
+      expect(video.currentTime).toBe(5);
+      expect(playhead.getTime()).toBe(5);
 
-    videoOnPlaying();
-    expect(video.currentTime).toBe(10);
-    videoOnSeeking();
-    expect(playhead.getTime()).toBe(10);
-    expect(onSeek).toHaveBeenCalled();
+      // Simulate pausing.
+      timeline.getEarliestStart.and.returnValue(10);
+      timeline.getSegmentAvailabilityStart.and.returnValue(10);
+      timeline.getSegmentAvailabilityEnd.and.returnValue(70);
+      timeline.getSegmentAvailabilityDuration.and.returnValue(30);
+
+      videoOnPlaying();
+      expect(video.currentTime).toBe(10);
+      videoOnSeeking();
+      expect(playhead.getTime()).toBe(10);
+      expect(onSeek).toHaveBeenCalled();
+    });
   });
 
   describe('enters/leaves buffering state', function() {

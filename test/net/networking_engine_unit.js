@@ -124,30 +124,29 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
 
     describe('backoff', function() {
       var baseDelay = 200;
-      var realSetTimeout;
+      var origSetTimeout;
       var setTimeoutSpy;
       var realRandom;
 
       beforeAll(function() {
-        realSetTimeout = window.setTimeout;
+        origSetTimeout = shaka.net.NetworkingEngine.setTimeout_;
         setTimeoutSpy = jasmine.createSpy('setTimeout');
-        setTimeoutSpy.and.callFake(realSetTimeout);
-        window.setTimeout = setTimeoutSpy;
+        setTimeoutSpy.and.callFake(origSetTimeout);
+        shaka.net.NetworkingEngine.setTimeout_ = setTimeoutSpy;
         realRandom = Math.random;
         Math.random = function() { return 0.75; };
       });
 
       afterAll(function() {
         Math.random = realRandom;
-        window.setTimeout = realSetTimeout;
+        shaka.net.NetworkingEngine.setTimeout_ = origSetTimeout;
       });
 
       beforeEach(function() {
         setTimeoutSpy.calls.reset();
       });
 
-      // QUARANTINED: this test does not pass 100% of the time on IE11.
-      quarantined_it('uses baseDelay', function(done) {
+      it('uses baseDelay', function(done) {
         var request = createRequest('reject://foo', {
           maxAttempts: 2,
           baseDelay: baseDelay,
@@ -165,8 +164,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
             .then(done);
       });
 
-      // QUARANTINED: this test does not pass 100% of the time on IE11.
-      quarantined_it('uses backoffFactor', function(done) {
+      it('uses backoffFactor', function(done) {
         var request = createRequest('reject://foo', {
           maxAttempts: 3,
           baseDelay: baseDelay,
@@ -186,8 +184,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
             .then(done);
       });
 
-      // QUARANTINED: this test does not pass 100% of the time on IE11.
-      quarantined_it('uses fuzzFactor', function(done) {
+      it('uses fuzzFactor', function(done) {
         var request = createRequest('reject://foo', {
           maxAttempts: 2,
           baseDelay: baseDelay,
