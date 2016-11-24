@@ -27,8 +27,26 @@
  * @param {Uint8Array} keyId
  * @param {string} sessionId
  */
+HTMLMediaElement.prototype.addKey =
+    function(keySystem, key, keyId, sessionId) {};
+
+
+/**
+ * @param {string} keySystem
+ * @param {Uint8Array} key
+ * @param {Uint8Array} keyId
+ * @param {string} sessionId
+ */
 HTMLMediaElement.prototype.webkitAddKey =
     function(keySystem, key, keyId, sessionId) {};
+
+
+/**
+ * @param {string} keySystem
+ * @param {string} sessionId
+ */
+HTMLMediaElement.prototype.cancelKeyRequest =
+    function(keySystem, sessionId) {};
 
 
 /**
@@ -44,6 +62,14 @@ HTMLMediaElement.prototype.webkitCancelKeyRequest =
  * @param {!Uint8Array} initData
  */
 HTMLMediaElement.prototype.webkitGenerateKeyRequest =
+    function(keySystem, initData) {};
+
+
+/**
+ * @param {string} keySystem
+ * @param {!Uint8Array} initData
+ */
+HTMLMediaElement.prototype.generateKeyRequest =
     function(keySystem, initData) {};
 
 
