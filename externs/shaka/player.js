@@ -100,7 +100,9 @@ shakaExtern.Stats;
  *   language: string,
  *   kind: ?string,
  *   width: ?number,
- *   height: ?number
+ *   height: ?number,
+ *   frameRate: ?number,
+ *   codecs: ?string
  * }}
  *
  * @description
@@ -129,6 +131,10 @@ shakaExtern.Stats;
  *   (only for video tracks) The width of the track in pixels.
  * @property {?number} height
  *   (only for video tracks) The height of the track in pixels.
+ * @property {?number} frameRate
+ *   The video framerate provided in the manifest, if present.
+ * @property {?string} codecs
+ *   The audio/video codecs string provided in the manifest, if present.
  * @exportDoc
  */
 shakaExtern.Track;
@@ -183,26 +189,35 @@ shakaExtern.Restrictions;
 
 /**
  * @typedef {{
- *   manifest: Object.<string, boolean>,
- *   media: Object.<string, boolean>,
- *   drm: Object.<string, boolean>,
- *   supported: boolean
+ *   persistentState: boolean
+ * }}
+ *
+ * @property {boolean} persistentState
+ *   Whether this key system supports persistent state.
+ */
+shakaExtern.DrmSupportType;
+
+
+/**
+ * @typedef {{
+ *   manifest: !Object.<string, boolean>,
+ *   media: !Object.<string, boolean>,
+ *   drm: !Object.<string, ?shakaExtern.DrmSupportType>
  * }}
  *
  * @description
  * An object detailing browser support for various features.
  *
- * @property {Object.<string, boolean>} manifest
+ * @property {!Object.<string, boolean>} manifest
  *   A map of supported manifest types.
  *   The keys are manifest MIME types and file extensions.
- * @property {Object.<string, boolean>} media
+ * @property {!Object.<string, boolean>} media
  *   A map of supported media types.
  *   The keys are media MIME types.
- * @property {Object.<string, boolean>} drm
- *   A map of DRM support.
- *   The keys are well-known key system IDs.
- * @property {boolean} supported
- *   True if the library is usable at all.
+ * @property {!Object.<string, ?shakaExtern.DrmSupportType>} drm
+ *   A map of supported key systems.
+ *   The keys are the key system names.  The value is null if it is not
+ *   supported.  Key systems not probed will not be in this dictionary.
  *
  * @exportDoc
  */
@@ -259,6 +274,7 @@ shakaExtern.AdvancedDrmConfiguration;
  *   retryParameters: shakaExtern.RetryParameters,
  *   servers: !Object.<string, string>,
  *   clearKeys: !Object.<string, string>,
+ *   delayLicenseRequestUntilPlayed: boolean,
  *   advanced: Object.<string, shakaExtern.AdvancedDrmConfiguration>
  * }}
  *
@@ -271,6 +287,10 @@ shakaExtern.AdvancedDrmConfiguration;
  * @property {!Object.<string, string>} clearKeys
  *   <i>Forces the use of the Clear Key CDM.</i>
  *   A map of key IDs (hex) to keys (hex).
+ * @property {boolean} delayLicenseRequestUntilPlayed
+ *   <i>Defaults to false.</i> <br>
+ *   True to configure drm to delay sending a license request until a user
+ *   actually starts playing content.
  * @property {Object.<string, shakaExtern.AdvancedDrmConfiguration>} advanced
  *   <i>Optional.</i> <br>
  *   A dictionary which maps key system IDs to advanced DRM configuration for
@@ -283,13 +303,18 @@ shakaExtern.DrmConfiguration;
 
 /**
  * @typedef {{
- *   customScheme: shakaExtern.DashContentProtectionCallback
+ *   customScheme: shakaExtern.DashContentProtectionCallback,
+ *   clockSyncUri: string
  * }}
  *
  * @property {shakaExtern.DashContentProtectionCallback} customScheme
  *   If given, invoked by a DASH manifest parser to interpret custom or
  *   non-standard DRM schemes found in the manifest.  The argument is a
  *   ContentProtection node.  Return null if not recognized.
+ * @property {string} clockSyncUri
+ *   A default clock sync URI to be used with live streams which do not
+ *   contain any clock sync information.  The "Date" header from this URI
+ *   will be used to determine the current time.
  *
  * @exportDoc
  */
@@ -317,7 +342,9 @@ shakaExtern.ManifestConfiguration;
  *   retryParameters: shakaExtern.RetryParameters,
  *   rebufferingGoal: number,
  *   bufferingGoal: number,
- *   bufferBehind: number
+ *   bufferBehind: number,
+ *   ignoreTextStreamFailures: boolean,
+ *   useRelativeCueTimestamps: boolean
  * }}
  *
  * @description
@@ -338,7 +365,12 @@ shakaExtern.ManifestConfiguration;
  *   The maximum number of seconds of content that the StreamingEngine will keep
  *   in buffer behind the playhead when it appends a new media segment.
  *   The StreamingEngine will evict content to meet this limit.
- *
+ * @property {boolean} ignoreTextStreamFailures
+ *   If true, the player will ignore text stream failures and proceed to play
+ *   other streams.
+ * @property {boolean} useRelativeCueTimestamps
+ *   If true, WebVTT cue timestamps will be treated as relative to the start
+ *   time of the VTT segment. Defaults to false.
  * @exportDoc
  */
 shakaExtern.StreamingConfiguration;

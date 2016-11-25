@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# Copyright 2016 Google Inc.
+# Copyright 2016 Google Inc.  All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,63 +19,73 @@
 This checks:
  * All files in lib/ appear when compiling +@complete
  * Runs a compiler pass over the test code to check for type errors
- * Run the linter to check for style violations."""
+ * Run the linter to check for style violations.
+"""
 
-import build
 import os
 import re
-import shakaBuildHelpers
 import subprocess
 import sys
 
-def getLintFiles():
-  """Returns an array of absolute paths to all the files to run the linter
-  over.
-  """
+import build
+import shakaBuildHelpers
+
+
+def get_lint_files():
+  """Returns the absolute paths to all the files to run the linter over."""
   match = re.compile(r'.*\.js$')
-  base = shakaBuildHelpers.getSourceBase()
+  base = shakaBuildHelpers.get_source_base()
   def get(arg):
-    return shakaBuildHelpers.getAllFiles(os.path.join(base, arg), match)
+    return shakaBuildHelpers.get_all_files(os.path.join(base, arg), match)
   return get('test') + get('lib') + get('externs') + get('demo')
 
-def checkLint():
+
+def check_lint():
   """Runs the linter over the library files."""
   print 'Running Closure linter...'
 
   jsdoc3_tags = ','.join([
       'static', 'summary', 'namespace', 'event', 'description', 'property',
-      'fires', 'listens', 'example', 'exportDoc'])
+      'fires', 'listens', 'example', 'exportDoc', 'tutorial'])
   args = ['--nobeep', '--custom_jsdoc_tags', jsdoc3_tags, '--strict']
-  base = shakaBuildHelpers.getSourceBase()
+  base = shakaBuildHelpers.get_source_base()
   cmd = os.path.join(base, 'third_party', 'gjslint', 'gjslint')
 
   # Even though this is python, don't import and execute since gjslint expects
   # command-line arguments using argv.  Have to explicitly execute python so
   # it works on Windows.
-  cmdLine = ['python', cmd] + args + getLintFiles()
-  shakaBuildHelpers.printCmdLine(cmdLine)
-  return (subprocess.call(cmdLine) == 0)
+  cmd_line = [sys.executable or 'python', cmd] + args + get_lint_files()
+  shakaBuildHelpers.print_cmd_line(cmd_line)
+  return subprocess.call(cmd_line) == 0
 
-def checkHtmlLint():
+
+def check_html_lint():
   """Runs the HTML linter over the HTML files.
+
   Skipped if htmlhint is not available.
+
+  Returns:
+    True on success, False on failure.
   """
-  htmlhint_path = shakaBuildHelpers.getNodeBinaryPath('htmlhint')
+  htmlhint_path = shakaBuildHelpers.get_node_binary_path('htmlhint')
   if not os.path.exists(htmlhint_path):
     return True
   print 'Running htmlhint...'
 
-  base = shakaBuildHelpers.getSourceBase()
+  base = shakaBuildHelpers.get_source_base()
   files = ['index.html', 'demo/index.html', 'support.html']
   file_paths = [os.path.join(base, x) for x in files]
-  cmdLine = [htmlhint_path] + file_paths
-  shakaBuildHelpers.printCmdLine(cmdLine)
-  return (subprocess.call(cmdLine) == 0)
+  config_path = os.path.join(base, '.htmlhintrc')
+  cmd_line = [htmlhint_path, '--config=' + config_path] + file_paths
+  shakaBuildHelpers.print_cmd_line(cmd_line)
+  return subprocess.call(cmd_line) == 0
 
-def checkComplete():
-  """Checks whether the 'complete' build references every file.  This is used
-  by the build script to ensure that every file is included in at least one
-  build type.
+
+def check_complete():
+  """Checks whether the 'complete' build references every file.
+
+  This is used by the build script to ensure that every file is included in at
+  least one build type.
 
   Returns:
     True on success, False on failure.
@@ -86,24 +96,25 @@ def checkComplete():
   # Normally we don't need to include @core, but because we look at the build
   # object directly, we need to include it here.  When using main(), it will
   # call addCore which will ensure core is included.
-  if not complete.parseBuild(['+@complete', '+@core'], os.getcwd()):
+  if not complete.parse_build(['+@complete', '+@core'], os.getcwd()):
     print >> sys.stderr, 'Error parsing complete build'
     return False
 
   match = re.compile(r'.*\.js$')
-  base = shakaBuildHelpers.getSourceBase()
-  allFiles = shakaBuildHelpers.getAllFiles(os.path.join(base, 'lib'), match)
-  missingFiles = set(allFiles) - complete.include
+  base = shakaBuildHelpers.get_source_base()
+  all_files = shakaBuildHelpers.get_all_files(os.path.join(base, 'lib'), match)
+  missing_files = set(all_files) - complete.include
 
-  if len(missingFiles) > 0:
+  if missing_files:
     print >> sys.stderr, 'There are files missing from the complete build:'
-    for missing in missingFiles:
+    for missing in missing_files:
       # Convert to a path relative to source base.
       print >> sys.stderr, '  ' + os.path.relpath(missing, base)
     return False
   return True
 
-def checkTests():
+
+def check_tests():
   """Runs an extra compile pass over the test code to check for type errors.
 
   Returns:
@@ -112,22 +123,25 @@ def checkTests():
   print 'Checking the tests for type errors...'
 
   match = re.compile(r'.*\.js$')
-  base = shakaBuildHelpers.getSourceBase()
+  base = shakaBuildHelpers.get_source_base()
   def get(*args):
-    return shakaBuildHelpers.getAllFiles(os.path.join(base, *args), match)
+    return shakaBuildHelpers.get_all_files(os.path.join(base, *args), match)
   files = (get('lib') + get('externs') + get('test') + get('demo') +
-      get('third_party', 'closure'))
-  testBuild = build.Build(set(files))
+           get('third_party', 'closure'))
+  test_build = build.Build(set(files))
 
   # Ignore missing goog.require since we assume the whole library is
   # already included.
-  opts = ['--jscomp_off=missingRequire', '--checks-only', '-O', 'SIMPLE']
-  return testBuild.buildRaw(opts)
+  opts = ['--jscomp_off=missingRequire', '--jscomp_off=strictMissingRequire',
+          '--checks-only', '-O', 'SIMPLE']
+  return test_build.build_raw(opts)
+
 
 def usage():
   print 'Usage:', sys.argv[0]
   print
   print __doc__
+
 
 def main(args):
   for arg in args:
@@ -139,17 +153,17 @@ def main(args):
       usage()
       return 1
 
-  if not checkLint():
+  if not check_lint():
     return 1
-  elif not checkHtmlLint():
+  elif not check_html_lint():
     return 1
-  elif not checkComplete():
+  elif not check_complete():
     return 1
-  elif not checkTests():
+  elif not check_tests():
     return 1
   else:
     return 0
 
-if __name__ == '__main__':
-  shakaBuildHelpers.runMain(main)
 
+if __name__ == '__main__':
+  shakaBuildHelpers.run_main(main)

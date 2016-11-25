@@ -23,6 +23,7 @@
  * @typedef {{
  *   presentationTimeline: !shaka.media.PresentationTimeline,
  *   periods: !Array.<!shakaExtern.Period>,
+ *   offlineSessionIds: !Array.<string>,
  *   minBufferTime: number
  * }}
  *
@@ -66,6 +67,9 @@
  * @property {!Array.<!shakaExtern.Period>} periods
  *   <i>Required.</i> <br>
  *   The presentation's Periods. There must be at least one Period.
+ * @property {!Array.<string>} offlineSessionIds
+ *   <i>Defaults to [].</i> <br>
+ *   An array of EME sessions to load for offline playback.
  * @property {number} minBufferTime
  *   <i>Defaults to 0.</i> <br>
  *   The minimum number of seconds of content that must be buffered before
@@ -111,7 +115,7 @@ shakaExtern.Period;
  * @description
  * Explicit initialization data, which override any initialization data in the
  * content. The initDataType values and the formats that they correspond to
- * are specified {@link http://goo.gl/hKBdff here}.
+ * are specified {@link https://goo.gl/TNjYwn here}.
  *
  * @property {!Uint8Array} initData
  *   Initialization data in the format indicated by initDataType.
@@ -132,7 +136,8 @@ shakaExtern.InitDataOverride;
  *   audioRobustness: string,
  *   videoRobustness: string,
  *   serverCertificate: Uint8Array,
- *   initData: Array.<!shakaExtern.InitDataOverride>
+ *   initData: Array.<!shakaExtern.InitDataOverride>,
+ *   keyIds: Array.<string>
  * }}
  *
  * @description
@@ -170,7 +175,9 @@ shakaExtern.InitDataOverride;
  *   <i>Defaults to [], e.g., no override.</i> <br>
  *   A list of initialization data which override any initialization data found
  *   in the content.  See also shakaExtern.InitDataOverride.
- *
+ * @property {Array.<string>} keyIds
+ *   <i>Defaults to []</i> <br>
+ *   If not empty, contains the default key IDs for this key system.
  * @exportDoc
  */
 shakaExtern.DrmInfo;
@@ -260,11 +267,14 @@ shakaExtern.GetSegmentReferenceFunction;
  *   presentationTimeOffset: (number|undefined),
  *   mimeType: string,
  *   codecs: string,
+ *   frameRate: (number|undefined),
  *   bandwidth: (number|undefined),
  *   width: (number|undefined),
  *   height: (number|undefined),
  *   kind: (string|undefined),
+ *   encrypted: boolean,
  *   keyId: ?string,
+ *   language: string,
  *   allowedByApplication: boolean,
  *   allowedByKeySystem: boolean
  * }}
@@ -309,6 +319,9 @@ shakaExtern.GetSegmentReferenceFunction;
  *   The Stream's codecs, e.g., 'avc1.4d4015' or 'vp9', which must be
  *   compatible with the Stream's MIME type. <br>
  *   See {@link https://tools.ietf.org/html/rfc6381}
+ * @property {(number|undefined)} frameRate
+ *   <i>Video streams only.</i> <br>
+ *   The Stream's framerate in frames per second
  * @property {(number|undefined)} bandwidth
  *   <i>Audio and video streams only.</i> <br>
  *   The stream's required bandwidth in bits per second.
@@ -322,11 +335,17 @@ shakaExtern.GetSegmentReferenceFunction;
  *   <i>Text streams only.</i> <br>
  *   The kind of text stream.  For example, 'captions' or 'subtitles'.
  *   @see https://goo.gl/k1HWA6
+ * @property {boolean} encrypted
+ *   <i>Defaults to false.</i><br>
+ *   True if the stream is encrypted.
  * @property {?string} keyId
  *   <i>Defaults to null (i.e., unencrypted or key ID unknown).</i> <br>
  *   The stream's key ID as a lowercase hex string. This key ID identifies the
  *   encryption key that the browser (key system) can use to decrypt the
  *   stream.
+ * @property {string} language
+ *   The Stream's language, specified as a language code. <br>
+ *   Must be identical to the language of the containing StreamSet.
  * @property {boolean} allowedByApplication
  *   <i>Defaults to true.</i><br>
  *   Set by the Player to indicate whether the stream is allowed to be played

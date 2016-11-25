@@ -24,6 +24,7 @@ requirement: {
       'com.google.javascript.jscomp.ConformanceRules$BanThrowOfNonErrorTypes'
   error_message: 'Throwing non-Error types or Error itself is not allowed: '
                  'throw shaka.util.Error instead.'
+  whitelist_regexp: 'test/*'
 }
 
 requirement: {
@@ -55,3 +56,19 @@ requirement: {
                  'use shaka.log instead'
 }
 
+
+# Disallow fdescribe.
+requirement: {
+  type: BANNED_NAME
+  value: 'fdescribe'
+  error_message: 'Using "fdescribe" is not allowed'
+}
+
+
+# Disallow fit.
+requirement: {
+  type: BANNED_NAME
+  value: 'fit'
+  error_message: 'Using "fit" is not allowed'
+  whitelist_regexp: 'test/player_integration.js'
+}

@@ -466,10 +466,17 @@ level of the configuration hierarchy):
   - `segmentRequestTimeout` => `streaming.retryParameters.timeout`
   - `preferredLanguage` => split into `preferredAudioLanguage` and
       `preferredTextLanguage`
-  - `restrictions` => (coming soon in v2)
+  - `restrictions` => (same name, see below)
   - `liveStreamEndTimeout` => (not needed in v2)
   - `disableCacheBustingEvenThoughItMayAffectBandwidthEstimation` =>
       (not needed, always cache-friendly)
+
+The `shaka.player.Restriction` type was replaced by a simple record type.  So
+instead of constructing an object, simply create an anonymous JavaScript object.
+`minPixels`/`maxPixels` were added to limit total pixels. Also `minBandwidth`
+and `maxBandwidth` were split into `minAudioBandwidth`, `maxAudioBandwidth`,
+`minVideoBandwidth`, and `maxVideoBandwidth`, see
+{@link shakaExtern.Restrictions}.
 
 For more information on configuration in v2, see {@tutorial config},
 {@tutorial network-and-buffering-config}, and {@tutorial drm-config}.
@@ -571,16 +578,19 @@ if (!shaka.player.Player.isBrowserSupported()) {
 }
 ```
 
-The check in v1 was not very detailed and only did a surface examination of
-browser APIs.  In v2, the check is much more detailed:
+In v2, the same method exists to detect support.  For diagnostics there is a new
+method that will get more detailed information about the browser.  This will
+involve making a number of queries to EME which may result in user prompts,
+so it is suggested this only be used for diagnostics:
 
 ```js
 // v2:
-shaka.Player.support().then(function(support) {
-  // The check is asynchronous because the EME API is asynchronous.
-  if (!support.supported) {
-    // Show an error and abort.
-  } else {
+if (!shaka.Player.isBrowserSupported()) {
+  // Show an error and abort.
+} else {
+  // Only call this method if the browser is supported.
+  shaka.Player.probeSupport().then(function(support) {
+    // The check is asynchronous because the EME API is asynchronous.
     // The support object contains much more information about what the browser
     // offers, if you need it.  For example, if you require both Widevine and
     // WebM/VP9:
@@ -588,12 +598,12 @@ shaka.Player.support().then(function(support) {
         !support.media['video/webm; codecs="vp9"']) {
       // Show an error and abort.
     }
-  }
-});
+  });
+}
 ```
 
 For more on the support object, check out {@link shakaExtern.SupportType}.
-You can also see the full `support()` report for your browser at:
+You can also see the full `probeSupport()` report for your browser at:
 {@link http://shaka-player-demo.appspot.com/support.html}
 
 

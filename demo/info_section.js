@@ -82,6 +82,7 @@ shakaDemo.onTracksChanged_ = function(event) {
   });
   tracks.forEach(function(track) {
     var list = lists[track.type];
+    if (!list) return;
     var option = document.createElement('option');
     option.textContent = formatters[track.type](track);
     option.track = track;

@@ -1,0 +1,8 @@
+# The offline storage system and manifest parser plugin.
+
++../../lib/offline/db_engine.js
++../../lib/offline/download_manager.js
++../../lib/offline/offline_manifest_parser.js
++../../lib/offline/offline_scheme.js
++../../lib/offline/offline_utils.js
++../../lib/offline/storage.js

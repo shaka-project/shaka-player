@@ -43,6 +43,8 @@
  * @property {number} timeout
  *   The request timeout, in milliseconds.  Zero means "unlimited".
  *
+ * @tutorial network-and-buffering-config
+ *
  * @exportDoc
  */
 shakaExtern.RetryParameters;
@@ -108,3 +110,35 @@ shakaExtern.Request;
  * @exportDoc
  */
 shakaExtern.Response;
+
+
+/**
+ * Defines a plugin that handles a specific scheme.
+ *
+ * @typedef {!function(string, shakaExtern.Request):
+ *     !Promise.<shakaExtern.Response>}
+ * @exportDoc
+ */
+shakaExtern.SchemePlugin;
+
+
+/**
+ * Defines a filter for requests.  This filter takes the request and modifies
+ * it before it is sent to the scheme plugin.
+ *
+ * @typedef {!function(shaka.net.NetworkingEngine.RequestType,
+ *                     shakaExtern.Request)}
+ * @exportDoc
+ */
+shakaExtern.RequestFilter;
+
+
+/**
+ * Defines a filter for responses.  This filter takes the response and modifies
+ * it before it is returned.
+ *
+ * @typedef {!function(shaka.net.NetworkingEngine.RequestType,
+ *                     shakaExtern.Response)}
+ * @exportDoc
+ */
+shakaExtern.ResponseFilter;

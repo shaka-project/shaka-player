@@ -1,4 +1,4 @@
-# Shaka Player #
+# ![Shaka Player](docs/shaka-player-logo.png)
 
 Shaka Player is a JavaScript library for adaptive video streaming.
 It plays [DASH][] content without browser plugins using

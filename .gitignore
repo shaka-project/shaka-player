@@ -1,4 +1,5 @@
 *.pyc
+*~
 node_modules
 dist/
 docs/api/

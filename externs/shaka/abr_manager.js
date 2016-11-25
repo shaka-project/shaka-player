@@ -30,10 +30,23 @@ shakaExtern.AbrManager = function() {};
 
 
 /**
+ * A callback which implementations call to switch streams.
+ *
+ * The first argument is a map of content types to chosen streams.
+ *
+ * The second argument is an optional boolean.  If true, all data will be
+ * from the buffer, which will result in a buffering event.
+ *
+ * @typedef {function(!Object.<string, !shakaExtern.Stream>, boolean=)}
+ * @exportDoc
+ */
+shakaExtern.AbrManager.SwitchCallback;
+
+
+/**
  * Initializes the AbrManager.
  *
- * @param {function(!Object.<string, !shakaExtern.Stream>)} switchCallback
- *     A callback which implementations call to switch streams.
+ * @param {shakaExtern.AbrManager.SwitchCallback} switchCallback
  * @exportDoc
  */
 shakaExtern.AbrManager.prototype.init = function(switchCallback) {};
@@ -41,7 +54,8 @@ shakaExtern.AbrManager.prototype.init = function(switchCallback) {};
 
 /**
  * Chooses one Stream from each StreamSet to switch to. All StreamSets must be
- * from the same Period.
+ * from the same Period. Some StreamSets may be absent in the case of language
+ * changes.
  *
  * @param {!Object.<string, !shakaExtern.StreamSet>} streamSetsByType
  * @return {!Object.<string, shakaExtern.Stream>}

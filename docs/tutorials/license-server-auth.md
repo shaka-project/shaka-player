@@ -8,7 +8,7 @@ authentication.
 *Please note that the license server we are using in this tutorial is a
 Widevine license server, so you will need to use Chrome to follow along.*
 
-To start, we're going to use the code from {@link basic-usage}, but use this
+To start, we're going to use the code from {@tutorial basic-usage}, but use this
 manifest and license server:
 
 ```js
@@ -89,6 +89,9 @@ We can use a request filter to modify the URL and add the required parameter:
     // Only add headers to license requests:
     if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
       // This is the specific parameter name and value the server wants:
+      // Note that all network requests can have multiple URIs (for fallback),
+      // and therefore this is an array. But there should only be one license
+      // server URI in this tutorial.
       request.uris[0] += '?CWIP-Auth-Param=VGhpc0lzQVRlc3QK';
     }
   });
@@ -172,4 +175,4 @@ therefore not allowed access.
 
 #### Continue the Tutorials
 
-Next, check out {@tutorial plugins}.
+Next, check out {@tutorial license-wrapping}.

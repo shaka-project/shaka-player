@@ -69,6 +69,8 @@ shakaDemo.setupAssets_ = function() {
     first.selected = true;
   }
 
+  shakaDemo.setupOfflineAssets_();
+
   // Add an extra option for custom assets.
   var option = document.createElement('option');
   option.textContent = '(custom asset)';
@@ -101,23 +103,28 @@ shakaDemo.onAssetKeyUp_ = function(event) {
 };
 
 
-/** Load the selected asset. */
-shakaDemo.load = function() {
-  var errorDisplay = document.getElementById('errorDisplay');
-  errorDisplay.textContent = '';
+/**
+ * Prepares the Player to load the given assets by setting the configuration
+ * values.  This does not load the asset.
+ *
+ * @param {?shakaAssets.AssetInfo} asset
+ * @return {shakaAssets.AssetInfo}
+ * @private
+ */
+shakaDemo.preparePlayer_ = function(asset) {
+  shakaDemo.closeError();
 
-  var assetList = document.getElementById('assetList');
-  var option = assetList.options[assetList.selectedIndex];
-  var asset = option.asset;
   var player = shakaDemo.player_;
 
   var config = /** @type {shakaExtern.PlayerConfiguration} */(
-      { abr: {}, drm: {}, manifest: { dash: {} } });
+      { abr: {}, manifest: { dash: {} } });
+  config.manifest.dash.clockSyncUri =
+      '//shaka-player-demo.appspot.com/time.txt';
 
   if (!asset) {
     // Use the custom fields.
     var licenseServer = document.getElementById('licenseServerInput').value;
-    asset = {
+    asset = /** @type {shakaAssets.AssetInfo} */ ({
       manifestUri: document.getElementById('manifestInput').value,
       // Use the custom license server for all key systems.
       // This simplifies configuration for the user.
@@ -127,16 +134,17 @@ shakaDemo.load = function() {
         'com.microsoft.playready': licenseServer,
         'com.adobe.primetime': licenseServer
       }
-    };
+    });
   }
 
+  player.resetConfiguration();
+
   // Add config from this asset.
-  if (asset.licenseServers)
-    config.drm.servers = asset.licenseServers;
-  if (asset.drmCallback)
-    config.manifest.dash.customScheme = asset.drmCallback;
-  if (asset.clearKeys)
-    config.drm.clearKeys = asset.clearKeys;
+  ShakaDemoUtils.setupAssetMetadata(asset, player);
+  shakaDemo.castProxy_.setAppData({
+    'asset': asset,
+    'isYtDrm': asset.drmCallback == shakaAssets.YouTubeCallback
+  });
 
   // Add configuration from the UI.
   config.preferredAudioLanguage =
@@ -146,45 +154,39 @@ shakaDemo.load = function() {
   config.abr.enabled =
       document.getElementById('enableAdaptation').checked;
 
-  player.resetConfiguration();
   player.configure(config);
 
-  // Configure network filters.
-  var networkingEngine = player.getNetworkingEngine();
-  networkingEngine.clearAllRequestFilters();
-  networkingEngine.clearAllResponseFilters();
-
-  if (asset.licenseRequestHeaders) {
-    var filter = shakaDemo.addLicenseRequestHeaders_.bind(
-        null, asset.licenseRequestHeaders);
-    networkingEngine.registerRequestFilter(filter);
-  }
-
-  if (asset.licenseProcessor) {
-    networkingEngine.registerResponseFilter(asset.licenseProcessor);
-  }
-
-  // Load the manifest.
-  player.load(asset.manifestUri).then(function() {
-  }, function(reason) {
-    var error = /** @type {!shaka.util.Error} */(reason);
-    shakaDemo.onError_(error);
-  });
+  return asset;
 };
 
 
-/**
- * @param {!Object.<string, string>} headers
- * @param {shaka.net.NetworkingEngine.RequestType} requestType
- * @param {shakaExtern.Request} request
- * @private
- */
-shakaDemo.addLicenseRequestHeaders_ = function(headers, requestType, request) {
-  if (requestType != shaka.net.NetworkingEngine.RequestType.LICENSE) return;
+/** Load the selected asset. */
+shakaDemo.load = function() {
+  var assetList = document.getElementById('assetList');
+  var option = assetList.options[assetList.selectedIndex];
+  var player = shakaDemo.player_;
 
-  // Add these to the existing headers.  Do not clobber them!
-  // For PlayReady, there will already be headers in the request.
-  for (var k in headers) {
-    request.headers[k] = headers[k];
-  }
+  var asset = shakaDemo.preparePlayer_(option.asset);
+
+  // Load the manifest.
+  player.load(asset.manifestUri).then(function() {
+    // Update control state in case autoplay is disabled.
+    shakaDemo.controls_.loadComplete();
+
+    // Disallow casting of offline content.
+    var isOffline = asset.manifestUri.indexOf('offline:') == 0;
+    shakaDemo.controls_.allowCast(!isOffline);
+
+    (asset.extraText || []).forEach(function(extraText) {
+      player.addTextTrack(extraText.uri, extraText.language, extraText.kind,
+                          extraText.mime, extraText.codecs);
+    });
+  }, function(reason) {
+    var error = /** @type {!shaka.util.Error} */(reason);
+    if (error.code == shaka.util.Error.Code.LOAD_INTERRUPTED) {
+      shaka.log.debug('load() interrupted');
+    } else {
+      shakaDemo.onError_(error);
+    }
+  });
 };

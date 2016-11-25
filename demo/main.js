@@ -20,12 +20,20 @@
 var shakaDemo = shakaDemo || {};
 
 
-/** @private {HTMLVideoElement} */
+/** @private {shaka.cast.CastProxy} */
+shakaDemo.castProxy_ = null;
+
+
+/** @private {HTMLMediaElement} */
 shakaDemo.video_ = null;
 
 
 /** @private {shaka.Player} */
 shakaDemo.player_ = null;
+
+
+/** @private {shaka.Player} */
+shakaDemo.localPlayer_ = null;
 
 
 /** @private {shakaExtern.SupportType} */
@@ -37,9 +45,20 @@ shakaDemo.controls_ = null;
 
 
 /**
+ * The registered ID of the v2 Chromecast receiver demo.
+ * @const {string}
+ * @private
+ */
+shakaDemo.CC_APP_ID_ = '4E839F3A';
+
+
+/**
  * Initialize the application.
  */
 shakaDemo.init = function() {
+  document.getElementById('errorDisplayCloseButton').addEventListener(
+      'click', shakaDemo.closeError);
+
   // Display the version number.
   document.getElementById('version').textContent = shaka.Player.version;
 
@@ -67,6 +86,14 @@ shakaDemo.init = function() {
   if ('license' in params) {
     document.getElementById('licenseServerInput').value = params['license'];
   }
+  if ('logtoscreen' in params) {
+    document.getElementById('logToScreen').checked = true;
+  }
+  if ('noinput' in params) {
+    // Both the content container and body need different styles in this mode.
+    document.getElementById('container').className = 'noinput';
+    document.body.className = 'noinput';
+  }
 
   if ('vv' in params && shaka.log) {
     shaka.log.setLevel(shaka.log.Level.V2);
@@ -80,38 +107,63 @@ shakaDemo.init = function() {
 
   shaka.polyfill.installAll();
 
-  shaka.Player.support().then(function(support) {
-    shakaDemo.support_ = support;
+  if (!shaka.Player.isBrowserSupported()) {
+    var errorDisplayLink = document.getElementById('errorDisplayLink');
+    var error = 'Your browser is not supported!';
 
-    if (shakaDemo.support_.supported == false) {
-      var errorDisplay = document.getElementById('errorDisplay');
-      var error = 'Your browser is not supported!';
-
-      // IE8 and other very old browsers don't have textContent.
-      if (errorDisplay.textContent === undefined) {
-        errorDisplay.innerText = error;
-      } else {
-        errorDisplay.textContent = error;
-      }
-
-      // Disable the load button.
-      var loadButton = document.getElementById('loadButton');
-      loadButton.disabled = true;
-
-      // Make sure the error is seen.
-      errorDisplay.style.fontSize = '250%';
+    // IE8 and other very old browsers don't have textContent.
+    if (errorDisplayLink.textContent === undefined) {
+      errorDisplayLink.innerText = error;
     } else {
-      shakaDemo.video_ =
+      errorDisplayLink.textContent = error;
+    }
+
+    // Disable the load button.
+    var loadButton = document.getElementById('loadButton');
+    loadButton.disabled = true;
+
+    // Hide the error message's close button.
+    var errorDisplayCloseButton =
+        document.getElementById('errorDisplayCloseButton');
+    errorDisplayCloseButton.style.display = 'none';
+
+    // Make sure the error is seen.
+    errorDisplayLink.style.fontSize = '250%';
+
+    // TODO: Link to docs about browser support.  For now, disable link.
+    errorDisplayLink.href = '#';
+    // Disable for newer browsers:
+    errorDisplayLink.style.pointerEvents = 'none';
+    // Disable for older browsers:
+    errorDisplayLink.style.textDecoration = 'none';
+    errorDisplayLink.style.cursor = 'default';
+    errorDisplayLink.onclick = function() { return false; };
+
+    var errorDisplay = document.getElementById('errorDisplay');
+    errorDisplay.style.display = 'block';
+  } else {
+    shaka.Player.probeSupport().then(function(support) {
+      shakaDemo.support_ = support;
+
+      var localVideo =
           /** @type {!HTMLVideoElement} */(document.getElementById('video'));
-      shakaDemo.player_ = new shaka.Player(shakaDemo.video_);
+      var localPlayer = new shaka.Player(localVideo);
+      shakaDemo.castProxy_ = new shaka.cast.CastProxy(
+          localVideo, localPlayer, shakaDemo.CC_APP_ID_);
+
+      shakaDemo.video_ = shakaDemo.castProxy_.getVideo();
+      shakaDemo.player_ = shakaDemo.castProxy_.getPlayer();
       shakaDemo.player_.addEventListener('error', shakaDemo.onErrorEvent_);
+      shakaDemo.localPlayer_ = localPlayer;
 
       shakaDemo.setupAssets_();
+      shakaDemo.setupOffline_();
       shakaDemo.setupConfiguration_();
       shakaDemo.setupInfo_();
 
       shakaDemo.controls_ = new ShakaControls();
-      shakaDemo.controls_.init(shakaDemo.video_, shakaDemo.player_);
+      shakaDemo.controls_.init(shakaDemo.castProxy_, shakaDemo.onError_,
+                               shakaDemo.onCastStatusChange_);
 
       // If a custom asset was given in the URL, select it now.
       if ('asset' in params) {
@@ -124,8 +176,8 @@ shakaDemo.init = function() {
       if ('play' in params) {
         shakaDemo.load();
       }
-    }
-  });
+    });
+  }
 };
 
 
@@ -146,8 +198,23 @@ shakaDemo.onErrorEvent_ = function(event) {
 shakaDemo.onError_ = function(error) {
   console.error('Player error', error);
   var message = error.message || ('Error code ' + error.code);
-  var errorDisplay = document.getElementById('errorDisplay');
-  errorDisplay.textContent = message;
+  var link = document.getElementById('errorDisplayLink');
+  link.href = '../docs/api/shaka.util.Error.html#value:' + error.code;
+  link.textContent = message;
+  // Make the link clickable only if we have an error code.
+  link.style.pointerEvents = error.code ? 'auto' : 'none';
+  document.getElementById('errorDisplay').style.display = 'block';
+};
+
+
+/**
+ * Closes the error bar.
+ */
+shakaDemo.closeError = function() {
+  document.getElementById('errorDisplay').style.display = 'none';
+  var link = document.getElementById('errorDisplayLink');
+  link.href = '';
+  link.textContent = '';
 };
 
 

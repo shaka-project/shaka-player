@@ -1,3 +1,20 @@
+/**
+ * @license
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 // Karma configuration
 // Install required modules by running "npm install"
 
@@ -30,29 +47,30 @@ module.exports = function(config) {
       // requirejs next
       'node_modules/requirejs/require.js',
 
+      // bootstrapping for the test suite
+      'test/test/boot.js',
+
       // test utils next
-      'test/util/*.js',
+      'test/test/util/*.js',
 
       // list of test assets next
       'demo/assets.js',
 
-      // support test before other tests
-      'test/support_check.js',
-
       // unit tests last
-      'test/*_unit.js',
+      'test/**/*_unit.js',
 
       // if --quick is not present, we will add integration tests.
 
       // source files - these are only watched and served
       {pattern: 'lib/**/*.js', included: false},
       {pattern: 'third_party/closure/goog/**/*.js', included: false},
-      {pattern: 'test/assets/*', included: false},
+      {pattern: 'test/test/assets/*', included: false},
       {pattern: 'dist/shaka-player.compiled.js', included: false},
     ],
 
+    // NOTE: Do not use proxies for media! That sometimes results in truncated
+    // content and failed tests. The effect does not appear to be deterministic.
     proxies: {
-      '/test/assets/': '/base/test/assets/',
       '/dist/': '/base/dist/',
     },
 
@@ -63,10 +81,12 @@ module.exports = function(config) {
       'lib/player.js': 'coverage',
     },
 
-    // do not panic about "no activity" unless a test takes longer than 120s.
-    // this value must be greater than any jasmine.DEFAULT_TIMEOUT_INTERVAL used
-    // in test cases. (eg. 90s in test/streaming_engine_integration.js)
-    browserNoActivityTimeout: 120000,
+    // to avoid DISCONNECTED messages on Safari:
+    browserDisconnectTimeout: 10 * 1000,  // 10s to reconnect
+    browserDisconnectTolerance: 1,  // max of 1 disconnect is OK
+    browserNoActivityTimeout: 5 * 60 * 1000,  // disconnect after 5m silence
+    captureTimeout: 1 * 60 * 1000,  // give up if startup takes 1m
+    // https://support.saucelabs.com/customer/en/portal/articles/2440724
 
     client: {
       // don't capture the client's console logs
@@ -130,13 +150,7 @@ module.exports = function(config) {
       WebDriver_OperaMac: {
         base: 'WebDriver',
         config: {hostname: 'localhost', port: 4444},
-        // This is not obvious, but as of 2016-03-17, operadriver responds to
-        // browserName 'chrome', not 'opera'.  It still launches opera.  This
-        // should be solveable once operachromiumdriver releases sources.
-        // See:
-        //   https://github.com/operasoftware/operachromiumdriver/issues/8
-        //   http://stackoverflow.com/a/27387949
-        browserName: 'chrome',
+        browserName: 'operablink',
         pseudoActivityInterval: 20000
       },
       // }}}
@@ -146,7 +160,9 @@ module.exports = function(config) {
         base: 'WebDriver',
         config: {hostname: 'localhost', port: 4446},
         browserName: 'internet explorer',
-        pseudoActivityInterval: 20000
+        pseudoActivityInterval: 20000,
+        ignoreZoomSetting: true,
+        ignoreProtectedModeSettings: true
       },
 
       WebDriver_Edge: {
@@ -170,9 +186,37 @@ module.exports = function(config) {
         pseudoActivityInterval: 20000
       },
       // }}}
+
+      // Linux {{{
+      WebDriver_ChromeLinux: {
+        base: 'WebDriver',
+        config: {hostname: 'localhost', port: 4447},
+        browserName: 'chrome',
+        pseudoActivityInterval: 20000
+      },
+
+      WebDriver_FirefoxLinux: {
+        base: 'WebDriver',
+        config: {hostname: 'localhost', port: 4447},
+        browserName: 'firefox',
+        pseudoActivityInterval: 20000
+      },
+      // }}}
+
+      // Android 6.0.1 {{{
+      // Note this is tethered to the Linux machine.
+      WebDriver_ChromeAndroid: {
+        base: 'WebDriver',
+        config: {hostname: 'localhost', port: 4447},
+        browserName: 'chrome',
+        pseudoActivityInterval: 20000,
+        chromeOptions: {'androidPackage': 'com.android.chrome'}
+      },
+      // }}}
     },
 
     coverageReporter: {
+      includeAllSources: true,
       reporters: [
         { type: 'text' },
       ],
@@ -193,6 +237,7 @@ module.exports = function(config) {
       coverageReporter: {
         reporters: [
           { type: 'html', dir: 'coverage' },
+          { type: 'cobertura', dir: 'coverage', file: 'coverage.xml' },
         ],
       },
     });
@@ -201,7 +246,7 @@ module.exports = function(config) {
   if (!flagPresent('quick')) {
     // If --quick is present, we don't serve integration tests.
     var files = config.files;
-    files.push('test/*_integration.js');
+    files.push('test/**/*_integration.js');
     // We just modified the config in-place.  No need for config.set().
   }
 
@@ -225,9 +270,21 @@ module.exports = function(config) {
     setClientArg(config, 'external', true);
   }
 
+  if (flagPresent('quarantined')) {
+    // Run quarantined tests which do not consistently pass.
+    // Skipped by default.
+    setClientArg(config, 'quarantined', true);
+  }
+
   if (flagPresent('uncompiled')) {
     // Run Player integration tests with uncompiled code for debugging.
     setClientArg(config, 'uncompiled', true);
+  }
+
+  var hostname = getFlagValue('hostname');
+  if (hostname !== null) {
+    // Point the browsers to a hostname other than localhost.
+    config.set({hostname: hostname});
   }
 };
 

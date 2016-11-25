@@ -23,7 +23,16 @@
  * @suppress {missingProvide}
  */
 function ShakaControls() {
-  /** @private {HTMLVideoElement} */
+  /** @private {shaka.cast.CastProxy} */
+  this.castProxy_ = null;
+
+  /** @private {boolean} */
+  this.castAllowed_ = true;
+
+  /** @private {?function(!shaka.util.Error)} */
+  this.onError_ = null;
+
+  /** @private {HTMLMediaElement} */
   this.video_ = null;
 
   /** @private {shaka.Player} */
@@ -66,10 +75,14 @@ function ShakaControls() {
   this.castButton_ = document.getElementById('castButton');
 
   /** @private {Element} */
+  this.castReceiverName_ = document.getElementById('castReceiverName');
+
+  /** @private {Element} */
   this.bufferingSpinner_ = document.getElementById('bufferingSpinner');
 
   /** @private {Element} */
-  this.giantPlayButton_ = document.getElementById('giantPlayButton');
+  this.giantPlayButtonContainer_ =
+      document.getElementById('giantPlayButtonContainer');
 
   /** @private {boolean} */
   this.isSeeking_ = false;
@@ -87,15 +100,15 @@ function ShakaControls() {
 
 /**
  * Initializes the player controls.
- * @param {HTMLVideoElement} video
- * @param {shaka.Player} player
+ * @param {shaka.cast.CastProxy} castProxy
+ * @param {function(!shaka.util.Error)} onError
+ * @param {function(boolean)} notifyCastStatus
  */
-ShakaControls.prototype.init = function(video, player) {
-  // TODO: Make these resettable for switching to/from Chromecast
-  this.video_ = video;
-  this.player_ = player;
-  // TODO: Method to tear these down
-  // TODO: Event manager?
+ShakaControls.prototype.init = function(castProxy, onError, notifyCastStatus) {
+  this.castProxy_ = castProxy;
+  this.onError_ = onError;
+  this.notifyCastStatus_ = notifyCastStatus;
+  this.initMinimal(castProxy.getVideo(), castProxy.getPlayer());
 
   // IE11 doesn't treat the 'input' event correctly.
   // https://connect.microsoft.com/IE/Feedback/Details/856998
@@ -139,13 +152,13 @@ ShakaControls.prototype.init = function(video, player) {
       'click', this.onCaptionClick_.bind(this));
   this.player_.addEventListener(
       'texttrackvisibility', this.onCaptionStateChange_.bind(this));
+  this.player_.addEventListener(
+      'trackschanged', this.onTracksChange_.bind(this));
   // initialize caption state with a fake event
   this.onCaptionStateChange_();
 
   this.fullscreenButton_.addEventListener(
       'click', this.onFullscreenClick_.bind(this));
-
-  window.setInterval(this.updateTimeAndSeekRange_.bind(this), 125);
 
   this.currentTime_.addEventListener(
       'click', this.onCurrentTimeClick_.bind(this));
@@ -158,18 +171,10 @@ ShakaControls.prototype.init = function(video, player) {
   this.castButton_.addEventListener(
       'click', this.onCastClick_.bind(this));
 
-  this.player_.addEventListener(
-      'buffering', this.onBufferingStateChange_.bind(this));
-
+  this.videoContainer_.addEventListener(
+      'touchstart', this.onContainerTouch_.bind(this));
   this.videoContainer_.addEventListener(
       'click', this.onPlayPauseClick_.bind(this));
-
-  // This gets play-pause state corrected for non-autoplaying systems like
-  // Android by recomputing state as soon as the video is loaded.  If autoplay
-  // is enabled, video.paused will be false when this event fires, so this is
-  // the right event for this.
-  this.video_.addEventListener(
-      'loadeddata', this.onPlayStateChange_.bind(this));
 
   // Clicks in the controls should not propagate up to the video container.
   this.controls_.addEventListener(
@@ -179,6 +184,47 @@ ShakaControls.prototype.init = function(video, player) {
       'mousemove', this.onMouseMove_.bind(this));
   this.videoContainer_.addEventListener(
       'mouseout', this.onMouseOut_.bind(this));
+
+  this.castProxy_.addEventListener(
+      'caststatuschanged', this.onCastStatusChange_.bind(this));
+};
+
+
+/**
+ * Initializes minimal player controls.  Used on both sender (indirectly) and
+ * receiver (directly).
+ * @param {HTMLMediaElement} video
+ * @param {shaka.Player} player
+ */
+ShakaControls.prototype.initMinimal = function(video, player) {
+  this.video_ = video;
+  this.player_ = player;
+  this.player_.addEventListener(
+      'buffering', this.onBufferingStateChange_.bind(this));
+  window.setInterval(this.updateTimeAndSeekRange_.bind(this), 125);
+};
+
+
+/**
+ * This allows the application to inhibit casting.
+ *
+ * @param {boolean} allow
+ */
+ShakaControls.prototype.allowCast = function(allow) {
+  this.castAllowed_ = allow;
+  this.onCastStatusChange_(null);
+};
+
+
+/**
+ * Used by the application to notify the controls that a load operation is
+ * complete.  This allows the controls to recalculate play/paused state, which
+ * is important for platforms like Android where autoplay is disabled.
+ */
+ShakaControls.prototype.loadComplete = function() {
+  // If we are on Android or if autoplay is false, video.paused should be true.
+  // Otherwise, video.paused is false and the content is autoplaying.
+  this.onPlayStateChange_();
 };
 
 
@@ -230,6 +276,28 @@ ShakaControls.prototype.onMouseStill_ = function() {
 };
 
 
+/**
+ * @param {!Event} event
+ * @private
+ */
+ShakaControls.prototype.onContainerTouch_ = function(event) {
+  if (!this.video_.duration) {
+    // Can't play yet.  Ignore.
+    return;
+  }
+
+  if (this.controls_.style.opacity == 1) {
+    // The controls are showing.
+    // Let this event continue and become a click.
+  } else {
+    // The controls are hidden, so show them.
+    this.onMouseMove_();
+    // Stop this event from becoming a click event.
+    event.preventDefault();
+  }
+};
+
+
 /** @private */
 ShakaControls.prototype.onPlayPauseClick_ = function() {
   if (!this.video_.duration) {
@@ -253,10 +321,10 @@ ShakaControls.prototype.onPlayStateChange_ = function() {
   // Video is paused during seek, so don't show the play arrow while seeking:
   if (this.video_.paused && !this.isSeeking_) {
     this.playPauseButton_.textContent = 'play_arrow';
-    this.giantPlayButton_.style.display = 'inline';
+    this.giantPlayButtonContainer_.style.display = 'inline';
   } else {
     this.playPauseButton_.textContent = 'pause';
-    this.giantPlayButton_.style.display = 'none';
+    this.giantPlayButtonContainer_.style.display = 'none';
   }
 };
 
@@ -290,7 +358,7 @@ ShakaControls.prototype.onSeekInput_ = function() {
 /** @private */
 ShakaControls.prototype.onSeekInputTimeout_ = function() {
   this.seekTimeoutId_ = null;
-  this.video_.currentTime = this.seekBar_.value;
+  this.video_.currentTime = parseFloat(this.seekBar_.value);
 };
 
 
@@ -337,7 +405,7 @@ ShakaControls.prototype.onVolumeStateChange_ = function() {
 
 /** @private */
 ShakaControls.prototype.onVolumeInput_ = function() {
-  this.video_.volume = this.volumeBar_.value;
+  this.video_.volume = parseFloat(this.volumeBar_.value);
   this.video_.muted = false;
 };
 
@@ -345,6 +413,15 @@ ShakaControls.prototype.onVolumeInput_ = function() {
 /** @private */
 ShakaControls.prototype.onCaptionClick_ = function() {
   this.player_.setTextTrackVisibility(!this.player_.isTextTrackVisible());
+};
+
+
+/** @private */
+ShakaControls.prototype.onTracksChange_ = function() {
+  var hasText = this.player_.getTracks().some(function(track) {
+    return track.type == 'text';
+  });
+  this.captionButton_.style.display = hasText ? 'inherit' : 'none';
 };
 
 
@@ -410,7 +487,39 @@ ShakaControls.prototype.onFastForwardClick_ = function() {
 
 /** @private */
 ShakaControls.prototype.onCastClick_ = function() {
-  // TODO: cast, cast_connected
+  if (this.castProxy_.isCasting()) {
+    this.castProxy_.suggestDisconnect();
+  } else {
+    this.castButton_.disabled = true;
+    this.castProxy_.cast().then(function() {
+      this.castButton_.disabled = false;
+      // Success!
+    }.bind(this), function(error) {
+      this.castButton_.disabled = false;
+      if (error.code != shaka.util.Error.Code.CAST_CANCELED_BY_USER) {
+        this.onError_(error);
+      }
+    }.bind(this));
+  }
+};
+
+
+/**
+ * @param {Event} event
+ * @private
+ */
+ShakaControls.prototype.onCastStatusChange_ = function(event) {
+  var canCast = this.castProxy_.canCast() && this.castAllowed_;
+  var isCasting = this.castProxy_.isCasting();
+
+  this.notifyCastStatus_(isCasting);
+  this.castButton_.style.display = canCast ? 'inherit' : 'none';
+  this.castButton_.textContent = isCasting ? 'cast_connected' : 'cast';
+  this.castReceiverName_.style.display =
+      isCasting ? 'inherit' : 'none';
+  this.castReceiverName_.textContent =
+      isCasting ? 'Casting to ' + this.castProxy_.receiverName() : '';
+  this.controls_.classList.toggle('casting', this.castProxy_.isCasting());
 };
 
 
@@ -494,7 +603,7 @@ ShakaControls.prototype.updateTimeAndSeekRange_ = function() {
     var bufferEndFraction = (bufferedEnd / duration) || 0;
     var playheadFraction = (displayTime / duration) || 0;
 
-    if (this.isLive_) {
+    if (this.player_.isLive()) {
       var bufferStart = Math.max(bufferedStart, seekRange.start);
       var bufferEnd = Math.min(bufferedEnd, seekRange.end);
       var seekRangeSize = seekRange.end - seekRange.start;
