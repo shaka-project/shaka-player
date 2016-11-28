@@ -587,6 +587,7 @@ describe('Playhead', function() {
     it('leaves buffering state with small non-zero start time', function(done) {
       video.readyState = HTMLMediaElement.HAVE_METADATA;
 
+      // Nothing buffered.
       video.buffered = {
         length: 0
       };
@@ -618,6 +619,52 @@ describe('Playhead', function() {
           },
           end: function(i) {
             if (i == 0) return 5;
+            throw new Error('Unexpected index');
+          }
+        };
+
+        onBuffering.and.callFake(function(buffering) {
+          expect(buffering).toEqual(false);
+          done();
+        });
+      });
+    });
+
+    it('leaves buffering state with exact amount buffered', function(done) {
+      video.readyState = HTMLMediaElement.HAVE_METADATA;
+
+      // Nothing buffered.
+      video.buffered = {
+        length: 0
+      };
+
+      video.duration = 20;
+      timeline.getDuration.and.returnValue(20);
+      timeline.getEarliestStart.and.returnValue(0);
+      timeline.getSegmentAvailabilityStart.and.returnValue(0);
+
+      playhead = new shaka.media.Playhead(
+          video,
+          timeline,
+          10 /* rebufferingGoal */,
+          0 /* startTime */,
+          onBuffering, onSeek);
+
+      expect(video.currentTime).toBe(0);
+      expect(playhead.getTime()).toBe(0);
+
+      onBuffering.and.callFake(function(buffering) {
+        expect(buffering).toEqual(true);
+
+        // Exactly 10s (rebufferingGoal) is buffered now.
+        video.buffered = {
+          length: 1,
+          start: function(i) {
+            if (i == 0) return 0;
+            throw new Error('Unexpected index');
+          },
+          end: function(i) {
+            if (i == 0) return 10;
             throw new Error('Unexpected index');
           }
         };
