@@ -123,20 +123,20 @@ module.exports = function(config) {
         browserName: 'safari',
         pseudoActivityInterval: 20000
       },
-
-      WebDriver_ChromeMac: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4445},
-        browserName: 'chrome',
-        pseudoActivityInterval: 20000
-      },
       // }}}
 
-      // OS X Yosemite {{{
-      WebDriver_Safari8: {
+      // macOS Sierra {{{
+      WebDriver_Safari10: {
         base: 'WebDriver',
         config: {hostname: 'localhost', port: 4444},
         browserName: 'safari',
+        pseudoActivityInterval: 20000
+      },
+
+      WebDriver_ChromeMac: {
+        base: 'WebDriver',
+        config: {hostname: 'localhost', port: 4444},
+        browserName: 'chrome',
         pseudoActivityInterval: 20000
       },
 
@@ -155,7 +155,7 @@ module.exports = function(config) {
       },
       // }}}
 
-      // Windows {{{
+      // Windows 10 {{{
       WebDriver_IE11: {
         base: 'WebDriver',
         config: {hostname: 'localhost', port: 4446},
@@ -204,7 +204,7 @@ module.exports = function(config) {
       // }}}
 
       // Android 6.0.1 {{{
-      // Note this is tethered to the Linux machine.
+      // Note: this is tethered to the Linux machine.
       WebDriver_ChromeAndroid: {
         base: 'WebDriver',
         config: {hostname: 'localhost', port: 4447},
