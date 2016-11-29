@@ -16,7 +16,7 @@
  */
 
 // Test basic manifest parsing functionality.
-describe('DashParser.Manifest', function() {
+describe('DashParser Manifest', function() {
   var Dash;
   var fakeNetEngine;
   var parser;

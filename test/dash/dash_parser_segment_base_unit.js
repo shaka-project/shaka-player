@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('DashParser.SegmentBase', function() {
+describe('DashParser SegmentBase', function() {
   var Dash;
   var fakeNetEngine;
   var parser;
