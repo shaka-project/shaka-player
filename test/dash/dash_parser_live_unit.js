@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('DashParser.Live', function() {
+describe('DashParser Live', function() {
   var Dash;
   var errorCallback;
   var fakeNetEngine;

@@ -16,7 +16,7 @@
  */
 
 // Test DRM-related parsing.
-describe('DashParser.ContentProtection', function() {
+describe('DashParser ContentProtection', function() {
   var Dash;
   var filterPeriod = function() {};
 
