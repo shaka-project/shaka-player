@@ -369,10 +369,10 @@ shakaAssets.testAssets = [
     drm: [],
     features: [
       shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
-      shakaAssets.Feature.WEBM,
       shakaAssets.Feature.WEBVTT
     ]
   },
@@ -404,7 +404,7 @@ shakaAssets.testAssets = [
 
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
-    drm: [shakaAssets.KeySystem.WIDEVINE],
+    drm: [],
     features: [
       shakaAssets.Feature.EMBEDDED_TEXT,
       shakaAssets.Feature.HIGH_DEFINITION,
