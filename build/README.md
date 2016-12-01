@@ -69,7 +69,7 @@ the build to run even if there are no changes detected to the source code.
 some integration tests will not run without the compiled library present.
 
 There are also several custom arguments that are handled in JavaScript by
-`karma.conf.js` or the tests themselves (via `shaka.test.Util.getClientArg`).
+`karma.conf.js` or the tests themselves (via `getClientArg`).
 These arguments can be passed in using `test.py` or using `karma start`
 directly:
 * `--quick` will only run unit tests, skipping integration tests.
@@ -82,6 +82,9 @@ directly:
   connection.
 * `--uncompiled` will run integration tests using the uncompiled library instead
   of the compiled version.
+* `--random` will run the tests in a random order to isolate test dependencies.
+* `--seed` will seed the random test order so that the same order can be
+  reproduced across runs.
 
 The `karma` argument `--browsers` will set the browsers used to run the tests
 (e.g. `--browsers Chrome,Firefox`).  If you don't pass any arguments, `test.py`
