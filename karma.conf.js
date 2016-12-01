@@ -281,6 +281,16 @@ module.exports = function(config) {
     setClientArg(config, 'uncompiled', true);
   }
 
+  if (flagPresent('random')) {
+    // Run tests in a random order.
+    setClientArg(config, 'random', true);
+  }
+
+  if (flagPresent('seed')) {
+    // Use a specific seed to reproduce a specific 'random' order.
+    setClientArg(config, 'seed', getFlagValue('seed'));
+  }
+
   var hostname = getFlagValue('hostname');
   if (hostname !== null) {
     // Point the browsers to a hostname other than localhost.

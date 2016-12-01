@@ -409,6 +409,19 @@ jasmine.Env = function() {};
 jasmine.Env.prototype.specFilter = function(spec) {};
 
 
+/**
+ * @param {boolean} random
+ */
+jasmine.Env.prototype.randomizeTests = function(random) {};
+
+
+/**
+ * @param {string} seed
+ * @return {?string}
+ */
+jasmine.Env.prototype.seed = function(seed) {};
+
+
 /** @return {!jasmine.Env} */
 jasmine.getEnv = function() {};
 

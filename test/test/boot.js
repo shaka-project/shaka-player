@@ -15,6 +15,20 @@
  * limitations under the License.
  */
 
+
+/**
+ * Gets the value of an argument passed from karma.
+ * @param {string} name
+ * @return {?string|boolean}
+ */
+function getClientArg(name) {
+  if (window.__karma__ && __karma__.config.args.length)
+    return __karma__.config.args[0][name] || null;
+  else
+    return null;
+}
+
+
 // Executed before test utilities and tests are loaded, but after Shaka Player
 // is loaded in uncompiled mode.
 (function() {
@@ -69,15 +83,22 @@
   // Set the default timeout to 120s for all asynchronous tests.
   jasmine.DEFAULT_TIMEOUT_INTERVAL = 120 * 1000;
 
-  // This references test.Util, which isn't loaded yet, so defer to beforeAll:
-  beforeAll(function() {
-    var logLevel = shaka.test.Util.getClientArg('logLevel');
-    if (logLevel) {
-      shaka.log.setLevel(Number(logLevel));
-    } else {
-      shaka.log.setLevel(shaka.log.Level.INFO);
+  var logLevel = getClientArg('logLevel');
+  if (logLevel) {
+    shaka.log.setLevel(Number(logLevel));
+  } else {
+    shaka.log.setLevel(shaka.log.Level.INFO);
+  }
+
+  // Set random and seed if specified.
+  if (getClientArg('random')) {
+    jasmine.getEnv().randomizeTests(true);
+
+    var seed = getClientArg('seed').toString();
+    if (seed) {
+      jasmine.getEnv().seed(seed);
     }
-  });
+  }
 
   /**
    * Returns a Jasmine callback which shims the real callback and checks for
@@ -93,7 +114,7 @@
     if (callback.length) {
       // This callback is for an async test.  Replace it with an async shim.
       return function(done) {
-        if (shaka.test.Util.getClientArg(clientArg)) {
+        if (getClientArg(clientArg)) {
           callback(done);
         } else {
           pending(skipMessage);
@@ -103,7 +124,7 @@
     } else {
       // This callback is for a synchronous test.  Use a synchronous shim.
       return function() {
-        if (shaka.test.Util.getClientArg(clientArg)) {
+        if (getClientArg(clientArg)) {
           callback();
         } else {
           pending(skipMessage);
