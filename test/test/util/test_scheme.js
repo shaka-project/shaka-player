@@ -37,7 +37,6 @@ shaka.test.TestScheme = function(uri, request) {
     };
     return Promise.resolve(response);
   }
-
   var re = /^test:([^\/]+)\/(video|audio)\/(init|[0-9]+)$/;
   var segmentParts = re.exec(uri);
   if (!segmentParts) {
@@ -48,6 +47,7 @@ shaka.test.TestScheme = function(uri, request) {
 
   var name = segmentParts[1];
   var type = segmentParts[2];
+
   var generators = shaka.test.TestScheme.GENERATORS[name];
   expect(generators).toBeTruthy();
   if (!generators) return Promise.reject();
@@ -230,11 +230,41 @@ shaka.test.TestScheme.setupPlayer = function(player, name) {
  * @return {!Promise}
  */
 shaka.test.TestScheme.createManifests = function(shaka, suffix) {
+  /**
+   * @param {Object} metadata
+   * @return {shaka.test.DashVodStreamGenerator}
+   */
   function createStreamGenerator(metadata) {
     return new window.shaka.test.DashVodStreamGenerator(
         metadata.initSegmentUri, metadata.mvhdOffset, metadata.segmentUri,
         metadata.tfdtOffset, metadata.segmentDuration,
         metadata.presentationTimeOffset);
+  }
+
+  /**
+   * @param {shaka.test.ManifestGenerator} manifestGenerator
+   * @param {Object} data
+   * @param {string} contentType
+   * @param {string} name
+   */
+  function addStreamInfo(manifestGenerator, data, contentType, name) {
+    manifestGenerator
+      .presentationTimeOffset(data[contentType].presentationTimeOffset)
+      .mime(data[contentType].mimeType, data[contentType].codecs)
+      .initSegmentReference(
+            ['test:' + name + '/' + contentType + '/init'], 0, null)
+      .useSegmentTemplate('test:' + name + '/' + contentType + '/%d',
+                          data[contentType].segmentDuration);
+
+    if (data.licenseServers) {
+      for (var keySystem in data.licenseServers) {
+        gen.addDrmInfo(keySystem)
+            .licenseServerUri(data.licenseServers[keySystem]);
+        if (data[contentType].initData) {
+          gen.addCencInitData(data[contentType].initData);
+        }
+      }
+    }
   }
 
   var async = [];
@@ -252,27 +282,12 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
 
     var gen = new window.shaka.test.ManifestGenerator(shaka)
         .setPresentationDuration(data.duration)
-        .addPeriod(0);
-    ['audio', 'video'].forEach(function(type, i) {
-      gen.addStreamSet(type)
-          .addStream(i)
-            .presentationTimeOffset(data[type].presentationTimeOffset)
-            .mime(data[type].mimeType, data[type].codecs)
-            .initSegmentReference(
-                  ['test:' + name + '/' + type + '/init'], 0, null)
-            .useSegmentTemplate('test:' + name + '/' + type + '/%d',
-                                data[type].segmentDuration);
-
-      if (data.licenseServers) {
-        for (var keySystem in data.licenseServers) {
-          gen.addDrmInfo(keySystem)
-              .licenseServerUri(data.licenseServers[keySystem]);
-          if (data[type].initData) {
-            gen.addCencInitData(data[type].initData);
-          }
-        }
-      }
-    });
+        .addPeriod(0)
+        .addVariant(0)
+          .addVideo(1);
+    addStreamInfo(gen, data, 'video', name);
+    gen.addAudio(2);
+    addStreamInfo(gen, data, 'audio', name);
 
     // This seems to be necessary.  Otherwise, we end up with a URL like
     // "http:/base/..." which then fails to load on Safari for some reason.
@@ -280,8 +295,7 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
     var partialUri = new goog.Uri(data.text.uri);
     var absoluteUri = locationUri.resolve(partialUri);
 
-    gen.addStreamSet('text')
-        .addStream(2)
+    gen.addTextStream(3)
           .mime(data.text.mimeType, data.text.codecs)
           .textStream(absoluteUri.toString());
 

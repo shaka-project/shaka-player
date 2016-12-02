@@ -53,15 +53,34 @@ shakaExtern.AbrManager.prototype.init = function(switchCallback) {};
 
 
 /**
- * Chooses one Stream from each StreamSet to switch to. All StreamSets must be
- * from the same Period. Some StreamSets may be absent in the case of language
- * changes.
+ * Updates manager's variants collection.
  *
- * @param {!Object.<string, !shakaExtern.StreamSet>} streamSetsByType
+ * @param {!Array.<!shakaExtern.Variant>} variants
+ * @exportDoc
+ */
+shakaExtern.AbrManager.prototype.setVariants = function(variants) {};
+
+
+/**
+ * Updates manager's text streams collection.
+ *
+ * @param {!Array.<!shakaExtern.Stream>} streams
+ * @exportDoc
+ */
+shakaExtern.AbrManager.prototype.setTextStreams = function(streams) {};
+
+
+/**
+ * Chooses one Stream from each media type in mediaTypesToUpdate to switch to.
+ * All Variants and Streams must be from the same Period.
+ *
+ * @param {!Array.<!string>} mediaTypesToUpdate
  * @return {!Object.<string, shakaExtern.Stream>}
  * @exportDoc
  */
-shakaExtern.AbrManager.prototype.chooseStreams = function(streamSetsByType) {};
+// TODO: Consider breaking down into chooseVariant() and chooseText()
+shakaExtern.AbrManager.prototype.chooseStreams =
+    function(mediaTypesToUpdate) {};
 
 
 /**

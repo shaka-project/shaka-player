@@ -47,9 +47,9 @@
  *
  * <p>
  * The presentation timeline is divided into one or more Periods, and each of
- * these Periods contains its own collection of streams. Periods group their
- * streams by type (e.g., 'audio', 'video', or 'text') and logical content, and
- * each individual group defines a StreamSet.
+ * these Periods contains its own collection of Variants and text streams.
+ * Variant is a combination of an audio and a video streams that can be played
+ * together.
  * </p>
  *
  * <p>
@@ -84,7 +84,8 @@ shakaExtern.Manifest;
 /**
  * @typedef {{
  *   startTime: number,
- *   streamSets: !Array.<shakaExtern.StreamSet>
+ *   variants: !Array.<shakaExtern.Variant>,
+ *   textStreams: !Array.<shakaExtern.Stream>
  * }}
  *
  * @description
@@ -97,9 +98,12 @@ shakaExtern.Manifest;
  *   presentation. The Period ends immediately before the next Period's start
  *   time or exactly at the end of the presentation timeline. Periods which
  *   begin after the end of the presentation timeline are ignored.
- * @property {!Array.<shakaExtern.StreamSet>} streamSets
+ * @property {!Array.<shakaExtern.Variant>} variants
  *   <i>Required.</i> <br>
- *   The Period's StreamSets. There must be at least one StreamSet.
+ *   The Period's Variants. There must be at least one Variant.
+ * @property {!Array.<shakaExtern.Stream>} textStreams
+ *   <i>Required.</i> <br>
+ *   The Period's text streams.
  *
  * @exportDoc
  */
@@ -185,43 +189,57 @@ shakaExtern.DrmInfo;
 
 /**
  * @typedef {{
+ *   id: number,
  *   language: string,
- *   type: string,
  *   primary: boolean,
- *   drmInfos: Array.<!shakaExtern.DrmInfo>,
- *   streams: !Array.<!shakaExtern.Stream>
+ *   audio: ?shakaExtern.Stream,
+ *   video: ?shakaExtern.Stream,
+ *   bandwidth: number,
+ *   drmInfos: !Array.<!shakaExtern.DrmInfo>,
+ *   allowedByApplication: boolean,
+ *   allowedByKeySystem: boolean
  * }}
  *
  * @description
- * A StreamSet object contains a set of Streams which have the same type,
- * container/format, and logical content. A StreamSet's type and
- * container/format define its MIME type.
+ * A Variant describes a combination of an audio and video streams which
+ * could be played together. It's possible to have a video/audio only
+ * variant.
  *
+ * @property {number} id
+ *   <i>Required.</i> <br>
+ *   A unique ID among all Variant objects within the same Manifest.
  * @property {string} language
  *   <i>Defaults to '' (i.e., unknown).</i> <br>
- *   The Streams' language, specified as a language code. <br>
+ *   The Variant's language, specified as a language code. <br>
  *   See {@link https://tools.ietf.org/html/rfc5646} <br>
  *   See {@link http://www.iso.org/iso/home/standards/language_codes.htm}
- * @property {string} type
- *   <i>Required.</i> <br>
- *   The Streams' type, e.g., 'audio', 'video', or 'text'.
  * @property {boolean} primary
  *   <i>Defaults to false.</i> <br>
- *   True indicates that the player should use this StreamSet over others of
- *   the same type in the same Period. However, the player may use another
- *   StreamSet to meet application preferences, or to achieve better MIME type
- *   or DRM compatibility among other StreamSets.
- * @property {Array.<!shakaExtern.DrmInfo>} drmInfos
+ *   True indicates that the player should use this Variant over others of
+ *   the in the same Period. However, the player may use another
+ *   Variant to meet application preferences.
+ * @property {?shakaExtern.Stream} audio
+ *   The audio stream of the variant.
+ * @property {?shakaExtern.Stream} video
+ *   The video stream of the variant.
+ * @property {number} bandwidth
+ *   The variant's required bandwidth in bits per second.
+ * @property {!Array.<!shakaExtern.DrmInfo>} drmInfos
  *   <i>Defaults to [] (i.e., no DRM).</i> <br>
  *   An array of DrmInfo objects which describe DRM schemes are compatible with
  *   the content.
- * @property {!Array.<!shakaExtern.Stream>} streams
- *   <i>Required.</i> <br>
- *   The StreamSets's Streams. There must be at least one Stream.
+ * @property {boolean} allowedByApplication
+ *   <i>Defaults to true.</i><br>
+ *   Set by the Player to indicate whether the variant is allowed to be played
+ *   by the application.
+ * @property {boolean} allowedByKeySystem
+ *   <i>Defaults to true.</i><br>
+ *   Set by the Player to indicate whether the variant is allowed to be played
+ *   by the key system.
  *
  * @exportDoc
  */
-shakaExtern.StreamSet;
+shakaExtern.Variant;
 
 
 /**
@@ -275,8 +293,8 @@ shakaExtern.GetSegmentReferenceFunction;
  *   encrypted: boolean,
  *   keyId: ?string,
  *   language: string,
- *   allowedByApplication: boolean,
- *   allowedByKeySystem: boolean
+ *   type: string,
+ *   primary: boolean
  * }}
  *
  * @description
@@ -345,15 +363,16 @@ shakaExtern.GetSegmentReferenceFunction;
  *   stream.
  * @property {string} language
  *   The Stream's language, specified as a language code. <br>
- *   Must be identical to the language of the containing StreamSet.
- * @property {boolean} allowedByApplication
- *   <i>Defaults to true.</i><br>
- *   Set by the Player to indicate whether the stream is allowed to be played
- *   by the application.
- * @property {boolean} allowedByKeySystem
- *   <i>Defaults to true.</i><br>
- *   Set by the Player to indicate whether the stream is allowed to be played
- *   by the key system.
+ *   Audio stream's language must be identical to the language of the containing
+ *   Variant.
+ * @property {string} type
+ *   <i>Required.</i> <br>
+ *   Content type (e.g. 'video', 'audio' or 'text')
+ * @property {boolean} primary
+ *   <i>Defaults to false.</i> <br>
+ *   True indicates that the player should prefer this Stream over others
+ *   in the same Period. However, the player may use another
+ *   Stream to meet application preferences.
  *
  * @exportDoc
  */

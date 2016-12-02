@@ -237,19 +237,19 @@ describe('StreamingEngine', function() {
 
     // Create InitSegmentReferences.
     function makeUris(uri) { return function() { return [uri]; }; }
-    manifest.periods[0].streamSetsByType.audio.streams[0].initSegmentReference =
+    manifest.periods[0].variants[0].audio.initSegmentReference =
         new shaka.media.InitSegmentReference(makeUris('1_audio_init'), 0, null);
-    manifest.periods[0].streamSetsByType.video.streams[0].initSegmentReference =
+    manifest.periods[0].variants[0].video.initSegmentReference =
         new shaka.media.InitSegmentReference(makeUris('1_video_init'), 0, null);
-    manifest.periods[1].streamSetsByType.audio.streams[0].initSegmentReference =
+    manifest.periods[1].variants[0].audio.initSegmentReference =
         new shaka.media.InitSegmentReference(makeUris('2_audio_init'), 0, null);
-    manifest.periods[1].streamSetsByType.video.streams[0].initSegmentReference =
+    manifest.periods[1].variants[0].video.initSegmentReference =
         new shaka.media.InitSegmentReference(makeUris('2_video_init'), 0, null);
 
-    audioStream1 = manifest.periods[0].streamSets[0].streams[0];
-    videoStream1 = manifest.periods[0].streamSets[1].streams[0];
-    audioStream2 = manifest.periods[1].streamSets[0].streams[0];
-    videoStream2 = manifest.periods[1].streamSets[1].streams[0];
+    audioStream1 = manifest.periods[0].variants[0].audio;
+    videoStream1 = manifest.periods[0].variants[0].video;
+    audioStream2 = manifest.periods[1].variants[0].audio;
+    videoStream2 = manifest.periods[1].variants[0].video;
   }
 
   function createStreamingEngine() {

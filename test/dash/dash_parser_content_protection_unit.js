@@ -92,19 +92,21 @@ describe('DashParser ContentProtection', function() {
     return jasmine.objectContaining({
       periods: [
         jasmine.objectContaining({
-          streamSets: [
+          variants: [
             jasmine.objectContaining({
               drmInfos: drmInfos,
-              streams: [
-                jasmine.objectContaining({
-                  keyId: keyId1
-                }),
-                jasmine.objectContaining({
-                  keyId: keyId2
-                })
-              ]  // streams
+              video: jasmine.objectContaining({
+                keyId: keyId1
+              })
+            }),
+            jasmine.objectContaining({
+              drmInfos: drmInfos,
+              video: jasmine.objectContaining({
+                keyId: keyId2
+              })
             })
-          ]  // streamSets
+          ], // variants
+          textStreams: []
         })
       ]  // periods
     });
@@ -216,22 +218,24 @@ describe('DashParser ContentProtection', function() {
       '  </Period>',
       '</MPD>'
     ].join('\n');
-    var expected = shaka.test.Dash.makeManifestFromStreamSets([
+    var expected = shaka.test.Dash.makeManifestFromVariants([
       jasmine.objectContaining({
         drmInfos: [
-          buildDrmInfo('com.widevine.alpha'),
           buildDrmInfo('com.widevine.alpha')
         ],
-        streams: [
-          jasmine.objectContaining({
-            bandwidth: 100,
-            keyId: 'deadbeeffeedbaadf00d000008675309'
-          }),
-          jasmine.objectContaining({
-            bandwidth: 200,
-            keyId: 'baadf00dfeeddeafbeef000004390116'
-          })
-        ]
+        video: jasmine.objectContaining({
+          bandwidth: 100,
+          keyId: 'deadbeeffeedbaadf00d000008675309'
+        })
+      }),
+      jasmine.objectContaining({
+        drmInfos: [
+          buildDrmInfo('com.widevine.alpha')
+        ],
+        video: jasmine.objectContaining({
+          bandwidth: 200,
+          keyId: 'baadf00dfeeddeafbeef000004390116'
+        })
       })
     ]);
     testDashParser(done, source, expected);

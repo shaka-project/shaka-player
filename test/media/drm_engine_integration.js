@@ -104,14 +104,11 @@ describe('DrmEngine', function() {
 
     manifest = new shaka.test.ManifestGenerator()
       .addPeriod(0)
-        .addStreamSet('video')
+        .addVariant(0)
           .addDrmInfo('com.widevine.alpha')
           .addDrmInfo('com.microsoft.playready')
-          .addStream(1).mime('video/mp4', 'avc1.640015').encrypted(true)
-        .addStreamSet('audio')
-          .addDrmInfo('com.widevine.alpha')
-          .addDrmInfo('com.microsoft.playready')
-          .addStream(1).mime('audio/mp4', 'mp4a.40.2').encrypted(true)
+          .addVideo(1).mime('video/mp4', 'avc1.640015').encrypted(true)
+          .addAudio(2).mime('audio/mp4', 'mp4a.40.2').encrypted(true)
       .build();
 
     eventManager = new shaka.util.EventManager();

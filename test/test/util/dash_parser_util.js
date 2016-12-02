@@ -46,7 +46,7 @@ shaka.test.Dash.makeDashParser = function() {
 shaka.test.Dash.verifySegmentIndex = function(
     manifest, references, periodIndex) {
   expect(manifest).toBeTruthy();
-  var stream = manifest.periods[periodIndex].streamSets[0].streams[0];
+  var stream = manifest.periods[periodIndex].variants[0].video;
   expect(stream).toBeTruthy();
   expect(stream.findSegmentPosition).toBeTruthy();
   expect(stream.getSegmentReference).toBeTruthy();
@@ -160,14 +160,14 @@ shaka.test.Dash.makeSimpleManifestText =
  * Makes a simple manifest object for jasmine.toEqual; this does not do any
  * checking.  This only constructs one period with the given stream sets.
  *
- * @param {!Array.<shakaExtern.StreamSet>} streamSets
+ * @param {!Array.<shakaExtern.Variant>} variants
  * @return {shakaExtern.Manifest}
  */
-shaka.test.Dash.makeManifestFromStreamSets = function(streamSets) {
+shaka.test.Dash.makeManifestFromVariants = function(variants) {
   return /** @type {shakaExtern.Manifest} */ (jasmine.objectContaining({
     periods: [
       jasmine.objectContaining({
-        streamSets: streamSets
+        variants: variants
       })
     ]
   }));
@@ -187,8 +187,8 @@ shaka.test.Dash.makeManifestFromStreamSets = function(streamSets) {
  */
 shaka.test.Dash.makeManifestFromInit = function(
     uri, startByte, endByte, opt_pto) {
-  return shaka.test.Dash.makeManifestFromStreamSets([jasmine.objectContaining({
-    streams: [jasmine.objectContaining({
+  return shaka.test.Dash.makeManifestFromVariants([jasmine.objectContaining({
+    video: jasmine.objectContaining({
       presentationTimeOffset: (opt_pto || 0),
       createSegmentIndex: jasmine.any(Function),
       findSegmentPosition: jasmine.any(Function),
@@ -196,7 +196,7 @@ shaka.test.Dash.makeManifestFromInit = function(
           // TODO: Change back to checking specific URIs once jasmine is fixed.
           // https://github.com/jasmine/jasmine/issues/1138
           jasmine.any(Function), startByte, endByte)
-    })]
+    })
   })]);
 };
 
@@ -210,7 +210,7 @@ shaka.test.Dash.makeManifestFromInit = function(
  * @return {!Promise}
  */
 shaka.test.Dash.callCreateSegmentIndex = function(manifest) {
-  var stream = manifest.periods[0].streamSets[0].streams[0];
+  var stream = manifest.periods[0].variants[0].video;
   return stream.createSegmentIndex().then(fail).catch(function() {});
 };
 

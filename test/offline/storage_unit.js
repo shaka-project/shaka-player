@@ -64,7 +64,8 @@ describe('Storage', function() {
             width: 1920,
             height: 1080,
             frameRate: 24,
-            codecs: 'avc1.4d401f'
+            codecs: 'avc1.4d401f',
+            segments: []
           },
           {
             id: 1,
@@ -74,7 +75,8 @@ describe('Storage', function() {
             width: null,
             height: null,
             frameRate: undefined,
-            codecs: 'vorbis'
+            codecs: 'vorbis',
+            segments: []
           }
         ]
       }],
@@ -99,26 +101,14 @@ describe('Storage', function() {
       {
         id: 0,
         active: false,
-        type: 'video',
+        type: 'variant',
         bandwidth: 0,
-        language: '',
+        language: 'en',
         kind: null,
         width: 1920,
         height: 1080,
         frameRate: 24,
-        codecs: 'avc1.4d401f'
-      },
-      {
-        id: 1,
-        active: false,
-        type: 'audio',
-        bandwidth: 0,
-        language: 'en',
-        kind: null,
-        width: null,
-        height: null,
-        frameRate: undefined,
-        codecs: 'vorbis'
+        codecs: 'avc1.4d401f, vorbis'
       }
     ];
     Promise
@@ -164,11 +154,9 @@ describe('Storage', function() {
       manifest = new shaka.test.ManifestGenerator()
           .setPresentationDuration(20)
           .addPeriod(0)
-            .addStreamSet('video')
-              .addStream(0).size(100, 200).bandwidth(80)
-            .addStreamSet('audio')
-              .language('en')
-              .addStream(1).bandwidth(80)
+            .addVariant(0).language('en').bandwidth(160)
+              .addVideo(1).size(100, 200).bandwidth(80)
+              .addAudio(2).language('en').bandwidth(80)
           .build();
       // Get the original tracks from the manifest.
       var getTracks = shaka.util.StreamUtils.getTracks;
@@ -189,11 +177,11 @@ describe('Storage', function() {
       stream1Index = new shaka.media.SegmentIndex([]);
       stream2Index = new shaka.media.SegmentIndex([]);
 
-      var stream1 = manifest.periods[0].streamSets[0].streams[0];
+      var stream1 = manifest.periods[0].variants[0].audio;
       stream1.findSegmentPosition = stream1Index.find.bind(stream1Index);
       stream1.getSegmentReference = stream1Index.get.bind(stream1Index);
 
-      var stream2 = manifest.periods[0].streamSets[1].streams[0];
+      var stream2 = manifest.periods[0].variants[0].video;
       stream2.findSegmentPosition = stream2Index.find.bind(stream2Index);
       stream2.getSegmentReference = stream2Index.get.bind(stream2Index);
     });
@@ -206,7 +194,7 @@ describe('Storage', function() {
       var originalUri = 'fake://foobar';
       var appData = {tools: ['Google', 'StackOverflow'], volume: 11};
       storage.store(originalUri, appData)
-          .then(function(data) {
+      .then(function(data) {
             expect(data).toBeTruthy();
             // Since we are using a memory DB, it will always be the first one.
             expect(data.offlineUri).toBe('offline:0');
@@ -216,20 +204,16 @@ describe('Storage', function() {
             expect(data.tracks).toEqual(tracks);
             expect(data.appMetadata).toEqual(appData);
           })
-          .catch(fail)
-          .then(done);
+      .catch(fail)
+      .then(done);
     });
 
     it('gives warning if storing tracks with the same type', function(done) {
       manifest = new shaka.test.ManifestGenerator()
           .setPresentationDuration(20)
           .addPeriod(0)
-            .addStreamSet('audio')
-              .language('en')
-              .addStream(0).bandwidth(80)
-            .addStreamSet('audio')
-              .language('en')
-              .addStream(1).bandwidth(160)
+            .addVariant(0)
+            .addVariant(1)
           .build();
 
       // Store every stream.
@@ -431,9 +415,9 @@ describe('Storage', function() {
               expect(stream1.initSegmentUri).toBe(null);
               expect(stream1.segments.length).toBe(5);
               expect(stream1.segments[0])
-                  .toEqual({startTime: 0, endTime: 1, uri: 'offline:0/0/0'});
+                  .toEqual({startTime: 0, endTime: 1, uri: 'offline:0/2/0'});
               expect(stream1.segments[3])
-                  .toEqual({startTime: 3, endTime: 4, uri: 'offline:0/0/3'});
+                  .toEqual({startTime: 3, endTime: 4, uri: 'offline:0/2/3'});
 
               var stream2 = manifest.periods[0].streams[1];
               expect(stream2.initSegmentUri).toBe(null);
@@ -490,7 +474,7 @@ describe('Storage', function() {
       it('stores init segment', function(done) {
         netEngine.setResponseMap({'fake:0': new ArrayBuffer(5)});
 
-        var stream = manifest.periods[0].streamSets[0].streams[0];
+        var stream = manifest.periods[0].variants[0].audio;
         stream.initSegmentReference =
             new shaka.media.InitSegmentReference(makeUris('fake:0'), 0, null);
 
@@ -505,7 +489,7 @@ describe('Storage', function() {
             .then(function(manifest) {
               var stream = manifest.periods[0].streams[0];
               expect(stream.segments.length).toBe(0);
-              expect(stream.initSegmentUri).toBe('offline:0/0/0');
+              expect(stream.initSegmentUri).toBe('offline:0/2/0');
               return fakeDbEngine.get('segment', 0);
             })
             .then(function(segment) {
