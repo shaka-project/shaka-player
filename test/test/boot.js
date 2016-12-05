@@ -94,9 +94,9 @@ function getClientArg(name) {
   if (getClientArg('random')) {
     jasmine.getEnv().randomizeTests(true);
 
-    var seed = getClientArg('seed').toString();
+    var seed = getClientArg('seed');
     if (seed) {
-      jasmine.getEnv().seed(seed);
+      jasmine.getEnv().seed(seed.toString());
     }
   }
 
