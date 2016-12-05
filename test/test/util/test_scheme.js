@@ -90,23 +90,22 @@ shaka.test.TestScheme.DATA = {
       segmentDuration: 10,
       presentationTimeOffset: 0,
       mimeType: 'video/mp4',
-      codec: 'avc1.42c01e'
+      codecs: 'avc1.42c01e'
     },
     audio: {
       initSegmentUri: '/base/test/test/assets/sintel-audio-init.mp4',
       mvhdOffset: 0x20,
       segmentUri: '/base/test/test/assets/sintel-audio-segment.mp4',
       tfdtOffset: 0x3c,
-      segmentDuration: 10,
+      segmentDuration: 10.005,
       presentationTimeOffset: 0,
       mimeType: 'audio/mp4',
-      codec: 'mp4a.40.2'
+      codecs: 'mp4a.40.2'
     },
     text: {
       uri: '/base/test/test/assets/text-clip.vtt',
       mimeType: 'text/vtt'
     },
-    // TODO: Allow changing the duration so StreamingEngine test can use this.
     duration: 30
   },
   'sintel-enc': {
@@ -118,7 +117,7 @@ shaka.test.TestScheme.DATA = {
       segmentDuration: 10,
       presentationTimeOffset: 0,
       mimeType: 'video/mp4',
-      codec: 'avc1.42c01e',
+      codecs: 'avc1.42c01e',
       initData:
           'AAAAc3Bzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAAFMIARIQaKzMBtasU1iYiGwe' +
           'MeC/ORIQPgfUgWF6UGqdIm5yx/XJtxIQRC1g0g+tXe6lxz4ABfHDnhoNd2lkZXZp' +
@@ -129,10 +128,10 @@ shaka.test.TestScheme.DATA = {
       mvhdOffset: 0x20,
       segmentUri: '/base/test/test/assets/encrypted-sintel-audio-segment.mp4',
       tfdtOffset: 0x3c,
-      segmentDuration: 10,
+      segmentDuration: 10.005,
       presentationTimeOffset: 0,
       mimeType: 'audio/mp4',
-      codec: 'mp4a.40.2',
+      codecs: 'mp4a.40.2',
       initData:
           'AAAAc3Bzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAAFMIARIQaKzMBtasU1iYiGwe' +
           'MeC/ORIQPgfUgWF6UGqdIm5yx/XJtxIQRC1g0g+tXe6lxz4ABfHDnhoNd2lkZXZp' +
@@ -153,10 +152,10 @@ shaka.test.TestScheme.DATA = {
       mvhdOffset: 0x72,
       segmentUri: '/base/test/test/assets/multidrm-video-segment.mp4',
       tfdtOffset: 0x78,
-      segmentDuration: 10,
+      segmentDuration: 4,
       presentationTimeOffset: 0,
       mimeType: 'video/mp4',
-      codec: 'avc1.64001e',
+      codecs: 'avc1.64001e',
       initData:
           'AAAANHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAABQIARIQblodJidXR9eARuq' +
           'l0dNLWg=='
@@ -166,10 +165,10 @@ shaka.test.TestScheme.DATA = {
       mvhdOffset: 0x72,
       segmentUri: '/base/test/test/assets/multidrm-audio-segment.mp4',
       tfdtOffset: 0x7c,
-      segmentDuration: 10,
+      segmentDuration: 4,
       presentationTimeOffset: 0,
       mimeType: 'audio/mp4',
-      codec: 'mp4a.40.2',
+      codecs: 'mp4a.40.2',
       initData:
           'AAAANHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAABQIARIQblodJidXR9eARuq' +
           'l0dNLWg=='
@@ -231,11 +230,11 @@ shaka.test.TestScheme.setupPlayer = function(player, name) {
  * @return {!Promise}
  */
 shaka.test.TestScheme.createManifests = function(shaka, suffix) {
-  function createStreamGenerator(metadata, duration) {
+  function createStreamGenerator(metadata) {
     return new window.shaka.test.DashVodStreamGenerator(
         metadata.initSegmentUri, metadata.mvhdOffset, metadata.segmentUri,
         metadata.tfdtOffset, metadata.segmentDuration,
-        metadata.presentationTimeOffset, duration);
+        metadata.presentationTimeOffset);
   }
 
   var async = [];
@@ -246,7 +245,7 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
     GENERATORS[name + suffix] = GENERATORS[name + suffix] || {};
     var data = DATA[name];
     ['video', 'audio'].forEach(function(type) {
-      var streamGen = createStreamGenerator(data[type], data.duration);
+      var streamGen = createStreamGenerator(data[type]);
       GENERATORS[name + suffix][type] = streamGen;
       async.push(streamGen.init());
     });
@@ -258,7 +257,7 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
       gen.addStreamSet(type)
           .addStream(i)
             .presentationTimeOffset(data[type].presentationTimeOffset)
-            .mime(data[type].mimeType, data[type].codec)
+            .mime(data[type].mimeType, data[type].codecs)
             .initSegmentReference(
                   ['test:' + name + '/' + type + '/init'], 0, null)
             .useSegmentTemplate('test:' + name + '/' + type + '/%d',
@@ -283,7 +282,7 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
 
     gen.addStreamSet('text')
         .addStream(2)
-          .mime(data.text.mimeType, data.text.codec)
+          .mime(data.text.mimeType, data.text.codecs)
           .textStream(absoluteUri.toString());
 
     MANIFESTS[name + suffix] = gen.build();
