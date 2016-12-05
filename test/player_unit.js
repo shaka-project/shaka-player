@@ -1366,6 +1366,20 @@ describe('Player', function() {
     });
   });
 
+  it('rejects empty manifests', function(done) {
+    var emptyManifest = new shaka.test.ManifestGenerator().build();
+    var emptyParser = new shaka.test.FakeManifestParser(emptyManifest);
+    var emptyFactory = function() { return emptyParser; };
+
+    player.load('', 0, emptyFactory).then(fail).catch(function(error) {
+      shaka.test.Util.expectToEqualError(
+          error,
+          new shaka.util.Error(
+              shaka.util.Error.Category.MANIFEST,
+              shaka.util.Error.Code.NO_PERIODS));
+    }).then(done);
+  });
+
   /**
    * Choose streams for the given period.
    *
