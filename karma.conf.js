@@ -137,7 +137,14 @@ module.exports = function(config) {
         base: 'WebDriver',
         config: {hostname: 'localhost', port: 4444},
         browserName: 'chrome',
-        pseudoActivityInterval: 20000
+        pseudoActivityInterval: 20000,
+        chromeOptions: {
+          // Instruct chromedriver not to disable component updater. The
+          // component updater must run in order for the Widevine CDM to be
+          // available when using a new user-data-dir.
+          // TODO: remove once http://crbug.com/613581 is fixed.
+          excludeSwitches: ['disable-component-update']
+        }
       },
 
       WebDriver_FirefoxMac: {
@@ -176,7 +183,14 @@ module.exports = function(config) {
         base: 'WebDriver',
         config: {hostname: 'localhost', port: 4446},
         browserName: 'chrome',
-        pseudoActivityInterval: 20000
+        pseudoActivityInterval: 20000,
+        chromeOptions: {
+          // Instruct chromedriver not to disable component updater. The
+          // component updater must run in order for the Widevine CDM to be
+          // available when using a new user-data-dir.
+          // TODO: remove once http://crbug.com/613581 is fixed.
+          excludeSwitches: ['disable-component-update']
+        }
       },
 
       WebDriver_FirefoxWin: {
