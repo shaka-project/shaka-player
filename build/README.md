@@ -85,6 +85,8 @@ directly:
 * `--random` will run the tests in a random order to isolate test dependencies.
 * `--seed` will seed the random test order so that the same order can be
   reproduced across runs.
+* `--runs` allows running the tests multiple times in succession. This parameter
+  must be specified with a positive integer value, for example `--runs 5`.
 
 The `karma` argument `--browsers` will set the browsers used to run the tests
 (e.g. `--browsers Chrome,Firefox`).  If you don't pass any arguments, `test.py`
