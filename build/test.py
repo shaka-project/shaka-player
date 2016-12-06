@@ -50,6 +50,9 @@ def run_tests_single(args):
   karma_path = shakaBuildHelpers.get_node_binary_path('karma')
   cmd = [karma_path, 'start']
 
+  if shakaBuildHelpers.is_linux() and '--use-xvfb' in args:
+    cmd = ['xvfb-run', '--auto-servernum'] + cmd
+
   # Get the browsers supported on the local system.
   browsers = _get_browsers()
   if not browsers:

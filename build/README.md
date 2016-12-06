@@ -87,6 +87,7 @@ directly:
   reproduced across runs.
 * `--runs` allows running the tests multiple times in succession. This parameter
   must be specified with a positive integer value, for example `--runs 5`.
+* `--use-xvfb` will launch the browsers in a virtual display (only on Linux).
 
 The `karma` argument `--browsers` will set the browsers used to run the tests
 (e.g. `--browsers Chrome,Firefox`).  If you don't pass any arguments, `test.py`
