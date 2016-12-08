@@ -22,6 +22,7 @@ describe('Player', function() {
   var logErrorSpy;
   var logWarnSpy;
   var manifest;
+  var onError;
   var player;
   var networkingEngine;
   var streamingEngine;
@@ -81,6 +82,12 @@ describe('Player', function() {
 
     abrManager = new shaka.test.FakeAbrManager();
     player.configure({abr: {manager: abrManager}});
+
+    onError = jasmine.createSpy('error event');
+    onError.and.callFake(function(event) {
+      fail(event.detail);
+    });
+    player.addEventListener('error', onError);
   });
 
   afterEach(function(done) {
@@ -1294,7 +1301,6 @@ describe('Player', function() {
     });
 
     it('issues error if no streams are playable', function() {
-      var onError = jasmine.createSpy('error event');
       onError.and.callFake(function(e) {
         var error = e.detail;
         shaka.test.Util.expectToEqualError(
@@ -1303,7 +1309,6 @@ describe('Player', function() {
                 shaka.util.Error.Category.MANIFEST,
                 shaka.util.Error.Code.RESTRICTIONS_CANNOT_BE_MET));
       });
-      player.addEventListener('error', onError);
 
       player.configure(
           {restrictions: {maxAudioBandwidth: 0, maxVideoBandwidth: 0}});
@@ -1355,6 +1360,41 @@ describe('Player', function() {
               shaka.util.Error.Category.MANIFEST,
               shaka.util.Error.Code.NO_PERIODS));
     }).then(done);
+  });
+
+  it('does not error on unknown contentTypes', function(done) {
+    manifest = new shaka.test.ManifestGenerator()
+      .addPeriod(0)
+        .addStreamSet('audio')
+          .addStream(1)
+        .addStreamSet('video')
+          .addStream(2)
+        .addStreamSet('application')
+          .addStream(3).mime('application/mp4', 'wvtt')
+      .build();
+    var parser = new shaka.test.FakeManifestParser(manifest);
+    var factory = function() { return parser; };
+
+    abrManager.chooseStreams.and.callFake(function(streamSetsByType) {
+      // Emulate the real AbrManager and ignore strange content types.
+      // Only return 'audio' and 'video', in this case.
+      return {
+        'audio': streamSetsByType['audio'].streams[0],
+        'video': streamSetsByType['video'].streams[0]
+      };
+    });
+
+    player.load('', 0, factory).catch(fail).then(function() {
+      // For this test to be valid, the 'application' stream set must not be
+      // filtered out as unsupported.  There should be 3 sets:
+      expect(manifest.periods[0].streamSets.length).toBe(3);
+      // Now ask AbrManager to choose streams.
+      chooseStreams();
+      // Expect that streams were chosen and no error was dispatched.
+      expect(abrManager.chooseStreams).toHaveBeenCalled();
+      expect(onError).not.toHaveBeenCalled();
+      done();
+    });
   });
 
   /**
