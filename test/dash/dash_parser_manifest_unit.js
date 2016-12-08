@@ -935,4 +935,35 @@ describe('DashParser Manifest', function() {
           expect(manifest.periods[0].streamSets[0].streams.length).toBe(1);
         }).catch(fail).then(done);
   });
+
+  it('sets contentType to text for embedded text mime types', function(done) {
+    // One MIME type for embedded TTML, one for embedded WebVTT.
+    // One MIME type specified on AdaptationSet, on one Representation.
+    var manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" mimeType="application/mp4" codecs="stpp">',
+      '      <Representation>',
+      '        <SegmentTemplate media="1.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="2">',
+      '      <Representation mimeType="application/mp4" codecs="wvtt">',
+      '        <SegmentTemplate media="2.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'
+    ].join('\n');
+
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
+    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, onEventSpy)
+        .then(function(manifest) {
+          expect(manifest.periods.length).toBe(1);
+          expect(manifest.periods[0].streamSets.length).toBe(2);
+          // At one time, these came out as 'application' rather than 'text'.
+          expect(manifest.periods[0].streamSets[0].type).toBe('text');
+          expect(manifest.periods[0].streamSets[1].type).toBe('text');
+        }).catch(fail).then(done);
+  });
 });
