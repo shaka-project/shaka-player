@@ -84,7 +84,7 @@ directly:
   of the compiled version.
 * `--random` will run the tests in a random order to isolate test dependencies.
 * `--seed` will seed the random test order so that the same order can be
-  reproduced across runs.
+  reproduced across runs. Specify any value `--seed=xyz`.
 * `--runs` allows running the tests multiple times in succession. This parameter
   must be specified with a positive integer value, for example `--runs 5`.
 * `--use-xvfb` will launch the browsers in a virtual display (only on Linux).

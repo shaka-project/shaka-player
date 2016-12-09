@@ -298,11 +298,13 @@ module.exports = function(config) {
   if (flagPresent('random')) {
     // Run tests in a random order.
     setClientArg(config, 'random', true);
-  }
 
-  if (flagPresent('seed')) {
-    // Use a specific seed to reproduce a specific 'random' order.
-    setClientArg(config, 'seed', getFlagValue('seed'));
+    // If --seed was specified use that value, else generate a seed so that the
+    // exact order can be reproduced if it catches an issue.
+    var seed = getFlagValue('seed') || new Date().getTime();
+    setClientArg(config, 'seed', seed);
+
+    console.log("Using a random test order (--random) with --seed=" + seed);
   }
 
   var hostname = getFlagValue('hostname');
