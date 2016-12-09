@@ -48,6 +48,12 @@ jasmine.Spec.prototype.pend = function(opt_message) {};
 jasmine.Spec.prototype.result;
 
 
+/**
+ * @return {!string}
+ */
+jasmine.Spec.prototype.getFullName = function() {};
+
+
 
 /**
  * @constructor

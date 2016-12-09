@@ -307,6 +307,10 @@ module.exports = function(config) {
     console.log("Using a random test order (--random) with --seed=" + seed);
   }
 
+  if (flagPresent('specFilter')) {
+    setClientArg(config, 'specFilter', getFlagValue('specFilter'));
+  }
+
   var hostname = getFlagValue('hostname');
   if (hostname !== null) {
     // Point the browsers to a hostname other than localhost.

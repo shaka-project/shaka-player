@@ -55,15 +55,21 @@ function getClientArg(name) {
   goog.asserts.assert = jasmineAssert;
   console.assert = /** @type {?} */(jasmineAssert);
 
+  // Use a RegExp if --specFilter is set, else empty string will match all.
+  var specFilterRegExp = new RegExp(getClientArg('specFilter') || '');
+
   /**
    * A filter over all Jasmine specs.
    * @param {jasmine.Spec} spec
    * @return {boolean}
    */
   function specFilter(spec) {
-    // If the browser is not supported, don't run the tests.  Running zero tests
-    // is considered an error so the test run will fail on unsupported browsers.
-    return shaka.Player.isBrowserSupported();
+    // If the browser is not supported, don't run the tests.
+    // If the user specified a RegExp, only run the matched tests.
+    // Running zero tests is considered an error so the test run will fail on
+    // unsupported browsers or if the filter doesn't match any specs.
+    return shaka.Player.isBrowserSupported() &&
+        specFilterRegExp.test(spec.getFullName());
   }
   jasmine.getEnv().specFilter = specFilter;
 
