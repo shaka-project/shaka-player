@@ -134,7 +134,7 @@ def check_tests():
   # already included.
   opts = ['--jscomp_off=missingRequire', '--jscomp_off=strictMissingRequire',
           '--checks-only', '-O', 'SIMPLE']
-  return test_build.build_raw(opts)
+  return test_build.build_raw(opts, is_debug=True)
 
 
 def usage():

@@ -35,6 +35,8 @@ def main(args):
 
   if '--force' in args:
     build_args.append('--force')
+  if '--debug' in args:
+    build_args.append('--debug')
 
   return build.main(build_args)
 
