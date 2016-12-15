@@ -255,7 +255,7 @@ describe('SimpleAbrManager', function() {
     var audioBandwidth = 5e5;
     var videoBandwidth = 2e6;
     var bytesPerSecond =
-        sufficientBWMultiplier * (audioBandwidth + videoBandwidth) / 8.0;
+        1.1 * (audioBandwidth + videoBandwidth) / 8.0;
 
     abrManager.chooseStreams(streamSetsByType);
 
