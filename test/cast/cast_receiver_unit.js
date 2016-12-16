@@ -415,6 +415,7 @@ describe('CastReceiver', function() {
       checkChromeOrChromecast();
       fakeInitState.manifest = 'foo://bar';
       var fakeError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.UNABLE_TO_GUESS_MANIFEST_TYPE);
       mockPlayer.load.and.returnValue(Promise.reject(fakeError));
@@ -595,6 +596,7 @@ describe('CastReceiver', function() {
       expect(mockMessageBus.getCastChannel).not.toHaveBeenCalled();
 
       var fakeError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.UNABLE_TO_GUESS_MANIFEST_TYPE);
       p.reject(fakeError);

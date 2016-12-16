@@ -424,6 +424,7 @@ describe('DashParser Live', function() {
           expect(fakeNetEngine.request.calls.count()).toBe(1);
 
           var error = new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
               shaka.util.Error.Category.NETWORK,
               shaka.util.Error.Code.BAD_HTTP_STATUS);
           var promise = Promise.reject(error);

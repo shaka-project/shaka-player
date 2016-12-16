@@ -35,7 +35,9 @@ describe('Mp4SegmentIndexParser', function() {
   });
 
   it('rejects a non-index segment ', function() {
-    var error = new shaka.util.Error(shaka.util.Error.Category.MEDIA,
+    var error = new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.MEDIA,
         shaka.util.Error.Code.MP4_SIDX_WRONG_BOX_TYPE);
     try {
       shaka.media.Mp4SegmentIndexParser(mediaSegment, 0, [], 0);

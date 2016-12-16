@@ -101,6 +101,7 @@ describe('Offline', function() {
     var onError = function(e) {
       // We should only get a not-found error.
       var expected = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.DRM,
           shaka.util.Error.Code.OFFLINE_SESSION_REMOVED);
       shaka.test.Util.expectToEqualError(e, expected);

@@ -99,6 +99,7 @@ describe('OfflineManifestParser', function() {
           shaka.test.Util.expectToEqualError(
               err,
               new shaka.util.Error(
+                  shaka.util.Error.Severity.CRITICAL,
                   shaka.util.Error.Category.STORAGE,
                   shaka.util.Error.Code.REQUESTED_ITEM_NOT_FOUND, 123));
 
@@ -133,6 +134,7 @@ describe('OfflineManifestParser', function() {
           shaka.test.Util.expectToEqualError(
               err,
               new shaka.util.Error(
+                  shaka.util.Error.Severity.CRITICAL,
                   shaka.util.Error.Category.NETWORK,
                   shaka.util.Error.Code.MALFORMED_OFFLINE_URI, uri));
         })

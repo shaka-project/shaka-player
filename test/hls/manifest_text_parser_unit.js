@@ -87,6 +87,7 @@ describe('ManifestTextParser', function() {
     function verifyError(string, code) {
       var data = shaka.util.StringUtils.toUTF8(string);
       var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           code);
       try {
@@ -204,6 +205,7 @@ describe('ManifestTextParser', function() {
 
     it('rejects invalid tags', function() {
       var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.INVALID_HLS_TAG);
       var text = shaka.util.StringUtils.toUTF8('#EXTM3U\ninvalid tag');

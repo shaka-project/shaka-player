@@ -624,6 +624,7 @@ describe('DashParser Manifest', function() {
     it('invalid XML', function(done) {
       var source = '<not XML';
       var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_INVALID_XML);
       Dash.testFails(done, source, error);
@@ -631,6 +632,7 @@ describe('DashParser Manifest', function() {
 
     it('failed network requests', function(done) {
       var expectedError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.NETWORK,
           shaka.util.Error.Code.BAD_HTTP_STATUS);
 
@@ -644,6 +646,7 @@ describe('DashParser Manifest', function() {
     it('missing MPD element', function(done) {
       var source = '<XML></XML>';
       var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_INVALID_XML);
       Dash.testFails(done, source, error);
@@ -658,6 +661,7 @@ describe('DashParser Manifest', function() {
         '</MPD>'
       ].join('\n');
       var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_EMPTY_ADAPTATION_SET);
       Dash.testFails(done, source, error);
@@ -670,6 +674,7 @@ describe('DashParser Manifest', function() {
         '</MPD>'
       ].join('\n');
       var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_EMPTY_PERIOD);
       Dash.testFails(done, source, error);
@@ -693,6 +698,7 @@ describe('DashParser Manifest', function() {
         '</MPD>'
       ].join('\n');
       var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_DUPLICATE_REPRESENTATION_ID);
       Dash.testFails(done, source, error);

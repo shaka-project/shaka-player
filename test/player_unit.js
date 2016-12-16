@@ -1892,6 +1892,7 @@ describe('Player', function() {
           shaka.test.Util.expectToEqualError(
               error,
               new shaka.util.Error(
+                  shaka.util.Error.Severity.CRITICAL,
                   shaka.util.Error.Category.MANIFEST,
                   shaka.util.Error.Code.RESTRICTIONS_CANNOT_BE_MET));
         });
@@ -1955,6 +1956,7 @@ describe('Player', function() {
       shaka.test.Util.expectToEqualError(
           error,
           new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
               shaka.util.Error.Category.MANIFEST,
               shaka.util.Error.Code.NO_PERIODS));
     }).then(done);

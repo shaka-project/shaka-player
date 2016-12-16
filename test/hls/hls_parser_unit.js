@@ -590,6 +590,7 @@ describe('HlsParser', function() {
       ].join('');
 
       var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           Code.HLS_MULTIPLE_MEDIA_INIT_SECTIONS_FOUND);
 
@@ -614,6 +615,7 @@ describe('HlsParser', function() {
       ].join('');
 
       var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           Code.HLS_COULD_NOT_GUESS_MIME_TYPE,
           'exe');
@@ -640,6 +642,7 @@ describe('HlsParser', function() {
       ].join('');
 
       var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           Code.HLS_COULD_NOT_GUESS_CODECS,
           ['aaa', 'bbb']);
@@ -656,6 +659,7 @@ describe('HlsParser', function() {
        */
       function verifyMissingAttribute(master, media, attributeName, done) {
         var error = new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.MANIFEST,
             Code.HLS_REQUIRED_ATTRIBUTE_MISSING,
             attributeName);
@@ -733,6 +737,7 @@ describe('HlsParser', function() {
        */
       function verifyMissingTag(master, media, tagName, done) {
         var error = new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.MANIFEST,
             Code.HLS_REQUIRED_TAG_MISSING,
             tagName);

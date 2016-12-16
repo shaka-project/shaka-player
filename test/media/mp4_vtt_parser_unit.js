@@ -105,7 +105,9 @@ describe('Mp4vttParser', function() {
   });
 
   it('rejects init segment with no vtt', function() {
-    var error = new shaka.util.Error(shaka.util.Error.Category.TEXT,
+    var error = new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.TEXT,
         shaka.util.Error.Code.INVALID_MP4_VTT);
     try {
       shaka.media.Mp4VttParser(audioInitSegment, 0, 0, 0, false);

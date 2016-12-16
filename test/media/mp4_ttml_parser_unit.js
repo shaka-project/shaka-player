@@ -62,7 +62,9 @@ describe('Mp4TtmlParser', function() {
   });
 
   it('rejects init segment with no ttml', function() {
-    var error = new shaka.util.Error(shaka.util.Error.Category.TEXT,
+    var error = new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.TEXT,
         shaka.util.Error.Code.INVALID_MP4_TTML);
     try {
       shaka.media.Mp4TtmlParser(audioInitSegment, 0, null, null, false);

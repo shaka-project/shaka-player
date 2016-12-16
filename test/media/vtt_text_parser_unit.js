@@ -466,7 +466,9 @@ describe('VttTextParser', function() {
    * @param {string} text
    */
   function errorHelper(code, text) {
-    var error = new shaka.util.Error(shaka.util.Error.Category.TEXT, code);
+    var error = new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.TEXT,
+        code);
     var data = shaka.util.StringUtils.toUTF8(text);
     try {
       shaka.media.VttTextParser(data, 0, null, null, false);

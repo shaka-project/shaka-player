@@ -1434,10 +1434,15 @@ describe('StreamingEngine', function() {
     it('from failed init segment append during startup', function() {
       playhead.getTime.and.returnValue(0);
 
+      var expectedError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MEDIA,
+          shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_FAILED);
+
       onError.and.callFake(function(error) {
         expect(onInitialStreamsSetup).toHaveBeenCalled();
         expect(onStartupComplete).not.toHaveBeenCalled();
-        expect(error).toBe('FAKE_ERROR');
+        Util.expectToEqualError(error, expectedError);
       });
 
       onChooseStreams.and.callFake(function(period) {
@@ -1451,7 +1456,7 @@ describe('StreamingEngine', function() {
             function(type, data, startTime, endTime) {
               // Reject the first video init segment.
               if (data == segmentData.video.initSegments[0]) {
-                return Promise.reject('FAKE_ERROR');
+                return Promise.reject(expectedError);
               } else {
                 return originalAppendBuffer.call(
                     mediaSourceEngine, type, data, startTime, endTime);
@@ -1470,10 +1475,15 @@ describe('StreamingEngine', function() {
     it('from failed media segment append during startup', function() {
       playhead.getTime.and.returnValue(0);
 
+      var expectedError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MEDIA,
+          shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_FAILED);
+
       onError.and.callFake(function(error) {
         expect(onInitialStreamsSetup).toHaveBeenCalled();
         expect(onStartupComplete).not.toHaveBeenCalled();
-        expect(error).toBe('FAKE_ERROR');
+        Util.expectToEqualError(error, expectedError);
       });
 
       onChooseStreams.and.callFake(function(period) {
@@ -1487,7 +1497,7 @@ describe('StreamingEngine', function() {
             function(type, data, startTime, endTime) {
               // Reject the first audio segment.
               if (data == segmentData.audio.segments[0]) {
-                return Promise.reject('FAKE_ERROR');
+                return Promise.reject(expectedError);
               } else {
                 return originalAppendBuffer.call(
                     mediaSourceEngine, type, data, startTime, endTime);
@@ -1526,6 +1536,7 @@ describe('StreamingEngine', function() {
             }
 
             return Promise.reject(new shaka.util.Error(
+                shaka.util.Error.Severity.CRITICAL,
                 shaka.util.Error.Category.NETWORK, code, data));
           }
         }
@@ -1541,6 +1552,7 @@ describe('StreamingEngine', function() {
       });
 
       onError.and.callFake(function(error) {
+        expect(error.severity).toBe(shaka.util.Error.Severity.RECOVERABLE);
         expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
         expect(error.code).toBe(code);
       });
@@ -1605,6 +1617,7 @@ describe('StreamingEngine', function() {
       netEngine.request.and.callFake(function(requestType, request) {
         if (request.uris[0] == targetUri) {
           return Promise.reject(new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
               shaka.util.Error.Category.NETWORK, code, [targetUri]));
         }
         return originalNetEngine.request(requestType, request);
@@ -1619,6 +1632,7 @@ describe('StreamingEngine', function() {
       });
 
       onError.and.callFake(function(error) {
+        expect(error.severity).toBe(shaka.util.Error.Severity.CRITICAL);
         expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
         expect(error.code).toBe(code);
       });
@@ -1670,6 +1684,7 @@ describe('StreamingEngine', function() {
       netEngine.request.and.callFake(function(requestType, request) {
         if (request.uris[0] == textUri) {
           return Promise.reject(new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
               shaka.util.Error.Category.NETWORK,
               shaka.util.Error.Code.BAD_HTTP_STATUS, textUri, 404));
         }
@@ -1824,6 +1839,7 @@ describe('StreamingEngine', function() {
             if (throwError) {
               numErrorsThrown++;
               throw new shaka.util.Error(
+                  shaka.util.Error.Severity.CRITICAL,
                   shaka.util.Error.Category.MEDIA,
                   shaka.util.Error.Code.QUOTA_EXCEEDED_ERROR,
                   type);
@@ -1890,6 +1906,7 @@ describe('StreamingEngine', function() {
           function(type, data, startTime, endTime) {
             if (startTime >= 10) {
               throw new shaka.util.Error(
+                  shaka.util.Error.Severity.CRITICAL,
                   shaka.util.Error.Category.MEDIA,
                   shaka.util.Error.Code.QUOTA_EXCEEDED_ERROR,
                   type);

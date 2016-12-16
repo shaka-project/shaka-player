@@ -602,6 +602,7 @@ describe('DashParser ContentProtection', function() {
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />'
     ]);
     var expected = new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.MANIFEST,
         shaka.util.Error.Code.DASH_NO_COMMON_KEY_SYSTEM);
     Dash.testFails(done, source, expected);
@@ -616,6 +617,7 @@ describe('DashParser ContentProtection', function() {
       '</ContentProtection>'
     ], [], []);
     var expected = new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.MANIFEST,
         shaka.util.Error.Code.DASH_PSSH_BAD_ENCODING);
     Dash.testFails(done, source, expected);
@@ -632,6 +634,7 @@ describe('DashParser ContentProtection', function() {
       '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />'
     ], [], []);
     var expected = new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.MANIFEST,
         shaka.util.Error.Code.DASH_CONFLICTING_KEY_IDS);
     Dash.testFails(done, source, expected);
@@ -647,6 +650,7 @@ describe('DashParser ContentProtection', function() {
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />'
     ], [], []);
     var expected = new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.MANIFEST,
         shaka.util.Error.Code.DASH_MULTIPLE_KEY_IDS_NOT_SUPPORTED);
     Dash.testFails(done, source, expected);

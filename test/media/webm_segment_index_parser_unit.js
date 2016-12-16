@@ -36,7 +36,9 @@ describe('WebmSegmentIndexParser', function() {
   });
 
   it('rejects a non-index segment ', function() {
-    var error = new shaka.util.Error(shaka.util.Error.Category.MEDIA,
+    var error = new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.MEDIA,
         shaka.util.Error.Code.WEBM_CUES_ELEMENT_MISSING);
     try {
       parser.parse(initSegment, initSegment, [], 0);
@@ -47,7 +49,9 @@ describe('WebmSegmentIndexParser', function() {
   });
 
   it('rejects an invalid init segment ', function() {
-    var error = new shaka.util.Error(shaka.util.Error.Category.MEDIA,
+    var error = new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.MEDIA,
         shaka.util.Error.Code.WEBM_EBML_HEADER_ELEMENT_MISSING);
     try {
       parser.parse(indexSegment, indexSegment, [], 0);
