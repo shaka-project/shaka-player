@@ -87,15 +87,13 @@ shakaExtern.AbrManager.prototype.disable = function() {};
  * Notifies the AbrManager that a segment has been downloaded (includes MP4
  * SIDX data, WebM Cues data, initialization segments, and media segments).
  *
- * @param {number} startTimeMs The wall-clock time, in milliseconds, when the
- *     request began (before any outbound request filters).
- * @param {number} endTimeMs The wall-clock time, in milliseconds, when the
- *     response ended (after all retries and inbound response filters).
+ * @param {number} deltaTimeMs The duration, in milliseconds, that the request
+ *     took to complete.
  * @param {number} numBytes The total number of bytes transferred.
  * @exportDoc
  */
 shakaExtern.AbrManager.prototype.segmentDownloaded = function(
-    startTimeMs, endTimeMs, numBytes) {};
+    deltaTimeMs, numBytes) {};
 
 
 /**

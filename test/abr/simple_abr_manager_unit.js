@@ -133,14 +133,14 @@ describe('SimpleAbrManager', function() {
     it(description, function() {
       abrManager.chooseStreams(streamSetsByType);
 
-      abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
-      abrManager.segmentDownloaded(1000, 2000, bytesPerSecond);
+      abrManager.segmentDownloaded(1000, bytesPerSecond);
+      abrManager.segmentDownloaded(1000, bytesPerSecond);
 
       abrManager.enable();
 
       // Make another call to segmentDownloaded() so switchCallback() is
       // called.
-      abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
+      abrManager.segmentDownloaded(1000, bytesPerSecond);
 
       expect(switchCallback).toHaveBeenCalled();
       expect(switchCallback.calls.argsFor(0)[0]).toEqual({
@@ -165,14 +165,14 @@ describe('SimpleAbrManager', function() {
     it(description, function() {
       abrManager.chooseStreams(streamSetsByType);
 
-      abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
-      abrManager.segmentDownloaded(1000, 2000, bytesPerSecond);
+      abrManager.segmentDownloaded(1000, bytesPerSecond);
+      abrManager.segmentDownloaded(1000, bytesPerSecond);
 
       abrManager.enable();
 
       // Make another call to segmentDownloaded() so switchCallback() is
       // called.
-      abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
+      abrManager.segmentDownloaded(1000, bytesPerSecond);
 
       expect(switchCallback).toHaveBeenCalled();
       expect(switchCallback.calls.argsFor(0)[0]).toEqual({
@@ -191,12 +191,12 @@ describe('SimpleAbrManager', function() {
     abrManager.chooseStreams(streamSetsByType);
 
     // 0 duration segment shouldn't cause us to get stuck on the lowest variant
-    abrManager.segmentDownloaded(1000, 1000, bytesPerSecond);
-    abrManager.segmentDownloaded(2000, 3000, bytesPerSecond);
+    abrManager.segmentDownloaded(0, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     abrManager.enable();
 
-    abrManager.segmentDownloaded(4000, 5000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     expect(switchCallback).toHaveBeenCalled();
     expect(switchCallback.calls.argsFor(0)[0]).toEqual({
@@ -219,14 +219,14 @@ describe('SimpleAbrManager', function() {
 
         abrManager.chooseStreams(streamSetsByType);
 
-        abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
-        abrManager.segmentDownloaded(1000, 2000, bytesPerSecond);
+        abrManager.segmentDownloaded(1000, bytesPerSecond);
+        abrManager.segmentDownloaded(1000, bytesPerSecond);
 
         abrManager.enable();
 
         // Make another call to segmentDownloaded() so switchCallback() is
         // called.
-        abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
+        abrManager.segmentDownloaded(1000, bytesPerSecond);
 
         expect(switchCallback).toHaveBeenCalled();
         expect(switchCallback.calls.argsFor(0)[0]).toEqual({
@@ -244,9 +244,9 @@ describe('SimpleAbrManager', function() {
     abrManager.chooseStreams(streamSetsByType);
 
     // Don't enable AbrManager.
-    abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
-    abrManager.segmentDownloaded(2000, 3000, bytesPerSecond);
-    abrManager.segmentDownloaded(4000, 5000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
     expect(switchCallback).not.toHaveBeenCalled();
   });
 
@@ -258,12 +258,12 @@ describe('SimpleAbrManager', function() {
 
     abrManager.chooseStreams(streamSetsByType);
 
-    abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
-    abrManager.segmentDownloaded(2000, 3000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     abrManager.enable();
 
-    abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
     expect(switchCallback).toHaveBeenCalled();
     switchCallback.calls.reset();
 
@@ -273,24 +273,24 @@ describe('SimpleAbrManager', function() {
     bytesPerSecond =
         sufficientBWMultiplier * (audioBandwidth + videoBandwidth) / 8.0;
 
-    abrManager.segmentDownloaded(4000, 5000, bytesPerSecond);
-    abrManager.segmentDownloaded(5000, 6000, bytesPerSecond);
-    abrManager.segmentDownloaded(6000, 7000, bytesPerSecond);
-    abrManager.segmentDownloaded(7000, 8000, bytesPerSecond);
-    abrManager.segmentDownloaded(8000, 9000, bytesPerSecond);
-    abrManager.segmentDownloaded(9000, 10000, bytesPerSecond);
-    abrManager.segmentDownloaded(10000, 11000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     // Stay inside switch interval.
     shaka.test.Util.fakeEventLoop(
         (shaka.abr.SimpleAbrManager.SWITCH_INTERVAL_MS / 1000.0) - 2);
-    abrManager.segmentDownloaded(10000, 11000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     expect(switchCallback).not.toHaveBeenCalled();
 
     // Move outside switch interval.
     shaka.test.Util.fakeEventLoop(3);
-    abrManager.segmentDownloaded(12000, 13000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     expect(switchCallback).toHaveBeenCalled();
     expect(switchCallback.calls.argsFor(0)[0]).toEqual({
@@ -309,14 +309,14 @@ describe('SimpleAbrManager', function() {
 
     abrManager.chooseStreams(streamSetsByType);
 
-    abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
-    abrManager.segmentDownloaded(1000, 2000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     abrManager.enable();
 
     // Make another call to segmentDownloaded(). switchCallback() will be
     // called to upgrade.
-    abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     // The second parameter is missing to indicate that the buffer should not be
     // cleared.
@@ -335,14 +335,14 @@ describe('SimpleAbrManager', function() {
     abrManager.setDefaultEstimate(4e6);
     abrManager.chooseStreams(streamSetsByType);
 
-    abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
-    abrManager.segmentDownloaded(1000, 2000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     abrManager.enable();
 
     // Make another call to segmentDownloaded(). switchCallback() will be
     // called to downgrade.
-    abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     // The second parameter is missing to indicate that the buffer should not be
     // cleared.
