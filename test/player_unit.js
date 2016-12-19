@@ -123,6 +123,37 @@ describe('Player', function() {
       });
     });
 
+    xit('won\'t start loading until unloading is done', function(done) {
+      // There was a bug when calling unload before calling load would cause
+      // the load to continue before the (first) unload was complete.
+      // https://github.com/google/shaka-player/issues/612
+      player.load('', 0, factory1).then(function() {
+        // Delay the promise to destroy the parser.
+        var p = new shaka.util.PublicPromise();
+        parser1.stop.and.returnValue(p);
+
+        var unloadDone = false;
+        spyOn(player, 'createMediaSourceEngine');
+
+        shaka.test.Util.delay(0.5).then(function() {
+          // Should not start loading yet.
+          expect(player.createMediaSourceEngine).not.toHaveBeenCalled();
+
+          // Unblock the unload chain.
+          unloadDone = true;
+          p.resolve();
+        });
+
+        // Explicitly unload the player first.  When load calls unload, it
+        // should wait until the parser is destroyed.
+        player.unload();
+        player.load('', 0, factory2).then(function() {
+          expect(unloadDone).toBe(true);
+          done();
+        });
+      });
+    });
+
     it('handles repeated load/unload', function(done) {
       player.load('', 0, factory1).then(function() {
         shaka.log.debug('finished load 1');
