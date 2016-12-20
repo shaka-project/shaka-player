@@ -123,7 +123,7 @@ describe('Player', function() {
       });
     });
 
-    xit('won\'t start loading until unloading is done', function(done) {
+    it('won\'t start loading until unloading is done', function(done) {
       // There was a bug when calling unload before calling load would cause
       // the load to continue before the (first) unload was complete.
       // https://github.com/google/shaka-player/issues/612
