@@ -189,58 +189,6 @@ describe('DashParser ContentProtection', function() {
         ]);
   });
 
-  it('squashes encrypted sets in same group', function(done) {
-    var source = [
-      '<MPD xmlns="urn:mpeg:DASH:schema:MPD:2011"',
-      '    xmlns:cenc="urn:mpeg:cenc:2013">',
-      '  <Period duration="PT30S">',
-      '    <SegmentTemplate media="s.mp4" duration="2" />',
-      '    <AdaptationSet mimeType="video/mp4" id="1">',
-      '      <SupplementalProperty value="2"',
-      'schemeIdUri="http://dashif.org/guidelines/AdaptationSetSwitching" />',
-      '      <ContentProtection',
-      '         schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
-      '      <ContentProtection',
-      '          schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
-      '          cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
-      '      <Representation bandwidth="100" />',
-      '    </AdaptationSet>',
-      '    <AdaptationSet mimeType="video/mp4" id="2">',
-      '      <SupplementalProperty value="1"',
-      'schemeIdUri="http://dashif.org/descriptor/AdaptationSetSwitching" />',
-      '      <ContentProtection',
-      '         schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
-      '      <ContentProtection',
-      '          schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
-      '          cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />',
-      '      <Representation bandwidth="200" />',
-      '    </AdaptationSet>',
-      '  </Period>',
-      '</MPD>'
-    ].join('\n');
-    var expected = shaka.test.Dash.makeManifestFromVariants([
-      jasmine.objectContaining({
-        drmInfos: [
-          buildDrmInfo('com.widevine.alpha')
-        ],
-        video: jasmine.objectContaining({
-          bandwidth: 100,
-          keyId: 'deadbeeffeedbaadf00d000008675309'
-        })
-      }),
-      jasmine.objectContaining({
-        drmInfos: [
-          buildDrmInfo('com.widevine.alpha')
-        ],
-        video: jasmine.objectContaining({
-          bandwidth: 200,
-          keyId: 'baadf00dfeeddeafbeef000004390116'
-        })
-      })
-    ]);
-    testDashParser(done, source, expected);
-  });
-
   it('inherits key IDs from AdaptationSet to Representation', function(done) {
     var source = buildManifestText([
       // AdaptationSet lines
