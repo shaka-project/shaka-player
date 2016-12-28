@@ -298,6 +298,11 @@ describe('DashParser Manifest', function() {
     var source = [
       '<MPD mediaPresentationDuration="PT30S">',
       '  <Period>',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation bandwidth="1">',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
       '    <AdaptationSet mimeType="text/vtt" lang="de">',
       '      <Representation>',
       '        <BaseURL>http://example.com/de.vtt</BaseURL>',
@@ -531,6 +536,11 @@ describe('DashParser Manifest', function() {
       var source = [
         '<MPD minBufferTime="PT75S">',
         '  <Period id="1" duration="PT30S">',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation bandwidth="1">',
+        '        <SegmentBase indexRange="100-200" />',
+        '      </Representation>',
+        '    </AdaptationSet>',
         '    <AdaptationSet contentType="text" lang="en" group="1">',
         '      <Representation />',
         '    </AdaptationSet>',
@@ -550,6 +560,11 @@ describe('DashParser Manifest', function() {
       var source = [
         '<MPD minBufferTime="PT75S">',
         '  <Period id="1" duration="PT30S">',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation bandwidth="1">',
+        '        <SegmentBase indexRange="100-200" />',
+        '      </Representation>',
+        '    </AdaptationSet>',
         '    <AdaptationSet mimeType="text/vtt" lang="en" group="1">',
         '      <Representation />',
         '    </AdaptationSet>',
@@ -569,6 +584,11 @@ describe('DashParser Manifest', function() {
       var source = [
         '<MPD minBufferTime="PT75S">',
         '  <Period id="1" duration="PT30S">',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation bandwidth="1">',
+        '        <SegmentBase indexRange="100-200" />',
+        '      </Representation>',
+        '    </AdaptationSet>',
         '    <AdaptationSet>',
         '      <Representation mimeType="text/vtt" />',
         '    </AdaptationSet>',
@@ -676,7 +696,7 @@ describe('DashParser Manifest', function() {
         '  <Period id="1" duration="PT30S">',
         '    <AdaptationSet mimeType="video/mp4">',
         '      <InbandEventStream scheme_id_uri="urn:mpeg:dash:event:2012" />',
-        '      <Representation>',
+        '      <Representation bandwidth="1">',
         '        <SegmentTemplate media="1.mp4" duration="1" />',
         '      </Representation>',
         '    </AdaptationSet>',
@@ -697,7 +717,7 @@ describe('DashParser Manifest', function() {
         '  <Period id="1" duration="PT30S">',
         '    <AdaptationSet mimeType="video/mp4">',
         '      <InbandEventStream scheme_id_uri="urn:mpeg:dash:event:2012" />',
-        '      <Representation>',
+        '      <Representation bandwidth="1">',
         '        <SegmentTemplate media="1.mp4" duration="1" />',
         '      </Representation>',
         '    </AdaptationSet>',
@@ -725,7 +745,7 @@ describe('DashParser Manifest', function() {
         '  <Period id="1" duration="PT30S">',
         '    <AdaptationSet mimeType="video/mp4">',
         '      <InbandEventStream scheme_id_uri="urn:mpeg:dash:event:2012" />',
-        '      <Representation>',
+        '      <Representation bandwidth="1">',
         '        <SegmentTemplate media="1.mp4" duration="1" />',
         '      </Representation>',
         '    </AdaptationSet>',
@@ -766,7 +786,7 @@ describe('DashParser Manifest', function() {
         '  <Period id="1" duration="PT30S">',
         '    <AdaptationSet mimeType="video/mp4">',
         '      <InbandEventStream scheme_id_uri="urn:mpeg:dash:event:2012" />',
-        '      <Representation>',
+        '      <Representation bandwidth="1">',
         '        <SegmentTemplate media="1.mp4" duration="1" />',
         '      </Representation>',
         '    </AdaptationSet>',
@@ -790,19 +810,19 @@ describe('DashParser Manifest', function() {
     });
   });
 
-  it('ignores trickmode tracks', function(done) {
+  it('parses trickmode tracks', function(done) {
     var manifestText = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
       '    <AdaptationSet id="1" mimeType="video/mp4">',
-      '      <Representation>',
+      '      <Representation bandwidth="1">',
       '        <SegmentTemplate media="1.mp4" duration="1" />',
       '      </Representation>',
       '    </AdaptationSet>',
       '    <AdaptationSet id="2" mimeType="video/mp4">',
       '      <EssentialProperty value="1" ',
       '        schemeIdUri="http://dashif.org/guidelines/trickmode" />',
-      '      <Representation>',
+      '      <Representation bandwidth="1">',
       '        <SegmentTemplate media="2.mp4" duration="1" />',
       '      </Representation>',
       '    </AdaptationSet>',
@@ -816,6 +836,14 @@ describe('DashParser Manifest', function() {
           expect(manifest.periods.length).toBe(1);
           expect(manifest.periods[0].variants.length).toBe(1);
           expect(manifest.periods[0].textStreams.length).toBe(0);
+
+          var variant = manifest.periods[0].variants[0];
+          var trickModeVideo = variant && variant.video &&
+                               variant.video.trickModeVideo;
+          expect(trickModeVideo).toEqual(jasmine.objectContaining({
+            id: 2,
+            type: 'video'
+          }));
         }).catch(fail).then(done);
   });
 
@@ -825,6 +853,11 @@ describe('DashParser Manifest', function() {
     var manifestText = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation bandwidth="1">',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
       '    <AdaptationSet id="1" mimeType="application/mp4" codecs="stpp">',
       '      <Representation>',
       '        <SegmentTemplate media="1.mp4" duration="1" />',
