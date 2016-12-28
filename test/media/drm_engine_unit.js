@@ -185,9 +185,15 @@ describe('DrmEngine', function() {
 
       drmEngine.init(manifest, /* offline */ false).then(function() {
         expect(drmEngine.initialized()).toBe(true);
-        expect(drmEngine.getSupportedTypes()).toEqual([
-          'audio/webm', 'video/mp4; codecs="fake"'
-        ]);
+        var supportedTypes = drmEngine.getSupportedTypes();
+        // This is conditional because Edge 14 has a bug that prevents us from
+        // getting the types at all.  TODO: Remove the condition once Edge has
+        // released a fix for https://goo.gl/qMeV7v
+        if (supportedTypes) {
+          expect(supportedTypes).toEqual([
+            'audio/webm', 'video/mp4; codecs="fake"'
+          ]);
+        }
       }).catch(fail).then(done);
     });
 
