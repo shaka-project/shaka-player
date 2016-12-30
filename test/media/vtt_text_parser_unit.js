@@ -438,8 +438,7 @@ describe('VttTextParser', function() {
                                   opt_offset || 0,
                                   opt_startTime || 0,
                                   null,
-                                  opt_useRelativeCueTimestamps || false,
-                                  null);
+                                  opt_useRelativeCueTimestamps || false);
     expect(result).toBeTruthy();
     expect(result.length).toBe(cues.length);
     for (var i = 0; i < cues.length; i++) {
@@ -470,7 +469,7 @@ describe('VttTextParser', function() {
     var error = new shaka.util.Error(shaka.util.Error.Category.TEXT, code);
     var data = shaka.util.StringUtils.toUTF8(text);
     try {
-      shaka.media.VttTextParser(data, 0, null, null, false, null);
+      shaka.media.VttTextParser(data, 0, null, null, false);
       fail('Invalid WebVTT file supported');
     } catch (e) {
       shaka.test.Util.expectToEqualError(e, error);
