@@ -392,19 +392,14 @@ shakaExtern.AbrConfiguration;
 /**
  * @typedef {{
  *   override: boolean,
- *   viewportAnchorX: number,
- *   viewportAnchorY: number
+ *   region: VTTRegion
  * }}
  *
  * @property {boolean} override
- *   When true the cue region settings below overrides browser
- *   default VTT Cue region
- * @property {number} viewportAnchorX
- *   x coordinates within the video viewport to which the region anchor
- *   point is anchored (0, 100)
- * @property {number} viewportAnchorY
- *   y coordinates within the video viewport to which the region anchor
- *   point is anchored (0, 100)
+ *   Override browser default VTT Cue region
+ * @property {VTTRegion} region
+ *   When override parameter is set to true then
+ *   override browser default VTT Cue region with this VTT Region.
  * @exportDoc
  */
 shakaExtern.TextConfiguration;
@@ -418,7 +413,7 @@ shakaExtern.TextConfiguration;
  *   abr: shakaExtern.AbrConfiguration,
  *   preferredAudioLanguage: string,
  *   preferredTextLanguage: string,
- *   textcues: shakaExtern.TextConfiguration,
+ *   text: shakaExtern.TextConfiguration,
  *   restrictions: shakaExtern.Restrictions
  * }}
  *
@@ -441,10 +436,8 @@ shakaExtern.TextConfiguration;
  *   the text track will be shown.
  *   Changing this during playback will cause the language selection algorithm
  *   to run again, and may change the active text track.
- * @property {shakaExtern.TextConfiguration} textcues
- *   Apply this Cue Region Configuration on all text cues to control
- *   the positioning of the cue box and override the default
- *   VTT cue box region.
+ * @property {shakaExtern.TextConfiguration} text
+ *   Text engine configuration and settings. Cannot be changed after load.
  * @property {shakaExtern.Restrictions} restrictions
  *   The application restrictions to apply to the tracks.  The track must
  *   meet all the restrictions to be playable.

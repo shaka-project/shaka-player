@@ -351,7 +351,7 @@ describe('StreamingEngine', function() {
         /** @type {shakaExtern.Manifest} */(manifest),
         onChooseStreams, onCanSwitch, onError,
         onInitialStreamsSetup, onStartupComplete);
-    streamingEngine.configure(config, null);
+    streamingEngine.configure(config);
   }
 
   afterEach(function(done) {
