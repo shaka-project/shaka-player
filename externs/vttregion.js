@@ -28,29 +28,19 @@
 function VTTRegion() {}
 
 
-/** @type {number} */
-VTTRegion.prototype.width;
-
-
-/** @type {number} */
-VTTRegion.prototype.lines;
-
-
-/** @type {number} */
-VTTRegion.prototype.regionAnchorX;
-
-
-/** @type {number} */
-VTTRegion.prototype.regionAnchorY;
-
-
-/** @type {number} */
-VTTRegion.prototype.viewportAnchorX;
-
-
-/** @type {number} */
-VTTRegion.prototype.viewportAnchorY;
-
-
-/** @type {?string} */
-VTTRegion.prototype.scroll;
+VTTRegion.prototype = {
+  get width() {},
+  set width(value) {},
+  get lines() {},
+  set lines(value) {},
+  get regionAnchorX() {},
+  set regionAnchorX(value) {},
+  get regionAnchorY() {},
+  set regionAnchorY(value) {},
+  get viewportAnchorX() {},
+  set viewportAnchorX(value) {},
+  get viewportAnchorY() {},
+  set viewportAnchorY(value) {},
+  get scroll() {},
+  set scroll(value) {}
+};
