@@ -65,8 +65,7 @@ describe('TextEngine', function() {
       mockParser.and.returnValue([]);
 
       textEngine.appendBuffer(dummyData, 0, 3).then(function() {
-        expect(mockParser).toHaveBeenCalledWith(dummyData, 0, 0, 3, false,
-            null);
+        expect(mockParser).toHaveBeenCalledWith(dummyData, 0, 0, 3, false);
         expect(mockTrack.addCue).not.toHaveBeenCalled();
         expect(mockTrack.removeCue).not.toHaveBeenCalled();
 
@@ -82,8 +81,7 @@ describe('TextEngine', function() {
       mockParser.and.returnValue([1, 2, 3]);
 
       textEngine.appendBuffer(dummyData, 0, 3).then(function() {
-        expect(mockParser).toHaveBeenCalledWith(dummyData, 0, 0, 3, false,
-            null);
+        expect(mockParser).toHaveBeenCalledWith(dummyData, 0, 0, 3, false);
         expect(mockTrack.addCue).toHaveBeenCalledWith(1);
         expect(mockTrack.addCue).toHaveBeenCalledWith(2);
         expect(mockTrack.addCue).toHaveBeenCalledWith(3);
@@ -95,8 +93,7 @@ describe('TextEngine', function() {
         mockParser.and.returnValue([4, 5]);
         return textEngine.appendBuffer(dummyData, 3, 5);
       }).then(function() {
-        expect(mockParser).toHaveBeenCalledWith(dummyData, 0, 3, 5, false,
-            null);
+        expect(mockParser).toHaveBeenCalledWith(dummyData, 0, 3, 5, false);
         expect(mockTrack.addCue).toHaveBeenCalledWith(4);
         expect(mockTrack.addCue).toHaveBeenCalledWith(5);
       }).catch(fail).then(done);
@@ -174,8 +171,7 @@ describe('TextEngine', function() {
       });
 
       textEngine.appendBuffer(dummyData, 0, 3).then(function() {
-        expect(mockParser).toHaveBeenCalledWith(dummyData, 0, 0, 3, false,
-            null);
+        expect(mockParser).toHaveBeenCalledWith(dummyData, 0, 0, 3, false);
         expect(mockTrack.addCue).toHaveBeenCalledWith(createFakeCue(0, 1));
         expect(mockTrack.addCue).toHaveBeenCalledWith(createFakeCue(2, 3));
 
@@ -183,8 +179,7 @@ describe('TextEngine', function() {
         textEngine.setTimestampOffset(4);
         return textEngine.appendBuffer(dummyData, 0, 3);
       }).then(function() {
-        expect(mockParser).toHaveBeenCalledWith(dummyData, 4, 0, 3, false,
-            null);
+        expect(mockParser).toHaveBeenCalledWith(dummyData, 4, 0, 3, false);
         expect(mockTrack.addCue).toHaveBeenCalledWith(createFakeCue(4, 5));
         expect(mockTrack.addCue).toHaveBeenCalledWith(createFakeCue(6, 7));
       }).catch(fail).then(done);
