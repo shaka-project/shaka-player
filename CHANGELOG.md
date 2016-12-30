@@ -1,3 +1,39 @@
+## 2.0.2 (2016-12-15)
+New features:
+  - Add support for Toshiba dTV
+    - https://github.com/google/shaka-player/pull/605
+  - TTML subtitles: Support for \<br\> inside a paragraph
+    - https://github.com/google/shaka-player/pull/572
+    - https://github.com/google/shaka-player/pull/584
+  - Parse TTML textAlign settings into align property of a VTTCue
+    - https://github.com/google/shaka-player/pull/573
+  - Improved test stability and coverage reports
+
+Bugfixes:
+  - Fix DASH content type parsing
+    - https://github.com/google/shaka-player/issues/631
+  - Tolerate larger gaps at the start
+    - https://github.com/google/shaka-player/issues/579
+  - Fixes for TTML alignment, positioning and cue externs
+    - https://github.com/google/shaka-player/pull/588
+    - https://github.com/google/shaka-player/pull/594
+  - Keep ewma sampling from failing on 0 duration segments
+    - https://github.com/google/shaka-player/issues/582
+    - https://github.com/google/shaka-player/pull/583
+   - Allow text parsers to change during playback
+    - https://github.com/google/shaka-player/issues/571
+  - Fix playback when IE11 modifies the XML DOM
+    - https://github.com/google/shaka-player/issues/608
+    - https://github.com/google/shaka-player/pull/611
+  - Update MediaSource polyfills for Safari 10
+    - https://github.com/google/shaka-player/issues/615
+  - Throw explicit error on empty manifests
+    - https://github.com/google/shaka-player/issues/618
+
+Docs:
+  - Link to error docs from the demo app
+
+
 ## 2.0.1 (2016-10-26)
 
 New features:

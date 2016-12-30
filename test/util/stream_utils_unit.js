@@ -17,7 +17,7 @@
 
 describe('StreamUtils', function() {
 
-  describe('chooses correct stream set', function() {
+  describe('chooses correct variants and text streams', function() {
     var config;
     var manifest;
 
@@ -29,157 +29,92 @@ describe('StreamUtils', function() {
       });
     });
 
-    it('chooses audio stream with the lowest average bandwidth', function() {
+    it("chooses variants in user's preferred language", function() {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
-          .addStreamSet('audio')
-            .language('en')
-            .addStream(1).bandwidth(200)
-            .addStream(2).bandwidth(400)
-          .addStreamSet('audio')
-            .language('en')
-            .addStream(3).bandwidth(100)
-            .addStream(4).bandwidth(300)
-        .build();
-
-      var chosen = shaka.util.StreamUtils.chooseStreamSets(
-          manifest.periods[0], config);
-      expect(chosen['audio']).toBe(manifest.periods[0].streamSets[1]);
-    });
-
-    it("chooses audio stream in user's preferred language", function() {
-      manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addStreamSet('audio')
-            .language('en')
-            .addStream(1).bandwidth(200)
-            .addStream(2).bandwidth(400)
-          .addStreamSet('audio')
+          .addVariant(0)
             .language('es')
-            .addStream(3).bandwidth(100)
-            .addStream(4).bandwidth(300)
-        .build();
-
-      var chosen = shaka.util.StreamUtils.chooseStreamSets(
-          manifest.periods[0], config);
-      expect(chosen['audio']).toBe(manifest.periods[0].streamSets[0]);
-    });
-
-    it('chooses video stream with the highest top resolution', function() {
-      manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-         .addStreamSet('video')
-            .addStream(5).bandwidth(100).size(100, 200)
-            .addStream(6).bandwidth(200).size(200, 400)
-          .addStreamSet('video')
-            .addStream(7).bandwidth(100).size(100, 200)
-            .addStream(8).bandwidth(200).size(400, 600)
-        .build();
-
-      var chosen = shaka.util.StreamUtils.chooseStreamSets(
-          manifest.periods[0], config);
-      expect(chosen['video']).toBe(manifest.periods[0].streamSets[1]);
-    });
-
-    it('breaks ties on video streams by choosing one with the lowest' +
-       ' average bandwidth', function() {
-          manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-           .addStreamSet('video')
-              .addStream(5).bandwidth(200).size(100, 200)
-              .addStream(6).bandwidth(200).size(200, 400)
-            .addStreamSet('video')
-              .addStream(7).bandwidth(100).size(100, 200)
-              .addStream(8).bandwidth(200).size(200, 400)
-          .build();
-
-          var chosen = shaka.util.StreamUtils.chooseStreamSets(
-              manifest.periods[0], config);
-          expect(chosen['video']).toBe(manifest.periods[0].streamSets[1]);
-        });
-
-    it('chooses the first available text stream', function() {
-      manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addStreamSet('text')
+          .addVariant(1)
             .language('en')
-            .addStream(1).bandwidth(200).kind('caption')
-          .addStreamSet('text')
+          .addVariant(2)
             .language('en')
-            .addStream(2).bandwidth(200).kind('caption')
         .build();
 
-      var chosen = shaka.util.StreamUtils.chooseStreamSets(
+      var chosen = shaka.util.StreamUtils.filterVariantsByConfig(
           manifest.periods[0], config);
-      expect(chosen['text']).toBe(manifest.periods[0].streamSets[0]);
+      expect(chosen.length).toBe(2);
+      expect(chosen[0]).toBe(manifest.periods[0].variants[1]);
+      expect(chosen[1]).toBe(manifest.periods[0].variants[2]);
     });
 
-    it("chooses a text stream in user's preferred language", function() {
+    it("chooses text streams in user's preferred language", function() {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
-          .addStreamSet('text')
+          .addTextStream(1)
+            .language('en')
+          .addTextStream(2)
             .language('es')
-            .addStream(1).bandwidth(100).kind('caption')
-          .addStreamSet('text')
+          .addTextStream(3)
             .language('en')
-            .addStream(2).bandwidth(200).kind('caption')
         .build();
 
-      var chosen = shaka.util.StreamUtils.chooseStreamSets(
+      var chosen = shaka.util.StreamUtils.filterTextStreamsByConfig(
           manifest.periods[0], config);
-      expect(chosen['text']).toBe(manifest.periods[0].streamSets[1]);
+      expect(chosen.length).toBe(2);
+      expect(chosen[0]).toBe(manifest.periods[0].textStreams[0]);
+      expect(chosen[1]).toBe(manifest.periods[0].textStreams[2]);
     });
 
-    it('chooses primary media streams', function() {
+    it('chooses primary variants', function() {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
-         .addStreamSet('video')
+         .addVariant(0)
             .primary()
-            .addStream(5).bandwidth(100).size(100, 200)
-            .addStream(6).bandwidth(200).size(200, 400)
-          .addStreamSet('video')
-            .addStream(7).bandwidth(100).size(100, 200)
-            .addStream(8).bandwidth(200).size(400, 600)
-          .addStreamSet('audio')
-            .language('es')
+         .addVariant(1)
+         .addVariant(2)
+         .addVariant(3)
             .primary()
-            .addStream(1).bandwidth(200)
-            .addStream(2).bandwidth(400)
-          .addStreamSet('audio')
-            .language('de')
-            .addStream(3).bandwidth(200)
-            .addStream(4).bandwidth(400)
         .build();
 
-      var chosen = shaka.util.StreamUtils.chooseStreamSets(
+      var chosen = shaka.util.StreamUtils.filterVariantsByConfig(
           manifest.periods[0], config);
-      expect(chosen['video']).toBe(manifest.periods[0].streamSets[0]);
-      expect(chosen['audio']).toBe(manifest.periods[0].streamSets[2]);
+      expect(chosen.length).toBe(2);
+      expect(chosen[0]).toBe(manifest.periods[0].variants[0]);
+      expect(chosen[1]).toBe(manifest.periods[0].variants[3]);
     });
 
-    it('breaks tie on primary media streams by choosing one' +
-        ' with lower average bandwidth', function() {
-         manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addStreamSet('audio')
-              .language('es')
-              .primary()
-              .addStream(1).bandwidth(200)
-              .addStream(2).bandwidth(400)
-            .addStreamSet('audio')
-              .language('es')
-              .primary()
-              .addStream(3).bandwidth(200)
-              .addStream(4).bandwidth(100)
-            .addStreamSet('audio')
-              .language('de')
-              .addStream(3).bandwidth(200)
-              .addStream(4).bandwidth(100)
-          .build();
+    it('chooses primary text streams', function() {
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addTextStream(1)
+          .addTextStream(2)
+            .primary()
+          .addTextStream(3)
+            .primary()
+        .build();
 
-         var chosen = shaka.util.StreamUtils.chooseStreamSets(
-             manifest.periods[0], config);
-         expect(chosen['audio']).toBe(manifest.periods[0].streamSets[1]);
-       });
+      var chosen = shaka.util.StreamUtils.filterTextStreamsByConfig(
+          manifest.periods[0], config);
+      expect(chosen.length).toBe(2);
+      expect(chosen[0]).toBe(manifest.periods[0].textStreams[1]);
+      expect(chosen[1]).toBe(manifest.periods[0].textStreams[2]);
+    });
+
+    it('filters out resctricted variants', function() {
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addVariant(0)
+          .addVariant(1)
+          .addVariant(2)
+        .build();
+
+      manifest.periods[0].variants[0].allowedByKeySystem = false;
+      manifest.periods[0].variants[1].allowedByApplication = false;
+
+      var chosen = shaka.util.StreamUtils.filterVariantsByConfig(
+          manifest.periods[0], config);
+      expect(chosen.length).toBe(1);
+      expect(chosen[0]).toBe(manifest.periods[0].variants[2]);
+    });
   });
 });

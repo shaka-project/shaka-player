@@ -149,10 +149,8 @@ shakaExtern.Track;
  *   minPixels: number,
  *   maxPixels: number,
  *
- *   minAudioBandwidth: number,
- *   maxAudioBandwidth: number,
- *   minVideoBandwidth: number,
- *   maxVideoBandwidth: number
+ *   minBandwidth: number,
+ *   maxBandwidth: number
  * }}
  *
  * @description
@@ -174,14 +172,10 @@ shakaExtern.Track;
  * @property {number} maxPixels
  *   The maximum number of total pixels in a video track (i.e. width * height).
  *
- * @property {number} minAudioBandwidth
- *   The minimum bandwidth of an audio track, in bit/sec.
- * @property {number} maxAudioBandwidth
- *   The maximum bandwidth of an audio track, in bit/sec.
- * @property {number} minVideoBandwidth
- *   The minimum bandwidth of a video track, in bit/sec.
- * @property {number} maxVideoBandwidth
- *   The maximum bandwidth of a video track, in bit/sec.
+ * @property {number} minBandwidth
+ *   The minimum bandwidth of a variant track, in bit/sec.
+ * @property {number} maxBandwidth
+ *   The maximum bandwidth of a variant track, in bit/sec.
  * @exportDoc
  */
 shakaExtern.Restrictions;

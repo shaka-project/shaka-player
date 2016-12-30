@@ -124,22 +124,22 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
 
     describe('backoff', function() {
       var baseDelay = 200;
-      var realSetTimeout;
+      var origSetTimeout;
       var setTimeoutSpy;
       var realRandom;
 
       beforeAll(function() {
-        realSetTimeout = window.setTimeout;
+        origSetTimeout = shaka.net.NetworkingEngine.setTimeout_;
         setTimeoutSpy = jasmine.createSpy('setTimeout');
-        setTimeoutSpy.and.callFake(realSetTimeout);
-        window.setTimeout = setTimeoutSpy;
+        setTimeoutSpy.and.callFake(origSetTimeout);
+        shaka.net.NetworkingEngine.setTimeout_ = setTimeoutSpy;
         realRandom = Math.random;
         Math.random = function() { return 0.75; };
       });
 
       afterAll(function() {
         Math.random = realRandom;
-        window.setTimeout = realSetTimeout;
+        shaka.net.NetworkingEngine.setTimeout_ = origSetTimeout;
       });
 
       beforeEach(function() {
@@ -269,7 +269,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
       resolveScheme.and.callFake(function(uri, request) {
         expect(uri).toBe(request.uris[0]);
         expect(request).toEqual(request);
-        return Promise.resolve();
+        return Promise.resolve({});
       });
       networkingEngine.request(requestType, request).catch(fail).then(done);
     });
@@ -497,7 +497,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
 
       Util.delay(0.1).then(function() {
         expect(d.status).toBe('pending');
-        p.resolve();
+        p.resolve({});
         return d;
       }).then(function() {
         return Util.delay(0.1);
@@ -563,7 +563,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         expect(r1.status).toBe('pending');
         expect(r2.status).toBe('rejected');
         expect(d.status).toBe('pending');
-        p.resolve();
+        p.resolve({});
         return d;
       }).then(function() {
         return Util.delay(0.1);

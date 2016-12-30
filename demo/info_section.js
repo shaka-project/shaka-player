@@ -27,9 +27,7 @@ shakaDemo.setupInfo_ = function() {
       'trackschanged', shakaDemo.onTracksChanged_);
   shakaDemo.player_.addEventListener(
       'adaptation', shakaDemo.onAdaptation_);
-  document.getElementById('videoTracks').addEventListener(
-      'change', shakaDemo.onTrackSelected_);
-  document.getElementById('audioTracks').addEventListener(
+  document.getElementById('variantTracks').addEventListener(
       'change', shakaDemo.onTrackSelected_);
   document.getElementById('textTracks').addEventListener(
       'change', shakaDemo.onTrackSelected_);
@@ -43,18 +41,17 @@ shakaDemo.setupInfo_ = function() {
 shakaDemo.onTracksChanged_ = function(event) {
   // Update the track lists.
   var lists = {
-    video: document.getElementById('videoTracks'),
-    audio: document.getElementById('audioTracks'),
+    variant: document.getElementById('variantTracks'),
     text: document.getElementById('textTracks')
   };
   var formatters = {
-    video: function(track) {
-      return track.width + 'x' + track.height + ', ' +
-             track.bandwidth + ' bits/s';
-    },
-    audio: function(track) {
-      return 'language: ' + track.language + ', ' +
-             track.bandwidth + ' bits/s';
+    variant: function(track) {
+      var trackInfo = '';
+      if (track.language) trackInfo += 'language: ' + track.language + ', ';
+      if (track.width && track.height)
+        trackInfo += track.width + 'x' + track.height + ', ';
+      trackInfo += track.bandwidth + ' bits/s';
+      return trackInfo;
     },
     text: function(track) {
       return 'language: ' + track.language + ' ' +
@@ -99,8 +96,7 @@ shakaDemo.onTracksChanged_ = function(event) {
  */
 shakaDemo.onAdaptation_ = function(event) {
   var lists = {
-    video: document.getElementById('videoTracks'),
-    audio: document.getElementById('audioTracks'),
+    variant: document.getElementById('variantTracks'),
     text: document.getElementById('textTracks')
   };
 

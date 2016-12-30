@@ -146,7 +146,8 @@ shakaExtern.PeriodDB;
  *   initSegmentUri: ?string,
  *   encrypted: boolean,
  *   keyId: ?string,
- *   segments: !Array.<shakaExtern.SegmentDB>
+ *   segments: !Array.<shakaExtern.SegmentDB>,
+ *   variantIds: ?Array.<number>
  * }}
  *
  * @property {number} id
@@ -179,6 +180,8 @@ shakaExtern.PeriodDB;
  *   The key ID this stream is encrypted with.
  * @property {!Array.<shakaExtern.SegmentDB>} segments
  *   An array of segments that make up the stream
+ * @property {?Array.<number>} variantIds
+ *   An array of ids of variants the stream is a part of.
  */
 shakaExtern.StreamDB;
 

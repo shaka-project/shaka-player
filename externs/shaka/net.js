@@ -89,7 +89,8 @@ shakaExtern.Request;
  * @typedef {{
  *   uri: string,
  *   data: ArrayBuffer,
- *   headers: !Object.<string, string>
+ *   headers: !Object.<string, string>,
+ *   timeMs: (number|undefined)
  * }}
  *
  * @description
@@ -106,6 +107,9 @@ shakaExtern.Request;
  *   A map of response headers, if supported by the underlying protocol.
  *   All keys should be lowercased.
  *   For HTTP/HTTPS, may not be available cross-origin.
+ * @property {(number|undefined)} timeMs
+ *   Optional.  The time it took to get the response, in miliseconds.  If not
+ *   given, NetworkingEngine will calculate it using Date.now.
  *
  * @exportDoc
  */

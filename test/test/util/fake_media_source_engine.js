@@ -71,6 +71,7 @@ shaka.test.FakeMediaSourceEngine = function(segmentData, opt_drift) {
 
   spyOn(this, 'destroy').and.callThrough();
   spyOn(this, 'init').and.callThrough();
+  spyOn(this, 'reinitText').and.callThrough();
   spyOn(this, 'bufferStart').and.callThrough();
   spyOn(this, 'bufferEnd').and.callThrough();
   spyOn(this, 'bufferedAheadOf').and.callThrough();
@@ -119,6 +120,10 @@ shaka.test.FakeMediaSourceEngine.prototype.destroy = function() {
 
 /** @override */
 shaka.test.FakeMediaSourceEngine.prototype.init = function() {};
+
+
+/** @override */
+shaka.test.FakeMediaSourceEngine.prototype.reinitText = function() {};
 
 
 /** @override */

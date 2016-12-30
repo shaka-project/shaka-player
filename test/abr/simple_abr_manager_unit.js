@@ -18,9 +18,9 @@
 describe('SimpleAbrManager', function() {
   var switchCallback;
   var abrManager;
-  var audioStreamSet;
-  var videoStreamSet;
-  var streamSetsByType;
+  var manifest;
+  var variants;
+  var textStreams;
   var sufficientBWMultiplier = 1.06;
 
   beforeAll(function() {
@@ -34,34 +34,37 @@ describe('SimpleAbrManager', function() {
     switchCallback = jasmine.createSpy('switchCallback');
 
     // Keep unsorted.
-    audioStreamSet = new shaka.test.ManifestGenerator()
+    manifest = new shaka.test.ManifestGenerator()
       .addPeriod(0)
-        .addStreamSet('audio')
-          .addStream(0).bandwidth(4e5)  // 400 kbps
-          .addStream(1).bandwidth(6e5)
-          .addStream(2).bandwidth(5e5)
-      .build()
-      .periods[0].streamSets[0];
+        .addVariant(0).bandwidth(4e5)  // 400 kbps
+          .addAudio(0)
+          .addVideo(1)
+        .addVariant(1).bandwidth(1e6)  // 1000 kbps
+          .addAudio(2)
+          .addVideo(3)
+        .addVariant(2).bandwidth(5e5)  // 500 kbps
+          .addAudio(12)
+          .addVideo(4)
+        .addVariant(3).bandwidth(2e6)
+          .addAudio(5)
+          .addVideo(6)
+        .addVariant(4).bandwidth(2e6)  // Identical on purpose.
+          .addAudio(7)
+          .addVideo(6)
+        .addVariant(5).bandwidth(6e5)
+          .addAudio(8)
+          .addVideo(9)
+        .addTextStream(10)
+        .addTextStream(11)
+      .build();
 
-    // Keep unsorted.
-    videoStreamSet = new shaka.test.ManifestGenerator()
-      .addPeriod(0)
-        .addStreamSet('video')
-          .addStream(1).bandwidth(5e5)  // 500 kbps, initial selection
-          .addStream(2).bandwidth(1e6)  // 1000 kbps
-          .addStream(3).bandwidth(3e6)
-          .addStream(4).bandwidth(2e6)
-          .addStream(5).bandwidth(2e6)  // Identical on purpose.
-      .build()
-      .periods[0].streamSets[0];
-
-    streamSetsByType = {
-      'audio': audioStreamSet,
-      'video': videoStreamSet
-    };
+    variants = manifest.periods[0].variants;
+    textStreams = manifest.periods[0].textStreams;
 
     abrManager = new shaka.abr.SimpleAbrManager();
     abrManager.init(switchCallback);
+    abrManager.setVariants(variants);
+    abrManager.setTextStreams(textStreams);
   });
 
   afterEach(function() {
@@ -74,249 +77,228 @@ describe('SimpleAbrManager', function() {
   });
 
   it('can choose audio and video Streams right away', function() {
-    var streamsByType = abrManager.chooseStreams(streamSetsByType);
-    expect(streamsByType['audio']).toBeTruthy();
-    expect(streamsByType['video']).toBeTruthy();
+    var chosen = abrManager.chooseStreams(['audio', 'video']);
+    expect(chosen['audio']).toBeTruthy();
+    expect(chosen['video']).toBeTruthy();
   });
 
   it('uses custom default estimate', function() {
     abrManager.setDefaultEstimate(3e6);
-    var streamsByType = abrManager.chooseStreams(streamSetsByType);
-    expect(streamsByType['video'].bandwidth).toBe(2e6);
+    var chosen = abrManager.chooseStreams(['audio', 'video']);
+    expect(chosen['video'].id).toBe(6);
   });
 
-  it('can choose just an audio Stream right away', function() {
-    delete streamSetsByType['video'];
-    var streamsByType = abrManager.chooseStreams(streamSetsByType);
-    expect(streamsByType['audio']).toBeTruthy();
-    expect(streamsByType['video']).toBeFalsy();
+  it('can handle empty variants', function() {
+    abrManager.setVariants([]);
+    abrManager.setTextStreams([]);
+    var chosen = abrManager.chooseStreams(['audio', 'video']);
+    expect(Object.keys(chosen).length).toBe(0);
   });
 
-  it('can choose just a video Stream right away', function() {
-    delete streamSetsByType['audio'];
-    var streamsByType = abrManager.chooseStreams(streamSetsByType);
-    expect(streamsByType['audio']).toBeFalsy();
-    expect(streamsByType['video']).toBeTruthy();
+  it('can choose from audio only variants', function() {
+    manifest = new shaka.test.ManifestGenerator()
+      .addPeriod(0)
+        .addVariant(0).bandwidth(4e5)
+          .addAudio(0)
+        .addVariant(1).bandwidth(1e6)
+          .addAudio(2)
+      .build();
+
+    abrManager.setVariants(manifest.periods[0].variants);
+    var chosen = abrManager.chooseStreams(['audio']);
+
+    expect(chosen['audio']).toBeTruthy();
+    expect(chosen['video']).toBeFalsy();
   });
 
-  it('won\'t choose restricted streams', function() {
-    // No available audio streams.
-    audioStreamSet.streams[0].allowedByKeySystem = false;
-    audioStreamSet.streams[1].allowedByApplication = false;
-    audioStreamSet.streams[2].allowedByApplication = false;
-    // Disallow the initial guess.
-    videoStreamSet.streams[0].allowedByApplication = false;
+  it('can choose from video only variants', function() {
+    manifest = new shaka.test.ManifestGenerator()
+      .addPeriod(0)
+        .addVariant(0).bandwidth(4e5)
+          .addVideo(0)
+        .addVariant(1).bandwidth(1e6)
+          .addVideo(2)
+      .build();
 
-    var streamsByType = abrManager.chooseStreams(streamSetsByType);
-    expect(streamsByType['audio']).toBeFalsy();
-    expect(streamsByType['video']).toBeTruthy();
-    expect(streamsByType['video'].bandwidth).toBe(1e6);
+    abrManager.setVariants(manifest.periods[0].variants);
+    var chosen = abrManager.chooseStreams(['video']);
+
+    expect(chosen['video']).toBeTruthy();
+    expect(chosen['audio']).toBeFalsy();
   });
 
-  it('can handle empty StreamSets', function() {
-    var streamsByType = abrManager.chooseStreams({});
-    expect(Object.keys(streamsByType).length).toBe(0);
-  });
-
-  [1e6, 2e6, 3e6].forEach(function(videoBandwidth) {
-    var audioBandwidth = 5e5;  // This corresponds to the middle audio Stream.
-
+  [5e5, 6e5].forEach(function(bandwidth) {
     // Simulate some segments being downloaded just above the desired
     // bandwidth.
     var bytesPerSecond =
-        sufficientBWMultiplier * (audioBandwidth + videoBandwidth) / 8.0;
+        sufficientBWMultiplier * bandwidth / 8.0;
 
-    var bandwidthKbps = (audioBandwidth + videoBandwidth) / 1000.0;
+    var bandwidthKbps = bandwidth / 1000.0;
     var description =
-        'picks correct video Stream at ' + bandwidthKbps + ' kbps';
+        'picks correct Variant at ' + bandwidthKbps + ' kbps';
 
     it(description, function() {
-      abrManager.chooseStreams(streamSetsByType);
+      abrManager.setVariants(variants);
+      abrManager.chooseStreams(['audio', 'video']);
 
-      abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
-      abrManager.segmentDownloaded(1000, 2000, bytesPerSecond);
+      abrManager.segmentDownloaded(1000, bytesPerSecond);
+      abrManager.segmentDownloaded(1000, bytesPerSecond);
 
       abrManager.enable();
 
       // Make another call to segmentDownloaded() so switchCallback() is
       // called.
-      abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
+      abrManager.segmentDownloaded(1000, bytesPerSecond);
+
+      // Expect variants 2 to be chosen for bandwidth = 5e5
+      // and variant 5 - for bandwidth = 6e5
+      var audioStream = variants[2].audio;
+      var videoStream = variants[2].video;
+
+      if (bandwidth == 6e5) {
+        audioStream = variants[5].audio;
+        videoStream = variants[5].video;
+      }
 
       expect(switchCallback).toHaveBeenCalled();
       expect(switchCallback.calls.argsFor(0)[0]).toEqual({
-        'audio': jasmine.objectContaining({bandwidth: audioBandwidth}),
-        'video': jasmine.objectContaining({bandwidth: videoBandwidth})
-      });
-    });
-  });
-
-  [5e5, 6e5].forEach(function(audioBandwidth) {
-    var videoBandwidth = 1e6;
-
-    // Simulate some segments being downloaded just above the desired
-    // bandwidth.
-    var bytesPerSecond =
-        sufficientBWMultiplier * (audioBandwidth + videoBandwidth) / 8.0;
-
-    var bandwidthKbps = (audioBandwidth + videoBandwidth) / 1000.0;
-    var description =
-        'picks correct audio Stream at ' + bandwidthKbps + ' kbps';
-
-    it(description, function() {
-      abrManager.chooseStreams(streamSetsByType);
-
-      abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
-      abrManager.segmentDownloaded(1000, 2000, bytesPerSecond);
-
-      abrManager.enable();
-
-      // Make another call to segmentDownloaded() so switchCallback() is
-      // called.
-      abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
-
-      expect(switchCallback).toHaveBeenCalled();
-      expect(switchCallback.calls.argsFor(0)[0]).toEqual({
-        'audio': jasmine.objectContaining({bandwidth: audioBandwidth}),
-        'video': jasmine.objectContaining({bandwidth: videoBandwidth})
+        'audio': audioStream,
+        'video': videoStream
       });
     });
   });
 
   it('can handle 0 duration segments', function() {
-    var audioBandwidth = 5e5;
-    var videoBandwidth = 2e6;
+    // Makes sure bandwidth estimate doesn't get set to NaN
+    // when a 0 duration segment is encountered.
+    // https://github.com/google/shaka-player/issues/582
+    var bandwidth = 5e5;
     var bytesPerSecond =
-        sufficientBWMultiplier * (audioBandwidth + videoBandwidth) / 8.0;
+        sufficientBWMultiplier * bandwidth / 8.0;
 
-    abrManager.chooseStreams(streamSetsByType);
+    abrManager.setVariants(variants);
+    abrManager.chooseStreams(['audio', 'video']);
 
     // 0 duration segment shouldn't cause us to get stuck on the lowest variant
-    abrManager.segmentDownloaded(1000, 1000, bytesPerSecond);
-    abrManager.segmentDownloaded(2000, 3000, bytesPerSecond);
+    abrManager.segmentDownloaded(0, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     abrManager.enable();
 
-    abrManager.segmentDownloaded(4000, 5000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
 
-    expect(switchCallback).toHaveBeenCalled();
-    expect(switchCallback.calls.argsFor(0)[0]).toEqual({
-      'audio': jasmine.objectContaining({bandwidth: audioBandwidth}),
-      'video': jasmine.objectContaining({bandwidth: videoBandwidth})
-    });
+    expect(abrManager.getBandwidthEstimate()).toBeTruthy();
   });
 
-  it('picks lowest audio Stream when there is insufficient bandwidth',
+  it('picks lowest variant when there is insufficient bandwidth',
       function() {
-        // The lowest audio track will only be chosen if needed to fit the
-        // the lowest video track.
-        var audioBandwidth = 4e5;
-        var videoBandwidth = 5e5;
+        var bandwidth = 2e6;
+
+        abrManager.setVariants(variants);
+        abrManager.chooseStreams(['audio', 'video']);
 
         // Simulate some segments being downloaded just above the desired
         // bandwidth.
         var bytesPerSecond =
-            sufficientBWMultiplier * (audioBandwidth + videoBandwidth) / 8.0;
+            sufficientBWMultiplier * bandwidth / 8.0;
 
-        abrManager.chooseStreams(streamSetsByType);
-
-        abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
-        abrManager.segmentDownloaded(1000, 2000, bytesPerSecond);
+        abrManager.segmentDownloaded(1000, bytesPerSecond);
+        abrManager.segmentDownloaded(1000, bytesPerSecond);
 
         abrManager.enable();
 
         // Make another call to segmentDownloaded() so switchCallback() is
         // called.
-        abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
+        abrManager.segmentDownloaded(1000, bytesPerSecond);
+
+        // Expect variants 4 to be chosen
+        var videoStream = variants[4].video;
+        var audioStream = variants[4].audio;
 
         expect(switchCallback).toHaveBeenCalled();
         expect(switchCallback.calls.argsFor(0)[0]).toEqual({
-          'audio': jasmine.objectContaining({bandwidth: audioBandwidth}),
-          'video': jasmine.objectContaining({bandwidth: videoBandwidth})
+          'audio': audioStream,
+          'video': videoStream
         });
       });
 
   it('does not call switchCallback() if not enabled', function() {
-    var audioBandwidth = 5e5;
-    var videoBandwidth = 2e6;
+    var bandwidth = 5e5;
     var bytesPerSecond =
-        sufficientBWMultiplier * (audioBandwidth + videoBandwidth) / 8.0;
+        sufficientBWMultiplier * bandwidth / 8.0;
 
-    abrManager.chooseStreams(streamSetsByType);
+    abrManager.setVariants(variants);
+    abrManager.chooseStreams(['audio', 'video']);
 
     // Don't enable AbrManager.
-    abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
-    abrManager.segmentDownloaded(2000, 3000, bytesPerSecond);
-    abrManager.segmentDownloaded(4000, 5000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
     expect(switchCallback).not.toHaveBeenCalled();
   });
 
   it('does not call switchCallback() in switch interval', function() {
-    var audioBandwidth = 5e5;
-    var videoBandwidth = 3e6;
+    var bandwidth = 5e5;
     var bytesPerSecond =
-        sufficientBWMultiplier * (audioBandwidth + videoBandwidth) / 8.0;
+        sufficientBWMultiplier * bandwidth / 8.0;
 
-    abrManager.chooseStreams(streamSetsByType);
+    abrManager.setVariants(variants);
+    abrManager.chooseStreams(['audio', 'video']);
 
-    abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
-    abrManager.segmentDownloaded(2000, 3000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     abrManager.enable();
 
-    abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
     expect(switchCallback).toHaveBeenCalled();
     switchCallback.calls.reset();
 
     // Simulate drop in bandwidth.
-    audioBandwidth = 5e5;
-    videoBandwidth = 1e6;
+    bandwidth = 2e6;
     bytesPerSecond =
-        sufficientBWMultiplier * (audioBandwidth + videoBandwidth) / 8.0;
+        sufficientBWMultiplier * bandwidth / 8.0;
 
-    abrManager.segmentDownloaded(4000, 5000, bytesPerSecond);
-    abrManager.segmentDownloaded(5000, 6000, bytesPerSecond);
-    abrManager.segmentDownloaded(6000, 7000, bytesPerSecond);
-    abrManager.segmentDownloaded(7000, 8000, bytesPerSecond);
-    abrManager.segmentDownloaded(8000, 9000, bytesPerSecond);
-    abrManager.segmentDownloaded(9000, 10000, bytesPerSecond);
-    abrManager.segmentDownloaded(10000, 11000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     // Stay inside switch interval.
     shaka.test.Util.fakeEventLoop(
         (shaka.abr.SimpleAbrManager.SWITCH_INTERVAL_MS / 1000.0) - 2);
-    abrManager.segmentDownloaded(10000, 11000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     expect(switchCallback).not.toHaveBeenCalled();
 
     // Move outside switch interval.
     shaka.test.Util.fakeEventLoop(3);
-    abrManager.segmentDownloaded(12000, 13000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     expect(switchCallback).toHaveBeenCalled();
-    expect(switchCallback.calls.argsFor(0)[0]).toEqual({
-      'audio': jasmine.objectContaining({bandwidth: audioBandwidth}),
-      'video': jasmine.objectContaining({bandwidth: videoBandwidth})
-    });
   });
 
   it('does not clear the buffer on upgrade', function() {
     // Simulate some segments being downloaded at a high rate, to trigger an
     // upgrade.
-    var audioBandwidth = 5e5;
-    var videoBandwidth = 4e6;
+    var bandwidth = 5e5;
     var bytesPerSecond =
-        sufficientBWMultiplier * (audioBandwidth + videoBandwidth) / 8.0;
+        sufficientBWMultiplier * bandwidth / 8.0;
 
-    abrManager.chooseStreams(streamSetsByType);
+    abrManager.setVariants(variants);
+    abrManager.chooseStreams(['audio', 'video']);
 
-    abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
-    abrManager.segmentDownloaded(1000, 2000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     abrManager.enable();
 
     // Make another call to segmentDownloaded(). switchCallback() will be
     // called to upgrade.
-    abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     // The second parameter is missing to indicate that the buffer should not be
     // cleared.
@@ -326,23 +308,24 @@ describe('SimpleAbrManager', function() {
   it('does not clear the buffer on downgrade', function() {
     // Simulate some segments being downloaded at a low rate, to trigger a
     // downgrade.
-    var audioBandwidth = 5e5;
-    var videoBandwidth = 5e5;
+    var bandwidth = 5e5;
     var bytesPerSecond =
-        sufficientBWMultiplier * (audioBandwidth + videoBandwidth) / 8.0;
+        sufficientBWMultiplier * bandwidth / 8.0;
 
     // Set the default high so that the initial choice will be high-quality.
     abrManager.setDefaultEstimate(4e6);
-    abrManager.chooseStreams(streamSetsByType);
 
-    abrManager.segmentDownloaded(0, 1000, bytesPerSecond);
-    abrManager.segmentDownloaded(1000, 2000, bytesPerSecond);
+    abrManager.setVariants(variants);
+    abrManager.chooseStreams(['audio', 'video']);
+
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     abrManager.enable();
 
     // Make another call to segmentDownloaded(). switchCallback() will be
     // called to downgrade.
-    abrManager.segmentDownloaded(3000, 4000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     // The second parameter is missing to indicate that the buffer should not be
     // cleared.
