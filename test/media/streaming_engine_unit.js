@@ -49,6 +49,7 @@ describe('StreamingEngine', function() {
   var onInitialStreamsSetup;
   var onStartupComplete;
   var streamingEngine;
+  var textConfig;
 
   /**
    * Runs the fake event loop.
@@ -355,8 +356,10 @@ describe('StreamingEngine', function() {
    **
    * @param {shakaExtern.StreamingConfiguration=} opt_config Optional
    *   configuration object which overrides the default one.
+   * @param {shakaExtern.TextConfiguration=} opt_textConfig Optional
+   *   text configuration object which overrides the default one.
    */
-  function createStreamingEngine(opt_config) {
+  function createStreamingEngine(opt_config, opt_textConfig) {
     onChooseStreams = jasmine.createSpy('onChooseStreams');
     onCanSwitch = jasmine.createSpy('onCanSwitch');
     onInitialStreamsSetup = jasmine.createSpy('onInitialStreamsSetup');
@@ -376,6 +379,11 @@ describe('StreamingEngine', function() {
         ignoreTextStreamFailures: false,
         useRelativeCueTimestamps: false
       };
+    }
+    if (opt_textConfig) {
+      textConfig = opt_textConfig;
+    } else {
+      textConfig = { override: false, region: null };
     }
 
     streamingEngine = new shaka.media.StreamingEngine(
@@ -512,7 +520,7 @@ describe('StreamingEngine', function() {
     });
 
     // Here we go!
-    streamingEngine.init();
+    streamingEngine.init(textConfig);
 
     runTest();
     expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
@@ -546,7 +554,7 @@ describe('StreamingEngine', function() {
     onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
 
     // Here we go!
-    streamingEngine.init();
+    streamingEngine.init(textConfig);
 
     runTest(slideSegmentAvailabilityWindow);
     expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
@@ -609,7 +617,7 @@ describe('StreamingEngine', function() {
       };
     });
 
-    streamingEngine.init();
+    streamingEngine.init(textConfig);
 
     runTest();
     // Verify buffers.
@@ -657,7 +665,7 @@ describe('StreamingEngine', function() {
       };
     });
 
-    streamingEngine.init();
+    streamingEngine.init(textConfig);
 
     runTest();
     // Verify buffers.
@@ -685,7 +693,7 @@ describe('StreamingEngine', function() {
 
     // Here we go!
     onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-    streamingEngine.init();
+    streamingEngine.init(textConfig);
 
     runTest();
     expect(onStartupComplete).toHaveBeenCalled();
@@ -755,7 +763,7 @@ describe('StreamingEngine', function() {
       });
 
       // Here we go!
-      streamingEngine.init();
+      streamingEngine.init(textConfig);
 
       runTest();
       // Verify buffers.
@@ -801,7 +809,7 @@ describe('StreamingEngine', function() {
       });
 
       // Here we go!
-      streamingEngine.init();
+      streamingEngine.init(textConfig);
 
       runTest();
       // Verify buffers.
@@ -868,7 +876,7 @@ describe('StreamingEngine', function() {
       });
 
       // Here we go!
-      streamingEngine.init();
+      streamingEngine.init(textConfig);
 
       runTest(onTick);
       // Verify buffers.
@@ -959,7 +967,7 @@ describe('StreamingEngine', function() {
       });
 
       // Here we go!
-      streamingEngine.init();
+      streamingEngine.init(textConfig);
 
       runTest(onTick);
       // Verify buffers.
@@ -1026,7 +1034,7 @@ describe('StreamingEngine', function() {
       onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 15));
 
       // Here we go!
-      streamingEngine.init();
+      streamingEngine.init(textConfig);
 
       runTest(onTick);
       // Verify buffers.
@@ -1065,7 +1073,7 @@ describe('StreamingEngine', function() {
       });
 
       // Here we go!
-      streamingEngine.init();
+      streamingEngine.init(textConfig);
 
       runTest();
       // Verify buffers. Segment 3 should not be buffered since we never
@@ -1112,7 +1120,7 @@ describe('StreamingEngine', function() {
       });
 
       // Here we go!
-      streamingEngine.init();
+      streamingEngine.init(textConfig);
 
       runTest();
       // Verify buffers.
@@ -1194,7 +1202,7 @@ describe('StreamingEngine', function() {
       });
 
       // Here we go!
-      streamingEngine.init();
+      streamingEngine.init(textConfig);
 
       runTest(slideSegmentAvailabilityWindow);
       // Verify buffers.
@@ -1242,7 +1250,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init().then(fail).catch(onInitError);
+      streamingEngine.init(textConfig).then(fail).catch(onInitError);
 
       runTest();
       expect(onInitError).toHaveBeenCalled();
@@ -1263,7 +1271,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init().catch(fail);
+      streamingEngine.init(textConfig).catch(fail);
       runTest();
       expect(onError).toHaveBeenCalled();
     });
@@ -1299,7 +1307,7 @@ describe('StreamingEngine', function() {
       });
 
       // Here we go!
-      streamingEngine.init().catch(fail);
+      streamingEngine.init(textConfig).catch(fail);
       runTest();
       expect(onError).toHaveBeenCalled();
     });
@@ -1335,7 +1343,7 @@ describe('StreamingEngine', function() {
       });
 
       // Here we go!
-      streamingEngine.init().catch(fail);
+      streamingEngine.init(textConfig).catch(fail);
       runTest();
       expect(onError).toHaveBeenCalled();
     });
@@ -1384,7 +1392,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.init(textConfig);
 
       runTest();
       expect(onError.calls.count()).toBe(1);
@@ -1462,7 +1470,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.init(textConfig);
 
       runTest();
       expect(onError.calls.count()).toBe(1);
@@ -1522,7 +1530,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.init(textConfig);
       streamingEngine.configure({ignoreTextStreamFailures: true});
 
       runTest();
@@ -1579,7 +1587,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.init(textConfig);
 
       // Since StreamingEngine is free to peform audio, video, and text updates
       // in any order, there are many valid ways in which StreamingEngine can
@@ -1661,7 +1669,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.init(textConfig);
 
       runTest();
       expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
@@ -1731,7 +1739,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.init(textConfig);
 
       // Stop the playhead after 10 seconds since will not append any
       // segments after this time.
@@ -1762,7 +1770,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.init(textConfig);
 
       runTest();
       expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
@@ -1794,7 +1802,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.init(textConfig);
 
       runTest();
       expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
@@ -1836,7 +1844,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.init(textConfig);
 
       runTest(slideSegmentAvailabilityWindow);
       expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
