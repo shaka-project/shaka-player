@@ -44,6 +44,7 @@ describe('StreamingEngine', function() {
   var onInitialStreamsSetup;
   var onStartupComplete;
   var streamingEngine;
+  var textConfig;
 
   beforeAll(function() {
     video = /** @type {HTMLVideoElement} */ (document.createElement('video'));
@@ -268,6 +269,7 @@ describe('StreamingEngine', function() {
       ignoreTextStreamFailures: false,
       useRelativeCueTimestamps: false
     };
+    textConfig = { override: false, region: null };
     streamingEngine = new shaka.media.StreamingEngine(
         playhead,
         mediaSourceEngine,
@@ -312,7 +314,7 @@ describe('StreamingEngine', function() {
 
       // Let's go!
       onChooseStreams.and.callFake(defaultOnChooseStreams);
-      streamingEngine.init();
+      streamingEngine.init(textConfig);
     });
 
     it('plays at high playback rates', function(done) {
@@ -339,7 +341,7 @@ describe('StreamingEngine', function() {
 
       // Let's go!
       onChooseStreams.and.callFake(defaultOnChooseStreams);
-      streamingEngine.init();
+      streamingEngine.init(textConfig);
     });
 
     it('can handle buffered seeks', function(done) {
@@ -365,7 +367,7 @@ describe('StreamingEngine', function() {
 
       // Let's go!
       onChooseStreams.and.callFake(defaultOnChooseStreams);
-      streamingEngine.init();
+      streamingEngine.init(textConfig);
     });
 
     it('can handle unbuffered seeks', function(done) {
@@ -391,7 +393,7 @@ describe('StreamingEngine', function() {
 
       // Let's go!
       onChooseStreams.and.callFake(defaultOnChooseStreams);
-      streamingEngine.init();
+      streamingEngine.init(textConfig);
     });
   });
 
@@ -434,7 +436,7 @@ describe('StreamingEngine', function() {
 
       // Let's go!
       onChooseStreams.and.callFake(defaultOnChooseStreams);
-      streamingEngine.init();
+      streamingEngine.init(textConfig);
     });
 
     // QUARANTINED: this test does not pass 100% of the time on Firefox Win/Mac.
@@ -463,7 +465,7 @@ describe('StreamingEngine', function() {
 
           // Let's go!
           onChooseStreams.and.callFake(defaultOnChooseStreams);
-          streamingEngine.init();
+          streamingEngine.init(textConfig);
         });
 
     it('can handle seeks behind availability window', function(done) {
@@ -491,7 +493,7 @@ describe('StreamingEngine', function() {
 
       // Let's go!
       onChooseStreams.and.callFake(defaultOnChooseStreams);
-      streamingEngine.init();
+      streamingEngine.init(textConfig);
     });
   });
 
