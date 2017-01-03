@@ -16,17 +16,11 @@
  */
 
 describe('StreamUtils', function() {
-  var config;
   var manifest;
+  var preferredAudioLanguage = 'en';
+  var preferredTextLanguage = 'en';
 
-  beforeAll(function() {
-    config = /** @type {shakaExtern.PlayerConfiguration} */({
-      preferredAudioLanguage: 'en',
-      preferredTextLanguage: 'en'
-    });
-  });
-
-  describe('filterVariantsByConfig', function() {
+  describe('filterVariantsByRoleAndLanguage', function() {
     it("chooses variants in user's preferred language", function() {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
@@ -38,8 +32,8 @@ describe('StreamUtils', function() {
             .language('en')
         .build();
 
-      var chosen = shaka.util.StreamUtils.filterVariantsByConfig(
-          manifest.periods[0], config);
+      var chosen = shaka.util.StreamUtils.filterVariantsByRoleAndLanguage(
+          manifest.periods[0], preferredAudioLanguage);
       expect(chosen.length).toBe(2);
       expect(chosen[0]).toBe(manifest.periods[0].variants[1]);
       expect(chosen[1]).toBe(manifest.periods[0].variants[2]);
@@ -56,8 +50,8 @@ describe('StreamUtils', function() {
             .primary()
         .build();
 
-      var chosen = shaka.util.StreamUtils.filterVariantsByConfig(
-          manifest.periods[0], config);
+      var chosen = shaka.util.StreamUtils.filterVariantsByRoleAndLanguage(
+          manifest.periods[0], preferredAudioLanguage);
       expect(chosen.length).toBe(2);
       expect(chosen[0]).toBe(manifest.periods[0].variants[0]);
       expect(chosen[1]).toBe(manifest.periods[0].variants[3]);
@@ -74,14 +68,14 @@ describe('StreamUtils', function() {
       manifest.periods[0].variants[0].allowedByKeySystem = false;
       manifest.periods[0].variants[1].allowedByApplication = false;
 
-      var chosen = shaka.util.StreamUtils.filterVariantsByConfig(
-          manifest.periods[0], config);
+      var chosen = shaka.util.StreamUtils.filterVariantsByRoleAndLanguage(
+          manifest.periods[0], preferredAudioLanguage);
       expect(chosen.length).toBe(1);
       expect(chosen[0]).toBe(manifest.periods[0].variants[2]);
     });
   });
 
-  describe('filterTextStreamsByConfig', function() {
+  describe('filterTextStreamsByRoleAndLanguage', function() {
     it("chooses text streams in user's preferred language", function() {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
@@ -93,8 +87,8 @@ describe('StreamUtils', function() {
             .language('en')
         .build();
 
-      var chosen = shaka.util.StreamUtils.filterTextStreamsByConfig(
-          manifest.periods[0], config);
+      var chosen = shaka.util.StreamUtils.filterTextStreamsByRoleAndLanguage(
+          manifest.periods[0], preferredTextLanguage);
       expect(chosen.length).toBe(2);
       expect(chosen[0]).toBe(manifest.periods[0].textStreams[0]);
       expect(chosen[1]).toBe(manifest.periods[0].textStreams[2]);
@@ -110,8 +104,8 @@ describe('StreamUtils', function() {
             .primary()
         .build();
 
-      var chosen = shaka.util.StreamUtils.filterTextStreamsByConfig(
-          manifest.periods[0], config);
+      var chosen = shaka.util.StreamUtils.filterTextStreamsByRoleAndLanguage(
+          manifest.periods[0], preferredTextLanguage);
       expect(chosen.length).toBe(2);
       expect(chosen[0]).toBe(manifest.periods[0].textStreams[1]);
       expect(chosen[1]).toBe(manifest.periods[0].textStreams[2]);

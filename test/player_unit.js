@@ -676,7 +676,8 @@ describe('Player', function() {
   });
 
   describe('tracks', function() {
-    var tracks;
+    var variantTracks;
+    var textTracks;
 
     beforeEach(function() {
       // A manifest we can use to test track expectations.
@@ -704,6 +705,11 @@ describe('Player', function() {
             .bandwidth(300)
             .addAudio(2).bandwidth(100)
             .addVideo(5).bandwidth(200).size(200, 400).frameRate(24)
+          .addVariant(5)
+            .language('es')
+            .bandwidth(300)
+            .addAudio(8).bandwidth(100)
+            .addVideo(5).bandwidth(200).size(200, 400).frameRate(24)
           .addTextStream(6)
             .language('es')
             .bandwidth(100).kind('caption')
@@ -715,7 +721,7 @@ describe('Player', function() {
           // Both text tracks should remain, even with different MIME types.
         .build();
 
-      tracks = [
+      variantTracks = [
         {
           id: 1,
           active: true,
@@ -765,6 +771,21 @@ describe('Player', function() {
           codecs: 'avc1.4d401f, mp4a.40.2'
         },
         {
+          id: 5,
+          active: false,
+          type: 'variant',
+          bandwidth: 300,
+          language: 'es',
+          kind: null,
+          width: 200,
+          height: 400,
+          frameRate: 24,
+          codecs: 'avc1.4d401f, mp4a.40.2'
+        }
+      ];
+
+      textTracks = [
+        {
           id: 6,
           active: true,
           type: 'text',
@@ -791,37 +812,26 @@ describe('Player', function() {
     });
 
     it('returns the correct tracks', function() {
-      var actual = player.getTracks();
-      expect(actual).toEqual(tracks);
+      var actualVariantTracks = player.getVariantTracks();
+      var actualTextTracks = player.getTextTracks();
+      expect(actualVariantTracks).toEqual(variantTracks);
+      expect(actualTextTracks).toEqual(textTracks);
     });
 
-    it('disables AbrManager if switching audio or video', function() {
+    it('doesn\'t disable AbrManager if switching variants', function() {
       var config = player.getConfiguration();
       expect(config.abr.enabled).toBe(true);
-
-      expect(tracks[1].type).toBe('variant');
-      player.selectTrack(tracks[1]);
-
+      expect(variantTracks[1].type).toBe('variant');
+      player.selectVariantTrack(variantTracks[1]);
       config = player.getConfiguration();
-      expect(config.abr.enabled).toBe(false);
-
-      // Test again with video.
-      player.configure({abr: {enabled: true}});
-
-      expect(tracks[3].type).toBe('variant');
-      player.selectTrack(tracks[3]);
-
-      config = player.getConfiguration();
-      expect(config.abr.enabled).toBe(false);
+      expect(config.abr.enabled).toBe(true);
     });
 
     it('doesn\'t disable AbrManager if switching text', function() {
       var config = player.getConfiguration();
       expect(config.abr.enabled).toBe(true);
-
-      expect(tracks[4].type).toBe('text');
-      player.selectTrack(tracks[4]);
-
+      expect(textTracks[0].type).toBe('text');
+      player.selectTextTrack(textTracks[0]);
       config = player.getConfiguration();
       expect(config.abr.enabled).toBe(true);
     });
@@ -832,7 +842,7 @@ describe('Player', function() {
 
       var period = manifest.periods[0];
       var variant = period.variants[3];
-      player.selectTrack(tracks[3]);
+      player.selectVariantTrack(variantTracks[3]);
       expect(streamingEngine.switch)
           .toHaveBeenCalledWith('audio', variant.audio, false);
       expect(streamingEngine.switch)
@@ -840,7 +850,7 @@ describe('Player', function() {
     });
 
     it('still switches streams if called during startup', function() {
-      player.selectTrack(tracks[1]);
+      player.selectVariantTrack(variantTracks[1]);
       expect(streamingEngine.switch).not.toHaveBeenCalled();
 
       // Does not call switch, just overrides the choices made in AbrManager.
@@ -854,7 +864,7 @@ describe('Player', function() {
     it('still switches streams if called while switching Periods', function() {
       chooseStreams();
 
-      player.selectTrack(tracks[1]);
+      player.selectVariantTrack(variantTracks[1]);
       expect(streamingEngine.switch).not.toHaveBeenCalled();
 
       canSwitch();
@@ -874,9 +884,9 @@ describe('Player', function() {
         preferredTextLanguage: 'es'
       });
 
-      expect(tracks[5].type).toBe('text');
-      expect(tracks[5].language).toBe('en');
-      player.selectTrack(tracks[5]);
+      expect(textTracks[1].type).toBe('text');
+      expect(textTracks[1].language).toBe('en');
+      player.selectTextTrack(textTracks[1]);
       var period = manifest.periods[0];
       var textStream = period.textStreams[1];
 
@@ -886,12 +896,84 @@ describe('Player', function() {
       streamingEngine.switch.calls.reset();
 
       var variant = period.variants[1];
-      expect(tracks[1].id).toBe(variant.id);
-      player.selectTrack(tracks[1]);
+      expect(variantTracks[1].id).toBe(variant.id);
+      player.selectVariantTrack(variantTracks[1]);
       expect(streamingEngine.switch)
           .toHaveBeenCalledWith('text', textStream, true);
       expect(streamingEngine.switch)
           .toHaveBeenCalledWith('audio', variant.audio, false);
+    });
+
+    it('selectAudioLanguage() takes precedence over preferredAudioLanguage',
+        function() {
+          chooseStreams();
+          canSwitch();
+          player.configure({
+            preferredAudioLanguage: 'en'
+          });
+
+          var period = manifest.periods[0];
+          var spanishStream = period.variants[4].audio;
+          var englishStream = period.variants[3].audio;
+
+          expect(streamingEngine.switch).not.toHaveBeenCalled();
+          player.selectAudioLanguage('es');
+
+          expect(streamingEngine.switch)
+              .toHaveBeenCalledWith('audio', spanishStream, true);
+          expect(streamingEngine.switch)
+              .not.toHaveBeenCalledWith('audio', englishStream, true);
+
+        });
+
+    it('selectTextLanguage() takes precedence over preferredTextLanguage',
+        function() {
+          chooseStreams();
+          canSwitch();
+          player.configure({
+            preferredTextLanguage: 'es'
+          });
+
+          var period = manifest.periods[0];
+          var spanishStream = period.textStreams[0];
+          var englishStream = period.textStreams[1];
+
+          expect(streamingEngine.switch).not.toHaveBeenCalled();
+          player.selectTextLanguage('en');
+
+          expect(streamingEngine.switch)
+              .toHaveBeenCalledWith('text', englishStream, true);
+          expect(streamingEngine.switch)
+              .not.toHaveBeenCalledWith('text', spanishStream, true);
+
+        });
+
+    it('changing currentAudioLanguage changes active stream', function() {
+      chooseStreams();
+      canSwitch();
+
+      var period = manifest.periods[0];
+      var spanishStream = period.variants[4].audio;
+
+      expect(streamingEngine.switch).not.toHaveBeenCalled();
+      player.selectAudioLanguage('es');
+
+      expect(streamingEngine.switch)
+          .toHaveBeenCalledWith('audio', spanishStream, true);
+    });
+
+    it('changing currentTextLanguage changes active stream', function() {
+      chooseStreams();
+      canSwitch();
+
+      var period = manifest.periods[0];
+      var englishStream = period.textStreams[1];
+
+      expect(streamingEngine.switch).not.toHaveBeenCalled();
+      player.selectTextLanguage('en');
+
+      expect(streamingEngine.switch)
+          .toHaveBeenCalledWith('text', englishStream, true);
     });
   });
 
@@ -937,10 +1019,9 @@ describe('Player', function() {
           player.load('', 0, factory)
               .then(function() {
                 expect(player.isTextTrackVisible()).toBe(false);
-                player.configure({
-                  preferredAudioLanguage: 'en',
-                  preferredTextLanguage: 'fr'
-                });
+                player.selectAudioLanguage('en');
+                player.selectTextLanguage('fr');
+
                 expect(player.isTextTrackVisible()).toBe(true);
               })
               .catch(fail)
@@ -975,10 +1056,8 @@ describe('Player', function() {
       var factory = function() { return parser; };
       player.load('', 0, factory)
           .then(function() {
-            player.configure({
-              preferredAudioLanguage: preference,
-              preferredTextLanguage: preference
-            });
+            player.selectAudioLanguage(preference);
+            player.selectTextLanguage(preference);
 
             var chosen = chooseStreams();
             expect(chosen['audio'].id).toBe(expectedIndex);
@@ -1117,9 +1196,9 @@ describe('Player', function() {
         checkHistory([]);
       });
 
-      it('includes selectTrack choices', function() {
-        var track = player.getTracks()[1];
-        player.selectTrack(track);
+      it('includes selectVariantTrack choices', function() {
+        var track = player.getVariantTracks()[1];
+        player.selectVariantTrack(track);
 
         var period = manifest.periods[0];
         var variant = shaka.util.StreamUtils.findVariantForTrack(period,
@@ -1337,11 +1416,11 @@ describe('Player', function() {
         chooseStreams();
         canSwitch();
       }).catch(fail).then(function() {
-        expect(player.getTracks().length).toBe(2);
+        expect(player.getVariantTracks().length).toBe(2);
 
         onKeyStatus({'abc': 'output-restricted'});
 
-        var tracks = player.getTracks();
+        var tracks = player.getVariantTracks();
         expect(tracks.length).toBe(1);
         expect(tracks[0].id).toBe(1);
       }).then(done);
@@ -1363,11 +1442,11 @@ describe('Player', function() {
         chooseStreams();
         canSwitch();
       }).catch(fail).then(function() {
-        expect(player.getTracks().length).toBe(2);
+        expect(player.getVariantTracks().length).toBe(2);
 
         onKeyStatus({'abc': 'internal-error'});
 
-        var tracks = player.getTracks();
+        var tracks = player.getVariantTracks();
         expect(tracks.length).toBe(1);
         expect(tracks[0].id).toBe(1);
       }).then(done);
@@ -1390,7 +1469,7 @@ describe('Player', function() {
         chooseStreams();
         canSwitch();
       }).catch(fail).then(function() {
-        var tracks = player.getTracks();
+        var tracks = player.getVariantTracks();
         expect(tracks.length).toBe(1);
         expect(tracks[0].id).toBe(1);
       }).then(done);
@@ -1414,12 +1493,12 @@ describe('Player', function() {
         chooseStreams();
         canSwitch();
       }).catch(fail).then(function() {
-        expect(player.getTracks().length).toBe(3);
+        expect(player.getVariantTracks().length).toBe(3);
 
         player.configure(
             {restrictions: {minBandwidth: 100, maxBandwidth: 1000}});
 
-        var tracks = player.getTracks();
+        var tracks = player.getVariantTracks();
         expect(tracks.length).toBe(1);
         expect(tracks[0].id).toBe(2);
       }).then(done);
@@ -1443,12 +1522,12 @@ describe('Player', function() {
         chooseStreams();
         canSwitch();
       }).catch(fail).then(function() {
-        expect(player.getTracks().length).toBe(3);
+        expect(player.getVariantTracks().length).toBe(3);
 
         player.configure(
             {restrictions: {minPixels: 100, maxPixels: 800 * 800}});
 
-        var tracks = player.getTracks();
+        var tracks = player.getVariantTracks();
         expect(tracks.length).toBe(1);
         expect(tracks[0].id).toBe(2);
       }).then(done);
@@ -1472,11 +1551,11 @@ describe('Player', function() {
         chooseStreams();
         canSwitch();
       }).catch(fail).then(function() {
-        expect(player.getTracks().length).toBe(3);
+        expect(player.getVariantTracks().length).toBe(3);
 
         player.configure({restrictions: {minWidth: 100, maxWidth: 1000}});
 
-        var tracks = player.getTracks();
+        var tracks = player.getVariantTracks();
         expect(tracks.length).toBe(1);
         expect(tracks[0].id).toBe(2);
       }).then(done);
@@ -1500,11 +1579,11 @@ describe('Player', function() {
         chooseStreams();
         canSwitch();
       }).catch(fail).then(function() {
-        expect(player.getTracks().length).toBe(3);
+        expect(player.getVariantTracks().length).toBe(3);
 
         player.configure({restrictions: {minHeight: 100, maxHeight: 1000}});
 
-        var tracks = player.getTracks();
+        var tracks = player.getVariantTracks();
         expect(tracks.length).toBe(1);
         expect(tracks[0].id).toBe(2);
       }).then(done);
@@ -1529,11 +1608,11 @@ describe('Player', function() {
             chooseStreams();
             canSwitch();
           }).catch(fail).then(function() {
-            expect(player.getTracks().length).toBe(2);
+            expect(player.getVariantTracks().length).toBe(2);
 
             player.configure({restrictions: {minHeight: 100, maxHeight: 1000}});
 
-            var tracks = player.getTracks();
+            var tracks = player.getVariantTracks();
             expect(tracks.length).toBe(1);
             expect(tracks[0].id).toBe(1);
           }).then(done);
@@ -1557,7 +1636,7 @@ describe('Player', function() {
         chooseStreams();
         canSwitch();
       }).catch(fail).then(function() {
-        expect(player.getTracks().length).toBe(3);
+        expect(player.getVariantTracks().length).toBe(3);
 
         onError.and.callFake(function(e) {
           var error = e.detail;
@@ -1579,7 +1658,7 @@ describe('Player', function() {
      * @return {shakaExtern.Track}
      */
     function getActiveTrack(type) {
-      var activeTracks = player.getTracks().filter(function(track) {
+      var activeTracks = player.getVariantTracks().filter(function(track) {
         return track.type == type && track.active;
       });
 

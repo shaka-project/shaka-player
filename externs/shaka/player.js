@@ -416,14 +416,12 @@ shakaExtern.AbrConfiguration;
  * @property {string} preferredAudioLanguage
  *   The preferred language to use for audio tracks.  If not given it will use
  *   the 'main' track.
- *   Changing this during playback will cause the language selection algorithm
- *   to run again, and may change the active audio track.
+ *   Changing this during playback will not affect the current playback.
  * @property {string} preferredTextLanguage
  *   The preferred language to use for text tracks.  If a matching text track
  *   is found, and the selected audio and text tracks have different languages,
  *   the text track will be shown.
- *   Changing this during playback will cause the language selection algorithm
- *   to run again, and may change the active text track.
+ *   Changing this during playback will not affect the current playback.
  * @property {shakaExtern.Restrictions} restrictions
  *   The application restrictions to apply to the tracks.  The track must
  *   meet all the restrictions to be playable.

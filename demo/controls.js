@@ -418,9 +418,7 @@ ShakaControls.prototype.onCaptionClick_ = function() {
 
 /** @private */
 ShakaControls.prototype.onTracksChange_ = function() {
-  var hasText = this.player_.getTracks().some(function(track) {
-    return track.type == 'text';
-  });
+  var hasText = this.player_.getTextTracks().length;
   this.captionButton_.style.display = hasText ? 'inherit' : 'none';
 };
 

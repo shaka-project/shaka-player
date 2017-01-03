@@ -159,8 +159,8 @@ describe('Storage', function() {
               .addAudio(2).language('en').bandwidth(80)
           .build();
       // Get the original tracks from the manifest.
-      var getTracks = shaka.util.StreamUtils.getTracks;
-      tracks = getTracks(manifest.periods[0], {});
+      var getVariantTracks = shaka.util.StreamUtils.getVariantTracks;
+      tracks = getVariantTracks(manifest.periods[0], null, null);
       // The expected tracks we get back from the stored version of the content
       // will have 0 for bandwidth, so adjust the tracks list to match.
       tracks.forEach(function(t) { t.bandwidth = 0; });

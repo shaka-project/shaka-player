@@ -31,6 +31,10 @@ shakaDemo.setupInfo_ = function() {
       'change', shakaDemo.onTrackSelected_);
   document.getElementById('textTracks').addEventListener(
       'change', shakaDemo.onTrackSelected_);
+  document.getElementById('audioLanguages').addEventListener(
+      'change', shakaDemo.onAudioLanguageSelected_);
+  document.getElementById('textLanguages').addEventListener(
+      'change', shakaDemo.onTextLanguageSelected_);
 };
 
 
@@ -39,11 +43,55 @@ shakaDemo.setupInfo_ = function() {
  * @private
  */
 shakaDemo.onTracksChanged_ = function(event) {
-  // Update the track lists.
-  var lists = {
-    variant: document.getElementById('variantTracks'),
-    text: document.getElementById('textTracks')
-  };
+  // Update language options first and then populate new tracks with
+  // respect to the chosen languages.
+  shakaDemo.updateLanguages_();
+  shakaDemo.updateVariantTracks_();
+  shakaDemo.updateTextTracks_();
+};
+
+
+/**
+ * @private
+ */
+shakaDemo.updateVariantTracks_ = function() {
+  var trackList = document.getElementById('variantTracks');
+  var langList = document.getElementById('audioLanguages');
+  var language = langList.options[langList.selectedIndex].value;
+
+  var tracks = shakaDemo.player_.getVariantTracks();
+
+  tracks.sort(function(t1, t2) {
+    // Sort by bandwidth.
+    return t1.bandwidth - t2.bandwidth;
+  });
+
+  shakaDemo.updateTrackOptions_(trackList, tracks, language);
+};
+
+
+/**
+ * @private
+ */
+shakaDemo.updateTextTracks_ = function() {
+  var trackList = document.getElementById('textTracks');
+
+  var langList = document.getElementById('textLanguages');
+  var language = langList.options[langList.selectedIndex].value;
+
+  var tracks = shakaDemo.player_.getTextTracks();
+
+  shakaDemo.updateTrackOptions_(trackList, tracks, language);
+};
+
+
+/**
+ * @param {Element} list
+ * @param {!Array.<!shakaExtern.Track>} tracks
+ * @param {!string} language
+ * @private
+ */
+shakaDemo.updateTrackOptions_ = function(list, tracks, language) {
   var formatters = {
     variant: function(track) {
       var trackInfo = '';
@@ -59,31 +107,16 @@ shakaDemo.onTracksChanged_ = function(event) {
     }
   };
 
-  // Clear the old track lists.
-  Object.keys(lists).forEach(function(type) {
-    var list = lists[type];
-    while (list.firstChild) {
-      list.removeChild(list.firstChild);
-    }
+  // Remove old tracks
+  while (list.firstChild) {
+    list.removeChild(list.firstChild);
+  }
+
+  tracks = tracks.filter(function(track) {
+    return track.language == language;
   });
 
-  // Populate with the new tracks.
-  var tracks = shakaDemo.player_.getTracks();
-  tracks.sort(function(t1, t2) {
-    // Sort by type, then language, then by bandwidth.
-    var ret = t1.type.localeCompare(t2.type);
-    if (ret) return ret;
-
-    if (t1.language) {
-      ret = t1.language.localeCompare(t2.language);
-      if (ret) return ret;
-    }
-
-    return t1.bandwidth - t2.bandwidth;
-  });
   tracks.forEach(function(track) {
-    var list = lists[track.type];
-    if (!list) return;
     var option = document.createElement('option');
     option.textContent = formatters[track.type](track);
     option.track = track;
@@ -95,21 +128,86 @@ shakaDemo.onTracksChanged_ = function(event) {
 
 
 /**
+ * @private
+ */
+shakaDemo.updateLanguages_ = function() {
+  shakaDemo.updateTextLanguages_();
+  shakaDemo.updateAudioLanguages_();
+};
+
+
+/**
+ * Updates options for text language selection.
+ * @private
+ */
+shakaDemo.updateTextLanguages_ = function() {
+  var player = shakaDemo.player_;
+  var list = document.getElementById('textLanguages');
+  var languages = player.getTextLanguages();
+  var tracks = player.getTextTracks();
+
+  shakaDemo.updateLanguageOptions_(list, languages, tracks);
+};
+
+
+/**
+ * Updates options for audio language selection.
+ * @private
+ */
+shakaDemo.updateAudioLanguages_ = function() {
+  var player = shakaDemo.player_;
+  var list = document.getElementById('audioLanguages');
+  var languages = player.getAudioLanguages();
+  var tracks = player.getVariantTracks();
+
+  shakaDemo.updateLanguageOptions_(list, languages, tracks);
+};
+
+
+/**
+ * @param {Element} list
+ * @param {!Array.<!string>} languages
+ * @param {!Array.<shakaExtern.Track>} tracks
+ * @private
+ */
+shakaDemo.updateLanguageOptions_ =
+    function(list, languages, tracks) {
+  // Remove old options
+  while (list.firstChild) {
+    list.removeChild(list.firstChild);
+  }
+
+  // Using array.filter(f)[0] as an alternative to array.find(f) which is
+  // not supported in IE11.
+  var activeTracks = tracks.filter(function(track) {
+    return track.active == true;
+  });
+  var selectedTrack = activeTracks[0];
+
+  // Populate list with new options.
+  languages.forEach(function(lang) {
+    var option = document.createElement('option');
+    option.textContent = lang;
+    option.value = lang;
+    option.selected = lang == selectedTrack.language;
+    list.appendChild(option);
+  });
+};
+
+
+/**
  * @param {!Event} event
  * @private
  */
 shakaDemo.onAdaptation_ = function(event) {
-  var lists = {
-    variant: document.getElementById('variantTracks'),
-    text: document.getElementById('textTracks')
-  };
+  var list = document.getElementById('variantTracks');
 
-  // Find the rows for the active tracks and select them.
-  var tracks = shakaDemo.player_.getTracks();
+  // Find the row for the active track and select it.
+  var tracks = shakaDemo.player_.getVariantTracks();
+
   tracks.forEach(function(track) {
     if (!track.active) return;
 
-    var list = lists[track.type];
     for (var i = 0; i < list.options.length; ++i) {
       var option = list.options[i];
       if (option.value == track.id) {
@@ -131,12 +229,48 @@ shakaDemo.onTrackSelected_ = function(event) {
   var track = option.track;
   var player = shakaDemo.player_;
 
-  player.selectTrack(track, /* clearBuffer */ true);
+  if (list.id == 'variantTracks') {
+    // Disable abr manager before changing tracks
+    var config = {abr: {enabled: false}};
+    player.configure(config);
+
+    player.selectVariantTrack(track, /* clearBuffer */ true);
+  } else {
+    player.selectTextTrack(track);
+  }
 
   // Adaptation might have been changed by calling selectTrack().
   // Update the adaptation checkbox.
   var enableAdaptation = player.getConfiguration().abr.enabled;
   document.getElementById('enableAdaptation').checked = enableAdaptation;
+};
+
+
+/**
+ * @param {!Event} event
+ * @private
+ */
+shakaDemo.onAudioLanguageSelected_ = function(event) {
+  var list = event.target;
+  var language = list.options[list.selectedIndex].value;
+  var player = shakaDemo.player_;
+
+  player.selectAudioLanguage(language);
+  shakaDemo.updateVariantTracks_();
+};
+
+
+/**
+ * @param {!Event} event
+ * @private
+ */
+shakaDemo.onTextLanguageSelected_ = function(event) {
+  var list = event.target;
+  var language = list.options[list.selectedIndex].value;
+  var player = shakaDemo.player_;
+
+  player.selectTextLanguage(language);
+  shakaDemo.updateTextTracks_();
 };
 
 
