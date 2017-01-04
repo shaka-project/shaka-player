@@ -168,7 +168,7 @@ describe('CastUtils', function() {
           mediaSourceEngine = new shaka.media.MediaSourceEngine(
               video, mediaSource, /* TextTrack */ null);
 
-          mediaSourceEngine.init({'video': mimeType}, false);
+          mediaSourceEngine.init({'video': mimeType}, false, null);
           shaka.test.Util.fetch(initSegmentUrl).then(function(data) {
             return mediaSourceEngine.appendBuffer('video', data, null, null);
           }).then(function() {

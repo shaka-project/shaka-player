@@ -391,12 +391,29 @@ shakaExtern.AbrConfiguration;
 
 /**
  * @typedef {{
+ *   override: boolean,
+ *   region: VTTRegion
+ * }}
+ *
+ * @property {boolean} override
+ *   Override browser default VTT Cue region
+ * @property {VTTRegion} region
+ *   When override parameter is set to true then
+ *   override browser default VTT Cue region with this VTT Region.
+ * @exportDoc
+ */
+shakaExtern.TextConfiguration;
+
+
+/**
+ * @typedef {{
  *   drm: shakaExtern.DrmConfiguration,
  *   manifest: shakaExtern.ManifestConfiguration,
  *   streaming: shakaExtern.StreamingConfiguration,
  *   abr: shakaExtern.AbrConfiguration,
  *   preferredAudioLanguage: string,
  *   preferredTextLanguage: string,
+ *   text: shakaExtern.TextConfiguration,
  *   restrictions: shakaExtern.Restrictions
  * }}
  *
@@ -419,6 +436,8 @@ shakaExtern.AbrConfiguration;
  *   the text track will be shown.
  *   Changing this during playback will cause the language selection algorithm
  *   to run again, and may change the active text track.
+ * @property {shakaExtern.TextConfiguration} text
+ *   Text engine configuration and settings. Cannot be changed after load.
  * @property {shakaExtern.Restrictions} restrictions
  *   The application restrictions to apply to the tracks.  The track must
  *   meet all the restrictions to be playable.
