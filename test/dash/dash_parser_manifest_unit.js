@@ -936,6 +936,42 @@ describe('DashParser Manifest', function() {
         }).catch(fail).then(done);
   });
 
+  it('skips unrecognized EssentialProperty elements', function(done) {
+    var manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation bandwidth="1">',
+      '        <SegmentTemplate media="1.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <EssentialProperty schemeIdUri="http://foo.bar/" />',
+      '      <Representation bandwidth="1">',
+      '        <SegmentTemplate media="2.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'
+    ].join('\n');
+
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
+    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, onEventSpy)
+        .then(function(manifest) {
+          expect(manifest.periods.length).toBe(1);
+
+          // The bogus EssentialProperty did not result in a variant.
+          expect(manifest.periods[0].variants.length).toBe(1);
+          expect(manifest.periods[0].textStreams.length).toBe(0);
+
+          // The bogus EssentialProperty did not result in a trick mode track.
+          var variant = manifest.periods[0].variants[0];
+          var trickModeVideo = variant && variant.video &&
+                               variant.video.trickModeVideo;
+          expect(trickModeVideo).toBe(null);
+        }).catch(fail).then(done);
+  });
+
   it('sets contentType to text for embedded text mime types', function(done) {
     // One MIME type for embedded TTML, one for embedded WebVTT.
     // One MIME type specified on AdaptationSet, on one Representation.
