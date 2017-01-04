@@ -17,22 +17,22 @@
 
 describe('VttTextParser', function() {
   var logWarningSpy;
-  var originalCueConstructor;
+  var originalVTTCue;
 
   beforeAll(function() {
-    originalCueConstructor = shaka.media.TextEngine.CueConstructor;
+    originalVTTCue = window.VTTCue;
 
     logWarningSpy = jasmine.createSpy('shaka.log.warning');
     shaka.log.warning = logWarningSpy;
   });
 
   afterAll(function() {
-    shaka.media.TextEngine.CueConstructor = originalCueConstructor;
+    window.VTTCue = originalVTTCue;
   });
 
   beforeEach(function() {
     logWarningSpy.calls.reset();
-    shaka.media.TextEngine.CueConstructor = function(start, end, text) {
+    window.VTTCue = function(start, end, text) {
       this.startTime = start;
       this.endTime = end;
       this.text = text;

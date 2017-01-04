@@ -47,5 +47,6 @@ goog.require('shaka.polyfill.MediaKeys');
 goog.require('shaka.polyfill.MediaSource');
 goog.require('shaka.polyfill.Promise');
 goog.require('shaka.polyfill.VideoPlaybackQuality');
+goog.require('shaka.polyfill.VTTCue');
 goog.require('shaka.polyfill.installAll');
 goog.require('shaka.util.Error');
