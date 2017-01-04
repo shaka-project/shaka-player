@@ -16,19 +16,17 @@
  */
 
 describe('StreamUtils', function() {
+  var config;
+  var manifest;
 
-  describe('chooses correct variants and text streams', function() {
-    var config;
-    var manifest;
-
-    beforeAll(function() {
-
-      config = /** @type {shakaExtern.PlayerConfiguration} */({
-        preferredAudioLanguage: 'en',
-        preferredTextLanguage: 'en'
-      });
+  beforeAll(function() {
+    config = /** @type {shakaExtern.PlayerConfiguration} */({
+      preferredAudioLanguage: 'en',
+      preferredTextLanguage: 'en'
     });
+  });
 
+  describe('filterVariantsByConfig', function() {
     it("chooses variants in user's preferred language", function() {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
@@ -45,24 +43,6 @@ describe('StreamUtils', function() {
       expect(chosen.length).toBe(2);
       expect(chosen[0]).toBe(manifest.periods[0].variants[1]);
       expect(chosen[1]).toBe(manifest.periods[0].variants[2]);
-    });
-
-    it("chooses text streams in user's preferred language", function() {
-      manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addTextStream(1)
-            .language('en')
-          .addTextStream(2)
-            .language('es')
-          .addTextStream(3)
-            .language('en')
-        .build();
-
-      var chosen = shaka.util.StreamUtils.filterTextStreamsByConfig(
-          manifest.periods[0], config);
-      expect(chosen.length).toBe(2);
-      expect(chosen[0]).toBe(manifest.periods[0].textStreams[0]);
-      expect(chosen[1]).toBe(manifest.periods[0].textStreams[2]);
     });
 
     it('chooses primary variants', function() {
@@ -83,6 +63,43 @@ describe('StreamUtils', function() {
       expect(chosen[1]).toBe(manifest.periods[0].variants[3]);
     });
 
+    it('filters out resctricted variants', function() {
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addVariant(0)
+          .addVariant(1)
+          .addVariant(2)
+        .build();
+
+      manifest.periods[0].variants[0].allowedByKeySystem = false;
+      manifest.periods[0].variants[1].allowedByApplication = false;
+
+      var chosen = shaka.util.StreamUtils.filterVariantsByConfig(
+          manifest.periods[0], config);
+      expect(chosen.length).toBe(1);
+      expect(chosen[0]).toBe(manifest.periods[0].variants[2]);
+    });
+  });
+
+  describe('filterTextStreamsByConfig', function() {
+    it("chooses text streams in user's preferred language", function() {
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addTextStream(1)
+            .language('en')
+          .addTextStream(2)
+            .language('es')
+          .addTextStream(3)
+            .language('en')
+        .build();
+
+      var chosen = shaka.util.StreamUtils.filterTextStreamsByConfig(
+          manifest.periods[0], config);
+      expect(chosen.length).toBe(2);
+      expect(chosen[0]).toBe(manifest.periods[0].textStreams[0]);
+      expect(chosen[1]).toBe(manifest.periods[0].textStreams[2]);
+    });
+
     it('chooses primary text streams', function() {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
@@ -99,22 +116,35 @@ describe('StreamUtils', function() {
       expect(chosen[0]).toBe(manifest.periods[0].textStreams[1]);
       expect(chosen[1]).toBe(manifest.periods[0].textStreams[2]);
     });
+  });
 
-    it('filters out resctricted variants', function() {
+  describe('filterPeriod', function() {
+    var fakeDrmEngine;
+
+    beforeAll(function() {
+      fakeDrmEngine = new shaka.test.FakeDrmEngine();
+    });
+
+    it('filters text streams with the full MIME type', function() {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
-          .addVariant(0)
-          .addVariant(1)
-          .addVariant(2)
+          .addTextStream(1).mime('text/vtt')
+          .addTextStream(2).mime('application/mp4', 'wvtt')
+          .addTextStream(3).mime('text/bogus')
+          .addTextStream(4).mime('application/mp4', 'bogus')
         .build();
 
-      manifest.periods[0].variants[0].allowedByKeySystem = false;
-      manifest.periods[0].variants[1].allowedByApplication = false;
+      var activeStreams = {};
+      shaka.util.StreamUtils.filterPeriod(
+          fakeDrmEngine, activeStreams, manifest.periods[0]);
 
-      var chosen = shaka.util.StreamUtils.filterVariantsByConfig(
-          manifest.periods[0], config);
-      expect(chosen.length).toBe(1);
-      expect(chosen[0]).toBe(manifest.periods[0].variants[2]);
+      // Covers a regression in which we would remove streams with codecs.
+      // The last two streams should be removed because their full MIME types
+      // are bogus.
+      expect(manifest.periods[0].textStreams.length).toBe(2);
+      var textStreams = manifest.periods[0].textStreams;
+      expect(textStreams[0].id).toBe(1);
+      expect(textStreams[1].id).toBe(2);
     });
   });
 });
