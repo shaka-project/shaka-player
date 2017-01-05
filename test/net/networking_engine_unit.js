@@ -266,9 +266,10 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
       var request = createRequest('resolve://foo');
       request.method = 'POST';
 
-      resolveScheme.and.callFake(function(uri, request) {
+      resolveScheme.and.callFake(function(uri, request, requestTypePassed) {
         expect(uri).toBe(request.uris[0]);
         expect(request).toEqual(request);
+        expect(requestTypePassed).toEqual(requestType);
         return Promise.resolve({});
       });
       networkingEngine.request(requestType, request).catch(fail).then(done);

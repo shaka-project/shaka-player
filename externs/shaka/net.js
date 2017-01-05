@@ -119,7 +119,9 @@ shakaExtern.Response;
 /**
  * Defines a plugin that handles a specific scheme.
  *
- * @typedef {!function(string, shakaExtern.Request):
+ * @typedef {!function(string,
+ *                     shakaExtern.Request,
+ *                     shaka.net.NetworkingEngine.RequestType):
  *     !Promise.<shakaExtern.Response>}
  * @exportDoc
  */
