@@ -57,8 +57,8 @@
   }
 
   if (compiledMode) {
-    // This contains the entire library, compiled in debug mode.
-    loadScript('../dist/shaka-player.compiled.debug.js');
+    // This contains the entire library.
+    loadScript('../dist/shaka-player.compiled.js');
   } else {
     // In non-compiled mode, we load the closure library and the generated deps
     // file to bootstrap the system.  goog.require will load the rest.
