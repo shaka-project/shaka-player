@@ -142,3 +142,11 @@ shakaExtern.AbrManager.prototype.getBandwidthEstimate = function() {};
  */
 shakaExtern.AbrManager.prototype.setDefaultEstimate = function(estimate) {};
 
+
+/**
+ * Sets the restrictions that AbrManager will use when choosing streams.
+ *
+ * @param {shakaExtern.Restrictions} restrictions
+ * @exportDoc
+ */
+shakaExtern.AbrManager.prototype.setRestrictions = function(restrictions) {};
