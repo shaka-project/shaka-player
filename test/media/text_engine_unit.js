@@ -315,7 +315,7 @@ describe('TextEngine', function() {
     });
   });
 
-  describe('overrideCueRegion', function() {
+  describe('Cue Overrides', function() {
     beforeEach(function() {
       mockParser.and.callFake(function() {
         return [createFakeCuePos(0, 1, 0, 0),
@@ -325,11 +325,16 @@ describe('TextEngine', function() {
     });
 
     it('overrides cue box x- and y-position', function(done) {
-      var overrideCueRegion = new shaka.polyfill.VTTCue.VTTRegion();
-      overrideCueRegion.viewportAnchorX = 30;
-      overrideCueRegion.viewportAnchorY = 80;
+      var cueOverrides = {
+        cueRegion: null,
+        cueStyling: null
+      };
+      var cueRegion = new shaka.polyfill.VTTCue.VTTRegion();
+      cueRegion.viewportAnchorX = 30;
+      cueRegion.viewportAnchorY = 80;
+      cueOverrides.cueRegion = cueRegion;
 
-      textEngine = new TextEngine(mockTrack, false, overrideCueRegion);
+      textEngine = new TextEngine(mockTrack, false, cueOverrides);
       textEngine.initParser(dummyMimeType);
       textEngine.appendBuffer(dummyData, 0, 3).then(function() {
         expect(mockTrack.addCue)
@@ -340,7 +345,30 @@ describe('TextEngine', function() {
           .toHaveBeenCalledWith(createFakeCuePos(2, 3, 80, 100));
       }).catch(fail).then(done);
     });
+    it('overrides cue styling', function(done) {
+      var cueOverrides = {
+        cueRegion: null,
+        cueStyling: null
+      };
+      var cueStyling = {
+        position: 10,
+        line: 80,
+        align: null
+      };
+      cueOverrides.cueStyling = cueStyling;
+      textEngine = new TextEngine(mockTrack, false, cueOverrides);
+      textEngine.initParser(dummyMimeType);
+      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+        expect(mockTrack.addCue)
+          .toHaveBeenCalledWith(createFakeCuePos(0, 1, 10, 80));
+        expect(mockTrack.addCue)
+          .toHaveBeenCalledWith(createFakeCuePos(1, 2, 10, 80));
+        expect(mockTrack.addCue)
+          .toHaveBeenCalledWith(createFakeCuePos(2, 3, 10, 80));
+      }).catch(fail).then(done);
+    });
   });
+
 
   function createMockTrack() {
     var track = {

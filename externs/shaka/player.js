@@ -497,15 +497,38 @@ shakaExtern.AbrConfiguration;
 
 /**
  * @typedef {{
+ *   line: ?number,
+ *   position: ?number,
+ *   align: ?string
+ * }}
+ *
+ * @property {?number} line
+ *   Positioning of the cue box as percentage of the video
+ *   viewport height (y)
+ * @property {?number} position
+ *   Positioning of the cue box as percentage of the video
+ *   viewport width (x)
+ * @property {?string} align
+ *   Text alignment (left|center|right)
+ */
+shakaExtern.CueStyle;
+
+
+/**
+ * @typedef {{
  *   override: boolean,
- *   region: VTTRegion
+ *   region: ?VTTRegion,
+ *   cueStyling: ?shakaExtern.CueStyle
  * }}
  *
  * @property {boolean} override
  *   Override browser default VTT Cue region
- * @property {VTTRegion} region
+ * @property {?VTTRegion} region
  *   When override parameter is set to true then
  *   override browser default VTT Cue region with this VTT Region.
+ * @property {?shakaExtern.CueStyle} cueStyling
+ *   When override parameter is set to true then
+ *   apply this style on all subtitle cues.
  * @exportDoc
  */
 shakaExtern.TextConfiguration;
