@@ -45,11 +45,11 @@ shakaDemo.controls_ = null;
 
 
 /**
- * The registered ID of the v2 Chromecast receiver demo.
+ * The registered ID of the v2.1 Chromecast receiver demo.
  * @const {string}
  * @private
  */
-shakaDemo.CC_APP_ID_ = '4E839F3A';
+shakaDemo.CC_APP_ID_ = '658CCD53';
 
 
 /**
