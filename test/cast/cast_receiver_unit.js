@@ -659,20 +659,25 @@ describe('CastReceiver', function() {
 
   function createMockPlayer() {
     var player = {
+      configure: jasmine.createSpy('configure'),
+      destroy: jasmine.createSpy('destroy'),
+      drmInfo: jasmine.createSpy('drmInfo'),
       getConfiguration: jasmine.createSpy('getConfiguration'),
       getManifestUri: jasmine.createSpy('getManifestUri'),
       getPlaybackRate: jasmine.createSpy('getPlaybackRate'),
+      getPlayheadTimeAsDate: jasmine.createSpy('getPlayheadTimeAsDate'),
       getTracks: jasmine.createSpy('getTracks'),
       getStats: jasmine.createSpy('getStats'),
       isBuffering: jasmine.createSpy('isBuffering'),
+      isInProgress: jasmine.createSpy('isInProgress'),
       isLive: jasmine.createSpy('isLive'),
       isTextTrackVisible: jasmine.createSpy('isTextTrackVisible'),
-      seekRange: jasmine.createSpy('seekRange'),
-      configure: jasmine.createSpy('configure'),
-      setTextTrackVisibility: jasmine.createSpy('setTextTrackVisibility'),
-      setMaxHardwareResolution: jasmine.createSpy('setMaxHardwareResolution'),
+      keySystem: jasmine.createSpy('keySystem'),
       load: jasmine.createSpy('load'),
-      destroy: jasmine.createSpy('destroy'),
+      seekRange: jasmine.createSpy('seekRange'),
+      setMaxHardwareResolution: jasmine.createSpy('setMaxHardwareResolution'),
+      setTextTrackVisibility: jasmine.createSpy('setTextTrackVisibility'),
+
       addEventListener: function(eventName, listener) {
         player.listeners[eventName] = listener;
       },
