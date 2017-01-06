@@ -22,6 +22,7 @@ This uses two environment variables to help with debugging the scripts:
   RAISE_INTERRUPT - Will raise keyboard interrupts rather than swallowing them.
 """
 
+import errno
 import os
 import platform
 import re
@@ -186,7 +187,15 @@ def update_node_modules():
   # Check the version of npm.
   cmd_line = [cmd, '-v']
   print_cmd_line(cmd_line)
-  version = subprocess.check_output(cmd_line)
+  try:
+    version = subprocess.check_output(cmd_line)
+  except OSError as e:
+    if e.errno != errno.ENOENT:
+      raise
+    print >> sys.stderr, 'npm is not found. Please install npm.'
+    print >> sys.stderr, '  See https://nodejs.org/en/download/'
+    return False
+
   if _parse_version(version) < _parse_version('1.3.12'):
     print >> sys.stderr, 'npm version is too old, please upgrade.  e.g.:'
     print >> sys.stderr, '  npm install -g npm'
