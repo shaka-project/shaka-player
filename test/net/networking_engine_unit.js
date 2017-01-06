@@ -328,8 +328,13 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
     });
 
     it('waits for asynchronous filters', function(done) {
+      var responseFilter = jasmine.createSpy('response filter');
+      networkingEngine.registerResponseFilter(responseFilter);
+
       var p = new shaka.util.PublicPromise();
+      var p2 = new shaka.util.PublicPromise();
       filter.and.returnValue(p);
+      responseFilter.and.returnValue(p2);
       var request = createRequest('resolve://foo');
       var r = networkingEngine.request(requestType, request);
       Util.capturePromiseStatus(r);
@@ -337,12 +342,19 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
       Util.delay(0.1).then(function() {
         expect(filter).toHaveBeenCalled();
         expect(resolveScheme).not.toHaveBeenCalled();
+        expect(responseFilter).not.toHaveBeenCalled();
         expect(r.status).toBe('pending');
         p.resolve();
 
         return Util.delay(0.1);
       }).then(function() {
         expect(resolveScheme).toHaveBeenCalled();
+        expect(responseFilter).toHaveBeenCalled();
+        expect(r.status).toBe('pending');
+        p2.resolve();
+
+        return Util.delay(0.1);
+      }).then(function() {
         expect(r.status).toBe('resolved');
         done();
       }).catch(fail);
@@ -544,6 +556,68 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
             expect(response.headers['DATE']).toBe('CAT');
             done();
           });
+    });
+
+    it('applies response filters sequentially', function(done) {
+      var secondFilter = jasmine.createSpy('second response filter');
+      networkingEngine.registerResponseFilter(secondFilter);
+
+      var order = 0;
+      filter.and.callFake(function() {
+        expect(order).toBe(0);
+        order += 1;
+      });
+      secondFilter.and.callFake(function() {
+        expect(order).toBe(1);
+        order += 1;
+      });
+
+      networkingEngine.request(requestType, createRequest('resolve://foo'))
+          .catch(fail)
+          .then(done);
+    });
+
+    it('turns errors into shaka errors', function(done) {
+      var fakeError = 'fake error';
+      filter.and.callFake(function() {
+        throw fakeError;
+      });
+      networkingEngine.request(requestType, createRequest('resolve://foo'))
+          .then(fail)
+          .catch(function(e) {
+            expect(e.code).toBe(shaka.util.Error.Code.RESPONSE_FILTER_ERROR);
+            expect(e.data).toEqual([fakeError]);
+            done();
+          });
+    });
+
+    it('can modify responses asynchronously', function(done) {
+      var p = new shaka.util.PublicPromise();
+      filter.and.callFake(function(type, response) {
+        return p.then(function() {
+          expect(response.headers).toBeTruthy();
+          response.headers['DATE'] = 'CAT';
+          response.data = new ArrayBuffer(5);
+        });
+      });
+
+      var request = createRequest('resolve://foo');
+      var r = networkingEngine.request(requestType, request)
+          .catch(fail)
+          .then(function(response) {
+            expect(response).toBeTruthy();
+            expect(response.headers['DATE']).toBe('CAT');
+            expect(response.data.byteLength).toBe(5);
+            done();
+          });
+      Util.capturePromiseStatus(r);
+
+      Util.delay(0.1).then(function() {
+        expect(filter).toHaveBeenCalled();
+        expect(r.status).toBe('pending');
+
+        p.resolve();
+      });
     });
 
     it('if throws will stop requests', function(done) {
