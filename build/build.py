@@ -282,8 +282,7 @@ class Build(object):
           return True
 
     opts = ['--create_source_map', result_map, '--js_output_file', result_debug,
-            '--source_map_location_mapping', source_base + '|..',
-            '--dependency_mode=LOOSE', '--js=shaka-player.uncompiled.js']
+            '--source_map_location_mapping', source_base + '|..']
     if not self.build_raw(opts):
       return False
 
