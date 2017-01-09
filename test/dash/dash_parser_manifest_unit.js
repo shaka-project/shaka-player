@@ -960,15 +960,8 @@ describe('DashParser Manifest', function() {
         .then(function(manifest) {
           expect(manifest.periods.length).toBe(1);
 
-          // The bogus EssentialProperty did not result in a variant.
-          expect(manifest.periods[0].variants.length).toBe(1);
-          expect(manifest.periods[0].textStreams.length).toBe(0);
-
-          // The bogus EssentialProperty did not result in a trick mode track.
-          var variant = manifest.periods[0].variants[0];
-          var trickModeVideo = variant && variant.video &&
-                               variant.video.trickModeVideo;
-          expect(trickModeVideo).toBe(null);
+          // The bogus EssentialProperty did not result in a StreamSet.
+          expect(manifest.periods[0].streamSets.length).toBe(1);
         }).catch(fail).then(done);
   });
 
