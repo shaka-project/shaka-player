@@ -229,6 +229,24 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
             done();
           });
     });
+
+    it('won\'t retry for CRITICAL error', function(done) {
+      var request = createRequest('reject://foo', {
+        maxAttempts: 5,
+        baseDelay: 0,
+        backoffFactor: 0,
+        fuzzFactor: 0,
+        timeout: 0
+      });
+
+      error.severity = shaka.util.Error.Severity.CRITICAL;
+      networkingEngine.request(requestType, request)
+          .then(fail)
+          .catch(function() {
+            expect(rejectScheme.calls.count()).toBe(1);
+            done();
+          });
+    });
   });
 
   describe('request', function() {
@@ -391,6 +409,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
       networkingEngine.request(requestType, createRequest('resolve://foo'))
           .then(fail)
           .catch(function(e) {
+            expect(e.severity).toBe(shaka.util.Error.Severity.CRITICAL);
             expect(e.code).toBe(shaka.util.Error.Code.REQUEST_FILTER_ERROR);
             expect(e.data).toEqual([fakeError]);
             done();
@@ -664,9 +683,11 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         fuzzFactor: 0,
         timeout: 0
       });
+      error.severity = shaka.util.Error.Severity.RECOVERABLE;
       filter.and.callFake(function() {
         if (filter.calls.count() == 1) throw error;
       });
+
       networkingEngine.request(requestType, request)
           .catch(fail)
           .then(function() {
@@ -696,11 +717,15 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
       expect(r1.status).toBe('pending');
       expect(r2.status).toBe('pending');
 
-      var d = networkingEngine.destroy();
-      Util.capturePromiseStatus(d);
-      expect(d.status).toBe('pending');
-
+      var d;
       Util.delay(0.1).then(function() {
+        d = networkingEngine.destroy();
+        Util.capturePromiseStatus(d);
+        expect(d.status).toBe('pending');
+        expect(r1.status).toBe('pending');
+        expect(r2.status).toBe('pending');
+        return Util.delay(0.1);
+      }).then(function() {
         expect(d.status).toBe('pending');
         p.resolve({});
         return d;
@@ -759,11 +784,14 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
       expect(r1.status).toBe('pending');
       expect(r2.status).toBe('pending');
 
-      var d = networkingEngine.destroy();
-      Util.capturePromiseStatus(d);
-      expect(d.status).toBe('pending');
-
+      var d;
       Util.delay(0.1).then(function() {
+        d = networkingEngine.destroy();
+        Util.capturePromiseStatus(d);
+        expect(d.status).toBe('pending');
+
+        return Util.delay(0.1);
+      }).then(function() {
         expect(d.status).toBe('pending');
         p.reject(error);
         return d;
