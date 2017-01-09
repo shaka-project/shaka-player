@@ -1,4 +1,7 @@
 # The HLS manifest parser plugin.
 
 +../../lib/hls/hls_classes.js
++../../lib/hls/hls_parser.js
++../../lib/hls/hls_utils.js
 +../../lib/hls/manifest_text_parser.js
+

@@ -445,7 +445,7 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
     mimeType: defaultMimeType,
     codecs: defaultCodecs,
     frameRate: undefined,
-    bandwidth: 100,
+    bandwidth: undefined,
     width: undefined,
     height: undefined,
     kind: undefined,

@@ -17,6 +17,12 @@
 
 
 describe('ManifestTextParser', function() {
+  var parser;
+
+  beforeEach(function() {
+    parser = new shaka.hls.ManifestTextParser();
+  });
+
   describe('parsePlaylist', function() {
     it('rejects invalid playlists', function() {
       verifyError('invalid playlist',
@@ -35,14 +41,11 @@ describe('ManifestTextParser', function() {
           {
             type: shaka.hls.PlaylistType.MEDIA,
             tags: [
-              new shaka.hls.Tag('EXT-X-TARGETDURATION', [], '6')
-            ],
-            segmentsData: ['#EXTINF:6.00600,', 'main.mp4']
+              new shaka.hls.Tag(/* id */ 0, 'EXT-X-TARGETDURATION', [], '6')
+            ]
           },
           '#EXTM3U\n' +
-          '#EXT-X-TARGETDURATION:6\n' +
-          '#EXTINF:6.00600,\n' +
-          'main.mp4');
+          '#EXT-X-TARGETDURATION:6\n');
     });
 
     it('parses a Master Playlist', function() {
@@ -50,8 +53,8 @@ describe('ManifestTextParser', function() {
           {
             type: shaka.hls.PlaylistType.MEDIA,
             tags: [
-              new shaka.hls.Tag('EXT-X-TARGETDURATION', [], '6'),
-              new shaka.hls.Tag('EXT-X-STREAM-INF',
+              new shaka.hls.Tag(/* id */ 0, 'EXT-X-TARGETDURATION', [], '6'),
+              new shaka.hls.Tag(/* id */ 1, 'EXT-X-STREAM-INF',
                   [
                     new shaka.hls.Attribute('BANDWIDTH', '2165224'),
                     new shaka.hls.Attribute('URI', 'prog_index.m3u8')
@@ -69,15 +72,12 @@ describe('ManifestTextParser', function() {
           {
             type: shaka.hls.PlaylistType.MEDIA,
             tags: [
-              new shaka.hls.Tag('EXT-X-TARGETDURATION', [], '6')
-            ],
-            segmentsData: ['#EXTINF:6.00600,', 'main.mp4']
+              new shaka.hls.Tag(/* id */ 0, 'EXT-X-TARGETDURATION', [], '6')
+            ]
           },
           '#EXTM3U\n' +
           '#Comment\n' +
-          '#EXT-X-TARGETDURATION:6\n' +
-          '#EXTINF:6.00600,\n' +
-          'main.mp4');
+          '#EXT-X-TARGETDURATION:6');
     });
 
     /**
@@ -90,7 +90,7 @@ describe('ManifestTextParser', function() {
           shaka.util.Error.Category.MANIFEST,
           code);
       try {
-        shaka.hls.ManifestTextParser.parsePlaylist(data);
+        parser.parsePlaylist(data, /* uri */ '');
         fail('Invalid HLS playlist should not be supported!');
       } catch (e) {
         shaka.test.Util.expectToEqualError(e, error);
@@ -104,7 +104,7 @@ describe('ManifestTextParser', function() {
           {
             type: shaka.hls.PlaylistType.MASTER,
             tags: [
-              new shaka.hls.Tag('EXT-X-INDEPENDENT-SEGMENTS', [])
+              new shaka.hls.Tag(/* id */ 0, 'EXT-X-INDEPENDENT-SEGMENTS', [])
             ]
           },
           '#EXTM3U\n' +
@@ -114,7 +114,7 @@ describe('ManifestTextParser', function() {
           {
             type: shaka.hls.PlaylistType.MEDIA,
             tags: [
-              new shaka.hls.Tag('EXT-X-PLAYLIST-TYPE', [], 'VOD')
+              new shaka.hls.Tag(/* id */ 1, 'EXT-X-PLAYLIST-TYPE', [], 'VOD')
             ]
           },
           '#EXTM3U\n' +
@@ -124,7 +124,7 @@ describe('ManifestTextParser', function() {
           {
             type: shaka.hls.PlaylistType.MEDIA,
             tags: [
-              new shaka.hls.Tag('EXT-X-MEDIA-SEQUENCE', [], '1')
+              new shaka.hls.Tag(/* id */ 2, 'EXT-X-MEDIA-SEQUENCE', [], '1')
             ]
           },
           '#EXTM3U\n' +
@@ -136,7 +136,7 @@ describe('ManifestTextParser', function() {
           {
             type: shaka.hls.PlaylistType.MASTER,
             tags: [
-              new shaka.hls.Tag('EXT-X-MEDIA',
+              new shaka.hls.Tag(/* id */ 0, 'EXT-X-MEDIA',
                   [new shaka.hls.Attribute('TYPE', 'CLOSED-CAPTIONS')])
             ]
           },
@@ -147,7 +147,7 @@ describe('ManifestTextParser', function() {
           {
             type: shaka.hls.PlaylistType.MASTER,
             tags: [
-              new shaka.hls.Tag('EXT-X-MEDIA',
+              new shaka.hls.Tag(/* id */ 1, 'EXT-X-MEDIA',
                   [
                     new shaka.hls.Attribute('URI', 'main.mp4'),
                     new shaka.hls.Attribute('BYTERANGE', '720@0')
@@ -163,7 +163,7 @@ describe('ManifestTextParser', function() {
           {
             type: shaka.hls.PlaylistType.MASTER,
             tags: [
-              new shaka.hls.Tag('EXT-X-MEDIA',
+              new shaka.hls.Tag(/* id */ 0, 'EXT-X-MEDIA',
                   [
                     new shaka.hls.Attribute('CODECS', 'avc1.64002a,mp4a.40.2')
                   ])
@@ -176,7 +176,7 @@ describe('ManifestTextParser', function() {
           {
             type: shaka.hls.PlaylistType.MASTER,
             tags: [
-              new shaka.hls.Tag('EXT-X-MEDIA',
+              new shaka.hls.Tag(/* id */ 1, 'EXT-X-MEDIA',
                   [
                     new shaka.hls.Attribute('CODECS',
                                             'avc1.64002a,mp4a.40.2,avc2.64000')
@@ -190,7 +190,7 @@ describe('ManifestTextParser', function() {
           {
             type: shaka.hls.PlaylistType.MASTER,
             tags: [
-              new shaka.hls.Tag('EXT-X-MEDIA',
+              new shaka.hls.Tag(/* id */ 2, 'EXT-X-MEDIA',
                   [
                     new shaka.hls.Attribute('CODECS',
                                             'avc1.64002a,mp4a.40.2'),
@@ -208,11 +208,33 @@ describe('ManifestTextParser', function() {
           shaka.util.Error.Code.INVALID_HLS_TAG);
       var text = shaka.util.StringUtils.toUTF8('#EXTM3U\ninvalid tag');
       try {
-        shaka.hls.ManifestTextParser.parsePlaylist(text);
+        parser.parsePlaylist(text, /* uri */ '');
         fail('Invalid HLS tags should not be supported!');
       } catch (e) {
         shaka.test.Util.expectToEqualError(e, error);
       }
+    });
+  });
+
+  describe('parseSegments', function() {
+    it('parses segments', function() {
+      verifyPlaylist(
+          {
+            type: shaka.hls.PlaylistType.MEDIA,
+            tags: [
+              new shaka.hls.Tag(/* id */ 0, 'EXT-X-MEDIA-SEQUENCE', [], '1')
+            ],
+            segments: [
+              new shaka.hls.Segment('https://test/test.mp4',
+                  [
+                    new shaka.hls.Tag(/* id */ 2, 'EXTINF', [], '5.99467')
+                  ])
+            ]
+          },
+          '#EXTM3U\n' +
+          '#EXT-X-MEDIA-SEQUENCE:1\n' +
+          '#EXTINF:5.99467\n' +
+          'https://test/test.mp4\n');
     });
   });
 
@@ -223,13 +245,13 @@ describe('ManifestTextParser', function() {
      */
   function verifyPlaylist(expected, string) {
     var data = shaka.util.StringUtils.toUTF8(string);
-    var actual = shaka.hls.ManifestTextParser.parsePlaylist(data);
+    var actual = parser.parsePlaylist(data, /* uri */ '');
 
     expect(actual).toBeTruthy();
     expect(actual.type).toEqual(expected.type);
     expect(actual.tags).toEqual(expected.tags);
 
-    if (expected.segmentsData)
-      expect(actual.segmentsData).toEqual(expected.segmentsData);
+    if (expected.segments)
+      expect(actual.segments).toEqual(expected.segments);
   }
 });
