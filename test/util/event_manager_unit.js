@@ -113,6 +113,19 @@ describe('EventManager', function() {
     expect(listener).not.toHaveBeenCalled();
   });
 
+  it('ignores other targets when removing listeners', function() {
+    var listener1 = jasmine.createSpy('listener1');
+    var listener2 = jasmine.createSpy('listener2');
+
+    eventManager.listen(target1, 'eventtype1', listener1);
+    eventManager.listen(target2, 'eventtype1', listener2);
+    eventManager.unlisten(target2, 'eventtype1');
+
+    target1.dispatchEvent(event1);
+
+    expect(listener1).toHaveBeenCalled();
+  });
+
   it('stops listening to multiple events', function() {
     var listener1 = jasmine.createSpy('listener1');
     var listener2 = jasmine.createSpy('listener2');

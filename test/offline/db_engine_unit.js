@@ -104,6 +104,27 @@ describe('DBEngine', function() {
     }).catch(fail).then(done);
   });
 
+  it('supports iterating over each element', function(done) {
+    var testData = [
+      {key: 1, i: 4},
+      {key: 2, i: 1},
+      {key: 3, i: 2},
+      {key: 4, i: 9}
+    ];
+    var spy = jasmine.createSpy('forEach');
+    Promise.all(testData.map(db.insert.bind(db, 'test')))
+        .then(function() {
+          return db.forEach('test', spy);
+        })
+        .then(function() {
+          expect(spy).toHaveBeenCalledTimes(testData.length);
+          for (var i = 0; i < testData.length; i++)
+            expect(spy).toHaveBeenCalledWith(testData[i]);
+        })
+        .catch(fail)
+        .then(done);
+  });
+
   it('aborts transactions on destroy()', function(done) {
     var expectedError = new shaka.util.Error(
         shaka.util.Error.Category.STORAGE,
