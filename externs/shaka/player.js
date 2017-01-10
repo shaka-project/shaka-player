@@ -219,6 +219,72 @@ shakaExtern.SupportType;
 
 
 /**
+ * @typedef {{
+ *   schemeIdUri: string,
+ *   value: string,
+ *   startTime: number,
+ *   endTime: number,
+ *   id: string,
+ *   eventElement: Element
+ * }}
+ *
+ * @description
+ * Contains information about a region of the timeline that will cause an event
+ * to be raised when the playhead enters or exits it.  In DASH this is the
+ * EventStream element.
+ *
+ * @property {string} schemeIdUri
+ *   Identifies the message scheme.
+ * @property {string} value
+ *   Specifies the value for the region.
+ * @property {number} startTime
+ *   The presentation time (in seconds) that the region should start.
+ * @property {number} endTime
+ *   The presentation time (in seconds) that the region should end.
+ * @property {string} id
+ *   Specifies an identifier for this instance of the region.
+ * @property {Element} eventElement
+ *   The XML element that defines the Event.
+ */
+shakaExtern.TimelineRegionInfo;
+
+
+/**
+ * @typedef {{
+ *   schemeIdUri: string,
+ *   value: string,
+ *   timescale: number,
+ *   presentationTimeDelta: number,
+ *   eventDuration: number,
+ *   id: number,
+ *   messageData: Uint8Array
+ * }}
+ *
+ * @description
+ * Contains information about an EMSG MP4 box.
+ *
+ * @property {string} schemeIdUri
+ *    Identifies the message scheme.
+ * @property {string} value
+ *    Specifies the value for the event.
+ * @property {number} timescale
+ *    Provides the timescale, in ticks per second,
+ *    for the time and duration fields within this box.
+ * @property {number} presentationTimeDelta
+ *    Provides the Media Presentation time delta of the media presentation
+ *    time of the event and the earliest presentation time in this segment.
+ * @property {number} eventDuration
+ *    Provides the duration of event in media presentation time.
+ * @property {number} id
+ *    A field identifying this instance of the message.
+ * @property {Uint8Array} messageData
+ *    Body of the message.
+ * @exportDoc
+ */
+shakaExtern.EmsgInfo;
+
+
+/**
  * @typedef {function(!Element):Array.<shakaExtern.DrmInfo>}
  * @see shakaExtern.DashManifestConfiguration
  * @exportDoc

@@ -222,7 +222,8 @@ describe('StreamingEngine', function() {
         2 /* rebufferingGoal */,
         null /* startTime */,
         onBuffering,
-        onSeek);
+        onSeek,
+        function() {});
   }
 
   function setupManifest(
