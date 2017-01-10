@@ -38,6 +38,10 @@ describe('TtmlTextParser', function() {
     verifyHelper([], '<tt></tt>');
   });
 
+  it('supports div with no cues but whitespace', function() {
+    verifyHelper([], '<tt><body><div>  \r\n </div></body></tt>');
+  });
+
   it('rejects invalid ttml', function() {
     errorHelper(shaka.util.Error.Code.INVALID_TTML, '<test></test>');
     errorHelper(shaka.util.Error.Code.INVALID_TTML, '');
