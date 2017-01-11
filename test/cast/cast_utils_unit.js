@@ -142,13 +142,15 @@ describe('CastUtils', function() {
       var eventManager;
       var mediaSourceEngine;
 
-      beforeAll(function(done) {
-        // The TimeRanges constructor cannot be used directly, so we load a clip
-        // to get ranges to use.
+      beforeAll(function() {
         video = /** @type {HTMLMediaElement} */(
             document.createElement('video'));
         document.body.appendChild(video);
+      });
 
+      beforeEach(function(done) {
+        // The TimeRanges constructor cannot be used directly, so we load a clip
+        // to get ranges to use.
         var mediaSource = new MediaSource();
         var mimeType = 'video/mp4; codecs="avc1.42c01e"';
         var initSegmentUrl = '/base/test/test/assets/sintel-video-init.mp4';
@@ -165,6 +167,7 @@ describe('CastUtils', function() {
         }
 
         function onSourceOpen() {
+          eventManager.unlisten(mediaSource, 'sourceopen');
           mediaSourceEngine = new shaka.media.MediaSourceEngine(
               video, mediaSource, /* TextTrack */ null);
 
@@ -179,9 +182,20 @@ describe('CastUtils', function() {
         }
       });
 
+      afterEach(function(done) {
+        eventManager.destroy().then(function() {
+          if (mediaSourceEngine) {
+            return mediaSourceEngine.destroy();
+          }
+        }).then(function() {
+          video.removeAttribute('src');
+          video.load();
+          done();
+        });
+      });
+
       afterAll(function() {
-        eventManager.destroy();
-        if (mediaSourceEngine) mediaSourceEngine.destroy();
+        document.body.removeChild(video);
       });
 
       it('deserialize into equivalent objects', function() {
