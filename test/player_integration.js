@@ -51,7 +51,7 @@ describe('Player', function() {
     } else {
       // Load the compiled library as a module.
       // All tests in this suite will use the compiled library.
-      require(['../dist/shaka-player.compiled.js'], function(shakaModule) {
+      require(['/base/dist/shaka-player.compiled.js'], function(shakaModule) {
         shaka = shakaModule;
         shaka.net.NetworkingEngine.registerScheme(
             'test', window.shaka.test.TestScheme);
