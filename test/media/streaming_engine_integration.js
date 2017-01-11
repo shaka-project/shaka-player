@@ -280,7 +280,8 @@ describe('StreamingEngine', function() {
 
   afterEach(function(done) {
     streamingEngine.destroy().then(function() {
-      video.src = '';
+      video.removeAttribute('src');
+      video.load();
       return Promise.all([
         mediaSourceEngine.destroy(),
         playhead.destroy(),
