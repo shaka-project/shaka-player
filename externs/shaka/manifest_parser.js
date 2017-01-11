@@ -39,6 +39,7 @@ shakaExtern.ManifestParser = function() {};
  * @typedef {{
  *   networkingEngine: !shaka.net.NetworkingEngine,
  *   filterPeriod: function(shakaExtern.Period),
+ *   onTimelineRegionAdded: function(shakaExtern.TimelineRegionInfo),
  *   onEvent: function(!Event),
  *   onError: function(!shaka.util.Error)
  * }}
@@ -52,6 +53,8 @@ shakaExtern.ManifestParser = function() {};
  *   The networking engine to use for network requests.
  * @property {function(shakaExtern.Period)} filterPeriod
  *   Should be called on all new Periods so that they can be filtered.
+ * @property {function(shakaExtern.TimelineRegionInfo)} onTimelineRegionAdded
+ *   Should be called when a new timeline region is added.
  * @property {function(!Event)} onEvent
  *   Should be called to raise events.
  * @property {function(!shaka.util.Error)} onError

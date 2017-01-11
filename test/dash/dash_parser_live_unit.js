@@ -46,6 +46,7 @@ describe('DashParser Live', function() {
     playerInterface = {
       networkingEngine: fakeNetEngine,
       filterPeriod: function() {},
+      onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail
     };
@@ -911,6 +912,134 @@ describe('DashParser Live', function() {
 
     testCommonBehaviors(
         basicLines, basicRefs, updateLines, updateRefs, partialUpdateLines);
+  });
+
+  describe('EventStream', function() {
+    var onTimelineRegionAddedSpy;
+    var originalManifest;
+
+    beforeAll(function() {
+      originalManifest = [
+        '<MPD type="dynamic" minimumUpdatePeriod="PT' + updateTime + 'S"',
+        '    availabilityStartTime="1970-01-01T00:00:00Z">',
+        '  <Period id="1" duration="PT60S" start="PT10S">',
+        '    <EventStream schemeIdUri="http://example.com" value="foobar"',
+        '        timescale="100">',
+        '      <Event duration="5000" />',
+        '      <Event id="abc" presentationTime="300" duration="1000" />',
+        '    </EventStream>',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation bandwidth="1">',
+        '        <SegmentBase indexRange="100-200" />',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>'
+      ].join('\n');
+    });
+
+    beforeEach(function() {
+      onTimelineRegionAddedSpy = jasmine.createSpy('onTimelineRegionAdded');
+      playerInterface.onTimelineRegionAdded = onTimelineRegionAddedSpy;
+    });
+
+    it('will parse EventStream nodes', function(done) {
+      fakeNetEngine.setResponseMapAsText({'dummy://foo': originalManifest});
+      parser.start('dummy://foo', playerInterface)
+          .then(function(manifest) {
+            expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(2);
+
+            expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith({
+              schemeIdUri: 'http://example.com',
+              value: 'foobar',
+              startTime: 10,
+              endTime: 60,
+              id: '',
+              eventElement: jasmine.any(Element)
+            });
+            expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith({
+              schemeIdUri: 'http://example.com',
+              value: 'foobar',
+              startTime: 13,
+              endTime: 23,
+              id: 'abc',
+              eventElement: jasmine.any(Element)
+            });
+          })
+          .catch(fail)
+          .then(done);
+      shaka.polyfill.Promise.flush();
+    });
+
+    it('will add timeline regions on manifest update', function(done) {
+      var newManifest = [
+        '<MPD type="dynamic" minimumUpdatePeriod="PT' + updateTime + 'S"',
+        '    availabilityStartTime="1970-01-01T00:00:00Z">',
+        '  <Period id="1" duration="PT30S">',
+        '    <EventStream schemeIdUri="http://example.com" timescale="100">',
+        '      <Event id="100" />',
+        '    </EventStream>',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation bandwidth="1">',
+        '        <SegmentBase indexRange="100-200" />',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>'
+      ].join('\n');
+
+      fakeNetEngine.setResponseMapAsText({'dummy://foo': originalManifest});
+      parser.start('dummy://foo', playerInterface)
+          .then(function(manifest) {
+            expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(2);
+            onTimelineRegionAddedSpy.calls.reset();
+
+            fakeNetEngine.setResponseMapAsText({'dummy://foo': newManifest});
+            delayForUpdatePeriod();
+
+            expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(1);
+          })
+          .catch(fail)
+          .then(done);
+      shaka.polyfill.Promise.flush();
+    });
+
+    it('will not let an event exceed the Period duration', function(done) {
+      var newManifest = [
+        '<MPD>',
+        '  <Period id="1" duration="PT30S">',
+        '    <EventStream schemeIdUri="http://example.com" timescale="1">',
+        '      <Event presentationTime="10" duration="15"/>',
+        '      <Event presentationTime="25" duration="50"/>',
+        '      <Event presentationTime="50" duration="10"/>',
+        '    </EventStream>',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation bandwidth="1">',
+        '        <SegmentBase indexRange="100-200" />',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>'
+      ].join('\n');
+
+      fakeNetEngine.setResponseMapAsText({'dummy://foo': newManifest});
+      parser.start('dummy://foo', playerInterface)
+          .then(function(manifest) {
+            expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(3);
+            expect(onTimelineRegionAddedSpy)
+                .toHaveBeenCalledWith(
+                    jasmine.objectContaining({startTime: 10, endTime: 25}));
+            expect(onTimelineRegionAddedSpy)
+                .toHaveBeenCalledWith(
+                    jasmine.objectContaining({startTime: 25, endTime: 30}));
+            expect(onTimelineRegionAddedSpy)
+                .toHaveBeenCalledWith(
+                    jasmine.objectContaining({startTime: 30, endTime: 30}));
+          })
+          .catch(fail)
+          .then(done);
+      shaka.polyfill.Promise.flush();
+    });
   });
 });
 

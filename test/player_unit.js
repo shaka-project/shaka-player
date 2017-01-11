@@ -62,7 +62,9 @@ describe('Player', function() {
       player.createNetworkingEngine = function() {
         return networkingEngine;
       };
-      player.createPlayhead = function() { return {destroy: function() {}}; };
+      player.createPlayhead = function() {
+        return {destroy: function() {}, addTimelineRegion: function() {}};
+      };
       player.createMediaSource = function() { return Promise.resolve(); };
       player.createMediaSourceEngine = function() {
         return {destroy: function() {}};

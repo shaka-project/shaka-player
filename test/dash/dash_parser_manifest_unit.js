@@ -30,6 +30,7 @@ describe('DashParser Manifest', function() {
     playerInterface = {
       networkingEngine: fakeNetEngine,
       filterPeriod: function() {},
+      onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: onEventSpy,
       onError: fail
     };

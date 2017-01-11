@@ -823,7 +823,7 @@ describe('Playhead', function() {
         value: 'something',
         startTime: 15,
         endTime: 25,
-        id: 'abc',
+        id: '123',
         eventElement: null
       };
 
@@ -863,6 +863,34 @@ describe('Playhead', function() {
       video.currentTime = 28;
       videoOnTimeUpdate();
       expect(onEvent).not.toHaveBeenCalled();
+    });
+
+    it('won\'t add duplicate regions', function() {
+      // Regions with the same scheme ID and time ranges are ignored.
+      var infoWithSameTime = {
+        schemeIdUri: 'http://example.com',
+        value: 'other',
+        startTime: 10,
+        endTime: 20,
+        id: '123',
+        eventElement: null
+      };
+      var differentInfo = {
+        schemeIdUri: 'http://google.com',
+        value: 'other',
+        startTime: 10,
+        endTime: 20,
+        id: '123',
+        eventElement: null
+      };
+
+      playhead.addTimelineRegion(regionInfo);
+      playhead.addTimelineRegion(regionInfo);
+      playhead.addTimelineRegion(differentInfo);
+      playhead.addTimelineRegion(infoWithSameTime);
+      expect(onEvent).toHaveBeenCalledTimes(2);
+      expectTimelineEvent('timelineregionadded', regionInfo, 0);
+      expectTimelineEvent('timelineregionadded', differentInfo, 1);
     });
 
     /**

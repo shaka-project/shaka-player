@@ -41,6 +41,7 @@ describe('DashParser ContentProtection', function() {
     var playerEvents = {
       networkingEngine: netEngine,
       filterPeriod: function() {},
+      onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail
     };
