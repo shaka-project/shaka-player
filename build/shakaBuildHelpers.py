@@ -82,7 +82,7 @@ def quote_argument(arg):
   return arg
 
 
-def execute_subprocess(args):
+def execute_subprocess(args, pipeOut=True):
   """Executes the given command using subprocess.
 
   If PRINT_ARGUMENTS environment variable is set, this will first print the
@@ -94,7 +94,8 @@ def execute_subprocess(args):
   if os.environ.get('PRINT_ARGUMENTS'):
     print ' '.join([quote_argument(x) for x in args])
   try:
-    return subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    out = subprocess.PIPE if pipeOut else None
+    return subprocess.Popen(args, stdin=subprocess.PIPE, stdout=out)
   except OSError as e:
     if e.errno == errno.ENOENT:
       print >> sys.stderr, '*** A required dependency is missing: ' + args[0]
@@ -105,14 +106,14 @@ def execute_subprocess(args):
 
 def execute_get_code(args):
   """Calls execute_subprocess and gets return code."""
-  obj = execute_subprocess(args)
+  obj = execute_subprocess(args, pipeOut=False)
   obj.communicate()
   return obj.returncode
 
 
 def execute_get_output(args):
   """Calls execute_subprocess and get the stdout of the process."""
-  obj = execute_subprocess(args)
+  obj = execute_subprocess(args, pipeOut=True)
   # This will block until the process terminates, storing the stdout in a string
   stdout = obj.communicate()[0]
   if obj.returncode != 0:
