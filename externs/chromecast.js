@@ -167,6 +167,17 @@ cast.receiver.CastReceiverManager.prototype.onSystemVolumeChanged;
 
 
 /** @const */
+cast.__platform__;
+
+
+/**
+ * @param {string} type
+ * @return {boolean}
+ */
+cast.__platform__.canDisplayType = function(type) {};
+
+
+/** @const */
 chrome.cast = {};
 
 
