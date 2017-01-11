@@ -41,7 +41,6 @@ Examples:
 
 import os
 import re
-import shutil
 import subprocess
 import sys
 
@@ -249,19 +248,16 @@ class Build(object):
     files = [shakaBuildHelpers.cygwin_safe_path(f) for f in self.include]
     files.sort()
 
-    try:
-      if is_debug:
-        closure_opts = common_closure_opts + debug_closure_opts
-      else:
-        closure_opts = common_closure_opts + release_closure_opts
+    if is_debug:
+      closure_opts = common_closure_opts + debug_closure_opts
+    else:
+      closure_opts = common_closure_opts + release_closure_opts
 
-      cmd_line = ['java', '-jar', jar] + closure_opts + extra_opts + files
-      shakaBuildHelpers.print_cmd_line(cmd_line)
-      subprocess.check_call(cmd_line)
-      return True
-    except subprocess.CalledProcessError:
+    cmd_line = ['java', '-jar', jar] + closure_opts + extra_opts + files
+    if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
       print >> sys.stderr, 'Build failed'
       return False
+    return True
 
   def build_library(self, name, rebuild, is_debug):
     """Builds Shaka Player using the files in |self.include|.

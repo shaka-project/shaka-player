@@ -17,7 +17,6 @@
 """Runs unit and integrations tests on the library."""
 
 import platform
-import subprocess
 import sys
 
 import build
@@ -64,16 +63,14 @@ def run_tests_single(args):
     # Run tests in all available browsers.
     print 'Running with platform default:', '--browsers', browsers
     cmd_line = cmd + ['--browsers', browsers]
-    shakaBuildHelpers.print_cmd_line(cmd_line)
-    return subprocess.call(cmd_line)
+    return shakaBuildHelpers.execute_get_code(cmd_line)
   else:
     # Run with command-line arguments from the user.
     if '--browsers' not in args:
       print 'No --browsers specified.'
       print 'In this mode, browsers must be manually connected to karma.'
     cmd_line = cmd + args
-    shakaBuildHelpers.print_cmd_line(cmd_line)
-    return subprocess.call(cmd_line)
+    return shakaBuildHelpers.execute_get_code(cmd_line)
 
 
 def run_tests_multiple(args):
@@ -92,13 +89,13 @@ def run_tests_multiple(args):
     return 1
 
   results = []
-  print "\nRunning the tests %d times." % runs
-  for i in range(runs):
+  print '\nRunning the tests %d times.' % runs
+  for _ in range(runs):
     results.append(run_tests_single(args))
 
-  print "\nAll runs completed."
-  print "%d passed out of %d total runs." % (results.count(0), len(results))
-  print "Results (exit code): %r" % results
+  print '\nAll runs completed.'
+  print '%d passed out of %d total runs.' % (results.count(0), len(results))
+  print 'Results (exit code): %r' % results
   return all(result == 0 for result in results)
 
 
