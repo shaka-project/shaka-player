@@ -24,7 +24,6 @@ This checks:
 
 import os
 import re
-import subprocess
 import sys
 
 import build
@@ -55,8 +54,7 @@ def check_lint():
   # command-line arguments using argv.  Have to explicitly execute python so
   # it works on Windows.
   cmd_line = [sys.executable or 'python', cmd] + args + get_lint_files()
-  shakaBuildHelpers.print_cmd_line(cmd_line)
-  return subprocess.call(cmd_line) == 0
+  return shakaBuildHelpers.execute_get_code(cmd_line) == 0
 
 
 def check_html_lint():
@@ -77,8 +75,7 @@ def check_html_lint():
   file_paths = [os.path.join(base, x) for x in files]
   config_path = os.path.join(base, '.htmlhintrc')
   cmd_line = [htmlhint_path, '--config=' + config_path] + file_paths
-  shakaBuildHelpers.print_cmd_line(cmd_line)
-  return subprocess.call(cmd_line) == 0
+  return shakaBuildHelpers.execute_get_code(cmd_line) == 0
 
 
 def check_complete():

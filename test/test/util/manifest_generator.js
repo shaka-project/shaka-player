@@ -453,7 +453,8 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
     keyId: null,
     language: language,
     type: type,
-    primary: false
+    primary: false,
+    trickModeVideo: null
   };
   stream.createSegmentIndex.and.callFake(
       function() { return Promise.resolve(); });

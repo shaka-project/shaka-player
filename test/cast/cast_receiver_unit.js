@@ -29,6 +29,7 @@ describe('CastReceiver', function() {
 
   var mockReceiverApi;
   var mockMessageBus;
+  var mockCanDisplayType;
 
   /** @type {shaka.cast.CastReceiver} */
   var receiver;
@@ -72,18 +73,22 @@ describe('CastReceiver', function() {
 
   beforeEach(function() {
     mockReceiverApi = createMockReceiverApi();
+    mockCanDisplayType = jasmine.createSpy('canDisplayType');
+    mockCanDisplayType.and.returnValue(false);
+
     // We're using quotes to access window.cast because the compiler
     // knows about lots of Cast-specific APIs we aren't mocking.  We
     // don't need this mock strictly type-checked.
-    window['cast'] = { receiver: mockReceiverApi };
+    window['cast'] = {
+      receiver: mockReceiverApi,
+      __platform__: { canDisplayType: mockCanDisplayType }
+    };
 
     mockReceiverManager = createMockReceiverManager();
     mockMessageBus = createMockMessageBus();
     mockVideo = createMockVideo();
     mockPlayer = createMockPlayer();
     mockAppDataCallback = jasmine.createSpy('appDataCallback');
-
-    receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
   });
 
   afterEach(function(done) {
@@ -101,29 +106,60 @@ describe('CastReceiver', function() {
   describe('constructor', function() {
     it('starts the receiver manager', function() {
       checkChromeOrChromecast();
+      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
       expect(mockReceiverManager.start).toHaveBeenCalled();
     });
 
     it('listens for video and player events', function() {
       checkChromeOrChromecast();
+      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
       expect(Object.keys(mockVideo.listeners).length).toBeGreaterThan(0);
       expect(Object.keys(mockPlayer.listeners).length).toBeGreaterThan(0);
     });
 
-    it('limits streams to 1080p', function() {
+    it('limits streams to 1080p on Chromecast v1 and v2', function() {
       checkChromeOrChromecast();
+      // Simulate the canDisplayType reponse of Chromecast v1 or v2
+      mockCanDisplayType.and.callFake(function(type) {
+        var matches = /height=(\d+)/.exec(type);
+        var height = matches[1];
+        if (height && height > 1080) return false;
+        return true;
+      });
+      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+      expect(mockCanDisplayType).toHaveBeenCalled();
       expect(mockPlayer.setMaxHardwareResolution).
           toHaveBeenCalledWith(1920, 1080);
     });
 
+    it('limits streams to 4k on Chromecast Ultra', function() {
+      checkChromeOrChromecast();
+      // Simulate the canDisplayType reponse of Chromecast Ultra
+      mockCanDisplayType.and.callFake(function(type) {
+        var matches = /height=(\d+)/.exec(type);
+        var height = matches[1];
+        if (height && height > 2160) return false;
+        return true;
+      });
+      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+      expect(mockCanDisplayType).toHaveBeenCalled();
+      expect(mockPlayer.setMaxHardwareResolution).
+          toHaveBeenCalledWith(3840, 2160);
+    });
+
     it('does not start polling', function() {
       checkChromeOrChromecast();
+      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
       expect(mockPlayer.getConfiguration).not.toHaveBeenCalled();
       expect(mockMessageBus.messages.length).toBe(0);
     });
   });
 
   describe('isConnected', function() {
+    beforeEach(function() {
+      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+    });
+
     it('is true when there are senders', function() {
       checkChromeOrChromecast();
       expect(receiver.isConnected()).toBe(false);
@@ -139,6 +175,10 @@ describe('CastReceiver', function() {
   });
 
   describe('"caststatuschanged" event', function() {
+    beforeEach(function() {
+      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+    });
+
     it('is triggered when senders connect or disconnect', function(done) {
       checkChromeOrChromecast();
       var listener = jasmine.createSpy('listener');
@@ -204,6 +244,10 @@ describe('CastReceiver', function() {
   });
 
   describe('local events', function() {
+    beforeEach(function() {
+      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+    });
+
     it('trigger "update" and "event" messages', function() {
       checkChromeOrChromecast();
       fakeConnectedSenders(1);
@@ -234,6 +278,8 @@ describe('CastReceiver', function() {
     var fakeAppData = {myFakeAppData: 1234};
 
     beforeEach(function() {
+      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+
       fakeInitState = {
         player: {
           configure: fakeConfig
@@ -393,6 +439,10 @@ describe('CastReceiver', function() {
   });
 
   describe('"appData" message', function() {
+    beforeEach(function() {
+      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+    });
+
     it('triggers the app data callback', function() {
       checkChromeOrChromecast();
       expect(mockAppDataCallback).not.toHaveBeenCalled();
@@ -408,6 +458,10 @@ describe('CastReceiver', function() {
   });
 
   describe('"set" message', function() {
+    beforeEach(function() {
+      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+    });
+
     it('sets local properties', function() {
       checkChromeOrChromecast();
       expect(mockVideo.currentTime).toBe(undefined);
@@ -459,6 +513,10 @@ describe('CastReceiver', function() {
   });
 
   describe('"call" message', function() {
+    beforeEach(function() {
+      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+    });
+
     it('calls local methods', function() {
       checkChromeOrChromecast();
       expect(mockVideo.play).not.toHaveBeenCalled();
@@ -487,6 +545,8 @@ describe('CastReceiver', function() {
     var fakeCallId = '5';
 
     beforeEach(function() {
+      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+
       fakeConnectedSenders(1);
       p = new shaka.util.PublicPromise();
       mockPlayer.load.and.returnValue(p);
@@ -560,6 +620,10 @@ describe('CastReceiver', function() {
   });
 
   describe('destroy', function() {
+    beforeEach(function() {
+      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+    });
+
     it('destroys the local player', function(done) {
       checkChromeOrChromecast();
       expect(mockPlayer.destroy).not.toHaveBeenCalled();
@@ -659,20 +723,25 @@ describe('CastReceiver', function() {
 
   function createMockPlayer() {
     var player = {
+      configure: jasmine.createSpy('configure'),
+      destroy: jasmine.createSpy('destroy'),
+      drmInfo: jasmine.createSpy('drmInfo'),
       getConfiguration: jasmine.createSpy('getConfiguration'),
       getManifestUri: jasmine.createSpy('getManifestUri'),
       getPlaybackRate: jasmine.createSpy('getPlaybackRate'),
+      getPlayheadTimeAsDate: jasmine.createSpy('getPlayheadTimeAsDate'),
       getTracks: jasmine.createSpy('getTracks'),
       getStats: jasmine.createSpy('getStats'),
       isBuffering: jasmine.createSpy('isBuffering'),
+      isInProgress: jasmine.createSpy('isInProgress'),
       isLive: jasmine.createSpy('isLive'),
       isTextTrackVisible: jasmine.createSpy('isTextTrackVisible'),
-      seekRange: jasmine.createSpy('seekRange'),
-      configure: jasmine.createSpy('configure'),
-      setTextTrackVisibility: jasmine.createSpy('setTextTrackVisibility'),
-      setMaxHardwareResolution: jasmine.createSpy('setMaxHardwareResolution'),
+      keySystem: jasmine.createSpy('keySystem'),
       load: jasmine.createSpy('load'),
-      destroy: jasmine.createSpy('destroy'),
+      seekRange: jasmine.createSpy('seekRange'),
+      setMaxHardwareResolution: jasmine.createSpy('setMaxHardwareResolution'),
+      setTextTrackVisibility: jasmine.createSpy('setTextTrackVisibility'),
+
       addEventListener: function(eventName, listener) {
         player.listeners[eventName] = listener;
       },

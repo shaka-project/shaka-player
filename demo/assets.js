@@ -73,6 +73,7 @@ shakaAssets.Feature = {
   PSSH: 'embedded PSSH',
   MULTIKEY: 'multiple keys',
   MULTIPERIOD: 'multiple Periods',
+  TRICK_MODE: 'special trick mode track',
 
   SUBTITLES: 'subtitles',
   CAPTIONS: 'captions',
@@ -339,6 +340,22 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
       shakaAssets.Feature.WEBM,
+      shakaAssets.Feature.WEBVTT
+    ]
+  },
+  {
+    name: 'Sintel w/ trick mode (MP4 only, 720p)',
+    manifestUri: '//storage.googleapis.com/shaka-demo-assets/sintel-trickplay/dash.mpd',  // gjslint: disable=110
+
+    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
+    source: shakaAssets.Source.SHAKA,
+    drm: [],
+    features: [
+      shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_BASE,
+      shakaAssets.Feature.SUBTITLES,
+      shakaAssets.Feature.TRICK_MODE,
       shakaAssets.Feature.WEBVTT
     ]
   },

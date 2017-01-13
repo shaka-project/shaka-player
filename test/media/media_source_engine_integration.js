@@ -49,7 +49,8 @@ describe('MediaSourceEngine', function() {
 
   afterEach(function(done) {
     mediaSourceEngine.destroy().then(function() {
-      video.src = '';
+      video.removeAttribute('src');
+      video.load();
       done();
     });
   });

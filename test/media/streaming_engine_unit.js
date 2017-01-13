@@ -73,7 +73,8 @@ describe('StreamingEngine', function() {
     shaka.polyfill.Promise.install(/* force */ true);
   });
 
-  function setupVod() {
+  /** @param {boolean=} opt_trickMode */
+  function setupVod(opt_trickMode) {
     // For VOD, we fake a presentation that has 2 Periods of equal duration
     // (20 seconds), where each Period has 1 Variant and 1 text stream.
     //
@@ -124,6 +125,19 @@ describe('StreamingEngine', function() {
         segmentDuration: 10
       }
     };
+    if (opt_trickMode) {
+      segmentData.trickvideo = {
+        initSegments:
+            [makeBuffer(initSegmentSizeVideo),
+             makeBuffer(initSegmentSizeVideo)],
+        segments:
+            [makeBuffer(segmentSizes.video), makeBuffer(segmentSizes.video),
+             makeBuffer(segmentSizes.video), makeBuffer(segmentSizes.video)],
+        segmentStartTimes: [0, 10, 0, 10],
+        segmentPeriodTimes: [0, 0, 20, 20],
+        segmentDuration: 10
+      };
+    }
 
     playhead = createMockPlayhead();
     playheadTime = 0;
@@ -266,11 +280,17 @@ describe('StreamingEngine', function() {
 
   function setupManifest(
       firstPeriodStartTime, secondPeriodStartTime, presentationDuration) {
+    var segmentDurations = {
+      audio: segmentData.audio.segmentDuration,
+      video: segmentData.video.segmentDuration,
+      text: segmentData.text.segmentDuration
+    };
+    if (segmentData.trickvideo) {
+      segmentDurations.trickvideo = segmentData.trickvideo.segmentDuration;
+    }
     manifest = shaka.test.StreamingEngineUtil.createManifest(
         [firstPeriodStartTime, secondPeriodStartTime], presentationDuration,
-        { audio: segmentData.audio.segmentDuration,
-          video: segmentData.video.segmentDuration,
-          text: segmentData.text.segmentDuration});
+        segmentDurations);
 
     manifest.presentationTimeline = timeline;
     manifest.minBufferTime = 2;
@@ -286,6 +306,13 @@ describe('StreamingEngine', function() {
             function() { return ['1_video_init']; },
             initSegmentRanges.video[0],
             initSegmentRanges.video[1]);
+    if (manifest.periods[0].variants[0].video.trickModeVideo) {
+      manifest.periods[0].variants[0].video.trickModeVideo
+          .initSegmentReference = new shaka.media.InitSegmentReference(
+              function() { return ['1_trickvideo_init']; },
+              initSegmentRanges.video[0],
+              initSegmentRanges.video[1]);
+    }
     manifest.periods[1].variants[0].audio.initSegmentReference =
         new shaka.media.InitSegmentReference(
             function() { return ['2_audio_init']; },
@@ -296,6 +323,13 @@ describe('StreamingEngine', function() {
             function() { return ['2_video_init']; },
             initSegmentRanges.video[0],
             initSegmentRanges.video[1]);
+    if (manifest.periods[1].variants[0].video.trickModeVideo) {
+      manifest.periods[1].variants[0].video.trickModeVideo
+          .initSegmentReference = new shaka.media.InitSegmentReference(
+              function() { return ['2_trickvideo_init']; },
+              initSegmentRanges.video[0],
+              initSegmentRanges.video[1]);
+    }
 
     audioStream1 = manifest.periods[0].variants[0].audio;
     videoStream1 = manifest.periods[0].variants[0].video;
@@ -304,7 +338,7 @@ describe('StreamingEngine', function() {
     // This Stream is only used to verify that StreamingEngine can setup
     // Streams correctly. It does not have init or media segments.
     alternateVideoStream1 =
-        shaka.test.StreamingEngineUtil.createMockVideoStream(6);
+        shaka.test.StreamingEngineUtil.createMockVideoStream(8);
     alternateVideoStream1.createSegmentIndex.and.returnValue(Promise.resolve());
     alternateVideoStream1.findSegmentPosition.and.returnValue(null);
     alternateVideoStream1.getSegmentReference.and.returnValue(null);
@@ -1828,6 +1862,111 @@ describe('StreamingEngine', function() {
     }
 
     it('is handled for large - values', testNegativeDrift.bind(null, -12));
+  });
+
+  describe('setTrickPlay', function() {
+    it('uses trick mode track when requested', function() {
+      setupVod(/* trickMode */ true);
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      createStreamingEngine({
+        retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+        bufferBehind: Infinity,
+        ignoreTextStreamFailures: false,
+        useRelativeCueTimestamps: false,
+        // Only buffer ahead 1 second to make it easier to set segment
+        // expectations based on playheadTime.
+        rebufferingGoal: 1,
+        bufferingGoal: 1
+      });
+
+      playhead.getTime.and.returnValue(0);
+
+      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+
+      // Here we go!
+      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      streamingEngine.init();
+
+      runTest(function() {
+        if (playheadTime == 1) {
+          expect(mediaSourceEngine.initSegments).toEqual({
+            audio: [true, false],
+            video: [true, false],
+            trickvideo: [false, false],
+            text: []
+          });
+          expect(mediaSourceEngine.segments).toEqual({
+            audio: [true, false, false, false],
+            video: [true, false, false, false],
+            trickvideo: [false, false, false, false],
+            text: [true, false, false, false]
+          });
+
+          // Engage trick play.
+          streamingEngine.setTrickPlay(true);
+        } else if (playheadTime == 11) {
+          // We're in the second segment, in trick play mode.
+          expect(mediaSourceEngine.initSegments).toEqual({
+            audio: [true, false],
+            video: [true, false],
+            trickvideo: [true, false],
+            text: []
+          });
+          expect(mediaSourceEngine.segments).toEqual({
+            audio: [true, true, false, false],
+            video: [true, false, false, false],
+            trickvideo: [false, true, false, false],
+            text: [true, true, false, false]
+          });
+        } else if (playheadTime == 21) {
+          // We've started the second period, still in trick play mode.
+          expect(mediaSourceEngine.initSegments).toEqual({
+            audio: [false, true],
+            video: [true, false],  // no init segment fetched for normal video
+            trickvideo: [false, true],
+            text: []
+          });
+          expect(mediaSourceEngine.segments).toEqual({
+            audio: [true, true, true, false],
+            video: [true, false, false, false],
+            trickvideo: [false, true, true, false],
+            text: [true, true, true, false]
+          });
+        } else if (playheadTime == 31) {
+          // We've started the final segment, still in trick play mode.
+          expect(mediaSourceEngine.initSegments).toEqual({
+            audio: [false, true],
+            video: [true, false],  // no init segment appended for normal video
+            trickvideo: [false, true],
+            text: []
+          });
+          expect(mediaSourceEngine.segments).toEqual({
+            audio: [true, true, true, true],
+            video: [true, false, false, false],
+            trickvideo: [false, true, true, true],
+            text: [true, true, true, true]
+          });
+
+          // Disengage trick play mode, which will clear the video buffer.
+          streamingEngine.setTrickPlay(false);
+        } else if (playheadTime == 39) {
+          // We're 1 second from the end of the stream now.
+          expect(mediaSourceEngine.initSegments).toEqual({
+            audio: [false, true],
+            video: [false, true],  // init segment appended for normal video now
+            trickvideo: [false, true],
+            text: []
+          });
+          expect(mediaSourceEngine.segments).toEqual({
+            audio: [true, true, true, true],
+            video: [false, false, true, true],  // starts buffering one seg back
+            trickvideo: [false, false, false, false],  // cleared
+            text: [true, true, true, true]
+          });
+        }
+      });
+      expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+    });
   });
 
   /**

@@ -78,6 +78,7 @@ shaka.test.FakeMediaSourceEngine = function(segmentData, opt_drift) {
   spyOn(this, 'appendBuffer').and.callThrough();
   spyOn(this, 'remove').and.callThrough();
   spyOn(this, 'clear').and.callThrough();
+  spyOn(this, 'flush').and.callThrough();
   spyOn(this, 'endOfStream').and.callThrough();
   spyOn(this, 'setTimestampOffset').and.callThrough();
   spyOn(this, 'setAppendWindowEnd').and.callThrough();
@@ -180,8 +181,16 @@ shaka.test.FakeMediaSourceEngine.prototype.appendBuffer = function(
     type, data, startTime, endTime) {
   if (this.segments[type] === undefined) throw new Error('unexpected type');
 
+  // Remains 'video' even when we detect a 'trickvideo' segment.
+  var originalType = type;
+
   // Set init segment.
   var i = this.segmentData[type].initSegments.indexOf(data);
+  if (i < 0 && type == 'video' && this.segmentData['trickvideo']) {
+    // appendBuffer('video', ...) might be for 'trickvideo' data.
+    i = this.segmentData['trickvideo'].initSegments.indexOf(data);
+    if (i >= 0) type = 'trickvideo';
+  }
   if (i >= 0) {
     expect(startTime).toBe(null);
     expect(endTime).toBe(null);
@@ -194,6 +203,11 @@ shaka.test.FakeMediaSourceEngine.prototype.appendBuffer = function(
 
   // Set media segment.
   i = this.segmentData[type].segments.indexOf(data);
+  if (i < 0 && type == 'video' && this.segmentData['trickvideo']) {
+    // appendBuffer('video', ...) might be for 'trickvideo' data.
+    i = this.segmentData['trickvideo'].segments.indexOf(data);
+    if (i >= 0) type = 'trickvideo';
+  }
   if (i < 0)
     throw new Error('unexpected data');
 
@@ -204,7 +218,7 @@ shaka.test.FakeMediaSourceEngine.prototype.appendBuffer = function(
 
   // Verify that the segment is aligned.
   var start = this.segmentData[type].segmentStartTimes[i] +
-              this.timestampOffsets_[type];
+              this.timestampOffsets_[originalType];
   var expectedStart = i * this.segmentData[type].segmentDuration;
   expect(start).toBe(expectedStart);
 
@@ -245,6 +259,17 @@ shaka.test.FakeMediaSourceEngine.prototype.clear = function(type) {
     this.segments[type][i] = false;
   }
 
+  // If we're clearing video, clear the segment list for 'trickvideo', too.
+  if (type == 'video' && this.segments['trickvideo']) {
+    this.clear('trickvideo');
+  }
+
+  return Promise.resolve();
+};
+
+
+/** @override */
+shaka.test.FakeMediaSourceEngine.prototype.flush = function(type) {
   return Promise.resolve();
 };
 

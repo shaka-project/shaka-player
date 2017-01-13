@@ -37,6 +37,24 @@ describe('Promise polyfill', function() {
       }, fail);
     });
 
+    it('Promise.resolve takes on status of passed promise', function(done) {
+      var rejected = Promise.reject(1);
+      var pending = new Promise(function(resolve, reject) {});
+
+      var rejectedResult = 0;
+      Promise.resolve(rejected).then(fail, function(i) {
+        // This should be called with the value of 1, as it's rejected.
+        rejectedResult = i;
+      });
+      // This should never be called, as it's pending.
+      Promise.resolve(pending).then(fail);
+
+      setTimeout(function() {
+        expect(rejectedResult).toBe(1);
+        done();
+      }, 50);
+    });
+
     it('Promise constructor arguments correctly resolve Promise',
        function(done) {
          var resolved = false;

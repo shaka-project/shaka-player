@@ -229,6 +229,7 @@ shaka.test.StreamingEngineUtil.createManifest = function(
     };
 
     var variant = {};
+    var trickModeVideo;
 
     for (var type in segmentDurations) {
       var stream = shaka.test.StreamingEngineUtil.createMockStream(type, id++);
@@ -238,9 +239,11 @@ shaka.test.StreamingEngineUtil.createManifest = function(
 
       if (type == 'text') period.textStreams.push(stream);
       else if (type == 'audio') variant.audio = stream;
+      else if (type == 'trickvideo') trickModeVideo = stream;
       else variant.video = stream;
     }
 
+    variant.video.trickModeVideo = trickModeVideo;
     period.variants.push(variant);
     manifest.periods.push(period);
   }
@@ -303,6 +306,7 @@ shaka.test.StreamingEngineUtil.createMockStream = function(type, id) {
   return {
     audio: shaka.test.StreamingEngineUtil.createMockAudioStream,
     video: shaka.test.StreamingEngineUtil.createMockVideoStream,
+    trickvideo: shaka.test.StreamingEngineUtil.createMockVideoStream,
     text: shaka.test.StreamingEngineUtil.createMockTextStream
   }[type](id);
 };

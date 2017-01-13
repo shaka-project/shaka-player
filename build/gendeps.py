@@ -44,8 +44,7 @@ def gen_deps(_):
 
   try:
     cmd_line = [sys.executable or 'python', deps_writer] + deps_args
-    shakaBuildHelpers.print_cmd_line(cmd_line)
-    deps = subprocess.check_output(cmd_line)
+    deps = shakaBuildHelpers.execute_get_output(cmd_line)
     with open(os.path.join(base, 'dist', 'deps.js'), 'w') as f:
       f.write(deps)
     return 0

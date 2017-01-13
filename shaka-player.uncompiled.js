@@ -25,6 +25,7 @@ goog.require('shaka.abr.SimpleAbrManager');
 goog.require('shaka.cast.CastProxy');
 goog.require('shaka.cast.CastReceiver');
 goog.require('shaka.dash.DashParser');
+goog.require('shaka.hls.HlsParser');
 goog.require('shaka.log');
 goog.require('shaka.media.InitSegmentReference');
 goog.require('shaka.media.ManifestParser');

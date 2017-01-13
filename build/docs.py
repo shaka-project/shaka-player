@@ -21,7 +21,6 @@ This deletes the old documentation first.
 
 import os
 import shutil
-import subprocess
 
 import shakaBuildHelpers
 
@@ -42,8 +41,7 @@ def build_docs(_):
     jsdoc = os.path.join('third_party', 'jsdoc', 'jsdoc')
 
   cmd_line = [jsdoc, '-c', 'docs/jsdoc.conf.json', '-R', 'docs/api-mainpage.md']
-  shakaBuildHelpers.print_cmd_line(cmd_line)
-  return subprocess.call(cmd_line)
+  return shakaBuildHelpers.execute_get_code(cmd_line)
 
 
 if __name__ == '__main__':

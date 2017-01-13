@@ -70,11 +70,15 @@ shakaDemo.onTracksChanged_ = function(event) {
   // Populate with the new tracks.
   var tracks = shakaDemo.player_.getTracks();
   tracks.sort(function(t1, t2) {
-    // Sort by language, then by bandwidth.
+    // Sort by type, then language, then by bandwidth.
+    var ret = t1.type.localeCompare(t2.type);
+    if (ret) return ret;
+
     if (t1.language) {
-      var ret = t1.language.localeCompare(t2.language);
+      ret = t1.language.localeCompare(t2.language);
       if (ret) return ret;
     }
+
     return t1.bandwidth - t2.bandwidth;
   });
   tracks.forEach(function(track) {

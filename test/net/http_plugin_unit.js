@@ -27,6 +27,10 @@ describe('HttpPlugin', function() {
       'status': 200,
       'responseHeaders': { 'FOO': 'BAR' }
     });
+    jasmine.Ajax.stubRequest('https://foo.bar/202').andReturn({
+      'response': new ArrayBuffer(0),
+      'status': 202
+    });
     jasmine.Ajax.stubRequest('https://foo.bar/204').andReturn({
       'response': new ArrayBuffer(10),
       'status': 204,
@@ -71,6 +75,10 @@ describe('HttpPlugin', function() {
         })
         .catch(fail)
         .then(done);
+  });
+
+  it('fails with 202 status', function(done) {
+    testFails('https://foo.bar/202', done);
   });
 
   it('succeeds with 204 status', function(done) {

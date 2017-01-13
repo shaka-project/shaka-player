@@ -22,6 +22,7 @@ This uses two environment variables to help with debugging the scripts:
   RAISE_INTERRUPT - Will raise keyboard interrupts rather than swallowing them.
 """
 
+import errno
 import os
 import platform
 import re
@@ -62,7 +63,7 @@ def is_cygwin():
 def quote_argument(arg):
   """Wraps the given argument in quotes if needed.
 
-  This is so print_cmd_line output can be copied and pasted into a shell.
+  This is so execute_subprocess output can be copied and pasted into a shell.
 
   Args:
     arg: The string to convert.
@@ -81,24 +82,49 @@ def quote_argument(arg):
   return arg
 
 
-def print_cmd_line(args):
-  """Prints the given command line if needed.
+def execute_subprocess(args, pipeOut=True):
+  """Executes the given command using subprocess.
 
-  This uses the environment variable PRINT_ARGUMENTS.
+  If PRINT_ARGUMENTS environment variable is set, this will first print the
+  arguments.
 
-  Args:
-    args: The arguments to print.
+  Returns:
+    The same value as subprocess.Popen.
   """
   if os.environ.get('PRINT_ARGUMENTS'):
     print ' '.join([quote_argument(x) for x in args])
+  try:
+    out = subprocess.PIPE if pipeOut else None
+    return subprocess.Popen(args, stdin=subprocess.PIPE, stdout=out)
+  except OSError as e:
+    if e.errno == errno.ENOENT:
+      print >> sys.stderr, '*** A required dependency is missing: ' + args[0]
+      # Exit early to avoid showing a confusing stack trace.
+      sys.exit(1)
+    raise
+
+
+def execute_get_code(args):
+  """Calls execute_subprocess and gets return code."""
+  obj = execute_subprocess(args, pipeOut=False)
+  obj.communicate()
+  return obj.returncode
+
+
+def execute_get_output(args):
+  """Calls execute_subprocess and get the stdout of the process."""
+  obj = execute_subprocess(args, pipeOut=True)
+  # This will block until the process terminates, storing the stdout in a string
+  stdout = obj.communicate()[0]
+  if obj.returncode != 0:
+    raise subprocess.CalledProcessError(obj.returnCode, args[0], stdout)
+  return stdout
 
 
 def cygwin_safe_path(path):
   """Converts the given path to a Cygwin path, if needed."""
   if is_cygwin():
-    cmd_line = ['cygpath', '-w', path]
-    print_cmd_line(cmd_line)
-    return subprocess.check_output(cmd_line).strip()
+    return execute_get_output(['cygpath', '-w', path]).strip()
   else:
     return path
 
@@ -108,8 +134,7 @@ def git_version():
   try:
     # Check git tags for a version number, noting if the sources are dirty.
     cmd_line = ['git', '-C', get_source_base(), 'describe', '--tags', '--dirty']
-    print_cmd_line(cmd_line)
-    return subprocess.check_output(cmd_line).strip()
+    return execute_get_output(cmd_line).strip()
   except subprocess.CalledProcessError:
     raise RuntimeError('Unable to determine library version!')
 
@@ -120,8 +145,7 @@ def npm_version(is_dirty=False):
     base = cygwin_safe_path(get_source_base())
     cmd = 'npm.cmd' if is_windows() else 'npm'
     cmd_line = [cmd, '--prefix', base, 'ls', 'shaka-player']
-    print_cmd_line(cmd_line)
-    text = subprocess.check_output(cmd_line, stderr=subprocess.STDOUT)
+    text = execute_get_output(cmd_line)
   except subprocess.CalledProcessError as e:
     text = e.output
   match = re.search(r'shaka-player@(.*) ', text)
@@ -184,18 +208,15 @@ def update_node_modules():
   cmd = 'npm.cmd' if is_windows() else 'npm'
 
   # Check the version of npm.
-  cmd_line = [cmd, '-v']
-  print_cmd_line(cmd_line)
-  version = subprocess.check_output(cmd_line)
+  version = execute_get_output([cmd, '-v'])
+
   if _parse_version(version) < _parse_version('1.3.12'):
     print >> sys.stderr, 'npm version is too old, please upgrade.  e.g.:'
     print >> sys.stderr, '  npm install -g npm'
     return False
 
   # Update the modules.
-  cmd_line = [cmd, '--prefix', base, 'update']
-  print_cmd_line(cmd_line)
-  subprocess.check_call(cmd_line)
+  execute_get_output([cmd, '--prefix', base, 'update'])
   return True
 
 

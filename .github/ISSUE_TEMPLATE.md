@@ -10,6 +10,9 @@
   - If custom app, can you reproduce the issue using our demo app?
 
 
+- What browser and OS are you using?
+
+
 - What did you do?
 
   - What content did you load?

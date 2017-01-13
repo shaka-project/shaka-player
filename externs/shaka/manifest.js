@@ -294,7 +294,8 @@ shakaExtern.GetSegmentReferenceFunction;
  *   keyId: ?string,
  *   language: string,
  *   type: string,
- *   primary: boolean
+ *   primary: boolean,
+ *   trickModeVideo: ?shakaExtern.Stream
  * }}
  *
  * @description
@@ -373,6 +374,9 @@ shakaExtern.GetSegmentReferenceFunction;
  *   True indicates that the player should prefer this Stream over others
  *   in the same Period. However, the player may use another
  *   Stream to meet application preferences.
+ * @property {?shakaExtern.Stream} trickModeVideo
+ *   <i>Video streams only.</i> <br>
+ *   An alternate video stream to use for trick mode playback.
  *
  * @exportDoc
  */

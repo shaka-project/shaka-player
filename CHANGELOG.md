@@ -1,3 +1,29 @@
+## 2.0.3 (2017-01-09)
+New features:
+  - Treat HTTP 202 status codes as failures
+    - https://github.com/google/shaka-player/issues/645
+
+Bugfixes:
+  - Fix race condition in StreamingEngine
+  - Fix race in load/unload in Player
+    - https://github.com/google/shaka-player/pull/613
+    - https://github.com/google/shaka-player/issues/612
+  - Update workarounds for Edge EME bugs
+    - https://github.com/google/shaka-player/issues/634
+  - Add missing events and methods to cast proxy
+  - Fix exclusion of standard features in custom builds
+  - Be more permissive of text failures
+    - Permit text parsing errors as well as streaming errors with the
+      ignoreTextStreamFailures config option.
+    - Do not fail StreamingEngine startup because of text streams,
+      regardless of config.
+    - https://github.com/google/shaka-player/issues/635
+  - Fix selectTrack() call with no text tracks
+    - https://github.com/google/shaka-player/issues/640
+  - Fix buffering state for live streams (stop at live edge)
+    - https://github.com/google/shaka-player/issues/636
+
+
 ## 2.0.2 (2016-12-15)
 New features:
   - Add support for Toshiba dTV

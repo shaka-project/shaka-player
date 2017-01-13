@@ -331,4 +331,22 @@ describe('SimpleAbrManager', function() {
     // cleared.
     expect(switchCallback).toHaveBeenCalledWith(jasmine.any(Object));
   });
+
+  it('will respect restrictions', function() {
+    manifest = new shaka.test.ManifestGenerator()
+      .addPeriod(0)
+        .addVariant(0).bandwidth(1e5)
+          .addVideo(0).size(50, 50)
+        .addVariant(1).bandwidth(2e5)
+          .addVideo(2).size(200, 200)
+      .build();
+
+    abrManager.setVariants(manifest.periods[0].variants);
+    var chosen = abrManager.chooseStreams(['video']);
+    expect(chosen['video'].id).toBe(2);
+
+    abrManager.setRestrictions({maxWidth: 100});
+    chosen = abrManager.chooseStreams(['video']);
+    expect(chosen['video'].id).toBe(0);
+  });
 });

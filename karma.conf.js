@@ -68,11 +68,9 @@ module.exports = function(config) {
       {pattern: 'dist/shaka-player.compiled.js', included: false},
     ],
 
-    // NOTE: Do not use proxies for media! That sometimes results in truncated
-    // content and failed tests. The effect does not appear to be deterministic.
-    proxies: {
-      '/dist/': '/base/dist/',
-    },
+    // NOTE: Do not use proxies at all!  They cannot be used with the --hostname
+    // option, which is necessary for some of our lab testing.
+    proxies: {},
 
     preprocessors: {
       // Don't compute coverage over lib/debug/ or lib/polyfill/

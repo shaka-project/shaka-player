@@ -374,7 +374,8 @@ shakaExtern.StreamingConfiguration;
  * @typedef {{
  *   manager: shakaExtern.AbrManager,
  *   enabled: boolean,
- *   defaultBandwidthEstimate: number
+ *   defaultBandwidthEstimate: number,
+ *   restrictions: shakaExtern.Restrictions
  * }}
  *
  * @property {shakaExtern.AbrManager} manager
@@ -384,6 +385,10 @@ shakaExtern.StreamingConfiguration;
  * @property {number} defaultBandwidthEstimate
  *   The default bandwidth estimate to use if there is not enough data, in
  *   bit/sec.
+ * @property {shakaExtern.Restrictions} restrictions
+ *   The restrictions to apply to ABR decisions.  The AbrManager will not
+ *   choose any streams that do not meet these restrictions.  (Note that
+ *   they can still be chosen by the application)
  * @exportDoc
  */
 shakaExtern.AbrConfiguration;

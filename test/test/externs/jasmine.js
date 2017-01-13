@@ -130,6 +130,10 @@ jasmine.Matchers.prototype.toHaveBeenCalled = function(opt_value) {};
 jasmine.Matchers.prototype.toHaveBeenCalledWith = function(var_args) {};
 
 
+/** @param {number} times */
+jasmine.Matchers.prototype.toHaveBeenCalledTimes = function(times) {};
+
+
 /** @param {string|RegExp} value */
 jasmine.Matchers.prototype.toMatch = function(value) {};
 
