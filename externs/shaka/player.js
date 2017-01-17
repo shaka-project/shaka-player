@@ -44,6 +44,28 @@ shakaExtern.StreamChoice;
 
 /**
  * @typedef {{
+ *   timestamp: number,
+ *   state: string,
+ *   duration: number
+ * }}
+ *
+ * @property {number} timestamp
+ *   The timestamp the state was entered, in seconds since 1970
+ *   (i.e. Date.now() / 1000).
+ * @property {string} state
+ *   The state the player entered.  This could be 'buffering', 'playing',
+ *   'paused', or 'ended'.
+ * @property {number} duration
+ *   The number of seconds the player was in this state.  If this is the last
+ *   entry in the list, the player is still in this state, so the duration will
+ *   continue to increase.
+ * @exportDoc
+ */
+shakaExtern.StateChange;
+
+
+/**
+ * @typedef {{
  *   width: number,
  *   height: number,
  *   streamBandwidth: number,
@@ -51,10 +73,13 @@ shakaExtern.StreamChoice;
  *   decodedFrames: number,
  *   droppedFrames: number,
  *   estimatedBandwidth: number,
+ *
+ *   loadLatency: number,
  *   playTime: number,
  *   bufferingTime: number,
  *
- *   switchHistory: !Array.<shakaExtern.StreamChoice>
+ *   switchHistory: !Array.<shakaExtern.StreamChoice>,
+ *   stateHistory: !Array.<shakaExtern.StateChange>
  * }}
  *
  * @description
@@ -77,6 +102,11 @@ shakaExtern.StreamChoice;
  *   is not supported by the browser.
  * @property {number} estimatedBandwidth
  *   The current estimated network bandwidth (in bit/sec).
+ *
+ * @property {number} loadLatency
+ *   This is the number of seconds it took for the video element to have enough
+ *   data to begin playback.  This is measured from the time load() is called to
+ *   the time the 'loadeddata' event is fired by the media element.
  * @property {number} playTime
  *   The total time spent in a playing state in seconds.
  * @property {number} bufferingTime
@@ -84,6 +114,8 @@ shakaExtern.StreamChoice;
  *
  * @property {!Array.<shakaExtern.StreamChoice>} switchHistory
  *   A history of the stream changes.
+ * @property {!Array.<shakaExtern.StateChange>} stateHistory
+ *   A history of the state changes.
  * @exportDoc
  */
 shakaExtern.Stats;
@@ -102,6 +134,7 @@ shakaExtern.Stats;
  *   width: ?number,
  *   height: ?number,
  *   frameRate: ?number,
+ *   mimeType: ?string,
  *   codecs: ?string
  * }}
  *
@@ -133,6 +166,8 @@ shakaExtern.Stats;
  *   (only for video tracks) The height of the track in pixels.
  * @property {?number} frameRate
  *   The video framerate provided in the manifest, if present.
+ * @property {?string} mimeType
+ *   The MIME type of the content provided in the manifest.
  * @property {?string} codecs
  *   The audio/video codecs string provided in the manifest, if present.
  * @exportDoc

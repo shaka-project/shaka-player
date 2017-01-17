@@ -64,6 +64,7 @@ describe('Storage', function() {
             width: 1920,
             height: 1080,
             frameRate: 24,
+            mimeType: 'video/mp4',
             codecs: 'avc1.4d401f',
             segments: []
           },
@@ -75,6 +76,7 @@ describe('Storage', function() {
             width: null,
             height: null,
             frameRate: undefined,
+            mimeType: 'audio/mp4',
             codecs: 'vorbis',
             segments: []
           }
@@ -108,6 +110,7 @@ describe('Storage', function() {
         width: 1920,
         height: 1080,
         frameRate: 24,
+        mimeType: 'video/mp4',
         codecs: 'avc1.4d401f, vorbis'
       }
     ];

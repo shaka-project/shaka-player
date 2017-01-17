@@ -7,7 +7,6 @@
 
 +../../lib/debug/asserts.js
 +../../lib/debug/log.js
-+../../lib/debug/timer.js
 
 +../../lib/media/drm_engine.js
 +../../lib/media/manifest_parser.js

@@ -732,6 +732,7 @@ describe('Player', function() {
           width: 100,
           height: 200,
           frameRate: 1000000 / 42000,
+          mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2'
         },
         {
@@ -744,6 +745,7 @@ describe('Player', function() {
           width: 200,
           height: 400,
           frameRate: 24,
+          mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2'
         },
         {
@@ -756,6 +758,7 @@ describe('Player', function() {
           width: 100,
           height: 200,
           frameRate: 1000000 / 42000,
+          mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2'
         },
         {
@@ -768,6 +771,7 @@ describe('Player', function() {
           width: 200,
           height: 400,
           frameRate: 24,
+          mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2'
         },
         {
@@ -780,6 +784,7 @@ describe('Player', function() {
           width: 200,
           height: 400,
           frameRate: 24,
+          mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2'
         }
       ];
@@ -791,6 +796,7 @@ describe('Player', function() {
           type: 'text',
           language: 'es',
           kind: 'caption',
+          mimeType: 'text/vtt',
           codecs: null
         },
         {
@@ -799,6 +805,7 @@ describe('Player', function() {
           type: 'text',
           language: 'en',
           kind: 'caption',
+          mimeType: 'application/ttml+xml',
           codecs: null
         }
       ];
@@ -1193,6 +1200,7 @@ describe('Player', function() {
 
     describe('.switchHistory', function() {
       it('includes original choices', function() {
+        // checkHistory prepends the initial stream selections.
         checkHistory([]);
       });
 
@@ -1290,6 +1298,126 @@ describe('Player', function() {
        */
       function switch_(streamsByType) {
         player.switch_(streamsByType);
+      }
+    });
+
+    describe('.stateHistory', function() {
+      it('begins with buffering state', function() {
+        setBuffering(true);
+        expect(player.getStats().stateHistory).toEqual([
+          {
+            // We are using a mock date, so this is not a race.
+            timestamp: Date.now() / 1000,
+            duration: 0,
+            state: 'buffering'
+          }
+        ]);
+      });
+
+      it('transitions to paused if the video is paused', function() {
+        setBuffering(true);
+        video.paused = true;
+        setBuffering(false);
+        expect(player.getStats().stateHistory).toEqual([
+          {
+            timestamp: jasmine.any(Number),
+            duration: jasmine.any(Number),
+            state: 'buffering'
+          },
+          {
+            timestamp: jasmine.any(Number),
+            duration: jasmine.any(Number),
+            state: 'paused'
+          }
+        ]);
+      });
+
+      it('transitions to playing if the video is playing', function() {
+        setBuffering(true);
+        video.paused = false;
+        setBuffering(false);
+        expect(player.getStats().stateHistory).toEqual([
+          {
+            timestamp: jasmine.any(Number),
+            duration: jasmine.any(Number),
+            state: 'buffering'
+          },
+          {
+            timestamp: jasmine.any(Number),
+            duration: jasmine.any(Number),
+            state: 'playing'
+          }
+        ]);
+      });
+
+      it('transitions to ended when the video ends', function() {
+        setBuffering(false);
+
+        video.ended = true;
+        // Fire an 'ended' event on the mock video.
+        // Using quotes to access 'on' to avoid casting to our mock video type.
+        video['on']['ended']();
+
+        expect(player.getStats().stateHistory).toEqual([
+          {
+            timestamp: jasmine.any(Number),
+            duration: jasmine.any(Number),
+            state: 'playing'
+          },
+          {
+            timestamp: jasmine.any(Number),
+            duration: jasmine.any(Number),
+            state: 'ended'
+          }
+        ]);
+      });
+
+      it('accumulates duration as time passes', function() {
+        // We are using a mock date, so this is not a race.
+        var bufferingStarts = Date.now() / 1000;
+        setBuffering(true);
+
+        expect(player.getStats().stateHistory).toEqual([
+          {
+            timestamp: bufferingStarts,
+            duration: 0,
+            state: 'buffering'
+          }
+        ]);
+
+        jasmine.clock().tick(1500);
+        expect(player.getStats().stateHistory).toEqual([
+          {
+            timestamp: bufferingStarts,
+            duration: 1.5,
+            state: 'buffering'
+          }
+        ]);
+
+        var playbackStarts = Date.now() / 1000;
+        setBuffering(false);
+        jasmine.clock().tick(9000);
+        expect(player.getStats().stateHistory).toEqual([
+          {
+            timestamp: bufferingStarts,
+            duration: 1.5,
+            state: 'buffering'
+          },
+          {
+            timestamp: playbackStarts,
+            duration: 9,
+            state: 'playing'
+          }
+        ]);
+
+      });
+
+      /**
+       * @param {boolean} buffering
+       * @suppress {accessControls}
+       */
+      function setBuffering(buffering) {
+        player.onBuffering_(buffering);
       }
     });
   });

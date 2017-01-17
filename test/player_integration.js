@@ -112,6 +112,8 @@ describe('Player', function() {
           decodedFrames: jasmine.any(Number),
           droppedFrames: jasmine.any(Number),
           estimatedBandwidth: jasmine.any(Number),
+
+          loadLatency: jasmine.any(Number),
           playTime: jasmine.any(Number),
           bufferingTime: jasmine.any(Number),
 
@@ -122,6 +124,12 @@ describe('Player', function() {
             id: jasmine.any(Number),
             type: 'video',
             fromAdaptation: true
+          }]),
+
+          stateHistory: jasmine.arrayContaining([{
+            state: 'playing',
+            timestamp: jasmine.any(Number),
+            duration: jasmine.any(Number)
           }])
         };
         expect(stats).toEqual(expected);
