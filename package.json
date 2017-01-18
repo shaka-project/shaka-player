@@ -28,7 +28,8 @@
     "karma-webdriver-launcher": "~1.0.4",
     "requirejs": "2.x",
     "rimraf": "2.x",
-    "sprintf-js": "1.x"
+    "sprintf-js": "1.x",
+    "useragent": "joeyparrish/useragent#chromecast"
   },
   "main": "dist/shaka-player.compiled.js",
   "repository": {
