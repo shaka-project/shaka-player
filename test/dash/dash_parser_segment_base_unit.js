@@ -19,7 +19,7 @@ describe('DashParser SegmentBase', function() {
   var Dash;
   var fakeNetEngine;
   var parser;
-  var filterPeriod = function() {};
+  var playerInterface;
 
   beforeAll(function() {
     Dash = shaka.test.Dash;
@@ -28,6 +28,13 @@ describe('DashParser SegmentBase', function() {
   beforeEach(function() {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = shaka.test.Dash.makeDashParser();
+
+    playerInterface = {
+      networkingEngine: fakeNetEngine,
+      filterPeriod: function() {},
+      onEvent: fail,
+      onError: fail
+    };
   });
 
   it('requests init data for WebM', function(done) {
@@ -50,7 +57,7 @@ describe('DashParser SegmentBase', function() {
       'http://example.com': '',
       'http://example.com/init.webm': ''
     });
-    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+    parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           expect(manifest).toEqual(
               Dash.makeManifestFromInit('init.webm', 201, 300));
@@ -84,7 +91,7 @@ describe('DashParser SegmentBase', function() {
       'dummy://foo': source,
       'http://example.com': ''
     });
-    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+    parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           expect(manifest).toEqual(
               Dash.makeManifestFromInit('init.mp4', 201, 300));
@@ -116,7 +123,7 @@ describe('DashParser SegmentBase', function() {
       'dummy://foo': source,
       'http://example.com': ''
     });
-    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+    parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           expect(manifest).toEqual(
               Dash.makeManifestFromInit('init.mp4', 201, 300));
@@ -149,7 +156,7 @@ describe('DashParser SegmentBase', function() {
       'dummy://foo': source,
       'http://example.com/stream.mp4': ''
     });
-    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+    parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           expect(manifest).toEqual(
               Dash.makeManifestFromInit('stream.mp4', 201, 300));
@@ -189,7 +196,7 @@ describe('DashParser SegmentBase', function() {
       'dummy://foo': source,
       'http://example.com/index.mp4': ''
     });
-    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+    parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           expect(manifest).toEqual(
               Dash.makeManifestFromInit('init.mp4', 201, 300, 10));
@@ -227,7 +234,7 @@ describe('DashParser SegmentBase', function() {
       'dummy://foo': source,
       'http://example.com': ''
     });
-    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+    parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           expect(manifest).toEqual(
               Dash.makeManifestFromInit('special.mp4', 0, null, 20));

@@ -19,7 +19,7 @@ describe('DashParser SegmentList', function() {
   var Dash;
   var fakeNetEngine;
   var parser;
-  var filterPeriod = function() {};
+  var playerInterface;
 
   beforeAll(function() {
     Dash = shaka.test.Dash;
@@ -28,6 +28,13 @@ describe('DashParser SegmentList', function() {
   beforeEach(function() {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = shaka.test.Dash.makeDashParser();
+
+    playerInterface = {
+      networkingEngine: fakeNetEngine,
+      filterPeriod: function() {},
+      onEvent: fail,
+      onError: fail
+    };
   });
 
   shaka.test.Dash.makeTimelineTests('SegmentList', '', [
@@ -168,7 +175,7 @@ describe('DashParser SegmentList', function() {
       ].join('\n');
 
       fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
-      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+      parser.start('dummy://foo', playerInterface)
           .then(function(manifest) {
             var timeline = manifest.presentationTimeline;
             expect(timeline.getEarliestStart()).toBe(4);

@@ -18,7 +18,6 @@
 // Test DRM-related parsing.
 describe('DashParser ContentProtection', function() {
   var Dash;
-  var filterPeriod = function() {};
 
   /**
    * Tests that the parser produces the correct results.
@@ -39,7 +38,14 @@ describe('DashParser ContentProtection', function() {
       retryParameters: retry,
       dash: { clockSyncUri: '', customScheme: callback }
     });
-    dashParser.start('http://example.com', netEngine, filterPeriod, fail, fail)
+    var playerEvents = {
+      networkingEngine: netEngine,
+      filterPeriod: function() {},
+      onEvent: fail,
+      onError: fail
+    };
+
+    dashParser.start('http://example.com', playerEvents)
         .then(function(actual) { expect(actual).toEqual(expected); })
         .catch(fail)
         .then(done);

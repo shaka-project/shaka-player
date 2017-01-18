@@ -19,7 +19,7 @@ describe('DashParser SegmentTemplate', function() {
   var Dash;
   var fakeNetEngine;
   var parser;
-  var filterPeriod = function() {};
+  var playerInterface;
 
   beforeAll(function() {
     Dash = shaka.test.Dash;
@@ -28,6 +28,13 @@ describe('DashParser SegmentTemplate', function() {
   beforeEach(function() {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = shaka.test.Dash.makeDashParser();
+
+    playerInterface = {
+      networkingEngine: fakeNetEngine,
+      filterPeriod: function() {},
+      onEvent: fail,
+      onError: fail
+    };
   });
 
   shaka.test.Dash.makeTimelineTests(
@@ -75,7 +82,7 @@ describe('DashParser SegmentTemplate', function() {
         'dummy://foo': source,
         'http://example.com/index-500.mp4': ''
       });
-      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+      parser.start('dummy://foo', playerInterface)
           .then(function(manifest) {
             expect(manifest).toEqual(
                 Dash.makeManifestFromInit('init-500.mp4', 0, null));
@@ -104,7 +111,7 @@ describe('DashParser SegmentTemplate', function() {
         'dummy://foo': source,
         'http://example.com/index-500.mp4': ''
       });
-      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+      parser.start('dummy://foo', playerInterface)
           .then(function(manifest) {
             expect(manifest).toEqual(
                 Dash.makeManifestFromInit('init-500.mp4', 0, null));
@@ -140,7 +147,7 @@ describe('DashParser SegmentTemplate', function() {
         'http://example.com/index-500.webm': '',
         'http://example.com/init-500.webm': ''
       });
-      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+      parser.start('dummy://foo', playerInterface)
           .then(function(manifest) {
             expect(manifest).toEqual(
                 Dash.makeManifestFromInit('init-500.webm', 0, null));
@@ -175,7 +182,7 @@ describe('DashParser SegmentTemplate', function() {
         'dummy://foo': source,
         'http://example.com/index-500.mp4': ''
       });
-      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+      parser.start('dummy://foo', playerInterface)
           .then(function(manifest) {
             expect(manifest).toEqual(
                 Dash.makeManifestFromInit('init-500.mp4', 0, null));
@@ -208,7 +215,7 @@ describe('DashParser SegmentTemplate', function() {
         'dummy://foo': source,
         'http://example.com/index-500.mp4': ''
       });
-      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+      parser.start('dummy://foo', playerInterface)
           .then(function(manifest) {
             expect(manifest).toEqual(
                 Dash.makeManifestFromInit('init-500.mp4', 0, null));
@@ -311,7 +318,7 @@ describe('DashParser SegmentTemplate', function() {
       ].join('\n');
 
       fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
-      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+      parser.start('dummy://foo', playerInterface)
           .then(function(actual) {
             expect(actual).toBeTruthy();
 
@@ -367,7 +374,7 @@ describe('DashParser SegmentTemplate', function() {
       ].join('\n');
 
       fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
-      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+      parser.start('dummy://foo', playerInterface)
           .then(function(manifest) {
             var timeline = manifest.presentationTimeline;
             expect(timeline.getEarliestStart()).toBe(4);

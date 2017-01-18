@@ -36,6 +36,32 @@ shakaExtern.ManifestParser = function() {};
 
 
 /**
+ * @typedef {{
+ *   networkingEngine: !shaka.net.NetworkingEngine,
+ *   filterPeriod: function(shakaExtern.Period),
+ *   onEvent: function(!Event),
+ *   onError: function(!shaka.util.Error)
+ * }}
+ *
+ * Defines the interface of the Player to the manifest parser.  This defines
+ * fields and callback methods that the parser will use to interact with the
+ * Player.  The callback methods do not to be called as member functions (i.e.
+ * they can be called as "free" functions).
+ *
+ * @property {!shaka.net.NetworkingEngine} networkingEngine
+ *   The networking engine to use for network requests.
+ * @property {function(shakaExtern.Period)} filterPeriod
+ *   Should be called on all new Periods so that they can be filtered.
+ * @property {function(!Event)} onEvent
+ *   Should be called to raise events.
+ * @property {function(!shaka.util.Error)} onError
+ *   Should be called when an error occurs.
+ * @exportDoc
+ */
+shakaExtern.ManifestParser.PlayerInterface;
+
+
+/**
  * A factory for creating the manifest parser.  This will be called with 'new'.
  * This function is registered with shaka.media.ManifestParser to create parser
  * instances.
@@ -61,19 +87,12 @@ shakaExtern.ManifestParser.prototype.configure = function(config) {};
  * background timers that are needed.  This will only be called once.
  *
  * @param {string} uri The URI of the manifest.
- * @param {!shaka.net.NetworkingEngine} networkingEngine The networking engine
- *     to use for network requests.
- * @param {function(shakaExtern.Period)} filterPeriod A callback to be invoked
- *     on all new Periods so that they can be filtered.
- * @param {function(!shaka.util.Error)} onError A callback to be invoked on
- *     errors.
- * @param {function(!Event)} onEvent A callback to be invoked to dispatch events
- *     to the application.
+ * @param {shakaExtern.ManifestParser.PlayerInterface} playerInterface Contains
+ *   the interface to the Player.
  * @return {!Promise.<shakaExtern.Manifest>}
  * @exportDoc
  */
-shakaExtern.ManifestParser.prototype.start =
-    function(uri, networkingEngine, filterPeriod, onError, onEvent) {};
+shakaExtern.ManifestParser.prototype.start = function(uri, playerInterface) {};
 
 
 /**

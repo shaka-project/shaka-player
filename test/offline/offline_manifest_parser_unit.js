@@ -55,7 +55,7 @@ describe('OfflineManifestParser', function() {
       appMetadata: null
     }));
 
-    parser.start(uri, null, null, null)
+    parser.start(uri, /* playerInterface */ null)
         .then(function(manifest) {
           expect(manifest).toBeTruthy();
 
@@ -73,7 +73,7 @@ describe('OfflineManifestParser', function() {
     var uri = 'offline:123';
     dbEngine.get.and.returnValue(Promise.resolve(null));
 
-    parser.start(uri, null, null, null)
+    parser.start(uri, /* playerInterface */ null)
         .then(fail)
         .catch(function(err) {
           shaka.test.Util.expectToEqualError(
@@ -95,7 +95,7 @@ describe('OfflineManifestParser', function() {
     var uri = 'offline:123';
     dbEngine.get.and.returnValue(Promise.reject());
 
-    parser.start(uri, null, null, null)
+    parser.start(uri, /* playerInterface */ null)
         .then(fail)
         .catch(function(err) {
           expect(fakeDbEngineCtor).toHaveBeenCalledTimes(1);
@@ -107,7 +107,7 @@ describe('OfflineManifestParser', function() {
 
   it('will fail for invalid URI', function(done) {
     var uri = 'offline:abc';
-    parser.start(uri, null, null, null)
+    parser.start(uri, /* playerInterface */ null)
         .then(fail)
         .catch(function(err) {
           shaka.test.Util.expectToEqualError(
@@ -144,7 +144,7 @@ describe('OfflineManifestParser', function() {
       };
       dbEngine.get.and.returnValue(Promise.resolve(data));
 
-      parser.start(uri, null, null, null)
+      parser.start(uri, /* playerInterface */ null)
           .then(function(manifest) {
             expect(manifest).toBeTruthy();
             expect(manifest.minBufferTime).toEqual(jasmine.any(Number));
@@ -190,7 +190,7 @@ describe('OfflineManifestParser', function() {
       var spy = jasmine.createSpy('reconstructPeriod');
       shaka.offline.OfflineUtils.reconstructPeriod = spy;
 
-      parser.start(uri, null, null, null)
+      parser.start(uri, /* playerInterface */ null)
           .then(function(manifest) {
             expect(manifest).toBeTruthy();
 
@@ -218,7 +218,7 @@ describe('OfflineManifestParser', function() {
       var spy = jasmine.createSpy('reconstructPeriod');
       shaka.offline.OfflineUtils.reconstructPeriod = spy;
 
-      parser.start(uri, null, null, null)
+      parser.start(uri, /* playerInterface */ null)
           .then(function(manifest) {
             expect(manifest).toBeTruthy();
 

@@ -20,13 +20,19 @@ describe('DashParser Manifest', function() {
   var Dash;
   var fakeNetEngine;
   var parser;
-  var filterPeriod = function() {};
   var onEventSpy;
+  var playerInterface;
 
   beforeEach(function() {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = shaka.test.Dash.makeDashParser();
     onEventSpy = jasmine.createSpy('onEvent');
+    playerInterface = {
+      networkingEngine: fakeNetEngine,
+      filterPeriod: function() {},
+      onEvent: onEventSpy,
+      onError: fail
+    };
   });
 
   beforeAll(function() {
@@ -59,7 +65,7 @@ describe('DashParser Manifest', function() {
      */
     function testDashParser(done, manifestText) {
       fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
-      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, onEventSpy)
+      parser.start('dummy://foo', playerInterface)
           .then(function(actual) { expect(actual).toEqual(expected); })
           .catch(fail)
           .then(done);
@@ -203,7 +209,7 @@ describe('DashParser Manifest', function() {
     var source = sprintf(template, {periodContents: periodContents});
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
-    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, onEventSpy)
+    parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           expect(manifest.periods.length).toBe(1);
         })
@@ -237,7 +243,7 @@ describe('DashParser Manifest', function() {
     var source = sprintf(template, {periodContents: periodContents});
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
-    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, onEventSpy)
+    parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           expect(manifest.periods.length).toBe(3);
           expect(manifest.periods[0].startTime).toBe(10);
@@ -260,7 +266,7 @@ describe('DashParser Manifest', function() {
     ]);
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
-    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, onEventSpy)
+    parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           var stream = manifest.periods[0].variants[0].video;
           expect(stream.presentationTimeOffset).toBe(1);
@@ -285,7 +291,7 @@ describe('DashParser Manifest', function() {
     ]);
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
-    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, onEventSpy)
+    parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           var stream = manifest.periods[0].variants[0].video;
           expect(stream.presentationTimeOffset).toBe(2);
@@ -315,18 +321,21 @@ describe('DashParser Manifest', function() {
     fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
 
     var stream;
-    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, onEventSpy)
+    parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           stream = manifest.periods[0].textStreams[0];
           return stream.createSegmentIndex();
-        }).then(function() {
+        })
+        .then(function() {
           expect(stream.initSegmentReference).toBe(null);
           expect(stream.findSegmentPosition(0)).toBe(1);
           expect(stream.getSegmentReference(1))
               .toEqual(new shaka.media.SegmentReference(1, 0, 30, function() {
                 return ['http://example.com/de.vtt'];
               }, 0, null));
-        }).catch(fail).then(done);
+        })
+        .catch(fail)
+        .then(done);
   });
 
   it('correctly parses UTF-8', function(done) {
@@ -346,14 +355,16 @@ describe('DashParser Manifest', function() {
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
 
-    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, onEventSpy)
+    parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           var variant = manifest.periods[0].variants[0];
           var stream = manifest.periods[0].variants[0].audio;
           expect(stream.initSegmentReference.getUris()[0])
               .toBe('http://example.com/%C8%A7.mp4');
           expect(variant.language).toBe('\u2603');
-        }).catch(fail).then(done);
+        })
+        .catch(fail)
+        .then(done);
   });
 
   describe('supports UTCTiming', function() {
@@ -398,12 +409,7 @@ describe('DashParser Manifest', function() {
      * @param {number} expectedTime
      */
     function runTest(done, expectedTime) {
-      parser.start(
-          'http://foo.bar/manifest',
-          fakeNetEngine,
-          filterPeriod,
-          fail,
-          onEventSpy)
+      parser.start('http://foo.bar/manifest', playerInterface)
           .then(function(manifest) {
             expect(manifest.presentationTimeline).toBeTruthy();
             expect(manifest.presentationTimeline.getSegmentAvailabilityEnd())
@@ -522,13 +528,15 @@ describe('DashParser Manifest', function() {
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
 
-    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, onEventSpy)
+    parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           // First Representation should be dropped.
           var period = manifest.periods[0];
           expect(period.variants.length).toBe(1);
           expect(period.variants[0].bandwidth).toBe(200);
-        }).catch(fail).then(done);
+        })
+        .catch(fail)
+        .then(done);
   });
 
   describe('allows missing Segment* elements for text', function() {
@@ -550,10 +558,12 @@ describe('DashParser Manifest', function() {
 
       fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
 
-      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, onEventSpy)
+      parser.start('dummy://foo', playerInterface)
           .then(function(manifest) {
             expect(manifest.periods[0].textStreams.length).toBe(1);
-          }).catch(fail).then(done);
+          })
+          .catch(fail)
+          .then(done);
     });
 
     it('specified via AdaptationSet@mimeType', function(done) {
@@ -574,10 +584,12 @@ describe('DashParser Manifest', function() {
 
       fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
 
-      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, onEventSpy)
+      parser.start('dummy://foo', playerInterface)
           .then(function(manifest) {
             expect(manifest.periods[0].textStreams.length).toBe(1);
-          }).catch(fail).then(done);
+          })
+          .catch(fail)
+          .then(done);
     });
 
     it('specified via Representation@mimeType', function(done) {
@@ -598,10 +610,12 @@ describe('DashParser Manifest', function() {
 
       fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
 
-      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, onEventSpy)
+      parser.start('dummy://foo', playerInterface)
           .then(function(manifest) {
             expect(manifest.periods[0].textStreams.length).toBe(1);
-          }).catch(fail).then(done);
+          })
+          .catch(fail)
+          .then(done);
     });
   });
 
@@ -620,7 +634,7 @@ describe('DashParser Manifest', function() {
           shaka.util.Error.Code.BAD_HTTP_STATUS);
 
       fakeNetEngine.request.and.returnValue(Promise.reject(expectedError));
-      parser.start('', fakeNetEngine, filterPeriod, fail, onEventSpy)
+      parser.start('', playerInterface)
           .then(fail)
           .catch(function(error) { expect(error).toEqual(expectedError); })
           .then(done);
@@ -705,10 +719,12 @@ describe('DashParser Manifest', function() {
       ].join('\n');
 
       fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
-      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, onEventSpy)
-      .then(function() {
+      parser.start('dummy://foo', playerInterface)
+          .then(function() {
             expect(fakeNetEngine.registerResponseFilter).toHaveBeenCalled();
-          }).catch(fail).then(done);
+          })
+          .catch(fail)
+          .then(done);
     });
 
     it('updates manifest when emsg box is present', function(done) {
@@ -726,8 +742,8 @@ describe('DashParser Manifest', function() {
       ].join('\n');
 
       fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
-      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, onEventSpy)
-      .then(function() {
+      parser.start('dummy://foo', playerInterface)
+          .then(function() {
             expect(fakeNetEngine.registerResponseFilter).toHaveBeenCalled();
             var filter =
                 fakeNetEngine.registerResponseFilter.calls.mostRecent().args[0];
@@ -736,7 +752,9 @@ describe('DashParser Manifest', function() {
             fakeNetEngine.request.calls.reset();
             filter(type, response);
             expect(fakeNetEngine.request).toHaveBeenCalled();
-          }).catch(fail).then(done);
+          })
+          .catch(fail)
+          .then(done);
     });
 
     it('dispatches an event on non-typical emsg content', function(done) {
@@ -754,9 +772,8 @@ describe('DashParser Manifest', function() {
       ].join('\n');
 
       fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
-      parser.start(
-          'dummy://foo', fakeNetEngine, filterPeriod, fail, onEventSpy)
-      .then(function() {
+      parser.start('dummy://foo', playerInterface)
+          .then(function() {
             expect(fakeNetEngine.registerResponseFilter).toHaveBeenCalled();
             var filter =
                 fakeNetEngine.registerResponseFilter.calls.mostRecent().args[0];
@@ -765,7 +782,7 @@ describe('DashParser Manifest', function() {
             fakeNetEngine.request.calls.reset();
             filter(type, response);
             expect(onEventSpy)
-              .toHaveBeenCalledWith(jasmine.any(shaka.util.FakeEvent));
+                .toHaveBeenCalledWith(jasmine.any(shaka.util.FakeEvent));
             var event =
                 onEventSpy.calls.mostRecent().args[0];
             var emsg = event.detail;
@@ -777,7 +794,9 @@ describe('DashParser Manifest', function() {
             expect(emsg.id).toBe(1);
             expect(emsg.messageData).toEqual(
                 new Uint8Array([116, 101, 115, 116]));
-          }).catch(fail).then(done);
+          })
+          .catch(fail)
+          .then(done);
     });
 
     it('does not update manifest when emsg box is not present', function(done) {
@@ -795,8 +814,8 @@ describe('DashParser Manifest', function() {
       ].join('\n');
 
       fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
-      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, onEventSpy)
-      .then(function() {
+      parser.start('dummy://foo', playerInterface)
+          .then(function() {
             expect(fakeNetEngine.registerResponseFilter).toHaveBeenCalled();
             var filter =
                 fakeNetEngine.registerResponseFilter.calls.mostRecent().args[0];
@@ -806,7 +825,9 @@ describe('DashParser Manifest', function() {
             filter(type, response);
             expect(fakeNetEngine.request).not.toHaveBeenCalled();
             expect(onEventSpy).not.toHaveBeenCalled();
-          }).catch(fail).then(done);
+          })
+          .catch(fail)
+          .then(done);
     });
   });
 
@@ -831,7 +852,7 @@ describe('DashParser Manifest', function() {
     ].join('\n');
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
-    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, onEventSpy)
+    parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           expect(manifest.periods.length).toBe(1);
           expect(manifest.periods[0].variants.length).toBe(1);
@@ -844,7 +865,9 @@ describe('DashParser Manifest', function() {
             id: 2,
             type: 'video'
           }));
-        }).catch(fail).then(done);
+        })
+        .catch(fail)
+        .then(done);
   });
 
   it('skips unrecognized EssentialProperty elements', function(done) {
@@ -867,7 +890,7 @@ describe('DashParser Manifest', function() {
     ].join('\n');
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
-    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, onEventSpy)
+    parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           expect(manifest.periods.length).toBe(1);
 
@@ -880,7 +903,9 @@ describe('DashParser Manifest', function() {
           var trickModeVideo = variant && variant.video &&
                                variant.video.trickModeVideo;
           expect(trickModeVideo).toBe(null);
-        }).catch(fail).then(done);
+        })
+        .catch(fail)
+        .then(done);
   });
 
   it('sets contentType to text for embedded text mime types', function(done) {
@@ -909,13 +934,15 @@ describe('DashParser Manifest', function() {
     ].join('\n');
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
-    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, onEventSpy)
+    parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           expect(manifest.periods.length).toBe(1);
           expect(manifest.periods[0].textStreams.length).toBe(2);
           // At one time, these came out as 'application' rather than 'text'.
           expect(manifest.periods[0].textStreams[0].type).toBe('text');
           expect(manifest.periods[0].textStreams[1].type).toBe('text');
-        }).catch(fail).then(done);
+        })
+        .catch(fail)
+        .then(done);
   });
 });
