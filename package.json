@@ -11,7 +11,7 @@
     }
   ],
   "devDependencies": {
-    "htmlhint": "0.9.12",
+    "htmlhint": "yaniswang/HTMLHint#152a114f",
     "in-publish": "2.x",
     "jasmine-ajax": "3.3.x",
     "jasmine-core": "2.4.x",
