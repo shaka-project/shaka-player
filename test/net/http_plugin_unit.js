@@ -85,10 +85,7 @@ describe('HttpPlugin', function() {
     testSucceeds('https://foo.bar/204', done);
   });
 
-  // Disabled until responseURL patch is accepted in jasmine-ajax.
-  // Until then, we can't mock responseURL.
-  // See jasmine/jasmine-ajax#145
-  xit('gets redirect URLs with 302 status', function(done) {
+  it('gets redirect URLs with 302 status', function(done) {
     testSucceeds('https://foo.bar/302', done,
                  'https://foo.bar/after/302');
   });
