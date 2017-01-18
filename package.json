@@ -13,7 +13,7 @@
   "devDependencies": {
     "htmlhint": "0.9.12",
     "in-publish": "2.x",
-    "jasmine-ajax": "3.2.x",
+    "jasmine-ajax": "3.3.x",
     "jasmine-core": "2.4.x",
     "karma": "~1.1.2",
     "karma-chrome-launcher": "~1.0.1",
