@@ -1,4 +1,28 @@
+## 2.0.4 (2017-01-24)
+
+New features:
+  - Support for 4k on Chromecast Ultra
+  - Support for text tracks on Toshiba dTV
+    - https://github.com/google/shaka-player/issues/635
+    - https://github.com/google/shaka-player/pull/643
+
+Bugfixes:
+  - Fixed buffering issues at the end of streams in IE/Edge
+    - https://github.com/google/shaka-player/issues/658
+  - Fixed parsing of empty divs in TTML
+    - https://github.com/google/shaka-player/issues/646
+    - https://github.com/google/shaka-player/pull/650
+  - Fixed subtle bug in Promise.resolve polyfill on IE
+  - Fixed test failures on Chromecast
+
+Docs:
+  - Added additional docs for offline storage
+  - Updated and clarified debugging tutorial
+    - https://github.com/google/shaka-player/issues/653
+
+
 ## 2.0.3 (2017-01-09)
+
 New features:
   - Treat HTTP 202 status codes as failures
     - https://github.com/google/shaka-player/issues/645
