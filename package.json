@@ -29,7 +29,7 @@
     "requirejs": "2.x",
     "rimraf": "2.x",
     "sprintf-js": "1.x",
-    "useragent": "joeyparrish/useragent#chromecast"
+    "useragent": "^2.1.11"
   },
   "main": "dist/shaka-player.compiled.js",
   "repository": {
