@@ -9,7 +9,7 @@ and make a bad change.
 First, let's change `manifestUri` by removing the last letter.
 
 ```js
-var manifestUri = '//storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mp';
+var manifestUri = '//storage.googleapis.com/shaka-demo-assets/angel-one/dash.mp';
 ```
 
 Now reload the page.  This causes an error in the JS console that says "Error
@@ -63,52 +63,36 @@ and line numbers for errors.
   </head>
 ```
 
-Reload the page and look in the JavaScript console.  Now we see:
+Reload the page and look in the JavaScript console.  Now we see something
+similar to this (formatted a bit differently in the console):
 
 ```js
-Failed to load resource: the server responded with a status of 404 (Not Found)
-  http://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mp
+HEAD http://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mp 404 (Not Found)  http_plugin.js:94
 
-Unable to find byte-order-mark, making an educated guess.  string_utils.js:130
-
-HTTP error text:  http_plugin.js:67
-
-Failed to load resource: the server responded with a status of 404 (Not Found)
-  http://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mp
-
-Unable to find byte-order-mark, making an educated guess.  string_utils.js:130
-
-HTTP error text:  http_plugin.js:67
+HEAD http://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mp 404 (Not Found)  http_plugin.js:94
 
 HEAD request to guess manifest type failed! shaka.util.Error  manifest_parser.js:179
 
-load() failed: shaka.util.Error  player.js:448
-
-Error code 1001 object shaka.util.Error  myapp.js:55
+Error code 1001 object shaka.util.Error  myapp.js:45
 ```
 
-So much more information!  We have several logs from the library now.  We can
-see the player tried to use a HEAD request to guess the manifest type, but that
-failed, which caused load() to fail.
-
-
-We can also expand the Error object and see a human-readable message and a stack
-trace:
+We have a little more information from the library now, and we can expand the
+Error object and see a human-readable message and a stack trace:
 
 ```js
 shaka.util.Error
   category: 1
   code: 1001
   data: Array[3]
-    0: "http://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mp"
+    0: "http://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mp"
     1: 404
     2: ""
     length: 3
   message:
     "Shaka Error NETWORK.BAD_HTTP_STATUS (...)"
-  stack: "Error: Shaka Error NETWORK.BAD_HTTP_STATUS (http://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mp,404,)
-    at new shaka.util.Error (http://horcrux.kir.corp.google.com/shaka/lib/util/error.js:77:13)
-    at XMLHttpRequest.xhr.onload (http://horcrux.kir.corp.google.com/shaka/lib/net/http_plugin.js:68:16)"
+  stack: "Error: Shaka Error NETWORK.BAD_HTTP_STATUS (http://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mp,404,)
+    at new shaka.util.Error (http://localhost/shaka/lib/util/error.js:77:13)
+    at XMLHttpRequest.xhr.onload (http://localhost/shaka/lib/net/http_plugin.js:70:16)"
 ```
 
 With the information from the uncompiled library, we have the error name as well
@@ -124,7 +108,8 @@ long sequence of events leading up to an error.  You may also be asked to attach
 logs as part of a bug report to help the Shaka Player team understand your bug.
 
 For this, you want to set the log level.  The log level lets you control what
-logs are shown by the uncompiled library.  To set the log level:
+logs are shown by the uncompiled library.  To set the log level, add one of
+these to the top of `initApp()` in myapp.js:
 
 ```js
 // Debug logs, when the default of INFO isn't enough:
@@ -138,6 +123,41 @@ shaka.log.setLevel(shaka.log.Level.V2);
 ```
 
 Please note that this method is not available from the compiled library.
+
+If we set the level to `V1` and reload, we get something like this in the
+JavaScript console:
+
+```js
+HEAD http://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mp 404 (Not Found)  http_plugin.js:94
+
+Unable to find byte-order-mark, making an educated guess.  string_utils.js:130
+
+HTTP error text:  http_plugin.js:69
+
+HEAD http://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mp 404 (Not Found)  http_plugin.js:94
+
+Unable to find byte-order-mark, making an educated guess.  string_utils.js:130
+
+HTTP error text:  http_plugin.js:69
+
+HEAD request to guess manifest type failed! shaka.util.Error  manifest_parser.js:179
+
+load() failed: shaka.util.Error  player.js:498
+
+Error code 1001 object shaka.util.Error  myapp.js:48
+```
+
+So much more information!  We can now see that the failed HEAD request caused
+load() to fail.
+
+
+#### Wrap up
+
+To sum up, remember these points when debugging your application:
+
+ - Use the uncompiled version of Shaka Player for debugging and integration work
+ - Refer to the docs for error codes
+ - Increase the log level when you need more detail
 
 
 #### Continue the Tutorials
