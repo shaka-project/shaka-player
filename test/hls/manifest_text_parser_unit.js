@@ -16,13 +16,7 @@
  */
 
 
-describe('HlsParser', function() {
-  var parser;
-
-  beforeEach(function() {
-    parser = new shaka.hls.HlsParser();
-  });
-
+describe('ManifestTextParser', function() {
   describe('parsePlaylist', function() {
     it('rejects invalid playlists', function() {
       verifyError('invalid playlist',
@@ -96,7 +90,7 @@ describe('HlsParser', function() {
           shaka.util.Error.Category.MANIFEST,
           code);
       try {
-        parser.parsePlaylist(data);
+        shaka.hls.ManifestTextParser.parsePlaylist(data);
         fail('Invalid HLS playlist should not be supported!');
       } catch (e) {
         shaka.test.Util.expectToEqualError(e, error);
@@ -214,7 +208,7 @@ describe('HlsParser', function() {
           shaka.util.Error.Code.INVALID_HLS_TAG);
       var text = shaka.util.StringUtils.toUTF8('#EXTM3U\ninvalid tag');
       try {
-        parser.parsePlaylist(text);
+        shaka.hls.ManifestTextParser.parsePlaylist(text);
         fail('Invalid HLS tags should not be supported!');
       } catch (e) {
         shaka.test.Util.expectToEqualError(e, error);
@@ -229,7 +223,7 @@ describe('HlsParser', function() {
      */
   function verifyPlaylist(expected, string) {
     var data = shaka.util.StringUtils.toUTF8(string);
-    var actual = parser.parsePlaylist(data);
+    var actual = shaka.hls.ManifestTextParser.parsePlaylist(data);
 
     expect(actual).toBeTruthy();
     expect(actual.type).toEqual(expected.type);
