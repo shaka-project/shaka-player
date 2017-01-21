@@ -64,6 +64,7 @@ common_closure_opts = [
 
     '--extra_annotation_name=listens',
     '--extra_annotation_name=exportDoc',
+    '--extra_annotation_name=exportInterface',
 
     '--conformance_configs',
     ('%s/build/conformance.textproto' %
@@ -257,6 +258,37 @@ class Build(object):
     if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
       print >> sys.stderr, 'Build failed'
       return False
+
+    return True
+
+  def generate_externs(self, name):
+    """Generates externs for the files in |self.include|.
+
+    Args:
+      name: The name of the build.
+
+    Returns:
+      True on success; False on failure.
+    """
+    # Update node modules if needed.
+    if not shakaBuildHelpers.update_node_modules():
+      return False
+
+    files = [shakaBuildHelpers.cygwin_safe_path(f) for f in self.include]
+
+    extern_generator = shakaBuildHelpers.cygwin_safe_path(os.path.join(
+        shakaBuildHelpers.get_source_base(), 'build', 'generateExterns.js'))
+
+    output = shakaBuildHelpers.cygwin_safe_path(os.path.join(
+        shakaBuildHelpers.get_source_base(), 'dist',
+        'shaka-player.' + name + '.externs.js'))
+
+    # TODO: support Windows builds
+    cmd_line = ['node', extern_generator, '--output', output] + files
+    if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
+      print >> sys.stderr, 'Externs generation failed'
+      return False
+
     return True
 
   def build_library(self, name, rebuild, is_debug):
@@ -307,6 +339,9 @@ class Build(object):
     # source locations.
     with open(result_file, 'a') as f:
       f.write('//# sourceMappingURL=shaka-player.' + name + '.map')
+
+    if not self.generate_externs(name):
+      return False
 
     return True
 
