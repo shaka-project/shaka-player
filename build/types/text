@@ -4,6 +4,3 @@
 +../../lib/media/mp4_vtt_parser.js
 +../../lib/media/ttml_text_parser.js
 +../../lib/media/vtt_text_parser.js
-+../../lib/util/mp4_parser.js
-
-
