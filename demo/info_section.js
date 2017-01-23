@@ -57,7 +57,9 @@ shakaDemo.onTracksChanged_ = function(event) {
 shakaDemo.updateVariantTracks_ = function() {
   var trackList = document.getElementById('variantTracks');
   var langList = document.getElementById('audioLanguages');
-  var language = langList.options[langList.selectedIndex].value;
+  var language = langList.selectedIndex >= 0 ?
+      langList.options[langList.selectedIndex].value :
+      '';
 
   var tracks = shakaDemo.player_.getVariantTracks();
 
@@ -77,7 +79,9 @@ shakaDemo.updateTextTracks_ = function() {
   var trackList = document.getElementById('textTracks');
 
   var langList = document.getElementById('textLanguages');
-  var language = langList.options[langList.selectedIndex].value;
+  var language = langList.selectedIndex >= 0 ?
+      langList.options[langList.selectedIndex].value :
+      '';
 
   var tracks = shakaDemo.player_.getTextTracks();
 
