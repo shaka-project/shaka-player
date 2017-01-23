@@ -41,6 +41,7 @@
 +../../lib/util/i_destroyable.js
 +../../lib/util/language_utils.js
 +../../lib/util/map_utils.js
++../../lib/util/mp4_parser.js
 +../../lib/util/multi_map.js
 +../../lib/util/pssh.js
 +../../lib/util/public_promise.js
