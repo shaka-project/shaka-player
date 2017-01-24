@@ -356,7 +356,7 @@ describe('VttTextParser', function() {
         'WEBVTT\n\n' +
         '0:00:20.000 --> 0:00:40.000 align:center size:56% vertical:lr\n' +
         'Test',
-        undefined,
+        /* offset */ 7,  // ignored when using relative timestamps
         20,
         true);
   });
