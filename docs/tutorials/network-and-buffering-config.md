@@ -73,6 +73,14 @@ content will be removed from the start of the buffer to save memory.
 All of these settings should be customized for your application.  The default
 values are very conservative.
 
+#### Buffering and Adaptation
+
+While we are playing, we will only buffer the currently chosen stream.  We do
+not download other bitrates until AbrManager tells us to switch.  We also (by
+default) do not clear the buffer when we adapt.  This means that when we adapt
+to a different bitrate, it may not be visible for a while because the old
+buffer will still be used.  There will be at most `bufferingGoal` seconds left
+of the old bitrate in the buffer.
 
 #### Try it out
 

@@ -21,7 +21,16 @@
 
 
 /**
- * An object which selects Streams for adaptive bit-rate presentations.
+ * An object which selects Streams from a set of possible choices.  This also
+ * watches for system changes to automatically adapt for the current streaming
+ * requirements.  For example, when the network slows down, this class is in
+ * charge of telling the Player which streams to switch to in order to reduce
+ * the required bandwidth.
+ *
+ * This class is given a set of streams to choose from when the Player starts
+ * up.  This class should store these and use them to make future decisions
+ * about ABR.  It is up to this class how those decisions are made.  All the
+ * Player will do is tell this class what streams to choose from.
  *
  * @interface
  * @exportDoc
@@ -30,7 +39,8 @@ shakaExtern.AbrManager = function() {};
 
 
 /**
- * A callback which implementations call to switch streams.
+ * A callback from the Player that should be called when the AbrManager decides
+ * it's time to change to a different set of streams.
  *
  * The first argument is a map of content types to chosen streams.
  *
@@ -50,6 +60,15 @@ shakaExtern.AbrManager.SwitchCallback;
  * @exportDoc
  */
 shakaExtern.AbrManager.prototype.init = function(switchCallback) {};
+
+
+/**
+ * Stops any background timers and frees any objects held by this instance.
+ * This will only be called after a call to init.
+ *
+ * @exportDoc
+ */
+shakaExtern.AbrManager.prototype.stop = function() {};
 
 
 /**
@@ -113,15 +132,6 @@ shakaExtern.AbrManager.prototype.disable = function() {};
  */
 shakaExtern.AbrManager.prototype.segmentDownloaded = function(
     deltaTimeMs, numBytes) {};
-
-
-/**
- * Stops any background timers and frees any objects held by this instance.
- * This will only be called after a call to init.
- *
- * @exportDoc
- */
-shakaExtern.AbrManager.prototype.stop = function() {};
 
 
 /**
