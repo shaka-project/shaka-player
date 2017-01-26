@@ -1393,6 +1393,39 @@ describe('DrmEngine', function() {
       }).catch(fail).then(done);
       // onError is a failure by default.
     });
+
+    it('still completes if session is not callable', function(done) {
+      // Before, we would use |session.closed| as part of destroy().  However,
+      // this doesn't work if the session is not callable (no license request
+      // sent).  So |session.closed| should never resolve and |session.close()|
+      // should be rejected and destroy() should still succeed.
+      // https://github.com/google/shaka-player/issues/664
+      initAndAttach().then(function() {
+        session1.closed = new shaka.util.PublicPromise();
+        session2.closed = new shaka.util.PublicPromise();
+        session1.close.and.returnValue(Promise.reject());
+        session2.close.and.returnValue(Promise.reject());
+
+        var initData1 = new Uint8Array(1);
+        var initData2 = new Uint8Array(2);
+        mockVideo.on['encrypted'](
+            { initDataType: 'webm', initData: initData1 });
+        mockVideo.on['encrypted'](
+            { initDataType: 'webm', initData: initData2 });
+
+        // Still resolve these since we are mocking close and closed.  This
+        // ensures DrmEngine is in the correct state.
+        var message = new Uint8Array(0);
+        session1.on['message']({ target: session1, message: message });
+        session1.update.and.returnValue(Promise.resolve());
+        session2.on['message']({ target: session2, message: message });
+        session2.update.and.returnValue(Promise.resolve());
+
+        return shaka.test.Util.delay(0.5);
+      }).then(function() {
+        return drmEngine.destroy();
+      }).catch(fail).then(done);
+    });
   });  // describe('destroy')
 
   describe('getDrmInfo', function() {
