@@ -1452,6 +1452,67 @@ describe('DrmEngine', function() {
     });
   });  // describe('getDrmInfo')
 
+  describe('getCommonDrmInfos', function() {
+    it('returns one array if the other is empty', function(done) {
+      var drmInfo = {
+        keySystem: 'drm.abc',
+        licenseServerUri: 'http://abc.drm/license',
+        distinctiveIdentifierRequired: true,
+        persistentStateRequired: true,
+        audioRobustness: 'good',
+        videoRobustness: 'really_really_ridiculously_good',
+        serverCertificate: undefined,
+        initData: [],
+        keyIds: ['deadbeefdeadbeefdeadbeefdeadbeef']
+      };
+      var returnedOne = shaka.media.DrmEngine.getCommonDrmInfos([drmInfo], []);
+      var returnedTwo = shaka.media.DrmEngine.getCommonDrmInfos([], [drmInfo]);
+      expect(returnedOne).toEqual([drmInfo]);
+      expect(returnedTwo).toEqual([drmInfo]);
+      done();
+    });
+
+    it('merges drmInfos if two exist', function(done) {
+      var serverCert = new Uint8Array(0);
+      var drmInfoVideo = {
+        keySystem: 'drm.abc',
+        licenseServerUri: 'http://abc.drm/license',
+        distinctiveIdentifierRequired: false,
+        persistentStateRequired: true,
+        videoRobustness: 'really_really_ridiculously_good',
+        serverCertificate: serverCert,
+        initData: ['blah'],
+        keyIds: ['deadbeefdeadbeefdeadbeefdeadbeef']
+      };
+      var drmInfoAudio = {
+        keySystem: 'drm.abc',
+        licenseServerUri: undefined,
+        distinctiveIdentifierRequired: true,
+        persistentStateRequired: false,
+        audioRobustness: 'good',
+        serverCertificate: undefined,
+        initData: ['init data'],
+        keyIds: ['eadbeefdeadbeefdeadbeefdeadbeefd']
+      };
+      var drmInfoDesired = {
+        keySystem: 'drm.abc',
+        licenseServerUri: 'http://abc.drm/license',
+        distinctiveIdentifierRequired: true,
+        persistentStateRequired: true,
+        audioRobustness: 'good',
+        videoRobustness: 'really_really_ridiculously_good',
+        serverCertificate: serverCert,
+        initData: ['blah', 'init data'],
+        keyIds: ['deadbeefdeadbeefdeadbeefdeadbeef',
+                 'eadbeefdeadbeefdeadbeefdeadbeefd']
+      };
+      var returned = shaka.media.DrmEngine.getCommonDrmInfos([drmInfoVideo],
+          [drmInfoAudio]);
+      expect(returned).toEqual([drmInfoDesired]);
+      done();
+    });
+  }); // describe('getCommonDrmInfos')
+
   describe('configure', function() {
     it('delays initial license requests if configured to', function(done) {
       config.delayLicenseRequestUntilPlayed = true;

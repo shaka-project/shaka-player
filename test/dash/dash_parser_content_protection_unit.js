@@ -91,11 +91,17 @@ describe('DashParser ContentProtection', function() {
    * Build an expected manifest which checks DRM-related fields.
    *
    * @param {!Array.<!Object>} drmInfos A list of DrmInfo-like objects.
-   * @param {?string} keyId1 Key ID for the 1st Representation.
-   * @param {?string} keyId2 Key ID for the 2nd Representation.
    * @return {Object} A Manifest-like object.
    */
-  function buildExpectedManifest(drmInfos, keyId1, keyId2) {
+  function buildExpectedManifest(drmInfos) {
+    var keyIds = [];
+    if (drmInfos.length > 0) {
+      keyIds = drmInfos[0].sample.keyIds;
+    }
+    if (keyIds.length == 0) {
+      keyIds = [null, null];
+    }
+
     return jasmine.objectContaining({
       periods: [
         jasmine.objectContaining({
@@ -103,13 +109,13 @@ describe('DashParser ContentProtection', function() {
             jasmine.objectContaining({
               drmInfos: drmInfos,
               video: jasmine.objectContaining({
-                keyId: keyId1
+                keyId: keyIds[0]
               })
             }),
             jasmine.objectContaining({
               drmInfos: drmInfos,
               video: jasmine.objectContaining({
-                keyId: keyId2
+                keyId: keyIds[1]
               })
             })
           ], // variants
@@ -123,10 +129,11 @@ describe('DashParser ContentProtection', function() {
    * Build an expected DrmInfo based on a key system and optional PSSHs.
    *
    * @param {string} keySystem
+   * @param {Array.<string>=} opt_keyIds
    * @param {Array.<string>=} opt_base64Psshs
    * @return {Object} A DrmInfo-like object.
    */
-  function buildDrmInfo(keySystem, opt_base64Psshs) {
+  function buildDrmInfo(keySystem, opt_keyIds, opt_base64Psshs) {
     var base64Psshs = opt_base64Psshs || [];
     var initData = base64Psshs.map(function(base64) {
       return {
@@ -134,7 +141,9 @@ describe('DashParser ContentProtection', function() {
         initData: shaka.util.Uint8ArrayUtils.fromBase64(base64)
       };
     });
-    return jasmine.objectContaining({keySystem: keySystem, initData: initData});
+    var keyIds = opt_keyIds || [];
+    var containing = {keySystem: keySystem, initData: initData, keyIds: keyIds};
+    return jasmine.objectContaining(containing);
   }
 
   beforeAll(function() {
@@ -143,7 +152,7 @@ describe('DashParser ContentProtection', function() {
 
   it('handles clear content', function(done) {
     var source = buildManifestText([], [], []);
-    var expected = buildExpectedManifest([], null, null);
+    var expected = buildExpectedManifest([]);
     testDashParser(done, source, expected);
   });
 
@@ -163,7 +172,7 @@ describe('DashParser ContentProtection', function() {
         var drmInfos = keySystems.map(function(keySystem) {
           return buildDrmInfo(keySystem);
         });
-        var expected = buildExpectedManifest(drmInfos, null, null);
+        var expected = buildExpectedManifest(drmInfos);
         testDashParser(done, source, expected);
       });
     }
@@ -205,12 +214,12 @@ describe('DashParser ContentProtection', function() {
       '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
       '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />'
     ], [], []);
-    var expected = buildExpectedManifest(
-        [buildDrmInfo('com.widevine.alpha')],
+    var expected = buildExpectedManifest([
+      buildDrmInfo('com.widevine.alpha', [
         // Representation 1 key ID
         'deadbeeffeedbaadf00d000008675309',
         // Representation 2 key ID
-        'deadbeeffeedbaadf00d000008675309');
+        'deadbeeffeedbaadf00d000008675309'])]);
     testDashParser(done, source, expected);
   });
 
@@ -233,12 +242,12 @@ describe('DashParser ContentProtection', function() {
       '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
       '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-018006492568" />'
     ]);
-    var expected = buildExpectedManifest(
-        [buildDrmInfo('com.widevine.alpha')],
+    var expected = buildExpectedManifest([
+      buildDrmInfo('com.widevine.alpha', [
         // Representation 1 key ID
         'baadf00dfeeddeafbeef000004390116',
         // Representation 2 key ID
-        'baadf00dfeeddeafbeef018006492568');
+        'baadf00dfeeddeafbeef018006492568'])]);
     testDashParser(done, source, expected);
   });
 
@@ -256,14 +265,13 @@ describe('DashParser ContentProtection', function() {
     ], [], []);
     var expected = buildExpectedManifest(
         [
-          buildDrmInfo('com.widevine.alpha', [
+          buildDrmInfo('com.widevine.alpha', [], [
             'ZmFrZSBXaWRldmluZSBQU1NI'
           ]),
-          buildDrmInfo('com.microsoft.playready', [
+          buildDrmInfo('com.microsoft.playready', [], [
             'bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5'
           ])
-        ],
-        null, null);
+        ]);
     testDashParser(done, source, expected);
   });
 
@@ -279,7 +287,7 @@ describe('DashParser ContentProtection', function() {
           buildDrmInfo('com.widevine.alpha'),
           buildDrmInfo('com.microsoft.playready'),
           buildDrmInfo('com.adobe.primetime')
-        ])), null, null);
+        ])));
     testDashParser(done, source, expected);
   });
 
@@ -296,13 +304,13 @@ describe('DashParser ContentProtection', function() {
       '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95" />'
     ], [], []);
     var expected = buildExpectedManifest([
-      buildDrmInfo('com.widevine.alpha', [
+      buildDrmInfo('com.widevine.alpha', [], [
         'b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'
       ]),
-      buildDrmInfo('com.microsoft.playready', [
+      buildDrmInfo('com.microsoft.playready', [], [
         'b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'
       ])
-    ], null, null);
+    ]);
     testDashParser(done, source, expected);
   });
 
@@ -323,13 +331,13 @@ describe('DashParser ContentProtection', function() {
       '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95" />'
     ], [], []);
     var expected = buildExpectedManifest([
-      buildDrmInfo('com.widevine.alpha', [
+      buildDrmInfo('com.widevine.alpha', [], [
         'VGltZSBpcyBhbiBpbGx1c2lvbi4gTHVuY2h0aW1lIGRvdWJseSBzby4='
       ]),
-      buildDrmInfo('com.microsoft.playready', [
+      buildDrmInfo('com.microsoft.playready', [], [
         'b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'
       ])
-    ], null, null);
+    ]);
     testDashParser(done, source, expected);
   });
 
@@ -345,7 +353,7 @@ describe('DashParser ContentProtection', function() {
     ], [], []);
     var expected = buildExpectedManifest([
       buildDrmInfo('com.widevine.alpha')
-    ], null, null);
+    ]);
     testDashParser(done, source, expected);
   });
 
@@ -375,7 +383,8 @@ describe('DashParser ContentProtection', function() {
           videoRobustness: '',
           audioRobustness: '',
           serverCertificate: null,
-          initData: []
+          initData: [],
+          keyIds: []
         }];
       } else if (schemeIdUri == 'http://example.com/drm') {
         return [{
@@ -386,7 +395,8 @@ describe('DashParser ContentProtection', function() {
           videoRobustness: '',
           audioRobustness: '',
           serverCertificate: null,
-          initData: []
+          initData: [],
+          keyIds: []
         }];
       } else {
         return null;
@@ -397,7 +407,7 @@ describe('DashParser ContentProtection', function() {
       buildDrmInfo('com.custom.baadd00d'),
       buildDrmInfo('com.widevine.alpha'),
       buildDrmInfo('com.example.drm')
-    ], null, null);
+    ]);
 
     testDashParser(done, source, expected, callback);
   });
@@ -413,12 +423,12 @@ describe('DashParser ContentProtection', function() {
       '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
       '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />'
     ], [], []);
-    var expected = buildExpectedManifest(
-        [buildDrmInfo('')],  // placeholder: only unrecognized schemes found
+    var expected = buildExpectedManifest([
+      buildDrmInfo('', [  // placeholder: only unrecognized schemes found
         // Representation 1 key ID
         'deadbeeffeedbaadf00d000008675309',
         // Representation 2 key ID
-        'deadbeeffeedbaadf00d000008675309');
+        'deadbeeffeedbaadf00d000008675309'])]);
     testDashParser(done, source, expected);
   });
 
@@ -435,8 +445,7 @@ describe('DashParser ContentProtection', function() {
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />'
     ]);
     var expected = buildExpectedManifest(
-        [buildDrmInfo('com.widevine.alpha')],
-        null, null);
+        [buildDrmInfo('com.widevine.alpha')]);
     testDashParser(done, source, expected);
   });
 
@@ -455,8 +464,7 @@ describe('DashParser ContentProtection', function() {
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />'
     ]);
     var expected = buildExpectedManifest(
-        [buildDrmInfo('com.widevine.alpha')],
-        null, null);
+        [buildDrmInfo('com.widevine.alpha')]);
     testDashParser(done, source, expected);
   });
 
@@ -478,12 +486,12 @@ describe('DashParser ContentProtection', function() {
       '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
       '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />'
     ]);
-    var expected = buildExpectedManifest(
-        [buildDrmInfo('com.widevine.alpha')],
+    var expected = buildExpectedManifest([
+      buildDrmInfo('com.widevine.alpha', [
         // Representation 1 key ID
         'deadbeeffeedbaadf00d000008675309',
         // Representation 2 key ID
-        'baadf00dfeeddeafbeef000004390116');
+        'baadf00dfeeddeafbeef000004390116'])]);
     testDashParser(done, source, expected);
   });
 
@@ -507,15 +515,16 @@ describe('DashParser ContentProtection', function() {
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"',
       '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />'
     ]);
+    var keyIds = [
+      // Representation 1 key ID
+      'deadbeeffeedbaadf00d000008675309',
+      // Representation 2 key ID
+      'baadf00dfeeddeafbeef000004390116'];
     var expected = buildExpectedManifest(
         [
-          buildDrmInfo('com.microsoft.playready'),
-          buildDrmInfo('com.widevine.alpha')
-        ],
-        // Representation 1 key ID
-        'deadbeeffeedbaadf00d000008675309',
-        // Representation 2 key ID
-        'baadf00dfeeddeafbeef000004390116');
+          buildDrmInfo('com.microsoft.playready', keyIds),
+          buildDrmInfo('com.widevine.alpha', keyIds)
+        ]);
     testDashParser(done, source, expected);
   });
 
@@ -529,15 +538,17 @@ describe('DashParser ContentProtection', function() {
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"',
       '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />'
     ], [], []);
+    var keyIds = [
+      // Representation 1 key ID
+      'deadbeeffeedbaadf00d000008675309',
+      // Representation 2 key ID
+      'deadbeeffeedbaadf00d000008675309'
+    ];
     var expected = buildExpectedManifest(
         [
-          buildDrmInfo('com.microsoft.playready'),
-          buildDrmInfo('com.widevine.alpha')
-        ],
-        // Representation 1 key ID
-        'deadbeeffeedbaadf00d000008675309',
-        // Representation 2 key ID
-        'deadbeeffeedbaadf00d000008675309');
+          buildDrmInfo('com.microsoft.playready', keyIds),
+          buildDrmInfo('com.widevine.alpha', keyIds)
+        ]);
     testDashParser(done, source, expected);
   });
 
@@ -549,7 +560,7 @@ describe('DashParser ContentProtection', function() {
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />'
     ], [], []);
     var expected = buildExpectedManifest(
-        [buildDrmInfo('com.widevine.alpha')], null, null);
+        [buildDrmInfo('com.widevine.alpha')]);
     testDashParser(done, source, expected);
   });
 
