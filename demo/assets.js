@@ -801,6 +801,20 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE
     ]
   },
+  {
+    name: 'Live sim (multi-period)',
+    manifestUri: '//vm2.dashif.org/livesim/utc_head/periods_20/testpic_2s/Manifest.mpd',  // gjslint: disable=110
+
+    encoder: shakaAssets.Encoder.UNKNOWN,
+    source: shakaAssets.Source.DASH_IF,
+    drm: [],
+    features: [
+      shakaAssets.Feature.LIVE,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.MULTIPERIOD,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE
+    ]
+  },
   // }}}
 
   // Wowza assets {{{
@@ -1033,6 +1047,4 @@ shakaAssets.testAssets = [
     ]
   }
   // }}}
-
-  // TODO: Add a stable live stream with multiple periods.
 ];
