@@ -1,3 +1,18 @@
+## 2.0.5 (2017-01-30)
+
+Bugfixes:
+  - Fix several bugs with multi-Period content
+    - Possible hang when seeking
+    - Fix race between buffering and Period transition
+    - Fix race between rapid Period transitions
+    - https://github.com/google/shaka-player/issues/655
+  - Fix hang in destroy() when EME sessions are in a bad state
+    - https://github.com/google/shaka-player/issues/664
+  - Fix doubling of time offset for segment-relative cues
+    - https://github.com/google/shaka-player/issues/595
+    - https://github.com/google/shaka-player/pull/599
+
+
 ## 2.0.4 (2017-01-24)
 
 New features:
