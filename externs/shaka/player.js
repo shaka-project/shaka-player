@@ -497,12 +497,52 @@ shakaExtern.AbrConfiguration;
 
 /**
  * @typedef {{
+ *   line: ?number,
+ *   position: ?number,
+ *   align: ?string
+ * }}
+ *
+ * @property {?number} line
+ *   Positioning of the cue box as percentage of the video
+ *   viewport height (y)
+ * @property {?number} position
+ *   Positioning of the cue box as percentage of the video
+ *   viewport width (x)
+ * @property {?string} align
+ *   Text alignment (left|center|right)
+ */
+shakaExtern.CueStyle;
+
+
+/**
+ * @typedef {{
+ *   override: boolean,
+ *   region: ?VTTRegion,
+ *   cueStyling: ?shakaExtern.CueStyle
+ * }}
+ *
+ * @property {boolean} override
+ *   Override browser default VTT Cue region
+ * @property {?VTTRegion} region
+ *   When override parameter is set to true then
+ *   override browser default VTT Cue region with this VTT Region.
+ * @property {?shakaExtern.CueStyle} cueStyling
+ *   When override parameter is set to true then
+ *   apply this style on all subtitle cues.
+ * @exportDoc
+ */
+shakaExtern.TextConfiguration;
+
+
+/**
+ * @typedef {{
  *   drm: shakaExtern.DrmConfiguration,
  *   manifest: shakaExtern.ManifestConfiguration,
  *   streaming: shakaExtern.StreamingConfiguration,
  *   abr: shakaExtern.AbrConfiguration,
  *   preferredAudioLanguage: string,
  *   preferredTextLanguage: string,
+ *   text: shakaExtern.TextConfiguration,
  *   restrictions: shakaExtern.Restrictions
  * }}
  *
@@ -522,7 +562,10 @@ shakaExtern.AbrConfiguration;
  *   The preferred language to use for text tracks.  If a matching text track
  *   is found, and the selected audio and text tracks have different languages,
  *   the text track will be shown.
- *   Changing this during playback will not affect the current playback.
+ *   Changing this during playback will cause the language selection algorithm
+ *   to run again, and may change the active text track.
+ * @property {shakaExtern.TextConfiguration} text
+ *   Text engine configuration and settings. Cannot be changed after load.
  * @property {shakaExtern.Restrictions} restrictions
  *   The application restrictions to apply to the tracks.  The track must
  *   meet all the restrictions to be playable.

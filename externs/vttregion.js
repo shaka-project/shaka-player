@@ -16,36 +16,41 @@
  */
 
 /**
- * @fileoverview Externs for TextTrack and TextTrackCue which are
- * missing from the closure compiler.
+ * @fileoverview Externs for VTTRegion based on this
+ * {@link https://w3c.github.io/webvtt/#the-vttregion-interface API}
  *
  * @externs
  */
 
 
-/** @type {string} */
-TextTrack.prototype.label;
+
+/** @interface */
+function VTTRegion() {}
 
 
-/** @type {?VTTRegion} */
-TextTrackCue.prototype.region;
+/** @type {number} */
+VTTRegion.prototype.width;
 
 
-/** @type {string} */
-TextTrackCue.prototype.positionAlign;
+/** @type {number} */
+VTTRegion.prototype.lines;
 
 
-/** @type {string} */
-TextTrackCue.prototype.lineAlign;
+/** @type {number} */
+VTTRegion.prototype.regionAnchorX;
 
 
-/** @type {number|null|string} */
-TextTrackCue.prototype.line;
+/** @type {number} */
+VTTRegion.prototype.regionAnchorY;
 
 
-/** @type {string} */
-TextTrackCue.prototype.vertical;
+/** @type {number} */
+VTTRegion.prototype.viewportAnchorX;
 
 
-/** @type {boolean} */
-TextTrackCue.prototype.snapToLines;
+/** @type {number} */
+VTTRegion.prototype.viewportAnchorY;
+
+
+/** @type {?string} */
+VTTRegion.prototype.scroll;

@@ -32,7 +32,7 @@ describe('TextEngine', function() {
     mockParser = jasmine.createSpy('mockParser');
     mockTrack = createMockTrack();
     TextEngine.registerParser(dummyMimeType, mockParser);
-    textEngine = new TextEngine(mockTrack, false);
+    textEngine = new TextEngine(mockTrack, false, null);
     textEngine.initParser(dummyMimeType);
   });
 
@@ -315,6 +315,61 @@ describe('TextEngine', function() {
     });
   });
 
+  describe('Cue Overrides', function() {
+    beforeEach(function() {
+      mockParser.and.callFake(function() {
+        return [createFakeCuePos(0, 1, 0, 0),
+                createFakeCuePos(1, 2, 20, 20),
+                createFakeCuePos(2, 3, 50, 50)];
+      });
+    });
+
+    it('overrides cue box x- and y-position', function(done) {
+      var cueOverrides = {
+        cueRegion: null,
+        cueStyling: null
+      };
+      var cueRegion = new shaka.polyfill.VTTCue.VTTRegion();
+      cueRegion.viewportAnchorX = 30;
+      cueRegion.viewportAnchorY = 80;
+      cueOverrides.cueRegion = cueRegion;
+
+      textEngine = new TextEngine(mockTrack, false, cueOverrides);
+      textEngine.initParser(dummyMimeType);
+      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+        expect(mockTrack.addCue)
+          .toHaveBeenCalledWith(createFakeCuePos(0, 1, 30, 80));
+        expect(mockTrack.addCue)
+          .toHaveBeenCalledWith(createFakeCuePos(1, 2, 50, 100));
+        expect(mockTrack.addCue)
+          .toHaveBeenCalledWith(createFakeCuePos(2, 3, 80, 100));
+      }).catch(fail).then(done);
+    });
+    it('overrides cue styling', function(done) {
+      var cueOverrides = {
+        cueRegion: null,
+        cueStyling: null
+      };
+      var cueStyling = {
+        position: 10,
+        line: 80,
+        align: null
+      };
+      cueOverrides.cueStyling = cueStyling;
+      textEngine = new TextEngine(mockTrack, false, cueOverrides);
+      textEngine.initParser(dummyMimeType);
+      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+        expect(mockTrack.addCue)
+          .toHaveBeenCalledWith(createFakeCuePos(0, 1, 10, 80));
+        expect(mockTrack.addCue)
+          .toHaveBeenCalledWith(createFakeCuePos(1, 2, 10, 80));
+        expect(mockTrack.addCue)
+          .toHaveBeenCalledWith(createFakeCuePos(2, 3, 10, 80));
+      }).catch(fail).then(done);
+    });
+  });
+
+
   function createMockTrack() {
     var track = {
       addCue: jasmine.createSpy('addCue'),
@@ -334,5 +389,12 @@ describe('TextEngine', function() {
 
   function createFakeCue(startTime, endTime) {
     return { startTime: startTime, endTime: endTime };
+  }
+
+  function createFakeCuePos(startTime, endTime, position, line) {
+    return {
+      startTime: startTime, endTime: endTime,
+      position: position, line: line
+    };
   }
 });
