@@ -1091,6 +1091,71 @@ describe('StreamingEngine', function() {
         text: [true, true, true, true]
       });
     });
+
+    it('into partially buffered regions', function() {
+      // Seeking into a region where some buffers (text) are buffered and some
+      // are not should work despite the media states requiring different
+      // periods.
+      playhead.getTime.and.returnValue(0);
+
+      onChooseStreams.and.callFake(function(period) {
+        expect(period).toBe(manifest.periods[0]);
+
+        onChooseStreams.and.callFake(function(period) {
+          expect(period).toBe(manifest.periods[1]);
+
+          // Should get another call for the unbuffered Period transition.
+          onChooseStreams.and.callFake(defaultOnChooseStreams);
+
+          mediaSourceEngine.endOfStream.and.callFake(function() {
+            // Should have the first Period entirely buffered.
+            expect(mediaSourceEngine.initSegments).toEqual({
+              audio: [false, true],
+              video: [false, true],
+              text: []
+            });
+            expect(mediaSourceEngine.segments).toEqual({
+              audio: [true, true, true, true],
+              video: [true, true, true, true],
+              text: [true, true, true, true]
+            });
+
+            // Fake the audio/video buffers being removed.
+            mediaSourceEngine.segments.audio = [false, false, true, true];
+            mediaSourceEngine.segments.video = [false, false, true, true];
+
+            // Seek back into the first Period.
+            expect(playhead.getTime()).toBe(26);
+            playheadTime -= 20;
+            streamingEngine.seeked();
+
+            mediaSourceEngine.endOfStream.and.stub();
+          });
+
+          return defaultOnChooseStreams(period);
+        });
+
+        return defaultOnChooseStreams(period);
+      });
+
+      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+
+      // Here we go!
+      streamingEngine.init();
+      runTest();
+
+      // Verify buffers.
+      expect(mediaSourceEngine.initSegments).toEqual({
+        audio: [false, true],
+        video: [false, true],
+        text: []
+      });
+      expect(mediaSourceEngine.segments).toEqual({
+        audio: [true, true, true, true],
+        video: [true, true, true, true],
+        text: [true, true, true, true]
+      });
+    });
   });
 
   describe('handles seeks (live)', function() {
