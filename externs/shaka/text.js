@@ -15,24 +15,15 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.util.IDestroyable');
 
-
-
-/**
- * An interface to standardize how objects are destroyed.
- * @interface
- * @exportInterface
- */
-shaka.util.IDestroyable = function() {};
+/** @externs */
 
 
 /**
- * Destroys the object, releasing all resources and shutting down all
- * operations.  Returns a Promise which is resolved when destruction is
- * complete.  This Promise should never be rejected.
+ * Parses a text buffer into an array of cues.
  *
- * @return {!Promise}
- * @exportInterface
+ * @typedef {function(ArrayBuffer, number, ?number,
+ *                    ?number, boolean):!Array.<!TextTrackCue>}
+ * @exportDoc
  */
-shaka.util.IDestroyable.prototype.destroy = function() {};
+shakaExtern.TextParserPlugin;

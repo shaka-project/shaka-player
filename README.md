@@ -5,7 +5,7 @@ It plays [DASH][] content without browser plugins using
 [MediaSource Extensions][] and [Encrypted Media Extensions][].
 
 We are currently testing on the latest stable releases of Chrome, Firefox, and
-Edge, as well as IE 11 and Safari 9. We test using both Widevine and PlayReady,
+Edge, as well as IE 11 and Safari. We test using both Widevine and PlayReady,
 but any browser-supported DRM system available through EME should work.
 
 Our main goal is to make it as easy as possible to stream adaptive bitrate
@@ -38,8 +38,15 @@ Shaka Player is meant to be deployed after being compiled. The tools you need
 to compile the sources and documentation are included in the sources:
 [Closure Compiler][], [Closure Linter][], and [JSDoc][].
 
+If you are integrating Shaka Player into another Closure-based project, our
+build process will generate externs for Shaka Player itself.
+
 If you installed Shaka Player via npm, the sources have already been compiled
-for you.
+for you and the externs have been generated.
+
+See:
+ * dist/shaka-player.compiled.js (compiled bundle)
+ * dist/shaka-player.compiled.externs.js (generated externs)
 
 In order to build, you simply need python v2.7 (for the build scripts) and
 JRE 7+ (for the compiler). Just run `./build/all.py` and look for the output
