@@ -373,15 +373,19 @@ var i = /* choose an index somehow */;
 player.selectVideoTrack(videoTracks[i].id);  // id, specifically video
 ```
 
-In Shaka v2, all tracks are queried and selected through the same methods:
-`getTracks()` and `selectTrack()`.  Tracks are selected by passing the
-entire track object:
+In Shaka v2, audio and video tracks are combined into a variant track.  It is
+not possible to select individual audio/video streams, you can only select a
+specific variant as specified by the manifest.
+
+You can get the currently available tracks using `getVariantTracks()` and
+`getTextTracks()`.  To switch tracks, use `selectVariantTrack()` and
+`selectTextTrack()`, passing in the whole track object.
 
 ```js
 // v2:
-var tracks = player.getTracks();
+var variantTracks = player.getVariantTracks();
 var i = /* choose an index somehow */;
-player.selectTrack(tracks[i]);  // whole track, type does not matter
+player.selectVariantTrack(variantTracks[i]);  // whole track
 ```
 
 In v1, you could show or hide text tracks with `player.enableTextTrack()`:
@@ -399,7 +403,7 @@ player.setTextTrackVisibility(true);
 ```
 
 See also the {@link shakaExtern.Track} structure which is used for all track
-types (video, audio, text).
+types (variant and text).
 
 
 #### Side-loading captions/subtitles
@@ -527,13 +531,18 @@ player.getStats()
   decodedFrames: number  // same as v1
   droppedFrames: number  // same as v1
   estimatedBandwidth: number  // bits/sec, same as v1
+  loadLatency: number,  // seconds between load() and the video's 'loadend' event
   playTime: number  // seconds, same as v1
   bufferingTime: number  // seconds, same as v1
   switchHistory: Array of Objects  // replaces v1's streamHistory
     timestamp: number  // seconds, when the stream was selected
     id: number  // stream ID
-    type: string  // 'audio', 'video', 'text'
+    type: string  // 'variant' or 'text'
     fromAdaptation: boolean  // distinguishes between ABR and manual choices
+  stateChange: Array of Objects
+    timestamp: number  // seconds, when the state changed
+    state: string  // 'buffering', 'playing', 'paused', or 'ended'
+    duration: number  // seconds in this state
 ```
 
 For more on stats in v2, see {@link shakaExtern.Stats}.

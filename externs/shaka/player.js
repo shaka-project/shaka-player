@@ -31,9 +31,9 @@
  *   The timestamp the choice was made, in seconds since 1970
  *   (i.e. Date.now() / 1000).
  * @property {number} id
- *   The id of the stream that was chosen.
+ *   The id of the track that was chosen.
  * @property {string} type
- *   The type of stream chosen ('audio', 'text', or 'video')
+ *   The type of stream chosen ('variant' or 'text')
  * @property {boolean} fromAdaptation
  *   True if the choice was made by AbrManager for adaptation; false if it
  *   was made by the application through selectTrack.
@@ -141,7 +141,8 @@ shakaExtern.Stats;
  * @description
  * An object describing a media track.  This object should be treated as
  * read-only as changing any values does not have any effect.  This is the
- * public view of the Stream type.
+ * public view of an audio/video paring (variant type) or text track (text
+ * type).
  *
  * @property {number} id
  *   The unique ID of the track.
@@ -150,20 +151,20 @@ shakaExtern.Stats;
  *   visible/audible in the buffer).
  *
  * @property {string} type
- *   The type of track, one of 'audio', 'text', or 'video'.
+ *   The type of track, either 'variant' or 'text'.
  * @property {number} bandwidth
  *   The bandwidth required to play the track, in bits/sec.
  *
  * @property {string} language
- *   The language of the track, or '' for video tracks.  This is the exact
+ *   The language of the track, or 'und' if not given.  This is the exact
  *   value provided in the manifest; it may need to be normalized.
  * @property {?string} kind
  *   (only for text tracks) The kind of text track, either 'captions' or
  *   'subtitles'.
  * @property {?number} width
- *   (only for video tracks) The width of the track in pixels.
+ *   The video width provided in the manifest, if present.
  * @property {?number} height
- *   (only for video tracks) The height of the track in pixels.
+ *   The video height provided in the manifest, if present.
  * @property {?number} frameRate
  *   The video framerate provided in the manifest, if present.
  * @property {?string} mimeType
