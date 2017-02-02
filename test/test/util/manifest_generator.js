@@ -273,7 +273,7 @@ shaka.test.ManifestGenerator.prototype.addInitData = function(type, buffer) {
   var drmInfo = this.currentDrmInfo_();
   if (!drmInfo.initData)
     drmInfo.initData = [];
-  drmInfo.initData.push({initData: buffer, initDataType: type});
+  drmInfo.initData.push({initData: buffer, initDataType: type, keyId: null});
   return this;
 };
 

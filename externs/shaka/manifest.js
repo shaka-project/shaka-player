@@ -113,7 +113,8 @@ shakaExtern.Period;
 /**
  * @typedef {{
  *   initData: !Uint8Array,
- *   initDataType: string
+ *   initDataType: string,
+ *   keyId: ?string
  * }}
  *
  * @description
@@ -125,6 +126,8 @@ shakaExtern.Period;
  *   Initialization data in the format indicated by initDataType.
  * @property {string} initDataType
  *   A string to indicate what format initData is in.
+ * @property {?string} keyId
+ *   The key Id that corresponds to this initData.
  *
  * @exportDoc
  */

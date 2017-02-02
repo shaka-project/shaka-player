@@ -91,34 +91,31 @@ describe('DashParser ContentProtection', function() {
    * Build an expected manifest which checks DRM-related fields.
    *
    * @param {!Array.<!Object>} drmInfos A list of DrmInfo-like objects.
+   * @param {number=} opt_numVariants The number of variants, default 2.
    * @return {Object} A Manifest-like object.
    */
-  function buildExpectedManifest(drmInfos) {
+  function buildExpectedManifest(drmInfos, opt_numVariants) {
+    var numVariants = opt_numVariants || 2;
     var keyIds = [];
     if (drmInfos.length > 0) {
       keyIds = drmInfos[0].sample.keyIds;
     }
-    if (keyIds.length == 0) {
-      keyIds = [null, null];
+
+    var variants = [];
+    for (var i = 0; i < numVariants; i++) {
+      var variant = jasmine.objectContaining({
+        drmInfos: drmInfos,
+        video: jasmine.objectContaining({
+          keyId: keyIds[i] || null
+        })
+      });
+      variants.push(variant);
     }
 
     return jasmine.objectContaining({
       periods: [
         jasmine.objectContaining({
-          variants: [
-            jasmine.objectContaining({
-              drmInfos: drmInfos,
-              video: jasmine.objectContaining({
-                keyId: keyIds[0]
-              })
-            }),
-            jasmine.objectContaining({
-              drmInfos: drmInfos,
-              video: jasmine.objectContaining({
-                keyId: keyIds[1]
-              })
-            })
-          ], // variants
+          variants: variants,
           textStreams: []
         })
       ]  // periods
@@ -131,15 +128,20 @@ describe('DashParser ContentProtection', function() {
    * @param {string} keySystem
    * @param {Array.<string>=} opt_keyIds
    * @param {Array.<string>=} opt_base64Psshs
+   * @param {Array.<string>=} opt_initDataKeyIds
    * @return {Object} A DrmInfo-like object.
    */
-  function buildDrmInfo(keySystem, opt_keyIds, opt_base64Psshs) {
+  function buildDrmInfo(keySystem, opt_keyIds,
+      opt_base64Psshs, opt_initDataKeyIds) {
     var base64Psshs = opt_base64Psshs || [];
-    var initData = base64Psshs.map(function(base64) {
-      return {
+    var initData = base64Psshs.map(function(base64, index) {
+      /** @type {shakaExtern.InitDataOverride} */
+      var initData = {
         initDataType: 'cenc',
-        initData: shaka.util.Uint8ArrayUtils.fromBase64(base64)
+        initData: shaka.util.Uint8ArrayUtils.fromBase64(base64),
+        keyId: opt_initDataKeyIds ? opt_initDataKeyIds[index] : null
       };
+      return initData;
     });
     var keyIds = opt_keyIds || [];
     var containing = {keySystem: keySystem, initData: initData, keyIds: keyIds};
@@ -220,6 +222,27 @@ describe('DashParser ContentProtection', function() {
         'deadbeeffeedbaadf00d000008675309',
         // Representation 2 key ID
         'deadbeeffeedbaadf00d000008675309'])]);
+    testDashParser(done, source, expected);
+  });
+
+  it('sets key IDs for the init data', function(done) {
+    var source = buildManifestText([
+      // AdaptationSet lines
+    ], [
+      // Representation 1 lines
+      '<ContentProtection',
+      '    schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"',
+      '    value="cenc"',
+      '    cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309">',
+      '  <cenc:pssh>bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5</cenc:pssh>',
+      '</ContentProtection'
+    ], []);
+    var expected = buildExpectedManifest([
+      buildDrmInfo('com.widevine.alpha',
+          ['deadbeeffeedbaadf00d000008675309'], // key Id
+          ['bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5'], // initData
+          ['deadbeeffeedbaadf00d000008675309'])], // key Id for initData
+    1); // one variant
     testDashParser(done, source, expected);
   });
 
