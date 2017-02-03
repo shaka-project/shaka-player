@@ -18,6 +18,7 @@
 describe('Playhead', function() {
   var video;
   var timeline;
+  var manifest;
   var playhead;
 
   // Callback to Playhead to simulate 'loadedmetadata' event from |video|.
@@ -44,6 +45,9 @@ describe('Playhead', function() {
   // Callback to us from Playhead when a timeline event occurs.
   var onEvent;
 
+  // Callback to us from Playhead when we change to a different Period.
+  var onChangePeriod;
+
   beforeEach(function() {
     video = createMockVideo();
     timeline = createMockPresentationTimeline();
@@ -56,6 +60,7 @@ describe('Playhead', function() {
     onBuffering = jasmine.createSpy('onBuffering');
     onSeek = jasmine.createSpy('onSeek');
     onEvent = jasmine.createSpy('onEvent');
+    onChangePeriod = jasmine.createSpy('onChangePeriod');
 
     video.addEventListener.and.callFake(function(eventName, f, bubbles) {
       if (eventName == 'loadedmetadata') {
@@ -82,6 +87,11 @@ describe('Playhead', function() {
     timeline.getSegmentAvailabilityDuration.and.throwError(new Error());
     timeline.getDuration.and.throwError(new Error());
     timeline.setDuration.and.throwError(new Error());
+
+    manifest = /** @type {shakaExtern.Manifest} */ ({
+      periods: [],
+      presentationTimeline: timeline
+    });
   });
 
   afterEach(function(done) {
@@ -93,10 +103,10 @@ describe('Playhead', function() {
     it('returns the correct time when readyState starts at 0', function() {
       playhead = new shaka.media.Playhead(
           video,
-          timeline,
+          manifest,
           10 /* minBufferTime */,
           5 /* startTime */,
-          onBuffering, onSeek, onEvent);
+          onBuffering, onSeek, onEvent, onChangePeriod);
 
       expect(video.addEventListener).toHaveBeenCalledWith(
           'loadedmetadata', videoOnLoadedMetadata, false);
@@ -132,10 +142,10 @@ describe('Playhead', function() {
 
       playhead = new shaka.media.Playhead(
           video,
-          timeline,
+          manifest,
           10 /* minBufferTime */,
           5 /* startTime */,
-          onBuffering, onSeek, onEvent);
+          onBuffering, onSeek, onEvent, onChangePeriod);
 
       expect(playhead.getTime()).toBe(5);
       expect(video.currentTime).toBe(5);
@@ -148,10 +158,10 @@ describe('Playhead', function() {
   it('sets/unsets buffering state', function() {
     playhead = new shaka.media.Playhead(
         video,
-        timeline,
+        manifest,
         10 /* minBufferTime */,
         5 /* startTime */,
-        onBuffering, onSeek, onEvent);
+        onBuffering, onSeek, onEvent, onChangePeriod);
 
     // Set to 2 to ensure Playhead restores the correct rate.
     video.playbackRate = 2;
@@ -199,10 +209,10 @@ describe('Playhead', function() {
 
     playhead = new shaka.media.Playhead(
         video,
-        timeline,
+        manifest,
         10 /* rebufferingGoal */,
         5 /* startTime */,
-        onBuffering, onSeek, onEvent);
+        onBuffering, onSeek, onEvent, onChangePeriod);
 
     // Calling videoOnSeeking() is like dispatching a 'seeking' event. So, each
     // time we change the video's current time or Playhead changes the video's
@@ -353,10 +363,10 @@ describe('Playhead', function() {
 
     playhead = new shaka.media.Playhead(
         video,
-        timeline,
+        manifest,
         10 /* rebufferingGoal */,
         5 /* startTime */,
-        onBuffering, onSeek, onEvent);
+        onBuffering, onSeek, onEvent, onChangePeriod);
 
     videoOnSeeking();
     expect(video.currentTime).toBe(5);
@@ -409,10 +419,10 @@ describe('Playhead', function() {
 
       playhead = new shaka.media.Playhead(
           video,
-          timeline,
+          manifest,
           10 /* rebufferingGoal */,
           5 /* startTime */,
-          onBuffering, onSeek, onEvent);
+          onBuffering, onSeek, onEvent, onChangePeriod);
 
       videoOnSeeking();
       expect(video.currentTime).toBe(5);
@@ -445,10 +455,10 @@ describe('Playhead', function() {
 
       playhead = new shaka.media.Playhead(
           video,
-          timeline,
+          manifest,
           10 /* rebufferingGoal */,
           5 /* startTime */,
-          onBuffering, onSeek, onEvent);
+          onBuffering, onSeek, onEvent, onChangePeriod);
 
       videoOnSeeking();
       expect(video.currentTime).toBe(5);
@@ -488,10 +498,10 @@ describe('Playhead', function() {
 
       playhead = new shaka.media.Playhead(
           video,
-          timeline,
+          manifest,
           10 /* rebufferingGoal */,
           5 /* startTime */,
-          onBuffering, onSeek, onEvent);
+          onBuffering, onSeek, onEvent, onChangePeriod);
 
       videoOnSeeking();
       expect(video.currentTime).toBe(5);
@@ -525,10 +535,10 @@ describe('Playhead', function() {
 
          playhead = new shaka.media.Playhead(
               video,
-              timeline,
+              manifest,
               10 /* rebufferingGoal */,
               5 /* startTime */,
-              onBuffering, onSeek, onEvent);
+              onBuffering, onSeek, onEvent, onChangePeriod);
 
           videoOnSeeking();
           expect(video.currentTime).toBe(5);
@@ -560,10 +570,10 @@ describe('Playhead', function() {
 
       playhead = new shaka.media.Playhead(
           video,
-          timeline,
+          manifest,
           10 /* rebufferingGoal */,
           5 /* startTime */,
-          onBuffering, onSeek, onEvent);
+          onBuffering, onSeek, onEvent, onChangePeriod);
 
       videoOnSeeking();
       expect(video.currentTime).toBe(5);
@@ -608,10 +618,10 @@ describe('Playhead', function() {
 
       playhead = new shaka.media.Playhead(
           video,
-          timeline,
+          manifest,
           2 /* rebufferingGoal */,
           0 /* startTime */,
-          onBuffering, onSeek, onEvent);
+          onBuffering, onSeek, onEvent, onChangePeriod);
 
       videoOnSeeking();
       expect(video.currentTime).toBe(0);
@@ -654,10 +664,10 @@ describe('Playhead', function() {
 
       playhead = new shaka.media.Playhead(
           video,
-          timeline,
+          manifest,
           10 /* rebufferingGoal */,
           0 /* startTime */,
-          onBuffering, onSeek, onEvent);
+          onBuffering, onSeek, onEvent, onChangePeriod);
 
       expect(video.currentTime).toBe(0);
       expect(playhead.getTime()).toBe(0);
@@ -707,8 +717,8 @@ describe('Playhead', function() {
       timeline.getSegmentAvailabilityEnd.and.returnValue(60);
 
       playhead = new shaka.media.Playhead(
-          video, timeline, 10 /* rebufferingGoal */, 0 /* startTime */,
-          onBuffering, onSeek, onEvent);
+          video, manifest, 10 /* rebufferingGoal */, 0 /* startTime */,
+          onBuffering, onSeek, onEvent, onChangePeriod);
     });
 
     it('fires enter/exit events when playhead plays into a region', function() {
@@ -903,6 +913,85 @@ describe('Playhead', function() {
       expect(event.type).toBe(eventName);
       expect(event.detail).toEqual(info);
     }
+  });
+
+  describe('changing Periods', function() {
+    beforeEach(function() {
+      manifest.periods = [
+        {startTime: 0},
+        {startTime: 10},
+        {startTime: 20}
+      ];
+
+      video.readyState = HTMLMediaElement.HAVE_METADATA;
+
+      timeline.getEarliestStart.and.returnValue(0);
+      timeline.getDuration.and.returnValue(40);
+      timeline.getSegmentAvailabilityStart.and.returnValue(0);
+      timeline.getSegmentAvailabilityEnd.and.returnValue(40);
+
+      playhead = new shaka.media.Playhead(
+          video,
+          manifest,
+          10 /* minBufferTime */,
+          5 /* startTime */,
+          onBuffering, onSeek, onEvent, onChangePeriod);
+
+      videoOnTimeUpdate();
+      expect(onChangePeriod).not.toHaveBeenCalled();
+    });
+
+    it('calls the callback when playing into new Period', function(done) {
+      video.currentTime = 12;
+      shaka.test.Util.delay(0.5).then(function() {
+        expect(onChangePeriod).toHaveBeenCalledTimes(1);
+        expect(onChangePeriod).toHaveBeenCalledWith(0, 1);
+
+        onChangePeriod.calls.reset();
+        video.currentTime = 18;
+        return shaka.test.Util.delay(0.5);
+      }).then(function() {
+        expect(onChangePeriod).not.toHaveBeenCalled();
+
+        video.currentTime = 21;
+        return shaka.test.Util.delay(0.5);
+      }).then(function() {
+        expect(onChangePeriod).toHaveBeenCalledTimes(1);
+        expect(onChangePeriod).toHaveBeenCalledWith(1, 2);
+      }).catch(fail).then(done);
+    });
+
+    it('calls the callback when seeking forward', function(done) {
+      video.currentTime = 12;
+      videoOnSeeking();
+      shaka.test.Util.delay(0.5).then(function() {
+        expect(onChangePeriod).toHaveBeenCalledTimes(1);
+        expect(onChangePeriod).toHaveBeenCalledWith(0, 1);
+      }).catch(fail).then(done);
+    });
+
+    it('calls the callback when seeking backward', function(done) {
+      video.currentTime = 12;
+      shaka.test.Util.delay(0.5).then(function() {
+        onChangePeriod.calls.reset();
+
+        video.currentTime = 2;
+        videoOnSeeking();
+        return shaka.test.Util.delay(0.5);
+      }).then(function() {
+        expect(onChangePeriod).toHaveBeenCalledTimes(1);
+        expect(onChangePeriod).toHaveBeenCalledWith(1, 0);
+      }).catch(fail).then(done);
+    });
+
+    it('calls the callback when seeking over a Period', function(done) {
+      video.currentTime = 22;
+      videoOnSeeking();
+      shaka.test.Util.delay(0.5).then(function() {
+        expect(onChangePeriod).toHaveBeenCalledTimes(1);
+        expect(onChangePeriod).toHaveBeenCalledWith(0, 2);
+      }).catch(fail).then(done);
+    });
   });
 
   function createMockVideo() {

@@ -88,7 +88,6 @@ describe('StreamingEngine', function() {
           0 /* segmentAvailabilityStart */,
           60 /* segmentAvailabilityEnd */,
           60 /* presentationDuration */);
-      setupPlayhead();
 
       setupNetworkingEngine(
           0 /* firstPeriodStartTime */,
@@ -101,6 +100,7 @@ describe('StreamingEngine', function() {
           0 /* firstPeriodStartTime */,
           30 /* secondPeriodStartTime */,
           60 /* presentationDuration */);
+      setupPlayhead();
 
       createStreamingEngine();
     });
@@ -122,7 +122,6 @@ describe('StreamingEngine', function() {
           275 - 10 /* segmentAvailabilityStart */,
           295 - 10 /* segmentAvailabilityEnd */,
           Infinity /* presentationDuration */);
-      setupPlayhead();
 
       setupNetworkingEngine(
           0 /* firstPeriodStartTime */,
@@ -135,6 +134,7 @@ describe('StreamingEngine', function() {
           0 /* firstPeriodStartTime */,
           300 /* secondPeriodStartTime */,
           Infinity /* presentationDuration */);
+      setupPlayhead();
 
       createStreamingEngine();
     });
@@ -218,11 +218,12 @@ describe('StreamingEngine', function() {
     var onSeek = function() { streamingEngine.seeked(); };
     playhead = new shaka.media.Playhead(
         /** @type {!HTMLVideoElement} */(video),
-        /** @type {!shaka.media.PresentationTimeline} */(timeline),
+        /** @type {shakaExtern.Manifest} */ (manifest),
         2 /* rebufferingGoal */,
         null /* startTime */,
         onBuffering,
         onSeek,
+        function() {},
         function() {});
   }
 
