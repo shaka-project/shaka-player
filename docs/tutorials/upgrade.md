@@ -623,6 +623,105 @@ playback via MSE.  This is much simpler and allowed us to remove many special
 cases from the code.
 
 
+#### Offline storage
+
+In v1, to store offline content you used an `OfflineVideoSource`.
+
+```js
+// v1:
+function chooseStreams() {
+  return Promise.resolve(trackIds);
+}
+
+function onProgress(evt) {
+  console.log('Stored ' + evt.detail + '%');
+}
+
+var videoSource = new shaka.player.OfflineVideoSource(null, null);
+videoSource.addEventListener('progress', onProgress);
+
+var promise = videoSource.store('https://url', 'en-US', null, chooseStreams);
+promise.then(function(groupId) {
+  console.log('Stored at group ID ' + groupId);
+});
+```
+
+In v2 you use the `Storage` class to store offline content.
+
+```js
+// v2:
+function chooseTracks(allTracks) {
+  return filteredTracks;
+}
+
+function onProgress(storedContent, percent) {
+  console.log('Stored ' + percent + '%');
+}
+
+var storage = new shaka.offline.Storage(player);
+// Optional
+storage.configure({
+  trackSelectionCallback: chooseTracks,
+  progressCallback: onProgress
+});
+
+var promise = storage.store('https://url', {extra: 'data'});
+promise.then(function(storedContent) {
+  console.log('Can be loaded using url: ' + storedContent.offlineUri);
+});
+```
+
 #### Offline playback
 
-(coming soon to Shaka v2)
+In v1, you also used `OfflineVideoSource` to load the stored content.
+
+```js
+// v1:
+var videoSource = new shaka.player.OfflineVideoSource(groupId, null);
+player.load(videoSource);
+```
+
+In v2, you don't have to use any special types so long as you know the URL to
+use.  When storing the content, you get a special URL that is simply passed to
+`load` like any other URL.  You can also get the info by listing all stored
+content.
+
+```js
+// v2:
+player.load(offlineUri);
+```
+
+#### Offline listing and deleting
+
+In v1, you used `OfflineVideoSource` to list and delete content.
+
+```js
+// v1:
+var videoSource = new shaka.player.OfflineVideoSource(null, null);
+
+videoSource.retrieveGroupIds().then(function(groupIds) {
+  console.log(groupIds[0]);
+});
+
+var sourceToDelete = new shaka.player.OfflineVideoSource(groupId, null);
+sourceToDelete.deleteGroup().then(function() {
+  console.log('Done');
+});
+```
+
+In v2, you use `Storage` to list and delete stored content.
+
+```js
+// v2:
+var storage = new shaka.offline.Storage(player);
+
+storage.list().then(function(storedContents) {
+  var firstInfo = storedContents[0];
+  var url = firstInfo.offlineUri;
+  player.load(url);
+});
+
+storage.delete(storedContent).then(function() {
+  console.log('Done');
+});
+```
