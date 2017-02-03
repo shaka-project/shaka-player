@@ -232,7 +232,8 @@ shakaAssets.YouTubeCallback = function(node) {
     for (var i = 0; i < node.childNodes.length; ++i) {
       var child = node.childNodes[i];
       if (child.nodeName == 'yt:SystemURL') {
-        var licenseServerUri = child.textContent;
+        // The URL may be http, but the demo app requires https.
+        var licenseServerUri = child.textContent.replace(/^http:/, 'https:');
         var typeAttr = child.getAttribute('type');
         var keySystem;
         // NOTE: Ignoring clearkey type here because this YT demo content does
