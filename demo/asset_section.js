@@ -189,4 +189,11 @@ shakaDemo.load = function() {
       shakaDemo.onError_(error);
     }
   });
+
+  // While the manifest is being loaded in parallel, go ahead and ask the video
+  // to play.  This can help with autoplay on Android, since Android requires
+  // user interaction to play a video and this function is called from a click
+  // event.  This seems to work only because Shaka Player has already created a
+  // MediaSource object and set video.src.
+  shakaDemo.video_.play();
 };
