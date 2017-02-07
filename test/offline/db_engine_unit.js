@@ -21,28 +21,42 @@ describe('DBEngine', function() {
   var oldName;
 
   beforeAll(/** @suppress {accessControls} */ function() {
-    oldName = shaka.offline.DBEngine.DB_NAME_;
-    shaka.offline.DBEngine.DB_NAME_ += '_test';
+    if (shaka.offline.DBEngine.isSupported()) {
+      oldName = shaka.offline.DBEngine.DB_NAME_;
+      shaka.offline.DBEngine.DB_NAME_ += '_test';
+    }
   });
 
   beforeEach(function(done) {
-    schema = {'test': 'key', 'other': 'key'};
-
-    shaka.offline.DBEngine.deleteDatabase().then(function() {
-      db = new shaka.offline.DBEngine();
-      return db.init(schema);
-    }).catch(fail).then(done);
+    if (shaka.offline.DBEngine.isSupported()) {
+      schema = {'test': 'key', 'other': 'key'};
+      shaka.offline.DBEngine.deleteDatabase().then(function() {
+        db = new shaka.offline.DBEngine();
+        return db.init(schema);
+      }).catch(fail).then(done);
+    } else {
+      done();
+    }
   });
 
   afterAll(/** @suppress {accessControls} */ function() {
-    shaka.offline.DBEngine.DB_NAME_ = oldName;
+    if (shaka.offline.DBEngine.isSupported()) {
+      shaka.offline.DBEngine.DB_NAME_ = oldName;
+    }
   });
 
   afterEach(function(done) {
-    db.destroy().catch(fail).then(done);
+    if (shaka.offline.DBEngine.isSupported()) {
+      db.destroy().catch(fail).then(done);
+    } else {
+      done();
+    }
   });
 
   it('stores and retrieves values', function(done) {
+    if (!shaka.offline.DBEngine.isSupported()) {
+      pending('DBEngine is not supported on this platform.');
+    }
     var data = {
       key: 123,
       extra: 'foobar'
@@ -55,6 +69,9 @@ describe('DBEngine', function() {
   });
 
   it('supports concurrent operations', function(done) {
+    if (!shaka.offline.DBEngine.isSupported()) {
+      pending('DBEngine is not supported on this platform.');
+    }
     var data1 = {key: 1, extra: 'cat'};
     var data2 = {key: 2, foobar: 'baz'};
     var data3 = {key: 3, abc: 123};
@@ -80,6 +97,9 @@ describe('DBEngine', function() {
   });
 
   it('supports remove', function(done) {
+    if (!shaka.offline.DBEngine.isSupported()) {
+      pending('DBEngine is not supported on this platform.');
+    }
     Promise.all([
       db.insert('test', {key: 1, i: 4}),
       db.insert('test', {key: 2, i: 1}),
@@ -105,6 +125,9 @@ describe('DBEngine', function() {
   });
 
   it('aborts transactions on destroy()', function(done) {
+    if (!shaka.offline.DBEngine.isSupported()) {
+      pending('DBEngine is not supported on this platform.');
+    }
     var expectedError = new shaka.util.Error(
         shaka.util.Error.Category.STORAGE,
         shaka.util.Error.Code.OPERATION_ABORTED);
@@ -133,6 +156,9 @@ describe('DBEngine', function() {
   });
 
   it('will find and reserve IDs', function(done) {
+    if (!shaka.offline.DBEngine.isSupported()) {
+      pending('DBEngine is not supported on this platform.');
+    }
     Promise
         .all([
           db.insert('test', {key: 1}),
