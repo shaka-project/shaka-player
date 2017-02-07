@@ -42,6 +42,37 @@ describe('TtmlTextParser', function() {
     verifyHelper([], '<tt><body><div>  \r\n </div></body></tt>');
   });
 
+  it('supports xml:space', function() {
+    var ttBody = '\n' +
+        '  <body>\n' +
+        '    <p begin="01:02.03" end="01:02.05">\n' +
+        '      <span> A    B   C  </span>\n' +
+        '    </p>\n' +
+        '  </body>\n';
+
+    // When xml:space="default", ignore whitespace outside tags.
+    verifyHelper(
+        [
+          {start: 62.03, end: 62.05, text: 'A B C'}
+        ],
+        '<tt xml:space="default">' + ttBody + '</tt>');
+    // When xml:space="preserve", take them into account.
+    verifyHelper(
+        [
+          {start: 62.03, end: 62.05, text: '\n       A    B   C  \n    '}
+        ],
+        '<tt xml:space="preserve">' + ttBody + '</tt>');
+    // The default value for xml:space is "default".
+    verifyHelper(
+        [
+          {start: 62.03, end: 62.05, text: 'A B C'}
+        ],
+        '<tt>' + ttBody + '</tt>');
+    // Any other value is rejected as an error.
+    errorHelper(shaka.util.Error.Code.INVALID_XML_SPACE,
+                '<tt xml:space="invalid">' + ttBody + '</tt>');
+  });
+
   it('rejects invalid ttml', function() {
     errorHelper(shaka.util.Error.Code.INVALID_TTML, '<test></test>');
     errorHelper(shaka.util.Error.Code.INVALID_TTML, '');
