@@ -63,7 +63,11 @@ describe('Player', function() {
         return networkingEngine;
       };
       player.createPlayhead = function() {
-        return {destroy: function() {}, addTimelineRegion: function() {}};
+        return {
+          destroy: function() {},
+          addTimelineRegion: function() {},
+          getTime: function() { return 0; }
+        };
       };
       player.createMediaSource = function() { return Promise.resolve(); };
       player.createMediaSourceEngine = function() {
@@ -821,6 +825,10 @@ describe('Player', function() {
     });
 
     it('returns the correct tracks', function() {
+      // Switch tracks first so we setup the "active" tracks.
+      player.selectVariantTrack(variantTracks[0]);
+      player.selectTextTrack(textTracks[0]);
+
       var actualVariantTracks = player.getVariantTracks();
       var actualTextTracks = player.getTextTracks();
       expect(actualVariantTracks).toEqual(variantTracks);
