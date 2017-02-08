@@ -440,7 +440,8 @@ shakaExtern.ManifestConfiguration;
  *   bufferingGoal: number,
  *   bufferBehind: number,
  *   ignoreTextStreamFailures: boolean,
- *   useRelativeCueTimestamps: boolean
+ *   useRelativeCueTimestamps: boolean,
+ *   startAtSegmentBoundary: boolean
  * }}
  *
  * @description
@@ -467,6 +468,11 @@ shakaExtern.ManifestConfiguration;
  * @property {boolean} useRelativeCueTimestamps
  *   If true, WebVTT cue timestamps will be treated as relative to the start
  *   time of the VTT segment. Defaults to false.
+ * @property {boolean} startAtSegmentBoundary
+ *   If true, adjust the start time backwards so it is at the start of a
+ *   segment. This affects both explicit start times and calculated start time
+ *   for live streams. This can put us further from the live edge. Defaults to
+ *   false.
  * @exportDoc
  */
 shakaExtern.StreamingConfiguration;

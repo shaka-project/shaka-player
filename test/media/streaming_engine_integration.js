@@ -268,7 +268,8 @@ describe('StreamingEngine', function() {
       retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
       bufferBehind: 15,
       ignoreTextStreamFailures: false,
-      useRelativeCueTimestamps: false
+      useRelativeCueTimestamps: false,
+      startAtSegmentBoundary: false
     };
     streamingEngine = new shaka.media.StreamingEngine(
         playhead,

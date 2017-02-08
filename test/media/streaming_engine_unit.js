@@ -374,7 +374,8 @@ describe('StreamingEngine', function() {
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
         bufferBehind: Infinity,
         ignoreTextStreamFailures: false,
-        useRelativeCueTimestamps: false
+        useRelativeCueTimestamps: false,
+        startAtSegmentBoundary: false
       };
     }
 
@@ -1611,7 +1612,8 @@ describe('StreamingEngine', function() {
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
         bufferBehind: 10,
         ignoreTextStreamFailures: false,
-        useRelativeCueTimestamps: false
+        useRelativeCueTimestamps: false,
+        startAtSegmentBoundary: false
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -1692,7 +1694,8 @@ describe('StreamingEngine', function() {
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
         bufferBehind: 10,
         ignoreTextStreamFailures: false,
-        useRelativeCueTimestamps: false
+        useRelativeCueTimestamps: false,
+        startAtSegmentBoundary: false
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -1758,7 +1761,8 @@ describe('StreamingEngine', function() {
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
         bufferBehind: 10,
         ignoreTextStreamFailures: false,
-        useRelativeCueTimestamps: false
+        useRelativeCueTimestamps: false,
+        startAtSegmentBoundary: false
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -1940,6 +1944,7 @@ describe('StreamingEngine', function() {
         bufferBehind: Infinity,
         ignoreTextStreamFailures: false,
         useRelativeCueTimestamps: false,
+        startAtSegmentBoundary: false,
         // Only buffer ahead 1 second to make it easier to set segment
         // expectations based on playheadTime.
         rebufferingGoal: 1,
