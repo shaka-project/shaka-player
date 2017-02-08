@@ -17,25 +17,44 @@
 
 describe('OfflineScheme', function() {
   var OfflineScheme;
-  var originalDbEngineCtor;
-  var fakeDbEngineCtor;
-  var dbEngine;
+  var originalIsStorageEngineSupported;
+  var originalCreateStorageEngine;
+  var fakeStorageEngine;
+  var fakeCreateStorageEngine;
   var request;
 
   beforeAll(function() {
     OfflineScheme = shaka.offline.OfflineScheme;
-    originalDbEngineCtor = shaka.offline.DBEngine;
+    originalIsStorageEngineSupported =
+        shaka.offline.OfflineUtils.isStorageEngineSupported;
+    originalCreateStorageEngine =
+        shaka.offline.OfflineUtils.createStorageEngine;
   });
 
   afterAll(function() {
-    shaka.offline.DBEngine = originalDbEngineCtor;
+    shaka.offline.OfflineUtils.isStorageEngineSupported =
+        originalIsStorageEngineSupported;
+    shaka.offline.OfflineUtils.createStorageEngine =
+        originalCreateStorageEngine;
   });
 
   beforeEach(function() {
-    dbEngine = createFakeDbEngine();
-    fakeDbEngineCtor = jasmine.createSpy('DBEngine');
-    fakeDbEngineCtor.and.returnValue(dbEngine);
-    shaka.offline.DBEngine = fakeDbEngineCtor;
+    shaka.offline.OfflineUtils.isStorageEngineSupported = function() {
+      return true;
+    };
+
+    fakeStorageEngine = jasmine.createSpyObj(
+        'DBEngine', ['init', 'destroy', 'get']);
+
+    var commonResolve = Promise.resolve();
+    var getResolve = Promise.resolve({data: new ArrayBuffer(0)});
+    fakeStorageEngine.init.and.returnValue(commonResolve);
+    fakeStorageEngine.destroy.and.returnValue(commonResolve);
+    fakeStorageEngine.get.and.returnValue(getResolve);
+
+    fakeCreateStorageEngine = jasmine.createSpy('createStorageEngine');
+    fakeCreateStorageEngine.and.returnValue(fakeStorageEngine);
+    shaka.offline.OfflineUtils.createStorageEngine = fakeCreateStorageEngine;
 
     // The whole request is ignored by the OfflineScheme.
     var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
@@ -44,7 +63,7 @@ describe('OfflineScheme', function() {
 
   it('will return special content-type header for manifests', function(done) {
     var uri = 'offline:123';
-    fakeDbEngineCtor.and.throwError();
+    fakeCreateStorageEngine.and.throwError();
     OfflineScheme(uri, request)
         .then(function(response) {
           expect(response).toBeTruthy();
@@ -65,11 +84,11 @@ describe('OfflineScheme', function() {
           expect(response.uri).toBe(uri);
           expect(response.data).toBeTruthy();
 
-          expect(fakeDbEngineCtor).toHaveBeenCalledTimes(1);
-          expect(dbEngine.init).toHaveBeenCalledTimes(1);
-          expect(dbEngine.destroy).toHaveBeenCalledTimes(1);
-          expect(dbEngine.get).toHaveBeenCalledTimes(1);
-          expect(dbEngine.get).toHaveBeenCalledWith('segment', 789);
+          expect(fakeCreateStorageEngine).toHaveBeenCalledTimes(1);
+          expect(fakeStorageEngine.init).toHaveBeenCalledTimes(1);
+          expect(fakeStorageEngine.destroy).toHaveBeenCalledTimes(1);
+          expect(fakeStorageEngine.get).toHaveBeenCalledTimes(1);
+          expect(fakeStorageEngine.get).toHaveBeenCalledWith('segment', 789);
         })
         .catch(fail)
         .then(done);
@@ -77,7 +96,7 @@ describe('OfflineScheme', function() {
 
   it('will fail if segment not found', function(done) {
     var uri = 'offline:123/456/789';
-    dbEngine.get.and.returnValue(Promise.resolve(null));
+    fakeStorageEngine.get.and.returnValue(Promise.resolve(null));
 
     OfflineScheme(uri, request)
         .then(fail)
@@ -88,11 +107,11 @@ describe('OfflineScheme', function() {
                   shaka.util.Error.Category.STORAGE,
                   shaka.util.Error.Code.REQUESTED_ITEM_NOT_FOUND, 789));
 
-          expect(fakeDbEngineCtor).toHaveBeenCalledTimes(1);
-          expect(dbEngine.init).toHaveBeenCalledTimes(1);
-          expect(dbEngine.destroy).toHaveBeenCalledTimes(1);
-          expect(dbEngine.get).toHaveBeenCalledTimes(1);
-          expect(dbEngine.get).toHaveBeenCalledWith('segment', 789);
+          expect(fakeCreateStorageEngine).toHaveBeenCalledTimes(1);
+          expect(fakeStorageEngine.init).toHaveBeenCalledTimes(1);
+          expect(fakeStorageEngine.destroy).toHaveBeenCalledTimes(1);
+          expect(fakeStorageEngine.get).toHaveBeenCalledTimes(1);
+          expect(fakeStorageEngine.get).toHaveBeenCalledWith('segment', 789);
         })
         .catch(fail)
         .then(done);
@@ -100,7 +119,7 @@ describe('OfflineScheme', function() {
 
   it('will fail for invalid URI', function(done) {
     var uri = 'offline:abc';
-    fakeDbEngineCtor.and.throwError();
+    fakeCreateStorageEngine.and.throwError();
     OfflineScheme(uri, request)
         .then(fail)
         .catch(function(err) {
@@ -112,16 +131,4 @@ describe('OfflineScheme', function() {
         })
         .then(done);
   });
-
-  function createFakeDbEngine() {
-    var resolve = Promise.resolve.bind(Promise);
-
-    var fake = jasmine.createSpyObj('DBEngine', ['init', 'destroy', 'get']);
-    fake.init.and.callFake(resolve);
-    fake.destroy.and.callFake(resolve);
-    fake.get.and.callFake(function() {
-      return Promise.resolve({data: new ArrayBuffer(0)});
-    });
-    return fake;
-  }
 });

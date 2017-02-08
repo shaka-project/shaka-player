@@ -16,15 +16,40 @@
  */
 
 describe('Storage', function() {
+  var originalSupportsStorageEngine;
+  var originalCreateStorageEngine;
   var SegmentReference;
-  var fakeDbEngine;
+  var fakeStorageEngine;
   var storage;
   var player;
   var netEngine;
 
-  beforeEach(function(done) {
+  beforeAll(function() {
     SegmentReference = shaka.media.SegmentReference;
-    fakeDbEngine = new shaka.test.MemoryDBEngine();
+    originalSupportsStorageEngine =
+        shaka.offline.OfflineUtils.supportsStorageEngine;
+    originalCreateStorageEngine =
+        shaka.offline.OfflineUtils.createStorageEngine;
+  });
+
+  afterAll(function() {
+    shaka.offline.OfflineUtils.supportsStorageEngine =
+        originalSupportsStorageEngine;
+    shaka.offline.OfflineUtils.createStorageEngine =
+        originalCreateStorageEngine;
+  });
+
+  beforeEach(function(done) {
+    shaka.offline.OfflineUtils.supportsStorageEngine = function() {
+      return true;
+    };
+
+    fakeStorageEngine = new shaka.test.MemoryDBEngine();
+
+    shaka.offline.OfflineUtils.createStorageEngine = function() {
+      return fakeStorageEngine;
+    };
+
     netEngine = new shaka.test.FakeNetworkingEngine();
 
     // Use a real Player since Storage only uses the configuration and
@@ -37,9 +62,8 @@ describe('Storage', function() {
     });
 
     storage = new shaka.offline.Storage(player);
-    storage.setDbEngine(fakeDbEngine);
 
-    fakeDbEngine.init(shaka.offline.OfflineUtils.DB_SCHEME)
+    fakeStorageEngine.init(shaka.offline.OfflineUtils.DB_SCHEME)
         .catch(fail)
         .then(done);
   });
@@ -116,8 +140,8 @@ describe('Storage', function() {
     ];
     Promise
         .all([
-          fakeDbEngine.insert('manifest', manifestDb1),
-          fakeDbEngine.insert('manifest', manifestDb2)
+          fakeStorageEngine.insert('manifest', manifestDb1),
+          fakeStorageEngine.insert('manifest', manifestDb2)
         ])
         .then(function() {
           return storage.list();
@@ -243,7 +267,7 @@ describe('Storage', function() {
       storage.store('')
           .then(function(data) {
             expect(data.offlineUri).toBe('offline:0');
-            return fakeDbEngine.get('manifest', 0);
+            return fakeStorageEngine.get('manifest', 0);
           })
           .then(function(manifestDb) {
             expect(manifestDb).toBeTruthy();
@@ -265,7 +289,7 @@ describe('Storage', function() {
       storage.store('')
           .then(function(data) {
             expect(data.offlineUri).toBe('offline:0');
-            return fakeDbEngine.get('manifest', 0);
+            return fakeStorageEngine.get('manifest', 0);
           })
           .then(function(manifestDb) {
             expect(manifestDb).toBeTruthy();
@@ -411,7 +435,7 @@ describe('Storage', function() {
               expect(manifest.size).toBe(34);
               expect(manifest.duration).toBe(5);
               expect(netEngine.request.calls.count()).toBe(6);
-              return fakeDbEngine.get('manifest', 0);
+              return fakeStorageEngine.get('manifest', 0);
             })
             .then(function(manifest) {
               var stream1 = manifest.periods[0].streams[0];
@@ -427,7 +451,7 @@ describe('Storage', function() {
               expect(stream2.segments.length).toBe(1);
               expect(stream2.segments[0])
                   .toEqual({startTime: 0, endTime: 1, uri: 'offline:0/1/5'});
-              return fakeDbEngine.get('segment', 3);
+              return fakeStorageEngine.get('segment', 3);
             })
             .then(function(segment) {
               expect(segment).toBeTruthy();
@@ -487,13 +511,13 @@ describe('Storage', function() {
               expect(manifest.size).toBe(5);
               expect(manifest.duration).toBe(0);
               expect(netEngine.request.calls.count()).toBe(1);
-              return fakeDbEngine.get('manifest', 0);
+              return fakeStorageEngine.get('manifest', 0);
             })
             .then(function(manifest) {
               var stream = manifest.periods[0].streams[0];
               expect(stream.segments.length).toBe(0);
               expect(stream.initSegmentUri).toBe('offline:0/2/0');
-              return fakeDbEngine.get('segment', 0);
+              return fakeStorageEngine.get('segment', 0);
             })
             .then(function(segment) {
               expect(segment).toBeTruthy();
@@ -521,7 +545,7 @@ describe('Storage', function() {
               expect(manifest.size).toBe(15);
               expect(manifest.duration).toBe(3);
               expect(netEngine.request.calls.count()).toBe(3);
-              return fakeDbEngine.get('manifest', 0);
+              return fakeStorageEngine.get('manifest', 0);
             })
             .then(function(manifest) {
               var stream = manifest.periods[0].streams[0];
@@ -568,7 +592,7 @@ describe('Storage', function() {
           .then(function(refs) {
             var manifest = createManifest(manifestId);
             manifest.periods[0].streams.push({segments: refs});
-            return fakeDbEngine.insert('manifest', manifest);
+            return fakeStorageEngine.insert('manifest', manifest);
           })
           .then(function() {
             expectDatabaseCount(1, 5);
@@ -590,7 +614,7 @@ describe('Storage', function() {
             var manifest = createManifest(manifestId);
             manifest.periods[0].streams.push(
                 {initSegmentUri: data[1][0].uri, segments: data[0]});
-            return fakeDbEngine.insert('manifest', manifest);
+            return fakeStorageEngine.insert('manifest', manifest);
           })
           .then(function() {
             expectDatabaseCount(1, 6);
@@ -612,7 +636,7 @@ describe('Storage', function() {
             var manifest = createManifest(manifestId);
             manifest.periods[0].streams.push({segments: data[0]});
             manifest.periods[0].streams.push({segments: data[1]});
-            return fakeDbEngine.insert('manifest', manifest);
+            return fakeStorageEngine.insert('manifest', manifest);
           })
           .then(function() {
             expectDatabaseCount(1, 8);
@@ -636,7 +660,7 @@ describe('Storage', function() {
               {streams: [{segments: data[0]}]},
               {streams: [{segments: data[1]}]}
             ];
-            return fakeDbEngine.insert('manifest', manifest);
+            return fakeStorageEngine.insert('manifest', manifest);
           })
           .then(function() {
             expectDatabaseCount(1, 8);
@@ -661,8 +685,8 @@ describe('Storage', function() {
             var manifest2 = createManifest(manifestId2);
             manifest2.periods[0].streams.push({segments: data[1]});
             return Promise.all([
-              fakeDbEngine.insert('manifest', manifest1),
-              fakeDbEngine.insert('manifest', manifest2)
+              fakeStorageEngine.insert('manifest', manifest1),
+              fakeStorageEngine.insert('manifest', manifest2)
             ]);
           })
           .then(function() {
@@ -671,7 +695,7 @@ describe('Storage', function() {
           })
           .then(function() {
             expectDatabaseCount(1, 3);
-            return fakeDbEngine.get('segment', segmentId - 1);
+            return fakeStorageEngine.get('segment', segmentId - 1);
           })
           .then(function(segment) { expect(segment).toBeTruthy(); })
           .catch(fail)
@@ -685,7 +709,7 @@ describe('Storage', function() {
             var manifest = createManifest(manifestId);
             data[0].uri = 'offline:0/0/1253';
             manifest.periods[0].streams.push({segments: data});
-            return fakeDbEngine.insert('manifest', manifest);
+            return fakeStorageEngine.insert('manifest', manifest);
           })
           .then(function() {
             expectDatabaseCount(1, 5);
@@ -718,9 +742,9 @@ describe('Storage', function() {
      * @param {number} segmentCount
      */
     function expectDatabaseCount(manifestCount, segmentCount) {
-      var manifests = fakeDbEngine.getAllData('manifest');
+      var manifests = fakeStorageEngine.getAllData('manifest');
       expect(Object.keys(manifests).length).toBe(manifestCount);
-      var segments = fakeDbEngine.getAllData('segment');
+      var segments = fakeStorageEngine.getAllData('segment');
       expect(Object.keys(segments).length).toBe(segmentCount);
     }
 
@@ -753,7 +777,7 @@ describe('Storage', function() {
       }
       return Promise
           .all(ret.map(function(segment) {
-            return fakeDbEngine.insert('segment', segment);
+            return fakeStorageEngine.insert('segment', segment);
           }))
           .then(function() {
             return ret.map(function(segment, i) {

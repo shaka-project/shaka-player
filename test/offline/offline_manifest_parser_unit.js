@@ -16,24 +16,43 @@
  */
 
 describe('OfflineManifestParser', function() {
-  var originalDbEngineCtor;
-  var fakeDbEngineCtor;
+  var originalIsStorageEngineSupported;
+  var originalCreateStorageEngine;
+  var fakeStorageEngine;
+  var fakeCreateStorageEngine;
   var parser;
-  var dbEngine;
 
   beforeAll(function() {
-    originalDbEngineCtor = shaka.offline.DBEngine;
+    originalIsStorageEngineSupported =
+        shaka.offline.OfflineUtils.isStorageEngineSupported;
+    originalCreateStorageEngine =
+        shaka.offline.OfflineUtils.createStorageEngine;
   });
 
   afterAll(function() {
-    shaka.offline.DBEngine = originalDbEngineCtor;
+    shaka.offline.OfflineUtils.isStorageEngineSupported =
+        originalIsStorageEngineSupported;
+    shaka.offline.OfflineUtils.createStorageEngine =
+        originalCreateStorageEngine;
   });
 
   beforeEach(function() {
-    dbEngine = createFakeDbEngine();
-    fakeDbEngineCtor = jasmine.createSpy('DBEngine');
-    fakeDbEngineCtor.and.returnValue(dbEngine);
-    shaka.offline.DBEngine = fakeDbEngineCtor;
+    shaka.offline.OfflineUtils.isStorageEngineSupported = function() {
+      return true;
+    };
+
+    fakeStorageEngine = jasmine.createSpyObj(
+        'DBEngine', ['init', 'destroy', 'get']);
+
+    var commonResolve = Promise.resolve();
+    var getResolve = Promise.resolve({data: new ArrayBuffer(0)});
+    fakeStorageEngine.init.and.returnValue(commonResolve);
+    fakeStorageEngine.destroy.and.returnValue(commonResolve);
+    fakeStorageEngine.get.and.returnValue(getResolve);
+
+    fakeCreateStorageEngine = jasmine.createSpy('createStorageEngine');
+    fakeCreateStorageEngine.and.returnValue(fakeStorageEngine);
+    shaka.offline.OfflineUtils.createStorageEngine = fakeCreateStorageEngine;
 
     parser = new shaka.offline.OfflineManifestParser();
   });
@@ -44,7 +63,7 @@ describe('OfflineManifestParser', function() {
 
   it('will query DBEngine for the manifest', function(done) {
     var uri = 'offline:123';
-    dbEngine.get.and.returnValue(Promise.resolve({
+    fakeStorageEngine.get.and.returnValue(Promise.resolve({
       key: 0,
       originalManifestUri: '',
       duration: 60,
@@ -59,11 +78,11 @@ describe('OfflineManifestParser', function() {
         .then(function(manifest) {
           expect(manifest).toBeTruthy();
 
-          expect(fakeDbEngineCtor).toHaveBeenCalledTimes(1);
-          expect(dbEngine.init).toHaveBeenCalledTimes(1);
-          expect(dbEngine.destroy).toHaveBeenCalledTimes(1);
-          expect(dbEngine.get).toHaveBeenCalledTimes(1);
-          expect(dbEngine.get).toHaveBeenCalledWith('manifest', 123);
+          expect(fakeCreateStorageEngine).toHaveBeenCalledTimes(1);
+          expect(fakeStorageEngine.init).toHaveBeenCalledTimes(1);
+          expect(fakeStorageEngine.destroy).toHaveBeenCalledTimes(1);
+          expect(fakeStorageEngine.get).toHaveBeenCalledTimes(1);
+          expect(fakeStorageEngine.get).toHaveBeenCalledWith('manifest', 123);
         })
         .catch(fail)
         .then(done);
@@ -71,7 +90,7 @@ describe('OfflineManifestParser', function() {
 
   it('will fail if manifest not found', function(done) {
     var uri = 'offline:123';
-    dbEngine.get.and.returnValue(Promise.resolve(null));
+    fakeStorageEngine.get.and.returnValue(Promise.resolve(null));
 
     parser.start(uri, /* playerInterface */ null)
         .then(fail)
@@ -82,25 +101,25 @@ describe('OfflineManifestParser', function() {
                   shaka.util.Error.Category.STORAGE,
                   shaka.util.Error.Code.REQUESTED_ITEM_NOT_FOUND, 123));
 
-          expect(fakeDbEngineCtor).toHaveBeenCalledTimes(1);
-          expect(dbEngine.init).toHaveBeenCalledTimes(1);
-          expect(dbEngine.destroy).toHaveBeenCalledTimes(1);
-          expect(dbEngine.get).toHaveBeenCalledTimes(1);
-          expect(dbEngine.get).toHaveBeenCalledWith('manifest', 123);
+          expect(fakeCreateStorageEngine).toHaveBeenCalledTimes(1);
+          expect(fakeStorageEngine.init).toHaveBeenCalledTimes(1);
+          expect(fakeStorageEngine.destroy).toHaveBeenCalledTimes(1);
+          expect(fakeStorageEngine.get).toHaveBeenCalledTimes(1);
+          expect(fakeStorageEngine.get).toHaveBeenCalledWith('manifest', 123);
         })
         .then(done);
   });
 
   it('still calls destroy on error', function(done) {
     var uri = 'offline:123';
-    dbEngine.get.and.returnValue(Promise.reject());
+    fakeStorageEngine.get.and.returnValue(Promise.reject());
 
     parser.start(uri, /* playerInterface */ null)
         .then(fail)
         .catch(function(err) {
-          expect(fakeDbEngineCtor).toHaveBeenCalledTimes(1);
-          expect(dbEngine.init).toHaveBeenCalledTimes(1);
-          expect(dbEngine.destroy).toHaveBeenCalledTimes(1);
+          expect(fakeCreateStorageEngine).toHaveBeenCalledTimes(1);
+          expect(fakeStorageEngine.init).toHaveBeenCalledTimes(1);
+          expect(fakeStorageEngine.destroy).toHaveBeenCalledTimes(1);
         })
         .then(done);
   });
@@ -142,7 +161,7 @@ describe('OfflineManifestParser', function() {
         drmInfo: null,
         appMetadata: null
       };
-      dbEngine.get.and.returnValue(Promise.resolve(data));
+      fakeStorageEngine.get.and.returnValue(Promise.resolve(data));
 
       parser.start(uri, /* playerInterface */ null)
           .then(function(manifest) {
@@ -185,7 +204,7 @@ describe('OfflineManifestParser', function() {
         drmInfo: drmInfo,
         appMetadata: null
       };
-      dbEngine.get.and.returnValue(Promise.resolve(data));
+      fakeStorageEngine.get.and.returnValue(Promise.resolve(data));
 
       var spy = jasmine.createSpy('reconstructPeriod');
       shaka.offline.OfflineUtils.reconstructPeriod = spy;
@@ -213,7 +232,7 @@ describe('OfflineManifestParser', function() {
         drmInfo: null,
         appMetadata: null
       };
-      dbEngine.get.and.returnValue(Promise.resolve(data));
+      fakeStorageEngine.get.and.returnValue(Promise.resolve(data));
 
       var spy = jasmine.createSpy('reconstructPeriod');
       shaka.offline.OfflineUtils.reconstructPeriod = spy;
@@ -232,16 +251,4 @@ describe('OfflineManifestParser', function() {
           .then(done);
     });
   });
-
-  function createFakeDbEngine() {
-    var resolve = Promise.resolve.bind(Promise);
-
-    var fake = jasmine.createSpyObj('DBEngine', ['init', 'destroy', 'get']);
-    fake.init.and.callFake(resolve);
-    fake.destroy.and.callFake(resolve);
-    fake.get.and.callFake(function() {
-      return Promise.resolve({data: new ArrayBuffer(0)});
-    });
-    return fake;
-  }
 });
