@@ -1585,6 +1585,80 @@ describe('DrmEngine', function() {
     });
   }); // describe('configure')
 
+  describe('removeSessions', function() {
+    var updatePromise1, updatePromise2;
+
+    beforeEach(function(done) {
+      session1.load.and.returnValue(Promise.resolve(true));
+      session2.load.and.returnValue(Promise.resolve(true));
+
+      // When remove() is called, it should resolve quickly and raise a
+      // 'message' event of type 'license-release'.  The removeSessions method
+      // should wait until update() is complete with the response.
+      updatePromise1 = new shaka.util.PublicPromise();
+      updatePromise2 = new shaka.util.PublicPromise();
+      session1.remove.and.callFake(function() {
+        // Raise the event synchronously, even though it doesn't normally.
+        session1.on['message']({target: session1, message: new ArrayBuffer(0)});
+        session1.update.and.returnValue(updatePromise1);
+        return Promise.resolve();
+      });
+      session2.remove.and.callFake(function() {
+        session2.on['message']({target: session2, message: new ArrayBuffer(0)});
+        session2.update.and.returnValue(updatePromise2);
+        return Promise.resolve();
+      });
+
+      drmEngine.init(manifest, /* offline */ true).catch(fail).then(done);
+    });
+
+    it('waits until update() is complete', function(done) {
+      shaka.test.Util.delay(0.1).then(
+          updatePromise1.resolve.bind(updatePromise1));
+      shaka.test.Util.delay(0.3).then(
+          updatePromise2.resolve.bind(updatePromise2));
+
+      drmEngine.removeSessions(['abc', 'def']).then(function() {
+        expect(session1.update).toHaveBeenCalled();
+        expect(session2.update).toHaveBeenCalled();
+      }).catch(fail).then(done);
+    });
+
+    it('is rejected when network request fails', function(done) {
+      var p = fakeNetEngine.delayNextRequest();
+      var networkError = new shaka.util.Error(
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.BAD_HTTP_STATUS);
+      p.reject(networkError);
+      onErrorSpy.and.stub();
+
+      drmEngine.removeSessions(['abc', 'def']).then(fail).catch(function(err) {
+        shaka.test.Util.expectToEqualError(
+            err,
+            new shaka.util.Error(
+                shaka.util.Error.Category.DRM,
+                shaka.util.Error.Code.LICENSE_REQUEST_FAILED,
+                networkError));
+        // The first session's request was rejected.
+        expect(session1.update).not.toHaveBeenCalled();
+      }).catch(fail).then(done);
+    });
+
+    it('is rejected when update() is rejected', function(done) {
+      updatePromise1.reject({message: 'Error'});
+      onErrorSpy.and.stub();
+
+      drmEngine.removeSessions(['abc', 'def']).then(fail).catch(function(err) {
+        shaka.test.Util.expectToEqualError(
+            err,
+            new shaka.util.Error(
+                shaka.util.Error.Category.DRM,
+                shaka.util.Error.Code.LICENSE_RESPONSE_REJECTED,
+                'Error'));
+      }).catch(fail).then(done);
+    });
+  });
+
   function initAndAttach() {
     return drmEngine.init(manifest, /* offline */ false).then(function() {
       return drmEngine.attach(mockVideo);
