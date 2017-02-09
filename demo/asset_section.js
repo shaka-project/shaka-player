@@ -196,11 +196,11 @@ shakaDemo.load = function() {
   // event.  This seems to work only because Shaka Player has already created a
   // MediaSource object and set video.src.
   var playPromise = shakaDemo.video_.play();
-  // Check if browser supports Media Session first.
-  if ('mediaSession' in navigator) {
-    // Reset the media session.
-    navigator.mediaSession.metadata = new MediaMetadata();
-    if (playPromise !== undefined) {
+  if (playPromise !== undefined) {
+    // Check if browser supports Media Session first.
+    if ('mediaSession' in navigator) {
+      // Reset the media session.
+      navigator.mediaSession.metadata = new MediaMetadata();
       // If video plays successfully, set media session title.
       playPromise.then(function() {
         navigator.mediaSession.metadata.title = asset.name;
