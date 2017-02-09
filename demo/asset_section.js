@@ -195,5 +195,16 @@ shakaDemo.load = function() {
   // user interaction to play a video and this function is called from a click
   // event.  This seems to work only because Shaka Player has already created a
   // MediaSource object and set video.src.
-  shakaDemo.video_.play();
+  var playPromise = shakaDemo.video_.play();
+  // Check if browser supports Media Session first.
+  if ('mediaSession' in navigator) {
+    // Reset the media session.
+    navigator.mediaSession.metadata = new MediaMetadata();
+    if (playPromise !== undefined) {
+      // If video plays successfully, set media session title.
+      playPromise.then(function() {
+        navigator.mediaSession.metadata.title = asset.name;
+      });
+    }
+  }
 };
