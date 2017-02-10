@@ -69,7 +69,7 @@ describe('TtmlTextParser', function() {
         ],
         '<tt>' + ttBody + '</tt>');
     // Any other value is rejected as an error.
-    errorHelper(shaka.util.Error.Code.INVALID_XML_SPACE,
+    errorHelper(shaka.util.Error.Code.INVALID_XML,
                 '<tt xml:space="invalid">' + ttBody + '</tt>');
   });
 
