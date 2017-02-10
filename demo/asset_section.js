@@ -196,7 +196,7 @@ shakaDemo.load = function() {
   // event.  This seems to work only because Shaka Player has already created a
   // MediaSource object and set video.src.
   var playPromise = shakaDemo.video_.play();
-  if (playPromise !== undefined) {
+  if (playPromise != undefined) {
     // Check if browser supports Media Session first.
     if ('mediaSession' in navigator) {
       // Reset the media session.
