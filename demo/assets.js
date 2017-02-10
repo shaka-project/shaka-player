@@ -35,7 +35,8 @@ shakaAssets.Encoder = {
   BITCODIN: 'Bitcodin',
   NIMBLE_STREAMER: 'Nimble Streamer',
   AZURE_MEDIA_SERVICES: 'Azure Media Services',
-  MP4BOX: 'MP4Box'
+  MP4BOX: 'MP4Box',
+  APPLE: 'Apple'
 };
 
 
@@ -88,7 +89,9 @@ shakaAssets.Feature = {
   WEBVTT: 'WebVTT',
 
   HIGH_DEFINITION: 'high definition',
-  ULTRA_HIGH_DEFINITION: 'ultra-high definition'
+  ULTRA_HIGH_DEFINITION: 'ultra-high definition',
+
+  HLS: 'HLS'
 };
 
 
@@ -326,6 +329,19 @@ shakaAssets.testAssets = [
     licenseServers: {
       'org.w3.clearkey': '//cwip-shaka-proxy.appspot.com/clearkey?_u3wDe7erb7v8Lqt8A3QDQ=ABEiM0RVZneImaq7zN3u_w'  // gjslint: disable=110
     }
+  },
+  {
+    name: 'Angel One (HLS, multilingual)',
+    manifestUri: '//storage.googleapis.com/shaka-demo-assets/angel-one-hls/master.m3u8',  // gjslint: disable=110
+
+    encoder: shakaAssets.Encoder.APPLE,
+    source: shakaAssets.Source.SHAKA,
+    drm: [],
+    features: [
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.MULTIPLE_LANGUAGES,
+      shakaAssets.Feature.HLS
+    ]
   },
   {
     name: 'Sintel 4k (multicodec)',
