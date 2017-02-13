@@ -235,14 +235,15 @@ describe('DashParser ContentProtection', function() {
       '    value="cenc"',
       '    cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309">',
       '  <cenc:pssh>bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5</cenc:pssh>',
-      '</ContentProtection'
+      '</ContentProtection>'
     ], []);
+
     var expected = buildExpectedManifest([
       buildDrmInfo('com.widevine.alpha',
           ['deadbeeffeedbaadf00d000008675309'], // key Id
           ['bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5'], // initData
-          ['deadbeeffeedbaadf00d000008675309'])], // key Id for initData
-    1); // one variant
+          ['deadbeeffeedbaadf00d000008675309'])] // key Id for initData
+    );
     testDashParser(done, source, expected);
   });
 
