@@ -494,6 +494,18 @@ shaka.test.ManifestGenerator.prototype.anyInitSegment = function() {
 
 
 /**
+ * Sets the init segment of the current stream to null.
+ *
+ * @return {!shaka.test.ManifestGenerator}
+ */
+shaka.test.ManifestGenerator.prototype.nullInitSegment = function() {
+  var stream = this.currentStream_();
+  stream.initSegmentReference = null;
+  return this;
+};
+
+
+/**
  * Sets the current stream to use segment template to create segments.
  *
  * @param {string} template An sprintf template that will take the segment

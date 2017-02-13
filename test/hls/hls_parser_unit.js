@@ -49,7 +49,8 @@ describe('HlsParser', function() {
     fakeNetEngine.setResponseMapAsText({
       'test://master': master,
       'test://audio': media,
-      'test://video': media
+      'test://video': media,
+      'test://text': media
     });
 
     parser.start('test://master', playerInterface)
@@ -192,6 +193,66 @@ describe('HlsParser', function() {
                   .anyInitSegment()
                   .presentationTimeOffset(10)
                   .mime('audio/mp4', 'mp4a')
+          .build();
+
+    testHlsParser(master, media, manifest, done);
+  });
+
+  it('parses manifest with text streams', function(done) {
+    var master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
+      'test://video\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="en",',
+      'URI="test://audio"\n',
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="en",',
+      'URI="test://text"\n',
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub2",LANGUAGE="es",',
+      'URI="test://text"\n'
+    ].join('');
+
+    var media = [
+      '#EXTM3U\n',
+      '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'test://main.mp4'
+    ].join('');
+
+    var manifest = new shaka.test.ManifestGenerator()
+            .anyTimeline()
+            .addPeriod(jasmine.any(Number))
+              .addVariant(jasmine.any(Number))
+                .language('en')
+                .bandwidth(200)
+                .addVideo(jasmine.any(Number))
+                  .anySegmentFunctions()
+                  .anyInitSegment()
+                  .presentationTimeOffset(10)
+                  .mime('video/mp4', 'avc1')
+                  .frameRate(60)
+                  .size(960, 540)
+                .addAudio(jasmine.any(Number))
+                  .language('en')
+                  .anySegmentFunctions()
+                  .anyInitSegment()
+                  .presentationTimeOffset(10)
+                  .mime('audio/mp4', 'mp4a')
+              .addTextStream(jasmine.any(Number))
+                .language('en')
+                .anySegmentFunctions()
+                .nullInitSegment()
+                .presentationTimeOffset(10)
+                .mime('text/vtt', '')
+                .kind('subtitles')
+              .addTextStream(jasmine.any(Number))
+                .language('es')
+                .anySegmentFunctions()
+                .nullInitSegment()
+                .presentationTimeOffset(10)
+                .mime('text/vtt', '')
+                .kind('subtitles')
           .build();
 
     testHlsParser(master, media, manifest, done);
