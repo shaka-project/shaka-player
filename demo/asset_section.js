@@ -181,6 +181,12 @@ shakaDemo.load = function() {
       player.addTextTrack(extraText.uri, extraText.language, extraText.kind,
                           extraText.mime, extraText.codecs);
     });
+
+    // Check if browser supports Media Session first.
+    if ('mediaSession' in navigator) {
+      // Set media session title.
+      navigator.mediaSession.metadata = new MediaMetadata({title: asset.name});
+    }
   }, function(reason) {
     var error = /** @type {!shaka.util.Error} */(reason);
     if (error.code == shaka.util.Error.Code.LOAD_INTERRUPTED) {
