@@ -18,7 +18,7 @@
 
 /**
  * @fileoverview Externs for MediaSession based on
- * {@link https://goo.gl/8QS094i Editor's Draft, 12 January 2017}
+ * {@link https://goo.gl/8QS094 Editor's Draft, 12 January 2017}
  *
  * @externs
  */
@@ -28,11 +28,12 @@
 /**
  * @constructor
  */
-var MediaMetadata = function() {};
+var MediaMetadata = function(options) {};
 
 
+/** @type {string} */
+MediaMetadata.prototype.title;
 
-/**
- * @constructor
- */
-Navigator.prototype.mediaSession = function() {};
+
+/** @type {MediaMetadata} */
+Navigator.prototype.mediaSession;

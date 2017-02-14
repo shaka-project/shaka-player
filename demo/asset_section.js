@@ -181,6 +181,12 @@ shakaDemo.load = function() {
       player.addTextTrack(extraText.uri, extraText.language, extraText.kind,
                           extraText.mime, extraText.codecs);
     });
+
+    // Check if browser supports Media Session first.
+    if ('mediaSession' in navigator) {
+      // Set media session title.
+      navigator.mediaSession.metadata = new MediaMetadata({title: asset.name});
+    }
   }, function(reason) {
     var error = /** @type {!shaka.util.Error} */(reason);
     if (error.code == shaka.util.Error.Code.LOAD_INTERRUPTED) {
@@ -195,16 +201,5 @@ shakaDemo.load = function() {
   // user interaction to play a video and this function is called from a click
   // event.  This seems to work only because Shaka Player has already created a
   // MediaSource object and set video.src.
-  var playPromise = shakaDemo.video_.play();
-  if (playPromise != undefined) {
-    // Check if browser supports Media Session first.
-    if ('mediaSession' in navigator) {
-      // Reset the media session.
-      navigator.mediaSession.metadata = new MediaMetadata();
-      // If video plays successfully, set media session title.
-      playPromise.then(function() {
-        navigator.mediaSession.metadata.title = asset.name;
-      });
-    }
-  }
+  shakaDemo.video_.play();
 };
