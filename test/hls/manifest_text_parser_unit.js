@@ -216,6 +216,26 @@ describe('ManifestTextParser', function() {
     });
   });
 
+  describe('tag.toString', function() {
+    it('recreates valid tag with attributes', function() {
+      var text = '#EXT-X-MEDIA:CODECS="avc1.64002a,mp4a.40.2",AUDIO="a1,a2"';
+      var tag = shaka.hls.ManifestTextParser.parseTag(0, text);
+      expect(text).toEqual(tag.toString());
+    });
+
+    it('recreates valid tag with value', function() {
+      var text = '#EXT-X-PLAYLIST-TYPE:VOD';
+      var tag = shaka.hls.ManifestTextParser.parseTag(0, text);
+      expect(text).toEqual(tag.toString());
+    });
+
+    it('recreates valid tag with no value', function() {
+      var text = '#EXTM3U';
+      var tag = shaka.hls.ManifestTextParser.parseTag(0, text);
+      expect(text).toEqual(tag.toString());
+    });
+  });
+
   describe('parseSegments', function() {
     it('parses segments', function() {
       verifyPlaylist(
