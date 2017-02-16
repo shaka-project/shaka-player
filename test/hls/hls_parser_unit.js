@@ -220,6 +220,7 @@ describe('HlsParser', function() {
       'test://main.mp4'
     ].join('');
 
+    var TextStreamKind = shaka.util.ManifestParserUtils.TextStreamKind;
     var manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(jasmine.any(Number))
@@ -245,14 +246,14 @@ describe('HlsParser', function() {
                 .nullInitSegment()
                 .presentationTimeOffset(10)
                 .mime('text/vtt', '')
-                .kind('subtitles')
+                .kind(TextStreamKind.SUBTITLE)
               .addTextStream(jasmine.any(Number))
                 .language('es')
                 .anySegmentFunctions()
                 .nullInitSegment()
                 .presentationTimeOffset(10)
                 .mime('text/vtt', '')
-                .kind('subtitles')
+                .kind('subtitle')
           .build();
 
     testHlsParser(master, media, manifest, done);
