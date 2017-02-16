@@ -183,9 +183,9 @@ describe('DashParser Live', function() {
             expect(stream.findSegmentPosition(0)).not.toBe(null);
             Dash.verifySegmentIndex(manifest, basicRefs, 0);
 
-            // 15 seconds for @timeShiftBufferDepth, the first segment duration,
-            // and the @suggestedPresentationDelay.
-            Date.now = function() { return (2 * 15 + 5) * 1000; };
+            // 15 seconds for @timeShiftBufferDepth and the first segment
+            // duration.
+            Date.now = function() { return 2 * 15 * 1000; };
             delayForUpdatePeriod();
             // The first reference should have been evicted.
             expect(stream.findSegmentPosition(0)).toBe(null);
@@ -236,16 +236,16 @@ describe('DashParser Live', function() {
             Dash.verifySegmentIndex(manifest, basicRefs, 0);
             Dash.verifySegmentIndex(manifest, basicRefs, 1);
 
-            // 15 seconds for @timeShiftBufferDepth, the first segment duration,
-            // and the @suggestedPresentationDelay.
-            Date.now = function() { return (2 * 15 + 5) * 1000; };
+            // 15 seconds for @timeShiftBufferDepth and the first segment
+            // duration.
+            Date.now = function() { return 2 * 15 * 1000; };
             delayForUpdatePeriod();
             // The first reference should have been evicted.
             Dash.verifySegmentIndex(manifest, basicRefs.slice(1), 0);
             Dash.verifySegmentIndex(manifest, basicRefs, 1);
 
             // Same as above, but 1 period length later
-            Date.now = function() { return (2 * 15 + 5 + pStart) * 1000; };
+            Date.now = function() { return (2 * 15 + pStart) * 1000; };
             delayForUpdatePeriod();
             Dash.verifySegmentIndex(manifest, [], 0);
             Dash.verifySegmentIndex(manifest, basicRefs.slice(1), 1);
@@ -530,11 +530,10 @@ describe('DashParser Live', function() {
 
           //  We are 5 minutes into the presentation, with a
           //  @timeShiftBufferDepth of 120 seconds and a @maxSegmentDuration of
-          //  10 seconds, the normal start will be 2:50; but with a 60
-          //  @suggestedPresentationDelay it should be 1:50.
-          expect(timeline.getSegmentAvailabilityStart()).toBe(110);
-          // Similarly, normally the end should be 4:50; but with the delay
-          // it will be 3:50 minutes.
+          //  10 seconds, the start will be 2:50.
+          expect(timeline.getSegmentAvailabilityStart()).toBe(170);
+          // Normally the end should be 4:50; but with a 60 second
+          // @suggestedPresentationDelay it will be 3:50 minutes.
           expect(timeline.getSegmentAvailabilityEnd()).toBe(290);
           expect(timeline.getSeekRangeEnd()).toBe(230);
         }).catch(fail).then(done);
