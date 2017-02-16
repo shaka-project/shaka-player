@@ -298,7 +298,8 @@ shakaExtern.GetSegmentReferenceFunction;
  *   language: string,
  *   type: string,
  *   primary: boolean,
- *   trickModeVideo: ?shakaExtern.Stream
+ *   trickModeVideo: ?shakaExtern.Stream,
+ *   containsEmsgBoxes: boolean
  * }}
  *
  * @description
@@ -380,6 +381,10 @@ shakaExtern.GetSegmentReferenceFunction;
  * @property {?shakaExtern.Stream} trickModeVideo
  *   <i>Video streams only.</i> <br>
  *   An alternate video stream to use for trick mode playback.
+ * @property {boolean} containsEmsgBoxes
+ *   <i>Defaults to false.</i><br>
+ *   Whether the stream contains embedded 'emsg' boxes that should result in
+ *   Player events.
  *
  * @exportDoc
  */

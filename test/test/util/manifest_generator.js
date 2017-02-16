@@ -454,7 +454,8 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
     language: language,
     type: type,
     primary: false,
-    trickModeVideo: null
+    trickModeVideo: null,
+    containsEmsgBoxes: false
   };
   stream.createSegmentIndex.and.callFake(
       function() { return Promise.resolve(); });

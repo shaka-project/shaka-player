@@ -289,6 +289,8 @@ shakaExtern.TimelineRegionInfo;
  * @typedef {{
  *   schemeIdUri: string,
  *   value: string,
+ *   startTime: number,
+ *   endTime: number,
  *   timescale: number,
  *   presentationTimeDelta: number,
  *   eventDuration: number,
@@ -300,21 +302,24 @@ shakaExtern.TimelineRegionInfo;
  * Contains information about an EMSG MP4 box.
  *
  * @property {string} schemeIdUri
- *    Identifies the message scheme.
+ *   Identifies the message scheme.
  * @property {string} value
- *    Specifies the value for the event.
+ *   Specifies the value for the event.
+ * @property {number} startTime
+ *   The time that the event starts (in presentation time).
+ * @property {number} endTime
+ *   The time that the event ends (in presentation time).
  * @property {number} timescale
- *    Provides the timescale, in ticks per second,
- *    for the time and duration fields within this box.
+ *   Provides the timescale, in ticks per second.
  * @property {number} presentationTimeDelta
- *    Provides the Media Presentation time delta of the media presentation
- *    time of the event and the earliest presentation time in this segment.
+ *   The offset that the event starts, relative to the start of the segment
+ *   this is contained in (in units of timescale).
  * @property {number} eventDuration
- *    Provides the duration of event in media presentation time.
+ *   The duration of the event (in units of timescale).
  * @property {number} id
- *    A field identifying this instance of the message.
+ *   A field identifying this instance of the message.
  * @property {Uint8Array} messageData
- *    Body of the message.
+ *   Body of the message.
  * @exportDoc
  */
 shakaExtern.EmsgInfo;

@@ -41,6 +41,7 @@ describe('StreamingEngine', function() {
   var onChooseStreams;
   var onCanSwitch;
   var onError;
+  var onEvent;
   var onInitialStreamsSetup;
   var onStartupComplete;
   var streamingEngine;
@@ -261,6 +262,7 @@ describe('StreamingEngine', function() {
     onStartupComplete = jasmine.createSpy('onStartupComplete');
     onError = jasmine.createSpy('onError');
     onError.and.callFake(fail);
+    onEvent = jasmine.createSpy('onEvent');
 
     var config = {
       rebufferingGoal: 2,
@@ -276,7 +278,7 @@ describe('StreamingEngine', function() {
         mediaSourceEngine,
         /** @type {!shaka.net.NetworkingEngine} */(netEngine),
         /** @type {shakaExtern.Manifest} */(manifest),
-        onChooseStreams, onCanSwitch, onError,
+        onChooseStreams, onCanSwitch, onError, onEvent,
         onInitialStreamsSetup, onStartupComplete);
     streamingEngine.configure(config);
   }

@@ -254,7 +254,8 @@ describe('OfflineUtils', function() {
         language: streamDb.language,
         type: streamDb.contentType,
         primary: streamDb.primary,
-        trickModeVideo: null
+        trickModeVideo: null,
+        containsEmsgBoxes: false
       };
       expect(stream).toEqual(expectedStream);
 
