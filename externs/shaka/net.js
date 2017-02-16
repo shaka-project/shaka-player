@@ -90,7 +90,8 @@ shakaExtern.Request;
  *   uri: string,
  *   data: ArrayBuffer,
  *   headers: !Object.<string, string>,
- *   timeMs: (number|undefined)
+ *   timeMs: (number|undefined),
+ *   fromCache: (boolean|undefined)
  * }}
  *
  * @description
@@ -110,6 +111,9 @@ shakaExtern.Request;
  * @property {(number|undefined)} timeMs
  *   Optional.  The time it took to get the response, in miliseconds.  If not
  *   given, NetworkingEngine will calculate it using Date.now.
+ * @property {(boolean|undefined)} fromCache
+ *   Optional. If true, this response was from a cache and should be ignored
+ *   for bandwidth estimation.
  *
  * @exportDoc
  */

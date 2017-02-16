@@ -832,6 +832,33 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
     });
   });
 
+  it('ignores cache hits', function(done) {
+    var onSegmentDownloaded = jasmine.createSpy('onSegmentDownloaded');
+    networkingEngine = new shaka.net.NetworkingEngine(onSegmentDownloaded);
+
+    networkingEngine.request(requestType, createRequest('resolve://foo'))
+        .then(function() {
+          expect(onSegmentDownloaded).toHaveBeenCalled();
+          onSegmentDownloaded.calls.reset();
+
+          resolveScheme.and.callFake(function() {
+            return Promise.resolve({
+              uri: '',
+              data: new ArrayBuffer(5),
+              headers: {},
+              fromCache: true
+            });
+          });
+          return networkingEngine.request(
+              requestType, createRequest('resolve://foo'));
+        })
+        .then(function() {
+          expect(onSegmentDownloaded).not.toHaveBeenCalled();
+        })
+        .catch(fail)
+        .then(done);
+  });
+
   /**
    * @param {string} uri
    * @param {shakaExtern.RetryParameters=} opt_retryParameters
