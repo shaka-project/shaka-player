@@ -281,7 +281,8 @@ describe('MediaSourceEngine', function() {
     mediaSourceEngine.setDuration(presentationDuration).then(function() {
       return appendInit('video');
     }).then(function() {
-      return mediaSourceEngine.setAppendWindowEnd('video', 18);
+      return mediaSourceEngine.setStreamProperties(
+          'video', /* timestampOffset */ 0, /* appendWindowEnd */ 18);
     }).then(function() {
       expect(buffered('video', 0)).toBe(0);
       return append('video', 1);

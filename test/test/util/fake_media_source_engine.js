@@ -80,8 +80,7 @@ shaka.test.FakeMediaSourceEngine = function(segmentData, opt_drift) {
   spyOn(this, 'clear').and.callThrough();
   spyOn(this, 'flush').and.callThrough();
   spyOn(this, 'endOfStream').and.callThrough();
-  spyOn(this, 'setTimestampOffset').and.callThrough();
-  spyOn(this, 'setAppendWindowEnd').and.callThrough();
+  spyOn(this, 'setStreamProperties').and.callThrough();
   spyOn(this, 'setDuration').and.callThrough();
   spyOn(this, 'getDuration').and.callThrough();
 };
@@ -281,17 +280,11 @@ shaka.test.FakeMediaSourceEngine.prototype.flush = function(type) {
 
 
 /** @override */
-shaka.test.FakeMediaSourceEngine.prototype.setTimestampOffset = function(
-    type, offset) {
+shaka.test.FakeMediaSourceEngine.prototype.setStreamProperties = function(
+    type, offset, appendWindowEnd) {
   if (this.segments[type] === undefined) throw new Error('unexpected type');
   this.timestampOffsets_[type] = offset;
-  return Promise.resolve();
-};
-
-
-/** @override */
-shaka.test.FakeMediaSourceEngine.prototype.setAppendWindowEnd = function(
-    type, appendWindowEnd) {
+  // Don't use |appendWindowEnd|.
   return Promise.resolve();
 };
 

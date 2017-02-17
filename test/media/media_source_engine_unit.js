@@ -587,48 +587,39 @@ describe('MediaSourceEngine', function() {
     });
   });
 
-  describe('setTimestampOffset', function() {
+  describe('setStreamProperties', function() {
     beforeEach(function() {
       mediaSourceEngine.init({'audio': 'audio/foo', 'text': 'text/foo'});
     });
 
-    it('sets the timestamp offset', function(done) {
+    it('sets the correct fields', function(done) {
       expect(audioSourceBuffer.timestampOffset).toBe(0);
-      mediaSourceEngine.setTimestampOffset('audio', 10).then(function() {
-        expect(audioSourceBuffer.timestampOffset).toBe(10);
-        done();
-      });
+      expect(audioSourceBuffer.appendWindowEnd).toBe(Infinity);
+      mediaSourceEngine
+          .setStreamProperties(
+              'audio', /* timestampOffset */ 10, /* appendWindowEnd */ 20)
+          .then(function() {
+            expect(audioSourceBuffer.timestampOffset).toBe(10);
+            // MediaSourceEngine adds a fudge factor to deal with edge cases
+            // where the last desired frame in a period could be chopped off.
+            // Expect a tolerance of at most 0.1.
+            expect(audioSourceBuffer.appendWindowEnd).toBeCloseTo(20, 1);
+            done();
+          });
     });
 
     it('will forward to TextEngine', function(done) {
       expect(mockTextEngine.setTimestampOffset).not.toHaveBeenCalled();
-      mediaSourceEngine.setTimestampOffset('text', 10).then(function() {
-        expect(mockTextEngine.setTimestampOffset).toHaveBeenCalledWith(10);
-      }).catch(fail).then(done);
-    });
-  });
-
-  describe('setAppendWindowEnd', function() {
-    beforeEach(function() {
-      mediaSourceEngine.init({'audio': 'audio/foo', 'text': 'text/foo'});
-    });
-
-    it('sets the append window end', function(done) {
-      expect(audioSourceBuffer.appendWindowEnd).toBe(Infinity);
-      mediaSourceEngine.setAppendWindowEnd('audio', 10).then(function() {
-        // MediaSourceEngine adds a fudge factor to deal with edge cases where
-        // the last desired frame in a period could be chopped off.  Expect a
-        // tolerance of at most 0.1.
-        expect(audioSourceBuffer.appendWindowEnd).toBeCloseTo(10, 1);
-        done();
-      });
-    });
-
-    it('will forward to TextEngine', function(done) {
       expect(mockTextEngine.setAppendWindowEnd).not.toHaveBeenCalled();
-      mediaSourceEngine.setAppendWindowEnd('text', 5).then(function() {
-        expect(mockTextEngine.setAppendWindowEnd).toHaveBeenCalledWith(5);
-      }).catch(fail).then(done);
+      mediaSourceEngine
+          .setStreamProperties(
+              'text', /* timestampOffset */ 10, /* appendWindowEnd */ 20)
+          .then(function() {
+            expect(mockTextEngine.setTimestampOffset).toHaveBeenCalledWith(10);
+            expect(mockTextEngine.setAppendWindowEnd).toHaveBeenCalledWith(20);
+          })
+          .catch(fail)
+          .then(done);
     });
   });
 
