@@ -298,6 +298,45 @@ describe('HlsParser', function() {
     testHlsParser(master, media, manifest, done);
   });
 
+  it('allows streams with no init segment', function(done) {
+    var master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,VIDEO="vid"\n',
+      'test://audio\n',
+      '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid",URI="test://video"'
+    ].join('');
+
+    var media = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:6\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'test://main.mp4'
+    ].join('');
+
+    var manifest = new shaka.test.ManifestGenerator()
+            .anyTimeline()
+            .addPeriod(jasmine.any(Number))
+              .addVariant(jasmine.any(Number))
+                .bandwidth(200)
+                .addVideo(jasmine.any(Number))
+                  .anySegmentFunctions()
+                  .nullInitSegment()
+                  .presentationTimeOffset(10)
+                  .mime('video/mp4', 'avc1')
+                  .frameRate(60)
+                  .size(960, 540)
+                .addAudio(jasmine.any(Number))
+                  .anySegmentFunctions()
+                  .nullInitSegment()
+                  .presentationTimeOffset(10)
+                  .mime('audio/mp4', 'mp4a')
+          .build();
+
+    testHlsParser(master, media, manifest, done);
+  });
+
   describe('Errors out', function() {
     var Code = shaka.util.Error.Code;
 
@@ -320,30 +359,6 @@ describe('HlsParser', function() {
               })
             .then(done);
     }
-
-    it('if no init section was provided', function(done) {
-      var master = [
-        '#EXTM3U\n',
-        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
-        'RESOLUTION=960x540,FRAME-RATE=60,VIDEO="vid"\n',
-        'test://audio\n',
-        '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid",URI="test://video"'
-      ].join('');
-
-      var media = [
-        '#EXTM3U\n',
-        '#EXT-X-TARGETDURATION:6\n',
-        '#EXTINF:5,\n',
-        '#EXT-X-BYTERANGE:121090@616\n',
-        'test://main.mp4'
-      ].join('');
-
-      var error = new shaka.util.Error(
-          shaka.util.Error.Category.MANIFEST,
-          Code.HLS_MEDIA_INIT_SECTION_INFO_MISSING);
-
-      verifyError(master, media, error, done);
-    });
 
     it('if multiple init sections were provided', function(done) {
       var master = [
