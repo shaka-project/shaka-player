@@ -773,19 +773,25 @@ var closureTags = exports.closureTags = {
     deprecated: cloneTagDef(baseTags.deprecated),
     enum: cloneTagDef(baseTags.enum),
     extends: cloneTagDef(baseTags.augments),
-    export: {
+    export: {  // Truly exported by the compiler.
         mustNotHaveValue: true,
         onTagged: function(doclet, tag) {
             doclet.visibility = 'export';
         }
     },
-    exportDoc: {
+    exportInterface: {  // Exported interface in generated externs.
         mustNotHaveValue: true,
         onTagged: function(doclet, tag) {
             doclet.visibility = 'export';
         }
     },
-    expose: {
+    exportDoc: {  // Exported only to docs.
+        mustNotHaveValue: true,
+        onTagged: function(doclet, tag) {
+            doclet.visibility = 'export';
+        }
+    },
+    expose: {  // Truly exposed by the compiler.
         onTagged: function(doclet, tag) {
             doclet.visibility = 'expose';
         }

@@ -57,18 +57,17 @@ describe('CancelableChain', function() {
     }).finalize().catch(fail).then(done);
   });
 
-  it('must be finalized to catch failures',
-      /** @suppress {unnecessaryCasts} */ function() {
-        // compiler workaround
-        var catchMethod = /** @type {Object} */(chain)['catch'];
+  it('must be finalized to catch failures', function() {
+    // compiler workaround
+    var catchMethod = /** @type {Object} */(chain)['catch'];
 
-        // no chain.catch
-        expect(catchMethod).toBe(undefined);
-        // no second argument on chain.then
-        expect(chain.then.length).toBe(1);
-        // finalize returns the final Promise, where errors are received.
-        expect(chain.finalize().catch).toEqual(jasmine.any(Function));
-      });
+    // no chain.catch
+    expect(catchMethod).toBe(undefined);
+    // no second argument on chain.then
+    expect(chain.then.length).toBe(1);
+    // finalize returns the final Promise, where errors are received.
+    expect(chain.finalize().catch).toEqual(jasmine.any(Function));
+  });
 
   it('stops accepting new stages after being finalized', function(done) {
     chain.then(function() {
@@ -78,6 +77,11 @@ describe('CancelableChain', function() {
     var p = chain.finalize();
     expect(chain.then).toThrow(jasmine.any(TypeError));
     p.catch(fail).then(done);
+  });
+
+  it('returns the same promise after being finalized', function() {
+    var p = chain.then(function() { return 1; }).finalize();
+    expect(chain.finalize()).toBe(p);
   });
 
   describe('cancel', function() {

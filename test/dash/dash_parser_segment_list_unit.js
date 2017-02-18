@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-describe('DashParser.SegmentList', function() {
+describe('DashParser SegmentList', function() {
   var Dash;
   var fakeNetEngine;
   var parser;
-  var filterPeriod = function() {};
+  var playerInterface;
 
   beforeAll(function() {
     Dash = shaka.test.Dash;
@@ -28,6 +28,14 @@ describe('DashParser.SegmentList', function() {
   beforeEach(function() {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = shaka.test.Dash.makeDashParser();
+
+    playerInterface = {
+      networkingEngine: fakeNetEngine,
+      filterPeriod: function() {},
+      onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
+      onEvent: fail,
+      onError: fail
+    };
   });
 
   shaka.test.Dash.makeTimelineTests('SegmentList', '', [
@@ -168,7 +176,7 @@ describe('DashParser.SegmentList', function() {
       ].join('\n');
 
       fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
-      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+      parser.start('dummy://foo', playerInterface)
           .then(function(manifest) {
             var timeline = manifest.presentationTimeline;
             expect(timeline.getEarliestStart()).toBe(4);
@@ -226,7 +234,7 @@ describe('DashParser.SegmentList', function() {
         '    <SegmentList startNumber="40" />',
         '    <AdaptationSet mimeType="video/webm">',
         '      <SegmentList startNumber="1" duration="50" />',
-        '      <Representation>',
+        '      <Representation bandwidth="1">',
         '        <BaseURL>http://example.com</BaseURL>',
         '        <SegmentList>',
         '          <SegmentURL media="s1.mp4" />',
@@ -260,7 +268,7 @@ describe('DashParser.SegmentList', function() {
         '      </SegmentTimeline>',
         '    </SegmentList>',
         '    <AdaptationSet mimeType="video/webm">',
-        '      <Representation>',
+        '      <Representation bandwidth="1">',
         '        <BaseURL>http://example.com</BaseURL>',
         '        <SegmentList>',
         '          <SegmentURL media="s1.mp4" />',
@@ -290,7 +298,7 @@ describe('DashParser.SegmentList', function() {
         '      <SegmentURL media="s3.mp4" />',
         '    </SegmentList>',
         '    <AdaptationSet mimeType="video/webm">',
-        '      <Representation>',
+        '      <Representation bandwidth="1">',
         '        <BaseURL>http://example.com</BaseURL>',
         '        <SegmentList>',
         '          <SegmentTimeline>',
@@ -325,7 +333,7 @@ describe('DashParser.SegmentList', function() {
         '      <SegmentURL media="s4.mp4" />',
         '    </SegmentList>',
         '    <AdaptationSet mimeType="video/webm">',
-        '      <Representation>',
+        '      <Representation bandwidth="1">',
         '        <BaseURL>http://example.com</BaseURL>',
         '        <SegmentList presentationTimeOffset="10" startNumber="1">',
         '          <SegmentTimeline>',

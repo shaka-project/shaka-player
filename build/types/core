@@ -7,7 +7,6 @@
 
 +../../lib/debug/asserts.js
 +../../lib/debug/log.js
-+../../lib/debug/timer.js
 
 +../../lib/media/drm_engine.js
 +../../lib/media/manifest_parser.js
@@ -40,7 +39,9 @@
 +../../lib/util/functional.js
 +../../lib/util/i_destroyable.js
 +../../lib/util/language_utils.js
++../../lib/util/manifest_parser_utils.js
 +../../lib/util/map_utils.js
++../../lib/util/mp4_parser.js
 +../../lib/util/multi_map.js
 +../../lib/util/pssh.js
 +../../lib/util/public_promise.js

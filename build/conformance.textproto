@@ -72,3 +72,33 @@ requirement: {
   error_message: 'Using "fit" is not allowed'
   whitelist_regexp: 'test/player_integration.js'
 }
+
+
+# Disallow ES6 methods.
+requirement: {
+  type: BANNED_PROPERTY
+  value: 'Array.prototype.entries'
+  value: 'Array.prototype.keys'
+  value: 'Array.prototype.values'
+  value: 'Array.prototype.find'
+  value: 'Array.prototype.findIndex'
+  value: 'Array.prototype.copyWithin'
+  value: 'Array.prototype.fill'
+  error_message: 'ES6 Array methods are not allowed'
+                 ' because they are not supported in IE11'
+}
+requirement: {
+  type: BANNED_NAME
+  value: 'Array.from'
+  value: 'Array.of'
+  error_message: 'ES6 Array methods are not allowed'
+                 ' because they are not supported in IE11'
+}
+requirement: {
+  type: BANNED_PROPERTY
+  value: 'String.prototype.startsWith'
+  value: 'String.prototype.endsWith'
+  value: 'String.prototype.includes'
+  error_message: 'ES6 String methods are not allowed'
+                 'because they are not supported in IE11'
+}

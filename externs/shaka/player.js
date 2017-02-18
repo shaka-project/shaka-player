@@ -31,15 +31,37 @@
  *   The timestamp the choice was made, in seconds since 1970
  *   (i.e. Date.now() / 1000).
  * @property {number} id
- *   The id of the stream that was chosen.
+ *   The id of the track that was chosen.
  * @property {string} type
- *   The type of stream chosen ('audio', 'text', or 'video')
+ *   The type of stream chosen ('variant' or 'text')
  * @property {boolean} fromAdaptation
  *   True if the choice was made by AbrManager for adaptation; false if it
  *   was made by the application through selectTrack.
  * @exportDoc
  */
 shakaExtern.StreamChoice;
+
+
+/**
+ * @typedef {{
+ *   timestamp: number,
+ *   state: string,
+ *   duration: number
+ * }}
+ *
+ * @property {number} timestamp
+ *   The timestamp the state was entered, in seconds since 1970
+ *   (i.e. Date.now() / 1000).
+ * @property {string} state
+ *   The state the player entered.  This could be 'buffering', 'playing',
+ *   'paused', or 'ended'.
+ * @property {number} duration
+ *   The number of seconds the player was in this state.  If this is the last
+ *   entry in the list, the player is still in this state, so the duration will
+ *   continue to increase.
+ * @exportDoc
+ */
+shakaExtern.StateChange;
 
 
 /**
@@ -51,10 +73,13 @@ shakaExtern.StreamChoice;
  *   decodedFrames: number,
  *   droppedFrames: number,
  *   estimatedBandwidth: number,
+ *
+ *   loadLatency: number,
  *   playTime: number,
  *   bufferingTime: number,
  *
- *   switchHistory: !Array.<shakaExtern.StreamChoice>
+ *   switchHistory: !Array.<shakaExtern.StreamChoice>,
+ *   stateHistory: !Array.<shakaExtern.StateChange>
  * }}
  *
  * @description
@@ -77,6 +102,11 @@ shakaExtern.StreamChoice;
  *   is not supported by the browser.
  * @property {number} estimatedBandwidth
  *   The current estimated network bandwidth (in bit/sec).
+ *
+ * @property {number} loadLatency
+ *   This is the number of seconds it took for the video element to have enough
+ *   data to begin playback.  This is measured from the time load() is called to
+ *   the time the 'loadeddata' event is fired by the media element.
  * @property {number} playTime
  *   The total time spent in a playing state in seconds.
  * @property {number} bufferingTime
@@ -84,6 +114,8 @@ shakaExtern.StreamChoice;
  *
  * @property {!Array.<shakaExtern.StreamChoice>} switchHistory
  *   A history of the stream changes.
+ * @property {!Array.<shakaExtern.StateChange>} stateHistory
+ *   A history of the state changes.
  * @exportDoc
  */
 shakaExtern.Stats;
@@ -102,13 +134,15 @@ shakaExtern.Stats;
  *   width: ?number,
  *   height: ?number,
  *   frameRate: ?number,
+ *   mimeType: ?string,
  *   codecs: ?string
  * }}
  *
  * @description
  * An object describing a media track.  This object should be treated as
  * read-only as changing any values does not have any effect.  This is the
- * public view of the Stream type.
+ * public view of an audio/video paring (variant type) or text track (text
+ * type).
  *
  * @property {number} id
  *   The unique ID of the track.
@@ -117,22 +151,24 @@ shakaExtern.Stats;
  *   visible/audible in the buffer).
  *
  * @property {string} type
- *   The type of track, one of 'audio', 'text', or 'video'.
+ *   The type of track, either 'variant' or 'text'.
  * @property {number} bandwidth
  *   The bandwidth required to play the track, in bits/sec.
  *
  * @property {string} language
- *   The language of the track, or '' for video tracks.  This is the exact
+ *   The language of the track, or 'und' if not given.  This is the exact
  *   value provided in the manifest; it may need to be normalized.
  * @property {?string} kind
  *   (only for text tracks) The kind of text track, either 'captions' or
  *   'subtitles'.
  * @property {?number} width
- *   (only for video tracks) The width of the track in pixels.
+ *   The video width provided in the manifest, if present.
  * @property {?number} height
- *   (only for video tracks) The height of the track in pixels.
+ *   The video height provided in the manifest, if present.
  * @property {?number} frameRate
  *   The video framerate provided in the manifest, if present.
+ * @property {?string} mimeType
+ *   The MIME type of the content provided in the manifest.
  * @property {?string} codecs
  *   The audio/video codecs string provided in the manifest, if present.
  * @exportDoc
@@ -149,10 +185,8 @@ shakaExtern.Track;
  *   minPixels: number,
  *   maxPixels: number,
  *
- *   minAudioBandwidth: number,
- *   maxAudioBandwidth: number,
- *   minVideoBandwidth: number,
- *   maxVideoBandwidth: number
+ *   minBandwidth: number,
+ *   maxBandwidth: number
  * }}
  *
  * @description
@@ -174,14 +208,10 @@ shakaExtern.Track;
  * @property {number} maxPixels
  *   The maximum number of total pixels in a video track (i.e. width * height).
  *
- * @property {number} minAudioBandwidth
- *   The minimum bandwidth of an audio track, in bit/sec.
- * @property {number} maxAudioBandwidth
- *   The maximum bandwidth of an audio track, in bit/sec.
- * @property {number} minVideoBandwidth
- *   The minimum bandwidth of a video track, in bit/sec.
- * @property {number} maxVideoBandwidth
- *   The maximum bandwidth of a video track, in bit/sec.
+ * @property {number} minBandwidth
+ *   The minimum bandwidth of a variant track, in bit/sec.
+ * @property {number} maxBandwidth
+ *   The maximum bandwidth of a variant track, in bit/sec.
  * @exportDoc
  */
 shakaExtern.Restrictions;
@@ -222,6 +252,72 @@ shakaExtern.DrmSupportType;
  * @exportDoc
  */
 shakaExtern.SupportType;
+
+
+/**
+ * @typedef {{
+ *   schemeIdUri: string,
+ *   value: string,
+ *   startTime: number,
+ *   endTime: number,
+ *   id: string,
+ *   eventElement: Element
+ * }}
+ *
+ * @description
+ * Contains information about a region of the timeline that will cause an event
+ * to be raised when the playhead enters or exits it.  In DASH this is the
+ * EventStream element.
+ *
+ * @property {string} schemeIdUri
+ *   Identifies the message scheme.
+ * @property {string} value
+ *   Specifies the value for the region.
+ * @property {number} startTime
+ *   The presentation time (in seconds) that the region should start.
+ * @property {number} endTime
+ *   The presentation time (in seconds) that the region should end.
+ * @property {string} id
+ *   Specifies an identifier for this instance of the region.
+ * @property {Element} eventElement
+ *   The XML element that defines the Event.
+ */
+shakaExtern.TimelineRegionInfo;
+
+
+/**
+ * @typedef {{
+ *   schemeIdUri: string,
+ *   value: string,
+ *   timescale: number,
+ *   presentationTimeDelta: number,
+ *   eventDuration: number,
+ *   id: number,
+ *   messageData: Uint8Array
+ * }}
+ *
+ * @description
+ * Contains information about an EMSG MP4 box.
+ *
+ * @property {string} schemeIdUri
+ *    Identifies the message scheme.
+ * @property {string} value
+ *    Specifies the value for the event.
+ * @property {number} timescale
+ *    Provides the timescale, in ticks per second,
+ *    for the time and duration fields within this box.
+ * @property {number} presentationTimeDelta
+ *    Provides the Media Presentation time delta of the media presentation
+ *    time of the event and the earliest presentation time in this segment.
+ * @property {number} eventDuration
+ *    Provides the duration of event in media presentation time.
+ * @property {number} id
+ *    A field identifying this instance of the message.
+ * @property {Uint8Array} messageData
+ *    Body of the message.
+ * @exportDoc
+ */
+shakaExtern.EmsgInfo;
 
 
 /**
@@ -344,7 +440,8 @@ shakaExtern.ManifestConfiguration;
  *   bufferingGoal: number,
  *   bufferBehind: number,
  *   ignoreTextStreamFailures: boolean,
- *   useRelativeCueTimestamps: boolean
+ *   useRelativeCueTimestamps: boolean,
+ *   startAtSegmentBoundary: boolean
  * }}
  *
  * @description
@@ -371,6 +468,11 @@ shakaExtern.ManifestConfiguration;
  * @property {boolean} useRelativeCueTimestamps
  *   If true, WebVTT cue timestamps will be treated as relative to the start
  *   time of the VTT segment. Defaults to false.
+ * @property {boolean} startAtSegmentBoundary
+ *   If true, adjust the start time backwards so it is at the start of a
+ *   segment. This affects both explicit start times and calculated start time
+ *   for live streams. This can put us further from the live edge. Defaults to
+ *   false.
  * @exportDoc
  */
 shakaExtern.StreamingConfiguration;
@@ -380,7 +482,8 @@ shakaExtern.StreamingConfiguration;
  * @typedef {{
  *   manager: shakaExtern.AbrManager,
  *   enabled: boolean,
- *   defaultBandwidthEstimate: number
+ *   defaultBandwidthEstimate: number,
+ *   restrictions: shakaExtern.Restrictions
  * }}
  *
  * @property {shakaExtern.AbrManager} manager
@@ -390,6 +493,10 @@ shakaExtern.StreamingConfiguration;
  * @property {number} defaultBandwidthEstimate
  *   The default bandwidth estimate to use if there is not enough data, in
  *   bit/sec.
+ * @property {shakaExtern.Restrictions} restrictions
+ *   The restrictions to apply to ABR decisions.  The AbrManager will not
+ *   choose any streams that do not meet these restrictions.  (Note that
+ *   they can still be chosen by the application)
  * @exportDoc
  */
 shakaExtern.AbrConfiguration;
@@ -417,14 +524,12 @@ shakaExtern.AbrConfiguration;
  * @property {string} preferredAudioLanguage
  *   The preferred language to use for audio tracks.  If not given it will use
  *   the 'main' track.
- *   Changing this during playback will cause the language selection algorithm
- *   to run again, and may change the active audio track.
+ *   Changing this during playback will not affect the current playback.
  * @property {string} preferredTextLanguage
  *   The preferred language to use for text tracks.  If a matching text track
  *   is found, and the selected audio and text tracks have different languages,
  *   the text track will be shown.
- *   Changing this during playback will cause the language selection algorithm
- *   to run again, and may change the active text track.
+ *   Changing this during playback will not affect the current playback.
  * @property {shakaExtern.Restrictions} restrictions
  *   The application restrictions to apply to the tracks.  The track must
  *   meet all the restrictions to be playable.

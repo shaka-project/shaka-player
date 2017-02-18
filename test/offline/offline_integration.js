@@ -89,7 +89,7 @@ describe('Offline', function() {
         .then(done);
   });
 
-  it('stores, plays, and deletes protected content', function(done) {
+  external_it('stores, plays, and deletes protected content', function(done) {
     // TODO: Add a PlayReady version once Edge supports offline.
     if (!support['offline'] ||
         !support.drm['com.widevine.alpha'] ||

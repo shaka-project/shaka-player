@@ -16,35 +16,66 @@
  */
 
 describe('TtmlTextParser', function() {
-  var mockCue = false;
+  var originalVTTCue;
 
   beforeAll(function() {
-    // Mock out VTTCue if not supported.  These tests don't actually need
-    // VTTCue to do anything, this simply verifies the value of its members.
-    if (!window.VTTCue) {
-      mockCue = true;
-      window.VTTCue = function(start, end, text) {
-        this.startTime = start;
-        this.endTime = end;
-        this.text = text;
-      };
-    }
+    originalVTTCue = window.VTTCue;
   });
 
   afterAll(function() {
-    // Delete our mock.
-    if (mockCue) {
-      delete window.VTTCue;
-    }
+    window.VTTCue = originalVTTCue;
+  });
+
+  beforeEach(function() {
+    window.VTTCue = function(start, end, text) {
+      this.startTime = start;
+      this.endTime = end;
+      this.text = text;
+    };
   });
 
   it('supports no cues', function() {
     verifyHelper([], '<tt></tt>');
   });
 
+  it('supports div with no cues but whitespace', function() {
+    verifyHelper([], '<tt><body><div>  \r\n </div></body></tt>');
+  });
+
+  it('supports xml:space', function() {
+    var ttBody = '\n' +
+        '  <body>\n' +
+        '    <p begin="01:02.03" end="01:02.05">\n' +
+        '      <span> A    B   C  </span>\n' +
+        '    </p>\n' +
+        '  </body>\n';
+
+    // When xml:space="default", ignore whitespace outside tags.
+    verifyHelper(
+        [
+          {start: 62.03, end: 62.05, text: 'A B C'}
+        ],
+        '<tt xml:space="default">' + ttBody + '</tt>');
+    // When xml:space="preserve", take them into account.
+    verifyHelper(
+        [
+          {start: 62.03, end: 62.05, text: '\n       A    B   C  \n    '}
+        ],
+        '<tt xml:space="preserve">' + ttBody + '</tt>');
+    // The default value for xml:space is "default".
+    verifyHelper(
+        [
+          {start: 62.03, end: 62.05, text: 'A B C'}
+        ],
+        '<tt>' + ttBody + '</tt>');
+    // Any other value is rejected as an error.
+    errorHelper(shaka.util.Error.Code.INVALID_XML,
+                '<tt xml:space="invalid">' + ttBody + '</tt>');
+  });
+
   it('rejects invalid ttml', function() {
-    errorHelper(shaka.util.Error.Code.INVALID_TTML, '<test></test>');
-    errorHelper(shaka.util.Error.Code.INVALID_TTML, '');
+    errorHelper(shaka.util.Error.Code.INVALID_XML, '<test></test>');
+    errorHelper(shaka.util.Error.Code.INVALID_XML, '');
   });
 
   it('rejects invalid time format', function() {
@@ -390,6 +421,73 @@ describe('TtmlTextParser', function() {
         '</tt>');
   });
 
+  it('inserts newline characters into <br> tags', function() {
+    verifyHelper(
+        [
+          {start: 62.05, end: 3723.2, text: 'Line1\nLine2'}
+        ],
+        '<tt><body><p begin="01:02.05" ' +
+        'end="01:02:03.200">Line1<br/>Line2</p></body></tt>');
+    verifyHelper(
+        [
+          {start: 62.05, end: 3723.2, text: 'Line1\nLine2'}
+        ],
+        '<tt><body><p begin="01:02.05" ' +
+        'end="01:02:03.200"><span>Line1<br/>Line2</span></p></body></tt>');
+  });
+
+  it('parses cue alignment from textAlign attribute', function() {
+    verifyHelper(
+        [
+          {start: 62.05, end: 3723.2, text: 'Test', lineAlign: 'start',
+            align: 'left', positionAlign: 'line-left'}
+        ],
+        '<tt xmlns:tts="ttml#styling">' +
+        '<styling>' +
+        '<style xml:id="s1" tts:textAlign="left"/>' +
+        '</styling>' +
+        '<layout xmlns:tts="ttml#styling">' +
+        '<region xml:id="subtitleArea" />' +
+        '</layout>' +
+        '<body region="subtitleArea">' +
+        '<p begin="01:02.05" end="01:02:03.200" style="s1">Test</p>' +
+        '</body>' +
+        '</tt>');
+  });
+
+
+  it('uses a workaround for browsers not supporting align=center', function() {
+
+    window.VTTCue = function(start, end, text) {
+      var align = 'middle';
+      Object.defineProperty(this, 'align', {
+        get: function() { return align; },
+        set: function(newValue) { if (newValue != 'center') align = newValue; }
+      });
+      this.startTime = start;
+      this.endTime = end;
+      this.text = text;
+    };
+
+
+    verifyHelper(
+        [
+          {start: 62.05, end: 3723.2, text: 'Test', lineAlign: 'center',
+            align: 'middle', position: 'auto', positionAlign: 'center'}
+        ],
+        '<tt xmlns:tts="ttml#styling">' +
+        '<styling>' +
+        '<style xml:id="s1" tts:textAlign="center"/>' +
+        '</styling>' +
+        '<layout xmlns:tts="ttml#styling">' +
+        '<region xml:id="subtitleArea" />' +
+        '</layout>' +
+        '<body region="subtitleArea">' +
+        '<p begin="01:02.05" end="01:02:03.200" style="s1">Test</p>' +
+        '</body>' +
+        '</tt>');
+  });
+
 
   /**
    * @param {!Array} cues
@@ -408,8 +506,12 @@ describe('TtmlTextParser', function() {
       expect(result[i].endTime).toBeCloseTo(cues[i].end, 3);
       expect(result[i].text).toBe(cues[i].text);
 
+      if (cues[i].align)
+        expect(result[i].align).toBe(cues[i].align);
       if (cues[i].lineAlign)
         expect(result[i].lineAlign).toBe(cues[i].lineAlign);
+      if (cues[i].positionAlign)
+        expect(result[i].positionAlign).toBe(cues[i].positionAlign);
       if (cues[i].size)
         expect(result[i].size).toBe(cues[i].size);
       if (cues[i].line)

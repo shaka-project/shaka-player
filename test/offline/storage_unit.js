@@ -16,15 +16,40 @@
  */
 
 describe('Storage', function() {
+  var originalSupportsStorageEngine;
+  var originalCreateStorageEngine;
   var SegmentReference;
-  var fakeDbEngine;
+  var fakeStorageEngine;
   var storage;
   var player;
   var netEngine;
 
-  beforeEach(function(done) {
+  beforeAll(function() {
     SegmentReference = shaka.media.SegmentReference;
-    fakeDbEngine = new shaka.test.MemoryDBEngine();
+    originalSupportsStorageEngine =
+        shaka.offline.OfflineUtils.supportsStorageEngine;
+    originalCreateStorageEngine =
+        shaka.offline.OfflineUtils.createStorageEngine;
+  });
+
+  afterAll(function() {
+    shaka.offline.OfflineUtils.supportsStorageEngine =
+        originalSupportsStorageEngine;
+    shaka.offline.OfflineUtils.createStorageEngine =
+        originalCreateStorageEngine;
+  });
+
+  beforeEach(function(done) {
+    shaka.offline.OfflineUtils.supportsStorageEngine = function() {
+      return true;
+    };
+
+    fakeStorageEngine = new shaka.test.MemoryDBEngine();
+
+    shaka.offline.OfflineUtils.createStorageEngine = function() {
+      return fakeStorageEngine;
+    };
+
     netEngine = new shaka.test.FakeNetworkingEngine();
 
     // Use a real Player since Storage only uses the configuration and
@@ -37,9 +62,8 @@ describe('Storage', function() {
     });
 
     storage = new shaka.offline.Storage(player);
-    storage.setDbEngine(fakeDbEngine);
 
-    fakeDbEngine.init(shaka.offline.OfflineUtils.DB_SCHEME)
+    fakeStorageEngine.init(shaka.offline.OfflineUtils.DB_SCHEME)
         .catch(fail)
         .then(done);
   });
@@ -64,7 +88,9 @@ describe('Storage', function() {
             width: 1920,
             height: 1080,
             frameRate: 24,
-            codecs: 'avc1.4d401f'
+            mimeType: 'video/mp4',
+            codecs: 'avc1.4d401f',
+            segments: []
           },
           {
             id: 1,
@@ -74,7 +100,9 @@ describe('Storage', function() {
             width: null,
             height: null,
             frameRate: undefined,
-            codecs: 'vorbis'
+            mimeType: 'audio/mp4',
+            codecs: 'vorbis',
+            segments: []
           }
         ]
       }],
@@ -99,32 +127,21 @@ describe('Storage', function() {
       {
         id: 0,
         active: false,
-        type: 'video',
+        type: 'variant',
         bandwidth: 0,
-        language: '',
+        language: 'en',
         kind: null,
         width: 1920,
         height: 1080,
         frameRate: 24,
-        codecs: 'avc1.4d401f'
-      },
-      {
-        id: 1,
-        active: false,
-        type: 'audio',
-        bandwidth: 0,
-        language: 'en',
-        kind: null,
-        width: null,
-        height: null,
-        frameRate: undefined,
-        codecs: 'vorbis'
+        mimeType: 'video/mp4',
+        codecs: 'avc1.4d401f, vorbis'
       }
     ];
     Promise
         .all([
-          fakeDbEngine.insert('manifest', manifestDb1),
-          fakeDbEngine.insert('manifest', manifestDb2)
+          fakeStorageEngine.insert('manifest', manifestDb1),
+          fakeStorageEngine.insert('manifest', manifestDb2)
         ])
         .then(function() {
           return storage.list();
@@ -164,15 +181,13 @@ describe('Storage', function() {
       manifest = new shaka.test.ManifestGenerator()
           .setPresentationDuration(20)
           .addPeriod(0)
-            .addStreamSet('video')
-              .addStream(0).size(100, 200).bandwidth(80)
-            .addStreamSet('audio')
-              .language('en')
-              .addStream(1).bandwidth(80)
+            .addVariant(0).language('en').bandwidth(160)
+              .addVideo(1).size(100, 200).bandwidth(80)
+              .addAudio(2).language('en').bandwidth(80)
           .build();
       // Get the original tracks from the manifest.
-      var getTracks = shaka.util.StreamUtils.getTracks;
-      tracks = getTracks(manifest.periods[0], {});
+      var getVariantTracks = shaka.util.StreamUtils.getVariantTracks;
+      tracks = getVariantTracks(manifest.periods[0], null, null);
       // The expected tracks we get back from the stored version of the content
       // will have 0 for bandwidth, so adjust the tracks list to match.
       tracks.forEach(function(t) { t.bandwidth = 0; });
@@ -189,11 +204,11 @@ describe('Storage', function() {
       stream1Index = new shaka.media.SegmentIndex([]);
       stream2Index = new shaka.media.SegmentIndex([]);
 
-      var stream1 = manifest.periods[0].streamSets[0].streams[0];
+      var stream1 = manifest.periods[0].variants[0].audio;
       stream1.findSegmentPosition = stream1Index.find.bind(stream1Index);
       stream1.getSegmentReference = stream1Index.get.bind(stream1Index);
 
-      var stream2 = manifest.periods[0].streamSets[1].streams[0];
+      var stream2 = manifest.periods[0].variants[0].video;
       stream2.findSegmentPosition = stream2Index.find.bind(stream2Index);
       stream2.getSegmentReference = stream2Index.get.bind(stream2Index);
     });
@@ -206,7 +221,7 @@ describe('Storage', function() {
       var originalUri = 'fake://foobar';
       var appData = {tools: ['Google', 'StackOverflow'], volume: 11};
       storage.store(originalUri, appData)
-          .then(function(data) {
+      .then(function(data) {
             expect(data).toBeTruthy();
             // Since we are using a memory DB, it will always be the first one.
             expect(data.offlineUri).toBe('offline:0');
@@ -216,20 +231,16 @@ describe('Storage', function() {
             expect(data.tracks).toEqual(tracks);
             expect(data.appMetadata).toEqual(appData);
           })
-          .catch(fail)
-          .then(done);
+      .catch(fail)
+      .then(done);
     });
 
     it('gives warning if storing tracks with the same type', function(done) {
       manifest = new shaka.test.ManifestGenerator()
           .setPresentationDuration(20)
           .addPeriod(0)
-            .addStreamSet('audio')
-              .language('en')
-              .addStream(0).bandwidth(80)
-            .addStreamSet('audio')
-              .language('en')
-              .addStream(1).bandwidth(160)
+            .addVariant(0)
+            .addVariant(1)
           .build();
 
       // Store every stream.
@@ -256,7 +267,7 @@ describe('Storage', function() {
       storage.store('')
           .then(function(data) {
             expect(data.offlineUri).toBe('offline:0');
-            return fakeDbEngine.get('manifest', 0);
+            return fakeStorageEngine.get('manifest', 0);
           })
           .then(function(manifestDb) {
             expect(manifestDb).toBeTruthy();
@@ -278,7 +289,7 @@ describe('Storage', function() {
       storage.store('')
           .then(function(data) {
             expect(data.offlineUri).toBe('offline:0');
-            return fakeDbEngine.get('manifest', 0);
+            return fakeStorageEngine.get('manifest', 0);
           })
           .then(function(manifestDb) {
             expect(manifestDb).toBeTruthy();
@@ -424,23 +435,23 @@ describe('Storage', function() {
               expect(manifest.size).toBe(34);
               expect(manifest.duration).toBe(5);
               expect(netEngine.request.calls.count()).toBe(6);
-              return fakeDbEngine.get('manifest', 0);
+              return fakeStorageEngine.get('manifest', 0);
             })
             .then(function(manifest) {
               var stream1 = manifest.periods[0].streams[0];
               expect(stream1.initSegmentUri).toBe(null);
               expect(stream1.segments.length).toBe(5);
               expect(stream1.segments[0])
-                  .toEqual({startTime: 0, endTime: 1, uri: 'offline:0/0/0'});
+                  .toEqual({startTime: 0, endTime: 1, uri: 'offline:0/2/0'});
               expect(stream1.segments[3])
-                  .toEqual({startTime: 3, endTime: 4, uri: 'offline:0/0/3'});
+                  .toEqual({startTime: 3, endTime: 4, uri: 'offline:0/2/3'});
 
               var stream2 = manifest.periods[0].streams[1];
               expect(stream2.initSegmentUri).toBe(null);
               expect(stream2.segments.length).toBe(1);
               expect(stream2.segments[0])
                   .toEqual({startTime: 0, endTime: 1, uri: 'offline:0/1/5'});
-              return fakeDbEngine.get('segment', 3);
+              return fakeStorageEngine.get('segment', 3);
             })
             .then(function(segment) {
               expect(segment).toBeTruthy();
@@ -490,7 +501,7 @@ describe('Storage', function() {
       it('stores init segment', function(done) {
         netEngine.setResponseMap({'fake:0': new ArrayBuffer(5)});
 
-        var stream = manifest.periods[0].streamSets[0].streams[0];
+        var stream = manifest.periods[0].variants[0].audio;
         stream.initSegmentReference =
             new shaka.media.InitSegmentReference(makeUris('fake:0'), 0, null);
 
@@ -500,13 +511,13 @@ describe('Storage', function() {
               expect(manifest.size).toBe(5);
               expect(manifest.duration).toBe(0);
               expect(netEngine.request.calls.count()).toBe(1);
-              return fakeDbEngine.get('manifest', 0);
+              return fakeStorageEngine.get('manifest', 0);
             })
             .then(function(manifest) {
               var stream = manifest.periods[0].streams[0];
               expect(stream.segments.length).toBe(0);
-              expect(stream.initSegmentUri).toBe('offline:0/0/0');
-              return fakeDbEngine.get('segment', 0);
+              expect(stream.initSegmentUri).toBe('offline:0/2/0');
+              return fakeStorageEngine.get('segment', 0);
             })
             .then(function(segment) {
               expect(segment).toBeTruthy();
@@ -534,7 +545,7 @@ describe('Storage', function() {
               expect(manifest.size).toBe(15);
               expect(manifest.duration).toBe(3);
               expect(netEngine.request.calls.count()).toBe(3);
-              return fakeDbEngine.get('manifest', 0);
+              return fakeStorageEngine.get('manifest', 0);
             })
             .then(function(manifest) {
               var stream = manifest.periods[0].streams[0];
@@ -581,7 +592,7 @@ describe('Storage', function() {
           .then(function(refs) {
             var manifest = createManifest(manifestId);
             manifest.periods[0].streams.push({segments: refs});
-            return fakeDbEngine.insert('manifest', manifest);
+            return fakeStorageEngine.insert('manifest', manifest);
           })
           .then(function() {
             expectDatabaseCount(1, 5);
@@ -603,7 +614,7 @@ describe('Storage', function() {
             var manifest = createManifest(manifestId);
             manifest.periods[0].streams.push(
                 {initSegmentUri: data[1][0].uri, segments: data[0]});
-            return fakeDbEngine.insert('manifest', manifest);
+            return fakeStorageEngine.insert('manifest', manifest);
           })
           .then(function() {
             expectDatabaseCount(1, 6);
@@ -625,7 +636,7 @@ describe('Storage', function() {
             var manifest = createManifest(manifestId);
             manifest.periods[0].streams.push({segments: data[0]});
             manifest.periods[0].streams.push({segments: data[1]});
-            return fakeDbEngine.insert('manifest', manifest);
+            return fakeStorageEngine.insert('manifest', manifest);
           })
           .then(function() {
             expectDatabaseCount(1, 8);
@@ -649,7 +660,7 @@ describe('Storage', function() {
               {streams: [{segments: data[0]}]},
               {streams: [{segments: data[1]}]}
             ];
-            return fakeDbEngine.insert('manifest', manifest);
+            return fakeStorageEngine.insert('manifest', manifest);
           })
           .then(function() {
             expectDatabaseCount(1, 8);
@@ -674,8 +685,8 @@ describe('Storage', function() {
             var manifest2 = createManifest(manifestId2);
             manifest2.periods[0].streams.push({segments: data[1]});
             return Promise.all([
-              fakeDbEngine.insert('manifest', manifest1),
-              fakeDbEngine.insert('manifest', manifest2)
+              fakeStorageEngine.insert('manifest', manifest1),
+              fakeStorageEngine.insert('manifest', manifest2)
             ]);
           })
           .then(function() {
@@ -684,7 +695,7 @@ describe('Storage', function() {
           })
           .then(function() {
             expectDatabaseCount(1, 3);
-            return fakeDbEngine.get('segment', segmentId - 1);
+            return fakeStorageEngine.get('segment', segmentId - 1);
           })
           .then(function(segment) { expect(segment).toBeTruthy(); })
           .catch(fail)
@@ -698,7 +709,7 @@ describe('Storage', function() {
             var manifest = createManifest(manifestId);
             data[0].uri = 'offline:0/0/1253';
             manifest.periods[0].streams.push({segments: data});
-            return fakeDbEngine.insert('manifest', manifest);
+            return fakeStorageEngine.insert('manifest', manifest);
           })
           .then(function() {
             expectDatabaseCount(1, 5);
@@ -731,9 +742,9 @@ describe('Storage', function() {
      * @param {number} segmentCount
      */
     function expectDatabaseCount(manifestCount, segmentCount) {
-      var manifests = fakeDbEngine.getAllData('manifest');
+      var manifests = fakeStorageEngine.getAllData('manifest');
       expect(Object.keys(manifests).length).toBe(manifestCount);
-      var segments = fakeDbEngine.getAllData('segment');
+      var segments = fakeStorageEngine.getAllData('segment');
       expect(Object.keys(segments).length).toBe(segmentCount);
     }
 
@@ -766,7 +777,7 @@ describe('Storage', function() {
       }
       return Promise
           .all(ret.map(function(segment) {
-            return fakeDbEngine.insert('segment', segment);
+            return fakeStorageEngine.insert('segment', segment);
           }))
           .then(function() {
             return ret.map(function(segment, i) {

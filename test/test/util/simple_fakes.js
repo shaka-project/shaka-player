@@ -33,6 +33,12 @@ shaka.test.FakeAbrManager = function() {
   /** @type {number} */
   this.chooseIndex = 0;
 
+  /** @type {!Array.<shakaExtern.Variant>} */
+  this.variants = [];
+
+  /** @type {!Array.<shakaExtern.Stream>} */
+  this.textStreams = [];
+
   spyOn(this, 'chooseStreams').and.callThrough();
   spyOn(this, 'stop');
   spyOn(this, 'init');
@@ -41,6 +47,9 @@ shaka.test.FakeAbrManager = function() {
   spyOn(this, 'segmentDownloaded');
   spyOn(this, 'getBandwidthEstimate');
   spyOn(this, 'setDefaultEstimate');
+  spyOn(this, 'setRestrictions');
+  spyOn(this, 'setTextStreams').and.callThrough();
+  spyOn(this, 'setVariants').and.callThrough();
 };
 
 
@@ -73,13 +82,41 @@ shaka.test.FakeAbrManager.prototype.setDefaultEstimate = function() {};
 
 
 /** @override */
+shaka.test.FakeAbrManager.prototype.setRestrictions = function() {};
+
+
+/** @override */
 shaka.test.FakeAbrManager.prototype.chooseStreams = function(
-    streamSetsByType) {
+    mediaTypesToUpdate) {
   var ret = {};
-  Object.keys(streamSetsByType).forEach(function(type) {
-    ret[type] = streamSetsByType[type].streams[this.chooseIndex];
-  }.bind(this));
+  var variant = this.variants[this.chooseIndex];
+
+  var textStream = null;
+  if (this.textStreams.length > this.chooseIndex)
+    textStream = this.textStreams[this.chooseIndex];
+
+  if (mediaTypesToUpdate.indexOf('audio') > -1 ||
+      mediaTypesToUpdate.indexOf('video') > -1) {
+    if (variant.audio) ret['audio'] = variant.audio;
+    if (variant.video) ret['video'] = variant.video;
+  }
+
+  if (mediaTypesToUpdate.indexOf('text') > -1 && textStream)
+    ret['text'] = textStream;
+
   return ret;
+};
+
+
+/** @override */
+shaka.test.FakeAbrManager.prototype.setVariants = function(variants) {
+  this.variants = variants;
+};
+
+
+/** @override */
+shaka.test.FakeAbrManager.prototype.setTextStreams = function(streams) {
+  this.textStreams = streams;
 };
 
 
@@ -99,7 +136,7 @@ shaka.test.FakeDrmEngine = function() {
 
   var ret = jasmine.createSpyObj('FakeDrmEngine', [
     'destroy', 'configure', 'init', 'attach', 'initialized', 'keySystem',
-    'getSupportedTypes', 'getDrmInfo', 'getSessionIds'
+    'getSupportedTypes', 'getDrmInfo', 'getSessionIds', 'isSupportedByKeySystem'
   ]);
   ret.destroy.and.callFake(resolve);
   ret.init.and.callFake(resolve);
@@ -118,6 +155,7 @@ shaka.test.FakeDrmEngine = function() {
   ret.getSessionIds.and.callFake(function() {
     return offlineSessionIds;
   });
+  ret.isSupportedByKeySystem.and.returnValue(true);
 
   return ret;
 };
@@ -152,19 +190,25 @@ shaka.test.FakeDrmEngine.prototype.setSessionIds;
 shaka.test.FakeStreamingEngine = function(period) {
   var resolve = Promise.resolve.bind(Promise);
   var activeStreams = {};
-  period.streamSets.forEach(function(streamSet) {
-    if (activeStreams[streamSet.type]) return;
-    activeStreams[streamSet.type] = streamSet.streams[0];
-  });
+  if (period.variants.length) {
+    var variant = period.variants[0];
+    if (variant.audio)
+      activeStreams['audio'] = variant.audio;
+    if (variant.video)
+      activeStreams['video'] = variant.video;
+  }
+
+  if (period.textStreams.length)
+    activeStreams['text'] = period.textStreams[0];
 
   var ret = jasmine.createSpyObj('fakeStreamingEngine', [
     'destroy', 'configure', 'init', 'getCurrentPeriod', 'getActiveStreams',
-    'notifyNewStream', 'switch', 'seeked'
+    'notifyNewTextStream', 'switch', 'seeked'
   ]);
   ret.destroy.and.callFake(resolve);
   ret.getCurrentPeriod.and.returnValue(period);
   ret.getActiveStreams.and.returnValue(activeStreams);
-  ret.notifyNewStream.and.callFake(resolve);
+  ret.notifyNewTextStream.and.callFake(resolve);
   ret.switch.and.callFake(function(type, stream) {
     activeStreams[type] = stream;
   });

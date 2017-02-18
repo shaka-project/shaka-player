@@ -22,6 +22,7 @@ describe('MediaSourceEngine', function() {
   var videoSourceBuffer;
   var mockVideo;
   var mockMediaSource;
+  var mockTextEngine;
   var mediaSourceEngine;
   var Util;
 
@@ -70,6 +71,10 @@ describe('MediaSourceEngine', function() {
         new shaka.media.MediaSourceEngine(video, mockMediaSource, null);
   });
 
+  afterEach(function() {
+    mockTextEngine = null;
+  });
+
   describe('init', function() {
     it('creates SourceBuffers for the given types', function() {
       mediaSourceEngine.init({'audio': 'audio/foo', 'video': 'video/foo'});
@@ -87,7 +92,7 @@ describe('MediaSourceEngine', function() {
 
   describe('bufferStart and bufferEnd', function() {
     beforeEach(function() {
-      mediaSourceEngine.init({'audio': 'audio/foo'});
+      mediaSourceEngine.init({'audio': 'audio/foo', 'text': 'text/foo'});
     });
 
     it('returns correct timestamps for one range', function() {
@@ -124,11 +129,24 @@ describe('MediaSourceEngine', function() {
       expect(mediaSourceEngine.bufferStart('audio', 0)).toBeNull();
       expect(mediaSourceEngine.bufferEnd('audio', 0)).toBeNull();
     });
+
+    it('will forward to TextEngine', function() {
+      mockTextEngine.bufferStart.and.returnValue(10);
+      mockTextEngine.bufferEnd.and.returnValue(20);
+
+      expect(mockTextEngine.bufferStart).not.toHaveBeenCalled();
+      expect(mediaSourceEngine.bufferStart('text')).toBe(10);
+      expect(mockTextEngine.bufferStart).toHaveBeenCalled();
+
+      expect(mockTextEngine.bufferEnd).not.toHaveBeenCalled();
+      expect(mediaSourceEngine.bufferEnd('text')).toBe(20);
+      expect(mockTextEngine.bufferEnd).toHaveBeenCalled();
+    });
   });
 
   describe('bufferedAheadOf', function() {
     beforeEach(function() {
-      mediaSourceEngine.init({'audio': 'audio/foo'});
+      mediaSourceEngine.init({'audio': 'audio/foo', 'text': 'text/foo'});
     });
 
     it('returns the amount of data ahead of the given position', function() {
@@ -188,13 +206,34 @@ describe('MediaSourceEngine', function() {
       expect(mediaSourceEngine.bufferedAheadOf('audio', 6.98))
                                               .toBeCloseTo(4.02);
     });
+
+    it('will forward to TextEngine', function() {
+      mockTextEngine.bufferedAheadOf.and.returnValue(10);
+
+      expect(mockTextEngine.bufferedAheadOf).not.toHaveBeenCalled();
+      expect(mediaSourceEngine.bufferedAheadOf('text', 5)).toBe(10);
+      expect(mockTextEngine.bufferedAheadOf).toHaveBeenCalledWith(5);
+
+      // This should get called with 25, return null, then MediaSourceEngine
+      // should retry at |25 + 5|.
+      mockTextEngine.bufferedAheadOf.calls.reset();
+      mockTextEngine.bufferedAheadOf.and.callFake(function(time) {
+        if (time < 30)
+          return null;
+        else
+          return 15;
+      });
+      expect(mediaSourceEngine.bufferedAheadOf('text', 25, 5)).toBe(20);
+      expect(mockTextEngine.bufferedAheadOf).toHaveBeenCalled();
+    });
   });
 
   describe('appendBuffer', function() {
     beforeEach(function() {
       captureEvents(audioSourceBuffer, ['updateend', 'error']);
       captureEvents(videoSourceBuffer, ['updateend', 'error']);
-      mediaSourceEngine.init({'audio': 'audio/foo', 'video': 'video/foo'});
+      mediaSourceEngine.init(
+          {'audio': 'audio/foo', 'video': 'video/foo', 'text': 'text/foo'});
     });
 
     it('appends the given data', function(done) {
@@ -338,13 +377,22 @@ describe('MediaSourceEngine', function() {
         done();
       });
     });
+
+    it('forwards to TextEngine', function(done) {
+      var data = new ArrayBuffer(0);
+      expect(mockTextEngine.appendBuffer).not.toHaveBeenCalled();
+      mediaSourceEngine.appendBuffer('text', data, 0, 10).then(function() {
+        expect(mockTextEngine.appendBuffer).toHaveBeenCalledWith(data, 0, 10);
+      }).catch(fail).then(done);
+    });
   });
 
-  describe('remove and clear', function() {
+  describe('remove', function() {
     beforeEach(function() {
       captureEvents(audioSourceBuffer, ['updateend', 'error']);
       captureEvents(videoSourceBuffer, ['updateend', 'error']);
-      mediaSourceEngine.init({'audio': 'audio/foo', 'video': 'video/foo'});
+      mediaSourceEngine.init(
+          {'audio': 'audio/foo', 'video': 'video/foo', 'text': 'text/foo'});
     });
 
     it('removes the given data', function(done) {
@@ -470,6 +518,22 @@ describe('MediaSourceEngine', function() {
       });
     });
 
+    it('will forward to TextEngine', function(done) {
+      expect(mockTextEngine.remove).not.toHaveBeenCalled();
+      mediaSourceEngine.remove('text', 10, 20).then(function() {
+        expect(mockTextEngine.remove).toHaveBeenCalledWith(10, 20);
+      }).catch(fail).then(done);
+    });
+  });
+
+  describe('clear', function() {
+    beforeEach(function() {
+      captureEvents(audioSourceBuffer, ['updateend', 'error']);
+      captureEvents(videoSourceBuffer, ['updateend', 'error']);
+      mediaSourceEngine.init(
+          {'audio': 'audio/foo', 'video': 'video/foo', 'text': 'text/foo'});
+    });
+
     it('clears the given data', function(done) {
       mockMediaSource.durationGetter_.and.returnValue(20);
       mediaSourceEngine.clear('audio').then(function() {
@@ -480,11 +544,52 @@ describe('MediaSourceEngine', function() {
       });
       audioSourceBuffer.updateend();
     });
+
+    it('does not seek', function(done) {
+      // We had a bug in which we got into a seek loop. Seeking caused
+      // StreamingEngine to call clear().  Clearing triggered a pipeline flush
+      // which was implemented by seeking.  See issue #569.
+
+      // This loop is difficult to test for directly.
+
+      // A unit test on StreamingEngine would not suffice, since reproduction of
+      // the bug would involve making the mock MediaSourceEngine seek on clear.
+      // Since the fix was to remove the implicit seek, this behavior would then
+      // be removed from the mock, which would render the test useless.
+
+      // An integration test involving both StreamingEngine and MediaSourcEngine
+      // would also be problematic.  The bug involved a race, so it would be
+      // difficult to reproduce the necessary timing.  And if we succeeded, it
+      // would be tough to detect that we were definitely in a seek loop, since
+      // nothing was mocked.
+
+      // So the best option seems to be to enforce that clear() does not result
+      // in a seek.  This can be done here, in a unit test on MediaSourceEngine.
+      // It does not reproduce the seek loop, but it does ensure that the test
+      // would fail if we ever reintroduced this behavior.
+
+      var originalTime = 10;
+      mockVideo.currentTime = originalTime;
+
+      mockMediaSource.durationGetter_.and.returnValue(20);
+      mediaSourceEngine.clear('audio').then(function() {
+        expect(mockVideo.currentTime).toBe(originalTime);
+        done();
+      });
+      audioSourceBuffer.updateend();
+    });
+
+    it('will forward to TextEngine', function(done) {
+      expect(mockTextEngine.remove).not.toHaveBeenCalled();
+      mediaSourceEngine.clear('text').then(function() {
+        expect(mockTextEngine.remove).toHaveBeenCalledWith(0, Infinity);
+      }).catch(fail).then(done);
+    });
   });
 
   describe('setTimestampOffset', function() {
     beforeEach(function() {
-      mediaSourceEngine.init({'audio': 'audio/foo'});
+      mediaSourceEngine.init({'audio': 'audio/foo', 'text': 'text/foo'});
     });
 
     it('sets the timestamp offset', function(done) {
@@ -494,11 +599,18 @@ describe('MediaSourceEngine', function() {
         done();
       });
     });
+
+    it('will forward to TextEngine', function(done) {
+      expect(mockTextEngine.setTimestampOffset).not.toHaveBeenCalled();
+      mediaSourceEngine.setTimestampOffset('text', 10).then(function() {
+        expect(mockTextEngine.setTimestampOffset).toHaveBeenCalledWith(10);
+      }).catch(fail).then(done);
+    });
   });
 
   describe('setAppendWindowEnd', function() {
     beforeEach(function() {
-      mediaSourceEngine.init({'audio': 'audio/foo'});
+      mediaSourceEngine.init({'audio': 'audio/foo', 'text': 'text/foo'});
     });
 
     it('sets the append window end', function(done) {
@@ -510,6 +622,13 @@ describe('MediaSourceEngine', function() {
         expect(audioSourceBuffer.appendWindowEnd).toBeCloseTo(10, 1);
         done();
       });
+    });
+
+    it('will forward to TextEngine', function(done) {
+      expect(mockTextEngine.setAppendWindowEnd).not.toHaveBeenCalled();
+      mediaSourceEngine.setAppendWindowEnd('text', 5).then(function() {
+        expect(mockTextEngine.setAppendWindowEnd).toHaveBeenCalledWith(5);
+      }).catch(fail).then(done);
     });
   });
 
@@ -825,6 +944,15 @@ describe('MediaSourceEngine', function() {
         done();
       });
     });
+
+    it('destroys text engines', function(done) {
+      mediaSourceEngine.reinitText('text/vtt');
+
+      mediaSourceEngine.destroy().then(function() {
+        expect(mockTextEngine).toBeTruthy();
+        expect(mockTextEngine.destroy).toHaveBeenCalled();
+      }).catch(fail).then(done);
+    });
   });
 
   function createMockMediaSource() {
@@ -863,8 +991,19 @@ describe('MediaSourceEngine', function() {
   function createMockTextEngineCtor() {
     var ctor = jasmine.createSpy('TextEngine');
     ctor.isTypeSupported = function() { return true; };
-    ctor.prototype.addEventListener = function() {};
-    ctor.prototype.removeEventListener = function() {};
+    ctor.and.callFake(function() {
+      expect(mockTextEngine).toBeFalsy();
+      mockTextEngine = jasmine.createSpyObj('TextEngine', [
+        'initParser', 'destroy', 'appendBuffer', 'remove', 'setTimestampOffset',
+        'setAppendWindowEnd', 'bufferStart', 'bufferEnd', 'bufferedAheadOf'
+      ]);
+
+      var resolve = Promise.resolve.bind(Promise);
+      mockTextEngine.destroy.and.callFake(resolve);
+      mockTextEngine.appendBuffer.and.callFake(resolve);
+      mockTextEngine.remove.and.callFake(resolve);
+      return mockTextEngine;
+    });
     return ctor;
   }
 

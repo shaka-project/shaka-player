@@ -161,8 +161,8 @@ shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
 /**
  * Creates a fake Manifest.
  *
- * Each Period within the fake Manifest has a special property:
- * |streamSetsByType|, which maps a content type to a StreamSet.
+ * Each Period within the fake Manifest has one Variant and one
+ * text stream.
  *
  * Audio, Video, and Text Stream MIME types are set to
  * "audio/mp4; codecs=mp4a.40.2", "video/mp4; codecs=avc1.42c01e",
@@ -224,9 +224,12 @@ shaka.test.StreamingEngineUtil.createManifest = function(
   for (var i = 0; i < periodStartTimes.length; ++i) {
     var period = {
       startTime: periodStartTimes[i],
-      streamSets: [],
-      streamSetsByType: {}
+      variants: [],
+      textStreams: []
     };
+
+    var variant = {};
+    var trickModeVideo;
 
     for (var type in segmentDurations) {
       var stream = shaka.test.StreamingEngineUtil.createMockStream(type, id++);
@@ -234,11 +237,14 @@ shaka.test.StreamingEngineUtil.createManifest = function(
       stream.findSegmentPosition.and.callFake(find.bind(null, type, i + 1));
       stream.getSegmentReference.and.callFake(get.bind(null, type, i + 1));
 
-      var streamSet = {type: type, streams: [stream]};
-      period.streamSets.push(streamSet);
-      period.streamSetsByType[type] = streamSet;
+      if (type == 'text') period.textStreams.push(stream);
+      else if (type == 'audio') variant.audio = stream;
+      else if (type == 'trickvideo') trickModeVideo = stream;
+      else variant.video = stream;
     }
 
+    variant.video.trickModeVideo = trickModeVideo;
+    period.variants.push(variant);
     manifest.periods.push(period);
   }
 
@@ -300,6 +306,7 @@ shaka.test.StreamingEngineUtil.createMockStream = function(type, id) {
   return {
     audio: shaka.test.StreamingEngineUtil.createMockAudioStream,
     video: shaka.test.StreamingEngineUtil.createMockVideoStream,
+    trickvideo: shaka.test.StreamingEngineUtil.createMockVideoStream,
     text: shaka.test.StreamingEngineUtil.createMockTextStream
   }[type](id);
 };
@@ -321,7 +328,8 @@ shaka.test.StreamingEngineUtil.createMockAudioStream = function(id) {
     presentationTimeOffset: 0,
     mimeType: 'audio/mp4',
     codecs: 'mp4a.40.2',
-    bandwidth: 192000
+    bandwidth: 192000,
+    type: 'audio'
   };
 };
 
@@ -344,7 +352,8 @@ shaka.test.StreamingEngineUtil.createMockVideoStream = function(id) {
     codecs: 'avc1.42c01e',
     bandwidth: 5000000,
     width: 600,
-    height: 400
+    height: 400,
+    type: 'video'
   };
 };
 
@@ -364,7 +373,8 @@ shaka.test.StreamingEngineUtil.createMockTextStream = function(id) {
     initSegmentReference: null,
     presentationTimeOffset: 0,
     mimeType: 'text/vtt',
-    kind: 'subtitles'
+    kind: 'subtitles',
+    type: 'text'
   };
 };
 

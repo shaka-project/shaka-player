@@ -68,11 +68,9 @@ module.exports = function(config) {
       {pattern: 'dist/shaka-player.compiled.js', included: false},
     ],
 
-    // NOTE: Do not use proxies for media! That sometimes results in truncated
-    // content and failed tests. The effect does not appear to be deterministic.
-    proxies: {
-      '/dist/': '/base/dist/',
-    },
+    // NOTE: Do not use proxies at all!  They cannot be used with the --hostname
+    // option, which is necessary for some of our lab testing.
+    proxies: {},
 
     preprocessors: {
       // Don't compute coverage over lib/debug/ or lib/polyfill/
@@ -113,115 +111,8 @@ module.exports = function(config) {
     // do a single run of the tests on captured browsers and then quit
     singleRun: true,
 
-    customLaunchers: {
-      // These entries are specific to Shaka team's internal test lab:
-
-      // OS X El Capitan {{{
-      WebDriver_Safari9: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4445},
-        browserName: 'safari',
-        pseudoActivityInterval: 20000
-      },
-
-      WebDriver_ChromeMac: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4445},
-        browserName: 'chrome',
-        pseudoActivityInterval: 20000
-      },
-      // }}}
-
-      // OS X Yosemite {{{
-      WebDriver_Safari8: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4444},
-        browserName: 'safari',
-        pseudoActivityInterval: 20000
-      },
-
-      WebDriver_FirefoxMac: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4444},
-        browserName: 'firefox',
-        pseudoActivityInterval: 20000
-      },
-
-      WebDriver_OperaMac: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4444},
-        // This is not obvious, but as of 2016-03-17, operadriver responds to
-        // browserName 'chrome', not 'opera'.  It still launches opera.  This
-        // should be solveable once operachromiumdriver releases sources.
-        // See:
-        //   https://github.com/operasoftware/operachromiumdriver/issues/8
-        //   http://stackoverflow.com/a/27387949
-        browserName: 'chrome',
-        pseudoActivityInterval: 20000
-      },
-      // }}}
-
-      // Windows {{{
-      WebDriver_IE11: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4446},
-        browserName: 'internet explorer',
-        pseudoActivityInterval: 20000,
-        ignoreZoomSetting: true,
-        ignoreProtectedModeSettings: true
-      },
-
-      WebDriver_Edge: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4446},
-        browserName: 'MicrosoftEdge',
-        pseudoActivityInterval: 20000
-      },
-
-      WebDriver_ChromeWin: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4446},
-        browserName: 'chrome',
-        pseudoActivityInterval: 20000
-      },
-
-      WebDriver_FirefoxWin: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4446},
-        browserName: 'firefox',
-        pseudoActivityInterval: 20000
-      },
-      // }}}
-
-      // Linux {{{
-      WebDriver_ChromeLinux: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4447},
-        browserName: 'chrome',
-        pseudoActivityInterval: 20000
-      },
-
-      WebDriver_FirefoxLinux: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4447},
-        browserName: 'firefox',
-        pseudoActivityInterval: 20000
-      },
-      // }}}
-
-      // Android 6.0.1 {{{
-      // Note this is tethered to the Linux machine.
-      WebDriver_ChromeAndroid: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4447},
-        browserName: 'chrome',
-        pseudoActivityInterval: 20000,
-        chromeOptions: {'androidPackage': 'com.android.chrome'}
-      },
-      // }}}
-    },
-
     coverageReporter: {
+      includeAllSources: true,
       reporters: [
         { type: 'text' },
       ],
@@ -242,6 +133,7 @@ module.exports = function(config) {
       coverageReporter: {
         reporters: [
           { type: 'html', dir: 'coverage' },
+          { type: 'cobertura', dir: 'coverage', file: 'coverage.xml' },
         ],
       },
     });
@@ -274,9 +166,37 @@ module.exports = function(config) {
     setClientArg(config, 'external', true);
   }
 
+  if (flagPresent('quarantined')) {
+    // Run quarantined tests which do not consistently pass.
+    // Skipped by default.
+    setClientArg(config, 'quarantined', true);
+  }
+
   if (flagPresent('uncompiled')) {
     // Run Player integration tests with uncompiled code for debugging.
     setClientArg(config, 'uncompiled', true);
+  }
+
+  if (flagPresent('random')) {
+    // Run tests in a random order.
+    setClientArg(config, 'random', true);
+
+    // If --seed was specified use that value, else generate a seed so that the
+    // exact order can be reproduced if it catches an issue.
+    var seed = getFlagValue('seed') || new Date().getTime();
+    setClientArg(config, 'seed', seed);
+
+    console.log("Using a random test order (--random) with --seed=" + seed);
+  }
+
+  if (flagPresent('specFilter')) {
+    setClientArg(config, 'specFilter', getFlagValue('specFilter'));
+  }
+
+  var hostname = getFlagValue('hostname');
+  if (hostname !== null) {
+    // Point the browsers to a hostname other than localhost.
+    config.set({hostname: hostname});
   }
 };
 

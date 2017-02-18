@@ -25,7 +25,7 @@
 var jasmine = {};
 
 
-/** @typedef {function(function())} */
+/** @typedef {(function(function())|function())} */
 jasmine.Callback;
 
 
@@ -46,6 +46,12 @@ jasmine.Spec.prototype.pend = function(opt_message) {};
  * gjslint: disable=900
  */
 jasmine.Spec.prototype.result;
+
+
+/**
+ * @return {!string}
+ */
+jasmine.Spec.prototype.getFullName = function() {};
 
 
 
@@ -122,6 +128,10 @@ jasmine.Matchers.prototype.toHaveBeenCalled = function(opt_value) {};
 
 /** @param {...*} var_args */
 jasmine.Matchers.prototype.toHaveBeenCalledWith = function(var_args) {};
+
+
+/** @param {number} times */
+jasmine.Matchers.prototype.toHaveBeenCalledTimes = function(times) {};
 
 
 /** @param {string|RegExp} value */
@@ -407,6 +417,19 @@ jasmine.Env = function() {};
  * @return {boolean}
  */
 jasmine.Env.prototype.specFilter = function(spec) {};
+
+
+/**
+ * @param {boolean} random
+ */
+jasmine.Env.prototype.randomizeTests = function(random) {};
+
+
+/**
+ * @param {string} seed
+ * @return {?string}
+ */
+jasmine.Env.prototype.seed = function(seed) {};
 
 
 /** @return {!jasmine.Env} */

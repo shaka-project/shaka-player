@@ -15,6 +15,20 @@
  * limitations under the License.
  */
 
+
+/**
+ * Gets the value of an argument passed from karma.
+ * @param {string} name
+ * @return {?string|boolean}
+ */
+function getClientArg(name) {
+  if (window.__karma__ && __karma__.config.args.length)
+    return __karma__.config.args[0][name] || null;
+  else
+    return null;
+}
+
+
 // Executed before test utilities and tests are loaded, but after Shaka Player
 // is loaded in uncompiled mode.
 (function() {
@@ -41,15 +55,21 @@
   goog.asserts.assert = jasmineAssert;
   console.assert = /** @type {?} */(jasmineAssert);
 
+  // Use a RegExp if --specFilter is set, else empty string will match all.
+  var specFilterRegExp = new RegExp(getClientArg('specFilter') || '');
+
   /**
    * A filter over all Jasmine specs.
    * @param {jasmine.Spec} spec
    * @return {boolean}
    */
   function specFilter(spec) {
-    // If the browser is not supported, don't run the tests.  Running zero tests
-    // is considered an error so the test run will fail on unsupported browsers.
-    return shaka.Player.isBrowserSupported();
+    // If the browser is not supported, don't run the tests.
+    // If the user specified a RegExp, only run the matched tests.
+    // Running zero tests is considered an error so the test run will fail on
+    // unsupported browsers or if the filter doesn't match any specs.
+    return shaka.Player.isBrowserSupported() &&
+        specFilterRegExp.test(spec.getFullName());
   }
   jasmine.getEnv().specFilter = specFilter;
 
@@ -69,13 +89,75 @@
   // Set the default timeout to 120s for all asynchronous tests.
   jasmine.DEFAULT_TIMEOUT_INTERVAL = 120 * 1000;
 
-  // This references test.Util, which isn't loaded yet, so defer to beforeAll:
-  beforeAll(function() {
-    var logLevel = shaka.test.Util.getClientArg('logLevel');
-    if (logLevel) {
-      shaka.log.setLevel(Number(logLevel));
-    } else {
-      shaka.log.setLevel(shaka.log.Level.INFO);
+  var logLevel = getClientArg('logLevel');
+  if (logLevel) {
+    shaka.log.setLevel(Number(logLevel));
+  } else {
+    shaka.log.setLevel(shaka.log.Level.INFO);
+  }
+
+  // Set random and seed if specified.
+  if (getClientArg('random')) {
+    jasmine.getEnv().randomizeTests(true);
+
+    var seed = getClientArg('seed');
+    if (seed) {
+      jasmine.getEnv().seed(seed.toString());
     }
-  });
+  }
+
+  /**
+   * Returns a Jasmine callback which shims the real callback and checks for
+   * a certain client arg.  The test will only be run if that argument is
+   * specified on the command-line.
+   *
+   * @param {jasmine.Callback} callback  The test callback.
+   * @param {string} clientArg  The command-line arg that must be present.
+   * @param {string} skipMessage  The message used when skipping a test.
+   * @return {jasmine.Callback}
+   */
+  function filterShim(callback, clientArg, skipMessage) {
+    if (callback.length) {
+      // This callback is for an async test.  Replace it with an async shim.
+      return function(done) {
+        if (getClientArg(clientArg)) {
+          callback(done);
+        } else {
+          pending(skipMessage);
+          done();
+        }
+      };
+    } else {
+      // This callback is for a synchronous test.  Use a synchronous shim.
+      return function() {
+        if (getClientArg(clientArg)) {
+          callback();
+        } else {
+          pending(skipMessage);
+        }
+      };
+    }
+  }
+
+  /**
+   * Run a test that uses external resources.
+   *
+   * @param {string} name
+   * @param {jasmine.Callback} callback
+   */
+  window.external_it = function(name, callback) {
+    it(name, filterShim(callback, 'external',
+        'Skipping tests that use external resources.'));
+  };
+
+  /**
+   * Run a test that has been quarantined.
+   *
+   * @param {string} name
+   * @param {jasmine.Callback} callback
+   */
+  window.quarantined_it = function(name, callback) {
+    it(name, filterShim(callback, 'quarantined',
+        'Skipping tests that are quarantined.'));
+  };
 })();

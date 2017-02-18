@@ -17,7 +17,6 @@
 """Runs unit and integrations tests on the library."""
 
 import platform
-import subprocess
 import sys
 
 import build
@@ -25,7 +24,7 @@ import gendeps
 import shakaBuildHelpers
 
 
-def run_tests(args):
+def run_tests_single(args):
   """Runs all the karma tests."""
   # Update node modules if needed.
   if not shakaBuildHelpers.update_node_modules():
@@ -50,6 +49,9 @@ def run_tests(args):
   karma_path = shakaBuildHelpers.get_node_binary_path('karma')
   cmd = [karma_path, 'start']
 
+  if shakaBuildHelpers.is_linux() and '--use-xvfb' in args:
+    cmd = ['xvfb-run', '--auto-servernum'] + cmd
+
   # Get the browsers supported on the local system.
   browsers = _get_browsers()
   if not browsers:
@@ -61,16 +63,47 @@ def run_tests(args):
     # Run tests in all available browsers.
     print 'Running with platform default:', '--browsers', browsers
     cmd_line = cmd + ['--browsers', browsers]
-    shakaBuildHelpers.print_cmd_line(cmd_line)
-    return subprocess.call(cmd_line)
+    return shakaBuildHelpers.execute_get_code(cmd_line)
   else:
     # Run with command-line arguments from the user.
     if '--browsers' not in args:
       print 'No --browsers specified.'
       print 'In this mode, browsers must be manually connected to karma.'
     cmd_line = cmd + args
-    shakaBuildHelpers.print_cmd_line(cmd_line)
-    return subprocess.call(cmd_line)
+    return shakaBuildHelpers.execute_get_code(cmd_line)
+
+
+def run_tests_multiple(args):
+  """Runs multiple iterations of the tests when --runs is set."""
+  index = args.index('--runs') + 1
+  if index == len(args) or args[index].startswith('--'):
+    print >> sys.stderr, 'Argument Error: --runs requires a value.'
+    return 1
+  try:
+    runs = int(args[index])
+  except ValueError:
+    print >> sys.stderr, 'Argument Error: --runs value must be an integer.'
+    return 1
+  if runs <= 0:
+    print >> sys.stderr, 'Argument Error: --runs value must be greater than 0.'
+    return 1
+
+  results = []
+  print '\nRunning the tests %d times.' % runs
+  for _ in range(runs):
+    results.append(run_tests_single(args))
+
+  print '\nAll runs completed.'
+  print '%d passed out of %d total runs.' % (results.count(0), len(results))
+  print 'Results (exit code): %r' % results
+  return all(result == 0 for result in results)
+
+
+def run_tests(args):
+  if '--runs' in args:
+    return run_tests_multiple(args)
+  else:
+    return run_tests_single(args)
 
 
 def _get_browsers():

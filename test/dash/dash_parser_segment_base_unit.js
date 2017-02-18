@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-describe('DashParser.SegmentBase', function() {
+describe('DashParser SegmentBase', function() {
   var Dash;
   var fakeNetEngine;
   var parser;
-  var filterPeriod = function() {};
+  var playerInterface;
 
   beforeAll(function() {
     Dash = shaka.test.Dash;
@@ -28,6 +28,14 @@ describe('DashParser.SegmentBase', function() {
   beforeEach(function() {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = shaka.test.Dash.makeDashParser();
+
+    playerInterface = {
+      networkingEngine: fakeNetEngine,
+      filterPeriod: function() {},
+      onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
+      onEvent: fail,
+      onError: fail
+    };
   });
 
   it('requests init data for WebM', function(done) {
@@ -35,7 +43,7 @@ describe('DashParser.SegmentBase', function() {
       '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <AdaptationSet mimeType="video/webm">',
-      '      <Representation>',
+      '      <Representation bandwidth="1">',
       '        <BaseURL>http://example.com</BaseURL>',
       '        <SegmentBase indexRange="100-200" timescale="9000">',
       '          <Initialization sourceURL="init.webm" range="201-300" />',
@@ -50,7 +58,7 @@ describe('DashParser.SegmentBase', function() {
       'http://example.com': '',
       'http://example.com/init.webm': ''
     });
-    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+    parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           expect(manifest).toEqual(
               Dash.makeManifestFromInit('init.webm', 201, 300));
@@ -75,7 +83,7 @@ describe('DashParser.SegmentBase', function() {
       '      <Initialization sourceURL="init.mp4" range="201-300" />',
       '    </SegmentBase>',
       '    <AdaptationSet mimeType="video/mp4">',
-      '      <Representation />',
+      '      <Representation bandwidth="1" />',
       '    </AdaptationSet>',
       '  </Period>',
       '</MPD>'].join('\n');
@@ -84,7 +92,7 @@ describe('DashParser.SegmentBase', function() {
       'dummy://foo': source,
       'http://example.com': ''
     });
-    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+    parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           expect(manifest).toEqual(
               Dash.makeManifestFromInit('init.mp4', 201, 300));
@@ -107,7 +115,7 @@ describe('DashParser.SegmentBase', function() {
       '      <SegmentBase indexRange="100-200" timescale="9000">',
       '        <Initialization sourceURL="init.mp4" range="201-300" />',
       '      </SegmentBase>',
-      '      <Representation />',
+      '      <Representation bandwidth="1" />',
       '    </AdaptationSet>',
       '  </Period>',
       '</MPD>'].join('\n');
@@ -116,7 +124,7 @@ describe('DashParser.SegmentBase', function() {
       'dummy://foo': source,
       'http://example.com': ''
     });
-    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+    parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           expect(manifest).toEqual(
               Dash.makeManifestFromInit('init.mp4', 201, 300));
@@ -135,7 +143,7 @@ describe('DashParser.SegmentBase', function() {
       '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <AdaptationSet mimeType="video/mp4">',
-      '      <Representation>',
+      '      <Representation bandwidth="1">',
       '        <BaseURL>http://example.com/stream.mp4</BaseURL>',
       '        <SegmentBase indexRange="100-200" timescale="9000">',
       '          <Initialization range="201-300" />',
@@ -149,7 +157,7 @@ describe('DashParser.SegmentBase', function() {
       'dummy://foo': source,
       'http://example.com/stream.mp4': ''
     });
-    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+    parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           expect(manifest).toEqual(
               Dash.makeManifestFromInit('stream.mp4', 201, 300));
@@ -176,7 +184,7 @@ describe('DashParser.SegmentBase', function() {
       '      <SegmentBase presentationTimeOffset="10">',
       '        <Initialization sourceURL="init.mp4" range="201-300" />',
       '      </SegmentBase>',
-      '      <Representation>',
+      '      <Representation bandwidth="1">',
       '        <SegmentBase>',
       '          <RepresentationIndex sourceURL="index.mp4" range="5-2000" />',
       '        </SegmentBase>',
@@ -189,7 +197,7 @@ describe('DashParser.SegmentBase', function() {
       'dummy://foo': source,
       'http://example.com/index.mp4': ''
     });
-    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+    parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           expect(manifest).toEqual(
               Dash.makeManifestFromInit('init.mp4', 201, 300, 10));
@@ -216,7 +224,7 @@ describe('DashParser.SegmentBase', function() {
       '      <SegmentBase timescale="10" presentationTimeOffset="10">',
       '        <Initialization sourceURL="special.mp4" />',
       '      </SegmentBase>',
-      '      <Representation>',
+      '      <Representation bandwidth="1">',
       '        <SegmentBase indexRange="30-900" presentationTimeOffset="20" />',
       '      </Representation>',
       '    </AdaptationSet>',
@@ -227,7 +235,7 @@ describe('DashParser.SegmentBase', function() {
       'dummy://foo': source,
       'http://example.com': ''
     });
-    parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+    parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           expect(manifest).toEqual(
               Dash.makeManifestFromInit('special.mp4', 0, null, 20));
@@ -248,7 +256,7 @@ describe('DashParser.SegmentBase', function() {
         '  <Period>',
         '    <BaseURL>http://example.com</BaseURL>',
         '    <AdaptationSet mimeType="video/cat">',
-        '      <Representation>',
+        '      <Representation bandwidth="1">',
         '        <SegmentBase indexRange="30-900" />',
         '      </Representation>',
         '    </AdaptationSet>',
@@ -267,7 +275,7 @@ describe('DashParser.SegmentBase', function() {
         '  <Period>',
         '    <BaseURL>http://example.com</BaseURL>',
         '    <AdaptationSet mimeType="video/webm">',
-        '      <Representation>',
+        '      <Representation bandwidth="1">',
         '        <SegmentBase indexRange="30-900" />',
         '      </Representation>',
         '    </AdaptationSet>',
@@ -286,7 +294,7 @@ describe('DashParser.SegmentBase', function() {
         '  <Period>',
         '    <BaseURL>http://example.com</BaseURL>',
         '    <AdaptationSet mimeType="video/webm">',
-        '      <Representation>',
+        '      <Representation bandwidth="1">',
         '        <SegmentBase>',
         '          <Initialization sourceURL="test.webm" />',
         '        </SegmentBase>',

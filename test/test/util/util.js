@@ -96,19 +96,6 @@ shaka.test.Util.expectToEqualError = function(actual, expected) {
 
 
 /**
- * Gets the value of an argument passed from karma.
- * @param {string} name
- * @return {?string}
- */
-shaka.test.Util.getClientArg = function(name) {
-  if (window.__karma__ && __karma__.config.args.length)
-    return __karma__.config.args[0][name] || null;
-  else
-    return null;
-};
-
-
-/**
  * Custom comparer for segment references.
  * @param {*} first
  * @param {*} second

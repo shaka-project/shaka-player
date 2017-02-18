@@ -35,7 +35,8 @@ shakaAssets.Encoder = {
   BITCODIN: 'Bitcodin',
   NIMBLE_STREAMER: 'Nimble Streamer',
   AZURE_MEDIA_SERVICES: 'Azure Media Services',
-  MP4BOX: 'MP4Box'
+  MP4BOX: 'MP4Box',
+  APPLE: 'Apple'
 };
 
 
@@ -73,6 +74,7 @@ shakaAssets.Feature = {
   PSSH: 'embedded PSSH',
   MULTIKEY: 'multiple keys',
   MULTIPERIOD: 'multiple Periods',
+  TRICK_MODE: 'special trick mode track',
 
   SUBTITLES: 'subtitles',
   CAPTIONS: 'captions',
@@ -87,7 +89,9 @@ shakaAssets.Feature = {
   WEBVTT: 'WebVTT',
 
   HIGH_DEFINITION: 'high definition',
-  ULTRA_HIGH_DEFINITION: 'ultra-high definition'
+  ULTRA_HIGH_DEFINITION: 'ultra-high definition',
+
+  HLS: 'HLS'
 };
 
 
@@ -129,8 +133,8 @@ shakaAssets.ExtraText;
  *
  *   licenseServers: (!Object.<string, string>|undefined),
  *   licenseRequestHeaders: (!Object.<string, string>|undefined),
- *   requestFilter: (shaka.net.NetworkingEngine.RequestFilter|undefined),
- *   responseFilter: (shaka.net.NetworkingEngine.ResponseFilter|undefined),
+ *   requestFilter: (shakaExtern.RequestFilter|undefined),
+ *   responseFilter: (shakaExtern.ResponseFilter|undefined),
  *   drmCallback: (shakaExtern.DashContentProtectionCallback|undefined),
  *   clearKeys: (!Object.<string, string>|undefined),
  *
@@ -164,10 +168,10 @@ shakaAssets.ExtraText;
  *   (optional) A map of key-system to license server.
  * @property {(!Object.<string, string>|undefined)} licenseRequestHeaders
  *   (optional) A map of headers to add to license requests.
- * @property {(shaka.net.NetworkingEngine.RequestFilter|undefined)}
+ * @property {(shakaExtern.RequestFilter|undefined)}
  *     requestFilter
  *   A filter on license requests before they are passed to the server.
- * @property {(shaka.net.NetworkingEngine.ResponseFilter|undefined)}
+ * @property {(shakaExtern.ResponseFilter|undefined)}
  *     responseFilter
  *   A filter on license responses before they are passed to the CDM.
  * @property {(shakaExtern.DashContentProtectionCallback|undefined)} drmCallback
@@ -232,7 +236,8 @@ shakaAssets.YouTubeCallback = function(node) {
     for (var i = 0; i < node.childNodes.length; ++i) {
       var child = node.childNodes[i];
       if (child.nodeName == 'yt:SystemURL') {
-        var licenseServerUri = child.textContent;
+        // The URL may be http, but the demo app requires https.
+        var licenseServerUri = child.textContent.replace(/^http:/, 'https:');
         var typeAttr = child.getAttribute('type');
         var keySystem;
         // NOTE: Ignoring clearkey type here because this YT demo content does
@@ -326,6 +331,19 @@ shakaAssets.testAssets = [
     }
   },
   {
+    name: 'Angel One (HLS, multilingual)',
+    manifestUri: '//storage.googleapis.com/shaka-demo-assets/angel-one-hls/master.m3u8',  // gjslint: disable=110
+
+    encoder: shakaAssets.Encoder.APPLE,
+    source: shakaAssets.Source.SHAKA,
+    drm: [],
+    features: [
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.MULTIPLE_LANGUAGES,
+      shakaAssets.Feature.HLS
+    ]
+  },
+  {
     name: 'Sintel 4k (multicodec)',
     manifestUri: '//storage.googleapis.com/shaka-demo-assets/sintel/dash.mpd',  // gjslint: disable=110
 
@@ -339,6 +357,22 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
       shakaAssets.Feature.WEBM,
+      shakaAssets.Feature.WEBVTT
+    ]
+  },
+  {
+    name: 'Sintel w/ trick mode (MP4 only, 720p)',
+    manifestUri: '//storage.googleapis.com/shaka-demo-assets/sintel-trickplay/dash.mpd',  // gjslint: disable=110
+
+    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
+    source: shakaAssets.Source.SHAKA,
+    drm: [],
+    features: [
+      shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_BASE,
+      shakaAssets.Feature.SUBTITLES,
+      shakaAssets.Feature.TRICK_MODE,
       shakaAssets.Feature.WEBVTT
     ]
   },
@@ -369,10 +403,10 @@ shakaAssets.testAssets = [
     drm: [],
     features: [
       shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
-      shakaAssets.Feature.WEBM,
       shakaAssets.Feature.WEBVTT
     ]
   },
@@ -404,7 +438,7 @@ shakaAssets.testAssets = [
 
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
-    drm: [shakaAssets.KeySystem.WIDEVINE],
+    drm: [],
     features: [
       shakaAssets.Feature.EMBEDDED_TEXT,
       shakaAssets.Feature.HIGH_DEFINITION,
@@ -801,6 +835,20 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE
     ]
   },
+  {
+    name: 'Live sim (multi-period)',
+    manifestUri: '//vm2.dashif.org/livesim/utc_head/periods_20/testpic_2s/Manifest.mpd',  // gjslint: disable=110
+
+    encoder: shakaAssets.Encoder.UNKNOWN,
+    source: shakaAssets.Source.DASH_IF,
+    drm: [],
+    features: [
+      shakaAssets.Feature.LIVE,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.MULTIPERIOD,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE
+    ]
+  },
   // }}}
 
   // Wowza assets {{{
@@ -1033,6 +1081,4 @@ shakaAssets.testAssets = [
     ]
   }
   // }}}
-
-  // TODO: Add a stable live stream with multiple periods.
 ];

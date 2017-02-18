@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-describe('DashParser.SegmentTemplate', function() {
+describe('DashParser SegmentTemplate', function() {
   var Dash;
   var fakeNetEngine;
   var parser;
-  var filterPeriod = function() {};
+  var playerInterface;
 
   beforeAll(function() {
     Dash = shaka.test.Dash;
@@ -28,6 +28,14 @@ describe('DashParser.SegmentTemplate', function() {
   beforeEach(function() {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = shaka.test.Dash.makeDashParser();
+
+    playerInterface = {
+      networkingEngine: fakeNetEngine,
+      filterPeriod: function() {},
+      onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
+      onEvent: fail,
+      onError: fail
+    };
   });
 
   shaka.test.Dash.makeTimelineTests(
@@ -75,7 +83,7 @@ describe('DashParser.SegmentTemplate', function() {
         'dummy://foo': source,
         'http://example.com/index-500.mp4': ''
       });
-      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+      parser.start('dummy://foo', playerInterface)
           .then(function(manifest) {
             expect(manifest).toEqual(
                 Dash.makeManifestFromInit('init-500.mp4', 0, null));
@@ -104,7 +112,7 @@ describe('DashParser.SegmentTemplate', function() {
         'dummy://foo': source,
         'http://example.com/index-500.mp4': ''
       });
-      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+      parser.start('dummy://foo', playerInterface)
           .then(function(manifest) {
             expect(manifest).toEqual(
                 Dash.makeManifestFromInit('init-500.mp4', 0, null));
@@ -140,7 +148,7 @@ describe('DashParser.SegmentTemplate', function() {
         'http://example.com/index-500.webm': '',
         'http://example.com/init-500.webm': ''
       });
-      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+      parser.start('dummy://foo', playerInterface)
           .then(function(manifest) {
             expect(manifest).toEqual(
                 Dash.makeManifestFromInit('init-500.webm', 0, null));
@@ -175,7 +183,7 @@ describe('DashParser.SegmentTemplate', function() {
         'dummy://foo': source,
         'http://example.com/index-500.mp4': ''
       });
-      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+      parser.start('dummy://foo', playerInterface)
           .then(function(manifest) {
             expect(manifest).toEqual(
                 Dash.makeManifestFromInit('init-500.mp4', 0, null));
@@ -208,7 +216,7 @@ describe('DashParser.SegmentTemplate', function() {
         'dummy://foo': source,
         'http://example.com/index-500.mp4': ''
       });
-      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+      parser.start('dummy://foo', playerInterface)
           .then(function(manifest) {
             expect(manifest).toEqual(
                 Dash.makeManifestFromInit('init-500.mp4', 0, null));
@@ -311,31 +319,30 @@ describe('DashParser.SegmentTemplate', function() {
       ].join('\n');
 
       fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
-      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+      parser.start('dummy://foo', playerInterface)
           .then(function(actual) {
             expect(actual).toBeTruthy();
 
-            var streamSet = actual.periods[0].streamSets[0];
-            expect(streamSet).toBeTruthy();
-            expect(streamSet.streams.length).toBe(3);
+            var variants = actual.periods[0].variants;
+            expect(variants.length).toBe(3);
 
-            expect(streamSet.streams[0].findSegmentPosition(0)).toBe(0);
-            expect(streamSet.streams[0].getSegmentReference(0)).toEqual(
+            expect(variants[0].video.findSegmentPosition(0)).toBe(0);
+            expect(variants[0].video.getSegmentReference(0)).toEqual(
                 Dash.makeReference('1-0-100.mp4', 0, 0, 10));
-            expect(streamSet.streams[0].findSegmentPosition(12)).toBe(1);
-            expect(streamSet.streams[0].getSegmentReference(1)).toEqual(
+            expect(variants[0].video.findSegmentPosition(12)).toBe(1);
+            expect(variants[0].video.getSegmentReference(1)).toEqual(
                 Dash.makeReference('2-10-100.mp4', 1, 10, 20));
-            expect(streamSet.streams[1].findSegmentPosition(0)).toBe(0);
-            expect(streamSet.streams[1].getSegmentReference(0)).toEqual(
+            expect(variants[1].video.findSegmentPosition(0)).toBe(0);
+            expect(variants[1].video.getSegmentReference(0)).toEqual(
                 Dash.makeReference('1-0-200.mp4', 0, 0, 10));
-            expect(streamSet.streams[1].findSegmentPosition(12)).toBe(1);
-            expect(streamSet.streams[1].getSegmentReference(1)).toEqual(
+            expect(variants[1].video.findSegmentPosition(12)).toBe(1);
+            expect(variants[1].video.getSegmentReference(1)).toEqual(
                 Dash.makeReference('2-10-200.mp4', 1, 10, 20));
-            expect(streamSet.streams[2].findSegmentPosition(0)).toBe(0);
-            expect(streamSet.streams[2].getSegmentReference(0)).toEqual(
+            expect(variants[2].video.findSegmentPosition(0)).toBe(0);
+            expect(variants[2].video.getSegmentReference(0)).toEqual(
                 Dash.makeReference('1-0-300.mp4', 0, 0, 10));
-            expect(streamSet.streams[2].findSegmentPosition(12)).toBe(1);
-            expect(streamSet.streams[2].getSegmentReference(1)).toEqual(
+            expect(variants[2].video.findSegmentPosition(12)).toBe(1);
+            expect(variants[2].video.getSegmentReference(1)).toEqual(
                 Dash.makeReference('2-10-300.mp4', 1, 10, 20));
           }).catch(fail).then(done);
     });
@@ -368,7 +375,7 @@ describe('DashParser.SegmentTemplate', function() {
       ].join('\n');
 
       fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
-      parser.start('dummy://foo', fakeNetEngine, filterPeriod, fail)
+      parser.start('dummy://foo', playerInterface)
           .then(function(manifest) {
             var timeline = manifest.presentationTimeline;
             expect(timeline.getEarliestStart()).toBe(4);

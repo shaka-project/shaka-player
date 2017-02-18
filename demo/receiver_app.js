@@ -132,6 +132,8 @@ ShakaReceiver.prototype.checkIdle_ = function() {
 
 /** @private */
 ShakaReceiver.prototype.startIdleTimer_ = function() {
+  this.cancelIdleTimer_();
+
   this.idleTimerId_ = window.setTimeout(
       window.close.bind(window), this.idleTimeout_ * 1000.0);
 };

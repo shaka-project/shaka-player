@@ -1,3 +1,105 @@
+## 2.0.5 (2017-01-30)
+
+Bugfixes:
+  - Fix several bugs with multi-Period content
+    - Possible hang when seeking
+    - Fix race between buffering and Period transition
+    - Fix race between rapid Period transitions
+    - https://github.com/google/shaka-player/issues/655
+  - Fix hang in destroy() when EME sessions are in a bad state
+    - https://github.com/google/shaka-player/issues/664
+  - Fix doubling of time offset for segment-relative cues
+    - https://github.com/google/shaka-player/issues/595
+    - https://github.com/google/shaka-player/pull/599
+
+
+## 2.0.4 (2017-01-24)
+
+New features:
+  - Support for 4k on Chromecast Ultra
+  - Support for text tracks on Toshiba dTV
+    - https://github.com/google/shaka-player/issues/635
+    - https://github.com/google/shaka-player/pull/643
+
+Bugfixes:
+  - Fixed buffering issues at the end of streams in IE/Edge
+    - https://github.com/google/shaka-player/issues/658
+  - Fixed parsing of empty divs in TTML
+    - https://github.com/google/shaka-player/issues/646
+    - https://github.com/google/shaka-player/pull/650
+  - Fixed subtle bug in Promise.resolve polyfill on IE
+  - Fixed test failures on Chromecast
+
+Docs:
+  - Added additional docs for offline storage
+  - Updated and clarified debugging tutorial
+    - https://github.com/google/shaka-player/issues/653
+
+
+## 2.0.3 (2017-01-09)
+
+New features:
+  - Treat HTTP 202 status codes as failures
+    - https://github.com/google/shaka-player/issues/645
+
+Bugfixes:
+  - Fix race condition in StreamingEngine
+  - Fix race in load/unload in Player
+    - https://github.com/google/shaka-player/pull/613
+    - https://github.com/google/shaka-player/issues/612
+  - Update workarounds for Edge EME bugs
+    - https://github.com/google/shaka-player/issues/634
+  - Add missing events and methods to cast proxy
+  - Fix exclusion of standard features in custom builds
+  - Be more permissive of text failures
+    - Permit text parsing errors as well as streaming errors with the
+      ignoreTextStreamFailures config option.
+    - Do not fail StreamingEngine startup because of text streams,
+      regardless of config.
+    - https://github.com/google/shaka-player/issues/635
+  - Fix selectTrack() call with no text tracks
+    - https://github.com/google/shaka-player/issues/640
+  - Fix buffering state for live streams (stop at live edge)
+    - https://github.com/google/shaka-player/issues/636
+
+
+## 2.0.2 (2016-12-15)
+
+New features:
+  - Add support for Toshiba dTV
+    - https://github.com/google/shaka-player/pull/605
+  - TTML subtitles: Support for \<br\> inside a paragraph
+    - https://github.com/google/shaka-player/pull/572
+    - https://github.com/google/shaka-player/pull/584
+  - Parse TTML textAlign settings into align property of a VTTCue
+    - https://github.com/google/shaka-player/pull/573
+  - Improved test stability and coverage reports
+
+Bugfixes:
+  - Fix DASH content type parsing
+    - https://github.com/google/shaka-player/issues/631
+  - Tolerate larger gaps at the start
+    - https://github.com/google/shaka-player/issues/579
+  - Fixes for TTML alignment, positioning and cue externs
+    - https://github.com/google/shaka-player/pull/588
+    - https://github.com/google/shaka-player/pull/594
+  - Keep ewma sampling from failing on 0 duration segments
+    - https://github.com/google/shaka-player/issues/582
+    - https://github.com/google/shaka-player/pull/583
+   - Allow text parsers to change during playback
+    - https://github.com/google/shaka-player/issues/571
+  - Fix playback when IE11 modifies the XML DOM
+    - https://github.com/google/shaka-player/issues/608
+    - https://github.com/google/shaka-player/pull/611
+  - Update MediaSource polyfills for Safari 10
+    - https://github.com/google/shaka-player/issues/615
+  - Throw explicit error on empty manifests
+    - https://github.com/google/shaka-player/issues/618
+
+Docs:
+  - Link to error docs from the demo app
+
+
 ## 2.0.1 (2016-10-26)
 
 New features:

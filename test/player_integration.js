@@ -44,14 +44,14 @@ describe('Player', function() {
     Feature = window.shakaAssets.Feature;
 
     var loaded = window.shaka.util.PublicPromise();
-    if (window.shaka.test.Util.getClientArg('uncompiled')) {
+    if (getClientArg('uncompiled')) {
       // For debugging purposes, use the uncompiled library.
       shaka = window.shaka;
       loaded.resolve();
     } else {
       // Load the compiled library as a module.
       // All tests in this suite will use the compiled library.
-      require(['../dist/shaka-player.compiled.js'], function(shakaModule) {
+      require(['/base/dist/shaka-player.compiled.js'], function(shakaModule) {
         shaka = shakaModule;
         shaka.net.NetworkingEngine.registerScheme(
             'test', window.shaka.test.TestScheme);
@@ -112,6 +112,8 @@ describe('Player', function() {
           decodedFrames: jasmine.any(Number),
           droppedFrames: jasmine.any(Number),
           estimatedBandwidth: jasmine.any(Number),
+
+          loadLatency: jasmine.any(Number),
           playTime: jasmine.any(Number),
           bufferingTime: jasmine.any(Number),
 
@@ -122,6 +124,12 @@ describe('Player', function() {
             id: jasmine.any(Number),
             type: 'video',
             fromAdaptation: true
+          }]),
+
+          stateHistory: jasmine.arrayContaining([{
+            state: 'playing',
+            timestamp: jasmine.any(Number),
+            duration: jasmine.any(Number)
           }])
         };
         expect(stats).toEqual(expected);
@@ -162,7 +170,7 @@ describe('Player', function() {
 
       var wit = asset.focus ? fit : it;
       wit(testName, function(done) {
-        if (!window.shaka.test.Util.getClientArg('external')) {
+        if (!getClientArg('external')) {
           pending('Skipping tests that use external assets.');
         }
 

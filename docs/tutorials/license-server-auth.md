@@ -173,6 +173,74 @@ therefore not allowed access.
 [delete\_cookie]: http://cwip-shaka-proxy.appspot.com/delete_cookie
 
 
+#### Asynchronous Credentials
+
+In some scenarios, you may not know the credentials right away.  You would like
+to make an additional request to get those credentials before you attach them to
+the request Shaka Player wants to make.
+
+Since v2.1.0, we support asynchronous filters.  This allows you to pause a
+license request, make an additional request for an authorization token, then use
+that token to complete the license request.
+
+Any filter that returns a Promise is an asynchronous filter.  NetworkingEngine
+uses Promises for requests, so it is easy to make an additional request as part
+of an asynchronous filter.
+
+To start, change the license server and add two additional variables:
+
+```js
+var licenseServer = '//cwip-shaka-proxy.appspot.com/header_auth';
+var authTokenServer = '//cwip-shaka-proxy.appspot.com/get_auth_token';
+var authToken = null;
+```
+
+Now change the request filter:
+
+```js
+  player.getNetworkingEngine().registerRequestFilter(function(type, request) {
+    // Only add headers to license requests:
+    if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) return;
+
+    // If we already know the token, attach it right away:
+    if (authToken) {
+      console.log('Have auth token, attaching to license request.');
+      request.headers['CWIP-Auth-Header'] = authToken;
+      return;
+    }
+
+    console.log('Need auth token.');
+    // Start an asynchronous request, and return a Promise chain based on that.
+    var authRequest = {
+      uris: [authTokenServer],
+      method: 'POST',
+    };
+    var requestType = shaka.net.NetworkingEngine.RequestType.APP;
+    return player.getNetworkingEngine().request(requestType, authRequest).then(
+        function(response) {
+          // This endpoint responds with the value we should use in the header.
+          authToken = shaka.util.StringUtils.fromUTF8(response.data);
+          console.log('Received auth token', authToken);
+          request.headers['CWIP-Auth-Header'] = authToken;
+          console.log('License request can now continue.');
+        });
+  });
+```
+
+Load the page again.  The license request will be delayed, an additional request
+will be made for the auth token, and then the license request will continue.
+You should see these messages in the JavaScript console:
+
+```html
+Need auth token.
+Received auth token VGhpc0lzQVRlc3QK
+License request can now continue.
+```
+
+If you need them, you can also create asynchronous response filters in the same
+way.
+
+
 #### Continue the Tutorials
 
 Next, check out {@tutorial license-wrapping}.
