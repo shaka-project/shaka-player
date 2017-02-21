@@ -13,5 +13,6 @@
   ] } },
   { "plugins": { "title": "Plugins and Customizing the Build" } },
   { "architecture": { "title": "Architecture Diagrams" } },
+  { "service-worker": { "title": "Service Worker Caching" } },
   { "upgrade": { "title": "Shaka v2 Upgrade Guide" } }
 ]
