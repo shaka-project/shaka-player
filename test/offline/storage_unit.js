@@ -261,6 +261,37 @@ describe('Storage', function() {
           .then(done);
     });
 
+    it('only stores the tracks chosen', function(done) {
+      manifest = new shaka.test.ManifestGenerator()
+          .setPresentationDuration(20)
+          .addPeriod(0)
+            .addVariant(0)
+              .addVideo(1)
+            .addVariant(2)
+              .addVideo(3)
+          .build();
+
+      // Store the first variant.
+      storage.configure({
+        trackSelectionCallback: function(tracks) {
+          return tracks.slice(0, 1);
+        }
+      });
+
+      storage.store('')
+          .then(function(data) {
+            expect(data.offlineUri).toBe('offline:0');
+            return fakeStorageEngine.get('manifest', 0);
+          })
+          .then(function(manifestDb) {
+            expect(manifestDb).toBeTruthy();
+            expect(manifestDb.periods.length).toBe(1);
+            expect(manifestDb.periods[0].streams.length).toBe(1);
+          })
+          .catch(fail)
+          .then(done);
+    });
+
     it('stores offline sessions', function(done) {
       var sessions = ['lorem', 'ipsum'];
       drmEngine.setSessionIds(sessions);
