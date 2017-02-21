@@ -46,6 +46,11 @@ describe('HttpPlugin', function() {
       'response': new ArrayBuffer(0),
       'status': 404
     });
+    jasmine.Ajax.stubRequest('https://foo.bar/cache').andReturn({
+      'response': new ArrayBuffer(0),
+      'status': 200,
+      'responseHeaders': { 'X-Shaka-From-Cache': 'true' }
+    });
     jasmine.Ajax.stubRequest('https://foo.bar/timeout').andTimeout();
     jasmine.Ajax.stubRequest('https://foo.bar/error').andError();
 
@@ -102,6 +107,18 @@ describe('HttpPlugin', function() {
     testFails('https://foo.bar/error', done);
   });
 
+  it('detects cache headers', function(done) {
+    var request = shaka.net.NetworkingEngine.makeRequest(
+        ['https://foo.bar/cache'], retryParameters);
+    shaka.net.HttpPlugin(request.uris[0], request)
+        .catch(fail)
+        .then(function(response) {
+          expect(response).toBeTruthy();
+          expect(response.fromCache).toBe(true);
+        })
+        .then(done);
+  });
+
   /**
    * @param {string} uri
    * @param {function()} done
@@ -118,6 +135,7 @@ describe('HttpPlugin', function() {
           expect(response.uri).toBe(opt_overrideUri || uri);
           expect(response.data).toBeTruthy();
           expect(response.data.byteLength).toBe(10);
+          expect(response.fromCache).toBe(false);
           expect(response.headers).toBeTruthy();
           // Returned header names are in lowercase.
           expect(response.headers['foo']).toBe('BAR');
