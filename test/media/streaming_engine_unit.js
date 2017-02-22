@@ -17,12 +17,20 @@
 
 describe('StreamingEngine', function() {
   var Util;
-
   var segmentData;
+  var ContentType = shaka.util.ManifestParserUtils.ContentType;
 
   // Dummy byte ranges and sizes for initialization and media segments.
-  var initSegmentRanges = {'audio': [100, 1000], 'video': [200, 2000]};
-  var segmentSizes = {'audio': 1000, 'video': 10000, 'text': 500};
+  // Create empty object first and initialize the fields through
+  // [] to allow field names to be expressions.
+  var initSegmentRanges = {};
+  initSegmentRanges[ContentType.AUDIO] = [100, 1000];
+  initSegmentRanges[ContentType.VIDEO] = [200, 2000];
+
+  var segmentSizes = {};
+  segmentSizes[ContentType.AUDIO] = 1000;
+  segmentSizes[ContentType.VIDEO] = 10000;
+  segmentSizes[ContentType.TEXT] = 500;
 
   var playhead;
   var playheadTime;
@@ -494,12 +502,14 @@ describe('StreamingEngine', function() {
     });
 
     onInitialStreamsSetup.and.callFake(function() {
-      expect(mediaSourceEngine.init).toHaveBeenCalledWith(
-          {
-            'audio': 'audio/mp4; codecs="mp4a.40.2"',
-            'video': 'video/mp4; codecs="avc1.42c01e"',
-            'text': 'text/vtt'
-          }, false);
+      // Create empty object first and initialize the fields through
+      // [] to allow field names to be expressions.
+      var expectedObject = {};
+      expectedObject[ContentType.AUDIO] = 'audio/mp4; codecs="mp4a.40.2"';
+      expectedObject[ContentType.VIDEO] = 'video/mp4; codecs="avc1.42c01e"';
+      expectedObject[ContentType.TEXT] = 'text/vtt';
+      expect(mediaSourceEngine.init)
+          .toHaveBeenCalledWith(expectedObject, false);
       expect(mediaSourceEngine.init.calls.count()).toBe(1);
       mediaSourceEngine.init.calls.reset();
 
@@ -607,9 +617,13 @@ describe('StreamingEngine', function() {
         return defaultOnChooseStreams(period);
       });
 
-      return {
-        'audio': audioStream2, 'video': videoStream2, 'text': textStream2
-      };
+      // Create empty object first and initialize the fields through
+      // [] to allow field names to be expressions.
+      var ret = {};
+      ret[ContentType.AUDIO] = audioStream2;
+      ret[ContentType.VIDEO] = videoStream2;
+      ret[ContentType.TEXT] = textStream2;
+      return ret;
     });
 
     streamingEngine.init();
@@ -655,9 +669,13 @@ describe('StreamingEngine', function() {
         return defaultOnChooseStreams(period);
       });
 
-      return {
-        'audio': audioStream1, 'video': videoStream1, 'text': textStream1
-      };
+      // Create empty object first and initialize the fields through
+      // [] to allow field names to be expressions.
+      var ret = {};
+      ret[ContentType.AUDIO] = audioStream1;
+      ret[ContentType.VIDEO] = videoStream1;
+      ret[ContentType.TEXT] = textStream1;
+      return ret;
     });
 
     streamingEngine.init();
@@ -843,9 +861,12 @@ describe('StreamingEngine', function() {
 
         onTick.and.callFake(function() {
           // Verify that all buffers have been cleared.
-          expect(mediaSourceEngine.clear).toHaveBeenCalledWith('audio');
-          expect(mediaSourceEngine.clear).toHaveBeenCalledWith('video');
-          expect(mediaSourceEngine.clear).toHaveBeenCalledWith('text');
+          expect(mediaSourceEngine.clear)
+                .toHaveBeenCalledWith(ContentType.AUDIO);
+          expect(mediaSourceEngine.clear)
+                .toHaveBeenCalledWith(ContentType.VIDEO);
+          expect(mediaSourceEngine.clear)
+                .toHaveBeenCalledWith(ContentType.TEXT);
           onTick.and.callFake(stub);
         });
 
@@ -926,9 +947,12 @@ describe('StreamingEngine', function() {
 
         onTick.and.callFake(function() {
           // Verify that all buffers have been cleared.
-          expect(mediaSourceEngine.clear).toHaveBeenCalledWith('audio');
-          expect(mediaSourceEngine.clear).toHaveBeenCalledWith('video');
-          expect(mediaSourceEngine.clear).toHaveBeenCalledWith('text');
+          expect(mediaSourceEngine.clear)
+                .toHaveBeenCalledWith(ContentType.AUDIO);
+          expect(mediaSourceEngine.clear)
+                .toHaveBeenCalledWith(ContentType.VIDEO);
+          expect(mediaSourceEngine.clear)
+                .toHaveBeenCalledWith(ContentType.TEXT);
           onTick.and.callFake(stub);
         });
 
@@ -1660,14 +1684,20 @@ describe('StreamingEngine', function() {
       runTest();
       expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
 
-      expect(mediaSourceEngine.remove).toHaveBeenCalledWith('audio', 0, 10);
-      expect(mediaSourceEngine.remove).toHaveBeenCalledWith('audio', 10, 20);
+      expect(mediaSourceEngine.remove)
+          .toHaveBeenCalledWith(ContentType.AUDIO, 0, 10);
+      expect(mediaSourceEngine.remove)
+          .toHaveBeenCalledWith(ContentType.AUDIO, 10, 20);
 
-      expect(mediaSourceEngine.remove).toHaveBeenCalledWith('video', 0, 10);
-      expect(mediaSourceEngine.remove).toHaveBeenCalledWith('video', 10, 20);
+      expect(mediaSourceEngine.remove)
+          .toHaveBeenCalledWith(ContentType.VIDEO, 0, 10);
+      expect(mediaSourceEngine.remove)
+          .toHaveBeenCalledWith(ContentType.VIDEO, 10, 20);
 
-      expect(mediaSourceEngine.remove).toHaveBeenCalledWith('text', 0, 10);
-      expect(mediaSourceEngine.remove).toHaveBeenCalledWith('text', 10, 20);
+      expect(mediaSourceEngine.remove)
+          .toHaveBeenCalledWith(ContentType.TEXT, 0, 10);
+      expect(mediaSourceEngine.remove)
+          .toHaveBeenCalledWith(ContentType.TEXT, 10, 20);
 
       // Verify buffers.
       expect(mediaSourceEngine.initSegments).toEqual({
@@ -1797,9 +1827,9 @@ describe('StreamingEngine', function() {
 
       onError.and.callFake(function(error) {
         expect(error.code).toBe(shaka.util.Error.Code.QUOTA_EXCEEDED_ERROR);
-        expect(error.data[0] == 'audio' ||
-               error.data[0] == 'video' ||
-               error.data[0] == 'text').toBe(true);
+        expect(error.data[0] == ContentType.AUDIO ||
+               error.data[0] == ContentType.VIDEO ||
+               error.data[0] == ContentType.TEXT).toBe(true);
       });
 
       // Here we go!
@@ -2152,14 +2182,19 @@ describe('StreamingEngine', function() {
    * @return {!Object.<string, !shakaExtern.Stream>}
    */
   function defaultOnChooseStreams(period) {
+    // Create empty object first and initialize the fields through
+    // [] to allow field names to be expressions.
+    var ret = {};
     if (period == manifest.periods[0]) {
-      return {
-        'audio': audioStream1, 'video': videoStream1, 'text': textStream1
-      };
+      ret[ContentType.AUDIO] = audioStream1;
+      ret[ContentType.VIDEO] = videoStream1;
+      ret[ContentType.TEXT] = textStream1;
+      return ret;
     } else if (period == manifest.periods[1]) {
-      return {
-        'audio': audioStream2, 'video': videoStream2, 'text': textStream2
-      };
+      ret[ContentType.AUDIO] = audioStream2;
+      ret[ContentType.VIDEO] = videoStream2;
+      ret[ContentType.TEXT] = textStream2;
+      return ret;
     } else {
       throw new Error();
     }

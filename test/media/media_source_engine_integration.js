@@ -22,6 +22,7 @@ describe('MediaSourceEngine', function() {
   var generators;
   var metadata;
   var presentationDuration = 840;
+  var ContentType = shaka.util.ManifestParserUtils.ContentType;
   // TODO: add text streams to MSE integration tests
 
   beforeAll(function() {
@@ -88,68 +89,80 @@ describe('MediaSourceEngine', function() {
   }
 
   it('buffers MP4 video', function(done) {
-    mediaSourceEngine.init({'video': getFullMimeType(metadata.video)});
+    // Create empty object first and initialize the fields through
+    // [] to allow field names to be expressions.
+    var initObject = {};
+    initObject[ContentType.VIDEO] = getFullMimeType(metadata.video);
+    mediaSourceEngine.init(initObject);
     mediaSourceEngine.setDuration(presentationDuration).then(function() {
-      return appendInit('video');
+      return appendInit(ContentType.VIDEO);
     }).then(function() {
-      expect(buffered('video', 0)).toBe(0);
-      return append('video', 1);
+      expect(buffered(ContentType.VIDEO, 0)).toBe(0);
+      return append(ContentType.VIDEO, 1);
     }).then(function() {
-      expect(buffered('video', 0)).toBeCloseTo(10);
-      return append('video', 2);
+      expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(10);
+      return append(ContentType.VIDEO, 2);
     }).then(function() {
-      expect(buffered('video', 0)).toBeCloseTo(20);
-      return append('video', 3);
+      expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(20);
+      return append(ContentType.VIDEO, 3);
     }).then(function() {
-      expect(buffered('video', 0)).toBeCloseTo(30);
+      expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(30);
     }).catch(fail).then(done);
   });
 
   it('removes segments', function(done) {
-    mediaSourceEngine.init({'video': getFullMimeType(metadata.video)});
+    // Create empty object first and initialize the fields through
+    // [] to allow field names to be expressions.
+    var initObject = {};
+    initObject[ContentType.VIDEO] = getFullMimeType(metadata.video);
+    mediaSourceEngine.init(initObject);
     mediaSourceEngine.setDuration(presentationDuration).then(function() {
-      return appendInit('video');
+      return appendInit(ContentType.VIDEO);
     }).then(function() {
       return Promise.all([
-        append('video', 1),
-        append('video', 2),
-        append('video', 3)
+        append(ContentType.VIDEO, 1),
+        append(ContentType.VIDEO, 2),
+        append(ContentType.VIDEO, 3)
       ]);
     }).then(function() {
-      expect(buffered('video', 0)).toBeCloseTo(30);
-      return remove('video', 1);
+      expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(30);
+      return remove(ContentType.VIDEO, 1);
     }).then(function() {
-      expect(buffered('video', 0)).toBe(0);
-      expect(buffered('video', 10)).toBeCloseTo(20);
-      return remove('video', 2);
+      expect(buffered(ContentType.VIDEO, 0)).toBe(0);
+      expect(buffered(ContentType.VIDEO, 10)).toBeCloseTo(20);
+      return remove(ContentType.VIDEO, 2);
     }).then(function() {
-      expect(buffered('video', 0)).toBe(0);
-      expect(buffered('video', 10)).toBe(0);
-      expect(buffered('video', 20)).toBeCloseTo(10);
-      return remove('video', 3);
+      expect(buffered(ContentType.VIDEO, 0)).toBe(0);
+      expect(buffered(ContentType.VIDEO, 10)).toBe(0);
+      expect(buffered(ContentType.VIDEO, 20)).toBeCloseTo(10);
+      return remove(ContentType.VIDEO, 3);
     }).then(function() {
-      expect(buffered('video', 20)).toBe(0);
+      expect(buffered(ContentType.VIDEO, 20)).toBe(0);
     }).catch(fail).then(done);
   });
 
   it('extends the duration', function(done) {
-    mediaSourceEngine.init({'video': getFullMimeType(metadata.video)});
+    // Create empty object first and initialize the fields through
+    // [] to allow field names to be expressions.
+    var initObject = {};
+    initObject[ContentType.VIDEO] = getFullMimeType(metadata.video);
+    mediaSourceEngine.init(initObject);
     mediaSourceEngine.setDuration(0).then(function() {
-      return appendInit('video');
+      return appendInit(ContentType.VIDEO);
     }).then(function() {
       return mediaSourceEngine.setDuration(20);
     }).then(function() {
       expect(mediaSource.duration).toBeCloseTo(20);
-      return append('video', 1);
+      return append(ContentType.VIDEO, 1);
     }).then(function() {
       expect(mediaSource.duration).toBeCloseTo(20);
       return mediaSourceEngine.setDuration(35);
     }).then(function() {
       expect(mediaSource.duration).toBeCloseTo(35);
       return Promise.all([
-        append('video', 2),
-        append('video', 3),
-        append('video', 4)
+        append(ContentType.VIDEO, 2),
+        append(ContentType.VIDEO, 3),
+        append(ContentType.VIDEO, 4)
       ]);
     }).then(function() {
       expect(mediaSource.duration).toBeCloseTo(40);
@@ -160,15 +173,19 @@ describe('MediaSourceEngine', function() {
   });
 
   it('ends the stream, truncating the duration', function(done) {
-    mediaSourceEngine.init({'video': getFullMimeType(metadata.video)});
+    // Create empty object first and initialize the fields through
+    // [] to allow field names to be expressions.
+    var initObject = {};
+    initObject[ContentType.VIDEO] = getFullMimeType(metadata.video);
+    mediaSourceEngine.init(initObject);
     mediaSourceEngine.setDuration(presentationDuration).then(function() {
-      return appendInit('video');
+      return appendInit(ContentType.VIDEO);
     }).then(function() {
-      return append('video', 1);
+      return append(ContentType.VIDEO, 1);
     }).then(function() {
-      return append('video', 2);
+      return append(ContentType.VIDEO, 2);
     }).then(function() {
-      return append('video', 3);
+      return append(ContentType.VIDEO, 3);
     }).then(function() {
       return mediaSourceEngine.endOfStream();
     }).then(function() {
@@ -186,12 +203,16 @@ describe('MediaSourceEngine', function() {
       p.then(function() { resolutionOrder.push(nextIndex); });
     }
 
-    mediaSourceEngine.init({'video': getFullMimeType(metadata.video)});
+    // Create empty object first and initialize the fields through
+    // [] to allow field names to be expressions.
+    var initObject = {};
+    initObject[ContentType.VIDEO] = getFullMimeType(metadata.video);
+    mediaSourceEngine.init(initObject);
     checkOrder(mediaSourceEngine.setDuration(presentationDuration));
-    checkOrder(appendInit('video'));
-    checkOrder(append('video', 1));
-    checkOrder(append('video', 2));
-    checkOrder(append('video', 3));
+    checkOrder(appendInit(ContentType.VIDEO));
+    checkOrder(append(ContentType.VIDEO, 1));
+    checkOrder(append(ContentType.VIDEO, 2));
+    checkOrder(append(ContentType.VIDEO, 3));
     checkOrder(mediaSourceEngine.endOfStream());
 
     Promise.all(requests).then(function() {
@@ -200,73 +221,79 @@ describe('MediaSourceEngine', function() {
   });
 
   it('buffers MP4 audio', function(done) {
-    mediaSourceEngine.init({'audio': getFullMimeType(metadata.audio)});
+    // Create empty object first and initialize the fields through
+    // [] to allow field names to be expressions.
+    var initObject = {};
+    initObject[ContentType.AUDIO] = getFullMimeType(metadata.audio);
+    mediaSourceEngine.init(initObject);
     mediaSourceEngine.setDuration(presentationDuration).then(function() {
       // NOTE: For some reason, this appendInit never resolves on my Windows VM.
       // The test operates correctly on real hardware.
-      return appendInit('audio');
+      return appendInit(ContentType.AUDIO);
     }).then(function() {
-      expect(buffered('audio', 0)).toBe(0);
-      return append('audio', 1);
+      expect(buffered(ContentType.AUDIO, 0)).toBe(0);
+      return append(ContentType.AUDIO, 1);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(10, 1);
-      return append('audio', 2);
+      expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(10, 1);
+      return append(ContentType.AUDIO, 2);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(20, 1);
-      return append('audio', 3);
+      expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(20, 1);
+      return append(ContentType.AUDIO, 3);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(30, 1);
+      expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(30, 1);
     }).catch(fail).then(done);
   });
 
   it('buffers MP4 video and audio', function(done) {
-    mediaSourceEngine.init({
-      'video': getFullMimeType(metadata.video),
-      'audio': getFullMimeType(metadata.audio)
-    });
+    // Create empty object first and initialize the fields through
+    // [] to allow field names to be expressions.
+    var initObject = {};
+    initObject[ContentType.AUDIO] = getFullMimeType(metadata.audio);
+    initObject[ContentType.VIDEO] = getFullMimeType(metadata.video);
+    mediaSourceEngine.init(initObject);
 
     mediaSourceEngine.setDuration(presentationDuration).catch(fail);
 
-    var audioStreaming = appendInit('audio').then(function() {
-      return append('audio', 1);
+    var audioStreaming = appendInit(ContentType.AUDIO).then(function() {
+      return append(ContentType.AUDIO, 1);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(10, 1);
-      return append('audio', 2);
+      expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(10, 1);
+      return append(ContentType.AUDIO, 2);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(20, 1);
-      return append('audio', 3);
+      expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(20, 1);
+      return append(ContentType.AUDIO, 3);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(30, 1);
-      return append('audio', 4);
+      expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(30, 1);
+      return append(ContentType.AUDIO, 4);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(40, 1);
-      return append('audio', 5);
+      expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(40, 1);
+      return append(ContentType.AUDIO, 5);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(50, 1);
-      return append('audio', 6);
+      expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(50, 1);
+      return append(ContentType.AUDIO, 6);
     }).then(function() {
-      expect(buffered('audio', 0)).toBeCloseTo(60, 1);
+      expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(60, 1);
     }).catch(fail);
 
-    var videoStreaming = appendInit('video').then(function() {
-      return append('video', 1);
+    var videoStreaming = appendInit(ContentType.VIDEO).then(function() {
+      return append(ContentType.VIDEO, 1);
     }).then(function() {
-      expect(buffered('video', 0)).toBeCloseTo(10);
-      return append('video', 2);
+      expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(10);
+      return append(ContentType.VIDEO, 2);
     }).then(function() {
-      expect(buffered('video', 0)).toBeCloseTo(20);
-      return append('video', 3);
+      expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(20);
+      return append(ContentType.VIDEO, 3);
     }).then(function() {
-      expect(buffered('video', 0)).toBeCloseTo(30);
-      return append('video', 4);
+      expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(30);
+      return append(ContentType.VIDEO, 4);
     }).then(function() {
-      expect(buffered('video', 0)).toBeCloseTo(40);
-      return append('video', 5);
+      expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(40);
+      return append(ContentType.VIDEO, 5);
     }).then(function() {
-      expect(buffered('video', 0)).toBeCloseTo(50);
-      return append('video', 6);
+      expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(50);
+      return append(ContentType.VIDEO, 6);
     }).then(function() {
-      expect(buffered('video', 0)).toBeCloseTo(60);
+      expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(60);
     }).catch(fail);
 
     Promise.all([audioStreaming, videoStreaming]).then(function() {
@@ -277,20 +304,25 @@ describe('MediaSourceEngine', function() {
   });
 
   it('trims content at appendWindowEnd', function(done) {
-    mediaSourceEngine.init({'video': getFullMimeType(metadata.video)});
+    // Create empty object first and initialize the fields through
+    // [] to allow field names to be expressions.
+    var initObject = {};
+    initObject[ContentType.VIDEO] = getFullMimeType(metadata.video);
+    mediaSourceEngine.init(initObject);
     mediaSourceEngine.setDuration(presentationDuration).then(function() {
-      return appendInit('video');
+      return appendInit(ContentType.VIDEO);
     }).then(function() {
-      return mediaSourceEngine.setStreamProperties(
-          'video', /* timestampOffset */ 0, /* appendWindowEnd */ 18);
+      return mediaSourceEngine.setStreamProperties(ContentType.VIDEO,
+                                                   /* timestampOffset */ 0,
+                                                   /* appendWindowEnd */ 18);
     }).then(function() {
-      expect(buffered('video', 0)).toBe(0);
-      return append('video', 1);
+      expect(buffered(ContentType.VIDEO, 0)).toBe(0);
+      return append(ContentType.VIDEO, 1);
     }).then(function() {
-      expect(buffered('video', 0)).toBeCloseTo(10);
-      return append('video', 2);
+      expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(10);
+      return append(ContentType.VIDEO, 2);
     }).then(function() {
-      expect(buffered('video', 0)).toBeCloseTo(18, 1);
+      expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(18, 1);
     }).catch(fail).then(done);
   });
 });

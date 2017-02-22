@@ -89,6 +89,7 @@ shaka.test.FakeAbrManager.prototype.setRestrictions = function() {};
 /** @override */
 shaka.test.FakeAbrManager.prototype.chooseStreams = function(
     mediaTypesToUpdate) {
+  var ContentType = shaka.util.ManifestParserUtils.ContentType;
   var ret = {};
   var variant = this.variants[this.chooseIndex];
 
@@ -96,14 +97,14 @@ shaka.test.FakeAbrManager.prototype.chooseStreams = function(
   if (this.textStreams.length > this.chooseIndex)
     textStream = this.textStreams[this.chooseIndex];
 
-  if (mediaTypesToUpdate.indexOf('audio') > -1 ||
-      mediaTypesToUpdate.indexOf('video') > -1) {
-    if (variant.audio) ret['audio'] = variant.audio;
-    if (variant.video) ret['video'] = variant.video;
+  if (mediaTypesToUpdate.indexOf(ContentType.AUDIO) > -1 ||
+      mediaTypesToUpdate.indexOf(ContentType.VIDEO) > -1) {
+    if (variant.audio) ret[ContentType.AUDIO] = variant.audio;
+    if (variant.video) ret[ContentType.VIDEO] = variant.video;
   }
 
-  if (mediaTypesToUpdate.indexOf('text') > -1 && textStream)
-    ret['text'] = textStream;
+  if (mediaTypesToUpdate.indexOf(ContentType.TEXT) > -1 && textStream)
+    ret[ContentType.TEXT] = textStream;
 
   return ret;
 };
@@ -189,18 +190,19 @@ shaka.test.FakeDrmEngine.prototype.setSessionIds;
  * @return {!Object}
  */
 shaka.test.FakeStreamingEngine = function(period) {
+  var ContentType = shaka.util.ManifestParserUtils.ContentType;
   var resolve = Promise.resolve.bind(Promise);
   var activeStreams = {};
   if (period.variants.length) {
     var variant = period.variants[0];
     if (variant.audio)
-      activeStreams['audio'] = variant.audio;
+      activeStreams[ContentType.AUDIO] = variant.audio;
     if (variant.video)
-      activeStreams['video'] = variant.video;
+      activeStreams[ContentType.VIDEO] = variant.video;
   }
 
   if (period.textStreams.length)
-    activeStreams['text'] = period.textStreams[0];
+    activeStreams[ContentType.TEXT] = period.textStreams[0];
 
   var ret = jasmine.createSpyObj('fakeStreamingEngine', [
     'destroy', 'configure', 'init', 'getCurrentPeriod', 'getActiveStreams',

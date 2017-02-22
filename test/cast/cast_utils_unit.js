@@ -205,17 +205,24 @@ describe('CastUtils', function() {
         }
 
         function onSourceOpen() {
+          var ContentType = shaka.util.ManifestParserUtils.ContentType;
           eventManager.unlisten(mediaSource, 'sourceopen');
           mediaSourceEngine = new shaka.media.MediaSourceEngine(
               video, mediaSource, /* TextTrack */ null);
 
-          mediaSourceEngine.init({'video': mimeType}, false);
+          // Create empty object first and initialize the fields through
+          // [] to allow field names to be expressions.
+          var initObject = {};
+          initObject[ContentType.VIDEO] = mimeType;
+          mediaSourceEngine.init(initObject, false);
           shaka.test.Util.fetch(initSegmentUrl).then(function(data) {
-            return mediaSourceEngine.appendBuffer('video', data, null, null);
+            return mediaSourceEngine.appendBuffer(ContentType.VIDEO, data,
+                                                  null, null);
           }).then(function() {
             return shaka.test.Util.fetch(videoSegmentUrl);
           }).then(function(data) {
-            return mediaSourceEngine.appendBuffer('video', data, null, null);
+            return mediaSourceEngine.appendBuffer(ContentType.VIDEO, data,
+                                                  null, null);
           }).catch(fail).then(done);
         }
       });

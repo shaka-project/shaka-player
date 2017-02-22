@@ -22,6 +22,8 @@ describe('SimpleAbrManager', function() {
   var variants;
   var textStreams;
   var sufficientBWMultiplier = 1.06;
+  var ContentType = shaka.util.ManifestParserUtils.ContentType;
+
 
   beforeAll(function() {
     jasmine.clock().install();
@@ -77,21 +79,25 @@ describe('SimpleAbrManager', function() {
   });
 
   it('can choose audio and video Streams right away', function() {
-    var chosen = abrManager.chooseStreams(['audio', 'video']);
-    expect(chosen['audio']).toBeTruthy();
-    expect(chosen['video']).toBeTruthy();
+    var chosen = abrManager.chooseStreams([ContentType.AUDIO,
+                                           ContentType.VIDEO]);
+    expect(chosen[ContentType.AUDIO]).toBeTruthy();
+    expect(chosen[ContentType.VIDEO]).toBeTruthy();
   });
 
   it('uses custom default estimate', function() {
     abrManager.setDefaultEstimate(3e6);
-    var chosen = abrManager.chooseStreams(['audio', 'video']);
-    expect(chosen['video'].id).toBe(6);
+    var chosen = abrManager.chooseStreams([ContentType.AUDIO,
+                                           ContentType.VIDEO]);
+    expect(chosen[ContentType.VIDEO].id).toBe(6);
   });
 
   it('can handle empty variants', function() {
+    var ContentType = shaka.util.ManifestParserUtils.ContentType;
     abrManager.setVariants([]);
     abrManager.setTextStreams([]);
-    var chosen = abrManager.chooseStreams(['audio', 'video']);
+    var chosen = abrManager.chooseStreams([ContentType.AUDIO,
+                                           ContentType.VIDEO]);
     expect(Object.keys(chosen).length).toBe(0);
   });
 
@@ -105,10 +111,10 @@ describe('SimpleAbrManager', function() {
       .build();
 
     abrManager.setVariants(manifest.periods[0].variants);
-    var chosen = abrManager.chooseStreams(['audio']);
+    var chosen = abrManager.chooseStreams([ContentType.AUDIO]);
 
-    expect(chosen['audio']).toBeTruthy();
-    expect(chosen['video']).toBeFalsy();
+    expect(chosen[ContentType.AUDIO]).toBeTruthy();
+    expect(chosen[ContentType.VIDEO]).toBeFalsy();
   });
 
   it('can choose from video only variants', function() {
@@ -121,10 +127,10 @@ describe('SimpleAbrManager', function() {
       .build();
 
     abrManager.setVariants(manifest.periods[0].variants);
-    var chosen = abrManager.chooseStreams(['video']);
+    var chosen = abrManager.chooseStreams([ContentType.VIDEO]);
 
-    expect(chosen['video']).toBeTruthy();
-    expect(chosen['audio']).toBeFalsy();
+    expect(chosen[ContentType.VIDEO]).toBeTruthy();
+    expect(chosen[ContentType.AUDIO]).toBeFalsy();
   });
 
   [5e5, 6e5].forEach(function(bandwidth) {
@@ -139,7 +145,7 @@ describe('SimpleAbrManager', function() {
 
     it(description, function() {
       abrManager.setVariants(variants);
-      abrManager.chooseStreams(['audio', 'video']);
+      abrManager.chooseStreams([ContentType.AUDIO, ContentType.VIDEO]);
 
       abrManager.segmentDownloaded(1000, bytesPerSecond);
       abrManager.segmentDownloaded(1000, bytesPerSecond);
@@ -161,10 +167,12 @@ describe('SimpleAbrManager', function() {
       }
 
       expect(switchCallback).toHaveBeenCalled();
-      expect(switchCallback.calls.argsFor(0)[0]).toEqual({
-        'audio': audioStream,
-        'video': videoStream
-      });
+      // Create empty object first and initialize the fields through
+      // [] to allow field names to be expressions.
+      var expectedObject = {};
+      expectedObject[ContentType.AUDIO] = audioStream;
+      expectedObject[ContentType.VIDEO] = videoStream;
+      expect(switchCallback.calls.argsFor(0)[0]).toEqual(expectedObject);
     });
   });
 
@@ -177,7 +185,7 @@ describe('SimpleAbrManager', function() {
         sufficientBWMultiplier * bandwidth / 8.0;
 
     abrManager.setVariants(variants);
-    abrManager.chooseStreams(['audio', 'video']);
+    abrManager.chooseStreams([ContentType.AUDIO, ContentType.VIDEO]);
 
     // 0 duration segment shouldn't cause us to get stuck on the lowest variant
     abrManager.segmentDownloaded(0, bytesPerSecond);
@@ -195,7 +203,7 @@ describe('SimpleAbrManager', function() {
         var bandwidth = 2e6;
 
         abrManager.setVariants(variants);
-        abrManager.chooseStreams(['audio', 'video']);
+        abrManager.chooseStreams([ContentType.AUDIO, ContentType.VIDEO]);
 
         // Simulate some segments being downloaded just above the desired
         // bandwidth.
@@ -216,10 +224,12 @@ describe('SimpleAbrManager', function() {
         var audioStream = variants[4].audio;
 
         expect(switchCallback).toHaveBeenCalled();
-        expect(switchCallback.calls.argsFor(0)[0]).toEqual({
-          'audio': audioStream,
-          'video': videoStream
-        });
+        // Create empty object first and initialize the fields through
+        // [] to allow field names to be expressions.
+        var expectedObject = {};
+        expectedObject[ContentType.AUDIO] = audioStream;
+        expectedObject[ContentType.VIDEO] = videoStream;
+        expect(switchCallback.calls.argsFor(0)[0]).toEqual(expectedObject);
       });
 
   it('does not call switchCallback() if not enabled', function() {
@@ -228,7 +238,7 @@ describe('SimpleAbrManager', function() {
         sufficientBWMultiplier * bandwidth / 8.0;
 
     abrManager.setVariants(variants);
-    abrManager.chooseStreams(['audio', 'video']);
+    abrManager.chooseStreams([ContentType.AUDIO, ContentType.VIDEO]);
 
     // Don't enable AbrManager.
     abrManager.segmentDownloaded(1000, bytesPerSecond);
@@ -243,7 +253,7 @@ describe('SimpleAbrManager', function() {
         sufficientBWMultiplier * bandwidth / 8.0;
 
     abrManager.setVariants(variants);
-    abrManager.chooseStreams(['audio', 'video']);
+    abrManager.chooseStreams([ContentType.AUDIO, ContentType.VIDEO]);
 
     abrManager.segmentDownloaded(1000, bytesPerSecond);
     abrManager.segmentDownloaded(1000, bytesPerSecond);
@@ -289,7 +299,7 @@ describe('SimpleAbrManager', function() {
         sufficientBWMultiplier * bandwidth / 8.0;
 
     abrManager.setVariants(variants);
-    abrManager.chooseStreams(['audio', 'video']);
+    abrManager.chooseStreams([ContentType.AUDIO, ContentType.VIDEO]);
 
     abrManager.segmentDownloaded(1000, bytesPerSecond);
     abrManager.segmentDownloaded(1000, bytesPerSecond);
@@ -316,7 +326,7 @@ describe('SimpleAbrManager', function() {
     abrManager.setDefaultEstimate(4e6);
 
     abrManager.setVariants(variants);
-    abrManager.chooseStreams(['audio', 'video']);
+    abrManager.chooseStreams([ContentType.AUDIO, ContentType.VIDEO]);
 
     abrManager.segmentDownloaded(1000, bytesPerSecond);
     abrManager.segmentDownloaded(1000, bytesPerSecond);
@@ -342,11 +352,11 @@ describe('SimpleAbrManager', function() {
       .build();
 
     abrManager.setVariants(manifest.periods[0].variants);
-    var chosen = abrManager.chooseStreams(['video']);
-    expect(chosen['video'].id).toBe(2);
+    var chosen = abrManager.chooseStreams([ContentType.VIDEO]);
+    expect(chosen[ContentType.VIDEO].id).toBe(2);
 
     abrManager.setRestrictions({maxWidth: 100});
-    chosen = abrManager.chooseStreams(['video']);
-    expect(chosen['video'].id).toBe(0);
+    chosen = abrManager.chooseStreams([ContentType.VIDEO]);
+    expect(chosen[ContentType.VIDEO].id).toBe(0);
   });
 });

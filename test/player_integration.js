@@ -122,7 +122,9 @@ describe('Player', function() {
           switchHistory: jasmine.arrayContaining([{
             timestamp: jasmine.any(Number),
             id: jasmine.any(Number),
-            type: 'video',
+            // Include 'window' to use uncompiled version version of the
+            // library.
+            type: window.shaka.util.ManifestParserUtils.ContentType.VIDEO,
             fromAdaptation: true
           }]),
 

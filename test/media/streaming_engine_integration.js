@@ -45,6 +45,7 @@ describe('StreamingEngine', function() {
   var onInitialStreamsSetup;
   var onStartupComplete;
   var streamingEngine;
+  var ContentType = shaka.util.ManifestParserUtils.ContentType;
 
   beforeAll(function() {
     video = /** @type {HTMLVideoElement} */ (document.createElement('video'));
@@ -82,8 +83,8 @@ describe('StreamingEngine', function() {
 
   function setupVod() {
     return Promise.all([
-      createVodStreamGenerator(metadata.audio, 'audio'),
-      createVodStreamGenerator(metadata.video, 'video')
+      createVodStreamGenerator(metadata.audio, ContentType.AUDIO),
+      createVodStreamGenerator(metadata.video, ContentType.VIDEO)
     ]).then(function() {
       timeline = shaka.test.StreamingEngineUtil.createFakePresentationTimeline(
           0 /* segmentAvailabilityStart */,
@@ -110,10 +111,10 @@ describe('StreamingEngine', function() {
   function setupLive() {
     return Promise.all([
       createLiveStreamGenerator(
-          metadata.audio, 'audio',
+          metadata.audio, ContentType.AUDIO,
           20 /* timeShiftBufferDepth */),
       createLiveStreamGenerator(
-          metadata.video, 'video',
+          metadata.video, ContentType.VIDEO,
           20 /* timeShiftBufferDepth */)
     ]).then(function() {
       // The generator's AST is set to 295 seconds in the past, so the live-edge
@@ -508,10 +509,17 @@ describe('StreamingEngine', function() {
    * @return {!Object.<string, !shakaExtern.Stream>}
    */
   function defaultOnChooseStreams(period) {
+    // Create empty object first and initialize the fields through
+    // [] to allow field names to be expressions.
+    var ret = {};
     if (period == manifest.periods[0]) {
-      return {'audio': audioStream1, 'video': videoStream1};
+      ret[ContentType.AUDIO] = audioStream1;
+      ret[ContentType.VIDEO] = videoStream1;
+      return ret;
     } else if (period == manifest.periods[1]) {
-      return {'audio': audioStream2, 'video': videoStream2};
+      ret[ContentType.AUDIO] = audioStream2;
+      ret[ContentType.VIDEO] = videoStream2;
+      return ret;
     } else {
       throw new Error();
     }

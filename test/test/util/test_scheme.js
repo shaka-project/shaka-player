@@ -244,7 +244,7 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
   /**
    * @param {shaka.test.ManifestGenerator} manifestGenerator
    * @param {Object} data
-   * @param {string} contentType
+   * @param {shaka.util.ManifestParserUtils.ContentType} contentType
    * @param {string} name
    */
   function addStreamInfo(manifestGenerator, data, contentType, name) {
@@ -268,13 +268,17 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
   }
 
   var async = [];
+  // Include 'window' to use uncompiled version version of the
+  // library.
   var DATA = window.shaka.test.TestScheme.DATA;
   var GENERATORS = window.shaka.test.TestScheme.GENERATORS;
   var MANIFESTS = window.shaka.test.TestScheme.MANIFESTS;
+  var ContentType = window.shaka.util.ManifestParserUtils.ContentType;
+
   for (var name in DATA) {
     GENERATORS[name + suffix] = GENERATORS[name + suffix] || {};
     var data = DATA[name];
-    ['video', 'audio'].forEach(function(type) {
+    [ContentType.VIDEO, ContentType.AUDIO].forEach(function(type) {
       var streamGen = createStreamGenerator(data[type]);
       GENERATORS[name + suffix][type] = streamGen;
       async.push(streamGen.init());
@@ -285,9 +289,9 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
         .addPeriod(0)
         .addVariant(0)
           .addVideo(1);
-    addStreamInfo(gen, data, 'video', name);
+    addStreamInfo(gen, data, ContentType.VIDEO, name);
     gen.addAudio(2);
-    addStreamInfo(gen, data, 'audio', name);
+    addStreamInfo(gen, data, ContentType.AUDIO, name);
 
     // This seems to be necessary.  Otherwise, we end up with a URL like
     // "http:/base/..." which then fails to load on Safari for some reason.

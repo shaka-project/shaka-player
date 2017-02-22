@@ -731,7 +731,7 @@ describe('DashParser Manifest', function() {
                                variant.video.trickModeVideo;
           expect(trickModeVideo).toEqual(jasmine.objectContaining({
             id: 2,
-            type: 'video'
+            type: shaka.util.ManifestParserUtils.ContentType.VIDEO
           }));
         })
         .catch(fail)
@@ -807,8 +807,11 @@ describe('DashParser Manifest', function() {
           expect(manifest.periods.length).toBe(1);
           expect(manifest.periods[0].textStreams.length).toBe(2);
           // At one time, these came out as 'application' rather than 'text'.
-          expect(manifest.periods[0].textStreams[0].type).toBe('text');
-          expect(manifest.periods[0].textStreams[1].type).toBe('text');
+          var ContentType = shaka.util.ManifestParserUtils.ContentType;
+          expect(manifest.periods[0].textStreams[0].type)
+            .toBe(ContentType.TEXT);
+          expect(manifest.periods[0].textStreams[1].type)
+            .toBe(ContentType.TEXT);
         })
         .catch(fail)
         .then(done);

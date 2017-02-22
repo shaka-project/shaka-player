@@ -141,11 +141,12 @@ describe('OfflineUtils', function() {
      * @return {shakaExtern.StreamDB}
      */
     function createVideoStreamDb(id, opt_variantIds) {
+      var ContentType = shaka.util.ManifestParserUtils.ContentType;
       return {
         id: id,
         primary: false,
         presentationTimeOffset: 25,
-        contentType: 'video',
+        contentType: ContentType.VIDEO,
         mimeType: 'video/mp4',
         codecs: 'avc1.42c01e',
         frameRate: 22,
@@ -171,11 +172,12 @@ describe('OfflineUtils', function() {
      * @return {shakaExtern.StreamDB}
      */
     function createAudioStreamDb(id, opt_variantIds) {
+      var ContentType = shaka.util.ManifestParserUtils.ContentType;
       return {
         id: id,
         primary: false,
         presentationTimeOffset: 10,
-        contentType: 'audio',
+        contentType: ContentType.AUDIO,
         mimeType: 'audio/mp4',
         codecs: 'mp4a.40.2',
         frameRate: undefined,
@@ -200,11 +202,12 @@ describe('OfflineUtils', function() {
      * @return {shakaExtern.StreamDB}
      */
     function createTextStreamDb(id) {
+      var ContentType = shaka.util.ManifestParserUtils.ContentType;
       return {
         id: id,
         primary: false,
         presentationTimeOffset: 10,
-        contentType: 'text',
+        contentType: ContentType.TEXT,
         mimeType: 'text/vtt',
         codecs: '',
         frameRate: undefined,

@@ -27,6 +27,7 @@ describe('Player', function() {
   var networkingEngine;
   var streamingEngine;
   var video;
+  var ContentType;
 
   beforeAll(function() {
     originalLogError = shaka.log.error;
@@ -36,6 +37,8 @@ describe('Player', function() {
     shaka.log.error = logErrorSpy;
     logWarnSpy = jasmine.createSpy('shaka.log.warning');
     shaka.log.warning = logWarnSpy;
+
+    ContentType = shaka.util.ManifestParserUtils.ContentType;
   });
 
   beforeEach(function() {
@@ -799,7 +802,7 @@ describe('Player', function() {
         {
           id: 6,
           active: true,
-          type: 'text',
+          type: ContentType.TEXT,
           language: 'es',
           kind: 'caption',
           mimeType: 'text/vtt',
@@ -808,7 +811,7 @@ describe('Player', function() {
         {
           id: 7,
           active: false,
-          type: 'text',
+          type: ContentType.TEXT,
           language: 'en',
           kind: 'caption',
           mimeType: 'application/ttml+xml',
@@ -847,7 +850,7 @@ describe('Player', function() {
     it('doesn\'t disable AbrManager if switching text', function() {
       var config = player.getConfiguration();
       expect(config.abr.enabled).toBe(true);
-      expect(textTracks[0].type).toBe('text');
+      expect(textTracks[0].type).toBe(ContentType.TEXT);
       player.selectTextTrack(textTracks[0]);
       config = player.getConfiguration();
       expect(config.abr.enabled).toBe(true);
@@ -861,9 +864,9 @@ describe('Player', function() {
       var variant = period.variants[3];
       player.selectVariantTrack(variantTracks[3]);
       expect(streamingEngine.switch)
-          .toHaveBeenCalledWith('audio', variant.audio, false);
+          .toHaveBeenCalledWith(ContentType.AUDIO, variant.audio, false);
       expect(streamingEngine.switch)
-          .toHaveBeenCalledWith('video', variant.video, false);
+          .toHaveBeenCalledWith(ContentType.VIDEO, variant.video, false);
     });
 
     it('still switches streams if called during startup', function() {
@@ -874,8 +877,10 @@ describe('Player', function() {
       var chosen = chooseStreams();
       var period = manifest.periods[0];
       var variant = period.variants[1];
-      expect(chosen).toEqual(jasmine.objectContaining(
-          {'audio': variant.audio, 'video': variant.video}));
+      var expectedObject = {};
+      expectedObject[ContentType.AUDIO] = variant.audio;
+      expectedObject[ContentType.VIDEO] = variant.video;
+      expect(chosen).toEqual(jasmine.objectContaining(expectedObject));
     });
 
     it('still switches streams if called while switching Periods', function() {
@@ -889,9 +894,9 @@ describe('Player', function() {
       var period = manifest.periods[0];
       var variant = period.variants[1];
       expect(streamingEngine.switch)
-          .toHaveBeenCalledWith('audio', variant.audio, false);
+          .toHaveBeenCalledWith(ContentType.AUDIO, variant.audio, false);
       expect(streamingEngine.switch)
-          .toHaveBeenCalledWith('video', variant.video, false);
+          .toHaveBeenCalledWith(ContentType.VIDEO, variant.video, false);
     });
 
     it('switching audio doesn\'t change selected text track', function() {
@@ -901,14 +906,14 @@ describe('Player', function() {
         preferredTextLanguage: 'es'
       });
 
-      expect(textTracks[1].type).toBe('text');
+      expect(textTracks[1].type).toBe(ContentType.TEXT);
       expect(textTracks[1].language).toBe('en');
       player.selectTextTrack(textTracks[1]);
       var period = manifest.periods[0];
       var textStream = period.textStreams[1];
 
       expect(streamingEngine.switch)
-          .toHaveBeenCalledWith('text', textStream, true);
+          .toHaveBeenCalledWith(ContentType.TEXT, textStream, true);
 
       streamingEngine.switch.calls.reset();
 
@@ -916,9 +921,9 @@ describe('Player', function() {
       expect(variantTracks[1].id).toBe(variant.id);
       player.selectVariantTrack(variantTracks[1]);
       expect(streamingEngine.switch)
-          .toHaveBeenCalledWith('text', textStream, true);
+          .toHaveBeenCalledWith(ContentType.TEXT, textStream, true);
       expect(streamingEngine.switch)
-          .toHaveBeenCalledWith('audio', variant.audio, false);
+          .toHaveBeenCalledWith(ContentType.AUDIO, variant.audio, false);
     });
 
     it('selectAudioLanguage() takes precedence over preferredAudioLanguage',
@@ -937,9 +942,9 @@ describe('Player', function() {
           player.selectAudioLanguage('es');
 
           expect(streamingEngine.switch)
-              .toHaveBeenCalledWith('audio', spanishStream, true);
+              .toHaveBeenCalledWith(ContentType.AUDIO, spanishStream, true);
           expect(streamingEngine.switch)
-              .not.toHaveBeenCalledWith('audio', englishStream, true);
+              .not.toHaveBeenCalledWith(ContentType.AUDIO, englishStream, true);
 
         });
 
@@ -959,9 +964,9 @@ describe('Player', function() {
           player.selectTextLanguage('en');
 
           expect(streamingEngine.switch)
-              .toHaveBeenCalledWith('text', englishStream, true);
+              .toHaveBeenCalledWith(ContentType.TEXT, englishStream, true);
           expect(streamingEngine.switch)
-              .not.toHaveBeenCalledWith('text', spanishStream, true);
+              .not.toHaveBeenCalledWith(ContentType.TEXT, spanishStream, true);
 
         });
 
@@ -976,7 +981,7 @@ describe('Player', function() {
       player.selectAudioLanguage('es');
 
       expect(streamingEngine.switch)
-          .toHaveBeenCalledWith('audio', spanishStream, true);
+          .toHaveBeenCalledWith(ContentType.AUDIO, spanishStream, true);
     });
 
     it('changing currentTextLanguage changes active stream', function() {
@@ -990,7 +995,7 @@ describe('Player', function() {
       player.selectTextLanguage('en');
 
       expect(streamingEngine.switch)
-          .toHaveBeenCalledWith('text', englishStream, true);
+          .toHaveBeenCalledWith(ContentType.TEXT, englishStream, true);
     });
   });
 
@@ -1052,6 +1057,7 @@ describe('Player', function() {
      * @param {function()} done
      */
     function runTest(languages, preference, expectedIndex, done) {
+      var ContentType = shaka.util.ManifestParserUtils.ContentType;
       var generator = new shaka.test.ManifestGenerator().addPeriod(0);
 
       for (var i = 0; i < languages.length; i++) {
@@ -1077,7 +1083,7 @@ describe('Player', function() {
             player.selectTextLanguage(preference);
 
             var chosen = chooseStreams();
-            expect(chosen['audio'].id).toBe(expectedIndex);
+            expect(chosen[ContentType.AUDIO].id).toBe(expectedIndex);
           })
           .catch(fail)
           .then(done);
@@ -1226,52 +1232,51 @@ describe('Player', function() {
           // We are using a mock date, so this is not a race.
           timestamp: Date.now() / 1000,
           id: variant.audio.id,
-          type: 'audio',
+          type: ContentType.AUDIO,
           fromAdaptation: false
         },
         {
           timestamp: Date.now() / 1000,
           id: variant.video.id,
-          type: 'video',
+          type: ContentType.VIDEO,
           fromAdaptation: false
         }]);
       });
 
       it('includes adaptation choices', function() {
-        var choices = {
-          'audio': manifest.periods[0].variants[3].audio,
-          'video': manifest.periods[0].variants[3].video
-        };
+        var choices = {};
+        choices[ContentType.AUDIO] = manifest.periods[0].variants[3].audio;
+        choices[ContentType.VIDEO] = manifest.periods[0].variants[3].video;
+
 
         switch_(choices);
         checkHistory(jasmine.arrayContaining([
           {
             timestamp: Date.now() / 1000,
-            id: choices['audio'].id,
-            type: 'audio',
+            id: choices[ContentType.AUDIO].id,
+            type: ContentType.AUDIO,
             fromAdaptation: true
           },
           {
             timestamp: Date.now() / 1000,
-            id: choices['video'].id,
-            type: 'video',
+            id: choices[ContentType.VIDEO].id,
+            type: ContentType.VIDEO,
             fromAdaptation: true
           }
         ]));
       });
 
       it('ignores adaptation if stream is already active', function() {
-        var choices = {
-          // This audio stream is already active.
-          'audio': manifest.periods[0].variants[1].audio,
-          'video': manifest.periods[0].variants[1].video
-        };
+        var choices = {};
+        // This audio stream is already active.
+        choices[ContentType.AUDIO] = manifest.periods[0].variants[1].audio;
+        choices[ContentType.VIDEO] = manifest.periods[0].variants[1].video;
 
         switch_(choices);
         checkHistory([{
           timestamp: Date.now() / 1000,
-          id: choices['video'].id,
-          type: 'video',
+          id: choices[ContentType.VIDEO].id,
+          type: ContentType.VIDEO,
           fromAdaptation: true
         }]);
       });
@@ -1285,13 +1290,13 @@ describe('Player', function() {
           {
             timestamp: jasmine.any(Number),
             id: 1,
-            type: 'audio',
+            type: ContentType.AUDIO,
             fromAdaptation: true
           },
           {
             timestamp: jasmine.any(Number),
             id: 4,
-            type: 'video',
+            type: ContentType.VIDEO,
             fromAdaptation: true
           }
         ];

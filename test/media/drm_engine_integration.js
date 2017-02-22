@@ -41,6 +41,8 @@ describe('DrmEngine', function() {
   var audioInitSegmentUri = '/base/test/test/assets/multidrm-audio-init.mp4';
   var audioSegmentUri = '/base/test/test/assets/multidrm-audio-segment.mp4';
 
+  var ContentType = shaka.util.ManifestParserUtils.ContentType;
+
   beforeAll(function(done) {
     var supportTest = shaka.media.DrmEngine.probeSupport()
         .then(function(result) { support = result; })
@@ -118,10 +120,12 @@ describe('DrmEngine', function() {
       mediaSourceEngine = new shaka.media.MediaSourceEngine(
           video, mediaSource, null);
 
-      mediaSourceEngine.init({
-        'video': 'video/mp4; codecs="avc1.640015"',
-        'audio': 'audio/mp4; codecs="mp4a.40.2"'
-      }, false);
+      // Create empty object first and initialize the fields through
+      // [] to allow field names to be expressions.
+      var expectedObject = {};
+      expectedObject[ContentType.AUDIO] = 'audio/mp4; codecs="mp4a.40.2"';
+      expectedObject[ContentType.VIDEO] = 'video/mp4; codecs="avc1.640015"';
+      mediaSourceEngine.init(expectedObject, false);
       done();
     });
   });
@@ -183,10 +187,12 @@ describe('DrmEngine', function() {
           drmEngine.init(manifest, /* offline */ false).then(function() {
             return drmEngine.attach(video);
           }).then(function() {
-            return mediaSourceEngine.appendBuffer('video', videoInitSegment,
+            return mediaSourceEngine.appendBuffer(ContentType.VIDEO,
+                                                  videoInitSegment,
                                                   null, null);
           }).then(function() {
-            return mediaSourceEngine.appendBuffer('audio', audioInitSegment,
+            return mediaSourceEngine.appendBuffer(ContentType.AUDIO,
+                                                  audioInitSegment,
                                                   null, null);
           }).then(function() {
             return encryptedEventSeen;
@@ -218,10 +224,12 @@ describe('DrmEngine', function() {
               }
             }
 
-            return mediaSourceEngine.appendBuffer('video', videoSegment,
+            return mediaSourceEngine.appendBuffer(ContentType.VIDEO,
+                                                  videoSegment,
                                                   null, null);
           }).then(function() {
-            return mediaSourceEngine.appendBuffer('audio', audioSegment,
+            return mediaSourceEngine.appendBuffer(ContentType.AUDIO,
+                                                  audioSegment,
                                                   null, null);
           }).then(function() {
             expect(video.buffered.end(0)).toBeGreaterThan(0);

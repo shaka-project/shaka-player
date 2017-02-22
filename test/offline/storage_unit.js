@@ -73,6 +73,7 @@ describe('Storage', function() {
   });
 
   it('lists stored manifests', function(done) {
+    var ContentType = shaka.util.ManifestParserUtils.ContentType;
     var manifestDb1 = {
       key: 0,
       originalManifestUri: 'fake:foobar',
@@ -82,7 +83,7 @@ describe('Storage', function() {
         streams: [
           {
             id: 0,
-            contentType: 'video',
+            contentType: ContentType.VIDEO,
             kind: undefined,
             language: '',
             width: 1920,
@@ -94,7 +95,7 @@ describe('Storage', function() {
           },
           {
             id: 1,
-            contentType: 'audio',
+            contentType: ContentType.AUDIO,
             kind: undefined,
             language: 'en',
             width: null,

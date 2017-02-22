@@ -35,7 +35,8 @@ describe('StringUtils', function() {
     // pair.
     var arr = [0xef, 0xbb, 0xbf, 0x74, 0x65, 0x78, 0x74];
     var buffer = new Uint8Array(arr).buffer;
-    expect(StringUtils.fromUTF8(buffer)).toBe('text');
+    var ContentType = shaka.util.ManifestParserUtils.ContentType;
+    expect(StringUtils.fromUTF8(buffer)).toBe(ContentType.TEXT);
   });
 
   it('parses fromUTF16 big-endian', function() {

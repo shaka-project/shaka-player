@@ -25,16 +25,18 @@ describe('MediaSourceEngine', function() {
   var mockTextEngine;
   var mediaSourceEngine;
   var Util;
+  var ContentType;
 
   beforeAll(function() {
     Util = shaka.test.Util;
+    ContentType = shaka.util.ManifestParserUtils.ContentType;
     originalIsTypeSupported = window.MediaSource.prototype.isTypeSupported;
     // Since this is not an integration test, we don't want MediaSourceEngine to
     // fail assertions based on browser support for types.  Pretend that all
     // video and audio types are supported.
     window.MediaSource.prototype.isTypeSupported = function(mimeType) {
-      var contentType = mimeType.split('/')[0];
-      return contentType == 'video' || contentType == 'audio';
+      var type = mimeType.split('/')[0];
+      return type == 'video' || type == 'audio';
     };
 
     originalTextEngine = shaka.media.TextEngine;
@@ -51,8 +53,8 @@ describe('MediaSourceEngine', function() {
     videoSourceBuffer = createMockSourceBuffer();
     mockMediaSource = createMockMediaSource();
     mockMediaSource.addSourceBuffer.and.callFake(function(mimeType) {
-      var contentType = mimeType.split('/')[0];
-      return contentType == 'audio' ? audioSourceBuffer : videoSourceBuffer;
+      var type = mimeType.split('/')[0];
+      return type == 'audio' ? audioSourceBuffer : videoSourceBuffer;
     });
 
     // MediaSourceEngine uses video to:
@@ -77,14 +79,23 @@ describe('MediaSourceEngine', function() {
 
   describe('init', function() {
     it('creates SourceBuffers for the given types', function() {
-      mediaSourceEngine.init({'audio': 'audio/foo', 'video': 'video/foo'});
+      // Create empty object first and initialize the fields through
+      // [] to allow field names to be expressions.
+      var initObject = {};
+      initObject[ContentType.AUDIO] = 'audio/foo';
+      initObject[ContentType.VIDEO] = 'video/foo';
+      mediaSourceEngine.init(initObject);
       expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledWith('audio/foo');
       expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledWith('video/foo');
       expect(shaka.media.TextEngine).not.toHaveBeenCalled();
     });
 
     it('creates TextEngines for text types', function() {
-      mediaSourceEngine.init({'text': 'text/foo'});
+      // Create empty object first and initialize the fields through
+      // [] to allow field names to be expressions.
+      var initObject = {};
+      initObject[ContentType.TEXT] = 'text/foo';
+      mediaSourceEngine.init(initObject);
       expect(mockMediaSource.addSourceBuffer).not.toHaveBeenCalled();
       expect(shaka.media.TextEngine).toHaveBeenCalled();
     });
@@ -92,7 +103,12 @@ describe('MediaSourceEngine', function() {
 
   describe('bufferStart and bufferEnd', function() {
     beforeEach(function() {
-      mediaSourceEngine.init({'audio': 'audio/foo', 'text': 'text/foo'});
+      // Create empty object first and initialize the fields through
+      // [] to allow field names to be expressions.
+      var initObject = {};
+      initObject[ContentType.AUDIO] = 'audio/foo';
+      initObject[ContentType.TEXT] = 'text/foo';
+      mediaSourceEngine.init(initObject);
     });
 
     it('returns correct timestamps for one range', function() {
@@ -100,8 +116,10 @@ describe('MediaSourceEngine', function() {
       audioSourceBuffer.buffered.start.and.returnValue(0);
       audioSourceBuffer.buffered.end.and.returnValue(10);
 
-      expect(mediaSourceEngine.bufferStart('audio', 0)).toBeCloseTo(0);
-      expect(mediaSourceEngine.bufferEnd('audio', 0)).toBeCloseTo(10);
+      expect(mediaSourceEngine.bufferStart(ContentType.AUDIO, 0))
+                                          .toBeCloseTo(0);
+      expect(mediaSourceEngine.bufferEnd(ContentType.AUDIO, 0))
+                                        .toBeCloseTo(10);
     });
 
     it('returns correct timestamps for multiple ranges', function() {
@@ -119,15 +137,17 @@ describe('MediaSourceEngine', function() {
         throw new Error('Unexpected index');
       });
 
-      expect(mediaSourceEngine.bufferStart('audio', 0)).toBeCloseTo(5);
-      expect(mediaSourceEngine.bufferEnd('audio', 0)).toBeCloseTo(30);
+      expect(mediaSourceEngine.bufferStart(ContentType.AUDIO, 0))
+                                          .toBeCloseTo(5);
+      expect(mediaSourceEngine.bufferEnd(ContentType.AUDIO, 0))
+                                        .toBeCloseTo(30);
     });
 
     it('returns null if there are no ranges', function() {
       audioSourceBuffer.buffered.length = 0;
 
-      expect(mediaSourceEngine.bufferStart('audio', 0)).toBeNull();
-      expect(mediaSourceEngine.bufferEnd('audio', 0)).toBeNull();
+      expect(mediaSourceEngine.bufferStart(ContentType.AUDIO, 0)).toBeNull();
+      expect(mediaSourceEngine.bufferEnd(ContentType.AUDIO, 0)).toBeNull();
     });
 
     it('will forward to TextEngine', function() {
@@ -135,18 +155,23 @@ describe('MediaSourceEngine', function() {
       mockTextEngine.bufferEnd.and.returnValue(20);
 
       expect(mockTextEngine.bufferStart).not.toHaveBeenCalled();
-      expect(mediaSourceEngine.bufferStart('text')).toBe(10);
+      expect(mediaSourceEngine.bufferStart(ContentType.TEXT)).toBe(10);
       expect(mockTextEngine.bufferStart).toHaveBeenCalled();
 
       expect(mockTextEngine.bufferEnd).not.toHaveBeenCalled();
-      expect(mediaSourceEngine.bufferEnd('text')).toBe(20);
+      expect(mediaSourceEngine.bufferEnd(ContentType.TEXT)).toBe(20);
       expect(mockTextEngine.bufferEnd).toHaveBeenCalled();
     });
   });
 
   describe('bufferedAheadOf', function() {
     beforeEach(function() {
-      mediaSourceEngine.init({'audio': 'audio/foo', 'text': 'text/foo'});
+      // Create empty object first and initialize the fields through
+      // [] to allow field names to be expressions.
+      var initObject = {};
+      initObject[ContentType.AUDIO] = 'audio/foo';
+      initObject[ContentType.TEXT] = 'text/foo';
+      mediaSourceEngine.init(initObject);
     });
 
     it('returns the amount of data ahead of the given position', function() {
@@ -154,9 +179,12 @@ describe('MediaSourceEngine', function() {
       audioSourceBuffer.buffered.start.and.returnValue(0);
       audioSourceBuffer.buffered.end.and.returnValue(10);
 
-      expect(mediaSourceEngine.bufferedAheadOf('audio', 0)).toBeCloseTo(10);
-      expect(mediaSourceEngine.bufferedAheadOf('audio', 5)).toBeCloseTo(5);
-      expect(mediaSourceEngine.bufferedAheadOf('audio', 9.9)).toBeCloseTo(0.1);
+      expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 0))
+                                              .toBeCloseTo(10);
+      expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 5))
+                                              .toBeCloseTo(5);
+      expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 9.9))
+                                              .toBeCloseTo(0.1);
     });
 
     it('returns zero when given an unbuffered time', function() {
@@ -164,9 +192,12 @@ describe('MediaSourceEngine', function() {
       audioSourceBuffer.buffered.start.and.returnValue(0);
       audioSourceBuffer.buffered.end.and.returnValue(10);
 
-      expect(mediaSourceEngine.bufferedAheadOf('audio', 10)).toBeCloseTo(0);
-      expect(mediaSourceEngine.bufferedAheadOf('audio', 100)).toBeCloseTo(0);
-      expect(mediaSourceEngine.bufferedAheadOf('audio', -0.001)).toBeCloseTo(0);
+      expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 10))
+                                              .toBeCloseTo(0);
+      expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 100))
+                                              .toBeCloseTo(0);
+      expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, -0.001))
+                                              .toBeCloseTo(0);
     });
 
     it('returns the correct amount with multiple ranges', function() {
@@ -179,15 +210,20 @@ describe('MediaSourceEngine', function() {
       });
 
       // in range 0
-      expect(mediaSourceEngine.bufferedAheadOf('audio', 1)).toBeCloseTo(2);
-      expect(mediaSourceEngine.bufferedAheadOf('audio', 2.5)).toBeCloseTo(0.5);
+      expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 1))
+                                              .toBeCloseTo(2);
+      expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 2.5))
+                                              .toBeCloseTo(0.5);
 
       // between range 0 and 1
-      expect(mediaSourceEngine.bufferedAheadOf('audio', 5)).toBeCloseTo(0);
+      expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 5))
+                                              .toBeCloseTo(0);
 
       // in range 1
-      expect(mediaSourceEngine.bufferedAheadOf('audio', 6)).toBeCloseTo(4);
-      expect(mediaSourceEngine.bufferedAheadOf('audio', 9.9)).toBeCloseTo(0.1);
+      expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 6))
+                                              .toBeCloseTo(4);
+      expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 9.9))
+                                              .toBeCloseTo(0.1);
     });
 
     it('jumps small gaps in media', function() {
@@ -199,11 +235,13 @@ describe('MediaSourceEngine', function() {
         return [3, 6, 9, 11][i];
       });
 
-      expect(mediaSourceEngine.bufferedAheadOf('audio', 3.02))
+      expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 3.02))
                                               .toBeCloseTo(2.98);
-      expect(mediaSourceEngine.bufferedAheadOf('audio', 2)).toBeCloseTo(4);
-      expect(mediaSourceEngine.bufferedAheadOf('audio', 6)).toBeCloseTo(0);
-      expect(mediaSourceEngine.bufferedAheadOf('audio', 6.98))
+      expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 2))
+                                              .toBeCloseTo(4);
+      expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 6))
+                                              .toBeCloseTo(0);
+      expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 6.98))
                                               .toBeCloseTo(4.02);
     });
 
@@ -211,7 +249,7 @@ describe('MediaSourceEngine', function() {
       mockTextEngine.bufferedAheadOf.and.returnValue(10);
 
       expect(mockTextEngine.bufferedAheadOf).not.toHaveBeenCalled();
-      expect(mediaSourceEngine.bufferedAheadOf('text', 5)).toBe(10);
+      expect(mediaSourceEngine.bufferedAheadOf(ContentType.TEXT, 5)).toBe(10);
       expect(mockTextEngine.bufferedAheadOf).toHaveBeenCalledWith(5);
 
       // This should get called with 25, return null, then MediaSourceEngine
@@ -223,7 +261,8 @@ describe('MediaSourceEngine', function() {
         else
           return 15;
       });
-      expect(mediaSourceEngine.bufferedAheadOf('text', 25, 5)).toBe(20);
+      expect(
+          mediaSourceEngine.bufferedAheadOf(ContentType.TEXT, 25, 5)).toBe(20);
       expect(mockTextEngine.bufferedAheadOf).toHaveBeenCalled();
     });
   });
@@ -232,32 +271,41 @@ describe('MediaSourceEngine', function() {
     beforeEach(function() {
       captureEvents(audioSourceBuffer, ['updateend', 'error']);
       captureEvents(videoSourceBuffer, ['updateend', 'error']);
-      mediaSourceEngine.init(
-          {'audio': 'audio/foo', 'video': 'video/foo', 'text': 'text/foo'});
+      // Create empty object first and initialize the fields through
+      // [] to allow field names to be expressions.
+      var initObject = {};
+      initObject[ContentType.AUDIO] = 'audio/foo';
+      initObject[ContentType.VIDEO] = 'video/foo';
+      initObject[ContentType.TEXT] = 'text/foo';
+      mediaSourceEngine.init(initObject);
     });
 
     it('appends the given data', function(done) {
-      mediaSourceEngine.appendBuffer('audio', 1, null, null).then(function() {
-        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
-        done();
-      });
+      mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null)
+          .then(function() {
+            expect(audioSourceBuffer.appendBuffer)
+                  .toHaveBeenCalledWith(1);
+            done();
+          });
       audioSourceBuffer.updateend();
     });
 
     it('rejects promise when operation throws', function(done) {
       audioSourceBuffer.appendBuffer.and.throwError('fail!');
       mockVideo.error = { code: 5 };
-      mediaSourceEngine.appendBuffer('audio', 1, null, null).then(function() {
-        fail('not reached');
-        done();
-      }, function(error) {
-        expect(error.code).toBe(
-            shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_THREW);
-        expect(error.data).toEqual(
-            [jasmine.objectContaining({message: 'fail!'})]);
-        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
-        done();
-      });
+      mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null)
+      .then(function() {
+            fail('not reached');
+            done();
+          }, function(error) {
+            expect(error.code).toBe(
+                shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_THREW);
+            expect(error.data).toEqual(
+                [jasmine.objectContaining({message: 'fail!'})]);
+            expect(audioSourceBuffer.appendBuffer)
+                  .toHaveBeenCalledWith(1);
+            done();
+          });
     });
 
     it('rejects promise when op. throws QuotaExceededError', function(done) {
@@ -266,36 +314,38 @@ describe('MediaSourceEngine', function() {
         throw fakeDOMException;
       });
       mockVideo.error = { code: 5 };
-      mediaSourceEngine.appendBuffer('audio', 1, null, null).then(function() {
-        fail('not reached');
-        done();
-      }, function(error) {
-        expect(error.code).toBe(shaka.util.Error.Code.QUOTA_EXCEEDED_ERROR);
-        expect(error.data).toEqual(['audio']);
-        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
-        done();
-      });
+      mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null)
+      .then(function() {
+            fail('not reached');
+            done();
+          }, function(error) {
+            expect(error.code).toBe(shaka.util.Error.Code.QUOTA_EXCEEDED_ERROR);
+            expect(error.data).toEqual([ContentType.AUDIO]);
+            expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
+            done();
+          });
     });
 
     it('rejects the promise if this operation fails async', function(done) {
       mockVideo.error = { code: 5 };
-      mediaSourceEngine.appendBuffer('audio', 1, null, null).then(function() {
-        fail('not reached');
-        done();
-      }, function(error) {
-        expect(error.code).toBe(
-            shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_FAILED);
-        expect(error.data).toEqual([5]);
-        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
-        done();
-      });
+      mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null)
+      .then(function() {
+            fail('not reached');
+            done();
+          }, function(error) {
+            expect(error.code).toBe(
+                shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_FAILED);
+            expect(error.data).toEqual([5]);
+            expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
+            done();
+          });
       audioSourceBuffer.error();
       audioSourceBuffer.updateend();
     });
 
     it('queues operations on a single SourceBuffer', function(done) {
-      var p1 = mediaSourceEngine.appendBuffer('audio', 1, null, null);
-      var p2 = mediaSourceEngine.appendBuffer('audio', 2, null, null);
+      var p1 = mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
+      var p2 = mediaSourceEngine.appendBuffer(ContentType.AUDIO, 2, null, null);
       Util.capturePromiseStatus(p1);
       Util.capturePromiseStatus(p2);
 
@@ -317,9 +367,9 @@ describe('MediaSourceEngine', function() {
     });
 
     it('queues operations independently for different types', function(done) {
-      var p1 = mediaSourceEngine.appendBuffer('audio', 1, null, null);
-      var p2 = mediaSourceEngine.appendBuffer('audio', 2, null, null);
-      var p3 = mediaSourceEngine.appendBuffer('video', 3, null, null);
+      var p1 = mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
+      var p2 = mediaSourceEngine.appendBuffer(ContentType.AUDIO, 2, null, null);
+      var p3 = mediaSourceEngine.appendBuffer(ContentType.VIDEO, 3, null, null);
       Util.capturePromiseStatus(p1);
       Util.capturePromiseStatus(p2);
       Util.capturePromiseStatus(p3);
@@ -360,9 +410,9 @@ describe('MediaSourceEngine', function() {
         }
       });
 
-      var p1 = mediaSourceEngine.appendBuffer('audio', 1, null, null);
-      var p2 = mediaSourceEngine.appendBuffer('audio', 2, null, null);
-      var p3 = mediaSourceEngine.appendBuffer('audio', 3, null, null);
+      var p1 = mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
+      var p2 = mediaSourceEngine.appendBuffer(ContentType.AUDIO, 2, null, null);
+      var p3 = mediaSourceEngine.appendBuffer(ContentType.AUDIO, 3, null, null);
       Util.capturePromiseStatus(p1);
       Util.capturePromiseStatus(p2);
       Util.capturePromiseStatus(p3);
@@ -381,9 +431,11 @@ describe('MediaSourceEngine', function() {
     it('forwards to TextEngine', function(done) {
       var data = new ArrayBuffer(0);
       expect(mockTextEngine.appendBuffer).not.toHaveBeenCalled();
-      mediaSourceEngine.appendBuffer('text', data, 0, 10).then(function() {
-        expect(mockTextEngine.appendBuffer).toHaveBeenCalledWith(data, 0, 10);
-      }).catch(fail).then(done);
+      mediaSourceEngine.appendBuffer(ContentType.TEXT, data, 0, 10)
+      .then(function() {
+            expect(mockTextEngine.appendBuffer)
+                  .toHaveBeenCalledWith(data, 0, 10);
+          }).catch(fail).then(done);
     });
   });
 
@@ -391,12 +443,17 @@ describe('MediaSourceEngine', function() {
     beforeEach(function() {
       captureEvents(audioSourceBuffer, ['updateend', 'error']);
       captureEvents(videoSourceBuffer, ['updateend', 'error']);
-      mediaSourceEngine.init(
-          {'audio': 'audio/foo', 'video': 'video/foo', 'text': 'text/foo'});
+      // Create empty object first and initialize the fields through
+      // [] to allow field names to be expressions.
+      var initObject = {};
+      initObject[ContentType.AUDIO] = 'audio/foo';
+      initObject[ContentType.VIDEO] = 'video/foo';
+      initObject[ContentType.TEXT] = 'text/foo';
+      mediaSourceEngine.init(initObject);
     });
 
     it('removes the given data', function(done) {
-      mediaSourceEngine.remove('audio', 1, 5).then(function() {
+      mediaSourceEngine.remove(ContentType.AUDIO, 1, 5).then(function() {
         expect(audioSourceBuffer.remove).toHaveBeenCalledWith(1, 5);
         done();
       });
@@ -406,7 +463,7 @@ describe('MediaSourceEngine', function() {
     it('rejects promise when operation throws', function(done) {
       audioSourceBuffer.remove.and.throwError('fail!');
       mockVideo.error = { code: 5 };
-      mediaSourceEngine.remove('audio', 1, 5).then(function() {
+      mediaSourceEngine.remove(ContentType.AUDIO, 1, 5).then(function() {
         fail('not reached');
         done();
       }, function(error) {
@@ -421,7 +478,7 @@ describe('MediaSourceEngine', function() {
 
     it('rejects the promise if this operation fails async', function(done) {
       mockVideo.error = { code: 5 };
-      mediaSourceEngine.remove('audio', 1, 5).then(function() {
+      mediaSourceEngine.remove(ContentType.AUDIO, 1, 5).then(function() {
         fail('not reached');
         done();
       }, function(error) {
@@ -436,8 +493,8 @@ describe('MediaSourceEngine', function() {
     });
 
     it('queues operations on a single SourceBuffer', function(done) {
-      var p1 = mediaSourceEngine.remove('audio', 1, 5);
-      var p2 = mediaSourceEngine.remove('audio', 6, 10);
+      var p1 = mediaSourceEngine.remove(ContentType.AUDIO, 1, 5);
+      var p2 = mediaSourceEngine.remove(ContentType.AUDIO, 6, 10);
       Util.capturePromiseStatus(p1);
       Util.capturePromiseStatus(p2);
 
@@ -459,9 +516,9 @@ describe('MediaSourceEngine', function() {
     });
 
     it('queues operations independently for different types', function(done) {
-      var p1 = mediaSourceEngine.remove('audio', 1, 5);
-      var p2 = mediaSourceEngine.remove('audio', 6, 10);
-      var p3 = mediaSourceEngine.remove('video', 3, 8);
+      var p1 = mediaSourceEngine.remove(ContentType.AUDIO, 1, 5);
+      var p2 = mediaSourceEngine.remove(ContentType.AUDIO, 6, 10);
+      var p3 = mediaSourceEngine.remove(ContentType.VIDEO, 3, 8);
       Util.capturePromiseStatus(p1);
       Util.capturePromiseStatus(p2);
       Util.capturePromiseStatus(p3);
@@ -500,9 +557,9 @@ describe('MediaSourceEngine', function() {
         }
       });
 
-      var p1 = mediaSourceEngine.remove('audio', 1, 2);
-      var p2 = mediaSourceEngine.remove('audio', 2, 3);
-      var p3 = mediaSourceEngine.remove('audio', 3, 4);
+      var p1 = mediaSourceEngine.remove(ContentType.AUDIO, 1, 2);
+      var p2 = mediaSourceEngine.remove(ContentType.AUDIO, 2, 3);
+      var p3 = mediaSourceEngine.remove(ContentType.AUDIO, 3, 4);
       Util.capturePromiseStatus(p1);
       Util.capturePromiseStatus(p2);
       Util.capturePromiseStatus(p3);
@@ -520,7 +577,7 @@ describe('MediaSourceEngine', function() {
 
     it('will forward to TextEngine', function(done) {
       expect(mockTextEngine.remove).not.toHaveBeenCalled();
-      mediaSourceEngine.remove('text', 10, 20).then(function() {
+      mediaSourceEngine.remove(ContentType.TEXT, 10, 20).then(function() {
         expect(mockTextEngine.remove).toHaveBeenCalledWith(10, 20);
       }).catch(fail).then(done);
     });
@@ -530,13 +587,18 @@ describe('MediaSourceEngine', function() {
     beforeEach(function() {
       captureEvents(audioSourceBuffer, ['updateend', 'error']);
       captureEvents(videoSourceBuffer, ['updateend', 'error']);
-      mediaSourceEngine.init(
-          {'audio': 'audio/foo', 'video': 'video/foo', 'text': 'text/foo'});
+      // Create empty object first and initialize the fields through
+      // [] to allow field names to be expressions.
+      var initObject = {};
+      initObject[ContentType.AUDIO] = 'audio/foo';
+      initObject[ContentType.VIDEO] = 'video/foo';
+      initObject[ContentType.TEXT] = 'text/foo';
+      mediaSourceEngine.init(initObject);
     });
 
     it('clears the given data', function(done) {
       mockMediaSource.durationGetter_.and.returnValue(20);
-      mediaSourceEngine.clear('audio').then(function() {
+      mediaSourceEngine.clear(ContentType.AUDIO).then(function() {
         expect(audioSourceBuffer.remove.calls.count()).toBe(1);
         expect(audioSourceBuffer.remove.calls.argsFor(0)[0]).toBe(0);
         expect(audioSourceBuffer.remove.calls.argsFor(0)[1] >= 20).toBeTruthy();
@@ -572,7 +634,7 @@ describe('MediaSourceEngine', function() {
       mockVideo.currentTime = originalTime;
 
       mockMediaSource.durationGetter_.and.returnValue(20);
-      mediaSourceEngine.clear('audio').then(function() {
+      mediaSourceEngine.clear(ContentType.AUDIO).then(function() {
         expect(mockVideo.currentTime).toBe(originalTime);
         done();
       });
@@ -580,40 +642,12 @@ describe('MediaSourceEngine', function() {
     });
 
     it('will forward to TextEngine', function(done) {
-      expect(mockTextEngine.remove).not.toHaveBeenCalled();
-      mediaSourceEngine.clear('text').then(function() {
-        expect(mockTextEngine.remove).toHaveBeenCalledWith(0, Infinity);
-      }).catch(fail).then(done);
-    });
-  });
-
-  describe('setStreamProperties', function() {
-    beforeEach(function() {
-      mediaSourceEngine.init({'audio': 'audio/foo', 'text': 'text/foo'});
-    });
-
-    it('sets the correct fields', function(done) {
-      expect(audioSourceBuffer.timestampOffset).toBe(0);
-      expect(audioSourceBuffer.appendWindowEnd).toBe(Infinity);
-      mediaSourceEngine
-          .setStreamProperties(
-              'audio', /* timestampOffset */ 10, /* appendWindowEnd */ 20)
-          .then(function() {
-            expect(audioSourceBuffer.timestampOffset).toBe(10);
-            // MediaSourceEngine adds a fudge factor to deal with edge cases
-            // where the last desired frame in a period could be chopped off.
-            // Expect a tolerance of at most 0.1.
-            expect(audioSourceBuffer.appendWindowEnd).toBeCloseTo(20, 1);
-            done();
-          });
-    });
-
-    it('will forward to TextEngine', function(done) {
       expect(mockTextEngine.setTimestampOffset).not.toHaveBeenCalled();
       expect(mockTextEngine.setAppendWindowEnd).not.toHaveBeenCalled();
       mediaSourceEngine
-          .setStreamProperties(
-              'text', /* timestampOffset */ 10, /* appendWindowEnd */ 20)
+          .setStreamProperties(ContentType.TEXT,
+                               /* timestampOffset */ 10,
+                               /* appendWindowEnd */ 20)
           .then(function() {
             expect(mockTextEngine.setTimestampOffset).toHaveBeenCalledWith(10);
             expect(mockTextEngine.setAppendWindowEnd).toHaveBeenCalledWith(20);
@@ -627,7 +661,12 @@ describe('MediaSourceEngine', function() {
     beforeEach(function() {
       captureEvents(audioSourceBuffer, ['updateend', 'error']);
       captureEvents(videoSourceBuffer, ['updateend', 'error']);
-      mediaSourceEngine.init({'audio': 'audio/foo', 'video': 'video/foo'});
+      // Create empty object first and initialize the fields through
+      // [] to allow field names to be expressions.
+      var initObject = {};
+      initObject[ContentType.AUDIO] = 'audio/foo';
+      initObject[ContentType.VIDEO] = 'video/foo';
+      mediaSourceEngine.init(initObject);
     });
 
     it('ends the MediaSource stream with the given reason', function(done) {
@@ -638,8 +677,8 @@ describe('MediaSourceEngine', function() {
     });
 
     it('waits for all previous operations to complete', function(done) {
-      var p1 = mediaSourceEngine.appendBuffer('audio', 1, null, null);
-      var p2 = mediaSourceEngine.appendBuffer('video', 1, null, null);
+      var p1 = mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
+      var p2 = mediaSourceEngine.appendBuffer(ContentType.VIDEO, 1, null, null);
       var p3 = mediaSourceEngine.endOfStream();
       Util.capturePromiseStatus(p1);
       Util.capturePromiseStatus(p2);
@@ -666,9 +705,9 @@ describe('MediaSourceEngine', function() {
 
     it('makes subsequent operations wait', function(done) {
       var p1 = mediaSourceEngine.endOfStream();
-      mediaSourceEngine.appendBuffer('audio', 1, null, null);
-      mediaSourceEngine.appendBuffer('video', 1, null, null);
-      mediaSourceEngine.appendBuffer('video', 2, null, null);
+      mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
+      mediaSourceEngine.appendBuffer(ContentType.VIDEO, 1, null, null);
+      mediaSourceEngine.appendBuffer(ContentType.VIDEO, 2, null, null);
 
       // endOfStream hasn't been called yet because blocking multiple queues
       // takes an extra tick, even when they are empty.
@@ -697,7 +736,7 @@ describe('MediaSourceEngine', function() {
     it('runs subsequent operations if this operation throws', function(done) {
       mockMediaSource.endOfStream.and.throwError(new Error());
       var p1 = mediaSourceEngine.endOfStream();
-      mediaSourceEngine.appendBuffer('audio', 1, null, null);
+      mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
 
       expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalled();
 
@@ -721,7 +760,12 @@ describe('MediaSourceEngine', function() {
       mockMediaSource.durationGetter_.and.returnValue(0);
       captureEvents(audioSourceBuffer, ['updateend', 'error']);
       captureEvents(videoSourceBuffer, ['updateend', 'error']);
-      mediaSourceEngine.init({'audio': 'audio/foo', 'video': 'video/foo'});
+      // Create empty object first and initialize the fields through
+      // [] to allow field names to be expressions.
+      var initObject = {};
+      initObject[ContentType.AUDIO] = 'audio/foo';
+      initObject[ContentType.VIDEO] = 'video/foo';
+      mediaSourceEngine.init(initObject);
     });
 
     it('sets the given duration', function(done) {
@@ -732,8 +776,8 @@ describe('MediaSourceEngine', function() {
     });
 
     it('waits for all previous operations to complete', function(done) {
-      var p1 = mediaSourceEngine.appendBuffer('audio', 1, null, null);
-      var p2 = mediaSourceEngine.appendBuffer('video', 1, null, null);
+      var p1 = mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
+      var p2 = mediaSourceEngine.appendBuffer(ContentType.VIDEO, 1, null, null);
       var p3 = mediaSourceEngine.setDuration(100);
       Util.capturePromiseStatus(p1);
       Util.capturePromiseStatus(p2);
@@ -760,9 +804,9 @@ describe('MediaSourceEngine', function() {
 
     it('makes subsequent operations wait', function(done) {
       var p1 = mediaSourceEngine.setDuration(100);
-      mediaSourceEngine.appendBuffer('audio', 1, null, null);
-      mediaSourceEngine.appendBuffer('video', 1, null, null);
-      mediaSourceEngine.appendBuffer('video', 2, null, null);
+      mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
+      mediaSourceEngine.appendBuffer(ContentType.VIDEO, 1, null, null);
+      mediaSourceEngine.appendBuffer(ContentType.VIDEO, 2, null, null);
 
       // The setter hasn't been called yet because blocking multiple queues
       // takes an extra tick, even when they are empty.
@@ -791,7 +835,7 @@ describe('MediaSourceEngine', function() {
     it('runs subsequent operations if this operation throws', function(done) {
       mockMediaSource.durationSetter_.and.throwError(new Error());
       var p1 = mediaSourceEngine.setDuration(100);
-      mediaSourceEngine.appendBuffer('audio', 1, null, null);
+      mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
 
       expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalled();
 
@@ -814,12 +858,17 @@ describe('MediaSourceEngine', function() {
     beforeEach(function() {
       captureEvents(audioSourceBuffer, ['updateend', 'error']);
       captureEvents(videoSourceBuffer, ['updateend', 'error']);
-      mediaSourceEngine.init({'audio': 'audio/foo', 'video': 'video/foo'});
+      // Create empty object first and initialize the fields through
+      // [] to allow field names to be expressions.
+      var initObject = {};
+      initObject[ContentType.AUDIO] = 'audio/foo';
+      initObject[ContentType.VIDEO] = 'video/foo';
+      mediaSourceEngine.init(initObject);
     });
 
     it('waits for all operations to complete', function(done) {
-      mediaSourceEngine.appendBuffer('audio', 1, null, null);
-      mediaSourceEngine.appendBuffer('video', 1, null, null);
+      mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
+      mediaSourceEngine.appendBuffer(ContentType.VIDEO, 1, null, null);
 
       var p = mediaSourceEngine.destroy();
       Util.capturePromiseStatus(p);
@@ -840,7 +889,7 @@ describe('MediaSourceEngine', function() {
     });
 
     it('resolves even when a pending operation fails', function(done) {
-      var p1 = mediaSourceEngine.appendBuffer('audio', 1, null, null);
+      var p1 = mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
       var p2 = mediaSourceEngine.destroy();
       Util.capturePromiseStatus(p1);
       Util.capturePromiseStatus(p2);
@@ -872,8 +921,9 @@ describe('MediaSourceEngine', function() {
     });
 
     it('cancels operations that have not yet started', function(done) {
-      mediaSourceEngine.appendBuffer('audio', 1, null, null);
-      var rejected = mediaSourceEngine.appendBuffer('audio', 2, null, null);
+      mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
+      var rejected = mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, 2, null, null);
       Util.capturePromiseStatus(rejected);
 
       expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
@@ -898,7 +948,7 @@ describe('MediaSourceEngine', function() {
     });
 
     it('cancels blocking operations that have not yet started', function(done) {
-      var p1 = mediaSourceEngine.appendBuffer('audio', 1, null, null);
+      var p1 = mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
       var p2 = mediaSourceEngine.endOfStream();
       var p3 = mediaSourceEngine.destroy();
       Util.capturePromiseStatus(p1);
@@ -921,7 +971,8 @@ describe('MediaSourceEngine', function() {
 
     it('prevents new operations from being added', function(done) {
       var p = mediaSourceEngine.destroy();
-      var rejected = mediaSourceEngine.appendBuffer('audio', 1, null, null);
+      var rejected = mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, 1, null, null);
       Util.capturePromiseStatus(rejected);
 
       // The promise has already been rejected, but our capture requires 1 tick.
