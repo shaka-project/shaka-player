@@ -247,8 +247,8 @@ describe('Playhead', function() {
     // region).
     video.currentTime = 5.5;
     videoOnSeeking();
-    expect(video.currentTime).toBe(18);
-    expect(playhead.getTime()).toBe(18);
+    expect(video.currentTime).toBe(17);
+    expect(playhead.getTime()).toBe(17);
     expect(onSeek).not.toHaveBeenCalled();
     videoOnSeeking();
     expect(onSeek).toHaveBeenCalled();
@@ -277,8 +277,8 @@ describe('Playhead', function() {
     // Seek outside safe region & in unbuffered region.
     video.currentTime = 9;
     videoOnSeeking();
-    expect(video.currentTime).toBe(18);
-    expect(playhead.getTime()).toBe(18);
+    expect(video.currentTime).toBe(17);
+    expect(playhead.getTime()).toBe(17);
     expect(onSeek).not.toHaveBeenCalled();
     videoOnSeeking();
     expect(onSeek).toHaveBeenCalled();
@@ -299,8 +299,8 @@ describe('Playhead', function() {
     // Seek before start.
     video.currentTime = 1;
     videoOnSeeking();
-    expect(video.currentTime).toBe(18);
-    expect(playhead.getTime()).toBe(18);
+    expect(video.currentTime).toBe(17);
+    expect(playhead.getTime()).toBe(17);
     expect(onSeek).not.toHaveBeenCalled();
     videoOnSeeking();
     expect(onSeek).toHaveBeenCalled();
@@ -434,15 +434,12 @@ describe('Playhead', function() {
       timeline.getSegmentAvailabilityEnd.and.returnValue(70);
       timeline.getSegmentAvailabilityDuration.and.returnValue(30);
 
-      // left = start + 1 = 10 + 1 = 11
-      // safe = left + rebufferingGoal = 11 + 10 = 21
-
-      // The playhead should move to 23 (safe + 2) after resuming, which will
-      // cause a 'seeking' event.
+      // Because this is buffered, the playhead should move to (start + 1),
+      // which will cause a 'seeking' event.
       videoOnPlaying();
-      expect(video.currentTime).toBe(23);
+      expect(video.currentTime).toBe(11);
       videoOnSeeking();
-      expect(playhead.getTime()).toBe(23);
+      expect(playhead.getTime()).toBe(11);
       expect(onSeek).toHaveBeenCalled();
     });
 
@@ -1007,6 +1004,12 @@ describe('Playhead', function() {
   }
 
   function createMockPresentationTimeline() {
+    var getStart = jasmine.createSpy('getSegmentAvailabilityStart');
+    var getSafeStart = jasmine.createSpy('getSafeAvailabilityStart');
+    getSafeStart.and.callFake(function(delay) {
+      return getStart() + delay;
+    });
+
     return {
       getDuration: jasmine.createSpy('getDuration'),
       setDuration: jasmine.createSpy('setDuration'),
@@ -1014,8 +1017,8 @@ describe('Playhead', function() {
           jasmine.createSpy('getSegmentAvailabilityDuration'),
       isLive: jasmine.createSpy('isLive'),
       getEarliestStart: jasmine.createSpy('getEarliestStart'),
-      getSegmentAvailabilityStart:
-          jasmine.createSpy('getSegmentAvailabilityStart'),
+      getSegmentAvailabilityStart: getStart,
+      getSafeAvailabilityStart: getSafeStart,
       getSegmentAvailabilityEnd:
           jasmine.createSpy('getSegmentAvailabilityEnd')
     };
