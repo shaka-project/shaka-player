@@ -1,3 +1,36 @@
+## 2.0.6 (2017-02-24)
+
+New Features:
+  - Add Media Session info to demo
+    - https://github.com/google/shaka-player/pull/689
+  - Add support for xml:space in TTML parser
+    - https://github.com/google/shaka-player/issues/665
+  - Add fullscreenEnabled property to fullscreen polyfill
+    - https://github.com/google/shaka-player/issues/669
+  - Allow InbandEventStream elements at Representation level
+    - https://github.com/google/shaka-player/pull/687
+    - https://github.com/google/shaka-player/issues/686
+  - Warning for unsupported indexRange attribute
+  - Warning for duplicate Representation IDs
+
+Bugfixes:
+  - Fix cast support broken since 2.0.3
+    - https://github.com/google/shaka-player/issues/675
+  - Fix timeout errors in cast demo
+    - https://github.com/google/shaka-player/issues/684
+  - Fix infinite buffering caused by a race
+    - https://github.com/google/shaka-player/issues/600
+  - Fix race in StreamingEngine for multi-Period content
+    - https://github.com/google/shaka-player/issues/655
+  - Hide the controls when going fullscreen on phones
+    - https://github.com/google/shaka-player/issues/663
+  - Improve calculation of $TIME$ in SegmentTemplate
+    - https://github.com/google/shaka-player/issues/690
+    - https://github.com/google/shaka-player/pull/706
+  - Fix YouTube asset on demo app
+    - https://github.com/google/shaka-player/issues/682
+
+
 ## 2.0.5 (2017-01-30)
 
 Bugfixes:
