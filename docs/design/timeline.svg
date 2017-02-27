@@ -1,0 +1,152 @@
+<?xml version="1.0" standalone="yes"?>
+<svg version="1.1" viewBox="0.0 0.0 1000 500"
+    font-family="Arial" font-size="18" stroke="black" stroke-width="2"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+  <!-- Common -->
+  <g>
+    <symbol id="leftArrow">
+      <polygon points="14,2 0,7 14,12" />
+    </symbol>
+    <symbol id="rightArrow">
+      <polygon points="0,2 14,7 0,12" />
+    </symbol>
+
+    <line x1="30" y1="20" x2="30" y2="460" />
+    <text x="5" y="300" font-size="32" stroke="none">
+      0
+    </text>
+    <text x="500" y="300" font-size="42" text-anchor="middle" stroke="none">
+      Presentation Timeline
+    </text>
+    <text x="55" y="300" stroke="none">
+      * Not real fields/methods
+    </text>
+  </g>
+
+  <!-- Live Case (top) -->
+  <g>
+    <text x="500" y="230" font-size="32" text-anchor="middle" stroke="none">
+      Live Case
+    </text>
+    <line x1="30" y1="170" x2="900" y2="170" />
+    <use xlink:href="#rightArrow" x="893" y="163" />
+
+
+    <!-- Vertical bars and times below timeline -->
+    <text x="40" y="193" stroke="none">
+      Presentation
+    </text>
+    <text x="40" y="210" stroke="none">
+      Start Time
+    </text>
+
+    <line x1="250" y1="30" x2="250" y2="170" />
+    <text x="250" y="193" text-anchor="middle" stroke="none">
+      Availability Start /
+    </text>
+    <text x="250" y="210" text-anchor="middle" stroke="none">
+      Earliest Start
+    </text>
+
+    <line x1="385" y1="70" x2="385" y2="170" />
+    <text x="385" y="193" text-anchor="middle" stroke="none">
+      Safe Start
+    </text>
+
+    <line x1="595" y1="120" x2="595" y2="170" />
+    <text x="595" y="193" text-anchor="middle" stroke="none">
+      Seek Range End
+    </text>
+
+    <line x1="750" y1="30" x2="750" y2="170" />
+    <text x="750" y="193" text-anchor="middle" stroke="none">
+      Availability End /
+    </text>
+    <text x="750" y="210" text-anchor="middle" stroke="none">
+      Live Edge
+    </text>
+
+    <line x1="880" y1="120" x2="880" y2="170" />
+    <text x="860" y="193" stroke="none">
+      Now*
+    </text>
+
+
+    <!-- Time Ranges -->
+    <text x="300" y="28" stroke="none">
+      Segment Availability Duration / Availability Window
+    </text>
+    <line x1="260" y1="45" x2="735" y2="45" />
+    <use xlink:href="#leftArrow" x="251" y="38" />
+    <use xlink:href="#rightArrow" x="733" y="38" />
+
+    <text x="525" y="80" stroke="none">
+      Safe Window*
+    </text>
+    <line x1="395" y1="97" x2="735" y2="97" />
+    <use xlink:href="#leftArrow" x="387" y="90" />
+    <use xlink:href="#rightArrow" x="733" y="90" />
+
+    <text x="440" y="130" stroke="none">
+      Seek Range*
+    </text>
+    <line x1="260" y1="150" x2="590" y2="150" />
+    <use xlink:href="#leftArrow" x="251" y="143" />
+    <use xlink:href="#rightArrow" x="577" y="143" />
+
+    <text x="598" y="130" stroke="none">
+      Presentation delay
+    </text>
+    <line x1="605" y1="150" x2="745" y2="150" />
+    <use xlink:href="#leftArrow" x="596" y="143" />
+    <use xlink:href="#rightArrow" x="733" y="143" />
+
+    <text x="773" y="130" stroke="none">
+      Clock offset
+    </text>
+    <line x1="760" y1="150" x2="870" y2="150" />
+    <use xlink:href="#leftArrow" x="751" y="143" />
+    <use xlink:href="#rightArrow" x="864" y="143" />
+  </g>
+
+  <!-- On-Demand Case (bottom) -->
+  <g>
+    <text x="500" y="450" font-size="32" text-anchor="middle" stroke="none">
+      On-Demand Case
+    </text>
+    <line x1="30" y1="400" x2="870" y2="400" />
+
+
+    <text x="40" y="424" stroke="none">
+      Availability Start
+    </text>
+
+    <line x1="250" y1="350" x2="250" y2="400" />
+    <text x="250" y="424" text-anchor="middle" stroke="none">
+      Earliest Start /
+    </text>
+    <text x="250" y="442" text-anchor="middle" stroke="none">
+      Safe Start /
+    </text>
+    <text x="250" y="460" text-anchor="middle" stroke="none">
+      Max First Segment Start Time
+    </text>
+
+    <line x1="869" y1="350" x2="869" y2="400" />
+    <text x="870" y="424" text-anchor="middle" stroke="none">
+      Duration
+    </text>
+    <text x="870" y="442" text-anchor="middle" stroke="none">
+      Availability End
+    </text>
+
+
+    <text x="500" y="368" stroke="none">
+      Seek Range*
+    </text>
+    <line x1="260" y1="380" x2="854" y2="380" />
+    <use xlink:href="#leftArrow" x="251" y="374" />
+    <use xlink:href="#rightArrow" x="853" y="374" />
+  </g>
+</svg>
