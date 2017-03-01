@@ -79,8 +79,7 @@ describe('DrmEngine', function() {
     requestMediaKeySystemAccessSpy.and.callFake(
         fakeRequestMediaKeySystemAccess.bind(null, ['drm.abc']));
 
-    mockVideo = createMockVideo();
-    mockVideo.setMediaKeys.and.returnValue(Promise.resolve());
+    mockVideo = new shaka.test.FakeVideo();
 
     session1 = createMockSession();
     session2 = createMockSession();
@@ -1744,19 +1743,5 @@ describe('DrmEngine', function() {
       session.on[name] = callback;
     });
     return session;
-  }
-
-  function createMockVideo() {
-    var video = {
-      setMediaKeys: jasmine.createSpy('setMediaKeys'),
-      addEventListener: jasmine.createSpy('addEventListener'),
-      removeEventListener: jasmine.createSpy('removeEventListener'),
-      dispatchEvent: jasmine.createSpy('dispatchEvent'),
-      on: {}  // event listeners
-    };
-    video.addEventListener.and.callFake(function(name, callback) {
-      video.on[name] = callback;
-    });
-    return video;
   }
 });

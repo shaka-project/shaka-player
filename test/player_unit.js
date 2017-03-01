@@ -82,7 +82,7 @@ describe('Player', function() {
       };
     }
 
-    video = createMockVideo(20);
+    video = new shaka.test.FakeVideo(20);
     player = new shaka.Player(video, dependencyInjector);
 
     abrManager = new shaka.test.FakeAbrManager();
@@ -1365,8 +1365,7 @@ describe('Player', function() {
 
         video.ended = true;
         // Fire an 'ended' event on the mock video.
-        // Using quotes to access 'on' to avoid casting to our mock video type.
-        video['on']['ended']();
+        video.on['ended']();
 
         expect(player.getStats().stateHistory).toEqual([
           {

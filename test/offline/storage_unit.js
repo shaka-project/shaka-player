@@ -55,7 +55,7 @@ describe('Storage', function() {
     // Use a real Player since Storage only uses the configuration and
     // networking engine.  This allows us to use Player.configure in these
     // tests.
-    player = new shaka.Player(createMockVideo(), function(player) {
+    player = new shaka.Player(new shaka.test.FakeVideo(), function(player) {
       player.createNetworkingEngine = function() {
         return netEngine;
       };

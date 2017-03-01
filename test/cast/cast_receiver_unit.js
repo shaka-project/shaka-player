@@ -86,7 +86,7 @@ describe('CastReceiver', function() {
 
     mockReceiverManager = createMockReceiverManager();
     mockMessageBus = createMockMessageBus();
-    mockVideo = createMockVideo();
+    mockVideo = new shaka.test.FakeVideo();
     mockPlayer = createMockPlayer();
     mockAppDataCallback = jasmine.createSpy('appDataCallback');
   });
@@ -113,7 +113,7 @@ describe('CastReceiver', function() {
     it('listens for video and player events', function() {
       checkChromeOrChromecast();
       receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
-      expect(Object.keys(mockVideo.listeners).length).toBeGreaterThan(0);
+      expect(Object.keys(mockVideo.on).length).toBeGreaterThan(0);
       expect(Object.keys(mockPlayer.listeners).length).toBeGreaterThan(0);
     });
 
@@ -227,7 +227,7 @@ describe('CastReceiver', function() {
         listener.calls.reset();
 
         mockVideo.ended = true;
-        mockVideo.listeners['ended'](fakeEndedEvent);
+        mockVideo.on['ended'](fakeEndedEvent);
         return shaka.test.Util.delay(5.2);  // There is a long delay for 'ended'
       }).then(function() {
         expect(listener).toHaveBeenCalled();
@@ -235,7 +235,7 @@ describe('CastReceiver', function() {
         expect(receiver.isIdle()).toBe(true);
 
         mockVideo.ended = false;
-        mockVideo.listeners['playing'](fakePlayingEvent);
+        mockVideo.on['playing'](fakePlayingEvent);
       }).then(function() {
         expect(listener).toHaveBeenCalled();
         expect(receiver.isIdle()).toBe(false);
@@ -255,7 +255,7 @@ describe('CastReceiver', function() {
       // No messages yet.
       expect(mockMessageBus.messages).toEqual([]);
       var fakeEvent = {type: 'timeupdate'};
-      mockVideo.listeners['timeupdate'](fakeEvent);
+      mockVideo.on['timeupdate'](fakeEvent);
 
       // There are now "update" and "event" messages, in that order.
       expect(mockMessageBus.messages).toEqual([
@@ -296,8 +296,8 @@ describe('CastReceiver', function() {
 
     it('sets initial state', function(done) {
       checkChromeOrChromecast();
-      expect(mockVideo.loop).toBe(undefined);
-      expect(mockVideo.playbackRate).toBe(undefined);
+      expect(mockVideo.loop).toBe(false);
+      expect(mockVideo.playbackRate).toBe(1);
       expect(mockPlayer.configure).not.toHaveBeenCalled();
 
       fakeIncomingMessage({
@@ -312,8 +312,8 @@ describe('CastReceiver', function() {
       expect(mockAppDataCallback).toHaveBeenCalledWith(fakeAppData);
       // Nothing else yet:
       expect(mockPlayer.setTextTrackVisibility).not.toHaveBeenCalled();
-      expect(mockVideo.loop).toBe(undefined);
-      expect(mockVideo.playbackRate).toBe(undefined);
+      expect(mockVideo.loop).toBe(false);
+      expect(mockVideo.playbackRate).toBe(1);
 
       // The rest is done async:
       shaka.test.Util.delay(0.1).then(function() {
@@ -370,8 +370,7 @@ describe('CastReceiver', function() {
     it('plays the video after loading', function(done) {
       checkChromeOrChromecast();
       fakeInitState.manifest = 'foo://bar';
-      // Autoplay has not been touched on the video yet.
-      expect(mockVideo.autoplay).toBe(undefined);
+      mockVideo.autoplay = true;
 
       fakeIncomingMessage({
         type: 'init',
@@ -384,7 +383,7 @@ describe('CastReceiver', function() {
       shaka.test.Util.delay(0.1).then(function() {
         expect(mockVideo.play).toHaveBeenCalled();
         // Video autoplay restored:
-        expect(mockVideo.autoplay).toBe(undefined);
+        expect(mockVideo.autoplay).toBe(true);
       }).catch(fail).then(done);
     });
 
@@ -464,7 +463,7 @@ describe('CastReceiver', function() {
 
     it('sets local properties', function() {
       checkChromeOrChromecast();
-      expect(mockVideo.currentTime).toBe(undefined);
+      expect(mockVideo.currentTime).toBe(0);
       fakeIncomingMessage({
         type: 'set',
         targetName: 'video',
@@ -485,8 +484,8 @@ describe('CastReceiver', function() {
 
     it('routes volume properties to the receiver manager', function() {
       checkChromeOrChromecast();
-      expect(mockVideo.volume).toBe(undefined);
-      expect(mockVideo.muted).toBe(undefined);
+      expect(mockVideo.volume).toBe(1);
+      expect(mockVideo.muted).toBe(false);
       expect(mockReceiverManager.setSystemVolumeLevel).not.toHaveBeenCalled();
       expect(mockReceiverManager.setSystemVolumeMuted).not.toHaveBeenCalled();
 
@@ -503,8 +502,8 @@ describe('CastReceiver', function() {
         value: true
       });
 
-      expect(mockVideo.volume).toBe(undefined);
-      expect(mockVideo.muted).toBe(undefined);
+      expect(mockVideo.volume).toBe(1);
+      expect(mockVideo.muted).toBe(false);
       expect(mockReceiverManager.setSystemVolumeLevel).
           toHaveBeenCalledWith(0.5);
       expect(mockReceiverManager.setSystemVolumeMuted).
@@ -706,19 +705,6 @@ describe('CastReceiver', function() {
     };
     bus.getCastChannel.and.returnValue(channel);
     return bus;
-  }
-
-  function createMockVideo() {
-    var video = {
-      play: jasmine.createSpy('play'),
-      pause: jasmine.createSpy('pause'),
-      addEventListener: function(eventName, listener) {
-        video.listeners[eventName] = listener;
-      },
-      // For convenience:
-      listeners: {}
-    };
-    return video;
   }
 
   function createMockPlayer() {

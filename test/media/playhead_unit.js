@@ -21,21 +21,6 @@ describe('Playhead', function() {
   var manifest;
   var playhead;
 
-  // Callback to Playhead to simulate 'loadedmetadata' event from |video|.
-  var videoOnLoadedMetadata;
-
-  // Callback to Playhead to simulate 'seeking' event from |video|.
-  var videoOnSeeking;
-
-  // Callback to Playhead to simulate 'playing' event from |video|.
-  var videoOnPlaying;
-
-  // Callback to Playhead to simulate 'ratechange' event from |video|.
-  var videoOnRateChange;
-
-  // Callback to Playhead to simulate 'timeupdate' event from |video|.
-  var videoOnTimeUpdate;
-
   // Callback to us from Playhead when the buffering state changes.
   var onBuffering;
 
@@ -49,34 +34,13 @@ describe('Playhead', function() {
   var onChangePeriod;
 
   beforeEach(function() {
-    video = createMockVideo();
+    video = new shaka.test.FakeVideo();
     timeline = createMockPresentationTimeline();
-
-    videoOnLoadedMetadata = undefined;
-    videoOnSeeking = undefined;
-    videoOnPlaying = undefined;
-    videoOnRateChange = undefined;
 
     onBuffering = jasmine.createSpy('onBuffering');
     onSeek = jasmine.createSpy('onSeek');
     onEvent = jasmine.createSpy('onEvent');
     onChangePeriod = jasmine.createSpy('onChangePeriod');
-
-    video.addEventListener.and.callFake(function(eventName, f, bubbles) {
-      if (eventName == 'loadedmetadata') {
-        videoOnLoadedMetadata = f;
-      } else if (eventName == 'seeking') {
-        videoOnSeeking = f;
-      } else if (eventName == 'playing') {
-        videoOnPlaying = f;
-      } else if (eventName == 'ratechange') {
-        videoOnRateChange = f;
-      } else if (eventName == 'timeupdate') {
-        videoOnTimeUpdate = f;
-      } else {
-        throw new Error('Unexpected event:' + eventName);
-      }
-    });
 
     timeline.isLive.and.returnValue(false);
     timeline.getEarliestStart.and.returnValue(5);
@@ -109,17 +73,17 @@ describe('Playhead', function() {
           onBuffering, onSeek, onEvent, onChangePeriod);
 
       expect(video.addEventListener).toHaveBeenCalledWith(
-          'loadedmetadata', videoOnLoadedMetadata, false);
+          'loadedmetadata', jasmine.any(Function), false);
       expect(video.addEventListener.calls.count()).toBe(3);
 
       expect(playhead.getTime()).toBe(5);
       expect(video.currentTime).toBe(0);
 
       video.readyState = HTMLMediaElement.HAVE_METADATA;
-      videoOnLoadedMetadata();
+      video.on['loadedmetadata']();
 
       expect(video.addEventListener).toHaveBeenCalledWith(
-          'seeking', videoOnSeeking, false);
+          'seeking', jasmine.any(Function), false);
       expect(video.addEventListener.calls.count()).toBe(4);
 
       expect(playhead.getTime()).toBe(5);
@@ -165,7 +129,7 @@ describe('Playhead', function() {
 
     // Set to 2 to ensure Playhead restores the correct rate.
     video.playbackRate = 2;
-    videoOnRateChange();
+    video.on['ratechange']();
 
     playhead.setBuffering(false);
     expect(onBuffering).not.toHaveBeenCalled();
@@ -189,17 +153,7 @@ describe('Playhead', function() {
   it('clamps playhead after seeking for live', function() {
     video.readyState = HTMLMediaElement.HAVE_METADATA;
 
-    video.buffered = {
-      length: 1,
-      start: function(i) {
-        if (i == 0) return 25;
-        throw new Error('Unexpected index');
-      },
-      end: function(i) {
-        if (i == 0) return 55;
-        throw new Error('Unexpected index');
-      }
-    };
+    video.buffered = createFakeBuffered([{start: 25, end: 55}]);
 
     timeline.isLive.and.returnValue(true);
     timeline.getEarliestStart.and.returnValue(5);
@@ -214,11 +168,11 @@ describe('Playhead', function() {
         5 /* startTime */,
         onBuffering, onSeek, onEvent, onChangePeriod);
 
-    // Calling videoOnSeeking() is like dispatching a 'seeking' event. So, each
+    // Calling on['seeking']() is like dispatching a 'seeking' event. So, each
     // time we change the video's current time or Playhead changes the video's
-    // current time we must call videoOnSeeking(),
+    // current time we must call on['seeking'](),
 
-    videoOnSeeking();
+    video.on['seeking']();
     expect(video.currentTime).toBe(5);
     expect(playhead.getTime()).toBe(5);
 
@@ -227,7 +181,7 @@ describe('Playhead', function() {
 
     // Seek in safe region & in buffered region.
     video.currentTime = 26;
-    videoOnSeeking();
+    video.on['seeking']();
     expect(video.currentTime).toBe(26);
     expect(playhead.getTime()).toBe(26);
     expect(onSeek).toHaveBeenCalled();
@@ -236,7 +190,7 @@ describe('Playhead', function() {
 
     // Seek in safe region & in unbuffered region.
     video.currentTime = 24;
-    videoOnSeeking();
+    video.on['seeking']();
     expect(video.currentTime).toBe(24);
     expect(playhead.getTime()).toBe(24);
     expect(onSeek).toHaveBeenCalled();
@@ -246,28 +200,18 @@ describe('Playhead', function() {
     // Seek before left (treated like seek before start even though in buffered
     // region).
     video.currentTime = 5.5;
-    videoOnSeeking();
+    video.on['seeking']();
     expect(video.currentTime).toBe(17);
     expect(playhead.getTime()).toBe(17);
     expect(onSeek).not.toHaveBeenCalled();
-    videoOnSeeking();
+    video.on['seeking']();
     expect(onSeek).toHaveBeenCalled();
 
-    video.buffered = {
-      length: 1,
-      start: function(i) {
-        if (i == 0) return 10;
-        throw new Error('Unexpected index');
-      },
-      end: function(i) {
-        if (i == 0) return 40;
-        throw new Error('Unexpected index');
-      }
-    };
+    video.buffered = createFakeBuffered([{start: 10, end: 40}]);
 
     // Seek outside safe region & in buffered region.
     video.currentTime = 15;
-    videoOnSeeking();
+    video.on['seeking']();
     expect(video.currentTime).toBe(15);
     expect(playhead.getTime()).toBe(15);
     expect(onSeek).toHaveBeenCalled();
@@ -276,33 +220,33 @@ describe('Playhead', function() {
 
     // Seek outside safe region & in unbuffered region.
     video.currentTime = 9;
-    videoOnSeeking();
+    video.on['seeking']();
     expect(video.currentTime).toBe(17);
     expect(playhead.getTime()).toBe(17);
     expect(onSeek).not.toHaveBeenCalled();
-    videoOnSeeking();
+    video.on['seeking']();
     expect(onSeek).toHaveBeenCalled();
 
     onSeek.calls.reset();
 
     // Seek past end.
     video.currentTime = 120;
-    videoOnSeeking();
+    video.on['seeking']();
     expect(video.currentTime).toBe(60);
     expect(playhead.getTime()).toBe(60);
     expect(onSeek).not.toHaveBeenCalled();
-    videoOnSeeking();
+    video.on['seeking']();
     expect(onSeek).toHaveBeenCalled();
 
     onSeek.calls.reset();
 
     // Seek before start.
     video.currentTime = 1;
-    videoOnSeeking();
+    video.on['seeking']();
     expect(video.currentTime).toBe(17);
     expect(playhead.getTime()).toBe(17);
     expect(onSeek).not.toHaveBeenCalled();
-    videoOnSeeking();
+    video.on['seeking']();
     expect(onSeek).toHaveBeenCalled();
 
     onSeek.calls.reset();
@@ -312,18 +256,18 @@ describe('Playhead', function() {
 
     // Seek before start
     video.currentTime = 4;
-    videoOnSeeking();
+    video.on['seeking']();
     expect(video.currentTime).toBe(12);
     expect(playhead.getTime()).toBe(12);
     expect(onSeek).not.toHaveBeenCalled();
-    videoOnSeeking();
+    video.on['seeking']();
     expect(onSeek).toHaveBeenCalled();
 
     onSeek.calls.reset();
 
     // Seek in window.
     video.currentTime = 8;
-    videoOnSeeking();
+    video.on['seeking']();
     expect(video.currentTime).toBe(8);
     expect(playhead.getTime()).toBe(8);
     expect(onSeek).toHaveBeenCalled();
@@ -332,28 +276,18 @@ describe('Playhead', function() {
 
     // Seek past end.
     video.currentTime = 13;
-    videoOnSeeking();
+    video.on['seeking']();
     expect(video.currentTime).toBe(12);
     expect(playhead.getTime()).toBe(12);
     expect(onSeek).not.toHaveBeenCalled();
-    videoOnSeeking();
+    video.on['seeking']();
     expect(onSeek).toHaveBeenCalled();
   });
 
   it('clamps playhead after seeking for VOD', function() {
     video.readyState = HTMLMediaElement.HAVE_METADATA;
 
-    video.buffered = {
-      length: 1,
-      start: function(i) {
-        if (i == 0) return 25;
-        throw new Error('Unexpected index');
-      },
-      end: function(i) {
-        if (i == 0) return 55;
-        throw new Error('Unexpected index');
-      }
-    };
+    video.buffered = createFakeBuffered([{start: 25, end: 55}]);
 
     timeline.isLive.and.returnValue(false);
     timeline.getEarliestStart.and.returnValue(5);
@@ -368,28 +302,28 @@ describe('Playhead', function() {
         5 /* startTime */,
         onBuffering, onSeek, onEvent, onChangePeriod);
 
-    videoOnSeeking();
+    video.on['seeking']();
     expect(video.currentTime).toBe(5);
     expect(playhead.getTime()).toBe(5);
 
     // Seek past end.
     video.currentTime = 120;
-    videoOnSeeking();
+    video.on['seeking']();
     expect(video.currentTime).toBe(60);
     expect(playhead.getTime()).toBe(60);
     expect(onSeek).not.toHaveBeenCalled();
-    videoOnSeeking();
+    video.on['seeking']();
     expect(onSeek).toHaveBeenCalled();
 
     onSeek.calls.reset();
 
     // Seek before start.
     video.currentTime = 1;
-    videoOnSeeking();
+    video.on['seeking']();
     expect(video.currentTime).toBe(5);
     expect(playhead.getTime()).toBe(5);
     expect(onSeek).not.toHaveBeenCalled();
-    videoOnSeeking();
+    video.on['seeking']();
     expect(onSeek).toHaveBeenCalled();
   });
 
@@ -397,17 +331,7 @@ describe('Playhead', function() {
     beforeEach(function() {
       video.readyState = HTMLMediaElement.HAVE_METADATA;
 
-      video.buffered = {
-        length: 1,
-        start: function(i) {
-          if (i == 0) return 5;
-          throw new Error('Unexpected index');
-        },
-        end: function(i) {
-          if (i == 0) return 35;
-          throw new Error('Unexpected index');
-        }
-      };
+      video.buffered = createFakeBuffered([{start: 5, end: 35}]);
     });
 
     it('(live case)', function() {
@@ -424,7 +348,7 @@ describe('Playhead', function() {
           5 /* startTime */,
           onBuffering, onSeek, onEvent, onChangePeriod);
 
-      videoOnSeeking();
+      video.on['seeking']();
       expect(video.currentTime).toBe(5);
       expect(playhead.getTime()).toBe(5);
 
@@ -436,9 +360,9 @@ describe('Playhead', function() {
 
       // Because this is buffered, the playhead should move to (start + 1),
       // which will cause a 'seeking' event.
-      videoOnPlaying();
+      video.on['playing']();
       expect(video.currentTime).toBe(11);
-      videoOnSeeking();
+      video.on['seeking']();
       expect(playhead.getTime()).toBe(11);
       expect(onSeek).toHaveBeenCalled();
     });
@@ -457,7 +381,7 @@ describe('Playhead', function() {
           5 /* startTime */,
           onBuffering, onSeek, onEvent, onChangePeriod);
 
-      videoOnSeeking();
+      video.on['seeking']();
       expect(video.currentTime).toBe(5);
       expect(playhead.getTime()).toBe(5);
 
@@ -467,9 +391,9 @@ describe('Playhead', function() {
       timeline.getSegmentAvailabilityEnd.and.returnValue(70);
       timeline.getSegmentAvailabilityDuration.and.returnValue(30);
 
-      videoOnPlaying();
+      video.on['playing']();
       expect(video.currentTime).toBe(10);
-      videoOnSeeking();
+      video.on['seeking']();
       expect(playhead.getTime()).toBe(10);
       expect(onSeek).toHaveBeenCalled();
     });
@@ -479,17 +403,7 @@ describe('Playhead', function() {
     it('enters buffering state when out of buffered content', function(done) {
       video.readyState = HTMLMediaElement.HAVE_METADATA;
 
-      video.buffered = {
-        length: 1,
-        start: function(i) {
-          if (i == 0) return 5;
-          throw new Error('Unexpected index');
-        },
-        end: function(i) {
-          if (i == 0) return 10;
-          throw new Error('Unexpected index');
-        }
-      };
+      video.buffered = createFakeBuffered([{start: 5, end: 10}]);
 
       video.duration = 20;
 
@@ -500,7 +414,7 @@ describe('Playhead', function() {
           5 /* startTime */,
           onBuffering, onSeek, onEvent, onChangePeriod);
 
-      videoOnSeeking();
+      video.on['seeking']();
       expect(video.currentTime).toBe(5);
       expect(playhead.getTime()).toBe(5);
 
@@ -516,17 +430,7 @@ describe('Playhead', function() {
         function(done) {
           video.readyState = HTMLMediaElement.HAVE_METADATA;
 
-          video.buffered = {
-            length: 1,
-            start: function(i) {
-              if (i == 0) return 5;
-              throw new Error('Unexpected index');
-            },
-            end: function(i) {
-              if (i == 0) return 10;
-              throw new Error('Unexpected index');
-            }
-          };
+          video.buffered = createFakeBuffered([{start: 5, end: 10}]);
 
           video.duration = 20;
 
@@ -537,7 +441,7 @@ describe('Playhead', function() {
               5 /* startTime */,
               onBuffering, onSeek, onEvent, onChangePeriod);
 
-          videoOnSeeking();
+          video.on['seeking']();
           expect(video.currentTime).toBe(5);
           expect(playhead.getTime()).toBe(5);
 
@@ -551,17 +455,7 @@ describe('Playhead', function() {
     it('leaves buffering state if content got buffered', function(done) {
       video.readyState = HTMLMediaElement.HAVE_METADATA;
 
-      video.buffered = {
-        length: 1,
-        start: function(i) {
-          if (i == 0) return 5;
-          throw new Error('Unexpected index');
-        },
-        end: function(i) {
-          if (i == 0) return 10;
-          throw new Error('Unexpected index');
-        }
-      };
+      video.buffered = createFakeBuffered([{start: 5, end: 10}]);
 
       video.duration = 20;
 
@@ -572,7 +466,7 @@ describe('Playhead', function() {
           5 /* startTime */,
           onBuffering, onSeek, onEvent, onChangePeriod);
 
-      videoOnSeeking();
+      video.on['seeking']();
       expect(video.currentTime).toBe(5);
       expect(playhead.getTime()).toBe(5);
 
@@ -581,17 +475,7 @@ describe('Playhead', function() {
       onBuffering.and.callFake(function(buffering) {
         expect(buffering).toEqual(true);
 
-        video.buffered = {
-          length: 1,
-          start: function(i) {
-            if (i == 0) return 10;
-            throw new Error('Unexpected index');
-          },
-          end: function(i) {
-            if (i == 0) return 25;
-            throw new Error('Unexpected index');
-          }
-        };
+        video.buffered = createFakeBuffered([{start: 10, end: 25}]);
 
         onBuffering.and.callFake(function(buffering) {
           expect(buffering).toEqual(false);
@@ -604,9 +488,7 @@ describe('Playhead', function() {
       video.readyState = HTMLMediaElement.HAVE_METADATA;
 
       // Nothing buffered.
-      video.buffered = {
-        length: 0
-      };
+      video.buffered = createFakeBuffered([]);
 
       video.duration = 60;
       timeline.getDuration.and.returnValue(60);
@@ -620,24 +502,14 @@ describe('Playhead', function() {
           0 /* startTime */,
           onBuffering, onSeek, onEvent, onChangePeriod);
 
-      videoOnSeeking();
+      video.on['seeking']();
       expect(video.currentTime).toBe(0);
       expect(playhead.getTime()).toBe(0);
 
       onBuffering.and.callFake(function(buffering) {
         expect(buffering).toEqual(true);
 
-        video.buffered = {
-          length: 1,
-          start: function(i) {
-            if (i == 0) return 0.2;
-            throw new Error('Unexpected index');
-          },
-          end: function(i) {
-            if (i == 0) return 5;
-            throw new Error('Unexpected index');
-          }
-        };
+        video.buffered = createFakeBuffered([{start: 0.2, end: 5}]);
 
         onBuffering.and.callFake(function(buffering) {
           expect(buffering).toEqual(false);
@@ -650,9 +522,7 @@ describe('Playhead', function() {
       video.readyState = HTMLMediaElement.HAVE_METADATA;
 
       // Nothing buffered.
-      video.buffered = {
-        length: 0
-      };
+      video.buffered = createFakeBuffered([]);
 
       video.duration = 20;
       timeline.getDuration.and.returnValue(20);
@@ -673,17 +543,7 @@ describe('Playhead', function() {
         expect(buffering).toEqual(true);
 
         // Exactly 10s (rebufferingGoal) is buffered now.
-        video.buffered = {
-          length: 1,
-          start: function(i) {
-            if (i == 0) return 0;
-            throw new Error('Unexpected index');
-          },
-          end: function(i) {
-            if (i == 0) return 10;
-            throw new Error('Unexpected index');
-          }
-        };
+        video.buffered = createFakeBuffered([{start: 0, end: 10}]);
 
         onBuffering.and.callFake(function(buffering) {
           expect(buffering).toEqual(false);
@@ -723,21 +583,21 @@ describe('Playhead', function() {
       onEvent.calls.reset();
 
       video.currentTime = 0;
-      videoOnTimeUpdate();
+      video.on['timeupdate']();
       expect(onEvent).not.toHaveBeenCalled();
 
       video.currentTime = 12;
-      videoOnTimeUpdate();
+      video.on['timeupdate']();
       expect(onEvent).toHaveBeenCalledTimes(1);
       expectTimelineEvent('timelineregionenter', regionInfo);
       onEvent.calls.reset();
 
       video.currentTime = 17;
-      videoOnTimeUpdate();
+      video.on['timeupdate']();
       expect(onEvent).not.toHaveBeenCalled();
 
       video.currentTime = 22;
-      videoOnTimeUpdate();
+      video.on['timeupdate']();
       expect(onEvent).toHaveBeenCalledTimes(1);
       expectTimelineEvent('timelineregionexit', regionInfo);
     });
@@ -748,11 +608,11 @@ describe('Playhead', function() {
       onEvent.calls.reset();
 
       video.currentTime = 8;
-      videoOnTimeUpdate();
+      video.on['timeupdate']();
       expect(onEvent).not.toHaveBeenCalled();
 
       video.currentTime = 11;
-      videoOnTimeUpdate();
+      video.on['timeupdate']();
       expect(onEvent).toHaveBeenCalledTimes(2);
       expectTimelineEvent('timelineregionenter', regionInfo, 0);
       expectTimelineEvent('timelineregionexit', regionInfo, 1);
@@ -766,8 +626,8 @@ describe('Playhead', function() {
       expectTimelineEvent('timelineregionenter', regionInfo, 1);
       onEvent.calls.reset();
 
-      video.currentime = 15;
-      videoOnTimeUpdate();
+      video.currentTime = 15;
+      video.on['timeupdate']();
       expect(onEvent).not.toHaveBeenCalled();
     });
 
@@ -776,14 +636,14 @@ describe('Playhead', function() {
       onEvent.calls.reset();
 
       video.currentTime = 13;
-      videoOnSeeking();
+      video.on['seeking']();
 
       expect(onEvent).toHaveBeenCalledTimes(1);
       expectTimelineEvent('timelineregionenter', regionInfo);
       onEvent.calls.reset();
 
       video.currentTime = 16;
-      videoOnTimeUpdate();
+      video.on['timeupdate']();
       expect(onEvent).not.toHaveBeenCalled();
     });
 
@@ -794,14 +654,14 @@ describe('Playhead', function() {
       onEvent.calls.reset();
 
       video.currentTime = 0;
-      videoOnSeeking();
+      video.on['seeking']();
 
       expect(onEvent).toHaveBeenCalledTimes(1);
       expectTimelineEvent('timelineregionexit', regionInfo);
       onEvent.calls.reset();
 
       video.currentTime = 4;
-      videoOnTimeUpdate();
+      video.on['timeupdate']();
       expect(onEvent).not.toHaveBeenCalled();
     });
 
@@ -810,16 +670,16 @@ describe('Playhead', function() {
       onEvent.calls.reset();
 
       video.currentTime = 4;
-      videoOnTimeUpdate();
+      video.on['timeupdate']();
 
       video.currentTime = 7;
-      videoOnTimeUpdate();
+      video.on['timeupdate']();
 
       video.currentTime = 25;
-      videoOnSeeking();
+      video.on['seeking']();
 
       video.currentTime = 28;
-      videoOnTimeUpdate();
+      video.on['timeupdate']();
 
       expect(onEvent).not.toHaveBeenCalled();
     });
@@ -840,35 +700,35 @@ describe('Playhead', function() {
       onEvent.calls.reset();
 
       video.currentTime = 7;
-      videoOnTimeUpdate();
+      video.on['timeupdate']();
       expect(onEvent).not.toHaveBeenCalled();
 
       video.currentTime = 12;
-      videoOnTimeUpdate();
+      video.on['timeupdate']();
       expect(onEvent).toHaveBeenCalledTimes(1);
       expectTimelineEvent('timelineregionenter', regionInfo);
       onEvent.calls.reset();
 
       video.currentTime = 16;
-      videoOnTimeUpdate();
+      video.on['timeupdate']();
       expect(onEvent).toHaveBeenCalledTimes(1);
       expectTimelineEvent('timelineregionenter', regionInfo2);
       onEvent.calls.reset();
 
       video.currentTime = 22;
-      videoOnTimeUpdate();
+      video.on['timeupdate']();
       expect(onEvent).toHaveBeenCalledTimes(1);
       expectTimelineEvent('timelineregionexit', regionInfo);
       onEvent.calls.reset();
 
       video.currentTime = 26;
-      videoOnTimeUpdate();
+      video.on['timeupdate']();
       expect(onEvent).toHaveBeenCalledTimes(1);
       expectTimelineEvent('timelineregionexit', regionInfo2);
       onEvent.calls.reset();
 
       video.currentTime = 28;
-      videoOnTimeUpdate();
+      video.on['timeupdate']();
       expect(onEvent).not.toHaveBeenCalled();
     });
 
@@ -934,7 +794,7 @@ describe('Playhead', function() {
           5 /* startTime */,
           onBuffering, onSeek, onEvent, onChangePeriod);
 
-      videoOnTimeUpdate();
+      video.on['timeupdate']();
       expect(onChangePeriod).not.toHaveBeenCalled();
     });
 
@@ -960,7 +820,7 @@ describe('Playhead', function() {
 
     it('calls the callback when seeking forward', function(done) {
       video.currentTime = 12;
-      videoOnSeeking();
+      video.on['seeking']();
       shaka.test.Util.delay(0.5).then(function() {
         expect(onChangePeriod).toHaveBeenCalledTimes(1);
         expect(onChangePeriod).toHaveBeenCalledWith(0, 1);
@@ -973,7 +833,7 @@ describe('Playhead', function() {
         onChangePeriod.calls.reset();
 
         video.currentTime = 2;
-        videoOnSeeking();
+        video.on['seeking']();
         return shaka.test.Util.delay(0.5);
       }).then(function() {
         expect(onChangePeriod).toHaveBeenCalledTimes(1);
@@ -983,25 +843,13 @@ describe('Playhead', function() {
 
     it('calls the callback when seeking over a Period', function(done) {
       video.currentTime = 22;
-      videoOnSeeking();
+      video.on['seeking']();
       shaka.test.Util.delay(0.5).then(function() {
         expect(onChangePeriod).toHaveBeenCalledTimes(1);
         expect(onChangePeriod).toHaveBeenCalledWith(0, 2);
       }).catch(fail).then(done);
     });
   });
-
-  function createMockVideo() {
-    return {
-      currentTime: 0,
-      readyState: 0,
-      playbackRate: 1,
-      buffered: null,
-      addEventListener: jasmine.createSpy('addEventListener'),
-      removeEventListener: jasmine.createSpy('removeEventListener'),
-      dispatchEvent: jasmine.createSpy('dispatchEvent')
-    };
-  }
 
   function createMockPresentationTimeline() {
     var getStart = jasmine.createSpy('getSegmentAvailabilityStart');
