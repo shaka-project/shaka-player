@@ -708,14 +708,14 @@ describe('Player', function() {
             .addAudio(1).bandwidth(100)
             .addVideo(5).bandwidth(200).size(200, 400).frameRate(24)
           .addVariant(3)
-            .language('en')
             .bandwidth(200)
+            .language('en')
             .addAudio(2).bandwidth(100)
             .addVideo(4).bandwidth(100).size(100, 200)
             .frameRate(1000000 / 42000)
           .addVariant(4)
-            .language('en')
             .bandwidth(300)
+            .language('en')
             .addAudio(2).bandwidth(100)
             .addVideo(5).bandwidth(200).size(200, 400).frameRate(24)
           .addVariant(5)
@@ -746,7 +746,8 @@ describe('Player', function() {
           height: 200,
           frameRate: 1000000 / 42000,
           mimeType: 'video/mp4',
-          codecs: 'avc1.4d401f, mp4a.40.2'
+          codecs: 'avc1.4d401f, mp4a.40.2',
+          primary: false
         },
         {
           id: 2,
@@ -759,7 +760,8 @@ describe('Player', function() {
           height: 400,
           frameRate: 24,
           mimeType: 'video/mp4',
-          codecs: 'avc1.4d401f, mp4a.40.2'
+          codecs: 'avc1.4d401f, mp4a.40.2',
+          primary: false
         },
         {
           id: 3,
@@ -772,7 +774,8 @@ describe('Player', function() {
           height: 200,
           frameRate: 1000000 / 42000,
           mimeType: 'video/mp4',
-          codecs: 'avc1.4d401f, mp4a.40.2'
+          codecs: 'avc1.4d401f, mp4a.40.2',
+          primary: false
         },
         {
           id: 4,
@@ -785,7 +788,8 @@ describe('Player', function() {
           height: 400,
           frameRate: 24,
           mimeType: 'video/mp4',
-          codecs: 'avc1.4d401f, mp4a.40.2'
+          codecs: 'avc1.4d401f, mp4a.40.2',
+          primary: false
         },
         {
           id: 5,
@@ -798,7 +802,8 @@ describe('Player', function() {
           height: 400,
           frameRate: 24,
           mimeType: 'video/mp4',
-          codecs: 'avc1.4d401f, mp4a.40.2'
+          codecs: 'avc1.4d401f, mp4a.40.2',
+          primary: false
         }
       ];
 
@@ -810,7 +815,8 @@ describe('Player', function() {
           language: 'es',
           kind: 'caption',
           mimeType: 'text/vtt',
-          codecs: null
+          codecs: null,
+          primary: false
         },
         {
           id: 7,
@@ -819,7 +825,8 @@ describe('Player', function() {
           language: 'en',
           kind: 'caption',
           mimeType: 'application/ttml+xml',
-          codecs: null
+          codecs: null,
+          primary: false
         }
       ];
     });

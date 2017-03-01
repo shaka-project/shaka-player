@@ -91,6 +91,7 @@ describe('Storage', function() {
             frameRate: 24,
             mimeType: 'video/mp4',
             codecs: 'avc1.4d401f',
+            primary: false,
             segments: []
           },
           {
@@ -103,6 +104,7 @@ describe('Storage', function() {
             frameRate: undefined,
             mimeType: 'audio/mp4',
             codecs: 'vorbis',
+            primary: true,
             segments: []
           }
         ]
@@ -136,6 +138,7 @@ describe('Storage', function() {
         height: 1080,
         frameRate: 24,
         mimeType: 'video/mp4',
+        primary: true,
         codecs: 'avc1.4d401f, vorbis'
       }
     ];
@@ -214,7 +217,7 @@ describe('Storage', function() {
       stream2.getSegmentReference = stream2Index.get.bind(stream2Index);
     });
 
-    afterAll(function() {
+    afterEach(function() {
       shaka.log.warning = originalWarning;
     });
 
@@ -441,7 +444,7 @@ describe('Storage', function() {
             .catch(fail)
             .then(done);
       });
-    });
+    });  // describe('reports progress')
 
     describe('segments', function() {
       it('stores media segments', function(done) {
@@ -608,8 +611,167 @@ describe('Storage', function() {
             .catch(fail)
             .then(done);
       });
-    });
-  });
+    });  // describe('segments')
+
+    describe('default track selection callback', function() {
+      var allTextTracks;
+
+      beforeEach(function() {
+        manifest = new shaka.test.ManifestGenerator()
+            .setPresentationDuration(20)
+            .addPeriod(0)
+            // Spanish, primary
+            // To test language selection fallback to primary
+            .addVariant(10).language('es').bandwidth(160).primary()
+              .addVideo(100).size(100, 200)
+              .addAudio(101).language('es').primary()
+            // English variations
+            // To test language selection for exact matches
+            .addVariant(20).language('en').bandwidth(160)
+              .addVideo(200).size(100, 200)
+              .addAudio(201).language('en')
+            .addVariant(21).language('en-US').bandwidth(160)
+              .addVideo(200).size(100, 200)
+              .addAudio(202).language('en-US')
+            .addVariant(22).language('en-GB').bandwidth(160)
+              .addVideo(200).size(100, 200)
+              .addAudio(203).language('en-GB')
+            // French
+            // To test language selection without exact match
+            .addVariant(30).language('fr-CA').bandwidth(160)
+              .addVideo(300).size(100, 200)
+              .addAudio(301).language('fr-CA')
+            // Swahili, multiple video resolutions
+            // To test video resolution selection
+            .addVariant(40).language('sw').bandwidth(160)
+              .addAudio(400).language('sw')
+              .addVideo(401).size(100, 200)  // small SD video
+            .addVariant(41).language('sw').bandwidth(160)
+              .addAudio(400).language('sw')
+              .addVideo(402).size(1080, 720)  // HD video
+            .addVariant(42).language('sw').bandwidth(100)  // low
+              .addAudio(403).language('sw').kind('low')
+              .addVideo(404).size(720, 480)  // largest SD video
+            .addVariant(43).language('sw').bandwidth(200)  // mid
+              .addAudio(405).language('sw').kind('mid')
+              .addVideo(404).size(720, 480)  // largest SD video
+            .addVariant(44).language('sw').bandwidth(300)  // high
+              .addAudio(406).language('sw').kind('high')
+              .addVideo(404).size(720, 480)  // largest SD video
+            // Text streams in various languages
+            // To test text selection
+            .addTextStream(90).language('es')
+            .addTextStream(91).language('en')
+            .addTextStream(92).language('ar')
+            .addTextStream(93).language('el')
+            .addTextStream(94).language('he')
+            .addTextStream(95).language('zh')
+            .build();
+
+        // Get the original text tracks from the manifest.
+        allTextTracks = shaka.util.StreamUtils.getTextTracks(
+            manifest.periods[0], null);
+
+        storage.loadInternal = function() {
+          return Promise.resolve({
+            manifest: manifest,
+            drmEngine: drmEngine
+          });
+        };
+
+        // Use the default track selection callback.
+        storage.configure({ trackSelectionCallback: undefined });
+      });
+
+      function getVariants(data) {
+        return data.tracks.filter(function(t) {
+          return t.type == 'variant';
+        });
+      }
+
+      function getText(data) {
+        return data.tracks.filter(function(t) {
+          return t.type == 'text';
+        });
+      }
+
+      it('stores the best audio language match', function(done) {
+        /**
+         * @param {string} preferredLanguage
+         * @param {string} expectedLanguage
+         * @return {!Promise}
+         */
+        function testAudioMatch(preferredLanguage, expectedLanguage) {
+          player.configure({preferredAudioLanguage: preferredLanguage});
+          return storage.store('').then(function(data) {
+            var variantTracks = getVariants(data);
+            expect(variantTracks.length).toBe(1);
+            expect(variantTracks[0].language).toEqual(expectedLanguage);
+          });
+        }
+
+        var warning = jasmine.createSpy('shaka.log.warning');
+        shaka.log.warning = warning;
+
+        // An exact match is available for en-US, en-GB, and en.
+        // Test all three to show that we are not just choosing the first loose
+        // match, but rather always choosing the best available match.
+        testAudioMatch('en-US', 'en-US').then(function() {
+          return testAudioMatch('en-GB', 'en-GB');
+        }).then(function() {
+          return testAudioMatch('en', 'en');
+        }).then(function() {
+          // The best match for en-AU is a matching base language, en.
+          return testAudioMatch('en-AU', 'en');
+        }).then(function() {
+          // The best match for fr-FR is another related sub-language, fr-CA.
+          return testAudioMatch('fr-FR', 'fr-CA');
+        }).then(function() {
+          // When there is no related match at all, we choose the primary, es.
+          return testAudioMatch('zh', 'es');
+        }).then(function() {
+          // Set the primary flags to false.
+          manifest.periods[0].variants.forEach(function(variant) {
+            variant.primary = false;
+            if (variant.audio)
+              variant.audio.primary = false;
+          });
+          // When there is no related match at all, and no primary, we issue a
+          // warning, and we only store one track.
+          warning.calls.reset();
+          return storage.store('');
+        }).then(function(data) {
+          var variantTracks = getVariants(data);
+          expect(variantTracks.length).toBe(1);
+          expect(warning).toHaveBeenCalled();
+        }).catch(fail).then(done);
+      });
+
+      it('stores the largest SD video track, middle audio', function(done) {
+        // This language will select variants with multiple video resolutions.
+        player.configure({preferredAudioLanguage: 'sw'});
+        storage.store('').then(function(data) {
+          var variantTracks = getVariants(data);
+          expect(variantTracks.length).toBe(1);
+          expect(variantTracks[0].width).toBe(720);
+          expect(variantTracks[0].height).toBe(480);
+          expect(variantTracks[0].language).toEqual('sw');
+          // Note that kind == 'mid' is not realistic, but we use it here as a
+          // convenient way to detect which audio was selected after offline
+          // storage removes bandwidth information from the original tracks.
+          expect(variantTracks[0].kind).toEqual('mid');
+        }).catch(fail).then(done);
+      });
+
+      it('stores all text tracks', function(done) {
+        storage.store('').then(function(data) {
+          var textTracks = getText(data);
+          expect(textTracks.length).toBe(allTextTracks.length);
+          expect(textTracks).toEqual(jasmine.arrayContaining(allTextTracks));
+        }).catch(fail).then(done);
+      });
+    });  // describe('default track selection callback')
+  });  // describe('store')
 
   describe('remove', function() {
     var segmentId;
@@ -821,7 +983,7 @@ describe('Storage', function() {
             });
           });
     }
-  });
+  });  // describe('remove')
 
   function makeUris(uri) {
     return function() { return [uri]; };

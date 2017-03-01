@@ -135,7 +135,8 @@ shakaExtern.Stats;
  *   height: ?number,
  *   frameRate: ?number,
  *   mimeType: ?string,
- *   codecs: ?string
+ *   codecs: ?string,
+ *   primary: boolean
  * }}
  *
  * @description
@@ -171,6 +172,12 @@ shakaExtern.Stats;
  *   The MIME type of the content provided in the manifest.
  * @property {?string} codecs
  *   The audio/video codecs string provided in the manifest, if present.
+ * @property {boolean} primary
+ *   True indicates that this in the primary language for the content.
+ *   This flag is based on signals from the manifest.
+ *   This can be a useful hint about which language should be the default, and
+ *   indicates which track Shaka will use when the user's language preference
+ *   cannot be satisfied.
  * @exportDoc
  */
 shakaExtern.Track;
