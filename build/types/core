@@ -13,6 +13,7 @@
 +../../lib/media/media_source_engine.js
 +../../lib/media/mp4_segment_index_parser.js
 +../../lib/media/playhead.js
++../../lib/media/playhead_observer.js
 +../../lib/media/presentation_timeline.js
 +../../lib/media/segment_index.js
 +../../lib/media/segment_reference.js

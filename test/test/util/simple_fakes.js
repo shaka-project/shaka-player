@@ -18,6 +18,7 @@
 goog.provide('shaka.test.FakeAbrManager');
 goog.provide('shaka.test.FakeDrmEngine');
 goog.provide('shaka.test.FakeManifestParser');
+goog.provide('shaka.test.FakePresentationTimeline');
 goog.provide('shaka.test.FakeStreamingEngine');
 goog.provide('shaka.test.FakeVideo');
 
@@ -337,3 +338,100 @@ function createFakeBuffered(ranges) {
     }
   });
 }
+
+
+
+/**
+ * Creates a fake PresentationTimeline object.
+ *
+ * @constructor
+ * @struct
+ * @extends {shaka.media.PresentationTimeline}
+ * @return {!Object}
+ */
+shaka.test.FakePresentationTimeline = function() {
+  var getStart = jasmine.createSpy('getSegmentAvailabilityStart');
+  var getSafeStart = jasmine.createSpy('getSafeAvailabilityStart');
+  getSafeStart.and.callFake(function(delay) {
+    return getStart() + delay;
+  });
+
+  return {
+    getDuration: jasmine.createSpy('getDuration'),
+    setDuration: jasmine.createSpy('setDuration'),
+    getPresentationStartTime: jasmine.createSpy('getPresentationStartTime'),
+    setClockOffset: jasmine.createSpy('setClockOffset'),
+    setStatic: jasmine.createSpy('setStatic'),
+    getSegmentAvailabilityDuration:
+        jasmine.createSpy('getSegmentAvailabilityDuration'),
+    notifySegments: jasmine.createSpy('notifySegments'),
+    notifyMaxSegmentDuration: jasmine.createSpy('notifyMaxSegmentDuration'),
+    isLive: jasmine.createSpy('isLive'),
+    isInProgress: jasmine.createSpy('isInProgress'),
+    getEarliestStart: jasmine.createSpy('getEarliestStart'),
+    getSegmentAvailabilityStart: getStart,
+    getSafeAvailabilityStart: getSafeStart,
+    getSegmentAvailabilityEnd: jasmine.createSpy('getSegmentAvailabilityEnd'),
+    getSeekRangeEnd: jasmine.createSpy('getSeekRangeEnd')
+  };
+};
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.getDuration;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.setDuration;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.getPresentationStartTime;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.setClockOffset;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.setStatic;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.getSegmentAvailabilityDuration;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.notifySegments;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.notifyMaxSegmentDuration;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.isLive;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.isInProgress;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.getEarliestStart;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.getSegmentAvailabilityStart;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.getSafeAvailabilityStart;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.getSegmentAvailabilityEnd;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.getSeekRangeEnd;

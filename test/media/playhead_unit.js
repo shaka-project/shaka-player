@@ -35,7 +35,7 @@ describe('Playhead', function() {
 
   beforeEach(function() {
     video = new shaka.test.FakeVideo();
-    timeline = createMockPresentationTimeline();
+    timeline = new shaka.test.FakePresentationTimeline();
 
     onBuffering = jasmine.createSpy('onBuffering');
     onSeek = jasmine.createSpy('onSeek');
@@ -850,26 +850,5 @@ describe('Playhead', function() {
       }).catch(fail).then(done);
     });
   });
-
-  function createMockPresentationTimeline() {
-    var getStart = jasmine.createSpy('getSegmentAvailabilityStart');
-    var getSafeStart = jasmine.createSpy('getSafeAvailabilityStart');
-    getSafeStart.and.callFake(function(delay) {
-      return getStart() + delay;
-    });
-
-    return {
-      getDuration: jasmine.createSpy('getDuration'),
-      setDuration: jasmine.createSpy('setDuration'),
-      getSegmentAvailabilityDuration:
-          jasmine.createSpy('getSegmentAvailabilityDuration'),
-      isLive: jasmine.createSpy('isLive'),
-      getEarliestStart: jasmine.createSpy('getEarliestStart'),
-      getSegmentAvailabilityStart: getStart,
-      getSafeAvailabilityStart: getSafeStart,
-      getSegmentAvailabilityEnd:
-          jasmine.createSpy('getSegmentAvailabilityEnd')
-    };
-  }
 });
 
