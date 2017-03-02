@@ -30,6 +30,9 @@ describe('HlsParser', function() {
       dash: {
         customScheme: function(node) { return null; },
         clockSyncUri: ''
+      },
+      hls: {
+        defaultTimeOffset: 0
       }
     });
     playerInterface = {
@@ -84,7 +87,7 @@ describe('HlsParser', function() {
                 .addVideo(jasmine.any(Number))
                   .anySegmentFunctions()
                   .anyInitSegment()
-                  .presentationTimeOffset(10)
+                  .presentationTimeOffset(0)
                   .mime('video/mp4', 'avc1')
                   .frameRate(60)
                   .size(960, 540)
@@ -120,7 +123,7 @@ describe('HlsParser', function() {
                 .addVideo(jasmine.any(Number))
                   .anySegmentFunctions()
                   .anyInitSegment()
-                  .presentationTimeOffset(10)
+                  .presentationTimeOffset(0)
                   .mime('video/mp4', 'avc1')
                   .frameRate(60)
                   .size(960, 540)
@@ -128,7 +131,7 @@ describe('HlsParser', function() {
                   .language('en')
                   .anySegmentFunctions()
                   .anyInitSegment()
-                  .presentationTimeOffset(10)
+                  .presentationTimeOffset(0)
                   .mime('audio/mp4', 'mp4a')
           .build();
 
@@ -167,7 +170,7 @@ describe('HlsParser', function() {
                 .addVideo(jasmine.any(Number))
                   .anySegmentFunctions()
                   .anyInitSegment()
-                  .presentationTimeOffset(10)
+                  .presentationTimeOffset(0)
                   .mime('video/mp4', 'avc1')
                   .frameRate(60)
                   .size(960, 540)
@@ -175,7 +178,7 @@ describe('HlsParser', function() {
                   .language('en')
                   .anySegmentFunctions()
                   .anyInitSegment()
-                  .presentationTimeOffset(10)
+                  .presentationTimeOffset(0)
                   .mime('audio/mp4', 'mp4a')
               .addVariant(jasmine.any(Number))
                 .language('fr')
@@ -183,7 +186,7 @@ describe('HlsParser', function() {
                 .addVideo(jasmine.any(Number))
                   .anySegmentFunctions()
                   .anyInitSegment()
-                  .presentationTimeOffset(10)
+                  .presentationTimeOffset(0)
                   .mime('video/mp4', 'avc1')
                   .frameRate(120)
                   .size(960, 540)
@@ -191,7 +194,7 @@ describe('HlsParser', function() {
                   .language('fr')
                   .anySegmentFunctions()
                   .anyInitSegment()
-                  .presentationTimeOffset(10)
+                  .presentationTimeOffset(0)
                   .mime('audio/mp4', 'mp4a')
           .build();
 
@@ -230,7 +233,7 @@ describe('HlsParser', function() {
                 .addVideo(jasmine.any(Number))
                   .anySegmentFunctions()
                   .anyInitSegment()
-                  .presentationTimeOffset(10)
+                  .presentationTimeOffset(0)
                   .mime('video/mp4', 'avc1')
                   .frameRate(60)
                   .size(960, 540)
@@ -238,23 +241,61 @@ describe('HlsParser', function() {
                   .language('en')
                   .anySegmentFunctions()
                   .anyInitSegment()
-                  .presentationTimeOffset(10)
+                  .presentationTimeOffset(0)
                   .mime('audio/mp4', 'mp4a')
               .addTextStream(jasmine.any(Number))
                 .language('en')
                 .anySegmentFunctions()
                 .nullInitSegment()
-                .presentationTimeOffset(10)
+                .presentationTimeOffset(0)
                 .mime('text/vtt', '')
                 .kind(TextStreamKind.SUBTITLE)
               .addTextStream(jasmine.any(Number))
                 .language('es')
                 .anySegmentFunctions()
                 .nullInitSegment()
-                .presentationTimeOffset(10)
+                .presentationTimeOffset(0)
                 .mime('text/vtt', '')
                 .kind('subtitle')
           .build();
+
+    testHlsParser(master, media, manifest, done);
+  });
+
+  it('respects config.hls.defaultTimeOffset setting', function(done) {
+    var master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60\n',
+      'test://video'
+    ].join('');
+
+    var media = [
+      '#EXTM3U\n',
+      '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'test://main.mp4'
+    ].join('');
+
+    var manifest = new shaka.test.ManifestGenerator()
+            .anyTimeline()
+            .addPeriod(jasmine.any(Number))
+              .addVariant(jasmine.any(Number))
+                .language('und')
+                .bandwidth(200)
+                .addVideo(jasmine.any(Number))
+                  .anySegmentFunctions()
+                  .anyInitSegment()
+                  .presentationTimeOffset(10)
+                  .mime('video/mp4', 'avc1')
+                  .frameRate(60)
+                  .size(960, 540)
+          .build();
+
+    parser.configure({
+      hls: {defaultTimeOffset: 10}
+    });
 
     testHlsParser(master, media, manifest, done);
   });
@@ -284,14 +325,14 @@ describe('HlsParser', function() {
                 .addVideo(jasmine.any(Number))
                   .anySegmentFunctions()
                   .anyInitSegment()
-                  .presentationTimeOffset(10)
+                  .presentationTimeOffset(0)
                   .mime('video/mp4', 'avc1')
                   .frameRate(60)
                   .size(960, 540)
                 .addAudio(jasmine.any(Number))
                   .anySegmentFunctions()
                   .anyInitSegment()
-                  .presentationTimeOffset(10)
+                  .presentationTimeOffset(0)
                   .mime('audio/mp4', 'mp4a')
           .build();
 
@@ -323,14 +364,14 @@ describe('HlsParser', function() {
                 .addVideo(jasmine.any(Number))
                   .anySegmentFunctions()
                   .nullInitSegment()
-                  .presentationTimeOffset(10)
+                  .presentationTimeOffset(0)
                   .mime('video/mp4', 'avc1')
                   .frameRate(60)
                   .size(960, 540)
                 .addAudio(jasmine.any(Number))
                   .anySegmentFunctions()
                   .nullInitSegment()
-                  .presentationTimeOffset(10)
+                  .presentationTimeOffset(0)
                   .mime('audio/mp4', 'mp4a')
           .build();
 

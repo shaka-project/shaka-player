@@ -424,14 +424,32 @@ shakaExtern.DashManifestConfiguration;
 
 /**
  * @typedef {{
+ *   defaultTimeOffset: number
+ * }}
+ *
+ * @property {number} defaultTimeOffset
+ *   Default time offset (in seconds) for hls content used when no offset
+ *   is specified by the manifest. Defaults to 0 if not provided.
+ *   NOTE: Default time offset for Apple encoded content is 10 seconds.
+ *
+ * @exportDoc
+ */
+shakaExtern.HlsManifestConfiguration;
+
+
+/**
+ * @typedef {{
  *   retryParameters: shakaExtern.RetryParameters,
- *   dash: shakaExtern.DashManifestConfiguration
+ *   dash: shakaExtern.DashManifestConfiguration,
+ *   hls: shakaExtern.HlsManifestConfiguration
  * }}
  *
  * @property {shakaExtern.RetryParameters} retryParameters
  *   Retry parameters for manifest requests.
  * @property {shakaExtern.DashManifestConfiguration} dash
  *   Advanced parameters used by the DASH manifest parser.
+ * @property {shakaExtern.HlsManifestConfiguration} hls
+ *   Advanced parameters used by the HLS manifest parser.
  *
  * @exportDoc
  */

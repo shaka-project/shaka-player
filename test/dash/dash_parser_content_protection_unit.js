@@ -36,7 +36,8 @@ describe('DashParser ContentProtection', function() {
     var callback = opt_callback || function(node) { return null; };
     dashParser.configure({
       retryParameters: retry,
-      dash: { clockSyncUri: '', customScheme: callback }
+      dash: { clockSyncUri: '', customScheme: callback },
+      hls: { defaultTimeOffset: 0 }
     });
     var playerEvents = {
       networkingEngine: netEngine,

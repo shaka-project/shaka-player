@@ -30,7 +30,8 @@ shaka.test.Dash.makeDashParser = function() {
     dash: {
       customScheme: function(node) { return null; },
       clockSyncUri: ''
-    }
+    },
+    hls: { defaultTimeOffset: 0 }
   });
   return parser;
 };
