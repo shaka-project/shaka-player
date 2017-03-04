@@ -39,6 +39,10 @@ shakaDemo.video_ = null;
 shakaDemo.player_ = null;
 
 
+/** @private {HTMLMediaElement} */
+shakaDemo.localVideo_ = null;
+
+
 /** @private {shaka.Player} */
 shakaDemo.localPlayer_ = null;
 
@@ -137,6 +141,7 @@ shakaDemo.init = function() {
       shakaDemo.video_ = shakaDemo.castProxy_.getVideo();
       shakaDemo.player_ = shakaDemo.castProxy_.getPlayer();
       shakaDemo.player_.addEventListener('error', shakaDemo.onErrorEvent_);
+      shakaDemo.localVideo_ = localVideo;
       shakaDemo.localPlayer_ = localPlayer;
 
       var asyncSetup = shakaDemo.setupAssets_();

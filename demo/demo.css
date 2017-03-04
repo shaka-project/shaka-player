@@ -270,6 +270,16 @@ summary {
   width: 100%;
   height: 100%;
   margin: auto;
+
+  background-color: transparent;
+  background-position: 50% 50%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-image: url('//shaka-player-demo.appspot.com/assets/poster.jpg');
+}
+
+#video.audioOnly {
+  background-image: url('//shaka-player-demo.appspot.com/assets/audioOnly.gif');
 }
 
 .errorLog {

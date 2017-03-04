@@ -191,12 +191,24 @@ shakaDemo.load = function() {
 
   var asset = shakaDemo.preparePlayer_(option.asset);
 
+  // Revert to default styles while we load.
+  shakaDemo.localVideo_.classList.remove('audioOnly');
+
   // Load the manifest.
   player.load(asset.manifestUri).then(function() {
     // Update control state in case autoplay is disabled.
     shakaDemo.controls_.loadComplete();
 
     shakaDemo.hashShouldChange_();
+
+    // Audio-only tracks have no width/height.
+    var videoTracks =
+        player.getVariantTracks().filter(function(t) { return t.width; });
+
+    // Style the video element differently for audio-only assets.
+    if (videoTracks.length == 0) {
+      shakaDemo.localVideo_.classList.add('audioOnly');
+    }
 
     // Disallow casting of offline content.
     var isOffline = asset.manifestUri.indexOf('offline:') == 0;
