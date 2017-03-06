@@ -62,7 +62,8 @@ describe('Offline', function() {
     shaka.offline.DBEngine.DB_NAME_ = originalName;
   });
 
-  it('stores and plays clear content', function(done) {
+  // QUARANTINED: this test does not pass 100% of the time on IE and Edge.
+  quarantined_it('stores and plays clear content', function(done) {
     if (!support['offline']) {
       pending('Offline storage not supported');
     }
