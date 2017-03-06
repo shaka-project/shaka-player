@@ -712,6 +712,60 @@ describe('StreamingEngine', function() {
     expect(onStartupComplete).toHaveBeenCalled();
   });
 
+  it('plays when 1st Period doesn\'t have text streams', function() {
+    setupVod();
+    manifest.periods[0].textStreams = [];
+
+    mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+    createStreamingEngine();
+
+    playhead.getTime.and.returnValue(0);
+    onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+    onChooseStreams.and.callFake(function(period) {
+      var chosen = defaultOnChooseStreams(period);
+      if (period == manifest.periods[0])
+        delete chosen[ContentType.TEXT];
+      return chosen;
+    });
+
+    // Here we go!
+    streamingEngine.init();
+    runTest();
+
+    expect(mediaSourceEngine.segments).toEqual({
+      audio: [true, true, true, true],
+      video: [true, true, true, true],
+      text: [false, false, true, true]
+    });
+  });
+
+  it('plays when 2nd Period doesn\'t have text streams', function() {
+    setupVod();
+    manifest.periods[1].textStreams = [];
+
+    mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+    createStreamingEngine();
+
+    playhead.getTime.and.returnValue(0);
+    onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+    onChooseStreams.and.callFake(function(period) {
+      var chosen = defaultOnChooseStreams(period);
+      if (period == manifest.periods[1])
+        delete chosen[ContentType.TEXT];
+      return chosen;
+    });
+
+    // Here we go!
+    streamingEngine.init();
+    runTest();
+
+    expect(mediaSourceEngine.segments).toEqual({
+      audio: [true, true, true, true],
+      video: [true, true, true, true],
+      text: [true, true, false, false]
+    });
+  });
+
   describe('handles seeks (VOD)', function() {
     var onTick;
     var stub = function() {};
