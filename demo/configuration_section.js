@@ -37,6 +37,35 @@ shakaDemo.setupConfiguration_ = function() {
       'change', shakaDemo.onTrickPlayChange_);
   document.getElementById('enableAdaptation').addEventListener(
       'change', shakaDemo.onAdaptationChange_);
+  document.getElementById('logLevelList').addEventListener(
+      'change', shakaDemo.onLogLevelChange_);
+};
+
+
+/**
+ * @param {!Event} event
+ * @private
+ */
+shakaDemo.onLogLevelChange_ = function(event) {
+  // shaka.log is not set if logging isn't enabled.
+  // I.E. if using the compiled version of shaka.
+  if (shaka.log) {
+    var logLevel = event.target[event.target.selectedIndex];
+    switch (logLevel.value) {
+      case 'info':
+        shaka.log.setLevel(shaka.log.Level.INFO);
+        break;
+      case 'debug':
+        shaka.log.setLevel(shaka.log.Level.DEBUG);
+        break;
+      case 'vv':
+        shaka.log.setLevel(shaka.log.Level.V2);
+        break;
+      case 'v':
+        shaka.log.setLevel(shaka.log.Level.V1);
+        break;
+    }
+  }
 };
 
 
