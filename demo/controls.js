@@ -87,6 +87,9 @@ function ShakaControls() {
   /** @private {boolean} */
   this.isSeeking_ = false;
 
+  /** @private {boolean} */
+  this.isKeyboardSeeking_ = false;
+
   /** @private {number} */
   this.trickPlayRate_ = 1;
 
@@ -459,12 +462,20 @@ ShakaControls.prototype.onPlayStateChange_ = function() {
 /** @private */
 ShakaControls.prototype.onSeekStart_ = function() {
   this.isSeeking_ = true;
+  this.isKeyboardSeeking_ = false;
   this.video_.pause();
 };
 
 
 /** @private */
 ShakaControls.prototype.onSeekInput_ = function() {
+  if (!this.isSeeking_) {
+    // The seek was initialized by non-mouse/touchpad
+    // input, so onSeekStart_ wasn't called. Call it now.
+    this.onSeekStart_();
+    this.isKeyboardSeeking_ = true;
+  }
+
   if (!this.video_.duration) {
     // Can't seek yet.  Ignore.
     return;
@@ -478,7 +489,8 @@ ShakaControls.prototype.onSeekInput_ = function() {
     window.clearTimeout(this.seekTimeoutId_);
   }
   this.seekTimeoutId_ = window.setTimeout(
-      this.onSeekInputTimeout_.bind(this), 125);
+      this.onSeekInputTimeout_.bind(this),
+      this.isKeyboardSeeking_ ? 500 : 125);
 };
 
 
@@ -486,6 +498,12 @@ ShakaControls.prototype.onSeekInput_ = function() {
 ShakaControls.prototype.onSeekInputTimeout_ = function() {
   this.seekTimeoutId_ = null;
   this.video_.currentTime = parseFloat(this.seekBar_.value);
+
+  if (this.isKeyboardSeeking_) {
+    // Users who are seeking via keyboard have no way of manually ending
+    // the seek process, so timing out also causes the seek to end.
+    this.onSeekEnd_();
+  }
 };
 
 
