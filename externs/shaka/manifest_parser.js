@@ -44,6 +44,7 @@ shakaExtern.ManifestParser = function() {};
  *   onError: function(!shaka.util.Error)
  * }}
  *
+ * @description
  * Defines the interface of the Player to the manifest parser.  This defines
  * fields and callback methods that the parser will use to interact with the
  * Player.  The callback methods do not to be called as member functions (i.e.

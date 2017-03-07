@@ -12,6 +12,7 @@
     { "offline": { "title": "Offline Storage and Playback" } }
   ] } },
   { "plugins": { "title": "Plugins and Customizing the Build" } },
+  { "manifest-parser": { "title": "Manifest Parser Plugins" } },
   { "architecture": { "title": "Architecture Diagrams" } },
   { "service-worker": { "title": "Service Worker Caching" } },
   { "upgrade": { "title": "Shaka v2 Upgrade Guide" } }
