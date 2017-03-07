@@ -225,6 +225,41 @@ shakaExtern.SupportType;
 
 
 /**
+ * @typedef {{
+ *   schemeIdUri: string,
+ *   value: string,
+ *   timescale: number,
+ *   presentationTimeDelta: number,
+ *   eventDuration: number,
+ *   id: number,
+ *   messageData: Uint8Array
+ * }}
+ *
+ * @description
+ * Contains information about an EMSG MP4 box.
+ *
+ * @property {string} schemeIdUri
+ *    Identifies the message scheme.
+ * @property {string} value
+ *    Specifies the value for the event.
+ * @property {number} timescale
+ *    Provides the timescale, in ticks per second,
+ *    for the time and duration fields within this box.
+ * @property {number} presentationTimeDelta
+ *    Provides the Media Presentation time delta of the media presentation
+ *    time of the event and the earliest presentation time in this segment.
+ * @property {number} eventDuration
+ *    Provides the duration of event in media presentation time.
+ * @property {number} id
+ *    A field identifying this instance of the message.
+ * @property {Uint8Array} messageData
+ *    Body of the message.
+ * @exportDoc
+ */
+shakaExtern.EmsgInfo;
+
+
+/**
  * @typedef {function(!Element):Array.<shakaExtern.DrmInfo>}
  * @see shakaExtern.DashManifestConfiguration
  * @exportDoc
