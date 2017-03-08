@@ -72,35 +72,35 @@ describe('Mp4vttParser', function() {
   it('parses media segment', function() {
     var cues =
         [
-         {start: 20, end: 40, text: 'It has shed much innocent blood.\n'},
-         {start: 20, end: 40, text:
+         {start: 1080, end: 3480, text: 'It has shed much innocent blood.\n'},
+         {start: 4800, end: 6000, text:
            'You\'re a fool for traveling alone,\nso completely unprepared.\n'}
         ];
-    var result = shaka.media.Mp4VttParser(vttSegment, 0, 20, 40, false);
+    var result = shaka.media.Mp4VttParser(vttSegment, 0, 0, 10000, false);
     verifyHelper(cues, result);
   });
 
   it('parses media segment containing settings', function() {
     var cues =
         [
-         {start: 20, end: 40, text: 'It has shed much innocent blood.\n',
+         {start: 1080, end: 3480, text: 'It has shed much innocent blood.\n',
            align: 'right', size: 50, position: 10},
-         {start: 20, end: 40, text:
+         {start: 4800, end: 6000, text:
            'You\'re a fool for traveling alone,\nso completely unprepared.\n',
            vertical: 'lr', line: 1}
         ];
-    var result = shaka.media.Mp4VttParser(vttSegSettings, 0, 20, 40, false);
+    var result = shaka.media.Mp4VttParser(vttSegSettings, 0, 0, 10000, false);
     verifyHelper(cues, result);
   });
 
   it('accounts for offset', function() {
     var cues =
         [
-         {start: 27, end: 47, text: 'It has shed much innocent blood.\n'},
-         {start: 27, end: 47, text:
+         {start: 1080, end: 3480, text: 'It has shed much innocent blood.\n'},
+         {start: 4800, end: 6000, text:
            'You\'re a fool for traveling alone,\nso completely unprepared.\n'}
         ];
-    var result = shaka.media.Mp4VttParser(vttSegment, 7, 20, 40, false);
+    var result = shaka.media.Mp4VttParser(vttSegment, 7, 0, 10000, false);
     verifyHelper(cues, result);
   });
 
@@ -108,7 +108,7 @@ describe('Mp4vttParser', function() {
     var error = new shaka.util.Error(shaka.util.Error.Category.TEXT,
         shaka.util.Error.Code.INVALID_MP4_VTT);
     try {
-      shaka.media.Mp4VttParser(audioInitSegment, 0, 20, 40, false);
+      shaka.media.Mp4VttParser(audioInitSegment, 0, 0, 10000, false);
       fail('Mp4 file with no vtt supported');
     } catch (e) {
       shaka.test.Util.expectToEqualError(e, error);
