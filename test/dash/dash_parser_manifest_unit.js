@@ -675,9 +675,9 @@ describe('DashParser Manifest', function() {
       Dash.testFails(done, source, error);
     });
 
-    it('duplicate Representation ids', function(done) {
+    it('duplicate Representation ids with live', function(done) {
       var source = [
-        '<MPD minBufferTime="PT75S">',
+        '<MPD minBufferTime="PT75S" type="dynamic">',
         '  <Period id="1" duration="PT30S">',
         '    <AdaptationSet mimeType="video/mp4">',
         '      <Representation id="1" bandwidth="1">',
@@ -812,6 +812,56 @@ describe('DashParser Manifest', function() {
             .toBe(ContentType.TEXT);
           expect(manifest.periods[0].textStreams[1].type)
             .toBe(ContentType.TEXT);
+        })
+        .catch(fail)
+        .then(done);
+  });
+
+  it('ignores duplicate Representation IDs for VOD', function(done) {
+    var source = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation id="1" bandwidth="1">',
+      '        <SegmentTemplate media="1.mp4">',
+      '          <SegmentTimeline>',
+      '            <S t="0" d="30" />',
+      '          </SegmentTimeline>',
+      '        </SegmentTemplate>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation id="1" bandwidth="1">',
+      '        <SegmentTemplate media="2.mp4">',
+      '          <SegmentTimeline>',
+      '            <S t="0" d="30" />',
+      '          </SegmentTimeline>',
+      '        </SegmentTemplate>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'
+    ].join('\n');
+
+    // See https://goo.gl/BAM3mi
+    // The old error was that with SegmentTimeline, duplicate Representation IDs
+    // would use the same segment index, so they would have the same references.
+    // This test proves that duplicate Representation IDs are allowed for VOD
+    // and that error doesn't occur.
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+    parser.start('dummy://foo', playerInterface)
+        .then(function(manifest) {
+          expect(manifest.periods.length).toBe(1);
+          expect(manifest.periods[0].variants.length).toBe(2);
+
+          var variant1 = manifest.periods[0].variants[0];
+          var variant2 = manifest.periods[0].variants[1];
+          expect(variant1.video).toBeTruthy();
+          expect(variant2.video).toBeTruthy();
+          expect(variant1.video.getSegmentReference(1).getUris())
+              .toEqual(['dummy://foo/1.mp4']);
+          expect(variant2.video.getSegmentReference(1).getUris())
+              .toEqual(['dummy://foo/2.mp4']);
         })
         .catch(fail)
         .then(done);
