@@ -19,6 +19,7 @@ describe('StreamingEngine', function() {
   var Util;
   var segmentData;
   var ContentType = shaka.util.ManifestParserUtils.ContentType;
+  var Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
 
   // Dummy byte ranges and sizes for initialization and media segments.
   // Create empty object first and initialize the fields through
@@ -55,6 +56,7 @@ describe('StreamingEngine', function() {
   var onCanSwitch;
   var onError;
   var onEvent;
+  var onManifestUpdate;
   var onInitialStreamsSetup;
   var onStartupComplete;
   var streamingEngine;
@@ -373,6 +375,7 @@ describe('StreamingEngine', function() {
     onError = jasmine.createSpy('onError');
     onError.and.callFake(fail);
     onEvent = jasmine.createSpy('onEvent');
+    onManifestUpdate = jasmine.createSpy('onManifestUpdate');
 
     var config;
     if (opt_config) {
@@ -397,6 +400,7 @@ describe('StreamingEngine', function() {
       onCanSwitch: onCanSwitch,
       onError: onError,
       onEvent: onEvent,
+      onManifestUpdate: onManifestUpdate,
       onInitialStreamsSetup: onInitialStreamsSetup,
       onStartupComplete: onStartupComplete
     };
@@ -2146,15 +2150,12 @@ describe('StreamingEngine', function() {
 
     it('raises an event for embedded emsg boxes', function() {
       videoStream1.containsEmsgBoxes = true;
-      segmentData.video.segments[0] = new Uint8Array([
-        0, 0, 0, 59, 101, 109, 115, 103,
-        0, 0, 0, 0, 102, 111, 111, 58, 98,
-        97, 114, 58, 99, 117, 115, 116, 111,
-        109, 100, 97, 116, 97, 115, 99, 104,
-        101, 109, 101, 0, 49, 0, 0, 0, 0,
-        1, 0, 0, 0, 8, 0, 0, 255, 255, 0,
-        0, 0, 1, 116, 101, 115, 116
-      ]).buffer;
+      segmentData.video.segments[0] =
+          Uint8ArrayUtils.fromHex(
+              '0000003b656d736700000000666f6f3a' +
+              '6261723a637573746f6d646174617363' +
+              '68656d65003100000000010000000800' +
+              '00ffff0000000174657374').buffer;
 
       // Here we go!
       streamingEngine.init();
@@ -2178,15 +2179,12 @@ describe('StreamingEngine', function() {
 
     it('won\'t raise an event without stream field set', function() {
       videoStream1.containsEmsgBoxes = false;
-      segmentData.video.segments[0] = new Uint8Array([
-        0, 0, 0, 59, 101, 109, 115, 103,
-        0, 0, 0, 0, 102, 111, 111, 58, 98,
-        97, 114, 58, 99, 117, 115, 116, 111,
-        109, 100, 97, 116, 97, 115, 99, 104,
-        101, 109, 101, 0, 49, 0, 0, 0, 0,
-        1, 0, 0, 0, 8, 0, 0, 255, 255, 0,
-        0, 0, 1, 116, 101, 115, 116
-      ]).buffer;
+      segmentData.video.segments[0] =
+          Uint8ArrayUtils.fromHex(
+              '0000003b656d736700000000666f6f3a' +
+              '6261723a637573746f6d646174617363' +
+              '68656d65003100000000010000000800' +
+              '00ffff0000000174657374').buffer;
 
       // Here we go!
       streamingEngine.init();
@@ -2203,6 +2201,25 @@ describe('StreamingEngine', function() {
       runTest();
 
       expect(onEvent).not.toHaveBeenCalled();
+    });
+
+    it('triggers manifest updates', function() {
+      videoStream1.containsEmsgBoxes = true;
+      // This is an 'emsg' box that contains a scheme of
+      // urn:mpeg:dash:event:2012 to indicate a manifest update.
+      segmentData.video.segments[0] =
+          Uint8ArrayUtils.fromHex(
+              '0000003a656d73670000000075726e3a' +
+              '6d7065673a646173683a6576656e743a' +
+              '32303132000000000031000000080000' +
+              '00ff0000000c74657374').buffer;
+
+      // Here we go!
+      streamingEngine.init();
+      runTest();
+
+      expect(onEvent).not.toHaveBeenCalled();
+      expect(onManifestUpdate).toHaveBeenCalled();
     });
   });
 

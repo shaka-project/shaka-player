@@ -352,6 +352,10 @@ shaka.test.TestScheme.ManifestParser.prototype.stop = function() {
 };
 
 
+/** @override */
+shaka.test.TestScheme.ManifestParser.prototype.update = function() {};
+
+
 shaka.net.NetworkingEngine.registerScheme('test', shaka.test.TestScheme);
 shaka.media.ManifestParser.registerParserByMime(
     'application/x-test-manifest', shaka.test.TestScheme.ManifestParser);

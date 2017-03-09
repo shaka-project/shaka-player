@@ -282,6 +282,7 @@ describe('StreamingEngine', function() {
       onCanSwitch: onCanSwitch,
       onError: onError,
       onEvent: onEvent,
+      onManifestUpdate: function() {},
       onInitialStreamsSetup: onInitialStreamsSetup,
       onStartupComplete: onStartupComplete
     };

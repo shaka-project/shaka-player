@@ -239,6 +239,7 @@ shaka.test.FakeManifestParser = function(manifest) {
   spyOn(this, 'start').and.callThrough();
   spyOn(this, 'stop').and.callThrough();
   spyOn(this, 'configure');
+  spyOn(this, 'update');
 };
 
 
@@ -252,6 +253,10 @@ shaka.test.FakeManifestParser.prototype.start = function() {
 shaka.test.FakeManifestParser.prototype.stop = function() {
   return Promise.resolve();
 };
+
+
+/** @override */
+shaka.test.FakeManifestParser.prototype.update = function() {};
 
 
 /** @override */

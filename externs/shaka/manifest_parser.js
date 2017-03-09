@@ -107,3 +107,11 @@ shakaExtern.ManifestParser.prototype.start = function(uri, playerInterface) {};
  * @exportDoc
  */
 shakaExtern.ManifestParser.prototype.stop = function() {};
+
+
+/**
+ * Tells the parser to do a manual manifest update.  Implementing this is
+ * optional and is only called when 'emsg' boxes are present.
+ * @exportDoc
+ */
+shakaExtern.ManifestParser.prototype.update = function() {};
