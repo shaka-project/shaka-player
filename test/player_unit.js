@@ -1542,6 +1542,38 @@ describe('Player', function() {
       }).then(done);
     });
 
+    it('doesn\'t switch if the active stream isn\'t restricted',
+        function(done) {
+          manifest = new shaka.test.ManifestGenerator()
+              .addPeriod(0)
+                .addVariant(0)
+                  .addVideo(1).keyId('abc')
+                .addVariant(1)
+                  .addVideo(2)
+              .build();
+
+          parser = new shaka.test.FakeManifestParser(manifest);
+          factory = function() { return parser; };
+          player.load('', 0, factory)
+              .then(function() {
+                // "initialize" the current period.
+                chooseStreams();
+                canSwitch();
+                abrManager.chooseStreams.calls.reset();
+
+                var activeVariant = getActiveTrack('variant');
+                expect(activeVariant.id).toBe(0);
+
+                onKeyStatus({'abc': 'usable'});
+                expect(abrManager.chooseStreams).not.toHaveBeenCalled();
+
+                activeVariant = getActiveTrack('variant');
+                expect(activeVariant.id).toBe(0);
+              })
+              .catch(fail)
+              .then(done);
+        });
+
     it('removes if key status is "output-restricted"', function(done) {
       manifest = new shaka.test.ManifestGenerator()
               .addPeriod(0)
