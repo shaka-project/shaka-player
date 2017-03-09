@@ -27,26 +27,6 @@ import shakaBuildHelpers
 
 def run_tests_single(args):
   """Runs all the karma tests."""
-  # Update node modules if needed.
-  if not shakaBuildHelpers.update_node_modules():
-    return 1
-
-  # Generate dependencies and compile library.
-  # This is required for the tests.
-  if gendeps.gen_deps([]) != 0:
-    return 1
-
-  build_args = []
-  if '--force' in args:
-    build_args.append('--force')
-    args.remove('--force')
-
-  if '--no-build' in args:
-    args.remove('--no-build')
-  else:
-    if build.main(build_args) != 0:
-      return 1
-
   karma_path = shakaBuildHelpers.get_node_binary_path('karma')
   cmd = [karma_path, 'start']
 
@@ -103,6 +83,26 @@ def run_tests_multiple(args):
 
 
 def run_tests(args):
+  # Update node modules if needed.
+  if not shakaBuildHelpers.update_node_modules():
+    return 1
+
+  # Generate dependencies and compile library.
+  # This is required for the tests.
+  if gendeps.gen_deps([]) != 0:
+    return 1
+
+  build_args = []
+  if '--force' in args:
+    build_args.append('--force')
+    args.remove('--force')
+
+  if '--no-build' in args:
+    args.remove('--no-build')
+  else:
+    if build.main(build_args) != 0:
+      return 1
+
   if '--runs' in args:
     return run_tests_multiple(args)
   else:
