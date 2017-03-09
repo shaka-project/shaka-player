@@ -89,7 +89,11 @@ describe('Player', function() {
     player = new shaka.Player(video, dependencyInjector);
 
     abrManager = new shaka.test.FakeAbrManager();
-    player.configure({abr: {manager: abrManager}});
+    player.configure({
+      abr: {manager: abrManager},
+      // Ensures we don't get a warning about missing preference.
+      preferredAudioLanguage: 'en'
+    });
 
     onError = jasmine.createSpy('error event');
     onError.and.callFake(function(event) {
@@ -1049,6 +1053,29 @@ describe('Player', function() {
               .catch(fail)
               .then(done);
         });
+
+    it('chooses an arbitrary language when none given', function(done) {
+      // The Player shouldn't allow changing between languages, so it should
+      // choose an arbitrary language when none is given.
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addVariant(0).language('pt').addAudio(0)
+          .addVariant(1).language('en').addAudio(1)
+       .build();
+
+      player.configure({preferredAudioLanguage: undefined});
+
+      var parser = new shaka.test.FakeManifestParser(manifest);
+      var factory = function() { return parser; };
+      player.load('', 0, factory)
+          .then(function() {
+            expect(abrManager.setVariants).toHaveBeenCalled();
+            var variants = abrManager.setVariants.calls.argsFor(0)[0];
+            expect(variants.length).toBe(1);
+          })
+          .catch(fail)
+          .then(done);
+    });
 
     /**
      * @param {!Array.<string>} languages
