@@ -274,13 +274,19 @@ describe('StreamingEngine', function() {
       useRelativeCueTimestamps: false,
       startAtSegmentBoundary: false
     };
+    var playerInterface = {
+      playhead: playhead,
+      mediaSourceEngine: mediaSourceEngine,
+      netEngine: /** @type {!shaka.net.NetworkingEngine} */(netEngine),
+      onChooseStreams: onChooseStreams,
+      onCanSwitch: onCanSwitch,
+      onError: onError,
+      onEvent: onEvent,
+      onInitialStreamsSetup: onInitialStreamsSetup,
+      onStartupComplete: onStartupComplete
+    };
     streamingEngine = new shaka.media.StreamingEngine(
-        playhead,
-        mediaSourceEngine,
-        /** @type {!shaka.net.NetworkingEngine} */(netEngine),
-        /** @type {shakaExtern.Manifest} */(manifest),
-        onChooseStreams, onCanSwitch, onError, onEvent,
-        onInitialStreamsSetup, onStartupComplete);
+        /** @type {shakaExtern.Manifest} */(manifest), playerInterface);
     streamingEngine.configure(config);
   }
 
