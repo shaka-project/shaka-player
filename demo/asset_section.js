@@ -83,11 +83,14 @@ shakaDemo.setupAssets_ = function() {
   option.textContent = '(custom asset)';
   assetList.appendChild(option);
 
-  // Show/hide the custom asset fields based on the selection.
   assetList.addEventListener('change', function() {
+    // Show/hide the custom asset fields based on the selection.
     var asset = assetList.options[assetList.selectedIndex].asset;
     var customAsset = document.getElementById('customAsset');
     customAsset.style.display = asset ? 'none' : 'block';
+
+    // Update the hash to reflect this change.
+    shakaDemo.hashShouldChange_();
   });
 
   document.getElementById('loadButton').addEventListener(
@@ -104,6 +107,8 @@ shakaDemo.setupAssets_ = function() {
  * @private
  */
 shakaDemo.onAssetKeyUp_ = function(event) {
+  // Mirror the users input as they type.
+  shakaDemo.hashShouldChange_();
   // Load the asset if the user presses enter.
   if (event.keyCode != 13) return;
   shakaDemo.load();

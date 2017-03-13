@@ -39,6 +39,15 @@ shakaDemo.setupConfiguration_ = function() {
       'change', shakaDemo.onAdaptationChange_);
   document.getElementById('logLevelList').addEventListener(
       'change', shakaDemo.onLogLevelChange_);
+  document.getElementById('enableAutoplay').addEventListener(
+      'change', shakaDemo.onAutoplayChange_);
+};
+
+
+/** @private */
+shakaDemo.onAutoplayChange_ = function() {
+  // Change the hash, to mirror this.
+  shakaDemo.hashShouldChange_();
 };
 
 
@@ -65,6 +74,8 @@ shakaDemo.onLogLevelChange_ = function(event) {
         shaka.log.setLevel(shaka.log.Level.V1);
         break;
     }
+    // Change the hash, to mirror this.
+    shakaDemo.hashShouldChange_();
   }
 };
 
@@ -74,15 +85,14 @@ shakaDemo.onLogLevelChange_ = function(event) {
  * @private
  */
 shakaDemo.onConfigKeyUp_ = function(event) {
-  // Update the configuration if the user presses enter.
-  if (event.keyCode != 13) return;
-
   shakaDemo.player_.configure(/** @type {shakaExtern.PlayerConfiguration} */({
     preferredAudioLanguage:
         document.getElementById('preferredAudioLanguage').value,
     preferredTextLanguage:
         document.getElementById('preferredTextLanguage').value
   }));
+  // Change the hash, to mirror this.
+  shakaDemo.hashShouldChange_();
 };
 
 
@@ -95,6 +105,8 @@ shakaDemo.onAdaptationChange_ = function(event) {
   shakaDemo.player_.configure(/** @type {shakaExtern.PlayerConfiguration} */({
     abr: { enabled: event.target.checked }
   }));
+  // Change the hash, to mirror this.
+  shakaDemo.hashShouldChange_();
 };
 
 
@@ -105,4 +117,6 @@ shakaDemo.onAdaptationChange_ = function(event) {
 shakaDemo.onTrickPlayChange_ = function(event) {
   // Show/hide trick play controls.
   shakaDemo.controls_.showTrickPlay(event.target.checked);
+  // Change the hash, to mirror this.
+  shakaDemo.hashShouldChange_();
 };
