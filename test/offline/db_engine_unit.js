@@ -32,7 +32,7 @@ describe('DBEngine', function() {
       schema = {'test': 'key', 'other': 'key'};
       shaka.offline.DBEngine.deleteDatabase().then(function() {
         db = new shaka.offline.DBEngine();
-        return db.init(schema);
+        return db.init(schema, /* opt_retryCount */ 5);
       }).catch(fail).then(done);
     } else {
       done();
