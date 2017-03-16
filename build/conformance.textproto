@@ -84,21 +84,59 @@ requirement: {
   value: 'Array.prototype.findIndex'
   value: 'Array.prototype.copyWithin'
   value: 'Array.prototype.fill'
-  error_message: 'ES6 Array methods are not allowed'
-                 ' because they are not supported in IE11'
+  error_message: 'ES6 Array methods are not allowed '
+                 'because they are not supported in IE11'
 }
 requirement: {
   type: BANNED_NAME
   value: 'Array.from'
   value: 'Array.of'
-  error_message: 'ES6 Array methods are not allowed'
-                 ' because they are not supported in IE11'
+  error_message: 'ES6 Array methods are not allowed '
+                 'because they are not supported in IE11'
 }
 requirement: {
   type: BANNED_PROPERTY
   value: 'String.prototype.startsWith'
   value: 'String.prototype.endsWith'
   value: 'String.prototype.includes'
-  error_message: 'ES6 String methods are not allowed'
+  error_message: 'ES6 String methods are not allowed '
+                 'because they are not supported in IE11'
+}
+requirement: {
+  type: BANNED_NAME
+  value: 'ArrayBuffer.isView'
+  error_message: 'ES6 ArrayBuffer methods are not allowed '
+                 'because they are not supported in IE11'
+}
+requirement: {
+  type: BANNED_NAME
+  value: 'Int8Array.of'
+  value: 'Int8Array.from'
+  value: 'Uint8Array.of'
+  value: 'Uint8Array.from'
+  value: 'Uint8ClampedArray.of'
+  value: 'Uint8ClampedArray.from'
+  value: 'Int16Array.of'
+  value: 'Int16Array.from'
+  value: 'Uint16Array.of'
+  value: 'Uint16Array.from'
+  value: 'Int32Array.of'
+  value: 'Int32Array.from'
+  value: 'Uint32Array.of'
+  value: 'Uint32Array.from'
+  value: 'Float32Array.of'
+  value: 'Float32Array.from'
+  value: 'Float64Array.of'
+  value: 'Float64Array.from'
+  error_message: 'ES6 TypedArray methods are not allowed '
+                 'because they are not supported in IE11'
+}
+requirement: {
+  type: BANNED_NAME
+  value: 'Map'
+  value: 'WeakMap'
+  value: 'Set'
+  value: 'WeakSet'
+  error_message: 'ES6 Maps and Sets are not allowed '
                  'because they are not supported in IE11'
 }
