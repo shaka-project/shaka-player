@@ -115,3 +115,15 @@ shakaExtern.ManifestParser.prototype.stop = function() {};
  * @exportDoc
  */
 shakaExtern.ManifestParser.prototype.update = function() {};
+
+
+/**
+ * Tells the parser that the expiration time of an EME session has changed.
+ * Implementing this is optional.
+ *
+ * @param {string} sessionId
+ * @param {number} expiration
+ * @exportDoc
+ */
+shakaExtern.ManifestParser.prototype.onExpirationUpdated = function(
+    sessionId, expiration) {};

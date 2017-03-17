@@ -61,6 +61,7 @@ shakaExtern.OfflineConfiguration;
  *   originalManifestUri: string,
  *   duration: number,
  *   size: number,
+ *   expiration: number,
  *   tracks: !Array.<shakaExtern.Track>,
  *   appMetadata: Object
  * }}
@@ -74,6 +75,9 @@ shakaExtern.OfflineConfiguration;
  *   The duration of the content, in seconds.
  * @property {number} size
  *   The size of the content, in bytes.
+ * @property {number} expiration
+ *   The time that the encrypted license expires, in milliseconds.  If the media
+ *   is clear or the license never expires, this will equal Infinity.
  * @property {!Array.<shakaExtern.Track>} tracks
  *   The tracks that are stored.  This only lists those found in the first
  *   Period.
@@ -90,6 +94,7 @@ shakaExtern.StoredContent;
  *   originalManifestUri: string,
  *   duration: number,
  *   size: number,
+ *   expiration: number,
  *   periods: !Array.<shakaExtern.PeriodDB>,
  *   sessionIds: !Array.<string>,
  *   drmInfo: ?shakaExtern.DrmInfo,
@@ -104,6 +109,8 @@ shakaExtern.StoredContent;
  *   The total duration of the media, in seconds.
  * @property {number} size
  *   The total size of all stored segments, in bytes.
+ * @property {number} expiration
+ *   The license expiration, in milliseconds; or Infinity if not applicable.
  * @property {!Array.<shakaExtern.PeriodDB>} periods
  *   The Periods that are stored.
  * @property {!Array.<string>} sessionIds

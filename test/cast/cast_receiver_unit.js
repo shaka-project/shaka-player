@@ -714,6 +714,7 @@ describe('CastReceiver', function() {
       drmInfo: jasmine.createSpy('drmInfo'),
       getAudioLanguages: jasmine.createSpy('getAudioLanguages'),
       getConfiguration: jasmine.createSpy('getConfiguration'),
+      getExpiration: jasmine.createSpy('getExpiration'),
       getManifestUri: jasmine.createSpy('getManifestUri'),
       getPlaybackRate: jasmine.createSpy('getPlaybackRate'),
       getPlayheadTimeAsDate: jasmine.createSpy('getPlayheadTimeAsDate'),

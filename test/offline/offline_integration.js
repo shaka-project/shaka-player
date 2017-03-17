@@ -128,7 +128,8 @@ describe('Offline', function() {
           var OfflineManifestParser = shaka.offline.OfflineManifestParser;
           var manifest = OfflineManifestParser.reconstructManifest(manifestDb);
           drmEngine = new shaka.media.DrmEngine(
-              player.getNetworkingEngine(), onError, function() {});
+              player.getNetworkingEngine(), onError, function() {},
+              function() {});
           drmEngine.configure(player.getConfiguration().drm);
           return drmEngine.init(manifest, true /* isOffline */);
         })

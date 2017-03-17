@@ -334,6 +334,23 @@ describe('Storage', function() {
           .then(done);
     });
 
+    it('stores expiration', function(done) {
+      drmEngine.setSessionIds(['abcd']);
+      drmEngine.getExpiration.and.returnValue(1234);
+
+      storage.store('')
+          .then(function(data) {
+            expect(data.offlineUri).toBe('offline:0');
+            return fakeStorageEngine.get('manifest', 0);
+          })
+          .then(function(manifestDb) {
+            expect(manifestDb).toBeTruthy();
+            expect(manifestDb.expiration).toBe(1234);
+          })
+          .catch(fail)
+          .then(done);
+    });
+
     it('throws an error if another store is in progress', function(done) {
       var p1 = storage.store('', {}).catch(fail);
       var p2 = storage.store('', {}).then(fail).catch(function(error) {
@@ -423,6 +440,7 @@ describe('Storage', function() {
             originalManifestUri: originalUri,
             duration: 4,
             size: 150,
+            expiration: Infinity,
             tracks: tracks,
             appMetadata: undefined
           });
@@ -477,6 +495,7 @@ describe('Storage', function() {
             originalManifestUri: originalUri,
             duration: 5,
             size: jasmine.any(Number),
+            expiration: Infinity,
             tracks: tracks,
             appMetadata: undefined
           });

@@ -23,6 +23,7 @@ describe('DrmEngine', function() {
   var logErrorSpy;
   var onErrorSpy;
   var onKeyStatusSpy;
+  var onExpirationSpy;
 
   var fakeNetEngine;
   var drmEngine;
@@ -53,6 +54,7 @@ describe('DrmEngine', function() {
 
     onErrorSpy = jasmine.createSpy('onError');
     onKeyStatusSpy = jasmine.createSpy('onKeyStatus');
+    onExpirationSpy = jasmine.createSpy('onExpirationUpdated');
   });
 
   beforeEach(function() {
@@ -70,6 +72,7 @@ describe('DrmEngine', function() {
     onErrorSpy.calls.reset();
     logErrorSpy.calls.reset();
     onKeyStatusSpy.calls.reset();
+    onExpirationSpy.calls.reset();
 
     // By default, error logs and callbacks result in failure.
     onErrorSpy.and.callFake(fail);
@@ -101,7 +104,7 @@ describe('DrmEngine', function() {
     fakeNetEngine.setResponseMap({ 'http://abc.drm/license': license });
 
     drmEngine = new shaka.media.DrmEngine(
-        fakeNetEngine, onErrorSpy, onKeyStatusSpy);
+        fakeNetEngine, onErrorSpy, onKeyStatusSpy, onExpirationSpy);
     config = {
       retryParameters: retryParameters,
       delayLicenseRequestUntilPlayed: false,
@@ -1678,6 +1681,61 @@ describe('DrmEngine', function() {
                 shaka.util.Error.Code.LICENSE_RESPONSE_REJECTED,
                 'Error'));
       }).catch(fail).then(done);
+    });
+  });
+
+  describe('expiration', function() {
+    beforeAll(function() {
+      jasmine.clock().install();
+    });
+
+    afterAll(function() {
+      jasmine.clock().uninstall();
+    });
+
+    beforeEach(function(done) {
+      session1.sessionId = 'abc';
+      session1.expiration = NaN;
+
+      initAndAttach().then(function() {
+        var initData = new Uint8Array(0);
+        var message = new Uint8Array(0);
+        mockVideo.on['encrypted'](
+            { initDataType: 'webm', initData: initData, keyId: null });
+        session1.on['message']({ target: session1, message: message });
+        session1.update.and.returnValue(Promise.resolve());
+
+        jasmine.clock().tick(1000);
+      }).catch(fail).then(done);
+    });
+
+    it('calls the callback when the expiration changes', function() {
+      onExpirationSpy.calls.reset();
+
+      session1.expiration = 10000;
+      jasmine.clock().tick(1000);
+      expect(onExpirationSpy).toHaveBeenCalledTimes(1);
+      expect(onExpirationSpy).toHaveBeenCalledWith(session1.sessionId, 10000);
+
+      onExpirationSpy.calls.reset();
+      session1.expiration = 50;
+      jasmine.clock().tick(1000);
+      expect(onExpirationSpy).toHaveBeenCalledTimes(1);
+      expect(onExpirationSpy).toHaveBeenCalledWith(session1.sessionId, 50);
+
+      onExpirationSpy.calls.reset();
+      session1.expiration = NaN;
+      jasmine.clock().tick(1000);
+      expect(onExpirationSpy).toHaveBeenCalledTimes(1);
+      expect(onExpirationSpy)
+          .toHaveBeenCalledWith(session1.sessionId, Infinity);
+    });
+
+    it('gets the current expiration times', function() {
+      session1.expiration = NaN;
+      expect(drmEngine.getExpiration()).toEqual(Infinity);
+      session1.expiration = 12345;
+      expect(drmEngine.getExpiration()).toEqual(12345);
     });
   });
 
