@@ -68,8 +68,7 @@ describe('DBEngine', function() {
     }).catch(fail).then(done);
   });
 
-  // QUARANTINED: this test does not pass 100% of the time on IE and Edge.
-  quarantined_it('supports concurrent operations', function(done) {
+  it('supports concurrent operations', function(done) {
     if (!shaka.offline.DBEngine.isSupported()) {
       pending('DBEngine is not supported on this platform.');
     }
@@ -97,8 +96,7 @@ describe('DBEngine', function() {
     }).catch(fail).then(done);
   });
 
-  // QUARANTINED: this test does not pass 100% of the time on IE and Edge.
-  quarantined_it('supports remove', function(done) {
+  it('supports remove', function(done) {
     if (!shaka.offline.DBEngine.isSupported()) {
       pending('DBEngine is not supported on this platform.');
     }
