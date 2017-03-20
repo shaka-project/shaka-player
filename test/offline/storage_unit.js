@@ -225,7 +225,7 @@ describe('Storage', function() {
       var originalUri = 'fake://foobar';
       var appData = {tools: ['Google', 'StackOverflow'], volume: 11};
       storage.store(originalUri, appData)
-      .then(function(data) {
+          .then(function(data) {
             expect(data).toBeTruthy();
             // Since we are using a memory DB, it will always be the first one.
             expect(data.offlineUri).toBe('offline:0');
@@ -235,8 +235,8 @@ describe('Storage', function() {
             expect(data.tracks).toEqual(tracks);
             expect(data.appMetadata).toEqual(appData);
           })
-      .catch(fail)
-      .then(done);
+          .catch(fail)
+          .then(done);
     });
 
     it('gives warning if storing tracks with the same type', function(done) {
@@ -332,6 +332,71 @@ describe('Storage', function() {
           })
           .catch(fail)
           .then(done);
+    });
+
+    it('throws an error if another store is in progress', function(done) {
+      var p1 = storage.store('', {}).catch(fail);
+      var p2 = storage.store('', {}).then(fail).catch(function(error) {
+        var expectedError = new shaka.util.Error(
+            shaka.util.Error.Category.STORAGE,
+            shaka.util.Error.Code.STORE_ALREADY_IN_PROGRESS);
+        shaka.test.Util.expectToEqualError(error, expectedError);
+      });
+      Promise.all([p1, p2]).catch(fail).then(done);
+    });
+
+    it('throws an error if the content is a live stream', function(done) {
+      manifest.presentationTimeline.setDuration(Infinity);
+      manifest.presentationTimeline.setStatic(false);
+
+      storage.store('', {}).then(fail).catch(function(error) {
+        var expectedError = new shaka.util.Error(
+            shaka.util.Error.Category.STORAGE,
+            shaka.util.Error.Code.CANNOT_STORE_LIVE_OFFLINE,
+            '');
+        shaka.test.Util.expectToEqualError(error, expectedError);
+      }).then(done);
+    });
+
+    it('throws an error if DRM sessions are not ready', function(done) {
+      var drmInfo = {
+        keySystem: 'com.example.abc',
+        licenseServerUri: 'http://example.com',
+        persistentStateRequire: true,
+        audioRobustness: 'HARDY'
+      };
+      drmEngine.setDrmInfo(drmInfo);
+      drmEngine.setSessionIds([]);
+      storage.store('', {}).then(fail).catch(function(error) {
+        var expectedError = new shaka.util.Error(
+            shaka.util.Error.Category.STORAGE,
+            shaka.util.Error.Code.NO_INIT_DATA_FOR_OFFLINE,
+            '');
+        shaka.test.Util.expectToEqualError(error, expectedError);
+      }).then(done);
+    });
+
+    it('throws an error if storage is not supported', function(done) {
+      fakeStorageEngine = null;
+      // Recreate Storage object so null fakeStorageEngine takes effect.
+      storage = new shaka.offline.Storage(player);
+      storage.store('', {}).then(fail).catch(function(error) {
+        var expectedError = new shaka.util.Error(
+            shaka.util.Error.Category.STORAGE,
+            shaka.util.Error.Code.STORAGE_NOT_SUPPORTED);
+        shaka.test.Util.expectToEqualError(error, expectedError);
+      }).then(done);
+    });
+
+    it('throws an error if destroyed mid-store', function(done) {
+      var p1 = storage.store('', {}).then(fail).catch(function(error) {
+        var expectedError = new shaka.util.Error(
+            shaka.util.Error.Category.STORAGE,
+            shaka.util.Error.Code.OPERATION_ABORTED);
+        shaka.test.Util.expectToEqualError(error, expectedError);
+      });
+      var p2 = storage.destroy();
+      Promise.all([p1, p2]).catch(fail).then(done);
     });
 
     describe('reports progress', function() {
@@ -605,8 +670,8 @@ describe('Storage', function() {
             shaka.util.Error.Code.HTTP_ERROR);
         delay.reject(expectedError);
         storage.store('')
-            .then(fail, function(err) {
-              shaka.test.Util.expectToEqualError(err, expectedError);
+            .then(fail, function(error) {
+              shaka.test.Util.expectToEqualError(error, expectedError);
             })
             .catch(fail)
             .then(done);
@@ -917,18 +982,25 @@ describe('Storage', function() {
           .then(done);
     });
 
-    it('raises not found error', function(done) {
-      removeManifest(0)
-          .then(fail)
-          .catch(function(e) {
-            shaka.test.Util.expectToEqualError(
-                e,
-                new shaka.util.Error(
-                    shaka.util.Error.Category.STORAGE,
-                    shaka.util.Error.Code.REQUESTED_ITEM_NOT_FOUND,
-                    'offline:0'));
-          })
-          .then(done);
+    it('throws an error if the content is not found', function(done) {
+      removeManifest(0).then(fail).catch(function(error) {
+        var expectedError = new shaka.util.Error(
+            shaka.util.Error.Category.STORAGE,
+            shaka.util.Error.Code.REQUESTED_ITEM_NOT_FOUND,
+            'offline:0');
+        shaka.test.Util.expectToEqualError(error, expectedError);
+      }).then(done);
+    });
+
+    it('throws an error if the URI is malformed', function(done) {
+      var bogusContent = {offlineUri: 'foo:bar'};
+      storage.remove(bogusContent).then(fail).catch(function(error) {
+        var expectedError = new shaka.util.Error(
+            shaka.util.Error.Category.STORAGE,
+            shaka.util.Error.Code.MALFORMED_OFFLINE_URI,
+            'foo:bar');
+        shaka.test.Util.expectToEqualError(error, expectedError);
+      }).then(done);
     });
 
     /**
@@ -969,19 +1041,17 @@ describe('Storage', function() {
       for (var i = 0; i < count; i++) {
         ret[i] = {key: segmentId++};
       }
-      return Promise
-          .all(ret.map(function(segment) {
-            return fakeStorageEngine.insert('segment', segment);
-          }))
-          .then(function() {
-            return ret.map(function(segment, i) {
-              return {
-                uri: 'offline:' + manifestId + '/0/' + segment.key,
-                startTime: i,
-                endTime: (i + 1)
-              };
-            });
-          });
+      return Promise.all(ret.map(function(segment) {
+        return fakeStorageEngine.insert('segment', segment);
+      })).then(function() {
+        return ret.map(function(segment, i) {
+          return {
+            uri: 'offline:' + manifestId + '/0/' + segment.key,
+            startTime: i,
+            endTime: (i + 1)
+          };
+        });
+      });
     }
   });  // describe('remove')
 
