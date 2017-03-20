@@ -166,6 +166,12 @@ module.exports = function(config) {
     setClientArg(config, 'external', true);
   }
 
+  if (flagPresent('drm')) {
+    // Run Player integration tests against DRM license servers.
+    // Skipped by default.
+    setClientArg(config, 'drm', true);
+  }
+
   if (flagPresent('quarantined')) {
     // Run quarantined tests which do not consistently pass.
     // Skipped by default.

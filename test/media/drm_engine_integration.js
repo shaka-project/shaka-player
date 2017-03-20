@@ -146,7 +146,7 @@ describe('DrmEngine', function() {
   });
 
   describe('basic flow', function() {
-    external_it('gets a license and can play encrypted segments',
+    drm_it('gets a license and can play encrypted segments',
         function(done) {
           checkKeySystems();
 

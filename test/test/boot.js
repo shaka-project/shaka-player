@@ -140,14 +140,25 @@ function getClientArg(name) {
   }
 
   /**
-   * Run a test that uses external resources.
+   * Run a test that uses external content.
    *
    * @param {string} name
    * @param {jasmine.Callback} callback
    */
   window.external_it = function(name, callback) {
     it(name, filterShim(callback, 'external',
-        'Skipping tests that use external resources.'));
+        'Skipping tests that use external content.'));
+  };
+
+  /**
+   * Run a test that uses a DRM license server.
+   *
+   * @param {string} name
+   * @param {jasmine.Callback} callback
+   */
+  window.drm_it = function(name, callback) {
+    it(name, filterShim(callback, 'drm',
+        'Skipping tests that use a DRM license server.'));
   };
 
   /**
