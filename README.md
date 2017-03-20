@@ -1,25 +1,60 @@
 # ![Shaka Player](docs/shaka-player-logo.png)
 
-Shaka Player is a JavaScript library for adaptive video streaming.
-It plays [DASH][] content without browser plugins using
+Shaka Player is an open-source JavaScript library for adaptive media.  It plays
+adaptive media formats (such as [DASH][] and [HLS][]) in a browser, without
+using plugins or Flash.  Instead, Shaka Player uses the open web standards
 [MediaSource Extensions][] and [Encrypted Media Extensions][].
 
-We are currently testing on the latest stable releases of Chrome, Firefox, and
-Edge, as well as IE 11 and Safari. We test using both Widevine and PlayReady,
-but any browser-supported DRM system available through EME should work.
-
 Our main goal is to make it as easy as possible to stream adaptive bitrate
-video using modern browser technologies. We try to keep the library light and
-simple, and it has no third-party dependencies. Everything you need to build
-and deploy is in the sources.
+video and audio using modern browser technologies. We try to keep the library
+light, simple, and free from third-party dependencies. Everything you need to
+build and deploy is in the sources.
 
-We support both ISO BMFF (MP4) and WebM content (even in the same
-manifest), WebVTT for subtitles and captions, both clear and encrypted content,
-and multilingual content. And best of all, it's free!
+Shaka Player supports any browser that supports the necessary web standards.
+It is actively tested with:
+  - Chrome
+  - Chromecast
+  - Firefox
+  - Microsoft Edge
+  - IE 11
+  - Safari
+  - [Widevine][]
+  - [PlayReady][]
+
+Shaka Player supports:
+  - Streaming formats:
+    - [DASH][]
+    - [HLS][]
+  - protected content:
+    - [Widevine][]
+    - [PlayReady][]
+    - Clear Key
+    - any other [EME][]-compliant DRM system
+  - media formats:
+    - ISO-BMFF / MP4
+    - [WebM][] (depends on browser support)
+    - MPEG2-TS (depends on browser support)
+    - [WebVTT][]
+    - [TTML][]
+  - [Chromecast][]
+  - offline playback:
+    - clear content (all browsers)
+    - protected content (depends on browser support)
+
+*Please note that Shaka Player cannot support iOS due to a lack of
+[MediaSource Extensions][] on that platform.*
 
 [DASH]: http://dashif.org/
+[HLS]: https://developer.apple.com/streaming/
+[Widevine]: http://www.widevine.com/
+[PlayReady]: https://www.microsoft.com/playready/
+[WebM]: https://www.webmproject.org/
+[WebVTT]: https://w3c.github.io/webvtt/
+[TTML]: https://www.w3.org/TR/ttaf1-dfxp/
+[Chromecast]: https://www.google.com/chromecast/
 [MediaSource Extensions]: http://w3c.github.io/media-source/
 [Encrypted Media Extensions]: https://w3c.github.io/encrypted-media/
+[EME]: https://w3c.github.io/encrypted-media/
 
 
 ## Important Links ##
