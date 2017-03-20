@@ -285,6 +285,23 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
             done();
           });
     });
+
+    it('fills in defaults for partial request objects', function(done) {
+      var originalRequest = {
+        uris: ['resolve://foo']
+      };
+
+      resolveScheme.and.callFake(function(uri, request, requestTypePassed) {
+        // NetworkingEngine should have filled in these values:
+        expect(request.method).toBeTruthy();
+        expect(request.headers).toBeTruthy();
+        expect(request.retryParameters).toBeTruthy();
+
+        return Promise.resolve({});
+      });
+      networkingEngine.request(requestType, originalRequest)
+          .catch(fail).then(done);
+    });
   });
 
   describe('request filter', function() {
@@ -480,6 +497,11 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
           })
           .then(done);
     });
+
+    it('causes no errors to remove an unused filter', function() {
+      var unusedFilter = jasmine.createSpy('unused filter');
+      networkingEngine.unregisterRequestFilter(unusedFilter);
+    });
   });
 
   describe('response filter', function() {
@@ -646,6 +668,11 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
             expect(filter.calls.count()).toBe(2);
             done();
           });
+    });
+
+    it('causes no errors to remove an unused filter', function() {
+      var unusedFilter = jasmine.createSpy('unused filter');
+      networkingEngine.unregisterResponseFilter(unusedFilter);
     });
   });
 
