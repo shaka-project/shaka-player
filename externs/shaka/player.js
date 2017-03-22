@@ -465,7 +465,56 @@ shakaExtern.ManifestConfiguration;
 
 /**
  * @typedef {{
+ *   adjustOffset: boolean,
+ *   adjustWindowEnd: boolean,
+ *   bFrameCount: number
+ * }}
+ *
+ * @description
+ * This configuration block can be used to account for a bug in chrome that
+ * uses the DTS instead of the PTS for timestamp comparisons in the MSE.
+ * https://bugs.chromium.org/p/chromium/issues/detail?id=398130
+ *
+ * There are two problems that arise from this bug:
+ *
+ * 1. The presentationTimeOffset (PTO) will be set too far in the future since
+ *    the DTS falls before the PTS. This will lead to a negative starting value
+ *    for the presentation time, which, in Chrome throws error 3014. This
+ *    will only happen if the base_media_decode_time in your tftd is set
+ *    (correctly) to the DTS. ffmpeg, for example, will set it to the PTS by
+ *    default, which would mask the aforementioned bug.
+ * 2. Periods will get incorrect durations, leading to gaps in the timeline.
+ *    This happens because the Chrome MSE expects appendWindowEnd to be in DTS
+ *    time, and thus it filters frames after the last DTS, which will always
+ *    be count(bframes) before the last PTS.
+ *
+ * The bframe count is typically an encoder configuration option, and can be
+ * held constant within fragments. Given the number of bframes, and the
+ * framerate, shaka can adjust the windowEnd, and the timestampOffset to
+ * account for Chrome's bug. To address (1) above, set adjustOffset to true,
+ * and to address (2), set adjustWindowEnd to true. You must provide an accurate
+ * bFrameCount for this to work correctly.
+ *
+ * Shaka will use the frameRate provided by the manifest to calculate frame
+ * durations.
+ *
+ * @property {boolean} adjustOffset
+ *   If true, adjust the timestampOffset on the MSE to account for bframes.
+ *   Use this if your base_media_decode time is set to the DTS.
+ * @property {boolean} adjustWindowEnd
+ *   If true, adjust the windowEnd on the MSE to accounbt for bframes.
+ *   Use this to correct your period durations.
+ * @property {number} bFrameCount
+ *   The number of bframes in each segment.
+ * @exportDoc
+ */
+shakaExtern.BFrameAdjustment;
+
+
+/**
+ * @typedef {{
  *   retryParameters: shakaExtern.RetryParameters,
+ *   bFrameAdjustment: shakaExtern.BFrameAdjustment,
  *   rebufferingGoal: number,
  *   bufferingGoal: number,
  *   bufferBehind: number,
@@ -477,6 +526,8 @@ shakaExtern.ManifestConfiguration;
  * @description
  * The StreamingEngine's configuration options.
  *
+ * @property {shakaExtern.BFrameAdjustment} bFrameAdjustment
+ *   Configuration to address Chrome PTS/DTS bug
  * @property {shakaExtern.RetryParameters} retryParameters
  *   Retry parameters for segment requests.
  * @property {number} rebufferingGoal
