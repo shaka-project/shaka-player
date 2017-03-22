@@ -210,6 +210,11 @@ shakaDemo.refreshAssetList_ = function() {
  * @private
  */
 shakaDemo.onCastStatusChange_ = function(connected) {
+  if (!shakaDemo.offlineOptGroup_) {
+    // No offline support.
+    return;
+  }
+
   // When we are casting, offline assets become unavailable.
   shakaDemo.offlineOptGroup_.disabled = connected;
 
