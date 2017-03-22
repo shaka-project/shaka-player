@@ -96,11 +96,11 @@ describe('Mp4vttParser', function() {
   it('accounts for offset', function() {
     var cues =
         [
-         {start: 111.8, end: 115.8, text: 'It has shed much innocent blood.\n'},
-         {start: 118, end: 120, text:
+         {start: 121.8, end: 125.8, text: 'It has shed much innocent blood.\n'},
+         {start: 128, end: 130, text:
            'You\'re a fool for traveling alone,\nso completely unprepared.\n'}
         ];
-    var result = shaka.media.Mp4VttParser(vttSegment, 0, 0, 0, false);
+    var result = shaka.media.Mp4VttParser(vttSegment, 10, 0, 0, false);
     verifyHelper(cues, result);
   });
 
