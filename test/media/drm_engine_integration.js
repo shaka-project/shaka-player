@@ -127,7 +127,7 @@ describe('DrmEngine', function() {
       var expectedObject = {};
       expectedObject[ContentType.AUDIO] = 'audio/mp4; codecs="mp4a.40.2"';
       expectedObject[ContentType.VIDEO] = 'video/mp4; codecs="avc1.640015"';
-      mediaSourceEngine.init(expectedObject, false);
+      mediaSourceEngine.init(expectedObject);
       done();
     });
   });

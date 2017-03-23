@@ -281,7 +281,6 @@ describe('StreamingEngine', function() {
       retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
       bufferBehind: 15,
       ignoreTextStreamFailures: false,
-      useRelativeCueTimestamps: false,
       startAtSegmentBoundary: false,
       smallGapLimit: 0.5,
       jumpLargeGaps: false

@@ -470,7 +470,6 @@ shakaExtern.ManifestConfiguration;
  *   bufferingGoal: number,
  *   bufferBehind: number,
  *   ignoreTextStreamFailures: boolean,
- *   useRelativeCueTimestamps: boolean,
  *   startAtSegmentBoundary: boolean,
  *   smallGapLimit: number,
  *   jumpLargeGaps: boolean
@@ -497,9 +496,6 @@ shakaExtern.ManifestConfiguration;
  * @property {boolean} ignoreTextStreamFailures
  *   If true, the player will ignore text stream failures and proceed to play
  *   other streams.
- * @property {boolean} useRelativeCueTimestamps
- *   If true, WebVTT cue timestamps will be treated as relative to the start
- *   time of the VTT segment. Defaults to false.
  * @property {boolean} startAtSegmentBoundary
  *   If true, adjust the start time backwards so it is at the start of a
  *   segment. This affects both explicit start times and calculated start time

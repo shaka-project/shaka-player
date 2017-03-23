@@ -29,7 +29,8 @@ describe('Cue', function() {
     var cues = parseVtt(
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:20.000\n' +
-        'Test');
+        'Test',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
     expect(cues.length).toBe(0);
   });
 
@@ -40,7 +41,7 @@ describe('Cue', function() {
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000\n' +
         'Test',
-        /* offset */ 7);
+        {periodStart: 0, segmentStart: 7, segmentEnd: 0 });
     expect(cues.length).toBe(1);
     expect(cues[0].startTime).toBe(27);
     expect(cues[0].endTime).toBe(47);
@@ -54,17 +55,18 @@ describe('Cue', function() {
         'WEBVTT\n\n' +
         'ID1\n' +
         '00:00:20.000 --> 00:00:40.000 align:middle size:56% vertical:lr\n' +
-        'Test');
+        'Test',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
     expect(cues.length).toBe(1);
   });
 
   /**
    * @param {string} text
-   * @param {number=} opt_offset
+   * @param {!shakaExtern.TextParser.TimeContext} time
    * @return {!Array.<TextTrackCue>}
    */
-  function parseVtt(text, opt_offset) {
+  function parseVtt(text, time) {
     var data = shaka.util.StringUtils.toUTF8(text);
-    return shaka.media.VttTextParser(data, opt_offset || 0, null, null, false);
+    return new shaka.media.VttTextParser().parseMedia(data, time);
   }
 });

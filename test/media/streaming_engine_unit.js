@@ -387,7 +387,6 @@ describe('StreamingEngine', function() {
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
         bufferBehind: Infinity,
         ignoreTextStreamFailures: false,
-        useRelativeCueTimestamps: false,
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
         jumpLargeGaps: false
@@ -521,7 +520,7 @@ describe('StreamingEngine', function() {
       expectedObject[ContentType.VIDEO] = 'video/mp4; codecs="avc1.42c01e"';
       expectedObject[ContentType.TEXT] = 'text/vtt';
       expect(mediaSourceEngine.init)
-          .toHaveBeenCalledWith(expectedObject, false);
+          .toHaveBeenCalledWith(expectedObject);
       expect(mediaSourceEngine.init.calls.count()).toBe(1);
       mediaSourceEngine.init.calls.reset();
 
@@ -1719,7 +1718,6 @@ describe('StreamingEngine', function() {
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
         bufferBehind: 10,
         ignoreTextStreamFailures: false,
-        useRelativeCueTimestamps: false,
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
         jumpLargeGaps: false
@@ -1809,7 +1807,6 @@ describe('StreamingEngine', function() {
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
         bufferBehind: 10,
         ignoreTextStreamFailures: false,
-        useRelativeCueTimestamps: false,
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
         jumpLargeGaps: false
@@ -1879,7 +1876,6 @@ describe('StreamingEngine', function() {
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
         bufferBehind: 10,
         ignoreTextStreamFailures: false,
-        useRelativeCueTimestamps: false,
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
         jumpLargeGaps: false
@@ -2064,7 +2060,6 @@ describe('StreamingEngine', function() {
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
         bufferBehind: Infinity,
         ignoreTextStreamFailures: false,
-        useRelativeCueTimestamps: false,
         startAtSegmentBoundary: false,
         // Only buffer ahead 1 second to make it easier to set segment
         // expectations based on playheadTime.
