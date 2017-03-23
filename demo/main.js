@@ -310,7 +310,7 @@ shakaDemo.postBrowserCheckParams_ = function(params) {
   shakaDemo.hashCanChange_ = true;
   shakaDemo.hashShouldChange_();
 
-  if ('play' in params) {
+  if ('noinput' in params || 'play' in params) {
     shakaDemo.load();
   }
 };
@@ -394,9 +394,11 @@ shakaDemo.hashShouldChange_ = function() {
       params.push(logLevel);
     }
   }
-
   if (document.getElementById('enableAutoplay').checked) {
     params.push('play');
+  }
+  if ('noinput' in shakaDemo.getParams_()) {
+    params.push('noinput');
   }
 
   location.hash = '#' + params.join(';');
