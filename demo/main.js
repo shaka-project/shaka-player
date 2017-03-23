@@ -148,7 +148,7 @@ shakaDemo.init = function() {
       shakaDemo.player_.addEventListener('error', shakaDemo.onErrorEvent_);
       shakaDemo.localPlayer_ = localPlayer;
 
-      shakaDemo.setupAssets_();
+      var asyncSetup = shakaDemo.setupAssets_();
       shakaDemo.setupOffline_();
       shakaDemo.setupConfiguration_();
       shakaDemo.setupInfo_();
@@ -157,7 +157,9 @@ shakaDemo.init = function() {
       shakaDemo.controls_.init(shakaDemo.castProxy_, shakaDemo.onError_,
                                shakaDemo.onCastStatusChange_);
 
-      shakaDemo.postBrowserCheckParams_(params);
+      asyncSetup.then(function() {
+        shakaDemo.postBrowserCheckParams_(params);
+      });
     });
   }
 };
@@ -255,10 +257,11 @@ shakaDemo.preBrowserCheckParams_ = function(params) {
 };
 
 
-/** @private */
-shakaDemo.postOfflineLoadOperation_ = function() {
-  var params = shakaDemo.getParams_();
-
+/**
+ * @param {!Object.<string, string>} params
+ * @private
+ */
+shakaDemo.postBrowserCheckParams_ = function(params) {
   // If a custom asset was given in the URL, select it now.
   if ('asset' in params) {
     var assetList = document.getElementById('assetList');
@@ -266,7 +269,8 @@ shakaDemo.postOfflineLoadOperation_ = function() {
     var isDefault = false;
     // Check all options except the last, which is 'custom asset'.
     for (var index = 0; index < assetList.options.length - 1; index++) {
-      if (assetList[index].asset.manifestUri == assetUri) {
+      if (assetList[index].asset &&
+          assetList[index].asset.manifestUri == assetUri) {
         assetList.selectedIndex = index;
         isDefault = true;
         break;
@@ -284,21 +288,6 @@ shakaDemo.postOfflineLoadOperation_ = function() {
     }
   }
 
-  if ('play' in params) {
-    shakaDemo.load();
-  }
-
-  // Allow the hash to be changed, and give it an initial change.
-  shakaDemo.hashCanChange_ = true;
-  shakaDemo.hashShouldChange_();
-};
-
-
-/**
-  * @param {!Object.<string, string>} params
-  * @private
-  */
-shakaDemo.postBrowserCheckParams_ = function(params) {
   if ('noadaptation' in params) {
     var enableAdaptation = document.getElementById('enableAdaptation');
     enableAdaptation.checked = false;
@@ -315,6 +304,14 @@ shakaDemo.postBrowserCheckParams_ = function(params) {
     // programatically doesn't fire a 'change' event.
     var fakeEvent = /** @type {!Event} */({target: showTrickPlay});
     shakaDemo.onTrickPlayChange_(fakeEvent);
+  }
+
+  // Allow the hash to be changed, and give it an initial change.
+  shakaDemo.hashCanChange_ = true;
+  shakaDemo.hashShouldChange_();
+
+  if ('play' in params) {
+    shakaDemo.load();
   }
 };
 

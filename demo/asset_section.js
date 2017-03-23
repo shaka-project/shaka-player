@@ -27,7 +27,10 @@
 var shakaDemo = shakaDemo || {};
 
 
-/** @private */
+/**
+ * @return {!Promise}
+ * @private
+ */
 shakaDemo.setupAssets_ = function() {
   // Populate the asset list.
   var assetList = document.getElementById('assetList');
@@ -76,7 +79,8 @@ shakaDemo.setupAssets_ = function() {
     first.selected = true;
   }
 
-  shakaDemo.setupOfflineAssets_();
+  // This needs to be started before we add the custom asset option.
+  var asyncOfflineSetup = shakaDemo.setupOfflineAssets_();
 
   // Add an extra option for custom assets.
   var option = document.createElement('option');
@@ -99,6 +103,8 @@ shakaDemo.setupAssets_ = function() {
       'keyup', shakaDemo.onAssetKeyUp_);
   document.getElementById('manifestInput').addEventListener(
       'keyup', shakaDemo.onAssetKeyUp_);
+
+  return asyncOfflineSetup;
 };
 
 

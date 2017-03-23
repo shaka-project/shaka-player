@@ -134,8 +134,6 @@ shakaDemo.setupOfflineAssets_ = function() {
 
     shakaDemo.updateButtons_(true);
     return db.destroy();
-  }).then(function() {
-    shakaDemo.postOfflineLoadOperation_();
   });
 };
 
