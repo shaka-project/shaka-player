@@ -402,7 +402,13 @@ shakaDemo.hashShouldChange_ = function() {
   }
 
   location.hash = '#' + params.join(';');
-  location.search = '';
+
+  // If search is already blank, setting it triggers a navigation and reloads
+  // the page.  Only blank out the search if we have just upgraded from search
+  // parameters to hash parameters.
+  if (location.search) {
+    location.search = '';
+  }
 };
 
 
