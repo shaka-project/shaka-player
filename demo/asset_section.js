@@ -163,6 +163,11 @@ shakaDemo.preparePlayer_ = function(asset) {
 
   player.configure(config);
 
+  // TODO: document demo app debugging features
+  if (window.debugConfig) {
+    player.configure(window.debugConfig);
+  }
+
   return asset;
 };
 
