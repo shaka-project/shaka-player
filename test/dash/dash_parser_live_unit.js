@@ -56,6 +56,7 @@ describe('DashParser Live', function() {
   afterAll(function() {
     Date.now = oldNow;
     jasmine.clock().uninstall();
+    shaka.polyfill.Promise.uninstall();
   });
 
   /**

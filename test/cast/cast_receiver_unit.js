@@ -68,7 +68,7 @@ describe('CastReceiver', function() {
     // Since we can't write to window.navigator or navigator.userAgent, we use
     // Object.defineProperty.
     Object.defineProperty(window['navigator'],
-                          'userAgent', {value: 'CrKey'});
+                          'userAgent', {value: 'CrKey', configurable: true});
   });
 
   beforeEach(function() {
