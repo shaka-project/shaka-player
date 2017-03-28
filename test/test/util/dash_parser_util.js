@@ -70,9 +70,13 @@ shaka.test.Dash.verifySegmentIndex = function(
   }
 
   // Make sure that the references stop at the end.
+  var lastExpectedReference = references[references.length - 1];
   var positionAfterEnd =
-      stream.findSegmentPosition(references[references.length - 1].endTime);
+      stream.findSegmentPosition(lastExpectedReference.endTime);
   expect(positionAfterEnd).toBe(null);
+  var referencePastEnd =
+      stream.getSegmentReference(lastExpectedReference.position + 1);
+  expect(referencePastEnd).toBe(null);
 };
 
 
