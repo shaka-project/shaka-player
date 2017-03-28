@@ -286,6 +286,10 @@ shakaDemo.postBrowserCheckParams_ = function(params) {
       var customAsset = document.getElementById('customAsset');
       customAsset.style.display = 'block';
     }
+
+    // Call updateButtons_ manually, because changing assetList
+    // programatically doesn't fire a 'change' event.
+    shakaDemo.updateButtons_(/* canHide */ true);
   }
 
   if ('noadaptation' in params) {
