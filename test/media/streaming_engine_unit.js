@@ -34,6 +34,7 @@ describe('StreamingEngine', function() {
   segmentSizes[ContentType.TEXT] = 500;
 
   var playhead;
+  var playheadObserver;
   var playheadTime;
   var playing;
 
@@ -150,7 +151,8 @@ describe('StreamingEngine', function() {
       };
     }
 
-    playhead = createMockPlayhead();
+    playhead = new shaka.test.FakePlayhead();
+    playheadObserver = new shaka.test.FakePlayheadObserver();
     playheadTime = 0;
     playing = false;
 
@@ -249,7 +251,7 @@ describe('StreamingEngine', function() {
       segmentData.text.segmentPeriodTimes.push(segmentsInFirstPeriod * 10);
     }
 
-    playhead = createMockPlayhead();
+    playhead = new shaka.test.FakePlayhead();
     playheadTime = 110;
     playing = false;
 
@@ -394,6 +396,7 @@ describe('StreamingEngine', function() {
 
     var playerInterface = {
       playhead: playhead,
+      playheadObserver: playheadObserver,
       mediaSourceEngine: mediaSourceEngine,
       netEngine: /** @type {!shaka.net.NetworkingEngine} */(netEngine),
       onChooseStreams: onChooseStreams,
@@ -2300,14 +2303,5 @@ describe('StreamingEngine', function() {
     timeline.segmentAvailabilityStart++;
     timeline.segmentAvailabilityEnd++;
   };
-
-  function createMockPlayhead() {
-    return {
-      destroy: jasmine.createSpy('destroy'),
-      setRebufferingGoal: jasmine.createSpy('setRebufferingGoal'),
-      getTime: jasmine.createSpy('getTime'),
-      setBuffering: jasmine.createSpy('setBuffering')
-    };
-  }
 });
 

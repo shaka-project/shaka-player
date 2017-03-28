@@ -24,6 +24,7 @@ describe('StreamingEngine', function() {
   var timeline;
 
   var playhead;
+  var playheadObserver;
   var onBuffering;
 
   var mediaSource;
@@ -223,10 +224,15 @@ describe('StreamingEngine', function() {
         /** @type {shakaExtern.Manifest} */ (manifest),
         2 /* rebufferingGoal */,
         null /* startTime */,
+        onSeek);
+    playheadObserver = new shaka.media.PlayheadObserver(
+        /** @type {!HTMLVideoElement} */(video),
+        /** @type {shakaExtern.Manifest} */ (manifest),
+        2 /* rebufferingGoal */,
         onBuffering,
-        onSeek,
         function() {},
         function() {});
+
   }
 
   function setupManifest(
@@ -276,6 +282,7 @@ describe('StreamingEngine', function() {
     };
     var playerInterface = {
       playhead: playhead,
+      playheadObserver: playheadObserver,
       mediaSourceEngine: mediaSourceEngine,
       netEngine: /** @type {!shaka.net.NetworkingEngine} */(netEngine),
       onChooseStreams: onChooseStreams,
@@ -298,6 +305,7 @@ describe('StreamingEngine', function() {
       return Promise.all([
         mediaSourceEngine.destroy(),
         playhead.destroy(),
+        playheadObserver.destroy(),
         eventManager.destroy()
       ]);
     }).catch(fail).then(done);

@@ -66,11 +66,10 @@ describe('Player', function() {
         return networkingEngine;
       };
       player.createPlayhead = function() {
-        return {
-          destroy: function() {},
-          addTimelineRegion: function() {},
-          getTime: function() { return 0; }
-        };
+        return new shaka.test.FakePlayhead();
+      };
+      player.createPlayheadObserver = function() {
+        return new shaka.test.FakePlayheadObserver();
       };
       player.createMediaSource = function() { return Promise.resolve(); };
       player.createMediaSourceEngine = function() {

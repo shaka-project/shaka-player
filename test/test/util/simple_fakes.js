@@ -18,6 +18,8 @@
 goog.provide('shaka.test.FakeAbrManager');
 goog.provide('shaka.test.FakeDrmEngine');
 goog.provide('shaka.test.FakeManifestParser');
+goog.provide('shaka.test.FakePlayhead');
+goog.provide('shaka.test.FakePlayheadObserver');
 goog.provide('shaka.test.FakePresentationTimeline');
 goog.provide('shaka.test.FakeStreamingEngine');
 goog.provide('shaka.test.FakeVideo');
@@ -435,3 +437,55 @@ shaka.test.FakePresentationTimeline.prototype.getSegmentAvailabilityEnd;
 
 /** @type {jasmine.Spy} */
 shaka.test.FakePresentationTimeline.prototype.getSeekRangeEnd;
+
+
+
+/**
+ * Creates a fake Playhead object.
+ *
+ * @constructor
+ * @struct
+ * @extends {shaka.media.Playhead}
+ * @return {!Object}
+ */
+shaka.test.FakePlayhead = function() {
+  return {
+    destroy: jasmine.createSpy('destroy').and.returnValue(Promise.resolve()),
+    setRebufferingGoal: jasmine.createSpy('setRebufferingGoal'),
+    setStartTime: jasmine.createSpy('setStartTime'),
+    getTime: jasmine.createSpy('getTime').and.returnValue(0),
+    setBuffering: jasmine.createSpy('setBuffering'),
+    getPlaybackRate: jasmine.createSpy('getPlaybackRate').and.returnValue(1),
+    setPlaybackRate: jasmine.createSpy('setPlaybackRate')
+  };
+};
+
+
+
+/**
+ * Creates a fake PlayheadObserver object.
+ *
+ * @constructor
+ * @struct
+ * @extends {shaka.media.PlayheadObserver}
+ * @return {!Object}
+ */
+shaka.test.FakePlayheadObserver = function() {
+  return {
+    seeked: jasmine.createSpy('seeked'),
+    setRebufferingGoal: jasmine.createSpy('setRebufferingGoal'),
+    addTimelineRegion: jasmine.createSpy('addTimelineRegion')
+  };
+};
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePlayheadObserver.prototype.seeked;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePlayheadObserver.prototype.setRebufferingGoal;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePlayheadObserver.prototype.addTimelineRegion;
