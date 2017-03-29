@@ -1,3 +1,26 @@
+## 2.0.7 (2017-03-29)
+
+New Features:
+  - Improved keyboard navigation in demo page for accessibility
+  - Play through small gaps at the start of the timeline
+  - Add a method for accessing the HTMLMediaElement from the Player
+    - https://github.com/google/shaka-player/pull/723
+  - Improved error reporting for HTTP errors
+
+Bugfixes:
+  - Fixed a DASH compliance bug in SegmentList w/ presentationTimeOffset
+  - Fixed compiler renaming in emsg events.
+    - https://github.com/google/shaka-player/issues/717
+  - Fix period transitions where text streams may be absent
+    - https://github.com/google/shaka-player/issues/715
+  - Fix Firefox DRM detection
+  - Fix cleanup of expired EME sessions for offline
+  - Fix demo app error thrown when offline is not supported
+  - Fix infinite loop in offline storage of SegmentTemplate-based DASH
+    - https://github.com/google/shaka-player/issues/739
+  - Fix contamination between tests
+
+
 ## 2.0.6 (2017-02-24)
 
 New Features:
