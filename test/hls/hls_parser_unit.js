@@ -99,7 +99,7 @@ describe('HlsParser', function() {
   it('parses audio and video variant', function(done) {
     var master = [
       '#EXTM3U\n',
-      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1, mp4a",',
       'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
       'test://video\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
@@ -141,7 +141,7 @@ describe('HlsParser', function() {
   it('parses multiple variants', function(done) {
     var master = [
       '#EXTM3U\n',
-      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1, mp4a",',
       'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
       'test://video\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1,mp4a",',
