@@ -94,9 +94,6 @@ module.exports = function(config) {
       args: [{}],
     },
 
-    // web server port
-    port: 9876,
-
     // enable / disable colors in the output (reporters and logs)
     colors: true,
 
@@ -197,12 +194,6 @@ module.exports = function(config) {
 
   if (flagPresent('specFilter')) {
     setClientArg(config, 'specFilter', getFlagValue('specFilter'));
-  }
-
-  var hostname = getFlagValue('hostname');
-  if (hostname !== null) {
-    // Point the browsers to a hostname other than localhost.
-    config.set({hostname: hostname});
   }
 };
 
