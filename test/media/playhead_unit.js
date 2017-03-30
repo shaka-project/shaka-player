@@ -133,8 +133,8 @@ describe('Playhead', function() {
     expect(video.currentTime).toBe(5);
     expect(playhead.getTime()).toBe(5);
 
-    // left = start + 1 = 5 + 1 = 6
-    // safe = left + rebufferingGoal = 6 + 10 = 16
+    // safe = start + rebufferingGoal = 5 + 10 = 15
+    // safeSeek = safeSeek + 1 = 15 + 1 = 16
 
     // Seek in safe region & in buffered region.
     video.currentTime = 26;
@@ -158,8 +158,8 @@ describe('Playhead', function() {
     // region).
     video.currentTime = 5.5;
     video.on['seeking']();
-    expect(video.currentTime).toBe(17);
-    expect(playhead.getTime()).toBe(17);
+    expect(video.currentTime).toBe(16);
+    expect(playhead.getTime()).toBe(16);
     expect(onSeek).not.toHaveBeenCalled();
     video.on['seeking']();
     expect(onSeek).toHaveBeenCalled();
@@ -178,8 +178,8 @@ describe('Playhead', function() {
     // Seek outside safe region & in unbuffered region.
     video.currentTime = 9;
     video.on['seeking']();
-    expect(video.currentTime).toBe(17);
-    expect(playhead.getTime()).toBe(17);
+    expect(video.currentTime).toBe(16);
+    expect(playhead.getTime()).toBe(16);
     expect(onSeek).not.toHaveBeenCalled();
     video.on['seeking']();
     expect(onSeek).toHaveBeenCalled();
@@ -200,16 +200,17 @@ describe('Playhead', function() {
     // Seek before start.
     video.currentTime = 1;
     video.on['seeking']();
-    expect(video.currentTime).toBe(17);
-    expect(playhead.getTime()).toBe(17);
+    expect(video.currentTime).toBe(16);
+    expect(playhead.getTime()).toBe(16);
     expect(onSeek).not.toHaveBeenCalled();
     video.on['seeking']();
     expect(onSeek).toHaveBeenCalled();
 
     onSeek.calls.reset();
 
-    // Seek with end < safe (note: safe == 16).
+    // Seek with safe == end
     timeline.getSegmentAvailabilityEnd.and.returnValue(12);
+    timeline.getSafeAvailabilityStart.and.returnValue(12);
 
     // Seek before start
     video.currentTime = 4;
@@ -225,8 +226,10 @@ describe('Playhead', function() {
     // Seek in window.
     video.currentTime = 8;
     video.on['seeking']();
-    expect(video.currentTime).toBe(8);
-    expect(playhead.getTime()).toBe(8);
+    expect(video.currentTime).toBe(12);
+    expect(playhead.getTime()).toBe(12);
+    expect(onSeek).not.toHaveBeenCalled();
+    video.on['seeking']();
     expect(onSeek).toHaveBeenCalled();
 
     onSeek.calls.reset();
@@ -249,6 +252,7 @@ describe('Playhead', function() {
     timeline.isLive.and.returnValue(false);
     timeline.getEarliestStart.and.returnValue(5);
     timeline.getSegmentAvailabilityStart.and.returnValue(5);
+    timeline.getSafeAvailabilityStart.and.returnValue(5);
     timeline.getSegmentAvailabilityEnd.and.returnValue(60);
     timeline.getSegmentAvailabilityDuration.and.returnValue(null);
 
@@ -328,6 +332,7 @@ describe('Playhead', function() {
       timeline.isLive.and.returnValue(false);
       timeline.getEarliestStart.and.returnValue(5);
       timeline.getSegmentAvailabilityStart.and.returnValue(5);
+      timeline.getSafeAvailabilityStart.and.returnValue(5);
       timeline.getSegmentAvailabilityEnd.and.returnValue(60);
       timeline.getSegmentAvailabilityDuration.and.returnValue(30);
 
@@ -345,6 +350,7 @@ describe('Playhead', function() {
       // Simulate pausing.
       timeline.getEarliestStart.and.returnValue(10);
       timeline.getSegmentAvailabilityStart.and.returnValue(10);
+      timeline.getSafeAvailabilityStart.and.returnValue(10);
       timeline.getSegmentAvailabilityEnd.and.returnValue(70);
       timeline.getSegmentAvailabilityDuration.and.returnValue(30);
 
