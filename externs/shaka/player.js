@@ -471,7 +471,9 @@ shakaExtern.ManifestConfiguration;
  *   bufferBehind: number,
  *   ignoreTextStreamFailures: boolean,
  *   useRelativeCueTimestamps: boolean,
- *   startAtSegmentBoundary: boolean
+ *   startAtSegmentBoundary: boolean,
+ *   smallGapLimit: number,
+ *   jumpLargeGaps: boolean
  * }}
  *
  * @description
@@ -503,6 +505,15 @@ shakaExtern.ManifestConfiguration;
  *   segment. This affects both explicit start times and calculated start time
  *   for live streams. This can put us further from the live edge. Defaults to
  *   false.
+ * @property {number} smallGapLimit
+ *   The limit (in seconds) for a gap in the media to be considered "small".
+ *   Small gaps are jumped automatically without events.  Large gaps result
+ *   in a Player event and can be jumped.
+ * @property {boolean} jumpLargeGaps
+ *   If true, jump large gaps in addition to small gaps.  The event will be
+ *   raised first.  Then, if the app doesn't call preventDefault() on the event,
+ *   the Player will jump the gap.  If false, then the event will be raised,
+ *   but the gap will not be jumped.
  * @exportDoc
  */
 shakaExtern.StreamingConfiguration;

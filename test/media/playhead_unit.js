@@ -20,6 +20,7 @@ describe('Playhead', function() {
   var timeline;
   var manifest;
   var playhead;
+  var config;
 
   // Callback to us from Playhead when a valid 'seeking' event occurs.
   var onSeek;
@@ -40,10 +41,26 @@ describe('Playhead', function() {
     timeline.getDuration.and.throwError(new Error());
     timeline.setDuration.and.throwError(new Error());
 
-    manifest = /** @type {shakaExtern.Manifest} */ ({
+    // shakaExtern.Manifest
+    manifest = {
       periods: [],
-      presentationTimeline: timeline
-    });
+      presentationTimeline: timeline,
+      minBufferTime: 10,
+      offlineSessionIds: []
+    };
+
+    // shakaExtern.StreamingConfiguration
+    config = {
+      rebufferingGoal: 10,
+      bufferingGoal: 5,
+      retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+      bufferBehind: 15,
+      ignoreTextStreamFailures: false,
+      useRelativeCueTimestamps: false,
+      startAtSegmentBoundary: false,
+      smallGapLimit: 0.5,
+      jumpLargeGaps: false
+    };
   });
 
   afterEach(function(done) {
@@ -56,7 +73,7 @@ describe('Playhead', function() {
       playhead = new shaka.media.Playhead(
           video,
           manifest,
-          10 /* minBufferTime */,
+          config,
           5 /* startTime */,
           onSeek);
 
@@ -95,7 +112,7 @@ describe('Playhead', function() {
       playhead = new shaka.media.Playhead(
           video,
           manifest,
-          10 /* minBufferTime */,
+          config,
           5 /* startTime */,
           onSeek);
 
@@ -121,7 +138,7 @@ describe('Playhead', function() {
     playhead = new shaka.media.Playhead(
         video,
         manifest,
-        10 /* rebufferingGoal */,
+        config,
         5 /* startTime */,
         onSeek);
 
@@ -259,7 +276,7 @@ describe('Playhead', function() {
     playhead = new shaka.media.Playhead(
         video,
         manifest,
-        10 /* rebufferingGoal */,
+        config,
         5 /* startTime */,
         onSeek);
 
@@ -305,7 +322,7 @@ describe('Playhead', function() {
       playhead = new shaka.media.Playhead(
           video,
           manifest,
-          10 /* rebufferingGoal */,
+          config,
           5 /* startTime */,
           onSeek);
 
@@ -339,7 +356,7 @@ describe('Playhead', function() {
       playhead = new shaka.media.Playhead(
           video,
           manifest,
-          10 /* rebufferingGoal */,
+          config,
           5 /* startTime */,
           onSeek);
 

@@ -217,12 +217,25 @@ describe('StreamingEngine', function() {
   }
 
   function setupPlayhead() {
+    /** @type {shakaExtern.StreamingConfiguration} */
+    var config = {
+      rebufferingGoal: 2,
+      bufferingGoal: 5,
+      retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+      bufferBehind: 15,
+      ignoreTextStreamFailures: false,
+      useRelativeCueTimestamps: false,
+      startAtSegmentBoundary: false,
+      smallGapLimit: 0.5,
+      jumpLargeGaps: false
+    };
+
     onBuffering = jasmine.createSpy('onBuffering');
     var onSeek = function() { streamingEngine.seeked(); };
     playhead = new shaka.media.Playhead(
         /** @type {!HTMLVideoElement} */(video),
         /** @type {shakaExtern.Manifest} */ (manifest),
-        2 /* rebufferingGoal */,
+        config,
         null /* startTime */,
         onSeek);
     playheadObserver = new shaka.media.PlayheadObserver(
@@ -278,7 +291,9 @@ describe('StreamingEngine', function() {
       bufferBehind: 15,
       ignoreTextStreamFailures: false,
       useRelativeCueTimestamps: false,
-      startAtSegmentBoundary: false
+      startAtSegmentBoundary: false,
+      smallGapLimit: 0.5,
+      jumpLargeGaps: false
     };
     var playerInterface = {
       playhead: playhead,

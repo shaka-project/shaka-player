@@ -390,7 +390,9 @@ describe('StreamingEngine', function() {
         bufferBehind: Infinity,
         ignoreTextStreamFailures: false,
         useRelativeCueTimestamps: false,
-        startAtSegmentBoundary: false
+        startAtSegmentBoundary: false,
+        smallGapLimit: 0.5,
+        jumpLargeGaps: false
       };
     }
 
@@ -1706,7 +1708,9 @@ describe('StreamingEngine', function() {
         bufferBehind: 10,
         ignoreTextStreamFailures: false,
         useRelativeCueTimestamps: false,
-        startAtSegmentBoundary: false
+        startAtSegmentBoundary: false,
+        smallGapLimit: 0.5,
+        jumpLargeGaps: false
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -1794,7 +1798,9 @@ describe('StreamingEngine', function() {
         bufferBehind: 10,
         ignoreTextStreamFailures: false,
         useRelativeCueTimestamps: false,
-        startAtSegmentBoundary: false
+        startAtSegmentBoundary: false,
+        smallGapLimit: 0.5,
+        jumpLargeGaps: false
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -1861,7 +1867,9 @@ describe('StreamingEngine', function() {
         bufferBehind: 10,
         ignoreTextStreamFailures: false,
         useRelativeCueTimestamps: false,
-        startAtSegmentBoundary: false
+        startAtSegmentBoundary: false,
+        smallGapLimit: 0.5,
+        jumpLargeGaps: false
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -2047,7 +2055,9 @@ describe('StreamingEngine', function() {
         // Only buffer ahead 1 second to make it easier to set segment
         // expectations based on playheadTime.
         rebufferingGoal: 1,
-        bufferingGoal: 1
+        bufferingGoal: 1,
+        smallGapLimit: 0.5,
+        jumpLargeGaps: false
       });
 
       playhead.getTime.and.returnValue(0);
