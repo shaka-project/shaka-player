@@ -331,17 +331,34 @@ shakaAssets.testAssets = [
     }
   },
   {
-    name: 'Angel One (HLS, multilingual)',
+    name: 'Angel One (HLS, MP4, multilingual)',
     manifestUri: '//storage.googleapis.com/shaka-demo-assets/angel-one-hls/master.m3u8',  // gjslint: disable=110
 
     encoder: shakaAssets.Encoder.APPLE,
     source: shakaAssets.Source.SHAKA,
     drm: [],
     features: [
+      shakaAssets.Feature.HLS,
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.MULTIPLE_LANGUAGES,
-      shakaAssets.Feature.HLS
+      shakaAssets.Feature.MULTIPLE_LANGUAGES
     ]
+  },
+  {
+    name: 'Angel One (HLS, MP4, multilingual, Widevine)',
+    manifestUri: '//storage.googleapis.com/shaka-demo-assets/angel-one-widevine-hls/hls.m3u8',  // gjslint: disable=110
+
+    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
+    source: shakaAssets.Source.SHAKA,
+    drm: [shakaAssets.KeySystem.WIDEVINE],
+    features: [
+      shakaAssets.Feature.HLS,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.MULTIPLE_LANGUAGES
+    ],
+
+    licenseServers: {
+      'com.widevine.alpha': '//widevine-proxy.appspot.com/proxy'
+    }
   },
   {
     name: 'Sintel 4k (multicodec)',

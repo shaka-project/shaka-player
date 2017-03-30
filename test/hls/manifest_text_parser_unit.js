@@ -256,22 +256,51 @@ describe('ManifestTextParser', function() {
           '#EXTINF:5.99467\n' +
           'https://test/test.mp4\n');
     });
+
+    it('tracks playlist URI', function() {
+      verifyPlaylist(
+          {
+            uri: 'https://test/manifest.m3u8',
+            type: shaka.hls.PlaylistType.MEDIA,
+            tags: [
+              new shaka.hls.Tag(/* id */ 0, 'EXT-X-MEDIA-SEQUENCE', [], '1')
+            ],
+            segments: [
+              new shaka.hls.Segment('test.mp4',
+                  [
+                    new shaka.hls.Tag(/* id */ 2, 'EXTINF', [], '5.99467')
+                  ])
+            ]
+          },
+          // playlist text:
+          '#EXTM3U\n' +
+          '#EXT-X-MEDIA-SEQUENCE:1\n' +
+          '#EXTINF:5.99467\n' +
+          'test.mp4\n',
+          // manifest URI:
+          'https://test/manifest.m3u8');
+    });
   });
 
 
   /**
-     * @param {Object} expected
-     * @param {!string} string
-     */
-  function verifyPlaylist(expected, string) {
-    var data = shaka.util.StringUtils.toUTF8(string);
-    var actual = parser.parsePlaylist(data, /* uri */ '');
+   * @param {Object} expectedPlaylist
+   * @param {string} playlistText
+   * @param {string=} opt_manifestUri
+   */
+  function verifyPlaylist(expectedPlaylist, playlistText, opt_manifestUri) {
+    var manifestUri = opt_manifestUri || '';
+    var playlistBuffer = shaka.util.StringUtils.toUTF8(playlistText);
+    var actualPlaylist = parser.parsePlaylist(playlistBuffer, manifestUri);
 
-    expect(actual).toBeTruthy();
-    expect(actual.type).toEqual(expected.type);
-    expect(actual.tags).toEqual(expected.tags);
+    expect(actualPlaylist).toBeTruthy();
+    expect(actualPlaylist.type).toEqual(expectedPlaylist.type);
+    expect(actualPlaylist.tags).toEqual(expectedPlaylist.tags);
 
-    if (expected.segments)
-      expect(actual.segments).toEqual(expected.segments);
+    if (expectedPlaylist.segments)
+      expect(actualPlaylist.segments).toEqual(expectedPlaylist.segments);
+
+    if (expectedPlaylist.uri)
+      expect(actualPlaylist.uri).toEqual(expectedPlaylist.uri);
   }
 });
