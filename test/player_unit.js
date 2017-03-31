@@ -879,6 +879,48 @@ describe('Player', function() {
           .toHaveBeenCalledWith(ContentType.VIDEO, variant.video, false);
     });
 
+    it('doesn\'t switch audio if old and new variants ' +
+       'have the same audio track', function() {
+          chooseStreams();
+          canSwitch();
+
+          var period = manifest.periods[0];
+          var variant1 = period.variants[0];
+          var variant2 = period.variants[1];
+          expect(variant1.audio).toEqual(variant2.audio);
+
+          player.selectVariantTrack(variantTracks[0]);
+          streamingEngine.switch.calls.reset();
+
+          player.selectVariantTrack(variantTracks[1]);
+
+          expect(streamingEngine.switch).toHaveBeenCalledWith(
+              ContentType.VIDEO, variant2.video, false);
+          expect(streamingEngine.switch).not.toHaveBeenCalledWith(
+              ContentType.AUDIO, variant2.audio, false);
+        });
+
+    it('doesn\'t switch video if old and new variants ' +
+       'have the same video track', function() {
+          chooseStreams();
+          canSwitch();
+
+          var period = manifest.periods[0];
+          var variant1 = period.variants[0];
+          var variant2 = period.variants[2];
+          expect(variant1.video).toEqual(variant2.video);
+
+          player.selectVariantTrack(variantTracks[0]);
+          streamingEngine.switch.calls.reset();
+
+          player.selectVariantTrack(variantTracks[2]);
+
+          expect(streamingEngine.switch).toHaveBeenCalledWith(
+              ContentType.AUDIO, variant2.audio, false);
+          expect(streamingEngine.switch).not.toHaveBeenCalledWith(
+              ContentType.VIDEO, variant2.video, false);
+        });
+
     it('still switches streams if called during startup', function() {
       player.selectVariantTrack(variantTracks[1]);
       expect(streamingEngine.switch).not.toHaveBeenCalled();
@@ -896,13 +938,13 @@ describe('Player', function() {
     it('still switches streams if called while switching Periods', function() {
       chooseStreams();
 
-      player.selectVariantTrack(variantTracks[1]);
+      player.selectVariantTrack(variantTracks[3]);
       expect(streamingEngine.switch).not.toHaveBeenCalled();
 
       canSwitch();
 
       var period = manifest.periods[0];
-      var variant = period.variants[1];
+      var variant = period.variants[3];
       expect(streamingEngine.switch)
           .toHaveBeenCalledWith(ContentType.AUDIO, variant.audio, false);
       expect(streamingEngine.switch)
@@ -927,9 +969,9 @@ describe('Player', function() {
 
       streamingEngine.switch.calls.reset();
 
-      var variant = period.variants[1];
-      expect(variantTracks[1].id).toBe(variant.id);
-      player.selectVariantTrack(variantTracks[1]);
+      var variant = period.variants[2];
+      expect(variantTracks[2].id).toBe(variant.id);
+      player.selectVariantTrack(variantTracks[2]);
       expect(streamingEngine.switch)
           .toHaveBeenCalledWith(ContentType.TEXT, textStream, true);
       expect(streamingEngine.switch)
@@ -1254,7 +1296,7 @@ describe('Player', function() {
       });
 
       it('includes selectVariantTrack choices', function() {
-        var track = player.getVariantTracks()[1];
+        var track = player.getVariantTracks()[3];
         player.selectVariantTrack(track);
 
         var period = manifest.periods[0];
