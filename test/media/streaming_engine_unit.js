@@ -34,7 +34,6 @@ describe('StreamingEngine', function() {
   segmentSizes[ContentType.TEXT] = 500;
 
   var playhead;
-  var playheadObserver;
   var playheadTime;
   var playing;
 
@@ -152,7 +151,6 @@ describe('StreamingEngine', function() {
     }
 
     playhead = new shaka.test.FakePlayhead();
-    playheadObserver = new shaka.test.FakePlayheadObserver();
     playheadTime = 0;
     playing = false;
 
@@ -398,7 +396,6 @@ describe('StreamingEngine', function() {
 
     var playerInterface = {
       playhead: playhead,
-      playheadObserver: playheadObserver,
       mediaSourceEngine: mediaSourceEngine,
       netEngine: /** @type {!shaka.net.NetworkingEngine} */(netEngine),
       onChooseStreams: onChooseStreams,

@@ -20,6 +20,7 @@ describe('PlayheadObserver', function() {
   var video;
   var timeline;
   var manifest;
+  var config;
 
   var onBuffering;
   var onChangePeriod;
@@ -40,12 +41,27 @@ describe('PlayheadObserver', function() {
     video.buffered = createFakeBuffered([]);
 
     timeline = new shaka.test.FakePresentationTimeline();
-    manifest = /** @type {shakaExtern.Manifest} */ ({
+
+    // shakaExtern.Manifest
+    manifest = {
       periods: [],
       offlineSessionIds: [],
       minBufferTime: 0,
       presentationTimeline: timeline
-    });
+    };
+
+    // shakaExtern.StreamingConfiguration
+    config = {
+      rebufferingGoal: 10,
+      bufferingGoal: 5,
+      retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+      bufferBehind: 15,
+      ignoreTextStreamFailures: false,
+      useRelativeCueTimestamps: false,
+      startAtSegmentBoundary: false,
+      smallGapLimit: 0.5,
+      jumpLargeGaps: false
+    };
 
     onBuffering = jasmine.createSpy('onBuffering');
     onChangePeriod = jasmine.createSpy('onChangePeriod');
@@ -65,8 +81,7 @@ describe('PlayheadObserver', function() {
       video.buffered = createFakeBuffered([{start: 0, end: 20}]);
       video.currentTime = 0;
       observer = new shaka.media.PlayheadObserver(
-          video, manifest, /* rebufferingGoal */ 10, onBuffering, onEvent,
-          onChangePeriod);
+          video, manifest, config, onBuffering, onEvent, onChangePeriod);
 
       observer.seeked();
       jasmine.clock().tick(1000);
@@ -77,8 +92,7 @@ describe('PlayheadObserver', function() {
       video.buffered = createFakeBuffered([{start: 0, end: 20}]);
       video.currentTime = 0;
       observer = new shaka.media.PlayheadObserver(
-          video, manifest, /* rebufferingGoal */ 10, onBuffering, onEvent,
-          onChangePeriod);
+          video, manifest, config, onBuffering, onEvent, onChangePeriod);
 
       video.currentTime = 20;
       jasmine.clock().tick(1000);
@@ -90,8 +104,7 @@ describe('PlayheadObserver', function() {
       video.buffered = createFakeBuffered([{start: 0, end: 20}]);
       video.currentTime = 0;
       observer = new shaka.media.PlayheadObserver(
-          video, manifest, /* rebufferingGoal */ 10, onBuffering, onEvent,
-          onChangePeriod);
+          video, manifest, config, onBuffering, onEvent, onChangePeriod);
 
       video.currentTime = 40;
       observer.seeked();
@@ -104,8 +117,7 @@ describe('PlayheadObserver', function() {
       video.buffered = createFakeBuffered([{start: 0, end: 20}]);
       video.currentTime = 0;
       observer = new shaka.media.PlayheadObserver(
-          video, manifest, /* rebufferingGoal */ 10, onBuffering, onEvent,
-          onChangePeriod);
+          video, manifest, config, onBuffering, onEvent, onChangePeriod);
 
       video.currentTime = 22;
       jasmine.clock().tick(1000);
@@ -123,8 +135,7 @@ describe('PlayheadObserver', function() {
       video.buffered = createFakeBuffered([]);
       video.currentTime = 0;
       observer = new shaka.media.PlayheadObserver(
-          video, manifest, /* rebufferingGoal */ 10, onBuffering, onEvent,
-          onChangePeriod);
+          video, manifest, config, onBuffering, onEvent, onChangePeriod);
 
       jasmine.clock().tick(1000);
       expect(onBuffering).toHaveBeenCalledTimes(1);
@@ -141,8 +152,7 @@ describe('PlayheadObserver', function() {
       video.buffered = createFakeBuffered([]);
       video.currentTime = 0;
       observer = new shaka.media.PlayheadObserver(
-          video, manifest, /* rebufferingGoal */ 10, onBuffering, onEvent,
-          onChangePeriod);
+          video, manifest, config, onBuffering, onEvent, onChangePeriod);
 
       jasmine.clock().tick(1000);
       expect(onBuffering).toHaveBeenCalledTimes(1);
@@ -163,8 +173,7 @@ describe('PlayheadObserver', function() {
       timeline.getSegmentAvailabilityEnd.and.returnValue(60);
 
       observer = new shaka.media.PlayheadObserver(
-          video, manifest, /* rebufferingGoal */ 10, onBuffering, onEvent,
-          onChangePeriod);
+          video, manifest, config, onBuffering, onEvent, onChangePeriod);
 
       jasmine.clock().tick(1000);
       expect(onBuffering).not.toHaveBeenCalled();
@@ -182,8 +191,7 @@ describe('PlayheadObserver', function() {
       timeline.getSegmentAvailabilityEnd.and.returnValue(60);
 
       observer = new shaka.media.PlayheadObserver(
-          video, manifest, /* rebufferingGoal */ 10, onBuffering, onEvent,
-          onChangePeriod);
+          video, manifest, config, onBuffering, onEvent, onChangePeriod);
 
       jasmine.clock().tick(1000);
       expect(onBuffering).not.toHaveBeenCalled();
@@ -215,8 +223,7 @@ describe('PlayheadObserver', function() {
       video.buffered = createFakeBuffered([{start: 0, end: 60}]);
       video.currentTime = 0;
       observer = new shaka.media.PlayheadObserver(
-          video, manifest, /* rebufferingGoal */ 10, onBuffering, onEvent,
-          onChangePeriod);
+          video, manifest, config, onBuffering, onEvent, onChangePeriod);
     });
 
     describe('adding regions', function() {
@@ -431,8 +438,7 @@ describe('PlayheadObserver', function() {
       ];
 
       observer = new shaka.media.PlayheadObserver(
-          video, manifest, /* rebufferingGoal */ 10, onBuffering, onEvent,
-          onChangePeriod);
+          video, manifest, config, onBuffering, onEvent, onChangePeriod);
 
       // Ignore the call for the initial Period.
       jasmine.clock().tick(1000);
