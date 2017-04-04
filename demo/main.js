@@ -426,7 +426,8 @@ shakaDemo.onFocus_ = function(event) {
     // because the selection borders are ugly and should only be shown
     // when actually necessary (i.e. keyboard navigation).
 
-    if (document.activeElement.type != 'text') {
+    if (document.activeElement.type != 'text' &&
+        document.activeElement.type != 'select-one') {
       document.activeElement.blur();
     }
   }
