@@ -58,9 +58,9 @@ shaka.test.Dash.verifySegmentIndex = function(
     return;
   }
 
-  var positionBeforeFirst =
-      stream.findSegmentPosition(references[0].startTime - 1);
-  expect(positionBeforeFirst).toBe(null);
+  // Even if the first segment doesn't start at 0, this should return the first
+  // segment.
+  expect(stream.findSegmentPosition(0)).toBe(references[0].position);
 
   for (var i = 0; i < references.length - 1; i++) {
     var expectedRef = references[i];

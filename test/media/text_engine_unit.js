@@ -281,8 +281,13 @@ describe('TextEngine', function() {
 
     it('returns 0 if |t| is not buffered', function(done) {
       textEngine.appendBuffer(dummyData, 3, 6).then(function() {
-        expect(textEngine.bufferedAheadOf(2.9)).toBe(0);
         expect(textEngine.bufferedAheadOf(6.1)).toBe(0);
+      }).catch(fail).then(done);
+    });
+
+    it('ignores gaps in the content', function(done) {
+      textEngine.appendBuffer(dummyData, 3, 6).then(function() {
+        expect(textEngine.bufferedAheadOf(2)).toBe(3);
       }).catch(fail).then(done);
     });
 

@@ -596,7 +596,8 @@ ShakaControls.prototype.updateTimeAndSeekRange_ = function() {
   var duration = this.video_.duration;
   var bufferedLength = this.video_.buffered.length;
   var bufferedStart = bufferedLength ? this.video_.buffered.start(0) : 0;
-  var bufferedEnd = bufferedLength ? this.video_.buffered.end(0) : 0;
+  var bufferedEnd =
+      bufferedLength ? this.video_.buffered.end(bufferedLength - 1) : 0;
   var seekRange = this.player_.seekRange();
 
   this.seekBar_.min = seekRange.start;

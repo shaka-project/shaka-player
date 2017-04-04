@@ -112,9 +112,7 @@ describe('MediaSourceEngine', function() {
     });
 
     it('returns correct timestamps for one range', function() {
-      audioSourceBuffer.buffered.length = 1;
-      audioSourceBuffer.buffered.start.and.returnValue(0);
-      audioSourceBuffer.buffered.end.and.returnValue(10);
+      audioSourceBuffer.buffered = createFakeBuffered([{start: 0, end: 10}]);
 
       expect(mediaSourceEngine.bufferStart(ContentType.AUDIO, 0))
                                           .toBeCloseTo(0);
@@ -123,19 +121,8 @@ describe('MediaSourceEngine', function() {
     });
 
     it('returns correct timestamps for multiple ranges', function() {
-      audioSourceBuffer.buffered.length = 2;
-
-      audioSourceBuffer.buffered.start.and.callFake(function(i) {
-        if (i == 0) return 5;
-        if (i == 1) return 20;
-        throw new Error('Unexpected index');
-      });
-
-      audioSourceBuffer.buffered.end.and.callFake(function(i) {
-        if (i == 0) return 10;
-        if (i == 1) return 30;
-        throw new Error('Unexpected index');
-      });
+      audioSourceBuffer.buffered =
+          createFakeBuffered([{start: 5, end: 10}, {start: 20, end: 30}]);
 
       expect(mediaSourceEngine.bufferStart(ContentType.AUDIO, 0))
                                           .toBeCloseTo(5);
@@ -144,7 +131,7 @@ describe('MediaSourceEngine', function() {
     });
 
     it('returns null if there are no ranges', function() {
-      audioSourceBuffer.buffered.length = 0;
+      audioSourceBuffer.buffered = createFakeBuffered([]);
 
       expect(mediaSourceEngine.bufferStart(ContentType.AUDIO, 0)).toBeNull();
       expect(mediaSourceEngine.bufferEnd(ContentType.AUDIO, 0)).toBeNull();
@@ -175,9 +162,7 @@ describe('MediaSourceEngine', function() {
     });
 
     it('returns the amount of data ahead of the given position', function() {
-      audioSourceBuffer.buffered.length = 1;
-      audioSourceBuffer.buffered.start.and.returnValue(0);
-      audioSourceBuffer.buffered.end.and.returnValue(10);
+      audioSourceBuffer.buffered = createFakeBuffered([{start: 0, end: 10}]);
 
       expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 0))
                                               .toBeCloseTo(10);
@@ -188,36 +173,27 @@ describe('MediaSourceEngine', function() {
     });
 
     it('returns zero when given an unbuffered time', function() {
-      audioSourceBuffer.buffered.length = 1;
-      audioSourceBuffer.buffered.start.and.returnValue(0);
-      audioSourceBuffer.buffered.end.and.returnValue(10);
+      audioSourceBuffer.buffered = createFakeBuffered([{start: 5, end: 10}]);
 
       expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 10))
                                               .toBeCloseTo(0);
       expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 100))
                                               .toBeCloseTo(0);
-      expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, -0.001))
-                                              .toBeCloseTo(0);
     });
 
     it('returns the correct amount with multiple ranges', function() {
-      audioSourceBuffer.buffered.length = 2;
-      audioSourceBuffer.buffered.start.and.callFake(function(i) {
-        return i == 0 ? 1 : 6;
-      });
-      audioSourceBuffer.buffered.end.and.callFake(function(i) {
-        return i == 0 ? 3 : 10;
-      });
+      audioSourceBuffer.buffered =
+          createFakeBuffered([{start: 1, end: 3}, {start: 6, end: 10}]);
 
       // in range 0
       expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 1))
-                                              .toBeCloseTo(2);
+                                              .toBeCloseTo(6);
       expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 2.5))
-                                              .toBeCloseTo(0.5);
+                                              .toBeCloseTo(4.5);
 
       // between range 0 and 1
       expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 5))
-                                              .toBeCloseTo(0);
+                                              .toBeCloseTo(4);
 
       // in range 1
       expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 6))
@@ -226,44 +202,12 @@ describe('MediaSourceEngine', function() {
                                               .toBeCloseTo(0.1);
     });
 
-    it('jumps small gaps in media', function() {
-      audioSourceBuffer.buffered.length = 4;
-      audioSourceBuffer.buffered.start.and.callFake(function(i) {
-        return [1, 3.03, 7, 9.02][i];
-      });
-      audioSourceBuffer.buffered.end.and.callFake(function(i) {
-        return [3, 6, 9, 11][i];
-      });
-
-      expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 3.02))
-                                              .toBeCloseTo(2.98);
-      expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 2))
-                                              .toBeCloseTo(4);
-      expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 6))
-                                              .toBeCloseTo(0);
-      expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 6.98))
-                                              .toBeCloseTo(4.02);
-    });
-
     it('will forward to TextEngine', function() {
       mockTextEngine.bufferedAheadOf.and.returnValue(10);
 
       expect(mockTextEngine.bufferedAheadOf).not.toHaveBeenCalled();
       expect(mediaSourceEngine.bufferedAheadOf(ContentType.TEXT, 5)).toBe(10);
       expect(mockTextEngine.bufferedAheadOf).toHaveBeenCalledWith(5);
-
-      // This should get called with 25, return null, then MediaSourceEngine
-      // should retry at |25 + 5|.
-      mockTextEngine.bufferedAheadOf.calls.reset();
-      mockTextEngine.bufferedAheadOf.and.callFake(function(time) {
-        if (time < 30)
-          return null;
-        else
-          return 15;
-      });
-      expect(
-          mediaSourceEngine.bufferedAheadOf(ContentType.TEXT, 25, 5)).toBe(20);
-      expect(mockTextEngine.bufferedAheadOf).toHaveBeenCalled();
     });
   });
 

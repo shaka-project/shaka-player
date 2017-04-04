@@ -667,7 +667,7 @@ describe('Storage', function() {
             .then(function(manifest) {
               expect(manifest).toBeTruthy();
               expect(manifest.size).toBe(15);
-              expect(manifest.duration).toBe(3);
+              expect(manifest.duration).toBe(13);
               expect(netEngine.request.calls.count()).toBe(3);
               return fakeStorageEngine.get('manifest', 0);
             })

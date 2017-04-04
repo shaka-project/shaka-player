@@ -380,7 +380,6 @@ shaka.test.FakePresentationTimeline = function() {
     notifyMaxSegmentDuration: jasmine.createSpy('notifyMaxSegmentDuration'),
     isLive: jasmine.createSpy('isLive'),
     isInProgress: jasmine.createSpy('isInProgress'),
-    getEarliestStart: jasmine.createSpy('getEarliestStart'),
     getSegmentAvailabilityStart: getStart,
     getSafeAvailabilityStart: getSafeStart,
     getSegmentAvailabilityEnd: jasmine.createSpy('getSegmentAvailabilityEnd'),
@@ -427,10 +426,6 @@ shaka.test.FakePresentationTimeline.prototype.isLive;
 
 /** @type {jasmine.Spy} */
 shaka.test.FakePresentationTimeline.prototype.isInProgress;
-
-
-/** @type {jasmine.Spy} */
-shaka.test.FakePresentationTimeline.prototype.getEarliestStart;
 
 
 /** @type {jasmine.Spy} */

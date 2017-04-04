@@ -348,41 +348,6 @@ describe('DashParser SegmentTemplate', function() {
     });
   });
 
-  describe('presentation timeline', function() {
-    it('returns correct earliest start time', function(done) {
-      var source = [
-        '<MPD>',
-        '  <Period duration="PT60S">',
-        '    <AdaptationSet mimeType="video/webm">',
-        '      <BaseURL>http://example.com</BaseURL>',
-        '      <Representation bandwidth="100">',
-        '        <SegmentTemplate media="$Number$-$Bandwidth$.mp4">',
-        '          <SegmentTimeline>',
-        '            <S t="0" d="10" />',
-        '          </SegmentTimeline>',
-        '        </SegmentTemplate>',
-        '      </Representation>',
-        '      <Representation bandwidth="200">',
-        '        <SegmentTemplate media="$Number$-$Bandwidth$.mp4">',
-        '          <SegmentTimeline>',
-        '            <S t="4" d="10" />',
-        '          </SegmentTimeline>',
-        '        </SegmentTemplate>',
-        '      </Representation>',
-        '    </AdaptationSet>',
-        '  </Period>',
-        '</MPD>'
-      ].join('\n');
-
-      fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
-      parser.start('dummy://foo', playerInterface)
-          .then(function(manifest) {
-            var timeline = manifest.presentationTimeline;
-            expect(timeline.getEarliestStart()).toBe(4);
-          }).catch(fail).then(done);
-    });
-  });
-
   describe('rejects streams with', function() {
     it('bad container type', function(done) {
       var source = [

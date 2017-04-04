@@ -236,7 +236,8 @@ describe('StreamingEngine', function() {
         /** @type {shakaExtern.Manifest} */ (manifest),
         config,
         null /* startTime */,
-        onSeek);
+        onSeek,
+        function() {});
   }
 
   function setupManifest(
@@ -294,6 +295,7 @@ describe('StreamingEngine', function() {
       onError: onError,
       onEvent: onEvent,
       onManifestUpdate: function() {},
+      onSegmentAppended: playhead.onSegmentAppended.bind(playhead),
       onInitialStreamsSetup: onInitialStreamsSetup,
       onStartupComplete: onStartupComplete
     };

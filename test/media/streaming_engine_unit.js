@@ -402,6 +402,7 @@ describe('StreamingEngine', function() {
       onError: onError,
       onEvent: onEvent,
       onManifestUpdate: onManifestUpdate,
+      onSegmentAppended: function() {},
       onInitialStreamsSetup: onInitialStreamsSetup,
       onStartupComplete: onStartupComplete
     };

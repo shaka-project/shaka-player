@@ -17,25 +17,9 @@
 
 describe('DashParser SegmentList', function() {
   var Dash;
-  var fakeNetEngine;
-  var parser;
-  var playerInterface;
 
   beforeAll(function() {
     Dash = shaka.test.Dash;
-  });
-
-  beforeEach(function() {
-    fakeNetEngine = new shaka.test.FakeNetworkingEngine();
-    parser = shaka.test.Dash.makeDashParser();
-
-    playerInterface = {
-      networkingEngine: fakeNetEngine,
-      filterPeriod: function() {},
-      onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
-      onEvent: fail,
-      onError: fail
-    };
   });
 
   shaka.test.Dash.makeTimelineTests('SegmentList', '', [
@@ -144,43 +128,6 @@ describe('DashParser SegmentList', function() {
         Dash.makeReference('s4.mp4', 4, 6, 8)
       ];
       Dash.testSegmentIndex(done, source, references);
-    });
-  });
-
-  describe('presentation timeline', function() {
-    it('returns correct earliest start time', function(done) {
-      var source = [
-        '<MPD>',
-        '  <Period duration="PT60S">',
-        '    <AdaptationSet mimeType="video/webm">',
-        '      <BaseURL>http://example.com</BaseURL>',
-        '      <Representation bandwidth="100">',
-        '        <SegmentList>',
-        '          <SegmentTimeline>',
-        '            <S t="0" d="10" />',
-        '          </SegmentTimeline>',
-        '          <SegmentURL media="1-100.mp4" />',
-        '        </SegmentList>',
-        '      </Representation>',
-        '      <Representation bandwidth="200">',
-        '        <SegmentList>',
-        '          <SegmentTimeline>',
-        '            <S t="4" d="10" />',
-        '          </SegmentTimeline>',
-        '          <SegmentURL media="1-200.mp4" />',
-        '        </SegmentList>',
-        '      </Representation>',
-        '    </AdaptationSet>',
-        '  </Period>',
-        '</MPD>'
-      ].join('\n');
-
-      fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
-      parser.start('dummy://foo', playerInterface)
-          .then(function(manifest) {
-            var timeline = manifest.presentationTimeline;
-            expect(timeline.getEarliestStart()).toBe(4);
-          }).catch(fail).then(done);
     });
   });
 

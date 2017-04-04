@@ -75,6 +75,10 @@ describe('MediaSourceEngine', function() {
     return mediaSourceEngine.bufferedAheadOf(type, time);
   }
 
+  function bufferStart(type) {
+    return mediaSourceEngine.bufferStart(type);
+  }
+
   function remove(type, segmentNumber) {
     var start = (segmentNumber - 1) * metadata[type].segmentDuration;
     var end = segmentNumber * metadata[type].segmentDuration;
@@ -128,16 +132,15 @@ describe('MediaSourceEngine', function() {
       expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(30);
       return remove(ContentType.VIDEO, 1);
     }).then(function() {
-      expect(buffered(ContentType.VIDEO, 0)).toBe(0);
+      expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(10);
       expect(buffered(ContentType.VIDEO, 10)).toBeCloseTo(20);
       return remove(ContentType.VIDEO, 2);
     }).then(function() {
-      expect(buffered(ContentType.VIDEO, 0)).toBe(0);
-      expect(buffered(ContentType.VIDEO, 10)).toBe(0);
+      expect(bufferStart(ContentType.VIDEO)).toBe(20);
       expect(buffered(ContentType.VIDEO, 20)).toBeCloseTo(10);
       return remove(ContentType.VIDEO, 3);
     }).then(function() {
-      expect(buffered(ContentType.VIDEO, 20)).toBe(0);
+      expect(bufferStart(ContentType.VIDEO)).toBe(null);
     }).catch(fail).then(done);
   });
 

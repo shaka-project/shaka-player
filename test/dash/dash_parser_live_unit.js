@@ -186,7 +186,7 @@ describe('DashParser Live', function() {
             expect(stream).toBeTruthy();
 
             expect(stream.findSegmentPosition).toBeTruthy();
-            expect(stream.findSegmentPosition(0)).not.toBe(null);
+            expect(stream.findSegmentPosition(0)).toBe(1);
             Dash.verifySegmentIndex(manifest, basicRefs, 0);
 
             // 15 seconds for @timeShiftBufferDepth and the first segment
@@ -194,7 +194,7 @@ describe('DashParser Live', function() {
             Date.now = function() { return 2 * 15 * 1000; };
             delayForUpdatePeriod();
             // The first reference should have been evicted.
-            expect(stream.findSegmentPosition(0)).toBe(null);
+            expect(stream.findSegmentPosition(0)).toBe(2);
             Dash.verifySegmentIndex(manifest, basicRefs.slice(1), 0);
           }).catch(fail).then(done);
       shaka.polyfill.Promise.flush();

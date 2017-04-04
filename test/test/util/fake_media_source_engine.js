@@ -151,8 +151,21 @@ shaka.test.FakeMediaSourceEngine.prototype.bufferEnd = function(type) {
 
 
 /** @override */
+shaka.test.FakeMediaSourceEngine.prototype.isBuffered = function(type, time) {
+  if (this.segments[type] === undefined) throw new Error('unexpected type');
+
+  var first = this.segments[type].indexOf(true);
+  var last = this.segments[type].lastIndexOf(true);
+  if (first < 0 || last < 0)
+    return false;
+
+  return time >= this.toTime_(type, first) && time < this.toTime_(type, last);
+};
+
+
+/** @override */
 shaka.test.FakeMediaSourceEngine.prototype.bufferedAheadOf = function(
-    type, start, opt_tolerance) {
+    type, start) {
   if (this.segments[type] === undefined) throw new Error('unexpected type');
 
   var ContentType = shaka.util.ManifestParserUtils.ContentType;
@@ -162,14 +175,9 @@ shaka.test.FakeMediaSourceEngine.prototype.bufferedAheadOf = function(
          this.segments['trickvideo'][i]);
   }.bind(this));
 
-  var tolerance = 0;
   // Note: |start| may equal the end of the last segment, so |first|
   // may equal segments[type].length
   var first = this.toIndex_(type, start);
-  if (!hasSegment(first) && opt_tolerance) {
-    first = this.toIndex_(type, start + opt_tolerance);
-    tolerance = opt_tolerance;
-  }
   if (!hasSegment(first))
     return 0;  // Unbuffered.
 
@@ -178,7 +186,7 @@ shaka.test.FakeMediaSourceEngine.prototype.bufferedAheadOf = function(
   while (last < this.segments[type].length && hasSegment(last))
     last++;
 
-  return this.toTime_(type, last) - start + tolerance;
+  return this.toTime_(type, last) - start;
 };
 
 
