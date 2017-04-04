@@ -92,12 +92,8 @@
   background: rgba(100, 100, 100, 0.4);
 }
 
-#controls button:disabled:not(#currentTime) {
+#controls button:disabled {
   color: rgba(255, 255, 255, 0.3);
-}
-
-#currentTime:disabled {
-  cursor: default;
 }
 
 #controls input[type="range"] {
@@ -157,7 +153,6 @@
   font-size: 13px;
   font-weight: bold;
   color: white;
-  white-space: nowrap;
 
   cursor: default;
   user-select: none;
@@ -279,11 +274,6 @@
   #volumeBar, #muteButton {
     display: none;
   }
-}
-
-/* controls should be highlighted when focused */
-#controls button:focus, #controls input:focus, summary:focus {
-  outline: 3px solid LightBlue;
 }
 
 

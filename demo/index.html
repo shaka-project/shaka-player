@@ -91,11 +91,10 @@
       </div>
       <div id="videoContainer" class="overlay-parent">
         <video id="video"
-               tabindex="-1"
                poster="//shaka-player-demo.appspot.com/assets/poster.jpg"
                autoplay></video>
         <div id="giantPlayButtonContainer" class="overlay">
-          <button id="giantPlayButton" class="material-icons" tabindex="-1">play_arrow</button>
+          <button id="giantPlayButton" class="material-icons">play_arrow</button>
         </div>
         <div id="bufferingSpinner" class="overlay">
           <svg class="spinnerSvg" viewBox="25 25 50 50">
@@ -109,11 +108,11 @@
           <label for="seekBar" class="for-screen-readers">seek</label>
           <input id="seekBar" type="range" step="any" min="0" max="1" value="0">
           <button id="rewindButton" class="material-icons">fast_rewind</button>
-          <button id="currentTime" disabled>0:00</button>
+          <div id="currentTime">0:00</div>
           <button id="fastForwardButton" class="material-icons">fast_forward</button>
           <button id="muteButton" class="material-icons">volume_up</button>
           <label for="volumeBar" class="for-screen-readers">volume</label>
-          <input id="volumeBar" type="range" step="any" min="0" max="100" value="0">
+          <input id="volumeBar" type="range" step="any" min="0" max="1" value="0">
           <button id="castButton" class="material-icons">cast</button>
           <button id="captionButton" class="material-icons">closed_caption</button>
           <button id="fullscreenButton" class="material-icons">fullscreen</button>
@@ -125,7 +124,7 @@
         <div id="log"></div>
       </details>
 
-      <details id="configurationSection" class="input">
+      <details class="input">
         <summary>Configuration</summary>
         <div class="flex">
           <label for="preferredAudioLanguage">Preferred audio language:</label>
@@ -149,7 +148,7 @@
         </div>
       </details>
 
-      <details id="infoSection" class="input">
+      <details class="input">
         <summary>Info</summary>
         <div class="flex">
           <label for="videoTracks">Video tracks:</label>
