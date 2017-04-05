@@ -213,7 +213,7 @@ shakaExtern.SegmentDB;
 /**
  * @typedef {{
  *   key: number,
- *   data: !ArrayBuffer,
+ *   data: ArrayBuffer,
  *   manifestKey: number,
  *   streamNumber: number,
  *   segmentNumber: number
@@ -221,7 +221,7 @@ shakaExtern.SegmentDB;
  *
  * @property {number} key
  *   A key that uniquely describes the segment.
- * @property {!ArrayBuffer} data
+ * @property {ArrayBuffer} data
  *   The data contents of the segment.
  * @property {number} manifestKey
  *   The key of the manifest this belongs to.
