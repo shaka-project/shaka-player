@@ -256,6 +256,7 @@ ShakaControls.prototype.onMouseMove_ = function(event) {
   this.videoContainer_.style.cursor = '';
   // Show the controls.
   this.controls_.style.opacity = 1;
+  this.updateTimeAndSeekRange_();
 
   // Hide the cursor when the mouse stops moving.
   // Only applies while the cursor is over the video container.
@@ -567,10 +568,29 @@ ShakaControls.prototype.showTrickPlay = function(show) {
 
 
 /**
+ * @return {boolean}
+ * @private
+ */
+ShakaControls.prototype.isOpaque_ = function() {
+  var parentElement = this.controls_.parentElement;
+  // The controls are opaque if either:
+  //   1. We have explicitly made them so in JavaScript
+  //   2. The browser has made them so via css and the hover state
+  return (this.controls_.style.opacity == 1 ||
+          parentElement.querySelector('#controls:hover') == this.controls_);
+};
+
+
+/**
  * Called when the seek range or current time need to be updated.
  * @private
  */
 ShakaControls.prototype.updateTimeAndSeekRange_ = function() {
+  // Suppress updates if the controls are hidden.
+  if (!this.isOpaque_()) {
+    return;
+  }
+
   var displayTime = this.isSeeking_ ?
       this.seekBar_.value : this.video_.currentTime;
   var duration = this.video_.duration;
