@@ -144,7 +144,11 @@ shakaDemo.init = function() {
       shakaDemo.controls_.init(shakaDemo.castProxy_, shakaDemo.onError_,
                                shakaDemo.onCastStatusChange_);
 
-      asyncSetup.then(function() {
+      asyncSetup.catch(function(error) {
+        // shakaDemo.setupOfflineAssets_ errored while trying to
+        // load the offline assets. Notify the user of this.
+        shakaDemo.onError_(/** @type {!shaka.util.Error} */ (error));
+      }).then(function() {
         shakaDemo.postBrowserCheckParams_(params);
       });
     });
