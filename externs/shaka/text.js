@@ -33,9 +33,9 @@ shakaExtern.TextParser = function() {};
  * A collection of time offsets used to adjust text cue times.
  *
  * @typedef {{
- *    periodStart : number,
- *    segmentStart : number,
- *    segmentEnd : number
+ *   periodStart : number,
+ *   segmentStart : number,
+ *   segmentEnd : number
  * }}
  *
  * @property {number} periodStart
@@ -59,8 +59,7 @@ shakaExtern.TextParser.TimeContext;
  *
  * @exportDoc
  */
-
-shakaExtern.TextParser.prototype.parseInit;
+shakaExtern.TextParser.prototype.parseInit = function(data) {};
 
 
 /**
@@ -75,7 +74,7 @@ shakaExtern.TextParser.prototype.parseInit;
  *
  * @exportDoc
  */
-shakaExtern.TextParser.prototype.parseMedia;
+shakaExtern.TextParser.prototype.parseMedia = function(data, timeContext) {};
 
 
 /**

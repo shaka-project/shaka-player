@@ -7,13 +7,15 @@
   { "drm-config": { "title": "DRM Configuration" } },
   { "license-server-auth": { "title": "License Server Authentication" } },
   { "license-wrapping": { "title": "License Wrapping" } },
-  { "Coming Soon": { "children": [
-    { "live": { "title": "Special Considerations for Live Streaming" } },
-    { "offline": { "title": "Offline Storage and Playback" } }
-  ] } },
   { "plugins": { "title": "Plugins and Customizing the Build" } },
   { "manifest-parser": { "title": "Manifest Parser Plugins" } },
   { "architecture": { "title": "Architecture Diagrams" } },
   { "service-worker": { "title": "Service Worker Caching" } },
-  { "upgrade": { "title": "Shaka v2 Upgrade Guide" } }
+  { "upgrade": {
+      "title": "Upgrade Guide",
+      "children": {
+        "upgrade-v1": { "title": "Upgrade Guide, v1 => v2.1" },
+        "upgrade-v2-0": { "title": "Upgrade Guide, v2.0 => v2.1" }
+      }
+  } }
 ]
