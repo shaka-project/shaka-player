@@ -1,3 +1,11 @@
+## 2.0.8 (2017-04-07)
+
+Bugfixes:
+  - Suppress controls UI updates when hidden
+    - https://github.com/google/shaka-player/issues/749
+  - Revert keyboard navigation changes in demo, failing on Firefox
+
+
 ## 2.0.7 (2017-03-29)
 
 New Features:
