@@ -16,7 +16,6 @@
  */
 
 describe('Player', function() {
-  var abrManager;
   var originalLogError;
   var originalLogWarn;
   var logErrorSpy;
@@ -24,6 +23,8 @@ describe('Player', function() {
   var manifest;
   var onError;
   var player;
+  var abrManager;
+  var abrFactory;
 
   var networkingEngine;
   var streamingEngine;
@@ -61,6 +62,9 @@ describe('Player', function() {
           .addVideo(2)
       .build();
 
+    abrManager = new shaka.test.FakeAbrManager();
+    abrFactory = function() { return abrManager; };
+
     function dependencyInjector(player) {
       networkingEngine =
           new shaka.test.FakeNetworkingEngine({}, new ArrayBuffer(0));
@@ -88,12 +92,10 @@ describe('Player', function() {
 
     video = new shaka.test.FakeVideo(20);
     player = new shaka.Player(video, dependencyInjector);
-
-    abrManager = new shaka.test.FakeAbrManager();
     player.configure({
-      abr: {manager: abrManager},
       // Ensures we don't get a warning about missing preference.
-      preferredAudioLanguage: 'en'
+      preferredAudioLanguage: 'en',
+      abrFactory: abrFactory
     });
 
     onError = jasmine.createSpy('error event');
@@ -690,66 +692,94 @@ describe('Player', function() {
   });
 
   describe('AbrManager', function() {
-    it('sets through configure', function() {
-      var config = player.getConfiguration();
-      expect(config.abr.manager).toBe(abrManager);
-      expect(abrManager.init).toHaveBeenCalled();
+    var parser;
+    var parserFactory;
+
+    beforeEach(function() {
+      goog.asserts.assert(manifest, 'manifest must be non-null');
+      parser = new shaka.test.FakeManifestParser(manifest);
+      parserFactory = function() { return parser; };
     });
 
-    it('calls chooseStreams', function() {
-      expect(abrManager.chooseStreams).not.toHaveBeenCalled();
-      chooseStreams();
-      expect(abrManager.chooseStreams).toHaveBeenCalled();
+    it('sets through load', function(done) {
+      player.load('', 0, parserFactory).then(function() {
+        expect(abrManager.init).toHaveBeenCalled();
+      })
+      .catch(fail)
+      .then(done);
     });
 
-    it('does not enable before stream startup', function() {
-      chooseStreams();
-      expect(abrManager.enable).not.toHaveBeenCalled();
-      canSwitch();
-      expect(abrManager.enable).toHaveBeenCalled();
+    it('calls chooseStreams', function(done) {
+      player.load('', 0, parserFactory).then(function() {
+        expect(abrManager.chooseStreams).not.toHaveBeenCalled();
+        chooseStreams();
+        expect(abrManager.chooseStreams).toHaveBeenCalled();
+      })
+      .catch(fail)
+      .then(done);
     });
 
-    it('does not enable if adaptation is disabled', function() {
-      player.configure({abr: {enabled: false}});
-      chooseStreams();
-      canSwitch();
-      expect(abrManager.enable).not.toHaveBeenCalled();
+    it('does not enable before stream startup', function(done) {
+      player.load('', 0, parserFactory).then(function() {
+        chooseStreams();
+        expect(abrManager.enable).not.toHaveBeenCalled();
+        canSwitch();
+        expect(abrManager.enable).toHaveBeenCalled();
+      })
+      .catch(fail)
+      .then(done);
     });
 
-    it('enables/disables though configure', function() {
-      chooseStreams();
-      canSwitch();
-      abrManager.enable.calls.reset();
-      abrManager.disable.calls.reset();
-
-      player.configure({abr: {enabled: false}});
-      expect(abrManager.disable).toHaveBeenCalled();
-
-      player.configure({abr: {enabled: true}});
-      expect(abrManager.enable).toHaveBeenCalled();
+    it('does not enable if adaptation is disabled', function(done) {
+      player.load('', 0, parserFactory).then(function() {
+        player.configure({abr: {enabled: false}});
+        chooseStreams();
+        canSwitch();
+        expect(abrManager.enable).not.toHaveBeenCalled();
+      })
+      .catch(fail)
+      .then(done);
     });
 
-    it('waits to enable if in-between Periods', function() {
-      player.configure({abr: {enabled: false}});
-      chooseStreams();
-      player.configure({abr: {enabled: true}});
-      expect(abrManager.enable).not.toHaveBeenCalled();
-      canSwitch();
-      expect(abrManager.enable).toHaveBeenCalled();
+    it('enables/disables though configure', function(done) {
+      player.load('', 0, parserFactory).then(function() {
+        chooseStreams();
+        canSwitch();
+        abrManager.enable.calls.reset();
+        abrManager.disable.calls.reset();
+
+        player.configure({abr: {enabled: false}});
+        expect(abrManager.disable).toHaveBeenCalled();
+
+        player.configure({abr: {enabled: true}});
+        expect(abrManager.enable).toHaveBeenCalled();
+      })
+      .catch(fail)
+      .then(done);
     });
 
-    it('still disables if called after chooseStreams', function() {
-      chooseStreams();
-      player.configure({abr: {enabled: false}});
-      canSwitch();
-      expect(abrManager.enable).not.toHaveBeenCalled();
+    it('waits to enable if in-between Periods', function(done) {
+      player.load('', 0, parserFactory).then(function() {
+        player.configure({abr: {enabled: false}});
+        chooseStreams();
+        player.configure({abr: {enabled: true}});
+        expect(abrManager.enable).not.toHaveBeenCalled();
+        canSwitch();
+        expect(abrManager.enable).toHaveBeenCalled();
+      })
+      .catch(fail)
+      .then(done);
     });
 
-    it('sets the default bandwidth estimate', function() {
-      chooseStreams();
-      canSwitch();
-      player.configure({abr: {defaultBandwidthEstimate: 2000}});
-      expect(abrManager.setDefaultEstimate).toHaveBeenCalledWith(2000);
+    it('still disables if called after chooseStreams', function(done) {
+      player.load('', 0, parserFactory).then(function() {
+        chooseStreams();
+        player.configure({abr: {enabled: false}});
+        canSwitch();
+        expect(abrManager.enable).not.toHaveBeenCalled();
+      })
+      .catch(fail)
+      .then(done);
     });
   });
 
@@ -929,8 +959,8 @@ describe('Player', function() {
     beforeEach(function(done) {
       goog.asserts.assert(manifest, 'manifest must be non-null');
       var parser = new shaka.test.FakeManifestParser(manifest);
-      var factory = function() { return parser; };
-      player.load('', 0, factory).catch(fail).then(done);
+      var parserFactory = function() { return parser; };
+      player.load('', 0, parserFactory).catch(fail).then(done);
     });
 
     it('returns the correct tracks', function() {
@@ -1210,8 +1240,8 @@ describe('Player', function() {
       player.configure({preferredAudioLanguage: undefined});
 
       var parser = new shaka.test.FakeManifestParser(manifest);
-      var factory = function() { return parser; };
-      player.load('', 0, factory)
+      var parserFactory = function() { return parser; };
+      player.load('', 0, parserFactory)
           .then(function() {
             expect(abrManager.setVariants).toHaveBeenCalled();
             var variants = abrManager.setVariants.calls.argsFor(0)[0];
@@ -1290,8 +1320,8 @@ describe('Player', function() {
         .build();
 
       var parser = new shaka.test.FakeManifestParser(manifest);
-      var factory = function() { return parser; };
-      player.load('', 0, factory)
+      var parserFactory = function() { return parser; };
+      player.load('', 0, parserFactory)
           .then(function() {
             // "initialize" the current period.
             chooseStreams();
@@ -1609,7 +1639,7 @@ describe('Player', function() {
 
   describe('restrictions', function() {
     var parser;
-    var factory;
+    var parserFactory;
 
     it('switches if active is restricted by application', function(done) {
       manifest = new shaka.test.ManifestGenerator()
@@ -1621,8 +1651,8 @@ describe('Player', function() {
               .build();
 
       parser = new shaka.test.FakeManifestParser(manifest);
-      factory = function() { return parser; };
-      player.load('', 0, factory).then(function() {
+      parserFactory = function() { return parser; };
+      player.load('', 0, parserFactory).then(function() {
         // "initialize" the current period.
         chooseStreams();
         canSwitch();
@@ -1655,8 +1685,8 @@ describe('Player', function() {
               .build();
 
       parser = new shaka.test.FakeManifestParser(manifest);
-      factory = function() { return parser; };
-      player.load('', 0, factory).then(function() {
+      parserFactory = function() { return parser; };
+      player.load('', 0, parserFactory).then(function() {
         // "initialize" the current period.
         chooseStreams();
         canSwitch();
@@ -1689,8 +1719,8 @@ describe('Player', function() {
               .build();
 
       parser = new shaka.test.FakeManifestParser(manifest);
-      factory = function() { return parser; };
-      player.load('', 0, factory).then(function() {
+      parserFactory = function() { return parser; };
+      player.load('', 0, parserFactory).then(function() {
         // "initialize" the current period.
         chooseStreams();
         canSwitch();
@@ -1724,25 +1754,22 @@ describe('Player', function() {
               .build();
 
           parser = new shaka.test.FakeManifestParser(manifest);
-          factory = function() { return parser; };
-          player.load('', 0, factory)
-              .then(function() {
-                // "initialize" the current period.
-                chooseStreams();
-                canSwitch();
-                abrManager.chooseStreams.calls.reset();
+          parserFactory = function() { return parser; };
+          player.load('', 0, parserFactory).then(function() {
+            // "initialize" the current period.
+            chooseStreams();
+            canSwitch();
+            abrManager.chooseStreams.calls.reset();
 
-                var activeVariant = getActiveTrack('variant');
-                expect(activeVariant.id).toBe(0);
+            var activeVariant = getActiveTrack('variant');
+            expect(activeVariant.id).toBe(0);
 
-                onKeyStatus({'abc': 'usable'});
-                expect(abrManager.chooseStreams).not.toHaveBeenCalled();
+            onKeyStatus({'abc': 'usable'});
+            expect(abrManager.chooseStreams).not.toHaveBeenCalled();
 
-                activeVariant = getActiveTrack('variant');
-                expect(activeVariant.id).toBe(0);
-              })
-              .catch(fail)
-              .then(done);
+            activeVariant = getActiveTrack('variant');
+            expect(activeVariant.id).toBe(0);
+          }).catch(fail).then(done);
         });
 
     it('removes if key status is "output-restricted"', function(done) {
@@ -1755,8 +1782,8 @@ describe('Player', function() {
               .build();
 
       parser = new shaka.test.FakeManifestParser(manifest);
-      factory = function() { return parser; };
-      player.load('', 0, factory).then(function() {
+      parserFactory = function() { return parser; };
+      player.load('', 0, parserFactory).then(function() {
         // "initialize" the current period.
         chooseStreams();
         canSwitch();
@@ -1781,8 +1808,8 @@ describe('Player', function() {
               .build();
 
       parser = new shaka.test.FakeManifestParser(manifest);
-      factory = function() { return parser; };
-      player.load('', 0, factory).then(function() {
+      parserFactory = function() { return parser; };
+      player.load('', 0, parserFactory).then(function() {
         // "initialize" the current period.
         chooseStreams();
         canSwitch();
@@ -1807,8 +1834,8 @@ describe('Player', function() {
               .build();
 
       parser = new shaka.test.FakeManifestParser(manifest);
-      factory = function() { return parser; };
-      player.load('', 0, factory).then(function() {
+      parserFactory = function() { return parser; };
+      player.load('', 0, parserFactory).then(function() {
         // "initialize" the current period.
         chooseStreams();
         canSwitch();
@@ -1834,8 +1861,8 @@ describe('Player', function() {
               .build();
 
       parser = new shaka.test.FakeManifestParser(manifest);
-      factory = function() { return parser; };
-      player.load('', 0, factory).then(function() {
+      parserFactory = function() { return parser; };
+      player.load('', 0, parserFactory).then(function() {
         // "initialize" the current period.
         chooseStreams();
         canSwitch();
@@ -1858,8 +1885,8 @@ describe('Player', function() {
               .build();
 
       parser = new shaka.test.FakeManifestParser(manifest);
-      factory = function() { return parser; };
-      player.load('', 0, factory).then(function() {
+      parserFactory = function() { return parser; };
+      player.load('', 0, parserFactory).then(function() {
         // "initialize" the current period.
         chooseStreams();
         canSwitch();
@@ -1887,8 +1914,8 @@ describe('Player', function() {
               .build();
 
       parser = new shaka.test.FakeManifestParser(manifest);
-      factory = function() { return parser; };
-      player.load('', 0, factory).then(function() {
+      parserFactory = function() { return parser; };
+      player.load('', 0, parserFactory).then(function() {
         // "initialize" the current period.
         chooseStreams();
         canSwitch();
@@ -1916,8 +1943,8 @@ describe('Player', function() {
               .build();
 
       parser = new shaka.test.FakeManifestParser(manifest);
-      factory = function() { return parser; };
-      player.load('', 0, factory).then(function() {
+      parserFactory = function() { return parser; };
+      player.load('', 0, parserFactory).then(function() {
         // "initialize" the current period.
         chooseStreams();
         canSwitch();
@@ -1944,8 +1971,8 @@ describe('Player', function() {
               .build();
 
       parser = new shaka.test.FakeManifestParser(manifest);
-      factory = function() { return parser; };
-      player.load('', 0, factory).then(function() {
+      parserFactory = function() { return parser; };
+      player.load('', 0, parserFactory).then(function() {
         // "initialize" the current period.
         chooseStreams();
         canSwitch();
@@ -1973,8 +2000,8 @@ describe('Player', function() {
               .build();
 
           parser = new shaka.test.FakeManifestParser(manifest);
-          factory = function() { return parser; };
-          player.load('', 0, factory).then(function() {
+          parserFactory = function() { return parser; };
+          player.load('', 0, parserFactory).then(function() {
             // "initialize" the current period.
             chooseStreams();
             canSwitch();
@@ -2001,8 +2028,8 @@ describe('Player', function() {
               .build();
 
       parser = new shaka.test.FakeManifestParser(manifest);
-      factory = function() { return parser; };
-      player.load('', 0, factory).then(function() {
+      parserFactory = function() { return parser; };
+      player.load('', 0, parserFactory).then(function() {
         // "initialize" the current period.
         chooseStreams();
         canSwitch();

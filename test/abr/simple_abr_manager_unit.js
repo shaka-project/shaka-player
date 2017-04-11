@@ -23,6 +23,25 @@ describe('SimpleAbrManager', function() {
   var textStreams;
   var sufficientBWMultiplier = 1.06;
   var ContentType = shaka.util.ManifestParserUtils.ContentType;
+  var defaultBandwidthEstimate = 500e3; // 500kbps
+  var defaultRestrictions = {
+    minWidth: 0,
+    maxWidth: Infinity,
+    minHeight: 0,
+    maxHeight: Infinity,
+    minPixels: 0,
+    maxPixels: Infinity,
+    minBandwidth: 0,
+    maxBandwidth: Infinity
+  };
+  var config = {
+    enabled: true,
+    defaultBandwidthEstimate: defaultBandwidthEstimate,
+    switchInterval: 8,
+    bandwidthUpgradeTarget: 0.85,
+    bandwidthDowngradeTarget: 0.95,
+    restrictions: defaultRestrictions
+  };
 
 
   beforeAll(function() {
@@ -65,6 +84,9 @@ describe('SimpleAbrManager', function() {
 
     abrManager = new shaka.abr.SimpleAbrManager();
     abrManager.init(switchCallback);
+    config.defaultBandwidthEstimate = defaultBandwidthEstimate;
+    config.restrictions = defaultRestrictions;
+    abrManager.configure(config);
     abrManager.setVariants(variants);
     abrManager.setTextStreams(textStreams);
   });
@@ -86,7 +108,8 @@ describe('SimpleAbrManager', function() {
   });
 
   it('uses custom default estimate', function() {
-    abrManager.setDefaultEstimate(3e6);
+    config.defaultBandwidthEstimate = 3e6;
+    abrManager.configure(config);
     var chosen = abrManager.chooseStreams([ContentType.AUDIO,
                                            ContentType.VIDEO]);
     expect(chosen[ContentType.VIDEO].id).toBe(6);
@@ -278,8 +301,7 @@ describe('SimpleAbrManager', function() {
     abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     // Stay inside switch interval.
-    shaka.test.Util.fakeEventLoop(
-        (shaka.abr.SimpleAbrManager.SWITCH_INTERVAL_MS / 1000.0) - 2);
+    shaka.test.Util.fakeEventLoop(config.switchInterval - 2);
     abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     expect(switchCallback).not.toHaveBeenCalled();
@@ -323,7 +345,8 @@ describe('SimpleAbrManager', function() {
         sufficientBWMultiplier * bandwidth / 8.0;
 
     // Set the default high so that the initial choice will be high-quality.
-    abrManager.setDefaultEstimate(4e6);
+    config.defaultBandwidthEstimate = 4e6;
+    abrManager.configure(config);
 
     abrManager.setVariants(variants);
     abrManager.chooseStreams([ContentType.AUDIO, ContentType.VIDEO]);
@@ -355,7 +378,8 @@ describe('SimpleAbrManager', function() {
     var chosen = abrManager.chooseStreams([ContentType.VIDEO]);
     expect(chosen[ContentType.VIDEO].id).toBe(2);
 
-    abrManager.setRestrictions({maxWidth: 100});
+    config.restrictions.maxWidth = 100;
+    abrManager.configure(config);
     chosen = abrManager.chooseStreams([ContentType.VIDEO]);
     expect(chosen[ContentType.VIDEO].id).toBe(0);
   });

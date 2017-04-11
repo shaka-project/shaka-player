@@ -540,14 +540,14 @@ shakaExtern.StreamingConfiguration;
 
 /**
  * @typedef {{
- *   manager: shakaExtern.AbrManager,
  *   enabled: boolean,
  *   defaultBandwidthEstimate: number,
- *   restrictions: shakaExtern.Restrictions
+ *   restrictions: shakaExtern.Restrictions,
+ *   switchInterval: number,
+ *   bandwidthUpgradeTarget: number,
+ *   bandwidthDowngradeTarget: number
  * }}
  *
- * @property {shakaExtern.AbrManager} manager
- *   The AbrManager instance.
  * @property {boolean} enabled
  *   If true, enable adaptation by the current AbrManager.  Defaults to true.
  * @property {number} defaultBandwidthEstimate
@@ -557,6 +557,15 @@ shakaExtern.StreamingConfiguration;
  *   The restrictions to apply to ABR decisions.  The AbrManager will not
  *   choose any streams that do not meet these restrictions.  (Note that
  *   they can still be chosen by the application)
+ * @property {number} switchInterval
+ *   The minimum amount of time that must pass between switches, in
+ *   seconds. This keeps us from changing too often and annoying the user.
+ * @property {number} bandwidthUpgradeTarget
+ *   The fraction of the estimated bandwidth which we should try to use when
+ *   upgrading.
+ * @property {number} bandwidthDowngradeTarget
+ *   The largest fraction of the estimated bandwidth we should use. We should
+ *   downgrade to avoid this.
  * @exportDoc
  */
 shakaExtern.AbrConfiguration;
@@ -567,6 +576,7 @@ shakaExtern.AbrConfiguration;
  *   drm: shakaExtern.DrmConfiguration,
  *   manifest: shakaExtern.ManifestConfiguration,
  *   streaming: shakaExtern.StreamingConfiguration,
+ *   abrFactory: shakaExtern.AbrManager.Factory,
  *   abr: shakaExtern.AbrConfiguration,
  *   preferredAudioLanguage: string,
  *   preferredTextLanguage: string,
@@ -581,6 +591,8 @@ shakaExtern.AbrConfiguration;
  *   Manifest configuration and settings.
  * @property {shakaExtern.StreamingConfiguration} streaming
  *   Streaming configuration and settings.
+ * @property {shakaExtern.AbrManager.Factory} abrFactory
+ *   A factory to construct an abr manager.
  * @property {shakaExtern.AbrConfiguration} abr
  *   ABR configuration and settings.
  * @property {string} preferredAudioLanguage
