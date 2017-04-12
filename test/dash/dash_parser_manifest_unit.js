@@ -626,7 +626,8 @@ describe('DashParser Manifest', function() {
       var error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.DASH_INVALID_XML);
+          shaka.util.Error.Code.DASH_INVALID_XML,
+          'dummy://foo');
       Dash.testFails(done, source, error);
     });
 
@@ -645,7 +646,8 @@ describe('DashParser Manifest', function() {
       var error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.DASH_INVALID_XML);
+          shaka.util.Error.Code.DASH_INVALID_XML,
+          'dummy://foo');
       Dash.testFails(done, source, error);
     });
 
@@ -667,7 +669,8 @@ describe('DashParser Manifest', function() {
       var error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.DASH_INVALID_XML);
+          shaka.util.Error.Code.DASH_INVALID_XML,
+          'dummy://foo');
       Dash.testFails(done, source, error);
     });
 

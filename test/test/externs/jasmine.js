@@ -29,6 +29,12 @@ var jasmine = {};
 jasmine.Callback;
 
 
+/**
+ * @param {!Object} matchers
+ */
+jasmine.addMatchers = function(matchers) {};
+
+
 
 /**
  * @constructor
@@ -144,6 +150,13 @@ jasmine.Matchers.prototype.toThrow = function(value) {};
 
 /** @param {*} value */
 jasmine.Matchers.prototype.toThrowError = function(value) {};
+
+
+/**
+ * A custom matcher for DOM Node objects.
+ * @param {!Node} expected
+ */
+jasmine.Matchers.prototype.toEqualElement = function(expected) {};
 
 
 

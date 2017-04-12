@@ -432,4 +432,256 @@ describe('MpdUtils', function() {
       }
     }
   });
+
+  describe('processXlinks', function() {
+    var fakeNetEngine;
+    var retry;
+    var parser;
+    var Error = shaka.util.Error;
+
+    beforeEach(function() {
+      retry = shaka.net.NetworkingEngine.defaultRetryParameters();
+      fakeNetEngine = new shaka.test.FakeNetworkingEngine();
+      parser = new DOMParser();
+    });
+
+    it('will replace elements and children', function(done) {
+      var baseXMLString = inBaseContainer(
+          '<ToReplace xlink:href="https://xlink1" xlink:actuate="onLoad" />');
+      var xlinkXMLString = '<ToReplace variable="1"><Contents /></ToReplace>';
+      var desiredXMLString = inBaseContainer(
+          '<ToReplace variable="1"><Contents /></ToReplace>');
+
+      fakeNetEngine.setResponseMapAsText({'https://xlink1': xlinkXMLString});
+      testSucceeds(baseXMLString, desiredXMLString, 1, done);
+    });
+
+    it('preserves non-xlink attributes', function(done) {
+      var baseXMLString = inBaseContainer(
+          '<ToReplace otherVariable="q" xlink:href="https://xlink1" ' +
+          'xlink:actuate="onLoad" />');
+      var xlinkXMLString = '<ToReplace variable="1"><Contents /></ToReplace>';
+      var desiredXMLString = inBaseContainer(
+          '<ToReplace otherVariable="q" variable="1"><Contents /></ToReplace>');
+
+      fakeNetEngine.setResponseMapAsText({'https://xlink1': xlinkXMLString});
+      testSucceeds(baseXMLString, desiredXMLString, 1, done);
+    });
+
+    it('preserves text', function(done) {
+      var baseXMLString = inBaseContainer(
+          '<ToReplace xlink:href="https://xlink1" xlink:actuate="onLoad" />');
+      var xlinkXMLString =
+          '<ToReplace variable="1">TEXT CONTAINED WITHIN</ToReplace>';
+      var desiredXMLString = inBaseContainer(
+          '<ToReplace variable="1">TEXT CONTAINED WITHIN</ToReplace>');
+
+      fakeNetEngine.setResponseMapAsText({'https://xlink1': xlinkXMLString});
+      testSucceeds(baseXMLString, desiredXMLString, 1, done);
+    });
+
+    it('supports multiple replacements', function(done) {
+      var baseXMLString = inBaseContainer(
+          '<ToReplace xlink:href="https://xlink1" xlink:actuate="onLoad" />',
+          '<ToReplace xlink:href="https://xlink2" xlink:actuate="onLoad" />');
+      var xlinkXMLString1 = makeRecursiveXMLString(1, 'https://xlink3');
+      var xlinkXMLString2 = '<ToReplace variable="2"><Contents /></ToReplace>';
+      var xlinkXMLString3 = '<ToReplace otherVariable="blue" />';
+      var desiredXMLString = inBaseContainer(
+          '<ToReplace xmlns="urn:mpeg:dash:schema:mpd:2011" ' +
+          'xmlns:xlink="http://www.w3.org/1999/xlink" variable="1">' +
+          '<ToReplace otherVariable="blue" /></ToReplace>',
+          '<ToReplace variable="2"><Contents /></ToReplace>');
+
+      fakeNetEngine.setResponseMapAsText({
+        'https://xlink1': xlinkXMLString1,
+        'https://xlink2': xlinkXMLString2,
+        'https://xlink3': xlinkXMLString3});
+      testSucceeds(baseXMLString, desiredXMLString, 3, done);
+    });
+
+    it('fails if loaded file is invalid xml', function(done) {
+      var baseXMLString = inBaseContainer(
+          '<ToReplace xlink:href="https://xlink1" xlink:actuate="onLoad" />');
+      // Note this does not have a close angle bracket.
+      var xlinkXMLString = '<ToReplace></ToReplace';
+      var expectedError = new shaka.util.Error(
+          Error.Severity.CRITICAL, Error.Category.MANIFEST,
+          Error.Code.DASH_INVALID_XML, 'https://xlink1');
+
+      fakeNetEngine.setResponseMapAsText({'https://xlink1': xlinkXMLString});
+      testFails(baseXMLString, expectedError, 1, done);
+    });
+
+    it('fails if it recurses too many times', function(done) {
+      var baseXMLString = inBaseContainer(
+          '<ToReplace xlink:href="https://xlink1" xlink:actuate="onLoad" />');
+      // Create a large but finite number of links, so this won't
+      // infinitely recurse if there isn't a depth limit.
+      var responseMap = {};
+      for (var i = 1; i < 20; i++) {
+        responseMap['https://xlink' + i] =
+            makeRecursiveXMLString(0, 'https://xlink' + (i + 1) + '');
+      }
+      var expectedError = new shaka.util.Error(
+          Error.Severity.CRITICAL, Error.Category.MANIFEST,
+          Error.Code.DASH_XLINK_DEPTH_LIMIT);
+
+      fakeNetEngine.setResponseMapAsText(responseMap);
+      testFails(baseXMLString, expectedError, 5, done);
+    });
+
+    it('preserves url parameters', function(done) {
+      var baseXMLString = inBaseContainer(
+          '<ToReplace xlink:href="https://xlink1?parameter" ' +
+          'xlink:actuate="onLoad" />');
+      var xlinkXMLString = '<ToReplace variable="1"><Contents /></ToReplace>';
+      var desiredXMLString = inBaseContainer(
+          '<ToReplace variable="1"><Contents /></ToReplace>');
+
+      fakeNetEngine.setResponseMapAsText(
+          {'https://xlink1?parameter': xlinkXMLString});
+      testSucceeds(baseXMLString, desiredXMLString, 1, done);
+    });
+
+    it('replaces existing contents', function(done) {
+      var baseXMLString = inBaseContainer(
+          '<ToReplace xlink:href="https://xlink1" xlink:actuate="onLoad">' +
+          '<Unwanted /></ToReplace>');
+      var xlinkXMLString = '<ToReplace variable="1"><Contents /></ToReplace>';
+      var desiredXMLString = inBaseContainer(
+          '<ToReplace variable="1"><Contents /></ToReplace>');
+
+      fakeNetEngine.setResponseMapAsText({'https://xlink1': xlinkXMLString});
+      testSucceeds(baseXMLString, desiredXMLString, 1, done);
+    });
+
+    it('handles relative links', function(done) {
+      var baseXMLString = inBaseContainer(
+          '<ToReplace xlink:href="https://xlink1" xlink:actuate="onLoad" />',
+          '<ToReplace xlink:href="xlink2" xlink:actuate="onLoad" />');
+      var xlinkXMLString1 = makeRecursiveXMLString(1, 'xlink3');
+      var xlinkXMLString2 = // This is loaded relative to base.
+          '<ToReplace variable="2"><Contents /></ToReplace>';
+      var xlinkXMLString3 = // This is loaded relative to string1.
+          '<ToReplace variable="3" />';
+      var responseMap = {};
+      responseMap['https://xlink1'] = xlinkXMLString1;
+      responseMap['https://base/xlink2'] = xlinkXMLString2;
+      responseMap['https://xlink1/xlink3'] = xlinkXMLString3;
+      var desiredXMLString = inBaseContainer(
+          '<ToReplace xmlns="urn:mpeg:dash:schema:mpd:2011" ' +
+          'xmlns:xlink="http://www.w3.org/1999/xlink" variable="1">' +
+          '<ToReplace variable="3" /></ToReplace>',
+          '<ToReplace variable="2"><Contents /></ToReplace>');
+
+      fakeNetEngine.setResponseMapAsText(responseMap);
+      testSucceeds(baseXMLString, desiredXMLString, 3, done);
+    });
+
+    it('fails for actuate=onRequest', function(done) {
+      var baseXMLString = inBaseContainer(
+          '<ToReplace xlink:href="https://xlink1" ' +
+          'xlink:actuate="onRequest" />');
+      var xlinkXMLString = '<ToReplace variable="1"><Contents /></ToReplace>';
+      var expectedError = new shaka.util.Error(
+          Error.Severity.CRITICAL, Error.Category.MANIFEST,
+          Error.Code.DASH_UNSUPPORTED_XLINK_ACTUATE);
+
+      fakeNetEngine.setResponseMapAsText({'https://xlink1': xlinkXMLString});
+      testFails(baseXMLString, expectedError, 0, done);
+    });
+
+    it('fails for no actuate', function(done) {
+      var baseXMLString = inBaseContainer(
+          '<ToReplace xlink:href="https://xlink1" />');
+      var xlinkXMLString = '<ToReplace variable="1"><Contents /></ToReplace>';
+      var expectedError = new shaka.util.Error(
+          Error.Severity.CRITICAL, Error.Category.MANIFEST,
+          Error.Code.DASH_UNSUPPORTED_XLINK_ACTUATE);
+
+      fakeNetEngine.setResponseMapAsText({'https://xlink1': xlinkXMLString});
+      testFails(baseXMLString, expectedError, 0, done);
+    });
+
+    it('removes elements with resolve-to-zero', function(done) {
+      var baseXMLString = inBaseContainer(
+          '<ToReplace xlink:href="urn:mpeg:dash:resolve-to-zero:2013" />');
+      var desiredXMLString = inBaseContainer();
+
+      testSucceeds(baseXMLString, desiredXMLString, 0, done);
+    });
+
+    it('needs the top-level to match the link\'s tagName', function(done) {
+      var baseXMLString = inBaseContainer(
+          '<ToReplace xlink:href="https://xlink1" xlink:actuate="onLoad" />');
+      var xlinkXMLString = '<BadTagName</BadTagName>';
+
+      fakeNetEngine.setResponseMapAsText({'https://xlink1': xlinkXMLString});
+      testFails(baseXMLString, null, 1, done);
+    });
+
+    function testSucceeds(
+        baseXMLString, desiredXMLString, desiredNetCalls, done) {
+      var desiredXML = parser.parseFromString(desiredXMLString, 'text/xml')
+          .documentElement;
+      testRequest(baseXMLString).then(function(finalXML) {
+        expect(fakeNetEngine.request).toHaveBeenCalledTimes(desiredNetCalls);
+        expect(finalXML).toEqualElement(desiredXML);
+        return Promise.resolve();
+      }).catch(fail).then(done);
+    }
+
+    function testFails(baseXMLString, desiredError, desiredNetCalls, done) {
+      testRequest(baseXMLString).then(fail).catch(function(error) {
+        expect(fakeNetEngine.request).toHaveBeenCalledTimes(desiredNetCalls);
+        if (desiredError)
+          shaka.test.Util.expectToEqualError(error, desiredError);
+        return Promise.resolve();
+      }).then(done);
+    }
+
+    /**
+    * Creates an XML string with an xlink link to another URL,
+    * for use in testing recursive chains of xlink links.
+    * @param {number} variable
+    * @param {string} link
+    * @return {string}
+    * @private
+    */
+    function makeRecursiveXMLString(variable, link) {
+      var format =
+          '<ToReplace xmlns="urn:mpeg:dash:schema:mpd:2011" ' +
+          'xmlns:xlink="http://www.w3.org/1999/xlink" variable="%(var)s">' +
+          '<ToReplace xlink:href="%(link)s" xlink:actuate="onLoad" />' +
+          '</ToReplace>';
+      return sprintf(format, {var : variable, link : link});
+    }
+
+    /**
+     * @param {string=} opt_toReplaceOne
+     * @param {string=} opt_toReplaceTwo
+     * @return {string}
+     * @private
+     */
+    function inBaseContainer(opt_toReplaceOne, opt_toReplaceTwo) {
+      var format =
+          '<Container xmlns="urn:mpeg:dash:schema:mpd:2011" ' +
+          'xmlns:xlink="http://www.w3.org/1999/xlink">' +
+          '<Thing>' +
+          '%(toReplaceOne)s' +
+          '</Thing>' +
+          '%(toReplaceTwo)s' +
+          '</Container>';
+      return sprintf(format, {
+        toReplaceOne: opt_toReplaceOne || '',
+        toReplaceTwo: opt_toReplaceTwo || ''});
+    }
+
+    function testRequest(baseXMLString) {
+      var xml = parser.parseFromString(baseXMLString, 'text/xml')
+          .documentElement;
+      return MpdUtils.processXlinks(xml, retry, 'https://base', fakeNetEngine);
+    }
+  });
 });

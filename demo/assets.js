@@ -75,6 +75,7 @@ shakaAssets.Feature = {
   MULTIKEY: 'multiple keys',
   MULTIPERIOD: 'multiple Periods',
   TRICK_MODE: 'special trick mode track',
+  XLINK: 'xlink',
 
   SUBTITLES: 'subtitles',
   CAPTIONS: 'captions',
@@ -479,6 +480,21 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.MULTIPERIOD,
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.WEBM
+    ]
+  },
+  {
+    name: 'Heliocentrism (multicodec, multiperiod, xlink)',
+    manifestUri: '//storage.googleapis.com/shaka-demo-assets/heliocentrism-xlink/heliocentrism.mpd',  // gjslint: disable=110
+
+    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
+    source: shakaAssets.Source.SHAKA,
+    drm: [],
+    features: [
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.MULTIPERIOD,
+      shakaAssets.Feature.SEGMENT_BASE,
+      shakaAssets.Feature.WEBM,
+      shakaAssets.Feature.XLINK
     ]
   },
   {
