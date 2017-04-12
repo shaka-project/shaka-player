@@ -41,7 +41,11 @@ describe('DashParser Live', function() {
     parser = new shaka.dash.DashParser();
     parser.configure({
       retryParameters: retry,
-      dash: { clockSyncUri: '', customScheme: function(node) { return null; } },
+      dash: {
+        clockSyncUri: '',
+        customScheme: function(node) { return null; },
+        ignoreDrmInfo: false
+      },
       hls: { defaultTimeOffset: 0 }
     });
     playerInterface = {

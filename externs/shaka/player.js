@@ -412,7 +412,8 @@ shakaExtern.DrmConfiguration;
 /**
  * @typedef {{
  *   customScheme: shakaExtern.DashContentProtectionCallback,
- *   clockSyncUri: string
+ *   clockSyncUri: string,
+ *   ignoreDrmInfo: boolean
  * }}
  *
  * @property {shakaExtern.DashContentProtectionCallback} customScheme
@@ -423,6 +424,10 @@ shakaExtern.DrmConfiguration;
  *   A default clock sync URI to be used with live streams which do not
  *   contain any clock sync information.  The "Date" header from this URI
  *   will be used to determine the current time.
+ * @property {boolean} ignoreDrmInfo
+ *   If true will cause DASH parser to ignore DRM information specified
+ *   by the manifest and treat it as if it signaled no particular key
+ *   system and contained no init data. Defaults to false if not provided.
  *
  * @exportDoc
  */

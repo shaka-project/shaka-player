@@ -29,7 +29,8 @@ shaka.test.Dash.makeDashParser = function() {
     retryParameters: retry,
     dash: {
       customScheme: function(node) { return null; },
-      clockSyncUri: ''
+      clockSyncUri: '',
+      ignoreDrmInfo: false
     },
     hls: { defaultTimeOffset: 0 }
   });

@@ -27,16 +27,23 @@ describe('DashParser ContentProtection', function() {
    * @param {Object} expected A Manifest-like object.  The parser output is
    *   expected to match this.
    * @param {shakaExtern.DashContentProtectionCallback=} opt_callback
+   * @param {boolean=} opt_ignoreDrmInfo
    */
-  function testDashParser(done, manifestText, expected, opt_callback) {
+  function testDashParser(done, manifestText, expected, opt_callback,
+      opt_ignoreDrmInfo) {
     var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
     var netEngine = new shaka.test.FakeNetworkingEngine();
     netEngine.setDefaultText(manifestText);
     var dashParser = new shaka.dash.DashParser();
     var callback = opt_callback || function(node) { return null; };
+    var ignoreDrmInfo = opt_ignoreDrmInfo || false;
     dashParser.configure({
       retryParameters: retry,
-      dash: { clockSyncUri: '', customScheme: callback },
+      dash: {
+        clockSyncUri: '',
+        customScheme: callback,
+        ignoreDrmInfo: ignoreDrmInfo
+      },
       hls: { defaultTimeOffset: 0 }
     });
     var playerEvents = {
@@ -314,6 +321,61 @@ describe('DashParser ContentProtection', function() {
           buildDrmInfo('com.adobe.primetime')
         ])));
     testDashParser(done, source, expected);
+  });
+
+  it('assumes all known key systems when ignoreDrmInfo flag is set',
+      function(done) {
+        var source = buildManifestText([
+          // AdaptationSet lines
+          '<ContentProtection',
+          '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed">',
+          '  <cenc:pssh>ZmFrZSBXaWRldmluZSBQU1NI</cenc:pssh>',
+          '</ContentProtection>',
+          '<ContentProtection',
+          '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95">',
+          '  <cenc:pssh>bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcm</cenc:pssh>',
+          '</ContentProtection>'
+        ], [], []);
+
+
+        var expected = buildExpectedManifest(
+            // The order does not matter here, so use arrayContaining.
+            // NOTE: the buildDrmInfo calls here specify no init data
+            /** @type {!Array.<!Object>} */(jasmine.arrayContaining([
+              buildDrmInfo('com.widevine.alpha'),
+              buildDrmInfo('com.microsoft.playready'),
+              buildDrmInfo('com.adobe.primetime')
+            ])));
+        testDashParser(done, source, expected, /* opt_callback */ undefined,
+                       /* opt_ignoreDrmInfo */ true);
+      });
+
+  it('parses key IDs when ignoreDrmInfo flag is set', function(done) {
+    var source = buildManifestText([
+      // AdaptationSet lines
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95"',
+      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"',
+      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />'
+    ], [], []);
+    var keyIds = [
+      // Representation 1 key ID
+      'deadbeeffeedbaadf00d000008675309',
+      // Representation 2 key ID
+      'deadbeeffeedbaadf00d000008675309'
+    ];
+
+    var expected = buildExpectedManifest(
+        [
+          buildDrmInfo('org.w3.clearkey', keyIds),
+          buildDrmInfo('com.widevine.alpha', keyIds),
+          buildDrmInfo('com.microsoft.playready', keyIds),
+          buildDrmInfo('com.adobe.primetime', keyIds)
+        ]);
+    testDashParser(done, source, expected, /* opt_callback */ undefined,
+                   /* opt_ignoreDrmInfo */ true);
   });
 
   it('inherits PSSH from generic CENC into all key systems', function(done) {
