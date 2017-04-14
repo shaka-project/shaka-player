@@ -184,7 +184,8 @@ shakaExtern.InitDataOverride;
  *   in the content.  See also shakaExtern.InitDataOverride.
  * @property {Array.<string>} keyIds
  *   <i>Defaults to []</i> <br>
- *   If not empty, contains the default key IDs for this key system.
+ *   If not empty, contains the default key IDs for this key system, as
+ *   lowercase hex strings.
  * @exportDoc
  */
 shakaExtern.DrmInfo;
