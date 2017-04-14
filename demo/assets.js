@@ -518,22 +518,6 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.WEBM
     ]
   },
-  {
-    name: 'Tears of Steel (multiperiod with segmented subtitles and PTO)',
-    manifestUri: '//storage.googleapis.com/shaka-demo-assets/tos-pto-webvtt/dash.mpd',  // gjslint: disable=110
-    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
-    source: shakaAssets.Source.SHAKA,
-    drm: [],
-    features: [
-      shakaAssets.Feature.HIGH_DEFINITION,
-      shakaAssets.Feature.MP4,
-      shakaAssets.Feature.MULTIPERIOD,
-      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
-      shakaAssets.Feature.SEGMENTED_TEXT,
-      shakaAssets.Feature.SUBTITLES,
-      shakaAssets.Feature.WEBVTT
-    ]
-  },
   // }}}
 
   // YouTube assets {{{
