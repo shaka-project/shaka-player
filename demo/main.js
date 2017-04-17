@@ -55,6 +55,10 @@ shakaDemo.controls_ = null;
 shakaDemo.hashCanChange_ = false;
 
 
+/** @private {boolean} */
+shakaDemo.suppressHashChangeEvent_ = false;
+
+
 /**
  * The registered ID of the v2.1 Chromecast receiver demo.
  * @const {string}
@@ -150,6 +154,7 @@ shakaDemo.init = function() {
         shakaDemo.onError_(/** @type {!shaka.util.Error} */ (error));
       }).then(function() {
         shakaDemo.postBrowserCheckParams_(params);
+        window.addEventListener('hashchange', shakaDemo.updateFromHash_);
       });
     });
   }
@@ -312,6 +317,21 @@ shakaDemo.postBrowserCheckParams_ = function(params) {
 
 
 /** @private */
+shakaDemo.updateFromHash_ = function() {
+  // Hash changes made by us should be ignored.  We only want to respond to hash
+  // changes made by the user in the URL bar.
+  if (shakaDemo.suppressHashChangeEvent_) {
+    shakaDemo.suppressHashChangeEvent_ = false;
+    return;
+  }
+
+  var params = shakaDemo.getParams_();
+  shakaDemo.preBrowserCheckParams_(params);
+  shakaDemo.postBrowserCheckParams_(params);
+};
+
+
+/** @private */
 shakaDemo.hashShouldChange_ = function() {
   if (!shakaDemo.hashCanChange_)
     return;
@@ -405,7 +425,13 @@ shakaDemo.hashShouldChange_ = function() {
     params.push('compiled');
   }
 
-  location.hash = '#' + params.join(';');
+  var newHash = '#' + params.join(';');
+  if (newHash != location.hash) {
+    // We want to suppress hashchange events triggered here.  We only want to
+    // respond to hashchange events initiated by the user in the URL bar.
+    shakaDemo.suppressHashChangeEvent_ = true;
+    location.hash = newHash;
+  }
 
   // If search is already blank, setting it triggers a navigation and reloads
   // the page.  Only blank out the search if we have just upgraded from search
