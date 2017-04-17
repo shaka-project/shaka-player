@@ -392,8 +392,17 @@ shakaDemo.hashShouldChange_ = function() {
   if (document.getElementById('enableAutoplay').checked) {
     params.push('play');
   }
+
+  // This parameter must be added manually, so preserve it.
   if ('noinput' in shakaDemo.getParams_()) {
     params.push('noinput');
+  }
+
+  // This parameter must be added manually, so preserve it.
+  // This one is only used by the loader in load.js to decide which version of
+  // the library to load.
+  if ('compiled' in shakaDemo.getParams_()) {
+    params.push('compiled');
   }
 
   location.hash = '#' + params.join(';');
