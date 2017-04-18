@@ -196,6 +196,8 @@ shakaDemo.load = function() {
     // Update control state in case autoplay is disabled.
     shakaDemo.controls_.loadComplete();
 
+    shakaDemo.hashShouldChange_();
+
     // Disallow casting of offline content.
     var isOffline = asset.manifestUri.indexOf('offline:') == 0;
     shakaDemo.controls_.allowCast(!isOffline);
