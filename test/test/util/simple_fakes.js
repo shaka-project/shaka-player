@@ -477,6 +477,7 @@ shaka.test.FakePlayhead = function() {
  */
 shaka.test.FakePlayheadObserver = function() {
   return {
+    destroy: jasmine.createSpy('destroy').and.returnValue(Promise.resolve()),
     seeked: jasmine.createSpy('seeked'),
     setRebufferingGoal: jasmine.createSpy('setRebufferingGoal'),
     addTimelineRegion: jasmine.createSpy('addTimelineRegion')

@@ -24,8 +24,14 @@ describe('Player', function() {
   var manifest;
   var onError;
   var player;
+
   var networkingEngine;
   var streamingEngine;
+  var drmEngine;
+  var playhead;
+  var playheadObserver;
+  var mediaSourceEngine;
+
   var video;
   var ContentType;
 
@@ -58,23 +64,19 @@ describe('Player', function() {
     function dependencyInjector(player) {
       networkingEngine =
           new shaka.test.FakeNetworkingEngine({}, new ArrayBuffer(0));
+      drmEngine = new shaka.test.FakeDrmEngine();
+      playhead = new shaka.test.FakePlayhead();
+      playheadObserver = new shaka.test.FakePlayheadObserver();
+      mediaSourceEngine = {
+        destroy: jasmine.createSpy('destroy').and.returnValue(Promise.resolve())
+      };
 
-      player.createDrmEngine = function() {
-        return new shaka.test.FakeDrmEngine();
-      };
-      player.createNetworkingEngine = function() {
-        return networkingEngine;
-      };
-      player.createPlayhead = function() {
-        return new shaka.test.FakePlayhead();
-      };
-      player.createPlayheadObserver = function() {
-        return new shaka.test.FakePlayheadObserver();
-      };
+      player.createDrmEngine = function() { return drmEngine; };
+      player.createNetworkingEngine = function() { return networkingEngine; };
+      player.createPlayhead = function() { return playhead; };
+      player.createPlayheadObserver = function() { return playheadObserver; };
       player.createMediaSource = function() { return Promise.resolve(); };
-      player.createMediaSourceEngine = function() {
-        return {destroy: function() {}};
-      };
+      player.createMediaSourceEngine = function() { return mediaSourceEngine; };
       player.createStreamingEngine = function() {
         // This captures the variable |manifest| so this should only be used
         // after the manifest has been set.
@@ -112,6 +114,25 @@ describe('Player', function() {
   afterAll(function() {
     shaka.log.error = originalLogError;
     shaka.log.warning = originalLogWarn;
+  });
+
+  describe('destroy', function() {
+    it('cleans up all dependencies', function(done) {
+      goog.asserts.assert(manifest, 'Manifest should be non-null');
+      var parser = new shaka.test.FakeManifestParser(manifest);
+      var factory = function() { return parser; };
+
+      player.load('', 0, factory).then(function() {
+        return player.destroy();
+      }).then(function() {
+        expect(networkingEngine.destroy).toHaveBeenCalled();
+        expect(drmEngine.destroy).toHaveBeenCalled();
+        expect(playhead.destroy).toHaveBeenCalled();
+        expect(playheadObserver.destroy).toHaveBeenCalled();
+        expect(mediaSourceEngine.destroy).toHaveBeenCalled();
+        expect(streamingEngine.destroy).toHaveBeenCalled();
+      }).catch(fail).then(done);
+    });
   });
 
   describe('load/unload', function() {
