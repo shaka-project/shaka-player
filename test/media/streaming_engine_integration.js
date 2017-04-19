@@ -430,7 +430,8 @@ describe('StreamingEngine', function() {
       window.clearInterval(slideSegmentAvailabilityWindow);
     });
 
-    it('plays through Period transition', function(done) {
+    // QUARANTINED: this test does not pass 100% of the time on Firefox Win/Mac.
+    quarantined_it('plays through Period transition', function(done) {
       onStartupComplete.and.callFake(function() {
         // firstSegmentNumber =
         //   [(segmentAvailabilityEnd - rebufferingGoal) / segmentDuration] + 1
@@ -455,7 +456,8 @@ describe('StreamingEngine', function() {
       streamingEngine.init();
     });
 
-    it('can handle seeks ahead of availability window',
+    // QUARANTINED: this test does not pass 100% of the time on Firefox Win/Mac.
+    quarantined_it('can handle seeks ahead of availability window',
         function(done) {
           onStartupComplete.and.callFake(function() {
             video.play();
