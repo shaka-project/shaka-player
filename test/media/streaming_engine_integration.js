@@ -430,8 +430,7 @@ describe('StreamingEngine', function() {
       window.clearInterval(slideSegmentAvailabilityWindow);
     });
 
-    // QUARANTINED: this test does not pass 100% of the time on Firefox Win/Mac.
-    quarantined_it('plays through Period transition', function(done) {
+    it('plays through Period transition', function(done) {
       onStartupComplete.and.callFake(function() {
         // firstSegmentNumber =
         //   [(segmentAvailabilityEnd - rebufferingGoal) / segmentDuration] + 1
@@ -456,8 +455,7 @@ describe('StreamingEngine', function() {
       streamingEngine.init();
     });
 
-    // QUARANTINED: this test does not pass 100% of the time on Firefox Win/Mac.
-    quarantined_it('can handle seeks ahead of availability window',
+    it('can handle seeks ahead of availability window',
         function(done) {
           onStartupComplete.and.callFake(function() {
             video.play();
@@ -468,17 +466,21 @@ describe('StreamingEngine', function() {
               // Seek outside the availability window right away. The playhead
               // should adjust the video's current time.
               video.currentTime = timeline.segmentAvailabilityEnd + 120;
+
+              // Wait until the repositioning is complete so we don't
+              // immediately hit this case.
+              setTimeout(function() {
+                var onTimeUpdate = function() {
+                  if (video.currentTime >= 305) {
+                    // We've played through the Period transition!
+                    eventManager.unlisten(video, 'timeupdate');
+                    done();
+                  }
+                };
+                eventManager.listen(video, 'timeupdate', onTimeUpdate);
+              }, 1000);
             }, 50);
           });
-
-          var onTimeUpdate = function() {
-            if (video.currentTime >= 305) {
-              // We've played through the Period transition!
-              eventManager.unlisten(video, 'timeupdate');
-              done();
-            }
-          };
-          eventManager.listen(video, 'timeupdate', onTimeUpdate);
 
           // Let's go!
           onChooseStreams.and.callFake(defaultOnChooseStreams);

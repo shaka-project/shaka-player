@@ -326,7 +326,7 @@ shaka.test.DashLiveStreamGenerator.prototype.getSegment = function(
 
   // Note it is possible for this to be called slightly before it becomes
   // available due to rounding errors with PresentationTimeline.
-  if (wallClockTime + 0.1 < segmentAvailabilityStartTime) {
+  if (wallClockTime + 1 < segmentAvailabilityStartTime) {
     shaka.log.debug(
         'wallClockTime < segmentAvailabilityStartTime:',
         'wallClockTime=' + wallClockTime,
