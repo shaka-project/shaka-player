@@ -464,6 +464,24 @@ describe('VttTextParser', function() {
     expect(logWarningSpy.calls.count()).toBe(7);
   });
 
+  it('respects X-TIMESTAMP-MAP header', function() {
+    verifyHelper(
+        [
+          {start: 30, end: 50, text: 'Test'},
+          {start: 50, end: 60, text: 'Test2'}
+        ] ,
+        // 900000 = 10 sec, so expect every timestamp to be 10
+        // seconds ahead of what is specified.
+        'WEBVTT\n' +
+        'X-TIMESTAMP-MAP=MPEGTS:900000,LOCAL:00:00:00.000\n\n' +
+        '00:00:20.000 --> 00:00:40.000 line:0\n' +
+        'Test\n\n' +
+        '00:00:40.000 --> 00:00:50.000 line:-1\n' +
+        'Test2',
+        { periodStart: 0, segmentStart: 0, segmentEnd: 0 });
+  });
+
+
   /**
    * @param {!Array} cues
    * @param {string} text
