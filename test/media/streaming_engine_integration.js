@@ -499,10 +499,24 @@ describe('StreamingEngine', function() {
         }, 50);
       });
 
+      var seekCount = 0;
+      eventManager.listen(video, 'seeking', function() {
+        seekCount++;
+      });
+
       var onTimeUpdate = function() {
         if (video.currentTime >= 305) {
           // We've played through the Period transition!
           eventManager.unlisten(video, 'timeupdate');
+
+          // We are playing close to the beginning of the availability window.
+          // We should be playing smoothly and not seeking repeatedly as we fall
+          // outside the window.
+          //
+          // We seek once above, then Playhead seeks once to adjust, plus one
+          // extra.
+          expect(seekCount).toBeLessThan(4);
+
           done();
         }
       };

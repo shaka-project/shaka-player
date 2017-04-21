@@ -237,7 +237,7 @@ describe('Playhead', function() {
     expect(playhead.getTime()).toBe(5);
 
     // safe = start + rebufferingGoal = 5 + 10 = 15
-    // safeSeek = safeSeek + 1 = 15 + 1 = 16
+    // safeSeek = safeSeek + 5 = 15 + 5 = 20
 
     // Seek in safe region & in buffered region.
     video.currentTime = 26;
@@ -257,23 +257,24 @@ describe('Playhead', function() {
 
     onSeek.calls.reset();
 
-    // Seek before left (treated like seek before start even though in buffered
-    // region).
-    video.currentTime = 5.5;
+    // Seek before start, start is unbuffered.
+    video.currentTime = 1;
     video.on['seeking']();
-    expect(video.currentTime).toBe(16);
-    expect(playhead.getTime()).toBe(16);
+    expect(video.currentTime).toBe(20);
+    expect(playhead.getTime()).toBe(20);
     expect(onSeek).not.toHaveBeenCalled();
     video.on['seeking']();
     expect(onSeek).toHaveBeenCalled();
 
+    onSeek.calls.reset();
+
     video.buffered = createFakeBuffered([{start: 10, end: 40}]);
 
     // Seek outside safe region & in buffered region.
-    video.currentTime = 15;
+    video.currentTime = 11;
     video.on['seeking']();
-    expect(video.currentTime).toBe(15);
-    expect(playhead.getTime()).toBe(15);
+    expect(video.currentTime).toBe(11);
+    expect(playhead.getTime()).toBe(11);
     expect(onSeek).toHaveBeenCalled();
 
     onSeek.calls.reset();
@@ -281,8 +282,8 @@ describe('Playhead', function() {
     // Seek outside safe region & in unbuffered region.
     video.currentTime = 9;
     video.on['seeking']();
-    expect(video.currentTime).toBe(16);
-    expect(playhead.getTime()).toBe(16);
+    expect(video.currentTime).toBe(20);
+    expect(playhead.getTime()).toBe(20);
     expect(onSeek).not.toHaveBeenCalled();
     video.on['seeking']();
     expect(onSeek).toHaveBeenCalled();
@@ -300,11 +301,11 @@ describe('Playhead', function() {
 
     onSeek.calls.reset();
 
-    // Seek before start.
+    // Seek before start, start is buffered.
     video.currentTime = 1;
     video.on['seeking']();
-    expect(video.currentTime).toBe(16);
-    expect(playhead.getTime()).toBe(16);
+    expect(video.currentTime).toBe(10);
+    expect(playhead.getTime()).toBe(10);
     expect(onSeek).not.toHaveBeenCalled();
     video.on['seeking']();
     expect(onSeek).toHaveBeenCalled();
@@ -421,12 +422,12 @@ describe('Playhead', function() {
       timeline.getSegmentAvailabilityEnd.and.returnValue(70);
       timeline.getSegmentAvailabilityDuration.and.returnValue(30);
 
-      // Because this is buffered, the playhead should move to (start + 1),
+      // Because this is buffered, the playhead should move to (start + 5),
       // which will cause a 'seeking' event.
       video.on['playing']();
-      expect(video.currentTime).toBe(11);
+      expect(video.currentTime).toBe(15);
       video.on['seeking']();
-      expect(playhead.getTime()).toBe(11);
+      expect(playhead.getTime()).toBe(15);
       expect(onSeek).toHaveBeenCalled();
     });
 
