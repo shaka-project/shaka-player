@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 #
 # Copyright 2016 Google Inc.  All Rights Reserved.
 #
@@ -283,7 +283,6 @@ class Build(object):
         shakaBuildHelpers.get_source_base(), 'dist',
         'shaka-player.' + name + '.externs.js'))
 
-    # TODO: support Windows builds
     cmd_line = ['node', extern_generator, '--output', output] + files
     if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
       print >> sys.stderr, 'Externs generation failed'
