@@ -458,13 +458,37 @@ shakaDemo.onErrorEvent_ = function(event) {
  */
 shakaDemo.onError_ = function(error) {
   console.error('Player error', error);
-  var message = error.message || ('Error code ' + error.code);
   var link = document.getElementById('errorDisplayLink');
-  link.href = '../docs/api/shaka.util.Error.html#value:' + error.code;
-  link.textContent = message;
-  // Make the link clickable only if we have an error code.
-  link.style.pointerEvents = error.code ? 'auto' : 'none';
-  document.getElementById('errorDisplay').style.display = 'block';
+
+  // Don't let less serious or equally serious errors replace what is already
+  // shown.  The first error is usually the most important one, and the others
+  // may distract us in bug reports.
+
+  // If this is an unexpected non-shaka.util.Error, severity is null.
+  if (error.severity == null) {
+    // Treat these as the most severe, since they should not happen.
+    error.severity = /** @type {shaka.util.Error.Severity} */(99);
+  }
+
+  // Always show the new error if:
+  //   1. there is no error showing currently
+  //   2. the new error is more severe than the old one
+  if (link.severity == null ||
+      error.severity > link.severity) {
+    var message = error.message || ('Error code ' + error.code);
+    if (error.code) {
+      link.href = '../docs/api/shaka.util.Error.html#value:' + error.code;
+    } else {
+      link.href = '';
+    }
+    link.textContent = message;
+    // By converting severity == null to 99, non-shaka errors will not be
+    // replaced by any subsequent error.
+    link.severity = error.severity || 99;
+    // Make the link clickable only if we have an error code.
+    link.style.pointerEvents = error.code ? 'auto' : 'none';
+    document.getElementById('errorDisplay').style.display = 'block';
+  }
 };
 
 
@@ -476,6 +500,7 @@ shakaDemo.closeError = function() {
   var link = document.getElementById('errorDisplayLink');
   link.href = '';
   link.textContent = '';
+  link.severity = null;
 };
 
 
