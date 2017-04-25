@@ -513,9 +513,9 @@ describe('StreamingEngine', function() {
           // We should be playing smoothly and not seeking repeatedly as we fall
           // outside the window.
           //
-          // We seek once above, then Playhead seeks once to adjust, plus one
-          // extra.
-          expect(seekCount).toBeLessThan(4);
+          // We seek once above, then Playhead seeks once to adjust, plus a
+          // couple extra.
+          expect(seekCount).toBeLessThan(6);
 
           done();
         }
