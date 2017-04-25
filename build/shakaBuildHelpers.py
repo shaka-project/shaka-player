@@ -139,7 +139,7 @@ def execute_get_output(args):
   # This will block until the process terminates, storing the stdout in a string
   stdout = obj.communicate()[0]
   if obj.returncode != 0:
-    raise subprocess.CalledProcessError(obj.returnCode, args[0], stdout)
+    raise subprocess.CalledProcessError(obj.returncode, args[0], stdout)
   return stdout
 
 
