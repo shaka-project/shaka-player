@@ -85,7 +85,7 @@ You can start with the complete library (`+@complete`) and exclude any
 individual source file with a minus sign and a path:
 
 ```sh
-python build/build.py +@complete -lib/net/data_uri_plugin.js
+python build/build.py +@complete -lib/media/mp4_ttml_parser.js
 ```
 
 You can also exclude an entire category of plugins:
