@@ -211,4 +211,34 @@ describe('DBEngine', function() {
         .catch(fail)
         .then(done);
   });
+
+  it('will catch aborting transactions', function(done) {
+    if (!shaka.offline.DBEngine.isSupported()) {
+      pending('DBEngine is not supported on this platform.');
+    }
+
+    // Change the insert function so that once the put request completes
+    // the transaction will abort. This should cause the promise to be
+    // rejected.
+    db.insert = function(storeName, value) {
+      return this.createOperation_(storeName, 'readwrite', function(store) {
+        var request = store.put(value);
+        request.onsuccess = function(event) {
+          request.transaction.abort();
+        };
+        return request;
+      });
+    };
+
+    var expected = new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.STORAGE,
+        shaka.util.Error.Code.OPERATION_ABORTED);
+
+    db.insert('test', {key: 1}).then(fail, function(error) {
+      shaka.log.info('insert failed as expected ', error);
+      shaka.test.Util.expectToEqualError(error, expected);
+      done();
+    });
+  });
 });
