@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # Copyright 2016 Google Inc.  All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,6 +26,30 @@ import platform
 import re
 import subprocess
 import sys
+import time
+
+
+def _node_modules_last_update_path():
+  return os.path.join(get_source_base(), 'node_modules', '.last_update')
+
+
+def _modules_need_update():
+  try:
+    last_update = os.path.getmtime(_node_modules_last_update_path())
+    if last_update > time.time():
+      # Update time in the future!  Something is wrong, so update.
+      return True
+
+    package_json_path = os.path.join(get_source_base(), 'package.json')
+    last_json_change = os.path.getmtime(package_json_path)
+    if last_json_change >= last_update:
+      # The json file has changed, so update.
+      return True
+  except:
+    # No such file, so we should update.
+    return True
+
+  return False
 
 
 def _parse_version(version):
@@ -117,7 +139,7 @@ def execute_get_output(args):
   # This will block until the process terminates, storing the stdout in a string
   stdout = obj.communicate()[0]
   if obj.returncode != 0:
-    raise subprocess.CalledProcessError(obj.returnCode, args[0], stdout)
+    raise subprocess.CalledProcessError(obj.returncode, args[0], stdout)
   return stdout
 
 
@@ -203,7 +225,11 @@ def get_node_binary_path(name):
 
 
 def update_node_modules():
-  """Updates the node modules using 'npm'."""
+  """Updates the node modules using 'npm', if they have not already been
+     updated recently enough."""
+  if not _modules_need_update():
+    return True
+
   base = cygwin_safe_path(get_source_base())
   cmd = 'npm.cmd' if is_windows() else 'npm'
 
@@ -217,6 +243,8 @@ def update_node_modules():
 
   # Update the modules.
   execute_get_output([cmd, '--prefix', base, 'update'])
+  # Update the timestamp of the file that tracks when we last updated.
+  open(_node_modules_last_update_path(), 'w').close()
   return True
 
 

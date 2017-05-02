@@ -624,6 +624,26 @@ describe('DashParser Manifest', function() {
     it('invalid XML', function(done) {
       var source = '<not XML';
       var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MANIFEST,
+          shaka.util.Error.Code.DASH_INVALID_XML);
+      Dash.testFails(done, source, error);
+    });
+
+    it('XML with inner errors', function(done) {
+      var source = [
+        '<MPD minBufferTime="PT75S">',
+        '  <Period id="1" duration="PT30S">',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation bandwidth="1">',
+        '        <SegmentBase indexRange="100-200" />',
+        '      </Representation', // Missing a close bracket.
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>'
+      ].join('\n');
+      var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_INVALID_XML);
       Dash.testFails(done, source, error);
@@ -631,6 +651,7 @@ describe('DashParser Manifest', function() {
 
     it('failed network requests', function(done) {
       var expectedError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.NETWORK,
           shaka.util.Error.Code.BAD_HTTP_STATUS);
 
@@ -644,6 +665,7 @@ describe('DashParser Manifest', function() {
     it('missing MPD element', function(done) {
       var source = '<XML></XML>';
       var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_INVALID_XML);
       Dash.testFails(done, source, error);
@@ -658,6 +680,7 @@ describe('DashParser Manifest', function() {
         '</MPD>'
       ].join('\n');
       var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_EMPTY_ADAPTATION_SET);
       Dash.testFails(done, source, error);
@@ -670,6 +693,7 @@ describe('DashParser Manifest', function() {
         '</MPD>'
       ].join('\n');
       var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_EMPTY_PERIOD);
       Dash.testFails(done, source, error);
@@ -693,6 +717,7 @@ describe('DashParser Manifest', function() {
         '</MPD>'
       ].join('\n');
       var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_DUPLICATE_REPRESENTATION_ID);
       Dash.testFails(done, source, error);

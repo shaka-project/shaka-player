@@ -48,6 +48,8 @@ shaka.test.FakeNetworkingEngine = function(
 
   // The prototype has already been applied; create spies for the
   // methods but still call it by default.
+  spyOn(this, 'destroy').and.callThrough();
+
   spyOn(this, 'request').and.callThrough();
 
   spyOn(this, 'registerResponseFilter').and.callThrough();

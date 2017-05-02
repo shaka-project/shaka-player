@@ -44,13 +44,16 @@
     document.write('<script src="' + baseUrl + src + '"></script>');
   }
 
-  var fields = location.search.split('?').slice(1).join('?');
+  var fields = location.search.substr(1);
   fields = fields ? fields.split(';') : [];
+  var fragments = location.hash.substr(1);
+  fragments = fragments ? fragments.split(';') : [];
+  var combined = fields.concat(fragments);
 
   // Very old browsers do not have Array.prototype.indexOf.
   var compiledMode = false;
-  for (var i = 0; i < fields.length; ++i) {
-    if (fields[i] == 'compiled') {
+  for (var i = 0; i < combined.length; ++i) {
+    if (combined[i] == 'compiled') {
       compiledMode = true;
       break;
     }

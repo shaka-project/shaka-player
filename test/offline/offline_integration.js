@@ -101,6 +101,7 @@ describe('Offline', function() {
     var onError = function(e) {
       // We should only get a not-found error.
       var expected = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.DRM,
           shaka.util.Error.Code.OFFLINE_SESSION_REMOVED);
       shaka.test.Util.expectToEqualError(e, expected);
@@ -128,7 +129,8 @@ describe('Offline', function() {
           var OfflineManifestParser = shaka.offline.OfflineManifestParser;
           var manifest = OfflineManifestParser.reconstructManifest(manifestDb);
           drmEngine = new shaka.media.DrmEngine(
-              player.getNetworkingEngine(), onError, function() {});
+              player.getNetworkingEngine(), onError, function() {},
+              function() {});
           drmEngine.configure(player.getConfiguration().drm);
           return drmEngine.init(manifest, true /* isOffline */);
         })

@@ -24,8 +24,14 @@ describe('Player', function() {
   var manifest;
   var onError;
   var player;
+
   var networkingEngine;
   var streamingEngine;
+  var drmEngine;
+  var playhead;
+  var playheadObserver;
+  var mediaSourceEngine;
+
   var video;
   var ContentType;
 
@@ -58,24 +64,19 @@ describe('Player', function() {
     function dependencyInjector(player) {
       networkingEngine =
           new shaka.test.FakeNetworkingEngine({}, new ArrayBuffer(0));
+      drmEngine = new shaka.test.FakeDrmEngine();
+      playhead = new shaka.test.FakePlayhead();
+      playheadObserver = new shaka.test.FakePlayheadObserver();
+      mediaSourceEngine = {
+        destroy: jasmine.createSpy('destroy').and.returnValue(Promise.resolve())
+      };
 
-      player.createDrmEngine = function() {
-        return new shaka.test.FakeDrmEngine();
-      };
-      player.createNetworkingEngine = function() {
-        return networkingEngine;
-      };
-      player.createPlayhead = function() {
-        return {
-          destroy: function() {},
-          addTimelineRegion: function() {},
-          getTime: function() { return 0; }
-        };
-      };
+      player.createDrmEngine = function() { return drmEngine; };
+      player.createNetworkingEngine = function() { return networkingEngine; };
+      player.createPlayhead = function() { return playhead; };
+      player.createPlayheadObserver = function() { return playheadObserver; };
       player.createMediaSource = function() { return Promise.resolve(); };
-      player.createMediaSourceEngine = function() {
-        return {destroy: function() {}};
-      };
+      player.createMediaSourceEngine = function() { return mediaSourceEngine; };
       player.createStreamingEngine = function() {
         // This captures the variable |manifest| so this should only be used
         // after the manifest has been set.
@@ -113,6 +114,25 @@ describe('Player', function() {
   afterAll(function() {
     shaka.log.error = originalLogError;
     shaka.log.warning = originalLogWarn;
+  });
+
+  describe('destroy', function() {
+    it('cleans up all dependencies', function(done) {
+      goog.asserts.assert(manifest, 'Manifest should be non-null');
+      var parser = new shaka.test.FakeManifestParser(manifest);
+      var factory = function() { return parser; };
+
+      player.load('', 0, factory).then(function() {
+        return player.destroy();
+      }).then(function() {
+        expect(networkingEngine.destroy).toHaveBeenCalled();
+        expect(drmEngine.destroy).toHaveBeenCalled();
+        expect(playhead.destroy).toHaveBeenCalled();
+        expect(playheadObserver.destroy).toHaveBeenCalled();
+        expect(mediaSourceEngine.destroy).toHaveBeenCalled();
+        expect(streamingEngine.destroy).toHaveBeenCalled();
+      }).catch(fail).then(done);
+    });
   });
 
   describe('load/unload', function() {
@@ -880,6 +900,48 @@ describe('Player', function() {
           .toHaveBeenCalledWith(ContentType.VIDEO, variant.video, false);
     });
 
+    it('doesn\'t switch audio if old and new variants ' +
+       'have the same audio track', function() {
+          chooseStreams();
+          canSwitch();
+
+          var period = manifest.periods[0];
+          var variant1 = period.variants[0];
+          var variant2 = period.variants[1];
+          expect(variant1.audio).toEqual(variant2.audio);
+
+          player.selectVariantTrack(variantTracks[0]);
+          streamingEngine.switch.calls.reset();
+
+          player.selectVariantTrack(variantTracks[1]);
+
+          expect(streamingEngine.switch).toHaveBeenCalledWith(
+              ContentType.VIDEO, variant2.video, false);
+          expect(streamingEngine.switch).not.toHaveBeenCalledWith(
+              ContentType.AUDIO, variant2.audio, false);
+        });
+
+    it('doesn\'t switch video if old and new variants ' +
+       'have the same video track', function() {
+          chooseStreams();
+          canSwitch();
+
+          var period = manifest.periods[0];
+          var variant1 = period.variants[0];
+          var variant2 = period.variants[2];
+          expect(variant1.video).toEqual(variant2.video);
+
+          player.selectVariantTrack(variantTracks[0]);
+          streamingEngine.switch.calls.reset();
+
+          player.selectVariantTrack(variantTracks[2]);
+
+          expect(streamingEngine.switch).toHaveBeenCalledWith(
+              ContentType.AUDIO, variant2.audio, false);
+          expect(streamingEngine.switch).not.toHaveBeenCalledWith(
+              ContentType.VIDEO, variant2.video, false);
+        });
+
     it('still switches streams if called during startup', function() {
       player.selectVariantTrack(variantTracks[1]);
       expect(streamingEngine.switch).not.toHaveBeenCalled();
@@ -897,13 +959,13 @@ describe('Player', function() {
     it('still switches streams if called while switching Periods', function() {
       chooseStreams();
 
-      player.selectVariantTrack(variantTracks[1]);
+      player.selectVariantTrack(variantTracks[3]);
       expect(streamingEngine.switch).not.toHaveBeenCalled();
 
       canSwitch();
 
       var period = manifest.periods[0];
-      var variant = period.variants[1];
+      var variant = period.variants[3];
       expect(streamingEngine.switch)
           .toHaveBeenCalledWith(ContentType.AUDIO, variant.audio, false);
       expect(streamingEngine.switch)
@@ -928,9 +990,9 @@ describe('Player', function() {
 
       streamingEngine.switch.calls.reset();
 
-      var variant = period.variants[1];
-      expect(variantTracks[1].id).toBe(variant.id);
-      player.selectVariantTrack(variantTracks[1]);
+      var variant = period.variants[2];
+      expect(variantTracks[2].id).toBe(variant.id);
+      player.selectVariantTrack(variantTracks[2]);
       expect(streamingEngine.switch)
           .toHaveBeenCalledWith(ContentType.TEXT, textStream, true);
       expect(streamingEngine.switch)
@@ -1255,7 +1317,7 @@ describe('Player', function() {
       });
 
       it('includes selectVariantTrack choices', function() {
-        var track = player.getVariantTracks()[1];
+        var track = player.getVariantTracks()[3];
         player.selectVariantTrack(track);
 
         var period = manifest.periods[0];
@@ -1851,6 +1913,7 @@ describe('Player', function() {
           shaka.test.Util.expectToEqualError(
               error,
               new shaka.util.Error(
+                  shaka.util.Error.Severity.CRITICAL,
                   shaka.util.Error.Category.MANIFEST,
                   shaka.util.Error.Code.RESTRICTIONS_CANNOT_BE_MET));
         });
@@ -1914,6 +1977,7 @@ describe('Player', function() {
       shaka.test.Util.expectToEqualError(
           error,
           new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
               shaka.util.Error.Category.MANIFEST,
               shaka.util.Error.Code.NO_PERIODS));
     }).then(done);

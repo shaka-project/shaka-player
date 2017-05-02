@@ -41,7 +41,11 @@ describe('DashParser Live', function() {
     parser = new shaka.dash.DashParser();
     parser.configure({
       retryParameters: retry,
-      dash: { clockSyncUri: '', customScheme: function(node) { return null; } },
+      dash: {
+        clockSyncUri: '',
+        customScheme: function(node) { return null; },
+        ignoreDrmInfo: false
+      },
       hls: { defaultTimeOffset: 0 }
     });
     playerInterface = {
@@ -61,6 +65,7 @@ describe('DashParser Live', function() {
   afterAll(function() {
     Date.now = oldNow;
     jasmine.clock().uninstall();
+    shaka.polyfill.Promise.uninstall();
   });
 
   /**
@@ -75,16 +80,19 @@ describe('DashParser Live', function() {
    * Makes a simple live manifest with the given representation contents.
    *
    * @param {!Array.<string>} lines
-   * @param {number} updateTime
+   * @param {number?} updateTime
    * @param {number=} opt_duration
    * @return {string}
    */
   function makeSimpleLiveManifestText(lines, updateTime, opt_duration) {
-    var attr = opt_duration ? 'duration="PT' + opt_duration + 'S"' : '';
+    var updateAttr = updateTime != null ?
+        'minimumUpdatePeriod="PT' + updateTime + 'S"' : '';
+    var durationAttr = opt_duration != undefined ?
+        'duration="PT' + opt_duration + 'S"' : '';
     var template = [
-      '<MPD type="dynamic" minimumUpdatePeriod="PT%(updateTime)dS"',
+      '<MPD type="dynamic" %(updateAttr)s',
       '    availabilityStartTime="1970-01-01T00:00:00Z">',
-      '  <Period id="1" %(attr)s>',
+      '  <Period id="1" %(durationAttr)s>',
       '    <AdaptationSet mimeType="video/mp4">',
       '      <Representation id="3" bandwidth="500">',
       '        <BaseURL>http://example.com</BaseURL>',
@@ -95,7 +103,8 @@ describe('DashParser Live', function() {
       '</MPD>'
     ].join('\n');
     var text = sprintf(template, {
-      attr: attr,
+      updateAttr: updateAttr,
+      durationAttr: durationAttr,
       contents: lines.join('\n'),
       updateTime: updateTime
     });
@@ -181,7 +190,7 @@ describe('DashParser Live', function() {
             expect(stream).toBeTruthy();
 
             expect(stream.findSegmentPosition).toBeTruthy();
-            expect(stream.findSegmentPosition(0)).not.toBe(null);
+            expect(stream.findSegmentPosition(0)).toBe(1);
             Dash.verifySegmentIndex(manifest, basicRefs, 0);
 
             // 15 seconds for @timeShiftBufferDepth and the first segment
@@ -189,7 +198,7 @@ describe('DashParser Live', function() {
             Date.now = function() { return 2 * 15 * 1000; };
             delayForUpdatePeriod();
             // The first reference should have been evicted.
-            expect(stream.findSegmentPosition(0)).toBe(null);
+            expect(stream.findSegmentPosition(0)).toBe(2);
             Dash.verifySegmentIndex(manifest, basicRefs.slice(1), 0);
           }).catch(fail).then(done);
       shaka.polyfill.Promise.flush();
@@ -423,6 +432,7 @@ describe('DashParser Live', function() {
           expect(fakeNetEngine.request.calls.count()).toBe(1);
 
           var error = new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
               shaka.util.Error.Category.NETWORK,
               shaka.util.Error.Code.BAD_HTTP_STATUS);
           var promise = Promise.reject(error);
@@ -459,6 +469,54 @@ describe('DashParser Live', function() {
 
           // Update period has passed.
           expect(fakeNetEngine.request.calls.count()).toBe(2);
+        }).catch(fail).then(done);
+    shaka.polyfill.Promise.flush();
+  });
+
+  it('still updates when @minimumUpdatePeriod is zero', function(done) {
+    var lines = [
+      '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />'
+    ];
+    // updateTime parameter sets @minimumUpdatePeriod in the manifest.
+    var manifest = makeSimpleLiveManifestText(lines, /* updateTime */ 0);
+
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifest});
+    parser.start('dummy://foo', playerInterface)
+        .then(function(manifest) {
+          expect(manifest).toBeTruthy();
+          fakeNetEngine.request.calls.reset();
+
+          var waitTimeMs = shaka.dash.DashParser['MIN_UPDATE_PERIOD_'] * 1000;
+          jasmine.clock().tick(waitTimeMs);
+          shaka.polyfill.Promise.flush();
+
+          // Update period has passed.
+          expect(fakeNetEngine.request).toHaveBeenCalled();
+        }).catch(fail).then(done);
+    shaka.polyfill.Promise.flush();
+  });
+
+  it('does not update when @minimumUpdatePeriod is missing', function(done) {
+    var lines = [
+      '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />'
+    ];
+    // updateTime parameter sets @minimumUpdatePeriod in the manifest.
+    var manifest = makeSimpleLiveManifestText(lines, /* updateTime */ null);
+
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifest});
+    parser.start('dummy://foo', playerInterface)
+        .then(function(manifest) {
+          expect(manifest).toBeTruthy();
+          fakeNetEngine.request.calls.reset();
+
+          var waitTimeMs = shaka.dash.DashParser['MIN_UPDATE_PERIOD_'] * 1000;
+          jasmine.clock().tick(waitTimeMs * 2);
+          shaka.polyfill.Promise.flush();
+
+          // Even though we have waited longer than the minimum update period,
+          // the missing attribute means "do not update".  So no update should
+          // have happened.
+          expect(fakeNetEngine.request).not.toHaveBeenCalled();
         }).catch(fail).then(done);
     shaka.polyfill.Promise.flush();
   });

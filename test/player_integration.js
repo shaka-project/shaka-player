@@ -101,7 +101,7 @@ describe('Player', function() {
       // API and to check for renaming.
       player.load('test:sintel_compiled').then(function() {
         video.play();
-        return waitForEvent(video, 'timeupdate', 10);
+        return waitUntilPlayheadReaches(video, 1, 10);
       }).then(function() {
         var stats = player.getStats();
         var expected = {
@@ -147,7 +147,7 @@ describe('Player', function() {
       var textTrack = video.textTracks[0];
       player.load('test:sintel_compiled').then(function() {
         video.play();
-        return waitForEvent(video, 'timeupdate', 10);
+        return waitUntilPlayheadReaches(video, 1, 10);
       }).then(function() {
         // This should not be null initially.
         expect(textTrack.cues).not.toBe(null);
@@ -217,8 +217,6 @@ describe('Player', function() {
         player.load(asset.manifestUri).then(function() {
           expect(player.isLive()).toEqual(isLive);
           video.play();
-          return waitForEvent(video, 'timeupdate', 10);
-        }).then(function() {
           // 30 seconds or video ended, whichever comes first.
           return waitForTimeOrEnd(video, 30);
         }).then(function() {
@@ -245,20 +243,23 @@ describe('Player', function() {
   });
 
   /**
-   * @param {!EventTarget} target
-   * @param {string} eventName
+   * @param {!HTMLMediaElement} video
+   * @param {number} playheadTime The time to wait for.
    * @param {number} timeout in seconds, after which the Promise fails
    * @return {!Promise}
    */
-  function waitForEvent(target, eventName, timeout) {
+  function waitUntilPlayheadReaches(video, playheadTime, timeout) {
+    var curEventManager = eventManager;
     return new Promise(function(resolve, reject) {
-      eventManager.listen(target, eventName, function() {
-        resolve();
-        eventManager.unlisten(target, eventName);
+      curEventManager.listen(video, 'timeupdate', function() {
+        if (video.currentTime >= playheadTime) {
+          curEventManager.unlisten(video, 'timeupdate');
+          resolve();
+        }
       });
       Util.delay(timeout).then(function() {
-        reject('Timeout waiting for ' + eventName);
-        eventManager.unlisten(target, eventName);
+        curEventManager.unlisten(video, 'timeupdate');
+        reject('Timeout waiting for time');
       });
     });
   }
@@ -269,10 +270,15 @@ describe('Player', function() {
    * @return {!Promise}
    */
   function waitForTimeOrEnd(target, timeout) {
-    return Promise.race([
-      Util.delay(timeout),
-      waitForEvent(target, 'ended', timeout + 1)
-    ]);
+    var curEventManager = eventManager;
+    return new Promise(function(resolve, reject) {
+      var callback = function() {
+        curEventManager.unlisten(target, 'ended');
+        resolve();
+      };
+      curEventManager.listen(target, 'ended', callback);
+      Util.delay(timeout).then(callback);
+    });
   }
 
   /**

@@ -412,7 +412,8 @@ shakaExtern.DrmConfiguration;
 /**
  * @typedef {{
  *   customScheme: shakaExtern.DashContentProtectionCallback,
- *   clockSyncUri: string
+ *   clockSyncUri: string,
+ *   ignoreDrmInfo: boolean
  * }}
  *
  * @property {shakaExtern.DashContentProtectionCallback} customScheme
@@ -423,6 +424,10 @@ shakaExtern.DrmConfiguration;
  *   A default clock sync URI to be used with live streams which do not
  *   contain any clock sync information.  The "Date" header from this URI
  *   will be used to determine the current time.
+ * @property {boolean} ignoreDrmInfo
+ *   If true will cause DASH parser to ignore DRM information specified
+ *   by the manifest and treat it as if it signaled no particular key
+ *   system and contained no init data. Defaults to false if not provided.
  *
  * @exportDoc
  */
@@ -519,8 +524,9 @@ shakaExtern.BFrameAdjustment;
  *   bufferingGoal: number,
  *   bufferBehind: number,
  *   ignoreTextStreamFailures: boolean,
- *   useRelativeCueTimestamps: boolean,
- *   startAtSegmentBoundary: boolean
+ *   startAtSegmentBoundary: boolean,
+ *   smallGapLimit: number,
+ *   jumpLargeGaps: boolean
  * }}
  *
  * @description
@@ -546,14 +552,20 @@ shakaExtern.BFrameAdjustment;
  * @property {boolean} ignoreTextStreamFailures
  *   If true, the player will ignore text stream failures and proceed to play
  *   other streams.
- * @property {boolean} useRelativeCueTimestamps
- *   If true, WebVTT cue timestamps will be treated as relative to the start
- *   time of the VTT segment. Defaults to false.
  * @property {boolean} startAtSegmentBoundary
  *   If true, adjust the start time backwards so it is at the start of a
  *   segment. This affects both explicit start times and calculated start time
  *   for live streams. This can put us further from the live edge. Defaults to
  *   false.
+ * @property {number} smallGapLimit
+ *   The limit (in seconds) for a gap in the media to be considered "small".
+ *   Small gaps are jumped automatically without events.  Large gaps result
+ *   in a Player event and can be jumped.
+ * @property {boolean} jumpLargeGaps
+ *   If true, jump large gaps in addition to small gaps.  The event will be
+ *   raised first.  Then, if the app doesn't call preventDefault() on the event,
+ *   the Player will jump the gap.  If false, then the event will be raised,
+ *   but the gap will not be jumped.
  * @exportDoc
  */
 shakaExtern.StreamingConfiguration;

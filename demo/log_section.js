@@ -98,6 +98,8 @@ shakaDemo.onLogChange_ = function() {
   }
   // Re-initialize Shaka library logging to the freshly-patched console methods.
   shaka.log.setLevel(shaka.log.currentLevel);
+  // Change the hash, to mirror this.
+  shakaDemo.hashShouldChange_();
 };
 
 

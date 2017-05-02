@@ -1,3 +1,134 @@
+## 2.1.0 (2017-04-25)
+
+New features:
+  - Add basic HLS support
+    - VOD only
+    - Widevine & clear content only
+    - No support for CEA-708
+    - https://github.com/google/shaka-player/issues/279
+  - Tolerate gaps in the presentation timeline and jump over them
+    - https://github.com/google/shaka-player/issues/555
+  - Add an indicator for critical errors
+    - https://github.com/google/shaka-player/issues/564
+  - Do not retry on HTTP 401/403 errors
+    - https://github.com/google/shaka-player/issues/620
+  - Expand player stats and track metadata
+    - Add loadLatency stat
+    - Add mimeType to tracks
+    - Track state changes (buffering, playing, paused, ended)
+  - DASH trick mode support
+    - https://github.com/google/shaka-player/issues/538
+  - Expose license expiration times through Player
+    - https://github.com/google/shaka-player/issues/727
+  - Add support for EventStream elements in DASH
+    - https://github.com/google/shaka-player/issues/462
+  - Add support for Chromecast Media Playback messages from generic senders
+    - https://github.com/google/shaka-player/issues/722
+  - Add config to ignore key system and init data in DASH manifest
+    - https://github.com/google/shaka-player/issues/750
+  - Add support for asynchronous response filters
+    - https://github.com/google/shaka-player/issues/610
+  - Filter duplicate initData from manifest by key ID
+    - https://github.com/google/shaka-player/issues/580
+  - Optionally adjust start time to segment boundary
+    - https://github.com/google/shaka-player/issues/683
+  - StringUtils and Uint8ArrayUtils are now exported, to make filters easier
+    - https://github.com/google/shaka-player/issues/667
+  - Add audio adaptation to default AbrManager
+  - Add an API to force the Chromecast to disconnect
+    - https://github.com/google/shaka-player/issues/523
+  - Add possibility to delay license request until playback is started
+    - https://github.com/google/shaka-player/issues/262
+  - Add API to get live stream position as Date
+    - https://github.com/google/shaka-player/issues/356
+  - Don't clear buffer if switching to the same stream
+    - https://github.com/google/shaka-player/issues/693
+  - Demo app permalink support through URL hash parameters
+    - https://github.com/google/shaka-player/issues/709
+  - Add a flag so scheme plugins can ask us to ignore cache hits for ABR
+  - Allow passing durations from scheme plugins to compute throughput
+    - https://github.com/google/shaka-player/issues/621
+  - Make ES6 imports easier
+    - https://github.com/google/shaka-player/issues/466
+  - Add separate restrictions to AbrManager
+    - https://github.com/google/shaka-player/issues/565
+  - Allow network plugins to see the request type
+    - https://github.com/google/shaka-player/issues/602
+
+Bugfixes:
+  - Make language selection explicit
+    - https://github.com/google/shaka-player/issues/412
+  - Make text track visibility explicit
+    - https://github.com/google/shaka-player/issues/626
+  - Fix firing of 'trackschanged' event for multi-Period content
+    - https://github.com/google/shaka-player/issues/680
+  - Correct time parsing for MP4 VTT subtitles
+    - https://github.com/google/shaka-player/issues/699
+  - Fix playback of live when segments do not extend to the end of the Period
+    - https://github.com/google/shaka-player/issues/694
+  - Allow seeking to 0 in live streams
+    - https://github.com/google/shaka-player/issues/692
+  - Add explicit timestamps to 'emsg' events
+    - https://github.com/google/shaka-player/issues/698
+  - Fix playback of YouTube demo assets
+    - https://github.com/google/shaka-player/issues/682
+  - Allow text parsers to change during playback
+    - https://github.com/google/shaka-player/issues/571
+
+Docs:
+  - Add offline storage to v2 upgrade guide
+  - Add additional docs for AbrManager
+    - https://github.com/google/shaka-player/issues/629
+  - Add manifest parser plugin tutorial
+
+Broken Compatibility:
+  - Track types 'video' and 'audio' have been combined into 'variant'.
+    - Any application looking at track.type will need to be updated.
+  - Removed useRelativeCueTimestamps option
+    - All segmented WebVTT cue timestamps are now segment-relative
+    - https://github.com/google/shaka-player/issues/726
+  - Plugin interface for text parsers has changed
+    - Both old & new interfaces still supported
+    - Support for old interface will be removed in v2.2
+  - Plugin interface for ManifestParser.start has changed
+    - Now takes an object with named parameters instead of positional params
+    - Both old & new interfaces still supported
+    - Support for old interface will be removed in v2.2
+  - Retired the INVALID\_TTML error code
+    - Folded into the INVALID\_XML error code
+
+
+## 2.0.8 (2017-04-07)
+
+Bugfixes:
+  - Suppress controls UI updates when hidden
+    - https://github.com/google/shaka-player/issues/749
+  - Revert keyboard navigation changes in demo, failing on Firefox
+
+
+## 2.0.7 (2017-03-29)
+
+New Features:
+  - Improved keyboard navigation in demo page for accessibility
+  - Play through small gaps at the start of the timeline
+  - Add a method for accessing the HTMLMediaElement from the Player
+    - https://github.com/google/shaka-player/pull/723
+  - Improved error reporting for HTTP errors
+
+Bugfixes:
+  - Fixed a DASH compliance bug in SegmentList w/ presentationTimeOffset
+  - Fixed compiler renaming in emsg events.
+    - https://github.com/google/shaka-player/issues/717
+  - Fix period transitions where text streams may be absent
+    - https://github.com/google/shaka-player/issues/715
+  - Fix Firefox DRM detection
+  - Fix cleanup of expired EME sessions for offline
+  - Fix demo app error thrown when offline is not supported
+  - Fix infinite loop in offline storage of SegmentTemplate-based DASH
+    - https://github.com/google/shaka-player/issues/739
+  - Fix contamination between tests
+
+
 ## 2.0.6 (2017-02-24)
 
 New Features:

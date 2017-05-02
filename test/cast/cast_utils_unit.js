@@ -214,7 +214,7 @@ describe('CastUtils', function() {
           // [] to allow field names to be expressions.
           var initObject = {};
           initObject[ContentType.VIDEO] = mimeType;
-          mediaSourceEngine.init(initObject, false);
+          mediaSourceEngine.init(initObject);
           shaka.test.Util.fetch(initSegmentUrl).then(function(data) {
             return mediaSourceEngine.appendBuffer(ContentType.VIDEO, data,
                                                   null, null);

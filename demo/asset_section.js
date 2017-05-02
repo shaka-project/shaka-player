@@ -27,7 +27,10 @@
 var shakaDemo = shakaDemo || {};
 
 
-/** @private */
+/**
+ * @return {!Promise}
+ * @private
+ */
 shakaDemo.setupAssets_ = function() {
   // Populate the asset list.
   var assetList = document.getElementById('assetList');
@@ -76,18 +79,22 @@ shakaDemo.setupAssets_ = function() {
     first.selected = true;
   }
 
-  shakaDemo.setupOfflineAssets_();
+  // This needs to be started before we add the custom asset option.
+  var asyncOfflineSetup = shakaDemo.setupOfflineAssets_();
 
   // Add an extra option for custom assets.
   var option = document.createElement('option');
   option.textContent = '(custom asset)';
   assetList.appendChild(option);
 
-  // Show/hide the custom asset fields based on the selection.
   assetList.addEventListener('change', function() {
+    // Show/hide the custom asset fields based on the selection.
     var asset = assetList.options[assetList.selectedIndex].asset;
     var customAsset = document.getElementById('customAsset');
     customAsset.style.display = asset ? 'none' : 'block';
+
+    // Update the hash to reflect this change.
+    shakaDemo.hashShouldChange_();
   });
 
   document.getElementById('loadButton').addEventListener(
@@ -96,6 +103,8 @@ shakaDemo.setupAssets_ = function() {
       'keyup', shakaDemo.onAssetKeyUp_);
   document.getElementById('manifestInput').addEventListener(
       'keyup', shakaDemo.onAssetKeyUp_);
+
+  return asyncOfflineSetup;
 };
 
 
@@ -104,6 +113,8 @@ shakaDemo.setupAssets_ = function() {
  * @private
  */
 shakaDemo.onAssetKeyUp_ = function(event) {
+  // Mirror the users input as they type.
+  shakaDemo.hashShouldChange_();
   // Load the asset if the user presses enter.
   if (event.keyCode != 13) return;
   shakaDemo.load();
@@ -163,6 +174,11 @@ shakaDemo.preparePlayer_ = function(asset) {
 
   player.configure(config);
 
+  // TODO: document demo app debugging features
+  if (window.debugConfig) {
+    player.configure(window.debugConfig);
+  }
+
   return asset;
 };
 
@@ -175,10 +191,24 @@ shakaDemo.load = function() {
 
   var asset = shakaDemo.preparePlayer_(option.asset);
 
+  // Revert to default styles while we load.
+  shakaDemo.localVideo_.classList.remove('audioOnly');
+
   // Load the manifest.
   player.load(asset.manifestUri).then(function() {
     // Update control state in case autoplay is disabled.
     shakaDemo.controls_.loadComplete();
+
+    shakaDemo.hashShouldChange_();
+
+    // Audio-only tracks have no width/height.
+    var videoTracks =
+        player.getVariantTracks().filter(function(t) { return t.width; });
+
+    // Style the video element differently for audio-only assets.
+    if (videoTracks.length == 0) {
+      shakaDemo.localVideo_.classList.add('audioOnly');
+    }
 
     // Disallow casting of offline content.
     var isOffline = asset.manifestUri.indexOf('offline:') == 0;

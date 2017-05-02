@@ -23,6 +23,7 @@ describe('DrmEngine', function() {
   var logErrorSpy;
   var onErrorSpy;
   var onKeyStatusSpy;
+  var onExpirationSpy;
 
   var fakeNetEngine;
   var drmEngine;
@@ -53,6 +54,7 @@ describe('DrmEngine', function() {
 
     onErrorSpy = jasmine.createSpy('onError');
     onKeyStatusSpy = jasmine.createSpy('onKeyStatus');
+    onExpirationSpy = jasmine.createSpy('onExpirationUpdated');
   });
 
   beforeEach(function() {
@@ -70,6 +72,7 @@ describe('DrmEngine', function() {
     onErrorSpy.calls.reset();
     logErrorSpy.calls.reset();
     onKeyStatusSpy.calls.reset();
+    onExpirationSpy.calls.reset();
 
     // By default, error logs and callbacks result in failure.
     onErrorSpy.and.callFake(fail);
@@ -101,7 +104,7 @@ describe('DrmEngine', function() {
     fakeNetEngine.setResponseMap({ 'http://abc.drm/license': license });
 
     drmEngine = new shaka.media.DrmEngine(
-        fakeNetEngine, onErrorSpy, onKeyStatusSpy);
+        fakeNetEngine, onErrorSpy, onKeyStatusSpy, onExpirationSpy);
     config = {
       retryParameters: retryParameters,
       delayLicenseRequestUntilPlayed: false,
@@ -229,6 +232,7 @@ describe('DrmEngine', function() {
         expect(requestMediaKeySystemAccessSpy)
             .toHaveBeenCalledWith('drm.def', jasmine.any(Object));
         shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.DRM,
             shaka.util.Error.Code.REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE));
       }).then(done);
@@ -247,6 +251,7 @@ describe('DrmEngine', function() {
         expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(0);
 
         shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.DRM,
             shaka.util.Error.Code.NO_RECOGNIZED_KEY_SYSTEMS));
       }).then(done);
@@ -263,6 +268,7 @@ describe('DrmEngine', function() {
         expect(requestMediaKeySystemAccessSpy)
             .toHaveBeenCalledWith('drm.abc', jasmine.any(Object));
         shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.DRM,
             shaka.util.Error.Code.FAILED_TO_CREATE_CDM,
             'whoops!'));
@@ -456,6 +462,7 @@ describe('DrmEngine', function() {
       drmEngine.init(manifest, /* offline */ false).then(fail, function(error) {
         expect(logErrorSpy).toHaveBeenCalled();
         shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.DRM,
             shaka.util.Error.Code.NO_LICENSE_SERVER_GIVEN));
       }).then(done);
@@ -613,6 +620,7 @@ describe('DrmEngine', function() {
 
       initAndAttach().then(fail).catch(function(error) {
         shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.DRM,
             shaka.util.Error.Code.FAILED_TO_ATTACH_TO_VIDEO,
             'whoops!'));
@@ -631,6 +639,7 @@ describe('DrmEngine', function() {
 
       initAndAttach().then(fail).catch(function(error) {
         shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.DRM,
             shaka.util.Error.Code.INVALID_SERVER_CERTIFICATE,
             'whoops!'));
@@ -657,6 +666,7 @@ describe('DrmEngine', function() {
         expect(onErrorSpy).toHaveBeenCalled();
         var error = onErrorSpy.calls.argsFor(0)[0];
         shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.DRM,
             shaka.util.Error.Code.FAILED_TO_GENERATE_LICENSE_REQUEST,
             'whoops!'));
@@ -733,6 +743,7 @@ describe('DrmEngine', function() {
           expect(onErrorSpy).toHaveBeenCalled();
           var error = onErrorSpy.calls.argsFor(0)[0];
           shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
               shaka.util.Error.Category.DRM,
               shaka.util.Error.Code.FAILED_TO_CREATE_SESSION,
               'whoops!'));
@@ -752,6 +763,7 @@ describe('DrmEngine', function() {
           expect(onErrorSpy).toHaveBeenCalled();
           var error = onErrorSpy.calls.argsFor(0)[0];
           shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
               shaka.util.Error.Category.DRM,
               shaka.util.Error.Code.ENCRYPTED_CONTENT_WITHOUT_DRM_INFO));
         }).catch(fail).then(done);
@@ -819,6 +831,7 @@ describe('DrmEngine', function() {
 
           // Simulate a permission error from the web server.
           var netError = new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
               shaka.util.Error.Category.NETWORK,
               shaka.util.Error.Code.BAD_HTTP_STATUS,
               'http://abc.drm/license', 403);
@@ -831,6 +844,7 @@ describe('DrmEngine', function() {
           expect(onErrorSpy).toHaveBeenCalled();
           var error = onErrorSpy.calls.argsFor(0)[0];
           shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
               shaka.util.Error.Category.DRM,
               shaka.util.Error.Code.LICENSE_REQUEST_FAILED,
               jasmine.objectContaining({
@@ -917,6 +931,7 @@ describe('DrmEngine', function() {
               expect(onErrorSpy.calls.count()).toEqual(1);
               var error = onErrorSpy.calls.argsFor(0)[0];
               shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+                  shaka.util.Error.Severity.CRITICAL,
                   shaka.util.Error.Category.DRM,
                   shaka.util.Error.Code.EXPIRED));
               done();
@@ -955,6 +970,7 @@ describe('DrmEngine', function() {
             expect(onErrorSpy.calls.count()).toEqual(1);
             var error = onErrorSpy.calls.argsFor(0)[0];
             shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+                shaka.util.Error.Severity.CRITICAL,
                 shaka.util.Error.Category.DRM,
                 shaka.util.Error.Code.EXPIRED));
 
@@ -1057,6 +1073,7 @@ describe('DrmEngine', function() {
         expect(onErrorSpy).toHaveBeenCalled();
         var error = onErrorSpy.calls.argsFor(0)[0];
         shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.DRM,
             shaka.util.Error.Code.LICENSE_RESPONSE_REJECTED,
             'whoops!'));
@@ -1649,6 +1666,7 @@ describe('DrmEngine', function() {
     it('is rejected when network request fails', function(done) {
       var p = fakeNetEngine.delayNextRequest();
       var networkError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.NETWORK,
           shaka.util.Error.Code.BAD_HTTP_STATUS);
       p.reject(networkError);
@@ -1658,6 +1676,7 @@ describe('DrmEngine', function() {
         shaka.test.Util.expectToEqualError(
             err,
             new shaka.util.Error(
+                shaka.util.Error.Severity.CRITICAL,
                 shaka.util.Error.Category.DRM,
                 shaka.util.Error.Code.LICENSE_REQUEST_FAILED,
                 networkError));
@@ -1674,10 +1693,66 @@ describe('DrmEngine', function() {
         shaka.test.Util.expectToEqualError(
             err,
             new shaka.util.Error(
+                shaka.util.Error.Severity.CRITICAL,
                 shaka.util.Error.Category.DRM,
                 shaka.util.Error.Code.LICENSE_RESPONSE_REJECTED,
                 'Error'));
       }).catch(fail).then(done);
+    });
+  });
+
+  describe('expiration', function() {
+    beforeAll(function() {
+      jasmine.clock().install();
+    });
+
+    afterAll(function() {
+      jasmine.clock().uninstall();
+    });
+
+    beforeEach(function(done) {
+      session1.sessionId = 'abc';
+      session1.expiration = NaN;
+
+      initAndAttach().then(function() {
+        var initData = new Uint8Array(0);
+        var message = new Uint8Array(0);
+        mockVideo.on['encrypted'](
+            { initDataType: 'webm', initData: initData, keyId: null });
+        session1.on['message']({ target: session1, message: message });
+        session1.update.and.returnValue(Promise.resolve());
+
+        jasmine.clock().tick(1000);
+      }).catch(fail).then(done);
+    });
+
+    it('calls the callback when the expiration changes', function() {
+      onExpirationSpy.calls.reset();
+
+      session1.expiration = 10000;
+      jasmine.clock().tick(1000);
+      expect(onExpirationSpy).toHaveBeenCalledTimes(1);
+      expect(onExpirationSpy).toHaveBeenCalledWith(session1.sessionId, 10000);
+
+      onExpirationSpy.calls.reset();
+      session1.expiration = 50;
+      jasmine.clock().tick(1000);
+      expect(onExpirationSpy).toHaveBeenCalledTimes(1);
+      expect(onExpirationSpy).toHaveBeenCalledWith(session1.sessionId, 50);
+
+      onExpirationSpy.calls.reset();
+      session1.expiration = NaN;
+      jasmine.clock().tick(1000);
+      expect(onExpirationSpy).toHaveBeenCalledTimes(1);
+      expect(onExpirationSpy)
+          .toHaveBeenCalledWith(session1.sessionId, Infinity);
+    });
+
+    it('gets the current expiration times', function() {
+      session1.expiration = NaN;
+      expect(drmEngine.getExpiration()).toEqual(Infinity);
+      session1.expiration = 12345;
+      expect(drmEngine.getExpiration()).toEqual(12345);
     });
   });
 

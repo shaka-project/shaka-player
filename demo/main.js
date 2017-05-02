@@ -39,6 +39,10 @@ shakaDemo.video_ = null;
 shakaDemo.player_ = null;
 
 
+/** @private {HTMLMediaElement} */
+shakaDemo.localVideo_ = null;
+
+
 /** @private {shaka.Player} */
 shakaDemo.localPlayer_ = null;
 
@@ -51,8 +55,12 @@ shakaDemo.support_;
 shakaDemo.controls_ = null;
 
 
-/** @private {?number} */
-shakaDemo.lastMousePressTime_ = null;
+/** @private {boolean} */
+shakaDemo.hashCanChange_ = false;
+
+
+/** @private {boolean} */
+shakaDemo.suppressHashChangeEvent_ = false;
 
 
 /**
@@ -85,15 +93,6 @@ shakaDemo.init = function() {
   shakaDemo.preBrowserCheckParams_(params);
 
   shaka.polyfill.installAll();
-
-  // Listen to events to automatically blur elements focused by mouse input.
-  // This is to prevent the borders from showing up when not needed, as they
-  // are distracting for the user (not to mention fairly ugly).
-  // Because of event bubbling, this will implicitly listen to child elements.
-  document.body.addEventListener(
-      'focus', shakaDemo.onFocus_.bind(shakaDemo), true /* capture phase */);
-  document.body.addEventListener(
-      'mousedown', shakaDemo.onMouseDown_.bind(shakaDemo));
 
   if (!shaka.Player.isBrowserSupported()) {
     var errorDisplayLink = document.getElementById('errorDisplayLink');
@@ -142,9 +141,10 @@ shakaDemo.init = function() {
       shakaDemo.video_ = shakaDemo.castProxy_.getVideo();
       shakaDemo.player_ = shakaDemo.castProxy_.getPlayer();
       shakaDemo.player_.addEventListener('error', shakaDemo.onErrorEvent_);
+      shakaDemo.localVideo_ = localVideo;
       shakaDemo.localPlayer_ = localPlayer;
 
-      shakaDemo.setupAssets_();
+      var asyncSetup = shakaDemo.setupAssets_();
       shakaDemo.setupOffline_();
       shakaDemo.setupConfiguration_();
       shakaDemo.setupInfo_();
@@ -153,7 +153,14 @@ shakaDemo.init = function() {
       shakaDemo.controls_.init(shakaDemo.castProxy_, shakaDemo.onError_,
                                shakaDemo.onCastStatusChange_);
 
-      shakaDemo.postBrowserCheckParams_(params);
+      asyncSetup.catch(function(error) {
+        // shakaDemo.setupOfflineAssets_ errored while trying to
+        // load the offline assets. Notify the user of this.
+        shakaDemo.onError_(/** @type {!shaka.util.Error} */ (error));
+      }).then(function() {
+        shakaDemo.postBrowserCheckParams_(params);
+        window.addEventListener('hashchange', shakaDemo.updateFromHash_);
+      });
     });
   }
 };
@@ -216,6 +223,9 @@ shakaDemo.preBrowserCheckParams_ = function(params) {
     document.getElementById('container').className = 'noinput';
     document.body.className = 'noinput';
   }
+  if ('play' in params) {
+    document.getElementById('enableAutoplay').checked = true;
+  }
   // shaka.log is not set if logging isn't enabled.
   // I.E. if using the compiled version of shaka.
   if (shaka.log) {
@@ -249,26 +259,38 @@ shakaDemo.preBrowserCheckParams_ = function(params) {
 
 
 /**
-  * @param {!Object.<string, string>} params
-  * @private
-  */
+ * @param {!Object.<string, string>} params
+ * @private
+ */
 shakaDemo.postBrowserCheckParams_ = function(params) {
   // If a custom asset was given in the URL, select it now.
   if ('asset' in params) {
     var assetList = document.getElementById('assetList');
-    var customAsset = document.getElementById('customAsset');
-    assetList.selectedIndex = assetList.options.length - 1;
-    customAsset.style.display = 'block';
-  }
-  if ('defaultasset' in params) {
-    var assetList = document.getElementById('assetList');
-    var assetUri = params['defaultasset'];
-    for (var index = 0; index < assetList.length; index++) {
-      if (assetList[index].asset.manifestUri == assetUri) {
+    var assetUri = params['asset'];
+    var isDefault = false;
+    // Check all options except the last, which is 'custom asset'.
+    for (var index = 0; index < assetList.options.length - 1; index++) {
+      if (assetList[index].asset &&
+          assetList[index].asset.manifestUri == assetUri) {
         assetList.selectedIndex = index;
+        isDefault = true;
         break;
       }
     }
+    if (isDefault) {
+      // Clear the custom fields.
+      document.getElementById('manifestInput').value = '';
+      document.getElementById('licenseServerInput').value = '';
+    } else {
+      // It was a custom asset, so put it into the custom field.
+      assetList.selectedIndex = assetList.options.length - 1;
+      var customAsset = document.getElementById('customAsset');
+      customAsset.style.display = 'block';
+    }
+
+    // Call updateButtons_ manually, because changing assetList
+    // programatically doesn't fire a 'change' event.
+    shakaDemo.updateButtons_(/* canHide */ true);
   }
 
   if ('noadaptation' in params) {
@@ -289,44 +311,138 @@ shakaDemo.postBrowserCheckParams_ = function(params) {
     shakaDemo.onTrickPlayChange_(fakeEvent);
   }
 
-  if ('play' in params) {
+  // Allow the hash to be changed, and give it an initial change.
+  shakaDemo.hashCanChange_ = true;
+  shakaDemo.hashShouldChange_();
+
+  if ('noinput' in params || 'play' in params) {
     shakaDemo.load();
   }
 };
 
 
-/**
-  * @param {!Event} event
-  * @private
-  */
-shakaDemo.onFocus_ = function(event) {
-  if (shakaDemo.lastMousePressTime_ > Date.now() - 10) {
-    // We don't want control elements to stay selected when clicked on
-    // because the selection borders are ugly and should only be shown
-    // when actually necessary (i.e. keyboard navigation).
-
-    if (document.activeElement.type != 'text') {
-      document.activeElement.blur();
-    }
+/** @private */
+shakaDemo.updateFromHash_ = function() {
+  // Hash changes made by us should be ignored.  We only want to respond to hash
+  // changes made by the user in the URL bar.
+  if (shakaDemo.suppressHashChangeEvent_) {
+    shakaDemo.suppressHashChangeEvent_ = false;
+    return;
   }
+
+  var params = shakaDemo.getParams_();
+  shakaDemo.preBrowserCheckParams_(params);
+  shakaDemo.postBrowserCheckParams_(params);
 };
 
 
-/**
-  * @param {!Event} event
-  * @private
-  */
-shakaDemo.onMouseDown_ = function(event) {
-  shakaDemo.lastMousePressTime_ = Date.now();
+/** @private */
+shakaDemo.hashShouldChange_ = function() {
+  if (!shakaDemo.hashCanChange_)
+    return;
 
-  if (document.activeElement) {
-    // There's something selected already, perhaps due to
-    // switching from keyboard controls to mouse controls.
-    // Un-select that thing.
-    // Otherwise, clicking on a focused element won't un-focus
-    // it, since clicking on a focused element doesn't issue a
-    // focus event.
-    document.activeElement.blur();
+  var params = [];
+
+  // Save the current asset.
+  var assetUri;
+  var licenseServerUri;
+  if (shakaDemo.player_) {
+    assetUri = shakaDemo.player_.getManifestUri();
+    var drmInfo = shakaDemo.player_.drmInfo();
+    if (drmInfo)
+      licenseServerUri = drmInfo.licenseServerUri;
+  }
+  var assetList = document.getElementById('assetList');
+  if (assetUri) {
+    // Store the currently playing asset URI.
+    params.push('asset=' + assetUri);
+
+    // Is the asset a default asset?
+    var isDefault = false;
+    // Check all options except the last, which is 'custom asset'.
+    for (var index = 0; index < assetList.options.length - 1; index++) {
+      if (assetList[index].asset.manifestUri == assetUri) {
+        isDefault = true;
+        break;
+      }
+    }
+
+    // If it's a custom asset we should store whatever the license
+    // server URI is.
+    if (!isDefault && licenseServerUri) {
+      params.push('license=' + licenseServerUri);
+    }
+  } else {
+    if (assetList.selectedIndex == assetList.length - 1) {
+      // It's a custom asset.
+      if (document.getElementById('manifestInput').value) {
+        params.push('asset=' + document.getElementById('manifestInput').value);
+      }
+      if (document.getElementById('licenseServerInput').value) {
+        params.push('license=' +
+            document.getElementById('licenseServerInput').value);
+      }
+    } else {
+      // It's a default asset.
+      params.push('asset=' +
+          assetList[assetList.selectedIndex].asset.manifestUri);
+    }
+  }
+
+  // Save config panel state.
+  var audioLang = document.getElementById('preferredAudioLanguage').value;
+  var textLang = document.getElementById('preferredTextLanguage').value;
+  if (textLang != audioLang) {
+    params.push('audiolang=' + audioLang);
+    params.push('textlang=' + textLang);
+  } else {
+    params.push('lang=' + audioLang);
+  }
+  if (document.getElementById('logToScreen').checked) {
+    params.push('logtoscreen');
+  }
+  if (!document.getElementById('enableAdaptation').checked) {
+    params.push('noadaptation');
+  }
+  if (document.getElementById('showTrickPlay').checked) {
+    params.push('trickplay');
+  }
+  if (shaka.log) {
+    var logLevelList = document.getElementById('logLevelList');
+    var logLevel = logLevelList[logLevelList.selectedIndex].value;
+    if (logLevel != 'info') {
+      params.push(logLevel);
+    }
+  }
+  if (document.getElementById('enableAutoplay').checked) {
+    params.push('play');
+  }
+
+  // This parameter must be added manually, so preserve it.
+  if ('noinput' in shakaDemo.getParams_()) {
+    params.push('noinput');
+  }
+
+  // This parameter must be added manually, so preserve it.
+  // This one is only used by the loader in load.js to decide which version of
+  // the library to load.
+  if ('compiled' in shakaDemo.getParams_()) {
+    params.push('compiled');
+  }
+
+  var newHash = '#' + params.join(';');
+  if (newHash != location.hash) {
+    // We want to suppress hashchange events triggered here.  We only want to
+    // respond to hashchange events initiated by the user in the URL bar.
+    shakaDemo.suppressHashChangeEvent_ = true;
+    location.hash = newHash;
+  }
+
+  // If search is already blank, setting it triggers a navigation and reloads
+  // the page.  Only blank out the search if we have just upgraded from search
+  // parameters to hash parameters.
+  if (location.search) {
+    location.search = '';
   }
 };
 
@@ -347,13 +463,37 @@ shakaDemo.onErrorEvent_ = function(event) {
  */
 shakaDemo.onError_ = function(error) {
   console.error('Player error', error);
-  var message = error.message || ('Error code ' + error.code);
   var link = document.getElementById('errorDisplayLink');
-  link.href = '../docs/api/shaka.util.Error.html#value:' + error.code;
-  link.textContent = message;
-  // Make the link clickable only if we have an error code.
-  link.style.pointerEvents = error.code ? 'auto' : 'none';
-  document.getElementById('errorDisplay').style.display = 'block';
+
+  // Don't let less serious or equally serious errors replace what is already
+  // shown.  The first error is usually the most important one, and the others
+  // may distract us in bug reports.
+
+  // If this is an unexpected non-shaka.util.Error, severity is null.
+  if (error.severity == null) {
+    // Treat these as the most severe, since they should not happen.
+    error.severity = /** @type {shaka.util.Error.Severity} */(99);
+  }
+
+  // Always show the new error if:
+  //   1. there is no error showing currently
+  //   2. the new error is more severe than the old one
+  if (link.severity == null ||
+      error.severity > link.severity) {
+    var message = error.message || ('Error code ' + error.code);
+    if (error.code) {
+      link.href = '../docs/api/shaka.util.Error.html#value:' + error.code;
+    } else {
+      link.href = '';
+    }
+    link.textContent = message;
+    // By converting severity == null to 99, non-shaka errors will not be
+    // replaced by any subsequent error.
+    link.severity = error.severity || 99;
+    // Make the link clickable only if we have an error code.
+    link.style.pointerEvents = error.code ? 'auto' : 'none';
+    document.getElementById('errorDisplay').style.display = 'block';
+  }
 };
 
 
@@ -365,6 +505,7 @@ shakaDemo.closeError = function() {
   var link = document.getElementById('errorDisplayLink');
   link.href = '';
   link.textContent = '';
+  link.severity = null;
 };
 
 

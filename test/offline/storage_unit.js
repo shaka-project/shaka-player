@@ -334,10 +334,28 @@ describe('Storage', function() {
           .then(done);
     });
 
+    it('stores expiration', function(done) {
+      drmEngine.setSessionIds(['abcd']);
+      drmEngine.getExpiration.and.returnValue(1234);
+
+      storage.store('')
+          .then(function(data) {
+            expect(data.offlineUri).toBe('offline:0');
+            return fakeStorageEngine.get('manifest', 0);
+          })
+          .then(function(manifestDb) {
+            expect(manifestDb).toBeTruthy();
+            expect(manifestDb.expiration).toBe(1234);
+          })
+          .catch(fail)
+          .then(done);
+    });
+
     it('throws an error if another store is in progress', function(done) {
       var p1 = storage.store('', {}).catch(fail);
       var p2 = storage.store('', {}).then(fail).catch(function(error) {
         var expectedError = new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.STORAGE,
             shaka.util.Error.Code.STORE_ALREADY_IN_PROGRESS);
         shaka.test.Util.expectToEqualError(error, expectedError);
@@ -351,6 +369,7 @@ describe('Storage', function() {
 
       storage.store('', {}).then(fail).catch(function(error) {
         var expectedError = new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.STORAGE,
             shaka.util.Error.Code.CANNOT_STORE_LIVE_OFFLINE,
             '');
@@ -369,6 +388,7 @@ describe('Storage', function() {
       drmEngine.setSessionIds([]);
       storage.store('', {}).then(fail).catch(function(error) {
         var expectedError = new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.STORAGE,
             shaka.util.Error.Code.NO_INIT_DATA_FOR_OFFLINE,
             '');
@@ -382,6 +402,7 @@ describe('Storage', function() {
       storage = new shaka.offline.Storage(player);
       storage.store('', {}).then(fail).catch(function(error) {
         var expectedError = new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.STORAGE,
             shaka.util.Error.Code.STORAGE_NOT_SUPPORTED);
         shaka.test.Util.expectToEqualError(error, expectedError);
@@ -391,6 +412,7 @@ describe('Storage', function() {
     it('throws an error if destroyed mid-store', function(done) {
       var p1 = storage.store('', {}).then(fail).catch(function(error) {
         var expectedError = new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.STORAGE,
             shaka.util.Error.Code.OPERATION_ABORTED);
         shaka.test.Util.expectToEqualError(error, expectedError);
@@ -423,6 +445,7 @@ describe('Storage', function() {
             originalManifestUri: originalUri,
             duration: 4,
             size: 150,
+            expiration: Infinity,
             tracks: tracks,
             appMetadata: undefined
           });
@@ -477,6 +500,7 @@ describe('Storage', function() {
             originalManifestUri: originalUri,
             duration: 5,
             size: jasmine.any(Number),
+            expiration: Infinity,
             tracks: tracks,
             appMetadata: undefined
           });
@@ -643,7 +667,7 @@ describe('Storage', function() {
             .then(function(manifest) {
               expect(manifest).toBeTruthy();
               expect(manifest.size).toBe(15);
-              expect(manifest.duration).toBe(3);
+              expect(manifest.duration).toBe(13);
               expect(netEngine.request.calls.count()).toBe(3);
               return fakeStorageEngine.get('manifest', 0);
             })
@@ -666,6 +690,7 @@ describe('Storage', function() {
 
         var delay = netEngine.delayNextRequest();
         var expectedError = new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.NETWORK,
             shaka.util.Error.Code.HTTP_ERROR);
         delay.reject(expectedError);
@@ -985,6 +1010,7 @@ describe('Storage', function() {
     it('throws an error if the content is not found', function(done) {
       removeManifest(0).then(fail).catch(function(error) {
         var expectedError = new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.STORAGE,
             shaka.util.Error.Code.REQUESTED_ITEM_NOT_FOUND,
             'offline:0');
@@ -996,11 +1022,27 @@ describe('Storage', function() {
       var bogusContent = {offlineUri: 'foo:bar'};
       storage.remove(bogusContent).then(fail).catch(function(error) {
         var expectedError = new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.STORAGE,
             shaka.util.Error.Code.MALFORMED_OFFLINE_URI,
             'foo:bar');
         shaka.test.Util.expectToEqualError(error, expectedError);
       }).then(done);
+    });
+
+    it('raises not found error', function(done) {
+      removeManifest(0)
+          .then(fail)
+          .catch(function(e) {
+            shaka.test.Util.expectToEqualError(
+                e,
+                new shaka.util.Error(
+                    shaka.util.Error.Severity.CRITICAL,
+                    shaka.util.Error.Category.STORAGE,
+                    shaka.util.Error.Code.REQUESTED_ITEM_NOT_FOUND,
+                    'offline:0'));
+          })
+          .then(done);
     });
 
     /**

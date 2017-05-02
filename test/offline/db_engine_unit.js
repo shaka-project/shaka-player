@@ -153,6 +153,7 @@ describe('DBEngine', function() {
       pending('DBEngine is not supported on this platform.');
     }
     var expectedError = new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.STORAGE,
         shaka.util.Error.Code.OPERATION_ABORTED);
     var insert1Finished = false, insert2Finished = false;

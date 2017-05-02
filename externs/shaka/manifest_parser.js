@@ -44,6 +44,7 @@ shakaExtern.ManifestParser = function() {};
  *   onError: function(!shaka.util.Error)
  * }}
  *
+ * @description
  * Defines the interface of the Player to the manifest parser.  This defines
  * fields and callback methods that the parser will use to interact with the
  * Player.  The callback methods do not to be called as member functions (i.e.
@@ -115,3 +116,15 @@ shakaExtern.ManifestParser.prototype.stop = function() {};
  * @exportDoc
  */
 shakaExtern.ManifestParser.prototype.update = function() {};
+
+
+/**
+ * Tells the parser that the expiration time of an EME session has changed.
+ * Implementing this is optional.
+ *
+ * @param {string} sessionId
+ * @param {number} expiration
+ * @exportDoc
+ */
+shakaExtern.ManifestParser.prototype.onExpirationUpdated = function(
+    sessionId, expiration) {};

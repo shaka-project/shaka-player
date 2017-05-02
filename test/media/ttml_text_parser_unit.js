@@ -35,11 +35,16 @@ describe('TtmlTextParser', function() {
   });
 
   it('supports no cues', function() {
-    verifyHelper([], '<tt></tt>');
+    verifyHelper([],
+        '<tt></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
   it('supports div with no cues but whitespace', function() {
-    verifyHelper([], '<tt><body><div>  \r\n </div></body></tt>');
+    verifyHelper(
+        [],
+        '<tt><body><div>  \r\n </div></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
   it('supports xml:space', function() {
@@ -55,19 +60,22 @@ describe('TtmlTextParser', function() {
         [
           {start: 62.03, end: 62.05, text: 'A B C'}
         ],
-        '<tt xml:space="default">' + ttBody + '</tt>');
+        '<tt xml:space="default">' + ttBody + '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
     // When xml:space="preserve", take them into account.
     verifyHelper(
         [
           {start: 62.03, end: 62.05, text: '\n       A    B   C  \n    '}
         ],
-        '<tt xml:space="preserve">' + ttBody + '</tt>');
+        '<tt xml:space="preserve">' + ttBody + '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
     // The default value for xml:space is "default".
     verifyHelper(
         [
           {start: 62.03, end: 62.05, text: 'A B C'}
         ],
-        '<tt>' + ttBody + '</tt>');
+        '<tt>' + ttBody + '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
     // Any other value is rejected as an error.
     errorHelper(shaka.util.Error.Code.INVALID_XML,
                 '<tt xml:space="invalid">' + ttBody + '</tt>');
@@ -91,7 +99,8 @@ describe('TtmlTextParser', function() {
           {start: 62.05, end: 3723.2, text: 'Test'}
         ],
         '<tt><body><p begin="01:02.05" ' +
-        'end="01:02:03.200">Test</p></body></tt>');
+        'end="01:02:03.200">Test</p></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
   it('accounts for offset', function() {
@@ -101,7 +110,7 @@ describe('TtmlTextParser', function() {
         ],
         '<tt><body><p begin="01:02.05" ' +
         'end="01:02:03.200">Test</p></body></tt>',
-        /* offset */ 7);
+        {periodStart: 7, segmentStart: 0, segmentEnd: 0 });
   });
 
   it('supports time in 0.00h 0.00m 0.00s format', function() {
@@ -110,7 +119,8 @@ describe('TtmlTextParser', function() {
           {start: 3567.03, end: 5402.3, text: 'Test'}
         ],
         '<tt><body><p begin="59.45m30ms" ' +
-        'end="1.5h2.3s">Test</p></body></tt>');
+        'end="1.5h2.3s">Test</p></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
   it('supports time with frame rate', function() {
@@ -123,7 +133,8 @@ describe('TtmlTextParser', function() {
         '<body>' +
         '<p begin="00:10:15:15" end="00:11:02:30">Test</p>' +
         '</body>' +
-        '</tt>');
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
   it('supports time with frame rate multiplier', function() {
@@ -137,7 +148,8 @@ describe('TtmlTextParser', function() {
         '<body>' +
         '<p begin="00:10:15:15" end="00:11:02:30">Test</p>' +
         '</body>' +
-        '</tt>');
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
   it('supports time with subframes', function() {
@@ -151,7 +163,8 @@ describe('TtmlTextParser', function() {
         '<body>' +
         '<p begin="00:10:15:15.1" end="00:11:02:29.2">Test</p>' +
         '</body>' +
-        '</tt>');
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
   it('supports time in frame format', function() {
@@ -165,7 +178,8 @@ describe('TtmlTextParser', function() {
         '<body>' +
         '<p begin="75f" end="300.3f">Test</p>' +
         '</body>' +
-        '</tt>');
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
   it('supports time in tick format', function() {
@@ -179,7 +193,8 @@ describe('TtmlTextParser', function() {
         '<body>' +
         '<p begin="50t" end="60.2t">Test</p>' +
         '</body>' +
-        '</tt>');
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
   it('supports time with duration', function() {
@@ -188,7 +203,8 @@ describe('TtmlTextParser', function() {
           {start: 62.05, end: 67.05, text: 'Test'}
         ],
         '<tt><body><p begin="01:02.05" ' +
-        'dur="5s">Test</p></body></tt>');
+        'dur="5s">Test</p></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
   it('parses alignment from textAlign attribute of a region', function() {
@@ -203,7 +219,8 @@ describe('TtmlTextParser', function() {
         '<body region="subtitleArea">' +
         '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
         '</body>' +
-        '</tt>');
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
   it('parses alignment from <style> block with id on region', function() {
@@ -221,7 +238,8 @@ describe('TtmlTextParser', function() {
         '<body region="subtitleArea">' +
         '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
         '</body>' +
-        '</tt>');
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
   it('parses alignment from <style> block with id on p', function() {
@@ -239,7 +257,8 @@ describe('TtmlTextParser', function() {
         '<body region="subtitleArea">' +
         '<p begin="01:02.05" end="01:02:03.200" style="s1">Test</p>' +
         '</body>' +
-        '</tt>');
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
   it('supports size setting', function() {
@@ -254,7 +273,8 @@ describe('TtmlTextParser', function() {
         '<body region="subtitleArea">' +
         '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
         '</body>' +
-        '</tt>');
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
   it('supports line and position settings for horizontal text',
@@ -270,7 +290,8 @@ describe('TtmlTextParser', function() {
            '<body region="subtitleArea">' +
            '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
            '</body>' +
-           '</tt>');
+           '</tt>',
+           {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
        verifyHelper(
            [
              {start: 62.05, end: 3723.2, text: 'Test', position: 50, line: 16}
@@ -283,7 +304,8 @@ describe('TtmlTextParser', function() {
            '<body region="subtitleArea">' +
            '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
            '</body>' +
-           '</tt>');
+           '</tt>',
+           {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
        verifyHelper(
            [
              {start: 62.05, end: 3723.2, text: 'Test', position: 50, line: 16}
@@ -296,7 +318,8 @@ describe('TtmlTextParser', function() {
            '<body region="subtitleArea">' +
            '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
            '</body>' +
-           '</tt>');
+           '</tt>',
+           {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
       });
 
   it('supports line and position settings for vertical text',
@@ -313,7 +336,8 @@ describe('TtmlTextParser', function() {
            '<body region="subtitleArea">' +
            '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
            '</body>' +
-           '</tt>');
+           '</tt>',
+           {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
        verifyHelper(
            [
              {start: 62.05, end: 3723.2, text: 'Test', position: 16, line: 50}
@@ -326,7 +350,8 @@ describe('TtmlTextParser', function() {
            '<body region="subtitleArea">' +
            '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
            '</body>' +
-           '</tt>');
+           '</tt>',
+           {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
        verifyHelper(
            [
              {start: 62.05, end: 3723.2, text: 'Test', position: 16, line: 50}
@@ -339,7 +364,8 @@ describe('TtmlTextParser', function() {
            '<body region="subtitleArea">' +
            '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
            '</body>' +
-           '</tt>');
+           '</tt>',
+           {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
       });
 
   it('supports vertical setting', function() {
@@ -355,7 +381,8 @@ describe('TtmlTextParser', function() {
         '<body region="subtitleArea">' +
         '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
         '</body>' +
-        '</tt>');
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
     verifyHelper(
         [
           {start: 62.05, end: 3723.2, text: 'Test', vertical: 'rl'}
@@ -368,7 +395,8 @@ describe('TtmlTextParser', function() {
         '<body region="subtitleArea">' +
         '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
         '</body>' +
-        '</tt>');
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
     verifyHelper(
         [
           {start: 62.05, end: 3723.2, text: 'Test', vertical: 'lr'}
@@ -381,7 +409,8 @@ describe('TtmlTextParser', function() {
         '<body region="subtitleArea">' +
         '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
         '</body>' +
-        '</tt>');
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
   it('disregards empty divs and ps', function() {
@@ -396,7 +425,8 @@ describe('TtmlTextParser', function() {
         '</div>' +
         '<div></div>' +
         '</body>' +
-        '</tt>');
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
     verifyHelper(
         [
           {start: 62.05, end: 3723.2, text: 'Test'}
@@ -408,7 +438,8 @@ describe('TtmlTextParser', function() {
         '<p></p>' +
         '</div>' +
         '</body>' +
-        '</tt>');
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
     verifyHelper(
         [],
         '<tt>' +
@@ -418,7 +449,8 @@ describe('TtmlTextParser', function() {
         '</div>' +
         '<div></div>' +
         '</body>' +
-        '</tt>');
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
   it('inserts newline characters into <br> tags', function() {
@@ -427,13 +459,15 @@ describe('TtmlTextParser', function() {
           {start: 62.05, end: 3723.2, text: 'Line1\nLine2'}
         ],
         '<tt><body><p begin="01:02.05" ' +
-        'end="01:02:03.200">Line1<br/>Line2</p></body></tt>');
+        'end="01:02:03.200">Line1<br/>Line2</p></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
     verifyHelper(
         [
           {start: 62.05, end: 3723.2, text: 'Line1\nLine2'}
         ],
         '<tt><body><p begin="01:02.05" ' +
-        'end="01:02:03.200"><span>Line1<br/>Line2</span></p></body></tt>');
+        'end="01:02:03.200"><span>Line1<br/>Line2</span></p></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
   it('parses cue alignment from textAlign attribute', function() {
@@ -452,7 +486,8 @@ describe('TtmlTextParser', function() {
         '<body region="subtitleArea">' +
         '<p begin="01:02.05" end="01:02:03.200" style="s1">Test</p>' +
         '</body>' +
-        '</tt>');
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
 
@@ -485,20 +520,19 @@ describe('TtmlTextParser', function() {
         '<body region="subtitleArea">' +
         '<p begin="01:02.05" end="01:02:03.200" style="s1">Test</p>' +
         '</body>' +
-        '</tt>');
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
 
   /**
    * @param {!Array} cues
    * @param {string} text
-   * @param {number=} opt_offset
+   * @param {shakaExtern.TextParser.TimeContext} time
    */
-  function verifyHelper(cues, text, opt_offset) {
+  function verifyHelper(cues, text, time) {
     var data = shaka.util.StringUtils.toUTF8(text);
-    // Last two parameters are only used by mp4 vtt parser.
-    var result =
-        shaka.media.TtmlTextParser(data, opt_offset || 0, null, null, false);
+    var result = new shaka.media.TtmlTextParser().parseMedia(data, time);
     expect(result).toBeTruthy();
     expect(result.length).toBe(cues.length);
     for (var i = 0; i < cues.length; i++) {
@@ -528,10 +562,14 @@ describe('TtmlTextParser', function() {
    * @param {string} text
    */
   function errorHelper(code, text) {
-    var error = new shaka.util.Error(shaka.util.Error.Category.TEXT, code);
+    var error = new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.TEXT,
+        code);
     var data = shaka.util.StringUtils.toUTF8(text);
     try {
-      shaka.media.TtmlTextParser(data, 0, null, null, false);
+      new shaka.media.TtmlTextParser().parseMedia(
+          data,
+          {periodStart: 0, segmentStart: 0, segmentEnd: 0});
       fail('Invalid TTML file supported');
     } catch (e) {
       shaka.test.Util.expectToEqualError(e, error);

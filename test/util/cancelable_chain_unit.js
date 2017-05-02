@@ -89,6 +89,7 @@ describe('CancelableChain', function() {
 
     beforeAll(function() {
       cannedError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.PLAYER,
           shaka.util.Error.Code.LOAD_INTERRUPTED);
     });

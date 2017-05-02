@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 #
 # Copyright 2016 Google Inc.  All Rights Reserved.
 #
@@ -61,16 +61,15 @@ def check_lint():
 def check_html_lint():
   """Runs the HTML linter over the HTML files.
 
-  Skipped if htmlhint is not available.
-
   Returns:
     True on success, False on failure.
   """
-  htmlhint_path = shakaBuildHelpers.get_node_binary_path('htmlhint')
-  if not os.path.exists(htmlhint_path):
-    return True
-  print 'Running htmlhint...'
+  # Update node modules if needed.
+  if not shakaBuildHelpers.update_node_modules():
+    return False
 
+  print 'Running htmlhint...'
+  htmlhint_path = shakaBuildHelpers.get_node_binary_path('htmlhint')
   base = shakaBuildHelpers.get_source_base()
   files = ['index.html', 'demo/index.html', 'support.html']
   file_paths = [os.path.join(base, x) for x in files]

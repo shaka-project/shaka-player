@@ -29,7 +29,8 @@ describe('HlsParser', function() {
       retryParameters: retry,
       dash: {
         customScheme: function(node) { return null; },
-        clockSyncUri: ''
+        clockSyncUri: '',
+        ignoreDrmInfo: false
       },
       hls: {
         defaultTimeOffset: 0
@@ -99,7 +100,7 @@ describe('HlsParser', function() {
   it('parses audio and video variant', function(done) {
     var master = [
       '#EXTM3U\n',
-      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1, mp4a",',
       'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
       'test://video\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
@@ -141,7 +142,7 @@ describe('HlsParser', function() {
   it('parses multiple variants', function(done) {
     var master = [
       '#EXTM3U\n',
-      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1, mp4a",',
       'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
       'test://video\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1,mp4a",',
@@ -399,6 +400,73 @@ describe('HlsParser', function() {
     testHlsParser(master, media, manifest, done);
   });
 
+  it('constructs relative URIs', function(done) {
+    var master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,VIDEO="vid"\n',
+      'audio/audio.m3u8\n',
+      '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid",URI="video/video.m3u8"'
+    ].join('');
+
+    var media = [
+      '#EXTM3U\n',
+      '#EXT-X-MAP:URI="init.mp4"\n',
+      '#EXTINF:5,\n',
+      'segment.mp4'
+    ].join('');
+
+    var manifest = new shaka.test.ManifestGenerator()
+            .anyTimeline()
+            .addPeriod(jasmine.any(Number))
+              .addVariant(jasmine.any(Number))
+                .bandwidth(200)
+                .addVideo(jasmine.any(Number))
+                  .anySegmentFunctions()
+                  .anyInitSegment()
+                  .presentationTimeOffset(0)
+                  .mime('video/mp4', 'avc1')
+                  .frameRate(60)
+                  .size(960, 540)
+                .addAudio(jasmine.any(Number))
+                  .anySegmentFunctions()
+                  .anyInitSegment()
+                  .presentationTimeOffset(0)
+                  .mime('audio/mp4', 'mp4a')
+          .build();
+
+    fakeNetEngine.setResponseMapAsText({
+      'test://host/master.m3u8': master,
+      'test://host/audio/audio.m3u8': media,
+      'test://host/video/video.m3u8': media
+    });
+
+    parser.start('test://host/master.m3u8', playerInterface)
+        .then(function(actual) {
+          expect(actual).toEqual(manifest);
+          var video = actual.periods[0].variants[0].video;
+          var audio = actual.periods[0].variants[0].audio;
+
+          var videoPosition = video.findSegmentPosition(0);
+          var audioPosition = audio.findSegmentPosition(0);
+          expect(videoPosition).not.toBe(null);
+          expect(audioPosition).not.toBe(null);
+
+          var videoReference = video.getSegmentReference(videoPosition);
+          var audioReference = audio.getSegmentReference(audioPosition);
+          expect(videoReference).not.toBe(null);
+          expect(audioReference).not.toBe(null);
+          if (videoReference) {
+            expect(videoReference.getUris()[0])
+                .toEqual('test://host/video/segment.mp4');
+          }
+          if (audioReference) {
+            expect(audioReference.getUris()[0])
+                .toEqual('test://host/audio/segment.mp4');
+          }
+        }).catch(fail).then(done);
+  });
+
   it('allows streams with no init segment', function(done) {
     var master = [
       '#EXTM3U\n',
@@ -433,6 +501,49 @@ describe('HlsParser', function() {
                   .nullInitSegment()
                   .presentationTimeOffset(0)
                   .mime('audio/mp4', 'mp4a')
+          .build();
+
+    testHlsParser(master, media, manifest, done);
+  });
+
+  it('constructs DrmInfo for Widevine', function(done) {
+    var master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+      'RESOLUTION=960x540,FRAME-RATE=60\n',
+      'test://video\n'
+    ].join('');
+
+    var initDataBase64 =
+        'dGhpcyBpbml0IGRhdGEgY29udGFpbnMgaGlkZGVuIHNlY3JldHMhISE=';
+
+    var media = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:6\n',
+      '#EXT-X-KEY:METHOD=SAMPLE-AES-CENC,',
+      'KEYFORMAT="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed",',
+      'URI="data:text/plain;base64,',
+      initDataBase64, '",\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'test://main.mp4'
+    ].join('');
+
+    var manifest = new shaka.test.ManifestGenerator()
+            .anyTimeline()
+            .addPeriod(jasmine.any(Number))
+              .addVariant(jasmine.any(Number))
+                .bandwidth(200)
+                .addVideo(jasmine.any(Number))
+                  .anySegmentFunctions()
+                  .nullInitSegment()
+                  .presentationTimeOffset(0)
+                  .mime('video/mp4', 'avc1')
+                  .frameRate(60)
+                  .size(960, 540)
+                .encrypted(true)
+                .addDrmInfo('com.widevine.alpha')
+                  .addCencInitData(initDataBase64)
           .build();
 
     testHlsParser(master, media, manifest, done);
@@ -480,6 +591,7 @@ describe('HlsParser', function() {
       ].join('');
 
       var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           Code.HLS_MULTIPLE_MEDIA_INIT_SECTIONS_FOUND);
 
@@ -504,6 +616,7 @@ describe('HlsParser', function() {
       ].join('');
 
       var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           Code.HLS_COULD_NOT_GUESS_MIME_TYPE,
           'exe');
@@ -530,6 +643,7 @@ describe('HlsParser', function() {
       ].join('');
 
       var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           Code.HLS_COULD_NOT_GUESS_CODECS,
           ['aaa', 'bbb']);
@@ -546,6 +660,7 @@ describe('HlsParser', function() {
        */
       function verifyMissingAttribute(master, media, attributeName, done) {
         var error = new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.MANIFEST,
             Code.HLS_REQUIRED_ATTRIBUTE_MISSING,
             attributeName);
@@ -623,6 +738,7 @@ describe('HlsParser', function() {
        */
       function verifyMissingTag(master, media, tagName, done) {
         var error = new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.MANIFEST,
             Code.HLS_REQUIRED_TAG_MISSING,
             tagName);

@@ -24,6 +24,7 @@ describe('StreamingEngine', function() {
   var timeline;
 
   var playhead;
+  var config;
   var onBuffering;
 
   var mediaSource;
@@ -59,8 +60,46 @@ describe('StreamingEngine', function() {
   });
 
   beforeEach(function(done) {
+    // shakaExtern.StreamingConfiguration
+    config = {
+      rebufferingGoal: 2,
+      bufferingGoal: 5,
+      retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+      bufferBehind: 15,
+      ignoreTextStreamFailures: false,
+      useRelativeCueTimestamps: false,
+      startAtSegmentBoundary: false,
+      smallGapLimit: 0.5,
+      jumpLargeGaps: false
+    };
+
+    onChooseStreams = jasmine.createSpy('onChooseStreams');
+    onCanSwitch = jasmine.createSpy('onCanSwitch');
+    onInitialStreamsSetup = jasmine.createSpy('onInitialStreamsSetup');
+    onStartupComplete = jasmine.createSpy('onStartupComplete');
+    onError = jasmine.createSpy('onError');
+    onError.and.callFake(fail);
+    onEvent = jasmine.createSpy('onEvent');
+
+
     eventManager = new shaka.util.EventManager();
     setupMediaSource().catch(fail).then(done);
+  });
+
+  afterEach(function(done) {
+    streamingEngine.destroy().then(function() {
+      video.removeAttribute('src');
+      video.load();
+      return Promise.all([
+        mediaSourceEngine.destroy(),
+        playhead.destroy(),
+        eventManager.destroy()
+      ]);
+    }).catch(fail).then(done);
+  });
+
+  afterAll(function() {
+    document.body.removeChild(video);
   });
 
   // Setup MediaSource and MediaSourceEngine.
@@ -221,12 +260,10 @@ describe('StreamingEngine', function() {
     playhead = new shaka.media.Playhead(
         /** @type {!HTMLVideoElement} */(video),
         /** @type {shakaExtern.Manifest} */ (manifest),
-        2 /* rebufferingGoal */,
+        config,
         null /* startTime */,
-        onBuffering,
         onSeek,
-        function() {},
-        function() {});
+        onEvent);
   }
 
   function setupManifest(
@@ -257,23 +294,6 @@ describe('StreamingEngine', function() {
   }
 
   function createStreamingEngine() {
-    onChooseStreams = jasmine.createSpy('onChooseStreams');
-    onCanSwitch = jasmine.createSpy('onCanSwitch');
-    onInitialStreamsSetup = jasmine.createSpy('onInitialStreamsSetup');
-    onStartupComplete = jasmine.createSpy('onStartupComplete');
-    onError = jasmine.createSpy('onError');
-    onError.and.callFake(fail);
-    onEvent = jasmine.createSpy('onEvent');
-
-    var config = {
-      rebufferingGoal: 2,
-      bufferingGoal: 5,
-      retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-      bufferBehind: 15,
-      ignoreTextStreamFailures: false,
-      useRelativeCueTimestamps: false,
-      startAtSegmentBoundary: false
-    };
     var playerInterface = {
       playhead: playhead,
       mediaSourceEngine: mediaSourceEngine,
@@ -283,6 +303,7 @@ describe('StreamingEngine', function() {
       onError: onError,
       onEvent: onEvent,
       onManifestUpdate: function() {},
+      onSegmentAppended: playhead.onSegmentAppended.bind(playhead),
       onInitialStreamsSetup: onInitialStreamsSetup,
       onStartupComplete: onStartupComplete
     };
@@ -290,22 +311,6 @@ describe('StreamingEngine', function() {
         /** @type {shakaExtern.Manifest} */(manifest), playerInterface);
     streamingEngine.configure(config);
   }
-
-  afterEach(function(done) {
-    streamingEngine.destroy().then(function() {
-      video.removeAttribute('src');
-      video.load();
-      return Promise.all([
-        mediaSourceEngine.destroy(),
-        playhead.destroy(),
-        eventManager.destroy()
-      ]);
-    }).catch(fail).then(done);
-  });
-
-  afterAll(function() {
-    document.body.removeChild(video);
-  });
 
   describe('VOD', function() {
     beforeEach(function(done) {
@@ -425,8 +430,7 @@ describe('StreamingEngine', function() {
       window.clearInterval(slideSegmentAvailabilityWindow);
     });
 
-    // QUARANTINED: this test does not pass 100% of the time on Firefox Win/Mac.
-    quarantined_it('plays through Period transition', function(done) {
+    it('plays through Period transition', function(done) {
       onStartupComplete.and.callFake(function() {
         // firstSegmentNumber =
         //   [(segmentAvailabilityEnd - rebufferingGoal) / segmentDuration] + 1
@@ -451,8 +455,7 @@ describe('StreamingEngine', function() {
       streamingEngine.init();
     });
 
-    // QUARANTINED: this test does not pass 100% of the time on Firefox Win/Mac.
-    quarantined_it('can handle seeks ahead of availability window',
+    it('can handle seeks ahead of availability window',
         function(done) {
           onStartupComplete.and.callFake(function() {
             video.play();
@@ -463,17 +466,21 @@ describe('StreamingEngine', function() {
               // Seek outside the availability window right away. The playhead
               // should adjust the video's current time.
               video.currentTime = timeline.segmentAvailabilityEnd + 120;
+
+              // Wait until the repositioning is complete so we don't
+              // immediately hit this case.
+              setTimeout(function() {
+                var onTimeUpdate = function() {
+                  if (video.currentTime >= 305) {
+                    // We've played through the Period transition!
+                    eventManager.unlisten(video, 'timeupdate');
+                    done();
+                  }
+                };
+                eventManager.listen(video, 'timeupdate', onTimeUpdate);
+              }, 1000);
             }, 50);
           });
-
-          var onTimeUpdate = function() {
-            if (video.currentTime >= 305) {
-              // We've played through the Period transition!
-              eventManager.unlisten(video, 'timeupdate');
-              done();
-            }
-          };
-          eventManager.listen(video, 'timeupdate', onTimeUpdate);
 
           // Let's go!
           onChooseStreams.and.callFake(defaultOnChooseStreams);
@@ -494,10 +501,24 @@ describe('StreamingEngine', function() {
         }, 50);
       });
 
+      var seekCount = 0;
+      eventManager.listen(video, 'seeking', function() {
+        seekCount++;
+      });
+
       var onTimeUpdate = function() {
         if (video.currentTime >= 305) {
           // We've played through the Period transition!
           eventManager.unlisten(video, 'timeupdate');
+
+          // We are playing close to the beginning of the availability window.
+          // We should be playing smoothly and not seeking repeatedly as we fall
+          // outside the window.
+          //
+          // We seek once above, then Playhead seeks once to adjust, plus a
+          // couple extra.
+          expect(seekCount).toBeLessThan(6);
+
           done();
         }
       };
@@ -507,6 +528,271 @@ describe('StreamingEngine', function() {
       onChooseStreams.and.callFake(defaultOnChooseStreams);
       streamingEngine.init();
     });
+  });
+
+  // This tests gaps created by missing segments.
+  // TODO: Consider also adding tests for missing frames.
+  describe('gap jumping', function() {
+    it('jumps small gaps at the beginning', function(done) {
+      config.smallGapLimit = 5;
+      setupGappyContent(/* gapAtStart */ 1, /* dropSegment */ false)
+          .then(function() {
+            onStartupComplete.and.callFake(function() {
+              expect(video.buffered.length).toBeGreaterThan(0);
+              expect(video.buffered.start(0)).toBeCloseTo(1);
+
+              video.play();
+            });
+
+            // Let's go!
+            onChooseStreams.and.callFake(defaultOnChooseStreams);
+            streamingEngine.init();
+
+            return waitForTime(5);
+          })
+          .catch(fail)
+          .then(done);
+    });
+
+    it('jumps large gaps at the beginning', function(done) {
+      config.smallGapLimit = 1;
+      config.jumpLargeGaps = true;
+      setupGappyContent(/* gapAtStart */ 5, /* dropSegment */ false)
+          .then(function() {
+            onStartupComplete.and.callFake(function() {
+              expect(video.buffered.length).toBeGreaterThan(0);
+              expect(video.buffered.start(0)).toBeCloseTo(5);
+
+              video.play();
+            });
+
+            // Let's go!
+            onChooseStreams.and.callFake(defaultOnChooseStreams);
+            streamingEngine.init();
+
+            return waitForTime(8);
+          })
+          .catch(fail)
+          .then(done);
+    });
+
+    it('jumps small gaps in the middle', function(done) {
+      config.smallGapLimit = 20;
+      setupGappyContent(/* gapAtStart */ 0, /* dropSegment */ true)
+          .then(function() {
+            onStartupComplete.and.callFake(function() {
+              video.currentTime = 8;
+              video.play();
+            });
+
+            // Let's go!
+            onChooseStreams.and.callFake(defaultOnChooseStreams);
+            streamingEngine.init();
+
+            return waitForTime(23);
+          })
+          .then(function() {
+            // Should be close enough to still have the gap buffered.
+            expect(video.buffered.length).toBe(2);
+            expect(onEvent).not.toHaveBeenCalled();
+          })
+          .catch(fail)
+          .then(done);
+    });
+
+    it('jumps large gaps in the middle', function(done) {
+      config.jumpLargeGaps = true;
+      setupGappyContent(/* gapAtStart */ 0, /* dropSegment */ true)
+          .then(function() {
+            onStartupComplete.and.callFake(function() {
+              video.currentTime = 8;
+              video.play();
+            });
+
+            // Let's go!
+            onChooseStreams.and.callFake(defaultOnChooseStreams);
+            streamingEngine.init();
+
+            return waitForTime(23);
+          })
+          .then(function() {
+            // Should be close enough to still have the gap buffered.
+            expect(video.buffered.length).toBe(2);
+            expect(onEvent).toHaveBeenCalled();
+          })
+          .catch(fail)
+          .then(done);
+    });
+
+    it('won\'t jump large gaps with preventDefault()', function(done) {
+      config.jumpLargeGaps = true;
+      setupGappyContent(/* gapAtStart */ 0, /* dropSegment */ true)
+          .then(function() {
+            onStartupComplete.and.callFake(function() {
+              video.currentTime = 8;
+              video.play();
+            });
+
+            onEvent.and.callFake(function(event) {
+              event.preventDefault();
+              shaka.test.Util.delay(5).then(function() {
+                // IE/Edge somehow plays inside the gap.  Just make sure we
+                // don't jump the gap.
+                expect(video.currentTime).toBeLessThan(20);
+                done();
+              })
+              .catch(done.fail);
+            });
+
+            // Let's go!
+            onChooseStreams.and.callFake(defaultOnChooseStreams);
+            streamingEngine.init();
+          })
+          .catch(done.fail);
+    });
+
+
+    /**
+     * @param {number} gapAtStart The gap to introduce before start, in seconds.
+     * @param {boolean} dropSegment Whether to drop a segment in the middle.
+     * @return {!Promise}
+     */
+    function setupGappyContent(gapAtStart, dropSegment) {
+      // This uses "normal" stream generators and networking engine.  The only
+      // difference is the segments are removed from the manifest.  The segments
+      // should not be downloaded.
+      return Promise.all([
+        createVodStreamGenerator(metadata.audio, ContentType.AUDIO),
+        createVodStreamGenerator(metadata.video, ContentType.VIDEO)
+      ]).then(function() {
+        timeline =
+            shaka.test.StreamingEngineUtil.createFakePresentationTimeline(
+                0 /* segmentAvailabilityStart */,
+                30 /* segmentAvailabilityEnd */,
+                30 /* presentationDuration */);
+
+        setupNetworkingEngine(
+            0 /* firstPeriodStartTime */,
+            30 /* secondPeriodStartTime */,
+            30 /* presentationDuration */,
+            { audio: metadata.audio.segmentDuration,
+              video: metadata.video.segmentDuration });
+
+        manifest = setupGappyManifest(gapAtStart, dropSegment);
+        audioStream1 = manifest.periods[0].variants[0].audio;
+        videoStream1 = manifest.periods[0].variants[0].video;
+
+        setupPlayhead();
+        createStreamingEngine();
+      });
+    }
+
+    /**
+     * TODO: Consolidate with StreamingEngineUtils.createManifest?
+     * @param {number} gapAtStart
+     * @param {boolean} dropSegment
+     * @return {shakaExtern.Manifest}
+     */
+    function setupGappyManifest(gapAtStart, dropSegment) {
+      /**
+       * @param {string} type
+       * @return {!shaka.media.SegmentIndex}
+       */
+      function createIndex(type) {
+        var d = metadata[type].segmentDuration;
+        var refs = [];
+        var i = 1;
+        var time = gapAtStart;
+        while (time < 30) {
+          var end = time + d;
+          // Make segment 1 longer to make the manifest continuous, despite the
+          // dropped segment.
+          if (i == 1 && dropSegment)
+            end += d;
+
+          var getUris = (function(i) {
+            // The times in the media are based on the URL; so to drop a
+            // segment, we change the URL.
+            if (i >= 2 && dropSegment) i++;
+            return ['1_' + type + '_' + i];
+          }.bind(null, i));
+          refs.push(
+              new shaka.media.SegmentReference(i, time, end, getUris, 0, null));
+
+          i++;
+          time = end;
+        }
+        return new shaka.media.SegmentIndex(refs);
+      }
+
+      function createInit(type) {
+        var getUris = function() {
+          return ['1_' + type + '_init'];
+        };
+        return new shaka.media.InitSegmentReference(getUris, 0, null);
+      }
+
+      var videoIndex = createIndex('video');
+      var audioIndex = createIndex('audio');
+      return {
+        presentationTimeline: timeline,
+        offlineSessionIds: [],
+        minBufferTime: 2,
+        periods: [{
+          startTime: 0,
+          textStreams: [],
+          variants: [{
+            id: 1,
+            video: {
+              id: 2,
+              createSegmentIndex: Promise.resolve.bind(Promise),
+              findSegmentPosition: videoIndex.find.bind(videoIndex),
+              getSegmentReference: videoIndex.get.bind(videoIndex),
+              initSegmentReference: createInit('video'),
+              // Normally PTO adjusts the segment time backwards; so to make the
+              // segment appear in the future, use a negative.
+              presentationTimeOffset: -gapAtStart,
+              mimeType: 'video/mp4',
+              codecs: 'avc1.42c01e',
+              bandwidth: 5000000,
+              width: 600,
+              height: 400,
+              type: shaka.util.ManifestParserUtils.ContentType.VIDEO
+            },
+            audio: {
+              id: 3,
+              createSegmentIndex: Promise.resolve.bind(Promise),
+              findSegmentPosition: audioIndex.find.bind(audioIndex),
+              getSegmentReference: audioIndex.get.bind(audioIndex),
+              initSegmentReference: createInit('audio'),
+              presentationTimeOffset: -gapAtStart,
+              mimeType: 'audio/mp4',
+              codecs: 'mp4a.40.2',
+              bandwidth: 192000,
+              type: shaka.util.ManifestParserUtils.ContentType.AUDIO
+            }
+          }]
+        }]
+      };
+    }
+
+    /**
+     * @param {number} time
+     * @return {!Promise}
+     */
+    function waitForTime(time) {
+      var p = new shaka.util.PublicPromise();
+      var onTimeUpdate = function() {
+        if (video.currentTime >= time) {
+          p.resolve();
+        }
+      };
+      eventManager.listen(video, 'timeupdate', onTimeUpdate);
+      var timeout = shaka.test.Util.delay(30).then(function() {
+        throw 'Timeout waiting for time';
+      });
+      return Promise.race([p, timeout]);
+    }
   });
 
   /**

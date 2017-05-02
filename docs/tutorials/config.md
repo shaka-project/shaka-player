@@ -52,6 +52,7 @@ player.getConfiguration();
 
 // set audio language preference to Canadian French:
 player.configure({ preferredAudioLanguage: 'fr-CA' });
+// NOTE: language preferences affect the next call to load()
 
 // set text language preference to Greek and buffering goal to 2 minutes:
 player.configure({
@@ -79,9 +80,9 @@ player.configure({
 });
 ```
 
-Some of these fields have immediate effects (such as language-related settings,
-networking settings, and buffering settings) while some will not have any
-effect until the next call to `load()` (such as DRM and manifest settings).
+Some of these fields have immediate effects (such as networking settings and
+buffering settings) while some will not have any effect until the next call to
+`load()` (such as DRM settings, manifest settings, and language settings).
 
 
 #### Detailed API Docs

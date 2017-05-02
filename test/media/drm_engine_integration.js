@@ -24,6 +24,7 @@ describe('DrmEngine', function() {
 
   var onErrorSpy;
   var onKeyStatusSpy;
+  var onExpirationSpy;
   var drmEngine;
   var mediaSourceEngine;
   var networkingEngine;
@@ -71,6 +72,7 @@ describe('DrmEngine', function() {
   beforeEach(function(done) {
     onErrorSpy = jasmine.createSpy('onError');
     onKeyStatusSpy = jasmine.createSpy('onKeyStatus');
+    onExpirationSpy = jasmine.createSpy('onExpirationUpdated');
 
     mediaSource = new MediaSource();
     video.src = window.URL.createObjectURL(mediaSource);
@@ -89,7 +91,7 @@ describe('DrmEngine', function() {
     });
 
     drmEngine = new shaka.media.DrmEngine(
-        networkingEngine, onErrorSpy, onKeyStatusSpy);
+        networkingEngine, onErrorSpy, onKeyStatusSpy, onExpirationSpy);
     var config = {
       retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
       clearKeys: {},
@@ -125,7 +127,7 @@ describe('DrmEngine', function() {
       var expectedObject = {};
       expectedObject[ContentType.AUDIO] = 'audio/mp4; codecs="mp4a.40.2"';
       expectedObject[ContentType.VIDEO] = 'video/mp4; codecs="avc1.640015"';
-      mediaSourceEngine.init(expectedObject, false);
+      mediaSourceEngine.init(expectedObject);
       done();
     });
   });

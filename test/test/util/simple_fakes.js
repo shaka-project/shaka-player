@@ -18,6 +18,9 @@
 goog.provide('shaka.test.FakeAbrManager');
 goog.provide('shaka.test.FakeDrmEngine');
 goog.provide('shaka.test.FakeManifestParser');
+goog.provide('shaka.test.FakePlayhead');
+goog.provide('shaka.test.FakePlayheadObserver');
+goog.provide('shaka.test.FakePresentationTimeline');
 goog.provide('shaka.test.FakeStreamingEngine');
 goog.provide('shaka.test.FakeVideo');
 
@@ -137,14 +140,16 @@ shaka.test.FakeDrmEngine = function() {
   var drmInfo = null;
 
   var ret = jasmine.createSpyObj('FakeDrmEngine', [
-    'destroy', 'configure', 'init', 'attach', 'initialized', 'keySystem',
-    'getSupportedTypes', 'getDrmInfo', 'getSessionIds', 'isSupportedByKeySystem'
+    'attach', 'configure', 'destroy', 'getDrmInfo', 'getExpiration',
+    'getSessionIds', 'getSupportedTypes', 'init', 'initialized',
+    'isSupportedByKeySystem', 'keySystem'
   ]);
+  ret.attach.and.callFake(resolve);
   ret.destroy.and.callFake(resolve);
   ret.init.and.callFake(resolve);
-  ret.attach.and.callFake(resolve);
   ret.initialized.and.returnValue(true);
   ret.keySystem.and.returnValue('com.example.fake');
+  ret.getExpiration.and.returnValue(Infinity);
   // See shaka.test.ManifestGenerator.protototype.createStream.
   ret.getSupportedTypes.and.returnValue(
       ['video/mp4; codecs="avc1.4d401f"']);
@@ -169,6 +174,10 @@ shaka.test.FakeDrmEngine.prototype.init;
 
 /** @type {jasmine.Spy} */
 shaka.test.FakeDrmEngine.prototype.attach;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakeDrmEngine.prototype.getExpiration;
 
 
 /** @param {?shakaExtern.DrmInfo} info */
@@ -260,6 +269,10 @@ shaka.test.FakeManifestParser.prototype.update = function() {};
 
 
 /** @override */
+shaka.test.FakeManifestParser.prototype.onExpirationUpdated = function() {};
+
+
+/** @override */
 shaka.test.FakeManifestParser.prototype.configure = function() {};
 
 
@@ -337,3 +350,148 @@ function createFakeBuffered(ranges) {
     }
   });
 }
+
+
+
+/**
+ * Creates a fake PresentationTimeline object.
+ *
+ * @constructor
+ * @struct
+ * @extends {shaka.media.PresentationTimeline}
+ * @return {!Object}
+ */
+shaka.test.FakePresentationTimeline = function() {
+  var getStart = jasmine.createSpy('getSegmentAvailabilityStart');
+  var getSafeStart = jasmine.createSpy('getSafeAvailabilityStart');
+  getSafeStart.and.callFake(function(delay) {
+    return getStart() + delay;
+  });
+
+  return {
+    getDuration: jasmine.createSpy('getDuration'),
+    setDuration: jasmine.createSpy('setDuration'),
+    getPresentationStartTime: jasmine.createSpy('getPresentationStartTime'),
+    setClockOffset: jasmine.createSpy('setClockOffset'),
+    setStatic: jasmine.createSpy('setStatic'),
+    getSegmentAvailabilityDuration:
+        jasmine.createSpy('getSegmentAvailabilityDuration'),
+    notifySegments: jasmine.createSpy('notifySegments'),
+    notifyMaxSegmentDuration: jasmine.createSpy('notifyMaxSegmentDuration'),
+    isLive: jasmine.createSpy('isLive'),
+    isInProgress: jasmine.createSpy('isInProgress'),
+    getSegmentAvailabilityStart: getStart,
+    getSafeAvailabilityStart: getSafeStart,
+    getSegmentAvailabilityEnd: jasmine.createSpy('getSegmentAvailabilityEnd'),
+    getSeekRangeEnd: jasmine.createSpy('getSeekRangeEnd')
+  };
+};
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.getDuration;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.setDuration;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.getPresentationStartTime;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.setClockOffset;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.setStatic;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.getSegmentAvailabilityDuration;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.notifySegments;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.notifyMaxSegmentDuration;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.isLive;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.isInProgress;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.getSegmentAvailabilityStart;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.getSafeAvailabilityStart;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.getSegmentAvailabilityEnd;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.getSeekRangeEnd;
+
+
+
+/**
+ * Creates a fake Playhead object.
+ *
+ * @constructor
+ * @struct
+ * @extends {shaka.media.Playhead}
+ * @return {!Object}
+ */
+shaka.test.FakePlayhead = function() {
+  return {
+    destroy: jasmine.createSpy('destroy').and.returnValue(Promise.resolve()),
+    setRebufferingGoal: jasmine.createSpy('setRebufferingGoal'),
+    setStartTime: jasmine.createSpy('setStartTime'),
+    getTime: jasmine.createSpy('getTime').and.returnValue(0),
+    setBuffering: jasmine.createSpy('setBuffering'),
+    getPlaybackRate: jasmine.createSpy('getPlaybackRate').and.returnValue(1),
+    setPlaybackRate: jasmine.createSpy('setPlaybackRate')
+  };
+};
+
+
+
+/**
+ * Creates a fake PlayheadObserver object.
+ *
+ * @constructor
+ * @struct
+ * @extends {shaka.media.PlayheadObserver}
+ * @return {!Object}
+ */
+shaka.test.FakePlayheadObserver = function() {
+  return {
+    destroy: jasmine.createSpy('destroy').and.returnValue(Promise.resolve()),
+    seeked: jasmine.createSpy('seeked'),
+    setRebufferingGoal: jasmine.createSpy('setRebufferingGoal'),
+    addTimelineRegion: jasmine.createSpy('addTimelineRegion')
+  };
+};
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePlayheadObserver.prototype.seeked;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePlayheadObserver.prototype.setRebufferingGoal;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePlayheadObserver.prototype.addTimelineRegion;

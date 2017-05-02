@@ -611,6 +611,7 @@ describe('CastProxy', function() {
     it('triggers an "error" event if load fails', function(done) {
       cache.player.getManifestUri = 'foo://bar';
       var fakeError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.UNABLE_TO_GUESS_MANIFEST_TYPE);
       mockPlayer.load.and.returnValue(Promise.reject(fakeError));

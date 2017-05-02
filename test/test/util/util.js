@@ -162,6 +162,19 @@ shaka.test.Util.fetch = function(uri) {
   });
 };
 
+
+/**
+ * Accepts a mock object (i.e. a simple JavaScript object composed of jasmine
+ * spies) and makes it strict.  This means that every spy in the given object
+ * will be made to throw an exception by default.
+ * @param {!Object} obj
+ */
+shaka.test.Util.makeMockObjectStrict = function(obj) {
+  for (var name in obj)
+    obj[name].and.throwError(new Error(name));
+};
+
+
 beforeEach(function() {
   jasmine.addCustomEqualityTester(shaka.test.Util.compareReferences);
 });

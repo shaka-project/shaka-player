@@ -39,22 +39,28 @@ describe('Mp4TtmlParser', function() {
   });
 
   it('parses init segment', function() {
-    // Last two parameters are only used by mp4 vtt parser.
-    var ret = shaka.media.Mp4TtmlParser(ttmlInitSegment, 0, null, null, false);
-    // init segment doesn't have the subtitles. The code should verify
-    // their declaration and proceed to the next segment.
-    expect(ret).toEqual([]);
+    new shaka.media.Mp4TtmlParser().parseInit(ttmlInitSegment);
   });
 
   it('parses media segment', function() {
-    var ret = shaka.media.Mp4TtmlParser(ttmlSegment, 0, null, null, false);
+    var parser = new shaka.media.Mp4TtmlParser();
+    parser.parseInit(ttmlInitSegment);
+    var time = {periodStart: 0, segmentStart: 0, segmentEnd: 0 };
+    var ret = parser.parseMedia(ttmlSegment, time);
     expect(ret.length).toBeGreaterThan(0);
   });
 
   it('accounts for offset', function() {
-    var ret1 = shaka.media.Mp4TtmlParser(ttmlSegment, 0, null, null, false);
+    var time1 = {periodStart: 0, segmentStart: 0, segmentEnd: 0 };
+    var time2 = {periodStart: 7, segmentStart: 0, segmentEnd: 0 };
+
+    var parser = new shaka.media.Mp4TtmlParser();
+    parser.parseInit(ttmlInitSegment);
+
+    var ret1 = parser.parseMedia(ttmlSegment, time1);
     expect(ret1.length).toBeGreaterThan(0);
-    var ret2 = shaka.media.Mp4TtmlParser(ttmlSegment, 7, null, null, false);
+
+    var ret2 = parser.parseMedia(ttmlSegment, time2);
     expect(ret2.length).toBeGreaterThan(0);
 
     expect(ret2[0].startTime).toEqual(ret1[0].startTime + 7);
@@ -62,10 +68,13 @@ describe('Mp4TtmlParser', function() {
   });
 
   it('rejects init segment with no ttml', function() {
-    var error = new shaka.util.Error(shaka.util.Error.Category.TEXT,
+    var error = new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.TEXT,
         shaka.util.Error.Code.INVALID_MP4_TTML);
+
     try {
-      shaka.media.Mp4TtmlParser(audioInitSegment, 0, null, null, false);
+      new shaka.media.Mp4TtmlParser().parseInit(audioInitSegment);
       fail('Mp4 file with no ttml supported');
     } catch (e) {
       shaka.test.Util.expectToEqualError(e, error);

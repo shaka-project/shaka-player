@@ -46,6 +46,14 @@ body {
   margin: auto;
 }
 
+#video.audioOnly {
+  background-color: transparent;
+  background-position: 50% 50%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-image: url('//shaka-player-demo.appspot.com/assets/audioOnly.gif');
+}
+
 #controlsContainer {
   padding: 0 3%;
   height: auto;

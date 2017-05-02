@@ -331,17 +331,34 @@ shakaAssets.testAssets = [
     }
   },
   {
-    name: 'Angel One (HLS, multilingual)',
+    name: 'Angel One (HLS, MP4, multilingual)',
     manifestUri: '//storage.googleapis.com/shaka-demo-assets/angel-one-hls/master.m3u8',  // gjslint: disable=110
 
     encoder: shakaAssets.Encoder.APPLE,
     source: shakaAssets.Source.SHAKA,
     drm: [],
     features: [
+      shakaAssets.Feature.HLS,
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.MULTIPLE_LANGUAGES,
-      shakaAssets.Feature.HLS
+      shakaAssets.Feature.MULTIPLE_LANGUAGES
     ]
+  },
+  {
+    name: 'Angel One (HLS, MP4, multilingual, Widevine)',
+    manifestUri: '//storage.googleapis.com/shaka-demo-assets/angel-one-widevine-hls/hls.m3u8',  // gjslint: disable=110
+
+    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
+    source: shakaAssets.Source.SHAKA,
+    drm: [shakaAssets.KeySystem.WIDEVINE],
+    features: [
+      shakaAssets.Feature.HLS,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.MULTIPLE_LANGUAGES
+    ],
+
+    licenseServers: {
+      'com.widevine.alpha': '//widevine-proxy.appspot.com/proxy'
+    }
   },
   {
     name: 'Sintel 4k (multicodec)',
@@ -465,6 +482,23 @@ shakaAssets.testAssets = [
     ]
   },
   {
+    name: '"Dig the Uke" by Stefan Kartenberg (audio only, multicodec)',  // gjslint: disable=110
+    // From: http://dig.ccmixter.org/files/JeffSpeed68/53327
+    // Licensed under Creative Commons BY-NC 3.0.
+    // Free for non-commercial use with attribution.
+    // http://creativecommons.org/licenses/by-nc/3.0/
+    manifestUri: '//storage.googleapis.com/shaka-demo-assets/dig-the-uke-clear/dash.mpd',  // gjslint: disable=110
+
+    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
+    source: shakaAssets.Source.SHAKA,
+    drm: [],
+    features: [
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_BASE,
+      shakaAssets.Feature.WEBM
+    ]
+  },
+  {
     name: '"Dig the Uke" by Stefan Kartenberg (audio only, multicodec, Widevine)',  // gjslint: disable=110
     // From: http://dig.ccmixter.org/files/JeffSpeed68/53327
     // Licensed under Creative Commons BY-NC 3.0.
@@ -499,22 +533,6 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.TTML,
       shakaAssets.Feature.WEBM
-    ]
-  },
-  {
-    name: 'Tears of Steel (multiperiod with segmented subtitles and PTO)',
-    manifestUri: '//storage.googleapis.com/shaka-demo-assets/tos-pto-webvtt/dash.mpd',  // gjslint: disable=110
-    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
-    source: shakaAssets.Source.SHAKA,
-    drm: [],
-    features: [
-      shakaAssets.Feature.HIGH_DEFINITION,
-      shakaAssets.Feature.MP4,
-      shakaAssets.Feature.MULTIPERIOD,
-      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
-      shakaAssets.Feature.SEGMENTED_TEXT,
-      shakaAssets.Feature.SUBTITLES,
-      shakaAssets.Feature.WEBVTT
     ]
   },
   // }}}

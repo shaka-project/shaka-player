@@ -63,12 +63,12 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
       expect(pos).toBe(actual2.position);
     });
 
-    it('returns null if time < first start time', function() {
+    it('returns the first segment if time < first start time', function() {
       var actual = makeReference(1, 10, 20, uri(10));
       var index = new shaka.media.SegmentIndex([actual]);
 
       var pos = index.find(5);
-      expect(pos).toBeNull();
+      expect(pos).toBe(actual.position);
     });
 
     it('returns null if time == last end time', function() {

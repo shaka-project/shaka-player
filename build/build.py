@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 #
 # Copyright 2016 Google Inc.  All Rights Reserved.
 #
@@ -270,10 +270,6 @@ class Build(object):
     Returns:
       True on success; False on failure.
     """
-    # Update node modules if needed.
-    if not shakaBuildHelpers.update_node_modules():
-      return False
-
     files = [shakaBuildHelpers.cygwin_safe_path(f) for f in self.include]
 
     extern_generator = shakaBuildHelpers.cygwin_safe_path(os.path.join(
@@ -283,7 +279,6 @@ class Build(object):
         shakaBuildHelpers.get_source_base(), 'dist',
         'shaka-player.' + name + '.externs.js'))
 
-    # TODO: support Windows builds
     cmd_line = ['node', extern_generator, '--output', output] + files
     if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
       print >> sys.stderr, 'Externs generation failed'
@@ -393,8 +388,12 @@ def main(args):
   custom_build = Build()
   if not custom_build.parse_build(lines, os.getcwd()):
     return 1
+
+  # Update node modules if needed.
+  if not shakaBuildHelpers.update_node_modules():
+    return 1
+
   return 0 if custom_build.build_library(name, rebuild, is_debug) else 1
 
 if __name__ == '__main__':
   shakaBuildHelpers.run_main(main)
-

@@ -87,9 +87,6 @@ function ShakaControls() {
   /** @private {boolean} */
   this.isSeeking_ = false;
 
-  /** @private {boolean} */
-  this.isKeyboardSeeking_ = false;
-
   /** @private {number} */
   this.trickPlayRate_ = 1;
 
@@ -163,24 +160,6 @@ ShakaControls.prototype.init = function(castProxy, onError, notifyCastStatus) {
   // initialize caption state with a fake event
   this.onCaptionStateChange_();
 
-  // Listen to events to handle custom border highlighting, and implement a
-  // keyboard trap.
-  // This needs to be on the document body to allow the keyboard trap to detect
-  // focusing on external elements.
-  // Because of event bubbling, these will implicitly listen to child elements.
-  document.body.addEventListener(
-      'focus', this.onFocus_.bind(this), true /* capture phase */);
-  // Also add an event listener for blurs, to handle the case where the user
-  // clicks on a non-focusable element to un-select the focused element.
-  document.body.addEventListener(
-      'blur', this.onBlur_.bind(this), true /* capture phase */);
-
-  // Also add an event listener to the video container for keyboard events,
-  // to detect when the user is interacting with input bars (volume, etc)
-  // to prevent the controls from going opaque while being used.
-  this.videoContainer_.addEventListener(
-      sliderInputEvent, this.onContainerInput_.bind(this));
-
   this.fullscreenButton_.addEventListener(
       'click', this.onFullscreenClick_.bind(this));
 
@@ -253,10 +232,6 @@ ShakaControls.prototype.loadComplete = function() {
   // If we are on Android or if autoplay is false, video.paused should be true.
   // Otherwise, video.paused is false and the content is autoplaying.
   this.onPlayStateChange_();
-
-  // The currentTime button should be disabled when not viewing a livestream.
-  var isVod = !this.player_.isLive();
-  this.currentTime_.disabled = isVod;
 };
 
 
@@ -264,11 +239,12 @@ ShakaControls.prototype.loadComplete = function() {
  * Hiding the cursor when the mouse stops moving seems to be the only decent UX
  * in fullscreen mode.  Since we can't use pure CSS for that, we use events both
  * in and out of fullscreen mode.
- * @param {boolean} isTouch
+ * @param {!Event} event
  * @private
  */
-ShakaControls.prototype.makeControlsOpaque_ = function(isTouch) {
-  if (isTouch) {
+ShakaControls.prototype.onMouseMove_ = function(event) {
+  if (event.type == 'touchstart' || event.type == 'touchmove' ||
+      event.type == 'touchend') {
     this.lastTouchEventTime_ = Date.now();
   } else if (this.lastTouchEventTime_ + 1000 < Date.now()) {
     // It has been a while since the last touch event, this is probably a real
@@ -280,13 +256,8 @@ ShakaControls.prototype.makeControlsOpaque_ = function(isTouch) {
   this.videoContainer_.style.cursor = '';
   // Show the controls.
   this.controls_.style.opacity = 1;
+  this.updateTimeAndSeekRange_();
 
-  this.startMouseStillTimeout_();
-};
-
-
-/** @private */
-ShakaControls.prototype.startMouseStillTimeout_ = function() {
   // Hide the cursor when the mouse stops moving.
   // Only applies while the cursor is over the video container.
   if (this.mouseStillTimeoutId_) {
@@ -294,83 +265,11 @@ ShakaControls.prototype.startMouseStillTimeout_ = function() {
     window.clearTimeout(this.mouseStillTimeoutId_);
   }
 
-  this.mouseStillTimeoutId_ = window.setTimeout(
-      this.onMouseStill_.bind(this), 3000);
-};
-
-
-/**
-  * @param {!Event} event
-  * @private
-  */
-ShakaControls.prototype.onMouseMove_ = function(event) {
-  this.makeControlsOpaque_(event.type == 'touchstart' ||
-                           event.type == 'touchmove' ||
-                           event.type == 'touchend');
-};
-
-
-/** @private */
-ShakaControls.prototype.onContainerInput_ = function() {
-  // This event listener isn't on the document, so there's no need
-  // to check to see if the controls have focus.
-  this.makeControlsOpaque_(false /* isTouch */);
-};
-
-
-/**
-  * @param {!Event} event
-  * @private
-  */
-ShakaControls.prototype.onBlur_ = function(event) {
-  // The relatedTarget field contains the element that will be focused,
-  // if this element is blurring before a focus.
-  if (!event.relatedTarget) {
-    // The selected element is being unselected, so immediately try to blur.
-    // If, for example, an one of the controls are selected and the user
-    // clicks on the background.
-    this.onMouseStill_();
+  // Only start a timeout on 'touchend' or for 'mousemove' with no touch events.
+  if (event.type == 'touchend' || !this.lastTouchEventTime_) {
+    this.mouseStillTimeoutId_ = window.setTimeout(
+        this.onMouseStill_.bind(this), 3000);
   }
-};
-
-
-/**
-  * @param {!Event} event
-  * @private
-  */
-ShakaControls.prototype.onFocus_ = function(event) {
-  // Focus changing into the controls counts as a touch event
-  // no matter what the source is (keyboard, mouse, etc)
-  if (this.controlsHaveFocus_()) {
-    this.makeControlsOpaque_(false /* isTouch */);
-  } else {
-    // Start the timeout without making controls opaque,
-    // in case (for instance) you focused out of the controls.
-    this.startMouseStillTimeout_();
-  }
-
-  if (document.fullscreenElement && !this.controlsHaveFocus_()) {
-    // When fullscreen, trap the focus inside the controls.
-
-    // The relatedTarget field contains the previously focused element.
-    if (event.relatedTarget == this.playPauseButton_) {
-      // They focused out going left, so wrap around to the right.
-      this.fullscreenButton_.focus();
-    } else {
-      // They focused out going right, or have just focused,
-      // so start on the left.
-      this.playPauseButton_.focus();
-    }
-  }
-};
-
-
-/**
-  * @return {boolean}
-  * @private
-  */
-ShakaControls.prototype.controlsHaveFocus_ = function() {
-  return (this.videoContainer_.contains(document.activeElement));
 };
 
 
@@ -393,15 +292,10 @@ ShakaControls.prototype.onMouseStill_ = function() {
   this.mouseStillTimeoutId_ = null;
   // Hide the cursor.  (NOTE: not supported on IE)
   this.videoContainer_.style.cursor = 'none';
-
-  // The controls shouldn't fade when selected,
-  // unless the video is fullscreen.
-  if (!this.controlsHaveFocus_() || document.fullscreenElement) {
-    // Revert opacity control to CSS.  Hovering directly over the controls will
-    // keep them showing, even in fullscreen mode. Unless there were touch
-    // events, then override the hover and hide the controls.
-    this.controls_.style.opacity = this.lastTouchEventTime_ ? '0' : '';
-  }
+  // Revert opacity control to CSS.  Hovering directly over the controls will
+  // keep them showing, even in fullscreen mode. Unless there were touch events,
+  // then override the hover and hide the controls.
+  this.controls_.style.opacity = this.lastTouchEventTime_ ? '0' : '';
 };
 
 
@@ -462,20 +356,12 @@ ShakaControls.prototype.onPlayStateChange_ = function() {
 /** @private */
 ShakaControls.prototype.onSeekStart_ = function() {
   this.isSeeking_ = true;
-  this.isKeyboardSeeking_ = false;
   this.video_.pause();
 };
 
 
 /** @private */
 ShakaControls.prototype.onSeekInput_ = function() {
-  if (!this.isSeeking_) {
-    // The seek was initialized by non-mouse/touchpad
-    // input, so onSeekStart_ wasn't called. Call it now.
-    this.onSeekStart_();
-    this.isKeyboardSeeking_ = true;
-  }
-
   if (!this.video_.duration) {
     // Can't seek yet.  Ignore.
     return;
@@ -489,8 +375,7 @@ ShakaControls.prototype.onSeekInput_ = function() {
     window.clearTimeout(this.seekTimeoutId_);
   }
   this.seekTimeoutId_ = window.setTimeout(
-      this.onSeekInputTimeout_.bind(this),
-      this.isKeyboardSeeking_ ? 500 : 125);
+      this.onSeekInputTimeout_.bind(this), 125);
 };
 
 
@@ -498,12 +383,6 @@ ShakaControls.prototype.onSeekInput_ = function() {
 ShakaControls.prototype.onSeekInputTimeout_ = function() {
   this.seekTimeoutId_ = null;
   this.video_.currentTime = parseFloat(this.seekBar_.value);
-
-  if (this.isKeyboardSeeking_) {
-    // Users who are seeking via keyboard have no way of manually ending
-    // the seek process, so timing out also causes the seek to end.
-    this.onSeekEnd_();
-  }
 };
 
 
@@ -531,20 +410,17 @@ ShakaControls.prototype.onMuteClick_ = function() {
  * @private
  */
 ShakaControls.prototype.onVolumeStateChange_ = function() {
-  // The volume bar goes from 0 to 100 while the volume variable goes from
-  // 0 to 1 because the input range implementation of IE and Edge doesn't
-  // work well with input ranges that go from 0 to 1.
   if (this.video_.muted) {
     this.muteButton_.textContent = 'volume_off';
     this.volumeBar_.value = 0;
   } else {
     this.muteButton_.textContent = 'volume_up';
-    this.volumeBar_.value = this.video_.volume * 100;
+    this.volumeBar_.value = this.video_.volume;
   }
 
   var gradient = ['to right'];
-  gradient.push('#ccc ' + (this.volumeBar_.value) + '%');
-  gradient.push('#000 ' + (this.volumeBar_.value) + '%');
+  gradient.push('#ccc ' + (this.volumeBar_.value * 100) + '%');
+  gradient.push('#000 ' + (this.volumeBar_.value * 100) + '%');
   gradient.push('#000 100%');
   this.volumeBar_.style.background =
       'linear-gradient(' + gradient.join(',') + ')';
@@ -553,7 +429,7 @@ ShakaControls.prototype.onVolumeStateChange_ = function() {
 
 /** @private */
 ShakaControls.prototype.onVolumeInput_ = function() {
-  this.video_.volume = parseFloat(this.volumeBar_.value) / 100;
+  this.video_.volume = parseFloat(this.volumeBar_.value);
   this.video_.muted = false;
 };
 
@@ -692,16 +568,36 @@ ShakaControls.prototype.showTrickPlay = function(show) {
 
 
 /**
+ * @return {boolean}
+ * @private
+ */
+ShakaControls.prototype.isOpaque_ = function() {
+  var parentElement = this.controls_.parentElement;
+  // The controls are opaque if either:
+  //   1. We have explicitly made them so in JavaScript
+  //   2. The browser has made them so via css and the hover state
+  return (this.controls_.style.opacity == 1 ||
+          parentElement.querySelector('#controls:hover') == this.controls_);
+};
+
+
+/**
  * Called when the seek range or current time need to be updated.
  * @private
  */
 ShakaControls.prototype.updateTimeAndSeekRange_ = function() {
+  // Suppress updates if the controls are hidden.
+  if (!this.isOpaque_()) {
+    return;
+  }
+
   var displayTime = this.isSeeking_ ?
       this.seekBar_.value : this.video_.currentTime;
   var duration = this.video_.duration;
   var bufferedLength = this.video_.buffered.length;
   var bufferedStart = bufferedLength ? this.video_.buffered.start(0) : 0;
-  var bufferedEnd = bufferedLength ? this.video_.buffered.end(0) : 0;
+  var bufferedEnd =
+      bufferedLength ? this.video_.buffered.end(bufferedLength - 1) : 0;
   var seekRange = this.player_.seekRange();
 
   this.seekBar_.min = seekRange.start;
