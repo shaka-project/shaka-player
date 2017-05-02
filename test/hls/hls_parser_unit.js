@@ -262,6 +262,45 @@ describe('HlsParser', function() {
     testHlsParser(master, media, manifest, done);
   });
 
+  it('gets mime type from header request', function(done) {
+    var master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60\n',
+      'test://video'
+    ].join('');
+
+    var media = [
+      '#EXTM3U\n',
+      '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'test://main.test'
+    ].join('');
+
+    var manifest = new shaka.test.ManifestGenerator()
+            .anyTimeline()
+            .addPeriod(jasmine.any(Number))
+              .addVariant(jasmine.any(Number))
+                .language('und')
+                .bandwidth(200)
+                .addVideo(jasmine.any(Number))
+                  .anySegmentFunctions()
+                  .anyInitSegment()
+                  .presentationTimeOffset(0)
+                  .mime('video/mp4', 'avc1')
+                  .frameRate(60)
+                  .size(960, 540)
+          .build();
+
+    var headers = {'content-type': 'video/mp4'};
+    fakeNetEngine.setHeadersMap({
+      'test://main.test': headers
+    });
+
+    testHlsParser(master, media, manifest, done);
+  });
+
   it('parses manifest with text streams', function(done) {
     var master = [
       '#EXTM3U\n',
@@ -561,7 +600,8 @@ describe('HlsParser', function() {
     function verifyError(master, media, error, done) {
       fakeNetEngine.setResponseMapAsText({'test://master': master,
         'test://audio': media,
-        'test://video': media
+        'test://video': media,
+        'test://main.exe': media
       });
 
       parser.start('test://master', playerInterface)

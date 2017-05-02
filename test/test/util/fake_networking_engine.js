@@ -30,15 +30,20 @@ goog.require('shaka.util.StringUtils');
  * @param {!ArrayBuffer=} opt_defaultResponse The default value to return; if
  *   null, a jasmine expect will fail if a request is made that is not in
  *   |opt_data|.
+ * @param {Object.<string, !Object.<string, string>>=} opt_headersMap
+ *   A map from URI to the headers to return.
  *
  * @constructor
  * @struct
  * @extends {shaka.net.NetworkingEngine}
  */
 shaka.test.FakeNetworkingEngine = function(
-    opt_responseMap, opt_defaultResponse) {
+    opt_responseMap, opt_defaultResponse, opt_headersMap) {
   /** @private {!Object.<string, !ArrayBuffer>} */
   this.responseMap_ = opt_responseMap || {};
+
+  /** @private {!Object.<string, !Object.<string, string>>} */
+  this.headersMap_ = opt_headersMap || {};
 
   /** @private {ArrayBuffer} */
   this.defaultResponse_ = opt_defaultResponse || null;
@@ -105,15 +110,16 @@ shaka.test.FakeNetworkingEngine.prototype.request = function(type, request) {
   expect(request).toBeTruthy();
   expect(request.uris.length).toBe(1);
 
+  var headers = this.headersMap_[request.uris[0]] || {};
   var result = this.responseMap_[request.uris[0]] || this.defaultResponse_;
-  if (!result) {
+  if (!result && request.method != 'HEAD') {
     // Give a more helpful error message to jasmine.
     expect(request.uris[0]).toBe('in the response map');
     return Promise.reject();
   }
 
   /** @type {shakaExtern.Response} */
-  var response = {uri: request.uris[0], data: result, headers: {}};
+  var response = {uri: request.uris[0], data: result, headers: headers};
 
   if (this.delayNextRequestPromise_) {
     var delay = this.delayNextRequestPromise_;
@@ -198,6 +204,17 @@ shaka.test.FakeNetworkingEngine.prototype.setResponseMapAsText = function(
     obj[key] = data;
     return obj;
   }, {});
+};
+
+
+/**
+ * Sets the response map.
+ *
+ * @param {!Object.<string, !Object.<string, string>>} headersMap
+ */
+shaka.test.FakeNetworkingEngine.prototype.setHeadersMap = function(
+    headersMap) {
+  this.headersMap_ = headersMap;
 };
 
 
