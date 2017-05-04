@@ -1722,6 +1722,32 @@ describe('Player', function() {
       }).then(done);
     });
 
+    it('removes if we don\'t have the required key', function(done) {
+      manifest = new shaka.test.ManifestGenerator()
+              .addPeriod(0)
+                .addVariant(0)
+                  .addVideo(1).keyId('abc')
+                .addVariant(2)
+                  .addVideo(3)
+              .build();
+
+      parser = new shaka.test.FakeManifestParser(manifest);
+      factory = function() { return parser; };
+      player.load('', 0, factory).then(function() {
+        // "initialize" the current period.
+        chooseStreams();
+        canSwitch();
+      }).then(function() {
+        expect(player.getVariantTracks().length).toBe(2);
+
+        onKeyStatus({});
+
+        var tracks = player.getVariantTracks();
+        expect(tracks.length).toBe(1);
+        expect(tracks[0].id).toBe(2);
+      }).catch(fail).then(done);
+    });
+
     it('removes if key system does not support codec', function(done) {
       // Should already be removed from filterPeriod_
       manifest = new shaka.test.ManifestGenerator()
