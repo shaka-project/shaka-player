@@ -1277,6 +1277,31 @@ describe('Player', function() {
       expectDoesNotInclude(tracks, 4);
     });
 
+    it('removes if we don\'t have the required key', function(done) {
+      manifest = new shaka.test.ManifestGenerator()
+              .addPeriod(0)
+                .addStreamSet('video')
+                  .addStream(1).keyId('abc')
+                  .addStream(2)
+              .build();
+
+      parser = new shaka.test.FakeManifestParser(manifest);
+      factory = function() { return parser; };
+      player.load('', 0, factory).then(function() {
+        // "initialize" the current period.
+        chooseStreams();
+        canSwitch();
+      }).then(function() {
+        expect(player.getTracks().length).toBe(2);
+
+        onKeyStatus({});
+
+        var tracks = player.getTracks();
+        expect(tracks.length).toBe(1);
+        expect(tracks[0].id).toBe(2);
+      }).catch(fail).then(done);
+    });
+
     it('removes if key status is "internal-error"', function() {
       expect(player.getTracks().length).toBe(9);
 
