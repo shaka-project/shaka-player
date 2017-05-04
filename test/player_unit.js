@@ -767,6 +767,8 @@ describe('Player', function() {
           frameRate: 1000000 / 42000,
           mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
+          audioCodec: 'mp4a.40.2',
+          videoCodec: 'avc1.4d401f',
           primary: false
         },
         {
@@ -781,6 +783,8 @@ describe('Player', function() {
           frameRate: 24,
           mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
+          audioCodec: 'mp4a.40.2',
+          videoCodec: 'avc1.4d401f',
           primary: false
         },
         {
@@ -795,6 +799,8 @@ describe('Player', function() {
           frameRate: 1000000 / 42000,
           mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
+          audioCodec: 'mp4a.40.2',
+          videoCodec: 'avc1.4d401f',
           primary: false
         },
         {
@@ -809,6 +815,8 @@ describe('Player', function() {
           frameRate: 24,
           mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
+          audioCodec: 'mp4a.40.2',
+          videoCodec: 'avc1.4d401f',
           primary: false
         },
         {
@@ -823,6 +831,8 @@ describe('Player', function() {
           frameRate: 24,
           mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
+          audioCodec: 'mp4a.40.2',
+          videoCodec: 'avc1.4d401f',
           primary: false
         }
       ];
@@ -836,6 +846,8 @@ describe('Player', function() {
           kind: 'caption',
           mimeType: 'text/vtt',
           codecs: null,
+          audioCodec: null,
+          videoCodec: null,
           primary: false
         },
         {
@@ -846,6 +858,8 @@ describe('Player', function() {
           kind: 'caption',
           mimeType: 'application/ttml+xml',
           codecs: null,
+          audioCodec: null,
+          videoCodec: null,
           primary: false
         }
       ];
