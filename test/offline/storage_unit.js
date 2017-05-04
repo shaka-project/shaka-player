@@ -139,7 +139,9 @@ describe('Storage', function() {
         frameRate: 24,
         mimeType: 'video/mp4',
         primary: true,
-        codecs: 'avc1.4d401f, vorbis'
+        codecs: 'avc1.4d401f, vorbis',
+        audioCodec: 'vorbis',
+        videoCodec: 'avc1.4d401f'
       }
     ];
     Promise

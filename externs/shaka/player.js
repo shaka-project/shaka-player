@@ -136,6 +136,8 @@ shakaExtern.Stats;
  *   frameRate: ?number,
  *   mimeType: ?string,
  *   codecs: ?string,
+ *   audioCodec: ?string,
+ *   videoCodec: ?string,
  *   primary: boolean
  * }}
  *
@@ -172,6 +174,10 @@ shakaExtern.Stats;
  *   The MIME type of the content provided in the manifest.
  * @property {?string} codecs
  *   The audio/video codecs string provided in the manifest, if present.
+ * @property {?string} audioCodec
+ *   The audio codecs string provided in the manifest, if present.
+  * @property {?string} videoCodec
+ *   The video codecs string provided in the manifest, if present.
  * @property {boolean} primary
  *   True indicates that this in the primary language for the content.
  *   This flag is based on signals from the manifest.
