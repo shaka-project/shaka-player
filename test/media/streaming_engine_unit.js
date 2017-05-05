@@ -778,6 +778,33 @@ describe('StreamingEngine', function() {
     });
   });
 
+  it('updates the timeline duration to match media duration', function() {
+    setupVod();
+    mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+    createStreamingEngine();
+
+    playhead.getTime.and.returnValue(0);
+    onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+    onChooseStreams.and.callFake(defaultOnChooseStreams);
+
+    // TODO(modmaker): Don't just silence the compiler error.
+    var endOfStream = /** @type {?} */ (mediaSourceEngine.endOfStream);
+    endOfStream.and.callFake(function() {
+      // Simulate the media ending before the expected (manifest) duration.
+      expect(mediaSourceEngine.setDuration).toHaveBeenCalledWith(40);
+      expect(mediaSourceEngine.setDuration).toHaveBeenCalledTimes(1);
+      mediaSourceEngine.getDuration.and.returnValue(35);
+      return Promise.resolve();
+    });
+
+    // Here we go!
+    streamingEngine.init();
+
+    runTest();
+    expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+    expect(timeline.setDuration).toHaveBeenCalledWith(35);
+  });
+
   describe('handles seeks (VOD)', function() {
     var onTick;
     var stub = function() {};
@@ -882,6 +909,7 @@ describe('StreamingEngine', function() {
           expect(playhead.getTime()).toBe(26);
           playheadTime -= 20;
           streamingEngine.seeked();
+          return Promise.resolve();
         });
 
         // Init the first Period.
@@ -1046,11 +1074,12 @@ describe('StreamingEngine', function() {
             return defaultOnChooseStreams(period);
           });
 
-          mediaSourceEngine.endOfStream.and.stub();
+          mediaSourceEngine.endOfStream.and.callThrough();
 
           // Switch to the first Period.
           return defaultOnChooseStreams(period);
         });
+        return Promise.resolve();
       });
 
       // Here we go!
@@ -1157,6 +1186,7 @@ describe('StreamingEngine', function() {
         // call seeked().
         expect(playhead.getTime()).toBe(26);
         playheadTime -= 10;
+        return Promise.resolve();
       });
 
       // Here we go!
@@ -1260,7 +1290,8 @@ describe('StreamingEngine', function() {
             playheadTime -= 20;
             streamingEngine.seeked();
 
-            mediaSourceEngine.endOfStream.and.stub();
+            mediaSourceEngine.endOfStream.and.callThrough();
+            return Promise.resolve();
           });
 
           return defaultOnChooseStreams(period);
