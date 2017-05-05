@@ -191,8 +191,8 @@ shakaDemo.load = function() {
 
   var asset = shakaDemo.preparePlayer_(option.asset);
 
-  // Revert to default styles while we load.
-  shakaDemo.localVideo_.classList.remove('audioOnly');
+  // Revert to default poster while we load.
+  shakaDemo.localVideo_.poster = shakaDemo.mainPoster_;
 
   // Load the manifest.
   player.load(asset.manifestUri).then(function() {
@@ -205,9 +205,9 @@ shakaDemo.load = function() {
     var videoTracks =
         player.getVariantTracks().filter(function(t) { return t.width; });
 
-    // Style the video element differently for audio-only assets.
+    // Set a different poster for audio-only assets.
     if (videoTracks.length == 0) {
-      shakaDemo.localVideo_.classList.add('audioOnly');
+      shakaDemo.localVideo_.poster = shakaDemo.audioOnlyPoster_;
     }
 
     // Disallow casting of offline content.
