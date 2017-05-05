@@ -211,13 +211,25 @@ describe('PlayheadObserver', function() {
     var regionInfo;
 
     beforeEach(function() {
+      // expect(...).toEquals doesn't compare DOM nodes well, so create a custom
+      // wrapper that will match it.
+      var fakeElement = {
+        asymmetricMatch: function(other) {
+          // The |regionInfo.fakeElement| member should be copied by-reference.
+          return other == this;
+        },
+        jasmineToString: function() {
+          return '<Event element>';
+        }
+      };
+
       regionInfo = {
         schemeIdUri: 'http://example.com',
         value: 'something',
         startTime: 10,
         endTime: 20,
         id: 'abc',
-        eventElement: null
+        eventElement: /** @type {?} */ (fakeElement)
       };
 
       video.buffered = createFakeBuffered([{start: 0, end: 60}]);
