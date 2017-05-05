@@ -64,6 +64,21 @@ shakaDemo.suppressHashChangeEvent_ = false;
 
 
 /**
+ * @private
+ * @const {string}
+ */
+shakaDemo.mainPoster_ = '//shaka-player-demo.appspot.com/assets/poster.jpg';
+
+
+/**
+ * @private
+ * @const {string}
+ */
+shakaDemo.audioOnlyPoster_ =
+    '//shaka-player-demo.appspot.com/assets/audioOnly.gif';
+
+
+/**
  * The registered ID of the v2.1 Chromecast receiver demo.
  * @const {string}
  * @private
@@ -143,6 +158,9 @@ shakaDemo.init = function() {
       shakaDemo.player_.addEventListener('error', shakaDemo.onErrorEvent_);
       shakaDemo.localVideo_ = localVideo;
       shakaDemo.localPlayer_ = localPlayer;
+
+      // Set the default poster.
+      shakaDemo.localVideo_.poster = shakaDemo.mainPoster_;
 
       var asyncSetup = shakaDemo.setupAssets_();
       shakaDemo.setupOffline_();

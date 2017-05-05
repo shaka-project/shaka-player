@@ -131,11 +131,13 @@ ShakaReceiver.prototype.checkIdle_ = function() {
     var videoTracks =
         this.player_.getVariantTracks().filter(function(t) { return t.width; });
 
-    // Style the video element differently for audio-only assets.
+    // Set a special poster for audio-only assets.
     if (videoTracks.length == 0) {
-      this.video_.classList.add('audioOnly');
+      this.video_.poster =
+          '//shaka-player-demo.appspot.com/assets/audioOnly.gif';
     } else {
-      this.video_.classList.remove('audioOnly');
+      // The cast receiver never shows the poster for assets with video streams.
+      this.video_.removeAttribute('poster');
     }
   }
 };
