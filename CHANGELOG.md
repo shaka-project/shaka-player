@@ -1,3 +1,27 @@
+## 2.1.1 (2017-05-10)
+
+New features:
+  - Separate audio and video codec in Track
+    - https://github.com/google/shaka-player/issues/758
+  - Make segment request to establish HLS media MIME type
+    - https://github.com/google/shaka-player/issues/769
+
+Bugfixes:
+  - Fix exception in fullscreen polyfill on IE 11
+    - https://github.com/google/shaka-player/pull/777
+  - Fix exception when reconfiguring serverCertificate
+    - https://github.com/google/shaka-player/issues/784
+  - Don't fire 'trackschanged' event twice
+    - https://github.com/google/shaka-player/issues/783
+  - Fix track restriction based on key status
+    - https://github.com/google/shaka-player/issues/761
+  - Fix offline download stalls on Android
+    - https://github.com/google/shaka-player/issues/747
+  - Fix race condition in gap-jumping code
+  - Fix poster visibility in fullscreen mode
+    - https://github.com/google/shaka-player/issues/778
+
+
 ## 2.1.0 (2017-04-25)
 
 New features:
