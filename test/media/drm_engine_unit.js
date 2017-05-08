@@ -498,7 +498,7 @@ describe('DrmEngine', function() {
     });
 
     it('sets server certificate if present in config', function(done) {
-      var cert = new Uint8Array(0);
+      var cert = new Uint8Array(1);
       config.advanced['drm.abc'] = { serverCertificate: cert };
       drmEngine.configure(config);
 
@@ -509,7 +509,7 @@ describe('DrmEngine', function() {
 
     it('prefers server certificate from DrmInfo', function(done) {
       var cert1 = new Uint8Array(5);
-      var cert2 = new Uint8Array(0);
+      var cert2 = new Uint8Array(1);
       manifest.periods[0].variants[0].drmInfos[0].serverCertificate = cert1;
 
       config.advanced['drm.abc'] = { serverCertificate: cert2 };
@@ -628,7 +628,7 @@ describe('DrmEngine', function() {
     });
 
     it('fails with an error if setServerCertificate fails', function(done) {
-      var cert = new Uint8Array(0);
+      var cert = new Uint8Array(1);
       config.advanced['drm.abc'] = { serverCertificate: cert };
       drmEngine.configure(config);
 
@@ -1268,7 +1268,7 @@ describe('DrmEngine', function() {
     });
 
     it('interrupts failed calls to setServerCertificate', function(done) {
-      var cert = new Uint8Array(0);
+      var cert = new Uint8Array(1);
       config.advanced['drm.abc'] = { serverCertificate: cert };
       drmEngine.configure(config);
 
@@ -1290,7 +1290,7 @@ describe('DrmEngine', function() {
     });
 
     it('interrupts successful calls to setServerCertificate', function(done) {
-      var cert = new Uint8Array(0);
+      var cert = new Uint8Array(1);
       config.advanced['drm.abc'] = { serverCertificate: cert };
       drmEngine.configure(config);
 

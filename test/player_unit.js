@@ -548,9 +548,9 @@ describe('Player', function() {
       });
 
       newConfig = player.getConfiguration();
-      expect(newConfig.drm.advanced).toEqual(jasmine.objectContaining({
-        'ks1': { distinctiveIdentifierRequired: true }
-      }));
+      expect(newConfig.drm.advanced).toEqual({
+        'ks1': jasmine.objectContaining({ distinctiveIdentifierRequired: true })
+      });
       expect(logErrorSpy).not.toHaveBeenCalled();
       var lastGoodConfig = newConfig;
 
@@ -666,6 +666,48 @@ describe('Player', function() {
           }
         }
       });
+    });
+
+    it('checks the type of serverCertificate', function() {
+      logErrorSpy.and.stub();
+
+      player.configure({
+        drm: {
+          advanced: {
+            'com.widevine.alpha': {
+              serverCertificate: null
+            }
+          }
+        }
+      });
+
+      expect(logErrorSpy).toHaveBeenCalledWith(
+          stringContaining('.serverCertificate'));
+
+      logErrorSpy.calls.reset();
+      player.configure({
+        drm: {
+          advanced: {
+            'com.widevine.alpha': {
+              serverCertificate: 'foobar'
+            }
+          }
+        }
+      });
+
+      expect(logErrorSpy).toHaveBeenCalledWith(
+          stringContaining('.serverCertificate'));
+    });
+
+    it('does not throw when null appears instead of an object', function() {
+      logErrorSpy.and.stub();
+
+      player.configure({
+        drm: { advanced: null }
+      });
+
+      expect(logErrorSpy).toHaveBeenCalledWith(
+          stringContaining('.drm.advanced'));
     });
 
     it('configures play and seek range for VOD', function(done) {

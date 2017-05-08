@@ -378,8 +378,10 @@ shakaExtern.DashContentProtectionCallback;
  *   audio.
  *   <i>Defaults to '', i.e., no specific robustness required.</i> <br>
  * @property {Uint8Array} serverCertificate
- *   <i>Defaults to null, i.e., certificate will be requested from the license
- *   server if required.</i> <br>
+ *   <i>Defaults to null.</i> <br>
+ *   <i>An empty certificate (byteLength 0) will be treated as null.</i> <br>
+ *   <i>A certificate will be requested from the license server if
+ *   required.</i> <br>
  *   A key-system-specific server certificate used to encrypt license requests.
  *   Its use is optional and is meant as an optimization to avoid a round-trip
  *   to request a certificate.
