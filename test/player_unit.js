@@ -610,6 +610,29 @@ describe('Player', function() {
       expect(newConfig.manifest.dash.customScheme).not.toBe(badCustomScheme2);
       expect(logWarnSpy).not.toHaveBeenCalled();
     });
+
+    // Regression test for https://github.com/google/shaka-player/issues/784
+    it('does not throw when overwriting serverCertificate', function() {
+      player.configure({
+        drm: {
+          advanced: {
+            'com.widevine.alpha': {
+              serverCertificate: new Uint8Array(1)
+            }
+          }
+        }
+      });
+
+      player.configure({
+        drm: {
+          advanced: {
+            'com.widevine.alpha': {
+              serverCertificate: new Uint8Array(2)
+            }
+          }
+        }
+      });
+    });
   });
 
   describe('AbrManager', function() {
