@@ -209,9 +209,8 @@ shaka.test.Dash.makeManifestFromInit = function(
       createSegmentIndex: jasmine.any(Function),
       findSegmentPosition: jasmine.any(Function),
       initSegmentReference: new shaka.media.InitSegmentReference(
-          // TODO: Change back to checking specific URIs once jasmine is fixed.
-          // https://github.com/jasmine/jasmine/issues/1138
-          jasmine.any(Function), startByte, endByte)
+          function() { return ['http://example.com/' + uri]; },
+          startByte, endByte)
     })
   })]);
 };
