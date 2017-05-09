@@ -76,6 +76,7 @@ shakaAssets.Feature = {
   PSSH: 'embedded PSSH',
   MULTIKEY: 'multiple keys',
   MULTIPERIOD: 'multiple Periods',
+  ENCRYPTED_WITH_CLEAR: 'mixing encrypted and unencrypted periods',
   TRICK_MODE: 'special trick mode track',
 
   SUBTITLES: 'subtitles',
@@ -1187,7 +1188,8 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_LIST_DURATION,
       shakaAssets.Feature.PSSH,
       shakaAssets.Feature.HIGH_DEFINITION,
-      shakaAssets.Feature.MULTIPERIOD
+      shakaAssets.Feature.MULTIPERIOD,
+      shakaAssets.Feature.ENCRYPTED_WITH_CLEAR
     ],
     licenseServers: {
       'com.widevine.alpha': 'https://content.uplynk.com/wv',
