@@ -558,17 +558,18 @@ describe('MpdUtils', function() {
 
     it('handles relative links', function(done) {
       var baseXMLString = inBaseContainer(
-          '<ToReplace xlink:href="https://xlink1" xlink:actuate="onLoad" />',
+          '<ToReplace xlink:href="xlink1" xlink:actuate="onLoad" />',
           '<ToReplace xlink:href="xlink2" xlink:actuate="onLoad" />');
-      var xlinkXMLString1 = makeRecursiveXMLString(1, 'xlink3');
+      var xlinkXMLString1 = // This is loaded relative to base.
+          makeRecursiveXMLString(1, 'xlink3');
       var xlinkXMLString2 = // This is loaded relative to base.
           '<ToReplace variable="2"><Contents /></ToReplace>';
       var xlinkXMLString3 = // This is loaded relative to string1.
           '<ToReplace variable="3" />';
       var responseMap = {};
-      responseMap['https://xlink1'] = xlinkXMLString1;
+      responseMap['https://base/xlink1'] = xlinkXMLString1;
       responseMap['https://base/xlink2'] = xlinkXMLString2;
-      responseMap['https://xlink1/xlink3'] = xlinkXMLString3;
+      responseMap['https://base/xlink3'] = xlinkXMLString3;
       var desiredXMLString = inBaseContainer(
           '<ToReplace xmlns="urn:mpeg:dash:schema:mpd:2011" ' +
           'xmlns:xlink="http://www.w3.org/1999/xlink" variable="1">' +
