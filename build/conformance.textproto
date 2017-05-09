@@ -57,6 +57,15 @@ requirement: {
 }
 
 
+# Disallow Element.children.
+requirement: {
+  type: BANNED_PROPERTY
+  value: 'Element.prototype.children'
+  error_message: 'Using "Element.children" is not allowed: '
+                 'use Node.childNodes instead'
+}
+
+
 # Disallow fdescribe.
 requirement: {
   type: BANNED_NAME

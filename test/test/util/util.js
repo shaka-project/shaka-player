@@ -142,8 +142,8 @@ shaka.test.Util.expectToEqualElementRecursive_ = function(actual, expected) {
       (actual.outerHTML || actual.textContent) + ' vs ' +
       (expected.outerHTML || expected.textContent) + ': ';
 
-  var actualIsElement = actual.children != undefined;
-  var expectedIsElement = expected.children != undefined;
+  var actualIsElement = actual.nodeType == Node.ELEMENT_NODE;
+  var expectedIsElement = expected.nodeType == Node.ELEMENT_NODE;
   if (actualIsElement != expectedIsElement)
     return prospectiveDiff + 'One is element, one isn\'t.';
 
