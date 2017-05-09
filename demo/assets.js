@@ -36,7 +36,8 @@ shakaAssets.Encoder = {
   NIMBLE_STREAMER: 'Nimble Streamer',
   AZURE_MEDIA_SERVICES: 'Azure Media Services',
   MP4BOX: 'MP4Box',
-  APPLE: 'Apple'
+  APPLE: 'Apple',
+  UPLYNK: 'Verizon Digital Media Services'
 };
 
 
@@ -51,8 +52,8 @@ shakaAssets.Source = {
   BITCODIN: 'Bitcodin',
   NIMBLE_STREAMER: 'Nimble Streamer',
   AZURE_MEDIA_SERVICES: 'Azure Media Services',
-  UPLYNK: 'Verizon Digital Media Services',
-  GPAC: 'GPAC'
+  GPAC: 'GPAC',
+  UPLYNK: 'Verizon Digital Media Services'
 };
 
 
@@ -1142,17 +1143,24 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION
     ]
   },
+  // }}}
+
+  // Verizon Digital Media Services (VDMS) assets {{{
   {
     name: 'Big Buck Bunny',
     manifestUri: 'https://content.uplynk.com/224ac8717e714b68831997ab6cea4015.mpd', // gjslint: disable=110
 
+    encoder: shakaAssets.Encoder.UPLYNK,
     source: shakaAssets.Source.UPLYNK,
     drm: [
-      shakaAssets.KeySystem.WIDEVINE
+      shakaAssets.KeySystem.WIDEVINE,
+      shakaAssets.KeySystem.CLEAR_KEY
     ],
     features: [
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_LIST_DURATION
+      shakaAssets.Feature.SEGMENT_LIST_DURATION,
+      shakaAssets.Feature.PSSH,
+      shakaAssets.Feature.HIGH_DEFINITION
     ],
     licenseServers: {
       'com.widevine.alpha': 'https://content.uplynk.com/wv',
@@ -1165,15 +1173,21 @@ shakaAssets.testAssets = [
     name: 'Sintel - (multiperiod-mix of encrypted and unencrypted)',
     //Unencrypted periods interspersed with protected periods
     //Requires Chrome 58
-    manifestUri: 'https://content.uplynk.com/1eb40d8e64234f5c9879db7045c3d48c.mpd?ad=cleardash', // gjslint: disable=110
+    manifestUri: 'https://content.uplynk.com/1eb40d8e64234f5c9879db7045c3d48c.mpd?ad=cleardash&rays=cdefg', // gjslint: disable=110
 
+    encoder: shakaAssets.Encoder.UPLYNK,
     source: shakaAssets.Source.UPLYNK,
     drm: [
-      shakaAssets.KeySystem.WIDEVINE
+      shakaAssets.KeySystem.WIDEVINE,
+      shakaAssets.KeySystem.CLEAR_KEY
     ],
     features: [
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_LIST_DURATION
+      shakaAssets.Feature.MULTIPLE_LANGUAGES,
+      shakaAssets.Feature.SEGMENT_LIST_DURATION,
+      shakaAssets.Feature.PSSH,
+      shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.MULTIPERIOD
     ],
     licenseServers: {
       'com.widevine.alpha': 'https://content.uplynk.com/wv',
