@@ -16,6 +16,7 @@
 
 """Creates the Closure dependencies file required to run in uncompiled mode."""
 
+import logging
 import os
 import subprocess
 import sys
@@ -31,7 +32,7 @@ deps_args = [
 
 def gen_deps(_):
   """Generates the uncompiled dependencies files."""
-  print 'Generating Closure dependencies...'
+  logging.info('Generating Closure dependencies...')
 
   # Make the dist/ folder, ignore errors.
   base = shakaBuildHelpers.get_source_base()

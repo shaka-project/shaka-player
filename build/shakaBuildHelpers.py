@@ -21,6 +21,7 @@ This uses two environment variables to help with debugging the scripts:
 """
 
 import errno
+import logging
 import os
 import platform
 import re
@@ -114,13 +115,13 @@ def execute_subprocess(args, pipeOut=True):
     The same value as subprocess.Popen.
   """
   if os.environ.get('PRINT_ARGUMENTS'):
-    print ' '.join([quote_argument(x) for x in args])
+    logging.info(' '.join([quote_argument(x) for x in args]))
   try:
     out = subprocess.PIPE if pipeOut else None
     return subprocess.Popen(args, stdin=subprocess.PIPE, stdout=out)
   except OSError as e:
     if e.errno == errno.ENOENT:
-      print >> sys.stderr, '*** A required dependency is missing: ' + args[0]
+      logging.error('*** A required dependency is missing: %s', args[0])
       # Exit early to avoid showing a confusing stack trace.
       sys.exit(1)
     raise
@@ -237,8 +238,8 @@ def update_node_modules():
   version = execute_get_output([cmd, '-v'])
 
   if _parse_version(version) < _parse_version('1.3.12'):
-    print >> sys.stderr, 'npm version is too old, please upgrade.  e.g.:'
-    print >> sys.stderr, '  npm install -g npm'
+    logging.error('npm version is too old, please upgrade.  e.g.:')
+    logging.error('  npm install -g npm')
     return False
 
   # Update the modules.
@@ -256,11 +257,15 @@ def run_main(main):
   Args:
     main: The main function to call.
   """
+  logging.getLogger().setLevel(logging.INFO)
+  fmt = '[%(levelname)s] %(message)s'
+  logging.basicConfig(format=fmt)
+
   try:
     sys.exit(main(sys.argv[1:]))
   except KeyboardInterrupt:
     if os.environ.get('RAISE_INTERRUPT'):
       raise
     print >> sys.stderr  # Clear the current line that has ^C on it.
-    print >> sys.stderr, 'Keyboard interrupt'
+    logging.error('Keyboard interrupt')
     sys.exit(1)

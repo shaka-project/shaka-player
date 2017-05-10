@@ -22,6 +22,7 @@ This checks:
  * Run the linter to check for style violations.
 """
 
+import logging
 import os
 import re
 import sys
@@ -41,7 +42,7 @@ def get_lint_files():
 
 def check_lint():
   """Runs the linter over the library files."""
-  print 'Running Closure linter...'
+  logging.info('Running Closure linter...')
 
   jsdoc3_tags = ','.join([
       'static', 'summary', 'namespace', 'event', 'description', 'property',
@@ -68,7 +69,7 @@ def check_html_lint():
   if not shakaBuildHelpers.update_node_modules():
     return False
 
-  print 'Running htmlhint...'
+  logging.info('Running htmlhint...')
   htmlhint_path = shakaBuildHelpers.get_node_binary_path('htmlhint')
   base = shakaBuildHelpers.get_source_base()
   files = ['index.html', 'demo/index.html', 'support.html']
@@ -87,14 +88,14 @@ def check_complete():
   Returns:
     True on success, False on failure.
   """
-  print 'Checking that the build files are complete...'
+  logging.info('Checking that the build files are complete...')
 
   complete = build.Build()
   # Normally we don't need to include @core, but because we look at the build
   # object directly, we need to include it here.  When using main(), it will
   # call addCore which will ensure core is included.
   if not complete.parse_build(['+@complete', '+@core'], os.getcwd()):
-    print >> sys.stderr, 'Error parsing complete build'
+    logging.error('Error parsing complete build')
     return False
 
   match = re.compile(r'.*\.js$')
@@ -103,10 +104,10 @@ def check_complete():
   missing_files = set(all_files) - complete.include
 
   if missing_files:
-    print >> sys.stderr, 'There are files missing from the complete build:'
+    logging.error('There are files missing from the complete build:')
     for missing in missing_files:
       # Convert to a path relative to source base.
-      print >> sys.stderr, '  ' + os.path.relpath(missing, base)
+      logging.error('  ' + os.path.relpath(missing, base))
     return False
   return True
 
@@ -117,7 +118,7 @@ def check_tests():
   Returns:
     True on success, False on failure.
   """
-  print 'Checking the tests for type errors...'
+  logging.info('Checking the tests for type errors...')
 
   match = re.compile(r'.*\.js$')
   base = shakaBuildHelpers.get_source_base()
@@ -146,7 +147,7 @@ def main(args):
       usage()
       return 0
     else:
-      print >> sys.stderr, 'Unknown option', arg
+      logging.error('Unknown option: %s', arg)
       usage()
       return 1
 
