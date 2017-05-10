@@ -105,12 +105,15 @@ shaka.test.MemoryDBEngine.prototype.remove = function(storeName, key) {
 
 
 /** @override */
-shaka.test.MemoryDBEngine.prototype.removeWhere = function(
-    storeName, predicate) {
+shaka.test.MemoryDBEngine.prototype.removeKeys = function(storeName,
+                                                          keys,
+                                                          opt_onKeyRemoved) {
   var store = this.getStore_(storeName);
   for (var key in store) {
-    if (predicate(store[Number(key)]))
-      delete store[Number(key)];
+    key = Number(key);
+    if (keys.indexOf(key) >= 0) {
+      delete store[key];
+    }
   }
   return Promise.resolve();
 };

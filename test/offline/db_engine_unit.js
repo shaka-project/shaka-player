@@ -113,7 +113,7 @@ describe('DBEngine', function() {
       return db.get('test', 2);
     }).then(function(data) {
       expect(data).toBeFalsy();
-      return db.removeWhere('test', function(s) { return s.i >= 7; });
+      return db.removeKeys('test', [4, 5, 6]);
     }).then(function() {
       return db.get('test', 5);
     }).then(function(data) {
@@ -221,12 +221,11 @@ describe('DBEngine', function() {
     // the transaction will abort. This should cause the promise to be
     // rejected.
     db.insert = function(storeName, value) {
-      return this.createOperation_(storeName, 'readwrite', function(store) {
+      return this.createTransaction_(storeName, 'readwrite', function(store) {
         var request = store.put(value);
         request.onsuccess = function(event) {
           request.transaction.abort();
         };
-        return request;
       });
     };
 
