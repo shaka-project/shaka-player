@@ -17,7 +17,7 @@
     "htmlhint": "yaniswang/HTMLHint#152a114f",
     "in-publish": "2.x",
     "jasmine-ajax": "3.3.x",
-    "jasmine-core": "2.4.x",
+    "jasmine-core": "2.5.x",
     "karma": "~1.1.2",
     "karma-chrome-launcher": "~1.0.1",
     "karma-coverage": "~1.1.1",

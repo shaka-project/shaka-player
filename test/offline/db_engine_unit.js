@@ -206,7 +206,6 @@ describe('DBEngine', function() {
     };
 
     var expected = new shaka.util.Error(
-        shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.STORAGE,
         shaka.util.Error.Code.OPERATION_ABORTED);
 

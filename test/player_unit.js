@@ -1308,8 +1308,8 @@ describe('Player', function() {
                   .addStream(2)
               .build();
 
-      parser = new shaka.test.FakeManifestParser(manifest);
-      factory = function() { return parser; };
+      var parser = new shaka.test.FakeManifestParser(manifest);
+      var factory = function() { return parser; };
       player.load('', 0, factory).then(function() {
         // "initialize" the current period.
         chooseStreams();
