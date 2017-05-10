@@ -1,3 +1,16 @@
+## 2.0.9 (2017-05-10)
+
+Backported bugfixes from v2.1.x:
+  - Fix offline download stalls on Android
+    - https://github.com/google/shaka-player/issues/747
+  - Fix track restriction based on key status
+    - https://github.com/google/shaka-player/issues/761
+  - Fix exception in fullscreen polyfill on IE 11
+    - https://github.com/google/shaka-player/pull/777
+  - Fix exception when reconfiguring serverCertificate
+    - https://github.com/google/shaka-player/issues/784
+
+
 ## 2.1.1 (2017-05-10)
 
 New features:
