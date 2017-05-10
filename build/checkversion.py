@@ -16,9 +16,9 @@
 
 """Checks that all the versions match."""
 
+import logging
 import os
 import re
-import sys
 
 import shakaBuildHelpers
 
@@ -53,26 +53,26 @@ def check_version(_):
 
   ret = 0
   if 'dirty' in git:
-    print >> sys.stderr, 'Git version is dirty.'
+    logging.error('Git version is dirty.')
     ret = 1
   elif 'unknown' in git:
-    print >> sys.stderr, 'Git version is not a tag.'
+    logging.error('Git version is not a tag.')
     ret = 1
   elif not re.match(r'^v[0-9]+\.[0-9]+\.[0-9]+(?:-[a-z0-9]+)?$', git):
-    print >> sys.stderr, 'Git version is a malformed release version.'
-    print >> sys.stderr, 'It should be a \'v\', followed by three numbers'
-    print >> sys.stderr, 'separated by dots, optionally followed by a hyphen'
-    print >> sys.stderr, 'and a pre-release identifier.  See http://semver.org/'
+    logging.error('Git version is a malformed release version.')
+    logging.error('It should be a \'v\', followed by three numbers')
+    logging.error('separated by dots, optionally followed by a hyphen')
+    logging.error('and a pre-release identifier.  See http://semver.org/')
     ret = 1
 
   if 'v' + npm != git:
-    print >> sys.stderr, 'NPM version does not match git version.'
+    logging.error('NPM version does not match git version.')
     ret = 1
   if player != git + '-debug':
-    print >> sys.stderr, 'Player version does not match git version.'
+    logging.error('Player version does not match git version.')
     ret = 1
   if 'v' + changelog != git:
-    print >> sys.stderr, 'Changelog version does not match git version.'
+    logging.error('Changelog version does not match git version.')
     ret = 1
 
   return ret

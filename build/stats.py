@@ -33,6 +33,7 @@ programs to display a visual layout of the dependencies.
 """
 
 import json
+import logging
 import math
 import os
 import string
@@ -822,7 +823,7 @@ def main(args):
       print_help()
       return 0
     else:
-      print >> sys.stderr, 'Unrecognized argument:', arg
+      logging.error('Unrecognized argument: %s', arg)
       print_help()
       return 1
 
@@ -844,18 +845,18 @@ def main(args):
         os.path.join(base, 'dist', 'shaka-player.' + name + '.debug.map')):
       name = os.path.join(base, 'dist', 'shaka-player.' + name + '.debug.map')
     else:
-      print >> sys.stderr, name, 'not found; build Shaka first.'
+      logging.error('"%s" not found; build Shaka first.', name)
       return 1
 
   # Verify arguments are correct.
   if (options.print_sizes + options.print_deps + options.print_tokens +
       options.is_class) != 1:
-    print >> sys.stderr, 'Must include exactly one output type.'
+    logging.error('Must include exactly one output type.')
     print_help()
     return 1
   elif options.in_dot and not options.print_deps and not options.is_class:
-    line = '--dot-format only valid with --function-deps or --class-deps.'
-    print >> sys.stderr, line
+    logging.error('--dot-format only valid with --function-deps or '
+                  '--class-deps.')
     return 1
   else:
     process(open(name).read(), options)

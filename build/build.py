@@ -39,9 +39,9 @@ Examples:
   build.py --name custom +@manifests +@networking +../my_plugin.js
 """
 
+import logging
 import os
 import re
-import subprocess
 import sys
 
 import shakaBuildHelpers
@@ -127,14 +127,14 @@ class Build(object):
     build_path = os.path.join(source_base, 'build', 'types', name)
     if (os.path.isfile(local_path) and os.path.isfile(build_path)
         and local_path != build_path):
-      print >> sys.stderr, 'Build file "%s" is ambiguous' % name
+      logging.error('Build file "%s" is ambiguous', name)
       return None
     elif os.path.isfile(local_path):
       return local_path
     elif os.path.isfile(build_path):
       return build_path
     else:
-      print >> sys.stderr, 'Build file not found: ' + name
+      logging.error('Build file not found: %s', name)
       return None
 
   def _combine(self, other):
@@ -162,7 +162,7 @@ class Build(object):
     core_build.parse_build(['+@core'], os.getcwd())
     core_files = core_build.include
     if self.exclude & core_files:
-      print >> sys.stderr, 'Cannot exclude files from core'
+      logging.error('Cannot exclude files from core')
     self.include |= core_files
 
   def parse_build(self, lines, root):
@@ -196,7 +196,7 @@ class Build(object):
         is_neg = True
         line = line[1:].strip()
       else:
-        print >> sys.stderr, 'Operation (+/-) required'
+        logging.error('Operation (+/-) required')
         return False
 
       if line[0] == '@':
@@ -221,7 +221,7 @@ class Build(object):
         if not os.path.isabs(line):
           line = os.path.abspath(os.path.join(root, line))
         if not os.path.isfile(line):
-          print >> sys.stderr, 'Unable to find file ' + line
+          logging.error('Unable to find file: %s', line)
           return False
 
         if is_neg:
@@ -256,7 +256,7 @@ class Build(object):
 
     cmd_line = ['java', '-jar', jar] + closure_opts + extra_opts + files
     if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
-      print >> sys.stderr, 'Build failed'
+      logging.error('Build failed')
       return False
 
     return True
@@ -281,7 +281,7 @@ class Build(object):
 
     cmd_line = ['node', extern_generator, '--output', output] + files
     if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
-      print >> sys.stderr, 'Externs generation failed'
+      logging.error('Externs generation failed')
       return False
 
     return True
@@ -321,7 +321,8 @@ class Build(object):
         edited_files = [f for f in complete_build.include
                         if os.path.getmtime(f) > build_time]
         if not edited_files:
-          print 'No changes detected, not building.  Use --force to override.'
+          logging.warning('No changes detected, not building.  Use --force '
+                          'to override.')
           return True
 
     opts = ['--create_source_map', result_map, '--js_output_file', result_file,
@@ -363,7 +364,7 @@ def main(args):
     if args[i] == '--name':
       i += 1
       if i == len(args):
-        print >> sys.stderr, '--name requires an argument'
+        logging.error('--name requires an argument')
         return 1
       name = args[i]
     elif args[i] == '--debug':
@@ -374,7 +375,7 @@ def main(args):
       usage()
       return 0
     elif args[i].startswith('--'):
-      print >> sys.stderr, 'Unknown option', args[i]
+      logging.error('Unknown option: %s', args[i])
       usage()
       return 1
     else:
@@ -384,7 +385,7 @@ def main(args):
   if not lines:
     lines = ['+@complete']
 
-  print 'Compiling the library...'
+  logging.info('Compiling the library...')
   custom_build = Build()
   if not custom_build.parse_build(lines, os.getcwd()):
     return 1

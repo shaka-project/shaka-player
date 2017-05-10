@@ -16,8 +16,8 @@
 
 """Runs unit and integrations tests on the library."""
 
+import logging
 import platform
-import sys
 
 import build
 import gendeps
@@ -35,20 +35,21 @@ def run_tests_single(args):
   # Get the browsers supported on the local system.
   browsers = _get_browsers()
   if not browsers:
-    print >> sys.stderr, 'Unrecognized system "%s"' % platform.uname()[0]
+    logging.error('Unrecognized system: %s', platform.uname()[0])
     return 1
 
-  print 'Starting tests...'
+  logging.info('Starting tests...')
   if not args:
     # Run tests in all available browsers.
-    print 'Running with platform default:', '--browsers', browsers
+    logging.warning('Running with platform default: --browsers %s', browsers)
     cmd_line = cmd + ['--browsers', browsers]
     return shakaBuildHelpers.execute_get_code(cmd_line)
   else:
     # Run with command-line arguments from the user.
     if '--browsers' not in args:
-      print 'No --browsers specified.'
-      print 'In this mode, browsers must be manually connected to karma.'
+      logging.warning('No --browsers specified.')
+      logging.warning('In this mode, browsers must be manually connected to '
+                      'karma.')
     cmd_line = cmd + args
     return shakaBuildHelpers.execute_get_code(cmd_line)
 
@@ -57,25 +58,26 @@ def run_tests_multiple(args):
   """Runs multiple iterations of the tests when --runs is set."""
   index = args.index('--runs') + 1
   if index == len(args) or args[index].startswith('--'):
-    print >> sys.stderr, 'Argument Error: --runs requires a value.'
+    logging.error('Argument Error: --runs requires a value.')
     return 1
   try:
     runs = int(args[index])
   except ValueError:
-    print >> sys.stderr, 'Argument Error: --runs value must be an integer.'
+    logging.error('Argument Error: --runs value must be an integer.')
     return 1
   if runs <= 0:
-    print >> sys.stderr, 'Argument Error: --runs value must be greater than 0.'
+    logging.error('Argument Error: --runs value must be greater than 0.')
     return 1
 
   results = []
-  print '\nRunning the tests %d times.' % runs
+  logging.info('Running the tests %d times.', runs)
   for _ in range(runs):
     results.append(run_tests_single(args))
 
-  print '\nAll runs completed.'
-  print '%d passed out of %d total runs.' % (results.count(0), len(results))
-  print 'Results (exit code): %r' % results
+  logging.info('\nAll runs completed.')
+  logging.info('%d passed out of %d total runs.', results.count(0),
+               len(results))
+  logging.info('Results (exit code): %r', results)
   return all(result == 0 for result in results)
 
 
