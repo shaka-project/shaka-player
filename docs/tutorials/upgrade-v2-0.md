@@ -56,6 +56,30 @@ See also the {@link shakaExtern.Track} structure which is used for all track
 types (variant and text).
 
 
+#### Selecting tracks and adaptation settings
+
+In v2.0, selecting a new video or audio track would implicitly disable
+adaptation.
+
+```js
+// v2.0
+player.selectTrack(videoTracks[i]);
+// Adaptation has been implicitly disabled.
+// To explicitly re-enable:
+player.configure({abr: {enabled: true}});
+```
+
+In v2.1, any change in ABR state must be made explicitly if desired.
+
+```js
+// v2.1
+player.selectVariantTrack(variantTracks[i]);
+// Adaptation state has not changed!
+// To explicitly disable:
+player.configure({abr: {enabled: false}});
+```
+
+
 #### Changing languages
 
 With Shaka v2.0, you could change languages using `configure()` and the
