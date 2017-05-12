@@ -66,14 +66,6 @@ requirement: {
 }
 
 
-# Disallow fdescribe.
-requirement: {
-  type: BANNED_NAME
-  value: 'fdescribe'
-  error_message: 'Using "fdescribe" is not allowed'
-}
-
-
 # Disallow fit.
 requirement: {
   type: BANNED_NAME
