@@ -1168,8 +1168,8 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Sintel - (multiperiod-mix of encrypted and unencrypted)',
-    //Unencrypted periods interspersed with protected periods
-    //Requires Chrome 58
+    // Unencrypted periods interspersed with protected periods
+    // Doesn't work on Chrome < 58
     manifestUri: 'https://content.uplynk.com/1eb40d8e64234f5c9879db7045c3d48c.mpd?ad=cleardash&rays=cdefg', // gjslint: disable=110
 
     encoder: shakaAssets.Encoder.UPLYNK,
