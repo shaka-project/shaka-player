@@ -162,8 +162,8 @@ shakaExtern.Stats;
  *   The language of the track, or 'und' if not given.  This is the exact
  *   value provided in the manifest; it may need to be normalized.
  * @property {?string} kind
- *   (only for text tracks) The kind of text track, either 'captions' or
- *   'subtitles'.
+ *   (only for text tracks) The kind of text track, either 'caption' or
+ *   'subtitle'.
  * @property {?number} width
  *   The video width provided in the manifest, if present.
  * @property {?number} height
