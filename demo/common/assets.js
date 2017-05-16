@@ -58,6 +58,7 @@ shakaAssets.Source = {
 /** @enum {string} */
 shakaAssets.KeySystem = {
   CLEAR_KEY: 'org.w3.clearkey',
+  FAIRPLAY: 'com.apple.fps',
   PLAYREADY: 'com.microsoft.playready',
   WIDEVINE: 'com.widevine.alpha'
 };

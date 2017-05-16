@@ -8,6 +8,7 @@
 +../../lib/polyfill/mediasource.js
 +../../lib/polyfill/patchedmediakeys_ms.js
 +../../lib/polyfill/patchedmediakeys_nop.js
++../../lib/polyfill/patchedmediakeys_safari.js
 +../../lib/polyfill/patchedmediakeys_webkit.js
 +../../lib/polyfill/promise.js
 +../../lib/polyfill/video_play_promise.js
