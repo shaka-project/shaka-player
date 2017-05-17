@@ -84,7 +84,6 @@ shakaDemo.updateVariantTracks_ = function() {
  */
 shakaDemo.updateTextTracks_ = function() {
   var trackList = document.getElementById('textTracks');
-
   var langList = document.getElementById('textLanguages');
   var language = langList.selectedIndex >= 0 ?
       langList.options[langList.selectedIndex].value :
@@ -198,7 +197,11 @@ shakaDemo.updateLanguageOptions_ =
   // Populate list with new options.
   languages.forEach(function(lang) {
     var option = document.createElement('option');
-    option.textContent = lang;
+    var currentTrack = tracks.filter(function(track) {
+      return track.language === lang;
+    });
+    option.textContent = currentTrack[0].label != 'und' ?
+        currentTrack[0].label : lang;
     option.value = lang;
     option.selected = lang == selectedTrack.language;
     list.appendChild(option);

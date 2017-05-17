@@ -163,6 +163,18 @@ shaka.test.ManifestGenerator.prototype.language = function(language) {
 
 
 /**
+ * Sets the label of the language of the most recent variant or text stream.
+ *
+ * @param {string} label
+ * @return {!shaka.test.ManifestGenerator}
+ */
+shaka.test.ManifestGenerator.prototype.label = function(label) {
+  this.currentStreamOrVariant_().label = label;
+  return this;
+};
+
+
+/**
  * Sets that the most recent variant or text stream is primary.
  *
  * @return {!shaka.test.ManifestGenerator}
