@@ -247,8 +247,9 @@ describe('DrmEngine', function() {
   });  // describe('basic flow')
 
   function checkKeySystems() {
+    // TODO: re-enable these tests for PlayReady (b/38496036)
     // Our test asset for this suite can use any of these key systems:
-    if (!support['com.widevine.alpha'] && !support['com.microsoft.playready']) {
+    if (!support['com.widevine.alpha']) {
       // pending() throws a special exception that Jasmine uses to skip a test.
       // It can only be used from inside it(), not describe() or beforeEach().
       pending('Skipping DrmEngine tests.');
