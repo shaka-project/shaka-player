@@ -139,7 +139,8 @@ shakaExtern.Stats;
  *   codecs: ?string,
  *   audioCodec: ?string,
  *   videoCodec: ?string,
- *   primary: boolean
+ *   primary: boolean,
+ *   roles: !Array.<string>
  * }}
  *
  * @description
@@ -187,6 +188,8 @@ shakaExtern.Stats;
  *   This can be a useful hint about which language should be the default, and
  *   indicates which track Shaka will use when the user's language preference
  *   cannot be satisfied.
+ * @property {!Array.<string>} roles
+ *   The roles of the track, e.g. 'main', 'caption', or 'commentary'.
  * @exportDoc
  */
 shakaExtern.Track;

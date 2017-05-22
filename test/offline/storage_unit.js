@@ -92,7 +92,8 @@ describe('Storage', function() {
             mimeType: 'video/mp4',
             codecs: 'avc1.4d401f',
             primary: false,
-            segments: []
+            segments: [],
+            roles: []
           },
           {
             id: 1,
@@ -105,7 +106,8 @@ describe('Storage', function() {
             mimeType: 'audio/mp4',
             codecs: 'vorbis',
             primary: true,
-            segments: []
+            segments: [],
+            roles: []
           }
         ]
       }],
@@ -142,7 +144,8 @@ describe('Storage', function() {
         primary: true,
         codecs: 'avc1.4d401f, vorbis',
         audioCodec: 'vorbis',
-        videoCodec: 'avc1.4d401f'
+        videoCodec: 'avc1.4d401f',
+        roles: []
       }
     ];
     Promise
