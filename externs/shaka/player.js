@@ -130,6 +130,7 @@ shakaExtern.Stats;
  *   bandwidth: number,
  *
  *   language: string,
+ *   label: ?string,
  *   kind: ?string,
  *   width: ?number,
  *   height: ?number,
@@ -161,6 +162,8 @@ shakaExtern.Stats;
  * @property {string} language
  *   The language of the track, or 'und' if not given.  This is the exact
  *   value provided in the manifest; it may need to be normalized.
+ * @property {?string} label
+ *   The track label, unique text that should describe the track.
  * @property {?string} kind
  *   (only for text tracks) The kind of text track, either 'caption' or
  *   'subtitle'.

@@ -297,6 +297,7 @@ shakaExtern.GetSegmentReferenceFunction;
  *   encrypted: boolean,
  *   keyId: ?string,
  *   language: string,
+ *   label: ?string,
  *   type: string,
  *   primary: boolean,
  *   trickModeVideo: ?shakaExtern.Stream,
@@ -371,6 +372,8 @@ shakaExtern.GetSegmentReferenceFunction;
  *   The Stream's language, specified as a language code. <br>
  *   Audio stream's language must be identical to the language of the containing
  *   Variant.
+ * @property {?string} label
+ *   The Stream's label, unique text that should describe the audio/text track.
  * @property {string} type
  *   <i>Required.</i> <br>
  *   Content type (e.g. 'video', 'audio' or 'text')

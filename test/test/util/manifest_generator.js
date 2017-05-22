@@ -169,7 +169,7 @@ shaka.test.ManifestGenerator.prototype.language = function(language) {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.label = function(label) {
-  this.currentStreamOrVariant_().label = label;
+  this.currentStream_().label = label;
   return this;
 };
 
@@ -332,7 +332,7 @@ shaka.test.ManifestGenerator.prototype.addVideo = function(id) {
   }
 
   if (!stream)
-    stream = this.createStream_(id, ContentType.VIDEO, 'und');
+    stream = this.createStream_(id, ContentType.VIDEO, 'und', null);
 
   variant.video = stream;
   this.lastStreamAdded_ = stream;
@@ -365,7 +365,8 @@ shaka.test.ManifestGenerator.prototype.addAudio = function(id) {
   }
 
   if (!stream)
-    stream = this.createStream_(id, ContentType.AUDIO, variant.language);
+    stream = this.createStream_(id, ContentType.AUDIO, variant.language,
+        variant.audio.label);
 
   variant.audio = stream;
   this.lastStreamAdded_ = stream;
@@ -384,7 +385,7 @@ shaka.test.ManifestGenerator.prototype.addAudio = function(id) {
 shaka.test.ManifestGenerator.prototype.addTextStream = function(id) {
   var ContentType = shaka.util.ManifestParserUtils.ContentType;
   var period = this.currentPeriod_();
-  var stream = this.createStream_(id, ContentType.TEXT, 'und');
+  var stream = this.createStream_(id, ContentType.TEXT, 'und', '');
   period.textStreams.push(stream);
   this.lastObjectAdded_ = stream;
   this.lastStreamAdded_ = stream;
@@ -428,11 +429,12 @@ shaka.test.ManifestGenerator.prototype.isIdUsed_ = function(id) {
  * @param {number} id
  * @param {string} type
  * @param {string} language
+ * @param {?string} label
  * @return {!shakaExtern.Stream}
  * @private
  */
 shaka.test.ManifestGenerator.prototype.createStream_ =
-    function(id, type, language) {
+    function(id, type, language, label) {
   goog.asserts.assert(!this.isIdUsed_(id),
                       'Streams should have unique ids!');
 
@@ -468,6 +470,7 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
     encrypted: false,
     keyId: null,
     language: language,
+    label: label,
     type: type,
     primary: false,
     trickModeVideo: null,

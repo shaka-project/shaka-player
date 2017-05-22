@@ -153,8 +153,10 @@ shakaDemo.updateLanguages_ = function() {
 shakaDemo.updateTextLanguages_ = function() {
   var player = shakaDemo.player_;
   var list = document.getElementById('textLanguages');
-  var languages = player.getTextLanguages();
   var tracks = player.getTextTracks();
+  var languages = tracks.map(function(track) {
+    return { id: track.id, lang: track.language, label: track.label};
+  });
 
   shakaDemo.updateLanguageOptions_(list, languages, tracks);
 };
@@ -167,8 +169,10 @@ shakaDemo.updateTextLanguages_ = function() {
 shakaDemo.updateAudioLanguages_ = function() {
   var player = shakaDemo.player_;
   var list = document.getElementById('audioLanguages');
-  var languages = player.getAudioLanguages();
   var tracks = player.getVariantTracks();
+  var languages = tracks.map(function(track) {
+    return { id: track.id, lang: track.language, label: track.label};
+  });
 
   shakaDemo.updateLanguageOptions_(list, languages, tracks);
 };
@@ -197,13 +201,9 @@ shakaDemo.updateLanguageOptions_ =
   // Populate list with new options.
   languages.forEach(function(lang) {
     var option = document.createElement('option');
-    var currentTrack = tracks.filter(function(track) {
-      return track.language === lang;
-    });
-    option.textContent = currentTrack[0].label != 'und' ?
-        currentTrack[0].label : lang;
-    option.value = lang;
-    option.selected = lang == selectedTrack.language;
+    option.textContent = lang.label ? lang.label : lang.lang;
+    option.value = lang.lang;
+    option.selected = lang.lang == selectedTrack.language;
     list.appendChild(option);
   });
 };
