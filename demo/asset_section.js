@@ -202,8 +202,9 @@ shakaDemo.load = function() {
     shakaDemo.hashShouldChange_();
 
     // Audio-only tracks have no width/height.
-    var videoTracks =
-        player.getVariantTracks().filter(function(t) { return t.width; });
+    var videoTracks = player.getVariantTracks().filter(function(t) {
+      return t.videoCodec;
+    });
 
     // Set a different poster for audio-only assets.
     if (videoTracks.length == 0) {
