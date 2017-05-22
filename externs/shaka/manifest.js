@@ -301,7 +301,8 @@ shakaExtern.GetSegmentReferenceFunction;
  *   type: string,
  *   primary: boolean,
  *   trickModeVideo: ?shakaExtern.Stream,
- *   containsEmsgBoxes: boolean
+ *   containsEmsgBoxes: boolean,
+ *   roles: !Array.<string>
  * }}
  *
  * @description
@@ -389,7 +390,9 @@ shakaExtern.GetSegmentReferenceFunction;
  *   <i>Defaults to false.</i><br>
  *   Whether the stream contains embedded 'emsg' boxes that should result in
  *   Player events.
- *
+ * @property {!Array.<string>} roles
+ *   The roles of the stream as they appear on the manifest,
+ *   e.g. 'main', 'caption', or 'commentary'.
  * @exportDoc
  */
 shakaExtern.Stream;

@@ -155,6 +155,7 @@ describe('DashParser Manifest', function() {
                 .presentationTimeOffset(0)
                 .mime('audio/mp4', 'mp4a.40.29')
                 .primary()
+                .roles(['main'])
             .addVariant(jasmine.any(Number))
               .language('en')
               .bandwidth(150)
@@ -174,6 +175,7 @@ describe('DashParser Manifest', function() {
                 .presentationTimeOffset(0)
                 .mime('audio/mp4', 'mp4a.40.29')
                 .primary()
+                .roles(['main'])
             .addTextStream(jasmine.any(Number))
               .language('es')
               .label('spanish')
@@ -184,6 +186,7 @@ describe('DashParser Manifest', function() {
               .mime('text/vtt')
               .bandwidth(100)
               .kind('caption')
+              .roles(['caption', 'main'])
         .build());
   });
 
