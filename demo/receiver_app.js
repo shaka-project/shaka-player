@@ -128,8 +128,9 @@ ShakaReceiver.prototype.checkIdle_ = function() {
     this.cancelIdleTimer_();
 
     // Audio-only tracks have no width/height.
-    var videoTracks =
-        this.player_.getVariantTracks().filter(function(t) { return t.width; });
+    var videoTracks = this.player_.getVariantTracks().filter(function(t) {
+      return t.videoCodec;
+    });
 
     // Set a special poster for audio-only assets.
     if (videoTracks.length == 0) {
