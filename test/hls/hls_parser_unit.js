@@ -30,7 +30,8 @@ describe('HlsParser', function() {
       dash: {
         customScheme: function(node) { return null; },
         clockSyncUri: '',
-        ignoreDrmInfo: false
+        ignoreDrmInfo: false,
+        xlinkFailGracefully: false
       },
       hls: {
         defaultTimeOffset: 0

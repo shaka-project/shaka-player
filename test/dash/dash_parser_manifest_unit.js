@@ -652,6 +652,27 @@ describe('DashParser Manifest', function() {
       Dash.testFails(done, source, error);
     });
 
+    it('xlink problems when xlinkFailGracefully is false', function(done) {
+      var source = [
+        '<MPD minBufferTime="PT75S" xmlns="urn:mpeg:dash:schema:mpd:2011" ' +
+            'xmlns:xlink="http://www.w3.org/1999/xlink">',
+        '  <Period id="1" duration="PT30S">',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation bandwidth="1" xlink:href="https://xlink1" ' +
+            'xlink:actuate="onInvalid">', // Incorrect actuate
+        '        <SegmentBase indexRange="100-200" />',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>'
+      ].join('\n');
+      var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MANIFEST,
+          shaka.util.Error.Code.DASH_UNSUPPORTED_XLINK_ACTUATE);
+      Dash.testFails(done, source, error);
+    });
+
     it('failed network requests', function(done) {
       var expectedError = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
