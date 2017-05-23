@@ -332,7 +332,7 @@ shaka.test.ManifestGenerator.prototype.addVideo = function(id) {
   }
 
   if (!stream)
-    stream = this.createStream_(id, ContentType.VIDEO, 'und', null);
+    stream = this.createStream_(id, ContentType.VIDEO, 'und');
 
   variant.video = stream;
   this.lastStreamAdded_ = stream;
@@ -365,8 +365,7 @@ shaka.test.ManifestGenerator.prototype.addAudio = function(id) {
   }
 
   if (!stream)
-    stream = this.createStream_(id, ContentType.AUDIO, variant.language,
-        variant.audio.label);
+    stream = this.createStream_(id, ContentType.AUDIO, variant.language);
 
   variant.audio = stream;
   this.lastStreamAdded_ = stream;
@@ -385,7 +384,7 @@ shaka.test.ManifestGenerator.prototype.addAudio = function(id) {
 shaka.test.ManifestGenerator.prototype.addTextStream = function(id) {
   var ContentType = shaka.util.ManifestParserUtils.ContentType;
   var period = this.currentPeriod_();
-  var stream = this.createStream_(id, ContentType.TEXT, 'und', '');
+  var stream = this.createStream_(id, ContentType.TEXT, 'und');
   period.textStreams.push(stream);
   this.lastObjectAdded_ = stream;
   this.lastStreamAdded_ = stream;
@@ -429,12 +428,11 @@ shaka.test.ManifestGenerator.prototype.isIdUsed_ = function(id) {
  * @param {number} id
  * @param {string} type
  * @param {string} language
- * @param {?string} label
  * @return {!shakaExtern.Stream}
  * @private
  */
 shaka.test.ManifestGenerator.prototype.createStream_ =
-    function(id, type, language, label) {
+    function(id, type, language) {
   goog.asserts.assert(!this.isIdUsed_(id),
                       'Streams should have unique ids!');
 
@@ -470,7 +468,7 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
     encrypted: false,
     keyId: null,
     language: language,
-    label: label,
+    label: null,
     type: type,
     primary: false,
     trickModeVideo: null,
