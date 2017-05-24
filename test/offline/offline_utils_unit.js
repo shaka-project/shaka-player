@@ -56,6 +56,7 @@ describe('OfflineUtils', function() {
       var variant = period.variants[0];
       expect(variant.id).toEqual(jasmine.any(Number));
       expect(variant.language).toBe(periodDb.streams[1].language);
+      expect(variant.label).toBe(periodDb.streams[1].label);
       expect(variant.primary).toBe(false);
       expect(variant.bandwidth).toEqual(jasmine.any(Number));
       expect(variant.drmInfos).toBe(drmInfos);
@@ -152,7 +153,7 @@ describe('OfflineUtils', function() {
         frameRate: 22,
         kind: undefined,
         language: '',
-        label: '',
+        label: undefined,
         width: 250,
         height: 100,
         initSegmentUri: null,
@@ -184,7 +185,7 @@ describe('OfflineUtils', function() {
         frameRate: undefined,
         kind: undefined,
         language: 'en',
-        label: 'English',
+        label: undefined,
         width: null,
         height: null,
         initSegmentUri: 'offline:1/' + id + '/0',
@@ -215,7 +216,7 @@ describe('OfflineUtils', function() {
         frameRate: undefined,
         kind: undefined,
         language: 'en',
-        label: 'English',
+        label: undefined,
         width: null,
         height: null,
         initSegmentUri: 'offline:1/' + id + '/0',
@@ -258,6 +259,7 @@ describe('OfflineUtils', function() {
         encrypted: streamDb.encrypted,
         keyId: streamDb.keyId,
         language: streamDb.language,
+        label: streamDb.label,
         type: streamDb.contentType,
         primary: streamDb.primary,
         trickModeVideo: null,

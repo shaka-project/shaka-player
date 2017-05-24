@@ -84,6 +84,7 @@ shakaDemo.updateVariantTracks_ = function() {
  */
 shakaDemo.updateTextTracks_ = function() {
   var trackList = document.getElementById('textTracks');
+
   var langList = document.getElementById('textLanguages');
   var language = langList.selectedIndex >= 0 ?
       langList.options[langList.selectedIndex].value :
@@ -106,17 +107,19 @@ shakaDemo.updateTrackOptions_ = function(list, tracks, language) {
     variant: function(track) {
       var trackInfo = '';
       if (track.language) trackInfo += 'language: ' + track.language + ', ';
+      if (track.label) trackInfo += 'label: ' + track.label + ', ';
       if (track.width && track.height)
         trackInfo += track.width + 'x' + track.height + ', ';
       trackInfo += track.bandwidth + ' bits/s';
       return trackInfo;
-    },
+    } ,
     text: function(track) {
-      return 'language: ' + track.language + ' ' +
-             '(' + track.kind + ')';
+      var trackInfo = 'language: ' + track.language + ', ';
+      if (track.label) trackInfo += 'label: ' + track.label + ', ';
+      trackInfo += 'kind: ' + track.kind;
+      return trackInfo;
     }
   };
-
   // Remove old tracks
   while (list.firstChild) {
     list.removeChild(list.firstChild);
@@ -195,11 +198,11 @@ shakaDemo.updateLanguageOptions_ =
   var selectedTrack = activeTracks[0];
 
   // Populate list with new options.
-  tracks.forEach(function(track) {
+  languages.forEach(function(lang) {
     var option = document.createElement('option');
-    option.textContent = track.label ? track.label : track.language;
-    option.value = track.language;
-    option.selected = track.language == selectedTrack.language;
+    option.textContent = lang;
+    option.value = lang;
+    option.selected = lang == selectedTrack.language;
     list.appendChild(option);
   });
 };
