@@ -77,7 +77,8 @@ describe('HttpPlugin', function() {
     request.method = 'POST';
     request.headers['BAZ'] = '123';
 
-    shaka.net.HttpPlugin(request.uris[0], request)
+    shaka.net.HttpPlugin(request.uris[0],
+        request, shaka.net.NetworkingEngine.RequestType.SEGMENT, function() {})
         .then(function() {
           var actual = jasmine.Ajax.requests.mostRecent();
           expect(actual).toBeTruthy();
@@ -126,7 +127,8 @@ describe('HttpPlugin', function() {
   it('detects cache headers', function(done) {
     var request = shaka.net.NetworkingEngine.makeRequest(
         ['https://foo.bar/cache'], retryParameters);
-    shaka.net.HttpPlugin(request.uris[0], request)
+    shaka.net.HttpPlugin(request.uris[0],
+        request, shaka.net.NetworkingEngine.RequestType.SEGMENT, function() {})
         .catch(fail)
         .then(function(response) {
           expect(response).toBeTruthy();
@@ -143,7 +145,8 @@ describe('HttpPlugin', function() {
   function testSucceeds(uri, done, opt_overrideUri) {
     var request = shaka.net.NetworkingEngine.makeRequest(
         [uri], retryParameters);
-    shaka.net.HttpPlugin(uri, request)
+    shaka.net.HttpPlugin(uri, request,
+        shaka.net.NetworkingEngine.RequestType.SEGMENT, function() {})
         .catch(fail)
         .then(function(response) {
           expect(jasmine.Ajax.requests.mostRecent().url).toBe(uri);
@@ -167,7 +170,8 @@ describe('HttpPlugin', function() {
   function testFails(uri, done, opt_severity) {
     var request = shaka.net.NetworkingEngine.makeRequest(
         [uri], retryParameters);
-    shaka.net.HttpPlugin(uri, request)
+    shaka.net.HttpPlugin(uri, request,
+        shaka.net.NetworkingEngine.RequestType.SEGMENT, function() {})
         .then(fail)
         .catch(function(error) {
           expect(error).toBeTruthy();
