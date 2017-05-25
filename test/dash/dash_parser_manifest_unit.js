@@ -119,7 +119,7 @@ describe('DashParser Manifest', function() {
           '      <Representation bandwidth="50" width="576" height="432" />',
           '    </AdaptationSet>',
           '    <AdaptationSet mimeType="text/vtt"',
-          '        lang="es">',
+          '        lang="es" label="spanish">',
           '      <Role value="caption" />',
           '      <Role value="main" />',
           '      <Representation bandwidth="100" />',
@@ -176,6 +176,7 @@ describe('DashParser Manifest', function() {
                 .primary()
             .addTextStream(jasmine.any(Number))
               .language('es')
+              .label('spanish')
               .primary()
               .anySegmentFunctions()
               .anyInitSegment()
