@@ -46,7 +46,6 @@ describe('OfflineUtils', function() {
         startTime: 60,
         streams: [createVideoStreamDb(1), createAudioStreamDb(2)]
       };
-
       var period = OfflineUtils.reconstructPeriod(periodDb, drmInfos, timeline);
       expect(period).toBeTruthy();
       expect(period.startTime).toBe(periodDb.startTime);
@@ -152,6 +151,7 @@ describe('OfflineUtils', function() {
         frameRate: 22,
         kind: undefined,
         language: '',
+        label: null,
         width: 250,
         height: 100,
         initSegmentUri: null,
@@ -183,6 +183,7 @@ describe('OfflineUtils', function() {
         frameRate: undefined,
         kind: undefined,
         language: 'en',
+        label: null,
         width: null,
         height: null,
         initSegmentUri: 'offline:1/' + id + '/0',
@@ -213,6 +214,7 @@ describe('OfflineUtils', function() {
         frameRate: undefined,
         kind: undefined,
         language: 'en',
+        label: null,
         width: null,
         height: null,
         initSegmentUri: 'offline:1/' + id + '/0',
@@ -255,6 +257,7 @@ describe('OfflineUtils', function() {
         encrypted: streamDb.encrypted,
         keyId: streamDb.keyId,
         language: streamDb.language,
+        label: streamDb.label,
         type: streamDb.contentType,
         primary: streamDb.primary,
         trickModeVideo: null,

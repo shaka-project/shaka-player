@@ -148,6 +148,7 @@ shakaExtern.PeriodDB;
  *   frameRate: (number|undefined),
  *   kind: (string|undefined),
  *   language: string,
+ *   label: ?string,
  *   width: ?number,
  *   height: ?number,
  *   initSegmentUri: ?string,
@@ -175,6 +176,8 @@ shakaExtern.PeriodDB;
  *   The kind of text stream; undefined for audio/video.
  * @property {string} language
  *   The language of the stream; '' for video.
+ * @property {?string} label
+ *   The label of the stream; '' for video.
  * @property {?number} width
  *   The width of the stream; null for audio/text.
  * @property {?number} height

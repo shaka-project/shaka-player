@@ -107,17 +107,19 @@ shakaDemo.updateTrackOptions_ = function(list, tracks, language) {
     variant: function(track) {
       var trackInfo = '';
       if (track.language) trackInfo += 'language: ' + track.language + ', ';
+      if (track.label) trackInfo += 'label: ' + track.label + ', ';
       if (track.width && track.height)
         trackInfo += track.width + 'x' + track.height + ', ';
       trackInfo += track.bandwidth + ' bits/s';
       return trackInfo;
-    },
+    } ,
     text: function(track) {
-      return 'language: ' + track.language + ' ' +
-             '(' + track.kind + ')';
+      var trackInfo = 'language: ' + track.language + ', ';
+      if (track.label) trackInfo += 'label: ' + track.label + ', ';
+      trackInfo += 'kind: ' + track.kind;
+      return trackInfo;
     }
   };
-
   // Remove old tracks
   while (list.firstChild) {
     list.removeChild(list.firstChild);
