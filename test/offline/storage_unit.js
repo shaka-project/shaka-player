@@ -133,7 +133,7 @@ describe('Storage', function() {
         type: 'variant',
         bandwidth: 0,
         language: 'en',
-        label: undefined,
+        label: null,
         kind: null,
         width: 1920,
         height: 1080,

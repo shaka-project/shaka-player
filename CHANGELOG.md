@@ -1,3 +1,27 @@
+## 2.1.2 (2017-05-23)
+
+New features:
+  - Make educated guesses about missing HLS info (CODECS no longer required)
+    - https://github.com/google/shaka-player/issues/805
+  - Add support for PlayReady on Chromecast and Tizen
+    - https://github.com/google/shaka-player/issues/814
+    - https://github.com/google/shaka-player/pull/815
+
+Bugfixes:
+  - Fix flakiness in RESTRICTIONS\_CANNOT\_BE\_MET errors
+  - Make isBrowserSupported more strict about MediaSource
+  - Fix detection of audio-only assets in the demo
+    - https://github.com/google/shaka-player/issues/794
+  - Fix exports and generated externs that were broken in v2.1.0 and v2.1.1
+  - Speed up deletion of offline content
+    - https://github.com/google/shaka-player/issues/756
+
+Docs:
+  - Fix docs on subtitles and captions
+    - https://github.com/google/shaka-player/issues/808
+  - Add notes on adaptation to upgrade guide
+
+
 ## 2.0.9 (2017-05-10)
 
 Backported bugfixes from v2.1.x:
