@@ -19,6 +19,8 @@ describe('StreamUtils', function() {
   var manifest;
   var preferredAudioLanguage = 'en';
   var preferredTextLanguage = 'en';
+  var preferredAudioRole = 'main';
+  var preferredTextRole = 'main';
 
   describe('filterVariantsByRoleAndLanguage', function() {
     it("chooses variants in user's preferred language", function() {
@@ -73,6 +75,27 @@ describe('StreamUtils', function() {
       expect(chosen.length).toBe(1);
       expect(chosen[0]).toBe(manifest.periods[0].variants[2]);
     });
+
+    it('chooses variants in preferred language and role', function() {
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addVariant(0)
+            .language('en')
+            .addAudio(0).roles(['main', 'commentary'])
+          .addVariant(1)
+            .language('en')
+            .addAudio(1).roles(['secondary'])
+          .addVariant(2)
+            .language('es')
+            .addAudio(2).roles(['main'])
+        .build();
+
+      var chosen = shaka.util.StreamUtils.filterVariantsByRoleAndLanguage(
+          manifest.periods[0],
+          preferredAudioLanguage, undefined, preferredAudioRole);
+      expect(chosen.length).toBe(1);
+      expect(chosen[0]).toBe(manifest.periods[0].variants[0]);
+    });
   });
 
   describe('filterTextStreamsByRoleAndLanguage', function() {
@@ -109,6 +132,26 @@ describe('StreamUtils', function() {
       expect(chosen.length).toBe(2);
       expect(chosen[0]).toBe(manifest.periods[0].textStreams[1]);
       expect(chosen[1]).toBe(manifest.periods[0].textStreams[2]);
+    });
+
+    it('chooses text streams in preferred language and role', function() {
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addTextStream(1)
+            .language('en')
+            .roles(['main', 'commentary'])
+          .addTextStream(2)
+            .language('es')
+          .addTextStream(3)
+            .language('en')
+            .roles(['caption'])
+        .build();
+
+      var chosen = shaka.util.StreamUtils.filterTextStreamsByRoleAndLanguage(
+          manifest.periods[0],
+          preferredTextLanguage, undefined, preferredTextRole);
+      expect(chosen.length).toBe(1);
+      expect(chosen[0]).toBe(manifest.periods[0].textStreams[0]);
     });
   });
 
