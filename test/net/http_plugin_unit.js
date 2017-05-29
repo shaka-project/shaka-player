@@ -137,6 +137,20 @@ describe('HttpPlugin', function() {
         .then(done);
   });
 
+  it('triggers progress events', function(done) {
+    testSucceeds('https://foo.bar/', done);
+  });
+
+  function checkProgressEvent(progressEvent) {
+    // see https://developer.mozilla.org/en-US/docs/Web/API/ProgressEvent
+    expect(typeof progressEvent).toBe('object');
+    expect(typeof progressEvent.loaded).toBe('number');
+    expect(typeof progressEvent.total).toBe('number');
+    expect(typeof progressEvent.lengthComputable).toBe('boolean');
+    expect(progressEvent.loaded).toBeLessThanOrEqual(progressEvent.total);
+    expect(progressEvent.total).toBeGreaterThanOrEqual(0);
+  }
+
   /**
    * @param {string} uri
    * @param {function()} done
@@ -146,7 +160,10 @@ describe('HttpPlugin', function() {
     var request = shaka.net.NetworkingEngine.makeRequest(
         [uri], retryParameters);
     shaka.net.HttpPlugin(uri, request,
-        shaka.net.NetworkingEngine.RequestType.SEGMENT, function() {})
+        shaka.net.NetworkingEngine.RequestType.SEGMENT,
+        function(progressEvent) {
+          checkProgressEvent(progressEvent);
+        })
         .catch(fail)
         .then(function(response) {
           expect(jasmine.Ajax.requests.mostRecent().url).toBe(uri);
