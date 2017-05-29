@@ -438,8 +438,10 @@ describe('MpdUtils', function() {
     var retry;
     var parser;
     var Error = shaka.util.Error;
+    var failGracefully;
 
     beforeEach(function() {
+      failGracefully = false;
       retry = shaka.net.NetworkingEngine.defaultRetryParameters();
       fakeNetEngine = new shaka.test.FakeNetworkingEngine();
       parser = new DOMParser();
@@ -622,6 +624,20 @@ describe('MpdUtils', function() {
       testFails(baseXMLString, null, 1, done);
     });
 
+    it('doesn\'t error when set to fail gracefully', function(done) {
+      failGracefully = true;
+      var baseXMLString = inBaseContainer(
+          '<ToReplace xlink:href="https://xlink1" xlink:actuate="onLoad">' +
+          '<DefaultContents />' +
+          '</ToReplace>');
+      var xlinkXMLString = '<BadTagName</BadTagName>';
+      var desiredXMLString = inBaseContainer(
+          '<ToReplace><DefaultContents /></ToReplace>');
+
+      fakeNetEngine.setResponseMapAsText({'https://xlink1': xlinkXMLString});
+      testSucceeds(baseXMLString, desiredXMLString, 1, done);
+    });
+
     function testSucceeds(
         baseXMLString, desiredXMLString, desiredNetCalls, done) {
       var desiredXML = parser.parseFromString(desiredXMLString, 'text/xml')
@@ -682,7 +698,8 @@ describe('MpdUtils', function() {
     function testRequest(baseXMLString) {
       var xml = parser.parseFromString(baseXMLString, 'text/xml')
           .documentElement;
-      return MpdUtils.processXlinks(xml, retry, 'https://base', fakeNetEngine);
+      return MpdUtils.processXlinks(xml, retry, failGracefully, 'https://base',
+                                    fakeNetEngine);
     }
   });
 });

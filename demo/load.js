@@ -35,14 +35,21 @@
   var loaderSrc = currentScript.src;
   var baseUrl = loaderSrc.split('/').slice(0, -1).join('/') + '/';
 
-  function loadScript(src) {
-    // This does not seem like it would be the best way to do this, but the
-    // timing is different than creating a new script element and appending
-    // it to the head element.  This way, all script loading happens before
-    // DOMContentLoaded.  This is also compatible with goog.require's loading
-    // mechanism, whereas appending an element to head isn't.
-    document.write('<script src="' + baseUrl + src + '"></script>');
+  function loadRelativeScript(src) {
+    importScript(baseUrl + src);
   }
+
+  function importScript(src) {
+    var script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = src;
+    script.defer = true;
+    // Setting async = false is important to make sure the script is imported
+    // before the 'load' event fires.
+    script.async = false;
+    document.head.appendChild(script);
+  }
+  window.CLOSURE_IMPORT_SCRIPT = importScript;
 
   var fields = location.search.substr(1);
   fields = fields ? fields.split(';') : [];
@@ -61,13 +68,13 @@
 
   if (compiledMode) {
     // This contains the entire library.
-    loadScript('../dist/shaka-player.compiled.js');
+    loadRelativeScript('../dist/shaka-player.compiled.js');
   } else {
     // In non-compiled mode, we load the closure library and the generated deps
     // file to bootstrap the system.  goog.require will load the rest.
-    loadScript('../third_party/closure/goog/base.js');
-    loadScript('../dist/deps.js');
+    loadRelativeScript('../third_party/closure/goog/base.js');
+    loadRelativeScript('../dist/deps.js');
     // This file contains goog.require calls for all exported classes.
-    loadScript('../shaka-player.uncompiled.js');
+    loadRelativeScript('../shaka-player.uncompiled.js');
   }
 })();  // anonymous namespace

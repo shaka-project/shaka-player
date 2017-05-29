@@ -42,7 +42,8 @@ describe('DashParser ContentProtection', function() {
       dash: {
         clockSyncUri: '',
         customScheme: callback,
-        ignoreDrmInfo: ignoreDrmInfo
+        ignoreDrmInfo: ignoreDrmInfo,
+        xlinkFailGracefully: false
       },
       hls: { defaultTimeOffset: 0 }
     });

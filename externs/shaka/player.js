@@ -139,7 +139,8 @@ shakaExtern.Stats;
  *   codecs: ?string,
  *   audioCodec: ?string,
  *   videoCodec: ?string,
- *   primary: boolean
+ *   primary: boolean,
+ *   roles: !Array.<string>
  * }}
  *
  * @description
@@ -187,6 +188,8 @@ shakaExtern.Stats;
  *   This can be a useful hint about which language should be the default, and
  *   indicates which track Shaka will use when the user's language preference
  *   cannot be satisfied.
+ * @property {!Array.<string>} roles
+ *   The roles of the track, e.g. 'main', 'caption', or 'commentary'.
  * @exportDoc
  */
 shakaExtern.Track;
@@ -422,7 +425,8 @@ shakaExtern.DrmConfiguration;
  * @typedef {{
  *   customScheme: shakaExtern.DashContentProtectionCallback,
  *   clockSyncUri: string,
- *   ignoreDrmInfo: boolean
+ *   ignoreDrmInfo: boolean,
+ *   xlinkFailGracefully: boolean
  * }}
  *
  * @property {shakaExtern.DashContentProtectionCallback} customScheme
@@ -437,6 +441,11 @@ shakaExtern.DrmConfiguration;
  *   If true will cause DASH parser to ignore DRM information specified
  *   by the manifest and treat it as if it signaled no particular key
  *   system and contained no init data. Defaults to false if not provided.
+ * @property {boolean} xlinkFailGracefully
+ *   If true, xlink-related errors will result in a fallback to the tag's
+ *   existing contents. If false, xlink-related errors will be propagated
+ *   to the application and will result in a playback failure. Defaults to
+ *   false if not provided.
  *
  * @exportDoc
  */

@@ -44,7 +44,8 @@ describe('DashParser Live', function() {
       dash: {
         clockSyncUri: '',
         customScheme: function(node) { return null; },
-        ignoreDrmInfo: false
+        ignoreDrmInfo: false,
+        xlinkFailGracefully: false
       },
       hls: { defaultTimeOffset: 0 }
     });

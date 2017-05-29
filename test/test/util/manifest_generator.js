@@ -472,7 +472,8 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
     type: type,
     primary: false,
     trickModeVideo: null,
-    containsEmsgBoxes: false
+    containsEmsgBoxes: false,
+    roles: []
   };
   stream.createSegmentIndex.and.callFake(
       function() { return Promise.resolve(); });
@@ -688,6 +689,18 @@ shaka.test.ManifestGenerator.prototype.encrypted = function(encrypted) {
 shaka.test.ManifestGenerator.prototype.frameRate = function(frameRate) {
   var stream = this.currentStream_();
   stream.frameRate = frameRate;
+  return this;
+};
+
+
+/**
+ * Sets the roles of the current stream.
+ * @param {!Array.<string>} roles
+ * @return {!shaka.test.ManifestGenerator}
+ */
+shaka.test.ManifestGenerator.prototype.roles = function(roles) {
+  var stream = this.currentStream_();
+  stream.roles = roles;
   return this;
 };
 
