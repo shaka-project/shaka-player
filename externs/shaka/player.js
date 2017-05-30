@@ -570,7 +570,9 @@ shakaExtern.AbrConfiguration;
  *   abr: shakaExtern.AbrConfiguration,
  *   preferredAudioLanguage: string,
  *   preferredTextLanguage: string,
- *   restrictions: shakaExtern.Restrictions
+ *   restrictions: shakaExtern.Restrictions,
+ *   playRangeStart: number,
+ *   playRangeEnd: number
  * }}
  *
  * @property {shakaExtern.DrmConfiguration} drm
@@ -593,6 +595,12 @@ shakaExtern.AbrConfiguration;
  * @property {shakaExtern.Restrictions} restrictions
  *   The application restrictions to apply to the tracks.  The track must
  *   meet all the restrictions to be playable.
+ * @property {number} playRangeStart
+ *   Optional playback and seek start time in seconds. Defaults to 0 if
+ *   not provided.
+ * @property {number} playRangeEnd
+ *   Optional playback and seek end time in seconds. Defaults to the end of
+ *   the presentation if not provided.
  * @exportDoc
  */
 shakaExtern.PlayerConfiguration;

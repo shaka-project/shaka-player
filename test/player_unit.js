@@ -665,6 +665,28 @@ describe('Player', function() {
         }
       });
     });
+
+    it('configures play and seek range for VOD', function(done) {
+      player.configure({playRangeStart: 5, playRangeEnd: 10});
+      var timeline = new shaka.media.PresentationTimeline(300, 0);
+      timeline.setStatic(true);
+      manifest = new shaka.test.ManifestGenerator()
+          .setTimeline(timeline)
+          .addPeriod(0)
+            .addVariant(0)
+            .addVideo(1)
+          .build();
+      goog.asserts.assert(manifest, 'manifest must be non-null');
+      var parser = new shaka.test.FakeManifestParser(manifest);
+      var factory = function() { return parser; };
+      player.load('', 0, factory).then(function() {
+        var seekRange = player.seekRange();
+        expect(seekRange.start).toBe(5);
+        expect(seekRange.end).toBe(10);
+      })
+      .catch(fail)
+      .then(done);
+    });
   });
 
   describe('AbrManager', function() {
