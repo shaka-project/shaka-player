@@ -768,10 +768,12 @@ describe('Player', function() {
             .addVideo(5).bandwidth(200).size(200, 400).frameRate(24)
           .addTextStream(6)
             .language('es')
+            .label('Spanish')
             .bandwidth(100).kind('caption')
                          .mime('text/vtt')
           .addTextStream(7)
             .language('en')
+            .label('English')
             .bandwidth(100).kind('caption')
                          .mime('application/ttml+xml')
           // Both text tracks should remain, even with different MIME types.
@@ -876,6 +878,7 @@ describe('Player', function() {
           active: true,
           type: ContentType.TEXT,
           language: 'es',
+          label: 'Spanish',
           kind: 'caption',
           mimeType: 'text/vtt',
           codecs: null,
@@ -889,6 +892,7 @@ describe('Player', function() {
           active: false,
           type: ContentType.TEXT,
           language: 'en',
+          label: 'English',
           kind: 'caption',
           mimeType: 'application/ttml+xml',
           codecs: null,
