@@ -2115,6 +2115,43 @@ describe('Player', function() {
       }).then(done);
     });
 
+    it('chooses efficient codecs and removes the rest', function(done) {
+      manifest = new shaka.test.ManifestGenerator()
+              .addPeriod(0)
+              // More efficient codecs
+                .addVariant(0).bandwidth(100)
+                  .addVideo(0).mime('video/mp4', 'good')
+                .addVariant(1).bandwidth(200)
+                  .addVideo(1).mime('video/mp4', 'good')
+                .addVariant(2).bandwidth(300)
+                  .addVideo(2).mime('video/mp4', 'good')
+              // Less efficient codecs
+                .addVariant(3).bandwidth(10000)
+                  .addVideo(3).mime('video/mp4', 'bad')
+                .addVariant(4).bandwidth(20000)
+                  .addVideo(4).mime('video/mp4', 'bad')
+                .addVariant(5).bandwidth(30000)
+                  .addVideo(5).mime('video/mp4', 'bad')
+              .build();
+
+      parser = new shaka.test.FakeManifestParser(manifest);
+      parserFactory = function() { return parser; };
+      player.load('', 0, parserFactory).then(function() {
+        // "initialize" the current period.
+        chooseStreams();
+        canSwitch();
+      }).catch(fail).then(function() {
+        expect(abrManager.setVariants).toHaveBeenCalled();
+        var variants = abrManager.setVariants.calls.argsFor(0)[0];
+        // We've already chosen codecs, so only 3 tracks should remain.
+        expect(variants.length).toBe(3);
+        // They should be the low-bandwidth ones.
+        expect(variants[0].video.codecs).toEqual('good');
+        expect(variants[1].video.codecs).toEqual('good');
+        expect(variants[2].video.codecs).toEqual('good');
+      }).then(done);
+    });
+
     /**
      * Gets the currently active track.
      * @param {string} type
