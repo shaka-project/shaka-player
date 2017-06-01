@@ -19,6 +19,7 @@ describe('Player', function() {
   var abrManager;
   var originalLogError;
   var originalLogWarn;
+  var originalIsTypeSupported;
   var logErrorSpy;
   var logWarnSpy;
   var manifest;
@@ -38,6 +39,15 @@ describe('Player', function() {
   beforeAll(function() {
     originalLogError = shaka.log.error;
     originalLogWarn = shaka.log.warning;
+
+    originalIsTypeSupported = window.MediaSource.isTypeSupported;
+    // Since this is not an integration test, we don't want MediaSourceEngine to
+    // fail assertions based on browser support for types.  Pretend that all
+    // video and audio types are supported.
+    window.MediaSource.isTypeSupported = function(mimeType) {
+      var type = mimeType.split('/')[0];
+      return type == 'video' || type == 'audio';
+    };
 
     logErrorSpy = jasmine.createSpy('shaka.log.error');
     shaka.log.error = logErrorSpy;
@@ -114,6 +124,7 @@ describe('Player', function() {
   afterAll(function() {
     shaka.log.error = originalLogError;
     shaka.log.warning = originalLogWarn;
+    window.MediaSource.isTypeSupported = originalIsTypeSupported;
   });
 
   describe('destroy', function() {
@@ -1802,14 +1813,19 @@ describe('Player', function() {
     });
 
     it('removes if key system does not support codec', function(done) {
-      // Should already be removed from filterPeriod_
       manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addVariant(0)
-                  .addVideo(1).mime('video/unsupported')
-                .addVariant(1)
-                  .addVideo(2)
-              .build();
+          .addPeriod(0)
+            .addVariant(0).addDrmInfo('foo.bar')
+              .addVideo(1).encrypted(true).mime('video/unsupported')
+            .addVariant(1).addDrmInfo('foo.bar')
+              .addVideo(2).encrypted(true)
+          .build();
+
+      // We must be careful that our video/unsupported was not filtered out
+      // because of MSE support.  We are specifically testing EME-based
+      // filtering of codecs.
+      expect(MediaSource.isTypeSupported('video/unsupported')).toBe(true);
+      // FakeDrmEngine's getSupportedTypes() returns video/mp4 by default.
 
       parser = new shaka.test.FakeManifestParser(manifest);
       factory = function() { return parser; };
