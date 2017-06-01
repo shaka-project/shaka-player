@@ -77,6 +77,7 @@ describe('Player', function() {
       drmEngine = new shaka.test.FakeDrmEngine();
       playhead = new shaka.test.FakePlayhead();
       playheadObserver = new shaka.test.FakePlayheadObserver();
+      streamingEngine = new shaka.test.FakeStreamingEngine();
       mediaSourceEngine = {
         destroy: jasmine.createSpy('destroy').and.returnValue(Promise.resolve())
       };
@@ -91,7 +92,7 @@ describe('Player', function() {
         // This captures the variable |manifest| so this should only be used
         // after the manifest has been set.
         var period = manifest.periods[0];
-        streamingEngine = new shaka.test.FakeStreamingEngine(period);
+        streamingEngine.getCurrentPeriod.and.returnValue(period);
         return streamingEngine;
       };
     }
@@ -415,12 +416,7 @@ describe('Player', function() {
       it('StreamingEngine init', function(done) {
         // Block StreamingEngine init.
         var p = new shaka.util.PublicPromise();
-        player.createStreamingEngine = function() {
-          var period = manifest.periods[0];
-          streamingEngine = new shaka.test.FakeStreamingEngine(period);
-          streamingEngine.init.and.returnValue(p);
-          return streamingEngine;
-        };
+        streamingEngine.init.and.returnValue(p);
 
         player.load('', 0, factory1).then(fail).catch(checkError).then(done);
 
@@ -2087,8 +2083,6 @@ describe('Player', function() {
    */
   function chooseStreams() {
     var period = manifest.periods[0];
-    player.manifest_ = manifest;
-    player.streamingEngine_ = player.createStreamingEngine();
     return player.onChooseStreams_(period);
   }
 

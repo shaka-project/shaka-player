@@ -193,34 +193,35 @@ shaka.test.FakeDrmEngine.prototype.setSessionIds;
  * A fake StreamingEngine.
  *
  * @constructor
- * @param {shakaExtern.Period} period
  * @struct
  * @extends {shaka.media.StreamingEngine}
  * @return {!Object}
  */
-shaka.test.FakeStreamingEngine = function(period) {
+shaka.test.FakeStreamingEngine = function() {
   var ContentType = shaka.util.ManifestParserUtils.ContentType;
   var resolve = Promise.resolve.bind(Promise);
   var activeStreams = {};
-  if (period.variants.length) {
-    var variant = period.variants[0];
-    if (variant.audio)
-      activeStreams[ContentType.AUDIO] = variant.audio;
-    if (variant.video)
-      activeStreams[ContentType.VIDEO] = variant.video;
-  }
-
-  if (period.textStreams.length)
-    activeStreams[ContentType.TEXT] = period.textStreams[0];
 
   var ret = jasmine.createSpyObj('fakeStreamingEngine', [
     'destroy', 'configure', 'init', 'getCurrentPeriod', 'getActiveStreams',
     'notifyNewTextStream', 'switch', 'seeked'
   ]);
   ret.destroy.and.callFake(resolve);
-  ret.getCurrentPeriod.and.returnValue(period);
+  ret.getCurrentPeriod.and.returnValue(null);
   ret.getActiveStreams.and.returnValue(activeStreams);
   ret.notifyNewTextStream.and.callFake(resolve);
+  ret.init.and.callFake(function() {
+    var period = ret.getCurrentPeriod();
+    var variant = period.variants[0];
+    if (variant.audio)
+      activeStreams[ContentType.AUDIO] = variant.audio;
+    if (variant.video)
+      activeStreams[ContentType.VIDEO] = variant.video;
+    var text = period.textStreams[0];
+    if (text)
+      activeStreams[ContentType.TEXT] = text;
+    return Promise.resolve();
+  });
   ret.switch.and.callFake(function(type, stream) {
     activeStreams[type] = stream;
   });
