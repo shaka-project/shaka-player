@@ -101,11 +101,13 @@ shaka.test.StreamingEngineUtil.createFakeNetworkingEngine = function(
  * @param {number} segmentAvailabilityEnd The initial value of
  *   |segmentAvailabilityEnd|.
  * @param {number} presentationDuration
+ * @param {boolean} isLive
  * @return {!Object} A PresentationTimeline look-alike.
  *
  */
 shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
-    segmentAvailabilityStart, segmentAvailabilityEnd, presentationDuration) {
+    segmentAvailabilityStart, segmentAvailabilityEnd, presentationDuration,
+    isLive) {
   var timeline = {
     getDuration: jasmine.createSpy('getDuration'),
     setDuration: jasmine.createSpy('setDuration'),
@@ -127,7 +129,7 @@ shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
   timeline.getDuration.and.returnValue(presentationDuration);
 
   timeline.isLive.and.callFake(function() {
-    return presentationDuration == Infinity;
+    return isLive;
   });
 
   timeline.getEarliestStart.and.callFake(function() {
