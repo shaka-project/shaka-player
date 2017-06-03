@@ -193,9 +193,9 @@ shakaExtern.Stats;
  * @property {!Array.<string>} roles
  *   The roles of the track, e.g. 'main', 'caption', or 'commentary'.
  * @property {?number} videoId
- *   (only for variant tracks) The video track id.
+ *   (only for variant tracks) The video stream id.
  * @property {?number} audioId
- *   (only for variant tracks) The audio track id.
+ *   (only for variant tracks) The audio stream id.
  * @exportDoc
  */
 shakaExtern.Track;
