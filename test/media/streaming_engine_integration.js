@@ -65,6 +65,7 @@ describe('StreamingEngine', function() {
       rebufferingGoal: 2,
       bufferingGoal: 5,
       retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+      infiniteRetriesForLiveStreams: true,
       bufferBehind: 15,
       ignoreTextStreamFailures: false,
       useRelativeCueTimestamps: false,
@@ -128,7 +129,8 @@ describe('StreamingEngine', function() {
       timeline = shaka.test.StreamingEngineUtil.createFakePresentationTimeline(
           0 /* segmentAvailabilityStart */,
           60 /* segmentAvailabilityEnd */,
-          60 /* presentationDuration */);
+          60 /* presentationDuration */,
+          false /* isLive */);
 
       setupNetworkingEngine(
           0 /* firstPeriodStartTime */,
@@ -162,7 +164,8 @@ describe('StreamingEngine', function() {
       timeline = shaka.test.StreamingEngineUtil.createFakePresentationTimeline(
           275 - 10 /* segmentAvailabilityStart */,
           295 - 10 /* segmentAvailabilityEnd */,
-          Infinity /* presentationDuration */);
+          Infinity /* presentationDuration */,
+          true /* isLive */);
 
       setupNetworkingEngine(
           0 /* firstPeriodStartTime */,
@@ -669,7 +672,8 @@ describe('StreamingEngine', function() {
             shaka.test.StreamingEngineUtil.createFakePresentationTimeline(
                 0 /* segmentAvailabilityStart */,
                 30 /* segmentAvailabilityEnd */,
-                30 /* presentationDuration */);
+                30 /* presentationDuration */,
+                false /* isLive */);
 
         setupNetworkingEngine(
             0 /* firstPeriodStartTime */,

@@ -55,6 +55,7 @@ describe('PlayheadObserver', function() {
       rebufferingGoal: 10,
       bufferingGoal: 5,
       retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+      infiniteRetriesForLiveStreams: true,
       bufferBehind: 15,
       ignoreTextStreamFailures: false,
       useRelativeCueTimestamps: false,
