@@ -140,7 +140,9 @@ shakaExtern.Stats;
  *   audioCodec: ?string,
  *   videoCodec: ?string,
  *   primary: boolean,
- *   roles: !Array.<string>
+ *   roles: !Array.<string>,
+ *   videoId: ?number,
+ *   audioId: ?number
  * }}
  *
  * @description
@@ -190,6 +192,10 @@ shakaExtern.Stats;
  *   cannot be satisfied.
  * @property {!Array.<string>} roles
  *   The roles of the track, e.g. 'main', 'caption', or 'commentary'.
+ * @property {?number} videoId
+ *   (only for variant tracks) The video stream id.
+ * @property {?number} audioId
+ *   (only for variant tracks) The audio stream id.
  * @exportDoc
  */
 shakaExtern.Track;

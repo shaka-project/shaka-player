@@ -897,7 +897,9 @@ describe('Player', function() {
           audioCodec: 'mp4a.40.2',
           videoCodec: 'avc1.4d401f',
           primary: false,
-          roles: []
+          roles: [],
+          videoId: 4,
+          audioId: 1
         },
         {
           id: 2,
@@ -915,7 +917,9 @@ describe('Player', function() {
           audioCodec: 'mp4a.40.2',
           videoCodec: 'avc1.4d401f',
           primary: false,
-          roles: []
+          roles: [],
+          videoId: 5,
+          audioId: 1
         },
         {
           id: 3,
@@ -933,7 +937,9 @@ describe('Player', function() {
           audioCodec: 'mp4a.40.2',
           videoCodec: 'avc1.4d401f',
           primary: false,
-          roles: []
+          roles: [],
+          videoId: 4,
+          audioId: 2
         },
         {
           id: 4,
@@ -951,7 +957,9 @@ describe('Player', function() {
           audioCodec: 'mp4a.40.2',
           videoCodec: 'avc1.4d401f',
           primary: false,
-          roles: []
+          roles: [],
+          videoId: 5,
+          audioId: 2
         },
         {
           id: 5,
@@ -969,7 +977,9 @@ describe('Player', function() {
           audioCodec: 'mp4a.40.2',
           videoCodec: 'avc1.4d401f',
           primary: false,
-          roles: []
+          roles: [],
+          videoId: 5,
+          audioId: 8
         }
       ];
 

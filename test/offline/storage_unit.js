@@ -145,7 +145,9 @@ describe('Storage', function() {
         codecs: 'avc1.4d401f, vorbis',
         audioCodec: 'vorbis',
         videoCodec: 'avc1.4d401f',
-        roles: []
+        roles: [],
+        videoId: 0,
+        audioId: 1
       }
     ];
     Promise
