@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('TtmlTextParser', function() {
+fdescribe('TtmlTextParser', function() {
   var originalVTTCue;
 
   beforeAll(function() {
