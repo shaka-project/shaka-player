@@ -162,7 +162,7 @@ describe('Player', function() {
   });
 
   describe('plays', function() {
-    it('while external text tracks', function(done) {
+    it('with external text tracks', function(done) {
       player.load('test:sintel_no_text_compiled').then(function() {
         // For some reason, using path-absolute URLs (i.e. without the hostname)
         // like this doesn't work on Safari.  So manually resolve the URL.

@@ -606,7 +606,8 @@ shakaExtern.AbrConfiguration;
  *   preferredTextLanguage: string,
  *   restrictions: shakaExtern.Restrictions,
  *   playRangeStart: number,
- *   playRangeEnd: number
+ *   playRangeEnd: number,
+ *   textDisplayFactory: shakaExtern.TextDisplayer.Factory
  * }}
  *
  * @property {shakaExtern.DrmConfiguration} drm
@@ -637,6 +638,8 @@ shakaExtern.AbrConfiguration;
  * @property {number} playRangeEnd
  *   Optional playback and seek end time in seconds. Defaults to the end of
  *   the presentation if not provided.
+ * @property {shakaExtern.TextDisplayer.Factory} textDisplayFactory
+ *   A factory to construct text displayer.
  * @exportDoc
  */
 shakaExtern.PlayerConfiguration;

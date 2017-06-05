@@ -372,4 +372,3 @@ shaka.test.FakeMediaSourceEngine.prototype.toIndex_ = function(type, ts) {
 shaka.test.FakeMediaSourceEngine.prototype.toTime_ = function(type, i) {
   return this.drift_ + (i * this.segmentData[type].segmentDuration);
 };
-

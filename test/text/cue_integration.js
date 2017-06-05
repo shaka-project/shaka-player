@@ -23,17 +23,6 @@ describe('Cue', function() {
   // The scenarios under test are not specific to WebVTT, but WebVTT is used to
   // exercise the platform's native cues and ensure that no errors occur.
 
-  it('skips zero-duration cues', function() {
-    // These cannot be constructed on IE/Edge.
-    // See issue #501
-    var cues = parseVtt(
-        'WEBVTT\n\n' +
-        '00:00:20.000 --> 00:00:20.000\n' +
-        'Test',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
-    expect(cues.length).toBe(0);
-  });
-
   it('handles offsets', function() {
     // Offsets must be handled early.
     // See issue #502
@@ -63,7 +52,7 @@ describe('Cue', function() {
   /**
    * @param {string} text
    * @param {!shakaExtern.TextParser.TimeContext} time
-   * @return {!Array.<TextTrackCue>}
+   * @return {!Array.<shaka.text.Cue>}
    */
   function parseVtt(text, time) {
     var data = shaka.util.StringUtils.toUTF8(text);

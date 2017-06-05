@@ -25,13 +25,18 @@ describe('TextEngine', function() {
 
   /** @type {!Function} */
   var mockParserPlugIn;
+
+  /** @type {!shaka.test.FakeTextDisplayer} */
+  var mockDisplayer;
+
   /** @type {!jasmine.Spy} */
   var mockParseInit;
+
   /** @type {!jasmine.Spy} */
   var mockParseMedia;
+
   /** @type {!shaka.text.TextEngine} */
   var textEngine;
-  var mockTrack;
 
   beforeEach(function() {
     mockParseInit = jasmine.createSpy('mockParseInit');
@@ -42,9 +47,10 @@ describe('TextEngine', function() {
         parseMedia: mockParseMedia
       };
     };
-    mockTrack = createMockTrack();
+
+    mockDisplayer = new shaka.test.FakeTextDisplayer();
     TextEngine.registerParser(dummyMimeType, mockParserPlugIn);
-    textEngine = new TextEngine(mockTrack);
+    textEngine = new TextEngine(mockDisplayer);
     textEngine.initParser(dummyMimeType);
   });
 
@@ -67,48 +73,32 @@ describe('TextEngine', function() {
     it('works asynchronously', function(done) {
       mockParseMedia.and.returnValue([1, 2, 3]);
       textEngine.appendBuffer(dummyData, 0, 3).catch(fail).then(done);
-      expect(mockTrack.addCue).not.toHaveBeenCalled();
+      expect(mockDisplayer.append).not.toHaveBeenCalled();
     });
 
-    it('considers empty cues buffered', function(done) {
-      mockParseMedia.and.returnValue([]);
-
-      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
-        expect(mockParseMedia).toHaveBeenCalledWith(
-            dummyData, {periodStart: 0, segmentStart: 0, segmentEnd: 3});
-        expect(mockTrack.addCue).not.toHaveBeenCalled();
-        expect(mockTrack.removeCue).not.toHaveBeenCalled();
-
-        expect(textEngine.bufferStart()).toBe(0);
-        expect(textEngine.bufferEnd()).toBe(3);
-
-        mockTrack.addCue.calls.reset();
-        mockParseInit.calls.reset();
-        mockParseMedia.calls.reset();
-      }).catch(fail).then(done);
-    });
-
-    it('adds cues to the track', function(done) {
-      mockParseMedia.and.returnValue([1, 2, 3]);
+    it('calls displayer.append()', function(done) {
+      var cue1 = createFakeCue(1, 2);
+      var cue2 = createFakeCue(2, 3);
+      var cue3 = createFakeCue(3, 4);
+      var cue4 = createFakeCue(4, 5);
+      mockParseMedia.and.returnValue([cue1, cue2]);
 
       textEngine.appendBuffer(dummyData, 0, 3).then(function() {
         expect(mockParseMedia).toHaveBeenCalledWith(
             dummyData, {periodStart: 0, segmentStart: 0, segmentEnd: 3 });
-        expect(mockTrack.addCue).toHaveBeenCalledWith(1);
-        expect(mockTrack.addCue).toHaveBeenCalledWith(2);
-        expect(mockTrack.addCue).toHaveBeenCalledWith(3);
-        expect(mockTrack.removeCue).not.toHaveBeenCalled();
+        expect(mockDisplayer.append).toHaveBeenCalledWith([cue1, cue2]);
 
-        mockTrack.addCue.calls.reset();
+        expect(mockDisplayer.remove).not.toHaveBeenCalled();
+
+        mockDisplayer.append.calls.reset();
         mockParseMedia.calls.reset();
 
-        mockParseMedia.and.returnValue([4, 5]);
+        mockParseMedia.and.returnValue([cue3, cue4]);
         return textEngine.appendBuffer(dummyData, 3, 5);
       }).then(function() {
         expect(mockParseMedia).toHaveBeenCalledWith(
             dummyData, {periodStart: 0, segmentStart: 3, segmentEnd: 5 });
-        expect(mockTrack.addCue).toHaveBeenCalledWith(4);
-        expect(mockTrack.addCue).toHaveBeenCalledWith(5);
+        expect(mockDisplayer.append).toHaveBeenCalledWith([cue3, cue4]);
       }).catch(fail).then(done);
     });
 
@@ -134,37 +124,15 @@ describe('TextEngine', function() {
     it('works asynchronously', function(done) {
       textEngine.appendBuffer(dummyData, 0, 3).then(function() {
         var p = textEngine.remove(0, 1);
-        expect(mockTrack.removeCue).not.toHaveBeenCalled();
+        expect(mockDisplayer.remove).not.toHaveBeenCalled();
         return p;
       }).catch(fail).then(done);
     });
 
-    it('removes cues which overlap the range', function(done) {
-      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
-        return textEngine.remove(0, 1);
-      }).then(function() {
-        expect(mockTrack.removeCue.calls.allArgs()).toEqual([[cue1]]);
 
-        mockTrack.removeCue.calls.reset();
-        return textEngine.remove(0.5, 1.001);
-      }).then(function() {
-        expect(mockTrack.removeCue.calls.allArgs()).toEqual([[cue2]]);
-
-        mockTrack.removeCue.calls.reset();
-        return textEngine.remove(3, 5);
-      }).then(function() {
-        expect(mockTrack.removeCue).not.toHaveBeenCalled();
-
-        mockTrack.removeCue.calls.reset();
-        return textEngine.remove(2.9999, Infinity);
-      }).then(function() {
-        expect(mockTrack.removeCue.calls.allArgs()).toEqual([[cue3]]);
-      }).catch(fail).then(done);
-    });
-
-    it('does nothing when nothing is buffered', function(done) {
+    it('calls displayer.remove()', function(done) {
       textEngine.remove(0, 1).then(function() {
-        expect(mockTrack.removeCue).not.toHaveBeenCalled();
+        expect(mockDisplayer.remove).toHaveBeenCalledWith(0, 1);
       }).catch(fail).then(done);
     });
 
@@ -189,18 +157,25 @@ describe('TextEngine', function() {
         expect(mockParseMedia).toHaveBeenCalledWith(
             dummyData,
             {periodStart: 0, segmentStart: 0, segmentEnd: 3});
-        expect(mockTrack.addCue).toHaveBeenCalledWith(createFakeCue(0, 1));
-        expect(mockTrack.addCue).toHaveBeenCalledWith(createFakeCue(2, 3));
 
-        mockTrack.addCue.calls.reset();
+        expect(mockDisplayer.append).toHaveBeenCalledWith(
+            [
+              createFakeCue(0, 1),
+              createFakeCue(2, 3)
+            ]);
+
+        mockDisplayer.append.calls.reset();
         textEngine.setTimestampOffset(4);
         return textEngine.appendBuffer(dummyData, 0, 3);
       }).then(function() {
         expect(mockParseMedia).toHaveBeenCalledWith(
             dummyData,
             {periodStart: 4, segmentStart: 0, segmentEnd: 3});
-        expect(mockTrack.addCue).toHaveBeenCalledWith(createFakeCue(4, 5));
-        expect(mockTrack.addCue).toHaveBeenCalledWith(createFakeCue(6, 7));
+        expect(mockDisplayer.append).toHaveBeenCalledWith(
+            [
+              createFakeCue(4, 5),
+              createFakeCue(6, 7)
+            ]);
       }).catch(fail).then(done);
     });
   });
@@ -308,16 +283,22 @@ describe('TextEngine', function() {
     it('limits appended cues', function(done) {
       textEngine.setAppendWindowEnd(1.9);
       textEngine.appendBuffer(dummyData, 0, 3).then(function() {
-        expect(mockTrack.addCue).toHaveBeenCalledWith(createFakeCue(0, 1));
-        expect(mockTrack.addCue).toHaveBeenCalledWith(createFakeCue(1, 2));
+        expect(mockDisplayer.append).toHaveBeenCalledWith(
+            [
+              createFakeCue(0, 1),
+              createFakeCue(1, 2)
+            ]);
 
-        mockTrack.addCue.calls.reset();
+        mockDisplayer.append.calls.reset();
         textEngine.setAppendWindowEnd(2.1);
         return textEngine.appendBuffer(dummyData, 0, 3);
       }).then(function() {
-        expect(mockTrack.addCue).toHaveBeenCalledWith(createFakeCue(0, 1));
-        expect(mockTrack.addCue).toHaveBeenCalledWith(createFakeCue(1, 2));
-        expect(mockTrack.addCue).toHaveBeenCalledWith(createFakeCue(2, 3));
+        expect(mockDisplayer.append).toHaveBeenCalledWith(
+            [
+              createFakeCue(0, 1),
+              createFakeCue(1, 2),
+              createFakeCue(2, 3)
+            ]);
       }).catch(fail).then(done);
     });
 
@@ -360,7 +341,7 @@ describe('TextEngine', function() {
     describe('stateless parser', function() {
       describe('converted to stateful parser', function() {
         it('parses init segment', function(done) {
-          var textEngine = new TextEngine(createMockTrack());
+          var textEngine = new TextEngine(mockDisplayer);
           textEngine.initParser(dummyMimeType);
           textEngine.appendBuffer(dummyData, null, null).then(function() {
             expect(mockParser).toHaveBeenCalledWith(dummyData, 0, null, null);
@@ -368,7 +349,7 @@ describe('TextEngine', function() {
         });
 
         it('parses media segment', function(done) {
-          var textEngine = new TextEngine(createMockTrack());
+          var textEngine = new TextEngine(mockDisplayer);
           textEngine.initParser(dummyMimeType);
           textEngine.appendBuffer(dummyData, 0, 3).then(function() {
             expect(mockParser).toHaveBeenCalledWith(dummyData, 0, 0, 3);
@@ -376,7 +357,7 @@ describe('TextEngine', function() {
         });
 
         it('parses media segment with time offset', function(done) {
-          var textEngine = new TextEngine(createMockTrack());
+          var textEngine = new TextEngine(mockDisplayer);
           textEngine.initParser(dummyMimeType);
           textEngine.setTimestampOffset(3);
           textEngine.appendBuffer(dummyData, 0, 3).then(function() {
@@ -386,23 +367,6 @@ describe('TextEngine', function() {
       });
     });
   });
-
-  function createMockTrack() {
-    var track = {
-      addCue: jasmine.createSpy('addCue'),
-      removeCue: jasmine.createSpy('removeCue'),
-      cues: []
-    };
-    track.addCue.and.callFake(function(cue) {
-      track.cues.push(cue);
-    });
-    track.removeCue.and.callFake(function(cue) {
-      var idx = track.cues.indexOf(cue);
-      expect(idx).not.toBeLessThan(0);
-      track.cues.splice(idx, 1);
-    });
-    return track;
-  }
 
   function createFakeCue(startTime, endTime) {
     return { startTime: startTime, endTime: endTime };

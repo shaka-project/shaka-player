@@ -53,6 +53,11 @@ describe('Player', function() {
   var playhead;
   /** @type {!shaka.test.FakePlayheadObserver} */
   var playheadObserver;
+  /** @type {!shaka.test.FakeTextDisplayer} */
+  var textDisplayer;
+  /** @type {function():shakaExtern.TextDisplayer} */
+  var textDisplayFactory;
+
   var mediaSourceEngine;
 
   /** @type {!shaka.test.FakeVideo} */
@@ -90,6 +95,9 @@ describe('Player', function() {
     abrManager = new shaka.test.FakeAbrManager();
     abrFactory = function() { return abrManager; };
 
+    textDisplayer = new shaka.test.FakeTextDisplayer();
+    textDisplayFactory = function() { return textDisplayer; };
+
     function dependencyInjector(player) {
       networkingEngine =
           new shaka.test.FakeNetworkingEngine({}, new ArrayBuffer(0));
@@ -121,7 +129,8 @@ describe('Player', function() {
     player.configure({
       // Ensures we don't get a warning about missing preference.
       preferredAudioLanguage: 'en',
-      abrFactory: abrFactory
+      abrFactory: abrFactory,
+      textDisplayFactory: textDisplayFactory
     });
 
     onError = jasmine.createSpy('error event');
@@ -156,6 +165,7 @@ describe('Player', function() {
         expect(playheadObserver.destroy).toHaveBeenCalled();
         expect(mediaSourceEngine.destroy).toHaveBeenCalled();
         expect(streamingEngine.destroy).toHaveBeenCalled();
+        expect(textDisplayer.destroy).toHaveBeenCalled();
       }).catch(fail).then(done);
     });
   });

@@ -22,6 +22,8 @@ goog.provide('shaka.test.FakePlayhead');
 goog.provide('shaka.test.FakePlayheadObserver');
 goog.provide('shaka.test.FakePresentationTimeline');
 goog.provide('shaka.test.FakeStreamingEngine');
+goog.provide('shaka.test.FakeTextDisplayer');
+goog.provide('shaka.test.FakeTextTrack');
 goog.provide('shaka.test.FakeVideo');
 
 
@@ -321,8 +323,7 @@ shaka.test.FakeVideo = function(opt_currentTime) {
   };
   video.setMediaKeys.and.returnValue(Promise.resolve());
   video.addTextTrack.and.callFake(function(kind, id) {
-    // TODO: mock TextTrack, if/when Player starts directly accessing it.
-    var track = {};
+    var track = new shaka.test.FakeTextTrack();
     video.textTracks.push(track);
     return track;
   });
@@ -538,3 +539,82 @@ shaka.test.FakePlayheadObserver.prototype.setRebufferingGoal;
 
 /** @type {jasmine.Spy} */
 shaka.test.FakePlayheadObserver.prototype.addTimelineRegion;
+
+
+
+/**
+ * Creates a text track.
+ *
+ * @constructor
+ * @struct
+ * @extends {TextTrack}
+ * @return {!Object}
+ */
+shaka.test.FakeTextTrack = function() {
+  var track = {
+    addCue: jasmine.createSpy('addCue'),
+    removeCue: jasmine.createSpy('removeCue'),
+    cues: []
+  };
+  track.addCue.and.callFake(function(cue) {
+    track.cues.push(cue);
+  });
+  track.removeCue.and.callFake(function(cue) {
+    var idx = track.cues.indexOf(cue);
+    expect(idx).not.toBeLessThan(0);
+    track.cues.splice(idx, 1);
+  });
+  return track;
+};
+
+
+/** @type {!jasmine.Spy} */
+shaka.test.FakeTextTrack.prototype.addCue;
+
+
+/** @type {!jasmine.Spy} */
+shaka.test.FakeTextTrack.prototype.removeCue;
+
+
+
+/**
+ * Creates a text track.
+ *
+ * @constructor
+ * @struct
+ * @extends {shaka.text.SimpleTextDisplayer}
+ * @return {!Object}
+ */
+shaka.test.FakeTextDisplayer = function() {
+  var displayer = {
+    append: jasmine.createSpy('append'),
+    remove: jasmine.createSpy('remove').and.returnValue(true),
+    destroy:
+        jasmine.createSpy('destroy').and.returnValue(Promise.resolve()),
+    isTextVisible: jasmine.createSpy('isTextVisible'),
+    setTextVisibility: jasmine.createSpy('setTextVisibility'),
+    textVisible: false
+  };
+
+  displayer.isTextVisible.and.callFake(function() {
+    return displayer.textVisible;
+  });
+
+  displayer.setTextVisibility.and.callFake(function(on) {
+    displayer.textVisible = on;
+  });
+
+  return displayer;
+};
+
+
+/** @type {!jasmine.Spy} */
+shaka.test.FakeTextDisplayer.prototype.remove;
+
+
+/** @type {!jasmine.Spy} */
+shaka.test.FakeTextDisplayer.prototype.append;
+
+
+/** @type {!jasmine.Spy} */
+shaka.test.FakeTextDisplayer.prototype.destroy;

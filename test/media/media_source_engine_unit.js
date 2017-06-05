@@ -978,7 +978,8 @@ describe('MediaSourceEngine', function() {
       expect(mockTextEngine).toBeFalsy();
       mockTextEngine = jasmine.createSpyObj('TextEngine', [
         'initParser', 'destroy', 'appendBuffer', 'remove', 'setTimestampOffset',
-        'setAppendWindowEnd', 'bufferStart', 'bufferEnd', 'bufferedAheadOf'
+        'setAppendWindowEnd', 'bufferStart', 'bufferEnd', 'bufferedAheadOf',
+        'setDisplayer'
       ]);
 
       var resolve = Promise.resolve.bind(Promise);

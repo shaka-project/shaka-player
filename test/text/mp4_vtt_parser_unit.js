@@ -76,9 +76,17 @@ describe('Mp4vttParser', function() {
   it('parses media segment', function() {
     var cues =
         [
-         {start: 111.8, end: 115.8, text: 'It has shed much innocent blood.\n'},
-         {start: 118, end: 120, text:
-           'You\'re a fool for traveling alone,\nso completely unprepared.\n'}
+         {
+           start: 111.8,
+           end: 115.8,
+           payload: 'It has shed much innocent blood.\n'
+         },
+         {
+           start: 118,
+           end: 120,
+           payload:
+           'You\'re a fool for traveling alone,\nso completely unprepared.\n'
+         }
         ];
 
     var parser = new shaka.text.Mp4VttParser();
@@ -89,13 +97,25 @@ describe('Mp4vttParser', function() {
   });
 
   it('parses media segment containing settings', function() {
+    var Cue = shaka.text.Cue;
     var cues =
         [
-         {start: 111.8, end: 115.8, text: 'It has shed much innocent blood.\n',
-           align: 'right', size: 50, position: 10},
-         {start: 118, end: 120, text:
+         {
+           start: 111.8,
+           end: 115.8,
+           payload: 'It has shed much innocent blood.\n',
+           align: 'right',
+           size: 50,
+           position: 10
+         },
+         {
+           start: 118,
+           end: 120,
+           payload:
            'You\'re a fool for traveling alone,\nso completely unprepared.\n',
-           vertical: 'lr', line: 1}
+           writingDirection: Cue.writingDirection.VERTICAL_LEFT,
+           line: 1
+         }
         ];
 
     var parser = new shaka.text.Mp4VttParser();
@@ -108,9 +128,17 @@ describe('Mp4vttParser', function() {
   it('accounts for offset', function() {
     var cues =
         [
-         {start: 121.8, end: 125.8, text: 'It has shed much innocent blood.\n'},
-         {start: 128, end: 130, text:
-           'You\'re a fool for traveling alone,\nso completely unprepared.\n'}
+         {
+           start: 121.8,
+           end: 125.8,
+           payload: 'It has shed much innocent blood.\n'
+         },
+         {
+           start: 128,
+           end: 130,
+           payload:
+           'You\'re a fool for traveling alone,\nso completely unprepared.\n'
+         }
         ];
 
     var parser = new shaka.text.Mp4VttParser();
@@ -140,14 +168,14 @@ describe('Mp4vttParser', function() {
     for (var i = 0; i < actual.length; i++) {
       expect(actual[i].startTime).toBe(expected[i].start);
       expect(actual[i].endTime).toBe(expected[i].end);
-      expect(actual[i].text).toBe(expected[i].text);
+      expect(actual[i].payload).toBe(expected[i].payload);
 
       if (expected[i].line)
         expect(actual[i].line).toBe(expected[i].line);
-      if (expected[i].vertical)
-        expect(actual[i].vertical).toBe(expected[i].vertical);
-      if (expected[i].align)
-        expect(actual[i].align).toBe(expected[i].align);
+      if (expected[i].writingDirection)
+        expect(actual[i].writingDirection).toBe(expected[i].writingDirection);
+      if (expected[i].textAlign)
+        expect(actual[i].textAlign).toBe(expected[i].textAlign);
       if (expected[i].size)
         expect(actual[i].size).toBe(expected[i].size);
       if (expected[i].position)
