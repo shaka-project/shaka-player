@@ -46,6 +46,7 @@ player.getConfiguration();
        bufferBehind: 30
        bufferingGoal: 10
        ignoreTextStreamFailures: false
+       infiniteRetriesForLiveStreams: true
        rebufferingGoal: 2
        retryParameters: Object
 
