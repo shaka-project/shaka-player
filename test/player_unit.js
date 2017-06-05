@@ -2044,8 +2044,8 @@ describe('Player', function() {
               .build();
 
       parser = new shaka.test.FakeManifestParser(manifest);
-      parserFactory = function() { return parser; };
-      player.load('', 0, parserFactory).then(function() {
+      factory = function() { return parser; };
+      player.load('', 0, factory).then(function() {
         // "initialize" the current period.
         chooseStreams();
         canSwitch();
@@ -2130,6 +2130,8 @@ describe('Player', function() {
    */
   function chooseStreams() {
     var period = manifest.periods[0];
+    player.manifest_ = manifest;
+    player.streamingEngine_ = player.createStreamingEngine();
     return player.onChooseStreams_(period);
   }
 
