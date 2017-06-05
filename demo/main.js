@@ -109,6 +109,11 @@ shakaDemo.init = function() {
 
   shaka.polyfill.installAll();
 
+  // Display uncaught exceptions.
+  window.addEventListener('error', function(event) {
+    shakaDemo.onError_(/** @type {!shaka.util.Error} */ (event.error));
+  });
+
   if (!shaka.Player.isBrowserSupported()) {
     var errorDisplayLink = document.getElementById('errorDisplayLink');
     var error = 'Your browser is not supported!';
