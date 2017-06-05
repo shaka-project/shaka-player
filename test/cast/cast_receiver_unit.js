@@ -73,6 +73,8 @@ describe('CastReceiver', function() {
   });
 
   beforeEach(function() {
+    checkChromeOrChromecast();
+
     mockReceiverApi = createMockReceiverApi();
     mockCanDisplayType = jasmine.createSpy('canDisplayType');
     mockCanDisplayType.and.returnValue(false);
@@ -86,15 +88,19 @@ describe('CastReceiver', function() {
     };
 
     mockReceiverManager = createMockReceiverManager();
-    mockShakaMessageBus = createmockMessageBus();
-    mockGenericMessageBus = createmockMessageBus();
+    mockShakaMessageBus = createMockMessageBus();
+    mockGenericMessageBus = createMockMessageBus();
     mockVideo = new shaka.test.FakeVideo();
     mockPlayer = createMockPlayer();
     mockAppDataCallback = jasmine.createSpy('appDataCallback');
   });
 
   afterEach(function(done) {
-    receiver.destroy().catch(fail).then(done);
+    if (receiver) {
+      receiver.destroy().catch(fail).then(done);
+    } else {
+      done();
+    }
   });
 
   afterAll(function() {
@@ -821,7 +827,7 @@ describe('CastReceiver', function() {
     };
   }
 
-  function createmockMessageBus() {
+  function createMockMessageBus() {
     var bus = {
       messages: [],
       broadcast: jasmine.createSpy('CastMessageBus.broadcast'),
