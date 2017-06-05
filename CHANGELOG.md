@@ -1,3 +1,35 @@
+## 2.1.3 (2017-06-06)
+
+New features:
+  - Limit network retries for VOD, only retry forever on live
+    - https://github.com/google/shaka-player/issues/762
+    - https://github.com/google/shaka-player/issues/830
+    - https://github.com/google/shaka-player/pull/842
+  - Add stream IDs in getStats().switchHistory
+    - https://github.com/google/shaka-player/issues/785
+    - https://github.com/google/shaka-player/issues/823
+    - https://github.com/google/shaka-player/pull/846
+  - Add label attribute to tracks
+    - https://github.com/google/shaka-player/issues/825
+    - https://github.com/google/shaka-player/pull/811
+    - https://github.com/google/shaka-player/pull/831
+  - Expose role attributes on tracks
+    - https://github.com/google/shaka-player/issues/767
+  - Silence confusing browser-generated errors related to play()
+    - https://github.com/google/shaka-player/issues/836
+
+Bugfixes:
+  - Fix offline storage in compiled mode
+  - Choose lowest-bandwidth codecs when multiple are possible
+    - https://github.com/google/shaka-player/issues/841
+  - Fix PlayReady on IE and Edge
+    - https://github.com/google/shaka-player/issues/837
+  - Fix rounding errors on IE11
+    - https://github.com/google/shaka-player/pull/832
+  - Clean up demo app loader
+  - Fix PlayReady test failures
+
+
 ## 2.1.2 (2017-05-23)
 
 New features:
