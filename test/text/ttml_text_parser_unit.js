@@ -532,7 +532,7 @@ describe('TtmlTextParser', function() {
    */
   function verifyHelper(cues, text, time) {
     var data = shaka.util.StringUtils.toUTF8(text);
-    var result = new shaka.media.TtmlTextParser().parseMedia(data, time);
+    var result = new shaka.text.TtmlTextParser().parseMedia(data, time);
     expect(result).toBeTruthy();
     expect(result.length).toBe(cues.length);
     for (var i = 0; i < cues.length; i++) {
@@ -567,7 +567,7 @@ describe('TtmlTextParser', function() {
         code);
     var data = shaka.util.StringUtils.toUTF8(text);
     try {
-      new shaka.media.TtmlTextParser().parseMedia(
+      new shaka.text.TtmlTextParser().parseMedia(
           data,
           {periodStart: 0, segmentStart: 0, segmentEnd: 0});
       fail('Invalid TTML file supported');

@@ -18,7 +18,6 @@
 +../../lib/media/segment_index.js
 +../../lib/media/segment_reference.js
 +../../lib/media/streaming_engine.js
-+../../lib/media/text_engine.js
 +../../lib/media/time_ranges_utils.js
 +../../lib/media/webm_segment_index_parser.js
 
@@ -27,6 +26,8 @@
 +../../lib/player.js
 
 +../../lib/polyfill/all.js
+
++../../lib/text/text_engine.js
 
 +../../lib/util/array_utils.js
 +../../lib/util/data_view_reader.js

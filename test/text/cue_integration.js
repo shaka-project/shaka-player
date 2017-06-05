@@ -67,6 +67,6 @@ describe('Cue', function() {
    */
   function parseVtt(text, time) {
     var data = shaka.util.StringUtils.toUTF8(text);
-    return new shaka.media.VttTextParser().parseMedia(data, time);
+    return new shaka.text.VttTextParser().parseMedia(data, time);
   }
 });

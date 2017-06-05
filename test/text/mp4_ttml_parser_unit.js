@@ -39,11 +39,11 @@ describe('Mp4TtmlParser', function() {
   });
 
   it('parses init segment', function() {
-    new shaka.media.Mp4TtmlParser().parseInit(ttmlInitSegment);
+    new shaka.text.Mp4TtmlParser().parseInit(ttmlInitSegment);
   });
 
   it('parses media segment', function() {
-    var parser = new shaka.media.Mp4TtmlParser();
+    var parser = new shaka.text.Mp4TtmlParser();
     parser.parseInit(ttmlInitSegment);
     var time = {periodStart: 0, segmentStart: 0, segmentEnd: 0 };
     var ret = parser.parseMedia(ttmlSegment, time);
@@ -54,7 +54,7 @@ describe('Mp4TtmlParser', function() {
     var time1 = {periodStart: 0, segmentStart: 0, segmentEnd: 0 };
     var time2 = {periodStart: 7, segmentStart: 0, segmentEnd: 0 };
 
-    var parser = new shaka.media.Mp4TtmlParser();
+    var parser = new shaka.text.Mp4TtmlParser();
     parser.parseInit(ttmlInitSegment);
 
     var ret1 = parser.parseMedia(ttmlSegment, time1);
@@ -74,7 +74,7 @@ describe('Mp4TtmlParser', function() {
         shaka.util.Error.Code.INVALID_MP4_TTML);
 
     try {
-      new shaka.media.Mp4TtmlParser().parseInit(audioInitSegment);
+      new shaka.text.Mp4TtmlParser().parseInit(audioInitSegment);
       fail('Mp4 file with no ttml supported');
     } catch (e) {
       shaka.test.Util.expectToEqualError(e, error);

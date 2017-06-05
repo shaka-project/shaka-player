@@ -27,7 +27,7 @@ describe('TextEngine', function() {
   var textEngine;
 
   beforeAll(function() {
-    TextEngine = shaka.media.TextEngine;
+    TextEngine = shaka.text.TextEngine;
   });
 
   beforeEach(function() {

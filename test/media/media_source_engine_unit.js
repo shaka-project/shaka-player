@@ -39,13 +39,13 @@ describe('MediaSourceEngine', function() {
       return type == 'video' || type == 'audio';
     };
 
-    originalTextEngine = shaka.media.TextEngine;
-    shaka.media.TextEngine = createMockTextEngineCtor();
+    originalTextEngine = shaka.text.TextEngine;
+    shaka.text.TextEngine = createMockTextEngineCtor();
   });
 
   afterAll(function() {
     window.MediaSource.isTypeSupported = originalIsTypeSupported;
-    shaka.media.TextEngine = originalTextEngine;
+    shaka.text.TextEngine = originalTextEngine;
   });
 
   beforeEach(/** @suppress {invalidCasts} */ function() {
@@ -87,7 +87,7 @@ describe('MediaSourceEngine', function() {
       mediaSourceEngine.init(initObject);
       expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledWith('audio/foo');
       expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledWith('video/foo');
-      expect(shaka.media.TextEngine).not.toHaveBeenCalled();
+      expect(shaka.text.TextEngine).not.toHaveBeenCalled();
     });
 
     it('creates TextEngines for text types', function() {
@@ -97,7 +97,7 @@ describe('MediaSourceEngine', function() {
       initObject[ContentType.TEXT] = 'text/foo';
       mediaSourceEngine.init(initObject);
       expect(mockMediaSource.addSourceBuffer).not.toHaveBeenCalled();
-      expect(shaka.media.TextEngine).toHaveBeenCalled();
+      expect(shaka.text.TextEngine).toHaveBeenCalled();
     });
   });
 

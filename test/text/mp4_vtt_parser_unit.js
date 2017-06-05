@@ -63,7 +63,7 @@ describe('Mp4vttParser', function() {
   });
 
   it('parses init segment', function() {
-    new shaka.media.Mp4VttParser().parseInit(vttInitSegment);
+    new shaka.text.Mp4VttParser().parseInit(vttInitSegment);
   });
 
   it('parses media segment', function() {
@@ -74,7 +74,7 @@ describe('Mp4vttParser', function() {
            'You\'re a fool for traveling alone,\nso completely unprepared.\n'}
         ];
 
-    var parser = new shaka.media.Mp4VttParser();
+    var parser = new shaka.text.Mp4VttParser();
     parser.parseInit(vttInitSegment);
     var time = {periodStart: 0, segmentStart: 0, segmentEnd: 0 };
     var result = parser.parseMedia(vttSegment, time);
@@ -91,7 +91,7 @@ describe('Mp4vttParser', function() {
            vertical: 'lr', line: 1}
         ];
 
-    var parser = new shaka.media.Mp4VttParser();
+    var parser = new shaka.text.Mp4VttParser();
     parser.parseInit(vttInitSegment);
     var time = {periodStart: 0, segmentStart: 0, segmentEnd: 0 };
     var result = parser.parseMedia(vttSegSettings, time);
@@ -106,7 +106,7 @@ describe('Mp4vttParser', function() {
            'You\'re a fool for traveling alone,\nso completely unprepared.\n'}
         ];
 
-    var parser = new shaka.media.Mp4VttParser();
+    var parser = new shaka.text.Mp4VttParser();
     parser.parseInit(vttInitSegment);
     var time = {periodStart: 10, segmentStart: 0, segmentEnd: 0 };
     var result = parser.parseMedia(vttSegment, time);
@@ -119,7 +119,7 @@ describe('Mp4vttParser', function() {
         shaka.util.Error.Category.TEXT,
         shaka.util.Error.Code.INVALID_MP4_VTT);
     try {
-      new shaka.media.Mp4VttParser().parseInit(audioInitSegment);
+      new shaka.text.Mp4VttParser().parseInit(audioInitSegment);
       fail('Mp4 file with no vtt supported');
     } catch (e) {
       shaka.test.Util.expectToEqualError(e, error);
