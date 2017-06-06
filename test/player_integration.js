@@ -164,6 +164,23 @@ describe('Player', function() {
   });
 
   describe('plays', function() {
+    it('while external text tracks', function(done) {
+      player.load('test:sintel_no_text_compiled').then(function() {
+        player.addTextTrack('/base/test/test/assets/text-clip.vtt', 'en',
+                            'subtitles', 'text/vtt');
+
+        video.play();
+        return Util.delay(5);
+      }).then(function() {
+        var textTracks = player.getTextTracks();
+        expect(textTracks).toBeTruthy();
+        expect(textTracks.length).toBe(1);
+
+        expect(textTracks[0].active).toBe(true);
+        expect(textTracks[0].language).toEqual('en');
+      }).catch(fail).then(done);
+    });
+
     window.shakaAssets.testAssets.forEach(function(asset) {
       if (asset.disabled) return;
 

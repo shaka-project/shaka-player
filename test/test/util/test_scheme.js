@@ -108,6 +108,29 @@ shaka.test.TestScheme.DATA = {
     },
     duration: 30
   },
+  'sintel_no_text': {
+    video: {
+      initSegmentUri: '/base/test/test/assets/sintel-video-init.mp4',
+      mvhdOffset: 0x24,
+      segmentUri: '/base/test/test/assets/sintel-video-segment.mp4',
+      tfdtOffset: 0x38,
+      segmentDuration: 10,
+      presentationTimeOffset: 0,
+      mimeType: 'video/mp4',
+      codecs: 'avc1.42c01e'
+    },
+    audio: {
+      initSegmentUri: '/base/test/test/assets/sintel-audio-init.mp4',
+      mvhdOffset: 0x20,
+      segmentUri: '/base/test/test/assets/sintel-audio-segment.mp4',
+      tfdtOffset: 0x3c,
+      segmentDuration: 10.005,
+      presentationTimeOffset: 0,
+      mimeType: 'audio/mp4',
+      codecs: 'mp4a.40.2'
+    },
+    duration: 30
+  },
   'sintel-enc': {
     video: {
       initSegmentUri: '/base/test/test/assets/encrypted-sintel-video-init.mp4',
@@ -293,15 +316,17 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
     gen.addAudio(2);
     addStreamInfo(gen, data, ContentType.AUDIO, name);
 
-    // This seems to be necessary.  Otherwise, we end up with a URL like
-    // "http:/base/..." which then fails to load on Safari for some reason.
-    var locationUri = new goog.Uri(location.href);
-    var partialUri = new goog.Uri(data.text.uri);
-    var absoluteUri = locationUri.resolve(partialUri);
+    if (data.text) {
+      // This seems to be necessary.  Otherwise, we end up with a URL like
+      // "http:/base/..." which then fails to load on Safari for some reason.
+      var locationUri = new goog.Uri(location.href);
+      var partialUri = new goog.Uri(data.text.uri);
+      var absoluteUri = locationUri.resolve(partialUri);
 
-    gen.addTextStream(3)
-          .mime(data.text.mimeType, data.text.codecs)
-          .textStream(absoluteUri.toString());
+      gen.addTextStream(3)
+            .mime(data.text.mimeType, data.text.codecs)
+            .textStream(absoluteUri.toString());
+    }
 
     MANIFESTS[name + suffix] = gen.build();
   }
