@@ -225,6 +225,19 @@ def get_node_binary_path(name):
   return name
 
 
+class InDir(object):
+  """A Context Manager that changes directories temporarily and safely."""
+  def __init__(self, path):
+    self.new_path = path
+
+  def __enter__(self):
+    self.old_path = os.getcwd()
+    os.chdir(self.new_path)
+
+  def __exit__(self, type, value, traceback):
+    os.chdir(self.old_path)
+
+
 def update_node_modules():
   """Updates the node modules using 'npm', if they have not already been
      updated recently enough."""
@@ -243,7 +256,16 @@ def update_node_modules():
     return False
 
   # Update the modules.
-  execute_get_output([cmd, '--prefix', base, 'update'])
+  # Actually change directories instead of using npm --prefix.
+  # See npm/npm#17027 and google/shaka-player#776 for more details.
+  with InDir(base):
+    if _parse_version(version) >= _parse_version('5.0.0'):
+      # npm update seems to be the wrong thing in npm v5, so use install.
+      # See google/shaka-player#854 for more details.
+      execute_get_output([cmd, 'install'])
+    else:
+      execute_get_output([cmd, 'update'])
+
   # Update the timestamp of the file that tracks when we last updated.
   open(_node_modules_last_update_path(), 'w').close()
   return True
