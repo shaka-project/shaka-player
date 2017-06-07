@@ -148,6 +148,10 @@ summary {
   max-width: 80%;
 }
 
+#bufferingProgressBar {
+  width: 80%;
+}
+
 #container {
   margin: 0 auto 0 auto;
   max-width: 40em;
