@@ -159,6 +159,29 @@ describe('CancelableChain', function() {
       block.resolve();
     });
 
+    it('works even if stage is rejected after being canceled', function(done) {
+      var p = new shaka.util.PublicPromise();
+      var finalComplete = false;
+      chain.then(function() {
+        return p;
+      }).finalize().then(fail).catch(function(err) {
+        finalComplete = true;
+        shaka.test.Util.expectToEqualError(cannedError, err);
+      });
+
+      chain.cancel(cannedError).catch(fail).then(function() {
+        // Delay so the catch block above can run.
+        return shaka.test.Util.delay(0.1);
+      }).then(function() {
+        expect(finalComplete).toBe(true);
+        done();
+      });
+      p.reject(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MANIFEST,
+          shaka.util.Error.Code.UNABLE_TO_GUESS_MANIFEST_TYPE));
+    });
+
     it('resolves even after the finalized chain is resolved', function(done) {
       var stageComplete = false;
       var finalComplete = false;
