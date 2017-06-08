@@ -49,9 +49,21 @@ response data looks correct.  For Widevine, the response should be binary.  If
 you see JSON, you will need to [unwrap the response][wrapping].
 
 
+**Q:** My HLS manifest doesn't load.
+
+**A:** If your HLS manifest describes MPEG2-TS content, the only browsers
+capable of playing it are Edge, Chromecast and Safari. You will get an
+`UNPLAYABLE_PERIOD` error on other browsers due to their lack of TS support.
+We also were not able to make it work on Safari yet due to a bug in their
+MediaSource implementation ([#743][743]).
+Please file a issue if your TS content isn't playing in Chromecast or Edge
+and your MP4 content - on any browser.
+
+
 [386]: https://github.com/google/shaka-player/issues/386#issuecomment-227898001
 [489]: https://github.com/google/shaka-player/issues/489#issuecomment-240466224
 [auth]: https://shaka-player-demo.appspot.com/docs/api/tutorial-license-server-auth.html
 [clockSyncUri]: https://shaka-player-demo.appspot.com/docs/api/shakaExtern.html#DashManifestConfiguration
 [CORS]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
 [wrapping]: https://shaka-player-demo.appspot.com/docs/api/tutorial-license-wrapping.html
+[743]: https://github.com/google/shaka-player/issues/743
