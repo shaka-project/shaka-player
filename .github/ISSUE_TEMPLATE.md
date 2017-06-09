@@ -1,4 +1,4 @@
-**Have you read the [FAQ](https://goo.gl/njDlGk) and checked for duplicate issues**:
+**Have you read the [FAQ](https://goo.gl/JE1Sy5) and checked for duplicate issues**:
 
 **What version of Shaka Player are you using**:
 

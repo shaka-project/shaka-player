@@ -11,6 +11,7 @@
   { "manifest-parser": { "title": "Manifest Parser Plugins" } },
   { "architecture": { "title": "Architecture Diagrams" } },
   { "service-worker": { "title": "Service Worker Caching" } },
+  { "faq": { "title": "Frequently Asked Questions" } },
   { "upgrade": {
       "title": "Upgrade Guide",
       "children": {
