@@ -225,6 +225,8 @@ shakaDemo.load = function() {
       // Set media session title.
       navigator.mediaSession.metadata = new MediaMetadata({title: asset.name});
     }
+
+    shakaDemo.video_.play();
   }, function(reason) {
     var error = /** @type {!shaka.util.Error} */(reason);
     if (error.code == shaka.util.Error.Code.LOAD_INTERRUPTED) {
@@ -235,9 +237,9 @@ shakaDemo.load = function() {
   });
 
   // While the manifest is being loaded in parallel, go ahead and ask the video
-  // to play.  This can help with autoplay on Android, since Android requires
+  // to load to help with autoplay on Android, since Android requires
   // user interaction to play a video and this function is called from a click
-  // event.  This seems to work only because Shaka Player has already created a
+  // event. This seems to work only because Shaka Player has already created a
   // MediaSource object and set video.src.
-  shakaDemo.video_.play();
+  shakaDemo.video_.load();
 };
