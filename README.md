@@ -18,6 +18,7 @@ It is actively tested with:
   - Microsoft Edge
   - IE 11
   - Safari
+  - 2017 Tizen TV
   - [Widevine][]
   - [PlayReady][]
 
