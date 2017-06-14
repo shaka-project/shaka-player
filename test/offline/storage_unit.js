@@ -869,6 +869,43 @@ describe('Storage', function() {
         }).catch(fail).then(done);
       });
     });  // describe('default track selection callback')
+
+    fdescribe('temporary license', function(){
+
+      beforeEach(function(){
+        storage.configure({ isPersistentLicense: false });
+      });
+
+      it('stores basic manifests', function(done) {
+        var originalUri = 'fake://foobar';
+        storage.store(originalUri)
+            .then(function(data) {
+              expect(data).toBeTruthy();
+              // Since we are using a memory DB, it will always be the first one.
+              expect(data.offlineUri).toBe('offline:0');
+              expect(data.originalManifestUri).toBe(originalUri);
+              expect(data.duration).toBe(0);  // There are no segments.
+              expect(data.size).toEqual(0);
+              expect(data.tracks).toEqual(tracks);
+            })
+            .catch(fail)
+            .then(done);
+      });
+
+      it('does not store offline sessions', function(done) {
+        storage.store('')
+            .then(function(data) {
+              expect(data.offlineUri).toBe('offline:0');
+              return fakeStorageEngine.get('manifest', 0);
+            })
+            .then(function(manifestDb) {
+              expect(manifestDb).toBeTruthy();
+              expect(manifestDb.sessionIds.length).toEqual(0);
+            })
+            .catch(fail)
+            .then(done);
+      });
+    }); // describe('temporary license')
   });  // describe('store')
 
   describe('remove', function() {
