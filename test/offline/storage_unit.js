@@ -870,7 +870,7 @@ describe('Storage', function() {
       });
     });  // describe('default track selection callback')
 
-    fdescribe('temporary license', function(){
+    describe('temporary license', function(){
 
       beforeEach(function(){
         storage.configure({ isPersistentLicense: false });
@@ -993,6 +993,24 @@ describe('Storage', function() {
           })
           .then(function() {
             expectDatabaseCount(1, 8);
+            return removeManifest(manifestId);
+          })
+          .then(function() { expectDatabaseCount(0, 0); })
+          .catch(fail)
+          .then(done);
+    });
+
+    it('will delete content with a temporary license', function(done){
+      storage.configure({ isPersistentLicense: false });
+      var manifestId = 0;
+      createAndInsertSegments(manifestId, 5)
+          .then(function(refs) {
+            var manifest = createManifest(manifestId);
+            manifest.periods[0].streams.push({segments: refs});
+            return fakeStorageEngine.insert('manifest', manifest);
+          })
+          .then(function() {
+            expectDatabaseCount(1, 5);
             return removeManifest(manifestId);
           })
           .then(function() { expectDatabaseCount(0, 0); })
