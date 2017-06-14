@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-fdescribe('Offline', function() {
+describe('Offline', function() {
   var originalName;
   var dbEngine;
   var storage;
