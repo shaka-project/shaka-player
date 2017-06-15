@@ -64,6 +64,8 @@ shakaDemo.setupAssets_ = function() {
       mimeTypes.push('video/webm');
     if (asset.features.indexOf(shakaAssets.Feature.MP4) >= 0)
       mimeTypes.push('video/mp4');
+    if (asset.features.indexOf(shakaAssets.Feature.MP2TS) >= 0)
+      mimeTypes.push('video/mp2t');
     if (!mimeTypes.some(
         function(type) { return shakaDemo.support_.media[type]; })) {
       option.disabled = true;

@@ -89,6 +89,7 @@ shakaAssets.Feature = {
   LIVE: 'live',
   WEBM: 'WebM',
   MP4: 'mp4',
+  MP2TS: 'MPEG-2 TS',
   TTML: 'TTML',
   WEBVTT: 'WebVTT',
 
