@@ -1,3 +1,40 @@
+## 2.1.4 (2017-06-16)
+
+New features:
+  - Allow role to be specified in selectAudioLanguage and selectTextLanguage
+    - https://github.com/google/shaka-player/issues/767
+
+Bugfixes:
+  - Fix changing languages close to a period boundary
+    - https://github.com/google/shaka-player/issues/797
+  - Fix hang in load() when there are pending failures
+    - https://github.com/google/shaka-player/issues/782
+  - Fix DASH parser ignoring certain text streams
+    - https://github.com/google/shaka-player/issues/875
+  - Fix exceptions when side-loading text tracks
+    - https://github.com/google/shaka-player/issues/821
+  - Fix PlayReady support on Chromecast
+    - https://github.com/google/shaka-player/issues/852
+  - Fix version number issues during publication on NPM
+    - https://github.com/google/shaka-player/issues/869
+  - Fix pollution from npm on Windows
+    - https://github.com/google/shaka-player/issues/776
+  - Fix support for npm v5
+    - https://github.com/google/shaka-player/issues/854
+
+Demo app:
+  - Fix control visibility in fullscreen mode on mobile phones
+    - https://github.com/google/shaka-player/issues/663
+
+Docs:
+  - Updated welcome docs
+  - Updated list of supported platforms
+    - https://github.com/google/shaka-player/issues/863
+  - Updated FAQ
+    - https://github.com/google/shaka-player/issues/864
+    - https://github.com/google/shaka-player/issues/865
+
+
 ## 2.1.3 (2017-06-06)
 
 New features:
