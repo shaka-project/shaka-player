@@ -215,7 +215,11 @@ describe('DrmEngine', function() {
               // This was probably a PlayReady persistent license.
             }
           }).then(function() {
-            return keyStatusEventSeen;
+            // Some platforms (notably 2017 Tizen TVs) do not fire key status
+            // events.  This is a temporary workaround for the test failure
+            // in https://github.com/google/shaka-player/issues/891
+            var keyStatusTimeout = shaka.test.Util.delay(5);
+            return Promise.race([keyStatusTimeout, keyStatusEventSeen]);
           }).then(function() {
             var call = onKeyStatusSpy.calls.mostRecent();
             if (call) {
