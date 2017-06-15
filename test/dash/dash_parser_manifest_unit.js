@@ -870,6 +870,42 @@ describe('DashParser Manifest', function() {
         .then(done);
   });
 
+  it('handles text with mime and codecs on different levels', function(done) {
+    // Regression test for #875
+    var manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation bandwidth="1">',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="1" mimeType="application/mp4">',
+      '      <Representation codecs="stpp">',
+      '        <SegmentTemplate media="1.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'
+    ].join('\n');
+
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
+    parser.start('dummy://foo', playerInterface)
+        .then(function(manifest) {
+          expect(manifest.periods.length).toBe(1);
+
+          // In #875, this was an empty list.
+          expect(manifest.periods[0].textStreams.length).toBe(1);
+          if (manifest.periods[0].textStreams.length) {
+            var ContentType = shaka.util.ManifestParserUtils.ContentType;
+            expect(manifest.periods[0].textStreams[0].type)
+              .toBe(ContentType.TEXT);
+          }
+        })
+        .catch(fail)
+        .then(done);
+  });
+
   it('ignores duplicate Representation IDs for VOD', function(done) {
     var source = [
       '<MPD minBufferTime="PT75S">',
