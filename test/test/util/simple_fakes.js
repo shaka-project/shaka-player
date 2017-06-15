@@ -198,11 +198,12 @@ shaka.test.FakeStreamingEngine = function() {
   var activeStreams = {};
 
   var ret = jasmine.createSpyObj('fakeStreamingEngine', [
-    'destroy', 'configure', 'init', 'getCurrentPeriod', 'getActiveStreams',
-    'notifyNewTextStream', 'switch', 'seeked'
+    'destroy', 'configure', 'init', 'getCurrentPeriod', 'getActivePeriod',
+    'getActiveStreams', 'notifyNewTextStream', 'switch', 'seeked'
   ]);
   ret.destroy.and.callFake(resolve);
   ret.getCurrentPeriod.and.returnValue(null);
+  ret.getActivePeriod.and.returnValue(null);
   ret.getActiveStreams.and.returnValue(activeStreams);
   ret.notifyNewTextStream.and.callFake(resolve);
   ret.init.and.callFake(function() {

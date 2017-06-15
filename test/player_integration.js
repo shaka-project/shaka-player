@@ -186,6 +186,30 @@ describe('Player', function() {
       }).catch(fail).then(done);
     });
 
+    it('while changing languages with short Periods', function(done) {
+      // See: https://github.com/google/shaka-player/issues/797
+      player.configure({preferredAudioLanguage: 'en'});
+      player.load('test:sintel_short_periods_compiled').then(function() {
+        video.play();
+        return waitUntilPlayheadReaches(video, 8, 30);
+      }).then(function() {
+        // The Period changes at 10 seconds.  Assert that we are in the previous
+        // Period and have buffered into the next one.
+        expect(video.currentTime).toBeLessThan(9);
+        expect(video.buffered.end(0)).toBeGreaterThan(11);
+
+        // Change to a different language; this should clear the buffers and
+        // cause a Period transition again.
+        expect(getActiveLanguage()).toBe('en');
+        player.selectAudioLanguage('es');
+        return waitUntilPlayheadReaches(video, 21, 30);
+      }).then(function() {
+        // Should have gotten past the next Period transition and still be
+        // playing the new language.
+        expect(getActiveLanguage()).toBe('es');
+      }).catch(fail).then(done);
+    });
+
     window.shakaAssets.testAssets.forEach(function(asset) {
       if (asset.disabled) return;
 
@@ -262,6 +286,18 @@ describe('Player', function() {
         }).catch(fail).then(done);
       });
     });
+
+    /**
+     * Gets the language of the active Variant.
+     * @return {string}
+     */
+    function getActiveLanguage() {
+      var tracks = player.getVariantTracks().filter(function(t) {
+        return t.active;
+      });
+      expect(tracks.length).toBeGreaterThan(0);
+      return tracks[0].language;
+    }
   });
 
   /**
