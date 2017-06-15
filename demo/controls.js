@@ -550,7 +550,11 @@ ShakaControls.prototype.onCastStatusChange_ = function(event) {
       isCasting ? 'inherit' : 'none';
   this.castReceiverName_.textContent =
       isCasting ? 'Casting to ' + this.castProxy_.receiverName() : '';
-  this.controls_.classList.toggle('casting', this.castProxy_.isCasting());
+  if (this.castProxy_.isCasting()) {
+    this.controls_.classList.add('casting');
+  } else {
+    this.controls_.classList.remove('casting');
+  }
 };
 
 
