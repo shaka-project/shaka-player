@@ -306,10 +306,12 @@ MyManifestParser.prototype.loadStream_ = function(type) {
     encrypted: false,
     keyId:     null,
     language:  'en',
+    label:     'my_stream',
     type:      type,
     primary:   false,
     trickModeVideo: null,
-    containsEmsgBoxes: false
+    containsEmsgBoxes: false,
+    roles:     []
   };
 };
 

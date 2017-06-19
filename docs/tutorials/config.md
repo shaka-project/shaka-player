@@ -23,9 +23,13 @@ player.getConfiguration();
 
 => Object
      abr: Object
+       bandwidthDowngradeTarget: 0.95
+       bandwidthUpgradeTarget: 0.85
        defaultBandwidthEstimate: 500000
        enabled: true
-       manager: SimpleAbrManager
+       restrictions: Object
+       switchInterval: 8
+     abrFactory: Function
      drm: Object
        advanced: Object
        clearKeys: Object
@@ -38,7 +42,10 @@ player.getConfiguration();
        servers: Object
      manifest: Object
        dash: Object
+       hls: Object
        retryParameters: Object
+     playRangeEnd: Infinity
+     playRangeStart: 0
      preferredAudioLanguage: ""
      preferredTextLanguage: ""
      restrictions: Object
@@ -47,8 +54,11 @@ player.getConfiguration();
        bufferingGoal: 10
        ignoreTextStreamFailures: false
        infiniteRetriesForLiveStreams: true
+       jumpLargeGaps: false
        rebufferingGoal: 2
        retryParameters: Object
+       smallGapLimit: 0.5
+       startAtSegmentBoundary: false
 
 
 // set audio language preference to Canadian French:
