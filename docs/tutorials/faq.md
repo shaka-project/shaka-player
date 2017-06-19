@@ -31,6 +31,26 @@ This can also happen with mixed-content restrictions.  If the site is using
 
 <hr>
 
+**Q:** I am getting `REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE` or error code 6001.
+
+**A:** Check that your platform/browser actually supports the key system.  If
+your manifest contains only Playready, it will need to be played on IE/Edge, a
+Chromecast, or some smart TVs.  Also check the `drm.advanced` configuration for
+the key system.  If you are passing a non-empty robustness, it may not be
+supported by your patform.  See the [DRM tuturial][drm_tutorial] for more info.
+
+Also, to use EME requires using a secure origin.  This means using `https` or
+be on `localhost`.  Currently only Chrome enforces this, but other browsers
+will in the future. See the [announcement][eme_https] for more info.
+
+This will also happen if you use `Storage` to store protected content (when
+`usePersistentLicense` is true).  Currently, the only Chromebooks support
+persistent licenses.  On other platforms, you can only store clear content or
+store only the content offline (i.e. set `usePersistentLicense` configuration to
+false).
+
+<hr>
+
 **Q:** I am getting `LICENSE_REQUEST_FAILED` or error code 6007.
 
 **A:** See `HTTP_ERROR`.  If you are getting a bad HTTP status, the server
@@ -104,4 +124,6 @@ these initial decisions.
 [StreamingConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shakaExtern.html#StreamingConfiguration
 [auth]: https://shaka-player-demo.appspot.com/docs/api/tutorial-license-server-auth.html
 [buffering]: https://shaka-player-demo.appspot.com/docs/api/tutorial-network-and-buffering-config.html
+[drm_tutorial]: https://shaka-player-demo.appspot.com/docs/api/tutorial-drm-config.html
+[eme_https]: https://sites.google.com/a/chromium.org/dev/Home/chromium-security/deprecating-powerful-features-on-insecure-origins
 [wrapping]: https://shaka-player-demo.appspot.com/docs/api/tutorial-license-wrapping.html
