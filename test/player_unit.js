@@ -1818,6 +1818,66 @@ describe('Player', function() {
       }).catch(fail).then(done);
     });
 
+    it('doesn\'t remove when using synthetic key status', function(done) {
+      manifest = new shaka.test.ManifestGenerator()
+              .addPeriod(0)
+                .addVariant(0)
+                  .addVideo(1).keyId('abc')
+                .addVariant(2)
+                  .addVideo(3)
+              .build();
+
+      parser = new shaka.test.FakeManifestParser(manifest);
+      parserFactory = function() { return parser; };
+      player.load('', 0, parserFactory).then(function() {
+        // "initialize" the current period.
+        chooseStreams();
+        canSwitch();
+      }).then(function() {
+        expect(player.getVariantTracks().length).toBe(2);
+
+        // A synthetic key status contains a single key status with key '00'.
+        onKeyStatus({'00': 'usable'});
+
+        expect(player.getVariantTracks().length).toBe(2);
+      }).catch(fail).then(done);
+    });
+
+    it('removes all encrypted tracks for errors with synthetic key status',
+        function(done) {
+          manifest = new shaka.test.ManifestGenerator()
+                  .addPeriod(0)
+                    .addVariant(0)
+                      .addVideo(1).keyId('abc')
+                    .addVariant(2)
+                      .addVideo(3).keyId('xyz')
+                    .addVariant(4)
+                      .addVideo(5)
+                  .build();
+
+          parser = new shaka.test.FakeManifestParser(manifest);
+          parserFactory = function() { return parser; };
+          player.load('', 0, parserFactory)
+              .then(function() {
+                // "initialize" the current period.
+                chooseStreams();
+                canSwitch();
+              })
+              .then(function() {
+                expect(player.getVariantTracks().length).toBe(3);
+
+                // A synthetic key status contains a single key status with key
+                // '00'.
+                onKeyStatus({'00': 'internal-error'});
+
+                var tracks = player.getVariantTracks();
+                expect(tracks.length).toBe(1);
+                expect(tracks[0].id).toBe(4);
+              })
+              .catch(fail)
+              .then(done);
+        });
+
     it('removes if key system does not support codec', function(done) {
       manifest = new shaka.test.ManifestGenerator()
           .addPeriod(0)

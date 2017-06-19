@@ -216,8 +216,7 @@ describe('DrmEngine', function() {
             }
           }).then(function() {
             // Some platforms (notably 2017 Tizen TVs) do not fire key status
-            // events.  This is a temporary workaround for the test failure
-            // in https://github.com/google/shaka-player/issues/891
+            // events.
             var keyStatusTimeout = shaka.test.Util.delay(5);
             return Promise.race([keyStatusTimeout, keyStatusEventSeen]);
           }).then(function() {
