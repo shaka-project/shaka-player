@@ -871,8 +871,17 @@ describe('Storage', function() {
     });  // describe('default track selection callback')
 
     describe('temporary license', function(){
+      var drmInfo;
 
       beforeEach(function(){
+        drmInfo = {
+          keySystem: 'com.example.abc',
+          licenseServerUri: 'http://example.com',
+          persistentStateRequire: false,
+          audioRobustness: 'HARDY'
+        };
+        drmEngine.setDrmInfo(drmInfo);
+        drmEngine.setSessionIds(['abcd']);
         storage.configure({ isPersistentLicense: false });
       });
 
@@ -887,6 +896,20 @@ describe('Storage', function() {
               expect(data.duration).toBe(0);  // There are no segments.
               expect(data.size).toEqual(0);
               expect(data.tracks).toEqual(tracks);
+            })
+            .catch(fail)
+            .then(done);
+      });
+
+      it('stores drm info', function(done) {
+        storage.store('')
+            .then(function(data) {
+              expect(data.offlineUri).toBe('offline:0');
+              return fakeStorageEngine.get('manifest', 0);
+            })
+            .then(function(manifestDb) {
+              expect(manifestDb).toBeTruthy();
+              expect(manifestDb.drmInfo).toEqual(drmInfo);
             })
             .catch(fail)
             .then(done);
