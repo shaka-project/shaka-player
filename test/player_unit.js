@@ -1697,9 +1697,6 @@ describe('Player', function() {
   });
 
   describe('restrictions', function() {
-    var parser;
-    var parserFactory;
-
     it('switches if active is restricted by application', function(done) {
       manifest = new shaka.test.ManifestGenerator()
               .addPeriod(0)
@@ -1709,13 +1706,7 @@ describe('Player', function() {
                   .addVideo(2)
               .build();
 
-      parser = new shaka.test.FakeManifestParser(manifest);
-      parserFactory = function() { return parser; };
-      player.load('', 0, parserFactory).then(function() {
-        // "initialize" the current period.
-        chooseStreams();
-        canSwitch();
-      }).then(function() {
+      setupPlayer(manifest).then(function() {
         var activeVariant = getActiveTrack('variant');
         expect(activeVariant.id).toBe(0);
 
@@ -1731,7 +1722,7 @@ describe('Player', function() {
 
         activeVariant = getActiveTrack('variant');
         expect(activeVariant.id).toBe(1);
-      }).then(done);
+      }).catch(fail).then(done);
     });
 
     it('switches if active key status is "output-restricted"', function(done) {
@@ -1743,13 +1734,7 @@ describe('Player', function() {
                   .addVideo(2)
               .build();
 
-      parser = new shaka.test.FakeManifestParser(manifest);
-      parserFactory = function() { return parser; };
-      player.load('', 0, parserFactory).then(function() {
-        // "initialize" the current period.
-        chooseStreams();
-        canSwitch();
-      }).catch(fail).then(function() {
+      setupPlayer(manifest).then(function() {
         var activeVariant = getActiveTrack('variant');
         expect(activeVariant.id).toBe(0);
 
@@ -1765,7 +1750,7 @@ describe('Player', function() {
 
         activeVariant = getActiveTrack('variant');
         expect(activeVariant.id).toBe(1);
-      }).then(done);
+      }).catch(fail).then(done);
     });
 
     it('switches if active key status is "internal-error"', function(done) {
@@ -1777,13 +1762,7 @@ describe('Player', function() {
                   .addVideo(2)
               .build();
 
-      parser = new shaka.test.FakeManifestParser(manifest);
-      parserFactory = function() { return parser; };
-      player.load('', 0, parserFactory).then(function() {
-        // "initialize" the current period.
-        chooseStreams();
-        canSwitch();
-      }).catch(fail).then(function() {
+      setupPlayer(manifest).then(function() {
         var activeVariant = getActiveTrack('variant');
         expect(activeVariant.id).toBe(0);
 
@@ -1799,7 +1778,7 @@ describe('Player', function() {
 
         activeVariant = getActiveTrack('variant');
         expect(activeVariant.id).toBe(1);
-      }).then(done);
+      }).catch(fail).then(done);
     });
 
     it('doesn\'t switch if the active stream isn\'t restricted',
@@ -1812,12 +1791,7 @@ describe('Player', function() {
                   .addVideo(2)
               .build();
 
-          parser = new shaka.test.FakeManifestParser(manifest);
-          parserFactory = function() { return parser; };
-          player.load('', 0, parserFactory).then(function() {
-            // "initialize" the current period.
-            chooseStreams();
-            canSwitch();
+          setupPlayer(manifest).then(function() {
             abrManager.chooseStreams.calls.reset();
 
             var activeVariant = getActiveTrack('variant');
@@ -1840,13 +1814,7 @@ describe('Player', function() {
                   .addVideo(2)
               .build();
 
-      parser = new shaka.test.FakeManifestParser(manifest);
-      parserFactory = function() { return parser; };
-      player.load('', 0, parserFactory).then(function() {
-        // "initialize" the current period.
-        chooseStreams();
-        canSwitch();
-      }).catch(fail).then(function() {
+      setupPlayer(manifest).then(function() {
         expect(player.getVariantTracks().length).toBe(2);
 
         onKeyStatus({'abc': 'output-restricted'});
@@ -1854,7 +1822,7 @@ describe('Player', function() {
         var tracks = player.getVariantTracks();
         expect(tracks.length).toBe(1);
         expect(tracks[0].id).toBe(1);
-      }).then(done);
+      }).catch(fail).then(done);
     });
 
     it('removes if key status is "internal-error"', function(done) {
@@ -1866,13 +1834,7 @@ describe('Player', function() {
                   .addVideo(2)
               .build();
 
-      parser = new shaka.test.FakeManifestParser(manifest);
-      parserFactory = function() { return parser; };
-      player.load('', 0, parserFactory).then(function() {
-        // "initialize" the current period.
-        chooseStreams();
-        canSwitch();
-      }).catch(fail).then(function() {
+      setupPlayer(manifest).then(function() {
         expect(player.getVariantTracks().length).toBe(2);
 
         onKeyStatus({'abc': 'internal-error'});
@@ -1880,7 +1842,7 @@ describe('Player', function() {
         var tracks = player.getVariantTracks();
         expect(tracks.length).toBe(1);
         expect(tracks[0].id).toBe(1);
-      }).then(done);
+      }).catch(fail).then(done);
     });
 
     it('removes if we don\'t have the required key', function(done) {
@@ -1892,13 +1854,7 @@ describe('Player', function() {
                   .addVideo(3)
               .build();
 
-      parser = new shaka.test.FakeManifestParser(manifest);
-      parserFactory = function() { return parser; };
-      player.load('', 0, parserFactory).then(function() {
-        // "initialize" the current period.
-        chooseStreams();
-        canSwitch();
-      }).then(function() {
+      setupPlayer(manifest).then(function() {
         expect(player.getVariantTracks().length).toBe(2);
 
         onKeyStatus({});
@@ -1918,13 +1874,7 @@ describe('Player', function() {
                   .addVideo(3)
               .build();
 
-      parser = new shaka.test.FakeManifestParser(manifest);
-      parserFactory = function() { return parser; };
-      player.load('', 0, parserFactory).then(function() {
-        // "initialize" the current period.
-        chooseStreams();
-        canSwitch();
-      }).then(function() {
+      setupPlayer(manifest).then(function() {
         expect(player.getVariantTracks().length).toBe(2);
 
         // A synthetic key status contains a single key status with key '00'.
@@ -1946,14 +1896,7 @@ describe('Player', function() {
                       .addVideo(5)
                   .build();
 
-          parser = new shaka.test.FakeManifestParser(manifest);
-          parserFactory = function() { return parser; };
-          player.load('', 0, parserFactory)
-              .then(function() {
-                // "initialize" the current period.
-                chooseStreams();
-                canSwitch();
-              })
+          setupPlayer(manifest)
               .then(function() {
                 expect(player.getVariantTracks().length).toBe(3);
 
@@ -1984,17 +1927,11 @@ describe('Player', function() {
       expect(MediaSource.isTypeSupported('video/unsupported')).toBe(true);
       // FakeDrmEngine's getSupportedTypes() returns video/mp4 by default.
 
-      parser = new shaka.test.FakeManifestParser(manifest);
-      parserFactory = function() { return parser; };
-      player.load('', 0, parserFactory).then(function() {
-        // "initialize" the current period.
-        chooseStreams();
-        canSwitch();
-      }).catch(fail).then(function() {
+      setupPlayer(manifest).then(function() {
         var tracks = player.getVariantTracks();
         expect(tracks.length).toBe(1);
         expect(tracks[0].id).toBe(1);
-      }).then(done);
+      }).catch(fail).then(done);
     });
 
     it('removes based on bandwidth', function(done) {
@@ -2008,13 +1945,7 @@ describe('Player', function() {
                   .addVideo(3)
               .build();
 
-      parser = new shaka.test.FakeManifestParser(manifest);
-      parserFactory = function() { return parser; };
-      player.load('', 0, parserFactory).then(function() {
-        // "initialize" the current period.
-        chooseStreams();
-        canSwitch();
-      }).catch(fail).then(function() {
+      setupPlayer(manifest).then(function() {
         expect(player.getVariantTracks().length).toBe(3);
 
         player.configure(
@@ -2023,7 +1954,7 @@ describe('Player', function() {
         var tracks = player.getVariantTracks();
         expect(tracks.length).toBe(1);
         expect(tracks[0].id).toBe(2);
-      }).then(done);
+      }).catch(fail).then(done);
     });
 
     it('removes based on pixels', function(done) {
@@ -2037,13 +1968,7 @@ describe('Player', function() {
                   .addVideo(3).size(190, 190)
               .build();
 
-      parser = new shaka.test.FakeManifestParser(manifest);
-      parserFactory = function() { return parser; };
-      player.load('', 0, parserFactory).then(function() {
-        // "initialize" the current period.
-        chooseStreams();
-        canSwitch();
-      }).catch(fail).then(function() {
+      setupPlayer(manifest).then(function() {
         expect(player.getVariantTracks().length).toBe(3);
 
         player.configure(
@@ -2052,7 +1977,7 @@ describe('Player', function() {
         var tracks = player.getVariantTracks();
         expect(tracks.length).toBe(1);
         expect(tracks[0].id).toBe(2);
-      }).then(done);
+      }).catch(fail).then(done);
     });
 
     it('removes based on width', function(done) {
@@ -2066,13 +1991,7 @@ describe('Player', function() {
                   .addVideo(3).size(190, 190)
               .build();
 
-      parser = new shaka.test.FakeManifestParser(manifest);
-      parserFactory = function() { return parser; };
-      player.load('', 0, parserFactory).then(function() {
-        // "initialize" the current period.
-        chooseStreams();
-        canSwitch();
-      }).catch(fail).then(function() {
+      setupPlayer(manifest).then(function() {
         expect(player.getVariantTracks().length).toBe(3);
 
         player.configure({restrictions: {minWidth: 100, maxWidth: 1000}});
@@ -2080,7 +1999,7 @@ describe('Player', function() {
         var tracks = player.getVariantTracks();
         expect(tracks.length).toBe(1);
         expect(tracks[0].id).toBe(2);
-      }).then(done);
+      }).catch(fail).then(done);
     });
 
     it('removes based on height', function(done) {
@@ -2094,13 +2013,7 @@ describe('Player', function() {
                   .addVideo(3).size(190, 190)
               .build();
 
-      parser = new shaka.test.FakeManifestParser(manifest);
-      parserFactory = function() { return parser; };
-      player.load('', 0, parserFactory).then(function() {
-        // "initialize" the current period.
-        chooseStreams();
-        canSwitch();
-      }).catch(fail).then(function() {
+      setupPlayer(manifest).then(function() {
         expect(player.getVariantTracks().length).toBe(3);
 
         player.configure({restrictions: {minHeight: 100, maxHeight: 1000}});
@@ -2108,7 +2021,7 @@ describe('Player', function() {
         var tracks = player.getVariantTracks();
         expect(tracks.length).toBe(1);
         expect(tracks[0].id).toBe(2);
-      }).then(done);
+      }).catch(fail).then(done);
     });
 
     it('removes the whole variant if one of the streams is restricted',
@@ -2123,13 +2036,7 @@ describe('Player', function() {
                   .addAudio(4)
               .build();
 
-          parser = new shaka.test.FakeManifestParser(manifest);
-          parserFactory = function() { return parser; };
-          player.load('', 0, parserFactory).then(function() {
-            // "initialize" the current period.
-            chooseStreams();
-            canSwitch();
-          }).catch(fail).then(function() {
+          setupPlayer(manifest).then(function() {
             expect(player.getVariantTracks().length).toBe(2);
 
             player.configure({restrictions: {minHeight: 100, maxHeight: 1000}});
@@ -2137,7 +2044,7 @@ describe('Player', function() {
             var tracks = player.getVariantTracks();
             expect(tracks.length).toBe(1);
             expect(tracks[0].id).toBe(1);
-          }).then(done);
+          }).catch(fail).then(done);
         });
 
     it('issues error if no streams are playable', function(done) {
@@ -2151,13 +2058,7 @@ describe('Player', function() {
                   .addVideo(3).size(190, 190)
               .build();
 
-      parser = new shaka.test.FakeManifestParser(manifest);
-      parserFactory = function() { return parser; };
-      player.load('', 0, parserFactory).then(function() {
-        // "initialize" the current period.
-        chooseStreams();
-        canSwitch();
-      }).catch(fail).then(function() {
+      setupPlayer(manifest).then(function() {
         expect(player.getVariantTracks().length).toBe(3);
 
         onError.and.callFake(function(e) {
@@ -2172,7 +2073,7 @@ describe('Player', function() {
 
         player.configure({restrictions: {minHeight: 1000, maxHeight: 2000}});
         expect(onError).toHaveBeenCalled();
-      }).then(done);
+      }).catch(fail).then(done);
     });
 
     it('chooses efficient codecs and removes the rest', function(done) {
@@ -2194,13 +2095,7 @@ describe('Player', function() {
                   .addVideo(5).mime('video/mp4', 'bad')
               .build();
 
-      parser = new shaka.test.FakeManifestParser(manifest);
-      parserFactory = function() { return parser; };
-      player.load('', 0, parserFactory).then(function() {
-        // "initialize" the current period.
-        chooseStreams();
-        canSwitch();
-      }).catch(fail).then(function() {
+      setupPlayer(manifest).then(function() {
         expect(abrManager.setVariants).toHaveBeenCalled();
         var variants = abrManager.setVariants.calls.argsFor(0)[0];
         // We've already chosen codecs, so only 3 tracks should remain.
@@ -2209,7 +2104,7 @@ describe('Player', function() {
         expect(variants[0].video.codecs).toEqual('good');
         expect(variants[1].video.codecs).toEqual('good');
         expect(variants[2].video.codecs).toEqual('good');
-      }).then(done);
+      }).catch(fail).then(done);
     });
 
     /**
@@ -2232,6 +2127,20 @@ describe('Player', function() {
      */
     function onKeyStatus(keyStatusMap) {
       player.onKeyStatus_(keyStatusMap);
+    }
+
+    /**
+     * @param {shakaExtern.Manifest} manifest
+     * @return {!Promise}
+     */
+    function setupPlayer(manifest) {
+      var parser = new shaka.test.FakeManifestParser(manifest);
+      var parserFactory = function() { return parser; };
+      return player.load('', 0, parserFactory).then(function() {
+        // "initialize" the current period.
+        chooseStreams();
+        canSwitch();
+      });
     }
   });
 
