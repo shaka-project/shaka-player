@@ -158,8 +158,9 @@ describe('Offline', function() {
         .then(done);
   });
 
-  it('stores, plays, and deletes protected content with a temporary license', function(done) {
-    if (!support['offline']) {
+  drm_it('stores, plays, and deletes protected content with a temporary license', function(done) {
+    if (!support['offline'] ||
+        !support.drm['com.widevine.alpha']) {
       pending('Offline storage not supported');
     }
 
