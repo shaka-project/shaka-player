@@ -882,7 +882,7 @@ describe('Storage', function() {
         };
         drmEngine.setDrmInfo(drmInfo);
         drmEngine.setSessionIds(['abcd']);
-        storage.configure({ isPersistentLicense: false });
+        storage.configure({ usePersistentLicense: false });
       });
 
       it('does not store offline sessions', function(done) {
@@ -995,7 +995,7 @@ describe('Storage', function() {
     });
 
     it('will delete content with a temporary license', function(done) {
-      storage.configure({ isPersistentLicense: false });
+      storage.configure({ usePersistentLicense: false });
       var manifestId = 0;
       createAndInsertSegments(manifestId, 5)
           .then(function(refs) {

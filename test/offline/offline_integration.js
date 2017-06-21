@@ -169,7 +169,7 @@ describe('Offline', function() {
         shaka.test.TestScheme.setupPlayer(player, 'sintel-enc');
 
         var storedContent;
-        storage.configure({ isPersistentLicense: false });
+        storage.configure({ usePersistentLicense: false });
         storage.store('test:sintel-enc')
             .then(function(content) {
               storedContent = content;
