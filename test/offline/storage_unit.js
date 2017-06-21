@@ -869,6 +869,37 @@ describe('Storage', function() {
         }).catch(fail).then(done);
       });
     });  // describe('default track selection callback')
+
+    describe('temporary license', function() {
+      var drmInfo;
+
+      beforeEach(function() {
+        drmInfo = {
+          keySystem: 'com.example.abc',
+          licenseServerUri: 'http://example.com',
+          persistentStateRequire: false,
+          audioRobustness: 'HARDY'
+        };
+        drmEngine.setDrmInfo(drmInfo);
+        drmEngine.setSessionIds(['abcd']);
+        storage.configure({ isPersistentLicense: false });
+      });
+
+      it('does not store offline sessions', function(done) {
+        storage.store('')
+            .then(function(data) {
+              expect(data.offlineUri).toBe('offline:0');
+              return fakeStorageEngine.get('manifest', 0);
+            })
+            .then(function(manifestDb) {
+              expect(manifestDb).toBeTruthy();
+              expect(manifestDb.drmInfo).toEqual(drmInfo);
+              expect(manifestDb.sessionIds.length).toEqual(0);
+            })
+            .catch(fail)
+            .then(done);
+      });
+    }); // describe('temporary license')
   });  // describe('store')
 
   describe('remove', function() {
@@ -956,6 +987,24 @@ describe('Storage', function() {
           })
           .then(function() {
             expectDatabaseCount(1, 8);
+            return removeManifest(manifestId);
+          })
+          .then(function() { expectDatabaseCount(0, 0); })
+          .catch(fail)
+          .then(done);
+    });
+
+    it('will delete content with a temporary license', function(done) {
+      storage.configure({ isPersistentLicense: false });
+      var manifestId = 0;
+      createAndInsertSegments(manifestId, 5)
+          .then(function(refs) {
+            var manifest = createManifest(manifestId);
+            manifest.periods[0].streams.push({segments: refs});
+            return fakeStorageEngine.insert('manifest', manifest);
+          })
+          .then(function() {
+            expectDatabaseCount(1, 5);
             return removeManifest(manifestId);
           })
           .then(function() { expectDatabaseCount(0, 0); })

@@ -157,4 +157,43 @@ describe('Offline', function() {
         .catch(fail)
         .then(done);
   });
+
+  drm_it(
+      'stores, plays, and deletes protected content with a temporary license',
+      function(done) {
+        if (!support['offline'] ||
+            !support.drm['com.widevine.alpha']) {
+          pending('Offline storage not supported');
+        }
+
+        shaka.test.TestScheme.setupPlayer(player, 'sintel-enc');
+
+        var storedContent;
+        storage.configure({ isPersistentLicense: false });
+        storage.store('test:sintel-enc')
+            .then(function(content) {
+              storedContent = content;
+              expect(storedContent.offlineUri).toBe('offline:0');
+              return player.load(storedContent.offlineUri);
+            })
+            .then(function() {
+              video.play();
+              return shaka.test.Util.delay(5);
+            })
+            .then(function() { return dbEngine.get('manifest', 0); })
+            .then(function(manifestDb) {
+              expect(manifestDb.sessionIds.length).toEqual(0);
+
+              expect(video.currentTime).toBeGreaterThan(3);
+              expect(video.ended).toBe(false);
+              return player.unload();
+            })
+            .then(function() { return storage.remove(storedContent); })
+            .then(function() { return dbEngine.get('manifest', 0); })
+            .then(function(manifestDb) {
+              expect(manifestDb).toBeFalsy();
+            })
+            .catch(fail)
+            .then(done);
+      });
 });
