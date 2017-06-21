@@ -107,7 +107,8 @@ describe('Storage', function() {
             codecs: 'vorbis',
             primary: true,
             segments: [],
-            roles: []
+            roles: [],
+            channelsCount: null
           }
         ]
       }],
@@ -147,7 +148,8 @@ describe('Storage', function() {
         videoCodec: 'avc1.4d401f',
         roles: [],
         videoId: 0,
-        audioId: 1
+        audioId: 1,
+        channelsCount: null
       }
     ];
     Promise

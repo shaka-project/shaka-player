@@ -473,7 +473,8 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
     primary: false,
     trickModeVideo: null,
     containsEmsgBoxes: false,
-    roles: []
+    roles: [],
+    channelsCount: null
   };
   stream.createSegmentIndex.and.callFake(
       function() { return Promise.resolve(); });
@@ -804,5 +805,17 @@ shaka.test.ManifestGenerator.prototype.currentStream_ = function() {
   goog.asserts.assert(this.lastStreamAdded_,
                       'Must add at least one stream.');
   return this.lastStreamAdded_;
+};
+
+
+/**
+ * Sets the count of the channels of the current stream.
+ * @param {number} count
+ * @return {!shaka.test.ManifestGenerator}
+ */
+shaka.test.ManifestGenerator.prototype.channelsCount = function(count) {
+  var stream = this.currentStream_();
+  stream.channelsCount = count;
+  return this;
 };
 // }}}

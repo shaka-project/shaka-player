@@ -136,7 +136,7 @@ describe('HlsParser', function() {
       'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
       'test://video\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
-      'URI="test://audio"\n'
+      'CHANNELS="2",URI="test://audio"\n'
     ].join('');
 
     var media = [
@@ -166,6 +166,7 @@ describe('HlsParser', function() {
                   .anyInitSegment()
                   .presentationTimeOffset(0)
                   .mime('audio/mp4', 'mp4a')
+                  .channelsCount(2)
           .build();
 
     testHlsParser(master, media, manifest, done);

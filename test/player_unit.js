@@ -899,7 +899,8 @@ describe('Player', function() {
           primary: false,
           roles: [],
           videoId: 4,
-          audioId: 1
+          audioId: 1,
+          channelsCount: null
         },
         {
           id: 2,
@@ -919,7 +920,8 @@ describe('Player', function() {
           primary: false,
           roles: [],
           videoId: 5,
-          audioId: 1
+          audioId: 1,
+          channelsCount: null
         },
         {
           id: 3,
@@ -939,7 +941,8 @@ describe('Player', function() {
           primary: false,
           roles: [],
           videoId: 4,
-          audioId: 2
+          audioId: 2,
+          channelsCount: null
         },
         {
           id: 4,
@@ -959,7 +962,8 @@ describe('Player', function() {
           primary: false,
           roles: [],
           videoId: 5,
-          audioId: 2
+          audioId: 2,
+          channelsCount: null
         },
         {
           id: 5,
@@ -979,7 +983,8 @@ describe('Player', function() {
           primary: false,
           roles: [],
           videoId: 5,
-          audioId: 8
+          audioId: 8,
+          channelsCount: null
         }
       ];
 
@@ -996,7 +1001,8 @@ describe('Player', function() {
           audioCodec: null,
           videoCodec: null,
           primary: false,
-          roles: []
+          roles: [],
+          channelsCount: null
         },
         {
           id: 7,
@@ -1010,7 +1016,8 @@ describe('Player', function() {
           audioCodec: null,
           videoCodec: null,
           primary: false,
-          roles: []
+          roles: [],
+          channelsCount: null
         }
       ];
     });
