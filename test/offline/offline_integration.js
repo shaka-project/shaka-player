@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-fdescribe('Offline', function() {
+describe('Offline', function() {
   var originalName;
   var dbEngine;
   var storage;
@@ -190,7 +190,7 @@ fdescribe('Offline', function() {
             })
             .then(function() { return storage.remove(storedContent); })
             .then(function() { return dbEngine.get('manifest', 0); })
-            .then(function(manifestDb){
+            .then(function(manifestDb) {
               expect(manifestDb).toBeFalsy();
             })
             .catch(fail)
