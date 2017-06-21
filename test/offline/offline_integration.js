@@ -158,45 +158,46 @@ describe('Offline', function() {
         .then(done);
   });
 
-  drm_it('stores, plays, and deletes protected content with a temporary license', function(done) {
-    if (!support['offline'] ||
-        !support.drm['com.widevine.alpha']) {
-      pending('Offline storage not supported');
-    }
+  drm_it('stores, plays, and deletes protected content with a temporary license',
+      function(done) {
+        if (!support['offline'] ||
+            !support.drm['com.widevine.alpha']) {
+          pending('Offline storage not supported');
+        }
 
-    shaka.test.TestScheme.setupPlayer(player, 'sintel-enc');
-    var onError = function(e) {
-      // We should only get a not-found error.
-      var expected = new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.DRM,
-          shaka.util.Error.Code.OFFLINE_SESSION_REMOVED);
-      shaka.test.Util.expectToEqualError(e, expected);
-    };
+        shaka.test.TestScheme.setupPlayer(player, 'sintel-enc');
+        var onError = function(e) {
+          // We should only get a not-found error.
+          var expected = new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
+              shaka.util.Error.Category.DRM,
+              shaka.util.Error.Code.OFFLINE_SESSION_REMOVED);
+          shaka.test.Util.expectToEqualError(e, expected);
+        };
 
-    var storedContent;
-    var drmEngine;
-    storage.configure({ isPersistentLicense: false });
-    storage.store('test:sintel-enc')
-        .then(function(content) {
-          storedContent = content;
-          expect(storedContent.offlineUri).toBe('offline:0');
-          return player.load(storedContent.offlineUri);
-        })
-        .then(function() {
-          video.play();
-          return shaka.test.Util.delay(5);
-        })
-        .then(function() { return dbEngine.get('manifest', 0); })
-        .then(function(manifestDb) {
-          expect(manifestDb.sessionIds.length).toEqual(0);
+        var storedContent;
+        var drmEngine;
+        storage.configure({ isPersistentLicense: false });
+        storage.store('test:sintel-enc')
+            .then(function(content) {
+              storedContent = content;
+              expect(storedContent.offlineUri).toBe('offline:0');
+              return player.load(storedContent.offlineUri);
+            })
+            .then(function() {
+              video.play();
+              return shaka.test.Util.delay(5);
+            })
+            .then(function() { return dbEngine.get('manifest', 0); })
+            .then(function(manifestDb) {
+              expect(manifestDb.sessionIds.length).toEqual(0);
 
-          expect(video.currentTime).toBeGreaterThan(3);
-          expect(video.ended).toBe(false);
-          return player.unload();
-        })
-        .then(function() { return storage.remove(storedContent); })
-        .catch(fail)
-        .then(done);
-  })
+              expect(video.currentTime).toBeGreaterThan(3);
+              expect(video.ended).toBe(false);
+              return player.unload();
+            })
+            .then(function() { return storage.remove(storedContent); })
+            .catch(fail)
+            .then(done);
+      });
 });

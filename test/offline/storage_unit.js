@@ -870,10 +870,10 @@ describe('Storage', function() {
       });
     });  // describe('default track selection callback')
 
-    describe('temporary license', function(){
+    describe('temporary license', function() {
       var drmInfo;
 
-      beforeEach(function(){
+      beforeEach(function() {
         drmInfo = {
           keySystem: 'com.example.abc',
           licenseServerUri: 'http://example.com',
@@ -886,7 +886,6 @@ describe('Storage', function() {
       });
 
       it('does not store offline sessions', function(done) {
-
         storage.store('')
             .then(function(data) {
               expect(data.offlineUri).toBe('offline:0');
@@ -995,7 +994,7 @@ describe('Storage', function() {
           .then(done);
     });
 
-    it('will delete content with a temporary license', function(done){
+    it('will delete content with a temporary license', function(done) {
       storage.configure({ isPersistentLicense: false });
       var manifestId = 0;
       createAndInsertSegments(manifestId, 5)
