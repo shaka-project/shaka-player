@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('Offline', function() {
+fdescribe('Offline', function() {
   var originalName;
   var dbEngine;
   var storage;
@@ -158,7 +158,8 @@ describe('Offline', function() {
         .then(done);
   });
 
-  drm_it('stores, plays, and deletes protected content with a temporary license',
+  drm_it(
+      'stores, plays, and deletes protected content with a temporary license',
       function(done) {
         if (!support['offline'] ||
             !support.drm['com.widevine.alpha']) {
@@ -166,17 +167,8 @@ describe('Offline', function() {
         }
 
         shaka.test.TestScheme.setupPlayer(player, 'sintel-enc');
-        var onError = function(e) {
-          // We should only get a not-found error.
-          var expected = new shaka.util.Error(
-              shaka.util.Error.Severity.CRITICAL,
-              shaka.util.Error.Category.DRM,
-              shaka.util.Error.Code.OFFLINE_SESSION_REMOVED);
-          shaka.test.Util.expectToEqualError(e, expected);
-        };
 
         var storedContent;
-        var drmEngine;
         storage.configure({ isPersistentLicense: false });
         storage.store('test:sintel-enc')
             .then(function(content) {
@@ -197,6 +189,10 @@ describe('Offline', function() {
               return player.unload();
             })
             .then(function() { return storage.remove(storedContent); })
+            .then(function() { return dbEngine.get('manifest', 0); })
+            .then(function(manifestDb){
+              expect(manifestDb).toBeFalsy();
+            })
             .catch(fail)
             .then(done);
       });
