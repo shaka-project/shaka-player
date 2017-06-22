@@ -154,12 +154,17 @@ def cygwin_safe_path(path):
 
 def git_version():
   """Gets the version of the library from git."""
-  try:
-    # Check git tags for a version number, noting if the sources are dirty.
-    cmd_line = ['git', '-C', get_source_base(), 'describe', '--tags', '--dirty']
-    return execute_get_output(cmd_line).strip()
-  except subprocess.CalledProcessError:
-    raise RuntimeError('Unable to determine library version!')
+  # Check if the shaka-player source base directory has '.git' file.
+  git_path = os.path.join(get_source_base(), '.git')
+  if not os.path.exists(git_path):
+    raise RuntimeError('no .git file is in the shaka-player repository.')
+  else:
+    try:
+      # Check git tags for a version number, noting if the sources are dirty.
+      cmd_line = ['git', '-C', get_source_base(), 'describe', '--tags', '--dirty']
+      return execute_get_output(cmd_line).strip()
+    except subprocess.CalledProcessError:
+      raise RuntimeError('Unable to determine library version!')
 
 
 def npm_version(is_dirty=False):
