@@ -162,6 +162,8 @@ shakaDemo.init = function() {
 
       // add error handling
       shakaDemo.player_.addEventListener('error', shakaDemo.onErrorEvent_);
+      shakaDemo.player_.addEventListener('segmentbuffering', 
+          shakaDemo.onSegmentBufferingEvent_);
 
       // add network transactions progress events listener
       shakaDemo.player_.getNetworkingEngine().addEventListener('progress',
@@ -486,11 +488,29 @@ shakaDemo.onErrorEvent_ = function(event) {
 };
 
 
+shakaDemo.onSegmentBufferingEvent_ = function(event) {
+
+  console.log(event);
+
+  var contentType = event.contentType;
+
+  if (contentType === 'video') {
+
+    var progressBar = document.getElementById('bufferingProgressBar');
+    progressBar.value = event.bufferingProgress;
+    progressBar.max = event.bufferingGoal;
+  }
+};
+
 /**
  * @param {Object} event
  * @private
  */
 shakaDemo.onNetworkProgressEvent_ = function(event) {
+
+  return;
+
+  /*
 
   var responseURL;
   var aggregatedLoaded = 0;
@@ -538,6 +558,7 @@ shakaDemo.onNetworkProgressEvent_ = function(event) {
   if (event.loaded === event.total) {
     delete pendingNetworkTransactions[responseURL];
   }
+  */
 };
 
 
