@@ -51,8 +51,10 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         });
     rejectScheme = jasmine.createSpy('reject scheme')
         .and.callFake(function() { return Promise.reject(error); });
-    shaka.net.NetworkingEngine.registerScheme('resolve', resolveScheme);
-    shaka.net.NetworkingEngine.registerScheme('reject', rejectScheme);
+    shaka.net.NetworkingEngine.registerScheme(
+        'resolve', Util.spyFunc(resolveScheme));
+    shaka.net.NetworkingEngine.registerScheme(
+        'reject', Util.spyFunc(rejectScheme));
   });
 
   afterEach(function() {
@@ -138,7 +140,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         origSetTimeout = shaka.net.NetworkingEngine.setTimeout_;
         setTimeoutSpy = jasmine.createSpy('setTimeout');
         setTimeoutSpy.and.callFake(origSetTimeout);
-        shaka.net.NetworkingEngine.setTimeout_ = setTimeoutSpy;
+        shaka.net.NetworkingEngine.setTimeout_ = Util.spyFunc(setTimeoutSpy);
         realRandom = Math.random;
         Math.random = function() { return 0.75; };
       });
@@ -896,7 +898,8 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
 
   it('ignores cache hits', function(done) {
     var onSegmentDownloaded = jasmine.createSpy('onSegmentDownloaded');
-    networkingEngine = new shaka.net.NetworkingEngine(onSegmentDownloaded);
+    networkingEngine =
+        new shaka.net.NetworkingEngine(Util.spyFunc(onSegmentDownloaded));
 
     networkingEngine.request(requestType, createRequest('resolve://foo'))
         .then(function() {

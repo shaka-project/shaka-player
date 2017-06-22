@@ -362,7 +362,7 @@ shaka.test.FakePresentationTimeline = function() {
   var getStart = jasmine.createSpy('getSegmentAvailabilityStart');
   var getSafeStart = jasmine.createSpy('getSafeAvailabilityStart');
   getSafeStart.and.callFake(function(delay) {
-    return getStart() + delay;
+    return shaka.test.Util.invokeSpy(getStart) + delay;
   });
 
   return {

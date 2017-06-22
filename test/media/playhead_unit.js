@@ -97,6 +97,8 @@ var SeekTestInfo;
 
 
 describe('Playhead', function() {
+  var Util = shaka.test.Util;
+
   var video;
   var timeline;
   var manifest;
@@ -160,8 +162,8 @@ describe('Playhead', function() {
           manifest,
           config,
           5 /* startTime */,
-          onSeek,
-          onEvent);
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
 
       expect(video.addEventListener).toHaveBeenCalledWith(
           'loadedmetadata', jasmine.any(Function), false);
@@ -200,8 +202,8 @@ describe('Playhead', function() {
           manifest,
           config,
           5 /* startTime */,
-          onSeek,
-          onEvent);
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
 
       expect(playhead.getTime()).toBe(5);
       expect(video.currentTime).toBe(5);
@@ -226,8 +228,8 @@ describe('Playhead', function() {
         manifest,
         config,
         5 /* startTime */,
-        onSeek,
-        onEvent);
+        Util.spyFunc(onSeek),
+        Util.spyFunc(onEvent));
 
     // Calling on['seeking']() is like dispatching a 'seeking' event. So, each
     // time we change the video's current time or Playhead changes the video's
@@ -365,8 +367,8 @@ describe('Playhead', function() {
         manifest,
         config,
         5 /* startTime */,
-        onSeek,
-        onEvent);
+        Util.spyFunc(onSeek),
+        Util.spyFunc(onEvent));
 
     video.on['seeking']();
     expect(video.currentTime).toBe(5);
@@ -411,8 +413,8 @@ describe('Playhead', function() {
           manifest,
           config,
           5 /* startTime */,
-          onSeek,
-          onEvent);
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
 
       video.on['seeking']();
       expect(video.currentTime).toBe(5);
@@ -444,8 +446,8 @@ describe('Playhead', function() {
           manifest,
           config,
           5 /* startTime */,
-          onSeek,
-          onEvent);
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
 
       video.on['seeking']();
       expect(video.currentTime).toBe(5);
@@ -598,8 +600,8 @@ describe('Playhead', function() {
               manifest,
               config,
               data.start /* startTime */,
-              onSeek,
-              onEvent);
+              Util.spyFunc(onSeek),
+              Util.spyFunc(onEvent));
 
           jasmine.clock().tick(1000);
           for (var time = data.start; time < data.waitingAt; time++) {
@@ -838,8 +840,8 @@ describe('Playhead', function() {
             manifest,
             config,
             data.start /* startTime */,
-            onSeek,
-            onEvent);
+            Util.spyFunc(onSeek),
+            Util.spyFunc(onEvent));
 
         jasmine.clock().tick(1000);
         expect(onEvent).not.toHaveBeenCalled();

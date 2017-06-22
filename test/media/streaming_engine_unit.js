@@ -400,14 +400,14 @@ describe('StreamingEngine', function() {
       playhead: playhead,
       mediaSourceEngine: mediaSourceEngine,
       netEngine: /** @type {!shaka.net.NetworkingEngine} */(netEngine),
-      onChooseStreams: onChooseStreams,
-      onCanSwitch: onCanSwitch,
-      onError: onError,
-      onEvent: onEvent,
-      onManifestUpdate: onManifestUpdate,
+      onChooseStreams: Util.spyFunc(onChooseStreams),
+      onCanSwitch: Util.spyFunc(onCanSwitch),
+      onError: Util.spyFunc(onError),
+      onEvent: Util.spyFunc(onEvent),
+      onManifestUpdate: Util.spyFunc(onManifestUpdate),
       onSegmentAppended: function() {},
-      onInitialStreamsSetup: onInitialStreamsSetup,
-      onStartupComplete: onStartupComplete
+      onInitialStreamsSetup: Util.spyFunc(onInitialStreamsSetup),
+      onStartupComplete: Util.spyFunc(onStartupComplete)
     };
     streamingEngine = new shaka.media.StreamingEngine(
         /** @type {shakaExtern.Manifest} */(manifest), playerInterface);
@@ -992,7 +992,7 @@ describe('StreamingEngine', function() {
       // Here we go!
       streamingEngine.init();
 
-      runTest(onTick);
+      runTest(Util.spyFunc(onTick));
       // Verify buffers.
       expect(mediaSourceEngine.initSegments).toEqual({
         audio: [false, true],
@@ -1088,7 +1088,7 @@ describe('StreamingEngine', function() {
       // Here we go!
       streamingEngine.init();
 
-      runTest(onTick);
+      runTest(Util.spyFunc(onTick));
       // Verify buffers.
       expect(mediaSourceEngine.initSegments).toEqual({
         audio: [false, true],
@@ -1155,7 +1155,7 @@ describe('StreamingEngine', function() {
       // Here we go!
       streamingEngine.init();
 
-      runTest(onTick);
+      runTest(Util.spyFunc(onTick));
       // Verify buffers.
       expect(mediaSourceEngine.initSegments).toEqual({
         audio: [false, true],
@@ -1882,7 +1882,7 @@ describe('StreamingEngine', function() {
       // NOTE: Closure cannot type check spy's correctly. Here we have to
       // explicitly re-create remove()'s spy.
       var removeSpy = jasmine.createSpy('remove');
-      mediaSourceEngine.remove = removeSpy;
+      mediaSourceEngine.remove = Util.spyFunc(removeSpy);
 
       removeSpy.and.callFake(function(type, start, end) {
         expect(playheadTime).toBe(20);
@@ -1971,7 +1971,7 @@ describe('StreamingEngine', function() {
       var originalAppendBuffer =
           shaka.test.FakeMediaSourceEngine.prototype.appendBuffer;
       var appendBufferSpy = jasmine.createSpy('appendBuffer');
-      mediaSourceEngine.appendBuffer = appendBufferSpy;
+      mediaSourceEngine.appendBuffer = Util.spyFunc(appendBufferSpy);
 
       // Throw two QuotaExceededErrors at different times.
       var numErrorsThrown = 0;
@@ -2041,7 +2041,7 @@ describe('StreamingEngine', function() {
       var originalAppendBuffer =
           shaka.test.FakeMediaSourceEngine.prototype.appendBuffer;
       var appendBufferSpy = jasmine.createSpy('appendBuffer');
-      mediaSourceEngine.appendBuffer = appendBufferSpy;
+      mediaSourceEngine.appendBuffer = Util.spyFunc(appendBufferSpy);
 
       // Throw QuotaExceededError multiple times after at least one segment of
       // each type has been appended.

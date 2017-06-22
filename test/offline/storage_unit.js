@@ -265,7 +265,7 @@ describe('Storage', function() {
       });
 
       var warning = jasmine.createSpy('shaka.log.warning');
-      shaka.log.warning = warning;
+      shaka.log.warning = shaka.test.Util.spyFunc(warning);
       storage.store('')
           .then(function(data) {
             expect(data).toBeTruthy();
@@ -811,7 +811,7 @@ describe('Storage', function() {
         }
 
         var warning = jasmine.createSpy('shaka.log.warning');
-        shaka.log.warning = warning;
+        shaka.log.warning = shaka.test.Util.spyFunc(warning);
 
         // An exact match is available for en-US, en-GB, and en.
         // Test all three to show that we are not just choosing the first loose

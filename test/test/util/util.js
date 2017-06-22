@@ -266,6 +266,25 @@ shaka.test.Util.makeMockObjectStrict = function(obj) {
 };
 
 
+/**
+ * @param {!jasmine.Spy} spy
+ * @return {!Function}
+ */
+shaka.test.Util.spyFunc = function(spy) {
+  return spy;
+};
+
+
+/**
+ * @param {!jasmine.Spy} spy
+ * @param {...*} var_args
+ * @return {*}
+ */
+shaka.test.Util.invokeSpy = function(spy, var_args) {
+  return spy.apply(null, Array.prototype.slice.call(arguments, 1));
+};
+
+
 beforeEach(function() {
   jasmine.addCustomEqualityTester(shaka.test.Util.compareReferences);
   shaka.test.Util.registerElementMatcher_();

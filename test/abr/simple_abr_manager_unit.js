@@ -83,7 +83,7 @@ describe('SimpleAbrManager', function() {
     textStreams = manifest.periods[0].textStreams;
 
     abrManager = new shaka.abr.SimpleAbrManager();
-    abrManager.init(switchCallback);
+    abrManager.init(shaka.test.Util.spyFunc(switchCallback));
     config.defaultBandwidthEstimate = defaultBandwidthEstimate;
     config.restrictions = defaultRestrictions;
     abrManager.configure(config);

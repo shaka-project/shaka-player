@@ -18,6 +18,7 @@
 describe('CastSender', function() {
   var CastSender;
   var CastUtils;
+  var Util = shaka.test.Util;
 
   var originalChrome;
 
@@ -61,8 +62,9 @@ describe('CastSender', function() {
     window['chrome'] = { cast: mockCastApi };
     mockSession = null;
 
-    sender = new CastSender(fakeAppId, onStatusChanged, onRemoteEvent,
-                            onResumeLocal, onInitStateRequired);
+    sender = new CastSender(
+        fakeAppId, Util.spyFunc(onStatusChanged), Util.spyFunc(onRemoteEvent),
+        Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
   });
 
   afterEach(function(done) {

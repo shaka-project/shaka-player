@@ -149,7 +149,7 @@ shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
   });
 
   timeline.getSeekRangeEnd.and.callFake(function() {
-    return timeline.getSegmentAvailabilityEnd();
+    return shaka.test.Util.invokeSpy(timeline.getSegmentAvailabilityEnd);
   });
 
   timeline.getSegmentAvailabilityDuration.and.callFake(function() {

@@ -266,7 +266,7 @@ describe('StreamingEngine', function() {
         config,
         null /* startTime */,
         onSeek,
-        onEvent);
+        shaka.test.Util.spyFunc(onEvent));
   }
 
   function setupManifest(

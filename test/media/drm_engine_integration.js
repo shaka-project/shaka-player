@@ -91,7 +91,9 @@ describe('DrmEngine', function() {
     });
 
     drmEngine = new shaka.media.DrmEngine(
-        networkingEngine, onErrorSpy, onKeyStatusSpy, onExpirationSpy);
+        networkingEngine, shaka.test.Util.spyFunc(onErrorSpy),
+        shaka.test.Util.spyFunc(onKeyStatusSpy),
+        shaka.test.Util.spyFunc(onExpirationSpy));
     var config = {
       retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
       clearKeys: {},
@@ -164,7 +166,7 @@ describe('DrmEngine', function() {
             requestComplete = originalRequest.apply(this, arguments);
             return requestComplete;
           });
-          networkingEngine.request = requestSpy;
+          networkingEngine.request = shaka.test.Util.spyFunc(requestSpy);
 
           var encryptedEventSeen = new shaka.util.PublicPromise();
           eventManager.listen(video, 'encrypted', function() {

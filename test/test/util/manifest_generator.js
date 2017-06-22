@@ -450,12 +450,18 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
     defaultMimeType = 'text/vtt';
   }
 
+  var create = jasmine.createSpy('createSegmentIndex').and.callFake(function() {
+    return Promise.resolve();
+  });
+  var find = jasmine.createSpy('findSegmentPosition').and.returnValue(null);
+  var get = jasmine.createSpy('getSegmentReference').and.returnValue(null);
+
   /** @type {shakaExtern.Stream} */
   var stream = {
     id: id,
-    createSegmentIndex: jasmine.createSpy('createSegmentIndex'),
-    findSegmentPosition: jasmine.createSpy('findSegmentPosition'),
-    getSegmentReference: jasmine.createSpy('getSegmentReference'),
+    createSegmentIndex: shaka.test.Util.spyFunc(create),
+    findSegmentPosition: shaka.test.Util.spyFunc(find),
+    getSegmentReference: shaka.test.Util.spyFunc(get),
     initSegmentReference: null,
     presentationTimeOffset: 0,
     mimeType: defaultMimeType,
@@ -476,11 +482,6 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
     roles: [],
     channelsCount: null
   };
-  stream.createSegmentIndex.and.callFake(
-      function() { return Promise.resolve(); });
-  stream.findSegmentPosition.and.returnValue(null);
-  stream.getSegmentReference.and.returnValue(null);
-
   return stream;
 };
 

@@ -276,7 +276,6 @@ jasmine.CallTracker.prototype.reset = function() {};
 /**
  * @constructor
  * @extends {Function}
- * @struct
  */
 jasmine.Spy = function() {};
 
@@ -291,7 +290,7 @@ jasmine.Spy.prototype.and;
 
 /**
  * @param {string} name
- * @return {!jasmine.Spy|!Function}
+ * @return {!jasmine.Spy}
  * @see https://github.com/google/closure-compiler/issues/1422
  */
 jasmine.createSpy = function(name) {};
@@ -308,7 +307,7 @@ jasmine.createSpyObj = function(name, members) {};
 /**
  * @param {*} obj
  * @param {string} name
- * @return {!jasmine.Spy|!Function}
+ * @return {!jasmine.Spy}
  * @see https://github.com/google/closure-compiler/issues/1422
  */
 var spyOn = function(obj, name) {};

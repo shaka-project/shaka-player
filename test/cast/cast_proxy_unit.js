@@ -18,6 +18,7 @@
 describe('CastProxy', function() {
   var CastProxy;
   var FakeEvent;
+  var Util = shaka.test.Util;
 
   var originalCastSender;
 
@@ -38,7 +39,7 @@ describe('CastProxy', function() {
     mockCastSenderConstructor.and.callFake(createMockCastSender);
 
     originalCastSender = shaka.cast.CastSender;
-    shaka.cast.CastSender = mockCastSenderConstructor;
+    shaka.cast.CastSender = Util.spyFunc(mockCastSenderConstructor);
   });
 
   afterAll(function() {
@@ -300,7 +301,8 @@ describe('CastProxy', function() {
     describe('local events', function() {
       it('forward to the proxy when we are playing back locally', function() {
         var proxyListener = jasmine.createSpy('listener');
-        proxy.getVideo().addEventListener('timeupdate', proxyListener);
+        proxy.getVideo().addEventListener(
+            'timeupdate', Util.spyFunc(proxyListener));
 
         expect(proxyListener).not.toHaveBeenCalled();
         var fakeEvent = new FakeEvent('timeupdate', {detail: 8675309});
@@ -313,7 +315,8 @@ describe('CastProxy', function() {
 
       it('are ignored when we are casting', function() {
         var proxyListener = jasmine.createSpy('listener');
-        proxy.getVideo().addEventListener('timeupdate', proxyListener);
+        proxy.getVideo().addEventListener(
+            'timeupdate', Util.spyFunc(proxyListener));
 
         // Set up the sender in casting mode:
         mockSender.isCasting.and.returnValue(true);
@@ -329,7 +332,8 @@ describe('CastProxy', function() {
     describe('remote events', function() {
       it('forward to the proxy when we are casting', function() {
         var proxyListener = jasmine.createSpy('listener');
-        proxy.getVideo().addEventListener('timeupdate', proxyListener);
+        proxy.getVideo().addEventListener(
+            'timeupdate', Util.spyFunc(proxyListener));
 
         // Set up the sender in casting mode:
         mockSender.isCasting.and.returnValue(true);
@@ -443,7 +447,8 @@ describe('CastProxy', function() {
     describe('local events', function() {
       it('forward to the proxy when we are playing back locally', function() {
         var proxyListener = jasmine.createSpy('listener');
-        proxy.getPlayer().addEventListener('buffering', proxyListener);
+        proxy.getPlayer().addEventListener(
+            'buffering', Util.spyFunc(proxyListener));
 
         expect(proxyListener).not.toHaveBeenCalled();
         var fakeEvent = new FakeEvent('buffering', {detail: 8675309});
@@ -456,7 +461,8 @@ describe('CastProxy', function() {
 
       it('are ignored when we are casting', function() {
         var proxyListener = jasmine.createSpy('listener');
-        proxy.getPlayer().addEventListener('buffering', proxyListener);
+        proxy.getPlayer().addEventListener(
+            'buffering', Util.spyFunc(proxyListener));
 
         // Set up the sender in casting mode:
         mockSender.isCasting.and.returnValue(true);
@@ -472,7 +478,8 @@ describe('CastProxy', function() {
     describe('remote events', function() {
       it('forward to the proxy when we are casting', function() {
         var proxyListener = jasmine.createSpy('listener');
-        proxy.getPlayer().addEventListener('buffering', proxyListener);
+        proxy.getPlayer().addEventListener(
+            'buffering', Util.spyFunc(proxyListener));
 
         // Set up the sender in casting mode:
         mockSender.isCasting.and.returnValue(true);
@@ -492,7 +499,7 @@ describe('CastProxy', function() {
   describe('"caststatuschanged" event', function() {
     it('is triggered by the sender', function() {
       var listener = jasmine.createSpy('listener');
-      proxy.addEventListener('caststatuschanged', listener);
+      proxy.addEventListener('caststatuschanged', Util.spyFunc(listener));
       expect(listener).not.toHaveBeenCalled();
       mockSender.onCastStatusChanged();
       expect(listener).toHaveBeenCalledWith(jasmine.objectContaining({

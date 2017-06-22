@@ -51,9 +51,9 @@ describe('Player', function() {
     };
 
     logErrorSpy = jasmine.createSpy('shaka.log.error');
-    shaka.log.error = logErrorSpy;
+    shaka.log.error = shaka.test.Util.spyFunc(logErrorSpy);
     logWarnSpy = jasmine.createSpy('shaka.log.warning');
-    shaka.log.warning = logWarnSpy;
+    shaka.log.warning = shaka.test.Util.spyFunc(logWarnSpy);
 
     ContentType = shaka.util.ManifestParserUtils.ContentType;
   });
@@ -113,7 +113,7 @@ describe('Player', function() {
     onError.and.callFake(function(event) {
       fail(event.detail);
     });
-    player.addEventListener('error', onError);
+    player.addEventListener('error', shaka.test.Util.spyFunc(onError));
   });
 
   afterEach(function(done) {

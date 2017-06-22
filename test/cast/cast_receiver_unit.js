@@ -18,6 +18,7 @@
 describe('CastReceiver', function() {
   var CastReceiver;
   var CastUtils;
+  var Util = shaka.test.Util;
 
   var originalCast;
   var originalUserAgent;
@@ -114,13 +115,15 @@ describe('CastReceiver', function() {
   describe('constructor', function() {
     it('starts the receiver manager', function() {
       checkChromeOrChromecast();
-      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
       expect(mockReceiverManager.start).toHaveBeenCalled();
     });
 
     it('listens for video and player events', function() {
       checkChromeOrChromecast();
-      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
       expect(Object.keys(mockVideo.on).length).toBeGreaterThan(0);
       expect(Object.keys(mockPlayer.listeners).length).toBeGreaterThan(0);
     });
@@ -134,7 +137,8 @@ describe('CastReceiver', function() {
         if (height && height > 1080) return false;
         return true;
       });
-      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
       expect(mockCanDisplayType).toHaveBeenCalled();
       expect(mockPlayer.setMaxHardwareResolution).
           toHaveBeenCalledWith(1920, 1080);
@@ -149,7 +153,8 @@ describe('CastReceiver', function() {
         if (height && height > 2160) return false;
         return true;
       });
-      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
       expect(mockCanDisplayType).toHaveBeenCalled();
       expect(mockPlayer.setMaxHardwareResolution).
           toHaveBeenCalledWith(3840, 2160);
@@ -157,7 +162,8 @@ describe('CastReceiver', function() {
 
     it('does not start polling', function() {
       checkChromeOrChromecast();
-      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
       expect(mockPlayer.getConfiguration).not.toHaveBeenCalled();
       expect(mockShakaMessageBus.messages.length).toBe(0);
     });
@@ -165,7 +171,8 @@ describe('CastReceiver', function() {
 
   describe('isConnected', function() {
     beforeEach(function() {
-      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
     });
 
     it('is true when there are senders', function() {
@@ -184,13 +191,14 @@ describe('CastReceiver', function() {
 
   describe('"caststatuschanged" event', function() {
     beforeEach(function() {
-      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
     });
 
     it('is triggered when senders connect or disconnect', function(done) {
       checkChromeOrChromecast();
       var listener = jasmine.createSpy('listener');
-      receiver.addEventListener('caststatuschanged', listener);
+      receiver.addEventListener('caststatuschanged', Util.spyFunc(listener));
 
       shaka.test.Util.delay(0.2).then(function() {
         expect(listener).not.toHaveBeenCalled();
@@ -209,7 +217,7 @@ describe('CastReceiver', function() {
     it('is triggered when idle state changes', function(done) {
       checkChromeOrChromecast();
       var listener = jasmine.createSpy('listener');
-      receiver.addEventListener('caststatuschanged', listener);
+      receiver.addEventListener('caststatuschanged', Util.spyFunc(listener));
 
       var fakeLoadingEvent = {type: 'loading'};
       var fakeUnloadingEvent = {type: 'unloading'};
@@ -253,7 +261,8 @@ describe('CastReceiver', function() {
 
   describe('local events', function() {
     beforeEach(function() {
-      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
     });
 
     it('trigger "update" and "event" messages', function() {
@@ -286,7 +295,8 @@ describe('CastReceiver', function() {
     var fakeAppData = {myFakeAppData: 1234};
 
     beforeEach(function() {
-      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
 
       fakeInitState = {
         player: {
@@ -448,7 +458,8 @@ describe('CastReceiver', function() {
 
   describe('"appData" message', function() {
     beforeEach(function() {
-      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
     });
 
     it('triggers the app data callback', function() {
@@ -467,7 +478,8 @@ describe('CastReceiver', function() {
 
   describe('"set" message', function() {
     beforeEach(function() {
-      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
     });
 
     it('sets local properties', function() {
@@ -522,7 +534,8 @@ describe('CastReceiver', function() {
 
   describe('"call" message', function() {
     beforeEach(function() {
-      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
     });
 
     it('calls local methods', function() {
@@ -553,7 +566,8 @@ describe('CastReceiver', function() {
     var fakeCallId = '5';
 
     beforeEach(function() {
-      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
 
       fakeConnectedSenders(1);
       p = new shaka.util.PublicPromise();
@@ -630,7 +644,8 @@ describe('CastReceiver', function() {
 
   describe('respects generic control messages', function() {
     beforeEach(function() {
-      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
       fakeConnectedSenders(1);
     });
 
@@ -755,7 +770,8 @@ describe('CastReceiver', function() {
 
   describe('destroy', function() {
     beforeEach(function() {
-      receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
     });
 
     it('destroys the local player', function(done) {

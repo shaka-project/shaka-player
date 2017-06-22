@@ -350,9 +350,13 @@ describe('TextEngine', function() {
       // This will overwrite the parser defined in the outer before each
       TextEngine.registerParser(
           dummyMimeType,
-          function(data, periodStart, segmentStart, segmentEnd) {
-            return mockParser(data, periodStart, segmentStart, segmentEnd);
-          });
+          /** @type {!Function} */
+          (function(data, periodStart, segmentStart, segmentEnd) {
+            // TextEngine uses the number of arguments to detect the type of
+            // parser, so we can't just pass the spy in (who has 0 args).
+            var func = shaka.test.Util.spyFunc(mockParser);
+            return func(data, periodStart, segmentStart, segmentEnd);
+          }));
     });
 
     describe('stateless parser', function() {

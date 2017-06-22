@@ -390,7 +390,7 @@ describe('Promise polyfill', function() {
 
       var all = Promise.all([p1, p2]);
       var spy = jasmine.createSpy('resolve').and.callFake(done);
-      all.then(spy, fail);
+      all.then(shaka.test.Util.spyFunc(spy), fail);
 
       setTimeout(function() {
         expect(spy).not.toHaveBeenCalled();
@@ -523,7 +523,7 @@ describe('Promise polyfill', function() {
 
          var race = Promise.race([p1]);
          var spy = jasmine.createSpy('resolve').and.callFake(done);
-         race.then(spy, fail);
+         race.then(shaka.test.Util.spyFunc(spy), fail);
 
          setTimeout(function() {
            expect(spy).not.toHaveBeenCalled();

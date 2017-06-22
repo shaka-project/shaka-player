@@ -53,7 +53,8 @@ describe('OfflineManifestParser', function() {
 
     fakeCreateStorageEngine = jasmine.createSpy('createStorageEngine');
     fakeCreateStorageEngine.and.returnValue(fakeStorageEngine);
-    shaka.offline.OfflineUtils.createStorageEngine = fakeCreateStorageEngine;
+    shaka.offline.OfflineUtils.createStorageEngine =
+        shaka.test.Util.spyFunc(fakeCreateStorageEngine);
 
     parser = new shaka.offline.OfflineManifestParser();
   });
@@ -279,7 +280,8 @@ describe('OfflineManifestParser', function() {
       fakeStorageEngine.get.and.returnValue(Promise.resolve(data));
 
       var spy = jasmine.createSpy('reconstructPeriod');
-      shaka.offline.OfflineUtils.reconstructPeriod = spy;
+      shaka.offline.OfflineUtils.reconstructPeriod =
+          shaka.test.Util.spyFunc(spy);
 
       parser.start(uri, /* playerInterface */ null)
           .then(function(manifest) {
@@ -307,7 +309,8 @@ describe('OfflineManifestParser', function() {
       fakeStorageEngine.get.and.returnValue(Promise.resolve(data));
 
       var spy = jasmine.createSpy('reconstructPeriod');
-      shaka.offline.OfflineUtils.reconstructPeriod = spy;
+      shaka.offline.OfflineUtils.reconstructPeriod =
+          shaka.test.Util.spyFunc(spy);
 
       parser.start(uri, /* playerInterface */ null)
           .then(function(manifest) {

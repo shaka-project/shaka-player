@@ -45,12 +45,13 @@ describe('DrmEngine', function() {
 
     requestMediaKeySystemAccessSpy =
         jasmine.createSpy('requestMediaKeySystemAccess');
-    navigator.requestMediaKeySystemAccess = requestMediaKeySystemAccessSpy;
+    navigator.requestMediaKeySystemAccess =
+        shaka.test.Util.spyFunc(requestMediaKeySystemAccessSpy);
 
     originalLogError = shaka.log.error;
 
     logErrorSpy = jasmine.createSpy('shaka.log.error');
-    shaka.log.error = logErrorSpy;
+    shaka.log.error = shaka.test.Util.spyFunc(logErrorSpy);
 
     onErrorSpy = jasmine.createSpy('onError');
     onKeyStatusSpy = jasmine.createSpy('onKeyStatus');
@@ -104,7 +105,9 @@ describe('DrmEngine', function() {
     fakeNetEngine.setResponseMap({ 'http://abc.drm/license': license });
 
     drmEngine = new shaka.media.DrmEngine(
-        fakeNetEngine, onErrorSpy, onKeyStatusSpy, onExpirationSpy);
+        fakeNetEngine, shaka.test.Util.spyFunc(onErrorSpy),
+        shaka.test.Util.spyFunc(onKeyStatusSpy),
+        shaka.test.Util.spyFunc(onExpirationSpy));
     config = {
       retryParameters: retryParameters,
       delayLicenseRequestUntilPlayed: false,
