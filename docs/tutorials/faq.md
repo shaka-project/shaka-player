@@ -85,11 +85,14 @@ you see JSON, you will need to [unwrap the response][wrapping].
 **A:** If your HLS manifest describes MPEG2-TS content, the only browsers
 capable of playing it are Edge, Chromecast and Safari. You will get an
 `UNPLAYABLE_PERIOD` error on other browsers due to their lack of TS support.
+We are planning to implement transmuxing TS files to fMP4 so they're
+supported across all browsers. Please subscibe to issue [#887][887] to
+get updates on the progress.
 
 We also were not able to make it work on Safari yet due to a bug in their
 MediaSource implementation ([#743][743]).
 
-Please file a issue if your TS content isn't playing in Chromecast or Edge
+Please file an issue if your TS content isn't playing in Chromecast or Edge
 and your MP4 content - on any browser.
 
 <hr>
@@ -118,6 +121,7 @@ these initial decisions.
 [386]: https://github.com/google/shaka-player/issues/386#issuecomment-227898001
 [489]: https://github.com/google/shaka-player/issues/489#issuecomment-240466224
 [743]: https://github.com/google/shaka-player/issues/743
+[887]: https://github.com/google/shaka-player/issues/887
 [AbrConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shakaExtern.html#AbrConfiguration
 [CORS]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
 [DashManifestConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shakaExtern.html#DashManifestConfiguration
