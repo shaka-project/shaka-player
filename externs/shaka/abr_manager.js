@@ -45,7 +45,7 @@ shakaExtern.AbrManager = function() {};
  * The first argument is a map of content types to chosen streams.
  *
  * The second argument is an optional boolean.  If true, all data will be
- * from the buffer, which will result in a buffering event.
+ * flushed from the buffer, which will result in a buffering event.
  *
  * @typedef {function(!Object.<string, !shakaExtern.Stream>, boolean=)}
  * @exportDoc
