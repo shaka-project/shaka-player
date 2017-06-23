@@ -1028,7 +1028,8 @@ describe('DrmEngine', function() {
       // Not mocked.  Run data through real data URI parser to ensure that it is
       // correctly formatted.
       fakeNetEngine.request.and.callFake(function(type, request) {
-        return shaka.net.DataUriPlugin(request.uris[0], request);
+        return shaka.net.DataUriPlugin(request.uris[0], request,
+            shaka.net.NetworkingEngine.RequestType.LICENSE, function() {});
       });
 
       initAndAttach().then(function() {

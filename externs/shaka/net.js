@@ -125,7 +125,9 @@ shakaExtern.Response;
  *
  * @typedef {!function(string,
  *                     shakaExtern.Request,
- *                     shaka.net.NetworkingEngine.RequestType):
+ *                     shaka.net.NetworkingEngine.RequestType,
+ *                     function(ProgressEvent,
+ *                      shaka.net.NetworkingEngine.RequestType)):
  *     !Promise.<shakaExtern.Response>}
  * @exportDoc
  */

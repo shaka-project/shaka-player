@@ -63,6 +63,10 @@ shakaDemo.hashCanChange_ = false;
 shakaDemo.suppressHashChangeEvent_ = false;
 
 
+/** @private {Object} */
+shakaDemo.pendingNetworkTransactions_ = {};
+
+
 /**
  * @private
  * @const {string}
@@ -160,7 +164,16 @@ shakaDemo.init = function() {
 
       shakaDemo.video_ = shakaDemo.castProxy_.getVideo();
       shakaDemo.player_ = shakaDemo.castProxy_.getPlayer();
+
+      // add error handling
       shakaDemo.player_.addEventListener('error', shakaDemo.onErrorEvent_);
+      shakaDemo.player_.addEventListener('segmentbuffering', 
+          shakaDemo.onSegmentBufferingEvent_);
+
+      // add network transactions progress events listener
+      shakaDemo.player_.getNetworkingEngine().addEventListener('progress',
+          shakaDemo.onNetworkProgressEvent_);
+
       shakaDemo.localVideo_ = localVideo;
       shakaDemo.localPlayer_ = localPlayer;
 
@@ -477,6 +490,80 @@ shakaDemo.hashShouldChange_ = function() {
 shakaDemo.onErrorEvent_ = function(event) {
   var error = event.detail;
   shakaDemo.onError_(error);
+};
+
+
+shakaDemo.onSegmentBufferingEvent_ = function(event) {
+
+  console.log(event);
+
+  var contentType = event.contentType;
+
+  if (contentType === 'video') {
+
+    var progressBar = document.getElementById('bufferingProgressBar');
+    progressBar.value = event.bufferingProgress;
+    progressBar.max = event.bufferingGoal;
+  }
+};
+
+/**
+ * @param {Object} event
+ * @private
+ */
+shakaDemo.onNetworkProgressEvent_ = function(event) {
+
+  return;
+
+  /*
+
+  var responseURL;
+  var aggregatedLoaded = 0;
+  var aggregatedTotal = 0;
+  var progressBar;
+  var contentType;
+  var pendingNetworkTransactions = shakaDemo.pendingNetworkTransactions_;
+
+  // only track progress of segment requests
+  if (event.requestType !== shaka.net.NetworkingEngine.RequestType.SEGMENT) {
+    return;
+  }
+
+  // make sure we have an underlying XHR
+  if (!(event.innerTarget instanceof XMLHttpRequest)) {
+    return;
+  }
+
+  // make sure we ignore text/ and audio/ or init segments.
+  // (webm audio segments may be returned by the server as video/webm however)
+  contentType = event.innerTarget.getResponseHeader('Content-Type');
+  if (!contentType || !contentType.startsWith('video/')) {
+    return;
+  }
+
+  responseURL = event.innerTarget.responseURL;
+  pendingNetworkTransactions[responseURL] = event;
+
+  var pendingSegmentUrls =
+      Object.getOwnPropertyNames(pendingNetworkTransactions);
+
+  // only aggregate progress info when buffering
+  if (shakaDemo.player_.isBuffering()) {
+    pendingSegmentUrls.forEach(function(url) {
+      aggregatedLoaded += pendingNetworkTransactions[url].loaded;
+      aggregatedTotal += pendingNetworkTransactions[url].total;
+    });
+  }
+
+  progressBar = document.getElementById('bufferingProgressBar');
+  progressBar.value = aggregatedLoaded;
+  progressBar.max = aggregatedTotal;
+
+  // if we loaded the last byte remove it from map
+  if (event.loaded === event.total) {
+    delete pendingNetworkTransactions[responseURL];
+  }
+  */
 };
 
 

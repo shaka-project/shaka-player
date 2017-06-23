@@ -23,6 +23,8 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
   var Util;
   var originalGetLocationProtocol;
   var fakeProtocol;
+  var fakeProgressEvent;
+  var fakeProgressEventTarget;
   var error;
 
   beforeAll(function() {
@@ -53,6 +55,15 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         .and.callFake(function() { return Promise.reject(error); });
     shaka.net.NetworkingEngine.registerScheme('resolve', resolveScheme);
     shaka.net.NetworkingEngine.registerScheme('reject', rejectScheme);
+
+    fakeProgressEventTarget = {};
+    fakeProgressEvent = {
+      lengthComputable: false,
+      loaded: 0,
+      total: 0,
+      target: fakeProgressEventTarget,
+      currentTarget: fakeProgressEventTarget
+    };
   });
 
   afterEach(function() {
@@ -249,6 +260,49 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
     });
   });
 
+  describe('eventtarget', function() {
+    it('implements EventTarget interface', function() {
+      expect(typeof networkingEngine.addEventListener).toBe('function');
+      expect(typeof networkingEngine.removeEventListener).toBe('function');
+    });
+
+    it('propagates progress events via callback passed to scheme plugin',
+        function(done) {
+          var requestTypePassedStored;
+
+          networkingEngine.addEventListener('progress',
+              function(progressEvent) {
+                expect(progressEvent.loaded)
+                      .toEqual(fakeProgressEvent.loaded);
+                expect(progressEvent.total)
+                      .toEqual(fakeProgressEvent.total);
+                expect(progressEvent.lengthComputable)
+                      .toEqual(fakeProgressEvent.lengthComputable);
+                expect(progressEvent.requestType)
+                      .toEqual(requestTypePassedStored);
+                expect(progressEvent.target).toBe(networkingEngine);
+                expect(progressEvent.currentTarget).toBe(networkingEngine);
+                expect(progressEvent.innerTarget)
+                      .toBe(fakeProgressEventTarget);
+                done();
+              });
+
+          var request = createRequest('resolve://foo');
+          request.method = 'POST';
+
+          resolveScheme.and.callFake(
+              function(uri,
+                  requestPassed, 
+                  requestTypePassed, 
+                  progressCallbackPassed) {
+                requestTypePassedStored = requestTypePassed;
+                progressCallbackPassed(fakeProgressEvent, requestTypePassed);
+                return Promise.resolve({});
+              });
+          networkingEngine.request(requestType, request).catch(fail);
+        });
+  });
+
   describe('request', function() {
     it('uses registered schemes', function(done) {
       networkingEngine.request(requestType, createRequest('resolve://foo'))
@@ -291,10 +345,14 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
       request.method = 'POST';
 
       resolveScheme.and.callFake(
-          function(uri, requestPassed, requestTypePassed) {
+          function(uri, 
+              requestPassed, 
+              requestTypePassed, 
+              progressCallbackPassed) {
             expect(uri).toBe(request.uris[0]);
             expect(requestPassed).toEqual(request);
             expect(requestTypePassed).toEqual(requestType);
+            expect(typeof progressCallbackPassed).toBe('function');
             return Promise.resolve({});
           });
       networkingEngine.request(requestType, request).catch(fail).then(done);

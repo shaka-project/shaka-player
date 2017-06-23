@@ -64,7 +64,8 @@ describe('OfflineScheme', function() {
   it('will return special content-type header for manifests', function(done) {
     var uri = 'offline:123';
     fakeCreateStorageEngine.and.throwError();
-    OfflineScheme(uri, request)
+    OfflineScheme(uri, request,
+        shaka.net.NetworkingEngine.RequestType.LICENSE, function() {})
         .then(function(response) {
           expect(response).toBeTruthy();
           expect(response.uri).toBe(uri);
@@ -78,7 +79,8 @@ describe('OfflineScheme', function() {
   it('will query DBEngine for segments', function(done) {
     var uri = 'offline:123/456/789';
 
-    OfflineScheme(uri, request)
+    OfflineScheme(uri, request,
+        shaka.net.NetworkingEngine.RequestType.LICENSE, function() {})
         .then(function(response) {
           expect(response).toBeTruthy();
           expect(response.uri).toBe(uri);
@@ -98,7 +100,8 @@ describe('OfflineScheme', function() {
     var uri = 'offline:123/456/789';
     fakeStorageEngine.get.and.returnValue(Promise.resolve(null));
 
-    OfflineScheme(uri, request)
+    OfflineScheme(uri, request,
+        shaka.net.NetworkingEngine.RequestType.LICENSE, function() {})
         .then(fail)
         .catch(function(err) {
           shaka.test.Util.expectToEqualError(
@@ -121,7 +124,8 @@ describe('OfflineScheme', function() {
   it('will fail for invalid URI', function(done) {
     var uri = 'offline:abc';
     fakeCreateStorageEngine.and.throwError();
-    OfflineScheme(uri, request)
+    OfflineScheme(uri, request,
+        shaka.net.NetworkingEngine.RequestType.LICENSE, function() {})
         .then(fail)
         .catch(function(err) {
           shaka.test.Util.expectToEqualError(
