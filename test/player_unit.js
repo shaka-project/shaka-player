@@ -738,6 +738,105 @@ describe('Player', function() {
     });
   });
 
+  describe('filterTracks', function() {
+    it('retains only video+audio variants if they exist', function(done) {
+      var manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addVariant(1)
+            .bandwidth(200)
+            .language('fr')
+            .addAudio(2).bandwidth(100)
+          .addVariant(2)
+            .bandwidth(400)
+            .language('en')
+            .addAudio(1).bandwidth(100)
+            .addVideo(4).bandwidth(100).size(100, 200)
+            .frameRate(1000000 / 42000)
+          .addVariant(3)
+            .bandwidth(200)
+            .addVideo(5).bandwidth(100).size(300, 400)
+            .frameRate(1000000 / 42000)
+        .addPeriod(1)
+          .addVariant(1)
+            .bandwidth(200)
+            .language('fr')
+            .addAudio(2).bandwidth(100)
+          .addVariant(2)
+            .bandwidth(200)
+            .addVideo(5).bandwidth(100).size(300, 400)
+            .frameRate(1000000 / 42000)
+          .addVariant(3)
+            .bandwidth(450)
+            .language('en')
+            .addAudio(1).bandwidth(100)
+            .addVideo(4).bandwidth(100).size(100, 200)
+            .frameRate(1000000 / 42000)
+        .build();
+
+      var variantTracks1 = [
+        {
+          id: 2,
+          active: false,
+          type: 'variant',
+          bandwidth: 400,
+          language: 'en',
+          label: null,
+          kind: null,
+          width: 100,
+          height: 200,
+          frameRate: 1000000 / 42000,
+          mimeType: 'video/mp4',
+          codecs: 'avc1.4d401f, mp4a.40.2',
+          audioCodec: 'mp4a.40.2',
+          videoCodec: 'avc1.4d401f',
+          primary: false,
+          roles: [],
+          videoId: 4,
+          audioId: 1,
+          channelsCount: null
+        }
+      ];
+      var variantTracks2 = [
+        {
+          id: 3,
+          active: false,
+          type: 'variant',
+          bandwidth: 450,
+          language: 'en',
+          label: null,
+          kind: null,
+          width: 100,
+          height: 200,
+          frameRate: 1000000 / 42000,
+          mimeType: 'video/mp4',
+          codecs: 'avc1.4d401f, mp4a.40.2',
+          audioCodec: 'mp4a.40.2',
+          videoCodec: 'avc1.4d401f',
+          primary: false,
+          roles: [],
+          videoId: 4,
+          audioId: 1,
+          channelsCount: null
+        }
+      ];
+
+      var parser = new shaka.test.FakeManifestParser(manifest);
+      var parserFactory = function() { return parser; };
+      player.load('', 0, parserFactory).catch(fail).then(function() {
+        // Check the first period's variant tracks.
+        var actualVariantTracks1 = player.getVariantTracks();
+        expect(actualVariantTracks1).toEqual(variantTracks1);
+
+        // Check the second period's variant tracks.
+        playhead.getTime.and.callFake(function() {
+          return 100;
+        });
+        var actualVariantTracks2 = player.getVariantTracks();
+        expect(actualVariantTracks2).toEqual(variantTracks2);
+      }).then(done);
+    });
+  });
+
   describe('tracks', function() {
     var variantTracks;
     var textTracks;
