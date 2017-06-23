@@ -52,6 +52,17 @@ shakaExtern.AbrManager = function() {};
  */
 shakaExtern.AbrManager.SwitchCallback;
 
+/**
+ * A getter from the Player that should provide actual playback statistics
+ * when the ABR manager needs to take decisions based on these.
+ *
+ * The provider function should return {shakaExtern.Stats}.
+ *
+ * @typedef {function()}
+ * @exportDoc
+ */
+shakaExtern.AbrManager.StatsProvider;
+
 
 /**
  * A factory for creating the abr manager.  This will be called with 'new'.
@@ -66,9 +77,10 @@ shakaExtern.AbrManager.Factory;
  * Initializes the AbrManager.
  *
  * @param {shakaExtern.AbrManager.SwitchCallback} switchCallback
+ * @param {shakaExtern.AbrManager.StatsProvider} statsProvider
  * @exportDoc
  */
-shakaExtern.AbrManager.prototype.init = function(switchCallback) {};
+shakaExtern.AbrManager.prototype.init = function(switchCallback, statsProvider) {};
 
 
 /**
