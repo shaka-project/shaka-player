@@ -15,14 +15,17 @@
  * limitations under the License.
  */
 
-describe('DBEngine', function() {
-  var db;
-  var schema;
-  var oldName;
+describe('DBEngine', /** @suppress {accessControls} */ function() {
+  /** @const */
+  var oldName = shaka.offline.DBEngine.DB_NAME_;
 
-  beforeAll(/** @suppress {accessControls} */ function() {
+  /** @type {!shaka.offline.DBEngine} */
+  var db;
+  /** @type {!Object.<string, string>} */
+  var schema;
+
+  beforeAll(function() {
     if (shaka.offline.DBEngine.isSupported()) {
-      oldName = shaka.offline.DBEngine.DB_NAME_;
       shaka.offline.DBEngine.DB_NAME_ += '_test';
     }
   });
@@ -39,7 +42,7 @@ describe('DBEngine', function() {
     }
   });
 
-  afterAll(/** @suppress {accessControls} */ function() {
+  afterAll(function() {
     if (shaka.offline.DBEngine.isSupported()) {
       shaka.offline.DBEngine.DB_NAME_ = oldName;
     }
@@ -137,7 +140,7 @@ describe('DBEngine', function() {
     var spy = jasmine.createSpy('forEach');
     Promise.all(testData.map(db.insert.bind(db, 'test')))
         .then(function() {
-          return db.forEach('test', spy);
+          return db.forEach('test', shaka.test.Util.spyFunc(spy));
         })
         .then(function() {
           expect(spy).toHaveBeenCalledTimes(testData.length);

@@ -1116,7 +1116,7 @@ describe('StreamingEngine', function() {
             return defaultOnChooseStreams(period);
           });
 
-          mediaSourceEngine.endOfStream.and.callThrough();
+          mediaSourceEngine.endOfStream.and.returnValue(Promise.resolve());
 
           // Switch to the first Period.
           return defaultOnChooseStreams(period);
@@ -1332,7 +1332,7 @@ describe('StreamingEngine', function() {
             playheadTime -= 20;
             streamingEngine.seeked();
 
-            mediaSourceEngine.endOfStream.and.callThrough();
+            mediaSourceEngine.endOfStream.and.returnValue(Promise.resolve());
             return Promise.resolve();
           });
 
@@ -1412,7 +1412,7 @@ describe('StreamingEngine', function() {
         // it needs the second segment) of the second Period when it becomes
         // available.
         var originalAppendBuffer =
-            shaka.test.FakeMediaSourceEngine.prototype.appendBuffer;
+            shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl;
         mediaSourceEngine.appendBuffer.and.callFake(
             function(type, data, startTime, endTime) {
               expect(playhead.getTime()).toBe(125);
@@ -1521,7 +1521,7 @@ describe('StreamingEngine', function() {
         var streamsByType = defaultOnChooseStreams(period);
 
         var originalAppendBuffer =
-            shaka.test.FakeMediaSourceEngine.prototype.appendBuffer;
+            shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl;
         mediaSourceEngine.appendBuffer.and.callFake(
             function(type, data, startTime, endTime) {
               // Reject the first video init segment.
@@ -1562,7 +1562,7 @@ describe('StreamingEngine', function() {
         var streamsByType = defaultOnChooseStreams(period);
 
         var originalAppendBuffer =
-            shaka.test.FakeMediaSourceEngine.prototype.appendBuffer;
+            shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl;
         mediaSourceEngine.appendBuffer.and.callFake(
             function(type, data, startTime, endTime) {
               // Reject the first audio segment.
@@ -2008,7 +2008,7 @@ describe('StreamingEngine', function() {
       onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
 
       var originalAppendBuffer =
-          shaka.test.FakeMediaSourceEngine.prototype.appendBuffer;
+          shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl;
       var appendBufferSpy = jasmine.createSpy('appendBuffer');
       mediaSourceEngine.appendBuffer = Util.spyFunc(appendBufferSpy);
 
@@ -2078,7 +2078,7 @@ describe('StreamingEngine', function() {
       onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
 
       var originalAppendBuffer =
-          shaka.test.FakeMediaSourceEngine.prototype.appendBuffer;
+          shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl;
       var appendBufferSpy = jasmine.createSpy('appendBuffer');
       mediaSourceEngine.appendBuffer = Util.spyFunc(appendBufferSpy);
 

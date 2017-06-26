@@ -15,15 +15,22 @@
  * limitations under the License.
  */
 
-describe('Offline', function() {
-  var originalName;
+describe('Offline', /** @suppress {accessControls} */ function() {
+  /** @const */
+  var originalName = shaka.offline.DBEngine.DB_NAME_;
+
+  /** @type {!shaka.offline.DBEngine} */
   var dbEngine;
+  /** @type {!shaka.offline.Storage} */
   var storage;
+  /** @type {!shaka.Player} */
   var player;
+  /** @type {!HTMLVideoElement} */
   var video;
+  /** @type {shakaExtern.SupportType} */
   var support;
 
-  beforeAll(/** @suppress {accessControls} */ function(done) {
+  beforeAll(function(done) {
     video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
     video.width = 600;
     video.height = 400;
@@ -35,7 +42,6 @@ describe('Offline', function() {
           support = data;
         });
 
-    originalName = shaka.offline.DBEngine.DB_NAME_;
     shaka.offline.DBEngine.DB_NAME_ += '_test';
     // Ensure we start with a clean slate.
     Promise.all([shaka.offline.DBEngine.deleteDatabase(), supportPromise])
@@ -57,7 +63,7 @@ describe('Offline', function() {
         .then(done);
   });
 
-  afterAll(/** @suppress {accessControls} */ function() {
+  afterAll(function() {
     document.body.removeChild(video);
     shaka.offline.DBEngine.DB_NAME_ = originalName;
   });
@@ -109,6 +115,7 @@ describe('Offline', function() {
 
     var storedContent;
     var sessionId;
+    /** @type {!shaka.media.DrmEngine} */
     var drmEngine;
     storage.store('test:sintel-enc')
         .then(function(content) {
@@ -125,9 +132,10 @@ describe('Offline', function() {
           // later, after the content has been deleted.
           var OfflineManifestParser = shaka.offline.OfflineManifestParser;
           var manifest = OfflineManifestParser.reconstructManifest(manifestDb);
+          var netEngine = player.getNetworkingEngine();
+          goog.asserts.assert(netEngine, 'Must have a NetworkingEngine');
           drmEngine = new shaka.media.DrmEngine(
-              player.getNetworkingEngine(), onError, function() {},
-              function() {});
+              netEngine, onError, function() {}, function() {});
           drmEngine.configure(player.getConfiguration().drm);
           return drmEngine.init(manifest, true /* isOffline */);
         })

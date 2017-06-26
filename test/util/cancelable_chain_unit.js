@@ -16,6 +16,7 @@
  */
 
 describe('CancelableChain', function() {
+  /** @type {!shaka.util.CancelableChain} */
   var chain;
 
   beforeEach(function() {
@@ -166,7 +167,7 @@ describe('CancelableChain', function() {
         return p;
       }).finalize().then(fail).catch(function(err) {
         finalComplete = true;
-        shaka.test.Util.expectToEqualError(cannedError, err);
+        shaka.test.Util.expectToEqualError(err, cannedError);
       });
 
       chain.cancel(cannedError).catch(fail).then(function() {

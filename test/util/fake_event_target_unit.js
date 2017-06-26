@@ -16,14 +16,17 @@
  */
 
 describe('FakeEventTarget', function() {
+  /** @const */
   var Util = shaka.test.Util;
+  /** @const */
+  var originalLogError = shaka.log.error;
 
+  /** @type {!shaka.util.FakeEventTarget} */
   var target;
+  /** @type {!jasmine.Spy} */
   var logErrorSpy;
-  var originalLogError;
 
   beforeAll(function() {
-    originalLogError = shaka.log.error;
     logErrorSpy = jasmine.createSpy('shaka.log.error');
     shaka.log.error = Util.spyFunc(logErrorSpy);
   });

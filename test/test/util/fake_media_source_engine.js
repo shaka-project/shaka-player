@@ -69,20 +69,36 @@ shaka.test.FakeMediaSourceEngine = function(segmentData, opt_drift) {
     this.timestampOffsets_[type] = 0;
   }
 
+  /** @type {!jasmine.Spy} */
+  this.init = jasmine.createSpy('init').and.stub();
+
+  /** @type {!jasmine.Spy} */
+  this.reinitText = jasmine.createSpy('reinitText').and.stub();
+
+  /** @type {!jasmine.Spy} */
+  this.endOfStream =
+      jasmine.createSpy('endOfStream').and.returnValue(Promise.resolve());
+
+  /** @type {!jasmine.Spy} */
+  this.setDuration = jasmine.createSpy('setDuration')
+                         .and.callFake(this.setDurationImpl_.bind(this));
+
+  /** @type {!jasmine.Spy} */
+  this.getDuration = jasmine.createSpy('getDuration')
+                         .and.callFake(this.getDurationImpl_.bind(this));
+
+  /** @type {!jasmine.Spy} */
+  this.appendBuffer = jasmine.createSpy('appendBuffer')
+                          .and.callFake(this.appendBufferImpl.bind(this));
+
   spyOn(this, 'destroy').and.callThrough();
-  spyOn(this, 'init').and.callThrough();
-  spyOn(this, 'reinitText').and.callThrough();
   spyOn(this, 'bufferStart').and.callThrough();
   spyOn(this, 'bufferEnd').and.callThrough();
   spyOn(this, 'bufferedAheadOf').and.callThrough();
-  spyOn(this, 'appendBuffer').and.callThrough();
   spyOn(this, 'remove').and.callThrough();
   spyOn(this, 'clear').and.callThrough();
   spyOn(this, 'flush').and.callThrough();
-  spyOn(this, 'endOfStream').and.callThrough();
   spyOn(this, 'setStreamProperties').and.callThrough();
-  spyOn(this, 'setDuration').and.callThrough();
-  spyOn(this, 'getDuration').and.callThrough();
 };
 
 
@@ -116,14 +132,6 @@ shaka.test.FakeMediaSourceEngine.SegmentData;
 shaka.test.FakeMediaSourceEngine.prototype.destroy = function() {
   return Promise.resolve();
 };
-
-
-/** @override */
-shaka.test.FakeMediaSourceEngine.prototype.init = function() {};
-
-
-/** @override */
-shaka.test.FakeMediaSourceEngine.prototype.reinitText = function() {};
 
 
 /** @override */
@@ -190,8 +198,14 @@ shaka.test.FakeMediaSourceEngine.prototype.bufferedAheadOf = function(
 };
 
 
-/** @override */
-shaka.test.FakeMediaSourceEngine.prototype.appendBuffer = function(
+/**
+ * @param {string} type
+ * @param {!ArrayBuffer} data
+ * @param {?number} startTime
+ * @param {?number} endTime
+ * @return {!Promise}
+ */
+shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl = function(
     type, data, startTime, endTime) {
   if (this.segments[type] === undefined) throw new Error('unexpected type');
 
@@ -317,26 +331,22 @@ shaka.test.FakeMediaSourceEngine.prototype.setStreamProperties = function(
 
 
 /**
- * @param {string=} opt_reason
+ * @param {number} duration
  * @return {!Promise}
- * @override
- * TODO: explicit "param" and "return" are needed with current Closure
- * compiler, remove them once the Closure compiler is upgraded.
+ * @private
  */
-shaka.test.FakeMediaSourceEngine.prototype.endOfStream = function(opt_reason) {
-  return Promise.resolve();
-};
-
-
-/** @override */
-shaka.test.FakeMediaSourceEngine.prototype.setDuration = function(duration) {
+shaka.test.FakeMediaSourceEngine.prototype.setDurationImpl_ = function(
+    duration) {
   this.duration_ = duration;
   return Promise.resolve();
 };
 
 
-/** @override */
-shaka.test.FakeMediaSourceEngine.prototype.getDuration = function() {
+/**
+ * @return {number}
+ * @private
+ */
+shaka.test.FakeMediaSourceEngine.prototype.getDurationImpl_ = function() {
   return this.duration_;
 };
 

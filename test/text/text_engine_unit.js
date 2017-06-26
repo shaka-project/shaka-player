@@ -16,19 +16,22 @@
  */
 
 describe('TextEngine', function() {
-  var TextEngine;
+  /** @const */
+  var TextEngine = shaka.text.TextEngine;
+  /** @const */
   var dummyData = new ArrayBuffer(0);
+  /** @const */
   var dummyMimeType = 'text/fake';
 
+  /** @type {!Function} */
   var mockParserPlugIn;
+  /** @type {!jasmine.Spy} */
   var mockParseInit;
+  /** @type {!jasmine.Spy} */
   var mockParseMedia;
-  var mockTrack;
+  /** @type {!shaka.text.TextEngine} */
   var textEngine;
-
-  beforeAll(function() {
-    TextEngine = shaka.text.TextEngine;
-  });
+  var mockTrack;
 
   beforeEach(function() {
     mockParseInit = jasmine.createSpy('mockParseInit');
@@ -46,12 +49,7 @@ describe('TextEngine', function() {
   });
 
   afterEach(function() {
-    textEngine = null;
     TextEngine.unregisterParser(dummyMimeType);
-    mockTrack = null;
-    mockParseInit = null;
-    mockParseMedia = null;
-    mockParserPlugIn = null;
   });
 
   describe('isTypeSupported', function() {

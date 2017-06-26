@@ -16,12 +16,18 @@
  */
 
 describe('EventManager', function() {
+  /** @const */
   var Util = shaka.test.Util;
 
+  /** @type {!shaka.util.EventManager} */
   var eventManager;
+  /** @type {!Event} */
   var event1;
+  /** @type {!Event} */
   var event2;
+  /** @type {!EventTarget} */
   var target1;
+  /** @type {!EventTarget} */
   var target2;
 
   beforeEach(function() {
@@ -30,9 +36,9 @@ describe('EventManager', function() {
     target2 = document.createElement('div');
 
     // new Event() is current, but document.createEvent() works back to IE11.
-    event1 = document.createEvent('Event');
+    event1 = /** @type {!Event} */ (document.createEvent('Event'));
     event1.initEvent('eventtype1', false, false);
-    event2 = document.createEvent('Event');
+    event2 = /** @type {!Event} */ (document.createEvent('Event'));
     event2.initEvent('eventtype2', false, false);
   });
 
@@ -135,7 +141,7 @@ describe('EventManager', function() {
     eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener1));
     eventManager.listen(target1, 'eventtype2', Util.spyFunc(listener2));
 
-    eventManager.removeAll(target1);
+    eventManager.removeAll();
 
     target1.dispatchEvent(event1);
     target1.dispatchEvent(event2);
@@ -151,7 +157,7 @@ describe('EventManager', function() {
     eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener1));
     eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener2));
 
-    eventManager.removeAll(target1);
+    eventManager.removeAll();
 
     target1.dispatchEvent(event1);
 

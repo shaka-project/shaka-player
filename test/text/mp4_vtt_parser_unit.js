@@ -16,16 +16,25 @@
  */
 
 describe('Mp4vttParser', function() {
+  /** @const */
   var vttInitSegmentUri = '/base/test/test/assets/vtt-init.mp4';
+  /** @const */
   var vttSegmentUri = '/base/test/test/assets/vtt-segment.mp4';
+  /** @const */
   var vttSegSettingsUri = '/base/test/test/assets/vtt-segment-settings.mp4';
+  /** @const */
   var audioInitSegmentUri = '/base/test/test/assets/sintel-audio-init.mp4';
 
+  /** @type {!ArrayBuffer} */
   var vttInitSegment;
+  /** @type {!ArrayBuffer} */
   var vttSegment;
+  /** @type {!ArrayBuffer} */
   var vttSegSettings;
+  /** @type {!ArrayBuffer} */
   var audioInitSegment;
 
+  /** @type {boolean} */
   var mockCue = false;
 
   beforeAll(function(done) {
