@@ -16,32 +16,49 @@
  */
 
 describe('Player', function() {
-  var originalLogError;
-  var originalLogWarn;
-  var originalIsTypeSupported;
+  /** @const */
+  var ContentType = shaka.util.ManifestParserUtils.ContentType;
+  /** @const */
+  var Util = shaka.test.Util;
+
+  /** @const */
+  var originalLogError = shaka.log.error;
+  /** @const */
+  var originalLogWarn = shaka.log.warning;
+  /** @const */
+  var originalIsTypeSupported = window.MediaSource.isTypeSupported;
+
+  /** @type {!jasmine.Spy} */
   var logErrorSpy;
+  /** @type {!jasmine.Spy} */
   var logWarnSpy;
-  var manifest;
+  /** @type {!jasmine.Spy} */
   var onError;
+  /** @type {shakaExtern.Manifest} */
+  var manifest;
+  /** @type {!shaka.Player} */
   var player;
+  /** @type {!shaka.test.FakeAbrManager} */
   var abrManager;
+  /** @type {function():shakaExtern.AbrManager} */
   var abrFactory;
 
+  /** @type {!shaka.test.FakeNetworkingEngine} */
   var networkingEngine;
+  /** @type {!shaka.test.FakeStreamingEngine} */
   var streamingEngine;
+  /** @type {!shaka.test.FakeDrmEngine} */
   var drmEngine;
+  /** @type {!shaka.test.FakePlayhead} */
   var playhead;
+  /** @type {!shaka.test.FakePlayheadObserver} */
   var playheadObserver;
   var mediaSourceEngine;
 
+  /** @type {!shaka.test.FakeVideo} */
   var video;
-  var ContentType;
 
   beforeAll(function() {
-    originalLogError = shaka.log.error;
-    originalLogWarn = shaka.log.warning;
-
-    originalIsTypeSupported = window.MediaSource.isTypeSupported;
     // Since this is not an integration test, we don't want MediaSourceEngine to
     // fail assertions based on browser support for types.  Pretend that all
     // video and audio types are supported.
@@ -54,8 +71,6 @@ describe('Player', function() {
     shaka.log.error = shaka.test.Util.spyFunc(logErrorSpy);
     logWarnSpy = jasmine.createSpy('shaka.log.warning');
     shaka.log.warning = shaka.test.Util.spyFunc(logWarnSpy);
-
-    ContentType = shaka.util.ManifestParserUtils.ContentType;
   });
 
   beforeEach(function() {
@@ -117,11 +132,7 @@ describe('Player', function() {
   });
 
   afterEach(function(done) {
-    player.destroy().catch(fail).then(function() {
-      manifest = null;
-      player = null;
-      done();
-    });
+    player.destroy().catch(fail).then(done);
   });
 
   afterAll(function() {
@@ -150,10 +161,15 @@ describe('Player', function() {
   });
 
   describe('load/unload', function() {
+    /** @type {!shaka.test.FakeManifestParser} */
     var parser1;
+    /** @type {!shaka.test.FakeManifestParser} */
     var parser2;
+    /** @type {!Function} */
     var factory1;
+    /** @type {!Function} */
     var factory2;
+    /** @type {!jasmine.Spy} */
     var checkError;
 
     beforeEach(function() {
@@ -228,8 +244,8 @@ describe('Player', function() {
     });
 
     it('handles load interrupting load', function(done) {
-      player.load('', 0, factory1).then(fail).catch(checkError);
-      player.load('', 0, factory1).then(fail).catch(checkError);
+      player.load('', 0, factory1).then(fail).catch(Util.spyFunc(checkError));
+      player.load('', 0, factory1).then(fail).catch(Util.spyFunc(checkError));
 
       player.load('', 0, factory2).catch(fail).then(function() {
         // Delay so the interrupted calls have time to reject themselves.
@@ -242,9 +258,9 @@ describe('Player', function() {
     });
 
     it('handles unload interrupting load', function(done) {
-      player.load('', 0, factory1).then(fail).catch(checkError);
+      player.load('', 0, factory1).then(fail).catch(Util.spyFunc(checkError));
       player.unload().catch(fail);
-      player.load('', 0, factory1).then(fail).catch(checkError);
+      player.load('', 0, factory1).then(fail).catch(Util.spyFunc(checkError));
       player.unload().catch(fail);
 
       player.load('', 0, factory2).catch(fail).then(function() {
@@ -258,7 +274,7 @@ describe('Player', function() {
     });
 
     it('handles destroy interrupting load', function(done) {
-      player.load('', 0, factory1).then(fail).catch(checkError);
+      player.load('', 0, factory1).then(fail).catch(Util.spyFunc(checkError));
       player.destroy().catch(fail).then(function() {
         // Delay so the interrupted calls have time to reject themselves.
         return shaka.test.Util.delay(0.5);
@@ -270,10 +286,10 @@ describe('Player', function() {
     });
 
     it('handles multiple unloads interrupting load', function(done) {
-      player.load('', 0, factory1).then(fail).catch(checkError);
+      player.load('', 0, factory1).then(fail).catch(Util.spyFunc(checkError));
       player.unload().catch(fail);
       player.unload().catch(fail);
-      player.load('', 0, factory1).then(fail).catch(checkError);
+      player.load('', 0, factory1).then(fail).catch(Util.spyFunc(checkError));
       player.unload().catch(fail);
       player.unload().catch(fail);
       player.unload().catch(fail);
@@ -289,7 +305,7 @@ describe('Player', function() {
     });
 
     it('handles multiple destroys interrupting load', function(done) {
-      player.load('', 0, factory1).then(fail).catch(checkError);
+      player.load('', 0, factory1).then(fail).catch(Util.spyFunc(checkError));
       player.destroy().catch(fail);
       player.destroy().catch(fail);
       player.destroy().catch(fail).then(function() {
@@ -303,7 +319,7 @@ describe('Player', function() {
     });
 
     it('handles unload, then destroy interrupting load', function(done) {
-      player.load('', 0, factory1).then(fail).catch(checkError);
+      player.load('', 0, factory1).then(fail).catch(Util.spyFunc(checkError));
       player.unload().catch(fail);
       player.unload().catch(fail);
       player.destroy().catch(fail).then(function() {
@@ -317,7 +333,7 @@ describe('Player', function() {
     });
 
     it('handles destroy, then unload interrupting load', function(done) {
-      player.load('', 0, factory1).then(fail).catch(checkError);
+      player.load('', 0, factory1).then(fail).catch(Util.spyFunc(checkError));
       player.destroy().catch(fail).then(function() {
         // Delay so the interrupted calls have time to reject themselves.
         return shaka.test.Util.delay(0.5);
@@ -347,11 +363,12 @@ describe('Player', function() {
         // Give the stage a factory so that it can succeed and get canceled.
         shaka.media.ManifestParser.registerParserByMime('undefined', factory1);
 
-        player.load('', 0).then(fail).catch(checkError).then(function() {
-          // Unregister our parser factory.
-          delete shaka.media.ManifestParser.parsersByMime['undefined'];
-          done();
-        });
+        player.load('', 0).then(fail).catch(Util.spyFunc(checkError))
+            .then(function() {
+              // Unregister our parser factory.
+              delete shaka.media.ManifestParser.parsersByMime['undefined'];
+              done();
+            });
 
         shaka.test.Util.delay(0.5).then(function() {
           // Make sure we're blocked.
@@ -368,7 +385,8 @@ describe('Player', function() {
         var p = new shaka.util.PublicPromise();
         parser1.start.and.returnValue(p);
 
-        player.load('', 0, factory1).then(fail).catch(checkError).then(done);
+        player.load('', 0, factory1).then(fail).catch(Util.spyFunc(checkError))
+            .then(done);
 
         shaka.test.Util.delay(0.5).then(function() {
           // Make sure we're blocked.
@@ -386,7 +404,8 @@ describe('Player', function() {
         drmEngine.init.and.returnValue(p);
         player.createDrmEngine = function() { return drmEngine; };
 
-        player.load('', 0, factory1).then(fail).catch(checkError).then(done);
+        player.load('', 0, factory1).then(fail).catch(Util.spyFunc(checkError))
+            .then(done);
 
         shaka.test.Util.delay(1.0).then(function() {
           // Make sure we're blocked.
@@ -404,7 +423,8 @@ describe('Player', function() {
         drmEngine.attach.and.returnValue(p);
         player.createDrmEngine = function() { return drmEngine; };
 
-        player.load('', 0, factory1).then(fail).catch(checkError).then(done);
+        player.load('', 0, factory1).then(fail).catch(Util.spyFunc(checkError))
+            .then(done);
 
         shaka.test.Util.delay(1.0).then(function() {
           // Make sure we're blocked.
@@ -420,7 +440,8 @@ describe('Player', function() {
         var p = new shaka.util.PublicPromise();
         streamingEngine.init.and.returnValue(p);
 
-        player.load('', 0, factory1).then(fail).catch(checkError).then(done);
+        player.load('', 0, factory1).then(fail).catch(Util.spyFunc(checkError))
+            .then(done);
 
         shaka.test.Util.delay(1.5).then(function() {
           // Make sure we're blocked.
@@ -741,7 +762,9 @@ describe('Player', function() {
   });
 
   describe('AbrManager', function() {
+    /** @type {!shaka.test.FakeManifestParser} */
     var parser;
+    /** @type {!Function} */
     var parserFactory;
 
     beforeEach(function() {
@@ -833,7 +856,9 @@ describe('Player', function() {
   });
 
   describe('tracks', function() {
+    /** @type {!Array.<shakaExtern.Track>} */
     var variantTracks;
+    /** @type {!Array.<shakaExtern.Track>} */
     var textTracks;
 
     beforeEach(function() {
@@ -1422,7 +1447,13 @@ describe('Player', function() {
       expect(stats.droppedFrames).toBeNaN();
 
       video.getVideoPlaybackQuality = function() {
-        return {totalVideoFrames: 75, droppedVideoFrames: 125};
+        return {
+          corruptedVideoFrames: 0,
+          creationTime: 0,
+          totalFrameDelay: 0,
+          totalVideoFrames: 75,
+          droppedVideoFrames: 125
+        };
       };
 
       // Now that it exists, theses stats should exist.

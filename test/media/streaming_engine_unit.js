@@ -305,7 +305,8 @@ describe('StreamingEngine', function() {
         [firstPeriodStartTime, secondPeriodStartTime], presentationDuration,
         segmentDurations);
 
-    manifest.presentationTimeline = timeline;
+    manifest.presentationTimeline =
+        /** @type {!shaka.media.PresentationTimeline} */ (timeline);
     manifest.minBufferTime = 2;
 
     // Create InitSegmentReferences.
@@ -355,7 +356,17 @@ describe('StreamingEngine', function() {
     alternateVideoStream1.createSegmentIndex.and.returnValue(Promise.resolve());
     alternateVideoStream1.findSegmentPosition.and.returnValue(null);
     alternateVideoStream1.getSegmentReference.and.returnValue(null);
-    var variant = {video: alternateVideoStream1};
+    var variant = {
+      audio: null,
+      video: /** @type {shakaExtern.Stream} */ (alternateVideoStream1),
+      id: 0,
+      language: 'und',
+      primary: false,
+      bandwidth: 0,
+      drmInfos: [],
+      allowedByApplication: true,
+      allowedByKeySystem: true
+    };
     manifest.periods[0].variants.push(variant);
 
     audioStream2 = manifest.periods[1].variants[0].audio;

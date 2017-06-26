@@ -17,15 +17,19 @@
 
 
 describe('HlsParser', function() {
+  /** @type {!shaka.test.FakeNetworkingEngine} */
   var fakeNetEngine;
+  /** @type {!shaka.hls.HlsParser} */
   var parser;
+  /** @type {shakaExtern.ManifestParser.PlayerInterface} */
   var playerInterface;
+  /** @type {shakaExtern.ManifestConfiguration} */
+  var config;
 
   beforeEach(function() {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
-    parser = new shaka.hls.HlsParser();
-    parser.configure({
+    config = {
       retryParameters: retry,
       dash: {
         customScheme: function(node) { return null; },
@@ -36,12 +40,16 @@ describe('HlsParser', function() {
       hls: {
         defaultTimeOffset: 0
       }
-    });
-    playerInterface = {
-      networkingEngine: fakeNetEngine,
-      filterPeriod: function() {},
-      onError: fail
     };
+    playerInterface = {
+      filterPeriod: function() {},
+      networkingEngine: fakeNetEngine,
+      onError: fail,
+      onEvent: function() {},
+      onTimelineRegionAdded: function() {}
+    };
+    parser = new shaka.hls.HlsParser();
+    parser.configure(config);
   });
 
   /**
@@ -536,9 +544,7 @@ describe('HlsParser', function() {
                   .size(960, 540)
           .build();
 
-    parser.configure({
-      hls: {defaultTimeOffset: 10}
-    });
+    config.hls.defaultTimeOffset = 10;
 
     testHlsParser(master, media, manifest, done);
   });
@@ -631,8 +637,10 @@ describe('HlsParser', function() {
 
           var videoPosition = video.findSegmentPosition(0);
           var audioPosition = audio.findSegmentPosition(0);
-          expect(videoPosition).not.toBe(null);
-          expect(audioPosition).not.toBe(null);
+          goog.asserts.assert(videoPosition != null,
+                              'Cannot find first video segment');
+          goog.asserts.assert(audioPosition != null,
+                              'Cannot find first audio segment');
 
           var videoReference = video.getSegmentReference(videoPosition);
           var audioReference = audio.getSegmentReference(audioPosition);

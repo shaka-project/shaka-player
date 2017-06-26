@@ -16,16 +16,25 @@
  */
 
 describe('PlayheadObserver', function() {
+  /** @const */
   var Util = shaka.test.Util;
 
+  /** @type {!shaka.media.PlayheadObserver} */
   var observer;
+  /** @type {!shaka.test.FakeVideo} */
   var video;
+  /** @type {!shaka.test.FakePresentationTimeline} */
   var timeline;
+  /** @type {shakaExtern.Manifest} */
   var manifest;
+  /** @type {shakaExtern.StreamingConfiguration} */
   var config;
 
+  /** @type {!jasmine.Spy} */
   var onBuffering;
+  /** @type {!jasmine.Spy} */
   var onChangePeriod;
+  /** @type {!jasmine.Spy} */
   var onEvent;
 
   beforeAll(function() {
@@ -44,7 +53,6 @@ describe('PlayheadObserver', function() {
 
     timeline = new shaka.test.FakePresentationTimeline();
 
-    // shakaExtern.Manifest
     manifest = {
       periods: [],
       offlineSessionIds: [],
@@ -52,7 +60,6 @@ describe('PlayheadObserver', function() {
       presentationTimeline: timeline
     };
 
-    // shakaExtern.StreamingConfiguration
     config = {
       rebufferingGoal: 10,
       bufferingGoal: 5,

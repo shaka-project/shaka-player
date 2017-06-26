@@ -16,17 +16,24 @@
  */
 
 describe('MediaSourceEngine', function() {
+  /** @const */
+  var ContentType = shaka.util.ManifestParserUtils.ContentType;
+
+  /** @const */
+  var presentationDuration = 840;
+
+  /** @type {!HTMLVideoElement} */
   var video;
+  /** @type {!MediaSource} */
   var mediaSource;
+  /** @type {!shaka.media.MediaSourceEngine} */
   var mediaSourceEngine;
   var generators;
   var metadata;
-  var presentationDuration = 840;
-  var ContentType = shaka.util.ManifestParserUtils.ContentType;
   // TODO: add text streams to MSE integration tests
 
   beforeAll(function() {
-    video = /** @type {HTMLVideoElement} */ (document.createElement('video'));
+    video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
     video.width = 600;
     video.height = 400;
     document.body.appendChild(video);
