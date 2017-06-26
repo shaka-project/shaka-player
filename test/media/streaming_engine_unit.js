@@ -754,6 +754,34 @@ describe('StreamingEngine', function() {
     });
   });
 
+  it('only reinitializes text when switching streams', function() {
+    // See: https://github.com/google/shaka-player/issues/910
+    setupVod();
+    mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+    createStreamingEngine();
+
+    playhead.getTime.and.returnValue(0);
+    onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+    onChooseStreams.and.callFake(defaultOnChooseStreams);
+
+    // When we can switch in the second Period, switch to the playing stream.
+    onCanSwitch.and.callFake(function() {
+      onCanSwitch.and.callFake(function() {
+        expect(streamingEngine.getActiveStreams()[ContentType.TEXT])
+            .toBe(textStream2);
+
+        mediaSourceEngine.reinitText.calls.reset();
+        streamingEngine.switch(ContentType.TEXT, textStream2, false);
+      });
+    });
+
+    // Here we go!
+    streamingEngine.init();
+    runTest();
+
+    expect(mediaSourceEngine.reinitText).not.toHaveBeenCalled();
+  });
+
   it('plays when 2nd Period doesn\'t have text streams', function() {
     setupVod();
     manifest.periods[1].textStreams = [];
