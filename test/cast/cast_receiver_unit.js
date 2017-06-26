@@ -16,27 +16,37 @@
  */
 
 describe('CastReceiver', function() {
-  var CastReceiver;
-  var CastUtils;
+  /** @const */
+  var CastReceiver = shaka.cast.CastReceiver;
+  /** @const */
+  var CastUtils = shaka.cast.CastUtils;
+  /** @const */
   var Util = shaka.test.Util;
 
-  var originalCast;
-  var originalUserAgent;
+  /** @const */
+  var originalCast = window['cast'];
+  /** @const */
+  var originalUserAgent = navigator.userAgent;
 
-  var mockReceiverManager;
+  /** @type {!shaka.test.FakeVideo} */
   var mockVideo;
-  var mockPlayer;
+  /** @type {!jasmine.Spy} */
   var mockAppDataCallback;
+  var mockPlayer;
+  var mockReceiverManager;
 
   var mockReceiverApi;
   var mockShakaMessageBus;
   var mockGenericMessageBus;
+  /** @type {!jasmine.Spy} */
   var mockCanDisplayType;
 
   /** @type {shaka.cast.CastReceiver} */
   var receiver;
 
+  /** @type {boolean} */
   var isChrome;
+  /** @type {boolean} */
   var isChromecast;
 
   function checkChromeOrChromecast() {
@@ -55,14 +65,8 @@ describe('CastReceiver', function() {
     // Edge also has "Chrome/" in its user agent string.
     isChrome = navigator.userAgent.indexOf('Chrome/') >= 0 && !isEdge;
 
-    CastReceiver = shaka.cast.CastReceiver;
-    CastUtils = shaka.cast.CastUtils;
-
     // Don't do any more work here if the tests will not end up running.
     if (!isChromecast && !isChrome) return;
-
-    originalCast = window['cast'];
-    originalUserAgent = navigator.userAgent;
 
     // In uncompiled mode, there is a UA check for Chromecast in order to make
     // manual testing easier.  For these automated tests, we want to act as if
@@ -290,9 +294,11 @@ describe('CastReceiver', function() {
   });
 
   describe('"init" message', function() {
-    var fakeInitState;
+    /** @const */
     var fakeConfig = {key: 'value'};
+    /** @const */
     var fakeAppData = {myFakeAppData: 1234};
+    var fakeInitState;
 
     beforeEach(function() {
       receiver = new CastReceiver(
@@ -561,9 +567,12 @@ describe('CastReceiver', function() {
   });
 
   describe('"asyncCall" message', function() {
-    var p;
+    /** @const */
     var fakeSenderId = 'senderId';
+    /** @const */
     var fakeCallId = '5';
+    /** @type {!shaka.util.PublicPromise} */
+    var p;
 
     beforeEach(function() {
       receiver = new CastReceiver(

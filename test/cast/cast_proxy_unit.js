@@ -16,29 +16,32 @@
  */
 
 describe('CastProxy', function() {
-  var CastProxy;
-  var FakeEvent;
+  /** @const */
+  var CastProxy = shaka.cast.CastProxy;
+  /** @const */
+  var FakeEvent = shaka.util.FakeEvent;
+  /** @const */
   var Util = shaka.test.Util;
 
-  var originalCastSender;
-
+  /** @const */
+  var originalCastSender = shaka.cast.CastSender;
+  /** @const */
   var fakeAppId = 'fake app ID';
-  var mockVideo;
+
   var mockPlayer;
   var mockSender;
+  /** @type {!shaka.test.FakeVideo} */
+  var mockVideo;
+  /** @type {!jasmine.Spy} */
   var mockCastSenderConstructor;
 
   /** @type {shaka.cast.CastProxy} */
   var proxy;
 
   beforeAll(function() {
-    CastProxy = shaka.cast.CastProxy;
-    FakeEvent = shaka.util.FakeEvent;
-
     mockCastSenderConstructor = jasmine.createSpy('CastSender constructor');
     mockCastSenderConstructor.and.callFake(createMockCastSender);
 
-    originalCastSender = shaka.cast.CastSender;
     shaka.cast.CastSender = Util.spyFunc(mockCastSenderConstructor);
   });
 

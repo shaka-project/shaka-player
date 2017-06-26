@@ -16,24 +16,21 @@
  */
 
 describe('MpdUtils', function() {
-  var MpdUtils;
-
-  beforeAll(function() {
-    MpdUtils = shaka.dash.MpdUtils;
-  });
+  /** @const */
+  var MpdUtils = shaka.dash.MpdUtils;
 
   describe('fillUriTemplate', function() {
     it('handles a single RepresentationID identifier', function() {
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$RepresentationID$.mp4',
-              100, null, null, null).toString()).toBe('/example/100.mp4');
+              '100', null, null, null).toString()).toBe('/example/100.mp4');
 
       // RepresentationID cannot use a width specifier.
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$RepresentationID%01d$.mp4',
-              100, null, null, null).toString()).toBe('/example/100.mp4');
+              '100', null, null, null).toString()).toBe('/example/100.mp4');
 
       expect(
           MpdUtils.fillUriTemplate(
@@ -112,49 +109,49 @@ describe('MpdUtils', function() {
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$RepresentationID$_$Number$_$Bandwidth$_$Time$.mp4',
-              1, 2, 3, 4).toString()).toBe('/example/1_2_3_4.mp4');
+              '1', 2, 3, 4).toString()).toBe('/example/1_2_3_4.mp4');
 
       // No spaces.
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$RepresentationID$$Number$$Bandwidth$$Time$.mp4',
-              1, 2, 3, 4).toString()).toBe('/example/1234.mp4');
+              '1', 2, 3, 4).toString()).toBe('/example/1234.mp4');
 
       // Different order.
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$Bandwidth$_$Time$_$RepresentationID$_$Number$.mp4',
-              1, 2, 3, 4).toString()).toBe('/example/3_4_1_2.mp4');
+              '1', 2, 3, 4).toString()).toBe('/example/3_4_1_2.mp4');
 
       // Single width.
       expect(
           MpdUtils.fillUriTemplate(
               '$RepresentationID$_$Number%01d$_$Bandwidth%01d$_$Time%01d$',
-              1, 2, 3, 400).toString()).toBe('1_2_3_400');
+              '1', 2, 3, 400).toString()).toBe('1_2_3_400');
 
       // Different widths.
       expect(
           MpdUtils.fillUriTemplate(
               '$RepresentationID$_$Number%02d$_$Bandwidth%02d$_$Time%02d$',
-              1, 2, 3, 4).toString()).toBe('1_02_03_04');
+              '1', 2, 3, 4).toString()).toBe('1_02_03_04');
 
       // Double $$.
       expect(
           MpdUtils.fillUriTemplate(
               '$$/$RepresentationID$$$$Number$$$$Bandwidth$$$$Time$$$.$$',
-              1, 2, 3, 4).toString()).toBe('$/1$2$3$4$.$');
+              '1', 2, 3, 4).toString()).toBe('$/1$2$3$4$.$');
     });
 
     it('handles invalid identifiers', function() {
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$Garbage$.mp4',
-              1, 2, 3, 4).toString()).toBe('/example/$Garbage$.mp4');
+              '1', 2, 3, 4).toString()).toBe('/example/$Garbage$.mp4');
 
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$Time.mp4',
-              1, 2, 3, 4).toString()).toBe('/example/$Time.mp4');
+              '1', 2, 3, 4).toString()).toBe('/example/$Time.mp4');
     });
   });
 
@@ -381,6 +378,7 @@ describe('MpdUtils', function() {
       ];
       checkTimePoints(timePoints, result, 1, 10, Infinity);
     });
+
     /**
      * Creates a new TimePoint.
      *
@@ -434,10 +432,16 @@ describe('MpdUtils', function() {
   });
 
   describe('processXlinks', function() {
-    var fakeNetEngine;
-    var retry;
-    var parser;
+    /** @const */
     var Error = shaka.util.Error;
+
+    /** @type {!shaka.test.FakeNetworkingEngine} */
+    var fakeNetEngine;
+    /** @type {shakaExtern.RetryParameters} */
+    var retry;
+    /** @type {!DOMParser} */
+    var parser;
+    /** @type {boolean} */
     var failGracefully;
 
     beforeEach(function() {

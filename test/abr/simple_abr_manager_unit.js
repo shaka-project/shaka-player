@@ -16,14 +16,14 @@
  */
 
 describe('SimpleAbrManager', function() {
-  var switchCallback;
-  var abrManager;
-  var manifest;
-  var variants;
-  var textStreams;
-  var sufficientBWMultiplier = 1.06;
+  /** @const */
   var ContentType = shaka.util.ManifestParserUtils.ContentType;
+
+  /** @const */
+  var sufficientBWMultiplier = 1.06;
+  /** @const */
   var defaultBandwidthEstimate = 500e3; // 500kbps
+  /** @const */
   var defaultRestrictions = {
     minWidth: 0,
     maxWidth: Infinity,
@@ -34,14 +34,19 @@ describe('SimpleAbrManager', function() {
     minBandwidth: 0,
     maxBandwidth: Infinity
   };
-  var config = {
-    enabled: true,
-    defaultBandwidthEstimate: defaultBandwidthEstimate,
-    switchInterval: 8,
-    bandwidthUpgradeTarget: 0.85,
-    bandwidthDowngradeTarget: 0.95,
-    restrictions: defaultRestrictions
-  };
+
+  /** @type {shakaExtern.AbrConfiguration} */
+  var config;
+  /** @type {!jasmine.Spy} */
+  var switchCallback;
+  /** @type {!shaka.abr.SimpleAbrManager} */
+  var abrManager;
+  /** @type {shakaExtern.Manifest} */
+  var manifest;
+  /** @type {!Array.<shakaExtern.Variant>} */
+  var variants;
+  /** @type {!Array.<shakaExtern.Stream>} */
+  var textStreams;
 
 
   beforeAll(function() {
@@ -78,6 +83,15 @@ describe('SimpleAbrManager', function() {
         .addTextStream(10)
         .addTextStream(11)
       .build();
+
+    config = {
+      enabled: true,
+      defaultBandwidthEstimate: defaultBandwidthEstimate,
+      switchInterval: 8,
+      bandwidthUpgradeTarget: 0.85,
+      bandwidthDowngradeTarget: 0.95,
+      restrictions: defaultRestrictions
+    };
 
     variants = manifest.periods[0].variants;
     textStreams = manifest.periods[0].textStreams;

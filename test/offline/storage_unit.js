@@ -457,7 +457,7 @@ describe('Storage', function() {
             size: 150,
             expiration: Infinity,
             tracks: tracks,
-            appMetadata: undefined
+            appMetadata: {}
           });
 
           switch (progress.calls.count()) {
@@ -512,7 +512,7 @@ describe('Storage', function() {
             size: jasmine.any(Number),
             expiration: Infinity,
             tracks: tracks,
-            appMetadata: undefined
+            appMetadata: {}
           });
 
           switch (progress.calls.count()) {

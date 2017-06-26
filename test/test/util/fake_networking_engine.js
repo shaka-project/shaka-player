@@ -51,15 +51,23 @@ shaka.test.FakeNetworkingEngine = function(
   /** @private {?shaka.util.PublicPromise} */
   this.delayNextRequestPromise_ = null;
 
+  /** @type {!jasmine.Spy} */
+  this.request =
+      jasmine.createSpy('request').and.callFake(this.requestImpl_.bind(this));
+
+  /** @type {!jasmine.Spy} */
+  this.registerResponseFilter =
+      jasmine.createSpy('registerResponseFilter')
+          .and.callFake(this.registerResponseFilterImpl_.bind(this));
+
+  /** @type {!jasmine.Spy} */
+  this.unregisterResponseFilter =
+      jasmine.createSpy('unregisterResponseFilter')
+          .and.callFake(this.unregisterResponseFilterImpl_.bind(this));
+
   // The prototype has already been applied; create spies for the
   // methods but still call it by default.
   spyOn(this, 'destroy').and.callThrough();
-
-  spyOn(this, 'request').and.callThrough();
-
-  spyOn(this, 'registerResponseFilter').and.callThrough();
-
-  spyOn(this, 'unregisterResponseFilter').and.callThrough();
 };
 
 
@@ -105,8 +113,14 @@ shaka.test.FakeNetworkingEngine.expectRangeRequest = function(
 };
 
 
-/** @override */
-shaka.test.FakeNetworkingEngine.prototype.request = function(type, request) {
+/**
+ * @param {shaka.net.NetworkingEngine.RequestType} type
+ * @param {shakaExtern.Request} request
+ * @return {!Promise.<shakaExtern.Response>}
+ * @private
+ */
+shaka.test.FakeNetworkingEngine.prototype.requestImpl_ = function(
+    type, request) {
   expect(request).toBeTruthy();
   expect(request.uris.length).toBe(1);
 
@@ -131,15 +145,21 @@ shaka.test.FakeNetworkingEngine.prototype.request = function(type, request) {
 };
 
 
-/** @override */
-shaka.test.FakeNetworkingEngine.prototype.registerResponseFilter =
+/**
+ * @param {shakaExtern.RequestFilter} filter
+ * @private
+ */
+shaka.test.FakeNetworkingEngine.prototype.registerResponseFilterImpl_ =
     function(filter) {
   expect(filter).toEqual(jasmine.any(Function));
 };
 
 
-/** @override */
-shaka.test.FakeNetworkingEngine.prototype.unregisterResponseFilter =
+/**
+ * @param {shakaExtern.RequestFilter} filter
+ * @private
+ */
+shaka.test.FakeNetworkingEngine.prototype.unregisterResponseFilterImpl_ =
     function(filter) {
   expect(filter).toEqual(jasmine.any(Function));
 };
