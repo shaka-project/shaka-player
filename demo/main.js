@@ -316,6 +316,29 @@ shakaDemo.postBrowserCheckParams_ = function(params) {
     shakaDemo.updateButtons_(/* canHide */ true);
   }
 
+  var smallGapLimit = document.getElementById('smallGapLimit');
+  smallGapLimit.placeholder =
+      shakaDemo.player_.defaultConfig_().streaming.smallGapLimit;
+  if ('smallGapLimit' in params) {
+    smallGapLimit.value = params['smallGapLimit'];
+    // Call onGapInput_ manually, because setting the value
+    // programatically doesn't fire 'input' event.
+    var fakeEvent = /** @type {!Event} */({target: smallGapLimit});
+    shakaDemo.onGapInput_(fakeEvent);
+  }
+
+  var jumpLargeGaps = document.getElementById('jumpLargeGaps');
+  if ('jumpLargeGaps' in params) {
+    jumpLargeGaps.checked = true;
+    // Call onJumpLargeGapsChange_ manually, because setting checked
+    // programatically doesn't fire a 'change' event.
+    var fakeEvent = /** @type {!Event} */({target: jumpLargeGaps});
+    shakaDemo.onJumpLargeGapsChange_(fakeEvent);
+  } else {
+    jumpLargeGaps.checked =
+        shakaDemo.player_.getConfiguration().streaming.jumpLargeGaps;
+  }
+
   if ('noadaptation' in params) {
     var enableAdaptation = document.getElementById('enableAdaptation');
     enableAdaptation.checked = false;
@@ -413,6 +436,12 @@ shakaDemo.hashShouldChange_ = function() {
   }
 
   // Save config panel state.
+  if (document.getElementById('smallGapLimit').value.length) {
+    params.push('smallGapLimit=' +
+        document.getElementById('smallGapLimit').value);
+  }
+  if (document.getElementById('jumpLargeGaps').checked)
+    params.push('jumpLargeGaps');
   var audioLang = document.getElementById('preferredAudioLanguage').value;
   var textLang = document.getElementById('preferredTextLanguage').value;
   if (textLang != audioLang) {
