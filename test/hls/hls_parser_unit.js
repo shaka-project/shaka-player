@@ -931,33 +931,6 @@ describe('HlsParser', function() {
       verifyError(master, media, error, done);
     });
 
-    it('if encountered live content (PLAYLIST-TYPE:EVENT)', function(done) {
-      var master = [
-        '#EXTM3U\n',
-        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="aaa,bbb",',
-        'RESOLUTION=960x540,FRAME-RATE=60,VIDEO="vid"\n',
-        'test://audio\n',
-        '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid",',
-        'URI="test://video"'
-      ].join('');
-
-      var media = [
-        '#EXTM3U\n',
-        '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
-        '#EXT-X-PLAYLIST-TYPE:EVENT\n',
-        '#EXTINF:5,\n',
-        '#EXT-X-BYTERANGE:121090@616\n',
-        'test://main.mp4'
-      ].join('');
-
-      var error = new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.MANIFEST,
-          Code.HLS_LIVE_CONTENT_NOT_SUPPORTED);
-
-      verifyError(master, media, error, done);
-    });
-
     it('if encountered live content (no PLAYLIST-TYPE tag)', function(done) {
       var master = [
         '#EXTM3U\n',
