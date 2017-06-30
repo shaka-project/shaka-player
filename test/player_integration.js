@@ -121,8 +121,9 @@ describe('Player', function() {
           switchHistory: jasmine.arrayContaining([{
             timestamp: jasmine.any(Number),
             id: jasmine.any(Number),
-            type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
-            fromAdaptation: true
+            type: 'variant',
+            fromAdaptation: true,
+            bandwidth: 0
           }]),
 
           stateHistory: jasmine.arrayContaining([{

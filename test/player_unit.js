@@ -1646,80 +1646,50 @@ describe('Player', function() {
         checkHistory([{
           // We are using a mock date, so this is not a race.
           timestamp: Date.now() / 1000,
-          id: variant.audio.id,
-          type: ContentType.AUDIO,
-          fromAdaptation: false
-        },
-        {
-          timestamp: Date.now() / 1000,
-          id: variant.video.id,
-          type: ContentType.VIDEO,
-          fromAdaptation: false
+          id: variant.id,
+          type: 'variant',
+          fromAdaptation: false,
+          bandwidth: variant.bandwidth
         }]);
       });
 
       it('includes adaptation choices', function() {
         var choices = {};
-        choices[ContentType.AUDIO] = manifest.periods[0].variants[3].audio;
-        choices[ContentType.VIDEO] = manifest.periods[0].variants[3].video;
-
+        var variant = manifest.periods[0].variants[3];
+        choices[ContentType.AUDIO] = variant.audio;
+        choices[ContentType.VIDEO] = variant.video;
 
         switch_(choices);
         checkHistory(jasmine.arrayContaining([
           {
             timestamp: Date.now() / 1000,
-            id: choices[ContentType.AUDIO].id,
-            type: ContentType.AUDIO,
-            fromAdaptation: true
-          },
-          {
-            timestamp: Date.now() / 1000,
-            id: choices[ContentType.VIDEO].id,
-            type: ContentType.VIDEO,
-            fromAdaptation: true
+            id: variant.id,
+            type: 'variant',
+            fromAdaptation: true,
+            bandwidth: variant.bandwidth
           }
         ]));
       });
 
-      it('ignores adaptation if stream is already active', function() {
-        var choices = {};
-        // This audio stream is already active.
-        choices[ContentType.AUDIO] = manifest.periods[0].variants[1].audio;
-        choices[ContentType.VIDEO] = manifest.periods[0].variants[1].video;
-
-        switch_(choices);
-        checkHistory([{
-          timestamp: Date.now() / 1000,
-          id: choices[ContentType.VIDEO].id,
-          type: ContentType.VIDEO,
-          fromAdaptation: true
-        }]);
-      });
-
       /**
        * Checks that the switch history is correct.
-       * @param {!Array.<shakaExtern.StreamChoice>} additional
+       * @param {!Array.<shakaExtern.TrackChoice>} additional
        */
       function checkHistory(additional) {
         var prefix = [
           {
             timestamp: jasmine.any(Number),
-            id: 1,
-            type: ContentType.AUDIO,
-            fromAdaptation: true
-          },
-          {
-            timestamp: jasmine.any(Number),
-            id: 4,
-            type: ContentType.VIDEO,
-            fromAdaptation: true
+            id: 0,
+            type: 'variant',
+            fromAdaptation: true,
+            bandwidth: 200
           }
         ];
 
         var stats = player.getStats();
-        expect(stats.switchHistory.slice(0, 2))
+        expect(stats.switchHistory.slice(0, 1))
             .toEqual(jasmine.arrayContaining(prefix));
-        expect(stats.switchHistory.slice(2)).toEqual(additional);
+        expect(stats.switchHistory.slice(1)).toEqual(additional);
       }
 
       /**
