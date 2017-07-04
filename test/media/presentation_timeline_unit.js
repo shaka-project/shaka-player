@@ -16,12 +16,14 @@
  */
 
 describe('PresentationTimeline', function() {
-  var originalDateNow;
+  /** @const */
+  var originalDateNow = Date.now;
+
+  /** @type {!Date} */
   var baseTime;
 
   beforeEach(function() {
     baseTime = new Date(2015, 11, 30);
-    originalDateNow = Date.now;
     Date.now = function() { return baseTime.getTime(); };
   });
 

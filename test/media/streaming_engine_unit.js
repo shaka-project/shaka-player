@@ -305,7 +305,8 @@ describe('StreamingEngine', function() {
         [firstPeriodStartTime, secondPeriodStartTime], presentationDuration,
         segmentDurations);
 
-    manifest.presentationTimeline = timeline;
+    manifest.presentationTimeline =
+        /** @type {!shaka.media.PresentationTimeline} */ (timeline);
     manifest.minBufferTime = 2;
 
     // Create InitSegmentReferences.
@@ -355,7 +356,17 @@ describe('StreamingEngine', function() {
     alternateVideoStream1.createSegmentIndex.and.returnValue(Promise.resolve());
     alternateVideoStream1.findSegmentPosition.and.returnValue(null);
     alternateVideoStream1.getSegmentReference.and.returnValue(null);
-    var variant = {video: alternateVideoStream1};
+    var variant = {
+      audio: null,
+      video: /** @type {shakaExtern.Stream} */ (alternateVideoStream1),
+      id: 0,
+      language: 'und',
+      primary: false,
+      bandwidth: 0,
+      drmInfos: [],
+      allowedByApplication: true,
+      allowedByKeySystem: true
+    };
     manifest.periods[0].variants.push(variant);
 
     audioStream2 = manifest.periods[1].variants[0].audio;
@@ -400,14 +411,14 @@ describe('StreamingEngine', function() {
       playhead: playhead,
       mediaSourceEngine: mediaSourceEngine,
       netEngine: /** @type {!shaka.net.NetworkingEngine} */(netEngine),
-      onChooseStreams: onChooseStreams,
-      onCanSwitch: onCanSwitch,
-      onError: onError,
-      onEvent: onEvent,
-      onManifestUpdate: onManifestUpdate,
+      onChooseStreams: Util.spyFunc(onChooseStreams),
+      onCanSwitch: Util.spyFunc(onCanSwitch),
+      onError: Util.spyFunc(onError),
+      onEvent: Util.spyFunc(onEvent),
+      onManifestUpdate: Util.spyFunc(onManifestUpdate),
       onSegmentAppended: function() {},
-      onInitialStreamsSetup: onInitialStreamsSetup,
-      onStartupComplete: onStartupComplete
+      onInitialStreamsSetup: Util.spyFunc(onInitialStreamsSetup),
+      onStartupComplete: Util.spyFunc(onStartupComplete)
     };
     streamingEngine = new shaka.media.StreamingEngine(
         /** @type {shakaExtern.Manifest} */(manifest), playerInterface);
@@ -754,6 +765,34 @@ describe('StreamingEngine', function() {
     });
   });
 
+  it('only reinitializes text when switching streams', function() {
+    // See: https://github.com/google/shaka-player/issues/910
+    setupVod();
+    mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+    createStreamingEngine();
+
+    playhead.getTime.and.returnValue(0);
+    onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+    onChooseStreams.and.callFake(defaultOnChooseStreams);
+
+    // When we can switch in the second Period, switch to the playing stream.
+    onCanSwitch.and.callFake(function() {
+      onCanSwitch.and.callFake(function() {
+        expect(streamingEngine.getActiveStreams()[ContentType.TEXT])
+            .toBe(textStream2);
+
+        mediaSourceEngine.reinitText.calls.reset();
+        streamingEngine.switch(ContentType.TEXT, textStream2, false);
+      });
+    });
+
+    // Here we go!
+    streamingEngine.init();
+    runTest();
+
+    expect(mediaSourceEngine.reinitText).not.toHaveBeenCalled();
+  });
+
   it('plays when 2nd Period doesn\'t have text streams', function() {
     setupVod();
     manifest.periods[1].textStreams = [];
@@ -992,7 +1031,7 @@ describe('StreamingEngine', function() {
       // Here we go!
       streamingEngine.init();
 
-      runTest(onTick);
+      runTest(Util.spyFunc(onTick));
       // Verify buffers.
       expect(mediaSourceEngine.initSegments).toEqual({
         audio: [false, true],
@@ -1088,7 +1127,7 @@ describe('StreamingEngine', function() {
       // Here we go!
       streamingEngine.init();
 
-      runTest(onTick);
+      runTest(Util.spyFunc(onTick));
       // Verify buffers.
       expect(mediaSourceEngine.initSegments).toEqual({
         audio: [false, true],
@@ -1155,7 +1194,7 @@ describe('StreamingEngine', function() {
       // Here we go!
       streamingEngine.init();
 
-      runTest(onTick);
+      runTest(Util.spyFunc(onTick));
       // Verify buffers.
       expect(mediaSourceEngine.initSegments).toEqual({
         audio: [false, true],
@@ -1882,7 +1921,7 @@ describe('StreamingEngine', function() {
       // NOTE: Closure cannot type check spy's correctly. Here we have to
       // explicitly re-create remove()'s spy.
       var removeSpy = jasmine.createSpy('remove');
-      mediaSourceEngine.remove = removeSpy;
+      mediaSourceEngine.remove = Util.spyFunc(removeSpy);
 
       removeSpy.and.callFake(function(type, start, end) {
         expect(playheadTime).toBe(20);
@@ -1971,7 +2010,7 @@ describe('StreamingEngine', function() {
       var originalAppendBuffer =
           shaka.test.FakeMediaSourceEngine.prototype.appendBuffer;
       var appendBufferSpy = jasmine.createSpy('appendBuffer');
-      mediaSourceEngine.appendBuffer = appendBufferSpy;
+      mediaSourceEngine.appendBuffer = Util.spyFunc(appendBufferSpy);
 
       // Throw two QuotaExceededErrors at different times.
       var numErrorsThrown = 0;
@@ -2041,7 +2080,7 @@ describe('StreamingEngine', function() {
       var originalAppendBuffer =
           shaka.test.FakeMediaSourceEngine.prototype.appendBuffer;
       var appendBufferSpy = jasmine.createSpy('appendBuffer');
-      mediaSourceEngine.appendBuffer = appendBufferSpy;
+      mediaSourceEngine.appendBuffer = Util.spyFunc(appendBufferSpy);
 
       // Throw QuotaExceededError multiple times after at least one segment of
       // each type has been appended.

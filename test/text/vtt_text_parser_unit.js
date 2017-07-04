@@ -23,7 +23,7 @@ describe('VttTextParser', function() {
     originalVTTCue = window.VTTCue;
 
     logWarningSpy = jasmine.createSpy('shaka.log.warning');
-    shaka.log.warning = logWarningSpy;
+    shaka.log.warning = shaka.test.Util.spyFunc(logWarningSpy);
   });
 
   afterAll(function() {

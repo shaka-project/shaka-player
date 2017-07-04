@@ -16,23 +16,24 @@
  */
 
 describe('SegmentIndex', /** @suppress {accessControls} */ function() {
+  /** @const */
+  var actual1 = makeReference(0, 0, 10, uri(0));
+  /** @const */
+  var actual2 = makeReference(1, 10, 20, uri(20));
+  /** @const */
+  var actual3 = makeReference(2, 20, 30, uri(20));
+
   describe('find', function() {
     it('finds the correct references', function() {
-      var actual1 = makeReference(0, 0, 10, uri(0));
-      var actual2 = makeReference(1, 10, 20, uri(10));
-      var actual3 = makeReference(2, 20, 30, uri(20));
-
-      var index, pos1, pos2, pos3;
-
       // One reference.
-      index = new shaka.media.SegmentIndex([actual1]);
-      pos1 = index.find(5);
+      var index = new shaka.media.SegmentIndex([actual1]);
+      var pos1 = index.find(5);
       expect(pos1).toBe(actual1.position);
 
       // Two references.
       index = new shaka.media.SegmentIndex([actual1, actual2]);
       pos1 = index.find(5);
-      pos2 = index.find(15);
+      var pos2 = index.find(15);
       expect(pos1).toBe(actual1.position);
       expect(pos2).toBe(actual2.position);
 
@@ -40,7 +41,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
       index = new shaka.media.SegmentIndex([actual1, actual2, actual3]);
       pos1 = index.find(5);
       pos2 = index.find(15);
-      pos3 = index.find(25);
+      var pos3 = index.find(25);
       expect(pos1).toBe(actual1.position);
       expect(pos2).toBe(actual2.position);
       expect(pos3).toBe(actual3.position);
@@ -98,26 +99,16 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
   });
 
   describe('get', function() {
-    var actual1, actual2, actual3;
-
-    beforeEach(function() {
-      actual1 = makeReference(0, 0, 10, uri(0));
-      actual2 = makeReference(1, 10, 20, uri(10));
-      actual3 = makeReference(2, 20, 30, uri(20));
-    });
-
     it('returns the correct references', function() {
-      var index, r1, r2, r3;
-
       // One reference.
-      index = new shaka.media.SegmentIndex([actual1]);
-      r1 = index.get(0);
+      var index = new shaka.media.SegmentIndex([actual1]);
+      var r1 = index.get(0);
       expect(r1).toEqual(actual1);
 
       // Two references.
       index = new shaka.media.SegmentIndex([actual1, actual2]);
       r1 = index.get(0);
-      r2 = index.get(1);
+      var r2 = index.get(1);
       expect(r1).toEqual(actual1);
       expect(r2).toEqual(actual2);
 
@@ -125,7 +116,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
       index = new shaka.media.SegmentIndex([actual1, actual2, actual3]);
       r1 = index.get(0);
       r2 = index.get(1);
-      r3 = index.get(2);
+      var r3 = index.get(2);
       expect(r1).toEqual(actual1);
       expect(r2).toEqual(actual2);
       expect(r3).toEqual(actual3);
@@ -166,11 +157,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
     it('three references into zero references', function() {
       var index1 = new shaka.media.SegmentIndex([]);
 
-      var references2 = [
-        makeReference(0, 0, 10, uri(0)),
-        makeReference(1, 10, 20, uri(10)),
-        makeReference(2, 20, 30, uri(20))
-      ];
+      var references2 = [actual1, actual2, actual3];
 
       index1.merge(references2);
       expect(index1.references_.length).toBe(3);
@@ -178,11 +165,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
     });
 
     it('zero references into three references', function() {
-      var references1 = [
-        makeReference(0, 0, 10, uri(0)),
-        makeReference(1, 10, 20, uri(10)),
-        makeReference(2, 20, 30, uri(20))
-      ];
+      var references1 = [actual1, actual2, actual3];
       var index1 = new shaka.media.SegmentIndex(references1);
 
       index1.merge([]);
@@ -258,12 +241,10 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
   });
 
   describe('evict', function() {
-    var actual1, actual2, actual3, index1;
+    /** @type {!shaka.media.SegmentIndex} */
+    var index1;
 
     beforeEach(function() {
-      actual1 = makeReference(0, 0, 10, uri(0));
-      actual2 = makeReference(1, 10, 20, uri(10));
-      actual3 = makeReference(2, 20, 30, uri(20));
       index1 = new shaka.media.SegmentIndex([actual1, actual2, actual3]);
     });
 

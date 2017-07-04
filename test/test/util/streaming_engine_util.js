@@ -149,7 +149,7 @@ shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
   });
 
   timeline.getSeekRangeEnd.and.callFake(function() {
-    return timeline.getSegmentAvailabilityEnd();
+    return shaka.test.Util.invokeSpy(timeline.getSegmentAvailabilityEnd);
   });
 
   timeline.getSegmentAvailabilityDuration.and.callFake(function() {
@@ -183,7 +183,7 @@ shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
  * @param {number} presentationDuration
  * @param {!Object.<string, number>} segmentDurations The duration of each
  *   type of segment.
- * @return {!Object}
+ * @return {shakaExtern.Manifest}
  */
 shaka.test.StreamingEngineUtil.createManifest = function(
     periodStartTimes, presentationDuration, segmentDurations) {
@@ -257,7 +257,7 @@ shaka.test.StreamingEngineUtil.createManifest = function(
     manifest.periods.push(period);
   }
 
-  return manifest;
+  return /** @type {shakaExtern.Manifest} */ (manifest);
 };
 
 

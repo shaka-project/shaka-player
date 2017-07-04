@@ -54,7 +54,7 @@ module.exports = function(config) {
       'test/test/util/*.js',
 
       // list of test assets next
-      'demo/assets.js',
+      'demo/common/assets.js',
 
       // unit tests last
       'test/**/*_unit.js',

@@ -16,9 +16,13 @@
  */
 
 describe('Player', function() {
-  var Util;
+  /** @const */
+  var Util = shaka.test.Util;
+  /** @const */
+  var Feature = shakaAssets.Feature;
+
+  /** @type {!jasmine.Spy} */
   var onErrorSpy;
-  var Feature;
 
   /** @type {shakaExtern.SupportType} */
   var support;
@@ -29,7 +33,7 @@ describe('Player', function() {
   /** @type {shaka.util.EventManager} */
   var eventManager;
 
-  var shaka;
+  var compiledShaka;
 
   beforeAll(function(done) {
     video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
@@ -38,35 +42,30 @@ describe('Player', function() {
     video.muted = true;
     document.body.appendChild(video);
 
-    // Load test utils from outside the compiled library.
-    Util = window.shaka.test.Util;
-    // Load asset features from outside the compiled library.
-    Feature = window.shakaAssets.Feature;
-
-    var loaded = window.shaka.util.PublicPromise();
+    var loaded = new shaka.util.PublicPromise();
     if (getClientArg('uncompiled')) {
       // For debugging purposes, use the uncompiled library.
-      shaka = window.shaka;
+      compiledShaka = shaka;
       loaded.resolve();
     } else {
       // Load the compiled library as a module.
       // All tests in this suite will use the compiled library.
       require(['/base/dist/shaka-player.compiled.js'], function(shakaModule) {
-        shaka = shakaModule;
-        shaka.net.NetworkingEngine.registerScheme(
-            'test', window.shaka.test.TestScheme);
-        shaka.media.ManifestParser.registerParserByMime(
+        compiledShaka = shakaModule;
+        compiledShaka.net.NetworkingEngine.registerScheme(
+            'test', shaka.test.TestScheme);
+        compiledShaka.media.ManifestParser.registerParserByMime(
             'application/x-test-manifest',
-            window.shaka.test.TestScheme.ManifestParser);
+            shaka.test.TestScheme.ManifestParser);
 
         loaded.resolve();
       });
     }
 
     loaded.then(function() {
-      return window.shaka.test.TestScheme.createManifests(shaka, '_compiled');
+      return shaka.test.TestScheme.createManifests(compiledShaka, '_compiled');
     }).then(function() {
-      return shaka.Player.probeSupport();
+      return compiledShaka.Player.probeSupport();
     }).then(function(supportResults) {
       support = supportResults;
       done();
@@ -74,14 +73,14 @@ describe('Player', function() {
   });
 
   beforeEach(function() {
-    player = new shaka.Player(video);
+    player = new compiledShaka.Player(video);
 
     // Grab event manager from the uncompiled library:
-    eventManager = new window.shaka.util.EventManager();
+    eventManager = new shaka.util.EventManager();
 
     onErrorSpy = jasmine.createSpy('onError');
     onErrorSpy.and.callFake(function(event) { fail(event.detail); });
-    eventManager.listen(player, 'error', onErrorSpy);
+    eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
   });
 
   afterEach(function(done) {
@@ -122,9 +121,7 @@ describe('Player', function() {
           switchHistory: jasmine.arrayContaining([{
             timestamp: jasmine.any(Number),
             id: jasmine.any(Number),
-            // Include 'window' to use uncompiled version version of the
-            // library.
-            type: window.shaka.util.ManifestParserUtils.ContentType.VIDEO,
+            type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
             fromAdaptation: true
           }]),
 
@@ -186,7 +183,31 @@ describe('Player', function() {
       }).catch(fail).then(done);
     });
 
-    window.shakaAssets.testAssets.forEach(function(asset) {
+    it('while changing languages with short Periods', function(done) {
+      // See: https://github.com/google/shaka-player/issues/797
+      player.configure({preferredAudioLanguage: 'en'});
+      player.load('test:sintel_short_periods_compiled').then(function() {
+        video.play();
+        return waitUntilPlayheadReaches(video, 8, 30);
+      }).then(function() {
+        // The Period changes at 10 seconds.  Assert that we are in the previous
+        // Period and have buffered into the next one.
+        expect(video.currentTime).toBeLessThan(9);
+        expect(video.buffered.end(0)).toBeGreaterThan(11);
+
+        // Change to a different language; this should clear the buffers and
+        // cause a Period transition again.
+        expect(getActiveLanguage()).toBe('en');
+        player.selectAudioLanguage('es');
+        return waitUntilPlayheadReaches(video, 21, 30);
+      }).then(function() {
+        // Should have gotten past the next Period transition and still be
+        // playing the new language.
+        expect(getActiveLanguage()).toBe('es');
+      }).catch(fail).then(done);
+    });
+
+    shakaAssets.testAssets.forEach(function(asset) {
       if (asset.disabled) return;
 
       var testName =
@@ -262,6 +283,18 @@ describe('Player', function() {
         }).catch(fail).then(done);
       });
     });
+
+    /**
+     * Gets the language of the active Variant.
+     * @return {string}
+     */
+    function getActiveLanguage() {
+      var tracks = player.getVariantTracks().filter(function(t) {
+        return t.active;
+      });
+      expect(tracks.length).toBeGreaterThan(0);
+      return tracks[0].language;
+    }
   });
 
   /**
@@ -309,7 +342,7 @@ describe('Player', function() {
    * @param {shakaExtern.Request} request
    */
   function addLicenseRequestHeaders(headers, requestType, request) {
-    var RequestType = shaka.net.NetworkingEngine.RequestType;
+    var RequestType = compiledShaka.net.NetworkingEngine.RequestType;
     if (requestType != RequestType.LICENSE) return;
 
     // Add these to the existing headers.  Do not clobber them!

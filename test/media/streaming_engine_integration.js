@@ -16,40 +16,63 @@
  */
 
 describe('StreamingEngine', function() {
+  /** @const */
+  var ContentType = shaka.util.ManifestParserUtils.ContentType;
+  /** @const */
+  var Util = shaka.test.Util;
+
   var metadata;
   var generators;
 
+  /** @type {!shaka.util.EventManager} */
   var eventManager;
+  /** @type {!HTMLVideoElement} */
   var video;
   var timeline;
 
+  /** @type {!shaka.media.Playhead} */
   var playhead;
+  /** @type {shakaExtern.StreamingConfiguration} */
   var config;
-  var onBuffering;
-
-  var mediaSource;
-  var mediaSourceEngine;
 
   var netEngine;
+  /** @type {!MediaSource} */
+  var mediaSource;
+  /** @type {!shaka.media.MediaSourceEngine} */
+  var mediaSourceEngine;
+  /** @type {!shaka.media.StreamingEngine} */
+  var streamingEngine;
 
+
+  /** @type {?shakaExtern.Stream} */
   var audioStream1;
+  /** @type {?shakaExtern.Stream} */
   var videoStream1;
+  /** @type {?shakaExtern.Stream} */
   var audioStream2;
+  /** @type {?shakaExtern.Stream} */
   var videoStream2;
 
+  /** @type {shakaExtern.Manifest} */
   var manifest;
 
+  /** @type {!jasmine.Spy} */
+  var onBuffering;
+  /** @type {!jasmine.Spy} */
   var onChooseStreams;
+  /** @type {!jasmine.Spy} */
   var onCanSwitch;
+  /** @type {!jasmine.Spy} */
   var onError;
+  /** @type {!jasmine.Spy} */
   var onEvent;
+  /** @type {!jasmine.Spy} */
   var onInitialStreamsSetup;
+  /** @type {!jasmine.Spy} */
   var onStartupComplete;
-  var streamingEngine;
-  var ContentType = shaka.util.ManifestParserUtils.ContentType;
 
   beforeAll(function() {
-    video = /** @type {HTMLVideoElement} */ (document.createElement('video'));
+    video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
     video.width = 600;
     video.height = 400;
     video.muted = true;
@@ -266,7 +289,7 @@ describe('StreamingEngine', function() {
         config,
         null /* startTime */,
         onSeek,
-        onEvent);
+        shaka.test.Util.spyFunc(onEvent));
   }
 
   function setupManifest(
@@ -276,7 +299,8 @@ describe('StreamingEngine', function() {
         { audio: metadata.audio.segmentDuration,
           video: metadata.video.segmentDuration });
 
-    manifest.presentationTimeline = timeline;
+    manifest.presentationTimeline =
+        /** @type {!shaka.media.PresentationTimeline} */ (timeline);
     manifest.minBufferTime = 2;
 
     // Create InitSegmentReferences.
@@ -301,14 +325,14 @@ describe('StreamingEngine', function() {
       playhead: playhead,
       mediaSourceEngine: mediaSourceEngine,
       netEngine: /** @type {!shaka.net.NetworkingEngine} */(netEngine),
-      onChooseStreams: onChooseStreams,
-      onCanSwitch: onCanSwitch,
-      onError: onError,
-      onEvent: onEvent,
+      onChooseStreams: Util.spyFunc(onChooseStreams),
+      onCanSwitch: Util.spyFunc(onCanSwitch),
+      onError: Util.spyFunc(onError),
+      onEvent: Util.spyFunc(onEvent),
       onManifestUpdate: function() {},
       onSegmentAppended: playhead.onSegmentAppended.bind(playhead),
-      onInitialStreamsSetup: onInitialStreamsSetup,
-      onStartupComplete: onStartupComplete
+      onInitialStreamsSetup: Util.spyFunc(onInitialStreamsSetup),
+      onStartupComplete: Util.spyFunc(onStartupComplete)
     };
     streamingEngine = new shaka.media.StreamingEngine(
         /** @type {shakaExtern.Manifest} */(manifest), playerInterface);
@@ -683,8 +707,10 @@ describe('StreamingEngine', function() {
               video: metadata.video.segmentDuration });
 
         manifest = setupGappyManifest(gapAtStart, dropSegment);
-        audioStream1 = manifest.periods[0].variants[0].audio;
-        videoStream1 = manifest.periods[0].variants[0].video;
+        audioStream1 = /** @type {shakaExtern.Stream} */ (
+            manifest.periods[0].variants[0].audio);
+        videoStream1 = /** @type {shakaExtern.Stream} */ (
+            manifest.periods[0].variants[0].video);
 
         setupPlayhead();
         createStreamingEngine();

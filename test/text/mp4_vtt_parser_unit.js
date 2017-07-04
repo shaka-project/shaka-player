@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.test.Util');
-
 describe('Mp4vttParser', function() {
   var vttInitSegmentUri = '/base/test/test/assets/vtt-init.mp4';
   var vttSegmentUri = '/base/test/test/assets/vtt-segment.mp4';

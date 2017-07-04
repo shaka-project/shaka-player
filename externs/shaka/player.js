@@ -142,7 +142,8 @@ shakaExtern.Stats;
  *   primary: boolean,
  *   roles: !Array.<string>,
  *   videoId: ?number,
- *   audioId: ?number
+ *   audioId: ?number,
+ *   channelsCount: ?number
  * }}
  *
  * @description
@@ -182,7 +183,7 @@ shakaExtern.Stats;
  *   The audio/video codecs string provided in the manifest, if present.
  * @property {?string} audioCodec
  *   The audio codecs string provided in the manifest, if present.
-  * @property {?string} videoCodec
+ * @property {?string} videoCodec
  *   The video codecs string provided in the manifest, if present.
  * @property {boolean} primary
  *   True indicates that this in the primary language for the content.
@@ -196,6 +197,8 @@ shakaExtern.Stats;
  *   (only for variant tracks) The video stream id.
  * @property {?number} audioId
  *   (only for variant tracks) The audio stream id.
+ * @property {?number} channelsCount
+ *   The count of the audio track channels.
  * @exportDoc
  */
 shakaExtern.Track;

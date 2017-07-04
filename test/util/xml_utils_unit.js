@@ -148,6 +148,11 @@ describe('XmlUtils', function() {
   it('parseDate', function() {
     var parseDate = shaka.util.XmlUtils.parseDate;
 
+    // Should be parsed as UTC independent of local timezone.
+    expect(parseDate('2015-11-30T12:46:33')).toBe(1448887593);
+    // Should be parsed using the given timezone, not the local timezone.
+    expect(parseDate('2015-11-30T12:46:33+06:00')).toBe(1448865993);
+
     expect(parseDate('November 30, 2015')).toBeTruthy();
     expect(parseDate('Apple')).toBeNull();
     expect(parseDate('')).toBeNull();

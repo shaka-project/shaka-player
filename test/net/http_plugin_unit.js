@@ -16,6 +16,7 @@
  */
 
 describe('HttpPlugin', function() {
+  /** @type {shakaExtern.RetryParameters} */
   var retryParameters;
 
   beforeAll(function() {
@@ -79,6 +80,7 @@ describe('HttpPlugin', function() {
 
     shaka.net.HttpPlugin(request.uris[0], request)
         .then(function() {
+          /** @type {!jasmine.Ajax.RequestStub} */
           var actual = jasmine.Ajax.requests.mostRecent();
           expect(actual).toBeTruthy();
           expect(actual.url).toBe(request.uris[0]);

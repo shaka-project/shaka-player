@@ -54,7 +54,8 @@ describe('OfflineScheme', function() {
 
     fakeCreateStorageEngine = jasmine.createSpy('createStorageEngine');
     fakeCreateStorageEngine.and.returnValue(fakeStorageEngine);
-    shaka.offline.OfflineUtils.createStorageEngine = fakeCreateStorageEngine;
+    shaka.offline.OfflineUtils.createStorageEngine =
+        shaka.test.Util.spyFunc(fakeCreateStorageEngine);
 
     // The whole request is ignored by the OfflineScheme.
     var retry = shaka.net.NetworkingEngine.defaultRetryParameters();

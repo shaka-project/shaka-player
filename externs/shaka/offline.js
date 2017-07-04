@@ -38,7 +38,8 @@ shakaExtern.OfflineSupport;
  * @typedef {{
  *   trackSelectionCallback:
  *       function(!Array.<shakaExtern.Track>):!Array.<shakaExtern.Track>,
- *   progressCallback: function(shakaExtern.StoredContent,number)
+ *   progressCallback: function(shakaExtern.StoredContent,number),
+ *   usePersistentLicense: boolean
  * }}
  *
  * @property {function(!Array.<shakaExtern.Track>):!Array.<shakaExtern.Track>}
@@ -50,6 +51,12 @@ shakaExtern.OfflineSupport;
  * @property {function(shakaExtern.StoredContent,number)} progressCallback
  *   Called inside store() to give progress info back to the app.  It is given
  *   the current manifest being stored and the progress of it being stored.
+ * @property {boolean} usePersistentLicense
+ *   If true, store protected content with a persistent license so that no
+ *   network is required to view.
+ *   If false, store protected content without a persistent license.  A network
+ *   will be required to retrieve a temporary license to view.
+ *   Defaults to true.
  * @exportDoc
  */
 shakaExtern.OfflineConfiguration;

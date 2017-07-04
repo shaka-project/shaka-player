@@ -17,12 +17,10 @@
 
 // Based on: https://github.com/promises-aplus/promises-tests
 describe('Promise polyfill', function() {
-  var Promise;
+  /** @const */
+  var Promise = shaka.polyfill.Promise;
+  /** @const */
   var dummy = { 'FOO': 'BAR' };
-
-  beforeAll(function() {
-    Promise = shaka.polyfill.Promise;
-  });
 
   describe('resolve', function() {
     it('Promise.resolve returns a resolved promise', function(done) {
@@ -129,7 +127,7 @@ describe('Promise polyfill', function() {
         p.resolve(dummy);
       }, 50);
 
-      p.then(function() {
+      p.promise.then(function() {
         expect(resolved).toBe(true);
         done();
       });
@@ -140,7 +138,8 @@ describe('Promise polyfill', function() {
       var p = deferred();
       var fulfilled = jasmine.createSpy('onFulfilled');
       var rejected = jasmine.createSpy('onRejected');
-      p.then(fulfilled, rejected);
+      p.promise.then(shaka.test.Util.spyFunc(fulfilled),
+                     shaka.test.Util.spyFunc(rejected));
 
       p.resolve(dummy);
       p.resolve(dummy);
@@ -165,7 +164,7 @@ describe('Promise polyfill', function() {
         p.reject(dummy);
       }, 50);
 
-      p.then(fail, function() {
+      p.promise.then(fail, function() {
         expect(rejected).toBe(true);
         done();
       });
@@ -176,7 +175,8 @@ describe('Promise polyfill', function() {
       var p = deferred();
       var fulfilled = jasmine.createSpy('onFulfilled');
       var rejected = jasmine.createSpy('onRejected');
-      p.then(fulfilled, rejected);
+      p.promise.then(shaka.test.Util.spyFunc(fulfilled),
+                     shaka.test.Util.spyFunc(rejected));
 
       p.reject(dummy);
       p.reject(dummy);
@@ -231,7 +231,7 @@ describe('Promise polyfill', function() {
     // `promise2 = promise1.then(onFulfilled, onRejected)`
     it('must return a promise', function() {
       var p = deferred();
-      var p2 = p.then();
+      var p2 = p.promise.then();
 
       expect(p2).toBeTruthy();
       expect(typeof p2).toBe('object');
@@ -251,15 +251,15 @@ describe('Promise polyfill', function() {
       p4.resolved = false;
 
       p.then(function() {
-        return p2;
+        return p2.promise;
       }, fail).then(function(i) {
         expect(i).toBe(2);
         expect(p2.resolved).toBe(true);
-        return p3;
+        return p3.promise;
       }).then(fail, function(i) {
         expect(i).toBe(3);
         expect(p3.resolved).toBe(true);
-        return p4;
+        return p4.promise;
       }).then(function(i) {
         expect(i).toBe(4);
         expect(p4.resolved).toBe(true);
@@ -326,7 +326,7 @@ describe('Promise polyfill', function() {
       var p2 = deferred();
       var p3 = deferred();
 
-      var all = Promise.all([p1, p2, p3]);
+      var all = Promise.all([p1.promise, p2.promise, p3.promise]);
       all.then(function() {
         expect(p1.resolved).toBe(true);
         expect(p2.resolved).toBe(true);
@@ -374,7 +374,7 @@ describe('Promise polyfill', function() {
       var p1 = deferred();
       var p2 = deferred();
 
-      var all = Promise.all([p1, p2]);
+      var all = Promise.all([p1.promise, p2.promise]);
       all.then(fail, function(e) {
         expect(e).toBe(1);
       }).then(done);
@@ -386,11 +386,11 @@ describe('Promise polyfill', function() {
     it('is not resolved until all Promise chains are resolved', function(done) {
       var p = deferred();
       var p1 = Promise.resolve(0);
-      var p2 = Promise.resolve().then(function() { return p; });
+      var p2 = Promise.resolve().then(function() { return p.promise; });
 
       var all = Promise.all([p1, p2]);
       var spy = jasmine.createSpy('resolve').and.callFake(done);
-      all.then(spy, fail);
+      all.then(shaka.test.Util.spyFunc(spy), fail);
 
       setTimeout(function() {
         expect(spy).not.toHaveBeenCalled();
@@ -403,7 +403,7 @@ describe('Promise polyfill', function() {
       var p2 = deferred();
       var p3 = deferred();
 
-      Promise.all([p1, p2, p3]).then(function(data) {
+      Promise.all([p1.promise, p2.promise, p3.promise]).then(function(data) {
         expect(data.length).toBe(3);
         expect(data[0]).toBe(1);
         expect(data[1]).toBe(2);
@@ -447,7 +447,7 @@ describe('Promise polyfill', function() {
       var p3 = deferred();
 
       var anyDone = false;
-      var race = Promise.race([p1, p2, p3]);
+      var race = Promise.race([p1.promise, p2.promise, p3.promise]);
       race.then(function() { expect(anyDone).toBe(true); })
           .catch(fail).then(done);
 
@@ -462,7 +462,7 @@ describe('Promise polyfill', function() {
       var p2 = Promise.resolve(2);
       var p3 = deferred();
 
-      var race = Promise.race([p1, p2, p3]);
+      var race = Promise.race([p1.promise, p2, p3.promise]);
       race.then(function(arg) { expect(arg).toBe(2); })
           .catch(fail).then(done);
     });
@@ -472,7 +472,7 @@ describe('Promise polyfill', function() {
       var p2 = deferred();
       var p3 = deferred();
 
-      var race = Promise.race([p1, p2, p3]);
+      var race = Promise.race([p1.promise, p2.promise, p3.promise]);
       race.then(function(arg) { expect(arg).toBe(2); })
           .catch(fail).then(done);
 
@@ -484,7 +484,7 @@ describe('Promise polyfill', function() {
       var p1 = deferred();
       var p2 = Promise.reject(2);
 
-      var race = Promise.race([p1, p2]);
+      var race = Promise.race([p1.promise, p2]);
       race.then(fail, function(e) {
         expect(e).toBe(2);
       }).then(done);
@@ -496,7 +496,7 @@ describe('Promise polyfill', function() {
       var p1 = deferred();
       var p2 = deferred();
 
-      var race = Promise.race([p1, p2]);
+      var race = Promise.race([p1.promise, p2.promise]);
       race.then(fail, function(e) {
         expect(e).toBe(2);
       }).then(done);
@@ -509,7 +509,7 @@ describe('Promise polyfill', function() {
       var p1 = deferred();
       var p2 = deferred();
 
-      var race = Promise.race([p1, p2]);
+      var race = Promise.race([p1.promise, p2.promise]);
       race.then(function(e) { expect(e).toBe(2); }, fail).then(done);
 
       p1.resolve(2);
@@ -519,11 +519,11 @@ describe('Promise polyfill', function() {
     it('if a function returns a Promise, wait for it to resolve/reject',
        function(done) {
          var p = deferred();
-         var p1 = Promise.resolve().then(function() { return p; });
+         var p1 = Promise.resolve().then(function() { return p.promise; });
 
          var race = Promise.race([p1]);
          var spy = jasmine.createSpy('resolve').and.callFake(done);
-         race.then(spy, fail);
+         race.then(shaka.test.Util.spyFunc(spy), fail);
 
          setTimeout(function() {
            expect(spy).not.toHaveBeenCalled();
@@ -551,7 +551,7 @@ describe('Promise polyfill', function() {
       var p1 = deferred();
       var p2 = null;
 
-      Promise.race([p1, p2]).then(function(arg) {
+      Promise.race([p1.promise, p2]).then(function(arg) {
         expect(arg).toBe(null);
       }).catch(fail).then(done);
     });
@@ -571,7 +571,7 @@ describe('Promise polyfill', function() {
     it('once fulfilled must not change state', function(done) {
       var p = deferred();
       var called = false;
-      p.then(function() {
+      p.promise.then(function() {
         expect(called).toBe(false);
         called = true;
       }, function() {
@@ -589,7 +589,7 @@ describe('Promise polyfill', function() {
     it('once rejected must not change state', function(done) {
       var p = deferred();
       var called = false;
-      p.then(function() {
+      p.promise.then(function() {
         fail('Promise resolved when should reject');
         done();
       }, function() {
@@ -640,15 +640,15 @@ describe('Promise polyfill', function() {
       var p = deferred();
       var calls = 0;
 
-      p.then(function() {
+      p.promise.then(function() {
         expect(++calls).toBe(1);
       });
-      p.then(function() {
+      p.promise.then(function() {
         expect(++calls).toBe(2);
         // Ensure that it handles exceptions correctly.
         throw new Error();
       });
-      p.then(function() {
+      p.promise.then(function() {
         expect(++calls).toBe(3);
       });
 
@@ -665,15 +665,15 @@ describe('Promise polyfill', function() {
       var p = deferred();
       var calls = 0;
 
-      p.then(undefined, function() {
+      p.promise.then(undefined, function() {
         expect(++calls).toBe(1);
       });
-      p.then(undefined, function() {
+      p.promise.then(undefined, function() {
         expect(++calls).toBe(2);
         // Ensure that it handles exceptions correctly.
         throw new Error();
       });
-      p.then(undefined, function() {
+      p.promise.then(undefined, function() {
         expect(++calls).toBe(3);
       });
 
@@ -734,6 +734,13 @@ describe('Promise polyfill', function() {
     });
   });
 
+  /**
+   * @return {{
+   *   promise: shaka.polyfill.Promise,
+   *   resolve: function(*=),
+   *   reject: function(*=)
+   * }}
+   */
   function deferred() {
     var resolveLocal;
     var rejectLocal;
@@ -742,8 +749,10 @@ describe('Promise polyfill', function() {
       rejectLocal = reject;
     });
 
-    p.resolve = resolveLocal;
-    p.reject = rejectLocal;
-    return p;
+    return {
+      promise: p,
+      resolve: resolveLocal,
+      reject: rejectLocal
+    };
   }
 });

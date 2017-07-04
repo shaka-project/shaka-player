@@ -16,11 +16,8 @@
  */
 
 describe('DashParser SegmentList', function() {
-  var Dash;
-
-  beforeAll(function() {
-    Dash = shaka.test.Dash;
-  });
+  /** @const */
+  var Dash = shaka.test.Dash;
 
   shaka.test.Dash.makeTimelineTests('SegmentList', '', [
     '<SegmentURL media="s1.mp4" />',

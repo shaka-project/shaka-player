@@ -450,12 +450,18 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
     defaultMimeType = 'text/vtt';
   }
 
+  var create = jasmine.createSpy('createSegmentIndex').and.callFake(function() {
+    return Promise.resolve();
+  });
+  var find = jasmine.createSpy('findSegmentPosition').and.returnValue(null);
+  var get = jasmine.createSpy('getSegmentReference').and.returnValue(null);
+
   /** @type {shakaExtern.Stream} */
   var stream = {
     id: id,
-    createSegmentIndex: jasmine.createSpy('createSegmentIndex'),
-    findSegmentPosition: jasmine.createSpy('findSegmentPosition'),
-    getSegmentReference: jasmine.createSpy('getSegmentReference'),
+    createSegmentIndex: shaka.test.Util.spyFunc(create),
+    findSegmentPosition: shaka.test.Util.spyFunc(find),
+    getSegmentReference: shaka.test.Util.spyFunc(get),
     initSegmentReference: null,
     presentationTimeOffset: 0,
     mimeType: defaultMimeType,
@@ -473,13 +479,9 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
     primary: false,
     trickModeVideo: null,
     containsEmsgBoxes: false,
-    roles: []
+    roles: [],
+    channelsCount: null
   };
-  stream.createSegmentIndex.and.callFake(
-      function() { return Promise.resolve(); });
-  stream.findSegmentPosition.and.returnValue(null);
-  stream.getSegmentReference.and.returnValue(null);
-
   return stream;
 };
 
@@ -804,5 +806,17 @@ shaka.test.ManifestGenerator.prototype.currentStream_ = function() {
   goog.asserts.assert(this.lastStreamAdded_,
                       'Must add at least one stream.');
   return this.lastStreamAdded_;
+};
+
+
+/**
+ * Sets the count of the channels of the current stream.
+ * @param {number} count
+ * @return {!shaka.test.ManifestGenerator}
+ */
+shaka.test.ManifestGenerator.prototype.channelsCount = function(count) {
+  var stream = this.currentStream_();
+  stream.channelsCount = count;
+  return this;
 };
 // }}}

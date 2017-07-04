@@ -26,9 +26,10 @@
 
     <title>Shaka Player Demo</title>
 
+    <link rel="manifest" href="app_manifest.json">
     <link rel="icon" href="favicon.ico">
     <link rel="stylesheet" href="demo.css">
-    <link rel="stylesheet" href="controls.css">
+    <link rel="stylesheet" href="common/controls.css">
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
@@ -36,15 +37,15 @@
 
     <script src="//www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
     <script src="load.js"></script>
-    <script src="assets.js"></script>
-    <script src="demo_utils.js"></script>
     <script src="main.js"></script>
     <script src="asset_section.js"></script>
     <script src="configuration_section.js"></script>
     <script src="info_section.js"></script>
     <script src="log_section.js"></script>
     <script src="offline_section.js"></script>
-    <script src="controls.js"></script>
+    <script src="common/assets.js"></script>
+    <script src="common/demo_utils.js"></script>
+    <script src="common/controls.js"></script>
   </head>
   <body>
     <div id="container">
@@ -147,6 +148,14 @@
         <div>
           <label for="logToScreen">Log to the screen:</label>
           <input id="logToScreen" type="checkbox">
+        </div>
+        <div>
+          <label for="smallGapLimit">Maximum small gap size:</label>
+          <input id="smallGapLimit" class="flex-grow" type="text">
+        </div>
+        <div>
+          <label for="jumpLargeGaps">Jump large gaps:</label>
+          <input id="jumpLargeGaps" type="checkbox">
         </div>
         <div id="logLevelListDiv" hidden>
           <label for="logLevelList">Log Level:</label>

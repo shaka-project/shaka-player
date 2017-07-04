@@ -83,6 +83,14 @@ requirement: {
 }
 
 
+#Disallow classList toggle.
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  value: 'DOMTokenList.prototype.toggle'
+  error_message: 'classList toggle is not supported in IE11'
+}
+
+
 # Disallow ES6 methods.
 requirement: {
   type: BANNED_PROPERTY

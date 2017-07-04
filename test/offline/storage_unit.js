@@ -107,7 +107,8 @@ describe('Storage', function() {
             codecs: 'vorbis',
             primary: true,
             segments: [],
-            roles: []
+            roles: [],
+            channelsCount: null
           }
         ]
       }],
@@ -147,7 +148,8 @@ describe('Storage', function() {
         videoCodec: 'avc1.4d401f',
         roles: [],
         videoId: 0,
-        audioId: 1
+        audioId: 1,
+        channelsCount: null
       }
     ];
     Promise
@@ -263,7 +265,7 @@ describe('Storage', function() {
       });
 
       var warning = jasmine.createSpy('shaka.log.warning');
-      shaka.log.warning = warning;
+      shaka.log.warning = shaka.test.Util.spyFunc(warning);
       storage.store('')
           .then(function(data) {
             expect(data).toBeTruthy();
@@ -455,7 +457,7 @@ describe('Storage', function() {
             size: 150,
             expiration: Infinity,
             tracks: tracks,
-            appMetadata: undefined
+            appMetadata: {}
           });
 
           switch (progress.calls.count()) {
@@ -510,7 +512,7 @@ describe('Storage', function() {
             size: jasmine.any(Number),
             expiration: Infinity,
             tracks: tracks,
-            appMetadata: undefined
+            appMetadata: {}
           });
 
           switch (progress.calls.count()) {
@@ -809,7 +811,7 @@ describe('Storage', function() {
         }
 
         var warning = jasmine.createSpy('shaka.log.warning');
-        shaka.log.warning = warning;
+        shaka.log.warning = shaka.test.Util.spyFunc(warning);
 
         // An exact match is available for en-US, en-GB, and en.
         // Test all three to show that we are not just choosing the first loose
@@ -869,6 +871,37 @@ describe('Storage', function() {
         }).catch(fail).then(done);
       });
     });  // describe('default track selection callback')
+
+    describe('temporary license', function() {
+      var drmInfo;
+
+      beforeEach(function() {
+        drmInfo = {
+          keySystem: 'com.example.abc',
+          licenseServerUri: 'http://example.com',
+          persistentStateRequire: false,
+          audioRobustness: 'HARDY'
+        };
+        drmEngine.setDrmInfo(drmInfo);
+        drmEngine.setSessionIds(['abcd']);
+        storage.configure({ usePersistentLicense: false });
+      });
+
+      it('does not store offline sessions', function(done) {
+        storage.store('')
+            .then(function(data) {
+              expect(data.offlineUri).toBe('offline:0');
+              return fakeStorageEngine.get('manifest', 0);
+            })
+            .then(function(manifestDb) {
+              expect(manifestDb).toBeTruthy();
+              expect(manifestDb.drmInfo).toEqual(drmInfo);
+              expect(manifestDb.sessionIds.length).toEqual(0);
+            })
+            .catch(fail)
+            .then(done);
+      });
+    }); // describe('temporary license')
   });  // describe('store')
 
   describe('remove', function() {
@@ -956,6 +989,24 @@ describe('Storage', function() {
           })
           .then(function() {
             expectDatabaseCount(1, 8);
+            return removeManifest(manifestId);
+          })
+          .then(function() { expectDatabaseCount(0, 0); })
+          .catch(fail)
+          .then(done);
+    });
+
+    it('will delete content with a temporary license', function(done) {
+      storage.configure({ usePersistentLicense: false });
+      var manifestId = 0;
+      createAndInsertSegments(manifestId, 5)
+          .then(function(refs) {
+            var manifest = createManifest(manifestId);
+            manifest.periods[0].streams.push({segments: refs});
+            return fakeStorageEngine.insert('manifest', manifest);
+          })
+          .then(function() {
+            expectDatabaseCount(1, 5);
             return removeManifest(manifestId);
           })
           .then(function() { expectDatabaseCount(0, 0); })
