@@ -15,6 +15,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Shaka Player demo, main section.
+ *
+ * @suppress {visibility} to work around compiler errors until we can
+ *   refactor the demo into classes that talk via public method.  TODO
+ */
+
 
 /** @suppress {duplicate} */
 var shakaDemo = shakaDemo || {};
@@ -143,7 +150,7 @@ shakaDemo.storeDeleteAsset_ = function() {
 
   progress.textContent = '0';
 
-  var storage = new shaka.offline.Storage(shakaDemo.player_);
+  var storage = new shaka.offline.Storage(shakaDemo.localPlayer_);
   storage.configure(/** @type {shakaExtern.OfflineConfiguration} */ ({
     progressCallback: function(data, percent) {
       progress.textContent = (percent * 100).toFixed(2);
@@ -201,6 +208,11 @@ shakaDemo.refreshAssetList_ = function() {
  * @private
  */
 shakaDemo.onCastStatusChange_ = function(connected) {
+  if (!shakaDemo.offlineOptGroup_) {
+    // No offline support.
+    return;
+  }
+
   // When we are casting, offline assets become unavailable.
   shakaDemo.offlineOptGroup_.disabled = connected;
 

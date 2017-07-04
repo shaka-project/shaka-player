@@ -15,7 +15,31 @@
  * limitations under the License.
  */
 
+goog.provide('shaka.test.StatusPromise');
 goog.provide('shaka.test.Util');
+
+
+
+/**
+ * @param {!Promise} p
+ * @constructor
+ * @struct
+ * @extends {Promise}
+ * @return {!Promise}
+ */
+shaka.test.StatusPromise = function(p) {
+  p.status = 'pending';
+  p.then(function() {
+    p.status = 'resolved';
+  }, function() {
+    p.status = 'rejected';
+  });
+  return p;
+};
+
+
+/** @type {string} */
+shaka.test.StatusPromise.prototype.status;
 
 
 /**
@@ -48,14 +72,10 @@ shaka.test.Util.fakeEventLoop = function(duration, opt_onTick) {
 /**
  * Capture a Promise's status and attach it to the Promise.
  * @param {!Promise} promise
+ * @return {!shaka.test.StatusPromise}
  */
 shaka.test.Util.capturePromiseStatus = function(promise) {
-  promise.status = 'pending';
-  promise.then(function() {
-    promise.status = 'resolved';
-  }, function() {
-    promise.status = 'rejected';
-  });
+  return new shaka.test.StatusPromise(promise);
 };
 
 
@@ -92,6 +112,94 @@ shaka.test.Util.expectToEqualError = function(actual, expected) {
   delete expected['stack'];
   delete expected['message'];
   expect(actual).toEqual(jasmine.objectContaining(expected));
+};
+
+
+/**
+  * Registers a custom matcher for Element objects, called 'toEqualElement'.
+  * @private
+  */
+shaka.test.Util.registerElementMatcher_ = function() {
+  jasmine.addMatchers({
+    toEqualElement: function(util, customEqualityTesters) {
+      return {
+        compare: shaka.test.Util.expectToEqualElementCompare_
+      };
+    }
+  });
+};
+
+
+/**
+ * @param {?} actual
+ * @param {!Element} expected
+ * @return {!Object} result
+ * @private
+ */
+shaka.test.Util.expectToEqualElementCompare_ = function(actual, expected) {
+  var diff = shaka.test.Util.expectToEqualElementRecursive_(actual, expected);
+  var result = {};
+  result.pass = diff == null;
+  if (result.pass) {
+    result.message = 'Expected ' + actual.innerHTML + ' not to match ';
+    result.message += expected.innerHTML + '.';
+  } else {
+    result.message = 'Expected ' + actual.innerHTML + ' to match ';
+    result.message += expected.innerHTML + '. ' + diff;
+  }
+  return result;
+};
+
+
+/**
+ * @param {?} actual
+ * @param {!Node} expected
+ * @return {?string} failureReason
+ * @private
+ */
+shaka.test.Util.expectToEqualElementRecursive_ = function(actual, expected) {
+  var prospectiveDiff = 'The difference was in ' +
+      (actual.outerHTML || actual.textContent) + ' vs ' +
+      (expected['outerHTML'] || expected.textContent) + ': ';
+
+  if (!(actual instanceof Element) && !(expected instanceof Element)) {
+    // Compare them as nodes.
+    if (actual.textContent != expected.textContent)
+      return prospectiveDiff + 'Nodes are different.';
+  } else if (!(actual instanceof Element) || !(expected instanceof Element)) {
+    return prospectiveDiff + 'One is element, one isn\'t.';
+  } else {
+    // Compare them as elements.
+    if (actual.tagName != expected.tagName)
+      return prospectiveDiff + 'Different tagName.';
+
+    if (actual.attributes.length != expected.attributes.length)
+      return prospectiveDiff + 'Different attribute list length.';
+    for (var i = 0; i < actual.attributes.length; i++) {
+      var aAttrib = actual.attributes[i].nodeName;
+      var aAttribVal = actual.getAttribute(aAttrib);
+      var eAttrib = expected.attributes[i].nodeName;
+      var eAttribVal = expected.getAttribute(eAttrib);
+      if (aAttrib != eAttrib || aAttribVal != eAttribVal) {
+        var diffNote =
+            aAttrib + '=' + aAttribVal + ' vs ' + eAttrib + '=' + eAttribVal;
+        return prospectiveDiff + 'Attribute #' + i +
+            ' was different (' + diffNote + ').';
+      }
+    }
+
+    if (actual.childNodes.length != expected.childNodes.length)
+      return prospectiveDiff + 'Different child node list length.';
+    for (var i = 0; i < actual.childNodes.length; i++) {
+      var aNode = actual.childNodes[i];
+      var eNode = expected.childNodes[i];
+      var diff = shaka.test.Util.expectToEqualElementRecursive_(aNode, eNode);
+      if (diff)
+        return diff;
+    }
+  }
+
+  return null;
 };
 
 
@@ -162,6 +270,39 @@ shaka.test.Util.fetch = function(uri) {
   });
 };
 
+
+/**
+ * Accepts a mock object (i.e. a simple JavaScript object composed of jasmine
+ * spies) and makes it strict.  This means that every spy in the given object
+ * will be made to throw an exception by default.
+ * @param {!Object} obj
+ */
+shaka.test.Util.makeMockObjectStrict = function(obj) {
+  for (var name in obj)
+    obj[name].and.throwError(new Error(name));
+};
+
+
+/**
+ * @param {!jasmine.Spy} spy
+ * @return {!Function}
+ */
+shaka.test.Util.spyFunc = function(spy) {
+  return spy;
+};
+
+
+/**
+ * @param {!jasmine.Spy} spy
+ * @param {...*} var_args
+ * @return {*}
+ */
+shaka.test.Util.invokeSpy = function(spy, var_args) {
+  return spy.apply(null, Array.prototype.slice.call(arguments, 1));
+};
+
+
 beforeEach(function() {
   jasmine.addCustomEqualityTester(shaka.test.Util.compareReferences);
+  shaka.test.Util.registerElementMatcher_();
 });

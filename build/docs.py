@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 #
 # Copyright 2016 Google Inc.  All Rights Reserved.
 #
@@ -19,15 +19,17 @@
 This deletes the old documentation first.
 """
 
+import logging
 import os
 import shutil
+import sys
 
 import shakaBuildHelpers
 
 
 def build_docs(_):
   """Builds the source code documentation."""
-  print 'Building the docs...'
+  logging.info('Building the docs...')
 
   base = shakaBuildHelpers.get_source_base()
   shutil.rmtree(os.path.join(base, 'docs', 'api'), ignore_errors=True)

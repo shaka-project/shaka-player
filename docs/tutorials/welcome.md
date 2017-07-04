@@ -25,10 +25,13 @@ Additionally, to build the documentation and run the tests, you will need:
 To quickly install these prerequisites on Ubuntu or Debian, run:
 
 ```sh
-sudo apt-get install git python2.7 openjdk-7-jre-headless npm
-sudo npm install -g npm  # Upgrade npm to the latest
-# Add a symlink missing on some systems:
-sudo ln -s /usr/bin/nodejs /usr/local/bin/node
+sudo apt-get update
+sudo apt-get install git python2.7 default-jre-headless npm
+
+# Upgrade npm and node to the latest versions
+sudo npm install -g n
+sudo n stable
+sudo npm install -g npm
 ```
 
 Installation instructions for other operating systems are not provided here.

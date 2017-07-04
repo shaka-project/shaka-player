@@ -46,7 +46,6 @@ describe('OfflineUtils', function() {
         startTime: 60,
         streams: [createVideoStreamDb(1), createAudioStreamDb(2)]
       };
-
       var period = OfflineUtils.reconstructPeriod(periodDb, drmInfos, timeline);
       expect(period).toBeTruthy();
       expect(period.startTime).toBe(periodDb.startTime);
@@ -141,16 +140,18 @@ describe('OfflineUtils', function() {
      * @return {shakaExtern.StreamDB}
      */
     function createVideoStreamDb(id, opt_variantIds) {
+      var ContentType = shaka.util.ManifestParserUtils.ContentType;
       return {
         id: id,
         primary: false,
         presentationTimeOffset: 25,
-        contentType: 'video',
+        contentType: ContentType.VIDEO,
         mimeType: 'video/mp4',
         codecs: 'avc1.42c01e',
         frameRate: 22,
         kind: undefined,
         language: '',
+        label: null,
         width: 250,
         height: 100,
         initSegmentUri: null,
@@ -171,16 +172,18 @@ describe('OfflineUtils', function() {
      * @return {shakaExtern.StreamDB}
      */
     function createAudioStreamDb(id, opt_variantIds) {
+      var ContentType = shaka.util.ManifestParserUtils.ContentType;
       return {
         id: id,
         primary: false,
         presentationTimeOffset: 10,
-        contentType: 'audio',
+        contentType: ContentType.AUDIO,
         mimeType: 'audio/mp4',
         codecs: 'mp4a.40.2',
         frameRate: undefined,
         kind: undefined,
         language: 'en',
+        label: null,
         width: null,
         height: null,
         initSegmentUri: 'offline:1/' + id + '/0',
@@ -200,16 +203,18 @@ describe('OfflineUtils', function() {
      * @return {shakaExtern.StreamDB}
      */
     function createTextStreamDb(id) {
+      var ContentType = shaka.util.ManifestParserUtils.ContentType;
       return {
         id: id,
         primary: false,
         presentationTimeOffset: 10,
-        contentType: 'text',
+        contentType: ContentType.TEXT,
         mimeType: 'text/vtt',
         codecs: '',
         frameRate: undefined,
         kind: undefined,
         language: 'en',
+        label: null,
         width: null,
         height: null,
         initSegmentUri: 'offline:1/' + id + '/0',
@@ -252,9 +257,14 @@ describe('OfflineUtils', function() {
         encrypted: streamDb.encrypted,
         keyId: streamDb.keyId,
         language: streamDb.language,
+        label: streamDb.label,
         type: streamDb.contentType,
         primary: streamDb.primary,
-        trickModeVideo: null
+        trickModeVideo: null,
+        containsEmsgBoxes: false,
+        roles: [],
+        channelsCount: null
+
       };
       expect(stream).toEqual(expectedStream);
 

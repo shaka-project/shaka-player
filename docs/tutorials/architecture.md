@@ -10,3 +10,8 @@
   alt="Shaka ownership diagram"
   style="width: 100%">
 
+<img
+  src="../design/timeline.svg"
+  alt="PresentationTimeline diagram"
+  style="width: 100%">
+

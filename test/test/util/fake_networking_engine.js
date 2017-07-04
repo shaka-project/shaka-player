@@ -30,15 +30,20 @@ goog.require('shaka.util.StringUtils');
  * @param {!ArrayBuffer=} opt_defaultResponse The default value to return; if
  *   null, a jasmine expect will fail if a request is made that is not in
  *   |opt_data|.
+ * @param {Object.<string, !Object.<string, string>>=} opt_headersMap
+ *   A map from URI to the headers to return.
  *
  * @constructor
  * @struct
  * @extends {shaka.net.NetworkingEngine}
  */
 shaka.test.FakeNetworkingEngine = function(
-    opt_responseMap, opt_defaultResponse) {
+    opt_responseMap, opt_defaultResponse, opt_headersMap) {
   /** @private {!Object.<string, !ArrayBuffer>} */
   this.responseMap_ = opt_responseMap || {};
+
+  /** @private {!Object.<string, !Object.<string, string>>} */
+  this.headersMap_ = opt_headersMap || {};
 
   /** @private {ArrayBuffer} */
   this.defaultResponse_ = opt_defaultResponse || null;
@@ -46,13 +51,23 @@ shaka.test.FakeNetworkingEngine = function(
   /** @private {?shaka.util.PublicPromise} */
   this.delayNextRequestPromise_ = null;
 
+  /** @type {!jasmine.Spy} */
+  this.request =
+      jasmine.createSpy('request').and.callFake(this.requestImpl_.bind(this));
+
+  /** @type {!jasmine.Spy} */
+  this.registerResponseFilter =
+      jasmine.createSpy('registerResponseFilter')
+          .and.callFake(this.registerResponseFilterImpl_.bind(this));
+
+  /** @type {!jasmine.Spy} */
+  this.unregisterResponseFilter =
+      jasmine.createSpy('unregisterResponseFilter')
+          .and.callFake(this.unregisterResponseFilterImpl_.bind(this));
+
   // The prototype has already been applied; create spies for the
   // methods but still call it by default.
-  spyOn(this, 'request').and.callThrough();
-
-  spyOn(this, 'registerResponseFilter').and.callThrough();
-
-  spyOn(this, 'unregisterResponseFilter').and.callThrough();
+  spyOn(this, 'destroy').and.callThrough();
 };
 
 
@@ -98,20 +113,27 @@ shaka.test.FakeNetworkingEngine.expectRangeRequest = function(
 };
 
 
-/** @override */
-shaka.test.FakeNetworkingEngine.prototype.request = function(type, request) {
+/**
+ * @param {shaka.net.NetworkingEngine.RequestType} type
+ * @param {shakaExtern.Request} request
+ * @return {!Promise.<shakaExtern.Response>}
+ * @private
+ */
+shaka.test.FakeNetworkingEngine.prototype.requestImpl_ = function(
+    type, request) {
   expect(request).toBeTruthy();
   expect(request.uris.length).toBe(1);
 
+  var headers = this.headersMap_[request.uris[0]] || {};
   var result = this.responseMap_[request.uris[0]] || this.defaultResponse_;
-  if (!result) {
+  if (!result && request.method != 'HEAD') {
     // Give a more helpful error message to jasmine.
     expect(request.uris[0]).toBe('in the response map');
     return Promise.reject();
   }
 
   /** @type {shakaExtern.Response} */
-  var response = {uri: request.uris[0], data: result, headers: {}};
+  var response = {uri: request.uris[0], data: result, headers: headers};
 
   if (this.delayNextRequestPromise_) {
     var delay = this.delayNextRequestPromise_;
@@ -123,15 +145,21 @@ shaka.test.FakeNetworkingEngine.prototype.request = function(type, request) {
 };
 
 
-/** @override */
-shaka.test.FakeNetworkingEngine.prototype.registerResponseFilter =
+/**
+ * @param {shakaExtern.RequestFilter} filter
+ * @private
+ */
+shaka.test.FakeNetworkingEngine.prototype.registerResponseFilterImpl_ =
     function(filter) {
   expect(filter).toEqual(jasmine.any(Function));
 };
 
 
-/** @override */
-shaka.test.FakeNetworkingEngine.prototype.unregisterResponseFilter =
+/**
+ * @param {shakaExtern.RequestFilter} filter
+ * @private
+ */
+shaka.test.FakeNetworkingEngine.prototype.unregisterResponseFilterImpl_ =
     function(filter) {
   expect(filter).toEqual(jasmine.any(Function));
 };
@@ -196,6 +224,17 @@ shaka.test.FakeNetworkingEngine.prototype.setResponseMapAsText = function(
     obj[key] = data;
     return obj;
   }, {});
+};
+
+
+/**
+ * Sets the response map.
+ *
+ * @param {!Object.<string, !Object.<string, string>>} headersMap
+ */
+shaka.test.FakeNetworkingEngine.prototype.setHeadersMap = function(
+    headersMap) {
+  this.headersMap_ = headersMap;
 };
 
 

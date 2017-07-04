@@ -252,10 +252,16 @@ ShakaControls.prototype.onMouseMove_ = function(event) {
     this.lastTouchEventTime_ = null;
   }
 
+  // When there is a touch, we can get a 'mousemove' event after touch events.
+  // This should be treated as part of the touch, which has already been handled
+  if (this.lastTouchEventTime_ && event.type == 'mousemove')
+    return;
+
   // Use the cursor specified in the CSS file.
   this.videoContainer_.style.cursor = '';
   // Show the controls.
   this.controls_.style.opacity = 1;
+  this.updateTimeAndSeekRange_();
 
   // Hide the cursor when the mouse stops moving.
   // Only applies while the cursor is over the video container.
@@ -274,6 +280,10 @@ ShakaControls.prototype.onMouseMove_ = function(event) {
 
 /** @private */
 ShakaControls.prototype.onMouseOut_ = function() {
+  // We sometimes get 'mouseout' events with touches.  Since we can never leave
+  // the video element when touching, ignore.
+  if (this.lastTouchEventTime_) return;
+
   // Expire the timer early.
   if (this.mouseStillTimeoutId_) {
     window.clearTimeout(this.mouseStillTimeoutId_);
@@ -540,7 +550,11 @@ ShakaControls.prototype.onCastStatusChange_ = function(event) {
       isCasting ? 'inherit' : 'none';
   this.castReceiverName_.textContent =
       isCasting ? 'Casting to ' + this.castProxy_.receiverName() : '';
-  this.controls_.classList.toggle('casting', this.castProxy_.isCasting());
+  if (this.castProxy_.isCasting()) {
+    this.controls_.classList.add('casting');
+  } else {
+    this.controls_.classList.remove('casting');
+  }
 };
 
 
@@ -567,16 +581,36 @@ ShakaControls.prototype.showTrickPlay = function(show) {
 
 
 /**
+ * @return {boolean}
+ * @private
+ */
+ShakaControls.prototype.isOpaque_ = function() {
+  var parentElement = this.controls_.parentElement;
+  // The controls are opaque if either:
+  //   1. We have explicitly made them so in JavaScript
+  //   2. The browser has made them so via css and the hover state
+  return (this.controls_.style.opacity == 1 ||
+          parentElement.querySelector('#controls:hover') == this.controls_);
+};
+
+
+/**
  * Called when the seek range or current time need to be updated.
  * @private
  */
 ShakaControls.prototype.updateTimeAndSeekRange_ = function() {
+  // Suppress updates if the controls are hidden.
+  if (!this.isOpaque_()) {
+    return;
+  }
+
   var displayTime = this.isSeeking_ ?
       this.seekBar_.value : this.video_.currentTime;
   var duration = this.video_.duration;
   var bufferedLength = this.video_.buffered.length;
   var bufferedStart = bufferedLength ? this.video_.buffered.start(0) : 0;
-  var bufferedEnd = bufferedLength ? this.video_.buffered.end(0) : 0;
+  var bufferedEnd =
+      bufferedLength ? this.video_.buffered.end(bufferedLength - 1) : 0;
   var seekRange = this.player_.seekRange();
 
   this.seekBar_.min = seekRange.start;

@@ -54,7 +54,7 @@ module.exports = function(config) {
       'test/test/util/*.js',
 
       // list of test assets next
-      'demo/assets.js',
+      'demo/common/assets.js',
 
       // unit tests last
       'test/**/*_unit.js',
@@ -93,9 +93,6 @@ module.exports = function(config) {
       // argument.
       args: [{}],
     },
-
-    // web server port
-    port: 9876,
 
     // enable / disable colors in the output (reporters and logs)
     colors: true,
@@ -166,6 +163,12 @@ module.exports = function(config) {
     setClientArg(config, 'external', true);
   }
 
+  if (flagPresent('drm')) {
+    // Run Player integration tests against DRM license servers.
+    // Skipped by default.
+    setClientArg(config, 'drm', true);
+  }
+
   if (flagPresent('quarantined')) {
     // Run quarantined tests which do not consistently pass.
     // Skipped by default.
@@ -191,12 +194,6 @@ module.exports = function(config) {
 
   if (flagPresent('specFilter')) {
     setClientArg(config, 'specFilter', getFlagValue('specFilter'));
-  }
-
-  var hostname = getFlagValue('hostname');
-  if (hostname !== null) {
-    // Point the browsers to a hostname other than localhost.
-    config.set({hostname: hostname});
   }
 };
 

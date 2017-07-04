@@ -16,13 +16,10 @@
  */
 
 describe('CastUtils', function() {
-  var CastUtils;
-  var FakeEvent;
-
-  beforeAll(function() {
-    CastUtils = shaka.cast.CastUtils;
-    FakeEvent = shaka.util.FakeEvent;
-  });
+  /** @const */
+  var CastUtils = shaka.cast.CastUtils;
+  /** @const */
+  var FakeEvent = shaka.util.FakeEvent;
 
   it('includes every Player member', function() {
     var ignoredMembers = [
@@ -88,7 +85,8 @@ describe('CastUtils', function() {
 
     it('transfers real Events', function() {
       // new Event() is not usable on IE11:
-      var event = document.createEvent('CustomEvent');
+      var event =
+          /** @type {!CustomEvent} */ (document.createEvent('CustomEvent'));
       event.initCustomEvent('myEventType', false, false, null);
 
       // Properties that can definitely be transferred.
@@ -176,13 +174,16 @@ describe('CastUtils', function() {
     });
 
     describe('TimeRanges', function() {
+      /** @type {!HTMLVideoElement} */
       var video;
+      /** @type {!shaka.util.EventManager} */
       var eventManager;
+      /** @type {!shaka.media.MediaSourceEngine} */
       var mediaSourceEngine;
 
       beforeAll(function() {
-        video = /** @type {HTMLMediaElement} */(
-            document.createElement('video'));
+        video =
+            /** @type {!HTMLVideoElement} */ (document.createElement('video'));
         document.body.appendChild(video);
       });
 
@@ -205,17 +206,24 @@ describe('CastUtils', function() {
         }
 
         function onSourceOpen() {
+          var ContentType = shaka.util.ManifestParserUtils.ContentType;
           eventManager.unlisten(mediaSource, 'sourceopen');
           mediaSourceEngine = new shaka.media.MediaSourceEngine(
               video, mediaSource, /* TextTrack */ null);
 
-          mediaSourceEngine.init({'video': mimeType}, false);
+          // Create empty object first and initialize the fields through
+          // [] to allow field names to be expressions.
+          var initObject = {};
+          initObject[ContentType.VIDEO] = mimeType;
+          mediaSourceEngine.init(initObject);
           shaka.test.Util.fetch(initSegmentUrl).then(function(data) {
-            return mediaSourceEngine.appendBuffer('video', data, null, null);
+            return mediaSourceEngine.appendBuffer(ContentType.VIDEO, data,
+                                                  null, null);
           }).then(function() {
             return shaka.test.Util.fetch(videoSegmentUrl);
           }).then(function(data) {
-            return mediaSourceEngine.appendBuffer('video', data, null, null);
+            return mediaSourceEngine.appendBuffer(ContentType.VIDEO, data,
+                                                  null, null);
           }).catch(fail).then(done);
         }
       });

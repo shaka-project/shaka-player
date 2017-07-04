@@ -1,32 +1,26 @@
-- What version of Shaka Player are you using?
+**Have you read the [FAQ](https://goo.gl/JE1Sy5) and checked for duplicate issues**:
 
-  - Can you reproduce the issue with our latest release version?
+**What version of Shaka Player are you using**:
 
-  - Can you reproduce the issue with the latest code from `master`?
+**Can you reproduce the issue with our latest release version**:
 
+**Can you reproduce the issue with the latest code from `master`**:
 
-- Are you using the demo app or your own custom app?
+**Are you using the demo app or your own custom app**:
 
-  - If custom app, can you reproduce the issue using our demo app?
+**If custom app, can you reproduce the issue using our demo app**:
 
+**What browser and OS are you using**:
 
-- What browser and OS are you using?
-
-
-- What did you do?
-
-  - What content did you load?
-
-    - If standard demo asset, which one?
-
-    - If custom asset, what manifest and license server URIs?
-
-  - How did you interact with the content, if at all?
+**What are the manifest and license server URIs**:
+*(you can send the URIs to <shaka-player-issues@google.com> instead, but please use GitHub and the template for the rest)*
 
 
-- What did you expect to happen?
+**What did you do?**
 
 
-- What actually happened?
+**What did you expect to happen?**
 
+
+**What actually happened?**
 

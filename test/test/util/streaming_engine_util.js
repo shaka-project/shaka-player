@@ -101,11 +101,13 @@ shaka.test.StreamingEngineUtil.createFakeNetworkingEngine = function(
  * @param {number} segmentAvailabilityEnd The initial value of
  *   |segmentAvailabilityEnd|.
  * @param {number} presentationDuration
+ * @param {boolean} isLive
  * @return {!Object} A PresentationTimeline look-alike.
  *
  */
 shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
-    segmentAvailabilityStart, segmentAvailabilityEnd, presentationDuration) {
+    segmentAvailabilityStart, segmentAvailabilityEnd, presentationDuration,
+    isLive) {
   var timeline = {
     getDuration: jasmine.createSpy('getDuration'),
     setDuration: jasmine.createSpy('setDuration'),
@@ -115,6 +117,8 @@ shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
     getEarliestStart: jasmine.createSpy('getEarliestStart'),
     getSegmentAvailabilityStart:
         jasmine.createSpy('getSegmentAvailabilityStart'),
+    getSafeAvailabilityStart:
+        jasmine.createSpy('getSafeAvailabilityStart'),
     getSegmentAvailabilityEnd:
         jasmine.createSpy('getSegmentAvailabilityEnd'),
     getSeekRangeEnd: jasmine.createSpy('getSeekRangeEnd'),
@@ -125,7 +129,7 @@ shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
   timeline.getDuration.and.returnValue(presentationDuration);
 
   timeline.isLive.and.callFake(function() {
-    return presentationDuration == Infinity;
+    return isLive;
   });
 
   timeline.getEarliestStart.and.callFake(function() {
@@ -136,12 +140,16 @@ shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
     return timeline.segmentAvailabilityStart;
   });
 
+  timeline.getSafeAvailabilityStart.and.callFake(function(delay) {
+    return timeline.segmentAvailabilityStart + delay;
+  });
+
   timeline.getSegmentAvailabilityEnd.and.callFake(function() {
     return timeline.segmentAvailabilityEnd;
   });
 
   timeline.getSeekRangeEnd.and.callFake(function() {
-    return timeline.getSegmentAvailabilityEnd();
+    return shaka.test.Util.invokeSpy(timeline.getSegmentAvailabilityEnd);
   });
 
   timeline.getSegmentAvailabilityDuration.and.callFake(function() {
@@ -175,7 +183,7 @@ shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
  * @param {number} presentationDuration
  * @param {!Object.<string, number>} segmentDurations The duration of each
  *   type of segment.
- * @return {!Object}
+ * @return {shakaExtern.Manifest}
  */
 shaka.test.StreamingEngineUtil.createManifest = function(
     periodStartTimes, presentationDuration, segmentDurations) {
@@ -237,8 +245,9 @@ shaka.test.StreamingEngineUtil.createManifest = function(
       stream.findSegmentPosition.and.callFake(find.bind(null, type, i + 1));
       stream.getSegmentReference.and.callFake(get.bind(null, type, i + 1));
 
-      if (type == 'text') period.textStreams.push(stream);
-      else if (type == 'audio') variant.audio = stream;
+      var ContentType = shaka.util.ManifestParserUtils.ContentType;
+      if (type == ContentType.TEXT) period.textStreams.push(stream);
+      else if (type == ContentType.AUDIO) variant.audio = stream;
       else if (type == 'trickvideo') trickModeVideo = stream;
       else variant.video = stream;
     }
@@ -248,7 +257,7 @@ shaka.test.StreamingEngineUtil.createManifest = function(
     manifest.periods.push(period);
   }
 
-  return manifest;
+  return /** @type {shakaExtern.Manifest} */ (manifest);
 };
 
 
@@ -319,6 +328,7 @@ shaka.test.StreamingEngineUtil.createMockStream = function(type, id) {
  * @return {!Object}
  */
 shaka.test.StreamingEngineUtil.createMockAudioStream = function(id) {
+  var ContentType = shaka.util.ManifestParserUtils.ContentType;
   return {
     id: id,
     createSegmentIndex: jasmine.createSpy('createSegmentIndex'),
@@ -329,7 +339,7 @@ shaka.test.StreamingEngineUtil.createMockAudioStream = function(id) {
     mimeType: 'audio/mp4',
     codecs: 'mp4a.40.2',
     bandwidth: 192000,
-    type: 'audio'
+    type: ContentType.AUDIO
   };
 };
 
@@ -341,6 +351,7 @@ shaka.test.StreamingEngineUtil.createMockAudioStream = function(id) {
  * @return {!Object}
  */
 shaka.test.StreamingEngineUtil.createMockVideoStream = function(id) {
+  var ContentType = shaka.util.ManifestParserUtils.ContentType;
   return {
     id: id,
     createSegmentIndex: jasmine.createSpy('createSegmentIndex'),
@@ -353,7 +364,7 @@ shaka.test.StreamingEngineUtil.createMockVideoStream = function(id) {
     bandwidth: 5000000,
     width: 600,
     height: 400,
-    type: 'video'
+    type: ContentType.VIDEO
   };
 };
 
@@ -365,6 +376,7 @@ shaka.test.StreamingEngineUtil.createMockVideoStream = function(id) {
  * @return {!Object}
  */
 shaka.test.StreamingEngineUtil.createMockTextStream = function(id) {
+  var ManifestParserUtils = shaka.util.ManifestParserUtils;
   return {
     id: id,
     createSegmentIndex: jasmine.createSpy('createSegmentIndex'),
@@ -373,8 +385,8 @@ shaka.test.StreamingEngineUtil.createMockTextStream = function(id) {
     initSegmentReference: null,
     presentationTimeOffset: 0,
     mimeType: 'text/vtt',
-    kind: 'subtitles',
-    type: 'text'
+    kind: ManifestParserUtils.TextStreamKind.SUBTITLE,
+    type: ManifestParserUtils.ContentType.TEXT
   };
 };
 

@@ -184,7 +184,8 @@ shakaExtern.InitDataOverride;
  *   in the content.  See also shakaExtern.InitDataOverride.
  * @property {Array.<string>} keyIds
  *   <i>Defaults to []</i> <br>
- *   If not empty, contains the default key IDs for this key system.
+ *   If not empty, contains the default key IDs for this key system, as
+ *   lowercase hex strings.
  * @exportDoc
  */
 shakaExtern.DrmInfo;
@@ -296,9 +297,13 @@ shakaExtern.GetSegmentReferenceFunction;
  *   encrypted: boolean,
  *   keyId: ?string,
  *   language: string,
+ *   label: ?string,
  *   type: string,
  *   primary: boolean,
- *   trickModeVideo: ?shakaExtern.Stream
+ *   trickModeVideo: ?shakaExtern.Stream,
+ *   containsEmsgBoxes: boolean,
+ *   roles: !Array.<string>,
+ *   channelsCount: ?number
  * }}
  *
  * @description
@@ -355,7 +360,7 @@ shakaExtern.GetSegmentReferenceFunction;
  *   The stream's height in pixels.
  * @property {(string|undefined)} kind
  *   <i>Text streams only.</i> <br>
- *   The kind of text stream.  For example, 'captions' or 'subtitles'.
+ *   The kind of text stream.  For example, 'caption' or 'subtitle'.
  *   @see https://goo.gl/k1HWA6
  * @property {boolean} encrypted
  *   <i>Defaults to false.</i><br>
@@ -369,6 +374,8 @@ shakaExtern.GetSegmentReferenceFunction;
  *   The Stream's language, specified as a language code. <br>
  *   Audio stream's language must be identical to the language of the containing
  *   Variant.
+ * @property {?string} label
+ *   The Stream's label, unique text that should describe the audio/text track.
  * @property {string} type
  *   <i>Required.</i> <br>
  *   Content type (e.g. 'video', 'audio' or 'text')
@@ -380,7 +387,15 @@ shakaExtern.GetSegmentReferenceFunction;
  * @property {?shakaExtern.Stream} trickModeVideo
  *   <i>Video streams only.</i> <br>
  *   An alternate video stream to use for trick mode playback.
- *
+ * @property {boolean} containsEmsgBoxes
+ *   <i>Defaults to false.</i><br>
+ *   Whether the stream contains embedded 'emsg' boxes that should result in
+ *   Player events.
+ * @property {!Array.<string>} roles
+ *   The roles of the stream as they appear on the manifest,
+ *   e.g. 'main', 'caption', or 'commentary'.
+ * @property {?number} channelsCount
+ *   The channel count information for the audio stream.
  * @exportDoc
  */
 shakaExtern.Stream;

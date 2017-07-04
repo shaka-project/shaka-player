@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.test.Util');
-
 describe('Mp4vttParser', function() {
   var vttInitSegmentUri = '/base/test/test/assets/vtt-init.mp4';
   var vttSegmentUri = '/base/test/test/assets/vtt-segment.mp4';
@@ -63,52 +61,63 @@ describe('Mp4vttParser', function() {
   });
 
   it('parses init segment', function() {
-    // init segment doesn't have the subtitles. The code should verify
-    // their declaration and proceed to the next segment.
-    var ret = shaka.media.Mp4VttParser(vttInitSegment, 0, null, null, false);
-    expect(ret).toEqual([]);
+    new shaka.text.Mp4VttParser().parseInit(vttInitSegment);
   });
 
   it('parses media segment', function() {
     var cues =
         [
-         {start: 20, end: 40, text: 'It has shed much innocent blood.\n'},
-         {start: 20, end: 40, text:
+         {start: 111.8, end: 115.8, text: 'It has shed much innocent blood.\n'},
+         {start: 118, end: 120, text:
            'You\'re a fool for traveling alone,\nso completely unprepared.\n'}
         ];
-    var result = shaka.media.Mp4VttParser(vttSegment, 0, 20, 40, false);
+
+    var parser = new shaka.text.Mp4VttParser();
+    parser.parseInit(vttInitSegment);
+    var time = {periodStart: 0, segmentStart: 0, segmentEnd: 0 };
+    var result = parser.parseMedia(vttSegment, time);
     verifyHelper(cues, result);
   });
 
   it('parses media segment containing settings', function() {
     var cues =
         [
-         {start: 20, end: 40, text: 'It has shed much innocent blood.\n',
+         {start: 111.8, end: 115.8, text: 'It has shed much innocent blood.\n',
            align: 'right', size: 50, position: 10},
-         {start: 20, end: 40, text:
+         {start: 118, end: 120, text:
            'You\'re a fool for traveling alone,\nso completely unprepared.\n',
            vertical: 'lr', line: 1}
         ];
-    var result = shaka.media.Mp4VttParser(vttSegSettings, 0, 20, 40, false);
+
+    var parser = new shaka.text.Mp4VttParser();
+    parser.parseInit(vttInitSegment);
+    var time = {periodStart: 0, segmentStart: 0, segmentEnd: 0 };
+    var result = parser.parseMedia(vttSegSettings, time);
     verifyHelper(cues, result);
   });
 
   it('accounts for offset', function() {
     var cues =
         [
-         {start: 27, end: 47, text: 'It has shed much innocent blood.\n'},
-         {start: 27, end: 47, text:
+         {start: 121.8, end: 125.8, text: 'It has shed much innocent blood.\n'},
+         {start: 128, end: 130, text:
            'You\'re a fool for traveling alone,\nso completely unprepared.\n'}
         ];
-    var result = shaka.media.Mp4VttParser(vttSegment, 7, 20, 40, false);
+
+    var parser = new shaka.text.Mp4VttParser();
+    parser.parseInit(vttInitSegment);
+    var time = {periodStart: 10, segmentStart: 0, segmentEnd: 0 };
+    var result = parser.parseMedia(vttSegment, time);
     verifyHelper(cues, result);
   });
 
   it('rejects init segment with no vtt', function() {
-    var error = new shaka.util.Error(shaka.util.Error.Category.TEXT,
+    var error = new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.TEXT,
         shaka.util.Error.Code.INVALID_MP4_VTT);
     try {
-      shaka.media.Mp4VttParser(audioInitSegment, 0, 20, 40, false);
+      new shaka.text.Mp4VttParser().parseInit(audioInitSegment);
       fail('Mp4 file with no vtt supported');
     } catch (e) {
       shaka.test.Util.expectToEqualError(e, error);

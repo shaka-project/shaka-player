@@ -54,6 +54,15 @@ shakaExtern.AbrManager.SwitchCallback;
 
 
 /**
+ * A factory for creating the abr manager.  This will be called with 'new'.
+ *
+ * @typedef {function(new:shakaExtern.AbrManager)}
+ * @exportDoc
+ */
+shakaExtern.AbrManager.Factory;
+
+
+/**
  * Initializes the AbrManager.
  *
  * @param {shakaExtern.AbrManager.SwitchCallback} switchCallback
@@ -145,18 +154,9 @@ shakaExtern.AbrManager.prototype.getBandwidthEstimate = function() {};
 
 
 /**
- * Sets the default bandwidth estimate to use if there is not enough data.
+ * Sets the abr configurations.
  *
- * @param {number} estimate The default bandwidth estimate, in bit/sec.
+ * @param {shakaExtern.AbrConfiguration} config
  * @exportDoc
  */
-shakaExtern.AbrManager.prototype.setDefaultEstimate = function(estimate) {};
-
-
-/**
- * Sets the restrictions that AbrManager will use when choosing streams.
- *
- * @param {shakaExtern.Restrictions} restrictions
- * @exportDoc
- */
-shakaExtern.AbrManager.prototype.setRestrictions = function(restrictions) {};
+shakaExtern.AbrManager.prototype.configure = function(config) {};

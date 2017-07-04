@@ -19,11 +19,65 @@
 /** @externs */
 
 
+
 /**
- * Parses a text buffer into an array of cues.
+ * An interface for plugins that parse text tracks.
  *
- * @typedef {function(ArrayBuffer, number, ?number,
- *                    ?number, boolean):!Array.<!TextTrackCue>}
+ * @interface
  * @exportDoc
+ */
+shakaExtern.TextParser = function() {};
+
+
+/**
+ * A collection of time offsets used to adjust text cue times.
+ *
+ * @typedef {{
+ *   periodStart : number,
+ *   segmentStart : number,
+ *   segmentEnd : number
+ * }}
+ *
+ * @property {number} periodStart
+ *     The absolute start time of the period in seconds.
+ * @property {number} segmentStart
+ *     The absolute start time of the segment in seconds.
+ * @property {number} segmentEnd
+ *     The absolute end time of the segment in seconds.
+ *
+ * @exportDoc
+ */
+shakaExtern.TextParser.TimeContext;
+
+
+/**
+ * Parse an initialization segment. Some formats do not have init
+ * segments so this won't always be called.
+ *
+ * @param {!ArrayBuffer} data
+ *    The data that makes up the init segment.
+ *
+ * @exportDoc
+ */
+shakaExtern.TextParser.prototype.parseInit = function(data) {};
+
+
+/**
+ * Parse a media segment and return the cues that make up the segment.
+ *
+ * @param {!ArrayBuffer} data
+ *    The next section of buffer.
+ * @param {shakaExtern.TextParser.TimeContext} timeContext
+ *    The time information that should be used to adjust the times values
+ *    for each cue.
+ * @return {!Array.<!TextTrackCue>}
+ *
+ * @exportDoc
+ */
+shakaExtern.TextParser.prototype.parseMedia = function(data, timeContext) {};
+
+
+/**
+ * @typedef {function(new:shakaExtern.TextParser)}
  */
 shakaExtern.TextParserPlugin;

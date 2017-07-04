@@ -36,7 +36,8 @@ shakaAssets.Encoder = {
   NIMBLE_STREAMER: 'Nimble Streamer',
   AZURE_MEDIA_SERVICES: 'Azure Media Services',
   MP4BOX: 'MP4Box',
-  APPLE: 'Apple'
+  APPLE: 'Apple',
+  UPLYNK: 'Verizon Digital Media Services'
 };
 
 
@@ -51,7 +52,8 @@ shakaAssets.Source = {
   BITCODIN: 'Bitcodin',
   NIMBLE_STREAMER: 'Nimble Streamer',
   AZURE_MEDIA_SERVICES: 'Azure Media Services',
-  GPAC: 'GPAC'
+  GPAC: 'GPAC',
+  UPLYNK: 'Verizon Digital Media Services'
 };
 
 
@@ -74,7 +76,9 @@ shakaAssets.Feature = {
   PSSH: 'embedded PSSH',
   MULTIKEY: 'multiple keys',
   MULTIPERIOD: 'multiple Periods',
+  ENCRYPTED_WITH_CLEAR: 'mixing encrypted and unencrypted periods',
   TRICK_MODE: 'special trick mode track',
+  XLINK: 'xlink',
 
   SUBTITLES: 'subtitles',
   CAPTIONS: 'captions',
@@ -85,6 +89,7 @@ shakaAssets.Feature = {
   LIVE: 'live',
   WEBM: 'WebM',
   MP4: 'mp4',
+  MP2TS: 'MPEG-2 TS',
   TTML: 'TTML',
   WEBVTT: 'WebVTT',
 
@@ -224,6 +229,49 @@ shakaAssets.YouTubeResponseFilter = function(type, response) {
 
 
 /**
+ * A response filter for VDMS Uplynk manifest responses,
+ * this allows us to get the license prefix that is necessary
+ * to later generate a proper license response.
+ * @param {shaka.net.NetworkingEngine.RequestType} type
+ * @param {shakaExtern.Response} response
+ * The uplynk_prefix attribute is set on the shakaAssets object
+ * and is later referenced in the UplynkRequestFilter.
+ */
+shakaAssets.UplynkResponseFilter = function(type, response) {
+  if (type == shaka.net.NetworkingEngine.RequestType.MANIFEST) {
+    // Parse a custom header that contains a value needed to build a proper
+    // license server URL
+    shakaAssets.uplynk_prefix = response.headers['x-uplynk-prefix'];
+  }
+};
+
+
+/**
+ * A license request filter for VDMS Uplynk license requests.
+ * @param {shaka.net.NetworkingEngine.RequestType} type
+ * @param {shakaExtern.Request} request
+ * The uplynk_prefix variable is retrieved from the shakaAssets
+ * object, and requires that the uplynk manifest response filter
+ * also be set.
+ */
+shakaAssets.UplynkRequestFilter = function(type, request) {
+  if (type == shaka.net.NetworkingEngine.RequestType.LICENSE ||
+      type == shaka.net.NetworkingEngine.RequestType.MANIFEST) {
+    request.allowCrossSiteCredentials = true;
+  }
+
+  if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
+    // Modify the license request URL based on our cookie
+    if (request.uris[0].indexOf('wv') !== -1) {
+      request.uris[0] = shakaAssets.uplynk_prefix.concat('/wv');
+    } else if (request.uris[0].indexOf('ck') !== -1) {
+      request.uris[0] = shakaAssets.uplynk_prefix.concat('/ck');
+    }
+  }
+};
+
+
+/**
  * @param {!Node} node
  * @return {Array.<shakaExtern.DrmInfo>}
  */
@@ -331,17 +379,34 @@ shakaAssets.testAssets = [
     }
   },
   {
-    name: 'Angel One (HLS, multilingual)',
+    name: 'Angel One (HLS, MP4, multilingual)',
     manifestUri: '//storage.googleapis.com/shaka-demo-assets/angel-one-hls/master.m3u8',  // gjslint: disable=110
 
     encoder: shakaAssets.Encoder.APPLE,
     source: shakaAssets.Source.SHAKA,
     drm: [],
     features: [
+      shakaAssets.Feature.HLS,
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.MULTIPLE_LANGUAGES,
-      shakaAssets.Feature.HLS
+      shakaAssets.Feature.MULTIPLE_LANGUAGES
     ]
+  },
+  {
+    name: 'Angel One (HLS, MP4, multilingual, Widevine)',
+    manifestUri: '//storage.googleapis.com/shaka-demo-assets/angel-one-widevine-hls/hls.m3u8',  // gjslint: disable=110
+
+    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
+    source: shakaAssets.Source.SHAKA,
+    drm: [shakaAssets.KeySystem.WIDEVINE],
+    features: [
+      shakaAssets.Feature.HLS,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.MULTIPLE_LANGUAGES
+    ],
+
+    licenseServers: {
+      'com.widevine.alpha': '//widevine-proxy.appspot.com/proxy'
+    }
   },
   {
     name: 'Sintel 4k (multicodec)',
@@ -465,6 +530,38 @@ shakaAssets.testAssets = [
     ]
   },
   {
+    name: 'Heliocentrism (multicodec, multiperiod, xlink)',
+    manifestUri: '//storage.googleapis.com/shaka-demo-assets/heliocentrism-xlink/heliocentrism.mpd',  // gjslint: disable=110
+
+    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
+    source: shakaAssets.Source.SHAKA,
+    drm: [],
+    features: [
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.MULTIPERIOD,
+      shakaAssets.Feature.SEGMENT_BASE,
+      shakaAssets.Feature.WEBM,
+      shakaAssets.Feature.XLINK
+    ]
+  },
+  {
+    name: '"Dig the Uke" by Stefan Kartenberg (audio only, multicodec)',  // gjslint: disable=110
+    // From: http://dig.ccmixter.org/files/JeffSpeed68/53327
+    // Licensed under Creative Commons BY-NC 3.0.
+    // Free for non-commercial use with attribution.
+    // http://creativecommons.org/licenses/by-nc/3.0/
+    manifestUri: '//storage.googleapis.com/shaka-demo-assets/dig-the-uke-clear/dash.mpd',  // gjslint: disable=110
+
+    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
+    source: shakaAssets.Source.SHAKA,
+    drm: [],
+    features: [
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_BASE,
+      shakaAssets.Feature.WEBM
+    ]
+  },
+  {
     name: '"Dig the Uke" by Stefan Kartenberg (audio only, multicodec, Widevine)',  // gjslint: disable=110
     // From: http://dig.ccmixter.org/files/JeffSpeed68/53327
     // Licensed under Creative Commons BY-NC 3.0.
@@ -499,22 +596,6 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.TTML,
       shakaAssets.Feature.WEBM
-    ]
-  },
-  {
-    name: 'Tears of Steel (multiperiod with segmented subtitles and PTO)',
-    manifestUri: '//storage.googleapis.com/shaka-demo-assets/tos-pto-webvtt/dash.mpd',  // gjslint: disable=110
-    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
-    source: shakaAssets.Source.SHAKA,
-    drm: [],
-    features: [
-      shakaAssets.Feature.HIGH_DEFINITION,
-      shakaAssets.Feature.MP4,
-      shakaAssets.Feature.MULTIPERIOD,
-      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
-      shakaAssets.Feature.SEGMENTED_TEXT,
-      shakaAssets.Feature.SUBTITLES,
-      shakaAssets.Feature.WEBVTT
     ]
   },
   // }}}
@@ -645,10 +726,6 @@ shakaAssets.testAssets = [
   {
     name: 'Multi-DRM, multi-key, multi-Period',
     manifestUri: '//media.axprod.net/TestVectors/v7-MultiDRM-MultiKey-MultiPeriod/Manifest.mpd',  // gjslint: disable=110
-    // NOTE: Some of period 1's audio is encrypted, and some of period 2's
-    // audio is unencrypted.  This is something Chrome does not support at
-    // this time.  See http://crbug.com/597443 for discussion and history.
-    disabled: true,
 
     encoder: shakaAssets.Encoder.AXINOM,
     source: shakaAssets.Source.AXINOM,
@@ -1079,6 +1156,60 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION
     ]
+  },
+  // }}}
+
+  // Verizon Digital Media Services (VDMS) assets {{{
+  {
+    name: 'Big Buck Bunny',
+    manifestUri: 'https://content.uplynk.com/224ac8717e714b68831997ab6cea4015.mpd', // gjslint: disable=110
+
+    encoder: shakaAssets.Encoder.UPLYNK,
+    source: shakaAssets.Source.UPLYNK,
+    drm: [
+      shakaAssets.KeySystem.WIDEVINE,
+      shakaAssets.KeySystem.CLEAR_KEY
+    ],
+    features: [
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_LIST_DURATION,
+      shakaAssets.Feature.PSSH,
+      shakaAssets.Feature.HIGH_DEFINITION
+    ],
+    licenseServers: {
+      'com.widevine.alpha': 'https://content.uplynk.com/wv',
+      'org.w3.clearkey': 'https://content.uplynk.com/ck'
+    },
+    requestFilter: shakaAssets.UplynkRequestFilter,
+    responseFilter: shakaAssets.UplynkResponseFilter
+  },
+  {
+    name: 'Sintel - (multiperiod-mix of encrypted and unencrypted)',
+    // Unencrypted periods interspersed with protected periods
+    // Doesn't work on Chrome < 58
+    manifestUri: 'https://content.uplynk.com/1eb40d8e64234f5c9879db7045c3d48c.mpd?ad=cleardash&rays=cdefg', // gjslint: disable=110
+
+    encoder: shakaAssets.Encoder.UPLYNK,
+    source: shakaAssets.Source.UPLYNK,
+    drm: [
+      shakaAssets.KeySystem.WIDEVINE,
+      shakaAssets.KeySystem.CLEAR_KEY
+    ],
+    features: [
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.MULTIPLE_LANGUAGES,
+      shakaAssets.Feature.SEGMENT_LIST_DURATION,
+      shakaAssets.Feature.PSSH,
+      shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.MULTIPERIOD,
+      shakaAssets.Feature.ENCRYPTED_WITH_CLEAR
+    ],
+    licenseServers: {
+      'com.widevine.alpha': 'https://content.uplynk.com/wv',
+      'org.w3.clearkey': 'https://content.uplynk.com/ck'
+    },
+    requestFilter: shakaAssets.UplynkRequestFilter,
+    responseFilter: shakaAssets.UplynkResponseFilter
   }
   // }}}
 ];

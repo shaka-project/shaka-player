@@ -92,6 +92,20 @@ describe('DataViewReader', function() {
     expect(value4).toBe(0xffff0100);
   });
 
+  it('reads an int32 in big endian', function() {
+    var value1 = bigEndianReader.readInt32();
+    expect(value1).toBe(66051);
+
+    var value2 = bigEndianReader.readInt32();
+    expect(value2).toBe(67438087);
+
+    var value3 = bigEndianReader2.readInt32();
+    expect(value3).toBe(-559038737);
+
+    var value4 = bigEndianReader2.readInt32();
+    expect(value4).toBe(-65280);
+  });
+
   it('reads a uint64 in big endian', function() {
     var value = bigEndianReader.readUint64();
     expect(value).toBe(0x0001020304050607);
@@ -137,6 +151,20 @@ describe('DataViewReader', function() {
 
     var value4 = littleEndianReader2.readUint32();
     expect(value4).toBe(0x0001ffff);
+  });
+
+  it('reads an int32 in little endian', function() {
+    var value1 = littleEndianReader.readInt32();
+    expect(value1).toBe(50462976);
+
+    var value2 = littleEndianReader.readInt32();
+    expect(value2).toBe(117835012);
+
+    var value3 = littleEndianReader2.readInt32();
+    expect(value3).toBe(-272716322);
+
+    var value4 = littleEndianReader2.readInt32();
+    expect(value4).toBe(131071);
   });
 
   it('reads a uint64 in little endian', function() {
@@ -185,7 +213,12 @@ describe('DataViewReader', function() {
       runTest(function() { bigEndianReader.readUint32(); });
     });
 
-    it('detects when readinga uint64', function() {
+    it('detects when reading a int32', function() {
+      bigEndianReader.skip(5);
+      runTest(function() { bigEndianReader.readInt32(); });
+    });
+
+    it('detects when reading a uint64', function() {
       bigEndianReader.skip(3);
       runTest(function() { bigEndianReader.readUint64(); });
     });

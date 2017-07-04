@@ -16,14 +16,15 @@
  */
 
 describe('DashParser SegmentBase', function() {
-  var Dash;
-  var fakeNetEngine;
-  var parser;
-  var playerInterface;
+  /** @const */
+  var Dash = shaka.test.Dash;
 
-  beforeAll(function() {
-    Dash = shaka.test.Dash;
-  });
+  /** @type {!shaka.test.FakeNetworkingEngine} */
+  var fakeNetEngine;
+  /** @type {!shaka.dash.DashParser} */
+  var parser;
+  /** @type {shakaExtern.ManifestParser.PlayerInterface} */
+  var playerInterface;
 
   beforeEach(function() {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
@@ -264,6 +265,7 @@ describe('DashParser SegmentBase', function() {
         '</MPD>'
       ].join('\n');
       var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_UNSUPPORTED_CONTAINER);
       Dash.testFails(done, source, error);
@@ -283,6 +285,7 @@ describe('DashParser SegmentBase', function() {
         '</MPD>'
       ].join('\n');
       var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_WEBM_MISSING_INIT);
       Dash.testFails(done, source, error);
@@ -304,6 +307,7 @@ describe('DashParser SegmentBase', function() {
         '</MPD>'
       ].join('\n');
       var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_NO_SEGMENT_INFO);
       Dash.testFails(done, source, error);

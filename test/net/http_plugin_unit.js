@@ -16,6 +16,7 @@
  */
 
 describe('HttpPlugin', function() {
+  /** @type {shakaExtern.RetryParameters} */
   var retryParameters;
 
   beforeAll(function() {
@@ -42,9 +43,22 @@ describe('HttpPlugin', function() {
       'responseHeaders': { 'FOO': 'BAR' },
       'responseURL': 'https://foo.bar/after/302'
     });
+    jasmine.Ajax.stubRequest('https://foo.bar/401').andReturn({
+      'response': new ArrayBuffer(0),
+      'status': 401
+    });
+    jasmine.Ajax.stubRequest('https://foo.bar/403').andReturn({
+      'response': new ArrayBuffer(0),
+      'status': 403
+    });
     jasmine.Ajax.stubRequest('https://foo.bar/404').andReturn({
       'response': new ArrayBuffer(0),
       'status': 404
+    });
+    jasmine.Ajax.stubRequest('https://foo.bar/cache').andReturn({
+      'response': new ArrayBuffer(0),
+      'status': 200,
+      'responseHeaders': { 'X-Shaka-From-Cache': 'true' }
     });
     jasmine.Ajax.stubRequest('https://foo.bar/timeout').andTimeout();
     jasmine.Ajax.stubRequest('https://foo.bar/error').andError();
@@ -66,6 +80,7 @@ describe('HttpPlugin', function() {
 
     shaka.net.HttpPlugin(request.uris[0], request)
         .then(function() {
+          /** @type {!jasmine.Ajax.RequestStub} */
           var actual = jasmine.Ajax.requests.mostRecent();
           expect(actual).toBeTruthy();
           expect(actual.url).toBe(request.uris[0]);
@@ -90,6 +105,14 @@ describe('HttpPlugin', function() {
                  'https://foo.bar/after/302');
   });
 
+  it('fails with CRITICAL for 401 status', function(done) {
+    testFails('https://foo.bar/401', done, shaka.util.Error.Severity.CRITICAL);
+  });
+
+  it('fails with CRITICAL for 403 status', function(done) {
+    testFails('https://foo.bar/403', done, shaka.util.Error.Severity.CRITICAL);
+  });
+
   it('fails if non-2xx status', function(done) {
     testFails('https://foo.bar/404', done);
   });
@@ -100,6 +123,18 @@ describe('HttpPlugin', function() {
 
   it('fails on error', function(done) {
     testFails('https://foo.bar/error', done);
+  });
+
+  it('detects cache headers', function(done) {
+    var request = shaka.net.NetworkingEngine.makeRequest(
+        ['https://foo.bar/cache'], retryParameters);
+    shaka.net.HttpPlugin(request.uris[0], request)
+        .catch(fail)
+        .then(function(response) {
+          expect(response).toBeTruthy();
+          expect(response.fromCache).toBe(true);
+        })
+        .then(done);
   });
 
   /**
@@ -118,6 +153,7 @@ describe('HttpPlugin', function() {
           expect(response.uri).toBe(opt_overrideUri || uri);
           expect(response.data).toBeTruthy();
           expect(response.data.byteLength).toBe(10);
+          expect(response.fromCache).toBe(false);
           expect(response.headers).toBeTruthy();
           // Returned header names are in lowercase.
           expect(response.headers['foo']).toBe('BAR');
@@ -128,13 +164,19 @@ describe('HttpPlugin', function() {
   /**
    * @param {string} uri
    * @param {function()} done
+   * @param {shaka.util.Error.Severity=} opt_severity
    */
-  function testFails(uri, done) {
+  function testFails(uri, done, opt_severity) {
     var request = shaka.net.NetworkingEngine.makeRequest(
         [uri], retryParameters);
     shaka.net.HttpPlugin(uri, request)
         .then(fail)
-        .catch(function() {
+        .catch(function(error) {
+          expect(error).toBeTruthy();
+          expect(error.severity)
+              .toBe(opt_severity || shaka.util.Error.Severity.RECOVERABLE);
+          expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
+
           expect(jasmine.Ajax.requests.mostRecent().url).toBe(uri);
         })
         .then(done);

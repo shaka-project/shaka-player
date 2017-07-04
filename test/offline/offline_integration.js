@@ -89,7 +89,7 @@ describe('Offline', function() {
         .then(done);
   });
 
-  external_it('stores, plays, and deletes protected content', function(done) {
+  drm_it('stores, plays, and deletes protected content', function(done) {
     // TODO: Add a PlayReady version once Edge supports offline.
     if (!support['offline'] ||
         !support.drm['com.widevine.alpha'] ||
@@ -101,6 +101,7 @@ describe('Offline', function() {
     var onError = function(e) {
       // We should only get a not-found error.
       var expected = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.DRM,
           shaka.util.Error.Code.OFFLINE_SESSION_REMOVED);
       shaka.test.Util.expectToEqualError(e, expected);
@@ -113,31 +114,42 @@ describe('Offline', function() {
         .then(function(content) {
           storedContent = content;
           expect(storedContent.offlineUri).toBe('offline:0');
-          return player.load(storedContent.offlineUri);
+          return dbEngine.get('manifest', 0);
         })
-        .then(function() {
-          video.play();
-          return shaka.test.Util.delay(5);
-        })
-        .then(function() { return dbEngine.get('manifest', 0); })
         .then(function(manifestDb) {
+          // Did we store a persistent license?
           expect(manifestDb.sessionIds.length).toBeGreaterThan(0);
           sessionId = manifestDb.sessionIds[0];
 
-          // Create a DrmEngine so we can try to load the session later.
+          // Create a DrmEngine now so we can use it to try to load the session
+          // later, after the content has been deleted.
           var OfflineManifestParser = shaka.offline.OfflineManifestParser;
           var manifest = OfflineManifestParser.reconstructManifest(manifestDb);
           drmEngine = new shaka.media.DrmEngine(
-              player.getNetworkingEngine(), onError, function() {});
+              player.getNetworkingEngine(), onError, function() {},
+              function() {});
           drmEngine.configure(player.getConfiguration().drm);
           return drmEngine.init(manifest, true /* isOffline */);
         })
         .then(function() {
+          // Load the stored content.
+          return player.load(storedContent.offlineUri);
+        })
+        .then(function() {
+          // Let it play some.
+          video.play();
+          return shaka.test.Util.delay(10);
+        })
+        .then(function() {
+          // Is it playing?
           expect(video.currentTime).toBeGreaterThan(3);
           expect(video.ended).toBe(false);
           return player.unload();
         })
-        .then(function() { return storage.remove(storedContent); })
+        .then(function() {
+          // Remove the content.
+          return storage.remove(storedContent);
+        })
         .then(
             /**
              * @suppress {accessControls}
@@ -149,10 +161,63 @@ describe('Offline', function() {
             }
         )
         .then(function(session) {
+          // We should not have been able to load the session.
+          // Removing the content should have deleted the session.
           expect(session).toBeFalsy();
           return drmEngine.destroy();
         })
         .catch(fail)
         .then(done);
   });
+
+  drm_it(
+      'stores, plays, and deletes protected content with a temporary license',
+      function(done) {
+        // Because this does not rely on persistent licenses, it should be
+        // testable with PlayReady as well as Widevine.
+        if (!support['offline'] ||
+            !support.drm['com.widevine.alpha'] ||
+            !support.drm['com.microsoft.playready']) {
+          pending('Offline or DRM not supported');
+        }
+
+        shaka.test.TestScheme.setupPlayer(player, 'sintel-enc');
+
+        var storedContent;
+        storage.configure({ usePersistentLicense: false });
+        storage.store('test:sintel-enc')
+            .then(function(content) {
+              storedContent = content;
+              expect(storedContent.offlineUri).toBe('offline:0');
+              return dbEngine.get('manifest', 0);
+            })
+            .then(function(manifestDb) {
+              // There should not be any licenses stored.
+              expect(manifestDb.sessionIds.length).toEqual(0);
+
+              // Load the stored content.
+              return player.load(storedContent.offlineUri);
+            })
+            .then(function() {
+              // Let it play some.
+              video.play();
+              return shaka.test.Util.delay(10);
+            })
+            .then(function() {
+              // Is it playing?
+              expect(video.currentTime).toBeGreaterThan(3);
+              expect(video.ended).toBe(false);
+              return player.unload();
+            })
+            .then(function() {
+              // Remove the content.
+              return storage.remove(storedContent);
+            })
+            .then(function() { return dbEngine.get('manifest', 0); })
+            .then(function(manifestDb) {
+              expect(manifestDb).toBeFalsy();
+            })
+            .catch(fail)
+            .then(done);
+      });
 });

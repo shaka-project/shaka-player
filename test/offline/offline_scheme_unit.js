@@ -54,7 +54,8 @@ describe('OfflineScheme', function() {
 
     fakeCreateStorageEngine = jasmine.createSpy('createStorageEngine');
     fakeCreateStorageEngine.and.returnValue(fakeStorageEngine);
-    shaka.offline.OfflineUtils.createStorageEngine = fakeCreateStorageEngine;
+    shaka.offline.OfflineUtils.createStorageEngine =
+        shaka.test.Util.spyFunc(fakeCreateStorageEngine);
 
     // The whole request is ignored by the OfflineScheme.
     var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
@@ -104,6 +105,7 @@ describe('OfflineScheme', function() {
           shaka.test.Util.expectToEqualError(
               err,
               new shaka.util.Error(
+                  shaka.util.Error.Severity.CRITICAL,
                   shaka.util.Error.Category.STORAGE,
                   shaka.util.Error.Code.REQUESTED_ITEM_NOT_FOUND, 789));
 
@@ -126,6 +128,7 @@ describe('OfflineScheme', function() {
           shaka.test.Util.expectToEqualError(
               err,
               new shaka.util.Error(
+                  shaka.util.Error.Severity.CRITICAL,
                   shaka.util.Error.Category.NETWORK,
                   shaka.util.Error.Code.MALFORMED_OFFLINE_URI, uri));
         })

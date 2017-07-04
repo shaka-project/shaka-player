@@ -16,14 +16,15 @@
  */
 
 describe('DashParser SegmentTemplate', function() {
-  var Dash;
-  var fakeNetEngine;
-  var parser;
-  var playerInterface;
+  /** @const */
+  var Dash = shaka.test.Dash;
 
-  beforeAll(function() {
-    Dash = shaka.test.Dash;
-  });
+  /** @type {!shaka.test.FakeNetworkingEngine} */
+  var fakeNetEngine;
+  /** @type {!shaka.dash.DashParser} */
+  var parser;
+  /** @type {shakaExtern.ManifestParser.PlayerInterface} */
+  var playerInterface;
 
   beforeEach(function() {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
@@ -348,41 +349,6 @@ describe('DashParser SegmentTemplate', function() {
     });
   });
 
-  describe('presentation timeline', function() {
-    it('returns correct earliest start time', function(done) {
-      var source = [
-        '<MPD>',
-        '  <Period duration="PT60S">',
-        '    <AdaptationSet mimeType="video/webm">',
-        '      <BaseURL>http://example.com</BaseURL>',
-        '      <Representation bandwidth="100">',
-        '        <SegmentTemplate media="$Number$-$Bandwidth$.mp4">',
-        '          <SegmentTimeline>',
-        '            <S t="0" d="10" />',
-        '          </SegmentTimeline>',
-        '        </SegmentTemplate>',
-        '      </Representation>',
-        '      <Representation bandwidth="200">',
-        '        <SegmentTemplate media="$Number$-$Bandwidth$.mp4">',
-        '          <SegmentTimeline>',
-        '            <S t="4" d="10" />',
-        '          </SegmentTimeline>',
-        '        </SegmentTemplate>',
-        '      </Representation>',
-        '    </AdaptationSet>',
-        '  </Period>',
-        '</MPD>'
-      ].join('\n');
-
-      fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
-      parser.start('dummy://foo', playerInterface)
-          .then(function(manifest) {
-            var timeline = manifest.presentationTimeline;
-            expect(timeline.getEarliestStart()).toBe(4);
-          }).catch(fail).then(done);
-    });
-  });
-
   describe('rejects streams with', function() {
     it('bad container type', function(done) {
       var source = [
@@ -400,6 +366,7 @@ describe('DashParser SegmentTemplate', function() {
         '</MPD>'
       ].join('\n');
       var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_UNSUPPORTED_CONTAINER);
       Dash.testFails(done, source, error);
@@ -420,6 +387,7 @@ describe('DashParser SegmentTemplate', function() {
         '</MPD>'
       ].join('\n');
       var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_WEBM_MISSING_INIT);
       Dash.testFails(done, source, error);
@@ -430,6 +398,7 @@ describe('DashParser SegmentTemplate', function() {
         '<SegmentTemplate startNumber="1" />'
       ]);
       var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_NO_SEGMENT_INFO);
       Dash.testFails(done, source, error);
@@ -444,6 +413,7 @@ describe('DashParser SegmentTemplate', function() {
         '</SegmentTemplate>'
       ]);
       var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_NO_SEGMENT_INFO);
       Dash.testFails(done, source, error);

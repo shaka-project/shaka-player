@@ -5,3 +5,5 @@
 +../../lib/hls/hls_utils.js
 +../../lib/hls/manifest_text_parser.js
 
+# Used by the HLS parser:
++../../lib/net/data_uri_plugin.js

@@ -18,6 +18,7 @@
 describe('CastSender', function() {
   var CastSender;
   var CastUtils;
+  var Util = shaka.test.Util;
 
   var originalChrome;
 
@@ -61,8 +62,9 @@ describe('CastSender', function() {
     window['chrome'] = { cast: mockCastApi };
     mockSession = null;
 
-    sender = new CastSender(fakeAppId, onStatusChanged, onRemoteEvent,
-                            onResumeLocal, onInitStateRequired);
+    sender = new CastSender(
+        fakeAppId, Util.spyFunc(onStatusChanged), Util.spyFunc(onRemoteEvent),
+        Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
   });
 
   afterEach(function(done) {
@@ -457,6 +459,7 @@ describe('CastSender', function() {
 
       it('reject when "asyncComplete" messages have an error', function(done) {
         var originalError = new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.MANIFEST,
             shaka.util.Error.Code.UNABLE_TO_GUESS_MANIFEST_TYPE,
             'foo://bar');
@@ -498,6 +501,7 @@ describe('CastSender', function() {
           expect(p.status).toBe('rejected');
           return p.catch(function(error) {
             shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+                shaka.util.Error.Severity.RECOVERABLE,
                 shaka.util.Error.Category.PLAYER,
                 shaka.util.Error.Code.LOAD_INTERRUPTED));
           });
@@ -596,6 +600,7 @@ describe('CastSender', function() {
           expect(p.status).toBe('rejected');
           return p.catch(function(error) {
             shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+                shaka.util.Error.Severity.RECOVERABLE,
                 shaka.util.Error.Category.PLAYER,
                 shaka.util.Error.Code.LOAD_INTERRUPTED));
           });
@@ -631,6 +636,7 @@ describe('CastSender', function() {
           expect(p.status).toBe('rejected');
           return p.catch(function(error) {
             shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+                shaka.util.Error.Severity.RECOVERABLE,
                 shaka.util.Error.Category.PLAYER,
                 shaka.util.Error.Code.LOAD_INTERRUPTED));
           });

@@ -1,3 +1,297 @@
+## 2.1.4 (2017-06-16)
+
+New features:
+  - Allow role to be specified in selectAudioLanguage and selectTextLanguage
+    - https://github.com/google/shaka-player/issues/767
+
+Bugfixes:
+  - Fix changing languages close to a period boundary
+    - https://github.com/google/shaka-player/issues/797
+  - Fix hang in load() when there are pending failures
+    - https://github.com/google/shaka-player/issues/782
+  - Fix DASH parser ignoring certain text streams
+    - https://github.com/google/shaka-player/issues/875
+  - Fix exceptions when side-loading text tracks
+    - https://github.com/google/shaka-player/issues/821
+  - Fix PlayReady support on Chromecast
+    - https://github.com/google/shaka-player/issues/852
+  - Fix version number issues during publication on NPM
+    - https://github.com/google/shaka-player/issues/869
+  - Fix pollution from npm on Windows
+    - https://github.com/google/shaka-player/issues/776
+  - Fix support for npm v5
+    - https://github.com/google/shaka-player/issues/854
+
+Demo app:
+  - Fix control visibility in fullscreen mode on mobile phones
+    - https://github.com/google/shaka-player/issues/663
+
+Docs:
+  - Updated welcome docs
+  - Updated list of supported platforms
+    - https://github.com/google/shaka-player/issues/863
+  - Updated FAQ
+    - https://github.com/google/shaka-player/issues/864
+    - https://github.com/google/shaka-player/issues/865
+
+
+## 2.1.3 (2017-06-06)
+
+New features:
+  - Limit network retries for VOD, only retry forever on live
+    - https://github.com/google/shaka-player/issues/762
+    - https://github.com/google/shaka-player/issues/830
+    - https://github.com/google/shaka-player/pull/842
+  - Add stream IDs in getStats().switchHistory
+    - https://github.com/google/shaka-player/issues/785
+    - https://github.com/google/shaka-player/issues/823
+    - https://github.com/google/shaka-player/pull/846
+  - Add label attribute to tracks
+    - https://github.com/google/shaka-player/issues/825
+    - https://github.com/google/shaka-player/pull/811
+    - https://github.com/google/shaka-player/pull/831
+  - Expose role attributes on tracks
+    - https://github.com/google/shaka-player/issues/767
+  - Silence confusing browser-generated errors related to play()
+    - https://github.com/google/shaka-player/issues/836
+
+Bugfixes:
+  - Fix offline storage in compiled mode
+  - Choose lowest-bandwidth codecs when multiple are possible
+    - https://github.com/google/shaka-player/issues/841
+  - Fix PlayReady on IE and Edge
+    - https://github.com/google/shaka-player/issues/837
+  - Fix rounding errors on IE11
+    - https://github.com/google/shaka-player/pull/832
+  - Clean up demo app loader
+  - Fix PlayReady test failures
+
+
+## 2.1.2 (2017-05-23)
+
+New features:
+  - Make educated guesses about missing HLS info (CODECS no longer required)
+    - https://github.com/google/shaka-player/issues/805
+  - Add support for PlayReady on Chromecast and Tizen
+    - https://github.com/google/shaka-player/issues/814
+    - https://github.com/google/shaka-player/pull/815
+
+Bugfixes:
+  - Fix flakiness in RESTRICTIONS\_CANNOT\_BE\_MET errors
+  - Make isBrowserSupported more strict about MediaSource
+  - Fix detection of audio-only assets in the demo
+    - https://github.com/google/shaka-player/issues/794
+  - Fix exports and generated externs that were broken in v2.1.0 and v2.1.1
+  - Speed up deletion of offline content
+    - https://github.com/google/shaka-player/issues/756
+
+Docs:
+  - Fix docs on subtitles and captions
+    - https://github.com/google/shaka-player/issues/808
+  - Add notes on adaptation to upgrade guide
+
+
+## 2.0.9 (2017-05-10)
+
+Backported bugfixes from v2.1.x:
+  - Fix offline download stalls on Android
+    - https://github.com/google/shaka-player/issues/747
+  - Fix track restriction based on key status
+    - https://github.com/google/shaka-player/issues/761
+  - Fix exception in fullscreen polyfill on IE 11
+    - https://github.com/google/shaka-player/pull/777
+  - Fix exception when reconfiguring serverCertificate
+    - https://github.com/google/shaka-player/issues/784
+
+
+## 2.1.1 (2017-05-10)
+
+New features:
+  - Separate audio and video codec in Track
+    - https://github.com/google/shaka-player/issues/758
+  - Make segment request to establish HLS media MIME type
+    - https://github.com/google/shaka-player/issues/769
+
+Bugfixes:
+  - Fix exception in fullscreen polyfill on IE 11
+    - https://github.com/google/shaka-player/pull/777
+  - Fix exception when reconfiguring serverCertificate
+    - https://github.com/google/shaka-player/issues/784
+  - Don't fire 'trackschanged' event twice
+    - https://github.com/google/shaka-player/issues/783
+  - Fix track restriction based on key status
+    - https://github.com/google/shaka-player/issues/761
+  - Fix offline download stalls on Android
+    - https://github.com/google/shaka-player/issues/747
+  - Fix race condition in gap-jumping code
+  - Fix poster visibility in fullscreen mode
+    - https://github.com/google/shaka-player/issues/778
+
+
+## 2.1.0 (2017-04-25)
+
+New features:
+  - Add basic HLS support
+    - VOD only
+    - Widevine & clear content only
+    - No support for CEA-708
+    - https://github.com/google/shaka-player/issues/279
+  - Tolerate gaps in the presentation timeline and jump over them
+    - https://github.com/google/shaka-player/issues/555
+  - Add an indicator for critical errors
+    - https://github.com/google/shaka-player/issues/564
+  - Do not retry on HTTP 401/403 errors
+    - https://github.com/google/shaka-player/issues/620
+  - Expand player stats and track metadata
+    - Add loadLatency stat
+    - Add mimeType to tracks
+    - Track state changes (buffering, playing, paused, ended)
+  - DASH trick mode support
+    - https://github.com/google/shaka-player/issues/538
+  - Expose license expiration times through Player
+    - https://github.com/google/shaka-player/issues/727
+  - Add support for EventStream elements in DASH
+    - https://github.com/google/shaka-player/issues/462
+  - Add support for Chromecast Media Playback messages from generic senders
+    - https://github.com/google/shaka-player/issues/722
+  - Add config to ignore key system and init data in DASH manifest
+    - https://github.com/google/shaka-player/issues/750
+  - Add support for asynchronous response filters
+    - https://github.com/google/shaka-player/issues/610
+  - Filter duplicate initData from manifest by key ID
+    - https://github.com/google/shaka-player/issues/580
+  - Optionally adjust start time to segment boundary
+    - https://github.com/google/shaka-player/issues/683
+  - StringUtils and Uint8ArrayUtils are now exported, to make filters easier
+    - https://github.com/google/shaka-player/issues/667
+  - Add audio adaptation to default AbrManager
+  - Add an API to force the Chromecast to disconnect
+    - https://github.com/google/shaka-player/issues/523
+  - Add possibility to delay license request until playback is started
+    - https://github.com/google/shaka-player/issues/262
+  - Add API to get live stream position as Date
+    - https://github.com/google/shaka-player/issues/356
+  - Don't clear buffer if switching to the same stream
+    - https://github.com/google/shaka-player/issues/693
+  - Demo app permalink support through URL hash parameters
+    - https://github.com/google/shaka-player/issues/709
+  - Add a flag so scheme plugins can ask us to ignore cache hits for ABR
+  - Allow passing durations from scheme plugins to compute throughput
+    - https://github.com/google/shaka-player/issues/621
+  - Make ES6 imports easier
+    - https://github.com/google/shaka-player/issues/466
+  - Add separate restrictions to AbrManager
+    - https://github.com/google/shaka-player/issues/565
+  - Allow network plugins to see the request type
+    - https://github.com/google/shaka-player/issues/602
+
+Bugfixes:
+  - Make language selection explicit
+    - https://github.com/google/shaka-player/issues/412
+  - Make text track visibility explicit
+    - https://github.com/google/shaka-player/issues/626
+  - Fix firing of 'trackschanged' event for multi-Period content
+    - https://github.com/google/shaka-player/issues/680
+  - Correct time parsing for MP4 VTT subtitles
+    - https://github.com/google/shaka-player/issues/699
+  - Fix playback of live when segments do not extend to the end of the Period
+    - https://github.com/google/shaka-player/issues/694
+  - Allow seeking to 0 in live streams
+    - https://github.com/google/shaka-player/issues/692
+  - Add explicit timestamps to 'emsg' events
+    - https://github.com/google/shaka-player/issues/698
+  - Fix playback of YouTube demo assets
+    - https://github.com/google/shaka-player/issues/682
+  - Allow text parsers to change during playback
+    - https://github.com/google/shaka-player/issues/571
+
+Docs:
+  - Add offline storage to v2 upgrade guide
+  - Add additional docs for AbrManager
+    - https://github.com/google/shaka-player/issues/629
+  - Add manifest parser plugin tutorial
+
+Broken Compatibility:
+  - Track types 'video' and 'audio' have been combined into 'variant'.
+    - Any application looking at track.type will need to be updated.
+  - Removed useRelativeCueTimestamps option
+    - All segmented WebVTT cue timestamps are now segment-relative
+    - https://github.com/google/shaka-player/issues/726
+  - Plugin interface for text parsers has changed
+    - Both old & new interfaces still supported
+    - Support for old interface will be removed in v2.2
+  - Plugin interface for ManifestParser.start has changed
+    - Now takes an object with named parameters instead of positional params
+    - Both old & new interfaces still supported
+    - Support for old interface will be removed in v2.2
+  - Retired the INVALID\_TTML error code
+    - Folded into the INVALID\_XML error code
+
+
+## 2.0.8 (2017-04-07)
+
+Bugfixes:
+  - Suppress controls UI updates when hidden
+    - https://github.com/google/shaka-player/issues/749
+  - Revert keyboard navigation changes in demo, failing on Firefox
+
+
+## 2.0.7 (2017-03-29)
+
+New Features:
+  - Improved keyboard navigation in demo page for accessibility
+  - Play through small gaps at the start of the timeline
+  - Add a method for accessing the HTMLMediaElement from the Player
+    - https://github.com/google/shaka-player/pull/723
+  - Improved error reporting for HTTP errors
+
+Bugfixes:
+  - Fixed a DASH compliance bug in SegmentList w/ presentationTimeOffset
+  - Fixed compiler renaming in emsg events.
+    - https://github.com/google/shaka-player/issues/717
+  - Fix period transitions where text streams may be absent
+    - https://github.com/google/shaka-player/issues/715
+  - Fix Firefox DRM detection
+  - Fix cleanup of expired EME sessions for offline
+  - Fix demo app error thrown when offline is not supported
+  - Fix infinite loop in offline storage of SegmentTemplate-based DASH
+    - https://github.com/google/shaka-player/issues/739
+  - Fix contamination between tests
+
+
+## 2.0.6 (2017-02-24)
+
+New Features:
+  - Add Media Session info to demo
+    - https://github.com/google/shaka-player/pull/689
+  - Add support for xml:space in TTML parser
+    - https://github.com/google/shaka-player/issues/665
+  - Add fullscreenEnabled property to fullscreen polyfill
+    - https://github.com/google/shaka-player/issues/669
+  - Allow InbandEventStream elements at Representation level
+    - https://github.com/google/shaka-player/pull/687
+    - https://github.com/google/shaka-player/issues/686
+  - Warning for unsupported indexRange attribute
+  - Warning for duplicate Representation IDs
+
+Bugfixes:
+  - Fix cast support broken since 2.0.3
+    - https://github.com/google/shaka-player/issues/675
+  - Fix timeout errors in cast demo
+    - https://github.com/google/shaka-player/issues/684
+  - Fix infinite buffering caused by a race
+    - https://github.com/google/shaka-player/issues/600
+  - Fix race in StreamingEngine for multi-Period content
+    - https://github.com/google/shaka-player/issues/655
+  - Hide the controls when going fullscreen on phones
+    - https://github.com/google/shaka-player/issues/663
+  - Improve calculation of $TIME$ in SegmentTemplate
+    - https://github.com/google/shaka-player/issues/690
+    - https://github.com/google/shaka-player/pull/706
+  - Fix YouTube asset on demo app
+    - https://github.com/google/shaka-player/issues/682
+
+
 ## 2.0.5 (2017-01-30)
 
 Bugfixes:

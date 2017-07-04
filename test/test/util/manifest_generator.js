@@ -163,6 +163,18 @@ shaka.test.ManifestGenerator.prototype.language = function(language) {
 
 
 /**
+ * Sets the label of the language of the most recent variant or text stream.
+ *
+ * @param {string} label
+ * @return {!shaka.test.ManifestGenerator}
+ */
+shaka.test.ManifestGenerator.prototype.label = function(label) {
+  this.currentStream_().label = label;
+  return this;
+};
+
+
+/**
  * Sets that the most recent variant or text stream is primary.
  *
  * @return {!shaka.test.ManifestGenerator}
@@ -304,6 +316,7 @@ shaka.test.ManifestGenerator.prototype.addCencInitData = function(base64) {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.addVideo = function(id) {
+  var ContentType = shaka.util.ManifestParserUtils.ContentType;
   var variant = this.currentVariant_();
   var period = this.currentPeriod_();
   var stream;
@@ -319,7 +332,7 @@ shaka.test.ManifestGenerator.prototype.addVideo = function(id) {
   }
 
   if (!stream)
-    stream = this.createStream_(id, 'video', 'und');
+    stream = this.createStream_(id, ContentType.VIDEO, 'und');
 
   variant.video = stream;
   this.lastStreamAdded_ = stream;
@@ -336,6 +349,7 @@ shaka.test.ManifestGenerator.prototype.addVideo = function(id) {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.addAudio = function(id) {
+  var ContentType = shaka.util.ManifestParserUtils.ContentType;
   var variant = this.currentVariant_();
   var period = this.currentPeriod_();
   var stream;
@@ -351,7 +365,7 @@ shaka.test.ManifestGenerator.prototype.addAudio = function(id) {
   }
 
   if (!stream)
-    stream = this.createStream_(id, 'audio', variant.language);
+    stream = this.createStream_(id, ContentType.AUDIO, variant.language);
 
   variant.audio = stream;
   this.lastStreamAdded_ = stream;
@@ -368,8 +382,9 @@ shaka.test.ManifestGenerator.prototype.addAudio = function(id) {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.addTextStream = function(id) {
+  var ContentType = shaka.util.ManifestParserUtils.ContentType;
   var period = this.currentPeriod_();
-  var stream = this.createStream_(id, 'text', 'und');
+  var stream = this.createStream_(id, ContentType.TEXT, 'und');
   period.textStreams.push(stream);
   this.lastObjectAdded_ = stream;
   this.lastStreamAdded_ = stream;
@@ -421,25 +436,32 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
   goog.asserts.assert(!this.isIdUsed_(id),
                       'Streams should have unique ids!');
 
+  var ContentType = shaka.util.ManifestParserUtils.ContentType;
   var defaultMimeType = 'text/plain';
   var defaultCodecs = '';
 
-  if (type == 'audio') {
+  if (type == ContentType.AUDIO) {
     defaultMimeType = 'audio/mp4';
     defaultCodecs = 'mp4a.40.2';
-  } else if (type == 'video') {
+  } else if (type == ContentType.VIDEO) {
     defaultMimeType = 'video/mp4';
     defaultCodecs = 'avc1.4d401f';
-  } else if (type == 'text') {
+  } else if (type == ContentType.TEXT) {
     defaultMimeType = 'text/vtt';
   }
+
+  var create = jasmine.createSpy('createSegmentIndex').and.callFake(function() {
+    return Promise.resolve();
+  });
+  var find = jasmine.createSpy('findSegmentPosition').and.returnValue(null);
+  var get = jasmine.createSpy('getSegmentReference').and.returnValue(null);
 
   /** @type {shakaExtern.Stream} */
   var stream = {
     id: id,
-    createSegmentIndex: jasmine.createSpy('createSegmentIndex'),
-    findSegmentPosition: jasmine.createSpy('findSegmentPosition'),
-    getSegmentReference: jasmine.createSpy('getSegmentReference'),
+    createSegmentIndex: shaka.test.Util.spyFunc(create),
+    findSegmentPosition: shaka.test.Util.spyFunc(find),
+    getSegmentReference: shaka.test.Util.spyFunc(get),
     initSegmentReference: null,
     presentationTimeOffset: 0,
     mimeType: defaultMimeType,
@@ -452,15 +474,14 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
     encrypted: false,
     keyId: null,
     language: language,
+    label: null,
     type: type,
     primary: false,
-    trickModeVideo: null
+    trickModeVideo: null,
+    containsEmsgBoxes: false,
+    roles: [],
+    channelsCount: null
   };
-  stream.createSegmentIndex.and.callFake(
-      function() { return Promise.resolve(); });
-  stream.findSegmentPosition.and.returnValue(null);
-  stream.getSegmentReference.and.returnValue(null);
-
   return stream;
 };
 
@@ -675,6 +696,18 @@ shaka.test.ManifestGenerator.prototype.frameRate = function(frameRate) {
 
 
 /**
+ * Sets the roles of the current stream.
+ * @param {!Array.<string>} roles
+ * @return {!shaka.test.ManifestGenerator}
+ */
+shaka.test.ManifestGenerator.prototype.roles = function(roles) {
+  var stream = this.currentStream_();
+  stream.roles = roles;
+  return this;
+};
+
+
+/**
  * Sets the key ID of the current stream.
  *
  * @param {string} keyId
@@ -773,5 +806,17 @@ shaka.test.ManifestGenerator.prototype.currentStream_ = function() {
   goog.asserts.assert(this.lastStreamAdded_,
                       'Must add at least one stream.');
   return this.lastStreamAdded_;
+};
+
+
+/**
+ * Sets the count of the channels of the current stream.
+ * @param {number} count
+ * @return {!shaka.test.ManifestGenerator}
+ */
+shaka.test.ManifestGenerator.prototype.channelsCount = function(count) {
+  var stream = this.currentStream_();
+  stream.channelsCount = count;
+  return this;
 };
 // }}}

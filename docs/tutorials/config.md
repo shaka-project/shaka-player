@@ -23,9 +23,13 @@ player.getConfiguration();
 
 => Object
      abr: Object
+       bandwidthDowngradeTarget: 0.95
+       bandwidthUpgradeTarget: 0.85
        defaultBandwidthEstimate: 500000
        enabled: true
-       manager: SimpleAbrManager
+       restrictions: Object
+       switchInterval: 8
+     abrFactory: Function
      drm: Object
        advanced: Object
        clearKeys: Object
@@ -38,7 +42,10 @@ player.getConfiguration();
        servers: Object
      manifest: Object
        dash: Object
+       hls: Object
        retryParameters: Object
+     playRangeEnd: Infinity
+     playRangeStart: 0
      preferredAudioLanguage: ""
      preferredTextLanguage: ""
      restrictions: Object
@@ -46,12 +53,17 @@ player.getConfiguration();
        bufferBehind: 30
        bufferingGoal: 10
        ignoreTextStreamFailures: false
+       infiniteRetriesForLiveStreams: true
+       jumpLargeGaps: false
        rebufferingGoal: 2
        retryParameters: Object
+       smallGapLimit: 0.5
+       startAtSegmentBoundary: false
 
 
 // set audio language preference to Canadian French:
 player.configure({ preferredAudioLanguage: 'fr-CA' });
+// NOTE: language preferences affect the next call to load()
 
 // set text language preference to Greek and buffering goal to 2 minutes:
 player.configure({
@@ -79,9 +91,9 @@ player.configure({
 });
 ```
 
-Some of these fields have immediate effects (such as language-related settings,
-networking settings, and buffering settings) while some will not have any
-effect until the next call to `load()` (such as DRM and manifest settings).
+Some of these fields have immediate effects (such as networking settings and
+buffering settings) while some will not have any effect until the next call to
+`load()` (such as DRM settings, manifest settings, and language settings).
 
 
 #### Detailed API Docs
