@@ -120,13 +120,57 @@ module.exports = function(config) {
     },
   });
 
-  if (flagPresent('html-coverage-report')) {
+  // Find the settings JSON object in the command arguments
+  var args = process.argv;
+  var settingsIndex = args.indexOf('--settings')
+  var settings = settingsIndex >= 0 ? JSON.parse(args[settingsIndex + 1]) : {};
+
+  if (!settings.quick) {
+    // If --quick is present, we don't serve integration tests.
+    var files = config.files;
+    files.push('test/**/*_integration.js');
+    // We just modified the config in-place.  No need for config.set().
+  }
+
+  if (settings.logging) {
+    var logMap = {
+      none: 0,
+      error: 1,
+      warning: 2,
+      info: 3,
+      debug: 4,
+      v1: 5,
+      v2: 6
+    };
+
+    // Setting |config.client| using config.set will remove the
+    // |config.client.settings| member.
+    config.client.captureConsole = true;
+    setClientArg(config,
+                'logLevel',
+                logMap[settings.logging] || logMap.warning);
+  }
+
+  var reporters = [];
+
+  if (settings.reporters) {
+    // Explicit reporters, use these.
+    reporters.push.apply(reporters, settings.reporters);
+  } else if (settings.logging && settings.logging != 'none') {
+    // With logging, default to 'spec', which makes logs easier to associate
+    // with individual tests.
+    reporters.push('spec');
+  } else {
+    // Without logging, default to 'progress'.
+    reporters.push('progress');
+  }
+
+  if (settings.html_coverage_report) {
     // Wipe out any old coverage reports to avoid confusion.
     var rimraf = require('rimraf');
     rimraf.sync('coverage', {});  // Like rm -rf
 
     config.set({
-      reporters: [ 'coverage', 'progress' ],
       coverageReporter: {
         reporters: [
           { type: 'html', dir: 'coverage' },
@@ -134,97 +178,48 @@ module.exports = function(config) {
         ],
       },
     });
+
+    // The report requires the 'coverage' reporter to be added to the list.
+    reporters.push('coverage');
   }
 
-  if (!flagPresent('quick')) {
-    // If --quick is present, we don't serve integration tests.
-    var files = config.files;
-    files.push('test/**/*_integration.js');
-    // We just modified the config in-place.  No need for config.set().
-  }
+  config.set({reporters: reporters});
 
-  var logLevel = getFlagValue('enable-logging');
-  if (logLevel !== null) {
-    if (logLevel === '')
-      logLevel = 3;  // INFO
+  // Run Player integration tests against external assets.
+  // Skipped by default.
+  setClientArg(config, 'external', !!settings.external);
 
-    config.set({
-      reporters: ['spec'],
-    });
-    // Setting |config.client| using config.set will remove the
-    // |config.client.args| member.
-    config.client.captureConsole = true;
-    setClientArg(config, 'logLevel', logLevel);
-  }
+  // Run Player integration tests against DRM license servers.
+  // Skipped by default.
+  setClientArg(config, 'drm', !!settings.drm);
 
-  if (flagPresent('external')) {
-    // Run Player integration tests against external assets.
-    // Skipped by default.
-    setClientArg(config, 'external', true);
-  }
+  // Run quarantined tests which do not consistently pass.
+  // Skipped by default.
+  setClientArg(config, 'quarantined', !!settings.quarantined);
 
-  if (flagPresent('drm')) {
-    // Run Player integration tests against DRM license servers.
-    // Skipped by default.
-    setClientArg(config, 'drm', true);
-  }
+  // Run Player integration tests with uncompiled code for debugging.
+  setClientArg(config, 'uncompiled', !!settings.uncompiled);
 
-  if (flagPresent('quarantined')) {
-    // Run quarantined tests which do not consistently pass.
-    // Skipped by default.
-    setClientArg(config, 'quarantined', true);
-  }
-
-  if (flagPresent('uncompiled')) {
-    // Run Player integration tests with uncompiled code for debugging.
-    setClientArg(config, 'uncompiled', true);
-  }
-
-  if (flagPresent('random')) {
-    // Run tests in a random order.
-    setClientArg(config, 'random', true);
-
+  if (settings.random) {
     // If --seed was specified use that value, else generate a seed so that the
     // exact order can be reproduced if it catches an issue.
-    var seed = getFlagValue('seed') || new Date().getTime();
+    var seed = settings.seed == null ? new Date().getTime() : settings.seed;
+
+    // Run tests in a random order.
+    setClientArg(config, 'random', true);
     setClientArg(config, 'seed', seed);
 
     console.log("Using a random test order (--random) with --seed=" + seed);
   }
 
-  if (flagPresent('specFilter')) {
-    setClientArg(config, 'specFilter', getFlagValue('specFilter'));
+  if (settings.filter) {
+    setClientArg(config, 'specFilter', settings.filter);
   }
 };
 
 // Sets the value of an argument passed to the client.
 function setClientArg(config, name, value) {
   config.client.args[0][name] = value;
-}
-
-// Find a custom command-line flag that has a value (e.g. --option=12).
-// Returns:
-// * string value  --option=12
-// * empty string  --option= or --option
-// * null          not present
-function getFlagValue(name) {
-  var re = /^--([^=]+)(?:=(.*))?$/;
-  for (var i = 0; i < process.argv.length; i++) {
-    var match = re.exec(process.argv[i]);
-    if (match && match[1] == name) {
-      if (match[2] !== undefined)
-        return match[2];
-      else
-        return '';
-    }
-  }
-
-  return null;
-}
-
-// Find custom command-line flags.
-function flagPresent(name) {
-  return getFlagValue(name) !== null;
 }
 
 // Construct framework plugins on-the-fly for arbitrary node modules.
