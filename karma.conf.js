@@ -19,6 +19,30 @@
 // Install required modules by running "npm install"
 
 module.exports = function(config) {
+
+  var SHAKA_LOG_MAP = {
+    none: 0,
+    error: 1,
+    warning: 2,
+    info: 3,
+    debug: 4,
+    v1: 5,
+    v2: 6
+  };
+
+  var KARMA_LOG_MAP = {
+    'disable': config.LOG_DISABLE,
+    'error': config.LOG_ERROR,
+    'warn': config.LOG_WARN,
+    'info': config.LOG_INFO,
+    'debug':  config.LOG_DEBUG
+  };
+
+  // Find the settings JSON object in the command arguments
+  var args = process.argv;
+  var settingsIndex = args.indexOf('--settings')
+  var settings = settingsIndex >= 0 ? JSON.parse(args[settingsIndex + 1]) : {};
+
   config.set({
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '.',
@@ -83,30 +107,67 @@ module.exports = function(config) {
     browserDisconnectTimeout: 10 * 1000,  // 10s to reconnect
     browserDisconnectTolerance: 1,  // max of 1 disconnect is OK
     browserNoActivityTimeout: 5 * 60 * 1000,  // disconnect after 5m silence
-    captureTimeout: 1 * 60 * 1000,  // give up if startup takes 1m
+    captureTimeout: settings.capture_timeout,
     // https://support.saucelabs.com/customer/en/portal/articles/2440724
 
     client: {
-      // don't capture the client's console logs
-      captureConsole: false,
+      // Only capture the client's logs if the settings want logging.
+      captureConsole: !!settings.logging,
       // |args| must be an array; pass a key-value map as the sole client
       // argument.
-      args: [{}],
+      args: [{
+        // Run Player integration tests against external assets.
+        // Skipped by default.
+        external: !!settings.external,
+
+        // Run Player integration tests against DRM license servers.
+        // Skipped by default.
+        drm: !!settings.drm,
+
+        // Run quarantined tests which do not consistently pass.
+        // Skipped by default.
+        quarantined: !!settings.quarantined,
+
+        // Run Player integration tests with uncompiled code for debugging.
+        uncompiled: !!settings.uncompiled,
+
+        // Limit which tests to run. If undefined, all tests should run.
+        specFilter: settings.filter,
+
+        // Set what level of logs for the player to print.
+        logLevel: SHAKA_LOG_MAP[settings.logging]
+      }],
     },
 
-    // enable / disable colors in the output (reporters and logs)
-    colors: true,
+    // Specify the hostname to be used when capturing browsers.
+    hostname: settings.hostname,
 
-    // level of logging
-    // possible values: config.LOG_DISABLE || config.LOG_ERROR ||
-    //                  config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-    logLevel: config.LOG_WARN,
+    // Specify the port where the server runs.
+    port: settings.port,
 
-    // do not execute tests whenever any file changes
-    autoWatch: false,
+    // Set which browsers to run on. If this is null, then Karma will wait for
+    // an incoming connection.
+    browsers: settings.browsers,
 
-    // do a single run of the tests on captured browsers and then quit
-    singleRun: true,
+    // Enable / disable colors in the output (reporters and logs). Defaults
+    // to true.
+    colors: settings.colors,
+
+    // Set Karma's level of logging.
+    logLevel: KARMA_LOG_MAP[settings.log_level],
+
+    // Should Karma xecute tests whenever a file changes?
+    autoWatch: settings.auto_watch,
+
+    // Do a single run of the tests on captured browsers and then quit.
+    // Defaults to true.
+    singleRun: settings.single_run,
+
+    // Set the time limit (ms) that should be used to identify slow tests.
+    reportSlowerThan: settings.report_slower_than,
+
+    // Force failure when running empty test-suites.
+    failOnEmptyTestSuite: true,
 
     coverageReporter: {
       includeAllSources: true,
@@ -120,13 +181,36 @@ module.exports = function(config) {
     },
   });
 
-  if (flagPresent('html-coverage-report')) {
+  function getClientArgs() {
+    return config.client.args[0];
+  }
+
+  if (!settings.quick) {
+    // If --quick is present, we don't serve integration tests.
+    config.files.push('test/**/*_integration.js');
+    // We just modified the config in-place.  No need for config.set().
+  }
+
+  var reporters = [];
+
+  if (settings.reporters) {
+    // Explicit reporters, use these.
+    reporters.push.apply(reporters, settings.reporters);
+  } else if (settings.logging && settings.logging != 'none') {
+    // With logging, default to 'spec', which makes logs easier to associate
+    // with individual tests.
+    reporters.push('spec');
+  } else {
+    // Without logging, default to 'progress'.
+    reporters.push('progress');
+  }
+
+  if (settings.html_coverage_report) {
     // Wipe out any old coverage reports to avoid confusion.
     var rimraf = require('rimraf');
     rimraf.sync('coverage', {});  // Like rm -rf
 
     config.set({
-      reporters: [ 'coverage', 'progress' ],
       coverageReporter: {
         reporters: [
           { type: 'html', dir: 'coverage' },
@@ -134,98 +218,25 @@ module.exports = function(config) {
         ],
       },
     });
+
+    // The report requires the 'coverage' reporter to be added to the list.
+    reporters.push('coverage');
   }
 
-  if (!flagPresent('quick')) {
-    // If --quick is present, we don't serve integration tests.
-    var files = config.files;
-    files.push('test/**/*_integration.js');
-    // We just modified the config in-place.  No need for config.set().
-  }
+  config.set({reporters: reporters});
 
-  var logLevel = getFlagValue('enable-logging');
-  if (logLevel !== null) {
-    if (logLevel === '')
-      logLevel = 3;  // INFO
-
-    config.set({
-      reporters: ['spec'],
-    });
-    // Setting |config.client| using config.set will remove the
-    // |config.client.args| member.
-    config.client.captureConsole = true;
-    setClientArg(config, 'logLevel', logLevel);
-  }
-
-  if (flagPresent('external')) {
-    // Run Player integration tests against external assets.
-    // Skipped by default.
-    setClientArg(config, 'external', true);
-  }
-
-  if (flagPresent('drm')) {
-    // Run Player integration tests against DRM license servers.
-    // Skipped by default.
-    setClientArg(config, 'drm', true);
-  }
-
-  if (flagPresent('quarantined')) {
-    // Run quarantined tests which do not consistently pass.
-    // Skipped by default.
-    setClientArg(config, 'quarantined', true);
-  }
-
-  if (flagPresent('uncompiled')) {
-    // Run Player integration tests with uncompiled code for debugging.
-    setClientArg(config, 'uncompiled', true);
-  }
-
-  if (flagPresent('random')) {
-    // Run tests in a random order.
-    setClientArg(config, 'random', true);
-
+  if (settings.random) {
     // If --seed was specified use that value, else generate a seed so that the
     // exact order can be reproduced if it catches an issue.
-    var seed = getFlagValue('seed') || new Date().getTime();
-    setClientArg(config, 'seed', seed);
+    var seed = settings.seed == null ? new Date().getTime() : settings.seed;
+
+    // Run tests in a random order.
+    getClientArgs().random = true;
+    getClientArgs().seed = seed;
 
     console.log("Using a random test order (--random) with --seed=" + seed);
   }
-
-  if (flagPresent('specFilter')) {
-    setClientArg(config, 'specFilter', getFlagValue('specFilter'));
-  }
 };
-
-// Sets the value of an argument passed to the client.
-function setClientArg(config, name, value) {
-  config.client.args[0][name] = value;
-}
-
-// Find a custom command-line flag that has a value (e.g. --option=12).
-// Returns:
-// * string value  --option=12
-// * empty string  --option= or --option
-// * null          not present
-function getFlagValue(name) {
-  var re = /^--([^=]+)(?:=(.*))?$/;
-  for (var i = 0; i < process.argv.length; i++) {
-    var match = re.exec(process.argv[i]);
-    if (match && match[1] == name) {
-      if (match[2] !== undefined)
-        return match[2];
-      else
-        return '';
-    }
-  }
-
-  return null;
-}
-
-// Find custom command-line flags.
-function flagPresent(name) {
-  return getFlagValue(name) !== null;
-}
 
 // Construct framework plugins on-the-fly for arbitrary node modules.
 // A call to this must be placed in the config in the 'plugins' array,

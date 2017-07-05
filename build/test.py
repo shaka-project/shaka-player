@@ -16,6 +16,8 @@
 
 """Runs unit and integrations tests on the library."""
 
+import argparse
+import json
 import logging
 import platform
 
@@ -24,104 +26,371 @@ import gendeps
 import shakaBuildHelpers
 
 
-def run_tests_single(args):
-  """Runs all the karma tests."""
-  karma_path = shakaBuildHelpers.get_node_binary_path('karma')
-  cmd = [karma_path, 'start']
+class _HandleMixedListsAction(argparse.Action):
+  '''Action to handle comma-separated and space-separated lists.
 
-  if shakaBuildHelpers.is_linux() and '--use-xvfb' in args:
-    cmd = ['xvfb-run', '--auto-servernum'] + cmd
+     When input can be given as a comma-separated list or a space-
+     separated list, default actions and types don't work. For example
+     if you had |'a,b,c' 'd'| you can get |['a,b,c', 'd']| or
+     |[['a','b','c'], 'd']|.
 
-  # Get the browsers supported on the local system.
-  browsers = _get_browsers()
-  if not browsers:
-    logging.error('Unrecognized system: %s', platform.uname()[0])
-    return 1
+     This action will expand the comma-separated lists and merge then with
+     the space separated lists so you will get |['a', 'b', 'c', 'd']|.
+  '''
 
-  logging.info('Starting tests...')
-  if not args:
-    # Run tests in all available browsers.
-    logging.warning('Running with platform default: --browsers %s', browsers)
-    cmd_line = cmd + ['--browsers', browsers]
-    return shakaBuildHelpers.execute_get_code(cmd_line)
-  else:
-    # Run with command-line arguments from the user.
-    if '--browsers' not in args:
-      logging.warning('No --browsers specified.')
-      logging.warning('In this mode, browsers must be manually connected to '
-                      'karma.')
-    cmd_line = cmd + args
-    return shakaBuildHelpers.execute_get_code(cmd_line)
+  def __call__(self, parser, namespace, new_values, option_string=None):
+    merged = getattr(namespace, self.dest) or []
+    for value in new_values:
+      merged += value.split(',')
+    setattr(namespace, self.dest, merged)
 
 
-def run_tests_multiple(args):
-  """Runs multiple iterations of the tests when --runs is set."""
-  index = args.index('--runs') + 1
-  if index == len(args) or args[index].startswith('--'):
-    logging.error('Argument Error: --runs requires a value.')
-    return 1
-  try:
-    runs = int(args[index])
-  except ValueError:
-    logging.error('Argument Error: --runs value must be an integer.')
-    return 1
-  if runs <= 0:
-    logging.error('Argument Error: --runs value must be greater than 0.')
-    return 1
-
-  results = []
-  logging.info('Running the tests %d times.', runs)
-  for _ in range(runs):
-    results.append(run_tests_single(args))
-
-  logging.info('\nAll runs completed.')
-  logging.info('%d passed out of %d total runs.', results.count(0),
-               len(results))
-  logging.info('Results (exit code): %r', results)
-  return all(result == 0 for result in results)
+def _IntGreaterThanZero(x):
+  i = int(x)
+  if i <= 0:
+    raise argparse.ArgumentTypeError('%s is not greater than zero' % x)
+  return i
 
 
-def run_tests(args):
-  # Update node modules if needed.
-  if not shakaBuildHelpers.update_node_modules():
-    return 1
+def _GetDefaultBrowsers():
+  """Use the platform name to get which browsers can be tested."""
 
-  # Generate dependencies and compile library.
-  # This is required for the tests.
-  if gendeps.gen_deps([]) != 0:
-    return 1
-
-  build_args = []
-  if '--force' in args:
-    build_args.append('--force')
-    args.remove('--force')
-
-  if '--no-build' in args:
-    args.remove('--no-build')
-  else:
-    if build.main(build_args) != 0:
-      return 1
-
-  if '--runs' in args:
-    return run_tests_multiple(args)
-  else:
-    return run_tests_single(args)
-
-
-def _get_browsers():
-  """Uses the platform name to configure which browsers will be tested."""
-  browsers = None
   if shakaBuildHelpers.is_linux():
     # For MP4 support on Linux Firefox, install gstreamer1.0-libav.
     # Opera on Linux only supports MP4 for Ubuntu 15.04+, so it is not in the
     # default list of browsers for Linux at this time.
-    browsers = 'Chrome,Firefox'
-  elif shakaBuildHelpers.is_darwin():
-    browsers = 'Chrome,Firefox,Safari'
-  elif shakaBuildHelpers.is_windows() or shakaBuildHelpers.is_cygwin():
-    browsers = 'Chrome,Firefox,IE'
-  return browsers
+    return ['Chrome','Firefox']
+
+  if shakaBuildHelpers.is_darwin():
+    return ['Chrome','Firefox','Safari']
+
+  if shakaBuildHelpers.is_windows() or shakaBuildHelpers.is_cygwin():
+    return ['Chrome','Firefox','IE']
+
+  raise Error('Unrecognized system: %s' % platform.uname()[0])
+
+
+class Launcher:
+  """A stateful object for parsing arguments and running Karma commands.
+
+     A launcher that holds the state of parsing arguments and builds and
+     executes the resulting Karma command. The process is split into sections so
+     that other scripts can inject their own logic between calls.
+
+     For example:
+       l = Launcher('Launch Karma tests', ['Chrome'])
+       l.parser.add_argument('custom_flag')
+       l.ParseArguments(args)
+       if l.parsed_args.custom_flag:
+         do_custom_logic
+      l.RunCommand(karma_conf_path)
+  """
+
+  def __init__(self, description, default_browsers):
+    self.default_browsers = default_browsers
+    self.karma_config = {}
+    self.parsed_args = None
+    self.parser = argparse.ArgumentParser(
+        description=description,
+        formatter_class=argparse.RawDescriptionHelpFormatter)
+
+    running_commands = self.parser.add_argument_group(
+        'Running',
+        'These commands affect how tests are ran.')
+    logging_commands = self.parser.add_argument_group(
+        'Logging',
+        'These commands affect what gets logged and how the logs will appear.')
+    networking_commands = self.parser.add_argument_group(
+        'Networking',
+        'These commands affect how Karma works over a network.')
+    pre_launch_commands = self.parser.add_argument_group(
+        'Pre-Launch',
+        'These commands are handled before the tests start running.')
+
+    running_commands.add_argument(
+        '--browsers',
+        help='Specify which browsers to run tests on as a space-separated or '
+             'comma-separated list.',
+        action=_HandleMixedListsAction,
+        nargs='+')
+    running_commands.add_argument(
+        '--exclude-browsers',
+        help='Browsers to skip as a comma-separated or space-separated list.',
+        action=_HandleMixedListsAction,
+        nargs='+')
+    running_commands.add_argument(
+        '--no-browsers',
+        help='Instead of Karma starting browsers, Karma will wait for a '
+             'browser to connect to it.',
+        action='store_true')
+    running_commands.add_argument(
+        '--single-run',
+        help='Run the test when browsers capture and exit.',
+        dest='single_run',
+        action='store_true',
+        default=True)
+    running_commands.add_argument(
+        '--no-single-run',
+        help='Do not shut down Karma when tests are complete.',
+        dest='single_run',
+        action='store_false')
+    running_commands.add_argument(
+        '--random',
+        help='Run the tests in a random order. This can be used with --seed '
+             'to control the random order. If used without --seed, a seed '
+             'will be generated.',
+        action='store_true')
+    running_commands.add_argument(
+        '--seed',
+        help='Set the seed that will be used by --random. If used without '
+             '--random, this will have no effect.',
+        type=int)
+    running_commands.add_argument(
+        '--filter',
+        help='Specify a regular expression to limit which tests run.',
+        type=str,
+        dest='filter')
+    running_commands.add_argument(
+        '--use-xvfb',
+        help='Run tests without opening browser windows. Requires Linux '
+             'and xvfb.',
+        action='store_true')
+    running_commands.add_argument(
+        '--quick',
+        help='Skip integration tests.',
+        action='store_true')
+    running_commands.add_argument(
+        '--external',
+        help='Run tests that require external resources. This will require a '
+             'fast connection to the open internet.',
+        action='store_true')
+    running_commands.add_argument(
+        '--drm',
+        help='Run tests that require DRM.',
+        action='store_true')
+    running_commands.add_argument(
+        '--quarantined',
+        help='Run tests that have been quarantined.',
+        action='store_true')
+    running_commands.add_argument(
+        '--runs',
+        help='Set the number of times each test should run. This '
+             'defaults to 1.',
+        type=_IntGreaterThanZero,
+        default=1,
+        dest='runs')
+    running_commands.add_argument(
+        '--uncompiled',
+        help='Use the uncompiled source code when running the tests. This can be '
+             'used to make debugging easier.',
+        action='store_true')
+    running_commands.add_argument(
+        '--auto-watch',
+        help='Auto watch source files and run on change.',
+        dest='auto_watch',
+        action='store_true',
+        default=False)
+    running_commands.add_argument(
+        '--no-auto-watch',
+        help='Do not watch source files',
+        dest='auto_watch',
+        action='store_false')
+    running_commands.add_argument(
+        '--capture-timeout',
+        help='Kill the browser if it does not capture in the given time [ms]. '
+             'This defaults to one minute.',
+        type=int,
+        default=60000)
+    logging_commands.add_argument(
+        '--colors',
+        help='Use colors when reporting and printing logs.',
+        action='store_true',
+        dest='colors',
+        default=True)
+    logging_commands.add_argument(
+        '--no-colors',
+        help='Do not use colors when reporting or printing logs',
+        action='store_false',
+        dest='colors')
+    logging_commands.add_argument(
+        '--log-level',
+        help='Set the type of log messages that Karma will print.',
+        choices=['disable', 'error', 'warn', 'info', 'debug'],
+        default='error')
+    logging_commands.add_argument(
+        '--html-coverage-report',
+        help='Generate HTML-formatted code coverage reports in the "coverage" '
+             'folder.',
+        action='store_true')
+    logging_commands.add_argument(
+        '--enable-logging',
+        help='Print log messages from tests and limits the type of log messages '
+             'printed. If no value is given "info" will be used. If '
+             '--enable-logging is not used, logging will default to "none".',
+        choices=['none', 'error', 'warning', 'info', 'debug', 'v1', 'v2'],
+        default='none',
+        const='info',
+        dest='logging',
+        nargs='?')
+    logging_commands.add_argument(
+        '--reporters',
+        help='Specify which reporters to use as a space-separated or '
+             'comma-separated list. Possible options are dots, progress, junit, '
+             'growl, or coverage.',
+        action=_HandleMixedListsAction,
+        nargs='+')
+    logging_commands.add_argument(
+        '--report-slower-than',
+        help='Report tests that are slower than the given time [ms].',
+        type=int)
+    networking_commands.add_argument(
+       '--port',
+        help='Port where the server is running.',
+        type=int)
+    networking_commands.add_argument(
+        '--hostname',
+        help='Specify the hostname to be used when capturing browsers. This '
+             'defaults to localhost.',
+        default='localhost')
+    pre_launch_commands.add_argument(
+        '--force',
+        help='Force a rebuild of the project before running tests. This will '
+             'have no effect if --no-build is set.',
+        action='store_true')
+    pre_launch_commands.add_argument(
+        '--no-build',
+        help='Skip building the project before running tests.',
+        action='store_false',
+        dest='build',
+        default=True)
+    pre_launch_commands.add_argument(
+        '--print-command',
+        help='Print the command passed to Karma before passing it to Karma.',
+        action='store_true')
+
+
+  def ParseArguments(self, args):
+    """Parse the given arguments.
+
+       Uses the parser definition to parse |args| and populates
+       |self.karma_config|.
+    """
+
+    self.parsed_args = self.parser.parse_args(args)
+    self.karma_config = {}
+
+    pass_through = [
+      'auto_watch',
+      'capture_timeout',
+      'colors',
+      'drm',
+      'external',
+      'filter',
+      'hostname',
+      'html_coverage_report',
+      'log_level',
+      'logging',
+      'port',
+      'quarantined',
+      'quick',
+      'random',
+      'report_slower_than',
+      'seed',
+      'single_run',
+      'uncompiled',
+    ]
+
+    # Check each value before setting it to avoid passing null values.
+    for name in pass_through:
+      value = getattr(self.parsed_args, name, None)
+      if value is not None:
+        self.karma_config[name] = value
+
+    if self.parsed_args.reporters:
+      self.karma_config['reporters'] = self.parsed_args.reporters
+
+    if self.parsed_args.no_browsers:
+      logging.warning('In this mode browsers must manually connect to karma.')
+    elif self.parsed_args.browsers:
+      self.karma_config['browsers'] = self.parsed_args.browsers
+    else:
+      logging.warning('Using default browsers: %s', self.default_browsers)
+      self.karma_config['browsers'] = self.default_browsers
+
+    # Check if there are any browsers that we should remove
+    if self.parsed_args.exclude_browsers and 'browsers' in self.karma_config:
+      all_browsers = set(self.karma_config['browsers'])
+      bad_browsers = set(self.parsed_args.exclude_browsers)
+      good_browsers = all_browsers - bad_browsers
+      self.karma_config['browsers'] = list(good_browsers)
+
+
+  def RunCommand(self, karma_conf):
+    """Build a command and send it to Karma for execution.
+
+       Uses |self.parsed_args| and |self.karma_config| to build and run a Karma
+       command.
+    """
+    karma = shakaBuildHelpers.get_node_binary_path('karma')
+    cmd = ['xvfb-run', '--auto-servernum'] if self.parsed_args.use_xvfb else []
+    cmd += [karma, 'start']
+    cmd += [karma_conf] if karma_conf else []
+    cmd += ['--settings', json.dumps(self.karma_config)]
+
+    if self.parsed_args.use_xvfb and not shakaBuildHelpers.is_linux():
+      logging.error('xvfb can only be used on Linux')
+      return 1
+
+    if not shakaBuildHelpers.update_node_modules():
+      logging.error('Failed to update node modules')
+      return 1
+
+    # There is no need to print a status here as the gendep and build
+    # calls will print their own status updates.
+    if self.parsed_args.build:
+      if gendeps.gen_deps([]) != 0:
+        logging.error('Failed to generate project dependencies')
+        return 1
+
+      if build.main(['--force'] if self.parsed_args.force else []) != 0:
+        logging.error('Failed to build project')
+        return 1
+
+    # Before Running the command, print the command.
+    if self.parsed_args.print_command:
+      logging.info('Karma Run Command')
+      logging.info('%s', cmd)
+
+    # Run the command.
+    results = []
+    for run in range(self.parsed_args.runs):
+      logging.info('Running test (%d / %d)...', run + 1, self.parsed_args.runs)
+      results.append(shakaBuildHelpers.execute_get_code(cmd))
+
+    # Print a summary of the results.
+    if self.parsed_args.runs > 1:
+      logging.info('All runs completed. %d / %d runs passed.',
+                   results.count(0),
+                   len(results))
+      logging.info('Results (exit code): %r', results)
+    else:
+      logging.info('Run complete')
+      logging.info('Result (exit code): %d', results[0])
+
+    return 0 if all(result == 0 for result in results) else 1
+
+
+def main(args):
+  launcher = Launcher('Shaka Player Test Runner Script', _GetDefaultBrowsers())
+  launcher.ParseArguments(args)
+  return launcher.RunCommand(None)
+
+
+# TODO(vaage) : Remove this method once all other tools have been updated to not
+#               require it.
+def run_tests(args):
+  main(args)
 
 
 if __name__ == '__main__':
-  shakaBuildHelpers.run_main(run_tests)
+  shakaBuildHelpers.run_main(main)
