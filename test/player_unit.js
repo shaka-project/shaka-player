@@ -862,31 +862,31 @@ describe('Player', function() {
           .addVariant(1)
             .bandwidth(200)
             .language('fr')
-            .addAudio(2).bandwidth(100)
+            .addAudio(2).bandwidth(200)
           .addVariant(2)
             .bandwidth(400)
             .language('en')
-            .addAudio(1).bandwidth(100)
-            .addVideo(4).bandwidth(100).size(100, 200)
+            .addAudio(1).bandwidth(200)
+            .addVideo(4).bandwidth(200).size(100, 200)
             .frameRate(1000000 / 42000)
           .addVariant(3)
             .bandwidth(200)
-            .addVideo(5).bandwidth(100).size(300, 400)
+            .addVideo(5).bandwidth(200).size(300, 400)
             .frameRate(1000000 / 42000)
         .addPeriod(1)
           .addVariant(1)
             .bandwidth(200)
             .language('fr')
-            .addAudio(2).bandwidth(100)
+            .addAudio(2).bandwidth(200)
           .addVariant(2)
             .bandwidth(200)
-            .addVideo(5).bandwidth(100).size(300, 400)
+            .addVideo(5).bandwidth(200).size(300, 400)
             .frameRate(1000000 / 42000)
           .addVariant(3)
-            .bandwidth(450)
+            .bandwidth(400)
             .language('en')
-            .addAudio(1).bandwidth(100)
-            .addVideo(4).bandwidth(100).size(100, 200)
+            .addAudio(1).bandwidth(200)
+            .addVideo(4).bandwidth(200).size(100, 200)
             .frameRate(1000000 / 42000)
         .build();
 
@@ -910,7 +910,9 @@ describe('Player', function() {
           roles: [],
           videoId: 4,
           audioId: 1,
-          channelsCount: null
+          channelsCount: null,
+          audioBandwidth: 200,
+          videoBandwidth: 200
         }
       ];
       var variantTracks2 = [
@@ -918,7 +920,7 @@ describe('Player', function() {
           id: 3,
           active: false,
           type: 'variant',
-          bandwidth: 450,
+          bandwidth: 400,
           language: 'en',
           label: null,
           kind: null,
@@ -933,7 +935,9 @@ describe('Player', function() {
           roles: [],
           videoId: 4,
           audioId: 1,
-          channelsCount: null
+          channelsCount: null,
+          audioBandwidth: 200,
+          videoBandwidth: 200
         }
       ];
 
@@ -1024,7 +1028,9 @@ describe('Player', function() {
           roles: [],
           videoId: 4,
           audioId: 1,
-          channelsCount: null
+          channelsCount: null,
+          audioBandwidth: 100,
+          videoBandwidth: 100
         },
         {
           id: 2,
@@ -1045,7 +1051,9 @@ describe('Player', function() {
           roles: [],
           videoId: 5,
           audioId: 1,
-          channelsCount: null
+          channelsCount: null,
+          audioBandwidth: 100,
+          videoBandwidth: 200
         },
         {
           id: 3,
@@ -1066,7 +1074,9 @@ describe('Player', function() {
           roles: [],
           videoId: 4,
           audioId: 2,
-          channelsCount: null
+          channelsCount: null,
+          audioBandwidth: 100,
+          videoBandwidth: 100
         },
         {
           id: 4,
@@ -1087,7 +1097,9 @@ describe('Player', function() {
           roles: [],
           videoId: 5,
           audioId: 2,
-          channelsCount: null
+          channelsCount: null,
+          audioBandwidth: 100,
+          videoBandwidth: 200
         },
         {
           id: 5,
@@ -1108,7 +1120,9 @@ describe('Player', function() {
           roles: [],
           videoId: 5,
           audioId: 8,
-          channelsCount: null
+          channelsCount: null,
+          audioBandwidth: 100,
+          videoBandwidth: 200
         }
       ];
 
@@ -1126,7 +1140,9 @@ describe('Player', function() {
           videoCodec: null,
           primary: false,
           roles: [],
-          channelsCount: null
+          channelsCount: null,
+          audioBandwidth: null,
+          videoBandwidth: null
         },
         {
           id: 7,
@@ -1141,7 +1157,9 @@ describe('Player', function() {
           videoCodec: null,
           primary: false,
           roles: [],
-          channelsCount: null
+          channelsCount: null,
+          audioBandwidth: null,
+          videoBandwidth: null
         }
       ];
     });

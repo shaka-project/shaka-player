@@ -143,7 +143,9 @@ shakaExtern.Stats;
  *   roles: !Array.<string>,
  *   videoId: ?number,
  *   audioId: ?number,
- *   channelsCount: ?number
+ *   channelsCount: ?number,
+ *   audioBandwidth: ?number,
+ *   videoBandwidth: ?number
  * }}
  *
  * @description
@@ -199,6 +201,10 @@ shakaExtern.Stats;
  *   (only for variant tracks) The audio stream id.
  * @property {?number} channelsCount
  *   The count of the audio track channels.
+ * @property {?number} audioBandwidth
+ *   (only for variant tracks) The audio stream's bandwidth if known.
+ * @property {?number} videoBandwidth
+ *   (only for variant tracks) The video stream's bandwidth if known.
  * @exportDoc
  */
 shakaExtern.Track;
