@@ -16,11 +16,8 @@
  */
 
 describe('TtmlTextParser', function() {
-  var originalVTTCue;
-
-  beforeAll(function() {
-    originalVTTCue = window.VTTCue;
-  });
+  /** @const */
+  var originalVTTCue = window.VTTCue;
 
   afterAll(function() {
     window.VTTCue = originalVTTCue;
@@ -540,18 +537,20 @@ describe('TtmlTextParser', function() {
       expect(result[i].endTime).toBeCloseTo(cues[i].end, 3);
       expect(result[i].text).toBe(cues[i].text);
 
+      // Workaround a bug in the compiler's externs.
+      // TODO: Remove when compiler is updated.
       if (cues[i].align)
-        expect(result[i].align).toBe(cues[i].align);
+        expect(/** @type {?} */ (result[i]).align).toBe(cues[i].align);
       if (cues[i].lineAlign)
         expect(result[i].lineAlign).toBe(cues[i].lineAlign);
       if (cues[i].positionAlign)
         expect(result[i].positionAlign).toBe(cues[i].positionAlign);
       if (cues[i].size)
-        expect(result[i].size).toBe(cues[i].size);
+        expect(/** @type {?} */ (result[i]).size).toBe(cues[i].size);
       if (cues[i].line)
         expect(result[i].line).toBe(cues[i].line);
       if (cues[i].position)
-        expect(result[i].position).toBe(cues[i].position);
+        expect(/** @type {?} */ (result[i]).position).toBe(cues[i].position);
       if (cues[i].vertical)
         expect(result[i].vertical).toBe(cues[i].vertical);
     }

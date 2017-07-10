@@ -16,12 +16,13 @@
  */
 
 describe('VttTextParser', function() {
+  /** @const */
+  var originalVTTCue = window.VTTCue;
+
+  /** @type {!jasmine.Spy} */
   var logWarningSpy;
-  var originalVTTCue;
 
   beforeAll(function() {
-    originalVTTCue = window.VTTCue;
-
     logWarningSpy = jasmine.createSpy('shaka.log.warning');
     shaka.log.warning = shaka.test.Util.spyFunc(logWarningSpy);
   });
@@ -498,6 +499,8 @@ describe('VttTextParser', function() {
       expect(result[i].endTime).toBe(cues[i].end);
       expect(result[i].text).toBe(cues[i].text);
 
+      // Workaround a bug in the compiler's externs.
+      // TODO: Remove when compiler is updated.
       if (cues[i].id)
         expect(result[i].id).toBe(cues[i].id);
       if (cues[i].vertical)
@@ -505,11 +508,11 @@ describe('VttTextParser', function() {
       if (cues[i].line)
         expect(result[i].line).toBe(cues[i].line);
       if (cues[i].align)
-        expect(result[i].align).toBe(cues[i].align);
+        expect(/** @type {?} */ (result[i]).align).toBe(cues[i].align);
       if (cues[i].size)
-        expect(result[i].size).toBe(cues[i].size);
+        expect(/** @type {?} */ (result[i]).size).toBe(cues[i].size);
       if (cues[i].position)
-        expect(result[i].position).toBe(cues[i].position);
+        expect(/** @type {?} */ (result[i]).position).toBe(cues[i].position);
     }
   }
 

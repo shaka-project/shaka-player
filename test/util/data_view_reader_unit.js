@@ -16,24 +16,27 @@
  */
 
 describe('DataViewReader', function() {
+  /** @const */
+  var Code = shaka.util.Error.Code;
+
   // |data| as interpreted as a 64 bit integer must not be larger than 2^53-1.
   // decimal digits.
+  /** @const */
   var data = new Uint8Array([0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07]);
   // |data2| is small enough in little-endian to be read as a 64-bit number,
   // and has the sign bit set on the first 6 bytes to prove that we don't
   // return negative values.
+  /** @const */
   var data2 = new Uint8Array([0xde, 0xad, 0xbe, 0xef, 0xff, 0xff, 0x01, 0x00]);
 
+  /** @type {!shaka.util.DataViewReader} */
   var bigEndianReader;
+  /** @type {!shaka.util.DataViewReader} */
   var littleEndianReader;
+  /** @type {!shaka.util.DataViewReader} */
   var bigEndianReader2;
+  /** @type {!shaka.util.DataViewReader} */
   var littleEndianReader2;
-
-  var Code;
-
-  beforeAll(function() {
-    Code = shaka.util.Error.Code;
-  });
 
   beforeEach(function() {
     bigEndianReader = new shaka.util.DataViewReader(

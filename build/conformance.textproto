@@ -27,6 +27,16 @@ requirement: {
   whitelist_regexp: 'test/*'
 }
 
+# Ban accessing members of unknown types.
+requirement: {
+  type: CUSTOM
+  java_class: 'com.google.javascript.jscomp.ConformanceRules$'
+              'BanUnknownTypedClassPropsReferences'
+  error_message: 'Using properties of unknown types is not allowed: add an '
+                 'explicit type to the variable.'
+  whitelist_regexp: 'demo/*'
+}
+
 requirement: {
   type: BANNED_CODE_PATTERN
   value: 'function template() { throw new Error(); }'

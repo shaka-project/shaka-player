@@ -30,7 +30,8 @@ goog.provide('shaka.test.ManifestGenerator');
  * @struct
  */
 shaka.test.ManifestGenerator = function(opt_shaka) {
-  this.shaka_ = opt_shaka || window.shaka;
+  /** @private {?} */
+  this.shaka_ = opt_shaka || window['shaka'];
 
   var timeline = new this.shaka_.media.PresentationTimeline(0, 0);
   timeline.setSegmentAvailabilityDuration(Infinity);

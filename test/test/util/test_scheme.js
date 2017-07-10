@@ -254,12 +254,15 @@ shaka.test.TestScheme.setupPlayer = function(player, name) {
  * @return {!Promise}
  */
 shaka.test.TestScheme.createManifests = function(shaka, suffix) {
+  /** @type {?} */
+  var windowShaka = window['shaka'];
+
   /**
    * @param {Object} metadata
    * @return {shaka.test.DashVodStreamGenerator}
    */
   function createStreamGenerator(metadata) {
-    return new window.shaka.test.DashVodStreamGenerator(
+    return new windowShaka.test.DashVodStreamGenerator(
         metadata.initSegmentUri, metadata.mvhdOffset, metadata.segmentUri,
         metadata.tfdtOffset, metadata.segmentDuration,
         metadata.presentationTimeOffset);
@@ -294,10 +297,10 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
   var async = [];
   // Include 'window' to use uncompiled version version of the
   // library.
-  var DATA = window.shaka.test.TestScheme.DATA;
-  var GENERATORS = window.shaka.test.TestScheme.GENERATORS;
-  var MANIFESTS = window.shaka.test.TestScheme.MANIFESTS;
-  var ContentType = window.shaka.util.ManifestParserUtils.ContentType;
+  var DATA = windowShaka.test.TestScheme.DATA;
+  var GENERATORS = windowShaka.test.TestScheme.GENERATORS;
+  var MANIFESTS = windowShaka.test.TestScheme.MANIFESTS;
+  var ContentType = windowShaka.util.ManifestParserUtils.ContentType;
 
   for (var name in DATA) {
     GENERATORS[name + suffix] = GENERATORS[name + suffix] || {};
@@ -308,7 +311,7 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
       async.push(streamGen.init());
     });
 
-    var gen = new window.shaka.test.ManifestGenerator(shaka)
+    var gen = new windowShaka.test.ManifestGenerator(shaka)
         .setPresentationDuration(data.duration)
         .addPeriod(0)
         .addVariant(0)
@@ -338,7 +341,7 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
     var data = DATA['sintel'];
     var period_duration = 10;
     var num_periods = 10;
-    var gen = new window.shaka.test.ManifestGenerator(shaka)
+    var gen = new windowShaka.test.ManifestGenerator(shaka)
         .setPresentationDuration(period_duration * num_periods);
 
     for (var i = 0; i < num_periods; i++) {

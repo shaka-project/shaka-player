@@ -16,21 +16,28 @@
  */
 
 describe('MediaSourceEngine', function() {
-  var originalIsTypeSupported;
-  var originalTextEngine;
+  var Util = shaka.test.Util;
+  var ContentType = shaka.util.ManifestParserUtils.ContentType;
+
+  var originalIsTypeSupported = window.MediaSource.isTypeSupported;
+  var originalTextEngine = shaka.text.TextEngine;
+
+  // Jasmine Spies don't handle toHaveBeenCalledWith well with objects, so use
+  // some numbers instead.
+  var buffer = /** @type {!ArrayBuffer} */ (/** @type {?} */ (1));
+  var buffer2 = /** @type {!ArrayBuffer} */ (/** @type {?} */ (2));
+  var buffer3 = /** @type {!ArrayBuffer} */ (/** @type {?} */ (3));
+
   var audioSourceBuffer;
   var videoSourceBuffer;
   var mockVideo;
   var mockMediaSource;
   var mockTextEngine;
+
+  /** @type {!shaka.media.MediaSourceEngine} */
   var mediaSourceEngine;
-  var Util;
-  var ContentType;
 
   beforeAll(function() {
-    Util = shaka.test.Util;
-    ContentType = shaka.util.ManifestParserUtils.ContentType;
-    originalIsTypeSupported = window.MediaSource.isTypeSupported;
     // Since this is not an integration test, we don't want MediaSourceEngine to
     // fail assertions based on browser support for types.  Pretend that all
     // video and audio types are supported.
@@ -39,7 +46,6 @@ describe('MediaSourceEngine', function() {
       return type == 'video' || type == 'audio';
     };
 
-    originalTextEngine = shaka.text.TextEngine;
     shaka.text.TextEngine = createMockTextEngineCtor();
   });
 
@@ -114,27 +120,23 @@ describe('MediaSourceEngine', function() {
     it('returns correct timestamps for one range', function() {
       audioSourceBuffer.buffered = createFakeBuffered([{start: 0, end: 10}]);
 
-      expect(mediaSourceEngine.bufferStart(ContentType.AUDIO, 0))
-                                          .toBeCloseTo(0);
-      expect(mediaSourceEngine.bufferEnd(ContentType.AUDIO, 0))
-                                        .toBeCloseTo(10);
+      expect(mediaSourceEngine.bufferStart(ContentType.AUDIO)).toBeCloseTo(0);
+      expect(mediaSourceEngine.bufferEnd(ContentType.AUDIO)).toBeCloseTo(10);
     });
 
     it('returns correct timestamps for multiple ranges', function() {
       audioSourceBuffer.buffered =
           createFakeBuffered([{start: 5, end: 10}, {start: 20, end: 30}]);
 
-      expect(mediaSourceEngine.bufferStart(ContentType.AUDIO, 0))
-                                          .toBeCloseTo(5);
-      expect(mediaSourceEngine.bufferEnd(ContentType.AUDIO, 0))
-                                        .toBeCloseTo(30);
+      expect(mediaSourceEngine.bufferStart(ContentType.AUDIO)).toBeCloseTo(5);
+      expect(mediaSourceEngine.bufferEnd(ContentType.AUDIO)).toBeCloseTo(30);
     });
 
     it('returns null if there are no ranges', function() {
       audioSourceBuffer.buffered = createFakeBuffered([]);
 
-      expect(mediaSourceEngine.bufferStart(ContentType.AUDIO, 0)).toBeNull();
-      expect(mediaSourceEngine.bufferEnd(ContentType.AUDIO, 0)).toBeNull();
+      expect(mediaSourceEngine.bufferStart(ContentType.AUDIO)).toBeNull();
+      expect(mediaSourceEngine.bufferEnd(ContentType.AUDIO)).toBeNull();
     });
 
     it('will forward to TextEngine', function() {
@@ -165,20 +167,20 @@ describe('MediaSourceEngine', function() {
       audioSourceBuffer.buffered = createFakeBuffered([{start: 0, end: 10}]);
 
       expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 0))
-                                              .toBeCloseTo(10);
+          .toBeCloseTo(10);
       expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 5))
-                                              .toBeCloseTo(5);
+          .toBeCloseTo(5);
       expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 9.9))
-                                              .toBeCloseTo(0.1);
+          .toBeCloseTo(0.1);
     });
 
     it('returns zero when given an unbuffered time', function() {
       audioSourceBuffer.buffered = createFakeBuffered([{start: 5, end: 10}]);
 
       expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 10))
-                                              .toBeCloseTo(0);
+          .toBeCloseTo(0);
       expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 100))
-                                              .toBeCloseTo(0);
+          .toBeCloseTo(0);
     });
 
     it('returns the correct amount with multiple ranges', function() {
@@ -187,19 +189,19 @@ describe('MediaSourceEngine', function() {
 
       // in range 0
       expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 1))
-                                              .toBeCloseTo(6);
+          .toBeCloseTo(6);
       expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 2.5))
-                                              .toBeCloseTo(4.5);
+          .toBeCloseTo(4.5);
 
       // between range 0 and 1
       expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 5))
-                                              .toBeCloseTo(4);
+          .toBeCloseTo(4);
 
       // in range 1
       expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 6))
-                                              .toBeCloseTo(4);
+          .toBeCloseTo(4);
       expect(mediaSourceEngine.bufferedAheadOf(ContentType.AUDIO, 9.9))
-                                              .toBeCloseTo(0.1);
+          .toBeCloseTo(0.1);
     });
 
     it('will forward to TextEngine', function() {
@@ -225,10 +227,9 @@ describe('MediaSourceEngine', function() {
     });
 
     it('appends the given data', function(done) {
-      mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null)
+      mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null, null)
           .then(function() {
-            expect(audioSourceBuffer.appendBuffer)
-                  .toHaveBeenCalledWith(1);
+            expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
             done();
           });
       audioSourceBuffer.updateend();
@@ -237,7 +238,7 @@ describe('MediaSourceEngine', function() {
     it('rejects promise when operation throws', function(done) {
       audioSourceBuffer.appendBuffer.and.throwError('fail!');
       mockVideo.error = { code: 5 };
-      mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null)
+      mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null, null)
       .then(function() {
             fail('not reached');
             done();
@@ -247,7 +248,7 @@ describe('MediaSourceEngine', function() {
             expect(error.data).toEqual(
                 [jasmine.objectContaining({message: 'fail!'})]);
             expect(audioSourceBuffer.appendBuffer)
-                  .toHaveBeenCalledWith(1);
+                  .toHaveBeenCalledWith(buffer);
             done();
           });
     });
@@ -258,21 +259,21 @@ describe('MediaSourceEngine', function() {
         throw fakeDOMException;
       });
       mockVideo.error = { code: 5 };
-      mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null)
+      mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null, null)
       .then(function() {
             fail('not reached');
             done();
           }, function(error) {
             expect(error.code).toBe(shaka.util.Error.Code.QUOTA_EXCEEDED_ERROR);
             expect(error.data).toEqual([ContentType.AUDIO]);
-            expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
+            expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
             done();
           });
     });
 
     it('rejects the promise if this operation fails async', function(done) {
       mockVideo.error = { code: 5 };
-      mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null)
+      mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null, null)
       .then(function() {
             fail('not reached');
             done();
@@ -280,7 +281,7 @@ describe('MediaSourceEngine', function() {
             expect(error.code).toBe(
                 shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_FAILED);
             expect(error.data).toEqual([5]);
-            expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
+            expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
             done();
           });
       audioSourceBuffer.error();
@@ -288,20 +289,20 @@ describe('MediaSourceEngine', function() {
     });
 
     it('queues operations on a single SourceBuffer', function(done) {
-      var p1 = mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
-      var p2 = mediaSourceEngine.appendBuffer(ContentType.AUDIO, 2, null, null);
-      Util.capturePromiseStatus(p1);
-      Util.capturePromiseStatus(p2);
+      var p1 = new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer, null, null));
+      var p2 = new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer2, null, null));
 
-      expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
-      expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalledWith(2);
+      expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+      expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalledWith(buffer2);
       expect(p1.status).toBe('pending');
       expect(p2.status).toBe('pending');
 
       audioSourceBuffer.updateend();
       p1.then(function() {
         expect(p2.status).toBe('pending');
-        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(2);
+        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer2);
 
         audioSourceBuffer.updateend();
         return p2;
@@ -311,16 +312,16 @@ describe('MediaSourceEngine', function() {
     });
 
     it('queues operations independently for different types', function(done) {
-      var p1 = mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
-      var p2 = mediaSourceEngine.appendBuffer(ContentType.AUDIO, 2, null, null);
-      var p3 = mediaSourceEngine.appendBuffer(ContentType.VIDEO, 3, null, null);
-      Util.capturePromiseStatus(p1);
-      Util.capturePromiseStatus(p2);
-      Util.capturePromiseStatus(p3);
+      var p1 = new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer, null, null));
+      var p2 = new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer2, null, null));
+      var p3 = new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer3, null, null));
 
-      expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
-      expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalledWith(2);
-      expect(videoSourceBuffer.appendBuffer).toHaveBeenCalledWith(3);
+      expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+      expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalledWith(buffer2);
+      expect(videoSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer3);
       expect(p1.status).toBe('pending');
       expect(p2.status).toBe('pending');
       expect(p3.status).toBe('pending');
@@ -330,7 +331,7 @@ describe('MediaSourceEngine', function() {
       // Wait a tick between each updateend() and the status check that follows.
       p1.then(function() {
         expect(p2.status).toBe('pending');
-        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(2);
+        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer2);
 
         return p3;
       }).then(function() {
@@ -354,17 +355,17 @@ describe('MediaSourceEngine', function() {
         }
       });
 
-      var p1 = mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
-      var p2 = mediaSourceEngine.appendBuffer(ContentType.AUDIO, 2, null, null);
-      var p3 = mediaSourceEngine.appendBuffer(ContentType.AUDIO, 3, null, null);
-      Util.capturePromiseStatus(p1);
-      Util.capturePromiseStatus(p2);
-      Util.capturePromiseStatus(p3);
+      var p1 = new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer, null, null));
+      var p2 = new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer2, null, null));
+      var p3 = new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer3, null, null));
 
       Util.delay(0.1).then(function() {
-        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
-        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(2);
-        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(3);
+        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer2);
+        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer3);
         expect(p1.status).toBe('resolved');
         expect(p2.status).toBe('rejected');
         expect(p3.status).toBe('resolved');
@@ -437,10 +438,10 @@ describe('MediaSourceEngine', function() {
     });
 
     it('queues operations on a single SourceBuffer', function(done) {
-      var p1 = mediaSourceEngine.remove(ContentType.AUDIO, 1, 5);
-      var p2 = mediaSourceEngine.remove(ContentType.AUDIO, 6, 10);
-      Util.capturePromiseStatus(p1);
-      Util.capturePromiseStatus(p2);
+      var p1 = new shaka.test.StatusPromise(
+          mediaSourceEngine.remove(ContentType.AUDIO, 1, 5));
+      var p2 = new shaka.test.StatusPromise(
+          mediaSourceEngine.remove(ContentType.AUDIO, 6, 10));
 
       expect(audioSourceBuffer.remove).toHaveBeenCalledWith(1, 5);
       expect(audioSourceBuffer.remove).not.toHaveBeenCalledWith(6, 10);
@@ -460,12 +461,12 @@ describe('MediaSourceEngine', function() {
     });
 
     it('queues operations independently for different types', function(done) {
-      var p1 = mediaSourceEngine.remove(ContentType.AUDIO, 1, 5);
-      var p2 = mediaSourceEngine.remove(ContentType.AUDIO, 6, 10);
-      var p3 = mediaSourceEngine.remove(ContentType.VIDEO, 3, 8);
-      Util.capturePromiseStatus(p1);
-      Util.capturePromiseStatus(p2);
-      Util.capturePromiseStatus(p3);
+      var p1 = new shaka.test.StatusPromise(
+          mediaSourceEngine.remove(ContentType.AUDIO, 1, 5));
+      var p2 = new shaka.test.StatusPromise(
+          mediaSourceEngine.remove(ContentType.AUDIO, 6, 10));
+      var p3 = new shaka.test.StatusPromise(
+          mediaSourceEngine.remove(ContentType.VIDEO, 3, 8));
 
       expect(audioSourceBuffer.remove).toHaveBeenCalledWith(1, 5);
       expect(audioSourceBuffer.remove).not.toHaveBeenCalledWith(6, 10);
@@ -501,12 +502,12 @@ describe('MediaSourceEngine', function() {
         }
       });
 
-      var p1 = mediaSourceEngine.remove(ContentType.AUDIO, 1, 2);
-      var p2 = mediaSourceEngine.remove(ContentType.AUDIO, 2, 3);
-      var p3 = mediaSourceEngine.remove(ContentType.AUDIO, 3, 4);
-      Util.capturePromiseStatus(p1);
-      Util.capturePromiseStatus(p2);
-      Util.capturePromiseStatus(p3);
+      var p1 = new shaka.test.StatusPromise(
+          mediaSourceEngine.remove(ContentType.AUDIO, 1, 2));
+      var p2 = new shaka.test.StatusPromise(
+          mediaSourceEngine.remove(ContentType.AUDIO, 2, 3));
+      var p3 = new shaka.test.StatusPromise(
+          mediaSourceEngine.remove(ContentType.AUDIO, 3, 4));
 
       Util.delay(0.1).then(function() {
         expect(audioSourceBuffer.remove).toHaveBeenCalledWith(1, 2);
@@ -621,12 +622,11 @@ describe('MediaSourceEngine', function() {
     });
 
     it('waits for all previous operations to complete', function(done) {
-      var p1 = mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
-      var p2 = mediaSourceEngine.appendBuffer(ContentType.VIDEO, 1, null, null);
-      var p3 = mediaSourceEngine.endOfStream();
-      Util.capturePromiseStatus(p1);
-      Util.capturePromiseStatus(p2);
-      Util.capturePromiseStatus(p3);
+      var p1 = new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer, null, null));
+      var p2 = new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, null, null));
+      var p3 = new shaka.test.StatusPromise(mediaSourceEngine.endOfStream());
 
       expect(mockMediaSource.endOfStream).not.toHaveBeenCalled();
       expect(p1.status).toBe('pending');
@@ -641,7 +641,7 @@ describe('MediaSourceEngine', function() {
         return p2;
       }).then(function() {
         return p3;
-      }).then(function() {}).then(function() {
+      }).then(function() {
         expect(mockMediaSource.endOfStream).toHaveBeenCalled();
         done();
       });
@@ -649,9 +649,9 @@ describe('MediaSourceEngine', function() {
 
     it('makes subsequent operations wait', function(done) {
       var p1 = mediaSourceEngine.endOfStream();
-      mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
-      mediaSourceEngine.appendBuffer(ContentType.VIDEO, 1, null, null);
-      mediaSourceEngine.appendBuffer(ContentType.VIDEO, 2, null, null);
+      mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null, null);
+      mediaSourceEngine.appendBuffer(ContentType.VIDEO, buffer, null, null);
+      mediaSourceEngine.appendBuffer(ContentType.VIDEO, buffer2, null, null);
 
       // endOfStream hasn't been called yet because blocking multiple queues
       // takes an extra tick, even when they are empty.
@@ -663,14 +663,15 @@ describe('MediaSourceEngine', function() {
       p1.then(function() {
         expect(mockMediaSource.endOfStream).toHaveBeenCalled();
         // The next operations have already been kicked off.
-        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
-        expect(videoSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
+        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+        expect(videoSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
         // This one is still in queue.
-        expect(videoSourceBuffer.appendBuffer).not.toHaveBeenCalledWith(2);
+        expect(videoSourceBuffer.appendBuffer)
+            .not.toHaveBeenCalledWith(buffer2);
         audioSourceBuffer.updateend();
         videoSourceBuffer.updateend();
       }).then(function() {
-        expect(videoSourceBuffer.appendBuffer).toHaveBeenCalledWith(2);
+        expect(videoSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer2);
         videoSourceBuffer.updateend();
       }).then(function() {
         done();
@@ -680,7 +681,7 @@ describe('MediaSourceEngine', function() {
     it('runs subsequent operations if this operation throws', function(done) {
       mockMediaSource.endOfStream.and.throwError(new Error());
       var p1 = mediaSourceEngine.endOfStream();
-      mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
+      mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null, null);
 
       expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalled();
 
@@ -720,12 +721,11 @@ describe('MediaSourceEngine', function() {
     });
 
     it('waits for all previous operations to complete', function(done) {
-      var p1 = mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
-      var p2 = mediaSourceEngine.appendBuffer(ContentType.VIDEO, 1, null, null);
-      var p3 = mediaSourceEngine.setDuration(100);
-      Util.capturePromiseStatus(p1);
-      Util.capturePromiseStatus(p2);
-      Util.capturePromiseStatus(p3);
+      var p1 = new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer, null, null));
+      var p2 = new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, null, null));
+      var p3 = new shaka.test.StatusPromise(mediaSourceEngine.setDuration(100));
 
       expect(mockMediaSource.durationSetter_).not.toHaveBeenCalled();
       expect(p1.status).toBe('pending');
@@ -740,7 +740,7 @@ describe('MediaSourceEngine', function() {
         return p2;
       }).then(function() {
         return p3;
-      }).then(function() {}).then(function() {
+      }).then(function() {
         expect(mockMediaSource.durationSetter_).toHaveBeenCalledWith(100);
         done();
       });
@@ -748,9 +748,9 @@ describe('MediaSourceEngine', function() {
 
     it('makes subsequent operations wait', function(done) {
       var p1 = mediaSourceEngine.setDuration(100);
-      mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
-      mediaSourceEngine.appendBuffer(ContentType.VIDEO, 1, null, null);
-      mediaSourceEngine.appendBuffer(ContentType.VIDEO, 2, null, null);
+      mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null, null);
+      mediaSourceEngine.appendBuffer(ContentType.VIDEO, buffer, null, null);
+      mediaSourceEngine.appendBuffer(ContentType.VIDEO, buffer2, null, null);
 
       // The setter hasn't been called yet because blocking multiple queues
       // takes an extra tick, even when they are empty.
@@ -762,14 +762,15 @@ describe('MediaSourceEngine', function() {
       p1.then(function() {
         expect(mockMediaSource.durationSetter_).toHaveBeenCalled();
         // The next operations have already been kicked off.
-        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
-        expect(videoSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
+        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+        expect(videoSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
         // This one is still in queue.
-        expect(videoSourceBuffer.appendBuffer).not.toHaveBeenCalledWith(2);
+        expect(videoSourceBuffer.appendBuffer)
+            .not.toHaveBeenCalledWith(buffer2);
         audioSourceBuffer.updateend();
         videoSourceBuffer.updateend();
       }).then(function() {
-        expect(videoSourceBuffer.appendBuffer).toHaveBeenCalledWith(2);
+        expect(videoSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer2);
         videoSourceBuffer.updateend();
       }).then(function() {
         done();
@@ -779,7 +780,7 @@ describe('MediaSourceEngine', function() {
     it('runs subsequent operations if this operation throws', function(done) {
       mockMediaSource.durationSetter_.and.throwError(new Error());
       var p1 = mediaSourceEngine.setDuration(100);
-      mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
+      mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null, null);
 
       expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalled();
 
@@ -790,7 +791,7 @@ describe('MediaSourceEngine', function() {
         expect(mockMediaSource.durationSetter_).toHaveBeenCalled();
         return Util.delay(0.1);
       }).then(function() {
-        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
+        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
         audioSourceBuffer.updateend();
       }).then(function() {
         done();
@@ -811,11 +812,10 @@ describe('MediaSourceEngine', function() {
     });
 
     it('waits for all operations to complete', function(done) {
-      mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
-      mediaSourceEngine.appendBuffer(ContentType.VIDEO, 1, null, null);
+      mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null, null);
+      mediaSourceEngine.appendBuffer(ContentType.VIDEO, buffer, null, null);
 
-      var p = mediaSourceEngine.destroy();
-      Util.capturePromiseStatus(p);
+      var p = new shaka.test.StatusPromise(mediaSourceEngine.destroy());
 
       expect(p.status).toBe('pending');
       Util.delay(0.1).then(function() {
@@ -833,10 +833,9 @@ describe('MediaSourceEngine', function() {
     });
 
     it('resolves even when a pending operation fails', function(done) {
-      var p1 = mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
-      var p2 = mediaSourceEngine.destroy();
-      Util.capturePromiseStatus(p1);
-      Util.capturePromiseStatus(p2);
+      var p1 = new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer, null, null));
+      var p2 = new shaka.test.StatusPromise(mediaSourceEngine.destroy());
 
       audioSourceBuffer.error();
       audioSourceBuffer.updateend();
@@ -848,10 +847,8 @@ describe('MediaSourceEngine', function() {
     });
 
     it('waits for blocking operations to complete', function(done) {
-      var p1 = mediaSourceEngine.endOfStream();
-      var p2 = mediaSourceEngine.destroy();
-      Util.capturePromiseStatus(p1);
-      Util.capturePromiseStatus(p2);
+      var p1 = new shaka.test.StatusPromise(mediaSourceEngine.endOfStream());
+      var p2 = new shaka.test.StatusPromise(mediaSourceEngine.destroy());
 
       expect(p1.status).toBe('pending');
       expect(p2.status).toBe('pending');
@@ -865,39 +862,38 @@ describe('MediaSourceEngine', function() {
     });
 
     it('cancels operations that have not yet started', function(done) {
-      mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
-      var rejected = mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, 2, null, null);
-      Util.capturePromiseStatus(rejected);
+      mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null, null);
+      var rejected =
+          new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
+              ContentType.AUDIO, buffer2, null, null));
 
-      expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
-      expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalledWith(2);
+      expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+      expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalledWith(buffer2);
 
-      var p = mediaSourceEngine.destroy();
-      Util.capturePromiseStatus(p);
+      var p = new shaka.test.StatusPromise(mediaSourceEngine.destroy());
 
       expect(p.status).toBe('pending');
       Util.delay(0.1).then(function() {
         expect(p.status).toBe('pending');
         expect(rejected.status).toBe('rejected');
-        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
-        expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalledWith(2);
+        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+        expect(audioSourceBuffer.appendBuffer)
+            .not.toHaveBeenCalledWith(buffer2);
         audioSourceBuffer.updateend();
         return Util.delay(0.1);
       }).then(function() {
         expect(p.status).toBe('resolved');
-        expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalledWith(2);
+        expect(audioSourceBuffer.appendBuffer)
+            .not.toHaveBeenCalledWith(buffer2);
         done();
       });
     });
 
     it('cancels blocking operations that have not yet started', function(done) {
-      var p1 = mediaSourceEngine.appendBuffer(ContentType.AUDIO, 1, null, null);
-      var p2 = mediaSourceEngine.endOfStream();
-      var p3 = mediaSourceEngine.destroy();
-      Util.capturePromiseStatus(p1);
-      Util.capturePromiseStatus(p2);
-      Util.capturePromiseStatus(p3);
+      var p1 = new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer, null, null));
+      var p2 = new shaka.test.StatusPromise(mediaSourceEngine.endOfStream());
+      var p3 = new shaka.test.StatusPromise(mediaSourceEngine.destroy());
 
       expect(p1.status).toBe('pending');
       expect(p2.status).toBe('pending');
@@ -915,9 +911,9 @@ describe('MediaSourceEngine', function() {
 
     it('prevents new operations from being added', function(done) {
       var p = mediaSourceEngine.destroy();
-      var rejected = mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, 1, null, null);
-      Util.capturePromiseStatus(rejected);
+      var rejected =
+          new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
+              ContentType.AUDIO, buffer, null, null));
 
       // The promise has already been rejected, but our capture requires 1 tick.
       Promise.resolve().then(function() {
@@ -949,8 +945,9 @@ describe('MediaSourceEngine', function() {
       durationGetter_: jasmine.createSpy('duration getter'),
       durationSetter_: jasmine.createSpy('duration setter')
     };
-    Object.defineProperty(mediaSource, 'duration',
-        { get: mediaSource.durationGetter_, set: mediaSource.durationSetter_ });
+    Object.defineProperty(
+        mediaSource, 'duration',
+        {get: mediaSource.durationGetter_, set: mediaSource.durationSetter_});
     return mediaSource;
   }
 

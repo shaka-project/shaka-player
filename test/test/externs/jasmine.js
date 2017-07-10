@@ -154,7 +154,7 @@ jasmine.Matchers.prototype.toThrowError = function(value) {};
 
 /**
  * A custom matcher for DOM Node objects.
- * @param {!Node} expected
+ * @param {!Element} expected
  */
 jasmine.Matchers.prototype.toEqualElement = function(expected) {};
 
@@ -193,10 +193,10 @@ jasmine.SpyStrategy.prototype.returnValues = function(var_args) {};
 
 
 /**
- * @param {*} value
+ * @param {*=} opt_value
  * @return {!jasmine.Spy}
  */
-jasmine.SpyStrategy.prototype.throwError = function(value) {};
+jasmine.SpyStrategy.prototype.throwError = function(opt_value) {};
 
 
 /**
@@ -299,7 +299,7 @@ jasmine.createSpy = function(name) {};
 /**
  * @param {string} name
  * @param {!Array.<string>} members
- * @return {!Object}
+ * @return {?}
  */
 jasmine.createSpyObj = function(name, members) {};
 
@@ -526,19 +526,19 @@ jasmine.Ajax.RequestStub = function() {};
 jasmine.Ajax.RequestStub.prototype.url;
 
 
-/** const {string|RegExp} */
+/** @const {string|RegExp} */
 jasmine.Ajax.RequestStub.prototype.query;
 
 
-/** const {string|RegExp} */
+/** @const {string|RegExp} */
 jasmine.Ajax.RequestStub.prototype.data;
 
 
-/** const {string} */
+/** @const {string} */
 jasmine.Ajax.RequestStub.prototype.method;
 
 
-/** const {!Object.<string, string>} */
+/** @const {!Object.<string, string>} */
 jasmine.Ajax.RequestStub.prototype.requestHeaders;
 
 
@@ -572,10 +572,6 @@ jasmine.Ajax.RequestStub.prototype.isTimeout = function() {};
 jasmine.Ajax.RequestTracker = function() {};
 
 
-/** @const {!jasmine.Ajax.RequestTracker} */
-jasmine.Ajax.requests;
-
-
 /** @return {!jasmine.Ajax.RequestStub} */
 jasmine.Ajax.RequestTracker.prototype.first = function() {};
 
@@ -597,3 +593,6 @@ jasmine.Ajax.RequestTracker.prototype.mostRecent = function() {};
  */
 jasmine.Ajax.RequestTracker.prototype.at = function(index) {};
 
+
+/** @const {!jasmine.Ajax.RequestTracker} */
+jasmine.Ajax.requests;
