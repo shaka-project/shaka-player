@@ -29,10 +29,14 @@ var shakaDemo = shakaDemo || {};
 
 /** @private */
 shakaDemo.setupConfiguration_ = function() {
+  document.getElementById('smallGapLimit').addEventListener(
+      'input', shakaDemo.onGapInput_);
+  document.getElementById('jumpLargeGaps').addEventListener(
+      'change', shakaDemo.onJumpLargeGapsChange_);
   document.getElementById('preferredAudioLanguage').addEventListener(
-      'keyup', shakaDemo.onConfigKeyUp_);
+      'input', shakaDemo.onConfigInput_);
   document.getElementById('preferredTextLanguage').addEventListener(
-      'keyup', shakaDemo.onConfigKeyUp_);
+      'input', shakaDemo.onConfigInput_);
   document.getElementById('showTrickPlay').addEventListener(
       'change', shakaDemo.onTrickPlayChange_);
   document.getElementById('enableAdaptation').addEventListener(
@@ -84,7 +88,37 @@ shakaDemo.onLogLevelChange_ = function(event) {
  * @param {!Event} event
  * @private
  */
-shakaDemo.onConfigKeyUp_ = function(event) {
+shakaDemo.onJumpLargeGapsChange_ = function(event) {
+  shakaDemo.player_.configure(({
+    streaming: { jumpLargeGaps: event.target.checked }
+  }));
+  // Change the hash, to mirror this.
+  shakaDemo.hashShouldChange_();
+};
+
+
+/**
+ * @param {!Event} event
+ * @private
+ */
+shakaDemo.onGapInput_ = function(event) {
+  var smallGapLimit = Number(event.target.value);
+  var useDefault = isNaN(smallGapLimit) || event.target.value.length == 0;
+  shakaDemo.player_.configure(({
+    streaming: {
+      smallGapLimit: useDefault ? undefined : smallGapLimit
+    }
+  }));
+  // Change the hash, to mirror this.
+  shakaDemo.hashShouldChange_();
+};
+
+
+/**
+ * @param {!Event} event
+ * @private
+ */
+shakaDemo.onConfigInput_ = function(event) {
   shakaDemo.player_.configure(/** @type {shakaExtern.PlayerConfiguration} */({
     preferredAudioLanguage:
         document.getElementById('preferredAudioLanguage').value,

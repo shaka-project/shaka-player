@@ -15,7 +15,31 @@
  * limitations under the License.
  */
 
+goog.provide('shaka.test.StatusPromise');
 goog.provide('shaka.test.Util');
+
+
+
+/**
+ * @param {!Promise} p
+ * @constructor
+ * @struct
+ * @extends {Promise}
+ * @return {!Promise}
+ */
+shaka.test.StatusPromise = function(p) {
+  p.status = 'pending';
+  p.then(function() {
+    p.status = 'resolved';
+  }, function() {
+    p.status = 'rejected';
+  });
+  return p;
+};
+
+
+/** @type {string} */
+shaka.test.StatusPromise.prototype.status;
 
 
 /**
@@ -48,14 +72,10 @@ shaka.test.Util.fakeEventLoop = function(duration, opt_onTick) {
 /**
  * Capture a Promise's status and attach it to the Promise.
  * @param {!Promise} promise
+ * @return {!shaka.test.StatusPromise}
  */
 shaka.test.Util.capturePromiseStatus = function(promise) {
-  promise.status = 'pending';
-  promise.then(function() {
-    promise.status = 'resolved';
-  }, function() {
-    promise.status = 'rejected';
-  });
+  return new shaka.test.StatusPromise(promise);
 };
 
 
@@ -111,8 +131,8 @@ shaka.test.Util.registerElementMatcher_ = function() {
 
 
 /**
- * @param {*} actual
- * @param {!Node} expected
+ * @param {?} actual
+ * @param {!Element} expected
  * @return {!Object} result
  * @private
  */
@@ -132,7 +152,7 @@ shaka.test.Util.expectToEqualElementCompare_ = function(actual, expected) {
 
 
 /**
- * @param {*} actual
+ * @param {?} actual
  * @param {!Node} expected
  * @return {?string} failureReason
  * @private
@@ -140,17 +160,14 @@ shaka.test.Util.expectToEqualElementCompare_ = function(actual, expected) {
 shaka.test.Util.expectToEqualElementRecursive_ = function(actual, expected) {
   var prospectiveDiff = 'The difference was in ' +
       (actual.outerHTML || actual.textContent) + ' vs ' +
-      (expected.outerHTML || expected.textContent) + ': ';
+      (expected['outerHTML'] || expected.textContent) + ': ';
 
-  var actualIsElement = actual.nodeType == Node.ELEMENT_NODE;
-  var expectedIsElement = expected.nodeType == Node.ELEMENT_NODE;
-  if (actualIsElement != expectedIsElement)
-    return prospectiveDiff + 'One is element, one isn\'t.';
-
-  if (!actualIsElement) {
+  if (!(actual instanceof Element) && !(expected instanceof Element)) {
     // Compare them as nodes.
     if (actual.textContent != expected.textContent)
       return prospectiveDiff + 'Nodes are different.';
+  } else if (!(actual instanceof Element) || !(expected instanceof Element)) {
+    return prospectiveDiff + 'One is element, one isn\'t.';
   } else {
     // Compare them as elements.
     if (actual.tagName != expected.tagName)
@@ -263,6 +280,25 @@ shaka.test.Util.fetch = function(uri) {
 shaka.test.Util.makeMockObjectStrict = function(obj) {
   for (var name in obj)
     obj[name].and.throwError(new Error(name));
+};
+
+
+/**
+ * @param {!jasmine.Spy} spy
+ * @return {!Function}
+ */
+shaka.test.Util.spyFunc = function(spy) {
+  return spy;
+};
+
+
+/**
+ * @param {!jasmine.Spy} spy
+ * @param {...*} var_args
+ * @return {*}
+ */
+shaka.test.Util.invokeSpy = function(spy, var_args) {
+  return spy.apply(null, Array.prototype.slice.call(arguments, 1));
 };
 
 

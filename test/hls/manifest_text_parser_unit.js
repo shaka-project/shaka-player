@@ -17,6 +17,7 @@
 
 
 describe('ManifestTextParser', function() {
+  /** @type {!shaka.hls.ManifestTextParser} */
   var parser;
 
   beforeEach(function() {

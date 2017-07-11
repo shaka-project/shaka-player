@@ -31,10 +31,10 @@ goog.require('shaka.test.FakeNetworkingEngine');
  * PERIOD_TYPE_init, e.g., "1_audio_init" or "2_video_init"; or the media
  * segment URI pattern: PERIOD_TYPE_POSITION, e.g., "1_text_2" or "2_video_1".
  *
- * @param {function(string, number): ArrayBuffer} getInitSegment Init segment
+ * @param {function(string, number): BufferSource} getInitSegment Init segment
  *   generator: takes a content type and a Period number; returns an init
  *   segment.
- * @param {function(string, number, number): ArrayBuffer} getSegment Media
+ * @param {function(string, number, number): BufferSource} getSegment Media
  *   segment generator: takes a content type, a Period number, and a segment
  *   position; returns a media segment.
  * @return {!Object} A NetworkingEngine look-alike.
@@ -149,7 +149,7 @@ shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
   });
 
   timeline.getSeekRangeEnd.and.callFake(function() {
-    return timeline.getSegmentAvailabilityEnd();
+    return shaka.test.Util.invokeSpy(timeline.getSegmentAvailabilityEnd);
   });
 
   timeline.getSegmentAvailabilityDuration.and.callFake(function() {
@@ -183,7 +183,7 @@ shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
  * @param {number} presentationDuration
  * @param {!Object.<string, number>} segmentDurations The duration of each
  *   type of segment.
- * @return {!Object}
+ * @return {shakaExtern.Manifest}
  */
 shaka.test.StreamingEngineUtil.createManifest = function(
     periodStartTimes, presentationDuration, segmentDurations) {
@@ -257,7 +257,7 @@ shaka.test.StreamingEngineUtil.createManifest = function(
     manifest.periods.push(period);
   }
 
-  return manifest;
+  return /** @type {shakaExtern.Manifest} */ (manifest);
 };
 
 

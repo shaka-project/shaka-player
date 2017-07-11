@@ -16,19 +16,22 @@
  */
 
 describe('TextEngine', function() {
-  var TextEngine;
+  /** @const */
+  var TextEngine = shaka.text.TextEngine;
+  /** @const */
   var dummyData = new ArrayBuffer(0);
+  /** @const */
   var dummyMimeType = 'text/fake';
 
+  /** @type {!Function} */
   var mockParserPlugIn;
+  /** @type {!jasmine.Spy} */
   var mockParseInit;
+  /** @type {!jasmine.Spy} */
   var mockParseMedia;
-  var mockTrack;
+  /** @type {!shaka.text.TextEngine} */
   var textEngine;
-
-  beforeAll(function() {
-    TextEngine = shaka.text.TextEngine;
-  });
+  var mockTrack;
 
   beforeEach(function() {
     mockParseInit = jasmine.createSpy('mockParseInit');
@@ -46,12 +49,7 @@ describe('TextEngine', function() {
   });
 
   afterEach(function() {
-    textEngine = null;
     TextEngine.unregisterParser(dummyMimeType);
-    mockTrack = null;
-    mockParseInit = null;
-    mockParseMedia = null;
-    mockParserPlugIn = null;
   });
 
   describe('isTypeSupported', function() {
@@ -350,9 +348,13 @@ describe('TextEngine', function() {
       // This will overwrite the parser defined in the outer before each
       TextEngine.registerParser(
           dummyMimeType,
-          function(data, periodStart, segmentStart, segmentEnd) {
-            return mockParser(data, periodStart, segmentStart, segmentEnd);
-          });
+          /** @type {!Function} */
+          (function(data, periodStart, segmentStart, segmentEnd) {
+            // TextEngine uses the number of arguments to detect the type of
+            // parser, so we can't just pass the spy in (who has 0 args).
+            var func = shaka.test.Util.spyFunc(mockParser);
+            return func(data, periodStart, segmentStart, segmentEnd);
+          }));
     });
 
     describe('stateless parser', function() {

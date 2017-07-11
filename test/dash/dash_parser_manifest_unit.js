@@ -17,10 +17,16 @@
 
 // Test basic manifest parsing functionality.
 describe('DashParser Manifest', function() {
-  var Dash;
+  /** @const */
+  var Dash = shaka.test.Dash;
+
+  /** @type {!shaka.test.FakeNetworkingEngine} */
   var fakeNetEngine;
+  /** @type {!shaka.dash.DashParser} */
   var parser;
+  /** @type {!jasmine.Spy} */
   var onEventSpy;
+  /** @type {shakaExtern.ManifestParser.PlayerInterface} */
   var playerInterface;
 
   beforeEach(function() {
@@ -31,13 +37,9 @@ describe('DashParser Manifest', function() {
       networkingEngine: fakeNetEngine,
       filterPeriod: function() {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
-      onEvent: onEventSpy,
+      onEvent: shaka.test.Util.spyFunc(onEventSpy),
       onError: fail
     };
-  });
-
-  beforeAll(function() {
-    Dash = shaka.test.Dash;
   });
 
   /**
@@ -373,10 +375,10 @@ describe('DashParser Manifest', function() {
   });
 
   describe('supports UTCTiming', function() {
-    var originalNow;
+    /** @const */
+    var originalNow = Date.now;
 
     beforeAll(function() {
-      originalNow = Date.now;
       Date.now = function() { return 10 * 1000; };
     });
 
@@ -966,8 +968,8 @@ describe('DashParser Manifest', function() {
     parser.start('dummy://foo', playerInterface)
         .then(function() {
           expect(fakeNetEngine.registerResponseFilter).toHaveBeenCalled();
-          var filter =
-              fakeNetEngine.registerResponseFilter.calls.mostRecent().args[0];
+          var filter = /** @type {!Function} */ (
+              fakeNetEngine.registerResponseFilter.calls.mostRecent().args[0]);
           var type = shaka.net.NetworkingEngine.RequestType.SEGMENT;
           var response = {data: emsgUpdate.buffer};
           fakeNetEngine.request.calls.reset();

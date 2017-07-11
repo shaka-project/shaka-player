@@ -16,20 +16,18 @@
  */
 
 describe('OfflineScheme', function() {
-  var OfflineScheme;
-  var originalIsStorageEngineSupported;
-  var originalCreateStorageEngine;
-  var fakeStorageEngine;
-  var fakeCreateStorageEngine;
-  var request;
+  var OfflineScheme = shaka.offline.OfflineScheme;
+  var originalIsStorageEngineSupported =
+      shaka.offline.OfflineUtils.isStorageEngineSupported;
+  var originalCreateStorageEngine =
+      shaka.offline.OfflineUtils.createStorageEngine;
 
-  beforeAll(function() {
-    OfflineScheme = shaka.offline.OfflineScheme;
-    originalIsStorageEngineSupported =
-        shaka.offline.OfflineUtils.isStorageEngineSupported;
-    originalCreateStorageEngine =
-        shaka.offline.OfflineUtils.createStorageEngine;
-  });
+  /** @type {{init: !jasmine.Spy, destroy: !jasmine.Spy, get: !jasmine.Spy}} */
+  var fakeStorageEngine;
+  /** @type {!jasmine.Spy} */
+  var fakeCreateStorageEngine;
+  /** @type {shakaExtern.Request} */
+  var request;
 
   afterAll(function() {
     shaka.offline.OfflineUtils.isStorageEngineSupported =
@@ -54,7 +52,8 @@ describe('OfflineScheme', function() {
 
     fakeCreateStorageEngine = jasmine.createSpy('createStorageEngine');
     fakeCreateStorageEngine.and.returnValue(fakeStorageEngine);
-    shaka.offline.OfflineUtils.createStorageEngine = fakeCreateStorageEngine;
+    shaka.offline.OfflineUtils.createStorageEngine =
+        shaka.test.Util.spyFunc(fakeCreateStorageEngine);
 
     // The whole request is ignored by the OfflineScheme.
     var retry = shaka.net.NetworkingEngine.defaultRetryParameters();

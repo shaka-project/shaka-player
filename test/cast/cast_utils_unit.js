@@ -16,13 +16,10 @@
  */
 
 describe('CastUtils', function() {
-  var CastUtils;
-  var FakeEvent;
-
-  beforeAll(function() {
-    CastUtils = shaka.cast.CastUtils;
-    FakeEvent = shaka.util.FakeEvent;
-  });
+  /** @const */
+  var CastUtils = shaka.cast.CastUtils;
+  /** @const */
+  var FakeEvent = shaka.util.FakeEvent;
 
   it('includes every Player member', function() {
     var ignoredMembers = [
@@ -88,7 +85,8 @@ describe('CastUtils', function() {
 
     it('transfers real Events', function() {
       // new Event() is not usable on IE11:
-      var event = document.createEvent('CustomEvent');
+      var event =
+          /** @type {!CustomEvent} */ (document.createEvent('CustomEvent'));
       event.initCustomEvent('myEventType', false, false, null);
 
       // Properties that can definitely be transferred.
@@ -176,13 +174,16 @@ describe('CastUtils', function() {
     });
 
     describe('TimeRanges', function() {
+      /** @type {!HTMLVideoElement} */
       var video;
+      /** @type {!shaka.util.EventManager} */
       var eventManager;
+      /** @type {!shaka.media.MediaSourceEngine} */
       var mediaSourceEngine;
 
       beforeAll(function() {
-        video = /** @type {HTMLMediaElement} */(
-            document.createElement('video'));
+        video =
+            /** @type {!HTMLVideoElement} */ (document.createElement('video'));
         document.body.appendChild(video);
       });
 

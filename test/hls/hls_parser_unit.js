@@ -17,15 +17,19 @@
 
 
 describe('HlsParser', function() {
+  /** @type {!shaka.test.FakeNetworkingEngine} */
   var fakeNetEngine;
+  /** @type {!shaka.hls.HlsParser} */
   var parser;
+  /** @type {shakaExtern.ManifestParser.PlayerInterface} */
   var playerInterface;
+  /** @type {shakaExtern.ManifestConfiguration} */
+  var config;
 
   beforeEach(function() {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
-    parser = new shaka.hls.HlsParser();
-    parser.configure({
+    config = {
       retryParameters: retry,
       dash: {
         customScheme: function(node) { return null; },
@@ -36,12 +40,16 @@ describe('HlsParser', function() {
       hls: {
         defaultTimeOffset: 0
       }
-    });
-    playerInterface = {
-      networkingEngine: fakeNetEngine,
-      filterPeriod: function() {},
-      onError: fail
     };
+    playerInterface = {
+      filterPeriod: function() {},
+      networkingEngine: fakeNetEngine,
+      onError: fail,
+      onEvent: function() {},
+      onTimelineRegionAdded: function() {}
+    };
+    parser = new shaka.hls.HlsParser();
+    parser.configure(config);
   });
 
   /**
@@ -167,6 +175,40 @@ describe('HlsParser', function() {
                   .presentationTimeOffset(0)
                   .mime('audio/mp4', 'mp4a')
                   .channelsCount(2)
+          .build();
+
+    testHlsParser(master, media, manifest, done);
+  });
+
+  it('handles audio tags on audio streams', function(done) {
+    var master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="mp4a",AUDIO="aud1"\n',
+      'test://audio\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+      'URI="test://audio"\n'
+    ].join('');
+
+    var media = [
+      '#EXTM3U\n',
+      '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'test://main.mp4'
+    ].join('');
+
+    var manifest = new shaka.test.ManifestGenerator()
+            .anyTimeline()
+            .addPeriod(jasmine.any(Number))
+              .addVariant(jasmine.any(Number))
+                .language('en')
+                .bandwidth(200)
+                .addAudio(jasmine.any(Number))
+                  .language('en')
+                  .anySegmentFunctions()
+                  .anyInitSegment()
+                  .presentationTimeOffset(0)
+                  .mime('audio/mp4', 'mp4a')
           .build();
 
     testHlsParser(master, media, manifest, done);
@@ -536,9 +578,7 @@ describe('HlsParser', function() {
                   .size(960, 540)
           .build();
 
-    parser.configure({
-      hls: {defaultTimeOffset: 10}
-    });
+    config.hls.defaultTimeOffset = 10;
 
     testHlsParser(master, media, manifest, done);
   });
@@ -631,8 +671,10 @@ describe('HlsParser', function() {
 
           var videoPosition = video.findSegmentPosition(0);
           var audioPosition = audio.findSegmentPosition(0);
-          expect(videoPosition).not.toBe(null);
-          expect(audioPosition).not.toBe(null);
+          goog.asserts.assert(videoPosition != null,
+                              'Cannot find first video segment');
+          goog.asserts.assert(audioPosition != null,
+                              'Cannot find first audio segment');
 
           var videoReference = video.getSegmentReference(videoPosition);
           var audioReference = audio.getSegmentReference(audioPosition);

@@ -16,10 +16,18 @@
  */
 
 describe('EventManager', function() {
+  /** @const */
+  var Util = shaka.test.Util;
+
+  /** @type {!shaka.util.EventManager} */
   var eventManager;
+  /** @type {!Event} */
   var event1;
+  /** @type {!Event} */
   var event2;
+  /** @type {!EventTarget} */
   var target1;
+  /** @type {!EventTarget} */
   var target2;
 
   beforeEach(function() {
@@ -28,9 +36,9 @@ describe('EventManager', function() {
     target2 = document.createElement('div');
 
     // new Event() is current, but document.createEvent() works back to IE11.
-    event1 = document.createEvent('Event');
+    event1 = /** @type {!Event} */ (document.createEvent('Event'));
     event1.initEvent('eventtype1', false, false);
-    event2 = document.createEvent('Event');
+    event2 = /** @type {!Event} */ (document.createEvent('Event'));
     event2.initEvent('eventtype2', false, false);
   });
 
@@ -41,7 +49,7 @@ describe('EventManager', function() {
   it('listens for an event', function() {
     var listener = jasmine.createSpy('listener');
 
-    eventManager.listen(target1, 'eventtype1', listener);
+    eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener));
     target1.dispatchEvent(event1);
 
     expect(listener).toHaveBeenCalled();
@@ -51,8 +59,8 @@ describe('EventManager', function() {
     var listener1 = jasmine.createSpy('listener1');
     var listener2 = jasmine.createSpy('listener2');
 
-    eventManager.listen(target1, 'eventtype1', listener1);
-    eventManager.listen(target2, 'eventtype1', listener2);
+    eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener1));
+    eventManager.listen(target2, 'eventtype1', Util.spyFunc(listener2));
 
     target1.dispatchEvent(event1);
     target2.dispatchEvent(event1);
@@ -65,8 +73,8 @@ describe('EventManager', function() {
     var listener1 = jasmine.createSpy('listener1');
     var listener2 = jasmine.createSpy('listener2');
 
-    eventManager.listen(target1, 'eventtype1', listener1);
-    eventManager.listen(target1, 'eventtype2', listener2);
+    eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener1));
+    eventManager.listen(target1, 'eventtype2', Util.spyFunc(listener2));
 
     target1.dispatchEvent(event1);
     target1.dispatchEvent(event2);
@@ -79,8 +87,8 @@ describe('EventManager', function() {
     var listener1 = jasmine.createSpy('listener1');
     var listener2 = jasmine.createSpy('listener2');
 
-    eventManager.listen(target1, 'eventtype1', listener1);
-    eventManager.listen(target2, 'eventtype2', listener2);
+    eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener1));
+    eventManager.listen(target2, 'eventtype2', Util.spyFunc(listener2));
 
     target1.dispatchEvent(event1);
     target2.dispatchEvent(event2);
@@ -93,8 +101,8 @@ describe('EventManager', function() {
     var listener1 = jasmine.createSpy('listener1');
     var listener2 = jasmine.createSpy('listener2');
 
-    eventManager.listen(target1, 'eventtype1', listener1);
-    eventManager.listen(target1, 'eventtype1', listener2);
+    eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener1));
+    eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener2));
 
     target1.dispatchEvent(event1);
 
@@ -105,7 +113,7 @@ describe('EventManager', function() {
   it('stops listening to an event', function() {
     var listener = jasmine.createSpy('listener');
 
-    eventManager.listen(target1, 'eventtype1', listener);
+    eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener));
     eventManager.unlisten(target1, 'eventtype1');
 
     target1.dispatchEvent(event1);
@@ -117,8 +125,8 @@ describe('EventManager', function() {
     var listener1 = jasmine.createSpy('listener1');
     var listener2 = jasmine.createSpy('listener2');
 
-    eventManager.listen(target1, 'eventtype1', listener1);
-    eventManager.listen(target2, 'eventtype1', listener2);
+    eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener1));
+    eventManager.listen(target2, 'eventtype1', Util.spyFunc(listener2));
     eventManager.unlisten(target2, 'eventtype1');
 
     target1.dispatchEvent(event1);
@@ -130,10 +138,10 @@ describe('EventManager', function() {
     var listener1 = jasmine.createSpy('listener1');
     var listener2 = jasmine.createSpy('listener2');
 
-    eventManager.listen(target1, 'eventtype1', listener1);
-    eventManager.listen(target1, 'eventtype2', listener2);
+    eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener1));
+    eventManager.listen(target1, 'eventtype2', Util.spyFunc(listener2));
 
-    eventManager.removeAll(target1);
+    eventManager.removeAll();
 
     target1.dispatchEvent(event1);
     target1.dispatchEvent(event2);
@@ -146,10 +154,10 @@ describe('EventManager', function() {
     var listener1 = jasmine.createSpy('listener1');
     var listener2 = jasmine.createSpy('listener2');
 
-    eventManager.listen(target1, 'eventtype1', listener1);
-    eventManager.listen(target1, 'eventtype1', listener2);
+    eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener1));
+    eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener2));
 
-    eventManager.removeAll(target1);
+    eventManager.removeAll();
 
     target1.dispatchEvent(event1);
 

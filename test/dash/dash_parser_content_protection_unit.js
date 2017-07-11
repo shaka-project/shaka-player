@@ -17,7 +17,8 @@
 
 // Test DRM-related parsing.
 describe('DashParser ContentProtection', function() {
-  var Dash;
+  /** @const */
+  var Dash = shaka.test.Dash;
 
   /**
    * Tests that the parser produces the correct results.
@@ -156,10 +157,6 @@ describe('DashParser ContentProtection', function() {
     var containing = {keySystem: keySystem, initData: initData, keyIds: keyIds};
     return jasmine.objectContaining(containing);
   }
-
-  beforeAll(function() {
-    Dash = shaka.test.Dash;
-  });
 
   it('handles clear content', function(done) {
     var source = buildManifestText([], [], []);
