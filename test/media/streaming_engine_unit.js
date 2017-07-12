@@ -754,6 +754,46 @@ describe('StreamingEngine', function() {
     });
   });
 
+  it('doesn\'t get stuck when 2nd Period isn\'t available yet', function() {
+    // See: https://github.com/google/shaka-player/pull/839
+    setupVod();
+    manifest.periods[0].textStreams = [];
+
+    // For the first update, indicate the segment isn't available.  This should
+    // not cause us to fallback to the Playhead time to determine which segment
+    // to start streaming.
+    var oldGet = textStream2.getSegmentReference;
+    textStream2.getSegmentReference = function(idx) {
+      if (idx == 1) {
+        textStream2.getSegmentReference = oldGet;
+        return null;
+      }
+      return oldGet(idx);
+    };
+
+    mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+    createStreamingEngine();
+
+    playhead.getTime.and.returnValue(0);
+    onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+    onChooseStreams.and.callFake(function(period) {
+      var chosen = defaultOnChooseStreams(period);
+      if (period == manifest.periods[0])
+        delete chosen[ContentType.TEXT];
+      return chosen;
+    });
+
+    // Here we go!
+    streamingEngine.init();
+    runTest();
+
+    expect(mediaSourceEngine.segments).toEqual({
+      audio: [true, true, true, true],
+      video: [true, true, true, true],
+      text: [false, false, true, true]
+    });
+  });
+
   it('only reinitializes text when switching streams', function() {
     // See: https://github.com/google/shaka-player/issues/910
     setupVod();
