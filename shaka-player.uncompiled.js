@@ -44,6 +44,7 @@ goog.require('shaka.offline.OfflineScheme');
 goog.require('shaka.offline.Storage');
 goog.require('shaka.polyfill.Fullscreen');
 goog.require('shaka.polyfill.IndexedDB');
+goog.require('shaka.polyfill.InputEvent');
 goog.require('shaka.polyfill.MathRound');
 goog.require('shaka.polyfill.MediaKeys');
 goog.require('shaka.polyfill.MediaSource');

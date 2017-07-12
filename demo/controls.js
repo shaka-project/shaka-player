@@ -113,16 +113,6 @@ ShakaControls.prototype.init = function(castProxy, onError, notifyCastStatus) {
   this.notifyCastStatus_ = notifyCastStatus;
   this.initMinimal(castProxy.getVideo(), castProxy.getPlayer());
 
-  // IE11 doesn't treat the 'input' event correctly.
-  // https://connect.microsoft.com/IE/Feedback/Details/856998
-  // If you know a better way than a userAgent check to handle this, please
-  // send a patch.
-  var sliderInputEvent = 'input';
-  // This matches IE11, but not Edge.  Edge does not have this problem.
-  if (navigator.userAgent.indexOf('Trident/') >= 0) {
-    sliderInputEvent = 'change';
-  }
-
   this.playPauseButton_.addEventListener(
       'click', this.onPlayPauseClick_.bind(this));
   this.video_.addEventListener(
@@ -135,7 +125,7 @@ ShakaControls.prototype.init = function(castProxy, onError, notifyCastStatus) {
   this.seekBar_.addEventListener(
       'touchstart', this.onSeekStart_.bind(this));
   this.seekBar_.addEventListener(
-      sliderInputEvent, this.onSeekInput_.bind(this));
+      'input', this.onSeekInput_.bind(this));
   this.seekBar_.addEventListener(
       'touchend', this.onSeekEnd_.bind(this));
   this.seekBar_.addEventListener(
@@ -145,7 +135,7 @@ ShakaControls.prototype.init = function(castProxy, onError, notifyCastStatus) {
       'click', this.onMuteClick_.bind(this));
 
   this.volumeBar_.addEventListener(
-      sliderInputEvent, this.onVolumeInput_.bind(this));
+      'input', this.onVolumeInput_.bind(this));
   this.video_.addEventListener(
       'volumechange', this.onVolumeStateChange_.bind(this));
   // initialize volume display with a fake event
