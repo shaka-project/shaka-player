@@ -792,8 +792,7 @@ describe('Player', function() {
           primary: false,
           roles: [],
           videoId: 4,
-          audioId: 1,
-          channelsCount: null
+          audioId: 1
         }
       ];
       var variantTracks2 = [
@@ -815,8 +814,7 @@ describe('Player', function() {
           primary: false,
           roles: [],
           videoId: 4,
-          audioId: 1,
-          channelsCount: null
+          audioId: 1
         }
       ];
 
@@ -1927,8 +1925,8 @@ describe('Player', function() {
               .build();
 
       parser = new shaka.test.FakeManifestParser(manifest);
-      parserFactory = function() { return parser; };
-      player.load('', 0, parserFactory).then(function() {
+      factory = function() { return parser; };
+      player.load('', 0, factory).then(function() {
         // "initialize" the current period.
         chooseStreams();
         canSwitch();
@@ -1955,8 +1953,8 @@ describe('Player', function() {
                   .build();
 
           parser = new shaka.test.FakeManifestParser(manifest);
-          parserFactory = function() { return parser; };
-          player.load('', 0, parserFactory)
+          factory = function() { return parser; };
+          player.load('', 0, factory)
               .then(function() {
                 // "initialize" the current period.
                 chooseStreams();
