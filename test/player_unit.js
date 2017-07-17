@@ -2316,6 +2316,18 @@ describe('Player', function() {
     }).then(done);
   });
 
+  describe('isTextTrackVisible', function() {
+    it('does not throw before load', function() {
+      player.isTextTrackVisible();
+    });
+  });
+
+  describe('setTextTrackVisibility', function() {
+    it('does not throw before load', function() {
+      player.setTextTrackVisibility(true);
+    });
+  });
+
 
   /**
    * Choose streams for the given period.
