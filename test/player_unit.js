@@ -83,6 +83,8 @@ describe('Player', function() {
     logErrorSpy.calls.reset();
     logErrorSpy.and.callFake(fail);
 
+    logWarnSpy.calls.reset();
+
     // Many tests assume the existence of a manifest, so create a basic one.
     // Test suites can override this with more specific manifests.
     manifest = new shaka.test.ManifestGenerator()
@@ -862,6 +864,45 @@ describe('Player', function() {
       })
       .catch(fail)
       .then(done);
+    });
+
+    it('can still be configured through deprecated config', function() {
+      var managerInstance = new shaka.test.FakeAbrManager();
+
+      expect(logWarnSpy).not.toHaveBeenCalled();
+      player.configure({
+        abr: { manager: managerInstance }
+      });
+      expect(logWarnSpy).toHaveBeenCalled();
+
+      var compatibilityFactory = player.getConfiguration().abrFactory;
+      expect(new compatibilityFactory()).toBe(managerInstance);
+    });
+
+    it('can still be given a custom v2.1.x AbrManager', function(done) {
+      var managerInstance = new shaka.test.FakeAbrManager();
+      // Convert it back into the v2.1.x API.  Use a compiler hack to get around
+      // the @struct restrictions on FakeAbrManager.
+      var notAStruct = /** @type {!Object} */(managerInstance);
+      notAStruct['setDefaultEstimate'] =
+          jasmine.createSpy('setDefaultEstimate');
+      notAStruct['setRestrictions'] = jasmine.createSpy('setRestrictions');
+      notAStruct['configure'] = null;
+
+      expect(logWarnSpy).not.toHaveBeenCalled();
+      player.configure({
+        abrFactory: function() { return managerInstance; }
+      });
+      // No warning yet.  We're using the current configure interface, and the
+      // factory isn't called until load.
+      expect(logWarnSpy).not.toHaveBeenCalled();
+
+      player.load('', 0, parserFactory).then(function() {
+        expect(managerInstance.init).toHaveBeenCalled();
+        expect(notAStruct['setDefaultEstimate']).toHaveBeenCalled();
+        expect(notAStruct['setRestrictions']).toHaveBeenCalled();
+        expect(logWarnSpy).toHaveBeenCalled();
+      }).catch(fail).then(done);
     });
   });
 
