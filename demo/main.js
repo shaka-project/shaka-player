@@ -317,8 +317,7 @@ shakaDemo.postBrowserCheckParams_ = function(params) {
   }
 
   var smallGapLimit = document.getElementById('smallGapLimit');
-  smallGapLimit.placeholder =
-      shakaDemo.player_.defaultConfig_().streaming.smallGapLimit;
+  smallGapLimit.placeholder = 0.5; // The default smallGapLimit.
   if ('smallGapLimit' in params) {
     smallGapLimit.value = params['smallGapLimit'];
     // Call onGapInput_ manually, because setting the value
