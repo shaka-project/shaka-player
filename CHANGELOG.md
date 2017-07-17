@@ -1,3 +1,52 @@
+## 2.1.5 (2017-07-17)
+
+New features:
+  - Add more information to video errors in Chrome
+
+Bugfixes:
+  - Fix key status problems on IE11 and Tizen TVs
+    - https://github.com/google/shaka-player/issues/884
+    - https://github.com/google/shaka-player/issues/890
+  - Fix period switching when streams are not yet available
+    - https://github.com/google/shaka-player/issues/839
+  - Filter out audio-only HLS variants that can't be switched to
+    - https://github.com/google/shaka-player/issues/824
+    - https://github.com/google/shaka-player/issues/861
+  - Fix parsing of Microsoft-packaged HLS content
+  - Fix rounding issues with multi-Period content
+    - https://github.com/google/shaka-player/issues/882
+    - https://github.com/google/shaka-player/issues/909
+    - https://github.com/google/shaka-player/issues/911
+  - Fix exceptions thrown in some cases when switching text tracks
+    - https://github.com/google/shaka-player/issues/910
+  - Fix DASH date parsing when timezone is missing
+    - https://github.com/google/shaka-player/issues/901
+  - Fix persistent storage detection on IE11 and Tizen TVs
+  - Fix test issues on Tizen
+    - https://github.com/google/shaka-player/issues/893
+  - Fix version detection when compiling from the NPM package
+    - https://github.com/google/shaka-player/issues/871
+  - Work around lack of key statuses on Tizen
+    - https://github.com/google/shaka-player/issues/891
+    - https://github.com/google/shaka-player/issues/894
+
+Demo app:
+  - Fix missing fullscreen button on IE11
+    - https://github.com/google/shaka-player/issues/787
+  - Added configuration for gap jumping
+
+Docs:
+  - Document HTTPS requirement for EME
+    - https://github.com/google/shaka-player/issues/867
+    - https://github.com/google/shaka-player/issues/928
+  - Update tutorials
+    - https://github.com/google/shaka-player/issues/862
+  - Add FAQ entry on EME robustness
+    - https://github.com/google/shaka-player/issues/866
+  - Update HLS FAQ
+  - Document that we test on Tizen TV now
+
+
 ## 2.1.4 (2017-06-16)
 
 New features:
