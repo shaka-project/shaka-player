@@ -1,5 +1,20 @@
 # DRM Configuration
 
+#### NOTE: EME and http URLs
+
+EME requires a secure URL to use.  This means you have to use `https` or be on
+`localhost`.  Currently only Chrome enforces it, but other browsers will in the
+future.  Also, because of mixed content requirements, if your site is using
+`https`, then your manifest and every segment will also need to use `https` too.
+
+See: Chrome's [announcement][], Firefox's [intent to remove][firefox_bug], and
+how to [disable for testing][allow_http].
+
+[allow_http]: https://www.chromium.org/Home/chromium-security/deprecating-powerful-features-on-insecure-origins
+[announcement]: https://groups.google.com/a/chromium.org/forum/#!msg/blink-dev/tXmKPlXsnCQ/ptOETCUvBwAJ
+[firefox_bug]: https://bugzilla.mozilla.org/show_bug.cgi?id=1322517
+
+
 #### License Servers
 
 Without DRM configuration, Shaka only plays clear content.  To play protected
@@ -91,21 +106,6 @@ player.configure({
 
 [license request format]: https://w3c.github.io/encrypted-media/#clear-key-request-format
 [license format]: https://w3c.github.io/encrypted-media/#clear-key-license-format
-
-
-#### EME and http URLs
-
-EME requires a secure URL to use.  This means you have to use `https` or be on
-`localhost`.  Currently only Chrome enforces it, but other browsers will in the
-future.  Also, because of mixed content requirements, if your site is using
-`https`, then your manifest and every segment will also need to use `https` too.
-
-See: Chrome's [announcement][], Firefox's [intent to remove][firefox_bug], and
-how to [disable for testing][allow_http].
-
-[allow_http]: https://www.chromium.org/Home/chromium-security/deprecating-powerful-features-on-insecure-origins
-[announcement]: https://groups.google.com/a/chromium.org/forum/#!msg/blink-dev/tXmKPlXsnCQ/ptOETCUvBwAJ
-[firefox_bug]: https://bugzilla.mozilla.org/show_bug.cgi?id=1322517
 
 
 #### Advanced DRM Configuration
