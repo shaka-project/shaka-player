@@ -256,6 +256,9 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
       expect(index1.references_[2]).toEqual(references2[1]);
     });
 
+    // Makes sure segment references from time-based template merge with correct
+    // position numbers.
+    // https://github.com/google/shaka-player/pull/838
     it('last live stream reference with corrected position', function() {
       var references1 = [
         makeReference(1, 10, 20, uri(10)),
