@@ -558,7 +558,10 @@ describe('TtmlTextParser', function() {
             color: 'red',
             backgroundColor: 'blue',
             fontWeight: Cue.fontWeight.BOLD,
-            fontFamily: 'Times New Roman'
+            fontFamily: 'Times New Roman',
+            fontStyle: Cue.fontStyle.ITALIC,
+            lineHeight: '20px',
+            fontSize: '10em'
           }
         ],
         '<tt xmlns:tts="ttml#styling">' +
@@ -566,7 +569,10 @@ describe('TtmlTextParser', function() {
         '<style xml:id="s1" tts:color="red" ' +
         'tts:backgroundColor="blue" ' +
         'tts:fontWeight="bold" ' +
-        'tts:fontFamily="Times New Roman"/>' +
+        'tts:fontFamily="Times New Roman" ' +
+        'tts:fontStyle="italic" ' +
+        'tts:lineHeight="20px" ' +
+        'tts:fontSize="10em"/>' +
         '</styling>' +
         '<layout xmlns:tts="ttml#styling">' +
         '<region xml:id="subtitleArea" />' +
@@ -602,6 +608,58 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
+  it('parses text decoration', function() {
+    verifyHelper(
+        [
+          {
+            start: 62.05,
+            end: 3723.2,
+            payload: 'Test',
+            textDecoration: [Cue.textDecoration.UNDERLINE,
+                             Cue.textDecoration.OVERLINE]
+          }
+        ],
+        '<tt xmlns:tts="ttml#styling">' +
+        '<styling>' +
+        '<style xml:id="s1" tts:textDecoration="underline ' +
+        'overline lineThrough"/>' +
+        '<style xml:id="s2" tts:textDecoration="noLineThrough"/>' +
+        '</styling>' +
+        '<layout xmlns:tts="ttml#styling">' +
+        '<region xml:id="subtitleArea" style="s1"/>' +
+        '</layout>' +
+        '<body region="subtitleArea">' +
+        '<p begin="01:02.05" end="01:02:03.200" style="s2">Test</p>' +
+        '</body>' +
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
+  });
+
+  it('chooses style on element over style on region', function() {
+    verifyHelper(
+        [
+          {
+            start: 62.05,
+            end: 3723.2,
+            payload: 'Test',
+            color: 'blue'
+          }
+        ],
+        '<tt xmlns:tts="ttml#styling">' +
+        '<styling>' +
+        '<style xml:id="s1" tts:color="red"/>' +
+        '<style xml:id="s2" tts:color="blue"/>' +
+        '</styling>' +
+        '<layout xmlns:tts="ttml#styling">' +
+        '<region xml:id="subtitleArea" style="s1"/>' +
+        '</layout>' +
+        '<body region="subtitleArea">' +
+        '<p begin="01:02.05" end="01:02:03.200" style="s2">Test</p>' +
+        '</body>' +
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
+  });
+
 
   /**
    * @param {!Array} cues
@@ -611,6 +669,10 @@ describe('TtmlTextParser', function() {
   function verifyHelper(cues, text, time) {
     var data = shaka.util.StringUtils.toUTF8(text);
     var result = new shaka.text.TtmlTextParser().parseMedia(data, time);
+    var properties = ['textAlign', 'lineAlign', 'positionAlign', 'size',
+                      'line', 'position', 'writingDirection', 'color',
+                      'backgroundColor', 'fontWeight', 'fontFamily',
+                      'wrapLine', 'lineHeight', 'fontStyle', 'fontSize'];
     expect(result).toBeTruthy();
     expect(result.length).toBe(cues.length);
     for (var i = 0; i < cues.length; i++) {
@@ -618,40 +680,21 @@ describe('TtmlTextParser', function() {
       expect(result[i].endTime).toBeCloseTo(cues[i].end, 3);
       expect(result[i].payload).toBe(cues[i].payload);
 
-      // Workaround a bug in the compiler's externs.
-      // TODO: Remove when compiler is updated.
-      if (cues[i].textAlign)
-        expect(/** @type {?} */ (result[i]).textAlign).toBe(cues[i].textAlign);
-      if (cues[i].lineAlign)
-        expect(/** @type {?} */ (result[i]).lineAlign).toBe(cues[i].lineAlign);
-      if (cues[i].positionAlign)
-        expect(/** @type {?} */ (result[i]).positionAlign)
-               .toBe(cues[i].positionAlign);
-      if (cues[i].size)
-        expect(/** @type {?} */ (result[i]).size).toBe(cues[i].size);
-      if (cues[i].line)
-        expect(/** @type {?} */ (result[i]).line).toBe(cues[i].line);
-      if (cues[i].position)
-        expect(/** @type {?} */ (result[i]).position).toBe(cues[i].position);
-      if (cues[i].vertical)
-        expect(/** @type {?} */ (result[i]).writingDirection)
-               .toBe(cues[i].writingDirection);
-      if (cues[i].vertical)
-        expect(/** @type {?} */ (result[i]).lineInterpretation)
-               .toBe(cues[i].lineInterpretation);
-      if (cues[i].color)
-        expect(/** @type {?} */ (result[i]).color).toBe(cues[i].color);
-      if (cues[i].backgroundColor)
-        expect(/** @type {?} */ (result[i]).backgroundColor)
-               .toBe(cues[i].backgroundColor);
-      if (cues[i].fontWeight)
-        expect(/** @type {?} */ (result[i]).fontWeight)
-               .toBe(cues[i].fontWeight);
-      if (cues[i].fontFamily)
-        expect(/** @type {?} */ (result[i]).fontFamily)
-               .toBe(cues[i].fontFamily);
-      if (cues[i].wrapLine)
-        expect(/** @type {?} */ (result[i]).wrapLine).toBe(cues[i].wrapLine);
+      for (var j = 0; j < properties.length; j++) {
+        var property = properties[j];
+        // Workaround a bug in the compiler's externs.
+        // TODO: Remove when compiler is updated.
+        if (property in cues[i])
+          expect(/** @type {?} */ (result[i])[property])
+                 .toBe(cues[i][property]);
+      }
+
+      if (cues[i].textDecoration) {
+        for (var j = 0; j < cues[i].textDecoration.length; j++) {
+          expect(/** @type {?} */ (result[i]).textDecoration[j])
+               .toBe(cues[i].textDecoration[j]);
+        }
+      }
     }
   }
 
