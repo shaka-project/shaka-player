@@ -155,7 +155,7 @@ describe('StreamUtils', function() {
     });
   });
 
-  describe('filterPeriod', function() {
+  describe('filterNewPeriod', function() {
     var fakeDrmEngine;
 
     beforeAll(function() {
@@ -172,7 +172,7 @@ describe('StreamUtils', function() {
         .build();
 
       var activeStreams = {};
-      shaka.util.StreamUtils.filterPeriod(
+      shaka.util.StreamUtils.filterNewPeriod(
           fakeDrmEngine, activeStreams, manifest.periods[0]);
 
       // Covers a regression in which we would remove streams with codecs.

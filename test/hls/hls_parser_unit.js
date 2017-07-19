@@ -17,6 +17,8 @@
 
 
 describe('HlsParser', function() {
+  /** @const */
+  var Util = shaka.test.Util;
   /** @type {!shaka.test.FakeNetworkingEngine} */
   var fakeNetEngine;
   /** @type {!shaka.hls.HlsParser} */
@@ -42,11 +44,12 @@ describe('HlsParser', function() {
       }
     };
     playerInterface = {
-      filterPeriod: function() {},
+      filterNewPeriod: function() {},
+      filterAllPeriods: function() {},
       networkingEngine: fakeNetEngine,
       onError: fail,
-      onEvent: function() {},
-      onTimelineRegionAdded: function() {}
+      onEvent: fail,
+      onTimelineRegionAdded: fail
     };
     parser = new shaka.hls.HlsParser();
     parser.configure(config);
@@ -445,6 +448,38 @@ describe('HlsParser', function() {
           .build();
 
     testHlsParser(master, media, manifest, done);
+  });
+
+  it('should call filterAllPeriods for parsing', function(done) {
+    var master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+      'RESOLUTION=960x540,FRAME-RATE=60\n',
+      'test://video'
+    ].join('');
+
+    var media = [
+      '#EXTM3U\n',
+      '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'test://main.mp4'
+    ].join('');
+
+    fakeNetEngine.setResponseMapAsText({
+      'test://master': master,
+      'test://audio': media,
+      'test://video': media,
+      'test://text': media
+    });
+
+    var filterAllPeriods = jasmine.createSpy('filterAllPeriods');
+    playerInterface.filterAllPeriods = Util.spyFunc(filterAllPeriods);
+
+    parser.start('test://master', playerInterface)
+        .then(function(manifest) {
+          expect(filterAllPeriods.calls.count()).toBe(1);
+        }).catch(fail).then(done);
   });
 
   it('gets mime type from header request', function(done) {

@@ -66,14 +66,6 @@ describe('Player', function() {
   var video;
 
   beforeAll(function() {
-    // Since this is not an integration test, we don't want MediaSourceEngine to
-    // fail assertions based on browser support for types.  Pretend that all
-    // video and audio types are supported.
-    window.MediaSource.isTypeSupported = function(mimeType) {
-      var type = mimeType.split('/')[0];
-      return type == 'video' || type == 'audio';
-    };
-
     logErrorSpy = jasmine.createSpy('shaka.log.error');
     shaka.log.error = shaka.test.Util.spyFunc(logErrorSpy);
     logWarnSpy = jasmine.createSpy('shaka.log.warning');
@@ -86,6 +78,14 @@ describe('Player', function() {
     logErrorSpy.and.callFake(fail);
 
     logWarnSpy.calls.reset();
+
+    // Since this is not an integration test, we don't want MediaSourceEngine to
+    // fail assertions based on browser support for types.  Pretend that all
+    // video and audio types are supported.
+    window.MediaSource.isTypeSupported = function(mimeType) {
+      var type = mimeType.split('/')[0];
+      return type == 'video' || type == 'audio';
+    };
 
     // Many tests assume the existence of a manifest, so create a basic one.
     // Test suites can override this with more specific manifests.
@@ -1871,6 +1871,138 @@ describe('Player', function() {
         player.onBuffering_(buffering);
       }
     });
+  });
+
+  describe('unplayable periods', function() {
+    beforeEach(function() {
+      // overriding for good / bad codecs.
+      window.MediaSource.isTypeSupported = function(mimeType) {
+        return mimeType.indexOf('good') >= 0;
+      };
+    });
+
+    it('success when one period is playable', function(done) {
+      manifest = new shaka.test.ManifestGenerator()
+              .addPeriod(0)
+                .addVariant(0)
+                  .addVideo(0).mime('video/mp4', 'good')
+              .build();
+      var parser = new shaka.test.FakeManifestParser(manifest);
+      var factory = function() { return parser; };
+      player.load('', 0, factory).catch(fail).then(done);
+    });
+
+    it('success when all periods are playable', function(done) {
+      manifest = new shaka.test.ManifestGenerator()
+              .addPeriod(0)
+                .addVariant(0)
+                  .addVideo(0).mime('video/mp4', 'good')
+              .addPeriod(1)
+                .addVariant(1)
+                  .addVideo(1).mime('video/mp4', 'good')
+              .build();
+      var parser = new shaka.test.FakeManifestParser(manifest);
+      var factory = function() { return parser; };
+      player.load('', 0, factory).catch(fail).then(done);
+    });
+
+    it('throw UNPLAYABLE_PERIOD when some periods are unplayable',
+        function(done) {
+          manifest = new shaka.test.ManifestGenerator()
+              .addPeriod(0)
+                .addVariant(0).bandwidth(500)
+                  .addVideo(0).mime('video/mp4', 'good')
+              .addPeriod(1)
+                .addVariant(1).bandwidth(500)
+                  .addVideo(1).mime('video/mp4', 'bad')
+              .build();
+          var parser = new shaka.test.FakeManifestParser(manifest);
+          var factory = function() { return parser; };
+          player.load('', 0, factory).then(fail).catch(function(error) {
+            shaka.test.Util.expectToEqualError(
+                error,
+                new shaka.util.Error(
+                    shaka.util.Error.Severity.CRITICAL,
+                    shaka.util.Error.Category.MANIFEST,
+                    shaka.util.Error.Code.UNPLAYABLE_PERIOD));
+          }).then(done);
+        });
+
+    it('throw CONTENT_UNSUPPORTED_BY_BROWSER when the only period is ' +
+        'unplayable', function(done) {
+          manifest = new shaka.test.ManifestGenerator()
+              .addPeriod(0)
+                .addVariant(0).bandwidth(500)
+                  .addVideo(0).mime('video/mp4', 'bad')
+              .build();
+          var parser = new shaka.test.FakeManifestParser(manifest);
+          var factory = function() { return parser; };
+          player.load('', 0, factory).then(fail).catch(function(error) {
+            shaka.test.Util.expectToEqualError(
+                error,
+                new shaka.util.Error(
+                    shaka.util.Error.Severity.CRITICAL,
+                    shaka.util.Error.Category.MANIFEST,
+                    shaka.util.Error.Code.CONTENT_UNSUPPORTED_BY_BROWSER));
+          }).then(done);
+        });
+
+    it('throw CONTENT_UNSUPPORTED_BY_BROWSER when all periods are unplayable',
+        function(done) {
+          manifest = new shaka.test.ManifestGenerator()
+              .addPeriod(0)
+                .addVariant(0).bandwidth(500)
+                  .addVideo(0).mime('video/mp4', 'bad')
+                .addVariant(1).bandwidth(500)
+                  .addVideo(1).mime('video/mp4', 'bad')
+              .addPeriod(1)
+                .addVariant(2)
+                  .addVideo(2).mime('video/mp4', 'bad')
+              .build();
+
+          var parser = new shaka.test.FakeManifestParser(manifest);
+          var factory = function() { return parser; };
+          player.load('', 0, factory).then(fail).catch(function(error) {
+            shaka.test.Util.expectToEqualError(
+                error,
+                new shaka.util.Error(
+                    shaka.util.Error.Severity.CRITICAL,
+                    shaka.util.Error.Category.MANIFEST,
+                    shaka.util.Error.Code.CONTENT_UNSUPPORTED_BY_BROWSER));
+          }).then(done);
+        });
+
+    it('throw UNPLAYABLE_PERIOD when the new period is unplayable',
+        function(done) {
+          manifest = new shaka.test.ManifestGenerator()
+              .addPeriod(0)
+                .addVariant(0).bandwidth(500)
+                  .addVideo(0).mime('video/mp4', 'good')
+                .addVariant(1).bandwidth(500)
+                  .addVideo(1).mime('video/mp4', 'good')
+              .build();
+          var parser = new shaka.test.FakeManifestParser(manifest);
+          var factory = function() { return parser; };
+          player.load('', 0, factory).catch(fail).then(function() {
+            var manifest2 = new shaka.test.ManifestGenerator()
+              .addPeriod(0)
+                .addVariant(0).bandwidth(500)
+                  .addVideo(0).mime('video/mp4', 'bad')
+              .build();
+            manifest.periods.push(manifest2.periods[0]);
+            try {
+              parser.playerInterface.filterNewPeriod(manifest2.periods[0]);
+              fail('filter period wrong');
+            } catch (error) {
+              shaka.test.Util.expectToEqualError(
+                  error,
+                  new shaka.util.Error(
+                      shaka.util.Error.Severity.CRITICAL,
+                      shaka.util.Error.Category.MANIFEST,
+                      shaka.util.Error.Code.UNPLAYABLE_PERIOD));
+            }
+          }).catch(fail).then(done);
+        });
   });
 
   describe('restrictions', function() {

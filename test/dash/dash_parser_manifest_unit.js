@@ -35,7 +35,8 @@ describe('DashParser Manifest', function() {
     onEventSpy = jasmine.createSpy('onEvent');
     playerInterface = {
       networkingEngine: fakeNetEngine,
-      filterPeriod: function() {},
+      filterNewPeriod: function() {},
+      filterAllPeriods: function() {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: shaka.test.Util.spyFunc(onEventSpy),
       onError: fail

@@ -263,7 +263,12 @@ shaka.test.FakeManifestParser = function(manifest) {
   var ret = jasmine.createSpyObj('FakeManifestParser', [
     'start', 'stop', 'configure', 'update', 'onExpirationUpdated'
   ]);
-  ret.start.and.returnValue(Promise.resolve(manifest));
+  ret.start.and.callFake(function(manifestUri, playerInterface) {
+    ret.playerInterface = playerInterface;
+    return Promise.resolve().then(function() {
+      return manifest;
+    });
+  });
   ret.stop.and.returnValue(Promise.resolve());
   return ret;
 };
@@ -287,6 +292,10 @@ shaka.test.FakeManifestParser.prototype.onExpirationUpdated;
 
 /** @type {!jasmine.Spy} */
 shaka.test.FakeManifestParser.prototype.configure;
+
+
+/** @type {shaka.media.StreamingEngine.PlayerInterface} */
+shaka.test.FakeManifestParser.prototype.playerInterface;
 
 
 

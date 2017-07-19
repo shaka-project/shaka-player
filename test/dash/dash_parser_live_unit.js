@@ -57,7 +57,8 @@ describe('DashParser Live', function() {
     });
     playerInterface = {
       networkingEngine: fakeNetEngine,
-      filterPeriod: function() {},
+      filterNewPeriod: function() {},
+      filterAllPeriods: function() {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail
@@ -362,21 +363,28 @@ describe('DashParser Live', function() {
         sprintf(template, {updateTime: updateTime, contents: lines.join('\n')});
     var firstManifest = makeSimpleLiveManifestText(lines, updateTime);
 
-    var filterPeriod = jasmine.createSpy('filterPeriod');
-    playerInterface.filterPeriod = Util.spyFunc(filterPeriod);
+    var filterNewPeriod = jasmine.createSpy('filterNewPeriod');
+    playerInterface.filterNewPeriod = Util.spyFunc(filterNewPeriod);
+
+    var filterAllPeriods = jasmine.createSpy('filterAllPeriods');
+    playerInterface.filterAllPeriods = Util.spyFunc(filterAllPeriods);
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': firstManifest});
     parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           expect(manifest.periods.length).toBe(1);
-          expect(filterPeriod.calls.count()).toBe(1);
+          // Should call filterAllPeriods for parsing the first manifest
+          expect(filterNewPeriod.calls.count()).toBe(0);
+          expect(filterAllPeriods.calls.count()).toBe(1);
 
           fakeNetEngine.setResponseMapAsText({'dummy://foo': secondManifest});
           delayForUpdatePeriod();
 
           // Should update the same manifest object.
           expect(manifest.periods.length).toBe(2);
-          expect(filterPeriod.calls.count()).toBe(2);
+          // Should call filterNewPeriod for parsing the new manifest
+          expect(filterAllPeriods.calls.count()).toBe(1);
+          expect(filterNewPeriod.calls.count()).toBe(1);
         }).catch(fail).then(done);
     shaka.polyfill.Promise.flush();
   });

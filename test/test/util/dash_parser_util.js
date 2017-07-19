@@ -96,7 +96,8 @@ shaka.test.Dash.testSegmentIndex = function(done, manifestText, references) {
   var playerInterface = {
     networkingEngine:
         new shaka.test.FakeNetworkingEngine({'dummy://foo': buffer}),
-    filterPeriod: function() {},
+    filterNewPeriod: function() {},
+    filterAllPeriods: function() {},
     onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
     onEvent: fail,
     onError: fail
@@ -123,7 +124,8 @@ shaka.test.Dash.testFails = function(done, manifestText, expectedError) {
   var playerInterface = {
     networkingEngine:
         new shaka.test.FakeNetworkingEngine({'dummy://foo': manifestData}),
-    filterPeriod: function() {},
+    filterNewPeriod: function() {},
+    filterAllPeriods: function() {},
     onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
     onEvent: fail,
     onError: fail
