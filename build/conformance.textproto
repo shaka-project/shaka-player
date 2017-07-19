@@ -92,6 +92,7 @@ requirement: {
   value: 'Array.prototype.findIndex'
   value: 'Array.prototype.copyWithin'
   value: 'Array.prototype.fill'
+  value: 'Array.prototype.includes'
   error_message: 'ES6 Array methods are not allowed '
                  'because they are not supported in IE11'
 }
