@@ -2329,6 +2329,7 @@ describe('Player', function() {
           .addPeriod(0)
             .addVariant(0)
             .addVideo(1)
+              .segmentReferences(null)
           .build();
       goog.asserts.assert(manifest, 'manifest must be non-null');
       var parser = new shaka.test.FakeManifestParser(manifest);

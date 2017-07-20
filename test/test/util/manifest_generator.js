@@ -464,6 +464,7 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
     findSegmentPosition: shaka.test.Util.spyFunc(find),
     getSegmentReference: shaka.test.Util.spyFunc(get),
     initSegmentReference: null,
+    mediaSegmentReferences: shaka.test.Util.anyNullable(Array),
     presentationTimeOffset: 0,
     mimeType: defaultMimeType,
     codecs: defaultCodecs,
@@ -523,6 +524,20 @@ shaka.test.ManifestGenerator.prototype.anyInitSegment = function() {
 shaka.test.ManifestGenerator.prototype.nullInitSegment = function() {
   var stream = this.currentStream_();
   stream.initSegmentReference = null;
+  return this;
+};
+
+
+/**
+ * Sets the media segments of the current stream.
+ *
+ * @param {Array.<shaka.media.SegmentReference>} segmentReferences
+ * @return {!shaka.test.ManifestGenerator}
+ */
+shaka.test.ManifestGenerator.prototype.segmentReferences =
+    function(segmentReferences) {
+  var stream = this.currentStream_();
+  stream.mediaSegmentReferences = segmentReferences;
   return this;
 };
 

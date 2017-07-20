@@ -247,6 +247,7 @@ describe('OfflineUtils', function() {
         initSegmentReference: streamDb.initSegmentUri ?
             jasmine.any(shaka.media.InitSegmentReference) :
             null,
+        mediaSegmentReferences: jasmine.any(Array),
         presentationTimeOffset: streamDb.presentationTimeOffset,
         mimeType: streamDb.mimeType,
         codecs: streamDb.codecs,

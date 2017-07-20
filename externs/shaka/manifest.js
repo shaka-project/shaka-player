@@ -286,6 +286,7 @@ shakaExtern.GetSegmentReferenceFunction;
  *   findSegmentPosition: shakaExtern.FindSegmentPositionFunction,
  *   getSegmentReference: shakaExtern.GetSegmentReferenceFunction,
  *   initSegmentReference: shaka.media.InitSegmentReference,
+ *   mediaSegmentReferences: Array.<shaka.media.SegmentReference>,
  *   presentationTimeOffset: (number|undefined),
  *   mimeType: string,
  *   codecs: string,
@@ -328,6 +329,12 @@ shakaExtern.GetSegmentReferenceFunction;
  * @property {shaka.media.InitSegmentReference} initSegmentReference
  *   The Stream's initialization segment metadata, or null if the segments are
  *   self-initializing.
+ * @property {Array.<shaka.media.SegmentReference>} mediaSegmentReferences
+ *   A list of references to media segments, or null if the references are
+ *   dynamically generated (such as in DASH's SegmentTemplate).
+ *   This is used to detect and attempt to correct common timeline issues in
+ *   content at startup.  It does not need to be kept updated when the manifest
+ *   is refreshed.
  * @property {(number|undefined)} presentationTimeOffset
  *   <i>Defaults to 0.</i> <br>
  *   The amount of time, in seconds, that the stream's presentation timestamps

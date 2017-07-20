@@ -302,6 +302,23 @@ shaka.test.Util.invokeSpy = function(spy, var_args) {
 };
 
 
+/**
+ * Works just like jasmine.any, but allows for null.
+ * @param {function(new:T)} factory
+ * @return {?T}
+ * @template T
+ */
+shaka.test.Util.anyNullable = function(factory) {
+  // This is an asymmetric matcher that matches on T instances or null when used
+  // on the right-hand side of jasmine's .toEqual().
+  return {
+    asymmetricMatch: function(actual) {
+      return actual == null || jasmine.any(factory).asymmetricMatch(actual);
+    }
+  };
+};
+
+
 beforeEach(function() {
   jasmine.addCustomEqualityTester(shaka.test.Util.compareReferences);
   shaka.test.Util.registerElementMatcher_();
