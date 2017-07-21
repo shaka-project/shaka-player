@@ -2391,6 +2391,187 @@ describe('Player', function() {
     });
   });
 
+  describe('live timeline correction', function() {
+    beforeAll(function() {
+      jasmine.clock().install();
+      jasmine.clock().mockDate();
+    });
+
+    afterAll(function() {
+      jasmine.clock().uninstall();
+    });
+
+    /** @type {shaka.media.PresentationTimeline} */
+    var timeline;
+    var segmentDuration = 10;
+    function fakeGetUris() { return []; }
+
+    function makeReference(offsetFromLive) {
+      var liveEdge = timeline.getSegmentAvailabilityEnd();
+
+      var startTime = liveEdge + offsetFromLive;
+      var endTime = startTime + segmentDuration;
+
+      return new shaka.media.SegmentReference(
+          /* position */ 0, startTime, endTime,
+          /* uris */ fakeGetUris, /* startByte */ 0, /* endByte */ null);
+    }
+
+    function insideTimeline(ref) {
+      return ref.startTime >= timeline.getSegmentAvailabilityStart() &&
+             ref.startTime <= timeline.getSegmentAvailabilityEnd() &&
+             ref.endTime >= timeline.getSegmentAvailabilityStart() &&
+             ref.endTime <= timeline.getSegmentAvailabilityEnd();
+    }
+
+    it('detects and corrects segments before the timeline', function(done) {
+      timeline = new shaka.media.PresentationTimeline(0, 0);
+      timeline.setStatic(false);  // live
+      timeline.setSegmentAvailabilityDuration(60);  // available for 1m
+      spyOn(timeline, 'setClockOffset').and.callThrough();
+
+      var references = [
+        makeReference(-120),
+        makeReference(-110),
+        makeReference(-100),
+        makeReference(-90)
+      ];
+
+      // Everything is initially outside of the timeline.
+      expect(references.some(insideTimeline)).toBe(false);
+
+      var manifest = new shaka.test.ManifestGenerator()
+          .setTimeline(timeline)
+          .addPeriod(0)
+            .addVariant(0)
+            .addVideo(1)
+              .segmentReferences(references)
+          .build();
+
+      var parser = new shaka.test.FakeManifestParser(manifest);
+      var factory = function() { return parser; };
+
+      expect(logWarnSpy).not.toHaveBeenCalled();
+      player.load('', 0, factory).then(function() {
+        expect(logWarnSpy).toHaveBeenCalled();
+        expect(timeline.setClockOffset).toHaveBeenCalledWith(-80 * 1000);
+        // Everything is now inside the timeline.
+        expect(references.every(insideTimeline)).toBe(true);
+      }).catch(fail).then(done);
+    });
+
+    it('detects and corrects segments after the timeline', function(done) {
+      timeline = new shaka.media.PresentationTimeline(0, 0);
+      timeline.setStatic(false);  // live
+      timeline.setSegmentAvailabilityDuration(60);  // available for 1m
+      spyOn(timeline, 'setClockOffset').and.callThrough();
+
+      var references = [
+        makeReference(0),
+        makeReference(10),
+        makeReference(20),
+        makeReference(30)
+      ];
+
+      // Everything is initially outside of the timeline.
+      expect(references.some(insideTimeline)).toBe(false);
+
+      var manifest = new shaka.test.ManifestGenerator()
+          .setTimeline(timeline)
+          .addPeriod(0)
+            .addVariant(0)
+            .addVideo(1)
+              .segmentReferences(references)
+          .build();
+
+      var parser = new shaka.test.FakeManifestParser(manifest);
+      var factory = function() { return parser; };
+
+      expect(logWarnSpy).not.toHaveBeenCalled();
+      player.load('', 0, factory).then(function() {
+        expect(logWarnSpy).toHaveBeenCalled();
+        expect(timeline.setClockOffset).toHaveBeenCalledWith(40 * 1000);
+        // Everything is now inside the timeline.
+        expect(references.every(insideTimeline)).toBe(true);
+      }).catch(fail).then(done);
+    });
+
+    it('does not correct if the last segment is available', function(done) {
+      timeline = new shaka.media.PresentationTimeline(0, 0);
+      timeline.setStatic(false);  // live
+      timeline.setSegmentAvailabilityDuration(60);  // available for 1m
+      spyOn(timeline, 'setClockOffset').and.callThrough();
+
+      var references = [
+        makeReference(-80),
+        makeReference(-70),
+        makeReference(-60),
+        makeReference(-50),
+        makeReference(-40),
+        makeReference(-30),
+        makeReference(-20),
+        makeReference(-10)
+      ];
+
+      // Not everything is initially inside the timeline, but the last one is.
+      expect(references.every(insideTimeline)).toBe(false);
+      expect(insideTimeline(references[references.length - 1])).toBe(true);
+
+      var manifest = new shaka.test.ManifestGenerator()
+          .setTimeline(timeline)
+          .addPeriod(0)
+            .addVariant(0)
+            .addVideo(1)
+              .segmentReferences(references)
+          .build();
+
+      var parser = new shaka.test.FakeManifestParser(manifest);
+      var factory = function() { return parser; };
+
+      expect(logWarnSpy).not.toHaveBeenCalled();
+      player.load('', 0, factory).then(function() {
+        expect(logWarnSpy).not.toHaveBeenCalled();
+        expect(timeline.setClockOffset).not.toHaveBeenCalled();
+      }).catch(fail).then(done);
+    });
+
+    it('does not correct if only last segment is unavailable', function(done) {
+      timeline = new shaka.media.PresentationTimeline(0, 0);
+      timeline.setStatic(false);  // live
+      timeline.setSegmentAvailabilityDuration(60);  // available for 1m
+      timeline.notifyMaxSegmentDuration(segmentDuration);
+      spyOn(timeline, 'setClockOffset').and.callThrough();
+
+      var references = [
+        makeReference(-30),
+        makeReference(-20),
+        makeReference(-10),
+        makeReference(0)
+      ];
+
+      // Almost everything is initially inside the timeline.
+      expect(references.every(insideTimeline)).toBe(false);
+      expect(references.slice(0, -1).every(insideTimeline)).toBe(true);
+
+      var manifest = new shaka.test.ManifestGenerator()
+          .setTimeline(timeline)
+          .addPeriod(0)
+            .addVariant(0)
+            .addVideo(1)
+              .segmentReferences(references)
+          .build();
+
+      var parser = new shaka.test.FakeManifestParser(manifest);
+      var factory = function() { return parser; };
+
+      expect(logWarnSpy).not.toHaveBeenCalled();
+      player.load('', 0, factory).then(function() {
+        expect(logWarnSpy).not.toHaveBeenCalled();
+        expect(timeline.setClockOffset).not.toHaveBeenCalled();
+      }).catch(fail).then(done);
+    });
+  });
+
   /**
    * Choose streams for the given period.
    *
