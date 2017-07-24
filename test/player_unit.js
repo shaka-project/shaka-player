@@ -2278,6 +2278,26 @@ describe('Player', function() {
     }).then(done);
   });
 
+  describe('load', function() {
+    it('tolerates bandwidth of NaN, undefined, or 0', function(done) {
+      // Regression test for https://github.com/google/shaka-player/issues/938
+      manifest = new shaka.test.ManifestGenerator()
+              .addPeriod(0)
+                .addVariant(0).bandwidth(/** @type {?} */(undefined))
+                  .addVideo(0).mime('video/mp4', 'good')
+                .addVariant(1).bandwidth(NaN)
+                  .addVideo(1).mime('video/mp4', 'good')
+                .addVariant(2).bandwidth(0)
+                  .addVideo(2).mime('video/mp4', 'good')
+              .build();
+
+      var parser = new shaka.test.FakeManifestParser(manifest);
+      var parserFactory = function() { return parser; };
+
+      // Before the fix, load() would fail assertions and throw errors.
+      player.load('', 0, parserFactory).catch(fail).then(done);
+    });
+  });
 
   /**
    * Choose streams for the given period.

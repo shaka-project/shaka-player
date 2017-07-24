@@ -932,6 +932,46 @@ describe('DashParser Manifest', function() {
         .then(done);
   });
 
+  it('handles bandwidth of 0 or missing', function(done) {
+    // Regression test for https://github.com/google/shaka-player/issues/938
+    var source = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation id="1" bandwidth="1">',
+      '        <SegmentTemplate media="1-$Number$.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet mimeType="audio/mp4">',
+      '      <Representation id="2" bandwidth="0">',
+      '        <SegmentTemplate media="2-$Number$.mp4" duration="1" />',
+      '      </Representation>',
+      '      <Representation id="3">',
+      '        <SegmentTemplate media="3-$Number$.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'
+    ].join('\n');
+
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+    parser.start('dummy://foo', playerInterface)
+        .then(function(manifest) {
+          expect(manifest.periods.length).toBe(1);
+          expect(manifest.periods[0].variants.length).toBe(2);
+
+          var variant1 = manifest.periods[0].variants[0];
+          expect(isNaN(variant1.bandwidth)).toBe(false);
+          expect(variant1.bandwidth).toBeGreaterThan(0);
+
+          var variant2 = manifest.periods[0].variants[1];
+          expect(isNaN(variant2.bandwidth)).toBe(false);
+          expect(variant2.bandwidth).toBeGreaterThan(0);
+        })
+        .catch(fail)
+        .then(done);
+  });
+
   /**
    * @param {string} manifestText
    * @param {Uint8Array} emsgUpdate
