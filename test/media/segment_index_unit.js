@@ -255,6 +255,32 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
       expect(index1.references_[1]).toEqual(references2[0]);
       expect(index1.references_[2]).toEqual(references2[1]);
     });
+
+    // Makes sure segment references from time-based template merge with correct
+    // position numbers.
+    // https://github.com/google/shaka-player/pull/838
+    it('last live stream reference with corrected position', function() {
+      var references1 = [
+        makeReference(1, 10, 20, uri(10)),
+        makeReference(2, 20, 30, uri(20)),
+        makeReference(3, 30, 49.887, uri(30))
+      ];
+      var index1 = new shaka.media.SegmentIndex(references1);
+
+      // segment position always start from 1 for time-based segment templates
+      var references2 = [
+        makeReference(1, 20, 30, uri(20)),
+        makeReference(2, 30, 50, uri(30))
+      ];
+
+      var lastReference = makeReference(3, 30, 50, uri(30));
+
+      index1.merge(references2);
+      expect(index1.references_.length).toBe(3);
+      expect(index1.references_[0]).toEqual(references1[0]);
+      expect(index1.references_[1]).toEqual(references1[1]);
+      expect(index1.references_[2]).toEqual(lastReference);
+    });
   });
 
   describe('evict', function() {
