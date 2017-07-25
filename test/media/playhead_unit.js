@@ -393,6 +393,35 @@ describe('Playhead', function() {
     expect(onSeek).toHaveBeenCalled();
   });
 
+  it('handles live manifests with no seek range', function() {
+    video.buffered = createFakeBuffered([{start: 1000, end: 1030}]);
+    video.readyState = HTMLMediaElement.HAVE_METADATA;
+
+    timeline.isLive.and.returnValue(true);
+    timeline.getSegmentAvailabilityStart.and.returnValue(1000);
+    timeline.getSegmentAvailabilityEnd.and.returnValue(1000);
+    timeline.getSegmentAvailabilityDuration.and.returnValue(1000);
+
+    playhead = new shaka.media.Playhead(
+        video,
+        manifest,
+        config,
+        5 /* startTime */,
+        Util.spyFunc(onSeek),
+        Util.spyFunc(onEvent));
+    expect(video.currentTime).toBe(1000);
+    video.on['seeking']();
+
+    // The availability window slips ahead.
+    timeline.getSegmentAvailabilityStart.and.returnValue(1030);
+    timeline.getSegmentAvailabilityEnd.and.returnValue(1030);
+    video.on['waiting']();
+    // We expect this to move to 15 seconds ahead of the start of the
+    // availability window, due to the rebuffering goal (10s) and the 5s
+    // for the Chromecast.
+    expect(video.currentTime).toBe(1045);
+  });
+
   describe('clamps playhead after resuming', function() {
     beforeEach(function() {
       video.readyState = HTMLMediaElement.HAVE_METADATA;
