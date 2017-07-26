@@ -380,16 +380,14 @@ class Launcher:
     return 0 if all(result == 0 for result in results) else 1
 
 
-def main(args):
+def Run(args):
   launcher = Launcher('Shaka Player Test Runner Script', _GetDefaultBrowsers())
   launcher.ParseArguments(args)
   return launcher.RunCommand(None)
 
 
-# TODO(vaage) : Remove this method once all other tools have been updated to not
-#               require it.
-def run_tests(args):
-  main(args)
+def main(args):
+  Run(args)
 
 
 if __name__ == '__main__':
