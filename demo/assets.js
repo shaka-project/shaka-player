@@ -832,7 +832,7 @@ shakaAssets.testAssets = [
     ],
 
     licenseServers: {
-      'com.microsoft.playready': '//playready.directtaps.net/pr/svc/rightsmanager.asmx?PlayRight=1&UseSimpleNonPersistentLicense=1'  // gjslint: disable=110
+      'com.microsoft.playready': '//test.playready.microsoft.com/service/rightsmanager.asmx?PlayRight=1&UseSimpleNonPersistentLicense=1'  // gjslint: disable=110
     }
   },
   {
