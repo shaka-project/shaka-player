@@ -18,8 +18,12 @@
 // Karma configuration
 // Install required modules by running "npm install"
 
-module.exports = function(config) {
+var fs = require('fs');
+var path = require('path');
+var rimraf = require('rimraf');
+var which = require('which');
 
+module.exports = function(config) {
   var SHAKA_LOG_MAP = {
     none: 0,
     error: 1,
@@ -42,6 +46,16 @@ module.exports = function(config) {
   var args = process.argv;
   var settingsIndex = args.indexOf('--settings')
   var settings = settingsIndex >= 0 ? JSON.parse(args[settingsIndex + 1]) : {};
+
+  if (settings.browsers && settings.browsers.length == 1 &&
+      settings.browsers[0] == 'help') {
+    console.log('Available browsers:');
+    console.log('===================');
+    allUsableBrowserLaunchers(config).forEach(function(name) {
+      console.log('  ' + name);
+    });
+    process.exit(1);
+  }
 
   config.set({
     // base path that will be used to resolve all patterns (eg. files, exclude)
@@ -207,7 +221,6 @@ module.exports = function(config) {
 
   if (settings.html_coverage_report) {
     // Wipe out any old coverage reports to avoid confusion.
-    var rimraf = require('rimraf');
     rimraf.sync('coverage', {});  // Like rm -rf
 
     config.set({
@@ -245,7 +258,6 @@ function frameworkPluginForModule(name) {
   // The framework injects files into the client which runs the tests.
   var framework = function(files) {
     // Locate the main file for the node module.
-    var path = require('path');
     var mainFile = path.resolve(require.resolve(name));
 
     // Add a file entry to the list of files to be served.
@@ -265,4 +277,63 @@ function frameworkPluginForModule(name) {
   var obj = {};
   obj['framework:' + name] = ['factory', framework];
   return obj;
+}
+
+// Determines which launchers and customLaunchers can be used and returns an
+// array of strings.
+function allUsableBrowserLaunchers(config) {
+  var browsers = [];
+
+  // Load all launcher plugins.
+  // The format of the items in this list is something like:
+  // {
+  //   'launcher:foo1': ['type', Function],
+  //   'launcher:foo2': ['type', Function],
+  // }
+  // Where the launchers grouped together into one item were defined by a single
+  // plugin, and the Functions in the inner array are the constructors for those
+  // launchers.
+  var plugins = require('karma/lib/plugin').resolve(['karma-*-launcher']);
+  plugins.forEach(function(map) {
+    Object.keys(map).forEach(function(name) {
+      // Launchers should all start with 'launcher:', but occasionally we also
+      // see 'test' come up for some reason.
+      if (!name.startsWith('launcher:')) return;
+
+      var browserName = name.split(':')[1];
+      var pluginConstructor = map[name][1];
+
+      // Most launchers requiring configuration through customLaunchers have
+      // no DEFAULT_CMD.  Some launchers have DEFAULT_CMD, but not for this
+      // platform.  Finally, WebDriver has DEFAULT_CMD, but still requires
+      // configuration, so we simply blacklist it by name.
+      var DEFAULT_CMD = pluginConstructor.prototype.DEFAULT_CMD;
+      if (!DEFAULT_CMD || !DEFAULT_CMD[process.platform]) return;
+      if (browserName == 'WebDriver') return;
+
+      // Now that we've filtered out the browsers that can't be launched without
+      // custom config or that can't be launched on this platform, we filter out
+      // the browsers you don't have installed.
+      var ENV_CMD = pluginConstructor.prototype.ENV_CMD;
+      var browserPath = process.env[ENV_CMD] || DEFAULT_CMD[process.platform];
+
+      // which.sync currently throws when the executable is not found.
+      // https://github.com/npm/node-which/issues/51
+      try {
+        if (!fs.existsSync(browserPath) && !which.sync(browserPath)) return;
+      } catch(exception) {
+        return;
+      }
+
+      browsers.push(browserName);
+    });
+  });
+
+  // Once we've found the names of all the standard launchers, add to that list
+  // the names of any custom launcher configurations.
+  if (config.customLaunchers) {
+    browsers.push.apply(browsers, Object.keys(config.customLaunchers));
+  }
+
+  return browsers;
 }

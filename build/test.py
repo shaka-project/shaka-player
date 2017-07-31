@@ -110,7 +110,8 @@ class Launcher:
     running_commands.add_argument(
         '--browsers',
         help='Specify which browsers to run tests on as a space-separated or '
-             'comma-separated list.',
+             'comma-separated list. Use "--browsers help" to see a list of '
+             'available browsers on this platform.',
         action=_HandleMixedListsAction,
         nargs='+')
     running_commands.add_argument(
