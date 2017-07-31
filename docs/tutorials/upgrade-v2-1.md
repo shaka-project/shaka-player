@@ -82,24 +82,28 @@ See {@link shaka.text.Cue} for details.
 
 #### Setting and configuring ABR manager
 
-In Shaka v2.1 a custom abr manager could be set through
+In Shaka v2.1, a custom ABR manager could be set through:
+
 ```js
 player.configure({
   abr.manager: customAbrManager
 });
 ```
 
-In v2.2 it's done through
+In v2.2, it's done through:
+
 ```js
 player.configure({
   abrFactory: customAbrManager
 });
 ```
 
-The API for abr manager also changed.
-In v2.1 default bandwidth estimate and restrictions were set through
+The API for AbrManager also changed.
+
+In v2.1, default bandwidth estimate and restrictions were set through
 `setDefaultEstimate()` and `setRestrictions()` methods.
-In 2.2 they are set through `configure()` method which accepts a
+
+In v2.2, they are set through `configure()` method which accepts a
 {@link shakaExtern.AbrConfiguration} structure. The new method is more general,
 and allows for the configuration of bandwidth upgrade and downgrade targets
 as well.
@@ -113,8 +117,39 @@ abrManager.setRestrictions(restrictions);
 abrManager.configure(abrConfigurations);
 ```
 
-In v2.2, the v2.1 interfaces for setting and configuring abr manager are
-still supported, but are deprecated.  Support will be removed in v2.3.
+In v2.1, AbrManager had a `chooseStreams()` method for the player to prompt for
+a stream selection, and a `switch()` callback to send unsolicited changes from
+AbrManager to player.  In v2.2, `chooseStreams()` has been replaced with
+`chooseVariant()`, and the `switch()` callback takes a variant instead of a map
+of streams.
+
+```js
+// v2.1:
+var map = abrManager.chooseStreams(['audio', 'video']);
+console.log(map['video'], map['audio']);
+
+MyAbrManager.prototype.makeDecision_ = function() {
+  var video = this.computeBestVideo_(this.bandwidth_);
+  var audio = this.computeBestAudio_(this.bandwidth_);
+  var map = {
+    'audio': audio,
+    'video': video
+  };
+  this.switch_(map);
+};
+
+// v2.2:
+var variant = abrManager.chooseVariant();
+console.log(variant, variant.video, variant.audio);
+
+MyAbrManager.prototype.makeDecision_ = function() {
+  var variant = this.computeBestVariant_(this.bandwidth_);
+  this.switch_(variant);
+};
+```
+
+In v2.2, the v2.1 interfaces are still supported, but are deprecated.  Support
+will be removed in v2.3.
 
 
 #### Switch history changes

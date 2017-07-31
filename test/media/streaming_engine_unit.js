@@ -53,11 +53,13 @@ describe('StreamingEngine', function() {
 
   var audioStream1;
   var videoStream1;
+  var variant1;
   var textStream1;
   var alternateVideoStream1;
 
   var audioStream2;
   var videoStream2;
+  var variant2;
   var textStream2;
 
   /** @type {shakaExtern.Manifest} */
@@ -388,6 +390,7 @@ describe('StreamingEngine', function() {
 
     audioStream1 = manifest.periods[0].variants[0].audio;
     videoStream1 = manifest.periods[0].variants[0].video;
+    variant1 = manifest.periods[0].variants[0];
     textStream1 = manifest.periods[0].textStreams[0];
 
     // This Stream is only used to verify that StreamingEngine can setup
@@ -412,6 +415,7 @@ describe('StreamingEngine', function() {
 
     audioStream2 = manifest.periods[1].variants[0].audio;
     videoStream2 = manifest.periods[1].variants[0].video;
+    variant2 = manifest.periods[1].variants[0];
     textStream2 = manifest.periods[1].textStreams[0];
   }
 
@@ -684,13 +688,7 @@ describe('StreamingEngine', function() {
         return defaultOnChooseStreams(period);
       });
 
-      // Create empty object first and initialize the fields through
-      // [] to allow field names to be expressions.
-      var ret = {};
-      ret[ContentType.AUDIO] = audioStream2;
-      ret[ContentType.VIDEO] = videoStream2;
-      ret[ContentType.TEXT] = textStream2;
-      return ret;
+      return { variant: variant2, text: textStream2 };
     });
 
     streamingEngine.init();
@@ -736,13 +734,7 @@ describe('StreamingEngine', function() {
         return defaultOnChooseStreams(period);
       });
 
-      // Create empty object first and initialize the fields through
-      // [] to allow field names to be expressions.
-      var ret = {};
-      ret[ContentType.AUDIO] = audioStream1;
-      ret[ContentType.VIDEO] = videoStream1;
-      ret[ContentType.TEXT] = textStream1;
-      return ret;
+      return { variant: variant1, text: textStream1 };
     });
 
     streamingEngine.init();
@@ -791,7 +783,7 @@ describe('StreamingEngine', function() {
     onChooseStreams.and.callFake(function(period) {
       var chosen = defaultOnChooseStreams(period);
       if (period == manifest.periods[0])
-        delete chosen[ContentType.TEXT];
+        chosen.text = null;
       return chosen;
     });
 
@@ -831,7 +823,7 @@ describe('StreamingEngine', function() {
     onChooseStreams.and.callFake(function(period) {
       var chosen = defaultOnChooseStreams(period);
       if (period == manifest.periods[0])
-        delete chosen[ContentType.TEXT];
+        chosen.text = null;
       return chosen;
     });
 
@@ -863,7 +855,7 @@ describe('StreamingEngine', function() {
             .toBe(textStream2);
 
         mediaSourceEngine.reinitText.calls.reset();
-        streamingEngine.switch(ContentType.TEXT, textStream2, false);
+        streamingEngine.switchTextStream(textStream2);
       });
     });
 
@@ -886,7 +878,7 @@ describe('StreamingEngine', function() {
     onChooseStreams.and.callFake(function(period) {
       var chosen = defaultOnChooseStreams(period);
       if (period == manifest.periods[1])
-        delete chosen[ContentType.TEXT];
+        chosen.text = null;
       return chosen;
     });
 
@@ -926,6 +918,112 @@ describe('StreamingEngine', function() {
     runTest();
     expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
     expect(timeline.setDuration).toHaveBeenCalledWith(35);
+  });
+
+  describe('switchVariant/switchTextStream', function() {
+    var initialVariant;
+    var sameAudioVariant;
+    var sameVideoVariant;
+    var initialTextStream;
+
+    beforeEach(function() {
+      // Set up a manifest with multiple variants and a text stream.
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addVariant(0)
+            .addAudio(10).useSegmentTemplate('audio-10-%d.mp4', 10)
+            .addVideo(11).useSegmentTemplate('video-11-%d.mp4', 10)
+          .addVariant(1)
+            .addAudio(10)  // reused
+            .addVideo(12).useSegmentTemplate('video-12-%d.mp4', 10)
+          .addVariant(2)
+            .addAudio(13).useSegmentTemplate('audio-13-%d.mp4', 10)
+            .addVideo(12)  // reused
+          .addTextStream(20).useSegmentTemplate('text-20-%d.mp4', 10)
+        .build();
+
+      initialVariant = manifest.periods[0].variants[0];
+      sameAudioVariant = manifest.periods[0].variants[1];
+      sameVideoVariant = manifest.periods[0].variants[2];
+      initialTextStream = manifest.periods[0].textStreams[0];
+
+      // For these tests, we don't care about specific data appended.
+      // Just return any old ArrayBuffer for any requested segment.
+      netEngine = {
+        request: function(requestType, request) {
+          var buffer = new ArrayBuffer(0);
+          var response = { uri: request.uris[0], data: buffer, headers: {} };
+          return Promise.resolve(response);
+        }
+      };
+
+      // For these tests, we also don't need FakeMediaSourceEngine to verify
+      // its input data.
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine({});
+      mediaSourceEngine.clear.and.returnValue(Promise.resolve());
+      mediaSourceEngine.bufferedAheadOf.and.returnValue(0);
+      mediaSourceEngine.bufferStart.and.returnValue(0);
+      mediaSourceEngine.setStreamProperties.and.returnValue(Promise.resolve());
+      mediaSourceEngine.remove.and.returnValue(Promise.resolve());
+
+      var bufferEnd = { audio: 0, video: 0, text: 0 };
+      mediaSourceEngine.appendBuffer.and.callFake(
+          function(type, data, start, end) {
+            bufferEnd[type] = end;
+            return Promise.resolve();
+          });
+      mediaSourceEngine.bufferEnd.and.callFake(function(type) {
+        return bufferEnd[type];
+      });
+      mediaSourceEngine.bufferedAheadOf.and.callFake(function(type, start) {
+        return Math.max(0, bufferEnd[type] - start);
+      });
+      mediaSourceEngine.isBuffered.and.callFake(function(type, time) {
+        return time >= 0 && time < bufferEnd[type];
+      });
+
+      playhead = new shaka.test.FakePlayhead();
+      playheadTime = 0;
+      playing = false;
+      createStreamingEngine();
+
+      playhead.getTime.and.returnValue(0);
+      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+      onChooseStreams.and.callFake(function() {
+        return { variant: initialVariant, text: initialTextStream };
+      });
+    });
+
+    it('will not clear buffers if streams have not changed', function() {
+      onCanSwitch.and.callFake(function() {
+        mediaSourceEngine.clear.calls.reset();
+        streamingEngine.switchVariant(sameAudioVariant, /* clearBuffer */ true);
+        Util.fakeEventLoop(1);
+        expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('audio');
+        expect(mediaSourceEngine.clear).toHaveBeenCalledWith('video');
+        expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('text');
+
+        mediaSourceEngine.clear.calls.reset();
+        streamingEngine.switchVariant(sameVideoVariant, /* clearBuffer */ true);
+        Util.fakeEventLoop(1);
+        expect(mediaSourceEngine.clear).toHaveBeenCalledWith('audio');
+        expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('video');
+        expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('text');
+
+        mediaSourceEngine.clear.calls.reset();
+        streamingEngine.switchTextStream(initialTextStream);
+        Util.fakeEventLoop(1);
+        expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('audio');
+        expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('video');
+        expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('text');
+      });
+
+      streamingEngine.init().catch(fail);
+
+      Util.fakeEventLoop(1);
+
+      expect(onCanSwitch).toHaveBeenCalled();
+    });
   });
 
   describe('handles seeks (VOD)', function() {
@@ -2002,19 +2100,16 @@ describe('StreamingEngine', function() {
 
       onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
 
-      var originalRemove = shaka.test.FakeMediaSourceEngine.prototype.remove;
-      // NOTE: Closure cannot type check spy's correctly. Here we have to
-      // explicitly re-create remove()'s spy.
-      var removeSpy = jasmine.createSpy('remove');
-      mediaSourceEngine.remove = Util.spyFunc(removeSpy);
+      var originalRemove =
+          shaka.test.FakeMediaSourceEngine.prototype.removeImpl;
 
-      removeSpy.and.callFake(function(type, start, end) {
+      mediaSourceEngine.remove.and.callFake(function(type, start, end) {
         expect(playheadTime).toBe(20);
         expect(start).toBe(0);
         expect(end).toBe(10);
 
-        if (removeSpy.calls.count() == 3) {
-          removeSpy.and.callFake(function(type, start, end) {
+        if (mediaSourceEngine.remove.calls.count() == 3) {
+          mediaSourceEngine.remove.and.callFake(function(type, start, end) {
             expect(playheadTime).toBe(30);
             expect(start).toBe(10);
             expect(end).toBe(20);
@@ -2556,19 +2651,10 @@ describe('StreamingEngine', function() {
    * @return {!Object.<string, !shakaExtern.Stream>}
    */
   function defaultOnChooseStreams(period) {
-    // Create empty object first and initialize the fields through
-    // [] to allow field names to be expressions.
-    var ret = {};
     if (period == manifest.periods[0]) {
-      ret[ContentType.AUDIO] = audioStream1;
-      ret[ContentType.VIDEO] = videoStream1;
-      ret[ContentType.TEXT] = textStream1;
-      return ret;
+      return { variant: variant1, text: textStream1 };
     } else if (period == manifest.periods[1]) {
-      ret[ContentType.AUDIO] = audioStream2;
-      ret[ContentType.VIDEO] = videoStream2;
-      ret[ContentType.TEXT] = textStream2;
-      return ret;
+      return { variant: variant2, text: textStream2 };
     } else {
       throw new Error();
     }
