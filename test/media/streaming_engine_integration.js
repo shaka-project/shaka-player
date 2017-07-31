@@ -779,7 +779,6 @@ describe('StreamingEngine', function() {
               findSegmentPosition: videoIndex.find.bind(videoIndex),
               getSegmentReference: videoIndex.get.bind(videoIndex),
               initSegmentReference: createInit('video'),
-              mediaSegmentReferences: null,
               // Normally PTO adjusts the segment time backwards; so to make the
               // segment appear in the future, use a negative.
               presentationTimeOffset: -gapAtStart,
@@ -796,7 +795,6 @@ describe('StreamingEngine', function() {
               findSegmentPosition: audioIndex.find.bind(audioIndex),
               getSegmentReference: audioIndex.get.bind(audioIndex),
               initSegmentReference: createInit('audio'),
-              mediaSegmentReferences: null,
               presentationTimeOffset: -gapAtStart,
               mimeType: 'audio/mp4',
               codecs: 'mp4a.40.2',

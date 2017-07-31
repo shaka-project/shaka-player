@@ -178,13 +178,6 @@ This is *not* a function, but a {@link shaka.media.InitSegmentReference} that
 contains info about how to fetch the initialization segment.  This can be
 `null` if the stream is self-initializing.
 
-#### mediaSegmentReferences
-
-This is an array of references used by the system to detect and attempt to
-correct common timeline issues in content.  It may be null if the references
-are not known in advance or if this detection and correction feature is not
-required.
-
 
 ## shaka.media.SegmentIndex
 
@@ -289,13 +282,12 @@ MyManifestParser.prototype.loadStream_ = function(type) {
   var getUris = function() { return ['https://example.com/init']; };
   var init = new shaka.media.InitSegmentReference(getUris, 0, null);
 
-  var references = [
+  var index = new shaka.media.SegmentIndex([
     // Times are in seconds, relative to the Period
     this.loadReference_(0, 0, 10),
     this.loadReference_(1, 10, 20),
     this.loadReference_(2, 20, 30),
-  ];
-  var index = new shaka.media.SegmentIndex(references);
+  ]);
 
   return {
     id: this.curId_++,  // globally unique ID
@@ -303,7 +295,6 @@ MyManifestParser.prototype.loadStream_ = function(type) {
     findSegmentPosition:    index.find.bind(index),
     getSegmentReference:    index.get.bind(index),
     initSegmentReference:   init,
-    mediaSegmentReferences: references,
     presentationTimeOffset: 0,  // seconds
     mimeType : type == 'video' ? 'video/webm' : (type == 'audio' ? 'audio/webm' : 'text/vtt'),
     codecs:    type == 'video' ? 'vp9' : (type == 'audio' ? 'vorbis' : ''),
