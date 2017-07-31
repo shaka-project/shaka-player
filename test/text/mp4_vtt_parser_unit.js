@@ -113,7 +113,7 @@ describe('Mp4vttParser', function() {
            end: 120,
            payload:
            'You\'re a fool for traveling alone,\nso completely unprepared.\n',
-           writingDirection: Cue.writingDirection.VERTICAL_LEFT,
+           writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT,
            line: 1
          }
         ];

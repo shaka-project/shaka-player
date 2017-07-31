@@ -106,7 +106,7 @@ describe('SimpleTextDisplayer', function() {
       cue1.lineAlign = Cue.lineAlign.START;
       cue1.size = 80;
       cue1.textAlign = Cue.textAlign.LEFT;
-      cue1.writingDirection = Cue.writingDirection.VERTICAL_LEFT;
+      cue1.writingDirection = Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT;
       cue1.lineInterpretation = Cue.lineInterpretation.LINE_NUMBER;
       cue1.line = 5;
       cue1.position = 10;
@@ -115,7 +115,7 @@ describe('SimpleTextDisplayer', function() {
       cue2.positionAlign = Cue.positionAlign.RIGHT;
       cue2.lineAlign = Cue.lineAlign.END;
       cue2.textAlign = Cue.textAlign.RIGHT;
-      cue2.writingDirection = Cue.writingDirection.VERTICAL_RIGHT;
+      cue2.writingDirection = Cue.writingDirection.VERTICAL_RIGHT_TO_LEFT;
       cue2.lineInterpretation = Cue.lineInterpretation.PERCENTAGE;
       cue2.line = 5;
 
@@ -123,7 +123,7 @@ describe('SimpleTextDisplayer', function() {
       cue3.positionAlign = Cue.positionAlign.CENTER;
       cue3.lineAlign = Cue.lineAlign.CENTER;
       cue3.textAlign = Cue.textAlign.START;
-      cue3.writingDirection = Cue.writingDirection.HORIZONTAL;
+      cue3.writingDirection = Cue.writingDirection.HORIZONTAL_LEFT_TO_RIGHT;
 
       verifyHelper(
           [

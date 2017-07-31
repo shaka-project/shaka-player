@@ -412,7 +412,7 @@ describe('TtmlTextParser', function() {
             start: 62.05,
             end: 3723.2,
             payload: 'Test',
-            writingDirection: Cue.writingDirection.VERTICAL_LEFT
+            writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT
           }
         ],
         '<tt xmlns:tts="ttml#styling">' +
@@ -431,7 +431,7 @@ describe('TtmlTextParser', function() {
             start: 62.05,
             end: 3723.2,
             payload: 'Test',
-            writingDirection: Cue.writingDirection.VERTICAL_RIGHT
+            writingDirection: Cue.writingDirection.VERTICAL_RIGHT_TO_LEFT
           }
         ],
         '<tt xmlns:tts="ttml#styling">' +
@@ -450,13 +450,51 @@ describe('TtmlTextParser', function() {
             start: 62.05,
             end: 3723.2,
             payload: 'Test',
-            writingDirection: Cue.writingDirection.VERTICAL_LEFT
+            writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT
           }
         ],
         '<tt xmlns:tts="ttml#styling">' +
         '<layout>' +
         '<region xml:id="subtitleArea" ' +
         'tts:writingMode="tblr" />' +
+        '</layout>' +
+        '<body region="subtitleArea">' +
+        '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '</body>' +
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
+    verifyHelper(
+        [
+          {
+            start: 62.05,
+            end: 3723.2,
+            payload: 'Test',
+            writingDirection: Cue.writingDirection.HORIZONTAL_RIGHT_TO_LEFT
+          }
+        ],
+        '<tt xmlns:tts="ttml#styling">' +
+        '<layout>' +
+        '<region xml:id="subtitleArea" ' +
+        'tts:direction="rtl" />' +
+        '</layout>' +
+        '<body region="subtitleArea">' +
+        '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '</body>' +
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
+    verifyHelper(
+        [
+          {
+            start: 62.05,
+            end: 3723.2,
+            payload: 'Test',
+            writingDirection: Cue.writingDirection.HORIZONTAL_LEFT_TO_RIGHT
+          }
+        ],
+        '<tt xmlns:tts="ttml#styling">' +
+        '<layout>' +
+        '<region xml:id="subtitleArea" ' +
+        'tts:direction="rtl" tts:writingMode="lrtb"/>' +
         '</layout>' +
         '<body region="subtitleArea">' +
         '<p begin="01:02.05" end="01:02:03.200">Test</p>' +

@@ -215,13 +215,13 @@ describe('VttTextParser', function() {
             start: 20,
             end: 40,
             payload: 'Test',
-            writingDirection: Cue.writingDirection.VERTICAL_RIGHT
+            writingDirection: Cue.writingDirection.VERTICAL_RIGHT_TO_LEFT
           },
           {
             start: 40,
             end: 50,
             payload: 'Test2',
-            writingDirection: Cue.writingDirection.VERTICAL_LEFT
+            writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT
           }
         ],
         'WEBVTT\n\n' +
@@ -316,7 +316,7 @@ describe('VttTextParser', function() {
             payload: 'Test',
             textAlign: Cue.textAlign.CENTER,
             size: 56,
-            writingDirection: Cue.writingDirection.VERTICAL_LEFT
+            writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT
           }
         ],
         'WEBVTT\n\n' +
@@ -334,7 +334,7 @@ describe('VttTextParser', function() {
             payload: 'Test',
             textAlign: Cue.textAlign.CENTER,
             size: 56,
-            writingDirection: Cue.writingDirection.VERTICAL_LEFT
+            writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT
           }
         ],
         'WEBVTT\n\n' +
@@ -352,7 +352,7 @@ describe('VttTextParser', function() {
             payload: 'Test',
             textAlign: Cue.textAlign.CENTER,
             size: 56,
-            writingDirection: Cue.writingDirection.VERTICAL_LEFT
+            writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT
           }
         ],
         'WEBVTT\n\n' +
@@ -370,7 +370,7 @@ describe('VttTextParser', function() {
             payload: 'Test',
             align: 'center',
             size: 56,
-            writingDirection: Cue.writingDirection.VERTICAL_LEFT
+            writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT
           }
         ],
         'WEBVTT\n\n' +
@@ -388,7 +388,7 @@ describe('VttTextParser', function() {
             payload: 'Test',
             align: 'center',
             size: 56,
-            writingDirection: Cue.writingDirection.VERTICAL_LEFT
+            writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT
           }
         ],
         'WEBVTT\n\n' +
