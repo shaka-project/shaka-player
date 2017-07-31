@@ -86,6 +86,9 @@ module.exports = function(config) {
       // requirejs instead of loading directly into the window.
       'node_modules/sprintf-js/src/sprintf.js',
 
+      // muxjs module next
+      'node_modules/mux.js/dist/mux.js',
+
       // requirejs module next
       'node_modules/requirejs/require.js',
 
