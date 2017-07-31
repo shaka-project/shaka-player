@@ -2328,6 +2328,55 @@ describe('Player', function() {
     }).then(done);
   });
 
+  describe('isAudioOnly', function() {
+    it('detects audio-only content', function(done) {
+      // This factory recreates the parser each time, so updates to |manifest|
+      // affect the next load() call.
+      var parserFactory = function() {
+        return new shaka.test.FakeManifestParser(manifest);
+      };
+
+      // False before we've loaded anything.
+      expect(player.isAudioOnly()).toEqual(false);
+
+      manifest = new shaka.test.ManifestGenerator()
+              .addPeriod(0)
+                .addVariant(0).bandwidth(100)
+                  .addVideo(0).mime('video/mp4', 'good')
+                  .addAudio(1).mime('audio/mp4', 'good')
+              .build();
+      player.load('', 0, parserFactory).then(function() {
+        // We have audio & video tracks, so this is not audio-only.
+        expect(player.isAudioOnly()).toEqual(false);
+
+        manifest = new shaka.test.ManifestGenerator()
+                .addPeriod(0)
+                  .addVariant(0).bandwidth(100)
+                    .addVideo(0).mime('video/mp4', 'good')
+                .build();
+        return player.load('', 0, parserFactory);
+      }).then(function() {
+        // We have video-only tracks, so this is not audio-only.
+        expect(player.isAudioOnly()).toEqual(false);
+
+        manifest = new shaka.test.ManifestGenerator()
+                .addPeriod(0)
+                  .addVariant(0).bandwidth(100)
+                    .addAudio(1).mime('audio/mp4', 'good')
+                .build();
+        return player.load('', 0, parserFactory);
+      }).then(function() {
+        // We have audio-only tracks, so this is audio-only.
+        expect(player.isAudioOnly()).toEqual(true);
+
+        return player.unload();
+      }).then(function() {
+        // When we have nothing loaded, we go back to not audio-only status.
+        expect(player.isAudioOnly()).toEqual(false);
+      }).catch(fail).then(done);
+    });
+  });
+
   describe('load', function() {
     it('tolerates bandwidth of NaN, undefined, or 0', function(done) {
       // Regression test for https://github.com/google/shaka-player/issues/938
