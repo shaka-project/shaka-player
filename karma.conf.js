@@ -293,13 +293,8 @@ function allUsableBrowserLaunchers(config) {
       var ENV_CMD = pluginConstructor.prototype.ENV_CMD;
       var browserPath = process.env[ENV_CMD] || DEFAULT_CMD[process.platform];
 
-      // which.sync currently throws when the executable is not found.
-      // https://github.com/npm/node-which/issues/51
-      try {
-        if (!fs.existsSync(browserPath) && !which.sync(browserPath)) return;
-      } catch(exception) {
-        return;
-      }
+      if (!fs.existsSync(browserPath) &&
+          !which.sync(browserPath, {nothrow: true})) return;
 
       browsers.push(browserName);
     });

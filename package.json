@@ -34,7 +34,7 @@
     "rimraf": "~2.6.1",
     "sprintf-js": "~1.0.3",
     "useragent": "~2.1.13",
-    "which": "~1.2.14"
+    "which": "~1.3.0"
   },
   "main": "dist/shaka-player.compiled.js",
   "repository": {
