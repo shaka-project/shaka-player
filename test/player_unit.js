@@ -1033,7 +1033,7 @@ describe('Player', function() {
           .addVariant(3)
             .bandwidth(200)
             .language('en')
-            .addAudio(2).bandwidth(100)
+            .addAudio(2).bandwidth(100).roles(['secondary'])
             .addVideo(4).bandwidth(100).size(100, 200)
             .frameRate(1000000 / 42000)
           .addVariant(4)
@@ -1044,7 +1044,7 @@ describe('Player', function() {
           .addVariant(5)
             .language('es')
             .bandwidth(300)
-            .addAudio(8).bandwidth(100)
+            .addAudio(9).bandwidth(100)
             .addVideo(5).bandwidth(200).size(200, 400).frameRate(24)
           .addTextStream(6)
             .language('es')
@@ -1056,6 +1056,11 @@ describe('Player', function() {
             .label('English')
             .bandwidth(100).kind('caption')
                          .mime('application/ttml+xml')
+          .addTextStream(8)
+            .language('es')
+            .label('Spanish')
+            .bandwidth(100).kind('caption').roles(['caption', 'secondary'])
+                         .mime('text/vtt')
           // Both text tracks should remain, even with different MIME types.
         .build();
 
@@ -1122,7 +1127,7 @@ describe('Player', function() {
           audioCodec: 'mp4a.40.2',
           videoCodec: 'avc1.4d401f',
           primary: false,
-          roles: [],
+          roles: ['secondary'],
           videoId: 4,
           audioId: 2,
           channelsCount: null,
@@ -1145,7 +1150,7 @@ describe('Player', function() {
           audioCodec: 'mp4a.40.2',
           videoCodec: 'avc1.4d401f',
           primary: false,
-          roles: [],
+          roles: ['secondary'],
           videoId: 5,
           audioId: 2,
           channelsCount: null,
@@ -1170,7 +1175,7 @@ describe('Player', function() {
           primary: false,
           roles: [],
           videoId: 5,
-          audioId: 8,
+          audioId: 9,
           channelsCount: null,
           audioBandwidth: 100,
           videoBandwidth: 200
@@ -1211,7 +1216,24 @@ describe('Player', function() {
           channelsCount: null,
           audioBandwidth: null,
           videoBandwidth: null
-        }
+        },
+        {
+          id: 8,
+          active: false,
+          type: ContentType.TEXT,
+          language: 'es',
+          label: 'Spanish',
+          kind: 'caption',
+          mimeType: 'text/vtt',
+          codecs: null,
+          audioCodec: null,
+          videoCodec: null,
+          primary: false,
+          roles: ['caption', 'secondary'],
+          channelsCount: null,
+          audioBandwidth: null,
+          videoBandwidth: null
+        },
       ];
     });
 
@@ -1421,6 +1443,46 @@ describe('Player', function() {
           .toHaveBeenCalledWith(ContentType.AUDIO, spanishStream, true);
     });
 
+    it('selectAudioLanguage() does not switch if language already selected',
+        function() {
+          chooseStreams();
+          canSwitch();
+          player.configure({
+            preferredAudioLanguage: 'en'
+          });
+
+          var period = manifest.periods[0];
+          var englishStream = period.variants[3].audio;
+          var activeTrack = getActiveTrack('variant')
+          expect(activeTrack.language).toEqual('en')
+
+          player.selectAudioLanguage('en');
+          expect(streamingEngine.switch).not.toHaveBeenCalled();
+        });
+
+    it('selectAudioLanguage() switches tracks if new role selected',
+        function() {
+          chooseStreams();
+          canSwitch();
+          player.configure({
+            preferredAudioLanguage: 'en'
+          });
+
+          var period = manifest.periods[0];
+          var variant1 = period.variants[0];
+          var variant2 = period.variants[2]; // role "secondary"
+          expect(variant1.video).toEqual(variant2.video);
+          expect(variant1.language).toEqual(variant2.language);
+          expect(variant1.audio.roles.length).not.toEqual(
+            variant2.audio.roles.length);
+          var activeTrack = getActiveTrack('variant')
+          expect(variant1.id).toEqual(activeTrack.id);
+
+          player.selectAudioLanguage('en', 'secondary');
+          expect(streamingEngine.switch)
+              .toHaveBeenCalledWith(ContentType.AUDIO, variant2.audio, true);
+        });
+
     it('changing currentTextLanguage changes active stream', function() {
       chooseStreams();
       canSwitch();
@@ -1434,6 +1496,43 @@ describe('Player', function() {
       expect(streamingEngine.switch)
           .toHaveBeenCalledWith(ContentType.TEXT, englishStream, true);
     });
+
+    it('selectTextLanguage() does not switch if language already selected',
+        function() {
+          chooseStreams();
+          canSwitch();
+          player.configure({
+            preferredTextLanguage: 'es'
+          });
+
+          var period = manifest.periods[0];
+          var activeTrack = getActiveTextTrack()
+          expect(activeTrack.language).toEqual('es')
+
+          player.selectTextLanguage('es');
+          expect(streamingEngine.switch).not.toHaveBeenCalled();
+        });
+
+    it('selectTextLanguage() switches tracks if new role selected',
+        function() {
+          chooseStreams();
+          canSwitch();
+          player.configure({
+            preferredTextLanguage: 'es'
+          });
+
+          var period = manifest.periods[0];
+          var text1 = period.textStreams[0];
+          var text2 = period.textStreams[2]; // role "secondary"
+          expect(text1.language).toEqual(text2.language);
+          expect(text1.roles.length).not.toEqual(text2.roles.length);
+          var activeTrack = getActiveTextTrack()
+          expect(text1.id).toEqual(activeTrack.id)
+
+          player.selectTextLanguage('es', 'secondary');
+          expect(streamingEngine.switch)
+              .toHaveBeenCalledWith(ContentType.TEXT, text2, true);
+        });
   });
 
   describe('languages', function() {
@@ -2284,20 +2383,6 @@ describe('Player', function() {
     });
 
     /**
-     * Gets the currently active track.
-     * @param {string} type
-     * @return {shakaExtern.Track}
-     */
-    function getActiveTrack(type) {
-      var activeTracks = player.getVariantTracks().filter(function(track) {
-        return track.type == type && track.active;
-      });
-
-      expect(activeTracks.length).toBe(1);
-      return activeTracks[0];
-    }
-
-    /**
      * @param {!Object.<string, string>} keyStatusMap
      * @suppress {accessControls}
      */
@@ -2438,6 +2523,33 @@ describe('Player', function() {
       player.load('', 0, parserFactory).catch(fail).then(done);
     });
   });
+
+  /**
+   * Gets the currently active track.
+   * @param {string} type
+   * @return {shakaExtern.Track}
+   */
+  function getActiveTrack(type) {
+    var activeTracks = player.getVariantTracks().filter(function(track) {
+      return track.type == type && track.active;
+    });
+
+    expect(activeTracks.length).toBe(1);
+    return activeTracks[0];
+  }
+
+  /**
+   * Gets the currently active text track.
+   * @return {shakaExtern.Track}
+   */
+  function getActiveTextTrack() {
+    var activeTracks = player.getTextTracks().filter(function(track) {
+      return track.active;
+    });
+
+    expect(activeTracks.length).toBe(1);
+    return activeTracks[0];
+  }
 
   /**
    * Choose streams for the given period.
