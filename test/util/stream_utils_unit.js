@@ -17,12 +17,12 @@
 
 describe('StreamUtils', function() {
   var manifest;
-  var preferredAudioLanguage = 'en';
-  var preferredTextLanguage = 'en';
-  var preferredAudioRole = 'main';
-  var preferredTextRole = 'main';
+  var filterVariantsByLanguageAndRole =
+      shaka.util.StreamUtils.filterVariantsByLanguageAndRole;
+  var filterTextStreamsByLanguageAndRole =
+      shaka.util.StreamUtils.filterTextStreamsByLanguageAndRole;
 
-  describe('filterVariantsByRoleAndLanguage', function() {
+  describe('filterVariantsByLanguageAndRole', function() {
     it("chooses variants in user's preferred language", function() {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
@@ -34,14 +34,14 @@ describe('StreamUtils', function() {
             .language('en')
         .build();
 
-      var chosen = shaka.util.StreamUtils.filterVariantsByRoleAndLanguage(
-          manifest.periods[0], preferredAudioLanguage);
+      var chosen = filterVariantsByLanguageAndRole(manifest.periods[0],
+          'en', '');
       expect(chosen.length).toBe(2);
       expect(chosen[0]).toBe(manifest.periods[0].variants[1]);
       expect(chosen[1]).toBe(manifest.periods[0].variants[2]);
     });
 
-    it('chooses primary variants', function() {
+    it('prefers primary variants', function() {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
          .addVariant(0)
@@ -52,8 +52,8 @@ describe('StreamUtils', function() {
             .primary()
         .build();
 
-      var chosen = shaka.util.StreamUtils.filterVariantsByRoleAndLanguage(
-          manifest.periods[0], preferredAudioLanguage);
+      var chosen = filterVariantsByLanguageAndRole(manifest.periods[0],
+          'en', '');
       expect(chosen.length).toBe(2);
       expect(chosen[0]).toBe(manifest.periods[0].variants[0]);
       expect(chosen[1]).toBe(manifest.periods[0].variants[3]);
@@ -70,8 +70,8 @@ describe('StreamUtils', function() {
       manifest.periods[0].variants[0].allowedByKeySystem = false;
       manifest.periods[0].variants[1].allowedByApplication = false;
 
-      var chosen = shaka.util.StreamUtils.filterVariantsByRoleAndLanguage(
-          manifest.periods[0], preferredAudioLanguage);
+      var chosen = filterVariantsByLanguageAndRole(manifest.periods[0],
+          'en', '');
       expect(chosen.length).toBe(1);
       expect(chosen[0]).toBe(manifest.periods[0].variants[2]);
     });
@@ -90,15 +90,174 @@ describe('StreamUtils', function() {
             .addAudio(2).roles(['main'])
         .build();
 
-      var chosen = shaka.util.StreamUtils.filterVariantsByRoleAndLanguage(
-          manifest.periods[0],
-          preferredAudioLanguage, undefined, preferredAudioRole);
+      var chosen = filterVariantsByLanguageAndRole(manifest.periods[0],
+          'en', 'main');
       expect(chosen.length).toBe(1);
       expect(chosen[0]).toBe(manifest.periods[0].variants[0]);
     });
+
+    it('chooses only one role, even if none is preferred', function() {
+      // Regression test for https://github.com/google/shaka-player/issues/949
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addVariant(0)
+            .language('en')
+            .addAudio(0).roles(['commentary'])
+          .addVariant(1)
+            .language('en')
+            .addAudio(1).roles(['commentary'])
+          .addVariant(2)
+            .language('en')
+            .addAudio(2).roles(['secondary'])
+          .addVariant(3)
+            .language('en')
+            .addAudio(3).roles(['secondary'])
+          .addVariant(4)
+            .language('en')
+            .addAudio(4).roles(['main'])
+          .addVariant(5)
+            .language('en')
+            .addAudio(5).roles(['main'])
+        .build();
+
+      var chosen = filterVariantsByLanguageAndRole(manifest.periods[0],
+          'en', '');
+      // Which role is chosen is an implementation detail.
+      // Each role is found on two variants, so we should have two.
+      expect(chosen.length).toBe(2);
+      expect(chosen[0].audio.roles[0]).toEqual(chosen[1].audio.roles[0]);
+    });
+
+    it('chooses only one role, even if all are primary', function() {
+      // Regression test for https://github.com/google/shaka-player/issues/949
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addVariant(0)
+            .language('en').primary()
+            .addAudio(0).roles(['commentary'])
+          .addVariant(1)
+            .language('en').primary()
+            .addAudio(1).roles(['commentary'])
+          .addVariant(2)
+            .language('en').primary()
+            .addAudio(2).roles(['secondary'])
+          .addVariant(3)
+            .language('en').primary()
+            .addAudio(3).roles(['secondary'])
+          .addVariant(4)
+            .language('en').primary()
+            .addAudio(4).roles(['main'])
+          .addVariant(5)
+            .language('en').primary()
+            .addAudio(5).roles(['main'])
+        .build();
+
+      var chosen = filterVariantsByLanguageAndRole(manifest.periods[0],
+          'zh', '');
+      // Which role is chosen is an implementation detail.
+      // Each role is found on two variants, so we should have two.
+      expect(chosen.length).toBe(2);
+      expect(chosen[0].audio.roles[0]).toEqual(chosen[1].audio.roles[0]);
+    });
+
+    it('chooses only one language, even if all are primary', function() {
+      // Regression test for https://github.com/google/shaka-player/issues/918
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addVariant(0)
+            .language('en').primary()
+            .addAudio(0)
+          .addVariant(1)
+            .language('en').primary()
+            .addAudio(1)
+          .addVariant(2)
+            .language('es').primary()
+            .addAudio(2)
+          .addVariant(3)
+            .language('es').primary()
+            .addAudio(3)
+        .build();
+
+      var chosen = filterVariantsByLanguageAndRole(manifest.periods[0],
+          'zh', '');
+      // Which language is chosen is an implementation detail.
+      // Each role is found on two variants, so we should have two.
+      expect(chosen.length).toBe(2);
+      expect(chosen[0].language).toEqual(chosen[1].language);
+    });
+
+    it('chooses a role from among primary variants without language match',
+        function() {
+          manifest = new shaka.test.ManifestGenerator()
+            .addPeriod(0)
+              .addVariant(0)
+                .language('en').primary()
+                .addAudio(0).roles(['commentary'])
+              .addVariant(1)
+                .language('en').primary()
+                .addAudio(1).roles(['commentary'])
+              .addVariant(2)
+                .language('en')
+                .addAudio(2).roles(['secondary'])
+              .addVariant(3)
+                .language('en')
+                .addAudio(3).roles(['secondary'])
+              .addVariant(4)
+                .language('en').primary()
+                .addAudio(4).roles(['main'])
+              .addVariant(5)
+                .language('en').primary()
+                .addAudio(5).roles(['main'])
+            .build();
+
+          var chosen = filterVariantsByLanguageAndRole(manifest.periods[0],
+              'zh', '');
+          // Which role is chosen is an implementation detail.
+          // Each role is found on two variants, so we should have two.
+          expect(chosen.length).toBe(2);
+          expect(chosen[0].audio.roles[0]).toEqual(chosen[1].audio.roles[0]);
+
+          // Since nothing matches our language preference, we chose primary
+          // variants.
+          expect(chosen[0].primary).toBe(true);
+          expect(chosen[1].primary).toBe(true);
+        });
+
+    it('chooses a role from best language match, in spite of primary',
+        function() {
+          manifest = new shaka.test.ManifestGenerator()
+            .addPeriod(0)
+              .addVariant(0)
+                .language('en').primary()
+                .addAudio(0).roles(['commentary'])
+              .addVariant(1)
+                .language('en').primary()
+                .addAudio(1).roles(['commentary'])
+              .addVariant(2)
+                .language('zh')
+                .addAudio(2).roles(['secondary'])
+              .addVariant(3)
+                .language('zh')
+                .addAudio(3).roles(['secondary'])
+              .addVariant(4)
+                .language('en').primary()
+                .addAudio(4).roles(['main'])
+              .addVariant(5)
+                .language('en').primary()
+                .addAudio(5).roles(['main'])
+            .build();
+
+          var chosen = filterVariantsByLanguageAndRole(manifest.periods[0],
+              'zh', '');
+          expect(chosen.length).toBe(2);
+          expect(chosen[0].language).toBe('zh');
+          expect(chosen[1].language).toBe('zh');
+          expect(chosen[0].primary).toBe(false);
+          expect(chosen[1].primary).toBe(false);
+        });
   });
 
-  describe('filterTextStreamsByRoleAndLanguage', function() {
+  describe('filterTextStreamsByLanguageAndRole', function() {
     it("chooses text streams in user's preferred language", function() {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
@@ -110,8 +269,8 @@ describe('StreamUtils', function() {
             .language('en')
         .build();
 
-      var chosen = shaka.util.StreamUtils.filterTextStreamsByRoleAndLanguage(
-          manifest.periods[0], preferredTextLanguage);
+      var chosen = filterTextStreamsByLanguageAndRole(manifest.periods[0],
+          'en', '');
       expect(chosen.length).toBe(2);
       expect(chosen[0]).toBe(manifest.periods[0].textStreams[0]);
       expect(chosen[1]).toBe(manifest.periods[0].textStreams[2]);
@@ -127,8 +286,8 @@ describe('StreamUtils', function() {
             .primary()
         .build();
 
-      var chosen = shaka.util.StreamUtils.filterTextStreamsByRoleAndLanguage(
-          manifest.periods[0], preferredTextLanguage);
+      var chosen = filterTextStreamsByLanguageAndRole(manifest.periods[0],
+          'en', '');
       expect(chosen.length).toBe(2);
       expect(chosen[0]).toBe(manifest.periods[0].textStreams[1]);
       expect(chosen[1]).toBe(manifest.periods[0].textStreams[2]);
@@ -147,12 +306,168 @@ describe('StreamUtils', function() {
             .roles(['caption'])
         .build();
 
-      var chosen = shaka.util.StreamUtils.filterTextStreamsByRoleAndLanguage(
-          manifest.periods[0],
-          preferredTextLanguage, undefined, preferredTextRole);
+      var chosen = filterTextStreamsByLanguageAndRole(manifest.periods[0],
+          'en', 'main');
       expect(chosen.length).toBe(1);
       expect(chosen[0]).toBe(manifest.periods[0].textStreams[0]);
     });
+
+    it('chooses only one role, even if none is preferred', function() {
+      // Regression test for https://github.com/google/shaka-player/issues/949
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addTextStream(0)
+            .language('en')
+            .roles(['commentary'])
+          .addTextStream(1)
+            .language('en')
+            .roles(['commentary'])
+          .addTextStream(2)
+            .language('en')
+            .roles(['secondary'])
+          .addTextStream(3)
+            .language('en')
+            .roles(['secondary'])
+          .addTextStream(4)
+            .language('en')
+            .roles(['main'])
+          .addTextStream(5)
+            .language('en')
+            .roles(['main'])
+        .build();
+
+      var chosen = filterTextStreamsByLanguageAndRole(manifest.periods[0],
+          'en', '');
+      // Which role is chosen is an implementation detail.
+      // Each role is found on two text streams, so we should have two.
+      expect(chosen.length).toBe(2);
+      expect(chosen[0].roles[0]).toEqual(chosen[1].roles[0]);
+    });
+
+    it('chooses only one role, even if all are primary', function() {
+      // Regression test for https://github.com/google/shaka-player/issues/949
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addTextStream(0)
+            .language('en').primary()
+            .roles(['commentary'])
+          .addTextStream(1)
+            .language('en').primary()
+            .roles(['commentary'])
+          .addTextStream(2)
+            .language('en').primary()
+            .roles(['secondary'])
+          .addTextStream(3)
+            .language('en').primary()
+            .roles(['secondary'])
+          .addTextStream(4)
+            .language('en').primary()
+            .roles(['main'])
+          .addTextStream(5)
+            .language('en').primary()
+            .roles(['main'])
+        .build();
+
+      var chosen = filterTextStreamsByLanguageAndRole(manifest.periods[0],
+          'zh', '');
+      // Which role is chosen is an implementation detail.
+      // Each role is found on two text streams, so we should have two.
+      expect(chosen.length).toBe(2);
+      expect(chosen[0].roles[0]).toEqual(chosen[1].roles[0]);
+    });
+
+    it('chooses only one language, even if all are primary', function() {
+      // Regression test for https://github.com/google/shaka-player/issues/918
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addTextStream(0)
+            .language('en').primary()
+          .addTextStream(1)
+            .language('en').primary()
+          .addTextStream(2)
+            .language('es').primary()
+          .addTextStream(3)
+            .language('es').primary()
+        .build();
+
+      var chosen = filterTextStreamsByLanguageAndRole(manifest.periods[0],
+          'zh', '');
+      // Which language is chosen is an implementation detail.
+      // Each role is found on two variants, so we should have two.
+      expect(chosen.length).toBe(2);
+      expect(chosen[0].language).toEqual(chosen[1].language);
+    });
+
+    it('chooses a role from among primary streams without language match',
+        function() {
+          manifest = new shaka.test.ManifestGenerator()
+            .addPeriod(0)
+              .addTextStream(0)
+                .language('en').primary()
+                .roles(['commentary'])
+              .addTextStream(1)
+                .language('en').primary()
+                .roles(['commentary'])
+              .addTextStream(2)
+                .language('en')
+                .roles(['secondary'])
+              .addTextStream(3)
+                .language('en')
+                .roles(['secondary'])
+              .addTextStream(4)
+                .language('en').primary()
+                .roles(['main'])
+              .addTextStream(5)
+                .language('en').primary()
+                .roles(['main'])
+            .build();
+
+          var chosen = filterTextStreamsByLanguageAndRole(manifest.periods[0],
+              'zh', '');
+          // Which role is chosen is an implementation detail.
+          // Each role is found on two text streams, so we should have two.
+          expect(chosen.length).toBe(2);
+          expect(chosen[0].roles[0]).toEqual(chosen[1].roles[0]);
+
+          // Since nothing matches our language preference, we chose primary
+          // text streams.
+          expect(chosen[0].primary).toBe(true);
+          expect(chosen[1].primary).toBe(true);
+        });
+
+    it('chooses a role from best language match, in spite of primary',
+        function() {
+          manifest = new shaka.test.ManifestGenerator()
+            .addPeriod(0)
+              .addTextStream(0)
+                .language('en').primary()
+                .roles(['commentary'])
+              .addTextStream(1)
+                .language('en').primary()
+                .roles(['commentary'])
+              .addTextStream(2)
+                .language('zh')
+                .roles(['secondary'])
+              .addTextStream(3)
+                .language('zh')
+                .roles(['secondary'])
+              .addTextStream(4)
+                .language('en').primary()
+                .roles(['main'])
+              .addTextStream(5)
+                .language('en').primary()
+                .roles(['main'])
+            .build();
+
+          var chosen = filterTextStreamsByLanguageAndRole(manifest.periods[0],
+              'zh', '');
+          expect(chosen.length).toBe(2);
+          expect(chosen[0].language).toBe('zh');
+          expect(chosen[1].language).toBe('zh');
+          expect(chosen[0].primary).toBe(false);
+          expect(chosen[1].primary).toBe(false);
+        });
+
   });
 
   describe('filterPeriod', function() {
