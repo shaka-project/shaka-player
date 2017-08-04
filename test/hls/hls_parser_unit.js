@@ -85,6 +85,7 @@ describe('HlsParser', function() {
 
     var media = [
       '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:5,\n',
       '#EXT-X-BYTERANGE:121090@616\n',
@@ -118,6 +119,7 @@ describe('HlsParser', function() {
 
     var media = [
       '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:5,\n',
       '#EXT-X-BYTERANGE:121090@616\n',
@@ -152,6 +154,7 @@ describe('HlsParser', function() {
 
     var media = [
       '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:5,\n',
       '#EXT-X-BYTERANGE:121090@616\n',
@@ -194,6 +197,7 @@ describe('HlsParser', function() {
 
     var media = [
       '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:5,\n',
       '#EXT-X-BYTERANGE:121090@616\n',
@@ -227,6 +231,7 @@ describe('HlsParser', function() {
 
     var media = [
       '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:5,\n',
       '#EXT-X-BYTERANGE:121090@616\n',
@@ -261,6 +266,7 @@ describe('HlsParser', function() {
 
     var media = [
       '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:5,\n',
       '#EXT-X-BYTERANGE:121090@616\n',
@@ -297,6 +303,7 @@ describe('HlsParser', function() {
 
     var media = [
       '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:5,\n',
       '#EXT-X-BYTERANGE:121090@616\n',
@@ -344,6 +351,7 @@ describe('HlsParser', function() {
 
     var media = [
       '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:5,\n',
       '#EXT-X-BYTERANGE:121090@616\n',
@@ -404,6 +412,7 @@ describe('HlsParser', function() {
 
     var media = [
       '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:5,\n',
       '#EXT-X-BYTERANGE:121090@616\n',
@@ -492,6 +501,7 @@ describe('HlsParser', function() {
 
     var media = [
       '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:5,\n',
       '#EXT-X-BYTERANGE:121090@616\n',
@@ -537,6 +547,7 @@ describe('HlsParser', function() {
 
     var media = [
       '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:5,\n',
       '#EXT-X-BYTERANGE:121090@616\n',
@@ -592,6 +603,7 @@ describe('HlsParser', function() {
 
     var media = [
       '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:5,\n',
       '#EXT-X-BYTERANGE:121090@616\n',
@@ -629,6 +641,7 @@ describe('HlsParser', function() {
 
     var media = [
       '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:5,\n',
       '#EXT-X-BYTERANGE:121090@616\n',
@@ -668,6 +681,7 @@ describe('HlsParser', function() {
 
     var media = [
       '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="init.mp4"\n',
       '#EXTINF:5,\n',
       'segment.mp4'
@@ -738,6 +752,7 @@ describe('HlsParser', function() {
     var media = [
       '#EXTM3U\n',
       '#EXT-X-TARGETDURATION:6\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXTINF:5,\n',
       '#EXT-X-BYTERANGE:121090@616\n',
       'test://main.mp4'
@@ -779,6 +794,7 @@ describe('HlsParser', function() {
     var media = [
       '#EXTM3U\n',
       '#EXT-X-TARGETDURATION:6\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-KEY:METHOD=SAMPLE-AES-CENC,',
       'KEYFORMAT="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed",',
       'URI="data:text/plain;base64,',
@@ -845,6 +861,7 @@ describe('HlsParser', function() {
         '#EXTM3U\n',
         '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
         '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
+        '#EXT-X-PLAYLIST-TYPE:VOD\n',
         '#EXTINF:5,\n',
         '#EXT-X-BYTERANGE:121090@616\n',
         'test://main.mp4'
@@ -870,6 +887,7 @@ describe('HlsParser', function() {
       var media = [
         '#EXTM3U\n',
         '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
+        '#EXT-X-PLAYLIST-TYPE:VOD\n',
         '#EXTINF:5,\n',
         '#EXT-X-BYTERANGE:121090@616\n',
         'test://main.exe'
@@ -897,6 +915,7 @@ describe('HlsParser', function() {
       var media = [
         '#EXTM3U\n',
         '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
+        '#EXT-X-PLAYLIST-TYPE:VOD\n',
         '#EXTINF:5,\n',
         '#EXT-X-BYTERANGE:121090@616\n',
         'test://main.mp4'
@@ -907,6 +926,59 @@ describe('HlsParser', function() {
           shaka.util.Error.Category.MANIFEST,
           Code.HLS_COULD_NOT_GUESS_CODECS,
           ['aaa', 'bbb']);
+
+      verifyError(master, media, error, done);
+    });
+
+    it('if encountered live content (PLAYLIST-TYPE:EVENT)', function(done) {
+      var master = [
+        '#EXTM3U\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="aaa,bbb",',
+        'RESOLUTION=960x540,FRAME-RATE=60,VIDEO="vid"\n',
+        'test://audio\n',
+        '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid",',
+        'URI="test://video"'
+      ].join('');
+
+      var media = [
+        '#EXTM3U\n',
+        '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
+        '#EXT-X-PLAYLIST-TYPE:EVENT\n',
+        '#EXTINF:5,\n',
+        '#EXT-X-BYTERANGE:121090@616\n',
+        'test://main.mp4'
+      ].join('');
+
+      var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MANIFEST,
+          Code.HLS_LIVE_CONTENT_NOT_SUPPORTED);
+
+      verifyError(master, media, error, done);
+    });
+
+    it('if encountered live content (no PLAYLIST-TYPE tag)', function(done) {
+      var master = [
+        '#EXTM3U\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="aaa,bbb",',
+        'RESOLUTION=960x540,FRAME-RATE=60,VIDEO="vid"\n',
+        'test://audio\n',
+        '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid",',
+        'URI="test://video"'
+      ].join('');
+
+      var media = [
+        '#EXTM3U\n',
+        '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
+        '#EXTINF:5,\n',
+        '#EXT-X-BYTERANGE:121090@616\n',
+        'test://main.mp4'
+      ].join('');
+
+      var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MANIFEST,
+          Code.HLS_LIVE_CONTENT_NOT_SUPPORTED);
 
       verifyError(master, media, error, done);
     });
@@ -939,6 +1011,7 @@ describe('HlsParser', function() {
 
         var media = [
           '#EXTM3U\n',
+          '#EXT-X-PLAYLIST-TYPE:VOD\n',
           '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
           '#EXTINF:5,\n',
           '#EXT-X-BYTERANGE:121090@616\n',
@@ -959,6 +1032,7 @@ describe('HlsParser', function() {
 
         var media = [
           '#EXTM3U\n',
+          '#EXT-X-PLAYLIST-TYPE:VOD\n',
           '#EXT-X-MAP:URI="test://main.mp4"\n',
           '#EXTINF:5,\n',
           '#EXT-X-BYTERANGE:121090@616\n',
@@ -997,6 +1071,7 @@ describe('HlsParser', function() {
 
         var media = [
           '#EXTM3U\n',
+          '#EXT-X-PLAYLIST-TYPE:VOD\n',
           '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
           '#EXT-X-BYTERANGE:121090@616\n',
           'test://main.exe'
