@@ -77,10 +77,10 @@ shakaExtern.AbrManager.Factory;
  * Initializes the AbrManager.
  *
  * @param {shakaExtern.AbrManager.SwitchCallback} switchCallback
- * @param {shakaExtern.AbrManager.StatsProvider} statsProvider
+ * @param {HTMLVideoElement} videoEl
  * @exportDoc
  */
-shakaExtern.AbrManager.prototype.init = function(switchCallback, statsProvider) {};
+shakaExtern.AbrManager.prototype.init = function(switchCallback, videoEl) {};
 
 
 /**
