@@ -15,15 +15,18 @@
  * limitations under the License.
  */
 
-describe('Mp4vttParser', function() {
+describe('Mp4VttParser', function() {
   var vttInitSegmentUri = '/base/test/test/assets/vtt-init.mp4';
   var vttSegmentUri = '/base/test/test/assets/vtt-segment.mp4';
   var vttSegSettingsUri = '/base/test/test/assets/vtt-segment-settings.mp4';
+  var vttSegNoDurationUri =
+      '/base/test/test/assets/vtt-segment-no-duration.mp4';
   var audioInitSegmentUri = '/base/test/test/assets/sintel-audio-init.mp4';
 
   var vttInitSegment;
   var vttSegment;
   var vttSegSettings;
+  var vttSegNoDuration;
   var audioInitSegment;
 
   var mockCue = false;
@@ -44,12 +47,14 @@ describe('Mp4vttParser', function() {
       shaka.test.Util.fetch(vttInitSegmentUri),
       shaka.test.Util.fetch(vttSegmentUri),
       shaka.test.Util.fetch(vttSegSettingsUri),
+      shaka.test.Util.fetch(vttSegNoDurationUri),
       shaka.test.Util.fetch(audioInitSegmentUri)
     ]).then(function(responses) {
       vttInitSegment = responses[0];
       vttSegment = responses[1];
       vttSegSettings = responses[2];
-      audioInitSegment = responses[3];
+      vttSegNoDuration = responses[3];
+      audioInitSegment = responses[4];
     }).catch(fail).then(done);
   });
 
@@ -65,48 +70,94 @@ describe('Mp4vttParser', function() {
   });
 
   it('parses media segment', function() {
-    var cues =
-        [
-         {start: 111.8, end: 115.8, text: 'It has shed much innocent blood.\n'},
-         {start: 118, end: 120, text:
-           'You\'re a fool for traveling alone,\nso completely unprepared.\n'}
-        ];
+    var cues = [
+      {
+        start: 111.8,
+        end: 115.8,
+        text: 'It has shed much innocent blood.\n'
+      },
+      {
+        start: 118,
+        end: 120,
+        text:
+            'You\'re a fool for traveling alone,\nso completely unprepared.\n'
+      }
+    ];
 
     var parser = new shaka.media.Mp4VttParser();
     parser.parseInit(vttInitSegment);
-    var time = {periodStart: 0, segmentStart: 0, segmentEnd: 0 };
+    var time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
     var result = parser.parseMedia(vttSegment, time);
     verifyHelper(cues, result);
   });
 
   it('parses media segment containing settings', function() {
-    var cues =
-        [
-         {start: 111.8, end: 115.8, text: 'It has shed much innocent blood.\n',
-           align: 'right', size: 50, position: 10},
-         {start: 118, end: 120, text:
-           'You\'re a fool for traveling alone,\nso completely unprepared.\n',
-           vertical: 'lr', line: 1}
-        ];
+    var cues = [
+      {
+        start: 111.8,
+        end: 115.8,
+        text: 'It has shed much innocent blood.\n',
+        align: 'right',
+        size: 50,
+        position: 10
+      },
+      {
+        start: 118,
+        end: 120,
+        text:
+            'You\'re a fool for traveling alone,\nso completely unprepared.\n',
+        vertical: 'lr',
+        line: 1
+      }
+    ];
 
     var parser = new shaka.media.Mp4VttParser();
     parser.parseInit(vttInitSegment);
-    var time = {periodStart: 0, segmentStart: 0, segmentEnd: 0 };
+    var time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
     var result = parser.parseMedia(vttSegSettings, time);
     verifyHelper(cues, result);
   });
 
-  it('accounts for offset', function() {
-    var cues =
-        [
-         {start: 121.8, end: 125.8, text: 'It has shed much innocent blood.\n'},
-         {start: 128, end: 130, text:
-           'You\'re a fool for traveling alone,\nso completely unprepared.\n'}
-        ];
+  it('parses media segments without a sample duration', function() {
+    // Regression test for https://github.com/google/shaka-player/issues/919
+    var cues = [
+      { start: 10, end: 11, text: 'cue 10' },
+      { start: 11, end: 12, text: 'cue 11' },
+      { start: 12, end: 13, text: 'cue 12' },
+      { start: 13, end: 14, text: 'cue 13' },
+      { start: 14, end: 15, text: 'cue 14' },
+      { start: 15, end: 16, text: 'cue 15' },
+      { start: 16, end: 17, text: 'cue 16' },
+      { start: 17, end: 18, text: 'cue 17' },
+      { start: 18, end: 19, text: 'cue 18' },
+      { start: 19, end: 20, text: 'cue 19' }
+    ];
 
     var parser = new shaka.media.Mp4VttParser();
     parser.parseInit(vttInitSegment);
-    var time = {periodStart: 10, segmentStart: 0, segmentEnd: 0 };
+    var time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
+    var result = parser.parseMedia(vttSegNoDuration, time);
+    verifyHelper(cues, result);
+  });
+
+  it('accounts for offset', function() {
+    var cues = [
+      {
+        start: 121.8,
+        end: 125.8,
+        text: 'It has shed much innocent blood.\n'
+      },
+      {
+        start: 128,
+        end: 130,
+        text:
+            'You\'re a fool for traveling alone,\nso completely unprepared.\n'
+      }
+    ];
+
+    var parser = new shaka.media.Mp4VttParser();
+    parser.parseInit(vttInitSegment);
+    var time = {periodStart: 10, segmentStart: 0, segmentEnd: 0};
     var result = parser.parseMedia(vttSegment, time);
     verifyHelper(cues, result);
   });
