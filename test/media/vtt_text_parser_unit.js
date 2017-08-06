@@ -233,23 +233,47 @@ describe('VttTextParser', function() {
   it('supports line setting', function() {
     verifyHelper(
         [
-          {start: 20, end: 40, text: 'Test', line: 0},
-          {start: 40, end: 50, text: 'Test2', line: -1}
-        ] ,
+          {
+            start: 20, end: 40, text: 'Test', line: 0,
+            snapToLines: true
+          },
+          {
+            start: 40, end: 50, text: 'Test2', line: -1,
+            snapToLines: true
+          },
+          {
+            start: 50, end: 60, text: 'Test3', line: 45,
+            snapToLines: false
+          },
+          {
+            start: 55, end: 65, text: 'Test4', line: 12.3,
+            snapToLines: false
+          }
+        ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000 line:0\n' +
         'Test\n\n' +
         '00:00:40.000 --> 00:00:50.000 line:-1\n' +
-        'Test2',
+        'Test2\n\n' +
+        '00:00:50.000 --> 00:01:00.000 line:45%\n' +
+        'Test3\n\n' +
+        '00:00:55.000 --> 00:01:05.000 line:12.3%\n' +
+        'Test4\n\n',
         { periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
   it('supports line setting with optional part', function() {
     verifyHelper(
         [
-          {start: 20, end: 40, text: 'Test', line: 10},
-          {start: 40, end: 50, text: 'Test2', line: -1}
-        ] ,
+          {
+            start: 20, end: 40, text: 'Test', line: 10,
+            snapToLines: false, lineAlign: 'start'
+          },
+          {
+            start: 40, end: 50, text: 'Test2', line: -1,
+            snapToLines: true, lineAlign: 'center'
+          }
+        ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000 line:10%,start\n' +
         'Test\n\n' +
@@ -261,19 +285,28 @@ describe('VttTextParser', function() {
   it('supports position setting', function() {
     verifyHelper(
         [
-          {start: 20, end: 40, text: 'Test2', position: 45}
+          {start: 20, end: 40, text: 'Test', position: 45},
+          {start: 25, end: 45, text: 'Test2', position: 12.3}
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000 position:45%\n' +
-        'Test2',
+        'Test\n\n' +
+        '00:00:25.000 --> 00:00:45.000 position:12.3%\n' +
+        'Test2\n\n',
         { periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
   it('supports position setting with optional part', function() {
     verifyHelper(
         [
-          {start: 20, end: 40, text: 'Test', position: 45},
-          {start: 20, end: 40, text: 'Test2', position: 45}
+          {
+            start: 20, end: 40, text: 'Test', position: 45,
+            positionAlign: 'line-left'
+          },
+          {
+            start: 20, end: 40, text: 'Test2', position: 45,
+            positionAlign: 'left'
+          }
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000 position:45%,line-left\n' +
@@ -286,11 +319,14 @@ describe('VttTextParser', function() {
   it('supports size setting', function() {
     verifyHelper(
         [
-          {start: 20, end: 40, text: 'Test', size: 56}
+          {start: 20, end: 40, text: 'Test', size: 56},
+          {start: 25, end: 45, text: 'Test2', size: 12.3}
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000 size:56%\n' +
-        'Test',
+        'Test\n\n' +
+        '00:00:25.000 --> 00:00:45.000 size:12.3%\n' +
+        'Test2\n\n',
         { periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
