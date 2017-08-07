@@ -114,6 +114,18 @@ describe('TextEngine', function() {
       }).catch(fail).then(done);
     });
 
+    it('adds cues in reverse order', function(done) {
+      // Regression test for https://github.com/google/shaka-player/issues/848
+      mockParseMedia.and.returnValue([1, 2, 3]);
+      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+        expect(mockTrack.addCue.calls.count()).toBe(3);
+        var calls = mockTrack.addCue.calls;
+        expect(calls.argsFor(0)).toEqual([3]);
+        expect(calls.argsFor(1)).toEqual([2]);
+        expect(calls.argsFor(2)).toEqual([1]);
+      }).catch(fail).then(done);
+    });
+
     it('does not throw if called right before destroy', function(done) {
       mockParseMedia.and.returnValue([1, 2, 3]);
       textEngine.appendBuffer(dummyData, 0, 3).catch(fail).then(done);
