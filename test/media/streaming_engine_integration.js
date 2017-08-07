@@ -518,8 +518,13 @@ describe('StreamingEngine', function() {
           // We should be playing smoothly and not seeking repeatedly as we fall
           // outside the window.
           //
-          // We seek once above, then Playhead seeks once to adjust, plus a
-          // couple extra.
+          // Expected seeks:
+          //   1. seek to live stream start time during startup
+          //   2. explicit seek in the test to get outside the window
+          //   3. Playhead seeks to force us back inside the window
+          //   4. (maybe) seek if there is a gap at the period boundary
+          //   5. (maybe) seek to flush a pipeline stall
+          expect(seekCount).toBeGreaterThan(2);
           expect(seekCount).toBeLessThan(6);
 
           done();
