@@ -196,15 +196,15 @@ describe('Mp4VttParser', function() {
       expect(actual[i].endTime).toBe(expected[i].end);
       expect(actual[i].payload).toBe(expected[i].payload);
 
-      if (expected[i].line)
+      if ('line' in expected[i])
         expect(actual[i].line).toBe(expected[i].line);
-      if (expected[i].writingDirection)
+      if ('writingDirection' in expected[i])
         expect(actual[i].writingDirection).toBe(expected[i].writingDirection);
-      if (expected[i].textAlign)
+      if ('textAlign' in expected[i])
         expect(actual[i].textAlign).toBe(expected[i].textAlign);
-      if (expected[i].size)
+      if ('size' in expected[i])
         expect(actual[i].size).toBe(expected[i].size);
-      if (expected[i].position)
+      if ('position' in expected[i])
         expect(actual[i].position).toBe(expected[i].position);
     }
   }

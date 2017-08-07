@@ -180,6 +180,38 @@ describe('SimpleTextDisplayer', function() {
               vertical: undefined
             }
           ], [cue3]);
+
+      var cue4 = new shaka.text.Cue(40, 60, 'Test');
+      cue4.line = null;
+      cue4.position = null;
+
+      verifyHelper(
+          [
+            {
+              start: 40,
+              end: 60,
+              text: 'Test',
+              // In a real VTTCue, these would be the default of "auto".
+              // With our mock, we leave them unset and they are undefined.
+              line: undefined,
+              position: undefined
+            }
+          ], [cue4]);
+
+      var cue5 = new shaka.text.Cue(40, 60, 'Test');
+      cue5.line = 0;
+      cue5.position = 0;
+
+      verifyHelper(
+          [
+            {
+              start: 40,
+              end: 60,
+              text: 'Test',
+              line: 0,
+              position: 0
+            }
+          ], [cue5]);
     });
 
     it('uses a workaround for browsers not supporting align=center',
@@ -236,22 +268,23 @@ describe('SimpleTextDisplayer', function() {
         shaka.util.Functional.collapseArrays, []);
     expect(result).toBeTruthy();
     expect(result.length).toBe(vttCues.length);
+
     for (var i = 0; i < vttCues.length; i++) {
       expect(result[i].startTime).toBe(vttCues[i].start);
       expect(result[i].endTime).toBe(vttCues[i].end);
       expect(result[i].text).toBe(vttCues[i].text);
 
-      if (vttCues[i].id)
+      if ('id' in vttCues[i])
         expect(result[i].id).toBe(vttCues[i].id);
-      if (vttCues[i].vertical)
+      if ('vertical' in vttCues[i])
         expect(result[i].vertical).toBe(vttCues[i].vertical);
-      if (vttCues[i].line)
+      if ('line' in vttCues[i])
         expect(result[i].line).toBe(vttCues[i].line);
-      if (vttCues[i].align)
+      if ('align' in vttCues[i])
         expect(result[i].align).toBe(vttCues[i].align);
-      if (vttCues[i].size)
+      if ('size' in vttCues[i])
         expect(result[i].size).toBe(vttCues[i].size);
-      if (vttCues[i].position)
+      if ('position' in vttCues[i])
         expect(result[i].position).toBe(vttCues[i].position);
     }
   }

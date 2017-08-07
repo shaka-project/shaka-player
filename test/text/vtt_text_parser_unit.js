@@ -538,20 +538,18 @@ describe('VttTextParser', function() {
       expect(result[i].endTime).toBe(cues[i].end);
       expect(result[i].payload).toBe(cues[i].payload);
 
-      // Workaround a bug in the compiler's externs.
-      // TODO: Remove when compiler is updated.
-      if (cues[i].id)
+      if ('id' in cues[i])
         expect(result[i].id).toBe(cues[i].id);
-      if (cues[i].vertical)
+      if ('vertical' in cues[i])
         expect(result[i].writingDirection).toBe(cues[i].writingDirection);
-      if (cues[i].line)
+      if ('line' in cues[i])
         expect(result[i].line).toBe(cues[i].line);
-      if (cues[i].textAlign)
-        expect(/** @type {?} */ (result[i]).textAlign).toBe(cues[i].textAlign);
-      if (cues[i].size)
-        expect(/** @type {?} */ (result[i]).size).toBe(cues[i].size);
-      if (cues[i].position)
-        expect(/** @type {?} */ (result[i]).position).toBe(cues[i].position);
+      if ('textAlign' in cues[i])
+        expect(result[i].textAlign).toBe(cues[i].textAlign);
+      if ('size' in cues[i])
+        expect(result[i].size).toBe(cues[i].size);
+      if ('position' in cues[i])
+        expect(result[i].position).toBe(cues[i].position);
     }
   }
 
