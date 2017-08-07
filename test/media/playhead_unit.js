@@ -407,8 +407,8 @@ describe('Playhead', function() {
         manifest,
         config,
         5 /* startTime */,
-        Util.spyFunc(onSeek),
-        Util.spyFunc(onEvent));
+        onSeek,
+        onEvent);
     expect(video.currentTime).toBe(1000);
     video.on['seeking']();
 
