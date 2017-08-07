@@ -29,12 +29,6 @@ describe('SimpleTextDisplayer', function() {
   var mockTrack;
   /** @type {!shaka.text.SimpleTextDisplayer} */
   var displayer;
-  /** @type {shaka.text.Cue} */
-  var cue1;
-  /** @type {shaka.text.Cue} */
-  var cue2;
-  /** @type {shaka.text.Cue} */
-  var cue3;
 
   beforeEach(function() {
     video = new shaka.test.FakeVideo();
@@ -55,11 +49,28 @@ describe('SimpleTextDisplayer', function() {
     window.VTTCue = originalVTTCue;
   });
 
+  describe('append', function() {
+    it('appends cues in reverse order', function() {
+      // Regression test for https://github.com/google/shaka-player/issues/848
+      verifyHelper(
+          [
+            {start: 20, end: 40, text: 'Test1'},
+            {start: 20, end: 40, text: 'Test2'},
+            {start: 20, end: 40, text: 'Test3'}
+          ],
+          [
+            new shaka.text.Cue(20, 40, 'Test3'),
+            new shaka.text.Cue(20, 40, 'Test2'),
+            new shaka.text.Cue(20, 40, 'Test1')
+          ]);
+    });
+  });
+
   describe('remove', function() {
     it('removes cues which overlap the range', function() {
-      cue1 = new shaka.text.Cue(0, 1, 'Test');
-      cue2 = new shaka.text.Cue(1, 2, 'Test');
-      cue3 = new shaka.text.Cue(2, 3, 'Test');
+      var cue1 = new shaka.text.Cue(0, 1, 'Test');
+      var cue2 = new shaka.text.Cue(1, 2, 'Test');
+      var cue3 = new shaka.text.Cue(2, 3, 'Test');
       displayer.append([cue1, cue2, cue3]);
 
       displayer.remove(0, 1);
@@ -101,7 +112,7 @@ describe('SimpleTextDisplayer', function() {
             new shaka.text.Cue(20, 40, 'Test')
           ]);
 
-      cue1 = new shaka.text.Cue(20, 40, 'Test');
+      var cue1 = new shaka.text.Cue(20, 40, 'Test');
       cue1.positionAlign = Cue.positionAlign.LEFT;
       cue1.lineAlign = Cue.lineAlign.START;
       cue1.size = 80;
@@ -110,20 +121,6 @@ describe('SimpleTextDisplayer', function() {
       cue1.lineInterpretation = Cue.lineInterpretation.LINE_NUMBER;
       cue1.line = 5;
       cue1.position = 10;
-
-      cue2 = new shaka.text.Cue(20, 40, 'Test');
-      cue2.positionAlign = Cue.positionAlign.RIGHT;
-      cue2.lineAlign = Cue.lineAlign.END;
-      cue2.textAlign = Cue.textAlign.RIGHT;
-      cue2.writingDirection = Cue.writingDirection.VERTICAL_RIGHT_TO_LEFT;
-      cue2.lineInterpretation = Cue.lineInterpretation.PERCENTAGE;
-      cue2.line = 5;
-
-      cue3 = new shaka.text.Cue(20, 40, 'Test');
-      cue3.positionAlign = Cue.positionAlign.CENTER;
-      cue3.lineAlign = Cue.lineAlign.CENTER;
-      cue3.textAlign = Cue.textAlign.START;
-      cue3.writingDirection = Cue.writingDirection.HORIZONTAL_LEFT_TO_RIGHT;
 
       verifyHelper(
           [
@@ -139,10 +136,22 @@ describe('SimpleTextDisplayer', function() {
               snapToLines: true,
               line: 5,
               position: 10
-            },
+            }
+          ], [cue1]);
+
+      var cue2 = new shaka.text.Cue(30, 50, 'Test');
+      cue2.positionAlign = Cue.positionAlign.RIGHT;
+      cue2.lineAlign = Cue.lineAlign.END;
+      cue2.textAlign = Cue.textAlign.RIGHT;
+      cue2.writingDirection = Cue.writingDirection.VERTICAL_RIGHT_TO_LEFT;
+      cue2.lineInterpretation = Cue.lineInterpretation.PERCENTAGE;
+      cue2.line = 5;
+
+      verifyHelper(
+          [
             {
-              start: 20,
-              end: 40,
+              start: 30,
+              end: 50,
               text: 'Test',
               lineAlign: 'end',
               positionAlign: 'line-right',
@@ -150,18 +159,27 @@ describe('SimpleTextDisplayer', function() {
               vertical: 'rl',
               snapToLines: false,
               line: 5
-            },
+            }
+          ], [cue2]);
+
+      var cue3 = new shaka.text.Cue(40, 60, 'Test');
+      cue3.positionAlign = Cue.positionAlign.CENTER;
+      cue3.lineAlign = Cue.lineAlign.CENTER;
+      cue3.textAlign = Cue.textAlign.START;
+      cue3.writingDirection = Cue.writingDirection.HORIZONTAL_LEFT_TO_RIGHT;
+
+      verifyHelper(
+          [
             {
-              start: 20,
-              end: 40,
+              start: 40,
+              end: 60,
               text: 'Test',
               lineAlign: 'center',
               positionAlign: 'center',
               align: 'start',
               vertical: undefined
             }
-          ],
-          [cue1, cue2, cue3]);
+          ], [cue3]);
     });
 
     it('uses a workaround for browsers not supporting align=center',
@@ -179,7 +197,7 @@ describe('SimpleTextDisplayer', function() {
             this.text = text;
           };
 
-          cue1 = new shaka.text.Cue(20, 40, 'Test');
+          var cue1 = new shaka.text.Cue(20, 40, 'Test');
           cue1.textAlign = Cue.textAlign.CENTER;
 
           verifyHelper(
@@ -195,8 +213,8 @@ describe('SimpleTextDisplayer', function() {
         });
 
     it('ignores cues with startTime >= endTime', function() {
-      cue1 = new shaka.text.Cue(60, 40, 'Test');
-      cue2 = new shaka.text.Cue(40, 40, 'Test');
+      var cue1 = new shaka.text.Cue(60, 40, 'Test');
+      var cue2 = new shaka.text.Cue(40, 40, 'Test');
       displayer.append([cue1, cue2]);
       expect(mockTrack.addCue).not.toHaveBeenCalled();
     });
