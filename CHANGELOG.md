@@ -1,3 +1,41 @@
+## 2.1.6 (2017-08-09)
+
+New features:
+  - Add vp9, opus, and flac mp4 to probeSupport
+    - https://github.com/google/shaka-player/issues/944
+
+Bugfixes:
+  - Never adapt across roles or languages
+    - https://github.com/google/shaka-player/issues/918
+    - https://github.com/google/shaka-player/issues/947
+  - Fix parsing byterange attribute in HlsParser
+    - https://github.com/google/shaka-player/issues/925
+  - Fix incorrect segment position after update in some DASH live streams
+    - https://github.com/google/shaka-player/pull/838
+  - Fix support for live streams with no seek range
+    - https://github.com/google/shaka-player/issues/916
+  - Fix display order of cues with identical ranges
+    - https://github.com/google/shaka-player/issues/848
+  - Fix missing cues in WVTT MP4s using default sample duration
+    - https://github.com/google/shaka-player/issues/919
+  - Accept non-integer settings in VTT
+    - https://github.com/google/shaka-player/issues/919
+  - Tolerate bandwidth of 0 or missing bandwidth
+    - https://github.com/google/shaka-player/issues/938
+    - https://github.com/google/shaka-player/issues/940
+  - Fix multiple pipeline flushes on some platforms
+  - Make it safe to install polyfills twice
+    - https://github.com/google/shaka-player/issues/941
+
+Demo app:
+  - Fix compiled mode in the demo app.  Does not affect the library.
+    Removed defaultConfig_ reference in demo.
+    - https://github.com/google/shaka-player/issues/929
+  - Update license URI for PlayReady test asset
+    - https://github.com/google/shaka-player/pull/953
+    - https://github.com/google/shaka-player/issues/945
+
+
 ## 2.1.5 (2017-07-17)
 
 New features:
