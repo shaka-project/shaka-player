@@ -469,6 +469,7 @@ describe('HlsParser', function() {
 
     var media = [
       '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:5,\n',
       '#EXT-X-BYTERANGE:121090@616\n',
