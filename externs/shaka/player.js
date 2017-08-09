@@ -509,7 +509,7 @@ shakaExtern.ManifestConfiguration;
 /**
  * @typedef {{
  *   retryParameters: shakaExtern.RetryParameters,
- *   infiniteRetriesForLiveStreams: boolean,
+ *   failureCallback: function(!shaka.util.Error),
  *   rebufferingGoal: number,
  *   bufferingGoal: number,
  *   bufferBehind: number,
@@ -524,9 +524,9 @@ shakaExtern.ManifestConfiguration;
  *
  * @property {shakaExtern.RetryParameters} retryParameters
  *   Retry parameters for segment requests.
- * @property {boolean} infiniteRetriesForLiveStreams
- *   If true, will retry infinitely on network errors, for live streams only.
- *   Defaults to true.
+ * @property {function(!shaka.util.Error)} failureCallback
+ *   A callback to decide what to do on a streaming failure.  Default behavior
+ *   is to retry on live streams and not on VOD.
  * @property {number} rebufferingGoal
  *   The minimum number of seconds of content that the StreamingEngine must
  *   buffer before it can begin playback or can continue playback after it has

@@ -443,7 +443,7 @@ describe('StreamingEngine', function() {
         rebufferingGoal: 2,
         bufferingGoal: 5,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        infiniteRetriesForLiveStreams: true,
+        failureCallback: function() {},
         bufferBehind: Infinity,
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
@@ -1766,132 +1766,6 @@ describe('StreamingEngine', function() {
   });
 
   describe('handles network errors', function() {
-    function testRecoverableError(targetUri, code) {
-      setupLive();
-
-      // Wrap the NetworkingEngine to cause errors.
-      failFirstRequestForTarget(netEngine, targetUri, code);
-
-      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
-      createStreamingEngine();
-
-      playhead.getTime.and.returnValue(100);
-      onStartupComplete.and.callFake(function() {
-        setupFakeGetTime(100);
-      });
-
-      onError.and.callFake(function(error) {
-        expect(error.severity).toBe(shaka.util.Error.Severity.RECOVERABLE);
-        expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
-        expect(error.code).toBe(code);
-      });
-
-      // Here we go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
-
-      runTest();
-      expect(onError.calls.count()).toBe(1);
-      expect(netEngine.attempts).toBe(2);
-      expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
-    }
-
-    it('from missing init, first Period',
-        testRecoverableError.bind(
-            null, '1_audio_init', shaka.util.Error.Code.BAD_HTTP_STATUS));
-    it('from missing init, second Period',
-       testRecoverableError.bind(
-            null, '2_video_init', shaka.util.Error.Code.BAD_HTTP_STATUS));
-    it('from missing media, first Period',
-       testRecoverableError.bind(
-            null, '1_video_10', shaka.util.Error.Code.BAD_HTTP_STATUS));
-    it('from missing media, second Period',
-       testRecoverableError.bind(
-            null, '2_audio_2', shaka.util.Error.Code.BAD_HTTP_STATUS));
-
-    it('from missing init, first Period',
-        testRecoverableError.bind(
-            null, '1_video_init', shaka.util.Error.Code.HTTP_ERROR));
-    it('from missing init, second Period',
-       testRecoverableError.bind(
-            null, '2_audio_init', shaka.util.Error.Code.HTTP_ERROR));
-    it('from missing media, first Period',
-       testRecoverableError.bind(
-            null, '1_audio_10', shaka.util.Error.Code.HTTP_ERROR));
-    it('from missing media, second Period',
-       testRecoverableError.bind(
-            null, '2_video_2', shaka.util.Error.Code.HTTP_ERROR));
-
-    it('from missing init, first Period',
-        testRecoverableError.bind(
-            null, '1_audio_init', shaka.util.Error.Code.TIMEOUT));
-    it('from missing init, second Period',
-       testRecoverableError.bind(
-            null, '2_video_init', shaka.util.Error.Code.TIMEOUT));
-    it('from missing media, first Period',
-       testRecoverableError.bind(
-            null, '1_video_11', shaka.util.Error.Code.TIMEOUT));
-    it('from missing media, second Period',
-       testRecoverableError.bind(
-            null, '2_audio_1', shaka.util.Error.Code.TIMEOUT));
-
-    function testNonRecoverableError(targetUri, code) {
-      setupVod();
-
-      // Wrap the NetworkingEngine to cause errors.
-      failFirstRequestForTarget(netEngine, targetUri, code);
-
-      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
-      createStreamingEngine();
-
-      playhead.getTime.and.returnValue(0);
-      onStartupComplete.and.callFake(function() {
-        setupFakeGetTime(0);
-      });
-
-      onError.and.callFake(function(error) {
-        expect(error.severity).toBe(shaka.util.Error.Severity.CRITICAL);
-        expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
-        expect(error.code).toBe(code);
-      });
-
-      // Here we go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
-
-      runTest();
-      expect(onError.calls.count()).toBe(1);
-      expect(mediaSourceEngine.endOfStream).not.toHaveBeenCalled();
-    }
-
-    it('from unsupported scheme, init',
-        testNonRecoverableError.bind(
-            null, '1_audio_init', shaka.util.Error.Code.UNSUPPORTED_SCHEME));
-
-    it('from unsupported scheme, media',
-        testNonRecoverableError.bind(
-            null, '1_video_2', shaka.util.Error.Code.UNSUPPORTED_SCHEME));
-
-    it('from malformed data URI, init',
-        testNonRecoverableError.bind(
-            null, '1_video_init', shaka.util.Error.Code.MALFORMED_DATA_URI));
-
-    it('from malformed data URI, media',
-        testNonRecoverableError.bind(
-            null, '1_audio_2', shaka.util.Error.Code.MALFORMED_DATA_URI));
-
-    it('from unknown data URI encoding, init',
-        testNonRecoverableError.bind(
-            null,
-            '1_video_init',
-            shaka.util.Error.Code.UNKNOWN_DATA_URI_ENCODING));
-
-    it('from unknown data URI encoding, media',
-        testNonRecoverableError.bind(
-            null,
-            '1_audio_2',
-            shaka.util.Error.Code.UNKNOWN_DATA_URI_ENCODING));
-
     it('ignores text stream failures if configured to', function() {
       setupVod();
       var textUri = '1_text_1';
@@ -1928,6 +1802,50 @@ describe('StreamingEngine', function() {
       expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
     });
 
+    it('retries if configured to', function() {
+      setupLive();
+
+      // Wrap the NetworkingEngine to cause errors.
+      var targetUri = '1_audio_init';
+      failFirstRequestForTarget(netEngine, targetUri,
+                                shaka.util.Error.Code.BAD_HTTP_STATUS);
+
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+
+      var config = {
+        rebufferingGoal: 2,
+        bufferingGoal: 5,
+        retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+        failureCallback: function() { streamingEngine.retry(); },  // retry
+        bufferBehind: Infinity,
+        ignoreTextStreamFailures: false,
+        startAtSegmentBoundary: false,
+        smallGapLimit: 0.5,
+        jumpLargeGaps: false
+      };
+      createStreamingEngine(config);
+
+      playhead.getTime.and.returnValue(100);
+      onStartupComplete.and.callFake(function() {
+        setupFakeGetTime(100);
+      });
+
+      onError.and.callFake(function(error) {
+        expect(error.severity).toBe(shaka.util.Error.Severity.CRITICAL);
+        expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
+        expect(error.code).toBe(shaka.util.Error.Code.BAD_HTTP_STATUS);
+      });
+
+      // Here we go!
+      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      streamingEngine.init();
+
+      runTest();
+      expect(onError.calls.count()).toBe(1);
+      expect(netEngine.attempts).toBeGreaterThan(1);
+      expect(mediaSourceEngine.endOfStream).toHaveBeenCalledTimes(1);
+    });
+
     it('does not retry if configured not to', function() {
       setupLive();
 
@@ -1942,7 +1860,7 @@ describe('StreamingEngine', function() {
         rebufferingGoal: 2,
         bufferingGoal: 5,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        infiniteRetriesForLiveStreams: false,
+        failureCallback: function() {},  // no retry
         bufferBehind: Infinity,
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
@@ -1972,8 +1890,8 @@ describe('StreamingEngine', function() {
       expect(mediaSourceEngine.endOfStream).toHaveBeenCalledTimes(0);
     });
 
-    it('does not retry for VOD', function() {
-      setupVod();
+    it('does not invoke the callback if the error is handled', function() {
+      setupLive();
 
       // Wrap the NetworkingEngine to cause errors.
       var targetUri = '1_audio_init';
@@ -1981,17 +1899,29 @@ describe('StreamingEngine', function() {
                                 shaka.util.Error.Code.BAD_HTTP_STATUS);
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
-      createStreamingEngine();
 
-      playhead.getTime.and.returnValue(0);
+      // Configure with a failure callback
+      var failureCallback = jasmine.createSpy('failureCallback');
+      var config = {
+        rebufferingGoal: 2,
+        bufferingGoal: 5,
+        retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+        failureCallback: shaka.test.Util.spyFunc(failureCallback),
+        bufferBehind: Infinity,
+        ignoreTextStreamFailures: false,
+        startAtSegmentBoundary: false,
+        smallGapLimit: 0.5,
+        jumpLargeGaps: false
+      };
+      createStreamingEngine(config);
+
+      playhead.getTime.and.returnValue(100);
       onStartupComplete.and.callFake(function() {
-        setupFakeGetTime(0);
+        setupFakeGetTime(100);
       });
 
       onError.and.callFake(function(error) {
-        expect(error.severity).toBe(shaka.util.Error.Severity.CRITICAL);
-        expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
-        expect(error.code).toBe(shaka.util.Error.Code.BAD_HTTP_STATUS);
+        error.handled = true;
       });
 
       // Here we go!
@@ -2000,13 +1930,12 @@ describe('StreamingEngine', function() {
 
       runTest();
       expect(onError.calls.count()).toBe(1);
-      expect(netEngine.attempts).toBe(1);
-      expect(mediaSourceEngine.endOfStream).toHaveBeenCalledTimes(0);
+      expect(failureCallback).not.toHaveBeenCalled();
     });
   });
 
   describe('retry()', function() {
-    it('resumes streaming after VOD failure', function() {
+    it('resumes streaming after failure', function() {
       setupVod();
 
       // Wrap the NetworkingEngine to cause errors.
@@ -2024,10 +1953,6 @@ describe('StreamingEngine', function() {
       });
 
       onError.and.callFake(function(error) {
-        expect(error.severity).toBe(shaka.util.Error.Severity.CRITICAL);
-        expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
-        expect(error.code).toBe(shaka.util.Error.Code.BAD_HTTP_STATUS);
-
         // Restore the original fake request function.
         netEngine.request = originalNetEngineRequest;
         netEngine.request.calls.reset();
@@ -2140,7 +2065,7 @@ describe('StreamingEngine', function() {
         rebufferingGoal: 1,
         bufferingGoal: 1,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        infiniteRetriesForLiveStreams: true,
+        failureCallback: function() {},
         bufferBehind: 10,
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
@@ -2227,7 +2152,7 @@ describe('StreamingEngine', function() {
         rebufferingGoal: 1,
         bufferingGoal: 1,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        infiniteRetriesForLiveStreams: true,
+        failureCallback: function() {},
         bufferBehind: 10,
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
@@ -2297,7 +2222,7 @@ describe('StreamingEngine', function() {
         rebufferingGoal: 1,
         bufferingGoal: 1,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        infiniteRetriesForLiveStreams: true,
+        failureCallback: function() {},
         bufferBehind: 10,
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
@@ -2482,7 +2407,7 @@ describe('StreamingEngine', function() {
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
       createStreamingEngine({
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        infiniteRetriesForLiveStreams: true,
+        failureCallback: function() {},
         bufferBehind: Infinity,
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,

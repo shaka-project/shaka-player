@@ -414,3 +414,68 @@ MyManifestParser.prototype.onExpirationUpdated =
 
 For more information, see the {@link shakaExtern.ManifestParser.PlayerInterface}
 and {@link shakaExtern.ManifestParser} definitions in the API docs.
+
+
+#### Retry after streaming failure
+
+In v2.0, after a network error and all network retries were exhausted, streaming
+would continue to retry those requests.  The only way to stop this process was
+to `unload()` or `destroy()` the Player.
+
+In v2.2, we introduced new retry behavior.  The default is as it was in v2.1.3
+(retry on live, but not VOD), but applications can now customize the behavior
+through a callback:
+
+```js
+player.configure({
+  streaming: {
+    failureCallback: function(error) {
+      // Always retry, as in v2.0.0 - v2.1.2:
+      player.retryStreaming();
+    }
+  }
+});
+```
+
+The new `player.retryStreaming()` method can be used to retry after a failure.
+You can base the decision on `player.isLive()`, `error.code`, or anything else.
+Because you can call `retryStreaming()` at any time, you can also delay the
+decision until you get feedback from the user, the browser is back online, etc.
+
+A few more examples of possible failure callbacks:
+
+```js
+function neverRetryCallback(error) {}
+
+function retryLiveOnFailureCallback(error) {
+  if (player.isLive()) {
+    player.retryStreaming();
+  }
+}
+
+function retryOnSpecificHttpErrorsCallback(error) {
+  if (error.code == shaka.util.Error.Code.BAD_HTTP_STATUS) {
+    var statusCode = error.data[1];
+    var retryCodes = [ 502, 503, 504, 520 ];
+    if (retryCodes.indexOf(statusCode >= 0)) {
+      player.retryStreaming();
+    }
+  }
+}
+```
+
+If you choose to react to `error` events instead of the failure callback, you
+can use `event.preventDefault()` to avoid the callback completely:
+
+```js
+player.addEventListener('error', function(event) {
+  // Custom logic for error events
+  if (player.isLive() &&
+      event.error.code == shaka.util.Error.Code.BAD_HTTP_STATUS) {
+    player.retryStreaming();
+  }
+
+  // Do not invoke the failure callback for this event
+  event.preventDefault();
+});
+```
