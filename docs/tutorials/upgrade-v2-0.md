@@ -7,7 +7,7 @@ your application.
 
 #### What's New in v2.1 and v2.2?
 
-Shaka v2.1 introduces several improvements over v2.0, including:
+Shaka v2.2 introduces several improvements over v2.0, including:
   - Basic HLS support
   - DASH trick mode support
   - Support for jumping gaps in the timeline
@@ -15,6 +15,8 @@ Shaka v2.1 introduces several improvements over v2.0, including:
   - Additional stats and events from Player
   - Indication of critical errors vs recoverable errors
   - Allowing applications to render their own text tracks
+  - Allowing applications to define their own retry logic after streaming
+    failures
   - Making the default ABR manager more configurable
   - Adding channel count and bandwidth info to variant tracks
   - Xlink support in DASH

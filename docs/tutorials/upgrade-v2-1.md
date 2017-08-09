@@ -9,6 +9,8 @@ your application.
 
 Shaka v2.2 introduces several improvements over v2.1, including:
   - Allowing applications to render their own text tracks
+  - Allowing applications to define their own retry logic after streaming
+    failures
   - Making the default ABR manager more configurable
   - Adding channel count and bandwidth info to variant tracks
   - Xlink support in DASH
