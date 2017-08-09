@@ -47,11 +47,25 @@ shakaDemo.setupConfiguration_ = function() {
       'change', shakaDemo.onLogLevelChange_);
   document.getElementById('enableAutoplay').addEventListener(
       'change', shakaDemo.onAutoplayChange_);
+  document.getElementById('drmSettingsVideoRobustness').addEventListener(
+      'input', shakaDemo.onDrmSettingsChange_);
+  document.getElementById('drmSettingsAudioRobustness').addEventListener(
+      'input', shakaDemo.onDrmSettingsChange_);
 };
 
 
 /** @private */
 shakaDemo.onAutoplayChange_ = function() {
+  // Change the hash, to mirror this.
+  shakaDemo.hashShouldChange_();
+};
+
+
+/**
+ * @param {!Event} event
+ * @private
+ */
+shakaDemo.onDrmSettingsChange_ = function(event) {
   // Change the hash, to mirror this.
   shakaDemo.hashShouldChange_();
 };

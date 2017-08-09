@@ -218,6 +218,14 @@ shakaDemo.getParams_ = function() {
   * @private
   */
 shakaDemo.preBrowserCheckParams_ = function(params) {
+  if ('videoRobustness' in params) {
+    document.getElementById('drmSettingsVideoRobustness').value =
+        params['videoRobustness'];
+  }
+  if ('audioRobustness' in params) {
+    document.getElementById('drmSettingsAudioRobustness').value =
+        params['audioRobustness'];
+  }
   if ('lang' in params) {
     document.getElementById('preferredAudioLanguage').value = params['lang'];
     document.getElementById('preferredTextLanguage').value = params['lang'];
@@ -492,6 +500,16 @@ shakaDemo.hashShouldChange_ = function() {
   if ('compiled' in shakaDemo.getParams_()) {
     params.push('compiled');
   }
+
+  // Store values for drm configuration.
+  var videoRobustness =
+      document.getElementById('drmSettingsVideoRobustness').value;
+  if (videoRobustness)
+    params.push('videoRobustness=' + videoRobustness);
+  var audioRobustness =
+      document.getElementById('drmSettingsAudioRobustness').value;
+  if (audioRobustness)
+    params.push('audioRobustness=' + audioRobustness);
 
   var newHash = '#' + params.join(';');
   if (newHash != location.hash) {
