@@ -216,7 +216,7 @@ describe('Playhead', function() {
       video.currentTime = 6;
       expect(playhead.getTime()).toBe(6);
     });
-  });
+  });  // getTime
 
   it('clamps playhead after seeking for live', function() {
     video.readyState = HTMLMediaElement.HAVE_METADATA;
@@ -499,7 +499,7 @@ describe('Playhead', function() {
       expect(playhead.getTime()).toBe(10);
       expect(onSeek).toHaveBeenCalled();
     });
-  });
+  });  // clamps playhead after resuming
 
   describe('gap jumping', function() {
     beforeAll(function() {
@@ -562,7 +562,7 @@ describe('Playhead', function() {
           expectEvent: false,
           expectedEndTime: 21
         });
-      });
+      });  // with small gaps
 
       describe('with large gaps', function() {
         playingTest('will fire an event', {
@@ -611,7 +611,7 @@ describe('Playhead', function() {
           expectEvent: true,
           expectedEndTime: 10
         });
-      });
+      });  // with large gaps
 
       /**
        * @param {string} name
@@ -656,7 +656,7 @@ describe('Playhead', function() {
           expect(video.currentTime).toBe(data.expectedEndTime);
         });
       }
-    });
+    });  // when playing
 
     describe('with buffered seeks', function() {
       describe('with small gaps', function() {
@@ -701,7 +701,7 @@ describe('Playhead', function() {
           expectedEndTime: 30,
           expectEvent: false
         });
-      });
+      });  // with small gaps
 
       describe('with large gaps', function() {
         seekTest('will raise event', {
@@ -730,11 +730,11 @@ describe('Playhead', function() {
           expectedEndTime: 12,
           expectEvent: true
         });
-      });
-    });
+      });  // with large gaps
+    });  // with buffered seeks
 
-    describe('unbuffered seek', function() {
-      describe('w/ small gaps', function() {
+    describe('with unbuffered seeks', function() {
+      describe('with small gaps', function() {
         seekTest('won\'t jump when seeking into buffered range', {
           // [0-10], [20-30], [31-40]
           buffered: [{start: 0, end: 10}],
@@ -805,9 +805,9 @@ describe('Playhead', function() {
           expectedEndTime: 2,
           expectEvent: false
         });
-      });
+      });  // with small gaps
 
-      describe('w/ large gaps', function() {
+      describe('with large gaps', function() {
         seekTest('will jump large gap at beginning', {
           buffered: [{start: 20, end: 30}],
           newBuffered: [{start: 20, end: 30}],
@@ -850,8 +850,8 @@ describe('Playhead', function() {
           preventDefault: true,
           expectEvent: true
         });
-      });
-    });
+      });  // with large gaps
+    });  // with unbuffered seeks
 
     /**
      * @param {string} name
@@ -928,5 +928,70 @@ describe('Playhead', function() {
       // The video doesn't have any video data.
       return HTMLMediaElement.HAVE_METADATA;
     }
-  });
+  });  // gap jumping
+
+  describe('rate changes', function() {
+    beforeEach(function() {
+      playhead = new shaka.media.Playhead(
+          video,
+          manifest,
+          config,
+          0 /* startTime */,
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
+    });
+
+    it('notices video rate changes', function() {
+      expect(playhead.getPlaybackRate()).toBe(1);
+
+      video.playbackRate = 2;
+      video.on['ratechange']();
+      expect(playhead.getPlaybackRate()).toBe(2);
+    });
+
+    it('controls video rate with setPlaybackRate', function() {
+      expect(playhead.getPlaybackRate()).toBe(1);
+      playhead.setPlaybackRate(2);
+      expect(playhead.getPlaybackRate()).toBe(2);
+      expect(video.playbackRate).toBe(2);
+    });
+
+    it('sets video rate to 0 when buffering', function() {
+      expect(video.playbackRate).toBe(1);
+      playhead.setBuffering(true);
+      expect(video.playbackRate).toBe(0);
+    });
+
+    it('remembers previous rate while buffering', function() {
+      playhead.setPlaybackRate(5);
+      expect(video.playbackRate).toBe(5);
+      expect(playhead.getPlaybackRate()).toBe(5);
+      playhead.setBuffering(true);
+      expect(video.playbackRate).toBe(0);
+      expect(playhead.getPlaybackRate()).toBe(5);
+      playhead.setBuffering(false);
+      expect(video.playbackRate).toBe(5);
+      expect(playhead.getPlaybackRate()).toBe(5);
+    });
+
+    it('ignores a rate change to 0', function() {
+      // Regression test for https://github.com/google/shaka-player/issues/951
+      expect(video.playbackRate).toBe(1);
+      expect(playhead.getPlaybackRate()).toBe(1);
+
+      // With native controls on Edge, a rate change to 0 occurs when the user
+      // seeks.  This seems to happen before setBuffering(true).
+      video.playbackRate = 0;
+      video.on['ratechange']();
+      expect(playhead.getPlaybackRate()).toBe(1);
+
+      playhead.setBuffering(true);
+      expect(video.playbackRate).toBe(0);
+      expect(playhead.getPlaybackRate()).toBe(1);
+
+      playhead.setBuffering(false);
+      expect(video.playbackRate).toBe(1);
+      expect(playhead.getPlaybackRate()).toBe(1);
+    });
+  });  // rate changes
 });
