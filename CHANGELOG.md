@@ -1,3 +1,17 @@
+## 2.1.7 (2017-08-14)
+
+Bugfixes:
+  - Fixed "Invalid argument" exceptions for subtitles in IE & Edge
+  - Fixed buffering at the end of the stream for some content in IE & Edge
+    - https://github.com/google/shaka-player/issues/913
+  - Fixed seeking with native controls in Edge
+    - https://github.com/google/shaka-player/issues/951
+
+Docs:
+  - Fixed a bug in the upgrade guide for selecting tracks and disabling ABR
+    - https://github.com/google/shaka-player/issues/962
+
+
 ## 2.1.6 (2017-08-09)
 
 New features:
