@@ -285,6 +285,51 @@ describe('ManifestTextParser', function() {
     });
   });
 
+  describe('parseSegments', function() {
+    var manifestText = '#EXTM3U\n' +
+        '#EXT-X-TARGETDURATION:6\n' +
+        '#EXTINF:5\n' +
+        'uri\n' +
+        '#EXTINF:4\n' +
+        'uri2\n';
+
+    it('parses segments', function() {
+      verifyPlaylist(
+          {
+            type: shaka.hls.PlaylistType.MEDIA,
+            tags: [
+              new shaka.hls.Tag(/* id */ 0, 'EXT-X-TARGETDURATION', [], '6')
+            ],
+            segments: [
+              new shaka.hls.Segment('uri',
+                                    [new shaka.hls.Tag(2, 'EXTINF', [], '5')]),
+              new shaka.hls.Segment('uri2',
+                                    [new shaka.hls.Tag(3, 'EXTINF', [], '4')])
+            ]
+          },
+          manifestText);
+    });
+    it('identifies playlist tags', function() {
+      verifyPlaylist(
+          {
+            type: shaka.hls.PlaylistType.MEDIA,
+            tags: [
+              new shaka.hls.Tag(/* id */ 0, 'EXT-X-TARGETDURATION', [], '6'),
+              new shaka.hls.Tag(/* id */ 4, 'EXT-X-ENDLIST', [])
+            ],
+            segments: [
+              new shaka.hls.Segment('uri',
+                                    [new shaka.hls.Tag(2, 'EXTINF', [], '5')]),
+              new shaka.hls.Segment('uri2',
+                                    [new shaka.hls.Tag(3, 'EXTINF', [], '4')])
+            ]
+          },
+          // Append a playlist tag to the manifest text so it appears after
+          // segment-related tags.
+          manifestText + '#EXT-X-ENDLIST');
+    });
+  });
+
 
   /**
    * @param {Object} expectedPlaylist
