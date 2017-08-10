@@ -114,15 +114,37 @@ describe('TextEngine', function() {
       }).catch(fail).then(done);
     });
 
-    it('adds cues in reverse order', function(done) {
+    it('appends equal time cues in reverse order', function(done) {
       // Regression test for https://github.com/google/shaka-player/issues/848
-      mockParseMedia.and.returnValue([1, 2, 3]);
+      // See also: https://goo.gl/BirBy9
+
+      // This one comes first
+      var cue1 = { startTime: 0, endTime: 1, text: '1' };
+
+      // These three identically-timed cues are next
+      var cue2 = { startTime: 2, endTime: 3, text: '2' };
+      var cue3 = { startTime: 2, endTime: 3, text: '3' };
+      var cue4 = { startTime: 2, endTime: 3, text: '4' };
+
+      // This one comes last
+      var cue5 = { startTime: 4, endTime: 5, text: '5' };
+
+      mockParseMedia.and.returnValue([cue1, cue2, cue3, cue4, cue5]);
+
       textEngine.appendBuffer(dummyData, 0, 3).then(function() {
-        expect(mockTrack.addCue.calls.count()).toBe(3);
+        expect(mockTrack.addCue.calls.count()).toBe(5);
         var calls = mockTrack.addCue.calls;
-        expect(calls.argsFor(0)).toEqual([3]);
-        expect(calls.argsFor(1)).toEqual([2]);
-        expect(calls.argsFor(2)).toEqual([1]);
+
+        // This one came first
+        expect(calls.argsFor(0)).toEqual([cue1]);
+
+        // These three identically-timed cues in reverse order
+        expect(calls.argsFor(1)).toEqual([cue4]);
+        expect(calls.argsFor(2)).toEqual([cue3]);
+        expect(calls.argsFor(3)).toEqual([cue2]);
+
+        // This one came last
+        expect(calls.argsFor(4)).toEqual([cue5]);
       }).catch(fail).then(done);
     });
 
