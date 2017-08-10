@@ -147,10 +147,10 @@ In v2.2, any change in ABR state must be made explicitly if desired.
 
 ```js
 // v2.2
-player.selectVariantTrack(variantTracks[i]);
-// Adaptation state has not changed!
 // To explicitly disable:
 player.configure({abr: {enabled: false}});
+// Now select the track, which does not change adaptation state!
+player.selectVariantTrack(variantTracks[i]);
 ```
 
 
