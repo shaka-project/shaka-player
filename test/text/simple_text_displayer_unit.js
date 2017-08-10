@@ -50,7 +50,22 @@ describe('SimpleTextDisplayer', function() {
   });
 
   describe('append', function() {
-    it('appends cues in reverse order', function() {
+    it('sorts cues before inserting', function() {
+      // See: https://goo.gl/BirBy9
+      verifyHelper(
+          [
+            {start: 10, end: 20, text: 'Test1'},
+            {start: 20, end: 30, text: 'Test2'},
+            {start: 30, end: 40, text: 'Test3'}
+          ],
+          [
+            new shaka.text.Cue(20, 30, 'Test2'),
+            new shaka.text.Cue(30, 40, 'Test3'),
+            new shaka.text.Cue(10, 20, 'Test1')
+          ]);
+    });
+
+    it('appends equal time cues in reverse order', function() {
       // Regression test for https://github.com/google/shaka-player/issues/848
       verifyHelper(
           [
