@@ -356,6 +356,15 @@ shakaDemo.postBrowserCheckParams_ = function(params) {
     shakaDemo.onTrickPlayChange_(fakeEvent);
   }
 
+  if ('nativecontrols' in params) {
+    var showNative = document.getElementById('showNative');
+    showNative.checked = true;
+    // Call onNativeChange_ manually, because setting checked
+    // programatically doesn't fire a 'change' event.
+    var fakeEvent = /** @type {!Event} */({target: showNative});
+    shakaDemo.onNativeChange_(fakeEvent);
+  }
+
   // Allow the hash to be changed, and give it an initial change.
   shakaDemo.hashCanChange_ = true;
   shakaDemo.hashShouldChange_();
@@ -457,6 +466,9 @@ shakaDemo.hashShouldChange_ = function() {
   }
   if (document.getElementById('showTrickPlay').checked) {
     params.push('trickplay');
+  }
+  if (document.getElementById('showNative').checked) {
+    params.push('nativecontrols');
   }
   if (shaka.log) {
     var logLevelList = document.getElementById('logLevelList');
