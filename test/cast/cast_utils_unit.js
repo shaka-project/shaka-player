@@ -191,7 +191,10 @@ describe('CastUtils', function() {
         // The TimeRanges constructor cannot be used directly, so we load a clip
         // to get ranges to use.
         var mediaSource = new MediaSource();
-        var mimeType = 'video/mp4; codecs="avc1.42c01e"';
+        var fakeVideoStream = {
+          mimeType: 'video/mp4',
+          codecs: 'avc1.42c01e'
+        };
         var initSegmentUrl = '/base/test/test/assets/sintel-video-init.mp4';
         var videoSegmentUrl = '/base/test/test/assets/sintel-video-segment.mp4';
 
@@ -214,7 +217,7 @@ describe('CastUtils', function() {
           // Create empty object first and initialize the fields through
           // [] to allow field names to be expressions.
           var initObject = {};
-          initObject[ContentType.VIDEO] = mimeType;
+          initObject[ContentType.VIDEO] = fakeVideoStream;
           mediaSourceEngine.init(initObject);
           shaka.test.Util.fetch(initSegmentUrl).then(function(data) {
             return mediaSourceEngine.appendBuffer(ContentType.VIDEO, data,

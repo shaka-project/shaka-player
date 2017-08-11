@@ -576,9 +576,9 @@ describe('StreamingEngine', function() {
       // Create empty object first and initialize the fields through
       // [] to allow field names to be expressions.
       var expectedObject = {};
-      expectedObject[ContentType.AUDIO] = 'audio/mp4; codecs="mp4a.40.2"';
-      expectedObject[ContentType.VIDEO] = 'video/mp4; codecs="avc1.42c01e"';
-      expectedObject[ContentType.TEXT] = 'text/vtt';
+      expectedObject[ContentType.AUDIO] = audioStream1;
+      expectedObject[ContentType.VIDEO] = videoStream1;
+      expectedObject[ContentType.TEXT] = textStream1;
       expect(mediaSourceEngine.init)
           .toHaveBeenCalledWith(expectedObject);
       expect(mediaSourceEngine.init.calls.count()).toBe(1);
