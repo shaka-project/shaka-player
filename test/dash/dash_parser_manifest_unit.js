@@ -35,7 +35,8 @@ describe('DashParser Manifest', function() {
     onEventSpy = jasmine.createSpy('onEvent');
     playerInterface = {
       networkingEngine: fakeNetEngine,
-      filterPeriod: function() {},
+      filterNewPeriod: function() {},
+      filterAllPeriods: function() {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: shaka.test.Util.spyFunc(onEventSpy),
       onError: fail
@@ -956,6 +957,156 @@ describe('DashParser Manifest', function() {
         })
         .catch(fail)
         .then(done);
+  });
+
+  it('handles bandwidth of 0 or missing', function(done) {
+    // Regression test for https://github.com/google/shaka-player/issues/938
+    var source = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation id="1" bandwidth="1">',
+      '        <SegmentTemplate media="1-$Number$.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet mimeType="audio/mp4">',
+      '      <Representation id="2" bandwidth="0">',
+      '        <SegmentTemplate media="2-$Number$.mp4" duration="1" />',
+      '      </Representation>',
+      '      <Representation id="3">',
+      '        <SegmentTemplate media="3-$Number$.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'
+    ].join('\n');
+
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+    parser.start('dummy://foo', playerInterface)
+        .then(function(manifest) {
+          expect(manifest.periods.length).toBe(1);
+          expect(manifest.periods[0].variants.length).toBe(2);
+
+          var variant1 = manifest.periods[0].variants[0];
+          expect(isNaN(variant1.bandwidth)).toBe(false);
+          expect(variant1.bandwidth).toBeGreaterThan(0);
+
+          var variant2 = manifest.periods[0].variants[1];
+          expect(isNaN(variant2.bandwidth)).toBe(false);
+          expect(variant2.bandwidth).toBeGreaterThan(0);
+        })
+        .catch(fail)
+        .then(done);
+  });
+
+  describe('AudioChannelConfiguration', function() {
+    /**
+     * @param {?number} expectedNumChannels The expected number of channels
+     * @param {!Object.<string, string>} schemeMap A map where the map key is
+     *   the AudioChannelConfiguration's schemeIdUri attribute, and the map
+     *   value is the value attribute.
+     * @return {!Promise}
+     */
+    function testAudioChannelConfiguration(expectedNumChannels, schemeMap) {
+      var header = [
+        '<MPD minBufferTime="PT75S">',
+        '  <Period id="1" duration="PT30S">',
+        '    <AdaptationSet mimeType="audio/mp4">',
+        '      <Representation id="1" bandwidth="1">'
+      ].join('\n');
+
+      var configs = [];
+      for (var scheme in schemeMap) {
+        var value = schemeMap[scheme];
+        configs.push('<AudioChannelConfiguration schemeIdUri="' + scheme +
+                     '" value="' + value + '" />');
+      }
+
+      var footer = [
+        '        <SegmentTemplate media="1-$Number$.mp4" duration="1" />',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>'
+      ].join('\n');
+
+      var source = header + configs.join('\n') + footer;
+
+      // Create a fresh parser, to avoid issues when we chain multiple tests
+      // together.
+      parser = shaka.test.Dash.makeDashParser();
+
+      fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+      return parser.start('dummy://foo', playerInterface)
+          .then(function(manifest) {
+            expect(manifest.periods.length).toBe(1);
+            expect(manifest.periods[0].variants.length).toBe(1);
+
+            var variant = manifest.periods[0].variants[0];
+            expect(variant.audio.channelsCount).toEqual(expectedNumChannels);
+          }).catch(fail);
+    }
+
+    it('parses outputChannelPositionList scheme', function(done) {
+      Promise.resolve().then(function() {
+        // Parses the space-separated list and finds 8 channels.
+        return testAudioChannelConfiguration(8,
+            { 'urn:mpeg:dash:outputChannelPositionList:2012':
+                  '2 0 1 4 5 3 17 1' });
+      }).then(function() {
+        // Does not get confused about extra spaces.
+        return testAudioChannelConfiguration(7,
+            { 'urn:mpeg:dash:outputChannelPositionList:2012':
+                  '  5 2 1 12   8 9   1  '});
+      }).then(done);
+    });
+
+    it('parses 23003:3 scheme', function(done) {
+      return Promise.resolve().then(function() {
+        // Parses a simple channel count.
+        return testAudioChannelConfiguration(2,
+            { 'urn:mpeg:dash:23003:3:audio_channel_configuration:2011': '2' });
+      }).then(function() {
+        // This scheme seems to use the same format.
+        return testAudioChannelConfiguration(6,
+            { 'urn:dts:dash:audio_channel_configuration:2012': '6' });
+      }).then(function() {
+        // Results in null if the value is not an integer.
+        return testAudioChannelConfiguration(null,
+            { 'urn:mpeg:dash:23003:3:audio_channel_configuration:2011':
+                  'foo' });
+      }).then(done);
+    });
+
+    it('parses dolby scheme', function(done) {
+      return Promise.resolve().then(function() {
+        // Parses a hex value in which each 1-bit is a channel.
+        return testAudioChannelConfiguration(6,
+            { 'tag:dolby.com,2014:dash:audio_channel_configuration:2011':
+                  'F801' });
+      }).then(function() {
+        // This scheme seems to use the same format.
+        return testAudioChannelConfiguration(8,
+            { 'urn:dolby:dash:audio_channel_configuration:2011': '7037' });
+      }).then(function() {
+        // Results in null if the value is not a valid hex number.
+        return testAudioChannelConfiguration(null,
+            { 'urn:dolby:dash:audio_channel_configuration:2011': 'x' });
+      }).then(done);
+    });
+
+    it('ignores unrecognized schemes', function(done) {
+      return Promise.resolve().then(function() {
+        return testAudioChannelConfiguration(null,
+            { 'foo': 'bar' });
+      }).then(function() {
+        return testAudioChannelConfiguration(2,
+            {
+              'foo': 'bar',
+              'urn:mpeg:dash:23003:3:audio_channel_configuration:2011': '2'
+            });
+      }).then(done);
+    });
   });
 
   /**

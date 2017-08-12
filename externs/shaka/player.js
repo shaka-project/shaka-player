@@ -24,7 +24,8 @@
  *   timestamp: number,
  *   id: number,
  *   type: string,
- *   fromAdaptation: boolean
+ *   fromAdaptation: boolean,
+ *   bandwidth: ?number
  * }}
  *
  * @property {number} timestamp
@@ -33,13 +34,15 @@
  * @property {number} id
  *   The id of the track that was chosen.
  * @property {string} type
- *   The type of stream chosen ('variant' or 'text')
+ *   The type of track chosen ('variant' or 'text')
  * @property {boolean} fromAdaptation
  *   True if the choice was made by AbrManager for adaptation; false if it
  *   was made by the application through selectTrack.
+ * @property {?number} bandwidth
+ *   The bandwidth of the chosen track (null for text).
  * @exportDoc
  */
-shakaExtern.StreamChoice;
+shakaExtern.TrackChoice;
 
 
 /**
@@ -78,7 +81,7 @@ shakaExtern.StateChange;
  *   playTime: number,
  *   bufferingTime: number,
  *
- *   switchHistory: !Array.<shakaExtern.StreamChoice>,
+ *   switchHistory: !Array.<shakaExtern.TrackChoice>,
  *   stateHistory: !Array.<shakaExtern.StateChange>
  * }}
  *
@@ -112,7 +115,7 @@ shakaExtern.StateChange;
  * @property {number} bufferingTime
  *   The total time spent in a buffering state in seconds.
  *
- * @property {!Array.<shakaExtern.StreamChoice>} switchHistory
+ * @property {!Array.<shakaExtern.TrackChoice>} switchHistory
  *   A history of the stream changes.
  * @property {!Array.<shakaExtern.StateChange>} stateHistory
  *   A history of the state changes.
@@ -506,7 +509,7 @@ shakaExtern.ManifestConfiguration;
 /**
  * @typedef {{
  *   retryParameters: shakaExtern.RetryParameters,
- *   infiniteRetriesForLiveStreams: boolean,
+ *   failureCallback: function(!shaka.util.Error),
  *   rebufferingGoal: number,
  *   bufferingGoal: number,
  *   bufferBehind: number,
@@ -521,9 +524,9 @@ shakaExtern.ManifestConfiguration;
  *
  * @property {shakaExtern.RetryParameters} retryParameters
  *   Retry parameters for segment requests.
- * @property {boolean} infiniteRetriesForLiveStreams
- *   If true, will retry infinitely on network errors, for live streams only.
- *   Defaults to true.
+ * @property {function(!shaka.util.Error)} failureCallback
+ *   A callback to decide what to do on a streaming failure.  Default behavior
+ *   is to retry on live streams and not on VOD.
  * @property {number} rebufferingGoal
  *   The minimum number of seconds of content that the StreamingEngine must
  *   buffer before it can begin playback or can continue playback after it has
@@ -603,7 +606,8 @@ shakaExtern.AbrConfiguration;
  *   preferredTextLanguage: string,
  *   restrictions: shakaExtern.Restrictions,
  *   playRangeStart: number,
- *   playRangeEnd: number
+ *   playRangeEnd: number,
+ *   textDisplayFactory: shakaExtern.TextDisplayer.Factory
  * }}
  *
  * @property {shakaExtern.DrmConfiguration} drm
@@ -634,6 +638,8 @@ shakaExtern.AbrConfiguration;
  * @property {number} playRangeEnd
  *   Optional playback and seek end time in seconds. Defaults to the end of
  *   the presentation if not provided.
+ * @property {shakaExtern.TextDisplayer.Factory} textDisplayFactory
+ *   A factory to construct text displayer.
  * @exportDoc
  */
 shakaExtern.PlayerConfiguration;

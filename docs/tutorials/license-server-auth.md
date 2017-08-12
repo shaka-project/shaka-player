@@ -6,7 +6,10 @@ to use various license server endpoints that require various forms of
 authentication.
 
 *Please note that the license server we are using in this tutorial is a
-Widevine license server, so you will need to use Chrome to follow along.*
+Widevine license server, so you will need to use Chrome to follow along.
+Because EME requires a secure URL, you will also need to use localhost or
+https for this tutorial.  See the note at the top of {@tutorial drm-config}
+for more information.*
 
 To start, we're going to use the code from {@tutorial basic-usage}, but use this
 manifest and license server:

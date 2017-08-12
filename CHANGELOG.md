@@ -1,3 +1,104 @@
+## 2.1.7 (2017-08-14)
+
+Bugfixes:
+  - Fixed "Invalid argument" exceptions for subtitles in IE & Edge
+  - Fixed buffering at the end of the stream for some content in IE & Edge
+    - https://github.com/google/shaka-player/issues/913
+  - Fixed seeking with native controls in Edge
+    - https://github.com/google/shaka-player/issues/951
+
+Docs:
+  - Fixed a bug in the upgrade guide for selecting tracks and disabling ABR
+    - https://github.com/google/shaka-player/issues/962
+
+
+## 2.1.6 (2017-08-09)
+
+New features:
+  - Add vp9, opus, and flac mp4 to probeSupport
+    - https://github.com/google/shaka-player/issues/944
+
+Bugfixes:
+  - Never adapt across roles or languages
+    - https://github.com/google/shaka-player/issues/918
+    - https://github.com/google/shaka-player/issues/947
+  - Fix parsing byterange attribute in HlsParser
+    - https://github.com/google/shaka-player/issues/925
+  - Fix incorrect segment position after update in some DASH live streams
+    - https://github.com/google/shaka-player/pull/838
+  - Fix support for live streams with no seek range
+    - https://github.com/google/shaka-player/issues/916
+  - Fix display order of cues with identical ranges
+    - https://github.com/google/shaka-player/issues/848
+  - Fix missing cues in WVTT MP4s using default sample duration
+    - https://github.com/google/shaka-player/issues/919
+  - Accept non-integer settings in VTT
+    - https://github.com/google/shaka-player/issues/919
+  - Tolerate bandwidth of 0 or missing bandwidth
+    - https://github.com/google/shaka-player/issues/938
+    - https://github.com/google/shaka-player/issues/940
+  - Fix multiple pipeline flushes on some platforms
+  - Make it safe to install polyfills twice
+    - https://github.com/google/shaka-player/issues/941
+
+Demo app:
+  - Fix compiled mode in the demo app.  Does not affect the library.
+    Removed defaultConfig_ reference in demo.
+    - https://github.com/google/shaka-player/issues/929
+  - Update license URI for PlayReady test asset
+    - https://github.com/google/shaka-player/pull/953
+    - https://github.com/google/shaka-player/issues/945
+
+
+## 2.1.5 (2017-07-17)
+
+New features:
+  - Add more information to video errors in Chrome
+
+Bugfixes:
+  - Fix key status problems on IE11 and Tizen TVs
+    - https://github.com/google/shaka-player/issues/884
+    - https://github.com/google/shaka-player/issues/890
+  - Fix period switching when streams are not yet available
+    - https://github.com/google/shaka-player/issues/839
+  - Filter out audio-only HLS variants that can't be switched to
+    - https://github.com/google/shaka-player/issues/824
+    - https://github.com/google/shaka-player/issues/861
+  - Fix parsing of Microsoft-packaged HLS content
+  - Fix rounding issues with multi-Period content
+    - https://github.com/google/shaka-player/issues/882
+    - https://github.com/google/shaka-player/issues/909
+    - https://github.com/google/shaka-player/issues/911
+  - Fix exceptions thrown in some cases when switching text tracks
+    - https://github.com/google/shaka-player/issues/910
+  - Fix DASH date parsing when timezone is missing
+    - https://github.com/google/shaka-player/issues/901
+  - Fix persistent storage detection on IE11 and Tizen TVs
+  - Fix test issues on Tizen
+    - https://github.com/google/shaka-player/issues/893
+  - Fix version detection when compiling from the NPM package
+    - https://github.com/google/shaka-player/issues/871
+  - Work around lack of key statuses on Tizen
+    - https://github.com/google/shaka-player/issues/891
+    - https://github.com/google/shaka-player/issues/894
+
+Demo app:
+  - Fix missing fullscreen button on IE11
+    - https://github.com/google/shaka-player/issues/787
+  - Added configuration for gap jumping
+
+Docs:
+  - Document HTTPS requirement for EME
+    - https://github.com/google/shaka-player/issues/867
+    - https://github.com/google/shaka-player/issues/928
+  - Update tutorials
+    - https://github.com/google/shaka-player/issues/862
+  - Add FAQ entry on EME robustness
+    - https://github.com/google/shaka-player/issues/866
+  - Update HLS FAQ
+  - Document that we test on Tizen TV now
+
+
 ## 2.1.4 (2017-06-16)
 
 New features:

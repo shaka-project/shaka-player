@@ -121,8 +121,9 @@ describe('Player', function() {
           switchHistory: jasmine.arrayContaining([{
             timestamp: jasmine.any(Number),
             id: jasmine.any(Number),
-            type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
-            fromAdaptation: true
+            type: 'variant',
+            fromAdaptation: true,
+            bandwidth: 0
           }]),
 
           stateHistory: jasmine.arrayContaining([{
@@ -141,27 +142,33 @@ describe('Player', function() {
     // to a crash in TextEngine.  This validates that we do not trigger this
     // behavior when changing visibility of text.
     it('does not cause cues to be null', function(done) {
-      var textTrack = video.textTracks[0];
       player.load('test:sintel_compiled').then(function() {
         video.play();
         return waitUntilPlayheadReaches(video, 1, 10);
       }).then(function() {
-        // This should not be null initially.
-        expect(textTrack.cues).not.toBe(null);
+        // This TextTrack was created as part of load() when we set up the
+        // TextDisplayer.
+        var textTrack = video.textTracks[0];
+        expect(textTrack).not.toBe(null);
 
-        player.setTextTrackVisibility(true);
-        // This should definitely not be null when visible.
-        expect(textTrack.cues).not.toBe(null);
+        if (textTrack) {
+          // This should not be null initially.
+          expect(textTrack.cues).not.toBe(null);
 
-        player.setTextTrackVisibility(false);
-        // This should not transition to null when invisible.
-        expect(textTrack.cues).not.toBe(null);
+          player.setTextTrackVisibility(true);
+          // This should definitely not be null when visible.
+          expect(textTrack.cues).not.toBe(null);
+
+          player.setTextTrackVisibility(false);
+          // This should not transition to null when invisible.
+          expect(textTrack.cues).not.toBe(null);
+        }
       }).catch(fail).then(done);
     });
   });
 
   describe('plays', function() {
-    it('while external text tracks', function(done) {
+    it('with external text tracks', function(done) {
       player.load('test:sintel_no_text_compiled').then(function() {
         // For some reason, using path-absolute URLs (i.e. without the hostname)
         // like this doesn't work on Safari.  So manually resolve the URL.

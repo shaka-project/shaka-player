@@ -885,7 +885,6 @@ describe('CastReceiver', function() {
       getPlayheadTimeAsDate: jasmine.createSpy('getPlayheadTimeAsDate'),
       getTextLanguages: jasmine.createSpy('getTextLanguages'),
       getTextTracks: jasmine.createSpy('getTextTracks'),
-      getTracks: jasmine.createSpy('getTracks'),
       getStats: jasmine.createSpy('getStats'),
       getVariantTracks: jasmine.createSpy('getVariantTracks'),
       isBuffering: jasmine.createSpy('isBuffering'),

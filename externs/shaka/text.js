@@ -70,7 +70,7 @@ shakaExtern.TextParser.prototype.parseInit = function(data) {};
  * @param {shakaExtern.TextParser.TimeContext} timeContext
  *    The time information that should be used to adjust the times values
  *    for each cue.
- * @return {!Array.<!TextTrackCue>}
+ * @return {!Array.<!shaka.text.Cue>}
  *
  * @exportDoc
  */
@@ -81,3 +81,66 @@ shakaExtern.TextParser.prototype.parseMedia = function(data, timeContext) {};
  * @typedef {function(new:shakaExtern.TextParser)}
  */
 shakaExtern.TextParserPlugin;
+
+
+
+/**
+ * An interface for plugins that display text.
+ *
+ * @interface
+ * @extends {shaka.util.IDestroyable}
+ * @exportDoc
+ */
+shakaExtern.TextDisplayer = function() {};
+
+
+/**
+ * Append given text cues to the list of cues to be displayed.
+ *
+ * @param {!Array.<!shaka.text.Cue>} cues
+ *    Text cues to be appended.
+ *
+ * @exportDoc
+ */
+shakaExtern.TextDisplayer.prototype.append = function(cues) {};
+
+
+/**
+ * Remove cues in a given time range.
+ *
+ * @param {number} start
+ * @param {number} end
+ * @return {boolean}
+ *
+ * @exportDoc
+ */
+shakaExtern.TextDisplayer.prototype.remove = function(start, end) {};
+
+
+/**
+ * Returns true if text is currently visible.
+ *
+ * @return {boolean}
+ *
+ * @exportDoc
+ */
+shakaExtern.TextDisplayer.prototype.isTextVisible = function() {};
+
+
+/**
+ * Set text visibility.
+ *
+ * @param {boolean} on
+ *
+ * @exportDoc
+ */
+shakaExtern.TextDisplayer.prototype.setTextVisibility = function(on) {};
+
+
+/**
+ * A factory for creating a TextDisplayer.
+ *
+ * @typedef {function(new:shakaExtern.TextDisplayer)}
+ * @exportDoc
+ */
+shakaExtern.TextDisplayer.Factory;
