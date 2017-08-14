@@ -845,42 +845,50 @@ describe('Player', function() {
         .addPeriod(0)
           .addVariant(1)
             .bandwidth(200)
-            .language('en')
-            .addAudio(1).bandwidth(100)
+            .language('en').primary()
+            .addAudio(1).bandwidth(100).roles(['main'])
             .addVideo(4).bandwidth(100).size(100, 200)
             .frameRate(1000000 / 42000)
           .addVariant(2)
             .bandwidth(300)
-            .language('en')
-            .addAudio(1).bandwidth(100)
+            .language('en').primary()
+            .addAudio(1)  // already defined
             .addVideo(5).bandwidth(200).size(200, 400).frameRate(24)
           .addVariant(3)
             .bandwidth(200)
             .language('en')
-            .addAudio(2).bandwidth(100)
-            .addVideo(4).bandwidth(100).size(100, 200)
+            .addAudio(2).bandwidth(100).roles(['commentary'])
+            .addVideo(4)  // already defined
             .frameRate(1000000 / 42000)
           .addVariant(4)
             .bandwidth(300)
             .language('en')
-            .addAudio(2).bandwidth(100)
-            .addVideo(5).bandwidth(200).size(200, 400).frameRate(24)
+            .addAudio(2)  // already defined
+            .addVideo(5)  // already defined
           .addVariant(5)
             .language('es')
             .bandwidth(300)
             .addAudio(8).bandwidth(100)
-            .addVideo(5).bandwidth(200).size(200, 400).frameRate(24)
+            .addVideo(5)  // already defined
           .addTextStream(6)
             .language('es')
             .label('Spanish')
             .bandwidth(100).kind('caption')
-                         .mime('text/vtt')
+            .mime('text/vtt')
+            .primary().roles(['main'])
           .addTextStream(7)
             .language('en')
             .label('English')
             .bandwidth(100).kind('caption')
-                         .mime('application/ttml+xml')
-          // Both text tracks should remain, even with different MIME types.
+            .mime('application/ttml+xml')
+            .primary().roles(['main'])
+          .addTextStream(9)
+            .language('en')
+            .label('English')
+            .bandwidth(100).kind('caption')
+            .mime('application/ttml+xml')
+            .roles(['commentary'])
+          // All text tracks should remain, even with different MIME types.
         .build();
 
       variantTracks = [
@@ -899,8 +907,8 @@ describe('Player', function() {
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
           videoCodec: 'avc1.4d401f',
-          primary: false,
-          roles: [],
+          primary: true,
+          roles: ['main'],
           videoId: 4,
           audioId: 1
         },
@@ -919,8 +927,8 @@ describe('Player', function() {
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
           videoCodec: 'avc1.4d401f',
-          primary: false,
-          roles: [],
+          primary: true,
+          roles: ['main'],
           videoId: 5,
           audioId: 1
         },
@@ -940,7 +948,7 @@ describe('Player', function() {
           audioCodec: 'mp4a.40.2',
           videoCodec: 'avc1.4d401f',
           primary: false,
-          roles: [],
+          roles: ['commentary'],
           videoId: 4,
           audioId: 2
         },
@@ -960,7 +968,7 @@ describe('Player', function() {
           audioCodec: 'mp4a.40.2',
           videoCodec: 'avc1.4d401f',
           primary: false,
-          roles: [],
+          roles: ['commentary'],
           videoId: 5,
           audioId: 2
         },
@@ -998,8 +1006,8 @@ describe('Player', function() {
           codecs: null,
           audioCodec: null,
           videoCodec: null,
-          primary: false,
-          roles: []
+          primary: true,
+          roles: ['main']
         },
         {
           id: 7,
@@ -1012,8 +1020,22 @@ describe('Player', function() {
           codecs: null,
           audioCodec: null,
           videoCodec: null,
+          primary: true,
+          roles: ['main']
+        },
+        {
+          id: 9,
+          active: false,
+          type: ContentType.TEXT,
+          language: 'en',
+          label: 'English',
+          kind: 'caption',
+          mimeType: 'application/ttml+xml',
+          codecs: null,
+          audioCodec: null,
+          videoCodec: null,
           primary: false,
-          roles: []
+          roles: ['commentary']
         }
       ];
     });
@@ -1178,7 +1200,7 @@ describe('Player', function() {
           var spanishStream = period.variants[4].audio;
           var englishStream = period.variants[3].audio;
 
-          expect(streamingEngine.switch).not.toHaveBeenCalled();
+          streamingEngine.switch.calls.reset();
           player.selectAudioLanguage('es');
 
           expect(streamingEngine.switch)
@@ -1200,7 +1222,7 @@ describe('Player', function() {
           var spanishStream = period.textStreams[0];
           var englishStream = period.textStreams[1];
 
-          expect(streamingEngine.switch).not.toHaveBeenCalled();
+          streamingEngine.switch.calls.reset();
           player.selectTextLanguage('en');
 
           expect(streamingEngine.switch)
@@ -1224,6 +1246,20 @@ describe('Player', function() {
           .toHaveBeenCalledWith(ContentType.AUDIO, spanishStream, true);
     });
 
+    it('changing audio role changes active stream', function() {
+      chooseStreams();
+      canSwitch();
+
+      var period = manifest.periods[0];
+      var commentaryStream = period.variants[2].audio;
+
+      expect(streamingEngine.switch).not.toHaveBeenCalled();
+      player.selectAudioLanguage('en', 'commentary');
+
+      expect(streamingEngine.switch)
+          .toHaveBeenCalledWith(ContentType.AUDIO, commentaryStream, true);
+    });
+
     it('changing currentTextLanguage changes active stream', function() {
       chooseStreams();
       canSwitch();
@@ -1236,6 +1272,20 @@ describe('Player', function() {
 
       expect(streamingEngine.switch)
           .toHaveBeenCalledWith(ContentType.TEXT, englishStream, true);
+    });
+
+    it('changing text role changes active stream', function() {
+      chooseStreams();
+      canSwitch();
+
+      var period = manifest.periods[0];
+      var commentaryStream = period.textStreams[2];
+
+      expect(streamingEngine.switch).not.toHaveBeenCalled();
+      player.selectTextLanguage('en', 'commentary');
+
+      expect(streamingEngine.switch)
+          .toHaveBeenCalledWith(ContentType.TEXT, commentaryStream, true);
     });
   });
 
