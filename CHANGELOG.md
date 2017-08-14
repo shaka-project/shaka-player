@@ -6,6 +6,8 @@ Bugfixes:
     - https://github.com/google/shaka-player/issues/913
   - Fixed seeking with native controls in Edge
     - https://github.com/google/shaka-player/issues/951
+  - Fixed role selection to clear audio buffer right away
+    - https://github.com/google/shaka-player/issues/948
 
 Docs:
   - Fixed a bug in the upgrade guide for selecting tracks and disabling ABR
