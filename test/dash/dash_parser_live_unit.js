@@ -153,10 +153,15 @@ describe('DashParser Live', function() {
       parser.start('dummy://foo', playerInterface)
           .then(function(manifest) {
             Dash.verifySegmentIndex(manifest, firstReferences, 0);
+            expect(manifest.periods.length).toBe(1);
 
             fakeNetEngine.setResponseMapAsText({'dummy://foo': secondManifest});
             delayForUpdatePeriod();
             Dash.verifySegmentIndex(manifest, secondReferences, 0);
+            // In https://github.com/google/shaka-player/issues/963, we
+            // duplicated periods during the first update.  This check covers
+            // this case.
+            expect(manifest.periods.length).toBe(1);
           }).catch(fail).then(done);
       shaka.polyfill.Promise.flush();
     }
