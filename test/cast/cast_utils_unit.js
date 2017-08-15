@@ -28,6 +28,7 @@ describe('CastUtils', function() {
     var ignoredMembers = [
       'constructor',  // JavaScript added field
       'getNetworkingEngine',  // Handled specially
+      'getMediaElement',  // Handled specially
       'setMaxHardwareResolution',
       'destroy',  // Should use CastProxy.destroy instead
 
@@ -35,6 +36,7 @@ describe('CastUtils', function() {
       'createDrmEngine',
       'createNetworkingEngine',
       'createPlayhead',
+      'createPlayheadObserver',
       'createMediaSource',
       'createMediaSourceEngine',
       'createStreamingEngine'
@@ -55,7 +57,7 @@ describe('CastUtils', function() {
     var extraCastMembers = castMembers.filter(function(name) {
       return playerMembers.indexOf(name) < 0;
     });
-    var extraPlayerMembers = castMembers.filter(function(name) {
+    var extraPlayerMembers = playerMembers.filter(function(name) {
       return castMembers.indexOf(name) < 0;
     });
     expect(extraCastMembers).toEqual([]);
