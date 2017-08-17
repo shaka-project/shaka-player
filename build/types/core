@@ -21,6 +21,7 @@
 +../../lib/media/time_ranges_utils.js
 +../../lib/media/webm_segment_index_parser.js
 
++../../lib/net/backoff.js
 +../../lib/net/networking_engine.js
 
 +../../lib/player.js
