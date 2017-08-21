@@ -31,6 +31,8 @@ describe('CastSender', function() {
   };
 
   var onStatusChanged;
+  /** @type {!jasmine.Spy} */
+  var onFirstCastStateUpdate;
   var onRemoteEvent;
   var onResumeLocal;
   var onInitStateRequired;
@@ -50,6 +52,7 @@ describe('CastSender', function() {
 
   beforeEach(function() {
     onStatusChanged = jasmine.createSpy('onStatusChanged');
+    onFirstCastStateUpdate = jasmine.createSpy('onFirstCastStateUpdate');
     onRemoteEvent = jasmine.createSpy('onRemoteEvent');
     onResumeLocal = jasmine.createSpy('onResumeLocal');
     onInitStateRequired = jasmine.createSpy('onInitStateRequired')
@@ -63,7 +66,8 @@ describe('CastSender', function() {
     mockSession = null;
 
     sender = new CastSender(
-        fakeAppId, Util.spyFunc(onStatusChanged), Util.spyFunc(onRemoteEvent),
+        fakeAppId, Util.spyFunc(onStatusChanged),
+        Util.spyFunc(onFirstCastStateUpdate), Util.spyFunc(onRemoteEvent),
         Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
   });
 
@@ -278,6 +282,70 @@ describe('CastSender', function() {
         }));
       }).catch(fail).then(done);
       fakeSessionConnection();
+    });
+  });
+
+  describe('onFirstCastStateUpdate', function() {
+    it('is triggered by an "update" message', function(done) {
+      // You have to join an existing session for it to work.
+      sender.init();
+      fakeReceiverAvailability(true);
+      fakeJoinExistingSession();
+
+      shaka.test.Util.delay(0.1).then(function() {
+        expect(onFirstCastStateUpdate).not.toHaveBeenCalled();
+
+        fakeSessionMessage({
+          type: 'update',
+          update: {video: {currentTime: 12}, player: {isLive: false}}
+        });
+        expect(onFirstCastStateUpdate).toHaveBeenCalled();
+      }).catch(fail).then(done);
+    });
+
+    it('is not triggered if making a new session', function(done) {
+      sender.init();
+      fakeReceiverAvailability(true);
+      sender.cast(fakeInitState).then(function() {
+        fakeSessionMessage({
+          type: 'update',
+          update: {video: {currentTime: 12}, player: {isLive: false}}
+        });
+        expect(onFirstCastStateUpdate).not.toHaveBeenCalled();
+      }).catch(fail).then(done);
+      fakeSessionConnection();
+    });
+
+    it('is triggered once per existing session', function(done) {
+      sender.init();
+      fakeReceiverAvailability(true);
+      fakeJoinExistingSession();
+
+      shaka.test.Util.delay(0.1).then(function() {
+        fakeSessionMessage({
+          type: 'update',
+          update: {video: {currentTime: 12}, player: {isLive: false}}
+        });
+        expect(onFirstCastStateUpdate).toHaveBeenCalled();
+        onFirstCastStateUpdate.calls.reset();
+
+        fakeSessionMessage({
+          type: 'update',
+          update: {video: {currentTime: 12}, player: {isLive: false}}
+        });
+        expect(onFirstCastStateUpdate).not.toHaveBeenCalled();
+        onFirstCastStateUpdate.calls.reset();
+
+        // Disconnect and then connect to another existing session.
+        fakeJoinExistingSession();
+        return shaka.test.Util.delay(0.1);
+      }).then(function() {
+        fakeSessionMessage({
+          type: 'update',
+          update: {video: {currentTime: 12}, player: {isLive: false}}
+        });
+        expect(onFirstCastStateUpdate).toHaveBeenCalled();
+      }).catch(fail).then(done);
     });
   });
 
