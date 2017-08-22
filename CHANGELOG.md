@@ -1,3 +1,78 @@
+## 2.2.0 (2017-08-23)
+
+New features:
+  - Add support for EVENT type playlists in HLS
+    - https://github.com/google/shaka-player/issues/740
+  - Add new option for offline protected content without persistent licensing
+    - https://github.com/google/shaka-player/issues/873
+  - Allow applications to render their own text tracks
+    - https://github.com/google/shaka-player/issues/796
+  - Allow applications to control streaming retry behavior
+    - https://github.com/google/shaka-player/issues/960
+  - Add support for additional TTML styles
+    - https://github.com/google/shaka-player/issues/923
+    - https://github.com/google/shaka-player/issues/927
+  - Add channel count information for both DASH & HLS
+    - https://github.com/google/shaka-player/issues/424
+    - https://github.com/google/shaka-player/issues/826
+  - Add basic xlink support in DASH (actuate=onLoad only)
+    - https://github.com/google/shaka-player/issues/587
+    - https://github.com/google/shaka-player/issues/788
+  - Add API to limit playable/seekable range for VOD content.
+    - https://github.com/google/shaka-player/issues/246
+  - Add new error code for container/codec support issues
+    - https://github.com/google/shaka-player/issues/868
+  - The default ABR manager is much more configurable
+    - https://github.com/google/shaka-player/issues/744
+  - Add stream bandwidth info to variant tracks
+    - https://github.com/google/shaka-player/issues/834
+  - Add player.isAudioOnly()
+    - https://github.com/google/shaka-player/issues/942
+  - Expose presentation start time through player
+    - https://github.com/google/shaka-player/issues/957
+  - Add bandwidth info to switch history
+  - Improved Chromecast media queries
+  - Stricter runtime type-checking of EME cert configuration
+    - https://github.com/google/shaka-player/issues/784
+
+Bugfixes:
+  - Fix flakiness in offline-related tests
+    - https://github.com/google/shaka-player/issues/903
+
+Demo app:
+  - Added robustness fields to the UI
+    - https://github.com/google/shaka-player/issues/889
+
+Docs:
+  - Updated upgrade guide for v2.2
+    - https://github.com/google/shaka-player/issues/930
+
+Broken compatibility:
+  - The text-parsing plugin API has changed.  Plugins now return shaka.text.Cue
+    objects instead of VTTCue or TextTrackCue objects.  All application-specific
+    text-parsing plugins MUST be updated.
+    - https://github.com/google/shaka-player/issues/796
+
+Deprecated:
+  - The configuration for a custom ABR manager has changed.  Applications with
+    custom AbrManager implementations SHOULD now configure abrFactory instead of
+    abr.manager.
+    - https://github.com/google/shaka-player/issues/744
+    - The old interface will be removed in v2.3.
+  - The config API for AbrManager has changed.  setDefaultEstimate() and
+    setRestrictions() have been replaced with configure().  Applications with
+    custom AbrManager implementations SHOULD implement the new configure()
+    method.
+    - https://github.com/google/shaka-player/issues/744
+    - The old interface will be removed in v2.3.
+  - The choice API for AbrManager has changed.  chooseStreams() has been
+    replaced with chooseVariants(), and the switch callback now takes a variant.
+    - https://github.com/google/shaka-player/issues/954
+    - The old interface will be removed in v2.3.
+  - The getTracks() and selectTrack() methods which were deprecated in v2.1 have
+    now been removed.
+
+
 ## 2.1.7 (2017-08-14)
 
 Bugfixes:
