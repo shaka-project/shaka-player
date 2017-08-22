@@ -73,6 +73,14 @@ Deprecated:
     now been removed.
 
 
+## 2.1.8 (2017-08-23)
+
+Bugfixes:
+  - Add player.isAudioOnly() to fix flash of audio-only icon when casting
+    - https://github.com/google/shaka-player/issues/969
+  - Fix cast proxying of isAudioOnly and getMediaElement
+
+
 ## 2.1.7 (2017-08-14)
 
 Bugfixes:
