@@ -2333,6 +2333,7 @@ describe('Player', function() {
       // This factory recreates the parser each time, so updates to |manifest|
       // affect the next load() call.
       var parserFactory = function() {
+        goog.asserts.assert(manifest, 'manifest should be non-null!');
         return new shaka.test.FakeManifestParser(manifest);
       };
 
