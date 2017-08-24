@@ -236,6 +236,17 @@ describe('Player', function() {
       });
     });
 
+    it('destroys TextDisplayer on unload', function(done) {
+      // Regression test for https://github.com/google/shaka-player/issues/984
+      player.load('', 0, factory1).then(function() {
+        textDisplayer.destroy.calls.reset();
+        player.unload().then(function() {
+          expect(textDisplayer.destroy).toHaveBeenCalled();
+          done();
+        });
+      });
+    });
+
     it('handles repeated load/unload', function(done) {
       player.load('', 0, factory1).then(function() {
         shaka.log.debug('finished load 1');
@@ -471,8 +482,8 @@ describe('Player', function() {
           p.resolve();
         });
       });
-    });
-  });
+    });  // describe('interruption during')
+  });  // describe('load/unload')
 
   describe('getConfiguration', function() {
     it('returns a copy of the configuration', function() {
