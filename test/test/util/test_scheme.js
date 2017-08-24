@@ -386,7 +386,8 @@ shaka.test.TestScheme.ManifestParser.prototype.configure = function(config) {};
 
 
 /** @override */
-shaka.test.TestScheme.ManifestParser.prototype.start = function(uri) {
+shaka.test.TestScheme.ManifestParser.prototype.start =
+    function(uri, playerInterface) {
   var re = /^test:([^\/]+)$/;
   var manifestParts = re.exec(uri);
   if (!manifestParts) {
@@ -398,6 +399,14 @@ shaka.test.TestScheme.ManifestParser.prototype.start = function(uri) {
   var manifest = shaka.test.TestScheme.MANIFESTS[manifestParts[1]];
   expect(manifest).toBeTruthy();
   if (!manifest) return Promise.reject();
+
+  // Invoke filtering interfaces similar to how a real parser would.
+  // This makes sure the filtering functions are covered implicitly by tests.
+  // This covers regression https://github.com/google/shaka-player/issues/988
+  playerInterface.filterAllPeriods(manifest.periods);
+  manifest.periods.forEach(function(period) {
+    playerInterface.filterNewPeriod(period);
+  });
 
   return Promise.resolve(manifest);
 };
