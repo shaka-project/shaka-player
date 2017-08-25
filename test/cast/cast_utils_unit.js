@@ -39,9 +39,11 @@ describe('CastUtils', function() {
       'createStreamingEngine'
     ];
 
-    var castMembers = shaka.cast.CastUtils.PlayerVoidMethods
-                          .concat(shaka.cast.CastUtils.PlayerGetterMethods)
-                          .concat(shaka.cast.CastUtils.PlayerPromiseMethods);
+    var CastUtils = shaka.cast.CastUtils;
+    var castMembers = CastUtils.PlayerVoidMethods
+                          .concat(CastUtils.PlayerGetterMethods)
+                          .concat(CastUtils.PlayerPromiseMethods)
+                          .concat(CastUtils.PlayerGetterMethodsThatRequireLive);
     var playerMembers = Object.keys(shaka.Player.prototype).filter(
         function(name) {
           // Private members end with _.
