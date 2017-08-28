@@ -70,7 +70,8 @@ shakaDemo.updateButtons_ = function(canHide) {
   else if (!supportsDrm)
     helpText.textContent = 'This browser does not support persistent licenses.';
   else if (button.disabled)
-    helpText.textContent = 'Selected asset is stored offline.';
+    helpText.textContent = 'The asset is stored offline. ' +
+        'Checkout the "Offline" section in the "Asset" list';
   else
     helpText.textContent = '';
 };
