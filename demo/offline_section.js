@@ -168,17 +168,26 @@ shakaDemo.storeDeleteAsset_ = function() {
         if (option.asset && option.asset.manifestUri == originalManifestUri)
           option.isStored = false;
       }
-      shakaDemo.refreshAssetList_();
+      return shakaDemo.refreshAssetList_();
     });
   } else {
     var asset = shakaDemo.preparePlayer_(option.asset);
     var nameField = document.getElementById('offlineName').value;
-    var assetName = asset.name ? asset.name + ' (offline)' : null;
+    var assetName = asset.name ? '[OFFLINE] ' + asset.name : null;
     var metadata = {name: assetName || nameField || asset.manifestUri};
     p = storage.store(asset.manifestUri, metadata).then(function() {
-      shakaDemo.refreshAssetList_();
       if (option.asset)
         option.isStored = true;
+      return shakaDemo.refreshAssetList_().then(function() {
+        // Auto-select offline copy of asset after storing.
+        var group = shakaDemo.offlineOptGroup_;
+        for (var i = 0; i < group.children.length; i++) {
+          var option = group.children[i];
+          if (option.textContent == assetName) {
+            assetList.selectedIndex = option.index;
+          }
+        }
+      });
     });
   }
 
@@ -187,7 +196,7 @@ shakaDemo.storeDeleteAsset_ = function() {
     shakaDemo.onError_(error);
   }).then(function() {
     shakaDemo.offlineOperationInProgress_ = false;
-    shakaDemo.updateButtons_(false);
+    shakaDemo.updateButtons_(true /* canHide */);
     return storage.destroy();
   });
 };
@@ -201,7 +210,7 @@ shakaDemo.refreshAssetList_ = function() {
     group.removeChild(group.firstChild);
   }
 
-  shakaDemo.setupOfflineAssets_();
+  return shakaDemo.setupOfflineAssets_();
 };
 
 
