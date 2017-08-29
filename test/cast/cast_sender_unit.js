@@ -30,6 +30,7 @@ describe('CastSender', function() {
     video: null
   };
 
+  /** @type {!jasmine.Spy} */
   var onStatusChanged;
   /** @type {!jasmine.Spy} */
   var onFirstCastStateUpdate;
@@ -69,6 +70,7 @@ describe('CastSender', function() {
         fakeAppId, Util.spyFunc(onStatusChanged),
         Util.spyFunc(onFirstCastStateUpdate), Util.spyFunc(onRemoteEvent),
         Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
+    resetHasReceivers();
   });
 
   afterEach(function(done) {
@@ -125,6 +127,27 @@ describe('CastSender', function() {
 
       fakeReceiverAvailability(false);
       expect(sender.hasReceivers()).toBe(false);
+    });
+
+    it('remembers status from previous senders', function(done) {
+      sender.init();
+      fakeReceiverAvailability(true);
+      sender.destroy().then(function() {
+        sender = new CastSender(
+            fakeAppId, Util.spyFunc(onStatusChanged),
+            Util.spyFunc(onFirstCastStateUpdate), Util.spyFunc(onRemoteEvent),
+            Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
+        sender.init();
+        // You get an initial call to onStatusChanged when it initializes.
+        expect(onStatusChanged).toHaveBeenCalledTimes(3);
+
+        return Util.delay(0.25);
+      }).then(function() {
+        // And then you get another call after it has 'discovered' the
+        // existing receivers.
+        expect(sender.hasReceivers()).toBe(true);
+        expect(onStatusChanged).toHaveBeenCalledTimes(4);
+      }).catch(fail).then(done);
     });
   });
 
@@ -230,7 +253,7 @@ describe('CastSender', function() {
     fakeReceiverAvailability(true);
     fakeJoinExistingSession();
 
-    shaka.test.Util.delay(0.1).then(function() {
+    Util.delay(0.1).then(function() {
       expect(onStatusChanged).toHaveBeenCalled();
       expect(sender.isCasting()).toBe(true);
       expect(onInitStateRequired).toHaveBeenCalled();
@@ -292,7 +315,7 @@ describe('CastSender', function() {
       fakeReceiverAvailability(true);
       fakeJoinExistingSession();
 
-      shaka.test.Util.delay(0.1).then(function() {
+      Util.delay(0.1).then(function() {
         expect(onFirstCastStateUpdate).not.toHaveBeenCalled();
 
         fakeSessionMessage({
@@ -321,7 +344,7 @@ describe('CastSender', function() {
       fakeReceiverAvailability(true);
       fakeJoinExistingSession();
 
-      shaka.test.Util.delay(0.1).then(function() {
+      Util.delay(0.1).then(function() {
         fakeSessionMessage({
           type: 'update',
           update: {video: {currentTime: 12}, player: {isLive: false}}
@@ -338,7 +361,7 @@ describe('CastSender', function() {
 
         // Disconnect and then connect to another existing session.
         fakeJoinExistingSession();
-        return shaka.test.Util.delay(0.1);
+        return Util.delay(0.1);
       }).then(function() {
         fakeSessionMessage({
           type: 'update',
@@ -506,10 +529,10 @@ describe('CastSender', function() {
 
       it('resolve when "asyncComplete" messages are received', function(done) {
         var p = method(123, 'abc');
-        shaka.test.Util.capturePromiseStatus(p);
+        Util.capturePromiseStatus(p);
 
         // Wait a tick for the Promise status to be set.
-        shaka.test.Util.delay(0.1).then(function() {
+        Util.delay(0.1).then(function() {
           expect(p.status).toBe('pending');
           var id = mockSession.messages[mockSession.messages.length - 1].id;
           fakeSessionMessage({
@@ -519,7 +542,7 @@ describe('CastSender', function() {
           });
 
           // Wait a tick for the Promise status to change.
-          return shaka.test.Util.delay(0.1);
+          return Util.delay(0.1);
         }).then(function() {
           expect(p.status).toBe('resolved');
         }).catch(fail).then(done);
@@ -532,10 +555,10 @@ describe('CastSender', function() {
             shaka.util.Error.Code.UNABLE_TO_GUESS_MANIFEST_TYPE,
             'foo://bar');
         var p = method(123, 'abc');
-        shaka.test.Util.capturePromiseStatus(p);
+        Util.capturePromiseStatus(p);
 
         // Wait a tick for the Promise status to be set.
-        shaka.test.Util.delay(0.1).then(function() {
+        Util.delay(0.1).then(function() {
           expect(p.status).toBe('pending');
           var id = mockSession.messages[mockSession.messages.length - 1].id;
           fakeSessionMessage({
@@ -545,30 +568,30 @@ describe('CastSender', function() {
           });
 
           // Wait a tick for the Promise status to change.
-          return shaka.test.Util.delay(0.1);
+          return Util.delay(0.1);
         }).then(function() {
           expect(p.status).toBe('rejected');
           return p.catch(function(error) {
-            shaka.test.Util.expectToEqualError(error, originalError);
+            Util.expectToEqualError(error, originalError);
           });
         }).catch(fail).then(done);
       });
 
       it('reject when disconnected remotely', function(done) {
         var p = method(123, 'abc');
-        shaka.test.Util.capturePromiseStatus(p);
+        Util.capturePromiseStatus(p);
 
         // Wait a tick for the Promise status to be set.
-        shaka.test.Util.delay(0.1).then(function() {
+        Util.delay(0.1).then(function() {
           expect(p.status).toBe('pending');
           fakeRemoteDisconnect();
 
           // Wait a tick for the Promise status to change.
-          return shaka.test.Util.delay(0.1);
+          return Util.delay(0.1);
         }).then(function() {
           expect(p.status).toBe('rejected');
           return p.catch(function(error) {
-            shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+            Util.expectToEqualError(error, new shaka.util.Error(
                 shaka.util.Error.Severity.RECOVERABLE,
                 shaka.util.Error.Category.PLAYER,
                 shaka.util.Error.Code.LOAD_INTERRUPTED));
@@ -653,21 +676,21 @@ describe('CastSender', function() {
 
         var method = sender.get('player', 'load');
         var p = method();
-        shaka.test.Util.capturePromiseStatus(p);
+        Util.capturePromiseStatus(p);
 
         // Wait a tick for the Promise status to be set.
-        return shaka.test.Util.delay(0.1).then(function() {
+        return Util.delay(0.1).then(function() {
           expect(p.status).toBe('pending');
           sender.forceDisconnect();
           expect(mockSession.leave).not.toHaveBeenCalled();
           expect(mockSession.stop).toHaveBeenCalled();
 
           // Wait a tick for the Promise status to change.
-          return shaka.test.Util.delay(0.1);
+          return Util.delay(0.1);
         }).then(function() {
           expect(p.status).toBe('rejected');
           return p.catch(function(error) {
-            shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+            Util.expectToEqualError(error, new shaka.util.Error(
                 shaka.util.Error.Severity.RECOVERABLE,
                 shaka.util.Error.Category.PLAYER,
                 shaka.util.Error.Code.LOAD_INTERRUPTED));
@@ -689,21 +712,21 @@ describe('CastSender', function() {
 
         var method = sender.get('player', 'load');
         var p = method();
-        shaka.test.Util.capturePromiseStatus(p);
+        Util.capturePromiseStatus(p);
 
         // Wait a tick for the Promise status to be set.
-        return shaka.test.Util.delay(0.1).then(function() {
+        return Util.delay(0.1).then(function() {
           expect(p.status).toBe('pending');
           sender.destroy().catch(fail);
           expect(mockSession.leave).toHaveBeenCalled();
           expect(mockSession.stop).not.toHaveBeenCalled();
 
           // Wait a tick for the Promise status to change.
-          return shaka.test.Util.delay(0.1);
+          return Util.delay(0.1);
         }).then(function() {
           expect(p.status).toBe('rejected');
           return p.catch(function(error) {
-            shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+            Util.expectToEqualError(error, new shaka.util.Error(
                 shaka.util.Error.Severity.RECOVERABLE,
                 shaka.util.Error.Category.PLAYER,
                 shaka.util.Error.Code.LOAD_INTERRUPTED));
@@ -810,5 +833,14 @@ describe('CastSender', function() {
       mockSession = createMockCastSession();
       onJoinExistingSession(mockSession);
     }
+  }
+
+  /**
+   * @suppress {visibility}
+   */
+  function resetHasReceivers() {
+    // @suppress visibility has function scope, so this is a mini-function that
+    // exists solely to suppress visibility for this call.
+    CastSender.hasReceivers_ = false;
   }
 });
