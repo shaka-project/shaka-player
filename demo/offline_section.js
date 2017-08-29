@@ -61,23 +61,25 @@ shakaDemo.updateButtons_ = function(canHide) {
   document.getElementById('offlineNameDiv').style.display =
       option.asset ? 'none' : 'block';
 
-  var button = document.getElementById('storeDelete');
+  var button = document.getElementById('storeDeleteButton');
   button.disabled = (inProgress || !supportsDrm || option.isStored);
   button.innerText = storedContent ? 'Delete' : 'Store';
+  var helpText = document.getElementById('storeDeleteHelpText');
   if (inProgress)
-    button.title = 'There is already an operation in progress';
+    helpText.textContent = 'Operation is in progress...';
   else if (!supportsDrm)
-    button.title = 'This browser does not support persistent licenses';
+    helpText.textContent = 'This browser does not support persistent licenses.';
   else if (button.disabled)
-    button.title = 'Selected asset is already stored offline';
+    helpText.textContent = 'The asset is stored offline. ' +
+        'Checkout the "Offline" section in the "Asset" list';
   else
-    button.title = '';
+    helpText.textContent = '';
 };
 
 
 /** @private */
 shakaDemo.setupOffline_ = function() {
-  document.getElementById('storeDelete')
+  document.getElementById('storeDeleteButton')
       .addEventListener('click', shakaDemo.storeDeleteAsset_);
   document.getElementById('assetList')
       .addEventListener('change', shakaDemo.updateButtons_.bind(null, true));
