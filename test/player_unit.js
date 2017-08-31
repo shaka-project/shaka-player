@@ -1079,12 +1079,12 @@ describe('Player', function() {
           .addVariant(2)
             .bandwidth(300)
             .language('en')
-            .addAudio(1).bandwidth(100)
+            .addAudio(1).bandwidth(100).roles(['main'])
             .addVideo(5).bandwidth(200).size(200, 400).frameRate(24)
           .addVariant(3)
             .bandwidth(200)
             .language('en')
-            .addAudio(2).bandwidth(100)
+            .addAudio(2).bandwidth(100).roles(['commentary'])
             .addVideo(4).bandwidth(100).size(100, 200)
             .frameRate(1000000 / 42000)
           .addVariant(4)
@@ -1098,16 +1098,18 @@ describe('Player', function() {
             .addAudio(8).bandwidth(100)
             .addVideo(5).bandwidth(200).size(200, 400).frameRate(24)
           .addTextStream(6)
-            .language('es')
-            .label('Spanish')
-            .bandwidth(100).kind('caption')
-                         .mime('text/vtt')
+            .language('es').label('Spanish')
+            .bandwidth(100).mime('text/vtt')
+            .kind('caption')
           .addTextStream(7)
-            .language('en')
-            .label('English')
-            .bandwidth(100).kind('caption')
-                         .mime('application/ttml+xml')
-          // Both text tracks should remain, even with different MIME types.
+            .language('en').label('English')
+            .bandwidth(100).mime('application/ttml+xml')
+            .kind('caption').roles(['main'])
+           .addTextStream(11)
+            .language('en').label('English')
+            .bandwidth(100).mime('application/ttml+xml')
+            .kind('caption').roles(['commentary'])
+          // All text tracks should remain, even with different MIME types.
         .addPeriod(1)
           .addVariant(8)
             .bandwidth(200)
@@ -1133,7 +1135,7 @@ describe('Player', function() {
           audioCodec: 'mp4a.40.2',
           videoCodec: 'avc1.4d401f',
           primary: false,
-          roles: [],
+          roles: ['main'],
           videoId: 4,
           audioId: 1,
           channelsCount: null,
@@ -1156,7 +1158,7 @@ describe('Player', function() {
           audioCodec: 'mp4a.40.2',
           videoCodec: 'avc1.4d401f',
           primary: false,
-          roles: [],
+          roles: ['main'],
           videoId: 5,
           audioId: 1,
           channelsCount: null,
@@ -1179,7 +1181,7 @@ describe('Player', function() {
           audioCodec: 'mp4a.40.2',
           videoCodec: 'avc1.4d401f',
           primary: false,
-          roles: [],
+          roles: ['commentary'],
           videoId: 4,
           audioId: 2,
           channelsCount: null,
@@ -1202,7 +1204,7 @@ describe('Player', function() {
           audioCodec: 'mp4a.40.2',
           videoCodec: 'avc1.4d401f',
           primary: false,
-          roles: [],
+          roles: ['commentary'],
           videoId: 5,
           audioId: 2,
           channelsCount: null,
@@ -1270,7 +1272,30 @@ describe('Player', function() {
           audioCodec: null,
           videoCodec: null,
           primary: false,
-          roles: [],
+          roles: ['main'],
+          channelsCount: null,
+          audioBandwidth: null,
+          videoBandwidth: null,
+          bandwidth: 0,
+          width: null,
+          height: null,
+          frameRate: null,
+          videoId: null,
+          audioId: null
+        },
+        {
+          id: 11,
+          active: false,
+          type: ContentType.TEXT,
+          language: 'en',
+          label: 'English',
+          kind: 'caption',
+          mimeType: 'application/ttml+xml',
+          codecs: null,
+          audioCodec: null,
+          videoCodec: null,
+          primary: false,
+          roles: ['commentary'],
           channelsCount: null,
           audioBandwidth: null,
           videoBandwidth: null,
@@ -1433,8 +1458,8 @@ describe('Player', function() {
       expect(getActiveTextTrack().id).toBe(textTrack.id);
     });
 
-    it('selectAudioLanguage() takes precedence over preferredAudioLanguage',
-        function() {
+    it('selectAudioLanguage() takes precedence over ' +
+       'preferredAudioLanguage', function() {
           streamingEngine.onCanSwitch();
 
           // This preference is set in beforeEach, before load().
@@ -1454,8 +1479,25 @@ describe('Player', function() {
           expect(getActiveVariantTrack().language).toBe('es');
         });
 
-    it('selectTextLanguage() takes precedence over preferredTextLanguage',
+    it('selectAudioLanguage() respects selected role',
         function() {
+          streamingEngine.onCanSwitch();
+          expect(getActiveVariantTrack().id).toBe(1);
+
+          var period = manifest.periods[0];
+          var variantWithCommentaryRole = period.variants[2];
+          expect(variantWithCommentaryRole.audio.roles[0]).toBe('commentary');
+
+          streamingEngine.switchVariant.calls.reset();
+          player.selectAudioLanguage('en', 'commentary');
+
+          expect(streamingEngine.switchVariant)
+              .toHaveBeenCalledWith(variantWithCommentaryRole, true);
+          expect(getActiveVariantTrack().roles[0]).toBe('commentary');
+        });
+
+    it('selectTextLanguage() takes precedence over ' +
+       'preferredTextLanguage', function() {
           streamingEngine.onCanSwitch();
 
           // This preference is set in beforeEach, before load().
@@ -1473,6 +1515,23 @@ describe('Player', function() {
           expect(streamingEngine.switchTextStream)
               .toHaveBeenCalledWith(englishStream);
           expect(getActiveTextTrack().language).toBe('en');
+        });
+
+    it('selectTextLanguage() respects selected role',
+        function() {
+          streamingEngine.onCanSwitch();
+          expect(getActiveTextTrack().id).toBe(6);
+
+          var period = manifest.periods[0];
+          var streamWithCommentaryRole = period.textStreams[2];
+          expect(streamWithCommentaryRole.roles[0]).toBe('commentary');
+
+          streamingEngine.switchTextStream.calls.reset();
+          player.selectTextLanguage('en', 'commentary');
+
+          expect(streamingEngine.switchTextStream)
+              .toHaveBeenCalledWith(streamWithCommentaryRole);
+          expect(getActiveTextTrack().roles[0]).toBe('commentary');
         });
 
     it('changing current audio language changes active stream', function() {
@@ -2704,6 +2763,101 @@ describe('Player', function() {
 
       // Before the fix, load() would fail assertions and throw errors.
       player.load('', 0, parserFactory).catch(fail).then(done);
+    });
+  });
+
+  describe('language methods', function() {
+    var videoOnlyManifest;
+    var parserFactory = function() {
+      return new shaka.test.FakeManifestParser(manifest);
+    };
+
+    beforeEach(function() {
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addVariant(1).language('fr')
+            .addVideo(0).size(300, 400)
+            .addAudio(1).language('fr')
+
+          .addVariant(2).language('en')
+            .addVideo(0)  // already defined
+            .addAudio(2).language('en').roles(['main'])
+
+          .addVariant(3).language('en')
+            .addVideo(0)  // already defined
+            .addAudio(3).language('en').roles(['commentary'])
+
+          .addVariant(4).language('de')
+            .addVideo(0)  // already defined
+            .addAudio(4).language('de').roles(['foo', 'bar'])
+
+          .addTextStream(5)
+            .language('es').roles(['baz', 'qwerty'])
+          .addTextStream(6)
+            .language('en').kind('caption').roles(['main', 'caption'])
+          .addTextStream(7)
+            .language('en').kind('subtitle').roles(['main', 'subtitle'])
+        .build();
+
+      videoOnlyManifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addVariant(1)
+            .bandwidth(400)
+            .addVideo(1).size(300, 400)
+          .addVariant(2)
+            .bandwidth(800)
+            .addVideo(2).size(500, 600)
+        .build();
+    });
+
+    describe('get*Languages', function() {
+      it('returns a list of languages', function(done) {
+        player.load('', 0, parserFactory).then(function() {
+          expect(player.getAudioLanguages()).toEqual(['fr', 'en', 'de']);
+          expect(player.getTextLanguages()).toEqual(['es', 'en']);
+        }).catch(fail).then(done);
+      });
+
+      it('returns "und" for video-only tracks', function(done) {
+        manifest = videoOnlyManifest;
+
+        player.load('', 0, parserFactory).then(function() {
+          expect(player.getAudioLanguages()).toEqual(['und']);
+          expect(player.getTextLanguages()).toEqual([]);
+        }).catch(fail).then(done);
+      });
+    });
+
+    describe('get*LanguageAndRoles', function() {
+      it('returns a list of language/role combinations', function(done) {
+        player.load('', 0, parserFactory).then(function() {
+          expect(player.getAudioLanguagesAndRoles()).toEqual([
+            { language: 'fr', role: '' },
+            { language: 'en', role: 'main' },
+            { language: 'en', role: 'commentary' },
+            { language: 'de', role: 'foo' },
+            { language: 'de', role: 'bar' }
+          ]);
+          expect(player.getTextLanguagesAndRoles()).toEqual([
+            { language: 'es', role: 'baz' },
+            { language: 'es', role: 'qwerty' },
+            { language: 'en', role: 'main' },
+            { language: 'en', role: 'caption' },
+            { language: 'en', role: 'subtitle' }
+          ]);
+        }).catch(fail).then(done);
+      });
+
+      it('returns "und" for video-only tracks', function(done) {
+        manifest = videoOnlyManifest;
+
+        player.load('', 0, parserFactory).then(function() {
+          expect(player.getAudioLanguagesAndRoles()).toEqual([
+            { language: 'und', role: '' }
+          ]);
+          expect(player.getTextLanguagesAndRoles()).toEqual([]);
+        }).catch(fail).then(done);
+      });
     });
   });
 
