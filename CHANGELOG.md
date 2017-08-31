@@ -1,3 +1,30 @@
+## 2.2.1 (2017-09-01)
+
+New features:
+  - Support MP4+TTML in HLS
+    - https://github.com/google/shaka-player/issues/986
+
+Bugfixes:
+  - Fixed display of old text cues after loading new content
+    - https://github.com/google/shaka-player/issues/984
+  - Fixed text cue alignment in compiled mode
+    - https://github.com/google/shaka-player/issues/987
+  - Fixed exception triggered when storing offline content
+    - https://github.com/google/shaka-player/issues/988
+  - Fixed cast state when multiple cast senders exist at once
+    - https://github.com/google/shaka-player/issues/768
+  - Fixed several Cast UI issues
+  - Fixed (harmless) assertion failures on Cast receivers
+
+Demo app:
+  - Demo UI on mobile now shows help text on store/delete button
+    - https://github.com/google/shaka-player/pull/995
+
+Docs:
+  - Document lack of IE support on Windows 7
+    - https://github.com/google/shaka-player/pull/993
+
+
 ## 2.2.0 (2017-08-23)
 
 New features:
