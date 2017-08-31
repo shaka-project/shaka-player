@@ -37,7 +37,7 @@ This can also happen with mixed-content restrictions.  If the site is using
 your manifest contains only Playready, it will need to be played on IE/Edge, a
 Chromecast, or some smart TVs.  Also check the `drm.advanced` configuration for
 the key system.  If you are passing a non-empty robustness, it may not be
-supported by your patform.  See the [DRM tuturial][drm_tutorial] for more info.
+supported by your patform.  See the [DRM tutorial][drm_tutorial] for more info.
 
 Also, to use EME requires using a secure origin.  This means using `https` or
 be on `localhost`.  Currently only Chrome enforces this, but other browsers
