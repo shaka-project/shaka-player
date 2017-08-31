@@ -202,7 +202,10 @@ shakaDemo.storeDeleteAsset_ = function() {
 };
 
 
-/** @private */
+/**
+ * @return {!Promise}
+ * @private
+ */
 shakaDemo.refreshAssetList_ = function() {
   // Remove all child elements.
   var group = shakaDemo.offlineOptGroup_;
