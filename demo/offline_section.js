@@ -181,8 +181,8 @@ shakaDemo.storeDeleteAsset_ = function() {
       return shakaDemo.refreshAssetList_().then(function() {
         // Auto-select offline copy of asset after storing.
         var group = shakaDemo.offlineOptGroup_;
-        for (var i = 0; i < group.children.length; i++) {
-          var option = group.children[i];
+        for (var i = 0; i < group.childNodes.length; i++) {
+          var option = group.childNodes[i];
           if (option.textContent == assetName) {
             assetList.selectedIndex = option.index;
           }
