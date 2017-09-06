@@ -233,6 +233,8 @@ shakaDemo.load = function() {
 
     shakaDemo.hashShouldChange_();
 
+    shakaDemo.updateRobustnessSuggestions_();
+
     // Set a different poster for audio-only assets.
     if (player.isAudioOnly()) {
       shakaDemo.localVideo_.poster = shakaDemo.audioOnlyPoster_;

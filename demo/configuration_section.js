@@ -55,6 +55,25 @@ shakaDemo.setupConfiguration_ = function() {
 
 
 /** @private */
+shakaDemo.updateRobustnessSuggestions_ = function() {
+  var drmInfo = shakaDemo.player_.drmInfo();
+  var drmSettingsVideoRobustness =
+      document.getElementById('drmSettingsVideoRobustness');
+  var drmSettingsAudioRobustness =
+      document.getElementById('drmSettingsAudioRobustness');
+
+  // Suggest appropriate robustness values for Widevine.
+  if (drmInfo && drmInfo.keySystem === 'com.widevine.alpha') {
+    drmSettingsVideoRobustness.setAttribute('list', 'widevineRobustnessValues');
+    drmSettingsAudioRobustness.setAttribute('list', 'widevineRobustnessValues');
+  } else {
+    drmSettingsVideoRobustness.removeAttribute('list');
+    drmSettingsAudioRobustness.removeAttribute('list');
+  }
+};
+
+
+/** @private */
 shakaDemo.onAutoplayChange_ = function() {
   // Change the hash, to mirror this.
   shakaDemo.hashShouldChange_();
