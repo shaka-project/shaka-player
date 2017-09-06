@@ -717,3 +717,179 @@ describe('DashParser ContentProtection', function() {
     Dash.testFails(done, source, expected);
   });
 });
+
+describe('In-manifest PlayReady and Widevine', function() {
+  var ContentProtection = shaka.dash.ContentProtection;
+  var strToXml = function(str) {
+    var parser = new DOMParser();
+
+    return parser.parseFromString(str, 'application/xml').documentElement;
+  };
+
+  describe('getWidevineLicenseUrl_', function() {
+    it('valid ms:laurl node', function() {
+      var input = {
+        node: strToXml('<test><ms:laurl licenseUrl="www.example.com"></ms:laurl></test>')
+      };
+      var actual = ContentProtection.getWidevineLicenseUrl_(input);
+      var expected = 'www.example.com';
+      expect(actual).toEqual(expected);
+    });
+
+    it('ms:laurl without license url', function() {
+      var input = { node: strToXml('<test><ms:laurl></ms:laurl></test>') };
+      var actual = ContentProtection.getWidevineLicenseUrl_(input);
+      var expected = '';
+      expect(actual).toEqual(expected);
+    });
+
+    it('no ms:laurl node', function() {
+      var input = { node: strToXml('<test></test>') };
+      var actual = ContentProtection.getWidevineLicenseUrl_(input);
+      var expected = '';
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('parseRecords_', function() {
+    it('one record', function() {
+      var input = Uint16Array.from([
+        // Type
+        1,
+        // Size
+        2,
+        // Value
+        116
+      ]);
+      var actual = ContentProtection.parseRecords_(input, 1);
+      var expected = [{ type: 1, length: 2, value: 't' }];
+      expect(actual).toEqual(expected);
+    });
+
+    it('multiple records', function() {
+      var input = Uint16Array.from([
+        1, 2, 116,
+        2, 2, 120
+      ]);
+      var actual = ContentProtection.parseRecords_(input, 2);
+      var expected = [
+        { type: 1, length: 2, value: 't' },
+        { type: 2, length: 2, value: 'x' }
+      ];
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('parsePro_', function() {
+    it('one record', function() {
+      var input = Uint16Array.from([
+        // PlayReady Object size
+        12, 0,
+        // Record count
+        1,
+
+        // Record
+        // Type
+        1,
+        // Size
+        2,
+        // Value
+        116
+      ]);
+      var actual = ContentProtection.parsePro_(input);
+      var expected = {
+        length: 12, recordCount: 1,
+        records: [{ type: 1, length: 2, value: 't' }]
+      };
+      expect(actual).toEqual(expected);
+    });
+
+    it('multiple records', function() {
+      var input = Uint16Array.from([
+        // PlayReady Object
+        18, 0, 2,
+
+        // Record
+        1, 2, 116,
+
+        // Record
+        2, 2, 120
+      ]);
+      var actual = ContentProtection.parsePro_(input);
+      var expected = {
+        length: 18, recordCount: 2,
+        records: [
+          { type: 1, length: 2, value: 't' },
+          { type: 2, length: 2, value: 'x' }
+        ]
+      };
+      expect(actual).toEqual(expected);
+    });
+
+    it('no records', function() {
+      var input = Uint16Array.from([
+        // PlayReady Object
+        6, 0, 0,
+      ]);
+      var actual = ContentProtection.parsePro_(input);
+      var expected = { length: 6, recordCount: 0, records: [] };
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('getLaurl_', function() {
+    it('contains LA_URL', function() {
+      var input = strToXml('<test><LA_URL>www.example.com</LA_URL></test>');
+      var actual = ContentProtection.getLaurl_(input);
+      var expected = 'www.example.com';
+      expect(actual).toEqual(expected);
+    });
+
+    it('does not contain LA_URL', function() {
+      var input = strToXml('<test></test>');
+      var actual = ContentProtection.getLaurl_(input);
+      var expected = '';
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('getPlayReadyLicenseServerURL_', function() {
+    it('mspro', function() {
+      var laurl = '<test><LA_URL>www.example.com</LA_URL></test>';
+      var laurlCodes = laurl.split('').map(function(c) {
+        return c.charCodeAt();
+      });
+      var prBytes = Uint16Array.from([
+        // pr object size (unused)
+        0, 0,
+        // record count
+        1,
+
+        // type
+        0x0001,
+        // record size
+        laurl.length * 2,
+        // value
+      ].concat(laurlCodes));
+
+      var encodedPrObject = btoa(String.fromCharCode.apply(null, new Uint8Array(prBytes.buffer)));
+
+      var input = {
+        node: strToXml('<test><mspr:pro>' + encodedPrObject + '</mspr:pro></test>')
+      };
+
+      var actual = ContentProtection.getPlayReadyLicenseServerURL_(input);
+      var expected = 'www.example.com';
+      expect(actual).toEqual(expected);
+    });
+
+    it('no mspro', function() {
+      var input = {
+        node: strToXml('<test></test>')
+      };
+      var actual = ContentProtection.getPlayReadyLicenseServerURL_(input);
+      var expected = '';
+      expect(actual).toEqual(expected);
+    });
+  });
+});
