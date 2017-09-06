@@ -87,7 +87,12 @@ describe('Player', function() {
     Promise.all([
       eventManager.destroy(),
       player.destroy()
-    ]).catch(fail).then(done);
+    ]).then(function() {
+      // Work-around: allow the Tizen media pipeline to cool down.
+      // Without this, Tizen's pipeline seems to hang in subsequent tests.
+      // TODO: file a bug on Tizen
+      return Util.delay(0.1);
+    }).catch(fail).then(done);
   });
 
   afterAll(function() {

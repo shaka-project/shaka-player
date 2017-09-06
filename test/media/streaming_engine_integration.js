@@ -114,6 +114,11 @@ describe('StreamingEngine', function() {
         playhead.destroy(),
         eventManager.destroy()
       ]);
+    }).then(function() {
+      // Work-around: allow the Tizen media pipeline to cool down.
+      // Without this, Tizen's pipeline seems to hang in subsequent tests.
+      // TODO: file a bug on Tizen
+      return Util.delay(0.1);
     }).catch(fail).then(done);
   });
 
