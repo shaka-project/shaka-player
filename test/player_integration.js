@@ -200,7 +200,10 @@ describe('Player', function() {
         // The Period changes at 10 seconds.  Assert that we are in the previous
         // Period and have buffered into the next one.
         expect(video.currentTime).toBeLessThan(9);
-        expect(video.buffered.end(0)).toBeGreaterThan(11);
+        // The two periods might not be in a single contiguous buffer, so don't
+        // check end(0).  Gap-jumping will deal with any discontinuities.
+        var bufferEnd = video.buffered.end(video.buffered.length - 1);
+        expect(bufferEnd).toBeGreaterThan(11);
 
         // Change to a different language; this should clear the buffers and
         // cause a Period transition again.

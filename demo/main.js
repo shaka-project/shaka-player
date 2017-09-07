@@ -79,11 +79,11 @@ shakaDemo.audioOnlyPoster_ =
 
 
 /**
- * The registered ID of the v2.1 Chromecast receiver demo.
+ * The registered ID of the v2.2 Chromecast receiver demo.
  * @const {string}
  * @private
  */
-shakaDemo.CC_APP_ID_ = '658CCD53';
+shakaDemo.CC_APP_ID_ = '91580C19';
 
 
 /**
@@ -218,6 +218,14 @@ shakaDemo.getParams_ = function() {
   * @private
   */
 shakaDemo.preBrowserCheckParams_ = function(params) {
+  if ('videoRobustness' in params) {
+    document.getElementById('drmSettingsVideoRobustness').value =
+        params['videoRobustness'];
+  }
+  if ('audioRobustness' in params) {
+    document.getElementById('drmSettingsAudioRobustness').value =
+        params['audioRobustness'];
+  }
   if ('lang' in params) {
     document.getElementById('preferredAudioLanguage').value = params['lang'];
     document.getElementById('preferredTextLanguage').value = params['lang'];
@@ -356,6 +364,15 @@ shakaDemo.postBrowserCheckParams_ = function(params) {
     shakaDemo.onTrickPlayChange_(fakeEvent);
   }
 
+  if ('nativecontrols' in params) {
+    var showNative = document.getElementById('showNative');
+    showNative.checked = true;
+    // Call onNativeChange_ manually, because setting checked
+    // programatically doesn't fire a 'change' event.
+    var fakeEvent = /** @type {!Event} */({target: showNative});
+    shakaDemo.onNativeChange_(fakeEvent);
+  }
+
   // Allow the hash to be changed, and give it an initial change.
   shakaDemo.hashCanChange_ = true;
   shakaDemo.hashShouldChange_();
@@ -458,6 +475,9 @@ shakaDemo.hashShouldChange_ = function() {
   if (document.getElementById('showTrickPlay').checked) {
     params.push('trickplay');
   }
+  if (document.getElementById('showNative').checked) {
+    params.push('nativecontrols');
+  }
   if (shaka.log) {
     var logLevelList = document.getElementById('logLevelList');
     var logLevel = logLevelList[logLevelList.selectedIndex].value;
@@ -480,6 +500,16 @@ shakaDemo.hashShouldChange_ = function() {
   if ('compiled' in shakaDemo.getParams_()) {
     params.push('compiled');
   }
+
+  // Store values for drm configuration.
+  var videoRobustness =
+      document.getElementById('drmSettingsVideoRobustness').value;
+  if (videoRobustness)
+    params.push('videoRobustness=' + videoRobustness);
+  var audioRobustness =
+      document.getElementById('drmSettingsAudioRobustness').value;
+  if (audioRobustness)
+    params.push('audioRobustness=' + audioRobustness);
 
   var newHash = '#' + params.join(';');
   if (newHash != location.hash) {

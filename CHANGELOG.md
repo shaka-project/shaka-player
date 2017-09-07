@@ -1,3 +1,167 @@
+## 2.2.1 (2017-09-01)
+
+New features:
+  - Support MP4+TTML in HLS
+    - https://github.com/google/shaka-player/issues/986
+
+Bugfixes:
+  - Fixed display of old text cues after loading new content
+    - https://github.com/google/shaka-player/issues/984
+  - Fixed text cue alignment in compiled mode
+    - https://github.com/google/shaka-player/issues/987
+  - Fixed exception triggered when storing offline content
+    - https://github.com/google/shaka-player/issues/988
+  - Fixed cast state when multiple cast senders exist at once
+    - https://github.com/google/shaka-player/issues/768
+  - Fixed several Cast UI issues
+  - Fixed (harmless) assertion failures on Cast receivers
+
+Demo app:
+  - Demo UI on mobile now shows help text on store/delete button
+    - https://github.com/google/shaka-player/pull/995
+
+Docs:
+  - Document lack of IE support on Windows 7
+    - https://github.com/google/shaka-player/pull/993
+
+
+## 2.2.0 (2017-08-23)
+
+New features:
+  - Add support for EVENT type playlists in HLS
+    - https://github.com/google/shaka-player/issues/740
+  - Add new option for offline protected content without persistent licensing
+    - https://github.com/google/shaka-player/issues/873
+  - Allow applications to render their own text tracks
+    - https://github.com/google/shaka-player/issues/796
+  - Allow applications to control streaming retry behavior
+    - https://github.com/google/shaka-player/issues/960
+  - Add support for additional TTML styles
+    - https://github.com/google/shaka-player/issues/923
+    - https://github.com/google/shaka-player/issues/927
+  - Add channel count information for both DASH & HLS
+    - https://github.com/google/shaka-player/issues/424
+    - https://github.com/google/shaka-player/issues/826
+  - Add basic xlink support in DASH (actuate=onLoad only)
+    - https://github.com/google/shaka-player/issues/587
+    - https://github.com/google/shaka-player/issues/788
+  - Add API to limit playable/seekable range for VOD content.
+    - https://github.com/google/shaka-player/issues/246
+  - Add new error code for container/codec support issues
+    - https://github.com/google/shaka-player/issues/868
+  - The default ABR manager is much more configurable
+    - https://github.com/google/shaka-player/issues/744
+  - Add stream bandwidth info to variant tracks
+    - https://github.com/google/shaka-player/issues/834
+  - Add player.isAudioOnly()
+    - https://github.com/google/shaka-player/issues/942
+  - Expose presentation start time through player
+    - https://github.com/google/shaka-player/issues/957
+  - Add bandwidth info to switch history
+  - Improved Chromecast media queries
+  - Stricter runtime type-checking of EME cert configuration
+    - https://github.com/google/shaka-player/issues/784
+
+Bugfixes:
+  - Fix flakiness in offline-related tests
+    - https://github.com/google/shaka-player/issues/903
+
+Demo app:
+  - Added robustness fields to the UI
+    - https://github.com/google/shaka-player/issues/889
+
+Docs:
+  - Updated upgrade guide for v2.2
+    - https://github.com/google/shaka-player/issues/930
+
+Broken compatibility:
+  - The text-parsing plugin API has changed.  Plugins now return shaka.text.Cue
+    objects instead of VTTCue or TextTrackCue objects.  All application-specific
+    text-parsing plugins MUST be updated.
+    - https://github.com/google/shaka-player/issues/796
+
+Deprecated:
+  - The configuration for a custom ABR manager has changed.  Applications with
+    custom AbrManager implementations SHOULD now configure abrFactory instead of
+    abr.manager.
+    - https://github.com/google/shaka-player/issues/744
+    - The old interface will be removed in v2.3.
+  - The config API for AbrManager has changed.  setDefaultEstimate() and
+    setRestrictions() have been replaced with configure().  Applications with
+    custom AbrManager implementations SHOULD implement the new configure()
+    method.
+    - https://github.com/google/shaka-player/issues/744
+    - The old interface will be removed in v2.3.
+  - The choice API for AbrManager has changed.  chooseStreams() has been
+    replaced with chooseVariants(), and the switch callback now takes a variant.
+    - https://github.com/google/shaka-player/issues/954
+    - The old interface will be removed in v2.3.
+  - The getTracks() and selectTrack() methods which were deprecated in v2.1 have
+    now been removed.
+
+
+## 2.1.8 (2017-08-23)
+
+Bugfixes:
+  - Add player.isAudioOnly() to fix flash of audio-only icon when casting
+    - https://github.com/google/shaka-player/issues/969
+  - Fix cast proxying of isAudioOnly and getMediaElement
+
+
+## 2.1.7 (2017-08-14)
+
+Bugfixes:
+  - Fixed "Invalid argument" exceptions for subtitles in IE & Edge
+  - Fixed buffering at the end of the stream for some content in IE & Edge
+    - https://github.com/google/shaka-player/issues/913
+  - Fixed seeking with native controls in Edge
+    - https://github.com/google/shaka-player/issues/951
+  - Fixed role selection to clear audio buffer right away
+    - https://github.com/google/shaka-player/issues/948
+
+Docs:
+  - Fixed a bug in the upgrade guide for selecting tracks and disabling ABR
+    - https://github.com/google/shaka-player/issues/962
+
+
+## 2.1.6 (2017-08-09)
+
+New features:
+  - Add vp9, opus, and flac mp4 to probeSupport
+    - https://github.com/google/shaka-player/issues/944
+
+Bugfixes:
+  - Never adapt across roles or languages
+    - https://github.com/google/shaka-player/issues/918
+    - https://github.com/google/shaka-player/issues/947
+  - Fix parsing byterange attribute in HlsParser
+    - https://github.com/google/shaka-player/issues/925
+  - Fix incorrect segment position after update in some DASH live streams
+    - https://github.com/google/shaka-player/pull/838
+  - Fix support for live streams with no seek range
+    - https://github.com/google/shaka-player/issues/916
+  - Fix display order of cues with identical ranges
+    - https://github.com/google/shaka-player/issues/848
+  - Fix missing cues in WVTT MP4s using default sample duration
+    - https://github.com/google/shaka-player/issues/919
+  - Accept non-integer settings in VTT
+    - https://github.com/google/shaka-player/issues/919
+  - Tolerate bandwidth of 0 or missing bandwidth
+    - https://github.com/google/shaka-player/issues/938
+    - https://github.com/google/shaka-player/issues/940
+  - Fix multiple pipeline flushes on some platforms
+  - Make it safe to install polyfills twice
+    - https://github.com/google/shaka-player/issues/941
+
+Demo app:
+  - Fix compiled mode in the demo app.  Does not affect the library.
+    Removed defaultConfig_ reference in demo.
+    - https://github.com/google/shaka-player/issues/929
+  - Update license URI for PlayReady test asset
+    - https://github.com/google/shaka-player/pull/953
+    - https://github.com/google/shaka-player/issues/945
+
+
 ## 2.1.5 (2017-07-17)
 
 New features:

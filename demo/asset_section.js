@@ -136,37 +136,62 @@ shakaDemo.preparePlayer_ = function(asset) {
 
   var player = shakaDemo.player_;
 
+  var videoRobustness =
+      document.getElementById('drmSettingsVideoRobustness').value;
+  var audioRobustness =
+      document.getElementById('drmSettingsAudioRobustness').value;
+
+  var commonDrmSystems =
+      ['com.widevine.alpha', 'com.microsoft.playready', 'com.adobe.primetime'];
   var config = /** @type {shakaExtern.PlayerConfiguration} */(
       { abr: {}, streaming: {}, manifest: { dash: {} } });
+  config.drm = /** @type {shakaExtern.DrmConfiguration} */({
+    advanced: {}});
+  commonDrmSystems.forEach(function(system) {
+    config.drm.advanced[system] =
+        /** @type {shakaExtern.AdvancedDrmConfiguration} */({});
+  });
   config.manifest.dash.clockSyncUri =
       '//shaka-player-demo.appspot.com/time.txt';
 
   if (!asset) {
     // Use the custom fields.
-    var licenseServer = document.getElementById('licenseServerInput').value;
+    var licenseServers = {};
+    commonDrmSystems.forEach(function(system) {
+      licenseServers[system] =
+          document.getElementById('licenseServerInput').value;
+    });
     asset = /** @type {shakaAssets.AssetInfo} */ ({
       manifestUri: document.getElementById('manifestInput').value,
       // Use the custom license server for all key systems.
       // This simplifies configuration for the user.
       // They will simply fill in a Widevine license server on Chrome, etc.
-      licenseServers: {
-        'com.widevine.alpha': licenseServer,
-        'com.microsoft.playready': licenseServer,
-        'com.adobe.primetime': licenseServer
-      }
+      licenseServers: licenseServers
     });
   }
 
   player.resetConfiguration();
 
-  // Add config from this asset.
+  // Add configuration from this asset.
   ShakaDemoUtils.setupAssetMetadata(asset, player);
   shakaDemo.castProxy_.setAppData({
     'asset': asset,
     'isYtDrm': asset.drmCallback == shakaAssets.YouTubeCallback
   });
 
-  // Add configuration from the UI.
+  // Add drm configuration from the UI.
+  if (videoRobustness) {
+    commonDrmSystems.forEach(function(system) {
+      config.drm.advanced[system].videoRobustness = videoRobustness;
+    });
+  }
+  if (audioRobustness) {
+    commonDrmSystems.forEach(function(system) {
+      config.drm.advanced[system].audioRobustness = audioRobustness;
+    });
+  }
+
+  // Add other configuration from the UI.
   config.preferredAudioLanguage =
       document.getElementById('preferredAudioLanguage').value;
   config.preferredTextLanguage =
@@ -208,13 +233,8 @@ shakaDemo.load = function() {
 
     shakaDemo.hashShouldChange_();
 
-    // Audio-only tracks have no width/height.
-    var videoTracks = player.getVariantTracks().filter(function(t) {
-      return t.videoCodec;
-    });
-
     // Set a different poster for audio-only assets.
-    if (videoTracks.length == 0) {
+    if (player.isAudioOnly()) {
       shakaDemo.localVideo_.poster = shakaDemo.audioOnlyPoster_;
     }
 

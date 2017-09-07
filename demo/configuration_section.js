@@ -37,6 +37,8 @@ shakaDemo.setupConfiguration_ = function() {
       'input', shakaDemo.onConfigInput_);
   document.getElementById('preferredTextLanguage').addEventListener(
       'input', shakaDemo.onConfigInput_);
+  document.getElementById('showNative').addEventListener(
+      'change', shakaDemo.onNativeChange_);
   document.getElementById('showTrickPlay').addEventListener(
       'change', shakaDemo.onTrickPlayChange_);
   document.getElementById('enableAdaptation').addEventListener(
@@ -45,11 +47,25 @@ shakaDemo.setupConfiguration_ = function() {
       'change', shakaDemo.onLogLevelChange_);
   document.getElementById('enableAutoplay').addEventListener(
       'change', shakaDemo.onAutoplayChange_);
+  document.getElementById('drmSettingsVideoRobustness').addEventListener(
+      'input', shakaDemo.onDrmSettingsChange_);
+  document.getElementById('drmSettingsAudioRobustness').addEventListener(
+      'input', shakaDemo.onDrmSettingsChange_);
 };
 
 
 /** @private */
 shakaDemo.onAutoplayChange_ = function() {
+  // Change the hash, to mirror this.
+  shakaDemo.hashShouldChange_();
+};
+
+
+/**
+ * @param {!Event} event
+ * @private
+ */
+shakaDemo.onDrmSettingsChange_ = function(event) {
   // Change the hash, to mirror this.
   shakaDemo.hashShouldChange_();
 };
@@ -139,6 +155,28 @@ shakaDemo.onAdaptationChange_ = function(event) {
   shakaDemo.player_.configure(/** @type {shakaExtern.PlayerConfiguration} */({
     abr: { enabled: event.target.checked }
   }));
+  // Change the hash, to mirror this.
+  shakaDemo.hashShouldChange_();
+};
+
+
+/**
+ * @param {!Event} event
+ * @private
+ */
+shakaDemo.onNativeChange_ = function(event) {
+  var showTrickPlay = document.getElementById('showTrickPlay');
+
+  if (event.target.checked) {
+    showTrickPlay.checked = false;
+    showTrickPlay.disabled = true;
+    shakaDemo.controls_.showTrickPlay(false);
+    shakaDemo.controls_.setEnabled(false);
+  } else {
+    showTrickPlay.disabled = false;
+    shakaDemo.controls_.setEnabled(true);
+  }
+
   // Change the hash, to mirror this.
   shakaDemo.hashShouldChange_();
 };

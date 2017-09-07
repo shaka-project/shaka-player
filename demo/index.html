@@ -134,6 +134,10 @@
           <input id="preferredTextLanguage" class="flex-grow" type="text">
         </div>
         <div>
+          <label for="showNative">Show native browser controls:</label>
+          <input id="showNative" type="checkbox">
+        </div>
+        <div>
           <label for="showTrickPlay">Show trick play controls:</label>
           <input id="showTrickPlay" type="checkbox">
         </div>
@@ -165,6 +169,14 @@
             <option value="v">Verbose</option>
             <option value="vv">Very Verbose</option>
           </select>
+        </div>
+        <div>
+          <label for="drmSettingsVideoRobustness">Video Robustness:</label>
+          <input id="drmSettingsVideoRobustness" type="text" class="flex-grow">
+        </div>
+        <div>
+          <label for="drmSettingsAudioRobustness">Audio Robustness:</label>
+          <input id="drmSettingsAudioRobustness" type="text" class="flex-grow">
         </div>
       </details>
 
@@ -204,7 +216,8 @@
       <details id="offlineSection" class="input">
         <summary>Offline</summary>
         <div>
-          <button id="storeDelete">Store</button>
+          <button id="storeDeleteButton">Store</button>
+          <span id="storeDeleteHelpText"></span>
         </div>
         <div id="progressDiv">
           <span class="label">Progress:</span>

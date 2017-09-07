@@ -28,6 +28,10 @@ describe('MediaSourceEngine', function() {
   var buffer2 = /** @type {!ArrayBuffer} */ (/** @type {?} */ (2));
   var buffer3 = /** @type {!ArrayBuffer} */ (/** @type {?} */ (3));
 
+  var fakeVideoStream = { mimeType: 'video/foo' };
+  var fakeAudioStream = { mimeType: 'audio/foo' };
+  var fakeTextStream = { mimeType: 'text/foo' };
+
   var audioSourceBuffer;
   var videoSourceBuffer;
   var mockVideo;
@@ -88,8 +92,8 @@ describe('MediaSourceEngine', function() {
       // Create empty object first and initialize the fields through
       // [] to allow field names to be expressions.
       var initObject = {};
-      initObject[ContentType.AUDIO] = 'audio/foo';
-      initObject[ContentType.VIDEO] = 'video/foo';
+      initObject[ContentType.AUDIO] = fakeAudioStream;
+      initObject[ContentType.VIDEO] = fakeVideoStream;
       mediaSourceEngine.init(initObject);
       expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledWith('audio/foo');
       expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledWith('video/foo');
@@ -100,7 +104,7 @@ describe('MediaSourceEngine', function() {
       // Create empty object first and initialize the fields through
       // [] to allow field names to be expressions.
       var initObject = {};
-      initObject[ContentType.TEXT] = 'text/foo';
+      initObject[ContentType.TEXT] = fakeTextStream;
       mediaSourceEngine.init(initObject);
       expect(mockMediaSource.addSourceBuffer).not.toHaveBeenCalled();
       expect(shaka.text.TextEngine).toHaveBeenCalled();
@@ -112,8 +116,8 @@ describe('MediaSourceEngine', function() {
       // Create empty object first and initialize the fields through
       // [] to allow field names to be expressions.
       var initObject = {};
-      initObject[ContentType.AUDIO] = 'audio/foo';
-      initObject[ContentType.TEXT] = 'text/foo';
+      initObject[ContentType.AUDIO] = fakeAudioStream;
+      initObject[ContentType.TEXT] = fakeTextStream;
       mediaSourceEngine.init(initObject);
     });
 
@@ -158,8 +162,8 @@ describe('MediaSourceEngine', function() {
       // Create empty object first and initialize the fields through
       // [] to allow field names to be expressions.
       var initObject = {};
-      initObject[ContentType.AUDIO] = 'audio/foo';
-      initObject[ContentType.TEXT] = 'text/foo';
+      initObject[ContentType.AUDIO] = fakeAudioStream;
+      initObject[ContentType.TEXT] = fakeTextStream;
       mediaSourceEngine.init(initObject);
     });
 
@@ -220,9 +224,9 @@ describe('MediaSourceEngine', function() {
       // Create empty object first and initialize the fields through
       // [] to allow field names to be expressions.
       var initObject = {};
-      initObject[ContentType.AUDIO] = 'audio/foo';
-      initObject[ContentType.VIDEO] = 'video/foo';
-      initObject[ContentType.TEXT] = 'text/foo';
+      initObject[ContentType.AUDIO] = fakeAudioStream;
+      initObject[ContentType.VIDEO] = fakeVideoStream;
+      initObject[ContentType.TEXT] = fakeTextStream;
       mediaSourceEngine.init(initObject);
     });
 
@@ -391,9 +395,9 @@ describe('MediaSourceEngine', function() {
       // Create empty object first and initialize the fields through
       // [] to allow field names to be expressions.
       var initObject = {};
-      initObject[ContentType.AUDIO] = 'audio/foo';
-      initObject[ContentType.VIDEO] = 'video/foo';
-      initObject[ContentType.TEXT] = 'text/foo';
+      initObject[ContentType.AUDIO] = fakeAudioStream;
+      initObject[ContentType.VIDEO] = fakeVideoStream;
+      initObject[ContentType.TEXT] = fakeTextStream;
       mediaSourceEngine.init(initObject);
     });
 
@@ -535,9 +539,9 @@ describe('MediaSourceEngine', function() {
       // Create empty object first and initialize the fields through
       // [] to allow field names to be expressions.
       var initObject = {};
-      initObject[ContentType.AUDIO] = 'audio/foo';
-      initObject[ContentType.VIDEO] = 'video/foo';
-      initObject[ContentType.TEXT] = 'text/foo';
+      initObject[ContentType.AUDIO] = fakeAudioStream;
+      initObject[ContentType.VIDEO] = fakeVideoStream;
+      initObject[ContentType.TEXT] = fakeTextStream;
       mediaSourceEngine.init(initObject);
     });
 
@@ -609,8 +613,8 @@ describe('MediaSourceEngine', function() {
       // Create empty object first and initialize the fields through
       // [] to allow field names to be expressions.
       var initObject = {};
-      initObject[ContentType.AUDIO] = 'audio/foo';
-      initObject[ContentType.VIDEO] = 'video/foo';
+      initObject[ContentType.AUDIO] = fakeAudioStream;
+      initObject[ContentType.VIDEO] = fakeVideoStream;
       mediaSourceEngine.init(initObject);
     });
 
@@ -708,8 +712,8 @@ describe('MediaSourceEngine', function() {
       // Create empty object first and initialize the fields through
       // [] to allow field names to be expressions.
       var initObject = {};
-      initObject[ContentType.AUDIO] = 'audio/foo';
-      initObject[ContentType.VIDEO] = 'video/foo';
+      initObject[ContentType.AUDIO] = fakeAudioStream;
+      initObject[ContentType.VIDEO] = fakeVideoStream;
       mediaSourceEngine.init(initObject);
     });
 
@@ -806,8 +810,8 @@ describe('MediaSourceEngine', function() {
       // Create empty object first and initialize the fields through
       // [] to allow field names to be expressions.
       var initObject = {};
-      initObject[ContentType.AUDIO] = 'audio/foo';
-      initObject[ContentType.VIDEO] = 'video/foo';
+      initObject[ContentType.AUDIO] = fakeAudioStream;
+      initObject[ContentType.VIDEO] = fakeVideoStream;
       mediaSourceEngine.init(initObject);
     });
 

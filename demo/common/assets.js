@@ -849,7 +849,7 @@ shakaAssets.testAssets = [
     ],
 
     licenseServers: {
-      'com.microsoft.playready': '//playready.directtaps.net/pr/svc/rightsmanager.asmx?PlayRight=1&UseSimpleNonPersistentLicense=1'  // gjslint: disable=110
+      'com.microsoft.playready': '//test.playready.microsoft.com/service/rightsmanager.asmx?PlayRight=1&UseSimpleNonPersistentLicense=1'  // gjslint: disable=110
     }
   },
   {
@@ -966,6 +966,9 @@ shakaAssets.testAssets = [
   {
     name: 'Big Buck Bunny',
     manifestUri: '//video.wmspanel.com/local/raw/BigBuckBunny_320x180.mp4/manifest.mpd',  // gjslint: disable=110
+    // As of 2017-08-04, there is a common name mismatch error with this site's
+    // SSL certificate.  See https://github.com/google/shaka-player/issues/955
+    disabled: true,
 
     encoder: shakaAssets.Encoder.NIMBLE_STREAMER,
     source: shakaAssets.Source.NIMBLE_STREAMER,

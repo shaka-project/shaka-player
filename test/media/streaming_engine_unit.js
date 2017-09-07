@@ -53,11 +53,13 @@ describe('StreamingEngine', function() {
 
   var audioStream1;
   var videoStream1;
+  var variant1;
   var textStream1;
   var alternateVideoStream1;
 
   var audioStream2;
   var videoStream2;
+  var variant2;
   var textStream2;
 
   /** @type {shakaExtern.Manifest} */
@@ -99,6 +101,7 @@ describe('StreamingEngine', function() {
 
   beforeAll(function() {
     jasmine.clock().install();
+    jasmine.clock().mockDate();
     // This polyfill is required for fakeEventLoop.
     shaka.polyfill.Promise.install(/* force */ true);
   });
@@ -388,6 +391,7 @@ describe('StreamingEngine', function() {
 
     audioStream1 = manifest.periods[0].variants[0].audio;
     videoStream1 = manifest.periods[0].variants[0].video;
+    variant1 = manifest.periods[0].variants[0];
     textStream1 = manifest.periods[0].textStreams[0];
 
     // This Stream is only used to verify that StreamingEngine can setup
@@ -412,6 +416,7 @@ describe('StreamingEngine', function() {
 
     audioStream2 = manifest.periods[1].variants[0].audio;
     videoStream2 = manifest.periods[1].variants[0].video;
+    variant2 = manifest.periods[1].variants[0];
     textStream2 = manifest.periods[1].textStreams[0];
   }
 
@@ -439,7 +444,7 @@ describe('StreamingEngine', function() {
         rebufferingGoal: 2,
         bufferingGoal: 5,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        infiniteRetriesForLiveStreams: true,
+        failureCallback: function() {},
         bufferBehind: Infinity,
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
@@ -572,9 +577,9 @@ describe('StreamingEngine', function() {
       // Create empty object first and initialize the fields through
       // [] to allow field names to be expressions.
       var expectedObject = {};
-      expectedObject[ContentType.AUDIO] = 'audio/mp4; codecs="mp4a.40.2"';
-      expectedObject[ContentType.VIDEO] = 'video/mp4; codecs="avc1.42c01e"';
-      expectedObject[ContentType.TEXT] = 'text/vtt';
+      expectedObject[ContentType.AUDIO] = audioStream1;
+      expectedObject[ContentType.VIDEO] = videoStream1;
+      expectedObject[ContentType.TEXT] = textStream1;
       expect(mediaSourceEngine.init)
           .toHaveBeenCalledWith(expectedObject);
       expect(mediaSourceEngine.init.calls.count()).toBe(1);
@@ -684,13 +689,7 @@ describe('StreamingEngine', function() {
         return defaultOnChooseStreams(period);
       });
 
-      // Create empty object first and initialize the fields through
-      // [] to allow field names to be expressions.
-      var ret = {};
-      ret[ContentType.AUDIO] = audioStream2;
-      ret[ContentType.VIDEO] = videoStream2;
-      ret[ContentType.TEXT] = textStream2;
-      return ret;
+      return { variant: variant2, text: textStream2 };
     });
 
     streamingEngine.init();
@@ -736,13 +735,7 @@ describe('StreamingEngine', function() {
         return defaultOnChooseStreams(period);
       });
 
-      // Create empty object first and initialize the fields through
-      // [] to allow field names to be expressions.
-      var ret = {};
-      ret[ContentType.AUDIO] = audioStream1;
-      ret[ContentType.VIDEO] = videoStream1;
-      ret[ContentType.TEXT] = textStream1;
-      return ret;
+      return { variant: variant1, text: textStream1 };
     });
 
     streamingEngine.init();
@@ -791,7 +784,7 @@ describe('StreamingEngine', function() {
     onChooseStreams.and.callFake(function(period) {
       var chosen = defaultOnChooseStreams(period);
       if (period == manifest.periods[0])
-        delete chosen[ContentType.TEXT];
+        chosen.text = null;
       return chosen;
     });
 
@@ -831,7 +824,7 @@ describe('StreamingEngine', function() {
     onChooseStreams.and.callFake(function(period) {
       var chosen = defaultOnChooseStreams(period);
       if (period == manifest.periods[0])
-        delete chosen[ContentType.TEXT];
+        chosen.text = null;
       return chosen;
     });
 
@@ -863,7 +856,7 @@ describe('StreamingEngine', function() {
             .toBe(textStream2);
 
         mediaSourceEngine.reinitText.calls.reset();
-        streamingEngine.switch(ContentType.TEXT, textStream2, false);
+        streamingEngine.switchTextStream(textStream2);
       });
     });
 
@@ -886,7 +879,7 @@ describe('StreamingEngine', function() {
     onChooseStreams.and.callFake(function(period) {
       var chosen = defaultOnChooseStreams(period);
       if (period == manifest.periods[1])
-        delete chosen[ContentType.TEXT];
+        chosen.text = null;
       return chosen;
     });
 
@@ -928,10 +921,115 @@ describe('StreamingEngine', function() {
     expect(timeline.setDuration).toHaveBeenCalledWith(35);
   });
 
+  describe('switchVariant/switchTextStream', function() {
+    var initialVariant;
+    var sameAudioVariant;
+    var sameVideoVariant;
+    var initialTextStream;
+
+    beforeEach(function() {
+      // Set up a manifest with multiple variants and a text stream.
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addVariant(0)
+            .addAudio(10).useSegmentTemplate('audio-10-%d.mp4', 10)
+            .addVideo(11).useSegmentTemplate('video-11-%d.mp4', 10)
+          .addVariant(1)
+            .addAudio(10)  // reused
+            .addVideo(12).useSegmentTemplate('video-12-%d.mp4', 10)
+          .addVariant(2)
+            .addAudio(13).useSegmentTemplate('audio-13-%d.mp4', 10)
+            .addVideo(12)  // reused
+          .addTextStream(20).useSegmentTemplate('text-20-%d.mp4', 10)
+        .build();
+
+      initialVariant = manifest.periods[0].variants[0];
+      sameAudioVariant = manifest.periods[0].variants[1];
+      sameVideoVariant = manifest.periods[0].variants[2];
+      initialTextStream = manifest.periods[0].textStreams[0];
+
+      // For these tests, we don't care about specific data appended.
+      // Just return any old ArrayBuffer for any requested segment.
+      netEngine = {
+        request: function(requestType, request) {
+          var buffer = new ArrayBuffer(0);
+          var response = { uri: request.uris[0], data: buffer, headers: {} };
+          return Promise.resolve(response);
+        }
+      };
+
+      // For these tests, we also don't need FakeMediaSourceEngine to verify
+      // its input data.
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine({});
+      mediaSourceEngine.clear.and.returnValue(Promise.resolve());
+      mediaSourceEngine.bufferedAheadOf.and.returnValue(0);
+      mediaSourceEngine.bufferStart.and.returnValue(0);
+      mediaSourceEngine.setStreamProperties.and.returnValue(Promise.resolve());
+      mediaSourceEngine.remove.and.returnValue(Promise.resolve());
+
+      var bufferEnd = { audio: 0, video: 0, text: 0 };
+      mediaSourceEngine.appendBuffer.and.callFake(
+          function(type, data, start, end) {
+            bufferEnd[type] = end;
+            return Promise.resolve();
+          });
+      mediaSourceEngine.bufferEnd.and.callFake(function(type) {
+        return bufferEnd[type];
+      });
+      mediaSourceEngine.bufferedAheadOf.and.callFake(function(type, start) {
+        return Math.max(0, bufferEnd[type] - start);
+      });
+      mediaSourceEngine.isBuffered.and.callFake(function(type, time) {
+        return time >= 0 && time < bufferEnd[type];
+      });
+
+      playhead = new shaka.test.FakePlayhead();
+      playheadTime = 0;
+      playing = false;
+      createStreamingEngine();
+
+      playhead.getTime.and.returnValue(0);
+      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+      onChooseStreams.and.callFake(function() {
+        return { variant: initialVariant, text: initialTextStream };
+      });
+    });
+
+    it('will not clear buffers if streams have not changed', function() {
+      onCanSwitch.and.callFake(function() {
+        mediaSourceEngine.clear.calls.reset();
+        streamingEngine.switchVariant(sameAudioVariant, /* clearBuffer */ true);
+        Util.fakeEventLoop(1);
+        expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('audio');
+        expect(mediaSourceEngine.clear).toHaveBeenCalledWith('video');
+        expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('text');
+
+        mediaSourceEngine.clear.calls.reset();
+        streamingEngine.switchVariant(sameVideoVariant, /* clearBuffer */ true);
+        Util.fakeEventLoop(1);
+        expect(mediaSourceEngine.clear).toHaveBeenCalledWith('audio');
+        expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('video');
+        expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('text');
+
+        mediaSourceEngine.clear.calls.reset();
+        streamingEngine.switchTextStream(initialTextStream);
+        Util.fakeEventLoop(1);
+        expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('audio');
+        expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('video');
+        expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('text');
+      });
+
+      streamingEngine.init().catch(fail);
+
+      Util.fakeEventLoop(1);
+
+      expect(onCanSwitch).toHaveBeenCalled();
+    });
+  });
+
   describe('handles seeks (VOD)', function() {
     /** @type {!jasmine.Spy} */
     var onTick;
-    var stub = function() {};
 
     beforeEach(function() {
       setupVod();
@@ -941,7 +1039,7 @@ describe('StreamingEngine', function() {
       onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
 
       onTick = jasmine.createSpy('onTick');
-      onTick.and.callFake(stub);
+      onTick.and.stub();
     });
 
     it('into buffered regions', function() {
@@ -1085,7 +1183,7 @@ describe('StreamingEngine', function() {
                 .toHaveBeenCalledWith(ContentType.VIDEO);
           expect(mediaSourceEngine.clear)
                 .toHaveBeenCalledWith(ContentType.TEXT);
-          onTick.and.callFake(stub);
+          onTick.and.stub();
         });
 
         onChooseStreams.and.callFake(function(period) {
@@ -1171,7 +1269,7 @@ describe('StreamingEngine', function() {
                 .toHaveBeenCalledWith(ContentType.VIDEO);
           expect(mediaSourceEngine.clear)
                 .toHaveBeenCalledWith(ContentType.TEXT);
-          onTick.and.callFake(stub);
+          onTick.and.stub();
         });
 
         onChooseStreams.and.callFake(function(period) {
@@ -1244,7 +1342,7 @@ describe('StreamingEngine', function() {
         onTick.and.callFake(function() {
           // Nothing should have been cleared.
           expect(mediaSourceEngine.clear).not.toHaveBeenCalled();
-          onTick.and.callFake(stub);
+          onTick.and.stub();
         });
 
         onChooseStreams.and.callFake(function(period) {
@@ -1668,165 +1766,6 @@ describe('StreamingEngine', function() {
   });
 
   describe('handles network errors', function() {
-    function testRecoverableError(targetUri, code) {
-      setupLive();
-
-      // Wrap the NetworkingEngine to perform errors.
-      var originalNetEngine = netEngine;
-      netEngine = {
-        request: jasmine.createSpy('request')
-      };
-      var attempts = 0;
-      netEngine.request.and.callFake(function(requestType, request) {
-        if (request.uris[0] == targetUri) {
-          ++attempts;
-          if (attempts == 1) {
-            var data = [targetUri];
-
-            if (code == shaka.util.Error.Code.BAD_HTTP_STATUS) {
-              data.push(404);
-              data.push('');
-            }
-
-            return Promise.reject(new shaka.util.Error(
-                shaka.util.Error.Severity.CRITICAL,
-                shaka.util.Error.Category.NETWORK, code, data));
-          }
-        }
-        return originalNetEngine.request(requestType, request);
-      });
-
-      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
-      createStreamingEngine();
-
-      playhead.getTime.and.returnValue(100);
-      onStartupComplete.and.callFake(function() {
-        setupFakeGetTime(100);
-      });
-
-      onError.and.callFake(function(error) {
-        expect(error.severity).toBe(shaka.util.Error.Severity.RECOVERABLE);
-        expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
-        expect(error.code).toBe(code);
-      });
-
-      // Here we go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
-
-      runTest();
-      expect(onError.calls.count()).toBe(1);
-      expect(attempts).toBe(2);
-      expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
-    }
-
-    it('from missing init, first Period',
-        testRecoverableError.bind(
-            null, '1_audio_init', shaka.util.Error.Code.BAD_HTTP_STATUS));
-    it('from missing init, second Period',
-       testRecoverableError.bind(
-            null, '2_video_init', shaka.util.Error.Code.BAD_HTTP_STATUS));
-    it('from missing media, first Period',
-       testRecoverableError.bind(
-            null, '1_video_10', shaka.util.Error.Code.BAD_HTTP_STATUS));
-    it('from missing media, second Period',
-       testRecoverableError.bind(
-            null, '2_audio_2', shaka.util.Error.Code.BAD_HTTP_STATUS));
-
-    it('from missing init, first Period',
-        testRecoverableError.bind(
-            null, '1_video_init', shaka.util.Error.Code.HTTP_ERROR));
-    it('from missing init, second Period',
-       testRecoverableError.bind(
-            null, '2_audio_init', shaka.util.Error.Code.HTTP_ERROR));
-    it('from missing media, first Period',
-       testRecoverableError.bind(
-            null, '1_audio_10', shaka.util.Error.Code.HTTP_ERROR));
-    it('from missing media, second Period',
-       testRecoverableError.bind(
-            null, '2_video_2', shaka.util.Error.Code.HTTP_ERROR));
-
-    it('from missing init, first Period',
-        testRecoverableError.bind(
-            null, '1_audio_init', shaka.util.Error.Code.TIMEOUT));
-    it('from missing init, second Period',
-       testRecoverableError.bind(
-            null, '2_video_init', shaka.util.Error.Code.TIMEOUT));
-    it('from missing media, first Period',
-       testRecoverableError.bind(
-            null, '1_video_11', shaka.util.Error.Code.TIMEOUT));
-    it('from missing media, second Period',
-       testRecoverableError.bind(
-            null, '2_audio_1', shaka.util.Error.Code.TIMEOUT));
-
-    function testNonRecoverableError(targetUri, code) {
-      setupVod();
-
-      // Wrap the NetworkingEngine to perform 404 Not Found errors.
-      var originalNetEngine = netEngine;
-      netEngine = {
-        request: jasmine.createSpy('request')
-      };
-      netEngine.request.and.callFake(function(requestType, request) {
-        if (request.uris[0] == targetUri) {
-          return Promise.reject(new shaka.util.Error(
-              shaka.util.Error.Severity.CRITICAL,
-              shaka.util.Error.Category.NETWORK, code, [targetUri]));
-        }
-        return originalNetEngine.request(requestType, request);
-      });
-
-      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
-      createStreamingEngine();
-
-      playhead.getTime.and.returnValue(0);
-      onStartupComplete.and.callFake(function() {
-        setupFakeGetTime(0);
-      });
-
-      onError.and.callFake(function(error) {
-        expect(error.severity).toBe(shaka.util.Error.Severity.CRITICAL);
-        expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
-        expect(error.code).toBe(code);
-      });
-
-      // Here we go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
-
-      runTest();
-      expect(onError.calls.count()).toBe(1);
-      expect(mediaSourceEngine.endOfStream).not.toHaveBeenCalled();
-    }
-
-    it('from unsupported scheme, init',
-        testNonRecoverableError.bind(
-            null, '1_audio_init', shaka.util.Error.Code.UNSUPPORTED_SCHEME));
-
-    it('from unsupported scheme, media',
-        testNonRecoverableError.bind(
-            null, '1_video_2', shaka.util.Error.Code.UNSUPPORTED_SCHEME));
-
-    it('from malformed data URI, init',
-        testNonRecoverableError.bind(
-            null, '1_video_init', shaka.util.Error.Code.MALFORMED_DATA_URI));
-
-    it('from malformed data URI, media',
-        testNonRecoverableError.bind(
-            null, '1_audio_2', shaka.util.Error.Code.MALFORMED_DATA_URI));
-
-    it('from unknown data URI encoding, init',
-        testNonRecoverableError.bind(
-            null,
-            '1_video_init',
-            shaka.util.Error.Code.UNKNOWN_DATA_URI_ENCODING));
-
-    it('from unknown data URI encoding, media',
-        testNonRecoverableError.bind(
-            null,
-            '1_audio_2',
-            shaka.util.Error.Code.UNKNOWN_DATA_URI_ENCODING));
-
     it('ignores text stream failures if configured to', function() {
       setupVod();
       var textUri = '1_text_1';
@@ -1844,7 +1783,18 @@ describe('StreamingEngine', function() {
         return originalNetEngine.request(requestType, request);
       });
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
-      createStreamingEngine();
+      var config = {
+        rebufferingGoal: 2,
+        bufferingGoal: 5,
+        retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+        failureCallback: function() {},
+        bufferBehind: Infinity,
+        ignoreTextStreamFailures: true,
+        startAtSegmentBoundary: false,
+        smallGapLimit: 0.5,
+        jumpLargeGaps: false
+      };
+      createStreamingEngine(config);
 
       playhead.getTime.and.returnValue(0);
       onStartupComplete.and.callFake(function() {
@@ -1854,40 +1804,19 @@ describe('StreamingEngine', function() {
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
       streamingEngine.init();
-      streamingEngine.configure(
-          /** @type {shakaExtern.StreamingConfiguration} */ (
-              {ignoreTextStreamFailures: true}));
 
       runTest();
       expect(onError.calls.count()).toBe(0);
       expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
     });
 
-    it('Does not retry if configured not to', function() {
+    it('retries if configured to', function() {
       setupLive();
-      // Wrap the NetworkingEngine to perform errors.
-      var originalNetEngine = netEngine;
-      netEngine = {
-        request: jasmine.createSpy('request')
-      };
-      var attempts = 0;
-      var targetUri = '1_audio_init';
-      netEngine.request.and.callFake(function(requestType, request) {
-        if (request.uris[0] == targetUri) {
-          ++attempts;
-          if (attempts == 1) {
-            var data = [targetUri];
-            data.push(404);
-            data.push('');
 
-            return Promise.reject(new shaka.util.Error(
-                shaka.util.Error.Severity.CRITICAL,
-                shaka.util.Error.Category.NETWORK,
-                shaka.util.Error.Code.BAD_HTTP_STATUS, data));
-          }
-        }
-        return originalNetEngine.request(requestType, request);
-      });
+      // Wrap the NetworkingEngine to cause errors.
+      var targetUri = '1_audio_init';
+      failFirstRequestForTarget(netEngine, targetUri,
+                                shaka.util.Error.Code.BAD_HTTP_STATUS);
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
 
@@ -1895,7 +1824,7 @@ describe('StreamingEngine', function() {
         rebufferingGoal: 2,
         bufferingGoal: 5,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        infiniteRetriesForLiveStreams: false,
+        failureCallback: function() { streamingEngine.retry(); },  // retry
         bufferBehind: Infinity,
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
@@ -1921,42 +1850,36 @@ describe('StreamingEngine', function() {
 
       runTest();
       expect(onError.calls.count()).toBe(1);
-      expect(attempts).toBe(1);
-      expect(mediaSourceEngine.endOfStream).toHaveBeenCalledTimes(0);
+      expect(netEngine.attempts).toBeGreaterThan(1);
+      expect(mediaSourceEngine.endOfStream).toHaveBeenCalledTimes(1);
     });
 
-    it('Does not retry for VOD', function() {
-      setupVod();
-      // Wrap the NetworkingEngine to perform errors.
-      var originalNetEngine = netEngine;
-      netEngine = {
-        request: jasmine.createSpy('request')
-      };
-      var attempts = 0;
-      var targetUri = '1_audio_init';
-      netEngine.request.and.callFake(function(requestType, request) {
-        if (request.uris[0] == targetUri) {
-          ++attempts;
-          if (attempts == 1) {
-            var data = [targetUri];
-            data.push(404);
-            data.push('');
+    it('does not retry if configured not to', function() {
+      setupLive();
 
-            return Promise.reject(new shaka.util.Error(
-                shaka.util.Error.Severity.CRITICAL,
-                shaka.util.Error.Category.NETWORK,
-                shaka.util.Error.Code.BAD_HTTP_STATUS, data));
-          }
-        }
-        return originalNetEngine.request(requestType, request);
-      });
+      // Wrap the NetworkingEngine to cause errors.
+      var targetUri = '1_audio_init';
+      failFirstRequestForTarget(netEngine, targetUri,
+                                shaka.util.Error.Code.BAD_HTTP_STATUS);
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
-      createStreamingEngine();
 
-      playhead.getTime.and.returnValue(0);
+      var config = {
+        rebufferingGoal: 2,
+        bufferingGoal: 5,
+        retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+        failureCallback: function() {},  // no retry
+        bufferBehind: Infinity,
+        ignoreTextStreamFailures: false,
+        startAtSegmentBoundary: false,
+        smallGapLimit: 0.5,
+        jumpLargeGaps: false
+      };
+      createStreamingEngine(config);
+
+      playhead.getTime.and.returnValue(100);
       onStartupComplete.and.callFake(function() {
-        setupFakeGetTime(0);
+        setupFakeGetTime(100);
       });
 
       onError.and.callFake(function(error) {
@@ -1971,8 +1894,221 @@ describe('StreamingEngine', function() {
 
       runTest();
       expect(onError.calls.count()).toBe(1);
-      expect(attempts).toBe(1);
+      expect(netEngine.attempts).toBe(1);
       expect(mediaSourceEngine.endOfStream).toHaveBeenCalledTimes(0);
+    });
+
+    it('does not invoke the callback if the error is handled', function() {
+      setupLive();
+
+      // Wrap the NetworkingEngine to cause errors.
+      var targetUri = '1_audio_init';
+      failFirstRequestForTarget(netEngine, targetUri,
+                                shaka.util.Error.Code.BAD_HTTP_STATUS);
+
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+
+      // Configure with a failure callback
+      var failureCallback = jasmine.createSpy('failureCallback');
+      var config = {
+        rebufferingGoal: 2,
+        bufferingGoal: 5,
+        retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+        failureCallback: shaka.test.Util.spyFunc(failureCallback),
+        bufferBehind: Infinity,
+        ignoreTextStreamFailures: false,
+        startAtSegmentBoundary: false,
+        smallGapLimit: 0.5,
+        jumpLargeGaps: false
+      };
+      createStreamingEngine(config);
+
+      playhead.getTime.and.returnValue(100);
+      onStartupComplete.and.callFake(function() {
+        setupFakeGetTime(100);
+      });
+
+      onError.and.callFake(function(error) {
+        error.handled = true;
+      });
+
+      // Here we go!
+      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      streamingEngine.init();
+
+      runTest();
+      expect(onError.calls.count()).toBe(1);
+      expect(failureCallback).not.toHaveBeenCalled();
+    });
+
+    it('waits to invoke the failure callback', function() {
+      setupLive();
+
+      // Wrap the NetworkingEngine to cause errors.
+      var targetUri = '1_audio_init';
+      failFirstRequestForTarget(netEngine, targetUri,
+                                shaka.util.Error.Code.BAD_HTTP_STATUS);
+
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+
+      // Configure with a failure callback that records the callback time.
+      var callbackTime = null;
+      var failureCallback = jasmine.createSpy('failureCallback');
+      failureCallback.and.callFake(function() { callbackTime = Date.now(); });
+
+      var config = {
+        rebufferingGoal: 2,
+        bufferingGoal: 5,
+        retryParameters: {
+          maxAttempts: 2,
+          baseDelay: 10000,
+          backoffFactor: 1,
+          fuzzFactor: 0,
+          timeout: 0
+        },
+        failureCallback: shaka.test.Util.spyFunc(failureCallback),
+        bufferBehind: Infinity,
+        ignoreTextStreamFailures: false,
+        startAtSegmentBoundary: false,
+        smallGapLimit: 0.5,
+        jumpLargeGaps: false
+      };
+      createStreamingEngine(config);
+
+      playhead.getTime.and.returnValue(100);
+      onStartupComplete.and.callFake(function() {
+        setupFakeGetTime(100);
+      });
+      onError.and.stub();
+
+      // Here we go!
+      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      streamingEngine.init();
+
+      var startTime = Date.now();
+      runTest();
+      expect(failureCallback).toHaveBeenCalled();
+      expect(callbackTime - startTime).toEqual(10000);  // baseDelay == 10000
+    });
+  });
+
+  describe('retry()', function() {
+    it('resumes streaming after failure', function() {
+      setupVod();
+
+      // Wrap the NetworkingEngine to cause errors.
+      var targetUri = '1_audio_init';
+      var originalNetEngineRequest = netEngine.request;
+      failFirstRequestForTarget(netEngine, targetUri,
+                                shaka.util.Error.Code.BAD_HTTP_STATUS);
+
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      createStreamingEngine();
+
+      playhead.getTime.and.returnValue(0);
+      onStartupComplete.and.callFake(function() {
+        setupFakeGetTime(0);
+      });
+
+      onError.and.callFake(function(error) {
+        // Restore the original fake request function.
+        netEngine.request = originalNetEngineRequest;
+        netEngine.request.calls.reset();
+
+        // Retry streaming.
+        expect(streamingEngine.retry()).toBe(true);
+      });
+
+      // Here we go!
+      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      streamingEngine.init();
+
+      runTest();
+      // We definitely called onError().
+      expect(onError.calls.count()).toBe(1);
+      // We reset the request calls in onError() just before retry(), so this
+      // count reflects new calls since retry().
+      expect(netEngine.request.calls.count()).toBeGreaterThan(0);
+      // The retry worked, so we should have reached the end of the stream.
+      expect(mediaSourceEngine.endOfStream).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not resume streaming after quota error', function() {
+      setupVod();
+
+      var appendBufferSpy = jasmine.createSpy('appendBuffer');
+      // Throw QuotaExceededError on every segment to quickly trigger the quota
+      // error.
+      appendBufferSpy.and.callFake(function(type, data, startTime, endTime) {
+        throw new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
+            shaka.util.Error.Category.MEDIA,
+            shaka.util.Error.Code.QUOTA_EXCEEDED_ERROR,
+            type);
+      });
+
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      mediaSourceEngine.appendBuffer = appendBufferSpy;
+      createStreamingEngine();
+
+      playhead.getTime.and.returnValue(0);
+      onStartupComplete.and.callFake(function() {
+        setupFakeGetTime(0);
+      });
+
+      onError.and.callFake(function(error) {
+        expect(error.code).toBe(shaka.util.Error.Code.QUOTA_EXCEEDED_ERROR);
+
+        // Retry streaming, which should fail and return false.
+        netEngine.request.calls.reset();
+        expect(streamingEngine.retry()).toBe(false);
+      });
+
+      // Here we go!
+      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      streamingEngine.init();
+
+      runTest();
+
+      // We definitely called onError().
+      expect(onError.calls.count()).toBe(1);
+
+      // We reset the request calls in onError() just before retry(), so this
+      // count reflects new calls since retry().
+      expect(netEngine.request.calls.count()).toBe(0);
+      expect(mediaSourceEngine.endOfStream).not.toHaveBeenCalled();
+    });
+
+    it('does not resume streaming after destruction', function() {
+      setupVod();
+
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      createStreamingEngine();
+
+      playhead.getTime.and.returnValue(0);
+      onStartupComplete.and.callFake(function() {
+        setupFakeGetTime(0);
+      });
+
+      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      streamingEngine.init();
+
+      // Here we go!
+      var count = 0;
+      runTest(function() {
+        if (++count == 3) {
+          streamingEngine.destroy();
+
+          // Retry streaming, which should fail and return false.
+          netEngine.request.calls.reset();
+          expect(streamingEngine.retry()).toBe(false);
+        }
+      });
+
+      // We reset the request calls in onError() just before retry(), so this
+      // count reflects new calls since retry().
+      expect(netEngine.request.calls.count()).toBe(0);
+      expect(mediaSourceEngine.endOfStream).not.toHaveBeenCalled();
     });
   });
 
@@ -1987,7 +2123,7 @@ describe('StreamingEngine', function() {
         rebufferingGoal: 1,
         bufferingGoal: 1,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        infiniteRetriesForLiveStreams: true,
+        failureCallback: function() {},
         bufferBehind: 10,
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
@@ -2002,19 +2138,16 @@ describe('StreamingEngine', function() {
 
       onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
 
-      var originalRemove = shaka.test.FakeMediaSourceEngine.prototype.remove;
-      // NOTE: Closure cannot type check spy's correctly. Here we have to
-      // explicitly re-create remove()'s spy.
-      var removeSpy = jasmine.createSpy('remove');
-      mediaSourceEngine.remove = Util.spyFunc(removeSpy);
+      var originalRemove =
+          shaka.test.FakeMediaSourceEngine.prototype.removeImpl;
 
-      removeSpy.and.callFake(function(type, start, end) {
+      mediaSourceEngine.remove.and.callFake(function(type, start, end) {
         expect(playheadTime).toBe(20);
         expect(start).toBe(0);
         expect(end).toBe(10);
 
-        if (removeSpy.calls.count() == 3) {
-          removeSpy.and.callFake(function(type, start, end) {
+        if (mediaSourceEngine.remove.calls.count() == 3) {
+          mediaSourceEngine.remove.and.callFake(function(type, start, end) {
             expect(playheadTime).toBe(30);
             expect(start).toBe(10);
             expect(end).toBe(20);
@@ -2077,7 +2210,7 @@ describe('StreamingEngine', function() {
         rebufferingGoal: 1,
         bufferingGoal: 1,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        infiniteRetriesForLiveStreams: true,
+        failureCallback: function() {},
         bufferBehind: 10,
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
@@ -2147,7 +2280,7 @@ describe('StreamingEngine', function() {
         rebufferingGoal: 1,
         bufferingGoal: 1,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        infiniteRetriesForLiveStreams: true,
+        failureCallback: function() {},
         bufferBehind: 10,
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
@@ -2332,7 +2465,7 @@ describe('StreamingEngine', function() {
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
       createStreamingEngine({
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        infiniteRetriesForLiveStreams: true,
+        failureCallback: function() {},
         bufferBehind: Infinity,
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
@@ -2556,19 +2689,10 @@ describe('StreamingEngine', function() {
    * @return {!Object.<string, !shakaExtern.Stream>}
    */
   function defaultOnChooseStreams(period) {
-    // Create empty object first and initialize the fields through
-    // [] to allow field names to be expressions.
-    var ret = {};
     if (period == manifest.periods[0]) {
-      ret[ContentType.AUDIO] = audioStream1;
-      ret[ContentType.VIDEO] = videoStream1;
-      ret[ContentType.TEXT] = textStream1;
-      return ret;
+      return { variant: variant1, text: textStream1 };
     } else if (period == manifest.periods[1]) {
-      ret[ContentType.AUDIO] = audioStream2;
-      ret[ContentType.VIDEO] = videoStream2;
-      ret[ContentType.TEXT] = textStream2;
-      return ret;
+      return { variant: variant2, text: textStream2 };
     } else {
       throw new Error();
     }
@@ -2593,9 +2717,41 @@ describe('StreamingEngine', function() {
   /**
    * Slides the segment availability window forward by 1 second.
    */
-  var slideSegmentAvailabilityWindow = function() {
+  function slideSegmentAvailabilityWindow() {
     timeline.segmentAvailabilityStart++;
     timeline.segmentAvailabilityEnd++;
-  };
+  }
+
+  /**
+   * @param {!Object} netEngine A NetworkingEngine look-alike from
+   *   shaka.test.StreamingEngineUtil.createFakeNetworkingEngine()
+   * @param {string} targetUri
+   * @param {shaka.util.Error.Code} errorCode
+   */
+  function failFirstRequestForTarget(netEngine, targetUri, errorCode) {
+    var originalNetEngineRequest = netEngine.request.bind(netEngine);
+
+    netEngine.attempts = 0;
+    netEngine.request = jasmine.createSpy('request').and.callFake(
+        function(requestType, request) {
+          if (request.uris[0] == targetUri) {
+            if (++netEngine.attempts == 1) {
+              var data = [targetUri];
+
+              if (errorCode == shaka.util.Error.Code.BAD_HTTP_STATUS) {
+                data.push(404);
+                data.push('');
+              }
+
+              return Promise.reject(new shaka.util.Error(
+                  shaka.util.Error.Severity.CRITICAL,
+                  shaka.util.Error.Category.NETWORK,
+                  errorCode, data));
+            }
+          }
+          return originalNetEngineRequest(requestType, request);
+        });
+  }
+
 });
 

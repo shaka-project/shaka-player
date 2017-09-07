@@ -215,13 +215,13 @@ describe('VttTextParser', function() {
             start: 20,
             end: 40,
             payload: 'Test',
-            writingDirection: Cue.writingDirection.VERTICAL_RIGHT
+            writingDirection: Cue.writingDirection.VERTICAL_RIGHT_TO_LEFT
           },
           {
             start: 40,
             end: 50,
             payload: 'Test2',
-            writingDirection: Cue.writingDirection.VERTICAL_LEFT
+            writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT
           }
         ],
         'WEBVTT\n\n' +
@@ -235,22 +235,48 @@ describe('VttTextParser', function() {
   it('supports line setting', function() {
     verifyHelper(
         [
-          {start: 20, end: 40, payload: 'Test', line: 0},
-          {start: 40, end: 50, payload: 'Test2', line: -1}
+          {
+            start: 20, end: 40, payload: 'Test', line: 0,
+            lineInterpretation: Cue.lineInterpretation.LINE_NUMBER
+          },
+          {
+            start: 40, end: 50, payload: 'Test2', line: -1,
+            lineInterpretation: Cue.lineInterpretation.LINE_NUMBER
+          },
+          {
+            start: 50, end: 60, payload: 'Test3', line: 45,
+            lineInterpretation: Cue.lineInterpretation.PERCENTAGE
+          },
+          {
+            start: 55, end: 65, payload: 'Test4', line: 12.3,
+            lineInterpretation: Cue.lineInterpretation.PERCENTAGE
+          }
         ] ,
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000 line:0\n' +
         'Test\n\n' +
         '00:00:40.000 --> 00:00:50.000 line:-1\n' +
-        'Test2',
+        'Test2\n\n' +
+        '00:00:50.000 --> 00:01:00.000 line:45%\n' +
+        'Test3\n\n' +
+        '00:00:55.000 --> 00:01:05.000 line:12.3%\n' +
+        'Test4\n\n',
         { periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
   it('supports line setting with optional part', function() {
     verifyHelper(
         [
-          {start: 20, end: 40, payload: 'Test', line: 10},
-          {start: 40, end: 50, payload: 'Test2', line: -1}
+          {
+            start: 20, end: 40, payload: 'Test', line: 10,
+            lineInterpretation: Cue.lineInterpretation.PERCENTAGE,
+            lineAlign: Cue.lineAlign.START
+          },
+          {
+            start: 40, end: 50, payload: 'Test2', line: -1,
+            lineInterpretation: Cue.lineInterpretation.LINE_NUMBER,
+            lineAlign: Cue.lineAlign.CENTER
+          }
         ] ,
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000 line:10%,start\n' +
@@ -263,19 +289,28 @@ describe('VttTextParser', function() {
   it('supports position setting', function() {
     verifyHelper(
         [
-          {start: 20, end: 40, payload: 'Test2', position: 45}
+          {start: 20, end: 40, payload: 'Test', position: 45},
+          {start: 25, end: 45, payload: 'Test2', position: 12.3}
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000 position:45%\n' +
-        'Test2',
+        'Test\n\n' +
+        '00:00:25.000 --> 00:00:45.000 position:12.3%\n' +
+        'Test2\n\n',
         { periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
   it('supports position setting with optional part', function() {
     verifyHelper(
         [
-          {start: 20, end: 40, payload: 'Test', position: 45},
-          {start: 20, end: 40, payload: 'Test2', position: 45}
+          {
+            start: 20, end: 40, payload: 'Test', position: 45,
+            positionAlign: Cue.positionAlign.LEFT
+          },
+          {
+            start: 20, end: 40, payload: 'Test2', position: 45,
+            positionAlign: Cue.positionAlign.LEFT
+          }
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000 position:45%,line-left\n' +
@@ -288,11 +323,14 @@ describe('VttTextParser', function() {
   it('supports size setting', function() {
     verifyHelper(
         [
-          {start: 20, end: 40, payload: 'Test', size: 56}
+          {start: 20, end: 40, payload: 'Test', size: 56},
+          {start: 25, end: 45, payload: 'Test2', size: 12.3}
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000 size:56%\n' +
-        'Test',
+        'Test\n\n' +
+        '00:00:25.000 --> 00:00:45.000 size:12.3%\n' +
+        'Test2\n\n',
         { periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
@@ -316,7 +354,7 @@ describe('VttTextParser', function() {
             payload: 'Test',
             textAlign: Cue.textAlign.CENTER,
             size: 56,
-            writingDirection: Cue.writingDirection.VERTICAL_LEFT
+            writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT
           }
         ],
         'WEBVTT\n\n' +
@@ -334,7 +372,7 @@ describe('VttTextParser', function() {
             payload: 'Test',
             textAlign: Cue.textAlign.CENTER,
             size: 56,
-            writingDirection: Cue.writingDirection.VERTICAL_LEFT
+            writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT
           }
         ],
         'WEBVTT\n\n' +
@@ -352,7 +390,7 @@ describe('VttTextParser', function() {
             payload: 'Test',
             textAlign: Cue.textAlign.CENTER,
             size: 56,
-            writingDirection: Cue.writingDirection.VERTICAL_LEFT
+            writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT
           }
         ],
         'WEBVTT\n\n' +
@@ -370,7 +408,7 @@ describe('VttTextParser', function() {
             payload: 'Test',
             align: 'center',
             size: 56,
-            writingDirection: Cue.writingDirection.VERTICAL_LEFT
+            writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT
           }
         ],
         'WEBVTT\n\n' +
@@ -388,7 +426,7 @@ describe('VttTextParser', function() {
             payload: 'Test',
             align: 'center',
             size: 56,
-            writingDirection: Cue.writingDirection.VERTICAL_LEFT
+            writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT
           }
         ],
         'WEBVTT\n\n' +
@@ -500,20 +538,18 @@ describe('VttTextParser', function() {
       expect(result[i].endTime).toBe(cues[i].end);
       expect(result[i].payload).toBe(cues[i].payload);
 
-      // Workaround a bug in the compiler's externs.
-      // TODO: Remove when compiler is updated.
-      if (cues[i].id)
+      if ('id' in cues[i])
         expect(result[i].id).toBe(cues[i].id);
-      if (cues[i].vertical)
+      if ('vertical' in cues[i])
         expect(result[i].writingDirection).toBe(cues[i].writingDirection);
-      if (cues[i].line)
+      if ('line' in cues[i])
         expect(result[i].line).toBe(cues[i].line);
-      if (cues[i].textAlign)
-        expect(/** @type {?} */ (result[i]).textAlign).toBe(cues[i].textAlign);
-      if (cues[i].size)
-        expect(/** @type {?} */ (result[i]).size).toBe(cues[i].size);
-      if (cues[i].position)
-        expect(/** @type {?} */ (result[i]).position).toBe(cues[i].position);
+      if ('textAlign' in cues[i])
+        expect(result[i].textAlign).toBe(cues[i].textAlign);
+      if ('size' in cues[i])
+        expect(result[i].size).toBe(cues[i].size);
+      if ('position' in cues[i])
+        expect(result[i].position).toBe(cues[i].position);
     }
   }
 

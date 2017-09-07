@@ -52,8 +52,8 @@ player.getConfiguration();
      streaming: Object
        bufferBehind: 30
        bufferingGoal: 10
+       failureCallback: Function
        ignoreTextStreamFailures: false
-       infiniteRetriesForLiveStreams: true
        jumpLargeGaps: false
        rebufferingGoal: 2
        retryParameters: Object

@@ -138,6 +138,9 @@ describe('DrmEngine', function() {
           .addAudio(2).mime('audio/mp4', 'mp4a.40.2').encrypted(true)
       .build();
 
+    var videoStream = manifest.periods[0].variants[0].video;
+    var audioStream = manifest.periods[0].variants[0].audio;
+
     eventManager = new shaka.util.EventManager();
 
     eventManager.listen(mediaSource, 'sourceopen', function() {
@@ -148,8 +151,8 @@ describe('DrmEngine', function() {
       // Create empty object first and initialize the fields through
       // [] to allow field names to be expressions.
       var expectedObject = {};
-      expectedObject[ContentType.AUDIO] = 'audio/mp4; codecs="mp4a.40.2"';
-      expectedObject[ContentType.VIDEO] = 'video/mp4; codecs="avc1.640015"';
+      expectedObject[ContentType.AUDIO] = audioStream;
+      expectedObject[ContentType.VIDEO] = videoStream;
       mediaSourceEngine.init(expectedObject);
       done();
     });

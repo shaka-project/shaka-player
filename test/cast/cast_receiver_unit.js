@@ -376,6 +376,40 @@ describe('CastReceiver', function() {
       }));
     });
 
+    it('doesn\'t poll live methods while loading a VOD', function() {
+      checkChromeOrChromecast();
+      mockPlayer.getConfiguration.and.returnValue({key: 'value'});
+      mockPlayer.isLive.and.returnValue(false);
+
+      fakeConnectedSenders(1);
+
+      expect(mockShakaMessageBus.messages.length).toBe(0);
+      fakeIncomingMessage({
+        type: 'init',
+        initState: fakeInitState,
+        appData: fakeAppData
+      }, mockShakaMessageBus);
+
+      expect(mockPlayer.getPlayheadTimeAsDate).not.toHaveBeenCalled();
+    });
+
+    it('does poll live methods while loading a livestream', function() {
+      checkChromeOrChromecast();
+      mockPlayer.getConfiguration.and.returnValue({key: 'value'});
+      mockPlayer.isLive.and.returnValue(true);
+
+      fakeConnectedSenders(1);
+
+      expect(mockShakaMessageBus.messages.length).toBe(0);
+      fakeIncomingMessage({
+        type: 'init',
+        initState: fakeInitState,
+        appData: fakeAppData
+      }, mockShakaMessageBus);
+
+      expect(mockPlayer.getPlayheadTimeAsDate).toHaveBeenCalled();
+    });
+
     it('loads the manifest', function() {
       checkChromeOrChromecast();
       fakeInitState.startTime = 12;
@@ -874,32 +908,8 @@ describe('CastReceiver', function() {
 
   function createMockPlayer() {
     var player = {
-      configure: jasmine.createSpy('configure'),
-      destroy: jasmine.createSpy('destroy'),
-      drmInfo: jasmine.createSpy('drmInfo'),
-      getAudioLanguages: jasmine.createSpy('getAudioLanguages'),
-      getConfiguration: jasmine.createSpy('getConfiguration'),
-      getExpiration: jasmine.createSpy('getExpiration'),
-      getManifestUri: jasmine.createSpy('getManifestUri'),
-      getPlaybackRate: jasmine.createSpy('getPlaybackRate'),
-      getPlayheadTimeAsDate: jasmine.createSpy('getPlayheadTimeAsDate'),
-      getTextLanguages: jasmine.createSpy('getTextLanguages'),
-      getTextTracks: jasmine.createSpy('getTextTracks'),
-      getTracks: jasmine.createSpy('getTracks'),
-      getStats: jasmine.createSpy('getStats'),
-      getVariantTracks: jasmine.createSpy('getVariantTracks'),
-      isBuffering: jasmine.createSpy('isBuffering'),
-      isInProgress: jasmine.createSpy('isInProgress'),
-      isLive: jasmine.createSpy('isLive'),
-      isTextTrackVisible: jasmine.createSpy('isTextTrackVisible'),
-      keySystem: jasmine.createSpy('keySystem'),
-      load: jasmine.createSpy('load'),
-      seekRange: jasmine.createSpy('seekRange'),
+      destroy: jasmine.createSpy('destroy').and.returnValue(Promise.resolve()),
       setMaxHardwareResolution: jasmine.createSpy('setMaxHardwareResolution'),
-      setTextTrackVisibility: jasmine.createSpy('setTextTrackVisibility'),
-      unload: jasmine.createSpy('unload').and.callFake(function() {
-        return Promise.resolve();
-      }),
 
       addEventListener: function(eventName, listener) {
         player.listeners[eventName] = listener;
@@ -908,8 +918,18 @@ describe('CastReceiver', function() {
       // For convenience:
       listeners: {}
     };
-    player.destroy.and.returnValue(Promise.resolve());
-    player.load.and.returnValue(Promise.resolve());
+
+    var castMembers =
+        CastUtils.PlayerVoidMethods.concat(CastUtils.PlayerGetterMethods);
+    castMembers =
+        castMembers.concat(CastUtils.PlayerGetterMethodsThatRequireLive);
+    castMembers.forEach(function(name) {
+      player[name] = jasmine.createSpy(name);
+    });
+    CastUtils.PlayerPromiseMethods.forEach(function(name) {
+      player[name] = jasmine.createSpy(name).and.returnValue(Promise.resolve());
+    });
+
     return player;
   }
 

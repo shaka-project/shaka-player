@@ -18,6 +18,10 @@
 describe('DashParser SegmentTemplate', function() {
   /** @const */
   var Dash = shaka.test.Dash;
+  /** @const */
+  var ManifestParser = shaka.test.ManifestParser;
+  /** @const */
+  var baseUri = 'http://example.com/';
 
   /** @type {!shaka.test.FakeNetworkingEngine} */
   var fakeNetEngine;
@@ -32,7 +36,8 @@ describe('DashParser SegmentTemplate', function() {
 
     playerInterface = {
       networkingEngine: fakeNetEngine,
-      filterPeriod: function() {},
+      filterNewPeriod: function() {},
+      filterAllPeriods: function() {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail
@@ -49,12 +54,12 @@ describe('DashParser SegmentTemplate', function() {
         '  duration="10" />'
       ], 60 /* duration */);
       var references = [
-        Dash.makeReference('s1.mp4', 0, 0, 10),
-        Dash.makeReference('s2.mp4', 1, 10, 20),
-        Dash.makeReference('s3.mp4', 2, 20, 30),
-        Dash.makeReference('s4.mp4', 3, 30, 40),
-        Dash.makeReference('s5.mp4', 4, 40, 50),
-        Dash.makeReference('s6.mp4', 5, 50, 60)
+        ManifestParser.makeReference('s1.mp4', 0, 0, 10, baseUri),
+        ManifestParser.makeReference('s2.mp4', 1, 10, 20, baseUri),
+        ManifestParser.makeReference('s3.mp4', 2, 20, 30, baseUri),
+        ManifestParser.makeReference('s4.mp4', 3, 30, 40, baseUri),
+        ManifestParser.makeReference('s5.mp4', 4, 40, 50, baseUri),
+        ManifestParser.makeReference('s6.mp4', 5, 50, 60, baseUri)
       ];
       Dash.testSegmentIndex(done, source, references);
     });
@@ -65,9 +70,9 @@ describe('DashParser SegmentTemplate', function() {
         '   duration="10" />'
       ], 30 /* duration */);
       var references = [
-        Dash.makeReference('s10.mp4', 0, 0, 10),
-        Dash.makeReference('s11.mp4', 1, 10, 20),
-        Dash.makeReference('s12.mp4', 2, 20, 30)
+        ManifestParser.makeReference('s10.mp4', 0, 0, 10, baseUri),
+        ManifestParser.makeReference('s11.mp4', 1, 10, 20, baseUri),
+        ManifestParser.makeReference('s12.mp4', 2, 20, 30, baseUri)
       ];
       Dash.testSegmentIndex(done, source, references);
     });
@@ -244,9 +249,9 @@ describe('DashParser SegmentTemplate', function() {
         '</SegmentTemplate>'
       ], 45 /* duration */);
       var references = [
-        Dash.makeReference('0-0-500.mp4', 0, 0, 15),
-        Dash.makeReference('1-15-500.mp4', 1, 15, 30),
-        Dash.makeReference('2-30-500.mp4', 2, 30, 45)
+        ManifestParser.makeReference('0-0-500.mp4', 0, 0, 15, baseUri),
+        ManifestParser.makeReference('1-15-500.mp4', 1, 15, 30, baseUri),
+        ManifestParser.makeReference('2-30-500.mp4', 2, 30, 45, baseUri)
       ];
       Dash.testSegmentIndex(done, source, references);
     });
@@ -257,9 +262,9 @@ describe('DashParser SegmentTemplate', function() {
         '    media="$Number$-$Time$-$Bandwidth$.mp4" />'
       ], 30 /* duration */);
       var references = [
-        Dash.makeReference('0-0-500.mp4', 0, 0, 10),
-        Dash.makeReference('1-10-500.mp4', 1, 10, 20),
-        Dash.makeReference('2-20-500.mp4', 2, 20, 30)
+        ManifestParser.makeReference('0-0-500.mp4', 0, 0, 10, baseUri),
+        ManifestParser.makeReference('1-10-500.mp4', 1, 10, 20, baseUri),
+        ManifestParser.makeReference('2-20-500.mp4', 2, 20, 30, baseUri)
       ];
       Dash.testSegmentIndex(done, source, references);
     });
@@ -270,9 +275,9 @@ describe('DashParser SegmentTemplate', function() {
         '    media="$Number$-$Time$-$Bandwidth$.mp4" />'
       ], 30 /* duration */);
       var references = [
-        Dash.makeReference('1-0-500.mp4', 0, 0, 10),
-        Dash.makeReference('2-10-500.mp4', 1, 10, 20),
-        Dash.makeReference('3-20-500.mp4', 2, 20, 30)
+        ManifestParser.makeReference('1-0-500.mp4', 0, 0, 10, baseUri),
+        ManifestParser.makeReference('2-10-500.mp4', 1, 10, 20, baseUri),
+        ManifestParser.makeReference('3-20-500.mp4', 2, 20, 30, baseUri)
       ];
       Dash.testSegmentIndex(done, source, references);
     });
@@ -283,9 +288,9 @@ describe('DashParser SegmentTemplate', function() {
         '    media="$Number$-$Time$-$Bandwidth$.mp4" />'
       ], 30 /* duration */);
       var references = [
-        Dash.makeReference('10-0-500.mp4', 0, 0, 10),
-        Dash.makeReference('11-10-500.mp4', 1, 10, 20),
-        Dash.makeReference('12-20-500.mp4', 2, 20, 30)
+        ManifestParser.makeReference('10-0-500.mp4', 0, 0, 10, baseUri),
+        ManifestParser.makeReference('11-10-500.mp4', 1, 10, 20, baseUri),
+        ManifestParser.makeReference('12-20-500.mp4', 2, 20, 30, baseUri)
       ];
       Dash.testSegmentIndex(done, source, references);
     });
@@ -296,9 +301,9 @@ describe('DashParser SegmentTemplate', function() {
         '    media="$Number$-$Time$-$Bandwidth$.mp4" />'
       ], 3 /* duration */);
       var references = [
-        Dash.makeReference('1-0-500.mp4', 0, 0, 1),
-        Dash.makeReference('2-9000-500.mp4', 1, 1, 2),
-        Dash.makeReference('3-18000-500.mp4', 2, 2, 3)
+        ManifestParser.makeReference('1-0-500.mp4', 0, 0, 1, baseUri),
+        ManifestParser.makeReference('2-9000-500.mp4', 1, 1, 2, baseUri),
+        ManifestParser.makeReference('3-18000-500.mp4', 2, 2, 3, baseUri)
       ];
       Dash.testSegmentIndex(done, source, references);
     });
@@ -329,22 +334,25 @@ describe('DashParser SegmentTemplate', function() {
 
             expect(variants[0].video.findSegmentPosition(0)).toBe(0);
             expect(variants[0].video.getSegmentReference(0)).toEqual(
-                Dash.makeReference('1-0-100.mp4', 0, 0, 10));
+                ManifestParser.makeReference('1-0-100.mp4', 0, 0, 10, baseUri));
             expect(variants[0].video.findSegmentPosition(12)).toBe(1);
             expect(variants[0].video.getSegmentReference(1)).toEqual(
-                Dash.makeReference('2-10-100.mp4', 1, 10, 20));
+                ManifestParser.makeReference('2-10-100.mp4', 1, 10,
+                                             20, baseUri));
             expect(variants[1].video.findSegmentPosition(0)).toBe(0);
             expect(variants[1].video.getSegmentReference(0)).toEqual(
-                Dash.makeReference('1-0-200.mp4', 0, 0, 10));
+                ManifestParser.makeReference('1-0-200.mp4', 0, 0, 10, baseUri));
             expect(variants[1].video.findSegmentPosition(12)).toBe(1);
             expect(variants[1].video.getSegmentReference(1)).toEqual(
-                Dash.makeReference('2-10-200.mp4', 1, 10, 20));
+                ManifestParser.makeReference('2-10-200.mp4', 1, 10,
+                                             20, baseUri));
             expect(variants[2].video.findSegmentPosition(0)).toBe(0);
             expect(variants[2].video.getSegmentReference(0)).toEqual(
-                Dash.makeReference('1-0-300.mp4', 0, 0, 10));
+                ManifestParser.makeReference('1-0-300.mp4', 0, 0, 10, baseUri));
             expect(variants[2].video.findSegmentPosition(12)).toBe(1);
             expect(variants[2].video.getSegmentReference(1)).toEqual(
-                Dash.makeReference('2-10-300.mp4', 1, 10, 20));
+                ManifestParser.makeReference('2-10-300.mp4', 1, 10,
+                                             20, baseUri));
           }).catch(fail).then(done);
     });
   });

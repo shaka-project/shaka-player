@@ -142,7 +142,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
       /** @const */
       var baseDelay = 200;
       /** @const */
-      var origSetTimeout = shaka.net.NetworkingEngine.setTimeout_;
+      var origSetTimeout = shaka.net.Backoff.setTimeout_;
       /** @const */
       var realRandom = Math.random;
 
@@ -152,13 +152,13 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
       beforeAll(function() {
         setTimeoutSpy = jasmine.createSpy('setTimeout');
         setTimeoutSpy.and.callFake(origSetTimeout);
-        shaka.net.NetworkingEngine.setTimeout_ = Util.spyFunc(setTimeoutSpy);
+        shaka.net.Backoff.setTimeout_ = Util.spyFunc(setTimeoutSpy);
         Math.random = function() { return 0.75; };
       });
 
       afterAll(function() {
         Math.random = realRandom;
-        shaka.net.NetworkingEngine.setTimeout_ = origSetTimeout;
+        shaka.net.Backoff.setTimeout_ = origSetTimeout;
       });
 
       beforeEach(function() {

@@ -32,7 +32,8 @@ describe('DashParser SegmentBase', function() {
 
     playerInterface = {
       networkingEngine: fakeNetEngine,
-      filterPeriod: function() {},
+      filterNewPeriod: function() {},
+      filterAllPeriods: function() {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail

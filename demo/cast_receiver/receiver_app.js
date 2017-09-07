@@ -127,13 +127,8 @@ ShakaReceiver.prototype.checkIdle_ = function() {
     this.idle_.style.display = 'none';
     this.cancelIdleTimer_();
 
-    // Audio-only tracks have no width/height.
-    var videoTracks = this.player_.getVariantTracks().filter(function(t) {
-      return t.videoCodec;
-    });
-
     // Set a special poster for audio-only assets.
-    if (videoTracks.length == 0) {
+    if (this.player_.isAudioOnly()) {
       this.video_.poster =
           '//shaka-player-demo.appspot.com/assets/audioOnly.gif';
     } else {

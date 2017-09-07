@@ -511,6 +511,26 @@ describe('CastProxy', function() {
     });
   });
 
+  describe('synthetic video events from onFirstCastStateUpdate', function() {
+    it('sends a pause event if the video is paused', function() {
+      mockVideo.paused = true;
+      var proxyListener = jasmine.createSpy('listener');
+      proxy.getVideo().addEventListener('pause', Util.spyFunc(proxyListener));
+      expect(proxyListener).not.toHaveBeenCalled();
+      mockSender.onFirstCastStateUpdate();
+      expect(proxyListener).toHaveBeenCalled();
+    });
+
+    it('sends a play event if the video is playing', function() {
+      mockVideo.paused = false;
+      var proxyListener = jasmine.createSpy('listener');
+      proxy.getVideo().addEventListener('play', Util.spyFunc(proxyListener));
+      expect(proxyListener).not.toHaveBeenCalled();
+      mockSender.onFirstCastStateUpdate();
+      expect(proxyListener).toHaveBeenCalled();
+    });
+  });
+
   describe('resume local playback', function() {
     var cache;
 
@@ -663,12 +683,14 @@ describe('CastProxy', function() {
   /**
    * @param {string} appId
    * @param {Function} onCastStatusChanged
+   * @param {Function} onFirstCastStateUpdate
    * @param {Function} onRemoteEvent
    * @param {Function} onResumeLocal
    * @return {!Object}
    */
   function createMockCastSender(
-      appId, onCastStatusChanged, onRemoteEvent, onResumeLocal) {
+      appId, onCastStatusChanged, onFirstCastStateUpdate,
+      onRemoteEvent, onResumeLocal) {
     expect(appId).toEqual(fakeAppId);
 
     mockSender = {
@@ -687,6 +709,7 @@ describe('CastProxy', function() {
       set: jasmine.createSpy('set'),
       // For convenience:
       onCastStatusChanged: onCastStatusChanged,
+      onFirstCastStateUpdate: onFirstCastStateUpdate,
       onRemoteEvent: onRemoteEvent,
       onResumeLocal: onResumeLocal
     };
