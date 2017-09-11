@@ -103,12 +103,6 @@ ShakaReceiver.prototype.appDataCallback_ = function(appData) {
   if (!appData) return;
 
   var asset = /** @type {shakaAssets.AssetInfo} */(appData['asset']);
-  // Patch in non-transferable callbacks for YT DRM:
-  if (appData['isYtDrm']) {
-    asset.drmCallback = shakaAssets.YouTubeCallback;
-    asset.requestFilter = shakaAssets.YouTubeRequestFilter;
-    asset.responseFilter = shakaAssets.YouTubeResponseFilter;
-  }
   ShakaDemoUtils.setupAssetMetadata(asset, this.player_);
 };
 

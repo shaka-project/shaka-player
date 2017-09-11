@@ -28,7 +28,6 @@ var shakaAssets = {};
 shakaAssets.Encoder = {
   UNKNOWN: 'Unknown',
   SHAKA_PACKAGER: 'Shaka packager',
-  YOUTUBE: 'YouTube',
   AXINOM: 'Axinom',
   UNIFIED_STREAMING: 'Unified Streaming',
   WOWZA: 'Wowza',
@@ -44,7 +43,6 @@ shakaAssets.Encoder = {
 /** @enum {string} */
 shakaAssets.Source = {
   SHAKA: 'Shaka',
-  YOUTUBE: 'YouTube',
   AXINOM: 'Axinom',
   UNIFIED_STREAMING: 'Unified Streaming',
   DASH_IF: 'DASH-IF',
@@ -193,42 +191,6 @@ shakaAssets.AssetInfo;
 
 // Custom callbacks {{{
 /**
- * A license request filter for YouTube license requests.
- * @param {shaka.net.NetworkingEngine.RequestType} type
- * @param {shakaExtern.Request} request
- */
-shakaAssets.YouTubeRequestFilter = function(type, request) {
-  if (type != shaka.net.NetworkingEngine.RequestType.LICENSE)
-    return;
-
-  // The Playready endpoint does not allow cross-origin requests that include
-  // the headers we extracted from the Playready XML.  Remove them.
-  request.headers = {};
-};
-
-
-/**
- * A license response filter for YouTube license responses.
- * @param {shaka.net.NetworkingEngine.RequestType} type
- * @param {shakaExtern.Response} response
- */
-shakaAssets.YouTubeResponseFilter = function(type, response) {
-  if (type != shaka.net.NetworkingEngine.RequestType.LICENSE)
-    return;
-
-  // We are extracting an ASCII header and not reading the Stringified version
-  // of the license thereafter, so this conversion is safe.
-  var responseArray = new Uint8Array(response.data);
-  var responseStr = String.fromCharCode.apply(null, responseArray);
-  var headerIndex = responseStr.indexOf('\r\n\r\n');
-  if (responseStr.indexOf('GLS/1.0') == 0 && headerIndex >= 0) {
-    // Strip off the headers.
-    response.data = response.data.slice(headerIndex + 4);
-  }
-};
-
-
-/**
  * A response filter for VDMS Uplynk manifest responses,
  * this allows us to get the license prefix that is necessary
  * to later generate a proper license response.
@@ -268,53 +230,6 @@ shakaAssets.UplynkRequestFilter = function(type, request) {
       request.uris[0] = shakaAssets.uplynk_prefix.concat('/ck');
     }
   }
-};
-
-
-/**
- * @param {!Node} node
- * @return {Array.<shakaExtern.DrmInfo>}
- */
-shakaAssets.YouTubeCallback = function(node) {
-  var schemeIdUri = node.getAttribute('schemeIdUri');
-  if (schemeIdUri == 'http://youtube.com/drm/2012/10/10') {
-    /** @type {!Array.<shakaExtern.DrmInfo>} */
-    var configs = [];
-
-    for (var i = 0; i < node.childNodes.length; ++i) {
-      var child = node.childNodes[i];
-      if (child.nodeName == 'yt:SystemURL') {
-        // The URL may be http, but the demo app requires https.
-        var licenseServerUri = child.textContent.replace(/^http:/, 'https:');
-        var typeAttr = child.getAttribute('type');
-        var keySystem;
-        // NOTE: Ignoring clearkey type here because this YT demo content does
-        // not contain PSSHs appropriate for the clearkey CDM.
-        if (typeAttr == 'widevine') {
-          keySystem = 'com.widevine.alpha';
-        } else if (typeAttr == 'playready') {
-          keySystem = 'com.microsoft.playready';
-        } else {
-          continue;
-        }
-
-        configs.push({
-          keySystem: keySystem,
-          licenseServerUri: licenseServerUri,
-          distinctiveIdentifierRequired: false,
-          persistentStateRequired: false,
-          audioRobustness: '',
-          videoRobustness: '',
-          serverCertificate: null,
-          initData: null,
-          keyIds: []
-        });
-      }
-    }
-    return configs;
-  }
-
-  return null;
 };
 // }}}
 
@@ -597,70 +512,6 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.TTML,
       shakaAssets.Feature.WEBM
     ]
-  },
-  // }}}
-
-  // YouTube assets {{{
-  // Src: http://dash-mse-test.appspot.com/media.html
-  {
-    name: 'Car',
-    manifestUri: '//yt-dash-mse-test.commondatastorage.googleapis.com/media/car-20120827-manifest.mpd',  // gjslint: disable=110
-
-    encoder: shakaAssets.Encoder.YOUTUBE,
-    source: shakaAssets.Source.YOUTUBE,
-    drm: [],
-    features: [
-      shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_BASE
-    ]
-  },
-  {
-    name: 'Car ClearKey',
-    manifestUri: '//yt-dash-mse-test.commondatastorage.googleapis.com/media/car_cenc-20120827-manifest.mpd',  // gjslint: disable=110
-
-    encoder: shakaAssets.Encoder.YOUTUBE,
-    source: shakaAssets.Source.YOUTUBE,
-    drm: [shakaAssets.KeySystem.CLEAR_KEY],
-    features: [
-      shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_BASE
-    ],
-
-    clearKeys: {
-      '60061e017e477e877e57d00d1ed00d1e': '1a8a2095e4deb2d29ec816ac7bae2082'
-    }
-  },
-  {
-    name: 'Feelings',
-    manifestUri: '//yt-dash-mse-test.commondatastorage.googleapis.com/media/feelings_vp9-20130806-manifest.mpd',  // gjslint: disable=110
-
-    encoder: shakaAssets.Encoder.YOUTUBE,
-    source: shakaAssets.Source.YOUTUBE,
-    drm: [],
-    features: [
-      shakaAssets.Feature.SEGMENT_BASE,
-      shakaAssets.Feature.WEBM
-    ]
-  },
-  {
-    name: 'Oops multi-DRM',
-    manifestUri: '//yt-dash-mse-test.commondatastorage.googleapis.com/media/oops_cenc-20121114-signedlicenseurl-manifest.mpd',  // gjslint: disable=110
-
-    encoder: shakaAssets.Encoder.YOUTUBE,
-    source: shakaAssets.Source.YOUTUBE,
-    drm: [
-      // TODO: Failing on PlayReady with error 8004b896, investigate
-      //shakaAssets.KeySystem.PLAYREADY,
-      shakaAssets.KeySystem.WIDEVINE
-    ],
-    features: [
-      shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_BASE
-    ],
-
-    drmCallback: shakaAssets.YouTubeCallback,
-    requestFilter: shakaAssets.YouTubeRequestFilter,
-    responseFilter: shakaAssets.YouTubeResponseFilter
   },
   // }}}
 

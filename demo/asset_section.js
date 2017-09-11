@@ -174,10 +174,7 @@ shakaDemo.preparePlayer_ = function(asset) {
 
   // Add configuration from this asset.
   ShakaDemoUtils.setupAssetMetadata(asset, player);
-  shakaDemo.castProxy_.setAppData({
-    'asset': asset,
-    'isYtDrm': asset.drmCallback == shakaAssets.YouTubeCallback
-  });
+  shakaDemo.castProxy_.setAppData({'asset': asset});
 
   // Add drm configuration from the UI.
   if (videoRobustness) {
