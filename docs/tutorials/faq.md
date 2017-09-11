@@ -24,7 +24,9 @@ check `chrome://media-internals` for more info (see [#489(comment)][489]).
 
 **A:** The browser rejected the request.  Look at the browser logs for more
 info.  This is usually a [CORS][] error, which means you need particular
-headers in the response.
+headers in the response.  Additionally, with some manifests, we will send a
+`Range` header.  This will require explicit approval through the CORS header
+`Access-Control-Allow-Headers`.
 
 This can also happen with mixed-content restrictions.  If the site is using
 `https:`, then your manifest and segments must also.
