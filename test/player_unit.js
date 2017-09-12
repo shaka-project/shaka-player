@@ -959,6 +959,53 @@ describe('Player', function() {
           .catch(fail)
           .then(done);
     });
+
+    it('accepts parameters in a (fieldName, value) format', function() {
+      let oldConfig = player.getConfiguration();
+      let oldDelayLicense = oldConfig.drm.delayLicenseRequestUntilPlayed;
+      let oldSwitchInterval = oldConfig.abr.switchInterval;
+      let oldPreferredLang = oldConfig.preferredAudioLanguage;
+
+      expect(oldDelayLicense).toBe(false);
+      expect(oldSwitchInterval).toBe(8);
+      expect(oldPreferredLang).toBe('en');
+
+      player.configure('drm.delayLicenseRequestUntilPlayed', true);
+      player.configure('abr.switchInterval', 10);
+      player.configure('preferredAudioLanguage', 'fr');
+
+      let newConfig = player.getConfiguration();
+      let newDelayLicense = newConfig.drm.delayLicenseRequestUntilPlayed;
+      let newSwitchInterval = newConfig.abr.switchInterval;
+      let newPreferredLang = newConfig.preferredAudioLanguage;
+
+      expect(newDelayLicense).toBe(true);
+      expect(newSwitchInterval).toBe(10);
+      expect(newPreferredLang).toBe('fr');
+    });
+
+    it('accepts escaped "." in names',
+       /** @suppress {accessControls} */ (function() {
+         expect(player.convertToConfigObject_('foo', 1)).toEqual({foo: 1});
+         expect(player.convertToConfigObject_('foo.bar', 1))
+             .toEqual({foo: {bar: 1}});
+         expect(player.convertToConfigObject_('foo..bar', 1))
+             .toEqual({foo: {'': {bar: 1}}});
+         expect(player.convertToConfigObject_('foo.bar.baz', 1))
+             .toEqual({foo: {bar: {baz: 1}}});
+         expect(player.convertToConfigObject_('foo.bar\\.baz', 1))
+             .toEqual({foo: {'bar.baz': 1}});
+         expect(player.convertToConfigObject_('foo.baz.', 1))
+             .toEqual({foo: {baz: {'': 1}}});
+         expect(player.convertToConfigObject_('foo.baz\\.', 1))
+             .toEqual({foo: {'baz.': 1}});
+         expect(player.convertToConfigObject_('foo\\.bar', 1))
+             .toEqual({'foo.bar': 1});
+         expect(player.convertToConfigObject_('.foo', 1))
+             .toEqual({'': {foo: 1}});
+         expect(player.convertToConfigObject_('\\.foo', 1))
+             .toEqual({'.foo': 1});
+       }));
   });
 
   describe('AbrManager', function() {
