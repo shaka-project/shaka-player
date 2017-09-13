@@ -506,10 +506,23 @@ shakaAssets.testAssets = [
     features: [
       shakaAssets.Feature.HIGH_DEFINITION,
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.PSSH,
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.TTML,
+      shakaAssets.Feature.WEBM
+    ]
+  },
+  {
+    name: 'Shaka Player History (multicodec, live)',
+    manifestUri: '//storage.googleapis.com/shaka-live-assets/player-source.mpd',
+    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
+    source: shakaAssets.Source.SHAKA,
+    drm: [],
+    features: [
+      shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.LIVE,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
       shakaAssets.Feature.WEBM
     ]
   },
