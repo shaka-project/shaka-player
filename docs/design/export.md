@@ -15,19 +15,6 @@ The compiler has a special annotation for this: `@export`.  Anything annotated
 with `@export` will be exported by the compiler automatically.
 
 
-## Exposing a symbol
-
-Similar to exporting, the compiler also supports what it calls exposing.  This
-is similar, but rather than exporting a symbol to an exported namespace,
-exposing prevents a symbol from being renamed during compilation.  The compiler
-uses the `@expose` annotation for this purpose.
-
-This is useful for things that cannot be exported, such as public member
-variables.  In contrast, exporting can only be applied to static or prototype
-methods, since they do not differ per instance and can be attached to the
-exported namespace at load time.
-
-
 ## Exporting to the docs
 
 We generate our documentation from the same annotations that we feed to the
@@ -67,10 +54,17 @@ compiler because they are not part of the library's public API.  For example,
 To make this work, we created another new annotation: `@exportInterface`.  This
 annotation is used by the extern generator, but is ignored by the compiler.
 
+In some cases, public member variables need to be preserved when they would
+otherwise be renamed by the compiler. `@export` is not sufficient to keep the
+names from being renamed and is only useful for static members or prototype
+values. `@expose` used to be used for this but is now deprecated. The current
+best practice is to write an externs file defining the properties that should
+be preserved.
+
 
 ## Summary
 
  - `@export`: truly exported (attached to namespace) by the compiler
- - `@expose`: truly exposed (not renamed) by the compiler
+ - `@expose`: deprecated
  - `@exportDoc`: considered part of the exports in the docs
  - `@exportInterface`: considered part of the exports in generated externs

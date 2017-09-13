@@ -53,12 +53,6 @@ common_closure_opts = [
 
     '--jscomp_error=*',
 
-    # 'deprecatedAnnotations' controls complains about @expose, but the new
-    # @nocollapse annotation does not do the same job for properties.
-    # So since we can't use the new annotations, we have to ignore complaints
-    # about the old one.
-    '--jscomp_off=deprecatedAnnotations',
-
     # Analyzer checks require explicit nullability, which is a pain.
     '--jscomp_off=analyzerChecksInternal',
 
