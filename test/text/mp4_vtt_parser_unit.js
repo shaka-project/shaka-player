@@ -30,11 +30,11 @@ describe('Mp4VttParser', function() {
 
   /** @type {!ArrayBuffer} */
   var vttInitSegment;
-  /** @type {!ArrayBuffer} */
+  /** @type {!Uint8Array} */
   var vttSegment;
-  /** @type {!ArrayBuffer} */
+  /** @type {!Uint8Array} */
   var vttSegSettings;
-  /** @type {!ArrayBuffer} */
+  /** @type {!Uint8Array} */
   var vttSegNoDuration;
   /** @type {!ArrayBuffer} */
   var audioInitSegment;
@@ -62,9 +62,9 @@ describe('Mp4VttParser', function() {
       shaka.test.Util.fetch(audioInitSegmentUri)
     ]).then(function(responses) {
       vttInitSegment = responses[0];
-      vttSegment = responses[1];
-      vttSegSettings = responses[2];
-      vttSegNoDuration = responses[3];
+      vttSegment = new Uint8Array(responses[1]);
+      vttSegSettings = new Uint8Array(responses[2]);
+      vttSegNoDuration = new Uint8Array(responses[3]);
       audioInitSegment = responses[4];
     }).catch(fail).then(done);
   });

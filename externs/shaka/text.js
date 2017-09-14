@@ -272,7 +272,7 @@ shakaExtern.TextParser.prototype.parseInit = function(data) {};
 /**
  * Parse a media segment and return the cues that make up the segment.
  *
- * @param {!ArrayBuffer} data
+ * @param {!Uint8Array} data
  *    The next section of buffer.
  * @param {shakaExtern.TextParser.TimeContext} timeContext
  *    The time information that should be used to adjust the times values

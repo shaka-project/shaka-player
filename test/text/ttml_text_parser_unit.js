@@ -699,7 +699,7 @@ describe('TtmlTextParser', function() {
    * @param {shakaExtern.TextParser.TimeContext} time
    */
   function verifyHelper(cues, text, time) {
-    var data = shaka.util.StringUtils.toUTF8(text);
+    var data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
     var result = new shaka.text.TtmlTextParser().parseMedia(data, time);
     var properties = ['textAlign', 'lineAlign', 'positionAlign', 'size',
                       'line', 'position', 'writingDirection', 'color',
@@ -738,7 +738,7 @@ describe('TtmlTextParser', function() {
     var data = shaka.util.StringUtils.toUTF8(text);
     try {
       new shaka.text.TtmlTextParser().parseMedia(
-          data,
+          new Uint8Array(data),
           {periodStart: 0, segmentStart: 0, segmentEnd: 0});
       fail('Invalid TTML file supported');
     } catch (e) {

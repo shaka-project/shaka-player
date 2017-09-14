@@ -528,7 +528,7 @@ describe('VttTextParser', function() {
    * @param {shakaExtern.TextParser.TimeContext} time
    */
   function verifyHelper(cues, text, time) {
-    var data = shaka.util.StringUtils.toUTF8(text);
+    var data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
 
     var result = new shaka.text.VttTextParser().parseMedia(data, time);
     expect(result).toBeTruthy();
@@ -562,7 +562,7 @@ describe('VttTextParser', function() {
     var error = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.TEXT,
         code);
-    var data = shaka.util.StringUtils.toUTF8(text);
+    var data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
     try {
       new shaka.text.VttTextParser().parseMedia(data, time);
       fail('Invalid WebVTT file supported');
