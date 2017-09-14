@@ -131,6 +131,12 @@ requirement: {
                  'because they are not supported in IE11'
 }
 requirement: {
+  type: BANNED_PROPERTY
+  value: 'ArrayBuffer.prototype.slice'
+  error_message: 'ArrayBuffer.slice is not allowed because it '
+                 'is not supported on Tizen 2016'
+}
+requirement: {
   type: BANNED_NAME
   value: 'ArrayBuffer.isView'
   error_message: 'ES6 ArrayBuffer methods are not allowed '
