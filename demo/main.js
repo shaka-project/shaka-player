@@ -203,6 +203,7 @@ shakaDemo.getParams_ = function() {
   // Because they are being concatenated in this order, if both an
   // URL fragment and an URL parameter of the same type are present
   // the URL fragment takes precendence.
+  /** @type {!Array.<string>} */
   var combined = fields.concat(fragments);
   var params = {};
   for (var i = 0; i < combined.length; ++i) {

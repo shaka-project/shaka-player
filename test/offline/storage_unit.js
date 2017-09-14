@@ -299,12 +299,16 @@ describe('Storage', function() {
               .addVideo(3)
           .build();
 
-      // Store the first variant.
-      storage.configure({
-        trackSelectionCallback: function(tracks) {
-          return tracks.slice(0, 1);
-        }
-      });
+      /**
+       * @param {!Array.<shakaExtern.Track>} tracks
+       * @return {!Array.<shakaExtern.Track>}
+       */
+      var trackSelectionCallback = function(tracks) {
+        // Store the first variant.
+        return tracks.slice(0, 1);
+      };
+
+      storage.configure({trackSelectionCallback: trackSelectionCallback});
 
       storage.store('')
           .then(function(data) {
