@@ -332,12 +332,6 @@ class Launcher:
        Uses |self.parsed_args| and |self.karma_config| to build and run a Karma
        command.
     """
-    karma = shakaBuildHelpers.get_node_binary_path('karma')
-    cmd = ['xvfb-run', '--auto-servernum'] if self.parsed_args.use_xvfb else []
-    cmd += [karma, 'start']
-    cmd += [karma_conf] if karma_conf else []
-    cmd += ['--settings', json.dumps(self.karma_config)]
-
     if self.parsed_args.use_xvfb and not shakaBuildHelpers.is_linux():
       logging.error('xvfb can only be used on Linux')
       return 1
@@ -345,6 +339,12 @@ class Launcher:
     if not shakaBuildHelpers.update_node_modules():
       logging.error('Failed to update node modules')
       return 1
+
+    karma = shakaBuildHelpers.get_node_binary_path('karma')
+    cmd = ['xvfb-run', '--auto-servernum'] if self.parsed_args.use_xvfb else []
+    cmd += [karma, 'start']
+    cmd += [karma_conf] if karma_conf else []
+    cmd += ['--settings', json.dumps(self.karma_config)]
 
     # There is no need to print a status here as the gendep and build
     # calls will print their own status updates.
