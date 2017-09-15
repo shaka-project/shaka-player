@@ -284,9 +284,23 @@ chrome.cast.Session.prototype.addMessageListener = function(
 
 
 /**
+ * @param {string} namespace
+ * @param {Function} listener
+ */
+chrome.cast.Session.prototype.removeMessageListener = function(
+    namespace, listener) {};
+
+
+/**
  * @param {Function} listener
  */
 chrome.cast.Session.prototype.addUpdateListener = function(listener) {};
+
+
+/**
+ * @param {Function} listener
+ */
+chrome.cast.Session.prototype.removeUpdateListener = function(listener) {};
 
 
 /**
