@@ -673,6 +673,8 @@ describe('CastSender', function() {
         expect(sender.isCasting()).toBe(true);
         expect(mockSession.leave).not.toHaveBeenCalled();
         expect(mockSession.stop).not.toHaveBeenCalled();
+        expect(mockSession.removeUpdateListener).not.toHaveBeenCalled();
+        expect(mockSession.removeMessageListener).not.toHaveBeenCalled();
 
         var method = sender.get('player', 'load');
         var p = method();
@@ -684,6 +686,8 @@ describe('CastSender', function() {
           sender.forceDisconnect();
           expect(mockSession.leave).not.toHaveBeenCalled();
           expect(mockSession.stop).toHaveBeenCalled();
+          expect(mockSession.removeUpdateListener).toHaveBeenCalled();
+          expect(mockSession.removeMessageListener).toHaveBeenCalled();
 
           // Wait a tick for the Promise status to change.
           return Util.delay(0.1);
@@ -709,6 +713,8 @@ describe('CastSender', function() {
         expect(sender.isCasting()).toBe(true);
         expect(mockSession.leave).not.toHaveBeenCalled();
         expect(mockSession.stop).not.toHaveBeenCalled();
+        expect(mockSession.removeUpdateListener).not.toHaveBeenCalled();
+        expect(mockSession.removeMessageListener).not.toHaveBeenCalled();
 
         var method = sender.get('player', 'load');
         var p = method();
@@ -720,6 +726,8 @@ describe('CastSender', function() {
           sender.destroy().catch(fail);
           expect(mockSession.leave).toHaveBeenCalled();
           expect(mockSession.stop).not.toHaveBeenCalled();
+          expect(mockSession.removeUpdateListener).toHaveBeenCalled();
+          expect(mockSession.removeMessageListener).toHaveBeenCalled();
 
           // Wait a tick for the Promise status to change.
           return Util.delay(0.1);
@@ -753,7 +761,9 @@ describe('CastSender', function() {
       status: 'connected',
       receiver: { friendlyName: 'SomeDevice' },
       addUpdateListener: jasmine.createSpy('Session.addUpdateListener'),
+      removeUpdateListener: jasmine.createSpy('Session.removeUpdateListener'),
       addMessageListener: jasmine.createSpy('Session.addMessageListener'),
+      removeMessageListener: jasmine.createSpy('Session.removeMessageListener'),
       leave: jasmine.createSpy('Session.leave'),
       sendMessage: jasmine.createSpy('Session.sendMessage'),
       stop: jasmine.createSpy('Session.stop')
