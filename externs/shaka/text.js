@@ -19,6 +19,33 @@
 /** @externs */
 
 
+/**
+ * @typedef {{
+ *   x: number,
+ *   y: number,
+ *   width: number,
+ *   height: number
+ * }}
+ *
+ * @description
+ * The region of the video to render the cues into.
+ *
+ * @property {number} x
+ *   The X offset to start the rendering area.  This is a percentage (0-100) of
+ *   the video width.
+ * @property {number} y
+ *   The Y offset to start the rendering area.  This is a percentage (0-100) of
+ *   the video height.
+ * @property {number} width
+ *   The width of the rendering area.  This is a percentage (0-100) of the video
+ *   width.
+ * @property {number} height
+ *   The height of the rendering area.  This is a percentage (0-100) of the
+ *   video height.
+ */
+shakaExtern.CueRegion;
+
+
 
 /**
  * @interface
@@ -46,6 +73,13 @@ shakaExtern.Cue.prototype.endTime;
  * @type {!string}
  */
 shakaExtern.Cue.prototype.payload;
+
+
+/**
+ * The region to render the cue into.
+ * @type {shakaExtern.CueRegion}
+ */
+shakaExtern.Cue.prototype.region;
 
 
 /**
