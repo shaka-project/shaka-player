@@ -21,6 +21,179 @@
 
 
 /**
+ * @interface
+ * @exportDoc
+ */
+shakaExtern.Cue = function() {};
+
+
+/**
+ * The start time of the cue in seconds and fractions of a second.
+ * @type {number}
+ */
+shakaExtern.Cue.prototype.startTime;
+
+
+/**
+ * The end time of the cue in seconds and fractions of a second.
+ * @type {number}
+ */
+shakaExtern.Cue.prototype.endTime;
+
+
+/**
+ * The text payload of the cue.
+ * @type {!string}
+ */
+shakaExtern.Cue.prototype.payload;
+
+
+/**
+ * The indent (in percent) of the cue box in the direction defined by the
+ * writing direction.
+ * @type {?number}
+ */
+shakaExtern.Cue.prototype.position;
+
+
+/**
+ * Position alignment of the cue.
+ * @type {shaka.text.Cue.positionAlign}
+ */
+shakaExtern.Cue.prototype.positionAlign;
+
+
+/**
+ * Size of the cue box (in percents).
+ * @type {number}
+ */
+shakaExtern.Cue.prototype.size;
+
+
+/**
+ * Alignment of the text inside the cue box.
+ * @type {shaka.text.Cue.textAlign}
+ */
+shakaExtern.Cue.prototype.textAlign;
+
+
+/**
+ * Text writing direction of the cue.
+ * @type {shaka.text.Cue.writingDirection}
+ */
+shakaExtern.Cue.prototype.writingDirection;
+
+
+/**
+ * The way to interpret line field. (Either as an integer line number or
+ * percentage from the display box).
+ * @type {shaka.text.Cue.lineInterpretation}
+ */
+shakaExtern.Cue.prototype.lineInterpretation;
+
+
+/**
+ * The offset from the display box in either number of lines or
+ * percentage depending on the value of lineInterpretation.
+ * @type {?number}
+ */
+shakaExtern.Cue.prototype.line;
+
+
+/**
+ * Separation between line areas inside the cue box in px or em
+ * (e.g. '100px'/'100em'). If not specified, should be no less than
+ * the largest font size applied to the text in the cue.
+ * @type {string}.
+ */
+shakaExtern.Cue.prototype.lineHeight;
+
+
+/**
+ * Line alignment of the cue box.
+ * @type {shaka.text.Cue.lineAlign}
+ */
+shakaExtern.Cue.prototype.lineAlign;
+
+
+/**
+ * Vertical alignments of the cues within their extents.
+ * @type {shaka.text.Cue.displayAlign}
+ */
+shakaExtern.Cue.prototype.displayAlign;
+
+
+/**
+ * Text color represented by any string that would be
+ * accepted in CSS.
+ * E. g. '#FFFFFF' or 'white'.
+ * @type {!string}
+ */
+shakaExtern.Cue.prototype.color;
+
+
+/**
+ * Text background color represented by any string that would be
+ * accepted in CSS.
+ * E. g. '#FFFFFF' or 'white'.
+ * @type {!string}
+ */
+shakaExtern.Cue.prototype.backgroundColor;
+
+
+/**
+ * Text font size in px or em (e.g. '100px'/'100em').
+ * @type {string}
+ */
+shakaExtern.Cue.prototype.fontSize;
+
+
+/**
+ * Text font weight. Either normal or bold.
+ * @type {shaka.text.Cue.fontWeight}
+ */
+shakaExtern.Cue.prototype.fontWeight;
+
+
+/**
+ * Text font style. Normal, italic or oblique.
+ * @type {shaka.text.Cue.fontStyle}
+ */
+shakaExtern.Cue.prototype.fontStyle;
+
+
+/**
+ * Text font family.
+ * @type {!string}
+ */
+shakaExtern.Cue.prototype.fontFamily;
+
+
+/**
+ * Text decoration. A combination of underline, overline
+ * and line through. Empty array means no decoration.
+ * @type {!Array.<!shaka.text.Cue.textDecoration>}
+ */
+shakaExtern.Cue.prototype.textDecoration;
+
+
+/**
+ * Whether or not line wrapping should be applied
+ * to the cue.
+ * @type {boolean}
+ */
+shakaExtern.Cue.prototype.wrapLine;
+
+
+/**
+ * Id of the cue.
+ * @type {!string}
+ */
+shakaExtern.Cue.prototype.id;
+
+
+
+/**
  * An interface for plugins that parse text tracks.
  *
  * @interface
@@ -70,7 +243,7 @@ shakaExtern.TextParser.prototype.parseInit = function(data) {};
  * @param {shakaExtern.TextParser.TimeContext} timeContext
  *    The time information that should be used to adjust the times values
  *    for each cue.
- * @return {!Array.<!shaka.text.Cue>}
+ * @return {!Array.<!shakaExtern.Cue>}
  *
  * @exportDoc
  */

@@ -52,7 +52,7 @@ describe('Cue', function() {
   /**
    * @param {string} text
    * @param {!shakaExtern.TextParser.TimeContext} time
-   * @return {!Array.<shaka.text.Cue>}
+   * @return {!Array.<!shakaExtern.Cue>}
    */
   function parseVtt(text, time) {
     var data = shaka.util.StringUtils.toUTF8(text);
