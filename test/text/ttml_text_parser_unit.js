@@ -265,7 +265,9 @@ describe('TtmlTextParser', function() {
     verifyHelper(
         [
           {
-            start: 62.05, end: 3723.2, payload: 'Test', size: 50}
+            start: 62.05, end: 3723.2, payload: 'Test',
+            region: {x: 0, y: 0, width: 50, height: 16}
+          }
         ],
         '<tt xmlns:tts="ttml#styling">' +
         '<layout>' +
@@ -278,132 +280,124 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
-  it('supports line and position settings for horizontal text',
-     function() {
-       verifyHelper(
-           [
-             {
-              start: 62.05,
-              end: 3723.2,
-              payload: 'Test',
-              position: 50,
-              line: 16
-            }
-           ],
-           '<tt xmlns:tts="ttml#styling">' +
-           '<layout>' +
-           '<region xml:id="subtitleArea" tts:origin="50% 16%"/>' +
-           '</layout>' +
-           '<body region="subtitleArea">' +
-           '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
-           '</body>' +
-           '</tt>',
-           {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
-       verifyHelper(
-           [
-             {
-              start: 62.05,
-              end: 3723.2,
-              payload: 'Test',
-              position: 50,
-              line: 16
-            }
-           ],
-           '<tt xmlns:tts="ttml#styling">' +
-           '<layout>' +
-           '<region xml:id="subtitleArea" tts:origin="50% 16%" ' +
-           'tts:writingMode="lrtb" />' +
-           '</layout>' +
-           '<body region="subtitleArea">' +
-           '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
-           '</body>' +
-           '</tt>',
-           {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
-       verifyHelper(
-           [
-             {
-              start: 62.05,
-              end: 3723.2,
-              payload: 'Test',
-              position: 50,
-              line: 16
-            }
-           ],
-           '<tt xmlns:tts="ttml#styling">' +
-           '<layout>' +
-           '<region xml:id="subtitleArea" tts:origin="50% 16%" ' +
-           'tts:writingMode="lr" />' +
-           '</layout>' +
-           '<body region="subtitleArea">' +
-           '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
-           '</body>' +
-           '</tt>',
-           {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
-      });
+  it('supports regionsettings for horizontal text', function() {
+    verifyHelper(
+        [
+          {
+           start: 62.05,
+           end: 3723.2,
+           payload: 'Test',
+           region: {x: 50, y: 16, width: 100, height: 100}
+         }
+        ],
+        '<tt xmlns:tts="ttml#styling">' +
+        '<layout>' +
+        '<region xml:id="subtitleArea" tts:origin="50% 16%"/>' +
+        '</layout>' +
+        '<body region="subtitleArea">' +
+        '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '</body>' +
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
+    verifyHelper(
+        [
+          {
+           start: 62.05,
+           end: 3723.2,
+           payload: 'Test',
+           region: {x: 50, y: 16, width: 100, height: 100}
+         }
+        ],
+        '<tt xmlns:tts="ttml#styling">' +
+        '<layout>' +
+        '<region xml:id="subtitleArea" tts:origin="50% 16%" ' +
+        'tts:writingMode="lrtb" />' +
+        '</layout>' +
+        '<body region="subtitleArea">' +
+        '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '</body>' +
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
+    verifyHelper(
+        [
+          {
+           start: 62.05,
+           end: 3723.2,
+           payload: 'Test',
+           region: {x: 50, y: 16, width: 100, height: 100}
+         }
+        ],
+        '<tt xmlns:tts="ttml#styling">' +
+        '<layout>' +
+        '<region xml:id="subtitleArea" tts:origin="50% 16%" ' +
+        'tts:writingMode="lr" />' +
+        '</layout>' +
+        '<body region="subtitleArea">' +
+        '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '</body>' +
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
+  });
 
-  it('supports line and position settings for vertical text',
-     function() {
-       verifyHelper(
-           [
-             {
-              start: 62.05,
-              end: 3723.2,
-              payload: 'Test',
-              position: 16,
-              line: 50
-            }
-           ],
-           '<tt xmlns:tts="ttml#styling">' +
-           '<layout>' +
-           '<region xml:id="subtitleArea" tts:origin="50% 16%" ' +
-           'tts:writingMode="tb" />' +
-           '</layout>' +
-           '<body region="subtitleArea">' +
-           '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
-           '</body>' +
-           '</tt>',
-           {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
-       verifyHelper(
-           [
-             {
-              start: 62.05,
-              end: 3723.2,
-              payload: 'Test',
-              position: 16,
-              line: 50
-            }
-           ],
-           '<tt xmlns:tts="ttml#styling">' +
-           '<layout>' +
-           '<region xml:id="subtitleArea" tts:origin="50% 16%" ' +
-           'tts:writingMode="tblr" />' +
-           '</layout>' +
-           '<body region="subtitleArea">' +
-           '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
-           '</body>' +
-           '</tt>',
-           {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
-       verifyHelper(
-           [
-             {
-              start: 62.05,
-              end: 3723.2,
-              payload: 'Test',
-              position: 16,
-              line: 50
-            }
-           ],
-           '<tt xmlns:tts="ttml#styling">' +
-           '<layout>' +
-           '<region xml:id="subtitleArea" tts:origin="50% 16%" ' +
-           'tts:writingMode="tbrl" />' +
-           '</layout>' +
-           '<body region="subtitleArea">' +
-           '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
-           '</body>' +
-           '</tt>',
-           {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
-      });
+  it('supports region settings for vertical text', function() {
+    verifyHelper(
+        [
+          {
+           start: 62.05,
+           end: 3723.2,
+           payload: 'Test',
+           region: {x: 50, y: 16, width: 100, height: 100}
+         }
+        ],
+        '<tt xmlns:tts="ttml#styling">' +
+        '<layout>' +
+        '<region xml:id="subtitleArea" tts:origin="50% 16%" ' +
+        'tts:writingMode="tb" />' +
+        '</layout>' +
+        '<body region="subtitleArea">' +
+        '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '</body>' +
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
+    verifyHelper(
+        [
+          {
+           start: 62.05,
+           end: 3723.2,
+           payload: 'Test',
+           region: {x: 50, y: 16, width: 100, height: 100}
+         }
+        ],
+        '<tt xmlns:tts="ttml#styling">' +
+        '<layout>' +
+        '<region xml:id="subtitleArea" tts:origin="50% 16%" ' +
+        'tts:writingMode="tblr" />' +
+        '</layout>' +
+        '<body region="subtitleArea">' +
+        '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '</body>' +
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
+    verifyHelper(
+        [
+          {
+           start: 62.05,
+           end: 3723.2,
+           payload: 'Test',
+           region: {x: 50, y: 16, width: 100, height: 100}
+         }
+        ],
+        '<tt xmlns:tts="ttml#styling">' +
+        '<layout>' +
+        '<region xml:id="subtitleArea" tts:origin="50% 16%" ' +
+        'tts:writingMode="tbrl" />' +
+        '</layout>' +
+        '<body region="subtitleArea">' +
+        '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '</body>' +
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
+  });
 
   it('supports writingDirection setting', function() {
     verifyHelper(
@@ -709,7 +703,7 @@ describe('TtmlTextParser', function() {
     var result = new shaka.text.TtmlTextParser().parseMedia(data, time);
     var properties = ['textAlign', 'lineAlign', 'positionAlign', 'size',
                       'line', 'position', 'writingDirection', 'color',
-                      'backgroundColor', 'fontWeight', 'fontFamily',
+                      'backgroundColor', 'fontWeight', 'fontFamily', 'region',
                       'wrapLine', 'lineHeight', 'fontStyle', 'fontSize'];
     expect(result).toBeTruthy();
     expect(result.length).toBe(cues.length);
@@ -720,11 +714,8 @@ describe('TtmlTextParser', function() {
 
       for (var j = 0; j < properties.length; j++) {
         var property = properties[j];
-        // Workaround a bug in the compiler's externs.
-        // TODO: Remove when compiler is updated.
         if (property in cues[i])
-          expect(/** @type {?} */ (result[i])[property])
-                 .toBe(cues[i][property]);
+          expect(result[i][property]).toEqual(cues[i][property]);
       }
 
       if (cues[i].textDecoration) {
