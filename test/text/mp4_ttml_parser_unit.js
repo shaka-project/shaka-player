@@ -20,21 +20,26 @@ goog.require('shaka.test.Util');
 describe('Mp4TtmlParser', function() {
   var ttmlInitSegmentUri = '/base/test/test/assets/ttml-init.mp4';
   var ttmlSegmentUri = '/base/test/test/assets/ttml-segment.mp4';
+  var ttmlSegmentMultipleMDATUri =
+      '/base/test/test/assets/ttml-segment-multiplemdat.mp4';
   var audioInitSegmentUri = '/base/test/test/assets/sintel-audio-init.mp4';
 
   var ttmlInitSegment;
   var ttmlSegment;
+  var ttmlSegmentMultipleMDAT;
   var audioInitSegment;
 
   beforeAll(function(done) {
     Promise.all([
       shaka.test.Util.fetch(ttmlInitSegmentUri),
       shaka.test.Util.fetch(ttmlSegmentUri),
+      shaka.test.Util.fetch(ttmlSegmentMultipleMDATUri),
       shaka.test.Util.fetch(audioInitSegmentUri)
     ]).then(function(responses) {
       ttmlInitSegment = responses[0];
       ttmlSegment = responses[1];
-      audioInitSegment = responses[2];
+      ttmlSegmentMultipleMDAT = responses[2];
+      audioInitSegment = responses[3];
     }).catch(fail).then(done);
   });
 
@@ -47,7 +52,15 @@ describe('Mp4TtmlParser', function() {
     parser.parseInit(ttmlInitSegment);
     var time = {periodStart: 0, segmentStart: 0, segmentEnd: 0 };
     var ret = parser.parseMedia(ttmlSegment, time);
-    expect(ret.length).toBeGreaterThan(0);
+    expect(ret.length).toBe(10);
+  });
+
+  it('handles media segments with multiple mdats', function() {
+    var parser = new shaka.text.Mp4TtmlParser();
+    parser.parseInit(ttmlInitSegment);
+    var time = {periodStart: 0, segmentStart: 0, segmentEnd: 0 };
+    var ret = parser.parseMedia(ttmlSegmentMultipleMDAT, time);
+    expect(ret.length).toBe(20);
   });
 
   it('accounts for offset', function() {
