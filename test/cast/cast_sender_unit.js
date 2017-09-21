@@ -70,7 +70,7 @@ describe('CastSender', function() {
         fakeAppId, Util.spyFunc(onStatusChanged),
         Util.spyFunc(onFirstCastStateUpdate), Util.spyFunc(onRemoteEvent),
         Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
-    resetHasReceivers();
+    resetClassVariables();
   });
 
   afterEach(function(done) {
@@ -246,6 +246,67 @@ describe('CastSender', function() {
         expect(error.code).toBe(shaka.util.Error.Code.ALREADY_CASTING);
       }).then(done);
     });
+  });
+
+  it('re-uses old sessions', function(done) {
+    sender.init();
+    fakeReceiverAvailability(true);
+    var p = sender.cast(fakeInitState);
+    fakeSessionConnection();
+    var oldMockSession = mockSession;
+    p.then(function() {
+      return sender.destroy();
+    }).then(function() {
+      // Reset tracking variables.
+      mockCastApi.ApiConfig.calls.reset();
+      onStatusChanged.calls.reset();
+      oldMockSession.messages = [];
+
+      // Make a new session, to ensure that the sender is correctly using
+      // the previous mock session.
+      mockSession = createMockCastSession();
+
+      sender = new CastSender(
+          fakeAppId, Util.spyFunc(onStatusChanged),
+          Util.spyFunc(onFirstCastStateUpdate), Util.spyFunc(onRemoteEvent),
+          Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
+      sender.init();
+
+      // The sender should automatically rejoin the session, without needing
+      // to be told to cast.
+      expect(onStatusChanged).toHaveBeenCalled();
+      expect(sender.isCasting()).toBe(true);
+
+      // The message should be on the old session, instead of the new one.
+      expect(mockSession.messages.length).toBe(0);
+      expect(oldMockSession.messages).toContain(jasmine.objectContaining({
+        type: 'init',
+        initState: fakeInitState
+      }));
+    }).catch(fail).then(done);
+  });
+
+  it('doesn\'t re-use stopped sessions', function(done) {
+    sender.init();
+    fakeReceiverAvailability(true);
+    var p = sender.cast(fakeInitState);
+    fakeSessionConnection();
+    p.then(function() {
+      return sender.destroy();
+    }).then(function() {
+      mockCastApi.ApiConfig.calls.reset();
+
+      // The session is stopped in the meantime.
+      mockSession.status = chrome.cast.SessionStatus.STOPPED;
+
+      sender = new CastSender(
+          fakeAppId, Util.spyFunc(onStatusChanged),
+          Util.spyFunc(onFirstCastStateUpdate), Util.spyFunc(onRemoteEvent),
+          Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
+      sender.init();
+
+      expect(sender.isCasting()).toBe(false);
+    }).catch(fail).then(done);
   });
 
   it('joins existing sessions automatically', function(done) {
@@ -706,12 +767,11 @@ describe('CastSender', function() {
   });
 
   describe('destroy', function() {
-    it('leaves the session and cancels all async operations', function(done) {
+    it('cancels all async operations', function(done) {
       sender.init();
       fakeReceiverAvailability(true);
       sender.cast(fakeInitState).then(function() {
         expect(sender.isCasting()).toBe(true);
-        expect(mockSession.leave).not.toHaveBeenCalled();
         expect(mockSession.stop).not.toHaveBeenCalled();
         expect(mockSession.removeUpdateListener).not.toHaveBeenCalled();
         expect(mockSession.removeMessageListener).not.toHaveBeenCalled();
@@ -724,7 +784,7 @@ describe('CastSender', function() {
         return Util.delay(0.1).then(function() {
           expect(p.status).toBe('pending');
           sender.destroy().catch(fail);
-          expect(mockSession.leave).toHaveBeenCalled();
+          expect(mockSession.leave).not.toHaveBeenCalled();
           expect(mockSession.stop).not.toHaveBeenCalled();
           expect(mockSession.removeUpdateListener).toHaveBeenCalled();
           expect(mockSession.removeMessageListener).toHaveBeenCalled();
@@ -749,6 +809,7 @@ describe('CastSender', function() {
     return {
       isAvailable: true,
       SessionRequest: jasmine.createSpy('chrome.cast.SessionRequest'),
+      SessionStatus: {STOPPED: 'stopped'},
       ApiConfig: jasmine.createSpy('chrome.cast.ApiConfig'),
       initialize: jasmine.createSpy('chrome.cast.initialize'),
       requestSession: jasmine.createSpy('chrome.cast.requestSession')
@@ -848,9 +909,10 @@ describe('CastSender', function() {
   /**
    * @suppress {visibility}
    */
-  function resetHasReceivers() {
+  function resetClassVariables() {
     // @suppress visibility has function scope, so this is a mini-function that
     // exists solely to suppress visibility for this call.
     CastSender.hasReceivers_ = false;
+    CastSender.session_ = null;
   }
 });

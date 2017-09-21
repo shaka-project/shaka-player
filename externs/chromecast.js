@@ -185,6 +185,14 @@ chrome.cast = {};
 chrome.cast.isAvailable;
 
 
+/** @const */
+chrome.cast.SessionStatus = {};
+
+
+/** @type {string} */
+chrome.cast.SessionStatus.STOPPED;
+
+
 /**
  * @param {chrome.cast.ApiConfig} apiConfig
  * @param {Function} successCallback
