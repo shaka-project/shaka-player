@@ -37,7 +37,6 @@ shakaDemo.setupAssets_ = function() {
   /** @type {!Object.<string, !HTMLOptGroupElement>} */
   var groups = {};
   var first = null;
-  var robustnessSuggestions = document.getElementById('robustnessSuggestions');
   shakaAssets.testAssets.forEach(function(asset) {
     if (asset.disabled) return;
 
@@ -58,14 +57,6 @@ shakaDemo.setupAssets_ = function() {
     if (asset.drm.length && !asset.drm.some(
         function(keySystem) { return shakaDemo.support_.drm[keySystem]; })) {
       option.disabled = true;
-      asset.drm.forEach(function(keySystem) {
-        robustnessSuggestions.childNodes.forEach(function(suggestion) {
-          if (suggestion.nodeName == 'OPTION' &&
-              keySystem === suggestion.dataset.keysystem) {
-            suggestion.disabled = true;
-          }
-        });
-      });
     }
 
     var mimeTypes = [];
