@@ -71,7 +71,8 @@ common_closure_opts = [
      shakaBuildHelpers.cygwin_safe_path(shakaBuildHelpers.get_source_base())),
 
     '--generate_exports',
-
+]
+common_closure_defines = [
     '-D', 'COMPILED=true',
     '-D', 'goog.STRICT_MODE_COMPATIBLE=true',
     '-D', 'goog.ENABLE_DEBUG_LOADER=false',
@@ -80,8 +81,9 @@ common_closure_opts = [
 debug_closure_opts = [
     # Don't use a wrapper script in debug mode so all the internals are visible
     # on the global object.
-
     '-O', 'SIMPLE',
+]
+debug_closure_defines = [
     '-D', 'goog.DEBUG=true',
     '-D', 'goog.asserts.ENABLE_ASSERTS=true',
     '-D', 'shaka.log.MAX_LOG_LEVEL=4',  # shaka.log.Level.DEBUG
@@ -89,8 +91,9 @@ debug_closure_opts = [
 release_closure_opts = [
     ('--output_wrapper_file=%s/build/wrapper.template.js' %
      shakaBuildHelpers.cygwin_safe_path(shakaBuildHelpers.get_source_base())),
-
     '-O', 'ADVANCED',
+]
+release_closure_defines = [
     '-D', 'goog.DEBUG=false',
     '-D', 'goog.asserts.ENABLE_ASSERTS=false',
     '-D', 'shaka.log.MAX_LOG_LEVEL=0',
@@ -233,12 +236,11 @@ class Build(object):
 
     return True
 
-  def build_raw(self, extra_opts, is_debug):
+  def build_raw(self, closure_opts):
     """Builds the files in |self.include| using the given extra Closure options.
 
     Args:
-      extra_opts: An array of extra options to give to Closure.
-      is_debug: True to compile for debugging, false for release.
+      closure_opts: An array of options to give to Closure.
 
     Returns:
       True on success; False on failure.
@@ -249,12 +251,7 @@ class Build(object):
     files = [shakaBuildHelpers.cygwin_safe_path(f) for f in self.include]
     files.sort()
 
-    if is_debug:
-      closure_opts = common_closure_opts + debug_closure_opts
-    else:
-      closure_opts = common_closure_opts + release_closure_opts
-
-    cmd_line = ['java', '-jar', jar] + closure_opts + extra_opts + files
+    cmd_line = ['java', '-jar', jar] + closure_opts + files
     if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
       logging.error('Build failed')
       return False
@@ -325,9 +322,17 @@ class Build(object):
                           'to override.')
           return True
 
-    opts = ['--create_source_map', result_map, '--js_output_file', result_file,
-            '--source_map_location_mapping', source_base + '|..']
-    if not self.build_raw(opts, is_debug):
+    closure_opts = common_closure_opts + common_closure_defines
+    if is_debug:
+      closure_opts += debug_closure_opts + debug_closure_defines
+    else:
+      closure_opts += release_closure_opts + release_closure_defines
+
+    closure_opts += [
+        '--create_source_map', result_map, '--js_output_file', result_file,
+        '--source_map_location_mapping', source_base + '|..'
+    ]
+    if not self.build_raw(closure_opts):
       return False
 
     # Add a special source-mapping comment so that Chrome and Firefox can map

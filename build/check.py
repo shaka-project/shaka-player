@@ -128,11 +128,63 @@ def check_tests():
            get('third_party', 'closure'))
   test_build = build.Build(set(files))
 
+  closure_opts = build.common_closure_opts + build.common_closure_defines
+  closure_opts += build.debug_closure_opts + build.debug_closure_defines
+
   # Ignore missing goog.require since we assume the whole library is
   # already included.
-  opts = ['--jscomp_off=missingRequire', '--jscomp_off=strictMissingRequire',
-          '--checks-only', '-O', 'SIMPLE']
-  return test_build.build_raw(opts, is_debug=True)
+  closure_opts += [
+      '--jscomp_off=missingRequire', '--jscomp_off=strictMissingRequire',
+      '--checks-only', '-O', 'SIMPLE'
+  ]
+  return test_build.build_raw(closure_opts)
+
+
+def check_externs():
+  """Runs an extra compile pass over the generated externs to ensure that they
+  are usable.
+
+  Returns:
+    True on success, False on failure.
+  """
+  logging.info('Checking the usability of generated externs...')
+
+  # Create a complete "build" object.
+  externs_build = build.Build()
+  if not externs_build.parse_build(['+@complete'], os.getcwd()):
+    return False
+  externs_build.add_core()
+
+  # Use it to generate externs for the next check.
+  if not externs_build.generate_externs('check'):
+    return False
+
+  # Create a custom "build" object, add all manually-written externs, then add
+  # the generated externs we just generated.
+  source_base = shakaBuildHelpers.get_source_base()
+  manual_externs = shakaBuildHelpers.get_all_files(
+      os.path.join(source_base, 'externs'), re.compile(r'.*\.js$'))
+  generated_externs = os.path.join(
+      source_base, 'dist', 'shaka-player.check.externs.js')
+
+  check_build = build.Build()
+  check_build.include = set(manual_externs)
+  check_build.include.add(generated_externs)
+
+  # Build with the complete set of externs, but without any application code.
+  # This will help find issues in the generated externs, independent of the app.
+  # Since we have no app, don't use the defines.  Unused defines cause a
+  # compilation error.
+  closure_opts = build.common_closure_opts + build.debug_closure_opts + [
+      '--checks-only', '-O', 'SIMPLE'
+  ]
+  ok = check_build.build_raw(closure_opts)
+
+  # Clean up the temporary externs we just generated.
+  os.unlink(generated_externs)
+
+  # Return the success/failure of the build above.
+  return ok
 
 
 def usage():
@@ -151,16 +203,17 @@ def main(args):
       usage()
       return 1
 
-  if not check_lint():
-    return 1
-  elif not check_html_lint():
-    return 1
-  elif not check_complete():
-    return 1
-  elif not check_tests():
-    return 1
-  else:
-    return 0
+  steps = [
+    check_lint,
+    check_html_lint,
+    check_complete,
+    check_tests,
+    check_externs,
+  ]
+  for step in steps:
+    if not step():
+      return 1
+  return 0
 
 
 if __name__ == '__main__':
