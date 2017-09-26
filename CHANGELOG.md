@@ -1,3 +1,37 @@
+## 2.2.2 (2017-09-27)
+
+New features:
+  - Support for MP4+TTML text streams with multiple MDAT boxes
+    - https://github.com/google/shaka-player/issues/1028
+
+Bugfixes:
+  - Fixed playback hangs in certain content due to rounding error
+    - https://github.com/google/shaka-player/issues/979
+  - Fixed exception when TextTrack mode is set to "disabled"
+    - https://github.com/google/shaka-player/issues/990
+  - Fixed subtitle failures in Safari
+    - https://github.com/google/shaka-player/issues/991
+    - https://github.com/google/shaka-player/issues/1012
+  - Fixed renaming issues in compiled builds
+  - Fixed exceptions on Tizen 2016
+    - https://github.com/google/shaka-player/issues/1022
+    - https://github.com/google/shaka-player/issues/935
+  - Fixed TTML region parsing
+    - https://github.com/google/shaka-player/issues/1020
+
+Demo app:
+  - Auto-select offline copy of an asset after storing it offline
+    - https://github.com/google/shaka-player/issues/996
+    - https://github.com/google/shaka-player/pull/1001
+  - Removed YouTube-sourced assets, which were very outdated
+    - https://github.com/google/shaka-player/issues/1015
+  - Added "Shaka Player History" live stream
+
+Docs:
+  - Added CORS explanation to the docs
+    - https://github.com/google/shaka-player/issues/1018
+
+
 ## 2.2.1 (2017-09-01)
 
 New features:
