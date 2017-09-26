@@ -250,9 +250,12 @@ exports.addImplemented = function(docs) {
                         continue;
                     }
 
-                    // mark members that implement an interface
-                    member.implements = member.implements || [];
-                    member.implements.push(interfaceMember.longname);
+                    // interfaceMember.longname is undefined on Object.toString for some reason
+                    if (interfaceMember.longname) {
+                        // mark members that implement an interface
+                        member.implements = member.implements || [];
+                        member.implements.push(interfaceMember.longname);
+                    }
 
                     // mark interface members that the symbol implements
                     interfaceMember.implementations = interfaceMember.implementations || [];
