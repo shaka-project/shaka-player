@@ -58,17 +58,21 @@
   var combined = fields.concat(fragments);
 
   // Very old browsers do not have Array.prototype.indexOf.
-  var compiledMode = false;
+  var compiledScript = null;
   for (var i = 0; i < combined.length; ++i) {
     if (combined[i] == 'compiled') {
-      compiledMode = true;
+      compiledScript = '../dist/shaka-player.compiled.js';
+      break;
+    }
+    if (combined[i] == 'debug_compiled') {
+      compiledScript = '../dist/shaka-player.compiled.debug.js';
       break;
     }
   }
 
-  if (compiledMode) {
+  if (compiledScript) {
     // This contains the entire library.
-    loadRelativeScript('../dist/shaka-player.compiled.js');
+    loadRelativeScript(compiledScript);
   } else {
     // In non-compiled mode, we load the closure library and the generated deps
     // file to bootstrap the system.  goog.require will load the rest.

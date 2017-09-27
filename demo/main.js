@@ -501,6 +501,9 @@ shakaDemo.hashShouldChange_ = function() {
   if ('compiled' in shakaDemo.getParams_()) {
     params.push('compiled');
   }
+  if ('debug_compiled' in shakaDemo.getParams_()) {
+    params.push('debug_compiled');
+  }
 
   // Store values for drm configuration.
   var videoRobustness =
