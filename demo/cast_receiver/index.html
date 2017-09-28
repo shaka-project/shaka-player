@@ -26,11 +26,36 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
     <script src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
+
+    <script>
+COMPILED_JS = [
+  // The compiled library.
+  '../../dist/shaka-player.compiled.js',
+  // The compiled receiver app.
+  '../../dist/receiver.compiled.js'
+];
+COMPILED_DEBUG_JS = [
+  // The compiled library, debug mode.
+  '../../dist/shaka-player.compiled.debug.js',
+  // The compiled receiver app.
+  '../../dist/receiver.compiled.js'
+];
+UNCOMPILED_JS = [
+  // Bootstrap the Shaka Player library through the Closure library.
+  '../../third_party/closure/goog/base.js',
+  '../../dist/deps.js',
+  // This file contains goog.require calls for all exported library classes.
+  '../../shaka-player.uncompiled.js',
+  // These are the individual parts of the receiver app.
+  '../common/assets.js',
+  '../common/controls.js',
+  '../common/demo_utils.js',
+  'receiver_app.js'
+];
+    </script>
+
+    <!-- Load the compiled or uncompiled version of the code. -->
     <script src="../load.js"></script>
-    <script src="../common/assets.js"></script>
-    <script src="../common/controls.js"></script>
-    <script src="../common/demo_utils.js"></script>
-    <script src="receiver_app.js"></script>
   </head>
   <body>
     <div id="videoContainer" class="overlay-parent">

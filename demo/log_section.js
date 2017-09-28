@@ -52,7 +52,7 @@ shakaDemo.setupLogging_ = function() {
   var logToScreen = document.getElementById('logToScreen');
   var log = document.getElementById('log');
 
-  if (!shaka.log) {
+  if (!shaka['log']) {
     // This may be the compiled library, which has no logging by default.
     logToScreen.parentElement.style.display = 'none';
     return;
@@ -97,7 +97,7 @@ shakaDemo.onLogChange_ = function() {
     }
   }
   // Re-initialize Shaka library logging to the freshly-patched console methods.
-  shaka.log.setLevel(shaka.log.currentLevel);
+  shaka['log']['setLevel'](shaka['log']['currentLevel']);
   // Change the hash, to mirror this.
   shakaDemo.hashShouldChange_();
 };

@@ -124,9 +124,10 @@ def check_tests():
   base = shakaBuildHelpers.get_source_base()
   def get(*args):
     return shakaBuildHelpers.get_all_files(os.path.join(base, *args), match)
-  files = (get('lib') + get('externs') + get('test') + get('demo') +
-           get('third_party', 'closure'))
-  test_build = build.Build(set(files))
+  files = set(get('lib') + get('externs') + get('test') +
+              get('third_party', 'closure'))
+  files.add(os.path.join(base, 'demo', 'common', 'assets.js'))
+  test_build = build.Build(files)
 
   closure_opts = build.common_closure_opts + build.common_closure_defines
   closure_opts += build.debug_closure_opts + build.debug_closure_defines

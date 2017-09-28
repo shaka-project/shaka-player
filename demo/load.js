@@ -17,23 +17,20 @@
 
 
 /**
- * Loads the library.  Chooses compiled or debug version of the library based
- * on the presence or absence of the URL parameter "compiled".
+ * Loads both library and application sources.  Chooses compiled or debug
+ * version of the sources based on the presence or absence of the URL parameter
+ * "compiled".  Uses the global arrays COMPILED_JS, COMPILED_DEBUG_JS, and
+ * UNCOMPILED_JS, defined by the application in advance.
  *
  * This dynamic loading process is not necessary in a production environment,
- * but greatly simplifies the process of switching between compiled and
- * uncompiled mode during development.
- *
- * This is used in the provided demo app, but can also be used to load the
- * uncompiled version of the library into your own application environment.
+ * but simplifies the process of switching between compiled and uncompiled
+ * mode during development.
  */
 (function() {  // anonymous namespace
-  // The sources may be in a different folder from the app.
-  // Compute the base URL for all library sources.
-  var currentScript = document.currentScript ||
-                      document.scripts[document.scripts.length - 1];
-  var loaderSrc = currentScript.src;
-  var baseUrl = loaderSrc.split('/').slice(0, -1).join('/') + '/';
+  // The URL of the page itself, without URL fragments.
+  var pageUrl = location.href.split('#')[0];
+  // The URL of the page, up to and including the final '/'.
+  var baseUrl = pageUrl.split('/').slice(0, -1).join('/') + '/';
 
   function loadRelativeScript(src) {
     importScript(baseUrl + src);
@@ -57,28 +54,23 @@
   fragments = fragments ? fragments.split(';') : [];
   var combined = fields.concat(fragments);
 
+  var scripts = window['UNCOMPILED_JS'];
+
   // Very old browsers do not have Array.prototype.indexOf.
-  var compiledScript = null;
   for (var i = 0; i < combined.length; ++i) {
     if (combined[i] == 'compiled') {
-      compiledScript = '../dist/shaka-player.compiled.js';
+      scripts = window['COMPILED_JS'];
       break;
     }
     if (combined[i] == 'debug_compiled') {
-      compiledScript = '../dist/shaka-player.compiled.debug.js';
+      scripts = window['COMPILED_DEBUG_JS'];
       break;
     }
   }
 
-  if (compiledScript) {
-    // This contains the entire library.
-    loadRelativeScript(compiledScript);
-  } else {
-    // In non-compiled mode, we load the closure library and the generated deps
-    // file to bootstrap the system.  goog.require will load the rest.
-    loadRelativeScript('../third_party/closure/goog/base.js');
-    loadRelativeScript('../dist/deps.js');
-    // This file contains goog.require calls for all exported classes.
-    loadRelativeScript('../shaka-player.uncompiled.js');
+  // The application must define its list of compiled and uncompiled sources
+  // before including this loader.  The URLs should be relative to the page.
+  for (var i = 0; i < scripts.length; ++i) {
+    loadRelativeScript(scripts[i]);
   }
 })();  // anonymous namespace

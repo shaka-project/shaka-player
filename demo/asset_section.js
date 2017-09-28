@@ -252,7 +252,8 @@ shakaDemo.load = function() {
   }, function(reason) {
     var error = /** @type {!shaka.util.Error} */(reason);
     if (error.code == shaka.util.Error.Code.LOAD_INTERRUPTED) {
-      shaka.log.debug('load() interrupted');
+      // Don't use shaka.log, which is not present in compiled builds.
+      console.debug('load() interrupted');
     } else {
       shakaDemo.onError_(error);
     }
