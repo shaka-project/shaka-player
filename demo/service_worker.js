@@ -102,6 +102,20 @@ var NO_CORS_RESOURCES = [
 
 
 /**
+ * An array of URI prefixes.  Matching resources SHOULD be cached whenever seen
+ * and SHOULD be served from cache first without waiting for updated versions
+ * from the network.
+ *
+ * @const {!Array.<string>}
+ */
+var CACHE_FIRST = [
+  // Google Web Fonts should be cached when first seen, without being explicitly
+  // listed, and should be preferred from cache for speed.
+  'https://fonts.googleapis.com/'
+];
+
+
+/**
  * This event fires when the service worker is installed.
  * @param {!InstallEvent} event
  */
@@ -155,15 +169,29 @@ function onActivate(event) {
 function onFetch(event) {
   event.respondWith(caches.open(CACHE_NAME).then(function(cache) {
     return cache.match(event.request).then(function(cachedResponse) {
-      if (cachedResponse ||
-          event.request.referrer.startsWith('https://fonts.googleapis.com')) {
-        // This is one of our cached resources, or a Google web font which
-        // should be implicitly cached when first seen.
+      var preferCache = false;
+      CACHE_FIRST.forEach(function(prefix) {
+        if (event.request.referrer.startsWith(prefix)) {
+          preferCache = true;
+        }
+      });
+
+      if (cachedResponse || preferCache) {
+        // This is one of our cached resources, or it should be cached when
+        // first seen.
 
         if (!navigator.onLine) {
           // We are offline, and we know it.  Just return the cached response,
           // to avoid a bunch of pointless errors in the JS console that will
           // confuse us developers.
+          return cachedResponse;
+        }
+
+        if (preferCache && cachedResponse) {
+          // We have it in cache, and we prefer the cached version.
+          // Try to update the cache with a new version, but return right away
+          // with whatever was already in cache.
+          fetchAndCache(cache, event.request).catch(function() {});
           return cachedResponse;
         }
 
