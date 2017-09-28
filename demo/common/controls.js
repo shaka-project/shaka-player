@@ -642,7 +642,7 @@ ShakaControls.prototype.isOpaque_ = function() {
   if (!this.enabled_) return false;
 
   // While you are casting, the UI is always opaque.
-  if (this.castProxy_.isCasting()) return true;
+  if (this.castProxy_ && this.castProxy_.isCasting()) return true;
 
   var parentElement = this.controls_.parentElement;
   // The controls are opaque if either:
