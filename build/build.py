@@ -378,6 +378,8 @@ def compile_demo(rebuild):
   # everything else.  If we build that into the output, we will get an infinite
   # loop of scripts adding themselves.
   files.remove(os.path.join(base, 'demo', 'load.js'))
+  # Remove service_worker.js as well.  This executes in a different context.
+  files.remove(os.path.join(base, 'demo', 'service_worker.js'))
   # Add in the generated externs, so that the demo compilation knows the
   # definitions of the library APIs.
   files.add(os.path.join(base, 'dist', 'shaka-player.compiled.externs.js'))

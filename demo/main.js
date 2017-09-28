@@ -149,6 +149,16 @@ shakaDemo.init = function() {
     var errorDisplay = document.getElementById('errorDisplay');
     errorDisplay.style.display = 'block';
   } else {
+    if (navigator.serviceWorker) {
+      console.debug('Registering service worker.');
+      navigator.serviceWorker.register('service_worker.js')
+          .then(function(registration) {
+            console.debug('Service worker registered!', registration.scope);
+          }).catch(function(error) {
+            console.error('Service worker registration failed!', error);
+          });
+    }
+
     shaka.Player.probeSupport().then(function(support) {
       shakaDemo.support_ = support;
 

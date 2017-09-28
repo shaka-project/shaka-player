@@ -55,6 +55,11 @@
   var combined = fields.concat(fragments);
 
   var scripts = window['UNCOMPILED_JS'];
+  if (!navigator.onLine) {
+    // If we're offline, default to the compiled version, which may have been
+    // cached by the service worker.
+    scripts = window['COMPILED_JS'];
+  }
 
   // Very old browsers do not have Array.prototype.indexOf.
   for (var i = 0; i < combined.length; ++i) {
