@@ -48,7 +48,7 @@ COMPILED_DEBUG_JS = [
   // The compiled library, debug mode.
   '../dist/shaka-player.compiled.debug.js',
   // The compiled demo.
-  '../dist/demo.compiled.js'
+  '../dist/demo.compiled.debug.js'
 ];
 UNCOMPILED_JS = [
   // Bootstrap the Shaka Player library through the Closure library.
@@ -77,6 +77,11 @@ UNCOMPILED_JS = [
       <h1>Shaka Player <span id="version"></span></h1>
 
       <div class="input">
+        <p id="compiled_links">
+          <a href="#" id="uncompiled_link">uncompiled</a> |
+          <a href="#" id="debug_compiled_link">compiled (debug)</a> |
+          <a href="#" id="compiled_link">compiled (release)</a>
+        </p>
         <p>This is a demo of Google's Shaka Player, a JavaScript library for
            adaptive video streaming.</p>
 

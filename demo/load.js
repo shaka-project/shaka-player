@@ -63,11 +63,11 @@
 
   // Very old browsers do not have Array.prototype.indexOf.
   for (var i = 0; i < combined.length; ++i) {
-    if (combined[i] == 'compiled') {
+    if (combined[i] == 'compiled' || combined[i] == 'build=compiled') {
       scripts = window['COMPILED_JS'];
       break;
     }
-    if (combined[i] == 'debug_compiled') {
+    if (combined[i] == 'build=debug_compiled') {
       scripts = window['COMPILED_DEBUG_JS'];
       break;
     }

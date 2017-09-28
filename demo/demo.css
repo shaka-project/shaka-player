@@ -47,6 +47,12 @@ a:hover {
   text-decoration: underline;
 }
 
+a.disabled_link {
+  pointer-events: none;
+  cursor: default;
+  color: Gray;
+}
+
 button {
   background-color: #d04030;
   border: none;
@@ -114,6 +120,12 @@ p {
   font-weight: 300;
   line-height: 1.6em;
   margin: 0.5em 0;
+}
+
+p#compiled_links {
+  border-bottom: 1px solid #eee;
+  margin: 0 0 1.5em 0;
+  padding: 0 0 0.5em 0;
 }
 
 p.links {

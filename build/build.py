@@ -357,11 +357,12 @@ def compute_output_files(base_name):
   return js_path, map_path
 
 
-def compile_demo(rebuild):
+def compile_demo(rebuild, is_debug):
   """Compile the demo application.
 
   Args:
     rebuild: True to rebuild, False to ignore if no changes are detected.
+    is_debug: True to compile for debugging, false for release.
 
   Returns:
     True on success, False on failure.
@@ -386,7 +387,8 @@ def compile_demo(rebuild):
 
   demo_build = Build(files)
 
-  result_file, result_map = compute_output_files('demo.compiled')
+  name = 'demo.compiled' + ('.debug' if is_debug else '')
+  result_file, result_map = compute_output_files(name)
 
   # Don't build if we don't have to.
   if not rebuild and not demo_build.should_build(result_file):
@@ -410,11 +412,12 @@ def compile_demo(rebuild):
   return True
 
 
-def compile_receiver(rebuild):
+def compile_receiver(rebuild, is_debug):
   """Compile the cast receiver application.
 
   Args:
     rebuild: True to rebuild, False to ignore if no changes are detected.
+    is_debug: True to compile for debugging, false for release.
 
   Returns:
     True on success, False on failure.
@@ -433,7 +436,8 @@ def compile_receiver(rebuild):
 
   receiver_build = Build(files)
 
-  result_file, result_map = compute_output_files('receiver.compiled')
+  name = 'receiver.compiled' + ('.debug' if is_debug else '')
+  result_file, result_map = compute_output_files(name)
 
   # Don't build if we don't have to.
   if not rebuild and not receiver_build.should_build(result_file):
@@ -512,10 +516,10 @@ def main(args):
   if not custom_build.build_library(name, rebuild, is_debug):
     return 1
 
-  if not compile_demo(rebuild):
+  if not compile_demo(rebuild, is_debug):
     return 1
 
-  if not compile_receiver(rebuild):
+  if not compile_receiver(rebuild, is_debug):
     return 1
 
   return 0

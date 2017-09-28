@@ -83,6 +83,8 @@ shakaDemo.setupLogging_ = function() {
 
 /** @private */
 shakaDemo.onLogChange_ = function() {
+  if (!shaka['log']) return;
+
   var logToScreen = document.getElementById('logToScreen');
   var logSection = document.getElementById('logSection');
   if (logToScreen.checked) {

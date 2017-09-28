@@ -430,6 +430,7 @@ shakaDemo.hashShouldChange_ = function() {
     return;
 
   var params = [];
+  var oldParams = shakaDemo.getParams_();
 
   // Save the current asset.
   var assetUri;
@@ -516,18 +517,8 @@ shakaDemo.hashShouldChange_ = function() {
   }
 
   // This parameter must be added manually, so preserve it.
-  if ('noinput' in shakaDemo.getParams_()) {
+  if ('noinput' in oldParams) {
     params.push('noinput');
-  }
-
-  // This parameter must be added manually, so preserve it.
-  // This one is only used by the loader in load.js to decide which version of
-  // the library to load.
-  if ('compiled' in shakaDemo.getParams_()) {
-    params.push('compiled');
-  }
-  if ('debug_compiled' in shakaDemo.getParams_()) {
-    params.push('debug_compiled');
   }
 
   // Store values for drm configuration.
@@ -539,6 +530,35 @@ shakaDemo.hashShouldChange_ = function() {
       document.getElementById('drmSettingsAudioRobustness').value;
   if (audioRobustness)
     params.push('audioRobustness=' + audioRobustness);
+
+  // These parameters must be added manually, so preserve them.
+  // These are only used by the loader in load.js to decide which version of
+  // the library to load.
+  var buildType = 'uncompiled';
+  var strippedHash = '#' + params.join(';');
+  if ('build' in oldParams) {
+    params.push('build=' + oldParams['build']);
+    buildType = oldParams['build'];
+  } else if ('compiled' in oldParams) {
+    params.push('build=compiled');
+    buildType = 'compiled';
+  }
+
+  (['compiled', 'debug_compiled', 'uncompiled']).forEach(function(type) {
+    var elem = document.getElementById(type + '_link');
+    if (buildType == type) {
+      elem.classList.add('disabled_link');
+      elem.tabIndex = -1;
+    } else {
+      elem.classList.remove('disabled_link');
+      elem.tabIndex = 0;
+      elem.onclick = function() {
+        location.hash = strippedHash + ';build=' + type;
+        location.reload();
+        return false;
+      };
+    }
+  });
 
   var newHash = '#' + params.join(';');
   if (newHash != location.hash) {
