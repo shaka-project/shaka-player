@@ -159,6 +159,21 @@ shakaDemo.init = function() {
           });
     }
 
+    /** @param {Event} event */
+    var offlineStatusChanged = function(event) {
+      var version = document.getElementById('version');
+      var text = version.textContent;
+      text = text.replace(' (offline)', '');
+      if (!navigator.onLine) {
+        text += ' (offline)';
+      }
+      version.textContent = text;
+      shakaDemo.computeDisabledAssets();
+    };
+    window.addEventListener('online', offlineStatusChanged);
+    window.addEventListener('offline', offlineStatusChanged);
+    offlineStatusChanged(null);
+
     shaka.Player.probeSupport().then(function(support) {
       shakaDemo.support_ = support;
 

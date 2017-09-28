@@ -27,6 +27,10 @@
 var shakaDemo = shakaDemo || {};
 
 
+/** @private {!Array.<HTMLOptGroupElement>} */
+shakaDemo.onlineOptGroups_ = [];
+
+
 /**
  * @return {!Promise}
  * @private
@@ -45,8 +49,10 @@ shakaDemo.setupAssets_ = function() {
       group = /** @type {!HTMLOptGroupElement} */(
           document.createElement('optgroup'));
       group.label = asset.source;
+      group.disabled = !navigator.onLine;
       groups[asset.source] = group;
       assetList.appendChild(group);
+      shakaDemo.onlineOptGroups_.push(group);
     }
 
     var option = document.createElement('option');
@@ -71,7 +77,7 @@ shakaDemo.setupAssets_ = function() {
       option.disabled = true;
     }
 
-    if (!option.disabled) {
+    if (!option.disabled && !group.disabled) {
       first = first || option;
       if (asset.focus) first = option;
     }
@@ -209,6 +215,15 @@ shakaDemo.preparePlayer_ = function(asset) {
   }
 
   return asset;
+};
+
+
+/** Compute which assets should be disabled. */
+shakaDemo.computeDisabledAssets = function() {
+  // TODO: use remote support probe, recompute asset disabled when casting?
+  shakaDemo.onlineOptGroups_.forEach(function(group) {
+    group.disabled = !navigator.onLine;
+  });
 };
 
 
