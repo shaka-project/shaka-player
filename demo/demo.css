@@ -38,17 +38,17 @@ body.noinput {
 }
 
 a {
-  color: #4183C4;
+  color: #0070b0;
   text-decoration: none;
 }
 
 a:hover {
-  color: #3d85c6;
+  color: #0040b0;
   text-decoration: underline;
 }
 
 button {
-  background-color: #d84a38;
+  background-color: #d04030;
   border: none;
   border-radius: 2px;
   color: white;
@@ -61,11 +61,11 @@ button {
 }
 
 button:active {
-  background-color: #cf402f;
+  background-color: #e02020;
 }
 
 button:hover {
-  background-color: #cf402f;
+  background-color: #e02020;
 }
 
 button[disabled] {
