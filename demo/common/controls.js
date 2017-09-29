@@ -126,7 +126,7 @@ ShakaControls.prototype.init = function(castProxy, onError, notifyCastStatus) {
   this.seekBar_.addEventListener(
       'mousedown', this.onSeekStart_.bind(this));
   this.seekBar_.addEventListener(
-      'touchstart', this.onSeekStart_.bind(this));
+      'touchstart', this.onSeekStart_.bind(this), { passive: true });
   this.seekBar_.addEventListener(
       'input', this.onSeekInput_.bind(this));
   this.seekBar_.addEventListener(
@@ -168,7 +168,7 @@ ShakaControls.prototype.init = function(castProxy, onError, notifyCastStatus) {
       'click', this.onCastClick_.bind(this));
 
   this.videoContainer_.addEventListener(
-      'touchstart', this.onContainerTouch_.bind(this));
+      'touchstart', this.onContainerTouch_.bind(this), { passive: false });
   this.videoContainer_.addEventListener(
       'click', this.onContainerClick_.bind(this));
 
@@ -179,9 +179,9 @@ ShakaControls.prototype.init = function(castProxy, onError, notifyCastStatus) {
   this.videoContainer_.addEventListener(
       'mousemove', this.onMouseMove_.bind(this));
   this.videoContainer_.addEventListener(
-      'touchmove', this.onMouseMove_.bind(this));
+      'touchmove', this.onMouseMove_.bind(this), { passive: true });
   this.videoContainer_.addEventListener(
-      'touchend', this.onMouseMove_.bind(this));
+      'touchend', this.onMouseMove_.bind(this), { passive: true });
   this.videoContainer_.addEventListener(
       'mouseout', this.onMouseOut_.bind(this));
 
