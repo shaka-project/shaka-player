@@ -32,7 +32,7 @@ __Manifest parsers__
 
 __Subtitle/caption parsers__
   - Selected by MIME type
-  - Register with {@link shaka.media.TextEngine.registerParser}
+  - Register with {@link shaka.text.TextEngine.registerParser}
   - Default text parser plugins:
     - WebVTT: {@linksource shaka.media.VttTextParser} and
       {@linksource shaka.media.Mp4VttParser}

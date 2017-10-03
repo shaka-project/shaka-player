@@ -18,6 +18,13 @@ Shaka v2.2 introduces several improvements over v2.1, including:
   - New option for offline protected content without persistent licensing
 
 
+#### New "text" namespace
+
+In Shaka v2.1, `TextEngine` was part of the `shaka.media` namespace.  In v2.2,
+this was moved to the new `shaka.text` namespace.  Text-parsing plugins should
+now be registered with {@link shaka.text.TextEngine.registerParser}.
+
+
 #### Customizing subtitle display
 
 Shaka v2 gave applications an opportunity to have a custom text parser, but

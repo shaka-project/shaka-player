@@ -215,6 +215,13 @@ your plugins to the new interfaces.
 The v2.0 interfaces for text and manifest are no longer supported.
 
 
+#### New "text" namespace
+
+In Shaka v2.1, `TextEngine` was part of the `shaka.media` namespace.  In v2.2,
+this was moved to the new `shaka.text` namespace.  Text-parsing plugins should
+now be registered with {@link shaka.text.TextEngine.registerParser}.
+
+
 #### Text parser plugin changes
 
 Text parser plugins have a new interface.  The old interface was a single
