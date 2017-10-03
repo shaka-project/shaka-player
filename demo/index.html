@@ -172,12 +172,13 @@
         </div>
         <div>
           <label for="drmSettingsVideoRobustness">Video Robustness:</label>
-          <input id="drmSettingsVideoRobustness" type="text" class="flex-grow">
+          <input id="drmSettingsVideoRobustness" type="text" class="flex-grow" list="robustnessSuggestions">
         </div>
         <div>
           <label for="drmSettingsAudioRobustness">Audio Robustness:</label>
-          <input id="drmSettingsAudioRobustness" type="text" class="flex-grow">
+          <input id="drmSettingsAudioRobustness" type="text" class="flex-grow" list="robustnessSuggestions">
         </div>
+	<datalist id="robustnessSuggestions"></datalist>
       </details>
 
       <details class="input">
