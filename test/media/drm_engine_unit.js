@@ -32,6 +32,8 @@ describe('DrmEngine', function() {
   var onKeyStatusSpy;
   /** @type {!jasmine.Spy} */
   var onExpirationSpy;
+  /** @type {!jasmine.Spy} */
+  var onEventSpy;
 
   /** @type {!shaka.test.FakeNetworkingEngine} */
   var fakeNetEngine;
@@ -65,6 +67,7 @@ describe('DrmEngine', function() {
     onErrorSpy = jasmine.createSpy('onError');
     onKeyStatusSpy = jasmine.createSpy('onKeyStatus');
     onExpirationSpy = jasmine.createSpy('onExpirationUpdated');
+    onEventSpy = jasmine.createSpy('onEvent');
   });
 
   beforeEach(function() {
@@ -83,6 +86,7 @@ describe('DrmEngine', function() {
     logErrorSpy.calls.reset();
     onKeyStatusSpy.calls.reset();
     onExpirationSpy.calls.reset();
+    onEventSpy.calls.reset();
 
     // By default, error logs and callbacks result in failure.
     onErrorSpy.and.callFake(fail);
@@ -113,10 +117,15 @@ describe('DrmEngine', function() {
     license = (new Uint8Array(0)).buffer;
     fakeNetEngine.setResponseMap({ 'http://abc.drm/license': license });
 
-    drmEngine = new shaka.media.DrmEngine(
-        fakeNetEngine, shaka.test.Util.spyFunc(onErrorSpy),
-        shaka.test.Util.spyFunc(onKeyStatusSpy),
-        shaka.test.Util.spyFunc(onExpirationSpy));
+    var playerInterface = {
+      netEngine: fakeNetEngine,
+      onError: shaka.test.Util.spyFunc(onErrorSpy),
+      onKeyStatus: shaka.test.Util.spyFunc(onKeyStatusSpy),
+      onExpirationUpdated: shaka.test.Util.spyFunc(onExpirationSpy),
+      onEvent: shaka.test.Util.spyFunc(onEventSpy)
+    };
+
+    drmEngine = new shaka.media.DrmEngine(playerInterface);
     config = {
       retryParameters: retryParameters,
       delayLicenseRequestUntilPlayed: false,
@@ -1065,6 +1074,23 @@ describe('DrmEngine', function() {
           ]
         });
       }).catch(fail).then(done);
+    });
+
+    it('publishes an event if update succeeds', function(done) {
+      initAndAttach().then(function() {
+        var initData = new Uint8Array(1);
+        mockVideo.on['encrypted'](
+            { initDataType: 'webm', initData: initData, keyId: null });
+        var message = new Uint8Array(0);
+        session1.on['message']({ target: session1, message: message});
+        session1.update.and.returnValue(Promise.resolve());
+
+        return shaka.test.Util.delay(0.5);
+      }).then(function() {
+        expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({ type: 'drmsessionupdate' }));
+        done();
+      }).catch(fail);
     });
 
     it('dispatches an error if update fails', function(done) {
