@@ -134,8 +134,13 @@ describe('Offline', /** @suppress {accessControls} */ function() {
           var manifest = OfflineManifestParser.reconstructManifest(manifestDb);
           var netEngine = player.getNetworkingEngine();
           goog.asserts.assert(netEngine, 'Must have a NetworkingEngine');
-          drmEngine = new shaka.media.DrmEngine(
-              netEngine, onError, function() {}, function() {});
+          drmEngine = new shaka.media.DrmEngine({
+            netEngine: netEngine,
+            onError: onError,
+            onKeyStatus: function() {},
+            onExpirationUpdated: function() {},
+            onEvent: function() {}
+          });
           drmEngine.configure(player.getConfiguration().drm);
           return drmEngine.init(manifest, true /* isOffline */);
         })
