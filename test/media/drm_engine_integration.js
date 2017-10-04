@@ -46,6 +46,8 @@ describe('DrmEngine', function() {
   var onKeyStatusSpy;
   /** @type {!jasmine.Spy} */
   var onExpirationSpy;
+  /** @type {!jasmine.Spy} */
+  var onEventSpy;
 
   /** @type {!shaka.media.DrmEngine} */
   var drmEngine;
@@ -94,6 +96,7 @@ describe('DrmEngine', function() {
     onErrorSpy = jasmine.createSpy('onError');
     onKeyStatusSpy = jasmine.createSpy('onKeyStatus');
     onExpirationSpy = jasmine.createSpy('onExpirationUpdated');
+    onEventSpy = jasmine.createSpy('onEvent');
 
     mediaSource = new MediaSource();
     video.src = window.URL.createObjectURL(mediaSource);
@@ -111,10 +114,15 @@ describe('DrmEngine', function() {
       ].join('');
     });
 
-    drmEngine = new shaka.media.DrmEngine(
-        networkingEngine, shaka.test.Util.spyFunc(onErrorSpy),
-        shaka.test.Util.spyFunc(onKeyStatusSpy),
-        shaka.test.Util.spyFunc(onExpirationSpy));
+    var playerInterface = {
+      netEngine: networkingEngine,
+      onError: shaka.test.Util.spyFunc(onErrorSpy),
+      onKeyStatus: shaka.test.Util.spyFunc(onKeyStatusSpy),
+      onExpirationUpdated: shaka.test.Util.spyFunc(onExpirationSpy),
+      onEvent: shaka.test.Util.spyFunc(onEventSpy)
+    };
+
+    drmEngine = new shaka.media.DrmEngine(playerInterface);
     var config = {
       retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
       clearKeys: {},
