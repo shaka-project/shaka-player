@@ -1088,7 +1088,7 @@ describe('DrmEngine', function() {
         return shaka.test.Util.delay(0.5);
       }).then(function() {
         expect(onEventSpy).toHaveBeenCalledWith(
-          jasmine.objectContaining({ type: 'drmsessionupdate' }));
+            jasmine.objectContaining({ type: 'drmsessionupdate' }));
         done();
       }).catch(fail);
     });
