@@ -187,6 +187,44 @@ ShakaControls.prototype.init = function(castProxy, onError, notifyCastStatus) {
 
   this.castProxy_.addEventListener(
       'caststatuschanged', this.onCastStatusChange_.bind(this));
+
+  var screenOrientation = this.getScreenOrientation_();
+  if (screenOrientation) {
+    screenOrientation.addEventListener(
+        'change', this.onScreenRotation_.bind(this));
+  }
+};
+
+
+/**
+ * When mobile device is rotated to landscape layout, and the video is loaded,
+ * the demo app goes into fullscreen.
+ * Exit fullscreen when the device is rotated to portrait layout.
+ * @private
+ */
+ShakaControls.prototype.onScreenRotation_ = function() {
+  var orientation = this.getScreenOrientation_();
+  if (!this.video_ || this.video_.readyState == 0 || !orientation ||
+      this.castProxy_.isCasting()) return;
+  if (orientation.type.indexOf('landscape') >= 0 &&
+      !document.fullscreenElement) {
+    this.videoContainer_.requestFullscreen();
+  } else if (orientation.type.indexOf('portrait') >= 0 &&
+      document.fullscreenElement) {
+    document.exitFullscreen();
+  }
+};
+
+
+/**
+ * Get screen orientation.
+ * Screen Orientation is implemented with a prefix for some browsers.
+ * https://developer.mozilla.org/en-US/docs/Web/API/Screen/orientation
+ * @return {?ScreenOrientation}
+ * @private
+ */
+ShakaControls.prototype.getScreenOrientation_ = function() {
+  return screen.orientation || screen.mozOrientation || screen.msOrientation;
 };
 
 
