@@ -216,6 +216,21 @@ describe('Playhead', function() {
       video.currentTime = 6;
       expect(playhead.getTime()).toBe(6);
     });
+
+    it('allows using startTime of 0', function() {
+      video.readyState = HTMLMediaElement.HAVE_METADATA;
+      timeline.isLive.and.returnValue(true);
+      timeline.getDuration.and.returnValue(Infinity);
+      timeline.getSegmentAvailabilityStart.and.returnValue(0);
+      timeline.getSegmentAvailabilityEnd.and.returnValue(60);
+      timeline.getSeekRangeEnd.and.returnValue(60);
+
+      playhead = new shaka.media.Playhead(
+          video, manifest, config, 0 /* startTime */, Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
+
+      expect(playhead.getTime()).toBe(0);
+    });
   });  // getTime
 
   it('clamps playhead after seeking for live', function() {
