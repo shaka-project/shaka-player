@@ -18,9 +18,9 @@
 describe('OfflineScheme', function() {
   var OfflineScheme = shaka.offline.OfflineScheme;
   var originalIsStorageEngineSupported =
-      shaka.offline.OfflineUtils.isStorageEngineSupported;
+      shaka.offline.StorageEngineFactory.isStorageEngineSupported;
   var originalCreateStorageEngine =
-      shaka.offline.OfflineUtils.createStorageEngine;
+      shaka.offline.StorageEngineFactory.createStorageEngine;
 
   /** @type {{init: !jasmine.Spy, destroy: !jasmine.Spy, get: !jasmine.Spy}} */
   var fakeStorageEngine;
@@ -30,14 +30,14 @@ describe('OfflineScheme', function() {
   var request;
 
   afterAll(function() {
-    shaka.offline.OfflineUtils.isStorageEngineSupported =
+    shaka.offline.StorageEngineFactory.isStorageEngineSupported =
         originalIsStorageEngineSupported;
-    shaka.offline.OfflineUtils.createStorageEngine =
+    shaka.offline.StorageEngineFactory.createStorageEngine =
         originalCreateStorageEngine;
   });
 
   beforeEach(function() {
-    shaka.offline.OfflineUtils.isStorageEngineSupported = function() {
+    shaka.offline.StorageEngineFactory.isStorageEngineSupported = function() {
       return true;
     };
 
@@ -52,7 +52,7 @@ describe('OfflineScheme', function() {
 
     fakeCreateStorageEngine = jasmine.createSpy('createStorageEngine');
     fakeCreateStorageEngine.and.returnValue(fakeStorageEngine);
-    shaka.offline.OfflineUtils.createStorageEngine =
+    shaka.offline.StorageEngineFactory.createStorageEngine =
         shaka.test.Util.spyFunc(fakeCreateStorageEngine);
 
     // The whole request is ignored by the OfflineScheme.
@@ -61,7 +61,7 @@ describe('OfflineScheme', function() {
   });
 
   it('will return special content-type header for manifests', function(done) {
-    var uri = 'offline:123';
+    var uri = shaka.offline.OfflineScheme.manifestIdToUri(123);
     fakeCreateStorageEngine.and.throwError();
     OfflineScheme(uri, request)
         .then(function(response) {
@@ -75,7 +75,7 @@ describe('OfflineScheme', function() {
   });
 
   it('will query DBEngine for segments', function(done) {
-    var uri = 'offline:123/456/789';
+    var uri = shaka.offline.OfflineScheme.segmentToUri(123, 456, 789);
 
     OfflineScheme(uri, request)
         .then(function(response) {
@@ -94,7 +94,7 @@ describe('OfflineScheme', function() {
   });
 
   it('will fail if segment not found', function(done) {
-    var uri = 'offline:123/456/789';
+    var uri = shaka.offline.OfflineScheme.segmentToUri(123, 456, 789);
     fakeStorageEngine.get.and.returnValue(Promise.resolve(null));
 
     OfflineScheme(uri, request)
@@ -118,7 +118,7 @@ describe('OfflineScheme', function() {
   });
 
   it('will fail for invalid URI', function(done) {
-    var uri = 'offline:abc';
+    var uri = 'offline:this-is-invalid';
     fakeCreateStorageEngine.and.throwError();
     OfflineScheme(uri, request)
         .then(fail)

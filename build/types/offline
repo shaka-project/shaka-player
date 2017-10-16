@@ -7,3 +7,4 @@
 +../../lib/offline/offline_scheme.js
 +../../lib/offline/offline_utils.js
 +../../lib/offline/storage.js
++../../lib/offline/storage_engine_factory.js

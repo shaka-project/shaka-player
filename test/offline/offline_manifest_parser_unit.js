@@ -18,10 +18,10 @@
 describe('OfflineManifestParser', function() {
   /** @const */
   var originalIsStorageEngineSupported =
-      shaka.offline.OfflineUtils.isStorageEngineSupported;
+      shaka.offline.StorageEngineFactory.isStorageEngineSupported;
   /** @const */
   var originalCreateStorageEngine =
-      shaka.offline.OfflineUtils.createStorageEngine;
+      shaka.offline.StorageEngineFactory.createStorageEngine;
 
   /** @const */
   var playerInterface =
@@ -42,14 +42,14 @@ describe('OfflineManifestParser', function() {
   var parser;
 
   afterAll(function() {
-    shaka.offline.OfflineUtils.isStorageEngineSupported =
+    shaka.offline.StorageEngineFactory.isStorageEngineSupported =
         originalIsStorageEngineSupported;
-    shaka.offline.OfflineUtils.createStorageEngine =
+    shaka.offline.StorageEngineFactory.createStorageEngine =
         originalCreateStorageEngine;
   });
 
   beforeEach(function() {
-    shaka.offline.OfflineUtils.isStorageEngineSupported = function() {
+    shaka.offline.StorageEngineFactory.isStorageEngineSupported = function() {
       return true;
     };
 
@@ -65,7 +65,7 @@ describe('OfflineManifestParser', function() {
 
     fakeCreateStorageEngine = jasmine.createSpy('createStorageEngine');
     fakeCreateStorageEngine.and.returnValue(fakeStorageEngine);
-    shaka.offline.OfflineUtils.createStorageEngine =
+    shaka.offline.StorageEngineFactory.createStorageEngine =
         shaka.test.Util.spyFunc(fakeCreateStorageEngine);
 
     parser = new shaka.offline.OfflineManifestParser();
@@ -76,7 +76,7 @@ describe('OfflineManifestParser', function() {
   });
 
   it('will query DBEngine for the manifest', function(done) {
-    var uri = 'offline:123';
+    var uri = shaka.offline.OfflineScheme.manifestIdToUri(123);
     fakeStorageEngine.get.and.returnValue(Promise.resolve({
       key: 0,
       originalManifestUri: '',
@@ -103,7 +103,7 @@ describe('OfflineManifestParser', function() {
   });
 
   it('will fail if manifest not found', function(done) {
-    var uri = 'offline:123';
+    var uri = shaka.offline.OfflineScheme.manifestIdToUri(123);
     fakeStorageEngine.get.and.returnValue(Promise.resolve(null));
 
     parser.start(uri, playerInterface)
@@ -126,7 +126,7 @@ describe('OfflineManifestParser', function() {
   });
 
   it('still calls destroy on error', function(done) {
-    var uri = 'offline:123';
+    var uri = shaka.offline.OfflineScheme.manifestIdToUri(123);
     fakeStorageEngine.get.and.returnValue(Promise.reject());
 
     parser.start(uri, playerInterface)
@@ -140,7 +140,7 @@ describe('OfflineManifestParser', function() {
   });
 
   it('will fail for invalid URI', function(done) {
-    var uri = 'offline:abc';
+    var uri = 'offline:this-is-invalid';
     parser.start(uri, playerInterface)
         .then(fail)
         .catch(function(err) {
@@ -161,7 +161,7 @@ describe('OfflineManifestParser', function() {
     beforeEach(function(done) {
       sessionId = 'abc';
 
-      var uri = 'offline:123';
+      var uri = shaka.offline.OfflineScheme.manifestIdToUri(123);
       fakeStorageEngine.get.and.returnValue(Promise.resolve({
         key: 0,
         originalManifestUri: '',
@@ -234,7 +234,7 @@ describe('OfflineManifestParser', function() {
     });
 
     it('converts non-Period members correctly', function(done) {
-      var uri = 'offline:123';
+      var uri = shaka.offline.OfflineScheme.manifestIdToUri(123);
       var data = {
         key: 123,
         originalManifestUri: 'https://example.com/manifest',
@@ -265,7 +265,7 @@ describe('OfflineManifestParser', function() {
     });
 
     it('will accept DrmInfo', function(done) {
-      var uri = 'offline:123';
+      var uri = shaka.offline.OfflineScheme.manifestIdToUri(123);
       var drmInfo = {
         keySystem: 'com.example.drm',
         licenseServerUri: 'https://example.com/drm',
@@ -306,7 +306,7 @@ describe('OfflineManifestParser', function() {
     });
 
     it('will call reconstructPeriod for each Period', function(done) {
-      var uri = 'offline:123';
+      var uri = shaka.offline.OfflineScheme.manifestIdToUri(123);
       var data = {
         key: 123,
         originalManifestUri: 'https://example.com/manifest',

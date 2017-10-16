@@ -16,13 +16,13 @@
  */
 
 describe('OfflineUtils', function() {
-  var OfflineUtils;
+  /** @const */
+  var Scheme = shaka.offline.OfflineScheme;
+  /** @const */
+  var OfflineUtils = shaka.offline.OfflineUtils;
+
   var drmInfos;
   var timeline;
-
-  beforeAll(function() {
-    OfflineUtils = shaka.offline.OfflineUtils;
-  });
 
   beforeEach(function() {
     drmInfos = [{
@@ -158,9 +158,9 @@ describe('OfflineUtils', function() {
         encrypted: true,
         keyId: 'key1',
         segments: [
-          {startTime: 0, endTime: 10, uri: 'offline:1/1/1'},
-          {startTime: 10, endTime: 20, uri: 'offline:1/1/2'},
-          {startTime: 20, endTime: 25, uri: 'offline:1/1/3'}
+          {startTime: 0, endTime: 10, uri: Scheme.segmentToUri(1, 1, 1)},
+          {startTime: 10, endTime: 20, uri: Scheme.segmentToUri(1, 1, 2)},
+          {startTime: 20, endTime: 25, uri: Scheme.segmentToUri(1, 1, 3)}
         ],
         variantIds: opt_variantIds || [5]
       };
@@ -186,13 +186,13 @@ describe('OfflineUtils', function() {
         label: null,
         width: null,
         height: null,
-        initSegmentUri: 'offline:1/' + id + '/0',
+        initSegmentUri: Scheme.segmentToUri(1, id, 0),
         encrypted: false,
         keyId: null,
         segments: [
-          {startTime: 0, endTime: 10, uri: 'offline:1/' + id + '/1'},
-          {startTime: 10, endTime: 20, uri: 'offline:1/' + id + '/2'},
-          {startTime: 20, endTime: 25, uri: 'offline:1/' + id + '/3'}
+          {startTime: 0, endTime: 10, uri: Scheme.segmentToUri(1, id, 1)},
+          {startTime: 10, endTime: 20, uri: Scheme.segmentToUri(1, id, 2)},
+          {startTime: 20, endTime: 25, uri: Scheme.segmentToUri(1, id, 3)}
         ],
         variantIds: opt_variantIds || [5]
       };
@@ -217,21 +217,21 @@ describe('OfflineUtils', function() {
         label: null,
         width: null,
         height: null,
-        initSegmentUri: 'offline:1/' + id + '/0',
+        initSegmentUri: Scheme.segmentToUri(1, id, 0),
         encrypted: false,
         keyId: null,
         segments: [
-          {startTime: 0, endTime: 10, uri: 'offline:1/' + id + '/1'},
-          {startTime: 10, endTime: 20, uri: 'offline:1/' + id + '/2'},
-          {startTime: 20, endTime: 25, uri: 'offline:1/' + id + '/3'}
+          {startTime: 0, endTime: 10, uri: Scheme.segmentToUri(1, id, 1)},
+          {startTime: 10, endTime: 20, uri: Scheme.segmentToUri(1, id, 2)},
+          {startTime: 20, endTime: 25, uri: Scheme.segmentToUri(1, id, 3)}
         ],
         variantIds: [5]
       };
     }
 
     /**
-     * @param {shakaExtern.Stream} stream
-     * @param {shakaExtern.StreamDB} streamDb
+     * @param {?shakaExtern.Stream} stream
+     * @param {?shakaExtern.StreamDB} streamDb
      */
     function verifyStream(stream, streamDb) {
       if (!streamDb) {

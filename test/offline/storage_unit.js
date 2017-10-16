@@ -17,14 +17,17 @@
 
 describe('Storage', function() {
   /** @const */
+  var Scheme = shaka.offline.OfflineScheme;
+
+  /** @const */
   var SegmentReference = shaka.media.SegmentReference;
 
   /** @const */
   var originalSupportsStorageEngine =
-      shaka.offline.OfflineUtils.supportsStorageEngine;
+      shaka.offline.StorageEngineFactory.supportsStorageEngine;
   /** @const */
   var originalCreateStorageEngine =
-      shaka.offline.OfflineUtils.createStorageEngine;
+      shaka.offline.StorageEngineFactory.createStorageEngine;
 
   /** @type {shaka.test.MemoryDBEngine} */
   var fakeStorageEngine;
@@ -36,20 +39,20 @@ describe('Storage', function() {
   var netEngine;
 
   afterAll(function() {
-    shaka.offline.OfflineUtils.supportsStorageEngine =
+    shaka.offline.StorageEngineFactory.supportsStorageEngine =
         originalSupportsStorageEngine;
-    shaka.offline.OfflineUtils.createStorageEngine =
+    shaka.offline.StorageEngineFactory.createStorageEngine =
         originalCreateStorageEngine;
   });
 
   beforeEach(function(done) {
-    shaka.offline.OfflineUtils.supportsStorageEngine = function() {
+    shaka.offline.StorageEngineFactory.supportsStorageEngine = function() {
       return true;
     };
 
     fakeStorageEngine = new shaka.test.MemoryDBEngine();
 
-    shaka.offline.OfflineUtils.createStorageEngine = function() {
+    shaka.offline.StorageEngineFactory.createStorageEngine = function() {
       return fakeStorageEngine;
     };
 
@@ -169,7 +172,8 @@ describe('Storage', function() {
           expect(data).toBeTruthy();
           expect(data.length).toBe(2);
           for (var i = 0; i < 2; i++) {
-            expect(data[i].offlineUri).toBe('offline:' + manifestDbs[i].key);
+            expect(data[i].offlineUri)
+                .toBe(Scheme.manifestIdToUri(manifestDbs[i].key));
             expect(data[i].originalManifestUri)
                 .toBe(manifestDbs[i].originalManifestUri);
             expect(data[i].duration).toBe(manifestDbs[i].duration);
@@ -252,7 +256,7 @@ describe('Storage', function() {
           .then(function(data) {
             expect(data).toBeTruthy();
             // Since we are using a memory DB, it will always be the first one.
-            expect(data.offlineUri).toBe('offline:0');
+            expect(data.offlineUri).toBe(Scheme.manifestIdToUri(0));
             expect(data.originalManifestUri).toBe(originalUri);
             expect(data.duration).toBe(0);  // There are no segments.
             expect(data.size).toEqual(0);
@@ -312,7 +316,7 @@ describe('Storage', function() {
 
       storage.store('')
           .then(function(data) {
-            expect(data.offlineUri).toBe('offline:0');
+            expect(data.offlineUri).toBe(Scheme.manifestIdToUri(0));
             return fakeStorageEngine.get('manifest', 0);
           })
           .then(function(manifestDb) {
@@ -329,7 +333,7 @@ describe('Storage', function() {
       drmEngine.setSessionIds(sessions);
       storage.store('')
           .then(function(data) {
-            expect(data.offlineUri).toBe('offline:0');
+            expect(data.offlineUri).toBe(Scheme.manifestIdToUri(0));
             return fakeStorageEngine.get('manifest', 0);
           })
           .then(function(manifestDb) {
@@ -356,7 +360,7 @@ describe('Storage', function() {
       drmEngine.setSessionIds(['abcd']);
       storage.store('')
           .then(function(data) {
-            expect(data.offlineUri).toBe('offline:0');
+            expect(data.offlineUri).toBe(Scheme.manifestIdToUri(0));
             return fakeStorageEngine.get('manifest', 0);
           })
           .then(function(manifestDb) {
@@ -373,7 +377,7 @@ describe('Storage', function() {
 
       storage.store('')
           .then(function(data) {
-            expect(data.offlineUri).toBe('offline:0');
+            expect(data.offlineUri).toBe(Scheme.manifestIdToUri(0));
             return fakeStorageEngine.get('manifest', 0);
           })
           .then(function(manifestDb) {
@@ -603,16 +607,25 @@ describe('Storage', function() {
               var stream1 = manifest.periods[0].streams[0];
               expect(stream1.initSegmentUri).toBe(null);
               expect(stream1.segments.length).toBe(5);
-              expect(stream1.segments[0])
-                  .toEqual({startTime: 0, endTime: 1, uri: 'offline:0/2/0'});
-              expect(stream1.segments[3])
-                  .toEqual({startTime: 3, endTime: 4, uri: 'offline:0/2/3'});
+              expect(stream1.segments[0]).toEqual({
+                startTime: 0,
+                endTime: 1,
+                uri: Scheme.segmentToUri(0, 2, 0)
+              });
+              expect(stream1.segments[3]).toEqual({
+                startTime: 3,
+                endTime: 4,
+                uri: Scheme.segmentToUri(0, 2, 3)
+              });
 
               var stream2 = manifest.periods[0].streams[1];
               expect(stream2.initSegmentUri).toBe(null);
               expect(stream2.segments.length).toBe(1);
-              expect(stream2.segments[0])
-                  .toEqual({startTime: 0, endTime: 1, uri: 'offline:0/1/5'});
+              expect(stream2.segments[0]).toEqual({
+                startTime: 0,
+                endTime: 1,
+                uri: Scheme.segmentToUri(0, 1, 5)
+              });
               return fakeStorageEngine.get('segment', 3);
             })
             .then(function(segment) {
@@ -678,7 +691,7 @@ describe('Storage', function() {
             .then(function(manifest) {
               var stream = manifest.periods[0].streams[0];
               expect(stream.segments.length).toBe(0);
-              expect(stream.initSegmentUri).toBe('offline:0/2/0');
+              expect(stream.initSegmentUri).toBe(Scheme.segmentToUri(0, 2, 0));
               return fakeStorageEngine.get('segment', 0);
             })
             .then(function(segment) {
@@ -927,7 +940,7 @@ describe('Storage', function() {
       it('does not store offline sessions', function(done) {
         storage.store('')
             .then(function(data) {
-              expect(data.offlineUri).toBe('offline:0');
+              expect(data.offlineUri).toBe(Scheme.manifestIdToUri(0));
               return fakeStorageEngine.get('manifest', 0);
             })
             .then(function(manifestDb) {
@@ -1088,7 +1101,7 @@ describe('Storage', function() {
       createAndInsertSegments(manifestId, 5)
           .then(function(data) {
             var manifest = createManifest(manifestId);
-            data[0].uri = 'offline:0/0/1253';
+            data[0].uri = Scheme.segmentToUri(0, 0, 1253);
             manifest.periods[0].streams.push({segments: data});
             return fakeStorageEngine.insert('manifest', manifest);
           })
@@ -1110,7 +1123,7 @@ describe('Storage', function() {
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.STORAGE,
             shaka.util.Error.Code.REQUESTED_ITEM_NOT_FOUND,
-            'offline:0');
+            Scheme.manifestIdToUri(0));
         shaka.test.Util.expectToEqualError(error, expectedError);
       }).then(done);
     });
@@ -1138,7 +1151,7 @@ describe('Storage', function() {
                     shaka.util.Error.Severity.CRITICAL,
                     shaka.util.Error.Category.STORAGE,
                     shaka.util.Error.Code.REQUESTED_ITEM_NOT_FOUND,
-                    'offline:0'));
+                    Scheme.manifestIdToUri(0)));
           })
           .then(done);
     });
@@ -1160,7 +1173,7 @@ describe('Storage', function() {
      */
     function removeManifest(manifestId) {
       return storage.remove(/** @type {shakaExtern.StoredContent} */ (
-          {offlineUri: 'offline:' + manifestId}));
+          {offlineUri: Scheme.manifestIdToUri(manifestId)}));
     }
 
     function createManifest(manifestId) {
@@ -1187,7 +1200,7 @@ describe('Storage', function() {
       })).then(function() {
         return ret.map(function(segment, i) {
           return {
-            uri: 'offline:' + manifestId + '/0/' + segment.key,
+            uri: Scheme.segmentToUri(manifestId, 0, segment.key),
             startTime: i,
             endTime: (i + 1)
           };
