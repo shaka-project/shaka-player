@@ -1,3 +1,41 @@
+## 2.2.3 (2017-10-17)
+
+New features:
+  - Publish an event when the CDM accepts a license
+    - https://github.com/google/shaka-player/issues/1035
+    - https://github.com/google/shaka-player/pull/1049
+  - Added assertions and logging to the debug build
+  - Added a debugging method on Player to get buffered ranges
+
+Bugfixes:
+  - Fixed race between gap-jumping and seeking
+    - https://github.com/google/shaka-player/issues/1061
+  - Fixed startTime == 0 in player.load()
+    - https://github.com/google/shaka-player/issues/1069
+  - Avoid clearing buffer on configure unless restrictions change
+    - https://github.com/google/shaka-player/issues/1009
+  - Fixed exceptions in the cast receiver demo
+    - https://github.com/google/shaka-player/issues/1064
+  - Various fixes for concurrent use of CastProxy and related APIs
+    - https://github.com/google/shaka-player/issues/768
+  - Polyfilled various MediaSource issues on Safari 11
+    - https://github.com/google/shaka-player/issues/1048
+  - Reject TS content on Safari due to MediaSource bugs
+    - https://github.com/google/shaka-player/issues/743
+  - Fixed stuck progress bar on cast receiver demo
+    - https://github.com/google/shaka-player/issues/1064
+
+Demo app:
+  - Rotating mobile devices triggers fullscreen mode
+    - https://github.com/google/shaka-player/issues/883
+  - Added robustness suggestions for Widevine
+    - https://github.com/google/shaka-player/pull/1008
+
+Docs:
+  - Fixed docs with regard to shaka.text namespace
+    - https://github.com/google/shaka-player/issues/1046
+
+
 ## 2.2.2 (2017-09-27)
 
 New features:
