@@ -126,6 +126,48 @@ shakaExtern.Stats;
 
 /**
  * @typedef {{
+ *   start: number,
+ *   end: number
+ * }}
+ *
+ * @description
+ * Contains the times of a range of buffered content.
+ *
+ * @property {number} start
+ *   The start time of the range, in seconds.
+ * @property {number} end
+ *   The end time of the range, in seconds.
+ * @exportDoc
+ */
+shakaExtern.BufferedRange;
+
+
+/**
+ * @typedef {{
+ *   total: !Array.<shakaExtern.BufferedRange>,
+ *   audio: !Array.<shakaExtern.BufferedRange>,
+ *   video: !Array.<shakaExtern.BufferedRange>,
+ *   text: !Array.<shakaExtern.BufferedRange>
+ * }}
+ *
+ * @description
+ * Contains information about the current buffered ranges.
+ *
+ * @property {!Array.<shakaExtern.BufferedRange>} total
+ *   The combined audio/video buffered ranges, reported by |video.buffered|.
+ * @property {!Array.<shakaExtern.BufferedRange>} audio
+ *   The buffered ranges for audio content.
+ * @property {!Array.<shakaExtern.BufferedRange>} video
+ *   The buffered ranges for video content.
+ * @property {!Array.<shakaExtern.BufferedRange>} text
+ *   The buffered ranges for text content.
+ * @exportDoc
+ */
+shakaExtern.BufferedInfo;
+
+
+/**
+ * @typedef {{
  *   id: number,
  *   active: boolean,
  *
