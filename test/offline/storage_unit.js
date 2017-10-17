@@ -1111,9 +1111,8 @@ describe('Storage', function() {
     });
 
     it('throws an error if the URI is malformed', function(done) {
-      var bogusContent =
-          /** @type {shakaExtern.StoredContent} */ ({offlineUri: 'foo:bar'});
-      storage.remove(bogusContent).then(fail).catch(function(error) {
+      var bogusUri = 'foo:bar';
+      storage.remove(bogusUri).then(fail).catch(function(error) {
         var expectedError = new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.STORAGE,
@@ -1163,8 +1162,7 @@ describe('Storage', function() {
      * @return {!Promise}
      */
     function removeManifest(manifestId) {
-      return storage.remove(/** @type {shakaExtern.StoredContent} */ (
-          {offlineUri: Scheme.manifestIdToUri(manifestId)}));
+      return storage.remove(Scheme.manifestIdToUri(manifestId));
     }
 
     /**

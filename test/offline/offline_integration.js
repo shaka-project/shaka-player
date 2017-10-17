@@ -106,7 +106,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
           return player.unload();
         })
         .then(function() {
-          return storage.remove(storedContent);
+          return storage.remove(storedContent.offlineUri);
         })
         .catch(fail)
         .then(done);
@@ -191,7 +191,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
         })
         .then(function() {
           // Remove the content.
-          return storage.remove(storedContent);
+          return storage.remove(storedContent.offlineUri);
         })
         .then(
             /**
@@ -275,7 +275,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
             })
             .then(function() {
               // Remove the content.
-              return storage.remove(storedContent);
+              return storage.remove(storedContent.offlineUri);
             })
             .then(function() {
               /** @type {string} */
