@@ -64,112 +64,35 @@ describe('Storage', function() {
   });
 
   it('lists stored manifests', function(done) {
-    var ContentType = shaka.util.ManifestParserUtils.ContentType;
-    var manifestDb1 = {
-      key: 0,
-      originalManifestUri: 'fake:foobar',
-      duration: 1337,
-      size: 65536,
-      periods: [{
-        streams: [
-          {
-            id: 0,
-            contentType: ContentType.VIDEO,
-            kind: undefined,
-            language: '',
-            width: 1920,
-            height: 1080,
-            frameRate: 24,
-            mimeType: 'video/mp4',
-            codecs: 'avc1.4d401f',
-            primary: false,
-            segments: [],
-            roles: []
-          },
-          {
-            id: 1,
-            contentType: ContentType.AUDIO,
-            kind: undefined,
-            language: 'en',
-            width: null,
-            height: null,
-            frameRate: undefined,
-            mimeType: 'audio/mp4',
-            codecs: 'vorbis',
-            primary: true,
-            segments: [],
-            roles: [],
-            channelsCount: null
-          }
-        ]
-      }],
-      appMetadata: {
-        foo: 'bar',
-        drm: 'yes',
-        theAnswerToEverything: 42
-      }
-    };
-    var manifestDb2 = {
-      key: 1,
-      originalManifestUri: 'fake:another',
-      duration: 4181,
-      size: 6765,
-      periods: [{streams: []}],
-      appMetadata: {
-        something: 'else'
-      }
-    };
-    var manifestDbs = [manifestDb1, manifestDb2];
-    var expectedTracks = [
-      {
-        id: 0,
-        active: false,
-        type: 'variant',
-        bandwidth: 0,
-        language: 'en',
-        label: null,
-        kind: null,
-        width: 1920,
-        height: 1080,
-        frameRate: 24,
-        mimeType: 'video/mp4',
-        primary: true,
-        codecs: 'avc1.4d401f, vorbis',
-        audioCodec: 'vorbis',
-        videoCodec: 'avc1.4d401f',
-        roles: [],
-        videoId: 0,
-        audioId: 1,
-        channelsCount: null,
-        audioBandwidth: null,
-        videoBandwidth: null
-      }
-    ];
-    Promise
-        .all([
-          fakeStorageEngine.insert('manifest', manifestDb1),
-          fakeStorageEngine.insert('manifest', manifestDb2)
-        ])
-        .then(function() {
-          return storage.list();
-        })
-        .then(function(data) {
-          expect(data).toBeTruthy();
-          expect(data.length).toBe(2);
-          for (var i = 0; i < 2; i++) {
-            expect(data[i].offlineUri)
-                .toBe(Scheme.manifestIdToUri(manifestDbs[i].key));
-            expect(data[i].originalManifestUri)
-                .toBe(manifestDbs[i].originalManifestUri);
-            expect(data[i].duration).toBe(manifestDbs[i].duration);
-            expect(data[i].size).toBe(manifestDbs[i].size);
-            expect(data[i].appMetadata).toEqual(manifestDbs[i].appMetadata);
-          }
-          expect(data[0].tracks).toEqual(expectedTracks);
-          expect(data[1].tracks).toEqual([]);
-        })
-        .catch(fail)
-        .then(done);
+    goog.asserts.assert(
+        fakeStorageEngine,
+        'Need storage engine for this test.');
+
+    Promise.all([
+      new shaka.test.ManifestDBBuilder(fakeStorageEngine)
+          .metadata({ name: 'manifest 1' })
+          .period()
+          .build(),
+      new shaka.test.ManifestDBBuilder(fakeStorageEngine)
+          .metadata({ name: 'manifest 2' })
+          .period()
+          .build()
+    ]).then(function() {
+      return storage.list();
+    }).then(function(storedContent) {
+      expect(storedContent).toBeTruthy();
+      expect(storedContent.length).toBe(2);
+
+      // Manifest 1
+      expect(storedContent[0]).toBeTruthy();
+      expect(storedContent[0].appMetadata).toBeTruthy();
+      expect(storedContent[0].appMetadata.name).toBe('manifest 1');
+
+      // Manifest 2
+      expect(storedContent[1]).toBeTruthy();
+      expect(storedContent[1].appMetadata).toBeTruthy();
+      expect(storedContent[1].appMetadata.name).toBe('manifest 2');
+    }).catch(fail).then(done);
   });
 
   describe('store', function() {
@@ -949,166 +872,190 @@ describe('Storage', function() {
   });  // describe('store')
 
   describe('remove', function() {
-    /** @type {number} */
-    var segmentId;
-
-    beforeEach(function() {
-      segmentId = 0;
-    });
-
     it('will delete everything', function(done) {
-      var manifestId = 0;
-      createAndInsertSegments(manifestId, 5)
-          .then(function(refs) {
-            var manifest = createManifest(manifestId);
-            manifest.periods[0].streams.push({segments: refs});
-            return fakeStorageEngine.insert('manifest', manifest);
-          })
-          .then(function() {
-            expectDatabaseCount(1, 5);
-            return removeManifest(manifestId);
-          })
-          .then(function() { expectDatabaseCount(0, 0); })
-          .catch(fail)
-          .then(done);
+      goog.asserts.assert(
+          fakeStorageEngine,
+          'Need storage engine for this test.');
+      new shaka.test.ManifestDBBuilder(fakeStorageEngine)
+          .period()
+              .stream()
+                  .segment(0, 2)
+                  .segment(2, 4)
+                  .segment(4, 6)
+                  .segment(6, 8)
+          .build()
+          .then(function(manifest) {
+            expectDatabaseCount(1, 4);
+            return removeManifest(manifest.key);
+          }).then(function() {
+            expectDatabaseCount(0, 0);
+          }).catch(fail).then(done);
     });
 
     it('will delete init segments', function(done) {
-      var manifestId = 1;
-      Promise
-          .all([
-            createAndInsertSegments(manifestId, 5),
-            createAndInsertSegments(manifestId, 1)
-          ])
-          .then(function(data) {
-            var manifest = createManifest(manifestId);
-            manifest.periods[0].streams.push(
-                {initSegmentUri: data[1][0].uri, segments: data[0]});
-            return fakeStorageEngine.insert('manifest', manifest);
-          })
-          .then(function() {
-            expectDatabaseCount(1, 6);
-            return removeManifest(manifestId);
-          })
-          .then(function() { expectDatabaseCount(0, 0); })
-          .catch(fail)
-          .then(done);
+      goog.asserts.assert(
+          fakeStorageEngine,
+          'Need storage engine for this test.');
+      new shaka.test.ManifestDBBuilder(fakeStorageEngine)
+          .period()
+              .stream()
+                  .initSegment()
+                  .segment(0, 2)
+                  .segment(2, 4)
+                  .segment(4, 6)
+                  .segment(6, 8)
+          .build()
+          .then(function(manifest) {
+            expectDatabaseCount(1, 5);
+            return removeManifest(manifest.key);
+          }).then(function() {
+            expectDatabaseCount(0, 0);
+          }).catch(fail).then(done);
     });
 
     it('will delete multiple streams', function(done) {
-      var manifestId = 1;
-      Promise
-          .all([
-            createAndInsertSegments(manifestId, 5),
-            createAndInsertSegments(manifestId, 3)
-          ])
-          .then(function(data) {
-            var manifest = createManifest(manifestId);
-            manifest.periods[0].streams.push({segments: data[0]});
-            manifest.periods[0].streams.push({segments: data[1]});
-            return fakeStorageEngine.insert('manifest', manifest);
-          })
-          .then(function() {
+      goog.asserts.assert(
+          fakeStorageEngine,
+          'Need storage engine for this test.');
+      new shaka.test.ManifestDBBuilder(fakeStorageEngine)
+          .period()
+              .stream()
+                  .segment(0, 2)
+                  .segment(2, 4)
+                  .segment(4, 6)
+                  .segment(6, 8)
+              .stream()
+                  .segment(0, 2)
+                  .segment(2, 4)
+                  .segment(4, 6)
+                  .segment(6, 8)
+          .build()
+          .then(function(manifest) {
             expectDatabaseCount(1, 8);
-            return removeManifest(manifestId);
-          })
-          .then(function() { expectDatabaseCount(0, 0); })
-          .catch(fail)
-          .then(done);
+            return removeManifest(manifest.key);
+          }).then(function() {
+            expectDatabaseCount(0, 0);
+          }).catch(fail).then(done);
     });
 
     it('will delete multiple periods', function(done) {
-      var manifestId = 1;
-      Promise
-          .all([
-            createAndInsertSegments(manifestId, 5),
-            createAndInsertSegments(manifestId, 3)
-          ])
-          .then(function(data) {
-            var manifest = createManifest(manifestId);
-            manifest.periods = [
-              {streams: [{segments: data[0]}]},
-              {streams: [{segments: data[1]}]}
-            ];
-            return fakeStorageEngine.insert('manifest', manifest);
-          })
-          .then(function() {
+      goog.asserts.assert(
+          fakeStorageEngine,
+          'Need storage engine for this test.');
+      new shaka.test.ManifestDBBuilder(fakeStorageEngine)
+          .period()
+              .stream()
+                  .segment(0, 2)
+                  .segment(2, 4)
+                  .segment(4, 6)
+                  .segment(6, 8)
+          .period()
+              .stream()
+                  .segment(0, 2)
+                  .segment(2, 4)
+                  .segment(4, 6)
+                  .segment(6, 8)
+          .build()
+          .then(function(manifest) {
             expectDatabaseCount(1, 8);
-            return removeManifest(manifestId);
-          })
-          .then(function() { expectDatabaseCount(0, 0); })
-          .catch(fail)
-          .then(done);
+            return removeManifest(manifest.key);
+          }).then(function() {
+            expectDatabaseCount(0, 0);
+          }).catch(fail).then(done);
     });
 
     it('will delete content with a temporary license', function(done) {
       storage.configure({usePersistentLicense: false});
-      var manifestId = 0;
-      createAndInsertSegments(manifestId, 5)
-          .then(function(refs) {
-            var manifest = createManifest(manifestId);
-            manifest.periods[0].streams.push({segments: refs});
-            return fakeStorageEngine.insert('manifest', manifest);
-          })
-          .then(function() {
-            expectDatabaseCount(1, 5);
-            return removeManifest(manifestId);
-          })
-          .then(function() { expectDatabaseCount(0, 0); })
-          .catch(fail)
-          .then(done);
+
+      goog.asserts.assert(
+          fakeStorageEngine,
+          'Need storage engine for this test.');
+      new shaka.test.ManifestDBBuilder(fakeStorageEngine)
+          .period()
+              .stream()
+                  .segment(0, 2)
+                  .segment(2, 4)
+                  .segment(4, 6)
+                  .segment(6, 8)
+          .build()
+          .then(function(manifest) {
+            expectDatabaseCount(1, 4);
+            return removeManifest(manifest.key);
+          }).then(function() {
+            expectDatabaseCount(0, 0);
+          }).catch(fail).then(done);
     });
 
     it('will not delete other manifest\'s segments', function(done) {
-      var manifestId1 = 1;
-      var manifestId2 = 2;
-      Promise
-          .all([
-            createAndInsertSegments(manifestId1, 5),
-            createAndInsertSegments(manifestId2, 3)
-          ])
-          .then(function(data) {
-            var manifest1 = createManifest(manifestId1);
-            manifest1.periods[0].streams.push({segments: data[0]});
-            var manifest2 = createManifest(manifestId2);
-            manifest2.periods[0].streams.push({segments: data[1]});
-            return Promise.all([
-              fakeStorageEngine.insert('manifest', manifest1),
-              fakeStorageEngine.insert('manifest', manifest2)
-            ]);
-          })
-          .then(function() {
-            expectDatabaseCount(2, 8);
-            return removeManifest(manifestId1);
-          })
-          .then(function() {
-            expectDatabaseCount(1, 3);
-            return fakeStorageEngine.get('segment', segmentId - 1);
-          })
-          .then(function(segment) { expect(segment).toBeTruthy(); })
-          .catch(fail)
-          .then(done);
+      goog.asserts.assert(
+          fakeStorageEngine,
+          'Need storage engine for this test.');
+
+      var manifest1;
+      var manifest2;
+
+      Promise.all([
+        new shaka.test.ManifestDBBuilder(fakeStorageEngine)
+            .period()
+                .stream()
+                    .segment(0, 2)
+                    .segment(2, 4)
+                    .segment(4, 6)
+                    .segment(6, 8)
+            .build(),
+        new shaka.test.ManifestDBBuilder(fakeStorageEngine)
+            .period()
+                .stream()
+                    .segment(0, 2)
+                    .segment(2, 4)
+                    .segment(4, 6)
+                    .segment(6, 8)
+            .build()
+      ]).then(function(manifests) {
+        manifest1 = manifests[0];
+        manifest2 = manifests[1];
+
+        expectDatabaseCount(2, 8);
+        return removeManifest(manifest1.key);
+      }).then(function() {
+        expectDatabaseCount(1, 4);
+        return loadSegmentsForStream(manifest2.periods[0].streams[0]);
+      }).then(function(segments) {
+        // Make sure all the segments for the second manifest are still
+        // in storage.
+        var stream = manifest2.periods[0].streams[0];
+        expect(segments.length).toBe(stream.segments.length);
+        segments.forEach(function(segment) {
+          expect(segment).toBeTruthy();
+        });
+      }).catch(fail).then(done);
     });
 
     it('will not raise error on missing segments', function(done) {
-      var manifestId = 1;
-      createAndInsertSegments(manifestId, 5)
-          .then(function(data) {
-            var manifest = createManifest(manifestId);
-            data[0].uri = Scheme.segmentToUri(0, 0, 1253);
-            manifest.periods[0].streams.push({segments: data});
-            return fakeStorageEngine.insert('manifest', manifest);
-          })
-          .then(function() {
-            expectDatabaseCount(1, 5);
-            return removeManifest(manifestId);
-          })
-          .then(function() {
+      goog.asserts.assert(
+          fakeStorageEngine,
+          'Need storage engine for this test.');
+      new shaka.test.ManifestDBBuilder(fakeStorageEngine)
+          .period()
+              .stream()
+                  .segment(0, 2)
+                  .segment(2, 4)
+                  .segment(4, 6)
+                  .segment(6, 8)
+              .onStream(function(stream) {
+                // Change the uri for one segment so that it will be missing
+                // from storage.
+                var segment = stream.segments[0];
+                segment.uri = Scheme.segmentToUri(0, 0, 1253);
+              })
+          .build()
+          .then(function(manifest) {
+            expectDatabaseCount(1, 4);
+            return removeManifest(manifest.key);
+          }).then(function() {
             // The segment that was changed above was not deleted.
             expectDatabaseCount(0, 1);
-          })
-          .catch(fail)
-          .then(done);
+          }).catch(fail).then(done);
     });
 
     it('throws an error if the content is not found', function(done) {
@@ -1179,36 +1126,17 @@ describe('Storage', function() {
           {offlineUri: Scheme.manifestIdToUri(manifestId)}));
     }
 
-    function createManifest(manifestId) {
-      return {
-        key: manifestId,
-        periods: [{streams: []}],
-        sessionIds: [],
-        duration: 10
-      };
-    }
-
     /**
-     * @param {number} manifestId
-     * @param {number} count
-     * @return {!Promise.<!Array.<shakaExtern.SegmentDB>>}
+     * @param {!shakaExtern.Stream} stream
+     * @return {!Promise<!Array<shakaExtern.SegmentDataDB>>}
      */
-    function createAndInsertSegments(manifestId, count) {
-      var ret = new Array(count);
-      for (var i = 0; i < count; i++) {
-        ret[i] = {key: segmentId++};
-      }
-      return Promise.all(ret.map(function(segment) {
-        return fakeStorageEngine.insert('segment', segment);
-      })).then(function() {
-        return ret.map(function(segment, i) {
-          return {
-            uri: Scheme.segmentToUri(manifestId, 0, segment.key),
-            startTime: i,
-            endTime: (i + 1)
-          };
-        });
-      });
+    function loadSegmentsForStream(stream) {
+      return Promise.all(stream.segments.map(function(segment) {
+        var uri = segment.uri;
+        var id = Scheme.uriToSegmentId(uri);
+        goog.asserts.assert(id != null, 'Expecting valid uri (' + uri + ')');
+        return fakeStorageEngine.get('segment', id);
+      }));
     }
   });  // describe('remove')
 
