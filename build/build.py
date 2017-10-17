@@ -70,7 +70,6 @@ common_closure_defines = [
     '-D', 'COMPILED=true',
     '-D', 'goog.STRICT_MODE_COMPATIBLE=true',
     '-D', 'goog.ENABLE_DEBUG_LOADER=false',
-    '-D', 'GIT_VERSION="%s"' % shakaBuildHelpers.calculate_version()
 ]
 debug_closure_opts = [
     # Don't use a wrapper script in debug mode so all the internals are visible
@@ -81,6 +80,7 @@ debug_closure_defines = [
     '-D', 'goog.DEBUG=true',
     '-D', 'goog.asserts.ENABLE_ASSERTS=true',
     '-D', 'shaka.log.MAX_LOG_LEVEL=4',  # shaka.log.Level.DEBUG
+    '-D', 'GIT_VERSION="%s-debug"' % shakaBuildHelpers.calculate_version(),
 ]
 release_closure_opts = [
     ('--output_wrapper_file=%s/build/wrapper.template.js' %
@@ -91,6 +91,7 @@ release_closure_defines = [
     '-D', 'goog.DEBUG=false',
     '-D', 'goog.asserts.ENABLE_ASSERTS=false',
     '-D', 'shaka.log.MAX_LOG_LEVEL=0',
+    '-D', 'GIT_VERSION="%s"' % shakaBuildHelpers.calculate_version(),
 ]
 
 

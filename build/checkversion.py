@@ -68,7 +68,7 @@ def check_version(_):
   if 'v' + npm != git:
     logging.error('NPM version does not match git version.')
     ret = 1
-  if player != git + '-debug':
+  if player != git + '-uncompiled':
     logging.error('Player version does not match git version.')
     ret = 1
   if 'v' + changelog != git:
