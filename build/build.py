@@ -368,7 +368,8 @@ def compile_demo(rebuild, is_debug):
   Returns:
     True on success, False on failure.
   """
-  logging.info('Compiling the demo app...')
+  logging.info('Compiling the demo app (%s)...',
+               'debug' if is_debug else 'release')
 
   match = re.compile(r'.*\.js$')
   base = shakaBuildHelpers.get_source_base()
@@ -384,7 +385,9 @@ def compile_demo(rebuild, is_debug):
   files.remove(os.path.join(base, 'demo', 'service_worker.js'))
   # Add in the generated externs, so that the demo compilation knows the
   # definitions of the library APIs.
-  files.add(os.path.join(base, 'dist', 'shaka-player.compiled.externs.js'))
+  extern_name = ('shaka-player.compiled.debug.externs.js' if is_debug
+                 else 'shaka-player.compiled.externs.js')
+  files.add(os.path.join(base, 'dist', extern_name))
 
   demo_build = Build(files)
 
@@ -423,7 +426,8 @@ def compile_receiver(rebuild, is_debug):
   Returns:
     True on success, False on failure.
   """
-  logging.info('Compiling the receiver app...')
+  logging.info('Compiling the receiver app (%s)...',
+               'debug' if is_debug else 'release')
 
   match = re.compile(r'.*\.js$')
   base = shakaBuildHelpers.get_source_base()
@@ -433,7 +437,9 @@ def compile_receiver(rebuild, is_debug):
   files = set(get('demo/common') + get('demo/cast_receiver') + get('externs'))
   # Add in the generated externs, so that the receiver compilation knows the
   # definitions of the library APIs.
-  files.add(os.path.join(base, 'dist', 'shaka-player.compiled.externs.js'))
+  extern_name = ('shaka-player.compiled.debug.externs.js' if is_debug
+                 else 'shaka-player.compiled.externs.js')
+  files.add(os.path.join(base, 'dist', extern_name))
 
   receiver_build = Build(files)
 
@@ -467,6 +473,7 @@ def usage():
 
 Options:
  --debug          : Make a debug compiled file (e.g. don't rename internals).
+ --release        : Make a release compiled file (default).
  --force          : Build the library even if no changes are detected.
  --help           : Prints this help page.
  --name           : Sets the name of the build, uses 'compiled' if not given.
@@ -489,6 +496,11 @@ def main(args):
       name = args[i]
     elif args[i] == '--debug':
       is_debug = True
+    elif args[i] == '--release':
+      if is_debug:
+        logging.error('Cannot specify both --debug and --release')
+        return 1
+      # No-op since already the default.
     elif args[i] == '--force':
       rebuild = True
     elif args[i] == '--help':
@@ -505,7 +517,8 @@ def main(args):
   if not lines:
     lines = ['+@complete']
 
-  logging.info('Compiling the library...')
+  logging.info('Compiling the library (%s)...',
+               'debug' if is_debug else 'release')
   custom_build = Build()
   if not custom_build.parse_build(lines, os.getcwd()):
     return 1

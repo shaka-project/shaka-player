@@ -35,10 +35,16 @@ def main(args):
 
   if '--force' in args:
     build_args.append('--force')
-  if '--debug' in args:
-    build_args.append('--debug')
 
-  return build.main(build_args)
+  if '--debug' in args or '--release' not in args:
+    if build.main(build_args + ['--debug']) != 0:
+      return 1
+  if '--release' in args or '--debug' not in args:
+    if build.main(build_args) != 0:
+      return 1
+
+  return 0
+
 
 if __name__ == '__main__':
   shakaBuildHelpers.run_main(main)
