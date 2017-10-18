@@ -19,6 +19,8 @@
 describe('HlsParser', function() {
   /** @const */
   var Util = shaka.test.Util;
+  /** @const */
+  var ManifestParser = shaka.test.ManifestParser;
   /** @type {!shaka.test.FakeNetworkingEngine} */
   var fakeNetEngine;
   /** @type {!shaka.hls.HlsParser} */
@@ -29,9 +31,35 @@ describe('HlsParser', function() {
   var config;
   /** @const */
   var TextStreamKind = shaka.util.ManifestParserUtils.TextStreamKind;
+  /** @const {function(string):ArrayBuffer} */
+  var toUTF8 = shaka.util.StringUtils.toUTF8;
+  /** @type {ArrayBuffer} */
+  var segmentData;
+  /** @const {string} */
+  var vttText = [
+    'WEBVTT\n',
+    '\n',
+    '00:03.837 --> 00:07.297\n',
+    'Hello, world!\n'
+  ].join('');
 
   beforeEach(function() {
+    // TODO: use StreamGenerator?
+    segmentData = new Uint8Array([
+      0x00, 0x00, 0x00, 0x24, // size (36)
+      0x6D, 0x6F, 0x6F, 0x66, // type (moof)
+      0x00, 0x00, 0x00, 0x1C, // traf size (28)
+      0x74, 0x72, 0x61, 0x66, // type (traf)
+      0x00, 0x00, 0x00, 0x14, // tfdt size (20)
+      0x74, 0x66, 0x64, 0x74, // type (tfdt)
+      0x01, 0x00, 0x00, 0x00, // version and flags
+      0x00, 0x00, 0x00, 0x00, // baseMediaDecodeTime first 4 bytes (0)
+      0x00, 0x00, 0x00, 0x00  // baseMediaDecodeTime last 4 bytes (0)
+    ]).buffer;
+    // segment starts at 0s.
+
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
+
     var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
     config = {
       retryParameters: retry,
@@ -40,11 +68,9 @@ describe('HlsParser', function() {
         clockSyncUri: '',
         ignoreDrmInfo: false,
         xlinkFailGracefully: false
-      },
-      hls: {
-        defaultTimeOffset: 0
       }
     };
+
     playerInterface = {
       filterNewPeriod: function() {},
       filterAllPeriods: function() {},
@@ -53,6 +79,7 @@ describe('HlsParser', function() {
       onEvent: fail,
       onTimelineRegionAdded: fail
     };
+
     parser = new shaka.hls.HlsParser();
     parser.configure(config);
   });
@@ -64,12 +91,15 @@ describe('HlsParser', function() {
    * @param {function()} done
    */
   function testHlsParser(master, media, manifest, done) {
-    fakeNetEngine.setResponseMapAsText({
-      'test://master': master,
-      'test://audio': media,
-      'test://audio2': media,
-      'test://video': media,
-      'test://video2': media
+    fakeNetEngine.setResponseMap({
+      'test://master': toUTF8(master),
+      'test://audio': toUTF8(media),
+      'test://audio2': toUTF8(media),
+      'test://video': toUTF8(media),
+      'test://video2': toUTF8(media),
+      'test://main.vtt': toUTF8(vttText),
+      'test://main.mp4': segmentData,
+      'test://main.test': segmentData
     });
 
     parser.start('test://master', playerInterface)
@@ -511,10 +541,11 @@ describe('HlsParser', function() {
       'test://main.mp4'
     ].join('');
 
-    fakeNetEngine.setResponseMapAsText({
-      'test://master': master,
-      'test://audio': media,
-      'test://video': media
+    fakeNetEngine.setResponseMap({
+      'test://master': toUTF8(master),
+      'test://audio': toUTF8(media),
+      'test://video': toUTF8(media),
+      'test://main.mp4': segmentData
     });
 
     var filterAllPeriods = jasmine.createSpy('filterAllPeriods');
@@ -636,11 +667,13 @@ describe('HlsParser', function() {
                 .kind(TextStreamKind.SUBTITLE)
           .build();
 
-    fakeNetEngine.setResponseMapAsText({
-      'test://master': master,
-      'test://audio': media,
-      'test://video': media,
-      'test://text': textMedia
+    fakeNetEngine.setResponseMap({
+      'test://master': toUTF8(master),
+      'test://audio': toUTF8(media),
+      'test://video': toUTF8(media),
+      'test://text': toUTF8(textMedia),
+      'test://main.vtt': toUTF8(vttText),
+      'test://main.mp4': segmentData
     });
 
     parser.start('test://master', playerInterface)
@@ -714,11 +747,13 @@ describe('HlsParser', function() {
                 .kind(TextStreamKind.SUBTITLE)
           .build();
 
-    fakeNetEngine.setResponseMapAsText({
-      'test://master': master,
-      'test://audio': media,
-      'test://video': media,
-      'test://text': textMedia
+    fakeNetEngine.setResponseMap({
+      'test://master': toUTF8(master),
+      'test://audio': toUTF8(media),
+      'test://video': toUTF8(media),
+      'test://text': toUTF8(textMedia),
+      'test://main.vtt': toUTF8(vttText),
+      'test://main.mp4': segmentData
     });
 
     parser.start('test://master', playerInterface)
@@ -766,11 +801,12 @@ describe('HlsParser', function() {
                 .kind(TextStreamKind.SUBTITLE)
           .build();
 
-    fakeNetEngine.setResponseMapAsText({
-      'test://master': master,
-      'test://audio': media,
-      'test://video': media,
-      'test://text': media
+    fakeNetEngine.setResponseMap({
+      'test://master': toUTF8(master),
+      'test://audio': toUTF8(media),
+      'test://video': toUTF8(media),
+      'test://text': toUTF8(media),
+      'test://main.mp4': segmentData
     });
 
     parser.start('test://master', playerInterface)
@@ -826,53 +862,18 @@ describe('HlsParser', function() {
                 .kind(TextStreamKind.SUBTITLE)
           .build();
 
-    fakeNetEngine.setResponseMapAsText({
-      'test://master': master,
-      'test://audio': media,
-      'test://video': media,
-      'test://text': textMedia
+    fakeNetEngine.setResponseMap({
+      'test://master': toUTF8(master),
+      'test://audio': toUTF8(media),
+      'test://video': toUTF8(media),
+      'test://text': toUTF8(textMedia),
+      'test://main.foo': toUTF8(vttText),
+      'test://main.mp4': segmentData
     });
 
     parser.start('test://master', playerInterface)
         .then(function(actual) { expect(actual).toEqual(manifest); })
         .catch(fail).then(done);
-  });
-
-  it('respects config.hls.defaultTimeOffset setting', function(done) {
-    var master = [
-      '#EXTM3U\n',
-      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
-      'RESOLUTION=960x540,FRAME-RATE=60\n',
-      'test://video'
-    ].join('');
-
-    var media = [
-      '#EXTM3U\n',
-      '#EXT-X-PLAYLIST-TYPE:VOD\n',
-      '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
-      '#EXTINF:5,\n',
-      '#EXT-X-BYTERANGE:121090@616\n',
-      'test://main.mp4'
-    ].join('');
-
-    var manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(jasmine.any(Number))
-              .addVariant(jasmine.any(Number))
-                .language('und')
-                .bandwidth(200)
-                .addVideo(jasmine.any(Number))
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(10)
-                  .mime('video/mp4', 'avc1')
-                  .frameRate(60)
-                  .size(960, 540)
-          .build();
-
-    config.hls.defaultTimeOffset = 10;
-
-    testHlsParser(master, media, manifest, done);
   });
 
   it('parses video described by a media tag', function(done) {
@@ -951,10 +952,12 @@ describe('HlsParser', function() {
                   .mime('audio/mp4', 'mp4a')
           .build();
 
-    fakeNetEngine.setResponseMapAsText({
-      'test://host/master.m3u8': master,
-      'test://host/audio/audio.m3u8': media,
-      'test://host/video/video.m3u8': media
+    fakeNetEngine.setResponseMap({
+      'test://host/master.m3u8': toUTF8(master),
+      'test://host/audio/audio.m3u8': toUTF8(media),
+      'test://host/video/video.m3u8': toUTF8(media),
+      'test://host/audio/segment.mp4': segmentData,
+      'test://host/video/segment.mp4': segmentData
     });
 
     parser.start('test://host/master.m3u8', playerInterface)
@@ -1079,10 +1082,12 @@ describe('HlsParser', function() {
      * @param {function()} done
      */
     function verifyError(master, media, error, done) {
-      fakeNetEngine.setResponseMapAsText({'test://master': master,
-        'test://audio': media,
-        'test://video': media,
-        'test://main.exe': media
+      fakeNetEngine.setResponseMap({
+        'test://master': toUTF8(master),
+        'test://audio': toUTF8(media),
+        'test://video': toUTF8(media),
+        'test://main.exe': segmentData,
+        'test://main.mp4': segmentData
       });
 
       parser.start('test://master', playerInterface)
@@ -1141,8 +1146,7 @@ describe('HlsParser', function() {
       var error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
-          Code.HLS_COULD_NOT_GUESS_MIME_TYPE,
-          'exe');
+          Code.HLS_COULD_NOT_GUESS_MIME_TYPE, 'exe');
 
       verifyError(master, media, error, done);
     });
@@ -1266,12 +1270,130 @@ describe('HlsParser', function() {
           '#EXT-X-PLAYLIST-TYPE:VOD\n',
           '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
           '#EXT-X-BYTERANGE:121090@616\n',
-          'test://main.exe'
+          'test://main.mp4'
         ].join('');
 
         verifyMissingTag(master, media, 'EXTINF', done);
       });
     });
+  });  // Errors out
+
+  describe('getStartTime_', function() {
+    /** @type {number} */
+    var segmentDataStartTime;
+
+    var master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+      'RESOLUTION=960x540,FRAME-RATE=60\n',
+      'test://video'
+    ].join('');
+
+    var media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'test://main.mp4'
+    ].join('');
+
+    // TODO: Add separate tests to cover correct handling of BYTERANGE in
+    // constructing references.  Here it is covered incidentally.
+    var expectedStartByte = 616;
+    var expectedEndByte = 121705;
+
+    beforeEach(function() {
+      // TODO: use StreamGenerator?
+      segmentData = new Uint8Array([
+        0x00, 0x00, 0x00, 0x24, // size (36)
+        0x6D, 0x6F, 0x6F, 0x66, // type (moof)
+        0x00, 0x00, 0x00, 0x1C, // traf size (28)
+        0x74, 0x72, 0x61, 0x66, // type (traf)
+        0x00, 0x00, 0x00, 0x14, // tfdt size (20)
+        0x74, 0x66, 0x64, 0x74, // type (tfdt)
+        0x01, 0x00, 0x00, 0x00, // version and flags
+
+        0x00, 0x00, 0x00, 0x00, // baseMediaDecodeTime first 4 bytes
+        0x00, 0x02, 0xBF, 0x20  // baseMediaDecodeTime last 4 bytes (180000)
+      ]).buffer;
+      // 180000 divided by TS timescale (90000) = segment starts at 2s.
+      segmentDataStartTime = 2;
+    });
+
+    it('parses start time from mp4 segment', function(done) {
+      fakeNetEngine.setResponseMap({
+        'test://master': toUTF8(master),
+        'test://video': toUTF8(media),
+        'test://main.mp4': segmentData
+      });
+
+      var ref = ManifestParser.makeReference(
+          'test://main.mp4' /* uri */,
+          0 /* position */,
+          0 /* startTime */,
+          5 /* endTime */,
+          '' /* baseUri */,
+          expectedStartByte,
+          expectedEndByte);
+
+      parser.start('test://master', playerInterface).then(function(manifest) {
+        var video = manifest.periods[0].variants[0].video;
+        ManifestParser.verifySegmentIndex(video, [ref]);
+
+        // Make sure the segment data was fetched with the correct byte
+        // range.
+        fakeNetEngine.expectRangeRequest(
+            'test://main.mp4',
+            expectedStartByte,
+            expectedEndByte);
+
+        // In VOD content, we set the presentationTimeOffset to align the
+        // content to presentation time 0.
+        expect(video.presentationTimeOffset).toEqual(segmentDataStartTime);
+      }).catch(fail).then(done);
+    });
+
+    it('sets duration with respect to presentation offset', function(done) {
+      fakeNetEngine.setResponseMap({
+        'test://master': toUTF8(master),
+        'test://video': toUTF8(media),
+        'test://main.mp4': segmentData
+      });
+
+      parser.start('test://master', playerInterface).then(function(manifest) {
+        var presentationTimeline = manifest.presentationTimeline;
+        var video = manifest.periods[0].variants[0].video;
+        var ref = video.getSegmentReference(0);
+        expect(video.getSegmentReference(1)).toBe(null);  // No more references.
+
+        expect(video.presentationTimeOffset).toEqual(segmentDataStartTime);
+        // The duration should be set to the sum of the segment durations (5),
+        // even though the endTime of the segment is larger.
+        expect(ref.endTime - ref.startTime).toEqual(5);
+        expect(presentationTimeline.getDuration()).toEqual(5);
+      }).catch(fail).then(done);
+    });
+
+    it('cannot parse timestamps from non-mp4 content', function(done) {
+      var tsMediaPlaylist = media.replace(/\.mp4/g, '.ts');
+
+      fakeNetEngine.setResponseMap({
+        'test://master': toUTF8(master),
+        'test://video': toUTF8(tsMediaPlaylist),
+        'test://main.ts': new ArrayBuffer(10)
+      });
+
+      var error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MANIFEST,
+          shaka.util.Error.Code.HLS_COULD_NOT_PARSE_SEGMENT_START_TIME);
+
+      parser.start('test://master', playerInterface)
+          .then(fail)
+          .catch(function(e) {
+            shaka.test.Util.expectToEqualError(e, error);
+          })
+        .then(done);
+    });
   });
 });
-

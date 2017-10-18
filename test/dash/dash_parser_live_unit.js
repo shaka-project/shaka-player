@@ -55,8 +55,7 @@ describe('DashParser Live', function() {
         customScheme: function(node) { return null; },
         ignoreDrmInfo: false,
         xlinkFailGracefully: false
-      },
-      hls: { defaultTimeOffset: 0 }
+      }
     });
     playerInterface = {
       networkingEngine: fakeNetEngine,

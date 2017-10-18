@@ -32,8 +32,7 @@ shaka.test.Dash.makeDashParser = function() {
       clockSyncUri: '',
       ignoreDrmInfo: false,
       xlinkFailGracefully: false
-    },
-    hls: { defaultTimeOffset: 0 }
+    }
   });
   return parser;
 };

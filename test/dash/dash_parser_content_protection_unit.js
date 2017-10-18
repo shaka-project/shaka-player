@@ -45,8 +45,7 @@ describe('DashParser ContentProtection', function() {
         customScheme: callback,
         ignoreDrmInfo: ignoreDrmInfo,
         xlinkFailGracefully: false
-      },
-      hls: { defaultTimeOffset: 0 }
+      }
     });
     var playerEvents = {
       networkingEngine: netEngine,
