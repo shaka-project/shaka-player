@@ -377,6 +377,25 @@ describe('Player', function() {
       player.unload().catch(fail);
     });
 
+    it('streaming event', function(done) {
+      var streamingListener = jasmine.createSpy('listener');
+      streamingListener.and.callFake(function() {
+        var tracks = player.getVariantTracks();
+        expect(tracks).toBeDefined();
+        expect(tracks.length).toEqual(1);
+        var activeTracks = player.getVariantTracks().filter(function(track) {
+          return track.active;
+        });
+        expect(activeTracks.length).toEqual(0);
+      });
+
+      player.addEventListener('streaming', Util.spyFunc(streamingListener));
+      expect(streamingListener).not.toHaveBeenCalled();
+      player.load('', 0, factory1).then(function() {
+        expect(streamingListener).toHaveBeenCalled();
+      }).catch(fail).then(done);
+    });
+
     describe('interruption during', function() {
       beforeEach(function() {
         checkError.and.callFake(function(error) {
