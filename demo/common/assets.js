@@ -811,16 +811,45 @@ shakaAssets.testAssets = [
 
   // bitcodin assets {{{
   // Src: http://www.dash-player.com/demo/streaming-server-and-encoder-support/
+  // Src: https://bitmovin.com/mpeg-dash-hls-examples-sample-streams/
   {
-    name: 'Art of Motion',
+    name: 'Art of Motion (DASH)',
     manifestUri: '//bitdash-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd',  // gjslint: disable=110
 
     encoder: shakaAssets.Encoder.BITCODIN,
     source: shakaAssets.Source.BITCODIN,
     drm: [],
     features: [
+      shakaAssets.Feature.HIGH_DEFINITION,
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION
+    ]
+  },
+  {
+    name: 'Art of Motion (HLS, TS)',
+    manifestUri: '//bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8',  // gjslint: disable=110
+
+    encoder: shakaAssets.Encoder.BITCODIN,
+    source: shakaAssets.Source.BITCODIN,
+    drm: [],
+    features: [
+      shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.HLS,
+      shakaAssets.Feature.MP2TS
+    ]
+  },
+  {
+    name: 'Sintel (HLS, TS, 4k)',
+    manifestUri: '//bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+
+    encoder: shakaAssets.Encoder.BITCODIN,
+    source: shakaAssets.Source.BITCODIN,
+    drm: [],
+    features: [
+      shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.HLS,
+      shakaAssets.Feature.MP2TS,
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION
     ]
   },
   // }}}
