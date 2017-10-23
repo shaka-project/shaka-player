@@ -1,3 +1,20 @@
+## 2.2.4 (2017-10-23)
+
+New features:
+
+Bugfixes:
+  - Don't enforce seek range while paused in live streams (stays paused)
+    - https://github.com/google/shaka-player/issues/982
+  - Fix start time in live streams
+    - https://github.com/google/shaka-player/issues/1069
+  - Fix handling & transmission of errors from cast receiver to sender
+    - https://github.com/google/shaka-player/issues/1065
+
+Docs:
+  - Added a tutorial for the offline storage and playback APIs
+    - https://github.com/google/shaka-player/issues/1037
+
+
 ## 2.2.3 (2017-10-17)
 
 New features:
