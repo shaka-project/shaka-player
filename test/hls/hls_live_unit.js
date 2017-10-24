@@ -41,6 +41,8 @@ describe('HlsParser live', function() {
   var toUTF8 = shaka.util.StringUtils.toUTF8;
   /** @type {ArrayBuffer} */
   var segmentData;
+  /** @type {ArrayBuffer} */
+  var tsSegmentData;
   /** @const {number} */
   var segmentDataStartTime;
 
@@ -56,6 +58,18 @@ describe('HlsParser live', function() {
       0x01, 0x00, 0x00, 0x00, // version and flags
       0x00, 0x00, 0x00, 0x00, // baseMediaDecodeTime first 4 bytes
       0x00, 0x02, 0xBF, 0x20  // baseMediaDecodeTime last 4 bytes (180000)
+    ]).buffer;
+    tsSegmentData = new Uint8Array([
+      0x47, // TS sync byte (fixed value)
+      0x41, 0x01, // not corrupt, payload follows, packet ID 257
+      0x10, // not scrambled, no adaptation field, payload only, seq #0
+      0x00, 0x00, 0x01, // PES start code (fixed value)
+      0xe0, // stream ID (video stream 0)
+      0x00, 0x00, // PES packet length (doesn't matter)
+      0x80, // marker bits (fixed value), not scrambled, not priority
+      0x80, // PTS only, no DTS, other flags 0 (don't matter)
+      0x05, // remaining PES header length == 5 (one timestamp)
+      0x21, 0x00, 0x0b, 0x7e, 0x41 // PTS = 180000, encoded into 5 bytes
     ]).buffer;
     // 180000 divided by TS timescale (90000) = segment starts at 2s.
     segmentDataStartTime = 2;
@@ -390,7 +404,7 @@ describe('HlsParser live', function() {
                    mediaWithAdditionalSegment, [ref1, ref2]);
       });
 
-      it('gets start time from mp4 segment', function(done) {
+      it('parses start time from mp4 segments', function(done) {
         fakeNetEngine.setResponseMap({
           'test://master': toUTF8(master),
           'test://video': toUTF8(media),
@@ -448,6 +462,29 @@ describe('HlsParser live', function() {
           fakeNetEngine.expectRequest(
               'test://video',
               shaka.net.NetworkingEngine.RequestType.MANIFEST);
+        }).catch(fail).then(done);
+
+        shaka.polyfill.Promise.flush();
+      });
+
+      it('parses start time from ts segments', function(done) {
+        var tsMediaPlaylist = mediaWithRemovedSegment.replace(/\.mp4/g, '.ts');
+
+        fakeNetEngine.setResponseMap({
+          'test://master': toUTF8(master),
+          'test://video': toUTF8(tsMediaPlaylist),
+          'test://main2.ts': tsSegmentData
+        });
+
+        var ref = ManifestParser.makeReference(
+            'test://main2.ts', 1, segmentDataStartTime,
+            segmentDataStartTime + 2);
+
+        parser.start('test://master', playerInterface).then(function(manifest) {
+          var video = manifest.periods[0].variants[0].video;
+          ManifestParser.verifySegmentIndex(video, [ref]);
+          // In live content, we do not set presentationTimeOffset.
+          expect(video.presentationTimeOffset).toEqual(0);
         }).catch(fail).then(done);
 
         shaka.polyfill.Promise.flush();

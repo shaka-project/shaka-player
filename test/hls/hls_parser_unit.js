@@ -1281,6 +1281,8 @@ describe('HlsParser', function() {
   describe('getStartTime_', function() {
     /** @type {number} */
     var segmentDataStartTime;
+    /** @type {ArrayBuffer} */
+    var tsSegmentData;
 
     var master = [
       '#EXTM3U\n',
@@ -1315,6 +1317,18 @@ describe('HlsParser', function() {
 
         0x00, 0x00, 0x00, 0x00, // baseMediaDecodeTime first 4 bytes
         0x00, 0x02, 0xBF, 0x20  // baseMediaDecodeTime last 4 bytes (180000)
+      ]).buffer;
+      tsSegmentData = new Uint8Array([
+        0x47, // TS sync byte (fixed value)
+        0x41, 0x01, // not corrupt, payload follows, packet ID 257
+        0x10, // not scrambled, no adaptation field, payload only, seq #0
+        0x00, 0x00, 0x01, // PES start code (fixed value)
+        0xe0, // stream ID (video stream 0)
+        0x00, 0x00, // PES packet length (doesn't matter)
+        0x80, // marker bits (fixed value), not scrambled, not priority
+        0x80, // PTS only, no DTS, other flags 0 (don't matter)
+        0x05, // remaining PES header length == 5 (one timestamp)
+        0x21, 0x00, 0x0b, 0x7e, 0x41 // PTS = 180000, encoded into 5 bytes
       ]).buffer;
       // 180000 divided by TS timescale (90000) = segment starts at 2s.
       segmentDataStartTime = 2;
@@ -1353,6 +1367,35 @@ describe('HlsParser', function() {
       }).catch(fail).then(done);
     });
 
+    it('parses start time from ts segments', function(done) {
+      var tsMediaPlaylist = media.replace(/\.mp4/g, '.ts');
+
+      fakeNetEngine.setResponseMap({
+        'test://master': toUTF8(master),
+        'test://video': toUTF8(tsMediaPlaylist),
+        'test://main.ts': tsSegmentData
+      });
+
+      var ref = ManifestParser.makeReference(
+          'test://main.ts' /* uri */,
+          0 /* position */,
+          0 /* startTime */,
+          5 /* endTime */,
+          '' /* baseUri */,
+          expectedStartByte,
+          expectedEndByte);
+
+      parser.start('test://master', playerInterface)
+        .then(function(manifest) {
+            var video = manifest.periods[0].variants[0].video;
+            ManifestParser.verifySegmentIndex(video, [ref]);
+            // In VOD content, we set the presentationTimeOffset to align the
+            // content to presentation time 0.
+            expect(video.presentationTimeOffset)
+                .toEqual(segmentDataStartTime);
+          }).catch(fail).then(done);
+    });
+
     it('sets duration with respect to presentation offset', function(done) {
       fakeNetEngine.setResponseMap({
         'test://master': toUTF8(master),
@@ -1372,28 +1415,6 @@ describe('HlsParser', function() {
         expect(ref.endTime - ref.startTime).toEqual(5);
         expect(presentationTimeline.getDuration()).toEqual(5);
       }).catch(fail).then(done);
-    });
-
-    it('cannot parse timestamps from non-mp4 content', function(done) {
-      var tsMediaPlaylist = media.replace(/\.mp4/g, '.ts');
-
-      fakeNetEngine.setResponseMap({
-        'test://master': toUTF8(master),
-        'test://video': toUTF8(tsMediaPlaylist),
-        'test://main.ts': new ArrayBuffer(10)
-      });
-
-      var error = new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.HLS_COULD_NOT_PARSE_SEGMENT_START_TIME);
-
-      parser.start('test://master', playerInterface)
-          .then(fail)
-          .catch(function(e) {
-            shaka.test.Util.expectToEqualError(e, error);
-          })
-        .then(done);
     });
   });
 });
