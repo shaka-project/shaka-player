@@ -1417,4 +1417,58 @@ describe('HlsParser', function() {
       }).catch(fail).then(done);
     });
   });
+
+  it('correctly detects VOD streams as non-live', function(done) {
+    var master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+      'RESOLUTION=960x540,FRAME-RATE=60\n',
+      'test://video'
+    ].join('');
+
+    var media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXTINF:5,\n',
+      'test://main.mp4'
+    ].join('');
+
+    fakeNetEngine.setResponseMap({
+      'test://master': toUTF8(master),
+      'test://video': toUTF8(media),
+      'test://main.mp4': segmentData
+    });
+
+    parser.start('test://master', playerInterface).then(function(manifest) {
+      expect(manifest.presentationTimeline.isLive()).toBe(false);
+    }).catch(fail).then(done);
+  });
+
+  it('correctly detects streams with ENDLIST as non-live', function(done) {
+    var master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+      'RESOLUTION=960x540,FRAME-RATE=60\n',
+      'test://video'
+    ].join('');
+
+    var media = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXTINF:5,\n',
+      'test://main.mp4\n',
+      '#EXT-X-ENDLIST'
+    ].join('');
+
+    fakeNetEngine.setResponseMap({
+      'test://master': toUTF8(master),
+      'test://video': toUTF8(media),
+      'test://main.mp4': segmentData
+    });
+
+    parser.start('test://master', playerInterface).then(function(manifest) {
+      expect(manifest.presentationTimeline.isLive()).toBe(false);
+    }).catch(fail).then(done);
+  });
 });

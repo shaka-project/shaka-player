@@ -301,17 +301,29 @@ describe('HlsParser live', function() {
           'test://main.mp4': segmentData
         });
 
-        parser.start('test://master', playerInterface)
-        .then(function(manifest) {
-              expect(manifest.presentationTimeline.isLive()).toBe(true);
-              fakeNetEngine.setResponseMapAsText({
-                'test://master': master,
-                'test://video': mediaWithAdditionalSegment + '#EXT-X-ENDLIST\n'
-              });
+        parser.start('test://master', playerInterface).then(function(manifest) {
+          expect(manifest.presentationTimeline.isLive()).toBe(true);
+          fakeNetEngine.setResponseMapAsText({
+            'test://master': master,
+            'test://video': mediaWithAdditionalSegment + '#EXT-X-ENDLIST\n'
+          });
 
-              delayForUpdatePeriod();
-              expect(manifest.presentationTimeline.isLive()).toBe(false);
-            }).catch(fail).then(done);
+          delayForUpdatePeriod();
+          expect(manifest.presentationTimeline.isLive()).toBe(false);
+        }).catch(fail).then(done);
+        shaka.polyfill.Promise.flush();
+      });
+
+      it('starts presentation as VOD when ENDLIST is present', function(done) {
+        fakeNetEngine.setResponseMap({
+          'test://master': toUTF8(master),
+          'test://video': toUTF8(media + '#EXT-X-ENDLIST'),
+          'test://main.mp4': segmentData
+        });
+
+        parser.start('test://master', playerInterface).then(function(manifest) {
+          expect(manifest.presentationTimeline.isLive()).toBe(false);
+        }).catch(fail).then(done);
         shaka.polyfill.Promise.flush();
       });
     });
@@ -355,6 +367,18 @@ describe('HlsParser live', function() {
       '#EXTINF:2,\n',
       'test://main2.mp4\n'
     ].join('');
+
+    it('starts presentation as VOD when ENDLIST is present', function(done) {
+      fakeNetEngine.setResponseMap({
+        'test://master': toUTF8(master),
+        'test://video': toUTF8(media + '#EXT-X-ENDLIST'),
+        'test://main.mp4': segmentData
+      });
+
+      parser.start('test://master', playerInterface).then(function(manifest) {
+        expect(manifest.presentationTimeline.isLive()).toBe(false);
+      }).catch(fail).then(done);
+    });
 
     describe('update', function() {
       beforeAll(function() {
