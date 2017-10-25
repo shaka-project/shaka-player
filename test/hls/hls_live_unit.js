@@ -35,7 +35,7 @@ describe('HlsParser live', function() {
     '#EXTM3U\n',
     '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
     'RESOLUTION=960x540,FRAME-RATE=60\n',
-    'test://video\n'
+    'test:/video\n'
   ].join('');
   /** @const {function(string):ArrayBuffer} */
   var toUTF8 = shaka.util.StringUtils.toUTF8;
@@ -116,13 +116,13 @@ describe('HlsParser live', function() {
   function testUpdate(done, master, initialMedia, initialReferences,
                       updatedMedia, updatedReferences) {
     fakeNetEngine.setResponseMap({
-      'test://master': toUTF8(master),
-      'test://video': toUTF8(initialMedia),
-      'test://video2': toUTF8(initialMedia),
-      'test://audio': toUTF8(initialMedia),
-      'test://main.mp4': segmentData
+      'test:/master': toUTF8(master),
+      'test:/video': toUTF8(initialMedia),
+      'test:/video2': toUTF8(initialMedia),
+      'test:/audio': toUTF8(initialMedia),
+      'test:/main.mp4': segmentData
     });
-    parser.start('test://master', playerInterface)
+    parser.start('test:/master', playerInterface)
       .then(function(manifest) {
           var variants = manifest.periods[0].variants;
           for (var i = 0; i < variants.length; i++) {
@@ -134,10 +134,10 @@ describe('HlsParser live', function() {
           }
 
           fakeNetEngine.setResponseMapAsText({
-            'test://master': master,
-            'test://video': updatedMedia,
-            'test://video2': updatedMedia,
-            'test://audio': updatedMedia
+            'test:/master': master,
+            'test:/video': updatedMedia,
+            'test:/video2': updatedMedia,
+            'test:/audio': updatedMedia
           });
 
           delayForUpdatePeriod();
@@ -158,30 +158,30 @@ describe('HlsParser live', function() {
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:EVENT\n',
       '#EXT-X-TARGETDURATION:5\n',
-      '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MAP:URI="test:/main.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:2,\n',
-      'test://main.mp4\n'
+      'test:/main.mp4\n'
     ].join('');
 
     var mediaWithAdditionalSegment = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:EVENT\n',
       '#EXT-X-TARGETDURATION:5\n',
-      '#EXT-X-MAP:URI="test://main.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MAP:URI="test:/main.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:2,\n',
-      'test://main.mp4\n',
+      'test:/main.mp4\n',
       '#EXTINF:2,\n',
-      'test://main2.mp4\n'
+      'test:/main2.mp4\n'
     ].join('');
 
     it('treats already ended presentation like VOD', function(done) {
       fakeNetEngine.setResponseMap({
-        'test://master': toUTF8(master),
-        'test://video': toUTF8(media + '#EXT-X-ENDLIST'),
-        'test://main.mp4': segmentData
+        'test:/master': toUTF8(master),
+        'test:/video': toUTF8(media + '#EXT-X-ENDLIST'),
+        'test:/main.mp4': segmentData
       });
 
-      parser.start('test://master', playerInterface)
+      parser.start('test:/master', playerInterface)
         .then(function(manifest) {
             expect(manifest.presentationTimeline.isLive()).toBe(false);
             expect(manifest.presentationTimeline.isInProgress()).toBe(false);
@@ -203,9 +203,9 @@ describe('HlsParser live', function() {
       });
 
       it('adds new segments when they appear', function(done) {
-        var ref1 = ManifestParser.makeReference('test://main.mp4',
+        var ref1 = ManifestParser.makeReference('test:/main.mp4',
                                                 0, 2, 4);
-        var ref2 = ManifestParser.makeReference('test://main2.mp4',
+        var ref2 = ManifestParser.makeReference('test:/main2.mp4',
                                                 1, 4, 6);
 
         testUpdate(done, master, media, [ref1],
@@ -216,13 +216,13 @@ describe('HlsParser live', function() {
         var secondVariant = [
           '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1",',
           'RESOLUTION=1200x940,FRAME-RATE=60\n',
-          'test://video2'
+          'test:/video2'
         ].join('');
 
         var masterWithTwoVariants = master + secondVariant;
-        var ref1 = ManifestParser.makeReference('test://main.mp4',
+        var ref1 = ManifestParser.makeReference('test:/main.mp4',
                                                 0, 2, 4);
-        var ref2 = ManifestParser.makeReference('test://main2.mp4',
+        var ref2 = ManifestParser.makeReference('test:/main2.mp4',
                                                 1, 4, 6);
 
         testUpdate(done, masterWithTwoVariants, media, [ref1],
@@ -232,13 +232,13 @@ describe('HlsParser live', function() {
       it('updates all streams', function(done) {
         var audio = [
           '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
-          'URI="test://audio"\n'
+          'URI="test:/audio"\n'
         ].join('');
 
         var masterWithAudio = master + audio;
-        var ref1 = ManifestParser.makeReference('test://main.mp4',
+        var ref1 = ManifestParser.makeReference('test:/main.mp4',
                                                 0, 2, 4);
-        var ref2 = ManifestParser.makeReference('test://main2.mp4',
+        var ref2 = ManifestParser.makeReference('test:/main2.mp4',
                                                 1, 4, 6);
 
         testUpdate(done, masterWithAudio, media, [ref1],
@@ -248,44 +248,44 @@ describe('HlsParser live', function() {
       it('handles multiple updates', function(done) {
         var newSegment1 = [
           '#EXTINF:2,\n',
-          'test://main2.mp4\n'
+          'test:/main2.mp4\n'
         ].join('');
 
         var newSegment2 = [
           '#EXTINF:2,\n',
-          'test://main3.mp4\n'
+          'test:/main3.mp4\n'
         ].join('');
 
         var updatedMedia1 = media + newSegment1;
         var updatedMedia2 = updatedMedia1 + newSegment2;
-        var ref1 = ManifestParser.makeReference('test://main.mp4',
+        var ref1 = ManifestParser.makeReference('test:/main.mp4',
                                                 0, 2, 4);
-        var ref2 = ManifestParser.makeReference('test://main2.mp4',
+        var ref2 = ManifestParser.makeReference('test:/main2.mp4',
                                                 1, 4, 6);
-        var ref3 = ManifestParser.makeReference('test://main3.mp4',
+        var ref3 = ManifestParser.makeReference('test:/main3.mp4',
                                                 2, 6, 8);
 
         fakeNetEngine.setResponseMap({
-          'test://master': toUTF8(master),
-          'test://video': toUTF8(media),
-          'test://main.mp4': segmentData
+          'test:/master': toUTF8(master),
+          'test:/video': toUTF8(media),
+          'test:/main.mp4': segmentData
         });
-        parser.start('test://master', playerInterface)
+        parser.start('test:/master', playerInterface)
           .then(function(manifest) {
               var video = manifest.periods[0].variants[0].video;
               ManifestParser.verifySegmentIndex(video, [ref1]);
 
               fakeNetEngine.setResponseMapAsText({
-                'test://master': master,
-                'test://video': updatedMedia1
+                'test:/master': master,
+                'test:/video': updatedMedia1
               });
 
               delayForUpdatePeriod();
               ManifestParser.verifySegmentIndex(video, [ref1, ref2]);
 
               fakeNetEngine.setResponseMapAsText({
-                'test://master': master,
-                'test://video': updatedMedia2
+                'test:/master': master,
+                'test:/video': updatedMedia2
               });
 
               delayForUpdatePeriod();
@@ -296,16 +296,16 @@ describe('HlsParser live', function() {
 
       it('converts presentation to VOD when it is finished', function(done) {
         fakeNetEngine.setResponseMap({
-          'test://master': toUTF8(master),
-          'test://video': toUTF8(media),
-          'test://main.mp4': segmentData
+          'test:/master': toUTF8(master),
+          'test:/video': toUTF8(media),
+          'test:/main.mp4': segmentData
         });
 
-        parser.start('test://master', playerInterface).then(function(manifest) {
+        parser.start('test:/master', playerInterface).then(function(manifest) {
           expect(manifest.presentationTimeline.isLive()).toBe(true);
           fakeNetEngine.setResponseMapAsText({
-            'test://master': master,
-            'test://video': mediaWithAdditionalSegment + '#EXT-X-ENDLIST\n'
+            'test:/master': master,
+            'test:/video': mediaWithAdditionalSegment + '#EXT-X-ENDLIST\n'
           });
 
           delayForUpdatePeriod();
@@ -316,12 +316,12 @@ describe('HlsParser live', function() {
 
       it('starts presentation as VOD when ENDLIST is present', function(done) {
         fakeNetEngine.setResponseMap({
-          'test://master': toUTF8(master),
-          'test://video': toUTF8(media + '#EXT-X-ENDLIST'),
-          'test://main.mp4': segmentData
+          'test:/master': toUTF8(master),
+          'test:/video': toUTF8(media + '#EXT-X-ENDLIST'),
+          'test:/main.mp4': segmentData
         });
 
-        parser.start('test://master', playerInterface).then(function(manifest) {
+        parser.start('test:/master', playerInterface).then(function(manifest) {
           expect(manifest.presentationTimeline.isLive()).toBe(false);
         }).catch(fail).then(done);
         shaka.polyfill.Promise.flush();
@@ -335,7 +335,7 @@ describe('HlsParser live', function() {
       '#EXT-X-TARGETDURATION:5\n',
       '#EXT-X-MEDIA-SEQUENCE:0\n',
       '#EXTINF:2,\n',
-      'test://main.mp4\n'
+      'test:/main.mp4\n'
     ].join('');
 
     var mediaWithByteRange = [
@@ -344,7 +344,7 @@ describe('HlsParser live', function() {
       '#EXT-X-MEDIA-SEQUENCE:0\n',
       '#EXT-X-BYTERANGE:121090@616\n',
       '#EXTINF:2,\n',
-      'test://main.mp4\n'
+      'test:/main.mp4\n'
     ].join('');
 
     var expectedStartByte = 616;
@@ -355,9 +355,9 @@ describe('HlsParser live', function() {
       '#EXT-X-TARGETDURATION:5\n',
       '#EXT-X-MEDIA-SEQUENCE:0\n',
       '#EXTINF:2,\n',
-      'test://main.mp4\n',
+      'test:/main.mp4\n',
       '#EXTINF:2,\n',
-      'test://main2.mp4\n'
+      'test:/main2.mp4\n'
     ].join('');
 
     var mediaWithRemovedSegment = [
@@ -365,17 +365,17 @@ describe('HlsParser live', function() {
       '#EXT-X-TARGETDURATION:5\n',
       '#EXT-X-MEDIA-SEQUENCE:1\n',
       '#EXTINF:2,\n',
-      'test://main2.mp4\n'
+      'test:/main2.mp4\n'
     ].join('');
 
     it('starts presentation as VOD when ENDLIST is present', function(done) {
       fakeNetEngine.setResponseMap({
-        'test://master': toUTF8(master),
-        'test://video': toUTF8(media + '#EXT-X-ENDLIST'),
-        'test://main.mp4': segmentData
+        'test:/master': toUTF8(master),
+        'test:/video': toUTF8(media + '#EXT-X-ENDLIST'),
+        'test:/main.mp4': segmentData
       });
 
-      parser.start('test://master', playerInterface).then(function(manifest) {
+      parser.start('test:/master', playerInterface).then(function(manifest) {
         expect(manifest.presentationTimeline.isLive()).toBe(false);
       }).catch(fail).then(done);
     });
@@ -393,9 +393,9 @@ describe('HlsParser live', function() {
       });
 
       it('adds new segments when they appear', function(done) {
-        var ref1 = ManifestParser.makeReference('test://main.mp4',
+        var ref1 = ManifestParser.makeReference('test:/main.mp4',
                                                 0, 2, 4);
-        var ref2 = ManifestParser.makeReference('test://main2.mp4',
+        var ref2 = ManifestParser.makeReference('test:/main2.mp4',
                                                 1, 4, 6);
 
         testUpdate(done, master, media, [ref1],
@@ -403,9 +403,9 @@ describe('HlsParser live', function() {
       });
 
       it('evicts removed segments', function(done) {
-        var ref1 = ManifestParser.makeReference('test://main.mp4',
+        var ref1 = ManifestParser.makeReference('test:/main.mp4',
                                                 0, 2, 4);
-        var ref2 = ManifestParser.makeReference('test://main2.mp4',
+        var ref2 = ManifestParser.makeReference('test:/main2.mp4',
                                                 1, 4, 6);
 
         testUpdate(done, master, mediaWithAdditionalSegment, [ref1, ref2],
@@ -413,15 +413,15 @@ describe('HlsParser live', function() {
       });
 
       it('handles updates with redirects', function(done) {
-        var ref1 = ManifestParser.makeReference('test://main.mp4',
+        var ref1 = ManifestParser.makeReference('test:/main.mp4',
                                                 0, 2, 4);
-        var ref2 = ManifestParser.makeReference('test://main2.mp4',
+        var ref2 = ManifestParser.makeReference('test:/main2.mp4',
                                                 1, 4, 6);
 
         fakeNetEngine.setResponseFilter(function(type, response) {
           // Simulate a redirect by changing the response URI
-          if (response.uri.indexOf('test://redirected/') == 0) return;
-          response.uri = response.uri.replace('test://', 'test://redirected/');
+          if (response.uri.indexOf('test:/redirected/') == 0) return;
+          response.uri = response.uri.replace('test:/', 'test:/redirected/');
         });
 
         testUpdate(done, master, media, [ref1],
@@ -430,16 +430,16 @@ describe('HlsParser live', function() {
 
       it('parses start time from mp4 segments', function(done) {
         fakeNetEngine.setResponseMap({
-          'test://master': toUTF8(master),
-          'test://video': toUTF8(media),
-          'test://main.mp4': segmentData
+          'test:/master': toUTF8(master),
+          'test:/video': toUTF8(media),
+          'test:/main.mp4': segmentData
         });
 
         var ref = ManifestParser.makeReference(
-            'test://main.mp4', 0, segmentDataStartTime,
+            'test:/main.mp4', 0, segmentDataStartTime,
             segmentDataStartTime + 2);
 
-        parser.start('test://master', playerInterface).then(function(manifest) {
+        parser.start('test:/master', playerInterface).then(function(manifest) {
           var video = manifest.periods[0].variants[0].video;
           ManifestParser.verifySegmentIndex(video, [ref]);
 
@@ -451,28 +451,28 @@ describe('HlsParser live', function() {
 
       it('gets start time on update without segment request', function(done) {
         fakeNetEngine.setResponseMap({
-          'test://master': toUTF8(master),
-          'test://video': toUTF8(mediaWithAdditionalSegment),
-          'test://main.mp4': segmentData
+          'test:/master': toUTF8(master),
+          'test:/video': toUTF8(mediaWithAdditionalSegment),
+          'test:/main.mp4': segmentData
         });
 
         var ref1 = ManifestParser.makeReference(
-            'test://main.mp4', 0, segmentDataStartTime,
+            'test:/main.mp4', 0, segmentDataStartTime,
             segmentDataStartTime + 2);
 
         var ref2 = ManifestParser.makeReference(
-            'test://main2.mp4', 1, segmentDataStartTime + 2,
+            'test:/main2.mp4', 1, segmentDataStartTime + 2,
             segmentDataStartTime + 4);
 
-        parser.start('test://master', playerInterface).then(function(manifest) {
+        parser.start('test:/master', playerInterface).then(function(manifest) {
           var video = manifest.periods[0].variants[0].video;
           ManifestParser.verifySegmentIndex(video, [ref1, ref2]);
 
           fakeNetEngine.setResponseMap({
-            'test://master': toUTF8(master),
-            'test://video': toUTF8(mediaWithRemovedSegment),
-            'test://main.mp4': segmentData,
-            'test://main2.mp4': segmentData
+            'test:/master': toUTF8(master),
+            'test:/video': toUTF8(mediaWithRemovedSegment),
+            'test:/main.mp4': segmentData,
+            'test:/main2.mp4': segmentData
           });
 
           fakeNetEngine.request.calls.reset();
@@ -484,7 +484,7 @@ describe('HlsParser live', function() {
           // No segment requests were needed to get the start time.
           expect(fakeNetEngine.request.calls.count()).toBe(1);
           fakeNetEngine.expectRequest(
-              'test://video',
+              'test:/video',
               shaka.net.NetworkingEngine.RequestType.MANIFEST);
         }).catch(fail).then(done);
 
@@ -495,16 +495,16 @@ describe('HlsParser live', function() {
         var tsMediaPlaylist = mediaWithRemovedSegment.replace(/\.mp4/g, '.ts');
 
         fakeNetEngine.setResponseMap({
-          'test://master': toUTF8(master),
-          'test://video': toUTF8(tsMediaPlaylist),
-          'test://main2.ts': tsSegmentData
+          'test:/master': toUTF8(master),
+          'test:/video': toUTF8(tsMediaPlaylist),
+          'test:/main2.ts': tsSegmentData
         });
 
         var ref = ManifestParser.makeReference(
-            'test://main2.ts', 1, segmentDataStartTime,
+            'test:/main2.ts', 1, segmentDataStartTime,
             segmentDataStartTime + 2);
 
-        parser.start('test://master', playerInterface).then(function(manifest) {
+        parser.start('test:/master', playerInterface).then(function(manifest) {
           var video = manifest.periods[0].variants[0].video;
           ManifestParser.verifySegmentIndex(video, [ref]);
           // In live content, we do not set presentationTimeOffset.
@@ -516,13 +516,13 @@ describe('HlsParser live', function() {
 
       it('gets start time of segments with byte range', function(done) {
         fakeNetEngine.setResponseMap({
-          'test://master': toUTF8(master),
-          'test://video': toUTF8(mediaWithByteRange),
-          'test://main.mp4': segmentData
+          'test:/master': toUTF8(master),
+          'test:/video': toUTF8(mediaWithByteRange),
+          'test:/main.mp4': segmentData
         });
 
         var ref = ManifestParser.makeReference(
-            'test://main.mp4' /* uri */,
+            'test:/main.mp4' /* uri */,
             0 /* position */,
             segmentDataStartTime /* start */,
             segmentDataStartTime + 2 /* end */,
@@ -530,14 +530,14 @@ describe('HlsParser live', function() {
             expectedStartByte,
             expectedEndByte);
 
-        parser.start('test://master', playerInterface).then(function(manifest) {
+        parser.start('test:/master', playerInterface).then(function(manifest) {
           var video = manifest.periods[0].variants[0].video;
           ManifestParser.verifySegmentIndex(video, [ref]);
 
           // There should have been a range request for this segment to get the
           // start time.
           fakeNetEngine.expectRangeRequest(
-              'test://main.mp4',
+              'test:/main.mp4',
               expectedStartByte,
               expectedEndByte);
         }).catch(fail).then(done);
