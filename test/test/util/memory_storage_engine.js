@@ -15,19 +15,19 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.test.MemoryDBEngine');
+goog.provide('shaka.test.MemoryStorageEngine');
 
 
 
 /**
- * An in-memory version of the DBEngine.  This is used to test the behavior of
- * Storage using a fake DBEngine.
+ * An in-memory implementation of IStorageEngine.  This is used to test the
+ * behavior of Storage using a fake StorageEngine.
  *
- * @constructor
  * @struct
- * @extends {shaka.offline.DBEngine}
+ * @constructor
+ * @implements {shaka.offline.IStorageEngine}
  */
-shaka.test.MemoryDBEngine = function() {
+shaka.test.MemoryStorageEngine = function() {
   /** @private {Object.<string, !Object.<number, *>>} */
   this.stores_ = null;
 
@@ -42,19 +42,19 @@ shaka.test.MemoryDBEngine = function() {
  * @param {string} storeName
  * @return {!Object.<number, *>}
  */
-shaka.test.MemoryDBEngine.prototype.getAllData = function(storeName) {
+shaka.test.MemoryStorageEngine.prototype.getAllData = function(storeName) {
   return this.getStore_(storeName);
 };
 
 
 /** @override */
-shaka.test.MemoryDBEngine.prototype.initialized = function() {
+shaka.test.MemoryStorageEngine.prototype.initialized = function() {
   return this.stores_ != null;
 };
 
 
 /** @override */
-shaka.test.MemoryDBEngine.prototype.init = function(storeMap) {
+shaka.test.MemoryStorageEngine.prototype.init = function(storeMap) {
   this.stores_ = {};
   this.ids_ = {};
   for (var storeName in storeMap) {
@@ -67,7 +67,7 @@ shaka.test.MemoryDBEngine.prototype.init = function(storeMap) {
 
 
 /** @override */
-shaka.test.MemoryDBEngine.prototype.destroy = function() {
+shaka.test.MemoryStorageEngine.prototype.destroy = function() {
   this.stores_ = null;
   this.ids_ = null;
   return Promise.resolve();
@@ -75,20 +75,21 @@ shaka.test.MemoryDBEngine.prototype.destroy = function() {
 
 
 /** @override */
-shaka.test.MemoryDBEngine.prototype.get = function(storeName, key) {
+shaka.test.MemoryStorageEngine.prototype.get = function(storeName, key) {
   return Promise.resolve(this.getStore_(storeName)[key]);
 };
 
 
 /** @override */
-shaka.test.MemoryDBEngine.prototype.forEach = function(storeName, callback) {
+shaka.test.MemoryStorageEngine.prototype.forEach = function(
+    storeName, callback) {
   shaka.util.MapUtils.values(this.getStore_(storeName)).forEach(callback);
   return Promise.resolve();
 };
 
 
 /** @override */
-shaka.test.MemoryDBEngine.prototype.insert = function(storeName, value) {
+shaka.test.MemoryStorageEngine.prototype.insert = function(storeName, value) {
   var store = this.getStore_(storeName);
   goog.asserts.assert(!store[value.key], 'Value must not already exist');
   store[value.key] = value;
@@ -97,7 +98,7 @@ shaka.test.MemoryDBEngine.prototype.insert = function(storeName, value) {
 
 
 /** @override */
-shaka.test.MemoryDBEngine.prototype.remove = function(storeName, key) {
+shaka.test.MemoryStorageEngine.prototype.remove = function(storeName, key) {
   var store = this.getStore_(storeName);
   delete store[key];
   return Promise.resolve();
@@ -105,7 +106,7 @@ shaka.test.MemoryDBEngine.prototype.remove = function(storeName, key) {
 
 
 /** @override */
-shaka.test.MemoryDBEngine.prototype.removeKeys = function(storeName,
+shaka.test.MemoryStorageEngine.prototype.removeKeys = function(storeName,
                                                           keys,
                                                           opt_onKeyRemoved) {
   var store = this.getStore_(storeName);
@@ -120,7 +121,7 @@ shaka.test.MemoryDBEngine.prototype.removeKeys = function(storeName,
 
 
 /** @override */
-shaka.test.MemoryDBEngine.prototype.reserveId = function(storeName) {
+shaka.test.MemoryStorageEngine.prototype.reserveId = function(storeName) {
   goog.asserts.assert(this.ids_, 'Must not be destroyed');
   goog.asserts.assert(storeName in this.ids_,
                       'Store ' + storeName + ' must appear in init()');
@@ -133,7 +134,7 @@ shaka.test.MemoryDBEngine.prototype.reserveId = function(storeName) {
  * @return {!Object.<number, *>}
  * @private
  */
-shaka.test.MemoryDBEngine.prototype.getStore_ = function(storeName) {
+shaka.test.MemoryStorageEngine.prototype.getStore_ = function(storeName) {
   goog.asserts.assert(this.stores_, 'Must not be destroyed');
   goog.asserts.assert(storeName in this.stores_,
                       'Store ' + storeName + ' must appear in init()');

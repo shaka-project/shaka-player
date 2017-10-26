@@ -56,7 +56,8 @@ describe('Offline', /** @suppress {accessControls} */ function() {
     player.addEventListener('error', fail);
     storage = new shaka.offline.Storage(player);
     dbEngine = new shaka.offline.DBEngine();
-    dbEngine.init(shaka.offline.OfflineUtils.DB_SCHEME).catch(fail).then(done);
+    shaka.offline.StorageEngineFactory.initEngine(dbEngine)
+        .catch(fail).then(done);
   });
 
   afterEach(function(done) {

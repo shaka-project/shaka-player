@@ -17,11 +17,7 @@
 
 describe('OfflineManifestParser', function() {
   /** @const */
-  var originalIsStorageEngineSupported =
-      shaka.offline.StorageEngineFactory.isStorageEngineSupported;
-  /** @const */
-  var originalCreateStorageEngine =
-      shaka.offline.StorageEngineFactory.createStorageEngine;
+  var mockSEFactory = new shaka.test.MockStorageEngineFactory();
 
   /** @const */
   var playerInterface =
@@ -36,23 +32,10 @@ describe('OfflineManifestParser', function() {
    * }}
    */
   var fakeStorageEngine;
-  /** @type {!jasmine.Spy} */
-  var fakeCreateStorageEngine;
   /** @type {shaka.offline.OfflineManifestParser} */
   var parser;
 
-  afterAll(function() {
-    shaka.offline.StorageEngineFactory.isStorageEngineSupported =
-        originalIsStorageEngineSupported;
-    shaka.offline.StorageEngineFactory.createStorageEngine =
-        originalCreateStorageEngine;
-  });
-
   beforeEach(function() {
-    shaka.offline.StorageEngineFactory.isStorageEngineSupported = function() {
-      return true;
-    };
-
     fakeStorageEngine = jasmine.createSpyObj(
         'DBEngine', ['init', 'destroy', 'get', 'insert']);
 
@@ -63,16 +46,19 @@ describe('OfflineManifestParser', function() {
     fakeStorageEngine.get.and.returnValue(getResolve);
     fakeStorageEngine.insert.and.returnValue(commonResolve);
 
-    fakeCreateStorageEngine = jasmine.createSpy('createStorageEngine');
-    fakeCreateStorageEngine.and.returnValue(fakeStorageEngine);
-    shaka.offline.StorageEngineFactory.createStorageEngine =
-        shaka.test.Util.spyFunc(fakeCreateStorageEngine);
+    var getStorageEngine = function() {
+      return Promise.resolve(fakeStorageEngine);
+    };
+
+    mockSEFactory.overrideIsSupported(true);
+    mockSEFactory.overrideCreate(getStorageEngine);
 
     parser = new shaka.offline.OfflineManifestParser();
   });
 
   afterEach(function() {
     parser.stop();
+    mockSEFactory.resetAll();
   });
 
   it('will query DBEngine for the manifest', function(done) {
@@ -92,8 +78,6 @@ describe('OfflineManifestParser', function() {
         .then(function(manifest) {
           expect(manifest).toBeTruthy();
 
-          expect(fakeCreateStorageEngine).toHaveBeenCalledTimes(1);
-          expect(fakeStorageEngine.init).toHaveBeenCalledTimes(1);
           expect(fakeStorageEngine.destroy).toHaveBeenCalledTimes(1);
           expect(fakeStorageEngine.get).toHaveBeenCalledTimes(1);
           expect(fakeStorageEngine.get).toHaveBeenCalledWith('manifest', 123);
@@ -116,8 +100,6 @@ describe('OfflineManifestParser', function() {
                   shaka.util.Error.Category.STORAGE,
                   shaka.util.Error.Code.REQUESTED_ITEM_NOT_FOUND, 123));
 
-          expect(fakeCreateStorageEngine).toHaveBeenCalledTimes(1);
-          expect(fakeStorageEngine.init).toHaveBeenCalledTimes(1);
           expect(fakeStorageEngine.destroy).toHaveBeenCalledTimes(1);
           expect(fakeStorageEngine.get).toHaveBeenCalledTimes(1);
           expect(fakeStorageEngine.get).toHaveBeenCalledWith('manifest', 123);
@@ -132,8 +114,6 @@ describe('OfflineManifestParser', function() {
     parser.start(uri, playerInterface)
         .then(fail)
         .catch(function(err) {
-          expect(fakeCreateStorageEngine).toHaveBeenCalledTimes(1);
-          expect(fakeStorageEngine.init).toHaveBeenCalledTimes(1);
           expect(fakeStorageEngine.destroy).toHaveBeenCalledTimes(1);
         })
         .then(done);
@@ -178,10 +158,8 @@ describe('OfflineManifestParser', function() {
           .then(function(manifest) {
             expect(manifest).toBeTruthy();
 
-            expect(fakeCreateStorageEngine).toHaveBeenCalledTimes(1);
             fakeStorageEngine.destroy.calls.reset();
             fakeStorageEngine.get.calls.reset();
-            fakeStorageEngine.init.calls.reset();
             fakeStorageEngine.insert.calls.reset();
           })
           .catch(fail)

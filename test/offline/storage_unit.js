@@ -22,14 +22,9 @@ describe('Storage', function() {
   /** @const */
   var SegmentReference = shaka.media.SegmentReference;
 
-  /** @const */
-  var originalSupportsStorageEngine =
-      shaka.offline.StorageEngineFactory.supportsStorageEngine;
-  /** @const */
-  var originalCreateStorageEngine =
-      shaka.offline.StorageEngineFactory.createStorageEngine;
+  var mockSEFactory = new shaka.test.MockStorageEngineFactory();
 
-  /** @type {shaka.test.MemoryDBEngine} */
+  /** @type {!shaka.offline.IStorageEngine} */
   var fakeStorageEngine;
   /** @type {!shaka.offline.Storage} */
   var storage;
@@ -38,23 +33,13 @@ describe('Storage', function() {
   /** @type {!shaka.test.FakeNetworkingEngine} */
   var netEngine;
 
-  afterAll(function() {
-    shaka.offline.StorageEngineFactory.supportsStorageEngine =
-        originalSupportsStorageEngine;
-    shaka.offline.StorageEngineFactory.createStorageEngine =
-        originalCreateStorageEngine;
-  });
-
   beforeEach(function(done) {
-    shaka.offline.StorageEngineFactory.supportsStorageEngine = function() {
-      return true;
-    };
+    fakeStorageEngine = new shaka.test.MemoryStorageEngine();
 
-    fakeStorageEngine = new shaka.test.MemoryDBEngine();
-
-    shaka.offline.StorageEngineFactory.createStorageEngine = function() {
-      return fakeStorageEngine;
-    };
+    mockSEFactory.overrideIsSupported(true);
+    mockSEFactory.overrideCreate(function() {
+      return Promise.resolve(fakeStorageEngine);
+    });
 
     netEngine = new shaka.test.FakeNetworkingEngine();
 
@@ -69,13 +54,13 @@ describe('Storage', function() {
 
     storage = new shaka.offline.Storage(player);
 
-    fakeStorageEngine.init(shaka.offline.OfflineUtils.DB_SCHEME)
-        .catch(fail)
-        .then(done);
+    shaka.offline.StorageEngineFactory.initEngine(fakeStorageEngine)
+        .catch(fail).then(done);
   });
 
   afterEach(function(done) {
     storage.destroy().catch(fail).then(done);
+    mockSEFactory.resetAll();
   });
 
   it('lists stored manifests', function(done) {
@@ -439,16 +424,25 @@ describe('Storage', function() {
     });
 
     it('throws an error if storage is not supported', function(done) {
-      fakeStorageEngine = null;
-      // Recreate Storage object so null fakeStorageEngine takes effect.
-      storage = new shaka.offline.Storage(player);
-      storage.store('', {}).then(fail).catch(function(error) {
-        var expectedError = new shaka.util.Error(
-            shaka.util.Error.Severity.CRITICAL,
-            shaka.util.Error.Category.STORAGE,
-            shaka.util.Error.Code.STORAGE_NOT_SUPPORTED);
-        shaka.test.Util.expectToEqualError(error, expectedError);
-      }).then(done);
+      var expectedError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.STORAGE,
+          shaka.util.Error.Code.STORAGE_NOT_SUPPORTED);
+
+      mockSEFactory.overrideIsSupported(false);
+      mockSEFactory.resetCreate();
+
+      // Recreate Storage object so that the changes to mock will take effect.
+      Promise.resolve()
+          .then(function() {
+            storage = new shaka.offline.Storage(player);
+            return storage.store('', {});
+          })
+          .then(fail)
+          .catch(function(error) {
+            shaka.test.Util.expectToEqualError(error, expectedError);
+          })
+          .then(done);
     });
 
     it('throws an error if destroyed mid-store', function(done) {
@@ -1161,10 +1155,19 @@ describe('Storage', function() {
      * @param {number} segmentCount
      */
     function expectDatabaseCount(manifestCount, segmentCount) {
-      var manifests = fakeStorageEngine.getAllData('manifest');
-      expect(Object.keys(manifests).length).toBe(manifestCount);
-      var segments = fakeStorageEngine.getAllData('segment');
-      expect(Object.keys(segments).length).toBe(segmentCount);
+      var count;
+
+      count = 0;
+      fakeStorageEngine.forEach('manifest', function(manifest) {
+        count++;
+      });
+      expect(count).toBe(manifestCount);
+
+      count = 0;
+      fakeStorageEngine.forEach('segment', function(segment) {
+        count++;
+      });
+      expect(count).toBe(segmentCount);
     }
 
     /**
