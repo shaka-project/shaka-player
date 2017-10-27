@@ -26,6 +26,8 @@ describe('Player', function() {
   /** @const */
   var originalLogWarn = shaka.log.warning;
   /** @const */
+  var originalLogAlwaysWarn = shaka.log.alwaysWarn;
+  /** @const */
   var originalIsTypeSupported = window.MediaSource.isTypeSupported;
 
   /** @type {!jasmine.Spy} */
@@ -70,6 +72,7 @@ describe('Player', function() {
     shaka.log.error = shaka.test.Util.spyFunc(logErrorSpy);
     logWarnSpy = jasmine.createSpy('shaka.log.warning');
     shaka.log.warning = shaka.test.Util.spyFunc(logWarnSpy);
+    shaka.log.alwaysWarn = shaka.test.Util.spyFunc(logWarnSpy);
   });
 
   beforeEach(function() {
@@ -157,6 +160,7 @@ describe('Player', function() {
   afterAll(function() {
     shaka.log.error = originalLogError;
     shaka.log.warning = originalLogWarn;
+    shaka.log.alwaysWarn = originalLogAlwaysWarn;
     window.MediaSource.isTypeSupported = originalIsTypeSupported;
   });
 
