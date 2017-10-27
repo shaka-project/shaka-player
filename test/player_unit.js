@@ -809,6 +809,43 @@ describe('Player', function() {
       .catch(fail)
       .then(done);
     });
+
+    it('does not clear buffers when restrictions change', function(done) {
+      var smallBandwidth = 200000;
+      var largeBandwidth = 1000000;
+
+      var smallDelay = 0.5;
+      var doNotClear = false;
+
+      var smallBandwidthSettings = {
+        abr: {restrictions: {maxBandwidth: smallBandwidth}}
+      };
+
+      var largeBandwidthSettings = {
+        abr: {restrictions: {maxBandwidth: largeBandwidth}}
+      };
+
+      var parser = new shaka.test.FakeManifestParser(manifest);
+      var factory = function() { return parser; };
+
+      var switchVariantSpy = spyOn(player, 'switchVariant_');
+
+      player.configure(smallBandwidthSettings);
+
+      player.load('', 0, factory)
+          .then(function() {
+            player.configure(largeBandwidthSettings);
+            // Delay to ensure that the switch would have been called.
+            return shaka.test.Util.delay(smallDelay);
+          })
+          .then(function() {
+            expect(switchVariantSpy).toHaveBeenCalledWith(
+                /* variant */ jasmine.anything(),
+                doNotClear);
+          })
+          .catch(fail)
+          .then(done);
+    });
   });
 
   describe('AbrManager', function() {
