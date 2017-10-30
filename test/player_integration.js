@@ -312,6 +312,50 @@ describe('Player', function() {
     }
   });
 
+  describe('cancel', function() {
+    /** @type {!jasmine.Spy} */
+    var schemeSpy;
+
+    beforeAll(function() {
+      schemeSpy = jasmine.createSpy('reject scheme');
+      schemeSpy.and.callFake(function() {
+        // Throw a recoverable error so it will retry.
+        var error = new shaka.util.Error(
+            shaka.util.Error.Severity.RECOVERABLE,
+            shaka.util.Error.Category.NETWORK,
+            shaka.util.Error.Code.HTTP_ERROR);
+        return Promise.reject(error);
+      });
+      compiledShaka.net.NetworkingEngine.registerScheme('reject',
+          Util.spyFunc(schemeSpy));
+    });
+
+    afterEach(function() {
+      schemeSpy.calls.reset();
+    });
+
+    afterAll(function() {
+      compiledShaka.net.NetworkingEngine.unregisterScheme('reject');
+    });
+
+    function testTemplate(operationFn) {
+      // No data will be loaded for this test, so it can use a real manifest
+      // parser safely.
+      player.load('reject://www.foo.com/bar.mpd').then(fail);
+      return shaka.test.Util.delay(0.1).then(operationFn).then(function() {
+        expect(schemeSpy.calls.count()).toBe(1);
+      });
+    }
+
+    it('unload prevents further manifest load retries', function(done) {
+      testTemplate(function() { return player.unload(); }).then(done);
+    });
+
+    it('destroy prevents further manifest load retries', function(done) {
+      testTemplate(function() { return player.destroy(); }).then(done);
+    });
+  });
+
   /**
    * @param {!HTMLMediaElement} video
    * @param {number} playheadTime The time to wait for.

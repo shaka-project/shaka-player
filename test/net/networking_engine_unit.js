@@ -405,6 +405,64 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
     });
   });
 
+  describe('request cancel', function() {
+    /** @const */
+    var origSetTimeout = shaka.net.Backoff.setTimeout_;
+
+    /** @type {!jasmine.Spy} */
+    var setTimeoutSpy;
+
+    beforeAll(function() {
+      setTimeoutSpy = jasmine.createSpy('setTimeout');
+      setTimeoutSpy.and.callFake(origSetTimeout);
+      shaka.net.Backoff.setTimeout_ = Util.spyFunc(setTimeoutSpy);
+    });
+
+    afterAll(function() {
+      shaka.net.Backoff.setTimeout_ = origSetTimeout;
+    });
+
+    beforeEach(function() {
+      setTimeoutSpy.calls.reset();
+    });
+
+    it('cancels instantly if isCanceled is true from start', function(done) {
+      var isCanceled = function() { return true; };
+      var request = createRequest('resolve://foo');
+      networkingEngine.request(requestType, request, isCanceled)
+          .then(fail)
+          .catch(function() {
+            expect(setTimeoutSpy.calls.count()).toBe(0);
+            expect(resolveScheme.calls.count()).toBe(0);
+            done();
+          });
+    });
+
+    it('cancels when isCanceled becomes true', function(done) {
+      var request = createRequest('reject://foo', {
+        maxAttempts: 3,
+        baseDelay: 1000,
+        backoffFactor: 0,
+        fuzzFactor: 0,
+        timeout: 0
+      });
+
+      var cancelToken = false;
+      var isCanceled = function() { return cancelToken; };
+      networkingEngine.request(requestType, request, isCanceled)
+          .then(fail)
+          .catch(function() {
+            expect(setTimeoutSpy.calls.count()).toBe(1);
+            expect(cancelToken).toBe(true);
+            expect(rejectScheme.calls.count()).toBe(1);
+            done();
+          });
+      origSetTimeout(function() {
+        cancelToken = true;
+      }, 500);
+    });
+  });
+
   describe('request filter', function() {
     /** @type {!jasmine.Spy} */
     var filter;

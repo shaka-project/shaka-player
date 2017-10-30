@@ -568,7 +568,7 @@ describe('DashParser Live', function() {
     parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           expect(fakeNetEngine.request.calls.count()).toBe(1);
-          fakeNetEngine.expectRequest('dummy://foo', manifestRequest);
+          fakeNetEngine.expectCancelableRequest('dummy://foo', manifestRequest);
           fakeNetEngine.request.calls.reset();
 
           // Create a mock so we can verify it gives two URIs.
@@ -773,7 +773,8 @@ describe('DashParser Live', function() {
     it('stops updates', function(done) {
       parser.start(manifestUri, playerInterface)
           .then(function(manifest) {
-            fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
+            fakeNetEngine.expectCancelableRequest(
+                manifestUri, manifestRequestType);
             fakeNetEngine.request.calls.reset();
 
             parser.stop();
@@ -787,7 +788,8 @@ describe('DashParser Live', function() {
       parser.start('dummy://foo', playerInterface)
           .then(function(manifest) {
             expect(manifest).toBe(null);
-            fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
+            fakeNetEngine.expectCancelableRequest(
+                manifestUri, manifestRequestType);
             fakeNetEngine.request.calls.reset();
             delayForUpdatePeriod();
             // An update should not occur.
@@ -805,14 +807,16 @@ describe('DashParser Live', function() {
       parser.start('dummy://foo', playerInterface)
           .then(function(manifest) {
             expect(manifest).toBeTruthy();
-            fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
+            fakeNetEngine.expectCancelableRequest(
+                manifestUri, manifestRequestType);
             fakeNetEngine.request.calls.reset();
             var delay = fakeNetEngine.delayNextRequest();
 
             delayForUpdatePeriod();
             // The request was made but should not be resolved yet.
             expect(fakeNetEngine.request.calls.count()).toBe(1);
-            fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
+            fakeNetEngine.expectCancelableRequest(
+                manifestUri, manifestRequestType);
             fakeNetEngine.request.calls.reset();
             parser.stop();
             delay.resolve();
@@ -833,7 +837,7 @@ describe('DashParser Live', function() {
       Util.delay(0.2, realTimeout).then(function() {
         // This is the initial manifest request.
         expect(fakeNetEngine.request.calls.count()).toBe(1);
-        fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
+        fakeNetEngine.expectCancelableRequest(manifestUri, manifestRequestType);
         fakeNetEngine.request.calls.reset();
         // Resolve the manifest request and wait on the UTCTiming request.
         delay.resolve();
