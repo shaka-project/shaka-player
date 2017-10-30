@@ -62,8 +62,8 @@ due to a lack of [MediaSource Extensions][] on those platforms.*
 
  * [hosted demo](http://shaka-player-demo.appspot.com) (sources in `demo/`)
  * [hosted builds on cdnjs](https://cdnjs.com/libraries/shaka-player)
- * [mailing list](https://groups.google.com/forum/#!forum/shaka-player-users)
-     (join for release announcements or to discuss development)
+ * [announcement list](https://groups.google.com/forum/#!forum/shaka-player-users)
+     (join for release and survey announcements)
  * [hosted API docs](http://shaka-player-demo.appspot.com/docs/api/index.html)
  * [tutorials](http://shaka-player-demo.appspot.com/docs/api/tutorial-welcome.html)
 
