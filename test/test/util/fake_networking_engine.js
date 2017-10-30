@@ -92,6 +92,20 @@ shaka.test.FakeNetworkingEngine.expectRequest = function(
 
 
 /**
+ * Expects that a cancelable request for the given segment has occurred.
+ *
+ * @param {!Object} requestSpy
+ * @param {string} uri
+ * @param {shaka.net.NetworkingEngine.RequestType} type
+ */
+shaka.test.FakeNetworkingEngine.expectCancelableRequest = function(
+    requestSpy, uri, type) {
+  expect(requestSpy).toHaveBeenCalledWith(
+      type, jasmine.objectContaining({uris: [uri]}), jasmine.any(Function));
+};
+
+
+/**
  * Expects that a range request for the given segment has occurred.
  *
  * @param {!Object} requestSpy
@@ -184,6 +198,19 @@ shaka.test.FakeNetworkingEngine.prototype.delayNextRequest = function() {
  */
 shaka.test.FakeNetworkingEngine.prototype.expectRequest = function(uri, type) {
   shaka.test.FakeNetworkingEngine.expectRequest(this.request, uri, type);
+};
+
+
+/**
+ * Expects that a cancelable request for the given segment has occurred.
+ *
+ * @param {string} uri
+ * @param {shaka.net.NetworkingEngine.RequestType} type
+ */
+shaka.test.FakeNetworkingEngine.prototype.expectCancelableRequest =
+    function(uri, type) {
+  shaka.test.FakeNetworkingEngine.expectCancelableRequest(
+      this.request, uri, type);
 };
 
 

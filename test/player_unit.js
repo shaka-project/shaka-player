@@ -173,6 +173,7 @@ describe('Player', function() {
       player.load('', 0, factory).then(function() {
         return player.destroy();
       }).then(function() {
+        expect(abrManager.stop).toHaveBeenCalled();
         expect(networkingEngine.destroy).toHaveBeenCalled();
         expect(drmEngine.destroy).toHaveBeenCalled();
         expect(playhead.destroy).toHaveBeenCalled();
@@ -181,6 +182,28 @@ describe('Player', function() {
         expect(streamingEngine.destroy).toHaveBeenCalled();
         expect(textDisplayer.destroy).toHaveBeenCalled();
       }).catch(fail).then(done);
+    });
+
+    it('destroys parser first when interrupting load', function(done) {
+      var p = shaka.test.Util.delay(0.3);
+      var parser = new shaka.test.FakeManifestParser(manifest);
+      parser.start.and.returnValue(p);
+      parser.stop.and.callFake(function() {
+        expect(abrManager.stop).not.toHaveBeenCalled();
+        expect(networkingEngine.destroy).not.toHaveBeenCalled();
+        expect(textDisplayer.destroy).not.toHaveBeenCalled();
+      });
+      var factory = function() { return parser; };
+
+      player.load('', 0, factory).then(fail);
+      shaka.test.Util.delay(0.1).then(function() {
+        player.destroy().catch(fail).then(function() {
+          expect(abrManager.stop).toHaveBeenCalled();
+          expect(networkingEngine.destroy).toHaveBeenCalled();
+          expect(textDisplayer.destroy).toHaveBeenCalled();
+          expect(parser.stop).toHaveBeenCalled();
+        }).then(done);
+      });
     });
   });
 
