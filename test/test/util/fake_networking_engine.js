@@ -58,12 +58,15 @@ shaka.test.FakeNetworkingEngine = function(
   /** @type {!jasmine.Spy} */
   this.registerResponseFilter =
       jasmine.createSpy('registerResponseFilter')
-          .and.callFake(this.registerResponseFilterImpl_.bind(this));
+          .and.callFake(this.setResponseFilter.bind(this));
 
   /** @type {!jasmine.Spy} */
   this.unregisterResponseFilter =
       jasmine.createSpy('unregisterResponseFilter')
           .and.callFake(this.unregisterResponseFilterImpl_.bind(this));
+
+  /** @private {?shakaExtern.ResponseFilter} */
+  this.responseFilter_ = null;
 
   // The prototype has already been applied; create spies for the
   // methods but still call it by default.
@@ -135,6 +138,10 @@ shaka.test.FakeNetworkingEngine.prototype.requestImpl_ = function(
   /** @type {shakaExtern.Response} */
   var response = {uri: request.uris[0], data: result, headers: headers};
 
+  if (this.responseFilter_) {
+    this.responseFilter_(type, response);
+  }
+
   if (this.delayNextRequestPromise_) {
     var delay = this.delayNextRequestPromise_;
     this.delayNextRequestPromise_ = null;
@@ -146,22 +153,25 @@ shaka.test.FakeNetworkingEngine.prototype.requestImpl_ = function(
 
 
 /**
- * @param {shakaExtern.RequestFilter} filter
- * @private
+ * Useable by tests directly.  Library code will only call this via the Spy on
+ * registerResponseFilter.
+ *
+ * @param {shakaExtern.ResponseFilter} filter
  */
-shaka.test.FakeNetworkingEngine.prototype.registerResponseFilterImpl_ =
-    function(filter) {
+shaka.test.FakeNetworkingEngine.prototype.setResponseFilter = function(filter) {
   expect(filter).toEqual(jasmine.any(Function));
+  this.responseFilter_ = filter;
 };
 
 
 /**
- * @param {shakaExtern.RequestFilter} filter
+ * @param {shakaExtern.ResponseFilter} filter
  * @private
  */
 shaka.test.FakeNetworkingEngine.prototype.unregisterResponseFilterImpl_ =
     function(filter) {
   expect(filter).toEqual(jasmine.any(Function));
+  this.responseFilter_ = null;
 };
 
 

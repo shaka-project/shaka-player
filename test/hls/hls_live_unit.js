@@ -374,6 +374,22 @@ describe('HlsParser live', function() {
                    mediaWithRemovedSegment, [ref2]);
       });
 
+      it('handles updates with redirects', function(done) {
+        var ref1 = ManifestParser.makeReference('test://main.mp4',
+                                                0, 2, 4);
+        var ref2 = ManifestParser.makeReference('test://main2.mp4',
+                                                1, 4, 6);
+
+        fakeNetEngine.setResponseFilter(function(type, response) {
+          // Simulate a redirect by changing the response URI
+          if (response.uri.indexOf('test://redirected/') == 0) return;
+          response.uri = response.uri.replace('test://', 'test://redirected/');
+        });
+
+        testUpdate(done, master, media, [ref1],
+                   mediaWithAdditionalSegment, [ref1, ref2]);
+      });
+
       it('gets start time from mp4 segment', function(done) {
         fakeNetEngine.setResponseMap({
           'test://master': toUTF8(master),
