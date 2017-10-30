@@ -54,12 +54,11 @@ python build/all.py
 ```
 
 
-#### Join the community
+#### Join the announcement list
 
-If you want to discuss Shaka Player development or receive notifications when
-a new version is released, you should join our [users group].
-
-[users group]: https://groups.google.com/forum/#!forum/shaka-player-users
+If you want to receive release or survey announcements, you should join our
+[mailing list](https://groups.google.com/forum/#!forum/shaka-player-users).
+The list is very low volume.
 
 
 #### Continue the Tutorials
