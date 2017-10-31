@@ -170,7 +170,7 @@ shakaExtern.PeriodDB;
  * @property {boolean} primary
  *   Whether the stream set was primary.
  * @property {number} presentationTimeOffset
- *   The presentation time offset of the stream.
+ *   The presentation time offset of the stream, in seconds.
  * @property {string} contentType
  *   The type of the stream, 'audio', 'text', or 'video'.
  * @property {string} mimeType
