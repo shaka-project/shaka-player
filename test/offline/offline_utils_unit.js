@@ -39,6 +39,158 @@ describe('OfflineUtils', function() {
     timeline = new shaka.media.PresentationTimeline(null, 0);
   });
 
+  describe('recreateVariants', function() {
+    var OfflineUtils = shaka.offline.OfflineUtils;
+
+    /** @const {string} */
+    var audioType = 'audio';
+    /** @const {string} */
+    var videoType = 'video';
+
+    it('will create variants with variant ids', function() {
+      /** @type {!Array.<shakaExtern.StreamDB>} */
+      var audios = [
+        createStreamDB(0, audioType, [0]),
+        createStreamDB(1, audioType, [1])
+      ];
+      /** @type {!Array.<shakaExtern.StreamDB>} */
+      var videos = [
+        createStreamDB(2, videoType, [0]),
+        createStreamDB(3, videoType, [1])
+      ];
+      /** @type {!Array.<shakaExtern.DrmInfo>} */
+      var drm = [];
+
+      /** @type {!Array.<shakaExtern.Variant>} */
+      var variants = OfflineUtils.recreateVariants(audios, videos, drm);
+
+      expect(variants.length).toBe(2);
+
+      expect(variants[0].audio.id).toBe(0);
+      expect(variants[0].video.id).toBe(2);
+
+      expect(variants[1].audio.id).toBe(1);
+      expect(variants[1].video.id).toBe(3);
+    });
+
+    it('will create variants with no variant ids', function() {
+      /** @type {!Array.<shakaExtern.StreamDB>} */
+      var audios = [
+        createStreamDB(0, audioType, null),
+        createStreamDB(1, audioType, null)
+      ];
+      /** @type {!Array.<shakaExtern.StreamDB>} */
+      var videos = [
+        createStreamDB(2, videoType, null),
+        createStreamDB(3, videoType, null)
+      ];
+      /** @type {!Array.<shakaExtern.DrmInfo>} */
+      var drm = [];
+
+      /** @type {!Array.<shakaExtern.Variant>} */
+      var variants = OfflineUtils.recreateVariants(audios, videos, drm);
+
+      expect(variants.length).toBe(4);
+    });
+
+    it('will create variants when there is only audio', function() {
+      /** @type {!Array.<shakaExtern.StreamDB>} */
+      var audios = [
+        createStreamDB(0, audioType, [0]),
+        createStreamDB(1, audioType, [1])
+      ];
+      /** @type {!Array.<shakaExtern.StreamDB>} */
+      var videos = [];
+      /** @type {!Array.<shakaExtern.DrmInfo>} */
+      var drm = [];
+
+      /** @type {!Array.<shakaExtern.Variant>} */
+      var variants = OfflineUtils.recreateVariants(audios, videos, drm);
+
+      expect(variants.length).toBe(2);
+    });
+
+    it('will create variants when there is only audio with no ids', function() {
+      /** @type {!Array.<shakaExtern.StreamDB>} */
+      var audios = [
+        createStreamDB(0, audioType, null),
+        createStreamDB(1, audioType, null)
+      ];
+      /** @type {!Array.<shakaExtern.StreamDB>} */
+      var videos = [];
+      /** @type {!Array.<shakaExtern.DrmInfo>} */
+      var drm = [];
+
+      /** @type {!Array.<shakaExtern.Variant>} */
+      var variants = OfflineUtils.recreateVariants(audios, videos, drm);
+
+      expect(variants.length).toBe(2);
+    });
+
+    it('will create variants when there is only video', function() {
+      /** @type {!Array.<shakaExtern.StreamDB>} */
+      var audios = [];
+      /** @type {!Array.<shakaExtern.StreamDB>} */
+      var videos = [
+        createStreamDB(2, videoType, [0]),
+        createStreamDB(3, videoType, [1])
+      ];
+      /** @type {!Array.<shakaExtern.DrmInfo>} */
+      var drm = [];
+
+      /** @type {!Array.<shakaExtern.Variant>} */
+      var variants = OfflineUtils.recreateVariants(audios, videos, drm);
+
+      expect(variants.length).toBe(2);
+    });
+
+    it('will create variants when there is only video with no ids', function() {
+      /** @type {!Array.<shakaExtern.StreamDB>} */
+      var audios = [];
+      /** @type {!Array.<shakaExtern.StreamDB>} */
+      var videos = [
+        createStreamDB(2, videoType, null),
+        createStreamDB(3, videoType, null)
+      ];
+      /** @type {!Array.<shakaExtern.DrmInfo>} */
+      var drm = [];
+
+      /** @type {!Array.<shakaExtern.Variant>} */
+      var variants = OfflineUtils.recreateVariants(audios, videos, drm);
+
+      expect(variants.length).toBe(2);
+    });
+
+    /**
+     * @param {number} id
+     * @param {string} type
+     * @param {?Array.<number>} variants
+     * @return {shakaExtern.StreamDB}
+     */
+    function createStreamDB(id, type, variants) {
+      /** @type {shakaExtern.StreamDB} */
+      var streamDB = {
+        id: id,
+        primary: false,
+        presentationTimeOffset: 0,
+        contentType: type,
+        mimeType: '',
+        codecs: '',
+        language: '',
+        label: null,
+        width: null,
+        height: null,
+        initSegmentUri: null,
+        encrypted: false,
+        keyId: null,
+        segments: [],
+        variantIds: variants
+      };
+
+      return streamDB;
+    }
+  });
+
   describe('reconstructPeriod', function() {
     it('will reconstruct Periods correctly', function() {
       /** @type {shakaExtern.PeriodDB} */
