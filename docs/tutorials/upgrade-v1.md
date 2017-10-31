@@ -94,7 +94,7 @@ function interpretContentProtection(schemeIdUri, contentProtectionElement) {
     // This is the UUID which represents Widevine.
     return [{
       'keySystem': 'com.widevine.alpha',
-      'licenseServerUrl': '//widevine-proxy.appspot.com/proxy'
+      'licenseServerUrl': '//proxy.uat.widevine.com/proxy'
     }];
   } else if (schemeIdUri.toLowerCase() ==
       'urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95') {
@@ -124,7 +124,7 @@ var player = new shaka.Player(video);
 player.configure({
   drm: {
     servers: {
-      'com.widevine.alpha': '//widevine-proxy.appspot.com/proxy'
+      'com.widevine.alpha': '//proxy.uat.widevine.com/proxy'
       'com.microsoft.playready': '//playready.directtaps.net/pr/svc/rightsmanager.asmx'
     }
   }
@@ -181,7 +181,7 @@ function interpretContentProtection(schemeIdUri, contentProtectionElement) {
       'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed') {
     return [{
       'keySystem': 'com.widevine.alpha',
-      'licenseServerUrl': '//widevine-proxy.appspot.com/proxy',
+      'licenseServerUrl': '//proxy.uat.widevine.com/proxy',
 
       'distinctiveIdentifierRequired': true,
       'persistentStateRequired': false,
