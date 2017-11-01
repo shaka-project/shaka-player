@@ -852,8 +852,7 @@ describe('StreamingEngine', function() {
     // When we can switch in the second Period, switch to the playing stream.
     onCanSwitch.and.callFake(function() {
       onCanSwitch.and.callFake(function() {
-        expect(streamingEngine.getActiveStreams()[ContentType.TEXT])
-            .toBe(textStream2);
+        expect(streamingEngine.getActiveText()).toBe(textStream2);
 
         mediaSourceEngine.reinitText.calls.reset();
         streamingEngine.switchTextStream(textStream2);

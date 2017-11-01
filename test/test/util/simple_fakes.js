@@ -187,37 +187,43 @@ shaka.test.FakeDrmEngine.prototype.setSessionIds;
  */
 shaka.test.FakeStreamingEngine = function(onChooseStreams, onCanSwitch) {
   var resolve = Promise.resolve.bind(Promise);
-  var activeStreams = {};
+
+  var activeAudio = null;
+  var activeVideo = null;
+  var activeText = null;
 
   var ret = jasmine.createSpyObj('fakeStreamingEngine', [
     'destroy', 'configure', 'init', 'getCurrentPeriod', 'getActivePeriod',
-    'getActiveStreams', 'notifyNewTextStream', 'switchVariant',
-    'switchTextStream', 'seeked'
+    'getActiveAudio', 'getActiveVideo', 'getActiveText', 'notifyNewTextStream',
+    'switchVariant', 'switchTextStream', 'seeked'
   ]);
   ret.destroy.and.callFake(resolve);
   ret.getCurrentPeriod.and.returnValue(null);
   ret.getActivePeriod.and.returnValue(null);
-  ret.getActiveStreams.and.returnValue(activeStreams);
+  ret.getActiveAudio.and.callFake(function() { return activeAudio; });
+  ret.getActiveVideo.and.callFake(function() { return activeVideo; });
+  ret.getActiveText.and.callFake(function() { return activeText; });
   ret.notifyNewTextStream.and.callFake(resolve);
   ret.init.and.callFake(function() {
     var chosen = onChooseStreams();
     return Promise.resolve().then(function() {
-      if (chosen.variant && chosen.variant.video)
-        activeStreams['video'] = chosen.variant.video;
-      if (chosen.variant && chosen.variant.audio)
-        activeStreams['audio'] = chosen.variant.audio;
-      if (chosen.text)
-        activeStreams['text'] = chosen.text;
+      if (chosen.variant && chosen.variant.audio) {
+        activeAudio = chosen.variant.audio;
+      }
+      if (chosen.variant && chosen.variant.video) {
+        activeVideo = chosen.variant.video;
+      }
+      if (chosen.text) {
+        activeText = chosen.text;
+      }
     });
   });
   ret.switchVariant.and.callFake(function(variant) {
-    if (variant.video)
-      activeStreams['video'] = variant.video;
-    if (variant.audio)
-      activeStreams['audio'] = variant.audio;
+    activeAudio = variant.audio || activeAudio;
+    activeVideo = variant.video || activeVideo;
   });
   ret.switchTextStream.and.callFake(function(textStream) {
-    activeStreams['text'] = textStream;
+    activeText = textStream;
   });
   ret.onChooseStreams = onChooseStreams;
   ret.onCanSwitch = onCanSwitch;
