@@ -1,3 +1,10 @@
+## 2.1.9 (2017-11-02)
+
+Bugfixes:
+  - Fix interpretation of DASH presentationTimeOffset in SegmentBase
+    - https://github.com/google/shaka-player/issues/1099
+
+
 ## 2.1.8 (2017-08-23)
 
 Bugfixes:
