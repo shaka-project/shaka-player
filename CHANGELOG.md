@@ -1,6 +1,25 @@
-## 2.2.4 (2017-10-23)
+## 2.2.5 (2017-11-02)
 
 New features:
+  - Add streaming event to allow reconfiguration before streaming starts
+    - https://github.com/google/shaka-player/issues/1043
+  - Add method to get the parsed manifest structure
+    - https://github.com/google/shaka-player/issues/1074
+  - Log about deprecated APIs, even in a compiled build with other logs disabled
+
+Bugfixes:
+  - Fix interpretation of DASH presentationTimeOffset in SegmentBase
+    - https://github.com/google/shaka-player/issues/1099
+
+
+## 2.1.9 (2017-11-02)
+
+Bugfixes:
+  - Fix interpretation of DASH presentationTimeOffset in SegmentBase
+    - https://github.com/google/shaka-player/issues/1099
+
+
+## 2.2.4 (2017-10-23)
 
 Bugfixes:
   - Don't enforce seek range while paused in live streams (stays paused)
