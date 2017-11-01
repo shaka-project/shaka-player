@@ -389,7 +389,9 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
       networkingEngine.request(requestType, request, isCanceled)
           .then(fail)
           .catch(function() {
-            expect(setTimeoutSpy.calls.count()).toBe(1);
+            // Cancel at 500 MS means it will have gone through two 200 MS
+            // setTimeouts and will be halfway through the third.
+            expect(setTimeoutSpy.calls.count()).toBe(3);
             expect(cancelToken).toBe(true);
             expect(rejectScheme.calls.count()).toBe(1);
             done();
@@ -397,6 +399,25 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
       origSetTimeout(function() {
         cancelToken = true;
       }, 500);
+    });
+
+    it('does single timeouts when isCanceled is not provided', function(done) {
+      var request = createRequest('reject://foo', {
+        maxAttempts: 2,
+        baseDelay: 400,
+        backoffFactor: 0,
+        fuzzFactor: 0,
+        timeout: 0
+      });
+      networkingEngine.request(requestType, request)
+          .then(fail)
+          .catch(function() {
+            // If this is broken into 200 MS segments, this would have more than
+            // one call to setTimeoutSpy.
+            expect(setTimeoutSpy.calls.count()).toBe(1);
+            expect(rejectScheme.calls.count()).toBe(2);
+            done();
+          });
     });
   });
 
