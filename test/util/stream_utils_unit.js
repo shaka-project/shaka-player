@@ -486,9 +486,10 @@ describe('StreamUtils', function() {
           .addTextStream(4).mime('application/mp4', 'bogus')
         .build();
 
-      var activeStreams = {};
+      var noAudio = null;
+      var noVideo = null;
       shaka.util.StreamUtils.filterNewPeriod(
-          fakeDrmEngine, activeStreams, manifest.periods[0]);
+          fakeDrmEngine, noAudio, noVideo, manifest.periods[0]);
 
       // Covers a regression in which we would remove streams with codecs.
       // The last two streams should be removed because their full MIME types
