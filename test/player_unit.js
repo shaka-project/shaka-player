@@ -1284,7 +1284,13 @@ describe('Player', function() {
           roles: [],
           channelsCount: null,
           audioBandwidth: null,
-          videoBandwidth: null
+          videoBandwidth: null,
+          bandwidth: 0,
+          width: null,
+          height: null,
+          frameRate: null,
+          videoId: null,
+          audioId: null
         },
         {
           id: 7,
@@ -1301,7 +1307,13 @@ describe('Player', function() {
           roles: [],
           channelsCount: null,
           audioBandwidth: null,
-          videoBandwidth: null
+          videoBandwidth: null,
+          bandwidth: 0,
+          width: null,
+          height: null,
+          frameRate: null,
+          videoId: null,
+          audioId: null
         }
       ];
 
