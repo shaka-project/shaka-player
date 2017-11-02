@@ -264,25 +264,48 @@ describe('OfflineUtils', function() {
     });
 
     it('combines Variants according to variantIds field', function() {
+      /** @const {number} */
+      var audio1 = 0;
+      /** @const {number} */
+      var audio2 = 1;
+      /** @const {number} */
+      var video1 = 2;
+      /** @const {number} */
+      var video2 = 3;
+
+      /** @const {number} */
+      var variant1 = 0;
+      /** @const {number} */
+      var variant2 = 1;
+      /** @const {number} */
+      var variant3 = 2;
+
       /** @type {shakaExtern.PeriodDB} */
       var periodDb = {
         startTime: 60,
         streams: [
-          createVideoStreamDb(1, [10]),
-          createVideoStreamDb(2, [11]),
-          createVideoStreamDb(3, [12, 13]),
-          createAudioStreamDb(4, [12]),
-          createAudioStreamDb(5, [10, 13, 14])
+          // Audio
+          createAudioStreamDb(audio1, [variant2]),
+          createAudioStreamDb(audio2, [variant1, variant3]),
+
+          // Video
+          createVideoStreamDb(video1, [variant1]),
+          createVideoStreamDb(video2, [variant2, variant3])
         ]
       };
 
+      /** @type {shakaExtern.Period} */
       var period = OfflineUtils.reconstructPeriod(periodDb, drmInfos, timeline);
+
       expect(period).toBeTruthy();
       expect(period.variants.length).toBe(3);
 
-      verifyContainsVariantWithStreamIds(period, 1, 5);  // Variant 10
-      verifyContainsVariantWithStreamIds(period, 3, 4);  // Variant 12
-      verifyContainsVariantWithStreamIds(period, 3, 5);  // Variant 13
+      // Variant 1
+      expect(findVariant(period.variants, audio2, video1)).toBeTruthy();
+      // Variant 2
+      expect(findVariant(period.variants, audio1, video2)).toBeTruthy();
+      // Variant 3
+      expect(findVariant(period.variants, audio2, video2)).toBeTruthy();
     });
 
 
@@ -438,12 +461,17 @@ describe('OfflineUtils', function() {
     }
 
     /**
-     * @param {shakaExtern.Period} period
-     * @param {?number} videoId
+     * @param {!Array.<shakaExtern.Variant>} variants
      * @param {?number} audioId
+     * @param {?number} videoId
+     * @return {?shakaExtern.Variant}
      */
-    function verifyContainsVariantWithStreamIds(period, videoId, audioId) {
-      var found = period.variants.some(function(variant) {
+    function findVariant(variants, audioId, videoId) {
+      /*** @type {?shakaExtern.Variant} */
+      var found = null;
+
+      variants.forEach(function(variant) {
+
         /** @type {?shakaExtern.Stream} */
         var audio = variant.audio;
         /** @type {?shakaExtern.Stream} */
@@ -454,9 +482,12 @@ describe('OfflineUtils', function() {
         /** @type {boolean } */
         var videoMatch = video ? videoId == video.id : videoId == null;
 
-        return audioMatch && videoMatch;
+        if (audioMatch && videoMatch) {
+          found = variant;
+        }
       });
-      expect(found).toBe(true);
+
+      return found;
     }
   });
 });
