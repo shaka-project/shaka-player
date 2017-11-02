@@ -472,7 +472,7 @@ describe('HlsParser', function() {
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="en",',
       'URI="test:/audio"\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="fr",',
-      'URI="test:/audio"\n'
+      'URI="test:/audio2"\n'
     ].join('');
 
     var media = [
@@ -606,7 +606,7 @@ describe('HlsParser', function() {
       '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
       'URI="test:/text"\n',
       '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub2",LANGUAGE="es",',
-      'URI="test:/text"\n',
+      'URI="test:/text2"\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
       'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1",SUBTITLES="sub1"\n',
       'test:/video\n',
@@ -672,6 +672,7 @@ describe('HlsParser', function() {
       'test:/audio': toUTF8(media),
       'test:/video': toUTF8(media),
       'test:/text': toUTF8(textMedia),
+      'test:/text2': toUTF8(textMedia),
       'test:/main.vtt': toUTF8(vttText),
       'test:/main.mp4': segmentData
     });
@@ -689,7 +690,7 @@ describe('HlsParser', function() {
       '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
       'URI="test:/text"\n',
       '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub2",LANGUAGE="es",',
-      'URI="test:/text"\n',
+      'URI="test:/text2"\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
       'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
       'test:/video\n'
@@ -752,6 +753,7 @@ describe('HlsParser', function() {
       'test:/audio': toUTF8(media),
       'test:/video': toUTF8(media),
       'test:/text': toUTF8(textMedia),
+      'test:/text2': toUTF8(textMedia),
       'test:/main.vtt': toUTF8(vttText),
       'test:/main.mp4': segmentData
     });
@@ -1525,6 +1527,47 @@ describe('HlsParser', function() {
     parser.start('test:/master', playerInterface).then(function(manifest) {
       var video = manifest.periods[0].variants[0].video;
       expect(video.mimeType).toBe('video/mp4');
+    }).catch(fail).then(done);
+  });
+
+  it('does not produce multiple Streams for one playlist', function(done) {
+    // Regression test for a bug in our initial HLS live implementation
+    var master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio",URI="test:/audio"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=400,CODECS="avc1,mp4a",',
+      'RESOLUTION=1280x720,AUDIO="audio"\n',
+      'test:/video0\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=768x432,AUDIO="audio"\n',
+      'test:/video1\n'
+    ].join('');
+
+    var media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="test:/main.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'test:/main.mp4'
+    ].join('');
+
+    fakeNetEngine.setResponseMap({
+      'test:/master': toUTF8(master),
+      'test:/video0': toUTF8(media),
+      'test:/video1': toUTF8(media),
+      'test:/audio': toUTF8(media),
+      'test:/main.mp4': segmentData
+    });
+
+    parser.start('test:/master', playerInterface).then(function(manifest) {
+      expect(manifest.periods[0].variants.length).toBe(2);
+      var audio0 = manifest.periods[0].variants[0].audio;
+      var audio1 = manifest.periods[0].variants[1].audio;
+      // These should be the exact same memory address, not merely equal.
+      // Otherwise, the parser will only be replacing one of the SegmentIndexes
+      // on update, which will lead to live streaming issues.
+      expect(audio0).toBe(audio1);
     }).catch(fail).then(done);
   });
 });
