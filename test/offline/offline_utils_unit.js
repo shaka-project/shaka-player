@@ -196,7 +196,7 @@ describe('OfflineUtils', function() {
       /** @type {shakaExtern.PeriodDB} */
       var periodDb = {
         startTime: 60,
-        streams: [createVideoStreamDb(1), createAudioStreamDb(2)]
+        streams: [createVideoStreamDb(1, [0]), createAudioStreamDb(2, [0])]
       };
       var period = OfflineUtils.reconstructPeriod(periodDb, drmInfos, timeline);
       expect(period).toBeTruthy();
@@ -221,7 +221,7 @@ describe('OfflineUtils', function() {
       /** @type {shakaExtern.PeriodDB} */
       var periodDb = {
         startTime: 60,
-        streams: [createVideoStreamDb(1), createVideoStreamDb(2)]
+        streams: [createVideoStreamDb(1, [0]), createVideoStreamDb(2, [1])]
       };
 
       var period = OfflineUtils.reconstructPeriod(periodDb, drmInfos, timeline);
@@ -235,7 +235,7 @@ describe('OfflineUtils', function() {
       /** @type {shakaExtern.PeriodDB} */
       var periodDb = {
         startTime: 60,
-        streams: [createAudioStreamDb(1), createAudioStreamDb(2)]
+        streams: [createAudioStreamDb(1, [0]), createAudioStreamDb(2, [1])]
       };
 
       var period = OfflineUtils.reconstructPeriod(periodDb, drmInfos, timeline);
@@ -250,7 +250,7 @@ describe('OfflineUtils', function() {
       var periodDb = {
         startTime: 60,
         streams: [
-          createVideoStreamDb(1),
+          createVideoStreamDb(1, [0]),
           createTextStreamDb(2)
         ]
       };
@@ -288,10 +288,10 @@ describe('OfflineUtils', function() {
 
     /**
      * @param {number} id
-     * @param {!Array.<number>=} opt_variantIds
+     * @param {!Array.<number>} variantIds
      * @return {shakaExtern.StreamDB}
      */
-    function createVideoStreamDb(id, opt_variantIds) {
+    function createVideoStreamDb(id, variantIds) {
       var ContentType = shaka.util.ManifestParserUtils.ContentType;
       return {
         id: id,
@@ -314,16 +314,16 @@ describe('OfflineUtils', function() {
           {startTime: 10, endTime: 20, uri: Scheme.segmentToUri(1, 1, 2)},
           {startTime: 20, endTime: 25, uri: Scheme.segmentToUri(1, 1, 3)}
         ],
-        variantIds: opt_variantIds || [5]
+        variantIds: variantIds
       };
     }
 
     /**
      * @param {number} id
-     * @param {!Array.<number>=} opt_variantIds
+     * @param {!Array.<number>} variantIds
      * @return {shakaExtern.StreamDB}
      */
-    function createAudioStreamDb(id, opt_variantIds) {
+    function createAudioStreamDb(id, variantIds) {
       var ContentType = shaka.util.ManifestParserUtils.ContentType;
       return {
         id: id,
@@ -346,7 +346,7 @@ describe('OfflineUtils', function() {
           {startTime: 10, endTime: 20, uri: Scheme.segmentToUri(1, id, 2)},
           {startTime: 20, endTime: 25, uri: Scheme.segmentToUri(1, id, 3)}
         ],
-        variantIds: opt_variantIds || [5]
+        variantIds: variantIds
       };
     }
 
@@ -439,14 +439,22 @@ describe('OfflineUtils', function() {
 
     /**
      * @param {shakaExtern.Period} period
-     * @param {number} videoId
-     * @param {number} audioId
+     * @param {?number} videoId
+     * @param {?number} audioId
      */
     function verifyContainsVariantWithStreamIds(period, videoId, audioId) {
       var found = period.variants.some(function(variant) {
-        var audioIdMatches = variant.audio && variant.audio.id === audioId;
-        var videoIdMatches = variant.video && variant.video.id === videoId;
-        return audioIdMatches && videoIdMatches;
+        /** @type {?shakaExtern.Stream} */
+        var audio = variant.audio;
+        /** @type {?shakaExtern.Stream} */
+        var video = variant.video;
+
+        /** @type {boolean } */
+        var audioMatch = audio ? audioId == audio.id : audioId == null;
+        /** @type {boolean } */
+        var videoMatch = video ? videoId == video.id : videoId == null;
+
+        return audioMatch && videoMatch;
       });
       expect(found).toBe(true);
     }
