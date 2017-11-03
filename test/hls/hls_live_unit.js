@@ -515,6 +515,9 @@ describe('HlsParser live', function() {
       });
 
       it('gets start time of segments with byte range', function(done) {
+        // Nit: this value is an implementation detail of the fix for #1106
+        var partialEndByte = expectedStartByte + 1024;
+
         fakeNetEngine.setResponseMap({
           'test:/master': toUTF8(master),
           'test:/video': toUTF8(mediaWithByteRange),
@@ -528,7 +531,7 @@ describe('HlsParser live', function() {
             segmentDataStartTime + 2 /* end */,
             '' /* baseUri */,
             expectedStartByte,
-            expectedEndByte);
+            expectedEndByte);  // Complete segment reference
 
         parser.start('test:/master', playerInterface).then(function(manifest) {
           var video = manifest.periods[0].variants[0].video;
@@ -539,7 +542,7 @@ describe('HlsParser live', function() {
           fakeNetEngine.expectRangeRequest(
               'test:/main.mp4',
               expectedStartByte,
-              expectedEndByte);
+              partialEndByte);  // Partial segment request
         }).catch(fail).then(done);
 
         shaka.polyfill.Promise.flush();

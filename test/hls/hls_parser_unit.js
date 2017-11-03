@@ -1305,6 +1305,8 @@ describe('HlsParser', function() {
     // constructing references.  Here it is covered incidentally.
     var expectedStartByte = 616;
     var expectedEndByte = 121705;
+    // Nit: this value is an implementation detail of the fix for #1106
+    var partialEndByte = expectedStartByte + 1024;
 
     beforeEach(function() {
       // TODO: use StreamGenerator?
@@ -1361,7 +1363,7 @@ describe('HlsParser', function() {
         fakeNetEngine.expectRangeRequest(
             'test:/main.mp4',
             expectedStartByte,
-            expectedEndByte);
+            partialEndByte);
 
         // In VOD content, we set the presentationTimeOffset to align the
         // content to presentation time 0.
@@ -1387,15 +1389,21 @@ describe('HlsParser', function() {
           expectedStartByte,
           expectedEndByte);
 
-      parser.start('test:/master', playerInterface)
-        .then(function(manifest) {
-            var video = manifest.periods[0].variants[0].video;
-            ManifestParser.verifySegmentIndex(video, [ref]);
-            // In VOD content, we set the presentationTimeOffset to align the
-            // content to presentation time 0.
-            expect(video.presentationTimeOffset)
-                .toEqual(segmentDataStartTime);
-          }).catch(fail).then(done);
+      parser.start('test:/master', playerInterface).then(function(manifest) {
+        var video = manifest.periods[0].variants[0].video;
+        ManifestParser.verifySegmentIndex(video, [ref]);
+
+        // Make sure the segment data was fetched with the correct byte
+        // range.
+        fakeNetEngine.expectRangeRequest(
+            'test:/main.ts',
+            expectedStartByte,
+            partialEndByte);
+
+        // In VOD content, we set the presentationTimeOffset to align the
+        // content to presentation time 0.
+        expect(video.presentationTimeOffset).toEqual(segmentDataStartTime);
+      }).catch(fail).then(done);
     });
 
     it('sets duration with respect to presentation offset', function(done) {
