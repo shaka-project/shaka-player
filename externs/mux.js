@@ -38,6 +38,12 @@ muxjs.mp4.Transmuxer = function() {};
 
 
 /**
+ * @param {number} time
+ */
+muxjs.mp4.Transmuxer.prototype.setBaseMediaDecodeTime = function(time) {};
+
+
+/**
  * @param {!Uint8Array} data
  */
 muxjs.mp4.Transmuxer.prototype.push = function(data) {};
@@ -60,6 +66,12 @@ muxjs.mp4.Transmuxer.prototype.on = function(type, listener) {};
  * @param {Function} listener The callback to be removed
  */
 muxjs.mp4.Transmuxer.prototype.off = function(type, listener) {};
+
+
+/**
+ * Remove all handlers and clean up.
+ */
+muxjs.mp4.Transmuxer.prototype.dispose = function() {};
 
 
 /**
