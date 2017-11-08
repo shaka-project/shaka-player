@@ -1,8 +1,6 @@
-# All files related to text parsing and displaying.
+# Optional plugins related to text parsing and displaying.
 
-+../../lib/text/cue.js
 +../../lib/text/mp4_ttml_parser.js
 +../../lib/text/mp4_vtt_parser.js
-+../../lib/text/simple_text_displayer.js
 +../../lib/text/ttml_text_parser.js
 +../../lib/text/vtt_text_parser.js
