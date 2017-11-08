@@ -275,7 +275,7 @@ describe('TextEngine', function() {
     });
   });
 
-  describe('setAppendWindowEnd', function() {
+  describe('setAppendWindow', function() {
     beforeEach(function() {
       mockParseMedia.and.callFake(function() {
         return [createFakeCue(0, 1), createFakeCue(1, 2), createFakeCue(2, 3)];
@@ -283,7 +283,7 @@ describe('TextEngine', function() {
     });
 
     it('limits appended cues', function(done) {
-      textEngine.setAppendWindowEnd(1.9);
+      textEngine.setAppendWindow(0, 1.9);
       textEngine.appendBuffer(dummyData, 0, 3).then(function() {
         expect(mockDisplayer.append).toHaveBeenCalledWith(
             [
@@ -292,29 +292,42 @@ describe('TextEngine', function() {
             ]);
 
         mockDisplayer.append.calls.reset();
-        textEngine.setAppendWindowEnd(2.1);
+        textEngine.setAppendWindow(1, 2.1);
         return textEngine.appendBuffer(dummyData, 0, 3);
       }).then(function() {
         expect(mockDisplayer.append).toHaveBeenCalledWith(
             [
-              createFakeCue(0, 1),
               createFakeCue(1, 2),
               createFakeCue(2, 3)
             ]);
       }).catch(fail).then(done);
     });
 
+    it('limits bufferStart', function(done) {
+      textEngine.setAppendWindow(1, 9);
+      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+        expect(textEngine.bufferStart()).toBe(1);
+
+        return textEngine.remove(0, 9);
+      }).then(function() {
+        textEngine.setAppendWindow(2.1, 9);
+        return textEngine.appendBuffer(dummyData, 0, 3);
+      }).then(function() {
+        expect(textEngine.bufferStart()).toBe(2.1);
+      }).catch(fail).then(done);
+    });
+
     it('limits bufferEnd', function(done) {
-      textEngine.setAppendWindowEnd(1.9);
+      textEngine.setAppendWindow(0, 1.9);
       textEngine.appendBuffer(dummyData, 0, 3).then(function() {
         expect(textEngine.bufferEnd()).toBe(1.9);
 
-        textEngine.setAppendWindowEnd(2.1);
+        textEngine.setAppendWindow(0, 2.1);
         return textEngine.appendBuffer(dummyData, 0, 3);
       }).then(function() {
         expect(textEngine.bufferEnd()).toBe(2.1);
 
-        textEngine.setAppendWindowEnd(4.1);
+        textEngine.setAppendWindow(0, 4.1);
         return textEngine.appendBuffer(dummyData, 0, 3);
       }).then(function() {
         expect(textEngine.bufferEnd()).toBe(3);
