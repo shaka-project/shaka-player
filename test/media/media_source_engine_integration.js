@@ -313,7 +313,7 @@ describe('MediaSourceEngine', function() {
     }).catch(fail).then(done);
   });
 
-  it('trims content at appendWindowEnd', function(done) {
+  it('trims content at the append window', function(done) {
     // Create empty object first and initialize the fields through
     // [] to allow field names to be expressions.
     var initObject = {};
@@ -324,15 +324,56 @@ describe('MediaSourceEngine', function() {
     }).then(function() {
       return mediaSourceEngine.setStreamProperties(ContentType.VIDEO,
                                                    /* timestampOffset */ 0,
+                                                   /* appendWindowStart */ 5,
                                                    /* appendWindowEnd */ 18);
     }).then(function() {
       expect(buffered(ContentType.VIDEO, 0)).toBe(0);
       return append(ContentType.VIDEO, 1);
     }).then(function() {
-      expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(10);
+      expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(5, 1);
+      expect(buffered(ContentType.VIDEO, 5)).toBeCloseTo(5, 1);
       return append(ContentType.VIDEO, 2);
     }).then(function() {
-      expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(18, 1);
+      expect(buffered(ContentType.VIDEO, 5)).toBeCloseTo(13, 1);
+    }).catch(fail).then(done);
+  });
+
+  it('does not remove when overlap is outside append window', function(done) {
+    // Create empty object first and initialize the fields through
+    // [] to allow field names to be expressions.
+    var initObject = {};
+    initObject[ContentType.VIDEO] = getFakeStream(metadata.video);
+    mediaSourceEngine.init(initObject);
+    mediaSourceEngine.setDuration(presentationDuration).then(function() {
+      return appendInit(ContentType.VIDEO);
+    }).then(function() {
+      // Simulate period 1, with 20 seconds of content, no timestamp offset
+      return mediaSourceEngine.setStreamProperties(ContentType.VIDEO,
+                                                   /* timestampOffset */ 0,
+                                                   /* appendWindowStart */ 0,
+                                                   /* appendWindowEnd */ 20);
+    }).then(function() {
+      return append(ContentType.VIDEO, 1);
+    }).then(function() {
+      return append(ContentType.VIDEO, 2);
+    }).then(function() {
+      expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(0, 1);
+      expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(20, 1);
+
+      // Simulate period 2, with 20 seconds of content offset back by 5 seconds.
+      // The 5 seconds of overlap should be trimmed off, and we should still
+      // have a continuous stream with 35 seconds of content.
+      return mediaSourceEngine.setStreamProperties(ContentType.VIDEO,
+                                                   /* timestampOffset */ 15,
+                                                   /* appendWindowStart */ 20,
+                                                   /* appendWindowEnd */ 35);
+    }).then(function() {
+      return append(ContentType.VIDEO, 1);
+    }).then(function() {
+      return append(ContentType.VIDEO, 2);
+    }).then(function() {
+      expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(0, 1);
+      expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(35, 1);
     }).catch(fail).then(done);
   });
 });
