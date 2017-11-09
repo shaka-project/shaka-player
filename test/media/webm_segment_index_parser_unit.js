@@ -82,4 +82,24 @@ describe('WebmSegmentIndexParser', function() {
       expect(result[i].endByte).toBe(references[i].endByte);
     }
   });
+
+  it('takes a scaled presentationTimeOffset in seconds', function() {
+    var result = parser.parse(indexSegment, initSegment, [], 2);
+    var references =
+        [
+         {startTime: -2, endTime: 10},
+         {startTime: 10, endTime: 22},
+         {startTime: 22, endTime: 34},
+         {startTime: 34, endTime: 46},
+         {startTime: 46, endTime: 58}
+        ];
+
+    expect(result).toBeTruthy();
+    expect(result.length).toBe(references.length);
+    for (var i = 0; i < result.length; i++) {
+      expect(result[i].position).toBe(i);
+      expect(result[i].startTime).toBe(references[i].startTime);
+      expect(result[i].endTime).toBe(references[i].endTime);
+    }
+  });
 });
