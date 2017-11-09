@@ -290,8 +290,8 @@ describe('DashParser SegmentBase', function() {
         })
         .then(function() {
           var reference = video.getSegmentReference(0);
-          expect(reference.startTime).toEqual(-2);
-          expect(reference.endTime).toEqual(10);
+          expect(reference.startTime).toEqual(0);  // clamped to 0 by fit()
+          expect(reference.endTime).toEqual(10);  // would be 12 without PTO
         })
         .catch(fail)
         .then(done);
