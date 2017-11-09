@@ -153,6 +153,49 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
     });
   });
 
+  describe('fit', function() {
+    it('drops references which are outside the period bounds', function() {
+      // These negative numbers can occur due to presentationTimeOffset in DASH.
+      var references = [
+        makeReference(0, -10, -3, uri(0)),
+        makeReference(1, -3, 4, uri(1)),
+        makeReference(2, 4, 11, uri(2)),
+        makeReference(3, 11, 18, uri(3)),
+        makeReference(4, 18, 25, uri(4))
+      ];
+      var index = new shaka.media.SegmentIndex(references);
+      expect(index.references_).toEqual(references);
+
+      index.fit(/* periodDuration */ 15);
+      var newReferences = [
+        /* ref 0 dropped because it ends before the period starts */
+        makeReference(1, 0, 4, uri(1)),  // start time clamped to 0
+        makeReference(2, 4, 11, uri(2)),
+        makeReference(3, 11, 15, uri(3))  // end time clamped to period
+        /* ref 4 dropped because it starts after the period ends */
+      ];
+      expect(index.references_).toEqual(newReferences);
+    });
+
+    it('drops references which end exactly at zero', function() {
+      // The end time is meant to be exclusive, so segments ending at zero
+      // (after PTO adjustments) should be dropped.
+      var references = [
+        makeReference(0, -10, 0, uri(0)),
+        makeReference(1, 0, 10, uri(1))
+      ];
+      var index = new shaka.media.SegmentIndex(references);
+      expect(index.references_).toEqual(references);
+
+      index.fit(/* periodDuration */ 10);
+      var newReferences = [
+        /* ref 0 dropped because it ends before the period starts (at 0) */
+        makeReference(1, 0, 10, uri(1))
+      ];
+      expect(index.references_).toEqual(newReferences);
+    });
+  });
+
   describe('merge', function() {
     it('three references into zero references', function() {
       var index1 = new shaka.media.SegmentIndex([]);
@@ -225,8 +268,9 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
       ];
       var index1 = new shaka.media.SegmentIndex(references1);
 
-      // when period is changed, fitSegmentReference will
-      // expand last segment to the start of the next the period
+      // When the period is changed, fit() will expand last segment to the start
+      // of the next the period.  This simulates an update in which fit() has
+      // done that.
       var references2 = [
         makeReference(2, 20, 30, uri(20)),
         makeReference(3, 30, 50, uri(30))
