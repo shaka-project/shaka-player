@@ -45,8 +45,8 @@ shakaDemo.setupConfiguration_ = function() {
       'change', shakaDemo.onAdaptationChange_);
   document.getElementById('logLevelList').addEventListener(
       'change', shakaDemo.onLogLevelChange_);
-  document.getElementById('enableAutoplay').addEventListener(
-      'change', shakaDemo.onAutoplayChange_);
+  document.getElementById('enableLoadOnRefresh').addEventListener(
+      'change', shakaDemo.onLoadOnRefreshChange_);
   document.getElementById('drmSettingsVideoRobustness').addEventListener(
       'input', shakaDemo.onDrmSettingsChange_);
   document.getElementById('drmSettingsAudioRobustness').addEventListener(
@@ -68,7 +68,7 @@ shakaDemo.setupConfiguration_ = function() {
 
 
 /** @private */
-shakaDemo.onAutoplayChange_ = function() {
+shakaDemo.onLoadOnRefreshChange_ = function() {
   // Change the hash, to mirror this.
   shakaDemo.hashShouldChange_();
 };

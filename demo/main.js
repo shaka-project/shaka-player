@@ -281,7 +281,7 @@ shakaDemo.preBrowserCheckParams_ = function(params) {
     document.body.className = 'noinput';
   }
   if ('play' in params) {
-    document.getElementById('enableAutoplay').checked = true;
+    document.getElementById('enableLoadOnRefresh').checked = true;
   }
   // shaka.log is not set if logging isn't enabled.
   // I.E. if using the compiled version of shaka.
@@ -512,7 +512,7 @@ shakaDemo.hashShouldChange_ = function() {
       params.push(logLevel);
     }
   }
-  if (document.getElementById('enableAutoplay').checked) {
+  if (document.getElementById('enableLoadOnRefresh').checked) {
     params.push('play');
   }
 
