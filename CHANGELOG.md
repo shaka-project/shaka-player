@@ -1,3 +1,22 @@
+## 2.2.6 (2017-11-14)
+
+Bugfixes:
+  - Cancel network retries when the Player is destroyed
+    - https://github.com/google/shaka-player/issues/1084
+  - Do not overwrite media from an earlier period when new period is shifted
+    - https://github.com/google/shaka-player/issues/1098
+  - Do not assume same timescale in manifest and media
+    - https://github.com/google/shaka-player/issues/1098
+  - Do not fail assertions when media references are shifted outside the period
+    - https://github.com/google/shaka-player/issues/1098
+  - Fix custom builds which exclude text parsing plugins
+    - https://github.com/google/shaka-player/issues/1115
+
+Demo app:
+  - Rename demo "Autoplay" in demo UI to "Auto-load on page refresh"
+    - https://github.com/google/shaka-player/issues/1114
+
+
 ## 2.2.5 (2017-11-02)
 
 New features:
