@@ -93,11 +93,30 @@ requirement: {
 }
 
 
-#Disallow classList toggle.
+# Disallow classList toggle.
 requirement: {
   type: BANNED_PROPERTY_CALL
   value: 'DOMTokenList.prototype.toggle'
   error_message: 'classList toggle is not supported in IE11'
+}
+
+
+# Disallow setInterval.
+requirement: {
+  type: BANNED_NAME
+  value: 'window.setInterval'
+  error_message: 'Using "setInterval" is not allowed. '
+                 'Use shaka.util.Timer.prototype.scheduleRepeated instead.'
+  whitelist_regexp: 'demo/*'
+  whitelist_regexp: 'test/*'
+}
+requirement: {
+  type: BANNED_NAME
+  value: 'setInterval'
+  error_message: 'Using "setInterval" is not allowed. '
+                 'Use shaka.util.Timer.prototype.scheduleRepeated instead.'
+  whitelist_regexp: 'demo/*'
+  whitelist_regexp: 'test/*'
 }
 
 
