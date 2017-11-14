@@ -22,6 +22,7 @@ describe('Mp4Parser', function() {
   var fullBoxData;
   var boxWithChildData;
   var boxWithSampleDescription;
+  var partialBoxWithSampleDescription;
   var multipleSingleLevelBoxes;
   var twoLevelBoxStructure;
 
@@ -61,6 +62,16 @@ describe('Mp4Parser', function() {
       0x00, 0x00, 0x00, 0x0C, // child [1] size
       0x62, 0x30, 0x33, 0x33, // child [1] type
       0x44, 0x55, 0x66, 0x77  // child [1] payload
+    ]).buffer;
+
+    partialBoxWithSampleDescription = new Uint8Array([
+      0x00, 0x00, 0x00, 0x24, // size
+      0x62, 0x30, 0x30, 0x33, // type
+      0x00, 0x00, 0x00, 0x02, // number of chidren
+      0x00, 0x00, 0x00, 0x0C, // child [0] size
+      0x62, 0x30, 0x33, 0x32, // child [0] type
+      0x00, 0x11, 0x22, 0x33  // child [0] payload
+      // Omit child [1]
     ]).buffer;
 
     multipleSingleLevelBoxes = new Uint8Array([
@@ -291,10 +302,6 @@ describe('Mp4Parser', function() {
             // We found what we were looking for, so stop parsing.
             box.parser.stop();
           });
-
-      // This only contains the parent and the first child (12 bytes each).
-      var partialBoxWithSampleDescription =
-          (new Uint8Array(boxWithSampleDescription)).slice(0, 24).buffer;
 
       try {
         new shaka.util.Mp4Parser()
