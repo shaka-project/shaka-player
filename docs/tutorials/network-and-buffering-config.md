@@ -85,7 +85,7 @@ of the old bitrate in the buffer.
 #### Try it out
 
 Use the code from {@tutorial basic-usage} and try configuring some of these
-parameters in `playerInit()` to see how they affect playback.
+parameters in `initPlayer()` to see how they affect playback.
 
 #### Server Considerations
 
