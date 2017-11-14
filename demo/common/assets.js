@@ -270,7 +270,7 @@ shakaAssets.testAssets = [
     ],
 
     licenseServers: {
-      'com.widevine.alpha': '//proxy.uat.widevine.com/proxy'
+      'com.widevine.alpha': '//cwip-shaka-proxy.appspot.com/no_auth'
     }
   },
   {
@@ -320,7 +320,7 @@ shakaAssets.testAssets = [
     ],
 
     licenseServers: {
-      'com.widevine.alpha': '//proxy.uat.widevine.com/proxy'
+      'com.widevine.alpha': '//cwip-shaka-proxy.appspot.com/no_auth'
     }
   },
   {
@@ -409,7 +409,7 @@ shakaAssets.testAssets = [
     ],
 
     licenseServers: {
-      'com.widevine.alpha': '//proxy.uat.widevine.com/proxy'
+      'com.widevine.alpha': '//cwip-shaka-proxy.appspot.com/no_auth'
     }
   },
   {
@@ -494,7 +494,7 @@ shakaAssets.testAssets = [
     ],
 
     licenseServers: {
-      'com.widevine.alpha': '//proxy.uat.widevine.com/proxy'
+      'com.widevine.alpha': '//cwip-shaka-proxy.appspot.com/no_auth'
     }
   },
   {
@@ -690,7 +690,7 @@ shakaAssets.testAssets = [
     ],
 
     licenseServers: {
-      'com.widevine.alpha': '//proxy.uat.widevine.com/proxy'
+      'com.widevine.alpha': '//cwip-shaka-proxy.appspot.com/no_auth'
     }
   },
   {
