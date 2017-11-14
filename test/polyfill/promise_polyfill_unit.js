@@ -209,17 +209,19 @@ describe('Promise polyfill', function() {
     // with no `this` value).
     it('not called with `this`', function(done) {
       Promise.resolve(dummy)
-          .then(function() {
+          .then(/** @this {*} */ function() {
             expect(this).toBe(window);
             throw new Error();
           })
-          .then(fail, function() { expect(this).toBe(window); })
-          .then(function() {
+          .then(fail, /** @this {*} */ function() {
+            expect(this).toBe(window);
+          })
+          .then(/** @this {*} */ function() {
             'use strict';
             expect(this).toBe(undefined);
             throw new Error();
           })
-          .then(fail, function() {
+          .then(fail, /** @this {*} */ function() {
             'use strict';
             expect(this).toBe(undefined);
           })

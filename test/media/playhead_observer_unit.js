@@ -238,25 +238,16 @@ describe('PlayheadObserver', function() {
     var regionInfo;
 
     beforeEach(function() {
-      // expect(...).toEquals doesn't compare DOM nodes well, so create a custom
-      // wrapper that will match it.
-      var fakeElement = {
-        asymmetricMatch: function(other) {
-          // The |regionInfo.fakeElement| member should be copied by-reference.
-          return other == this;
-        },
-        jasmineToString: function() {
-          return '<Event element>';
-        }
-      };
-
       regionInfo = {
         schemeIdUri: 'http://example.com',
         value: 'something',
         startTime: 10,
         endTime: 20,
         id: 'abc',
-        eventElement: /** @type {?} */ (fakeElement)
+        // This should be an actual object, but it doesn't matter what.
+        // It will be checked with jasmine's toBe() to make sure it was copied
+        // by reference.
+        eventElement: /** @type {?} */({})
       };
 
       video.buffered = createFakeBuffered([{start: 0, end: 60}]);
@@ -452,6 +443,8 @@ describe('PlayheadObserver', function() {
       var event = onEvent.calls.argsFor(opt_index || 0)[0];
       expect(event.type).toBe(name);
       expect(event.detail).toEqual(info);
+      // This should be a copy by reference, not just a value match.
+      expect(event.detail.eventElement).toBe(info.eventElement);
     }
 
     /**

@@ -2138,7 +2138,8 @@ describe('StreamingEngine', function() {
       onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
 
       var originalRemove =
-          shaka.test.FakeMediaSourceEngine.prototype.removeImpl;
+          shaka.test.FakeMediaSourceEngine.prototype.removeImpl
+              .bind(mediaSourceEngine);
 
       mediaSourceEngine.remove.and.callFake(function(type, start, end) {
         expect(playheadTime).toBe(20);
@@ -2150,11 +2151,11 @@ describe('StreamingEngine', function() {
             expect(playheadTime).toBe(30);
             expect(start).toBe(10);
             expect(end).toBe(20);
-            return originalRemove.call(this, type, start, end);
+            return originalRemove.call(null, type, start, end);
           });
         }
 
-        return originalRemove.call(this, type, start, end);
+        return originalRemove.call(null, type, start, end);
       });
 
       // Here we go!

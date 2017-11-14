@@ -189,13 +189,13 @@ describe('DrmEngine', function() {
           // The error callback should not be invoked.
           onErrorSpy.and.callFake(fail);
 
-          var originalRequest = networkingEngine.request;
+          var originalRequest = networkingEngine.request.bind(networkingEngine);
           var requestComplete;
           var requestSpy = jasmine.createSpy('request');
           var requestMade = new shaka.util.PublicPromise();
           requestSpy.and.callFake(function() {
             requestMade.resolve();
-            requestComplete = originalRequest.apply(this, arguments);
+            requestComplete = originalRequest.apply(null, arguments);
             return requestComplete;
           });
           networkingEngine.request = shaka.test.Util.spyFunc(requestSpy);

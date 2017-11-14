@@ -224,7 +224,7 @@ describe('DBEngine', /** @suppress {accessControls} */ function() {
     // the transaction will abort. This should cause the promise to be
     // rejected.
     db.insert = function(storeName, value) {
-      return this.createTransaction_(storeName, 'readwrite', function(store) {
+      return db.createTransaction_(storeName, 'readwrite', function(store) {
         var request = store.put(value);
         request.onsuccess = function(event) {
           request.transaction.abort();

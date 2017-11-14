@@ -39,21 +39,7 @@ describe('Mp4VttParser', function() {
   /** @type {!ArrayBuffer} */
   var audioInitSegment;
 
-  /** @type {boolean} */
-  var mockCue = false;
-
   beforeAll(function(done) {
-    // Mock out VTTCue if not supported.  These tests don't actually need
-    // VTTCue to do anything, this simply verifies the value of its members.
-    if (!window.VTTCue) {
-      mockCue = true;
-      window.VTTCue = function(start, end, text) {
-        this.startTime = start;
-        this.endTime = end;
-        this.text = text;
-      };
-    }
-
     Promise.all([
       shaka.test.Util.fetch(vttInitSegmentUri),
       shaka.test.Util.fetch(vttSegmentUri),
@@ -67,13 +53,6 @@ describe('Mp4VttParser', function() {
       vttSegNoDuration = new Uint8Array(responses[3]);
       audioInitSegment = responses[4];
     }).catch(fail).then(done);
-  });
-
-  afterAll(function() {
-    // Delete our mock.
-    if (mockCue) {
-      delete window.VTTCue;
-    }
   });
 
   it('parses init segment', function() {
