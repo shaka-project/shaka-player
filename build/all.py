@@ -16,6 +16,7 @@
 
 """Builds the dependencies, runs the checks, and compiles the library."""
 
+import argparse
 import build
 import check
 import gendeps
@@ -23,6 +24,30 @@ import shakaBuildHelpers
 
 
 def main(args):
+  parser = argparse.ArgumentParser(
+      description='User facing build script for building the Shaka'
+                  ' Player Project.')
+
+  parser.add_argument(
+      '--force',
+      '-f',
+      help='Force building the library even if no files have changed.',
+      action='store_true')
+
+  parser.add_argument(
+      '--debug',
+      help='Limit which build types to build. Will at least build the debug '
+           'version.',
+      action='store_true')
+
+  parser.add_argument(
+      '--release',
+      help='Limit which build types to build. Will at least build the '
+           'release version.',
+      action='store_true')
+
+  parsed_args = parser.parse_args(args)
+
   code = gendeps.gen_deps([])
   if code != 0:
     return code
@@ -33,18 +58,29 @@ def main(args):
 
   build_args = ['--name', 'compiled', '+@complete']
 
-  if '--force' in args:
-    build_args.append('--force')
+  if parsed_args.force:
+    build_args += ['--force']
 
-  if '--debug' in args or '--release' not in args:
-    if build.main(build_args + ['--debug']) != 0:
-      return 1
-  if '--release' in args or '--debug' not in args:
-    if build.main(build_args) != 0:
-      return 1
+  # Create the list of build modes to build with. If the list is empty
+  # by the end, then populate it with every mode.
+  modes = []
+  modes += ['--debug'] if parsed_args.debug else []
+  modes += ['--release'] if parsed_args.release else []
 
-  return 0
+  # If --debug or --release are not given, build with everything.
+  if not modes:
+    modes += ['--debug', '--release']
 
+  result = 0
+
+  for mode in modes:
+    result = build.main(build_args + [mode])
+
+    # If a build fails then there is no reason to build the other modes.
+    if result:
+      break
+
+  return result
 
 if __name__ == '__main__':
   shakaBuildHelpers.run_main(main)
