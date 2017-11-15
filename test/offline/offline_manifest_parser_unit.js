@@ -23,29 +23,18 @@ describe('OfflineManifestParser', function() {
   var playerInterface =
       /** @type {shakaExtern.ManifestParser.PlayerInterface} */ (null);
 
-  /**
-   * @type {{
-   *   init: !jasmine.Spy,
-   *   destroy: !jasmine.Spy,
-   *   get: !jasmine.Spy,
-   *   insert: !jasmine.Spy
-   * }}
-   */
+  /** @const {number} */
+  var manifestId = 10;
+  /** @const {string} */
+  var manifestUri = shaka.offline.OfflineScheme.manifestIdToUri(manifestId);
+
+  /** @type {!shaka.offline.IStorageEngine} */
   var fakeStorageEngine;
-  /** @type {shaka.offline.OfflineManifestParser} */
+  /** @type {!shaka.offline.OfflineManifestParser} */
   var parser;
 
   beforeEach(function() {
-    fakeStorageEngine = jasmine.createSpyObj(
-        'DBEngine', ['init', 'destroy', 'get', 'insert']);
-
-    var commonResolve = Promise.resolve();
-    var getResolve = Promise.resolve({data: new ArrayBuffer(0)});
-    fakeStorageEngine.init.and.returnValue(commonResolve);
-    fakeStorageEngine.destroy.and.returnValue(commonResolve);
-    fakeStorageEngine.get.and.returnValue(getResolve);
-    fakeStorageEngine.insert.and.returnValue(commonResolve);
-
+    fakeStorageEngine = new shaka.test.MemoryStorageEngine();
     var getStorageEngine = function() {
       return Promise.resolve(fakeStorageEngine);
     };
@@ -62,37 +51,20 @@ describe('OfflineManifestParser', function() {
   });
 
   it('will query DBEngine for the manifest', function(done) {
-    var uri = shaka.offline.OfflineScheme.manifestIdToUri(123);
-    fakeStorageEngine.get.and.returnValue(Promise.resolve({
-      key: 0,
-      originalManifestUri: '',
-      duration: 60,
-      size: 100,
-      periods: [],
-      sessionIds: [],
-      drmInfo: null,
-      appMetadata: null
-    }));
-
-    parser.start(uri, playerInterface)
-        .then(function(manifest) {
-          expect(manifest).toBeTruthy();
-
-          expect(fakeStorageEngine.destroy).toHaveBeenCalledTimes(1);
-          expect(fakeStorageEngine.get).toHaveBeenCalledTimes(1);
-          expect(fakeStorageEngine.get).toHaveBeenCalledWith('manifest', 123);
+    new shaka.test.ManifestDBBuilder(fakeStorageEngine)
+        .onManifest(function(manifest) {
+          manifest.key = manifestId;
         })
-        .catch(fail)
-        .then(done);
+        .build().then(function(manifest) {
+          return parser.start(manifestUri, playerInterface);
+        }).catch(fail).then(done);
   });
 
   it('will fail if manifest not found', function(done) {
     /** @type {number} */
-    var id = 123;
+    var id = 101;
     /** @type {string} */
     var uri = shaka.offline.OfflineScheme.manifestIdToUri(id);
-
-    fakeStorageEngine.get.and.returnValue(Promise.resolve(null));
 
     parser.start(uri, playerInterface)
         .then(fail)
@@ -104,26 +76,6 @@ describe('OfflineManifestParser', function() {
                   shaka.util.Error.Category.STORAGE,
                   shaka.util.Error.Code.REQUESTED_ITEM_NOT_FOUND,
                   id));
-
-          expect(fakeStorageEngine.destroy).toHaveBeenCalledTimes(1);
-          expect(fakeStorageEngine.get).toHaveBeenCalledTimes(1);
-          expect(fakeStorageEngine.get).toHaveBeenCalledWith('manifest', id);
-        })
-        .then(done);
-  });
-
-  it('still calls destroy on error', function(done) {
-    /** @type {number} */
-    var id = 123;
-    /** @type {string} */
-    var uri = shaka.offline.OfflineScheme.manifestIdToUri(id);
-
-    fakeStorageEngine.get.and.returnValue(Promise.reject());
-
-    parser.start(uri, playerInterface)
-        .then(fail)
-        .catch(function(err) {
-          expect(fakeStorageEngine.destroy).toHaveBeenCalledTimes(1);
         })
         .then(done);
   });
@@ -144,73 +96,48 @@ describe('OfflineManifestParser', function() {
   });
 
   describe('update expiration', function() {
-    /** @type {string} */
-    var sessionId;
+    /** @const {string} */
+    var sessionId = 'abc';
 
     /** @const {number} */
-    var id = 123;
+    var id = 101;
     /** @const {string} */
     var uri = shaka.offline.OfflineScheme.manifestIdToUri(id);
 
+    /** @type {number} */
+    var expiration = 256;
+
     beforeEach(function(done) {
-      sessionId = 'abc';
+      new shaka.test.ManifestDBBuilder(fakeStorageEngine)
+          .onManifest(function(manifest) {
+            manifest.key = id;
+            manifest.sessionIds = [sessionId];
+          })
+          .build().then(function(manifest) {
+            return parser.start(uri, playerInterface);
+          }).catch(fail).then(done);
+    });
 
-      fakeStorageEngine.get.and.returnValue(Promise.resolve({
-        key: id,
-        originalManifestUri: '',
-        duration: 60,
-        size: 100,
-        expiration: Infinity,
-        periods: [],
-        sessionIds: [sessionId],
-        drmInfo: null,
-        appMetadata: null
-      }));
-
-      parser.start(uri, playerInterface)
-          .then(function(manifest) {
-            expect(manifest).toBeTruthy();
-
-            fakeStorageEngine.destroy.calls.reset();
-            fakeStorageEngine.get.calls.reset();
-            fakeStorageEngine.insert.calls.reset();
+    it('will ignore when data is deleted', function(done) {
+      fakeStorageEngine.removeManifests([0], null)
+          .then(function() {
+            parser.onExpirationUpdated(sessionId, expiration);
           })
           .catch(fail)
           .then(done);
     });
 
-    it('will ignore when data is deleted', function(done) {
-      fakeStorageEngine.get.and.returnValue(Promise.resolve(undefined));
-      parser.onExpirationUpdated(sessionId, 123);
-
-      shaka.test.Util.delay(0.1).then(function() {
-        expect(fakeStorageEngine.get).toHaveBeenCalled();
-        expect(fakeStorageEngine.destroy).toHaveBeenCalled();
-        expect(fakeStorageEngine.insert).not.toHaveBeenCalled();
-      }).catch(fail).then(done);
-    });
-
-    it('will ignore when updating unknown session', function(done) {
-      parser.onExpirationUpdated('other', 123);
-
-      shaka.test.Util.delay(0.1).then(function() {
-        expect(fakeStorageEngine.get).toHaveBeenCalled();
-        expect(fakeStorageEngine.destroy).toHaveBeenCalled();
-        expect(fakeStorageEngine.insert).not.toHaveBeenCalled();
-      }).catch(fail).then(done);
+    it('will ignore when updating unknown session', function() {
+      parser.onExpirationUpdated('other', expiration);
     });
 
     it('will update expiration', function(done) {
-      parser.onExpirationUpdated(sessionId, 123);
+      parser.onExpirationUpdated(sessionId, expiration);
 
       shaka.test.Util.delay(0.1).then(function() {
-        expect(fakeStorageEngine.get).toHaveBeenCalled();
-        expect(fakeStorageEngine.destroy).toHaveBeenCalled();
-        expect(fakeStorageEngine.insert).toHaveBeenCalled();
-
-        var stored = fakeStorageEngine.insert.calls.argsFor(0)[1];
-        expect(stored.key).toBe(id);
-        expect(stored.expiration).toBe(123);
+        return fakeStorageEngine.getManifest(id);
+      }).then(function(manifest) {
+        expect(manifest.expiration).toBe(expiration);
       }).catch(fail).then(done);
     });
   });
@@ -226,42 +153,36 @@ describe('OfflineManifestParser', function() {
 
     it('converts non-Period members correctly', function(done) {
       /** @const {number} */
-      var id = 123;
+      var id = 101;
       /** @const {string} */
       var uri = shaka.offline.OfflineScheme.manifestIdToUri(id);
 
-      var data = {
-        key: id,
-        originalManifestUri: 'https://example.com/manifest',
-        duration: 60,
-        size: 100,
-        periods: [],
-        sessionIds: ['abc', '123'],
-        drmInfo: null,
-        appMetadata: null
-      };
-      fakeStorageEngine.get.and.returnValue(Promise.resolve(data));
-
-      parser.start(uri, playerInterface)
-          .then(function(manifest) {
+      new shaka.test.ManifestDBBuilder(fakeStorageEngine)
+          .onManifest(function(manifest) {
+            manifest.key = id;
+            manifest.sessionIds = ['abc', '123'];
+            manifest.duration = 60;
+          })
+          .build().then(function(manifest) {
+            return parser.start(uri, playerInterface);
+          }).then(function(manifest) {
             expect(manifest).toBeTruthy();
-            expect(manifest.minBufferTime).toEqual(jasmine.any(Number));
-            expect(manifest.offlineSessionIds).toEqual(data.sessionIds);
-            expect(manifest.periods).toEqual([]);
+
+            expect(manifest.offlineSessionIds.length).toBe(2);
+            expect(manifest.offlineSessionIds).toContain('abc');
+            expect(manifest.offlineSessionIds).toContain('123');
 
             var timeline = manifest.presentationTimeline;
             expect(timeline).toBeTruthy();
             expect(timeline.isLive()).toBe(false);
             expect(timeline.getPresentationStartTime()).toBe(null);
-            expect(timeline.getDuration()).toBe(data.duration);
-          })
-          .catch(fail)
-          .then(done);
+            expect(timeline.getDuration()).toBe(60);
+          }).catch(fail).then(done);
     });
 
     it('will accept DrmInfo', function(done) {
       /** @const {number} */
-      var id = 123;
+      var id = 101;
       /** @const {string} */
       var uri = shaka.offline.OfflineScheme.manifestIdToUri(id);
 
@@ -276,65 +197,51 @@ describe('OfflineManifestParser', function() {
         initData: [{initData: new Uint8Array([1]), initDataType: 'foo'}],
         keyIds: ['key1', 'key2']
       };
-      var period = {};
-      var data = {
-        key: id,
-        originalManifestUri: 'https://example.com/manifest',
-        duration: 60,
-        size: 100,
-        periods: [period],
-        sessionIds: ['abc', '123'],
-        drmInfo: drmInfo,
-        appMetadata: null
-      };
-      fakeStorageEngine.get.and.returnValue(Promise.resolve(data));
 
       var spy = jasmine.createSpy('reconstructPeriod');
       shaka.offline.OfflineUtils.reconstructPeriod =
           shaka.test.Util.spyFunc(spy);
 
-      parser.start(uri, playerInterface)
-          .then(function(manifest) {
+      new shaka.test.ManifestDBBuilder(fakeStorageEngine)
+          .onManifest(function(manifest) {
+            manifest.key = id;
+            manifest.drmInfo = drmInfo;
+          })
+          .period()
+          .build().then(function() {
+            return parser.start(uri, playerInterface);
+          }).then(function(manifest) {
             expect(manifest).toBeTruthy();
 
             expect(spy).toHaveBeenCalled();
             expect(spy.calls.argsFor(0)[1]).toEqual([drmInfo]);
-          })
-          .catch(fail)
-          .then(done);
+          }).catch(fail).then(done);
     });
 
     it('will call reconstructPeriod for each Period', function(done) {
       /** @const {number} */
-      var id = 123;
+      var id = 101;
       /** @const {string} */
       var uri = shaka.offline.OfflineScheme.manifestIdToUri(id);
-
-      var data = {
-        key: id,
-        originalManifestUri: 'https://example.com/manifest',
-        duration: 60,
-        size: 100,
-        periods: [{id: 1}, {id: 2}, {id: 3}],
-        sessionIds: ['abc', '123'],
-        drmInfo: null,
-        appMetadata: null
-      };
-      fakeStorageEngine.get.and.returnValue(Promise.resolve(data));
 
       var spy = jasmine.createSpy('reconstructPeriod');
       shaka.offline.OfflineUtils.reconstructPeriod =
           shaka.test.Util.spyFunc(spy);
 
-      parser.start(uri, playerInterface)
+      new shaka.test.ManifestDBBuilder(fakeStorageEngine)
+          .onManifest(function(manifest) {
+            manifest.key = id;
+            manifest.sessionId = ['abc', '123'];
+          })
+          .period()
+          .period()
+          .period()
+          .build().then(function() {
+            return parser.start(uri, playerInterface);
+          })
           .then(function(manifest) {
             expect(manifest).toBeTruthy();
-
-            expect(spy).toHaveBeenCalledTimes(3);
-            for (var i = 0; i < data.periods.length; i++) {
-              expect(spy.calls.argsFor(i)[0]).toBe(data.periods[i]);
-              expect(spy.calls.argsFor(i)[1]).toEqual([]);  // drmInfos
-            }
+            expect(manifest.periods.length).toBe(3);
           })
           .catch(fail)
           .then(done);

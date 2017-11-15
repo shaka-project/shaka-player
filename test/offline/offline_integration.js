@@ -18,11 +18,14 @@
 describe('Offline', /** @suppress {accessControls} */ function() {
   var Scheme = shaka.offline.OfflineScheme;
 
-  /** @const */
-  var originalName = shaka.offline.DBEngine.DB_NAME_;
+  /** @const {string} */
+  var dbName = 'shaka-offline-integration-test-db';
 
-  /** @type {!shaka.offline.DBEngine} */
-  var dbEngine;
+  /** @const {number} */
+  var dbUpdateRetries = 5;
+
+  /** @type {!shaka.offline.IStorageEngine} */
+  var engine;
   /** @type {!shaka.offline.Storage} */
   var storage;
   /** @type {!shaka.Player} */
@@ -39,36 +42,33 @@ describe('Offline', /** @suppress {accessControls} */ function() {
     video.muted = true;
     document.body.appendChild(video);
 
-    var supportPromise = shaka.Player.probeSupport()
-        .then(function(data) {
-          support = data;
-        });
-
-    shaka.offline.DBEngine.DB_NAME_ += '_test';
     // Ensure we start with a clean slate.
-    Promise.all([shaka.offline.DBEngine.deleteDatabase(), supportPromise])
-        .catch(fail)
-        .then(done);
+    shaka.Player.probeSupport().then(function(data) {
+      support = data;
+      return shaka.offline.DBEngine.deleteDatabase(dbName);
+    }).catch(fail).then(done);
   });
 
   beforeEach(function(done) {
+    /** @type {!shaka.offline.DBEngine} */
+    var dbEngine = new shaka.offline.DBEngine(dbName, dbUpdateRetries);
+
     player = new shaka.Player(video);
     player.addEventListener('error', fail);
     storage = new shaka.offline.Storage(player);
-    dbEngine = new shaka.offline.DBEngine();
-    shaka.offline.StorageEngineFactory.initEngine(dbEngine)
-        .catch(fail).then(done);
+    engine = dbEngine;
+
+    return dbEngine.init().catch(fail).then(done);
   });
 
   afterEach(function(done) {
-    Promise.all([storage.destroy(), player.destroy(), dbEngine.destroy()])
+    Promise.all([storage.destroy(), player.destroy(), engine.destroy()])
         .catch(fail)
         .then(done);
   });
 
   afterAll(function() {
     document.body.removeChild(video);
-    shaka.offline.DBEngine.DB_NAME_ = originalName;
   });
 
   it('stores and plays clear content', function(done) {
@@ -122,9 +122,14 @@ describe('Offline', /** @suppress {accessControls} */ function() {
     var drmEngine;
     storage.store('test:sintel-enc')
         .then(function(content) {
+          /** @type {number} */
+          var manifestId = 0;
+          /** @type {string} */
+          var manifestUri = Scheme.manifestIdToUri(manifestId);
+
           storedContent = content;
-          expect(storedContent.offlineUri).toBe(Scheme.manifestIdToUri(0));
-          return dbEngine.get('manifest', 0);
+          expect(storedContent.offlineUri).toBe(manifestUri);
+          return engine.getManifest(manifestId);
         })
         .then(function(manifestDb) {
           // Did we store a persistent license?
@@ -203,9 +208,14 @@ describe('Offline', /** @suppress {accessControls} */ function() {
         storage.configure({ usePersistentLicense: false });
         storage.store('test:sintel-enc')
             .then(function(content) {
+              /** @type {number} */
+              var manifestId = 0;
+              /** @type {string} */
+              var manifestUri = Scheme.manifestIdToUri(manifestId);
+
               storedContent = content;
-              expect(storedContent.offlineUri).toBe(Scheme.manifestIdToUri(0));
-              return dbEngine.get('manifest', 0);
+              expect(storedContent.offlineUri).toBe(manifestUri);
+              return engine.getManifest(manifestId);
             })
             .then(function(manifestDb) {
               // There should not be any licenses stored.
@@ -229,7 +239,11 @@ describe('Offline', /** @suppress {accessControls} */ function() {
               // Remove the content.
               return storage.remove(storedContent);
             })
-            .then(function() { return dbEngine.get('manifest', 0); })
+            .then(function() {
+              /** @type {number} */
+              var manifestId = 0;
+              return engine.getManifest(manifestId);
+            })
             .then(function(manifestDb) {
               expect(manifestDb).toBeFalsy();
             })

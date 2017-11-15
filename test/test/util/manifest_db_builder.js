@@ -32,7 +32,7 @@ shaka.test.ManifestDBBuilder = function(storageEngine) {
   this.storageEngine_ = storageEngine;
 
   /** @type {number} */
-  var manifestId = this.storageEngine_.reserveId('manifest');
+  var manifestId = this.storageEngine_.reserveManifestId();
   /** @private {shakaExtern.ManifestDB} */
   this.manifest_ = shaka.test.ManifestDBBuilder.emptyManifest_(manifestId);
 
@@ -65,11 +65,21 @@ shaka.test.ManifestDBBuilder.prototype.build = function() {
       .then(function() {
         // TODO (vaage) : Calculate the duration and size of the manifest before
         //                writing the manifest to storage.
-        return storageEngine.insert('manifest', manifest);
+        return storageEngine.insertManifest(manifest);
       })
       .then(function() {
         return manifest;
       });
+};
+
+
+/**
+ * @param {function(shakaExtern.ManifestDB)} callback
+ * @return {!shaka.test.ManifestDBBuilder}
+ */
+shaka.test.ManifestDBBuilder.prototype.onManifest = function(callback) {
+  callback(this.manifest_);
+  return this;
 };
 
 
@@ -168,14 +178,14 @@ shaka.test.ManifestDBBuilder.prototype.initSegment = function() {
   var storageEngine = this.storageEngine_;
 
   /** @type {number} */
-  var id = storageEngine.reserveId('segment');
+  var id = storageEngine.reserveSegmentId();
   /** @type {string} */
   var uri = Scheme.segmentIdToUri(id);
 
   this.currentStream_.initSegmentUri = uri;
 
-  this.storageActions_.push(
-      storageEngine.insert('segment', {key: id}));
+  this.storageActions_.push(storageEngine.insertSegment(
+      shaka.test.ManifestDBBuilder.emptySegment_(id)));
 
   return this;
 };
@@ -198,7 +208,7 @@ shaka.test.ManifestDBBuilder.prototype.segment = function(start, end) {
   var storageEngine = this.storageEngine_;
 
   /** @type {number} */
-  var id = storageEngine.reserveId('segment');
+  var id = storageEngine.reserveSegmentId();
   /** @type {string} */
   var uri = Scheme.segmentIdToUri(id);
 
@@ -211,8 +221,8 @@ shaka.test.ManifestDBBuilder.prototype.segment = function(start, end) {
 
   this.currentStream_.segments.push(segment);
 
-  this.storageActions_.push(
-      storageEngine.insert('segment', {key: id}));
+  this.storageActions_.push(storageEngine.insertSegment(
+      shaka.test.ManifestDBBuilder.emptySegment_(id)));
 
   return this;
 };
@@ -239,4 +249,25 @@ shaka.test.ManifestDBBuilder.emptyManifest_ = function(id) {
   };
 
   return manifest;
+};
+
+
+/**
+ * Create an empty segment that can be inserted into storage. The data in this
+ * segment is meaningless.
+ * @param {number} id
+ * @return {shakaExtern.SegmentDataDB}
+ * @private
+ */
+shaka.test.ManifestDBBuilder.emptySegment_ = function(id) {
+  /** @type {shakaExtern.SegmentDataDB} */
+  var segment = {
+    data: null,
+    key: id,
+    manifestKey: 0,
+    segmentNumber: 0,
+    streamNumber: 0
+  };
+
+  return segment;
 };
