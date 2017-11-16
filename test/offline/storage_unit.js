@@ -400,7 +400,7 @@ describe('Storage', function() {
         var progress = jasmine.createSpy('onProgress');
         progress.and.callFake(function(storedContent, percent) {
           expect(storedContent).toEqual({
-            offlineUri: 'offline:0',
+            offlineUri: shaka.offline.OfflineScheme.manifestIdToUri(0),
             originalManifestUri: originalUri,
             duration: 4,
             size: 150,
@@ -455,7 +455,7 @@ describe('Storage', function() {
         var progress = jasmine.createSpy('onProgress');
         progress.and.callFake(function(storedContent, percent) {
           expect(storedContent).toEqual({
-            offlineUri: 'offline:0',
+            offlineUri: shaka.offline.OfflineScheme.manifestIdToUri(0),
             originalManifestUri: originalUri,
             duration: 5,
             size: jasmine.any(Number),
@@ -527,12 +527,12 @@ describe('Storage', function() {
               expect(stream1.segments[0]).toEqual({
                 startTime: 0,
                 endTime: 1,
-                uri: Scheme.segmentToUri(0, 2, 0)
+                uri: Scheme.segmentIdToUri(0)
               });
               expect(stream1.segments[3]).toEqual({
                 startTime: 3,
                 endTime: 4,
-                uri: Scheme.segmentToUri(0, 2, 3)
+                uri: Scheme.segmentIdToUri(3)
               });
 
               var stream2 = manifest.periods[0].streams[1];
@@ -541,7 +541,7 @@ describe('Storage', function() {
               expect(stream2.segments[0]).toEqual({
                 startTime: 0,
                 endTime: 1,
-                uri: Scheme.segmentToUri(0, 1, 5)
+                uri: Scheme.segmentIdToUri(5)
               });
               return fakeStorageEngine.get('segment', 3);
             })
@@ -608,7 +608,7 @@ describe('Storage', function() {
             .then(function(manifest) {
               var stream = manifest.periods[0].streams[0];
               expect(stream.segments.length).toBe(0);
-              expect(stream.initSegmentUri).toBe(Scheme.segmentToUri(0, 2, 0));
+              expect(stream.initSegmentUri).toBe(Scheme.segmentIdToUri(0));
               return fakeStorageEngine.get('segment', 0);
             })
             .then(function(segment) {
@@ -1046,7 +1046,7 @@ describe('Storage', function() {
                 // Change the uri for one segment so that it will be missing
                 // from storage.
                 var segment = stream.segments[0];
-                segment.uri = Scheme.segmentToUri(0, 0, 1253);
+                segment.uri = Scheme.segmentIdToUri(1253);
               })
           .build()
           .then(function(manifest) {

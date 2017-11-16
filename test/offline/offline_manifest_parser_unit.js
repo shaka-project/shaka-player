@@ -87,7 +87,11 @@ describe('OfflineManifestParser', function() {
   });
 
   it('will fail if manifest not found', function(done) {
-    var uri = shaka.offline.OfflineScheme.manifestIdToUri(123);
+    /** @type {number} */
+    var id = 123;
+    /** @type {string} */
+    var uri = shaka.offline.OfflineScheme.manifestIdToUri(id);
+
     fakeStorageEngine.get.and.returnValue(Promise.resolve(null));
 
     parser.start(uri, playerInterface)
@@ -98,17 +102,22 @@ describe('OfflineManifestParser', function() {
               new shaka.util.Error(
                   shaka.util.Error.Severity.CRITICAL,
                   shaka.util.Error.Category.STORAGE,
-                  shaka.util.Error.Code.REQUESTED_ITEM_NOT_FOUND, 123));
+                  shaka.util.Error.Code.REQUESTED_ITEM_NOT_FOUND,
+                  id));
 
           expect(fakeStorageEngine.destroy).toHaveBeenCalledTimes(1);
           expect(fakeStorageEngine.get).toHaveBeenCalledTimes(1);
-          expect(fakeStorageEngine.get).toHaveBeenCalledWith('manifest', 123);
+          expect(fakeStorageEngine.get).toHaveBeenCalledWith('manifest', id);
         })
         .then(done);
   });
 
   it('still calls destroy on error', function(done) {
-    var uri = shaka.offline.OfflineScheme.manifestIdToUri(123);
+    /** @type {number} */
+    var id = 123;
+    /** @type {string} */
+    var uri = shaka.offline.OfflineScheme.manifestIdToUri(id);
+
     fakeStorageEngine.get.and.returnValue(Promise.reject());
 
     parser.start(uri, playerInterface)
@@ -138,12 +147,16 @@ describe('OfflineManifestParser', function() {
     /** @type {string} */
     var sessionId;
 
+    /** @const {number} */
+    var id = 123;
+    /** @const {string} */
+    var uri = shaka.offline.OfflineScheme.manifestIdToUri(id);
+
     beforeEach(function(done) {
       sessionId = 'abc';
 
-      var uri = shaka.offline.OfflineScheme.manifestIdToUri(123);
       fakeStorageEngine.get.and.returnValue(Promise.resolve({
-        key: 0,
+        key: id,
         originalManifestUri: '',
         duration: 60,
         size: 100,
@@ -196,7 +209,7 @@ describe('OfflineManifestParser', function() {
         expect(fakeStorageEngine.insert).toHaveBeenCalled();
 
         var stored = fakeStorageEngine.insert.calls.argsFor(0)[1];
-        expect(stored.key).toBe(0);
+        expect(stored.key).toBe(id);
         expect(stored.expiration).toBe(123);
       }).catch(fail).then(done);
     });
@@ -212,9 +225,13 @@ describe('OfflineManifestParser', function() {
     });
 
     it('converts non-Period members correctly', function(done) {
-      var uri = shaka.offline.OfflineScheme.manifestIdToUri(123);
+      /** @const {number} */
+      var id = 123;
+      /** @const {string} */
+      var uri = shaka.offline.OfflineScheme.manifestIdToUri(id);
+
       var data = {
-        key: 123,
+        key: id,
         originalManifestUri: 'https://example.com/manifest',
         duration: 60,
         size: 100,
@@ -243,7 +260,11 @@ describe('OfflineManifestParser', function() {
     });
 
     it('will accept DrmInfo', function(done) {
-      var uri = shaka.offline.OfflineScheme.manifestIdToUri(123);
+      /** @const {number} */
+      var id = 123;
+      /** @const {string} */
+      var uri = shaka.offline.OfflineScheme.manifestIdToUri(id);
+
       var drmInfo = {
         keySystem: 'com.example.drm',
         licenseServerUri: 'https://example.com/drm',
@@ -257,7 +278,7 @@ describe('OfflineManifestParser', function() {
       };
       var period = {};
       var data = {
-        key: 123,
+        key: id,
         originalManifestUri: 'https://example.com/manifest',
         duration: 60,
         size: 100,
@@ -284,9 +305,13 @@ describe('OfflineManifestParser', function() {
     });
 
     it('will call reconstructPeriod for each Period', function(done) {
-      var uri = shaka.offline.OfflineScheme.manifestIdToUri(123);
+      /** @const {number} */
+      var id = 123;
+      /** @const {string} */
+      var uri = shaka.offline.OfflineScheme.manifestIdToUri(id);
+
       var data = {
-        key: 123,
+        key: id,
         originalManifestUri: 'https://example.com/manifest',
         duration: 60,
         size: 100,

@@ -333,9 +333,9 @@ describe('OfflineUtils', function() {
         encrypted: true,
         keyId: 'key1',
         segments: [
-          {startTime: 0, endTime: 10, uri: Scheme.segmentToUri(1, 1, 1)},
-          {startTime: 10, endTime: 20, uri: Scheme.segmentToUri(1, 1, 2)},
-          {startTime: 20, endTime: 25, uri: Scheme.segmentToUri(1, 1, 3)}
+          {startTime: 0, endTime: 10, uri: Scheme.segmentIdToUri(1)},
+          {startTime: 10, endTime: 20, uri: Scheme.segmentIdToUri(2)},
+          {startTime: 20, endTime: 25, uri: Scheme.segmentIdToUri(3)}
         ],
         variantIds: variantIds
       };
@@ -361,13 +361,13 @@ describe('OfflineUtils', function() {
         label: null,
         width: null,
         height: null,
-        initSegmentUri: Scheme.segmentToUri(1, id, 0),
+        initSegmentUri: Scheme.segmentIdToUri(0),
         encrypted: false,
         keyId: null,
         segments: [
-          {startTime: 0, endTime: 10, uri: Scheme.segmentToUri(1, id, 1)},
-          {startTime: 10, endTime: 20, uri: Scheme.segmentToUri(1, id, 2)},
-          {startTime: 20, endTime: 25, uri: Scheme.segmentToUri(1, id, 3)}
+          {startTime: 0, endTime: 10, uri: Scheme.segmentIdToUri(1)},
+          {startTime: 10, endTime: 20, uri: Scheme.segmentIdToUri(2)},
+          {startTime: 20, endTime: 25, uri: Scheme.segmentIdToUri(3)}
         ],
         variantIds: variantIds
       };
@@ -392,13 +392,13 @@ describe('OfflineUtils', function() {
         label: null,
         width: null,
         height: null,
-        initSegmentUri: Scheme.segmentToUri(1, id, 0),
+        initSegmentUri: Scheme.segmentIdToUri(0),
         encrypted: false,
         keyId: null,
         segments: [
-          {startTime: 0, endTime: 10, uri: Scheme.segmentToUri(1, id, 1)},
-          {startTime: 10, endTime: 20, uri: Scheme.segmentToUri(1, id, 2)},
-          {startTime: 20, endTime: 25, uri: Scheme.segmentToUri(1, id, 3)}
+          {startTime: 0, endTime: 10, uri: Scheme.segmentIdToUri(1)},
+          {startTime: 10, endTime: 20, uri: Scheme.segmentIdToUri(2)},
+          {startTime: 20, endTime: 25, uri: Scheme.segmentIdToUri(3)}
         ],
         variantIds: [5]
       };

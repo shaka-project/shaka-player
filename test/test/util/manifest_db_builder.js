@@ -170,8 +170,7 @@ shaka.test.ManifestDBBuilder.prototype.initSegment = function() {
   /** @type {number} */
   var id = storageEngine.reserveId('segment');
   /** @type {string} */
-  var uri = Scheme.segmentToUri(
-      this.manifest_.key, this.currentStream_.id, id);
+  var uri = Scheme.segmentIdToUri(id);
 
   this.currentStream_.initSegmentUri = uri;
 
@@ -201,8 +200,7 @@ shaka.test.ManifestDBBuilder.prototype.segment = function(start, end) {
   /** @type {number} */
   var id = storageEngine.reserveId('segment');
   /** @type {string} */
-  var uri = Scheme.segmentToUri(
-      this.manifest_.key, this.currentStream_.id, id);
+  var uri = Scheme.segmentIdToUri(id);
 
   /** @type {shakaExtern.SegmentDB} */
   var segment = {
