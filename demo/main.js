@@ -269,6 +269,9 @@ shakaDemo.preBrowserCheckParams_ = function(params) {
   if ('license' in params) {
     document.getElementById('licenseServerInput').value = params['license'];
   }
+  if ('certificate' in params) {
+    document.getElementById('certificateInput').value = params['certificate'];
+  }
   if ('logtoscreen' in params) {
     document.getElementById('logToScreen').checked = true;
     // Call onLogChange_ manually, because setting checked
@@ -464,12 +467,21 @@ shakaDemo.hashShouldChange_ = function() {
   } else {
     if (assetList.selectedIndex == assetList.length - 1) {
       // It's a custom asset.
-      if (document.getElementById('manifestInput').value) {
-        params.push('asset=' + document.getElementById('manifestInput').value);
+      var manifestInputValue = document.getElementById('manifestInput').value;
+      if (manifestInputValue) {
+        params.push('asset=' + manifestInputValue);
       }
-      if (document.getElementById('licenseServerInput').value) {
-        params.push('license=' +
-            document.getElementById('licenseServerInput').value);
+
+      var licenseInputValue =
+          document.getElementById('licenseServerInput').value;
+      if (licenseInputValue) {
+        params.push('license=' + licenseInputValue);
+      }
+
+      var certificateInputValue =
+          document.getElementById('certificateInput').value;
+      if (certificateInputValue) {
+        params.push('certificate=' + certificateInputValue);
       }
     } else {
       // It's a default asset.
