@@ -133,7 +133,7 @@ shakaDemo.onAssetKeyUp_ = function(event) {
 
 /**
  * @param {!string} uri
- * @return {!Promise}
+ * @return {!Promise.<ArrayBuffer>}
  * @private
  */
 shakaDemo.requestCertificate_ = function(uri) {
