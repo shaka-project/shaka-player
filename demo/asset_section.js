@@ -111,6 +111,8 @@ shakaDemo.setupAssets_ = function() {
       'keyup', shakaDemo.onAssetKeyUp_);
   document.getElementById('manifestInput').addEventListener(
       'keyup', shakaDemo.onAssetKeyUp_);
+  document.getElementById('certificateInput').addEventListener(
+      'keyup', shakaDemo.onAssetKeyUp_);
 
   return asyncOfflineSetup;
 };
@@ -126,6 +128,45 @@ shakaDemo.onAssetKeyUp_ = function(event) {
   // Load the asset if the user presses enter.
   if (event.keyCode != 13) return;
   shakaDemo.load();
+};
+
+
+/**
+ * @param {!string} uri
+ * @return {!Promise.<ArrayBuffer>}
+ * @private
+ */
+shakaDemo.requestCertificate_ = function(uri) {
+  var netEngine = shakaDemo.player_.getNetworkingEngine();
+  var requestType = shaka.net.NetworkingEngine.RequestType.APP;
+  var request = /** @type {shakaExtern.Request} */ ({ uris: [uri] });
+
+  return netEngine.request(requestType, request).then(function(response) {
+    return response.data;
+  });
+};
+
+
+/**
+ * @param {ArrayBuffer} certificate
+ * @private
+ */
+shakaDemo.configureCertificate_ = function(certificate) {
+  var player = shakaDemo.player_;
+  var config = player.getConfiguration();
+  var certConfig = {};
+
+  for (var keySystem in config.drm.advanced) {
+    certConfig[keySystem] = {
+      serverCertificate: new Uint8Array(certificate)
+    };
+  }
+
+  player.configure({
+    drm: {
+      advanced: certConfig
+    }
+  });
 };
 
 
@@ -172,7 +213,9 @@ shakaDemo.preparePlayer_ = function(asset) {
       // Use the custom license server for all key systems.
       // This simplifies configuration for the user.
       // They will simply fill in a Widevine license server on Chrome, etc.
-      licenseServers: licenseServers
+      licenseServers: licenseServers,
+      // Use custom certificate for all key systems as well
+      certificateUri: document.getElementById('certificateInput').value
     });
   }
 
@@ -238,8 +281,17 @@ shakaDemo.load = function() {
   // Revert to default poster while we load.
   shakaDemo.localVideo_.poster = shakaDemo.mainPoster_;
 
-  // Load the manifest.
-  player.load(asset.manifestUri).then(function() {
+  var configureCertificate = Promise.resolve();
+
+  if (asset.certificateUri) {
+    configureCertificate = shakaDemo.requestCertificate_(asset.certificateUri)
+      .then(shakaDemo.configureCertificate_);
+  }
+
+  configureCertificate.then(function() {
+    // Load the manifest.
+    return player.load(asset.manifestUri);
+  }).then(function() {
     // Update control state in case autoplay is disabled.
     shakaDemo.controls_.loadComplete();
 

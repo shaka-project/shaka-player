@@ -125,6 +125,7 @@ shakaAssets.ExtraText;
  * @typedef {{
  *   name: string,
  *   manifestUri: string,
+ *   certificateUri: (string|undefined),
  *   focus: (boolean|undefined),
  *   disabled: (boolean|undefined),
  *   extraText: (!Array.<shakaAssets.ExtraText>|undefined),
@@ -149,6 +150,8 @@ shakaAssets.ExtraText;
  *   same if the asset is encoded different ways (or by different encoders).
  * @property {string} manifestUri
  *   The URI of the manifest.
+ * @property {(string|undefined)} certificateUri
+ *   The URI of the DRM server certificate, if required to play this asset.
  * @property {(boolean|undefined)} focus
  *   (optional) If true, focuses the integration test for this asset and selects
  *   this asset in the demo app.
