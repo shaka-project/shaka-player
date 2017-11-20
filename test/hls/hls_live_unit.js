@@ -516,7 +516,7 @@ describe('HlsParser live', function() {
 
       it('gets start time of segments with byte range', function(done) {
         // Nit: this value is an implementation detail of the fix for #1106
-        var partialEndByte = expectedStartByte + 1024 - 1;
+        var partialEndByte = expectedStartByte + 2048 - 1;
 
         fakeNetEngine.setResponseMap({
           'test:/master': toUTF8(master),

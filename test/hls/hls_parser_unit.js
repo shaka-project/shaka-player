@@ -1306,7 +1306,7 @@ describe('HlsParser', function() {
     var expectedStartByte = 616;
     var expectedEndByte = 121705;
     // Nit: this value is an implementation detail of the fix for #1106
-    var partialEndByte = expectedStartByte + 1024 - 1;
+    var partialEndByte = expectedStartByte + 2048 - 1;
 
     beforeEach(function() {
       // TODO: use StreamGenerator?
