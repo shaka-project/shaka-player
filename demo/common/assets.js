@@ -298,9 +298,9 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Angel One (HLS, MP4, multilingual)',
-    manifestUri: '//storage.googleapis.com/shaka-demo-assets/angel-one-hls/master.m3u8',  // gjslint: disable=110
+    manifestUri: '//storage.googleapis.com/shaka-demo-assets/angel-one-hls/hls.m3u8',  // gjslint: disable=110
 
-    encoder: shakaAssets.Encoder.APPLE,
+    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [],
     features: [
