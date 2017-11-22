@@ -1349,6 +1349,31 @@ describe('Player', function() {
       expect(player.getTextTracks()).toEqual(textTracks);
     });
 
+    it('returns empty arrays before tracks can be determined', function(done) {
+      var parser = new shaka.test.FakeManifestParser(manifest);
+      var parserFactory = function() { return parser; };
+      parser.start.and.callFake(function(manifestUri, playerInterface) {
+        // The player does not yet have a manifest.
+        expect(player.getVariantTracks()).toEqual([]);
+        expect(player.getTextTracks()).toEqual([]);
+
+        parser.playerInterface = playerInterface;
+        return Promise.resolve(manifest);
+      });
+      drmEngine.init.and.callFake(function(manifest, isOffline) {
+        // The player does not yet have a playhead.
+        expect(player.getVariantTracks()).toEqual([]);
+        expect(player.getTextTracks()).toEqual([]);
+      });
+
+      player.load('', 0, parserFactory).catch(fail).then(function() {
+        // Make sure the interruptions didn't mess up the tracks.
+        streamingEngine.onCanSwitch();
+        expect(player.getVariantTracks()).toEqual(variantTracks);
+        expect(player.getTextTracks()).toEqual(textTracks);
+      }).then(done);
+    });
+
     it('doesn\'t disable AbrManager if switching variants', function() {
       streamingEngine.onCanSwitch();
 
