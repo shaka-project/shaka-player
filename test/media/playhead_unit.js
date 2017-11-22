@@ -811,6 +811,17 @@ describe('Playhead', function() {
           expectEvent: false
         });
 
+        seekTest('will wait to jump when seeking backwards', {
+          // [20-30]
+          buffered: [{start: 20, end: 30}],
+          // The lack of newBuffered means we won't append any segments, so we
+          // should still be waiting.
+          start: 24,
+          seekTo: 4,
+          expectedEndTime: 4,
+          expectEvent: false
+        });
+
         seekTest('will jump when seeking backwards into gap', {
           // [2-10], [20-30]
           buffered: [{start: 20, end: 30}],
@@ -898,9 +909,12 @@ describe('Playhead', function() {
         // Seek to the given position and update ready state.
         video.currentTime = data.seekTo;
         video.readyState = calculateReadyState(data.buffered, data.seekTo);
+        video.seeking = true;
         video.on['seeking']();
         if (video.readyState < HTMLMediaElement.HAVE_ENOUGH_DATA)
           video.on['waiting']();
+        else
+          video.seeking = false;
         jasmine.clock().tick(1000);
 
         if (data.newBuffered) {
@@ -911,8 +925,11 @@ describe('Playhead', function() {
 
           // Now StreamingEngine will buffer the new content and tell playhead
           // about it.
+          expect(video.currentTime).toBe(data.seekTo);
           video.buffered = createFakeBuffered(data.newBuffered);
           video.readyState = calculateReadyState(data.newBuffered, data.seekTo);
+          if (video.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA)
+            video.seeking = false;
           playhead.onSegmentAppended();
           jasmine.clock().tick(1000);
         }
