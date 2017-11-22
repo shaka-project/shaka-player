@@ -169,6 +169,28 @@ describe('Playhead', function() {
   });
 
   describe('getTime', function() {
+    it('returns current time when the video is paused', function() {
+      video.readyState = HTMLMediaElement.HAVE_METADATA;
+      playhead = new shaka.media.Playhead(
+          video,
+          manifest,
+          config,
+          5 /* startTime */,
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
+
+      expect(video.currentTime).toBe(5);
+      expect(playhead.getTime()).toBe(5);
+
+      // Simulate pausing.
+      video.paused = true;
+      timeline.getSegmentAvailabilityStart.and.returnValue(10);
+      timeline.getSegmentAvailabilityEnd.and.returnValue(70);
+
+      expect(video.currentTime).toBe(5);
+      expect(playhead.getTime()).toBe(5);
+    });
+
     it('returns the correct time when readyState starts at 0', function() {
       playhead = new shaka.media.Playhead(
           video,
