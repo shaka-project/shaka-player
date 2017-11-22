@@ -119,6 +119,14 @@ describe('Playhead', function() {
   /** @type {!jasmine.Spy} */
   var onEvent;
 
+  beforeAll(function() {
+    jasmine.clock().install();
+  });
+
+  afterAll(function() {
+    jasmine.clock().uninstall();
+  });
+
   beforeEach(function() {
     video = new shaka.test.FakeVideo();
     timeline = new shaka.test.FakePresentationTimeline();
@@ -230,6 +238,69 @@ describe('Playhead', function() {
           Util.spyFunc(onEvent));
 
       expect(playhead.getTime()).toBe(0);
+    });
+
+    it('respects a seek before metadata is loaded', function() {
+      playhead = new shaka.media.Playhead(
+          video,
+          manifest,
+          config,
+          5 /* startTime */,
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
+
+      expect(video.addEventListener).toHaveBeenCalledWith(
+          'loadedmetadata', jasmine.any(Function), false);
+
+      expect(playhead.getTime()).toBe(5);
+      expect(video.currentTime).toBe(0);
+
+      // Realism: Chrome fires timeupdate before currentTime changes.
+      video.on['timeupdate']();
+      video.currentTime = 20;
+
+      video.on['timeupdate']();
+      video.currentTime = 30;
+
+      // This hasn't changed yet, because Playhead delays observing currentTime.
+      expect(playhead.getTime()).toBe(5);
+
+      // Delay to let Playhead batch up changes to currentTime and observe.
+      jasmine.clock().tick(1000);
+
+      expect(playhead.getTime()).toBe(30);
+    });
+
+    // This is important for recovering from drift.
+    // See: https://github.com/google/shaka-player/issues/1105
+    // TODO: Re-evaluate after https://github.com/google/shaka-player/issues/999
+    it('does not change once the initial position is set', function() {
+      timeline.isLive.and.returnValue(true);
+      timeline.getDuration.and.returnValue(Infinity);
+      timeline.getSegmentAvailabilityStart.and.returnValue(0);
+      timeline.getSegmentAvailabilityEnd.and.returnValue(60);
+      timeline.getSeekRangeEnd.and.returnValue(60);
+
+      playhead = new shaka.media.Playhead(
+          video,
+          manifest,
+          config,
+          null /* startTime */,
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
+
+      expect(video.addEventListener).toHaveBeenCalledWith(
+          'loadedmetadata', jasmine.any(Function), false);
+
+      expect(playhead.getTime()).toBe(60);
+      expect(video.currentTime).toBe(0);
+
+      // Simulate time passing and the live edge changing.
+      timeline.getSegmentAvailabilityStart.and.returnValue(10);
+      timeline.getSegmentAvailabilityEnd.and.returnValue(70);
+      timeline.getSeekRangeEnd.and.returnValue(70);
+
+      expect(playhead.getTime()).toBe(60);
     });
   });  // getTime
 
@@ -517,14 +588,6 @@ describe('Playhead', function() {
   });  // clamps playhead after resuming
 
   describe('gap jumping', function() {
-    beforeAll(function() {
-      jasmine.clock().install();
-    });
-
-    afterAll(function() {
-      jasmine.clock().uninstall();
-    });
-
     beforeEach(function() {
       timeline.isLive.and.returnValue(false);
       timeline.getSafeAvailabilityStart.and.returnValue(0);
