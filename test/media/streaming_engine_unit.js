@@ -1167,14 +1167,16 @@ describe('StreamingEngine', function() {
     it('will not clear buffers if streams have not changed', function() {
       onCanSwitch.and.callFake(function() {
         mediaSourceEngine.clear.calls.reset();
-        streamingEngine.switchVariant(sameAudioVariant, /* clearBuffer */ true);
+        streamingEngine.switchVariant(sameAudioVariant, /* clearBuffer */ true,
+            /* safeMargin */ 0);
         Util.fakeEventLoop(1);
         expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('audio');
         expect(mediaSourceEngine.clear).toHaveBeenCalledWith('video');
         expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('text');
 
         mediaSourceEngine.clear.calls.reset();
-        streamingEngine.switchVariant(sameVideoVariant, /* clearBuffer */ true);
+        streamingEngine.switchVariant(sameVideoVariant, /* clearBuffer */ true,
+            /* safeMargin */ 0);
         Util.fakeEventLoop(1);
         expect(mediaSourceEngine.clear).toHaveBeenCalledWith('audio');
         expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('video');
