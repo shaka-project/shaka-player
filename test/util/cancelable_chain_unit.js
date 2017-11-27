@@ -220,4 +220,45 @@ describe('CancelableChain', function() {
       }).catch(fail).then(done);
     });
   });
+
+  describe('events', function() {
+    it('can register onComplete event', function(done) {
+      /** @type {boolean} */
+      var completed = false;
+
+      /** @type {!shaka.util.CancelableChain} */
+      var chain = new shaka.util.CancelableChain();
+      chain.onComplete(function() {
+        completed = true;
+      });
+
+      // Completed callbacks should be called before the promise
+      // completes.
+      chain.finalize().catch(fail).then(function() {
+        if (completed) {
+          done();
+        } else {
+          fail();
+        }
+      });
+    });
+
+    it('can register onCancel event', function(done) {
+      /** @const */
+      var cannedError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.PLAYER,
+          shaka.util.Error.Code.LOAD_INTERRUPTED);
+
+      /** @type {!shaka.util.CancelableChain} */
+      var chain = new shaka.util.CancelableChain();
+      chain.onCancel(done);
+
+      chain.then(function() {
+        var wait = shaka.test.Util.delay(1.0);
+        chain.cancel(cannedError);
+        return wait;
+      }).finalize().then(fail);
+    });
+  });
 });
