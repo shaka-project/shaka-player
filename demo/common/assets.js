@@ -75,6 +75,8 @@ shakaAssets.Feature = {
   MULTIKEY: 'multiple keys',
   MULTIPERIOD: 'multiple Periods',
   ENCRYPTED_WITH_CLEAR: 'mixing encrypted and unencrypted periods',
+  AESCTR_16_BYTE_IV: 'encrypted with AES CTR Mode using a 16 byte IV',
+  AESCTR_8_BYTE_IV: 'encrypted with AES CTR Mode using a 8 byte IV',
   TRICK_MODE: 'special trick mode track',
   XLINK: 'xlink',
 
@@ -206,7 +208,11 @@ shakaAssets.UplynkResponseFilter = function(type, response) {
   if (type == shaka.net.NetworkingEngine.RequestType.MANIFEST) {
     // Parse a custom header that contains a value needed to build a proper
     // license server URL
-    shakaAssets.uplynk_prefix = response.headers['x-uplynk-prefix'];
+    if (response.headers['x-uplynk-prefix']) {
+      shakaAssets.uplynk_prefix = response.headers['x-uplynk-prefix'];
+    } else {
+      shakaAssets.uplynk_prefix = '';
+    }
   }
 };
 
@@ -222,15 +228,25 @@ shakaAssets.UplynkResponseFilter = function(type, response) {
 shakaAssets.UplynkRequestFilter = function(type, request) {
   if (type == shaka.net.NetworkingEngine.RequestType.LICENSE ||
       type == shaka.net.NetworkingEngine.RequestType.MANIFEST) {
-    request.allowCrossSiteCredentials = true;
+    // It appears UTCTiming requests are considered MANIFEST type requests
+    if (request.uris[0].indexOf('servertime') == -1) {
+      request.allowCrossSiteCredentials = true;
+    } else {
+      request.allowCrossSiteCredentials = false;
+    }
   }
 
   if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
     // Modify the license request URL based on our cookie
-    if (request.uris[0].indexOf('wv') !== -1) {
+    if (request.uris[0].indexOf('wv') !== -1 &&
+        shakaAssets.uplynk_prefix) {
       request.uris[0] = shakaAssets.uplynk_prefix.concat('/wv');
-    } else if (request.uris[0].indexOf('ck') !== -1) {
+    } else if (request.uris[0].indexOf('ck') !== -1 &&
+               shakaAssets.uplynk_prefix) {
       request.uris[0] = shakaAssets.uplynk_prefix.concat('/ck');
+    } else if (request.uris[0].indexOf('pr') !== -1 &&
+               shakaAssets.uplynk_prefix) {
+      request.uris[0] = shakaAssets.uplynk_prefix.concat('/pr');
     }
   }
 };
@@ -1073,30 +1089,82 @@ shakaAssets.testAssets = [
 
   // Verizon Digital Media Services (VDMS) assets {{{
   {
-    name: 'Big Buck Bunny',
-    manifestUri: 'https://content.uplynk.com/224ac8717e714b68831997ab6cea4015.mpd', // gjslint: disable=110
-
+    name: 'Multi DRM - 8 Byte IV',
+    // Reliable Playready playback requires Edge 16+
+    // The playenabler and sl url parameters allow for playback in VMs
+    manifestUri: 'https://content.uplynk.com/847859273a4b4a81959d8fea181672a4.mpd?pr.version=2&pr.playenabler=B621D91F-EDCC-4035-8D4B-DC71760D43E9&pr.securitylevel=150', // gjslint: disable=110
     encoder: shakaAssets.Encoder.UPLYNK,
     source: shakaAssets.Source.UPLYNK,
     drm: [
-      shakaAssets.KeySystem.WIDEVINE,
-      shakaAssets.KeySystem.CLEAR_KEY
+      shakaAssets.KeySystem.PLAYREADY,
+      shakaAssets.KeySystem.WIDEVINE
     ],
     features: [
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_LIST_DURATION,
       shakaAssets.Feature.PSSH,
+      shakaAssets.Feature.MULTIKEY,
+      shakaAssets.Feature.AESCTR_8_BYTE_IV,
+      shakaAssets.Feature.SEGMENT_LIST_DURATION,
       shakaAssets.Feature.HIGH_DEFINITION
     ],
     licenseServers: {
-      'com.widevine.alpha': 'https://content.uplynk.com/wv',
-      'org.w3.clearkey': 'https://content.uplynk.com/ck'
+      'com.microsoft.playready': 'https://content.uplynk.com/pr',
+      'com.widevine.alpha': 'https://content.uplynk.com/wv'
     },
     requestFilter: shakaAssets.UplynkRequestFilter,
     responseFilter: shakaAssets.UplynkResponseFilter
   },
   {
-    name: 'Sintel - (multiperiod-mix of encrypted and unencrypted)',
+    name: 'Multi DRM - MultiPeriod - 8 Byte IV',
+    // Reliable Playready playback requires Edge 16+
+    // The playenabler and sl url parameters allow for playback in VMs
+    manifestUri: 'https://content.uplynk.com/054225d59be2454fabdca3e96912d847.mpd?ad=cleardash&pr.version=2&pr.playenabler=B621D91F-EDCC-4035-8D4B-DC71760D43E9&pr.securitylevel=150', // gjslint: disable=110
+    encoder: shakaAssets.Encoder.UPLYNK,
+    source: shakaAssets.Source.UPLYNK,
+    drm: [
+      shakaAssets.KeySystem.PLAYREADY,
+      shakaAssets.KeySystem.WIDEVINE
+    ],
+    features: [
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.PSSH,
+      shakaAssets.Feature.MULTIKEY,
+      shakaAssets.Feature.MULTIPERIOD,
+      shakaAssets.Feature.SEGMENT_LIST_DURATION,
+      shakaAssets.Feature.AESCTR_8_BYTE_IV,
+      shakaAssets.Feature.HIGH_DEFINITION
+    ],
+    licenseServers: {
+      'com.microsoft.playready': 'https://content.uplynk.com/pr',
+      'com.widevine.alpha': 'https://content.uplynk.com/wv'
+    },
+    requestFilter: shakaAssets.UplynkRequestFilter,
+    responseFilter: shakaAssets.UplynkResponseFilter
+  },
+  {
+    name: 'Widevine - 16 Byte IV',
+    manifestUri: 'https://content.uplynk.com/224ac8717e714b68831997ab6cea4015.mpd', // gjslint: disable=110
+    encoder: shakaAssets.Encoder.UPLYNK,
+    source: shakaAssets.Source.UPLYNK,
+    drm: [
+      shakaAssets.KeySystem.WIDEVINE
+    ],
+    features: [
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.PSSH,
+      shakaAssets.Feature.MULTIKEY,
+      shakaAssets.Feature.AESCTR_16_BYTE_IV,
+      shakaAssets.Feature.SEGMENT_LIST_DURATION,
+      shakaAssets.Feature.HIGH_DEFINITION
+    ],
+    licenseServers: {
+      'com.widevine.alpha': 'https://content.uplynk.com/wv'
+    },
+    requestFilter: shakaAssets.UplynkRequestFilter,
+    responseFilter: shakaAssets.UplynkResponseFilter
+  },
+  {
+    name: 'Widevine - 16 Byte IV - (mix of encrypted and unencrypted periods)',
     // Unencrypted periods interspersed with protected periods
     // Doesn't work on Chrome < 58
     manifestUri: 'https://content.uplynk.com/1eb40d8e64234f5c9879db7045c3d48c.mpd?ad=cleardash&rays=cdefg', // gjslint: disable=110
@@ -1104,8 +1172,7 @@ shakaAssets.testAssets = [
     encoder: shakaAssets.Encoder.UPLYNK,
     source: shakaAssets.Source.UPLYNK,
     drm: [
-      shakaAssets.KeySystem.WIDEVINE,
-      shakaAssets.KeySystem.CLEAR_KEY
+      shakaAssets.KeySystem.WIDEVINE
     ],
     features: [
       shakaAssets.Feature.MP4,
@@ -1114,11 +1181,12 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.PSSH,
       shakaAssets.Feature.HIGH_DEFINITION,
       shakaAssets.Feature.MULTIPERIOD,
+      shakaAssets.Feature.MULTIKEY,
+      shakaAssets.Feature.AESCTR_16_BYTE_IV,
       shakaAssets.Feature.ENCRYPTED_WITH_CLEAR
     ],
     licenseServers: {
-      'com.widevine.alpha': 'https://content.uplynk.com/wv',
-      'org.w3.clearkey': 'https://content.uplynk.com/ck'
+      'com.widevine.alpha': 'https://content.uplynk.com/wv'
     },
     requestFilter: shakaAssets.UplynkRequestFilter,
     responseFilter: shakaAssets.UplynkResponseFilter
