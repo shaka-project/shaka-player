@@ -139,7 +139,7 @@ shaka.test.ManifestDBBuilder.prototype.stream = function() {
     encrypted: false,
     keyId: null,
     segments: [],
-    variantIds: null
+    variantIds: []
   };
 
   this.currentStream_ = stream;

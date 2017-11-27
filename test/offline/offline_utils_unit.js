@@ -73,48 +73,11 @@ describe('OfflineUtils', function() {
       expect(variants[1].video.id).toBe(3);
     });
 
-    it('will create variants with no variant ids', function() {
-      /** @type {!Array.<shakaExtern.StreamDB>} */
-      var audios = [
-        createStreamDB(0, audioType, null),
-        createStreamDB(1, audioType, null)
-      ];
-      /** @type {!Array.<shakaExtern.StreamDB>} */
-      var videos = [
-        createStreamDB(2, videoType, null),
-        createStreamDB(3, videoType, null)
-      ];
-      /** @type {!Array.<shakaExtern.DrmInfo>} */
-      var drm = [];
-
-      /** @type {!Array.<shakaExtern.Variant>} */
-      var variants = OfflineUtils.recreateVariants(audios, videos, drm);
-
-      expect(variants.length).toBe(4);
-    });
-
     it('will create variants when there is only audio', function() {
       /** @type {!Array.<shakaExtern.StreamDB>} */
       var audios = [
         createStreamDB(0, audioType, [0]),
         createStreamDB(1, audioType, [1])
-      ];
-      /** @type {!Array.<shakaExtern.StreamDB>} */
-      var videos = [];
-      /** @type {!Array.<shakaExtern.DrmInfo>} */
-      var drm = [];
-
-      /** @type {!Array.<shakaExtern.Variant>} */
-      var variants = OfflineUtils.recreateVariants(audios, videos, drm);
-
-      expect(variants.length).toBe(2);
-    });
-
-    it('will create variants when there is only audio with no ids', function() {
-      /** @type {!Array.<shakaExtern.StreamDB>} */
-      var audios = [
-        createStreamDB(0, audioType, null),
-        createStreamDB(1, audioType, null)
       ];
       /** @type {!Array.<shakaExtern.StreamDB>} */
       var videos = [];
@@ -144,27 +107,10 @@ describe('OfflineUtils', function() {
       expect(variants.length).toBe(2);
     });
 
-    it('will create variants when there is only video with no ids', function() {
-      /** @type {!Array.<shakaExtern.StreamDB>} */
-      var audios = [];
-      /** @type {!Array.<shakaExtern.StreamDB>} */
-      var videos = [
-        createStreamDB(2, videoType, null),
-        createStreamDB(3, videoType, null)
-      ];
-      /** @type {!Array.<shakaExtern.DrmInfo>} */
-      var drm = [];
-
-      /** @type {!Array.<shakaExtern.Variant>} */
-      var variants = OfflineUtils.recreateVariants(audios, videos, drm);
-
-      expect(variants.length).toBe(2);
-    });
-
     /**
      * @param {number} id
      * @param {string} type
-     * @param {?Array.<number>} variants
+     * @param {!Array.<number>} variants
      * @return {shakaExtern.StreamDB}
      */
     function createStreamDB(id, type, variants) {
