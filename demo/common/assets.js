@@ -210,6 +210,8 @@ shakaAssets.UplynkResponseFilter = function(type, response) {
     // license server URL
     if (response.headers['x-uplynk-prefix']) {
       shakaAssets.uplynk_prefix = response.headers['x-uplynk-prefix'];
+    } else {
+      shakaAssets.uplynk_prefix = '';
     }
   }
 };
@@ -229,8 +231,7 @@ shakaAssets.UplynkRequestFilter = function(type, request) {
     // It appears UTCTiming requests are considered MANIFEST type requests
     if (request.uris[0].indexOf('servertime') == -1) {
       request.allowCrossSiteCredentials = true;
-    }
-    else {
+    } else {
       request.allowCrossSiteCredentials = false;
     }
   }
