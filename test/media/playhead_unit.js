@@ -293,6 +293,32 @@ describe('Playhead', function() {
       expect(playhead.getTime()).toBe(30);
     });
 
+    it('does not treat timeupdate as seek close to metadata load', function() {
+      playhead = new shaka.media.Playhead(
+          video,
+          manifest,
+          config,
+          5 /* startTime */,
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
+
+      expect(video.addEventListener).toHaveBeenCalledWith(
+          'loadedmetadata', jasmine.any(Function), false);
+
+      expect(playhead.getTime()).toBe(5);
+      expect(video.currentTime).toBe(0);
+
+      // Realism: Edge fires "timeupdate" right before "loadedmetadata".
+      // This was causing a failed assertion in onEarlySeek_();
+      video.currentTime = 5.001;
+      video.on['timeupdate']();
+      video.readyState = HTMLMediaElement.HAVE_METADATA;
+      video.on['loadedmetadata']();
+
+      // Delay to let Playhead batch up changes to currentTime and observe.
+      jasmine.clock().tick(1000);
+    });
+
     // This is important for recovering from drift.
     // See: https://github.com/google/shaka-player/issues/1105
     // TODO: Re-evaluate after https://github.com/google/shaka-player/issues/999
