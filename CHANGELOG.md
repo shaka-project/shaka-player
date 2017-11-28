@@ -9,6 +9,8 @@ Bugfixes:
     - https://github.com/google/shaka-player/issues/1150
   - Fix mis-detection of live streams as IPR
     - https://github.com/google/shaka-player/issues/1148
+  - Fix buffering of live streams while paused
+    - https://github.com/google/shaka-player/issues/1121
 
 Demo app:
   - Add multi-DRM assets from VDMS
