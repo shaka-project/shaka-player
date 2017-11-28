@@ -427,14 +427,14 @@ describe('Player', function() {
       it('load text stream if caption is visible', function(done) {
         player.load('', 0, factory1).then(function() {
           player.setTextTrackVisibility(true);
-          expect(streamingEngine.notifyNewTextStream).toHaveBeenCalled();
+          expect(streamingEngine.loadNewTextStream).toHaveBeenCalled();
         }).catch(fail).then(done);
       });
 
       it('do not load text stream if caption is invisible', function(done) {
         player.load('', 0, factory1).then(function() {
           player.setTextTrackVisibility(false);
-          expect(streamingEngine.notifyNewTextStream).not.toHaveBeenCalled();
+          expect(streamingEngine.loadNewTextStream).not.toHaveBeenCalled();
           expect(streamingEngine.unloadTextStream).toHaveBeenCalled();
         }).catch(fail).then(done);
       });

@@ -79,6 +79,11 @@ shaka.test.StreamingEngineUtil.createFakeNetworkingEngine = function(
         netEngine.request, uri, type);
   };
 
+  netEngine.expectNoRequest = function(uri, type) {
+    shaka.test.FakeNetworkingEngine.expectNoRequest(
+        netEngine.request, uri, type);
+  };
+
   netEngine.expectRangeRequest = function(uri, startByte, endByte) {
     shaka.test.FakeNetworkingEngine.expectRangeRequest(
         netEngine.request, uri, startByte, endByte);
