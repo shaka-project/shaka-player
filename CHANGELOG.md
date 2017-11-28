@@ -1,3 +1,34 @@
+## 2.2.7 (2017-11-28)
+
+Bugfixes:
+  - Allow playhead to recover from drift
+    - https://github.com/google/shaka-player/issues/1105
+  - Fix exception and race which prevented cast status updates
+    - https://github.com/google/shaka-player/issues/1128
+  - Fix live broadcast startup issues
+    - https://github.com/google/shaka-player/issues/1150
+  - Fix mis-detection of live streams as IPR
+    - https://github.com/google/shaka-player/issues/1148
+
+Demo app:
+  - Add multi-DRM assets from VDMS
+    - https://github.com/google/shaka-player/issues/780
+    - https://github.com/google/shaka-player/pull/781
+  - Add certificate URI field in the custom asset section
+    - https://github.com/google/shaka-player/issues/1135
+    - https://github.com/google/shaka-player/pull/1136
+  - Fix broken HLS asset
+    - https://github.com/google/shaka-player/issues/1137
+  - Update Widevine proxy URI
+
+Docs:
+  - Refactor main README.md
+  - Fix build/README.md typo
+    - https://github.com/google/shaka-player/pull/1139
+  - Fix typo in config tutorial
+    - https://github.com/google/shaka-player/pull/1124
+
+
 ## 2.2.6 (2017-11-14)
 
 Bugfixes:
