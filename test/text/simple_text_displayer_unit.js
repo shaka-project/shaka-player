@@ -38,11 +38,18 @@ describe('SimpleTextDisplayer', function() {
     mockTrack = /** @type {!shaka.test.FakeTextTrack} */ (video.textTracks[0]);
     expect(mockTrack).toBeTruthy();
 
-    window.VTTCue = function(start, end, text) {
+    /**
+     * @constructor
+     * @param {number} start
+     * @param {number} end
+     * @param {string} text
+     */
+    function FakeVTTCue(start, end, text) {
       this.startTime = start;
       this.endTime = end;
       this.text = text;
-    };
+    }
+    window.VTTCue = /** @type {?} */(FakeVTTCue);
   });
 
   afterAll(function() {
@@ -229,35 +236,41 @@ describe('SimpleTextDisplayer', function() {
           ], [cue5]);
     });
 
-    it('uses a workaround for browsers not supporting align=center',
-        function() {
-          window.VTTCue = function(start, end, text) {
-            var align = 'middle';
-            Object.defineProperty(this, 'align', {
-              get: function() { return align; },
-              set: function(newValue) {
-                if (newValue != 'center') align = newValue;
-              }
-            });
-            this.startTime = start;
-            this.endTime = end;
-            this.text = text;
-          };
-
-          var cue1 = new shaka.text.Cue(20, 40, 'Test');
-          cue1.textAlign = Cue.textAlign.CENTER;
-
-          verifyHelper(
-              [
-                {
-                  start: 20,
-                  end: 40,
-                  text: 'Test',
-                  align: 'middle'
-                }
-              ],
-              [cue1]);
+    it('works around browsers not supporting align=center', function() {
+      /**
+       * @constructor
+       * @param {number} start
+       * @param {number} end
+       * @param {string} text
+       */
+      function FakeVTTCueWithoutAlignCenter(start, end, text) {
+        var align = 'middle';
+        Object.defineProperty(this, 'align', {
+          get: function() { return align; },
+          set: function(newValue) {
+            if (newValue != 'center') align = newValue;
+          }
         });
+        this.startTime = start;
+        this.endTime = end;
+        this.text = text;
+      }
+      window.VTTCue = /** @type {?} */(FakeVTTCueWithoutAlignCenter);
+
+      var cue1 = new shaka.text.Cue(20, 40, 'Test');
+      cue1.textAlign = Cue.textAlign.CENTER;
+
+      verifyHelper(
+          [
+            {
+              start: 20,
+              end: 40,
+              text: 'Test',
+              align: 'middle'
+            }
+          ],
+          [cue1]);
+    });
 
     it('ignores cues with startTime >= endTime', function() {
       var cue1 = new shaka.text.Cue(60, 40, 'Test');
