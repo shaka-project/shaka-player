@@ -15,6 +15,37 @@
  * limitations under the License.
  */
 
+
+/**
+ * @typedef {{
+ *   length: number,
+ *   start: jasmine.Spy,
+ *   end: jasmine.Spy
+ * }}
+ * gjslint: disable=900
+ */
+var MockTimeRanges;
+
+
+/**
+ * @typedef {{
+ *   abort: jasmine.Spy,
+ *   appendBuffer: jasmine.Spy,
+ *   remove: jasmine.Spy,
+ *   updating: boolean,
+ *   addEventListener: jasmine.Spy,
+ *   removeEventListener: function(),
+ *   buffered: (MockTimeRanges|TimeRanges),
+ *   timestampOffset: number,
+ *   appendWindowEnd: number,
+ *   updateend: function(),
+ *   error: function()
+ * }}
+ * gjslint: disable=900
+ */
+var MockSourceBuffer;
+
+
 describe('MediaSourceEngine', function() {
   var Util = shaka.test.Util;
   var ContentType = shaka.util.ManifestParserUtils.ContentType;
@@ -956,6 +987,7 @@ describe('MediaSourceEngine', function() {
     return mediaSource;
   }
 
+  /** @return {MockSourceBuffer} */
   function createMockSourceBuffer() {
     return {
       abort: jasmine.createSpy('abort'),

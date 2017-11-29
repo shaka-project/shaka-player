@@ -27,7 +27,7 @@ def player_version():
   """Gets the version of the library from player.js."""
   path = os.path.join(shakaBuildHelpers.get_source_base(), 'lib', 'player.js')
   with open(path, 'r') as f:
-    match = re.search(r'goog\.define\(\'GIT_VERSION\', \'(.*)\'\)', f.read())
+    match = re.search(r'shaka\.Player\.version = \'(.*)\'', f.read())
     return match.group(1) if match else ''
 
 
