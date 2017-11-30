@@ -69,13 +69,13 @@ describe('MediaSourceEngine', function() {
 
   function appendInit(type) {
     var segment = generators[type].getInitSegment(Date.now() / 1000);
-    return mediaSourceEngine.appendBuffer(type, segment, null, null);
+    return mediaSourceEngine.appendBuffer(type, segment, null, null, null);
   }
 
   function append(type, segmentNumber) {
     var segment = generators[type].
         getSegment(segmentNumber, 0, Date.now() / 1000);
-    return mediaSourceEngine.appendBuffer(type, segment, null, null);
+    return mediaSourceEngine.appendBuffer(type, segment, null, null, null);
   }
 
   function buffered(type, time) {

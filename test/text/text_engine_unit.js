@@ -72,7 +72,7 @@ describe('TextEngine', function() {
   describe('appendBuffer', function() {
     it('works asynchronously', function(done) {
       mockParseMedia.and.returnValue([1, 2, 3]);
-      textEngine.appendBuffer(dummyData, 0, 3).catch(fail).then(done);
+      textEngine.appendBuffer(dummyData, 0, 3, 0).catch(fail).then(done);
       expect(mockDisplayer.append).not.toHaveBeenCalled();
     });
 
@@ -83,7 +83,7 @@ describe('TextEngine', function() {
       var cue4 = createFakeCue(4, 5);
       mockParseMedia.and.returnValue([cue1, cue2]);
 
-      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+      textEngine.appendBuffer(dummyData, 0, 3, 0).then(function() {
         expect(mockParseMedia).toHaveBeenCalledWith(
             new Uint8Array(dummyData),
             {periodStart: 0, segmentStart: 0, segmentEnd: 3 });
@@ -95,7 +95,7 @@ describe('TextEngine', function() {
         mockParseMedia.calls.reset();
 
         mockParseMedia.and.returnValue([cue3, cue4]);
-        return textEngine.appendBuffer(dummyData, 3, 5);
+        return textEngine.appendBuffer(dummyData, 3, 5, 0);
       }).then(function() {
         expect(mockParseMedia).toHaveBeenCalledWith(
             new Uint8Array(dummyData),
@@ -106,7 +106,7 @@ describe('TextEngine', function() {
 
     it('does not throw if called right before destroy', function(done) {
       mockParseMedia.and.returnValue([1, 2, 3]);
-      textEngine.appendBuffer(dummyData, 0, 3).catch(fail).then(done);
+      textEngine.appendBuffer(dummyData, 0, 3, 0).catch(fail).then(done);
       textEngine.destroy();
     });
   });
@@ -124,7 +124,7 @@ describe('TextEngine', function() {
     });
 
     it('works asynchronously', function(done) {
-      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+      textEngine.appendBuffer(dummyData, 0, 3, 0).then(function() {
         var p = textEngine.remove(0, 1);
         expect(mockDisplayer.remove).not.toHaveBeenCalled();
         return p;
@@ -155,7 +155,7 @@ describe('TextEngine', function() {
         ];
       });
 
-      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+      textEngine.appendBuffer(dummyData, 0, 3, 0).then(function() {
         expect(mockParseMedia).toHaveBeenCalledWith(
             new Uint8Array(dummyData),
             {periodStart: 0, segmentStart: 0, segmentEnd: 3});
@@ -168,7 +168,7 @@ describe('TextEngine', function() {
 
         mockDisplayer.append.calls.reset();
         textEngine.setTimestampOffset(4);
-        return textEngine.appendBuffer(dummyData, 0, 3);
+        return textEngine.appendBuffer(dummyData, 0, 3, 0);
       }).then(function() {
         expect(mockParseMedia).toHaveBeenCalledWith(
             new Uint8Array(dummyData),
@@ -195,16 +195,16 @@ describe('TextEngine', function() {
     });
 
     it('reflect newly-added cues', function(done) {
-      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+      textEngine.appendBuffer(dummyData, 0, 3, 0).then(function() {
         expect(textEngine.bufferStart()).toBe(0);
         expect(textEngine.bufferEnd()).toBe(3);
 
-        return textEngine.appendBuffer(dummyData, 3, 6);
+        return textEngine.appendBuffer(dummyData, 3, 6, 0);
       }).then(function() {
         expect(textEngine.bufferStart()).toBe(0);
         expect(textEngine.bufferEnd()).toBe(6);
 
-        return textEngine.appendBuffer(dummyData, 6, 10);
+        return textEngine.appendBuffer(dummyData, 6, 10, 0);
       }).then(function() {
         expect(textEngine.bufferStart()).toBe(0);
         expect(textEngine.bufferEnd()).toBe(10);
@@ -212,10 +212,10 @@ describe('TextEngine', function() {
     });
 
     it('reflect newly-removed cues', function(done) {
-      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
-        return textEngine.appendBuffer(dummyData, 3, 6);
+      textEngine.appendBuffer(dummyData, 0, 3, 0).then(function() {
+        return textEngine.appendBuffer(dummyData, 3, 6, 0);
       }).then(function() {
-        return textEngine.appendBuffer(dummyData, 6, 10);
+        return textEngine.appendBuffer(dummyData, 6, 10, 0);
       }).then(function() {
         expect(textEngine.bufferStart()).toBe(0);
         expect(textEngine.bufferEnd()).toBe(10);
@@ -255,19 +255,19 @@ describe('TextEngine', function() {
     });
 
     it('returns 0 if |t| is not buffered', function(done) {
-      textEngine.appendBuffer(dummyData, 3, 6).then(function() {
+      textEngine.appendBuffer(dummyData, 3, 6, 0).then(function() {
         expect(textEngine.bufferedAheadOf(6.1)).toBe(0);
       }).catch(fail).then(done);
     });
 
     it('ignores gaps in the content', function(done) {
-      textEngine.appendBuffer(dummyData, 3, 6).then(function() {
+      textEngine.appendBuffer(dummyData, 3, 6, 0).then(function() {
         expect(textEngine.bufferedAheadOf(2)).toBe(3);
       }).catch(fail).then(done);
     });
 
     it('returns the distance to the end if |t| is buffered', function(done) {
-      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+      textEngine.appendBuffer(dummyData, 0, 3, 0).then(function() {
         expect(textEngine.bufferedAheadOf(0)).toBe(3);
         expect(textEngine.bufferedAheadOf(1)).toBe(2);
         expect(textEngine.bufferedAheadOf(2.5)).toBeCloseTo(0.5);
@@ -284,7 +284,7 @@ describe('TextEngine', function() {
 
     it('limits appended cues', function(done) {
       textEngine.setAppendWindow(0, 1.9);
-      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+      textEngine.appendBuffer(dummyData, 0, 3, 0).then(function() {
         expect(mockDisplayer.append).toHaveBeenCalledWith(
             [
               createFakeCue(0, 1),
@@ -293,7 +293,7 @@ describe('TextEngine', function() {
 
         mockDisplayer.append.calls.reset();
         textEngine.setAppendWindow(1, 2.1);
-        return textEngine.appendBuffer(dummyData, 0, 3);
+        return textEngine.appendBuffer(dummyData, 0, 3, 0);
       }).then(function() {
         expect(mockDisplayer.append).toHaveBeenCalledWith(
             [
@@ -305,13 +305,13 @@ describe('TextEngine', function() {
 
     it('limits bufferStart', function(done) {
       textEngine.setAppendWindow(1, 9);
-      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+      textEngine.appendBuffer(dummyData, 0, 3, 0).then(function() {
         expect(textEngine.bufferStart()).toBe(1);
 
         return textEngine.remove(0, 9);
       }).then(function() {
         textEngine.setAppendWindow(2.1, 9);
-        return textEngine.appendBuffer(dummyData, 0, 3);
+        return textEngine.appendBuffer(dummyData, 0, 3, 0);
       }).then(function() {
         expect(textEngine.bufferStart()).toBe(2.1);
       }).catch(fail).then(done);
@@ -319,16 +319,16 @@ describe('TextEngine', function() {
 
     it('limits bufferEnd', function(done) {
       textEngine.setAppendWindow(0, 1.9);
-      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+      textEngine.appendBuffer(dummyData, 0, 3, 0).then(function() {
         expect(textEngine.bufferEnd()).toBe(1.9);
 
         textEngine.setAppendWindow(0, 2.1);
-        return textEngine.appendBuffer(dummyData, 0, 3);
+        return textEngine.appendBuffer(dummyData, 0, 3, 0);
       }).then(function() {
         expect(textEngine.bufferEnd()).toBe(2.1);
 
         textEngine.setAppendWindow(0, 4.1);
-        return textEngine.appendBuffer(dummyData, 0, 3);
+        return textEngine.appendBuffer(dummyData, 0, 3, 0);
       }).then(function() {
         expect(textEngine.bufferEnd()).toBe(3);
       }).catch(fail).then(done);
@@ -358,7 +358,7 @@ describe('TextEngine', function() {
         it('parses init segment', function(done) {
           var textEngine = new TextEngine(mockDisplayer);
           textEngine.initParser(dummyMimeType);
-          textEngine.appendBuffer(dummyData, null, null).then(function() {
+          textEngine.appendBuffer(dummyData, null, null, null).then(function() {
             expect(mockParser).toHaveBeenCalledWith(dummyData, 0, null, null);
           }).catch(fail).then(done);
         });
@@ -366,7 +366,7 @@ describe('TextEngine', function() {
         it('parses media segment', function(done) {
           var textEngine = new TextEngine(mockDisplayer);
           textEngine.initParser(dummyMimeType);
-          textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+          textEngine.appendBuffer(dummyData, 0, 3, 0).then(function() {
             expect(mockParser).toHaveBeenCalledWith(dummyData, 0, 0, 3);
           }).catch(fail).then(done);
         });
@@ -375,7 +375,7 @@ describe('TextEngine', function() {
           var textEngine = new TextEngine(mockDisplayer);
           textEngine.initParser(dummyMimeType);
           textEngine.setTimestampOffset(3);
-          textEngine.appendBuffer(dummyData, 0, 3).then(function() {
+          textEngine.appendBuffer(dummyData, 0, 3, 0).then(function() {
             expect(mockParser).toHaveBeenCalledWith(dummyData, 3, 0, 3);
           }).catch(fail).then(done);
         });

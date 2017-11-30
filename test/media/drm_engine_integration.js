@@ -225,11 +225,11 @@ describe('DrmEngine', function() {
           }).then(function() {
             return mediaSourceEngine.appendBuffer(ContentType.VIDEO,
                                                   videoInitSegment,
-                                                  null, null);
+                                                  null, null, null);
           }).then(function() {
             return mediaSourceEngine.appendBuffer(ContentType.AUDIO,
                                                   audioInitSegment,
-                                                  null, null);
+                                                  null, null, null);
           }).then(function() {
             return encryptedEventSeen;
           }).then(function() {
@@ -265,11 +265,11 @@ describe('DrmEngine', function() {
 
             return mediaSourceEngine.appendBuffer(ContentType.VIDEO,
                                                   videoSegment,
-                                                  null, null);
+                                                  null, null, null);
           }).then(function() {
             return mediaSourceEngine.appendBuffer(ContentType.AUDIO,
                                                   audioSegment,
-                                                  null, null);
+                                                  null, null, null);
           }).then(function() {
             expect(video.buffered.end(0)).toBeGreaterThan(0);
             video.play();
