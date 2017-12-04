@@ -540,7 +540,8 @@ shakaExtern.ManifestConfiguration;
  *   ignoreTextStreamFailures: boolean,
  *   startAtSegmentBoundary: boolean,
  *   smallGapLimit: number,
- *   jumpLargeGaps: boolean
+ *   jumpLargeGaps: boolean,
+ *   durationBackoff: number
  * }}
  *
  * @description
@@ -581,6 +582,12 @@ shakaExtern.ManifestConfiguration;
  *   raised first.  Then, if the app doesn't call preventDefault() on the event,
  *   the Player will jump the gap.  If false, then the event will be raised,
  *   but the gap will not be jumped.
+ * @property {number} durationBackoff
+ *   By default, we will not allow seeking to exactly the duration of a
+ *   presentation.  This field is the number of seconds before duration we will
+ *   seek to when the user tries to seek to or start playback at the duration.
+ *   To disable this behavior, the config can be set to 0.  We recommend using
+ *   the default value unless you have a good reason not to.
  * @exportDoc
  */
 shakaExtern.StreamingConfiguration;

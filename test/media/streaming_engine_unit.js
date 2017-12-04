@@ -449,7 +449,8 @@ describe('StreamingEngine', function() {
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
-        jumpLargeGaps: false
+        jumpLargeGaps: false,
+        durationBackoff: 1
       };
     }
 
@@ -1791,7 +1792,8 @@ describe('StreamingEngine', function() {
         ignoreTextStreamFailures: true,
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
-        jumpLargeGaps: false
+        jumpLargeGaps: false,
+        durationBackoff: 1
       };
       createStreamingEngine(config);
 
@@ -1828,7 +1830,8 @@ describe('StreamingEngine', function() {
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
-        jumpLargeGaps: false
+        jumpLargeGaps: false,
+        durationBackoff: 1
       };
       createStreamingEngine(config);
 
@@ -1872,7 +1875,8 @@ describe('StreamingEngine', function() {
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
-        jumpLargeGaps: false
+        jumpLargeGaps: false,
+        durationBackoff: 1
       };
       createStreamingEngine(config);
 
@@ -1918,7 +1922,8 @@ describe('StreamingEngine', function() {
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
-        jumpLargeGaps: false
+        jumpLargeGaps: false,
+        durationBackoff: 1
       };
       createStreamingEngine(config);
 
@@ -1970,7 +1975,8 @@ describe('StreamingEngine', function() {
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
-        jumpLargeGaps: false
+        jumpLargeGaps: false,
+        durationBackoff: 1
       };
       createStreamingEngine(config);
 
@@ -2127,7 +2133,8 @@ describe('StreamingEngine', function() {
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
-        jumpLargeGaps: false
+        jumpLargeGaps: false,
+        durationBackoff: 1
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -2215,7 +2222,8 @@ describe('StreamingEngine', function() {
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
-        jumpLargeGaps: false
+        jumpLargeGaps: false,
+        durationBackoff: 1
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -2285,7 +2293,8 @@ describe('StreamingEngine', function() {
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
-        jumpLargeGaps: false
+        jumpLargeGaps: false,
+        durationBackoff: 1
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -2474,7 +2483,8 @@ describe('StreamingEngine', function() {
         rebufferingGoal: 1,
         bufferingGoal: 1,
         smallGapLimit: 0.5,
-        jumpLargeGaps: false
+        jumpLargeGaps: false,
+        durationBackoff: 1
       });
 
       playhead.getTime.and.returnValue(0);
