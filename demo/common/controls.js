@@ -123,6 +123,11 @@ ShakaControls.prototype.init = function(castProxy, onError, notifyCastStatus) {
   this.video_.addEventListener(
       'pause', this.onPlayStateChange_.bind(this));
 
+  // Since videos go into a paused state at the end, Chrome and Edge both fire
+  // the 'pause' event when a video ends.  IE 11 only fires the 'ended' event.
+  this.video_.addEventListener(
+      'ended', this.onPlayStateChange_.bind(this));
+
   this.seekBar_.addEventListener(
       'mousedown', this.onSeekStart_.bind(this));
   this.seekBar_.addEventListener(
