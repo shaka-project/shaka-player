@@ -25,8 +25,14 @@
 var jasmine = {};
 
 
-/** @typedef {function(function())} */
+/** @typedef {(function(function())|function())} */
 jasmine.Callback;
+
+
+/**
+ * @param {!Object} matchers
+ */
+jasmine.addMatchers = function(matchers) {};
 
 
 
@@ -46,6 +52,12 @@ jasmine.Spec.prototype.pend = function(opt_message) {};
  * gjslint: disable=900
  */
 jasmine.Spec.prototype.result;
+
+
+/**
+ * @return {!string}
+ */
+jasmine.Spec.prototype.getFullName = function() {};
 
 
 
@@ -124,6 +136,10 @@ jasmine.Matchers.prototype.toHaveBeenCalled = function(opt_value) {};
 jasmine.Matchers.prototype.toHaveBeenCalledWith = function(var_args) {};
 
 
+/** @param {number} times */
+jasmine.Matchers.prototype.toHaveBeenCalledTimes = function(times) {};
+
+
 /** @param {string|RegExp} value */
 jasmine.Matchers.prototype.toMatch = function(value) {};
 
@@ -134,6 +150,13 @@ jasmine.Matchers.prototype.toThrow = function(value) {};
 
 /** @param {*} value */
 jasmine.Matchers.prototype.toThrowError = function(value) {};
+
+
+/**
+ * A custom matcher for DOM Node objects.
+ * @param {!Element} expected
+ */
+jasmine.Matchers.prototype.toEqualElement = function(expected) {};
 
 
 
@@ -170,10 +193,10 @@ jasmine.SpyStrategy.prototype.returnValues = function(var_args) {};
 
 
 /**
- * @param {*} value
+ * @param {*=} opt_value
  * @return {!jasmine.Spy}
  */
-jasmine.SpyStrategy.prototype.throwError = function(value) {};
+jasmine.SpyStrategy.prototype.throwError = function(opt_value) {};
 
 
 /**
@@ -253,7 +276,6 @@ jasmine.CallTracker.prototype.reset = function() {};
 /**
  * @constructor
  * @extends {Function}
- * @struct
  */
 jasmine.Spy = function() {};
 
@@ -268,7 +290,7 @@ jasmine.Spy.prototype.and;
 
 /**
  * @param {string} name
- * @return {!jasmine.Spy|!Function}
+ * @return {!jasmine.Spy}
  * @see https://github.com/google/closure-compiler/issues/1422
  */
 jasmine.createSpy = function(name) {};
@@ -277,7 +299,7 @@ jasmine.createSpy = function(name) {};
 /**
  * @param {string} name
  * @param {!Array.<string>} members
- * @return {!Object}
+ * @return {?}
  */
 jasmine.createSpyObj = function(name, members) {};
 
@@ -285,7 +307,7 @@ jasmine.createSpyObj = function(name, members) {};
 /**
  * @param {*} obj
  * @param {string} name
- * @return {!jasmine.Spy|!Function}
+ * @return {!jasmine.Spy}
  * @see https://github.com/google/closure-compiler/issues/1422
  */
 var spyOn = function(obj, name) {};
@@ -409,6 +431,19 @@ jasmine.Env = function() {};
 jasmine.Env.prototype.specFilter = function(spec) {};
 
 
+/**
+ * @param {boolean} random
+ */
+jasmine.Env.prototype.randomizeTests = function(random) {};
+
+
+/**
+ * @param {string} seed
+ * @return {?string}
+ */
+jasmine.Env.prototype.seed = function(seed) {};
+
+
 /** @return {!jasmine.Env} */
 jasmine.getEnv = function() {};
 
@@ -491,19 +526,19 @@ jasmine.Ajax.RequestStub = function() {};
 jasmine.Ajax.RequestStub.prototype.url;
 
 
-/** const {string|RegExp} */
+/** @const {string|RegExp} */
 jasmine.Ajax.RequestStub.prototype.query;
 
 
-/** const {string|RegExp} */
+/** @const {string|RegExp} */
 jasmine.Ajax.RequestStub.prototype.data;
 
 
-/** const {string} */
+/** @const {string} */
 jasmine.Ajax.RequestStub.prototype.method;
 
 
-/** const {!Object.<string, string>} */
+/** @const {!Object.<string, string>} */
 jasmine.Ajax.RequestStub.prototype.requestHeaders;
 
 
@@ -537,10 +572,6 @@ jasmine.Ajax.RequestStub.prototype.isTimeout = function() {};
 jasmine.Ajax.RequestTracker = function() {};
 
 
-/** @const {!jasmine.Ajax.RequestTracker} */
-jasmine.Ajax.requests;
-
-
 /** @return {!jasmine.Ajax.RequestStub} */
 jasmine.Ajax.RequestTracker.prototype.first = function() {};
 
@@ -562,3 +593,6 @@ jasmine.Ajax.RequestTracker.prototype.mostRecent = function() {};
  */
 jasmine.Ajax.RequestTracker.prototype.at = function(index) {};
 
+
+/** @const {!jasmine.Ajax.RequestTracker} */
+jasmine.Ajax.requests;

@@ -29,50 +29,12 @@ shaka.test.Dash.makeDashParser = function() {
     retryParameters: retry,
     dash: {
       customScheme: function(node) { return null; },
-      clockSyncUri: ''
+      clockSyncUri: '',
+      ignoreDrmInfo: false,
+      xlinkFailGracefully: false
     }
   });
   return parser;
-};
-
-
-/**
- * Verifies the segment references in a manifest.
- *
- * @param {shakaExtern.Manifest} manifest
- * @param {!Array.<shaka.media.SegmentReference>} references
- * @param {number} periodIndex
- */
-shaka.test.Dash.verifySegmentIndex = function(
-    manifest, references, periodIndex) {
-  expect(manifest).toBeTruthy();
-  var stream = manifest.periods[periodIndex].streamSets[0].streams[0];
-  expect(stream).toBeTruthy();
-  expect(stream.findSegmentPosition).toBeTruthy();
-  expect(stream.getSegmentReference).toBeTruthy();
-
-  if (references.length == 0) {
-    expect(stream.findSegmentPosition(0)).toBe(null);
-    return;
-  }
-
-  var positionBeforeFirst =
-      stream.findSegmentPosition(references[0].startTime - 1);
-  expect(positionBeforeFirst).toBe(null);
-
-  for (var i = 0; i < references.length - 1; i++) {
-    var expectedRef = references[i];
-    var position = stream.findSegmentPosition(expectedRef.startTime);
-    expect(position).not.toBe(null);
-    var actualRef =
-        stream.getSegmentReference(/** @type {number} */ (position));
-    expect(actualRef).toEqual(expectedRef);
-  }
-
-  // Make sure that the references stop at the end.
-  var positionAfterEnd =
-      stream.findSegmentPosition(references[references.length - 1].endTime);
-  expect(positionAfterEnd).toBe(null);
 };
 
 
@@ -85,13 +47,20 @@ shaka.test.Dash.verifySegmentIndex = function(
  */
 shaka.test.Dash.testSegmentIndex = function(done, manifestText, references) {
   var buffer = shaka.util.StringUtils.toUTF8(manifestText);
-  var fakeNetEngine =
-      new shaka.test.FakeNetworkingEngine({'dummy://foo': buffer});
   var dashParser = shaka.test.Dash.makeDashParser();
-  var filterPeriod = function() {};
-  dashParser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, fail)
+  var playerInterface = {
+    networkingEngine:
+        new shaka.test.FakeNetworkingEngine({'dummy://foo': buffer}),
+    filterNewPeriod: function() {},
+    filterAllPeriods: function() {},
+    onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
+    onEvent: fail,
+    onError: fail
+  };
+  dashParser.start('dummy://foo', playerInterface)
       .then(function(manifest) {
-        shaka.test.Dash.verifySegmentIndex(manifest, references, 0);
+        var stream = manifest.periods[0].variants[0].video;
+        shaka.test.ManifestParser.verifySegmentIndex(stream, references);
       })
       .catch(fail)
       .then(done);
@@ -107,11 +76,17 @@ shaka.test.Dash.testSegmentIndex = function(done, manifestText, references) {
  */
 shaka.test.Dash.testFails = function(done, manifestText, expectedError) {
   var manifestData = shaka.util.StringUtils.toUTF8(manifestText);
-  var fakeNetEngine =
-      new shaka.test.FakeNetworkingEngine({'dummy://foo': manifestData});
   var dashParser = shaka.test.Dash.makeDashParser();
-  var filterPeriod = function() {};
-  dashParser.start('dummy://foo', fakeNetEngine, filterPeriod, fail, fail)
+  var playerInterface = {
+    networkingEngine:
+        new shaka.test.FakeNetworkingEngine({'dummy://foo': manifestData}),
+    filterNewPeriod: function() {},
+    filterAllPeriods: function() {},
+    onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
+    onEvent: fail,
+    onError: fail
+  };
+  dashParser.start('dummy://foo', playerInterface)
       .then(fail)
       .catch(function(error) {
         shaka.test.Util.expectToEqualError(error, expectedError);
@@ -160,14 +135,14 @@ shaka.test.Dash.makeSimpleManifestText =
  * Makes a simple manifest object for jasmine.toEqual; this does not do any
  * checking.  This only constructs one period with the given stream sets.
  *
- * @param {!Array.<shakaExtern.StreamSet>} streamSets
+ * @param {!Array.<shakaExtern.Variant>} variants
  * @return {shakaExtern.Manifest}
  */
-shaka.test.Dash.makeManifestFromStreamSets = function(streamSets) {
+shaka.test.Dash.makeManifestFromVariants = function(variants) {
   return /** @type {shakaExtern.Manifest} */ (jasmine.objectContaining({
     periods: [
       jasmine.objectContaining({
-        streamSets: streamSets
+        variants: variants
       })
     ]
   }));
@@ -187,16 +162,15 @@ shaka.test.Dash.makeManifestFromStreamSets = function(streamSets) {
  */
 shaka.test.Dash.makeManifestFromInit = function(
     uri, startByte, endByte, opt_pto) {
-  return shaka.test.Dash.makeManifestFromStreamSets([jasmine.objectContaining({
-    streams: [jasmine.objectContaining({
+  return shaka.test.Dash.makeManifestFromVariants([jasmine.objectContaining({
+    video: jasmine.objectContaining({
       presentationTimeOffset: (opt_pto || 0),
       createSegmentIndex: jasmine.any(Function),
       findSegmentPosition: jasmine.any(Function),
       initSegmentReference: new shaka.media.InitSegmentReference(
-          // TODO: Change back to checking specific URIs once jasmine is fixed.
-          // https://github.com/jasmine/jasmine/issues/1138
-          jasmine.any(Function), startByte, endByte)
-    })]
+          function() { return ['http://example.com/' + uri]; },
+          startByte, endByte)
+    })
   })]);
 };
 
@@ -210,30 +184,8 @@ shaka.test.Dash.makeManifestFromInit = function(
  * @return {!Promise}
  */
 shaka.test.Dash.callCreateSegmentIndex = function(manifest) {
-  var stream = manifest.periods[0].streamSets[0].streams[0];
+  var stream = manifest.periods[0].variants[0].video;
   return stream.createSegmentIndex().then(fail).catch(function() {});
-};
-
-
-/**
- * Creates a segment reference using a relative URI.
- *
- * @param {string} uri A relative URI to http://example.com
- * @param {number} position
- * @param {number} start
- * @param {number} end
- * @param {number=} opt_startByte
- * @param {?number=} opt_endByte
- * @return {!shaka.media.SegmentReference}
- */
-shaka.test.Dash.makeReference =
-    function(uri, position, start, end, opt_startByte, opt_endByte) {
-  var base = 'http://example.com/';
-  var startByte = opt_startByte || 0;
-  var endByte = opt_endByte || null;
-  var getUris = function() { return [base + uri]; };
-  return new shaka.media.SegmentReference(
-      position, start, end, getUris, startByte, endByte);
 };
 
 
@@ -249,6 +201,8 @@ shaka.test.Dash.makeReference =
 shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
   describe('SegmentTimeline', function() {
     var Dash = shaka.test.Dash;
+    var ManifestParser = shaka.test.ManifestParser;
+    var baseUri = 'http://example.com/';
 
     /**
      * @param {!Array.<string>} timeline
@@ -278,11 +232,11 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
       ];
       var source = makeManifestText(timeline, '');
       var references = [
-        Dash.makeReference('s1.mp4', 1, 34, 46),
-        Dash.makeReference('s2.mp4', 2, 46, 67),
-        Dash.makeReference('s3.mp4', 3, 67, 111),
-        Dash.makeReference('s4.mp4', 4, 111, 121),
-        Dash.makeReference('s5.mp4', 5, 121, 131)
+        ManifestParser.makeReference('s1.mp4', 1, 34, 46, baseUri),
+        ManifestParser.makeReference('s2.mp4', 2, 46, 67, baseUri),
+        ManifestParser.makeReference('s3.mp4', 3, 67, 111, baseUri),
+        ManifestParser.makeReference('s4.mp4', 4, 111, 121, baseUri),
+        ManifestParser.makeReference('s5.mp4', 5, 121, 131, baseUri)
       ];
       Dash.testSegmentIndex(done, source, references);
     });
@@ -297,11 +251,11 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
       ];
       var source = makeManifestText(timeline, '');
       var references = [
-        Dash.makeReference('s1.mp4', 1, 34, 46),
-        Dash.makeReference('s2.mp4', 2, 46, 56),
-        Dash.makeReference('s3.mp4', 3, 56, 66),
-        Dash.makeReference('s4.mp4', 4, 66, 76),
-        Dash.makeReference('s5.mp4', 5, 76, 120)
+        ManifestParser.makeReference('s1.mp4', 1, 34, 46, baseUri),
+        ManifestParser.makeReference('s2.mp4', 2, 46, 56, baseUri),
+        ManifestParser.makeReference('s3.mp4', 3, 56, 66, baseUri),
+        ManifestParser.makeReference('s4.mp4', 4, 66, 76, baseUri),
+        ManifestParser.makeReference('s5.mp4', 5, 76, 120, baseUri)
       ];
       Dash.testSegmentIndex(done, source, references);
     });
@@ -317,11 +271,11 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
       ];
       var source = makeManifestText(timeline, '');
       var references = [
-        Dash.makeReference('s1.mp4', 1, 22, 30),
-        Dash.makeReference('s2.mp4', 2, 30, 40),
-        Dash.makeReference('s3.mp4', 3, 40, 50),
-        Dash.makeReference('s4.mp4', 4, 50, 62),
-        Dash.makeReference('s5.mp4', 5, 62, 72)
+        ManifestParser.makeReference('s1.mp4', 1, 22, 30, baseUri),
+        ManifestParser.makeReference('s2.mp4', 2, 30, 40, baseUri),
+        ManifestParser.makeReference('s3.mp4', 3, 40, 50, baseUri),
+        ManifestParser.makeReference('s4.mp4', 4, 50, 62, baseUri),
+        ManifestParser.makeReference('s5.mp4', 5, 62, 72, baseUri)
       ];
       Dash.testSegmentIndex(done, source, references);
     });
@@ -335,11 +289,11 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
       ];
       var source = makeManifestText(timeline, '', 50 /* duration */);
       var references = [
-        Dash.makeReference('s1.mp4', 1, 5, 10),
-        Dash.makeReference('s2.mp4', 2, 10, 20),
-        Dash.makeReference('s3.mp4', 3, 20, 30),
-        Dash.makeReference('s4.mp4', 4, 30, 40),
-        Dash.makeReference('s5.mp4', 5, 40, 50)
+        ManifestParser.makeReference('s1.mp4', 1, 5, 10, baseUri),
+        ManifestParser.makeReference('s2.mp4', 2, 10, 20, baseUri),
+        ManifestParser.makeReference('s3.mp4', 3, 20, 30, baseUri),
+        ManifestParser.makeReference('s4.mp4', 4, 30, 40, baseUri),
+        ManifestParser.makeReference('s5.mp4', 5, 40, 50, baseUri)
       ];
       Dash.testSegmentIndex(done, source, references);
     });
@@ -353,11 +307,11 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
       var source =
           makeManifestText(timeline, '', 50 /* duration */, 30 /* start */);
       var references = [
-        Dash.makeReference('s1.mp4', 1, 0, 10),
-        Dash.makeReference('s2.mp4', 2, 10, 20),
-        Dash.makeReference('s3.mp4', 3, 20, 30),
-        Dash.makeReference('s4.mp4', 4, 30, 40),
-        Dash.makeReference('s5.mp4', 5, 40, 50)
+        ManifestParser.makeReference('s1.mp4', 1, 0, 10, baseUri),
+        ManifestParser.makeReference('s2.mp4', 2, 10, 20, baseUri),
+        ManifestParser.makeReference('s3.mp4', 3, 20, 30, baseUri),
+        ManifestParser.makeReference('s4.mp4', 4, 30, 40, baseUri),
+        ManifestParser.makeReference('s5.mp4', 5, 40, 50, baseUri)
       ];
       Dash.testSegmentIndex(done, source, references);
     });
@@ -374,11 +328,11 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
       ];
       var source = makeManifestText(timeline, 'timescale="9000"');
       var references = [
-        Dash.makeReference('s1.mp4', 1, 2, 2.5),
-        Dash.makeReference('s2.mp4', 2, 2.5, 3.5),
-        Dash.makeReference('s3.mp4', 3, 3.5, 7),
-        Dash.makeReference('s4.mp4', 4, 7, 8),
-        Dash.makeReference('s5.mp4', 5, 8, 9)
+        ManifestParser.makeReference('s1.mp4', 1, 2, 2.5, baseUri),
+        ManifestParser.makeReference('s2.mp4', 2, 2.5, 3.5, baseUri),
+        ManifestParser.makeReference('s3.mp4', 3, 3.5, 7, baseUri),
+        ManifestParser.makeReference('s4.mp4', 4, 7, 8, baseUri),
+        ManifestParser.makeReference('s5.mp4', 5, 8, 9, baseUri)
       ];
       Dash.testSegmentIndex(done, source, references);
     });

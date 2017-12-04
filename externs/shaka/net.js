@@ -89,7 +89,9 @@ shakaExtern.Request;
  * @typedef {{
  *   uri: string,
  *   data: ArrayBuffer,
- *   headers: !Object.<string, string>
+ *   headers: !Object.<string, string>,
+ *   timeMs: (number|undefined),
+ *   fromCache: (boolean|undefined)
  * }}
  *
  * @description
@@ -106,7 +108,52 @@ shakaExtern.Request;
  *   A map of response headers, if supported by the underlying protocol.
  *   All keys should be lowercased.
  *   For HTTP/HTTPS, may not be available cross-origin.
+ * @property {(number|undefined)} timeMs
+ *   Optional.  The time it took to get the response, in miliseconds.  If not
+ *   given, NetworkingEngine will calculate it using Date.now.
+ * @property {(boolean|undefined)} fromCache
+ *   Optional. If true, this response was from a cache and should be ignored
+ *   for bandwidth estimation.
  *
  * @exportDoc
  */
 shakaExtern.Response;
+
+
+/**
+ * Defines a plugin that handles a specific scheme.
+ *
+ * @typedef {!function(string,
+ *                     shakaExtern.Request,
+ *                     shaka.net.NetworkingEngine.RequestType):
+ *     !Promise.<shakaExtern.Response>}
+ * @exportDoc
+ */
+shakaExtern.SchemePlugin;
+
+
+/**
+ * Defines a filter for requests.  This filter takes the request and modifies
+ * it before it is sent to the scheme plugin.
+ * A request filter can run asynchronously by returning a promise; in this case,
+ * the request will not be sent until the promise is resolved.
+ *
+ * @typedef {!function(shaka.net.NetworkingEngine.RequestType,
+ *                     shakaExtern.Request):
+             (Promise|undefined)}
+ * @exportDoc
+ */
+shakaExtern.RequestFilter;
+
+
+/**
+ * Defines a filter for responses.  This filter takes the response and modifies
+ * it before it is returned.
+ * A response filter can run asynchronously by returning a promise.
+ *
+ * @typedef {!function(shaka.net.NetworkingEngine.RequestType,
+ *                     shakaExtern.Response):
+              (Promise|undefined)}
+ * @exportDoc
+ */
+shakaExtern.ResponseFilter;

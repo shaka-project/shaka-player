@@ -36,6 +36,39 @@ shakaExtern.ManifestParser = function() {};
 
 
 /**
+ * @typedef {{
+ *   networkingEngine: !shaka.net.NetworkingEngine,
+ *   filterNewPeriod: function(shakaExtern.Period),
+ *   filterAllPeriods: function(!Array.<!shakaExtern.Period>),
+ *   onTimelineRegionAdded: function(shakaExtern.TimelineRegionInfo),
+ *   onEvent: function(!Event),
+ *   onError: function(!shaka.util.Error)
+ * }}
+ *
+ * @description
+ * Defines the interface of the Player to the manifest parser.  This defines
+ * fields and callback methods that the parser will use to interact with the
+ * Player.  The callback methods do not to be called as member functions (i.e.
+ * they can be called as "free" functions).
+ *
+ * @property {!shaka.net.NetworkingEngine} networkingEngine
+ *   The networking engine to use for network requests.
+ * @property {function(shakaExtern.Period)} filterNewPeriod
+ *   Should be called on a new Period so that it can be filtered.
+ * @property {function(!Array.<!shakaExtern.Period>)} filterAllPeriods
+ *   Should be called on all Periods so that they can be filtered.
+ * @property {function(shakaExtern.TimelineRegionInfo)} onTimelineRegionAdded
+ *   Should be called when a new timeline region is added.
+ * @property {function(!Event)} onEvent
+ *   Should be called to raise events.
+ * @property {function(!shaka.util.Error)} onError
+ *   Should be called when an error occurs.
+ * @exportDoc
+ */
+shakaExtern.ManifestParser.PlayerInterface;
+
+
+/**
  * A factory for creating the manifest parser.  This will be called with 'new'.
  * This function is registered with shaka.media.ManifestParser to create parser
  * instances.
@@ -61,19 +94,12 @@ shakaExtern.ManifestParser.prototype.configure = function(config) {};
  * background timers that are needed.  This will only be called once.
  *
  * @param {string} uri The URI of the manifest.
- * @param {!shaka.net.NetworkingEngine} networkingEngine The networking engine
- *     to use for network requests.
- * @param {function(shakaExtern.Period)} filterPeriod A callback to be invoked
- *     on all new Periods so that they can be filtered.
- * @param {function(!shaka.util.Error)} onError A callback to be invoked on
- *     errors.
- * @param {function(!Event)} onEvent A callback to be invoked to dispatch events
- *     to the application.
+ * @param {shakaExtern.ManifestParser.PlayerInterface} playerInterface Contains
+ *   the interface to the Player.
  * @return {!Promise.<shakaExtern.Manifest>}
  * @exportDoc
  */
-shakaExtern.ManifestParser.prototype.start =
-    function(uri, networkingEngine, filterPeriod, onError, onEvent) {};
+shakaExtern.ManifestParser.prototype.start = function(uri, playerInterface) {};
 
 
 /**
@@ -85,3 +111,23 @@ shakaExtern.ManifestParser.prototype.start =
  * @exportDoc
  */
 shakaExtern.ManifestParser.prototype.stop = function() {};
+
+
+/**
+ * Tells the parser to do a manual manifest update.  Implementing this is
+ * optional and is only called when 'emsg' boxes are present.
+ * @exportDoc
+ */
+shakaExtern.ManifestParser.prototype.update = function() {};
+
+
+/**
+ * Tells the parser that the expiration time of an EME session has changed.
+ * Implementing this is optional.
+ *
+ * @param {string} sessionId
+ * @param {number} expiration
+ * @exportDoc
+ */
+shakaExtern.ManifestParser.prototype.onExpirationUpdated = function(
+    sessionId, expiration) {};

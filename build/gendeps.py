@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 #
 # Copyright 2016 Google Inc.  All Rights Reserved.
 #
@@ -16,6 +16,7 @@
 
 """Creates the Closure dependencies file required to run in uncompiled mode."""
 
+import logging
 import os
 import subprocess
 import sys
@@ -31,7 +32,7 @@ deps_args = [
 
 def gen_deps(_):
   """Generates the uncompiled dependencies files."""
-  print 'Generating Closure dependencies...'
+  logging.info('Generating Closure dependencies...')
 
   # Make the dist/ folder, ignore errors.
   base = shakaBuildHelpers.get_source_base()
@@ -44,8 +45,7 @@ def gen_deps(_):
 
   try:
     cmd_line = [sys.executable or 'python', deps_writer] + deps_args
-    shakaBuildHelpers.print_cmd_line(cmd_line)
-    deps = subprocess.check_output(cmd_line)
+    deps = shakaBuildHelpers.execute_get_output(cmd_line)
     with open(os.path.join(base, 'dist', 'deps.js'), 'w') as f:
       f.write(deps)
     return 0

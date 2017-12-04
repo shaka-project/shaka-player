@@ -71,7 +71,11 @@
             if (!prop) { return; }
     ?>
 
+        <?js if (props.hasDefault && data.isEnum) {?>
+        <tr class="enum" id="value:<?js= self.htmlsafe(prop.defaultvalue) ?>">
+        <?js } else { ?>
         <tr>
+        <?js } ?>
             <?js if (props.hasName) {?>
                 <td class="name"><code><?js= prop.name ?></code></td>
             <?js } ?>

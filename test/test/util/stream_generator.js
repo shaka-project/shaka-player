@@ -86,8 +86,6 @@ shaka.test.IStreamGenerator.prototype.getSegment = function(
  * @param {number} segmentDuration The duration of a single segment in seconds.
  * @param {number} presentationTimeOffset The presentation time offset
  *   in seconds.
- * @param {number} mediaPresentationDuration The duration of the stream
- *   in seconds.
  *
  * @constructor
  * @struct
@@ -99,15 +97,12 @@ shaka.test.DashVodStreamGenerator = function(
     segmentTemplateUri,
     tfdtOffset,
     segmentDuration,
-    presentationTimeOffset,
-    mediaPresentationDuration) {
+    presentationTimeOffset) {
   goog.asserts.assert(mvhdOffset >= 0, 'mvhd offset invalid');
   goog.asserts.assert(tfdtOffset >= 0, 'tfdt offset invalid');
   goog.asserts.assert(segmentDuration > 0, 'segment duration invalid');
   goog.asserts.assert(presentationTimeOffset >= 0,
       'presentation time offset invalid');
-  goog.asserts.assert(mediaPresentationDuration > 0,
-      'presentation duration invalid');
 
   /** @private {string} */
   this.initSegmentUri_ = initSegmentUri;
@@ -126,9 +121,6 @@ shaka.test.DashVodStreamGenerator = function(
 
   /** @private {number} */
   this.presentationTimeOffset_ = presentationTimeOffset;
-
-  /** @private {number} */
-  this.mediaPresentationDuration_ = mediaPresentationDuration;
 
   /** @private {ArrayBuffer} */
   this.initSegment_ = null;
@@ -183,16 +175,8 @@ shaka.test.DashVodStreamGenerator.prototype.getSegment = function(
 
   var segmentStartTime = (position - 1) * this.segmentDuration_;
 
-  // Bounds check.
-  goog.asserts.assert(
-      segmentStartTime + (segmentOffset * this.segmentDuration_) <=
-          this.mediaPresentationDuration_,
-      'segment cannot end after the presentation end time');
-
   var mediaTimestamp = segmentStartTime + this.presentationTimeOffset_;
 
-  // TODO: If |segmentDuration_| does not divide |mediaPresentationDuration_|
-  // then we should truncate the last segment.
   return shaka.test.StreamGenerator.setBaseMediaDecodeTime_(
       this.segmentTemplate_, this.tfdtOffset_, mediaTimestamp, this.timescale_);
 };
@@ -340,7 +324,9 @@ shaka.test.DashLiveStreamGenerator.prototype.getSegment = function(
                                   this.segmentDuration_ +
                                   this.timeShiftBufferDepth_;
 
-  if (wallClockTime < segmentAvailabilityStartTime) {
+  // Note it is possible for this to be called slightly before it becomes
+  // available due to rounding errors with PresentationTimeline.
+  if (wallClockTime + 1 < segmentAvailabilityStartTime) {
     shaka.log.debug(
         'wallClockTime < segmentAvailabilityStartTime:',
         'wallClockTime=' + wallClockTime,

@@ -19,7 +19,7 @@ scripts can run on any platform that supports python v2.7 and JRE 7+.
 All the scripts here use two environment variables:
 
 * `PRINT_ARGUMENTS` if set, will print the command-line to subprocesses.
-* `RAUSE_INTERRUPT` if set, will raise interrupts rather than swallowing them.
+* `RAISE_INTERRUPT` if set, will raise interrupts rather than swallowing them.
 
 ```shell
 $ PRINT_ARGUMENTS=1 build.py
@@ -69,7 +69,7 @@ the build to run even if there are no changes detected to the source code.
 some integration tests will not run without the compiled library present.
 
 There are also several custom arguments that are handled in JavaScript by
-`karma.conf.js` or the tests themselves (via `shaka.test.Util.getClientArg`).
+`karma.conf.js` or the tests themselves (via `getClientArg`).
 These arguments can be passed in using `test.py` or using `karma start`
 directly:
 * `--quick` will only run unit tests, skipping integration tests.
@@ -80,8 +80,18 @@ directly:
 * `--external` will run integration tests against external assets.  This will
   take an extremely long time to run, and requires a fast and reliable internet
   connection.
+* `--drm` will run integration tests against DRM license servers.  This will
+  require a connection to the open internet.
 * `--uncompiled` will run integration tests using the uncompiled library instead
   of the compiled version.
+* `--random` will run the tests in a random order to isolate test dependencies.
+* `--seed` will seed the random test order so that the same order can be
+  reproduced across runs. Specify any value `--seed=xyz`.
+* `--runs` allows running the tests multiple times in succession. This parameter
+  must be specified with a positive integer value, for example `--runs 5`.
+* `--use-xvfb` will launch the browsers in a virtual display (only on Linux).
+* `--specFilter` is used to filter a specific test or set of tests.  This
+  parameter is specified as a RegExp string `--specFilter="DataUriPlugin .*\d"`.
 
 The `karma` argument `--browsers` will set the browsers used to run the tests
 (e.g. `--browsers Chrome,Firefox`).  If you don't pass any arguments, `test.py`

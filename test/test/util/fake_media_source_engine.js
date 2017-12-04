@@ -69,19 +69,64 @@ shaka.test.FakeMediaSourceEngine = function(segmentData, opt_drift) {
     this.timestampOffsets_[type] = 0;
   }
 
-  spyOn(this, 'destroy').and.callThrough();
-  spyOn(this, 'init').and.callThrough();
-  spyOn(this, 'bufferStart').and.callThrough();
-  spyOn(this, 'bufferEnd').and.callThrough();
-  spyOn(this, 'bufferedAheadOf').and.callThrough();
-  spyOn(this, 'appendBuffer').and.callThrough();
-  spyOn(this, 'remove').and.callThrough();
-  spyOn(this, 'clear').and.callThrough();
-  spyOn(this, 'endOfStream').and.callThrough();
-  spyOn(this, 'setTimestampOffset').and.callThrough();
-  spyOn(this, 'setAppendWindowEnd').and.callThrough();
-  spyOn(this, 'setDuration').and.callThrough();
-  spyOn(this, 'getDuration').and.callThrough();
+  /** @type {!jasmine.Spy} */
+  this.init = jasmine.createSpy('init').and.stub();
+
+  /** @type {!jasmine.Spy} */
+  this.reinitText = jasmine.createSpy('reinitText').and.stub();
+
+  /** @type {!jasmine.Spy} */
+  this.endOfStream =
+      jasmine.createSpy('endOfStream').and.returnValue(Promise.resolve());
+
+  /** @type {!jasmine.Spy} */
+  this.setDuration = jasmine.createSpy('setDuration')
+                         .and.callFake(this.setDurationImpl_.bind(this));
+
+  /** @type {!jasmine.Spy} */
+  this.getDuration = jasmine.createSpy('getDuration')
+                         .and.callFake(this.getDurationImpl_.bind(this));
+
+  /** @type {!jasmine.Spy} */
+  this.appendBuffer = jasmine.createSpy('appendBuffer')
+                          .and.callFake(this.appendBufferImpl.bind(this));
+
+  /** @type {!jasmine.Spy} */
+  this.clear = jasmine.createSpy('clear')
+                   .and.callFake(this.clearImpl_.bind(this));
+
+  /** @type {!jasmine.Spy} */
+  this.bufferStart = jasmine.createSpy('bufferStart')
+                   .and.callFake(this.bufferStartImpl_.bind(this));
+
+  /** @type {!jasmine.Spy} */
+  this.bufferEnd = jasmine.createSpy('bufferEnd')
+                   .and.callFake(this.bufferEndImpl_.bind(this));
+
+  /** @type {!jasmine.Spy} */
+  this.isBuffered = jasmine.createSpy('isBuffered')
+                   .and.callFake(this.isBufferedImpl_.bind(this));
+
+  /** @type {!jasmine.Spy} */
+  this.bufferedAheadOf = jasmine.createSpy('bufferedAheadOf')
+                   .and.callFake(this.bufferedAheadOfImpl_.bind(this));
+
+  /** @type {!jasmine.Spy} */
+  this.setStreamProperties = jasmine.createSpy('setStreamProperties')
+                   .and.callFake(this.setStreamPropertiesImpl_.bind(this));
+
+  /** @type {!jasmine.Spy} */
+  this.remove = jasmine.createSpy('remove')
+                   .and.callFake(this.removeImpl.bind(this));
+
+  /** @type {!jasmine.Spy} */
+  this.flush = jasmine.createSpy('flush').and.returnValue(Promise.resolve());
+};
+
+
+/** @override */
+shaka.test.FakeMediaSourceEngine.prototype.destroy = function() {
+  return Promise.resolve();
 };
 
 
@@ -111,18 +156,12 @@ shaka.test.FakeMediaSourceEngine = function(segmentData, opt_drift) {
 shaka.test.FakeMediaSourceEngine.SegmentData;
 
 
-/** @override */
-shaka.test.FakeMediaSourceEngine.prototype.destroy = function() {
-  return Promise.resolve();
-};
-
-
-/** @override */
-shaka.test.FakeMediaSourceEngine.prototype.init = function() {};
-
-
-/** @override */
-shaka.test.FakeMediaSourceEngine.prototype.bufferStart = function(type) {
+/**
+ * @param {string} type
+ * @return {?number}
+ * @private
+ */
+shaka.test.FakeMediaSourceEngine.prototype.bufferStartImpl_ = function(type) {
   if (this.segments[type] === undefined) throw new Error('unexpected type');
 
   var first = this.segments[type].indexOf(true);
@@ -133,8 +172,12 @@ shaka.test.FakeMediaSourceEngine.prototype.bufferStart = function(type) {
 };
 
 
-/** @override */
-shaka.test.FakeMediaSourceEngine.prototype.bufferEnd = function(type) {
+/**
+ * @param {string} type
+ * @return {?number}
+ * @private
+ */
+shaka.test.FakeMediaSourceEngine.prototype.bufferEndImpl_ = function(type) {
   if (this.segments[type] === undefined) throw new Error('unexpected type');
 
   var last = this.segments[type].lastIndexOf(true);
@@ -145,38 +188,85 @@ shaka.test.FakeMediaSourceEngine.prototype.bufferEnd = function(type) {
 };
 
 
-/** @override */
-shaka.test.FakeMediaSourceEngine.prototype.bufferedAheadOf = function(
-    type, start, opt_tolerance) {
+/**
+ * @param {string} type
+ * @param {number} time
+ * @return {boolean}
+ * @private
+ */
+shaka.test.FakeMediaSourceEngine.prototype.isBufferedImpl_ =
+    function(type, time) {
   if (this.segments[type] === undefined) throw new Error('unexpected type');
 
-  var tolerance = 0;
-  // Note: |start| may equal the end of the last segment, so |first|
-  // may equal segments[type].length
-  var first = this.toIndex_(type, start);
-  if (!this.segments[type][first] && opt_tolerance) {
-    first = this.toIndex_(type, start + opt_tolerance);
-    tolerance = opt_tolerance;
-  }
-  if (!this.segments[type][first])
-    return 0;  // Unbuffered.
+  var first = this.segments[type].indexOf(true);
+  var last = this.segments[type].lastIndexOf(true);
+  if (first < 0 || last < 0)
+    return false;
 
-  // Find the first gap.
-  var last = this.segments[type].indexOf(false, first);
-  if (last < 0)
-    last = this.segments[type].length;  // Buffered everything.
-
-  return this.toTime_(type, last) - start + tolerance;
+  return time >= this.toTime_(type, first) && time < this.toTime_(type, last);
 };
 
 
-/** @override */
-shaka.test.FakeMediaSourceEngine.prototype.appendBuffer = function(
+/**
+ * @param {string} type
+ * @param {number} start
+ * @return {number}
+ * @private
+ */
+shaka.test.FakeMediaSourceEngine.prototype.bufferedAheadOfImpl_ = function(
+    type, start) {
+  if (this.segments[type] === undefined) throw new Error('unexpected type');
+
+  var ContentType = shaka.util.ManifestParserUtils.ContentType;
+  var hasSegment = (function(i) {
+    return this.segments[type][i] ||
+        (type === ContentType.VIDEO && this.segments['trickvideo'] &&
+         this.segments['trickvideo'][i]);
+  }.bind(this));
+
+  // Note: |start| may equal the end of the last segment, so |first|
+  // may equal segments[type].length
+  var first = this.toIndex_(type, start);
+  if (!hasSegment(first))
+    return 0;  // Unbuffered.
+
+  // Find the first gap.
+  var last = first;
+  while (last < this.segments[type].length && hasSegment(last))
+    last++;
+
+  return this.toTime_(type, last) - start;
+};
+
+
+/**
+ * @param {string} type
+ * @param {!ArrayBuffer} data
+ * @param {?number} startTime
+ * @param {?number} endTime
+ * @return {!Promise}
+ */
+shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl = function(
     type, data, startTime, endTime) {
   if (this.segments[type] === undefined) throw new Error('unexpected type');
 
+  // Remains 'video' even when we detect a 'trickvideo' segment.
+  var originalType = type;
+  var ContentType = shaka.util.ManifestParserUtils.ContentType;
+
   // Set init segment.
   var i = this.segmentData[type].initSegments.indexOf(data);
+  if (i < 0 && type == ContentType.VIDEO &&
+      this.segmentData['trickvideo']) {
+    // appendBuffer('video', ...) might be for 'trickvideo' data.
+    i = this.segmentData['trickvideo'].initSegments.indexOf(data);
+    if (i >= 0) {
+      // 'trickvideo' value is only used for testing.
+      // Cast to the ContentType enum for compatibility.
+      type = /**@type {shaka.util.ManifestParserUtils.ContentType} */(
+          'trickvideo');
+    }
+  }
   if (i >= 0) {
     expect(startTime).toBe(null);
     expect(endTime).toBe(null);
@@ -189,6 +279,17 @@ shaka.test.FakeMediaSourceEngine.prototype.appendBuffer = function(
 
   // Set media segment.
   i = this.segmentData[type].segments.indexOf(data);
+  if (i < 0 && type == ContentType.VIDEO &&
+      this.segmentData['trickvideo']) {
+    // appendBuffer('video', ...) might be for 'trickvideo' data.
+    i = this.segmentData['trickvideo'].segments.indexOf(data);
+    if (i >= 0) {
+      // 'trickvideo' value is only used for testing.
+      // Cast to the ContentType enum for compatibility.
+      type = /**@type {shaka.util.ManifestParserUtils.ContentType} */(
+          'trickvideo');
+    }
+  }
   if (i < 0)
     throw new Error('unexpected data');
 
@@ -199,7 +300,7 @@ shaka.test.FakeMediaSourceEngine.prototype.appendBuffer = function(
 
   // Verify that the segment is aligned.
   var start = this.segmentData[type].segmentStartTimes[i] +
-              this.timestampOffsets_[type];
+              this.timestampOffsets_[originalType];
   var expectedStart = i * this.segmentData[type].segmentDuration;
   expect(start).toBe(expectedStart);
 
@@ -208,8 +309,14 @@ shaka.test.FakeMediaSourceEngine.prototype.appendBuffer = function(
 };
 
 
-/** @override */
-shaka.test.FakeMediaSourceEngine.prototype.remove = function(type, start, end) {
+/**
+ * @param {string} type
+ * @param {number} start
+ * @param {number} end
+ * @return {!Promise}
+ */
+shaka.test.FakeMediaSourceEngine.prototype.removeImpl =
+    function(type, start, end) {
   if (this.segments[type] === undefined) throw new Error('unexpected type');
 
   var first = this.toIndex_(type, start);
@@ -232,55 +339,65 @@ shaka.test.FakeMediaSourceEngine.prototype.remove = function(type, start, end) {
 };
 
 
-/** @override */
-shaka.test.FakeMediaSourceEngine.prototype.clear = function(type) {
+/**
+ * @param {string} type
+ * @return {!Promise}
+ * @private
+ */
+shaka.test.FakeMediaSourceEngine.prototype.clearImpl_ = function(type) {
   if (this.segments[type] === undefined) throw new Error('unexpected type');
 
   for (var i = 0; i < this.segments[type].length; ++i) {
     this.segments[type][i] = false;
   }
 
-  return Promise.resolve();
-};
+  var ContentType = shaka.util.ManifestParserUtils.ContentType;
 
+  // If we're clearing video, clear the segment list for 'trickvideo', too.
+  if (type == ContentType.VIDEO && this.segments['trickvideo']) {
+    // 'trickvideo' value is only used for testing.
+    // Cast to the ContentType enum for compatibility.
+    this.clearImpl_(
+        /**@type {shaka.util.ManifestParserUtils.ContentType} */('trickvideo'));
+  }
 
-/** @override */
-shaka.test.FakeMediaSourceEngine.prototype.setTimestampOffset = function(
-    type, offset) {
-  if (this.segments[type] === undefined) throw new Error('unexpected type');
-  this.timestampOffsets_[type] = offset;
-  return Promise.resolve();
-};
-
-
-/** @override */
-shaka.test.FakeMediaSourceEngine.prototype.setAppendWindowEnd = function(
-    type, appendWindowEnd) {
   return Promise.resolve();
 };
 
 
 /**
- * @param {string=} opt_reason
+ * @param {string} type
+ * @param {number} offset
+ * @param {number} appendWindowEnd
  * @return {!Promise}
- * @override
- * TODO: explicit "param" and "return" are needed with current Closure
- * compiler, remove them once the Closure compiler is upgraded.
+ * @private
  */
-shaka.test.FakeMediaSourceEngine.prototype.endOfStream = function(opt_reason) {
+shaka.test.FakeMediaSourceEngine.prototype.setStreamPropertiesImpl_ = function(
+    type, offset, appendWindowEnd) {
+  if (this.segments[type] === undefined) throw new Error('unexpected type');
+  this.timestampOffsets_[type] = offset;
+  // Don't use |appendWindowEnd|.
   return Promise.resolve();
 };
 
 
-/** @override */
-shaka.test.FakeMediaSourceEngine.prototype.setDuration = function(duration) {
+/**
+ * @param {number} duration
+ * @return {!Promise}
+ * @private
+ */
+shaka.test.FakeMediaSourceEngine.prototype.setDurationImpl_ = function(
+    duration) {
   this.duration_ = duration;
   return Promise.resolve();
 };
 
 
-/** @override */
-shaka.test.FakeMediaSourceEngine.prototype.getDuration = function() {
+/**
+ * @return {number}
+ * @private
+ */
+shaka.test.FakeMediaSourceEngine.prototype.getDurationImpl_ = function() {
   return this.duration_;
 };
 
@@ -306,4 +423,3 @@ shaka.test.FakeMediaSourceEngine.prototype.toIndex_ = function(type, ts) {
 shaka.test.FakeMediaSourceEngine.prototype.toTime_ = function(type, i) {
   return this.drift_ + (i * this.segmentData[type].segmentDuration);
 };
-

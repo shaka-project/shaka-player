@@ -28,12 +28,23 @@ __Manifest parsers__
     and {@link shaka.media.ManifestParser.registerParserByMime}
   - Default manifest parser plugins:
     - DASH: {@linksource shaka.dash.DashParser}
+    - HLS: {@linksource shaka.hls.HlsParser}
 
 __Subtitle/caption parsers__
   - Selected by MIME type
-  - Register with {@link shaka.media.TextEngine.registerParser}
+  - Register with {@link shaka.text.TextEngine.registerParser}
   - Default text parser plugins:
-    - WebVTT: {@linksource shaka.media.VttTextParser}
+    - WebVTT: {@linksource shaka.media.VttTextParser} and
+      {@linksource shaka.media.Mp4VttParser}
+    - TTML: {@linksource shaka.media.TtmlTextParser} and
+      {@linksource shaka.media.Mp4TtmlParser}
+
+__Subtitle/caption displayers__
+  - Configured at runtime on a Player instance
+  - Use {@link player.configure} and set the `textDisplayFactory` field
+  - Must implement the {@link shakaExtern.TextDisplayer} interface
+  - Default TextDisplayer implementation:
+    {@linksource shaka.text.SimpleTextDisplayer}
 
 __Networking plugins__
   - Selected by URI scheme (http, https, etc.)
@@ -44,7 +55,7 @@ __Networking plugins__
 
 __ABR plugins__
   - Configured at runtime on a Player instance
-  - Use {@link player.configure} and set the `abr.manager` field
+  - Use {@link player.configure} and set the `abrFactory` field
   - Must implement the {@link shakaExtern.AbrManager} interface
   - Default AbrManager implementation: {@linksource shaka.abr.SimpleAbrManager}
 
@@ -59,6 +70,8 @@ __Polyfills__
     - prefixed EME implementations for IE 11 and very old versions of embedded
       Chrome/Chromium: {@linksource shaka.polyfill.MediaKeys}
     - Promise implementation for IE 11: {@linksource shaka.polyfill.Promise}
+    - variants of VTTCue and TextTrackCue constructors:
+      {@linksource shaka.polyfill.VTTCue}
 
 
 #### Excluding Default Plugins
@@ -68,7 +81,7 @@ technically optional.  For example, if you don't need WebVTT, you can exclude
 our VTT parser from the build to save space.  Any VTT text streams found in a
 manifest would then be ignored.
 
-*(At the time of this writing, our default plugins account for 43% of the size
+*(At the time of this writing, our default plugins account for 54% of the size
 of our compiled library.)*
 
 Because each plugin's source file ends with a call to register itself with the
@@ -79,7 +92,7 @@ You can start with the complete library (`+@complete`) and exclude any
 individual source file with a minus sign and a path:
 
 ```sh
-python build/build.py +@complete -lib/net/data_uri_plugin.js
+python build/build.py +@complete -lib/media/mp4_ttml_parser.js
 ```
 
 You can also exclude an entire category of plugins:

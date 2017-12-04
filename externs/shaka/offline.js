@@ -38,7 +38,8 @@ shakaExtern.OfflineSupport;
  * @typedef {{
  *   trackSelectionCallback:
  *       function(!Array.<shakaExtern.Track>):!Array.<shakaExtern.Track>,
- *   progressCallback: function(shakaExtern.StoredContent,number)
+ *   progressCallback: function(shakaExtern.StoredContent,number),
+ *   usePersistentLicense: boolean
  * }}
  *
  * @property {function(!Array.<shakaExtern.Track>):!Array.<shakaExtern.Track>}
@@ -50,6 +51,12 @@ shakaExtern.OfflineSupport;
  * @property {function(shakaExtern.StoredContent,number)} progressCallback
  *   Called inside store() to give progress info back to the app.  It is given
  *   the current manifest being stored and the progress of it being stored.
+ * @property {boolean} usePersistentLicense
+ *   If true, store protected content with a persistent license so that no
+ *   network is required to view.
+ *   If false, store protected content without a persistent license.  A network
+ *   will be required to retrieve a temporary license to view.
+ *   Defaults to true.
  * @exportDoc
  */
 shakaExtern.OfflineConfiguration;
@@ -61,6 +68,7 @@ shakaExtern.OfflineConfiguration;
  *   originalManifestUri: string,
  *   duration: number,
  *   size: number,
+ *   expiration: number,
  *   tracks: !Array.<shakaExtern.Track>,
  *   appMetadata: Object
  * }}
@@ -74,6 +82,9 @@ shakaExtern.OfflineConfiguration;
  *   The duration of the content, in seconds.
  * @property {number} size
  *   The size of the content, in bytes.
+ * @property {number} expiration
+ *   The time that the encrypted license expires, in milliseconds.  If the media
+ *   is clear or the license never expires, this will equal Infinity.
  * @property {!Array.<shakaExtern.Track>} tracks
  *   The tracks that are stored.  This only lists those found in the first
  *   Period.
@@ -90,6 +101,7 @@ shakaExtern.StoredContent;
  *   originalManifestUri: string,
  *   duration: number,
  *   size: number,
+ *   expiration: number,
  *   periods: !Array.<shakaExtern.PeriodDB>,
  *   sessionIds: !Array.<string>,
  *   drmInfo: ?shakaExtern.DrmInfo,
@@ -104,6 +116,8 @@ shakaExtern.StoredContent;
  *   The total duration of the media, in seconds.
  * @property {number} size
  *   The total size of all stored segments, in bytes.
+ * @property {number} expiration
+ *   The license expiration, in milliseconds; or Infinity if not applicable.
  * @property {!Array.<shakaExtern.PeriodDB>} periods
  *   The Periods that are stored.
  * @property {!Array.<string>} sessionIds
@@ -141,12 +155,14 @@ shakaExtern.PeriodDB;
  *   frameRate: (number|undefined),
  *   kind: (string|undefined),
  *   language: string,
+ *   label: ?string,
  *   width: ?number,
  *   height: ?number,
  *   initSegmentUri: ?string,
  *   encrypted: boolean,
  *   keyId: ?string,
- *   segments: !Array.<shakaExtern.SegmentDB>
+ *   segments: !Array.<shakaExtern.SegmentDB>,
+ *   variantIds: ?Array.<number>
  * }}
  *
  * @property {number} id
@@ -154,7 +170,7 @@ shakaExtern.PeriodDB;
  * @property {boolean} primary
  *   Whether the stream set was primary.
  * @property {number} presentationTimeOffset
- *   The presentation time offset of the stream.
+ *   The presentation time offset of the stream, in seconds.
  * @property {string} contentType
  *   The type of the stream, 'audio', 'text', or 'video'.
  * @property {string} mimeType
@@ -167,6 +183,8 @@ shakaExtern.PeriodDB;
  *   The kind of text stream; undefined for audio/video.
  * @property {string} language
  *   The language of the stream; '' for video.
+ * @property {?string} label
+ *   The label of the stream; '' for video.
  * @property {?number} width
  *   The width of the stream; null for audio/text.
  * @property {?number} height
@@ -179,6 +197,8 @@ shakaExtern.PeriodDB;
  *   The key ID this stream is encrypted with.
  * @property {!Array.<shakaExtern.SegmentDB>} segments
  *   An array of segments that make up the stream
+ * @property {?Array.<number>} variantIds
+ *   An array of ids of variants the stream is a part of.
  */
 shakaExtern.StreamDB;
 
@@ -203,21 +223,12 @@ shakaExtern.SegmentDB;
 /**
  * @typedef {{
  *   key: number,
- *   data: !ArrayBuffer,
- *   manifestKey: number,
- *   streamNumber: number,
- *   segmentNumber: number
+ *   data: ArrayBuffer
  * }}
  *
  * @property {number} key
  *   A key that uniquely describes the segment.
- * @property {!ArrayBuffer} data
+ * @property {ArrayBuffer} data
  *   The data contents of the segment.
- * @property {number} manifestKey
- *   The key of the manifest this belongs to.
- * @property {number} streamNumber
- *   The index of the stream this belongs to.
- * @property {number} segmentNumber
- *   The index of the segment within the stream.
  */
 shakaExtern.SegmentDataDB;

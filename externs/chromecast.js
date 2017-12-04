@@ -167,11 +167,30 @@ cast.receiver.CastReceiverManager.prototype.onSystemVolumeChanged;
 
 
 /** @const */
+cast.__platform__;
+
+
+/**
+ * @param {string} type
+ * @return {boolean}
+ */
+cast.__platform__.canDisplayType = function(type) {};
+
+
+/** @const */
 chrome.cast = {};
 
 
 /** @type {boolean} */
 chrome.cast.isAvailable;
+
+
+/** @const */
+chrome.cast.SessionStatus = {};
+
+
+/** @type {string} */
+chrome.cast.SessionStatus.STOPPED;
 
 
 /**
@@ -273,9 +292,31 @@ chrome.cast.Session.prototype.addMessageListener = function(
 
 
 /**
+ * @param {string} namespace
+ * @param {Function} listener
+ */
+chrome.cast.Session.prototype.removeMessageListener = function(
+    namespace, listener) {};
+
+
+/**
  * @param {Function} listener
  */
 chrome.cast.Session.prototype.addUpdateListener = function(listener) {};
+
+
+/**
+ * @param {Function} listener
+ */
+chrome.cast.Session.prototype.removeUpdateListener = function(listener) {};
+
+
+/**
+ * @param {Function} successCallback
+ * @param {Function} errorCallback
+ */
+chrome.cast.Session.prototype.leave = function(
+    successCallback, errorCallback) {};
 
 
 /**

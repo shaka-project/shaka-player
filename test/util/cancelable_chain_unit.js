@@ -16,6 +16,7 @@
  */
 
 describe('CancelableChain', function() {
+  /** @type {!shaka.util.CancelableChain} */
   var chain;
 
   beforeEach(function() {
@@ -57,18 +58,17 @@ describe('CancelableChain', function() {
     }).finalize().catch(fail).then(done);
   });
 
-  it('must be finalized to catch failures',
-      /** @suppress {unnecessaryCasts} */ function() {
-        // compiler workaround
-        var catchMethod = /** @type {Object} */(chain)['catch'];
+  it('must be finalized to catch failures', function() {
+    // compiler workaround
+    var catchMethod = /** @type {Object} */(chain)['catch'];
 
-        // no chain.catch
-        expect(catchMethod).toBe(undefined);
-        // no second argument on chain.then
-        expect(chain.then.length).toBe(1);
-        // finalize returns the final Promise, where errors are received.
-        expect(chain.finalize().catch).toEqual(jasmine.any(Function));
-      });
+    // no chain.catch
+    expect(catchMethod).toBe(undefined);
+    // no second argument on chain.then
+    expect(chain.then.length).toBe(1);
+    // finalize returns the final Promise, where errors are received.
+    expect(chain.finalize().catch).toEqual(jasmine.any(Function));
+  });
 
   it('stops accepting new stages after being finalized', function(done) {
     chain.then(function() {
@@ -80,11 +80,17 @@ describe('CancelableChain', function() {
     p.catch(fail).then(done);
   });
 
+  it('returns the same promise after being finalized', function() {
+    var p = chain.then(function() { return 1; }).finalize();
+    expect(chain.finalize()).toBe(p);
+  });
+
   describe('cancel', function() {
     var cannedError;
 
     beforeAll(function() {
       cannedError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.PLAYER,
           shaka.util.Error.Code.LOAD_INTERRUPTED);
     });
@@ -154,6 +160,29 @@ describe('CancelableChain', function() {
       block.resolve();
     });
 
+    it('works even if stage is rejected after being canceled', function(done) {
+      var p = new shaka.util.PublicPromise();
+      var finalComplete = false;
+      chain.then(function() {
+        return p;
+      }).finalize().then(fail).catch(function(err) {
+        finalComplete = true;
+        shaka.test.Util.expectToEqualError(err, cannedError);
+      });
+
+      chain.cancel(cannedError).catch(fail).then(function() {
+        // Delay so the catch block above can run.
+        return shaka.test.Util.delay(0.1);
+      }).then(function() {
+        expect(finalComplete).toBe(true);
+        done();
+      });
+      p.reject(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MANIFEST,
+          shaka.util.Error.Code.UNABLE_TO_GUESS_MANIFEST_TYPE));
+    });
+
     it('resolves even after the finalized chain is resolved', function(done) {
       var stageComplete = false;
       var finalComplete = false;
@@ -189,6 +218,47 @@ describe('CancelableChain', function() {
         // Cancel should still resolve.
         return chain.cancel(cannedError);
       }).catch(fail).then(done);
+    });
+  });
+
+  describe('events', function() {
+    it('can register onComplete event', function(done) {
+      /** @type {boolean} */
+      var completed = false;
+
+      /** @type {!shaka.util.CancelableChain} */
+      var chain = new shaka.util.CancelableChain();
+      chain.onComplete(function() {
+        completed = true;
+      });
+
+      // Completed callbacks should be called before the promise
+      // completes.
+      chain.finalize().catch(fail).then(function() {
+        if (completed) {
+          done();
+        } else {
+          fail();
+        }
+      });
+    });
+
+    it('can register onCancel event', function(done) {
+      /** @const */
+      var cannedError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.PLAYER,
+          shaka.util.Error.Code.LOAD_INTERRUPTED);
+
+      /** @type {!shaka.util.CancelableChain} */
+      var chain = new shaka.util.CancelableChain();
+      chain.onCancel(done);
+
+      chain.then(function() {
+        var wait = shaka.test.Util.delay(1.0);
+        chain.cancel(cannedError);
+        return wait;
+      }).finalize().then(fail);
     });
   });
 });

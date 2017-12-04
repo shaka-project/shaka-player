@@ -1,4 +1,5 @@
 # All standard manifest parser plugins.
 
 +@dash
++@hls
 +@offline

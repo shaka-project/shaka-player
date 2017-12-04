@@ -48,9 +48,19 @@ HTMLMediaElement.prototype.webkitGenerateKeyRequest =
 
 
 /**
+ * An unprefixed variant of the webkit-prefixed API from EME v0.1b.
+ * @param {string} keySystem
+ * @param {!Uint8Array} initData
+ */
+HTMLMediaElement.prototype.generateKeyRequest =
+    function(keySystem, initData) {};
+
+
+/**
  * @param {string} mimeType
  * @param {string=} opt_keySystem
  * @return {string} '', 'maybe', or 'probably'
+ * @override the standard one-argument version
  */
 HTMLVideoElement.prototype.canPlayType =
     function(mimeType, opt_keySystem) {};

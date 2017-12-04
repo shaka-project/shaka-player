@@ -38,17 +38,23 @@ body.noinput {
 }
 
 a {
-  color: #4183C4;
+  color: #0070b0;
   text-decoration: none;
 }
 
 a:hover {
-  color: #3d85c6;
+  color: #0040b0;
   text-decoration: underline;
 }
 
+a.disabled_link {
+  pointer-events: none;
+  cursor: default;
+  color: Gray;
+}
+
 button {
-  background-color: #d84a38;
+  background-color: #d04030;
   border: none;
   border-radius: 2px;
   color: white;
@@ -61,11 +67,11 @@ button {
 }
 
 button:active {
-  background-color: #cf402f;
+  background-color: #e02020;
 }
 
 button:hover {
-  background-color: #cf402f;
+  background-color: #e02020;
 }
 
 button[disabled] {
@@ -96,7 +102,7 @@ input[type=text] {
   padding: 1px 2px 3px 6px;
 }
 
-label {
+label, .label {
   color: #444;
   display: inline-block;
   font-family: 'Roboto Condensed';
@@ -114,6 +120,12 @@ p {
   font-weight: 300;
   line-height: 1.6em;
   margin: 0.5em 0;
+}
+
+p#compiled_links {
+  border-bottom: 1px solid #eee;
+  margin: 0 0 1.5em 0;
+  padding: 0 0 0.5em 0;
 }
 
 p.links {
@@ -201,19 +213,15 @@ summary {
 #errorDisplay {
   background-color: #d84a38;
   margin: 0;
-  padding: 0;
+  padding: 1em;
   line-height: 2em;
   text-align: center;
   width: 100%;
   display: none;
 }
 
-#errorDisplayText {
-  background-color: #d84a38;
+#errorDisplayLink {
   color: white;
-  margin-left: 2em;
-  margin-right: 2em;
-  float: center;
 }
 
 #errorDisplayCloseButton {
@@ -307,6 +315,16 @@ summary {
   position: absolute;
 }
 
+.for-screen-readers {
+  /* Hide the content from sighted users, but not screen readers */
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
 @media screen and (max-width: 650px) {
   h1 {
     font-size: 1.5em;
@@ -335,7 +353,7 @@ summary {
     font-size: 0.8em;
   }
 
-  label {
+  label, .label {
     font-weight: 500;
     margin: 0 0 0.4em 0;
   }

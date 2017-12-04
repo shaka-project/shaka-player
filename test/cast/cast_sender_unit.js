@@ -18,6 +18,7 @@
 describe('CastSender', function() {
   var CastSender;
   var CastUtils;
+  var Util = shaka.test.Util;
 
   var originalChrome;
 
@@ -29,7 +30,10 @@ describe('CastSender', function() {
     video: null
   };
 
+  /** @type {!jasmine.Spy} */
   var onStatusChanged;
+  /** @type {!jasmine.Spy} */
+  var onFirstCastStateUpdate;
   var onRemoteEvent;
   var onResumeLocal;
   var onInitStateRequired;
@@ -49,6 +53,7 @@ describe('CastSender', function() {
 
   beforeEach(function() {
     onStatusChanged = jasmine.createSpy('onStatusChanged');
+    onFirstCastStateUpdate = jasmine.createSpy('onFirstCastStateUpdate');
     onRemoteEvent = jasmine.createSpy('onRemoteEvent');
     onResumeLocal = jasmine.createSpy('onResumeLocal');
     onInitStateRequired = jasmine.createSpy('onInitStateRequired')
@@ -61,8 +66,11 @@ describe('CastSender', function() {
     window['chrome'] = { cast: mockCastApi };
     mockSession = null;
 
-    sender = new CastSender(fakeAppId, onStatusChanged, onRemoteEvent,
-                            onResumeLocal, onInitStateRequired);
+    sender = new CastSender(
+        fakeAppId, Util.spyFunc(onStatusChanged),
+        Util.spyFunc(onFirstCastStateUpdate), Util.spyFunc(onRemoteEvent),
+        Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
+    resetClassVariables();
   });
 
   afterEach(function(done) {
@@ -119,6 +127,27 @@ describe('CastSender', function() {
 
       fakeReceiverAvailability(false);
       expect(sender.hasReceivers()).toBe(false);
+    });
+
+    it('remembers status from previous senders', function(done) {
+      sender.init();
+      fakeReceiverAvailability(true);
+      sender.destroy().then(function() {
+        sender = new CastSender(
+            fakeAppId, Util.spyFunc(onStatusChanged),
+            Util.spyFunc(onFirstCastStateUpdate), Util.spyFunc(onRemoteEvent),
+            Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
+        sender.init();
+        // You get an initial call to onStatusChanged when it initializes.
+        expect(onStatusChanged).toHaveBeenCalledTimes(3);
+
+        return Util.delay(0.25);
+      }).then(function() {
+        // And then you get another call after it has 'discovered' the
+        // existing receivers.
+        expect(sender.hasReceivers()).toBe(true);
+        expect(onStatusChanged).toHaveBeenCalledTimes(4);
+      }).catch(fail).then(done);
     });
   });
 
@@ -219,12 +248,73 @@ describe('CastSender', function() {
     });
   });
 
+  it('re-uses old sessions', function(done) {
+    sender.init();
+    fakeReceiverAvailability(true);
+    var p = sender.cast(fakeInitState);
+    fakeSessionConnection();
+    var oldMockSession = mockSession;
+    p.then(function() {
+      return sender.destroy();
+    }).then(function() {
+      // Reset tracking variables.
+      mockCastApi.ApiConfig.calls.reset();
+      onStatusChanged.calls.reset();
+      oldMockSession.messages = [];
+
+      // Make a new session, to ensure that the sender is correctly using
+      // the previous mock session.
+      mockSession = createMockCastSession();
+
+      sender = new CastSender(
+          fakeAppId, Util.spyFunc(onStatusChanged),
+          Util.spyFunc(onFirstCastStateUpdate), Util.spyFunc(onRemoteEvent),
+          Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
+      sender.init();
+
+      // The sender should automatically rejoin the session, without needing
+      // to be told to cast.
+      expect(onStatusChanged).toHaveBeenCalled();
+      expect(sender.isCasting()).toBe(true);
+
+      // The message should be on the old session, instead of the new one.
+      expect(mockSession.messages.length).toBe(0);
+      expect(oldMockSession.messages).toContain(jasmine.objectContaining({
+        type: 'init',
+        initState: fakeInitState
+      }));
+    }).catch(fail).then(done);
+  });
+
+  it('doesn\'t re-use stopped sessions', function(done) {
+    sender.init();
+    fakeReceiverAvailability(true);
+    var p = sender.cast(fakeInitState);
+    fakeSessionConnection();
+    p.then(function() {
+      return sender.destroy();
+    }).then(function() {
+      mockCastApi.ApiConfig.calls.reset();
+
+      // The session is stopped in the meantime.
+      mockSession.status = chrome.cast.SessionStatus.STOPPED;
+
+      sender = new CastSender(
+          fakeAppId, Util.spyFunc(onStatusChanged),
+          Util.spyFunc(onFirstCastStateUpdate), Util.spyFunc(onRemoteEvent),
+          Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
+      sender.init();
+
+      expect(sender.isCasting()).toBe(false);
+    }).catch(fail).then(done);
+  });
+
   it('joins existing sessions automatically', function(done) {
     sender.init();
     fakeReceiverAvailability(true);
     fakeJoinExistingSession();
 
-    shaka.test.Util.delay(0.1).then(function() {
+    Util.delay(0.1).then(function() {
       expect(onStatusChanged).toHaveBeenCalled();
       expect(sender.isCasting()).toBe(true);
       expect(onInitStateRequired).toHaveBeenCalled();
@@ -279,6 +369,70 @@ describe('CastSender', function() {
     });
   });
 
+  describe('onFirstCastStateUpdate', function() {
+    it('is triggered by an "update" message', function(done) {
+      // You have to join an existing session for it to work.
+      sender.init();
+      fakeReceiverAvailability(true);
+      fakeJoinExistingSession();
+
+      Util.delay(0.1).then(function() {
+        expect(onFirstCastStateUpdate).not.toHaveBeenCalled();
+
+        fakeSessionMessage({
+          type: 'update',
+          update: {video: {currentTime: 12}, player: {isLive: false}}
+        });
+        expect(onFirstCastStateUpdate).toHaveBeenCalled();
+      }).catch(fail).then(done);
+    });
+
+    it('is not triggered if making a new session', function(done) {
+      sender.init();
+      fakeReceiverAvailability(true);
+      sender.cast(fakeInitState).then(function() {
+        fakeSessionMessage({
+          type: 'update',
+          update: {video: {currentTime: 12}, player: {isLive: false}}
+        });
+        expect(onFirstCastStateUpdate).not.toHaveBeenCalled();
+      }).catch(fail).then(done);
+      fakeSessionConnection();
+    });
+
+    it('is triggered once per existing session', function(done) {
+      sender.init();
+      fakeReceiverAvailability(true);
+      fakeJoinExistingSession();
+
+      Util.delay(0.1).then(function() {
+        fakeSessionMessage({
+          type: 'update',
+          update: {video: {currentTime: 12}, player: {isLive: false}}
+        });
+        expect(onFirstCastStateUpdate).toHaveBeenCalled();
+        onFirstCastStateUpdate.calls.reset();
+
+        fakeSessionMessage({
+          type: 'update',
+          update: {video: {currentTime: 12}, player: {isLive: false}}
+        });
+        expect(onFirstCastStateUpdate).not.toHaveBeenCalled();
+        onFirstCastStateUpdate.calls.reset();
+
+        // Disconnect and then connect to another existing session.
+        fakeJoinExistingSession();
+        return Util.delay(0.1);
+      }).then(function() {
+        fakeSessionMessage({
+          type: 'update',
+          update: {video: {currentTime: 12}, player: {isLive: false}}
+        });
+        expect(onFirstCastStateUpdate).toHaveBeenCalled();
+      }).catch(fail).then(done);
+    });
+  });
+
   describe('onRemoteEvent', function() {
     it('is triggered by an "event" message', function(done) {
       sender.init();
@@ -317,16 +471,24 @@ describe('CastSender', function() {
     });
   });
 
-  describe('disconnect', function() {
-    it('stops the session if we are casting', function(done) {
+  describe('showDisconnectDialog', function() {
+    it('opens the dialog if we are casting', function(done) {
       sender.init();
       fakeReceiverAvailability(true);
       sender.cast(fakeInitState).then(function() {
         expect(sender.isCasting()).toBe(true);
+        expect(mockSession.leave).not.toHaveBeenCalled();
         expect(mockSession.stop).not.toHaveBeenCalled();
+        mockCastApi.requestSession.calls.reset();
 
         sender.showDisconnectDialog();
+
+        // this call opens the dialog:
         expect(mockCastApi.requestSession).toHaveBeenCalled();
+        // these were not used:
+        expect(mockSession.leave).not.toHaveBeenCalled();
+        expect(mockSession.stop).not.toHaveBeenCalled();
+
         fakeRemoteDisconnect();
       }).catch(fail).then(done);
       fakeSessionConnection();
@@ -428,10 +590,10 @@ describe('CastSender', function() {
 
       it('resolve when "asyncComplete" messages are received', function(done) {
         var p = method(123, 'abc');
-        shaka.test.Util.capturePromiseStatus(p);
+        Util.capturePromiseStatus(p);
 
         // Wait a tick for the Promise status to be set.
-        shaka.test.Util.delay(0.1).then(function() {
+        Util.delay(0.1).then(function() {
           expect(p.status).toBe('pending');
           var id = mockSession.messages[mockSession.messages.length - 1].id;
           fakeSessionMessage({
@@ -441,7 +603,7 @@ describe('CastSender', function() {
           });
 
           // Wait a tick for the Promise status to change.
-          return shaka.test.Util.delay(0.1);
+          return Util.delay(0.1);
         }).then(function() {
           expect(p.status).toBe('resolved');
         }).catch(fail).then(done);
@@ -449,14 +611,15 @@ describe('CastSender', function() {
 
       it('reject when "asyncComplete" messages have an error', function(done) {
         var originalError = new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.MANIFEST,
             shaka.util.Error.Code.UNABLE_TO_GUESS_MANIFEST_TYPE,
             'foo://bar');
         var p = method(123, 'abc');
-        shaka.test.Util.capturePromiseStatus(p);
+        Util.capturePromiseStatus(p);
 
         // Wait a tick for the Promise status to be set.
-        shaka.test.Util.delay(0.1).then(function() {
+        Util.delay(0.1).then(function() {
           expect(p.status).toBe('pending');
           var id = mockSession.messages[mockSession.messages.length - 1].id;
           fakeSessionMessage({
@@ -466,30 +629,31 @@ describe('CastSender', function() {
           });
 
           // Wait a tick for the Promise status to change.
-          return shaka.test.Util.delay(0.1);
+          return Util.delay(0.1);
         }).then(function() {
           expect(p.status).toBe('rejected');
           return p.catch(function(error) {
-            shaka.test.Util.expectToEqualError(error, originalError);
+            Util.expectToEqualError(error, originalError);
           });
         }).catch(fail).then(done);
       });
 
       it('reject when disconnected remotely', function(done) {
         var p = method(123, 'abc');
-        shaka.test.Util.capturePromiseStatus(p);
+        Util.capturePromiseStatus(p);
 
         // Wait a tick for the Promise status to be set.
-        shaka.test.Util.delay(0.1).then(function() {
+        Util.delay(0.1).then(function() {
           expect(p.status).toBe('pending');
           fakeRemoteDisconnect();
 
           // Wait a tick for the Promise status to change.
-          return shaka.test.Util.delay(0.1);
+          return Util.delay(0.1);
         }).then(function() {
           expect(p.status).toBe('rejected');
           return p.catch(function(error) {
-            shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+            Util.expectToEqualError(error, new shaka.util.Error(
+                shaka.util.Error.Severity.RECOVERABLE,
                 shaka.util.Error.Category.PLAYER,
                 shaka.util.Error.Code.LOAD_INTERRUPTED));
           });
@@ -562,30 +726,76 @@ describe('CastSender', function() {
     });
   });
 
-  describe('destroy', function() {
+  describe('forceDisconnect', function() {
     it('disconnects and cancels all async operations', function(done) {
       sender.init();
       fakeReceiverAvailability(true);
       sender.cast(fakeInitState).then(function() {
         expect(sender.isCasting()).toBe(true);
+        expect(mockSession.leave).not.toHaveBeenCalled();
         expect(mockSession.stop).not.toHaveBeenCalled();
+        expect(mockSession.removeUpdateListener).not.toHaveBeenCalled();
+        expect(mockSession.removeMessageListener).not.toHaveBeenCalled();
 
         var method = sender.get('player', 'load');
         var p = method();
-        shaka.test.Util.capturePromiseStatus(p);
+        Util.capturePromiseStatus(p);
 
         // Wait a tick for the Promise status to be set.
-        return shaka.test.Util.delay(0.1).then(function() {
+        return Util.delay(0.1).then(function() {
           expect(p.status).toBe('pending');
-          sender.destroy().catch(fail);
+          sender.forceDisconnect();
+          expect(mockSession.leave).not.toHaveBeenCalled();
           expect(mockSession.stop).toHaveBeenCalled();
+          expect(mockSession.removeUpdateListener).toHaveBeenCalled();
+          expect(mockSession.removeMessageListener).toHaveBeenCalled();
 
           // Wait a tick for the Promise status to change.
-          return shaka.test.Util.delay(0.1);
+          return Util.delay(0.1);
         }).then(function() {
           expect(p.status).toBe('rejected');
           return p.catch(function(error) {
-            shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+            Util.expectToEqualError(error, new shaka.util.Error(
+                shaka.util.Error.Severity.RECOVERABLE,
+                shaka.util.Error.Category.PLAYER,
+                shaka.util.Error.Code.LOAD_INTERRUPTED));
+          });
+        });
+      }).catch(fail).then(done);
+      fakeSessionConnection();
+    });
+  });
+
+  describe('destroy', function() {
+    it('cancels all async operations', function(done) {
+      sender.init();
+      fakeReceiverAvailability(true);
+      sender.cast(fakeInitState).then(function() {
+        expect(sender.isCasting()).toBe(true);
+        expect(mockSession.stop).not.toHaveBeenCalled();
+        expect(mockSession.removeUpdateListener).not.toHaveBeenCalled();
+        expect(mockSession.removeMessageListener).not.toHaveBeenCalled();
+
+        var method = sender.get('player', 'load');
+        var p = method();
+        Util.capturePromiseStatus(p);
+
+        // Wait a tick for the Promise status to be set.
+        return Util.delay(0.1).then(function() {
+          expect(p.status).toBe('pending');
+          sender.destroy().catch(fail);
+          expect(mockSession.leave).not.toHaveBeenCalled();
+          expect(mockSession.stop).not.toHaveBeenCalled();
+          expect(mockSession.removeUpdateListener).toHaveBeenCalled();
+          expect(mockSession.removeMessageListener).toHaveBeenCalled();
+
+          // Wait a tick for the Promise status to change.
+          return Util.delay(0.1);
+        }).then(function() {
+          expect(p.status).toBe('rejected');
+          return p.catch(function(error) {
+            Util.expectToEqualError(error, new shaka.util.Error(
+                shaka.util.Error.Severity.RECOVERABLE,
                 shaka.util.Error.Category.PLAYER,
                 shaka.util.Error.Code.LOAD_INTERRUPTED));
           });
@@ -599,6 +809,7 @@ describe('CastSender', function() {
     return {
       isAvailable: true,
       SessionRequest: jasmine.createSpy('chrome.cast.SessionRequest'),
+      SessionStatus: {STOPPED: 'stopped'},
       ApiConfig: jasmine.createSpy('chrome.cast.ApiConfig'),
       initialize: jasmine.createSpy('chrome.cast.initialize'),
       requestSession: jasmine.createSpy('chrome.cast.requestSession')
@@ -611,7 +822,10 @@ describe('CastSender', function() {
       status: 'connected',
       receiver: { friendlyName: 'SomeDevice' },
       addUpdateListener: jasmine.createSpy('Session.addUpdateListener'),
+      removeUpdateListener: jasmine.createSpy('Session.removeUpdateListener'),
       addMessageListener: jasmine.createSpy('Session.addMessageListener'),
+      removeMessageListener: jasmine.createSpy('Session.removeMessageListener'),
+      leave: jasmine.createSpy('Session.leave'),
       sendMessage: jasmine.createSpy('Session.sendMessage'),
       stop: jasmine.createSpy('Session.stop')
     };
@@ -690,5 +904,15 @@ describe('CastSender', function() {
       mockSession = createMockCastSession();
       onJoinExistingSession(mockSession);
     }
+  }
+
+  /**
+   * @suppress {visibility}
+   */
+  function resetClassVariables() {
+    // @suppress visibility has function scope, so this is a mini-function that
+    // exists solely to suppress visibility for this call.
+    CastSender.hasReceivers_ = false;
+    CastSender.session_ = null;
   }
 });

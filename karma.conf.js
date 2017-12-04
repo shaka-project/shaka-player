@@ -18,7 +18,45 @@
 // Karma configuration
 // Install required modules by running "npm install"
 
+var fs = require('fs');
+var path = require('path');
+var rimraf = require('rimraf');
+var which = require('which');
+
 module.exports = function(config) {
+  var SHAKA_LOG_MAP = {
+    none: 0,
+    error: 1,
+    warning: 2,
+    info: 3,
+    debug: 4,
+    v1: 5,
+    v2: 6
+  };
+
+  var KARMA_LOG_MAP = {
+    'disable': config.LOG_DISABLE,
+    'error': config.LOG_ERROR,
+    'warn': config.LOG_WARN,
+    'info': config.LOG_INFO,
+    'debug':  config.LOG_DEBUG
+  };
+
+  // Find the settings JSON object in the command arguments
+  var args = process.argv;
+  var settingsIndex = args.indexOf('--settings')
+  var settings = settingsIndex >= 0 ? JSON.parse(args[settingsIndex + 1]) : {};
+
+  if (settings.browsers && settings.browsers.length == 1 &&
+      settings.browsers[0] == 'help') {
+    console.log('Available browsers:');
+    console.log('===================');
+    allUsableBrowserLaunchers(config).forEach(function(name) {
+      console.log('  ' + name);
+    });
+    process.exit(1);
+  }
+
   config.set({
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '.',
@@ -27,12 +65,10 @@ module.exports = function(config) {
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
     frameworks: [
       'jasmine-ajax', 'jasmine',
-      'sprintf-js',
     ],
 
     plugins: [
       'karma-*',  // default
-      frameworkPluginForModule('sprintf-js'),
     ],
 
     // list of files / patterns to load in the browser
@@ -44,7 +80,16 @@ module.exports = function(config) {
       'dist/deps.js',
       'shaka-player.uncompiled.js',
 
-      // requirejs next
+      // sprintf module next
+      // Since we don't use require to load the sprintf module, this must be
+      // loaded before requirejs is loaded!  Otherwise, it tries to use
+      // requirejs instead of loading directly into the window.
+      'node_modules/sprintf-js/src/sprintf.js',
+
+      // muxjs module next
+      'node_modules/mux.js/dist/mux.js',
+
+      // requirejs module next
       'node_modules/requirejs/require.js',
 
       // bootstrapping for the test suite
@@ -54,7 +99,7 @@ module.exports = function(config) {
       'test/test/util/*.js',
 
       // list of test assets next
-      'demo/assets.js',
+      'demo/common/assets.js',
 
       // unit tests last
       'test/**/*_unit.js',
@@ -68,11 +113,9 @@ module.exports = function(config) {
       {pattern: 'dist/shaka-player.compiled.js', included: false},
     ],
 
-    // NOTE: Do not use proxies for media! That sometimes results in truncated
-    // content and failed tests. The effect does not appear to be deterministic.
-    proxies: {
-      '/dist/': '/base/dist/',
-    },
+    // NOTE: Do not use proxies at all!  They cannot be used with the --hostname
+    // option, which is necessary for some of our lab testing.
+    proxies: {},
 
     preprocessors: {
       // Don't compute coverage over lib/debug/ or lib/polyfill/
@@ -85,141 +128,70 @@ module.exports = function(config) {
     browserDisconnectTimeout: 10 * 1000,  // 10s to reconnect
     browserDisconnectTolerance: 1,  // max of 1 disconnect is OK
     browserNoActivityTimeout: 5 * 60 * 1000,  // disconnect after 5m silence
-    captureTimeout: 1 * 60 * 1000,  // give up if startup takes 1m
+    captureTimeout: settings.capture_timeout,
     // https://support.saucelabs.com/customer/en/portal/articles/2440724
 
     client: {
-      // don't capture the client's console logs
-      captureConsole: false,
+      // Only capture the client's logs if the settings want logging.
+      captureConsole: !!settings.logging && settings.logging != 'none',
       // |args| must be an array; pass a key-value map as the sole client
       // argument.
-      args: [{}],
+      args: [{
+        // Run Player integration tests against external assets.
+        // Skipped by default.
+        external: !!settings.external,
+
+        // Run Player integration tests against DRM license servers.
+        // Skipped by default.
+        drm: !!settings.drm,
+
+        // Run quarantined tests which do not consistently pass.
+        // Skipped by default.
+        quarantined: !!settings.quarantined,
+
+        // Run Player integration tests with uncompiled code for debugging.
+        uncompiled: !!settings.uncompiled,
+
+        // Limit which tests to run. If undefined, all tests should run.
+        specFilter: settings.filter,
+
+        // Set what level of logs for the player to print.
+        logLevel: SHAKA_LOG_MAP[settings.logging]
+      }],
     },
 
-    // web server port
-    port: 9876,
+    // Specify the hostname to be used when capturing browsers.
+    hostname: settings.hostname,
 
-    // enable / disable colors in the output (reporters and logs)
-    colors: true,
+    // Specify the port where the server runs.
+    port: settings.port,
 
-    // level of logging
-    // possible values: config.LOG_DISABLE || config.LOG_ERROR ||
-    //                  config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-    logLevel: config.LOG_WARN,
+    // Set which browsers to run on. If this is null, then Karma will wait for
+    // an incoming connection.
+    browsers: settings.browsers,
 
-    // do not execute tests whenever any file changes
-    autoWatch: false,
+    // Enable / disable colors in the output (reporters and logs). Defaults
+    // to true.
+    colors: settings.colors,
 
-    // do a single run of the tests on captured browsers and then quit
-    singleRun: true,
+    // Set Karma's level of logging.
+    logLevel: KARMA_LOG_MAP[settings.log_level],
 
-    customLaunchers: {
-      // These entries are specific to Shaka team's internal test lab:
+    // Should Karma xecute tests whenever a file changes?
+    autoWatch: settings.auto_watch,
 
-      // OS X El Capitan {{{
-      WebDriver_Safari9: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4445},
-        browserName: 'safari',
-        pseudoActivityInterval: 20000
-      },
+    // Do a single run of the tests on captured browsers and then quit.
+    // Defaults to true.
+    singleRun: settings.single_run,
 
-      WebDriver_ChromeMac: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4445},
-        browserName: 'chrome',
-        pseudoActivityInterval: 20000
-      },
-      // }}}
+    // Set the time limit (ms) that should be used to identify slow tests.
+    reportSlowerThan: settings.report_slower_than,
 
-      // OS X Yosemite {{{
-      WebDriver_Safari8: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4444},
-        browserName: 'safari',
-        pseudoActivityInterval: 20000
-      },
-
-      WebDriver_FirefoxMac: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4444},
-        browserName: 'firefox',
-        pseudoActivityInterval: 20000
-      },
-
-      WebDriver_OperaMac: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4444},
-        // This is not obvious, but as of 2016-03-17, operadriver responds to
-        // browserName 'chrome', not 'opera'.  It still launches opera.  This
-        // should be solveable once operachromiumdriver releases sources.
-        // See:
-        //   https://github.com/operasoftware/operachromiumdriver/issues/8
-        //   http://stackoverflow.com/a/27387949
-        browserName: 'chrome',
-        pseudoActivityInterval: 20000
-      },
-      // }}}
-
-      // Windows {{{
-      WebDriver_IE11: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4446},
-        browserName: 'internet explorer',
-        pseudoActivityInterval: 20000
-      },
-
-      WebDriver_Edge: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4446},
-        browserName: 'MicrosoftEdge',
-        pseudoActivityInterval: 20000
-      },
-
-      WebDriver_ChromeWin: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4446},
-        browserName: 'chrome',
-        pseudoActivityInterval: 20000
-      },
-
-      WebDriver_FirefoxWin: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4446},
-        browserName: 'firefox',
-        pseudoActivityInterval: 20000
-      },
-      // }}}
-
-      // Linux {{{
-      WebDriver_ChromeLinux: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4447},
-        browserName: 'chrome',
-        pseudoActivityInterval: 20000
-      },
-
-      WebDriver_FirefoxLinux: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4447},
-        browserName: 'firefox',
-        pseudoActivityInterval: 20000
-      },
-      // }}}
-
-      // Android 6.0.1 {{{
-      // Note this is tethered to the Linux machine.
-      WebDriver_ChromeAndroid: {
-        base: 'WebDriver',
-        config: {hostname: 'localhost', port: 4447},
-        browserName: 'chrome',
-        pseudoActivityInterval: 20000,
-        chromeOptions: {'androidPackage': 'com.android.chrome'}
-      },
-      // }}}
-    },
+    // Force failure when running empty test-suites.
+    failOnEmptyTestSuite: true,
 
     coverageReporter: {
+      includeAllSources: true,
       reporters: [
         { type: 'text' },
       ],
@@ -230,109 +202,112 @@ module.exports = function(config) {
     },
   });
 
-  if (flagPresent('html-coverage-report')) {
-    // Wipe out any old coverage reports to avoid confusion.
-    var rimraf = require('rimraf');
-    rimraf.sync('coverage', {});  // Like rm -rf
-
-    config.set({
-      reporters: [ 'coverage', 'progress' ],
-      coverageReporter: {
-        reporters: [
-          { type: 'html', dir: 'coverage' },
-        ],
-      },
-    });
+  function getClientArgs() {
+    return config.client.args[0];
   }
 
-  if (!flagPresent('quick')) {
+  if (!settings.quick) {
     // If --quick is present, we don't serve integration tests.
-    var files = config.files;
-    files.push('test/**/*_integration.js');
+    config.files.push('test/**/*_integration.js');
     // We just modified the config in-place.  No need for config.set().
   }
 
-  var logLevel = getFlagValue('enable-logging');
-  if (logLevel !== null) {
-    if (logLevel === '')
-      logLevel = 3;  // INFO
+  var reporters = [];
+
+  if (settings.reporters) {
+    // Explicit reporters, use these.
+    reporters.push.apply(reporters, settings.reporters);
+  } else if (settings.logging && settings.logging != 'none') {
+    // With logging, default to 'spec', which makes logs easier to associate
+    // with individual tests.
+    reporters.push('spec');
+  } else {
+    // Without logging, default to 'progress'.
+    reporters.push('progress');
+  }
+
+  if (settings.html_coverage_report) {
+    // Wipe out any old coverage reports to avoid confusion.
+    rimraf.sync('coverage', {});  // Like rm -rf
 
     config.set({
-      reporters: ['spec'],
+      coverageReporter: {
+        reporters: [
+          { type: 'html', dir: 'coverage' },
+          { type: 'cobertura', dir: 'coverage', file: 'coverage.xml' },
+        ],
+      },
     });
-    // Setting |config.client| using config.set will remove the
-    // |config.client.args| member.
-    config.client.captureConsole = true;
-    setClientArg(config, 'logLevel', logLevel);
+
+    // The report requires the 'coverage' reporter to be added to the list.
+    reporters.push('coverage');
   }
 
-  if (flagPresent('external')) {
-    // Run Player integration tests against external assets.
-    // Skipped by default.
-    setClientArg(config, 'external', true);
-  }
+  config.set({reporters: reporters});
 
-  if (flagPresent('uncompiled')) {
-    // Run Player integration tests with uncompiled code for debugging.
-    setClientArg(config, 'uncompiled', true);
+  if (settings.random) {
+    // If --seed was specified use that value, else generate a seed so that the
+    // exact order can be reproduced if it catches an issue.
+    var seed = settings.seed == null ? new Date().getTime() : settings.seed;
+
+    // Run tests in a random order.
+    getClientArgs().random = true;
+    getClientArgs().seed = seed;
+
+    console.log("Using a random test order (--random) with --seed=" + seed);
   }
 };
 
-// Sets the value of an argument passed to the client.
-function setClientArg(config, name, value) {
-  config.client.args[0][name] = value;
-}
+// Determines which launchers and customLaunchers can be used and returns an
+// array of strings.
+function allUsableBrowserLaunchers(config) {
+  var browsers = [];
 
-// Find a custom command-line flag that has a value (e.g. --option=12).
-// Returns:
-// * string value  --option=12
-// * empty string  --option= or --option
-// * null          not present
-function getFlagValue(name) {
-  var re = /^--([^=]+)(?:=(.*))?$/;
-  for (var i = 0; i < process.argv.length; i++) {
-    var match = re.exec(process.argv[i]);
-    if (match && match[1] == name) {
-      if (match[2] !== undefined)
-        return match[2];
-      else
-        return '';
-    }
+  // Load all launcher plugins.
+  // The format of the items in this list is something like:
+  // {
+  //   'launcher:foo1': ['type', Function],
+  //   'launcher:foo2': ['type', Function],
+  // }
+  // Where the launchers grouped together into one item were defined by a single
+  // plugin, and the Functions in the inner array are the constructors for those
+  // launchers.
+  var plugins = require('karma/lib/plugin').resolve(['karma-*-launcher']);
+  plugins.forEach(function(map) {
+    Object.keys(map).forEach(function(name) {
+      // Launchers should all start with 'launcher:', but occasionally we also
+      // see 'test' come up for some reason.
+      if (!name.startsWith('launcher:')) return;
+
+      var browserName = name.split(':')[1];
+      var pluginConstructor = map[name][1];
+
+      // Most launchers requiring configuration through customLaunchers have
+      // no DEFAULT_CMD.  Some launchers have DEFAULT_CMD, but not for this
+      // platform.  Finally, WebDriver has DEFAULT_CMD, but still requires
+      // configuration, so we simply blacklist it by name.
+      var DEFAULT_CMD = pluginConstructor.prototype.DEFAULT_CMD;
+      if (!DEFAULT_CMD || !DEFAULT_CMD[process.platform]) return;
+      if (browserName == 'WebDriver') return;
+
+      // Now that we've filtered out the browsers that can't be launched without
+      // custom config or that can't be launched on this platform, we filter out
+      // the browsers you don't have installed.
+      var ENV_CMD = pluginConstructor.prototype.ENV_CMD;
+      var browserPath = process.env[ENV_CMD] || DEFAULT_CMD[process.platform];
+
+      if (!fs.existsSync(browserPath) &&
+          !which.sync(browserPath, {nothrow: true})) return;
+
+      browsers.push(browserName);
+    });
+  });
+
+  // Once we've found the names of all the standard launchers, add to that list
+  // the names of any custom launcher configurations.
+  if (config.customLaunchers) {
+    browsers.push.apply(browsers, Object.keys(config.customLaunchers));
   }
 
-  return null;
-}
-
-// Find custom command-line flags.
-function flagPresent(name) {
-  return getFlagValue(name) !== null;
-}
-
-// Construct framework plugins on-the-fly for arbitrary node modules.
-// A call to this must be placed in the config in the 'plugins' array,
-// and the module name must be added to the config in the 'frameworks' array.
-function frameworkPluginForModule(name) {
-  // The framework injects files into the client which runs the tests.
-  var framework = function(files) {
-    // Locate the main file for the node module.
-    var path = require('path');
-    var mainFile = path.resolve(require.resolve(name));
-
-    // Add a file entry to the list of files to be served.
-    // This follows the same syntax as above in config.set({files: ...}).
-    files.unshift({
-      pattern: mainFile, included: true, served: true, watched: false
-    });
-  };
-
-  // The framework factory function takes one argument, which is the list of
-  // files from the karma config.
-  framework.$inject = ['config.files'];
-
-  // This is the plugin interface to register a new framework.  Adding this to
-  // the list of plugins makes the named module available as a framework.  That
-  // framework then injects the module into the client.
-  var obj = {};
-  obj['framework:' + name] = ['factory', framework];
-  return obj;
+  return browsers;
 }

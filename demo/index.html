@@ -14,11 +14,11 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="description" content="Shaka Player Demo">
-    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1, maximum-scale=1">
+    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#ffffff">
 
@@ -26,36 +26,68 @@
 
     <title>Shaka Player Demo</title>
 
+    <link rel="manifest" href="app_manifest.json">
     <link rel="icon" href="favicon.ico">
     <link rel="stylesheet" href="demo.css">
-    <link rel="stylesheet" href="controls.css">
+    <link rel="stylesheet" href="common/controls.css">
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
-    <script src="//www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
-    <script src="load.js"></script>
-    <script src="assets.js"></script>
-    <script src="demo_utils.js"></script>
-    <script src="main.js"></script>
-    <script src="asset_section.js"></script>
-    <script src="configuration_section.js"></script>
-    <script src="info_section.js"></script>
-    <script src="log_section.js"></script>
-    <script src="offline_section.js"></script>
-    <script src="controls.js"></script>
+    <script defer src="//www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
+    <script defer src="../node_modules/mux.js/dist/mux.js"></script>
+
+    <script>
+COMPILED_JS = [
+  // The compiled library.
+  '../dist/shaka-player.compiled.js',
+  // The compiled demo.
+  '../dist/demo.compiled.js'
+];
+COMPILED_DEBUG_JS = [
+  // The compiled library, debug mode.
+  '../dist/shaka-player.compiled.debug.js',
+  // The compiled demo.
+  '../dist/demo.compiled.debug.js'
+];
+UNCOMPILED_JS = [
+  // Bootstrap the Shaka Player library through the Closure library.
+  '../third_party/closure/goog/base.js',
+  '../dist/deps.js',
+  // This file contains goog.require calls for all exported library classes.
+  '../shaka-player.uncompiled.js',
+  // These are the individual parts of the demo app.
+  'common/assets.js',
+  'common/controls.js',
+  'common/demo_utils.js',
+  'main.js',
+  'asset_section.js',
+  'configuration_section.js',
+  'info_section.js',
+  'log_section.js',
+  'offline_section.js'
+];
+    </script>
+
+    <!-- Load the compiled or uncompiled version of the code. -->
+    <script defer src="load.js"></script>
   </head>
   <body>
     <div id="container">
       <h1>Shaka Player <span id="version"></span></h1>
 
       <div class="input">
+        <p id="compiled_links">
+          <a href="#" id="uncompiled_link">uncompiled</a> |
+          <a href="#" id="debug_compiled_link">compiled (debug)</a> |
+          <a href="#" id="compiled_link">compiled (release)</a>
+        </p>
         <p>This is a demo of Google's Shaka Player, a JavaScript library for
            adaptive video streaming.</p>
 
         <p>Choose an asset and tap <strong>Load</strong>.
-           (On Android, you'll also need to press the play button on the
+           (On Android, you may also need to press the play button on the
             video.)</p>
 
         <p class="links">
@@ -78,6 +110,10 @@
             <label for="licenseServerInput">Custom license server:</label>
             <input id="licenseServerInput" type="text" class="flex-grow">
           </div>
+          <div class="flex">
+            <label for="certificateInput">Custom license certificate URL:</label>
+            <input id="certificateInput" type="text" class="flex-grow">
+          </div>
         </div>
 
         <div>
@@ -87,12 +123,10 @@
 
       <div id="errorDisplay">
         <div id="errorDisplayCloseButton">x</div>
-        <div id="errorDisplayText"></div>
+        <a id="errorDisplayLink" href="#"></a>
       </div>
       <div id="videoContainer" class="overlay-parent">
-        <video id="video"
-               poster="//shaka-player-demo.appspot.com/assets/poster.jpg"
-               autoplay></video>
+        <video id="video" autoplay></video>
         <div id="giantPlayButtonContainer" class="overlay">
           <button id="giantPlayButton" class="material-icons">play_arrow</button>
         </div>
@@ -105,11 +139,13 @@
         <div id="castReceiverName" class="overlay"></div>
         <div id="controlsContainer" class="overlay"><div id="controls">
           <button id="playPauseButton" class="material-icons">play_arrow</button>
+          <label for="seekBar" class="for-screen-readers">seek</label>
           <input id="seekBar" type="range" step="any" min="0" max="1" value="0">
           <button id="rewindButton" class="material-icons">fast_rewind</button>
           <div id="currentTime">0:00</div>
           <button id="fastForwardButton" class="material-icons">fast_forward</button>
           <button id="muteButton" class="material-icons">volume_up</button>
+          <label for="volumeBar" class="for-screen-readers">volume</label>
           <input id="volumeBar" type="range" step="any" min="0" max="1" value="0">
           <button id="castButton" class="material-icons">cast</button>
           <button id="captionButton" class="material-icons">closed_caption</button>
@@ -133,6 +169,10 @@
           <input id="preferredTextLanguage" class="flex-grow" type="text">
         </div>
         <div>
+          <label for="showNative">Show native browser controls:</label>
+          <input id="showNative" type="checkbox">
+        </div>
+        <div>
           <label for="showTrickPlay">Show trick play controls:</label>
           <input id="showTrickPlay" type="checkbox">
         </div>
@@ -141,21 +181,56 @@
           <input id="enableAdaptation" type="checkbox" checked>
         </div>
         <div>
+          <label for="enableLoadOnRefresh">Auto-load on page refresh:</label>
+          <input id="enableLoadOnRefresh" type="checkbox">
+        </div>
+        <div>
           <label for="logToScreen">Log to the screen:</label>
           <input id="logToScreen" type="checkbox">
         </div>
+        <div>
+          <label for="smallGapLimit">Maximum small gap size:</label>
+          <input id="smallGapLimit" class="flex-grow" type="text">
+        </div>
+        <div>
+          <label for="jumpLargeGaps">Jump large gaps:</label>
+          <input id="jumpLargeGaps" type="checkbox">
+        </div>
+        <div id="logLevelListDiv" hidden>
+          <label for="logLevelList">Log Level:</label>
+          <select id="logLevelList" class="flex-grow">
+            <option value="info">Info</option>
+            <option value="debug">Debug</option>
+            <option value="v">Verbose</option>
+            <option value="vv">Very Verbose</option>
+          </select>
+        </div>
+        <div>
+          <label for="drmSettingsVideoRobustness">Video Robustness:</label>
+          <input id="drmSettingsVideoRobustness" type="text" class="flex-grow" list="robustnessSuggestions">
+        </div>
+        <div>
+          <label for="drmSettingsAudioRobustness">Audio Robustness:</label>
+          <input id="drmSettingsAudioRobustness" type="text" class="flex-grow" list="robustnessSuggestions">
+        </div>
+	<datalist id="robustnessSuggestions"></datalist>
       </details>
 
       <details class="input">
         <summary>Info</summary>
         <div class="flex">
-          <label for="videoTracks">Video tracks:</label>
-          <select id="videoTracks" class="flex-grow"></select>
+          <label for="audioLanguages">Audio languages:</label>
+          <select id="audioLanguages" class="flex-grow"></select>
         </div>
 
         <div class="flex">
-          <label for="audioTracks">Audio tracks:</label>
-          <select id="audioTracks" class="flex-grow"></select>
+          <label for="variantTracks">Video+audio track combinations:</label>
+          <select id="variantTracks" class="flex-grow"></select>
+        </div>
+
+        <div class="flex">
+          <label for="textLanguages">Text languages:</label>
+          <select id="textLanguages" class="flex-grow"></select>
         </div>
 
         <div class="flex">
@@ -164,12 +239,12 @@
         </div>
 
         <div>
-          <label for="videoResDebug">Active resolution:</label>
+          <span class="label">Active resolution:</span>
           <span id="videoResDebug"></span>
         </div>
 
         <div>
-          <label for="bufferedDebug">Buffered:</label>
+          <span class="label">Buffered:</span>
           <span id="bufferedDebug"></span>
         </div>
       </details>
@@ -177,10 +252,11 @@
       <details id="offlineSection" class="input">
         <summary>Offline</summary>
         <div>
-          <button id="storeDelete">Store</button>
+          <button id="storeDeleteButton">Store</button>
+          <span id="storeDeleteHelpText"></span>
         </div>
         <div id="progressDiv">
-          <label for="progress">Progress:</label>
+          <span class="label">Progress:</span>
           <span id="progress">0</span>%
         </div>
         <div id="offlineNameDiv">

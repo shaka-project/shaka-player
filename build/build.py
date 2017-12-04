@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 #
 # Copyright 2016 Google Inc.  All Rights Reserved.
 #
@@ -39,46 +39,60 @@ Examples:
   build.py --name custom +@manifests +@networking +../my_plugin.js
 """
 
+import logging
 import os
 import re
-import shutil
-import subprocess
 import sys
 
 import shakaBuildHelpers
 
 
-closure_opts = [
+common_closure_opts = [
     '--language_in', 'ECMASCRIPT5',
     '--language_out', 'ECMASCRIPT3',
 
     '--jscomp_error=*',
 
-    # 'deprecatedAnnotations' controls complains about @expose, but the new
-    # @nocollapse annotation does not do the same job for properties.
-    # So since we can't use the new annotations, we have to ignore complaints
-    # about the old one.
-    '--jscomp_off=deprecatedAnnotations',
+    # Analyzer checks require explicit nullability, which is a pain.
+    '--jscomp_off=analyzerChecksInternal',
 
     '--extra_annotation_name=listens',
     '--extra_annotation_name=exportDoc',
+    '--extra_annotation_name=exportInterface',
 
     '--conformance_configs',
     ('%s/build/conformance.textproto' %
      shakaBuildHelpers.cygwin_safe_path(shakaBuildHelpers.get_source_base())),
 
-    '-O', 'ADVANCED',
     '--generate_exports',
-    ('--output_wrapper_file=%s/build/wrapper.template.js' %
-     shakaBuildHelpers.cygwin_safe_path(shakaBuildHelpers.get_source_base())),
-
+]
+common_closure_defines = [
     '-D', 'COMPILED=true',
-    '-D', 'goog.DEBUG=false',
     '-D', 'goog.STRICT_MODE_COMPATIBLE=true',
     '-D', 'goog.ENABLE_DEBUG_LOADER=false',
+]
+debug_closure_opts = [
+    # Don't use a wrapper script in debug mode so all the internals are visible
+    # on the global object.
+    '-O', 'SIMPLE',
+]
+debug_closure_defines = [
+    '-D', 'goog.DEBUG=true',
+    '-D', 'goog.asserts.ENABLE_ASSERTS=true',
+    '-D', 'shaka.log.MAX_LOG_LEVEL=4',  # shaka.log.Level.DEBUG
+    '-D', 'shaka.Player.version="%s-debug"' % (
+          shakaBuildHelpers.calculate_version()),
+]
+release_closure_opts = [
+    ('--output_wrapper_file=%s/build/wrapper.template.js' %
+     shakaBuildHelpers.cygwin_safe_path(shakaBuildHelpers.get_source_base())),
+    '-O', 'ADVANCED',
+]
+release_closure_defines = [
+    '-D', 'goog.DEBUG=false',
     '-D', 'goog.asserts.ENABLE_ASSERTS=false',
     '-D', 'shaka.log.MAX_LOG_LEVEL=0',
-    '-D', 'GIT_VERSION="%s"' % shakaBuildHelpers.calculate_version()
+    '-D', 'shaka.Player.version="%s"' % shakaBuildHelpers.calculate_version(),
 ]
 
 
@@ -112,14 +126,14 @@ class Build(object):
     build_path = os.path.join(source_base, 'build', 'types', name)
     if (os.path.isfile(local_path) and os.path.isfile(build_path)
         and local_path != build_path):
-      print >> sys.stderr, 'Build file "%s" is ambiguous' % name
+      logging.error('Build file "%s" is ambiguous', name)
       return None
     elif os.path.isfile(local_path):
       return local_path
     elif os.path.isfile(build_path):
       return build_path
     else:
-      print >> sys.stderr, 'Build file not found: ' + name
+      logging.error('Build file not found: %s', name)
       return None
 
   def _combine(self, other):
@@ -147,7 +161,7 @@ class Build(object):
     core_build.parse_build(['+@core'], os.getcwd())
     core_files = core_build.include
     if self.exclude & core_files:
-      print >> sys.stderr, 'Cannot exclude files from core'
+      logging.error('Cannot exclude files from core')
     self.include |= core_files
 
   def parse_build(self, lines, root):
@@ -181,7 +195,7 @@ class Build(object):
         is_neg = True
         line = line[1:].strip()
       else:
-        print >> sys.stderr, 'Operation (+/-) required'
+        logging.error('Operation (+/-) required')
         return False
 
       if line[0] == '@':
@@ -206,7 +220,7 @@ class Build(object):
         if not os.path.isabs(line):
           line = os.path.abspath(os.path.join(root, line))
         if not os.path.isfile(line):
-          print >> sys.stderr, 'Unable to find file ' + line
+          logging.error('Unable to find file: %s', line)
           return False
 
         if is_neg:
@@ -218,11 +232,11 @@ class Build(object):
 
     return True
 
-  def build_raw(self, extra_opts):
+  def build_raw(self, closure_opts):
     """Builds the files in |self.include| using the given extra Closure options.
 
     Args:
-      extra_opts: An array of extra options to give to Closure.
+      closure_opts: An array of options to give to Closure.
 
     Returns:
       True on success; False on failure.
@@ -233,21 +247,45 @@ class Build(object):
     files = [shakaBuildHelpers.cygwin_safe_path(f) for f in self.include]
     files.sort()
 
-    try:
-      cmd_line = ['java', '-jar', jar] + closure_opts + extra_opts + files
-      shakaBuildHelpers.print_cmd_line(cmd_line)
-      subprocess.check_call(cmd_line)
-      return True
-    except subprocess.CalledProcessError:
-      print >> sys.stderr, 'Build failed'
+    cmd_line = ['java', '-jar', jar] + closure_opts + files
+    if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
+      logging.error('Build failed')
       return False
 
-  def build_library(self, name, rebuild):
+    return True
+
+  def generate_externs(self, name):
+    """Generates externs for the files in |self.include|.
+
+    Args:
+      name: The name of the build.
+
+    Returns:
+      True on success; False on failure.
+    """
+    files = [shakaBuildHelpers.cygwin_safe_path(f) for f in self.include]
+
+    extern_generator = shakaBuildHelpers.cygwin_safe_path(os.path.join(
+        shakaBuildHelpers.get_source_base(), 'build', 'generateExterns.js'))
+
+    output = shakaBuildHelpers.cygwin_safe_path(os.path.join(
+        shakaBuildHelpers.get_source_base(), 'dist',
+        'shaka-player.' + name + '.externs.js'))
+
+    cmd_line = ['node', extern_generator, '--output', output] + files
+    if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
+      logging.error('Externs generation failed')
+      return False
+
+    return True
+
+  def build_library(self, name, rebuild, is_debug):
     """Builds Shaka Player using the files in |self.include|.
 
     Args:
       name: The name of the build.
       rebuild: True to rebuild, False to ignore if no changes are detected.
+      is_debug: True to compile for debugging, false for release.
 
     Returns:
       True on success; False on failure.
@@ -258,47 +296,185 @@ class Build(object):
     # Although Windows supports both, the source mapping will not work.  So
     # use Linux-style paths for arguments.
     source_base = shakaBuildHelpers.get_source_base().replace('\\', '/')
+    if is_debug:
+      name += '.debug'
 
-    result_prefix = shakaBuildHelpers.cygwin_safe_path(
-        os.path.join(source_base, 'dist', 'shaka-player.' + name))
-    result_file = result_prefix + '.js'
-    result_debug = result_prefix + '.debug.js'
-    result_map = result_prefix + '.debug.map'
+    result_file, result_map = compute_output_files('shaka-player.' + name)
 
-    # Detect changes to the library and only build if changes have been made.
-    if not rebuild and os.path.isfile(result_file):
-      build_time = os.path.getmtime(result_file)
-      complete_build = Build()
-      if complete_build.parse_build(['+@complete'], os.getcwd()):
-        complete_build.add_core()
-        # Get a list of files modified since the build file was.
-        edited_files = [f for f in complete_build.include
-                        if os.path.getmtime(f) > build_time]
-        if not edited_files:
-          print 'No changes detected, not building.  Use --force to override.'
-          return True
+    # Don't build if we don't have to.
+    if not rebuild and not self.should_build(result_file):
+      return True
 
-    opts = ['--create_source_map', result_map, '--js_output_file', result_debug,
-            '--source_map_location_mapping', source_base + '|..',
-            '--dependency_mode=LOOSE', '--js=shaka-player.uncompiled.js']
-    if not self.build_raw(opts):
+    closure_opts = common_closure_opts + common_closure_defines
+    if is_debug:
+      closure_opts += debug_closure_opts + debug_closure_defines
+    else:
+      closure_opts += release_closure_opts + release_closure_defines
+
+    closure_opts += [
+        '--create_source_map', result_map, '--js_output_file', result_file,
+        '--source_map_location_mapping', source_base + '|..'
+    ]
+    if not self.build_raw(closure_opts):
       return False
 
-    shutil.copyfile(result_debug, result_file)
+    self.add_source_map(result_file, result_map)
 
+    if not self.generate_externs(name):
+      return False
+
+    return True
+
+  def add_source_map(self, result_file, result_map):
     # Add a special source-mapping comment so that Chrome and Firefox can map
     # line and character numbers from the compiled library back to the original
     # source locations.
-    with open(result_debug, 'a') as f:
-      f.write('//# sourceMappingURL=shaka-player.' + name + '.debug.map')
+    with open(result_file, 'a') as f:
+      f.write('//# sourceMappingURL=%s' % os.path.basename(result_map))
 
+  def should_build(self, result_file):
+    if not os.path.isfile(result_file):
+      # Nothing built, so we should definitely build.
+      return True
+
+    # Detect changes to the set of files that we intend to build.
+    build_time = os.path.getmtime(result_file)
+    # Get a list of files modified since the result file was created.
+    edited_files = [f for f in self.include if os.path.getmtime(f) > build_time]
+    if edited_files:
+      # Some input files have changed, so we should build again.
+      return True
+
+    logging.warning('No changes detected, not building.  Use --force '
+                    'to override.')
+    return False
+
+
+def compute_output_files(base_name):
+  source_base = shakaBuildHelpers.get_source_base().replace('\\', '/')
+  prefix = shakaBuildHelpers.cygwin_safe_path(
+      os.path.join(source_base, 'dist', base_name))
+  js_path = prefix + '.js'
+  map_path = prefix + '.map'
+  return js_path, map_path
+
+
+def compile_demo(rebuild, is_debug):
+  """Compile the demo application.
+
+  Args:
+    rebuild: True to rebuild, False to ignore if no changes are detected.
+    is_debug: True to compile for debugging, false for release.
+
+  Returns:
+    True on success, False on failure.
+  """
+  logging.info('Compiling the demo app (%s)...',
+               'debug' if is_debug else 'release')
+
+  match = re.compile(r'.*\.js$')
+  base = shakaBuildHelpers.get_source_base()
+  def get(*args):
+    return shakaBuildHelpers.get_all_files(os.path.join(base, *args), match)
+
+  files = set(get('demo') + get('externs')) - set(get('demo/cast_receiver'))
+  # Make sure we don't compile in load.js, which will be used to bootstrap
+  # everything else.  If we build that into the output, we will get an infinite
+  # loop of scripts adding themselves.
+  files.remove(os.path.join(base, 'demo', 'load.js'))
+  # Remove service_worker.js as well.  This executes in a different context.
+  files.remove(os.path.join(base, 'demo', 'service_worker.js'))
+  # Add in the generated externs, so that the demo compilation knows the
+  # definitions of the library APIs.
+  extern_name = ('shaka-player.compiled.debug.externs.js' if is_debug
+                 else 'shaka-player.compiled.externs.js')
+  files.add(os.path.join(base, 'dist', extern_name))
+
+  demo_build = Build(files)
+
+  name = 'demo.compiled' + ('.debug' if is_debug else '')
+  result_file, result_map = compute_output_files(name)
+
+  # Don't build if we don't have to.
+  if not rebuild and not demo_build.should_build(result_file):
     return True
+
+  source_base = shakaBuildHelpers.get_source_base().replace('\\', '/')
+  closure_opts = common_closure_opts + debug_closure_opts
+  closure_opts += [
+      # Ignore missing goog.require since we assume the whole library is
+      # already included.
+      '--jscomp_off=missingRequire', '--jscomp_off=strictMissingRequire',
+      '--create_source_map', result_map, '--js_output_file', result_file,
+      '--source_map_location_mapping', source_base + '|..',
+      '-D', 'COMPILED=true',
+  ]
+
+  if not demo_build.build_raw(closure_opts):
+    return False
+
+  demo_build.add_source_map(result_file, result_map)
+  return True
+
+
+def compile_receiver(rebuild, is_debug):
+  """Compile the cast receiver application.
+
+  Args:
+    rebuild: True to rebuild, False to ignore if no changes are detected.
+    is_debug: True to compile for debugging, false for release.
+
+  Returns:
+    True on success, False on failure.
+  """
+  logging.info('Compiling the receiver app (%s)...',
+               'debug' if is_debug else 'release')
+
+  match = re.compile(r'.*\.js$')
+  base = shakaBuildHelpers.get_source_base()
+  def get(*args):
+    return shakaBuildHelpers.get_all_files(os.path.join(base, *args), match)
+
+  files = set(get('demo/common') + get('demo/cast_receiver') + get('externs'))
+  # Add in the generated externs, so that the receiver compilation knows the
+  # definitions of the library APIs.
+  extern_name = ('shaka-player.compiled.debug.externs.js' if is_debug
+                 else 'shaka-player.compiled.externs.js')
+  files.add(os.path.join(base, 'dist', extern_name))
+
+  receiver_build = Build(files)
+
+  name = 'receiver.compiled' + ('.debug' if is_debug else '')
+  result_file, result_map = compute_output_files(name)
+
+  # Don't build if we don't have to.
+  if not rebuild and not receiver_build.should_build(result_file):
+    return True
+
+  source_base = shakaBuildHelpers.get_source_base().replace('\\', '/')
+  closure_opts = common_closure_opts + debug_closure_opts
+  closure_opts += [
+      # Ignore missing goog.require since we assume the whole library is
+      # already included.
+      '--jscomp_off=missingRequire', '--jscomp_off=strictMissingRequire',
+      '--create_source_map', result_map, '--js_output_file', result_file,
+      '--source_map_location_mapping', source_base + '|..',
+      '-D', 'COMPILED=true',
+  ]
+
+  if not receiver_build.build_raw(closure_opts):
+    return False
+
+  receiver_build.add_source_map(result_file, result_map)
+  return True
 
 
 def usage():
   print 'Usage:', sys.argv[0], """[options] [commands]
 
 Options:
+ --debug          : Make a debug compiled file (e.g. don't rename internals).
+ --release        : Make a release compiled file (default).
  --force          : Build the library even if no changes are detected.
  --help           : Prints this help page.
  --name           : Sets the name of the build, uses 'compiled' if not given.
@@ -310,21 +486,29 @@ def main(args):
   name = 'compiled'
   lines = []
   rebuild = False
+  is_debug = False
   i = 0
   while i < len(args):
     if args[i] == '--name':
       i += 1
       if i == len(args):
-        print >> sys.stderr, '--name requires an argument'
+        logging.error('--name requires an argument')
         return 1
       name = args[i]
+    elif args[i] == '--debug':
+      is_debug = True
+    elif args[i] == '--release':
+      if is_debug:
+        logging.error('Cannot specify both --debug and --release')
+        return 1
+      # No-op since already the default.
     elif args[i] == '--force':
       rebuild = True
     elif args[i] == '--help':
       usage()
       return 0
     elif args[i].startswith('--'):
-      print >> sys.stderr, 'Unknown option', args[i]
+      logging.error('Unknown option: %s', args[i])
       usage()
       return 1
     else:
@@ -334,12 +518,26 @@ def main(args):
   if not lines:
     lines = ['+@complete']
 
-  print 'Compiling the library...'
+  logging.info('Compiling the library (%s)...',
+               'debug' if is_debug else 'release')
   custom_build = Build()
   if not custom_build.parse_build(lines, os.getcwd()):
     return 1
-  return 0 if custom_build.build_library(name, rebuild) else 1
+
+  # Update node modules if needed.
+  if not shakaBuildHelpers.update_node_modules():
+    return 1
+
+  if not custom_build.build_library(name, rebuild, is_debug):
+    return 1
+
+  if not compile_demo(rebuild, is_debug):
+    return 1
+
+  if not compile_receiver(rebuild, is_debug):
+    return 1
+
+  return 0
 
 if __name__ == '__main__':
   shakaBuildHelpers.run_main(main)
-

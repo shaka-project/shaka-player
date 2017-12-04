@@ -15,6 +15,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Shaka Player demo, main section.
+ *
+ * @suppress {visibility} to work around compiler errors until we can
+ *   refactor the demo into classes that talk via public method.  TODO
+ */
+
 
 /** @suppress {duplicate} */
 var shakaDemo = shakaDemo || {};
@@ -54,23 +61,25 @@ shakaDemo.updateButtons_ = function(canHide) {
   document.getElementById('offlineNameDiv').style.display =
       option.asset ? 'none' : 'block';
 
-  var button = document.getElementById('storeDelete');
+  var button = document.getElementById('storeDeleteButton');
   button.disabled = (inProgress || !supportsDrm || option.isStored);
   button.innerText = storedContent ? 'Delete' : 'Store';
+  var helpText = document.getElementById('storeDeleteHelpText');
   if (inProgress)
-    button.title = 'There is already an operation in progress';
+    helpText.textContent = 'Operation is in progress...';
   else if (!supportsDrm)
-    button.title = 'This browser does not support persistent licenses';
+    helpText.textContent = 'This browser does not support persistent licenses.';
   else if (button.disabled)
-    button.title = 'Selected asset is already stored offline';
+    helpText.textContent = 'The asset is stored offline. ' +
+        'Checkout the "Offline" section in the "Asset" list';
   else
-    button.title = '';
+    helpText.textContent = '';
 };
 
 
 /** @private */
 shakaDemo.setupOffline_ = function() {
-  document.getElementById('storeDelete')
+  document.getElementById('storeDeleteButton')
       .addEventListener('click', shakaDemo.storeDeleteAsset_);
   document.getElementById('assetList')
       .addEventListener('change', shakaDemo.updateButtons_.bind(null, true));
@@ -143,7 +152,7 @@ shakaDemo.storeDeleteAsset_ = function() {
 
   progress.textContent = '0';
 
-  var storage = new shaka.offline.Storage(shakaDemo.player_);
+  var storage = new shaka.offline.Storage(shakaDemo.localPlayer_);
   storage.configure(/** @type {shakaExtern.OfflineConfiguration} */ ({
     progressCallback: function(data, percent) {
       progress.textContent = (percent * 100).toFixed(2);
@@ -159,17 +168,26 @@ shakaDemo.storeDeleteAsset_ = function() {
         if (option.asset && option.asset.manifestUri == originalManifestUri)
           option.isStored = false;
       }
-      shakaDemo.refreshAssetList_();
+      return shakaDemo.refreshAssetList_();
     });
   } else {
     var asset = shakaDemo.preparePlayer_(option.asset);
     var nameField = document.getElementById('offlineName').value;
-    var assetName = asset.name ? asset.name + ' (offline)' : null;
+    var assetName = asset.name ? '[OFFLINE] ' + asset.name : null;
     var metadata = {name: assetName || nameField || asset.manifestUri};
     p = storage.store(asset.manifestUri, metadata).then(function() {
-      shakaDemo.refreshAssetList_();
       if (option.asset)
         option.isStored = true;
+      return shakaDemo.refreshAssetList_().then(function() {
+        // Auto-select offline copy of asset after storing.
+        var group = shakaDemo.offlineOptGroup_;
+        for (var i = 0; i < group.childNodes.length; i++) {
+          var option = group.childNodes[i];
+          if (option.textContent == assetName) {
+            assetList.selectedIndex = option.index;
+          }
+        }
+      });
     });
   }
 
@@ -178,13 +196,16 @@ shakaDemo.storeDeleteAsset_ = function() {
     shakaDemo.onError_(error);
   }).then(function() {
     shakaDemo.offlineOperationInProgress_ = false;
-    shakaDemo.updateButtons_(false);
+    shakaDemo.updateButtons_(true /* canHide */);
     return storage.destroy();
   });
 };
 
 
-/** @private */
+/**
+ * @return {!Promise}
+ * @private
+ */
 shakaDemo.refreshAssetList_ = function() {
   // Remove all child elements.
   var group = shakaDemo.offlineOptGroup_;
@@ -192,7 +213,7 @@ shakaDemo.refreshAssetList_ = function() {
     group.removeChild(group.firstChild);
   }
 
-  shakaDemo.setupOfflineAssets_();
+  return shakaDemo.setupOfflineAssets_();
 };
 
 
@@ -201,6 +222,11 @@ shakaDemo.refreshAssetList_ = function() {
  * @private
  */
 shakaDemo.onCastStatusChange_ = function(connected) {
+  if (!shakaDemo.offlineOptGroup_) {
+    // No offline support.
+    return;
+  }
+
   // When we are casting, offline assets become unavailable.
   shakaDemo.offlineOptGroup_.disabled = connected;
 

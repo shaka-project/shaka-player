@@ -16,24 +16,37 @@
  */
 
 describe('CastReceiver', function() {
-  var CastReceiver;
-  var CastUtils;
+  /** @const */
+  var CastReceiver = shaka.cast.CastReceiver;
+  /** @const */
+  var CastUtils = shaka.cast.CastUtils;
+  /** @const */
+  var Util = shaka.test.Util;
 
-  var originalCast;
-  var originalUserAgent;
+  /** @const */
+  var originalCast = window['cast'];
+  /** @const */
+  var originalUserAgent = navigator.userAgent;
 
-  var mockReceiverManager;
+  /** @type {!shaka.test.FakeVideo} */
   var mockVideo;
-  var mockPlayer;
+  /** @type {!jasmine.Spy} */
   var mockAppDataCallback;
+  var mockPlayer;
+  var mockReceiverManager;
 
   var mockReceiverApi;
-  var mockMessageBus;
+  var mockShakaMessageBus;
+  var mockGenericMessageBus;
+  /** @type {!jasmine.Spy} */
+  var mockCanDisplayType;
 
   /** @type {shaka.cast.CastReceiver} */
   var receiver;
 
+  /** @type {boolean} */
   var isChrome;
+  /** @type {boolean} */
   var isChromecast;
 
   function checkChromeOrChromecast() {
@@ -52,14 +65,8 @@ describe('CastReceiver', function() {
     // Edge also has "Chrome/" in its user agent string.
     isChrome = navigator.userAgent.indexOf('Chrome/') >= 0 && !isEdge;
 
-    CastReceiver = shaka.cast.CastReceiver;
-    CastUtils = shaka.cast.CastUtils;
-
     // Don't do any more work here if the tests will not end up running.
     if (!isChromecast && !isChrome) return;
-
-    originalCast = window['cast'];
-    originalUserAgent = navigator.userAgent;
 
     // In uncompiled mode, there is a UA check for Chromecast in order to make
     // manual testing easier.  For these automated tests, we want to act as if
@@ -67,27 +74,38 @@ describe('CastReceiver', function() {
     // Since we can't write to window.navigator or navigator.userAgent, we use
     // Object.defineProperty.
     Object.defineProperty(window['navigator'],
-                          'userAgent', {value: 'CrKey'});
+                          'userAgent', {value: 'CrKey', configurable: true});
   });
 
   beforeEach(function() {
+    checkChromeOrChromecast();
+
     mockReceiverApi = createMockReceiverApi();
+    mockCanDisplayType = jasmine.createSpy('canDisplayType');
+    mockCanDisplayType.and.returnValue(false);
+
     // We're using quotes to access window.cast because the compiler
     // knows about lots of Cast-specific APIs we aren't mocking.  We
     // don't need this mock strictly type-checked.
-    window['cast'] = { receiver: mockReceiverApi };
+    window['cast'] = {
+      receiver: mockReceiverApi,
+      __platform__: { canDisplayType: mockCanDisplayType }
+    };
 
     mockReceiverManager = createMockReceiverManager();
-    mockMessageBus = createMockMessageBus();
-    mockVideo = createMockVideo();
+    mockShakaMessageBus = createMockMessageBus();
+    mockGenericMessageBus = createMockMessageBus();
+    mockVideo = new shaka.test.FakeVideo();
     mockPlayer = createMockPlayer();
     mockAppDataCallback = jasmine.createSpy('appDataCallback');
-
-    receiver = new CastReceiver(mockVideo, mockPlayer, mockAppDataCallback);
   });
 
   afterEach(function(done) {
-    receiver.destroy().catch(fail).then(done);
+    if (receiver) {
+      receiver.destroy().catch(fail).then(done);
+    } else {
+      done();
+    }
   });
 
   afterAll(function() {
@@ -101,29 +119,66 @@ describe('CastReceiver', function() {
   describe('constructor', function() {
     it('starts the receiver manager', function() {
       checkChromeOrChromecast();
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
       expect(mockReceiverManager.start).toHaveBeenCalled();
     });
 
     it('listens for video and player events', function() {
       checkChromeOrChromecast();
-      expect(Object.keys(mockVideo.listeners).length).toBeGreaterThan(0);
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
+      expect(Object.keys(mockVideo.on).length).toBeGreaterThan(0);
       expect(Object.keys(mockPlayer.listeners).length).toBeGreaterThan(0);
     });
 
-    it('limits streams to 1080p', function() {
+    it('limits streams to 1080p on Chromecast v1 and v2', function() {
       checkChromeOrChromecast();
+      // Simulate the canDisplayType reponse of Chromecast v1 or v2
+      mockCanDisplayType.and.callFake(function(type) {
+        var matches = /height=(\d+)/.exec(type);
+        var height = matches[1];
+        if (height && height > 1080) return false;
+        return true;
+      });
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
+      expect(mockCanDisplayType).toHaveBeenCalled();
       expect(mockPlayer.setMaxHardwareResolution).
           toHaveBeenCalledWith(1920, 1080);
     });
 
+    it('limits streams to 4k on Chromecast Ultra', function() {
+      checkChromeOrChromecast();
+      // Simulate the canDisplayType reponse of Chromecast Ultra
+      mockCanDisplayType.and.callFake(function(type) {
+        var matches = /height=(\d+)/.exec(type);
+        var height = matches[1];
+        if (height && height > 2160) return false;
+        return true;
+      });
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
+      expect(mockCanDisplayType).toHaveBeenCalled();
+      expect(mockPlayer.setMaxHardwareResolution).
+          toHaveBeenCalledWith(3840, 2160);
+    });
+
     it('does not start polling', function() {
       checkChromeOrChromecast();
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
       expect(mockPlayer.getConfiguration).not.toHaveBeenCalled();
-      expect(mockMessageBus.messages.length).toBe(0);
+      expect(mockShakaMessageBus.messages.length).toBe(0);
     });
   });
 
   describe('isConnected', function() {
+    beforeEach(function() {
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
+    });
+
     it('is true when there are senders', function() {
       checkChromeOrChromecast();
       expect(receiver.isConnected()).toBe(false);
@@ -139,10 +194,15 @@ describe('CastReceiver', function() {
   });
 
   describe('"caststatuschanged" event', function() {
+    beforeEach(function() {
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
+    });
+
     it('is triggered when senders connect or disconnect', function(done) {
       checkChromeOrChromecast();
       var listener = jasmine.createSpy('listener');
-      receiver.addEventListener('caststatuschanged', listener);
+      receiver.addEventListener('caststatuschanged', Util.spyFunc(listener));
 
       shaka.test.Util.delay(0.2).then(function() {
         expect(listener).not.toHaveBeenCalled();
@@ -161,45 +221,65 @@ describe('CastReceiver', function() {
     it('is triggered when idle state changes', function(done) {
       checkChromeOrChromecast();
       var listener = jasmine.createSpy('listener');
-      receiver.addEventListener('caststatuschanged', listener);
+      receiver.addEventListener('caststatuschanged', Util.spyFunc(listener));
 
       var fakeLoadingEvent = {type: 'loading'};
       var fakeUnloadingEvent = {type: 'unloading'};
       var fakeEndedEvent = {type: 'ended'};
+      var fakePlayingEvent = {type: 'playing'};
 
       shaka.test.Util.delay(0.2).then(function() {
         expect(listener).not.toHaveBeenCalled();
+        expect(receiver.isIdle()).toBe(true);
+
         mockPlayer.listeners['loading'](fakeLoadingEvent);
         return shaka.test.Util.delay(0.2);
       }).then(function() {
         expect(listener).toHaveBeenCalled();
+        expect(receiver.isIdle()).toBe(false);
         listener.calls.reset();
+
         mockPlayer.listeners['unloading'](fakeUnloadingEvent);
         return shaka.test.Util.delay(0.2);
       }).then(function() {
         expect(listener).toHaveBeenCalled();
+        expect(receiver.isIdle()).toBe(true);
         listener.calls.reset();
+
         mockVideo.ended = true;
-        mockVideo.listeners['ended'](fakeEndedEvent);
+        mockVideo.on['ended'](fakeEndedEvent);
         return shaka.test.Util.delay(5.2);  // There is a long delay for 'ended'
       }).then(function() {
         expect(listener).toHaveBeenCalled();
+        listener.calls.reset();
+        expect(receiver.isIdle()).toBe(true);
+
+        mockVideo.ended = false;
+        mockVideo.on['playing'](fakePlayingEvent);
+      }).then(function() {
+        expect(listener).toHaveBeenCalled();
+        expect(receiver.isIdle()).toBe(false);
       }).catch(fail).then(done);
     });
   });
 
   describe('local events', function() {
+    beforeEach(function() {
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
+    });
+
     it('trigger "update" and "event" messages', function() {
       checkChromeOrChromecast();
       fakeConnectedSenders(1);
 
       // No messages yet.
-      expect(mockMessageBus.messages).toEqual([]);
+      expect(mockShakaMessageBus.messages).toEqual([]);
       var fakeEvent = {type: 'timeupdate'};
-      mockVideo.listeners['timeupdate'](fakeEvent);
+      mockVideo.on['timeupdate'](fakeEvent);
 
       // There are now "update" and "event" messages, in that order.
-      expect(mockMessageBus.messages).toEqual([
+      expect(mockShakaMessageBus.messages).toEqual([
         {
           type: 'update',
           update: jasmine.any(Object)
@@ -214,11 +294,16 @@ describe('CastReceiver', function() {
   });
 
   describe('"init" message', function() {
-    var fakeInitState;
+    /** @const */
     var fakeConfig = {key: 'value'};
+    /** @const */
     var fakeAppData = {myFakeAppData: 1234};
+    var fakeInitState;
 
     beforeEach(function() {
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
+
       fakeInitState = {
         player: {
           configure: fakeConfig
@@ -235,15 +320,15 @@ describe('CastReceiver', function() {
 
     it('sets initial state', function(done) {
       checkChromeOrChromecast();
-      expect(mockVideo.loop).toBe(undefined);
-      expect(mockVideo.playbackRate).toBe(undefined);
+      expect(mockVideo.loop).toBe(false);
+      expect(mockVideo.playbackRate).toBe(1);
       expect(mockPlayer.configure).not.toHaveBeenCalled();
 
       fakeIncomingMessage({
         type: 'init',
         initState: fakeInitState,
         appData: fakeAppData
-      });
+      }, mockShakaMessageBus);
 
       // Initial Player state first:
       expect(mockPlayer.configure).toHaveBeenCalledWith(fakeConfig);
@@ -251,8 +336,8 @@ describe('CastReceiver', function() {
       expect(mockAppDataCallback).toHaveBeenCalledWith(fakeAppData);
       // Nothing else yet:
       expect(mockPlayer.setTextTrackVisibility).not.toHaveBeenCalled();
-      expect(mockVideo.loop).toBe(undefined);
-      expect(mockVideo.playbackRate).toBe(undefined);
+      expect(mockVideo.loop).toBe(false);
+      expect(mockVideo.playbackRate).toBe(1);
 
       // The rest is done async:
       shaka.test.Util.delay(0.1).then(function() {
@@ -273,15 +358,15 @@ describe('CastReceiver', function() {
 
       mockPlayer.getConfiguration.calls.reset();
 
-      expect(mockMessageBus.messages.length).toBe(0);
+      expect(mockShakaMessageBus.messages.length).toBe(0);
       fakeIncomingMessage({
         type: 'init',
         initState: fakeInitState,
         appData: fakeAppData
-      });
+      }, mockShakaMessageBus);
 
       expect(mockPlayer.getConfiguration).toHaveBeenCalled();
-      expect(mockMessageBus.messages).toContain(jasmine.objectContaining({
+      expect(mockShakaMessageBus.messages).toContain(jasmine.objectContaining({
         type: 'update',
         update: jasmine.objectContaining({
           player: jasmine.objectContaining({
@@ -289,6 +374,40 @@ describe('CastReceiver', function() {
           })
         })
       }));
+    });
+
+    it('doesn\'t poll live methods while loading a VOD', function() {
+      checkChromeOrChromecast();
+      mockPlayer.getConfiguration.and.returnValue({key: 'value'});
+      mockPlayer.isLive.and.returnValue(false);
+
+      fakeConnectedSenders(1);
+
+      expect(mockShakaMessageBus.messages.length).toBe(0);
+      fakeIncomingMessage({
+        type: 'init',
+        initState: fakeInitState,
+        appData: fakeAppData
+      }, mockShakaMessageBus);
+
+      expect(mockPlayer.getPlayheadTimeAsDate).not.toHaveBeenCalled();
+    });
+
+    it('does poll live methods while loading a livestream', function() {
+      checkChromeOrChromecast();
+      mockPlayer.getConfiguration.and.returnValue({key: 'value'});
+      mockPlayer.isLive.and.returnValue(true);
+
+      fakeConnectedSenders(1);
+
+      expect(mockShakaMessageBus.messages.length).toBe(0);
+      fakeIncomingMessage({
+        type: 'init',
+        initState: fakeInitState,
+        appData: fakeAppData
+      }, mockShakaMessageBus);
+
+      expect(mockPlayer.getPlayheadTimeAsDate).toHaveBeenCalled();
     });
 
     it('loads the manifest', function() {
@@ -301,7 +420,7 @@ describe('CastReceiver', function() {
         type: 'init',
         initState: fakeInitState,
         appData: fakeAppData
-      });
+      }, mockShakaMessageBus);
 
       expect(mockPlayer.load).toHaveBeenCalledWith('foo://bar', 12);
     });
@@ -309,21 +428,20 @@ describe('CastReceiver', function() {
     it('plays the video after loading', function(done) {
       checkChromeOrChromecast();
       fakeInitState.manifest = 'foo://bar';
-      // Autoplay has not been touched on the video yet.
-      expect(mockVideo.autoplay).toBe(undefined);
+      mockVideo.autoplay = true;
 
       fakeIncomingMessage({
         type: 'init',
         initState: fakeInitState,
         appData: fakeAppData
-      });
+      }, mockShakaMessageBus);
 
       // Video autoplay inhibited:
       expect(mockVideo.autoplay).toBe(false);
       shaka.test.Util.delay(0.1).then(function() {
         expect(mockVideo.play).toHaveBeenCalled();
         // Video autoplay restored:
-        expect(mockVideo.autoplay).toBe(undefined);
+        expect(mockVideo.autoplay).toBe(true);
       }).catch(fail).then(done);
     });
 
@@ -335,7 +453,7 @@ describe('CastReceiver', function() {
         type: 'init',
         initState: fakeInitState,
         appData: fakeAppData
-      });
+      }, mockShakaMessageBus);
 
       shaka.test.Util.delay(0.1).then(function() {
         // Nothing loaded or played:
@@ -355,6 +473,7 @@ describe('CastReceiver', function() {
       checkChromeOrChromecast();
       fakeInitState.manifest = 'foo://bar';
       var fakeError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.UNABLE_TO_GUESS_MANIFEST_TYPE);
       mockPlayer.load.and.returnValue(Promise.reject(fakeError));
@@ -367,7 +486,7 @@ describe('CastReceiver', function() {
         type: 'init',
         initState: fakeInitState,
         appData: fakeAppData
-      });
+      }, mockShakaMessageBus);
 
       shaka.test.Util.delay(0.1).then(function() {
         expect(mockPlayer.load).toHaveBeenCalled();
@@ -378,6 +497,11 @@ describe('CastReceiver', function() {
   });
 
   describe('"appData" message', function() {
+    beforeEach(function() {
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
+    });
+
     it('triggers the app data callback', function() {
       checkChromeOrChromecast();
       expect(mockAppDataCallback).not.toHaveBeenCalled();
@@ -386,22 +510,27 @@ describe('CastReceiver', function() {
       fakeIncomingMessage({
         type: 'appData',
         appData: fakeAppData
-      });
+      }, mockShakaMessageBus);
 
       expect(mockAppDataCallback).toHaveBeenCalledWith(fakeAppData);
     });
   });
 
   describe('"set" message', function() {
+    beforeEach(function() {
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
+    });
+
     it('sets local properties', function() {
       checkChromeOrChromecast();
-      expect(mockVideo.currentTime).toBe(undefined);
+      expect(mockVideo.currentTime).toBe(0);
       fakeIncomingMessage({
         type: 'set',
         targetName: 'video',
         property: 'currentTime',
         value: 12
-      });
+      }, mockShakaMessageBus);
       expect(mockVideo.currentTime).toEqual(12);
 
       expect(mockPlayer['arbitraryName']).toBe(undefined);
@@ -410,14 +539,14 @@ describe('CastReceiver', function() {
         targetName: 'player',
         property: 'arbitraryName',
         value: 'arbitraryValue'
-      });
+      }, mockShakaMessageBus);
       expect(mockPlayer['arbitraryName']).toEqual('arbitraryValue');
     });
 
     it('routes volume properties to the receiver manager', function() {
       checkChromeOrChromecast();
-      expect(mockVideo.volume).toBe(undefined);
-      expect(mockVideo.muted).toBe(undefined);
+      expect(mockVideo.volume).toBe(1);
+      expect(mockVideo.muted).toBe(false);
       expect(mockReceiverManager.setSystemVolumeLevel).not.toHaveBeenCalled();
       expect(mockReceiverManager.setSystemVolumeMuted).not.toHaveBeenCalled();
 
@@ -426,16 +555,16 @@ describe('CastReceiver', function() {
         targetName: 'video',
         property: 'volume',
         value: 0.5
-      });
+      }, mockShakaMessageBus);
       fakeIncomingMessage({
         type: 'set',
         targetName: 'video',
         property: 'muted',
         value: true
-      });
+      }, mockShakaMessageBus);
 
-      expect(mockVideo.volume).toBe(undefined);
-      expect(mockVideo.muted).toBe(undefined);
+      expect(mockVideo.volume).toBe(1);
+      expect(mockVideo.muted).toBe(false);
       expect(mockReceiverManager.setSystemVolumeLevel).
           toHaveBeenCalledWith(0.5);
       expect(mockReceiverManager.setSystemVolumeMuted).
@@ -444,6 +573,11 @@ describe('CastReceiver', function() {
   });
 
   describe('"call" message', function() {
+    beforeEach(function() {
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
+    });
+
     it('calls local methods', function() {
       checkChromeOrChromecast();
       expect(mockVideo.play).not.toHaveBeenCalled();
@@ -452,7 +586,7 @@ describe('CastReceiver', function() {
         targetName: 'video',
         methodName: 'play',
         args: [1, 2, 3]
-      });
+      }, mockShakaMessageBus);
       expect(mockVideo.play).toHaveBeenCalledWith(1, 2, 3);
 
       expect(mockPlayer.configure).not.toHaveBeenCalled();
@@ -461,17 +595,23 @@ describe('CastReceiver', function() {
         targetName: 'player',
         methodName: 'configure',
         args: [42]
-      });
+      }, mockShakaMessageBus);
       expect(mockPlayer.configure).toHaveBeenCalledWith(42);
     });
   });
 
   describe('"asyncCall" message', function() {
-    var p;
+    /** @const */
     var fakeSenderId = 'senderId';
+    /** @const */
     var fakeCallId = '5';
+    /** @type {!shaka.util.PublicPromise} */
+    var p;
 
     beforeEach(function() {
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
+
       fakeConnectedSenders(1);
       p = new shaka.util.PublicPromise();
       mockPlayer.load.and.returnValue(p);
@@ -483,7 +623,7 @@ describe('CastReceiver', function() {
         targetName: 'player',
         methodName: 'load',
         args: ['foo://bar', 12]
-      }, fakeSenderId);
+      }, mockShakaMessageBus, fakeSenderId);
     });
 
     it('calls local async methods', function() {
@@ -495,17 +635,17 @@ describe('CastReceiver', function() {
     it('sends "asyncComplete" replies when resolved', function(done) {
       checkChromeOrChromecast();
       // No messages have been sent, either broadcast  or privately.
-      expect(mockMessageBus.broadcast).not.toHaveBeenCalled();
-      expect(mockMessageBus.getCastChannel).not.toHaveBeenCalled();
+      expect(mockShakaMessageBus.broadcast).not.toHaveBeenCalled();
+      expect(mockShakaMessageBus.getCastChannel).not.toHaveBeenCalled();
 
       p.resolve();
       shaka.test.Util.delay(0.1).then(function() {
         // No broadcast messages have been sent, but a private message has
         // been sent to the sender who started the async call.
-        expect(mockMessageBus.broadcast).not.toHaveBeenCalled();
-        expect(mockMessageBus.getCastChannel).toHaveBeenCalledWith(
+        expect(mockShakaMessageBus.broadcast).not.toHaveBeenCalled();
+        expect(mockShakaMessageBus.getCastChannel).toHaveBeenCalledWith(
             fakeSenderId);
-        var senderChannel = mockMessageBus.getCastChannel();
+        var senderChannel = mockShakaMessageBus.getCastChannel();
         expect(senderChannel.messages).toEqual([{
           type: 'asyncComplete',
           id: fakeCallId,
@@ -517,20 +657,21 @@ describe('CastReceiver', function() {
     it('sends "asyncComplete" replies when rejected', function(done) {
       checkChromeOrChromecast();
       // No messages have been sent, either broadcast  or privately.
-      expect(mockMessageBus.broadcast).not.toHaveBeenCalled();
-      expect(mockMessageBus.getCastChannel).not.toHaveBeenCalled();
+      expect(mockShakaMessageBus.broadcast).not.toHaveBeenCalled();
+      expect(mockShakaMessageBus.getCastChannel).not.toHaveBeenCalled();
 
       var fakeError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.UNABLE_TO_GUESS_MANIFEST_TYPE);
       p.reject(fakeError);
       shaka.test.Util.delay(0.1).then(function() {
         // No broadcast messages have been sent, but a private message has
         // been sent to the sender who started the async call.
-        expect(mockMessageBus.broadcast).not.toHaveBeenCalled();
-        expect(mockMessageBus.getCastChannel).toHaveBeenCalledWith(
+        expect(mockShakaMessageBus.broadcast).not.toHaveBeenCalled();
+        expect(mockShakaMessageBus.getCastChannel).toHaveBeenCalledWith(
             fakeSenderId);
-        var senderChannel = mockMessageBus.getCastChannel();
+        var senderChannel = mockShakaMessageBus.getCastChannel();
         expect(senderChannel.messages).toEqual([{
           type: 'asyncComplete',
           id: fakeCallId,
@@ -544,7 +685,138 @@ describe('CastReceiver', function() {
     });
   });
 
+  describe('respects generic control messages', function() {
+    beforeEach(function() {
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
+      fakeConnectedSenders(1);
+    });
+
+    it('get status', function() {
+      checkChromeOrChromecast();
+      var message = {
+        // Arbitrary number
+        'requestId': 0,
+        'type': 'GET_STATUS'
+      };
+
+      fakeIncomingMessage(message, mockGenericMessageBus);
+      expect(mockGenericMessageBus.broadcast.calls.count()).toEqual(1);
+      expect(mockGenericMessageBus.broadcast.calls.argsFor(0)[0].indexOf(
+          '"requestId":0,"type":"MEDIA_STATUS"') != -1).toBe(true);
+    });
+
+    it('play', function() {
+      checkChromeOrChromecast();
+      var message = {
+        // Arbitrary number
+        'requestId': 0,
+        'type': 'PLAY'
+      };
+
+      fakeIncomingMessage(message, mockGenericMessageBus);
+      expect(mockVideo.play).toHaveBeenCalled();
+    });
+
+    it('pause', function() {
+      checkChromeOrChromecast();
+      var message = {
+        // Arbitrary number
+        'requestId': 0,
+        'type': 'PAUSE'
+      };
+
+      fakeIncomingMessage(message, mockGenericMessageBus);
+      expect(mockVideo.pause).toHaveBeenCalled();
+    });
+
+    it('seek', function() {
+      checkChromeOrChromecast();
+      var message = {
+        // Arbitrary number
+        'requestId': 0,
+        'type': 'SEEK',
+        'resumeState': 'PLAYBACK_START',
+        'currentTime': 10
+      };
+
+      fakeIncomingMessage(message, mockGenericMessageBus);
+      expect(mockVideo.play).toHaveBeenCalled();
+      expect(mockVideo.currentTime).toBe(10);
+    });
+
+    it('stop', function() {
+      checkChromeOrChromecast();
+      var message = {
+        // Arbitrary number
+        'requestId': 0,
+        'type': 'STOP'
+      };
+
+      fakeIncomingMessage(message, mockGenericMessageBus);
+      expect(mockPlayer.unload).toHaveBeenCalled();
+    });
+
+    it('volume', function() {
+      checkChromeOrChromecast();
+      var message = {
+        // Arbitrary number
+        'requestId': 0,
+        'type': 'VOLUME',
+        'volume': {
+          'level': 0.5,
+          'muted': true
+        }
+      };
+
+      fakeIncomingMessage(message, mockGenericMessageBus);
+      expect(mockVideo.volume).toBe(0.5);
+      expect(mockVideo.muted).toBe(true);
+    });
+
+    it('load', function() {
+      checkChromeOrChromecast();
+      var message = {
+        // Arbitrary number
+        'requestId': 0,
+        'type': 'LOAD',
+        'autoplay': false,
+        'currentTime': 10,
+        'media': {
+          'contentId': 'manifestUri',
+          'contentType': 'video/mp4',
+          'streamType': 'BUFFERED'
+        }
+      };
+
+      fakeIncomingMessage(message, mockGenericMessageBus);
+      expect(mockPlayer.load).toHaveBeenCalled();
+    });
+
+    it('dispatches error on unrecognized request type', function() {
+      checkChromeOrChromecast();
+      var message = {
+        // Arbitrary number
+        'requestId': 0,
+        'type': 'UNKNOWN_TYPE'
+      };
+
+      fakeIncomingMessage(message, mockGenericMessageBus);
+      expect(mockGenericMessageBus.broadcast.calls.count()).toEqual(1);
+      expect(mockGenericMessageBus.broadcast.calls.argsFor(0)[0].indexOf(
+          '"requestId":0,' +
+          '"type":"INVALID_REQUEST",' +
+          '"reason":"INVALID_COMMAND"') != -1)
+          .toBe(true);
+    });
+  });
+
   describe('destroy', function() {
+    beforeEach(function() {
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
+    });
+
     it('destroys the local player', function(done) {
       checkChromeOrChromecast();
       expect(mockPlayer.destroy).not.toHaveBeenCalled();
@@ -560,7 +832,7 @@ describe('CastReceiver', function() {
         type: 'init',
         initState: {},
         appData: {}
-      });
+      }, mockShakaMessageBus);
 
       mockPlayer.getConfiguration.calls.reset();
       shaka.test.Util.delay(1).then(function() {
@@ -605,7 +877,12 @@ describe('CastReceiver', function() {
           jasmine.createSpy('CastReceiverManager.setSystemVolumeMuted'),
       getSenders: jasmine.createSpy('CastReceiverManager.getSenders'),
       getSystemVolume: function() { return { level: 1, muted: false }; },
-      getCastMessageBus: function() { return mockMessageBus; }
+      getCastMessageBus: function(namespace) {
+        if (namespace == shaka.cast.CastUtils.SHAKA_MESSAGE_NAMESPACE)
+          return mockShakaMessageBus;
+
+        return mockGenericMessageBus;
+      }
     };
   }
 
@@ -629,35 +906,11 @@ describe('CastReceiver', function() {
     return bus;
   }
 
-  function createMockVideo() {
-    var video = {
-      play: jasmine.createSpy('play'),
-      pause: jasmine.createSpy('pause'),
-      addEventListener: function(eventName, listener) {
-        video.listeners[eventName] = listener;
-      },
-      // For convenience:
-      listeners: {}
-    };
-    return video;
-  }
-
   function createMockPlayer() {
     var player = {
-      getConfiguration: jasmine.createSpy('getConfiguration'),
-      getManifestUri: jasmine.createSpy('getManifestUri'),
-      getPlaybackRate: jasmine.createSpy('getPlaybackRate'),
-      getTracks: jasmine.createSpy('getTracks'),
-      getStats: jasmine.createSpy('getStats'),
-      isBuffering: jasmine.createSpy('isBuffering'),
-      isLive: jasmine.createSpy('isLive'),
-      isTextTrackVisible: jasmine.createSpy('isTextTrackVisible'),
-      seekRange: jasmine.createSpy('seekRange'),
-      configure: jasmine.createSpy('configure'),
-      setTextTrackVisibility: jasmine.createSpy('setTextTrackVisibility'),
+      destroy: jasmine.createSpy('destroy').and.returnValue(Promise.resolve()),
       setMaxHardwareResolution: jasmine.createSpy('setMaxHardwareResolution'),
-      load: jasmine.createSpy('load'),
-      destroy: jasmine.createSpy('destroy'),
+
       addEventListener: function(eventName, listener) {
         player.listeners[eventName] = listener;
       },
@@ -665,8 +918,18 @@ describe('CastReceiver', function() {
       // For convenience:
       listeners: {}
     };
-    player.destroy.and.returnValue(Promise.resolve());
-    player.load.and.returnValue(Promise.resolve());
+
+    var castMembers =
+        CastUtils.PlayerVoidMethods.concat(CastUtils.PlayerGetterMethods);
+    castMembers =
+        castMembers.concat(CastUtils.PlayerGetterMethodsThatRequireLive);
+    castMembers.forEach(function(name) {
+      player[name] = jasmine.createSpy(name);
+    });
+    CastUtils.PlayerPromiseMethods.forEach(function(name) {
+      player[name] = jasmine.createSpy(name).and.returnValue(Promise.resolve());
+    });
+
     return player;
   }
 
@@ -685,14 +948,15 @@ describe('CastReceiver', function() {
 
   /**
    * @param {?} message
+   * @param {!Object} bus
    * @param {string=} opt_senderId
    */
-  function fakeIncomingMessage(message, opt_senderId) {
+  function fakeIncomingMessage(message, bus, opt_senderId) {
     var serialized = CastUtils.serialize(message);
     var messageEvent = {
       senderId: opt_senderId,
       data: serialized
     };
-    mockMessageBus.onMessage(messageEvent);
+    bus.onMessage(messageEvent);
   }
 });

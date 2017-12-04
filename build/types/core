@@ -7,26 +7,31 @@
 
 +../../lib/debug/asserts.js
 +../../lib/debug/log.js
-+../../lib/debug/timer.js
 
 +../../lib/media/drm_engine.js
 +../../lib/media/manifest_parser.js
 +../../lib/media/media_source_engine.js
 +../../lib/media/mp4_segment_index_parser.js
 +../../lib/media/playhead.js
++../../lib/media/playhead_observer.js
 +../../lib/media/presentation_timeline.js
 +../../lib/media/segment_index.js
 +../../lib/media/segment_reference.js
 +../../lib/media/streaming_engine.js
-+../../lib/media/text_engine.js
 +../../lib/media/time_ranges_utils.js
++../../lib/media/transmuxer.js
 +../../lib/media/webm_segment_index_parser.js
 
++../../lib/net/backoff.js
 +../../lib/net/networking_engine.js
 
 +../../lib/player.js
 
 +../../lib/polyfill/all.js
+
++../../lib/text/cue.js
++../../lib/text/simple_text_displayer.js
++../../lib/text/text_engine.js
 
 +../../lib/util/array_utils.js
 +../../lib/util/data_view_reader.js
@@ -40,7 +45,10 @@
 +../../lib/util/functional.js
 +../../lib/util/i_destroyable.js
 +../../lib/util/language_utils.js
++../../lib/util/manifest_parser_utils.js
 +../../lib/util/map_utils.js
++../../lib/util/mime_utils.js
++../../lib/util/mp4_parser.js
 +../../lib/util/multi_map.js
 +../../lib/util/pssh.js
 +../../lib/util/public_promise.js

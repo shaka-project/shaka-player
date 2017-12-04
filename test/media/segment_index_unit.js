@@ -16,23 +16,24 @@
  */
 
 describe('SegmentIndex', /** @suppress {accessControls} */ function() {
+  /** @const */
+  var actual1 = makeReference(0, 0, 10, uri(0));
+  /** @const */
+  var actual2 = makeReference(1, 10, 20, uri(20));
+  /** @const */
+  var actual3 = makeReference(2, 20, 30, uri(20));
+
   describe('find', function() {
     it('finds the correct references', function() {
-      var actual1 = makeReference(0, 0, 10, uri(0));
-      var actual2 = makeReference(1, 10, 20, uri(10));
-      var actual3 = makeReference(2, 20, 30, uri(20));
-
-      var index, pos1, pos2, pos3;
-
       // One reference.
-      index = new shaka.media.SegmentIndex([actual1]);
-      pos1 = index.find(5);
+      var index = new shaka.media.SegmentIndex([actual1]);
+      var pos1 = index.find(5);
       expect(pos1).toBe(actual1.position);
 
       // Two references.
       index = new shaka.media.SegmentIndex([actual1, actual2]);
       pos1 = index.find(5);
-      pos2 = index.find(15);
+      var pos2 = index.find(15);
       expect(pos1).toBe(actual1.position);
       expect(pos2).toBe(actual2.position);
 
@@ -40,7 +41,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
       index = new shaka.media.SegmentIndex([actual1, actual2, actual3]);
       pos1 = index.find(5);
       pos2 = index.find(15);
-      pos3 = index.find(25);
+      var pos3 = index.find(25);
       expect(pos1).toBe(actual1.position);
       expect(pos2).toBe(actual2.position);
       expect(pos3).toBe(actual3.position);
@@ -63,12 +64,12 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
       expect(pos).toBe(actual2.position);
     });
 
-    it('returns null if time < first start time', function() {
+    it('returns the first segment if time < first start time', function() {
       var actual = makeReference(1, 10, 20, uri(10));
       var index = new shaka.media.SegmentIndex([actual]);
 
       var pos = index.find(5);
-      expect(pos).toBeNull();
+      expect(pos).toBe(actual.position);
     });
 
     it('returns null if time == last end time', function() {
@@ -98,26 +99,16 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
   });
 
   describe('get', function() {
-    var actual1, actual2, actual3;
-
-    beforeEach(function() {
-      actual1 = makeReference(0, 0, 10, uri(0));
-      actual2 = makeReference(1, 10, 20, uri(10));
-      actual3 = makeReference(2, 20, 30, uri(20));
-    });
-
     it('returns the correct references', function() {
-      var index, r1, r2, r3;
-
       // One reference.
-      index = new shaka.media.SegmentIndex([actual1]);
-      r1 = index.get(0);
+      var index = new shaka.media.SegmentIndex([actual1]);
+      var r1 = index.get(0);
       expect(r1).toEqual(actual1);
 
       // Two references.
       index = new shaka.media.SegmentIndex([actual1, actual2]);
       r1 = index.get(0);
-      r2 = index.get(1);
+      var r2 = index.get(1);
       expect(r1).toEqual(actual1);
       expect(r2).toEqual(actual2);
 
@@ -125,7 +116,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
       index = new shaka.media.SegmentIndex([actual1, actual2, actual3]);
       r1 = index.get(0);
       r2 = index.get(1);
-      r3 = index.get(2);
+      var r3 = index.get(2);
       expect(r1).toEqual(actual1);
       expect(r2).toEqual(actual2);
       expect(r3).toEqual(actual3);
@@ -162,15 +153,54 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
     });
   });
 
+  describe('fit', function() {
+    it('drops references which are outside the period bounds', function() {
+      // These negative numbers can occur due to presentationTimeOffset in DASH.
+      var references = [
+        makeReference(0, -10, -3, uri(0)),
+        makeReference(1, -3, 4, uri(1)),
+        makeReference(2, 4, 11, uri(2)),
+        makeReference(3, 11, 18, uri(3)),
+        makeReference(4, 18, 25, uri(4))
+      ];
+      var index = new shaka.media.SegmentIndex(references);
+      expect(index.references_).toEqual(references);
+
+      index.fit(/* periodDuration */ 15);
+      var newReferences = [
+        /* ref 0 dropped because it ends before the period starts */
+        makeReference(1, 0, 4, uri(1)),  // start time clamped to 0
+        makeReference(2, 4, 11, uri(2)),
+        makeReference(3, 11, 15, uri(3))  // end time clamped to period
+        /* ref 4 dropped because it starts after the period ends */
+      ];
+      expect(index.references_).toEqual(newReferences);
+    });
+
+    it('drops references which end exactly at zero', function() {
+      // The end time is meant to be exclusive, so segments ending at zero
+      // (after PTO adjustments) should be dropped.
+      var references = [
+        makeReference(0, -10, 0, uri(0)),
+        makeReference(1, 0, 10, uri(1))
+      ];
+      var index = new shaka.media.SegmentIndex(references);
+      expect(index.references_).toEqual(references);
+
+      index.fit(/* periodDuration */ 10);
+      var newReferences = [
+        /* ref 0 dropped because it ends before the period starts (at 0) */
+        makeReference(1, 0, 10, uri(1))
+      ];
+      expect(index.references_).toEqual(newReferences);
+    });
+  });
+
   describe('merge', function() {
     it('three references into zero references', function() {
       var index1 = new shaka.media.SegmentIndex([]);
 
-      var references2 = [
-        makeReference(0, 0, 10, uri(0)),
-        makeReference(1, 10, 20, uri(10)),
-        makeReference(2, 20, 30, uri(20))
-      ];
+      var references2 = [actual1, actual2, actual3];
 
       index1.merge(references2);
       expect(index1.references_.length).toBe(3);
@@ -178,11 +208,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
     });
 
     it('zero references into three references', function() {
-      var references1 = [
-        makeReference(0, 0, 10, uri(0)),
-        makeReference(1, 10, 20, uri(10)),
-        makeReference(2, 20, 30, uri(20))
-      ];
+      var references1 = [actual1, actual2, actual3];
       var index1 = new shaka.media.SegmentIndex(references1);
 
       index1.merge([]);
@@ -242,8 +268,9 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
       ];
       var index1 = new shaka.media.SegmentIndex(references1);
 
-      // when period is changed, fitSegmentReference will
-      // expand last segment to the start of the next the period
+      // When the period is changed, fit() will expand last segment to the start
+      // of the next the period.  This simulates an update in which fit() has
+      // done that.
       var references2 = [
         makeReference(2, 20, 30, uri(20)),
         makeReference(3, 30, 50, uri(30))
@@ -255,15 +282,39 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
       expect(index1.references_[1]).toEqual(references2[0]);
       expect(index1.references_[2]).toEqual(references2[1]);
     });
+
+    // Makes sure segment references from time-based template merge with correct
+    // position numbers.
+    // https://github.com/google/shaka-player/pull/838
+    it('last live stream reference with corrected position', function() {
+      var references1 = [
+        makeReference(1, 10, 20, uri(10)),
+        makeReference(2, 20, 30, uri(20)),
+        makeReference(3, 30, 49.887, uri(30))
+      ];
+      var index1 = new shaka.media.SegmentIndex(references1);
+
+      // segment position always start from 1 for time-based segment templates
+      var references2 = [
+        makeReference(1, 20, 30, uri(20)),
+        makeReference(2, 30, 50, uri(30))
+      ];
+
+      var lastReference = makeReference(3, 30, 50, uri(30));
+
+      index1.merge(references2);
+      expect(index1.references_.length).toBe(3);
+      expect(index1.references_[0]).toEqual(references1[0]);
+      expect(index1.references_[1]).toEqual(references1[1]);
+      expect(index1.references_[2]).toEqual(lastReference);
+    });
   });
 
   describe('evict', function() {
-    var actual1, actual2, actual3, index1;
+    /** @type {!shaka.media.SegmentIndex} */
+    var index1;
 
     beforeEach(function() {
-      actual1 = makeReference(0, 0, 10, uri(0));
-      actual2 = makeReference(1, 10, 20, uri(10));
-      actual3 = makeReference(2, 20, 30, uri(20));
       index1 = new shaka.media.SegmentIndex([actual1, actual2, actual3]);
     });
 

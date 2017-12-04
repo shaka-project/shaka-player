@@ -15,7 +15,7 @@ identical:
 ```js
 retryParameters: {
   timeout: 0,       // timeout in ms, after which we abort a request; 0 means never
-  maxAttempts: 1,   // the maximum number of requests before we fail
+  maxAttempts: 2,   // the maximum number of requests before we fail
   baseDelay: 1000,  // the base delay in ms between retries
   backoffFactor: 2, // the multiplicative backoff factor between retries
   fuzzFactor: 0.5,  // the fuzz factor to apply to each retry delay
@@ -73,11 +73,43 @@ content will be removed from the start of the buffer to save memory.
 All of these settings should be customized for your application.  The default
 values are very conservative.
 
+#### Buffering and Adaptation
+
+While we are playing, we will only buffer the currently chosen stream.  We do
+not download other bitrates until AbrManager tells us to switch.  We also (by
+default) do not clear the buffer when we adapt.  This means that when we adapt
+to a different bitrate, it may not be visible for a while because the old
+buffer will still be used.  There will be at most `bufferingGoal` seconds left
+of the old bitrate in the buffer.
 
 #### Try it out
 
 Use the code from {@tutorial basic-usage} and try configuring some of these
-parameters in `playerInit()` to see how they affect playback.
+parameters in `initPlayer()` to see how they affect playback.
+
+#### Server Considerations
+
+Shaka Player makes a number of requests to various servers while streaming.  You
+need to make sure that Shaka has correct access to those resources.  Browsers
+impose several restrictions on the content that a webpage has access to.
+
+One restriction is [CORS][] (Cross-Origin Resource Sharing).  This requires
+network requests to be made to the same origin, or for the server to explicitly
+give access.  An "origin" refers to the domain name (e.g. `api.example.com`),
+the scheme (e.g. `https:`), and the port (e.g. 80).  If you host your assets on
+a different origin than your web app, then you'll need to set CORS headers on
+the asset server to ensure we have access.  For some content, this will also
+require allowing the `Range` header by sending the CORS header
+`Access-Control-Allow-Headers`.
+
+Another restriction is called mixed-content.  If your webpage is accessed using
+`https:`, then all resources that are loaded also need to be loaded using
+`https:`.  This means that the manifest and all the media segments need to be
+loaded using `https:`.  This is most easily done by either having all the
+URLs in your manifests always use `https:`, or by having it not include the
+scheme (e.g. `//example.com/file.mp4`).
+
+[CORS]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
 
 
 #### Continue the Tutorials

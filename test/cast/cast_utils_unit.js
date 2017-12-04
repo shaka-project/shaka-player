@@ -16,12 +16,51 @@
  */
 
 describe('CastUtils', function() {
-  var CastUtils;
-  var FakeEvent;
+  /** @const */
+  var CastUtils = shaka.cast.CastUtils;
+  /** @const */
+  var FakeEvent = shaka.util.FakeEvent;
 
-  beforeAll(function() {
-    CastUtils = shaka.cast.CastUtils;
-    FakeEvent = shaka.util.FakeEvent;
+  it('includes every Player member', function() {
+    var ignoredMembers = [
+      'constructor',  // JavaScript added field
+      'getNetworkingEngine',  // Handled specially
+      'getMediaElement',  // Handled specially
+      'setMaxHardwareResolution',
+      'destroy',  // Should use CastProxy.destroy instead
+
+      // Test helper methods (not @export'd)
+      'createDrmEngine',
+      'createNetworkingEngine',
+      'createPlayhead',
+      'createPlayheadObserver',
+      'createMediaSource',
+      'createMediaSourceEngine',
+      'createStreamingEngine'
+    ];
+
+    var CastUtils = shaka.cast.CastUtils;
+    var castMembers = CastUtils.PlayerVoidMethods
+                          .concat(CastUtils.PlayerGetterMethods)
+                          .concat(CastUtils.PlayerPromiseMethods)
+                          .concat(CastUtils.PlayerGetterMethodsThatRequireLive);
+    var playerMembers = Object.keys(shaka.Player.prototype).filter(
+        function(name) {
+          // Private members end with _.
+          return ignoredMembers.indexOf(name) < 0 &&
+              name.substr(name.length - 1) != '_';
+        });
+
+    // To make debugging easier, don't check that they are equal; instead check
+    // that neither has any extra entries.
+    var extraCastMembers = castMembers.filter(function(name) {
+      return playerMembers.indexOf(name) < 0;
+    });
+    var extraPlayerMembers = playerMembers.filter(function(name) {
+      return castMembers.indexOf(name) < 0;
+    });
+    expect(extraCastMembers).toEqual([]);
+    expect(extraPlayerMembers).toEqual([]);
   });
 
   describe('serialize/deserialize', function() {
@@ -50,7 +89,8 @@ describe('CastUtils', function() {
 
     it('transfers real Events', function() {
       // new Event() is not usable on IE11:
-      var event = document.createEvent('CustomEvent');
+      var event =
+          /** @type {!CustomEvent} */ (document.createEvent('CustomEvent'));
       event.initCustomEvent('myEventType', false, false, null);
 
       // Properties that can definitely be transferred.
@@ -138,19 +178,27 @@ describe('CastUtils', function() {
     });
 
     describe('TimeRanges', function() {
+      /** @type {!HTMLVideoElement} */
       var video;
+      /** @type {!shaka.util.EventManager} */
       var eventManager;
+      /** @type {!shaka.media.MediaSourceEngine} */
       var mediaSourceEngine;
 
-      beforeAll(function(done) {
+      beforeAll(function() {
+        video =
+            /** @type {!HTMLVideoElement} */ (document.createElement('video'));
+        document.body.appendChild(video);
+      });
+
+      beforeEach(function(done) {
         // The TimeRanges constructor cannot be used directly, so we load a clip
         // to get ranges to use.
-        video = /** @type {HTMLMediaElement} */(
-            document.createElement('video'));
-        document.body.appendChild(video);
-
         var mediaSource = new MediaSource();
-        var mimeType = 'video/mp4; codecs="avc1.42c01e"';
+        var fakeVideoStream = {
+          mimeType: 'video/mp4',
+          codecs: 'avc1.42c01e'
+        };
         var initSegmentUrl = '/base/test/test/assets/sintel-video-init.mp4';
         var videoSegmentUrl = '/base/test/test/assets/sintel-video-segment.mp4';
 
@@ -165,22 +213,42 @@ describe('CastUtils', function() {
         }
 
         function onSourceOpen() {
+          var ContentType = shaka.util.ManifestParserUtils.ContentType;
+          eventManager.unlisten(mediaSource, 'sourceopen');
           mediaSourceEngine = new shaka.media.MediaSourceEngine(
               video, mediaSource, /* TextTrack */ null);
-          mediaSourceEngine.init({'video': mimeType});
+
+          // Create empty object first and initialize the fields through
+          // [] to allow field names to be expressions.
+          var initObject = {};
+          initObject[ContentType.VIDEO] = fakeVideoStream;
+          mediaSourceEngine.init(initObject);
           shaka.test.Util.fetch(initSegmentUrl).then(function(data) {
-            return mediaSourceEngine.appendBuffer('video', data, null, null);
+            return mediaSourceEngine.appendBuffer(ContentType.VIDEO, data,
+                                                  null, null);
           }).then(function() {
             return shaka.test.Util.fetch(videoSegmentUrl);
           }).then(function(data) {
-            return mediaSourceEngine.appendBuffer('video', data, null, null);
+            return mediaSourceEngine.appendBuffer(ContentType.VIDEO, data,
+                                                  null, null);
           }).catch(fail).then(done);
         }
       });
 
+      afterEach(function(done) {
+        eventManager.destroy().then(function() {
+          if (mediaSourceEngine) {
+            return mediaSourceEngine.destroy();
+          }
+        }).then(function() {
+          video.removeAttribute('src');
+          video.load();
+          done();
+        });
+      });
+
       afterAll(function() {
-        eventManager.destroy();
-        if (mediaSourceEngine) mediaSourceEngine.destroy();
+        document.body.removeChild(video);
       });
 
       it('deserialize into equivalent objects', function() {

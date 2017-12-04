@@ -547,7 +547,7 @@ if (goog.DEPENDENCIES_ENABLED) {
     // Search backwards since the current script is in almost all cases the one
     // that has base.js.
     for (var i = scripts.length - 1; i >= 0; --i) {
-      var src = scripts[i].src;
+      var src = (/** @type {!HTMLScriptElement} */ (scripts[i])).src;
       var qmark = src.lastIndexOf('?');
       var l = qmark == -1 ? src.length : qmark;
       if (src.substr(l - 7, 7) == 'base.js') {
