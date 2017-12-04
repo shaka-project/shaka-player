@@ -663,5 +663,17 @@ if (document.readyState == 'loading' ||
     window.addEventListener('load', shakaDemo.init);
   }
 } else {
-  shakaDemo.init();
+  /**
+   * Poll for Shaka Player on window.  On IE 11, the document is "ready", but
+   * there are still deferred scripts being loaded.  This does not occur on
+   * Chrome or Edge, which set the document's state at the correct time.
+   */
+  var pollForShakaPlayer = function() {
+    if (window.shaka) {
+      shakaDemo.init();
+    } else {
+      setTimeout(pollForShakaPlayer, 100);
+    }
+  };
+  pollForShakaPlayer();
 }
