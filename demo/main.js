@@ -184,6 +184,10 @@ shakaDemo.init = function() {
         shakaDemo.postBrowserCheckParams_(params);
         window.addEventListener('hashchange', shakaDemo.updateFromHash_);
       });
+    }).catch(function(error) {
+      // Some part of the setup of the demo app threw an error.
+      // Notify the user of this.
+      shakaDemo.onError_(/** @type {!shaka.util.Error} */ (error));
     });
   }
 };
