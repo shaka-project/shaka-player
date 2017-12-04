@@ -137,10 +137,10 @@ describe('Playhead', function() {
     timeline.isLive.and.returnValue(false);
     timeline.getSegmentAvailabilityStart.and.returnValue(5);
     timeline.getSegmentAvailabilityEnd.and.returnValue(60);
+    timeline.getDuration.and.returnValue(60);
 
     // These tests should not cause these methods to be invoked.
     timeline.getSegmentAvailabilityDuration.and.throwError(new Error());
-    timeline.getDuration.and.throwError(new Error());
     timeline.setDuration.and.throwError(new Error());
 
     manifest = {
@@ -160,7 +160,8 @@ describe('Playhead', function() {
       useRelativeCueTimestamps: false,
       startAtSegmentBoundary: false,
       smallGapLimit: 0.5,
-      jumpLargeGaps: false
+      jumpLargeGaps: false,
+      durationBackoff: 1
     };
   });
 
@@ -262,6 +263,22 @@ describe('Playhead', function() {
       expect(playhead.getTime()).toBe(0);
     });
 
+    it('bumps startTime back from duration', function() {
+      video.readyState = HTMLMediaElement.HAVE_METADATA;
+      timeline.isLive.and.returnValue(false);
+      timeline.getSegmentAvailabilityStart.and.returnValue(0);
+      timeline.getSegmentAvailabilityEnd.and.returnValue(60);
+      timeline.getSeekRangeEnd.and.returnValue(60);
+      timeline.getDuration.and.returnValue(60);
+
+      playhead = new shaka.media.Playhead(
+          video, manifest, config, 60 /* startTime */, Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
+
+      expect(playhead.getTime()).toBe(59);  // duration - durationBackoff
+      expect(video.currentTime).toBe(59);  // duration - durationBackoff
+    });
+
     it('respects a seek before metadata is loaded', function() {
       playhead = new shaka.media.Playhead(
           video,
@@ -358,6 +375,7 @@ describe('Playhead', function() {
     video.buffered = createFakeBuffered([{start: 25, end: 55}]);
 
     timeline.isLive.and.returnValue(true);
+    timeline.getDuration.and.returnValue(Infinity);
     timeline.getSegmentAvailabilityStart.and.returnValue(5);
     timeline.getSegmentAvailabilityEnd.and.returnValue(60);
     timeline.getSegmentAvailabilityDuration.and.returnValue(30);
@@ -499,6 +517,7 @@ describe('Playhead', function() {
     timeline.getSegmentAvailabilityStart.and.returnValue(5);
     timeline.getSafeAvailabilityStart.and.returnValue(5);
     timeline.getSegmentAvailabilityEnd.and.returnValue(60);
+    timeline.getDuration.and.returnValue(60);
     timeline.getSegmentAvailabilityDuration.and.returnValue(null);
 
     playhead = new shaka.media.Playhead(
@@ -516,8 +535,8 @@ describe('Playhead', function() {
     // Seek past end.
     video.currentTime = 120;
     video.on['seeking']();
-    expect(video.currentTime).toBe(60);
-    expect(playhead.getTime()).toBe(60);
+    expect(video.currentTime).toBe(59);  // duration - durationBackoff
+    expect(playhead.getTime()).toBe(59);  // duration - durationBackoff
     expect(onSeek).not.toHaveBeenCalled();
     video.on['seeking']();
     expect(onSeek).toHaveBeenCalled();
@@ -539,6 +558,7 @@ describe('Playhead', function() {
     video.readyState = HTMLMediaElement.HAVE_METADATA;
 
     timeline.isLive.and.returnValue(true);
+    timeline.getDuration.and.returnValue(Infinity);
     timeline.getSegmentAvailabilityStart.and.returnValue(1000);
     timeline.getSegmentAvailabilityEnd.and.returnValue(1000);
     timeline.getSegmentAvailabilityDuration.and.returnValue(1000);
@@ -572,6 +592,7 @@ describe('Playhead', function() {
 
     it('(live case)', function() {
       timeline.isLive.and.returnValue(true);
+      timeline.getDuration.and.returnValue(Infinity);
       timeline.getSegmentAvailabilityStart.and.returnValue(5);
       timeline.getSegmentAvailabilityEnd.and.returnValue(60);
       timeline.getSegmentAvailabilityDuration.and.returnValue(30);
@@ -607,6 +628,7 @@ describe('Playhead', function() {
       timeline.getSegmentAvailabilityStart.and.returnValue(5);
       timeline.getSafeAvailabilityStart.and.returnValue(5);
       timeline.getSegmentAvailabilityEnd.and.returnValue(60);
+      timeline.getDuration.and.returnValue(60);
       timeline.getSegmentAvailabilityDuration.and.returnValue(30);
 
       playhead = new shaka.media.Playhead(
@@ -641,6 +663,7 @@ describe('Playhead', function() {
       timeline.getSafeAvailabilityStart.and.returnValue(0);
       timeline.getSegmentAvailabilityStart.and.returnValue(0);
       timeline.getSegmentAvailabilityEnd.and.returnValue(60);
+      timeline.getDuration.and.returnValue(60);
 
       config.smallGapLimit = 1;
     });
