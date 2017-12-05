@@ -521,6 +521,21 @@ describe('VttTextParser', function() {
         { periodStart: 0, segmentStart: 0, segmentEnd: 0 });
   });
 
+  it('skips style blocks', function() {
+    verifyHelper(
+        [
+          {start: 20, end: 40, payload: 'Test'},
+          {start: 40, end: 50, payload: 'Test2'}
+        ],
+        'WEBVTT\n\n' +
+        'STYLE\n::cue(.cyan) { color: cyan; }\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        'Test\n\n' +
+        '00:00:40.000 --> 00:00:50.000\n' +
+        'Test2',
+        { periodStart: 0, segmentStart: 0, segmentEnd: 0 });
+  });
+
 
   /**
    * @param {!Array} cues
