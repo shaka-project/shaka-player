@@ -837,38 +837,22 @@ describe('Player', function() {
       .then(done);
     });
 
-    it('does not clear buffers when restrictions change', function(done) {
-      var smallBandwidth = 200000;
-      var largeBandwidth = 1000000;
-
-      var smallDelay = 0.5;
-      var doNotClear = false;
-
-      var smallBandwidthSettings = {
-        abr: {restrictions: {maxBandwidth: smallBandwidth}}
-      };
-
-      var largeBandwidthSettings = {
-        abr: {restrictions: {maxBandwidth: largeBandwidth}}
-      };
-
+    it('does not switch for plain configuration changes', function(done) {
       var parser = new shaka.test.FakeManifestParser(manifest);
       var factory = function() { return parser; };
 
       var switchVariantSpy = spyOn(player, 'switchVariant_');
 
-      player.configure(smallBandwidthSettings);
-
       player.load('', 0, factory)
           .then(function() {
-            player.configure(largeBandwidthSettings);
+            player.configure({abr: {enabled: false}});
+            player.configure({streaming: {bufferingGoal: 9001}});
+
             // Delay to ensure that the switch would have been called.
-            return shaka.test.Util.delay(smallDelay);
+            return shaka.test.Util.delay(0.1);
           })
           .then(function() {
-            expect(switchVariantSpy).toHaveBeenCalledWith(
-                /* variant */ jasmine.anything(),
-                doNotClear);
+            expect(switchVariantSpy).not.toHaveBeenCalled();
           })
           .catch(fail)
           .then(done);
