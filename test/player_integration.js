@@ -276,7 +276,7 @@ describe('Player', function() {
           expect(player.isLive()).toEqual(isLive);
           video.play();
           // 30 seconds or video ended, whichever comes first.
-          return waitForTimeOrEnd(video, 30);
+          return waitForTimeOrEnd(video, 40);
         }).then(function() {
           if (video.ended) {
             expect(video.currentTime).toBeCloseTo(video.duration, 1);
@@ -289,7 +289,7 @@ describe('Player', function() {
               // Seek and play out the end.
               video.currentTime = video.duration - 15;
               // 30 seconds or video ended, whichever comes first.
-              return waitForTimeOrEnd(video, 30).then(function() {
+              return waitForTimeOrEnd(video, 40).then(function() {
                 expect(video.ended).toBe(true);
                 expect(video.currentTime).toBeCloseTo(video.duration, 1);
               });

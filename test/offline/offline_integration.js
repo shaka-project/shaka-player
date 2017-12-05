@@ -21,6 +21,8 @@ describe('Offline', /** @suppress {accessControls} */ function() {
   /** @const {string} */
   var dbName = 'shaka-offline-integration-test-db';
 
+  var mockSEFactory = new shaka.test.MockStorageEngineFactory();
+
   /** @const {number} */
   var dbUpdateRetries = 5;
 
@@ -42,23 +44,30 @@ describe('Offline', /** @suppress {accessControls} */ function() {
     video.muted = true;
     document.body.appendChild(video);
 
-    // Ensure we start with a clean slate.
     shaka.Player.probeSupport().then(function(data) {
       support = data;
-      return shaka.offline.DBEngine.deleteDatabase(dbName);
     }).catch(fail).then(done);
   });
 
   beforeEach(function(done) {
-    /** @type {!shaka.offline.DBEngine} */
-    var dbEngine = new shaka.offline.DBEngine(dbName, dbUpdateRetries);
+    mockSEFactory.overrideCreate(function() {
+      /** @type {!shaka.offline.DBEngine} */
+      var engine = new shaka.offline.DBEngine(dbName, dbUpdateRetries);
+      return engine.init().then(function() { return engine; });
+    });
 
     player = new shaka.Player(video);
     player.addEventListener('error', fail);
     storage = new shaka.offline.Storage(player);
-    engine = dbEngine;
 
-    return dbEngine.init().catch(fail).then(done);
+    // Ensure we start with a clean slate.
+    return shaka.offline.DBEngine.deleteDatabase(dbName)
+        .then(function() {
+          return shaka.offline.StorageEngineFactory.createStorageEngine();
+        })
+        .then(function(storageEngine) {
+          engine = storageEngine;
+        }).catch(fail).then(done);
   });
 
   afterEach(function(done) {
@@ -84,7 +93,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
         })
         .then(function() {
           video.play();
-          return shaka.test.Util.delay(10);
+          return shaka.test.Util.delay(15);
         })
         .then(function() {
           expect(video.currentTime).toBeGreaterThan(3);
@@ -122,17 +131,21 @@ describe('Offline', /** @suppress {accessControls} */ function() {
     var drmEngine;
     storage.store('test:sintel-enc')
         .then(function(content) {
-          /** @type {number} */
-          var manifestId = 0;
-          /** @type {string} */
-          var manifestUri = Scheme.manifestIdToUri(manifestId);
-
           storedContent = content;
-          expect(storedContent.offlineUri).toBe(manifestUri);
-          return engine.getManifest(manifestId);
+
+          /** @type {string} */
+          var uri = storedContent.offlineUri;
+
+          /** @type {?number} */
+          var id = Scheme.uriToManifestId(uri);
+          goog.asserts.assert(
+              id != null,
+              uri + ' should be a valid offline manifest uri.');
+          return engine.getManifest(id);
         })
         .then(function(manifestDb) {
           // Did we store a persistent license?
+          expect(manifestDb).toBeTruthy();
           expect(manifestDb.sessionIds.length).toBeGreaterThan(0);
           sessionId = manifestDb.sessionIds[0];
 
@@ -159,7 +172,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
         .then(function() {
           // Let it play some.
           video.play();
-          return shaka.test.Util.delay(10);
+          return shaka.test.Util.delay(15);
         })
         .then(function() {
           // Is it playing?
@@ -208,17 +221,21 @@ describe('Offline', /** @suppress {accessControls} */ function() {
         storage.configure({ usePersistentLicense: false });
         storage.store('test:sintel-enc')
             .then(function(content) {
-              /** @type {number} */
-              var manifestId = 0;
-              /** @type {string} */
-              var manifestUri = Scheme.manifestIdToUri(manifestId);
-
               storedContent = content;
-              expect(storedContent.offlineUri).toBe(manifestUri);
-              return engine.getManifest(manifestId);
+
+              /** @type {string} */
+              var uri = storedContent.offlineUri;
+
+              /** @type {?number} */
+              var id = Scheme.uriToManifestId(uri);
+              goog.asserts.assert(
+                  id != null,
+                  uri + ' should be a valid offline manifest uri.');
+              return engine.getManifest(id);
             })
             .then(function(manifestDb) {
               // There should not be any licenses stored.
+              expect(manifestDb).toBeTruthy();
               expect(manifestDb.sessionIds.length).toEqual(0);
 
               // Load the stored content.
@@ -240,9 +257,15 @@ describe('Offline', /** @suppress {accessControls} */ function() {
               return storage.remove(storedContent);
             })
             .then(function() {
-              /** @type {number} */
-              var manifestId = 0;
-              return engine.getManifest(manifestId);
+              /** @type {string} */
+              var uri = storedContent.offlineUri;
+
+              /** @type {?number} */
+              var id = Scheme.uriToManifestId(uri);
+              goog.asserts.assert(
+                  id != null,
+                  uri + ' should be a valid offline manifest uri.');
+              return engine.getManifest(id);
             })
             .then(function(manifestDb) {
               expect(manifestDb).toBeFalsy();
