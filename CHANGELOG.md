@@ -1,3 +1,26 @@
+## 2.2.8 (2017-12-06)
+
+Bugfixes:
+  - Do not allow seeking/startup at duration (bump back by 1s)
+    - https://github.com/google/shaka-player/issues/1014
+  - Don't wait for sessions to close on DrmEngine.destroy
+    - https://github.com/google/shaka-player/issues/1093
+    - https://github.com/google/shaka-player/pull/1168
+  - Do not clear buffers on configuration changes unless required
+    - https://github.com/google/shaka-player/issues/1138
+  - Ignore unsupported STYLE blocks in WebVTT
+    - https://github.com/google/shaka-player/issues/1104
+  - Fix a null exception in CastReceiver.destroy
+
+
+Demo app:
+  - Fix "ended" video control state on IE
+    - https://github.com/google/shaka-player/issues/979
+  - Fix updates to demo app URL hash on Edge & IE 11
+    - https://github.com/google/shaka-player/issues/1111
+  - Fix demo app page-load race on IE 11
+
+
 ## 2.2.7 (2017-11-28)
 
 Bugfixes:
