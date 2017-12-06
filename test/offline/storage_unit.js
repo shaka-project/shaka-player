@@ -163,7 +163,9 @@ describe('Storage', function() {
             // Since we are using a memory DB, it will always be the first one.
             expect(data.offlineUri).toBe(Scheme.manifestIdToUri(0));
             expect(data.originalManifestUri).toBe(originalUri);
-            expect(data.duration).toBe(0);  // There are no segments.
+            // Even though there are no segments, it will use the duration from
+            // the original manifest.
+            expect(data.duration).toBe(20);
             expect(data.size).toEqual(0);
             expect(data.tracks).toEqual(tracks);
             expect(data.appMetadata).toEqual(appData);
@@ -399,7 +401,7 @@ describe('Storage', function() {
           expect(storedContent).toEqual({
             offlineUri: shaka.offline.OfflineScheme.manifestIdToUri(0),
             originalManifestUri: originalUri,
-            duration: 4,
+            duration: 20, // original manifest duration
             size: 150,
             expiration: Infinity,
             tracks: tracks,
@@ -454,7 +456,7 @@ describe('Storage', function() {
           expect(storedContent).toEqual({
             offlineUri: shaka.offline.OfflineScheme.manifestIdToUri(0),
             originalManifestUri: originalUri,
-            duration: 5,
+            duration: 20, // Original manifest duration
             size: jasmine.any(Number),
             expiration: Infinity,
             tracks: tracks,
@@ -513,7 +515,7 @@ describe('Storage', function() {
             .then(function(manifest) {
               expect(manifest).toBeTruthy();
               expect(manifest.size).toBe(34);
-              expect(manifest.duration).toBe(5);
+              expect(manifest.duration).toBe(20); // Original manifest duration
               expect(netEngine.request.calls.count()).toBe(6);
               return fakeStorageEngine.getManifest(0);
             })
@@ -598,7 +600,7 @@ describe('Storage', function() {
             .then(function(manifest) {
               expect(manifest).toBeTruthy();
               expect(manifest.size).toBe(5);
-              expect(manifest.duration).toBe(0);
+              expect(manifest.duration).toBe(20); // Original manifest duration
               expect(netEngine.request.calls.count()).toBe(1);
               return fakeStorageEngine.getManifest(0);
             })
@@ -632,7 +634,7 @@ describe('Storage', function() {
             .then(function(manifest) {
               expect(manifest).toBeTruthy();
               expect(manifest.size).toBe(15);
-              expect(manifest.duration).toBe(13);
+              expect(manifest.duration).toBe(20);  // Original manifest duration
               expect(netEngine.request.calls.count()).toBe(3);
               return fakeStorageEngine.getManifest(0);
             })
