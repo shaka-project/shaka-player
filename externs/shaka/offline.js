@@ -98,7 +98,6 @@ shakaExtern.StoredContent;
 
 /**
  * @typedef {{
- *   key: number,
  *   originalManifestUri: string,
  *   duration: number,
  *   size: number,
@@ -109,8 +108,6 @@ shakaExtern.StoredContent;
  *   appMetadata: Object
  * }}
  *
- * @property {number} key
- *   The key that uniquely identifies the manifest.
  * @property {string} originalManifestUri
  *   The URI that the manifest was originally loaded from.
  * @property {number} duration
@@ -223,12 +220,9 @@ shakaExtern.SegmentDB;
 
 /**
  * @typedef {{
- *   key: number,
  *   data: ArrayBuffer
  * }}
  *
- * @property {number} key
- *   A key that uniquely describes the segment.
  * @property {ArrayBuffer} data
  *   The data contents of the segment.
  */

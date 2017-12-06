@@ -507,9 +507,31 @@ describe('Storage', function() {
 
     describe('segments', function() {
       it('stores media segments', function(done) {
+        // The IDs and their order may change in a refactor.  The constant
+        // values here can be updated to match the behavior without changing
+        // the rest of the test."
+
+        /** @const {number} */
+        var id1 = 0;
+        /** @const {number} */
+        var id2 = 1;
+        /** @const {number} */
+        var id3 = 2;
+        /** @const {number} */
+        var id4 = 3;
+        /** @const {number} */
+        var id5 = 4;
+        /** @const {number} */
+        var id6 = 5;
+
+        /** @const {number} */
+        var fakeDataLength1 = 5;
+        /** @const {number} */
+        var fakeDataLength2 = 7;
+
         netEngine.setResponseMap({
-          'fake:0': new ArrayBuffer(5),
-          'fake:1': new ArrayBuffer(7)
+          'fake:0': new ArrayBuffer(fakeDataLength1),
+          'fake:1': new ArrayBuffer(fakeDataLength2)
         });
 
         stream1Index.merge([
@@ -523,6 +545,17 @@ describe('Storage', function() {
           new SegmentReference(0, 0, 1, makeUris('fake:0'), 0, null)
         ]);
 
+        var makeSegment = function(startTime, endTime, id) {
+          /** @type {string} */
+          var uri = Scheme.segmentIdToUri(id);
+
+          return {
+            startTime: startTime,
+            endTime: endTime,
+            uri: uri
+          };
+        };
+
         storage.store(fakeManifestUri)
             .then(function(manifest) {
               expect(manifest).toBeTruthy();
@@ -535,31 +568,23 @@ describe('Storage', function() {
               var stream1 = manifest.periods[0].streams[0];
               expect(stream1.initSegmentUri).toBe(null);
               expect(stream1.segments.length).toBe(5);
-              expect(stream1.segments[0]).toEqual({
-                startTime: 0,
-                endTime: 1,
-                uri: Scheme.segmentIdToUri(0)
-              });
-              expect(stream1.segments[3]).toEqual({
-                startTime: 3,
-                endTime: 4,
-                uri: Scheme.segmentIdToUri(3)
-              });
+              expect(stream1.segments).toContain(makeSegment(0, 1, id1));
+              expect(stream1.segments).toContain(makeSegment(1, 2, id3));
+              expect(stream1.segments).toContain(makeSegment(2, 3, id4));
+              expect(stream1.segments).toContain(makeSegment(3, 4, id5));
+              expect(stream1.segments).toContain(makeSegment(4, 5, id6));
 
               var stream2 = manifest.periods[0].streams[1];
               expect(stream2.initSegmentUri).toBe(null);
               expect(stream2.segments.length).toBe(1);
-              expect(stream2.segments[0]).toEqual({
-                startTime: 0,
-                endTime: 1,
-                uri: Scheme.segmentIdToUri(5)
-              });
-              return fakeStorageEngine.getSegment(3);
+              expect(stream2.segments).toContain(makeSegment(0, 1, id2));
+
+              return fakeStorageEngine.getSegment(id4);
             })
             .then(function(segment) {
               expect(segment).toBeTruthy();
               expect(segment.data).toBeTruthy();
-              expect(segment.data.byteLength).toBe(5);
+              expect(segment.data.byteLength).toBe(fakeDataLength2);
             })
             .catch(fail)
             .then(done);
@@ -895,9 +920,9 @@ describe('Storage', function() {
                   .segment(4, 6)
                   .segment(6, 8)
           .build()
-          .then(function(manifest) {
+          .then(function(manifestId) {
             expectDatabaseCount(1, 4);
-            return removeManifest(manifest.key);
+            return removeManifest(manifestId);
           }).then(function() {
             expectDatabaseCount(0, 0);
           }).catch(fail).then(done);
@@ -916,9 +941,9 @@ describe('Storage', function() {
                   .segment(4, 6)
                   .segment(6, 8)
           .build()
-          .then(function(manifest) {
+          .then(function(manifestId) {
             expectDatabaseCount(1, 5);
-            return removeManifest(manifest.key);
+            return removeManifest(manifestId);
           }).then(function() {
             expectDatabaseCount(0, 0);
           }).catch(fail).then(done);
@@ -941,9 +966,9 @@ describe('Storage', function() {
                   .segment(4, 6)
                   .segment(6, 8)
           .build()
-          .then(function(manifest) {
+          .then(function(manifestId) {
             expectDatabaseCount(1, 8);
-            return removeManifest(manifest.key);
+            return removeManifest(manifestId);
           }).then(function() {
             expectDatabaseCount(0, 0);
           }).catch(fail).then(done);
@@ -967,9 +992,9 @@ describe('Storage', function() {
                   .segment(4, 6)
                   .segment(6, 8)
           .build()
-          .then(function(manifest) {
+          .then(function(manifestId) {
             expectDatabaseCount(1, 8);
-            return removeManifest(manifest.key);
+            return removeManifest(manifestId);
           }).then(function() {
             expectDatabaseCount(0, 0);
           }).catch(fail).then(done);
@@ -989,9 +1014,9 @@ describe('Storage', function() {
                   .segment(4, 6)
                   .segment(6, 8)
           .build()
-          .then(function(manifest) {
+          .then(function(manifestId) {
             expectDatabaseCount(1, 4);
-            return removeManifest(manifest.key);
+            return removeManifest(manifestId);
           }).then(function() {
             expectDatabaseCount(0, 0);
           }).catch(fail).then(done);
@@ -1002,7 +1027,9 @@ describe('Storage', function() {
           fakeStorageEngine,
           'Need storage engine for this test.');
 
-      var manifest1;
+      var manifestId1;
+      var manifestId2;
+
       var manifest2;
 
       Promise.all([
@@ -1022,14 +1049,17 @@ describe('Storage', function() {
                     .segment(4, 6)
                     .segment(6, 8)
             .build()
-      ]).then(function(manifests) {
-        manifest1 = manifests[0];
-        manifest2 = manifests[1];
+      ]).then(function(manifestsIds) {
+        manifestId1 = manifestsIds[0];
+        manifestId2 = manifestsIds[1];
 
         expectDatabaseCount(2, 8);
-        return removeManifest(manifest1.key);
+        return removeManifest(manifestId1);
       }).then(function() {
         expectDatabaseCount(1, 4);
+        return fakeStorageEngine.getManifest(manifestId2);
+      }).then(function(manifest) {
+        manifest2 = manifest;
         return loadSegmentsForStream(manifest2.periods[0].streams[0]);
       }).then(function(segments) {
         // Make sure all the segments for the second manifest are still
@@ -1060,9 +1090,9 @@ describe('Storage', function() {
                 segment.uri = Scheme.segmentIdToUri(1253);
               })
           .build()
-          .then(function(manifest) {
+          .then(function(manifestId) {
             expectDatabaseCount(1, 4);
-            return removeManifest(manifest.key);
+            return removeManifest(manifestId);
           }).then(function() {
             // The segment that was changed above was not deleted.
             expectDatabaseCount(0, 1);

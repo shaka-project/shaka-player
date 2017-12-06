@@ -119,15 +119,12 @@ describe('OfflineScheme', function() {
     });
 
     it('will return special content-type header for manifests', function(done) {
-      /** @const {number} */
-      var id = 789;
-      /** @const {string} */
-      var uri = shaka.offline.OfflineScheme.manifestIdToUri(id);
+      /** @type {string} */
+      var uri;
 
       Promise.resolve()
           .then(function() {
-            return fakeStorageEngine.insertManifest({
-              key: id,
+            return fakeStorageEngine.addManifest({
               originalManifestUri: '',
               duration: 0,
               size: 0,
@@ -138,7 +135,8 @@ describe('OfflineScheme', function() {
               appMetadata: {}
             });
           })
-          .then(function() {
+          .then(function(id) {
+            uri = shaka.offline.OfflineScheme.manifestIdToUri(id);
             return OfflineScheme(uri, request);
           })
           .then(function(response) {
@@ -152,22 +150,20 @@ describe('OfflineScheme', function() {
     });
 
     it('will get segment data from storage engine', function(done) {
-      /** @const {number} */
-      var id = 789;
-      /** @const {string} */
-      var uri = shaka.offline.OfflineScheme.segmentIdToUri(id);
-
       /** @const {!Uint8Array} */
       var originalData = new Uint8Array([0, 1, 2, 3]);
 
+      /** @type {string} */
+      var uri;
+
       Promise.resolve()
           .then(function() {
-            return fakeStorageEngine.insertSegment({
-              key: id,
+            return fakeStorageEngine.addSegment({
               data: originalData.buffer
             });
           })
-          .then(function() {
+          .then(function(id) {
+            uri = shaka.offline.OfflineScheme.segmentIdToUri(id);
             return OfflineScheme(uri, request);
           })
           .then(function(response) {

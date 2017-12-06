@@ -55,18 +55,31 @@ shaka.test.MemoryStorageEngine.prototype.getManifest = function(key) {
 
 /** @override */
 shaka.test.MemoryStorageEngine.prototype.forEachManifest = function(each) {
-  shaka.util.MapUtils.forEach(this.manifests_, function(key, value) {
-    return each(value);
-  });
+  shaka.util.MapUtils.forEach(this.manifests_, each);
   return Promise.resolve();
 };
 
 
 /** @override */
-shaka.test.MemoryStorageEngine.prototype.insertManifest =
-    function(manifest) {
-  this.manifests_[manifest.key] = manifest;
-  return Promise.resolve();
+shaka.test.MemoryStorageEngine.prototype.addManifest = function(manifest) {
+  /** @type {number} */
+  var key = this.nextManifestId_++;
+
+  this.manifests_[key] = manifest;
+  return Promise.resolve(key);
+};
+
+
+/** @override */
+shaka.test.MemoryStorageEngine.prototype.updateManifest = function(
+    key, manifest) {
+
+  if (this.manifests_[key]) {
+    this.manifests_[key] = manifest;
+    return Promise.resolve(key);
+  } else {
+    return Promise.reject();
+  }
 };
 
 
@@ -83,12 +96,6 @@ shaka.test.MemoryStorageEngine.prototype.removeManifests =
 
 
 /** @override */
-shaka.test.MemoryStorageEngine.prototype.reserveManifestId = function() {
-  return this.nextManifestId_++;
-};
-
-
-/** @override */
 shaka.test.MemoryStorageEngine.prototype.getSegment = function(key) {
   var segment = this.segments_[key];
   return Promise.resolve(segment);
@@ -97,15 +104,16 @@ shaka.test.MemoryStorageEngine.prototype.getSegment = function(key) {
 
 /** @override */
 shaka.test.MemoryStorageEngine.prototype.forEachSegment = function(each) {
-  shaka.util.MapUtils.forEach(this.segments_, function(key, value) {
-    return each(value);
-  });
+  shaka.util.MapUtils.forEach(this.segments_, each);
   return Promise.resolve();
 };
 
 
 /** @override */
-shaka.test.MemoryStorageEngine.prototype.insertSegment = function(segment) {
+shaka.test.MemoryStorageEngine.prototype.addSegment = function(segment) {
+  /** @type {number} */
+  var key = this.nextSegmentId_++;
+
   // Clone the segment, so the caller can wipe its version.
   var clonedData = null;
   if (segment.data) {
@@ -113,11 +121,11 @@ shaka.test.MemoryStorageEngine.prototype.insertSegment = function(segment) {
     (new Uint8Array(clonedData)).set(new Uint8Array(segment.data));
   }
 
-  this.segments_[segment.key] = {
-    key: segment.key,
+  this.segments_[key] = {
     data: clonedData
   };
-  return Promise.resolve();
+
+  return Promise.resolve(key);
 };
 
 
@@ -130,12 +138,6 @@ shaka.test.MemoryStorageEngine.prototype.removeSegments =
       this.segments_, keys, opt_onRemoveKey || noop);
 
   return Promise.resolve();
-};
-
-
-/** @override */
-shaka.test.MemoryStorageEngine.prototype.reserveSegmentId = function() {
-  return this.nextSegmentId_++;
 };
 
 

@@ -48,17 +48,14 @@ describe('DBEngine', /** @suppress {accessControls} */ function() {
   });
 
   it('stores and retrieves a manifest', checkAndRun(function(done) {
-    /** @type {number} */
-    var id = db.reserveManifestId();
-
     /** @type {shakaExtern.ManifestDB} */
-    var original = createManifest(id);
+    var original = createManifest('original manifest');
 
     Promise.resolve()
         .then(function() {
-          return db.insertManifest(original);
+          return db.addManifest(original);
         })
-        .then(function() {
+        .then(function(id) {
           return db.getManifest(id);
         })
         .then(function(copy) {
@@ -68,17 +65,13 @@ describe('DBEngine', /** @suppress {accessControls} */ function() {
   }));
 
   it('stores and retrieves many manifest', checkAndRun(function(done) {
-    /** @type {!Array<number>} */
-    var ids = [
-      db.reserveManifestId(),
-      db.reserveManifestId(),
-      db.reserveManifestId()
-    ];
-
     /** @type {!Array<shakaExtern.ManifestDB>} */
-    var originals = ids.map(function(id) {
-      return createManifest(id);
-    });
+    var originals = [
+      createManifest('original manifest 1'),
+      createManifest('original manifest 2'),
+      createManifest('original manifest 3'),
+      createManifest('original manifest 4')
+    ];
 
     /** @type {!Array<shakaExtern.ManifestDB>} */
     var copies = [];
@@ -86,11 +79,11 @@ describe('DBEngine', /** @suppress {accessControls} */ function() {
     Promise.resolve()
         .then(function() {
           return Promise.all(originals.map(function(original) {
-            return db.insertManifest(original);
+            return db.addManifest(original);
           }));
         })
         .then(function() {
-          return db.forEachManifest(function(manifest) {
+          return db.forEachManifest(function(id, manifest) {
             copies.push(manifest);
           });
         })
@@ -103,17 +96,18 @@ describe('DBEngine', /** @suppress {accessControls} */ function() {
   }));
 
   it('stores and remove a manifest', checkAndRun(function(done) {
-    /** @type {number} */
-    var id = db.reserveManifestId();
-
     /** @type {shakaExtern.ManifestDB} */
-    var original = createManifest(id);
+    var original = createManifest('original manifest');
+
+    /** @type {number} */
+    var id;
 
     Promise.resolve()
         .then(function() {
-          return db.insertManifest(original);
+          return db.addManifest(original);
         })
-        .then(function() {
+        .then(function(newId) {
+          id = newId;
           return db.getManifest(id);
         })
         .then(function(value) {
@@ -130,17 +124,14 @@ describe('DBEngine', /** @suppress {accessControls} */ function() {
   }));
 
   it('stores and retrieves a segment', checkAndRun(function(done) {
-    /** @type {number} */
-    var id = db.reserveSegmentId();
-
     /** @type {shakaExtern.SegmentDataDB} */
-    var original = createSegment(id);
+    var original = createSegment([0, 1, 2]);
 
     Promise.resolve()
         .then(function() {
-          return db.insertSegment(original);
+          return db.addSegment(original);
         })
-        .then(function() {
+        .then(function(id) {
           return db.getSegment(id);
         })
         .then(function(copy) {
@@ -150,17 +141,13 @@ describe('DBEngine', /** @suppress {accessControls} */ function() {
   }));
 
   it('stores and retrieves many segments', checkAndRun(function(done) {
-    /** @type {!Array<number>} */
-    var ids = [
-      db.reserveSegmentId(),
-      db.reserveSegmentId(),
-      db.reserveSegmentId()
-    ];
-
     /** @type {!Array<shakaExtern.SegmentDataDB>} */
-    var originals = ids.map(function(id) {
-      return createSegment(id);
-    });
+    var originals = [
+      createSegment([0]),
+      createSegment([1, 2]),
+      createSegment([3, 4, 5]),
+      createSegment([6, 7, 8, 9])
+    ];
 
     /** @type {!Array<shakaExtern.SegmentDataDB>} */
     var copies = [];
@@ -168,11 +155,11 @@ describe('DBEngine', /** @suppress {accessControls} */ function() {
     Promise.resolve()
         .then(function() {
           return Promise.all(originals.map(function(original) {
-            return db.insertSegment(original);
+            return db.addSegment(original);
           }));
         })
         .then(function() {
-          return db.forEachSegment(function(segment) {
+          return db.forEachSegment(function(id, segment) {
             copies.push(segment);
           });
         })
@@ -185,17 +172,18 @@ describe('DBEngine', /** @suppress {accessControls} */ function() {
   }));
 
   it('stores and remove a segment', checkAndRun(function(done) {
-    /** @type {number} */
-    var id = db.reserveSegmentId();
-
     /** @type {shakaExtern.SegmentDataDB} */
-    var original = createSegment(id);
+    var original = createSegment([0, 1, 2]);
+
+    /** @type {number} */
+    var id;
 
     Promise.resolve()
         .then(function() {
-          return db.insertSegment(original);
+          return db.addSegment(original);
         })
-        .then(function() {
+        .then(function(newId) {
+          id = newId;
           return db.getSegment(id);
         })
         .then(function(value) {
@@ -213,15 +201,12 @@ describe('DBEngine', /** @suppress {accessControls} */ function() {
 
   // TODO : Remove this test once we drop support for DB Engine Version 1
   it('fills missing variant ids for old manifests', checkAndRun(function(done) {
-    /** @type {number} */
-    var id = db.reserveManifestId();
-
     // Create a manifest with four streams. Two video and two audio. When db
     // engine recreates the variant ids, it should pair them together into
     // four variants.
 
     /** @type {shakaExtern.ManifestDB} */
-    var originalManifest = createManifest(id);
+    var originalManifest = createManifest('original manifest');
     originalManifest.periods.push({
       startTime: 0,
       streams: [
@@ -240,9 +225,9 @@ describe('DBEngine', /** @suppress {accessControls} */ function() {
 
     Promise.resolve()
         .then(function() {
-          return db.insertManifest(originalManifest);
+          return db.addManifest(originalManifest);
         })
-        .then(function() {
+        .then(function(id) {
           return db.getManifest(id);
         })
         .then(function(manifest) {
@@ -287,17 +272,16 @@ describe('DBEngine', /** @suppress {accessControls} */ function() {
 
 
   /**
-   * @param {number} id
+   * @param {string} originalUri
    * @return {shakaExtern.ManifestDB}
    */
-  function createManifest(id) {
+  function createManifest(originalUri) {
     return {
       appMetadata: null,
       drmInfo: null,
       duration: 90,
       expiration: Infinity,
-      key: id,
-      originalManifestUri: '',
+      originalManifestUri: originalUri,
       periods: [],
       sessionIds: [],
       size: 1024
@@ -334,16 +318,15 @@ describe('DBEngine', /** @suppress {accessControls} */ function() {
 
 
   /**
-   * @param {number} id
+   * @param {!Array.<number>} data
    * @return {shakaExtern.SegmentDataDB}
    */
-  function createSegment(id) {
+  function createSegment(data) {
+    /** @type {Int32Array} */
+    var array = new Int32Array(data);
+
     return {
-      data: null,
-      key: id,
-      manifestKey: 0,
-      segmentNumber: 0,
-      streamNumber: 0
+      data: array.buffer
     };
   }
 });
