@@ -179,7 +179,15 @@ describe('Offline', /** @suppress {accessControls} */ function() {
           expect(session).toBeFalsy();
           return drmEngine.destroy();
         })
-        .catch(fail)
+        .catch(function(error) {
+          fail(error);
+
+          // Make sure we clean up the extra DrmEngine even if the Promise
+          // chain and test fail.
+          if (drmEngine) {
+            return drmEngine.destroy();
+          }
+        })
         .then(done);
   });
 
