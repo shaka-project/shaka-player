@@ -216,9 +216,9 @@ describe('DBEngine', /** @suppress {accessControls} */ function() {
     /** @type {number} */
     var id = db.reserveManifestId();
 
-    // Create a manifest with two streams. One video and one audio. When db
+    // Create a manifest with four streams. Two video and two audio. When db
     // engine recreates the variant ids, it should pair them together into
-    // a variant.
+    // four variants.
 
     /** @type {shakaExtern.ManifestDB} */
     var originalManifest = createManifest(id);
