@@ -81,7 +81,7 @@ describe('CastReceiver', function() {
     shaka.media.ManifestParser.registerParserByMime(
         'application/x-test-manifest',
         shaka.test.TestScheme.ManifestParser);
-    shaka.test.TestScheme.createManifests(shaka, '_compiled').then(done);
+    shaka.test.TestScheme.createManifests(shaka, '').then(done);
   });
 
   beforeEach(function() {
@@ -108,6 +108,7 @@ describe('CastReceiver', function() {
     video.width = 600;
     video.height = 400;
     video.muted = true;
+    document.body.appendChild(video);
 
     player = new shaka.Player(video);
     receiver = new CastReceiver(video, player);
@@ -120,10 +121,14 @@ describe('CastReceiver', function() {
     toRestore.forEach(function(restoreCallback) {
       restoreCallback();
     });
+
     receiver.destroy().catch(fail).then(function() {
+      document.body.removeChild(video);
+
       player = null;
       video = null;
       receiver = null;
+
       done();
     });
   });
@@ -150,25 +155,17 @@ describe('CastReceiver', function() {
         loop: true,
         playbackRate: 5
       },
-      manifest: 'test:sintel_no_text_compiled',
+      manifest: 'test:sintel_no_text',
       startTime: 0
     };
-
-    // Start the process of loading by sending a fake init message.
-    fakeConnectedSenders(1);
-    fakeIncomingMessage({
-      type: 'init',
-      initState: fakeInitState,
-      appData: {}
-    }, mockShakaMessageBus);
 
     // Add wrappers to various methods along player.load to make sure that,
     // at each stage, the cast receiver can form an update message without
     // causing an error.
-    waitForUpdateMessageWrapper(shaka.test.TestScheme.ManifestParser.prototype,
-        'ManifestParser', 'start');
     waitForUpdateMessageWrapper(
         shaka.media.ManifestParser, 'ManifestParser', 'getFactory');
+    waitForUpdateMessageWrapper(shaka.test.TestScheme.ManifestParser.prototype,
+        'ManifestParser', 'start');
     waitForUpdateMessageWrapper(
         shaka.media.DrmEngine.prototype, 'DrmEngine', 'init');
     waitForUpdateMessageWrapper(
@@ -192,6 +189,14 @@ describe('CastReceiver', function() {
       done();
     };
     player.addEventListener('error', onError);
+
+    // Start the process of loading by sending a fake init message.
+    fakeConnectedSenders(1);
+    fakeIncomingMessage({
+      type: 'init',
+      initState: fakeInitState,
+      appData: {}
+    }, mockShakaMessageBus);
   });
 
   /**
