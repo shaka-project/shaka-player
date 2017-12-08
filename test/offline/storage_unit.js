@@ -402,7 +402,7 @@ describe('Storage', function() {
             offlineUri: shaka.offline.OfflineScheme.manifestIdToUri(0),
             originalManifestUri: originalUri,
             duration: 20, // original manifest duration
-            size: 150,
+            size: jasmine.any(Number),
             expiration: Infinity,
             tracks: tracks,
             appMetadata: {}
@@ -411,15 +411,19 @@ describe('Storage', function() {
           switch (progress.calls.count()) {
             case 1:
               expect(percent).toBeCloseTo(54 / 150);
+              expect(storedContent.size).toBeCloseTo(54);
               break;
             case 2:
               expect(percent).toBeCloseTo(67 / 150);
+              expect(storedContent.size).toBeCloseTo(67);
               break;
             case 3:
               expect(percent).toBeCloseTo(133 / 150);
+              expect(storedContent.size).toBeCloseTo(133);
               break;
             default:
               expect(percent).toBeCloseTo(1);
+              expect(storedContent.size).toBeCloseTo(150);
               break;
           }
         });
@@ -466,15 +470,15 @@ describe('Storage', function() {
           switch (progress.calls.count()) {
             case 1:
               expect(percent).toBeCloseTo(54 / 101);
-              expect(storedContent.size).toBe(71);
+              expect(storedContent.size).toBe(54);
               break;
             case 2:
               expect(percent).toBeCloseTo(64 / 101);
-              expect(storedContent.size).toBe(84);
+              expect(storedContent.size).toBe(67);
               break;
             case 3:
               expect(percent).toBeCloseTo(84 / 101);
-              expect(storedContent.size).toBe(150);
+              expect(storedContent.size).toBe(133);
               break;
             default:
               expect(percent).toBeCloseTo(1);
