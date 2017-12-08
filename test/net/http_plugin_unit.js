@@ -37,6 +37,11 @@ describe('HttpPlugin', function() {
       'status': 204,
       'responseHeaders': { 'FOO': 'BAR' }
     });
+    jasmine.Ajax.stubRequest('https://foo.bar/withemptyline').andReturn({
+      'response': new ArrayBuffer(0),
+      'status': 200,
+      'responseHeaders': { '\nFOO': 'BAR' }
+    });
     jasmine.Ajax.stubRequest('https://foo.bar/302').andReturn({
       'response': new ArrayBuffer(10),
       'status': 200,
@@ -60,6 +65,7 @@ describe('HttpPlugin', function() {
       'status': 200,
       'responseHeaders': { 'X-Shaka-From-Cache': 'true' }
     });
+
     jasmine.Ajax.stubRequest('https://foo.bar/timeout').andTimeout();
     jasmine.Ajax.stubRequest('https://foo.bar/error').andError();
 
@@ -98,6 +104,10 @@ describe('HttpPlugin', function() {
 
   it('succeeds with 204 status', function(done) {
     testSucceeds('https://foo.bar/204', done);
+  });
+
+  it('succeeds with empty line in response', function(done) {
+    testSucceedsWithEmptyLine('https://foo.bar/withemptyline', done);
   });
 
   it('gets redirect URLs with 302 status', function(done) {
@@ -178,6 +188,31 @@ describe('HttpPlugin', function() {
           expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
 
           expect(jasmine.Ajax.requests.mostRecent().url).toBe(uri);
+        })
+        .then(done);
+  }
+
+  /**
+   * Since IE/Edge incorrectly return the header with a leading new line
+   * character ('\n'), we need to trim the response header.
+   * @param {string} uri
+   * @param {function()} done
+   * @param {string=} opt_overrideUri
+   */
+  function testSucceedsWithEmptyLine(uri, done, opt_overrideUri) {
+    var request = shaka.net.NetworkingEngine.makeRequest(
+        [uri], retryParameters);
+    shaka.net.HttpPlugin(uri, request)
+        .catch(fail)
+        .then(function(response) {
+          expect(jasmine.Ajax.requests.mostRecent().url).toBe(uri);
+          expect(response).toBeTruthy();
+          expect(response.uri).toBe(opt_overrideUri || uri);
+          expect(response.data).toBeTruthy();
+          expect(response.fromCache).toBe(false);
+          expect(response.headers).toBeTruthy();
+          // Returned header names do not contain empty lines.
+          expect(response.headers['foo']).toBe('BAR');
         })
         .then(done);
   }
