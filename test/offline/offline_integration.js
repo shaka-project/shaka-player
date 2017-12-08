@@ -89,6 +89,11 @@ describe('Offline', /** @suppress {accessControls} */ function() {
     storage.store('test:sintel')
         .then(function(content) {
           storedContent = content;
+
+          goog.asserts.assert(
+              storedContent.offlineUri,
+              'Downloaded content should have a valid uri.');
+
           return player.load(storedContent.offlineUri);
         })
         .then(function() {
@@ -132,6 +137,10 @@ describe('Offline', /** @suppress {accessControls} */ function() {
     storage.store('test:sintel-enc')
         .then(function(content) {
           storedContent = content;
+
+          goog.asserts.assert(
+              storedContent.offlineUri,
+              'Downloaded content should have a valid uri.');
 
           /** @type {string} */
           var uri = storedContent.offlineUri;
@@ -231,7 +240,11 @@ describe('Offline', /** @suppress {accessControls} */ function() {
             .then(function(content) {
               storedContent = content;
 
-              /** @type {string} */
+              goog.asserts.assert(
+                  storedContent.offlineUri,
+                  'Downloaded content should have a valid uri.');
+
+             /** @type {string} */
               var uri = storedContent.offlineUri;
 
               /** @type {?number} */

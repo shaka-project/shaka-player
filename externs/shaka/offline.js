@@ -64,7 +64,7 @@ shakaExtern.OfflineConfiguration;
 
 /**
  * @typedef {{
- *   offlineUri: string,
+ *   offlineUri: ?string,
  *   originalManifestUri: string,
  *   duration: number,
  *   size: number,
@@ -73,9 +73,10 @@ shakaExtern.OfflineConfiguration;
  *   appMetadata: Object
  * }}
  *
- * @property {string} offlineUri
- *   An offline URI to access the content.  This can be passed directly to
- *   Player.
+ * @property {?string} offlineUri
+ *   An offline URI to access the content. This can be passed directly to
+ *   Player. If the uri is null, it means that the content has not finished
+ *   downloading and is not ready to play.
  * @property {string} originalManifestUri
  *   The original manifest URI of the content stored.
  * @property {number} duration
