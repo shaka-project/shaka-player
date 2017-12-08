@@ -30,8 +30,6 @@ describe('CastReceiver', function() {
   var mockReceiverApi;
   var mockShakaMessageBus;
   var mockGenericMessageBus;
-  /** @type {!jasmine.Spy} */
-  var mockCanDisplayType;
 
   /** @type {shaka.cast.CastReceiver} */
   var receiver;
@@ -90,8 +88,9 @@ describe('CastReceiver', function() {
     checkChromeOrChromecast();
 
     mockReceiverApi = createMockReceiverApi();
-    mockCanDisplayType = jasmine.createSpy('canDisplayType');
-    mockCanDisplayType.and.returnValue(false);
+
+    var mockCanDisplayType = jasmine.createSpy('canDisplayType');
+    mockCanDisplayType.and.returnValue(true);
 
     // We're using quotes to access window.cast because the compiler
     // knows about lots of Cast-specific APIs we aren't mocking.  We
@@ -187,6 +186,12 @@ describe('CastReceiver', function() {
       waitForUpdateMessage().then(done);
     };
     video.addEventListener('loadeddata', onLoadedData);
+
+    var onError = function(event) {
+      fail(event.detail);
+      done();
+    };
+    player.addEventListener('error', onError);
   });
 
   /**
