@@ -91,6 +91,21 @@ shaka.test.MemoryDBEngine.prototype.forEach = function(storeName, callback) {
 shaka.test.MemoryDBEngine.prototype.insert = function(storeName, value) {
   var store = this.getStore_(storeName);
   goog.asserts.assert(!store[value.key], 'Value must not already exist');
+
+  if (value.data) {
+    // Clone the data and value, so the caller can wipe its version.
+    var clonedData = null;
+    if (value.data) {
+      clonedData = new ArrayBuffer(value.data.byteLength);
+      (new Uint8Array(clonedData)).set(new Uint8Array(value.data));
+    }
+
+    value = {
+      key: value.key,
+      data: clonedData
+    };
+  }
+
   store[value.key] = value;
   return Promise.resolve();
 };
