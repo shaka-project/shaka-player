@@ -2261,11 +2261,33 @@ describe('Player', function() {
       setupPlayer(manifest).then(function() {
         expect(player.getVariantTracks().length).toBe(2);
 
-        onKeyStatus({});
+        // We have some key statuses, but not for the key IDs we know.
+        onKeyStatus({'foo': 'usable'});
 
         var tracks = player.getVariantTracks();
         expect(tracks.length).toBe(1);
         expect(tracks[0].id).toBe(2);
+      }).catch(fail).then(done);
+    });
+
+    it('does not restrict if no key statuses are available', function(done) {
+      manifest = new shaka.test.ManifestGenerator()
+              .addPeriod(0)
+                .addVariant(0)
+                  .addVideo(1).keyId('abc')
+                .addVariant(2)
+                  .addVideo(3)
+              .build();
+
+      setupPlayer(manifest).then(function() {
+        expect(player.getVariantTracks().length).toBe(2);
+
+        // This simulates, for example, the lack of key status on Chromecast
+        // when using PlayReady.  See #1070.
+        onKeyStatus({});
+
+        var tracks = player.getVariantTracks();
+        expect(tracks.length).toBe(2);
       }).catch(fail).then(done);
     });
 
