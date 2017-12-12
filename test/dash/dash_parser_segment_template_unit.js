@@ -76,6 +76,49 @@ describe('DashParser SegmentTemplate', function() {
       ];
       Dash.testSegmentIndex(done, source, references);
     });
+
+    it('honors presentationTimeOffset', function(done) {
+      var source = Dash.makeSimpleManifestText([
+        '<SegmentTemplate media="s$Number$.mp4" duration="10"',
+        ' presentationTimeOffset="50" />'
+      ], 30 /* duration */);
+
+      // Due to PTO, the first segment is number 6 and position 5.
+      var references = [
+        ManifestParser.makeReference('s6.mp4', 5, 0, 10, baseUri),
+        ManifestParser.makeReference('s7.mp4', 6, 10, 20, baseUri),
+        ManifestParser.makeReference('s8.mp4', 7, 20, 30, baseUri)
+      ];
+      Dash.testSegmentIndex(done, source, references);
+    });
+
+    it('handles segments larger than the period', function(done) {
+      var source = Dash.makeSimpleManifestText([
+        '<SegmentTemplate media="s$Number$.mp4" duration="60" />'
+      ], 30 /* duration */);
+      // The first segment is number 1 and position 0.
+      // Although the segment is 60 seconds long, it is clipped to the period
+      // duration of 30 seconds.
+      var references = [
+        ManifestParser.makeReference('s1.mp4', 0, 0, 30, baseUri)
+      ];
+      Dash.testSegmentIndex(done, source, references);
+    });
+
+    it('allows negative start times', function(done) {
+      var source = Dash.makeSimpleManifestText([
+        '<SegmentTemplate media="s$Number$.mp4" duration="60"',
+        ' presentationTimeOffset="50" />'
+      ], 70 /* duration */);
+
+      // Due to PTO, the first segment has a negative start time.  It is
+      // included because it is partially within the period.
+      var references = [
+        ManifestParser.makeReference('s1.mp4', 0, -50, 10, baseUri),
+        ManifestParser.makeReference('s2.mp4', 1, 10, 70, baseUri)
+      ];
+      Dash.testSegmentIndex(done, source, references);
+    });
   });
 
   describe('index', function() {
