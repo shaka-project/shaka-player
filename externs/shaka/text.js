@@ -302,6 +302,13 @@ shakaExtern.TextDisplayer = function() {};
 
 
 /**
+ * @override
+ * @exportDoc
+ */
+shakaExtern.TextDisplayer.prototype.destroy = function() {};
+
+
+/**
  * Append given text cues to the list of cues to be displayed.
  *
  * @param {!Array.<!shaka.text.Cue>} cues

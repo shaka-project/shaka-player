@@ -356,6 +356,46 @@ describe('Player', function() {
     });
   });
 
+  describe('TextDisplayer plugin', function() {
+    // Simulate the use of an external TextDisplayer plugin.
+    var textDisplayer;
+    beforeEach(function() {
+      textDisplayer = {
+        destroy: jasmine.createSpy('destroy'),
+        append: jasmine.createSpy('append'),
+        remove: jasmine.createSpy('remove'),
+        isTextVisible: jasmine.createSpy('isTextVisible'),
+        setTextVisibility: jasmine.createSpy('setTextVisibility')
+      };
+
+      textDisplayer.destroy.and.returnValue(Promise.resolve());
+      textDisplayer.isTextVisible.and.returnValue(true);
+
+      player.configure({
+        textDisplayFactory: function() { return textDisplayer; }
+      });
+
+      // Make sure the configuration was taken.
+      var configuredFactory = player.getConfiguration().textDisplayFactory;
+      var configuredTextDisplayer = new configuredFactory();
+      expect(configuredTextDisplayer).toBe(textDisplayer);
+    });
+
+    // Regression test for https://github.com/google/shaka-player/issues/1187
+    it('does not throw on destroy', function(done) {
+      player.load('test:sintel_compiled').then(function() {
+        video.play();
+        return waitUntilPlayheadReaches(video, 1, 10);
+      }).then(function() {
+        return player.unload();
+      }).then(function() {
+        // Before we fixed #1187, the call to destroy() on textDisplayer was
+        // renamed in the compiled version and could not be called.
+        expect(textDisplayer.destroy).toHaveBeenCalled();
+      }).catch(fail).then(done);
+    });
+  });
+
   /**
    * @param {!HTMLMediaElement} video
    * @param {number} playheadTime The time to wait for.
