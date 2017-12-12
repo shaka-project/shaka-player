@@ -40,7 +40,9 @@ shaka.test.ManifestParser.verifySegmentIndex = function(stream, references) {
 
   for (var i = 0; i < references.length; i++) {
     var expectedRef = references[i];
-    var position = stream.findSegmentPosition(expectedRef.startTime);
+    // Don't query negative times.  Query 0 instead.
+    var startTime = Math.max(0, expectedRef.startTime);
+    var position = stream.findSegmentPosition(startTime);
     expect(position).not.toBe(null);
     var actualRef =
         stream.getSegmentReference(/** @type {number} */ (position));
