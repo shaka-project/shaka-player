@@ -46,7 +46,7 @@ describe('DBEngine', function() {
 
   it('stores and retrieves a manifest', checkAndRun(function(done) {
     /** @type {shakaExtern.ManifestDB} */
-    var original = createManifest('original manifest');
+    var original = shaka.test.OfflineUtils.createManifest('original manifest');
 
     Promise.resolve()
         .then(function() {
@@ -64,10 +64,10 @@ describe('DBEngine', function() {
   it('stores and retrieves many manifest', checkAndRun(function(done) {
     /** @type {!Array<shakaExtern.ManifestDB>} */
     var originals = [
-      createManifest('original manifest 1'),
-      createManifest('original manifest 2'),
-      createManifest('original manifest 3'),
-      createManifest('original manifest 4')
+      shaka.test.OfflineUtils.createManifest('original manifest 1'),
+      shaka.test.OfflineUtils.createManifest('original manifest 2'),
+      shaka.test.OfflineUtils.createManifest('original manifest 3'),
+      shaka.test.OfflineUtils.createManifest('original manifest 4')
     ];
 
     /** @type {!Array<shakaExtern.ManifestDB>} */
@@ -94,7 +94,7 @@ describe('DBEngine', function() {
 
   it('stores and removes a manifest', checkAndRun(function(done) {
     /** @type {shakaExtern.ManifestDB} */
-    var original = createManifest('original manifest');
+    var original = shaka.test.OfflineUtils.createManifest('original manifest');
 
     /** @type {number} */
     var id;
@@ -122,7 +122,7 @@ describe('DBEngine', function() {
 
   it('stores and retrieves a segment', checkAndRun(function(done) {
     /** @type {shakaExtern.SegmentDataDB} */
-    var original = createSegment([0, 1, 2]);
+    var original = shaka.test.OfflineUtils.createSegmentData([0, 1, 2]);
 
     Promise.resolve()
         .then(function() {
@@ -132,7 +132,7 @@ describe('DBEngine', function() {
           return db.getSegment(id);
         })
         .then(function(copy) {
-          expectSegmentToEqual(copy, original);
+          shaka.test.OfflineUtils.expectSegmentToEqual(copy, original);
         })
         .then(done).catch(fail);
   }));
@@ -140,10 +140,10 @@ describe('DBEngine', function() {
   it('stores and retrieves many segments', checkAndRun(function(done) {
     /** @type {!Array<shakaExtern.SegmentDataDB>} */
     var originals = [
-      createSegment([0]),
-      createSegment([1, 2]),
-      createSegment([3, 4, 5]),
-      createSegment([6, 7, 8, 9])
+      shaka.test.OfflineUtils.createSegmentData([0]),
+      shaka.test.OfflineUtils.createSegmentData([1, 2]),
+      shaka.test.OfflineUtils.createSegmentData([3, 4, 5]),
+      shaka.test.OfflineUtils.createSegmentData([6, 7, 8, 9])
     ];
 
     /** @type {!Array<shakaExtern.SegmentDataDB>} */
@@ -162,7 +162,7 @@ describe('DBEngine', function() {
         })
         .then(function() {
           originals.forEach(function(original) {
-            expectSegmentsToContain(copies, original);
+            shaka.test.OfflineUtils.expectSegmentsToContain(copies, original);
           });
         })
         .then(done).catch(fail);
@@ -170,7 +170,7 @@ describe('DBEngine', function() {
 
   it('stores and removes a segment', checkAndRun(function(done) {
     /** @type {shakaExtern.SegmentDataDB} */
-    var original = createSegment([0, 1, 2]);
+    var original = shaka.test.OfflineUtils.createSegmentData([0, 1, 2]);
 
     /** @type {number} */
     var id;
@@ -184,7 +184,7 @@ describe('DBEngine', function() {
           return db.getSegment(id);
         })
         .then(function(value) {
-          expectSegmentToEqual(value, original);
+          shaka.test.OfflineUtils.expectSegmentToEqual(value, original);
           return db.removeSegments([id], null);
         })
         .then(function() {
@@ -209,97 +209,5 @@ describe('DBEngine', function() {
         pending('DBEngine is not supported on this platform.');
       }
     };
-  }
-
-
-  /**
-   * @param {string} originalUri
-   * @return {shakaExtern.ManifestDB}
-   */
-  function createManifest(originalUri) {
-    return {
-      appMetadata: null,
-      drmInfo: null,
-      duration: 90,
-      expiration: Infinity,
-      originalManifestUri: originalUri,
-      periods: [],
-      sessionIds: [],
-      size: 1024
-    };
-  }
-
-
-  /**
-   * @param {number} id
-   * @param {string} type
-   * @return {shakaExtern.StreamDB}
-   */
-  function createStream(id, type) {
-    return {
-      id: id,
-      primary: false,
-      presentationTimeOffset: 0,
-      contentType: type,
-      mimeType: '',
-      codecs: '',
-      frameRate: undefined,
-      kind: undefined,
-      language: '',
-      label: null,
-      width: null,
-      height: null,
-      initSegmentKey: null,
-      encrypted: false,
-      keyId: null,
-      segments: [],
-      variantIds: []
-    };
-  }
-
-
-  /**
-   * @param {!Array.<number>} data
-   * @return {shakaExtern.SegmentDataDB}
-   */
-  function createSegment(data) {
-    /** @type {Int32Array} */
-    var array = new Int32Array(data);
-
-    return {
-      data: array.buffer
-    };
-  }
-
-
-  /**
-   * @param {!Array.<shakaExtern.SegmentDataDB>} segments
-   * @param {shakaExtern.SegmentDataDB} expected
-   */
-  function expectSegmentsToContain(segments, expected) {
-    var actualData = segments.map(function(segment) {
-      expect(segment.data).toBeTruthy();
-      return new Uint8Array(segment.data);
-    });
-
-    expect(expected.data).toBeTruthy();
-    var expectedData = new Uint8Array(expected.data);
-
-    expect(actualData).toContain(expectedData);
-  }
-
-
-  /**
-   * @param {shakaExtern.SegmentDataDB} actual
-   * @param {shakaExtern.SegmentDataDB} expected
-   */
-  function expectSegmentToEqual(actual, expected) {
-    expect(actual.data).toBeTruthy();
-    expect(expected.data).toBeTruthy();
-
-    var actualData = new Uint8Array(actual.data);
-    var expectedData = new Uint8Array(expected.data);
-
-    expect(actualData).toEqual(expectedData);
   }
 });
