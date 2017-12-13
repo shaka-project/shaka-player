@@ -919,13 +919,15 @@ describe('CastReceiver', function() {
       listeners: {}
     };
 
-    var castMembers =
-        CastUtils.PlayerVoidMethods.concat(CastUtils.PlayerGetterMethods);
-    castMembers =
-        castMembers.concat(CastUtils.PlayerGetterMethodsThatRequireLive);
-    castMembers.forEach(function(name) {
+    CastUtils.PlayerVoidMethods.forEach(function(name) {
       player[name] = jasmine.createSpy(name);
     });
+    for (var name in CastUtils.PlayerGetterMethods) {
+      player[name] = jasmine.createSpy(name);
+    }
+    for (var name in CastUtils.PlayerGetterMethodsThatRequireLive) {
+      player[name] = jasmine.createSpy(name);
+    }
     CastUtils.PlayerPromiseMethods.forEach(function(name) {
       player[name] = jasmine.createSpy(name).and.returnValue(Promise.resolve());
     });

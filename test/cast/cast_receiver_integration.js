@@ -21,6 +21,8 @@ describe('CastReceiver', function() {
   /** @const */
   var CastUtils = shaka.cast.CastUtils;
 
+  var eventManager = new shaka.util.EventManager();
+
   /** @const */
   var originalCast = window['cast'];
   /** @const */
@@ -183,15 +185,48 @@ describe('CastReceiver', function() {
     // Use an encrypted asset, to make sure DRM info doesn't balloon the size.
     fakeInitState.manifest = 'test:sintel-enc';
 
-    var onLoadedData = function() {
-      video.removeEventListener('loadeddata', onLoadedData);
+    eventManager.listenOnce(video, 'loadeddata', function() {
       // Wait for an update message.
       waitForUpdateMessage().then(function(message) {
         // Check that the update message is of a reasonable size.
         expect(message.length).toBeLessThan(5000);
       }).then(done);
-    };
-    video.addEventListener('loadeddata', onLoadedData);
+    });
+    addOnError(done);
+
+    // Start the process of loading by sending a fake init message.
+    fakeConnectedSenders(1);
+    fakeIncomingMessage({
+      type: 'init',
+      initState: fakeInitState,
+      appData: {}
+    }, mockShakaMessageBus);
+  });
+
+  drm_it('has a reasonably low average message size', function(done) {
+    checkChromeOrChromecast();
+    checkKeySystems();
+
+    // Use an encrypted asset, to make sure DRM info doesn't balloon the size.
+    fakeInitState.manifest = 'test:sintel-enc';
+
+    eventManager.listenOnce(video, 'loadeddata', function() {
+      // Collect 50 update messages, and average their length.
+      // Not all properties are passed along on every update message, so
+      // the average length is expected to be lower than the length of the first
+      // update message.
+      var totalLength = 0;
+      var waitForUpdate = Promise.resolve();
+      for (var i = 0; i < 50; i++)
+        waitForUpdate = waitForUpdate.then(function() {
+          return waitForUpdateMessage();
+        }).then(function(message) {
+          totalLength += message.length;
+        });
+      waitForUpdate.then(function() {
+        expect(totalLength / 50).toBeLessThan(3000);
+      }).then(done);
+    });
     addOnError(done);
 
     // Start the process of loading by sending a fake init message.
@@ -220,16 +255,14 @@ describe('CastReceiver', function() {
     waitForUpdateMessageWrapper(
         shaka.media.StreamingEngine.prototype, 'StreamingEngine', 'init');
 
-    var onLoadedData = function() {
+    eventManager.listenOnce(video, 'loadeddata', function() {
       // Make sure that each of the methods covered by
       // waitForUpdateMessageWrapper is called by this point.
       expect(pendingWaitWrapperCalls).toBe(0);
 
-      video.removeEventListener('loadeddata', onLoadedData);
       // Wait for a final update message before proceeding.
       waitForUpdateMessage().then(done);
-    };
-    video.addEventListener('loadeddata', onLoadedData);
+    });
     addOnError(done);
 
     // Start the process of loading by sending a fake init message.
