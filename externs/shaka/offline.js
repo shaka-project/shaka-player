@@ -220,10 +220,10 @@ shakaExtern.SegmentDB;
 
 /**
  * @typedef {{
- *   data: ArrayBuffer
+ *   data: !ArrayBuffer
  * }}
  *
- * @property {ArrayBuffer} data
+ * @property {!ArrayBuffer} data
  *   The data contents of the segment.
  */
 shakaExtern.SegmentDataDB;

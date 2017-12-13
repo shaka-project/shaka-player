@@ -111,19 +111,18 @@ shaka.test.MemoryStorageEngine.prototype.forEachSegment = function(each) {
 
 /** @override */
 shaka.test.MemoryStorageEngine.prototype.addSegment = function(segment) {
-  /** @type {number} */
-  var key = this.nextSegmentId_++;
-
   // Clone the segment, so the caller can wipe its version.
-  var clonedData = null;
-  if (segment.data) {
-    clonedData = new ArrayBuffer(segment.data.byteLength);
-    (new Uint8Array(clonedData)).set(new Uint8Array(segment.data));
-  }
+  var clonedData = new ArrayBuffer(segment.data.byteLength);
+  (new Uint8Array(clonedData)).set(new Uint8Array(segment.data));
 
-  this.segments_[key] = {
+  /** @type {shakaExtern.SegmentDataDB} */
+  var clonedSegment = {
     data: clonedData
   };
+
+  /** @type {number} */
+  var key = this.nextSegmentId_++;
+  this.segments_[key] = clonedSegment;
 
   return Promise.resolve(key);
 };

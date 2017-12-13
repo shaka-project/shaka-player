@@ -277,7 +277,7 @@ shaka.test.ManifestDBBuilder.emptyManifest_ = function() {
 shaka.test.ManifestDBBuilder.emptySegment_ = function() {
   /** @type {shakaExtern.SegmentDataDB} */
   var segment = {
-    data: null
+    data: new ArrayBuffer(0)
   };
 
   return segment;
