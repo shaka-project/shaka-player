@@ -28,6 +28,7 @@ describe('CastUtils', function() {
       'getMediaElement',  // Handled specially
       'setMaxHardwareResolution',
       'destroy',  // Should use CastProxy.destroy instead
+      'getManifest', // Too large to proxy
 
       // Test helper methods (not @export'd)
       'createDrmEngine',

@@ -49,6 +49,20 @@ describe('CastReceiver', function() {
   var isChrome;
   /** @type {boolean} */
   var isChromecast;
+  /** @type {!Object.<string, ?shakaExtern.DrmSupportType>} */
+  var support = {};
+
+  var fakeInitState;
+
+  function checkKeySystems() {
+    // Our test asset for this suite can use any of these key systems:
+    if (!support['com.widevine.alpha']) {
+      // pending() throws a special exception that Jasmine uses to skip a test.
+      // It can only be used from inside it(), not describe() or beforeEach().
+      pending('Skipping DrmEngine tests.');
+      // The rest of the test will not run.
+    }
+  }
 
   function checkChromeOrChromecast() {
     if (!isChromecast && !isChrome) {
@@ -57,6 +71,10 @@ describe('CastReceiver', function() {
   }
 
   beforeAll(function(done) {
+    var supportTest = shaka.media.DrmEngine.probeSupport()
+        .then(function(result) { support = result; })
+        .catch(fail);
+
     // The receiver is only meant to run on the Chromecast, so we have the
     // ability to use modern APIs there that may not be available on all of the
     // browsers our library supports.  Because of this, CastReceiver tests will
@@ -81,7 +99,9 @@ describe('CastReceiver', function() {
     shaka.media.ManifestParser.registerParserByMime(
         'application/x-test-manifest',
         shaka.test.TestScheme.ManifestParser);
-    shaka.test.TestScheme.createManifests(shaka, '').then(done);
+    var createManifests = shaka.test.TestScheme.createManifests(shaka, '');
+
+    Promise.all([createManifests, supportTest]).then(done);
   });
 
   beforeEach(function() {
@@ -115,6 +135,21 @@ describe('CastReceiver', function() {
 
     toRestore = [];
     pendingWaitWrapperCalls = 0;
+
+    fakeInitState = {
+      player: {
+        configure: {}
+      },
+      'playerAfterLoad': {
+        setTextTrackVisibility: true
+      },
+      video: {
+        loop: true,
+        playbackRate: 5
+      },
+      manifest: 'test:sintel_no_text',
+      startTime: 0
+    };
   });
 
   afterEach(function(done) {
@@ -141,23 +176,35 @@ describe('CastReceiver', function() {
     }
   });
 
+  drm_it('sends reasonably-sized update messages', function(done) {
+    checkChromeOrChromecast();
+    checkKeySystems();
+
+    // Use an encrypted asset, to make sure DRM info doesn't balloon the size.
+    fakeInitState.manifest = 'test:sintel-enc';
+
+    var onLoadedData = function() {
+      video.removeEventListener('loadeddata', onLoadedData);
+      // Wait for an update message.
+      waitForUpdateMessage().then(function(message) {
+        // Check that the update message is of a reasonable size.
+        expect(message.length).toBeLessThan(5000);
+      }).then(done);
+    };
+    video.addEventListener('loadeddata', onLoadedData);
+    addOnError(done);
+
+    // Start the process of loading by sending a fake init message.
+    fakeConnectedSenders(1);
+    fakeIncomingMessage({
+      type: 'init',
+      initState: fakeInitState,
+      appData: {}
+    }, mockShakaMessageBus);
+  });
+
   it('sends update messages at every stage of loading', function(done) {
     checkChromeOrChromecast();
-
-    var fakeInitState = {
-      player: {
-        configure: {}
-      },
-      'playerAfterLoad': {
-        setTextTrackVisibility: true
-      },
-      video: {
-        loop: true,
-        playbackRate: 5
-      },
-      manifest: 'test:sintel_no_text',
-      startTime: 0
-    };
 
     // Add wrappers to various methods along player.load to make sure that,
     // at each stage, the cast receiver can form an update message without
@@ -183,12 +230,7 @@ describe('CastReceiver', function() {
       waitForUpdateMessage().then(done);
     };
     video.addEventListener('loadeddata', onLoadedData);
-
-    var onError = function(event) {
-      fail(event.detail);
-      done();
-    };
-    player.addEventListener('error', onError);
+    addOnError(done);
 
     // Start the process of loading by sending a fake init message.
     fakeConnectedSenders(1);
@@ -224,6 +266,14 @@ describe('CastReceiver', function() {
     toRestore.push(function() {
       prototype[methodName] = original;
     });
+  }
+
+  function addOnError(done) {
+    var onError = function(event) {
+      fail(event.detail);
+      done();
+    };
+    player.addEventListener('error', onError);
   }
 
   function waitForUpdateMessage() {
@@ -271,7 +321,7 @@ describe('CastReceiver', function() {
       var parsed = CastUtils.deserialize(message);
       if (parsed.type == 'update' && messageWaitPromise) {
         shaka.log.debug('Received update message. Proceeding...');
-        messageWaitPromise.resolve();
+        messageWaitPromise.resolve(message);
         messageWaitPromise = null;
       }
     });
