@@ -127,7 +127,7 @@ shaka.test.ManifestDBBuilder.prototype.stream = function() {
     label: '',
     width: 1920,
     height: 1080,
-    initSegmentUri: null,
+    initSegmentKey: null,
     encrypted: false,
     keyId: null,
     segments: [],
@@ -175,9 +175,6 @@ shaka.test.ManifestDBBuilder.prototype.initSegment = function() {
       this.currentStream_,
       'Must have a currewnt stream to add a segment.');
 
-  /** @const */
-  var OfflineUri = shaka.offline.OfflineUri;
-
   /** @type {!shaka.offline.IStorageEngine} */
   var storageEngine = this.storageEngine_;
 
@@ -190,9 +187,7 @@ shaka.test.ManifestDBBuilder.prototype.initSegment = function() {
   this.deferredActions_ = this.deferredActions_.then(function() {
     return storageEngine.addSegment(segmentData);
   }).then(function(id) {
-    /** @type {string} */
-    var uri = OfflineUri.segmentIdToUri(id);
-    currentStream.initSegmentUri = uri;
+    currentStream.initSegmentKey = id;
   });
 
   return this;
@@ -214,9 +209,6 @@ shaka.test.ManifestDBBuilder.prototype.segment = function(start, end) {
       start < end,
       'Start should always be less than end');
 
-  /** @const */
-  var OfflineUri = shaka.offline.OfflineUri;
-
   /** @type {!shaka.offline.IStorageEngine} */
   var storageEngine = this.storageEngine_;
 
@@ -229,12 +221,9 @@ shaka.test.ManifestDBBuilder.prototype.segment = function(start, end) {
   this.deferredActions_ = this.deferredActions_.then(function() {
     return storageEngine.addSegment(segmentData);
   }).then(function(id) {
-    /** @type {string} */
-    var uri = OfflineUri.segmentIdToUri(id);
-
     /** @type {shakaExtern.SegmentDB} */
     var segment = {
-      uri: uri,
+      dataKey: id,
       startTime: start,
       endTime: end
     };

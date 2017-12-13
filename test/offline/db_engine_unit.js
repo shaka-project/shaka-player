@@ -308,7 +308,7 @@ describe('DBEngine', /** @suppress {accessControls} */ function() {
       label: null,
       width: null,
       height: null,
-      initSegmentUri: null,
+      initSegmentKey: null,
       encrypted: false,
       keyId: null,
       segments: [],

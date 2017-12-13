@@ -545,15 +545,21 @@ describe('Storage', function() {
           new SegmentReference(0, 0, 1, makeUris('fake:0'), 0, null)
         ]);
 
+        /**
+         * @param {number} startTime
+         * @param {number} endTime
+         * @param {number} id
+         * @return {shakaExtern.SegmentDB}
+         */
         var makeSegment = function(startTime, endTime, id) {
-          /** @type {string} */
-          var uri = OfflineUri.segmentIdToUri(id);
-
-          return {
+          /** @type {shakaExtern.SegmentDB} */
+          var segment = {
             startTime: startTime,
             endTime: endTime,
-            uri: uri
+            dataKey: id
           };
+
+          return segment;
         };
 
         storage.store(fakeManifestUri)
@@ -566,7 +572,7 @@ describe('Storage', function() {
             })
             .then(function(manifest) {
               var stream1 = manifest.periods[0].streams[0];
-              expect(stream1.initSegmentUri).toBe(null);
+              expect(stream1.initSegmentKey).toBe(null);
               expect(stream1.segments.length).toBe(5);
               expect(stream1.segments).toContain(makeSegment(0, 1, id1));
               expect(stream1.segments).toContain(makeSegment(1, 2, id3));
@@ -575,7 +581,7 @@ describe('Storage', function() {
               expect(stream1.segments).toContain(makeSegment(4, 5, id6));
 
               var stream2 = manifest.periods[0].streams[1];
-              expect(stream2.initSegmentUri).toBe(null);
+              expect(stream2.initSegmentKey).toBe(null);
               expect(stream2.segments.length).toBe(1);
               expect(stream2.segments).toContain(makeSegment(0, 1, id2));
 
@@ -644,7 +650,7 @@ describe('Storage', function() {
             .then(function(manifest) {
               var stream = manifest.periods[0].streams[0];
               expect(stream.segments.length).toBe(0);
-              expect(stream.initSegmentUri).toBe(OfflineUri.segmentIdToUri(0));
+              expect(stream.initSegmentKey).toBe(0);
               return fakeStorageEngine.getSegment(0);
             })
             .then(function(segment) {
@@ -1084,10 +1090,10 @@ describe('Storage', function() {
                   .segment(4, 6)
                   .segment(6, 8)
               .onStream(function(stream) {
-                // Change the uri for one segment so that it will be missing
+                // Change the key for one segment so that it will be missing
                 // from storage.
                 var segment = stream.segments[0];
-                segment.uri = OfflineUri.segmentIdToUri(1253);
+                segment.dataKey = 1253;
               })
           .build()
           .then(function(manifestId) {
@@ -1173,9 +1179,8 @@ describe('Storage', function() {
      */
     function loadSegmentsForStream(stream) {
       return Promise.all(stream.segments.map(function(segment) {
-        var uri = segment.uri;
-        var id = OfflineUri.uriToSegmentId(uri);
-        goog.asserts.assert(id != null, 'Expecting valid uri (' + uri + ')');
+        /** @type {number} */
+        var id = segment.dataKey;
         return fakeStorageEngine.getSegment(id);
       }));
     }

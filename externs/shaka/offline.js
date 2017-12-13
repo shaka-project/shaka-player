@@ -156,7 +156,7 @@ shakaExtern.PeriodDB;
  *   label: ?string,
  *   width: ?number,
  *   height: ?number,
- *   initSegmentUri: ?string,
+ *   initSegmentKey: ?number,
  *   encrypted: boolean,
  *   keyId: ?string,
  *   segments: !Array.<shakaExtern.SegmentDB>,
@@ -187,8 +187,8 @@ shakaExtern.PeriodDB;
  *   The width of the stream; null for audio/text.
  * @property {?number} height
  *   The height of the stream; null for audio/text.
- * @property  {?string} initSegmentUri
- *   The offline URI where the init segment is found; null if no init segment.
+ * @property  {?number} initSegmentKey
+ *   The storage key where the init segment is found; null if no init segment.
  * @property {boolean} encrypted
  *   Whether this stream is encrypted.
  * @property {?string} keyId
@@ -205,15 +205,15 @@ shakaExtern.StreamDB;
  * @typedef {{
  *   startTime: number,
  *   endTime: number,
- *   uri: string
+ *   dataKey: number
  * }}
  *
  * @property {number} startTime
  *   The start time of the segment, in seconds from the start of the Period.
  * @property {number} endTime
  *   The end time of the segment, in seconds from the start of the Period.
- * @property {string} uri
- *   The offline URI where the segment is found.
+ * @property {number} dataKey
+ *   The key to the data in storage.
  */
 shakaExtern.SegmentDB;
 
