@@ -18,80 +18,8 @@
 describe('OfflineScheme', function() {
   /** @const */
   var OfflineScheme = shaka.offline.OfflineScheme;
-
-  describe('Parsing', function() {
-    it('creates uri from manifest id', function() {
-      /** @type {number} */
-      var id = 123;
-      /** @type {string} */
-      var uri = OfflineScheme.manifestIdToUri(id);
-
-      expect(uri).toBe('offline:manifest/123');
-    });
-
-    it('creates uri from segment id', function() {
-      /** @type {number} */
-      var id = 123;
-      /** @type {string} */
-      var uri = OfflineScheme.segmentIdToUri(id);
-
-      expect(uri).toBe('offline:segment/123');
-    });
-
-    it('creates null id from non-manifest uri', function() {
-      /** @type {string} */
-      var uri = 'invalid-uri';
-      /** @type {?number} */
-      var id = OfflineScheme.uriToManifestId(uri);
-
-      expect(id).toBeNull();
-    });
-
-    it('creates id from manifest uri', function() {
-      /** @type {string} */
-      var uri = 'offline:manifest/123';
-      /** @type {?number} */
-      var id = OfflineScheme.uriToManifestId(uri);
-
-      expect(id).toBe(123);
-    });
-
-    it('creates id from legacy manifest uri', function() {
-      /** @type {string} */
-      var uri = 'offline:123';
-      /** @type {?number} */
-      var id = OfflineScheme.uriToManifestId(uri);
-
-      expect(id).toBe(123);
-    });
-
-    it('creates null id from non-segment uri', function() {
-      /** @type {string} */
-      var uri = 'invalid-uri';
-      /** @type {?number} */
-      var id = OfflineScheme.uriToSegmentId(uri);
-
-      expect(id).toBeNull();
-    });
-
-    it('creates id from segment uri', function() {
-      /** @type {string} */
-      var uri = 'offline:segment/123';
-      /** @type {?number} */
-      var id = OfflineScheme.uriToSegmentId(uri);
-
-      expect(id).toBe(123);
-    });
-
-    it('creates id from legacy segment uri', function() {
-      /** @type {string} */
-      var uri = 'offline:1/2/3';
-      /** @type {?number} */
-      var id = OfflineScheme.uriToSegmentId(uri);
-
-      expect(id).toBe(3);
-    });
-  });
+  /** @const */
+  var OfflineUri = shaka.offline.OfflineUri;
 
   describe('Get data from storage', function() {
     var mockSEFactory = new shaka.test.MockStorageEngineFactory();
@@ -136,7 +64,7 @@ describe('OfflineScheme', function() {
             });
           })
           .then(function(id) {
-            uri = shaka.offline.OfflineScheme.manifestIdToUri(id);
+            uri = OfflineUri.manifestIdToUri(id);
             return OfflineScheme(uri, request);
           })
           .then(function(response) {
@@ -163,7 +91,7 @@ describe('OfflineScheme', function() {
             });
           })
           .then(function(id) {
-            uri = shaka.offline.OfflineScheme.segmentIdToUri(id);
+            uri = OfflineUri.segmentIdToUri(id);
             return OfflineScheme(uri, request);
           })
           .then(function(response) {
@@ -183,7 +111,7 @@ describe('OfflineScheme', function() {
       /** @const {number} */
       var id = 789;
       /** @const {string} */
-      var uri = shaka.offline.OfflineScheme.segmentIdToUri(id);
+      var uri = OfflineUri.segmentIdToUri(id);
 
       OfflineScheme(uri, request)
           .then(fail)

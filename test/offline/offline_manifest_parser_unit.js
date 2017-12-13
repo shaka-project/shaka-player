@@ -17,6 +17,9 @@
 
 describe('OfflineManifestParser', function() {
   /** @const */
+  var OfflineUri = shaka.offline.OfflineUri;
+
+  /** @const */
   var mockSEFactory = new shaka.test.MockStorageEngineFactory();
 
   /** @const */
@@ -49,7 +52,7 @@ describe('OfflineManifestParser', function() {
     new shaka.test.ManifestDBBuilder(fakeStorageEngine)
         .build().then(function(id) {
           /** @const {string} */
-          var uri = shaka.offline.OfflineScheme.manifestIdToUri(id);
+          var uri = OfflineUri.manifestIdToUri(id);
           return parser.start(uri, playerInterface);
         }).catch(fail).then(done);
   });
@@ -58,7 +61,7 @@ describe('OfflineManifestParser', function() {
     /** @type {number} */
     var id = 101;
     /** @type {string} */
-    var uri = shaka.offline.OfflineScheme.manifestIdToUri(id);
+    var uri = OfflineUri.manifestIdToUri(id);
 
     parser.start(uri, playerInterface)
         .then(fail)
@@ -109,7 +112,7 @@ describe('OfflineManifestParser', function() {
             id = newId;
 
             /** @const {string} */
-            var uri = shaka.offline.OfflineScheme.manifestIdToUri(id);
+            var uri = OfflineUri.manifestIdToUri(id);
             return parser.start(uri, playerInterface);
           }).catch(fail).then(done);
     });
@@ -155,7 +158,7 @@ describe('OfflineManifestParser', function() {
           })
           .build().then(function(id) {
             /** @const {string} */
-            var uri = shaka.offline.OfflineScheme.manifestIdToUri(id);
+            var uri = OfflineUri.manifestIdToUri(id);
             return parser.start(uri, playerInterface);
           }).then(function(manifest) {
             expect(manifest).toBeTruthy();
@@ -196,7 +199,7 @@ describe('OfflineManifestParser', function() {
           .period()
           .build().then(function(id) {
             /** @const {string} */
-            var uri = shaka.offline.OfflineScheme.manifestIdToUri(id);
+            var uri = OfflineUri.manifestIdToUri(id);
             return parser.start(uri, playerInterface);
           }).then(function(manifest) {
             expect(manifest).toBeTruthy();
@@ -220,7 +223,7 @@ describe('OfflineManifestParser', function() {
           .period()
           .build().then(function(id) {
             /** @const {string} */
-            var uri = shaka.offline.OfflineScheme.manifestIdToUri(id);
+            var uri = OfflineUri.manifestIdToUri(id);
             return parser.start(uri, playerInterface);
           })
           .then(function(manifest) {

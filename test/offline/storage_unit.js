@@ -17,7 +17,7 @@
 
 describe('Storage', function() {
   /** @const */
-  var Scheme = shaka.offline.OfflineScheme;
+  var OfflineUri = shaka.offline.OfflineUri;
 
   /** @const */
   var SegmentReference = shaka.media.SegmentReference;
@@ -169,7 +169,7 @@ describe('Storage', function() {
           .then(function(data) {
             expect(data).toBeTruthy();
             // Since we are using a memory DB, it will always be the first one.
-            expect(data.offlineUri).toBe(Scheme.manifestIdToUri(0));
+            expect(data.offlineUri).toBe(OfflineUri.manifestIdToUri(0));
             expect(data.originalManifestUri).toBe(originalUri);
             // Even though there are no segments, it will use the duration from
             // the original manifest.
@@ -231,7 +231,7 @@ describe('Storage', function() {
 
       storage.store(fakeManifestUri)
           .then(function(data) {
-            expect(data.offlineUri).toBe(Scheme.manifestIdToUri(0));
+            expect(data.offlineUri).toBe(OfflineUri.manifestIdToUri(0));
             return fakeStorageEngine.getManifest(0);
           })
           .then(function(manifestDb) {
@@ -248,7 +248,7 @@ describe('Storage', function() {
       drmEngine.setSessionIds(sessions);
       storage.store(fakeManifestUri)
           .then(function(data) {
-            expect(data.offlineUri).toBe(Scheme.manifestIdToUri(0));
+            expect(data.offlineUri).toBe(OfflineUri.manifestIdToUri(0));
             return fakeStorageEngine.getManifest(0);
           })
           .then(function(manifestDb) {
@@ -275,7 +275,7 @@ describe('Storage', function() {
       drmEngine.setSessionIds(['abcd']);
       storage.store(fakeManifestUri)
           .then(function(data) {
-            expect(data.offlineUri).toBe(Scheme.manifestIdToUri(0));
+            expect(data.offlineUri).toBe(OfflineUri.manifestIdToUri(0));
             return fakeStorageEngine.getManifest(0);
           })
           .then(function(manifestDb) {
@@ -292,7 +292,7 @@ describe('Storage', function() {
 
       storage.store(fakeManifestUri)
           .then(function(data) {
-            expect(data.offlineUri).toBe(Scheme.manifestIdToUri(0));
+            expect(data.offlineUri).toBe(OfflineUri.manifestIdToUri(0));
             return fakeStorageEngine.getManifest(0);
           })
           .then(function(manifestDb) {
@@ -547,7 +547,7 @@ describe('Storage', function() {
 
         var makeSegment = function(startTime, endTime, id) {
           /** @type {string} */
-          var uri = Scheme.segmentIdToUri(id);
+          var uri = OfflineUri.segmentIdToUri(id);
 
           return {
             startTime: startTime,
@@ -644,7 +644,7 @@ describe('Storage', function() {
             .then(function(manifest) {
               var stream = manifest.periods[0].streams[0];
               expect(stream.segments.length).toBe(0);
-              expect(stream.initSegmentUri).toBe(Scheme.segmentIdToUri(0));
+              expect(stream.initSegmentUri).toBe(OfflineUri.segmentIdToUri(0));
               return fakeStorageEngine.getSegment(0);
             })
             .then(function(segment) {
@@ -893,7 +893,7 @@ describe('Storage', function() {
       it('does not store offline sessions', function(done) {
         storage.store(fakeManifestUri)
             .then(function(data) {
-              expect(data.offlineUri).toBe(Scheme.manifestIdToUri(0));
+              expect(data.offlineUri).toBe(OfflineUri.manifestIdToUri(0));
               return fakeStorageEngine.getManifest(0);
             })
             .then(function(manifestDb) {
@@ -1087,7 +1087,7 @@ describe('Storage', function() {
                 // Change the uri for one segment so that it will be missing
                 // from storage.
                 var segment = stream.segments[0];
-                segment.uri = Scheme.segmentIdToUri(1253);
+                segment.uri = OfflineUri.segmentIdToUri(1253);
               })
           .build()
           .then(function(manifestId) {
@@ -1105,7 +1105,7 @@ describe('Storage', function() {
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.STORAGE,
             shaka.util.Error.Code.REQUESTED_ITEM_NOT_FOUND,
-            Scheme.manifestIdToUri(0));
+            OfflineUri.manifestIdToUri(0));
         shaka.test.Util.expectToEqualError(error, expectedError);
       }).then(done);
     });
@@ -1132,7 +1132,7 @@ describe('Storage', function() {
                     shaka.util.Error.Severity.CRITICAL,
                     shaka.util.Error.Category.STORAGE,
                     shaka.util.Error.Code.REQUESTED_ITEM_NOT_FOUND,
-                    Scheme.manifestIdToUri(0)));
+                    OfflineUri.manifestIdToUri(0)));
           })
           .then(done);
     });
@@ -1162,7 +1162,9 @@ describe('Storage', function() {
      * @return {!Promise}
      */
     function removeManifest(manifestId) {
-      return storage.remove(Scheme.manifestIdToUri(manifestId));
+      /** @type {string} */
+      var uri = OfflineUri.manifestIdToUri(manifestId);
+      return storage.remove(uri);
     }
 
     /**
@@ -1172,7 +1174,7 @@ describe('Storage', function() {
     function loadSegmentsForStream(stream) {
       return Promise.all(stream.segments.map(function(segment) {
         var uri = segment.uri;
-        var id = Scheme.uriToSegmentId(uri);
+        var id = OfflineUri.uriToSegmentId(uri);
         goog.asserts.assert(id != null, 'Expecting valid uri (' + uri + ')');
         return fakeStorageEngine.getSegment(id);
       }));

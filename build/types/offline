@@ -5,6 +5,7 @@
 +../../lib/offline/i_storage_engine.js
 +../../lib/offline/offline_manifest_parser.js
 +../../lib/offline/offline_scheme.js
++../../lib/offline/offline_uri.js
 +../../lib/offline/offline_utils.js
 +../../lib/offline/storage.js
 +../../lib/offline/storage_engine_factory.js

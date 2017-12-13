@@ -16,7 +16,7 @@
  */
 
 describe('Offline', /** @suppress {accessControls} */ function() {
-  var Scheme = shaka.offline.OfflineScheme;
+  var OfflineUri = shaka.offline.OfflineUri;
 
   /** @const {string} */
   var dbName = 'shaka-offline-integration-test-db';
@@ -146,7 +146,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
           var uri = storedContent.offlineUri;
 
           /** @type {?number} */
-          var id = Scheme.uriToManifestId(uri);
+          var id = OfflineUri.uriToManifestId(uri);
           goog.asserts.assert(
               id != null,
               uri + ' should be a valid offline manifest uri.');
@@ -248,7 +248,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
               var uri = storedContent.offlineUri;
 
               /** @type {?number} */
-              var id = Scheme.uriToManifestId(uri);
+              var id = OfflineUri.uriToManifestId(uri);
               goog.asserts.assert(
                   id != null,
                   uri + ' should be a valid offline manifest uri.');
@@ -282,7 +282,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
               var uri = storedContent.offlineUri;
 
               /** @type {?number} */
-              var id = Scheme.uriToManifestId(uri);
+              var id = OfflineUri.uriToManifestId(uri);
               goog.asserts.assert(
                   id != null,
                   uri + ' should be a valid offline manifest uri.');

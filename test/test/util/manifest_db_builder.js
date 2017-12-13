@@ -176,7 +176,7 @@ shaka.test.ManifestDBBuilder.prototype.initSegment = function() {
       'Must have a currewnt stream to add a segment.');
 
   /** @const */
-  var Scheme = shaka.offline.OfflineScheme;
+  var OfflineUri = shaka.offline.OfflineUri;
 
   /** @type {!shaka.offline.IStorageEngine} */
   var storageEngine = this.storageEngine_;
@@ -191,7 +191,7 @@ shaka.test.ManifestDBBuilder.prototype.initSegment = function() {
     return storageEngine.addSegment(segmentData);
   }).then(function(id) {
     /** @type {string} */
-    var uri = Scheme.segmentIdToUri(id);
+    var uri = OfflineUri.segmentIdToUri(id);
     currentStream.initSegmentUri = uri;
   });
 
@@ -215,7 +215,7 @@ shaka.test.ManifestDBBuilder.prototype.segment = function(start, end) {
       'Start should always be less than end');
 
   /** @const */
-  var Scheme = shaka.offline.OfflineScheme;
+  var OfflineUri = shaka.offline.OfflineUri;
 
   /** @type {!shaka.offline.IStorageEngine} */
   var storageEngine = this.storageEngine_;
@@ -230,7 +230,7 @@ shaka.test.ManifestDBBuilder.prototype.segment = function(start, end) {
     return storageEngine.addSegment(segmentData);
   }).then(function(id) {
     /** @type {string} */
-    var uri = Scheme.segmentIdToUri(id);
+    var uri = OfflineUri.segmentIdToUri(id);
 
     /** @type {shakaExtern.SegmentDB} */
     var segment = {
