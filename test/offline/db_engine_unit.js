@@ -15,10 +15,7 @@
  * limitations under the License.
  */
 
-describe('DBEngine', /** @suppress {accessControls} */ function() {
-  /** @const */
-  var ContentType = shaka.util.ManifestParserUtils.ContentType;
-
+describe('DBEngine', function() {
   /** @const {string} */
   var dbName = 'shaka-player-test-db';
 
@@ -198,62 +195,6 @@ describe('DBEngine', /** @suppress {accessControls} */ function() {
         })
         .then(done).catch(fail);
   }));
-
-  // TODO : Remove this test once we drop support for DB Engine Version 1
-  it('fills missing variant ids for old manifests', checkAndRun(function(done) {
-    // Create a manifest with four streams. Two video and two audio. When db
-    // engine recreates the variant ids, it should pair them together into
-    // four variants.
-
-    /** @type {shakaExtern.ManifestDB} */
-    var originalManifest = createManifest('original manifest');
-    originalManifest.periods.push({
-      startTime: 0,
-      streams: [
-        createStream(0, ContentType.AUDIO),
-        createStream(1, ContentType.AUDIO),
-        createStream(2, ContentType.VIDEO),
-        createStream(3, ContentType.VIDEO)
-      ]
-    });
-
-    // Remove the variant ids field from all streams.
-    originalManifest.periods[0].streams.forEach(function(stream) {
-      delete stream['variantIds'];
-      expect(stream.variantIds).toBe(undefined);
-    });
-
-    Promise.resolve()
-        .then(function() {
-          return db.addManifest(originalManifest);
-        })
-        .then(function(id) {
-          return db.getManifest(id);
-        })
-        .then(function(manifest) {
-          expect(manifest.periods.length).toBe(1);
-
-          var streams = manifest.periods[0].streams;
-          expect(streams.length).toBe(4);
-
-          // Create a mapping of variants to stream ids.
-          var variants = {};
-          streams.forEach(function(stream) {
-            stream.variantIds.forEach(function(id) {
-              variants[id] = variants[id] || [];
-              variants[id].push(stream.id);
-            });
-          });
-
-          shaka.log.info(variants);
-
-          expect(variants[0]).toEqual([0, 2]);
-          expect(variants[1]).toEqual([0, 3]);
-          expect(variants[2]).toEqual([1, 2]);
-          expect(variants[3]).toEqual([1, 3]);
-        }).then(done).catch(fail);
-  }));
-
 
   /**
    * Before running the test, check if DBEngine is supported on this platform.

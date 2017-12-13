@@ -55,15 +55,6 @@ describe('OfflineUri', function() {
     expect(id).toBe(123);
   });
 
-  it('creates id from legacy manifest uri', function() {
-    /** @type {string} */
-    var uri = 'offline:123';
-    /** @type {?number} */
-    var id = OfflineUri.uriToManifestId(uri);
-
-    expect(id).toBe(123);
-  });
-
   it('creates null id from non-segment uri', function() {
     /** @type {string} */
     var uri = 'invalid-uri';
@@ -80,14 +71,5 @@ describe('OfflineUri', function() {
     var id = OfflineUri.uriToSegmentId(uri);
 
     expect(id).toBe(123);
-  });
-
-  it('creates id from legacy segment uri', function() {
-    /** @type {string} */
-    var uri = 'offline:1/2/3';
-    /** @type {?number} */
-    var id = OfflineUri.uriToSegmentId(uri);
-
-    expect(id).toBe(3);
   });
 });
