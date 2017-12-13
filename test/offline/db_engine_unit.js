@@ -95,7 +95,7 @@ describe('DBEngine', /** @suppress {accessControls} */ function() {
         .then(done).catch(fail);
   }));
 
-  it('stores and remove a manifest', checkAndRun(function(done) {
+  it('stores and removes a manifest', checkAndRun(function(done) {
     /** @type {shakaExtern.ManifestDB} */
     var original = createManifest('original manifest');
 
@@ -135,7 +135,7 @@ describe('DBEngine', /** @suppress {accessControls} */ function() {
           return db.getSegment(id);
         })
         .then(function(copy) {
-          expect(copy).toEqual(original);
+          expectSegmentToEqual(copy, original);
         })
         .then(done).catch(fail);
   }));
@@ -165,13 +165,13 @@ describe('DBEngine', /** @suppress {accessControls} */ function() {
         })
         .then(function() {
           originals.forEach(function(original) {
-            expect(copies).toContain(original);
+            expectSegmentsToContain(copies, original);
           });
         })
         .then(done).catch(fail);
   }));
 
-  it('stores and remove a segment', checkAndRun(function(done) {
+  it('stores and removes a segment', checkAndRun(function(done) {
     /** @type {shakaExtern.SegmentDataDB} */
     var original = createSegment([0, 1, 2]);
 
@@ -187,7 +187,7 @@ describe('DBEngine', /** @suppress {accessControls} */ function() {
           return db.getSegment(id);
         })
         .then(function(value) {
-          expect(value).toEqual(original);
+          expectSegmentToEqual(value, original);
           return db.removeSegments([id], null);
         })
         .then(function() {
@@ -328,5 +328,37 @@ describe('DBEngine', /** @suppress {accessControls} */ function() {
     return {
       data: array.buffer
     };
+  }
+
+
+  /**
+   * @param {!Array.<shakaExtern.SegmentDataDB>} segments
+   * @param {shakaExtern.SegmentDataDB} expected
+   */
+  function expectSegmentsToContain(segments, expected) {
+    var actualData = segments.map(function(segment) {
+      expect(segment.data).toBeTruthy();
+      return new Uint8Array(segment.data);
+    });
+
+    expect(expected.data).toBeTruthy();
+    var expectedData = new Uint8Array(expected.data);
+
+    expect(actualData).toContain(expectedData);
+  }
+
+
+  /**
+   * @param {shakaExtern.SegmentDataDB} actual
+   * @param {shakaExtern.SegmentDataDB} expected
+   */
+  function expectSegmentToEqual(actual, expected) {
+    expect(actual.data).toBeTruthy();
+    expect(expected.data).toBeTruthy();
+
+    var actualData = new Uint8Array(actual.data);
+    var expectedData = new Uint8Array(expected.data);
+
+    expect(actualData).toEqual(expectedData);
   }
 });
