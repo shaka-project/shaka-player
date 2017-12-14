@@ -26,6 +26,8 @@ describe('Offline', /** @suppress {accessControls} */ function() {
   /** @const {number} */
   var dbUpdateRetries = 5;
 
+  /** @type {!shaka.util.EventManager} */
+  var eventManager;
   /** @type {!shaka.offline.IStorageEngine} */
   var engine;
   /** @type {!shaka.offline.Storage} */
@@ -56,6 +58,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
       return engine.init().then(function() { return engine; });
     });
 
+    eventManager = new shaka.util.EventManager();
     player = new shaka.Player(video);
     player.addEventListener('error', fail);
     storage = new shaka.offline.Storage(player);
@@ -71,9 +74,12 @@ describe('Offline', /** @suppress {accessControls} */ function() {
   });
 
   afterEach(function(done) {
-    Promise.all([storage.destroy(), player.destroy(), engine.destroy()])
-        .catch(fail)
-        .then(done);
+    Promise.all([
+      eventManager.destroy(),
+      storage.destroy(),
+      player.destroy(),
+      engine.destroy()
+    ]).catch(fail).then(done);
   });
 
   afterAll(function() {
@@ -224,19 +230,25 @@ describe('Offline', /** @suppress {accessControls} */ function() {
   drm_it(
       'stores, plays, and deletes protected content with a temporary license',
       function(done) {
-        // Because this does not rely on persistent licenses, it should be
-        // testable with PlayReady as well as Widevine.
-        if (!support['offline'] ||
-            !support.drm['com.widevine.alpha'] ||
-            !support.drm['com.microsoft.playready']) {
-          pending('Offline or DRM not supported');
+        if (!support['offline']) {
+          pending('Offline not supported');
         }
 
-        shaka.test.TestScheme.setupPlayer(player, 'sintel-enc');
+        // Because this does not rely on persistent licenses, it should be
+        // testable with PlayReady as well as Widevine.
+        if (!support.drm['com.widevine.alpha'] &&
+            !support.drm['com.microsoft.playready']) {
+          pending('Widevine/PlayReady not supported');
+        }
+
+        // Because we do not need a persistent license, we also do not need init
+        // data in the manifest.  Using this covers issue #1159, where we used
+        // to throw an error inappropriately.
+        shaka.test.TestScheme.setupPlayer(player, 'multidrm_no_init_data');
 
         var storedContent;
         storage.configure({ usePersistentLicense: false });
-        storage.store('test:sintel-enc')
+        storage.store('test:multidrm_no_init_data')
             .then(function(content) {
               storedContent = content;
 
@@ -265,7 +277,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
             .then(function() {
               // Let it play some.
               video.play();
-              return shaka.test.Util.delay(10);
+              return waitForTime(3);
             })
             .then(function() {
               // Is it playing?
@@ -294,4 +306,25 @@ describe('Offline', /** @suppress {accessControls} */ function() {
             .catch(fail)
             .then(done);
       });
+
+  /**
+   * @param {number} time
+   * @return {!Promise}
+   */
+  function waitForTime(time) {
+    var p = new shaka.util.PublicPromise();
+    var onTimeUpdate = function() {
+      if (video.currentTime >= time) {
+        p.resolve();
+      }
+    };
+
+    eventManager.listen(video, 'timeupdate', onTimeUpdate);
+    onTimeUpdate();  // In case we're already there.
+
+    var timeout = shaka.test.Util.delay(30).then(function() {
+      throw 'Timeout waiting for time';
+    });
+    return Promise.race([p, timeout]);
+  }
 });
