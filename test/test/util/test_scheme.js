@@ -203,9 +203,46 @@ shaka.test.TestScheme.DATA = {
     },
     licenseServers: {
       'com.widevine.alpha':
-          '//drm-widevine-licensing.axtest.net/AcquireLicense',
+          'https://drm-widevine-licensing.axtest.net/AcquireLicense',
       'com.microsoft.playready':
-          '//drm-playready-licensing.axtest.net/AcquireLicense'
+          'https://drm-playready-licensing.axtest.net/AcquireLicense'
+    },
+    licenseRequestHeaders: {
+      'X-AxDRM-Message':
+          'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5' +
+          'X2lkIjoiNjllNTQwODgtZTllMC00NTMwLThjMWEtMWViNmRjZDBkMTRlIiwibWVzc' +
+          '2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIj' +
+          'oiNmU1YTFkMjYtMjc1Ny00N2Q3LTgwNDYtZWFhNWQxZDM0YjVhIn1dfX0.yF7PflO' +
+          'Pv9qHnu3ZWJNZ12jgkqTabmwXbDWk_47tLNE'
+    },
+    duration: 30
+  },
+  'multidrm_no_init_data': {
+    video: {
+      initSegmentUri: '/base/test/test/assets/multidrm-video-init.mp4',
+      mvhdOffset: 0x72,
+      segmentUri: '/base/test/test/assets/multidrm-video-segment.mp4',
+      tfdtOffset: 0x78,
+      segmentDuration: 4,
+      presentationTimeOffset: 0,
+      mimeType: 'video/mp4',
+      codecs: 'avc1.64001e'
+    },
+    audio: {
+      initSegmentUri: '/base/test/test/assets/multidrm-audio-init.mp4',
+      mvhdOffset: 0x72,
+      segmentUri: '/base/test/test/assets/multidrm-audio-segment.mp4',
+      tfdtOffset: 0x7c,
+      segmentDuration: 4,
+      presentationTimeOffset: 0,
+      mimeType: 'audio/mp4',
+      codecs: 'mp4a.40.2'
+    },
+    licenseServers: {
+      'com.widevine.alpha':
+          'https://drm-widevine-licensing.axtest.net/AcquireLicense',
+      'com.microsoft.playready':
+          'https://drm-playready-licensing.axtest.net/AcquireLicense'
     },
     licenseRequestHeaders: {
       'X-AxDRM-Message':
