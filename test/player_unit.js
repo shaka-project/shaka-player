@@ -131,6 +131,9 @@ describe('Player', function() {
       player.createStreamingEngine = function() {
         // This captures the variable |manifest| so this should only be used
         // after the manifest has been set.
+        // Subtle: because this captures var manifest above, there cannot be any
+        // other location for manifests in these tests.
+        // TODO: fix this to use the manifest currently loaded by the player.
         var period = manifest.periods[0];
         streamingEngine.getCurrentPeriod.and.returnValue(period);
         return streamingEngine;
@@ -1000,7 +1003,7 @@ describe('Player', function() {
 
   describe('filterTracks', function() {
     it('retains only video+audio variants if they exist', function(done) {
-      var manifest = new shaka.test.ManifestGenerator()
+      manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addVariant(1)
             .bandwidth(200)
@@ -1036,7 +1039,7 @@ describe('Player', function() {
       var variantTracks1 = [
         {
           id: 2,
-          active: false,
+          active: true,
           type: 'variant',
           bandwidth: 400,
           language: 'en',
@@ -2130,7 +2133,7 @@ describe('Player', function() {
                   .addVideo(2)
               .build();
 
-      setupPlayer(manifest).then(function() {
+      setupPlayer().then(function() {
         var activeVariant = getActiveVariantTrack();
         expect(activeVariant.id).toBe(0);
 
@@ -2167,7 +2170,7 @@ describe('Player', function() {
                   .addVideo(2)
               .build();
 
-      setupPlayer(manifest).then(function() {
+      setupPlayer().then(function() {
         var activeVariant = getActiveVariantTrack();
         expect(activeVariant.id).toBe(0);
 
@@ -2198,7 +2201,7 @@ describe('Player', function() {
                   .addVideo(2)
               .build();
 
-      setupPlayer(manifest).then(function() {
+      setupPlayer().then(function() {
         var activeVariant = getActiveVariantTrack();
         expect(activeVariant.id).toBe(0);
 
@@ -2227,7 +2230,7 @@ describe('Player', function() {
                   .addVideo(2)
               .build();
 
-          setupPlayer(manifest).then(function() {
+          setupPlayer().then(function() {
             abrManager.chooseVariant.calls.reset();
 
             var activeVariant = getActiveVariantTrack();
@@ -2250,7 +2253,7 @@ describe('Player', function() {
                   .addVideo(2)
               .build();
 
-      setupPlayer(manifest).then(function() {
+      setupPlayer().then(function() {
         expect(player.getVariantTracks().length).toBe(2);
 
         onKeyStatus({'abc': 'output-restricted'});
@@ -2270,7 +2273,7 @@ describe('Player', function() {
                   .addVideo(2)
               .build();
 
-      setupPlayer(manifest).then(function() {
+      setupPlayer().then(function() {
         expect(player.getVariantTracks().length).toBe(2);
 
         onKeyStatus({'abc': 'internal-error'});
@@ -2290,7 +2293,7 @@ describe('Player', function() {
                   .addVideo(3)
               .build();
 
-      setupPlayer(manifest).then(function() {
+      setupPlayer().then(function() {
         expect(player.getVariantTracks().length).toBe(2);
 
         // We have some key statuses, but not for the key IDs we know.
@@ -2311,7 +2314,7 @@ describe('Player', function() {
                   .addVideo(3)
               .build();
 
-      setupPlayer(manifest).then(function() {
+      setupPlayer().then(function() {
         expect(player.getVariantTracks().length).toBe(2);
 
         // This simulates, for example, the lack of key status on Chromecast
@@ -2332,7 +2335,7 @@ describe('Player', function() {
                   .addVideo(3)
               .build();
 
-      setupPlayer(manifest).then(function() {
+      setupPlayer().then(function() {
         expect(player.getVariantTracks().length).toBe(2);
 
         // A synthetic key status contains a single key status with key '00'.
@@ -2354,7 +2357,7 @@ describe('Player', function() {
                       .addVideo(5)
                   .build();
 
-          setupPlayer(manifest)
+          setupPlayer()
               .then(function() {
                 expect(player.getVariantTracks().length).toBe(3);
 
@@ -2385,7 +2388,7 @@ describe('Player', function() {
       expect(MediaSource.isTypeSupported('video/unsupported')).toBe(true);
       // FakeDrmEngine's getSupportedTypes() returns video/mp4 by default.
 
-      setupPlayer(manifest).then(function() {
+      setupPlayer().then(function() {
         var tracks = player.getVariantTracks();
         expect(tracks.length).toBe(1);
         expect(tracks[0].id).toBe(1);
@@ -2403,7 +2406,7 @@ describe('Player', function() {
                   .addVideo(3)
               .build();
 
-      setupPlayer(manifest).then(function() {
+      setupPlayer().then(function() {
         expect(player.getVariantTracks().length).toBe(3);
 
         player.configure(
@@ -2426,7 +2429,7 @@ describe('Player', function() {
                   .addVideo(3).size(190, 190)
               .build();
 
-      setupPlayer(manifest).then(function() {
+      setupPlayer().then(function() {
         expect(player.getVariantTracks().length).toBe(3);
 
         player.configure(
@@ -2449,7 +2452,7 @@ describe('Player', function() {
                   .addVideo(3).size(190, 190)
               .build();
 
-      setupPlayer(manifest).then(function() {
+      setupPlayer().then(function() {
         expect(player.getVariantTracks().length).toBe(3);
 
         player.configure({restrictions: {minWidth: 100, maxWidth: 1000}});
@@ -2471,7 +2474,7 @@ describe('Player', function() {
                   .addVideo(3).size(190, 190)
               .build();
 
-      setupPlayer(manifest).then(function() {
+      setupPlayer().then(function() {
         expect(player.getVariantTracks().length).toBe(3);
 
         player.configure({restrictions: {minHeight: 100, maxHeight: 1000}});
@@ -2494,7 +2497,7 @@ describe('Player', function() {
                   .addAudio(4)
               .build();
 
-          setupPlayer(manifest).then(function() {
+          setupPlayer().then(function() {
             expect(player.getVariantTracks().length).toBe(2);
 
             player.configure({restrictions: {minHeight: 100, maxHeight: 1000}});
@@ -2516,7 +2519,7 @@ describe('Player', function() {
                   .addVideo(3).size(190, 190)
               .build();
 
-      setupPlayer(manifest).then(function() {
+      setupPlayer().then(function() {
         expect(player.getVariantTracks().length).toBe(3);
 
         onError.and.callFake(function(e) {
@@ -2553,7 +2556,7 @@ describe('Player', function() {
                   .addVideo(5).mime('video/mp4', 'bad')
               .build();
 
-      setupPlayer(manifest).then(function() {
+      setupPlayer().then(function() {
         expect(abrManager.setVariants).toHaveBeenCalled();
         var variants = abrManager.setVariants.calls.argsFor(0)[0];
         // We've already chosen codecs, so only 3 tracks should remain.
@@ -2574,10 +2577,9 @@ describe('Player', function() {
     }
 
     /**
-     * @param {shakaExtern.Manifest} manifest
      * @return {!Promise}
      */
-    function setupPlayer(manifest) {
+    function setupPlayer() {
       var parser = new shaka.test.FakeManifestParser(manifest);
       var parserFactory = function() { return parser; };
       return player.load('', 0, parserFactory).then(function() {
@@ -2610,8 +2612,8 @@ describe('Player', function() {
   });
 
   it('rejects empty manifests', function(done) {
-    var emptyManifest = new shaka.test.ManifestGenerator().build();
-    var emptyParser = new shaka.test.FakeManifestParser(emptyManifest);
+    manifest = new shaka.test.ManifestGenerator().build();
+    var emptyParser = new shaka.test.FakeManifestParser(manifest);
     var emptyFactory = function() { return emptyParser; };
 
     player.load('', 0, emptyFactory).then(fail).catch(function(error) {
