@@ -1013,6 +1013,34 @@ describe('Playhead', function() {
       });  // with large gaps
     });  // with unbuffered seeks
 
+    it('doesn\'t gap jump if the seeking event is late', function() {
+      var buffered = [{start: 10, end: 20}];
+      video.buffered = createFakeBuffered(buffered);
+      video.currentTime = 12;
+      video.readyState = HTMLMediaElement.HAVE_ENOUGH_DATA;
+
+      config.jumpLargeGaps = true;
+      playhead = new shaka.media.Playhead(video, manifest, config, 12,
+                                          Util.spyFunc(onSeek),
+                                          Util.spyFunc(onEvent));
+
+      jasmine.clock().tick(1000);
+      expect(onEvent).not.toHaveBeenCalled();
+
+      // Append a segment before seeking.
+      playhead.onSegmentAppended();
+
+      // Seek backwards but wait briefly to fire the seeking event.
+      video.currentTime = 3;
+      video.readyState = HTMLMediaElement.HAVE_METADATA;
+      video.seeking = true;
+      jasmine.clock().tick(600);
+      video.on['seeking']();
+
+      // There should NOT have been a gap jump.
+      expect(video.currentTime).toBe(3);
+    });
+
     /**
      * @param {string} name
      * @param {SeekTestInfo} data
