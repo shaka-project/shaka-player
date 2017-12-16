@@ -10,6 +10,10 @@ adding a `<UTCTiming>` element to the manifest or by setting the
 [`.manifest.dash.clockSyncUri`][DashManifestConfiguration] configuration.
 See [#386(comment)][386] for more info.
 
+We also have issues with "drifting" DASH streams.  If your encoder experiences
+drift, you may need to address that with the encoder.  We have plans to be
+more tolerant of drift in future.  See [#999][999] for more info.
+
 <hr>
 
 **Q:** I am getting decoder errors or `VIDEO_ERROR` or error code 3016.
@@ -35,21 +39,21 @@ This can also happen with mixed-content restrictions.  If the site is using
 
 **Q:** I am getting `REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE` or error code 6001.
 
-**A:** Check that your platform/browser actually supports the key system.  If
-your manifest contains only Playready, it will need to be played on IE/Edge, a
-Chromecast, or some smart TVs.  Also check the `drm.advanced` configuration for
-the key system.  If you are passing a non-empty robustness, it may not be
-supported by your patform.  See the [DRM tutorial][drm_tutorial] for more info.
+**A:** The most common cause is that you are not using a secure origin.  The
+EME API in the browser requires a secure origin, which means `https` or
+`localhost`.  Chrome enforces this requirement, but other browsers may not yet.
+See the [announcement][eme_https] for more info.
 
-Also, to use EME requires using a secure origin.  This means using `https` or
-be on `localhost`.  Currently only Chrome enforces this, but other browsers
-will in the future. See the [announcement][eme_https] for more info.
+You should also check that your platform/browser actually supports the key
+system.  If your manifest contains only PlayReady, it will need to be played on
+IE/Edge, a Chromecast, or another device with PlayReady.
+See the [DRM tutorial][drm_tutorial] for more info.
 
 This will also happen if you use `Storage` to store protected content (when
-`usePersistentLicense` is true).  Currently, the only Chromebooks support
-persistent licenses.  On other platforms, you can only store clear content or
-store only the content offline (i.e. set `usePersistentLicense` configuration to
-false).
+`usePersistentLicense` is true).  Currently, persistent licenses are supported
+on Chromebooks and Chrome 64+ on Mac/Windows.  On other platforms, you can only
+store clear content or store only the content offline (i.e. set
+`usePersistentLicense` configuration to false).
 
 <hr>
 
@@ -82,20 +86,16 @@ you see JSON, you will need to [unwrap the response][wrapping].
 
 <hr>
 
-**Q:** My HLS manifest doesn't load.
+**Q:** Why doesn't my HLS content work?
 
-**A:** If your HLS manifest describes MPEG2-TS content, the only browsers
-capable of playing it are Edge, Chromecast and Safari. You will get a
-`CONTENT_UNSUPPORTED_BY_BROWSER` error on other browsers due to their lack of TS
-support. We are planning to implement transmuxing TS files to fMP4 so they're
-supported across all browsers. Please subscibe to issue [#887][887] to
-get updates on the progress.
+**A:** If your HLS content uses MPEG2-TS, you may need to enable transmuxing.
+The only browsers capable of playing TS natively are Edge and Chromecast.  You
+will get a `CONTENT_UNSUPPORTED_BY_BROWSER` error on other browsers due to
+their lack of TS support.
 
-We also were not able to make it work on Safari yet due to a bug in their
-MediaSource implementation ([#743][743]).
-
-Please file an issue if your TS content fails in Chromecast or Edge or if your
-MP4 content fails anywhere.
+You can enable transmuxing by [including mux.js][] in your application.  If
+Shaka Player detects that mux.js has been loaded, we will use it to transmux TS
+content into MP4 on-the-fly, so that the content can be played by the browser.
 
 <hr>
 
@@ -124,6 +124,7 @@ these initial decisions.
 [489]: https://github.com/google/shaka-player/issues/489#issuecomment-240466224
 [743]: https://github.com/google/shaka-player/issues/743
 [887]: https://github.com/google/shaka-player/issues/887
+[999]: https://github.com/google/shaka-player/issues/999
 [AbrConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shakaExtern.html#AbrConfiguration
 [CORS]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
 [DashManifestConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shakaExtern.html#DashManifestConfiguration
@@ -133,3 +134,4 @@ these initial decisions.
 [drm_tutorial]: https://shaka-player-demo.appspot.com/docs/api/tutorial-drm-config.html
 [eme_https]: https://sites.google.com/a/chromium.org/dev/Home/chromium-security/deprecating-powerful-features-on-insecure-origins
 [wrapping]: https://shaka-player-demo.appspot.com/docs/api/tutorial-license-wrapping.html
+[including mux.js]: https://github.com/google/shaka-player/blob/967f3399/demo/index.html#L39
