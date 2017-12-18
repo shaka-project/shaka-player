@@ -1,3 +1,62 @@
+## 2.3.0 (2017-12-22)
+
+New features:
+  - Support for HLS live streams
+    - https://github.com/google/shaka-player/issues/740
+  - Support for HLS VOD streams that do not start at t=0
+    - https://github.com/google/shaka-player/issues/1011
+    - Previously supported through configuration, now automatic
+  - MPEG-2 TS content can be transmuxed to MP4 for playback on all browsers
+    - https://github.com/google/shaka-player/issues/887
+    - Requires apps to load https://github.com/videojs/mux.js/
+  - Do not stream captions until they are shown
+    - https://github.com/google/shaka-player/issues/1058
+  - Use NetworkInformation API to get initial bandwidth estimate
+    - https://github.com/google/shaka-player/issues/994
+    - https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation
+  - Added a method to list language/role combinations
+    - https://github.com/google/shaka-player/issues/967
+
+Demo app:
+  - The demo app is now a Progressive Web App (PWA) and can be used offline
+    - https://github.com/google/shaka-player/issues/876
+    - https://developers.google.com/web/progressive-web-apps/
+  - Lighthouse: improved page load latency, text contrast ratio, UI performance
+    - https://github.com/google/shaka-player/issues/905
+    - https://developers.google.com/web/tools/lighthouse/
+  - Roles can now be selected in the demo app
+    - https://github.com/google/shaka-player/issues/967
+  - Added quick links to change between compiled, debug, and uncompiled builds
+
+Bugfixes:
+  - Fixed interpretation of EXT-X-START in HLS
+    - https://github.com/google/shaka-player/issues/1011
+  - Fixed URI extension parsing in HLS
+    - https://github.com/google/shaka-player/issues/1085
+  - Offline storage API can now download multiple items in parallel
+    - https://github.com/google/shaka-player/issues/1047
+
+Docs:
+  - FAQ, architecture diagrams, and tutorials have all been updated.
+    - https://github.com/google/shaka-player/issues/1183
+
+Broken compatibility:
+  - Text parser plugins now take a Uint8Array, not an ArrayBuffer.  All
+    application-specific text-parsing plugins MUST be updated.
+    - https://github.com/google/shaka-player/issues/1022
+
+Deprecated:
+  - The AbrManager configuration interfaces and plugin APIs which were
+    deprecated in v2.2 have now been removed.  Applications with custom
+    AbrManager implementations MUST be upgraded to the v2.2 API now.
+  - The plugin interface for text parsers which was deprecated in v2.1 has now
+    been removed.
+  - The `remove()` method on `shaka.offline.Storage` now takes a URI instead of
+    a `StoredContent` instance.  Applications which use offline storage SHOULD
+    update to the new API.  Support for the old argument will be removed in
+    v2.4.
+
+
 ## 2.2.9 (2017-12-22)
 
 Bugfixes:
