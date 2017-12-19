@@ -452,6 +452,12 @@ describe('DBUpgradeFromVersion1', function() {
                       segments,
                       newSegment);
                 });
+              })
+              .then(function() {
+                // Make sure to close the database when we are done or else any
+                // following test that tries to delete this database will hang
+                // when trying to delete it.
+                db.close();
               });
         });
   }
