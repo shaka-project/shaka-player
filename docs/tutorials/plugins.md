@@ -167,8 +167,8 @@ with the appropriate interfaces after the library is loaded.
 #### Giving Back
 
 If you have a great plugin that you'd like to contribute back to the community,
-we'd love to hear from you.  You can get in touch via our [mailing list][] to
+we'd love to hear from you.  You can get in touch via our [issue tracker][] to
 discuss it, and once it's ready, you can send a [pull request][] on github.
 
-[mailing list]: https://groups.google.com/forum/#!forum/shaka-player-users
+[issue tracker]: https://github.com/google/shaka-player/issues/new
 [pull request]: https://github.com/google/shaka-player/pull/new/master
