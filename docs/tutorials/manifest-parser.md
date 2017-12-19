@@ -217,7 +217,7 @@ segment index.  Because the original manifest object is modified in-place,
 adding them to the index will allow the Player to use them. You *cannnot* add
 new Variants or text streams to an existing Period.
 
-To add a new Period, you must first call `filterPeriod`.  This will filter out
+To add a new Period, you must first call `filterNewPeriod`. This will filter out
 any streams that can't be played by the platform or those that are incompatible
 with the currently playing streams.  Then you can just add them to the manifest
 object.  Because the original manifest is modified in-place, the Player will
@@ -303,6 +303,7 @@ MyManifestParser.prototype.loadStream_ = function(type) {
     width:     type == 'video' ? 640 : undefined,
     height:    type == 'video' ? 480 : undefined,
     kind:      type == 'text' ? 'subtitles' : undefined,
+    channelsCount: type == 'audio' ? 2 : undefined,
     encrypted: false,
     keyId:     null,
     language:  'en',
