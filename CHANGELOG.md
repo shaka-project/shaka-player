@@ -1,3 +1,28 @@
+## 2.2.9 (2017-12-22)
+
+Bugfixes:
+  - Fix excessive memory usage during storage
+    - https://github.com/google/shaka-player/issues/1167
+  - Fix offline storage with temporary license
+    - https://github.com/google/shaka-player/issues/1159
+  - Fix exception while casting
+    - https://github.com/google/shaka-player/issues/1128
+  - Reduced bandwidth of cast messaging
+    - https://github.com/google/shaka-player/issues/1128
+  - Fix exception when destroying TextDisplayer
+    - https://github.com/google/shaka-player/issues/1187
+  - Fix presentationTimeOffset in SegmentTemplate
+    - https://github.com/google/shaka-player/issues/1164
+  - Fix inconsistencies in text visibility across playbacks
+    - https://github.com/google/shaka-player/issues/1185
+  - Work around bad header formatting in IE 11
+    - https://github.com/google/shaka-player/issues/1172
+  - Fix Chromecast PlayReady playback
+    - https://github.com/google/shaka-player/issues/1070
+  - Fix subtitle display with VTTRegion enabled in Chrome
+    - https://github.com/google/shaka-player/issues/1188
+
+
 ## 2.2.8 (2017-12-06)
 
 Bugfixes:
