@@ -4,9 +4,15 @@
 when the page is not loaded.  It can respond to push events from other sites and
 can act as a transparent cache for the page.
 
-This doc will show a basic example of how to create a transparent cache for
-Shaka that will not interfere with bandwidth estimation (for uncached segments).
-This is NOT a tutorial of service workers in general.
+We strongly recommend against using service workers to cache content for offline
+playback.  There are many subtle issues introduced when you try to cache content
+manifests and segments, and we have built an offline storage system that manages
+all of these issues for you.  See {@tutorial offline} and
+{@link shaka.offline.Storage} for more information.
+
+For other use cases, this doc will show a basic example of how to create a cache
+that will not interfere with Shaka Player's bandwidth estimation. This is NOT a
+tutorial of service workers in general.
 
 [1]: https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API
 
@@ -15,9 +21,10 @@ This is NOT a tutorial of service workers in general.
 
 Shaka looks for a special header `X-Shaka-From-Cache` to indicate that a
 response was from a cache.  This tells us to ignore the response for bandwidth
-estimation because the time is not accurate (i.e. it was loaded from disk).
-Simply adding this to the response object will ensure that cached segments will
-not interfere with bandwidth estimates.
+estimation purposes.  If we used these cached responses to estimate bandwidth,
+our estimate would too high, and we would make the wrong adaptation decisions.
+Simply adding this header to the response object will ensure that cached
+segments will not interfere with bandwidth estimates.
 
 
 ## Example Caching Service Worker
@@ -55,8 +62,7 @@ function loadFromCacheOrFetch(request) {
       }
 
       // Request not cached, make a real request for the file.
-      return fetch(request.clone()).then(function(response) {
-
+      return fetch(request).then(function(response) {
         // Cache any successfully request for an MP4 segment.  Service
         // workers cannot cache 206 (Partial Content).  This means that
         // content that uses range requests (e.g. SegmentBase) will require
