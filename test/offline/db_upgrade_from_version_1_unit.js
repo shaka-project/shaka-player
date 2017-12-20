@@ -171,7 +171,7 @@ describe('DBUpgradeFromVersion1', function() {
     ];
 
     runUpgradeTest(oldManifest, oldSegmentData, newManifest, newSegmentData)
-        .then(done).catch(fail);
+        .catch(fail).then(done);
   }));
 
 
@@ -327,7 +327,7 @@ describe('DBUpgradeFromVersion1', function() {
     ];
 
     runUpgradeTest(oldManifest, oldSegmentData, newManifest, newSegmentData)
-        .then(done).catch(fail);
+        .catch(fail).then(done);
   }));
 
 
@@ -355,30 +355,14 @@ describe('DBUpgradeFromVersion1', function() {
       return promise;
     };
 
-    var openDatabase = function(version, onupgrade) {
-      var promise = new shaka.util.PublicPromise();
-
-      var openRequest = window.indexedDB.open(dbName, version);
-      openRequest.onerror = function(event) { promise.reject(); };
-      openRequest.onupgradeneeded = function(event) {
-        var db = event.target.result;
-        var transaction = event.target.transaction;
-        onupgrade(db, transaction);
-      };
-      openRequest.onsuccess = function(event) {
-        var db = event.target.result;
-        promise.resolve(db);
-      };
-
-      return promise;
-    };
-
     return deleteOldInstance()
         .then(function() {
-          return openDatabase(1, function(db) {
+          var upgrade = function(version, db, transaction) {
             db.createObjectStore(DBUtils.StoreV1.MANIFEST, {keyPath: 'key'});
             db.createObjectStore(DBUtils.StoreV1.SEGMENT, {keyPath: 'key'});
-          });
+          };
+
+          return shaka.offline.DBUtils.open(dbName, 1, upgrade);
         })
         .then(function(db) {
           return Promise.resolve()
@@ -407,12 +391,17 @@ describe('DBUpgradeFromVersion1', function() {
               });
         })
         .then(function() {
-          return openDatabase(2, function(db, transaction) {
+          var upgrade = function(version, db, transaction) {
             var upgrader = new shaka.offline.DBUpgradeFromVersion1();
             upgrader.upgrade(db, transaction);
-          });
+          };
+
+          return shaka.offline.DBUtils.open(dbName, 2, upgrade);
         })
         .then(function(db) {
+          /** @const */
+          var noop = function() {};
+
           /** @type {!Array} */
           var manifests = [];
           /** @type {!Array} */
@@ -425,9 +414,13 @@ describe('DBUpgradeFromVersion1', function() {
                     DBUtils.StoreV2.MANIFEST,
                     DBUtils.Mode.READ_ONLY,
                     function(store) {
-                      DBUtils.forEach(store, function(key, value) {
-                        manifests.push(value);
-                      });
+                      DBUtils.forEach(
+                          store,
+                          function(key, value, next) {
+                            manifests.push(value);
+                            next();
+                          },
+                          noop);
                     });
               })
               .then(function() {
@@ -436,9 +429,13 @@ describe('DBUpgradeFromVersion1', function() {
                     DBUtils.StoreV2.SEGMENT,
                     DBUtils.Mode.READ_ONLY,
                     function(store) {
-                      DBUtils.forEach(store, function(key, value) {
-                        segments.push(value);
-                      });
+                      DBUtils.forEach(
+                          store,
+                          function(key, value, next) {
+                            segments.push(value);
+                            next();
+                          },
+                          noop);
                     });
               })
               .then(function() {
@@ -632,12 +629,19 @@ describe('DBUpgradeFromVersion1', function() {
    * @return {!Array}
    */
   function getAll(store) {
+    /** @const */
+    var noop = function() {};
+
     /** @type {!Array} */
     var all = [];
 
-    shaka.offline.DBUtils.forEach(store, function(key, value) {
-      all.push(value);
-    });
+    shaka.offline.DBUtils.forEach(
+        store,
+        function(key, value, next) {
+          all.push(value);
+          next();
+        },
+        noop);
 
     return all;
   }

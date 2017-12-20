@@ -54,7 +54,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
   beforeEach(function(done) {
     mockSEFactory.overrideCreate(function() {
       /** @type {!shaka.offline.DBEngine} */
-      var engine = new shaka.offline.DBEngine(dbName, dbUpdateRetries);
+      var engine = new shaka.offline.DBEngine(dbName);
       return engine.init().then(function() { return engine; });
     });
 
@@ -66,10 +66,11 @@ describe('Offline', /** @suppress {accessControls} */ function() {
     // Ensure we start with a clean slate.
     return shaka.offline.DBEngine.deleteDatabase(dbName)
         .then(function() {
-          return shaka.offline.StorageEngineFactory.createStorageEngine();
-        })
-        .then(function(storageEngine) {
-          engine = storageEngine;
+          // Make sure that the db engine is using the correct version before
+          // we start our tests. If we can't get the correct version, we should
+          // fail the test.
+          engine = new shaka.offline.DBEngine(dbName);
+          return engine.init(dbUpdateRetries);
         }).catch(fail).then(done);
   });
 

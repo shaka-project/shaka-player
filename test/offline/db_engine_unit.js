@@ -28,8 +28,8 @@ describe('DBEngine', function() {
   beforeEach(function(done) {
     if (shaka.offline.DBEngine.isSupported()) {
       shaka.offline.DBEngine.deleteDatabase(dbName).then(function() {
-        db = new shaka.offline.DBEngine(dbName, dbUpdateRetries);
-        return db.init();
+        db = new shaka.offline.DBEngine(dbName);
+        return db.init(dbUpdateRetries);
       }).catch(fail).then(done);
     } else {
       done();
