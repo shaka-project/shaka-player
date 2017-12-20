@@ -55,6 +55,9 @@ Deprecated:
     a `StoredContent` instance.  Applications which use offline storage SHOULD
     update to the new API.  Support for the old argument will be removed in
     v2.4.
+  - The `streaming.infiniteRetriesForLiveStreams` config was removed.
+    Applications using this feature MUST use the `streaming.failureCallback`
+    config and the method `player.retryStreaming()` instead.
 
 
 ## 2.2.9 (2017-12-22)
