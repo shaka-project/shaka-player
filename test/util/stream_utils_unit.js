@@ -19,8 +19,8 @@ describe('StreamUtils', function() {
   var manifest;
   var filterVariantsByLanguageAndRole =
       shaka.util.StreamUtils.filterVariantsByLanguageAndRole;
-  var filterTextStreamsByLanguageAndRole =
-      shaka.util.StreamUtils.filterTextStreamsByLanguageAndRole;
+  var filterStreamsByLanguageAndRole =
+      shaka.util.StreamUtils.filterStreamsByLanguageAndRole;
 
   describe('filterVariantsByLanguageAndRole', function() {
     it("chooses variants in user's preferred language", function() {
@@ -275,7 +275,7 @@ describe('StreamUtils', function() {
         });
   });
 
-  describe('filterTextStreamsByLanguageAndRole', function() {
+  describe('filterStreamsByLanguageAndRole', function() {
     it("chooses text streams in user's preferred language", function() {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
@@ -287,8 +287,10 @@ describe('StreamUtils', function() {
             .language('en')
         .build();
 
-      var chosen = filterTextStreamsByLanguageAndRole(manifest.periods[0],
-          'en', '');
+      var chosen = filterStreamsByLanguageAndRole(
+          manifest.periods[0].textStreams,
+          'en',
+          '');
       expect(chosen.length).toBe(2);
       expect(chosen[0]).toBe(manifest.periods[0].textStreams[0]);
       expect(chosen[1]).toBe(manifest.periods[0].textStreams[2]);
@@ -304,8 +306,10 @@ describe('StreamUtils', function() {
             .primary()
         .build();
 
-      var chosen = filterTextStreamsByLanguageAndRole(manifest.periods[0],
-          'en', '');
+      var chosen = filterStreamsByLanguageAndRole(
+          manifest.periods[0].textStreams,
+          'en',
+          '');
       expect(chosen.length).toBe(2);
       expect(chosen[0]).toBe(manifest.periods[0].textStreams[1]);
       expect(chosen[1]).toBe(manifest.periods[0].textStreams[2]);
@@ -324,8 +328,10 @@ describe('StreamUtils', function() {
             .roles(['caption'])
         .build();
 
-      var chosen = filterTextStreamsByLanguageAndRole(manifest.periods[0],
-          'en', 'main');
+      var chosen = filterStreamsByLanguageAndRole(
+          manifest.periods[0].textStreams,
+          'en',
+          'main');
       expect(chosen.length).toBe(1);
       expect(chosen[0]).toBe(manifest.periods[0].textStreams[0]);
     });
@@ -354,8 +360,10 @@ describe('StreamUtils', function() {
             .roles(['main'])
         .build();
 
-      var chosen = filterTextStreamsByLanguageAndRole(manifest.periods[0],
-          'en', '');
+      var chosen = filterStreamsByLanguageAndRole(
+          manifest.periods[0].textStreams,
+          'en',
+          '');
       // Which role is chosen is an implementation detail.
       // Each role is found on two text streams, so we should have two.
       expect(chosen.length).toBe(2);
@@ -386,8 +394,10 @@ describe('StreamUtils', function() {
             .roles(['main'])
         .build();
 
-      var chosen = filterTextStreamsByLanguageAndRole(manifest.periods[0],
-          'zh', '');
+      var chosen = filterStreamsByLanguageAndRole(
+          manifest.periods[0].textStreams,
+          'zh',
+          '');
       // Which role is chosen is an implementation detail.
       // Each role is found on two text streams, so we should have two.
       expect(chosen.length).toBe(2);
@@ -408,8 +418,10 @@ describe('StreamUtils', function() {
             .language('es').primary()
         .build();
 
-      var chosen = filterTextStreamsByLanguageAndRole(manifest.periods[0],
-          'zh', '');
+      var chosen = filterStreamsByLanguageAndRole(
+          manifest.periods[0].textStreams,
+          'zh',
+          '');
       // Which language is chosen is an implementation detail.
       // Each role is found on two variants, so we should have two.
       expect(chosen.length).toBe(2);
@@ -440,8 +452,10 @@ describe('StreamUtils', function() {
                 .roles(['main'])
             .build();
 
-          var chosen = filterTextStreamsByLanguageAndRole(manifest.periods[0],
-              'zh', '');
+          var chosen = filterStreamsByLanguageAndRole(
+              manifest.periods[0].textStreams,
+              'zh',
+              '');
           // Which role is chosen is an implementation detail.
           // Each role is found on two text streams, so we should have two.
           expect(chosen.length).toBe(2);
@@ -477,8 +491,10 @@ describe('StreamUtils', function() {
                 .roles(['main'])
             .build();
 
-          var chosen = filterTextStreamsByLanguageAndRole(manifest.periods[0],
-              'zh', '');
+          var chosen = filterStreamsByLanguageAndRole(
+              manifest.periods[0].textStreams,
+              'zh',
+              '');
           expect(chosen.length).toBe(2);
           expect(chosen[0].language).toBe('zh');
           expect(chosen[1].language).toBe('zh');
