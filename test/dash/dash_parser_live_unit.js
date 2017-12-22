@@ -1001,6 +1001,29 @@ describe('DashParser Live', function() {
         basicLines, basicRefs, updateLines, updateRefs, partialUpdateLines);
   });
 
+  describe('SegmentTemplate w/ duration', function() {
+    var templateLines = [
+      '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />'
+    ];
+
+    it('produces sane references without assertions', function(done) {
+      var manifest = makeSimpleLiveManifestText(templateLines, updateTime);
+
+      fakeNetEngine.setResponseMapAsText({'dummy://foo': manifest});
+      parser.start('dummy://foo', playerInterface).then(function(manifest) {
+        expect(manifest.periods.length).toBe(1);
+        var stream = manifest.periods[0].variants[0].video;
+
+        // In https://github.com/google/shaka-player/issues/1204, this
+        // failed an assertion and returned endTime == 0.
+        var ref = stream.getSegmentReference(1);
+        expect(ref.endTime).toBeGreaterThan(0);
+      }).catch(fail).then(done);
+      shaka.polyfill.Promise.flush();
+    });
+  });
+
+
   describe('EventStream', function() {
     /** @const */
     var originalManifest = [
