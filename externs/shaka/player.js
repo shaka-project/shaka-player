@@ -303,6 +303,7 @@ shakaExtern.Restrictions;
  *
  * @property {boolean} persistentState
  *   Whether this key system supports persistent state.
+ * @exportDoc
  */
 shakaExtern.DrmSupportType;
 
@@ -360,6 +361,7 @@ shakaExtern.SupportType;
  *   Specifies an identifier for this instance of the region.
  * @property {Element} eventElement
  *   The XML element that defines the Event.
+ * @exportDoc
  */
 shakaExtern.TimelineRegionInfo;
 
