@@ -27,8 +27,8 @@
  * mode during development.
  */
 (function() {  // anonymous namespace
-  // The URL of the page itself, without URL fragments.
-  var pageUrl = location.href.split('#')[0];
+  // The URL of the page itself, without URL fragments or search strings.
+  var pageUrl = location.href.split('#')[0].split('?')[0];
   // The URL of the page, up to and including the final '/'.
   var baseUrl = pageUrl.split('/').slice(0, -1).join('/') + '/';
 
