@@ -245,7 +245,7 @@ player.configure({
 
 For a discussion of advanced DRM configuration, see {@tutorial drm-config}.
 
-Shaka v1's license-request-releated settings have moved to v2's network filters.
+Shaka v1's license-request-related settings have moved to v2's network filters.
 
 Network filters are a generic filtering system for all networking, including
 license requests and responses.  They are more general and flexible, so they
