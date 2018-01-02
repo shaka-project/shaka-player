@@ -63,6 +63,9 @@ function ShakaControls() {
   this.captionButton_ = document.getElementById('captionButton');
 
   /** @private {Element} */
+  this.captionSelection_ = document.getElementById('captionSelection');
+
+  /** @private {Element} */
   this.fullscreenButton_ = document.getElementById('fullscreenButton');
 
   /** @private {Element} */
@@ -157,6 +160,9 @@ ShakaControls.prototype.init = function(castProxy, onError, notifyCastStatus) {
       'trackschanged', this.onTracksChange_.bind(this));
   // initialize caption state with a fake event
   this.onCaptionStateChange_();
+
+  this.captionSelection_.addEventListener('change',
+      this.onCaptionSelectChange_.bind(this));
 
   this.fullscreenButton_.addEventListener(
       'click', this.onFullscreenClick_.bind(this));
@@ -253,6 +259,27 @@ ShakaControls.prototype.allowCast = function(allow) {
  * is important for platforms like Android where autoplay is disabled.
  */
 ShakaControls.prototype.loadComplete = function() {
+  var textLang = this.player_.getTextLanguages();
+
+  // Clear options in select drop-down
+  var opts = this.captionSelection_.options.length;
+  for (var i = opts - 1; i >= 0; i--) {
+    this.captionSelection_.options[i] = null;
+  }
+  var option = document.createElement('option');
+  option.text = 'Off';
+  this.captionSelection_.add(option);
+
+  var langId;
+  for (langId = 0; langId < textLang.length; langId++) {
+    option = document.createElement('option');
+    option.text = textLang[langId];
+    this.captionSelection_.add(option);
+    if (textLang[langId] === this.player_.getCurrentTextLanguage()) {
+      this.captionSelection_.selectedIndex = langId + 1;
+    }
+  }
+
   // If we are on Android or if autoplay is false, video.paused should be true.
   // Otherwise, video.paused is false and the content is autoplaying.
   this.onPlayStateChange_();
@@ -515,6 +542,23 @@ ShakaControls.prototype.onCaptionClick_ = function() {
   if (!this.enabled_) return;
 
   this.player_.setTextTrackVisibility(!this.player_.isTextTrackVisible());
+};
+
+
+/** @private */
+ShakaControls.prototype.onCaptionSelectChange_ = function() {
+  if (!this.enabled_) return;
+
+  var idx = this.captionSelection_.selectedIndex;
+  if (idx === 0) {
+    this.player_.setTextTrackVisibility(false);
+    return;
+  }
+
+  var lang = this.captionSelection_.options[idx].text;
+  this.player_.selectTextLanguage(lang);
+
+  this.player_.setTextTrackVisibility(true);
 };
 
 
