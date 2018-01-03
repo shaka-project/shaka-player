@@ -17,7 +17,7 @@
 
 goog.provide('shaka.test.FakeNetworkingEngine');
 
-goog.require('shaka.util.StringUtils');
+/** @fileoverview @suppress {missingRequire} */
 
 
 
