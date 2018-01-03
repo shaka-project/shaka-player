@@ -3,6 +3,11 @@ closure/compiler.jar
   Apache v2.0 license.
   https://github.com/google/closure-compiler
 
+closure/linter.jar
+  The closure compiler linter, v20171203, by Google.
+  Apache v2.0 license.
+  https://github.com/google/closure-compiler
+
 closure/goog
   The closure library (modified), possibly v20150315, by Google.
   Apache v2.0 license.
@@ -14,19 +19,6 @@ closure/deps
   The closure dependency generator, part of the closure library, by Google.
   Apache v2.0 license.
   https://github.com/google/closure-library
-
-gjslint/closure_linter-2.3.13
-  The closure JavaScript linter (modified), by Google.
-  Apache v2.0 license.
-  https://code.google.com/p/closure-linter/
-  Local mods:
-    - Added support for suppressing gjslint errors
-    - Added checks for property documentation in typedefs
-
-gjslint/python-gflags-2.0
-  A python command-line parser, needed by the closure linter, by Google.
-  BSD-style license (3-clause).
-  https://code.google.com/p/python-gflags/
 
 jsdoc
   JSDoc 3 documentation generator (modified), by Michael Matthews.

@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.test.Util');
-
 describe('Mp4SegmentIndexParser', function() {
   var indexSegmentUri = '/base/test/test/assets/index-segment.mp4';
   var mediaSegmentUri = '/base/test/test/assets/sintel-audio-segment.mp4';
