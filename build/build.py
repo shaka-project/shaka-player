@@ -53,9 +53,6 @@ common_closure_opts = [
 
     '--jscomp_error=*',
 
-    # Analyzer checks require explicit nullability, which is a pain.
-    '--jscomp_off=analyzerChecksInternal',
-
     '--extra_annotation_name=listens',
     '--extra_annotation_name=exportDoc',
     '--extra_annotation_name=exportInterface',
