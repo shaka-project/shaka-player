@@ -294,6 +294,10 @@ describe('Promise polyfill', function() {
     it('chains correctly', function(done) {
       var p = Promise.resolve(dummy);
 
+      // Use a double-cast to get the compiler to allow this.
+      var invalidFunction = /** @type {function(*)} */(
+          /** @type {*} */(undefined));
+
       p.then(function() { return 1; })
           .then(function(i) { expect(i).toBe(1); })
           .catch(fail)
@@ -308,7 +312,7 @@ describe('Promise polyfill', function() {
           .then(fail)
           .catch(function() { throw new Error(); })
           .then(fail)
-          .catch()
+          .catch(invalidFunction)
           .then(fail)
           .catch(function() {})
           .then(done);

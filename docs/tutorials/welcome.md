@@ -29,7 +29,7 @@ You can build Shaka on Linux, Windows, or Mac.
 To get the sources and compile the library, you will need:
   * Git 1.7.10+  {@link https://git-scm.com/downloads}
   * Python 2.7.x  {@link https://www.python.org/downloads/}
-  * Java Runtime Environment 7+  {@link https://java.com/en/download/}
+  * Java Runtime Environment 8+  {@link https://java.com/en/download/}
   * A local web server
     * _NOTE: A local web server is required because browsers place restrictions
       on applications from file:/// URLs._
