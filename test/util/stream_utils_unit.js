@@ -336,6 +336,48 @@ describe('StreamUtils', function() {
       expect(chosen[0]).toBe(manifest.periods[0].textStreams[0]);
     });
 
+    it('prefers no-role streams if there is no preferred role', function() {
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addTextStream(0)
+            .language('en')
+            .roles(['commentary'])
+          .addTextStream(1)
+            .language('en')
+          .addTextStream(2)
+            .language('en')
+            .roles(['secondary'])
+        .build();
+
+      var chosen = filterStreamsByLanguageAndRole(
+          manifest.periods[0].textStreams,
+          'en',
+          '');
+      expect(chosen.length).toBe(1);
+      expect(chosen[0].roles.length).toBe(0); // Pick a stream with no role.
+    });
+
+    it('ignores no-role streams if there is a preferred role', function() {
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addTextStream(0)
+            .language('en')
+            .roles(['commentary'])
+          .addTextStream(1)
+            .language('en')
+          .addTextStream(2)
+            .language('en')
+            .roles(['secondary'])
+        .build();
+
+      var chosen = filterStreamsByLanguageAndRole(
+          manifest.periods[0].textStreams,
+          'en',
+          'main'); // A role that is not present.
+      expect(chosen.length).toBe(1);
+      expect(chosen[0].roles.length).toBe(1); // Pick a stream with a role.
+    });
+
     it('chooses only one role, even if none is preferred', function() {
       // Regression test for https://github.com/google/shaka-player/issues/949
       manifest = new shaka.test.ManifestGenerator()
