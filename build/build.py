@@ -49,7 +49,7 @@ import shakaBuildHelpers
 
 
 common_closure_opts = [
-    '--language_in', 'ECMASCRIPT5',
+    '--language_in', 'ECMASCRIPT6',
     '--language_out', 'ECMASCRIPT3',
 
     '--jscomp_error=*',
