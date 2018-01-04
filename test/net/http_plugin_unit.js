@@ -20,7 +20,16 @@ describe('HttpPlugin', function() {
   var retryParameters;
 
   beforeAll(function() {
+    // Install the mock only briefly in the global namespace, to get a handle to
+    // the mocked XHR implementation.
     jasmine.Ajax.install();
+    var MockXHR = window.XMLHttpRequest;
+    jasmine.Ajax.uninstall();
+    // Now plug this mock into HttpRequest directly, so it does not interfere
+    // with other requests, such as those made by karma frameworks like
+    // source-map-support.
+    shaka.net.HttpPlugin['xhr_'] = MockXHR;
+
     jasmine.clock().install();
 
     jasmine.Ajax.stubRequest('https://foo.bar/').andReturn({
@@ -73,7 +82,7 @@ describe('HttpPlugin', function() {
   });
 
   afterAll(function() {
-    jasmine.Ajax.uninstall();
+    shaka.net.HttpPlugin['xhr_'] = window.XMLHttpRequest;
     jasmine.clock().uninstall();
   });
 
