@@ -564,10 +564,10 @@ shakaDemo.hashShouldChange_ = function() {
     var elem = document.getElementById(type + '_link');
     if (buildType == type) {
       elem.classList.add('disabled_link');
-      elem.tabIndex = -1;
+      elem.removeAttribute('href');
+      elem.title = 'currently selected';
     } else {
       elem.classList.remove('disabled_link');
-      elem.tabIndex = 0;
       elem.onclick = function() {
         location.hash = strippedHash + ';build=' + type;
         location.reload();
@@ -575,6 +575,17 @@ shakaDemo.hashShouldChange_ = function() {
       };
     }
   });
+
+  // Check if ES6 is usable by evaluating arrow function syntax.
+  try {
+    eval('()=>{}');
+  } catch (e) {
+    // If ES6 is not usable, neither is the uncompiled version of the app.
+    var uncompiledLink = document.getElementById('uncompiled_link');
+    uncompiledLink.classList.add('disabled_link');
+    uncompiledLink.removeAttribute('href');
+    uncompiledLink.title = 'requires ES6';
+  }
 
   var newHash = '#' + params.join(';');
   if (newHash != location.hash) {

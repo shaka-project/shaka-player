@@ -48,8 +48,8 @@ a:hover {
 }
 
 a.disabled_link {
-  pointer-events: none;
-  cursor: default;
+  /* Allow pointer events, so that we can show a tooltip on hover */
+  cursor: not-allowed;
   color: Gray;
 }
 
