@@ -345,5 +345,5 @@ shakaDemo.updateDebugInfo_ = function() {
   }
 
   document.getElementById('bufferedDebug').textContent =
-      '- ' + behind.toFixed(0) + 's / ' + '+ ' + ahead.toFixed(0) + 's';
+      '- ' + behind.toFixed(0) + 's / + ' + ahead.toFixed(0) + 's';
 };

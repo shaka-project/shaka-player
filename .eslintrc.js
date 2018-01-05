@@ -1,3 +1,4 @@
+// vim: foldmethod=marker:foldmarker={{{,}}}
 module.exports = {
     "env": {
         "browser": true,
@@ -5,53 +6,131 @@ module.exports = {
     },
     "extends": "eslint:recommended",
     "rules": {
-        // Things the compiler already takes care of, with more precision:
-        "no-undef": "off",
+        // Things the compiler already takes care of, with more precision: {{{
         "no-console": "off",
+        "no-eq-null": "off",
+        "no-eval": "off",
+        "no-undef": "off",
+        "valid-jsdoc": "off",
+        // }}}
 
-        // Things we should probably fix, but in stages in multiple commits:
-        "no-unused-vars": "off",
+        // Things we should probably fix, but in stages in multiple commits: {{{
+
+        // In many cases, we should change scoped var to let.
+        "block-scoped-var": "off",
+        "no-inner-declarations": "off",
         "no-redeclare": "off",
-        "comma-dangle": "error",  // should be ["error", "always"]
+        "no-shadow": "off",
 
-        // Style rules derived by eslint after analyzing v2.3.0 sources:
+        // Google style now requires dangling commas (5.2.1)
+        "comma-dangle": "error",  // Should be ["error", "always"]
+        // Google style requires curly braces for single-line branches (4.1.1)
+        "curly": "off",
+        // Google style discourages horizontal alignment (4.6.3)
+        "no-multi-spaces": "off",  // Should be "error"
+
+        // These could catch real bugs
+        "consistent-return": "off",
+        "default-case": "off",
+        "no-extra-bind": "off",
+        "no-loop-func": "off",
+        "no-unused-expressions": "off",  // Conflicts with some Closure declarations
+        "prefer-promise-reject-errors": "off",
+
+        // These could improve readability
+        "complexity": "off",
+        "dot-location": "off",
+        // }}}
+
+        // "Possible error" rules in "eslint:recommended" that need options: {{{
+	"no-empty": ["error", {"allowEmptyCatch": true}],
+        // }}}
+
+        // "Possible error" rules we should be able to pass, but are not part of "eslint:recommended": {{{
+        "for-direction": "error",
+        "getter-return": "error",
+        "no-await-in-loop": "error",
+        "no-template-curly-in-string": "error",
+        // }}}
+
+        // "Best practices" rules we should be able to pass, but are not part of "eslint:recommended": {{{
         "accessor-pairs": "error",
+        "array-callback-return": "error",
+        "class-methods-use-this": "error",
+        "no-alert": "error",
+        "no-caller": "error",
+        "no-catch-shadow": "error",
+        "no-extend-native": "error",  // May conflict with future polyfills
+        "no-extra-label": "error",
+        "no-floating-decimal": "error",
+        "no-implied-eval": "error",
+        "no-invalid-this": "error",
+        "no-iterator": "error",
+        "no-label-var": "error",
+        "no-labels": "error",
+        "no-lone-blocks": "error",
+        "no-multi-str": "error",
+        "no-new": "error",
+        "no-new-func": "error",
+        "no-new-wrappers": "error",
+        "no-octal-escape": "error",
+        "no-proto": "error",
+        "no-return-assign": "error",
+        "no-return-await": "error",
+        "no-script-url": "error",
+        "no-self-compare": "error",
+        "no-sequences": "error",
+        "no-throw-literal": "error",
+        "no-unmodified-loop-condition": "error",
+        "no-useless-call": "error",
+        "no-useless-concat": "error",
+        "no-useless-return": "error",
+        "no-void": "error",
+        "no-with": "error",
+        "radix": ["error", "always"],
+        "require-await": "error",
+        "wrap-iife": ["error", "inside"],
+        // }}}
+
+        // Style rules we don't need: {{{
+        "dot-notation": "off",  // We use bracket notation in tests on purpose
+        "eqeqeq": "off",  // Compiler handles type checking in advance
+        "guard-for-in": "off",
+        "no-div-regex": "off",  // Conflicts with no-useless-escape
+        "no-undef-init": "off",  // Sometimes necessary with hacky compiler casts
+        "no-undefined": "off",  // We use undefined in many places, legitimately
+        "no-unused-vars": "off",  // Interface impls may not require all args
+        "no-use-before-define": "off",  // Does not know when things are executed, false positives
+        "no-warning-comments": "off",  // TODO and FIXME are fine
+        "vars-on-top": "off",
+        "yoda": ["error", "never"],
+        // }}}
+
+        // Style rules derived by eslint after analyzing v2.3.0 sources: {{{
         "array-bracket-newline": "off",
         "array-bracket-spacing": [
             "error",
             "never"
         ],
-        "array-callback-return": "off",
         "array-element-newline": "off",
         "arrow-body-style": "error",
         "arrow-parens": "error",
         "arrow-spacing": "error",
-        "block-scoped-var": "off",
         "block-spacing": "off",
         "brace-style": "off",
-        "callback-return": "off",
         "camelcase": "off",
         "capitalized-comments": "off",
-        "class-methods-use-this": "error",
         "comma-spacing": "off",
         "comma-style": [
             "error",
             "last"
         ],
-        "complexity": "off",
         "computed-property-spacing": [
             "error",
             "never"
         ],
-        "consistent-return": "off",
         "consistent-this": "off",
-        "curly": "off",
-        "default-case": "off",
-        "dot-location": "off",
-        "dot-notation": "off",
         "eol-last": "error",
-        "eqeqeq": "off",
-        "for-direction": "error",
         "func-call-spacing": "error",
         "func-name-matching": "error",
         "func-names": [
@@ -61,10 +140,6 @@ module.exports = {
         "func-style": "off",
         "function-paren-newline": "off",
         "generator-star-spacing": "error",
-        "getter-return": "error",
-        "global-require": "off",
-        "guard-for-in": "off",
-        "handle-callback-err": "error",
         "id-blacklist": "error",
         "id-length": "off",
         "id-match": "error",
@@ -102,107 +177,36 @@ module.exports = {
         "newline-after-var": "off",
         "newline-before-return": "off",
         "newline-per-chained-call": "off",
-        "no-alert": "error",
         "no-array-constructor": "error",
-        "no-await-in-loop": "error",
         "no-bitwise": "off",
-        "no-buffer-constructor": "error",
-        "no-caller": "error",
-        "no-catch-shadow": "off",
         "no-confusing-arrow": "error",
         "no-continue": "off",
-        "no-div-regex": "off",
         "no-duplicate-imports": "error",
-        "no-else-return": "off",
-        "no-empty": [
-            "error",
-            {
-                "allowEmptyCatch": true
-            }
-        ],
-        "no-empty-function": "off",
-        "no-eq-null": "off",
-        "no-eval": "off",
-        "no-extend-native": "error",
-        "no-extra-bind": "off",
-        "no-extra-label": "error",
-        "no-extra-parens": "off",
-        "no-floating-decimal": "error",
         "no-implicit-globals": "off",
-        "no-implied-eval": "error",
         "no-inline-comments": "off",
-        "no-inner-declarations": [
-            "error",
-            "functions"
-        ],
-        "no-invalid-this": "error",
-        "no-iterator": "error",
-        "no-label-var": "error",
-        "no-labels": "error",
-        "no-lone-blocks": "error",
         "no-lonely-if": "off",
-        "no-loop-func": "off",
-        "no-magic-numbers": "off",
         "no-mixed-operators": "off",
-        "no-mixed-requires": "error",
         "no-multi-assign": "off",
-        "no-multi-spaces": "off",
-        "no-multi-str": "error",
         "no-multiple-empty-lines": "off",
         "no-native-reassign": "error",
         "no-negated-condition": "off",
         "no-negated-in-lhs": "error",
         "no-nested-ternary": "off",
-        "no-new": "off",
-        "no-new-func": "error",
         "no-new-object": "error",
-        "no-new-require": "error",
-        "no-new-wrappers": "error",
-        "no-octal-escape": "error",
-        "no-param-reassign": "off",
-        "no-path-concat": "error",
         "no-plusplus": "off",
-        "no-process-env": "error",
-        "no-process-exit": "error",
-        "no-proto": "error",
-        "no-prototype-builtins": "off",
-        "no-restricted-globals": "error",
         "no-restricted-imports": "error",
-        "no-restricted-modules": "error",
-        "no-restricted-properties": "error",
         "no-restricted-syntax": "error",
-        "no-return-assign": "error",
-        "no-return-await": "error",
-        "no-script-url": "error",
-        "no-self-compare": "error",
-        "no-sequences": "error",
-        "no-shadow": "off",
-        "no-shadow-restricted-names": "error",
         "no-spaced-func": "error",
-        "no-sync": "error",
         "no-tabs": "error",
-        "no-template-curly-in-string": "error",
         "no-ternary": "off",
-        "no-throw-literal": "off",
         "no-trailing-spaces": "error",
-        "no-undef-init": "off",
-        "no-undefined": "off",
         "no-underscore-dangle": "off",
-        "no-unmodified-loop-condition": "error",
         "no-unneeded-ternary": "error",
-        "no-unused-expressions": "off",
-        "no-use-before-define": "off",
-        "no-useless-call": "off",
         "no-useless-computed-key": "error",
-        "no-useless-concat": "off",
         "no-useless-constructor": "error",
         "no-useless-rename": "error",
-        "no-useless-return": "off",
         "no-var": "off",
-        "no-void": "error",
-        "no-warning-comments": "off",
         "no-whitespace-before-property": "error",
-        "no-with": "error",
         "nonblock-statement-body-position": [
             "error",
             "any"
@@ -230,18 +234,12 @@ module.exports = {
         "prefer-const": "error",
         "prefer-destructuring": "off",
         "prefer-numeric-literals": "error",
-        "prefer-promise-reject-errors": "off",
         "prefer-reflect": "off",
         "prefer-rest-params": "off",
         "prefer-spread": "off",
         "prefer-template": "off",
         "quote-props": "off",
         "quotes": "off",
-        "radix": [
-            "error",
-            "always"
-        ],
-        "require-await": "error",
         "require-jsdoc": "off",
         "rest-spread-spacing": "error",
         "semi": "error",
@@ -283,13 +281,8 @@ module.exports = {
             "error",
             "never"
         ],
-        "valid-jsdoc": "off",
-        "vars-on-top": "off",
         "wrap-regex": "off",
         "yield-star-spacing": "error",
-        "yoda": [
-            "error",
-            "never"
-        ]
+        // }}}
     }
 };

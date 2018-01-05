@@ -2187,11 +2187,11 @@ describe('StreamingEngine', function() {
             expect(playheadTime).toBe(30);
             expect(start).toBe(10);
             expect(end).toBe(20);
-            return originalRemove.call(null, type, start, end);
+            return originalRemove(type, start, end);
           });
         }
 
-        return originalRemove.call(null, type, start, end);
+        return originalRemove(type, start, end);
       });
 
       // Here we go!

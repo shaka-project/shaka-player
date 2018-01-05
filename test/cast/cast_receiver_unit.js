@@ -862,7 +862,7 @@ describe('CastReceiver', function() {
   function createMockReceiverApi() {
     return {
       CastReceiverManager: {
-        getInstance: function()  { return mockReceiverManager; }
+        getInstance: function() { return mockReceiverManager; }
       }
     };
   }
