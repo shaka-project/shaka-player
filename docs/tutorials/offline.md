@@ -63,7 +63,7 @@ the end of the tutorial.
 
     <div>
       <span><progress id="progress-bar" value="0" max="100"></span>
-      <span><button id="download-button">Download</button></span></span>
+      <span><button id="download-button">Download</button></span>
     </div>
 
     <video id="video"
@@ -415,7 +415,7 @@ That’s it! For your convenience, here is the completed code:
 
     <div>
       <span><progress id="progress-bar" value="0" max="100"></span>
-      <span><button id="download-button">Download</button></span></span>
+      <span><button id="download-button">Download</button></span>
     </div>
 
     <video id="video"
