@@ -324,7 +324,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
     onTimeUpdate();  // In case we're already there.
 
     var timeout = shaka.test.Util.delay(30).then(function() {
-      throw 'Timeout waiting for time';
+      throw new Error('Timeout waiting for time');
     });
     return Promise.race([p, timeout]);
   }

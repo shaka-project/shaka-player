@@ -120,7 +120,8 @@ describe('Pssh', function() {
 
     for (var i = 0; i < psshs.length; ++i) {
       try {
-        new shaka.util.Pssh(psshs[i]);
+        var pssh = new shaka.util.Pssh(psshs[i]);
+        expect(pssh).toBeTruthy();  // Closure: don't complain about unused vars
         fail();
       } catch (error) {
         expect(error instanceof shaka.util.Error).toBe(true);
