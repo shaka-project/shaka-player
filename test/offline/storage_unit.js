@@ -17,12 +17,15 @@
 
 describe('Storage', function() {
   /** @const */
-  var Scheme = shaka.offline.OfflineScheme;
+  var OfflineUri = shaka.offline.OfflineUri;
 
   /** @const */
   var SegmentReference = shaka.media.SegmentReference;
 
   var mockSEFactory = new shaka.test.MockStorageEngineFactory();
+
+  /** @const */
+  var fakeManifestUri = 'my-fake-manifest';
 
   /** @type {!shaka.offline.IStorageEngine} */
   var fakeStorageEngine;
@@ -33,7 +36,7 @@ describe('Storage', function() {
   /** @type {!shaka.test.FakeNetworkingEngine} */
   var netEngine;
 
-  beforeEach(function(done) {
+  beforeEach(function() {
     fakeStorageEngine = new shaka.test.MemoryStorageEngine();
 
     mockSEFactory.overrideIsSupported(true);
@@ -53,9 +56,6 @@ describe('Storage', function() {
     });
 
     storage = new shaka.offline.Storage(player);
-
-    shaka.offline.StorageEngineFactory.initEngine(fakeStorageEngine)
-        .catch(fail).then(done);
   });
 
   afterEach(function(done) {
@@ -120,15 +120,10 @@ describe('Storage', function() {
               .addAudio(2).language('en').bandwidth(80)
           .build();
       // Get the original tracks from the manifest.
-      var getVariantTracks = shaka.util.StreamUtils.getVariantTracks;
-      tracks = getVariantTracks(manifest.periods[0], null, null);
-      // The expected tracks we get back from the stored version of the content
-      // will have 0 for bandwidth, so adjust the tracks list to match.
-      tracks.forEach(function(t) {
-        t.bandwidth = 0;
-        t.audioBandwidth = null;
-        t.videoBandwidth = null;
-      });
+      tracks = shaka.util.StreamUtils.getVariantTracks(
+          manifest.periods[0],
+          null,
+          null);
 
       storage.loadInternal = function() {
         return Promise.resolve().then(function() {
@@ -160,13 +155,25 @@ describe('Storage', function() {
     it('stores basic manifests', function(done) {
       var originalUri = 'fake://foobar';
       var appData = {tools: ['Google', 'StackOverflow'], volume: 11};
+
+      // Once tracks have completely been downloaded, they lose all
+      // bandwidth data. Clear bandwidth data from the tracks before
+      // checking the results of the stored tracks.
+      tracks.forEach(function(track) {
+        track.bandwidth = 0;
+        track.audioBandwidth = null;
+        track.videoBandwidth = null;
+      });
+
       storage.store(originalUri, appData)
           .then(function(data) {
             expect(data).toBeTruthy();
             // Since we are using a memory DB, it will always be the first one.
-            expect(data.offlineUri).toBe(Scheme.manifestIdToUri(0));
+            expect(data.offlineUri).toBe(OfflineUri.manifestIdToUri(0));
             expect(data.originalManifestUri).toBe(originalUri);
-            expect(data.duration).toBe(0);  // There are no segments.
+            // Even though there are no segments, it will use the duration from
+            // the original manifest.
+            expect(data.duration).toBe(20);
             expect(data.size).toEqual(0);
             expect(data.tracks).toEqual(tracks);
             expect(data.appMetadata).toEqual(appData);
@@ -192,7 +199,7 @@ describe('Storage', function() {
 
       var warning = jasmine.createSpy('shaka.log.warning');
       shaka.log.warning = shaka.test.Util.spyFunc(warning);
-      storage.store('')
+      storage.store(fakeManifestUri)
           .then(function(data) {
             expect(data).toBeTruthy();
             expect(warning).toHaveBeenCalled();
@@ -222,10 +229,10 @@ describe('Storage', function() {
 
       storage.configure({trackSelectionCallback: trackSelectionCallback});
 
-      storage.store('')
+      storage.store(fakeManifestUri)
           .then(function(data) {
-            expect(data.offlineUri).toBe(Scheme.manifestIdToUri(0));
-            return fakeStorageEngine.get('manifest', 0);
+            expect(data.offlineUri).toBe(OfflineUri.manifestIdToUri(0));
+            return fakeStorageEngine.getManifest(0);
           })
           .then(function(manifestDb) {
             expect(manifestDb).toBeTruthy();
@@ -239,10 +246,10 @@ describe('Storage', function() {
     it('stores offline sessions', function(done) {
       var sessions = ['lorem', 'ipsum'];
       drmEngine.setSessionIds(sessions);
-      storage.store('')
+      storage.store(fakeManifestUri)
           .then(function(data) {
-            expect(data.offlineUri).toBe(Scheme.manifestIdToUri(0));
-            return fakeStorageEngine.get('manifest', 0);
+            expect(data.offlineUri).toBe(OfflineUri.manifestIdToUri(0));
+            return fakeStorageEngine.getManifest(0);
           })
           .then(function(manifestDb) {
             expect(manifestDb).toBeTruthy();
@@ -266,10 +273,10 @@ describe('Storage', function() {
       };
       drmEngine.setDrmInfo(drmInfo);
       drmEngine.setSessionIds(['abcd']);
-      storage.store('')
+      storage.store(fakeManifestUri)
           .then(function(data) {
-            expect(data.offlineUri).toBe(Scheme.manifestIdToUri(0));
-            return fakeStorageEngine.get('manifest', 0);
+            expect(data.offlineUri).toBe(OfflineUri.manifestIdToUri(0));
+            return fakeStorageEngine.getManifest(0);
           })
           .then(function(manifestDb) {
             expect(manifestDb).toBeTruthy();
@@ -283,10 +290,10 @@ describe('Storage', function() {
       drmEngine.setSessionIds(['abcd']);
       drmEngine.getExpiration.and.returnValue(1234);
 
-      storage.store('')
+      storage.store(fakeManifestUri)
           .then(function(data) {
-            expect(data.offlineUri).toBe(Scheme.manifestIdToUri(0));
-            return fakeStorageEngine.get('manifest', 0);
+            expect(data.offlineUri).toBe(OfflineUri.manifestIdToUri(0));
+            return fakeStorageEngine.getManifest(0);
           })
           .then(function(manifestDb) {
             expect(manifestDb).toBeTruthy();
@@ -297,8 +304,8 @@ describe('Storage', function() {
     });
 
     it('throws an error if another store is in progress', function(done) {
-      var p1 = storage.store('', {}).catch(fail);
-      var p2 = storage.store('', {}).then(fail).catch(function(error) {
+      var p1 = storage.store(fakeManifestUri).catch(fail);
+      var p2 = storage.store(fakeManifestUri).then(fail).catch(function(error) {
         var expectedError = new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.STORAGE,
@@ -312,12 +319,12 @@ describe('Storage', function() {
       manifest.presentationTimeline.setDuration(Infinity);
       manifest.presentationTimeline.setStatic(false);
 
-      storage.store('', {}).then(fail).catch(function(error) {
+      storage.store(fakeManifestUri).then(fail).catch(function(error) {
         var expectedError = new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.STORAGE,
             shaka.util.Error.Code.CANNOT_STORE_LIVE_OFFLINE,
-            '');
+            fakeManifestUri);
         shaka.test.Util.expectToEqualError(error, expectedError);
       }).then(done);
     });
@@ -336,12 +343,12 @@ describe('Storage', function() {
       };
       drmEngine.setDrmInfo(drmInfo);
       drmEngine.setSessionIds([]);
-      storage.store('', {}).then(fail).catch(function(error) {
+      storage.store(fakeManifestUri).then(fail).catch(function(error) {
         var expectedError = new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.STORAGE,
             shaka.util.Error.Code.NO_INIT_DATA_FOR_OFFLINE,
-            '');
+            fakeManifestUri);
         shaka.test.Util.expectToEqualError(error, expectedError);
       }).then(done);
     });
@@ -359,7 +366,7 @@ describe('Storage', function() {
       Promise.resolve()
           .then(function() {
             storage = new shaka.offline.Storage(player);
-            return storage.store('', {});
+            return storage.store(fakeManifestUri);
           })
           .then(fail)
           .catch(function(error) {
@@ -369,7 +376,7 @@ describe('Storage', function() {
     });
 
     it('throws an error if destroyed mid-store', function(done) {
-      var p1 = storage.store('', {}).then(fail).catch(function(error) {
+      var p1 = storage.store(fakeManifestUri).then(fail).catch(function(error) {
         var expectedError = new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.STORAGE,
@@ -400,10 +407,10 @@ describe('Storage', function() {
         var progress = jasmine.createSpy('onProgress');
         progress.and.callFake(function(storedContent, percent) {
           expect(storedContent).toEqual({
-            offlineUri: shaka.offline.OfflineScheme.manifestIdToUri(0),
+            offlineUri: null,
             originalManifestUri: originalUri,
-            duration: 4,
-            size: 150,
+            duration: 20, // original manifest duration
+            size: jasmine.any(Number),
             expiration: Infinity,
             tracks: tracks,
             appMetadata: {}
@@ -412,15 +419,19 @@ describe('Storage', function() {
           switch (progress.calls.count()) {
             case 1:
               expect(percent).toBeCloseTo(54 / 150);
+              expect(storedContent.size).toBeCloseTo(54);
               break;
             case 2:
               expect(percent).toBeCloseTo(67 / 150);
+              expect(storedContent.size).toBeCloseTo(67);
               break;
             case 3:
               expect(percent).toBeCloseTo(133 / 150);
+              expect(storedContent.size).toBeCloseTo(133);
               break;
             default:
               expect(percent).toBeCloseTo(1);
+              expect(storedContent.size).toBeCloseTo(150);
               break;
           }
         });
@@ -455,9 +466,9 @@ describe('Storage', function() {
         var progress = jasmine.createSpy('onProgress');
         progress.and.callFake(function(storedContent, percent) {
           expect(storedContent).toEqual({
-            offlineUri: shaka.offline.OfflineScheme.manifestIdToUri(0),
+            offlineUri: null,
             originalManifestUri: originalUri,
-            duration: 5,
+            duration: 20, // Original manifest duration
             size: jasmine.any(Number),
             expiration: Infinity,
             tracks: tracks,
@@ -467,15 +478,15 @@ describe('Storage', function() {
           switch (progress.calls.count()) {
             case 1:
               expect(percent).toBeCloseTo(54 / 101);
-              expect(storedContent.size).toBe(71);
+              expect(storedContent.size).toBe(54);
               break;
             case 2:
               expect(percent).toBeCloseTo(64 / 101);
-              expect(storedContent.size).toBe(84);
+              expect(storedContent.size).toBe(67);
               break;
             case 3:
               expect(percent).toBeCloseTo(84 / 101);
-              expect(storedContent.size).toBe(150);
+              expect(storedContent.size).toBe(133);
               break;
             default:
               expect(percent).toBeCloseTo(1);
@@ -496,9 +507,31 @@ describe('Storage', function() {
 
     describe('segments', function() {
       it('stores media segments', function(done) {
+        // The IDs and their order may change in a refactor.  The constant
+        // values here can be updated to match the behavior without changing
+        // the rest of the test."
+
+        /** @const {number} */
+        var id1 = 0;
+        /** @const {number} */
+        var id2 = 1;
+        /** @const {number} */
+        var id3 = 2;
+        /** @const {number} */
+        var id4 = 3;
+        /** @const {number} */
+        var id5 = 4;
+        /** @const {number} */
+        var id6 = 5;
+
+        /** @const {number} */
+        var fakeDataLength1 = 5;
+        /** @const {number} */
+        var fakeDataLength2 = 7;
+
         netEngine.setResponseMap({
-          'fake:0': new ArrayBuffer(5),
-          'fake:1': new ArrayBuffer(7)
+          'fake:0': new ArrayBuffer(fakeDataLength1),
+          'fake:1': new ArrayBuffer(fakeDataLength2)
         });
 
         stream1Index.merge([
@@ -512,43 +545,52 @@ describe('Storage', function() {
           new SegmentReference(0, 0, 1, makeUris('fake:0'), 0, null)
         ]);
 
-        storage.store('')
+        /**
+         * @param {number} startTime
+         * @param {number} endTime
+         * @param {number} id
+         * @return {shakaExtern.SegmentDB}
+         */
+        var makeSegment = function(startTime, endTime, id) {
+          /** @type {shakaExtern.SegmentDB} */
+          var segment = {
+            startTime: startTime,
+            endTime: endTime,
+            dataKey: id
+          };
+
+          return segment;
+        };
+
+        storage.store(fakeManifestUri)
             .then(function(manifest) {
               expect(manifest).toBeTruthy();
               expect(manifest.size).toBe(34);
-              expect(manifest.duration).toBe(5);
+              expect(manifest.duration).toBe(20); // Original manifest duration
               expect(netEngine.request.calls.count()).toBe(6);
-              return fakeStorageEngine.get('manifest', 0);
+              return fakeStorageEngine.getManifest(0);
             })
             .then(function(manifest) {
               var stream1 = manifest.periods[0].streams[0];
-              expect(stream1.initSegmentUri).toBe(null);
+              expect(stream1.initSegmentKey).toBe(null);
               expect(stream1.segments.length).toBe(5);
-              expect(stream1.segments[0]).toEqual({
-                startTime: 0,
-                endTime: 1,
-                uri: Scheme.segmentIdToUri(0)
-              });
-              expect(stream1.segments[3]).toEqual({
-                startTime: 3,
-                endTime: 4,
-                uri: Scheme.segmentIdToUri(3)
-              });
+              expect(stream1.segments).toContain(makeSegment(0, 1, id1));
+              expect(stream1.segments).toContain(makeSegment(1, 2, id3));
+              expect(stream1.segments).toContain(makeSegment(2, 3, id4));
+              expect(stream1.segments).toContain(makeSegment(3, 4, id5));
+              expect(stream1.segments).toContain(makeSegment(4, 5, id6));
 
               var stream2 = manifest.periods[0].streams[1];
-              expect(stream2.initSegmentUri).toBe(null);
+              expect(stream2.initSegmentKey).toBe(null);
               expect(stream2.segments.length).toBe(1);
-              expect(stream2.segments[0]).toEqual({
-                startTime: 0,
-                endTime: 1,
-                uri: Scheme.segmentIdToUri(5)
-              });
-              return fakeStorageEngine.get('segment', 3);
+              expect(stream2.segments).toContain(makeSegment(0, 1, id2));
+
+              return fakeStorageEngine.getSegment(id4);
             })
             .then(function(segment) {
               expect(segment).toBeTruthy();
               expect(segment.data).toBeTruthy();
-              expect(segment.data.byteLength).toBe(5);
+              expect(segment.data.byteLength).toBe(fakeDataLength2);
             })
             .catch(fail)
             .then(done);
@@ -575,7 +617,7 @@ describe('Storage', function() {
         // video, but the other should continue.
         var req1 = netEngine.delayNextRequest();
 
-        storage.store('')
+        storage.store(fakeManifestUri)
             .then(function(manifest) {
               expect(manifest).toBeTruthy();
             })
@@ -597,19 +639,19 @@ describe('Storage', function() {
         stream.initSegmentReference =
             new shaka.media.InitSegmentReference(makeUris('fake:0'), 0, null);
 
-        storage.store('')
+        storage.store(fakeManifestUri)
             .then(function(manifest) {
               expect(manifest).toBeTruthy();
               expect(manifest.size).toBe(5);
-              expect(manifest.duration).toBe(0);
+              expect(manifest.duration).toBe(20); // Original manifest duration
               expect(netEngine.request.calls.count()).toBe(1);
-              return fakeStorageEngine.get('manifest', 0);
+              return fakeStorageEngine.getManifest(0);
             })
             .then(function(manifest) {
               var stream = manifest.periods[0].streams[0];
               expect(stream.segments.length).toBe(0);
-              expect(stream.initSegmentUri).toBe(Scheme.segmentIdToUri(0));
-              return fakeStorageEngine.get('segment', 0);
+              expect(stream.initSegmentKey).toBe(0);
+              return fakeStorageEngine.getSegment(0);
             })
             .then(function(segment) {
               expect(segment).toBeTruthy();
@@ -631,13 +673,13 @@ describe('Storage', function() {
         stream1Index.merge(refs);
         manifest.presentationTimeline.notifySegments(0, refs);
 
-        storage.store('')
+        storage.store(fakeManifestUri)
             .then(function(manifest) {
               expect(manifest).toBeTruthy();
               expect(manifest.size).toBe(15);
-              expect(manifest.duration).toBe(13);
+              expect(manifest.duration).toBe(20);  // Original manifest duration
               expect(netEngine.request.calls.count()).toBe(3);
-              return fakeStorageEngine.get('manifest', 0);
+              return fakeStorageEngine.getManifest(0);
             })
             .then(function(manifest) {
               var stream = manifest.periods[0].streams[0];
@@ -662,7 +704,7 @@ describe('Storage', function() {
             shaka.util.Error.Category.NETWORK,
             shaka.util.Error.Code.HTTP_ERROR);
         delay.reject(expectedError);
-        storage.store('')
+        storage.store(fakeManifestUri)
             .then(fail, function(error) {
               shaka.test.Util.expectToEqualError(error, expectedError);
             })
@@ -764,7 +806,7 @@ describe('Storage', function() {
          */
         function testAudioMatch(preferredLanguage, expectedLanguage) {
           player.configure({preferredAudioLanguage: preferredLanguage});
-          return storage.store('').then(function(data) {
+          return storage.store(fakeManifestUri).then(function(data) {
             var variantTracks = getVariants(data);
             expect(variantTracks.length).toBe(1);
             expect(variantTracks[0].language).toEqual(expectedLanguage);
@@ -800,7 +842,7 @@ describe('Storage', function() {
           // When there is no related match at all, and no primary, we issue a
           // warning, and we only store one track.
           warning.calls.reset();
-          return storage.store('');
+          return storage.store(fakeManifestUri);
         }).then(function(data) {
           var variantTracks = getVariants(data);
           expect(variantTracks.length).toBe(1);
@@ -811,7 +853,7 @@ describe('Storage', function() {
       it('stores the largest SD video track, middle audio', function(done) {
         // This language will select variants with multiple video resolutions.
         player.configure({preferredAudioLanguage: 'sw'});
-        storage.store('').then(function(data) {
+        storage.store(fakeManifestUri).then(function(data) {
           var variantTracks = getVariants(data);
           expect(variantTracks.length).toBe(1);
           expect(variantTracks[0].width).toBe(720);
@@ -825,7 +867,7 @@ describe('Storage', function() {
       });
 
       it('stores all text tracks', function(done) {
-        storage.store('').then(function(data) {
+        storage.store(fakeManifestUri).then(function(data) {
           var textTracks = getText(data);
           expect(textTracks.length).toBe(allTextTracks.length);
           expect(textTracks).toEqual(jasmine.arrayContaining(allTextTracks));
@@ -855,10 +897,10 @@ describe('Storage', function() {
       });
 
       it('does not store offline sessions', function(done) {
-        storage.store('')
+        storage.store(fakeManifestUri)
             .then(function(data) {
-              expect(data.offlineUri).toBe(Scheme.manifestIdToUri(0));
-              return fakeStorageEngine.get('manifest', 0);
+              expect(data.offlineUri).toBe(OfflineUri.manifestIdToUri(0));
+              return fakeStorageEngine.getManifest(0);
             })
             .then(function(manifestDb) {
               expect(manifestDb).toBeTruthy();
@@ -884,9 +926,9 @@ describe('Storage', function() {
                   .segment(4, 6)
                   .segment(6, 8)
           .build()
-          .then(function(manifest) {
+          .then(function(manifestId) {
             expectDatabaseCount(1, 4);
-            return removeManifest(manifest.key);
+            return removeManifest(manifestId);
           }).then(function() {
             expectDatabaseCount(0, 0);
           }).catch(fail).then(done);
@@ -905,9 +947,9 @@ describe('Storage', function() {
                   .segment(4, 6)
                   .segment(6, 8)
           .build()
-          .then(function(manifest) {
+          .then(function(manifestId) {
             expectDatabaseCount(1, 5);
-            return removeManifest(manifest.key);
+            return removeManifest(manifestId);
           }).then(function() {
             expectDatabaseCount(0, 0);
           }).catch(fail).then(done);
@@ -930,9 +972,9 @@ describe('Storage', function() {
                   .segment(4, 6)
                   .segment(6, 8)
           .build()
-          .then(function(manifest) {
+          .then(function(manifestId) {
             expectDatabaseCount(1, 8);
-            return removeManifest(manifest.key);
+            return removeManifest(manifestId);
           }).then(function() {
             expectDatabaseCount(0, 0);
           }).catch(fail).then(done);
@@ -956,9 +998,9 @@ describe('Storage', function() {
                   .segment(4, 6)
                   .segment(6, 8)
           .build()
-          .then(function(manifest) {
+          .then(function(manifestId) {
             expectDatabaseCount(1, 8);
-            return removeManifest(manifest.key);
+            return removeManifest(manifestId);
           }).then(function() {
             expectDatabaseCount(0, 0);
           }).catch(fail).then(done);
@@ -978,9 +1020,9 @@ describe('Storage', function() {
                   .segment(4, 6)
                   .segment(6, 8)
           .build()
-          .then(function(manifest) {
+          .then(function(manifestId) {
             expectDatabaseCount(1, 4);
-            return removeManifest(manifest.key);
+            return removeManifest(manifestId);
           }).then(function() {
             expectDatabaseCount(0, 0);
           }).catch(fail).then(done);
@@ -991,7 +1033,9 @@ describe('Storage', function() {
           fakeStorageEngine,
           'Need storage engine for this test.');
 
-      var manifest1;
+      var manifestId1;
+      var manifestId2;
+
       var manifest2;
 
       Promise.all([
@@ -1011,14 +1055,17 @@ describe('Storage', function() {
                     .segment(4, 6)
                     .segment(6, 8)
             .build()
-      ]).then(function(manifests) {
-        manifest1 = manifests[0];
-        manifest2 = manifests[1];
+      ]).then(function(manifestsIds) {
+        manifestId1 = manifestsIds[0];
+        manifestId2 = manifestsIds[1];
 
         expectDatabaseCount(2, 8);
-        return removeManifest(manifest1.key);
+        return removeManifest(manifestId1);
       }).then(function() {
         expectDatabaseCount(1, 4);
+        return fakeStorageEngine.getManifest(manifestId2);
+      }).then(function(manifest) {
+        manifest2 = manifest;
         return loadSegmentsForStream(manifest2.periods[0].streams[0]);
       }).then(function(segments) {
         // Make sure all the segments for the second manifest are still
@@ -1043,15 +1090,15 @@ describe('Storage', function() {
                   .segment(4, 6)
                   .segment(6, 8)
               .onStream(function(stream) {
-                // Change the uri for one segment so that it will be missing
+                // Change the key for one segment so that it will be missing
                 // from storage.
                 var segment = stream.segments[0];
-                segment.uri = Scheme.segmentIdToUri(1253);
+                segment.dataKey = 1253;
               })
           .build()
-          .then(function(manifest) {
+          .then(function(manifestId) {
             expectDatabaseCount(1, 4);
-            return removeManifest(manifest.key);
+            return removeManifest(manifestId);
           }).then(function() {
             // The segment that was changed above was not deleted.
             expectDatabaseCount(0, 1);
@@ -1064,15 +1111,14 @@ describe('Storage', function() {
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.STORAGE,
             shaka.util.Error.Code.REQUESTED_ITEM_NOT_FOUND,
-            Scheme.manifestIdToUri(0));
+            OfflineUri.manifestIdToUri(0));
         shaka.test.Util.expectToEqualError(error, expectedError);
       }).then(done);
     });
 
     it('throws an error if the URI is malformed', function(done) {
-      var bogusContent =
-          /** @type {shakaExtern.StoredContent} */ ({offlineUri: 'foo:bar'});
-      storage.remove(bogusContent).then(fail).catch(function(error) {
+      var bogusUri = 'foo:bar';
+      storage.remove(bogusUri).then(fail).catch(function(error) {
         var expectedError = new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.STORAGE,
@@ -1092,7 +1138,7 @@ describe('Storage', function() {
                     shaka.util.Error.Severity.CRITICAL,
                     shaka.util.Error.Category.STORAGE,
                     shaka.util.Error.Code.REQUESTED_ITEM_NOT_FOUND,
-                    Scheme.manifestIdToUri(0)));
+                    OfflineUri.manifestIdToUri(0)));
           })
           .then(done);
     });
@@ -1105,13 +1151,13 @@ describe('Storage', function() {
       var count;
 
       count = 0;
-      fakeStorageEngine.forEach('manifest', function(manifest) {
+      fakeStorageEngine.forEachManifest(function(manifest) {
         count++;
       });
       expect(count).toBe(manifestCount);
 
       count = 0;
-      fakeStorageEngine.forEach('segment', function(segment) {
+      fakeStorageEngine.forEachSegment(function(segment) {
         count++;
       });
       expect(count).toBe(segmentCount);
@@ -1122,8 +1168,9 @@ describe('Storage', function() {
      * @return {!Promise}
      */
     function removeManifest(manifestId) {
-      return storage.remove(/** @type {shakaExtern.StoredContent} */ (
-          {offlineUri: Scheme.manifestIdToUri(manifestId)}));
+      /** @type {string} */
+      var uri = OfflineUri.manifestIdToUri(manifestId);
+      return storage.remove(uri);
     }
 
     /**
@@ -1132,10 +1179,9 @@ describe('Storage', function() {
      */
     function loadSegmentsForStream(stream) {
       return Promise.all(stream.segments.map(function(segment) {
-        var uri = segment.uri;
-        var id = Scheme.uriToSegmentId(uri);
-        goog.asserts.assert(id != null, 'Expecting valid uri (' + uri + ')');
-        return fakeStorageEngine.get('segment', id);
+        /** @type {number} */
+        var id = segment.dataKey;
+        return fakeStorageEngine.getSegment(id);
       }));
     }
   });  // describe('remove')

@@ -178,6 +178,10 @@ cast.__platform__.canDisplayType = function(type) {};
 
 
 /** @const */
+var chrome = {};
+
+
+/** @const */
 chrome.cast = {};
 
 

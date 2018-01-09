@@ -28,7 +28,7 @@ describe('Mp4VttParser', function() {
   /** @const */
   var audioInitSegmentUri = '/base/test/test/assets/sintel-audio-init.mp4';
 
-  /** @type {!ArrayBuffer} */
+  /** @type {!Uint8Array} */
   var vttInitSegment;
   /** @type {!Uint8Array} */
   var vttSegment;
@@ -36,7 +36,7 @@ describe('Mp4VttParser', function() {
   var vttSegSettings;
   /** @type {!Uint8Array} */
   var vttSegNoDuration;
-  /** @type {!ArrayBuffer} */
+  /** @type {!Uint8Array} */
   var audioInitSegment;
 
   beforeAll(function(done) {
@@ -47,11 +47,11 @@ describe('Mp4VttParser', function() {
       shaka.test.Util.fetch(vttSegNoDurationUri),
       shaka.test.Util.fetch(audioInitSegmentUri)
     ]).then(function(responses) {
-      vttInitSegment = responses[0];
+      vttInitSegment = new Uint8Array(responses[0]);
       vttSegment = new Uint8Array(responses[1]);
       vttSegSettings = new Uint8Array(responses[2]);
       vttSegNoDuration = new Uint8Array(responses[3]);
-      audioInitSegment = responses[4];
+      audioInitSegment = new Uint8Array(responses[4]);
     }).catch(fail).then(done);
   });
 

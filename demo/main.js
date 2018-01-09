@@ -79,11 +79,11 @@ shakaDemo.audioOnlyPoster_ =
 
 
 /**
- * The registered ID of the v2.2 Chromecast receiver demo.
+ * The registered ID of the v2.3 Chromecast receiver demo.
  * @const {string}
  * @private
  */
-shakaDemo.CC_APP_ID_ = '91580C19';
+shakaDemo.CC_APP_ID_ = 'A15A181D';
 
 
 /**
@@ -209,6 +209,10 @@ shakaDemo.init = function() {
         shakaDemo.postBrowserCheckParams_(params);
         window.addEventListener('hashchange', shakaDemo.updateFromHash_);
       });
+    }).catch(function(error) {
+      // Some part of the setup of the demo app threw an error.
+      // Notify the user of this.
+      shakaDemo.onError_(/** @type {!shaka.util.Error} */ (error));
     });
   }
 };
@@ -560,10 +564,10 @@ shakaDemo.hashShouldChange_ = function() {
     var elem = document.getElementById(type + '_link');
     if (buildType == type) {
       elem.classList.add('disabled_link');
-      elem.tabIndex = -1;
+      elem.removeAttribute('href');
+      elem.title = 'currently selected';
     } else {
       elem.classList.remove('disabled_link');
-      elem.tabIndex = 0;
       elem.onclick = function() {
         location.hash = strippedHash + ';build=' + type;
         location.reload();
@@ -571,6 +575,17 @@ shakaDemo.hashShouldChange_ = function() {
       };
     }
   });
+
+  // Check if ES6 is usable by evaluating arrow function syntax.
+  try {
+    eval('()=>{}');
+  } catch (e) {
+    // If ES6 is not usable, neither is the uncompiled version of the app.
+    var uncompiledLink = document.getElementById('uncompiled_link');
+    uncompiledLink.classList.add('disabled_link');
+    uncompiledLink.removeAttribute('href');
+    uncompiledLink.title = 'requires ES6';
+  }
 
   var newHash = '#' + params.join(';');
   if (newHash != location.hash) {
@@ -663,5 +678,17 @@ if (document.readyState == 'loading' ||
     window.addEventListener('load', shakaDemo.init);
   }
 } else {
-  shakaDemo.init();
+  /**
+   * Poll for Shaka Player on window.  On IE 11, the document is "ready", but
+   * there are still deferred scripts being loaded.  This does not occur on
+   * Chrome or Edge, which set the document's state at the correct time.
+   */
+  var pollForShakaPlayer = function() {
+    if (window.shaka) {
+      shakaDemo.init();
+    } else {
+      setTimeout(pollForShakaPlayer, 100);
+    }
+  };
+  pollForShakaPlayer();
 }

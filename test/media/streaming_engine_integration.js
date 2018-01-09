@@ -90,7 +90,8 @@ describe('StreamingEngine', function() {
       useRelativeCueTimestamps: false,
       startAtSegmentBoundary: false,
       smallGapLimit: 0.5,
-      jumpLargeGaps: false
+      jumpLargeGaps: false,
+      durationBackoff: 1
     };
 
     onChooseStreams = jasmine.createSpy('onChooseStreams');

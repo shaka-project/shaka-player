@@ -23,7 +23,7 @@ Shaka v2 has several improvements over v1, including:
   - New plugin and build system to extend Shaka
   - Cache-friendly networking
   - Simpler, mobile-friendly demo app
-  - Basic HLS support
+  - HLS support (VOD, Event, and Live)
   - DASH trick mode support
   - Support for jumping gaps in the timeline
   - Additional stats and events from Player
@@ -33,6 +33,10 @@ Shaka v2 has several improvements over v1, including:
   - Adding channel count and bandwidth info to variant tracks
   - Xlink support in DASH
   - New option for offline protected content without persistent licensing
+  - MPEG-2 TS content can be transmuxed to MP4 for playback on all browsers
+  - Captions are not streamed until they are shown
+  - Use NetworkInformation API to get initial bandwidth estimate
+  - The demo app is now a Progressive Web App (PWA) and can be used offline
 
 
 #### Shaka Plugins
@@ -241,7 +245,7 @@ player.configure({
 
 For a discussion of advanced DRM configuration, see {@tutorial drm-config}.
 
-Shaka v1's license-request-releated settings have moved to v2's network filters.
+Shaka v1's license-request-related settings have moved to v2's network filters.
 
 Network filters are a generic filtering system for all networking, including
 license requests and responses.  They are more general and flexible, so they
@@ -729,7 +733,7 @@ storage.list().then(function(storedContents) {
   player.load(url);
 });
 
-storage.delete(storedContent).then(function() {
+storage.remove(storedContent.offlineUri).then(function() {
   console.log('Done');
 });
 ```

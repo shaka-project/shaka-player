@@ -16,13 +16,20 @@
  */
 
 describe('Offline', /** @suppress {accessControls} */ function() {
-  var Scheme = shaka.offline.OfflineScheme;
+  var OfflineUri = shaka.offline.OfflineUri;
 
-  /** @const */
-  var originalName = shaka.offline.DBEngine.DB_NAME_;
+  /** @const {string} */
+  var dbName = 'shaka-offline-integration-test-db';
 
-  /** @type {!shaka.offline.DBEngine} */
-  var dbEngine;
+  var mockSEFactory = new shaka.test.MockStorageEngineFactory();
+
+  /** @const {number} */
+  var dbUpdateRetries = 5;
+
+  /** @type {!shaka.util.EventManager} */
+  var eventManager;
+  /** @type {!shaka.offline.IStorageEngine} */
+  var engine;
   /** @type {!shaka.offline.Storage} */
   var storage;
   /** @type {!shaka.Player} */
@@ -39,36 +46,45 @@ describe('Offline', /** @suppress {accessControls} */ function() {
     video.muted = true;
     document.body.appendChild(video);
 
-    var supportPromise = shaka.Player.probeSupport()
-        .then(function(data) {
-          support = data;
-        });
-
-    shaka.offline.DBEngine.DB_NAME_ += '_test';
-    // Ensure we start with a clean slate.
-    Promise.all([shaka.offline.DBEngine.deleteDatabase(), supportPromise])
-        .catch(fail)
-        .then(done);
+    shaka.Player.probeSupport().then(function(data) {
+      support = data;
+    }).catch(fail).then(done);
   });
 
   beforeEach(function(done) {
+    mockSEFactory.overrideCreate(function() {
+      /** @type {!shaka.offline.DBEngine} */
+      var engine = new shaka.offline.DBEngine(dbName);
+      return engine.init().then(function() { return engine; });
+    });
+
+    eventManager = new shaka.util.EventManager();
     player = new shaka.Player(video);
     player.addEventListener('error', fail);
     storage = new shaka.offline.Storage(player);
-    dbEngine = new shaka.offline.DBEngine();
-    shaka.offline.StorageEngineFactory.initEngine(dbEngine)
-        .catch(fail).then(done);
+
+    // Ensure we start with a clean slate.
+    return shaka.offline.DBEngine.deleteDatabase(dbName)
+        .then(function() {
+          // Make sure that the db engine is using the correct version before
+          // we start our tests. If we can't get the correct version, we should
+          // fail the test.
+          engine = new shaka.offline.DBEngine(dbName);
+          return engine.init(dbUpdateRetries);
+        }).catch(fail).then(done);
   });
 
   afterEach(function(done) {
-    Promise.all([storage.destroy(), player.destroy(), dbEngine.destroy()])
-        .catch(fail)
-        .then(done);
+    Promise.all([
+      eventManager.destroy(),
+      storage.destroy(),
+      player.destroy(),
+      engine.destroy()
+    ]).catch(fail).then(done);
   });
 
   afterAll(function() {
     document.body.removeChild(video);
-    shaka.offline.DBEngine.DB_NAME_ = originalName;
   });
 
   it('stores and plays clear content', function(done) {
@@ -80,11 +96,16 @@ describe('Offline', /** @suppress {accessControls} */ function() {
     storage.store('test:sintel')
         .then(function(content) {
           storedContent = content;
+
+          goog.asserts.assert(
+              storedContent.offlineUri,
+              'Downloaded content should have a valid uri.');
+
           return player.load(storedContent.offlineUri);
         })
         .then(function() {
           video.play();
-          return shaka.test.Util.delay(10);
+          return shaka.test.Util.delay(15);
         })
         .then(function() {
           expect(video.currentTime).toBeGreaterThan(3);
@@ -92,7 +113,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
           return player.unload();
         })
         .then(function() {
-          return storage.remove(storedContent);
+          return storage.remove(storedContent.offlineUri);
         })
         .catch(fail)
         .then(done);
@@ -123,11 +144,24 @@ describe('Offline', /** @suppress {accessControls} */ function() {
     storage.store('test:sintel-enc')
         .then(function(content) {
           storedContent = content;
-          expect(storedContent.offlineUri).toBe(Scheme.manifestIdToUri(0));
-          return dbEngine.get('manifest', 0);
+
+          goog.asserts.assert(
+              storedContent.offlineUri,
+              'Downloaded content should have a valid uri.');
+
+          /** @type {string} */
+          var uri = storedContent.offlineUri;
+
+          /** @type {?number} */
+          var id = OfflineUri.uriToManifestId(uri);
+          goog.asserts.assert(
+              id != null,
+              uri + ' should be a valid offline manifest uri.');
+          return engine.getManifest(id);
         })
         .then(function(manifestDb) {
           // Did we store a persistent license?
+          expect(manifestDb).toBeTruthy();
           expect(manifestDb.sessionIds.length).toBeGreaterThan(0);
           sessionId = manifestDb.sessionIds[0];
 
@@ -154,7 +188,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
         .then(function() {
           // Let it play some.
           video.play();
-          return shaka.test.Util.delay(10);
+          return shaka.test.Util.delay(15);
         })
         .then(function() {
           // Is it playing?
@@ -164,7 +198,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
         })
         .then(function() {
           // Remove the content.
-          return storage.remove(storedContent);
+          return storage.remove(storedContent.offlineUri);
         })
         .then(
             /**
@@ -182,33 +216,60 @@ describe('Offline', /** @suppress {accessControls} */ function() {
           expect(session).toBeFalsy();
           return drmEngine.destroy();
         })
-        .catch(fail)
+        .catch(function(error) {
+          fail(error);
+
+          // Make sure we clean up the extra DrmEngine even if the Promise
+          // chain and test fail.
+          if (drmEngine) {
+            return drmEngine.destroy();
+          }
+        })
         .then(done);
   });
 
   drm_it(
       'stores, plays, and deletes protected content with a temporary license',
       function(done) {
-        // Because this does not rely on persistent licenses, it should be
-        // testable with PlayReady as well as Widevine.
-        if (!support['offline'] ||
-            !support.drm['com.widevine.alpha'] ||
-            !support.drm['com.microsoft.playready']) {
-          pending('Offline or DRM not supported');
+        if (!support['offline']) {
+          pending('Offline not supported');
         }
 
-        shaka.test.TestScheme.setupPlayer(player, 'sintel-enc');
+        // Because this does not rely on persistent licenses, it should be
+        // testable with PlayReady as well as Widevine.
+        if (!support.drm['com.widevine.alpha'] &&
+            !support.drm['com.microsoft.playready']) {
+          pending('Widevine/PlayReady not supported');
+        }
+
+        // Because we do not need a persistent license, we also do not need init
+        // data in the manifest.  Using this covers issue #1159, where we used
+        // to throw an error inappropriately.
+        shaka.test.TestScheme.setupPlayer(player, 'multidrm_no_init_data');
 
         var storedContent;
         storage.configure({ usePersistentLicense: false });
-        storage.store('test:sintel-enc')
+        storage.store('test:multidrm_no_init_data')
             .then(function(content) {
               storedContent = content;
-              expect(storedContent.offlineUri).toBe(Scheme.manifestIdToUri(0));
-              return dbEngine.get('manifest', 0);
+
+              goog.asserts.assert(
+                  storedContent.offlineUri,
+                  'Downloaded content should have a valid uri.');
+
+             /** @type {string} */
+              var uri = storedContent.offlineUri;
+
+              /** @type {?number} */
+              var id = OfflineUri.uriToManifestId(uri);
+              goog.asserts.assert(
+                  id != null,
+                  uri + ' should be a valid offline manifest uri.');
+              return engine.getManifest(id);
             })
             .then(function(manifestDb) {
               // There should not be any licenses stored.
+              expect(manifestDb).toBeTruthy();
               expect(manifestDb.sessionIds.length).toEqual(0);
 
               // Load the stored content.
@@ -217,7 +278,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
             .then(function() {
               // Let it play some.
               video.play();
-              return shaka.test.Util.delay(10);
+              return waitForTime(3);
             })
             .then(function() {
               // Is it playing?
@@ -227,13 +288,44 @@ describe('Offline', /** @suppress {accessControls} */ function() {
             })
             .then(function() {
               // Remove the content.
-              return storage.remove(storedContent);
+              return storage.remove(storedContent.offlineUri);
             })
-            .then(function() { return dbEngine.get('manifest', 0); })
+            .then(function() {
+              /** @type {string} */
+              var uri = storedContent.offlineUri;
+
+              /** @type {?number} */
+              var id = OfflineUri.uriToManifestId(uri);
+              goog.asserts.assert(
+                  id != null,
+                  uri + ' should be a valid offline manifest uri.');
+              return engine.getManifest(id);
+            })
             .then(function(manifestDb) {
               expect(manifestDb).toBeFalsy();
             })
             .catch(fail)
             .then(done);
       });
+
+  /**
+   * @param {number} time
+   * @return {!Promise}
+   */
+  function waitForTime(time) {
+    var p = new shaka.util.PublicPromise();
+    var onTimeUpdate = function() {
+      if (video.currentTime >= time) {
+        p.resolve();
+      }
+    };
+
+    eventManager.listen(video, 'timeupdate', onTimeUpdate);
+    onTimeUpdate();  // In case we're already there.
+
+    var timeout = shaka.test.Util.delay(30).then(function() {
+      throw 'Timeout waiting for time';
+    });
+    return Promise.race([p, timeout]);
+  }
 });

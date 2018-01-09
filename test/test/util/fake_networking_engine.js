@@ -95,6 +95,20 @@ shaka.test.FakeNetworkingEngine.expectRequest = function(
 
 
 /**
+ * Expects that no request for the given segment has occurred.
+ *
+ * @param {!Object} requestSpy
+ * @param {string} uri
+ * @param {shaka.net.NetworkingEngine.RequestType} type
+ */
+shaka.test.FakeNetworkingEngine.expectNoRequest = function(
+    requestSpy, uri, type) {
+  expect(requestSpy).not.toHaveBeenCalledWith(
+      type, jasmine.objectContaining({uris: [uri]}));
+};
+
+
+/**
  * Expects that a cancelable request for the given segment has occurred.
  *
  * @param {!Object} requestSpy
@@ -208,6 +222,18 @@ shaka.test.FakeNetworkingEngine.prototype.delayNextRequest = function() {
  */
 shaka.test.FakeNetworkingEngine.prototype.expectRequest = function(uri, type) {
   shaka.test.FakeNetworkingEngine.expectRequest(this.request, uri, type);
+};
+
+
+/**
+ * Expects that no request for the given segment has occurred.
+ *
+ * @param {string} uri
+ * @param {shaka.net.NetworkingEngine.RequestType} type
+ */
+shaka.test.FakeNetworkingEngine.prototype.expectNoRequest =
+    function(uri, type) {
+  shaka.test.FakeNetworkingEngine.expectNoRequest(this.request, uri, type);
 };
 
 

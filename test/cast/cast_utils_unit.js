@@ -28,6 +28,7 @@ describe('CastUtils', function() {
       'getMediaElement',  // Handled specially
       'setMaxHardwareResolution',
       'destroy',  // Should use CastProxy.destroy instead
+      'getManifest', // Too large to proxy
 
       // Test helper methods (not @export'd)
       'createDrmEngine',
@@ -41,9 +42,11 @@ describe('CastUtils', function() {
 
     var CastUtils = shaka.cast.CastUtils;
     var castMembers = CastUtils.PlayerVoidMethods
-                          .concat(CastUtils.PlayerGetterMethods)
-                          .concat(CastUtils.PlayerPromiseMethods)
-                          .concat(CastUtils.PlayerGetterMethodsThatRequireLive);
+                          .concat(CastUtils.PlayerPromiseMethods);
+    for (var name in CastUtils.PlayerGetterMethods)
+      castMembers.push(name);
+    for (var name in CastUtils.PlayerGetterMethodsThatRequireLive)
+      castMembers.push(name);
     var playerMembers = Object.keys(shaka.Player.prototype).filter(
         function(name) {
           // Private members end with _.

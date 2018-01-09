@@ -64,7 +64,7 @@ shakaExtern.OfflineConfiguration;
 
 /**
  * @typedef {{
- *   offlineUri: string,
+ *   offlineUri: ?string,
  *   originalManifestUri: string,
  *   duration: number,
  *   size: number,
@@ -73,9 +73,10 @@ shakaExtern.OfflineConfiguration;
  *   appMetadata: Object
  * }}
  *
- * @property {string} offlineUri
- *   An offline URI to access the content.  This can be passed directly to
- *   Player.
+ * @property {?string} offlineUri
+ *   An offline URI to access the content. This can be passed directly to
+ *   Player. If the uri is null, it means that the content has not finished
+ *   downloading and is not ready to play.
  * @property {string} originalManifestUri
  *   The original manifest URI of the content stored.
  * @property {number} duration
@@ -97,7 +98,6 @@ shakaExtern.StoredContent;
 
 /**
  * @typedef {{
- *   key: number,
  *   originalManifestUri: string,
  *   duration: number,
  *   size: number,
@@ -108,8 +108,6 @@ shakaExtern.StoredContent;
  *   appMetadata: Object
  * }}
  *
- * @property {number} key
- *   The key that uniquely identifies the manifest.
  * @property {string} originalManifestUri
  *   The URI that the manifest was originally loaded from.
  * @property {number} duration
@@ -158,11 +156,11 @@ shakaExtern.PeriodDB;
  *   label: ?string,
  *   width: ?number,
  *   height: ?number,
- *   initSegmentUri: ?string,
+ *   initSegmentKey: ?number,
  *   encrypted: boolean,
  *   keyId: ?string,
  *   segments: !Array.<shakaExtern.SegmentDB>,
- *   variantIds: ?Array.<number>
+ *   variantIds: !Array.<number>
  * }}
  *
  * @property {number} id
@@ -189,15 +187,15 @@ shakaExtern.PeriodDB;
  *   The width of the stream; null for audio/text.
  * @property {?number} height
  *   The height of the stream; null for audio/text.
- * @property  {?string} initSegmentUri
- *   The offline URI where the init segment is found; null if no init segment.
+ * @property  {?number} initSegmentKey
+ *   The storage key where the init segment is found; null if no init segment.
  * @property {boolean} encrypted
  *   Whether this stream is encrypted.
  * @property {?string} keyId
  *   The key ID this stream is encrypted with.
  * @property {!Array.<shakaExtern.SegmentDB>} segments
  *   An array of segments that make up the stream
- * @property {?Array.<number>} variantIds
+ * @property {!Array.<number>} variantIds
  *   An array of ids of variants the stream is a part of.
  */
 shakaExtern.StreamDB;
@@ -207,28 +205,25 @@ shakaExtern.StreamDB;
  * @typedef {{
  *   startTime: number,
  *   endTime: number,
- *   uri: string
+ *   dataKey: number
  * }}
  *
  * @property {number} startTime
  *   The start time of the segment, in seconds from the start of the Period.
  * @property {number} endTime
  *   The end time of the segment, in seconds from the start of the Period.
- * @property {string} uri
- *   The offline URI where the segment is found.
+ * @property {number} dataKey
+ *   The key to the data in storage.
  */
 shakaExtern.SegmentDB;
 
 
 /**
  * @typedef {{
- *   key: number,
- *   data: ArrayBuffer
+ *   data: !ArrayBuffer
  * }}
  *
- * @property {number} key
- *   A key that uniquely describes the segment.
- * @property {ArrayBuffer} data
+ * @property {!ArrayBuffer} data
  *   The data contents of the segment.
  */
 shakaExtern.SegmentDataDB;

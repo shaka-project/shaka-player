@@ -17,8 +17,9 @@
       "title": "Upgrade Guide",
       "children": {
         "upgrade-v1": { "title": "Upgrade Guide, v1 => v2" },
-        "upgrade-v2-0": { "title": "Upgrade Guide, v2.0 => v2.2" },
-        "upgrade-v2-1": { "title": "Upgrade Guide, v2.1 => v2.2" }
+        "upgrade-v2-0": { "title": "Upgrade Guide, v2.0 => v2.3" },
+        "upgrade-v2-1": { "title": "Upgrade Guide, v2.1 => v2.3" },
+        "upgrade-v2-2": { "title": "Upgrade Guide, v2.2 => v2.3" }
       }
   } }
 ]

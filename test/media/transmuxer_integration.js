@@ -71,15 +71,29 @@ describe('Transmuxer', function() {
   });
 
   describe('convertTsCodecs', function() {
+    var convertTsCodecs = shaka.media.Transmuxer.convertTsCodecs;
+
     it('returns converted codecs', function() {
-      var convertedVideoCodecs = shaka.media.Transmuxer
-          .convertTsCodecs(ContentType.VIDEO, transportStreamVideoMimeType);
-      var convertedAudioCodecs = shaka.media.Transmuxer
-          .convertTsCodecs(ContentType.AUDIO, transportStreamAudioMimeType);
+      var convertedVideoCodecs =
+          convertTsCodecs(ContentType.VIDEO, transportStreamVideoMimeType);
+      var convertedAudioCodecs =
+          convertTsCodecs(ContentType.AUDIO, transportStreamAudioMimeType);
       var expectedVideoCodecs = 'video/mp4; codecs="avc1.42E01E"';
       var expectedAudioCodecs = 'audio/mp4; codecs="mp4a.40.2"';
       expect(convertedVideoCodecs).toEqual(expectedVideoCodecs);
       expect(convertedAudioCodecs).toEqual(expectedAudioCodecs);
+    });
+
+    it('converts legacy avc1 codec strings', function() {
+      expect(convertTsCodecs(ContentType.VIDEO,
+          'video/mp2t; codecs="avc1.100.42"')).toEqual(
+          'video/mp4; codecs="avc1.64002a"');
+      expect(convertTsCodecs(ContentType.VIDEO,
+          'video/mp2t; codecs="avc1.77.80"')).toEqual(
+          'video/mp4; codecs="avc1.4d0050"');
+      expect(convertTsCodecs(ContentType.VIDEO,
+          'video/mp2t; codecs="avc1.66.1"')).toEqual(
+          'video/mp4; codecs="avc1.420001"');
     });
   });
 

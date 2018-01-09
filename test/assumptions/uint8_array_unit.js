@@ -15,47 +15,19 @@
  * limitations under the License.
  */
 
+describe('Uint8Array', function() {
+  it('checks equality', function() {
+    var subject = new Uint8Array([0, 1, 2, 3]);
+    var same = new Uint8Array([0, 1, 2, 3]);
+    var different = new Uint8Array([4, 5, 6, 7]);
 
-/** @externs */
+    expect(subject).toBe(subject);
+    expect(subject).toEqual(subject);
 
+    expect(subject).not.toBe(same);
+    expect(subject).toEqual(same);
 
-// See: https://w3c.github.io/webvtt/#the-vttregion-interface
-
-
-
-/**
- * @constructor
- */
-var VTTRegion = function() {};
-
-
-/** @type {string} */
-VTTRegion.prototype.id;
-
-
-/** @type {number} */
-VTTRegion.prototype.width;
-
-
-/** @type {number} */
-VTTRegion.prototype.lines;
-
-
-/** @type {number} */
-VTTRegion.prototype.regionAnchorX;
-
-
-/** @type {number} */
-VTTRegion.prototype.regionAnchorY;
-
-
-/** @type {number} */
-VTTRegion.prototype.viewportAnchorX;
-
-
-/** @type {number} */
-VTTRegion.prototype.viewportAnchorY;
-
-
-/** @type {string} */
-VTTRegion.prototype.scroll;
+    expect(subject).not.toBe(different);
+    expect(subject).not.toEqual(different);
+  });
+});

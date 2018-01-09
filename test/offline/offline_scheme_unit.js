@@ -18,107 +18,24 @@
 describe('OfflineScheme', function() {
   /** @const */
   var OfflineScheme = shaka.offline.OfflineScheme;
-
-  describe('Parsing', function() {
-    it('creates uri from manifest id', function() {
-      /** @type {number} */
-      var id = 123;
-      /** @type {string} */
-      var uri = OfflineScheme.manifestIdToUri(id);
-
-      expect(uri).toBe('offline:manifest/123');
-    });
-
-    it('creates uri from segment id', function() {
-      /** @type {number} */
-      var id = 123;
-      /** @type {string} */
-      var uri = OfflineScheme.segmentIdToUri(id);
-
-      expect(uri).toBe('offline:segment/123');
-    });
-
-    it('creates null id from non-manifest uri', function() {
-      /** @type {string} */
-      var uri = 'invalid-uri';
-      /** @type {?number} */
-      var id = OfflineScheme.uriToManifestId(uri);
-
-      expect(id).toBeNull();
-    });
-
-    it('creates id from manifest uri', function() {
-      /** @type {string} */
-      var uri = 'offline:manifest/123';
-      /** @type {?number} */
-      var id = OfflineScheme.uriToManifestId(uri);
-
-      expect(id).toBe(123);
-    });
-
-    it('creates id from legacy manifest uri', function() {
-      /** @type {string} */
-      var uri = 'offline:123';
-      /** @type {?number} */
-      var id = OfflineScheme.uriToManifestId(uri);
-
-      expect(id).toBe(123);
-    });
-
-    it('creates null id from non-segment uri', function() {
-      /** @type {string} */
-      var uri = 'invalid-uri';
-      /** @type {?number} */
-      var id = OfflineScheme.uriToSegmentId(uri);
-
-      expect(id).toBeNull();
-    });
-
-    it('creates id from segment uri', function() {
-      /** @type {string} */
-      var uri = 'offline:segment/123';
-      /** @type {?number} */
-      var id = OfflineScheme.uriToSegmentId(uri);
-
-      expect(id).toBe(123);
-    });
-
-    it('creates id from legacy segment uri', function() {
-      /** @type {string} */
-      var uri = 'offline:1/2/3';
-      /** @type {?number} */
-      var id = OfflineScheme.uriToSegmentId(uri);
-
-      expect(id).toBe(3);
-    });
-  });
+  /** @const */
+  var OfflineUri = shaka.offline.OfflineUri;
 
   describe('Get data from storage', function() {
     var mockSEFactory = new shaka.test.MockStorageEngineFactory();
 
-    /**
-     * @type {{init: !jasmine.Spy, destroy: !jasmine.Spy, get: !jasmine.Spy}}
-     */
+    /** @type {!shaka.offline.IStorageEngine} */
     var fakeStorageEngine;
     /** @type {shakaExtern.Request} */
     var request;
 
     beforeEach(function() {
-      fakeStorageEngine = jasmine.createSpyObj(
-          'DBEngine', ['init', 'destroy', 'get']);
-
-      var commonResolve = Promise.resolve();
-      var getResolve = Promise.resolve({data: new ArrayBuffer(0)});
-      fakeStorageEngine.init.and.returnValue(commonResolve);
-      fakeStorageEngine.destroy.and.returnValue(commonResolve);
-      fakeStorageEngine.get.and.returnValue(getResolve);
-
-      var makeStorageEngine = function() {
-        return Promise.resolve(fakeStorageEngine);
-      };
+      fakeStorageEngine = new shaka.test.MemoryStorageEngine();
 
       mockSEFactory.overrideIsSupported(true);
-      mockSEFactory.overrideCreate(makeStorageEngine);
+      mockSEFactory.overrideCreate(function() {
+        return Promise.resolve(fakeStorageEngine);
+      });
 
       // The whole request is ignored by the OfflineScheme.
       var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
@@ -130,8 +47,26 @@ describe('OfflineScheme', function() {
     });
 
     it('will return special content-type header for manifests', function(done) {
-      var uri = shaka.offline.OfflineScheme.manifestIdToUri(123);
-      OfflineScheme(uri, request)
+      /** @type {string} */
+      var uri;
+
+      Promise.resolve()
+          .then(function() {
+            return fakeStorageEngine.addManifest({
+              originalManifestUri: '',
+              duration: 0,
+              size: 0,
+              expiration: 0,
+              periods: [],
+              sessionIds: [],
+              drmInfo: null,
+              appMetadata: {}
+            });
+          })
+          .then(function(id) {
+            uri = OfflineUri.manifestIdToUri(id);
+            return OfflineScheme(uri, request);
+          })
           .then(function(response) {
             expect(response).toBeTruthy();
             expect(response.uri).toBe(uri);
@@ -142,33 +77,41 @@ describe('OfflineScheme', function() {
           .then(done);
     });
 
-    it('will query DBEngine for segments', function(done) {
-      /** @type {number} */
-      var id = 123;
-      /** @type {string} */
-      var uri = shaka.offline.OfflineScheme.segmentIdToUri(id);
+    it('will get segment data from storage engine', function(done) {
+      /** @const {!Uint8Array} */
+      var originalData = new Uint8Array([0, 1, 2, 3]);
 
-      OfflineScheme(uri, request)
+      /** @type {string} */
+      var uri;
+
+      Promise.resolve()
+          .then(function() {
+            return fakeStorageEngine.addSegment({
+              data: originalData.buffer
+            });
+          })
+          .then(function(id) {
+            uri = OfflineUri.segmentIdToUri(id);
+            return OfflineScheme(uri, request);
+          })
           .then(function(response) {
             expect(response).toBeTruthy();
             expect(response.uri).toBe(uri);
             expect(response.data).toBeTruthy();
 
-            expect(fakeStorageEngine.destroy).toHaveBeenCalledTimes(1);
-            expect(fakeStorageEngine.get).toHaveBeenCalledTimes(1);
-            expect(fakeStorageEngine.get).toHaveBeenCalledWith('segment', id);
+            /** @const {!Uint8Array} */
+            var responseData = new Uint8Array(response.data);
+            expect(responseData).toEqual(originalData);
           })
           .catch(fail)
           .then(done);
     });
 
     it('will fail if segment not found', function(done) {
-      /** @type {number} */
-      var id = 123;
-      /** @type {string} */
-      var uri = shaka.offline.OfflineScheme.segmentIdToUri(id);
-
-      fakeStorageEngine.get.and.returnValue(Promise.resolve(null));
+      /** @const {number} */
+      var id = 789;
+      /** @const {string} */
+      var uri = OfflineUri.segmentIdToUri(id);
 
       OfflineScheme(uri, request)
           .then(fail)
@@ -180,10 +123,6 @@ describe('OfflineScheme', function() {
                     shaka.util.Error.Category.STORAGE,
                     shaka.util.Error.Code.REQUESTED_ITEM_NOT_FOUND,
                     id));
-
-            expect(fakeStorageEngine.destroy).toHaveBeenCalledTimes(1);
-            expect(fakeStorageEngine.get).toHaveBeenCalledTimes(1);
-            expect(fakeStorageEngine.get).toHaveBeenCalledWith('segment', id);
           })
           .catch(fail)
           .then(done);
@@ -192,6 +131,7 @@ describe('OfflineScheme', function() {
     it('will fail for invalid URI', function(done) {
       /** @type {string} */
       var uri = 'offline:this-is-invalid';
+
       OfflineScheme(uri, request)
           .then(fail)
           .catch(function(err) {
@@ -200,7 +140,8 @@ describe('OfflineScheme', function() {
                 new shaka.util.Error(
                     shaka.util.Error.Severity.CRITICAL,
                     shaka.util.Error.Category.NETWORK,
-                    shaka.util.Error.Code.MALFORMED_OFFLINE_URI, uri));
+                    shaka.util.Error.Code.MALFORMED_OFFLINE_URI,
+                    uri));
           })
           .then(done);
     });

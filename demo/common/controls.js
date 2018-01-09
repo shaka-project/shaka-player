@@ -123,6 +123,11 @@ ShakaControls.prototype.init = function(castProxy, onError, notifyCastStatus) {
   this.video_.addEventListener(
       'pause', this.onPlayStateChange_.bind(this));
 
+  // Since videos go into a paused state at the end, Chrome and Edge both fire
+  // the 'pause' event when a video ends.  IE 11 only fires the 'ended' event.
+  this.video_.addEventListener(
+      'ended', this.onPlayStateChange_.bind(this));
+
   this.seekBar_.addEventListener(
       'mousedown', this.onSeekStart_.bind(this));
   this.seekBar_.addEventListener(
@@ -188,9 +193,8 @@ ShakaControls.prototype.init = function(castProxy, onError, notifyCastStatus) {
   this.castProxy_.addEventListener(
       'caststatuschanged', this.onCastStatusChange_.bind(this));
 
-  var screenOrientation = this.getScreenOrientation_();
-  if (screenOrientation) {
-    screenOrientation.addEventListener(
+  if (screen.orientation) {
+    screen.orientation.addEventListener(
         'change', this.onScreenRotation_.bind(this));
   }
 };
@@ -203,28 +207,17 @@ ShakaControls.prototype.init = function(castProxy, onError, notifyCastStatus) {
  * @private
  */
 ShakaControls.prototype.onScreenRotation_ = function() {
-  var orientation = this.getScreenOrientation_();
-  if (!this.video_ || this.video_.readyState == 0 || !orientation ||
+  if (!this.video_ ||
+      this.video_.readyState == 0 ||
       this.castProxy_.isCasting()) return;
-  if (orientation.type.indexOf('landscape') >= 0 &&
+
+  if (screen.orientation.type.indexOf('landscape') >= 0 &&
       !document.fullscreenElement) {
     this.videoContainer_.requestFullscreen();
-  } else if (orientation.type.indexOf('portrait') >= 0 &&
+  } else if (screen.orientation.type.indexOf('portrait') >= 0 &&
       document.fullscreenElement) {
     document.exitFullscreen();
   }
-};
-
-
-/**
- * Get screen orientation.
- * Screen Orientation is implemented with a prefix for some browsers.
- * https://developer.mozilla.org/en-US/docs/Web/API/Screen/orientation
- * @return {?ScreenOrientation}
- * @private
- */
-ShakaControls.prototype.getScreenOrientation_ = function() {
-  return screen.orientation || screen.mozOrientation || screen.msOrientation;
 };
 
 

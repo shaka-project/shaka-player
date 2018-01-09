@@ -27,8 +27,8 @@
  * mode during development.
  */
 (function() {  // anonymous namespace
-  // The URL of the page itself, without URL fragments.
-  var pageUrl = location.href.split('#')[0];
+  // The URL of the page itself, without URL fragments or search strings.
+  var pageUrl = location.href.split('#')[0].split('?')[0];
   // The URL of the page, up to and including the final '/'.
   var baseUrl = pageUrl.split('/').slice(0, -1).join('/') + '/';
 
@@ -54,23 +54,55 @@
   fragments = fragments ? fragments.split(';') : [];
   var combined = fields.concat(fragments);
 
+  // Check if ES6 is usable by evaluating arrow function syntax.
+  var es6Available = true;
+  try {
+    eval('()=>{}');
+  } catch (e) {
+    es6Available = false;
+  }
+
   var scripts = window['UNCOMPILED_JS'];
+  var buildType = 'uncompiled';
+  var buildSpecified = false;
+
+  if (!es6Available) {
+    // If ES6 arrow syntax is not supported (IE11), default to the compiled
+    // debug version, which should still work.
+    scripts = window['COMPILED_DEBUG_JS'];
+    buildType = 'debug_compiled';
+  }
+
   if (!navigator.onLine) {
     // If we're offline, default to the compiled version, which may have been
     // cached by the service worker.
     scripts = window['COMPILED_JS'];
+    buildType = 'compiled';
   }
 
-  // Very old browsers do not have Array.prototype.indexOf.
+  // Very old browsers do not have Array.prototype.indexOf, so we loop.
   for (var i = 0; i < combined.length; ++i) {
     if (combined[i] == 'compiled' || combined[i] == 'build=compiled') {
       scripts = window['COMPILED_JS'];
+      buildType = 'compiled';
+      buildSpecified = true;
       break;
     }
     if (combined[i] == 'build=debug_compiled') {
       scripts = window['COMPILED_DEBUG_JS'];
+      buildType = 'debug_compiled';
+      buildSpecified = true;
       break;
     }
+  }
+
+  // If no build was specified in the URL, update the fragment with the default
+  // we chose.
+  if (!buildSpecified) {
+    if (location.hash.length) {
+      location.hash += ';';
+    }
+    location.hash += 'build=' + buildType;
   }
 
   // The application must define its list of compiled and uncompiled sources

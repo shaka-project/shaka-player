@@ -1,12 +1,14 @@
 closure/compiler.jar
-  The closure compiler, v20170423, by Google.
+  The closure compiler, v20171203, by Google.
   Apache v2.0 license.
   https://github.com/google/closure-compiler
 
 closure/goog
-  The closure library (modified), by Google.
+  The closure library (modified), possibly v20150315, by Google.
   Apache v2.0 license.
   https://github.com/google/closure-library
+  Local mods:
+    - Library stripped down to just dependency management & URI parsing
 
 closure/deps
   The closure dependency generator, part of the closure library, by Google.
@@ -14,9 +16,12 @@ closure/deps
   https://github.com/google/closure-library
 
 gjslint/closure_linter-2.3.13
-  The closure JavaScript linter, by Google.
+  The closure JavaScript linter (modified), by Google.
   Apache v2.0 license.
   https://code.google.com/p/closure-linter/
+  Local mods:
+    - Added support for suppressing gjslint errors
+    - Added checks for property documentation in typedefs
 
 gjslint/python-gflags-2.0
   A python command-line parser, needed by the closure linter, by Google.
@@ -27,3 +32,11 @@ jsdoc
   JSDoc 3 documentation generator (modified), by Michael Matthews.
   Apache v2.0 license.
   https://github.com/jsdoc3/jsdoc
+  Local mods:
+    - Show tutorials in sorted order, as named in the JSON index
+    - Hide tutorial "child" links
+    - Added support for custom annotations like exportDoc, exportInterface
+    - Add support for linking to source code
+    - Add enum values in generated HTML
+    - Add support for focusing enum values by URL fragment
+    - Fixed crash when a type implements and overrides something like toString()

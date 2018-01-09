@@ -10,8 +10,9 @@ support. After this tutorial you will know how to:
  - Play downloaded content.
  - Remove downloaded content.
 
-This tutorial assumes that you only need to download content one at a time. A
-tutorial on how to download content concurrently is in development.
+This tutorial assumes that you only need to download content one at a time.
+Concurrent downloads can be done with multiple instances of
+`shaka.offline.Storage`.
 
 ## Offline API
 
@@ -62,7 +63,7 @@ the end of the tutorial.
 
     <div>
       <span><progress id="progress-bar" value="0" max="100"></span>
-      <span><button id="download-button">Download</button></span></span>
+      <span><button id="download-button">Download</button></span>
     </div>
 
     <video id="video"
@@ -318,7 +319,7 @@ code:
     'downloaded': new Date()
   };
 
-  return storage.store(manifestUri, metadata);
+  return window.storage.store(manifestUri, metadata);
 ```
 
 Storage allows us to store metadata alongside our content. We are going to save
@@ -372,13 +373,13 @@ limited space and so much great content out there. Resolve the TODO in
 “removeContent” labeled “remove content from storage” with:
 
 ```js
-return window.storage.remove(content);
+return window.storage.remove(content.offlineUri);
 ```
 
-All you need to do is pass `storage.remove` an instance of
-`shakaExtern.StoredContent` and that content will be removed from storage. If
-you remember the progress callback we set earlier, that will get called during
-the removal so that you can visualize the removal progress.
+All you need to do is pass `storage.remove` the URI of the offline content and
+that content will be removed from storage. If you remember the progress callback
+we set earlier, that will get called during the removal so that you can
+visualize the removal progress.
 
 ## Final Code
 
@@ -414,7 +415,7 @@ That’s it! For your convenience, here is the completed code:
 
     <div>
       <span><progress id="progress-bar" value="0" max="100"></span>
-      <span><button id="download-button">Download</button></span></span>
+      <span><button id="download-button">Download</button></span>
     </div>
 
     <video id="video"
@@ -512,7 +513,7 @@ function playContent(content) {
 }
 
 function removeContent(content) {
-  return window.storage.remove(content);
+  return window.storage.remove(content.offlineUri);
 }
 
 function downloadContent(manifestUri, title) {
@@ -524,7 +525,7 @@ function downloadContent(manifestUri, title) {
     'downloaded': Date()
   };
 
-  return storage.store(manifestUri, metadata);
+  return window.storage.store(manifestUri, metadata);
 }
 
 /*

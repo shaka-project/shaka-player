@@ -28,115 +28,128 @@ goog.provide('shaka.test.MemoryStorageEngine');
  * @implements {shaka.offline.IStorageEngine}
  */
 shaka.test.MemoryStorageEngine = function() {
-  /** @private {Object.<string, !Object.<number, *>>} */
-  this.stores_ = null;
+  /** @private {!Object<number, shakaExtern.ManifestDB>} */
+  this.manifests_ = {};
+  /** @private {!Object<number, shakaExtern.SegmentDataDB>} */
+  this.segments_ = {};
 
-  /** @private {Object.<string, number>} */
-  this.ids_ = null;
-};
-
-
-/**
- * Returns the data for the given store name, synchronously.
- *
- * @param {string} storeName
- * @return {!Object.<number, *>}
- */
-shaka.test.MemoryStorageEngine.prototype.getAllData = function(storeName) {
-  return this.getStore_(storeName);
-};
-
-
-/** @override */
-shaka.test.MemoryStorageEngine.prototype.initialized = function() {
-  return this.stores_ != null;
-};
-
-
-/** @override */
-shaka.test.MemoryStorageEngine.prototype.init = function(storeMap) {
-  this.stores_ = {};
-  this.ids_ = {};
-  for (var storeName in storeMap) {
-    goog.asserts.assert(storeMap[storeName] == 'key', 'Key path must be "key"');
-    this.stores_[storeName] = {};
-    this.ids_[storeName] = 0;
-  }
-  return Promise.resolve();
+  /** @private {number} */
+  this.nextManifestId_ = 0;
+  /** @private {number} */
+  this.nextSegmentId_ = 0;
 };
 
 
 /** @override */
 shaka.test.MemoryStorageEngine.prototype.destroy = function() {
-  this.stores_ = null;
-  this.ids_ = null;
   return Promise.resolve();
 };
 
 
 /** @override */
-shaka.test.MemoryStorageEngine.prototype.get = function(storeName, key) {
-  return Promise.resolve(this.getStore_(storeName)[key]);
+shaka.test.MemoryStorageEngine.prototype.getManifest = function(key) {
+  var manifest = this.manifests_[key];
+  return Promise.resolve(manifest);
 };
 
 
 /** @override */
-shaka.test.MemoryStorageEngine.prototype.forEach = function(
-    storeName, callback) {
-  shaka.util.MapUtils.values(this.getStore_(storeName)).forEach(callback);
+shaka.test.MemoryStorageEngine.prototype.forEachManifest = function(each) {
+  shaka.util.MapUtils.forEach(this.manifests_, each);
   return Promise.resolve();
 };
 
 
 /** @override */
-shaka.test.MemoryStorageEngine.prototype.insert = function(storeName, value) {
-  var store = this.getStore_(storeName);
-  goog.asserts.assert(!store[value.key], 'Value must not already exist');
-  store[value.key] = value;
-  return Promise.resolve();
+shaka.test.MemoryStorageEngine.prototype.addManifest = function(manifest) {
+  /** @type {number} */
+  var key = this.nextManifestId_++;
+
+  this.manifests_[key] = manifest;
+  return Promise.resolve(key);
 };
 
 
 /** @override */
-shaka.test.MemoryStorageEngine.prototype.remove = function(storeName, key) {
-  var store = this.getStore_(storeName);
-  delete store[key];
-  return Promise.resolve();
-};
+shaka.test.MemoryStorageEngine.prototype.updateManifest = function(
+    key, manifest) {
 
-
-/** @override */
-shaka.test.MemoryStorageEngine.prototype.removeKeys = function(storeName,
-                                                          keys,
-                                                          opt_onKeyRemoved) {
-  var store = this.getStore_(storeName);
-  for (var key in store) {
-    key = Number(key);
-    if (keys.indexOf(key) >= 0) {
-      delete store[key];
-    }
+  if (this.manifests_[key]) {
+    this.manifests_[key] = manifest;
+    return Promise.resolve(key);
+  } else {
+    return Promise.reject();
   }
+};
+
+
+/** @override */
+shaka.test.MemoryStorageEngine.prototype.removeManifests =
+    function(keys, opt_onRemoveKey) {
+  var noop = function(key) { };
+
+  shaka.test.MemoryStorageEngine.removeKeys_(
+      this.manifests_, keys, opt_onRemoveKey || noop);
+
   return Promise.resolve();
 };
 
 
 /** @override */
-shaka.test.MemoryStorageEngine.prototype.reserveId = function(storeName) {
-  goog.asserts.assert(this.ids_, 'Must not be destroyed');
-  goog.asserts.assert(storeName in this.ids_,
-                      'Store ' + storeName + ' must appear in init()');
-  return this.ids_[storeName]++;
+shaka.test.MemoryStorageEngine.prototype.getSegment = function(key) {
+  var segment = this.segments_[key];
+  return Promise.resolve(segment);
+};
+
+
+/** @override */
+shaka.test.MemoryStorageEngine.prototype.forEachSegment = function(each) {
+  shaka.util.MapUtils.forEach(this.segments_, each);
+  return Promise.resolve();
+};
+
+
+/** @override */
+shaka.test.MemoryStorageEngine.prototype.addSegment = function(segment) {
+  // Clone the segment, so the caller can wipe its version.
+  var clonedData = new ArrayBuffer(segment.data.byteLength);
+  (new Uint8Array(clonedData)).set(new Uint8Array(segment.data));
+
+  /** @type {shakaExtern.SegmentDataDB} */
+  var clonedSegment = {
+    data: clonedData
+  };
+
+  /** @type {number} */
+  var key = this.nextSegmentId_++;
+  this.segments_[key] = clonedSegment;
+
+  return Promise.resolve(key);
+};
+
+
+/** @override */
+shaka.test.MemoryStorageEngine.prototype.removeSegments =
+    function(keys, opt_onRemoveKey) {
+  var noop = function(key) { };
+
+  shaka.test.MemoryStorageEngine.removeKeys_(
+      this.segments_, keys, opt_onRemoveKey || noop);
+
+  return Promise.resolve();
 };
 
 
 /**
- * @param {string} storeName
- * @return {!Object.<number, *>}
+ * @param {!Object<number, T>} group
+ * @param {!Array<number>} keys
+ * @param {function(number)} onRemove
+ * @template T
  * @private
  */
-shaka.test.MemoryStorageEngine.prototype.getStore_ = function(storeName) {
-  goog.asserts.assert(this.stores_, 'Must not be destroyed');
-  goog.asserts.assert(storeName in this.stores_,
-                      'Store ' + storeName + ' must appear in init()');
-  return this.stores_[storeName];
+shaka.test.MemoryStorageEngine.removeKeys_ = function(group, keys, onRemove) {
+  keys.forEach(function(key) {
+    delete group[key];
+    onRemove(key);
+  });
 };

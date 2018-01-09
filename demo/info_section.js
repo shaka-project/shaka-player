@@ -64,7 +64,7 @@ shakaDemo.onTracksChanged_ = function(event) {
 shakaDemo.updateVariantTracks_ = function() {
   var trackList = document.getElementById('variantTracks');
   var langList = document.getElementById('audioLanguages');
-  var language = langList.selectedIndex >= 0 ?
+  var languageAndRole = langList.selectedIndex >= 0 ?
       langList.options[langList.selectedIndex].value :
       '';
 
@@ -75,7 +75,7 @@ shakaDemo.updateVariantTracks_ = function() {
     return t1.bandwidth - t2.bandwidth;
   });
 
-  shakaDemo.updateTrackOptions_(trackList, tracks, language);
+  shakaDemo.updateTrackOptions_(trackList, tracks, languageAndRole);
 };
 
 
@@ -86,28 +86,30 @@ shakaDemo.updateTextTracks_ = function() {
   var trackList = document.getElementById('textTracks');
 
   var langList = document.getElementById('textLanguages');
-  var language = langList.selectedIndex >= 0 ?
+  var languageAndRole = langList.selectedIndex >= 0 ?
       langList.options[langList.selectedIndex].value :
       '';
 
   var tracks = shakaDemo.player_.getTextTracks();
 
-  shakaDemo.updateTrackOptions_(trackList, tracks, language);
+  shakaDemo.updateTrackOptions_(trackList, tracks, languageAndRole);
 };
 
 
 /**
  * @param {Element} list
  * @param {!Array.<!shakaExtern.Track>} tracks
- * @param {!string} language
+ * @param {!string} languageAndRole
  * @private
  */
-shakaDemo.updateTrackOptions_ = function(list, tracks, language) {
+shakaDemo.updateTrackOptions_ = function(list, tracks, languageAndRole) {
   var formatters = {
     variant: function(track) {
       var trackInfo = '';
       if (track.language) trackInfo += 'language: ' + track.language + ', ';
       if (track.label) trackInfo += 'label: ' + track.label + ', ';
+      if (track.roles.length)
+        trackInfo += 'roles: [' + track.roles.join() + '], ';
       if (track.width && track.height)
         trackInfo += track.width + 'x' + track.height + ', ';
       trackInfo += track.bandwidth + ' bits/s';
@@ -116,6 +118,8 @@ shakaDemo.updateTrackOptions_ = function(list, tracks, language) {
     text: function(track) {
       var trackInfo = 'language: ' + track.language + ', ';
       if (track.label) trackInfo += 'label: ' + track.label + ', ';
+      if (track.roles.length)
+        trackInfo += 'roles: [' + track.roles.join() + '], ';
       trackInfo += 'kind: ' + track.kind;
       return trackInfo;
     }
@@ -125,8 +129,15 @@ shakaDemo.updateTrackOptions_ = function(list, tracks, language) {
     list.removeChild(list.firstChild);
   }
 
+  // Split language and role
+  var res = languageAndRole.split(':');
+  var language = res[0];
+  var role = res[1] || '';
+
   tracks = tracks.filter(function(track) {
-    return track.language == language;
+    var langMatch = track.language == language;
+    var roleMatch = role == '' || track.roles.indexOf(role) > -1;
+    return langMatch && roleMatch;
   });
 
   tracks.forEach(function(track) {
@@ -156,10 +167,10 @@ shakaDemo.updateLanguages_ = function() {
 shakaDemo.updateTextLanguages_ = function() {
   var player = shakaDemo.player_;
   var list = document.getElementById('textLanguages');
-  var languages = player.getTextLanguages();
+  var languagesAndRoles = player.getTextLanguagesAndRoles();
   var tracks = player.getTextTracks();
 
-  shakaDemo.updateLanguageOptions_(list, languages, tracks);
+  shakaDemo.updateLanguageOptions_(list, languagesAndRoles, tracks);
 };
 
 
@@ -170,21 +181,21 @@ shakaDemo.updateTextLanguages_ = function() {
 shakaDemo.updateAudioLanguages_ = function() {
   var player = shakaDemo.player_;
   var list = document.getElementById('audioLanguages');
-  var languages = player.getAudioLanguages();
+  var languagesAndRoles = player.getAudioLanguagesAndRoles();
   var tracks = player.getVariantTracks();
 
-  shakaDemo.updateLanguageOptions_(list, languages, tracks);
+  shakaDemo.updateLanguageOptions_(list, languagesAndRoles, tracks);
 };
 
 
 /**
  * @param {Element} list
- * @param {!Array.<!string>} languages
+ * @param {!Array.<{language: string, role: string}>} languagesAndRoles
  * @param {!Array.<shakaExtern.Track>} tracks
  * @private
  */
 shakaDemo.updateLanguageOptions_ =
-    function(list, languages, tracks) {
+    function(list, languagesAndRoles, tracks) {
   // Remove old options
   while (list.firstChild) {
     list.removeChild(list.firstChild);
@@ -198,11 +209,32 @@ shakaDemo.updateLanguageOptions_ =
   var selectedTrack = activeTracks[0];
 
   // Populate list with new options.
-  languages.forEach(function(lang) {
+  languagesAndRoles.forEach(function(langAndRole) {
+    var language = langAndRole.language;
+    var role = langAndRole.role;
+
+    var label = language;
+    if (role) {
+      label += ' (role: ' + role + ')';
+    }
+
     var option = document.createElement('option');
-    option.textContent = lang;
-    option.value = lang;
-    option.selected = lang == selectedTrack.language;
+    option.textContent = label;
+    option.value = language + ':' + role;
+    var isSelected = false;
+
+    if (selectedTrack.language == language) {
+      if (selectedTrack.roles.length) {
+        selectedTrack.roles.forEach(function(selectedRole) {
+          if (selectedRole == role)
+            isSelected = true;
+        });
+      } else {
+        isSelected = true;
+      }
+    }
+
+    option.selected = isSelected;
     list.appendChild(option);
   });
 };
@@ -265,10 +297,12 @@ shakaDemo.onTrackSelected_ = function(event) {
  */
 shakaDemo.onAudioLanguageSelected_ = function(event) {
   var list = event.target;
-  var language = list.options[list.selectedIndex].value;
+  var option = list.options[list.selectedIndex].value;
   var player = shakaDemo.player_;
-
-  player.selectAudioLanguage(language);
+  var res = option.split(':');
+  var language = res[0];
+  var role = res[1] || '';
+  player.selectAudioLanguage(language, role);
   shakaDemo.updateVariantTracks_();
 };
 
@@ -279,10 +313,13 @@ shakaDemo.onAudioLanguageSelected_ = function(event) {
  */
 shakaDemo.onTextLanguageSelected_ = function(event) {
   var list = event.target;
-  var language = list.options[list.selectedIndex].value;
+  var option = list.options[list.selectedIndex].value;
   var player = shakaDemo.player_;
+  var res = option.split(':');
+  var language = res[0];
+  var role = res[1] || '';
 
-  player.selectTextLanguage(language);
+  player.selectTextLanguage(language, role);
   shakaDemo.updateTextTracks_();
 };
 

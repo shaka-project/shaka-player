@@ -64,17 +64,17 @@ def main(args):
   # Create the list of build modes to build with. If the list is empty
   # by the end, then populate it with every mode.
   modes = []
-  modes += ['--debug'] if parsed_args.debug else []
-  modes += ['--release'] if parsed_args.release else []
+  modes += ['debug'] if parsed_args.debug else []
+  modes += ['release'] if parsed_args.release else []
 
   # If --debug or --release are not given, build with everything.
   if not modes:
-    modes += ['--debug', '--release']
+    modes += ['debug', 'release']
 
   result = 0
 
   for mode in modes:
-    result = build.main(build_args + [mode])
+    result = build.main(build_args + ['--mode', mode])
 
     # If a build fails then there is no reason to build the other modes.
     if result:

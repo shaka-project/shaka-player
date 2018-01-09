@@ -1,13 +1,13 @@
-# Shaka Upgrade Guide, v2.1 => v2.2
+# Shaka Upgrade Guide, v2.1 => v2.3
 
-This is a detailed guide for upgrading from Shaka Player v2.1 to v2.2.
+This is a detailed guide for upgrading from Shaka Player v2.1 to v2.3.
 Feel free to skim or to search for the class and method names you are using in
 your application.
 
 
-#### What's New in v2.2?
+#### What's New in v2.2 and v2.3?
 
-Shaka v2.2 introduces several improvements over v2.1, including:
+Shaka v2.3 introduces several improvements over v2.1, including:
   - Allowing applications to render their own text tracks
   - Allowing applications to define their own retry logic after streaming
     failures
@@ -16,6 +16,12 @@ Shaka v2.2 introduces several improvements over v2.1, including:
   - Xlink support in DASH
   - Stricter runtime type-checking of EME cert configuration
   - New option for offline protected content without persistent licensing
+  - Support for HLS live streams
+  - Support for HLS VOD streams that do not start at t=0
+  - MPEG-2 TS content can be transmuxed to MP4 for playback on all browsers
+  - Captions are not streamed until they are shown
+  - Use NetworkInformation API to get initial bandwidth estimate
+  - The demo app is now a Progressive Web App (PWA) and can be used offline
 
 
 #### New "text" namespace
@@ -28,7 +34,7 @@ now be registered with {@link shaka.text.TextEngine.registerParser}.
 #### Customizing subtitle display
 
 Shaka v2 gave applications an opportunity to have a custom text parser, but
-all the displaying was handled by the browser. Shaka v2.2 adds the
+all the displaying was handled by the browser. Shaka v2.2 added the
 possibility to have custom logic for displaying text. By default the
 rendering will still be done by the {@linksource shaka.text.SimpleTextDisplayer}
 class.
@@ -47,7 +53,8 @@ See {@linksource shakaExtern.TextDisplayer} for details.
 #### Text parser API changes
 
 The text-parsing plugin API has changed. Plugins now return `shaka.text.Cue`
-objects instead of VTTCue or TextTrackCue objects like in v2.1.
+objects instead of `VTTCue` or `TextTrackCue` objects like in v2.1.  The plugin
+API has also changed to take a `Uint8Array` instead of an `ArrayBuffer`.
 
 ```js
 // v2.1
@@ -65,9 +72,9 @@ MyTextParser.prototype.parseMedia = function(data, timeContext) {
   return cues;
 };
 
-// v2.2
+// v2.3
 /**
- * @param {!ArrayBuffer} data
+ * @param {!Uint8Array} data
  * @param {shakaExtern.TextParser.TimeContext} timeContext
  * @return {!Array.<!shaka.text.Cue>}
  */
@@ -81,8 +88,9 @@ MyTextParser.prototype.parseMedia = function(data, timeContext) {
 };
 ```
 
-All application-specific text-parsing plugins MUST to be updated,
-v2.2 does not have backward compatibility on this!
+All application-specific text-parsing plugins MUST to be updated.
+v2.3 does not have backward compatibility on this!
+
 Shaka.text.Cue class contains the same information about a text cue as
 VTTCue class plus extra information about text style.
 
@@ -99,7 +107,7 @@ player.configure({
 });
 ```
 
-In v2.2, it's done through:
+In v2.3, it's done through:
 
 ```js
 player.configure({
@@ -112,7 +120,7 @@ The API for AbrManager also changed.
 In v2.1, default bandwidth estimate and restrictions were set through
 `setDefaultEstimate()` and `setRestrictions()` methods.
 
-In v2.2, they are set through `configure()` method which accepts a
+In v2.3, they are set through `configure()` method which accepts a
 {@link shakaExtern.AbrConfiguration} structure. The new method is more general,
 and allows for the configuration of bandwidth upgrade and downgrade targets
 as well.
@@ -122,13 +130,13 @@ as well.
 abrManager.setDefaultEstimate(defaultBandwidthEstimate);
 abrManager.setRestrictions(restrictions);
 
-// v2.2:
+// v2.3:
 abrManager.configure(abrConfigurations);
 ```
 
 In v2.1, AbrManager had a `chooseStreams()` method for the player to prompt for
 a stream selection, and a `switch()` callback to send unsolicited changes from
-AbrManager to player.  In v2.2, `chooseStreams()` has been replaced with
+AbrManager to player.  In v2.3, `chooseStreams()` has been replaced with
 `chooseVariant()`, and the `switch()` callback takes a variant instead of a map
 of streams.
 
@@ -147,7 +155,7 @@ MyAbrManager.prototype.makeDecision_ = function() {
   this.switch_(map);
 };
 
-// v2.2:
+// v2.3:
 var variant = abrManager.chooseVariant();
 console.log(variant, variant.video, variant.audio);
 
@@ -157,17 +165,17 @@ MyAbrManager.prototype.makeDecision_ = function() {
 };
 ```
 
-In v2.2, the v2.1 interfaces are still supported, but are deprecated.  Support
-will be removed in v2.3.
+The v2.1 interfaces were deprecated in v2.2 and removed in v2.3.  All custom
+AbrManager plugins MUST be updated.
 
 
 #### Switch history changes
 
-In v2.1 `shakaExtern.Stats` had a member `shakaExtern.StreamChoice` structure
+In v2.1, `shakaExtern.Stats` had a member `shakaExtern.StreamChoice` structure
 named switchHistory that had a type field containing the changed stream's
 type ('audio', 'video' or 'text').
 
-In 2.2 shakaExtern.StreamChoice was renamed shakaExtern.TrackChoice to
+In v2.2, shakaExtern.StreamChoice was renamed shakaExtern.TrackChoice to
 reflect that it contains information about the changed track rather than
 stream. The type field now represents the changed track's type:
 'variant' or 'text'. It also now contains track's bandwidth. Similarly, the
@@ -185,7 +193,7 @@ id field is now a track id instead of stream id.
  */
 shakaExtern.StreamChoice;
 
-// v2.2:
+// v2.3:
 /*
  * @typedef {{
  *   timestamp: number,
@@ -205,33 +213,49 @@ In v2.0, after a network error and all network retries were exhausted, streaming
 would continue to retry those requests.  The only way to stop this process was
 to `unload()` or `destroy()` the Player.
 
-This was changed in v2.1.3, when the behavior became infinite retries for live
-and zero retries for VOD.  The infinite retries for live could be disabled like
-so:
+In v2.1.3, we introduced a new config called
+`streaming.infiniteRetriesForLiveStreams` to control retry behavior for live
+streams.  In v2.2, we added a more flexible callback mechanism to specify retry
+behavior for all kinds of streams.
 
 ```js
+// v2.1
 player.configure({
   streaming: {
-    infiniteRetriesForLiveStreams: false
+    infiniteRetriesForLiveStreams: true  // the default
   }
 });
-```
 
-There was no way to retry for failures in VOD streams.
-
-In v2.2, we introduced new retry behavior.  The default is as it was in v2.1.3,
-but applications can now customize the behavior through a callback:
-
-```js
+// v2.3
 player.configure({
   streaming: {
     failureCallback: function(error) {
-      // Always retry, as in v2.0.0 - v2.1.2:
-      player.retryStreaming();
+      // Always retry live streams:
+      if (player.isLive()) player.retryStreaming();
+    }
+  }
+});
+
+
+// v2.1
+player.configure({
+  streaming: {
+    infiniteRetriesForLiveStreams: false  // do not retry live
+  }
+});
+
+// v2.3
+player.configure({
+  streaming: {
+    failureCallback: function(error) {
+      // Do nothing, and we will stop trying to stream the content.
     }
   }
 });
 ```
+
+The `streaming.infiniteRetriesForLiveStreams` config was deprecated in v2.2 and
+removed in v2.3.
 
 The new `player.retryStreaming()` method can be used to retry after a failure.
 You can base the decision on `player.isLive()`, `error.code`, or anything else.
@@ -243,6 +267,10 @@ A few more examples of possible failure callbacks:
 ```js
 function neverRetryCallback(error) {}
 
+function alwaysRetryCallback(error) {
+  player.retryStreaming();
+}
+
 function retryLiveOnFailureCallback(error) {
   if (player.isLive()) {
     player.retryStreaming();
@@ -253,7 +281,7 @@ function retryOnSpecificHttpErrorsCallback(error) {
   if (error.code == shaka.util.Error.Code.BAD_HTTP_STATUS) {
     var statusCode = error.data[1];
     var retryCodes = [ 502, 503, 504, 520 ];
-    if (retryCodes.indexOf(statusCode >= 0)) {
+    if (retryCodes.indexOf(statusCode) >= 0) {
       player.retryStreaming();
     }
   }
@@ -274,4 +302,61 @@ player.addEventListener('error', function(event) {
   // Do not invoke the failure callback for this event
   event.preventDefault();
 });
+```
+
+
+#### HLS start time configuration
+
+For VOD HLS content which does not start at t=0, v2.1 had a configuration called
+`manifest.hls.defaultTimeOffset` which applications could use to inform us of
+the correct start time for content.
+
+This has been removed in v2.3.  The start time of HLS content can now be
+automatically extracted from the segments themselves.  No configuration is
+necessary.
+
+
+#### Offline storage API changes
+
+In v2.1, the `remove()` method on `shaka.offline.Storage` took an instance of
+`StoredContent` as an argument.  Now, in v2.3, it takes a the `offlineUri` field
+from `StoredContent` as an argument.
+
+All applications which use offline storage SHOULD update to the new API.
+Support for the old argument will be removed in v2.4.
+
+```js
+// v2.1:
+storage.list().then(function(storedContentList) {
+  var someContent = storedContentList[someIndex];
+  storage.remove(someContent);
+});
+
+// v2.3:
+storage.list().then(function(storedContentList) {
+  var someContent = storedContentList[someIndex];
+  storage.remove(someContent.offlineUri);
+});
+```
+
+
+#### Language and role selection
+
+In addition to the language methods introduced in v2.1, v2.3 adds additional
+methods for dealing with roles: `getAudioLanguagesAndRoles()` and
+`getTextLanguagesAndRoles()`.  These return language/role combinations in an
+object.  You can specify a role in an optional second argument to the language
+selection methods.
+
+```js
+// v2.3:
+var languagesAndRoles = player.getAudioLanguagesAndRoles();
+
+for (var i = 0; i < languagesAndRoles.length; ++i) {
+  var combo = languagesAndRoles[i];
+  if (someSelector(combo)) {
+    player.selectAudioLanguage(combo.language, combo.role);
+    break;
+  }
+}
 ```

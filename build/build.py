@@ -39,6 +39,7 @@ Examples:
   build.py --name custom +@manifests +@networking +../my_plugin.js
 """
 
+import argparse
 import logging
 import os
 import re
@@ -48,13 +49,10 @@ import shakaBuildHelpers
 
 
 common_closure_opts = [
-    '--language_in', 'ECMASCRIPT5',
+    '--language_in', 'ECMASCRIPT6',
     '--language_out', 'ECMASCRIPT3',
 
     '--jscomp_error=*',
-
-    # Analyzer checks require explicit nullability, which is a pain.
-    '--jscomp_off=analyzerChecksInternal',
 
     '--extra_annotation_name=listens',
     '--extra_annotation_name=exportDoc',
@@ -469,64 +467,56 @@ def compile_receiver(rebuild, is_debug):
   return True
 
 
-def usage():
-  print 'Usage:', sys.argv[0], """[options] [commands]
-
-Options:
- --debug          : Make a debug compiled file (e.g. don't rename internals).
- --release        : Make a release compiled file (default).
- --force          : Build the library even if no changes are detected.
- --help           : Prints this help page.
- --name           : Sets the name of the build, uses 'compiled' if not given.
-"""
-  print __doc__
-
-
 def main(args):
-  name = 'compiled'
-  lines = []
-  rebuild = False
-  is_debug = False
-  i = 0
-  while i < len(args):
-    if args[i] == '--name':
-      i += 1
-      if i == len(args):
-        logging.error('--name requires an argument')
-        return 1
-      name = args[i]
-    elif args[i] == '--debug':
-      is_debug = True
-    elif args[i] == '--release':
-      if is_debug:
-        logging.error('Cannot specify both --debug and --release')
-        return 1
-      # No-op since already the default.
-    elif args[i] == '--force':
-      rebuild = True
-    elif args[i] == '--help':
-      usage()
-      return 0
-    elif args[i].startswith('--'):
-      logging.error('Unknown option: %s', args[i])
-      usage()
-      return 1
-    else:
-      lines.append(args[i])
-    i += 1
+  parser = argparse.ArgumentParser(
+      description=__doc__,
+      formatter_class=argparse.RawDescriptionHelpFormatter)
 
-  if not lines:
-    lines = ['+@complete']
+  parser.add_argument(
+      '--force',
+      '-f',
+      help='Force building the library even if no files have changed.',
+      action='store_true')
 
-  logging.info('Compiling the library (%s)...',
-               'debug' if is_debug else 'release')
+  parser.add_argument(
+      '--mode',
+      help='Specify which build mode to use.',
+      choices=['debug', 'release'],
+      default='release')
+
+  parser.add_argument(
+      '--debug',
+      help='Same as using "--mode debug".',
+      action='store_const',
+      dest='mode',
+      const='debug')
+
+  parser.add_argument(
+      '--name',
+      help='Set the name of the build. Uses "compiled" if not given.',
+      type=str,
+      default='compiled')
+
+  parsed_args, commands = parser.parse_known_args(args)
+
+  # If no commands are given then use complete  by default.
+  if len(commands) == 0:
+    commands.append('+@complete')
+
+  logging.info('Compiling the library (%s)...', parsed_args.mode)
+
   custom_build = Build()
-  if not custom_build.parse_build(lines, os.getcwd()):
+
+  if not custom_build.parse_build(commands, os.getcwd()):
     return 1
 
   # Update node modules if needed.
   if not shakaBuildHelpers.update_node_modules():
     return 1
+
+  name = parsed_args.name
+  rebuild = parsed_args.force
+  is_debug = parsed_args.mode == 'debug'
 
   if not custom_build.build_library(name, rebuild, is_debug):
     return 1

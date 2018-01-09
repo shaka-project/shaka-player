@@ -1,7 +1,7 @@
 # Generate png with: dot -Tpng -O dataflow.gv
 
 digraph shaka2_data {
-  label=<<u>Shaka 2 Data Flow Diagram</u>>
+  label=<<u>Shaka 2 Data Flow Diagram (excluding Cast, Offline)</u>>
   labelloc=t
   node [ shape=rectangle ]
   edge [ fontsize=10 ]
@@ -9,12 +9,15 @@ digraph shaka2_data {
   SourceBuffer [ shape=oval ]
   TextTrack [ shape=oval ]
 
+  AbrManager [ shape=trapezium ]
   ManifestParser [ shape=trapezium ]
+  TextDisplayer [ shape=trapezium ]
   TextParser [ shape=trapezium ]
   RequestFilter [ shape=trapezium ]
   ResponseFilter [ shape=trapezium ]
-  HttpRequest [ shape=trapezium ]
+  HttpPlugin [ shape=trapezium ]
 
+  Player -> AbrManager [ label="Variants => Variant" dir=both arrowtail=onormal style=dashed ]
   Player -> ManifestParser [ label="URL => Manifest" dir=both arrowtail=onormal style=dashed ]
   Player -> StreamingEngine [ label=Manifest ]
   Player -> DrmEngine [ label=Manifest ]
@@ -26,12 +29,15 @@ digraph shaka2_data {
   StreamingEngine -> MediaSourceEngine [ label="ArrayBuffer" ]
   MediaSourceEngine -> SourceBuffer [ label="ArrayBuffer" ]
   MediaSourceEngine -> TextEngine [ label="ArrayBuffer" ]
-  TextEngine -> TextParser [ label="ArrayBuffer => TextCues" dir=both arrowtail=onormal ]
-  TextEngine -> TextTrack [ label="TextCues" ]
+  MediaSourceEngine -> Transmuxer [ label="ArrayBuffer => ArrayBuffer" dir=both arrowtail=onormal style=dashed ]
 
-  NetworkingEngine -> RequestFilter [ label="Request => Request" dir=both arrowtail=onormal ]
-  NetworkingEngine -> ResponseFilter [ label="Response => Response" dir=both arrowtail=onormal ]
-  NetworkingEngine -> HttpRequest [ label="Request => Response" dir=both arrowtail=onormal style=dashed ]
+  TextEngine -> TextParser [ label="ArrayBuffer => Cues" dir=both arrowtail=onormal ]
+  TextEngine -> TextDisplayer [ label="Cues" ]
+  TextDisplayer -> TextTrack [ label="TextCues" ]
+
+  NetworkingEngine -> RequestFilter [ label="Request => Request" dir=both arrowtail=onormal style=dashed ]
+  NetworkingEngine -> ResponseFilter [ label="Response => Response" dir=both arrowtail=onormal style=dashed ]
+  NetworkingEngine -> HttpPlugin [ label="Request => Response" dir=both arrowtail=onormal style=dashed ]
 
   subgraph cluster_legend {
     style=rounded
@@ -47,7 +53,7 @@ digraph shaka2_data {
     blank2 [ label="" fixedsize=true height=0 ]
     blank3 [ label="" fixedsize=true height=0 ]
     "async request" -> blank3 [ dir=both arrowtail=onormal style=dashed ]
-    "request with return value" -> blank2 [ dir=both arrowtail=onormal label="ArgTyp => ReturnType" ]
+    "request with return value" -> blank2 [ dir=both arrowtail=onormal label="ArgType => ReturnType" ]
     "data pushed one way" -> blank1 [ label="DataType" ]
 
     plugin [ shape=trapezium ]
@@ -56,5 +62,5 @@ digraph shaka2_data {
   }
 
   # Hack to move the legend beneath the main graph:
-  TextTrack -> "internal class" [ style=invisible arrowhead=none ]
+  TextParser -> "internal class" [ style=invisible arrowhead=none ]
 }

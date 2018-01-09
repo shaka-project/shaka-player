@@ -338,6 +338,13 @@ describe('HlsParser live', function() {
       'test:/main.mp4\n'
     ].join('');
 
+    var mediaWithoutSequenceNumber = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXTINF:2,\n',
+      'test:/main.mp4\n'
+    ].join('');
+
     var mediaWithByteRange = [
       '#EXTM3U\n',
       '#EXT-X-TARGETDURATION:5\n',
@@ -378,6 +385,16 @@ describe('HlsParser live', function() {
       parser.start('test:/master', playerInterface).then(function(manifest) {
         expect(manifest.presentationTimeline.isLive()).toBe(false);
       }).catch(fail).then(done);
+    });
+
+    it('does not fail on a missing sequence number', function(done) {
+      fakeNetEngine.setResponseMap({
+        'test:/master': toUTF8(master),
+        'test:/video': toUTF8(mediaWithoutSequenceNumber),
+        'test:/main.mp4': segmentData
+      });
+
+      parser.start('test:/master', playerInterface).catch(fail).then(done);
     });
 
     describe('update', function() {

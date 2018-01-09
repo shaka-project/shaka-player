@@ -161,8 +161,9 @@ shakaDemo.storeDeleteAsset_ = function() {
 
   var p;
   if (option.storedContent) {
+    var offlineUri = option.storedContent.offlineUri;
     var originalManifestUri = option.storedContent.originalManifestUri;
-    p = storage.remove(option.storedContent).then(function() {
+    p = storage.remove(offlineUri).then(function() {
       for (var i = 0; i < assetList.options.length; i++) {
         var option = assetList.options[i];
         if (option.asset && option.asset.manifestUri == originalManifestUri)

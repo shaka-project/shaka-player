@@ -335,54 +335,6 @@ describe('TextEngine', function() {
     });
   });
 
-  describe('parser plug-in', function() {
-    var mockParser;
-
-    beforeEach(function() {
-      mockParser = jasmine.createSpy('mockParser').and.returnValue([]);
-
-      // This will overwrite the parser defined in the outer before each
-      TextEngine.registerParser(
-          dummyMimeType,
-          /** @type {!Function} */
-          (function(data, periodStart, segmentStart, segmentEnd) {
-            // TextEngine uses the number of arguments to detect the type of
-            // parser, so we can't just pass the spy in (who has 0 args).
-            var func = shaka.test.Util.spyFunc(mockParser);
-            return func(data, periodStart, segmentStart, segmentEnd);
-          }));
-    });
-
-    describe('stateless parser', function() {
-      describe('converted to stateful parser', function() {
-        it('parses init segment', function(done) {
-          var textEngine = new TextEngine(mockDisplayer);
-          textEngine.initParser(dummyMimeType);
-          textEngine.appendBuffer(dummyData, null, null).then(function() {
-            expect(mockParser).toHaveBeenCalledWith(dummyData, 0, null, null);
-          }).catch(fail).then(done);
-        });
-
-        it('parses media segment', function(done) {
-          var textEngine = new TextEngine(mockDisplayer);
-          textEngine.initParser(dummyMimeType);
-          textEngine.appendBuffer(dummyData, 0, 3).then(function() {
-            expect(mockParser).toHaveBeenCalledWith(dummyData, 0, 0, 3);
-          }).catch(fail).then(done);
-        });
-
-        it('parses media segment with time offset', function(done) {
-          var textEngine = new TextEngine(mockDisplayer);
-          textEngine.initParser(dummyMimeType);
-          textEngine.setTimestampOffset(3);
-          textEngine.appendBuffer(dummyData, 0, 3).then(function() {
-            expect(mockParser).toHaveBeenCalledWith(dummyData, 3, 0, 3);
-          }).catch(fail).then(done);
-        });
-      });
-    });
-  });
-
   function createFakeCue(startTime, endTime) {
     return { startTime: startTime, endTime: endTime };
   }

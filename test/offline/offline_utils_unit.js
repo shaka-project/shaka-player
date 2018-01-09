@@ -17,8 +17,6 @@
 
 describe('OfflineUtils', function() {
   /** @const */
-  var Scheme = shaka.offline.OfflineScheme;
-  /** @const */
   var OfflineUtils = shaka.offline.OfflineUtils;
 
   var drmInfos;
@@ -73,48 +71,11 @@ describe('OfflineUtils', function() {
       expect(variants[1].video.id).toBe(3);
     });
 
-    it('will create variants with no variant ids', function() {
-      /** @type {!Array.<shakaExtern.StreamDB>} */
-      var audios = [
-        createStreamDB(0, audioType, null),
-        createStreamDB(1, audioType, null)
-      ];
-      /** @type {!Array.<shakaExtern.StreamDB>} */
-      var videos = [
-        createStreamDB(2, videoType, null),
-        createStreamDB(3, videoType, null)
-      ];
-      /** @type {!Array.<shakaExtern.DrmInfo>} */
-      var drm = [];
-
-      /** @type {!Array.<shakaExtern.Variant>} */
-      var variants = OfflineUtils.recreateVariants(audios, videos, drm);
-
-      expect(variants.length).toBe(4);
-    });
-
     it('will create variants when there is only audio', function() {
       /** @type {!Array.<shakaExtern.StreamDB>} */
       var audios = [
         createStreamDB(0, audioType, [0]),
         createStreamDB(1, audioType, [1])
-      ];
-      /** @type {!Array.<shakaExtern.StreamDB>} */
-      var videos = [];
-      /** @type {!Array.<shakaExtern.DrmInfo>} */
-      var drm = [];
-
-      /** @type {!Array.<shakaExtern.Variant>} */
-      var variants = OfflineUtils.recreateVariants(audios, videos, drm);
-
-      expect(variants.length).toBe(2);
-    });
-
-    it('will create variants when there is only audio with no ids', function() {
-      /** @type {!Array.<shakaExtern.StreamDB>} */
-      var audios = [
-        createStreamDB(0, audioType, null),
-        createStreamDB(1, audioType, null)
       ];
       /** @type {!Array.<shakaExtern.StreamDB>} */
       var videos = [];
@@ -144,27 +105,10 @@ describe('OfflineUtils', function() {
       expect(variants.length).toBe(2);
     });
 
-    it('will create variants when there is only video with no ids', function() {
-      /** @type {!Array.<shakaExtern.StreamDB>} */
-      var audios = [];
-      /** @type {!Array.<shakaExtern.StreamDB>} */
-      var videos = [
-        createStreamDB(2, videoType, null),
-        createStreamDB(3, videoType, null)
-      ];
-      /** @type {!Array.<shakaExtern.DrmInfo>} */
-      var drm = [];
-
-      /** @type {!Array.<shakaExtern.Variant>} */
-      var variants = OfflineUtils.recreateVariants(audios, videos, drm);
-
-      expect(variants.length).toBe(2);
-    });
-
     /**
      * @param {number} id
      * @param {string} type
-     * @param {?Array.<number>} variants
+     * @param {!Array.<number>} variants
      * @return {shakaExtern.StreamDB}
      */
     function createStreamDB(id, type, variants) {
@@ -180,7 +124,7 @@ describe('OfflineUtils', function() {
         label: null,
         width: null,
         height: null,
-        initSegmentUri: null,
+        initSegmentKey: null,
         encrypted: false,
         keyId: null,
         segments: [],
@@ -329,13 +273,22 @@ describe('OfflineUtils', function() {
         label: null,
         width: 250,
         height: 100,
-        initSegmentUri: null,
+        initSegmentKey: null,
         encrypted: true,
         keyId: 'key1',
         segments: [
-          {startTime: 0, endTime: 10, uri: Scheme.segmentIdToUri(1)},
-          {startTime: 10, endTime: 20, uri: Scheme.segmentIdToUri(2)},
-          {startTime: 20, endTime: 25, uri: Scheme.segmentIdToUri(3)}
+          createSegment(
+              /* start time */ 0,
+              /* end time */ 10,
+              /* data key */ 1),
+          createSegment(
+              /* start time */ 10,
+              /* end time */ 20,
+              /* data key */ 2),
+          createSegment(
+              /* start time */ 20,
+              /* end time */ 25,
+              /* data key */ 3)
         ],
         variantIds: variantIds
       };
@@ -361,13 +314,22 @@ describe('OfflineUtils', function() {
         label: null,
         width: null,
         height: null,
-        initSegmentUri: Scheme.segmentIdToUri(0),
+        initSegmentKey: 0,
         encrypted: false,
         keyId: null,
         segments: [
-          {startTime: 0, endTime: 10, uri: Scheme.segmentIdToUri(1)},
-          {startTime: 10, endTime: 20, uri: Scheme.segmentIdToUri(2)},
-          {startTime: 20, endTime: 25, uri: Scheme.segmentIdToUri(3)}
+          createSegment(
+              /* start time */ 0,
+              /* end time */ 10,
+              /* data key */ 1),
+          createSegment(
+              /* start time */ 10,
+              /* end time */ 20,
+              /* data key */ 2),
+          createSegment(
+              /* start time */ 20,
+              /* end time */ 25,
+              /* data key */ 3)
         ],
         variantIds: variantIds
       };
@@ -392,13 +354,22 @@ describe('OfflineUtils', function() {
         label: null,
         width: null,
         height: null,
-        initSegmentUri: Scheme.segmentIdToUri(0),
+        initSegmentKey: 0,
         encrypted: false,
         keyId: null,
         segments: [
-          {startTime: 0, endTime: 10, uri: Scheme.segmentIdToUri(1)},
-          {startTime: 10, endTime: 20, uri: Scheme.segmentIdToUri(2)},
-          {startTime: 20, endTime: 25, uri: Scheme.segmentIdToUri(3)}
+          createSegment(
+              /* start time */ 0,
+              /* end time */ 10,
+              /* data key */ 1),
+          createSegment(
+              /* start time */ 10,
+              /* end time */ 20,
+              /* data key */ 2),
+          createSegment(
+              /* start time */ 20,
+              /* end time */ 25,
+              /* data key */ 3)
         ],
         variantIds: [5]
       };
@@ -419,7 +390,7 @@ describe('OfflineUtils', function() {
         createSegmentIndex: jasmine.any(Function),
         findSegmentPosition: jasmine.any(Function),
         getSegmentReference: jasmine.any(Function),
-        initSegmentReference: streamDb.initSegmentUri ?
+        initSegmentReference: streamDb.initSegmentKey != null ?
             jasmine.any(shaka.media.InitSegmentReference) :
             null,
         presentationTimeOffset: streamDb.presentationTimeOffset,
@@ -439,16 +410,20 @@ describe('OfflineUtils', function() {
         containsEmsgBoxes: false,
         roles: [],
         channelsCount: null
-
       };
+
       expect(stream).toEqual(expectedStream);
 
       // Assume that we don't have to call createSegmentIndex.
-      for (var i = 0; i < streamDb.segments.length; i++) {
-        var segmentDb = streamDb.segments[i];
+
+      streamDb.segments.forEach(function(segmentDb, i) {
+        /** @type {?string} */
+        var uri = shaka.offline.OfflineUri.segmentIdToUri(segmentDb.dataKey);
+
         expect(stream.findSegmentPosition(segmentDb.startTime)).toBe(i);
         expect(stream.findSegmentPosition(segmentDb.endTime - 0.1)).toBe(i);
 
+        /** @type {shaka.media.SegmentReference} */
         var segment = stream.getSegmentReference(i);
         expect(segment).toBeTruthy();
         expect(segment.position).toBe(i);
@@ -456,8 +431,8 @@ describe('OfflineUtils', function() {
         expect(segment.endTime).toBe(segmentDb.endTime);
         expect(segment.startByte).toBe(0);
         expect(segment.endByte).toBe(null);
-        expect(segment.getUris()).toEqual([segmentDb.uri]);
-      }
+        expect(segment.getUris()).toEqual([uri]);
+      });
     }
 
     /**
@@ -490,4 +465,15 @@ describe('OfflineUtils', function() {
       return found;
     }
   });
+
+  function createSegment(startTime, endTime, dataKey) {
+    /** @type {shakaExtern.SegmentDB} */
+    var segment = {
+      startTime: startTime,
+      endTime: endTime,
+      dataKey: dataKey
+    };
+
+    return segment;
+  }
 });

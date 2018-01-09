@@ -261,7 +261,7 @@ shakaExtern.TextParser.TimeContext;
  * Parse an initialization segment. Some formats do not have init
  * segments so this won't always be called.
  *
- * @param {!ArrayBuffer} data
+ * @param {!Uint8Array} data
  *    The data that makes up the init segment.
  *
  * @exportDoc
@@ -299,6 +299,13 @@ shakaExtern.TextParserPlugin;
  * @exportDoc
  */
 shakaExtern.TextDisplayer = function() {};
+
+
+/**
+ * @override
+ * @exportDoc
+ */
+shakaExtern.TextDisplayer.prototype.destroy = function() {};
 
 
 /**

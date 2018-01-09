@@ -130,9 +130,9 @@ describe('DrmEngine', function() {
       advanced: {},
       servers: {
         'com.widevine.alpha':
-            'http://drm-widevine-licensing.axtest.net/AcquireLicense',
+            'https://drm-widevine-licensing.axtest.net/AcquireLicense',
         'com.microsoft.playready':
-            'http://drm-playready-licensing.axtest.net/AcquireLicense'
+            'https://drm-playready-licensing.axtest.net/AcquireLicense'
       }
     };
     drmEngine.configure(config);
