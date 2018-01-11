@@ -24,8 +24,8 @@ goog.provide('shaka.test.FakePresentationTimeline');
 goog.provide('shaka.test.FakeStreamingEngine');
 goog.provide('shaka.test.FakeTextDisplayer');
 goog.provide('shaka.test.FakeTextTrack');
+goog.provide('shaka.test.FakeTransmuxer');
 goog.provide('shaka.test.FakeVideo');
-
 
 /**
  * @fileoverview Defines simple mocks for library types.
@@ -638,3 +638,34 @@ shaka.test.FakeTextDisplayer.prototype.append;
 
 /** @type {!jasmine.Spy} */
 shaka.test.FakeTextDisplayer.prototype.destroy;
+
+
+
+/**
+ * Creates a transmuxer.
+ *
+ * @constructor
+ * @struct
+ * @extends {shaka.media.Transmuxer}
+ * @return {!Object}
+ */
+shaka.test.FakeTransmuxer = function() {
+  var output = {
+    data: new Uint8Array(),
+    captions: []
+  };
+  var transmuxer = {
+    destroy: jasmine.createSpy('destroy').and.returnValue(Promise.resolve()),
+    transmux: jasmine.createSpy('transmux').and
+        .returnValue(Promise.resolve(output))
+  };
+  return transmuxer;
+};
+
+
+/** @type {!jasmine.Spy} */
+shaka.test.FakeTransmuxer.prototype.destroy;
+
+
+/** @type {!jasmine.Spy} */
+shaka.test.FakeTransmuxer.prototype.transmux;

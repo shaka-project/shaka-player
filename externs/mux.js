@@ -78,12 +78,14 @@ muxjs.mp4.Transmuxer.prototype.dispose = function() {};
 /**
  * @typedef {{
  *   initSegment: !Uint8Array,
- *   data: !Uint8Array
+ *   data: !Uint8Array,
+ *   captions: !Array
  * }}
  *
  * @description Transmuxed data from mux.js.
  * @property {!Uint8Array} initSegment
  * @property {!Uint8Array} data
+ * @property {!Array} captions
  * @exportDoc
  */
 muxjs.mp4.Transmuxer.Segment;

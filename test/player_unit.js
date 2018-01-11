@@ -119,7 +119,10 @@ describe('Player', function() {
       streamingEngine = new shaka.test.FakeStreamingEngine(
           onChooseStreams, onCanSwitch);
       mediaSourceEngine = {
-        destroy: jasmine.createSpy('destroy').and.returnValue(Promise.resolve())
+        destroy: jasmine.createSpy('destroy').and.
+            returnValue(Promise.resolve()),
+        setUseEmbeddedText: jasmine.createSpy('setUseEmbeddedText'),
+        getUseEmbeddedText: jasmine.createSpy('getUseEmbeddedText')
       };
 
       player.createDrmEngine = function() { return drmEngine; };
@@ -427,6 +430,19 @@ describe('Player', function() {
     });
 
     describe('setTextTrackVisibility', function() {
+      beforeEach(function() {
+        manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addVariant(0)
+            .addAudio(1)
+            .addVideo(2)
+          .addTextStream(3)
+            .language('es').label('Spanish')
+            .bandwidth(100).mime('text/vtt')
+            .kind('caption')
+        .build();
+      });
+
       it('load text stream if caption is visible', function(done) {
         player.load('', 0, factory1).then(function() {
           player.setTextTrackVisibility(true);
