@@ -1040,7 +1040,7 @@ describe('HlsParser', function() {
       '#EXTM3U\n',
       '#EXT-X-TARGETDURATION:6\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
-      '#EXT-X-KEY:METHOD=SAMPLE-AES-CENC,',
+      '#EXT-X-KEY:METHOD=SAMPLE-AES-CTR,',
       'KEYFORMAT="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed",',
       'URI="data:text/plain;base64,',
       initDataBase64, '",\n',
