@@ -33,8 +33,9 @@ muxjs.mp4 = {};
 /**
  * @constructor
  * @struct
+ * @param {Object=} opt_options
  */
-muxjs.mp4.Transmuxer = function() {};
+muxjs.mp4.Transmuxer = function(opt_options) {};
 
 
 /**

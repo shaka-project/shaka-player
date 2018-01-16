@@ -100,7 +100,7 @@ describe('Transmuxer', function() {
   describe('transmuxing', function() {
     it('transmux video from TS to MP4', function(done) {
       var sawMDAT = false;
-      transmuxer.transmux(videoSegment, 0).then(function(transmuxedData) {
+      transmuxer.transmux(videoSegment).then(function(transmuxedData) {
         expect(transmuxedData instanceof Uint8Array).toBe(true);
         expect(transmuxedData.length).toBeGreaterThan(0);
         new shaka.util.Mp4Parser()
@@ -115,7 +115,7 @@ describe('Transmuxer', function() {
 
     it('transmux audio from TS to MP4', function(done) {
       var sawMDAT = false;
-      transmuxer.transmux(audioSegment, 0).then(function(transmuxedData) {
+      transmuxer.transmux(audioSegment).then(function(transmuxedData) {
         expect(transmuxedData instanceof Uint8Array).toBe(true);
         expect(transmuxedData.length).toBeGreaterThan(0);
         new shaka.util.Mp4Parser()
@@ -130,7 +130,7 @@ describe('Transmuxer', function() {
 
     it('transmux empty video from TS to MP4', function(done) {
       var sawMDAT = false;
-      transmuxer.transmux(emptySegment, 0).then(function(transmuxedData) {
+      transmuxer.transmux(emptySegment).then(function(transmuxedData) {
         expect(transmuxedData instanceof Uint8Array).toBe(true);
         expect(transmuxedData.length).toBeGreaterThan(0);
         new shaka.util.Mp4Parser()
@@ -142,12 +142,12 @@ describe('Transmuxer', function() {
       }).catch(fail).then(done);
     });
 
-    it('offsets output timestamps', function(done) {
+    it('passes through true timestamps', function(done) {
       var parsed = false;
-      var expectedMp4Timestamp = 123 * 90000;  // timescale units
+      var expectedMp4Timestamp = 5166000;  // in timescale units
       var mp4Timestamp;
 
-      transmuxer.transmux(videoSegment, 123).then(function(transmuxedData) {
+      transmuxer.transmux(videoSegment).then(function(transmuxedData) {
         var Mp4Parser = shaka.util.Mp4Parser;
 
         new Mp4Parser()
