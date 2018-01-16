@@ -119,6 +119,22 @@ bandwidth estimate used by Shaka Player to select the first segments.  Use the
 [`.abr.defaultBandwidthEstimate`][AbrConfiguration] configuration to control
 these initial decisions.
 
+<hr>
+
+**Q:** I am getting `UNSUPPORTED_SCHEME` or error code 1000 when loading from
+`file://`.
+
+**A:** In a browser environment, trying to load a file from `file://` is
+inappropriate. Therefore, we do not provide a default network plugin for such
+requests.
+
+In other environments, for example Electron, it is appropriate.
+In those cases, before Shaka Player loads a manifest, you can register the
+existing http plugin for `file://` requests:
+```js
+shaka.net.NetworkingEngine.registerScheme('file', shaka.net.HttpPlugin);
+```
+
 
 [386]: https://github.com/google/shaka-player/issues/386#issuecomment-227898001
 [489]: https://github.com/google/shaka-player/issues/489#issuecomment-240466224
