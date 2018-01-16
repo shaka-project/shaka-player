@@ -1,3 +1,4 @@
+// vim: foldmethod=marker:foldmarker={{{,}}}
 /**
  * @license
  * Copyright 2016 Google Inc.
