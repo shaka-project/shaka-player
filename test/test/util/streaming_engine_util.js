@@ -17,8 +17,7 @@
 
 goog.provide('shaka.test.StreamingEngineUtil');
 
-goog.require('shaka.media.SegmentReference');
-goog.require('shaka.test.FakeNetworkingEngine');
+/** @fileoverview @suppress {missingRequire} */
 
 
 /**

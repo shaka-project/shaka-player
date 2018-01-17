@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-goog.require('shaka.test.Util');
-
 describe('WebmSegmentIndexParser', function() {
   var indexSegmentUri = '/base/test/test/assets/index-segment.webm';
   var initSegmentUri = '/base/test/test/assets/init-segment.webm';
