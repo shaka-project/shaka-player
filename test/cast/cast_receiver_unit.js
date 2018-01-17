@@ -685,6 +685,130 @@ describe('CastReceiver', function() {
     });
   });
 
+  describe('sends duration', function() {
+    beforeEach(function(done) {
+      checkChromeOrChromecast();
+
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
+      fakeConnectedSenders(1);
+      mockPlayer.load = function() {
+        mockVideo.duration = 1;
+        mockPlayer.getManifestUri = function() {
+          return 'URI A';
+        };
+        return Promise.resolve();
+      };
+      fakeIncomingMessage({
+        type: 'init',
+        initState: { manifest: 'URI A' },
+        appData: {}
+      }, mockShakaMessageBus);
+
+      // The messages will show up asychronously:
+      Util.delay(0.1).then(function() {
+        expectMediaInfo('URI A', 1);
+        mockGenericMessageBus.messages = [];
+      }).then(done);
+    });
+
+    it('only once, if nothing else changes', function(done) {
+      checkChromeOrChromecast();
+
+      Util.delay(0.5).then(function() {
+        expect(mockGenericMessageBus.messages.length).toBe(0);
+      }).then(done);
+    });
+
+    it('after new sender connects', function(done) {
+      checkChromeOrChromecast();
+
+      fakeConnectedSenders(1);
+      Util.delay(0.5).then(function() {
+        expectMediaInfo('URI A', 1);
+        expect(mockGenericMessageBus.messages.length).toBe(0);
+      }).then(done);
+    });
+
+    it('for correct manifest after loading new manifest', function(done) {
+      checkChromeOrChromecast();
+
+      // Change media information, but only after half a second.
+      mockPlayer.load = function() {
+        return Util.delay(0.5).then(function() {
+          mockVideo.duration = 2;
+          mockPlayer.getManifestUri = function() {
+            return 'URI B';
+          };
+        });
+      };
+      fakeIncomingMessage({
+        type: 'asyncCall',
+        id: '5',
+        targetName: 'player',
+        methodName: 'load',
+        args: ['URI B']
+      }, mockShakaMessageBus, 'senderId');
+
+      // Wait for the mockPlayer to finish 'loading' before checking again.
+      Util.delay(1.0).then(function() {
+        expectMediaInfo('URI B', 2); // pollAttributes_
+        expect(mockGenericMessageBus.messages.length).toBe(0);
+      }).then(done);
+    });
+
+    it('after LOAD system message', function(done) {
+      checkChromeOrChromecast();
+
+      mockPlayer.load = function() {
+        mockVideo.duration = 2;
+        mockPlayer.getManifestUri = function() {
+          return 'URI B';
+        };
+        return Promise.resolve();
+      };
+      var message = {
+        // Arbitrary number
+        'requestId': 0,
+        'type': 'LOAD',
+        'autoplay': false,
+        'currentTime': 10,
+        'media': {
+          'contentId': 'URI B',
+          'contentType': 'video/mp4',
+          'streamType': 'BUFFERED'
+        }
+      };
+      fakeIncomingMessage(message, mockGenericMessageBus);
+
+      Util.delay(0.5).then(function() {
+        expectMediaInfo('URI B', 2);
+        expect(mockGenericMessageBus.messages.length).toBe(0);
+      }).then(done);
+    });
+
+    function expectMediaInfo(expectedUri, expectedDuration) {
+      expect(mockGenericMessageBus.messages.length).toBeGreaterThan(0);
+      if (mockGenericMessageBus.messages.length == 0)
+        return;
+      expect(mockGenericMessageBus.messages[0]).toEqual(
+        {
+          requestId: 0,
+          type: 'MEDIA_STATUS',
+          status: [jasmine.objectContaining({
+            media: {
+              contentId: expectedUri,
+              streamType: 'BUFFERED',
+              duration: expectedDuration,
+              contentType: ''
+            }
+          })]
+        }
+      );
+      mockGenericMessageBus.messages.shift();
+    }
+  });
+
   describe('respects generic control messages', function() {
     beforeEach(function() {
       receiver = new CastReceiver(
