@@ -374,16 +374,35 @@ describe('DrmEngine', function() {
       }).then(done);
     });
 
-    it('makes no queries for clear content', function(done) {
+    it('makes no queries for clear content if no key config', function(done) {
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, []));
       manifest.periods[0].variants[0].drmInfos = [];
+      config.servers = {};
+      config.advanced = {};
 
+      drmEngine.configure(config);
       drmEngine.init(manifest, /* offline */ false).then(function() {
         expect(drmEngine.initialized()).toBe(true);
         expect(drmEngine.keySystem()).toBe('');
         expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(0);
       }).catch(fail).then(done);
+    });
+
+    it('makes queries for clear content if key is configured', function(done) {
+      requestMediaKeySystemAccessSpy.and.callFake(
+          fakeRequestMediaKeySystemAccess.bind(null, ['drm.abc']));
+      manifest.periods[0].variants[0].drmInfos = [];
+      config.servers = {
+        'drm.abc': 'http://abc.drm/license'
+      };
+
+      drmEngine.configure(config);
+      drmEngine.init(manifest, /* offline */ false).then(function() {
+        expect(drmEngine.initialized()).toBe(true);
+        expect(drmEngine.keySystem()).toBe('drm.abc');
+        expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
+      }).then(done);
     });
 
     it('uses advanced config to override DrmInfo fields', function(done) {
@@ -508,6 +527,8 @@ describe('DrmEngine', function() {
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, []));
       manifest.periods[0].variants[0].drmInfos = [];
+      config.servers = {};
+      config.advanced = {};
 
       initAndAttach().then(function() {
         expect(mockVideo.setMediaKeys).not.toHaveBeenCalled();
@@ -775,6 +796,8 @@ describe('DrmEngine', function() {
 
       it('dispatches an error if manifest says unencrypted', function(done) {
         manifest.periods[0].variants[0].drmInfos = [];
+        config.servers = {};
+        config.advanced = {};
 
         onErrorSpy.and.stub();
 
