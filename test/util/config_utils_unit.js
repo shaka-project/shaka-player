@@ -52,7 +52,7 @@ describe('ConfigUtils', function() {
             1, null,
             {
               sed: null,
-              'do': undefined,
+              do_: undefined,
               eiusmod: []
             }
           ]

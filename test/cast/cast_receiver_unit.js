@@ -308,7 +308,7 @@ describe('CastReceiver', function() {
         player: {
           configure: fakeConfig
         },
-        'playerAfterLoad': {
+        playerAfterLoad: {
           setTextTrackVisibility: true
         },
         video: {

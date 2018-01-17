@@ -263,7 +263,7 @@ shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl = function(
     if (i >= 0) {
       // 'trickvideo' value is only used for testing.
       // Cast to the ContentType enum for compatibility.
-      type = /**@type {shaka.util.ManifestParserUtils.ContentType} */(
+      type = /** @type {shaka.util.ManifestParserUtils.ContentType} */(
           'trickvideo');
     }
   }
@@ -286,7 +286,7 @@ shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl = function(
     if (i >= 0) {
       // 'trickvideo' value is only used for testing.
       // Cast to the ContentType enum for compatibility.
-      type = /**@type {shaka.util.ManifestParserUtils.ContentType} */(
+      type = /** @type {shaka.util.ManifestParserUtils.ContentType} */(
           'trickvideo');
     }
   }
@@ -358,7 +358,8 @@ shaka.test.FakeMediaSourceEngine.prototype.clearImpl_ = function(type) {
     // 'trickvideo' value is only used for testing.
     // Cast to the ContentType enum for compatibility.
     this.clearImpl_(
-        /**@type {shaka.util.ManifestParserUtils.ContentType} */('trickvideo'));
+        /** @type {shaka.util.ManifestParserUtils.ContentType} */(
+            'trickvideo'));
   }
 
   return Promise.resolve();

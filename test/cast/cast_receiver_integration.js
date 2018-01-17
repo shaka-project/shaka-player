@@ -142,7 +142,7 @@ describe('CastReceiver', function() {
       player: {
         configure: {}
       },
-      'playerAfterLoad': {
+      playerAfterLoad: {
         setTextTrackVisibility: true
       },
       video: {

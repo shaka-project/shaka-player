@@ -442,7 +442,7 @@ describe('OfflineUtils', function() {
      * @return {?shakaExtern.Variant}
      */
     function findVariant(variants, audioId, videoId) {
-      /*** @type {?shakaExtern.Variant} */
+      /** @type {?shakaExtern.Variant} */
       var found = null;
 
       variants.forEach(function(variant) {

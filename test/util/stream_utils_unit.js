@@ -23,7 +23,7 @@ describe('StreamUtils', function() {
       shaka.util.StreamUtils.filterStreamsByLanguageAndRole;
 
   describe('filterVariantsByLanguageAndRole', function() {
-    it("chooses variants in user's preferred language", function() {
+    it('chooses variants in user\'s preferred language', function() {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addVariant(0)
@@ -276,7 +276,7 @@ describe('StreamUtils', function() {
   });
 
   describe('filterStreamsByLanguageAndRole', function() {
-    it("chooses text streams in user's preferred language", function() {
+    it('chooses text streams in user\'s preferred language', function() {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addTextStream(1)

@@ -63,7 +63,8 @@ describe('DashParser SegmentBase', function() {
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
-      '</MPD>'].join('\n');
+      '</MPD>',
+    ].join('\n');
 
     fakeNetEngine.setResponseMapAsText({
       'dummy://foo': source,
@@ -98,7 +99,8 @@ describe('DashParser SegmentBase', function() {
       '      <Representation bandwidth="1" />',
       '    </AdaptationSet>',
       '  </Period>',
-      '</MPD>'].join('\n');
+      '</MPD>',
+    ].join('\n');
 
     fakeNetEngine.setResponseMapAsText({
       'dummy://foo': source,
@@ -130,7 +132,8 @@ describe('DashParser SegmentBase', function() {
       '      <Representation bandwidth="1" />',
       '    </AdaptationSet>',
       '  </Period>',
-      '</MPD>'].join('\n');
+      '</MPD>',
+    ].join('\n');
 
     fakeNetEngine.setResponseMapAsText({
       'dummy://foo': source,
@@ -163,7 +166,8 @@ describe('DashParser SegmentBase', function() {
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
-      '</MPD>'].join('\n');
+      '</MPD>',
+    ].join('\n');
 
     fakeNetEngine.setResponseMapAsText({
       'dummy://foo': source,
@@ -203,7 +207,8 @@ describe('DashParser SegmentBase', function() {
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
-      '</MPD>'].join('\n');
+      '</MPD>',
+    ].join('\n');
 
     fakeNetEngine.setResponseMapAsText({
       'dummy://foo': source,
@@ -242,7 +247,8 @@ describe('DashParser SegmentBase', function() {
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
-      '</MPD>'].join('\n');
+      '</MPD>',
+    ].join('\n');
 
     fakeNetEngine.setResponseMapAsText({
       'dummy://foo': source,
@@ -275,7 +281,8 @@ describe('DashParser SegmentBase', function() {
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
-      '</MPD>'].join('\n');
+      '</MPD>',
+    ].join('\n');
 
     fakeNetEngine.setResponseMap({
       'dummy://foo': shaka.util.StringUtils.toUTF8(source),
@@ -309,7 +316,7 @@ describe('DashParser SegmentBase', function() {
         '      </Representation>',
         '    </AdaptationSet>',
         '  </Period>',
-        '</MPD>'
+        '</MPD>',
       ].join('\n');
       var error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
@@ -329,7 +336,7 @@ describe('DashParser SegmentBase', function() {
         '      </Representation>',
         '    </AdaptationSet>',
         '  </Period>',
-        '</MPD>'
+        '</MPD>',
       ].join('\n');
       var error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
@@ -351,7 +358,7 @@ describe('DashParser SegmentBase', function() {
         '      </Representation>',
         '    </AdaptationSet>',
         '  </Period>',
-        '</MPD>'
+        '</MPD>',
       ].join('\n');
       var error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,

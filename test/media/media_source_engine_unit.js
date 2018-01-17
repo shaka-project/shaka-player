@@ -22,7 +22,6 @@
  *   start: jasmine.Spy,
  *   end: jasmine.Spy
  * }}
- * gjslint: disable=900
  */
 var MockTimeRanges;
 
@@ -41,7 +40,6 @@ var MockTimeRanges;
  *   updateend: function(),
  *   error: function()
  * }}
- * gjslint: disable=900
  */
 var MockSourceBuffer;
 
