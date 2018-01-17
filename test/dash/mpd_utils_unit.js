@@ -676,7 +676,7 @@ describe('MpdUtils', function() {
           'xmlns:xlink="http://www.w3.org/1999/xlink" variable="%(var)s">' +
           '<ToReplace xlink:href="%(link)s" xlink:actuate="onLoad" />' +
           '</ToReplace>';
-      return sprintf(format, {var : variable, link : link});
+      return sprintf(format, {'var': variable, 'link': link});
     }
 
     /**
