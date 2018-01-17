@@ -62,9 +62,8 @@ def check_js_lint():
   # TODO: things not enforced: property doc requirements
   logging.info('Running eslint...')
 
-  eslint_path = shakaBuildHelpers.get_node_binary_path('eslint')
-  args = []
-  cmd_line = [eslint_path] + args + get_lint_files()
+  eslint = shakaBuildHelpers.get_node_binary('eslint')
+  cmd_line = eslint + get_lint_files()
   return shakaBuildHelpers.execute_get_code(cmd_line) == 0
 
 
@@ -75,12 +74,12 @@ def check_html_lint():
     True on success, False on failure.
   """
   logging.info('Running htmlhint...')
-  htmlhint_path = shakaBuildHelpers.get_node_binary_path('htmlhint')
+  htmlhint = shakaBuildHelpers.get_node_binary('htmlhint')
   base = shakaBuildHelpers.get_source_base()
   files = ['index.html', 'demo/index.html', 'support.html']
   file_paths = [os.path.join(base, x) for x in files]
   config_path = os.path.join(base, '.htmlhintrc')
-  cmd_line = [htmlhint_path, '--config=' + config_path] + file_paths
+  cmd_line = htmlhint + ['--config=' + config_path] + file_paths
   return shakaBuildHelpers.execute_get_code(cmd_line) == 0
 
 
