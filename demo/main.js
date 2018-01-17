@@ -85,6 +85,11 @@ shakaDemo.audioOnlyPoster_ =
  */
 shakaDemo.CC_APP_ID_ = 'A15A181D';
 
+/**
+ * @type {shakaDemo.AppPlugin}
+ */
+shakaDemo.appPlugin = null;
+
 
 /**
  * Initialize the application.
@@ -210,7 +215,10 @@ shakaDemo.init = function() {
         window.addEventListener('hashchange', shakaDemo.updateFromHash_);
       });
 
-      return shakaDemo.initAppPlugin_(localPlayer);
+      if (params['appPlugin']) {
+        var pluginParams = params['pluginParams'];
+        return shakaDemo.initAppPlugin_(params['appPlugin'], pluginParams);
+      }
     }).catch(function(error) {
       // Some part of the setup of the demo app threw an error.
       // Notify the user of this.
@@ -220,21 +228,27 @@ shakaDemo.init = function() {
 };
 
 /**
- * @param {shaka.Player} player
+ * @param {string} name
+ * @param {string} pluginParams Arbitrary params to pass to the plugin
  * @private
  * @returns {Promise}
  */
-shakaDemo.initAppPlugin_ = function(player) {
-  var plugin = shakaDemo.appPlugin;
-  for (var eventName in plugin.listeners) {
-    player.addEventListener(eventName, plugin.listeners[eventName]);
+shakaDemo.initAppPlugin_ = function(name, pluginParams) {
+  var player = shakaDemo.player_;
+  var plugin = shakaDemo.AppPlugin.getPluginInstance(name, player);
+  shakaDemo.appPlugin = plugin;
+
+  var listeners = plugin.getListeners();
+  for (var eventName in listeners) {
+    player.addEventListener(eventName, listeners[eventName]);
   }
 
   var netEngine = player.getNetworkingEngine();
   netEngine.registerRequestFilter(plugin.onRequest);
   netEngine.registerResponseFilter(plugin.onResponse);
 
-  return plugin.onStart(player).catch(function (error) {
+  return plugin.onStart(player, pluginParams).catch(function (error) {
+    shaka.log.error('Error setting up plugin ' + name, error);
     // TODO: `error` could be anything. How to handle?
   });
 };
@@ -242,9 +256,8 @@ shakaDemo.initAppPlugin_ = function(player) {
 
 /**
   * @return {!Object.<string, string>} params
-  * @private
   */
-shakaDemo.getParams_ = function() {
+shakaDemo.getParams = function() {
   // Read URL parameters.
   var fields = location.search.substr(1);
   fields = fields ? fields.split(';') : [];
