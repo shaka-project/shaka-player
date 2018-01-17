@@ -922,6 +922,30 @@ describe('StreamingEngine', function() {
     expect(timeline.setDuration).toHaveBeenCalledWith(35);
   });
 
+  it('applies fudge factor for appendWindowStart', function() {
+    setupVod();
+    mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+    createStreamingEngine();
+
+    playhead.getTime.and.returnValue(0);
+    onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+    onChooseStreams.and.callFake(defaultOnChooseStreams);
+
+    // Here we go!
+    streamingEngine.init();
+    runTest();
+
+    // The second Period starts at 20, so we should set the appendWindowStart to
+    // 20, but reduced by a small fudge factor.
+    var lt20 = {
+      asymmetricMatch: function(val) {
+        return val > 19.9 && val < 20;
+      }
+    };
+    expect(mediaSourceEngine.setStreamProperties)
+        .toHaveBeenCalledWith('video', 20, lt20, 40);
+  });
+
   describe('switchVariant/switchTextStream', function() {
     var initialVariant;
     var sameAudioVariant;
