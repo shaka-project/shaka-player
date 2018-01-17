@@ -203,11 +203,14 @@ shakaDemo.preparePlayer_ = function(asset) {
 
   if (!asset) {
     // Use the custom fields.
+    var licenseServerUri = document.getElementById('licenseServerInput').value;
     var licenseServers = {};
-    commonDrmSystems.forEach(function(system) {
-      licenseServers[system] =
-          document.getElementById('licenseServerInput').value;
-    });
+    if (licenseServerUri) {
+      commonDrmSystems.forEach(function(system) {
+        licenseServers[system] = licenseServerUri;
+      });
+    }
+
     asset = /** @type {shakaAssets.AssetInfo} */ ({
       manifestUri: document.getElementById('manifestInput').value,
       // Use the custom license server for all key systems.
