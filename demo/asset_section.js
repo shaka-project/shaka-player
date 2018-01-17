@@ -281,14 +281,16 @@ shakaDemo.load = function() {
   // Revert to default poster while we load.
   shakaDemo.localVideo_.poster = shakaDemo.mainPoster_;
 
-  var configureCertificate = Promise.resolve();
+  shakaDemo.appPlugin.onBeforeLoad(asset).then(function () {
+    var configureCertificate = Promise.resolve();
 
-  if (asset.certificateUri) {
-    configureCertificate = shakaDemo.requestCertificate_(asset.certificateUri)
-      .then(shakaDemo.configureCertificate_);
-  }
+    if (asset.certificateUri) {
+      configureCertificate = shakaDemo.requestCertificate_(asset.certificateUri)
+        .then(shakaDemo.configureCertificate_);
+    }
 
-  configureCertificate.then(function() {
+    return configureCertificate;
+  }).then(function () {
     // Load the manifest.
     return player.load(asset.manifestUri);
   }).then(function() {

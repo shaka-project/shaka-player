@@ -209,12 +209,34 @@ shakaDemo.init = function() {
         shakaDemo.postBrowserCheckParams_(params);
         window.addEventListener('hashchange', shakaDemo.updateFromHash_);
       });
+
+      return shakaDemo.initAppPlugin_(localPlayer);
     }).catch(function(error) {
       // Some part of the setup of the demo app threw an error.
       // Notify the user of this.
       shakaDemo.onError_(/** @type {!shaka.util.Error} */ (error));
     });
   }
+};
+
+/**
+ * @param {shaka.Player} player
+ * @private
+ * @returns {Promise}
+ */
+shakaDemo.initAppPlugin_ = function(player) {
+  var plugin = shakaDemo.appPlugin;
+  for (var eventName in plugin.listeners) {
+    player.addEventListener(eventName, plugin.listeners[eventName]);
+  }
+
+  var netEngine = player.getNetworkingEngine();
+  netEngine.registerRequestFilter(plugin.onRequest);
+  netEngine.registerResponseFilter(plugin.onResponse);
+
+  return plugin.onStart(player).catch(function (error) {
+    // TODO: `error` could be anything. How to handle?
+  });
 };
 
 
