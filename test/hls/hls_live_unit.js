@@ -47,6 +47,10 @@ describe('HlsParser live', function() {
   var selfInitializingSegmentData;
   /** @type {ArrayBuffer} */
   var tsSegmentData;
+  /** @type {ArrayBuffer} */
+  var pastRolloverSegmentData;
+  /** @const {number} */
+  var rolloverOffset;
   /** @const {number} */
   var segmentDataStartTime;
 
@@ -93,6 +97,22 @@ describe('HlsParser live', function() {
     ]).buffer;
     // 180000 divided by TS timescale (90000) = segment starts at 2s.
     segmentDataStartTime = 2;
+
+    pastRolloverSegmentData = new Uint8Array([
+      0x00, 0x00, 0x00, 0x24, // size (36)
+      0x6D, 0x6F, 0x6F, 0x66, // type (moof)
+      0x00, 0x00, 0x00, 0x1C, // traf size (28)
+      0x74, 0x72, 0x61, 0x66, // type (traf)
+      0x00, 0x00, 0x00, 0x14, // tfdt size (20)
+      0x74, 0x66, 0x64, 0x74, // type (tfdt)
+      0x01, 0x00, 0x00, 0x00, // version and flags
+      0x00, 0x00, 0x00, 0x00, // baseMediaDecodeTime first 4 bytes
+      0x0b, 0x60, 0xbc, 0x28  // baseMediaDecodeTime last 4 bytes (190889000)
+    ]).buffer;
+
+    // The timestamp above would roll over twice, so this rollover offset should
+    // be applied.
+    rolloverOffset = (0x200000000 * 2) / 90000;
 
     selfInitializingSegmentData = shaka.util.Uint8ArrayUtils.concat(
       new Uint8Array(initSegmentData),
@@ -432,6 +452,52 @@ describe('HlsParser live', function() {
       });
 
       parser.start('test:/master', playerInterface).catch(fail).then(done);
+    });
+
+    it('offsets VTT text with rolled over TS timestamps', function(done) {
+      var masterWithVtt = [
+        '#EXTM3U\n',
+        '#EXT-X-MEDIA:TYPE=SUBTITLES,LANGUAGE="fra",URI="test:/text"\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+        'RESOLUTION=960x540,FRAME-RATE=60\n',
+        'test:/video\n',
+      ].join('');
+
+      var textPlaylist = [
+        '#EXTM3U\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-MEDIA-SEQUENCE:0\n',
+        '#EXTINF:2,\n',
+        'test:/main.vtt\n',
+      ].join('');
+
+      var vtt = [
+        'WEBVTT\n',
+        '\n',
+        '00:03.837 --> 00:07.297\n',
+        'Hello, world!\n',
+      ].join('');
+
+      fakeNetEngine.setResponseMap({
+        'test:/master': toUTF8(masterWithVtt),
+        'test:/video': toUTF8(media),
+        'test:/text': toUTF8(textPlaylist),
+        'test:/init.mp4': initSegmentData,
+        'test:/main.mp4': pastRolloverSegmentData,
+        'test:/main.vtt': toUTF8(vtt),
+      });
+
+      parser.start('test:/master', playerInterface).then(function(manifest) {
+        var textStream = manifest.periods[0].textStreams[0];
+        var ref = textStream.getSegmentReference(0);
+        expect(ref).not.toBe(null);
+        expect(ref.startTime).not.toBeLessThan(rolloverOffset);
+
+        var videoStream = manifest.periods[0].variants[0].video;
+        ref = videoStream.getSegmentReference(0);
+        expect(ref).not.toBe(null);
+        expect(ref.startTime).not.toBeLessThan(rolloverOffset);
+      }).catch(fail).then(done);
     });
 
     describe('update', function() {
