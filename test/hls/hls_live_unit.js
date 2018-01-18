@@ -376,8 +376,8 @@ describe('HlsParser live', function() {
         }).catch(fail).then(done);
         shaka.polyfill.Promise.flush();
       });
-    });
-  });
+    });  // describe('update')
+  });  // describe('playlist type EVENT')
 
   describe('playlist type LIVE', function() {
     var media = [
@@ -474,7 +474,7 @@ describe('HlsParser live', function() {
       var vtt = [
         'WEBVTT\n',
         '\n',
-        '00:03.837 --> 00:07.297\n',
+        '00:00.000 --> 00:01.000\n',
         'Hello, world!\n',
       ].join('');
 
@@ -671,6 +671,94 @@ describe('HlsParser live', function() {
 
         shaka.polyfill.Promise.flush();
       });
-    });
-  });
-});
+
+      it('handles rollover on update', function(done) {
+        var masterWithVtt = [
+          '#EXTM3U\n',
+          '#EXT-X-MEDIA:TYPE=SUBTITLES,LANGUAGE="fra",URI="test:/text"\n',
+          '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+          'RESOLUTION=960x540,FRAME-RATE=60\n',
+          'test:/video\n',
+        ].join('');
+
+        var textPlaylist1 = [
+          '#EXTM3U\n',
+          '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MEDIA-SEQUENCE:0\n',
+          '#EXTINF:2,\n',
+          'test:/main1.vtt\n',
+        ].join('');
+
+        var textPlaylist2 = [
+          '#EXTM3U\n',
+          '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MEDIA-SEQUENCE:0\n',
+          '#EXTINF:2,\n',
+          'test:/main1.vtt\n',
+          '#EXTINF:2,\n',
+          'test:/main2.vtt\n',
+        ].join('');
+
+        // ~0.7s from rollover
+        var vtt1 = [
+          'WEBVTT\n',
+          'X-TIMESTAMP-MAP=MPEGTS:8589870000,LOCAL:00:00:00.000\n',
+          '\n',
+          '00:00.000 --> 00:01.000\n',
+          'Hello, world!\n',
+        ].join('');
+
+        // ~1.3s after rollover
+        var vtt2 = [
+          'WEBVTT\n',
+          'X-TIMESTAMP-MAP=MPEGTS:115408,LOCAL:00:00:00.000\n',
+          '\n',
+          '00:00.000 --> 00:01.000\n',
+          'Hello, again!\n',
+        ].join('');
+
+        fakeNetEngine.setResponseMap({
+          'test:/master': toUTF8(masterWithVtt),
+          'test:/video': toUTF8(media),
+          'test:/text': toUTF8(textPlaylist1),
+          'test:/init.mp4': initSegmentData,
+          'test:/main.mp4': pastRolloverSegmentData,
+          'test:/main1.vtt': toUTF8(vtt1),
+        });
+
+        var baseTime = 95443 + rolloverOffset;
+        var ref1 = ManifestParser.makeReference('test:/main1.vtt',
+                                                /* position */ 0,
+                                                /* startTime */ baseTime,
+                                                /* endTime */ baseTime + 2);
+        var ref2 = ManifestParser.makeReference('test:/main2.vtt',
+                                                /* position */ 1,
+                                                /* startTime */ baseTime + 2,
+                                                /* endTime */ baseTime + 4);
+
+        parser.start('test:/master', playerInterface).then(function(manifest) {
+          var text = manifest.periods[0].textStreams[0];
+          ManifestParser.verifySegmentIndex(text, [ref1]);
+
+          fakeNetEngine.setResponseMap({
+            'test:/master': toUTF8(masterWithVtt),
+            'test:/video': toUTF8(mediaWithAdditionalSegment),
+            'test:/text': toUTF8(textPlaylist2),
+            'test:/init.mp4': initSegmentData,
+            'test:/main.mp4': pastRolloverSegmentData,
+            'test:/main2.mp4': pastRolloverSegmentData,
+            'test:/main1.vtt': toUTF8(vtt1),
+            'test:/main2.vtt': toUTF8(vtt2),
+          });
+
+          fakeNetEngine.request.calls.reset();
+          delayForUpdatePeriod();
+
+          ManifestParser.verifySegmentIndex(text, [ref1, ref2]);
+        }).catch(fail).then(done);
+
+        shaka.polyfill.Promise.flush();
+      });
+    });  // describe('update')
+  });  // describe('playlist type LIVE')
+});  // describe('HlsParser live')

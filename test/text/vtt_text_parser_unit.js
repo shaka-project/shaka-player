@@ -504,7 +504,7 @@ describe('VttTextParser', function() {
     expect(logWarningSpy.calls.count()).toBe(7);
   });
 
-  it('respects X-TIMESTAMP-MAP header', function() {
+  it('respects X-TIMESTAMP-MAP header in probes', function() {
     verifyHelper(
         [
           {start: 30, end: 50, payload: 'Test'},
@@ -518,7 +518,27 @@ describe('VttTextParser', function() {
         'Test\n\n' +
         '00:00:40.000 --> 00:00:50.000 line:-1\n' +
         'Test2',
-        { periodStart: 0, segmentStart: 0, segmentEnd: 0 });
+        // segmentStart of null marks this as a probe.
+        { periodStart: 0, segmentStart: null, segmentEnd: 0 });
+  });
+
+  it('ignores X-TIMESTAMP-MAP header when segment times are known', function() {
+    verifyHelper(
+        [
+          {start: 120, end: 140, payload: 'Test'},
+          {start: 140, end: 150, payload: 'Test2'}
+        ] ,
+        // 900000 = 10 sec, so expect every timestamp to be 10
+        // seconds ahead of what is specified.
+        'WEBVTT\n' +
+        'X-TIMESTAMP-MAP=MPEGTS:900000,LOCAL:00:00:00.000\n\n' +
+        '00:00:20.000 --> 00:00:40.000 line:0\n' +
+        'Test\n\n' +
+        '00:00:40.000 --> 00:00:50.000 line:-1\n' +
+        'Test2',
+        // Non-null segmentStart takes precedence over X-TIMESTAMP-MAP.
+        // This protects us from rollover in the MPEGTS field.
+        { periodStart: 0, segmentStart: 100, segmentEnd: 0 });
   });
 
   it('skips style blocks', function() {
