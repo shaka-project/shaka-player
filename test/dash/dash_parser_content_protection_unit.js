@@ -44,7 +44,8 @@ describe('DashParser ContentProtection', function() {
         clockSyncUri: '',
         customScheme: callback,
         ignoreDrmInfo: ignoreDrmInfo,
-        xlinkFailGracefully: false
+        xlinkFailGracefully: false,
+        defaultPresentationDelay: 10
       }
     });
     var playerEvents = {
