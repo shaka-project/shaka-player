@@ -791,20 +791,18 @@ describe('CastReceiver', function() {
       expect(mockGenericMessageBus.messages.length).toBeGreaterThan(0);
       if (mockGenericMessageBus.messages.length == 0)
         return;
-      expect(mockGenericMessageBus.messages[0]).toEqual(
-        {
-          requestId: 0,
-          type: 'MEDIA_STATUS',
-          status: [jasmine.objectContaining({
-            media: {
-              contentId: expectedUri,
-              streamType: 'BUFFERED',
-              duration: expectedDuration,
-              contentType: ''
-            }
-          })]
-        }
-      );
+      expect(mockGenericMessageBus.messages[0]).toEqual({
+        requestId: 0,
+        type: 'MEDIA_STATUS',
+        status: [jasmine.objectContaining({
+          media: {
+            contentId: expectedUri,
+            streamType: 'BUFFERED',
+            duration: expectedDuration,
+            contentType: ''
+          }
+        })]
+      });
       mockGenericMessageBus.messages.shift();
     }
   });
