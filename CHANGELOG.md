@@ -1,3 +1,26 @@
+## 2.2.10 (2017-01-22)
+
+New features:
+  - Update Widevine HLS parsing support for SAMPLE-AES-CTR
+    - https://github.com/google/shaka-player/issues/1227
+
+Bugfixes:
+  - Fix display of duration in Chrome cast dialog
+    - https://github.com/google/shaka-player/issues/1174
+  - Compensate for rounding errors in multi-period manifests
+  - Delay gap-jumping until after seeking is complete
+    - https://github.com/google/shaka-player/issues/1061
+  - Fix SegmentTemplate w/ duration for live
+    - https://github.com/google/shaka-player/issues/1204
+
+Docs:
+  - Add FAQ entry for file:// requests in Electron
+    - https://github.com/google/shaka-player/issues/1222
+  - Fixed typos and extraneous tags
+  - Added missing @exportDoc annotations
+    - https://github.com/google/shaka-player/pull/1208
+
+
 ## 2.2.9 (2017-12-22)
 
 Bugfixes:
