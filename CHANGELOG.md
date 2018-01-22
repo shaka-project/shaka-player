@@ -1,3 +1,58 @@
+## 2.3.1 (2017-01-22)
+
+New features:
+  - All features released in 2.2.10, plus...
+  - DRM content is now implied by DRM config, fixes some ad insertion cases
+    - https://github.com/google/shaka-player/pull/1217
+    - https://github.com/google/shaka-player/issues/1094
+  - Add support for mp4a.40.34 mp3 in HLS
+    - https://github.com/google/shaka-player/issues/1210
+  - Allow ES6 syntax
+  - Replaced deprecated gjslint with eslint
+
+Bugfixes:
+  - All fixes released in 2.2.10, plus...
+  - Handle MPEGTS timestamp rollover issues, including WebVTT HLS
+    - https://github.com/google/shaka-player/issues/1191
+  - Fix MP4 timescale assumptions in HLS
+    - https://github.com/google/shaka-player/issues/1191
+  - Update muxjs to use new keepOriginalTimestamps option
+    - https://github.com/google/shaka-player/issues/1194
+  - Avoids line-length limits when building on Windows
+    - https://github.com/google/shaka-player/issues/1228
+  - Force JS files to use unix newlines on Windows
+    - https://github.com/google/shaka-player/issues/1228
+  - Fix selection of text streams with no role
+    - https://github.com/google/shaka-player/issues/1212
+
+Docs:
+  - All fixes released in 2.2.10, plus...
+  - Fix upgrade guide links
+
+
+## 2.2.10 (2017-01-22)
+
+New features:
+  - Update Widevine HLS parsing support for SAMPLE-AES-CTR
+    - https://github.com/google/shaka-player/issues/1227
+
+Bugfixes:
+  - Fix display of duration in Chrome cast dialog
+    - https://github.com/google/shaka-player/issues/1174
+  - Compensate for rounding errors in multi-period manifests
+  - Delay gap-jumping until after seeking is complete
+    - https://github.com/google/shaka-player/issues/1061
+  - Fix SegmentTemplate w/ duration for live
+    - https://github.com/google/shaka-player/issues/1204
+
+Docs:
+  - Add FAQ entry for file:// requests in Electron
+    - https://github.com/google/shaka-player/issues/1222
+  - Fixed typos and extraneous tags
+  - Added missing @exportDoc annotations
+    - https://github.com/google/shaka-player/pull/1208
+
+
 ## 2.3.0 (2017-12-22)
 
 New features:
