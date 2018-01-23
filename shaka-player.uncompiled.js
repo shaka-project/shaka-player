@@ -55,4 +55,5 @@ goog.require('shaka.text.SimpleTextDisplayer');
 goog.require('shaka.text.TextEngine');
 goog.require('shaka.text.TtmlTextParser');
 goog.require('shaka.text.VttTextParser');
+goog.require('shaka.util.AbortableOperation');  // TODO(#829): remove when used
 goog.require('shaka.util.Error');
