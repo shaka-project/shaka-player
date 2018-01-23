@@ -70,7 +70,7 @@ shaka.test.StreamingEngineUtil.createFakeNetworkingEngine = function(
     }
 
     var response = {uri: request.uris[0], data: buffer, headers: {}};
-    return Promise.resolve(response);
+    return shaka.util.AbortableOperation.completed(response);
   });
 
   netEngine.expectRequest = function(uri, type) {

@@ -607,7 +607,7 @@ describe('HlsParser live', function() {
           // Only one request was made, and it was for the playlist.
           // No segment requests were needed to get the start time.
           expect(fakeNetEngine.request.calls.count()).toBe(1);
-          fakeNetEngine.expectCancelableRequest(
+          fakeNetEngine.expectRequest(
               'test:/video',
               shaka.net.NetworkingEngine.RequestType.MANIFEST);
         }).catch(fail).then(done);

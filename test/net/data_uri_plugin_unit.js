@@ -71,7 +71,7 @@ describe('DataUriPlugin', function() {
   function testSucceeds(uri, contentType, text, done) {
     var request =
         shaka.net.NetworkingEngine.makeRequest([uri], retryParameters);
-    shaka.net.DataUriPlugin(uri, request)
+    shaka.net.DataUriPlugin(uri, request).promise
         .then(function(response) {
           expect(response).toBeTruthy();
           expect(response.uri).toBe(uri);
@@ -87,7 +87,7 @@ describe('DataUriPlugin', function() {
   function testFails(uri, done, code) {
     var request =
         shaka.net.NetworkingEngine.makeRequest([uri], retryParameters);
-    shaka.net.DataUriPlugin(uri, request)
+    shaka.net.DataUriPlugin(uri, request).promise
         .then(fail)
         .catch(function(error) { expect(error.code).toBe(code); })
         .then(function() {

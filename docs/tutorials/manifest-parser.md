@@ -27,7 +27,7 @@ MyManifestParser.prototype.start = function(uri, playerInterface) {
     method: 'GET',
     retryParameters: this.config_.retryParameters
   };
-  return playerInterface.networkingEngine.request(type, request)
+  return playerInterface.networkingEngine.request(type, request).promise
       .then(function(response) {
         return this.loadManifest_(response.data);
       });

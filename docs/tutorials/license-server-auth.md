@@ -219,8 +219,8 @@ Now change the request filter:
       method: 'POST',
     };
     var requestType = shaka.net.NetworkingEngine.RequestType.APP;
-    return player.getNetworkingEngine().request(requestType, authRequest).then(
-        function(response) {
+    return player.getNetworkingEngine().request(requestType, authRequest)
+        .promise.then(function(response) {
           // This endpoint responds with the value we should use in the header.
           authToken = shaka.util.StringUtils.fromUTF8(response.data);
           console.log('Received auth token', authToken);

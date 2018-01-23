@@ -65,7 +65,7 @@ describe('OfflineScheme', function() {
           })
           .then(function(id) {
             uri = OfflineUri.manifestIdToUri(id);
-            return OfflineScheme(uri, request);
+            return OfflineScheme(uri, request).promise;
           })
           .then(function(response) {
             expect(response).toBeTruthy();
@@ -92,7 +92,7 @@ describe('OfflineScheme', function() {
           })
           .then(function(id) {
             uri = OfflineUri.segmentIdToUri(id);
-            return OfflineScheme(uri, request);
+            return OfflineScheme(uri, request).promise;
           })
           .then(function(response) {
             expect(response).toBeTruthy();
@@ -113,7 +113,7 @@ describe('OfflineScheme', function() {
       /** @const {string} */
       var uri = OfflineUri.segmentIdToUri(id);
 
-      OfflineScheme(uri, request)
+      OfflineScheme(uri, request).promise
           .then(fail)
           .catch(function(err) {
             shaka.test.Util.expectToEqualError(
@@ -132,7 +132,7 @@ describe('OfflineScheme', function() {
       /** @type {string} */
       var uri = 'offline:this-is-invalid';
 
-      OfflineScheme(uri, request)
+      OfflineScheme(uri, request).promise
           .then(fail)
           .catch(function(err) {
             shaka.test.Util.expectToEqualError(

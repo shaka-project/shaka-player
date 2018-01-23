@@ -1007,7 +1007,7 @@ describe('StreamingEngine', function() {
         request: function(requestType, request) {
           var buffer = new ArrayBuffer(0);
           var response = { uri: request.uris[0], data: buffer, headers: {} };
-          return Promise.resolve(response);
+          return shaka.util.AbortableOperation.completed(response);
         }
       };
 
@@ -1828,7 +1828,7 @@ describe('StreamingEngine', function() {
       };
       netEngine.request.and.callFake(function(requestType, request) {
         if (request.uris[0] == textUri) {
-          return Promise.reject(new shaka.util.Error(
+          return shaka.util.AbortableOperation.failed(new shaka.util.Error(
               shaka.util.Error.Severity.CRITICAL,
               shaka.util.Error.Category.NETWORK,
               shaka.util.Error.Code.BAD_HTTP_STATUS, textUri, 404));
@@ -2824,7 +2824,7 @@ describe('StreamingEngine', function() {
                 data.push('');
               }
 
-              return Promise.reject(new shaka.util.Error(
+              return shaka.util.AbortableOperation.failed(new shaka.util.Error(
                   shaka.util.Error.Severity.CRITICAL,
                   shaka.util.Error.Category.NETWORK,
                   errorCode, data));

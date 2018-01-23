@@ -466,13 +466,17 @@ describe('DashParser Manifest', function() {
       fakeNetEngine.request.and.callFake(function(type, request) {
         if (request.uris[0] == 'http://foo.bar/manifest') {
           var data = shaka.util.StringUtils.toUTF8(source);
-          return Promise.resolve({data: data, headers: {}, uri: ''});
+          return shaka.util.AbortableOperation.completed({
+            data: data,
+            headers: {},
+            uri: '',
+          });
         } else {
           expect(request.uris[0]).toBe('http://foo.bar/date');
-          return Promise.resolve({
+          return shaka.util.AbortableOperation.completed({
             data: new ArrayBuffer(0),
             headers: {'date': '1970-01-01T00:00:40Z'},
-            uri: ''
+            uri: '',
           });
         }
       });
@@ -685,7 +689,8 @@ describe('DashParser Manifest', function() {
           shaka.util.Error.Category.NETWORK,
           shaka.util.Error.Code.BAD_HTTP_STATUS);
 
-      fakeNetEngine.request.and.returnValue(Promise.reject(expectedError));
+      fakeNetEngine.request.and.returnValue(
+          shaka.util.AbortableOperation.failed(expectedError));
       parser.start('', playerInterface)
           .then(fail)
           .catch(function(error) { expect(error).toEqual(expectedError); })

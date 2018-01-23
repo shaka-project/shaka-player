@@ -834,9 +834,10 @@ describe('DrmEngine', function() {
           mockVideo.on['encrypted'](
               { initDataType: 'webm', initData: initData, keyId: null });
 
-          fakeNetEngine.request.and.returnValue(new shaka.util.PublicPromise());
+          var operation = shaka.util.AbortableOperation.completed({});
+          fakeNetEngine.request.and.returnValue(operation);
           var message = new Uint8Array(0);
-          session1.on['message']({ message: message });
+          session1.on['message']({ target: session1, message: message });
 
           expect(fakeNetEngine.request).toHaveBeenCalledWith(
               shaka.net.NetworkingEngine.RequestType.LICENSE,
@@ -857,9 +858,10 @@ describe('DrmEngine', function() {
           mockVideo.on['encrypted'](
               { initDataType: 'webm', initData: initData, keyId: null });
 
-          fakeNetEngine.request.and.returnValue(new shaka.util.PublicPromise());
+          var operation = shaka.util.AbortableOperation.completed({});
+          fakeNetEngine.request.and.returnValue(operation);
           var message = new Uint8Array(0);
-          session1.on['message']({ message: message });
+          session1.on['message']({ target: session1, message: message });
 
           expect(fakeNetEngine.request).toHaveBeenCalledWith(
               shaka.net.NetworkingEngine.RequestType.LICENSE,
@@ -881,10 +883,11 @@ describe('DrmEngine', function() {
               shaka.util.Error.Category.NETWORK,
               shaka.util.Error.Code.BAD_HTTP_STATUS,
               'http://abc.drm/license', 403);
-          fakeNetEngine.request.and.returnValue(Promise.reject(netError));
+          var operation = shaka.util.AbortableOperation.failed(netError);
+          fakeNetEngine.request.and.returnValue(operation);
 
           var message = new Uint8Array(0);
-          session1.on['message']({ message: message });
+          session1.on['message']({ target: session1, message: message });
           return shaka.test.Util.delay(0.5);
         }).then(function() {
           expect(onErrorSpy).toHaveBeenCalled();
@@ -1398,7 +1401,8 @@ describe('DrmEngine', function() {
 
     it('interrupts successful license requests', function(done) {
       var p = new shaka.util.PublicPromise();
-      fakeNetEngine.request.and.returnValue(p);
+      var operation = shaka.util.AbortableOperation.notAbortable(p);
+      fakeNetEngine.request.and.returnValue(operation);
 
       initAndAttach().then(function() {
         var initData1 = new Uint8Array(1);
@@ -1428,7 +1432,8 @@ describe('DrmEngine', function() {
 
     it('interrupts failed license requests', function(done) {
       var p = new shaka.util.PublicPromise();
-      fakeNetEngine.request.and.returnValue(p);
+      var operation = shaka.util.AbortableOperation.notAbortable(p);
+      fakeNetEngine.request.and.returnValue(operation);
 
       initAndAttach().then(function() {
         var initData1 = new Uint8Array(1);
@@ -1627,9 +1632,10 @@ describe('DrmEngine', function() {
         mockVideo.on['encrypted'](
             { initDataType: 'webm', initData: initData, keyId: null });
 
-        fakeNetEngine.request.and.returnValue(new shaka.util.PublicPromise());
+        var operation = shaka.util.AbortableOperation.completed({});
+        fakeNetEngine.request.and.returnValue(operation);
         var message = new Uint8Array(0);
-        session1.on['message']({ message: message });
+        session1.on['message']({ target: session1, message: message });
 
         expect(fakeNetEngine.request).not.toHaveBeenCalled();
 
@@ -1655,9 +1661,10 @@ describe('DrmEngine', function() {
         mockVideo.on['encrypted'](
             { initDataType: 'webm', initData: initData, keyId: null });
 
-        fakeNetEngine.request.and.returnValue(new shaka.util.PublicPromise());
+        var operation = shaka.util.AbortableOperation.completed({});
+        fakeNetEngine.request.and.returnValue(operation);
         var message = new Uint8Array(0);
-        session1.on['message']({ message: message });
+        session1.on['message']({ target: session1, message: message });
 
         expect(fakeNetEngine.request).not.toHaveBeenCalled();
 
@@ -1674,7 +1681,7 @@ describe('DrmEngine', function() {
         fakeNetEngine.request.calls.reset();
 
         mockVideo.paused = true;
-        session1.on['message']({ message: message });
+        session1.on['message']({ target: session1, message: message });
 
         expect(fakeNetEngine.request).toHaveBeenCalledWith(
             shaka.net.NetworkingEngine.RequestType.LICENSE,
@@ -1881,6 +1888,7 @@ describe('DrmEngine', function() {
     };
     session.generateRequest.and.returnValue(Promise.resolve());
     session.close.and.returnValue(Promise.resolve());
+    session.update.and.returnValue(Promise.resolve());
     session.addEventListener.and.callFake(function(name, callback) {
       session.on[name] = callback;
     });

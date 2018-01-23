@@ -126,7 +126,7 @@ shakaExtern.Response;
  * @typedef {!function(string,
  *                     shakaExtern.Request,
  *                     shaka.net.NetworkingEngine.RequestType):
- *     !Promise.<shakaExtern.Response>}
+ *     !shakaExtern.IAbortableOperation.<shakaExtern.Response>}
  * @exportDoc
  */
 shakaExtern.SchemePlugin;

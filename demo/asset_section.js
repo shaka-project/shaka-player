@@ -141,9 +141,8 @@ shakaDemo.requestCertificate_ = function(uri) {
   var requestType = shaka.net.NetworkingEngine.RequestType.APP;
   var request = /** @type {shakaExtern.Request} */ ({ uris: [uri] });
 
-  return netEngine.request(requestType, request).then(function(response) {
-    return response.data;
-  });
+  return netEngine.request(requestType, request).promise
+      .then((response) => response.data);
 };
 
 

@@ -426,7 +426,10 @@ describe('DashParser Live', function() {
 
     // The initial manifest request will be redirected.
     fakeNetEngine.request.and.returnValue(
-        Promise.resolve({uri: redirectedUri, data: manifestData}));
+        shaka.util.AbortableOperation.completed({
+          uri: redirectedUri,
+          data: manifestData,
+        }));
 
     parser.start(originalUri, playerInterface)
         .then(function(manifest) {
@@ -461,8 +464,8 @@ describe('DashParser Live', function() {
               shaka.util.Error.Severity.CRITICAL,
               shaka.util.Error.Category.NETWORK,
               shaka.util.Error.Code.BAD_HTTP_STATUS);
-          var promise = Promise.reject(error);
-          fakeNetEngine.request.and.returnValue(promise);
+          var operation = shaka.util.AbortableOperation.failed(error);
+          fakeNetEngine.request.and.returnValue(operation);
 
           delayForUpdatePeriod();
           expect(onError.calls.count()).toBe(1);
@@ -569,7 +572,7 @@ describe('DashParser Live', function() {
     parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           expect(fakeNetEngine.request.calls.count()).toBe(1);
-          fakeNetEngine.expectCancelableRequest('dummy://foo', manifestRequest);
+          fakeNetEngine.expectRequest('dummy://foo', manifestRequest);
           fakeNetEngine.request.calls.reset();
 
           // Create a mock so we can verify it gives two URIs.
@@ -577,7 +580,7 @@ describe('DashParser Live', function() {
             expect(type).toBe(manifestRequest);
             expect(request.uris).toEqual(['http://foobar', 'http://foobar2']);
             var data = shaka.util.StringUtils.toUTF8(manifestText);
-            return Promise.resolve(
+            return shaka.util.AbortableOperation.completed(
                 {uri: request.uris[0], data: data, headers: {}});
           });
 
@@ -774,8 +777,7 @@ describe('DashParser Live', function() {
     it('stops updates', function(done) {
       parser.start(manifestUri, playerInterface)
           .then(function(manifest) {
-            fakeNetEngine.expectCancelableRequest(
-                manifestUri, manifestRequestType);
+            fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
             fakeNetEngine.request.calls.reset();
 
             parser.stop();
@@ -789,8 +791,7 @@ describe('DashParser Live', function() {
       parser.start('dummy://foo', playerInterface)
           .then(function(manifest) {
             expect(manifest).toBe(null);
-            fakeNetEngine.expectCancelableRequest(
-                manifestUri, manifestRequestType);
+            fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
             fakeNetEngine.request.calls.reset();
             delayForUpdatePeriod();
             // An update should not occur.
@@ -808,16 +809,14 @@ describe('DashParser Live', function() {
       parser.start('dummy://foo', playerInterface)
           .then(function(manifest) {
             expect(manifest).toBeTruthy();
-            fakeNetEngine.expectCancelableRequest(
-                manifestUri, manifestRequestType);
+            fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
             fakeNetEngine.request.calls.reset();
             var delay = fakeNetEngine.delayNextRequest();
 
             delayForUpdatePeriod();
             // The request was made but should not be resolved yet.
             expect(fakeNetEngine.request.calls.count()).toBe(1);
-            fakeNetEngine.expectCancelableRequest(
-                manifestUri, manifestRequestType);
+            fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
             fakeNetEngine.request.calls.reset();
             parser.stop();
             delay.resolve();
@@ -838,7 +837,7 @@ describe('DashParser Live', function() {
       Util.delay(0.2, realTimeout).then(function() {
         // This is the initial manifest request.
         expect(fakeNetEngine.request.calls.count()).toBe(1);
-        fakeNetEngine.expectCancelableRequest(manifestUri, manifestRequestType);
+        fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
         fakeNetEngine.request.calls.reset();
         // Resolve the manifest request and wait on the UTCTiming request.
         delay.resolve();

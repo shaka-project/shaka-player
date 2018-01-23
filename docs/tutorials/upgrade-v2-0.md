@@ -366,11 +366,12 @@ MyManifestParser.prototype.start =
   var type = shaka.net.NetworkingEngine.RequestType.MANIFEST;
   var request = shaka.net.NetworkingEngine.makeRequest(
       [uri], this.config_.retryParameters);
-  return this.networkingEngine_.request(type, request).then(function(response) {
-    this.manifest_ = this.parseInternal_(response.data);
-    this.updateInterval_ = setInterval(this.updateManifest_.bind(this), 5000);
-    return this.manifest_;
-  });
+  return this.networkingEngine_.request(type, request).promise
+      .then(function(response) {
+        this.manifest_ = this.parseInternal_(response.data);
+        this.updateInterval_ = setInterval(this.updateManifest_.bind(this), 5000);
+        return this.manifest_;
+      });
 };
 
 /** @return {!Promise} */
