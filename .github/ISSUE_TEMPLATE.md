@@ -1,26 +1,26 @@
-**Have you read the [FAQ](https://goo.gl/JE1Sy5) and checked for duplicate issues**:
+## NOTE: For bugs, if you delete this template, we will send it again and ask you to fill it out.
 
-**What version of Shaka Player are you using**:
+**Have you read the [FAQ](https://goo.gl/JE1Sy5) and checked for duplicate open issues?**:
 
-**Can you reproduce the issue with our latest release version**:
+**What version of Shaka Player are you using?**:
 
-**Can you reproduce the issue with the latest code from `master`**:
+**Can you reproduce the issue with our latest release version?**:
 
-**Are you using the demo app or your own custom app**:
+**Can you reproduce the issue with the latest code from `master`?**:
 
-**If custom app, can you reproduce the issue using our demo app**:
+**Are you using the demo app or your own custom app?**:
 
-**What browser and OS are you using**:
+**If custom app, can you reproduce the issue using our demo app?**:
 
-**What are the manifest and license server URIs**:
-*(you can send the URIs to <shaka-player-issues@google.com> instead, but please use GitHub and the template for the rest)*
+**What browser and OS are you using?**:
 
+**What are the manifest and license server URIs?**:
+*(NOTE: you can send the URIs to <shaka-player-issues@google.com> instead, but please use GitHub and the template for the rest)*
+*(NOTE: a copy of the manifest text or an attached manifest will **not** be enough to reproduce your issue, and we **will** ask you to send a URI instead)*
 
 **What did you do?**
 
-
 **What did you expect to happen?**
-
 
 **What actually happened?**
 
