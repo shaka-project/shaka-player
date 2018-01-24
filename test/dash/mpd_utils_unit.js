@@ -642,6 +642,47 @@ describe('MpdUtils', function() {
       testSucceeds(baseXMLString, desiredXMLString, 1, done);
     });
 
+    it('interrupts requests on abort', function(done) {
+      var baseXMLString = inBaseContainer(
+          '<ToReplace xlink:href="https://xlink1" xlink:actuate="onLoad" />');
+      // Create a few links.  This is few enough that it would succeed if we
+      // didn't abort it.
+      var responseMap = {};
+      for (var i = 1; i < 3; i++) {
+        responseMap['https://xlink' + i] =
+            makeRecursiveXMLString(0, 'https://xlink' + (i + 1) + '');
+      }
+      fakeNetEngine.setResponseMapAsText(responseMap);
+      var continuePromise = fakeNetEngine.delayNextRequest();
+
+      var xml = parser.parseFromString(baseXMLString, 'text/xml')
+          .documentElement;
+      var operation = MpdUtils.processXlinks(
+          xml, retry, failGracefully, 'https://base', fakeNetEngine);
+
+      shaka.test.Util.delay(0.1).then(() => {
+        // Only one request has been made so far.
+        expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+        continuePromise.resolve();
+
+        // Abort the operation.
+        operation.abort();
+      });
+
+      operation.promise.then(fail).catch((error) => {
+        // Still only one request has been made.
+        expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+
+        // The operation was aborted.
+        shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+            Error.Severity.CRITICAL,
+            Error.Category.PLAYER,
+            Error.Code.OPERATION_ABORTED));
+      });
+
+      operation.finally(done);
+    });
+
     function testSucceeds(
         baseXMLString, desiredXMLString, desiredNetCalls, done) {
       var desiredXML = parser.parseFromString(desiredXMLString, 'text/xml')
@@ -703,7 +744,7 @@ describe('MpdUtils', function() {
       var xml = parser.parseFromString(baseXMLString, 'text/xml')
           .documentElement;
       return MpdUtils.processXlinks(xml, retry, failGracefully, 'https://base',
-                                    fakeNetEngine);
+                                    fakeNetEngine).promise;
     }
   });
 });

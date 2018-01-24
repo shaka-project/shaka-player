@@ -312,9 +312,7 @@ describe('Player', function() {
     }
   });
 
-  // TODO(#829): re-enable these tests after AbortableOperation is used in the
-  // manifest parsers.
-  xdescribe('cancel', function() {
+  describe('abort', function() {
     /** @type {!jasmine.Spy} */
     var schemeSpy;
 
