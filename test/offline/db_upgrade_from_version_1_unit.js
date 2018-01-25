@@ -19,7 +19,7 @@ describe('DBUpgradeFromVersion1', function() {
   /** @const */
   var DBUtils = shaka.offline.DBUtils;
 
-  it('upgrade common v1 content with v1 uris', checkAndRun(function(done) {
+  it('upgrade common v1 content with v1 uris', checkAndRun((done) => {
     /** @const {!Array.<number>} */
     var data0 = [0];
     /** @const {!Array.<number>} */
@@ -175,7 +175,7 @@ describe('DBUpgradeFromVersion1', function() {
   }));
 
 
-  it('upgrade common v1 content with v2 uris', checkAndRun(function(done) {
+  it('upgrade common v1 content with v2 uris', checkAndRun((done) => {
     /** @const {!Array.<number>} */
     var data0 = [0];
     /** @const {!Array.<number>} */

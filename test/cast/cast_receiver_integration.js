@@ -56,21 +56,39 @@ describe('CastReceiver', function() {
 
   var fakeInitState;
 
-  function checkKeySystems() {
-    // Our test asset for this suite can use any of these key systems:
-    if (!support['com.widevine.alpha']) {
-      // pending() throws a special exception that Jasmine uses to skip a test.
-      // It can only be used from inside it(), not describe() or beforeEach().
-      pending('Skipping DrmEngine tests.');
-      // The rest of the test will not run.
-    }
+  /**
+   * Before running the test, check if this is Chrome or Chromecast, and maybe
+   * if Widevine is supported.
+   * @param {function(function()=)} test
+   * @param {boolean=} opt_checkKeySystems
+   * @return {function(function())}
+   */
+  function checkAndRun(test, opt_checkKeySystems) {
+    var check = function(done) {
+      if (opt_checkKeySystems && !support['com.widevine.alpha']) {
+        pending('Skipping DrmEngine tests.');
+      } else if (!isChromecast && !isChrome) {
+        pending(
+            'Skipping CastReceiver tests for non-Chrome and non-Chromecast');
+      } else {
+        test(done);
+      }
+    };
+    // Account for tests with a done argument, and tests without.
+    if (test.length == 1)
+      return (done) => check(done);
+    return () => check(undefined);
   }
 
-  function checkChromeOrChromecast() {
-    if (!isChromecast && !isChrome) {
-      pending('Skipping CastReceiver tests for non-Chrome and non-Chromecast');
-    }
-  }
+ /**
+  * Before running the test, check if this is Chrome or Chromecast, and if
+  * Widevine is supported.
+  * @param {function(function()=)} test
+  * @return {function(function())}
+  */
+ function checkAndRunWithDrm(test) {
+   return checkAndRun(test, /* opt_checkKeySystems */ true);
+ }
 
   beforeAll(function(done) {
     var supportTest = shaka.media.DrmEngine.probeSupport()
@@ -106,9 +124,7 @@ describe('CastReceiver', function() {
     Promise.all([createManifests, supportTest]).then(done);
   });
 
-  beforeEach(function() {
-    checkChromeOrChromecast();
-
+  beforeEach(checkAndRun(() => {
     mockReceiverApi = createMockReceiverApi();
 
     var mockCanDisplayType = jasmine.createSpy('canDisplayType');
@@ -152,7 +168,7 @@ describe('CastReceiver', function() {
       manifest: 'test:sintel_no_text',
       startTime: 0
     };
-  });
+  }));
 
   afterEach(function(done) {
     toRestore.forEach(function(restoreCallback) {
@@ -178,10 +194,7 @@ describe('CastReceiver', function() {
     }
   });
 
-  drm_it('sends reasonably-sized update messages', function(done) {
-    checkChromeOrChromecast();
-    checkKeySystems();
-
+  drm_it('sends reasonably-sized updates', checkAndRunWithDrm((done) => {
     // Use an encrypted asset, to make sure DRM info doesn't balloon the size.
     fakeInitState.manifest = 'test:sintel-enc';
 
@@ -201,12 +214,9 @@ describe('CastReceiver', function() {
       initState: fakeInitState,
       appData: {}
     }, mockShakaMessageBus);
-  });
+  }));
 
-  drm_it('has a reasonably low average message size', function(done) {
-    checkChromeOrChromecast();
-    checkKeySystems();
-
+  drm_it('has a reasonable average message size', checkAndRunWithDrm((done) => {
     // Use an encrypted asset, to make sure DRM info doesn't balloon the size.
     fakeInitState.manifest = 'test:sintel-enc';
 
@@ -236,11 +246,9 @@ describe('CastReceiver', function() {
       initState: fakeInitState,
       appData: {}
     }, mockShakaMessageBus);
-  });
+  }));
 
-  it('sends update messages at every stage of loading', function(done) {
-    checkChromeOrChromecast();
-
+  it('sends update messages at every stage of loading', checkAndRun((done) => {
     // Add wrappers to various methods along player.load to make sure that,
     // at each stage, the cast receiver can form an update message without
     // causing an error.
@@ -272,7 +280,7 @@ describe('CastReceiver', function() {
       initState: fakeInitState,
       appData: {}
     }, mockShakaMessageBus);
-  });
+  }));
 
   /**
    * Creates a wrapper around a method on a given prototype, which makes it

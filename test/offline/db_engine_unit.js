@@ -44,7 +44,7 @@ describe('DBEngine', function() {
     }
   });
 
-  it('stores and retrieves a manifest', checkAndRun(function(done) {
+  it('stores and retrieves a manifest', checkAndRun((done) => {
     /** @type {shakaExtern.ManifestDB} */
     var original = shaka.test.OfflineUtils.createManifest('original manifest');
 
@@ -61,7 +61,7 @@ describe('DBEngine', function() {
         .then(done).catch(fail);
   }));
 
-  it('stores and retrieves many manifest', checkAndRun(function(done) {
+  it('stores and retrieves many manifest', checkAndRun((done) => {
     /** @type {!Array<shakaExtern.ManifestDB>} */
     var originals = [
       shaka.test.OfflineUtils.createManifest('original manifest 1'),
@@ -92,7 +92,7 @@ describe('DBEngine', function() {
         .then(done).catch(fail);
   }));
 
-  it('stores and removes a manifest', checkAndRun(function(done) {
+  it('stores and removes a manifest', checkAndRun((done) => {
     /** @type {shakaExtern.ManifestDB} */
     var original = shaka.test.OfflineUtils.createManifest('original manifest');
 
@@ -120,7 +120,7 @@ describe('DBEngine', function() {
         .then(done).catch(fail);
   }));
 
-  it('stores and retrieves a segment', checkAndRun(function(done) {
+  it('stores and retrieves a segment', checkAndRun((done) => {
     /** @type {shakaExtern.SegmentDataDB} */
     var original = shaka.test.OfflineUtils.createSegmentData([0, 1, 2]);
 
@@ -137,7 +137,7 @@ describe('DBEngine', function() {
         .then(done).catch(fail);
   }));
 
-  it('stores and retrieves many segments', checkAndRun(function(done) {
+  it('stores and retrieves many segments', checkAndRun((done) => {
     /** @type {!Array<shakaExtern.SegmentDataDB>} */
     var originals = [
       shaka.test.OfflineUtils.createSegmentData([0]),
@@ -168,7 +168,7 @@ describe('DBEngine', function() {
         .then(done).catch(fail);
   }));
 
-  it('stores and removes a segment', checkAndRun(function(done) {
+  it('stores and removes a segment', checkAndRun((done) => {
     /** @type {shakaExtern.SegmentDataDB} */
     var original = shaka.test.OfflineUtils.createSegmentData([0, 1, 2]);
 
