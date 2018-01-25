@@ -42,18 +42,34 @@ describe('DBEngine', function() {
 
   describe('upgrade failures', function() {
     it('fails to open with old version', checkAndRun((done) => {
+      const storeNames = ['manifest', 'manifest-v2'];
+      const manifest1 = { originalManifestUri: 'original-uri-1' };
+      const manifest2 = { originalManifestUri: 'original-uri-2' };
+
       // Create a mock old database with the manifest tables.
       deleteOld()
           .then(() => {
-            return shaka.test.SimpleIDB.open(dbName, 1, []);
+            return shaka.test.SimpleIDB.open(dbName, 1, storeNames);
           })
-          .then((sdb) => sdb.close())
+          .then((sdb) => {
+            return Promise.resolve()
+                .then(() => sdb.add('manifest', manifest1))
+                .then(() => sdb.add('manifest-v2', manifest2))
+                .then(() => sdb.close());
+          })
           .then(openDB)
           // We expect a failure because the other database should keep the db
           // engine from starting easily.
           .then(fail)
           .catch((e) => {
             expect(e.code).toBe(UNSUPPORTED_UPGRADE_REQUEST);
+
+            // The data in the error should be all the content uris.
+            expect(e.data.length).toBe(1);
+            expect(e.data[0].length).toBe(2);
+            expect(e.data[0]).toContain('original-uri-1');
+            expect(e.data[0]).toContain('original-uri-2');
+
             done();
           });
     }));
