@@ -487,5 +487,47 @@ describe('AbortableOperation', function() {
         shaka.test.Util.expectToEqualError(e, error);
       }).finally(done);
     });
+
+    it('ensures abort is called with the correct "this"', function(done) {
+      // During testing and development, an early version of chain() would
+      // sometimes unbind an abort method from an earlier stage of the chain.
+      // Make sure this doesn't happen.
+      var innerOperation;
+      var p = new shaka.util.PublicPromise();
+      var abortCalled = false;
+
+      /**
+       * @this {shaka.util.AbortableOperation}
+       * @return {!Promise}
+       *
+       * NOTE: This is a subtle thing, but this must be an ES5 anonymous
+       * function for the test to work.  ES6 arrow functions would always be
+       * called with the "this" of the test itself, regardless of what the
+       * library is doing.
+       */
+      var abort = function() {
+        expect(this).toBe(innerOperation);
+        abortCalled = true;
+        return Promise.resolve();
+      };
+
+      // Since the issue was with the calling of operation.abort, rather than
+      // the onAbort_ callback, we make an operation-like thing instead of using
+      // the AbortableOperation constructor.
+      innerOperation = { promise: p, abort: abort };
+
+      // The second stage of the chain returns innerOperation.  A brief moment
+      // later, the outer chain is aborted.
+      var operation = shaka.util.AbortableOperation.completed(100).chain(() => {
+        shaka.test.Util.delay(0.1).then(() => {
+          operation.abort();
+          p.resolve();
+        });
+        return innerOperation;
+      }).finally(() => {
+        expect(abortCalled).toBe(true);
+        done();
+      });
+    });
   });  // describe('chain')
 });  // describe('AbortableOperation')
