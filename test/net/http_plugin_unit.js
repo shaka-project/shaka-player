@@ -28,7 +28,8 @@ function httpPluginTests(usingFetch) {
   /** @type {shakaExtern.SchemePlugin} */
   var plugin;
 
-  // Neither plugin uses the request type, so this is arbitrary.
+  // Arbitrary RequestType
+  /** @type {shaka.net.NetworkingEngine.RequestType} */
   var requestType = shaka.net.NetworkingEngine.RequestType.MANIFEST;
 
   beforeAll(function() {
