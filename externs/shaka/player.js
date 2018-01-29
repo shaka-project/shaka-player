@@ -680,3 +680,18 @@ shakaExtern.AbrConfiguration;
  * @exportDoc
  */
 shakaExtern.PlayerConfiguration;
+
+
+/**
+ * @typedef {{
+ *   language: string,
+ *   role: string
+ * }}
+ *
+ * @property {string} language
+ *    The language code for the stream.
+ * @property {string} role
+ *    The role name for the stream. If the stream has no role, |role| will be
+ *    ''.
+ */
+shakaExtern.LanguageRole;
