@@ -396,6 +396,21 @@ describe('Player', function() {
     });
   });
 
+  describe('TextAndRoles', function() {
+    // Regression Test. Makes sure that the language and role fields have been
+    // properly exported from the player.
+    it('exports language and roles fields', function(done) {
+      player.load('test:sintel_compiled').then(() => {
+        let languagesAndRoles = player.getTextLanguagesAndRoles();
+        expect(languagesAndRoles.length).toBeTruthy();
+        languagesAndRoles.forEach((languageAndRole) => {
+          expect(languageAndRole.language).not.toBeUndefined();
+          expect(languageAndRole.role).not.toBeUndefined();
+        });
+      }).catch(fail).then(done);
+    });
+  });
+
   /**
    * @param {!HTMLMediaElement} video
    * @param {number} playheadTime The time to wait for.
