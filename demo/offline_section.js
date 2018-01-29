@@ -163,6 +163,17 @@ shakaDemo.storeDeleteAsset_ = function() {
   if (option.storedContent) {
     var offlineUri = option.storedContent.offlineUri;
     var originalManifestUri = option.storedContent.originalManifestUri;
+
+    // If this is a stored demo asset, we'll need to configure the player with
+    // license server authentication so we can delete the offline license.
+    for (var i = 0; i < shakaAssets.testAssets.length; i++) {
+      var originalAsset = shakaAssets.testAssets[i];
+      if (originalManifestUri == originalAsset.manifestUri) {
+        shakaDemo.preparePlayer_(originalAsset);
+        break;
+      }
+    }
+
     p = storage.remove(offlineUri).then(function() {
       for (var i = 0; i < assetList.options.length; i++) {
         var option = assetList.options[i];
