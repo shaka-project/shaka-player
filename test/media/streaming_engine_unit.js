@@ -196,6 +196,7 @@ describe('StreamingEngine', function() {
         0 /* segmentAvailabilityStart */,
         40 /* segmentAvailabilityEnd */,
         40 /* presentationDuration */,
+        10 /* maxSegmentDuration */,
         false /* isLive */);
 
     setupManifest(
@@ -305,6 +306,7 @@ describe('StreamingEngine', function() {
         100 /* segmentAvailabilityStart */,
         140 /* segmentAvailabilityEnd */,
         140 /* presentationDuration */,
+        10 /* maxSegmentDuration */,
         true /* isLive */);
 
     setupManifest(
@@ -2171,13 +2173,14 @@ describe('StreamingEngine', function() {
   });
 
   describe('eviction', function() {
-    it('evicts media to meet the max buffer tail limit', function() {
+    var config;
+
+    beforeEach(function() {
       setupVod();
 
       manifest.minBufferTime = 1;
 
-      // Create StreamingEngine.
-      var config = {
+      config = {
         rebufferingGoal: 1,
         bufferingGoal: 1,
         retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
@@ -2190,10 +2193,13 @@ describe('StreamingEngine', function() {
         durationBackoff: 1
       };
 
+      playhead.getTime.and.returnValue(0);
+    });
+
+    it('evicts media to meet the max buffer tail limit', function() {
+      // Create StreamingEngine.
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
       createStreamingEngine(config);
-
-      playhead.getTime.and.returnValue(0);
 
       onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
 
@@ -2256,6 +2262,34 @@ describe('StreamingEngine', function() {
         video: [false, false, true, true],
         text: [false, false, true, true]
       });
+    });
+
+    it('doesn\'t evict too much when bufferBehind is very low', function() {
+      // Set the bufferBehind to a value significantly below the segment size.
+      config.bufferBehind = 0.1;
+
+      // Create StreamingEngine.
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      createStreamingEngine(config);
+      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      streamingEngine.init();
+
+      runTest(() => {
+        if (playheadTime == 8) {
+          // Run the test until a bit before the end of the first segment.
+          playing = false;
+        } else if (playheadTime == 6) {
+          // Soon before stopping the test, set the buffering goal up way
+          // higher to trigger more segment fetching, to (potentially) trigger
+          // an eviction.
+          config.bufferingGoal = 5;
+          streamingEngine.configure(config);
+        }
+      });
+
+      // It should not have removed any segments.
+      expect(mediaSourceEngine.remove).not.toHaveBeenCalled();
     });
   });
 
