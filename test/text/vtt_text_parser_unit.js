@@ -22,6 +22,9 @@ describe('VttTextParser', function() {
   /** @const */
   var Cue = shaka.text.Cue;
 
+  /** @const */
+  var CueRegion = shaka.text.CueRegion;
+
   beforeAll(function() {
     logWarningSpy = jasmine.createSpy('shaka.log.warning');
     shaka.log.warning = shaka.test.Util.spyFunc(logWarningSpy);
@@ -435,6 +438,37 @@ describe('VttTextParser', function() {
         { periodStart: 0, segmentStart: 20, segmentEnd: 0 });
   });
 
+
+  it('parses VTTRegions', function() {
+    verifyHelper(
+        [
+          {
+            start: 20,
+            end: 40,
+            payload: 'Test',
+            region: {
+              id: 'reg1',
+              viewportAnchorX: 10,
+              viewportAnchorY: 90,
+              regionAnchorX: 0,
+              regionAnchorY: 100,
+              width: 50,
+              height: 3,
+              heightUnits: CueRegion.units.LINES,
+              widthUnits: CueRegion.units.PERCENTAGE,
+              viewportAnchorUnits: CueRegion.units.PERCENTAGE,
+              scroll: CueRegion.scrollMode.UP
+            }
+          }
+        ],
+        'WEBVTT\n' +
+        'Region: id=reg1 width=50% lines=3 regionanchor=0%,100% ' +
+        'viewportanchor=10%,90% scroll=up\n\n' +
+        '0:00:20.000 --> 0:00:40.000 region:reg1\n' +
+        'Test',
+        { periodStart: 0, segmentStart: 0, segmentEnd: 0 });
+  });
+
   it('ignores and logs invalid settings', function() {
     expect(logWarningSpy.calls.count()).toBe(0);
 
@@ -585,6 +619,27 @@ describe('VttTextParser', function() {
         expect(result[i].size).toBe(cues[i].size);
       if ('position' in cues[i])
         expect(result[i].position).toBe(cues[i].position);
+      if ('region' in cues[i])
+        verifyRegion(cues[i].region, result[i].region);
+    }
+  }
+
+
+  /**
+   * @param {!Object} expected
+   * @param {shakaExtern.CueRegion} actual
+   */
+  function verifyRegion(expected, actual) {
+    var properties = ['id', 'viewportAnchorX', 'viewportAnchorY',
+                      'regionAnchorX', 'regionAnchorY', 'width', 'height',
+                      'heightUnits', 'widthUnits', 'viewportAnchorUnits',
+                      'scroll'];
+    expect(actual).toBeTruthy();
+
+    for (var i = 0; i < properties.length; i++) {
+      var property = properties[i];
+        if (property in expected)
+          expect(actual[property]).toEqual(expected[property]);
     }
   }
 

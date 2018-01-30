@@ -328,6 +328,8 @@ shaka.test.FakeVideo = function(opt_currentTime) {
     buffered: null,
     src: '',
     textTracks: [],
+    offsetWidth: 1000,
+    offsetHeight: 1000,
 
     addTextTrack: jasmine.createSpy('addTextTrack'),
     setMediaKeys: jasmine.createSpy('createMediaKeys'),
