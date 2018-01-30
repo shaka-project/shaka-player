@@ -269,7 +269,8 @@ describe('AbortableOperation', function() {
       var isDone = false;
       var promise = new shaka.util.PublicPromise();
 
-      shaka.util.AbortableOperation.notAbortable(promise).finally(() => {
+      shaka.util.AbortableOperation.notAbortable(promise).finally((ok) => {
+        expect(ok).toBe(true);
         isDone = true;
       });
 
@@ -287,7 +288,8 @@ describe('AbortableOperation', function() {
       var isDone = false;
       var promise = new shaka.util.PublicPromise();
 
-      shaka.util.AbortableOperation.notAbortable(promise).finally(() => {
+      shaka.util.AbortableOperation.notAbortable(promise).finally((ok) => {
+        expect(ok).toBe(false);
         isDone = true;
       });
 
@@ -308,7 +310,8 @@ describe('AbortableOperation', function() {
 
       shaka.util.AbortableOperation.notAbortable(promise1).chain(() => {
         return shaka.util.AbortableOperation.notAbortable(promise2);
-      }).finally(() => {
+      }).finally((ok) => {
+        expect(ok).toBe(true);
         isDone = true;
       });
 
@@ -333,7 +336,8 @@ describe('AbortableOperation', function() {
 
       shaka.util.AbortableOperation.notAbortable(promise1).chain(() => {
         return shaka.util.AbortableOperation.notAbortable(promise2);
-      }).finally(() => {
+      }).finally((ok) => {
+        expect(ok).toBe(false);
         isDone = true;
       });
 
@@ -356,7 +360,8 @@ describe('AbortableOperation', function() {
         fail('Should not be reachable');
       }, (e) => {
         return shaka.util.AbortableOperation.completed(100);
-      }).finally(() => {
+      }).finally((ok) => {
+        expect(ok).toBe(true);
         isDone = true;
       });
 
@@ -369,25 +374,40 @@ describe('AbortableOperation', function() {
 
   describe('chain', function() {
     it('passes the value to the next operation on success', function(done) {
+      var values = [];
+
       shaka.util.AbortableOperation.completed(100).chain((value) => {
+        values.push(value);
         expect(value).toBe(100);
         // Plain value
         return 200;
       }).chain((value) => {
+        values.push(value);
         expect(value).toBe(200);
         // Resolved Promise
         return Promise.resolve(300);
       }).chain((value) => {
+        values.push(value);
         expect(value).toBe(300);
         // Delayed Promise
         return shaka.test.Util.delay(0.1).then(() => 400);
       }).chain((value) => {
+        values.push(value);
         expect(value).toBe(400);
         // Abortable operation
         return shaka.util.AbortableOperation.completed(500);
       }).chain((value) => {
+        values.push(value);
         expect(value).toBe(500);
-      }).finally(done);
+      }).finally((ok) => {
+        expect(ok).toBe(true);
+        // The bug https://github.com/google/shaka-player/issues/1260 makes this
+        // expectation fail because some stages were skipped.  Without this
+        // check, the test would pass, even though the bug shows up first in the
+        // basic functionality of 'chain'.
+        expect(values).toEqual([100, 200, 300, 400, 500]);
+        done();
+      });
     });
 
     it('skips the onSuccess callbacks on error', function(done) {
@@ -404,7 +424,10 @@ describe('AbortableOperation', function() {
         throw error;  // rethrow
       }).chain(fail, (e) => {
         shaka.test.Util.expectToEqualError(e, error);
-      }).finally(done);
+      }).finally((ok) => {
+        expect(ok).toBe(true);  // Last stage did not rethrow
+        done();
+      });
     });
 
     it('can fall back to other operations in onError callback', function(done) {
@@ -432,7 +455,10 @@ describe('AbortableOperation', function() {
         return shaka.util.AbortableOperation.completed(400);
       }).chain((value) => {
         expect(value).toEqual(400);
-      }).finally(done);
+      }).finally((ok) => {
+        expect(ok).toBe(true);
+        done();
+      });
     });
 
     it('fails when an error is thrown', function(done) {
@@ -452,7 +478,10 @@ describe('AbortableOperation', function() {
         throw error2;
       }).chain(fail, (e) => {
         shaka.test.Util.expectToEqualError(e, error2);
-      }).finally(done);
+      }).finally((ok) => {
+        expect(ok).toBe(true);  // Last stage did not rethrow
+        done();
+      });
     });
 
     it('goes to success state when onError returns undefined', function(done) {
@@ -466,14 +495,20 @@ describe('AbortableOperation', function() {
         // no return value
       }).chain((value) => {
         expect(value).toBe(undefined);
-      }, fail).finally(done);
+      }, fail).finally((ok) => {
+        expect(ok).toBe(true);
+        done();
+      });
     });
 
     it('does not need return when onSuccess omitted', function(done) {
       var operation = shaka.util.AbortableOperation.completed(100);
       operation.chain(undefined, fail).chain(undefined, fail).chain((value) => {
         expect(value).toEqual(100);
-      }).finally(done);
+      }).finally((ok) => {
+        expect(ok).toBe(true);
+        done();
+      });
     });
 
     it('does not need rethrow when onError omitted', function(done) {
@@ -485,7 +520,10 @@ describe('AbortableOperation', function() {
       var operation = shaka.util.AbortableOperation.failed(error);
       operation.chain(fail).chain(fail).chain(fail).chain(fail, (e) => {
         shaka.test.Util.expectToEqualError(e, error);
-      }).finally(done);
+      }).finally((ok) => {
+        expect(ok).toBe(true);  // Last stage did not rethrow
+        done();
+      });
     });
 
     it('ensures abort is called with the correct "this"', function(done) {
@@ -524,7 +562,8 @@ describe('AbortableOperation', function() {
           p.resolve();
         });
         return innerOperation;
-      }).finally(() => {
+      }).finally((ok) => {
+        expect(ok).toBe(true);  // We resolved the non-abortable inner operation
         expect(abortCalled).toBe(true);
         done();
       });

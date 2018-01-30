@@ -54,8 +54,9 @@ shakaExtern.IAbortableOperation.prototype.abort = function() {};
 
 
 /**
- * @param {function()} onFinal A callback to be invoked after the operation
- *   succeeds or fails.
+ * @param {function(boolean)} onFinal A callback to be invoked after the
+ *   operation succeeds or fails.  The boolean argument is true if the operation
+ *   succeeded and false if it failed.
  * @return {!shakaExtern.IAbortableOperation.<T>} Returns this.
  * @exportDoc
  */
