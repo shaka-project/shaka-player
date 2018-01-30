@@ -171,4 +171,42 @@ function getClientArg(name) {
     it(name, filterShim(callback, 'quarantined',
         'Skipping tests that are quarantined.'));
   };
+
+  beforeAll((done) => {
+    // Configure AMD modules and their dependencies.
+    require.config({
+      baseUrl: '/base/node_modules',
+      packages: [
+        {
+          name: 'promise-mock',
+          main: 'lib/index',
+        },
+        {
+          name: 'promise-polyfill',  // Used by promise-mock.
+          main: 'lib/index',
+        },
+        {
+          name: 'sprintf-js',
+          main: 'src/sprintf',
+        },
+      ],
+    });
+
+    // Load required AMD modules, then proceed with tests.
+    require(['promise-mock', 'sprintf-js'], (PromiseMock, sprintfJs) => {
+      window.PromiseMock = PromiseMock;
+      window.sprintf = sprintfJs.sprintf;
+
+      // Patch a new convenience method into PromiseMock.
+      // See https://github.com/taylorhakes/promise-mock/issues/7
+      PromiseMock.flush = () => {
+        // PromiseMock.runAll() throws is waiting is empty.
+        if (PromiseMock.waiting.length) {
+          PromiseMock.runAll();
+        }
+      };
+
+      done();
+    });
+  });
 })();

@@ -47,8 +47,8 @@ describe('SimpleAbrManager', function() {
   beforeAll(function() {
     jasmine.clock().install();
     jasmine.clock().mockDate();
-    // This polyfill is required for fakeEventLoop.
-    shaka.polyfill.Promise.install(/* force */ true);
+    // This mock is required for fakeEventLoop.
+    PromiseMock.install();
   });
 
   beforeEach(function() {
@@ -103,7 +103,7 @@ describe('SimpleAbrManager', function() {
   });
 
   afterAll(function() {
-    shaka.polyfill.Promise.uninstall();
+    PromiseMock.uninstall();
     jasmine.clock().uninstall();
   });
 

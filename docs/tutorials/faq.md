@@ -136,6 +136,18 @@ existing http plugin for `file://` requests:
 shaka.net.NetworkingEngine.registerScheme('file', shaka.net.HttpPlugin);
 ```
 
+<hr>
+
+**Q:** Why doesn't my app work in IE 11?
+
+**A:** IE 11 doesn't have native Promise support.  Starting with v2.4,
+applications are required to load their own Promise polyfill for IE support.
+We no longer maintain and ship our own polyfill for this.  We recommend
+es6-promise-polyfill.
+
+Polyfill source: https://github.com/lahmatiy/es6-promise-polyfill
+Polyfill on NPM: https://www.npmjs.com/package/es6-promise-polyfill
+
 
 [386]: https://github.com/google/shaka-player/issues/386#issuecomment-227898001
 [489]: https://github.com/google/shaka-player/issues/489#issuecomment-240466224

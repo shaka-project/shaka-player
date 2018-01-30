@@ -196,7 +196,7 @@ describe('HlsParser live', function() {
               ManifestParser.verifySegmentIndex(audio, updatedReferences);
           }
         }).catch(fail).then(done);
-    shaka.polyfill.Promise.flush();
+    PromiseMock.flush();
   }
 
 
@@ -241,13 +241,13 @@ describe('HlsParser live', function() {
     describe('update', function() {
       beforeAll(function() {
         jasmine.clock().install();
-        // This polyfill is required for fakeEventLoop.
-        shaka.polyfill.Promise.install(/* force */ true);
+        // This mock is required for fakeEventLoop.
+        PromiseMock.install();
       });
 
       afterAll(function() {
         jasmine.clock().uninstall();
-        shaka.polyfill.Promise.uninstall();
+        PromiseMock.uninstall();
       });
 
       it('adds new segments when they appear', function(done) {
@@ -340,7 +340,7 @@ describe('HlsParser live', function() {
               delayForUpdatePeriod();
               ManifestParser.verifySegmentIndex(video, [ref1, ref2, ref3]);
             }).catch(fail).then(done);
-        shaka.polyfill.Promise.flush();
+        PromiseMock.flush();
       });
 
       it('converts presentation to VOD when it is finished', function(done) {
@@ -361,7 +361,7 @@ describe('HlsParser live', function() {
           delayForUpdatePeriod();
           expect(manifest.presentationTimeline.isLive()).toBe(false);
         }).catch(fail).then(done);
-        shaka.polyfill.Promise.flush();
+        PromiseMock.flush();
       });
 
       it('starts presentation as VOD when ENDLIST is present', function(done) {
@@ -375,7 +375,7 @@ describe('HlsParser live', function() {
         parser.start('test:/master', playerInterface).then(function(manifest) {
           expect(manifest.presentationTimeline.isLive()).toBe(false);
         }).catch(fail).then(done);
-        shaka.polyfill.Promise.flush();
+        PromiseMock.flush();
       });
     });  // describe('update')
   });  // describe('playlist type EVENT')
@@ -504,13 +504,13 @@ describe('HlsParser live', function() {
     describe('update', function() {
       beforeAll(function() {
         jasmine.clock().install();
-        // This polyfill is required for fakeEventLoop.
-        shaka.polyfill.Promise.install(/* force */ true);
+        // This mock is required for fakeEventLoop.
+        PromiseMock.install();
       });
 
       afterAll(function() {
         jasmine.clock().uninstall();
-        shaka.polyfill.Promise.uninstall();
+        PromiseMock.uninstall();
       });
 
       it('adds new segments when they appear', function(done) {
@@ -568,7 +568,7 @@ describe('HlsParser live', function() {
           // In live content, we do not set presentationTimeOffset.
           expect(video.presentationTimeOffset).toEqual(0);
         }).catch(fail).then(done);
-        shaka.polyfill.Promise.flush();
+        PromiseMock.flush();
       });
 
       it('gets start time on update without segment request', function(done) {
@@ -612,7 +612,7 @@ describe('HlsParser live', function() {
               shaka.net.NetworkingEngine.RequestType.MANIFEST);
         }).catch(fail).then(done);
 
-        shaka.polyfill.Promise.flush();
+        PromiseMock.flush();
       });
 
       it('parses start time from ts segments', function(done) {
@@ -635,7 +635,7 @@ describe('HlsParser live', function() {
           expect(video.presentationTimeOffset).toEqual(0);
         }).catch(fail).then(done);
 
-        shaka.polyfill.Promise.flush();
+        PromiseMock.flush();
       });
 
       it('gets start time of segments with byte range', function(done) {
@@ -670,7 +670,7 @@ describe('HlsParser live', function() {
               partialEndByte);  // Partial segment request
         }).catch(fail).then(done);
 
-        shaka.polyfill.Promise.flush();
+        PromiseMock.flush();
       });
 
       it('handles rollover on update', function(done) {
@@ -758,7 +758,7 @@ describe('HlsParser live', function() {
           ManifestParser.verifySegmentIndex(text, [ref1, ref2]);
         }).catch(fail).then(done);
 
-        shaka.polyfill.Promise.flush();
+        PromiseMock.flush();
       });
     });  // describe('update')
   });  // describe('playlist type LIVE')

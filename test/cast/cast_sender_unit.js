@@ -589,8 +589,7 @@ describe('CastSender', function() {
       });
 
       it('resolve when "asyncComplete" messages are received', function(done) {
-        var p = method(123, 'abc');
-        Util.capturePromiseStatus(p);
+        var p = new shaka.test.StatusPromise(method(123, 'abc'));
 
         // Wait a tick for the Promise status to be set.
         Util.delay(0.1).then(function() {
@@ -615,8 +614,7 @@ describe('CastSender', function() {
             shaka.util.Error.Category.MANIFEST,
             shaka.util.Error.Code.UNABLE_TO_GUESS_MANIFEST_TYPE,
             'foo://bar');
-        var p = method(123, 'abc');
-        Util.capturePromiseStatus(p);
+        var p = new shaka.test.StatusPromise(method(123, 'abc'));
 
         // Wait a tick for the Promise status to be set.
         Util.delay(0.1).then(function() {
@@ -639,8 +637,7 @@ describe('CastSender', function() {
       });
 
       it('reject when disconnected remotely', function(done) {
-        var p = method(123, 'abc');
-        Util.capturePromiseStatus(p);
+        var p = new shaka.test.StatusPromise(method(123, 'abc'));
 
         // Wait a tick for the Promise status to be set.
         Util.delay(0.1).then(function() {
@@ -738,8 +735,7 @@ describe('CastSender', function() {
         expect(mockSession.removeMessageListener).not.toHaveBeenCalled();
 
         var method = sender.get('player', 'load');
-        var p = method();
-        Util.capturePromiseStatus(p);
+        var p = new shaka.test.StatusPromise(method());
 
         // Wait a tick for the Promise status to be set.
         return Util.delay(0.1).then(function() {
@@ -777,8 +773,7 @@ describe('CastSender', function() {
         expect(mockSession.removeMessageListener).not.toHaveBeenCalled();
 
         var method = sender.get('player', 'load');
-        var p = method();
-        Util.capturePromiseStatus(p);
+        var p = new shaka.test.StatusPromise(method());
 
         // Wait a tick for the Promise status to be set.
         return Util.delay(0.1).then(function() {

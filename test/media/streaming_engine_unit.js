@@ -102,8 +102,8 @@ describe('StreamingEngine', function() {
   beforeAll(function() {
     jasmine.clock().install();
     jasmine.clock().mockDate();
-    // This polyfill is required for fakeEventLoop.
-    shaka.polyfill.Promise.install(/* force */ true);
+    // This mock is required for fakeEventLoop.
+    PromiseMock.install();
   });
 
   /** @param {boolean=} opt_trickMode */
@@ -476,11 +476,11 @@ describe('StreamingEngine', function() {
 
   afterEach(function(done) {
     streamingEngine.destroy().catch(fail).then(done);
-    shaka.polyfill.Promise.flush();
+    PromiseMock.flush();
   });
 
   afterAll(function() {
-    shaka.polyfill.Promise.uninstall();
+    PromiseMock.uninstall();
     jasmine.clock().uninstall();
   });
 

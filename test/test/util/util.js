@@ -25,16 +25,17 @@ goog.provide('shaka.test.Util');
  * @constructor
  * @struct
  * @extends {Promise}
- * @return {!Promise}
+ * @returns {!shaka.test.StatusPromise}
  */
 shaka.test.StatusPromise = function(p) {
+  // TODO: investigate using PromiseMock for this when possible.
   p.status = 'pending';
   p.then(function() {
     p.status = 'resolved';
   }, function() {
     p.status = 'rejected';
   });
-  return p;
+  return /** @type {!shaka.test.StatusPromise} */(p);
 };
 
 
@@ -51,31 +52,21 @@ shaka.test.StatusPromise.prototype.status;
  * @param {function(number)=} opt_onTick
  */
 shaka.test.Util.fakeEventLoop = function(duration, opt_onTick) {
-  expect(window.Promise).toBe(shaka.polyfill.Promise);
+  expect(window.Promise).toBe(PromiseMock);
 
   // Run this synchronously:
   for (var time = 0; time < duration; ++time) {
     // We shouldn't need more than 6 rounds.
     for (var i = 0; i < 6; ++i) {
       jasmine.clock().tick(0);
-      shaka.polyfill.Promise.flush();
+      PromiseMock.flush();
     }
 
     if (opt_onTick)
       opt_onTick(time);
     jasmine.clock().tick(1000);
-    shaka.polyfill.Promise.flush();
+    PromiseMock.flush();
   }
-};
-
-
-/**
- * Capture a Promise's status and attach it to the Promise.
- * @param {!Promise} promise
- * @return {!shaka.test.StatusPromise}
- */
-shaka.test.Util.capturePromiseStatus = function(promise) {
-  return new shaka.test.StatusPromise(promise);
 };
 
 
@@ -91,9 +82,9 @@ shaka.test.Util.delay = function(seconds, opt_setTimeout) {
     var timeout = opt_setTimeout || setTimeout;
     timeout(function() {
       resolve();
-      // Play nicely with shaka.polyfill.Promise by flushing automatically.
-      if (window.Promise == shaka.polyfill.Promise) {
-        shaka.polyfill.Promise.flush();
+      // Play nicely with PromiseMock by flushing automatically.
+      if (window.Promise == PromiseMock) {
+        PromiseMock.flush();
       }
     }, seconds * 1000.0);
   });

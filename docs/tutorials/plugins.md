@@ -69,7 +69,6 @@ __Polyfills__
       {@linksource shaka.polyfill.VideoPlaybackQuality}
     - prefixed EME implementations for IE 11 and very old versions of embedded
       Chrome/Chromium: {@linksource shaka.polyfill.MediaKeys}
-    - Promise implementation for IE 11: {@linksource shaka.polyfill.Promise}
     - variants of VTTCue and TextTrackCue constructors:
       {@linksource shaka.polyfill.VTTCue}
 
