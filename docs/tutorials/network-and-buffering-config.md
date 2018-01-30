@@ -65,6 +65,9 @@ and rebuffering later during playback.
 For example, if this is 30, we keep 30 seconds of content buffered behind the
 video's `currentTime`.  When we have more than 30 seconds buffered behind,
 content will be removed from the start of the buffer to save memory.
+This is a minimum; if the stream's max segment size is longer than the
+'bufferBehind', then that will be used instead.
+
 
 *NOTES:*
  - *`rebufferingGoal` should always be less than `bufferingGoal`.*
