@@ -1,7 +1,14 @@
 <?js
 var data = obj;
 var self = this;
+
+var accessClass = 'access-public';  // default
+if (data.access) {
+    accessClass = 'access-' + data.access;
+}
 ?>
+<div class="access-container <?js= accessClass ?>">
+
 <?js if (data.kind !== 'module' && !data.hideconstructor) { ?>
     <?js if (data.kind === 'class') { ?>
     <h2>Constructor</h2>
@@ -117,3 +124,5 @@ var self = this;
     <h5>Example<?js= examples.length > 1? 's':'' ?></h5>
     <?js= this.partial('examples.tmpl', examples) ?>
 <?js } ?>
+
+</div>

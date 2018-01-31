@@ -348,8 +348,18 @@ function buildMemberNav(items, itemHeading, itemsSeen, linktoFn) {
         items.forEach(function(item) {
             var displayName;
 
+            var className = 'access-public';  // default
+            if (item.access) {
+                className = 'access-' + item.access;
+            }
+
+            // Tutorials should always be visible.
+            if (item.kind == undefined && !!item.title) {
+                className = '';
+            }
+
             if ( !hasOwnProp.call(item, 'longname') ) {
-                itemsNav += '<li>' + linktoFn('', item.name) + '</li>';
+                itemsNav += '<li class="' + className + '">' + linktoFn('', item.name) + '</li>';
             }
             else if ( !hasOwnProp.call(itemsSeen, item.longname) ) {
                 if (env.conf.templates.default.useLongnameInNav) {
@@ -357,7 +367,7 @@ function buildMemberNav(items, itemHeading, itemsSeen, linktoFn) {
                 } else {
                     displayName = item.name;
                 }
-                itemsNav += '<li>' + linktoFn(item.longname, displayName.replace(/\b(module|event):/g, '')) + '</li>';
+                itemsNav += '<li class="' + className + '">' + linktoFn(item.longname, displayName.replace(/\b(module|event):/g, '')) + '</li>';
 
                 itemsSeen[item.longname] = true;
             }

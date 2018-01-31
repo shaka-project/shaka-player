@@ -364,3 +364,41 @@ tr.enum:target
 .disabled {
     color: #454545;
 }
+
+/* A container for the purpose of showing/hiding based on access. */
+div.access-container {
+    margin: 0;
+}
+
+/* Special coloring for exported parts of the API. */
+.access-export .name,
+li.access-export a, li.access-export a:active, li.access-export a:visited {
+    color: #ad4353;
+}
+
+/* Defaults, used before show/hide is applied in JavaScript */
+.access-export {
+    display: block;
+}
+.access-public,
+.access-private {
+    display: none;
+}
+
+/* Override if shown */
+.access-public.show,
+.access-private.show {
+    display: block;
+}
+
+/* The controls for showing/hiding based on access. */
+#showWidget {
+    position: fixed;
+    right: 20px;
+    top: 20px;
+    padding: 5px;
+
+    font-weight: bold;
+    background-color: rgba(240, 240, 240, 0.6);
+    border: black 1px solid;
+}
