@@ -1,7 +1,5 @@
 {
   "tags": {
-    /* This reverses the preferred order of tag dictionaries so that
-     * closure's version of tag interpretation is used over jsdoc's. */
     "dictionaries": [ "closure", "jsdoc" ]
   },
   "source": {
@@ -21,6 +19,7 @@
       ]
     }
   },
+  "plugins": [ "docs/jsdoc-plugin" ],
   "opts": {
     "private": true,
     "recurse": true,
