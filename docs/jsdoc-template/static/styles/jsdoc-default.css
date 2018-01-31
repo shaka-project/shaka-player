@@ -224,6 +224,12 @@ thead tr
 th { border-right: 1px solid #aaa; }
 tr > th:last-child { border-right: 1px solid #ddd; }
 
+/* enums that are focused by the URL fragment */
+tr.enum:target
+{
+    border: red 2px solid;
+}
+
 .ancestors, .attribs { color: #999; }
 .ancestors a, .attribs a
 {
