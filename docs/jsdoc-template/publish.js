@@ -367,15 +367,35 @@ function buildNav(members) {
     var nav = '<h2><a href="index.html">Home</a></h2>';
     var seen = {};
     var seenTutorials = {};
+    var i;
 
-    nav += buildMemberNav(members.modules, 'Modules', {}, linkto);
-    nav += buildMemberNav(members.externals, 'Externals', seen, linktoExternal);
-    nav += buildMemberNav(members.classes, 'Classes', seen, linkto);
-    nav += buildMemberNav(members.events, 'Events', seen, linkto);
-    nav += buildMemberNav(members.namespaces, 'Namespaces', seen, linkto);
-    nav += buildMemberNav(members.mixins, 'Mixins', seen, linkto);
-    nav += buildMemberNav(members.tutorials, 'Tutorials', seenTutorials, linktoTutorial);
-    nav += buildMemberNav(members.interfaces, 'Interfaces', seen, linkto);
+    var navSections = [
+      [members.modules, 'Modules', {}, linkto],
+      [members.externals, 'Externals', seen, linktoExternal],
+      [members.namespaces, 'Namespaces', seen, linkto],
+      [members.classes, 'Classes', seen, linkto],
+      [members.interfaces, 'Interfaces', seen, linkto],
+      [members.events, 'Events', seen, linkto],
+      [members.mixins, 'Mixins', seen, linkto],
+      [members.tutorials, 'Tutorials', seenTutorials, linktoTutorial],
+    ];
+
+    var navOrder = env.conf.templates.default.navOrder;
+    if (!navOrder) {
+      // Default order: everything listed in navSections, in that order.
+      navOrder = navSections.map(function(section) { return section[1]; });
+    }
+
+    navOrder.forEach(function(name) {
+      for (i = 0; i < navSections.length; ++i) {
+        if (navSections[i][1] == name) {
+          nav += buildMemberNav.apply(null, navSections[i]);
+          return;
+        }
+      }
+
+      logger.error('Section %s in navOrder is unrecognized!', name);
+    });
 
     if (members.globals.length) {
         globalNav = '';

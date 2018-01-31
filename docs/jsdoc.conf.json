@@ -12,7 +12,13 @@
   },
   "templates": {
     "default": {
-      "useLongnameInNav": true
+      "useLongnameInNav": true,
+      "navOrder": [
+        "Tutorials",
+        "Classes",
+        "Interfaces",
+        "Events"
+      ]
     }
   },
   "opts": {
