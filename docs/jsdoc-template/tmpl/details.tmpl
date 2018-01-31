@@ -64,6 +64,15 @@ if (data.defaultvalue && (data.defaultvaluetype === 'object' || data.defaultvalu
     </ul></dd>
     <?js } ?>
 
+    <?js if (data.augments && data.augments.length) { ?>
+    <dt class="augments">Extends:</dt>
+    <dd class="augments"><ul>
+        <?js data.augments.forEach(function(a) { ?>
+            <li><?js= self.linkto(a, self.htmlsafe(a)) ?></li>
+        <?js }); ?>
+    </ul></dd>
+    <?js } ?>
+
     <?js if (data.mixes && data.mixes.length) { ?>
         <dt class="mixes">Mixes In:</dt>
 
