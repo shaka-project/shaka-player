@@ -1,4 +1,4 @@
-## 2.3.1 (2017-01-22)
+## 2.3.1 (2018-01-22)
 
 New features:
   - Update Widevine HLS parsing support for SAMPLE-AES-CTR
