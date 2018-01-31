@@ -45,3 +45,35 @@ exports.defineTags = function(dictionary) {
     },
   });
 };
+
+exports.handlers = {
+  processingComplete: function(e) {
+    // Fill out the "implementations" field so that interface implementations
+    // can be listed on the interface docs.
+
+    let doclets = e.doclets;
+    let map = {};
+    doclets.forEach(function(doc) {
+      map[doc.longname] = doc;
+    });
+
+    doclets.forEach(function(doc) {
+      // Skip things that do not implement an interface.
+      if (!doc.implements) return;
+      // Skip things which are not classes (such as methods).
+      if (doc.kind != 'class') return;
+
+      doc.implements.forEach(function(interfaceName) {
+        // If the interface is a template, strip the template type.
+        interfaceName = interfaceName.split('.<')[0];
+
+        var interfaceDoc = map[interfaceName];
+        // Skip unknown interfaces, which occurs for externs like MediaKeys.
+        if (!interfaceDoc) return;
+
+        interfaceDoc.implementations = interfaceDoc.implementations || [];
+        interfaceDoc.implementations.push(doc.longname);
+      });
+    });
+  },
+};
