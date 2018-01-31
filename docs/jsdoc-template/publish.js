@@ -4,6 +4,7 @@ var doop = require('jsdoc/util/doop');
 var env = require('jsdoc/env');
 var fs = require('jsdoc/fs');
 var helper = require('jsdoc/util/templateHelper');
+var inline = require('jsdoc/tag/inline');
 var logger = require('jsdoc/util/logger');
 var path = require('jsdoc/path');
 var taffy = require('taffydb').taffy;
@@ -19,6 +20,36 @@ var data;
 var view;
 
 var outdir = path.normalize(env.opts.destination);
+
+var docletMap;
+
+function customResolveLinks(html) {
+    console.assert(!!docletMap, 'No doclet map!');
+
+    // Do the standard link resolution first.
+    html = helper.resolveLinks(html);
+
+    // Now do our custom link resolution.
+    var customReplacers = {
+        linksource: function processSource(string, tagInfo) {
+            var longname = tagInfo.text;
+            var doclet = docletMap[longname];
+            if (!doclet) {
+                logger.fatal('Unknown linksource target: %s', longname);
+                return '';
+            }
+
+            var link = linkto(
+                /* destination */ doclet.meta.shortpath,
+                /* link text */ longname,
+                /* css class */ null,
+                /* fragment */ 'line' + doclet.meta.lineno);
+            return string.replace(tagInfo.completeTag, link);
+        },
+    };
+
+    return inline.replaceInlineTags(html, customReplacers).newString;
+}
 
 function find(spec) {
     return helper.find(data, spec);
@@ -237,7 +268,7 @@ function generate(title, docs, filename, resolveLinks) {
     html = view.render('container.tmpl', docData);
 
     if (resolveLinks) {
-        html = helper.resolveLinks(html); // turn {@link foo} into <a href="foodoc.html">foo</a>
+        html = customResolveLinks(html); // turn {@link foo} into <a href="foodoc.html">foo</a>
     }
 
     fs.writeFileSync(outpath, html, 'utf8');
@@ -613,6 +644,12 @@ exports.publish = function(taffyData, opts, tutorials) {
         }
     });
 
+    // Used later by customResolveLinks.
+    docletMap = {};
+    data().each(function(doclet) {
+      docletMap[doclet.longname] = doclet;
+    });
+
     members = helper.getMembers(data);
     members.tutorials = tutorials.children;
 
@@ -704,7 +741,7 @@ exports.publish = function(taffyData, opts, tutorials) {
         var html = view.render('tutorial.tmpl', tutorialData);
 
         // yes, you can use {@link} in tutorials too!
-        html = helper.resolveLinks(html); // turn {@link foo} into <a href="foodoc.html">foo</a>
+        html = customResolveLinks(html); // turn {@link foo} into <a href="foodoc.html">foo</a>
 
         fs.writeFileSync(tutorialPath, html, 'utf8');
     }
