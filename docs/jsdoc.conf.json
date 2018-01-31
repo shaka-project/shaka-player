@@ -10,10 +10,16 @@
       "externs/shaka"
     ]
   },
+  "templates": {
+    "default": {
+      "useLongnameInNav": true
+    }
+  },
   "opts": {
     "private": true,
     "recurse": true,
     "tutorials": "docs/tutorials",
+    "template": "docs/jsdoc-template",
     "destination": "docs/api"
   }
 }

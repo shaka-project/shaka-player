@@ -35,14 +35,8 @@ def build_docs(_):
   shutil.rmtree(os.path.join(base, 'docs', 'api'), ignore_errors=True)
   os.chdir(base)
 
-  if shakaBuildHelpers.is_windows() or shakaBuildHelpers.is_cygwin():
-    # Windows has a different command name.  The Unix version does not seem to
-    # work on Cygwin, but the windows one does.
-    jsdoc = os.path.join('third_party', 'jsdoc', 'jsdoc.cmd')
-  else:
-    jsdoc = os.path.join('third_party', 'jsdoc', 'jsdoc')
-
-  cmd_line = [jsdoc, '-c', 'docs/jsdoc.conf.json', '-R', 'docs/api-mainpage.md']
+  jsdoc = shakaBuildHelpers.get_node_binary('jsdoc')
+  cmd_line = jsdoc + ['-c', 'docs/jsdoc.conf.json', '-R', 'docs/api-mainpage.md']
   return shakaBuildHelpers.execute_get_code(cmd_line)
 
 
