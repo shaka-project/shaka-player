@@ -19,16 +19,3 @@ closure/deps
   The closure dependency generator, part of the closure library, by Google.
   Apache v2.0 license.
   https://github.com/google/closure-library
-
-jsdoc
-  JSDoc 3 documentation generator (modified), by Michael Matthews.
-  Apache v2.0 license.
-  https://github.com/jsdoc3/jsdoc
-  Local mods:
-    - Show tutorials in sorted order, as named in the JSON index
-    - Hide tutorial "child" links
-    - Added support for custom annotations like exportDoc, exportInterface
-    - Add support for linking to source code
-    - Add enum values in generated HTML
-    - Add support for focusing enum values by URL fragment
-    - Fixed crash when a type implements and overrides something like toString()
