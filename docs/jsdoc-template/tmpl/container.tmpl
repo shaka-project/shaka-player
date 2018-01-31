@@ -19,6 +19,7 @@
 
 <section>
 
+<!--
 <header>
     <?js if (!doc.longname || doc.kind !== 'module') { ?>
         <h2><?js if (doc.attribs) { ?><span class="attribs"><?js= doc.attribs ?></span><?js }
@@ -40,6 +41,11 @@
         <?js }) ?>
     <?js } ?>
 </header>
+-->
+
+<?js if (doc.summary) { ?>
+    <div class="class-description"><?js= doc.summary ?></div>
+<?js } ?>
 
 <article>
     <div class="container-overview">
