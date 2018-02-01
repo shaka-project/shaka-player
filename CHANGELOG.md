@@ -1,3 +1,30 @@
+## 2.3.2 (2018-02-01)
+
+New features:
+  - Add Storage.deleteAll() to clear storage when database upgrades fail
+    - https://github.com/google/shaka-player/issues/1230
+    - https://github.com/google/shaka-player/issues/1248
+  - Make DASH default presentation delay configurable
+    - https://github.com/google/shaka-player/issues/1234
+    - https://github.com/google/shaka-player/pull/1235
+
+Bugfixes:
+  - Fix stall during eviction with small bufferBehind values
+    - https://github.com/google/shaka-player/issues/1123
+  - Fix deletion of offline licenses for demo content
+    - https://github.com/google/shaka-player/issues/1229
+  - Fix compiler renaming in Player language APIs
+    - https://github.com/google/shaka-player/issues/1258
+  - Rename Timeline events to include the "Event" suffix
+    - https://github.com/google/shaka-player/pull/1267
+
+Docs:
+  - Fix incorrect year in the change log
+    - https://github.com/google/shaka-player/pull/1263
+  - Fix some bad annotations found while upgrading jsdoc
+    - https://github.com/google/shaka-player/issues/1259
+
+
 ## 2.3.1 (2018-01-22)
 
 New features:
