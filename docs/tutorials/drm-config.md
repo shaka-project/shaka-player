@@ -57,7 +57,7 @@ particular key system at all, but instead state that any CENC system will do:
 
 If this is the only `<ContentProtection>` element in the manifest, Shaka will
 try all key systems it knows.  (Based on
-{@linksource shaka.dash.ContentProtection.defaultKeySystems\_}.)
+{@linksource shaka.dash.ContentProtection.defaultKeySystems_}.)
 If the browser supports it and you configured a license server URL for it, we'll
 use it.
 
