@@ -1,5 +1,6 @@
 'use strict';
 
+var catharsis = require('catharsis');
 var doop = require('jsdoc/util/doop');
 var env = require('jsdoc/env');
 var fs = require('jsdoc/fs');
@@ -460,6 +461,20 @@ function buildNav(members) {
     return nav;
 }
 
+
+function fixUpType(type) {
+    // Replace generic "function" and "record" types with their original types.
+    // With this, we see, for example:
+    //   "function(string):number" instead of just "function"
+    //   "{{ foo: string, bar: number }}" instead of just "Object"
+    var parsedType = type.parsedType || {};
+    if (parsedType.type == 'FunctionType' || parsedType.type == 'RecordType') {
+        var originalType = catharsis.stringify(parsedType);
+        type.names = [originalType];
+    }
+}
+
+
 /**
     @param {TAFFY} taffyData See <http://taffydb.com/>.
     @param {object} opts
@@ -621,6 +636,23 @@ exports.publish = function(taffyData, opts, tutorials) {
         }
     });
 
+    // Fix up types before signatures have been generated!
+    data().each(function(doclet) {
+        if (doclet.params) {
+            doclet.params.forEach(function(param) {
+                fixUpType(param.type);
+            });
+        }
+        if (doclet.returns) {
+            doclet.returns.forEach(function(ret) {
+                fixUpType(ret.type);
+            });
+        }
+        if (doclet.type) {
+            fixUpType(doclet.type);
+        }
+    });
+
     data().each(function(doclet) {
         var url = helper.longnameToUrl[doclet.longname];
 
@@ -657,7 +689,7 @@ exports.publish = function(taffyData, opts, tutorials) {
     // Used later by customResolveLinks.
     docletMap = {};
     data().each(function(doclet) {
-      docletMap[doclet.longname] = doclet;
+        docletMap[doclet.longname] = doclet;
     });
 
     members = helper.getMembers(data);
