@@ -34,10 +34,10 @@ __Subtitle/caption parsers__
   - Selected by MIME type
   - Register with {@link shaka.text.TextEngine.registerParser}
   - Default text parser plugins:
-    - WebVTT: {@linksource shaka.media.VttTextParser} and
-      {@linksource shaka.media.Mp4VttParser}
-    - TTML: {@linksource shaka.media.TtmlTextParser} and
-      {@linksource shaka.media.Mp4TtmlParser}
+    - WebVTT: {@linksource shaka.text.VttTextParser} and
+      {@linksource shaka.text.Mp4VttParser}
+    - TTML: {@linksource shaka.text.TtmlTextParser} and
+      {@linksource shaka.text.Mp4TtmlParser}
 
 __Subtitle/caption displayers__
   - Configured at runtime on a Player instance
@@ -92,7 +92,7 @@ You can start with the complete library (`+@complete`) and exclude any
 individual source file with a minus sign and a path:
 
 ```sh
-python build/build.py +@complete -lib/media/mp4_ttml_parser.js
+python build/build.py +@complete -lib/text/mp4_ttml_parser.js
 ```
 
 You can also exclude an entire category of plugins:
