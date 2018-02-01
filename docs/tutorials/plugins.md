@@ -50,7 +50,8 @@ __Networking plugins__
   - Selected by URI scheme (http, https, etc.)
   - Register with {@link shaka.net.NetworkingEngine.registerScheme}
   - Default networking plugins:
-    - HTTP(S): {@linksource shaka.net.HttpPlugin}
+    - HTTP(S) XHR: {@linksource shaka.net.HttpXHRPlugin}
+    - HTTP(S) Fetch: {@linksource shaka.net.HttpFetchPlugin}
     - data URIs: {@linksource shaka.net.DataUriPlugin}
 
 __ABR plugins__
