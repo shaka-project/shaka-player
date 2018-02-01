@@ -10,6 +10,7 @@
   },
   "templates": {
     "default": {
+      "sortTutorialsByConfigOrder": true,
       "useLongnameInNav": true,
       "navOrder": [
         "Tutorials",
