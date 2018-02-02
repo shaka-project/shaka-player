@@ -4,7 +4,7 @@
 const esprima = require('esprima');
 const doctrine = require('doctrine');
 const fs = require('fs');
-const { join } = require('path');
+const path = require('path');
 
 // Primitive types are not nullable in Closure unless marked as such.
 // Keep a list of primitives to properly set the nullable flag.
@@ -25,8 +25,8 @@ function staticMemberExpressionToPath(expression) {
     'Expected MemberExpression, got',
     expression.type
   );
-  var { object, property } = expression;
-  var objectPath = object.type === 'MemberExpression'
+  const { object, property } = expression;
+  const objectPath = object.type === 'MemberExpression'
     ? staticMemberExpressionToPath(object)
     : [object.name];
   objectPath.push(property.name);
@@ -34,20 +34,20 @@ function staticMemberExpressionToPath(expression) {
 }
 
 function parseAssignmentExpression(expression) {
-  var value;
+  const identifier = staticMemberExpressionToPath(expression.left);
   switch (expression.right.type) {
     case 'FunctionExpression':
-      value = {
+      return {
         type: 'function',
-        params: expression.right.params,
+        identifier: identifier,
+        params: expression.right.params.map((p) => p.name),
       };
-      break;
     case 'ObjectExpression':
-      value = {
+      return {
         type: 'object',
+        identifier: identifier,
         properties: expression.right.properties.map((p) => p.key.name),
       };
-      break;
     default:
       console.log(
         'Unknown expression type',
@@ -55,15 +55,11 @@ function parseAssignmentExpression(expression) {
         'for assignment value'
       );
   }
-
-  return {
-    identifier: staticMemberExpressionToPath(expression.left),
-    value: value,
-  };
 }
 
 function parseMemberExpression(expression) {
   return {
+    type: 'property',
     identifier: staticMemberExpressionToPath(expression),
   };
 }
@@ -188,12 +184,61 @@ function parseLeadingComments(statement) {
   return parseBlockComment(comment);
 }
 
-function parseExterns(program) {
+function getOrCreateNode(nodes, name) {
+  if (nodes.has(name)) {
+    return nodes.get(name);
+  }
+  const node = {
+    name: name,
+    definition: null,
+    children: new Map(),
+  };
+  nodes.set(name, node);
+  return node;
+}
+
+function getOrCreateNodeAtPath(root, path) {
+  let node = null;
+  let nodes = root;
+  for (const part of path) {
+    node = getOrCreateNode(nodes, part);
+    nodes = node.children;
+  }
+  return node;
+}
+
+function buildDefinitionTree(definitions) {
+  const root = new Map();
+
+  for (const definition of definitions) {
+    const id = definition.identifier;
+    console.assert(
+      id.length > 1,
+      'Illegal top-level definition found:',
+      id
+    );
+    const node = getOrCreateNodeAtPath(root, id);
+    node.definition = definition;
+  }
+
+  /*
+    // If the doc comment didn't lead to a type, fall back to the type we got
+    // from the declaration itself.
+    // Types: const, enum, class, interface, function, property, object
+    const type = definition.attributes.type || definition.type;
+  */
+
+  return root;
+}
+
+function parseExterns(code) {
+  const program = esprima.parse(code, {attachComment: true});
   const definitions = program.body
     // Only take expressions into consideration.
     // Variable declarations are discarded because they are only used for
     // declaring namespaces.
     .filter((statement) => statement.type === 'ExpressionStatement')
+    // Prepare for further inspection
     .map((statement) => Object.assign(
       parseExpressionStatement(statement),
       { attributes: parseLeadingComments(statement) }
@@ -203,12 +248,20 @@ function parseExterns(program) {
       definition.attributes.type !== 'const' ||
       definition.attributes.constType !== undefined
     );
+
+  return buildDefinitionTree(definitions);
 }
 
-function parseExternsFile(filePath) {
-  var code = fs.readFileSync(filePath, 'utf-8');
-  var program = esprima.parse(code, {attachComment: true});
-  parseExterns(program);
+function generateTypeDefinitions(definitionRoot) {
+  return '';
+} 
+
+function processFile(filePath) {
+  const code = fs.readFileSync(filePath, 'utf-8');
+  const root = parseExterns(code);
+  const typeDefinitions = generateTypeDefinitions(root);
 }
 
-parseExternsFile(join(__dirname, '..', 'dist', 'shaka-player.compiled.externs.js'));
+parseExternsFile(
+  path.join(__dirname, '..', 'dist', 'shaka-player.compiled.externs.js')
+);
