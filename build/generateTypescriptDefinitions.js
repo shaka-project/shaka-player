@@ -89,7 +89,7 @@ function parseVariableDeclaration(statement) {
 // Aside of that, type names are the same in Closure and TypeScript so a
 // mapping of type names is not necessary.
 // Enum nullability works the same with regards to the enum's base type.
-var primitiveTypes = [
+const primitiveTypes = [
   'null',
   'undefined',
   'boolean',
@@ -97,247 +97,25 @@ var primitiveTypes = [
   'string',
 ];
 
-function parseType(type) {
-  var isNullable = undefined,
-      i = 0;
-  if (type[0] === '?') {
-    isNullable = true;
-    i++;
-  } else if (type[1] === '!') {
-    isNullable = false;
-    i++;
-  }
-
-  var name = '',
-      parsingGenerics = false,
-      parsingParameters = false,
-      genericTypes = null,
-      parameterTypes = null,
-      isOptional = false,
-      returnType,
-      tmpTypeName;
-  for (; i < type.length; i++) {
-    if (parsingGenerics) {
-      if (type[i] === ',') {
-        // Type name complete, parse and add to list
-        genericTypes.push(parseType(tmpTypeName));
-        // Reset and aggregate next name
-        tmpTypeName = '';
-      } else if (type[i] === '>') {
-        // Type name complete, parse and add to list
-        genericTypes.push(parseType(tmpTypeName));
-        // Parsing generics done
-        parsingGenerics = false;
-      } else if (type[i] !== ' ') {
-        // Add to type name
-        tmpTypeName += type[i];
-      }
-      continue;
-    }
-
-    if (parsingParameters) {
-      if (type[i] === ',') {
-        // Type name complete, parse and add to list
-        parameterTypes.push(parseType(tmpTypeName));
-        // Reset and aggregate next name
-        tmpTypeName = '';
-      } else if (type[i] === ')') {
-        // Type name complete, parse and add to list
-        parameterTypes.push(parseType(tmpTypeName));
-        // Parsing parameters done
-        parsingParameters = false;
-      } else if (type[i] !== ' ') {
-        // Add to type name
-        tmpTypeName += type[i];
-      }
-      continue;
-    }
-
-    if (type[i] === '(') {
-      console.assert(
-        name === 'function',
-        'Found beginning of function parameter declaration,',
-        'but type is not a function:',
-        type
-      );
-      console.assert(
-        parameterTypes === null,
-        'Re-declaration of function parameters found:',
-        type
-      );
-      parameterTypes = [];
-      parsingParameters = true;
-      tmpTypeName = '';
-    } else if (type[i] === '<') {
-      console.assert(
-        genericTypes === null,
-        'Re-declaration of generics found:',
-        type
-      );
-      genericTypes = [];
-      parsingGenerics = true;
-      tmpTypeName = '';
-    } else if (type[i] === '.' && type[i + 1] === '<') {
-      parsingGenerics = true;
-      tmpTypeName = '';
-      i += 1;
-    } else if (type[i] === ':') {
-      // Parse return type
-
-      break;
-    } else if (type[i] === '=') {
-      console.assert(
-        i === type.length - 1,
-        'Found "=" in the middle of type:',
-        type
-      );
-      isOptional = true;
-    } else {
-      name += type[i];
-    }
-  }
-
-  console.assert(
-    !parsingGenerics,
-    'Expected ">" before end of type declaration, got',
-    type
-  );
-
-  console.assert(
-    !parsingParameters,
-    'Expected ")" before end of type declaration, got',
-    type
-  );
-
-  if (isNullable === undefined) {
-    isNullable = primitiveTypes.includes(name);
-  }
-
-  return {
-    typeName: name,
-    isNullable: isNullable,
-    isOptional: isOptional,
-    isGeneric: genericTypes != null,
-    genericTypes: genericTypes,
-    isFunction: name === 'function',
-    parameterTypes: parameterTypes,
-  };
-}
-
-function parseTypeDeclaration(args) {
-  console.assert(
-    args.length > 0,
-    'Expected args to have minimum length of 1, got',
-    args.length
-  );
-  console.assert(
-    args[0][0] === '{',
-    'Expected type declaration to start with "{", got',
-    args[0]
-  );
-  if (args[0][args[0].length - 1] === '}') {
-    return {
-      type: parseType(args[0].slice(1, -2)),
-      args: args.slice(1),
-    };
-  }
-  var declaration = [args[0]],
-      i;
-  for (i = 1; i < args.length; i++) {
-    declaration.push(args[i]);
-    if (args[i][args[i].length - 1] === '}') {
-      return {
-        type: parseType(declaration.join(' ')),
-        args: args.slice(i + 1),
-      };
-    }
-  }
-  console.error(
-    'Expected type declaration to end with "}", got',
-    args[i - 1]
-  );
-}
-
-function parseBlockCommentTag(tagLine) {
-  console.assert(
-    tagLine[0] === '@',
-    'Expected tag line to start with @, got',
-    tagLine
-  );
-  var components = tagLine.split(' '),
-      tagType = components[0].slice(1),
-      args = components.slice(1),
-      typeResult;
-  switch (tagType) {
-    case 'param':
-      console.assert(
-        args.length >= 2,
-        '@param tag requires at least 2 arguments, found',
-        args.length
-      );
-      typeResult = parseTypeDeclaration(args);
-      return {
-        tagType,
-        type: typeResult.type,
-        name: typeResult.args[0],
-        description: typeResult.args.slice(1).join(' '),
-      };
-    case 'return':
-      console.assert(
-        args.length >= 1,
-        '@return tag requires at least one argument, found',
-        args.length
-      );
-      typeResult = parseTypeDeclaration(args);
-      return {
-        tagType,
-        type: typeResult.type,
-        description: typeResult.args.join(' '),
-      };
-    case 'extends':
-      console.assert(
-        args.length === 1,
-        '@extends tag requires exactly one argument, found',
-        args.length
-      );
-      return {
-        tagType,
-        type: args[0],
-      };
-    case 'implements':
-      console.assert(
-        args.length === 1,
-        '@implements tag requires exactly one argument, found',
-        args.length
-      );
-      return {
-        tagType,
-        interface: args[0],
-      };
-    case 'enum':
-      console.assert(
-        args.length === 1,
-        '@enum tag requires exactly one argument, found',
-        args.length
-      );
-      typeResult = parseTypeDeclaration(args);
-      return {
-        tagType,
-        type: typeResult.type,
-      };
-    case 'throws':
-      // Ignore error type
-      return { tagType };
-    default:
-      console.assert(
-        args.length === 0,
-        'Tag',
-        '@' + tagType,
-        'with arguments requires special handling'
-      );
-      return { tagType };
-  }
-}
+/**
+ * Tags:
+ * override
+ * + interface
+ * + return
+ * - struct
+ * + param
+ * + constructor
+ * + implements
+ * namespace
+ * + summary
+ * see
+ * define
+ * + extends
+ * typedef
+ * throws
+ * + enum
+ * const
+ */
 
 function parseBlockComment(comment) {
   console.assert(
@@ -346,51 +124,89 @@ function parseBlockComment(comment) {
     comment.type
   );
 
-  // Split comment into lines, skip the first line and remove the leading
-  // asterisk and whitespace
-  var lines = comment.value.split('\n').slice(1).map((l) => l.slice(3)),
-      tagLines = [],
-      description = '',
-      line,
-      tagLine;
+  const ast = doctrine.parse(comment.value, { unwrap: true });
 
-  for (line of lines) {
-    if (line[0] === '@') {
-      // Block tag
-      if (tagLine) {
-        // Previous tag is finished, push to tagLines array
-        tagLines.push(tagLine);
-      }
-      tagLine = line;
-    } else if (tagLine) {
-      // Tag description
-      tagLine += line.trim();
-    } else {
-      // Description
-      description += line.trim();
+  const attributes = {
+    type: null, // const, enum, class, interface, function, property
+    description: ast.description,
+    comments: [],
+  };
+
+  for (const tag of ast.tags) {
+    switch (tag.title) {
+      case 'summary':
+        attributes.description = tag.description;
+        break;
+      case 'const':
+        attributes.type = 'const';
+        attributes.constType = tag.type;
+        break;
+      case 'define':
+        attributes.type = 'const';
+        attributes.constType = tag.type;
+        if (tag.description) {
+          attributes.description = tag.description;
+        }
+        break;
+      case 'type':
+        attributes.type = 'property';
+        attributes.propertyType = tag.type;
+        break;
+      case 'constructor':
+        attributes.type = 'class';
+        break;
+      case 'enum':
+        attributes.type = 'enum';
+        attributes.extends = tag.type;
+        break;
+      case 'interface':
+        attributes.type = 'interface';
+        break;
+      case 'param':
+        attributes.paramTypes = attributes.paramTypes || {};
+        attributes.paramTypes[tag.name] = tag.type;
+        if (tag.description) {
+          attributes.comments.push(`@param ${tag.name} ${tag.description}`);
+        }
+        break;
+      case 'return':
+        attributes.type = 'function';
+        attributes.returnType = tag.type;
+        if (tag.description) {
+          attributes.comments.push(`@returnType ${tag.description}`);
+        }
+        break;
+      case 'implements':
+        attributes.implements = tag.type;
+        break;
+      case 'extends':
+        attributes.extends = tag.type;
+        break;
+      case 'throws':
+        console.log(tag.toString());
+        break;
+      default:
+        break;
     }
   }
 
-  if (tagLine) {
-    // Last tag is finished as well, push to tagLines array
-    tagLines.push(tagLine);
+  if (attributes.description.length > 0) {
+    attributes.comments.unshift(attributes.description);
   }
 
-  return {
-    description: description,
-    tags: tagLines.map(parseBlockCommentTag),
-  };
+  // console.log(attributes);
+  return attributes;
 }
 
 function parseLeadingComments(statement) {
-  var comments = statement.leadingComments;
+  const comments = statement.leadingComments;
   console.assert(
     comments.length > 0,
     'Expected at least one leading comment, got',
     comments.length
   );
   // Only parse the comment closest to the statement
-  var comment = comments[comments.length - 1];
+  const comment = comments[comments.length - 1];
   return parseBlockComment(comment);
 }
 

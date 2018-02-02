@@ -15,6 +15,7 @@
     "babel-core": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "cajon": "^0.4.4",
+    "doctrine": "^2.1.0",
     "es6-promise-polyfill": "^1.2.0",
     "es6-shim": "~0.35.3",
     "eslint": "^4.14.0",
