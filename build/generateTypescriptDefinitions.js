@@ -6,6 +6,19 @@ const doctrine = require('doctrine');
 const fs = require('fs');
 const { join } = require('path');
 
+// Primitive types are not nullable in Closure unless marked as such.
+// Keep a list of primitives to properly set the nullable flag.
+// Aside of that, type names are the same in Closure and TypeScript so a
+// mapping of type names is not necessary.
+// Enum nullability works the same with regards to the enum's base type.
+const primitiveTypes = [
+  'null',
+  'undefined',
+  'boolean',
+  'number',
+  'string',
+];
+
 function staticMemberExpressionToPath(expression) {
   console.assert(
     expression.type === 'MemberExpression',
@@ -18,10 +31,6 @@ function staticMemberExpressionToPath(expression) {
     : [object.name];
   objectPath.push(property.name);
   return objectPath;
-}
-
-function buildDefinitionTree(definitions) {
-
 }
 
 function parseAssignmentExpression(expression) {
@@ -48,7 +57,6 @@ function parseAssignmentExpression(expression) {
   }
 
   return {
-    type: 'assignment',
     identifier: staticMemberExpressionToPath(expression.left),
     value: value,
   };
@@ -56,65 +64,39 @@ function parseAssignmentExpression(expression) {
 
 function parseMemberExpression(expression) {
   return {
-    type: 'definition',
     identifier: staticMemberExpressionToPath(expression),
   };
 }
 
 function parseExpressionStatement(statement) {
-  var { expression } = statement,
-      parsedExpression;
-  switch (expression.type) {
+  switch (statement.expression.type) {
     case 'AssignmentExpression':
-      parsedExpression = parseAssignmentExpression(expression);
-      break;
+      return parseAssignmentExpression(statement.expression);
     case 'MemberExpression':
-      parsedExpression = parseMemberExpression(expression);
-      break;
+      return parseMemberExpression(statement.expression);
     default:
-      console.log('Unknown expression type', expression.type);
+      console.error('Unknown expression type', statement.expression.type);
   }
-
-  return parsedExpression;
 }
-
-function parseVariableDeclaration(statement) {
-  // console.log(statement);
-  return {};
-}
-
-
-// Primitive types are not nullable in Closure unless marked as such.
-// Keep a list of primitives to properly set the nullable flag.
-// Aside of that, type names are the same in Closure and TypeScript so a
-// mapping of type names is not necessary.
-// Enum nullability works the same with regards to the enum's base type.
-const primitiveTypes = [
-  'null',
-  'undefined',
-  'boolean',
-  'number',
-  'string',
-];
 
 /**
  * Tags:
- * override
+ * - override
  * + interface
  * + return
  * - struct
  * + param
  * + constructor
  * + implements
- * namespace
+ * - namespace
  * + summary
  * see
- * define
+ * + define
  * + extends
  * typedef
  * throws
  * + enum
- * const
+ * + const
  */
 
 function parseBlockComment(comment) {
@@ -127,7 +109,7 @@ function parseBlockComment(comment) {
   const ast = doctrine.parse(comment.value, { unwrap: true });
 
   const attributes = {
-    type: null, // const, enum, class, interface, function, property
+    type: null, // null, const, enum, class, interface, function, property
     description: ast.description,
     comments: [],
   };
@@ -182,9 +164,6 @@ function parseBlockComment(comment) {
       case 'extends':
         attributes.extends = tag.type;
         break;
-      case 'throws':
-        console.log(tag.toString());
-        break;
       default:
         break;
     }
@@ -194,7 +173,6 @@ function parseBlockComment(comment) {
     attributes.comments.unshift(attributes.description);
   }
 
-  // console.log(attributes);
   return attributes;
 }
 
@@ -211,21 +189,20 @@ function parseLeadingComments(statement) {
 }
 
 function parseExterns(program) {
-  var statements = [],
-      statement;
-  for (statement of program.body) {
-    var c = parseLeadingComments(statement);
-    switch (statement.type) {
-      case 'VariableDeclaration':
-        statements.push(parseVariableDeclaration(statement));
-        break;
-      case 'ExpressionStatement':
-        statements.push(parseExpressionStatement(statement));
-        break;
-      default:
-        console.log('Unknown statement type', statement.type);
-    }
-  }
+  const definitions = program.body
+    // Only take expressions into consideration.
+    // Variable declarations are discarded because they are only used for
+    // declaring namespaces.
+    .filter((statement) => statement.type === 'ExpressionStatement')
+    .map((statement) => Object.assign(
+      parseExpressionStatement(statement),
+      { attributes: parseLeadingComments(statement) }
+    ))
+    // @const without type is only used to define namespaces, discard.
+    .filter((definition) =>
+      definition.attributes.type !== 'const' ||
+      definition.attributes.constType !== undefined
+    );
 }
 
 function parseExternsFile(filePath) {
