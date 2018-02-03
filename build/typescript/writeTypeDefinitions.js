@@ -117,8 +117,8 @@ function writeClassNode(writer, root, node) {
         methods.push(child);
         break;
       default:
-        console.error(
-          'Found unexpected node type', type, 'in class definition'
+        throw new Error(
+          `Found unexpected node type ${type} in class definition`
         );
     }
   }
@@ -245,8 +245,8 @@ function writeInterfaceNode(writer, root, node) {
         methods.push(child);
         break;
       default:
-        console.error(
-          'Found unexpected node type', type, 'in interface definition'
+        throw new Error(
+          `Found unexpected node type ${type} in interface definition`
         );
     }
   }
@@ -470,7 +470,7 @@ function writeNode(writer, root, node) {
       writeFunctionNode(writer, root, node);
       break;
     default:
-      console.error('Unexpected definition type', type);
+      throw new Error('Unexpected definition type ' + type);
   }
 }
 

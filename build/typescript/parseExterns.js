@@ -35,8 +35,7 @@ function parseAssignmentExpression(expression) {
           if (p.key.type === 'Literal') {
             return p.key.value;
           }
-          console.error('Unrecognited key type', p.key.type);
-          return undefined;
+          throw new Error('Unrecognited key type ' + p.key.type);
         }),
       };
     default:
@@ -62,7 +61,7 @@ function parseExpressionStatement(statement) {
     case 'MemberExpression':
       return parseMemberExpression(statement.expression);
     default:
-      console.error('Unknown expression type', statement.expression.type);
+      throw new Error('Unknown expression type ' + statement.expression.type);
   }
 }
 
