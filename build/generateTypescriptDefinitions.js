@@ -4,17 +4,22 @@
 const fs = require('fs');
 const path = require('path');
 const parseExterns = require('./typescript/parseExterns');
+const buildDefinitionTree = require('./typescript/buildDefinitionTree');
 const writeTypeDefinitions = require('./typescript/writeTypeDefinitions');
 
-function processFile(inputPath, outputPath) {
-  const code = fs.readFileSync(inputPath, 'utf-8');
-  const root = parseExterns(code);
+function processFile(outputPath, ...inputPaths) {
+  const definitions = [].concat(...inputPaths.map((inputPath) => {
+    const code = fs.readFileSync(inputPath, 'utf-8');
+    return parseExterns(code);
+  }));
+  const root = buildDefinitionTree(definitions);
+
   const stream = fs.createWriteStream(outputPath, { encoding: 'utf-8' });
-  const typeDefinitions = writeTypeDefinitions(stream, root);
+  writeTypeDefinitions(stream, root);
   stream.end();
 }
 
 processFile(
-  path.join(__dirname, '..', 'dist', 'shaka-player.compiled.externs.js'),
-  path.join(__dirname, '..', 'dist', 'shaka-player.compiled.d.ts')
+  path.join(__dirname, '..', 'dist', 'shaka-player.compiled.d.ts'),
+  ...process.argv.slice(2)
 );
