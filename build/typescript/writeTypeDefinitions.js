@@ -366,9 +366,11 @@ function writeFunctionNode(
   const params = node.definition.params.map((name) => {
     let type = 'any';
     let isOptional = false;
+    let isRest = false;
     if (paramTypes[name]) {
       type = generateType(root, paramTypes[name]);
       isOptional = paramTypes[name].type === 'OptionalType';
+      isRest = paramTypes[name].type === 'RestType';
     } else {
       console.warn(
         'Missing type information for parameter',
@@ -377,7 +379,7 @@ function writeFunctionNode(
         node.definition.identifier.join('.')
       );
     }
-    return `${name}${isOptional ? '?' : ''}: ${type}`;
+    return `${isRest ? '...' : ''}${name}${isOptional ? '?' : ''}: ${type}`;
   }).join(', ');
 
   const returnType = attributes.returnType
