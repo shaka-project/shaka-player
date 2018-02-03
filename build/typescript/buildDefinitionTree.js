@@ -26,24 +26,8 @@ function buildDefinitionTree(definitions) {
     }
   }
 
-  // Find interfaces for classes with implements keyword
   for (const node of classNodesWithInterface) {
     const id = node.definition.identifier;
-    const interfaceName = node.definition.attributes.implements;
-    node.interface = getNodeAtPath(root, interfaceName.split('.'));
-    if (node.interface != null) {
-      const attributes = node.interface.definition.attributes;
-      // Only allow names of interfaces or typedefs after @implements
-      console.assert(
-        attributes.type === 'interface' ||
-        attributes.type === 'typedef',
-        'Expected name of interface or typedef after implements keyword, got',
-        attributes.type
-      );
-    }
-    // If interface could not be found, still proceed.
-    // We assume the interface is a native interface in that case,
-    // defined by one of TypeScript's base libs.
   }
 
   return root;

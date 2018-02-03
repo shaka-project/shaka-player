@@ -52,6 +52,24 @@ function writeClassNode(writer, root, node) {
   // Prototype defaults to empty in that case
   const prototype = node.children.get('prototype') || { children: new Map() };
 
+  // Find interfaces for classes with implements keyword
+  const interfaceName = node.definition.attributes.implements;
+  const interface = interfaceName &&
+    getNodeAtPath(root, interfaceName.split('.'));
+  if (interface != null) {
+    const attributes = interface.definition.attributes;
+    // Only allow names of interfaces or typedefs for @implements
+    console.assert(
+      attributes.type === 'interface' ||
+      attributes.type === 'typedef',
+      'Expected name of interface or typedef after implements keyword, got',
+      attributes.type
+    );
+  }
+  // If interface could not be found, still proceed.
+  // We assume the interface is a native interface in that case,
+  // defined by one of TypeScript's base libs.
+
   // Gather all static members
   for (const child of node.children.values()) {
     if (child.name === 'prototype') {
@@ -137,20 +155,19 @@ function writeClassNode(writer, root, node) {
     const attributes = propNode.definition.attributes;
     let isConst = attributes.type === 'const';
     let rawType = isConst ? attributes.constType : attributes.propType;
-    if (!rawType && node.interface) {
+    if (!rawType && interface) {
       // Check if this property has been defined in the implemented
       // interface.
-      const attributes = node.interface.definition.attributes;
+      const attributes = interface.definition.attributes;
       if (attributes.type === 'interface') {
         const base = getNodeAtPath(
-          node.interface.children,
-          ['prototype', propNode.name]
+          interface.children, ['prototype', propNode.name]
         );
-        const attributes = base && base.definition.attributes || {};
-        if (attributes.type === 'const') {
-          isConst = true;
+        if (base) {
+          const attributes = base.definition.attributes;
+          isConst = attributes.type === 'const';
+          rawType = isConst ? attributes.constType : attributes.propType;
         }
-        rawType = isConst ? attributes.constType : attributes.propType;
       } else if (attributes.type === 'typedef') {
         const base = attributes.props &&
           attributes.props.find((p) => p.name === propNode.name);
