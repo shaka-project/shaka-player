@@ -53,10 +53,11 @@ function processType(root, rawType) {
         { isOptional: true }
       );
     case 'RestType':
-      return Object.assign(
-        processType(root, rawType.expression),
-        { isRest: true }
-      );
+      return {
+        name: 'Array',
+        isNullabe: false,
+        applications: [processType(root, rawType.expression)],
+      };
     case 'TypeApplication':
       return Object.assign(
         processType(root, rawType.expression),
@@ -141,6 +142,21 @@ function stringifyType(type) {
         );
       } else {
         type.applications = [{ isNullabe: false, name: 'void' }];
+      }
+    } else if (type.name === 'Array') {
+      if (type.applications) {
+        console.assert(
+          type.applications.length === 1,
+          'Expected Array to have at most one type application, got',
+          type.applications.length
+        );
+      } else {
+        type.applications = [{ isNullabe: false, name: 'any' }];
+      }
+
+      if (type.applications[0].name) {
+        str = stringifyType(type.applications[0]) + '[]';
+        type.applications = null;
       }
     }
   }
