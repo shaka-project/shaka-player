@@ -1,3 +1,4 @@
+const { getNodeAtPath } = require('./treeUtils');
 const generateType = require('./generateType');
 
 class AbstractWriter {
@@ -39,19 +40,6 @@ class StreamWriter extends AbstractWriter {
   writeLine(str) {
     this.stream.write(this.getIndentation() + str + '\n');
   }
-}
-
-function getNodeAtPath(root, path) {
-  let nodes = root;
-  let node = null;
-  for (const part of path) {
-    node = nodes.get(part);
-    if (!node) {
-      return null;
-    }
-    nodes = node.children;
-  }
-  return node;
 }
 
 function writeClassNode(writer, root, node) {
