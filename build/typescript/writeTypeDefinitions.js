@@ -324,7 +324,8 @@ function writeFunctionNode(
       'in function',
       node.definition.identifier.join('.')
     );
-    return `${name}: ${generateType(type)}`;
+    const isOptional = type.type === 'OptionalType';
+    return `${name}${isOptional ? '?' : ''}: ${generateType(type)}`;
   }).join(', ');
 
   const returnType = attributes.returnType
