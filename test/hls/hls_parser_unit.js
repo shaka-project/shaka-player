@@ -795,6 +795,74 @@ describe('HlsParser', function() {
         .catch(fail).then(done);
   });
 
+  it('calculates duration from stream lengths', function(done) {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
+      'URI="test:/text"\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+      'CHANNELS="2",URI="test:/audio"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1",SUBTITLES="sub1"\n',
+      'test:/video\n'
+    ].join('');
+
+    const video = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'test:/main.mp4\n',
+      '#EXTINF:5,\n',
+      'test:/main.mp4\n',
+      '#EXTINF:5,\n',
+      'test:/main.mp4\n'
+    ].join('');
+
+    const audio = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'test:/main.mp4\n',
+      '#EXTINF:5,\n',
+      'test:/main.mp4\n'
+    ].join('');
+
+    const text = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'test:/main.vtt'
+    ].join('');
+
+    fakeNetEngine.setResponseMap({
+      'test:/master': toUTF8(master),
+      'test:/audio': toUTF8(audio),
+      'test:/video': toUTF8(video),
+      'test:/text': toUTF8(text),
+      'test:/main.vtt': toUTF8(vttText),
+      'test:/init.mp4': initSegmentData,
+      'test:/main.mp4': segmentData
+    });
+
+    parser.start('test:/master', playerInterface)
+        .then((actual) => {
+          // Duration should be the minimum of the streams, but ignore the text
+          // stream.
+          let timeline = actual.presentationTimeline;
+          expect(timeline.getDuration()).toBe(10);
+
+          let period = actual.periods[0];
+          expect(period.textStreams.length).toBe(1);
+          expect(period.variants.length).toBe(1);
+          expect(period.variants[0].audio).toBeTruthy();
+          expect(period.variants[0].video).toBeTruthy();
+        })
+        .catch(fail).then(done);
+  });
+
   it('parses manifest with MP4+TTML streams', function(done) {
     var master = [
       '#EXTM3U\n',
