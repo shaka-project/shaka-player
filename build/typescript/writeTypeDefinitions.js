@@ -188,6 +188,90 @@ function writeClassNode(writer, root, node) {
   }
 }
 
+function writeInterfaceNode(writer, root, node) {
+  const properties = [];
+  const methods = [];
+  const others = [];
+  const prototype = node.children.get('prototype');
+  const attributes = node.definition.attributes;
+  const baseInterface = attributes.extends;
+
+  // Gather all non-prototype members
+  for (const child of node.children.values()) {
+    if (child.name === 'prototype') {
+      continue;
+    }
+    console.assert(
+      child.definition !== null,
+      'Unexpected child without definition in interface definition:',
+      child
+    );
+    others.push(child);
+  }
+
+  // Gather all prototype members
+  for (const child of prototype.children.values()) {
+    console.assert(
+      child.definition !== null,
+      'Unexpected child without definition in interface definition:',
+      child
+    );
+
+    const type = child.definition.attributes.type || child.definition.type;
+    switch (child.definition.type) {
+      case 'const':
+        properties.push(child);
+        break;
+      case 'property':
+        properties.push(child);
+        break;
+      case 'function':
+        methods.push(child);
+        break;
+      default:
+        console.error(
+          'Found unexpected node type', type, 'in interface definition'
+        );
+    }
+  }
+
+
+  writeComments(writer, attributes.comments);
+  if (baseInterface) {
+    writer.writeLine(`interface ${node.name} extends ${baseInterface} {`);
+  } else {
+    writer.writeLine(`interface ${node.name} {`);
+  }
+  writer.increaseLevel();
+
+  // Properties
+  for (const propNode of properties) {
+    const attributes = propNode.definition.attributes;
+    const isConst = attributes.type === 'const';
+    const rawType = isConst ? attributes.constType : attributes.propType;
+    const type = generateType(rawType);
+    writer.writeLine(
+      `${isConst ? 'readonly ' : ''}${propNode.name}: ${type};`
+    );
+  }
+
+  // Methods
+  for (const methodNode of methods) {
+    writeFunctionNode(writer, methodNode, null);
+  }
+
+  writer.decreaseLevel();
+  writer.writeLine('}');
+
+  if (others.length > 0) {
+    writer.writeLine(`namespace ${node.name} {`);
+    writer.increaseLevel();
+    writeNodes(writer, root, others);
+    writer.decreaseLevel();
+    writer.writeLine('}');
+  }
+}
+
 function writeFunctionNode(
   writer,
   node,
@@ -282,9 +366,7 @@ function writeNode(writer, root, node) {
       writeClassNode(writer, root, node);
       break;
     case 'interface':
-      writeComments(writer, attributes.comments);
-      writer.writeLine(`interface ${node.name} {`);
-      writer.writeLine(`}`);
+      writeInterfaceNode(writer, root, node);
       break;
     case 'enum':
       writeEnumNode(writer, node);
