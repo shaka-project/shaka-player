@@ -137,7 +137,7 @@ function parseBlockComment(comment) {
         break;
       case 'enum':
         attributes.type = 'enum';
-        attributes.extends = tag.type;
+        attributes.enumType = tag.type;
         break;
       case 'interface':
         attributes.type = 'interface';

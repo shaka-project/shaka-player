@@ -143,7 +143,7 @@ function writeClassNode(writer, root, node) {
     const attributes = propNode.definition.attributes;
     const isConst = attributes.type === 'const';
     const rawType = isConst ? attributes.constType : attributes.propType;
-    const type = generateType(rawType);
+    const type = generateType(root, rawType);
     writer.writeLine(
       `static ${isConst ? 'readonly ' : ''}${propNode.name}: ${type};`
     );
@@ -151,7 +151,7 @@ function writeClassNode(writer, root, node) {
 
   // Static methods
   for (const methodNode of staticMethods) {
-    writeFunctionNode(writer, methodNode, 'static');
+    writeFunctionNode(writer, root, methodNode, 'static');
   }
 
   // Properties
@@ -185,11 +185,11 @@ function writeClassNode(writer, root, node) {
   }
 
   // Constructor
-  writeFunctionNode(writer, node, null, 'constructor', true);
+  writeFunctionNode(writer, root, node, null, 'constructor', true);
 
   // Methods
   for (const methodNode of methods) {
-    writeFunctionNode(writer, methodNode, null);
+    writeFunctionNode(writer, root, methodNode, null);
   }
 
   writer.decreaseLevel();
@@ -264,7 +264,7 @@ function writeInterfaceNode(writer, root, node) {
     const attributes = propNode.definition.attributes;
     const isConst = attributes.type === 'const';
     const rawType = isConst ? attributes.constType : attributes.propType;
-    const type = generateType(rawType);
+    const type = generateType(root, rawType);
     writer.writeLine(
       `${isConst ? 'readonly ' : ''}${propNode.name}: ${type};`
     );
@@ -272,7 +272,7 @@ function writeInterfaceNode(writer, root, node) {
 
   // Methods
   for (const methodNode of methods) {
-    writeFunctionNode(writer, methodNode, null);
+    writeFunctionNode(writer, root, methodNode, null);
   }
 
   writer.decreaseLevel();
@@ -298,7 +298,7 @@ function writeTypedefNode(writer, root, node) {
     writer.increaseLevel();
 
     for (const prop of attributes.props) {
-      const type = generateType(prop.type);
+      const type = generateType(root, prop.type);
       if (prop.description) {
         writeComments(writer, [prop.description]);
       }
@@ -312,7 +312,7 @@ function writeTypedefNode(writer, root, node) {
     // In TypeScript, these are declared as interfaces with a
     // 'new' method.
 
-    const returnType = generateType(typedefType.this);
+    const returnType = generateType(root, typedefType.this);
 
     writer.writeLine(`interface ${node.name} {`);
     writer.increaseLevel();
@@ -341,18 +341,19 @@ function writeTypedefNode(writer, root, node) {
       },
     };
 
-    writeFunctionNode(writer, node, null);
+    writeFunctionNode(writer, root, node, null);
 
     writer.decreaseLevel();
     writer.writeLine('}');
   } else {
-    const type = generateType(typedefType);
+    const type = generateType(root, typedefType);
     writer.writeLine(`type ${node.name} = ${type};`);
   }
 }
 
 function writeFunctionNode(
   writer,
+  root,
   node,
   keyword = 'function',
   name = undefined,
@@ -364,20 +365,24 @@ function writeFunctionNode(
   writeComments(writer, attributes.comments);
 
   const params = node.definition.params.map((name) => {
-    const type = paramTypes[name] || 'any';
-    console.assert(
-      type !== undefined,
-      'Missing type information for parameter',
-      name,
-      'in function',
-      node.definition.identifier.join('.')
-    );
-    const isOptional = type.type === 'OptionalType';
-    return `${name}${isOptional ? '?' : ''}: ${generateType(type)}`;
+    let type = 'any';
+    let isOptional = false;
+    if (paramTypes[name]) {
+      type = generateType(root, paramTypes[name]);
+      isOptional = paramTypes[name].type === 'OptionalType';
+    } else {
+      console.warn(
+        'Missing type information for parameter',
+        name,
+        'in function',
+        node.definition.identifier.join('.')
+      );
+    }
+    return `${name}${isOptional ? '?' : ''}: ${type}`;
   }).join(', ');
 
   const returnType = attributes.returnType
-    ? generateType(attributes.returnType)
+    ? generateType(root, attributes.returnType)
     : 'void';
 
   const functionName = name || node.name;
@@ -456,12 +461,12 @@ function writeNode(writer, root, node) {
       break;
     case 'const': {
       writeComments(writer, attributes.comments);
-      const constType = generateType(attributes.constType);
+      const constType = generateType(root, attributes.constType);
       writer.writeLine(`const ${node.name}: ${constType};`);
       break;
     }
     case 'function':
-      writeFunctionNode(writer, node);
+      writeFunctionNode(writer, root, node);
       break;
     default:
       console.error('Unexpected definition type', type);
