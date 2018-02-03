@@ -189,10 +189,16 @@ function parseBlockComment(comment) {
 
 function parseLeadingComments(statement) {
   const comments = statement.leadingComments;
+  if (!comments) {
+    return {
+      type: null,
+      comments: [],
+      description: '',
+    };
+  }
   console.assert(
-    comments.length > 0,
-    'Expected at least one leading comment, got',
-    comments.length
+    comments,
+    'Expected at least one leading comment, found none'
   );
   // Only parse the comment closest to the statement
   const comment = comments[comments.length - 1];
