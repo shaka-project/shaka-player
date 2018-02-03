@@ -54,6 +54,7 @@ function parseAssignmentExpression(expression) {
             return p.key.value;
           }
           console.error('Unrecognited key type', p.key.type);
+          return undefined;
         }),
       };
     default:
@@ -83,6 +84,10 @@ function parseExpressionStatement(statement) {
   }
 }
 
+function normalizeDescription(description) {
+  return description.split('\n').map((line) => line.trim()).join(' ');
+}
+
 /**
  * Tags:
  * - override
@@ -104,14 +109,14 @@ function parseBlockComment(comment) {
 
   const attributes = {
     type: null, // null, const, enum, class, interface, function, property
-    description: ast.description,
+    description: normalizeDescription(ast.description),
     comments: [],
   };
 
   for (const tag of ast.tags) {
     switch (tag.title) {
       case 'summary':
-        attributes.description = tag.description;
+        attributes.description = normalizeDescription(tag.description);
         break;
       case 'typedef':
         // TODO: Handle @property
@@ -125,7 +130,7 @@ function parseBlockComment(comment) {
         attributes.type = 'const';
         attributes.constType = tag.type;
         if (tag.description) {
-          attributes.description = tag.description;
+          attributes.description = normalizeDescription(tag.description);
         }
         break;
       case 'type':
@@ -146,14 +151,16 @@ function parseBlockComment(comment) {
         attributes.paramTypes = attributes.paramTypes || {};
         attributes.paramTypes[tag.name] = tag.type;
         if (tag.description) {
-          attributes.comments.push(`@param ${tag.name} ${tag.description}`);
+          const description = normalizeDescription(tag.description);
+          attributes.comments.push(`@param ${tag.name} ${description}`);
         }
         break;
       case 'return':
         attributes.type = 'function';
         attributes.returnType = tag.type;
         if (tag.description) {
-          attributes.comments.push(`@returnType ${tag.description}`);
+          const description = normalizeDescription(tag.description);
+          attributes.comments.push(`@returnType ${description}`);
         }
         break;
       case 'implements':
