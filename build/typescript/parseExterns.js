@@ -89,8 +89,10 @@ function parseBlockComment(comment) {
 
   const ast = doctrine.parse(comment.value, { unwrap: true });
 
+  // Possible types:
+  // null, const, enum, class, interface, function, property, typedef
   const attributes = {
-    type: null, // null, const, enum, class, interface, function, property
+    type: null,
     description: normalizeDescription(ast.description),
     comments: [],
   };
@@ -100,9 +102,21 @@ function parseBlockComment(comment) {
       case 'summary':
         attributes.description = normalizeDescription(tag.description);
         break;
+      case 'description':
+        attributes.description = normalizeDescription(tag.description);
+        break;
       case 'typedef':
         // TODO: Handle @property
         attributes.type = 'typedef';
+        attributes.typedefType = tag.type;
+        break;
+      case 'property':
+        attributes.props = attributes.props || [];
+        attributes.props.push({
+          name: tag.name,
+          type: tag.type,
+          description: tag.description && normalizeDescription(tag.description),
+        });
         break;
       case 'const':
         attributes.type = 'const';
@@ -175,10 +189,8 @@ function parseLeadingComments(statement) {
   return parseBlockComment(comment);
 }
 
-
-
 function parseExterns(code) {
-  const program = esprima.parse(code, {attachComment: true});
+  const program = esprima.parse(code, { attachComment: true });
   const definitions = program.body
     // Only take expressions into consideration.
     // Variable declarations are discarded because they are only used for

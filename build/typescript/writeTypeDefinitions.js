@@ -53,7 +53,6 @@ class StreamWriter extends AbstractWriter {
 }
 
 function generateType(rawType) {
-  console.log(rawType);
   return 'any';
 }
 
@@ -272,6 +271,31 @@ function writeInterfaceNode(writer, root, node) {
   }
 }
 
+function writeTypedefNode(writer, root, node) {
+  const attributes = node.definition.attributes;
+
+  writeComments(writer, attributes.comments);
+  if (attributes.props) {
+    // Typedef defines an object structure, declare as interface
+    writer.writeLine(`interface ${node.name} {`);
+    writer.increaseLevel();
+
+    for (const prop of attributes.props) {
+      const type = generateType(prop.type);
+      if (prop.description) {
+        writeComments(writer, [prop.description]);
+      }
+      writer.writeLine(`${prop.name}: ${type};`);
+    }
+
+    writer.decreaseLevel();
+    writer.writeLine('}');
+  } else {
+    const type = generateType(attributes.typedefType);
+    writer.writeLine(`type ${node.name} = ${type};`);
+  }
+}
+
 function writeFunctionNode(
   writer,
   node,
@@ -367,6 +391,9 @@ function writeNode(writer, root, node) {
       break;
     case 'interface':
       writeInterfaceNode(writer, root, node);
+      break;
+    case 'typedef':
+      writeTypedefNode(writer, root, node);
       break;
     case 'enum':
       writeEnumNode(writer, node);
