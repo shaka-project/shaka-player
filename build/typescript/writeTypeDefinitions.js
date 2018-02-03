@@ -13,20 +13,20 @@ const primitiveTypes = [
 
 class AbstractWriter {
   constructor() {
-    this.indentationLevel = 0;
+    this.level = 0;
   }
 
-  indent() {
-    this.indentationLevel++;
+  increaseLevel() {
+    this.level++;
   }
 
-  outdent() {
-    this.indentationLevel--;
+  decreaseLevel() {
+    this.level--;
   }
 
   getIndentation() {
     // Repeat two spaces 'level'-times for indentation
-    return '  '.repeat(this.indentationLevel);
+    return '  '.repeat(this.level);
   }
 }
 
@@ -139,7 +139,7 @@ function writeClassNode(writer, root, node) {
 
   // TODO: Handle implements and extends
   writer.writeLine(`class ${node.name} {`);
-  writer.indent();
+  writer.increaseLevel();
 
   // Static properties
   for (const propNode of staticProperties) {
@@ -176,14 +176,14 @@ function writeClassNode(writer, root, node) {
     writeFunctionNode(writer, methodNode, null);
   }
 
-  writer.outdent();
+  writer.decreaseLevel();
   writer.writeLine('}');
 
   if (others.length > 0) {
     writer.writeLine(`namespace ${node.name} {`);
-    writer.indent();
+    writer.increaseLevel();
     writeNodes(writer, root, others);
-    writer.outdent();
+    writer.decreaseLevel();
     writer.writeLine('}');
   }
 }
@@ -235,11 +235,11 @@ function writeEnumNode(writer, node) {
   );
   writeComments(writer, definition.attributes.comments);
   writer.writeLine(`enum ${node.name} {`);
-  writer.indent();
+  writer.increaseLevel();
   for (const prop of definition.props) {
     writer.writeLine(prop + ',');
   }
-  writer.outdent();
+  writer.decreaseLevel();
   writer.writeLine(`}`);
 }
 
@@ -257,10 +257,15 @@ function writeComments(writer, comments) {
 function writeNode(writer, root, node) {
   if (node.definition === null) {
     // Write namespace to writer
-    writer.writeLine(`namespace ${node.name} {`);
-    writer.indent();
+    if (writer.level === 0) {
+      // Mark top-level namespaces as ambient
+      writer.writeLine(`declare namespace ${node.name} {`);
+    } else {
+      writer.writeLine(`namespace ${node.name} {`);
+    }
+    writer.increaseLevel();
     writeNodes(writer, root, node.children.values());
-    writer.outdent();
+    writer.decreaseLevel();
     writer.writeLine('}');
     return;
   }
