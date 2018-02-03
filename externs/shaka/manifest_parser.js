@@ -48,8 +48,8 @@ shakaExtern.ManifestParser = function() {};
  * @description
  * Defines the interface of the Player to the manifest parser.  This defines
  * fields and callback methods that the parser will use to interact with the
- * Player.  The callback methods do not to be called as member functions (i.e.
- * they can be called as "free" functions).
+ * Player.  The callback methods do not need to be called as member functions
+ * (i.e. they can be called as "free" functions).
  *
  * @property {!shaka.net.NetworkingEngine} networkingEngine
  *   The networking engine to use for network requests.
