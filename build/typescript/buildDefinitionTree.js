@@ -6,7 +6,6 @@ const {
 
 function buildDefinitionTree(definitions) {
   const root = new Map();
-  const classNodesWithInterface = [];
 
   // Insert all definitions into definition tree
   for (const definition of definitions) {
@@ -18,16 +17,6 @@ function buildDefinitionTree(definitions) {
     );
     const node = getOrCreateNodeAtPath(root, id);
     node.definition = definition;
-
-    const isClass = definition.attributes.type === 'class';
-    const implementsInterface = definition.attributes.implements != null;
-    if (isClass && implementsInterface) {
-      classNodesWithInterface.push(node);
-    }
-  }
-
-  for (const node of classNodesWithInterface) {
-    const id = node.definition.identifier;
   }
 
   return root;
