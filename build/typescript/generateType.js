@@ -117,10 +117,32 @@ function stringifyType(type) {
     str = type.elements.map(stringifyType).join(' | ');
   } else {
     str = type.name;
-  }
 
-  if (str === 'Promise' && (!type.applications || !type.applications.length)) {
-    type.applications = [{ isNullabe: false, name: 'void' }];
+    if (type.name === 'Object') {
+      if (type.applications) {
+        console.assert(
+          type.applications.length === 2,
+          'Expected Object to have either 0 or 2 type applications, got',
+          type.applications.length
+        );
+        const key = stringifyType(type.applications[0]);
+        const value = stringifyType(type.applications[1]);
+        str = `{ [key: ${key}]: ${value} }`;
+        type.applications = null;
+      } else {
+        str = 'object';
+      }
+    } else if (type.name === 'Promise') {
+      if (type.applications) {
+        console.assert(
+          type.applications.length === 1,
+          'Expected Promise to have at most one type application, got',
+          type.applications.length
+        );
+      } else {
+        type.applications = [{ isNullabe: false, name: 'void' }];
+      }
+    }
   }
 
   if (type.applications) {
