@@ -130,8 +130,15 @@ function writeClassNode(writer, root, node) {
     }
   }
 
-  // TODO: Handle implements and extends
-  writer.writeLine(`class ${node.name} {`);
+  const attributes = node.definition.attributes;
+  let classDeclaration = node.name;
+  if (attributes.extends) {
+    classDeclaration += ' extends ' + attributes.extends;
+  }
+  if (attributes.implements) {
+    classDeclaration += ' implements ' + attributes.implements;
+  }
+  writer.writeLine(`class ${classDeclaration} {`);
   writer.increaseLevel();
 
   // Static properties
@@ -230,7 +237,6 @@ function writeInterfaceNode(writer, root, node) {
 
 
   writeComments(writer, attributes.comments);
-  console.log(baseInterface);
   if (baseInterface) {
     writer.writeLine(`interface ${node.name} extends ${baseInterface} {`);
   } else {
