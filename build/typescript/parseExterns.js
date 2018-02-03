@@ -173,6 +173,9 @@ function parseBlockComment(comment) {
         );
         attributes.extends = tag.type.name;
         break;
+      case 'template':
+        attributes.template = tag.description.split(',');
+        break;
       default:
         break;
     }

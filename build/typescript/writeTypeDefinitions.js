@@ -125,6 +125,9 @@ function writeClassNode(writer, root, node) {
 
   const attributes = node.definition.attributes;
   let classDeclaration = node.name;
+  if (attributes.template) {
+    classDeclaration += '<' + attributes.template.join(', ') + '>';
+  }
   if (attributes.extends) {
     classDeclaration += ' extends ' + attributes.extends;
   }
@@ -132,7 +135,7 @@ function writeClassNode(writer, root, node) {
     classDeclaration += ' implements ' + attributes.implements;
   }
 
-  // Include construcotr description before class declaration as well,
+  // Include constructor description before class declaration as well,
   // as they can describe the constructor, the class, or both.
   writeComments(writer, [node.definition.attributes.description]);
   writer.writeLine(`class ${classDeclaration} {`);
@@ -251,12 +254,16 @@ function writeInterfaceNode(writer, root, node) {
     }
   }
 
-  writeComments(writer, attributes.comments);
-  if (baseInterface) {
-    writer.writeLine(`interface ${node.name} extends ${baseInterface} {`);
-  } else {
-    writer.writeLine(`interface ${node.name} {`);
+  let declaration = node.name;
+  if (attributes.template) {
+    declaration += '<' + attributes.template.join(', ') + '>';
   }
+  if (baseInterface) {
+    declaration += ' extends ' + baseInterface;
+  }
+
+  writeComments(writer, attributes.comments);
+  writer.writeLine(`interface ${declaration} {`);
   writer.increaseLevel();
 
   // Properties
@@ -386,13 +393,20 @@ function writeFunctionNode(
     ? generateType(root, attributes.returnType)
     : 'void';
 
-  const functionName = name || node.name;
+  let declaration = name || node.name;
+  if (keyword) {
+    declaration = keyword + ' ' + declaration;
+  }
+  if (attributes.template) {
+    declaration += '<' + attributes.template.join(', ') + '>';
+  }
+  declaration += '(' + params + ')';
+  if (!omitReturn) {
+    declaration += ': ' + returnType;
+  }
+  declaration += ';';
 
-  writer.writeLine(
-    (keyword ? keyword + ' ' : '') +
-    `${functionName}(${params})` +
-    (omitReturn ? ';' : `: ${returnType};`)
-  );
+  writer.writeLine(declaration);
 }
 
 function writeEnumNode(writer, node) {
