@@ -147,8 +147,28 @@ function writeClassNode(writer, root, node) {
   // Properties
   for (const propNode of properties) {
     const attributes = propNode.definition.attributes;
-    const isConst = attributes.type === 'const';
-    const rawType = isConst ? attributes.constType : attributes.propType;
+    let isConst = attributes.type === 'const';
+    let rawType = isConst ? attributes.constType : attributes.propType;
+    if (!rawType && node.interface) {
+      // Check if this property has been defined in the implemented
+      // interface.
+      const attributes = node.interface.definition.attributes;
+      if (attributes.type === 'interface') {
+        const base = getNodeAtPath(
+          node.interface.children,
+          ['prototype', propNode.name]
+        );
+        const attributes = base && base.definition.attributes || {};
+        if (attributes.type === 'const') {
+          isConst = true;
+        }
+        rawType = isConst ? attributes.constType : attributes.propType;
+      } else if (attributes.type === 'typedef') {
+        const base = attributes.props &&
+          attributes.props.find((p) => p.name === propNode.name);
+        rawType = base && base.type;
+      }
+    }
     const type = generateType(rawType);
     writer.writeLine(
       `${isConst ? 'readonly ' : ''}${propNode.name}: ${type};`
