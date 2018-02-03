@@ -107,7 +107,7 @@ function stringifyType(type) {
       `p${i}: ${stringifyType(paramType)}`
     )).join(', ');
     const returnType = stringifyType(type.returnType);
-    str = `(${params}) => ${returnType}`;
+    str = `((${params}) => ${returnType})`;
   } else if (type.isRecord) {
     const fields = type.fields.map((field) => (
       `${field.key}: ${stringifyType(field.value)}`
