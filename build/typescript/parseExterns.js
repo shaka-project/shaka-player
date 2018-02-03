@@ -160,10 +160,20 @@ function parseBlockComment(comment) {
         }
         break;
       case 'implements':
-        attributes.implements = tag.type;
+        console.assert(
+          tag.type.type === 'NameExpression',
+          'Expected name expression after implements keyword, got',
+          tag.type
+        );
+        attributes.implements = tag.type.name;
         break;
       case 'extends':
-        attributes.extends = tag.type;
+        console.assert(
+          tag.type.type === 'NameExpression',
+          'Expected name expression after extends keyword, got',
+          tag.type
+        );
+        attributes.extends = tag.type.name;
         break;
       default:
         break;

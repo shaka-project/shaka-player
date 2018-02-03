@@ -77,12 +77,6 @@ function writeClassNode(writer, root, node) {
   const others = [];
   const prototype = node.children.get('prototype');
 
-  let interfaceNode = null;
-  const interfaceIdentifier = node.definition.attributes.implements;
-  if (interfaceIdentifier) {
-    interfaceNode = getNodeAtPath(root, interfaceIdentifier.name.split('.'));
-  }
-
   // Gather all static members
   for (const child of node.children.values()) {
     if (child.name === 'prototype') {
@@ -236,6 +230,7 @@ function writeInterfaceNode(writer, root, node) {
 
 
   writeComments(writer, attributes.comments);
+  console.log(baseInterface);
   if (baseInterface) {
     writer.writeLine(`interface ${node.name} extends ${baseInterface} {`);
   } else {
