@@ -34,4 +34,8 @@ function getNodeAtPath(root, path) {
   return node;
 }
 
-
+module.exports = {
+    getOrCreateNode,
+    getOrCreateNodeAtPath,
+    getNodeAtPath,
+};
