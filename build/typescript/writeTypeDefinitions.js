@@ -1,15 +1,4 @@
-// Primitive types are not nullable in Closure unless marked as such.
-// Keep a list of primitives to properly set the nullable flag.
-// Aside of that, type names are the same in Closure and TypeScript so a
-// mapping of type names is not necessary.
-// Enum nullability works the same with regards to the enum's base type.
-const primitiveTypes = [
-  'null',
-  'undefined',
-  'boolean',
-  'number',
-  'string',
-];
+const generateType = require('./generateType');
 
 class AbstractWriter {
   constructor() {
@@ -52,10 +41,6 @@ class StreamWriter extends AbstractWriter {
   }
 }
 
-function generateType(rawType) {
-  return 'any';
-}
-
 function getNodeAtPath(root, path) {
   let nodes = root;
   let node = null;
@@ -89,7 +74,7 @@ function writeClassNode(writer, root, node) {
     );
 
     const type = child.definition.attributes.type || child.definition.type;
-    switch (child.definition.type) {
+    switch (type) {
       case 'const':
         staticProperties.push(child);
         break;
