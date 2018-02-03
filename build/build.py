@@ -276,6 +276,40 @@ class Build(object):
       return False
 
     return True
+  
+  def generate_typescript_definitions(self, name):
+    """Generates TypeScript type definitions.
+
+    Args:
+      name: The name of the build.
+
+    Returns:
+      True on success; False on failure.
+    """
+
+    match = re.compile(r'.*\.js$')
+    base = shakaBuildHelpers.get_source_base()
+    files = shakaBuildHelpers.get_all_files(
+        os.path.join(base, 'externs', 'shaka'), match)
+    externs = shakaBuildHelpers.cygwin_safe_path(os.path.join(
+        shakaBuildHelpers.get_source_base(), 'dist',
+        'shaka-player.' + name + '.externs.js'))
+    files.append(externs)
+
+    tsd_generator = shakaBuildHelpers.cygwin_safe_path(os.path.join(
+        shakaBuildHelpers.get_source_base(), 'build',
+        'generateTypescriptDefinitions.js'))
+
+    output = shakaBuildHelpers.cygwin_safe_path(os.path.join(
+        shakaBuildHelpers.get_source_base(), 'dist',
+        'shaka-player.' + name + '.d.ts'))
+
+    cmd_line = ['node', tsd_generator, '--output', output] + files
+    if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
+      logging.error('TypeScript type definition generation failed')
+      return False
+
+    return True
 
   def build_library(self, name, rebuild, is_debug):
     """Builds Shaka Player using the files in |self.include|.
@@ -319,6 +353,9 @@ class Build(object):
     self.add_source_map(result_file, result_map)
 
     if not self.generate_externs(name):
+      return False
+    
+    if not self.generate_typescript_definitions(name):
       return False
 
     return True

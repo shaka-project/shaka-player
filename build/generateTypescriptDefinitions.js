@@ -7,7 +7,7 @@ const parseExterns = require('./typescript/parseExterns');
 const buildDefinitionTree = require('./typescript/buildDefinitionTree');
 const writeTypeDefinitions = require('./typescript/writeTypeDefinitions');
 
-function processFile(outputPath, ...inputPaths) {
+function generateTypeDefinitions(outputPath, inputPaths) {
   const definitions = [].concat(...inputPaths.map((inputPath) => {
     const code = fs.readFileSync(inputPath, 'utf-8');
     return parseExterns(code);
@@ -19,7 +19,26 @@ function processFile(outputPath, ...inputPaths) {
   stream.end();
 }
 
-processFile(
-  path.join(__dirname, '..', 'dist', 'shaka-player.compiled.d.ts'),
-  ...process.argv.slice(2)
-);
+function main(args) {
+  var inputPaths = [];
+  var outputPath;
+
+  for (var i = 0; i < args.length; ++i) {
+    if (args[i] == '--output') {
+      outputPath = args[i + 1];
+      ++i;
+    } else {
+      inputPaths.push(args[i]);
+    }
+  }
+  console.assert(outputPath,
+                 'You must specify output file with --output <EXTERNS>');
+  console.assert(inputPaths.length,
+                 'You must specify at least one input file.');
+  
+  generateTypeDefinitions(outputPath, inputPaths);
+}
+
+
+// Skip argv[0], which is the node binary, and argv[1], which is the script.
+main(process.argv.slice(2));
