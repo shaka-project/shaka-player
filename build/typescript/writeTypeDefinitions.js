@@ -131,6 +131,10 @@ function writeClassNode(writer, root, node) {
   if (attributes.implements) {
     classDeclaration += ' implements ' + attributes.implements;
   }
+
+  // Include construcotr description before class declaration as well,
+  // as they can describe the constructor, the class, or both.
+  writeComments(writer, [node.definition.attributes.description]);
   writer.writeLine(`class ${classDeclaration} {`);
   writer.increaseLevel();
 
