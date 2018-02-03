@@ -409,7 +409,6 @@ function writeEnumNode(writer, node) {
 }
 
 function writeComments(writer, comments) {
-  // TODO: Handle max line length and newlines in comment
   if (comments.length > 0) {
     writer.writeLine('/**');
     for (const comment of comments) {
