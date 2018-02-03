@@ -287,7 +287,7 @@ function writeTypedefNode(writer, root, node) {
   const attributes = node.definition.attributes;
   const typedefType = attributes.typedefType;
 
-    writeComments(writer, attributes.comments);
+  writeComments(writer, attributes.comments);
   if (attributes.props) {
     // Typedef defines an object structure, declare as interface
     writer.writeLine(`interface ${node.name} {`);
