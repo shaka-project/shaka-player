@@ -307,12 +307,10 @@ function writeTypedefNode(writer, root, node) {
 
     writer.decreaseLevel();
     writer.writeLine('}');
-  } else if (typedefType.type === 'FuncionType' && typedefType.new) {
+  } else if (typedefType.type === 'FunctionType' && typedefType.new) {
     // Type definition describes a class factory.
     // In TypeScript, these are declared as interfaces with a
     // 'new' method.
-
-    const returnType = generateType(root, typedefType.this);
 
     writer.writeLine(`interface ${node.name} {`);
     writer.increaseLevel();
@@ -337,11 +335,12 @@ function writeTypedefNode(writer, root, node) {
           description: '',
           comments: [],
           paramTypes: paramTypes,
+          returnType: typedefType.this,
         },
       },
     };
 
-    writeFunctionNode(writer, root, node, null);
+    writeFunctionNode(writer, root, functionNode, null);
 
     writer.decreaseLevel();
     writer.writeLine('}');
