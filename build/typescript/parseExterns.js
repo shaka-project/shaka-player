@@ -106,7 +106,6 @@ function parseBlockComment(comment) {
         attributes.description = normalizeDescription(tag.description);
         break;
       case 'typedef':
-        // TODO: Handle @property
         attributes.type = 'typedef';
         attributes.typedefType = tag.type;
         break;
