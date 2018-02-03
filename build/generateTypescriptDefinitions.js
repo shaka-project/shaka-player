@@ -114,6 +114,7 @@ function parseBlockComment(comment) {
         attributes.description = tag.description;
         break;
       case 'typedef':
+        // TODO: Handle @property
         attributes.type = 'typedef';
         break;
       case 'const':
@@ -305,6 +306,33 @@ function writeClassNode(buffer, root, node) {
     }
   }
 
+  // Gather all prototype members
+  for (const child of prototype.children.values()) {
+    console.assert(
+      child.definition !== null,
+      'Unexpected child without definition in class definition:',
+      child
+    );
+
+    const type = child.definition.attributes.type || child.definition.type;
+    switch (child.definition.type) {
+      case 'const':
+        properties.push(child);
+        break;
+      case 'property':
+        properties.push(child);
+        break;
+      case 'function':
+        methods.push(child);
+        break;
+      default:
+        console.error(
+          'Found unexpected node type', type, 'in class definition'
+        );
+    }
+  }
+
+  // TODO: Handle implements and extends
   buffer.writeLine(`class ${node.name} {`);
   buffer.indent();
 
@@ -315,13 +343,32 @@ function writeClassNode(buffer, root, node) {
     const rawType = isConst ? attributes.constType : attributes.propType;
     const type = generateType(rawType);
     buffer.writeLine(
-      `static${isConst ? ' readonly' : ''} ${propNode.name}: ${type};`
+      `static ${isConst ? 'readonly ' : ''}${propNode.name}: ${type};`
     );
   }
 
   // Static methods
   for (const methodNode of staticMethods) {
     writeFunctionNode(buffer, methodNode, 'static');
+  }
+
+  // Properties
+  for (const propNode of properties) {
+    const attributes = propNode.definition.attributes;
+    const isConst = attributes.type === 'const';
+    const rawType = isConst ? attributes.constType : attributes.propType;
+    const type = generateType(rawType);
+    buffer.writeLine(
+      `${isConst ? 'readonly ' : ''}${propNode.name}: ${type};`
+    );
+  }
+
+  // Constructor
+  writeFunctionNode(buffer, node, null, true);
+
+  // Methods
+  for (const methodNode of methods) {
+    writeFunctionNode(buffer, methodNode, null);
   }
 
   buffer.outdent();
@@ -336,19 +383,25 @@ function writeClassNode(buffer, root, node) {
   }
 }
 
-function writeFunctionNode(buffer, node, keyword = 'function') {
+function writeFunctionNode(
+  buffer,
+  node,
+  keyword = 'function',
+  isConstructor = false
+) {
   const attributes = node.definition.attributes;
+  const paramTypes = attributes.paramTypes || {};
 
   writeComments(buffer, attributes.comments);
 
   const params = node.definition.params.map((name) => {
-    const type = attributes.paramTypes[name];
+    const type = paramTypes[name] || 'any';
     console.assert(
       type !== undefined,
       'Missing type information for parameter',
       name,
       'in function',
-      node.name
+      node.definition.identifier.join('.')
     );
     return `${name}: ${generateType(type)}`;
   }).join(', ');
@@ -357,9 +410,12 @@ function writeFunctionNode(buffer, node, keyword = 'function') {
     ? generateType(attributes.returnType)
     : 'void';
 
+  const name = isConstructor ? 'constructor' : node.name;
+
   buffer.writeLine(
     (keyword ? keyword + ' ' : '') +
-    `${node.name}(${params}): ${returnType};`
+    `${name}(${params})` +
+    (isConstructor ? ';' : `: ${returnType};`)
   );
 }
 
@@ -383,6 +439,7 @@ function writeEnumNode(buffer, node) {
 }
 
 function writeComments(buffer, comments) {
+  // TODO: Handle max line length and newlines in comment
   if (comments.length > 0) {
     buffer.writeLine('/**');
     for (const comment of comments) {
