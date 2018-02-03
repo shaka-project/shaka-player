@@ -181,7 +181,7 @@ function writeClassNode(writer, root, node) {
   }
 
   // Constructor
-  writeFunctionNode(writer, node, null, true);
+  writeFunctionNode(writer, node, null, 'constructor', true);
 
   // Methods
   for (const methodNode of methods) {
@@ -247,7 +247,6 @@ function writeInterfaceNode(writer, root, node) {
     }
   }
 
-
   writeComments(writer, attributes.comments);
   if (baseInterface) {
     writer.writeLine(`interface ${node.name} extends ${baseInterface} {`);
@@ -286,8 +285,9 @@ function writeInterfaceNode(writer, root, node) {
 
 function writeTypedefNode(writer, root, node) {
   const attributes = node.definition.attributes;
+  const typedefType = attributes.typedefType;
 
-  writeComments(writer, attributes.comments);
+    writeComments(writer, attributes.comments);
   if (attributes.props) {
     // Typedef defines an object structure, declare as interface
     writer.writeLine(`interface ${node.name} {`);
@@ -303,8 +303,46 @@ function writeTypedefNode(writer, root, node) {
 
     writer.decreaseLevel();
     writer.writeLine('}');
+  } else if (typedefType.type === 'FuncionType' && typedefType.new) {
+    // Type definition describes a class factory.
+    // In TypeScript, these are declared as interfaces with a
+    // 'new' method.
+
+    const returnType = generateType(typedefType.this);
+
+    writer.writeLine(`interface ${node.name} {`);
+    writer.increaseLevel();
+
+    // TypeScript doesn't allow nameless parameter declarations,
+    // so we are just going to follow a p0, p1, ... schema.
+    const params = typedefType.params.map((_, i) => 'p' + i);
+    const paramTypes = typedefType.params.reduce((acc, type, i) => {
+      acc['p' + i] = type;
+      return acc;
+    }, {});
+
+    const functionNode = {
+      name: 'new',
+      children: new Map(),
+      definition: {
+        type: 'function',
+        identifier: node.definition.identifier.concat(['new']),
+        params: params,
+        attributes: {
+          type: 'function',
+          description: '',
+          comments: [],
+          paramTypes: paramTypes,
+        },
+      },
+    };
+
+    writeFunctionNode(writer, node, null);
+
+    writer.decreaseLevel();
+    writer.writeLine('}');
   } else {
-    const type = generateType(attributes.typedefType);
+    const type = generateType(typedefType);
     writer.writeLine(`type ${node.name} = ${type};`);
   }
 }
@@ -313,7 +351,8 @@ function writeFunctionNode(
   writer,
   node,
   keyword = 'function',
-  isConstructor = false
+  name = undefined,
+  omitReturn = false
 ) {
   const attributes = node.definition.attributes;
   const paramTypes = attributes.paramTypes || {};
@@ -337,12 +376,12 @@ function writeFunctionNode(
     ? generateType(attributes.returnType)
     : 'void';
 
-  const name = isConstructor ? 'constructor' : node.name;
+  const functionName = name || node.name;
 
   writer.writeLine(
     (keyword ? keyword + ' ' : '') +
-    `${name}(${params})` +
-    (isConstructor ? ';' : `: ${returnType};`)
+    `${functionName}(${params})` +
+    (omitReturn ? ';' : `: ${returnType};`)
   );
 }
 
