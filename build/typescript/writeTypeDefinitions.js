@@ -60,7 +60,9 @@ function writeClassNode(writer, root, node) {
   const properties = [];
   const methods = [];
   const others = [];
-  const prototype = node.children.get('prototype');
+  // Class might consist of only a constructor
+  // Prototype defaults to empty in that case
+  const prototype = node.children.get('prototype') || { children: new Map() };
 
   // Gather all static members
   for (const child of node.children.values()) {
