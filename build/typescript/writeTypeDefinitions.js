@@ -182,8 +182,7 @@ function writeClassNode(writer, root, node) {
         rawType = base && base.type;
       }
     }
-    const type = generateType(rawType);
-    console.log(type);
+    const type = generateType(root, rawType);
     let declaration = `${propNode.name}: ${type};`;
     if (isConst) {
       declaration = 'readonly ' + declaration;
