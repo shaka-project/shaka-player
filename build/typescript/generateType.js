@@ -25,12 +25,14 @@ function processType(root, rawType) {
     case 'NameExpression': {
       let isNullabe = primitiveTypes.includes(rawType.name);
       if (isNullabe) {
-        // Also check if type is an enum to ensure to base type
+        // Also check if type is an enum to ensure the base type
         // isn't a primitive.
         const node = getNodeAtPath(root, rawType.name.split('.'));
-        isNullabe = node != null &&
-          node.definition.attributes.type === 'enum' &&
-          primitiveTypes.includes(node.definition.attributes.enumType);
+        if (node && node.definition.attributes.type === 'enum') {
+          isNullabe = primitiveTypes.includes(
+            node.definition.attributes.enumType
+          );
+        }
       }
       return {
         isNullabe: isNullabe,
