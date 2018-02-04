@@ -77,7 +77,7 @@ function writeClassNode(writer, root, node) {
     }
     console.assert(
       child.definition !== null,
-      'Unexpected child without definition in class definition:',
+      'Unexpected child without definition in class statics:',
       child
     );
 
@@ -101,7 +101,7 @@ function writeClassNode(writer, root, node) {
   for (const child of prototype.children.values()) {
     console.assert(
       child.definition !== null,
-      'Unexpected child without definition in class definition:',
+      'Unexpected child without definition in class prototype:',
       child
     );
 
@@ -118,7 +118,7 @@ function writeClassNode(writer, root, node) {
         break;
       default:
         throw new Error(
-          `Found unexpected node type ${type} in class definition`
+          `Found unexpected node type ${type} in class prototype`
         );
     }
   }
@@ -170,6 +170,7 @@ function writeClassNode(writer, root, node) {
         const base = getNodeAtPath(
           interface.children, ['prototype', propNode.name]
         );
+        console.dir(base, { depth: 10 });
         if (base) {
           const attributes = base.definition.attributes;
           isConst = attributes.type === 'const';
@@ -182,9 +183,12 @@ function writeClassNode(writer, root, node) {
       }
     }
     const type = generateType(rawType);
-    writer.writeLine(
-      `${isConst ? 'readonly ' : ''}${propNode.name}: ${type};`
-    );
+    console.log(type);
+    let declaration = `${propNode.name}: ${type};`;
+    if (isConst) {
+      declaration = 'readonly ' + declaration;
+    }
+    writer.writeLine(declaration);
   }
 
   // Constructor
@@ -272,9 +276,11 @@ function writeInterfaceNode(writer, root, node) {
     const isConst = attributes.type === 'const';
     const rawType = isConst ? attributes.constType : attributes.propType;
     const type = generateType(root, rawType);
-    writer.writeLine(
-      `${isConst ? 'readonly ' : ''}${propNode.name}: ${type};`
-    );
+    let declaration = `${propNode.name}: ${type};`;
+    if (isConst) {
+      declaration = 'readonly ' + declaration;
+    }
+    writer.writeLine(declaration);
   }
 
   // Methods
@@ -352,7 +358,7 @@ function writeTypedefNode(writer, root, node) {
     writer.decreaseLevel();
     writer.writeLine('}');
   } else {
-    const type = generateType(root, typedefType);
+    const type = generateType(root, typedefType, false);
     writer.writeLine(`type ${node.name} = ${type};`);
   }
 }

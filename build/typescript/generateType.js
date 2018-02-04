@@ -13,7 +13,7 @@ const primitiveTypes = [
   'string',
 ];
 
-function processType(root, rawType) {
+function processType(root, rawType, inferNullability) {
   if (!rawType) {
     return {
       isNullabe: false,
@@ -23,6 +23,12 @@ function processType(root, rawType) {
 
   switch (rawType.type) {
     case 'NameExpression': {
+      if (!inferNullability) {
+        return {
+          isNullabe: false,
+          name: rawType.name,
+        };
+      }
       let isNullabe = !primitiveTypes.includes(rawType.name);
       if (isNullabe) {
         // Also check if type is an enum to ensure the base type
@@ -41,43 +47,47 @@ function processType(root, rawType) {
     }
     case 'NullableType':
       return Object.assign(
-        processType(root, rawType.expression),
+        processType(root, rawType.expression, inferNullability),
         { isNullabe: true }
       );
     case 'NonNullableType':
       return Object.assign(
-        processType(root, rawType.expression),
+        processType(root, rawType.expression, inferNullability),
         { isNullabe: false }
       );
     case 'OptionalType':
       return Object.assign(
-        processType(root, rawType.expression),
+        processType(root, rawType.expression, inferNullability),
         { isOptional: true }
       );
     case 'RestType':
       return {
         name: 'Array',
         isNullabe: false,
-        applications: [processType(root, rawType.expression)],
+        applications: [processType(root, rawType.expression, false)],
       };
     case 'TypeApplication':
       return Object.assign(
-        processType(root, rawType.expression),
+        processType(root, rawType.expression, inferNullability),
         {
-          applications: rawType.applications.map(processType.bind(null, root)),
+          applications: rawType.applications.map(
+            (t) => processType(root, t, false)
+          ),
         }
       );
     case 'UnionType':
       return {
         isUnion: true,
-        elements: rawType.elements.map(processType.bind(null, root)),
+        elements: rawType.elements.map(
+          (t) => processType(root, t, inferNullability)
+        ),
       };
     case 'FunctionType':
       return {
         isFunction: true,
-        params: rawType.params.map(processType.bind(null, root)),
+        params: rawType.params.map((t) => processType(root, t, true)),
         returnType: rawType.result
-          ? processType(root, rawType.result)
+          ? processType(root, rawType.result, true)
           : { isNullabe: false, name: 'void' },
       };
     case 'RecordType':
@@ -85,7 +95,7 @@ function processType(root, rawType) {
         isRecord: true,
         fields: rawType.fields.map((field) => ({
           key: field.key,
-          value: processType(root, field.value),
+          value: processType(root, field.value, true),
         })),
       };
     case 'UndefinedLiteral':
@@ -167,19 +177,15 @@ function stringifyType(type) {
     const applications = type.applications.map(stringifyType).join(', ');
     str += '<' + applications + '>';
   }
-
   if (type.isNullabe) {
     str += ' | null';
-  }
-  if (type.isRest) {
-    str = '...' + str;
   }
 
   return str;
 }
 
-function generateType(root, rawType) {
-  return stringifyType(processType(root, rawType));
+function generateType(root, rawType, inferNullability = true) {
+  return stringifyType(processType(root, rawType, inferNullability));
 }
 
 module.exports = generateType;
