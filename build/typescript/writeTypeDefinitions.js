@@ -50,15 +50,26 @@ function getPropTypeFromInterface(interface, propName) {
     );
     if (base) {
       const baseAttributes = base.definition.attributes;
-      isConst = attributes.type === 'const';
-      return isConst ? baseAttributes.constType : baseAttributes.propType;
+      isConst = baseAttributes.type === 'const';
+      return {
+        rawType: isConst
+          ? baseAttributes.constType
+          : baseAttributes.propType,
+        isConst: isConst,
+      };
     }
   } else if (attributes.type === 'typedef' && attributes.props) {
     const base = attributes.props.find((p) => p.name === propName);
-    return base && base.type;
+    return {
+      rawType: base && base.type,
+      isConst: false,
+    };
   }
 
-  return null;
+  return {
+    rawType: null,
+    isConst: false,
+  };
 }
 
 function getMethodTypesFromInterface(interface, methodName) {
@@ -195,9 +206,12 @@ function writeClassNode(writer, root, node) {
     const isConst = attributes.type === 'const';
     const rawType = isConst ? attributes.constType : attributes.propType;
     const type = generateType(root, rawType);
-    writer.writeLine(
-      `static ${isConst ? 'readonly ' : ''}${propNode.name}: ${type};`
-    );
+    let declaration = `${propNode.name}: ${type};`;
+    if (isConst) {
+      declaration = 'readonly ' + declaration;
+    }
+    declaration = 'static ' + declaration;
+    writer.writeLine(declaration);
   }
 
   // Static methods
@@ -213,7 +227,9 @@ function writeClassNode(writer, root, node) {
     if (!rawType && interface) {
       // Check if this property has been defined in the implemented
       // interface.
-      rawType = getPropTypeFromInterface(interface, propNode.name);
+      const propType = getPropTypeFromInterface(interface, propNode.name);
+      rawType = propType.rawType;
+      isConst = propType.isConst;
     }
     const type = generateType(root, rawType);
     let declaration = `${propNode.name}: ${type};`;
@@ -328,10 +344,12 @@ function writeInterfaceNode(writer, root, node) {
   // Properties
   for (const propNode of properties) {
     const attributes = propNode.definition.attributes;
-    const isConst = attributes.type === 'const';
+    let isConst = attributes.type === 'const';
     let rawType = isConst ? attributes.constType : attributes.propType;
     if (!rawType && baseInterface) {
-      rawType = getPropTypeFromInterface(baseInterface, propNode.name);
+      const type = getPropTypeFromInterface(interface, propNode.name);
+      rawType = type.rawType;
+      isConst = type.isConst;
     }
     const type = generateType(root, rawType);
     let declaration = `${propNode.name}: ${type};`;
