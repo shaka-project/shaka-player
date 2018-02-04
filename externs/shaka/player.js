@@ -202,7 +202,7 @@ shakaExtern.BufferedInfo;
  * @property {number} id
  *   The unique ID of the track.
  * @property {boolean} active
- *   If true, this is the track is being streamed (another track may be
+ *   If true, this is the track being streamed (another track may be
  *   visible/audible in the buffer).
  *
  * @property {string} type
