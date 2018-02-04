@@ -229,10 +229,10 @@ function writeClassNode(writer, root, node) {
   // Methods
   for (const methodNode of methods) {
     const attributes = methodNode.definition.attributes;
-    if (!attributes.paramTypes && !attributes.returnType && interface) {
+    if ((!attributes.paramTypes  || !attributes.returnType) && interface) {
       const types = getMethodTypesFromInterface(interface, methodNode.name);
-      attributes.paramTypes = types.paramTypes;
-      attributes.returnType = types.returnType;
+      attributes.paramTypes = attributes.paramTypes || types.paramTypes;
+      attributes.returnType = attributes.returnType || types.returnType;
     }
     writeFunctionNode(writer, root, methodNode, null);
   }
@@ -344,10 +344,10 @@ function writeInterfaceNode(writer, root, node) {
   // Methods
   for (const methodNode of methods) {
     const attributes = methodNode.definition.attributes;
-    if (!attributes.paramTypes && !attributes.returnType && baseInterface) {
+    if ((!attributes.paramTypes || !attributes.returnType) && baseInterface) {
       const types = getMethodTypesFromInterface(baseInterface, methodNode.name);
-      attributes.paramTypes = types.paramTypes;
-      attributes.returnType = types.returnType;
+      attributes.paramTypes = attributes.paramTypes || types.paramTypes;
+      attributes.returnType = attributes.returnType || types.returnType;
     }
     writeFunctionNode(writer, root, methodNode, null);
   }
