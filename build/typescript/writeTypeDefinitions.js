@@ -42,6 +42,54 @@ class StreamWriter extends AbstractWriter {
   }
 }
 
+function getPropTypeFromInterface(interface, propName) {
+  const attributes = interface.definition.attributes;
+  if (attributes.type === 'interface') {
+    const base = getNodeAtPath(
+      interface.children, ['prototype', propName]
+    );
+    if (base) {
+      const baseAttributes = base.definition.attributes;
+      isConst = attributes.type === 'const';
+      return isConst ? baseAttributes.constType : baseAttributes.propType;
+    }
+  } else if (attributes.type === 'typedef' && attributes.props) {
+    const base = attributes.props.find((p) => p.name === propName);
+    return base && base.type;
+  }
+
+  return null;
+}
+
+function getMethodTypesFromInterface(interface, methodName) {
+  const attributes = interface.definition.attributes;
+  if (attributes.type === 'interface') {
+    const base = getNodeAtPath(
+      interface.children, ['prototype', methodName]
+    );
+    if (base) {
+      const baseAttributes = base.definition.attributes;
+      return {
+        paramTypes: baseAttributes.paramTypes,
+        returnType: baseAttributes.returnType,
+      };
+    }
+  } else if (attributes.type === 'typedef' && attributes.props) {
+    const base = attributes.props.find((p) => p.name === methodName);
+    if (base.type === 'FunctionType') {
+      return {
+        paramTypes: base.params,
+        returnType: base.result,
+      };
+    }
+  }
+
+  return {
+    paramTypes: null,
+    returnType: null,
+  };
+}
+
 function writeClassNode(writer, root, node) {
   const staticProperties = [];
   const staticMethods = [];
@@ -165,22 +213,7 @@ function writeClassNode(writer, root, node) {
     if (!rawType && interface) {
       // Check if this property has been defined in the implemented
       // interface.
-      const attributes = interface.definition.attributes;
-      if (attributes.type === 'interface') {
-        const base = getNodeAtPath(
-          interface.children, ['prototype', propNode.name]
-        );
-        console.dir(base, { depth: 10 });
-        if (base) {
-          const attributes = base.definition.attributes;
-          isConst = attributes.type === 'const';
-          rawType = isConst ? attributes.constType : attributes.propType;
-        }
-      } else if (attributes.type === 'typedef') {
-        const base = attributes.props &&
-          attributes.props.find((p) => p.name === propNode.name);
-        rawType = base && base.type;
-      }
+      rawType = getPropTypeFromInterface(interface, propNode.name);
     }
     const type = generateType(root, rawType);
     let declaration = `${propNode.name}: ${type};`;
@@ -195,6 +228,12 @@ function writeClassNode(writer, root, node) {
 
   // Methods
   for (const methodNode of methods) {
+    const attributes = methodNode.definition.attributes;
+    if (!attributes.paramTypes && !attributes.returnType && interface) {
+      const types = getMethodTypesFromInterface(interface, methodNode.name);
+      attributes.paramTypes = types.paramTypes;
+      attributes.returnType = types.returnType;
+    }
     writeFunctionNode(writer, root, methodNode, null);
   }
 
@@ -216,7 +255,24 @@ function writeInterfaceNode(writer, root, node) {
   const others = [];
   const prototype = node.children.get('prototype');
   const attributes = node.definition.attributes;
-  const baseInterface = attributes.extends;
+
+  // Find interfaces for classes with implements keyword
+  const baseInterfaceName = node.definition.attributes.extends;
+  const baseInterface = baseInterfaceName &&
+    getNodeAtPath(root, baseInterfaceName.split('.'));
+  if (baseInterface != null) {
+    const attributes = baseInterface.definition.attributes;
+    // Only allow names of interfaces or typedefs for @implements
+    console.assert(
+      attributes.type === 'interface' ||
+      attributes.type === 'typedef',
+      'Expected name of interface or typedef after extends keyword, got',
+      attributes.type
+    );
+  }
+  // If interface could not be found, still proceed.
+  // We assume the interface is a native interface in that case,
+  // defined by one of TypeScript's base libs.
 
   // Gather all non-prototype members
   for (const child of node.children.values()) {
@@ -225,7 +281,7 @@ function writeInterfaceNode(writer, root, node) {
     }
     console.assert(
       child.definition !== null,
-      'Unexpected child without definition in interface definition:',
+      'Unexpected child without definition in interface statics:',
       child
     );
     others.push(child);
@@ -235,7 +291,7 @@ function writeInterfaceNode(writer, root, node) {
   for (const child of prototype.children.values()) {
     console.assert(
       child.definition !== null,
-      'Unexpected child without definition in interface definition:',
+      'Unexpected child without definition in interface prototype:',
       child
     );
 
@@ -252,7 +308,7 @@ function writeInterfaceNode(writer, root, node) {
         break;
       default:
         throw new Error(
-          `Found unexpected node type ${type} in interface definition`
+          `Found unexpected node type ${type} in interface prototype`
         );
     }
   }
@@ -261,8 +317,8 @@ function writeInterfaceNode(writer, root, node) {
   if (attributes.template) {
     declaration += '<' + attributes.template.join(', ') + '>';
   }
-  if (baseInterface) {
-    declaration += ' extends ' + baseInterface;
+  if (baseInterfaceName) {
+    declaration += ' extends ' + baseInterfaceName;
   }
 
   writeComments(writer, attributes.comments);
@@ -273,7 +329,10 @@ function writeInterfaceNode(writer, root, node) {
   for (const propNode of properties) {
     const attributes = propNode.definition.attributes;
     const isConst = attributes.type === 'const';
-    const rawType = isConst ? attributes.constType : attributes.propType;
+    let rawType = isConst ? attributes.constType : attributes.propType;
+    if (!rawType && baseInterface) {
+      rawType = getPropTypeFromInterface(baseInterface, propNode.name);
+    }
     const type = generateType(root, rawType);
     let declaration = `${propNode.name}: ${type};`;
     if (isConst) {
@@ -284,6 +343,12 @@ function writeInterfaceNode(writer, root, node) {
 
   // Methods
   for (const methodNode of methods) {
+    const attributes = methodNode.definition.attributes;
+    if (!attributes.paramTypes && !attributes.returnType && baseInterface) {
+      const types = getMethodTypesFromInterface(baseInterface, methodNode.name);
+      attributes.paramTypes = types.paramTypes;
+      attributes.returnType = types.returnType;
+    }
     writeFunctionNode(writer, root, methodNode, null);
   }
 
