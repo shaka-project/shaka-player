@@ -98,8 +98,9 @@ function httpPluginTests(usingFetch) {
       'status': 403
     });
     stubRequest('https://foo.bar/404').andReturn({
-      'response': new ArrayBuffer(0),
-      'status': 404
+      'response': new Uint8Array([65, 66, 67]).buffer, // "ABC"
+      'status': 404,
+      'responseHeaders': { 'FOO': 'BAR' }
     });
     stubRequest('https://foo.bar/cache').andReturn({
       'response': new ArrayBuffer(0),
@@ -201,13 +202,17 @@ function httpPluginTests(usingFetch) {
   });
 
   it('fails if non-2xx status', function(done) {
-    testFails('https://foo.bar/404', done);
+    var uri = 'https://foo.bar/404';
+    testFails(uri, done, null, shaka.util.Error.Code.BAD_HTTP_STATUS,
+        [uri, 404, 'ABC', { 'foo': 'BAR' }, requestType]);
     PromiseMock.flush();
   });
 
   it('fails on timeout', function(done) {
-    testFails('https://foo.bar/timeout', done,
-        shaka.util.Error.Severity.RECOVERABLE, shaka.util.Error.Code.TIMEOUT);
+    var uri = 'https://foo.bar/timeout';
+    testFails(uri, done, shaka.util.Error.Severity.RECOVERABLE,
+        shaka.util.Error.Code.TIMEOUT, [uri, requestType]);
+
     // When using fetch, timeout is handled manually by the plugin, instead of
     // being done by the mocking framework, so we need to actually wait.
     if (usingFetch)
@@ -216,7 +221,9 @@ function httpPluginTests(usingFetch) {
   });
 
   it('fails on error', function(done) {
-    testFails('https://foo.bar/error', done);
+    var uri = 'https://foo.bar/error';
+    testFails(uri, done, shaka.util.Error.Severity.RECOVERABLE,
+        shaka.util.Error.Code.HTTP_ERROR, [uri, jasmine.any(Error), requestType]);
     PromiseMock.flush();
   });
 
@@ -336,8 +343,9 @@ function httpPluginTests(usingFetch) {
    * @param {function()} done
    * @param {shaka.util.Error.Severity=} opt_severity
    * @param {shaka.util.Error.Code=} opt_code
+   * @param {Array<*>=} opt_errorData
    */
-  function testFails(uri, done, opt_severity, opt_code) {
+  function testFails(uri, done, opt_severity, opt_code, opt_errorData) {
     var request = shaka.net.NetworkingEngine.makeRequest(
         [uri], retryParameters);
     plugin(uri, request, requestType).promise
@@ -349,6 +357,9 @@ function httpPluginTests(usingFetch) {
           if (opt_code)
             expect(error.code).toBe(opt_code);
           expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
+          if (opt_errorData) {
+            expect(error.data).toEqual(opt_errorData);
+          }
 
           expect(mostRecentRequest().url).toBe(uri);
         })
