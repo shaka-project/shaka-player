@@ -139,8 +139,11 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
       });
       networkingEngine.request(requestType, request).promise
           .then(fail)
-          .catch(function() { expect(rejectScheme.calls.count()).toBe(3); })
-          .then(done);
+          .catch(function(error) {
+            // It is expected to fail with the most recent error.
+            expect(error).toEqual(jasmine.any(shaka.util.Error));
+            expect(rejectScheme.calls.count()).toBe(3);
+          }).then(done);
     });
 
     describe('backoff', function() {
