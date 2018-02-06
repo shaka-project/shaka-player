@@ -76,6 +76,8 @@ describe('StreamingEngine', function() {
   /** @type {!jasmine.Spy} */
   let onManifestUpdate;
   /** @type {!jasmine.Spy} */
+  let onTimelineRegionAdded;
+  /** @type {!jasmine.Spy} */
   let onInitialStreamsSetup;
   /** @type {!jasmine.Spy} */
   let onStartupComplete;
@@ -437,6 +439,7 @@ describe('StreamingEngine', function() {
     onError.and.callFake(fail);
     onEvent = jasmine.createSpy('onEvent');
     onManifestUpdate = jasmine.createSpy('onManifestUpdate');
+    onTimelineRegionAdded = jasmine.createSpy('onTimelineRegionAdded');
 
     let config;
     if (opt_config) {
@@ -465,6 +468,7 @@ describe('StreamingEngine', function() {
       onError: Util.spyFunc(onError),
       onEvent: Util.spyFunc(onEvent),
       onManifestUpdate: Util.spyFunc(onManifestUpdate),
+      onTimelineRegionAdded: Util.spyFunc(onTimelineRegionAdded),
       onSegmentAppended: function() {},
       onInitialStreamsSetup: Util.spyFunc(onInitialStreamsSetup),
       onStartupComplete: Util.spyFunc(onStartupComplete)
@@ -2704,12 +2708,7 @@ describe('StreamingEngine', function() {
 
     it('raises an event for embedded emsg boxes', function() {
       videoStream1.containsEmsgBoxes = true;
-      segmentData[ContentType.VIDEO].segments[0] =
-          Uint8ArrayUtils.fromHex(
-              '0000003b656d736700000000666f6f3a' +
-              '6261723a637573746f6d646174617363' +
-              '68656d65003100000000010000000800' +
-              '00ffff0000000174657374').buffer;
+      segmentData[ContentType.VIDEO].segments[0] = getEmsgSegment();
 
       // Here we go!
       streamingEngine.init();
@@ -2718,27 +2717,13 @@ describe('StreamingEngine', function() {
       expect(onEvent).toHaveBeenCalled();
 
       let event = onEvent.calls.argsFor(0)[0];
-      expect(event.detail).toEqual({
-        startTime: 8,
-        endTime: 0xffff + 8,
-        schemeIdUri: 'foo:bar:customdatascheme',
-        value: '1',
-        timescale: 1,
-        presentationTimeDelta: 8,
-        eventDuration: 0xffff,
-        id: 1,
-        messageData: new Uint8Array([116, 101, 115, 116])
-      });
+      let expectedEmsg = getExpectedEmsg();
+      expect(event.detail).toEqual(expectedEmsg);
     });
 
     it('won\'t raise an event without stream field set', function() {
       videoStream1.containsEmsgBoxes = false;
-      segmentData[ContentType.VIDEO].segments[0] =
-          Uint8ArrayUtils.fromHex(
-              '0000003b656d736700000000666f6f3a' +
-              '6261723a637573746f6d646174617363' +
-              '68656d65003100000000010000000800' +
-              '00ffff0000000174657374').buffer;
+      segmentData[ContentType.VIDEO].segments[0] = getEmsgSegment();
 
       // Here we go!
       streamingEngine.init();
@@ -2775,6 +2760,41 @@ describe('StreamingEngine', function() {
       expect(onEvent).not.toHaveBeenCalled();
       expect(onManifestUpdate).toHaveBeenCalled();
     });
+
+    it('adds timeline regions for emsg events', function () {
+      videoStream1.containsEmsgBoxes = true;
+      segmentData[ContentType.VIDEO].segments[0] = getEmsgSegment();
+
+      // Here we go!
+      streamingEngine.init();
+      runTest();
+
+      var expectedEmsg = getExpectedEmsg();
+      expect(onTimelineRegionAdded).toHaveBeenCalledWith(expectedEmsg);
+    });
+
+    function getExpectedEmsg() {
+      // Gives us the expected emsg object from `getEmsgSegment` data
+      return {
+        startTime: 8,
+        endTime: 0xffff + 8,
+        schemeIdUri: 'foo:bar:customdatascheme',
+        value: '1',
+        timescale: 1,
+        presentationTimeDelta: 8,
+        eventDuration: 0xffff,
+        id: 1,
+        messageData: new Uint8Array([116, 101, 115, 116])
+      };
+    }
+
+    function getEmsgSegment() {
+      return Uint8ArrayUtils.fromHex(
+        '0000003b656d736700000000666f6f3a' +
+        '6261723a637573746f6d646174617363' +
+        '68656d65003100000000010000000800' +
+        '00ffff0000000174657374').buffer;
+    }
   });
 
   /**
