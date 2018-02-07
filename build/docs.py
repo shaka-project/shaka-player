@@ -36,7 +36,7 @@ def build_docs(_):
   os.chdir(base)
 
   jsdoc = shakaBuildHelpers.get_node_binary('jsdoc')
-  cmd_line = jsdoc + ['-c', 'docs/jsdoc.conf.json', '-R', 'docs/api-mainpage.md']
+  cmd_line = jsdoc + ['-c', 'docs/jsdoc.conf.json']
   return shakaBuildHelpers.execute_get_code(cmd_line)
 
 

@@ -22,8 +22,10 @@
   },
   "plugins": [ "docs/jsdoc-plugin" ],
   "opts": {
+    "pedantic": true,
     "private": true,
     "recurse": true,
+    "readme": "docs/api-mainpage.md",
     "tutorials": "docs/tutorials",
     "template": "docs/jsdoc-template",
     "destination": "docs/api"
