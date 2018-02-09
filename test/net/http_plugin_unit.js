@@ -147,6 +147,27 @@ function httpPluginTests(usingFetch) {
     PromiseMock.flush();
   });
 
+  if (usingFetch) {
+    // Regression test for an issue with Edge, where Fetch fails if the body
+    // is set to null but succeeds on undefined.
+    it('sets a request\'s null body to undefined', function(done) {
+      var request = shaka.net.NetworkingEngine.makeRequest(
+          ['https://foo.bar/'], retryParameters);
+      request.body = null;
+      request.method = 'GET';
+
+      plugin(request.uris[0], request, requestType).promise
+          .then(function() {
+            var actual = jasmine.Fetch.requests.mostRecent();
+            expect(actual).toBeTruthy();
+            expect(actual.body).toBeUndefined();
+          })
+          .catch(fail)
+          .then(done);
+      PromiseMock.flush();
+    });
+  }
+
   it('fails with 202 status', function(done) {
     testFails('https://foo.bar/202', done);
     PromiseMock.flush();

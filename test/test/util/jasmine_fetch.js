@@ -100,6 +100,7 @@ jasmine.Fetch.impl_ = function(url, init) {
     url: url,
     query: null,
     data: null,
+    body: init.body,
     method: init.method,
     requestHeaders: headers,
     withCredentials: init.credentials == 'include',
@@ -303,6 +304,8 @@ jasmine.Fetch.RequestStub = function(url) {
   this.timeout = false;
   this.error = false;
 
+  /** @type {ArrayBuffer|undefined} */
+  this.body = undefined;
   /** @type {?string} */
   this.query = null;
   /** @type {?Object} */
