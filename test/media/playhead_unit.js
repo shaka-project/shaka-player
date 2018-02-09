@@ -140,7 +140,6 @@ describe('Playhead', function() {
     timeline.getDuration.and.returnValue(60);
 
     // These tests should not cause these methods to be invoked.
-    timeline.getSegmentAvailabilityDuration.and.throwError(new Error());
     timeline.setDuration.and.throwError(new Error());
 
     manifest = {
@@ -378,7 +377,6 @@ describe('Playhead', function() {
     timeline.getDuration.and.returnValue(Infinity);
     timeline.getSegmentAvailabilityStart.and.returnValue(5);
     timeline.getSegmentAvailabilityEnd.and.returnValue(60);
-    timeline.getSegmentAvailabilityDuration.and.returnValue(30);
 
     playhead = new shaka.media.Playhead(
         video,
@@ -518,7 +516,6 @@ describe('Playhead', function() {
     timeline.getSafeAvailabilityStart.and.returnValue(5);
     timeline.getSegmentAvailabilityEnd.and.returnValue(60);
     timeline.getDuration.and.returnValue(60);
-    timeline.getSegmentAvailabilityDuration.and.returnValue(null);
 
     playhead = new shaka.media.Playhead(
         video,
@@ -561,7 +558,6 @@ describe('Playhead', function() {
     timeline.getDuration.and.returnValue(Infinity);
     timeline.getSegmentAvailabilityStart.and.returnValue(1000);
     timeline.getSegmentAvailabilityEnd.and.returnValue(1000);
-    timeline.getSegmentAvailabilityDuration.and.returnValue(1000);
 
     playhead = new shaka.media.Playhead(
         video,
@@ -595,7 +591,6 @@ describe('Playhead', function() {
       timeline.getDuration.and.returnValue(Infinity);
       timeline.getSegmentAvailabilityStart.and.returnValue(5);
       timeline.getSegmentAvailabilityEnd.and.returnValue(60);
-      timeline.getSegmentAvailabilityDuration.and.returnValue(30);
 
       playhead = new shaka.media.Playhead(
           video,
@@ -612,7 +607,6 @@ describe('Playhead', function() {
       // Simulate pausing.
       timeline.getSegmentAvailabilityStart.and.returnValue(10);
       timeline.getSegmentAvailabilityEnd.and.returnValue(70);
-      timeline.getSegmentAvailabilityDuration.and.returnValue(30);
 
       // Because this is buffered, the playhead should move to (start + 5),
       // which will cause a 'seeking' event.
@@ -629,7 +623,6 @@ describe('Playhead', function() {
       timeline.getSafeAvailabilityStart.and.returnValue(5);
       timeline.getSegmentAvailabilityEnd.and.returnValue(60);
       timeline.getDuration.and.returnValue(60);
-      timeline.getSegmentAvailabilityDuration.and.returnValue(30);
 
       playhead = new shaka.media.Playhead(
           video,
@@ -647,7 +640,6 @@ describe('Playhead', function() {
       timeline.getSegmentAvailabilityStart.and.returnValue(10);
       timeline.getSafeAvailabilityStart.and.returnValue(10);
       timeline.getSegmentAvailabilityEnd.and.returnValue(70);
-      timeline.getSegmentAvailabilityDuration.and.returnValue(30);
 
       video.on['playing']();
       expect(video.currentTime).toBe(10);
