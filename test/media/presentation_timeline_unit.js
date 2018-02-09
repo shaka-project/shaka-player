@@ -275,37 +275,6 @@ describe('PresentationTimeline', function() {
     });
   });
 
-  describe('getSegmentAvailabilityDuration', function() {
-    it('returns the availability duration', function() {
-      setElapsed(0);
-      var timeline1 = makeVodTimeline(/* duration */ 60);
-      var timeline2 = makeIprTimeline(/* duration */ 60);
-      var timeline3 = makeLiveTimeline(/* availability */ 20);
-      var timeline4 = makeLiveTimeline(/* availability */ Infinity);
-      expect(timeline1.getSegmentAvailabilityDuration()).toBe(Infinity);
-      expect(timeline2.getSegmentAvailabilityDuration()).toBe(Infinity);
-      expect(timeline3.getSegmentAvailabilityDuration()).toBe(20);
-      expect(timeline4.getSegmentAvailabilityDuration()).toBe(Infinity);
-    });
-  });
-
-  describe('setSegmentAvailabilityDuration', function() {
-    it('alters the availability duration', function() {
-      setElapsed(0);
-      var timeline = makeLiveTimeline(/* availability */ Infinity);
-      expect(timeline.getSegmentAvailabilityDuration()).toBe(Infinity);
-
-      timeline.setSegmentAvailabilityDuration(7);
-      expect(timeline.getSegmentAvailabilityDuration()).toBe(7);
-
-      timeline.setSegmentAvailabilityDuration(Infinity);
-      expect(timeline.getSegmentAvailabilityDuration()).toBe(Infinity);
-
-      timeline.setSegmentAvailabilityDuration(20);
-      expect(timeline.getSegmentAvailabilityDuration()).toBe(20);
-    });
-  });
-
   describe('clockOffset', function() {
     it('offsets availability calculations', function() {
       var timeline = makeLiveTimeline(/* availability */ 10);

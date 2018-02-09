@@ -117,8 +117,6 @@ shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
     getDuration: jasmine.createSpy('getDuration'),
     setDuration: jasmine.createSpy('setDuration'),
     getMaxSegmentDuration: jasmine.createSpy('getMaxSegmentDuration'),
-    getSegmentAvailabilityDuration:
-        jasmine.createSpy('getSegmentAvailabilityDuration'),
     isLive: jasmine.createSpy('isLive'),
     getEarliestStart: jasmine.createSpy('getEarliestStart'),
     getSegmentAvailabilityStart:
@@ -158,12 +156,6 @@ shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
 
   timeline.getSeekRangeEnd.and.callFake(function() {
     return shaka.test.Util.invokeSpy(timeline.getSegmentAvailabilityEnd);
-  });
-
-  timeline.getSegmentAvailabilityDuration.and.callFake(function() {
-    return presentationDuration == Infinity ?
-           timeline.segmentAvailabilityEnd - timeline.segmentAvailabilityStart :
-           Infinity;
   });
 
   // These methods should not be invoked.
