@@ -227,3 +227,118 @@ shakaExtern.SegmentDB;
  *   The data contents of the segment.
  */
 shakaExtern.SegmentDataDB;
+
+
+/**
+ * An interface that defines access to collection of segments and manifests. All
+ * methods are designed to be batched operations allowing the implementations to
+ * optimize their operations based on how they store data.
+ *
+ * The storage cell is one of two exposed APIs used to control where and how
+ * offline content is saved. The storage cell is responsible for converting
+ * information between its internal structures and the external (library)
+ * structures.
+ *
+ * @interface
+ */
+shakaExtern.StorageCell = function() {};
+
+
+/**
+ * Free all resources used by this cell. This should not affect the stored
+ * content.
+ *
+ * @return {!Promise}
+ */
+shakaExtern.StorageCell.prototype.destroy = function() {};
+
+
+/**
+ * Check if the cell can support new keys. If a cell has a fixed key space,
+ * then all add-operations will fail as no new keys can be added. All
+ * remove-operations and update-operations should still work.
+ *
+ * @return {boolean}
+ */
+shakaExtern.StorageCell.prototype.hasFixedKeySpace = function() {};
+
+
+/**
+ * Add a group of segments. Will return a promise that resolves with a list
+ * of keys for each segment. If one segment fails to be added, all segments
+ * should fail to be added.
+ *
+ * @param {!Array.<shakaExtern.SegmentDB>} segments
+ * @return {!Promise.<!Array.<number>>}
+ */
+shakaExtern.StorageCell.prototype.addSegments = function(segments) {};
+
+
+/**
+ * Remove a group of segments using their keys to identify them. If a key
+ * is not found, then that removal should be considered successful.
+ *
+ * @param {!Array.<number>} keys
+ * @return {!Promise}
+ */
+shakaExtern.StorageCell.prototype.removeSegments = function(keys) {};
+
+
+/**
+ * Get a group of segments using their keys to identify them. If any key is
+ * not found, the promise chain will be rejected.
+ *
+ * @param {!Array.<number>} keys
+ * @return {!Promise.<!Array.<shakaExtern.SegmentDB>>}
+ */
+shakaExtern.StorageCell.prototype.getSegments = function(keys) {};
+
+
+/**
+ * Add a group of manifests. Will return a promise that resolves with a list
+ * of keys for each manifest. If one manifest fails to be added, all manifests
+ * should fail to be added.
+ *
+ * @param {!Array.<shakaExtern.ManifestDB>} manifests
+ * @return {!Promise<!Array.<number>>} keys
+ */
+shakaExtern.StorageCell.prototype.addManifests = function(manifests) {};
+
+
+/**
+ * Replace the manifests already in the storage cell, with new copies.
+ *
+ * @param {!Object<number, shakaExtern.ManifestDB>} manifests
+ * @return {!Promise}
+ */
+shakaExtern.StorageCell.prototype.updateManifests = function(manifests) {};
+
+
+/**
+ * Remove a group of manifests using their keys to identify them. If a key
+ * is not found, then that removal should be considered successful.
+ *
+ * @param {!Array.<number>} keys
+ * @return {!Promise}
+ */
+shakaExtern.StorageCell.prototype.removeManifests = function(keys) {};
+
+
+/**
+ * Get a group of manifests using their keys to identify them. If any key is
+ * not found, the promise chain will be rejected.
+ *
+ * @param {!Array.<number>} keys
+ * @return {!Promise<!Array.<shakaExtern.ManifestDB>>}
+ */
+shakaExtern.StorageCell.prototype.getManifests = function(keys) {};
+
+
+/**
+ * Get all manifests stored in this cell. Since manifests are small compared to
+ * the asset they describe, it is assumed that it is feasible to have them all
+ * in main memory at one time.
+ *
+ * @return {!Promise<!Object.<number, shakaExtern.ManifestDB>>}
+ */
+shakaExtern.StorageCell.prototype.getAllManifests = function() {};
