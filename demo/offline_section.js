@@ -24,7 +24,7 @@
 
 
 /** @suppress {duplicate} */
-var shakaDemo = shakaDemo || {};
+var shakaDemo = shakaDemo || {};  // eslint-disable-line no-var
 
 
 /** @private {?HTMLOptGroupElement} */

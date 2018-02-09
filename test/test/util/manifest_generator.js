@@ -195,7 +195,7 @@ shaka.test.ManifestGenerator.prototype.bandwidth = function(bandwidth) {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.disallowByApplication = function() {
-  var variant = this.currentVariant_();
+  let variant = this.currentVariant_();
   variant.allowedByApplication = false;
   return this;
 };
@@ -207,7 +207,7 @@ shaka.test.ManifestGenerator.prototype.disallowByApplication = function() {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.disallowByKeySystem = function() {
-  var variant = this.currentVariant_();
+  let variant = this.currentVariant_();
   variant.allowedByKeySystem = false;
   return this;
 };
@@ -562,7 +562,7 @@ shaka.test.ManifestGenerator.prototype.textStream = function(uri) {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.anyInitSegment = function() {
-  var stream = this.currentStream_();
+  let stream = this.currentStream_();
   stream.initSegmentReference =
       /** @type {shaka.media.InitSegmentReference} */ (
           jasmine.any(this.shaka_.media.InitSegmentReference));
@@ -576,7 +576,7 @@ shaka.test.ManifestGenerator.prototype.anyInitSegment = function() {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.nullInitSegment = function() {
-  var stream = this.currentStream_();
+  let stream = this.currentStream_();
   stream.initSegmentReference = null;
   return this;
 };
@@ -635,7 +635,7 @@ shaka.test.ManifestGenerator.prototype.mime = function(mime, opt_codecs) {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.frameRate = function(frameRate) {
-  var stream = this.currentStream_();
+  let stream = this.currentStream_();
   stream.frameRate = frameRate;
   return this;
 };

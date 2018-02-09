@@ -107,7 +107,7 @@
 
   // The application must define its list of compiled and uncompiled sources
   // before including this loader.  The URLs should be relative to the page.
-  for (var i = 0; i < scripts.length; ++i) {
-    loadRelativeScript(scripts[i]);
+  for (var j = 0; j < scripts.length; ++j) {
+    loadRelativeScript(scripts[j]);
   }
 })();  // anonymous namespace

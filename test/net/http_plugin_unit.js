@@ -201,14 +201,14 @@ function httpPluginTests(usingFetch) {
   });
 
   it('fails if non-2xx status', function(done) {
-    var uri = 'https://foo.bar/404';
+    const uri = 'https://foo.bar/404';
     testFails(uri, done, undefined, shaka.util.Error.Code.BAD_HTTP_STATUS,
         [uri, 404, 'ABC', { 'foo': 'BAR' }, requestType]);
     PromiseMock.flush();
   });
 
   it('fails on timeout', function(done) {
-    var uri = 'https://foo.bar/timeout';
+    const uri = 'https://foo.bar/timeout';
     testFails(uri, done, shaka.util.Error.Severity.RECOVERABLE,
         shaka.util.Error.Code.TIMEOUT, [uri, requestType]);
 
@@ -220,7 +220,7 @@ function httpPluginTests(usingFetch) {
   });
 
   it('fails on error', function(done) {
-    var uri = 'https://foo.bar/error';
+    const uri = 'https://foo.bar/error';
     testFails(uri, done, shaka.util.Error.Severity.RECOVERABLE,
         shaka.util.Error.Code.HTTP_ERROR,
         [uri, jasmine.any(Object), requestType]);

@@ -35,12 +35,6 @@ module.exports = {
 
         // Things we should probably fix, but in stages in multiple commits: {{{
 
-        // In many cases, we should change scoped var to let.
-        "block-scoped-var": "off",
-        "no-inner-declarations": "off",
-        "no-redeclare": "off",
-        "no-shadow": "off",
-
         // These could catch real bugs
         "consistent-return": "off",
         "default-case": "off",
@@ -53,6 +47,7 @@ module.exports = {
         "complexity": "off",
         "dot-location": "off",
         "no-negated-condition": "off",
+        "no-shadow": "off",
         // }}}
 
         // Temporary Google style overrides while we get in compliance with the latest style guide {{{
@@ -65,7 +60,6 @@ module.exports = {
         "new-cap": "off",
         "no-multi-spaces": "off",
         "no-multiple-empty-lines": "off",
-        "no-var": "off",
         "object-curly-spacing": "off",
         "one-var": "off",
         "padded-blocks": "off",
@@ -75,7 +69,7 @@ module.exports = {
         // }}}
 
         // "Possible error" rules in "eslint:recommended" that need options: {{{
-	"no-empty": ["error", {"allowEmptyCatch": true}],
+        "no-empty": ["error", {"allowEmptyCatch": true}],
         // }}}
 
         // "Possible error" rules we should be able to pass, but are not part of "eslint:recommended": {{{
@@ -142,5 +136,20 @@ module.exports = {
         // Style rules that don't seem to be in the Google style config: {{{
         "array-bracket-newline": ["error", "consistent"],
         // }}}
-    }
+    },
+    "overrides": [
+        {
+            "files": [
+                // Closure requires using var in externs.
+                "externs/**/*.js",
+                "test/test/externs/*.js",
+                // Use var in load.js so it works in old browsers.  We'll use
+                // compiled mode for the main library and the demo.
+                "demo/load.js",
+            ],
+            "rules": {
+                "no-var": "off",
+            },
+        },
+    ],
 };
