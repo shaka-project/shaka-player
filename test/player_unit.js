@@ -954,7 +954,7 @@ describe('Player', function() {
           .setTimeline(timeline)
           .addPeriod(0)
             .addVariant(0)
-            .addVideo(1)
+              .addVideo(1)
           .build();
       goog.asserts.assert(manifest, 'manifest must be non-null');
       let parser = new shaka.test.FakeManifestParser(manifest);
@@ -1113,92 +1113,36 @@ describe('Player', function() {
     it('retains only video+audio variants if they exist', function(done) {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
-          .addVariant(1)
-            .bandwidth(200)
-            .language('fr')
-            .addAudio(2).bandwidth(200)
-          .addVariant(2)
-            .bandwidth(400)
-            .language('en')
-            .addAudio(1).bandwidth(200)
-            .addVideo(4).bandwidth(200).size(100, 200)
-            .frameRate(1000000 / 42000)
-          .addVariant(3)
-            .bandwidth(200)
-            .addVideo(5).bandwidth(200).size(300, 400)
-            .frameRate(1000000 / 42000)
+          .addVariant(10)
+            .addAudio(1)
+          .addVariant(11)
+            .addAudio(2)
+            .addVideo(3)
+          .addVariant(12)
+            .addVideo(4)
         .addPeriod(1)
-          .addVariant(1)
-            .bandwidth(200)
-            .language('fr')
-            .addAudio(2).bandwidth(200)
-          .addVariant(2)
-            .bandwidth(200)
-            .addVideo(5).bandwidth(200).size(300, 400)
-            .frameRate(1000000 / 42000)
-          .addVariant(3)
-            .bandwidth(400)
-            .language('en')
-            .addAudio(1).bandwidth(200)
-            .addVideo(4).bandwidth(200).size(100, 200)
-            .frameRate(1000000 / 42000)
+          .addVariant(20)
+            .addAudio(5)
+          .addVariant(21)
+            .addVideo(6)
+          .addVariant(22)
+            .addAudio(7)
+            .addVideo(8)
         .build();
 
       let variantTracks1 = [
-        {
-          id: 2,
+        jasmine.objectContaining({
+          id: 11,
           active: true,
           type: 'variant',
-          bandwidth: 400,
-          language: 'en',
-          label: null,
-          kind: null,
-          width: 100,
-          height: 200,
-          frameRate: 1000000 / 42000,
-          mimeType: 'video/mp4',
-          codecs: 'avc1.4d401f, mp4a.40.2',
-          audioCodec: 'mp4a.40.2',
-          videoCodec: 'avc1.4d401f',
-          primary: false,
-          roles: [],
-          videoId: 4,
-          audioId: 1,
-          channelsCount: null,
-          audioBandwidth: 200,
-          videoBandwidth: 200,
-          originalAudioId: null,
-          originalVideoId: null,
-          originalTextId: null,
-        },
+        }),
       ];
       let variantTracks2 = [
-        {
-          id: 3,
+        jasmine.objectContaining({
+          id: 22,
           active: false,
           type: 'variant',
-          bandwidth: 400,
-          language: 'en',
-          label: null,
-          kind: null,
-          width: 100,
-          height: 200,
-          frameRate: 1000000 / 42000,
-          mimeType: 'video/mp4',
-          codecs: 'avc1.4d401f, mp4a.40.2',
-          audioCodec: 'mp4a.40.2',
-          videoCodec: 'avc1.4d401f',
-          primary: false,
-          roles: [],
-          videoId: 4,
-          audioId: 1,
-          channelsCount: null,
-          audioBandwidth: 200,
-          videoBandwidth: 200,
-          originalAudioId: null,
-          originalVideoId: null,
-          originalTextId: null,
-        },
+        }),
       ];
 
       let parser = new shaka.test.FakeManifestParser(manifest);
@@ -1228,7 +1172,7 @@ describe('Player', function() {
       // A manifest we can use to test track expectations.
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
-          .addVariant(1)  // main surround, low res
+          .addVariant(100)  // main surround, low res
             .bandwidth(1300)
             .language('en')
             .addVideo(1).originalId('video-1kbps').bandwidth(1000)
@@ -1236,81 +1180,81 @@ describe('Player', function() {
             .addAudio(3).originalId('audio-en-6c').bandwidth(300)
               .channelsCount(6).roles(['main'])
 
-          .addVariant(2)  // main surround, high res
+          .addVariant(101)  // main surround, high res
             .bandwidth(2300)
             .language('en')
             .addVideo(2).originalId('video-2kbps').bandwidth(2000)
               .size(200, 400).frameRate(24)
-            .addAudio(3)  // already defined above
+            .addExistingStream(3)  // audio
 
-          .addVariant(3)  // main stereo, low res
+          .addVariant(102)  // main stereo, low res
             .bandwidth(1100)
             .language('en')
-            .addVideo(1)  // already defined above
+            .addExistingStream(1)  // video
             .addAudio(4).originalId('audio-en-2c').bandwidth(100)
               .channelsCount(2).roles(['main'])
 
-          .addVariant(4)  // main stereo, high res
+          .addVariant(103)  // main stereo, high res
             .bandwidth(2100)
             .language('en')
-            .addVideo(2)  // already defined above
-            .addAudio(4)  // already defined above
+            .addExistingStream(2)  // video
+            .addExistingStream(4)  // audio
 
-          .addVariant(5)  // commentary stereo, low res
+          .addVariant(104)  // commentary stereo, low res
             .bandwidth(1100)
             .language('en')
-            .addVideo(1)  // already defined above
+            .addExistingStream(1)  // video
             .addAudio(5).originalId('audio-commentary').bandwidth(100)
               .channelsCount(2).roles(['commentary'])
 
-          .addVariant(6)  // commentary stereo, low res
+          .addVariant(105)  // commentary stereo, low res
             .bandwidth(2100)
             .language('en')
-            .addVideo(2)  // already defined above
-            .addAudio(5)  // already defined above
+            .addExistingStream(2)  // video
+            .addExistingStream(5)  // audio
 
-          .addVariant(7)  // spanish stereo, low res
+          .addVariant(106)  // spanish stereo, low res
             .language('es')
             .bandwidth(1100)
-            .addVideo(1)  // already defined above
+            .addExistingStream(1)  // video
             .addAudio(6).originalId('audio-es').bandwidth(100)
               .channelsCount(2)
 
-          .addVariant(8)  // spanish stereo, high res
+          .addVariant(107)  // spanish stereo, high res
             .language('es')
             .bandwidth(2100)
-            .addVideo(2)  // already defined above
-            .addAudio(6)  // already defined above
+            .addExistingStream(2)  // video
+            .addExistingStream(6)  // audio
 
           // All text tracks should remain, even with different MIME types.
-          .addTextStream(7).originalId('text-es')
+          .addTextStream(50).originalId('text-es')
             .language('es').label('Spanish')
             .bandwidth(10).mime('text/vtt')
             .kind('caption')
-          .addTextStream(8).originalId('text-en')
+          .addTextStream(51).originalId('text-en')
             .language('en').label('English')
             .bandwidth(10).mime('application/ttml+xml')
             .kind('caption').roles(['main'])
-           .addTextStream(9).originalId('text-commentary')
+           .addTextStream(52).originalId('text-commentary')
             .language('en').label('English')
             .bandwidth(10).mime('application/ttml+xml')
             .kind('caption').roles(['commentary'])
         .addPeriod(1)
-          .addVariant(9)
+          .addVariant(200)
             .bandwidth(1100)
             .language('en')
             .addVideo(10).bandwidth(1000).size(100, 200)
             .addAudio(11).bandwidth(100).channelsCount(2)
-          .addVariant(10)
+          .addVariant(201)
             .bandwidth(1300)
             .language('en')
-            .addVideo(10)  // already defined above
+            .addExistingStream(10)  // video
             .addAudio(12).bandwidth(300).channelsCount(6)
         .build();
 
       variantTracks = [
         {
-          id: 1,
+          id: 100,
           active: true,
           type: 'variant',
           bandwidth: 1300,
@@ -1336,7 +1280,7 @@ describe('Player', function() {
           originalTextId: null,
         },
         {
-          id: 2,
+          id: 101,
           active: false,
           type: 'variant',
           bandwidth: 2300,
@@ -1362,7 +1306,7 @@ describe('Player', function() {
           originalTextId: null,
         },
         {
-          id: 3,
+          id: 102,
           active: false,
           type: 'variant',
           bandwidth: 1100,
@@ -1388,7 +1332,7 @@ describe('Player', function() {
           originalTextId: null,
         },
         {
-          id: 4,
+          id: 103,
           active: false,
           type: 'variant',
           bandwidth: 2100,
@@ -1414,7 +1358,7 @@ describe('Player', function() {
           originalTextId: null,
         },
         {
-          id: 5,
+          id: 104,
           active: false,
           type: 'variant',
           bandwidth: 1100,
@@ -1440,7 +1384,7 @@ describe('Player', function() {
           originalTextId: null,
         },
         {
-          id: 6,
+          id: 105,
           active: false,
           type: 'variant',
           bandwidth: 2100,
@@ -1466,7 +1410,7 @@ describe('Player', function() {
           originalTextId: null,
         },
         {
-          id: 7,
+          id: 106,
           active: false,
           type: 'variant',
           bandwidth: 1100,
@@ -1492,7 +1436,7 @@ describe('Player', function() {
           originalTextId: null,
         },
         {
-          id: 8,
+          id: 107,
           active: false,
           type: 'variant',
           bandwidth: 2100,
@@ -1521,7 +1465,7 @@ describe('Player', function() {
 
       textTracks = [
         {
-          id: 7,
+          id: 50,
           active: true,
           type: ContentType.TEXT,
           language: 'es',
@@ -1547,7 +1491,7 @@ describe('Player', function() {
           originalTextId: 'text-es',
         },
         {
-          id: 8,
+          id: 51,
           active: false,
           type: ContentType.TEXT,
           language: 'en',
@@ -1573,7 +1517,7 @@ describe('Player', function() {
           originalTextId: 'text-en',
         },
         {
-          id: 9,
+          id: 52,
           active: false,
           type: ContentType.TEXT,
           language: 'en',
@@ -2083,19 +2027,19 @@ describe('Player', function() {
           .addVariant(0)
             .bandwidth(200)
             .addAudio(1).bandwidth(100)
-            .addVideo(4).bandwidth(100).size(100, 200)
+            .addVideo(2).bandwidth(100).size(100, 200)
           .addVariant(1)
             .bandwidth(300)
-            .addAudio(1).bandwidth(100)
-            .addVideo(5).bandwidth(200).size(200, 400)
+            .addExistingStream(1)  // audio
+            .addVideo(3).bandwidth(200).size(200, 400)
           .addVariant(2)
             .bandwidth(300)
-            .addAudio(2).bandwidth(200)
-            .addVideo(4).bandwidth(100).size(100, 200)
+            .addAudio(4).bandwidth(200)
+            .addExistingStream(2)  // video
           .addVariant(3)
             .bandwidth(400)
-            .addAudio(2).bandwidth(200)
-            .addVideo(5).bandwidth(200).size(200, 400)
+            .addExistingStream(4)  // audio
+            .addExistingStream(3)  // video
         .build();
 
       let parser = new shaka.test.FakeManifestParser(manifest);
@@ -3067,10 +3011,10 @@ describe('Player', function() {
                 .addAudio(9).mime('audio/mp4', 'good')
               .addVariant(1).bandwidth(200)
                 .addVideo(1).mime('video/mp4', 'good')
-                .addAudio(9)  // reuse audio stream from variant 0
+                .addExistingStream(9)  // audio
               .addVariant(2).bandwidth(300)
                 .addVideo(2).mime('video/mp4', 'good')
-                .addAudio(9)  // reuse audio stream from variant 0
+                .addExistingStream(9)  // audio
             .build();
 
     let parser = new shaka.test.FakeManifestParser(manifest);
@@ -3223,15 +3167,15 @@ describe('Player', function() {
             .addAudio(1).language('fr')
 
           .addVariant(2).language('en')
-            .addVideo(0)  // already defined
+            .addExistingStream(0)  // video
             .addAudio(2).language('en').roles(['main'])
 
           .addVariant(3).language('en')
-            .addVideo(0)  // already defined
+            .addExistingStream(0)  // video
             .addAudio(3).language('en').roles(['commentary'])
 
           .addVariant(4).language('de')
-            .addVideo(0)  // already defined
+            .addExistingStream(0)  // video
             .addAudio(4).language('de').roles(['foo', 'bar'])
 
           .addTextStream(5)

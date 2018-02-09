@@ -1104,11 +1104,11 @@ describe('StreamingEngine', function() {
             .addAudio(10).useSegmentTemplate('audio-10-%d.mp4', 10)
             .addVideo(11).useSegmentTemplate('video-11-%d.mp4', 10)
           .addVariant(1)
-            .addAudio(10)  // reused
+            .addExistingStream(10)  // audio
             .addVideo(12).useSegmentTemplate('video-12-%d.mp4', 10)
           .addVariant(2)
             .addAudio(13).useSegmentTemplate('audio-13-%d.mp4', 10)
-            .addVideo(12)  // reused
+            .addExistingStream(12)  // video
           .addTextStream(20).useSegmentTemplate('text-20-%d.mp4', 10)
         .build();
 

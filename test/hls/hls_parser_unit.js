@@ -16,9 +16,10 @@
  */
 
 describe('HlsParser', function() {
-  const Util = shaka.test.Util;
+  const ContentType = shaka.util.ManifestParserUtils.ContentType;
   const ManifestParser = shaka.test.ManifestParser;
   const TextStreamKind = shaka.util.ManifestParserUtils.TextStreamKind;
+  const Util = shaka.test.Util;
 
   const vttText = [
     'WEBVTT\n',
@@ -132,12 +133,18 @@ describe('HlsParser', function() {
     return actual;
   }
 
-  it('parses video-only variant', async () => {
+  it('parses manifest attributes', function(done) {
     const master = [
       '#EXTM3U\n',
-      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
-      'RESOLUTION=960x540,FRAME-RATE=60\n',
-      'test:/video',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+      'CHANNELS="2",URI="test:/audio"\n',
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
+      'URI="test:/text"\n',
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub2",LANGUAGE="es",',
+      'URI="test:/text2"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
+      'test:/video\n',
     ].join('');
 
     const media = [
@@ -149,19 +156,84 @@ describe('HlsParser', function() {
       'test:/main.mp4',
     ].join('');
 
-    let manifest = new shaka.test.ManifestGenerator()
+    const textMedia = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'test:/main.vtt',
+    ].join('');
+
+    const manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
-            .addPeriod(jasmine.any(Number))
-              .addVariant(jasmine.any(Number))
-                .language('und')
+            .addPeriod(0)
+              .addPartialVariant()
+                .language('en')
                 .bandwidth(200)
-                .addVideo(jasmine.any(Number))
-                  .anySegmentFunctions()
+                .addPartialStream(ContentType.VIDEO)
                   .anyInitSegment()
                   .presentationTimeOffset(0)
                   .mime('video/mp4', 'avc1')
                   .frameRate(60)
                   .size(960, 540)
+                .addPartialStream(ContentType.AUDIO)
+                  .language('en')
+                  .anyInitSegment()
+                  .presentationTimeOffset(0)
+                  .mime('audio/mp4', 'mp4a')
+                  .channelsCount(2)
+              .addPartialStream(ContentType.TEXT)
+                .language('en')
+                .nullInitSegment()
+                .presentationTimeOffset(0)
+                .mime('text/vtt', '')
+                .kind(TextStreamKind.SUBTITLE)
+              .addPartialStream(ContentType.TEXT)
+                .language('es')
+                .nullInitSegment()
+                .presentationTimeOffset(0)
+                .mime('text/vtt', '')
+                .kind(TextStreamKind.SUBTITLE)
+          .build();
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', media)
+        .setResponseText('test:/video', media)
+        .setResponseText('test:/text', textMedia)
+        .setResponseText('test:/text2', textMedia)
+        .setResponseText('test:/main.vtt', vttText)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
+
+    parser.start('test:/master', playerInterface)
+        .then(function(actual) { expect(actual).toEqual(manifest); })
+        .catch(fail).then(done);
+  });
+
+  it('parses video-only variant', async function() {
+    let master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+      'RESOLUTION=960x540,FRAME-RATE=60\n',
+      'test:/video',
+    ].join('');
+
+    let media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'test:/main.mp4',
+    ].join('');
+
+    let manifest = new shaka.test.ManifestGenerator()
+            .anyTimeline()
+            .addPeriod(0)
+              .addPartialVariant()
+                .addPartialStream(ContentType.VIDEO)
+                  .mime('video/mp4', 'avc1')
           .build();
 
     await testHlsParser(master, media, manifest);
@@ -185,14 +257,9 @@ describe('HlsParser', function() {
 
     let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
-            .addPeriod(jasmine.any(Number))
-              .addVariant(jasmine.any(Number))
-                .language('und')
-                .bandwidth(200)
-                .addVideo(jasmine.any(Number))
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
+            .addPeriod(0)
+              .addPartialVariant()
+                .addPartialStream(ContentType.VIDEO)
                   .mime('video/mp4', 'avc1')
           .build();
 
@@ -217,14 +284,9 @@ describe('HlsParser', function() {
 
     let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
-            .addPeriod(jasmine.any(Number))
-              .addVariant(jasmine.any(Number))
-                .language('und')
-                .bandwidth(200)
-                .addAudio(jasmine.any(Number))
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
+            .addPeriod(0)
+              .addPartialVariant()
+                .addPartialStream(ContentType.AUDIO)
                   .mime('audio/mp4', 'mp4a')
           .build();
 
@@ -252,24 +314,12 @@ describe('HlsParser', function() {
 
     let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
-            .addPeriod(jasmine.any(Number))
-              .addVariant(jasmine.any(Number))
-                .language('en')
-                .bandwidth(200)
-                .addVideo(jasmine.any(Number))
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
+            .addPeriod(0)
+              .addPartialVariant()
+                .addPartialStream(ContentType.VIDEO)
                   .mime('video/mp4', 'avc1')
-                  .frameRate(60)
-                  .size(960, 540)
-                .addAudio(jasmine.any(Number))
-                  .language('en')
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
+                .addPartialStream(ContentType.AUDIO)
                   .mime('audio/mp4', 'mp4a')
-                  .channelsCount(2)
           .build();
 
     await testHlsParser(master, media, manifest);
@@ -295,15 +345,9 @@ describe('HlsParser', function() {
 
     let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
-            .addPeriod(jasmine.any(Number))
-              .addVariant(jasmine.any(Number))
-                .language('en')
-                .bandwidth(200)
-                .addAudio(jasmine.any(Number))
-                  .language('en')
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
+            .addPeriod(0)
+              .addPartialVariant()
+                .addPartialStream(ContentType.AUDIO)
                   .mime('audio/mp4', 'mp4a')
           .build();
 
@@ -373,17 +417,10 @@ describe('HlsParser', function() {
 
     let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
-            .addPeriod(jasmine.any(Number))
-              .addVariant(jasmine.any(Number))
-                .language('und')
-                .bandwidth(200)
-                .addVideo(jasmine.any(Number))
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
+            .addPeriod(0)
+              .addPartialVariant()
+                .addPartialStream(ContentType.VIDEO)
                   .mime('video/mp4', 'avc1,mp4a')
-                  .frameRate(60)
-                  .size(960, 540)
           .build();
 
     await testHlsParser(master, media, manifest);
@@ -408,17 +445,10 @@ describe('HlsParser', function() {
 
     let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
-            .addPeriod(jasmine.any(Number))
-              .addVariant(jasmine.any(Number))
-                .language('und')
-                .bandwidth(200)
-                .addVideo(jasmine.any(Number))
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
+            .addPeriod(0)
+              .addPartialVariant()
+                .addPartialStream(ContentType.VIDEO)
                   .mime('video/mp4', jasmine.any(String))
-                  .frameRate(60)
-                  .size(960, 540)
           .build();
 
     await testHlsParser(master, media, manifest);
@@ -445,22 +475,11 @@ describe('HlsParser', function() {
 
     let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
-            .addPeriod(jasmine.any(Number))
-              .addVariant(jasmine.any(Number))
-                .language('en')
-                .bandwidth(200)
-                .addVideo(jasmine.any(Number))
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
+            .addPeriod(0)
+              .addPartialVariant()
+                .addPartialStream(ContentType.VIDEO)
                   .mime('video/mp4', jasmine.any(String))
-                  .frameRate(60)
-                  .size(960, 540)
-                .addAudio(jasmine.any(Number))
-                  .language('en')
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
+                .addPartialStream(ContentType.AUDIO)
                   .mime('audio/mp4', jasmine.any(String))
           .build();
 
@@ -493,39 +512,19 @@ describe('HlsParser', function() {
 
     let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
-            .addPeriod(jasmine.any(Number))
-              .addVariant(jasmine.any(Number))
-                .language('en')
+            .addPeriod(0)
+              .addPartialVariant()
                 .bandwidth(200)
-                .addVideo(jasmine.any(Number))
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
-                  .mime('video/mp4', 'avc1')
-                  .frameRate(60)
+                .addPartialStream(ContentType.VIDEO)
                   .size(960, 540)
-                .addAudio(jasmine.any(Number))
+                .addPartialStream(ContentType.AUDIO)
                   .language('en')
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
-                  .mime('audio/mp4', 'mp4a')
-              .addVariant(jasmine.any(Number))
-                .language('fr')
+              .addPartialVariant()
                 .bandwidth(300)
-                .addVideo(jasmine.any(Number))
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
-                  .mime('video/mp4', 'avc1')
-                  .frameRate(120)
+                .addPartialStream(ContentType.VIDEO)
                   .size(960, 540)
-                .addAudio(jasmine.any(Number))
+                .addPartialStream(ContentType.AUDIO)
                   .language('fr')
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
-                  .mime('audio/mp4', 'mp4a')
           .build();
 
     await testHlsParser(master, media, manifest);
@@ -554,39 +553,17 @@ describe('HlsParser', function() {
 
     let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
-            .addPeriod(jasmine.any(Number))
-              .addVariant(jasmine.any(Number))
+            .addPeriod(0)
+              .addPartialVariant()
                 .language('en')
-                .bandwidth(200)
-                .addVideo(jasmine.any(Number))
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
-                  .mime('video/mp4', 'avc1')
-                  .frameRate(60)
-                  .size(960, 540)
-                .addAudio(jasmine.any(Number))
+                .addPartialStream(ContentType.VIDEO)
+                .addPartialStream(ContentType.AUDIO)
                   .language('en')
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
-                  .mime('audio/mp4', 'mp4a')
-              .addVariant(jasmine.any(Number))
+              .addPartialVariant()
                 .language('fr')
-                .bandwidth(200)
-                .addVideo(jasmine.any(Number))
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
-                  .mime('video/mp4', 'avc1')
-                  .frameRate(60)
-                  .size(960, 540)
-                .addAudio(jasmine.any(Number))
+                .addPartialStream(ContentType.VIDEO)
+                .addPartialStream(ContentType.AUDIO)
                   .language('fr')
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
-                  .mime('audio/mp4', 'mp4a')
           .build();
 
     await testHlsParser(master, media, manifest);
@@ -644,17 +621,10 @@ describe('HlsParser', function() {
 
     let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
-            .addPeriod(jasmine.any(Number))
-              .addVariant(jasmine.any(Number))
-                .language('und')
-                .bandwidth(200)
-                .addVideo(jasmine.any(Number))
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
+            .addPeriod(0)
+              .addPartialVariant()
+                .addPartialStream(ContentType.VIDEO)
                   .mime('video/mp4', 'avc1')
-                  .frameRate(60)
-                  .size(960, 540)
           .build();
 
     // The extra parameters should be stripped by the parser.
@@ -702,35 +672,18 @@ describe('HlsParser', function() {
 
     let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
-            .addPeriod(jasmine.any(Number))
-              .addVariant(jasmine.any(Number))
-                .language('en')
-                .bandwidth(200)
-                .addVideo(jasmine.any(Number))
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
+            .addPeriod(0)
+              .addPartialVariant()
+                .addPartialStream(ContentType.VIDEO)
                   .mime('video/mp4', 'avc1')
-                  .frameRate(60)
-                  .size(960, 540)
-                .addAudio(jasmine.any(Number))
-                  .language('en')
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
+                .addPartialStream(ContentType.AUDIO)
                   .mime('audio/mp4', 'mp4a')
-              .addTextStream(jasmine.any(Number))
+              .addPartialStream(ContentType.TEXT)
                 .language('en')
-                .anySegmentFunctions()
-                .nullInitSegment()
-                .presentationTimeOffset(0)
                 .mime('text/vtt', '')
                 .kind(TextStreamKind.SUBTITLE)
-              .addTextStream(jasmine.any(Number))
+              .addPartialStream(ContentType.TEXT)
                 .language('es')
-                .anySegmentFunctions()
-                .nullInitSegment()
-                .presentationTimeOffset(0)
                 .mime('text/vtt', '')
                 .kind(TextStreamKind.SUBTITLE)
           .build();
@@ -782,35 +735,14 @@ describe('HlsParser', function() {
 
     let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
-            .addPeriod(jasmine.any(Number))
-              .addVariant(jasmine.any(Number))
-                .language('en')
-                .bandwidth(200)
-                .addVideo(jasmine.any(Number))
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
-                  .mime('video/mp4', 'avc1')
-                  .frameRate(60)
-                  .size(960, 540)
-                .addAudio(jasmine.any(Number))
-                  .language('en')
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
-                  .mime('audio/mp4', 'mp4a')
-              .addTextStream(jasmine.any(Number))
-                .language('en')
-                .anySegmentFunctions()
-                .nullInitSegment()
-                .presentationTimeOffset(0)
+            .addPeriod(0)
+              .addPartialVariant()
+                .addPartialStream(ContentType.VIDEO)
+                .addPartialStream(ContentType.AUDIO)
+              .addPartialStream(ContentType.TEXT)
                 .mime('text/vtt', '')
                 .kind(TextStreamKind.SUBTITLE)
-              .addTextStream(jasmine.any(Number))
-                .language('es')
-                .anySegmentFunctions()
-                .nullInitSegment()
-                .presentationTimeOffset(0)
+              .addPartialStream(ContentType.TEXT)
                 .mime('text/vtt', '')
                 .kind(TextStreamKind.SUBTITLE)
           .build();
@@ -914,23 +846,12 @@ describe('HlsParser', function() {
 
     let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
-            .addPeriod(jasmine.any(Number))
-              .addVariant(jasmine.any(Number))
-                .bandwidth(200)
-                .addVideo(jasmine.any(Number))
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
-                  .mime('video/mp4', 'avc1')
-                  .frameRate(60)
-                  .size(960, 540)
-              .addTextStream(jasmine.any(Number))
+            .addPeriod(0)
+              .addPartialVariant()
+                .addPartialStream(ContentType.VIDEO)
+              .addPartialStream(ContentType.TEXT)
                 .language('en')
-                .anySegmentFunctions()
-                .anyInitSegment()
-                .presentationTimeOffset(0)
                 .mime('application/mp4', 'stpp.TTML.im1t')
-                .kind(TextStreamKind.SUBTITLE)
           .build();
 
     fakeNetEngine
@@ -974,23 +895,11 @@ describe('HlsParser', function() {
 
     let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
-            .addPeriod(jasmine.any(Number))
-              .addVariant(jasmine.any(Number))
-                .bandwidth(200)
-                .addVideo(jasmine.any(Number))
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
-                  .mime('video/mp4', 'avc1')
-                  .frameRate(60)
-                  .size(960, 540)
-              .addTextStream(jasmine.any(Number))
-                .language('en')
-                .anySegmentFunctions()
-                .nullInitSegment()
-                .presentationTimeOffset(0)
+            .addPeriod(0)
+              .addPartialVariant()
+                .addPartialStream(ContentType.VIDEO)
+              .addPartialStream(ContentType.TEXT)
                 .mime('text/vtt', 'vtt')
-                .kind(TextStreamKind.SUBTITLE)
           .build();
 
     fakeNetEngine
@@ -1028,21 +937,10 @@ describe('HlsParser', function() {
     let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(jasmine.any(Number))
-              .addVariant(jasmine.any(Number))
-                .bandwidth(200)
-                .addVideo(jasmine.any(Number))
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
-                  .mime('video/mp4', 'avc1')
-                  .frameRate(60)
-                  .size(960, 540)
-              .addTextStream(jasmine.any(Number))
-                .language('en')
-                .anySegmentFunctions()
+              .addPartialVariant()
+                .addPartialStream(ContentType.VIDEO)
+              .addPartialStream(ContentType.TEXT)
                 .anyInitSegment()
-                .presentationTimeOffset(0)
-                .mime('application/mp4', 'wvtt')
                 .kind(TextStreamKind.SUBTITLE)
           .build();
 
@@ -1079,21 +977,13 @@ describe('HlsParser', function() {
 
     let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
-            .addPeriod(jasmine.any(Number))
-              .addVariant(jasmine.any(Number))
-                .bandwidth(200)
-                .addVideo(jasmine.any(Number))
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
+            .addPeriod(0)
+              .addPartialVariant()
+                .addPartialStream(ContentType.VIDEO)
                   .mime('video/mp4', 'avc1')
                   .frameRate(60)
                   .size(960, 540)
-                .addAudio(jasmine.any(Number))
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
-                  .mime('audio/mp4', 'mp4a')
+                .addPartialStream(ContentType.AUDIO)
           .build();
 
     await testHlsParser(master, media, manifest);
@@ -1116,25 +1006,6 @@ describe('HlsParser', function() {
       'segment.mp4',
     ].join('');
 
-    let manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(jasmine.any(Number))
-              .addVariant(jasmine.any(Number))
-                .bandwidth(200)
-                .addVideo(jasmine.any(Number))
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
-                  .mime('video/mp4', 'avc1')
-                  .frameRate(60)
-                  .size(960, 540)
-                .addAudio(jasmine.any(Number))
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
-                  .mime('audio/mp4', 'mp4a')
-          .build();
-
     fakeNetEngine
         .setResponseText('test:/host/master.m3u8', master)
         .setResponseText('test:/host/audio/audio.m3u8', media)
@@ -1146,7 +1017,6 @@ describe('HlsParser', function() {
 
     parser.start('test:/host/master.m3u8', playerInterface)
         .then(function(actual) {
-          expect(actual).toEqual(manifest);
           let video = actual.periods[0].variants[0].video;
           let audio = actual.periods[0].variants[0].audio;
 
@@ -1192,20 +1062,13 @@ describe('HlsParser', function() {
 
     let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
-            .addPeriod(jasmine.any(Number))
-              .addVariant(jasmine.any(Number))
-                .bandwidth(200)
-                .addVideo(jasmine.any(Number))
-                  .anySegmentFunctions()
+            .addPeriod(0)
+              .addPartialVariant()
+                .addPartialStream(ContentType.VIDEO)
                   .nullInitSegment()
-                  .presentationTimeOffset(0)
                   .mime('video/mp4', 'avc1')
-                  .frameRate(60)
-                  .size(960, 540)
-                .addAudio(jasmine.any(Number))
-                  .anySegmentFunctions()
+                .addPartialStream(ContentType.AUDIO)
                   .nullInitSegment()
-                  .presentationTimeOffset(0)
                   .mime('audio/mp4', 'mp4a')
           .build();
 
@@ -1239,19 +1102,12 @@ describe('HlsParser', function() {
 
     let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
-            .addPeriod(jasmine.any(Number))
-              .addVariant(jasmine.any(Number))
-                .bandwidth(200)
-                .addVideo(jasmine.any(Number))
-                  .anySegmentFunctions()
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
-                  .mime('video/mp4', 'avc1')
-                  .frameRate(60)
-                  .size(960, 540)
-                .encrypted(true)
+            .addPeriod(0)
+              .addPartialVariant()
                 .addDrmInfo('com.widevine.alpha')
                   .addCencInitData(initDataBase64)
+                .addPartialStream(ContentType.VIDEO)
+                  .encrypted(true)
           .build();
 
     await testHlsParser(master, media, manifest);
