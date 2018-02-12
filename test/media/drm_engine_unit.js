@@ -497,12 +497,10 @@ describe('DrmEngine', function() {
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, ['drm.abc']));
 
-      logErrorSpy.and.stub();
       config.servers = {};
       drmEngine.configure(config);
 
       drmEngine.init(manifest, /* offline */ false).then(fail, function(error) {
-        expect(logErrorSpy).toHaveBeenCalled();
         shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.DRM,
