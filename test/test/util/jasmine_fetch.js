@@ -134,7 +134,7 @@ jasmine.Fetch.impl_ = function(url, init) {
     });
     return Promise.resolve(response);
   } else if (stubbed.error) {
-    return Promise.reject('fake error');
+    return Promise.reject({ message: 'fake error' });
   } else if (stubbed.timeout) {
     // Fetch does not time out yet, so just return a promise that rejects when
     // the user aborts.
