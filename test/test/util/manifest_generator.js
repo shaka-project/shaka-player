@@ -121,6 +121,8 @@ shaka.test.ManifestGenerator.prototype.addPeriod = function(startTime) {
         variants: [],
         textStreams: []
       });
+  this.lastObjectAdded_ = null;
+  this.lastStreamAdded_ = null;
   return this;
 };
 
@@ -147,6 +149,7 @@ shaka.test.ManifestGenerator.prototype.addVariant = function(id) {
   };
   period.variants.push(variant);
   this.lastObjectAdded_ = variant;
+  this.lastStreamAdded_ = null;
   return this;
 };
 
