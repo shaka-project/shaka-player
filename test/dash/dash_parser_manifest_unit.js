@@ -17,17 +17,16 @@
 
 // Test basic manifest parsing functionality.
 describe('DashParser Manifest', function() {
-  /** @const */
-  var Dash = shaka.test.Dash;
+  const Dash = shaka.test.Dash;
 
   /** @type {!shaka.test.FakeNetworkingEngine} */
-  var fakeNetEngine;
+  let fakeNetEngine;
   /** @type {!shaka.dash.DashParser} */
-  var parser;
+  let parser;
   /** @type {!jasmine.Spy} */
-  var onEventSpy;
+  let onEventSpy;
   /** @type {shakaExtern.ManifestParser.PlayerInterface} */
-  var playerInterface;
+  let playerInterface;
 
   beforeEach(function() {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
@@ -76,7 +75,7 @@ describe('DashParser Manifest', function() {
     }
 
     it('with SegmentBase', function(done) {
-      var source = makeTestManifest([
+      let source = makeTestManifest([
         '    <SegmentBase indexRange="100-200" timescale="9000">',
         '      <Initialization sourceURL="init.mp4" range="201-300" />',
         '    </SegmentBase>'
@@ -85,7 +84,7 @@ describe('DashParser Manifest', function() {
     });
 
     it('with SegmentList', function(done) {
-      var source = makeTestManifest([
+      let source = makeTestManifest([
         '    <SegmentList startNumber="1" duration="10">',
         '      <Initialization sourceURL="init.mp4" range="201-300" />',
         '      <SegmentURL media="s1.mp4" />',
@@ -95,7 +94,7 @@ describe('DashParser Manifest', function() {
     });
 
     it('with SegmentTemplate', function(done) {
-      var source = makeTestManifest([
+      let source = makeTestManifest([
         '    <SegmentTemplate startNumber="1" media="l-$Number$.mp4"',
         '        initialization="init.mp4">',
         '      <Initialization sourceURL="init.mp4" range="201-300" />',
@@ -195,7 +194,7 @@ describe('DashParser Manifest', function() {
 
 
   it('skips any periods after one without duration', function(done) {
-    var periodContents = [
+    let periodContents = [
       '    <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
       '      <Representation bandwidth="100">',
       '        <SegmentBase presentationTimeOffset="1" indexRange="100-200">',
@@ -204,7 +203,7 @@ describe('DashParser Manifest', function() {
       '      </Representation>',
       '    </AdaptationSet>'
     ].join('\n');
-    var template = [
+    let template = [
       '<MPD mediaPresentationDuration="PT75S">',
       '  <Period id="1">',
       '%(periodContents)s',
@@ -214,7 +213,7 @@ describe('DashParser Manifest', function() {
       '  </Period>',
       '</MPD>'
     ].join('\n');
-    var source = sprintf(template, {periodContents: periodContents});
+    let source = sprintf(template, {periodContents: periodContents});
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
     parser.start('dummy://foo', playerInterface)
@@ -226,7 +225,7 @@ describe('DashParser Manifest', function() {
   });
 
   it('calculates Period times when missing', function(done) {
-    var periodContents = [
+    let periodContents = [
       '    <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
       '      <Representation bandwidth="100">',
       '        <SegmentBase presentationTimeOffset="1" indexRange="100-200">',
@@ -235,7 +234,7 @@ describe('DashParser Manifest', function() {
       '      </Representation>',
       '    </AdaptationSet>'
     ].join('\n');
-    var template = [
+    let template = [
       '<MPD mediaPresentationDuration="PT75S">',
       '  <Period id="1" start="PT10S">',
       '%(periodContents)s',
@@ -248,7 +247,7 @@ describe('DashParser Manifest', function() {
       '  </Period>',
       '</MPD>'
     ].join('\n');
-    var source = sprintf(template, {periodContents: periodContents});
+    let source = sprintf(template, {periodContents: periodContents});
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
     parser.start('dummy://foo', playerInterface)
@@ -263,7 +262,7 @@ describe('DashParser Manifest', function() {
   });
 
   it('defaults to SegmentBase with multiple Segment*', function(done) {
-    var source = Dash.makeSimpleManifestText([
+    let source = Dash.makeSimpleManifestText([
       '<SegmentBase presentationTimeOffset="1" indexRange="100-200">',
       '  <Initialization sourceURL="init.mp4" range="201-300" />',
       '</SegmentBase>',
@@ -276,7 +275,7 @@ describe('DashParser Manifest', function() {
     fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
     parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
-          var stream = manifest.periods[0].variants[0].video;
+          let stream = manifest.periods[0].variants[0].video;
           expect(stream.presentationTimeOffset).toBe(1);
         })
         .catch(fail)
@@ -284,7 +283,7 @@ describe('DashParser Manifest', function() {
   });
 
   it('defaults to SegmentList with SegmentTemplate', function(done) {
-    var source = Dash.makeSimpleManifestText([
+    let source = Dash.makeSimpleManifestText([
       '<SegmentList presentationTimeOffset="2" duration="10">',
       '  <Initialization sourceURL="init.mp4" range="201-300" />',
       '  <SegmentURL media="s1.mp4" />',
@@ -301,7 +300,7 @@ describe('DashParser Manifest', function() {
     fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
     parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
-          var stream = manifest.periods[0].variants[0].video;
+          let stream = manifest.periods[0].variants[0].video;
           expect(stream.presentationTimeOffset).toBe(2);
         })
         .catch(fail)
@@ -309,7 +308,7 @@ describe('DashParser Manifest', function() {
   });
 
   it('generates a correct index for non-segmented text', function(done) {
-    var source = [
+    let source = [
       '<MPD mediaPresentationDuration="PT30S">',
       '  <Period>',
       '    <AdaptationSet mimeType="video/mp4">',
@@ -328,7 +327,7 @@ describe('DashParser Manifest', function() {
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
 
-    var stream;
+    let stream;
     parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           stream = manifest.periods[0].textStreams[0];
@@ -347,7 +346,7 @@ describe('DashParser Manifest', function() {
   });
 
   it('correctly parses UTF-8', function(done) {
-    var source = [
+    let source = [
       '<MPD>',
       '  <Period duration="PT30M">',
       '    <AdaptationSet mimeType="audio/mp4" lang="\u2603">',
@@ -365,8 +364,8 @@ describe('DashParser Manifest', function() {
 
     parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
-          var variant = manifest.periods[0].variants[0];
-          var stream = manifest.periods[0].variants[0].audio;
+          let variant = manifest.periods[0].variants[0];
+          let stream = manifest.periods[0].variants[0].audio;
           expect(stream.initSegmentReference.getUris()[0])
               .toBe('http://example.com/%C8%A7.mp4');
           expect(variant.language).toBe('\u2603');
@@ -376,8 +375,7 @@ describe('DashParser Manifest', function() {
   });
 
   describe('supports UTCTiming', function() {
-    /** @const */
-    var originalNow = Date.now;
+    const originalNow = Date.now;
 
     beforeAll(function() {
       Date.now = function() { return 10 * 1000; };
@@ -392,7 +390,7 @@ describe('DashParser Manifest', function() {
      * @return {string}
      */
     function makeManifest(lines) {
-      var template = [
+      let template = [
         '<MPD type="dynamic"',
         '     availabilityStartTime="1970-01-01T00:00:00Z"',
         '     timeShiftBufferDepth="PT60S"',
@@ -428,7 +426,7 @@ describe('DashParser Manifest', function() {
     }
 
     it('with direct', function(done) {
-      var source = makeManifest([
+      let source = makeManifest([
         '<UTCTiming schemeIdUri="urn:mpeg:dash:utc:direct:2014"',
         '    value="1970-01-01T00:00:30Z" />'
       ]);
@@ -438,7 +436,7 @@ describe('DashParser Manifest', function() {
     });
 
     it('does not produce errors', function(done) {
-      var source = makeManifest([
+      let source = makeManifest([
         '<UTCTiming schemeIdUri="unknown scheme" value="foobar" />'
       ]);
 
@@ -447,7 +445,7 @@ describe('DashParser Manifest', function() {
     });
 
     it('tries multiple sources', function(done) {
-      var source = makeManifest([
+      let source = makeManifest([
         '<UTCTiming schemeIdUri="unknown scheme" value="foobar" />',
         '<UTCTiming schemeIdUri="urn:mpeg:dash:utc:direct:2014"',
         '    value="1970-01-01T00:00:55Z" />'
@@ -458,14 +456,14 @@ describe('DashParser Manifest', function() {
     });
 
     it('with HEAD', function(done) {
-      var source = makeManifest([
+      let source = makeManifest([
         '<UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-head:2014"',
         '    value="http://foo.bar/date" />'
       ]);
 
       fakeNetEngine.request.and.callFake(function(type, request) {
         if (request.uris[0] == 'http://foo.bar/manifest') {
-          var data = shaka.util.StringUtils.toUTF8(source);
+          let data = shaka.util.StringUtils.toUTF8(source);
           return shaka.util.AbortableOperation.completed({
             data: data,
             headers: {},
@@ -484,7 +482,7 @@ describe('DashParser Manifest', function() {
     });
 
     it('with xsdate', function(done) {
-      var source = makeManifest([
+      let source = makeManifest([
         '<UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-xsdate:2014"',
         '    value="http://foo.bar/date" />'
       ]);
@@ -497,7 +495,7 @@ describe('DashParser Manifest', function() {
     });
 
     it('with relative paths', function(done) {
-      var source = makeManifest([
+      let source = makeManifest([
         '<UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-xsdate:2014"',
         '    value="/date" />'
       ]);
@@ -510,7 +508,7 @@ describe('DashParser Manifest', function() {
     });
 
     it('with paths relative to BaseURLs', function(done) {
-      var source = makeManifest([
+      let source = makeManifest([
         '<BaseURL>http://example.com</BaseURL>',
         '<UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-xsdate:2014"',
         '    value="/date" />'
@@ -525,7 +523,7 @@ describe('DashParser Manifest', function() {
   });
 
   it('handles missing Segment* elements', function(done) {
-    var source = [
+    let source = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
       '    <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
@@ -543,7 +541,7 @@ describe('DashParser Manifest', function() {
     parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           // First Representation should be dropped.
-          var period = manifest.periods[0];
+          let period = manifest.periods[0];
           expect(period.variants.length).toBe(1);
           expect(period.variants[0].bandwidth).toBe(200);
         })
@@ -553,7 +551,7 @@ describe('DashParser Manifest', function() {
 
   describe('allows missing Segment* elements for text', function() {
     it('specified via AdaptationSet@contentType', function(done) {
-      var source = [
+      let source = [
         '<MPD minBufferTime="PT75S">',
         '  <Period id="1" duration="PT30S">',
         '    <AdaptationSet mimeType="video/mp4">',
@@ -579,7 +577,7 @@ describe('DashParser Manifest', function() {
     });
 
     it('specified via AdaptationSet@mimeType', function(done) {
-      var source = [
+      let source = [
         '<MPD minBufferTime="PT75S">',
         '  <Period id="1" duration="PT30S">',
         '    <AdaptationSet mimeType="video/mp4">',
@@ -605,7 +603,7 @@ describe('DashParser Manifest', function() {
     });
 
     it('specified via Representation@mimeType', function(done) {
-      var source = [
+      let source = [
         '<MPD minBufferTime="PT75S">',
         '  <Period id="1" duration="PT30S">',
         '    <AdaptationSet mimeType="video/mp4">',
@@ -633,8 +631,8 @@ describe('DashParser Manifest', function() {
 
   describe('fails for', function() {
     it('invalid XML', function(done) {
-      var source = '<not XML';
-      var error = new shaka.util.Error(
+      let source = '<not XML';
+      let error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_INVALID_XML,
@@ -643,7 +641,7 @@ describe('DashParser Manifest', function() {
     });
 
     it('XML with inner errors', function(done) {
-      var source = [
+      let source = [
         '<MPD minBufferTime="PT75S">',
         '  <Period id="1" duration="PT30S">',
         '    <AdaptationSet mimeType="video/mp4">',
@@ -654,7 +652,7 @@ describe('DashParser Manifest', function() {
         '  </Period>',
         '</MPD>'
       ].join('\n');
-      var error = new shaka.util.Error(
+      let error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_INVALID_XML,
@@ -663,7 +661,7 @@ describe('DashParser Manifest', function() {
     });
 
     it('xlink problems when xlinkFailGracefully is false', function(done) {
-      var source = [
+      let source = [
         '<MPD minBufferTime="PT75S" xmlns="urn:mpeg:dash:schema:mpd:2011" ' +
             'xmlns:xlink="http://www.w3.org/1999/xlink">',
         '  <Period id="1" duration="PT30S">',
@@ -676,7 +674,7 @@ describe('DashParser Manifest', function() {
         '  </Period>',
         '</MPD>'
       ].join('\n');
-      var error = new shaka.util.Error(
+      let error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_UNSUPPORTED_XLINK_ACTUATE);
@@ -684,7 +682,7 @@ describe('DashParser Manifest', function() {
     });
 
     it('failed network requests', function(done) {
-      var expectedError = new shaka.util.Error(
+      let expectedError = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.NETWORK,
           shaka.util.Error.Code.BAD_HTTP_STATUS);
@@ -698,8 +696,8 @@ describe('DashParser Manifest', function() {
     });
 
     it('missing MPD element', function(done) {
-      var source = '<XML></XML>';
-      var error = new shaka.util.Error(
+      let source = '<XML></XML>';
+      let error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_INVALID_XML,
@@ -708,14 +706,14 @@ describe('DashParser Manifest', function() {
     });
 
     it('empty AdaptationSet', function(done) {
-      var source = [
+      let source = [
         '<MPD minBufferTime="PT75S">',
         '  <Period id="1" duration="PT30S">',
         '    <AdaptationSet mimeType="video/mp4" lang="en" group="1" />',
         '  </Period>',
         '</MPD>'
       ].join('\n');
-      var error = new shaka.util.Error(
+      let error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_EMPTY_ADAPTATION_SET);
@@ -723,12 +721,12 @@ describe('DashParser Manifest', function() {
     });
 
     it('empty Period', function(done) {
-      var source = [
+      let source = [
         '<MPD minBufferTime="PT75S">',
         '  <Period id="1" duration="PT30S" />',
         '</MPD>'
       ].join('\n');
-      var error = new shaka.util.Error(
+      let error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_EMPTY_PERIOD);
@@ -736,7 +734,7 @@ describe('DashParser Manifest', function() {
     });
 
     it('duplicate Representation ids with live', function(done) {
-      var source = [
+      let source = [
         '<MPD minBufferTime="PT75S" type="dynamic">',
         '  <Period id="1" duration="PT30S">',
         '    <AdaptationSet mimeType="video/mp4">',
@@ -752,7 +750,7 @@ describe('DashParser Manifest', function() {
         '  </Period>',
         '</MPD>'
       ].join('\n');
-      var error = new shaka.util.Error(
+      let error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_DUPLICATE_REPRESENTATION_ID);
@@ -761,7 +759,7 @@ describe('DashParser Manifest', function() {
   });
 
   it('parses trickmode tracks', function(done) {
-    var manifestText = [
+    let manifestText = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
       '    <AdaptationSet id="1" mimeType="video/mp4">',
@@ -787,8 +785,8 @@ describe('DashParser Manifest', function() {
           expect(manifest.periods[0].variants.length).toBe(1);
           expect(manifest.periods[0].textStreams.length).toBe(0);
 
-          var variant = manifest.periods[0].variants[0];
-          var trickModeVideo = variant && variant.video &&
+          let variant = manifest.periods[0].variants[0];
+          let trickModeVideo = variant && variant.video &&
                                variant.video.trickModeVideo;
           expect(trickModeVideo).toEqual(jasmine.objectContaining({
             id: 2,
@@ -800,7 +798,7 @@ describe('DashParser Manifest', function() {
   });
 
   it('skips unrecognized EssentialProperty elements', function(done) {
-    var manifestText = [
+    let manifestText = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
       '    <AdaptationSet id="1" mimeType="video/mp4">',
@@ -828,8 +826,8 @@ describe('DashParser Manifest', function() {
           expect(manifest.periods[0].textStreams.length).toBe(0);
 
           // The bogus EssentialProperty did not result in a trick mode track.
-          var variant = manifest.periods[0].variants[0];
-          var trickModeVideo = variant && variant.video &&
+          let variant = manifest.periods[0].variants[0];
+          let trickModeVideo = variant && variant.video &&
                                variant.video.trickModeVideo;
           expect(trickModeVideo).toBe(null);
         })
@@ -840,7 +838,7 @@ describe('DashParser Manifest', function() {
   it('sets contentType to text for embedded text mime types', function(done) {
     // One MIME type for embedded TTML, one for embedded WebVTT.
     // One MIME type specified on AdaptationSet, on one Representation.
-    var manifestText = [
+    let manifestText = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
       '    <AdaptationSet mimeType="video/mp4">',
@@ -868,7 +866,7 @@ describe('DashParser Manifest', function() {
           expect(manifest.periods.length).toBe(1);
           expect(manifest.periods[0].textStreams.length).toBe(2);
           // At one time, these came out as 'application' rather than 'text'.
-          var ContentType = shaka.util.ManifestParserUtils.ContentType;
+          const ContentType = shaka.util.ManifestParserUtils.ContentType;
           expect(manifest.periods[0].textStreams[0].type)
             .toBe(ContentType.TEXT);
           expect(manifest.periods[0].textStreams[1].type)
@@ -880,7 +878,7 @@ describe('DashParser Manifest', function() {
 
   it('handles text with mime and codecs on different levels', function(done) {
     // Regression test for #875
-    var manifestText = [
+    let manifestText = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
       '    <AdaptationSet mimeType="video/mp4">',
@@ -905,7 +903,7 @@ describe('DashParser Manifest', function() {
           // In #875, this was an empty list.
           expect(manifest.periods[0].textStreams.length).toBe(1);
           if (manifest.periods[0].textStreams.length) {
-            var ContentType = shaka.util.ManifestParserUtils.ContentType;
+            const ContentType = shaka.util.ManifestParserUtils.ContentType;
             expect(manifest.periods[0].textStreams[0].type)
               .toBe(ContentType.TEXT);
           }
@@ -915,7 +913,7 @@ describe('DashParser Manifest', function() {
   });
 
   it('ignores duplicate Representation IDs for VOD', function(done) {
-    var source = [
+    let source = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
       '    <AdaptationSet mimeType="video/mp4">',
@@ -951,8 +949,8 @@ describe('DashParser Manifest', function() {
           expect(manifest.periods.length).toBe(1);
           expect(manifest.periods[0].variants.length).toBe(2);
 
-          var variant1 = manifest.periods[0].variants[0];
-          var variant2 = manifest.periods[0].variants[1];
+          let variant1 = manifest.periods[0].variants[0];
+          let variant2 = manifest.periods[0].variants[1];
           expect(variant1.video).toBeTruthy();
           expect(variant2.video).toBeTruthy();
           expect(variant1.video.getSegmentReference(1).getUris())
@@ -966,7 +964,7 @@ describe('DashParser Manifest', function() {
 
   it('handles bandwidth of 0 or missing', function(done) {
     // Regression test for https://github.com/google/shaka-player/issues/938
-    var source = [
+    let source = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
       '    <AdaptationSet mimeType="video/mp4">',
@@ -992,11 +990,11 @@ describe('DashParser Manifest', function() {
           expect(manifest.periods.length).toBe(1);
           expect(manifest.periods[0].variants.length).toBe(2);
 
-          var variant1 = manifest.periods[0].variants[0];
+          let variant1 = manifest.periods[0].variants[0];
           expect(isNaN(variant1.bandwidth)).toBe(false);
           expect(variant1.bandwidth).toBeGreaterThan(0);
 
-          var variant2 = manifest.periods[0].variants[1];
+          let variant2 = manifest.periods[0].variants[1];
           expect(isNaN(variant2.bandwidth)).toBe(false);
           expect(variant2.bandwidth).toBeGreaterThan(0);
         })
@@ -1013,21 +1011,21 @@ describe('DashParser Manifest', function() {
      * @return {!Promise}
      */
     function testAudioChannelConfiguration(expectedNumChannels, schemeMap) {
-      var header = [
+      let header = [
         '<MPD minBufferTime="PT75S">',
         '  <Period id="1" duration="PT30S">',
         '    <AdaptationSet mimeType="audio/mp4">',
         '      <Representation id="1" bandwidth="1">'
       ].join('\n');
 
-      var configs = [];
-      for (var scheme in schemeMap) {
-        var value = schemeMap[scheme];
+      let configs = [];
+      for (let scheme in schemeMap) {
+        let value = schemeMap[scheme];
         configs.push('<AudioChannelConfiguration schemeIdUri="' + scheme +
                      '" value="' + value + '" />');
       }
 
-      var footer = [
+      let footer = [
         '        <SegmentTemplate media="1-$Number$.mp4" duration="1" />',
         '      </Representation>',
         '    </AdaptationSet>',
@@ -1035,7 +1033,7 @@ describe('DashParser Manifest', function() {
         '</MPD>'
       ].join('\n');
 
-      var source = header + configs.join('\n') + footer;
+      let source = header + configs.join('\n') + footer;
 
       // Create a fresh parser, to avoid issues when we chain multiple tests
       // together.
@@ -1047,7 +1045,7 @@ describe('DashParser Manifest', function() {
             expect(manifest.periods.length).toBe(1);
             expect(manifest.periods[0].variants.length).toBe(1);
 
-            var variant = manifest.periods[0].variants[0];
+            let variant = manifest.periods[0].variants[0];
             expect(variant.audio.channelsCount).toEqual(expectedNumChannels);
           }).catch(fail);
     }
@@ -1124,10 +1122,10 @@ describe('DashParser Manifest', function() {
     parser.start('dummy://foo', playerInterface)
         .then(function() {
           expect(fakeNetEngine.registerResponseFilter).toHaveBeenCalled();
-          var filter = /** @type {!Function} */ (
+          let filter = /** @type {!Function} */ (
               fakeNetEngine.registerResponseFilter.calls.mostRecent().args[0]);
-          var type = shaka.net.NetworkingEngine.RequestType.SEGMENT;
-          var response = {data: emsgUpdate.buffer};
+          const type = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+          let response = {data: emsgUpdate.buffer};
           fakeNetEngine.request.calls.reset();
           filter(type, response);
           expect(fakeNetEngine.request).toHaveBeenCalled();

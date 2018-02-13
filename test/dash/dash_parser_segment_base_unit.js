@@ -16,19 +16,18 @@
  */
 
 describe('DashParser SegmentBase', function() {
-  /** @const */
-  var Dash = shaka.test.Dash;
+  const Dash = shaka.test.Dash;
+
+  const indexSegmentUri = '/base/test/test/assets/index-segment.mp4';
 
   /** @type {!shaka.test.FakeNetworkingEngine} */
-  var fakeNetEngine;
+  let fakeNetEngine;
   /** @type {!shaka.dash.DashParser} */
-  var parser;
+  let parser;
   /** @type {shakaExtern.ManifestParser.PlayerInterface} */
-  var playerInterface;
-  /** @const {string} */
-  var indexSegmentUri = '/base/test/test/assets/index-segment.mp4';
+  let playerInterface;
   /** @type {ArrayBuffer} */
-  var indexSegment;
+  let indexSegment;
 
   beforeAll(function(done) {
     shaka.test.Util.fetch(indexSegmentUri).then(function(data) {
@@ -51,7 +50,7 @@ describe('DashParser SegmentBase', function() {
   });
 
   it('requests init data for WebM', function(done) {
-    var source = [
+    let source = [
       '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <AdaptationSet mimeType="video/webm">',
@@ -88,7 +87,7 @@ describe('DashParser SegmentBase', function() {
   });
 
   it('inherits from Period', function(done) {
-    var source = [
+    let source = [
       '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <BaseURL>http://example.com</BaseURL>',
@@ -121,7 +120,7 @@ describe('DashParser SegmentBase', function() {
   });
 
   it('inherits from AdaptationSet', function(done) {
-    var source = [
+    let source = [
       '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <AdaptationSet mimeType="video/mp4">',
@@ -154,7 +153,7 @@ describe('DashParser SegmentBase', function() {
   });
 
   it('does not require sourceURL in Initialization', function(done) {
-    var source = [
+    let source = [
       '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <AdaptationSet mimeType="video/mp4">',
@@ -189,7 +188,7 @@ describe('DashParser SegmentBase', function() {
   });
 
   it('merges across levels', function(done) {
-    var source = [
+    let source = [
       '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <BaseURL>http://example.com</BaseURL>',
@@ -230,7 +229,7 @@ describe('DashParser SegmentBase', function() {
   });
 
   it('merges and overrides across levels', function(done) {
-    var source = [
+    let source = [
       '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <BaseURL>http://example.com</BaseURL>',
@@ -269,7 +268,7 @@ describe('DashParser SegmentBase', function() {
   });
 
   it('does not assume the same timescale as media', function(done) {
-    var source = [
+    let source = [
       '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <AdaptationSet mimeType="video/mp4">',
@@ -289,14 +288,14 @@ describe('DashParser SegmentBase', function() {
       'http://example.com/index.mp4': indexSegment
     });
 
-    var video;
+    let video;
     parser.start('dummy://foo', playerInterface)
         .then(function(manifest) {
           video = manifest.periods[0].variants[0].video;
           return video.createSegmentIndex();  // real data, should succeed
         })
         .then(function() {
-          var reference = video.getSegmentReference(0);
+          let reference = video.getSegmentReference(0);
           expect(reference.startTime).toEqual(0);  // clamped to 0 by fit()
           expect(reference.endTime).toEqual(10);  // would be 12 without PTO
         })
@@ -306,7 +305,7 @@ describe('DashParser SegmentBase', function() {
 
   describe('fails for', function() {
     it('unsupported container', function(done) {
-      var source = [
+      let source = [
         '<MPD mediaPresentationDuration="PT75S">',
         '  <Period>',
         '    <BaseURL>http://example.com</BaseURL>',
@@ -318,7 +317,7 @@ describe('DashParser SegmentBase', function() {
         '  </Period>',
         '</MPD>',
       ].join('\n');
-      var error = new shaka.util.Error(
+      let error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_UNSUPPORTED_CONTAINER);
@@ -326,7 +325,7 @@ describe('DashParser SegmentBase', function() {
     });
 
     it('missing init segment for WebM', function(done) {
-      var source = [
+      let source = [
         '<MPD mediaPresentationDuration="PT75S">',
         '  <Period>',
         '    <BaseURL>http://example.com</BaseURL>',
@@ -338,7 +337,7 @@ describe('DashParser SegmentBase', function() {
         '  </Period>',
         '</MPD>',
       ].join('\n');
-      var error = new shaka.util.Error(
+      let error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_WEBM_MISSING_INIT);
@@ -346,7 +345,7 @@ describe('DashParser SegmentBase', function() {
     });
 
     it('no @indexRange nor RepresentationIndex', function(done) {
-      var source = [
+      let source = [
         '<MPD mediaPresentationDuration="PT75S">',
         '  <Period>',
         '    <BaseURL>http://example.com</BaseURL>',
@@ -360,7 +359,7 @@ describe('DashParser SegmentBase', function() {
         '  </Period>',
         '</MPD>',
       ].join('\n');
-      var error = new shaka.util.Error(
+      let error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_NO_SEGMENT_INFO);
