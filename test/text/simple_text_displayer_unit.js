@@ -17,22 +17,18 @@
 
 
 describe('SimpleTextDisplayer', function() {
-  /** @const */
-  var originalVTTCue = window.VTTCue;
-  /** @const */
-  var originalVTTRegion = window.VTTRegion;
-  /** @const */
-  var Cue = shaka.text.Cue;
-  /** @const */
-  var CueRegion = shaka.text.CueRegion;
-  /** @const */
-  var SimpleTextDisplayer = shaka.text.SimpleTextDisplayer;
+  const originalVTTCue = window.VTTCue;
+  const originalVTTRegion = window.VTTRegion;
+  const Cue = shaka.text.Cue;
+  const CueRegion = shaka.text.CueRegion;
+  const SimpleTextDisplayer = shaka.text.SimpleTextDisplayer;
+
   /** @type {!shaka.test.FakeVideo} */
-  var video;
+  let video;
   /** @type {!shaka.test.FakeTextTrack} */
-  var mockTrack;
+  let mockTrack;
   /** @type {!shaka.text.SimpleTextDisplayer} */
-  var displayer;
+  let displayer;
 
   beforeEach(function() {
     video = new shaka.test.FakeVideo();
@@ -101,9 +97,9 @@ describe('SimpleTextDisplayer', function() {
 
   describe('remove', function() {
     it('removes cues which overlap the range', function() {
-      var cue1 = new shaka.text.Cue(0, 1, 'Test');
-      var cue2 = new shaka.text.Cue(1, 2, 'Test');
-      var cue3 = new shaka.text.Cue(2, 3, 'Test');
+      let cue1 = new shaka.text.Cue(0, 1, 'Test');
+      let cue2 = new shaka.text.Cue(1, 2, 'Test');
+      let cue3 = new shaka.text.Cue(2, 3, 'Test');
       displayer.append([cue1, cue2, cue3]);
 
       displayer.remove(0, 1);
@@ -145,7 +141,7 @@ describe('SimpleTextDisplayer', function() {
             new shaka.text.Cue(20, 40, 'Test')
           ]);
 
-      var cue1 = new shaka.text.Cue(20, 40, 'Test');
+      let cue1 = new shaka.text.Cue(20, 40, 'Test');
       cue1.positionAlign = Cue.positionAlign.LEFT;
       cue1.lineAlign = Cue.lineAlign.START;
       cue1.size = 80;
@@ -172,7 +168,7 @@ describe('SimpleTextDisplayer', function() {
             }
           ], [cue1]);
 
-      var cue2 = new shaka.text.Cue(30, 50, 'Test');
+      let cue2 = new shaka.text.Cue(30, 50, 'Test');
       cue2.positionAlign = Cue.positionAlign.RIGHT;
       cue2.lineAlign = Cue.lineAlign.END;
       cue2.textAlign = Cue.textAlign.RIGHT;
@@ -195,7 +191,7 @@ describe('SimpleTextDisplayer', function() {
             }
           ], [cue2]);
 
-      var cue3 = new shaka.text.Cue(40, 60, 'Test');
+      let cue3 = new shaka.text.Cue(40, 60, 'Test');
       cue3.positionAlign = Cue.positionAlign.CENTER;
       cue3.lineAlign = Cue.lineAlign.CENTER;
       cue3.textAlign = Cue.textAlign.START;
@@ -214,7 +210,7 @@ describe('SimpleTextDisplayer', function() {
             }
           ], [cue3]);
 
-      var cue4 = new shaka.text.Cue(40, 60, 'Test');
+      let cue4 = new shaka.text.Cue(40, 60, 'Test');
       cue4.line = null;
       cue4.position = null;
 
@@ -231,7 +227,7 @@ describe('SimpleTextDisplayer', function() {
             }
           ], [cue4]);
 
-      var cue5 = new shaka.text.Cue(40, 60, 'Test');
+      let cue5 = new shaka.text.Cue(40, 60, 'Test');
       cue5.line = 0;
       cue5.position = 0;
 
@@ -255,7 +251,7 @@ describe('SimpleTextDisplayer', function() {
        * @param {string} text
        */
       function FakeVTTCueWithoutAlignCenter(start, end, text) {
-        var align = 'middle';
+        let align = 'middle';
         Object.defineProperty(this, 'align', {
           get: function() { return align; },
           set: function(newValue) {
@@ -268,7 +264,7 @@ describe('SimpleTextDisplayer', function() {
       }
       window.VTTCue = /** @type {?} */(FakeVTTCueWithoutAlignCenter);
 
-      var cue1 = new shaka.text.Cue(20, 40, 'Test');
+      let cue1 = new shaka.text.Cue(20, 40, 'Test');
       cue1.textAlign = Cue.textAlign.CENTER;
 
       verifyHelper(
@@ -284,8 +280,8 @@ describe('SimpleTextDisplayer', function() {
     });
 
     it('ignores cues with startTime >= endTime', function() {
-      var cue1 = new shaka.text.Cue(60, 40, 'Test');
-      var cue2 = new shaka.text.Cue(40, 40, 'Test');
+      let cue1 = new shaka.text.Cue(60, 40, 'Test');
+      let cue2 = new shaka.text.Cue(40, 40, 'Test');
       displayer.append([cue1, cue2]);
       expect(mockTrack.addCue).not.toHaveBeenCalled();
     });
@@ -293,14 +289,14 @@ describe('SimpleTextDisplayer', function() {
 
   describe('ConvertToVttRegion', function() {
     it('converts shaka.text.CueRegions to VTTRegions', function() {
-      var region1 = new shaka.text.CueRegion();
+      let region1 = new shaka.text.CueRegion();
       region1.id = 'reg1';
       region1.width = 50;
       region1.scroll = CueRegion.scrollMode.UP;
       region1.height = 3;
       region1.heightUnits = CueRegion.units.LINES;
 
-      var cue1 = new shaka.text.Cue(20, 40, 'Test');
+      let cue1 = new shaka.text.Cue(20, 40, 'Test');
       cue1.region = region1;
 
       verifyHelper(
@@ -323,7 +319,7 @@ describe('SimpleTextDisplayer', function() {
     });
 
     it('converts pixel values to percentage', function() {
-      var region1 = new shaka.text.CueRegion();
+      let region1 = new shaka.text.CueRegion();
       region1.id = 'reg1';
       region1.width = 500;
       region1.widthUnits = CueRegion.units.PX;
@@ -331,7 +327,7 @@ describe('SimpleTextDisplayer', function() {
       region1.viewportAnchorY = 100;
       region1.viewportAnchorUnits = CueRegion.units.PX;
 
-      var cue1 = new shaka.text.Cue(20, 40, 'Test');
+      let cue1 = new shaka.text.Cue(20, 40, 'Test');
       cue1.region = region1;
 
       verifyHelper(
@@ -361,12 +357,12 @@ describe('SimpleTextDisplayer', function() {
   function verifyHelper(vttCues, shakaCues) {
     mockTrack.addCue.calls.reset();
     displayer.append(shakaCues);
-    var result = mockTrack.addCue.calls.allArgs().reduce(
+    let result = mockTrack.addCue.calls.allArgs().reduce(
         shaka.util.Functional.collapseArrays, []);
     expect(result).toBeTruthy();
     expect(result.length).toBe(vttCues.length);
 
-    for (var i = 0; i < vttCues.length; i++) {
+    for (let i = 0; i < vttCues.length; i++) {
       expect(result[i].startTime).toBe(vttCues[i].start);
       expect(result[i].endTime).toBe(vttCues[i].end);
       expect(result[i].text).toBe(vttCues[i].text);

@@ -24,13 +24,13 @@
 //      of the track's current mode.
 describe('TextTrackIntegration', function() {
   /** @type {HTMLVideoElement} */
-  var video;
+  let video;
 
   /** @type {TextTrack} */
-  var track;
+  let track;
 
   /** @type {TextTrackCueList} */
-  var trackCues;
+  let trackCues;
 
   beforeEach(function() {
     video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
@@ -92,7 +92,7 @@ describe('TextTrackIntegration', function() {
 
 
   describe('addCue', function() {
-    var cues = [
+    let cues = [
       new VTTCue(0, 1000, 'Cue 1 message'),
       new VTTCue(2000, 3000, 'Cue 2 message')
     ];
@@ -132,7 +132,7 @@ describe('TextTrackIntegration', function() {
   });
 
   describe('removeCue', function() {
-    var cues = [
+    let cues = [
       new VTTCue(0, 1000, 'Cue 1 message'),
       new VTTCue(2000, 3000, 'Cue 2 message')
     ];

@@ -16,14 +16,11 @@
  */
 
 describe('VttTextParser', function() {
+  const Cue = shaka.text.Cue;
+  const CueRegion = shaka.text.CueRegion;
+
   /** @type {!jasmine.Spy} */
-  var logWarningSpy;
-
-  /** @const */
-  var Cue = shaka.text.Cue;
-
-  /** @const */
-  var CueRegion = shaka.text.CueRegion;
+  let logWarningSpy;
 
   beforeAll(function() {
     logWarningSpy = jasmine.createSpy('shaka.log.warning');
@@ -597,12 +594,12 @@ describe('VttTextParser', function() {
    * @param {shakaExtern.TextParser.TimeContext} time
    */
   function verifyHelper(cues, text, time) {
-    var data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
+    let data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
 
-    var result = new shaka.text.VttTextParser().parseMedia(data, time);
+    let result = new shaka.text.VttTextParser().parseMedia(data, time);
     expect(result).toBeTruthy();
     expect(result.length).toBe(cues.length);
-    for (var i = 0; i < cues.length; i++) {
+    for (let i = 0; i < cues.length; i++) {
       expect(result[i].startTime).toBe(cues[i].start);
       expect(result[i].endTime).toBe(cues[i].end);
       expect(result[i].payload).toBe(cues[i].payload);
@@ -630,14 +627,14 @@ describe('VttTextParser', function() {
    * @param {shakaExtern.CueRegion} actual
    */
   function verifyRegion(expected, actual) {
-    var properties = ['id', 'viewportAnchorX', 'viewportAnchorY',
+    let properties = ['id', 'viewportAnchorX', 'viewportAnchorY',
                       'regionAnchorX', 'regionAnchorY', 'width', 'height',
                       'heightUnits', 'widthUnits', 'viewportAnchorUnits',
                       'scroll'];
     expect(actual).toBeTruthy();
 
-    for (var i = 0; i < properties.length; i++) {
-      var property = properties[i];
+    for (let i = 0; i < properties.length; i++) {
+      let property = properties[i];
         if (property in expected)
           expect(actual[property]).toEqual(expected[property]);
     }
@@ -649,10 +646,10 @@ describe('VttTextParser', function() {
    * @param {shakaExtern.TextParser.TimeContext} time
    */
   function errorHelper(code, text, time) {
-    var error = new shaka.util.Error(
+    let error = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.TEXT,
         code);
-    var data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
+    let data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
     try {
       new shaka.text.VttTextParser().parseMedia(data, time);
       fail('Invalid WebVTT file supported');

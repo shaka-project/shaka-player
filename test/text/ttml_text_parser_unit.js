@@ -16,11 +16,8 @@
  */
 
 describe('TtmlTextParser', function() {
-  /** @const */
-  var Cue = shaka.text.Cue;
-
-  /** @const */
-  var CueRegion = shaka.text.CueRegion;
+  const Cue = shaka.text.Cue;
+  const CueRegion = shaka.text.CueRegion;
 
   it('supports no cues', function() {
     verifyHelper([],
@@ -36,7 +33,7 @@ describe('TtmlTextParser', function() {
   });
 
   it('supports xml:space', function() {
-    var ttBody = '\n' +
+    let ttBody = '\n' +
         '  <body>\n' +
         '    <p begin="01:02.03" end="01:02.05">\n' +
         '      <span> A    B   C  </span>\n' +
@@ -779,15 +776,15 @@ describe('TtmlTextParser', function() {
    * @param {shakaExtern.TextParser.TimeContext} time
    */
   function verifyHelper(cues, text, time) {
-    var data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
-    var result = new shaka.text.TtmlTextParser().parseMedia(data, time);
-    var properties = ['textAlign', 'lineAlign', 'positionAlign', 'size',
+    let data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
+    let result = new shaka.text.TtmlTextParser().parseMedia(data, time);
+    let properties = ['textAlign', 'lineAlign', 'positionAlign', 'size',
                       'line', 'position', 'writingDirection', 'color',
                       'backgroundColor', 'fontWeight', 'fontFamily',
                       'wrapLine', 'lineHeight', 'fontStyle', 'fontSize'];
     expect(result).toBeTruthy();
     expect(result.length).toBe(cues.length);
-    for (var i = 0; i < cues.length; i++) {
+    for (let i = 0; i < cues.length; i++) {
       expect(result[i].startTime).toBeCloseTo(cues[i].start, 3);
       expect(result[i].endTime).toBeCloseTo(cues[i].end, 3);
       expect(result[i].payload).toBe(cues[i].payload);
@@ -795,14 +792,14 @@ describe('TtmlTextParser', function() {
       if (cues[i].region)
         verifyRegion(cues[i].region, result[i].region);
 
-      for (var j = 0; j < properties.length; j++) {
-        var property = properties[j];
+      for (let j = 0; j < properties.length; j++) {
+        let property = properties[j];
         if (property in cues[i])
           expect(result[i][property]).toEqual(cues[i][property]);
       }
 
       if (cues[i].textDecoration) {
-        for (var j = 0; j < cues[i].textDecoration.length; j++) {
+        for (let j = 0; j < cues[i].textDecoration.length; j++) {
           expect(/** @type {?} */ (result[i]).textDecoration[j])
                .toBe(cues[i].textDecoration[j]);
         }
@@ -816,14 +813,14 @@ describe('TtmlTextParser', function() {
    * @param {shakaExtern.CueRegion} actual
    */
   function verifyRegion(expected, actual) {
-    var properties = ['id', 'viewportAnchorX', 'viewportAnchorY',
+    let properties = ['id', 'viewportAnchorX', 'viewportAnchorY',
                       'regionAnchorX', 'regionAnchorY', 'width', 'height',
                       'heightUnits', 'widthUnits', 'viewportAnchorUnits',
                       'scroll'];
     expect(actual).toBeTruthy();
 
-    for (var i = 0; i < properties.length; i++) {
-      var property = properties[i];
+    for (let i = 0; i < properties.length; i++) {
+      let property = properties[i];
         if (property in expected)
           expect(actual[property]).toEqual(expected[property]);
     }
@@ -835,10 +832,10 @@ describe('TtmlTextParser', function() {
    * @param {string} text
    */
   function errorHelper(code, text) {
-    var error = new shaka.util.Error(
+    let error = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.TEXT,
         code);
-    var data = shaka.util.StringUtils.toUTF8(text);
+    let data = shaka.util.StringUtils.toUTF8(text);
     try {
       new shaka.text.TtmlTextParser().parseMedia(
           new Uint8Array(data),
