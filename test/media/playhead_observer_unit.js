@@ -240,7 +240,7 @@ describe('PlayheadObserver', function() {
   });
 
   describe('timeline regions', function() {
-    var regionInfo;
+    let regionInfo;
 
     beforeEach(function() {
       regionInfo = {
@@ -379,7 +379,7 @@ describe('PlayheadObserver', function() {
       });
 
       it('fires an enter/exit event for zero-duration regions', function() {
-        var otherInfo = {
+        let otherInfo = {
           schemeIdUri: 'http://example.com',
           value: 'something',
           startTime: 3,
@@ -407,7 +407,7 @@ describe('PlayheadObserver', function() {
         //           10        20        30
         // 1: regionInfo, 2: nestedInfo, 3: overlapInfo
 
-        var nestedInfo = {
+        let nestedInfo = {
           schemeIdUri: 'http://example.com',
           value: 'something',
           startTime: 13,
@@ -415,7 +415,7 @@ describe('PlayheadObserver', function() {
           id: 'abc',
           eventElement: null
         };
-        var overlapInfo = {
+        let overlapInfo = {
           schemeIdUri: 'http://example.com',
           value: 'something',
           startTime: 18,
@@ -446,7 +446,7 @@ describe('PlayheadObserver', function() {
      * @param {number=} opt_index
      */
     function expectTimelineEvent(name, info, opt_index) {
-      var event = onEvent.calls.argsFor(opt_index || 0)[0];
+      let event = onEvent.calls.argsFor(opt_index || 0)[0];
       expect(event.type).toBe(name);
       expect(event.detail).toEqual(info);
       // This should be a copy by reference, not just a value match.

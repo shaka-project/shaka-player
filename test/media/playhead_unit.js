@@ -24,7 +24,7 @@
  * @property {number} end
  *   The end time of the range, in seconds.
  */
-var TimeRange;
+let TimeRange;
 
 
 /**
@@ -59,7 +59,7 @@ var TimeRange;
  * @property {(boolean|undefined)} preventDefault
  *   If true, call preventDefault() on the 'largegap' event.
  */
-var PlayingTestInfo;
+let PlayingTestInfo;
 
 
 /**
@@ -93,31 +93,30 @@ var PlayingTestInfo;
  * @property {boolean} expectEvent
  *   If true, expect the 'largegap' event to be fired.
  */
-var SeekTestInfo;
+let SeekTestInfo;
 
 
 describe('Playhead', function() {
-  /** @const */
-  var Util = shaka.test.Util;
+  const Util = shaka.test.Util;
 
   /** @type {!shaka.test.FakeVideo} */
-  var video;
+  let video;
   /** @type {!shaka.test.FakePresentationTimeline} */
-  var timeline;
+  let timeline;
   /** @type {shakaExtern.Manifest} */
-  var manifest;
+  let manifest;
   /** @type {!shaka.media.Playhead} */
-  var playhead;
+  let playhead;
   /** @type {shakaExtern.StreamingConfiguration} */
-  var config;
+  let config;
 
   // Callback to us from Playhead when a valid 'seeking' event occurs.
   /** @type {!jasmine.Spy} */
-  var onSeek;
+  let onSeek;
 
   // Callback to us from Playhead when an event should be sent to the app.
   /** @type {!jasmine.Spy} */
-  var onEvent;
+  let onEvent;
 
   beforeAll(function() {
     jasmine.clock().install();
@@ -780,7 +779,7 @@ describe('Playhead', function() {
               Util.spyFunc(onEvent));
 
           jasmine.clock().tick(1000);
-          for (var time = data.start; time < data.waitingAt; time++) {
+          for (let time = data.start; time < data.waitingAt; time++) {
             video.currentTime = time;
             jasmine.clock().tick(1000);
             // Make sure Playhead didn't adjust the time yet.
@@ -1007,7 +1006,7 @@ describe('Playhead', function() {
     });  // with unbuffered seeks
 
     it('doesn\'t gap jump if the seeking event is late', function() {
-      var buffered = [{start: 10, end: 20}];
+      let buffered = [{start: 10, end: 20}];
       video.buffered = createFakeBuffered(buffered);
       video.currentTime = 12;
       video.readyState = HTMLMediaElement.HAVE_ENOUGH_DATA;
@@ -1101,7 +1100,7 @@ describe('Playhead', function() {
      */
     function calculateReadyState(b, time) {
       // See: https://goo.gl/L8qxfD
-      for (var i = 0; i < b.length; i++) {
+      for (let i = 0; i < b.length; i++) {
         if (time >= b[i].start) {
           if (time == b[i].end) {
             // The video has the current frame, but no data in the future.

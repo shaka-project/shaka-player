@@ -171,10 +171,10 @@ describe('DrmEngine', function() {
           // The error callback should not be invoked.
           onErrorSpy.and.callFake(fail);
 
-          var originalRequest = networkingEngine.request.bind(networkingEngine);
-          var requestComplete;
-          var requestSpy = jasmine.createSpy('request');
-          var requestMade = new shaka.util.PublicPromise();
+          let originalRequest = networkingEngine.request.bind(networkingEngine);
+          let requestComplete;
+          let requestSpy = jasmine.createSpy('request');
+          let requestMade = new shaka.util.PublicPromise();
           requestSpy.and.callFake(function() {
             requestMade.resolve();
             requestComplete = originalRequest.apply(null, arguments);
@@ -182,13 +182,13 @@ describe('DrmEngine', function() {
           });
           networkingEngine.request = shaka.test.Util.spyFunc(requestSpy);
 
-          var encryptedEventSeen = new shaka.util.PublicPromise();
+          let encryptedEventSeen = new shaka.util.PublicPromise();
           eventManager.listen(video, 'encrypted', function() {
             encryptedEventSeen.resolve();
           });
           eventManager.listen(video, 'error', function() {
             fail('MediaError code ' + video.error.code);
-            var extended = video.error.msExtendedCode;
+            let extended = video.error.msExtendedCode;
             if (extended) {
               if (extended < 0) {
                 extended += Math.pow(2, 32);
@@ -197,7 +197,7 @@ describe('DrmEngine', function() {
             }
           });
 
-          var keyStatusEventSeen = new shaka.util.PublicPromise();
+          let keyStatusEventSeen = new shaka.util.PublicPromise();
           onKeyStatusSpy.and.callFake(function() {
             keyStatusEventSeen.resolve();
           });
@@ -233,14 +233,14 @@ describe('DrmEngine', function() {
           }).then(function() {
             // Some platforms (notably 2017 Tizen TVs) do not fire key status
             // events.
-            var keyStatusTimeout = shaka.test.Util.delay(5);
+            let keyStatusTimeout = shaka.test.Util.delay(5);
             return Promise.race([keyStatusTimeout, keyStatusEventSeen]);
           }).then(function() {
-            var call = onKeyStatusSpy.calls.mostRecent();
+            let call = onKeyStatusSpy.calls.mostRecent();
             if (call) {
-              var map = /** @type {!Object} */ (call.args[0]);
+              let map = /** @type {!Object} */ (call.args[0]);
               expect(Object.keys(map).length).not.toBe(0);
-              for (var k in map) {
+              for (let k in map) {
                 expect(map[k]).toBe('usable');
               }
             }

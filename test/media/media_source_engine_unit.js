@@ -23,7 +23,7 @@
  *   end: jasmine.Spy
  * }}
  */
-var MockTimeRanges;
+let MockTimeRanges;
 
 
 /**
@@ -41,7 +41,7 @@ var MockTimeRanges;
  *   error: function()
  * }}
  */
-var MockSourceBuffer;
+let MockSourceBuffer;
 
 
 describe('MediaSourceEngine', function() {
