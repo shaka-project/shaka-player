@@ -16,11 +16,10 @@
  */
 
 describe('OfflineUtils', function() {
-  /** @const */
-  var OfflineUtils = shaka.offline.OfflineUtils;
+  const OfflineUtils = shaka.offline.OfflineUtils;
 
-  var drmInfos;
-  var timeline;
+  let drmInfos;
+  let timeline;
 
   beforeEach(function() {
     drmInfos = [{
@@ -38,29 +37,27 @@ describe('OfflineUtils', function() {
   });
 
   describe('recreateVariants', function() {
-    var OfflineUtils = shaka.offline.OfflineUtils;
+    const OfflineUtils = shaka.offline.OfflineUtils;
 
-    /** @const {string} */
-    var audioType = 'audio';
-    /** @const {string} */
-    var videoType = 'video';
+    const audioType = 'audio';
+    const videoType = 'video';
 
     it('will create variants with variant ids', function() {
       /** @type {!Array.<shakaExtern.StreamDB>} */
-      var audios = [
+      let audios = [
         createStreamDB(0, audioType, [0]),
         createStreamDB(1, audioType, [1])
       ];
       /** @type {!Array.<shakaExtern.StreamDB>} */
-      var videos = [
+      let videos = [
         createStreamDB(2, videoType, [0]),
         createStreamDB(3, videoType, [1])
       ];
       /** @type {!Array.<shakaExtern.DrmInfo>} */
-      var drm = [];
+      let drm = [];
 
       /** @type {!Array.<shakaExtern.Variant>} */
-      var variants = OfflineUtils.recreateVariants(audios, videos, drm);
+      let variants = OfflineUtils.recreateVariants(audios, videos, drm);
 
       expect(variants.length).toBe(2);
 
@@ -73,34 +70,34 @@ describe('OfflineUtils', function() {
 
     it('will create variants when there is only audio', function() {
       /** @type {!Array.<shakaExtern.StreamDB>} */
-      var audios = [
+      let audios = [
         createStreamDB(0, audioType, [0]),
         createStreamDB(1, audioType, [1])
       ];
       /** @type {!Array.<shakaExtern.StreamDB>} */
-      var videos = [];
+      let videos = [];
       /** @type {!Array.<shakaExtern.DrmInfo>} */
-      var drm = [];
+      let drm = [];
 
       /** @type {!Array.<shakaExtern.Variant>} */
-      var variants = OfflineUtils.recreateVariants(audios, videos, drm);
+      let variants = OfflineUtils.recreateVariants(audios, videos, drm);
 
       expect(variants.length).toBe(2);
     });
 
     it('will create variants when there is only video', function() {
       /** @type {!Array.<shakaExtern.StreamDB>} */
-      var audios = [];
+      let audios = [];
       /** @type {!Array.<shakaExtern.StreamDB>} */
-      var videos = [
+      let videos = [
         createStreamDB(2, videoType, [0]),
         createStreamDB(3, videoType, [1])
       ];
       /** @type {!Array.<shakaExtern.DrmInfo>} */
-      var drm = [];
+      let drm = [];
 
       /** @type {!Array.<shakaExtern.Variant>} */
-      var variants = OfflineUtils.recreateVariants(audios, videos, drm);
+      let variants = OfflineUtils.recreateVariants(audios, videos, drm);
 
       expect(variants.length).toBe(2);
     });
@@ -113,7 +110,7 @@ describe('OfflineUtils', function() {
      */
     function createStreamDB(id, type, variants) {
       /** @type {shakaExtern.StreamDB} */
-      var streamDB = {
+      let streamDB = {
         id: id,
         primary: false,
         presentationTimeOffset: 0,
@@ -138,17 +135,17 @@ describe('OfflineUtils', function() {
   describe('reconstructPeriod', function() {
     it('will reconstruct Periods correctly', function() {
       /** @type {shakaExtern.PeriodDB} */
-      var periodDb = {
+      let periodDb = {
         startTime: 60,
         streams: [createVideoStreamDb(1, [0]), createAudioStreamDb(2, [0])]
       };
-      var period = OfflineUtils.reconstructPeriod(periodDb, drmInfos, timeline);
+      let period = OfflineUtils.reconstructPeriod(periodDb, drmInfos, timeline);
       expect(period).toBeTruthy();
       expect(period.startTime).toBe(periodDb.startTime);
       expect(period.textStreams).toEqual([]);
       expect(period.variants.length).toBe(1);
 
-      var variant = period.variants[0];
+      let variant = period.variants[0];
       expect(variant.id).toEqual(jasmine.any(Number));
       expect(variant.language).toBe(periodDb.streams[1].language);
       expect(variant.primary).toBe(false);
@@ -163,12 +160,12 @@ describe('OfflineUtils', function() {
 
     it('supports video-only content', function() {
       /** @type {shakaExtern.PeriodDB} */
-      var periodDb = {
+      let periodDb = {
         startTime: 60,
         streams: [createVideoStreamDb(1, [0]), createVideoStreamDb(2, [1])]
       };
 
-      var period = OfflineUtils.reconstructPeriod(periodDb, drmInfos, timeline);
+      let period = OfflineUtils.reconstructPeriod(periodDb, drmInfos, timeline);
       expect(period).toBeTruthy();
       expect(period.variants.length).toBe(2);
       expect(period.variants[0].audio).toBe(null);
@@ -177,12 +174,12 @@ describe('OfflineUtils', function() {
 
     it('supports audio-only content', function() {
       /** @type {shakaExtern.PeriodDB} */
-      var periodDb = {
+      let periodDb = {
         startTime: 60,
         streams: [createAudioStreamDb(1, [0]), createAudioStreamDb(2, [1])]
       };
 
-      var period = OfflineUtils.reconstructPeriod(periodDb, drmInfos, timeline);
+      let period = OfflineUtils.reconstructPeriod(periodDb, drmInfos, timeline);
       expect(period).toBeTruthy();
       expect(period.variants.length).toBe(2);
       expect(period.variants[0].audio).toBeTruthy();
@@ -191,7 +188,7 @@ describe('OfflineUtils', function() {
 
     it('supports text streams', function() {
       /** @type {shakaExtern.PeriodDB} */
-      var periodDb = {
+      let periodDb = {
         startTime: 60,
         streams: [
           createVideoStreamDb(1, [0]),
@@ -199,7 +196,7 @@ describe('OfflineUtils', function() {
         ]
       };
 
-      var period = OfflineUtils.reconstructPeriod(periodDb, drmInfos, timeline);
+      let period = OfflineUtils.reconstructPeriod(periodDb, drmInfos, timeline);
       expect(period).toBeTruthy();
       expect(period.variants.length).toBe(1);
       expect(period.textStreams.length).toBe(1);
@@ -208,24 +205,17 @@ describe('OfflineUtils', function() {
     });
 
     it('combines Variants according to variantIds field', function() {
-      /** @const {number} */
-      var audio1 = 0;
-      /** @const {number} */
-      var audio2 = 1;
-      /** @const {number} */
-      var video1 = 2;
-      /** @const {number} */
-      var video2 = 3;
+      const audio1 = 0;
+      const audio2 = 1;
+      const video1 = 2;
+      const video2 = 3;
 
-      /** @const {number} */
-      var variant1 = 0;
-      /** @const {number} */
-      var variant2 = 1;
-      /** @const {number} */
-      var variant3 = 2;
+      const variant1 = 0;
+      const variant2 = 1;
+      const variant3 = 2;
 
       /** @type {shakaExtern.PeriodDB} */
-      var periodDb = {
+      let periodDb = {
         startTime: 60,
         streams: [
           // Audio
@@ -239,7 +229,7 @@ describe('OfflineUtils', function() {
       };
 
       /** @type {shakaExtern.Period} */
-      var period = OfflineUtils.reconstructPeriod(periodDb, drmInfos, timeline);
+      let period = OfflineUtils.reconstructPeriod(periodDb, drmInfos, timeline);
 
       expect(period).toBeTruthy();
       expect(period.variants.length).toBe(3);
@@ -259,7 +249,7 @@ describe('OfflineUtils', function() {
      * @return {shakaExtern.StreamDB}
      */
     function createVideoStreamDb(id, variantIds) {
-      var ContentType = shaka.util.ManifestParserUtils.ContentType;
+      const ContentType = shaka.util.ManifestParserUtils.ContentType;
       return {
         id: id,
         primary: false,
@@ -300,7 +290,7 @@ describe('OfflineUtils', function() {
      * @return {shakaExtern.StreamDB}
      */
     function createAudioStreamDb(id, variantIds) {
-      var ContentType = shaka.util.ManifestParserUtils.ContentType;
+      const ContentType = shaka.util.ManifestParserUtils.ContentType;
       return {
         id: id,
         primary: false,
@@ -340,7 +330,7 @@ describe('OfflineUtils', function() {
      * @return {shakaExtern.StreamDB}
      */
     function createTextStreamDb(id) {
-      var ContentType = shaka.util.ManifestParserUtils.ContentType;
+      const ContentType = shaka.util.ManifestParserUtils.ContentType;
       return {
         id: id,
         primary: false,
@@ -385,7 +375,7 @@ describe('OfflineUtils', function() {
         return;
       }
 
-      var expectedStream = {
+      let expectedStream = {
         id: jasmine.any(Number),
         createSegmentIndex: jasmine.any(Function),
         findSegmentPosition: jasmine.any(Function),
@@ -418,13 +408,13 @@ describe('OfflineUtils', function() {
 
       streamDb.segments.forEach(function(segmentDb, i) {
         /** @type {?string} */
-        var uri = shaka.offline.OfflineUri.segmentIdToUri(segmentDb.dataKey);
+        let uri = shaka.offline.OfflineUri.segmentIdToUri(segmentDb.dataKey);
 
         expect(stream.findSegmentPosition(segmentDb.startTime)).toBe(i);
         expect(stream.findSegmentPosition(segmentDb.endTime - 0.1)).toBe(i);
 
         /** @type {shaka.media.SegmentReference} */
-        var segment = stream.getSegmentReference(i);
+        let segment = stream.getSegmentReference(i);
         expect(segment).toBeTruthy();
         expect(segment.position).toBe(i);
         expect(segment.startTime).toBe(segmentDb.startTime);
@@ -443,19 +433,19 @@ describe('OfflineUtils', function() {
      */
     function findVariant(variants, audioId, videoId) {
       /** @type {?shakaExtern.Variant} */
-      var found = null;
+      let found = null;
 
       variants.forEach(function(variant) {
 
         /** @type {?shakaExtern.Stream} */
-        var audio = variant.audio;
+        let audio = variant.audio;
         /** @type {?shakaExtern.Stream} */
-        var video = variant.video;
+        let video = variant.video;
 
         /** @type {boolean } */
-        var audioMatch = audio ? audioId == audio.id : audioId == null;
+        let audioMatch = audio ? audioId == audio.id : audioId == null;
         /** @type {boolean } */
-        var videoMatch = video ? videoId == video.id : videoId == null;
+        let videoMatch = video ? videoId == video.id : videoId == null;
 
         if (audioMatch && videoMatch) {
           found = variant;
@@ -468,7 +458,7 @@ describe('OfflineUtils', function() {
 
   function createSegment(startTime, endTime, dataKey) {
     /** @type {shakaExtern.SegmentDB} */
-    var segment = {
+    let segment = {
       startTime: startTime,
       endTime: endTime,
       dataKey: dataKey

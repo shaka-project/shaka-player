@@ -16,59 +16,58 @@
  */
 
 describe('OfflineUri', function() {
-  /** @const */
-  var OfflineUri = shaka.offline.OfflineUri;
+  const OfflineUri = shaka.offline.OfflineUri;
 
   it('creates uri from manifest id', function() {
     /** @type {number} */
-    var id = 123;
+    let id = 123;
     /** @type {string} */
-    var uri = OfflineUri.manifestIdToUri(id);
+    let uri = OfflineUri.manifestIdToUri(id);
 
     expect(uri).toBe('offline:manifest/123');
   });
 
   it('creates uri from segment id', function() {
     /** @type {number} */
-    var id = 123;
+    let id = 123;
     /** @type {string} */
-    var uri = OfflineUri.segmentIdToUri(id);
+    let uri = OfflineUri.segmentIdToUri(id);
 
     expect(uri).toBe('offline:segment/123');
   });
 
   it('creates null id from non-manifest uri', function() {
     /** @type {string} */
-    var uri = 'invalid-uri';
+    let uri = 'invalid-uri';
     /** @type {?number} */
-    var id = OfflineUri.uriToManifestId(uri);
+    let id = OfflineUri.uriToManifestId(uri);
 
     expect(id).toBeNull();
   });
 
   it('creates id from manifest uri', function() {
     /** @type {string} */
-    var uri = 'offline:manifest/123';
+    let uri = 'offline:manifest/123';
     /** @type {?number} */
-    var id = OfflineUri.uriToManifestId(uri);
+    let id = OfflineUri.uriToManifestId(uri);
 
     expect(id).toBe(123);
   });
 
   it('creates null id from non-segment uri', function() {
     /** @type {string} */
-    var uri = 'invalid-uri';
+    let uri = 'invalid-uri';
     /** @type {?number} */
-    var id = OfflineUri.uriToSegmentId(uri);
+    let id = OfflineUri.uriToSegmentId(uri);
 
     expect(id).toBeNull();
   });
 
   it('creates id from segment uri', function() {
     /** @type {string} */
-    var uri = 'offline:segment/123';
+    let uri = 'offline:segment/123';
     /** @type {?number} */
-    var id = OfflineUri.uriToSegmentId(uri);
+    let id = OfflineUri.uriToSegmentId(uri);
 
     expect(id).toBe(123);
   });

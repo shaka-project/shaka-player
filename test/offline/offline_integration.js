@@ -16,28 +16,25 @@
  */
 
 describe('Offline', /** @suppress {accessControls} */ function() {
-  var OfflineUri = shaka.offline.OfflineUri;
+  const OfflineUri = shaka.offline.OfflineUri;
 
-  /** @const {string} */
-  var dbName = 'shaka-offline-integration-test-db';
+  const dbName = 'shaka-offline-integration-test-db';
+  const dbUpdateRetries = 5;
 
-  var mockSEFactory = new shaka.test.MockStorageEngineFactory();
-
-  /** @const {number} */
-  var dbUpdateRetries = 5;
+  let mockSEFactory = new shaka.test.MockStorageEngineFactory();
 
   /** @type {!shaka.util.EventManager} */
-  var eventManager;
+  let eventManager;
   /** @type {!shaka.offline.IStorageEngine} */
-  var engine;
+  let engine;
   /** @type {!shaka.offline.Storage} */
-  var storage;
+  let storage;
   /** @type {!shaka.Player} */
-  var player;
+  let player;
   /** @type {!HTMLVideoElement} */
-  var video;
+  let video;
   /** @type {shakaExtern.SupportType} */
-  var support;
+  let support;
 
   beforeAll(function(done) {
     video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
@@ -54,7 +51,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
   beforeEach(function(done) {
     mockSEFactory.overrideCreate(function() {
       /** @type {!shaka.offline.DBEngine} */
-      var engine = new shaka.offline.DBEngine(dbName);
+      let engine = new shaka.offline.DBEngine(dbName);
       return engine.init().then(function() { return engine; });
     });
 
@@ -92,7 +89,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
       pending('Offline storage not supported');
     }
 
-    var storedContent;
+    let storedContent;
     storage.store('test:sintel')
         .then(function(content) {
           storedContent = content;
@@ -128,19 +125,19 @@ describe('Offline', /** @suppress {accessControls} */ function() {
     }
 
     shaka.test.TestScheme.setupPlayer(player, 'sintel-enc');
-    var onError = function(e) {
+    let onError = function(e) {
       // We should only get a not-found error.
-      var expected = new shaka.util.Error(
+      let expected = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.DRM,
           shaka.util.Error.Code.OFFLINE_SESSION_REMOVED);
       shaka.test.Util.expectToEqualError(e, expected);
     };
 
-    var storedContent;
-    var sessionId;
+    let storedContent;
+    let sessionId;
     /** @type {!shaka.media.DrmEngine} */
-    var drmEngine;
+    let drmEngine;
     storage.store('test:sintel-enc')
         .then(function(content) {
           storedContent = content;
@@ -150,10 +147,10 @@ describe('Offline', /** @suppress {accessControls} */ function() {
               'Downloaded content should have a valid uri.');
 
           /** @type {string} */
-          var uri = storedContent.offlineUri;
+          let uri = storedContent.offlineUri;
 
           /** @type {?number} */
-          var id = OfflineUri.uriToManifestId(uri);
+          let id = OfflineUri.uriToManifestId(uri);
           goog.asserts.assert(
               id != null,
               uri + ' should be a valid offline manifest uri.');
@@ -167,9 +164,9 @@ describe('Offline', /** @suppress {accessControls} */ function() {
 
           // Create a DrmEngine now so we can use it to try to load the session
           // later, after the content has been deleted.
-          var OfflineManifestParser = shaka.offline.OfflineManifestParser;
-          var manifest = OfflineManifestParser.reconstructManifest(manifestDb);
-          var netEngine = player.getNetworkingEngine();
+          const OfflineManifestParser = shaka.offline.OfflineManifestParser;
+          let manifest = OfflineManifestParser.reconstructManifest(manifestDb);
+          let netEngine = player.getNetworkingEngine();
           goog.asserts.assert(netEngine, 'Must have a NetworkingEngine');
           drmEngine = new shaka.media.DrmEngine({
             netEngine: netEngine,
@@ -247,7 +244,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
         // to throw an error inappropriately.
         shaka.test.TestScheme.setupPlayer(player, 'multidrm_no_init_data');
 
-        var storedContent;
+        let storedContent;
         storage.configure({ usePersistentLicense: false });
         storage.store('test:multidrm_no_init_data')
             .then(function(content) {
@@ -257,11 +254,11 @@ describe('Offline', /** @suppress {accessControls} */ function() {
                   storedContent.offlineUri,
                   'Downloaded content should have a valid uri.');
 
-             /** @type {string} */
-              var uri = storedContent.offlineUri;
+              /** @type {string} */
+              let uri = storedContent.offlineUri;
 
               /** @type {?number} */
-              var id = OfflineUri.uriToManifestId(uri);
+              let id = OfflineUri.uriToManifestId(uri);
               goog.asserts.assert(
                   id != null,
                   uri + ' should be a valid offline manifest uri.');
@@ -292,10 +289,10 @@ describe('Offline', /** @suppress {accessControls} */ function() {
             })
             .then(function() {
               /** @type {string} */
-              var uri = storedContent.offlineUri;
+              let uri = storedContent.offlineUri;
 
               /** @type {?number} */
-              var id = OfflineUri.uriToManifestId(uri);
+              let id = OfflineUri.uriToManifestId(uri);
               goog.asserts.assert(
                   id != null,
                   uri + ' should be a valid offline manifest uri.');
@@ -313,8 +310,8 @@ describe('Offline', /** @suppress {accessControls} */ function() {
    * @return {!Promise}
    */
   function waitForTime(time) {
-    var p = new shaka.util.PublicPromise();
-    var onTimeUpdate = function() {
+    let p = new shaka.util.PublicPromise();
+    let onTimeUpdate = function() {
       if (video.currentTime >= time) {
         p.resolve();
       }
@@ -323,7 +320,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
     eventManager.listen(video, 'timeupdate', onTimeUpdate);
     onTimeUpdate();  // In case we're already there.
 
-    var timeout = shaka.test.Util.delay(30).then(function() {
+    let timeout = shaka.test.Util.delay(30).then(function() {
       throw new Error('Timeout waiting for time');
     });
     return Promise.race([p, timeout]);
