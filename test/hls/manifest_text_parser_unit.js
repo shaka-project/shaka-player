@@ -18,7 +18,7 @@
 
 describe('ManifestTextParser', function() {
   /** @type {!shaka.hls.ManifestTextParser} */
-  var parser;
+  let parser;
 
   beforeEach(function() {
     parser = new shaka.hls.ManifestTextParser();
@@ -86,8 +86,8 @@ describe('ManifestTextParser', function() {
      * @param {shaka.util.Error.Code} code
      */
     function verifyError(string, code) {
-      var data = shaka.util.StringUtils.toUTF8(string);
-      var error = new shaka.util.Error(
+      let data = shaka.util.StringUtils.toUTF8(string);
+      let error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           code);
@@ -205,11 +205,11 @@ describe('ManifestTextParser', function() {
     });
 
     it('rejects invalid tags', function() {
-      var error = new shaka.util.Error(
+      let error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.INVALID_HLS_TAG);
-      var text = shaka.util.StringUtils.toUTF8('#EXTM3U\ninvalid tag');
+      let text = shaka.util.StringUtils.toUTF8('#EXTM3U\ninvalid tag');
       try {
         parser.parsePlaylist(text, /* uri */ '');
         fail('Invalid HLS tags should not be supported!');
@@ -221,20 +221,20 @@ describe('ManifestTextParser', function() {
 
   describe('tag.toString', function() {
     it('recreates valid tag with attributes', function() {
-      var text = '#EXT-X-MEDIA:CODECS="avc1.64002a,mp4a.40.2",AUDIO="a1,a2"';
-      var tag = shaka.hls.ManifestTextParser.parseTag(0, text);
+      const text = '#EXT-X-MEDIA:CODECS="avc1.64002a,mp4a.40.2",AUDIO="a1,a2"';
+      let tag = shaka.hls.ManifestTextParser.parseTag(0, text);
       expect(text).toEqual(tag.toString());
     });
 
     it('recreates valid tag with value', function() {
-      var text = '#EXT-X-PLAYLIST-TYPE:VOD';
-      var tag = shaka.hls.ManifestTextParser.parseTag(0, text);
+      const text = '#EXT-X-PLAYLIST-TYPE:VOD';
+      let tag = shaka.hls.ManifestTextParser.parseTag(0, text);
       expect(text).toEqual(tag.toString());
     });
 
     it('recreates valid tag with no value', function() {
-      var text = '#EXTM3U';
-      var tag = shaka.hls.ManifestTextParser.parseTag(0, text);
+      const text = '#EXTM3U';
+      let tag = shaka.hls.ManifestTextParser.parseTag(0, text);
       expect(text).toEqual(tag.toString());
     });
   });
@@ -286,7 +286,7 @@ describe('ManifestTextParser', function() {
   });
 
   describe('parseSegments', function() {
-    var manifestText = '#EXTM3U\n' +
+    const manifestText = '#EXTM3U\n' +
         '#EXT-X-TARGETDURATION:6\n' +
         '#EXTINF:5\n' +
         'uri\n' +
@@ -337,9 +337,9 @@ describe('ManifestTextParser', function() {
    * @param {string=} opt_manifestUri
    */
   function verifyPlaylist(expectedPlaylist, playlistText, opt_manifestUri) {
-    var manifestUri = opt_manifestUri || '';
-    var playlistBuffer = shaka.util.StringUtils.toUTF8(playlistText);
-    var actualPlaylist = parser.parsePlaylist(playlistBuffer, manifestUri);
+    let manifestUri = opt_manifestUri || '';
+    let playlistBuffer = shaka.util.StringUtils.toUTF8(playlistText);
+    let actualPlaylist = parser.parsePlaylist(playlistBuffer, manifestUri);
 
     expect(actualPlaylist).toBeTruthy();
     expect(actualPlaylist.type).toEqual(expectedPlaylist.type);

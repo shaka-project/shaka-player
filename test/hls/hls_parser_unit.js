@@ -16,35 +16,32 @@
  */
 
 describe('HlsParser', function() {
-  /** @const */
-  var Util = shaka.test.Util;
-  /** @const */
-  var ManifestParser = shaka.test.ManifestParser;
-  /** @type {!shaka.test.FakeNetworkingEngine} */
-  var fakeNetEngine;
-  /** @type {!shaka.hls.HlsParser} */
-  var parser;
-  /** @type {shakaExtern.ManifestParser.PlayerInterface} */
-  var playerInterface;
-  /** @type {shakaExtern.ManifestConfiguration} */
-  var config;
-  /** @const */
-  var TextStreamKind = shaka.util.ManifestParserUtils.TextStreamKind;
-  /** @const {function(string):ArrayBuffer} */
-  var toUTF8 = shaka.util.StringUtils.toUTF8;
-  /** @type {ArrayBuffer} */
-  var initSegmentData;
-  /** @type {ArrayBuffer} */
-  var segmentData;
-  /** @type {ArrayBuffer} */
-  var selfInitializingSegmentData;
-  /** @const {string} */
-  var vttText = [
+  const Util = shaka.test.Util;
+  const ManifestParser = shaka.test.ManifestParser;
+  const TextStreamKind = shaka.util.ManifestParserUtils.TextStreamKind;
+  const toUTF8 = shaka.util.StringUtils.toUTF8;
+
+  const vttText = [
     'WEBVTT\n',
     '\n',
     '00:03.837 --> 00:07.297\n',
     'Hello, world!\n'
   ].join('');
+
+  /** @type {!shaka.test.FakeNetworkingEngine} */
+  let fakeNetEngine;
+  /** @type {!shaka.hls.HlsParser} */
+  let parser;
+  /** @type {shakaExtern.ManifestParser.PlayerInterface} */
+  let playerInterface;
+  /** @type {shakaExtern.ManifestConfiguration} */
+  let config;
+  /** @type {ArrayBuffer} */
+  let initSegmentData;
+  /** @type {ArrayBuffer} */
+  let segmentData;
+  /** @type {ArrayBuffer} */
+  let selfInitializingSegmentData;
 
   beforeEach(function() {
     // TODO: use StreamGenerator?
@@ -86,7 +83,7 @@ describe('HlsParser', function() {
 
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
 
-    var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
+    let retry = shaka.net.NetworkingEngine.defaultRetryParameters();
     config = {
       retryParameters: retry,
       dash: {
@@ -138,14 +135,14 @@ describe('HlsParser', function() {
   }
 
   it('parses video-only variant', function(done) {
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
       'RESOLUTION=960x540,FRAME-RATE=60\n',
       'test:/video'
     ].join('');
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
@@ -154,7 +151,7 @@ describe('HlsParser', function() {
       'test:/main.mp4'
     ].join('');
 
-    var manifest = new shaka.test.ManifestGenerator()
+    let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(jasmine.any(Number))
               .addVariant(jasmine.any(Number))
@@ -173,13 +170,13 @@ describe('HlsParser', function() {
   });
 
   it('guesses video-only variant by codecs', function(done) {
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1"\n',
       'test:/video'
     ].join('');
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
@@ -188,7 +185,7 @@ describe('HlsParser', function() {
       'test:/main.mp4'
     ].join('');
 
-    var manifest = new shaka.test.ManifestGenerator()
+    let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(jasmine.any(Number))
               .addVariant(jasmine.any(Number))
@@ -205,13 +202,13 @@ describe('HlsParser', function() {
   });
 
   it('parses audio-only variant', function(done) {
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="mp4a"\n',
       'test:/audio'
     ].join('');
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
@@ -220,7 +217,7 @@ describe('HlsParser', function() {
       'test:/main.mp4'
     ].join('');
 
-    var manifest = new shaka.test.ManifestGenerator()
+    let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(jasmine.any(Number))
               .addVariant(jasmine.any(Number))
@@ -237,7 +234,7 @@ describe('HlsParser', function() {
   });
 
   it('parses audio+video variant', function(done) {
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
       'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
@@ -246,7 +243,7 @@ describe('HlsParser', function() {
       'CHANNELS="2",URI="test:/audio"\n'
     ].join('');
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
@@ -255,7 +252,7 @@ describe('HlsParser', function() {
       'test:/main.mp4'
     ].join('');
 
-    var manifest = new shaka.test.ManifestGenerator()
+    let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(jasmine.any(Number))
               .addVariant(jasmine.any(Number))
@@ -281,7 +278,7 @@ describe('HlsParser', function() {
   });
 
   it('handles audio tags on audio streams', function(done) {
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="mp4a",AUDIO="aud1"\n',
       'test:/audio\n',
@@ -289,7 +286,7 @@ describe('HlsParser', function() {
       'URI="test:/audio"\n'
     ].join('');
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
@@ -298,7 +295,7 @@ describe('HlsParser', function() {
       'test:/main.mp4'
     ].join('');
 
-    var manifest = new shaka.test.ManifestGenerator()
+    let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(jasmine.any(Number))
               .addVariant(jasmine.any(Number))
@@ -316,14 +313,14 @@ describe('HlsParser', function() {
   });
 
   it('parses multiplexed variant', function(done) {
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
       'RESOLUTION=960x540,FRAME-RATE=60\n',
       'test:/video'
     ].join('');
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
@@ -332,7 +329,7 @@ describe('HlsParser', function() {
       'test:/main.mp4'
     ].join('');
 
-    var manifest = new shaka.test.ManifestGenerator()
+    let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(jasmine.any(Number))
               .addVariant(jasmine.any(Number))
@@ -351,14 +348,14 @@ describe('HlsParser', function() {
   });
 
   it('parses multiplexed variant without codecs', function(done) {
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,',
       'RESOLUTION=960x540,FRAME-RATE=60\n',
       'test:/video'
     ].join('');
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
@@ -367,7 +364,7 @@ describe('HlsParser', function() {
       'test:/main.mp4'
     ].join('');
 
-    var manifest = new shaka.test.ManifestGenerator()
+    let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(jasmine.any(Number))
               .addVariant(jasmine.any(Number))
@@ -386,7 +383,7 @@ describe('HlsParser', function() {
   });
 
   it('parses audio+video variant without codecs', function(done) {
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,',
       'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
@@ -395,7 +392,7 @@ describe('HlsParser', function() {
       'URI="test:/audio"\n'
     ].join('');
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
@@ -404,7 +401,7 @@ describe('HlsParser', function() {
       'test:/main.mp4'
     ].join('');
 
-    var manifest = new shaka.test.ManifestGenerator()
+    let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(jasmine.any(Number))
               .addVariant(jasmine.any(Number))
@@ -429,7 +426,7 @@ describe('HlsParser', function() {
   });
 
   it('parses multiple variants', function(done) {
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
       'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
@@ -443,7 +440,7 @@ describe('HlsParser', function() {
       'URI="test:/audio2"\n'
     ].join('');
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
@@ -452,7 +449,7 @@ describe('HlsParser', function() {
       'test:/main.mp4'
     ].join('');
 
-    var manifest = new shaka.test.ManifestGenerator()
+    let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(jasmine.any(Number))
               .addVariant(jasmine.any(Number))
@@ -493,7 +490,7 @@ describe('HlsParser', function() {
   });
 
   it('parses multiple streams with the same group id', function(done) {
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
       'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
@@ -504,7 +501,7 @@ describe('HlsParser', function() {
       'URI="test:/audio2"\n'
     ].join('');
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
@@ -513,7 +510,7 @@ describe('HlsParser', function() {
       'test:/main.mp4'
     ].join('');
 
-    var manifest = new shaka.test.ManifestGenerator()
+    let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(jasmine.any(Number))
               .addVariant(jasmine.any(Number))
@@ -554,14 +551,14 @@ describe('HlsParser', function() {
   });
 
   it('should call filterAllPeriods for parsing', function(done) {
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
       'RESOLUTION=960x540,FRAME-RATE=60\n',
       'test:/video'
     ].join('');
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
@@ -578,7 +575,7 @@ describe('HlsParser', function() {
       'test:/main.mp4': segmentData
     });
 
-    var filterAllPeriods = jasmine.createSpy('filterAllPeriods');
+    let filterAllPeriods = jasmine.createSpy('filterAllPeriods');
     playerInterface.filterAllPeriods = Util.spyFunc(filterAllPeriods);
 
     parser.start('test:/master', playerInterface)
@@ -588,14 +585,14 @@ describe('HlsParser', function() {
   });
 
   it('gets mime type from header request', function(done) {
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
       'RESOLUTION=960x540,FRAME-RATE=60\n',
       'test:/video'
     ].join('');
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
@@ -604,7 +601,7 @@ describe('HlsParser', function() {
       'test:/main.test'
     ].join('');
 
-    var manifest = new shaka.test.ManifestGenerator()
+    let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(jasmine.any(Number))
               .addVariant(jasmine.any(Number))
@@ -620,7 +617,7 @@ describe('HlsParser', function() {
           .build();
 
     // The extra parameters should be stripped by the parser.
-    var headers = {'content-type': 'video/mp4; foo=bar'};
+    let headers = {'content-type': 'video/mp4; foo=bar'};
     fakeNetEngine.setHeadersMap({
       'test:/main.test': headers
     });
@@ -629,7 +626,7 @@ describe('HlsParser', function() {
   });
 
   it('parses manifest with text streams', function(done) {
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
       'URI="test:/audio"\n',
@@ -645,7 +642,7 @@ describe('HlsParser', function() {
       'test:/video\n'
     ].join('');
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
@@ -654,7 +651,7 @@ describe('HlsParser', function() {
       'test:/main.mp4'
     ].join('');
 
-    var textMedia = [
+    const textMedia = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXTINF:5,\n',
@@ -662,7 +659,7 @@ describe('HlsParser', function() {
       'test:/main.vtt'
     ].join('');
 
-    var manifest = new shaka.test.ManifestGenerator()
+    let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(jasmine.any(Number))
               .addVariant(jasmine.any(Number))
@@ -714,7 +711,7 @@ describe('HlsParser', function() {
   });
 
   it('parses manifest with text streams without SUBTITLES', function(done) {
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
       'URI="test:/audio"\n',
@@ -727,7 +724,7 @@ describe('HlsParser', function() {
       'test:/video\n'
     ].join('');
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
@@ -736,7 +733,7 @@ describe('HlsParser', function() {
       'test:/main.mp4'
     ].join('');
 
-    var textMedia = [
+    const textMedia = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXTINF:5,\n',
@@ -744,7 +741,7 @@ describe('HlsParser', function() {
       'test:/main.vtt'
     ].join('');
 
-    var manifest = new shaka.test.ManifestGenerator()
+    let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(jasmine.any(Number))
               .addVariant(jasmine.any(Number))
@@ -864,7 +861,7 @@ describe('HlsParser', function() {
   });
 
   it('parses manifest with MP4+TTML streams', function(done) {
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
       'URI="test:/text"\n',
@@ -873,7 +870,7 @@ describe('HlsParser', function() {
       'test:/video\n'
     ].join('');
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
@@ -882,7 +879,7 @@ describe('HlsParser', function() {
       'test:/main.mp4'
     ].join('');
 
-    var manifest = new shaka.test.ManifestGenerator()
+    let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(jasmine.any(Number))
               .addVariant(jasmine.any(Number))
@@ -918,7 +915,7 @@ describe('HlsParser', function() {
   });
 
   it('detects VTT streams by codec', function(done) {
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
       'URI="test:/text"\n',
@@ -927,7 +924,7 @@ describe('HlsParser', function() {
       'test:/video\n'
     ].join('');
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
@@ -936,7 +933,7 @@ describe('HlsParser', function() {
       'test:/main.mp4'
     ].join('');
 
-    var textMedia = [
+    const textMedia = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXTINF:5,\n',
@@ -944,7 +941,7 @@ describe('HlsParser', function() {
       'test:/main.foo'
     ].join('');
 
-    var manifest = new shaka.test.ManifestGenerator()
+    let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(jasmine.any(Number))
               .addVariant(jasmine.any(Number))
@@ -981,7 +978,7 @@ describe('HlsParser', function() {
   });
 
   it('parses video described by a media tag', function(done) {
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
       'RESOLUTION=960x540,FRAME-RATE=60,VIDEO="vid"\n',
@@ -989,7 +986,7 @@ describe('HlsParser', function() {
       '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid",URI="test:/video"'
     ].join('');
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
@@ -998,7 +995,7 @@ describe('HlsParser', function() {
       'test:/main.mp4'
     ].join('');
 
-    var manifest = new shaka.test.ManifestGenerator()
+    let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(jasmine.any(Number))
               .addVariant(jasmine.any(Number))
@@ -1021,7 +1018,7 @@ describe('HlsParser', function() {
   });
 
   it('constructs relative URIs', function(done) {
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
       'RESOLUTION=960x540,FRAME-RATE=60,VIDEO="vid"\n',
@@ -1029,7 +1026,7 @@ describe('HlsParser', function() {
       '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid",URI="video/video.m3u8"'
     ].join('');
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="init.mp4"\n',
@@ -1037,7 +1034,7 @@ describe('HlsParser', function() {
       'segment.mp4'
     ].join('');
 
-    var manifest = new shaka.test.ManifestGenerator()
+    let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(jasmine.any(Number))
               .addVariant(jasmine.any(Number))
@@ -1069,18 +1066,18 @@ describe('HlsParser', function() {
     parser.start('test:/host/master.m3u8', playerInterface)
         .then(function(actual) {
           expect(actual).toEqual(manifest);
-          var video = actual.periods[0].variants[0].video;
-          var audio = actual.periods[0].variants[0].audio;
+          let video = actual.periods[0].variants[0].video;
+          let audio = actual.periods[0].variants[0].audio;
 
-          var videoPosition = video.findSegmentPosition(0);
-          var audioPosition = audio.findSegmentPosition(0);
+          let videoPosition = video.findSegmentPosition(0);
+          let audioPosition = audio.findSegmentPosition(0);
           goog.asserts.assert(videoPosition != null,
                               'Cannot find first video segment');
           goog.asserts.assert(audioPosition != null,
                               'Cannot find first audio segment');
 
-          var videoReference = video.getSegmentReference(videoPosition);
-          var audioReference = audio.getSegmentReference(audioPosition);
+          let videoReference = video.getSegmentReference(videoPosition);
+          let audioReference = audio.getSegmentReference(audioPosition);
           expect(videoReference).not.toBe(null);
           expect(audioReference).not.toBe(null);
           if (videoReference) {
@@ -1095,7 +1092,7 @@ describe('HlsParser', function() {
   });
 
   it('allows streams with no init segment', function(done) {
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
       'RESOLUTION=960x540,FRAME-RATE=60,VIDEO="vid"\n',
@@ -1103,7 +1100,7 @@ describe('HlsParser', function() {
       '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid",URI="test:/video"'
     ].join('');
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-TARGETDURATION:6\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
@@ -1112,7 +1109,7 @@ describe('HlsParser', function() {
       'test:/selfInit.mp4'
     ].join('');
 
-    var manifest = new shaka.test.ManifestGenerator()
+    let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(jasmine.any(Number))
               .addVariant(jasmine.any(Number))
@@ -1135,17 +1132,17 @@ describe('HlsParser', function() {
   });
 
   it('constructs DrmInfo for Widevine', function(done) {
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
       'RESOLUTION=960x540,FRAME-RATE=60\n',
       'test:/video\n'
     ].join('');
 
-    var initDataBase64 =
+    const initDataBase64 =
         'dGhpcyBpbml0IGRhdGEgY29udGFpbnMgaGlkZGVuIHNlY3JldHMhISE=';
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-TARGETDURATION:6\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
@@ -1159,7 +1156,7 @@ describe('HlsParser', function() {
       'test:/main.mp4'
     ].join('');
 
-    var manifest = new shaka.test.ManifestGenerator()
+    let manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(jasmine.any(Number))
               .addVariant(jasmine.any(Number))
@@ -1180,7 +1177,7 @@ describe('HlsParser', function() {
   });
 
   describe('Errors out', function() {
-    var Code = shaka.util.Error.Code;
+    const Code = shaka.util.Error.Code;
 
     /**
      * @param {string} master
@@ -1207,7 +1204,7 @@ describe('HlsParser', function() {
     }
 
     it('if multiple init sections were provided', function(done) {
-      var master = [
+      const master = [
         '#EXTM3U\n',
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
         'RESOLUTION=960x540,FRAME-RATE=60,VIDEO="vid"\n',
@@ -1215,7 +1212,7 @@ describe('HlsParser', function() {
         '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid",URI="test:/video"'
       ].join('');
 
-      var media = [
+      const media = [
         '#EXTM3U\n',
         '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
         '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
@@ -1225,7 +1222,7 @@ describe('HlsParser', function() {
         'test:/main.mp4'
       ].join('');
 
-      var error = new shaka.util.Error(
+      const error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           Code.HLS_MULTIPLE_MEDIA_INIT_SECTIONS_FOUND);
@@ -1234,7 +1231,7 @@ describe('HlsParser', function() {
     });
 
     it('if unable to guess mime type', function(done) {
-      var master = [
+      const master = [
         '#EXTM3U\n',
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
         'RESOLUTION=960x540,FRAME-RATE=60,VIDEO="vid"\n',
@@ -1242,7 +1239,7 @@ describe('HlsParser', function() {
         '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid",URI="test:/video"'
       ].join('');
 
-      var media = [
+      const media = [
         '#EXTM3U\n',
         '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
         '#EXT-X-PLAYLIST-TYPE:VOD\n',
@@ -1251,7 +1248,7 @@ describe('HlsParser', function() {
         'test:/main.exe'
       ].join('');
 
-      var error = new shaka.util.Error(
+      const error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           Code.HLS_COULD_NOT_GUESS_MIME_TYPE, 'exe');
@@ -1260,7 +1257,7 @@ describe('HlsParser', function() {
     });
 
     it('if unable to guess codecs', function(done) {
-      var master = [
+      const master = [
         '#EXTM3U\n',
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="aaa,bbb",',
         'RESOLUTION=960x540,FRAME-RATE=60,VIDEO="vid"\n',
@@ -1269,7 +1266,7 @@ describe('HlsParser', function() {
         'URI="test:/video"'
       ].join('');
 
-      var media = [
+      const media = [
         '#EXTM3U\n',
         '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
         '#EXT-X-PLAYLIST-TYPE:VOD\n',
@@ -1278,7 +1275,7 @@ describe('HlsParser', function() {
         'test:/main.mp4'
       ].join('');
 
-      var error = new shaka.util.Error(
+      const error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           Code.HLS_COULD_NOT_GUESS_CODECS,
@@ -1295,7 +1292,7 @@ describe('HlsParser', function() {
        * @param {function()} done
        */
       function verifyMissingAttribute(master, media, attributeName, done) {
-        var error = new shaka.util.Error(
+        const error = new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.MANIFEST,
             Code.HLS_REQUIRED_ATTRIBUTE_MISSING,
@@ -1305,7 +1302,7 @@ describe('HlsParser', function() {
       }
 
       it('bandwidth', function(done) {
-        var master = [
+        const master = [
           '#EXTM3U\n',
           '#EXT-X-STREAM-INF:CODECS="avc1,mp4a",',
           'RESOLUTION=960x540,FRAME-RATE=60,VIDEO="vid"\n',
@@ -1313,7 +1310,7 @@ describe('HlsParser', function() {
           '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid",URI="test:/video"'
         ].join('');
 
-        var media = [
+        const media = [
           '#EXTM3U\n',
           '#EXT-X-PLAYLIST-TYPE:VOD\n',
           '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
@@ -1326,7 +1323,7 @@ describe('HlsParser', function() {
       });
 
       it('uri', function(done) {
-        var master = [
+        const master = [
           '#EXTM3U\n',
           '#EXT-X-STREAM-INF:CODECS="avc1,mp4a",BANDWIDTH=200,',
           'RESOLUTION=960x540,FRAME-RATE=60,VIDEO="vid"\n',
@@ -1334,7 +1331,7 @@ describe('HlsParser', function() {
           '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid"'
         ].join('');
 
-        var media = [
+        const media = [
           '#EXTM3U\n',
           '#EXT-X-PLAYLIST-TYPE:VOD\n',
           '#EXT-X-MAP:URI="test:/init.mp4"\n',
@@ -1355,7 +1352,7 @@ describe('HlsParser', function() {
        * @param {function()} done
        */
       function verifyMissingTag(master, media, tagName, done) {
-        var error = new shaka.util.Error(
+        const error = new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.MANIFEST,
             Code.HLS_REQUIRED_TAG_MISSING,
@@ -1365,7 +1362,7 @@ describe('HlsParser', function() {
       }
 
       it('EXTINF', function(done) {
-        var master = [
+        const master = [
           '#EXTM3U\n',
           '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
           'RESOLUTION=960x540,FRAME-RATE=60,VIDEO="vid"\n',
@@ -1373,7 +1370,7 @@ describe('HlsParser', function() {
           '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid",URI="test:/video"'
         ].join('');
 
-        var media = [
+        const media = [
           '#EXTM3U\n',
           '#EXT-X-PLAYLIST-TYPE:VOD\n',
           '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
@@ -1388,18 +1385,18 @@ describe('HlsParser', function() {
 
   describe('getStartTime_', function() {
     /** @type {number} */
-    var segmentDataStartTime;
+    let segmentDataStartTime;
     /** @type {ArrayBuffer} */
-    var tsSegmentData;
+    let tsSegmentData;
 
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
       'RESOLUTION=960x540,FRAME-RATE=60\n',
       'test:/video'
     ].join('');
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="init.mp4"\n',
@@ -1410,10 +1407,10 @@ describe('HlsParser', function() {
 
     // TODO: Add separate tests to cover correct handling of BYTERANGE in
     // constructing references.  Here it is covered incidentally.
-    var expectedStartByte = 616;
-    var expectedEndByte = 121705;
+    const expectedStartByte = 616;
+    const expectedEndByte = 121705;
     // Nit: this value is an implementation detail of the fix for #1106
-    var partialEndByte = expectedStartByte + 2048 - 1;
+    const partialEndByte = expectedStartByte + 2048 - 1;
 
     beforeEach(function() {
       // TODO: use StreamGenerator?
@@ -1454,7 +1451,7 @@ describe('HlsParser', function() {
         'test:/main.mp4': segmentData
       });
 
-      var ref = ManifestParser.makeReference(
+      let ref = ManifestParser.makeReference(
           'test:/main.mp4' /* uri */,
           0 /* position */,
           0 /* startTime */,
@@ -1464,7 +1461,7 @@ describe('HlsParser', function() {
           expectedEndByte);
 
       parser.start('test:/master', playerInterface).then(function(manifest) {
-        var video = manifest.periods[0].variants[0].video;
+        let video = manifest.periods[0].variants[0].video;
         ManifestParser.verifySegmentIndex(video, [ref]);
 
         // Make sure the segment data was fetched with the correct byte
@@ -1481,7 +1478,7 @@ describe('HlsParser', function() {
     });
 
     it('parses start time from ts segments', function(done) {
-      var tsMediaPlaylist = media.replace(/\.mp4/g, '.ts');
+      let tsMediaPlaylist = media.replace(/\.mp4/g, '.ts');
 
       fakeNetEngine.setResponseMap({
         'test:/master': toUTF8(master),
@@ -1489,7 +1486,7 @@ describe('HlsParser', function() {
         'test:/main.ts': tsSegmentData
       });
 
-      var ref = ManifestParser.makeReference(
+      let ref = ManifestParser.makeReference(
           'test:/main.ts' /* uri */,
           0 /* position */,
           0 /* startTime */,
@@ -1499,7 +1496,7 @@ describe('HlsParser', function() {
           expectedEndByte);
 
       parser.start('test:/master', playerInterface).then(function(manifest) {
-        var video = manifest.periods[0].variants[0].video;
+        let video = manifest.periods[0].variants[0].video;
         ManifestParser.verifySegmentIndex(video, [ref]);
 
         // Make sure the segment data was fetched with the correct byte
@@ -1524,9 +1521,9 @@ describe('HlsParser', function() {
       });
 
       parser.start('test:/master', playerInterface).then(function(manifest) {
-        var presentationTimeline = manifest.presentationTimeline;
-        var video = manifest.periods[0].variants[0].video;
-        var ref = video.getSegmentReference(0);
+        let presentationTimeline = manifest.presentationTimeline;
+        let video = manifest.periods[0].variants[0].video;
+        let ref = video.getSegmentReference(0);
         expect(video.getSegmentReference(1)).toBe(null);  // No more references.
 
         expect(video.presentationTimeOffset).toEqual(segmentDataStartTime);
@@ -1539,14 +1536,14 @@ describe('HlsParser', function() {
   });
 
   it('correctly detects VOD streams as non-live', function(done) {
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
       'RESOLUTION=960x540,FRAME-RATE=60\n',
       'test:/video'
     ].join('');
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-TARGETDURATION:5\n',
@@ -1568,14 +1565,14 @@ describe('HlsParser', function() {
   });
 
   it('correctly detects streams with ENDLIST as non-live', function(done) {
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
       'RESOLUTION=960x540,FRAME-RATE=60\n',
       'test:/video'
     ].join('');
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-TARGETDURATION:5\n',
       '#EXT-X-MAP:URI="init.mp4"\n',
@@ -1597,14 +1594,14 @@ describe('HlsParser', function() {
   });
 
   it('guesses MIME types for known extensions', function(done) {
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
       'RESOLUTION=960x540,FRAME-RATE=60\n',
       'test:/video'
     ].join('');
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-TARGETDURATION:5\n',
       '#EXT-X-MAP:URI="init.mp4"\n',
@@ -1621,20 +1618,20 @@ describe('HlsParser', function() {
     });
 
     parser.start('test:/master', playerInterface).then(function(manifest) {
-      var video = manifest.periods[0].variants[0].video;
+      let video = manifest.periods[0].variants[0].video;
       expect(video.mimeType).toBe('video/mp4');
     }).catch(fail).then(done);
   });
 
   it('guesses MIME types for known extensions with parameters', function(done) {
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
       'RESOLUTION=960x540,FRAME-RATE=60\n',
       'test:/video'
     ].join('');
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-TARGETDURATION:5\n',
       '#EXT-X-MAP:URI="init.mp4"\n',
@@ -1651,14 +1648,14 @@ describe('HlsParser', function() {
     });
 
     parser.start('test:/master', playerInterface).then(function(manifest) {
-      var video = manifest.periods[0].variants[0].video;
+      let video = manifest.periods[0].variants[0].video;
       expect(video.mimeType).toBe('video/mp4');
     }).catch(fail).then(done);
   });
 
   it('does not produce multiple Streams for one playlist', function(done) {
     // Regression test for a bug in our initial HLS live implementation
-    var master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio",URI="test:/audio"\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=400,CODECS="avc1,mp4a",',
@@ -1669,7 +1666,7 @@ describe('HlsParser', function() {
       'test:/video1\n'
     ].join('');
 
-    var media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
@@ -1689,8 +1686,8 @@ describe('HlsParser', function() {
 
     parser.start('test:/master', playerInterface).then(function(manifest) {
       expect(manifest.periods[0].variants.length).toBe(2);
-      var audio0 = manifest.periods[0].variants[0].audio;
-      var audio1 = manifest.periods[0].variants[1].audio;
+      let audio0 = manifest.periods[0].variants[0].audio;
+      let audio1 = manifest.periods[0].variants[1].audio;
       // These should be the exact same memory address, not merely equal.
       // Otherwise, the parser will only be replacing one of the SegmentIndexes
       // on update, which will lead to live streaming issues.
