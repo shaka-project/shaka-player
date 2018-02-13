@@ -17,13 +17,9 @@
 
 describe('XmlUtils', function() {
   // A number that cannot be represented as a Javascript number.
-  var HUGE_NUMBER_STRING = new Array(500).join('7');
+  const HUGE_NUMBER_STRING = new Array(500).join('7');
 
-  var XmlUtils;
-
-  beforeAll(function() {
-    XmlUtils = shaka.util.XmlUtils;
-  });
+  const XmlUtils = shaka.util.XmlUtils;
 
   describe('findChild', function() {
     it('finds a child node', function() {
@@ -34,9 +30,10 @@ describe('XmlUtils', function() {
         '</Root>'
       ].join('\n');
       var xml = new DOMParser().parseFromString(xmlString, 'application/xml');
+      goog.asserts.assert(xml, 'parseFromString should succeed');
 
       var root = XmlUtils.findChild(xml, 'Root');
-      expect(root).toBeTruthy();
+      goog.asserts.assert(root, 'findChild should find element');
 
       expect(XmlUtils.findChild(root, 'Child')).toBeTruthy();
       expect(XmlUtils.findChild(root, 'DoesNotExist')).toBeNull();
@@ -51,9 +48,10 @@ describe('XmlUtils', function() {
         '</Root>'
       ].join('\n');
       var xml = new DOMParser().parseFromString(xmlString, 'application/xml');
+      goog.asserts.assert(xml, 'parseFromString should succeed');
 
       var root = XmlUtils.findChild(xml, 'Root');
-      expect(root).toBeTruthy();
+      goog.asserts.assert(root, 'findChild should find element');
 
       expect(XmlUtils.findChild(root, 'Child')).toBeNull();
     });
@@ -68,6 +66,7 @@ describe('XmlUtils', function() {
       '</Root>'
     ].join('\n');
     var xml = new DOMParser().parseFromString(xmlString, 'application/xml');
+    goog.asserts.assert(xml, 'parseFromString should succeed');
 
     var roots = XmlUtils.findChildren(xml, 'Root');
     expect(roots).toBeTruthy();
@@ -89,8 +88,10 @@ describe('XmlUtils', function() {
         '</Root>'
       ].join('\n');
       var xml = new DOMParser().parseFromString(xmlString, 'application/xml');
+      goog.asserts.assert(xml, 'parseFromString should succeed');
 
       var root = XmlUtils.findChild(xml, 'Root');
+      goog.asserts.assert(root, 'findChild should find element');
       expect(XmlUtils.getContents(root)).toBe('foo bar');
     });
 
@@ -101,8 +102,10 @@ describe('XmlUtils', function() {
         '</Root>'
       ].join('\n');
       var xml = new DOMParser().parseFromString(xmlString, 'application/xml');
+      goog.asserts.assert(xml, 'parseFromString should succeed');
 
       var root = XmlUtils.findChild(xml, 'Root');
+      goog.asserts.assert(root, 'findChild should find element');
       expect(XmlUtils.getContents(root)).toBe('');
     });
 
@@ -113,12 +116,14 @@ describe('XmlUtils', function() {
         '</Root>'
       ].join('\n');
       var xml = new DOMParser().parseFromString(xmlString, 'application/xml');
+      goog.asserts.assert(xml, 'parseFromString should succeed');
 
       expect(XmlUtils.getContents(xml)).toBeNull();
     });
   });
 
   describe('parseAttr', function() {
+    /** @type {!Document} */
     var xml;
 
     beforeEach(function() {
@@ -127,11 +132,13 @@ describe('XmlUtils', function() {
         '<Root a="2-7" b="-5" c="">',
         '</Root>'
       ].join('\n');
-      xml = new DOMParser().parseFromString(xmlString, 'application/xml');
+      xml = /** @type {!Document} */ (
+          new DOMParser().parseFromString(xmlString, 'application/xml'));
     });
 
     it('delegates to parser function', function() {
       var root = XmlUtils.findChild(xml, 'Root');
+      goog.asserts.assert(root, 'findChild should find element');
       expect(XmlUtils.parseAttr(root, 'a', XmlUtils.parseRange)).toEqual(
           {start: 2, end: 7});
       expect(XmlUtils.parseAttr(root, 'b', XmlUtils.parseInt)).toBe(-5);
@@ -141,6 +148,7 @@ describe('XmlUtils', function() {
 
     it('supports default values', function() {
       var root = XmlUtils.findChild(xml, 'Root');
+      goog.asserts.assert(root, 'findChild should find element');
       expect(XmlUtils.parseAttr(root, 'd', XmlUtils.parseInt, 9)).toBe(9);
     });
   });
