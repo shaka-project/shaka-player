@@ -55,9 +55,9 @@ shaka.test.Util.fakeEventLoop = function(duration, opt_onTick) {
   expect(window.Promise).toBe(PromiseMock);
 
   // Run this synchronously:
-  for (var time = 0; time < duration; ++time) {
+  for (let time = 0; time < duration; ++time) {
     // We shouldn't need more than 6 rounds.
-    for (var i = 0; i < 6; ++i) {
+    for (let i = 0; i < 6; ++i) {
       jasmine.clock().tick(0);
       PromiseMock.flush();
     }
@@ -79,7 +79,7 @@ shaka.test.Util.fakeEventLoop = function(duration, opt_onTick) {
  */
 shaka.test.Util.delay = function(seconds, opt_setTimeout) {
   return new Promise(function(resolve, reject) {
-    var timeout = opt_setTimeout || setTimeout;
+    let timeout = opt_setTimeout || setTimeout;
     timeout(function() {
       resolve();
       // Play nicely with PromiseMock by flushing automatically.
@@ -128,8 +128,8 @@ shaka.test.Util.registerElementMatcher_ = function() {
  * @private
  */
 shaka.test.Util.expectToEqualElementCompare_ = function(actual, expected) {
-  var diff = shaka.test.Util.expectToEqualElementRecursive_(actual, expected);
-  var result = {};
+  let diff = shaka.test.Util.expectToEqualElementRecursive_(actual, expected);
+  let result = {};
   result.pass = diff == null;
   if (result.pass) {
     result.message = 'Expected ' + actual.innerHTML + ' not to match ';
@@ -149,7 +149,7 @@ shaka.test.Util.expectToEqualElementCompare_ = function(actual, expected) {
  * @private
  */
 shaka.test.Util.expectToEqualElementRecursive_ = function(actual, expected) {
-  var prospectiveDiff = 'The difference was in ' +
+  let prospectiveDiff = 'The difference was in ' +
       (actual.outerHTML || actual.textContent) + ' vs ' +
       (expected['outerHTML'] || expected.textContent) + ': ';
 
@@ -166,13 +166,13 @@ shaka.test.Util.expectToEqualElementRecursive_ = function(actual, expected) {
 
     if (actual.attributes.length != expected.attributes.length)
       return prospectiveDiff + 'Different attribute list length.';
-    for (var i = 0; i < actual.attributes.length; i++) {
-      var aAttrib = actual.attributes[i].nodeName;
-      var aAttribVal = actual.getAttribute(aAttrib);
-      var eAttrib = expected.attributes[i].nodeName;
-      var eAttribVal = expected.getAttribute(eAttrib);
+    for (let i = 0; i < actual.attributes.length; i++) {
+      let aAttrib = actual.attributes[i].nodeName;
+      let aAttribVal = actual.getAttribute(aAttrib);
+      let eAttrib = expected.attributes[i].nodeName;
+      let eAttribVal = expected.getAttribute(eAttrib);
       if (aAttrib != eAttrib || aAttribVal != eAttribVal) {
-        var diffNote =
+        let diffNote =
             aAttrib + '=' + aAttribVal + ' vs ' + eAttrib + '=' + eAttribVal;
         return prospectiveDiff + 'Attribute #' + i +
             ' was different (' + diffNote + ').';
@@ -181,10 +181,10 @@ shaka.test.Util.expectToEqualElementRecursive_ = function(actual, expected) {
 
     if (actual.childNodes.length != expected.childNodes.length)
       return prospectiveDiff + 'Different child node list length.';
-    for (var i = 0; i < actual.childNodes.length; i++) {
-      var aNode = actual.childNodes[i];
-      var eNode = expected.childNodes[i];
-      var diff = shaka.test.Util.expectToEqualElementRecursive_(aNode, eNode);
+    for (let i = 0; i < actual.childNodes.length; i++) {
+      let aNode = actual.childNodes[i];
+      let eNode = expected.childNodes[i];
+      let diff = shaka.test.Util.expectToEqualElementRecursive_(aNode, eNode);
       if (diff)
         return diff;
     }
@@ -201,13 +201,13 @@ shaka.test.Util.expectToEqualElementRecursive_ = function(actual, expected) {
  * @return {boolean|undefined}
  */
 shaka.test.Util.compareReferences = function(first, second) {
-  var isSegment = first instanceof shaka.media.SegmentReference &&
+  let isSegment = first instanceof shaka.media.SegmentReference &&
       second instanceof shaka.media.SegmentReference;
-  var isInit = first instanceof shaka.media.InitSegmentReference &&
+  let isInit = first instanceof shaka.media.InitSegmentReference &&
       second instanceof shaka.media.InitSegmentReference;
   if (isSegment || isInit) {
-    var a = first.getUris();
-    var b = second.getUris();
+    let a = first.getUris();
+    let b = second.getUris();
     if (typeof a !== 'object' || typeof b !== 'object' ||
         typeof a.length != 'number' || typeof b.length !== 'number') {
       return false;
@@ -239,7 +239,7 @@ shaka.test.Util.compareReferences = function(first, second) {
  */
 shaka.test.Util.fetch = function(uri) {
   return new Promise(function(resolve, reject) {
-    var xhr = new XMLHttpRequest();
+    let xhr = new XMLHttpRequest();
     xhr.open('GET', uri, true /* asynchronous */);
     xhr.responseType = 'arraybuffer';
 
@@ -269,7 +269,7 @@ shaka.test.Util.fetch = function(uri) {
  * @param {!Object} obj
  */
 shaka.test.Util.makeMockObjectStrict = function(obj) {
-  for (var name in obj)
+  for (let name in obj)
     obj[name].and.throwError(new Error(name));
 };
 

@@ -118,7 +118,7 @@ shaka.test.FakeNetworkingEngine.expectNoRequest = function(
  */
 shaka.test.FakeNetworkingEngine.expectRangeRequest = function(
     requestSpy, uri, startByte, endByte) {
-  var range = 'bytes=' + startByte + '-';
+  let range = 'bytes=' + startByte + '-';
   if (endByte != null) range += endByte;
 
   expect(requestSpy).toHaveBeenCalledWith(
@@ -141,12 +141,12 @@ shaka.test.FakeNetworkingEngine.prototype.requestImpl_ = function(
   expect(request).toBeTruthy();
   expect(request.uris.length).toBe(1);
 
-  var headers = this.headersMap_[request.uris[0]] || {};
-  var result = this.responseMap_[request.uris[0]] || this.defaultResponse_;
+  let headers = this.headersMap_[request.uris[0]] || {};
+  let result = this.responseMap_[request.uris[0]] || this.defaultResponse_;
   if (!result && request.method != 'HEAD') {
     // Give a more helpful error message to jasmine.
     expect(request.uris[0]).toBe('in the response map');
-    var error = new shaka.util.Error(
+    let error = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.NETWORK,
         shaka.util.Error.Code.UNEXPECTED_TEST_REQUEST);
@@ -154,14 +154,14 @@ shaka.test.FakeNetworkingEngine.prototype.requestImpl_ = function(
   }
 
   /** @type {shakaExtern.Response} */
-  var response = {uri: request.uris[0], data: result, headers: headers};
+  let response = {uri: request.uris[0], data: result, headers: headers};
 
   if (this.responseFilter_) {
     this.responseFilter_(type, response);
   }
 
   if (this.delayNextRequestPromise_) {
-    var delay = this.delayNextRequestPromise_;
+    let delay = this.delayNextRequestPromise_;
     this.delayNextRequestPromise_ = null;
     return shaka.util.AbortableOperation.notAbortable(
         delay.then(function() { return response; }));
@@ -261,7 +261,7 @@ shaka.test.FakeNetworkingEngine.prototype.setResponseMap = function(
 shaka.test.FakeNetworkingEngine.prototype.setResponseMapAsText = function(
     textMap) {
   this.responseMap_ = Object.keys(textMap).reduce(function(obj, key) {
-    var data = shaka.util.StringUtils.toUTF8(textMap[key]);
+    let data = shaka.util.StringUtils.toUTF8(textMap[key]);
     obj[key] = data;
     return obj;
   }, {});
@@ -299,7 +299,7 @@ shaka.test.FakeNetworkingEngine.prototype.setDefaultValue = function(
  */
 shaka.test.FakeNetworkingEngine.prototype.setDefaultText = function(
     defaultText) {
-  var data = null;
+  let data = null;
   if (defaultText) {
     data = shaka.util.StringUtils.toUTF8(defaultText);
   }

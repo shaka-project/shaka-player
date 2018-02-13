@@ -102,7 +102,7 @@ ShakaReceiver.prototype.appDataCallback_ = function(appData) {
   // appData is null if we start the app without any media loaded.
   if (!appData) return;
 
-  var asset = /** @type {shakaAssets.AssetInfo} */(appData['asset']);
+  let asset = /** @type {shakaAssets.AssetInfo} */(appData['asset']);
   ShakaDemoUtils.setupAssetMetadata(asset, this.player_);
 };
 

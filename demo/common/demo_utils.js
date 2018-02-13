@@ -17,7 +17,7 @@
 
 
 /** @namespace */
-var ShakaDemoUtils = {};
+let ShakaDemoUtils = {};
 
 
 /**
@@ -25,7 +25,7 @@ var ShakaDemoUtils = {};
  * @param {shaka.Player} player
  */
 ShakaDemoUtils.setupAssetMetadata = function(asset, player) {
-  var config = /** @type {shakaExtern.PlayerConfiguration} */(
+  let config = /** @type {shakaExtern.PlayerConfiguration} */(
       { drm: {}, manifest: { dash: {} } });
 
   // Add config from this asset.
@@ -38,12 +38,12 @@ ShakaDemoUtils.setupAssetMetadata = function(asset, player) {
   player.configure(config);
 
   // Configure network filters.
-  var networkingEngine = player.getNetworkingEngine();
+  let networkingEngine = player.getNetworkingEngine();
   networkingEngine.clearAllRequestFilters();
   networkingEngine.clearAllResponseFilters();
 
   if (asset.licenseRequestHeaders) {
-    var filter = ShakaDemoUtils.addLicenseRequestHeaders_.bind(
+    let filter = ShakaDemoUtils.addLicenseRequestHeaders_.bind(
         null, asset.licenseRequestHeaders);
     networkingEngine.registerRequestFilter(filter);
   }
@@ -70,7 +70,7 @@ ShakaDemoUtils.addLicenseRequestHeaders_ =
 
   // Add these to the existing headers.  Do not clobber them!
   // For PlayReady, there will already be headers in the request.
-  for (var k in headers) {
+  for (let k in headers) {
     request.headers[k] = headers[k];
   }
 };
@@ -85,10 +85,10 @@ ShakaDemoUtils.addLicenseRequestHeaders_ =
  * @return {boolean}
  */
 ShakaDemoUtils.isTsContent = function(player) {
-  var activeTracks = player.getVariantTracks().filter(function(track) {
+  let activeTracks = player.getVariantTracks().filter(function(track) {
     return track.active == true;
   });
-  var activeTrack = activeTracks[0];
+  let activeTrack = activeTracks[0];
   if (activeTrack) {
     return activeTrack.mimeType == 'video/mp2t';
   }

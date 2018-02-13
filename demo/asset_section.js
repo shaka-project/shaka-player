@@ -37,14 +37,14 @@ shakaDemo.onlineOptGroups_ = [];
  */
 shakaDemo.setupAssets_ = function() {
   // Populate the asset list.
-  var assetList = document.getElementById('assetList');
+  let assetList = document.getElementById('assetList');
   /** @type {!Object.<string, !HTMLOptGroupElement>} */
-  var groups = {};
-  var first = null;
+  let groups = {};
+  let first = null;
   shakaAssets.testAssets.forEach(function(asset) {
     if (asset.disabled) return;
 
-    var group = groups[asset.source];
+    let group = groups[asset.source];
     if (!group) {
       group = /** @type {!HTMLOptGroupElement} */(
           document.createElement('optgroup'));
@@ -55,7 +55,7 @@ shakaDemo.setupAssets_ = function() {
       shakaDemo.onlineOptGroups_.push(group);
     }
 
-    var option = document.createElement('option');
+    let option = document.createElement('option');
     option.textContent = asset.name;
     option.asset = asset;  // custom attribute to map back to the asset
     group.appendChild(option);
@@ -65,7 +65,7 @@ shakaDemo.setupAssets_ = function() {
       option.disabled = true;
     }
 
-    var mimeTypes = [];
+    let mimeTypes = [];
     if (asset.features.indexOf(shakaAssets.Feature.WEBM) >= 0)
       mimeTypes.push('video/webm');
     if (asset.features.indexOf(shakaAssets.Feature.MP4) >= 0)
@@ -88,17 +88,17 @@ shakaDemo.setupAssets_ = function() {
   }
 
   // This needs to be started before we add the custom asset option.
-  var asyncOfflineSetup = shakaDemo.setupOfflineAssets_();
+  let asyncOfflineSetup = shakaDemo.setupOfflineAssets_();
 
   // Add an extra option for custom assets.
-  var option = document.createElement('option');
+  let option = document.createElement('option');
   option.textContent = '(custom asset)';
   assetList.appendChild(option);
 
   assetList.addEventListener('change', function() {
     // Show/hide the custom asset fields based on the selection.
-    var asset = assetList.options[assetList.selectedIndex].asset;
-    var customAsset = document.getElementById('customAsset');
+    let asset = assetList.options[assetList.selectedIndex].asset;
+    let customAsset = document.getElementById('customAsset');
     customAsset.style.display = asset ? 'none' : 'block';
 
     // Update the hash to reflect this change.
@@ -137,9 +137,9 @@ shakaDemo.onAssetKeyUp_ = function(event) {
  * @private
  */
 shakaDemo.requestCertificate_ = function(uri) {
-  var netEngine = shakaDemo.player_.getNetworkingEngine();
-  var requestType = shaka.net.NetworkingEngine.RequestType.APP;
-  var request = /** @type {shakaExtern.Request} */ ({ uris: [uri] });
+  let netEngine = shakaDemo.player_.getNetworkingEngine();
+  const requestType = shaka.net.NetworkingEngine.RequestType.APP;
+  let request = /** @type {shakaExtern.Request} */ ({ uris: [uri] });
 
   return netEngine.request(requestType, request).promise
       .then((response) => response.data);
@@ -151,11 +151,11 @@ shakaDemo.requestCertificate_ = function(uri) {
  * @private
  */
 shakaDemo.configureCertificate_ = function(certificate) {
-  var player = shakaDemo.player_;
-  var config = player.getConfiguration();
-  var certConfig = {};
+  let player = shakaDemo.player_;
+  let config = player.getConfiguration();
+  let certConfig = {};
 
-  for (var keySystem in config.drm.advanced) {
+  for (let keySystem in config.drm.advanced) {
     certConfig[keySystem] = {
       serverCertificate: new Uint8Array(certificate)
     };
@@ -180,16 +180,16 @@ shakaDemo.configureCertificate_ = function(certificate) {
 shakaDemo.preparePlayer_ = function(asset) {
   shakaDemo.closeError();
 
-  var player = shakaDemo.player_;
+  let player = shakaDemo.player_;
 
-  var videoRobustness =
+  let videoRobustness =
       document.getElementById('drmSettingsVideoRobustness').value;
-  var audioRobustness =
+  let audioRobustness =
       document.getElementById('drmSettingsAudioRobustness').value;
 
-  var commonDrmSystems =
+  let commonDrmSystems =
       ['com.widevine.alpha', 'com.microsoft.playready', 'com.adobe.primetime'];
-  var config = /** @type {shakaExtern.PlayerConfiguration} */(
+  let config = /** @type {shakaExtern.PlayerConfiguration} */(
       { abr: {}, streaming: {}, manifest: { dash: {} } });
   config.drm = /** @type {shakaExtern.DrmConfiguration} */({
     advanced: {}});
@@ -202,8 +202,8 @@ shakaDemo.preparePlayer_ = function(asset) {
 
   if (!asset) {
     // Use the custom fields.
-    var licenseServerUri = document.getElementById('licenseServerInput').value;
-    var licenseServers = {};
+    let licenseServerUri = document.getElementById('licenseServerInput').value;
+    let licenseServers = {};
     if (licenseServerUri) {
       commonDrmSystems.forEach(function(system) {
         licenseServers[system] = licenseServerUri;
@@ -246,7 +246,7 @@ shakaDemo.preparePlayer_ = function(asset) {
       document.getElementById('preferredTextLanguage').value;
   config.abr.enabled =
       document.getElementById('enableAdaptation').checked;
-  var smallGapLimit = document.getElementById('smallGapLimit').value;
+  let smallGapLimit = document.getElementById('smallGapLimit').value;
   if (!isNaN(Number(smallGapLimit)) && smallGapLimit.length > 0)
     config.streaming.smallGapLimit = Number(smallGapLimit);
   config.streaming.jumpLargeGaps =
@@ -274,16 +274,16 @@ shakaDemo.computeDisabledAssets = function() {
 
 /** Load the selected asset. */
 shakaDemo.load = function() {
-  var assetList = document.getElementById('assetList');
-  var option = assetList.options[assetList.selectedIndex];
-  var player = shakaDemo.player_;
+  let assetList = document.getElementById('assetList');
+  let option = assetList.options[assetList.selectedIndex];
+  let player = shakaDemo.player_;
 
-  var asset = shakaDemo.preparePlayer_(option.asset);
+  let asset = shakaDemo.preparePlayer_(option.asset);
 
   // Revert to default poster while we load.
   shakaDemo.localVideo_.poster = shakaDemo.mainPoster_;
 
-  var configureCertificate = Promise.resolve();
+  let configureCertificate = Promise.resolve();
 
   if (asset.certificateUri) {
     configureCertificate = shakaDemo.requestCertificate_(asset.certificateUri)
@@ -305,7 +305,7 @@ shakaDemo.load = function() {
     }
 
     // Disallow casting of offline content.
-    var isOffline = asset.manifestUri.indexOf('offline:') == 0;
+    let isOffline = asset.manifestUri.indexOf('offline:') == 0;
     shakaDemo.controls_.allowCast(!isOffline);
 
     (asset.extraText || []).forEach(function(extraText) {
@@ -319,7 +319,7 @@ shakaDemo.load = function() {
       navigator.mediaSession.metadata = new MediaMetadata({title: asset.name});
     }
   }, function(reason) {
-    var error = /** @type {!shaka.util.Error} */(reason);
+    let error = /** @type {!shaka.util.Error} */(reason);
     if (error.code == shaka.util.Error.Code.LOAD_INTERRUPTED) {
       // Don't use shaka.log, which is not present in compiled builds.
       console.debug('load() interrupted');

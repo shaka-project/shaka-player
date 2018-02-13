@@ -52,10 +52,10 @@ shaka.test.ManifestDBBuilder = function(storageEngine) {
  */
 shaka.test.ManifestDBBuilder.prototype.build = function() {
   /** @type {shakaExtern.ManifestDB} */
-  var manifest = this.manifest_;
+  let manifest = this.manifest_;
 
   /** @type {!shaka.offline.IStorageEngine} */
-  var storageEngine = this.storageEngine_;
+  let storageEngine = this.storageEngine_;
 
   return this.deferredActions_.then(function() {
     // TODO (vaage) : Calculate the duration and size of the manifest before
@@ -92,7 +92,7 @@ shaka.test.ManifestDBBuilder.prototype.metadata = function(data) {
  */
 shaka.test.ManifestDBBuilder.prototype.period = function() {
   /** @type {shakaExtern.PeriodDB} */
-  var period = {
+  let period = {
     startTime: 0,
     streams: []
   };
@@ -111,10 +111,10 @@ shaka.test.ManifestDBBuilder.prototype.period = function() {
  */
 shaka.test.ManifestDBBuilder.prototype.stream = function() {
   /** @type {number} */
-  var id = this.nextStreamId_++;
+  let id = this.nextStreamId_++;
 
   /** @type {shakaExtern.StreamDB} */
-  var stream = {
+  let stream = {
     id: id,
     primary: false,
     presentationTimeOffset: 0,
@@ -152,7 +152,7 @@ shaka.test.ManifestDBBuilder.prototype.onStream = function(func) {
       'Must have current stream when using onStream.');
 
   /** @type {shakaExtern.StreamDB} */
-  var stream = this.currentStream_;
+  let stream = this.currentStream_;
 
   // Need to defer this function as the segments would not have been
   // added to it yet.
@@ -176,13 +176,13 @@ shaka.test.ManifestDBBuilder.prototype.initSegment = function() {
       'Must have a currewnt stream to add a segment.');
 
   /** @type {!shaka.offline.IStorageEngine} */
-  var storageEngine = this.storageEngine_;
+  let storageEngine = this.storageEngine_;
 
   /** @type {shakaExtern.SegmentDataDB} */
-  var segmentData = shaka.test.ManifestDBBuilder.emptySegment_();
+  let segmentData = shaka.test.ManifestDBBuilder.emptySegment_();
 
   /** @type {shakaExtern.StreamDB} */
-  var currentStream = this.currentStream_;
+  let currentStream = this.currentStream_;
 
   this.deferredActions_ = this.deferredActions_.then(function() {
     return storageEngine.addSegment(segmentData);
@@ -210,19 +210,19 @@ shaka.test.ManifestDBBuilder.prototype.segment = function(start, end) {
       'Start should always be less than end');
 
   /** @type {!shaka.offline.IStorageEngine} */
-  var storageEngine = this.storageEngine_;
+  let storageEngine = this.storageEngine_;
 
   /** @type {shakaExtern.SegmentDataDB} */
-  var segmentData = shaka.test.ManifestDBBuilder.emptySegment_();
+  let segmentData = shaka.test.ManifestDBBuilder.emptySegment_();
 
   /** @type {shakaExtern.StreamDB} */
-  var currentStream = this.currentStream_;
+  let currentStream = this.currentStream_;
 
   this.deferredActions_ = this.deferredActions_.then(function() {
     return storageEngine.addSegment(segmentData);
   }).then(function(id) {
     /** @type {shakaExtern.SegmentDB} */
-    var segment = {
+    let segment = {
       dataKey: id,
       startTime: start,
       endTime: end
@@ -242,7 +242,7 @@ shaka.test.ManifestDBBuilder.prototype.segment = function(start, end) {
  */
 shaka.test.ManifestDBBuilder.emptyManifest_ = function() {
   /** @type {shakaExtern.ManifestDB} */
-  var manifest = {
+  let manifest = {
     originalManifestUri: '',
     duration: 10,  // TODO(vaage) : calculate this from the segments
     size: 10,
@@ -265,7 +265,7 @@ shaka.test.ManifestDBBuilder.emptyManifest_ = function() {
  */
 shaka.test.ManifestDBBuilder.emptySegment_ = function() {
   /** @type {shakaExtern.SegmentDataDB} */
-  var segment = {
+  let segment = {
     data: new ArrayBuffer(0)
   };
 

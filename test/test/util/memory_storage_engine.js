@@ -48,7 +48,7 @@ shaka.test.MemoryStorageEngine.prototype.destroy = function() {
 
 /** @override */
 shaka.test.MemoryStorageEngine.prototype.getManifest = function(key) {
-  var manifest = this.manifests_[key];
+  let manifest = this.manifests_[key];
   return Promise.resolve(manifest);
 };
 
@@ -63,7 +63,7 @@ shaka.test.MemoryStorageEngine.prototype.forEachManifest = function(each) {
 /** @override */
 shaka.test.MemoryStorageEngine.prototype.addManifest = function(manifest) {
   /** @type {number} */
-  var key = this.nextManifestId_++;
+  let key = this.nextManifestId_++;
 
   this.manifests_[key] = manifest;
   return Promise.resolve(key);
@@ -86,7 +86,7 @@ shaka.test.MemoryStorageEngine.prototype.updateManifest = function(
 /** @override */
 shaka.test.MemoryStorageEngine.prototype.removeManifests =
     function(keys, opt_onRemoveKey) {
-  var noop = function(key) { };
+  let noop = function(key) { };
 
   shaka.test.MemoryStorageEngine.removeKeys_(
       this.manifests_, keys, opt_onRemoveKey || noop);
@@ -97,7 +97,7 @@ shaka.test.MemoryStorageEngine.prototype.removeManifests =
 
 /** @override */
 shaka.test.MemoryStorageEngine.prototype.getSegment = function(key) {
-  var segment = this.segments_[key];
+  let segment = this.segments_[key];
   return Promise.resolve(segment);
 };
 
@@ -112,16 +112,16 @@ shaka.test.MemoryStorageEngine.prototype.forEachSegment = function(each) {
 /** @override */
 shaka.test.MemoryStorageEngine.prototype.addSegment = function(segment) {
   // Clone the segment, so the caller can wipe its version.
-  var clonedData = new ArrayBuffer(segment.data.byteLength);
+  let clonedData = new ArrayBuffer(segment.data.byteLength);
   (new Uint8Array(clonedData)).set(new Uint8Array(segment.data));
 
   /** @type {shakaExtern.SegmentDataDB} */
-  var clonedSegment = {
+  let clonedSegment = {
     data: clonedData
   };
 
   /** @type {number} */
-  var key = this.nextSegmentId_++;
+  let key = this.nextSegmentId_++;
   this.segments_[key] = clonedSegment;
 
   return Promise.resolve(key);
@@ -131,7 +131,7 @@ shaka.test.MemoryStorageEngine.prototype.addSegment = function(segment) {
 /** @override */
 shaka.test.MemoryStorageEngine.prototype.removeSegments =
     function(keys, opt_onRemoveKey) {
-  var noop = function(key) { };
+  let noop = function(key) { };
 
   shaka.test.MemoryStorageEngine.removeKeys_(
       this.segments_, keys, opt_onRemoveKey || noop);

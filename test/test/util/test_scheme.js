@@ -28,10 +28,10 @@ goog.provide('shaka.test.TestScheme');
  * @return {!shakaExtern.IAbortableOperation.<shakaExtern.Response>}
  */
 shaka.test.TestScheme = function(uri, request, requestType) {
-  var manifestParts = /^test:([^/]+)$/.exec(uri);
+  let manifestParts = /^test:([^/]+)$/.exec(uri);
   if (manifestParts) {
     /** @type {shakaExtern.Response} */
-    var response = {
+    let response = {
       uri: uri,
       data: new ArrayBuffer(0),
       headers: {'content-type': 'application/x-test-manifest'}
@@ -39,44 +39,44 @@ shaka.test.TestScheme = function(uri, request, requestType) {
     return shaka.util.AbortableOperation.completed(response);
   }
 
-  var malformed = new shaka.util.Error(
+  let malformed = new shaka.util.Error(
       shaka.util.Error.Severity.CRITICAL,
       shaka.util.Error.Category.NETWORK,
       shaka.util.Error.Code.MALFORMED_TEST_URI);
 
-  var re = /^test:([^/]+)\/(video|audio)\/(init|[0-9]+)$/;
-  var segmentParts = re.exec(uri);
+  let re = /^test:([^/]+)\/(video|audio)\/(init|[0-9]+)$/;
+  let segmentParts = re.exec(uri);
   if (!segmentParts) {
     // Use expect so the URI is printed on errors.
     expect(uri).toMatch(re);
     return shaka.util.AbortableOperation.failed(malformed);
   }
 
-  var name = segmentParts[1];
-  var type = segmentParts[2];
+  let name = segmentParts[1];
+  let type = segmentParts[2];
 
-  var generators = shaka.test.TestScheme.GENERATORS[name];
+  let generators = shaka.test.TestScheme.GENERATORS[name];
   expect(generators).toBeTruthy();
   if (!generators) {
     return shaka.util.AbortableOperation.failed(malformed);
   }
 
-  var generator = generators[type];
+  let generator = generators[type];
   expect(generator).toBeTruthy();
   if (!generator) {
     return shaka.util.AbortableOperation.failed(malformed);
   }
 
-  var responseData;
+  let responseData;
   if (segmentParts[3] === 'init') {
     responseData = generator.getInitSegment(0);
   } else {
-    var index = Number(segmentParts[3]);
+    let index = Number(segmentParts[3]);
     responseData = generator.getSegment(index + 1, 0, 0);
   }
 
   /** @type {shakaExtern.Response} */
-  var ret = {uri: uri, data: responseData, headers: {}};
+  let ret = {uri: uri, data: responseData, headers: {}};
   return shaka.util.AbortableOperation.completed(ret);
 };
 
@@ -274,7 +274,7 @@ shaka.test.TestScheme.DATA = {
  * @param {string} name
  */
 shaka.test.TestScheme.setupPlayer = function(player, name) {
-  var asset = shaka.test.TestScheme.DATA[name];
+  let asset = shaka.test.TestScheme.DATA[name];
   goog.asserts.assert(asset, 'Unknown asset');
   if (!asset) return;
   if (asset.licenseRequestHeaders) {
@@ -282,13 +282,13 @@ shaka.test.TestScheme.setupPlayer = function(player, name) {
         function(type, request) {
           if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) return;
 
-          for (var header in asset.licenseRequestHeaders) {
+          for (let header in asset.licenseRequestHeaders) {
             request.headers[header] = asset.licenseRequestHeaders[header];
           }
         });
   }
   if (asset.licenseServers) {
-    var config = {drm: {servers: asset.licenseServers}};
+    let config = {drm: {servers: asset.licenseServers}};
     player.configure(config);
   }
 };
@@ -302,7 +302,7 @@ shaka.test.TestScheme.setupPlayer = function(player, name) {
  */
 shaka.test.TestScheme.createManifests = function(shaka, suffix) {
   /** @type {?} */
-  var windowShaka = window['shaka'];
+  let windowShaka = window['shaka'];
 
   /**
    * @param {Object} metadata
@@ -331,34 +331,34 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
                           data[contentType].segmentDuration);
 
     if (data.licenseServers) {
-      for (var keySystem in data.licenseServers) {
-        gen.addDrmInfo(keySystem)
+      for (let keySystem in data.licenseServers) {
+        manifestGenerator.addDrmInfo(keySystem)
             .licenseServerUri(data.licenseServers[keySystem]);
         if (data[contentType].initData) {
-          gen.addCencInitData(data[contentType].initData);
+          manifestGenerator.addCencInitData(data[contentType].initData);
         }
       }
     }
   }
 
-  var async = [];
+  let async = [];
   // Include 'window' to use uncompiled version version of the
   // library.
-  var DATA = windowShaka.test.TestScheme.DATA;
-  var GENERATORS = windowShaka.test.TestScheme.GENERATORS;
-  var MANIFESTS = windowShaka.test.TestScheme.MANIFESTS;
-  var ContentType = windowShaka.util.ManifestParserUtils.ContentType;
+  const DATA = windowShaka.test.TestScheme.DATA;
+  const GENERATORS = windowShaka.test.TestScheme.GENERATORS;
+  const MANIFESTS = windowShaka.test.TestScheme.MANIFESTS;
+  const ContentType = windowShaka.util.ManifestParserUtils.ContentType;
 
-  for (var name in DATA) {
+  for (let name in DATA) {
     GENERATORS[name + suffix] = GENERATORS[name + suffix] || {};
-    var data = DATA[name];
+    let data = DATA[name];
     [ContentType.VIDEO, ContentType.AUDIO].forEach(function(type) {
-      var streamGen = createStreamGenerator(data[type]);
+      let streamGen = createStreamGenerator(data[type]);
       GENERATORS[name + suffix][type] = streamGen;
       async.push(streamGen.init());
     });
 
-    var gen = new windowShaka.test.ManifestGenerator(shaka)
+    let gen = new windowShaka.test.ManifestGenerator(shaka)
         .setPresentationDuration(data.duration)
         .addPeriod(0)
         .addVariant(0)
@@ -370,9 +370,9 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
     if (data.text) {
       // This seems to be necessary.  Otherwise, we end up with a URL like
       // "http:/base/..." which then fails to load on Safari for some reason.
-      var locationUri = new goog.Uri(location.href);
-      var partialUri = new goog.Uri(data.text.uri);
-      var absoluteUri = locationUri.resolve(partialUri);
+      let locationUri = new goog.Uri(location.href);
+      let partialUri = new goog.Uri(data.text.uri);
+      let absoluteUri = locationUri.resolve(partialUri);
 
       gen.addTextStream(3)
             .mime(data.text.mimeType, data.text.codecs)
@@ -384,13 +384,13 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
 
   // Custom generators:
 
-  var data = DATA['sintel'];
-  var period_duration = 10;
-  var num_periods = 10;
-  var gen = new windowShaka.test.ManifestGenerator(shaka)
+  let data = DATA['sintel'];
+  let period_duration = 10;
+  let num_periods = 10;
+  let gen = new windowShaka.test.ManifestGenerator(shaka)
       .setPresentationDuration(period_duration * num_periods);
 
-  for (var i = 0; i < num_periods; i++) {
+  for (let i = 0; i < num_periods; i++) {
     gen.addPeriod(period_duration * i);
 
     gen.addVariant(2 * i).language('en');
@@ -433,15 +433,15 @@ shaka.test.TestScheme.ManifestParser.prototype.configure = function(config) {};
 /** @override */
 shaka.test.TestScheme.ManifestParser.prototype.start =
     function(uri, playerInterface) {
-  var re = /^test:([^/]+)$/;
-  var manifestParts = re.exec(uri);
+  let re = /^test:([^/]+)$/;
+  let manifestParts = re.exec(uri);
   if (!manifestParts) {
     // Use expect so the URI is printed on errors.
     expect(uri).toMatch(re);
     return Promise.reject();
   }
 
-  var manifest = shaka.test.TestScheme.MANIFESTS[manifestParts[1]];
+  let manifest = shaka.test.TestScheme.MANIFESTS[manifestParts[1]];
   expect(manifest).toBeTruthy();
   if (!manifest) return Promise.reject();
 

@@ -70,7 +70,7 @@ shaka.test.OfflineUtils.createStream = function(id, type) {
  */
 shaka.test.OfflineUtils.createSegmentData = function(data) {
   /** @type {Uint8Array} */
-  var array = new Uint8Array(data);
+  let array = new Uint8Array(data);
 
   return {
     data: array.buffer
@@ -84,13 +84,13 @@ shaka.test.OfflineUtils.createSegmentData = function(data) {
  */
 shaka.test.OfflineUtils.expectSegmentsToContain = function(segments,
                                                            expected) {
-  var actualData = segments.map(function(segment) {
+  let actualData = segments.map(function(segment) {
     expect(segment.data).toBeTruthy();
     return new Uint8Array(segment.data);
   });
 
   expect(expected.data).toBeTruthy();
-  var expectedData = new Uint8Array(expected.data);
+  let expectedData = new Uint8Array(expected.data);
 
   expect(actualData).toContain(expectedData);
 };
@@ -104,8 +104,8 @@ shaka.test.OfflineUtils.expectSegmentToEqual = function(actual, expected) {
   expect(actual.data).toBeTruthy();
   expect(expected.data).toBeTruthy();
 
-  var actualData = new Uint8Array(actual.data);
-  var expectedData = new Uint8Array(expected.data);
+  let actualData = new Uint8Array(actual.data);
+  let expectedData = new Uint8Array(expected.data);
 
   expect(actualData).toEqual(expectedData);
 };

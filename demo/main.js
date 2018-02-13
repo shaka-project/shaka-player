@@ -97,11 +97,11 @@ shakaDemo.init = function() {
   document.getElementById('version').textContent = shaka.Player.version;
 
   // Fill in the language preferences based on browser config, if available.
-  var language = navigator.language || 'en-us';
+  let language = navigator.language || 'en-us';
   document.getElementById('preferredAudioLanguage').value = language;
   document.getElementById('preferredTextLanguage').value = language;
 
-  var params = shakaDemo.getParams_();
+  let params = shakaDemo.getParams_();
 
   shakaDemo.setupLogging_();
 
@@ -115,8 +115,8 @@ shakaDemo.init = function() {
   });
 
   if (!shaka.Player.isBrowserSupported()) {
-    var errorDisplayLink = document.getElementById('errorDisplayLink');
-    var error = 'Your browser is not supported!';
+    let errorDisplayLink = document.getElementById('errorDisplayLink');
+    let error = 'Your browser is not supported!';
 
     // IE8 and other very old browsers don't have textContent.
     if (errorDisplayLink.textContent === undefined) {
@@ -126,11 +126,11 @@ shakaDemo.init = function() {
     }
 
     // Disable the load button.
-    var loadButton = document.getElementById('loadButton');
+    let loadButton = document.getElementById('loadButton');
     loadButton.disabled = true;
 
     // Hide the error message's close button.
-    var errorDisplayCloseButton =
+    let errorDisplayCloseButton =
         document.getElementById('errorDisplayCloseButton');
     errorDisplayCloseButton.style.display = 'none';
 
@@ -146,7 +146,7 @@ shakaDemo.init = function() {
     errorDisplayLink.style.cursor = 'default';
     errorDisplayLink.onclick = function() { return false; };
 
-    var errorDisplay = document.getElementById('errorDisplay');
+    let errorDisplay = document.getElementById('errorDisplay');
     errorDisplay.style.display = 'block';
   } else {
     if (navigator.serviceWorker) {
@@ -160,9 +160,9 @@ shakaDemo.init = function() {
     }
 
     /** @param {Event} event */
-    var offlineStatusChanged = function(event) {
-      var version = document.getElementById('version');
-      var text = version.textContent;
+    let offlineStatusChanged = function(event) {
+      let version = document.getElementById('version');
+      let text = version.textContent;
       text = text.replace(' (offline)', '');
       if (!navigator.onLine) {
         text += ' (offline)';
@@ -177,9 +177,9 @@ shakaDemo.init = function() {
     shaka.Player.probeSupport().then(function(support) {
       shakaDemo.support_ = support;
 
-      var localVideo =
+      let localVideo =
           /** @type {!HTMLVideoElement} */(document.getElementById('video'));
-      var localPlayer = new shaka.Player(localVideo);
+      let localPlayer = new shaka.Player(localVideo);
       shakaDemo.castProxy_ = new shaka.cast.CastProxy(
           localVideo, localPlayer, shakaDemo.CC_APP_ID_);
 
@@ -192,7 +192,7 @@ shakaDemo.init = function() {
       // Set the default poster.
       shakaDemo.localVideo_.poster = shakaDemo.mainPoster_;
 
-      var asyncSetup = shakaDemo.setupAssets_();
+      let asyncSetup = shakaDemo.setupAssets_();
       shakaDemo.setupOffline_();
       shakaDemo.setupConfiguration_();
       shakaDemo.setupInfo_();
@@ -224,19 +224,19 @@ shakaDemo.init = function() {
   */
 shakaDemo.getParams_ = function() {
   // Read URL parameters.
-  var fields = location.search.substr(1);
+  let fields = location.search.substr(1);
   fields = fields ? fields.split(';') : [];
-  var fragments = location.hash.substr(1);
+  let fragments = location.hash.substr(1);
   fragments = fragments ? fragments.split(';') : [];
 
   // Because they are being concatenated in this order, if both an
   // URL fragment and an URL parameter of the same type are present
   // the URL fragment takes precendence.
   /** @type {!Array.<string>} */
-  var combined = fields.concat(fragments);
-  var params = {};
-  for (var i = 0; i < combined.length; ++i) {
-    var kv = combined[i].split('=');
+  let combined = fields.concat(fragments);
+  let params = {};
+  for (let i = 0; i < combined.length; ++i) {
+    let kv = combined[i].split('=');
     params[kv[0]] = kv.slice(1).join('=');
   }
   return params;
@@ -297,7 +297,7 @@ shakaDemo.preBrowserCheckParams_ = function(params) {
     document.getElementById('logLevelListDiv').hidden = false;
 
     // Set log level.
-    var toSelectValue;
+    let toSelectValue;
     if ('vv' in params) {
       toSelectValue = 'vv';
       shaka.log.setLevel(shaka.log.Level.V2);
@@ -310,8 +310,8 @@ shakaDemo.preBrowserCheckParams_ = function(params) {
     }
     if (toSelectValue) {
       // Set the log level selector to the proper value.
-      var logLevelList = document.getElementById('logLevelList');
-      for (var index = 0; index < logLevelList.length; index++) {
+      let logLevelList = document.getElementById('logLevelList');
+      for (let index = 0; index < logLevelList.length; index++) {
         if (logLevelList[index].value == toSelectValue) {
           logLevelList.selectedIndex = index;
           break;
@@ -329,11 +329,11 @@ shakaDemo.preBrowserCheckParams_ = function(params) {
 shakaDemo.postBrowserCheckParams_ = function(params) {
   // If a custom asset was given in the URL, select it now.
   if ('asset' in params) {
-    var assetList = document.getElementById('assetList');
-    var assetUri = params['asset'];
-    var isDefault = false;
+    let assetList = document.getElementById('assetList');
+    let assetUri = params['asset'];
+    let isDefault = false;
     // Check all options except the last, which is 'custom asset'.
-    for (var index = 0; index < assetList.options.length - 1; index++) {
+    for (let index = 0; index < assetList.options.length - 1; index++) {
       if (assetList[index].asset &&
           assetList[index].asset.manifestUri == assetUri) {
         assetList.selectedIndex = index;
@@ -348,7 +348,7 @@ shakaDemo.postBrowserCheckParams_ = function(params) {
     } else {
       // It was a custom asset, so put it into the custom field.
       assetList.selectedIndex = assetList.options.length - 1;
-      var customAsset = document.getElementById('customAsset');
+      let customAsset = document.getElementById('customAsset');
       customAsset.style.display = 'block';
     }
 
@@ -357,22 +357,22 @@ shakaDemo.postBrowserCheckParams_ = function(params) {
     shakaDemo.updateButtons_(/* canHide */ true);
   }
 
-  var smallGapLimit = document.getElementById('smallGapLimit');
+  let smallGapLimit = document.getElementById('smallGapLimit');
   smallGapLimit.placeholder = 0.5; // The default smallGapLimit.
   if ('smallGapLimit' in params) {
     smallGapLimit.value = params['smallGapLimit'];
     // Call onGapInput_ manually, because setting the value
     // programatically doesn't fire 'input' event.
-    var fakeEvent = /** @type {!Event} */({target: smallGapLimit});
+    let fakeEvent = /** @type {!Event} */({target: smallGapLimit});
     shakaDemo.onGapInput_(fakeEvent);
   }
 
-  var jumpLargeGaps = document.getElementById('jumpLargeGaps');
+  let jumpLargeGaps = document.getElementById('jumpLargeGaps');
   if ('jumpLargeGaps' in params) {
     jumpLargeGaps.checked = true;
     // Call onJumpLargeGapsChange_ manually, because setting checked
     // programatically doesn't fire a 'change' event.
-    var fakeEvent = /** @type {!Event} */({target: jumpLargeGaps});
+    let fakeEvent = /** @type {!Event} */({target: jumpLargeGaps});
     shakaDemo.onJumpLargeGapsChange_(fakeEvent);
   } else {
     jumpLargeGaps.checked =
@@ -380,29 +380,29 @@ shakaDemo.postBrowserCheckParams_ = function(params) {
   }
 
   if ('noadaptation' in params) {
-    var enableAdaptation = document.getElementById('enableAdaptation');
+    let enableAdaptation = document.getElementById('enableAdaptation');
     enableAdaptation.checked = false;
     // Call onAdaptationChange_ manually, because setting checked
     // programatically doesn't fire a 'change' event.
-    var fakeEvent = /** @type {!Event} */({target: enableAdaptation});
+    let fakeEvent = /** @type {!Event} */({target: enableAdaptation});
     shakaDemo.onAdaptationChange_(fakeEvent);
   }
 
   if ('trickplay' in params) {
-    var showTrickPlay = document.getElementById('showTrickPlay');
+    let showTrickPlay = document.getElementById('showTrickPlay');
     showTrickPlay.checked = true;
     // Call onTrickPlayChange_ manually, because setting checked
     // programatically doesn't fire a 'change' event.
-    var fakeEvent = /** @type {!Event} */({target: showTrickPlay});
+    let fakeEvent = /** @type {!Event} */({target: showTrickPlay});
     shakaDemo.onTrickPlayChange_(fakeEvent);
   }
 
   if ('nativecontrols' in params) {
-    var showNative = document.getElementById('showNative');
+    let showNative = document.getElementById('showNative');
     showNative.checked = true;
     // Call onNativeChange_ manually, because setting checked
     // programatically doesn't fire a 'change' event.
-    var fakeEvent = /** @type {!Event} */({target: showNative});
+    let fakeEvent = /** @type {!Event} */({target: showNative});
     shakaDemo.onNativeChange_(fakeEvent);
   }
 
@@ -425,7 +425,7 @@ shakaDemo.updateFromHash_ = function() {
     return;
   }
 
-  var params = shakaDemo.getParams_();
+  let params = shakaDemo.getParams_();
   shakaDemo.preBrowserCheckParams_(params);
   shakaDemo.postBrowserCheckParams_(params);
 };
@@ -436,27 +436,27 @@ shakaDemo.hashShouldChange_ = function() {
   if (!shakaDemo.hashCanChange_)
     return;
 
-  var params = [];
-  var oldParams = shakaDemo.getParams_();
+  let params = [];
+  let oldParams = shakaDemo.getParams_();
 
   // Save the current asset.
-  var assetUri;
-  var licenseServerUri;
+  let assetUri;
+  let licenseServerUri;
   if (shakaDemo.player_) {
     assetUri = shakaDemo.player_.getManifestUri();
-    var drmInfo = shakaDemo.player_.drmInfo();
+    let drmInfo = shakaDemo.player_.drmInfo();
     if (drmInfo)
       licenseServerUri = drmInfo.licenseServerUri;
   }
-  var assetList = document.getElementById('assetList');
+  let assetList = document.getElementById('assetList');
   if (assetUri) {
     // Store the currently playing asset URI.
     params.push('asset=' + assetUri);
 
     // Is the asset a default asset?
-    var isDefault = false;
+    let isDefault = false;
     // Check all options except the last, which is 'custom asset'.
-    for (var index = 0; index < assetList.options.length - 1; index++) {
+    for (let index = 0; index < assetList.options.length - 1; index++) {
       if (assetList[index].asset.manifestUri == assetUri) {
         isDefault = true;
         break;
@@ -471,18 +471,18 @@ shakaDemo.hashShouldChange_ = function() {
   } else {
     if (assetList.selectedIndex == assetList.length - 1) {
       // It's a custom asset.
-      var manifestInputValue = document.getElementById('manifestInput').value;
+      let manifestInputValue = document.getElementById('manifestInput').value;
       if (manifestInputValue) {
         params.push('asset=' + manifestInputValue);
       }
 
-      var licenseInputValue =
+      let licenseInputValue =
           document.getElementById('licenseServerInput').value;
       if (licenseInputValue) {
         params.push('license=' + licenseInputValue);
       }
 
-      var certificateInputValue =
+      let certificateInputValue =
           document.getElementById('certificateInput').value;
       if (certificateInputValue) {
         params.push('certificate=' + certificateInputValue);
@@ -501,8 +501,8 @@ shakaDemo.hashShouldChange_ = function() {
   }
   if (document.getElementById('jumpLargeGaps').checked)
     params.push('jumpLargeGaps');
-  var audioLang = document.getElementById('preferredAudioLanguage').value;
-  var textLang = document.getElementById('preferredTextLanguage').value;
+  let audioLang = document.getElementById('preferredAudioLanguage').value;
+  let textLang = document.getElementById('preferredTextLanguage').value;
   if (textLang != audioLang) {
     params.push('audiolang=' + audioLang);
     params.push('textlang=' + textLang);
@@ -522,8 +522,8 @@ shakaDemo.hashShouldChange_ = function() {
     params.push('nativecontrols');
   }
   if (shaka.log) {
-    var logLevelList = document.getElementById('logLevelList');
-    var logLevel = logLevelList[logLevelList.selectedIndex].value;
+    let logLevelList = document.getElementById('logLevelList');
+    let logLevel = logLevelList[logLevelList.selectedIndex].value;
     if (logLevel != 'info') {
       params.push(logLevel);
     }
@@ -538,11 +538,11 @@ shakaDemo.hashShouldChange_ = function() {
   }
 
   // Store values for drm configuration.
-  var videoRobustness =
+  let videoRobustness =
       document.getElementById('drmSettingsVideoRobustness').value;
   if (videoRobustness)
     params.push('videoRobustness=' + videoRobustness);
-  var audioRobustness =
+  let audioRobustness =
       document.getElementById('drmSettingsAudioRobustness').value;
   if (audioRobustness)
     params.push('audioRobustness=' + audioRobustness);
@@ -550,8 +550,8 @@ shakaDemo.hashShouldChange_ = function() {
   // These parameters must be added manually, so preserve them.
   // These are only used by the loader in load.js to decide which version of
   // the library to load.
-  var buildType = 'uncompiled';
-  var strippedHash = '#' + params.join(';');
+  let buildType = 'uncompiled';
+  let strippedHash = '#' + params.join(';');
   if ('build' in oldParams) {
     params.push('build=' + oldParams['build']);
     buildType = oldParams['build'];
@@ -561,7 +561,7 @@ shakaDemo.hashShouldChange_ = function() {
   }
 
   (['compiled', 'debug_compiled', 'uncompiled']).forEach(function(type) {
-    var elem = document.getElementById(type + '_link');
+    let elem = document.getElementById(type + '_link');
     if (buildType == type) {
       elem.classList.add('disabled_link');
       elem.removeAttribute('href');
@@ -581,13 +581,13 @@ shakaDemo.hashShouldChange_ = function() {
     eval('()=>{}');
   } catch (e) {
     // If ES6 is not usable, neither is the uncompiled version of the app.
-    var uncompiledLink = document.getElementById('uncompiled_link');
+    let uncompiledLink = document.getElementById('uncompiled_link');
     uncompiledLink.classList.add('disabled_link');
     uncompiledLink.removeAttribute('href');
     uncompiledLink.title = 'requires ES6';
   }
 
-  var newHash = '#' + params.join(';');
+  let newHash = '#' + params.join(';');
   if (newHash != location.hash) {
     // We want to suppress hashchange events triggered here.  We only want to
     // respond to hashchange events initiated by the user in the URL bar.
@@ -609,7 +609,7 @@ shakaDemo.hashShouldChange_ = function() {
  * @private
  */
 shakaDemo.onErrorEvent_ = function(event) {
-  var error = event.detail;
+  let error = event.detail;
   shakaDemo.onError_(error);
 };
 
@@ -620,7 +620,7 @@ shakaDemo.onErrorEvent_ = function(event) {
  */
 shakaDemo.onError_ = function(error) {
   console.error('Player error', error);
-  var link = document.getElementById('errorDisplayLink');
+  let link = document.getElementById('errorDisplayLink');
 
   // Don't let less serious or equally serious errors replace what is already
   // shown.  The first error is usually the most important one, and the others
@@ -637,7 +637,7 @@ shakaDemo.onError_ = function(error) {
   //   2. the new error is more severe than the old one
   if (link.severity == null ||
       error.severity > link.severity) {
-    var message = error.message || ('Error code ' + error.code);
+    let message = error.message || ('Error code ' + error.code);
     if (error.code) {
       link.href = '../docs/api/shaka.util.Error.html#value:' + error.code;
     } else {
@@ -659,7 +659,7 @@ shakaDemo.onError_ = function(error) {
  */
 shakaDemo.closeError = function() {
   document.getElementById('errorDisplay').style.display = 'none';
-  var link = document.getElementById('errorDisplayLink');
+  let link = document.getElementById('errorDisplayLink');
   link.href = '';
   link.textContent = '';
   link.severity = null;
@@ -683,7 +683,7 @@ if (document.readyState == 'loading' ||
    * there are still deferred scripts being loaded.  This does not occur on
    * Chrome or Edge, which set the document's state at the correct time.
    */
-  var pollForShakaPlayer = function() {
+  let pollForShakaPlayer = function() {
     if (window.shaka) {
       shakaDemo.init();
     } else {

@@ -22,7 +22,7 @@
  * A container for demo assets.
  * @class
  */
-var shakaAssets = {};
+let shakaAssets = {};
 
 
 /** @enum {string} */

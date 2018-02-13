@@ -52,13 +52,13 @@ shakaDemo.setupConfiguration_ = function() {
   document.getElementById('drmSettingsAudioRobustness').addEventListener(
       'input', shakaDemo.onDrmSettingsChange_);
 
-  var robustnessSuggestions = document.getElementById('robustnessSuggestions');
+  let robustnessSuggestions = document.getElementById('robustnessSuggestions');
   if (shakaDemo.support_.drm['com.widevine.alpha']) {
-    var widevineSuggestions = ['SW_SECURE_CRYPTO', 'SW_SECURE_DECODE',
+    let widevineSuggestions = ['SW_SECURE_CRYPTO', 'SW_SECURE_DECODE',
       'HW_SECURE_CRYPTO', 'HW_SECURE_DECODE', 'HW_SECURE_ALL'];
     // Add Widevine robustness suggestions if it is supported.
     widevineSuggestions.forEach(function(suggestion) {
-      var option = document.createElement('option');
+      let option = document.createElement('option');
       option.value = suggestion;
       option.textContent = 'Widevine';
       robustnessSuggestions.appendChild(option);
@@ -92,7 +92,7 @@ shakaDemo.onLogLevelChange_ = function(event) {
   // shaka.log is not set if logging isn't enabled.
   // I.E. if using the compiled version of shaka.
   if (shaka.log) {
-    var logLevel = event.target[event.target.selectedIndex];
+    let logLevel = event.target[event.target.selectedIndex];
     switch (logLevel.value) {
       case 'info':
         shaka.log.setLevel(shaka.log.Level.INFO);
@@ -131,8 +131,8 @@ shakaDemo.onJumpLargeGapsChange_ = function(event) {
  * @private
  */
 shakaDemo.onGapInput_ = function(event) {
-  var smallGapLimit = Number(event.target.value);
-  var useDefault = isNaN(smallGapLimit) || event.target.value.length == 0;
+  let smallGapLimit = Number(event.target.value);
+  let useDefault = isNaN(smallGapLimit) || event.target.value.length == 0;
   shakaDemo.player_.configure(({
     streaming: {
       smallGapLimit: useDefault ? undefined : smallGapLimit
@@ -178,7 +178,7 @@ shakaDemo.onAdaptationChange_ = function(event) {
  * @private
  */
 shakaDemo.onNativeChange_ = function(event) {
-  var showTrickPlay = document.getElementById('showTrickPlay');
+  let showTrickPlay = document.getElementById('showTrickPlay');
 
   if (event.target.checked) {
     showTrickPlay.checked = false;

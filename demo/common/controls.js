@@ -494,7 +494,7 @@ ShakaControls.prototype.onVolumeStateChange_ = function() {
     this.volumeBar_.value = this.video_.volume;
   }
 
-  var gradient = ['to right'];
+  let gradient = ['to right'];
   gradient.push('#ccc ' + (this.volumeBar_.value * 100) + '%');
   gradient.push('#000 ' + (this.volumeBar_.value * 100) + '%');
   gradient.push('#000 100%');
@@ -526,7 +526,7 @@ ShakaControls.prototype.onTracksChange_ = function() {
   if (ShakaDemoUtils.isTsContent(this.player_)) {
     this.captionButton_.style.display = 'inherit';
   } else {
-    var hasText = this.player_.getTextTracks().length;
+    let hasText = this.player_.getTextTracks().length;
     this.captionButton_.style.display = hasText ? 'inherit' : 'none';
   }
 };
@@ -632,8 +632,8 @@ ShakaControls.prototype.onCastClick_ = function() {
  * @private
  */
 ShakaControls.prototype.onCastStatusChange_ = function(event) {
-  var canCast = this.castProxy_.canCast() && this.castAllowed_;
-  var isCasting = this.castProxy_.isCasting();
+  let canCast = this.castProxy_.canCast() && this.castAllowed_;
+  let isCasting = this.castProxy_.isCasting();
 
   this.notifyCastStatus_(isCasting);
   this.castButton_.style.display = canCast ? 'inherit' : 'none';
@@ -682,7 +682,7 @@ ShakaControls.prototype.isOpaque_ = function() {
   // While you are casting, the UI is always opaque.
   if (this.castProxy_ && this.castProxy_.isCasting()) return true;
 
-  var parentElement = this.controls_.parentElement;
+  let parentElement = this.controls_.parentElement;
   // The controls are opaque if either:
   //   1. We have explicitly made them so in JavaScript
   //   2. The browser has made them so via css and the hover state
@@ -701,25 +701,25 @@ ShakaControls.prototype.updateTimeAndSeekRange_ = function() {
     return;
   }
 
-  var displayTime = this.isSeeking_ ?
+  let displayTime = this.isSeeking_ ?
       this.seekBar_.value : this.video_.currentTime;
-  var duration = this.video_.duration;
-  var bufferedLength = this.video_.buffered.length;
-  var bufferedStart = bufferedLength ? this.video_.buffered.start(0) : 0;
-  var bufferedEnd =
+  let duration = this.video_.duration;
+  let bufferedLength = this.video_.buffered.length;
+  let bufferedStart = bufferedLength ? this.video_.buffered.start(0) : 0;
+  let bufferedEnd =
       bufferedLength ? this.video_.buffered.end(bufferedLength - 1) : 0;
-  var seekRange = this.player_.seekRange();
-  var seekRangeSize = seekRange.end - seekRange.start;
+  let seekRange = this.player_.seekRange();
+  let seekRangeSize = seekRange.end - seekRange.start;
 
   this.seekBar_.min = seekRange.start;
   this.seekBar_.max = seekRange.end;
 
   if (this.player_.isLive()) {
     // The amount of time we are behind the live edge.
-    var behindLive = Math.floor(seekRange.end - displayTime);
+    let behindLive = Math.floor(seekRange.end - displayTime);
     displayTime = Math.max(0, behindLive);
 
-    var showHour = seekRangeSize >= 3600;
+    let showHour = seekRangeSize >= 3600;
 
     // Consider "LIVE" when less than 1 second behind the live-edge.  Always
     // show the full time string when seeking, including the leading '-';
@@ -737,7 +737,7 @@ ShakaControls.prototype.updateTimeAndSeekRange_ = function() {
       this.seekBar_.value = seekRange.end - displayTime;
     }
   } else {
-    var showHour = duration >= 3600;
+    let showHour = duration >= 3600;
 
     this.currentTime_.textContent =
         this.buildTimeString_(displayTime, showHour);
@@ -749,21 +749,21 @@ ShakaControls.prototype.updateTimeAndSeekRange_ = function() {
     this.currentTime_.style.cursor = '';
   }
 
-  var gradient = ['to right'];
+  let gradient = ['to right'];
   if (bufferedLength == 0) {
     gradient.push('#000 0%');
   } else {
-    var clampedBufferStart = Math.max(bufferedStart, seekRange.start);
-    var clampedBufferEnd = Math.min(bufferedEnd, seekRange.end);
+    let clampedBufferStart = Math.max(bufferedStart, seekRange.start);
+    let clampedBufferEnd = Math.min(bufferedEnd, seekRange.end);
 
-    var bufferStartDistance = clampedBufferStart - seekRange.start;
-    var bufferEndDistance = clampedBufferEnd - seekRange.start;
-    var playheadDistance = displayTime - seekRange.start;
+    let bufferStartDistance = clampedBufferStart - seekRange.start;
+    let bufferEndDistance = clampedBufferEnd - seekRange.start;
+    let playheadDistance = displayTime - seekRange.start;
 
     // NOTE: the fallback to zero eliminates NaN.
-    var bufferStartFraction = (bufferStartDistance / seekRangeSize) || 0;
-    var bufferEndFraction = (bufferEndDistance / seekRangeSize) || 0;
-    var playheadFraction = (playheadDistance / seekRangeSize) || 0;
+    let bufferStartFraction = (bufferStartDistance / seekRangeSize) || 0;
+    let bufferEndFraction = (bufferEndDistance / seekRangeSize) || 0;
+    let playheadFraction = (playheadDistance / seekRangeSize) || 0;
 
     gradient.push('#000 ' + (bufferStartFraction * 100) + '%');
     gradient.push('#ccc ' + (bufferStartFraction * 100) + '%');
@@ -786,11 +786,11 @@ ShakaControls.prototype.updateTimeAndSeekRange_ = function() {
  * @private
  */
 ShakaControls.prototype.buildTimeString_ = function(displayTime, showHour) {
-  var h = Math.floor(displayTime / 3600);
-  var m = Math.floor((displayTime / 60) % 60);
-  var s = Math.floor(displayTime % 60);
+  let h = Math.floor(displayTime / 3600);
+  let m = Math.floor((displayTime / 60) % 60);
+  let s = Math.floor(displayTime % 60);
   if (s < 10) s = '0' + s;
-  var text = m + ':' + s;
+  let text = m + ':' + s;
   if (showHour) {
     if (m < 10) text = '0' + text;
     text = h + ':' + text;

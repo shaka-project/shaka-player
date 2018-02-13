@@ -35,7 +35,7 @@ shaka.test.MockStorageEngineFactory = function() {
  * Reset the platform to report it's actual support for storage.
  */
 shaka.test.MockStorageEngineFactory.prototype.resetIsSupported = function() {
-  var Factory = shaka.offline.StorageEngineFactory;
+  const Factory = shaka.offline.StorageEngineFactory;
   Factory.isSupported = this.originalIsSupported_;
 };
 
@@ -46,7 +46,7 @@ shaka.test.MockStorageEngineFactory.prototype.resetIsSupported = function() {
  */
 shaka.test.MockStorageEngineFactory.prototype.overrideIsSupported =
     function(supported) {
-  var Factory = shaka.offline.StorageEngineFactory;
+  const Factory = shaka.offline.StorageEngineFactory;
   Factory.isSupported = function() { return supported; };
 };
 
@@ -55,7 +55,7 @@ shaka.test.MockStorageEngineFactory.prototype.overrideIsSupported =
  * Reset the platform to create its default storage engine type.
  */
 shaka.test.MockStorageEngineFactory.prototype.resetCreate = function() {
-  var Factory = shaka.offline.StorageEngineFactory;
+  const Factory = shaka.offline.StorageEngineFactory;
   Factory.createStorageEngine = this.originalCreate_;
 };
 
@@ -66,7 +66,7 @@ shaka.test.MockStorageEngineFactory.prototype.resetCreate = function() {
  */
 shaka.test.MockStorageEngineFactory.prototype.overrideCreate =
     function(createEngine) {
-  var Factory = shaka.offline.StorageEngineFactory;
+  const Factory = shaka.offline.StorageEngineFactory;
   Factory.createStorageEngine = createEngine;
 };
 
