@@ -23,16 +23,16 @@ describe('XmlUtils', function() {
 
   describe('findChild', function() {
     it('finds a child node', function() {
-      var xmlString = [
+      let xmlString = [
         '<?xml version="1.0"?>',
         '<Root>',
         '  <Child></Child>',
         '</Root>'
       ].join('\n');
-      var xml = new DOMParser().parseFromString(xmlString, 'application/xml');
+      let xml = new DOMParser().parseFromString(xmlString, 'application/xml');
       goog.asserts.assert(xml, 'parseFromString should succeed');
 
-      var root = XmlUtils.findChild(xml, 'Root');
+      let root = XmlUtils.findChild(xml, 'Root');
       goog.asserts.assert(root, 'findChild should find element');
 
       expect(XmlUtils.findChild(root, 'Child')).toBeTruthy();
@@ -40,17 +40,17 @@ describe('XmlUtils', function() {
     });
 
     it('handles duplicate child nodes', function() {
-      var xmlString = [
+      let xmlString = [
         '<?xml version="1.0"?>',
         '<Root>',
         '  <Child></Child>',
         '  <Child></Child>',
         '</Root>'
       ].join('\n');
-      var xml = new DOMParser().parseFromString(xmlString, 'application/xml');
+      let xml = new DOMParser().parseFromString(xmlString, 'application/xml');
       goog.asserts.assert(xml, 'parseFromString should succeed');
 
-      var root = XmlUtils.findChild(xml, 'Root');
+      let root = XmlUtils.findChild(xml, 'Root');
       goog.asserts.assert(root, 'findChild should find element');
 
       expect(XmlUtils.findChild(root, 'Child')).toBeNull();
@@ -58,21 +58,21 @@ describe('XmlUtils', function() {
   });
 
   it('findChildren', function() {
-    var xmlString = [
+    let xmlString = [
       '<?xml version="1.0"?>',
       '<Root>',
       '  <Child></Child>',
       '  <Child></Child>',
       '</Root>'
     ].join('\n');
-    var xml = new DOMParser().parseFromString(xmlString, 'application/xml');
+    let xml = new DOMParser().parseFromString(xmlString, 'application/xml');
     goog.asserts.assert(xml, 'parseFromString should succeed');
 
-    var roots = XmlUtils.findChildren(xml, 'Root');
+    let roots = XmlUtils.findChildren(xml, 'Root');
     expect(roots).toBeTruthy();
     expect(roots.length).toBe(1);
 
-    var children = XmlUtils.findChildren(roots[0], 'Child');
+    let children = XmlUtils.findChildren(roots[0], 'Child');
     expect(children.length).toBe(2);
 
     children = XmlUtils.findChildren(roots[0], 'DoesNotExist');
@@ -81,41 +81,41 @@ describe('XmlUtils', function() {
 
   describe('getContents', function() {
     it('returns node contents', function() {
-      var xmlString = [
+      let xmlString = [
         '<?xml version="1.0"?>',
         '<Root>',
         '  foo bar',
         '</Root>'
       ].join('\n');
-      var xml = new DOMParser().parseFromString(xmlString, 'application/xml');
+      let xml = new DOMParser().parseFromString(xmlString, 'application/xml');
       goog.asserts.assert(xml, 'parseFromString should succeed');
 
-      var root = XmlUtils.findChild(xml, 'Root');
+      let root = XmlUtils.findChild(xml, 'Root');
       goog.asserts.assert(root, 'findChild should find element');
       expect(XmlUtils.getContents(root)).toBe('foo bar');
     });
 
     it('handles empty node contents', function() {
-      var xmlString = [
+      let xmlString = [
         '<?xml version="1.0"?>',
         '<Root>',
         '</Root>'
       ].join('\n');
-      var xml = new DOMParser().parseFromString(xmlString, 'application/xml');
+      let xml = new DOMParser().parseFromString(xmlString, 'application/xml');
       goog.asserts.assert(xml, 'parseFromString should succeed');
 
-      var root = XmlUtils.findChild(xml, 'Root');
+      let root = XmlUtils.findChild(xml, 'Root');
       goog.asserts.assert(root, 'findChild should find element');
       expect(XmlUtils.getContents(root)).toBe('');
     });
 
     it('handles null node contents', function() {
-      var xmlString = [
+      let xmlString = [
         '<?xml version="1.0"?>',
         '<Root>',
         '</Root>'
       ].join('\n');
-      var xml = new DOMParser().parseFromString(xmlString, 'application/xml');
+      let xml = new DOMParser().parseFromString(xmlString, 'application/xml');
       goog.asserts.assert(xml, 'parseFromString should succeed');
 
       expect(XmlUtils.getContents(xml)).toBeNull();
@@ -124,10 +124,10 @@ describe('XmlUtils', function() {
 
   describe('parseAttr', function() {
     /** @type {!Document} */
-    var xml;
+    let xml;
 
     beforeEach(function() {
-      var xmlString = [
+      let xmlString = [
         '<?xml version="1.0"?>',
         '<Root a="2-7" b="-5" c="">',
         '</Root>'
@@ -137,7 +137,7 @@ describe('XmlUtils', function() {
     });
 
     it('delegates to parser function', function() {
-      var root = XmlUtils.findChild(xml, 'Root');
+      let root = XmlUtils.findChild(xml, 'Root');
       goog.asserts.assert(root, 'findChild should find element');
       expect(XmlUtils.parseAttr(root, 'a', XmlUtils.parseRange)).toEqual(
           {start: 2, end: 7});
@@ -147,14 +147,14 @@ describe('XmlUtils', function() {
     });
 
     it('supports default values', function() {
-      var root = XmlUtils.findChild(xml, 'Root');
+      let root = XmlUtils.findChild(xml, 'Root');
       goog.asserts.assert(root, 'findChild should find element');
       expect(XmlUtils.parseAttr(root, 'd', XmlUtils.parseInt, 9)).toBe(9);
     });
   });
 
   it('parseDate', function() {
-    var parseDate = shaka.util.XmlUtils.parseDate;
+    let parseDate = shaka.util.XmlUtils.parseDate;
 
     // Should be parsed as UTC independent of local timezone.
     expect(parseDate('2015-11-30T12:46:33')).toBe(1448887593);
@@ -167,7 +167,7 @@ describe('XmlUtils', function() {
   });
 
   it('parseDuration', function() {
-    var parseDuration = shaka.util.XmlUtils.parseDuration;
+    let parseDuration = shaka.util.XmlUtils.parseDuration;
 
     // No time.
     expect(parseDuration('P')).toBe(0);
@@ -252,7 +252,7 @@ describe('XmlUtils', function() {
   });
 
   it('parseRange', function() {
-    var parseRange = shaka.util.XmlUtils.parseRange;
+    let parseRange = shaka.util.XmlUtils.parseRange;
 
     expect(parseRange('0-0')).toEqual({start: 0, end: 0});
     expect(parseRange('1-1')).toEqual({start: 1, end: 1});
@@ -275,7 +275,7 @@ describe('XmlUtils', function() {
   });
 
   it('parseInt', function() {
-    var parseInt = shaka.util.XmlUtils.parseInt;
+    let parseInt = shaka.util.XmlUtils.parseInt;
 
     expect(parseInt('0')).toBe(0);
     expect(parseInt('1')).toBe(1);
@@ -300,7 +300,7 @@ describe('XmlUtils', function() {
   });
 
   it('parsePositiveInt', function() {
-    var parsePositiveInt = shaka.util.XmlUtils.parsePositiveInt;
+    let parsePositiveInt = shaka.util.XmlUtils.parsePositiveInt;
 
     expect(parsePositiveInt('0')).toBeNull();
     expect(parsePositiveInt('1')).toBe(1);
@@ -325,7 +325,7 @@ describe('XmlUtils', function() {
   });
 
   it('parseNonNegativeInt', function() {
-    var parseNonNegativeInt = shaka.util.XmlUtils.parseNonNegativeInt;
+    let parseNonNegativeInt = shaka.util.XmlUtils.parseNonNegativeInt;
 
     expect(parseNonNegativeInt('0')).toBe(0);
     expect(parseNonNegativeInt('1')).toBe(1);
@@ -350,7 +350,7 @@ describe('XmlUtils', function() {
   });
 
   it('parseFloat', function() {
-    var parseFloat = shaka.util.XmlUtils.parseFloat;
+    let parseFloat = shaka.util.XmlUtils.parseFloat;
 
     expect(parseFloat('0')).toBe(0);
     expect(parseFloat('1')).toBe(1);

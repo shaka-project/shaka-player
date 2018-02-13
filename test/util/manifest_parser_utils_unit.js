@@ -16,53 +16,50 @@
  */
 
 describe('ManifestParserUtils', function() {
-  var ManifestParserUtils;
+  const ManifestParserUtils = shaka.util.ManifestParserUtils;
 
-  beforeAll(function() {
-    ManifestParserUtils = shaka.util.ManifestParserUtils;
-  });
   describe('resolveUris', function() {
     it('resolves relative URIs', function() {
-      var base = ['http://example.com/'];
-      var relative = ['page.html'];
-      var expected = ['http://example.com/page.html'];
-      var actual = ManifestParserUtils.resolveUris(base, relative);
+      let base = ['http://example.com/'];
+      let relative = ['page.html'];
+      let expected = ['http://example.com/page.html'];
+      let actual = ManifestParserUtils.resolveUris(base, relative);
       expect(actual).toEqual(expected);
     });
 
     it('resolves URIs multiplicatively', function() {
-      var base = ['http://example.com/', 'http://example.org'];
-      var relative = ['page.html', 'site.css'];
-      var expected = [
+      let base = ['http://example.com/', 'http://example.org'];
+      let relative = ['page.html', 'site.css'];
+      let expected = [
         'http://example.com/page.html',
         'http://example.com/site.css',
         'http://example.org/page.html',
         'http://example.org/site.css'
       ];
-      var actual = ManifestParserUtils.resolveUris(base, relative);
+      let actual = ManifestParserUtils.resolveUris(base, relative);
       expect(actual).toEqual(expected);
     });
 
     it('returns base if no relative URIs', function() {
-      var base = ['http://example.com'];
-      var relative = [];
-      var actual = ManifestParserUtils.resolveUris(base, relative);
+      let base = ['http://example.com'];
+      let relative = [];
+      let actual = ManifestParserUtils.resolveUris(base, relative);
       expect(actual).toEqual(base);
     });
 
     it('handles manifest file as base URI', function() {
-      var base = [
+      let base = [
         'http://example.com/manifest.mpd',
         'http://example.org/path/to/manifest.mpd'
       ];
-      var relative = ['segment.mp4', 'other/location/segment.webm'];
-      var expected = [
+      let relative = ['segment.mp4', 'other/location/segment.webm'];
+      let expected = [
         'http://example.com/segment.mp4',
         'http://example.com/other/location/segment.webm',
         'http://example.org/path/to/segment.mp4',
         'http://example.org/path/to/other/location/segment.webm'
       ];
-      var actual = ManifestParserUtils.resolveUris(base, relative);
+      let actual = ManifestParserUtils.resolveUris(base, relative);
       expect(actual).toEqual(expected);
     });
   });

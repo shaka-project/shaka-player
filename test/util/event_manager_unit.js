@@ -16,19 +16,18 @@
  */
 
 describe('EventManager', function() {
-  /** @const */
-  var Util = shaka.test.Util;
+  const Util = shaka.test.Util;
 
   /** @type {!shaka.util.EventManager} */
-  var eventManager;
+  let eventManager;
   /** @type {!Event} */
-  var event1;
+  let event1;
   /** @type {!Event} */
-  var event2;
+  let event2;
   /** @type {!EventTarget} */
-  var target1;
+  let target1;
   /** @type {!EventTarget} */
-  var target2;
+  let target2;
 
   beforeEach(function() {
     eventManager = new shaka.util.EventManager();
@@ -47,7 +46,7 @@ describe('EventManager', function() {
   });
 
   it('listens for an event', function() {
-    var listener = jasmine.createSpy('listener');
+    let listener = jasmine.createSpy('listener');
 
     eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener));
     target1.dispatchEvent(event1);
@@ -56,8 +55,8 @@ describe('EventManager', function() {
   });
 
   it('listens for an event from mutiple targets', function() {
-    var listener1 = jasmine.createSpy('listener1');
-    var listener2 = jasmine.createSpy('listener2');
+    let listener1 = jasmine.createSpy('listener1');
+    let listener2 = jasmine.createSpy('listener2');
 
     eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener1));
     eventManager.listen(target2, 'eventtype1', Util.spyFunc(listener2));
@@ -70,8 +69,8 @@ describe('EventManager', function() {
   });
 
   it('listens for multiple events', function() {
-    var listener1 = jasmine.createSpy('listener1');
-    var listener2 = jasmine.createSpy('listener2');
+    let listener1 = jasmine.createSpy('listener1');
+    let listener2 = jasmine.createSpy('listener2');
 
     eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener1));
     eventManager.listen(target1, 'eventtype2', Util.spyFunc(listener2));
@@ -84,8 +83,8 @@ describe('EventManager', function() {
   });
 
   it('listens for multiple events from mutiple targets', function() {
-    var listener1 = jasmine.createSpy('listener1');
-    var listener2 = jasmine.createSpy('listener2');
+    let listener1 = jasmine.createSpy('listener1');
+    let listener2 = jasmine.createSpy('listener2');
 
     eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener1));
     eventManager.listen(target2, 'eventtype2', Util.spyFunc(listener2));
@@ -98,8 +97,8 @@ describe('EventManager', function() {
   });
 
   it('listens for an event with multiple listeners', function() {
-    var listener1 = jasmine.createSpy('listener1');
-    var listener2 = jasmine.createSpy('listener2');
+    let listener1 = jasmine.createSpy('listener1');
+    let listener2 = jasmine.createSpy('listener2');
 
     eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener1));
     eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener2));
@@ -111,7 +110,7 @@ describe('EventManager', function() {
   });
 
   it('stops listening to an event', function() {
-    var listener = jasmine.createSpy('listener');
+    let listener = jasmine.createSpy('listener');
 
     eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener));
     eventManager.unlisten(target1, 'eventtype1');
@@ -122,8 +121,8 @@ describe('EventManager', function() {
   });
 
   it('ignores other targets when removing listeners', function() {
-    var listener1 = jasmine.createSpy('listener1');
-    var listener2 = jasmine.createSpy('listener2');
+    let listener1 = jasmine.createSpy('listener1');
+    let listener2 = jasmine.createSpy('listener2');
 
     eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener1));
     eventManager.listen(target2, 'eventtype1', Util.spyFunc(listener2));
@@ -135,8 +134,8 @@ describe('EventManager', function() {
   });
 
   it('stops listening to multiple events', function() {
-    var listener1 = jasmine.createSpy('listener1');
-    var listener2 = jasmine.createSpy('listener2');
+    let listener1 = jasmine.createSpy('listener1');
+    let listener2 = jasmine.createSpy('listener2');
 
     eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener1));
     eventManager.listen(target1, 'eventtype2', Util.spyFunc(listener2));
@@ -151,8 +150,8 @@ describe('EventManager', function() {
   });
 
   it('stops listening for an event with multiple listeners', function() {
-    var listener1 = jasmine.createSpy('listener1');
-    var listener2 = jasmine.createSpy('listener2');
+    let listener1 = jasmine.createSpy('listener1');
+    let listener2 = jasmine.createSpy('listener2');
 
     eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener1));
     eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener2));
