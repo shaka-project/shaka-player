@@ -16,24 +16,22 @@
  */
 
 describe('Player', function() {
-  /** @const */
-  var Util = shaka.test.Util;
-  /** @const */
-  var Feature = shakaAssets.Feature;
+  const Util = shaka.test.Util;
+  const Feature = shakaAssets.Feature;
 
   /** @type {!jasmine.Spy} */
-  var onErrorSpy;
+  let onErrorSpy;
 
   /** @type {shakaExtern.SupportType} */
-  var support;
+  let support;
   /** @type {!HTMLVideoElement} */
-  var video;
+  let video;
   /** @type {shaka.Player} */
-  var player;
+  let player;
   /** @type {shaka.util.EventManager} */
-  var eventManager;
+  let eventManager;
 
-  var compiledShaka;
+  let compiledShaka;
 
   beforeAll(function(done) {
     video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
@@ -42,7 +40,7 @@ describe('Player', function() {
     video.muted = true;
     document.body.appendChild(video);
 
-    var loaded = new shaka.util.PublicPromise();
+    let loaded = new shaka.util.PublicPromise();
     if (getClientArg('uncompiled')) {
       // For debugging purposes, use the uncompiled library.
       compiledShaka = shaka;
@@ -107,8 +105,8 @@ describe('Player', function() {
         video.play();
         return waitUntilPlayheadReaches(video, 1, 10);
       }).then(function() {
-        var stats = player.getStats();
-        var expected = {
+        let stats = player.getStats();
+        let expected = {
           width: jasmine.any(Number),
           height: jasmine.any(Number),
           streamBandwidth: jasmine.any(Number),
@@ -153,7 +151,7 @@ describe('Player', function() {
       }).then(function() {
         // This TextTrack was created as part of load() when we set up the
         // TextDisplayer.
-        var textTrack = video.textTracks[0];
+        let textTrack = video.textTracks[0];
         expect(textTrack).not.toBe(null);
 
         if (textTrack) {
@@ -177,16 +175,16 @@ describe('Player', function() {
       player.load('test:sintel_no_text_compiled').then(function() {
         // For some reason, using path-absolute URLs (i.e. without the hostname)
         // like this doesn't work on Safari.  So manually resolve the URL.
-        var locationUri = new goog.Uri(location.href);
-        var partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
-        var absoluteUri = locationUri.resolve(partialUri);
+        let locationUri = new goog.Uri(location.href);
+        let partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
+        let absoluteUri = locationUri.resolve(partialUri);
         player.addTextTrack(absoluteUri.toString(), 'en', 'subtitles',
                             'text/vtt');
 
         video.play();
         return Util.delay(5);
       }).then(function() {
-        var textTracks = player.getTextTracks();
+        let textTracks = player.getTextTracks();
         expect(textTracks).toBeTruthy();
         expect(textTracks.length).toBe(1);
 
@@ -207,7 +205,7 @@ describe('Player', function() {
         expect(video.currentTime).toBeLessThan(9);
         // The two periods might not be in a single contiguous buffer, so don't
         // check end(0).  Gap-jumping will deal with any discontinuities.
-        var bufferEnd = video.buffered.end(video.buffered.length - 1);
+        let bufferEnd = video.buffered.end(video.buffered.length - 1);
         expect(bufferEnd).toBeGreaterThan(11);
 
         // Change to a different language; this should clear the buffers and
@@ -225,17 +223,17 @@ describe('Player', function() {
     shakaAssets.testAssets.forEach(function(asset) {
       if (asset.disabled) return;
 
-      var testName =
+      let testName =
           asset.source + ' / ' + asset.name + ' : ' + asset.manifestUri;
 
-      var wit = asset.focus ? fit : external_it;
+      let wit = asset.focus ? fit : external_it;
       wit(testName, function(done) {
         if (asset.drm.length && !asset.drm.some(
             function(keySystem) { return support.drm[keySystem]; })) {
           pending('None of the required key systems are supported.');
         }
 
-        var mimeTypes = [];
+        let mimeTypes = [];
         if (asset.features.indexOf(Feature.WEBM) >= 0)
           mimeTypes.push('video/webm');
         if (asset.features.indexOf(Feature.MP4) >= 0)
@@ -245,9 +243,9 @@ describe('Player', function() {
           pending('None of the required MIME types are supported.');
         }
 
-        var isLive = asset.features.indexOf(Feature.LIVE) >= 0;
+        let isLive = asset.features.indexOf(Feature.LIVE) >= 0;
 
-        var config = { abr: {}, drm: {}, manifest: { dash: {} } };
+        let config = { abr: {}, drm: {}, manifest: { dash: {} } };
         config.abr.enabled = false;
         config.manifest.dash.clockSyncUri =
             '//shaka-player-demo.appspot.com/time.txt';
@@ -264,7 +262,7 @@ describe('Player', function() {
               addLicenseRequestHeaders.bind(null, asset.licenseRequestHeaders));
         }
 
-        var networkingEngine = player.getNetworkingEngine();
+        let networkingEngine = player.getNetworkingEngine();
         if (asset.requestFilter)
           networkingEngine.registerRequestFilter(asset.requestFilter);
         if (asset.responseFilter)
@@ -304,7 +302,7 @@ describe('Player', function() {
      * @return {string}
      */
     function getActiveLanguage() {
-      var tracks = player.getVariantTracks().filter(function(t) {
+      let tracks = player.getVariantTracks().filter(function(t) {
         return t.active;
       });
       expect(tracks.length).toBeGreaterThan(0);
@@ -314,13 +312,13 @@ describe('Player', function() {
 
   describe('abort', function() {
     /** @type {!jasmine.Spy} */
-    var schemeSpy;
+    let schemeSpy;
 
     beforeAll(function() {
       schemeSpy = jasmine.createSpy('reject scheme');
       schemeSpy.and.callFake(function() {
         // Throw a recoverable error so it will retry.
-        var error = new shaka.util.Error(
+        let error = new shaka.util.Error(
             shaka.util.Error.Severity.RECOVERABLE,
             shaka.util.Error.Category.NETWORK,
             shaka.util.Error.Code.HTTP_ERROR);
@@ -358,7 +356,7 @@ describe('Player', function() {
 
   describe('TextDisplayer plugin', function() {
     // Simulate the use of an external TextDisplayer plugin.
-    var textDisplayer;
+    let textDisplayer;
     beforeEach(function() {
       textDisplayer = {
         destroy: jasmine.createSpy('destroy'),
@@ -376,8 +374,8 @@ describe('Player', function() {
       });
 
       // Make sure the configuration was taken.
-      var configuredFactory = player.getConfiguration().textDisplayFactory;
-      var configuredTextDisplayer = new configuredFactory();
+      let configuredFactory = player.getConfiguration().textDisplayFactory;
+      let configuredTextDisplayer = new configuredFactory();
       expect(configuredTextDisplayer).toBe(textDisplayer);
     });
 
@@ -418,7 +416,7 @@ describe('Player', function() {
    * @return {!Promise}
    */
   function waitUntilPlayheadReaches(video, playheadTime, timeout) {
-    var curEventManager = eventManager;
+    let curEventManager = eventManager;
     return new Promise(function(resolve, reject) {
       curEventManager.listen(video, 'timeupdate', function() {
         if (video.currentTime >= playheadTime) {
@@ -439,9 +437,9 @@ describe('Player', function() {
    * @return {!Promise}
    */
   function waitForTimeOrEnd(target, timeout) {
-    var curEventManager = eventManager;
+    let curEventManager = eventManager;
     return new Promise(function(resolve, reject) {
-      var callback = function() {
+      let callback = function() {
         curEventManager.unlisten(target, 'ended');
         resolve();
       };
@@ -456,12 +454,12 @@ describe('Player', function() {
    * @param {shakaExtern.Request} request
    */
   function addLicenseRequestHeaders(headers, requestType, request) {
-    var RequestType = compiledShaka.net.NetworkingEngine.RequestType;
+    const RequestType = compiledShaka.net.NetworkingEngine.RequestType;
     if (requestType != RequestType.LICENSE) return;
 
     // Add these to the existing headers.  Do not clobber them!
     // For PlayReady, there will already be headers in the request.
-    for (var k in headers) {
+    for (let k in headers) {
       request.headers[k] = headers[k];
     }
   }
