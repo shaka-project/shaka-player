@@ -620,6 +620,30 @@ describe('StreamingEngine', function() {
     verifyNetworkingEngineRequestCalls(2);
   });
 
+  describe('loadNewTextStream', function() {
+    it('clears MediaSourceEngine', function() {
+      setupVod();
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      createStreamingEngine();
+      playhead.getTime.and.returnValue(0);
+      onStartupComplete.and.callFake(function() {setupFakeGetTime(0);});
+      onChooseStreams.and.callFake(onChooseStreamsWithUnloadedText);
+
+      streamingEngine.init();
+
+      runTest(function() {
+        if (playheadTime == 20) {
+          mediaSourceEngine.clear.calls.reset();
+          mediaSourceEngine.init.calls.reset();
+          streamingEngine.loadNewTextStream(textStream1);
+          expect(mediaSourceEngine.clear).toHaveBeenCalledWith('text');
+          expect(mediaSourceEngine.init).toHaveBeenCalledWith(
+              {text: jasmine.any(Object)});
+        }
+      });
+    });
+  });
+
   describe('unloadTextStream', function() {
     it('doesn\'t send requests for text after calling unload', function() {
       setupVod();
