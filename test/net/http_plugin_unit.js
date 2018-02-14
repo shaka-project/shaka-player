@@ -53,8 +53,40 @@ function httpPluginTests(usingFetch) {
       // Install the mock only briefly in the global namespace, to get a handle
       // to the mocked XHR implementation.
       jasmine.Ajax.install();
-      const MockXHR = window.XMLHttpRequest;
+      const jasmineXHRMock = window.XMLHttpRequest;
       jasmine.Ajax.uninstall();
+
+      // Wrap event handlers to catch errors
+      const MockXHR = function () {
+        const instance = new jasmineXHRMock();
+
+        ['abort', 'load', 'error', 'timeout'].forEach(function(eventName) {
+          const eventHandlerName = 'on' + eventName;
+          let eventHandler = null;
+
+          Object.defineProperty(instance, eventHandlerName, {
+            set: function(callback) {
+              eventHandler = function(event) {
+                // If an event handler throws, the test should fail, since
+                // errors should be passed as reasons to `reject()`. Otherwise
+                // we would leave the Promise in a pending state.
+                try {
+                  callback(event);
+                } catch (error) {
+                  fail('Uncaught error in XMLHttpRequest#' + eventHandlerName);
+                }
+              };
+            },
+            get: function() {
+              return eventHandler;
+            }
+          });
+        });
+
+        return instance;
+      };
+
+
       // Now plug this mock into HttpRequest directly, so it does not interfere
       // with other requests, such as those made by karma frameworks like
       // source-map-support.
