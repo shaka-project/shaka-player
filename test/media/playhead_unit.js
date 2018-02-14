@@ -573,6 +573,7 @@ describe('Playhead', function() {
     timeline.getSegmentAvailabilityStart.and.returnValue(1030);
     timeline.getSegmentAvailabilityEnd.and.returnValue(1030);
     video.on['waiting']();
+    jasmine.clock().tick(500);
     // We expect this to move to 15 seconds ahead of the start of the
     // availability window, due to the rebuffering goal (10s) and the 5s
     // for the Chromecast.
@@ -610,7 +611,7 @@ describe('Playhead', function() {
 
       // Because this is buffered, the playhead should move to (start + 5),
       // which will cause a 'seeking' event.
-      video.on['playing']();
+      jasmine.clock().tick(500);
       expect(video.currentTime).toBe(15);
       video.on['seeking']();
       expect(playhead.getTime()).toBe(15);
@@ -641,7 +642,7 @@ describe('Playhead', function() {
       timeline.getSafeAvailabilityStart.and.returnValue(10);
       timeline.getSegmentAvailabilityEnd.and.returnValue(70);
 
-      video.on['playing']();
+      jasmine.clock().tick(500);
       expect(video.currentTime).toBe(10);
       video.on['seeking']();
       expect(playhead.getTime()).toBe(10);
