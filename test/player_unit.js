@@ -119,6 +119,7 @@ describe('Player', function() {
       streamingEngine = new shaka.test.FakeStreamingEngine(
           onChooseStreams, onCanSwitch);
       mediaSourceEngine = {
+        init: jasmine.createSpy('init').and.returnValue(Promise.resolve()),
         destroy: jasmine.createSpy('destroy').and.
             returnValue(Promise.resolve()),
         setUseEmbeddedText: jasmine.createSpy('setUseEmbeddedText'),
@@ -248,7 +249,7 @@ describe('Player', function() {
         parser1.stop.and.returnValue(p);
 
         var unloadDone = false;
-        spyOn(player, 'createMediaSourceEngine');
+        spyOn(player, 'createMediaSourceEngine').and.callThrough();
 
         shaka.test.Util.delay(0.5).then(function() {
           // Should not start loading yet.

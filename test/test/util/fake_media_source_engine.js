@@ -70,10 +70,13 @@ shaka.test.FakeMediaSourceEngine = function(segmentData, opt_drift) {
   }
 
   /** @type {!jasmine.Spy} */
-  this.init = jasmine.createSpy('init').and.stub();
+  this.init = jasmine.createSpy('init').and.returnValue(Promise.resolve());
 
   /** @type {!jasmine.Spy} */
   this.reinitText = jasmine.createSpy('reinitText').and.stub();
+
+  /** @type {!jasmine.Spy} */
+  this.ended = jasmine.createSpy('ended').and.returnValue(false);
 
   /** @type {!jasmine.Spy} */
   this.endOfStream =

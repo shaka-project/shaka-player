@@ -16,56 +16,52 @@
  */
 
 describe('StreamingEngine', function() {
-  /** @const */
-  var ContentType = shaka.util.ManifestParserUtils.ContentType;
-  /** @const */
-  var Util = shaka.test.Util;
+  const ContentType = shaka.util.ManifestParserUtils.ContentType;
+  const Util = shaka.test.Util;
 
-  var metadata;
-  var generators;
+  let metadata;
+  let generators;
 
   /** @type {!shaka.util.EventManager} */
-  var eventManager;
+  let eventManager;
   /** @type {!HTMLVideoElement} */
-  var video;
-  var timeline;
+  let video;
+  let timeline;
 
   /** @type {!shaka.media.Playhead} */
-  var playhead;
+  let playhead;
   /** @type {shakaExtern.StreamingConfiguration} */
-  var config;
+  let config;
 
-  var netEngine;
-  /** @type {!MediaSource} */
-  var mediaSource;
+  let netEngine;
   /** @type {!shaka.media.MediaSourceEngine} */
-  var mediaSourceEngine;
+  let mediaSourceEngine;
   /** @type {!shaka.media.StreamingEngine} */
-  var streamingEngine;
+  let streamingEngine;
 
 
   /** @type {shakaExtern.Variant} */
-  var variant1;
+  let variant1;
   /** @type {shakaExtern.Variant} */
-  var variant2;
+  let variant2;
 
   /** @type {shakaExtern.Manifest} */
-  var manifest;
+  let manifest;
 
   /** @type {!jasmine.Spy} */
-  var onBuffering;
+  let onBuffering;
   /** @type {!jasmine.Spy} */
-  var onChooseStreams;
+  let onChooseStreams;
   /** @type {!jasmine.Spy} */
-  var onCanSwitch;
+  let onCanSwitch;
   /** @type {!jasmine.Spy} */
-  var onError;
+  let onError;
   /** @type {!jasmine.Spy} */
-  var onEvent;
+  let onEvent;
   /** @type {!jasmine.Spy} */
-  var onInitialStreamsSetup;
+  let onInitialStreamsSetup;
   /** @type {!jasmine.Spy} */
-  var onStartupComplete;
+  let onStartupComplete;
 
   beforeAll(function() {
     video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
@@ -78,7 +74,7 @@ describe('StreamingEngine', function() {
     generators = {};
   });
 
-  beforeEach(function(done) {
+  beforeEach(function() {
     // shakaExtern.StreamingConfiguration
     config = {
       rebufferingGoal: 2,
@@ -103,13 +99,12 @@ describe('StreamingEngine', function() {
     onEvent = jasmine.createSpy('onEvent');
 
     eventManager = new shaka.util.EventManager();
-    setupMediaSource().catch(fail).then(done);
+    mediaSourceEngine = new shaka.media.MediaSourceEngine(
+        video, /* TextDisplayer */ null);
   });
 
   afterEach(function(done) {
     streamingEngine.destroy().then(function() {
-      video.removeAttribute('src');
-      video.load();
       return Promise.all([
         mediaSourceEngine.destroy(),
         playhead.destroy(),
@@ -126,24 +121,6 @@ describe('StreamingEngine', function() {
   afterAll(function() {
     document.body.removeChild(video);
   });
-
-  // Setup MediaSource and MediaSourceEngine.
-  function setupMediaSource() {
-    mediaSource = new MediaSource();
-    video.src = window.URL.createObjectURL(mediaSource);
-
-    var p = new shaka.util.PublicPromise();
-    var onMediaSourceOpen = function() {
-      eventManager.unlisten(mediaSource, 'sourceopen');
-      mediaSource.duration = 0;
-      mediaSourceEngine = new shaka.media.MediaSourceEngine(
-          video, mediaSource, null);
-      p.resolve();
-    };
-    eventManager.listen(mediaSource, 'sourceopen', onMediaSourceOpen);
-
-    return p;
-  }
 
   function setupVod() {
     return Promise.all([
