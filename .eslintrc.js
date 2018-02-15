@@ -80,7 +80,6 @@ module.exports = {
         // "Best practices" rules we should be able to pass, but are not part of "eslint:recommended": {{{
         "accessor-pairs": "error",
         "array-callback-return": "error",
-        "class-methods-use-this": "error",
         "no-alert": "error",
         "no-caller": "error",
         "no-catch-shadow": "error",
@@ -117,6 +116,7 @@ module.exports = {
         // }}}
 
         // Style rules we don't need: {{{
+        "class-methods-use-this": "off",  // causes issues when implementing an interface
         "dot-notation": "off",  // We use bracket notation in tests on purpose
         "eqeqeq": "off",  // Compiler handles type checking in advance
         "guard-for-in": "off",
