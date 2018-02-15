@@ -400,8 +400,8 @@ function createFakeBuffered(ranges) {
  * @return {!Object}
  */
 shaka.test.FakePresentationTimeline = function() {
-  let getStart = jasmine.createSpy('getSegmentAvailabilityStart');
-  let getSafeStart = jasmine.createSpy('getSafeAvailabilityStart');
+  let getStart = jasmine.createSpy('getSeekRangeStart');
+  let getSafeStart = jasmine.createSpy('getSafeSeekRangeStart');
   getSafeStart.and.callFake(function(delay) {
     return shaka.test.Util.invokeSpy(getStart) + delay;
   });
@@ -416,9 +416,11 @@ shaka.test.FakePresentationTimeline = function() {
     notifyMaxSegmentDuration: jasmine.createSpy('notifyMaxSegmentDuration'),
     isLive: jasmine.createSpy('isLive'),
     isInProgress: jasmine.createSpy('isInProgress'),
-    getSegmentAvailabilityStart: getStart,
-    getSafeAvailabilityStart: getSafeStart,
+    getSegmentAvailabilityStart:
+        jasmine.createSpy('getSegmentAvailabilityStart'),
     getSegmentAvailabilityEnd: jasmine.createSpy('getSegmentAvailabilityEnd'),
+    getSeekRangeStart: getStart,
+    getSafeSeekRangeStart: getSafeStart,
     getSeekRangeEnd: jasmine.createSpy('getSeekRangeEnd')
   };
 };
@@ -465,11 +467,15 @@ shaka.test.FakePresentationTimeline.prototype.getSegmentAvailabilityStart;
 
 
 /** @type {jasmine.Spy} */
-shaka.test.FakePresentationTimeline.prototype.getSafeAvailabilityStart;
+shaka.test.FakePresentationTimeline.prototype.getSegmentAvailabilityEnd;
 
 
 /** @type {jasmine.Spy} */
-shaka.test.FakePresentationTimeline.prototype.getSegmentAvailabilityEnd;
+shaka.test.FakePresentationTimeline.prototype.getSafeSeekRangeStart;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.getSeekRangeStart;
 
 
 /** @type {jasmine.Spy} */

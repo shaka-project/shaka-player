@@ -658,7 +658,7 @@ describe('Storage', function() {
           new SegmentReference(2, 12, 13, makeUris('fake:0'), 0, null)
         ];
         stream1Index.merge(refs);
-        manifest.presentationTimeline.notifySegments(0, refs);
+        manifest.presentationTimeline.notifySegments(refs, true);
 
         storage.store(fakeManifestUri)
             .then(function(manifest) {
