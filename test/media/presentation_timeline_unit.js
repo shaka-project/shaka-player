@@ -286,6 +286,40 @@ describe('PresentationTimeline', function() {
     });
   });
 
+  describe('getSeekRangeStart', function() {
+    it('accounts for available segments', function() {
+      let timeline = makeLiveTimeline(/* availability */ 60, /* delay */ 0);
+
+      setElapsed(120);
+      // now (120) - availability (60) - segment size (10) = 50
+      expect(timeline.getSeekRangeStart()).toBe(50);
+
+      let ref = new shaka.media.SegmentReference(
+          /* position */ 0,
+          /* startTime */ 30,
+          /* endTime */ 40,
+          /* uris */ function() { return []; },
+          /* startByte */ 0,
+          /* endByte */ null);
+      timeline.notifySegments([ref], true);
+      // The earliest segment time is earlier than now - availability duration,
+      // so the seek range is not based on the segment list.
+      expect(timeline.getSeekRangeStart()).toBe(50);
+
+      ref = new shaka.media.SegmentReference(
+          /* position */ 0,
+          /* startTime */ 90,
+          /* endTime */ 100,
+          /* uris */ function() { return []; },
+          /* startByte */ 0,
+          /* endByte */ null);
+      timeline.notifySegments([ref], true);
+      // The earliest segment time is later than now - availability duration,
+      // so segment time 90 takes precedence.
+      expect(timeline.getSeekRangeStart()).toBe(90);
+    });
+  });
+
   describe('getSeekRangeEnd', function() {
     it('accounts for delay for live and IPR', function() {
       var timeline1 = makeIprTimeline(/* duration */ 60, /* delay */ 7);
