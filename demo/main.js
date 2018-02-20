@@ -85,6 +85,11 @@ shakaDemo.audioOnlyPoster_ =
  */
 shakaDemo.CC_APP_ID_ = 'A15A181D';
 
+/**
+ * @type {shakaDemo.AppPlugin}
+ */
+shakaDemo.appPlugin = null;
+
 
 /**
  * Initialize the application.
@@ -209,6 +214,11 @@ shakaDemo.init = function() {
         shakaDemo.postBrowserCheckParams_(params);
         window.addEventListener('hashchange', shakaDemo.updateFromHash_);
       });
+
+      if (params['appPlugin']) {
+        var pluginParams = params['pluginParams'];
+        return shakaDemo.initAppPlugin_(params['appPlugin'], pluginParams);
+      }
     }).catch(function(error) {
       // Some part of the setup of the demo app threw an error.
       // Notify the user of this.
@@ -217,12 +227,37 @@ shakaDemo.init = function() {
   }
 };
 
+/**
+ * @param {string} name
+ * @param {string} pluginParams Arbitrary params to pass to the plugin
+ * @private
+ * @returns {Promise}
+ */
+shakaDemo.initAppPlugin_ = function(name, pluginParams) {
+  var player = shakaDemo.player_;
+  var plugin = shakaDemo.AppPlugin.getPluginInstance(name, player);
+  shakaDemo.appPlugin = plugin;
+
+  var listeners = plugin.getListeners();
+  for (var eventName in listeners) {
+    player.addEventListener(eventName, listeners[eventName]);
+  }
+
+  var netEngine = player.getNetworkingEngine();
+  netEngine.registerRequestFilter(plugin.onRequest);
+  netEngine.registerResponseFilter(plugin.onResponse);
+
+  return plugin.onStart(player, pluginParams).catch(function (error) {
+    shaka.log.error('Error setting up plugin ' + name, error);
+    // TODO: `error` could be anything. How to handle?
+  });
+};
+
 
 /**
   * @return {!Object.<string, string>} params
-  * @private
   */
-shakaDemo.getParams_ = function() {
+shakaDemo.getParams = function() {
   // Read URL parameters.
   var fields = location.search.substr(1);
   fields = fields ? fields.split(';') : [];
