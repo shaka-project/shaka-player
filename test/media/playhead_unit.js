@@ -1033,6 +1033,41 @@ describe('Playhead', function() {
       expect(video.currentTime).toBe(3);
     });
 
+    it('works with rounding errors when seeking', function() {
+      // If the browser sets the time to slightly before where we seek to, we
+      // shouldn't get stuck in an infinite loop trying to jump the tiny gap.
+      // https://github.com/google/shaka-player/issues/1309
+      let buffered = [{start: 10, end: 20}];
+      video.buffered = createFakeBuffered(buffered);
+      video.readyState = HTMLMediaElement.HAVE_METADATA;
+
+      // Track the number of times we seeked.
+      let seekCount = 0;
+      let currentTime = 0;
+      Object.defineProperty(video, 'currentTime', {
+        get: () => currentTime - 0.00001,
+        set: (time) => {
+          seekCount++;
+          currentTime = time;
+          setTimeout(() => {
+            video.on['seeking']();
+            playhead.onSegmentAppended();
+          }, 5);
+        },
+      });
+
+      config.jumpLargeGaps = true;
+      playhead = new shaka.media.Playhead(video, manifest, config, 0,
+                                          Util.spyFunc(onSeek),
+                                          Util.spyFunc(onEvent));
+
+      playhead.onSegmentAppended();
+      jasmine.clock().tick(1000);
+
+      expect(seekCount).toBe(1);
+      expect(currentTime).toBe(10);
+    });
+
     /**
      * @param {string} name
      * @param {SeekTestInfo} data
