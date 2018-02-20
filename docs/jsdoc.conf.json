@@ -1,7 +1,5 @@
 {
   "tags": {
-    /* This reverses the preferred order of tag dictionaries so that
-     * closure's version of tag interpretation is used over jsdoc's. */
     "dictionaries": [ "closure", "jsdoc" ]
   },
   "source": {
@@ -10,10 +8,26 @@
       "externs/shaka"
     ]
   },
+  "templates": {
+    "default": {
+      "sortTutorialsByConfigOrder": true,
+      "useLongnameInNav": true,
+      "navOrder": [
+        "Tutorials",
+        "Classes",
+        "Interfaces",
+        "Events"
+      ]
+    }
+  },
+  "plugins": [ "docs/jsdoc-plugin" ],
   "opts": {
+    "pedantic": true,
     "private": true,
     "recurse": true,
+    "readme": "docs/api-mainpage.md",
     "tutorials": "docs/tutorials",
+    "template": "docs/jsdoc-template",
     "destination": "docs/api"
   }
 }

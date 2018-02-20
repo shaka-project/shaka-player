@@ -49,7 +49,6 @@ jasmine.Spec.prototype.pend = function(opt_message) {};
 
 /**
  * @type {{failedExpectations: !Array}}
- * gjslint: disable=900
  */
 jasmine.Spec.prototype.result;
 

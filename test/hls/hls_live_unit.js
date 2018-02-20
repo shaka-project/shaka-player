@@ -40,14 +40,38 @@ describe('HlsParser live', function() {
   /** @const {function(string):ArrayBuffer} */
   var toUTF8 = shaka.util.StringUtils.toUTF8;
   /** @type {ArrayBuffer} */
+  var initSegmentData;
+  /** @type {ArrayBuffer} */
   var segmentData;
   /** @type {ArrayBuffer} */
+  var selfInitializingSegmentData;
+  /** @type {ArrayBuffer} */
   var tsSegmentData;
+  /** @type {ArrayBuffer} */
+  var pastRolloverSegmentData;
+  /** @const {number} */
+  var rolloverOffset;
   /** @const {number} */
   var segmentDataStartTime;
 
   beforeEach(function() {
     // TODO: use StreamGenerator?
+    initSegmentData = new Uint8Array([
+      0x00, 0x00, 0x00, 0x30, // size (48)
+      0x6D, 0x6F, 0x6F, 0x76, // type (moov)
+      0x00, 0x00, 0x00, 0x28, // trak size (40)
+      0x74, 0x72, 0x61, 0x6B, // type (trak)
+      0x00, 0x00, 0x00, 0x20, // mdia size (32)
+      0x6D, 0x64, 0x69, 0x61, // type (mdia)
+
+      0x00, 0x00, 0x00, 0x18, // mdhd size (24)
+      0x6D, 0x64, 0x68, 0x64, // type (mdhd)
+      0x00, 0x00, 0x00, 0x00, // version and flags
+
+      0x00, 0x00, 0x00, 0x00, // creation time (0)
+      0x00, 0x00, 0x00, 0x00, // modification time (0)
+      0x00, 0x00, 0x03, 0xe8, // timescale (1000)
+    ]).buffer;
     segmentData = new Uint8Array([
       0x00, 0x00, 0x00, 0x24, // size (36)
       0x6D, 0x6F, 0x6F, 0x66, // type (moof)
@@ -57,7 +81,7 @@ describe('HlsParser live', function() {
       0x74, 0x66, 0x64, 0x74, // type (tfdt)
       0x01, 0x00, 0x00, 0x00, // version and flags
       0x00, 0x00, 0x00, 0x00, // baseMediaDecodeTime first 4 bytes
-      0x00, 0x02, 0xBF, 0x20  // baseMediaDecodeTime last 4 bytes (180000)
+      0x00, 0x00, 0x07, 0xd0  // baseMediaDecodeTime last 4 bytes (2000)
     ]).buffer;
     tsSegmentData = new Uint8Array([
       0x47, // TS sync byte (fixed value)
@@ -74,6 +98,26 @@ describe('HlsParser live', function() {
     // 180000 divided by TS timescale (90000) = segment starts at 2s.
     segmentDataStartTime = 2;
 
+    pastRolloverSegmentData = new Uint8Array([
+      0x00, 0x00, 0x00, 0x24, // size (36)
+      0x6D, 0x6F, 0x6F, 0x66, // type (moof)
+      0x00, 0x00, 0x00, 0x1C, // traf size (28)
+      0x74, 0x72, 0x61, 0x66, // type (traf)
+      0x00, 0x00, 0x00, 0x14, // tfdt size (20)
+      0x74, 0x66, 0x64, 0x74, // type (tfdt)
+      0x01, 0x00, 0x00, 0x00, // version and flags
+      0x00, 0x00, 0x00, 0x00, // baseMediaDecodeTime first 4 bytes
+      0x0b, 0x60, 0xbc, 0x28  // baseMediaDecodeTime last 4 bytes (190889000)
+    ]).buffer;
+
+    // The timestamp above would roll over twice, so this rollover offset should
+    // be applied.
+    rolloverOffset = (0x200000000 * 2) / 90000;
+
+    selfInitializingSegmentData = shaka.util.Uint8ArrayUtils.concat(
+      new Uint8Array(initSegmentData),
+      new Uint8Array(segmentData)).buffer;
+
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
 
     var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
@@ -83,7 +127,8 @@ describe('HlsParser live', function() {
         customScheme: function(node) { return null; },
         clockSyncUri: '',
         ignoreDrmInfo: false,
-        xlinkFailGracefully: false
+        xlinkFailGracefully: false,
+        defaultPresentationDelay: 10
       }
     };
 
@@ -120,7 +165,9 @@ describe('HlsParser live', function() {
       'test:/video': toUTF8(initialMedia),
       'test:/video2': toUTF8(initialMedia),
       'test:/audio': toUTF8(initialMedia),
-      'test:/main.mp4': segmentData
+      'test:/init.mp4': initSegmentData,
+      'test:/main.mp4': segmentData,
+      'test:/selfInit.mp4': selfInitializingSegmentData,
     });
     parser.start('test:/master', playerInterface)
       .then(function(manifest) {
@@ -149,7 +196,7 @@ describe('HlsParser live', function() {
               ManifestParser.verifySegmentIndex(audio, updatedReferences);
           }
         }).catch(fail).then(done);
-    shaka.polyfill.Promise.flush();
+    PromiseMock.flush();
   }
 
 
@@ -158,7 +205,7 @@ describe('HlsParser live', function() {
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:EVENT\n',
       '#EXT-X-TARGETDURATION:5\n',
-      '#EXT-X-MAP:URI="test:/main.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:2,\n',
       'test:/main.mp4\n'
     ].join('');
@@ -167,7 +214,7 @@ describe('HlsParser live', function() {
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:EVENT\n',
       '#EXT-X-TARGETDURATION:5\n',
-      '#EXT-X-MAP:URI="test:/main.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:2,\n',
       'test:/main.mp4\n',
       '#EXTINF:2,\n',
@@ -178,6 +225,7 @@ describe('HlsParser live', function() {
       fakeNetEngine.setResponseMap({
         'test:/master': toUTF8(master),
         'test:/video': toUTF8(media + '#EXT-X-ENDLIST'),
+        'test:/init.mp4': initSegmentData,
         'test:/main.mp4': segmentData
       });
 
@@ -193,13 +241,13 @@ describe('HlsParser live', function() {
     describe('update', function() {
       beforeAll(function() {
         jasmine.clock().install();
-        // This polyfill is required for fakeEventLoop.
-        shaka.polyfill.Promise.install(/* force */ true);
+        // This mock is required for fakeEventLoop.
+        PromiseMock.install();
       });
 
       afterAll(function() {
         jasmine.clock().uninstall();
-        shaka.polyfill.Promise.uninstall();
+        PromiseMock.uninstall();
       });
 
       it('adds new segments when they appear', function(done) {
@@ -268,6 +316,7 @@ describe('HlsParser live', function() {
         fakeNetEngine.setResponseMap({
           'test:/master': toUTF8(master),
           'test:/video': toUTF8(media),
+          'test:/init.mp4': initSegmentData,
           'test:/main.mp4': segmentData
         });
         parser.start('test:/master', playerInterface)
@@ -291,13 +340,14 @@ describe('HlsParser live', function() {
               delayForUpdatePeriod();
               ManifestParser.verifySegmentIndex(video, [ref1, ref2, ref3]);
             }).catch(fail).then(done);
-        shaka.polyfill.Promise.flush();
+        PromiseMock.flush();
       });
 
       it('converts presentation to VOD when it is finished', function(done) {
         fakeNetEngine.setResponseMap({
           'test:/master': toUTF8(master),
           'test:/video': toUTF8(media),
+          'test:/init.mp4': initSegmentData,
           'test:/main.mp4': segmentData
         });
 
@@ -311,28 +361,30 @@ describe('HlsParser live', function() {
           delayForUpdatePeriod();
           expect(manifest.presentationTimeline.isLive()).toBe(false);
         }).catch(fail).then(done);
-        shaka.polyfill.Promise.flush();
+        PromiseMock.flush();
       });
 
       it('starts presentation as VOD when ENDLIST is present', function(done) {
         fakeNetEngine.setResponseMap({
           'test:/master': toUTF8(master),
           'test:/video': toUTF8(media + '#EXT-X-ENDLIST'),
+          'test:/init.mp4': initSegmentData,
           'test:/main.mp4': segmentData
         });
 
         parser.start('test:/master', playerInterface).then(function(manifest) {
           expect(manifest.presentationTimeline.isLive()).toBe(false);
         }).catch(fail).then(done);
-        shaka.polyfill.Promise.flush();
+        PromiseMock.flush();
       });
-    });
-  });
+    });  // describe('update')
+  });  // describe('playlist type EVENT')
 
   describe('playlist type LIVE', function() {
     var media = [
       '#EXTM3U\n',
       '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
       '#EXT-X-MEDIA-SEQUENCE:0\n',
       '#EXTINF:2,\n',
       'test:/main.mp4\n'
@@ -341,6 +393,7 @@ describe('HlsParser live', function() {
     var mediaWithoutSequenceNumber = [
       '#EXTM3U\n',
       '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:2,\n',
       'test:/main.mp4\n'
     ].join('');
@@ -348,6 +401,7 @@ describe('HlsParser live', function() {
     var mediaWithByteRange = [
       '#EXTM3U\n',
       '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
       '#EXT-X-MEDIA-SEQUENCE:0\n',
       '#EXT-X-BYTERANGE:121090@616\n',
       '#EXTINF:2,\n',
@@ -360,6 +414,7 @@ describe('HlsParser live', function() {
     var mediaWithAdditionalSegment = [
       '#EXTM3U\n',
       '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
       '#EXT-X-MEDIA-SEQUENCE:0\n',
       '#EXTINF:2,\n',
       'test:/main.mp4\n',
@@ -370,6 +425,7 @@ describe('HlsParser live', function() {
     var mediaWithRemovedSegment = [
       '#EXTM3U\n',
       '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
       '#EXT-X-MEDIA-SEQUENCE:1\n',
       '#EXTINF:2,\n',
       'test:/main2.mp4\n'
@@ -379,6 +435,7 @@ describe('HlsParser live', function() {
       fakeNetEngine.setResponseMap({
         'test:/master': toUTF8(master),
         'test:/video': toUTF8(media + '#EXT-X-ENDLIST'),
+        'test:/init.mp4': initSegmentData,
         'test:/main.mp4': segmentData
       });
 
@@ -391,22 +448,69 @@ describe('HlsParser live', function() {
       fakeNetEngine.setResponseMap({
         'test:/master': toUTF8(master),
         'test:/video': toUTF8(mediaWithoutSequenceNumber),
+        'test:/init.mp4': initSegmentData,
         'test:/main.mp4': segmentData
       });
 
       parser.start('test:/master', playerInterface).catch(fail).then(done);
     });
 
+    it('offsets VTT text with rolled over TS timestamps', function(done) {
+      var masterWithVtt = [
+        '#EXTM3U\n',
+        '#EXT-X-MEDIA:TYPE=SUBTITLES,LANGUAGE="fra",URI="test:/text"\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+        'RESOLUTION=960x540,FRAME-RATE=60\n',
+        'test:/video\n',
+      ].join('');
+
+      var textPlaylist = [
+        '#EXTM3U\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-MEDIA-SEQUENCE:0\n',
+        '#EXTINF:2,\n',
+        'test:/main.vtt\n',
+      ].join('');
+
+      var vtt = [
+        'WEBVTT\n',
+        '\n',
+        '00:00.000 --> 00:01.000\n',
+        'Hello, world!\n',
+      ].join('');
+
+      fakeNetEngine.setResponseMap({
+        'test:/master': toUTF8(masterWithVtt),
+        'test:/video': toUTF8(media),
+        'test:/text': toUTF8(textPlaylist),
+        'test:/init.mp4': initSegmentData,
+        'test:/main.mp4': pastRolloverSegmentData,
+        'test:/main.vtt': toUTF8(vtt),
+      });
+
+      parser.start('test:/master', playerInterface).then(function(manifest) {
+        var textStream = manifest.periods[0].textStreams[0];
+        var ref = textStream.getSegmentReference(0);
+        expect(ref).not.toBe(null);
+        expect(ref.startTime).not.toBeLessThan(rolloverOffset);
+
+        var videoStream = manifest.periods[0].variants[0].video;
+        ref = videoStream.getSegmentReference(0);
+        expect(ref).not.toBe(null);
+        expect(ref.startTime).not.toBeLessThan(rolloverOffset);
+      }).catch(fail).then(done);
+    });
+
     describe('update', function() {
       beforeAll(function() {
         jasmine.clock().install();
-        // This polyfill is required for fakeEventLoop.
-        shaka.polyfill.Promise.install(/* force */ true);
+        // This mock is required for fakeEventLoop.
+        PromiseMock.install();
       });
 
       afterAll(function() {
         jasmine.clock().uninstall();
-        shaka.polyfill.Promise.uninstall();
+        PromiseMock.uninstall();
       });
 
       it('adds new segments when they appear', function(done) {
@@ -449,6 +553,7 @@ describe('HlsParser live', function() {
         fakeNetEngine.setResponseMap({
           'test:/master': toUTF8(master),
           'test:/video': toUTF8(media),
+          'test:/init.mp4': initSegmentData,
           'test:/main.mp4': segmentData
         });
 
@@ -463,13 +568,14 @@ describe('HlsParser live', function() {
           // In live content, we do not set presentationTimeOffset.
           expect(video.presentationTimeOffset).toEqual(0);
         }).catch(fail).then(done);
-        shaka.polyfill.Promise.flush();
+        PromiseMock.flush();
       });
 
       it('gets start time on update without segment request', function(done) {
         fakeNetEngine.setResponseMap({
           'test:/master': toUTF8(master),
           'test:/video': toUTF8(mediaWithAdditionalSegment),
+          'test:/init.mp4': initSegmentData,
           'test:/main.mp4': segmentData
         });
 
@@ -488,6 +594,7 @@ describe('HlsParser live', function() {
           fakeNetEngine.setResponseMap({
             'test:/master': toUTF8(master),
             'test:/video': toUTF8(mediaWithRemovedSegment),
+            'test:/init.mp4': initSegmentData,
             'test:/main.mp4': segmentData,
             'test:/main2.mp4': segmentData
           });
@@ -500,12 +607,12 @@ describe('HlsParser live', function() {
           // Only one request was made, and it was for the playlist.
           // No segment requests were needed to get the start time.
           expect(fakeNetEngine.request.calls.count()).toBe(1);
-          fakeNetEngine.expectCancelableRequest(
+          fakeNetEngine.expectRequest(
               'test:/video',
               shaka.net.NetworkingEngine.RequestType.MANIFEST);
         }).catch(fail).then(done);
 
-        shaka.polyfill.Promise.flush();
+        PromiseMock.flush();
       });
 
       it('parses start time from ts segments', function(done) {
@@ -528,7 +635,7 @@ describe('HlsParser live', function() {
           expect(video.presentationTimeOffset).toEqual(0);
         }).catch(fail).then(done);
 
-        shaka.polyfill.Promise.flush();
+        PromiseMock.flush();
       });
 
       it('gets start time of segments with byte range', function(done) {
@@ -538,6 +645,7 @@ describe('HlsParser live', function() {
         fakeNetEngine.setResponseMap({
           'test:/master': toUTF8(master),
           'test:/video': toUTF8(mediaWithByteRange),
+          'test:/init.mp4': initSegmentData,
           'test:/main.mp4': segmentData
         });
 
@@ -562,8 +670,96 @@ describe('HlsParser live', function() {
               partialEndByte);  // Partial segment request
         }).catch(fail).then(done);
 
-        shaka.polyfill.Promise.flush();
+        PromiseMock.flush();
       });
-    });
-  });
-});
+
+      it('handles rollover on update', function(done) {
+        var masterWithVtt = [
+          '#EXTM3U\n',
+          '#EXT-X-MEDIA:TYPE=SUBTITLES,LANGUAGE="fra",URI="test:/text"\n',
+          '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+          'RESOLUTION=960x540,FRAME-RATE=60\n',
+          'test:/video\n',
+        ].join('');
+
+        var textPlaylist1 = [
+          '#EXTM3U\n',
+          '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MEDIA-SEQUENCE:0\n',
+          '#EXTINF:2,\n',
+          'test:/main1.vtt\n',
+        ].join('');
+
+        var textPlaylist2 = [
+          '#EXTM3U\n',
+          '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MEDIA-SEQUENCE:0\n',
+          '#EXTINF:2,\n',
+          'test:/main1.vtt\n',
+          '#EXTINF:2,\n',
+          'test:/main2.vtt\n',
+        ].join('');
+
+        // ~0.7s from rollover
+        var vtt1 = [
+          'WEBVTT\n',
+          'X-TIMESTAMP-MAP=MPEGTS:8589870000,LOCAL:00:00:00.000\n',
+          '\n',
+          '00:00.000 --> 00:01.000\n',
+          'Hello, world!\n',
+        ].join('');
+
+        // ~1.3s after rollover
+        var vtt2 = [
+          'WEBVTT\n',
+          'X-TIMESTAMP-MAP=MPEGTS:115408,LOCAL:00:00:00.000\n',
+          '\n',
+          '00:00.000 --> 00:01.000\n',
+          'Hello, again!\n',
+        ].join('');
+
+        fakeNetEngine.setResponseMap({
+          'test:/master': toUTF8(masterWithVtt),
+          'test:/video': toUTF8(media),
+          'test:/text': toUTF8(textPlaylist1),
+          'test:/init.mp4': initSegmentData,
+          'test:/main.mp4': pastRolloverSegmentData,
+          'test:/main1.vtt': toUTF8(vtt1),
+        });
+
+        var baseTime = 95443 + rolloverOffset;
+        var ref1 = ManifestParser.makeReference('test:/main1.vtt',
+                                                /* position */ 0,
+                                                /* startTime */ baseTime,
+                                                /* endTime */ baseTime + 2);
+        var ref2 = ManifestParser.makeReference('test:/main2.vtt',
+                                                /* position */ 1,
+                                                /* startTime */ baseTime + 2,
+                                                /* endTime */ baseTime + 4);
+
+        parser.start('test:/master', playerInterface).then(function(manifest) {
+          var text = manifest.periods[0].textStreams[0];
+          ManifestParser.verifySegmentIndex(text, [ref1]);
+
+          fakeNetEngine.setResponseMap({
+            'test:/master': toUTF8(masterWithVtt),
+            'test:/video': toUTF8(mediaWithAdditionalSegment),
+            'test:/text': toUTF8(textPlaylist2),
+            'test:/init.mp4': initSegmentData,
+            'test:/main.mp4': pastRolloverSegmentData,
+            'test:/main2.mp4': pastRolloverSegmentData,
+            'test:/main1.vtt': toUTF8(vtt1),
+            'test:/main2.vtt': toUTF8(vtt2),
+          });
+
+          fakeNetEngine.request.calls.reset();
+          delayForUpdatePeriod();
+
+          ManifestParser.verifySegmentIndex(text, [ref1, ref2]);
+        }).catch(fail).then(done);
+
+        PromiseMock.flush();
+      });
+    });  // describe('update')
+  });  // describe('playlist type LIVE')
+});  // describe('HlsParser live')

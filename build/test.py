@@ -78,16 +78,16 @@ class Launcher:
      that other scripts can inject their own logic between calls.
 
      For example:
-       l = Launcher('Launch Karma tests', ['Chrome'])
+       l = Launcher('Launch Karma tests')
        l.parser.add_argument('custom_flag')
        l.ParseArguments(args)
+       l.ResolveBrowsers(['Chrome'])
        if l.parsed_args.custom_flag:
          do_custom_logic
       l.RunCommand(karma_conf_path)
   """
 
-  def __init__(self, description, default_browsers):
-    self.default_browsers = default_browsers
+  def __init__(self, description):
     self.karma_config = {}
     self.parsed_args = None
     self.parser = argparse.ArgumentParser(
@@ -310,13 +310,21 @@ class Launcher:
     if self.parsed_args.reporters:
       self.karma_config['reporters'] = self.parsed_args.reporters
 
+  def ResolveBrowsers(self, default_browsers):
+    """Decide what browsers we should use.
+
+       This is separate from ParseArguments so that other tools can insert
+       additional logic to derive a browser list from the parsed arguments.
+    """
+    assert(default_browsers and len(default_browsers))
+
     if self.parsed_args.no_browsers:
       logging.warning('In this mode browsers must manually connect to karma.')
     elif self.parsed_args.browsers:
       self.karma_config['browsers'] = self.parsed_args.browsers
     else:
-      logging.warning('Using default browsers: %s', self.default_browsers)
-      self.karma_config['browsers'] = self.default_browsers
+      logging.warning('Using default browsers: %s', default_browsers)
+      self.karma_config['browsers'] = default_browsers
 
     # Check if there are any browsers that we should remove
     if self.parsed_args.exclude_browsers and 'browsers' in self.karma_config:
@@ -324,7 +332,6 @@ class Launcher:
       bad_browsers = set(self.parsed_args.exclude_browsers)
       good_browsers = all_browsers - bad_browsers
       self.karma_config['browsers'] = list(good_browsers)
-
 
   def RunCommand(self, karma_conf):
     """Build a command and send it to Karma for execution.
@@ -340,9 +347,9 @@ class Launcher:
       logging.error('Failed to update node modules')
       return 1
 
-    karma = shakaBuildHelpers.get_node_binary_path('karma')
+    karma = shakaBuildHelpers.get_node_binary('karma')
     cmd = ['xvfb-run', '--auto-servernum'] if self.parsed_args.use_xvfb else []
-    cmd += [karma, 'start']
+    cmd += karma + ['start']
     cmd += [karma_conf] if karma_conf else []
     cmd += ['--settings', json.dumps(self.karma_config)]
 
@@ -382,8 +389,9 @@ class Launcher:
 
 
 def Run(args):
-  launcher = Launcher('Shaka Player Test Runner Script', _GetDefaultBrowsers())
+  launcher = Launcher('Shaka Player Test Runner Script')
   launcher.ParseArguments(args)
+  launcher.ResolveBrowsers(_GetDefaultBrowsers())
   return launcher.RunCommand(None)
 
 

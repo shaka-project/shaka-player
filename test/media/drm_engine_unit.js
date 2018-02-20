@@ -374,16 +374,35 @@ describe('DrmEngine', function() {
       }).then(done);
     });
 
-    it('makes no queries for clear content', function(done) {
+    it('makes no queries for clear content if no key config', function(done) {
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, []));
       manifest.periods[0].variants[0].drmInfos = [];
+      config.servers = {};
+      config.advanced = {};
 
+      drmEngine.configure(config);
       drmEngine.init(manifest, /* offline */ false).then(function() {
         expect(drmEngine.initialized()).toBe(true);
         expect(drmEngine.keySystem()).toBe('');
         expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(0);
       }).catch(fail).then(done);
+    });
+
+    it('makes queries for clear content if key is configured', function(done) {
+      requestMediaKeySystemAccessSpy.and.callFake(
+          fakeRequestMediaKeySystemAccess.bind(null, ['drm.abc']));
+      manifest.periods[0].variants[0].drmInfos = [];
+      config.servers = {
+        'drm.abc': 'http://abc.drm/license'
+      };
+
+      drmEngine.configure(config);
+      drmEngine.init(manifest, /* offline */ false).then(function() {
+        expect(drmEngine.initialized()).toBe(true);
+        expect(drmEngine.keySystem()).toBe('drm.abc');
+        expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
+      }).then(done);
     });
 
     it('uses advanced config to override DrmInfo fields', function(done) {
@@ -508,6 +527,8 @@ describe('DrmEngine', function() {
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, []));
       manifest.periods[0].variants[0].drmInfos = [];
+      config.servers = {};
+      config.advanced = {};
 
       initAndAttach().then(function() {
         expect(mockVideo.setMediaKeys).not.toHaveBeenCalled();
@@ -775,6 +796,8 @@ describe('DrmEngine', function() {
 
       it('dispatches an error if manifest says unencrypted', function(done) {
         manifest.periods[0].variants[0].drmInfos = [];
+        config.servers = {};
+        config.advanced = {};
 
         onErrorSpy.and.stub();
 
@@ -811,9 +834,10 @@ describe('DrmEngine', function() {
           mockVideo.on['encrypted'](
               { initDataType: 'webm', initData: initData, keyId: null });
 
-          fakeNetEngine.request.and.returnValue(new shaka.util.PublicPromise());
+          var operation = shaka.util.AbortableOperation.completed({});
+          fakeNetEngine.request.and.returnValue(operation);
           var message = new Uint8Array(0);
-          session1.on['message']({ message: message });
+          session1.on['message']({ target: session1, message: message });
 
           expect(fakeNetEngine.request).toHaveBeenCalledWith(
               shaka.net.NetworkingEngine.RequestType.LICENSE,
@@ -834,9 +858,10 @@ describe('DrmEngine', function() {
           mockVideo.on['encrypted'](
               { initDataType: 'webm', initData: initData, keyId: null });
 
-          fakeNetEngine.request.and.returnValue(new shaka.util.PublicPromise());
+          var operation = shaka.util.AbortableOperation.completed({});
+          fakeNetEngine.request.and.returnValue(operation);
           var message = new Uint8Array(0);
-          session1.on['message']({ message: message });
+          session1.on['message']({ target: session1, message: message });
 
           expect(fakeNetEngine.request).toHaveBeenCalledWith(
               shaka.net.NetworkingEngine.RequestType.LICENSE,
@@ -858,10 +883,11 @@ describe('DrmEngine', function() {
               shaka.util.Error.Category.NETWORK,
               shaka.util.Error.Code.BAD_HTTP_STATUS,
               'http://abc.drm/license', 403);
-          fakeNetEngine.request.and.returnValue(Promise.reject(netError));
+          var operation = shaka.util.AbortableOperation.failed(netError);
+          fakeNetEngine.request.and.returnValue(operation);
 
           var message = new Uint8Array(0);
-          session1.on['message']({ message: message });
+          session1.on['message']({ target: session1, message: message });
           return shaka.test.Util.delay(0.5);
         }).then(function() {
           expect(onErrorSpy).toHaveBeenCalled();
@@ -1375,7 +1401,8 @@ describe('DrmEngine', function() {
 
     it('interrupts successful license requests', function(done) {
       var p = new shaka.util.PublicPromise();
-      fakeNetEngine.request.and.returnValue(p);
+      var operation = shaka.util.AbortableOperation.notAbortable(p);
+      fakeNetEngine.request.and.returnValue(operation);
 
       initAndAttach().then(function() {
         var initData1 = new Uint8Array(1);
@@ -1405,7 +1432,8 @@ describe('DrmEngine', function() {
 
     it('interrupts failed license requests', function(done) {
       var p = new shaka.util.PublicPromise();
-      fakeNetEngine.request.and.returnValue(p);
+      var operation = shaka.util.AbortableOperation.notAbortable(p);
+      fakeNetEngine.request.and.returnValue(operation);
 
       initAndAttach().then(function() {
         var initData1 = new Uint8Array(1);
@@ -1604,9 +1632,10 @@ describe('DrmEngine', function() {
         mockVideo.on['encrypted'](
             { initDataType: 'webm', initData: initData, keyId: null });
 
-        fakeNetEngine.request.and.returnValue(new shaka.util.PublicPromise());
+        var operation = shaka.util.AbortableOperation.completed({});
+        fakeNetEngine.request.and.returnValue(operation);
         var message = new Uint8Array(0);
-        session1.on['message']({ message: message });
+        session1.on['message']({ target: session1, message: message });
 
         expect(fakeNetEngine.request).not.toHaveBeenCalled();
 
@@ -1632,9 +1661,10 @@ describe('DrmEngine', function() {
         mockVideo.on['encrypted'](
             { initDataType: 'webm', initData: initData, keyId: null });
 
-        fakeNetEngine.request.and.returnValue(new shaka.util.PublicPromise());
+        var operation = shaka.util.AbortableOperation.completed({});
+        fakeNetEngine.request.and.returnValue(operation);
         var message = new Uint8Array(0);
-        session1.on['message']({ message: message });
+        session1.on['message']({ target: session1, message: message });
 
         expect(fakeNetEngine.request).not.toHaveBeenCalled();
 
@@ -1651,7 +1681,7 @@ describe('DrmEngine', function() {
         fakeNetEngine.request.calls.reset();
 
         mockVideo.paused = true;
-        session1.on['message']({ message: message });
+        session1.on['message']({ target: session1, message: message });
 
         expect(fakeNetEngine.request).toHaveBeenCalledWith(
             shaka.net.NetworkingEngine.RequestType.LICENSE,
@@ -1858,6 +1888,7 @@ describe('DrmEngine', function() {
     };
     session.generateRequest.and.returnValue(Promise.resolve());
     session.close.and.returnValue(Promise.resolve());
+    session.update.and.returnValue(Promise.resolve());
     session.addEventListener.and.callFake(function(name, callback) {
       session.on[name] = callback;
     });

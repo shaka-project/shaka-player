@@ -154,6 +154,7 @@ function onActivate(event) {
           cacheName != CACHE_NAME) {
         return true;
       }
+      return false;
     }).map(function(cacheName) {
       return caches.delete(cacheName);
     }));

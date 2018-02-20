@@ -16,14 +16,15 @@
  */
 
 describe('StreamUtils', function() {
-  var manifest;
-  var filterVariantsByLanguageAndRole =
+  const filterVariantsByLanguageAndRole =
       shaka.util.StreamUtils.filterVariantsByLanguageAndRole;
-  var filterStreamsByLanguageAndRole =
+  const filterStreamsByLanguageAndRole =
       shaka.util.StreamUtils.filterStreamsByLanguageAndRole;
 
+  let manifest;
+
   describe('filterVariantsByLanguageAndRole', function() {
-    it("chooses variants in user's preferred language", function() {
+    it('chooses variants in user\'s preferred language', function() {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addVariant(0)
@@ -34,7 +35,7 @@ describe('StreamUtils', function() {
             .language('en')
         .build();
 
-      var chosen = filterVariantsByLanguageAndRole(
+      let chosen = filterVariantsByLanguageAndRole(
           manifest.periods[0].variants,
           'en',
           '');
@@ -54,7 +55,7 @@ describe('StreamUtils', function() {
             .primary()
         .build();
 
-      var chosen = filterVariantsByLanguageAndRole(
+      let chosen = filterVariantsByLanguageAndRole(
           manifest.periods[0].variants,
           'en',
           '');
@@ -74,7 +75,7 @@ describe('StreamUtils', function() {
       manifest.periods[0].variants[0].allowedByKeySystem = false;
       manifest.periods[0].variants[1].allowedByApplication = false;
 
-      var chosen = filterVariantsByLanguageAndRole(
+      let chosen = filterVariantsByLanguageAndRole(
           manifest.periods[0].variants,
           'en',
           '');
@@ -96,7 +97,7 @@ describe('StreamUtils', function() {
             .addAudio(2).roles(['main'])
         .build();
 
-      var chosen = filterVariantsByLanguageAndRole(
+      let chosen = filterVariantsByLanguageAndRole(
           manifest.periods[0].variants,
           'en',
           'main');
@@ -128,7 +129,7 @@ describe('StreamUtils', function() {
             .addAudio(5).roles(['main'])
         .build();
 
-      var chosen = filterVariantsByLanguageAndRole(
+      let chosen = filterVariantsByLanguageAndRole(
           manifest.periods[0].variants,
           'en',
           '');
@@ -162,7 +163,7 @@ describe('StreamUtils', function() {
             .addAudio(5).roles(['main'])
         .build();
 
-      var chosen = filterVariantsByLanguageAndRole(
+      let chosen = filterVariantsByLanguageAndRole(
           manifest.periods[0].variants,
           'zh',
           '');
@@ -190,7 +191,7 @@ describe('StreamUtils', function() {
             .addAudio(3)
         .build();
 
-      var chosen = filterVariantsByLanguageAndRole(
+      let chosen = filterVariantsByLanguageAndRole(
           manifest.periods[0].variants,
           'zh',
           '');
@@ -224,7 +225,7 @@ describe('StreamUtils', function() {
                 .addAudio(5).roles(['main'])
             .build();
 
-          var chosen = filterVariantsByLanguageAndRole(
+          let chosen = filterVariantsByLanguageAndRole(
               manifest.periods[0].variants,
               'zh',
               '');
@@ -263,7 +264,7 @@ describe('StreamUtils', function() {
                 .addAudio(5).roles(['main'])
             .build();
 
-          var chosen = filterVariantsByLanguageAndRole(
+          let chosen = filterVariantsByLanguageAndRole(
               manifest.periods[0].variants,
               'zh',
               '');
@@ -276,7 +277,7 @@ describe('StreamUtils', function() {
   });
 
   describe('filterStreamsByLanguageAndRole', function() {
-    it("chooses text streams in user's preferred language", function() {
+    it('chooses text streams in user\'s preferred language', function() {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addTextStream(1)
@@ -287,7 +288,7 @@ describe('StreamUtils', function() {
             .language('en')
         .build();
 
-      var chosen = filterStreamsByLanguageAndRole(
+      let chosen = filterStreamsByLanguageAndRole(
           manifest.periods[0].textStreams,
           'en',
           '');
@@ -306,7 +307,7 @@ describe('StreamUtils', function() {
             .primary()
         .build();
 
-      var chosen = filterStreamsByLanguageAndRole(
+      let chosen = filterStreamsByLanguageAndRole(
           manifest.periods[0].textStreams,
           'en',
           '');
@@ -328,7 +329,7 @@ describe('StreamUtils', function() {
             .roles(['caption'])
         .build();
 
-      var chosen = filterStreamsByLanguageAndRole(
+      let chosen = filterStreamsByLanguageAndRole(
           manifest.periods[0].textStreams,
           'en',
           'main');
@@ -349,7 +350,7 @@ describe('StreamUtils', function() {
             .roles(['secondary'])
         .build();
 
-      var chosen = filterStreamsByLanguageAndRole(
+      let chosen = filterStreamsByLanguageAndRole(
           manifest.periods[0].textStreams,
           'en',
           '');
@@ -370,7 +371,7 @@ describe('StreamUtils', function() {
             .roles(['secondary'])
         .build();
 
-      var chosen = filterStreamsByLanguageAndRole(
+      let chosen = filterStreamsByLanguageAndRole(
           manifest.periods[0].textStreams,
           'en',
           'main'); // A role that is not present.
@@ -402,7 +403,7 @@ describe('StreamUtils', function() {
             .roles(['main'])
         .build();
 
-      var chosen = filterStreamsByLanguageAndRole(
+      let chosen = filterStreamsByLanguageAndRole(
           manifest.periods[0].textStreams,
           'en',
           '');
@@ -436,7 +437,7 @@ describe('StreamUtils', function() {
             .roles(['main'])
         .build();
 
-      var chosen = filterStreamsByLanguageAndRole(
+      let chosen = filterStreamsByLanguageAndRole(
           manifest.periods[0].textStreams,
           'zh',
           '');
@@ -460,7 +461,7 @@ describe('StreamUtils', function() {
             .language('es').primary()
         .build();
 
-      var chosen = filterStreamsByLanguageAndRole(
+      let chosen = filterStreamsByLanguageAndRole(
           manifest.periods[0].textStreams,
           'zh',
           '');
@@ -494,7 +495,7 @@ describe('StreamUtils', function() {
                 .roles(['main'])
             .build();
 
-          var chosen = filterStreamsByLanguageAndRole(
+          let chosen = filterStreamsByLanguageAndRole(
               manifest.periods[0].textStreams,
               'zh',
               '');
@@ -533,7 +534,7 @@ describe('StreamUtils', function() {
                 .roles(['main'])
             .build();
 
-          var chosen = filterStreamsByLanguageAndRole(
+          let chosen = filterStreamsByLanguageAndRole(
               manifest.periods[0].textStreams,
               'zh',
               '');
@@ -547,7 +548,7 @@ describe('StreamUtils', function() {
   });
 
   describe('filterNewPeriod', function() {
-    var fakeDrmEngine;
+    let fakeDrmEngine;
 
     beforeAll(function() {
       fakeDrmEngine = new shaka.test.FakeDrmEngine();
@@ -562,8 +563,8 @@ describe('StreamUtils', function() {
           .addTextStream(4).mime('application/mp4', 'bogus')
         .build();
 
-      var noAudio = null;
-      var noVideo = null;
+      let noAudio = null;
+      let noVideo = null;
       shaka.util.StreamUtils.filterNewPeriod(
           fakeDrmEngine, noAudio, noVideo, manifest.periods[0]);
 
@@ -571,7 +572,7 @@ describe('StreamUtils', function() {
       // The last two streams should be removed because their full MIME types
       // are bogus.
       expect(manifest.periods[0].textStreams.length).toBe(2);
-      var textStreams = manifest.periods[0].textStreams;
+      let textStreams = manifest.periods[0].textStreams;
       expect(textStreams[0].id).toBe(1);
       expect(textStreams[1].id).toBe(2);
     });

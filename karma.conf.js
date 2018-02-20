@@ -82,17 +82,14 @@ module.exports = function(config) {
       'dist/deps.js',
       'shaka-player.uncompiled.js',
 
-      // sprintf module next
-      // Since we don't use require to load the sprintf module, this must be
-      // loaded before requirejs is loaded!  Otherwise, it tries to use
-      // requirejs instead of loading directly into the window.
-      'node_modules/sprintf-js/src/sprintf.js',
+      // Promise polyfill for IE11 and some older TVs
+      'node_modules/es6-promise-polyfill/promise.js',
 
       // muxjs module next
       'node_modules/mux.js/dist/mux.js',
 
-      // requirejs module next
-      'node_modules/requirejs/require.js',
+      // cajon module (an AMD variant of requirejs) next
+      'node_modules/cajon/cajon.js',
 
       // bootstrapping for the test suite
       'test/test/boot.js',
@@ -113,6 +110,7 @@ module.exports = function(config) {
       {pattern: 'third_party/closure/goog/**/*.js', included: false},
       {pattern: 'test/test/assets/*', included: false},
       {pattern: 'dist/shaka-player.compiled.js', included: false},
+      {pattern: 'node_modules/**/*.js', included: false},
     ],
 
     // NOTE: Do not use proxies at all!  They cannot be used with the --hostname

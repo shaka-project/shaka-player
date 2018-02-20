@@ -21,6 +21,7 @@ This uses two environment variables to help with debugging the scripts:
 """
 
 import errno
+import json
 import logging
 import os
 import platform
@@ -215,19 +216,24 @@ def get_all_files(dir_path, exp=None):
   return ret
 
 
-def get_node_binary_path(name):
-  # Windows binaries go by a different name.
-  if is_windows():
-    name += '.cmd'
+def get_node_binary(name):
+  """Returns an array to be used in the command-line execution of a node binary.
 
-  # Try local modules first.
+  For example, this may return ['eslint'] (global install)
+  or ['node', 'path/to/node_modules/eslint/bin/eslint.js'] (local install).
+  """
+
+  # Check local modules first.
   base = get_source_base()
-  path = os.path.join(base, 'node_modules', '.bin', name)
-  if os.path.isfile(path):
-    return path
+  path = os.path.join(base, 'node_modules', name)
+  if os.path.isdir(path):
+    json_path = os.path.join(path, 'package.json')
+    package_data = json.load(open(json_path, 'r'))
+    bin_path = os.path.join(path, package_data['bin'][name])
+    return ['node', bin_path]
 
   # Not found locally, assume it can be found in os.environ['PATH'].
-  return name
+  return [name]
 
 
 class InDir(object):

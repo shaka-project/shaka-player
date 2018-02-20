@@ -141,9 +141,8 @@ shakaDemo.requestCertificate_ = function(uri) {
   var requestType = shaka.net.NetworkingEngine.RequestType.APP;
   var request = /** @type {shakaExtern.Request} */ ({ uris: [uri] });
 
-  return netEngine.request(requestType, request).then(function(response) {
-    return response.data;
-  });
+  return netEngine.request(requestType, request).promise
+      .then((response) => response.data);
 };
 
 
@@ -203,11 +202,14 @@ shakaDemo.preparePlayer_ = function(asset) {
 
   if (!asset) {
     // Use the custom fields.
+    var licenseServerUri = document.getElementById('licenseServerInput').value;
     var licenseServers = {};
-    commonDrmSystems.forEach(function(system) {
-      licenseServers[system] =
-          document.getElementById('licenseServerInput').value;
-    });
+    if (licenseServerUri) {
+      commonDrmSystems.forEach(function(system) {
+        licenseServers[system] = licenseServerUri;
+      });
+    }
+
     asset = /** @type {shakaAssets.AssetInfo} */ ({
       manifestUri: document.getElementById('manifestInput').value,
       // Use the custom license server for all key systems.

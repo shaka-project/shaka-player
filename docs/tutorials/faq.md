@@ -93,9 +93,10 @@ The only browsers capable of playing TS natively are Edge and Chromecast.  You
 will get a `CONTENT_UNSUPPORTED_BY_BROWSER` error on other browsers due to
 their lack of TS support.
 
-You can enable transmuxing by [including mux.js][] in your application.  If
-Shaka Player detects that mux.js has been loaded, we will use it to transmux TS
-content into MP4 on-the-fly, so that the content can be played by the browser.
+You can enable transmuxing by [including mux.js][] v4.4+ in your application.
+If Shaka Player detects that mux.js has been loaded, we will use it to transmux
+TS content into MP4 on-the-fly, so that the content can be played by the
+browser.
 
 <hr>
 
@@ -118,6 +119,34 @@ the segment size in your content library, you may want to adjust the "default"
 bandwidth estimate used by Shaka Player to select the first segments.  Use the
 [`.abr.defaultBandwidthEstimate`][AbrConfiguration] configuration to control
 these initial decisions.
+
+<hr>
+
+**Q:** I am getting `UNSUPPORTED_SCHEME` or error code 1000 when loading from
+`file://`.
+
+**A:** In a browser environment, trying to load a file from `file://` is
+inappropriate. Therefore, we do not provide a default network plugin for such
+requests.
+
+In other environments, for example Electron, it is appropriate.
+In those cases, before Shaka Player loads a manifest, you can register the
+existing http plugin for `file://` requests:
+```js
+shaka.net.NetworkingEngine.registerScheme('file', shaka.net.HttpXHRPlugin);
+```
+
+<hr>
+
+**Q:** Why doesn't my app work in IE 11?
+
+**A:** IE 11 doesn't have native Promise support.  Starting with v2.4,
+applications are required to load their own Promise polyfill for IE support.
+We no longer maintain and ship our own polyfill for this.  We recommend
+es6-promise-polyfill.
+
+Polyfill source: https://github.com/lahmatiy/es6-promise-polyfill
+Polyfill on NPM: https://www.npmjs.com/package/es6-promise-polyfill
 
 
 [386]: https://github.com/google/shaka-player/issues/386#issuecomment-227898001

@@ -16,25 +16,21 @@
  */
 
 describe('Storage', function() {
-  /** @const */
-  var OfflineUri = shaka.offline.OfflineUri;
+  const OfflineUri = shaka.offline.OfflineUri;
+  const SegmentReference = shaka.media.SegmentReference;
 
-  /** @const */
-  var SegmentReference = shaka.media.SegmentReference;
+  const fakeManifestUri = 'my-fake-manifest';
 
-  var mockSEFactory = new shaka.test.MockStorageEngineFactory();
-
-  /** @const */
-  var fakeManifestUri = 'my-fake-manifest';
+  let mockSEFactory = new shaka.test.MockStorageEngineFactory();
 
   /** @type {!shaka.offline.IStorageEngine} */
-  var fakeStorageEngine;
+  let fakeStorageEngine;
   /** @type {!shaka.offline.Storage} */
-  var storage;
+  let storage;
   /** @type {!shaka.Player} */
-  var player;
+  let player;
   /** @type {!shaka.test.FakeNetworkingEngine} */
-  var netEngine;
+  let netEngine;
 
   beforeEach(function() {
     fakeStorageEngine = new shaka.test.MemoryStorageEngine();
@@ -96,19 +92,18 @@ describe('Storage', function() {
   });
 
   describe('store', function() {
-    /** @const */
-    var originalWarning = shaka.log.warning;
+    const originalWarning = shaka.log.warning;
 
     /** @type {shakaExtern.Manifest} */
-    var manifest;
+    let manifest;
     /** @type {!Array.<shakaExtern.Track>} */
-    var tracks;
+    let tracks;
     /** @type {!shaka.test.FakeDrmEngine} */
-    var drmEngine;
+    let drmEngine;
     /** @type {!shaka.media.SegmentIndex} */
-    var stream1Index;
+    let stream1Index;
     /** @type {!shaka.media.SegmentIndex} */
-    var stream2Index;
+    let stream2Index;
 
     beforeEach(function() {
       drmEngine = new shaka.test.FakeDrmEngine();
@@ -139,11 +134,11 @@ describe('Storage', function() {
       stream1Index = new shaka.media.SegmentIndex([]);
       stream2Index = new shaka.media.SegmentIndex([]);
 
-      var stream1 = manifest.periods[0].variants[0].audio;
+      let stream1 = manifest.periods[0].variants[0].audio;
       stream1.findSegmentPosition = stream1Index.find.bind(stream1Index);
       stream1.getSegmentReference = stream1Index.get.bind(stream1Index);
 
-      var stream2 = manifest.periods[0].variants[0].video;
+      let stream2 = manifest.periods[0].variants[0].video;
       stream2.findSegmentPosition = stream2Index.find.bind(stream2Index);
       stream2.getSegmentReference = stream2Index.get.bind(stream2Index);
     });
@@ -153,8 +148,8 @@ describe('Storage', function() {
     });
 
     it('stores basic manifests', function(done) {
-      var originalUri = 'fake://foobar';
-      var appData = {tools: ['Google', 'StackOverflow'], volume: 11};
+      let originalUri = 'fake://foobar';
+      let appData = {tools: ['Google', 'StackOverflow'], volume: 11};
 
       // Once tracks have completely been downloaded, they lose all
       // bandwidth data. Clear bandwidth data from the tracks before
@@ -197,7 +192,7 @@ describe('Storage', function() {
         }
       });
 
-      var warning = jasmine.createSpy('shaka.log.warning');
+      let warning = jasmine.createSpy('shaka.log.warning');
       shaka.log.warning = shaka.test.Util.spyFunc(warning);
       storage.store(fakeManifestUri)
           .then(function(data) {
@@ -222,7 +217,7 @@ describe('Storage', function() {
        * @param {!Array.<shakaExtern.Track>} tracks
        * @return {!Array.<shakaExtern.Track>}
        */
-      var trackSelectionCallback = function(tracks) {
+      let trackSelectionCallback = function(tracks) {
         // Store the first variant.
         return tracks.slice(0, 1);
       };
@@ -244,7 +239,7 @@ describe('Storage', function() {
     });
 
     it('stores offline sessions', function(done) {
-      var sessions = ['lorem', 'ipsum'];
+      let sessions = ['lorem', 'ipsum'];
       drmEngine.setSessionIds(sessions);
       storage.store(fakeManifestUri)
           .then(function(data) {
@@ -260,7 +255,7 @@ describe('Storage', function() {
     });
 
     it('stores DRM info', function(done) {
-      var drmInfo = {
+      let drmInfo = {
         keySystem: 'com.example.abc',
         licenseServerUri: 'http://example.com',
         persistentStateRequired: true,
@@ -304,9 +299,9 @@ describe('Storage', function() {
     });
 
     it('throws an error if another store is in progress', function(done) {
-      var p1 = storage.store(fakeManifestUri).catch(fail);
-      var p2 = storage.store(fakeManifestUri).then(fail).catch(function(error) {
-        var expectedError = new shaka.util.Error(
+      let p1 = storage.store(fakeManifestUri).catch(fail);
+      let p2 = storage.store(fakeManifestUri).then(fail).catch(function(error) {
+        let expectedError = new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.STORAGE,
             shaka.util.Error.Code.STORE_ALREADY_IN_PROGRESS);
@@ -320,7 +315,7 @@ describe('Storage', function() {
       manifest.presentationTimeline.setStatic(false);
 
       storage.store(fakeManifestUri).then(fail).catch(function(error) {
-        var expectedError = new shaka.util.Error(
+        let expectedError = new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.STORAGE,
             shaka.util.Error.Code.CANNOT_STORE_LIVE_OFFLINE,
@@ -330,7 +325,7 @@ describe('Storage', function() {
     });
 
     it('throws an error if DRM sessions are not ready', function(done) {
-      var drmInfo = {
+      let drmInfo = {
         keySystem: 'com.example.abc',
         licenseServerUri: 'http://example.com',
         persistentStateRequired: true,
@@ -344,7 +339,7 @@ describe('Storage', function() {
       drmEngine.setDrmInfo(drmInfo);
       drmEngine.setSessionIds([]);
       storage.store(fakeManifestUri).then(fail).catch(function(error) {
-        var expectedError = new shaka.util.Error(
+        let expectedError = new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.STORAGE,
             shaka.util.Error.Code.NO_INIT_DATA_FOR_OFFLINE,
@@ -354,7 +349,7 @@ describe('Storage', function() {
     });
 
     it('throws an error if storage is not supported', function(done) {
-      var expectedError = new shaka.util.Error(
+      let expectedError = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.STORAGE,
           shaka.util.Error.Code.STORAGE_NOT_SUPPORTED);
@@ -376,14 +371,14 @@ describe('Storage', function() {
     });
 
     it('throws an error if destroyed mid-store', function(done) {
-      var p1 = storage.store(fakeManifestUri).then(fail).catch(function(error) {
-        var expectedError = new shaka.util.Error(
+      let p1 = storage.store(fakeManifestUri).then(fail).catch(function(error) {
+        let expectedError = new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.STORAGE,
             shaka.util.Error.Code.OPERATION_ABORTED);
         shaka.test.Util.expectToEqualError(error, expectedError);
       });
-      var p2 = storage.destroy();
+      let p2 = storage.destroy();
       Promise.all([p1, p2]).catch(fail).then(done);
     });
 
@@ -403,8 +398,8 @@ describe('Storage', function() {
           new SegmentReference(3, 3, 4, makeUris('fake:3'), 11, 27)
         ]);
 
-        var originalUri = 'fake:123';
-        var progress = jasmine.createSpy('onProgress');
+        let originalUri = 'fake:123';
+        let progress = jasmine.createSpy('onProgress');
         progress.and.callFake(function(storedContent, percent) {
           expect(storedContent).toEqual({
             offlineUri: null,
@@ -462,8 +457,8 @@ describe('Storage', function() {
           new SegmentReference(3, 4, 5, makeUris('fake:3'), 11, 27)
         ]);
 
-        var originalUri = 'fake:123';
-        var progress = jasmine.createSpy('onProgress');
+        let originalUri = 'fake:123';
+        let progress = jasmine.createSpy('onProgress');
         progress.and.callFake(function(storedContent, percent) {
           expect(storedContent).toEqual({
             offlineUri: null,
@@ -511,23 +506,15 @@ describe('Storage', function() {
         // values here can be updated to match the behavior without changing
         // the rest of the test."
 
-        /** @const {number} */
-        var id1 = 0;
-        /** @const {number} */
-        var id2 = 1;
-        /** @const {number} */
-        var id3 = 2;
-        /** @const {number} */
-        var id4 = 3;
-        /** @const {number} */
-        var id5 = 4;
-        /** @const {number} */
-        var id6 = 5;
+        const id1 = 0;
+        const id2 = 1;
+        const id3 = 2;
+        const id4 = 3;
+        const id5 = 4;
+        const id6 = 5;
 
-        /** @const {number} */
-        var fakeDataLength1 = 5;
-        /** @const {number} */
-        var fakeDataLength2 = 7;
+        const fakeDataLength1 = 5;
+        const fakeDataLength2 = 7;
 
         netEngine.setResponseMap({
           'fake:0': new ArrayBuffer(fakeDataLength1),
@@ -551,9 +538,9 @@ describe('Storage', function() {
          * @param {number} id
          * @return {shakaExtern.SegmentDB}
          */
-        var makeSegment = function(startTime, endTime, id) {
+        let makeSegment = function(startTime, endTime, id) {
           /** @type {shakaExtern.SegmentDB} */
-          var segment = {
+          let segment = {
             startTime: startTime,
             endTime: endTime,
             dataKey: id
@@ -571,7 +558,7 @@ describe('Storage', function() {
               return fakeStorageEngine.getManifest(0);
             })
             .then(function(manifest) {
-              var stream1 = manifest.periods[0].streams[0];
+              let stream1 = manifest.periods[0].streams[0];
               expect(stream1.initSegmentKey).toBe(null);
               expect(stream1.segments.length).toBe(5);
               expect(stream1.segments).toContain(makeSegment(0, 1, id1));
@@ -580,7 +567,7 @@ describe('Storage', function() {
               expect(stream1.segments).toContain(makeSegment(3, 4, id5));
               expect(stream1.segments).toContain(makeSegment(4, 5, id6));
 
-              var stream2 = manifest.periods[0].streams[1];
+              let stream2 = manifest.periods[0].streams[1];
               expect(stream2.initSegmentKey).toBe(null);
               expect(stream2.segments.length).toBe(1);
               expect(stream2.segments).toContain(makeSegment(0, 1, id2));
@@ -615,7 +602,7 @@ describe('Storage', function() {
 
         // Delay the next segment download.  This will stall either audio or
         // video, but the other should continue.
-        var req1 = netEngine.delayNextRequest();
+        let req1 = netEngine.delayNextRequest();
 
         storage.store(fakeManifestUri)
             .then(function(manifest) {
@@ -635,7 +622,7 @@ describe('Storage', function() {
       it('stores init segment', function(done) {
         netEngine.setResponseMap({'fake:0': new ArrayBuffer(5)});
 
-        var stream = manifest.periods[0].variants[0].audio;
+        let stream = manifest.periods[0].variants[0].audio;
         stream.initSegmentReference =
             new shaka.media.InitSegmentReference(makeUris('fake:0'), 0, null);
 
@@ -648,7 +635,7 @@ describe('Storage', function() {
               return fakeStorageEngine.getManifest(0);
             })
             .then(function(manifest) {
-              var stream = manifest.periods[0].streams[0];
+              let stream = manifest.periods[0].streams[0];
               expect(stream.segments.length).toBe(0);
               expect(stream.initSegmentKey).toBe(0);
               return fakeStorageEngine.getSegment(0);
@@ -665,7 +652,7 @@ describe('Storage', function() {
       it('with non-0 start time', function(done) {
         netEngine.setResponseMap({'fake:0': new ArrayBuffer(5)});
 
-        var refs = [
+        let refs = [
           new SegmentReference(0, 10, 11, makeUris('fake:0'), 0, null),
           new SegmentReference(1, 11, 12, makeUris('fake:0'), 0, null),
           new SegmentReference(2, 12, 13, makeUris('fake:0'), 0, null)
@@ -682,7 +669,7 @@ describe('Storage', function() {
               return fakeStorageEngine.getManifest(0);
             })
             .then(function(manifest) {
-              var stream = manifest.periods[0].streams[0];
+              let stream = manifest.periods[0].streams[0];
               expect(stream.segments.length).toBe(3);
             })
             .catch(fail)
@@ -698,8 +685,8 @@ describe('Storage', function() {
           new SegmentReference(2, 2, 3, makeUris('fake:0'), 0, null)
         ]);
 
-        var delay = netEngine.delayNextRequest();
-        var expectedError = new shaka.util.Error(
+        let delay = netEngine.delayNextRequest();
+        let expectedError = new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.NETWORK,
             shaka.util.Error.Code.HTTP_ERROR);
@@ -715,7 +702,7 @@ describe('Storage', function() {
 
     describe('default track selection callback', function() {
       /** @type {!Array.<shakaExtern.Track>} */
-      var allTextTracks;
+      let allTextTracks;
 
       beforeEach(function() {
         manifest = new shaka.test.ManifestGenerator()
@@ -807,13 +794,13 @@ describe('Storage', function() {
         function testAudioMatch(preferredLanguage, expectedLanguage) {
           player.configure({preferredAudioLanguage: preferredLanguage});
           return storage.store(fakeManifestUri).then(function(data) {
-            var variantTracks = getVariants(data);
+            let variantTracks = getVariants(data);
             expect(variantTracks.length).toBe(1);
             expect(variantTracks[0].language).toEqual(expectedLanguage);
           });
         }
 
-        var warning = jasmine.createSpy('shaka.log.warning');
+        let warning = jasmine.createSpy('shaka.log.warning');
         shaka.log.warning = shaka.test.Util.spyFunc(warning);
 
         // An exact match is available for en-US, en-GB, and en.
@@ -844,7 +831,7 @@ describe('Storage', function() {
           warning.calls.reset();
           return storage.store(fakeManifestUri);
         }).then(function(data) {
-          var variantTracks = getVariants(data);
+          let variantTracks = getVariants(data);
           expect(variantTracks.length).toBe(1);
           expect(warning).toHaveBeenCalled();
         }).catch(fail).then(done);
@@ -854,7 +841,7 @@ describe('Storage', function() {
         // This language will select variants with multiple video resolutions.
         player.configure({preferredAudioLanguage: 'sw'});
         storage.store(fakeManifestUri).then(function(data) {
-          var variantTracks = getVariants(data);
+          let variantTracks = getVariants(data);
           expect(variantTracks.length).toBe(1);
           expect(variantTracks[0].width).toBe(720);
           expect(variantTracks[0].height).toBe(480);
@@ -868,7 +855,7 @@ describe('Storage', function() {
 
       it('stores all text tracks', function(done) {
         storage.store(fakeManifestUri).then(function(data) {
-          var textTracks = getText(data);
+          let textTracks = getText(data);
           expect(textTracks.length).toBe(allTextTracks.length);
           expect(textTracks).toEqual(jasmine.arrayContaining(allTextTracks));
         }).catch(fail).then(done);
@@ -877,7 +864,7 @@ describe('Storage', function() {
 
     describe('temporary license', function() {
       /** @type {shakaExtern.DrmInfo} */
-      var drmInfo;
+      let drmInfo;
 
       beforeEach(function() {
         drmInfo = {
@@ -1033,10 +1020,10 @@ describe('Storage', function() {
           fakeStorageEngine,
           'Need storage engine for this test.');
 
-      var manifestId1;
-      var manifestId2;
+      let manifestId1;
+      let manifestId2;
 
-      var manifest2;
+      let manifest2;
 
       Promise.all([
         new shaka.test.ManifestDBBuilder(fakeStorageEngine)
@@ -1070,7 +1057,7 @@ describe('Storage', function() {
       }).then(function(segments) {
         // Make sure all the segments for the second manifest are still
         // in storage.
-        var stream = manifest2.periods[0].streams[0];
+        let stream = manifest2.periods[0].streams[0];
         expect(segments.length).toBe(stream.segments.length);
         segments.forEach(function(segment) {
           expect(segment).toBeTruthy();
@@ -1092,7 +1079,7 @@ describe('Storage', function() {
               .onStream(function(stream) {
                 // Change the key for one segment so that it will be missing
                 // from storage.
-                var segment = stream.segments[0];
+                let segment = stream.segments[0];
                 segment.dataKey = 1253;
               })
           .build()
@@ -1107,7 +1094,7 @@ describe('Storage', function() {
 
     it('throws an error if the content is not found', function(done) {
       removeManifest(0).then(fail).catch(function(error) {
-        var expectedError = new shaka.util.Error(
+        let expectedError = new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.STORAGE,
             shaka.util.Error.Code.REQUESTED_ITEM_NOT_FOUND,
@@ -1117,9 +1104,9 @@ describe('Storage', function() {
     });
 
     it('throws an error if the URI is malformed', function(done) {
-      var bogusUri = 'foo:bar';
+      let bogusUri = 'foo:bar';
       storage.remove(bogusUri).then(fail).catch(function(error) {
-        var expectedError = new shaka.util.Error(
+        let expectedError = new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.STORAGE,
             shaka.util.Error.Code.MALFORMED_OFFLINE_URI,
@@ -1148,7 +1135,7 @@ describe('Storage', function() {
      * @param {number} segmentCount
      */
     function expectDatabaseCount(manifestCount, segmentCount) {
-      var count;
+      let count;
 
       count = 0;
       fakeStorageEngine.forEachManifest(function(manifest) {
@@ -1169,7 +1156,7 @@ describe('Storage', function() {
      */
     function removeManifest(manifestId) {
       /** @type {string} */
-      var uri = OfflineUri.manifestIdToUri(manifestId);
+      let uri = OfflineUri.manifestIdToUri(manifestId);
       return storage.remove(uri);
     }
 
@@ -1180,7 +1167,7 @@ describe('Storage', function() {
     function loadSegmentsForStream(stream) {
       return Promise.all(stream.segments.map(function(segment) {
         /** @type {number} */
-        var id = segment.dataKey;
+        let id = segment.dataKey;
         return fakeStorageEngine.getSegment(id);
       }));
     }

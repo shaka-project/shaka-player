@@ -27,11 +27,11 @@
 TextTrack.prototype.label;
 
 
-/** @type {string} */
+/** @type {string} */
 TextTrackCue.prototype.positionAlign;
 
 
-/** @type {string} */
+/** @type {string} */
 TextTrackCue.prototype.lineAlign;
 
 

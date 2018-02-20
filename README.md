@@ -40,9 +40,11 @@ NOTES:
  - ¹: Only the latest stable version is tested and supported. Older releases may still be usable, and we will accept pull requests for them, but they will not be officially tested or supported.
  - ²: Latest stable Chromecast firmware is tested. Both sender and receiver can be implemented with Shaka Player.
  - ³: Tizen 2017 model is actively tested and supported by the Shaka Player team. Tizen 2016 model is community-supported and untested by us.
- - ⁴: IE 11 offers PlayReady support on Windows 8.1 and Windows 10 only. IE 11 can play clear content on Windows 8.0. IE 11 does not support adaptive playback on Windows 7 and under.
+ - ⁴: IE 11 offers PlayReady support on Windows 8.1 and Windows 10 only. IE 11 can play clear content on Windows 8.0. IE 11 does not support adaptive playback on Windows 7 and under. A separate [Promise polyfill][] is required for IE 11.
  - ⁵: These are expected to work, but are not actively tested by the Shaka Player team.
  - ⁶: All iOS browers use the same HTML engine (Apple WebKit) and are not supported because they lack MediaSource support. For more information, see: https://github.com/google/shaka-player/issues/997
+
+[Promise polyfill]: https://github.com/lahmatiy/es6-promise-polyfill
 
 
 ## Manifest format support matrix
@@ -83,7 +85,7 @@ HLS features supported:
  - VOD, Live, and Event types
  - Encrypted content with Widevine
  - ISO-BMFF / MP4 / CMAF support
- - MPEG-2 TS support (transmuxing provided by [mux.js][], must be separately included)
+ - MPEG-2 TS support (transmuxing provided by [mux.js][] v4.4+, must be separately included)
  - WebVTT and TTML
 
 HLS features **not** supported:
@@ -134,7 +136,7 @@ Shaka Player supports:
     - Can parse [cueing data][] elements for DASH's SegmentBase@indexRange and SegmentTemplate@index
     - Not supported in HLS
   - MPEG-2 TS
-    - With help from [mux.js][], can be played on any browser which supports MP4
+    - With help from [mux.js][] v4.4+, can be played on any browser which supports MP4
     - Can find and parse timestamps to find segment start time in HLS
   - WebVTT
     - Supported in both text form and embedded in MP4

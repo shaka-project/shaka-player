@@ -183,9 +183,7 @@ describe('DrmEngine', function() {
 
   describe('basic flow', function() {
     drm_it('gets a license and can play encrypted segments',
-        function(done) {
-          checkKeySystems();
-
+        checkAndRun((done) => {
           // The error callback should not be invoked.
           onErrorSpy.and.callFake(fail);
 
@@ -280,16 +278,22 @@ describe('DrmEngine', function() {
             expect(video.readyState).toBeGreaterThan(1);
             expect(video.currentTime).toBeGreaterThan(0);
           }).catch(fail).then(done);
-        });
+        }));
   });  // describe('basic flow')
 
-  function checkKeySystems() {
-    // Our test asset for this suite can use any of these key systems:
-    if (!support['com.widevine.alpha'] && !support['com.microsoft.playready']) {
-      // pending() throws a special exception that Jasmine uses to skip a test.
-      // It can only be used from inside it(), not describe() or beforeEach().
-      pending('Skipping DrmEngine tests.');
-      // The rest of the test will not run.
-    }
+  /**
+   * Before running the test, check if the appropriate keysystems are available.
+   * @param {function(function())} test
+   * @return {function(function())}
+   */
+  function checkAndRun(test) {
+   return function(done) {
+     if (!support['com.widevine.alpha'] &&
+         !support['com.microsoft.playready']) {
+       pending('Skipping DrmEngine tests.');
+     } else {
+       test(done);
+     }
+   };
   }
 });

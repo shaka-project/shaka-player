@@ -24,10 +24,11 @@ goog.provide('shaka.test.TestScheme');
  *
  * @param {string} uri
  * @param {shakaExtern.Request} request
- * @return {!Promise.<shakaExtern.Response>}
+ * @param {shaka.net.NetworkingEngine.RequestType=} requestType
+ * @return {!shakaExtern.IAbortableOperation.<shakaExtern.Response>}
  */
-shaka.test.TestScheme = function(uri, request) {
-  var manifestParts = /^test:([^\/]+)$/.exec(uri);
+shaka.test.TestScheme = function(uri, request, requestType) {
+  var manifestParts = /^test:([^/]+)$/.exec(uri);
   if (manifestParts) {
     /** @type {shakaExtern.Response} */
     var response = {
@@ -35,14 +36,20 @@ shaka.test.TestScheme = function(uri, request) {
       data: new ArrayBuffer(0),
       headers: {'content-type': 'application/x-test-manifest'}
     };
-    return Promise.resolve(response);
+    return shaka.util.AbortableOperation.completed(response);
   }
-  var re = /^test:([^\/]+)\/(video|audio)\/(init|[0-9]+)$/;
+
+  var malformed = new shaka.util.Error(
+      shaka.util.Error.Severity.CRITICAL,
+      shaka.util.Error.Category.NETWORK,
+      shaka.util.Error.Code.MALFORMED_TEST_URI);
+
+  var re = /^test:([^/]+)\/(video|audio)\/(init|[0-9]+)$/;
   var segmentParts = re.exec(uri);
   if (!segmentParts) {
     // Use expect so the URI is printed on errors.
     expect(uri).toMatch(re);
-    return Promise.reject();
+    return shaka.util.AbortableOperation.failed(malformed);
   }
 
   var name = segmentParts[1];
@@ -50,11 +57,15 @@ shaka.test.TestScheme = function(uri, request) {
 
   var generators = shaka.test.TestScheme.GENERATORS[name];
   expect(generators).toBeTruthy();
-  if (!generators) return Promise.reject();
+  if (!generators) {
+    return shaka.util.AbortableOperation.failed(malformed);
+  }
 
   var generator = generators[type];
   expect(generator).toBeTruthy();
-  if (!generator) return Promise.reject();
+  if (!generator) {
+    return shaka.util.AbortableOperation.failed(malformed);
+  }
 
   var responseData;
   if (segmentParts[3] === 'init') {
@@ -64,10 +75,9 @@ shaka.test.TestScheme = function(uri, request) {
     responseData = generator.getSegment(index + 1, 0, 0);
   }
 
+  /** @type {shakaExtern.Response} */
   var ret = {uri: uri, data: responseData, headers: {}};
-  // Cannot use |Promise.resolve(ret)| because of a compiler bug.
-  // https://goo.gl/4TdteC
-  return Promise.resolve().then(function() { return ret; });
+  return shaka.util.AbortableOperation.completed(ret);
 };
 
 
@@ -374,31 +384,29 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
 
   // Custom generators:
 
-  if (true) {  // The linter complains without the "if" (i.e. for plain blocks)
-    var data = DATA['sintel'];
-    var period_duration = 10;
-    var num_periods = 10;
-    var gen = new windowShaka.test.ManifestGenerator(shaka)
-        .setPresentationDuration(period_duration * num_periods);
+  var data = DATA['sintel'];
+  var period_duration = 10;
+  var num_periods = 10;
+  var gen = new windowShaka.test.ManifestGenerator(shaka)
+      .setPresentationDuration(period_duration * num_periods);
 
-    for (var i = 0; i < num_periods; i++) {
-      gen.addPeriod(period_duration * i);
+  for (var i = 0; i < num_periods; i++) {
+    gen.addPeriod(period_duration * i);
 
-      gen.addVariant(2 * i).language('en');
-      gen.addVideo(4 * i);
-      addStreamInfo(gen, data, ContentType.VIDEO, 'sintel');
-      gen.addAudio(4 * i + 1);
-      addStreamInfo(gen, data, ContentType.AUDIO, 'sintel');
+    gen.addVariant(2 * i).language('en');
+    gen.addVideo(4 * i);
+    addStreamInfo(gen, data, ContentType.VIDEO, 'sintel');
+    gen.addAudio(4 * i + 1);
+    addStreamInfo(gen, data, ContentType.AUDIO, 'sintel');
 
-      gen.addVariant(2 * i + 1).language('es');
-      gen.addVideo(4 * i + 2);
-      addStreamInfo(gen, data, ContentType.VIDEO, 'sintel');
-      gen.addAudio(4 * i + 3);
-      addStreamInfo(gen, data, ContentType.AUDIO, 'sintel');
-    }
-
-    MANIFESTS['sintel_short_periods' + suffix] = gen.build();
+    gen.addVariant(2 * i + 1).language('es');
+    gen.addVideo(4 * i + 2);
+    addStreamInfo(gen, data, ContentType.VIDEO, 'sintel');
+    gen.addAudio(4 * i + 3);
+    addStreamInfo(gen, data, ContentType.AUDIO, 'sintel');
   }
+
+  MANIFESTS['sintel_short_periods' + suffix] = gen.build();
 
   return Promise.all(async);
 };
@@ -425,7 +433,7 @@ shaka.test.TestScheme.ManifestParser.prototype.configure = function(config) {};
 /** @override */
 shaka.test.TestScheme.ManifestParser.prototype.start =
     function(uri, playerInterface) {
-  var re = /^test:([^\/]+)$/;
+  var re = /^test:([^/]+)$/;
   var manifestParts = re.exec(uri);
   if (!manifestParts) {
     // Use expect so the URI is printed on errors.

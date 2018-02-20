@@ -93,6 +93,19 @@ shakaDemo.updateTextTracks_ = function() {
   var tracks = shakaDemo.player_.getTextTracks();
 
   shakaDemo.updateTrackOptions_(trackList, tracks, languageAndRole);
+
+  // CEA 608/708 captions data is embedded inside the video stream.
+  // Showing a 'Default Text' option in the Text Track list.
+  // Use Default Text Track if there's no external text tracks available.
+  if (tracks.length == 0) {
+    shakaDemo.player_.selectEmbeddedTextTrack();
+  }
+  if (ShakaDemoUtils.isTsContent(shakaDemo.player_)) {
+    var option = document.createElement('option');
+    option.textContent = 'Default Text';
+    option.selected = shakaDemo.player_.getUseEmbeddedTextTrack();
+    trackList.appendChild(option);
+  }
 };
 
 
@@ -281,7 +294,12 @@ shakaDemo.onTrackSelected_ = function(event) {
 
     player.selectVariantTrack(track, /* clearBuffer */ true);
   } else {
-    player.selectTextTrack(track);
+    // CEA 608/708 captions data is embedded inside the video stream.
+    if (option.textContent == 'Default Text') {
+      player.selectEmbeddedTextTrack();
+    } else {
+      player.selectTextTrack(track);
+    }
   }
 
   // Adaptation might have been changed by calling selectTrack().
@@ -345,5 +363,5 @@ shakaDemo.updateDebugInfo_ = function() {
   }
 
   document.getElementById('bufferedDebug').textContent =
-      '- ' + behind.toFixed(0) + 's / ' + '+ ' + ahead.toFixed(0) + 's';
+      '- ' + behind.toFixed(0) + 's / + ' + ahead.toFixed(0) + 's';
 };

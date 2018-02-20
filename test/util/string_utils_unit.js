@@ -16,86 +16,82 @@
  */
 
 describe('StringUtils', function() {
-  var StringUtils;
-
-  beforeAll(function() {
-    StringUtils = shaka.util.StringUtils;
-  });
+  const StringUtils = shaka.util.StringUtils;
 
   it('parses fromUTF8', function() {
     // This is 4 Unicode characters, the last will be split into a surrogate
     // pair.
-    var arr = [0x46, 0xe2, 0x82, 0xac, 0x20, 0xf0, 0x90, 0x8d, 0x88];
-    var buffer = new Uint8Array(arr).buffer;
+    let arr = [0x46, 0xe2, 0x82, 0xac, 0x20, 0xf0, 0x90, 0x8d, 0x88];
+    let buffer = new Uint8Array(arr).buffer;
     expect(StringUtils.fromUTF8(buffer)).toBe('F\u20ac \ud800\udf48');
   });
 
   it('strips the BOM in fromUTF8', function() {
     // This is 4 Unicode characters, the last will be split into a surrogate
     // pair.
-    var arr = [0xef, 0xbb, 0xbf, 0x74, 0x65, 0x78, 0x74];
-    var buffer = new Uint8Array(arr).buffer;
-    var ContentType = shaka.util.ManifestParserUtils.ContentType;
+    let arr = [0xef, 0xbb, 0xbf, 0x74, 0x65, 0x78, 0x74];
+    let buffer = new Uint8Array(arr).buffer;
+    const ContentType = shaka.util.ManifestParserUtils.ContentType;
     expect(StringUtils.fromUTF8(buffer)).toBe(ContentType.TEXT);
   });
 
   it('parses fromUTF16 big-endian', function() {
     // This is big-endian pairs of 16-bit numbers.  This translates into 3
     // Unicode characters where the last is split into a surrogate pair.
-    var arr = [0x00, 0x46, 0x38, 0x01, 0xd8, 0x01, 0xdc, 0x37];
-    var buffer = new Uint8Array(arr).buffer;
+    let arr = [0x00, 0x46, 0x38, 0x01, 0xd8, 0x01, 0xdc, 0x37];
+    let buffer = new Uint8Array(arr).buffer;
     expect(StringUtils.fromUTF16(buffer, false)).toBe('F\u3801\ud801\udc37');
   });
 
   it('parses fromUTF16 little-endian', function() {
     // This is little-endian pairs of 16-bit numbers.  This translates into 3
     // Unicode characters where the last is split into a surrogate pair.
-    var arr = [0x46, 0x00, 0x01, 0x38, 0x01, 0xd8, 0x37, 0xdc];
-    var buffer = new Uint8Array(arr).buffer;
+    let arr = [0x46, 0x00, 0x01, 0x38, 0x01, 0xd8, 0x37, 0xdc];
+    let buffer = new Uint8Array(arr).buffer;
     expect(StringUtils.fromUTF16(buffer, true)).toBe('F\u3801\ud801\udc37');
   });
 
   describe('fromBytesAutoDetect', function() {
     it('detects UTF-8 BOM', function() {
-      var arr = [0xef, 0xbb, 0xbf, 0x46, 0x6f, 0x6f];
-      var buffer = new Uint8Array(arr).buffer;
+      let arr = [0xef, 0xbb, 0xbf, 0x46, 0x6f, 0x6f];
+      let buffer = new Uint8Array(arr).buffer;
       expect(StringUtils.fromBytesAutoDetect(buffer)).toBe('Foo');
     });
 
     it('detects UTF-16 BE BOM', function() {
-      var arr = [0xfe, 0xff, 0x00, 0x46, 0x00, 0x6f, 0x00, 0x6f];
-      var buffer = new Uint8Array(arr).buffer;
+      let arr = [0xfe, 0xff, 0x00, 0x46, 0x00, 0x6f, 0x00, 0x6f];
+      let buffer = new Uint8Array(arr).buffer;
       expect(StringUtils.fromBytesAutoDetect(buffer)).toBe('Foo');
     });
 
     it('detects UTF-16 LE BOM', function() {
-      var arr = [0xff, 0xfe, 0x46, 0x00, 0x6f, 0x00, 0x6f, 0x00];
-      var buffer = new Uint8Array(arr).buffer;
+      let arr = [0xff, 0xfe, 0x46, 0x00, 0x6f, 0x00, 0x6f, 0x00];
+      let buffer = new Uint8Array(arr).buffer;
       expect(StringUtils.fromBytesAutoDetect(buffer)).toBe('Foo');
     });
 
     it('guesses UTF-8', function() {
-      var arr = [0x46, 0x6f, 0x6f];
-      var buffer = new Uint8Array(arr).buffer;
+      let arr = [0x46, 0x6f, 0x6f];
+      let buffer = new Uint8Array(arr).buffer;
       expect(StringUtils.fromBytesAutoDetect(buffer)).toBe('Foo');
     });
 
     it('guesses UTF-16 BE', function() {
-      var arr = [0x00, 0x46, 0x00, 0x6f, 0x00, 0x6f];
-      var buffer = new Uint8Array(arr).buffer;
+      let arr = [0x00, 0x46, 0x00, 0x6f, 0x00, 0x6f];
+      let buffer = new Uint8Array(arr).buffer;
       expect(StringUtils.fromBytesAutoDetect(buffer)).toBe('Foo');
     });
 
     it('guesses UTF-16 LE', function() {
-      var arr = [0x46, 0x00, 0x6f, 0x00, 0x6f, 0x00];
-      var buffer = new Uint8Array(arr).buffer;
+      let arr = [0x46, 0x00, 0x6f, 0x00, 0x6f, 0x00];
+      let buffer = new Uint8Array(arr).buffer;
       expect(StringUtils.fromBytesAutoDetect(buffer)).toBe('Foo');
     });
 
     it('fails if unable to guess', function() {
       try {
-        var arr = [0x01, 0x02, 0x03, 0x04];
-        var buffer = new Uint8Array(arr).buffer;
+        let arr = [0x01, 0x02, 0x03, 0x04];
+        let buffer = new Uint8Array(arr).buffer;
         StringUtils.fromBytesAutoDetect(buffer);
         fail('Should not be able to guess');
       } catch (e) {
@@ -106,14 +102,14 @@ describe('StringUtils', function() {
   });
 
   it('converts toUTF8', function() {
-    var str = 'Xe\u4524\u1952';
-    var arr = [0x58, 0x65, 0xe4, 0x94, 0xa4, 0xe1, 0xa5, 0x92];
-    var buffer = StringUtils.toUTF8(str);
+    let str = 'Xe\u4524\u1952';
+    let arr = [0x58, 0x65, 0xe4, 0x94, 0xa4, 0xe1, 0xa5, 0x92];
+    let buffer = StringUtils.toUTF8(str);
     expect(new Uint8Array(buffer)).toEqual(new Uint8Array(arr));
   });
 
   it('does not cause stack overflow, #335', function() {
-    var buffer = new Uint8Array(8e5).buffer;  // Well above arg count limit.
+    let buffer = new Uint8Array(8e5).buffer;  // Well above arg count limit.
     expect(StringUtils.fromUTF8(buffer).length).toBe(buffer.byteLength);
     expect(StringUtils.fromUTF16(buffer, true).length)
         .toBe(buffer.byteLength / 2);

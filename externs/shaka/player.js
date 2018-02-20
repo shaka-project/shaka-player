@@ -202,7 +202,7 @@ shakaExtern.BufferedInfo;
  * @property {number} id
  *   The unique ID of the track.
  * @property {boolean} active
- *   If true, this is the track is being streamed (another track may be
+ *   If true, this is the track being streamed (another track may be
  *   visible/audible in the buffer).
  *
  * @property {string} type
@@ -490,7 +490,8 @@ shakaExtern.DrmConfiguration;
  *   customScheme: shakaExtern.DashContentProtectionCallback,
  *   clockSyncUri: string,
  *   ignoreDrmInfo: boolean,
- *   xlinkFailGracefully: boolean
+ *   xlinkFailGracefully: boolean,
+ *   defaultPresentationDelay: number
  * }}
  *
  * @property {shakaExtern.DashContentProtectionCallback} customScheme
@@ -510,6 +511,9 @@ shakaExtern.DrmConfiguration;
  *   existing contents. If false, xlink-related errors will be propagated
  *   to the application and will result in a playback failure. Defaults to
  *   false if not provided.
+ * @property {number} defaultPresentationDelay
+ *   A default presentationDelay if suggestedPresentationDelay is missing
+ *   in the MPEG DASH manifest, has to be bigger than minBufferTime * 1.5.
  *
  * @exportDoc
  */
@@ -676,3 +680,18 @@ shakaExtern.AbrConfiguration;
  * @exportDoc
  */
 shakaExtern.PlayerConfiguration;
+
+
+/**
+ * @typedef {{
+ *   language: string,
+ *   role: string
+ * }}
+ *
+ * @property {string} language
+ *    The language code for the stream.
+ * @property {string} role
+ *    The role name for the stream. If the stream has no role, |role| will be
+ *    ''.
+ */
+shakaExtern.LanguageRole;

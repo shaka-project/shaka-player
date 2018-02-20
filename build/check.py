@@ -40,22 +40,30 @@ def get_lint_files():
   return get('test') + get('lib') + get('externs') + get('demo')
 
 
-def check_lint():
-  """Runs the linter over the library files."""
-  logging.info('Running Closure linter...')
+def check_closure_compiler_linter():
+  """Runs the Closure Compiler linter."""
+  logging.info('Running Closure Compiler linter...')
 
-  jsdoc3_tags = ','.join([
-      'static', 'summary', 'namespace', 'event', 'description', 'property',
-      'fires', 'listens', 'example', 'exportDoc', 'exportInterface',
-      'tutorial'])
-  args = ['--nobeep', '--custom_jsdoc_tags', jsdoc3_tags, '--strict']
   base = shakaBuildHelpers.get_source_base()
-  cmd = os.path.join(base, 'third_party', 'gjslint', 'gjslint')
+  closure_linter_path = os.path.join(base, 'third_party', 'closure', 'linter.jar')
+  cmd_line = ['java', '-jar', closure_linter_path] + get_lint_files()
 
-  # Even though this is python, don't import and execute since gjslint expects
-  # command-line arguments using argv.  Have to explicitly execute python so
-  # it works on Windows.
-  cmd_line = [sys.executable or 'python', cmd] + args + get_lint_files()
+  # The compiler's linter tool doesn't return a status code (as of v20171203)
+  # and has no options.  Instead of checking status, success is no output.
+  output = shakaBuildHelpers.execute_get_output(cmd_line)
+  if output != '':
+    print output
+    return False
+  return True
+
+
+def check_js_lint():
+  """Runs the JavaScript linter."""
+  # TODO: things not enforced: property doc requirements
+  logging.info('Running eslint...')
+
+  eslint = shakaBuildHelpers.get_node_binary('eslint')
+  cmd_line = eslint + get_lint_files()
   return shakaBuildHelpers.execute_get_code(cmd_line) == 0
 
 
@@ -65,17 +73,13 @@ def check_html_lint():
   Returns:
     True on success, False on failure.
   """
-  # Update node modules if needed.
-  if not shakaBuildHelpers.update_node_modules():
-    return False
-
   logging.info('Running htmlhint...')
-  htmlhint_path = shakaBuildHelpers.get_node_binary_path('htmlhint')
+  htmlhint = shakaBuildHelpers.get_node_binary('htmlhint')
   base = shakaBuildHelpers.get_source_base()
   files = ['index.html', 'demo/index.html', 'support.html']
   file_paths = [os.path.join(base, x) for x in files]
   config_path = os.path.join(base, '.htmlhintrc')
-  cmd_line = [htmlhint_path, '--config=' + config_path] + file_paths
+  cmd_line = htmlhint + ['--config=' + config_path] + file_paths
   return shakaBuildHelpers.execute_get_code(cmd_line) == 0
 
 
@@ -204,8 +208,13 @@ def main(args):
       usage()
       return 1
 
+  # Update node modules if needed.
+  if not shakaBuildHelpers.update_node_modules():
+    return 1
+
   steps = [
-    check_lint,
+    check_closure_compiler_linter,
+    check_js_lint,
     check_html_lint,
     check_complete,
     check_tests,

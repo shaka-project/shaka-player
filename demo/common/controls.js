@@ -520,8 +520,15 @@ ShakaControls.prototype.onCaptionClick_ = function() {
 
 /** @private */
 ShakaControls.prototype.onTracksChange_ = function() {
-  var hasText = this.player_.getTextTracks().length;
-  this.captionButton_.style.display = hasText ? 'inherit' : 'none';
+  // TS content might have captions embedded in video stream, we can't know
+  // until we start transmuxing. So, always show caption button if we're
+  // playing TS content.
+  if (ShakaDemoUtils.isTsContent(this.player_)) {
+    this.captionButton_.style.display = 'inherit';
+  } else {
+    var hasText = this.player_.getTextTracks().length;
+    this.captionButton_.style.display = hasText ? 'inherit' : 'none';
+  }
 };
 
 

@@ -161,6 +161,23 @@ requirement: {
 }
 
 
+# Disallow eval, except when testing for ES6 syntax in demo
+requirement: {
+  type: BANNED_NAME
+  value: 'window.eval'
+  error_message: 'Using "eval" is not allowed'
+  whitelist_regexp: 'demo/load.js'
+  whitelist_regexp: 'demo/main.js'
+}
+requirement: {
+  type: BANNED_NAME
+  value: 'eval'
+  error_message: 'Using "eval" is not allowed'
+  whitelist_regexp: 'demo/load.js'
+  whitelist_regexp: 'demo/main.js'
+}
+
+
 # Disallow ES6 methods.
 requirement: {
   type: BANNED_PROPERTY

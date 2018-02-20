@@ -136,6 +136,16 @@ shakaDemo.setupOfflineAssets_ = function() {
 
     shakaDemo.updateButtons_(true);
     return db.destroy();
+  }).catch(function(error) {
+    if (error.code == shaka.util.Error.Code.UNSUPPORTED_UPGRADE_REQUEST) {
+      console.warn('Warning: storage cleared.  For details, see ' +
+                   'https://github.com/google/shaka-player/issues/1248');
+      shaka.offline.Storage.deleteAll();
+      return;
+    }
+
+    // Let another component deal with it.
+    throw error;
   });
 };
 
@@ -163,6 +173,17 @@ shakaDemo.storeDeleteAsset_ = function() {
   if (option.storedContent) {
     var offlineUri = option.storedContent.offlineUri;
     var originalManifestUri = option.storedContent.originalManifestUri;
+
+    // If this is a stored demo asset, we'll need to configure the player with
+    // license server authentication so we can delete the offline license.
+    for (var i = 0; i < shakaAssets.testAssets.length; i++) {
+      var originalAsset = shakaAssets.testAssets[i];
+      if (originalManifestUri == originalAsset.manifestUri) {
+        shakaDemo.preparePlayer_(originalAsset);
+        break;
+      }
+    }
+
     p = storage.remove(offlineUri).then(function() {
       for (var i = 0; i < assetList.options.length; i++) {
         var option = assetList.options[i];

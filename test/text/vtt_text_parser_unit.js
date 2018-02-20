@@ -22,6 +22,9 @@ describe('VttTextParser', function() {
   /** @const */
   var Cue = shaka.text.Cue;
 
+  /** @const */
+  var CueRegion = shaka.text.CueRegion;
+
   beforeAll(function() {
     logWarningSpy = jasmine.createSpy('shaka.log.warning');
     shaka.log.warning = shaka.test.Util.spyFunc(logWarningSpy);
@@ -435,6 +438,37 @@ describe('VttTextParser', function() {
         { periodStart: 0, segmentStart: 20, segmentEnd: 0 });
   });
 
+
+  it('parses VTTRegions', function() {
+    verifyHelper(
+        [
+          {
+            start: 20,
+            end: 40,
+            payload: 'Test',
+            region: {
+              id: 'reg1',
+              viewportAnchorX: 10,
+              viewportAnchorY: 90,
+              regionAnchorX: 0,
+              regionAnchorY: 100,
+              width: 50,
+              height: 3,
+              heightUnits: CueRegion.units.LINES,
+              widthUnits: CueRegion.units.PERCENTAGE,
+              viewportAnchorUnits: CueRegion.units.PERCENTAGE,
+              scroll: CueRegion.scrollMode.UP
+            }
+          }
+        ],
+        'WEBVTT\n' +
+        'Region: id=reg1 width=50% lines=3 regionanchor=0%,100% ' +
+        'viewportanchor=10%,90% scroll=up\n\n' +
+        '0:00:20.000 --> 0:00:40.000 region:reg1\n' +
+        'Test',
+        { periodStart: 0, segmentStart: 0, segmentEnd: 0 });
+  });
+
   it('ignores and logs invalid settings', function() {
     expect(logWarningSpy.calls.count()).toBe(0);
 
@@ -504,7 +538,7 @@ describe('VttTextParser', function() {
     expect(logWarningSpy.calls.count()).toBe(7);
   });
 
-  it('respects X-TIMESTAMP-MAP header', function() {
+  it('respects X-TIMESTAMP-MAP header in probes', function() {
     verifyHelper(
         [
           {start: 30, end: 50, payload: 'Test'},
@@ -518,7 +552,27 @@ describe('VttTextParser', function() {
         'Test\n\n' +
         '00:00:40.000 --> 00:00:50.000 line:-1\n' +
         'Test2',
-        { periodStart: 0, segmentStart: 0, segmentEnd: 0 });
+        // segmentStart of null marks this as a probe.
+        { periodStart: 0, segmentStart: null, segmentEnd: 0 });
+  });
+
+  it('ignores X-TIMESTAMP-MAP header when segment times are known', function() {
+    verifyHelper(
+        [
+          {start: 120, end: 140, payload: 'Test'},
+          {start: 140, end: 150, payload: 'Test2'}
+        ] ,
+        // 900000 = 10 sec, so expect every timestamp to be 10
+        // seconds ahead of what is specified.
+        'WEBVTT\n' +
+        'X-TIMESTAMP-MAP=MPEGTS:900000,LOCAL:00:00:00.000\n\n' +
+        '00:00:20.000 --> 00:00:40.000 line:0\n' +
+        'Test\n\n' +
+        '00:00:40.000 --> 00:00:50.000 line:-1\n' +
+        'Test2',
+        // Non-null segmentStart takes precedence over X-TIMESTAMP-MAP.
+        // This protects us from rollover in the MPEGTS field.
+        { periodStart: 0, segmentStart: 100, segmentEnd: 0 });
   });
 
   it('skips style blocks', function() {
@@ -565,6 +619,27 @@ describe('VttTextParser', function() {
         expect(result[i].size).toBe(cues[i].size);
       if ('position' in cues[i])
         expect(result[i].position).toBe(cues[i].position);
+      if ('region' in cues[i])
+        verifyRegion(cues[i].region, result[i].region);
+    }
+  }
+
+
+  /**
+   * @param {!Object} expected
+   * @param {shakaExtern.CueRegion} actual
+   */
+  function verifyRegion(expected, actual) {
+    var properties = ['id', 'viewportAnchorX', 'viewportAnchorY',
+                      'regionAnchorX', 'regionAnchorY', 'width', 'height',
+                      'heightUnits', 'widthUnits', 'viewportAnchorUnits',
+                      'scroll'];
+    expect(actual).toBeTruthy();
+
+    for (var i = 0; i < properties.length; i++) {
+      var property = properties[i];
+        if (property in expected)
+          expect(actual[property]).toEqual(expected[property]);
     }
   }
 

@@ -20,31 +20,94 @@
 
 
 /**
- * @typedef {{
- *   x: number,
- *   y: number,
- *   width: number,
- *   height: number
- * }}
- *
- * @description
- * The region of the video to render the cues into.
- *
- * @property {number} x
- *   The X offset to start the rendering area.  This is a percentage (0-100) of
- *   the video width.
- * @property {number} y
- *   The Y offset to start the rendering area.  This is a percentage (0-100) of
- *   the video height.
- * @property {number} width
- *   The width of the rendering area.  This is a percentage (0-100) of the video
- *   width.
- * @property {number} height
- *   The height of the rendering area.  This is a percentage (0-100) of the
- *   video height.
+ * @interface
+ * @exportDoc
  */
-shakaExtern.CueRegion;
+shakaExtern.CueRegion = function() {};
 
+
+/**
+ * Region identifier.
+ * @type {string}
+ */
+shakaExtern.CueRegion.prototype.id;
+
+
+/**
+ * The X offset to start the rendering area in anchorUnits of
+ * the video width.
+ * @type {number}
+ */
+shakaExtern.CueRegion.prototype.viewportAnchorX;
+
+
+/**
+ * The X offset to start the rendering area in anchorUnits of
+ * the video height.
+ * @type {number}
+ */
+shakaExtern.CueRegion.prototype.viewportAnchorY;
+
+
+/**
+ * The X offset to start the rendering area in percentage (0-100) of
+ * the region width.
+ * @type {number}
+ */
+shakaExtern.CueRegion.prototype.regionAnchorX;
+
+
+/**
+ * The Y offset to start the rendering area in percentage (0-100) of
+ * the region height.
+ * @type {number}
+ */
+shakaExtern.CueRegion.prototype.regionAnchorY;
+
+
+/**
+ * The width of the rendering area in widthUnits.
+ * @type {number}
+ */
+shakaExtern.CueRegion.prototype.width;
+
+
+/**
+ * The width of the rendering area in heightUnits.
+ * @type {number}
+ */
+shakaExtern.CueRegion.prototype.height;
+
+
+/**
+ * The units (percentage, pixels or lines) the region height is in.
+ * @type {shaka.text.CueRegion.units}
+ */
+shakaExtern.CueRegion.prototype.heightUnits;
+
+
+/**
+ * The units (percentage or pixels) the region width is in.
+ * @type {shaka.text.CueRegion.units}
+ */
+shakaExtern.CueRegion.prototype.widthUnits;
+
+
+/**
+ * The units (percentage or pixels) the region viewportAnchors are in.
+ * @type {shaka.text.CueRegion.units}
+ */
+shakaExtern.CueRegion.prototype.viewportAnchorUnits;
+
+
+/**
+ * Scroll=UP means, cues in the region will be added at the bottom of the
+ * region and push any already displayed cues in the region up.
+ * Otherwise (scroll=NONE) cues will stay fixed at the location
+ * they were first painted in.
+ * @type {shaka.text.CueRegion.scrollMode}
+ */
+shakaExtern.CueRegion.prototype.scroll;
 
 
 /**
@@ -240,15 +303,16 @@ shakaExtern.TextParser = function() {};
  * A collection of time offsets used to adjust text cue times.
  *
  * @typedef {{
- *   periodStart : number,
- *   segmentStart : number,
- *   segmentEnd : number
+ *   periodStart: number,
+ *   segmentStart: ?number,
+ *   segmentEnd: number
  * }}
  *
  * @property {number} periodStart
  *     The absolute start time of the period in seconds.
- * @property {number} segmentStart
+ * @property {?number} segmentStart
  *     The absolute start time of the segment in seconds.
+ *     Null if the manifest does not provide this information, such as in HLS.
  * @property {number} segmentEnd
  *     The absolute end time of the segment in seconds.
  *

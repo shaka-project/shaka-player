@@ -16,20 +16,18 @@
  */
 
 describe('ConfigUtils', function() {
-  /** @const */
-  var ConfigUtils = shaka.util.ConfigUtils;
+  const ConfigUtils = shaka.util.ConfigUtils;
 
   describe('cloneObject', function() {
-    /** @const */
-    var cloneObject = ConfigUtils.cloneObject;
+    const cloneObject = ConfigUtils.cloneObject;
 
     it('clones values and plain objects', function() {
       expect(cloneObject(2)).toBe(2);
       expect(cloneObject('foo')).toBe('foo');
       expect(cloneObject(false)).toBe(false);
 
-      var o = {foo: 'bar', count: 123};
-      var copy = cloneObject(o);
+      let o = {foo: 'bar', count: 123};
+      let copy = cloneObject(o);
       expect(copy).not.toBe(o);
       expect(copy).toEqual(o);
 
@@ -40,7 +38,7 @@ describe('ConfigUtils', function() {
     });
 
     it('clones nested objects', function() {
-      var o = {
+      let o = {
         foo: 'bar',
         lorem: 'ipsum',
         dolor: {
@@ -52,7 +50,7 @@ describe('ConfigUtils', function() {
             1, null,
             {
               sed: null,
-              'do': undefined,
+              do_: undefined,
               eiusmod: []
             }
           ]
@@ -61,27 +59,27 @@ describe('ConfigUtils', function() {
           other: 123
         }
       };
-      var copy = cloneObject(o);
+      let copy = cloneObject(o);
       expect(copy).not.toBe(o);
       expect(copy).toEqual(o);
     });
 
     it('clones Arrays with non-default length', function() {
-      var a = [1, 2, 3];
+      let a = [1, 2, 3];
       a.length = 10;
-      var copy = cloneObject(a);
+      let copy = cloneObject(a);
       expect(copy).toEqual(a);
       expect(copy.length).toEqual(10);
     });
 
     it('ignores cyclic objects', function() {
-      var o = {foo: 'bar'};
+      let o = {foo: 'bar'};
       o['baz'] = o;
       expect(cloneObject(o)).toEqual({foo: 'bar', baz: null});
     });
 
     it('ignores non-simple Object objects', function() {
-      var o = {foo: 1, baz: /foo/g};
+      let o = {foo: 1, baz: /foo/g};
       expect(cloneObject(o)).toEqual({foo: 1, baz: null});
 
       o = {foo: 2, baz: new Date(123)};

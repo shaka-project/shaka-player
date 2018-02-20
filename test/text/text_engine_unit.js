@@ -172,7 +172,7 @@ describe('TextEngine', function() {
       }).then(function() {
         expect(mockParseMedia).toHaveBeenCalledWith(
             new Uint8Array(dummyData),
-            {periodStart: 4, segmentStart: 0, segmentEnd: 3});
+            {periodStart: 4, segmentStart: 4, segmentEnd: 7});
         expect(mockDisplayer.append).toHaveBeenCalledWith(
             [
               createFakeCue(4, 5),
