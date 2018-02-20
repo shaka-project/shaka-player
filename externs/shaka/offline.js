@@ -342,3 +342,57 @@ shakaExtern.StorageCell.prototype.getManifests = function(keys) {};
  * @return {!Promise<!Object.<number, shakaExtern.ManifestDB>>}
  */
 shakaExtern.StorageCell.prototype.getAllManifests = function() {};
+
+
+/**
+ * Storage mechanisms are one of two exported storage APIs. Storage mechanisms
+ * are groups of storage cells (shakaExtern.StorageCell). Storage mechanisms
+ * are responsible for managing the life cycle of resources shared between
+ * storage cells in the same block.
+ *
+ * For example, a storage mechanism may manage a single database connection
+ * while each cell would manage different tables in the database via the same
+ * connection.
+ *
+ * @interface
+ */
+shakaExtern.StorageMechanism = function() {};
+
+
+/**
+ * Initialize the storage mechanism for first use. This should only be called
+ * once. Calling |init| multiple times has an undefined behaviour.
+ *
+ * @return {!Promise}
+ */
+shakaExtern.StorageMechanism.prototype.init = function() {};
+
+
+/**
+ * Free all resources used by the storage mechanism and its cells. This should
+ * not affect the stored content.
+ *
+ * @return {!Promise}
+ */
+shakaExtern.StorageMechanism.prototype.destroy = function() {};
+
+
+/**
+ * Get a map of all the cells managed by the storage mechanism. Editing the map
+ * should have no effect on the storage mechanism. The map key is the cell's
+ * address in the mechanism and should be consistent between calls to
+ * |getCells|.
+ *
+ * @return {!Object.<string, !shakaExtern.StorageCell>}
+ */
+shakaExtern.StorageMechanism.prototype.getCells = function() {};
+
+
+/**
+ * Erase all content from storage and leave storage in an empty state. It is
+ * expected that |erase| will be called after |init| and will still be
+ * initialized for use after calling |erase|.
+ *
+ * @return {!Promise}
+ */
+shakaExtern.StorageMechanism.prototype.erase = function() {};
