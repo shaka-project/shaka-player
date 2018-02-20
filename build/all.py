@@ -29,6 +29,11 @@ def main(args):
                   ' Player Project.')
 
   parser.add_argument(
+      '--fix',
+      help='Automatically fix style violations.',
+      action='store_true')
+
+  parser.add_argument(
       '--force',
       '-f',
       help='Force building the library even if no files have changed.',
@@ -52,7 +57,8 @@ def main(args):
   if code != 0:
     return code
 
-  code = check.main([])
+  check_args = ['--fix'] if parsed_args.fix else []
+  code = check.main(check_args)
   if code != 0:
     return code
 
