@@ -40,8 +40,7 @@ describe('MediaSourceEngine', function() {
   });
 
   beforeEach(function(done) {
-    mediaSourceEngine = new shaka.media.MediaSourceEngine(
-        video, /* TextDisplayer */ null);
+    mediaSourceEngine = new shaka.media.MediaSourceEngine(video);
     mediaSource = /** @type {?} */(mediaSourceEngine)['mediaSource_'];
     expect(video.src).toBeTruthy();
     mediaSourceEngine.init({}).then(done);

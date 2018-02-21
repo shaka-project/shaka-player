@@ -211,8 +211,7 @@ describe('CastUtils', function() {
           fail('Error code ' + (video.error ? video.error.code : 0));
         }
 
-        mediaSourceEngine = new shaka.media.MediaSourceEngine(
-            video, /* TextDisplayer */ null);
+        mediaSourceEngine = new shaka.media.MediaSourceEngine(video);
 
         // Create empty object first and initialize the fields through
         // [] to allow field names to be expressions.

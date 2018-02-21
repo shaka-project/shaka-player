@@ -141,8 +141,7 @@ describe('DrmEngine', function() {
 
     eventManager = new shaka.util.EventManager();
 
-    mediaSourceEngine = new shaka.media.MediaSourceEngine(
-        video, /* TextDisplayer */ null);
+    mediaSourceEngine = new shaka.media.MediaSourceEngine(video);
 
     // Create empty object first and initialize the fields through
     // [] to allow field names to be expressions.

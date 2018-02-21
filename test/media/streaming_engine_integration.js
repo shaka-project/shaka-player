@@ -99,8 +99,7 @@ describe('StreamingEngine', function() {
     onEvent = jasmine.createSpy('onEvent');
 
     eventManager = new shaka.util.EventManager();
-    mediaSourceEngine = new shaka.media.MediaSourceEngine(
-        video, /* TextDisplayer */ null);
+    mediaSourceEngine = new shaka.media.MediaSourceEngine(video);
   });
 
   afterEach(function(done) {

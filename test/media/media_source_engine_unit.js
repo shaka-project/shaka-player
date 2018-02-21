@@ -142,8 +142,7 @@ describe('MediaSourceEngine', function() {
       },
     };
     video = /** @type {HTMLMediaElement} */(mockVideo);
-    mediaSourceEngine = new shaka.media.MediaSourceEngine(
-        video, /* TextDisplayer */ null);
+    mediaSourceEngine = new shaka.media.MediaSourceEngine(video);
   });
 
   afterEach(function() {
@@ -182,8 +181,7 @@ describe('MediaSourceEngine', function() {
     });
 
     it('creates a MediaSource object and sets video.src', function() {
-      mediaSourceEngine = new shaka.media.MediaSourceEngine(
-          video, /* TextDisplayer */ null);
+      mediaSourceEngine = new shaka.media.MediaSourceEngine(video);
       expect(createMediaSourceSpy).toHaveBeenCalled();
       expect(createObjectURLSpy).toHaveBeenCalled();
       expect(mockVideo.src).toEqual('blob:foo');

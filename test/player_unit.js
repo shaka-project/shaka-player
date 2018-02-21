@@ -117,7 +117,8 @@ describe('Player', function() {
         destroy: jasmine.createSpy('destroy').and.
             returnValue(Promise.resolve()),
         setUseEmbeddedText: jasmine.createSpy('setUseEmbeddedText'),
-        getUseEmbeddedText: jasmine.createSpy('getUseEmbeddedText')
+        getUseEmbeddedText: jasmine.createSpy('getUseEmbeddedText'),
+        setTextDisplayer: jasmine.createSpy('setTextDisplayer')
       };
 
       player.createDrmEngine = function() { return drmEngine; };
@@ -272,6 +273,15 @@ describe('Player', function() {
           expect(textDisplayer.destroy).toHaveBeenCalled();
           done();
         });
+      });
+    });
+
+    it('sets TextDisplayer and passes it to MediaSource on load',
+        function(done) {
+      player.load('', 0, factory1).then(function() {
+        expect(mediaSourceEngine.setTextDisplayer)
+               .toHaveBeenCalledWith(textDisplayer);
+        done();
       });
     });
 
