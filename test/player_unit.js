@@ -1507,6 +1507,34 @@ describe('Player', function() {
           expect(getActiveVariantTrack().roles[0]).toBe('commentary');
         });
 
+      it('selectAudioLanguage() does not change selected text track',
+        function() {
+          // This came up in a custom application that allows to select
+          // from all tracks regardless of selected language.
+          // We imitate this behavior by calling selectTextLanguage()
+          // with one language and then selecting a track in a different
+          // language.
+          player.selectTextLanguage('en');
+          expect(textTracks[0].language).toBe('es');
+          player.selectTextTrack(textTracks[0]);
+          player.selectAudioLanguage('es');
+          expect(getActiveTextTrack().id).toBe(textTracks[0].id);
+        });
+
+      it('selectTextLanguage() does not change selected variant track',
+        function() {
+          // This came up in a custom application that allows to select
+          // from all tracks regardless of selected language.
+          // We imitate this behavior by calling selectAudioLanguage()
+          // with one language and then selecting a track in a different
+          // language.
+          player.selectAudioLanguage('es');
+          expect(variantTracks[0].language).toBe('en');
+          player.selectVariantTrack(variantTracks[0]);
+          player.selectTextLanguage('es');
+          expect(getActiveVariantTrack().id).toBe(variantTracks[0].id);
+        });
+
     it('selectTextLanguage() takes precedence over ' +
        'preferredTextLanguage', function() {
           streamingEngine.onCanSwitch();
