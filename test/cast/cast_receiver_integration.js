@@ -71,8 +71,9 @@ describe('CastReceiver', function() {
       }
     };
     // Account for tests with a done argument, and tests without.
-    if (test.length == 1)
+    if (test.length == 1) {
       return (done) => check(done);
+    }
     return () => check(undefined);
   }
 
@@ -223,12 +224,13 @@ describe('CastReceiver', function() {
       // update message.
       let totalLength = 0;
       let waitForUpdate = Promise.resolve();
-      for (let i = 0; i < 50; i++)
+      for (let i = 0; i < 50; i++) {
         waitForUpdate = waitForUpdate.then(function() {
           return waitForUpdateMessage();
         }).then(function(message) {
           totalLength += message.length;
         });
+      }
       waitForUpdate.then(function() {
         expect(totalLength / 50).toBeLessThan(3000);
       }).then(done);
@@ -337,8 +339,9 @@ describe('CastReceiver', function() {
       getSenders: jasmine.createSpy('CastReceiverManager.getSenders'),
       getSystemVolume: function() { return { level: 1, muted: false }; },
       getCastMessageBus: function(namespace) {
-        if (namespace == CastUtils.SHAKA_MESSAGE_NAMESPACE)
+        if (namespace == CastUtils.SHAKA_MESSAGE_NAMESPACE) {
           return mockShakaMessageBus;
+        }
 
         return mockGenericMessageBus;
       }

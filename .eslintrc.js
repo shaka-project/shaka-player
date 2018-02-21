@@ -56,7 +56,6 @@ module.exports = {
         "camelcase": "off",
         "comma-dangle": "off",
         "comma-spacing": "off",
-        "curly": "off",
         "new-cap": "off",
         "no-multi-spaces": "off",
         "no-multiple-empty-lines": "off",

@@ -823,8 +823,9 @@ describe('Storage', function() {
           // Set the primary flags to false.
           manifest.periods[0].variants.forEach(function(variant) {
             variant.primary = false;
-            if (variant.audio)
+            if (variant.audio) {
               variant.audio.primary = false;
+            }
           });
           // When there is no related match at all, and no primary, we issue a
           // warning, and we only store one track.

@@ -215,8 +215,9 @@ shaka.test.StreamingEngineUtil.createManifest = function(
    * @return {shaka.media.SegmentReference} A SegmentReference.
    */
   function get(type, periodNumber, position) {
-    if (boundsCheckPosition(type, periodNumber, position) == null)
+    if (boundsCheckPosition(type, periodNumber, position) == null) {
       return null;
+    }
 
     let d = segmentDurations[type];
     let getUris = function() {

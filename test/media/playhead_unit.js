@@ -765,8 +765,9 @@ describe('Playhead', function() {
           video.readyState = HTMLMediaElement.HAVE_ENOUGH_DATA;
 
           onEvent.and.callFake(function(event) {
-            if (data.preventDefault)
+            if (data.preventDefault) {
               event.preventDefault();
+            }
           });
 
           config.jumpLargeGaps = !!data.jumpLargeGaps;
@@ -1079,8 +1080,9 @@ describe('Playhead', function() {
         video.readyState = HTMLMediaElement.HAVE_ENOUGH_DATA;
 
         onEvent.and.callFake(function(event) {
-          if (data.preventDefault)
+          if (data.preventDefault) {
             event.preventDefault();
+          }
         });
 
         config.jumpLargeGaps = !!data.jumpLargeGaps;
@@ -1100,10 +1102,11 @@ describe('Playhead', function() {
         video.readyState = calculateReadyState(data.buffered, data.seekTo);
         video.seeking = true;
         video.on['seeking']();
-        if (video.readyState < HTMLMediaElement.HAVE_ENOUGH_DATA)
+        if (video.readyState < HTMLMediaElement.HAVE_ENOUGH_DATA) {
           video.on['waiting']();
-        else
+        } else {
           video.seeking = false;
+        }
         jasmine.clock().tick(1000);
 
         if (data.newBuffered) {
@@ -1117,8 +1120,9 @@ describe('Playhead', function() {
           expect(video.currentTime).toBe(data.seekTo);
           video.buffered = createFakeBuffered(data.newBuffered);
           video.readyState = calculateReadyState(data.newBuffered, data.seekTo);
-          if (video.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA)
+          if (video.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA) {
             video.seeking = false;
+          }
           playhead.onSegmentAppended();
           jasmine.clock().tick(1000);
         }

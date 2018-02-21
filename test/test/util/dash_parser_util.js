@@ -112,8 +112,9 @@ shaka.test.Dash.makeSimpleManifestText =
     periodAttr = 'duration="PT' + opt_duration + 'S"';
     mpdAttr = 'type="static"';
   }
-  if (opt_start)
+  if (opt_start) {
     periodAttr += ' start="PT' + opt_start + 'S"';
+  }
 
   let start = [
     '<MPD ' + mpdAttr + '>',

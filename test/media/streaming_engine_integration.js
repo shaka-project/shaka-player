@@ -248,8 +248,9 @@ describe('StreamingEngine', function() {
           // Compute the total number of segments in all Periods before the
           // |periodNumber|'th one.
           let numPriorSegments = 0;
-          for (let n = 1; n < periodNumber; ++n)
+          for (let n = 1; n < periodNumber; ++n) {
             numPriorSegments += getNumSegments(type, n);
+          }
 
           let wallClockTime = Date.now() / 1000;
 
@@ -728,8 +729,9 @@ describe('StreamingEngine', function() {
           let end = time + d;
           // Make segment 1 longer to make the manifest continuous, despite the
           // dropped segment.
-          if (i == 1 && dropSegment)
+          if (i == 1 && dropSegment) {
             end += d;
+          }
 
           let getUris = (function(i) {
             // The times in the media are based on the URL; so to drop a

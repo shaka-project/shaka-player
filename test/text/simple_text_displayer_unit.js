@@ -367,39 +367,54 @@ describe('SimpleTextDisplayer', function() {
       expect(result[i].endTime).toBe(vttCues[i].end);
       expect(result[i].text).toBe(vttCues[i].text);
 
-      if ('id' in vttCues[i])
+      if ('id' in vttCues[i]) {
         expect(result[i].id).toBe(vttCues[i].id);
-      if ('vertical' in vttCues[i])
+      }
+      if ('vertical' in vttCues[i]) {
         expect(result[i].vertical).toBe(vttCues[i].vertical);
-      if ('line' in vttCues[i])
+      }
+      if ('line' in vttCues[i]) {
         expect(result[i].line).toBe(vttCues[i].line);
-      if ('align' in vttCues[i])
+      }
+      if ('align' in vttCues[i]) {
         expect(result[i].align).toBe(vttCues[i].align);
-      if ('size' in vttCues[i])
+      }
+      if ('size' in vttCues[i]) {
         expect(result[i].size).toBe(vttCues[i].size);
-      if ('position' in vttCues[i])
+      }
+      if ('position' in vttCues[i]) {
         expect(result[i].position).toBe(vttCues[i].position);
-      if ('region' in vttCues[i])
+      }
+      if ('region' in vttCues[i]) {
         verifyRegion(result[i].region, vttCues[i].region);
+      }
     }
   }
 
   function verifyRegion(actual, expected) {
-    if ('id' in expected)
+    if ('id' in expected) {
       expect(actual.id).toBe(expected.id);
-    if ('width' in expected)
+    }
+    if ('width' in expected) {
       expect(actual.width).toBe(expected.width);
-    if ('lines' in expected)
+    }
+    if ('lines' in expected) {
       expect(actual.lines).toBe(expected.lines);
-    if ('regionAnchorX' in expected)
+    }
+    if ('regionAnchorX' in expected) {
       expect(actual.regionAnchorX).toBe(expected.regionAnchorX);
-    if ('regionAnchorY' in expected)
+    }
+    if ('regionAnchorY' in expected) {
       expect(actual.regionAnchorY).toBe(expected.regionAnchorY);
-    if ('viewportAnchorX' in expected)
+    }
+    if ('viewportAnchorX' in expected) {
       expect(actual.viewportAnchorX).toBe(expected.viewportAnchorX);
-    if ('viewportAnchorY' in expected)
+    }
+    if ('viewportAnchorY' in expected) {
       expect(actual.viewportAnchorY).toBe(expected.viewportAnchorY);
-    if ('scroll' in expected)
+    }
+    if ('scroll' in expected) {
       expect(actual.scroll).toBe(expected.scroll);
+    }
   }
 });

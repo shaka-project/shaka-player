@@ -62,8 +62,9 @@ shaka.test.Util.fakeEventLoop = function(duration, opt_onTick) {
       PromiseMock.flush();
     }
 
-    if (opt_onTick)
+    if (opt_onTick) {
       opt_onTick(time);
+    }
     jasmine.clock().tick(1000);
     PromiseMock.flush();
   }
@@ -155,17 +156,20 @@ shaka.test.Util.expectToEqualElementRecursive_ = function(actual, expected) {
 
   if (!(actual instanceof Element) && !(expected instanceof Element)) {
     // Compare them as nodes.
-    if (actual.textContent != expected.textContent)
+    if (actual.textContent != expected.textContent) {
       return prospectiveDiff + 'Nodes are different.';
+    }
   } else if (!(actual instanceof Element) || !(expected instanceof Element)) {
     return prospectiveDiff + 'One is element, one isn\'t.';
   } else {
     // Compare them as elements.
-    if (actual.tagName != expected.tagName)
+    if (actual.tagName != expected.tagName) {
       return prospectiveDiff + 'Different tagName.';
+    }
 
-    if (actual.attributes.length != expected.attributes.length)
+    if (actual.attributes.length != expected.attributes.length) {
       return prospectiveDiff + 'Different attribute list length.';
+    }
     for (let i = 0; i < actual.attributes.length; i++) {
       let aAttrib = actual.attributes[i].nodeName;
       let aAttribVal = actual.getAttribute(aAttrib);
@@ -179,14 +183,16 @@ shaka.test.Util.expectToEqualElementRecursive_ = function(actual, expected) {
       }
     }
 
-    if (actual.childNodes.length != expected.childNodes.length)
+    if (actual.childNodes.length != expected.childNodes.length) {
       return prospectiveDiff + 'Different child node list length.';
+    }
     for (let i = 0; i < actual.childNodes.length; i++) {
       let aNode = actual.childNodes[i];
       let eNode = expected.childNodes[i];
       let diff = shaka.test.Util.expectToEqualElementRecursive_(aNode, eNode);
-      if (diff)
+      if (diff) {
         return diff;
+      }
     }
   }
 
@@ -269,8 +275,9 @@ shaka.test.Util.fetch = function(uri) {
  * @param {!Object} obj
  */
 shaka.test.Util.makeMockObjectStrict = function(obj) {
-  for (let name in obj)
+  for (let name in obj) {
     obj[name].and.throwError(new Error(name));
+  }
 };
 
 

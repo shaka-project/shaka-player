@@ -311,8 +311,9 @@ shaka.test.ManifestGenerator.prototype.videoRobustness = function(robustness) {
  */
 shaka.test.ManifestGenerator.prototype.addInitData = function(type, buffer) {
   let drmInfo = this.currentDrmInfo_();
-  if (!drmInfo.initData)
+  if (!drmInfo.initData) {
     drmInfo.initData = [];
+  }
   drmInfo.initData.push({initData: buffer, initDataType: type, keyId: null});
   return this;
 };
@@ -326,8 +327,9 @@ shaka.test.ManifestGenerator.prototype.addInitData = function(type, buffer) {
  */
 shaka.test.ManifestGenerator.prototype.addCencInitData = function(base64) {
   let drmInfo = this.currentDrmInfo_();
-  if (!drmInfo.initData)
+  if (!drmInfo.initData) {
     drmInfo.initData = [];
+  }
 
   let buffer = shaka.util.Uint8ArrayUtils.fromBase64(base64);
   drmInfo.initData.push({initData: buffer, initDataType: 'cenc'});
@@ -359,8 +361,9 @@ shaka.test.ManifestGenerator.prototype.addVideo = function(id) {
     }
   }
 
-  if (!stream)
+  if (!stream) {
     stream = this.createStream_(id, ContentType.VIDEO, 'und');
+  }
 
   variant.video = stream;
   this.lastStreamAdded_ = stream;
@@ -392,8 +395,9 @@ shaka.test.ManifestGenerator.prototype.addAudio = function(id) {
     }
   }
 
-  if (!stream)
+  if (!stream) {
     stream = this.createStream_(id, ContentType.AUDIO, variant.language);
+  }
 
   variant.audio = stream;
   this.lastStreamAdded_ = stream;
@@ -517,8 +521,9 @@ shaka.test.ManifestGenerator.prototype.useSegmentTemplate = function(
     return Math.floor(time / segmentDuration);
   };
   stream.getSegmentReference = (function(index) {
-    if (index < 0 || index >= segmentCount)
+    if (index < 0 || index >= segmentCount) {
       return null;
+    }
     let getUris = function() { return [sprintf(template, index)]; };
     let start = index * segmentDuration;
     let end = Math.min(totalDuration, (index + 1) * segmentDuration);

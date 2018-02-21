@@ -173,8 +173,9 @@ describe('HlsParser live', function() {
             let video = variants[i].video;
             let audio = variants[i].audio;
             ManifestParser.verifySegmentIndex(video, initialReferences);
-            if (audio)
+            if (audio) {
               ManifestParser.verifySegmentIndex(audio, initialReferences);
+            }
           }
 
           fakeNetEngine.setResponseMapAsText({
@@ -189,8 +190,9 @@ describe('HlsParser live', function() {
             let video = variants[i].video;
             let audio = variants[i].audio;
             ManifestParser.verifySegmentIndex(video, updatedReferences);
-            if (audio)
+            if (audio) {
               ManifestParser.verifySegmentIndex(audio, updatedReferences);
+            }
           }
         }).catch(fail).then(done);
     PromiseMock.flush();

@@ -234,10 +234,12 @@ describe('Player', function() {
         }
 
         let mimeTypes = [];
-        if (asset.features.indexOf(Feature.WEBM) >= 0)
+        if (asset.features.indexOf(Feature.WEBM) >= 0) {
           mimeTypes.push('video/webm');
-        if (asset.features.indexOf(Feature.MP4) >= 0)
+        }
+        if (asset.features.indexOf(Feature.MP4) >= 0) {
           mimeTypes.push('video/mp4');
+        }
         if (!mimeTypes.some(
             function(type) { return support.media[type]; })) {
           pending('None of the required MIME types are supported.');
@@ -249,12 +251,15 @@ describe('Player', function() {
         config.abr.enabled = false;
         config.manifest.dash.clockSyncUri =
             '//shaka-player-demo.appspot.com/time.txt';
-        if (asset.licenseServers)
+        if (asset.licenseServers) {
           config.drm.servers = asset.licenseServers;
-        if (asset.drmCallback)
+        }
+        if (asset.drmCallback) {
           config.manifest.dash.customScheme = asset.drmCallback;
-        if (asset.clearKeys)
+        }
+        if (asset.clearKeys) {
           config.drm.clearKeys = asset.clearKeys;
+        }
         player.configure(config);
 
         if (asset.licenseRequestHeaders) {
@@ -263,12 +268,15 @@ describe('Player', function() {
         }
 
         let networkingEngine = player.getNetworkingEngine();
-        if (asset.requestFilter)
+        if (asset.requestFilter) {
           networkingEngine.registerRequestFilter(asset.requestFilter);
-        if (asset.responseFilter)
+        }
+        if (asset.responseFilter) {
           networkingEngine.registerResponseFilter(asset.responseFilter);
-        if (asset.extraConfig)
+        }
+        if (asset.extraConfig) {
           player.configure(asset.extraConfig);
+        }
 
         player.load(asset.manifestUri).then(function() {
           expect(player.isLive()).toEqual(isLive);

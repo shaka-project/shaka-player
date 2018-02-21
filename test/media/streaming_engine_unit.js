@@ -839,8 +839,9 @@ describe('StreamingEngine', function() {
     onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
     onChooseStreams.and.callFake(function(period) {
       let chosen = defaultOnChooseStreams(period);
-      if (period == manifest.periods[0])
+      if (period == manifest.periods[0]) {
         chosen.text = null;
+      }
       return chosen;
     });
 
@@ -879,8 +880,9 @@ describe('StreamingEngine', function() {
     onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
     onChooseStreams.and.callFake(function(period) {
       let chosen = defaultOnChooseStreams(period);
-      if (period == manifest.periods[0])
+      if (period == manifest.periods[0]) {
         chosen.text = null;
+      }
       return chosen;
     });
 
@@ -933,8 +935,9 @@ describe('StreamingEngine', function() {
     onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
     onChooseStreams.and.callFake(function(period) {
       let chosen = defaultOnChooseStreams(period);
-      if (period == manifest.periods[1])
+      if (period == manifest.periods[1]) {
         chosen.text = null;
+      }
       return chosen;
     });
 

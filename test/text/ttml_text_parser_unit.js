@@ -789,13 +789,15 @@ describe('TtmlTextParser', function() {
       expect(result[i].endTime).toBeCloseTo(cues[i].end, 3);
       expect(result[i].payload).toBe(cues[i].payload);
 
-      if (cues[i].region)
+      if (cues[i].region) {
         verifyRegion(cues[i].region, result[i].region);
+      }
 
       for (let j = 0; j < properties.length; j++) {
         let property = properties[j];
-        if (property in cues[i])
+        if (property in cues[i]) {
           expect(result[i][property]).toEqual(cues[i][property]);
+        }
       }
 
       if (cues[i].textDecoration) {
@@ -821,8 +823,9 @@ describe('TtmlTextParser', function() {
 
     for (let i = 0; i < properties.length; i++) {
       let property = properties[i];
-        if (property in expected)
-          expect(actual[property]).toEqual(expected[property]);
+      if (property in expected) {
+        expect(actual[property]).toEqual(expected[property]);
+      }
     }
   }
 

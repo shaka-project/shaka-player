@@ -695,8 +695,9 @@ describe('MpdUtils', function() {
     function testFails(baseXMLString, desiredError, desiredNetCalls, done) {
       testRequest(baseXMLString).then(fail).catch(function(error) {
         expect(fakeNetEngine.request).toHaveBeenCalledTimes(desiredNetCalls);
-        if (desiredError)
+        if (desiredError) {
           shaka.test.Util.expectToEqualError(error, desiredError);
+        }
         return Promise.resolve();
       }).then(done);
     }

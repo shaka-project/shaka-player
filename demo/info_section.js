@@ -121,18 +121,21 @@ shakaDemo.updateTrackOptions_ = function(list, tracks, languageAndRole) {
       let trackInfo = '';
       if (track.language) trackInfo += 'language: ' + track.language + ', ';
       if (track.label) trackInfo += 'label: ' + track.label + ', ';
-      if (track.roles.length)
+      if (track.roles.length) {
         trackInfo += 'roles: [' + track.roles.join() + '], ';
-      if (track.width && track.height)
+      }
+      if (track.width && track.height) {
         trackInfo += track.width + 'x' + track.height + ', ';
+      }
       trackInfo += track.bandwidth + ' bits/s';
       return trackInfo;
     } ,
     text: function(track) {
       let trackInfo = 'language: ' + track.language + ', ';
       if (track.label) trackInfo += 'label: ' + track.label + ', ';
-      if (track.roles.length)
+      if (track.roles.length) {
         trackInfo += 'roles: [' + track.roles.join() + '], ';
+      }
       trackInfo += 'kind: ' + track.kind;
       return trackInfo;
     }
@@ -239,8 +242,9 @@ shakaDemo.updateLanguageOptions_ =
     if (selectedTrack.language == language) {
       if (selectedTrack.roles.length) {
         selectedTrack.roles.forEach(function(selectedRole) {
-          if (selectedRole == role)
+          if (selectedRole == role) {
             isSelected = true;
+          }
         });
       } else {
         isSelected = true;

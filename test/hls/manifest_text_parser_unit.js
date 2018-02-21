@@ -345,10 +345,12 @@ describe('ManifestTextParser', function() {
     expect(actualPlaylist.type).toEqual(expectedPlaylist.type);
     expect(actualPlaylist.tags).toEqual(expectedPlaylist.tags);
 
-    if (expectedPlaylist.segments)
+    if (expectedPlaylist.segments) {
       expect(actualPlaylist.segments).toEqual(expectedPlaylist.segments);
+    }
 
-    if (expectedPlaylist.uri)
+    if (expectedPlaylist.uri) {
       expect(actualPlaylist.uri).toEqual(expectedPlaylist.uri);
+    }
   }
 });

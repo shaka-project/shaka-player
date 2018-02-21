@@ -199,8 +199,9 @@ shaka.test.FakeNetworkingEngine.prototype.unregisterResponseFilterImpl_ =
  * @return {!shaka.util.PublicPromise}
  */
 shaka.test.FakeNetworkingEngine.prototype.delayNextRequest = function() {
-  if (!this.delayNextRequestPromise_)
+  if (!this.delayNextRequestPromise_) {
     this.delayNextRequestPromise_ = new shaka.util.PublicPromise();
+  }
   return this.delayNextRequestPromise_;
 };
 

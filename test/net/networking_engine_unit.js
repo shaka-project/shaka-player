@@ -86,12 +86,13 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         timeout: 0
       });
       rejectScheme.and.callFake(function() {
-        if (rejectScheme.calls.count() == 1)
+        if (rejectScheme.calls.count() == 1) {
           return shaka.util.AbortableOperation.failed(error);
-        else
+        } else {
           return shaka.util.AbortableOperation.completed({
             uri: '', data: new ArrayBuffer(0), headers: {}
           });
+        }
       });
       networkingEngine.request(requestType, request).promise
           .catch(fail)
@@ -110,12 +111,13 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         timeout: 0
       });
       rejectScheme.and.callFake(function() {
-        if (rejectScheme.calls.count() < 3)
+        if (rejectScheme.calls.count() < 3) {
           return shaka.util.AbortableOperation.failed(error);
-        else
+        } else {
           return shaka.util.AbortableOperation.completed({
             uri: '', data: new ArrayBuffer(0), headers: {}
           });
+        }
       });
       networkingEngine.request(requestType, request).promise
           .catch(fail)

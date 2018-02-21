@@ -66,12 +66,15 @@ shakaDemo.setupAssets_ = function() {
     }
 
     let mimeTypes = [];
-    if (asset.features.indexOf(shakaAssets.Feature.WEBM) >= 0)
+    if (asset.features.indexOf(shakaAssets.Feature.WEBM) >= 0) {
       mimeTypes.push('video/webm');
-    if (asset.features.indexOf(shakaAssets.Feature.MP4) >= 0)
+    }
+    if (asset.features.indexOf(shakaAssets.Feature.MP4) >= 0) {
       mimeTypes.push('video/mp4');
-    if (asset.features.indexOf(shakaAssets.Feature.MP2TS) >= 0)
+    }
+    if (asset.features.indexOf(shakaAssets.Feature.MP2TS) >= 0) {
       mimeTypes.push('video/mp2t');
+    }
     if (!mimeTypes.some(
         function(type) { return shakaDemo.support_.media[type]; })) {
       option.disabled = true;
@@ -247,8 +250,9 @@ shakaDemo.preparePlayer_ = function(asset) {
   config.abr.enabled =
       document.getElementById('enableAdaptation').checked;
   let smallGapLimit = document.getElementById('smallGapLimit').value;
-  if (!isNaN(Number(smallGapLimit)) && smallGapLimit.length > 0)
+  if (!isNaN(Number(smallGapLimit)) && smallGapLimit.length > 0) {
     config.streaming.smallGapLimit = Number(smallGapLimit);
+  }
   config.streaming.jumpLargeGaps =
       document.getElementById('jumpLargeGaps').checked;
 

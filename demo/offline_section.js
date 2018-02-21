@@ -65,15 +65,16 @@ shakaDemo.updateButtons_ = function(canHide) {
   button.disabled = (inProgress || !supportsDrm || option.isStored);
   button.innerText = storedContent ? 'Delete' : 'Store';
   let helpText = document.getElementById('storeDeleteHelpText');
-  if (inProgress)
+  if (inProgress) {
     helpText.textContent = 'Operation is in progress...';
-  else if (!supportsDrm)
+  } else if (!supportsDrm) {
     helpText.textContent = 'This browser does not support persistent licenses.';
-  else if (button.disabled)
+  } else if (button.disabled) {
     helpText.textContent = 'The asset is stored offline. ' +
         'Checkout the "Offline" section in the "Asset" list';
-  else
+  } else {
     helpText.textContent = '';
+  }
 };
 
 
@@ -187,8 +188,9 @@ shakaDemo.storeDeleteAsset_ = function() {
     p = storage.remove(offlineUri).then(function() {
       for (let i = 0; i < assetList.options.length; i++) {
         let option = assetList.options[i];
-        if (option.asset && option.asset.manifestUri == originalManifestUri)
+        if (option.asset && option.asset.manifestUri == originalManifestUri) {
           option.isStored = false;
+        }
       }
       return shakaDemo.refreshAssetList_();
     });
@@ -198,8 +200,9 @@ shakaDemo.storeDeleteAsset_ = function() {
     let assetName = asset.name ? '[OFFLINE] ' + asset.name : null;
     let metadata = {name: assetName || nameField || asset.manifestUri};
     p = storage.store(asset.manifestUri, metadata).then(function() {
-      if (option.asset)
+      if (option.asset) {
         option.isStored = true;
+      }
       return shakaDemo.refreshAssetList_().then(function() {
         // Auto-select offline copy of asset after storing.
         let group = shakaDemo.offlineOptGroup_;

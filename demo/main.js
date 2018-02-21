@@ -433,8 +433,9 @@ shakaDemo.updateFromHash_ = function() {
 
 /** @private */
 shakaDemo.hashShouldChange_ = function() {
-  if (!shakaDemo.hashCanChange_)
+  if (!shakaDemo.hashCanChange_) {
     return;
+  }
 
   let params = [];
   let oldParams = shakaDemo.getParams_();
@@ -445,8 +446,9 @@ shakaDemo.hashShouldChange_ = function() {
   if (shakaDemo.player_) {
     assetUri = shakaDemo.player_.getManifestUri();
     let drmInfo = shakaDemo.player_.drmInfo();
-    if (drmInfo)
+    if (drmInfo) {
       licenseServerUri = drmInfo.licenseServerUri;
+    }
   }
   let assetList = document.getElementById('assetList');
   if (assetUri) {
@@ -499,8 +501,9 @@ shakaDemo.hashShouldChange_ = function() {
     params.push('smallGapLimit=' +
         document.getElementById('smallGapLimit').value);
   }
-  if (document.getElementById('jumpLargeGaps').checked)
+  if (document.getElementById('jumpLargeGaps').checked) {
     params.push('jumpLargeGaps');
+  }
   let audioLang = document.getElementById('preferredAudioLanguage').value;
   let textLang = document.getElementById('preferredTextLanguage').value;
   if (textLang != audioLang) {
@@ -540,12 +543,14 @@ shakaDemo.hashShouldChange_ = function() {
   // Store values for drm configuration.
   let videoRobustness =
       document.getElementById('drmSettingsVideoRobustness').value;
-  if (videoRobustness)
+  if (videoRobustness) {
     params.push('videoRobustness=' + videoRobustness);
+  }
   let audioRobustness =
       document.getElementById('drmSettingsAudioRobustness').value;
-  if (audioRobustness)
+  if (audioRobustness) {
     params.push('audioRobustness=' + audioRobustness);
+  }
 
   // These parameters must be added manually, so preserve them.
   // These are only used by the loader in load.js to decide which version of

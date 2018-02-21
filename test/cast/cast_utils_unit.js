@@ -40,10 +40,12 @@ describe('CastUtils', function() {
 
     let castMembers = CastUtils.PlayerVoidMethods
                           .concat(CastUtils.PlayerPromiseMethods);
-    for (let name in CastUtils.PlayerGetterMethods)
+    for (let name in CastUtils.PlayerGetterMethods) {
       castMembers.push(name);
-    for (let name in CastUtils.PlayerGetterMethodsThatRequireLive)
+    }
+    for (let name in CastUtils.PlayerGetterMethodsThatRequireLive) {
       castMembers.push(name);
+    }
     let playerMembers = Object.keys(shaka.Player.prototype).filter(
         function(name) {
           // Private members end with _.

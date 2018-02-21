@@ -168,8 +168,9 @@ shaka.test.FakeMediaSourceEngine.prototype.bufferStartImpl_ = function(type) {
   if (this.segments[type] === undefined) throw new Error('unexpected type');
 
   let first = this.segments[type].indexOf(true);
-  if (first < 0)
+  if (first < 0) {
     return null;
+  }
 
   return this.toTime_(type, first);
 };
@@ -184,8 +185,9 @@ shaka.test.FakeMediaSourceEngine.prototype.bufferEndImpl_ = function(type) {
   if (this.segments[type] === undefined) throw new Error('unexpected type');
 
   let last = this.segments[type].lastIndexOf(true);
-  if (last < 0)
+  if (last < 0) {
     return null;
+  }
 
   return this.toTime_(type, last + 1);
 };
@@ -203,8 +205,9 @@ shaka.test.FakeMediaSourceEngine.prototype.isBufferedImpl_ =
 
   let first = this.segments[type].indexOf(true);
   let last = this.segments[type].lastIndexOf(true);
-  if (first < 0 || last < 0)
+  if (first < 0 || last < 0) {
     return false;
+  }
 
   return time >= this.toTime_(type, first) && time < this.toTime_(type, last);
 };
@@ -230,13 +233,15 @@ shaka.test.FakeMediaSourceEngine.prototype.bufferedAheadOfImpl_ = function(
   // Note: |start| may equal the end of the last segment, so |first|
   // may equal segments[type].length
   let first = this.toIndex_(type, start);
-  if (!hasSegment(first))
-    return 0;  // Unbuffered.
+  if (!hasSegment(first)) {
+    return 0;
+  }  // Unbuffered.
 
   // Find the first gap.
   let last = first;
-  while (last < this.segments[type].length && hasSegment(last))
+  while (last < this.segments[type].length && hasSegment(last)) {
     last++;
+  }
 
   return this.toTime_(type, last) - start;
 };
@@ -293,8 +298,9 @@ shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl = function(
           'trickvideo');
     }
   }
-  if (i < 0)
+  if (i < 0) {
     throw new Error('unexpected data');
+  }
 
   expect(startTime).toBe(this.segmentData[type].segmentStartTimes[i]);
   expect(endTime).toBe(startTime + this.segmentData[type].segmentDuration);
@@ -321,16 +327,19 @@ shaka.test.FakeMediaSourceEngine.prototype.removeImpl =
   if (this.segments[type] === undefined) throw new Error('unexpected type');
 
   let first = this.toIndex_(type, start);
-  if (first < 0 || first >= this.segments[type].length)
+  if (first < 0 || first >= this.segments[type].length) {
     throw new Error('unexpected start');
+  }
 
   // Note: |end| is exclusive.
   let last = this.toIndex_(type, end - 0.000001);
-  if (last < 0)
+  if (last < 0) {
     throw new Error('unexpected end');
+  }
 
-  if (first > last)
+  if (first > last) {
     throw new Error('unexpected start and end');
+  }
 
   for (let i = first; i <= last; ++i) {
     this.segments[type][i] = false;

@@ -214,8 +214,9 @@ function httpPluginTests(usingFetch) {
 
     // When using fetch, timeout is handled manually by the plugin, instead of
     // being done by the mocking framework, so we need to actually wait.
-    if (usingFetch)
+    if (usingFetch) {
       jasmine.clock().tick(5000);
+    }
     PromiseMock.flush();
   });
 
@@ -354,8 +355,9 @@ function httpPluginTests(usingFetch) {
           expect(error).toBeTruthy();
           expect(error.severity)
               .toBe(opt_severity || shaka.util.Error.Severity.RECOVERABLE);
-          if (opt_code)
+          if (opt_code) {
             expect(error.code).toBe(opt_code);
+          }
           expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
           if (opt_errorData) {
             expect(error.data).toEqual(opt_errorData);

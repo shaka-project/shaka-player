@@ -604,20 +604,27 @@ describe('VttTextParser', function() {
       expect(result[i].endTime).toBe(cues[i].end);
       expect(result[i].payload).toBe(cues[i].payload);
 
-      if ('id' in cues[i])
+      if ('id' in cues[i]) {
         expect(result[i].id).toBe(cues[i].id);
-      if ('vertical' in cues[i])
+      }
+      if ('vertical' in cues[i]) {
         expect(result[i].writingDirection).toBe(cues[i].writingDirection);
-      if ('line' in cues[i])
+      }
+      if ('line' in cues[i]) {
         expect(result[i].line).toBe(cues[i].line);
-      if ('textAlign' in cues[i])
+      }
+      if ('textAlign' in cues[i]) {
         expect(result[i].textAlign).toBe(cues[i].textAlign);
-      if ('size' in cues[i])
+      }
+      if ('size' in cues[i]) {
         expect(result[i].size).toBe(cues[i].size);
-      if ('position' in cues[i])
+      }
+      if ('position' in cues[i]) {
         expect(result[i].position).toBe(cues[i].position);
-      if ('region' in cues[i])
+      }
+      if ('region' in cues[i]) {
         verifyRegion(cues[i].region, result[i].region);
+      }
     }
   }
 
@@ -635,8 +642,9 @@ describe('VttTextParser', function() {
 
     for (let i = 0; i < properties.length; i++) {
       let property = properties[i];
-        if (property in expected)
-          expect(actual[property]).toEqual(expected[property]);
+      if (property in expected) {
+        expect(actual[property]).toEqual(expected[property]);
+      }
     }
   }
 

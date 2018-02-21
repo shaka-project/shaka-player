@@ -29,12 +29,15 @@ ShakaDemoUtils.setupAssetMetadata = function(asset, player) {
       { drm: {}, manifest: { dash: {} } });
 
   // Add config from this asset.
-  if (asset.licenseServers)
+  if (asset.licenseServers) {
     config.drm.servers = asset.licenseServers;
-  if (asset.drmCallback)
+  }
+  if (asset.drmCallback) {
     config.manifest.dash.customScheme = asset.drmCallback;
-  if (asset.clearKeys)
+  }
+  if (asset.clearKeys) {
     config.drm.clearKeys = asset.clearKeys;
+  }
   player.configure(config);
 
   // Configure network filters.
@@ -48,13 +51,16 @@ ShakaDemoUtils.setupAssetMetadata = function(asset, player) {
     networkingEngine.registerRequestFilter(filter);
   }
 
-  if (asset.requestFilter)
+  if (asset.requestFilter) {
     networkingEngine.registerRequestFilter(asset.requestFilter);
-  if (asset.responseFilter)
+  }
+  if (asset.responseFilter) {
     networkingEngine.registerResponseFilter(asset.responseFilter);
-  if (asset.extraConfig)
-    player.configure(/** @type {shakaExtern.PlayerConfiguration} */(
-        asset.extraConfig));
+  }
+  if (asset.extraConfig) {
+    player.configure(
+        /** @type {shakaExtern.PlayerConfiguration} */ (asset.extraConfig));
+  }
 };
 
 

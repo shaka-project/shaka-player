@@ -22,10 +22,11 @@
  * @return {?string|boolean}
  */
 function getClientArg(name) {
-  if (window.__karma__ && __karma__.config.args.length)
+  if (window.__karma__ && __karma__.config.args.length) {
     return __karma__.config.args[0][name] || null;
-  else
+  } else {
     return null;
+  }
 }
 
 
