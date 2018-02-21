@@ -52,7 +52,7 @@ describe('Mp4TtmlParser', function() {
   it('parses media segment', function() {
     let parser = new shaka.text.Mp4TtmlParser();
     parser.parseInit(ttmlInitSegment);
-    let time = {periodStart: 0, segmentStart: 0, segmentEnd: 0 };
+    let time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
     let ret = parser.parseMedia(ttmlSegment, time);
     expect(ret.length).toBe(10);
   });
@@ -60,14 +60,14 @@ describe('Mp4TtmlParser', function() {
   it('handles media segments with multiple mdats', function() {
     let parser = new shaka.text.Mp4TtmlParser();
     parser.parseInit(ttmlInitSegment);
-    let time = {periodStart: 0, segmentStart: 0, segmentEnd: 0 };
+    let time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
     let ret = parser.parseMedia(ttmlSegmentMultipleMDAT, time);
     expect(ret.length).toBe(20);
   });
 
   it('accounts for offset', function() {
-    let time1 = {periodStart: 0, segmentStart: 0, segmentEnd: 0 };
-    let time2 = {periodStart: 7, segmentStart: 0, segmentEnd: 0 };
+    let time1 = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
+    let time2 = {periodStart: 7, segmentStart: 0, segmentEnd: 0};
 
     let parser = new shaka.text.Mp4TtmlParser();
     parser.parseInit(ttmlInitSegment);

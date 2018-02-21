@@ -1054,12 +1054,12 @@ describe('DashParser Manifest', function() {
       Promise.resolve().then(function() {
         // Parses the space-separated list and finds 8 channels.
         return testAudioChannelConfiguration(8,
-            { 'urn:mpeg:dash:outputChannelPositionList:2012':
-                  '2 0 1 4 5 3 17 1' });
+            {'urn:mpeg:dash:outputChannelPositionList:2012':
+                  '2 0 1 4 5 3 17 1'});
       }).then(function() {
         // Does not get confused about extra spaces.
         return testAudioChannelConfiguration(7,
-            { 'urn:mpeg:dash:outputChannelPositionList:2012':
+            {'urn:mpeg:dash:outputChannelPositionList:2012':
                   '  5 2 1 12   8 9   1  '});
       }).then(done);
     });
@@ -1068,16 +1068,16 @@ describe('DashParser Manifest', function() {
       return Promise.resolve().then(function() {
         // Parses a simple channel count.
         return testAudioChannelConfiguration(2,
-            { 'urn:mpeg:dash:23003:3:audio_channel_configuration:2011': '2' });
+            {'urn:mpeg:dash:23003:3:audio_channel_configuration:2011': '2'});
       }).then(function() {
         // This scheme seems to use the same format.
         return testAudioChannelConfiguration(6,
-            { 'urn:dts:dash:audio_channel_configuration:2012': '6' });
+            {'urn:dts:dash:audio_channel_configuration:2012': '6'});
       }).then(function() {
         // Results in null if the value is not an integer.
         return testAudioChannelConfiguration(null,
-            { 'urn:mpeg:dash:23003:3:audio_channel_configuration:2011':
-                  'foo' });
+            {'urn:mpeg:dash:23003:3:audio_channel_configuration:2011':
+                  'foo'});
       }).then(done);
     });
 
@@ -1085,23 +1085,23 @@ describe('DashParser Manifest', function() {
       return Promise.resolve().then(function() {
         // Parses a hex value in which each 1-bit is a channel.
         return testAudioChannelConfiguration(6,
-            { 'tag:dolby.com,2014:dash:audio_channel_configuration:2011':
-                  'F801' });
+            {'tag:dolby.com,2014:dash:audio_channel_configuration:2011':
+                  'F801'});
       }).then(function() {
         // This scheme seems to use the same format.
         return testAudioChannelConfiguration(8,
-            { 'urn:dolby:dash:audio_channel_configuration:2011': '7037' });
+            {'urn:dolby:dash:audio_channel_configuration:2011': '7037'});
       }).then(function() {
         // Results in null if the value is not a valid hex number.
         return testAudioChannelConfiguration(null,
-            { 'urn:dolby:dash:audio_channel_configuration:2011': 'x' });
+            {'urn:dolby:dash:audio_channel_configuration:2011': 'x'});
       }).then(done);
     });
 
     it('ignores unrecognized schemes', function(done) {
       return Promise.resolve().then(function() {
         return testAudioChannelConfiguration(null,
-            { 'foo': 'bar' });
+            {'foo': 'bar'});
       }).then(function() {
         return testAudioChannelConfiguration(2,
             {

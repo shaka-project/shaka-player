@@ -80,7 +80,7 @@ describe('DashParser SegmentTemplate', function() {
         ' presentationTimeOffset="50" />'
       ], 30 /* duration */);
 
-      fakeNetEngine.setResponseMapAsText({ 'dummy://foo': source });
+      fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
       parser.start('dummy://foo', playerInterface)
           .then(function(manifest) {
             expect(manifest.periods.length).toBe(1);

@@ -97,7 +97,7 @@ describe('CastReceiver', function() {
     // don't need this mock strictly type-checked.
     window['cast'] = {
       receiver: mockReceiverApi,
-      __platform__: { canDisplayType: mockCanDisplayType }
+      __platform__: {canDisplayType: mockCanDisplayType}
     };
 
     mockReceiverManager = createMockReceiverManager();
@@ -482,7 +482,7 @@ describe('CastReceiver', function() {
       shaka.test.Util.delay(0.1).then(function() {
         expect(mockPlayer.load).toHaveBeenCalled();
         expect(mockPlayer.dispatchEvent).toHaveBeenCalledWith(
-            jasmine.objectContaining({ type: 'error', detail: fakeError }));
+            jasmine.objectContaining({type: 'error', detail: fakeError}));
       }).catch(fail).then(done);
     }));
   });
@@ -683,7 +683,7 @@ describe('CastReceiver', function() {
       };
       fakeIncomingMessage({
         type: 'init',
-        initState: { manifest: 'URI A' },
+        initState: {manifest: 'URI A'},
         appData: {}
       }, mockShakaMessageBus);
 
@@ -964,7 +964,7 @@ describe('CastReceiver', function() {
       setSystemVolumeMuted:
           jasmine.createSpy('CastReceiverManager.setSystemVolumeMuted'),
       getSenders: jasmine.createSpy('CastReceiverManager.getSenders'),
-      getSystemVolume: function() { return { level: 1, muted: false }; },
+      getSystemVolume: function() { return {level: 1, muted: false}; },
       getCastMessageBus: function(namespace) {
         if (namespace == shaka.cast.CastUtils.SHAKA_MESSAGE_NAMESPACE) {
           return mockShakaMessageBus;

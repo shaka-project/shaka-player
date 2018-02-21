@@ -132,7 +132,7 @@ describe('CastReceiver', function() {
     // don't need this mock strictly type-checked.
     window['cast'] = {
       receiver: mockReceiverApi,
-      __platform__: { canDisplayType: mockCanDisplayType }
+      __platform__: {canDisplayType: mockCanDisplayType}
     };
 
     mockReceiverManager = createMockReceiverManager();
@@ -337,7 +337,7 @@ describe('CastReceiver', function() {
       setSystemVolumeMuted:
           jasmine.createSpy('CastReceiverManager.setSystemVolumeMuted'),
       getSenders: jasmine.createSpy('CastReceiverManager.getSenders'),
-      getSystemVolume: function() { return { level: 1, muted: false }; },
+      getSystemVolume: function() { return {level: 1, muted: false}; },
       getCastMessageBus: function(namespace) {
         if (namespace == CastUtils.SHAKA_MESSAGE_NAMESPACE) {
           return mockShakaMessageBus;

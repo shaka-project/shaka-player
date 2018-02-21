@@ -715,7 +715,7 @@ describe('DashParser Live', function() {
         '  </Period>',
         '</MPD>'
       ].join('\n');
-      let manifest = sprintf(template, { contents: lines.join('\n') });
+      let manifest = sprintf(template, {contents: lines.join('\n')});
 
       fakeNetEngine.setResponseMapAsText({'dummy://foo': manifest});
       Date.now = function() { return 600000; /* 10 minutes */ };

@@ -162,9 +162,9 @@ describe('MpdUtils', function() {
         createTimePoint(20, 10, 0)
       ];
       let result = [
-        { start: 0, end: 10 },
-        { start: 10, end: 20 },
-        { start: 20, end: 30 }
+        {start: 0, end: 10},
+        {start: 10, end: 20},
+        {start: 20, end: 30}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -176,9 +176,9 @@ describe('MpdUtils', function() {
         createTimePoint(null, 10, 0)
       ];
       let result = [
-        { start: 0, end: 10 },
-        { start: 10, end: 20 },
-        { start: 20, end: 30 }
+        {start: 0, end: 10},
+        {start: 10, end: 20},
+        {start: 20, end: 30}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -189,8 +189,8 @@ describe('MpdUtils', function() {
         createTimePoint(15, 10, 0)
       ];
       let result = [
-        { start: 0, end: 15 },
-        { start: 15, end: 25 }
+        {start: 0, end: 15},
+        {start: 15, end: 25}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -201,8 +201,8 @@ describe('MpdUtils', function() {
         createTimePoint(10, 10, 0)
       ];
       let result = [
-        { start: 0, end: 10 },
-        { start: 10, end: 20 }
+        {start: 0, end: 10},
+        {start: 10, end: 20}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -213,13 +213,13 @@ describe('MpdUtils', function() {
         createTimePoint(60, 10, 0)
       ];
       let result = [
-        { start: 0, end: 10 },
-        { start: 10, end: 20 },
-        { start: 20, end: 30 },
-        { start: 30, end: 40 },
-        { start: 40, end: 50 },
-        { start: 50, end: 60 },
-        { start: 60, end: 70 }
+        {start: 0, end: 10},
+        {start: 10, end: 20},
+        {start: 20, end: 30},
+        {start: 30, end: 40},
+        {start: 40, end: 50},
+        {start: 50, end: 60},
+        {start: 60, end: 70}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -231,9 +231,9 @@ describe('MpdUtils', function() {
         createTimePoint(20, 10, 0)
       ];
       let result = [
-        { start: 0, end: 10 },
-        { start: 10, end: 20 },
-        { start: 20, end: 30 }
+        {start: 0, end: 10},
+        {start: 10, end: 20},
+        {start: 20, end: 30}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -244,10 +244,10 @@ describe('MpdUtils', function() {
         createTimePoint(35, 10, 0)
       ];
       let result = [
-        { start: 0, end: 10 },
-        { start: 10, end: 20 },
-        { start: 20, end: 35 },
-        { start: 35, end: 45 }
+        {start: 0, end: 10},
+        {start: 10, end: 20},
+        {start: 20, end: 35},
+        {start: 35, end: 45}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -259,11 +259,11 @@ describe('MpdUtils', function() {
         createTimePoint(40, 10, 0)
       ];
       let result = [
-        { start: 0, end: 10 },
-        { start: 10, end: 20 },
-        { start: 20, end: 30 },
-        { start: 30, end: 40 },
-        { start: 40, end: 50 }
+        {start: 0, end: 10},
+        {start: 10, end: 20},
+        {start: 20, end: 30},
+        {start: 30, end: 40},
+        {start: 40, end: 50}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -275,12 +275,12 @@ describe('MpdUtils', function() {
         createTimePoint(45, 5, 0)
       ];
       let result = [
-        { start: 0, end: 10 },
-        { start: 10, end: 20 },
-        { start: 20, end: 30 },
-        { start: 30, end: 40 },
-        { start: 40, end: 45 },
-        { start: 45, end: 50 }
+        {start: 0, end: 10},
+        {start: 10, end: 20},
+        {start: 20, end: 30},
+        {start: 30, end: 40},
+        {start: 40, end: 45},
+        {start: 45, end: 50}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -292,7 +292,7 @@ describe('MpdUtils', function() {
         createTimePoint(5, 10, 0)
       ];
       let result = [
-        { start: 0, end: 10 }
+        {start: 0, end: 10}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -304,7 +304,7 @@ describe('MpdUtils', function() {
         createTimePoint(null, 10, 0)
       ];
       let result = [
-        { start: 0, end: 10 }
+        {start: 0, end: 10}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -315,10 +315,10 @@ describe('MpdUtils', function() {
         createTimePoint(10, 5, -1)
       ];
       let result = [
-        { start: 0, end: 10 },
-        { start: 10, end: 15 },
-        { start: 15, end: 20 },
-        { start: 20, end: 25 }
+        {start: 0, end: 10},
+        {start: 10, end: 15},
+        {start: 15, end: 20},
+        {start: 20, end: 25}
       ];
       checkTimePoints(timePoints, result, 1, 0, 25);
     });
@@ -329,7 +329,7 @@ describe('MpdUtils', function() {
         createTimePoint(10, 5, -1)
       ];
       let result = [
-        { start: 0, end: 10 }
+        {start: 0, end: 10}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -341,8 +341,8 @@ describe('MpdUtils', function() {
         createTimePoint(25, 5, -1)
       ];
       let result = [
-        { start: 0, end: 10 },
-        { start: 10, end: 20 }
+        {start: 0, end: 10},
+        {start: 10, end: 20}
       ];
       checkTimePoints(timePoints, result, 1, 0, 20);
     });
@@ -356,8 +356,8 @@ describe('MpdUtils', function() {
         createTimePoint(40, 10, 0)
       ];
       let result = [
-        { start: 0, end: 10 },
-        { start: 10, end: 20 }
+        {start: 0, end: 10},
+        {start: 10, end: 20}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -370,10 +370,10 @@ describe('MpdUtils', function() {
         createTimePoint(40, 10, 0)
       ];
       let result = [
-        { start: 0, end: 10 },
-        { start: 10, end: 20 },
-        { start: 20, end: 30 },
-        { start: 30, end: 40 }
+        {start: 0, end: 10},
+        {start: 10, end: 20},
+        {start: 20, end: 30},
+        {start: 30, end: 40}
       ];
       checkTimePoints(timePoints, result, 1, 10, Infinity);
     });
@@ -387,7 +387,7 @@ describe('MpdUtils', function() {
      * @return {{t: ?number, d: ?number, r: ?number}}
      */
     function createTimePoint(t, d, r) {
-      return { t: t, d: d, r: r };
+      return {t: t, d: d, r: r};
     }
 
     /**

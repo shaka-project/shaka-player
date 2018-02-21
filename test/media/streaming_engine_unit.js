@@ -745,7 +745,7 @@ describe('StreamingEngine', function() {
         return defaultOnChooseStreams(period);
       });
 
-      return { variant: variant2, text: textStream2 };
+      return {variant: variant2, text: textStream2};
     });
 
     streamingEngine.init();
@@ -791,7 +791,7 @@ describe('StreamingEngine', function() {
         return defaultOnChooseStreams(period);
       });
 
-      return { variant: variant1, text: textStream1 };
+      return {variant: variant1, text: textStream1};
     });
 
     streamingEngine.init();
@@ -1035,7 +1035,7 @@ describe('StreamingEngine', function() {
       netEngine = {
         request: function(requestType, request) {
           let buffer = new ArrayBuffer(0);
-          let response = { uri: request.uris[0], data: buffer, headers: {} };
+          let response = {uri: request.uris[0], data: buffer, headers: {}};
           return shaka.util.AbortableOperation.completed(response);
         }
       };
@@ -1049,7 +1049,7 @@ describe('StreamingEngine', function() {
       mediaSourceEngine.setStreamProperties.and.returnValue(Promise.resolve());
       mediaSourceEngine.remove.and.returnValue(Promise.resolve());
 
-      let bufferEnd = { audio: 0, video: 0, text: 0 };
+      let bufferEnd = {audio: 0, video: 0, text: 0};
       mediaSourceEngine.appendBuffer.and.callFake(
           function(type, data, start, end) {
             bufferEnd[type] = end;
@@ -1073,7 +1073,7 @@ describe('StreamingEngine', function() {
       playhead.getTime.and.returnValue(0);
       onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
       onChooseStreams.and.callFake(function() {
-        return { variant: initialVariant, text: initialTextStream };
+        return {variant: initialVariant, text: initialTextStream};
       });
     });
 
@@ -2814,9 +2814,9 @@ describe('StreamingEngine', function() {
    */
   function defaultOnChooseStreams(period) {
     if (period == manifest.periods[0]) {
-      return { variant: variant1, text: textStream1 };
+      return {variant: variant1, text: textStream1};
     } else if (period == manifest.periods[1]) {
-      return { variant: variant2, text: textStream2 };
+      return {variant: variant2, text: textStream2};
     } else {
       throw new Error();
     }
@@ -2831,10 +2831,10 @@ describe('StreamingEngine', function() {
    */
   function onChooseStreamsWithUnloadedText(period) {
     if (period == manifest.periods[0]) {
-      return { variant: variant1, text: textStream1 };
+      return {variant: variant1, text: textStream1};
     } else if (period == manifest.periods[1]) {
       expect(streamingEngine.unloadTextStream).toHaveBeenCalled();
-      return { variant: variant2 };
+      return {variant: variant2};
     } else {
       throw new Error();
     }

@@ -107,16 +107,16 @@ describe('Mp4VttParser', function() {
   it('parses media segments without a sample duration', function() {
     // Regression test for https://github.com/google/shaka-player/issues/919
     let cues = [
-      { start: 10, end: 11, payload: 'cue 10' },
-      { start: 11, end: 12, payload: 'cue 11' },
-      { start: 12, end: 13, payload: 'cue 12' },
-      { start: 13, end: 14, payload: 'cue 13' },
-      { start: 14, end: 15, payload: 'cue 14' },
-      { start: 15, end: 16, payload: 'cue 15' },
-      { start: 16, end: 17, payload: 'cue 16' },
-      { start: 17, end: 18, payload: 'cue 17' },
-      { start: 18, end: 19, payload: 'cue 18' },
-      { start: 19, end: 20, payload: 'cue 19' }
+      {start: 10, end: 11, payload: 'cue 10'},
+      {start: 11, end: 12, payload: 'cue 11'},
+      {start: 12, end: 13, payload: 'cue 12'},
+      {start: 13, end: 14, payload: 'cue 13'},
+      {start: 14, end: 15, payload: 'cue 14'},
+      {start: 15, end: 16, payload: 'cue 15'},
+      {start: 16, end: 17, payload: 'cue 16'},
+      {start: 17, end: 18, payload: 'cue 17'},
+      {start: 18, end: 19, payload: 'cue 18'},
+      {start: 19, end: 20, payload: 'cue 19'}
     ];
 
     let parser = new shaka.text.Mp4VttParser();

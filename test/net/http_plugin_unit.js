@@ -66,7 +66,7 @@ function httpPluginTests(usingFetch) {
     stubRequest('https://foo.bar/').andReturn({
       'response': new ArrayBuffer(10),
       'status': 200,
-      'responseHeaders': { 'FOO': 'BAR' }
+      'responseHeaders': {'FOO': 'BAR'}
     });
     stubRequest('https://foo.bar/202').andReturn({
       'response': new ArrayBuffer(0),
@@ -75,17 +75,17 @@ function httpPluginTests(usingFetch) {
     stubRequest('https://foo.bar/204').andReturn({
       'response': new ArrayBuffer(10),
       'status': 204,
-      'responseHeaders': { 'FOO': 'BAR' }
+      'responseHeaders': {'FOO': 'BAR'}
     });
     stubRequest('https://foo.bar/withemptyline').andReturn({
       'response': new ArrayBuffer(0),
       'status': 200,
-      'responseHeaders': { '\nFOO': 'BAR' }
+      'responseHeaders': {'\nFOO': 'BAR'}
     });
     stubRequest('https://foo.bar/302').andReturn({
       'response': new ArrayBuffer(10),
       'status': 200,
-      'responseHeaders': { 'FOO': 'BAR' },
+      'responseHeaders': {'FOO': 'BAR'},
       'responseURL': 'https://foo.bar/after/302'
     });
     stubRequest('https://foo.bar/401').andReturn({
@@ -99,12 +99,12 @@ function httpPluginTests(usingFetch) {
     stubRequest('https://foo.bar/404').andReturn({
       'response': new Uint8Array([65, 66, 67]).buffer, // "ABC"
       'status': 404,
-      'responseHeaders': { 'FOO': 'BAR' }
+      'responseHeaders': {'FOO': 'BAR'}
     });
     stubRequest('https://foo.bar/cache').andReturn({
       'response': new ArrayBuffer(0),
       'status': 200,
-      'responseHeaders': { 'X-Shaka-From-Cache': 'true' }
+      'responseHeaders': {'X-Shaka-From-Cache': 'true'}
     });
 
     stubRequest('https://foo.bar/timeout').andTimeout();
@@ -203,7 +203,7 @@ function httpPluginTests(usingFetch) {
   it('fails if non-2xx status', function(done) {
     const uri = 'https://foo.bar/404';
     testFails(uri, done, undefined, shaka.util.Error.Code.BAD_HTTP_STATUS,
-        [uri, 404, 'ABC', { 'foo': 'BAR' }, requestType]);
+        [uri, 404, 'ABC', {'foo': 'BAR'}, requestType]);
     PromiseMock.flush();
   });
 

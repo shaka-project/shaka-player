@@ -59,7 +59,6 @@ module.exports = {
         "new-cap": "off",
         "no-multi-spaces": "off",
         "no-multiple-empty-lines": "off",
-        "object-curly-spacing": "off",
         "one-var": "off",
         "padded-blocks": "off",
         "prefer-rest-params": "off",

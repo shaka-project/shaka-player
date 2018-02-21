@@ -60,10 +60,10 @@ describe('MediaSourceEngine', function() {
   const buffer2 = /** @type {!ArrayBuffer} */ (/** @type {?} */ (2));
   const buffer3 = /** @type {!ArrayBuffer} */ (/** @type {?} */ (3));
 
-  const fakeVideoStream = { mimeType: 'video/foo' };
-  const fakeAudioStream = { mimeType: 'audio/foo' };
-  const fakeTextStream = { mimeType: 'text/foo' };
-  const fakeTransportStream = { mimeType: 'tsMimetype' };
+  const fakeVideoStream = {mimeType: 'video/foo'};
+  const fakeAudioStream = {mimeType: 'audio/foo'};
+  const fakeTextStream = {mimeType: 'text/foo'};
+  const fakeTransportStream = {mimeType: 'tsMimetype'};
 
   let audioSourceBuffer;
   let videoSourceBuffer;
@@ -350,7 +350,7 @@ describe('MediaSourceEngine', function() {
 
     it('rejects promise when operation throws', function(done) {
       audioSourceBuffer.appendBuffer.and.throwError('fail!');
-      mockVideo.error = { code: 5 };
+      mockVideo.error = {code: 5};
       mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null, null)
       .then(function() {
             fail('not reached');
@@ -367,11 +367,11 @@ describe('MediaSourceEngine', function() {
     });
 
     it('rejects promise when op. throws QuotaExceededError', function(done) {
-      let fakeDOMException = { name: 'QuotaExceededError' };
+      let fakeDOMException = {name: 'QuotaExceededError'};
       audioSourceBuffer.appendBuffer.and.callFake(function() {
         throw fakeDOMException;
       });
-      mockVideo.error = { code: 5 };
+      mockVideo.error = {code: 5};
       mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null, null)
       .then(function() {
             fail('not reached');
@@ -385,7 +385,7 @@ describe('MediaSourceEngine', function() {
     });
 
     it('rejects the promise if this operation fails async', function(done) {
-      mockVideo.error = { code: 5 };
+      mockVideo.error = {code: 5};
       mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null, null)
       .then(function() {
             fail('not reached');
@@ -562,7 +562,7 @@ describe('MediaSourceEngine', function() {
 
     it('rejects promise when operation throws', function(done) {
       audioSourceBuffer.remove.and.throwError('fail!');
-      mockVideo.error = { code: 5 };
+      mockVideo.error = {code: 5};
       mediaSourceEngine.remove(ContentType.AUDIO, 1, 5).then(function() {
         fail('not reached');
         done();
@@ -577,7 +577,7 @@ describe('MediaSourceEngine', function() {
     });
 
     it('rejects the promise if this operation fails async', function(done) {
-      mockVideo.error = { code: 5 };
+      mockVideo.error = {code: 5};
       mediaSourceEngine.remove(ContentType.AUDIO, 1, 5).then(function() {
         fail('not reached');
         done();

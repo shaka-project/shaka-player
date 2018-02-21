@@ -128,7 +128,7 @@ function onInstall(event) {
     // No-cors resources: failure on these will NOT fail the Promise chain.
     // For some reason, this doesn't work with addAll, so we use fetchAndCache.
     NO_CORS_RESOURCES.forEach(function(url) {
-      fetchAndCache(cache, new Request(url, { mode: 'no-cors' }));
+      fetchAndCache(cache, new Request(url, {mode: 'no-cors'}));
     });
 
     // Critical resources: failure on these will fail the Promise chain.

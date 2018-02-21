@@ -37,9 +37,9 @@ describe('CancelableChain', function() {
       return true;
     }).then(function(data) {
       expect(data).toBe(true);
-      return { 'testing': 'complex' };
+      return {'testing': 'complex'};
     }).then(function(data) {
-      expect(data).toEqual({ 'testing': 'complex' });
+      expect(data).toEqual({'testing': 'complex'});
       return ['a', 5, false];
     }).then(function(data) {
       expect(data).toEqual(['a', 5, false]);

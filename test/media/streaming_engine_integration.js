@@ -138,8 +138,8 @@ describe('StreamingEngine', function() {
           0 /* firstPeriodStartTime */,
           30 /* secondPeriodStartTime */,
           60 /* presentationDuration */,
-          { audio: metadata.audio.segmentDuration,
-            video: metadata.video.segmentDuration });
+          {audio: metadata.audio.segmentDuration,
+            video: metadata.video.segmentDuration});
 
       setupManifest(
           0 /* firstPeriodStartTime */,
@@ -174,8 +174,8 @@ describe('StreamingEngine', function() {
           0 /* firstPeriodStartTime */,
           300 /* secondPeriodStartTime */,
           Infinity /* presentationDuration */,
-          { audio: metadata.audio.segmentDuration,
-            video: metadata.video.segmentDuration });
+          {audio: metadata.audio.segmentDuration,
+            video: metadata.video.segmentDuration});
 
       setupManifest(
           0 /* firstPeriodStartTime */,
@@ -277,8 +277,8 @@ describe('StreamingEngine', function() {
       firstPeriodStartTime, secondPeriodStartTime, presentationDuration) {
     manifest = shaka.test.StreamingEngineUtil.createManifest(
         [firstPeriodStartTime, secondPeriodStartTime], presentationDuration,
-        { audio: metadata.audio.segmentDuration,
-          video: metadata.video.segmentDuration });
+        {audio: metadata.audio.segmentDuration,
+          video: metadata.video.segmentDuration});
 
     manifest.presentationTimeline =
         /** @type {!shaka.media.PresentationTimeline} */ (timeline);
@@ -698,8 +698,8 @@ describe('StreamingEngine', function() {
             0 /* firstPeriodStartTime */,
             30 /* secondPeriodStartTime */,
             30 /* presentationDuration */,
-            { audio: metadata.audio.segmentDuration,
-              video: metadata.video.segmentDuration });
+            {audio: metadata.audio.segmentDuration,
+              video: metadata.video.segmentDuration});
 
         manifest = setupGappyManifest(gapAtStart, dropSegment);
         variant1 = manifest.periods[0].variants[0];
@@ -826,9 +826,9 @@ describe('StreamingEngine', function() {
    */
   function defaultOnChooseStreams(period) {
     if (period == manifest.periods[0]) {
-      return { variant: variant1, text: null };
+      return {variant: variant1, text: null};
     } else if (period == manifest.periods[1]) {
-      return { variant: variant2, text: null };
+      return {variant: variant2, text: null};
     } else {
       throw new Error();
     }

@@ -347,7 +347,7 @@ describe('SimpleTextDisplayer', function() {
   });
 
   function createFakeCue(startTime, endTime) {
-    return { startTime: startTime, endTime: endTime };
+    return {startTime: startTime, endTime: endTime};
   }
 
   /**

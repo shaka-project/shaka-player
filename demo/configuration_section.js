@@ -119,7 +119,7 @@ shakaDemo.onLogLevelChange_ = function(event) {
  */
 shakaDemo.onJumpLargeGapsChange_ = function(event) {
   shakaDemo.player_.configure(({
-    streaming: { jumpLargeGaps: event.target.checked }
+    streaming: {jumpLargeGaps: event.target.checked}
   }));
   // Change the hash, to mirror this.
   shakaDemo.hashShouldChange_();
@@ -166,7 +166,7 @@ shakaDemo.onConfigInput_ = function(event) {
 shakaDemo.onAdaptationChange_ = function(event) {
   // Update adaptation config.
   shakaDemo.player_.configure(/** @type {shakaExtern.PlayerConfiguration} */({
-    abr: { enabled: event.target.checked }
+    abr: {enabled: event.target.checked}
   }));
   // Change the hash, to mirror this.
   shakaDemo.hashShouldChange_();

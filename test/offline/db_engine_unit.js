@@ -41,8 +41,8 @@ describe('DBEngine', function() {
   describe('upgrade failures', function() {
     it('fails to open with old version', checkAndRun((done) => {
       const storeNames = ['manifest', 'manifest-v2'];
-      const manifest1 = { originalManifestUri: 'original-uri-1' };
-      const manifest2 = { originalManifestUri: 'original-uri-2' };
+      const manifest1 = {originalManifestUri: 'original-uri-1'};
+      const manifest2 = {originalManifestUri: 'original-uri-2'};
 
       // Create a mock old database with the manifest tables.
       deleteOld()

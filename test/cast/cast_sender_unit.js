@@ -56,7 +56,7 @@ describe('CastSender', function() {
     // We're using quotes to access window.chrome because the compiler
     // knows about lots of Chrome-specific APIs we aren't mocking.  We
     // don't need this mock strictly type-checked.
-    window['chrome'] = { cast: mockCastApi };
+    window['chrome'] = {cast: mockCastApi};
     mockSession = null;
 
     sender = new CastSender(
@@ -808,7 +808,7 @@ describe('CastSender', function() {
     let session = {
       messages: [],
       status: 'connected',
-      receiver: { friendlyName: 'SomeDevice' },
+      receiver: {friendlyName: 'SomeDevice'},
       addUpdateListener: jasmine.createSpy('Session.addUpdateListener'),
       removeUpdateListener: jasmine.createSpy('Session.removeUpdateListener'),
       addMessageListener: jasmine.createSpy('Session.addMessageListener'),

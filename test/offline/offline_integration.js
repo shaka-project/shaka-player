@@ -245,7 +245,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
         shaka.test.TestScheme.setupPlayer(player, 'multidrm_no_init_data');
 
         let storedContent;
-        storage.configure({ usePersistentLicense: false });
+        storage.configure({usePersistentLicense: false});
         storage.store('test:multidrm_no_init_data')
             .then(function(content) {
               storedContent = content;

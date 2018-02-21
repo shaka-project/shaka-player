@@ -26,7 +26,7 @@ let ShakaDemoUtils = {};
  */
 ShakaDemoUtils.setupAssetMetadata = function(asset, player) {
   let config = /** @type {shakaExtern.PlayerConfiguration} */(
-      { drm: {}, manifest: { dash: {} } });
+      {drm: {}, manifest: {dash: {}}});
 
   // Add config from this asset.
   if (asset.licenseServers) {

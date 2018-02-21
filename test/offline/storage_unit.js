@@ -66,11 +66,11 @@ describe('Storage', function() {
 
     Promise.all([
       new shaka.test.ManifestDBBuilder(fakeStorageEngine)
-          .metadata({ name: 'manifest 1' })
+          .metadata({name: 'manifest 1'})
           .period()
           .build(),
       new shaka.test.ManifestDBBuilder(fakeStorageEngine)
-          .metadata({ name: 'manifest 2' })
+          .metadata({name: 'manifest 2'})
           .period()
           .build()
     ]).then(function() {

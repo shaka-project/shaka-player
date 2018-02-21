@@ -247,7 +247,7 @@ describe('Player', function() {
 
         let isLive = asset.features.indexOf(Feature.LIVE) >= 0;
 
-        let config = { abr: {}, drm: {}, manifest: { dash: {} } };
+        let config = {abr: {}, drm: {}, manifest: {dash: {}}};
         config.abr.enabled = false;
         config.manifest.dash.clockSyncUri =
             '//shaka-player-demo.appspot.com/time.txt';
