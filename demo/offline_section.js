@@ -44,8 +44,7 @@ shakaDemo.updateButtons_ = function(canHide) {
   let assetList = document.getElementById('assetList');
   let inProgress = shakaDemo.offlineOperationInProgress_;
 
-  document.getElementById('progressDiv').style.display =
-      canHide && !inProgress ? 'none' : 'block';
+  document.getElementById('progressDiv').style.display = 'block';
 
   let option = assetList.options[assetList.selectedIndex];
   let storedContent = option.storedContent;
@@ -81,6 +80,10 @@ shakaDemo.updateButtons_ = function(canHide) {
 shakaDemo.setupOffline_ = function() {
   document.getElementById('storeDeleteButton')
       .addEventListener('click', shakaDemo.storeDeleteAsset_);
+  document.getElementById('pauseBtn')
+      .addEventListener('click', shakaDemo.pauseDownload_);
+  document.getElementById('resumeButton')
+      .addEventListener('click', shakaDemo.resumeDownload_);
   document.getElementById('assetList')
       .addEventListener('change', shakaDemo.updateButtons_.bind(null, true));
   shakaDemo.updateButtons_(true);
@@ -149,6 +152,8 @@ shakaDemo.setupOfflineAssets_ = function() {
   });
 };
 
+var storage; // eslint-disable-line no-var
+var savedOfflineUri; // eslint-disable-line no-var
 
 /** @private */
 shakaDemo.storeDeleteAsset_ = function() {
@@ -162,7 +167,7 @@ shakaDemo.storeDeleteAsset_ = function() {
 
   progress.textContent = '0';
 
-  let storage = new shaka.offline.Storage(shakaDemo.localPlayer_);
+  storage = new shaka.offline.Storage(shakaDemo.localPlayer_);
   storage.configure(/** @type {shakaExtern.OfflineConfiguration} */ ({
     progressCallback: function(data, percent) {
       progress.textContent = (percent * 100).toFixed(2);
@@ -197,7 +202,8 @@ shakaDemo.storeDeleteAsset_ = function() {
     let nameField = document.getElementById('offlineName').value;
     let assetName = asset.name ? '[OFFLINE] ' + asset.name : null;
     let metadata = {name: assetName || nameField || asset.manifestUri};
-    p = storage.store(asset.manifestUri, metadata).then(function() {
+    p = storage.store(asset.manifestUri, metadata).then(function(offlineMan) {
+      savedOfflineUri = offlineMan.offlineUri;
       if (option.asset)
         option.isStored = true;
       return shakaDemo.refreshAssetList_().then(function() {
@@ -219,8 +225,24 @@ shakaDemo.storeDeleteAsset_ = function() {
   }).then(function() {
     shakaDemo.offlineOperationInProgress_ = false;
     shakaDemo.updateButtons_(true /* canHide */);
-    return storage.destroy();
+    // return storage.destroy();
   });
+};
+
+/**
+ * @return {void}
+ * @private
+ */
+shakaDemo.pauseDownload_ = function() {
+  storage.pause();
+};
+
+/**
+ * @return {void}
+ * @private
+ */
+shakaDemo.resumeDownload_ = function() {
+  storage.resume(savedOfflineUri);
 };
 
 
