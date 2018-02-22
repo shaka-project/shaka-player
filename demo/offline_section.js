@@ -80,9 +80,9 @@ shakaDemo.updateButtons_ = function(canHide) {
 shakaDemo.setupOffline_ = function() {
   document.getElementById('storeDeleteButton')
       .addEventListener('click', shakaDemo.storeDeleteAsset_);
-  document.getElementById('pauseBtn')
+  document.getElementById('pauseDownloadButton')
       .addEventListener('click', shakaDemo.pauseDownload_);
-  document.getElementById('resumeButton')
+  document.getElementById('resumeDownloadButton')
       .addEventListener('click', shakaDemo.resumeDownload_);
   document.getElementById('assetList')
       .addEventListener('change', shakaDemo.updateButtons_.bind(null, true));
@@ -152,8 +152,8 @@ shakaDemo.setupOfflineAssets_ = function() {
   });
 };
 
-var storage; // eslint-disable-line no-var
-var savedOfflineUri; // eslint-disable-line no-var
+let storage; // eslint-disable-line no-var
+let savedOfflineUri; // eslint-disable-line no-var
 
 /** @private */
 shakaDemo.storeDeleteAsset_ = function() {
