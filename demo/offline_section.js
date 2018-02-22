@@ -230,7 +230,6 @@ shakaDemo.storeDeleteAsset_ = function() {
 };
 
 /**
- * @return {void}
  * @private
  */
 shakaDemo.pauseDownload_ = function() {
