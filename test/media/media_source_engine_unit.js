@@ -88,7 +88,7 @@ describe('MediaSourceEngine', function() {
     };
 
     shaka.text.TextEngine = createMockTextEngineCtor();
-    shaka.media.Transmuxer.isSupported = function(contentType, mimeType) {
+    shaka.media.Transmuxer.isSupported = function(mimeType, contentType) {
       return mimeType == 'tsMimetype';
     };
   });

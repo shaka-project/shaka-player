@@ -56,8 +56,8 @@ describe('Transmuxer', function() {
   describe('isSupported', function() {
     let isSupported = shaka.media.Transmuxer.isSupported;
     it('returns whether the content type is supported', function() {
-      expect(isSupported(ContentType.VIDEO, mp4MimeType)).toBeFalsy();
-      expect(isSupported(ContentType.VIDEO, transportStreamVideoMimeType))
+      expect(isSupported(mp4MimeType, ContentType.VIDEO)).toBeFalsy();
+      expect(isSupported(transportStreamVideoMimeType, ContentType.VIDEO))
           .toBe(true);
     });
   });
