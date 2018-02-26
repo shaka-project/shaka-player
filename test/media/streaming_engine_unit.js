@@ -2761,7 +2761,7 @@ describe('StreamingEngine', function() {
       expect(onManifestUpdate).toHaveBeenCalled();
     });
 
-    it('adds timeline regions for emsg events', function () {
+    it('adds timeline regions for emsg events', function() {
       videoStream1.containsEmsgBoxes = true;
       segmentData[ContentType.VIDEO].segments[0] = getEmsgSegment();
 
@@ -2769,7 +2769,7 @@ describe('StreamingEngine', function() {
       streamingEngine.init();
       runTest();
 
-      var expectedEmsg = getExpectedEmsg();
+      let expectedEmsg = getExpectedEmsg();
       expect(onTimelineRegionAdded).toHaveBeenCalledWith(expectedEmsg);
     });
 
