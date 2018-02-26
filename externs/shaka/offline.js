@@ -69,7 +69,7 @@ shakaExtern.OfflineConfiguration;
  *   duration: number,
  *   size: number,
  *   expiration: number,
- *   tracks: !Array.<shakaExtern.Track>,
+ *   tracks: ?Array.<shakaExtern.Track>,
  *   appMetadata: Object
  * }}
  *
@@ -86,7 +86,7 @@ shakaExtern.OfflineConfiguration;
  * @property {number} expiration
  *   The time that the encrypted license expires, in milliseconds.  If the media
  *   is clear or the license never expires, this will equal Infinity.
- * @property {!Array.<shakaExtern.Track>} tracks
+ * @property {?Array.<shakaExtern.Track>} tracks
  *   The tracks that are stored.  This only lists those found in the first
  *   Period.
  * @property {Object} appMetadata
