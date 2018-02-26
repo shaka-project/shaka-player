@@ -57,7 +57,7 @@ function httpPluginTests(usingFetch) {
       jasmine.Ajax.uninstall();
 
       // Wrap event handlers to catch errors
-      const MockXHR = function () {
+      const MockXHR = function() {
         const instance = new jasmineXHRMock();
 
         ['abort', 'load', 'error', 'timeout'].forEach(function(eventName) {
