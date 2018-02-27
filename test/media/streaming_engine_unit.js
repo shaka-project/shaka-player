@@ -1023,7 +1023,7 @@ describe('StreamingEngine', function() {
     // 20, but reduced by a small fudge factor.
     var lt20 = {
       asymmetricMatch: function(val) {
-        return val > 19.9 && val < 20;
+        return val >= 19.9 && val < 20;
       }
     };
     expect(mediaSourceEngine.setStreamProperties)
