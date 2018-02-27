@@ -56,6 +56,21 @@ function getClientArg(name) {
   goog.asserts.assert = jasmineAssert;
   console.assert = /** @type {?} */(jasmineAssert);
 
+  // As of Feb 2018, this is only implemented in Chrome.
+  // https://developer.mozilla.org/en-US/docs/Web/Events/unhandledrejection
+  window.addEventListener('unhandledrejection', (event) => {
+    /** @type {?} */
+    const error = event.reason;
+    let message = 'Unhandled rejection in Promise: ' + error;
+
+    // Shaka errors have the stack trace in their toString() already, so don't
+    // add it again.  For native errors, we need to see where it came from.
+    if (error && error.stack && !(error instanceof shaka.util.Error)) {
+      message += '\n' + error.stack;
+    }
+    fail(message);
+  });
+
   // Use a RegExp if --specFilter is set, else empty string will match all.
   let specFilterRegExp = new RegExp(getClientArg('specFilter') || '');
 
@@ -210,4 +225,13 @@ function getClientArg(name) {
       done();
     });
   });
+
+  const delayTests = getClientArg('delayTests');
+  if (delayTests) {
+    const originalSetTimeout = window.setTimeout;
+    afterEach((done) => {
+      console.log('DELAYING...');
+      originalSetTimeout(done, delayTests * 1000);
+    });
+  }
 })();

@@ -1003,6 +1003,9 @@ describe('CastReceiver', function() {
       addEventListener: function(eventName, listener) {
         player.listeners[eventName] = listener;
       },
+      removeEventListener: function(eventName, listener) {
+        player.listeners[eventName] = null;
+      },
       dispatchEvent: jasmine.createSpy('dispatchEvent'),
       // For convenience:
       listeners: {}

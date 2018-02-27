@@ -163,10 +163,6 @@ shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
     return shaka.test.Util.invokeSpy(timeline.getSegmentAvailabilityEnd);
   });
 
-  // These methods should not be invoked.
-  timeline.setDuration.and.throwError(
-      new Error('unexpected call to setDuration()'));
-
   return timeline;
 };
 

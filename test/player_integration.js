@@ -347,7 +347,7 @@ describe('Player', function() {
     function testTemplate(operationFn) {
       // No data will be loaded for this test, so it can use a real manifest
       // parser safely.
-      player.load('reject://www.foo.com/bar.mpd').then(fail);
+      player.load('reject://www.foo.com/bar.mpd').then(fail).catch(() => {});
       return shaka.test.Util.delay(0.1).then(operationFn).then(function() {
         expect(schemeSpy.calls.count()).toBe(1);
       });

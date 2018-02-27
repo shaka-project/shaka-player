@@ -258,7 +258,7 @@ describe('CancelableChain', function() {
         let wait = shaka.test.Util.delay(1.0);
         chain.cancel(cannedError);
         return wait;
-      }).finalize().then(fail);
+      }).finalize().then(fail).catch(() => {});
     });
   });
 });

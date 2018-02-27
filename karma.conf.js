@@ -173,7 +173,11 @@ module.exports = function(config) {
         specFilter: settings.filter,
 
         // Set what level of logs for the player to print.
-        logLevel: SHAKA_LOG_MAP[settings.logging]
+        logLevel: SHAKA_LOG_MAP[settings.logging],
+
+        // Delay tests to aid in debugging async failures that pollute
+        // subsequent tests.
+        delayTests: settings.delay_tests,
       }],
     },
 

@@ -1487,8 +1487,14 @@ describe('DrmEngine', function() {
       initAndAttach().then(function() {
         session1.closed = new shaka.util.PublicPromise();
         session2.closed = new shaka.util.PublicPromise();
-        session1.close.and.returnValue(Promise.reject());
-        session2.close.and.returnValue(Promise.reject());
+
+        // Since this won't be attached to anything until much later, we must
+        // silence unhandled rejection errors.
+        const rejected = Promise.reject();
+        rejected.catch(() => {});
+
+        session1.close.and.returnValue(rejected);
+        session2.close.and.returnValue(rejected);
 
         let initData1 = new Uint8Array(1);
         let initData2 = new Uint8Array(2);

@@ -107,6 +107,7 @@ class Launcher:
         'Pre-Launch',
         'These commands are handled before the tests start running.')
 
+
     running_commands.add_argument(
         '--browsers',
         help='Specify which browsers to run tests on as a space-separated or '
@@ -202,6 +203,19 @@ class Launcher:
              'This defaults to one minute.',
         type=int,
         default=60000)
+    running_commands.add_argument(
+        '--delay-tests',
+        help='Insert an artifical delay between tests [s]. '
+             'This can be helpful when tracking down asynchronous test '
+             'pollution, in which an async process belonging to one test may '
+             'trigger a failure after other tests have begun. '
+             'If no delay is specified, defaults to 2 seconds.',
+        type=int,
+        default=None,
+        const=2,
+        nargs='?')
+
+
     logging_commands.add_argument(
         '--colors',
         help='Use colors when reporting and printing logs.',
@@ -244,6 +258,8 @@ class Launcher:
         '--report-slower-than',
         help='Report tests that are slower than the given time [ms].',
         type=int)
+
+
     networking_commands.add_argument(
        '--port',
         help='Port where the server is running.',
@@ -253,6 +269,8 @@ class Launcher:
         help='Specify the hostname to be used when capturing browsers. This '
              'defaults to localhost.',
         default='localhost')
+
+
     pre_launch_commands.add_argument(
         '--force',
         help='Force a rebuild of the project before running tests. This will '
@@ -299,6 +317,7 @@ class Launcher:
       'seed',
       'single_run',
       'uncompiled',
+      'delay_tests',
     ]
 
     # Check each value before setting it to avoid passing null values.
