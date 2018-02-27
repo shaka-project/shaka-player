@@ -411,6 +411,87 @@ describe('Player', function() {
     });
   });
 
+  describe('streaming event', function() {
+    // Calling switch early during load() caused a failed assertion in Player
+    // and the track selection was ignored.  Because this bug involved
+    // interactions between Player and StreamingEngine, it is an integration
+    // test and not a unit test.
+    // https://github.com/google/shaka-player/issues/1119
+    it('allows early selection of specific tracks', function(done) {
+      const streamingListener = jasmine.createSpy('listener');
+
+      // Because this is an issue with failed assertions, destroy the existing
+      // player from the compiled version, and create a new one using the
+      // uncompiled version.  Then we will get assertions.
+      eventManager.unlisten(player, 'error');
+      player.destroy().then(() => {
+        player = new shaka.Player(video);
+        player.configure({abr: {enabled: false}});
+        eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
+
+        // When 'streaming' fires, select the first track explicitly.
+        player.addEventListener('streaming', Util.spyFunc(streamingListener));
+        streamingListener.and.callFake(() => {
+          const tracks = player.getVariantTracks();
+          player.selectVariantTrack(tracks[0]);
+        });
+
+        // Now load the content.
+        return player.load('test:sintel');
+      }).then(() => {
+        // When the bug triggers, we fail assertions in Player.
+        // Make sure the listener was triggered, so that it could trigger the
+        // code path in this bug.
+        expect(streamingListener).toHaveBeenCalled();
+      }).catch(fail).then(done);
+    });
+
+    // After fixing the issue above, calling switch early during a second load()
+    // caused a failed assertion in StreamingEngine, because we did not reset
+    // switchingPeriods_ in Player.  Because this bug involved interactions
+    // between Player and StreamingEngine, it is an integration test and not a
+    // unit test.
+    // https://github.com/google/shaka-player/issues/1119
+    it('allows selection of tracks in subsequent loads', function(done) {
+      const streamingListener = jasmine.createSpy('listener');
+
+      // Because this is an issue with failed assertions, destroy the existing
+      // player from the compiled version, and create a new one using the
+      // uncompiled version.  Then we will get assertions.
+      eventManager.unlisten(player, 'error');
+      player.destroy().then(() => {
+        player = new shaka.Player(video);
+        player.configure({abr: {enabled: false}});
+        eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
+
+        // This bug only triggers when you do this on the second load.
+        // So we load one piece of content, then set up the streaming listener
+        // to change tracks, then we load a second piece of content.
+        return player.load('test:sintel');
+      }).then(() => {
+        // Give StreamingEngine time to complete all setup and to call back into
+        // the Player with canSwitch_.  If you move on too quickly to the next
+        // load(), the bug does not reproduce.
+        return shaka.test.Util.delay(1);
+      }).then(() => {
+        player.addEventListener('streaming', Util.spyFunc(streamingListener));
+
+        streamingListener.and.callFake(() => {
+          const track = player.getVariantTracks()[0];
+          player.selectVariantTrack(track);
+        });
+
+        // Now load again to trigger the failed assertion.
+        return player.load('test:sintel');
+      }).then(() => {
+        // When the bug triggers, we fail assertions in StreamingEngine.
+        // So just make sure the listener was triggered, so that it could
+        // trigger the code path in this bug.
+        expect(streamingListener).toHaveBeenCalled();
+      }).catch(fail).then(done);
+    });
+  });
+
   /**
    * @param {!HTMLMediaElement} video
    * @param {number} playheadTime The time to wait for.

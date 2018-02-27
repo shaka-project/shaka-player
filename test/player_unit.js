@@ -407,26 +407,81 @@ describe('Player', function() {
       player.unload().catch(fail);
     });
 
-    it('streaming event', function(done) {
-      var streamingListener = jasmine.createSpy('listener');
-      streamingListener.and.callFake(function() {
-        var tracks = player.getVariantTracks();
-        expect(tracks).toBeDefined();
-        expect(tracks.length).toEqual(1);
-        var activeTracks = player.getVariantTracks().filter(function(track) {
-          return track.active;
-        });
-        expect(activeTracks.length).toEqual(0);
+    describe('streaming event', function() {
+      /** @type {jasmine.Spy} */
+      let streamingListener;
+
+      beforeEach(function() {
+        streamingListener = jasmine.createSpy('listener');
+        player.addEventListener('streaming', Util.spyFunc(streamingListener));
+
+        // We must have two different sets of codecs for some of our tests.
+        manifest = new shaka.test.ManifestGenerator()
+          .addPeriod(0)
+            .addVariant(0)
+              .addAudio(1).mime('audio/mp4', 'mp4a.40.2')
+              .addVideo(2).mime('video/mp4', 'avc1.4d401f')
+            .addVariant(1)
+              .addAudio(3).mime('audio/webm', 'opus')
+              .addVideo(4).mime('video/webm', 'vp9')
+          .build();
+
+        parser1 = new shaka.test.FakeManifestParser(manifest);
       });
 
-      player.addEventListener('streaming', Util.spyFunc(streamingListener));
-      expect(streamingListener).not.toHaveBeenCalled();
-      player.load('', 0, factory1).then(function() {
-        expect(streamingListener).toHaveBeenCalled();
-      }).catch(fail).then(done);
+      function runTest(done) {
+        expect(streamingListener).not.toHaveBeenCalled();
+        player.load('', 0, factory1).then(function() {
+          expect(streamingListener).toHaveBeenCalled();
+        }).catch(fail).then(done);
+      }
+
+      it('fires after tracks exist', function(done) {
+        streamingListener.and.callFake(function() {
+          const tracks = player.getVariantTracks();
+          expect(tracks).toBeDefined();
+          expect(tracks.length).toBeGreaterThan(0);
+        });
+        runTest(done);
+      });
+
+      it('fires before any tracks are active', function(done) {
+        streamingListener.and.callFake(function() {
+          const activeTracks =
+            player.getVariantTracks().filter((t) => t.active);
+          expect(activeTracks.length).toEqual(0);
+        });
+        runTest(done);
+      });
+
+      // We used to fire the event /before/ filtering, which meant that for
+      // multi-codec content, the application might select something which will
+      // later be removed during filtering.
+      // https://github.com/google/shaka-player/issues/1119
+      it('fires after tracks have been filtered', function(done) {
+        streamingListener.and.callFake(function() {
+          const tracks = player.getVariantTracks();
+          // Either WebM, or MP4, but not both.
+          expect(tracks.length).toEqual(1);
+        });
+        runTest(done);
+      });
     });
 
     describe('setTextTrackVisibility', function() {
+      beforeEach(function() {
+        manifest = new shaka.test.ManifestGenerator()
+          .addPeriod(0)
+            .addVariant(0)
+              .addAudio(1)
+              .addVideo(2)
+            .addTextStream(3)
+              .language('es').label('Spanish')
+              .bandwidth(100).mime('text/vtt')
+              .kind('caption')
+          .build();
+      });
+
       it('load text stream if caption is visible', function(done) {
         player.load('', 0, factory1).then(function() {
           player.setTextTrackVisibility(true);
