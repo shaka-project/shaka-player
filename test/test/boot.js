@@ -216,10 +216,8 @@ function getClientArg(name) {
       // Patch a new convenience method into PromiseMock.
       // See https://github.com/taylorhakes/promise-mock/issues/7
       PromiseMock.flush = () => {
-        // PromiseMock.runAll() throws is waiting is empty.
-        if (PromiseMock.waiting.length) {
-          PromiseMock.runAll();
-        }
+        // Pass strict == false so it does not throw.
+        PromiseMock.runAll(false /* strict */);
       };
 
       done();

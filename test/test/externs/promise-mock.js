@@ -24,8 +24,9 @@
 var PromiseMock = {};
 
 /**
- * A convenience method added by us after loading the module.
- * Calls runAll() conditional on waiting.length == 0, to avoid throwing.
+ * A convenience/clarity method added by us after loading the module.
+ * Calls runAll(false) to flush all pending Promises without throwing when there
+ * are none.
  */
 PromiseMock.flush = function() {};
 
@@ -38,8 +39,12 @@ PromiseMock.waiting;
  */
 PromiseMock.run = function(count) {};
 
-/** Execute all pending Promises. */
-PromiseMock.runAll = function runAll() {};
+/**
+ * Execute all pending Promises.
+ * @param {boolean=} strict Defaults to true.  If true, throws an error when no
+ *   Promises are pending.
+ */
+PromiseMock.runAll = function runAll(strict) {};
 
 /** Install the mock. */
 PromiseMock.install = function install() {};
