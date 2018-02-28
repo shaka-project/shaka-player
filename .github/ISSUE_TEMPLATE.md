@@ -1,4 +1,4 @@
-## NOTE: For bugs, if you delete this template, we will send it again and ask you to fill it out.
+<!-- NOTE: For bugs, if you delete this template, we will send it again and ask you to fill it out. -->
 
 **Have you read the [FAQ](https://goo.gl/JE1Sy5) and checked for duplicate open issues?**:
 
