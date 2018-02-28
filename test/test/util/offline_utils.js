@@ -31,7 +31,8 @@ shaka.test.OfflineUtils.createManifest = function(originalUri) {
     originalManifestUri: originalUri,
     periods: [],
     sessionIds: [],
-    size: 1024
+    size: 1024,
+    downloadStatus: null
   };
 };
 

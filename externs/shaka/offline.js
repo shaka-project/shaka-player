@@ -70,7 +70,8 @@ shakaExtern.OfflineConfiguration;
  *   size: number,
  *   expiration: number,
  *   tracks: ?Array.<shakaExtern.Track>,
- *   appMetadata: Object
+ *   appMetadata: Object,
+ *   downloadStatus: ?string
  * }}
  *
  * @property {?string} offlineUri
@@ -91,6 +92,8 @@ shakaExtern.OfflineConfiguration;
  *   Period.
  * @property {Object} appMetadata
  *   The metadata passed to store().
+ *    * @property {string} downloadStatus
+ *   download status
  * @exportDoc
  */
 shakaExtern.StoredContent;
@@ -105,7 +108,8 @@ shakaExtern.StoredContent;
  *   periods: !Array.<shakaExtern.PeriodDB>,
  *   sessionIds: !Array.<string>,
  *   drmInfo: ?shakaExtern.DrmInfo,
- *   appMetadata: Object
+ *   appMetadata: Object,
+ *   downloadStatus: ?string
  * }}
  *
  * @property {string} originalManifestUri
@@ -124,6 +128,8 @@ shakaExtern.StoredContent;
  *   The DRM info used to initialize EME.
  * @property {Object} appMetadata
  *   A metadata object passed from the application.
+ * @property {string} downloadStatus
+ *   download status
  */
 shakaExtern.ManifestDB;
 
