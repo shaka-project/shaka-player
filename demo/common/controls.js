@@ -411,6 +411,13 @@ ShakaControls.prototype.onPlayPauseClick_ = function() {
 
 /** @private */
 ShakaControls.prototype.onPlayStateChange_ = function() {
+  // On IE 11, a video may end without going into a paused state.  To correct
+  // both the UI state and the state of the video tag itself, we explicitly
+  // pause the video if that happens.
+  if (this.video_.ended && !this.video_.paused) {
+    this.video_.pause();
+  }
+
   // Video is paused during seek, so don't show the play arrow while seeking:
   if (this.enabled_ && this.video_.paused && !this.isSeeking_) {
     this.playPauseButton_.textContent = 'play_arrow';

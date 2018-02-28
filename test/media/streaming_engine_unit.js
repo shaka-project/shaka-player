@@ -964,9 +964,10 @@ describe('StreamingEngine', function() {
     // TODO(modmaker): Don't just silence the compiler error.
     let endOfStream = /** @type {?} */ (mediaSourceEngine.endOfStream);
     endOfStream.and.callFake(function() {
-      // Simulate the media ending before the expected (manifest) duration.
       expect(mediaSourceEngine.setDuration).toHaveBeenCalledWith(40);
       expect(mediaSourceEngine.setDuration).toHaveBeenCalledTimes(1);
+      mediaSourceEngine.setDuration.calls.reset();
+      // Simulate the media ending BEFORE the expected (manifest) duration.
       mediaSourceEngine.getDuration.and.returnValue(35);
       return Promise.resolve();
     });
@@ -977,6 +978,35 @@ describe('StreamingEngine', function() {
     runTest();
     expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
     expect(timeline.setDuration).toHaveBeenCalledWith(35);
+  });
+
+  // https://github.com/google/shaka-player/issues/979
+  it('does not expand the timeline duration', function() {
+    setupVod();
+    mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+    createStreamingEngine();
+
+    playhead.getTime.and.returnValue(0);
+    onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+    onChooseStreams.and.callFake(defaultOnChooseStreams);
+
+    // TODO(modmaker): Don't just silence the compiler error.
+    let endOfStream = /** @type {?} */ (mediaSourceEngine.endOfStream);
+    endOfStream.and.callFake(function() {
+      expect(mediaSourceEngine.setDuration).toHaveBeenCalledWith(40);
+      expect(mediaSourceEngine.setDuration).toHaveBeenCalledTimes(1);
+      mediaSourceEngine.setDuration.calls.reset();
+      // Simulate the media ending AFTER the expected (manifest) duration.
+      mediaSourceEngine.getDuration.and.returnValue(41);
+      return Promise.resolve();
+    });
+
+    // Here we go!
+    streamingEngine.init();
+
+    runTest();
+    expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+    expect(timeline.setDuration).not.toHaveBeenCalled();
   });
 
   it('applies fudge factor for appendWindowStart', function() {
