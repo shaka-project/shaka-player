@@ -894,7 +894,7 @@ describe('HlsParser', function() {
               .addTextStream(jasmine.any(Number))
                 .language('en')
                 .anySegmentFunctions()
-                .nullInitSegment()
+                .anyInitSegment()
                 .presentationTimeOffset(0)
                 .mime('application/mp4', 'stpp.TTML.im1t')
                 .kind(TextStreamKind.SUBTITLE)
@@ -968,6 +968,60 @@ describe('HlsParser', function() {
       'test:/video': toUTF8(media),
       'test:/text': toUTF8(textMedia),
       'test:/main.foo': toUTF8(vttText),
+      'test:/init.mp4': initSegmentData,
+      'test:/main.mp4': segmentData
+    });
+
+    parser.start('test:/master', playerInterface)
+        .then(function(actual) { expect(actual).toEqual(manifest); })
+        .catch(fail).then(done);
+  });
+
+  it('allows init segments in text streams', function(done) {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
+      'URI="test:/text"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,wvtt",',
+      'RESOLUTION=960x540,FRAME-RATE=60,SUBTITLES="sub1"\n',
+      'test:/video\n'
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'test:/main.mp4'
+    ].join('');
+
+    let manifest = new shaka.test.ManifestGenerator()
+            .anyTimeline()
+            .addPeriod(jasmine.any(Number))
+              .addVariant(jasmine.any(Number))
+                .bandwidth(200)
+                .addVideo(jasmine.any(Number))
+                  .anySegmentFunctions()
+                  .anyInitSegment()
+                  .presentationTimeOffset(0)
+                  .mime('video/mp4', 'avc1')
+                  .frameRate(60)
+                  .size(960, 540)
+              .addTextStream(jasmine.any(Number))
+                .language('en')
+                .anySegmentFunctions()
+                .anyInitSegment()
+                .presentationTimeOffset(0)
+                .mime('application/mp4', 'wvtt')
+                .kind(TextStreamKind.SUBTITLE)
+          .build();
+
+    fakeNetEngine.setResponseMap({
+      'test:/master': toUTF8(master),
+      'test:/audio': toUTF8(media),
+      'test:/video': toUTF8(media),
+      'test:/text': toUTF8(media),
       'test:/init.mp4': initSegmentData,
       'test:/main.mp4': segmentData
     });
