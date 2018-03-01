@@ -1,3 +1,49 @@
+## 2.3.3 (2018-03-01)
+
+New features:
+  - Warn if parsing the date from UTCTiming fails
+    - https://github.com/google/shaka-player/issues/1317
+    - https://github.com/google/shaka-player/pull/1318
+  - Backpropagate language selections on track change
+    - https://github.com/google/shaka-player/issues/1299
+
+Bugfixes:
+  - Fix MP4+VTT in HLS
+    - https://github.com/google/shaka-player/issues/1270
+  - Fix track selection during "streaming" event
+    - https://github.com/google/shaka-player/issues/1119
+  - Work around MSE rounding errors in Edge
+    - https://github.com/google/shaka-player/issues/1281
+    - Edge bug: https://goo.gl/3ZTzse
+  - Fix IE stuck buffering at the end after replay
+    - https://github.com/google/shaka-player/issues/979
+  - Fix catastrophic backtracking in TTML text parser
+    - https://github.com/google/shaka-player/issues/1312
+  - Fix infinite loop when jumping very small gaps
+    - https://github.com/google/shaka-player/issues/1309
+  - Fix seek range for live content with less than a full availability window
+    - https://github.com/google/shaka-player/issues/1224
+  - Remove misleading logging in DrmEngine#fillInDrmInfoDefaults
+    - https://github.com/google/shaka-player/pull/1288
+    - https://github.com/google/shaka-player/issues/1284
+  - Fix old text cues displayed after loading new text stream
+    - https://github.com/google/shaka-player/issues/1293
+  - Fix truncated HLS duration with short text streams
+    - https://github.com/google/shaka-player/issues/1271
+  - Fix DASH SegmentTemplate w/ duration
+    - https://github.com/google/shaka-player/issues/1232
+
+Docs:
+  - Fix out-of-date docs for error 6014 EXPIRED
+    - https://github.com/google/shaka-player/issues/1319
+  - Simplify prerequisite installation on Linux
+    - https://github.com/google/shaka-player/issues/1175
+  - Simplify the debugging tutorial
+  - Fix various typos
+    - https://github.com/google/shaka-player/pull/1272
+    - https://github.com/google/shaka-player/pull/1274
+
+
 ## 2.3.2 (2018-02-01)
 
 New features:
