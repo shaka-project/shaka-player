@@ -250,7 +250,8 @@ shaka.test.ManifestDBBuilder.emptyManifest_ = function() {
     periods: [],
     sessionIds: [],
     drmInfo: null,
-    appMetadata: {}
+    appMetadata: {},
+    downloadStatus: null
   };
 
   return manifest;
