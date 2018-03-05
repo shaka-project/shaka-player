@@ -401,9 +401,11 @@ function createFakeBuffered(ranges) {
  */
 shaka.test.FakePresentationTimeline = function() {
   let getStart = jasmine.createSpy('getSeekRangeStart');
+  let getEnd = jasmine.createSpy('getSeekRangeEnd');
   let getSafeStart = jasmine.createSpy('getSafeSeekRangeStart');
   getSafeStart.and.callFake(function(delay) {
-    return shaka.test.Util.invokeSpy(getStart) + delay;
+    let end = shaka.test.Util.invokeSpy(getEnd);
+    return Math.min(shaka.test.Util.invokeSpy(getStart) + delay, end);
   });
 
   return {
@@ -421,7 +423,7 @@ shaka.test.FakePresentationTimeline = function() {
     getSegmentAvailabilityEnd: jasmine.createSpy('getSegmentAvailabilityEnd'),
     getSeekRangeStart: getStart,
     getSafeSeekRangeStart: getSafeStart,
-    getSeekRangeEnd: jasmine.createSpy('getSeekRangeEnd')
+    getSeekRangeEnd: getEnd,
   };
 };
 
