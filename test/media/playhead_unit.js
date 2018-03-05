@@ -559,6 +559,17 @@ describe('Playhead', function() {
     timeline.getSeekRangeStart.and.returnValue(1000);
     timeline.getSeekRangeEnd.and.returnValue(1000);
 
+    let currentTime = 0;
+    let seekCount = 0;
+    Object.defineProperty(video, 'currentTime', {
+      get: () => currentTime,
+      set: (val) => {
+        currentTime = val;
+        seekCount++;
+        setTimeout(video.on['seeking'], 5);
+      },
+    });
+
     playhead = new shaka.media.Playhead(
         video,
         manifest,
@@ -566,18 +577,30 @@ describe('Playhead', function() {
         5 /* startTime */,
         Util.spyFunc(onSeek),
         Util.spyFunc(onEvent));
-    expect(video.currentTime).toBe(1000);
-    video.on['seeking']();
+    expect(currentTime).toBe(1000);
+    seekCount = 0;
 
     // The availability window slips ahead.
     timeline.getSeekRangeStart.and.returnValue(1030);
     timeline.getSeekRangeEnd.and.returnValue(1030);
     video.on['waiting']();
     jasmine.clock().tick(500);
-    // We expect this to move to 15 seconds ahead of the start of the
-    // availability window, due to the rebuffering goal (10s) and the 5s
-    // for the Chromecast.
-    expect(video.currentTime).toBe(1045);
+    expect(currentTime).toBe(1030);
+    expect(seekCount).toBe(1);
+
+    // It should allow a small buffer around the seek range.
+    seekCount = 0;
+    currentTime = 1030.062441;
+    jasmine.clock().tick(500);
+    currentTime = 1029.9233;
+    jasmine.clock().tick(500);
+    expect(seekCount).toBe(0);
+
+    // Got too far away.
+    currentTime = 1029;
+    jasmine.clock().tick(500);
+    expect(currentTime).toBe(1030);
+    expect(seekCount).toBe(1);
   });
 
   describe('clamps playhead after resuming', function() {
