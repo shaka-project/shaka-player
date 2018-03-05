@@ -58,7 +58,8 @@ describe('OfflineScheme', function() {
               periods: [],
               sessionIds: [],
               drmInfo: null,
-              appMetadata: {}
+              appMetadata: {},
+              downloadStatus: null
             });
           })
           .then(function(id) {

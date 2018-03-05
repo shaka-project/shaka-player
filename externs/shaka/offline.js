@@ -69,8 +69,9 @@ shakaExtern.OfflineConfiguration;
  *   duration: number,
  *   size: number,
  *   expiration: number,
- *   tracks: !Array.<shakaExtern.Track>,
- *   appMetadata: Object
+ *   tracks: ?Array.<shakaExtern.Track>,
+ *   appMetadata: Object,
+ *   downloadStatus: ?string
  * }}
  *
  * @property {?string} offlineUri
@@ -86,11 +87,13 @@ shakaExtern.OfflineConfiguration;
  * @property {number} expiration
  *   The time that the encrypted license expires, in milliseconds.  If the media
  *   is clear or the license never expires, this will equal Infinity.
- * @property {!Array.<shakaExtern.Track>} tracks
+ * @property {?Array.<shakaExtern.Track>} tracks
  *   The tracks that are stored.  This only lists those found in the first
  *   Period.
  * @property {Object} appMetadata
  *   The metadata passed to store().
+ *    * @property {string} downloadStatus
+ *   download status
  * @exportDoc
  */
 shakaExtern.StoredContent;
@@ -105,7 +108,8 @@ shakaExtern.StoredContent;
  *   periods: !Array.<shakaExtern.PeriodDB>,
  *   sessionIds: !Array.<string>,
  *   drmInfo: ?shakaExtern.DrmInfo,
- *   appMetadata: Object
+ *   appMetadata: Object,
+ *   downloadStatus: ?string
  * }}
  *
  * @property {string} originalManifestUri
@@ -124,6 +128,8 @@ shakaExtern.StoredContent;
  *   The DRM info used to initialize EME.
  * @property {Object} appMetadata
  *   A metadata object passed from the application.
+ * @property {string} downloadStatus
+ *   download status
  */
 shakaExtern.ManifestDB;
 
