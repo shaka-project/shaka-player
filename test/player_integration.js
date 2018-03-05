@@ -97,6 +97,87 @@ describe('Player', function() {
     document.body.removeChild(video);
   });
 
+  describe('constructor', function() {
+    beforeEach(async function() {
+      // To test the constructor, destroy the player that was constructed
+      // in the outermost beforeEach().  Then we can control the details in
+      // each constructor test.
+      await player.destroy();
+    });
+
+    it('sets video.src when video is provided', async function() {
+      expect(video.src).toBeFalsy();
+      player = new compiledShaka.Player(video);
+
+      // This should always be enough time to set up MediaSource.
+      await Util.delay(2);
+      expect(video.src).toBeTruthy();
+    });
+
+    it('does not set video.src when no video is provided', async function() {
+      expect(video.src).toBeFalsy();
+      player = new compiledShaka.Player();
+
+      // This should always be enough time to set up MediaSource.
+      await Util.delay(2);
+      expect(video.src).toBeFalsy();
+    });
+  });
+
+  describe('attach', function() {
+    beforeEach(async function() {
+      // To test attach, we want to construct a player without a video element
+      // attached in advance.  To do that, we destroy the player that was
+      // constructed in the outermost beforeEach(), then construct a new one
+      // without a video element.
+      await player.destroy();
+      player = new compiledShaka.Player();
+    });
+
+    it('sets video.src when initializeMediaSource is true', async function() {
+      expect(video.src).toBeFalsy();
+      await player.attach(video, true);
+      expect(video.src).toBeTruthy();
+    });
+
+    it('does not set video.src when initializeMediaSource is false',
+        async function() {
+          expect(video.src).toBeFalsy();
+          await player.attach(video, false);
+          expect(video.src).toBeFalsy();
+        });
+
+    it('can be used before load()', async function() {
+      await player.attach(video);
+      await player.load('test:sintel_compiled');
+    });
+  });
+
+  describe('unload', function() {
+    it('unsets video.src when reinitializeMediaSource is false',
+        async function() {
+          await player.load('test:sintel_compiled');
+          expect(video.src).toBeTruthy();
+
+          await player.unload(false);
+          expect(video.src).toBeFalsy();
+
+          await Util.delay(0.4);
+          // After a long delay, we have not implicitly set MediaSource up
+          // again.  video.src stays unset.
+          expect(video.src).toBeFalsy();
+        });
+
+    it('resets video.src when reinitializeMediaSource is true',
+        async function() {
+          await player.load('test:sintel_compiled');
+          expect(video.src).toBeTruthy();
+
+          await player.unload(true);
+          expect(video.src).toBeTruthy();
+        });
+  });
+
   describe('getStats', function() {
     it('gives stats about current stream', function(done) {
       // This is tested more in player_unit.js.  This is here to test the public

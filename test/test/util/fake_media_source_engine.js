@@ -73,6 +73,9 @@ shaka.test.FakeMediaSourceEngine = function(segmentData, opt_drift) {
   this.init = jasmine.createSpy('init').and.returnValue(Promise.resolve());
 
   /** @type {!jasmine.Spy} */
+  this.open = jasmine.createSpy('open').and.returnValue(Promise.resolve());
+
+  /** @type {!jasmine.Spy} */
   this.reinitText = jasmine.createSpy('reinitText').and.stub();
 
   /** @type {!jasmine.Spy} */

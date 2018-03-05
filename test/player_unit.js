@@ -114,6 +114,7 @@ describe('Player', function() {
           onChooseStreams, onCanSwitch);
       mediaSourceEngine = {
         init: jasmine.createSpy('init').and.returnValue(Promise.resolve()),
+        open: jasmine.createSpy('open').and.returnValue(Promise.resolve()),
         destroy: jasmine.createSpy('destroy').and.
             returnValue(Promise.resolve()),
         setUseEmbeddedText: jasmine.createSpy('setUseEmbeddedText'),
@@ -125,7 +126,6 @@ describe('Player', function() {
       player.createNetworkingEngine = function() { return networkingEngine; };
       player.createPlayhead = function() { return playhead; };
       player.createPlayheadObserver = function() { return playheadObserver; };
-      player.createMediaSource = function() { return Promise.resolve(); };
       player.createMediaSourceEngine = function() { return mediaSourceEngine; };
       player.createStreamingEngine = function() {
         // This captures the variable |manifest| so this should only be used
