@@ -2719,6 +2719,21 @@ describe('StreamingEngine', function() {
   });
 
   describe('embedded emsg boxes', function() {
+    const emsgSegment = Uint8ArrayUtils.fromHex(
+        '0000003b656d736700000000666f6f3a6261723a637573746f6d646174617363' +
+        '68656d6500310000000001000000080000ffff0000000174657374');
+    const emsgObj = {
+      startTime: 8,
+      endTime: 0xffff + 8,
+      schemeIdUri: 'foo:bar:customdatascheme',
+      value: '1',
+      timescale: 1,
+      presentationTimeDelta: 8,
+      eventDuration: 0xffff,
+      id: 1,
+      messageData: new Uint8Array([0x74, 0x65, 0x73, 0x74])
+    };
+
     beforeEach(function() {
       setupVod();
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -2731,41 +2746,37 @@ describe('StreamingEngine', function() {
 
     it('raises an event for embedded emsg boxes', function() {
       videoStream1.containsEmsgBoxes = true;
-      segmentData[ContentType.VIDEO].segments[0] =
-          Uint8ArrayUtils.fromHex(
-              '0000003b656d736700000000666f6f3a' +
-              '6261723a637573746f6d646174617363' +
-              '68656d65003100000000010000000800' +
-              '00ffff0000000174657374').buffer;
+      segmentData[ContentType.VIDEO].segments[0] = emsgSegment.buffer;
 
       // Here we go!
       streamingEngine.init();
       runTest();
 
-      expect(onEvent).toHaveBeenCalled();
+      expect(onEvent).toHaveBeenCalledTimes(1);
 
-      var event = onEvent.calls.argsFor(0)[0];
-      expect(event.detail).toEqual({
-        startTime: 8,
-        endTime: 0xffff + 8,
-        schemeIdUri: 'foo:bar:customdatascheme',
-        value: '1',
-        timescale: 1,
-        presentationTimeDelta: 8,
-        eventDuration: 0xffff,
-        id: 1,
-        messageData: new Uint8Array([116, 101, 115, 116])
-      });
+      let event = onEvent.calls.argsFor(0)[0];
+      expect(event.detail).toEqual(emsgObj);
+    });
+
+    it('raises multiple events', function() {
+      videoStream1.containsEmsgBoxes = true;
+
+      const dummyBox =
+          shaka.util.Uint8ArrayUtils.fromHex('0000000c6672656501020304');
+      segmentData[ContentType.VIDEO].segments[0] =
+          shaka.util.Uint8ArrayUtils.concat(emsgSegment, dummyBox, emsgSegment)
+              .buffer;
+
+      // Here we go!
+      streamingEngine.init();
+      runTest();
+
+      expect(onEvent).toHaveBeenCalledTimes(2);
     });
 
     it('won\'t raise an event without stream field set', function() {
       videoStream1.containsEmsgBoxes = false;
-      segmentData[ContentType.VIDEO].segments[0] =
-          Uint8ArrayUtils.fromHex(
-              '0000003b656d736700000000666f6f3a' +
-              '6261723a637573746f6d646174617363' +
-              '68656d65003100000000010000000800' +
-              '00ffff0000000174657374').buffer;
+      segmentData[ContentType.VIDEO].segments[0] = emsgSegment.buffer;
 
       // Here we go!
       streamingEngine.init();
