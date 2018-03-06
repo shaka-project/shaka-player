@@ -268,7 +268,7 @@ shakaExtern.StorageCell.prototype.hasFixedKeySpace = function() {};
  * of keys for each segment. If one segment fails to be added, all segments
  * should fail to be added.
  *
- * @param {!Array.<shakaExtern.SegmentDB>} segments
+ * @param {!Array.<shakaExtern.SegmentDataDB>} segments
  * @return {!Promise.<!Array.<number>>}
  */
 shakaExtern.StorageCell.prototype.addSegments = function(segments) {};
@@ -289,7 +289,7 @@ shakaExtern.StorageCell.prototype.removeSegments = function(keys) {};
  * not found, the promise chain will be rejected.
  *
  * @param {!Array.<number>} keys
- * @return {!Promise.<!Array.<shakaExtern.SegmentDB>>}
+ * @return {!Promise.<!Array.<shakaExtern.SegmentDataDB>>}
  */
 shakaExtern.StorageCell.prototype.getSegments = function(keys) {};
 
