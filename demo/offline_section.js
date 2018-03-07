@@ -63,7 +63,7 @@ shakaDemo.updateButtons_ = function(canHide) {
 
   let button = document.getElementById('storeDeleteButton');
   button.disabled = (inProgress || !supportsDrm || option.isStored);
-  button.innerText = storedContent ? 'Delete' : 'Store';
+  button.textContent = storedContent ? 'Delete' : 'Store';
   let helpText = document.getElementById('storeDeleteHelpText');
   if (inProgress) {
     helpText.textContent = 'Operation is in progress...';
