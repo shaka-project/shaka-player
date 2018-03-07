@@ -308,6 +308,35 @@ describe('Playhead', function() {
       expect(playhead.getTime()).toBe(30);
     });
 
+    it('playback from a certain offset from live edge for live', function() {
+      video.readyState = HTMLMediaElement.HAVE_METADATA;
+      timeline.isLive.and.returnValue(true);
+      timeline.getDuration.and.returnValue(Infinity);
+      timeline.getSeekRangeStart.and.returnValue(0);
+      timeline.getSeekRangeEnd.and.returnValue(60);
+
+      playhead = new shaka.media.Playhead(
+          video, manifest, config, -15 /* startTime */, Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
+
+      expect(playhead.getTime()).toBe(45);
+    });
+
+    it('playback from segment seek range start time', function() {
+      video.readyState = HTMLMediaElement.HAVE_METADATA;
+      timeline.isLive.and.returnValue(true);
+      timeline.getDuration.and.returnValue(Infinity);
+      timeline.getSeekRangeStart.and.returnValue(30);
+      timeline.getSeekRangeEnd.and.returnValue(60);
+      // If the live stream's playback offset time is not available, start
+      // playing from the seek range start time.
+      playhead = new shaka.media.Playhead(
+          video, manifest, config, -40 /* startTime */, Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
+
+      expect(playhead.getTime()).toBe(30);
+    });
+
     it('does not treat timeupdate as seek close to metadata load', function() {
       playhead = new shaka.media.Playhead(
           video,
