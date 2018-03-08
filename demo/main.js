@@ -106,7 +106,7 @@ shakaDemo.init = function() {
   document.getElementById('preferredAudioLanguage').value = language;
   document.getElementById('preferredTextLanguage').value = language;
 
-  var params = shakaDemo.getParams_();
+  var params = shakaDemo.getParams();
 
   shakaDemo.setupLogging_();
 
@@ -248,15 +248,18 @@ shakaDemo.initAppPlugin_ = function(name, pluginParams) {
   netEngine.registerResponseFilter(plugin.onResponse);
 
   return plugin.onStart(player, pluginParams).catch(function (error) {
-    shaka.log.error('Error setting up plugin ' + name, error);
+    if (shaka.log) {
+      shaka.log.error('Error setting up plugin ' + name, error);
+    }
     // TODO: `error` could be anything. How to handle?
   });
 };
 
 
 /**
-  * @return {!Object.<string, string>} params
-  */
+ * @return {!Object.<string, string>} params
+ * @export
+ */
 shakaDemo.getParams = function() {
   // Read URL parameters.
   var fields = location.search.substr(1);
@@ -460,7 +463,7 @@ shakaDemo.updateFromHash_ = function() {
     return;
   }
 
-  var params = shakaDemo.getParams_();
+  var params = shakaDemo.getParams();
   shakaDemo.preBrowserCheckParams_(params);
   shakaDemo.postBrowserCheckParams_(params);
 };
@@ -472,7 +475,7 @@ shakaDemo.hashShouldChange_ = function() {
     return;
 
   var params = [];
-  var oldParams = shakaDemo.getParams_();
+  var oldParams = shakaDemo.getParams();
 
   // Save the current asset.
   var assetUri;

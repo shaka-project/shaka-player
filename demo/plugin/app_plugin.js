@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+ goog.provide('shakaDemo.AppPlugin');
+
 /** @suppress {duplicate} */
 var shakaDemo = shakaDemo || {};
 
@@ -44,6 +46,7 @@ shakaDemo.AppPlugin.registerPlugin = function (name, plugin) {
  *
  * @param {string} name
  * @param {shaka.Player} player
+ * @return {shakaDemo.AppPlugin}
  */
 shakaDemo.AppPlugin.getPluginInstance = function (name, player) {
   var plugin = appPlugins[name];
