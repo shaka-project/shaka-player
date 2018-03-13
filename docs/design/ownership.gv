@@ -10,7 +10,7 @@ digraph shaka2_ownership {
   TextTrack [ shape=oval ]
 
   AbrManager [ shape=trapezium ]
-  HttpPlugin [ shape=trapezium ]
+  HttpFetchPlugin [ shape=trapezium ]
   ManifestParser [ shape=trapezium ]
   TextDisplayer [ shape=trapezium ]
   TextParser [ shape=trapezium ]
@@ -22,12 +22,11 @@ digraph shaka2_ownership {
   Player -> StreamingEngine
   Player -> DrmEngine
   Player -> Manifest
-  Player -> MediaSource
   Player -> TextDisplayer
 
   TextDisplayer -> TextTrack
 
-  NetworkingEngine -> HttpPlugin
+  NetworkingEngine -> HttpFetchPlugin
 
   ManifestParser -> NetworkingEngine [ style=dotted ]
 
@@ -37,7 +36,7 @@ digraph shaka2_ownership {
   StreamingEngine -> Manifest [ style=dotted ]
   StreamingEngine -> NetworkingEngine [ style=dotted ]
 
-  MediaSourceEngine -> MediaSource [ style=dotted ]
+  MediaSourceEngine -> MediaSource
   # MediaSourceEngine owns multiple SourceBuffers, so we represent that here
   # with two edges:
   MediaSourceEngine -> SourceBuffer
@@ -47,6 +46,10 @@ digraph shaka2_ownership {
 
   TextEngine -> TextDisplayer [ style=dotted ]
   TextEngine -> TextParser
+
+  # Player does not own MediaSource since v2.4, but without this link, the graph
+  # becomes unbalanced and harder to read.  This is a hack.
+  Player -> MediaSource [ style=invisible arrowhead=none ]
 
   subgraph cluster_legend {
     style=rounded
