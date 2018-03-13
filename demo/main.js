@@ -125,9 +125,10 @@ shakaDemo.init = function() {
       errorDisplayLink.textContent = error;
     }
 
-    // Disable the load button.
+    // Disable the load/unload buttons.
     var loadButton = document.getElementById('loadButton');
     loadButton.disabled = true;
+    document.getElementById('unloadButton').disabled = true;
 
     // Hide the error message's close button.
     var errorDisplayCloseButton =
