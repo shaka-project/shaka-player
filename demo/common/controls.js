@@ -616,17 +616,20 @@ ShakaControls.prototype.onCastClick_ = function() {
     this.castProxy_.suggestDisconnect();
   } else {
     this.castButton_.disabled = true;
-    // Disable the load button, to prevent the users from trying to load an
-    // asset while the cast proxy is connecting.
+    // Disable the load/unload buttons, to prevent the users from trying to load
+    // an asset while the cast proxy is connecting.
     // That can lead to strange, erratic behavior.
     document.getElementById('loadButton').disabled = true;
+    document.getElementById('unloadButton').disabled = true;
     this.castProxy_.cast().then(function() {
       document.getElementById('loadButton').disabled = false;
+      document.getElementById('unloadButton').disabled = false;
       this.castButton_.disabled = false;
       // Success!
     }.bind(this), function(error) {
       this.castButton_.disabled = false;
       document.getElementById('loadButton').disabled = false;
+      document.getElementById('unloadButton').disabled = false;
       if (error.code != shaka.util.Error.Code.CAST_CANCELED_BY_USER) {
         this.onError_(error);
       }
