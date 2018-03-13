@@ -15,7 +15,7 @@ digraph shaka2_data {
   TextParser [ shape=trapezium ]
   RequestFilter [ shape=trapezium ]
   ResponseFilter [ shape=trapezium ]
-  HttpPlugin [ shape=trapezium ]
+  HttpFetchPlugin [ shape=trapezium ]
 
   Player -> AbrManager [ label="Variants => Variant" dir=both arrowtail=onormal style=dashed ]
   Player -> ManifestParser [ label="URL => Manifest" dir=both arrowtail=onormal style=dashed ]
@@ -37,7 +37,7 @@ digraph shaka2_data {
 
   NetworkingEngine -> RequestFilter [ label="Request => Request" dir=both arrowtail=onormal style=dashed ]
   NetworkingEngine -> ResponseFilter [ label="Response => Response" dir=both arrowtail=onormal style=dashed ]
-  NetworkingEngine -> HttpPlugin [ label="Request => Response" dir=both arrowtail=onormal style=dashed ]
+  NetworkingEngine -> HttpFetchPlugin [ label="Request => Response" dir=both arrowtail=onormal style=dashed ]
 
   subgraph cluster_legend {
     style=rounded
