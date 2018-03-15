@@ -544,6 +544,7 @@ shakaExtern.ManifestConfiguration;
  *   bufferingGoal: number,
  *   bufferBehind: number,
  *   ignoreTextStreamFailures: boolean,
+ *   alwaysStreamText: boolean,
  *   startAtSegmentBoundary: boolean,
  *   smallGapLimit: number,
  *   jumpLargeGaps: boolean,
@@ -572,8 +573,13 @@ shakaExtern.ManifestConfiguration;
  *   in buffer behind the playhead when it appends a new media segment.
  *   The StreamingEngine will evict content to meet this limit.
  * @property {boolean} ignoreTextStreamFailures
- *   If true, the player will ignore text stream failures and proceed to play
+ *   If true, the player will ignore text stream failures and continue playing
  *   other streams.
+ * @property {boolean} alwaysStreamText
+ *   If true, always stream text tracks, regardless of whether or not they are
+ *   shown.  This is necessary when using the browser's built-in controls, which
+ *   are not capable of signaling display state changes back to Shaka Player.
+ *   Defaults to false.
  * @property {boolean} startAtSegmentBoundary
  *   If true, adjust the start time backwards so it is at the start of a
  *   segment. This affects both explicit start times and calculated start time

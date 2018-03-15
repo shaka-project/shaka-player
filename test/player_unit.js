@@ -486,14 +486,33 @@ describe('Player', function() {
         player.load('', 0, factory1).then(function() {
           player.setTextTrackVisibility(true);
           expect(streamingEngine.loadNewTextStream).toHaveBeenCalled();
+          expect(streamingEngine.getActiveText()).not.toBe(null);
         }).catch(fail).then(done);
       });
 
-      it('do not load text stream if caption is invisible', function(done) {
+      it('does not load text stream if caption is invisible', function(done) {
         player.load('', 0, factory1).then(function() {
           player.setTextTrackVisibility(false);
           expect(streamingEngine.loadNewTextStream).not.toHaveBeenCalled();
           expect(streamingEngine.unloadTextStream).toHaveBeenCalled();
+          expect(streamingEngine.getActiveText()).toBe(null);
+        }).catch(fail).then(done);
+      });
+
+      it('loads text stream if alwaysStreamText is set', function(done) {
+        player.setTextTrackVisibility(false);
+        player.configure({streaming: {alwaysStreamText: true}});
+
+        player.load('', 0, factory1).then(function() {
+          expect(streamingEngine.getActiveText()).not.toBe(null);
+
+          player.setTextTrackVisibility(true);
+          expect(streamingEngine.loadNewTextStream).not.toHaveBeenCalled();
+          expect(streamingEngine.unloadTextStream).not.toHaveBeenCalled();
+
+          player.setTextTrackVisibility(false);
+          expect(streamingEngine.loadNewTextStream).not.toHaveBeenCalled();
+          expect(streamingEngine.unloadTextStream).not.toHaveBeenCalled();
         }).catch(fail).then(done);
       });
     });

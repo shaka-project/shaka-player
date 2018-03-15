@@ -204,7 +204,13 @@ shaka.test.FakeStreamingEngine = function(onChooseStreams, onCanSwitch) {
   ret.getActiveAudio.and.callFake(function() { return activeAudio; });
   ret.getActiveVideo.and.callFake(function() { return activeVideo; });
   ret.getActiveText.and.callFake(function() { return activeText; });
-  ret.loadNewTextStream.and.callFake(resolve);
+  ret.loadNewTextStream.and.callFake(function(stream) {
+    activeText = stream;
+    return Promise.resolve();
+  });
+  ret.unloadTextStream.and.callFake(function() {
+    activeText = null;
+  });
   ret.init.and.callFake(function() {
     var chosen = onChooseStreams();
     return Promise.resolve().then(function() {
