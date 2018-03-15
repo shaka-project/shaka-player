@@ -255,6 +255,11 @@ shakaDemo.preparePlayer_ = function(asset) {
   config.streaming.jumpLargeGaps =
       document.getElementById('jumpLargeGaps').checked;
 
+  // When we use native controls, we must always stream text.
+  // See comments in onNativeChange_ for details.
+  config.streaming.alwaysStreamText =
+      document.getElementById('showNative').checked;
+
   player.configure(config);
 
   // TODO: document demo app debugging features
