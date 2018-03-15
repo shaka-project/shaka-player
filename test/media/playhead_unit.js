@@ -157,6 +157,7 @@ describe('Playhead', function() {
       failureCallback: function() {},
       bufferBehind: 15,
       ignoreTextStreamFailures: false,
+      alwaysStreamText: false,
       useRelativeCueTimestamps: false,
       startAtSegmentBoundary: false,
       smallGapLimit: 0.5,
