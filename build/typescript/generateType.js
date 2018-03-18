@@ -204,4 +204,8 @@ function generateType(root, rawType, inferNullability = true) {
   return stringifyType(processType(root, rawType, inferNullability));
 }
 
-module.exports = generateType;
+module.exports = {
+  processType,
+  stringifyType,
+  generateType
+};

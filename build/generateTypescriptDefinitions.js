@@ -35,7 +35,7 @@ function main(args) {
                  'You must specify output file with --output <EXTERNS>');
   console.assert(inputPaths.length,
                  'You must specify at least one input file.');
-  
+
   generateTypeDefinitions(outputPath, inputPaths);
 }
 
