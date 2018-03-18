@@ -1,7 +1,7 @@
 const { getNodeAtPath } = require('./treeUtils');
 const generateType = require('./generateType');
 
-class AbstractWriter {
+class Writer {
   constructor() {
     this.level = 0;
   }
@@ -18,27 +18,36 @@ class AbstractWriter {
     // Repeat two spaces 'level'-times for indentation
     return '  '.repeat(this.level);
   }
+
+  writeLine(str) {
+    this.write(this.getIndentation() + str + '\n');
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  write(str) {
+    throw new Error('Abstract method Writer.write(str) has to be implemented');
+  }
 }
 
-class StringWriter extends AbstractWriter {
+class StringWriter extends Writer {
   constructor() {
     super();
     this.buffer = '';
   }
 
-  writeLine(str) {
-    this.buffer += this.getIndentation() + str + '\n';
+  write(str) {
+    this.buffer += str;
   }
 }
 
-class StreamWriter extends AbstractWriter {
+class StreamWriter extends Writer {
   constructor(stream) {
     super();
     this.stream = stream;
   }
 
-  writeLine(str) {
-    this.stream.write(this.getIndentation() + str + '\n');
+  write(str) {
+    this.stream.write(str);
   }
 }
 
