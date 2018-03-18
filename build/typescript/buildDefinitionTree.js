@@ -6,7 +6,15 @@ const {
   getMethodTypesFromInterface
 } = require('./treeUtils');
 const { processType } = require('./generateType');
-const nodes = require('./nodes');
+const {
+  ClassNode,
+  EnumNode,
+  FunctionNode,
+  InterfaceNode,
+  NamespaceNode,
+  PropertyNode,
+  TypeNode
+} = require('./nodes');
 
 function parseClassNode(root, node) {
   const staticProperties = [];
@@ -57,7 +65,7 @@ function parseClassNode(root, node) {
         const rawType = isConst ? attributes.constType : attributes.propType;
         const type = processType(root, rawType);
         staticProperties.push(
-          new nodes.PropertyNode(child.name, [], type, isConst)
+          new PropertyNode(child.name, [], type, isConst)
         );
         break;
       }
@@ -92,8 +100,8 @@ function parseClassNode(root, node) {
           rawType = propType.rawType;
           isConst = propType.isConst;
         }
-        const type = generateType(root, rawType);
-        properties.push(new nodes.PropertyNode(child.name, [], type, isConst));
+        const type = processType(root, rawType);
+        properties.push(new PropertyNode(child.name, [], type, isConst));
         break;
       }
       case 'function': {
@@ -122,18 +130,18 @@ function parseClassNode(root, node) {
   // Constructor
   const constructor = parseFunctionNode(root, node);
 
-  return new nodes.ClassNode(
+  return new ClassNode(
     node.name,
     [node.definition.attributes.description],
     attributes.template,
     attributes.extends,
-    [attributes.implements],
+    interfaceName ? [interfaceName] : null,
     staticProperties,
     staticMethods,
     constructor,
     properties,
     methods,
-    others.length > 0 ? new nodes.NamespaceNode(node.name, others) : null
+    others.length > 0 ? new NamespaceNode(node.name, others) : null
   );
 }
 
@@ -187,16 +195,16 @@ function parseInterfaceNode(root, node) {
     switch (child.definition.type) {
       case 'const':
       case 'property': {
-        const attributes = propNode.definition.attributes;
+        const attributes = child.definition.attributes;
         let isConst = attributes.type === 'const';
         let rawType = isConst ? attributes.constType : attributes.propType;
         if (!rawType && baseInterface) {
-          const type = getPropTypeFromInterface(interface, propNode.name);
+          const type = getPropTypeFromInterface(interface, child.name);
           rawType = type.rawType;
           isConst = type.isConst;
         }
         const type = processType(root, rawType);
-        properties.push(new nodes.PropertyNode(child.name, [], type, isConst));
+        properties.push(new PropertyNode(child.name, [], type, isConst));
         break;
       }
       case 'function': {
@@ -205,12 +213,12 @@ function parseInterfaceNode(root, node) {
         ) {
           const types = getMethodTypesFromInterface(
             baseInterface,
-            methodNode.name
+            child.name
           );
           attributes.paramTypes = attributes.paramTypes || types.paramTypes;
           attributes.returnType = attributes.returnType || types.returnType;
         }
-        methods.push(parseFunctionNode(root, methodNode));
+        methods.push(parseFunctionNode(root, child));
         break;
       }
       default:
@@ -220,14 +228,14 @@ function parseInterfaceNode(root, node) {
     }
   }
 
-  return new nodes.InterfaceNode(
+  return new InterfaceNode(
     node.name,
     attributes.comments,
     attributes.template,
-    [baseInterfaceName],
+    baseInterfaceName ? [baseInterfaceName] : null,
     properties,
     methods,
-    others.length > 0 ? new nodes.NamespaceNode(node.name, others) : null
+    others.length > 0 ? new NamespaceNode(node.name, others) : null
   );
 }
 
@@ -243,7 +251,7 @@ function parseTypedefNode(root, node) {
       processType(root, prop.type)
     ));
 
-    return new nodes.InterfaceNode(
+    return new InterfaceNode(
       node.name,
       attributes.comments,
       null,
@@ -286,7 +294,7 @@ function parseTypedefNode(root, node) {
 
     const methods = [parseFunctionNode(root, functionNode)];
 
-    return new nodes.InterfaceNode(
+    return new InterfaceNode(
       node.name,
       attributes.comments,
       null,
@@ -298,7 +306,7 @@ function parseTypedefNode(root, node) {
   }
 
   // Normal type alias, return a type node
-  return new nodes.TypeNode(
+  return new TypeNode(
     node.name,
     attributes.comments,
     processType(root, typedefType, false)
@@ -315,7 +323,7 @@ function parseEnumNode(node) {
     definition.type
   );
 
-  return new nodes.EnumNode(
+  return new EnumNode(
     node.name,
     definition.attributes.comments,
     definition.props
@@ -325,9 +333,9 @@ function parseEnumNode(node) {
 function parseConstNode(root, node) {
   const definition = node.definition;
   const attributes = definition.attributes;
-  const constType = generateType(root, attributes.constType);
+  const constType = processType(root, attributes.constType);
 
-  return new nodes.PropertyNode(
+  return new PropertyNode(
     node.name,
     attributes.comments,
     constType,
@@ -371,7 +379,7 @@ function parseFunctionNode(root, node) {
     ? processType(root, attributes.returnType)
     : null;
 
-  return new nodes.FunctionNode(
+  return new FunctionNode(
     node.name,
     attributes.comments,
     attributes.template,
@@ -383,10 +391,10 @@ function parseFunctionNode(root, node) {
 function parseNode(root, node) {
   if (node.definition === null) {
     const nodes = [];
-    for (const node of node.childre.values()) {
-      nodes.push(parseNode(root, node));
+    for (const child of node.children.values()) {
+      nodes.push(parseNode(root, child));
     }
-    return new nodes.NamespaceNode(node.name, nodes);
+    return new NamespaceNode(node.name, nodes);
   }
 
   const definition = node.definition;
@@ -429,7 +437,7 @@ function buildDefinitionTree(definitions) {
   }
 
   const definitionTreeRoot = [];
-  for (const node in root.values()) {
+  for (const node of root.values()) {
     definitionTreeRoot.push(parseNode(root, node));
   }
   return definitionTreeRoot;

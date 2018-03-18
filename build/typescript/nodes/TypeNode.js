@@ -1,3 +1,5 @@
+const { stringifyType } = require('../generateType');
+
 class TypeNode {
   constructor(name, comments, type) {
     this.name = name;

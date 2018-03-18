@@ -19,7 +19,7 @@ class FunctionNode {
       if (param.isOptional) {
         declaration += '?';
       }
-      declaration += ': ' + param.type;
+      declaration += ': ' + stringifyType(param.type);
       return declaration;
     });
 
@@ -34,7 +34,7 @@ class FunctionNode {
     if (this.templateTypes) {
       declaration += '<' + this.templateTypes.join(', ') + '>';
     }
-    declaration += '(' + params + ')';
+    declaration += '(' + params.join(', ') + ')';
     if (!isConstructor) {
       declaration += ': ' + returnType;
     }

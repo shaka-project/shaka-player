@@ -36,7 +36,7 @@ class InterfaceNode {
     }
 
     // Methods
-    for (const methodNode of methods) {
+    for (const methodNode of this.methods) {
       methodNode.write(writer, null);
     }
 

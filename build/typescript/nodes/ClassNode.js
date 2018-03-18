@@ -42,12 +42,12 @@ class ClassNode {
     writer.increaseLevel();
 
     // Static properties
-    for (const propNode of this.properties) {
+    for (const propNode of this.staticProperties) {
       propNode.write(writer, 'readonly', 'static');
     }
 
     // Static methods
-    for (const methodNode of methods) {
+    for (const methodNode of this.staticMethods) {
       methodNode.write(writer, 'static');
     }
 
@@ -60,7 +60,7 @@ class ClassNode {
     }
 
     // Methods
-    for (const methodNode of methods) {
+    for (const methodNode of this.methods) {
       methodNode.write(writer, null);
     }
 
