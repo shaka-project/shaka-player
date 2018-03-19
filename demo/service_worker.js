@@ -60,8 +60,8 @@ const NETWORK_TIMEOUT = 2;
  * @const {!Array.<string>}
  */
 const CRITICAL_RESOURCES = [
-  '.',  // this resolves to the page
-  'index.html',  // another way to access the page
+  '.',  // This resolves to the page.
+  'index.html',  // Another way to access the page.
   'app_manifest.json',
 
   'demo.css',

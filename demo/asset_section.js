@@ -57,7 +57,7 @@ shakaDemo.setupAssets_ = function() {
 
     let option = document.createElement('option');
     option.textContent = asset.name;
-    option.asset = asset;  // custom attribute to map back to the asset
+    option.asset = asset;  // A custom attribute to map back to the asset.
     group.appendChild(option);
 
     if (asset.drm.length && !asset.drm.some(
@@ -221,7 +221,7 @@ shakaDemo.preparePlayer_ = function(asset) {
       // This simplifies configuration for the user.
       // They will simply fill in a Widevine license server on Chrome, etc.
       licenseServers: licenseServers,
-      // Use custom certificate for all key systems as well
+      // Use a custom certificate for all key systems as well
       certificateUri: document.getElementById('certificateInput').value
     });
   }
@@ -265,7 +265,7 @@ shakaDemo.preparePlayer_ = function(asset) {
 
   player.configure(config);
 
-  // TODO: document demo app debugging features
+  // TODO: Document demo app debugging features.
   if (window.debugConfig) {
     player.configure(window.debugConfig);
   }
@@ -276,7 +276,7 @@ shakaDemo.preparePlayer_ = function(asset) {
 
 /** Compute which assets should be disabled. */
 shakaDemo.computeDisabledAssets = function() {
-  // TODO: use remote support probe, recompute asset disabled when casting?
+  // TODO: Use a remote support probe, recompute asset disabled when casting?
   shakaDemo.onlineOptGroups_.forEach(function(group) {
     group.disabled = !navigator.onLine;
   });
@@ -305,7 +305,7 @@ shakaDemo.load = function() {
     // Load the manifest.
     return player.load(asset.manifestUri);
   }).then(function() {
-    // Update control state in case autoplay is disabled.
+    // Update the control state in case autoplay is disabled.
     shakaDemo.controls_.loadComplete();
 
     shakaDemo.hashShouldChange_();
@@ -315,7 +315,7 @@ shakaDemo.load = function() {
       shakaDemo.localVideo_.poster = shakaDemo.audioOnlyPoster_;
     }
 
-    // Disallow casting of offline content.
+    // Disallow the casting of offline content.
     let isOffline = asset.manifestUri.indexOf('offline:') == 0;
     shakaDemo.controls_.allowCast(!isOffline);
 

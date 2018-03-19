@@ -201,8 +201,8 @@ shakaAssets.AssetInfo;
 
 // Custom callbacks {{{
 /**
- * A response filter for VDMS Uplynk manifest responses,
- * this allows us to get the license prefix that is necessary
+ * A response filter for VDMS Uplynk manifest responses.
+ * This allows us to get the license prefix that is necessary
  * to later generate a proper license response.
  * @param {shaka.net.NetworkingEngine.RequestType} type
  * @param {shakaExtern.Response} response
@@ -212,7 +212,7 @@ shakaAssets.AssetInfo;
 shakaAssets.UplynkResponseFilter = function(type, response) {
   if (type == shaka.net.NetworkingEngine.RequestType.MANIFEST) {
     // Parse a custom header that contains a value needed to build a proper
-    // license server URL
+    // license server URL.
     if (response.headers['x-uplynk-prefix']) {
       shakaAssets.uplynk_prefix = response.headers['x-uplynk-prefix'];
     } else {
@@ -227,13 +227,12 @@ shakaAssets.UplynkResponseFilter = function(type, response) {
  * @param {shaka.net.NetworkingEngine.RequestType} type
  * @param {shakaExtern.Request} request
  * The uplynk_prefix variable is retrieved from the shakaAssets
- * object, and requires that the uplynk manifest response filter
- * also be set.
+ * object, and requires that the uplynk manifest response filter also be set.
  */
 shakaAssets.UplynkRequestFilter = function(type, request) {
   if (type == shaka.net.NetworkingEngine.RequestType.LICENSE ||
       type == shaka.net.NetworkingEngine.RequestType.MANIFEST) {
-    // It appears UTCTiming requests are considered MANIFEST type requests
+    // It appears UTCTiming requests are considered MANIFEST type requests.
     if (request.uris[0].indexOf('servertime') == -1) {
       request.allowCrossSiteCredentials = true;
     } else {
@@ -242,7 +241,7 @@ shakaAssets.UplynkRequestFilter = function(type, request) {
   }
 
   if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
-    // Modify the license request URL based on our cookie
+    // Modify the license request URL based on our cookie.
     if (request.uris[0].indexOf('wv') !== -1 &&
         shakaAssets.uplynk_prefix) {
       request.uris[0] = shakaAssets.uplynk_prefix.concat('/wv');

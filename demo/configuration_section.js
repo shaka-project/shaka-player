@@ -90,7 +90,7 @@ shakaDemo.onDrmSettingsChange_ = function(event) {
  */
 shakaDemo.onLogLevelChange_ = function(event) {
   // shaka.log is not set if logging isn't enabled.
-  // I.E. if using the compiled version of shaka.
+  // I.E. if using the release version of shaka.
   if (shaka.log) {
     let logLevel = event.target[event.target.selectedIndex];
     switch (logLevel.value) {

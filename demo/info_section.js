@@ -140,12 +140,12 @@ shakaDemo.updateTrackOptions_ = function(list, tracks, languageAndRole) {
       return trackInfo;
     }
   };
-  // Remove old tracks
+  // Remove old tracks.
   while (list.firstChild) {
     list.removeChild(list.firstChild);
   }
 
-  // Split language and role
+  // Split language and role.
   let res = languageAndRole.split(':');
   let language = res[0];
   let role = res[1] || '';
@@ -292,7 +292,7 @@ shakaDemo.onTrackSelected_ = function(event) {
   let player = shakaDemo.player_;
 
   if (list.id == 'variantTracks') {
-    // Disable abr manager before changing tracks
+    // Disable abr manager before changing tracks.
     let config = {abr: {enabled: false}};
     player.configure(config);
 

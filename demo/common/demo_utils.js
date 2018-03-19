@@ -83,8 +83,8 @@ ShakaDemoUtils.addLicenseRequestHeaders_ =
 
 
 /**
- * Return true if the current content is Transport Stream.
- * Used to decide if caption button is shown all the time in the demo,
+ * Return true if the current content is in the Transport Stream format.
+ * Used to decide if the caption button is shown all the time in the demo,
  * and whether to show 'Default Text' as a Text Track option.
  *
  * @param {shaka.Player} player

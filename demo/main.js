@@ -672,9 +672,8 @@ shakaDemo.closeError = function() {
 };
 
 
-// IE 9 fires DOMContentLoaded, and enters the "interactive"
-// readyState, before document.body has been initialized, so wait
-// for window.load.
+// IE 9 fires DOMContentLoaded, and enters the "interactive" readyState, before
+// document.body has been initialized, so wait for window.load.
 if (document.readyState == 'loading' ||
     document.readyState == 'interactive') {
   if (window.attachEvent) {
