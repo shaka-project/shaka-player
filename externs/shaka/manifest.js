@@ -48,7 +48,7 @@
  * <p>
  * The presentation timeline is divided into one or more Periods, and each of
  * these Periods contains its own collection of Variants and text streams.
- * Variant is a combination of an audio and a video streams that can be played
+ * A variant is a combination of an audio and a video streams that can be played
  * together.
  * </p>
  *
@@ -57,7 +57,7 @@
  * difference between the two is their quality. For example, an SD video stream
  * and an HD video stream that depict the same scene have the same logical
  * content; whereas an English audio stream and a French audio stream have
- * different logical content. The player can automatically switch between
+ * different logical contents. The player can automatically switch between
  * streams which have the same logical content to adapt to network conditions.
  * </p>
  *
@@ -219,9 +219,9 @@ shakaExtern.DrmInfo;
  *   See {@link http://www.iso.org/iso/home/standards/language_codes.htm}
  * @property {boolean} primary
  *   <i>Defaults to false.</i> <br>
- *   True indicates that the player should use this Variant over others of
- *   the in the same Period. However, the player may use another
- *   Variant to meet application preferences.
+ *   True indicates that the player should use this Variant over others in the
+ *   same Period. The player may still use another Variant to meet application
+ *   preferences.
  * @property {?shakaExtern.Stream} audio
  *   The audio stream of the variant.
  * @property {?shakaExtern.Stream} video
@@ -272,7 +272,7 @@ shakaExtern.FindSegmentPositionFunction;
  * Gets the SegmentReference for the segment at the given position; returns
  * null if no such SegmentReference exists. Note: the position of a segment is
  * unique only among segments within the same Period.
-
+ *
  * @typedef {function(number): shaka.media.SegmentReference}
  * @exportDoc
  */
@@ -368,8 +368,7 @@ shakaExtern.GetSegmentReferenceFunction;
  * @property {?string} keyId
  *   <i>Defaults to null (i.e., unencrypted or key ID unknown).</i> <br>
  *   The stream's key ID as a lowercase hex string. This key ID identifies the
- *   encryption key that the browser (key system) can use to decrypt the
- *   stream.
+ *   encryption key that the browser (key system) can use to decrypt the stream.
  * @property {string} language
  *   The Stream's language, specified as a language code. <br>
  *   Audio stream's language must be identical to the language of the containing
@@ -382,8 +381,8 @@ shakaExtern.GetSegmentReferenceFunction;
  * @property {boolean} primary
  *   <i>Defaults to false.</i> <br>
  *   True indicates that the player should prefer this Stream over others
- *   in the same Period. However, the player may use another
- *   Stream to meet application preferences.
+ *   in the same Period. The player may still use another Stream to meet
+ *   application preferences.
  * @property {?shakaExtern.Stream} trickModeVideo
  *   <i>Video streams only.</i> <br>
  *   An alternate video stream to use for trick mode playback.

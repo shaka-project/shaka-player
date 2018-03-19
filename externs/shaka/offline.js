@@ -176,7 +176,7 @@ shakaExtern.PeriodDB;
  * @property {string} codecs
  *   The codecs of the stream.
  * @property {(number|undefined)} frameRate
- *   The Stream's framerate in frames per second
+ *   The Stream's framerate in frames per second.
  * @property {(string|undefined)} kind
  *   The kind of text stream; undefined for audio/video.
  * @property {string} language
@@ -194,7 +194,7 @@ shakaExtern.PeriodDB;
  * @property {?string} keyId
  *   The key ID this stream is encrypted with.
  * @property {!Array.<shakaExtern.SegmentDB>} segments
- *   An array of segments that make up the stream
+ *   An array of segments that make up the stream.
  * @property {!Array.<number>} variantIds
  *   An array of ids of variants the stream is a part of.
  */

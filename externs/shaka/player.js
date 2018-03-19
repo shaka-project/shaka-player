@@ -34,7 +34,7 @@
  * @property {number} id
  *   The id of the track that was chosen.
  * @property {string} type
- *   The type of track chosen ('variant' or 'text')
+ *   The type of track chosen ('variant' or 'text').
  * @property {boolean} fromAdaptation
  *   True if the choice was made by AbrManager for adaptation; false if it
  *   was made by the application through selectTrack.
@@ -214,7 +214,7 @@ shakaExtern.BufferedInfo;
  *   The language of the track, or 'und' if not given.  This is the exact
  *   value provided in the manifest; it may need to be normalized.
  * @property {?string} label
- *   The track label, unique text that should describe the track.
+ *   The track label, which is unique text that should describe the track.
  * @property {?string} kind
  *   (only for text tracks) The kind of text track, either 'caption' or
  *   'subtitle'.
@@ -513,7 +513,7 @@ shakaExtern.DrmConfiguration;
  *   false if not provided.
  * @property {number} defaultPresentationDelay
  *   A default presentationDelay if suggestedPresentationDelay is missing
- *   in the MPEG DASH manifest, has to be bigger than minBufferTime * 1.5.
+ *   in the MPEG DASH manifest. This has to be bigger than minBufferTime * 1.5.
  *
  * @exportDoc
  */

@@ -34,16 +34,14 @@ shakaExtern.CueRegion.prototype.id;
 
 
 /**
- * The X offset to start the rendering area in anchorUnits of
- * the video width.
+ * The X offset to start the rendering area in anchorUnits of the video width.
  * @type {number}
  */
 shakaExtern.CueRegion.prototype.viewportAnchorX;
 
 
 /**
- * The X offset to start the rendering area in anchorUnits of
- * the video height.
+ * The X offset to start the rendering area in anchorUnits of the video height.
  * @type {number}
  */
 shakaExtern.CueRegion.prototype.viewportAnchorY;
@@ -101,8 +99,8 @@ shakaExtern.CueRegion.prototype.viewportAnchorUnits;
 
 
 /**
- * Scroll=UP means, cues in the region will be added at the bottom of the
- * region and push any already displayed cues in the region up.
+ * If scroll=UP, it means that cues in the region will be added to the bottom of
+ * the region and will push any already displayed cues in the region up.
  * Otherwise (scroll=NONE) cues will stay fixed at the location
  * they were first painted in.
  * @type {shaka.text.CueRegion.scrollMode}
@@ -199,7 +197,7 @@ shakaExtern.Cue.prototype.line;
 
 /**
  * Separation between line areas inside the cue box in px or em
- * (e.g. '100px'/'100em'). If not specified, should be no less than
+ * (e.g. '100px'/'100em'). If not specified, this should be no less than
  * the largest font size applied to the text in the cue.
  * @type {string}.
  */
@@ -221,8 +219,7 @@ shakaExtern.Cue.prototype.displayAlign;
 
 
 /**
- * Text color represented by any string that would be
- * accepted in CSS.
+ * Text color represented by any string that would be accepted in CSS.
  * E. g. '#FFFFFF' or 'white'.
  * @type {!string}
  */
@@ -275,8 +272,7 @@ shakaExtern.Cue.prototype.textDecoration;
 
 
 /**
- * Whether or not line wrapping should be applied
- * to the cue.
+ * Whether or not line wrapping should be applied to the cue.
  * @type {boolean}
  */
 shakaExtern.Cue.prototype.wrapLine;
