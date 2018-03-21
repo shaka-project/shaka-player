@@ -307,7 +307,7 @@ shaka.test.FakeManifestParser.prototype.onExpirationUpdated;
 shaka.test.FakeManifestParser.prototype.configure;
 
 
-/** @type {shaka.media.StreamingEngine.PlayerInterface} */
+/** @type {shakaExtern.ManifestParser.PlayerInterface} */
 shaka.test.FakeManifestParser.prototype.playerInterface;
 
 

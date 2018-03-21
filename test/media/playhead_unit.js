@@ -69,7 +69,8 @@ var PlayingTestInfo;
  *   start: number,
  *   seekTo: number,
  *   expectedEndTime: number,
- *   expectEvent: boolean
+ *   expectEvent: boolean,
+ *   jumpLargeGaps: (boolean|undefined)
  * }}
  *
  * @description
@@ -92,6 +93,8 @@ var PlayingTestInfo;
  *   The expected time at the end of the test.
  * @property {boolean} expectEvent
  *   If true, expect the 'largegap' event to be fired.
+ * @property {(boolean|undefined)} jumpLargeGaps
+ *   If given, set this field of the Playhead configuration.
  */
 var SeekTestInfo;
 
