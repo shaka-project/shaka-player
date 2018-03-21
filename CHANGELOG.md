@@ -1,3 +1,32 @@
+## 2.3.4 (2018-03-22)
+
+New features:
+  - Support for non-standard DASH SegmentTemplate strings using formats other
+    than "d" (such as "x" and "o").
+    - https://github.com/Dash-Industry-Forum/DASH-IF-IOP/issues/177
+
+Bugfixes:
+  - Fixed rapid seeking in zero-width seek ranges, such as in HLS live
+    - https://github.com/google/shaka-player/issues/1331
+  - Fixed use of native controls for text display
+    - https://github.com/google/shaka-player/issues/1332
+  - Fixed parsing of multiple 'emsg' boxes
+    - https://github.com/google/shaka-player/issues/1340
+
+Demo app:
+  - Added an "unload" button to the demo app
+  - Fixed enabling of TS assets in the demo app
+    - https://github.com/google/shaka-player/issues/1214
+
+Docs:
+  - Added a doc describing DASH manifests
+    - https://github.com/google/shaka-player/issues/1233
+  - Fixed documentation of CONTENT_UNSUPPORTED_BY_BROWSER error
+    - https://github.com/google/shaka-player/issues/1349
+  - Updated architecture diagrams
+    - https://github.com/google/shaka-player/issues/1197
+
+
 ## 2.3.3 (2018-03-01)
 
 New features:
