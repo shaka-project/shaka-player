@@ -1162,7 +1162,7 @@ describe('Storage', function() {
     }
 
     /**
-     * @param {!shakaExtern.Stream} stream
+     * @param {!shakaExtern.StreamDB} stream
      * @return {!Promise<!Array<shakaExtern.SegmentDataDB>>}
      */
     function loadSegmentsForStream(stream) {
