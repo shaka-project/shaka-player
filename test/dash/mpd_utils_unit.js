@@ -153,6 +153,13 @@ describe('MpdUtils', function() {
               '/example/$Time.mp4',
               '1', 2, 3, 4).toString()).toBe('/example/$Time.mp4');
     });
+
+    it('handles non-decimal format specifiers', function() {
+      expect(
+          MpdUtils.fillUriTemplate(
+              '/$Number%05x$_$Number%01X$_$Number%01u$_$Number%01o$.mp4',
+              '', 180, 0, 0).toString()).toBe('/000b4_B4_180_264.mp4');
+    });
   });
 
   describe('createTimeline', function() {
