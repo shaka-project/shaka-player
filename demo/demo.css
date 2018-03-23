@@ -20,6 +20,9 @@ html {
 }
 
 body {
+  /* This is explicit because Chromecast has a different default (black). */
+  background-color: white;
+
   margin: 0.5em;
   padding: 0.5em 1em;
 
@@ -29,12 +32,18 @@ body {
 }
 
 body.noinput {
-  /* noinput mode: constrain the body to its size minus margin and padding, so
-     that nested elements can constrain to body */
+  /* noinput mode. */
+
+  /* Add some additional padding so that TV overscan doesn't cut off the version
+   * number or other information we might need. */
+  padding: 2.5em 2em;
+
+  /* Constrain the body to its size minus margin and padding, so that nested
+   * elements can constrain to the body. */
   width: 100%;
-  width: calc(100% - 3em);
+  width: calc(100% - 4em);
   height: 100%;
-  height: calc(100% - 2em);
+  height: calc(100% - 5em);
 }
 
 a {
