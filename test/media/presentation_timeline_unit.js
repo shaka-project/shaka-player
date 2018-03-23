@@ -320,6 +320,46 @@ describe('PresentationTimeline', function() {
     });
   });
 
+  describe('getSafeSeekRangeStart', function() {
+    it('ignores offset for VOD', function() {
+      let timeline = makeVodTimeline(/* duration */ 60);
+      expect(timeline.getSafeSeekRangeStart(0)).toBe(0);
+      expect(timeline.getSafeSeekRangeStart(10)).toBe(0);
+      expect(timeline.getSafeSeekRangeStart(25)).toBe(0);
+    });
+
+    it('offsets from live edge', function() {
+      let timeline = makeLiveTimeline(/* availability */ 60, /* delay */ 0);
+
+      setElapsed(120);
+      // now (120) - availability (60) - segment size (10) = 50
+      expect(timeline.getSeekRangeStart()).toBe(50);
+
+      expect(timeline.getSafeSeekRangeStart(10)).toBe(60);
+      expect(timeline.getSafeSeekRangeStart(25)).toBe(75);
+    });
+
+    it('clamps to end', function() {
+      let timeline = makeLiveTimeline(/* availability */ 60, /* delay */ 0);
+
+      setElapsed(120);
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(110);
+      expect(timeline.getSafeSeekRangeStart(70)).toBe(110);
+      expect(timeline.getSafeSeekRangeStart(85)).toBe(110);
+      expect(timeline.getSafeSeekRangeStart(200)).toBe(110);
+    });
+
+    it('will return 0 if safe', function() {
+      let timeline = makeLiveTimeline(/* availability */ 60, /* delay */ 0);
+
+      setElapsed(50);
+      // now (50) - availability (60) - segment size (10) = -20
+      expect(timeline.getSeekRangeStart()).toBe(0);
+      expect(timeline.getSafeSeekRangeStart(0)).toBe(0);
+      expect(timeline.getSafeSeekRangeStart(25)).toBe(5);
+    });
+  });
+
   describe('getSeekRangeEnd', function() {
     it('accounts for delay for live and IPR', function() {
       var timeline1 = makeIprTimeline(/* duration */ 60, /* delay */ 7);
