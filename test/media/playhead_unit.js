@@ -279,7 +279,7 @@ describe('Playhead', function() {
       expect(video.currentTime).toBe(59);  // duration - durationBackoff
     });
 
-    it('respects a seek before metadata is loaded', function() {
+    it('does not change currentTime if it\'s not 0', function() {
       playhead = new shaka.media.Playhead(
           video,
           manifest,
@@ -294,46 +294,14 @@ describe('Playhead', function() {
       expect(playhead.getTime()).toBe(5);
       expect(video.currentTime).toBe(0);
 
-      // Realism: Chrome fires timeupdate before currentTime changes.
-      video.on['timeupdate']();
-      video.currentTime = 20;
-
-      video.on['timeupdate']();
-      video.currentTime = 30;
-
-      // This hasn't changed yet, because Playhead delays observing currentTime.
-      expect(playhead.getTime()).toBe(5);
-
-      // Delay to let Playhead batch up changes to currentTime and observe.
-      jasmine.clock().tick(1000);
-
-      expect(playhead.getTime()).toBe(30);
-    });
-
-    it('does not treat timeupdate as seek close to metadata load', function() {
-      playhead = new shaka.media.Playhead(
-          video,
-          manifest,
-          config,
-          5 /* startTime */,
-          Util.spyFunc(onSeek),
-          Util.spyFunc(onEvent));
-
-      expect(video.addEventListener).toHaveBeenCalledWith(
-          'loadedmetadata', jasmine.any(Function), false);
-
-      expect(playhead.getTime()).toBe(5);
-      expect(video.currentTime).toBe(0);
-
-      // Realism: Edge fires "timeupdate" right before "loadedmetadata".
-      // This was causing a failed assertion in onEarlySeek_();
-      video.currentTime = 5.001;
-      video.on['timeupdate']();
+      video.currentTime = 8;
       video.readyState = HTMLMediaElement.HAVE_METADATA;
       video.on['loadedmetadata']();
 
       // Delay to let Playhead batch up changes to currentTime and observe.
       jasmine.clock().tick(1000);
+      expect(video.currentTime).toBe(8);
+
     });
 
     // This is important for recovering from drift.
