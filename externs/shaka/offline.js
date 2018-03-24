@@ -306,12 +306,16 @@ shakaExtern.StorageCell.prototype.addManifests = function(manifests) {};
 
 
 /**
- * Replace the manifests already in the storage cell, with new copies.
+ * Replace the expiration time of the manifest stored under |key| with
+ * |newExpiration|. If no manifest is found under |key| then this should
+ * act as a no-op.
  *
- * @param {!Object<number, shakaExtern.ManifestDB>} manifests
+ * @param {number} key
+ * @param {number} expiration
  * @return {!Promise}
  */
-shakaExtern.StorageCell.prototype.updateManifests = function(manifests) {};
+shakaExtern.StorageCell.prototype.updateManifestExpiration =
+    function(key, expiration) {};
 
 
 /**

@@ -173,6 +173,7 @@ describe('IndexeddbStorageCell', function() {
 
     /** @type {shakaExtern.ManifestDB} */
     let originalManifest = OfflineUtils.createManifest('original');
+    originalManifest.expiration = 1000;
 
     /** @type {number} */
     let key;
@@ -193,21 +194,17 @@ describe('IndexeddbStorageCell', function() {
       expect(found).toBeTruthy();
       expect(found.length).toBe(1);
       expect(found[0]).toEqual(originalManifest);
-      expect(found[0].originalManifestUri).toBe('original');
 
-      // Pack the manifest so that we can pass it back to storage for updating.
-      // Update the copy we have so that we can later check that the update
-      // took affect.
-      let map = {};
-      map[key] = OfflineUtils.createManifest('updated');
-
-      return cell.updateManifests(map);
+      return cell.updateManifestExpiration(key, 500);
     }).then(() => {
       return cell.getManifests([key]);
     }).then((newFound) => {
       expect(newFound).toBeTruthy();
       expect(newFound.length).toBe(1);
+
       expect(newFound[0]).not.toEqual(originalManifest);
+      originalManifest.expiration = 500;
+      expect(newFound[0]).toEqual(originalManifest);
     }).catch(fail).then(done);
   }));
 
