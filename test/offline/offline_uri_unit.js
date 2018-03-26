@@ -22,7 +22,7 @@ describe('OfflineUri', function() {
     /** @type {number} */
     let id = 123;
     /** @type {string} */
-    let uri = OfflineUri.manifestIdToUri(id);
+    let uri = OfflineUri.manifest(id).toString();
 
     expect(uri).toBe('offline:manifest/123');
   });
@@ -31,44 +31,36 @@ describe('OfflineUri', function() {
     /** @type {number} */
     let id = 123;
     /** @type {string} */
-    let uri = OfflineUri.segmentIdToUri(id);
+    let uri = OfflineUri.segment(id).toString();
 
     expect(uri).toBe('offline:segment/123');
   });
 
-  it('creates null id from non-manifest uri', function() {
+  it('creates null from invalid uri', function() {
     /** @type {string} */
     let uri = 'invalid-uri';
-    /** @type {?number} */
-    let id = OfflineUri.uriToManifestId(uri);
+    let parsed = OfflineUri.parse(uri);
 
-    expect(id).toBeNull();
+    expect(parsed).toBeNull();
   });
 
-  it('creates id from manifest uri', function() {
+  it('parse manifest uri', function() {
     /** @type {string} */
     let uri = 'offline:manifest/123';
-    /** @type {?number} */
-    let id = OfflineUri.uriToManifestId(uri);
+    let parsed = OfflineUri.parse(uri);
 
-    expect(id).toBe(123);
+    expect(parsed).toBeTruthy();
+    expect(parsed.isManifest()).toBeTruthy();
+    expect(parsed.key()).toBe(123);
   });
 
-  it('creates null id from non-segment uri', function() {
-    /** @type {string} */
-    let uri = 'invalid-uri';
-    /** @type {?number} */
-    let id = OfflineUri.uriToSegmentId(uri);
-
-    expect(id).toBeNull();
-  });
-
-  it('creates id from segment uri', function() {
+  it('parse segment uri', function() {
     /** @type {string} */
     let uri = 'offline:segment/123';
-    /** @type {?number} */
-    let id = OfflineUri.uriToSegmentId(uri);
+    let parsed = OfflineUri.parse(uri);
 
-    expect(id).toBe(123);
+    expect(parsed).toBeTruthy();
+    expect(parsed.isSegment()).toBeTruthy();
+    expect(parsed.key()).toBe(123);
   });
 });

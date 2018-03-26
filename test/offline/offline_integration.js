@@ -142,19 +142,20 @@ describe('Offline', /** @suppress {accessControls} */ function() {
         .then(function(content) {
           storedContent = content;
 
+          let contentUri = storedContent.offlineUri;
           goog.asserts.assert(
-              storedContent.offlineUri,
-              'Downloaded content should have a valid uri.');
+              contentUri,
+              'Stored content should have an offline uri.');
 
-          /** @type {string} */
-          let uri = storedContent.offlineUri;
-
-          /** @type {?number} */
-          let id = OfflineUri.uriToManifestId(uri);
+          let offlineUri = OfflineUri.parse(contentUri);
           goog.asserts.assert(
-              id != null,
-              uri + ' should be a valid offline manifest uri.');
-          return engine.getManifest(id);
+              offlineUri,
+              contentUri + ' should be a valid offline manifest uri.');
+          goog.asserts.assert(
+              offlineUri.isManifest(),
+              contentUri + ' should be a valid offline manifest uri.');
+
+          return engine.getManifest(offlineUri.key());
         })
         .then(function(manifestDb) {
           // Did we store a persistent license?
@@ -250,19 +251,20 @@ describe('Offline', /** @suppress {accessControls} */ function() {
             .then(function(content) {
               storedContent = content;
 
+              let contentUri = storedContent.offlineUri;
               goog.asserts.assert(
-                  storedContent.offlineUri,
-                  'Downloaded content should have a valid uri.');
+                  contentUri,
+                  'Stored content should have an offline uri.');
 
-              /** @type {string} */
-              let uri = storedContent.offlineUri;
-
-              /** @type {?number} */
-              let id = OfflineUri.uriToManifestId(uri);
+              let offlineUri = OfflineUri.parse(contentUri);
               goog.asserts.assert(
-                  id != null,
-                  uri + ' should be a valid offline manifest uri.');
-              return engine.getManifest(id);
+                  offlineUri,
+                  contentUri + ' should be a valid offline manifest uri.');
+              goog.asserts.assert(
+                  offlineUri.isManifest(),
+                  contentUri + ' should be a valid offline manifest uri.');
+
+              return engine.getManifest(offlineUri.key());
             })
             .then(function(manifestDb) {
               // There should not be any licenses stored.
@@ -288,15 +290,20 @@ describe('Offline', /** @suppress {accessControls} */ function() {
               return storage.remove(storedContent.offlineUri);
             })
             .then(function() {
-              /** @type {string} */
-              let uri = storedContent.offlineUri;
-
-              /** @type {?number} */
-              let id = OfflineUri.uriToManifestId(uri);
+              let contentUri = storedContent.offlineUri;
               goog.asserts.assert(
-                  id != null,
-                  uri + ' should be a valid offline manifest uri.');
-              return engine.getManifest(id);
+                  contentUri,
+                  'Stored content should have an offline uri.');
+
+              let offlineUri = OfflineUri.parse(contentUri);
+              goog.asserts.assert(
+                  offlineUri,
+                  contentUri + ' should be a valid offline manifest uri.');
+              goog.asserts.assert(
+                  offlineUri.isManifest(),
+                  contentUri + ' should be a valid offline manifest uri.');
+
+              return engine.getManifest(offlineUri.key());
             })
             .then(function(manifestDb) {
               expect(manifestDb).toBeFalsy();

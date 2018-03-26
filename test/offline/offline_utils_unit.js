@@ -16,6 +16,7 @@
  */
 
 describe('OfflineUtils', function() {
+  const OfflineUri = shaka.offline.OfflineUri;
   const OfflineUtils = shaka.offline.OfflineUtils;
 
   let drmInfos;
@@ -408,7 +409,7 @@ describe('OfflineUtils', function() {
 
       streamDb.segments.forEach(function(segmentDb, i) {
         /** @type {?string} */
-        let uri = shaka.offline.OfflineUri.segmentIdToUri(segmentDb.dataKey);
+        let uri = OfflineUri.segment(segmentDb.dataKey).toString();
 
         expect(stream.findSegmentPosition(segmentDb.startTime)).toBe(i);
         expect(stream.findSegmentPosition(segmentDb.endTime - 0.1)).toBe(i);

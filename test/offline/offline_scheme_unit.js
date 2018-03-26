@@ -62,7 +62,7 @@ describe('OfflineScheme', function() {
             });
           })
           .then(function(id) {
-            uri = OfflineUri.manifestIdToUri(id);
+            uri = OfflineUri.manifest(id).toString();
             return OfflineScheme(uri, request).promise;
           })
           .then(function(response) {
@@ -88,7 +88,7 @@ describe('OfflineScheme', function() {
             });
           })
           .then(function(id) {
-            uri = OfflineUri.segmentIdToUri(id);
+            uri = OfflineUri.segment(id).toString();
             return OfflineScheme(uri, request).promise;
           })
           .then(function(response) {
@@ -105,7 +105,7 @@ describe('OfflineScheme', function() {
 
     it('will fail if segment not found', function(done) {
       const id = 789;
-      const uri = OfflineUri.segmentIdToUri(id);
+      const uri = OfflineUri.segment(id).toString();
 
       OfflineScheme(uri, request).promise
           .then(fail)
