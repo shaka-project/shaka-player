@@ -16,8 +16,8 @@
  */
 
 describe('OfflineUtils', function() {
-  /** @const */
-  var OfflineUtils = shaka.offline.OfflineUtils;
+  const OfflineUri = shaka.offline.OfflineUri;
+  const OfflineUtils = shaka.offline.OfflineUtils;
 
   var drmInfos;
   var timeline;
@@ -418,7 +418,7 @@ describe('OfflineUtils', function() {
 
       streamDb.segments.forEach(function(segmentDb, i) {
         /** @type {?string} */
-        var uri = shaka.offline.OfflineUri.segmentIdToUri(segmentDb.dataKey);
+        let uri = OfflineUri.segment(segmentDb.dataKey).toString();
 
         expect(stream.findSegmentPosition(segmentDb.startTime)).toBe(i);
         expect(stream.findSegmentPosition(segmentDb.endTime - 0.1)).toBe(i);

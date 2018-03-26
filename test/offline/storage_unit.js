@@ -169,7 +169,7 @@ describe('Storage', function() {
           .then(function(data) {
             expect(data).toBeTruthy();
             // Since we are using a memory DB, it will always be the first one.
-            expect(data.offlineUri).toBe(OfflineUri.manifestIdToUri(0));
+            expect(data.offlineUri).toBe(OfflineUri.manifest(0).toString());
             expect(data.originalManifestUri).toBe(originalUri);
             // Even though there are no segments, it will use the duration from
             // the original manifest.
@@ -231,7 +231,7 @@ describe('Storage', function() {
 
       storage.store(fakeManifestUri)
           .then(function(data) {
-            expect(data.offlineUri).toBe(OfflineUri.manifestIdToUri(0));
+            expect(data.offlineUri).toBe(OfflineUri.manifest(0).toString());
             return fakeStorageEngine.getManifest(0);
           })
           .then(function(manifestDb) {
@@ -248,7 +248,7 @@ describe('Storage', function() {
       drmEngine.setSessionIds(sessions);
       storage.store(fakeManifestUri)
           .then(function(data) {
-            expect(data.offlineUri).toBe(OfflineUri.manifestIdToUri(0));
+            expect(data.offlineUri).toBe(OfflineUri.manifest(0).toString());
             return fakeStorageEngine.getManifest(0);
           })
           .then(function(manifestDb) {
@@ -275,7 +275,7 @@ describe('Storage', function() {
       drmEngine.setSessionIds(['abcd']);
       storage.store(fakeManifestUri)
           .then(function(data) {
-            expect(data.offlineUri).toBe(OfflineUri.manifestIdToUri(0));
+            expect(data.offlineUri).toBe(OfflineUri.manifest(0).toString());
             return fakeStorageEngine.getManifest(0);
           })
           .then(function(manifestDb) {
@@ -292,7 +292,7 @@ describe('Storage', function() {
 
       storage.store(fakeManifestUri)
           .then(function(data) {
-            expect(data.offlineUri).toBe(OfflineUri.manifestIdToUri(0));
+            expect(data.offlineUri).toBe(OfflineUri.manifest(0).toString());
             return fakeStorageEngine.getManifest(0);
           })
           .then(function(manifestDb) {
@@ -899,7 +899,7 @@ describe('Storage', function() {
       it('does not store offline sessions', function(done) {
         storage.store(fakeManifestUri)
             .then(function(data) {
-              expect(data.offlineUri).toBe(OfflineUri.manifestIdToUri(0));
+              expect(data.offlineUri).toBe(OfflineUri.manifest(0).toString());
               return fakeStorageEngine.getManifest(0);
             })
             .then(function(manifestDb) {
@@ -1111,7 +1111,7 @@ describe('Storage', function() {
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.STORAGE,
             shaka.util.Error.Code.REQUESTED_ITEM_NOT_FOUND,
-            OfflineUri.manifestIdToUri(0));
+            OfflineUri.manifest(0).toString());
         shaka.test.Util.expectToEqualError(error, expectedError);
       }).then(done);
     });
@@ -1138,7 +1138,7 @@ describe('Storage', function() {
                     shaka.util.Error.Severity.CRITICAL,
                     shaka.util.Error.Category.STORAGE,
                     shaka.util.Error.Code.REQUESTED_ITEM_NOT_FOUND,
-                    OfflineUri.manifestIdToUri(0)));
+                    OfflineUri.manifest(0).toString()));
           })
           .then(done);
     });
@@ -1169,7 +1169,7 @@ describe('Storage', function() {
      */
     function removeManifest(manifestId) {
       /** @type {string} */
-      var uri = OfflineUri.manifestIdToUri(manifestId);
+      let uri = OfflineUri.manifest(manifestId).toString();
       return storage.remove(uri);
     }
 

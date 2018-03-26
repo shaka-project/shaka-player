@@ -64,8 +64,8 @@ describe('OfflineScheme', function() {
             });
           })
           .then(function(id) {
-            uri = OfflineUri.manifestIdToUri(id);
-            return OfflineScheme(uri, request);
+            uri = OfflineUri.manifest(id).toString();
+            return OfflineScheme(uri, request).promise;
           })
           .then(function(response) {
             expect(response).toBeTruthy();
@@ -91,8 +91,8 @@ describe('OfflineScheme', function() {
             });
           })
           .then(function(id) {
-            uri = OfflineUri.segmentIdToUri(id);
-            return OfflineScheme(uri, request);
+            uri = OfflineUri.segment(id).toString();
+            return OfflineScheme(uri, request).promise;
           })
           .then(function(response) {
             expect(response).toBeTruthy();
@@ -108,10 +108,8 @@ describe('OfflineScheme', function() {
     });
 
     it('will fail if segment not found', function(done) {
-      /** @const {number} */
-      var id = 789;
-      /** @const {string} */
-      var uri = OfflineUri.segmentIdToUri(id);
+      const id = 789;
+      const uri = OfflineUri.segment(id).toString();
 
       OfflineScheme(uri, request)
           .then(fail)

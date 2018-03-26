@@ -23,7 +23,7 @@ describe('OfflineUri', function() {
     /** @type {number} */
     var id = 123;
     /** @type {string} */
-    var uri = OfflineUri.manifestIdToUri(id);
+    let uri = OfflineUri.manifest(id).toString();
 
     expect(uri).toBe('offline:manifest/123');
   });
@@ -32,44 +32,36 @@ describe('OfflineUri', function() {
     /** @type {number} */
     var id = 123;
     /** @type {string} */
-    var uri = OfflineUri.segmentIdToUri(id);
+    let uri = OfflineUri.segment(id).toString();
 
     expect(uri).toBe('offline:segment/123');
   });
 
-  it('creates null id from non-manifest uri', function() {
+  it('creates null from invalid uri', function() {
     /** @type {string} */
-    var uri = 'invalid-uri';
-    /** @type {?number} */
-    var id = OfflineUri.uriToManifestId(uri);
+    let uri = 'invalid-uri';
+    let parsed = OfflineUri.parse(uri);
 
-    expect(id).toBeNull();
+    expect(parsed).toBeNull();
   });
 
-  it('creates id from manifest uri', function() {
+  it('parse manifest uri', function() {
     /** @type {string} */
-    var uri = 'offline:manifest/123';
-    /** @type {?number} */
-    var id = OfflineUri.uriToManifestId(uri);
+    let uri = 'offline:manifest/123';
+    let parsed = OfflineUri.parse(uri);
 
-    expect(id).toBe(123);
+    expect(parsed).toBeTruthy();
+    expect(parsed.isManifest()).toBeTruthy();
+    expect(parsed.key()).toBe(123);
   });
 
-  it('creates null id from non-segment uri', function() {
+  it('parse segment uri', function() {
     /** @type {string} */
-    var uri = 'invalid-uri';
-    /** @type {?number} */
-    var id = OfflineUri.uriToSegmentId(uri);
+    let uri = 'offline:segment/123';
+    let parsed = OfflineUri.parse(uri);
 
-    expect(id).toBeNull();
-  });
-
-  it('creates id from segment uri', function() {
-    /** @type {string} */
-    var uri = 'offline:segment/123';
-    /** @type {?number} */
-    var id = OfflineUri.uriToSegmentId(uri);
-
-    expect(id).toBe(123);
+    expect(parsed).toBeTruthy();
+    expect(parsed.isSegment()).toBeTruthy();
+    expect(parsed.key()).toBe(123);
   });
 });
