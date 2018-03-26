@@ -40,8 +40,13 @@ goog.provide('shaka.test.StreamingEngineUtil');
  */
 shaka.test.StreamingEngineUtil.createFakeNetworkingEngine = function(
     getInitSegment, getSegment) {
-  var netEngine = {
-    request: jasmine.createSpy('request')
+  let netEngine = {
+    request: jasmine.createSpy('request'),
+    delays: {  // Artificial delays per content type, in seconds.
+      audio: 0,
+      video: 0,
+      text: 0,
+    },
   };
 
   netEngine.request.and.callFake(function(requestType, request) {
@@ -69,8 +74,13 @@ shaka.test.StreamingEngineUtil.createFakeNetworkingEngine = function(
       buffer = getSegment(contentType, periodNumber, position);
     }
 
-    var response = {uri: request.uris[0], data: buffer, headers: {}};
-    return Promise.resolve(response);
+    const response = {uri: request.uris[0], data: buffer, headers: {}};
+    const p = new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(response);
+      }, netEngine.delays[contentType] * 1000);
+    });
+    return p;
   });
 
   netEngine.expectRequest = function(uri, type) {
