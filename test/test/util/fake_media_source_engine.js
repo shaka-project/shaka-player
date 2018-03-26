@@ -115,7 +115,7 @@ shaka.test.FakeMediaSourceEngine = function(segmentData, opt_drift) {
 
   /** @type {!jasmine.Spy} */
   this.bufferedAheadOf = jasmine.createSpy('bufferedAheadOf')
-                   .and.callFake(this.bufferedAheadOfImpl_.bind(this));
+                   .and.callFake(this.bufferedAheadOfImpl.bind(this));
 
   /** @type {!jasmine.Spy} */
   this.setStreamProperties = jasmine.createSpy('setStreamProperties')
@@ -220,9 +220,8 @@ shaka.test.FakeMediaSourceEngine.prototype.isBufferedImpl_ =
  * @param {string} type
  * @param {number} start
  * @return {number}
- * @private
  */
-shaka.test.FakeMediaSourceEngine.prototype.bufferedAheadOfImpl_ = function(
+shaka.test.FakeMediaSourceEngine.prototype.bufferedAheadOfImpl = function(
     type, start) {
   if (this.segments[type] === undefined) throw new Error('unexpected type');
 

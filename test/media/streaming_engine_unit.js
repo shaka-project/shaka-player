@@ -962,9 +962,7 @@ describe('StreamingEngine', function() {
     onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
     onChooseStreams.and.callFake(defaultOnChooseStreams);
 
-    // TODO(modmaker): Don't just silence the compiler error.
-    let endOfStream = /** @type {?} */ (mediaSourceEngine.endOfStream);
-    endOfStream.and.callFake(function() {
+    mediaSourceEngine.endOfStream.and.callFake(function() {
       expect(mediaSourceEngine.setDuration).toHaveBeenCalledWith(40);
       expect(mediaSourceEngine.setDuration).toHaveBeenCalledTimes(1);
       mediaSourceEngine.setDuration.calls.reset();
@@ -991,9 +989,7 @@ describe('StreamingEngine', function() {
     onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
     onChooseStreams.and.callFake(defaultOnChooseStreams);
 
-    // TODO(modmaker): Don't just silence the compiler error.
-    let endOfStream = /** @type {?} */ (mediaSourceEngine.endOfStream);
-    endOfStream.and.callFake(function() {
+    mediaSourceEngine.endOfStream.and.callFake(function() {
       expect(mediaSourceEngine.setDuration).toHaveBeenCalledWith(40);
       expect(mediaSourceEngine.setDuration).toHaveBeenCalledTimes(1);
       mediaSourceEngine.setDuration.calls.reset();
@@ -1032,6 +1028,67 @@ describe('StreamingEngine', function() {
     };
     expect(mediaSourceEngine.setStreamProperties)
         .toHaveBeenCalledWith('video', 20, lt20, 40);
+  });
+
+  it('does not buffer one media type ahead of another', function() {
+    setupVod();
+    mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+
+    // Configure StreamingEngine with a high buffering goal.  The rest are
+    // defaults.
+    const config = {
+      bufferingGoal: 60,
+
+      rebufferingGoal: 2,
+      retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+      failureCallback: function() { streamingEngine.retry(); },  // retry
+      bufferBehind: Infinity,
+      ignoreTextStreamFailures: false,
+      alwaysStreamText: false,
+      startAtSegmentBoundary: false,
+      smallGapLimit: 0.5,
+      jumpLargeGaps: false,
+      durationBackoff: 1
+    };
+    createStreamingEngine(config);
+
+    // Make requests for different types take different amounts of time.
+    // This would let some media types buffer faster than others if unchecked.
+    netEngine.delays.text = 0.1;
+    netEngine.delays.audio = 1.0;
+    netEngine.delays.video = 10.0;
+
+    mediaSourceEngine.appendBuffer.and.callFake((type, data, start, end) => {
+      // Call to the underlying implementation.
+      const p = mediaSourceEngine.appendBufferImpl(type, data, start, end);
+
+      // Validate that no one media type got ahead of any other.
+      let minBuffered = Infinity;
+      let maxBuffered = 0;
+      ['audio', 'video', 'text'].forEach((t) => {
+        const buffered = mediaSourceEngine.bufferedAheadOfImpl(t, 0);
+        minBuffered = Math.min(minBuffered, buffered);
+        maxBuffered = Math.max(maxBuffered, buffered);
+      });
+
+      // Sanity check.
+      expect(maxBuffered).not.toBeLessThan(minBuffered);
+      // Proof that we didn't get too far ahead (10s == 1 segment).
+      expect(maxBuffered - minBuffered).not.toBeGreaterThan(10);
+
+      return p;
+    });
+
+    // Here we go!
+    playhead.getTime.and.returnValue(0);
+    onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+    onChooseStreams.and.callFake(defaultOnChooseStreams);
+    streamingEngine.init();
+
+    runTest();
+    // Make sure appendBuffer was called, so that we know that we executed the
+    // checks in our fake above.
+    expect(mediaSourceEngine.appendBuffer).toHaveBeenCalled();
   });
 
   describe('switchVariant/switchTextStream', function() {
