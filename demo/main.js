@@ -63,6 +63,10 @@ shakaDemo.hashCanChange_ = false;
 shakaDemo.suppressHashChangeEvent_ = false;
 
 
+/** @private {(number|undefined)} */
+shakaDemo.startTime_ = undefined;
+
+
 /**
  * @private
  * @const {string}
@@ -290,6 +294,10 @@ shakaDemo.preBrowserCheckParams_ = function(params) {
   }
   if ('play' in params) {
     document.getElementById('enableLoadOnRefresh').checked = true;
+  }
+  if ('startTime' in params) {
+    // Used manually for debugging start time issues in live streams.
+    shakaDemo.startTime_ = parseInt(params['startTime'], 10);
   }
   // shaka.log is not set if logging isn't enabled.
   // I.E. if using the compiled version of shaka.
@@ -536,9 +544,12 @@ shakaDemo.hashShouldChange_ = function() {
     params.push('play');
   }
 
-  // This parameter must be added manually, so preserve it.
+  // These parameters must be added manually, so preserve them.
   if ('noinput' in oldParams) {
     params.push('noinput');
+  }
+  if (shakaDemo.startTime_ != undefined) {
+    params.push('startTime=' + shakaDemo.startTime_);
   }
 
   // Store values for drm configuration.
