@@ -32,13 +32,13 @@ describe('DashParser Live', function() {
   /** @type {shakaExtern.ManifestParser.PlayerInterface} */
   let playerInterface;
 
-  beforeAll(function() {
-    jasmine.clock().install();
-    // This mock is required for fakeEventLoop.
-    PromiseMock.install();
-  });
-
   beforeEach(function() {
+    // First, fake the clock so we can control timers.
+    // This does not mock Date.now, which must be done separately.
+    jasmine.clock().install();
+    // This Promise mock is required for fakeEventLoop.
+    PromiseMock.install();
+
     let retry = shaka.net.NetworkingEngine.defaultRetryParameters();
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = new shaka.dash.DashParser();
@@ -65,12 +65,18 @@ describe('DashParser Live', function() {
   afterEach(function() {
     // Dash parser stop is synchronous.
     parser.stop();
-  });
 
-  afterAll(function() {
-    Date.now = oldNow;
+    // Uninstall the clock() first.  This also undoes mockDate(), and should be
+    // done afterEach, not afterAll.  Otherwise, we get conflicts when some
+    // tests use mockDate() and others directly overwrite Date.now.
     jasmine.clock().uninstall();
+    // Replace Date.now with the browser built-in.  This must come AFTER we
+    // uninstall the clock() module, or else mockDate() doesn't get cleaned up
+    // correctly.
+    Date.now = oldNow;
+    // Finally, uninstall the Promise mock.
     PromiseMock.uninstall();
+    // TODO: Clean up this suite so that everyone uses mockDate().
   });
 
   /**
@@ -441,7 +447,7 @@ describe('DashParser Live', function() {
     PromiseMock.flush();
   });
 
-  it('failures in update call error callback', function(done) {
+  it('calls the error callback if an update fails', function(done) {
     let lines = [
       '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />'
     ];
@@ -541,6 +547,55 @@ describe('DashParser Live', function() {
           // have happened.
           expect(fakeNetEngine.request).not.toHaveBeenCalled();
         }).catch(fail).then(done);
+    PromiseMock.flush();
+  });
+
+  it('delays subsequent updates when an update is slow', function(done) {
+    // For this test, we want Date.now() to follow the ticks of the fake clock.
+    jasmine.clock().mockDate();
+
+    const lines = [
+      '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />'
+    ];
+    const idealUpdateTime = shaka.dash.DashParser['MIN_UPDATE_PERIOD_'];
+    const manifestText = makeSimpleLiveManifestText(lines, idealUpdateTime);
+
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
+    parser.start('dummy://foo', playerInterface).then((manifest) => {
+      fakeNetEngine.request.calls.reset();
+
+      // Make the first update take a long time.
+      const delay = fakeNetEngine.delayNextRequest();
+
+      // Wait for the update to start.
+      jasmine.clock().tick(idealUpdateTime * 1000);
+      PromiseMock.flush();
+
+      // Update period has passed, so an update has been requested.
+      expect(fakeNetEngine.request).toHaveBeenCalled();
+      fakeNetEngine.request.calls.reset();
+
+      // Make the update take an extra 5 seconds, then end the delay.
+      const extraWaitTimeMs = 5.0;
+      jasmine.clock().tick(extraWaitTimeMs * 1000);
+      delay.resolve();
+      PromiseMock.flush();
+      // No new calls, since we are still working on the same one.
+      expect(fakeNetEngine.request).not.toHaveBeenCalled();
+      fakeNetEngine.request.calls.reset();
+
+      // From now on, the updates should be farther apart.
+      jasmine.clock().tick(idealUpdateTime * 1000);
+      PromiseMock.flush();
+      // The update should not have happened yet.
+      expect(fakeNetEngine.request).not.toHaveBeenCalled();
+      fakeNetEngine.request.calls.reset();
+
+      // After waiting the extra time, the update request should fire.
+      jasmine.clock().tick(extraWaitTimeMs * 1000);
+      PromiseMock.flush();
+      expect(fakeNetEngine.request).toHaveBeenCalled();
+    }).catch(fail).then(done);
     PromiseMock.flush();
   });
 
