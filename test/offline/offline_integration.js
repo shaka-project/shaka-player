@@ -16,8 +16,6 @@
  */
 
 describe('Offline', /** @suppress {accessControls} */ function() {
-  const OfflineUri = shaka.offline.OfflineUri;
-
   const dbName = 'shaka-offline-integration-test-db';
   const dbUpdateRetries = 5;
 
@@ -134,7 +132,11 @@ describe('Offline', /** @suppress {accessControls} */ function() {
       shaka.test.Util.expectToEqualError(e, expected);
     };
 
+    /** {@type {shakaExtern.StoredContent} */
     let storedContent;
+    /** {@type {shaka.offline.OfflineUri} */
+    let offlineUri;
+
     let sessionId;
     /** @type {!shaka.media.DrmEngine} */
     let drmEngine;
@@ -147,7 +149,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
               contentUri,
               'Stored content should have an offline uri.');
 
-          let offlineUri = OfflineUri.parse(contentUri);
+          offlineUri = shaka.offline.OfflineUri.parse(contentUri);
           goog.asserts.assert(
               offlineUri,
               contentUri + ' should be a valid offline manifest uri.');
@@ -157,18 +159,23 @@ describe('Offline', /** @suppress {accessControls} */ function() {
 
           return engine.getManifest(offlineUri.key());
         })
-        .then(function(manifestDb) {
+        .then(function(manifestDB) {
           // Did we store a persistent license?
-          expect(manifestDb).toBeTruthy();
-          expect(manifestDb.sessionIds.length).toBeGreaterThan(0);
-          sessionId = manifestDb.sessionIds[0];
+          expect(manifestDB).toBeTruthy();
+          expect(manifestDB.sessionIds.length).toBeGreaterThan(0);
+          sessionId = manifestDB.sessionIds[0];
+
+          goog.asserts.assert(
+              offlineUri,
+              'Offline uri should not be null here');
+          let converter = new shaka.offline.ManifestConverter(
+              offlineUri.mechanism(), offlineUri.cell());
+          let manifest = converter.fromManifestDB(manifestDB);
+          let netEngine = player.getNetworkingEngine();
+          goog.asserts.assert(netEngine, 'Must have a NetworkingEngine');
 
           // Create a DrmEngine now so we can use it to try to load the session
           // later, after the content has been deleted.
-          const OfflineManifestParser = shaka.offline.OfflineManifestParser;
-          let manifest = OfflineManifestParser.reconstructManifest(manifestDb);
-          let netEngine = player.getNetworkingEngine();
-          goog.asserts.assert(netEngine, 'Must have a NetworkingEngine');
           drmEngine = new shaka.media.DrmEngine({
             netEngine: netEngine,
             onError: onError,
@@ -256,7 +263,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
                   contentUri,
                   'Stored content should have an offline uri.');
 
-              let offlineUri = OfflineUri.parse(contentUri);
+              let offlineUri = shaka.offline.OfflineUri.parse(contentUri);
               goog.asserts.assert(
                   offlineUri,
                   contentUri + ' should be a valid offline manifest uri.');
@@ -266,10 +273,10 @@ describe('Offline', /** @suppress {accessControls} */ function() {
 
               return engine.getManifest(offlineUri.key());
             })
-            .then(function(manifestDb) {
+            .then(function(manifestDB) {
               // There should not be any licenses stored.
-              expect(manifestDb).toBeTruthy();
-              expect(manifestDb.sessionIds.length).toEqual(0);
+              expect(manifestDB).toBeTruthy();
+              expect(manifestDB.sessionIds.length).toEqual(0);
 
               // Load the stored content.
               return player.load(storedContent.offlineUri);
@@ -295,7 +302,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
                   contentUri,
                   'Stored content should have an offline uri.');
 
-              let offlineUri = OfflineUri.parse(contentUri);
+              let offlineUri = shaka.offline.OfflineUri.parse(contentUri);
               goog.asserts.assert(
                   offlineUri,
                   contentUri + ' should be a valid offline manifest uri.');
@@ -305,8 +312,8 @@ describe('Offline', /** @suppress {accessControls} */ function() {
 
               return engine.getManifest(offlineUri.key());
             })
-            .then(function(manifestDb) {
-              expect(manifestDb).toBeFalsy();
+            .then(function(manifestDB) {
+              expect(manifestDB).toBeFalsy();
             })
             .catch(fail)
             .then(done);

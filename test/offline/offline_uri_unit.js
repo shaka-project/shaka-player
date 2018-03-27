@@ -22,18 +22,18 @@ describe('OfflineUri', function() {
     /** @type {number} */
     let id = 123;
     /** @type {string} */
-    let uri = OfflineUri.manifest(id).toString();
+    let uri = OfflineUri.manifest('mech', 'cell', id).toString();
 
-    expect(uri).toBe('offline:manifest/123');
+    expect(uri).toBe('offline:manifest/mech/cell/123');
   });
 
   it('creates uri from segment id', function() {
     /** @type {number} */
     let id = 123;
     /** @type {string} */
-    let uri = OfflineUri.segment(id).toString();
+    let uri = OfflineUri.segment('mech', 'cell', id).toString();
 
-    expect(uri).toBe('offline:segment/123');
+    expect(uri).toBe('offline:segment/mech/cell/123');
   });
 
   it('creates null from invalid uri', function() {
@@ -46,21 +46,25 @@ describe('OfflineUri', function() {
 
   it('parse manifest uri', function() {
     /** @type {string} */
-    let uri = 'offline:manifest/123';
+    let uri = 'offline:manifest/mech/cell/123';
     let parsed = OfflineUri.parse(uri);
 
     expect(parsed).toBeTruthy();
     expect(parsed.isManifest()).toBeTruthy();
+    expect(parsed.mechanism()).toBe('mech');
+    expect(parsed.cell()).toBe('cell');
     expect(parsed.key()).toBe(123);
   });
 
   it('parse segment uri', function() {
     /** @type {string} */
-    let uri = 'offline:segment/123';
+    let uri = 'offline:segment/mech/cell/123';
     let parsed = OfflineUri.parse(uri);
 
     expect(parsed).toBeTruthy();
     expect(parsed.isSegment()).toBeTruthy();
+    expect(parsed.mechanism()).toBe('mech');
+    expect(parsed.cell()).toBe('cell');
     expect(parsed.key()).toBe(123);
   });
 });
