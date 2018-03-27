@@ -16,14 +16,8 @@
  */
 
 describe('OfflineManifestParser', function() {
-  /** @const */
-  var OfflineUri = shaka.offline.OfflineUri;
-
-  /** @const */
-  var mockSEFactory = new shaka.test.MockStorageEngineFactory();
-
-  /** @const */
-  var playerInterface =
+  const mockSEFactory = new shaka.test.MockStorageEngineFactory();
+  const playerInterface =
       /** @type {shakaExtern.ManifestParser.PlayerInterface} */ (null);
 
   /** @type {!shaka.offline.IStorageEngine} */
@@ -51,19 +45,19 @@ describe('OfflineManifestParser', function() {
   it('will query storage engine for the manifest', function(done) {
     new shaka.test.ManifestDBBuilder(fakeStorageEngine)
         .build().then(function(id) {
-          return parser.start(
-              OfflineUri.manifest(id).toString(),
-              playerInterface);
+          /** @type {shaka.offline.OfflineUri} */
+          let uri = shaka.offline.OfflineUri.manifest('mechanism', 'cell', id);
+          return parser.start(uri.toString(), playerInterface);
         }).catch(fail).then(done);
   });
 
   it('will fail if manifest not found', function(done) {
     /** @type {number} */
-    var id = 101;
-    /** @type {string} */
-    let uri = OfflineUri.manifest(id).toString();
+    let id = 101;
+    /** @type {shaka.offline.OfflineUri} */
+    let uri = shaka.offline.OfflineUri.manifest('mechanism', 'cell', id);
 
-    parser.start(uri, playerInterface)
+    parser.start(uri.toString(), playerInterface)
         .then(fail)
         .catch(function(err) {
           shaka.test.Util.expectToEqualError(
@@ -111,8 +105,9 @@ describe('OfflineManifestParser', function() {
             //  Save the id so that we can use it later to fetch the manifest.
             id = newId;
 
-            const uri = OfflineUri.manifest(id).toString();
-            return parser.start(uri, playerInterface);
+            const uri = shaka.offline.OfflineUri.manifest(
+                'mechanism', 'cell', id);
+            return parser.start(uri.toString(), playerInterface);
           }).catch(fail).then(done);
     });
 
@@ -137,97 +132,6 @@ describe('OfflineManifestParser', function() {
       }).then(function(manifest) {
         expect(manifest.expiration).toBe(expiration);
       }).catch(fail).then(done);
-    });
-  });
-
-  describe('reconstructing manifest', function() {
-    /** @const */
-    var originalReconstructPeriod =
-        shaka.offline.OfflineUtils.reconstructPeriod;
-
-    afterAll(function() {
-      shaka.offline.OfflineUtils.reconstructPeriod = originalReconstructPeriod;
-    });
-
-    it('converts non-Period members correctly', function(done) {
-      new shaka.test.ManifestDBBuilder(fakeStorageEngine)
-          .onManifest(function(manifest) {
-            manifest.sessionIds = ['abc', '123'];
-            manifest.duration = 60;
-          })
-          .build().then(function(id) {
-            const uri = OfflineUri.manifest(id).toString();
-            return parser.start(uri, playerInterface);
-          }).then(function(manifest) {
-            expect(manifest).toBeTruthy();
-
-            expect(manifest.offlineSessionIds.length).toBe(2);
-            expect(manifest.offlineSessionIds).toContain('abc');
-            expect(manifest.offlineSessionIds).toContain('123');
-
-            var timeline = manifest.presentationTimeline;
-            expect(timeline).toBeTruthy();
-            expect(timeline.isLive()).toBe(false);
-            expect(timeline.getPresentationStartTime()).toBe(null);
-            expect(timeline.getDuration()).toBe(60);
-          }).catch(fail).then(done);
-    });
-
-    it('will accept DrmInfo', function(done) {
-      var drmInfo = {
-        keySystem: 'com.example.drm',
-        licenseServerUri: 'https://example.com/drm',
-        distinctiveIdentifierRequired: false,
-        persistentStateRequired: true,
-        audioRobustness: 'weak',
-        videoRobustness: 'awesome',
-        serverCertificate: null,
-        initData: [{initData: new Uint8Array([1]), initDataType: 'foo'}],
-        keyIds: ['key1', 'key2']
-      };
-
-      var spy = jasmine.createSpy('reconstructPeriod');
-      shaka.offline.OfflineUtils.reconstructPeriod =
-          shaka.test.Util.spyFunc(spy);
-
-      new shaka.test.ManifestDBBuilder(fakeStorageEngine)
-          .onManifest(function(manifest) {
-            manifest.drmInfo = drmInfo;
-          })
-          .period()
-          .build().then(function(id) {
-            const uri = OfflineUri.manifest(id).toString();
-            return parser.start(uri, playerInterface);
-          }).then(function(manifest) {
-            expect(manifest).toBeTruthy();
-
-            expect(spy).toHaveBeenCalled();
-            expect(spy.calls.argsFor(0)[1]).toEqual([drmInfo]);
-          }).catch(fail).then(done);
-    });
-
-    it('will call reconstructPeriod for each Period', function(done) {
-      var spy = jasmine.createSpy('reconstructPeriod');
-      shaka.offline.OfflineUtils.reconstructPeriod =
-          shaka.test.Util.spyFunc(spy);
-
-      new shaka.test.ManifestDBBuilder(fakeStorageEngine)
-          .onManifest(function(manifest) {
-            manifest.sessionId = ['abc', '123'];
-          })
-          .period()
-          .period()
-          .period()
-          .build().then(function(id) {
-            const uri = OfflineUri.manifest(id).toString();
-            return parser.start(uri, playerInterface);
-          })
-          .then(function(manifest) {
-            expect(manifest).toBeTruthy();
-            expect(manifest.periods.length).toBe(3);
-          })
-          .catch(fail)
-          .then(done);
     });
   });
 });

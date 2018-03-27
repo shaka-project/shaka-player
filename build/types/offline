@@ -6,13 +6,14 @@
 +../../lib/offline/indexeddb/db_connection.js
 +../../lib/offline/indexeddb/db_operation.js
 +../../lib/offline/indexeddb/v2_storage_cell.js
++../../lib/offline/manifest_converter.js
 +../../lib/offline/memory/storage_cell.js
 +../../lib/offline/memory/storage_mechanism.js
 +../../lib/offline/memory/storage_table.js
 +../../lib/offline/offline_manifest_parser.js
 +../../lib/offline/offline_scheme.js
 +../../lib/offline/offline_uri.js
-+../../lib/offline/offline_utils.js
 +../../lib/offline/storage.js
 +../../lib/offline/storage_engine_factory.js
 +../../lib/offline/storage_muxer.js
++../../lib/offline/stored_content_utils.js

@@ -16,10 +16,7 @@
  */
 
 describe('OfflineScheme', function() {
-  /** @const */
-  var OfflineScheme = shaka.offline.OfflineScheme;
-  /** @const */
-  var OfflineUri = shaka.offline.OfflineUri;
+  const OfflineScheme = shaka.offline.OfflineScheme;
 
   describe('Get data from storage', function() {
     var mockSEFactory = new shaka.test.MockStorageEngineFactory();
@@ -47,8 +44,8 @@ describe('OfflineScheme', function() {
     });
 
     it('will return special content-type header for manifests', function(done) {
-      /** @type {string} */
-      var uri;
+      /** @type {!shaka.offline.OfflineUri} */
+      let uri;
 
       Promise.resolve()
           .then(function() {
@@ -64,12 +61,13 @@ describe('OfflineScheme', function() {
             });
           })
           .then(function(id) {
-            uri = OfflineUri.manifest(id).toString();
-            return OfflineScheme(uri, request).promise;
+            uri = shaka.offline.OfflineUri.manifest(
+                'mechanism', 'cell', id);
+            return OfflineScheme(uri.toString(), request).promise;
           })
           .then(function(response) {
             expect(response).toBeTruthy();
-            expect(response.uri).toBe(uri);
+            expect(response.uri).toBe(uri.toString());
             expect(response.headers['content-type'])
                 .toBe('application/x-offline-manifest');
           })
@@ -81,8 +79,8 @@ describe('OfflineScheme', function() {
       /** @const {!Uint8Array} */
       var originalData = new Uint8Array([0, 1, 2, 3]);
 
-      /** @type {string} */
-      var uri;
+      /** @type {!shaka.offline.OfflineUri} */
+      let uri;
 
       Promise.resolve()
           .then(function() {
@@ -91,12 +89,12 @@ describe('OfflineScheme', function() {
             });
           })
           .then(function(id) {
-            uri = OfflineUri.segment(id).toString();
-            return OfflineScheme(uri, request).promise;
+            uri = shaka.offline.OfflineUri.segment('mechanism', 'cell', id);
+            return OfflineScheme(uri.toString(), request).promise;
           })
           .then(function(response) {
             expect(response).toBeTruthy();
-            expect(response.uri).toBe(uri);
+            expect(response.uri).toBe(uri.toString());
             expect(response.data).toBeTruthy();
 
             /** @const {!Uint8Array} */
@@ -109,9 +107,9 @@ describe('OfflineScheme', function() {
 
     it('will fail if segment not found', function(done) {
       const id = 789;
-      const uri = OfflineUri.segment(id).toString();
+      const uri = shaka.offline.OfflineUri.segment('mechanism', 'cell', id);
 
-      OfflineScheme(uri, request)
+      OfflineScheme(uri.toString(), request).promise
           .then(fail)
           .catch(function(err) {
             shaka.test.Util.expectToEqualError(

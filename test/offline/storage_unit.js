@@ -156,6 +156,9 @@ describe('Storage', function() {
       var originalUri = 'fake://foobar';
       var appData = {tools: ['Google', 'StackOverflow'], volume: 11};
 
+      let expectedUri = shaka.offline.OfflineUri.manifest(
+          'mechanism', 'cell', 0);
+
       // Once tracks have completely been downloaded, they lose all
       // bandwidth data. Clear bandwidth data from the tracks before
       // checking the results of the stored tracks.
@@ -169,7 +172,7 @@ describe('Storage', function() {
           .then(function(data) {
             expect(data).toBeTruthy();
             // Since we are using a memory DB, it will always be the first one.
-            expect(data.offlineUri).toBe(OfflineUri.manifest(0).toString());
+            expect(data.offlineUri).toBe(expectedUri.toString());
             expect(data.originalManifestUri).toBe(originalUri);
             // Even though there are no segments, it will use the duration from
             // the original manifest.
@@ -209,6 +212,9 @@ describe('Storage', function() {
     });
 
     it('only stores the tracks chosen', function(done) {
+      let expectedUri = shaka.offline.OfflineUri.manifest(
+          'mechanism', 'cell', 0);
+
       manifest = new shaka.test.ManifestGenerator()
           .setPresentationDuration(20)
           .addPeriod(0)
@@ -231,7 +237,7 @@ describe('Storage', function() {
 
       storage.store(fakeManifestUri)
           .then(function(data) {
-            expect(data.offlineUri).toBe(OfflineUri.manifest(0).toString());
+            expect(data.offlineUri).toBe(expectedUri.toString());
             return fakeStorageEngine.getManifest(0);
           })
           .then(function(manifestDb) {
@@ -244,11 +250,13 @@ describe('Storage', function() {
     });
 
     it('stores offline sessions', function(done) {
-      var sessions = ['lorem', 'ipsum'];
+      let expectedUri = shaka.offline.OfflineUri.manifest(
+          'mechanism', 'cell', 0);
+      let sessions = ['lorem', 'ipsum'];
       drmEngine.setSessionIds(sessions);
       storage.store(fakeManifestUri)
           .then(function(data) {
-            expect(data.offlineUri).toBe(OfflineUri.manifest(0).toString());
+            expect(data.offlineUri).toBe(expectedUri.toString());
             return fakeStorageEngine.getManifest(0);
           })
           .then(function(manifestDb) {
@@ -260,7 +268,10 @@ describe('Storage', function() {
     });
 
     it('stores DRM info', function(done) {
-      var drmInfo = {
+      let expectedUri = shaka.offline.OfflineUri.manifest(
+          'mechanism', 'cell', 0);
+
+      let drmInfo = {
         keySystem: 'com.example.abc',
         licenseServerUri: 'http://example.com',
         persistentStateRequired: true,
@@ -275,7 +286,7 @@ describe('Storage', function() {
       drmEngine.setSessionIds(['abcd']);
       storage.store(fakeManifestUri)
           .then(function(data) {
-            expect(data.offlineUri).toBe(OfflineUri.manifest(0).toString());
+            expect(data.offlineUri).toBe(expectedUri.toString());
             return fakeStorageEngine.getManifest(0);
           })
           .then(function(manifestDb) {
@@ -287,12 +298,15 @@ describe('Storage', function() {
     });
 
     it('stores expiration', function(done) {
+      let expectedUri = shaka.offline.OfflineUri.manifest(
+          'mechanism', 'cell', 0);
+
       drmEngine.setSessionIds(['abcd']);
       drmEngine.getExpiration.and.returnValue(1234);
 
       storage.store(fakeManifestUri)
           .then(function(data) {
-            expect(data.offlineUri).toBe(OfflineUri.manifest(0).toString());
+            expect(data.offlineUri).toBe(expectedUri.toString());
             return fakeStorageEngine.getManifest(0);
           })
           .then(function(manifestDb) {
@@ -897,9 +911,11 @@ describe('Storage', function() {
       });
 
       it('does not store offline sessions', function(done) {
+        let expectedUri = shaka.offline.OfflineUri.manifest(
+            'mechanism', 'cell', 0);
         storage.store(fakeManifestUri)
             .then(function(data) {
-              expect(data.offlineUri).toBe(OfflineUri.manifest(0).toString());
+              expect(data.offlineUri).toBe(expectedUri.toString());
               return fakeStorageEngine.getManifest(0);
             })
             .then(function(manifestDb) {
@@ -1105,17 +1121,6 @@ describe('Storage', function() {
           }).catch(fail).then(done);
     });
 
-    it('throws an error if the content is not found', function(done) {
-      removeManifest(0).then(fail).catch(function(error) {
-        var expectedError = new shaka.util.Error(
-            shaka.util.Error.Severity.CRITICAL,
-            shaka.util.Error.Category.STORAGE,
-            shaka.util.Error.Code.REQUESTED_ITEM_NOT_FOUND,
-            OfflineUri.manifest(0).toString());
-        shaka.test.Util.expectToEqualError(error, expectedError);
-      }).then(done);
-    });
-
     it('throws an error if the URI is malformed', function(done) {
       var bogusUri = 'foo:bar';
       storage.remove(bogusUri).then(fail).catch(function(error) {
@@ -1129,7 +1134,9 @@ describe('Storage', function() {
     });
 
     it('raises not found error', function(done) {
-      removeManifest(0)
+      let uri = shaka.offline.OfflineUri.manifest('mechanism', 'cell', 0);
+
+      storage.remove(uri.toString())
           .then(fail)
           .catch(function(e) {
             shaka.test.Util.expectToEqualError(
@@ -1138,7 +1145,7 @@ describe('Storage', function() {
                     shaka.util.Error.Severity.CRITICAL,
                     shaka.util.Error.Category.STORAGE,
                     shaka.util.Error.Code.REQUESTED_ITEM_NOT_FOUND,
-                    OfflineUri.manifest(0).toString()));
+                    uri.toString()));
           })
           .then(done);
     });
@@ -1169,7 +1176,7 @@ describe('Storage', function() {
      */
     function removeManifest(manifestId) {
       /** @type {string} */
-      let uri = OfflineUri.manifest(manifestId).toString();
+      let uri = OfflineUri.manifest('mechanism', 'cell', manifestId).toString();
       return storage.remove(uri);
     }
 
