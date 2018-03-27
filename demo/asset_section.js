@@ -300,7 +300,7 @@ shakaDemo.load = function() {
 
   configureCertificate.then(function() {
     // Load the manifest.
-    return player.load(asset.manifestUri);
+    return player.load(asset.manifestUri, shakaDemo.startTime_);
   }).then(function() {
     // Update control state in case autoplay is disabled.
     shakaDemo.controls_.loadComplete();
