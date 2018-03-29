@@ -16,12 +16,11 @@
  */
 
 describe('OfflineUri', function() {
-  /** @const */
-  var OfflineUri = shaka.offline.OfflineUri;
+  const OfflineUri = shaka.offline.OfflineUri;
 
   it('creates uri from manifest id', function() {
     /** @type {number} */
-    var id = 123;
+    let id = 123;
     /** @type {string} */
     let uri = OfflineUri.manifest('mech', 'cell', id).toString();
 
@@ -30,7 +29,7 @@ describe('OfflineUri', function() {
 
   it('creates uri from segment id', function() {
     /** @type {number} */
-    var id = 123;
+    let id = 123;
     /** @type {string} */
     let uri = OfflineUri.segment('mech', 'cell', id).toString();
 

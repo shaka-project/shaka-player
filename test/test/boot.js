@@ -166,4 +166,23 @@ function getClientArg(name) {
     it(name, filterShim(callback, 'quarantined',
         'Skipping tests that are quarantined.'));
   };
+
+  beforeAll((done) => {
+    // Configure AMD modules and their dependencies.
+    require.config({
+      baseUrl: '/base/node_modules',
+      packages: [
+        {
+          name: 'sprintf-js',
+          main: 'src/sprintf',
+        },
+      ],
+    });
+
+    // Load required AMD modules, then proceed with tests.
+    require(['sprintf-js'], (sprintfJs) => {
+      window.sprintf = sprintfJs.sprintf;
+      done();
+    });
+  });
 })();

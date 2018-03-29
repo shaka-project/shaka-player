@@ -19,12 +19,12 @@ describe('OfflineScheme', function() {
   const OfflineScheme = shaka.offline.OfflineScheme;
 
   describe('Get data from storage', function() {
-    var mockSEFactory = new shaka.test.MockStorageEngineFactory();
+    let mockSEFactory = new shaka.test.MockStorageEngineFactory();
 
     /** @type {!shaka.offline.IStorageEngine} */
-    var fakeStorageEngine;
+    let fakeStorageEngine;
     /** @type {shakaExtern.Request} */
-    var request;
+    let request;
 
     beforeEach(function() {
       fakeStorageEngine = new shaka.test.MemoryStorageEngine();
@@ -35,7 +35,7 @@ describe('OfflineScheme', function() {
       });
 
       // The whole request is ignored by the OfflineScheme.
-      var retry = shaka.net.NetworkingEngine.defaultRetryParameters();
+      let retry = shaka.net.NetworkingEngine.defaultRetryParameters();
       request = shaka.net.NetworkingEngine.makeRequest([], retry);
     });
 
@@ -63,7 +63,7 @@ describe('OfflineScheme', function() {
           .then(function(id) {
             uri = shaka.offline.OfflineUri.manifest(
                 'mechanism', 'cell', id);
-            return OfflineScheme(uri.toString(), request).promise;
+            return OfflineScheme(uri.toString(), request);
           })
           .then(function(response) {
             expect(response).toBeTruthy();
@@ -76,8 +76,7 @@ describe('OfflineScheme', function() {
     });
 
     it('will get segment data from storage engine', function(done) {
-      /** @const {!Uint8Array} */
-      var originalData = new Uint8Array([0, 1, 2, 3]);
+      const originalData = new Uint8Array([0, 1, 2, 3]);
 
       /** @type {!shaka.offline.OfflineUri} */
       let uri;
@@ -90,15 +89,14 @@ describe('OfflineScheme', function() {
           })
           .then(function(id) {
             uri = shaka.offline.OfflineUri.segment('mechanism', 'cell', id);
-            return OfflineScheme(uri.toString(), request).promise;
+            return OfflineScheme(uri.toString(), request);
           })
           .then(function(response) {
             expect(response).toBeTruthy();
             expect(response.uri).toBe(uri.toString());
             expect(response.data).toBeTruthy();
 
-            /** @const {!Uint8Array} */
-            var responseData = new Uint8Array(response.data);
+            const responseData = new Uint8Array(response.data);
             expect(responseData).toEqual(originalData);
           })
           .catch(fail)
@@ -109,7 +107,7 @@ describe('OfflineScheme', function() {
       const id = 789;
       const uri = shaka.offline.OfflineUri.segment('mechanism', 'cell', id);
 
-      OfflineScheme(uri.toString(), request).promise
+      OfflineScheme(uri.toString(), request)
           .then(fail)
           .catch(function(err) {
             shaka.test.Util.expectToEqualError(
@@ -126,7 +124,7 @@ describe('OfflineScheme', function() {
 
     it('will fail for invalid URI', function(done) {
       /** @type {string} */
-      var uri = 'offline:this-is-invalid';
+      let uri = 'offline:this-is-invalid';
 
       OfflineScheme(uri, request)
           .then(fail)

@@ -75,27 +75,20 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      // Babel polyfill, required for async/await
+      // Polyfills first, primarily for IE 11 and older TVs:
+      //   Babel polyfill, required for async/await
       'node_modules/babel-polyfill/dist/polyfill.js',
-
-      // closure base
-      'third_party/closure/goog/base.js',
-
-      // deps next
-      'dist/deps.js',
-      'shaka-player.uncompiled.js',
-
-      // sprintf module next
-      // Since we don't use require to load the sprintf module, this must be
-      // loaded before requirejs is loaded!  Otherwise, it tries to use
-      // requirejs instead of loading directly into the window.
-      'node_modules/sprintf-js/src/sprintf.js',
 
       // muxjs module next
       'node_modules/mux.js/dist/mux.js',
 
-      // requirejs module next
-      'node_modules/requirejs/require.js',
+      // load closure base, the deps tree, and the uncompiled library
+      'third_party/closure/goog/base.js',
+      'dist/deps.js',
+      'shaka-player.uncompiled.js',
+
+      // cajon module (an AMD variant of requirejs) next
+      'node_modules/cajon/cajon.js',
 
       // bootstrapping for the test suite
       'test/test/boot.js',

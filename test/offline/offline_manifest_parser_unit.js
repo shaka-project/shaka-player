@@ -21,13 +21,13 @@ describe('OfflineManifestParser', function() {
       /** @type {shakaExtern.ManifestParser.PlayerInterface} */ (null);
 
   /** @type {!shaka.offline.IStorageEngine} */
-  var fakeStorageEngine;
+  let fakeStorageEngine;
   /** @type {!shaka.offline.OfflineManifestParser} */
-  var parser;
+  let parser;
 
   beforeEach(function() {
     fakeStorageEngine = new shaka.test.MemoryStorageEngine();
-    var getStorageEngine = function() {
+    let getStorageEngine = function() {
       return Promise.resolve(fakeStorageEngine);
     };
 
@@ -72,7 +72,7 @@ describe('OfflineManifestParser', function() {
   });
 
   it('will fail for invalid URI', function(done) {
-    var uri = 'offline:this-is-invalid';
+    let uri = 'offline:this-is-invalid';
     parser.start(uri, playerInterface)
         .then(fail)
         .catch(function(err) {
@@ -87,14 +87,13 @@ describe('OfflineManifestParser', function() {
   });
 
   describe('update expiration', function() {
-    /** @const {string} */
-    var sessionId = 'abc';
+    const sessionId = 'abc';
 
     /** @type {number} */
-    var id;
+    let id;
 
     /** @type {number} */
-    var expiration = 256;
+    let expiration = 256;
 
     beforeEach(function(done) {
       new shaka.test.ManifestDBBuilder(fakeStorageEngine)

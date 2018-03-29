@@ -18,10 +18,8 @@
 describe('DBEngine', function() {
   const UNSUPPORTED_UPGRADE_REQUEST =
       shaka.util.Error.Code.UNSUPPORTED_UPGRADE_REQUEST;
-
   const OfflineUtils = shaka.test.OfflineUtils;
 
-  /** @const {string} */
   const dbName = 'shaka-player-test-db';
 
   function deleteOld() {
@@ -43,8 +41,8 @@ describe('DBEngine', function() {
   describe('upgrade failures', function() {
     it('fails to open with old version', checkAndRun((done) => {
       const storeNames = ['manifest', 'manifest-v2'];
-      const manifest1 = { originalManifestUri: 'original-uri-1' };
-      const manifest2 = { originalManifestUri: 'original-uri-2' };
+      const manifest1 = {originalManifestUri: 'original-uri-1'};
+      const manifest2 = {originalManifestUri: 'original-uri-2'};
 
       // Create a mock old database with the manifest tables.
       deleteOld()
@@ -125,9 +123,9 @@ describe('DBEngine', function() {
     }));
   });
 
-  it('stores and retrieves a manifest', checkAndRun(function(done) {
+  it('stores and retrieves a manifest', checkAndRun((done) => {
     /** @type {shakaExtern.ManifestDB} */
-    var original = OfflineUtils.createManifest('original manifest');
+    let original = OfflineUtils.createManifest('original manifest');
 
     deleteOld().then(openDB).then((db) => {
       return db.addManifest(original)
@@ -139,9 +137,9 @@ describe('DBEngine', function() {
     }).catch(fail).then(done);
   }));
 
-  it('stores and retrieves many manifest', checkAndRun(function(done) {
+  it('stores and retrieves many manifest', checkAndRun((done) => {
     /** @type {!Array<shakaExtern.ManifestDB>} */
-    var originals = [
+    let originals = [
       OfflineUtils.createManifest('original manifest 1'),
       OfflineUtils.createManifest('original manifest 2'),
       OfflineUtils.createManifest('original manifest 3'),
@@ -149,7 +147,7 @@ describe('DBEngine', function() {
     ];
 
     /** @type {!Array<shakaExtern.ManifestDB>} */
-    var copies = [];
+    let copies = [];
 
     deleteOld().then(openDB).then((db) => {
       return Promise.all(originals.map((original) => db.addManifest(original)))
@@ -163,12 +161,12 @@ describe('DBEngine', function() {
     }).catch(fail).then(done);
   }));
 
-  it('stores and removes a manifest', checkAndRun(function(done) {
+  it('stores and removes a manifest', checkAndRun((done) => {
     /** @type {shakaExtern.ManifestDB} */
-    var original = OfflineUtils.createManifest('original manifest');
+    let original = OfflineUtils.createManifest('original manifest');
 
     /** @type {number} */
-    var id;
+    let id;
 
     deleteOld().then(openDB).then((db) => {
       return db.addManifest(original)
@@ -190,9 +188,9 @@ describe('DBEngine', function() {
     }).catch(fail).then(done);
   }));
 
-  it('stores and retrieves a segment', checkAndRun(function(done) {
+  it('stores and retrieves a segment', checkAndRun((done) => {
     /** @type {shakaExtern.SegmentDataDB} */
-    var original = OfflineUtils.createSegmentData([0, 1, 2]);
+    let original = OfflineUtils.createSegmentData([0, 1, 2]);
 
     deleteOld().then(openDB).then((db) => {
       return db.addSegment(original)
@@ -202,9 +200,9 @@ describe('DBEngine', function() {
     }).catch(fail).then(done);
   }));
 
-  it('stores and retrieves many segments', checkAndRun(function(done) {
+  it('stores and retrieves many segments', checkAndRun((done) => {
     /** @type {!Array<shakaExtern.SegmentDataDB>} */
-    var originals = [
+    let originals = [
       OfflineUtils.createSegmentData([0]),
       OfflineUtils.createSegmentData([1, 2]),
       OfflineUtils.createSegmentData([3, 4, 5]),
@@ -212,7 +210,7 @@ describe('DBEngine', function() {
     ];
 
     /** @type {!Array<shakaExtern.SegmentDataDB>} */
-    var copies = [];
+    let copies = [];
 
     deleteOld().then(openDB).then((db) => {
       return Promise.all(originals.map((original) => db.addSegment(original)))
@@ -224,12 +222,12 @@ describe('DBEngine', function() {
     }).catch(fail).then(done);
   }));
 
-  it('stores and removes a segment', checkAndRun(function(done) {
+  it('stores and removes a segment', checkAndRun((done) => {
     /** @type {shakaExtern.SegmentDataDB} */
-    var original = OfflineUtils.createSegmentData([0, 1, 2]);
+    let original = OfflineUtils.createSegmentData([0, 1, 2]);
 
     /** @type {number} */
-    var id;
+    let id;
 
     deleteOld().then(openDB).then((db) => {
       return db.addSegment(original)

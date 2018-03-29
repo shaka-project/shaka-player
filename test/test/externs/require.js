@@ -26,3 +26,6 @@
  * @param {Function} callback
  */
 var require = function(moduleNames, callback) {};
+
+/** @param {!Object} config */
+require.config = function(config) {};
