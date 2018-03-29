@@ -263,6 +263,14 @@ shaka.test.TestScheme.DATA = {
           'Pv9qHnu3ZWJNZ12jgkqTabmwXbDWk_47tLNE'
     },
     duration: 30
+  },
+  'cea-708_ts': {
+    video: {
+      segmentUri: '/base/test/test/assets/captions-test.ts',
+      mimeType: 'video/mp2t',
+      codecs: 'avc1.64001e'
+    },
+    duration: 30
   }
 };
 
@@ -306,10 +314,14 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
 
   /**
    * @param {Object} metadata
-   * @return {shaka.test.DashVodStreamGenerator}
+   * @return {shaka.test.IStreamGenerator}
    */
   function createStreamGenerator(metadata) {
-    return new windowShaka.test.DashVodStreamGenerator(
+    if (metadata.segmentUri.indexOf('.ts') != -1) {
+      return new windowShaka.test.TSVodStreamGenerator(
+          metadata.segmentUri);
+    }
+    return new windowShaka.test.Mp4VodStreamGenerator(
         metadata.initSegmentUri, metadata.mvhdOffset, metadata.segmentUri,
         metadata.tfdtOffset, metadata.segmentDuration,
         metadata.presentationTimeOffset);
@@ -342,8 +354,7 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
   }
 
   let async = [];
-  // Include 'window' to use uncompiled version version of the
-  // library.
+  // Include 'window' to use uncompiled version version of the library.
   const DATA = windowShaka.test.TestScheme.DATA;
   const GENERATORS = windowShaka.test.TestScheme.GENERATORS;
   const MANIFESTS = windowShaka.test.TestScheme.MANIFESTS;
@@ -353,9 +364,11 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
     GENERATORS[name + suffix] = GENERATORS[name + suffix] || {};
     let data = DATA[name];
     [ContentType.VIDEO, ContentType.AUDIO].forEach(function(type) {
-      let streamGen = createStreamGenerator(data[type]);
-      GENERATORS[name + suffix][type] = streamGen;
-      async.push(streamGen.init());
+      if (data[type]) {
+        let streamGen = createStreamGenerator(data[type]);
+        GENERATORS[name + suffix][type] = streamGen;
+        async.push(streamGen.init());
+      }
     });
 
     let gen = new windowShaka.test.ManifestGenerator(shaka)
@@ -364,11 +377,13 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
         .addVariant(0)
           .addVideo(1);
     addStreamInfo(gen, data, ContentType.VIDEO, name);
-    gen.addAudio(2);
-    addStreamInfo(gen, data, ContentType.AUDIO, name);
+    if (data[ContentType.AUDIO]) {
+      gen.addAudio(2);
+      addStreamInfo(gen, data, ContentType.AUDIO, name);
+    }
 
     if (data.text) {
-      // This seems to be necessary.  Otherwise, we end up with a URL like
+      // This seems to be necessary.  Otherwise, we end up with an URL like
       // "http:/base/..." which then fails to load on Safari for some reason.
       let locationUri = new goog.Uri(location.href);
       let partialUri = new goog.Uri(data.text.uri);

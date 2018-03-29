@@ -195,7 +195,7 @@ describe('MediaSourceEngine', function() {
       let initObject = {};
       initObject[ContentType.AUDIO] = fakeAudioStream;
       initObject[ContentType.VIDEO] = fakeVideoStream;
-      mediaSourceEngine.init(initObject).then(() => {
+      mediaSourceEngine.init(initObject, false).then(() => {
         expect(mockMediaSource.addSourceBuffer)
             .toHaveBeenCalledWith('audio/foo');
         expect(mockMediaSource.addSourceBuffer)
@@ -210,7 +210,7 @@ describe('MediaSourceEngine', function() {
       // [] to allow field names to be expressions.
       let initObject = {};
       initObject[ContentType.TEXT] = fakeTextStream;
-      mediaSourceEngine.init(initObject).then(() => {
+      mediaSourceEngine.init(initObject, false).then(() => {
         expect(mockMediaSource.addSourceBuffer).not.toHaveBeenCalled();
         expect(shaka.text.TextEngine).toHaveBeenCalled();
         done();
@@ -225,7 +225,7 @@ describe('MediaSourceEngine', function() {
       let initObject = {};
       initObject[ContentType.AUDIO] = fakeAudioStream;
       initObject[ContentType.TEXT] = fakeTextStream;
-      mediaSourceEngine.init(initObject).then(done);
+      mediaSourceEngine.init(initObject, false).then(done);
     });
 
     it('returns correct timestamps for one range', function() {
@@ -271,7 +271,7 @@ describe('MediaSourceEngine', function() {
       let initObject = {};
       initObject[ContentType.AUDIO] = fakeAudioStream;
       initObject[ContentType.TEXT] = fakeTextStream;
-      mediaSourceEngine.init(initObject).then(done);
+      mediaSourceEngine.init(initObject, false).then(done);
     });
 
     it('returns the amount of data ahead of the given position', function() {
@@ -334,7 +334,7 @@ describe('MediaSourceEngine', function() {
       initObject[ContentType.AUDIO] = fakeAudioStream;
       initObject[ContentType.VIDEO] = fakeVideoStream;
       initObject[ContentType.TEXT] = fakeTextStream;
-      mediaSourceEngine.init(initObject).then(done);
+      mediaSourceEngine.init(initObject, false).then(done);
     });
 
     it('appends the given data', function(done) {
@@ -496,7 +496,7 @@ describe('MediaSourceEngine', function() {
       let initObject = {};
       initObject[ContentType.VIDEO] = fakeTransportStream;
 
-      mediaSourceEngine.init(initObject).then(() => {
+      mediaSourceEngine.init(initObject, false).then(() => {
         mediaSourceEngine.setUseEmbeddedText(true);
         return mediaSourceEngine.appendBuffer(
             ContentType.VIDEO, buffer, null, null);
@@ -518,7 +518,7 @@ describe('MediaSourceEngine', function() {
       let initObject = {};
       initObject[ContentType.VIDEO] = fakeTransportStream;
 
-      mediaSourceEngine.init(initObject).then(() => {
+      mediaSourceEngine.init(initObject, false).then(() => {
         mediaSourceEngine.setUseEmbeddedText(false);
         return mediaSourceEngine.appendBuffer(
             ContentType.VIDEO, buffer, null, null);
@@ -547,7 +547,7 @@ describe('MediaSourceEngine', function() {
       initObject[ContentType.AUDIO] = fakeAudioStream;
       initObject[ContentType.VIDEO] = fakeVideoStream;
       initObject[ContentType.TEXT] = fakeTextStream;
-      mediaSourceEngine.init(initObject).then(done);
+      mediaSourceEngine.init(initObject, false).then(done);
     });
 
     it('removes the given data', function(done) {
@@ -691,7 +691,7 @@ describe('MediaSourceEngine', function() {
       initObject[ContentType.AUDIO] = fakeAudioStream;
       initObject[ContentType.VIDEO] = fakeVideoStream;
       initObject[ContentType.TEXT] = fakeTextStream;
-      mediaSourceEngine.init(initObject).then(done);
+      mediaSourceEngine.init(initObject, false).then(done);
     });
 
     it('clears the given data', function(done) {
@@ -765,7 +765,7 @@ describe('MediaSourceEngine', function() {
       let initObject = {};
       initObject[ContentType.AUDIO] = fakeAudioStream;
       initObject[ContentType.VIDEO] = fakeVideoStream;
-      mediaSourceEngine.init(initObject).then(done);
+      mediaSourceEngine.init(initObject, false).then(done);
     });
 
     it('ends the MediaSource stream with the given reason', function(done) {
@@ -864,7 +864,7 @@ describe('MediaSourceEngine', function() {
       let initObject = {};
       initObject[ContentType.AUDIO] = fakeAudioStream;
       initObject[ContentType.VIDEO] = fakeVideoStream;
-      mediaSourceEngine.init(initObject).then(done);
+      mediaSourceEngine.init(initObject, false).then(done);
     });
 
     it('sets the given duration', function(done) {
@@ -962,7 +962,7 @@ describe('MediaSourceEngine', function() {
       let initObject = {};
       initObject[ContentType.AUDIO] = fakeAudioStream;
       initObject[ContentType.VIDEO] = fakeVideoStream;
-      mediaSourceEngine.init(initObject).then(done);
+      mediaSourceEngine.init(initObject, false).then(done);
     });
 
     it('waits for all operations to complete', function(done) {

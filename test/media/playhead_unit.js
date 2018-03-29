@@ -165,7 +165,8 @@ describe('Playhead', function() {
       startAtSegmentBoundary: false,
       smallGapLimit: 0.5,
       jumpLargeGaps: false,
-      durationBackoff: 1
+      durationBackoff: 1,
+      forceTransmuxTS: false
     };
   });
 

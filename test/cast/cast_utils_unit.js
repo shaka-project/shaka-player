@@ -219,7 +219,7 @@ describe('CastUtils', function() {
         const ContentType = shaka.util.ManifestParserUtils.ContentType;
         initObject[ContentType.VIDEO] = fakeVideoStream;
 
-        mediaSourceEngine.init(initObject).then(function() {
+        mediaSourceEngine.init(initObject, false).then(function() {
           return shaka.test.Util.fetch(initSegmentUrl);
         }).then(function(data) {
           return mediaSourceEngine.appendBuffer(ContentType.VIDEO, data,

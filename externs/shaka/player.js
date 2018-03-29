@@ -548,7 +548,8 @@ shakaExtern.ManifestConfiguration;
  *   startAtSegmentBoundary: boolean,
  *   smallGapLimit: number,
  *   jumpLargeGaps: boolean,
- *   durationBackoff: number
+ *   durationBackoff: number,
+ *   forceTransmuxTS: boolean
  * }}
  *
  * @description
@@ -600,6 +601,12 @@ shakaExtern.ManifestConfiguration;
  *   seek to when the user tries to seek to or start playback at the duration.
  *   To disable this behavior, the config can be set to 0.  We recommend using
  *   the default value unless you have a good reason not to.
+ * @property {boolean} forceTransmuxTS
+ *   If this is true, we will transmux TS content even if not strictly necessary
+ *   for the assets to be played.  Shaka Player currently only supports CEA 708
+ *   captions by transmuxing, so this value is necessary for enabling them on
+ *   platforms with native TS support like Edge or Chromecast.
+ *   This value defaults to false.
  * @exportDoc
  */
 shakaExtern.StreamingConfiguration;

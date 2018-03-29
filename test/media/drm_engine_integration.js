@@ -148,7 +148,7 @@ describe('DrmEngine', function() {
     let expectedObject = {};
     expectedObject[ContentType.AUDIO] = audioStream;
     expectedObject[ContentType.VIDEO] = videoStream;
-    mediaSourceEngine.init(expectedObject).then(done);
+    mediaSourceEngine.init(expectedObject, false).then(done);
   });
 
   afterEach(function(done) {

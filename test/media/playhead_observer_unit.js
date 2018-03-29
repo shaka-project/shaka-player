@@ -75,7 +75,8 @@ describe('PlayheadObserver', function() {
       startAtSegmentBoundary: false,
       smallGapLimit: 0.5,
       jumpLargeGaps: false,
-      durationBackoff: 1
+      durationBackoff: 1,
+      forceTransmuxTS: false
     };
 
     onBuffering = jasmine.createSpy('onBuffering');

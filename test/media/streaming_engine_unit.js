@@ -453,7 +453,8 @@ describe('StreamingEngine', function() {
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
         jumpLargeGaps: false,
-        durationBackoff: 1
+        durationBackoff: 1,
+        forceTransmuxTS: false
       };
     }
 
@@ -585,7 +586,7 @@ describe('StreamingEngine', function() {
       expectedObject[ContentType.VIDEO] = videoStream1;
       expectedObject[ContentType.TEXT] = textStream1;
       expect(mediaSourceEngine.init)
-          .toHaveBeenCalledWith(expectedObject);
+          .toHaveBeenCalledWith(expectedObject, false);
       expect(mediaSourceEngine.init.calls.count()).toBe(1);
       mediaSourceEngine.init.calls.reset();
 
@@ -639,7 +640,7 @@ describe('StreamingEngine', function() {
           streamingEngine.loadNewTextStream(textStream1);
           expect(mediaSourceEngine.clear).toHaveBeenCalledWith('text');
           expect(mediaSourceEngine.init).toHaveBeenCalledWith(
-              {text: jasmine.any(Object)});
+              {text: jasmine.any(Object)}, false);
         }
       });
     });
@@ -1048,7 +1049,8 @@ describe('StreamingEngine', function() {
       startAtSegmentBoundary: false,
       smallGapLimit: 0.5,
       jumpLargeGaps: false,
-      durationBackoff: 1
+      durationBackoff: 1,
+      forceTransmuxTS: false
     };
     createStreamingEngine(config);
 
@@ -1964,7 +1966,8 @@ describe('StreamingEngine', function() {
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
         jumpLargeGaps: false,
-        durationBackoff: 1
+        durationBackoff: 1,
+        forceTransmuxTS: false
       };
       createStreamingEngine(config);
 
@@ -2003,7 +2006,8 @@ describe('StreamingEngine', function() {
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
         jumpLargeGaps: false,
-        durationBackoff: 1
+        durationBackoff: 1,
+        forceTransmuxTS: false
       };
       createStreamingEngine(config);
 
@@ -2049,7 +2053,8 @@ describe('StreamingEngine', function() {
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
         jumpLargeGaps: false,
-        durationBackoff: 1
+        durationBackoff: 1,
+        forceTransmuxTS: false
       };
       createStreamingEngine(config);
 
@@ -2097,7 +2102,8 @@ describe('StreamingEngine', function() {
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
         jumpLargeGaps: false,
-        durationBackoff: 1
+        durationBackoff: 1,
+        forceTransmuxTS: false
       };
       createStreamingEngine(config);
 
@@ -2151,7 +2157,8 @@ describe('StreamingEngine', function() {
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
         jumpLargeGaps: false,
-        durationBackoff: 1
+        durationBackoff: 1,
+        forceTransmuxTS: false
       };
       createStreamingEngine(config);
 
@@ -2311,7 +2318,8 @@ describe('StreamingEngine', function() {
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
         jumpLargeGaps: false,
-        durationBackoff: 1
+        durationBackoff: 1,
+        forceTransmuxTS: false
       };
 
       playhead.getTime.and.returnValue(0);
@@ -2432,7 +2440,8 @@ describe('StreamingEngine', function() {
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
         jumpLargeGaps: false,
-        durationBackoff: 1
+        durationBackoff: 1,
+        forceTransmuxTS: false
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -2504,7 +2513,8 @@ describe('StreamingEngine', function() {
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
         jumpLargeGaps: false,
-        durationBackoff: 1
+        durationBackoff: 1,
+        forceTransmuxTS: false
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -2695,7 +2705,8 @@ describe('StreamingEngine', function() {
         bufferingGoal: 1,
         smallGapLimit: 0.5,
         jumpLargeGaps: false,
-        durationBackoff: 1
+        durationBackoff: 1,
+        forceTransmuxTS: false
       });
 
       playhead.getTime.and.returnValue(0);

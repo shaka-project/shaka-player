@@ -34,16 +34,16 @@ describe('MediaSourceEngine', function() {
     video.width = 600;
     video.height = 400;
     document.body.appendChild(video);
-
-    metadata = shaka.test.TestScheme.DATA['sintel'];
-    generators = shaka.test.TestScheme.GENERATORS['sintel'];
   });
 
   beforeEach(function(done) {
+    metadata = shaka.test.TestScheme.DATA['sintel'];
+    generators = shaka.test.TestScheme.GENERATORS['sintel'];
+
     mediaSourceEngine = new shaka.media.MediaSourceEngine(video);
     mediaSource = /** @type {?} */(mediaSourceEngine)['mediaSource_'];
     expect(video.src).toBeTruthy();
-    mediaSourceEngine.init({}).then(done);
+    mediaSourceEngine.init({}, false).then(done);
   });
 
   afterEach(function(done) {
@@ -91,7 +91,7 @@ describe('MediaSourceEngine', function() {
     // [] to allow field names to be expressions.
     let initObject = {};
     initObject[ContentType.VIDEO] = getFakeStream(metadata.video);
-    mediaSourceEngine.init(initObject).then(() => {
+    mediaSourceEngine.init(initObject, false).then(() => {
       return mediaSourceEngine.setDuration(presentationDuration);
     }).then(() => {
       return appendInit(ContentType.VIDEO);
@@ -114,7 +114,7 @@ describe('MediaSourceEngine', function() {
     // [] to allow field names to be expressions.
     let initObject = {};
     initObject[ContentType.VIDEO] = getFakeStream(metadata.video);
-    mediaSourceEngine.init(initObject).then(() => {
+    mediaSourceEngine.init(initObject, false).then(() => {
       return mediaSourceEngine.setDuration(presentationDuration);
     }).then(() => {
       return appendInit(ContentType.VIDEO);
@@ -145,7 +145,7 @@ describe('MediaSourceEngine', function() {
     // [] to allow field names to be expressions.
     let initObject = {};
     initObject[ContentType.VIDEO] = getFakeStream(metadata.video);
-    mediaSourceEngine.init(initObject).then(() => {
+    mediaSourceEngine.init(initObject, false).then(() => {
       return mediaSourceEngine.setDuration(0);
     }).then(() => {
       return appendInit(ContentType.VIDEO);
@@ -177,7 +177,7 @@ describe('MediaSourceEngine', function() {
     // [] to allow field names to be expressions.
     let initObject = {};
     initObject[ContentType.VIDEO] = getFakeStream(metadata.video);
-    mediaSourceEngine.init(initObject).then(() => {
+    mediaSourceEngine.init(initObject, false).then(() => {
       return mediaSourceEngine.setDuration(presentationDuration);
     }).then(() => {
       return appendInit(ContentType.VIDEO);
@@ -208,7 +208,7 @@ describe('MediaSourceEngine', function() {
     // [] to allow field names to be expressions.
     let initObject = {};
     initObject[ContentType.VIDEO] = getFakeStream(metadata.video);
-    mediaSourceEngine.init(initObject).then(() => {
+    mediaSourceEngine.init(initObject, false).then(() => {
       checkOrder(mediaSourceEngine.setDuration(presentationDuration));
       checkOrder(appendInit(ContentType.VIDEO));
       checkOrder(append(ContentType.VIDEO, 1));
@@ -227,7 +227,7 @@ describe('MediaSourceEngine', function() {
     // [] to allow field names to be expressions.
     let initObject = {};
     initObject[ContentType.AUDIO] = getFakeStream(metadata.audio);
-    mediaSourceEngine.init(initObject).then(() => {
+    mediaSourceEngine.init(initObject, false).then(() => {
       return mediaSourceEngine.setDuration(presentationDuration);
     }).then(() => {
       // NOTE: For some reason, this appendInit never resolves on my Windows VM.
@@ -254,7 +254,7 @@ describe('MediaSourceEngine', function() {
     initObject[ContentType.AUDIO] = getFakeStream(metadata.audio);
     initObject[ContentType.VIDEO] = getFakeStream(metadata.video);
 
-    mediaSourceEngine.init(initObject).then(() => {
+    mediaSourceEngine.init(initObject, false).then(() => {
       return mediaSourceEngine.setDuration(presentationDuration);
     }).then(() => {
       let audioStreaming = appendInit(ContentType.AUDIO).then(() => {
@@ -312,7 +312,7 @@ describe('MediaSourceEngine', function() {
     // [] to allow field names to be expressions.
     let initObject = {};
     initObject[ContentType.VIDEO] = getFakeStream(metadata.video);
-    mediaSourceEngine.init(initObject).then(() => {
+    mediaSourceEngine.init(initObject, false).then(() => {
       return mediaSourceEngine.setDuration(presentationDuration);
     }).then(() => {
       return appendInit(ContentType.VIDEO);
@@ -338,7 +338,7 @@ describe('MediaSourceEngine', function() {
     // [] to allow field names to be expressions.
     let initObject = {};
     initObject[ContentType.VIDEO] = getFakeStream(metadata.video);
-    mediaSourceEngine.init(initObject).then(() => {
+    mediaSourceEngine.init(initObject, false).then(() => {
       return mediaSourceEngine.setDuration(presentationDuration);
     }).then(() => {
       return appendInit(ContentType.VIDEO);
@@ -370,6 +370,32 @@ describe('MediaSourceEngine', function() {
     }).then(() => {
       expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(0, 1);
       expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(35, 1);
+    }).catch(fail).then(done);
+  });
+
+  it('extracts CEA-708 captions', function(done) {
+    // Load TS files with CEA-708 captions.
+    metadata = shaka.test.TestScheme.DATA['cea-708_ts'];
+    generators = shaka.test.TestScheme.GENERATORS['cea-708_ts'];
+
+    // Create a mock text displayer, to intercept text cues.
+    let cues = [];
+    let mockTextDisplayer = /** @type {shakaExtern.TextDisplayer} */ ({
+      append: (newCues) => { cues = cues.concat(newCues); }
+    });
+    mediaSourceEngine.setTextDisplayer(mockTextDisplayer);
+
+    let initObject = {};
+    initObject[ContentType.VIDEO] = getFakeStream(metadata.video);
+    mediaSourceEngine.setUseEmbeddedText(true);
+    // Call with forceTransmuxTS = true, so that it will transmux even on
+    // platforms with native TS support.
+    mediaSourceEngine.init(initObject, /** forceTransmuxTS */ true).then(() => {
+      return append(ContentType.VIDEO, 0);
+    }).then(() => {
+      expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(1.4, 1);
+      expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(20, 1);
+      expect(cues.length).toBe(3);
     }).catch(fail).then(done);
   });
 });

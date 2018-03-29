@@ -88,7 +88,8 @@ describe('StreamingEngine', function() {
       startAtSegmentBoundary: false,
       smallGapLimit: 0.5,
       jumpLargeGaps: false,
-      durationBackoff: 1
+      durationBackoff: 1,
+      forceTransmuxTS: false
     };
 
     onChooseStreams = jasmine.createSpy('onChooseStreams');
@@ -188,7 +189,7 @@ describe('StreamingEngine', function() {
   }
 
   function createVodStreamGenerator(metadata, type) {
-    let generator = new shaka.test.DashVodStreamGenerator(
+    let generator = new shaka.test.Mp4VodStreamGenerator(
         metadata.initSegmentUri,
         metadata.mvhdOffset,
         metadata.segmentUri,
@@ -203,7 +204,7 @@ describe('StreamingEngine', function() {
     // Set the generator's AST to 295 seconds in the past so the
     // StreamingEngine begins streaming close to the end of the first Period.
     let now = Date.now() / 1000;
-    let generator = new shaka.test.DashLiveStreamGenerator(
+    let generator = new shaka.test.Mp4LiveStreamGenerator(
         metadata.initSegmentUri,
         metadata.mvhdOffset,
         metadata.segmentUri,

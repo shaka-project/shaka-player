@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.test.DashLiveStreamGenerator');
-goog.provide('shaka.test.DashVodStreamGenerator');
 goog.provide('shaka.test.IStreamGenerator');
+goog.provide('shaka.test.Mp4LiveStreamGenerator');
+goog.provide('shaka.test.Mp4VodStreamGenerator');
 goog.provide('shaka.test.StreamGenerator');
+goog.provide('shaka.test.TSVodStreamGenerator');
 
 
 
@@ -73,7 +74,53 @@ shaka.test.IStreamGenerator.prototype.getSegment = function(
 
 
 /**
- * Creates a DashVodStreamGenerator, which simulates a DASH, video-on-demand,
+ * Creates an TSVodStreamGenerator, which simulates an HLS, video-on-demand,
+ * ts stream.
+ *
+ * The StreamGenerator assumes the stream contains a single segment.
+ *
+ * @param {string} segmentUri The URI of the segment.
+ *
+ * @constructor
+ * @struct
+ * @implements {shaka.test.IStreamGenerator}
+ */
+shaka.test.TSVodStreamGenerator = function(segmentUri) {
+  /** @private {string} */
+  this.segmentUri_ = segmentUri;
+
+  /** @private {ArrayBuffer} */
+  this.segment_ = null;
+};
+
+
+/** @override */
+shaka.test.TSVodStreamGenerator.prototype.init = function() {
+  return shaka.test.Util.fetch(this.segmentUri_).then((segment) => {
+    this.segment_ = segment;
+  });
+};
+
+/** @override */
+shaka.test.TSVodStreamGenerator.prototype.getInitSegment = function(time) {
+  goog.asserts.assert(false, 'getInitSegment not implemented for HLS VOD.');
+  return new ArrayBuffer(0);
+};
+
+/** @override */
+shaka.test.TSVodStreamGenerator.prototype.getSegment = function(
+    position, segmentOffset, wallClockTime) {
+  goog.asserts.assert(
+      this.segment_,
+      'init() must be called before getSegment().');
+  // TODO: complete implementation; this should change the timestamps based on
+  // the given segmentOffset and wallClockTime, so as to simulate a long stream.
+  return this.segment_;
+};
+
+
+/**
+ * Creates a Mp4VodStreamGenerator, which simulates a DASH, video-on-demand,
  * MP4 stream.
  *
  * The StreamGenerator loops a single segment.
@@ -91,7 +138,7 @@ shaka.test.IStreamGenerator.prototype.getSegment = function(
  * @struct
  * @implements {shaka.test.IStreamGenerator}
  */
-shaka.test.DashVodStreamGenerator = function(
+shaka.test.Mp4VodStreamGenerator = function(
     initSegmentUri,
     mvhdOffset,
     segmentTemplateUri,
@@ -134,7 +181,7 @@ shaka.test.DashVodStreamGenerator = function(
 
 
 /** @override */
-shaka.test.DashVodStreamGenerator.prototype.init = function() {
+shaka.test.Mp4VodStreamGenerator.prototype.init = function() {
   let async = [
     shaka.test.Util.fetch(this.initSegmentUri_),
     shaka.test.Util.fetch(this.segmentTemplateUri_)
@@ -153,7 +200,7 @@ shaka.test.DashVodStreamGenerator.prototype.init = function() {
 
 
 /** @override */
-shaka.test.DashVodStreamGenerator.prototype.getInitSegment = function(time) {
+shaka.test.Mp4VodStreamGenerator.prototype.getInitSegment = function(time) {
   goog.asserts.assert(
       this.initSegment_,
       'init() must be called before getInitSegment().');
@@ -162,7 +209,7 @@ shaka.test.DashVodStreamGenerator.prototype.getInitSegment = function(time) {
 
 
 /** @override */
-shaka.test.DashVodStreamGenerator.prototype.getSegment = function(
+shaka.test.Mp4VodStreamGenerator.prototype.getSegment = function(
     position, segmentOffset, wallClockTime) {
   goog.asserts.assert(
       this.segmentTemplate_,
@@ -184,7 +231,7 @@ shaka.test.DashVodStreamGenerator.prototype.getSegment = function(
 
 
 /**
- * Creates a DashLiveStreamGenerator, which simulates a DASH, live, MP4 stream.
+ * Creates a Mp4LiveStreamGenerator, which simulates a DASH, live, MP4 stream.
  *
  * @param {string} initSegmentUri The URI of the initialization segment.
  * @param {number} mvhdOffset The offset of the initialization segment's
@@ -209,7 +256,7 @@ shaka.test.DashVodStreamGenerator.prototype.getSegment = function(
  * @struct
  * @implements {shaka.test.IStreamGenerator}
  */
-shaka.test.DashLiveStreamGenerator = function(
+shaka.test.Mp4LiveStreamGenerator = function(
     initSegmentUri,
     mvhdOffset,
     segmentTemplateUri,
@@ -272,7 +319,7 @@ shaka.test.DashLiveStreamGenerator = function(
 
 
 /** @override */
-shaka.test.DashLiveStreamGenerator.prototype.init = function() {
+shaka.test.Mp4LiveStreamGenerator.prototype.init = function() {
   let async = [
     shaka.test.Util.fetch(this.initSegmentUri_),
     shaka.test.Util.fetch(this.segmentTemplateUri_)
@@ -291,7 +338,7 @@ shaka.test.DashLiveStreamGenerator.prototype.init = function() {
 
 
 /** @override */
-shaka.test.DashLiveStreamGenerator.prototype.getInitSegment = function(
+shaka.test.Mp4LiveStreamGenerator.prototype.getInitSegment = function(
     wallClockTime) {
   goog.asserts.assert(
       this.initSegment_,
@@ -301,7 +348,7 @@ shaka.test.DashLiveStreamGenerator.prototype.getInitSegment = function(
 
 
 /** @override */
-shaka.test.DashLiveStreamGenerator.prototype.getSegment = function(
+shaka.test.Mp4LiveStreamGenerator.prototype.getSegment = function(
     position, segmentOffset, wallClockTime) {
   goog.asserts.assert(
       this.initSegment_,
