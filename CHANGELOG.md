@@ -1,3 +1,26 @@
+## 2.3.5 (2018-03-29)
+
+New features:
+  - Do not buffer audio far ahead of video
+    - https://github.com/google/shaka-player/issues/964
+
+Bugfixes:
+  - Fixed early seeking (immediately upon load)
+    - https://github.com/google/shaka-player/issues/1298
+  - Fixed repeated seeking in HLS live (also affects DASH with
+    timeShiftBufferDepth of zero)
+    - https://github.com/google/shaka-player/issues/1331
+  - Fixed VTT+MP4 parsing with respect to TRUN box
+    - https://github.com/google/shaka-player/issues/1266
+  - Fixed hang in StreamingEngine when playing at the left edge of the seek
+    range on slow embedded devices
+  - Work around slow DASH parsing on embedded devices
+
+Demo app:
+  - Fixed CSS for display on Chromecast and other TV devices
+  - Added "startTime" URL parameter for debugging purposes
+
+
 ## 2.3.4 (2018-03-22)
 
 New features:
