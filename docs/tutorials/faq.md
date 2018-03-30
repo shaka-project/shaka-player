@@ -148,6 +148,16 @@ es6-promise-polyfill.
 Polyfill source: https://github.com/lahmatiy/es6-promise-polyfill
 Polyfill on NPM: https://www.npmjs.com/package/es6-promise-polyfill
 
+<hr>
+
+**Q:** Why are my CEA-708 captions not showing on Edge or Chromecast?
+
+**A:** Our support for CEA-708 captions requires transmuxing the TS files that
+contain said captions.  Edge and Chromecast, however, have native TS support and
+thus are not required to transmux.
+In order to force those platforms to transmux, set the
+[`.streaming.forceTransmuxTS`][StreamingConfiguration] configuration to true.
+
 
 [386]: https://github.com/google/shaka-player/issues/386#issuecomment-227898001
 [489]: https://github.com/google/shaka-player/issues/489#issuecomment-240466224
