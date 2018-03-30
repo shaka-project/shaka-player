@@ -30,7 +30,7 @@ describe('ManifestTextParser', function() {
                   shaka.util.Error.Code.HLS_PLAYLIST_HEADER_MISSING);
 
       // This Master playlist is invalid cause it contains a segment tag.
-      // All segmnent information should be in a Media playlist.
+      // All segment information should be in a Media playlist.
       verifyError('#EXTM3U\n' +
                   '#EXT-X-MEDIA:TYPE=AUDIO\n' +
                   '#EXTINF:6.00600',
@@ -208,8 +208,9 @@ describe('ManifestTextParser', function() {
       var error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.INVALID_HLS_TAG);
-      var text = shaka.util.StringUtils.toUTF8('#EXTM3U\ninvalid tag');
+          shaka.util.Error.Code.INVALID_HLS_TAG,
+          'invalid tag');
+      let text = shaka.util.StringUtils.toUTF8('#EXTM3U\ninvalid tag');
       try {
         parser.parsePlaylist(text, /* uri */ '');
         fail('Invalid HLS tags should not be supported!');
@@ -256,6 +257,33 @@ describe('ManifestTextParser', function() {
           },
           '#EXTM3U\n' +
           '#EXT-X-MEDIA-SEQUENCE:1\n' +
+          '#EXTINF:5.99467\n' +
+          'https://test/test.mp4\n');
+    });
+
+    it('handles manifests with a segment tag before a playlist tag', () => {
+      verifyPlaylist(
+          {
+            type: shaka.hls.PlaylistType.MEDIA,
+            tags: [
+              new shaka.hls.Tag(/* id */ 2, 'EXT-X-TARGETDURATION', [], '6')
+            ],
+            segments: [
+              new shaka.hls.Segment('https://test/test.mp4',
+                [
+                  new shaka.hls.Tag(/* id */ 1, 'EXT-X-KEY',
+                    [
+                      new shaka.hls.Attribute('METHOD', 'AES-128'),
+                      new shaka.hls.Attribute('URI', 'http://key.com'),
+                      new shaka.hls.Attribute('IV', '123')
+                    ]),
+                  new shaka.hls.Tag(/* id */ 3, 'EXTINF', [], '5.99467')
+                ])
+            ]
+          },
+          '#EXTM3U\n' +
+          '#EXT-X-KEY:METHOD="AES-128",URI="http://key.com",IV="123"\n' +
+          '#EXT-X-TARGETDURATION:6\n' +
           '#EXTINF:5.99467\n' +
           'https://test/test.mp4\n');
     });
