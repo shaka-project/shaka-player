@@ -393,7 +393,7 @@ describe('MediaSourceEngine', function() {
     mediaSourceEngine.init(initObject, /** forceTransmuxTS */ true).then(() => {
       return append(ContentType.VIDEO, 0);
     }).then(() => {
-      expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(1.4, 1);
+      expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(1, 0);
       expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(20, 1);
       expect(cues.length).toBe(3);
     }).catch(fail).then(done);
