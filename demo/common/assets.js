@@ -227,16 +227,6 @@ shakaAssets.UplynkResponseFilter = function(type, response) {
  * also be set.
  */
 shakaAssets.UplynkRequestFilter = function(type, request) {
-  if (type == shaka.net.NetworkingEngine.RequestType.LICENSE ||
-      type == shaka.net.NetworkingEngine.RequestType.MANIFEST) {
-    // It appears UTCTiming requests are considered MANIFEST type requests
-    if (request.uris[0].indexOf('servertime') == -1) {
-      request.allowCrossSiteCredentials = true;
-    } else {
-      request.allowCrossSiteCredentials = false;
-    }
-  }
-
   if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
     // Modify the license request URL based on our cookie
     if (request.uris[0].indexOf('wv') !== -1 &&
