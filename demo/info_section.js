@@ -127,6 +127,9 @@ shakaDemo.updateTrackOptions_ = function(list, tracks, languageAndRole) {
       if (track.width && track.height) {
         trackInfo += track.width + 'x' + track.height + ', ';
       }
+      if (track.channelCount) {
+        trackInfo += 'channelCount: ' + track.channelCount + ', ';
+      }
       trackInfo += track.bandwidth + ' bits/s';
       return trackInfo;
     } ,

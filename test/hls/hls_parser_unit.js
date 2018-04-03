@@ -271,7 +271,7 @@ describe('HlsParser', function() {
                   .anyInitSegment()
                   .presentationTimeOffset(0)
                   .mime('audio/mp4', 'mp4a')
-                  .channelsCount(2)
+                  .channelCount(2)
           .build();
 
     testHlsParser(master, media, manifest, done);

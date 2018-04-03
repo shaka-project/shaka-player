@@ -188,7 +188,7 @@ shakaExtern.BufferedInfo;
  *   roles: !Array.<string>,
  *   videoId: ?number,
  *   audioId: ?number,
- *   channelsCount: ?number,
+ *   channelCount: ?number,
  *   audioBandwidth: ?number,
  *   videoBandwidth: ?number
  * }}
@@ -244,7 +244,7 @@ shakaExtern.BufferedInfo;
  *   (only for variant tracks) The video stream id.
  * @property {?number} audioId
  *   (only for variant tracks) The audio stream id.
- * @property {?number} channelsCount
+ * @property {?number} channelCount
  *   The count of the audio track channels.
  * @property {?number} audioBandwidth
  *   (only for variant tracks) The audio stream's bandwidth if known.
@@ -654,6 +654,9 @@ shakaExtern.AbrConfiguration;
  *   abr: shakaExtern.AbrConfiguration,
  *   preferredAudioLanguage: string,
  *   preferredTextLanguage: string,
+ *   preferredVariantRole: string,
+ *   preferredTextRole: string,
+ *   preferredAudioChannelCount: number,
  *   restrictions: shakaExtern.Restrictions,
  *   playRangeStart: number,
  *   playRangeEnd: number,
@@ -679,6 +682,12 @@ shakaExtern.AbrConfiguration;
  *   is found, and the selected audio and text tracks have different languages,
  *   the text track will be shown.
  *   Changing this during playback will not affect the current playback.
+ * @property {string} preferredVariantRole
+ *   The preferred role to use for variants.
+ * @property {string} preferredTextRole
+ *   The preferred role to use for text tracks.
+ * @property {number} preferredAudioChannelCount
+ *   The preferred number of audio channels.
  * @property {shakaExtern.Restrictions} restrictions
  *   The application restrictions to apply to the tracks.  The track must
  *   meet all the restrictions to be playable.

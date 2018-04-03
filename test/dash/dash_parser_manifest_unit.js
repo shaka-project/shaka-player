@@ -1046,7 +1046,7 @@ describe('DashParser Manifest', function() {
             expect(manifest.periods[0].variants.length).toBe(1);
 
             let variant = manifest.periods[0].variants[0];
-            expect(variant.audio.channelsCount).toEqual(expectedNumChannels);
+            expect(variant.audio.channelCount).toEqual(expectedNumChannels);
           }).catch(fail);
     }
 
