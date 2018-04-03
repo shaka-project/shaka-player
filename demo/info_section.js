@@ -103,7 +103,7 @@ shakaDemo.updateTextTracks_ = function() {
   if (ShakaDemoUtils.isTsContent(shakaDemo.player_)) {
     let option = document.createElement('option');
     option.textContent = 'Default Text';
-    option.selected = shakaDemo.player_.getUseEmbeddedTextTrack();
+    option.selected = shakaDemo.player_.usingEmbeddedTextTrack();
     trackList.appendChild(option);
   }
 };
