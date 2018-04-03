@@ -230,18 +230,15 @@ describe('Storage', function() {
 
       storage.configure({trackSelectionCallback: trackSelectionCallback});
 
-      storage.store(fakeManifestUri)
-          .then(function(data) {
-            expect(data.offlineUri).toBe(expectedUri.toString());
-            return fakeStorageEngine.getManifest(0);
-          })
-          .then(function(manifestDb) {
-            expect(manifestDb).toBeTruthy();
-            expect(manifestDb.periods.length).toBe(1);
-            expect(manifestDb.periods[0].streams.length).toBe(1);
-          })
-          .catch(fail)
-          .then(done);
+      storage.store(fakeManifestUri).then((data) => {
+        expect(data).toBeTruthy();
+        expect(data.offlineUri).toBe(expectedUri.toString());
+        return fakeStorageEngine.getManifest(0);
+      }).then((manifestDb) => {
+        expect(manifestDb).toBeTruthy();
+        expect(manifestDb.periods.length).toBe(1);
+        expect(manifestDb.periods[0].streams.length).toBe(1);
+      }).catch(fail).then(done);
     });
 
     it('stores offline sessions', function(done) {
@@ -527,23 +524,38 @@ describe('Storage', function() {
         const id5 = 4;
         const id6 = 5;
 
-        const fakeDataLength1 = 5;
-        const fakeDataLength2 = 7;
+        const fakeDataLength0 = 5;
+        const fakeDataLength1 = 7;
+        const fakeDataLength2 = 9;
+        const fakeDataLength3 = 11;
+        const fakeDataLength4 = 13;
+        const fakeDataLength5 = 15;
+
+        const totalSize = fakeDataLength0 +
+                          fakeDataLength1 +
+                          fakeDataLength2 +
+                          fakeDataLength3 +
+                          fakeDataLength4 +
+                          fakeDataLength5;
 
         netEngine.setResponseMap({
-          'fake:0': new ArrayBuffer(fakeDataLength1),
-          'fake:1': new ArrayBuffer(fakeDataLength2)
+          'fake:0': new ArrayBuffer(fakeDataLength0),
+          'fake:1': new ArrayBuffer(fakeDataLength1),
+          'fake:2': new ArrayBuffer(fakeDataLength2),
+          'fake:3': new ArrayBuffer(fakeDataLength3),
+          'fake:4': new ArrayBuffer(fakeDataLength4),
+          'fake:5': new ArrayBuffer(fakeDataLength5)
         });
 
         stream1Index.merge([
           new SegmentReference(0, 0, 1, makeUris('fake:0'), 0, null),
-          new SegmentReference(1, 1, 2, makeUris('fake:0'), 0, null),
-          new SegmentReference(2, 2, 3, makeUris('fake:1'), 0, null),
-          new SegmentReference(3, 3, 4, makeUris('fake:0'), 0, null),
-          new SegmentReference(4, 4, 5, makeUris('fake:1'), 0, null)
+          new SegmentReference(1, 1, 2, makeUris('fake:1'), 0, null),
+          new SegmentReference(2, 2, 3, makeUris('fake:2'), 0, null),
+          new SegmentReference(3, 3, 4, makeUris('fake:3'), 0, null),
+          new SegmentReference(4, 4, 5, makeUris('fake:4'), 0, null)
         ]);
         stream2Index.merge([
-          new SegmentReference(0, 0, 1, makeUris('fake:0'), 0, null)
+          new SegmentReference(0, 0, 1, makeUris('fake:5'), 0, null)
         ]);
 
         /**
@@ -566,7 +578,7 @@ describe('Storage', function() {
         storage.store(fakeManifestUri)
             .then(function(manifest) {
               expect(manifest).toBeTruthy();
-              expect(manifest.size).toBe(34);
+              expect(manifest.size).toBe(totalSize);
               expect(manifest.duration).toBe(20); // Original manifest duration
               expect(netEngine.request.calls.count()).toBe(6);
               return fakeStorageEngine.getManifest(0);
@@ -634,33 +646,30 @@ describe('Storage', function() {
       });
 
       it('stores init segment', function(done) {
-        netEngine.setResponseMap({'fake:0': new ArrayBuffer(5)});
+        const segmentSize = 5;
+        netEngine.setResponseMap({'fake:0': new ArrayBuffer(segmentSize)});
 
         let stream = manifest.periods[0].variants[0].audio;
         stream.initSegmentReference =
             new shaka.media.InitSegmentReference(makeUris('fake:0'), 0, null);
 
-        storage.store(fakeManifestUri)
-            .then(function(manifest) {
-              expect(manifest).toBeTruthy();
-              expect(manifest.size).toBe(5);
-              expect(manifest.duration).toBe(20); // Original manifest duration
-              expect(netEngine.request.calls.count()).toBe(1);
-              return fakeStorageEngine.getManifest(0);
-            })
-            .then(function(manifest) {
-              let stream = manifest.periods[0].streams[0];
-              expect(stream.segments.length).toBe(0);
-              expect(stream.initSegmentKey).toBe(0);
-              return fakeStorageEngine.getSegment(0);
-            })
-            .then(function(segment) {
-              expect(segment).toBeTruthy();
-              expect(segment.data).toBeTruthy();
-              expect(segment.data.byteLength).toBe(5);
-            })
-            .catch(fail)
-            .then(done);
+        storage.store(fakeManifestUri).then((manifest) => {
+          expect(manifest).toBeTruthy();
+          expect(manifest.size).toBe(segmentSize);
+          expect(manifest.duration).toBe(20); // Original manifest duration
+          expect(netEngine.request.calls.count()).toBe(1);
+          return fakeStorageEngine.getManifest(0);
+        }).then((manifest) => {
+          let stream = manifest.periods[0].streams[0];
+          expect(stream.contentType).toBe('audio');
+          expect(stream.segments.length).toBe(0);
+          expect(stream.initSegmentKey).toBe(0);
+          return fakeStorageEngine.getSegment(0);
+        }).then((segment) => {
+          expect(segment).toBeTruthy();
+          expect(segment.data).toBeTruthy();
+          expect(segment.data.byteLength).toBe(5);
+        }).catch(fail).then(done);
       });
 
       it('with non-0 start time', function(done) {
@@ -799,59 +808,6 @@ describe('Storage', function() {
         });
       }
 
-      it('stores the best audio language match', function(done) {
-        /**
-         * @param {string} preferredLanguage
-         * @param {string} expectedLanguage
-         * @return {!Promise}
-         */
-        function testAudioMatch(preferredLanguage, expectedLanguage) {
-          player.configure({preferredAudioLanguage: preferredLanguage});
-          return storage.store(fakeManifestUri).then(function(data) {
-            let variantTracks = getVariants(data);
-            expect(variantTracks.length).toBe(1);
-            expect(variantTracks[0].language).toEqual(expectedLanguage);
-          });
-        }
-
-        let warning = jasmine.createSpy('shaka.log.warning');
-        shaka.log.warning = shaka.test.Util.spyFunc(warning);
-
-        // An exact match is available for en-US, en-GB, and en.
-        // Test all three to show that we are not just choosing the first loose
-        // match, but rather always choosing the best available match.
-        testAudioMatch('en-US', 'en-US').then(function() {
-          return testAudioMatch('en-GB', 'en-GB');
-        }).then(function() {
-          return testAudioMatch('en', 'en');
-        }).then(function() {
-          // The best match for en-AU is a matching base language, en.
-          return testAudioMatch('en-AU', 'en');
-        }).then(function() {
-          // The best match for fr-FR is another related sub-language, fr-CA.
-          return testAudioMatch('fr-FR', 'fr-CA');
-        }).then(function() {
-          // When there is no related match at all, we choose the primary, es.
-          return testAudioMatch('zh', 'es');
-        }).then(function() {
-          // Set the primary flags to false.
-          manifest.periods[0].variants.forEach(function(variant) {
-            variant.primary = false;
-            if (variant.audio) {
-              variant.audio.primary = false;
-            }
-          });
-          // When there is no related match at all, and no primary, we issue a
-          // warning, and we only store one track.
-          warning.calls.reset();
-          return storage.store(fakeManifestUri);
-        }).then(function(data) {
-          let variantTracks = getVariants(data);
-          expect(variantTracks.length).toBe(1);
-          expect(warning).toHaveBeenCalled();
-        }).catch(fail).then(done);
-      });
-
       it('stores the largest SD video track, middle audio', function(done) {
         // This language will select variants with multiple video resolutions.
         player.configure({preferredAudioLanguage: 'sw'});
@@ -875,6 +831,92 @@ describe('Storage', function() {
           expect(textTracks).toEqual(jasmine.arrayContaining(allTextTracks));
         }).catch(fail).then(done);
       });
+
+      describe('language matching', function() {
+        let warning;
+        let originalWarning;
+
+        beforeEach(function() {
+          originalWarning = shaka.log.warning;
+          warning = jasmine.createSpy('shaka.log.warning');
+
+          shaka.log.warning = shaka.test.Util.spyFunc(warning);
+        });
+
+        afterEach(function() {
+          shaka.log.warning = originalWarning;
+        });
+
+        it('stores exact match when found', function(done) {
+          setLanguagePreference('en-US');
+
+          return storage.store(fakeManifestUri).then((content) => {
+            let variantTracks = getVariants(content);
+            expect(variantTracks.length).toBe(1);
+            expect(variantTracks[0].language).toEqual('en-US');
+          }).catch(fail).then(done);
+        });
+
+        it('stores exact match for only base when found', function(done) {
+          setLanguagePreference('en');
+
+          return storage.store(fakeManifestUri).then((content) => {
+            let variantTracks = getVariants(content);
+            expect(variantTracks.length).toBe(1);
+            expect(variantTracks[0].language).toEqual('en');
+          }).catch(fail).then(done);
+        });
+
+        it('stores base match when exact match is not found', function(done) {
+          setLanguagePreference('en-AU');
+
+          return storage.store(fakeManifestUri).then((content) => {
+            let variantTracks = getVariants(content);
+            expect(variantTracks.length).toBe(1);
+            expect(variantTracks[0].language).toEqual('en');
+          }).catch(fail).then(done);
+        });
+
+        it('stores common base when exact match is not found', function(done) {
+          setLanguagePreference('fr-FR');
+
+          return storage.store(fakeManifestUri).then((content) => {
+            let variantTracks = getVariants(content);
+            expect(variantTracks.length).toBe(1);
+            expect(variantTracks[0].language).toEqual('fr-CA');
+          }).catch(fail).then(done);
+        });
+
+        it('stores primary track when no match is found', function(done) {
+          setLanguagePreference('zh');
+
+          return storage.store(fakeManifestUri).then((content) => {
+            let variantTracks = getVariants(content);
+            expect(variantTracks.length).toBe(1);
+            expect(variantTracks[0].language).toEqual('es');
+          }).catch(fail).then(done);
+        });
+
+        it('warn when for no matche and no primary track', function(done) {
+          setLanguagePreference('not-a-language');
+
+          // Make every audio stream and variant non-primary.
+          manifest.periods[0].variants.forEach((variant) => {
+            variant.primary = false;
+            if (variant.audio) { variant.audio.primary = false; }
+          });
+
+          return storage.store(fakeManifestUri).then((content) => {
+            let variantTracks = getVariants(content);
+            expect(variantTracks.length).toBe(1);
+            expect(warning).toHaveBeenCalled();
+          }).catch(fail).then(done);
+        });
+
+        function setLanguagePreference(language) {
+          player.configure({preferredAudioLanguage: language});
+        }
+      });  // describe('language matching')
     });  // describe('default track selection callback')
 
     describe('temporary license', function() {
