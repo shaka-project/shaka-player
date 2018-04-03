@@ -110,4 +110,12 @@
   for (var j = 0; j < scripts.length; ++j) {
     loadRelativeScript(scripts[j]);
   }
+
+  // Load the application plugin if specified
+  var hash = location.hash;
+  var pluginSrc = hash.substr(hash.indexOf('plugin='))
+    .split(';')[0].split('=')[1];
+  if (pluginSrc) {
+    importScript(pluginSrc);
+  }
 })();  // anonymous namespace

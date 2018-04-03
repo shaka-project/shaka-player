@@ -5,3 +5,4 @@ package-lock.json
 dist/
 docs/api/
 coverage/
+demo/plugin/plugin_registry.json

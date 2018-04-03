@@ -22,7 +22,6 @@
  *   refactor the demo into classes that talk via public method.  TODO
  */
 
-
 /** @suppress {duplicate} */
 var shakaDemo = shakaDemo || {};  // eslint-disable-line no-var
 
@@ -89,6 +88,11 @@ shakaDemo.audioOnlyPoster_ =
  */
 shakaDemo.CC_APP_ID_ = 'A15A181D';
 
+/**
+ * @type {shakaDemo.AppPlugin}
+ */
+shakaDemo.appPlugin = null;
+
 
 /**
  * Initialize the application.
@@ -105,7 +109,7 @@ shakaDemo.init = function() {
   document.getElementById('preferredAudioLanguage').value = language;
   document.getElementById('preferredTextLanguage').value = language;
 
-  let params = shakaDemo.getParams_();
+  let params = shakaDemo.getParams();
 
   shakaDemo.setupLogging_();
 
@@ -214,6 +218,9 @@ shakaDemo.init = function() {
         shakaDemo.postBrowserCheckParams_(params);
         window.addEventListener('hashchange', shakaDemo.updateFromHash_);
       });
+
+      shakaDemo.initAppPlugin_();
+
     }).catch(function(error) {
       // Some part of the setup of the demo app threw an error.
       // Notify the user of this.
@@ -222,12 +229,40 @@ shakaDemo.init = function() {
   }
 };
 
+/**
+ * Initialize the application plugin
+ *
+ * @private
+ */
+shakaDemo.initAppPlugin_ = function() {
+  let player = shakaDemo.player_;
+  let plugin = shakaDemo.AppPlugin.getPluginInstance(player);
+  if (plugin) {
+    shakaDemo.appPlugin = plugin;
+
+    let listeners = plugin.getListeners();
+    for (let eventName in listeners) {
+      player.addEventListener(eventName, listeners[eventName]);
+    }
+
+    let netEngine = player.getNetworkingEngine();
+    netEngine.registerRequestFilter(plugin.onRequest);
+    netEngine.registerResponseFilter(plugin.onResponse);
+
+    plugin.onStart().catch(function(error) {
+      if (shaka.log) {
+        shaka.log.error('Error setting up plugin ' + error);
+      }
+      // TODO: `error` could be anything. How to handle?
+    });
+  }
+};
+
 
 /**
   * @return {!Object.<string, string>} params
-  * @private
   */
-shakaDemo.getParams_ = function() {
+shakaDemo.getParams = function() {
   // Read URL parameters.
   let fields = location.search.substr(1);
   fields = fields ? fields.split(';') : [];
@@ -434,7 +469,7 @@ shakaDemo.updateFromHash_ = function() {
     return;
   }
 
-  let params = shakaDemo.getParams_();
+  let params = shakaDemo.getParams();
   shakaDemo.preBrowserCheckParams_(params);
   shakaDemo.postBrowserCheckParams_(params);
 };
@@ -447,7 +482,7 @@ shakaDemo.hashShouldChange_ = function() {
   }
 
   let params = [];
-  let oldParams = shakaDemo.getParams_();
+  let oldParams = shakaDemo.getParams();
 
   // Save the current asset.
   let assetUri;
