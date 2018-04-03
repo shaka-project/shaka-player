@@ -37,6 +37,14 @@ Shaka v2 has several improvements over v1, including:
   - Captions are not streamed until they are shown
   - Use NetworkInformation API to get initial bandwidth estimate
   - The demo app is now a Progressive Web App (PWA) and can be used offline
+  - Support for CEA captions in TS content
+  - Support for TTML and VTT regions
+  - A video element is no longer required when `Player` is constructed
+  - New `attach()` and `detach()` methods have been added to `Player` to manage
+    attachment to video elements
+  - Fetch is now preferred over XHR when available
+  - Network requests are now abortable
+  - Live stream playback can begin at a negative offset from the live edge
 
 
 #### Shaka Plugins
@@ -81,6 +89,16 @@ based on the file extension or MIME type:
 var player = new shaka.Player(video);
 player.load(manifestUri);
 ```
+
+
+#### Promise polyfill for IE
+
+Prior to v2.4, we had our own polyfill of `Promise` for IE 11 support.  In v2.4,
+we have dropped that polyfill.  To support IE 11 in your application, you MUST
+install a `Promise` polyfill separately.  We recommend [es6-promise-polyfill][]
+for that purpose.
+
+[es6-promise-polyfill]: https://github.com/lahmatiy/es6-promise-polyfill
 
 
 #### ContentProtection callbacks

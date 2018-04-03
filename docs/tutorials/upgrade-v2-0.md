@@ -1,13 +1,13 @@
-# Shaka Upgrade Guide, v2.0 => v2.3
+# Shaka Upgrade Guide, v2.0 => v2.4
 
-This is a detailed guide for upgrading from Shaka Player v2.0 to v2.3.
+This is a detailed guide for upgrading from Shaka Player v2.0 to v2.4.
 Feel free to skim or to search for the class and method names you are using in
 your application.
 
 
-#### What's New in v2.1 and v2.3?
+#### What's New in v2.4?
 
-Shaka v2.3 introduces several improvements over v2.0, including:
+Shaka v2.4 introduces several improvements over v2.0, including:
   - HLS support (VOD, Event, and Live)
   - DASH trick mode support
   - Support for jumping gaps in the timeline
@@ -26,6 +26,24 @@ Shaka v2.3 introduces several improvements over v2.0, including:
   - Captions are not streamed until they are shown
   - Use NetworkInformation API to get initial bandwidth estimate
   - The demo app is now a Progressive Web App (PWA) and can be used offline
+  - Support for CEA captions in TS content
+  - Support for TTML and VTT regions
+  - A video element is no longer required when `Player` is constructed
+  - New `attach()` and `detach()` methods have been added to `Player` to manage
+    attachment to video elements
+  - Fetch is now preferred over XHR when available
+  - Network requests are now abortable
+  - Live stream playback can begin at a negative offset from the live edge
+
+
+#### Promise polyfill for IE
+
+Prior to v2.4, we had our own polyfill of `Promise` for IE 11 support.  In v2.4,
+we have dropped that polyfill.  To support IE 11 in your application, you MUST
+install a `Promise` polyfill separately.  We recommend [es6-promise-polyfill][]
+for that purpose.
+
+[es6-promise-polyfill]: https://github.com/lahmatiy/es6-promise-polyfill
 
 
 #### Selecting tracks
@@ -42,7 +60,7 @@ var i = /* choose an index somehow */;
 player.selectTrack(videoTracks[i]);
 ```
 
-In Shaka v2.3, audio and video tracks are combined into a variant track.  It is
+In Shaka v2.4, audio and video tracks are combined into a variant track.  It is
 not possible to select individual audio/video streams, you can only select a
 specific variant as specified by the manifest.  This was necessary for us to
 support HLS.  Text tracks are independent of variant tracks.
@@ -52,7 +70,7 @@ You can get the currently available tracks using `getVariantTracks()` and
 `selectTextTrack()`.
 
 ```js
-// v2.3:
+// v2.4:
 var variantTracks = player.getVariantTracks();
 var i = /* choose an index somehow */;
 player.selectVariantTrack(variantTracks[i]);
@@ -72,7 +90,7 @@ player.configure({
 });
 ```
 
-In v2.3, it's done through:
+In v2.4, it's done through:
 
 ```js
 player.configure({
@@ -85,7 +103,7 @@ The API for AbrManager has also changed.
 In v2.0, default bandwidth estimate and restrictions were set through
 `setDefaultEstimate()` and `setRestrictions()` methods.
 
-In v2.3, they are set through `configure()` method which accepts a
+In v2.4, they are set through `configure()` method which accepts a
 {@link shakaExtern.AbrConfiguration} structure. The new method is more general,
 and allows for the configuration of bandwidth upgrade and downgrade targets
 as well.
@@ -95,13 +113,13 @@ as well.
 abrManager.setDefaultEstimate(defaultBandwidthEstimate);
 abrManager.setRestrictions(restrictions);
 
-// v2.3:
+// v2.4:
 abrManager.configure(abrConfigurations);
 ```
 
 In v2.0, AbrManager had a `chooseStreams()` method for the player to prompt for
 a stream selection, and a `switch()` callback to send unsolicited changes from
-AbrManager to player.  In v2.3, `chooseStreams()` has been replaced with
+AbrManager to player.  In v2.4, `chooseStreams()` has been replaced with
 `chooseVariant()`, and the `switch()` callback takes a variant instead of a map
 of streams.
 
@@ -120,7 +138,7 @@ MyAbrManager.prototype.makeDecision_ = function() {
   this.switch_(map);
 };
 
-// v2.3:
+// v2.4:
 var variant = abrManager.chooseVariant();
 console.log(variant, variant.video, variant.audio);
 
@@ -147,10 +165,10 @@ player.selectTrack(videoTracks[i]);
 player.configure({abr: {enabled: true}});
 ```
 
-In v2.3, any change in ABR state must be made explicitly if desired.
+In v2.4, any change in ABR state must be made explicitly if desired.
 
 ```js
-// v2.3
+// v2.4
 // To explicitly disable:
 player.configure({abr: {enabled: false}});
 // Now select the track, which does not change adaptation state!
@@ -171,7 +189,7 @@ player.load(manifestUri);  // Canadian French preferred for initial playback
 player.configure({ preferredAudioLanguage: 'el' });  // switch to Greek
 ```
 
-In Shaka v2.3, language selection during playback is explicit and separate from
+In Shaka v2.4, language selection during playback is explicit and separate from
 the configuration.  Configuration only affects the next call to `load()`, and
 will not change languages during playback.
 
@@ -180,7 +198,7 @@ To list available languages, we provide the `getAudioLanguages()` and
 `selectAudioLanguage()` and `selectTextLanguage()`.
 
 ```js
-// v2.3:
+// v2.4:
 player.configure({ preferredAudioLanguage: 'fr-CA' });
 player.load(manifestUri);  // Canadian French preferred for initial playback
 
@@ -190,14 +208,14 @@ player.selectAudioLanguage('fa');  // switch to Farsi right now
 player.load(secondManifestUri);  // Greek preferred for initial playback
 ```
 
-In addition to the language methods introduced in v2.1, v2.3 adds additional
+In addition to the language methods introduced in v2.1, v2.4 adds additional
 methods for dealing with roles: `getAudioLanguagesAndRoles()` and
 `getTextLanguagesAndRoles()`.  These return language/role combinations in an
 object.  You can specify a role in an optional second argument to the language
 selection methods.
 
 ```js
-// v2.3:
+// v2.4:
 var languagesAndRoles = player.getAudioLanguagesAndRoles();
 
 for (var i = 0; i < languagesAndRoles.length; ++i) {
@@ -268,7 +286,7 @@ function MyTextParser(data, periodOffset, segmentStartTime, segmentEndTime) {
 }
 ```
 
-In Shaka v2.3, the text parser interface is now a constructor.  The interface
+In Shaka v2.4, the text parser interface is now a constructor.  The interface
 now has explicit methods for init segments and media segments, and parameters
 related to time offsets have been grouped together into one `TimeContext`
 parameter.
@@ -278,7 +296,7 @@ Also, text parser plugins now return `shaka.text.Cue` objects instead of
 `ArrayBuffer`.
 
 ```js
-// v2.3
+// v2.4
 /** @constructor */
 function MyTextParser() {}
 
@@ -304,7 +322,7 @@ MyTextParser.prototype.parseMedia = function(data, timeContext) {
 ```
 
 All application-specific text-parsing plugins MUST to be updated.
-v2.3 does not have backward compatibility on this!
+v2.4 does not have backward compatibility on this!
 
 The `Shaka.text.Cue` class contains the same information about a text cue as
 the VTTCue class, plus extra information about text style.
@@ -386,7 +404,7 @@ In Shaka v2.1, the parameters to `start()`, which were all tied back to the
 This will allow us to add features to the interface without breaking plugins.
 
 ```js
-// v2.3
+// v2.4
 /**
  * @param {string} uri The URI of the manifest.
  * @param {shakaExtern.ManifestParser.PlayerInterface} playerInterface Contains
@@ -416,7 +434,7 @@ update.  This is used, for example, to support `emsg` boxes in MP4 content,
 which can be used by the stream to indicate that a manifest update is needed.
 
 ```js
-// v2.3
+// v2.4
 MyManifestParser.prototype.update = function() {
   // Trigger an update now!
   this.updateManifest_();
@@ -429,7 +447,7 @@ changed.  We use this internally in our offline support, so that we can keep
 track of expiring licenses for stored content.
 
 ```js
-// v2.3
+// v2.4
 MyManifestParser.prototype.onExpirationUpdated =
     function(sessionId, expiration) {
   var oldExpiration = this.database_.getExpiration(this.contentId_);
@@ -437,6 +455,13 @@ MyManifestParser.prototype.onExpirationUpdated =
   this.database_.setExpiration(this.contentId_, expiration);
 };
 ```
+
+Shaka v2.4 changed some details of the `shaka.media.PresentationTimeline` API.
+`ManifestParser` plugins that use these methods MUST be updated:
+
+  - `setAvailabilityStart()` was renamed to `setUserSeekStart()`.
+  - `notifySegments()` now takes a reference array and a boolean called
+    `isFirstPeriod`, instead of a period start time and a reference array.
 
 For more information, see the {@link shakaExtern.ManifestParser.PlayerInterface}
 and {@link shakaExtern.ManifestParser} definitions in the API docs.
@@ -510,11 +535,11 @@ player.addEventListener('error', function(event) {
 #### Offline storage API changes
 
 In v2.0, the `remove()` method on `shaka.offline.Storage` took an instance of
-`StoredContent` as an argument.  Now, in v2.3, it takes a the `offlineUri` field
+`StoredContent` as an argument.  Now, in v2.4, it takes the `offlineUri` field
 from `StoredContent` as an argument.
 
-All applications which use offline storage SHOULD update to the new API.
-Support for the old argument will be removed in v2.4.
+All applications which use offline storage MUST update to the new API.
+The old argument was deprecated in v2.3 and has been removed in v2.4.
 
 ```js
 // v2.0:
@@ -523,9 +548,96 @@ storage.list().then(function(storedContentList) {
   storage.remove(someContent);
 });
 
-// v2.3:
+// v2.4:
 storage.list().then(function(storedContentList) {
   var someContent = storedContentList[someIndex];
   storage.remove(someContent.offlineUri);
 });
+```
+
+
+#### NetworkingEngine API changes
+
+In v2.0, the `request()` method on `shaka.net.NetworkingEngine` returned a
+Promise.  Now, in v2.4, it returns an instance of
+`shakaExtern.IAbortableOperation`, which contains a Promise.
+
+All applications which make application-level requests via `NetworkingEngine`
+SHOULD update to the new API.  Support for the old API will be removed in v2.5.
+
+```js
+// v2.0:
+player.getNetworkingEngine().request(type, request).then((response) => {
+  // ...
+});
+
+// v2.4:
+let operation = player.getNetworkingEngine().request(type, request);
+// Use operation.promise to get the response.
+operation.promise.then((response) => {
+  // ...
+});
+// The operation can also be aborted on some condition.
+onSomeOtherCondition(() => {
+  operation.abort();
+});
+```
+
+Backward compatibility is provided in the v2.4 releases by adding `.then` and
+`.catch` methods to the return value from `request()`.
+
+
+#### Network scheme plugin API changes
+
+In v2.4, we changed the API for network scheme plugins.
+
+These plugins now return an instance of `shakaExtern.IAbortableOperation`.
+We suggest using the utility `shaka.util.AbortableOperation` for convenience.
+
+We also introduced an additional parameter for network scheme plugins to
+identify the request type.
+
+All applications which have application-level network scheme plugins SHOULD
+update to the new API.  Support for the old API will be removed in v2.5.
+
+```js
+// v2.0
+function fooPlugin(uri, request) {
+  return new Promise((resolve, reject) => {
+    // ...
+  });
+}
+shaka.net.NetworkingEngine.registerScheme('foo', fooPlugin);
+
+// v2.4
+function fooPlugin(uri, request, requestType) {
+  let rejectCallback = null;
+
+  const promise = new Promise((resolve, reject) => {
+    rejectCallback = reject;
+
+    // Use this if you have a need for it.  Ignore it otherwise.
+    if (requestType == shaka.net.NetworkingEngine.RequestType.MANIFEST) {
+      // ...
+    } else {
+      // ...
+    }
+
+    // ...
+  });
+
+  const abort = () => {
+    // Abort the operation.
+    // ...
+
+    // Reject the Promise.
+    rejectCallback(new shaka.util.Error(
+        shaka.util.Error.Severity.RECOVERABLE,
+        shaka.util.Error.Category.NETWORK,
+        shaka.util.Error.Code.OPERATION_ABORTED));
+  };
+
+  return new shaka.util.AbortableOperation(promise, abort);
+}
+shaka.net.NetworkingEngine.registerScheme('foo', fooPlugin);
 ```
