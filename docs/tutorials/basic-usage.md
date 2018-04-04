@@ -24,7 +24,7 @@ Basic usage of Shaka Player is very easy:
     <video id="video"
            width="640"
            poster="https://shaka-player-demo.appspot.com/assets/poster.jpg"
-           controls autoplay ></video>
+           controls autoplay></video>
   </body>
 </html>
 ```
