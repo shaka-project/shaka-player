@@ -2697,6 +2697,31 @@ describe('Player', function() {
       }).catch(fail).then(done);
     });
 
+    it('updates AbrManager about restricted variants', function(done) {
+      manifest = new shaka.test.ManifestGenerator()
+              .addPeriod(0)
+                .addVariant(0)
+                  .addVideo(1).keyId('abc')
+                .addVariant(2)
+                  .addVideo(3)
+              .build();
+
+      let abrManager = new shaka.test.FakeAbrManager();
+      player.configure({abrFactory: function() { return abrManager; }});
+      setupPlayer().then(function() {
+        expect(player.getVariantTracks().length).toBe(2);
+
+        // We have some key statuses, but not for the key IDs we know.
+        abrManager.setVariants.calls.reset();
+        onKeyStatus({'foo': 'usable'});
+
+        expect(abrManager.setVariants).toHaveBeenCalled();
+        let variants = abrManager.setVariants.calls.argsFor(0)[0];
+        expect(variants.length).toBe(1);
+        expect(variants[0].id).toBe(2);
+      }).catch(fail).then(done);
+    });
+
     /**
      * @param {!Object.<string, string>} keyStatusMap
      * @suppress {accessControls}
