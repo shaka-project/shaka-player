@@ -23,8 +23,8 @@ Basic usage of Shaka Player is very easy:
   <body>
     <video id="video"
            width="640"
-           poster="//shaka-player-demo.appspot.com/assets/poster.jpg"
-           controls autoplay></video>
+           poster="/assets/poster.jpg"
+           controls autoplay playsinline></video>
   </body>
 </html>
 ```
@@ -32,7 +32,7 @@ Basic usage of Shaka Player is very easy:
 ```js
 // myapp.js
 
-var manifestUri = '//storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd';
+var manifestUri = 'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd';
 
 function initApp() {
   // Install built-in polyfills to patch browser incompatibilities.
