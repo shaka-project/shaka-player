@@ -584,19 +584,19 @@ describe('Storage', function() {
               return fakeStorageEngine.getManifest(0);
             })
             .then(function(manifest) {
-              let stream1 = manifest.periods[0].streams[0];
+              let stream1 = manifest.periods[0].streams[1];
               expect(stream1.initSegmentKey).toBe(null);
               expect(stream1.segments.length).toBe(5);
-              expect(stream1.segments).toContain(makeSegment(0, 1, id1));
+              expect(stream1.segments).toContain(makeSegment(0, 1, id2));
               expect(stream1.segments).toContain(makeSegment(1, 2, id3));
               expect(stream1.segments).toContain(makeSegment(2, 3, id4));
               expect(stream1.segments).toContain(makeSegment(3, 4, id5));
               expect(stream1.segments).toContain(makeSegment(4, 5, id6));
 
-              let stream2 = manifest.periods[0].streams[1];
+              let stream2 = manifest.periods[0].streams[0];
               expect(stream2.initSegmentKey).toBe(null);
               expect(stream2.segments.length).toBe(1);
-              expect(stream2.segments).toContain(makeSegment(0, 1, id2));
+              expect(stream2.segments).toContain(makeSegment(0, 1, id1));
 
               return fakeStorageEngine.getSegment(id4);
             })
@@ -660,7 +660,7 @@ describe('Storage', function() {
           expect(netEngine.request.calls.count()).toBe(1);
           return fakeStorageEngine.getManifest(0);
         }).then((manifest) => {
-          let stream = manifest.periods[0].streams[0];
+          let stream = manifest.periods[0].streams[1];
           expect(stream.contentType).toBe('audio');
           expect(stream.segments.length).toBe(0);
           expect(stream.initSegmentKey).toBe(0);
@@ -692,7 +692,7 @@ describe('Storage', function() {
               return fakeStorageEngine.getManifest(0);
             })
             .then(function(manifest) {
-              let stream = manifest.periods[0].streams[0];
+              let stream = manifest.periods[0].streams[1];
               expect(stream.segments.length).toBe(3);
             })
             .catch(fail)
