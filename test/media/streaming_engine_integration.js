@@ -30,7 +30,7 @@ describe('StreamingEngine', function() {
 
   /** @type {!shaka.media.Playhead} */
   let playhead;
-  /** @type {shakaExtern.StreamingConfiguration} */
+  /** @type {shaka.extern.StreamingConfiguration} */
   let config;
 
   let netEngine;
@@ -40,12 +40,12 @@ describe('StreamingEngine', function() {
   let streamingEngine;
 
 
-  /** @type {shakaExtern.Variant} */
+  /** @type {shaka.extern.Variant} */
   let variant1;
-  /** @type {shakaExtern.Variant} */
+  /** @type {shaka.extern.Variant} */
   let variant2;
 
-  /** @type {shakaExtern.Manifest} */
+  /** @type {shaka.extern.Manifest} */
   let manifest;
 
   /** @type {!jasmine.Spy} */
@@ -75,7 +75,7 @@ describe('StreamingEngine', function() {
   });
 
   beforeEach(function() {
-    // shakaExtern.StreamingConfiguration
+    // shaka.extern.StreamingConfiguration
     config = {
       rebufferingGoal: 2,
       bufferingGoal: 5,
@@ -267,7 +267,7 @@ describe('StreamingEngine', function() {
     let onSeek = function() { streamingEngine.seeked(); };
     playhead = new shaka.media.Playhead(
         /** @type {!HTMLVideoElement} */(video),
-        /** @type {shakaExtern.Manifest} */ (manifest),
+        /** @type {shaka.extern.Manifest} */ (manifest),
         config,
         null /* startTime */,
         onSeek,
@@ -315,7 +315,7 @@ describe('StreamingEngine', function() {
       onStartupComplete: Util.spyFunc(onStartupComplete)
     };
     streamingEngine = new shaka.media.StreamingEngine(
-        /** @type {shakaExtern.Manifest} */(manifest), playerInterface);
+        /** @type {shaka.extern.Manifest} */(manifest), playerInterface);
     streamingEngine.configure(config);
   }
 
@@ -714,7 +714,7 @@ describe('StreamingEngine', function() {
      * TODO: Consolidate with StreamingEngineUtils.createManifest?
      * @param {number} gapAtStart
      * @param {boolean} dropSegment
-     * @return {shakaExtern.Manifest}
+     * @return {shaka.extern.Manifest}
      */
     function setupGappyManifest(gapAtStart, dropSegment) {
       /**
@@ -822,8 +822,8 @@ describe('StreamingEngine', function() {
   /**
    * Choose streams for the given period.
    *
-   * @param {shakaExtern.Period} period
-   * @return {!Object.<string, !shakaExtern.Stream>}
+   * @param {shaka.extern.Period} period
+   * @return {!Object.<string, !shaka.extern.Stream>}
    */
   function defaultOnChooseStreams(period) {
     if (period == manifest.periods[0]) {

@@ -28,9 +28,9 @@ goog.provide('shaka.test.MemoryStorageEngine');
  * @implements {shaka.offline.IStorageEngine}
  */
 shaka.test.MemoryStorageEngine = function() {
-  /** @private {!Object<number, shakaExtern.ManifestDB>} */
+  /** @private {!Object<number, shaka.extern.ManifestDB>} */
   this.manifests_ = {};
-  /** @private {!Object<number, shakaExtern.SegmentDataDB>} */
+  /** @private {!Object<number, shaka.extern.SegmentDataDB>} */
   this.segments_ = {};
 
   /** @private {number} */
@@ -115,7 +115,7 @@ shaka.test.MemoryStorageEngine.prototype.addSegment = function(segment) {
   let clonedData = new ArrayBuffer(segment.data.byteLength);
   (new Uint8Array(clonedData)).set(new Uint8Array(segment.data));
 
-  /** @type {shakaExtern.SegmentDataDB} */
+  /** @type {shaka.extern.SegmentDataDB} */
   let clonedSegment = {
     data: clonedData
   };

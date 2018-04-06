@@ -137,11 +137,11 @@ shaka.test.Dash.makeSimpleManifestText =
  * Makes a simple manifest object for jasmine.toEqual; this does not do any
  * checking.  This only constructs one period with the given stream sets.
  *
- * @param {!Array.<shakaExtern.Variant>} variants
- * @return {shakaExtern.Manifest}
+ * @param {!Array.<shaka.extern.Variant>} variants
+ * @return {shaka.extern.Manifest}
  */
 shaka.test.Dash.makeManifestFromVariants = function(variants) {
-  return /** @type {shakaExtern.Manifest} */ (jasmine.objectContaining({
+  return /** @type {shaka.extern.Manifest} */ (jasmine.objectContaining({
     periods: [
       jasmine.objectContaining({
         variants: variants
@@ -160,7 +160,7 @@ shaka.test.Dash.makeManifestFromVariants = function(variants) {
  * @param {number} startByte
  * @param {?number} endByte
  * @param {number=} opt_pto The presentationTimeOffset of the stream.
- * @return {shakaExtern.Manifest}
+ * @return {shaka.extern.Manifest}
  */
 shaka.test.Dash.makeManifestFromInit = function(
     uri, startByte, endByte, opt_pto) {
@@ -182,7 +182,7 @@ shaka.test.Dash.makeManifestFromInit = function(
  * returning fake data, the parser will fail to parse the segment index; we
  * swallow the error and return a promise that will resolve.
  *
- * @param {shakaExtern.Manifest} manifest
+ * @param {shaka.extern.Manifest} manifest
  * @return {!Promise}
  */
 shaka.test.Dash.callCreateSegmentIndex = function(manifest) {

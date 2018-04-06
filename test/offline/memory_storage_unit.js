@@ -20,7 +20,7 @@ describe('MemoryStorageCell', function() {
   const OfflineUtils = shaka.test.OfflineUtils;
 
   it('can add, get, and remove segments', function(done) {
-    /** @type {!Array.<shakaExtern.SegmentDataDB>} */
+    /** @type {!Array.<shaka.extern.SegmentDataDB>} */
     let segments = [
       OfflineUtils.createSegmentData([0]),
       OfflineUtils.createSegmentData([0, 1]),
@@ -30,7 +30,7 @@ describe('MemoryStorageCell', function() {
     /** @type {!Array.<number>} */
     let keys;
 
-    /** @type {shakaExtern.StorageCell} */
+    /** @type {shaka.extern.StorageCell} */
     let cell = new shaka.offline.memory.StorageCell();
 
     cell.addSegments(segments).then((k) => {
@@ -58,7 +58,7 @@ describe('MemoryStorageCell', function() {
   });
 
   it('can add, get, and remove manifests', function(done) {
-    /** @type {!Array.<shakaExtern.ManifestDB>} */
+    /** @type {!Array.<shaka.extern.ManifestDB>} */
     let manifests = [
       OfflineUtils.createManifest('original-uri-1'),
       OfflineUtils.createManifest('original-uri-2'),
@@ -68,7 +68,7 @@ describe('MemoryStorageCell', function() {
     /** @type {!Array.<number>} */
     let keys;
 
-    /** @type {shakaExtern.StorageCell} */
+    /** @type {shaka.extern.StorageCell} */
     let cell = new shaka.offline.memory.StorageCell();
 
     cell.addManifests(manifests).then((k) => {
@@ -96,7 +96,7 @@ describe('MemoryStorageCell', function() {
   });
 
   it('can add and get all manifests', function(done) {
-    /** @type {!Array.<shakaExtern.ManifestDB>} */
+    /** @type {!Array.<shaka.extern.ManifestDB>} */
     let manifests = [
       OfflineUtils.createManifest('original-uri-1'),
       OfflineUtils.createManifest('original-uri-2'),
@@ -106,7 +106,7 @@ describe('MemoryStorageCell', function() {
     /** @type {!Array.<number>} */
     let keys = [];
 
-    /** @type {shakaExtern.StorageCell} */
+    /** @type {shaka.extern.StorageCell} */
     let cell = new shaka.offline.memory.StorageCell();
 
     cell.addManifests(manifests).then((k) => {
@@ -127,14 +127,14 @@ describe('MemoryStorageCell', function() {
   });
 
   it('can add, get, and update manifests', function(done) {
-    /** @type {shakaExtern.ManifestDB} */
+    /** @type {shaka.extern.ManifestDB} */
     let originalManifest = OfflineUtils.createManifest('original');
     originalManifest.expiration = 1000;
 
     /** @type {number} */
     let key;
 
-    /** @type {shakaExtern.StorageCell} */
+    /** @type {shaka.extern.StorageCell} */
     let cell = new shaka.offline.memory.StorageCell();
 
     cell.addManifests([originalManifest]).then((keys) => {

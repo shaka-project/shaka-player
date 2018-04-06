@@ -144,7 +144,7 @@ shakaDemo.onAssetKeyUp_ = function(event) {
 shakaDemo.requestCertificate_ = function(uri) {
   let netEngine = shakaDemo.player_.getNetworkingEngine();
   const requestType = shaka.net.NetworkingEngine.RequestType.APP;
-  let request = /** @type {shakaExtern.Request} */ ({uris: [uri]});
+  let request = /** @type {shaka.extern.Request} */ ({uris: [uri]});
 
   return netEngine.request(requestType, request).promise
       .then((response) => response.data);
@@ -194,13 +194,13 @@ shakaDemo.preparePlayer_ = function(asset) {
 
   let commonDrmSystems =
       ['com.widevine.alpha', 'com.microsoft.playready', 'com.adobe.primetime'];
-  let config = /** @type {shakaExtern.PlayerConfiguration} */(
+  let config = /** @type {shaka.extern.PlayerConfiguration} */(
       {abr: {}, streaming: {}, manifest: {dash: {}}});
-  config.drm = /** @type {shakaExtern.DrmConfiguration} */({
+  config.drm = /** @type {shaka.extern.DrmConfiguration} */({
     advanced: {}});
   commonDrmSystems.forEach(function(system) {
     config.drm.advanced[system] =
-        /** @type {shakaExtern.AdvancedDrmConfiguration} */({});
+        /** @type {shaka.extern.AdvancedDrmConfiguration} */({});
   });
   config.manifest.dash.clockSyncUri =
       'https://shaka-player-demo.appspot.com/time.txt';

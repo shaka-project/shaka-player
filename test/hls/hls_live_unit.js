@@ -32,9 +32,9 @@ describe('HlsParser live', function() {
   let fakeNetEngine;
   /** @type {!shaka.hls.HlsParser} */
   let parser;
-  /** @type {shakaExtern.ManifestParser.PlayerInterface} */
+  /** @type {shaka.extern.ManifestParser.PlayerInterface} */
   let playerInterface;
-  /** @type {shakaExtern.ManifestConfiguration} */
+  /** @type {shaka.extern.ManifestConfiguration} */
   let config;
   /** @type {ArrayBuffer} */
   let initSegmentData;

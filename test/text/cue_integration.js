@@ -51,8 +51,8 @@ describe('Cue', function() {
 
   /**
    * @param {string} text
-   * @param {!shakaExtern.TextParser.TimeContext} time
-   * @return {!Array.<!shakaExtern.Cue>}
+   * @param {!shaka.extern.TextParser.TimeContext} time
+   * @return {!Array.<!shaka.extern.Cue>}
    */
   function parseVtt(text, time) {
     let data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));

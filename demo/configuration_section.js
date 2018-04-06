@@ -148,7 +148,7 @@ shakaDemo.onGapInput_ = function(event) {
  * @private
  */
 shakaDemo.onConfigInput_ = function(event) {
-  shakaDemo.player_.configure(/** @type {shakaExtern.PlayerConfiguration} */({
+  shakaDemo.player_.configure(/** @type {shaka.extern.PlayerConfiguration} */({
     preferredAudioLanguage:
         document.getElementById('preferredAudioLanguage').value,
     preferredTextLanguage:

@@ -380,7 +380,7 @@ describe('MediaSourceEngine', function() {
 
     // Create a mock text displayer, to intercept text cues.
     let cues = [];
-    let mockTextDisplayer = /** @type {shakaExtern.TextDisplayer} */ ({
+    let mockTextDisplayer = /** @type {shaka.extern.TextDisplayer} */ ({
       append: (newCues) => { cues = cues.concat(newCues); }
     });
     mediaSourceEngine.setTextDisplayer(mockTextDisplayer);

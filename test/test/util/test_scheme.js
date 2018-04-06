@@ -23,14 +23,14 @@ goog.provide('shaka.test.TestScheme');
  * and manifests that will point to a fake manifest generator.
  *
  * @param {string} uri
- * @param {shakaExtern.Request} request
+ * @param {shaka.extern.Request} request
  * @param {shaka.net.NetworkingEngine.RequestType=} requestType
- * @return {!shakaExtern.IAbortableOperation.<shakaExtern.Response>}
+ * @return {!shaka.extern.IAbortableOperation.<shaka.extern.Response>}
  */
 shaka.test.TestScheme = function(uri, request, requestType) {
   let manifestParts = /^test:([^/]+)$/.exec(uri);
   if (manifestParts) {
-    /** @type {shakaExtern.Response} */
+    /** @type {shaka.extern.Response} */
     let response = {
       uri: uri,
       data: new ArrayBuffer(0),
@@ -75,13 +75,13 @@ shaka.test.TestScheme = function(uri, request, requestType) {
     responseData = generator.getSegment(index + 1, 0, 0);
   }
 
-  /** @type {shakaExtern.Response} */
+  /** @type {shaka.extern.Response} */
   let ret = {uri: uri, data: responseData, headers: {}};
   return shaka.util.AbortableOperation.completed(ret);
 };
 
 
-/** @const {!Object.<string, shakaExtern.Manifest>} */
+/** @const {!Object.<string, shaka.extern.Manifest>} */
 shaka.test.TestScheme.MANIFESTS = {};
 
 
@@ -436,7 +436,7 @@ beforeAll(function(done) {
 /**
  * @constructor
  * @struct
- * @implements {shakaExtern.ManifestParser}
+ * @implements {shaka.extern.ManifestParser}
  */
 shaka.test.TestScheme.ManifestParser = function() {};
 

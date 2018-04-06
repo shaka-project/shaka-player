@@ -103,7 +103,7 @@ buffering settings) while some will not have any effect until the next call to
 #### Detailed API Docs
 
 For more detail on individual configuration options, please see the API docs for
-{@link shakaExtern.PlayerConfiguration} and {@link shaka.Player#configure}.
+{@link shaka.extern.PlayerConfiguration} and {@link shaka.Player#configure}.
 
 
 #### Continue the Tutorials

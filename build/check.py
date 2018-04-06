@@ -216,7 +216,7 @@ def main(args):
     return 1
 
   steps = [
-      check_closure_compiler_linter,
+      # check_closure_compiler_linter,
       check_js_lint,
       check_html_lint,
       check_complete,

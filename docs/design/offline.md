@@ -61,7 +61,7 @@ StoredContent:
 stored
   duration: number  // length of the stored content in seconds
   size: number  // size of the stored content in bytes
-  tracks: !Array.<shakaExtern.Track>  // the tracks we stored
+  tracks: !Array.<shaka.extern.Track>  // the tracks we stored
   appMetadata: object  // arbitrary format, provided by the application to
 store()
 ```

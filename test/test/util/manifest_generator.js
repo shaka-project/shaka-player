@@ -37,7 +37,7 @@ shaka.test.ManifestGenerator = function(opt_shaka) {
   timeline.setSegmentAvailabilityDuration(Infinity);
   timeline.notifyMaxSegmentDuration(10);
 
-  /** @private {shakaExtern.Manifest} */
+  /** @private {shaka.extern.Manifest} */
   this.manifest_ = {
     presentationTimeline: timeline,
     periods: [],
@@ -45,15 +45,15 @@ shaka.test.ManifestGenerator = function(opt_shaka) {
     minBufferTime: 0
   };
 
-  /** @private {shakaExtern.Stream|shakaExtern.Variant|null} */
+  /** @private {shaka.extern.Stream|shaka.extern.Variant|null} */
   this.lastObjectAdded_ = null;
 
-  /** @private {?shakaExtern.Stream} */
+  /** @private {?shaka.extern.Stream} */
   this.lastStreamAdded_ = null;
 };
 
 
-/** @return {shakaExtern.Manifest} */
+/** @return {shaka.extern.Manifest} */
 shaka.test.ManifestGenerator.prototype.build = function() {
   return this.manifest_;
 };
@@ -431,7 +431,7 @@ shaka.test.ManifestGenerator.prototype.addTextStream = function(id) {
  * @param {number} id
  * @param {string} type
  * @param {string} language
- * @return {!shakaExtern.Stream}
+ * @return {!shaka.extern.Stream}
  * @private
  */
 shaka.test.ManifestGenerator.prototype.createStream_ =
@@ -459,7 +459,7 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
   let find = jasmine.createSpy('findSegmentPosition').and.returnValue(null);
   let get = jasmine.createSpy('getSegmentReference').and.returnValue(null);
 
-  /** @type {shakaExtern.Stream} */
+  /** @type {shaka.extern.Stream} */
   let stream = {
     id: id,
     createSegmentIndex: shaka.test.Util.spyFunc(create),
@@ -740,7 +740,7 @@ shaka.test.ManifestGenerator.prototype.channelsCount = function(count) {
 // Private methods {{{
 /**
  * Gets the most recent period.
- * @return {shakaExtern.Period}
+ * @return {shaka.extern.Period}
  * @private
  */
 shaka.test.ManifestGenerator.prototype.currentPeriod_ = function() {
@@ -752,7 +752,7 @@ shaka.test.ManifestGenerator.prototype.currentPeriod_ = function() {
 
 /**
  * Gets the most recent variant.
- * @return {shakaExtern.Variant}
+ * @return {shaka.extern.Variant}
  * @private
  */
 shaka.test.ManifestGenerator.prototype.currentVariant_ = function() {
@@ -765,7 +765,7 @@ shaka.test.ManifestGenerator.prototype.currentVariant_ = function() {
 
 /**
  * Gets the most recent variant or text stream.
- * @return {shakaExtern.Stream|shakaExtern.Variant}
+ * @return {shaka.extern.Stream|shaka.extern.Variant}
  * @private
  */
 shaka.test.ManifestGenerator.prototype.currentStreamOrVariant_ = function() {
@@ -778,7 +778,7 @@ shaka.test.ManifestGenerator.prototype.currentStreamOrVariant_ = function() {
 
 /**
  * Gets the most recent DRM info.
- * @return {shakaExtern.DrmInfo}
+ * @return {shaka.extern.DrmInfo}
  * @private
  */
 shaka.test.ManifestGenerator.prototype.currentDrmInfo_ = function() {
@@ -791,7 +791,7 @@ shaka.test.ManifestGenerator.prototype.currentDrmInfo_ = function() {
 
 /**
  * Gets the most recent stream.
- * @return {shakaExtern.Stream}
+ * @return {shaka.extern.Stream}
  * @private
  */
 shaka.test.ManifestGenerator.prototype.currentStream_ = function() {

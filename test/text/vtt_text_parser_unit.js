@@ -591,7 +591,7 @@ describe('VttTextParser', function() {
   /**
    * @param {!Array} cues
    * @param {string} text
-   * @param {shakaExtern.TextParser.TimeContext} time
+   * @param {shaka.extern.TextParser.TimeContext} time
    */
   function verifyHelper(cues, text, time) {
     let data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
@@ -631,7 +631,7 @@ describe('VttTextParser', function() {
 
   /**
    * @param {!Object} expected
-   * @param {shakaExtern.CueRegion} actual
+   * @param {shaka.extern.CueRegion} actual
    */
   function verifyRegion(expected, actual) {
     let properties = ['id', 'viewportAnchorX', 'viewportAnchorY',
@@ -651,7 +651,7 @@ describe('VttTextParser', function() {
   /**
    * @param {shaka.util.Error.Code} code
    * @param {string} text
-   * @param {shakaExtern.TextParser.TimeContext} time
+   * @param {shaka.extern.TextParser.TimeContext} time
    */
   function errorHelper(code, text, time) {
     let error = new shaka.util.Error(

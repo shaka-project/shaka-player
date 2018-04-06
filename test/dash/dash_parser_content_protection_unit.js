@@ -26,7 +26,7 @@ describe('DashParser ContentProtection', function() {
    * @param {string} manifestText
    * @param {Object} expected A Manifest-like object.  The parser output is
    *   expected to match this.
-   * @param {shakaExtern.DashContentProtectionCallback=} opt_callback
+   * @param {shaka.extern.DashContentProtectionCallback=} opt_callback
    * @param {boolean=} opt_ignoreDrmInfo
    */
   function testDashParser(done, manifestText, expected, opt_callback,
@@ -145,7 +145,7 @@ describe('DashParser ContentProtection', function() {
       opt_base64Psshs, opt_initDataKeyIds) {
     let base64Psshs = opt_base64Psshs || [];
     let initData = base64Psshs.map(function(base64, index) {
-      /** @type {shakaExtern.InitDataOverride} */
+      /** @type {shaka.extern.InitDataOverride} */
       let initData = {
         initDataType: 'cenc',
         initData: shaka.util.Uint8ArrayUtils.fromBase64(base64),
@@ -458,7 +458,7 @@ describe('DashParser ContentProtection', function() {
 
     /**
      * @param {!Element} contentProtection
-     * @return {Array.<shakaExtern.DrmInfo>}
+     * @return {Array.<shaka.extern.DrmInfo>}
      */
     let callback = function(contentProtection) {
       let schemeIdUri = contentProtection.getAttribute('schemeIdUri');

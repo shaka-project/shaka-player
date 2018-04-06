@@ -31,7 +31,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
   let player;
   /** @type {!HTMLVideoElement} */
   let video;
-  /** @type {shakaExtern.SupportType} */
+  /** @type {shaka.extern.SupportType} */
   let support;
 
   beforeAll(function(done) {
@@ -132,7 +132,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
       shaka.test.Util.expectToEqualError(e, expected);
     };
 
-    /** {@type {shakaExtern.StoredContent} */
+    /** {@type {shaka.extern.StoredContent} */
     let storedContent;
     /** {@type {shaka.offline.OfflineUri} */
     let offlineUri;

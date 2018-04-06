@@ -164,7 +164,7 @@ shakaDemo.storeDeleteAsset_ = function() {
   progress.textContent = '0';
 
   let storage = new shaka.offline.Storage(shakaDemo.localPlayer_);
-  storage.configure(/** @type {shakaExtern.OfflineConfiguration} */ ({
+  storage.configure(/** @type {shaka.extern.OfflineConfiguration} */ ({
     progressCallback: function(data, percent) {
       progress.textContent = (percent * 100).toFixed(2);
     }

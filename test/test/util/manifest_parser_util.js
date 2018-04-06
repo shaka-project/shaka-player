@@ -21,7 +21,7 @@ goog.provide('shaka.test.ManifestParser');
 /**
  * Verifies the segment references of a stream.
  *
- * @param {?shakaExtern.Stream} stream
+ * @param {?shaka.extern.Stream} stream
  * @param {!Array.<shaka.media.SegmentReference>} references
  */
 shaka.test.ManifestParser.verifySegmentIndex = function(stream, references) {

@@ -26,9 +26,9 @@ describe('PlayheadObserver', function() {
   let mockMediaSourceEngine;
   /** @type {!shaka.test.FakePresentationTimeline} */
   let timeline;
-  /** @type {shakaExtern.Manifest} */
+  /** @type {shaka.extern.Manifest} */
   let manifest;
-  /** @type {shakaExtern.StreamingConfiguration} */
+  /** @type {shaka.extern.StreamingConfiguration} */
   let config;
 
   /** @type {!jasmine.Spy} */
@@ -444,7 +444,7 @@ describe('PlayheadObserver', function() {
 
     /**
      * @param {string} name
-     * @param {shakaExtern.TimelineRegionInfo} info
+     * @param {shaka.extern.TimelineRegionInfo} info
      * @param {number=} opt_index
      */
     function expectTimelineEvent(name, info, opt_index) {
@@ -458,7 +458,7 @@ describe('PlayheadObserver', function() {
     /**
      * @param {number} newTime
      * @param {string} eventName
-     * @param {shakaExtern.TimelineRegionInfo} info
+     * @param {shaka.extern.TimelineRegionInfo} info
      */
     function moveToAndExpectEvent(newTime, eventName, info) {
       video.currentTime = newTime;

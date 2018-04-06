@@ -348,7 +348,7 @@ player.configure({
 });
 ```
 
-See {@linksource shakaExtern.TextDisplayer} for details.
+See {@linksource shaka.extern.TextDisplayer} for details.
 
 
 #### Manifest parser plugin changes

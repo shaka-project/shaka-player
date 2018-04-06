@@ -124,7 +124,7 @@ describe('DBEngine', function() {
   });
 
   it('stores and retrieves a manifest', checkAndRun((done) => {
-    /** @type {shakaExtern.ManifestDB} */
+    /** @type {shaka.extern.ManifestDB} */
     let original = OfflineUtils.createManifest('original manifest');
 
     deleteOld().then(openDB).then((db) => {
@@ -138,7 +138,7 @@ describe('DBEngine', function() {
   }));
 
   it('stores and retrieves many manifest', checkAndRun((done) => {
-    /** @type {!Array<shakaExtern.ManifestDB>} */
+    /** @type {!Array<shaka.extern.ManifestDB>} */
     let originals = [
       OfflineUtils.createManifest('original manifest 1'),
       OfflineUtils.createManifest('original manifest 2'),
@@ -146,7 +146,7 @@ describe('DBEngine', function() {
       OfflineUtils.createManifest('original manifest 4')
     ];
 
-    /** @type {!Array<shakaExtern.ManifestDB>} */
+    /** @type {!Array<shaka.extern.ManifestDB>} */
     let copies = [];
 
     deleteOld().then(openDB).then((db) => {
@@ -162,7 +162,7 @@ describe('DBEngine', function() {
   }));
 
   it('stores and removes a manifest', checkAndRun((done) => {
-    /** @type {shakaExtern.ManifestDB} */
+    /** @type {shaka.extern.ManifestDB} */
     let original = OfflineUtils.createManifest('original manifest');
 
     /** @type {number} */
@@ -189,7 +189,7 @@ describe('DBEngine', function() {
   }));
 
   it('stores and retrieves a segment', checkAndRun((done) => {
-    /** @type {shakaExtern.SegmentDataDB} */
+    /** @type {shaka.extern.SegmentDataDB} */
     let original = OfflineUtils.createSegmentData([0, 1, 2]);
 
     deleteOld().then(openDB).then((db) => {
@@ -201,7 +201,7 @@ describe('DBEngine', function() {
   }));
 
   it('stores and retrieves many segments', checkAndRun((done) => {
-    /** @type {!Array<shakaExtern.SegmentDataDB>} */
+    /** @type {!Array<shaka.extern.SegmentDataDB>} */
     let originals = [
       OfflineUtils.createSegmentData([0]),
       OfflineUtils.createSegmentData([1, 2]),
@@ -209,7 +209,7 @@ describe('DBEngine', function() {
       OfflineUtils.createSegmentData([6, 7, 8, 9])
     ];
 
-    /** @type {!Array<shakaExtern.SegmentDataDB>} */
+    /** @type {!Array<shaka.extern.SegmentDataDB>} */
     let copies = [];
 
     deleteOld().then(openDB).then((db) => {
@@ -223,7 +223,7 @@ describe('DBEngine', function() {
   }));
 
   it('stores and removes a segment', checkAndRun((done) => {
-    /** @type {shakaExtern.SegmentDataDB} */
+    /** @type {shaka.extern.SegmentDataDB} */
     let original = OfflineUtils.createSegmentData([0, 1, 2]);
 
     /** @type {number} */

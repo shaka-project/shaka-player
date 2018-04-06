@@ -146,9 +146,9 @@ shakaAssets.ExtraText;
  *
  *   licenseServers: (!Object.<string, string>|undefined),
  *   licenseRequestHeaders: (!Object.<string, string>|undefined),
- *   requestFilter: (shakaExtern.RequestFilter|undefined),
- *   responseFilter: (shakaExtern.ResponseFilter|undefined),
- *   drmCallback: (shakaExtern.DashContentProtectionCallback|undefined),
+ *   requestFilter: (shaka.extern.RequestFilter|undefined),
+ *   responseFilter: (shaka.extern.ResponseFilter|undefined),
+ *   drmCallback: (shaka.extern.DashContentProtectionCallback|undefined),
  *   clearKeys: (!Object.<string, string>|undefined),
  *
  *   extraConfig: (Object|undefined)
@@ -183,13 +183,14 @@ shakaAssets.ExtraText;
  *   (optional) A map of key-system to license server.
  * @property {(!Object.<string, string>|undefined)} licenseRequestHeaders
  *   (optional) A map of headers to add to license requests.
- * @property {(shakaExtern.RequestFilter|undefined)}
+ * @property {(shaka.extern.RequestFilter|undefined)}
  *     requestFilter
  *   A filter on license requests before they are passed to the server.
- * @property {(shakaExtern.ResponseFilter|undefined)}
+ * @property {(shaka.extern.ResponseFilter|undefined)}
  *     responseFilter
  *   A filter on license responses before they are passed to the CDM.
- * @property {(shakaExtern.DashContentProtectionCallback|undefined)} drmCallback
+ * @property {(shaka.extern.DashContentProtectionCallback|undefined)}
+ *   drmCallback
  *   A callback to use to interpret ContentProtection elements.
  * @property {(!Object.<string, string>|undefined)} clearKeys
  *   A map of key-id to key to use with clear-key encryption.
@@ -207,7 +208,7 @@ shakaAssets.AssetInfo;
  * This allows us to get the license prefix that is necessary
  * to later generate a proper license response.
  * @param {shaka.net.NetworkingEngine.RequestType} type
- * @param {shakaExtern.Response} response
+ * @param {shaka.extern.Response} response
  * The uplynk_prefix attribute is set on the shakaAssets object
  * and is later referenced in the UplynkRequestFilter.
  */
@@ -227,7 +228,7 @@ shakaAssets.UplynkResponseFilter = function(type, response) {
 /**
  * A license request filter for VDMS Uplynk license requests.
  * @param {shaka.net.NetworkingEngine.RequestType} type
- * @param {shakaExtern.Request} request
+ * @param {shaka.extern.Request} request
  * The uplynk_prefix variable is retrieved from the shakaAssets
  * object, and requires that the uplynk manifest response filter also be set.
  */

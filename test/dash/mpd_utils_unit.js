@@ -442,7 +442,7 @@ describe('MpdUtils', function() {
 
     /** @type {!shaka.test.FakeNetworkingEngine} */
     let fakeNetEngine;
-    /** @type {shakaExtern.RetryParameters} */
+    /** @type {shaka.extern.RetryParameters} */
     let retry;
     /** @type {!DOMParser} */
     let parser;

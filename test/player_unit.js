@@ -30,7 +30,7 @@ describe('Player', function() {
   let logWarnSpy;
   /** @type {!jasmine.Spy} */
   let onError;
-  /** @type {shakaExtern.Manifest} */
+  /** @type {shaka.extern.Manifest} */
   let manifest;
   /** @type {number} */
   let periodIndex;
@@ -38,7 +38,7 @@ describe('Player', function() {
   let player;
   /** @type {!shaka.test.FakeAbrManager} */
   let abrManager;
-  /** @type {function():shakaExtern.AbrManager} */
+  /** @type {function():shaka.extern.AbrManager} */
   let abrFactory;
 
   /** @type {!shaka.test.FakeNetworkingEngine} */
@@ -53,7 +53,7 @@ describe('Player', function() {
   let playheadObserver;
   /** @type {!shaka.test.FakeTextDisplayer} */
   let textDisplayer;
-  /** @type {function():shakaExtern.TextDisplayer} */
+  /** @type {function():shaka.extern.TextDisplayer} */
   let textDisplayFactory;
 
   let mediaSourceEngine;
@@ -1143,9 +1143,9 @@ describe('Player', function() {
   });
 
   describe('tracks', function() {
-    /** @type {!Array.<shakaExtern.Track>} */
+    /** @type {!Array.<shaka.extern.Track>} */
     let variantTracks;
-    /** @type {!Array.<shakaExtern.Track>} */
+    /** @type {!Array.<shaka.extern.Track>} */
     let textTracks;
 
     beforeEach(function(done) {
@@ -1982,7 +1982,7 @@ describe('Player', function() {
 
       /**
        * Checks that the switch history is correct.
-       * @param {!Array.<shakaExtern.TrackChoice>} additional
+       * @param {!Array.<shaka.extern.TrackChoice>} additional
        */
       function checkHistory(additional) {
         let prefix = {
@@ -2000,7 +2000,7 @@ describe('Player', function() {
       }
 
       /**
-       * @param {shakaExtern.Variant} variant
+       * @param {shaka.extern.Variant} variant
        * @suppress {accessControls}
        */
       function switch_(variant) {
@@ -2998,7 +2998,7 @@ describe('Player', function() {
 
   /**
    * Gets the currently active variant track.
-   * @return {shakaExtern.Track}
+   * @return {shaka.extern.Track}
    */
   function getActiveVariantTrack() {
     let activeTracks = player.getVariantTracks().filter(function(track) {
@@ -3011,7 +3011,7 @@ describe('Player', function() {
 
   /**
    * Gets the currently active text track.
-   * @return {shakaExtern.Track}
+   * @return {shaka.extern.Track}
    */
   function getActiveTextTrack() {
     let activeTracks = player.getTextTracks().filter(function(track) {

@@ -50,7 +50,7 @@ shaka.test.FakeAbrManager = function() {
     'getBandwidthEstimate', 'chooseVariant', 'setVariants', 'configure'
   ]);
 
-  /** @type {!Array.<shakaExtern.Variant>} */
+  /** @type {!Array.<shaka.extern.Variant>} */
   let variants = [];
 
   ret.chooseIndex = 0;
@@ -71,7 +71,7 @@ shaka.test.FakeAbrManager = function() {
 shaka.test.FakeAbrManager.prototype.chooseIndex;
 
 
-/** @type {shakaExtern.AbrManager.SwitchCallback} */
+/** @type {shaka.extern.AbrManager.SwitchCallback} */
 shaka.test.FakeAbrManager.prototype.switchCallback;
 
 
@@ -166,7 +166,7 @@ shaka.test.FakeDrmEngine.prototype.attach;
 shaka.test.FakeDrmEngine.prototype.getExpiration;
 
 
-/** @param {?shakaExtern.DrmInfo} info */
+/** @param {?shaka.extern.DrmInfo} info */
 shaka.test.FakeDrmEngine.prototype.setDrmInfo;
 
 
@@ -267,9 +267,9 @@ shaka.test.FakeStreamingEngine.prototype.onCanSwitch;
  * Creates a fake manifest parser.
  *
  * @constructor
- * @param {shakaExtern.Manifest} manifest
+ * @param {shaka.extern.Manifest} manifest
  * @struct
- * @implements {shakaExtern.ManifestParser}
+ * @implements {shaka.extern.ManifestParser}
  * @return {!Object}
  */
 shaka.test.FakeManifestParser = function(manifest) {
@@ -307,7 +307,7 @@ shaka.test.FakeManifestParser.prototype.onExpirationUpdated;
 shaka.test.FakeManifestParser.prototype.configure;
 
 
-/** @type {shakaExtern.ManifestParser.PlayerInterface} */
+/** @type {shaka.extern.ManifestParser.PlayerInterface} */
 shaka.test.FakeManifestParser.prototype.playerInterface;
 
 

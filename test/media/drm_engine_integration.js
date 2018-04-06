@@ -25,12 +25,12 @@ describe('DrmEngine', function() {
   const audioInitSegmentUri = '/base/test/test/assets/multidrm-audio-init.mp4';
   const audioSegmentUri = '/base/test/test/assets/multidrm-audio-segment.mp4';
 
-  /** @type {!Object.<string, ?shakaExtern.DrmSupportType>} */
+  /** @type {!Object.<string, ?shaka.extern.DrmSupportType>} */
   let support = {};
 
   /** @type {!HTMLVideoElement} */
   let video;
-  /** @type {shakaExtern.Manifest} */
+  /** @type {shaka.extern.Manifest} */
   let manifest;
 
   /** @type {!jasmine.Spy} */

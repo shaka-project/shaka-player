@@ -32,9 +32,9 @@ describe('HlsParser', function() {
   let fakeNetEngine;
   /** @type {!shaka.hls.HlsParser} */
   let parser;
-  /** @type {shakaExtern.ManifestParser.PlayerInterface} */
+  /** @type {shaka.extern.ManifestParser.PlayerInterface} */
   let playerInterface;
-  /** @type {shakaExtern.ManifestConfiguration} */
+  /** @type {shaka.extern.ManifestConfiguration} */
   let config;
   /** @type {ArrayBuffer} */
   let initSegmentData;
@@ -111,7 +111,7 @@ describe('HlsParser', function() {
   /**
    * @param {string} master
    * @param {string} media
-   * @param {shakaExtern.Manifest} manifest
+   * @param {shaka.extern.Manifest} manifest
    * @param {function()} done
    */
   function testHlsParser(master, media, manifest, done) {

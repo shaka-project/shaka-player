@@ -194,7 +194,7 @@ shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
  * @param {number} presentationDuration
  * @param {!Object.<string, number>} segmentDurations The duration of each
  *   type of segment.
- * @return {shakaExtern.Manifest}
+ * @return {shaka.extern.Manifest}
  */
 shaka.test.StreamingEngineUtil.createManifest = function(
     periodStartTimes, presentationDuration, segmentDurations) {
@@ -269,7 +269,7 @@ shaka.test.StreamingEngineUtil.createManifest = function(
     manifest.periods.push(period);
   }
 
-  return /** @type {shakaExtern.Manifest} */ (manifest);
+  return /** @type {shaka.extern.Manifest} */ (manifest);
 };
 
 

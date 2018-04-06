@@ -25,10 +25,10 @@ function httpPluginTests(usingFetch) {
   // Neither plugin uses the request type, so this is arbitrary.
   const requestType = shaka.net.NetworkingEngine.RequestType.MANIFEST;
 
-  /** @type {shakaExtern.RetryParameters} */
+  /** @type {shaka.extern.RetryParameters} */
   let retryParameters;
 
-  /** @type {shakaExtern.SchemePlugin} */
+  /** @type {shaka.extern.SchemePlugin} */
   let plugin;
 
   beforeAll(function() {
@@ -293,7 +293,7 @@ function httpPluginTests(usingFetch) {
       PromiseMock.flush();
       expect(actual.aborted).toBe(true);
     } else {
-      /** @type {shakaExtern.IAbortableOperation.<shakaExtern.Response>} */
+      /** @type {shaka.extern.IAbortableOperation.<shaka.extern.Response>} */
       let operation;
 
       // Jasmine-ajax stubbed requests are purely synchronous, so we can't

@@ -773,7 +773,7 @@ describe('TtmlTextParser', function() {
   /**
    * @param {!Array} cues
    * @param {string} text
-   * @param {shakaExtern.TextParser.TimeContext} time
+   * @param {shaka.extern.TextParser.TimeContext} time
    */
   function verifyHelper(cues, text, time) {
     let data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
@@ -812,7 +812,7 @@ describe('TtmlTextParser', function() {
 
   /**
    * @param {!Object} expected
-   * @param {shakaExtern.CueRegion} actual
+   * @param {shaka.extern.CueRegion} actual
    */
   function verifyRegion(expected, actual) {
     let properties = ['id', 'viewportAnchorX', 'viewportAnchorY',

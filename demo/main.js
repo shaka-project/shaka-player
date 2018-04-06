@@ -47,7 +47,7 @@ shakaDemo.localVideo_ = null;
 shakaDemo.localPlayer_ = null;
 
 
-/** @private {shakaExtern.SupportType} */
+/** @private {shaka.extern.SupportType} */
 shakaDemo.support_;
 
 

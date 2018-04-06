@@ -92,7 +92,7 @@ describe('Storage', function() {
   });
 
   describe('reports progress on store', function() {
-    /** @type {shakaExtern.Manifest} */
+    /** @type {shaka.extern.Manifest} */
     let manifest;
 
     beforeEach(function() {
@@ -198,9 +198,9 @@ describe('Storage', function() {
   describe('store', function() {
     const originalWarning = shaka.log.warning;
 
-    /** @type {shakaExtern.Manifest} */
+    /** @type {shaka.extern.Manifest} */
     let manifest;
-    /** @type {!Array.<shakaExtern.Track>} */
+    /** @type {!Array.<shaka.extern.Track>} */
     let tracks;
     /** @type {!shaka.test.FakeDrmEngine} */
     let drmEngine;
@@ -324,8 +324,8 @@ describe('Storage', function() {
           .build();
 
       /**
-       * @param {!Array.<shakaExtern.Track>} tracks
-       * @return {!Array.<shakaExtern.Track>}
+       * @param {!Array.<shaka.extern.Track>} tracks
+       * @return {!Array.<shaka.extern.Track>}
        */
       let trackSelectionCallback = function(tracks) {
         // Store the first variant.
@@ -548,10 +548,10 @@ describe('Storage', function() {
          * @param {number} startTime
          * @param {number} endTime
          * @param {number} id
-         * @return {shakaExtern.SegmentDB}
+         * @return {shaka.extern.SegmentDB}
          */
         let makeSegment = function(startTime, endTime, id) {
-          /** @type {shakaExtern.SegmentDB} */
+          /** @type {shaka.extern.SegmentDB} */
           let segment = {
             startTime: startTime,
             endTime: endTime,
@@ -710,7 +710,7 @@ describe('Storage', function() {
     });  // describe('segments')
 
     describe('default track selection callback', function() {
-      /** @type {!Array.<shakaExtern.Track>} */
+      /** @type {!Array.<shaka.extern.Track>} */
       let allTextTracks;
 
       beforeEach(function() {
@@ -906,7 +906,7 @@ describe('Storage', function() {
     });  // describe('default track selection callback')
 
     describe('temporary license', function() {
-      /** @type {shakaExtern.DrmInfo} */
+      /** @type {shaka.extern.DrmInfo} */
       let drmInfo;
 
       beforeEach(function() {
@@ -1197,8 +1197,8 @@ describe('Storage', function() {
     }
 
     /**
-     * @param {!shakaExtern.StreamDB} stream
-     * @return {!Promise<!Array<shakaExtern.SegmentDataDB>>}
+     * @param {!shaka.extern.StreamDB} stream
+     * @return {!Promise<!Array<shaka.extern.SegmentDataDB>>}
      */
     function loadSegmentsForStream(stream) {
       return Promise.all(stream.segments.map(function(segment) {

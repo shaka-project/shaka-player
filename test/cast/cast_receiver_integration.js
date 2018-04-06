@@ -47,7 +47,7 @@ describe('CastReceiver', function() {
   let isChrome;
   /** @type {boolean} */
   let isChromecast;
-  /** @type {!Object.<string, ?shakaExtern.DrmSupportType>} */
+  /** @type {!Object.<string, ?shaka.extern.DrmSupportType>} */
   let support = {};
 
   let fakeInitState;

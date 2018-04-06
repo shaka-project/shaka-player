@@ -31,12 +31,12 @@ shaka.test.ManifestDBBuilder = function(storageEngine) {
   /** @private {!shaka.offline.IStorageEngine} */
   this.storageEngine_ = storageEngine;
 
-  /** @private {shakaExtern.ManifestDB} */
+  /** @private {shaka.extern.ManifestDB} */
   this.manifest_ = shaka.test.ManifestDBBuilder.emptyManifest_();
 
-  /** @private {?shakaExtern.PeriodDB} */
+  /** @private {?shaka.extern.PeriodDB} */
   this.currentPeriod_ = null;
-  /** @private {?shakaExtern.StreamDB} */
+  /** @private {?shaka.extern.StreamDB} */
   this.currentStream_ = null;
   /** @private {number} */
   this.nextStreamId_ = 0;
@@ -51,7 +51,7 @@ shaka.test.ManifestDBBuilder = function(storageEngine) {
  * @return {!Promise<number>}
  */
 shaka.test.ManifestDBBuilder.prototype.build = function() {
-  /** @type {shakaExtern.ManifestDB} */
+  /** @type {shaka.extern.ManifestDB} */
   let manifest = this.manifest_;
 
   /** @type {!shaka.offline.IStorageEngine} */
@@ -66,7 +66,7 @@ shaka.test.ManifestDBBuilder.prototype.build = function() {
 
 
 /**
- * @param {function(shakaExtern.ManifestDB)} callback
+ * @param {function(shaka.extern.ManifestDB)} callback
  * @return {!shaka.test.ManifestDBBuilder}
  */
 shaka.test.ManifestDBBuilder.prototype.onManifest = function(callback) {
@@ -91,7 +91,7 @@ shaka.test.ManifestDBBuilder.prototype.metadata = function(data) {
  * @return {!shaka.test.ManifestDBBuilder}
  */
 shaka.test.ManifestDBBuilder.prototype.period = function() {
-  /** @type {shakaExtern.PeriodDB} */
+  /** @type {shaka.extern.PeriodDB} */
   let period = {
     startTime: 0,
     streams: []
@@ -113,7 +113,7 @@ shaka.test.ManifestDBBuilder.prototype.stream = function() {
   /** @type {number} */
   let id = this.nextStreamId_++;
 
-  /** @type {shakaExtern.StreamDB} */
+  /** @type {shaka.extern.StreamDB} */
   let stream = {
     id: id,
     primary: false,
@@ -143,7 +143,7 @@ shaka.test.ManifestDBBuilder.prototype.stream = function() {
 
 /**
  * Access and edit the current stream.
- * @param {function(shakaExtern.StreamDB)} func
+ * @param {function(shaka.extern.StreamDB)} func
  * @return {!shaka.test.ManifestDBBuilder}
  */
 shaka.test.ManifestDBBuilder.prototype.onStream = function(func) {
@@ -151,7 +151,7 @@ shaka.test.ManifestDBBuilder.prototype.onStream = function(func) {
       this.currentStream_,
       'Must have current stream when using onStream.');
 
-  /** @type {shakaExtern.StreamDB} */
+  /** @type {shaka.extern.StreamDB} */
   let stream = this.currentStream_;
 
   // Need to defer this function as the segments would not have been
@@ -178,10 +178,10 @@ shaka.test.ManifestDBBuilder.prototype.initSegment = function() {
   /** @type {!shaka.offline.IStorageEngine} */
   let storageEngine = this.storageEngine_;
 
-  /** @type {shakaExtern.SegmentDataDB} */
+  /** @type {shaka.extern.SegmentDataDB} */
   let segmentData = shaka.test.ManifestDBBuilder.emptySegment_();
 
-  /** @type {shakaExtern.StreamDB} */
+  /** @type {shaka.extern.StreamDB} */
   let currentStream = this.currentStream_;
 
   this.deferredActions_ = this.deferredActions_.then(function() {
@@ -212,16 +212,16 @@ shaka.test.ManifestDBBuilder.prototype.segment = function(start, end) {
   /** @type {!shaka.offline.IStorageEngine} */
   let storageEngine = this.storageEngine_;
 
-  /** @type {shakaExtern.SegmentDataDB} */
+  /** @type {shaka.extern.SegmentDataDB} */
   let segmentData = shaka.test.ManifestDBBuilder.emptySegment_();
 
-  /** @type {shakaExtern.StreamDB} */
+  /** @type {shaka.extern.StreamDB} */
   let currentStream = this.currentStream_;
 
   this.deferredActions_ = this.deferredActions_.then(function() {
     return storageEngine.addSegment(segmentData);
   }).then(function(id) {
-    /** @type {shakaExtern.SegmentDB} */
+    /** @type {shaka.extern.SegmentDB} */
     let segment = {
       dataKey: id,
       startTime: start,
@@ -237,11 +237,11 @@ shaka.test.ManifestDBBuilder.prototype.segment = function(start, end) {
 
 /**
  * Create an empty manifest as the starting point for all manifests.
- * @return {shakaExtern.ManifestDB}
+ * @return {shaka.extern.ManifestDB}
  * @private
  */
 shaka.test.ManifestDBBuilder.emptyManifest_ = function() {
-  /** @type {shakaExtern.ManifestDB} */
+  /** @type {shaka.extern.ManifestDB} */
   let manifest = {
     originalManifestUri: '',
     duration: 10,  // TODO(vaage) : calculate this from the segments
@@ -260,11 +260,11 @@ shaka.test.ManifestDBBuilder.emptyManifest_ = function() {
 /**
  * Create an empty segment that can be inserted into storage. The data in this
  * segment is meaningless.
- * @return {shakaExtern.SegmentDataDB}
+ * @return {shaka.extern.SegmentDataDB}
  * @private
  */
 shaka.test.ManifestDBBuilder.emptySegment_ = function() {
-  /** @type {shakaExtern.SegmentDataDB} */
+  /** @type {shaka.extern.SegmentDataDB} */
   let segment = {
     data: new ArrayBuffer(0)
   };

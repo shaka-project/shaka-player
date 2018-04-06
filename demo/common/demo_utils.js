@@ -25,7 +25,7 @@ let ShakaDemoUtils = {};
  * @param {shaka.Player} player
  */
 ShakaDemoUtils.setupAssetMetadata = function(asset, player) {
-  let config = /** @type {shakaExtern.PlayerConfiguration} */(
+  let config = /** @type {shaka.extern.PlayerConfiguration} */(
       {drm: {}, manifest: {dash: {}}});
 
   // Add config from this asset.
@@ -59,7 +59,7 @@ ShakaDemoUtils.setupAssetMetadata = function(asset, player) {
   }
   if (asset.extraConfig) {
     player.configure(
-        /** @type {shakaExtern.PlayerConfiguration} */ (asset.extraConfig));
+        /** @type {shaka.extern.PlayerConfiguration} */ (asset.extraConfig));
   }
 };
 
@@ -67,7 +67,7 @@ ShakaDemoUtils.setupAssetMetadata = function(asset, player) {
 /**
  * @param {!Object.<string, string>} headers
  * @param {shaka.net.NetworkingEngine.RequestType} requestType
- * @param {shakaExtern.Request} request
+ * @param {shaka.extern.Request} request
  * @private
  */
 ShakaDemoUtils.addLicenseRequestHeaders_ =

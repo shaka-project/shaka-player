@@ -111,7 +111,7 @@ shakaDemo.updateTextTracks_ = function() {
 
 /**
  * @param {Element} list
- * @param {!Array.<!shakaExtern.Track>} tracks
+ * @param {!Array.<!shaka.extern.Track>} tracks
  * @param {string} languageAndRole
  * @private
  */
@@ -210,7 +210,7 @@ shakaDemo.updateAudioLanguages_ = function() {
 /**
  * @param {Element} list
  * @param {!Array.<{language: string, role: string}>} languagesAndRoles
- * @param {!Array.<shakaExtern.Track>} tracks
+ * @param {!Array.<shaka.extern.Track>} tracks
  * @private
  */
 shakaDemo.updateLanguageOptions_ =

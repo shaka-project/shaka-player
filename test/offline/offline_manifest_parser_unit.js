@@ -18,7 +18,7 @@
 describe('OfflineManifestParser', function() {
   const mockSEFactory = new shaka.test.MockStorageEngineFactory();
   const playerInterface =
-      /** @type {shakaExtern.ManifestParser.PlayerInterface} */ (null);
+      /** @type {shaka.extern.ManifestParser.PlayerInterface} */ (null);
 
   /** @type {!shaka.offline.IStorageEngine} */
   let fakeStorageEngine;

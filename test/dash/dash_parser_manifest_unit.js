@@ -25,7 +25,7 @@ describe('DashParser Manifest', function() {
   let parser;
   /** @type {!jasmine.Spy} */
   let onEventSpy;
-  /** @type {shakaExtern.ManifestParser.PlayerInterface} */
+  /** @type {shaka.extern.ManifestParser.PlayerInterface} */
   let playerInterface;
 
   beforeEach(function() {
@@ -47,7 +47,7 @@ describe('DashParser Manifest', function() {
    *
    * @param {!Array.<string>} startLines
    * @param {!Array.<string>} endLines
-   * @param {shakaExtern.Manifest} expected
+   * @param {shaka.extern.Manifest} expected
    */
   function makeTestsForEach(startLines, endLines, expected) {
     /**

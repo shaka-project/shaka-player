@@ -106,11 +106,11 @@ describe('Playhead', function() {
   let video;
   /** @type {!shaka.test.FakePresentationTimeline} */
   let timeline;
-  /** @type {shakaExtern.Manifest} */
+  /** @type {shaka.extern.Manifest} */
   let manifest;
   /** @type {!shaka.media.Playhead} */
   let playhead;
-  /** @type {shakaExtern.StreamingConfiguration} */
+  /** @type {shaka.extern.StreamingConfiguration} */
   let config;
 
   // Callback to us from Playhead when a valid 'seeking' event occurs.

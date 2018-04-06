@@ -23,7 +23,7 @@ describe('OfflineScheme', function() {
 
     /** @type {!shaka.offline.IStorageEngine} */
     let fakeStorageEngine;
-    /** @type {shakaExtern.Request} */
+    /** @type {shaka.extern.Request} */
     let request;
 
     beforeEach(function() {

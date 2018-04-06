@@ -37,9 +37,9 @@ describe('DrmEngine', function() {
   let fakeNetEngine;
   /** @type {!shaka.media.DrmEngine} */
   let drmEngine;
-  /** @type {shakaExtern.Manifest} */
+  /** @type {shaka.extern.Manifest} */
   let manifest;
-  /** @type {shakaExtern.DrmConfiguration} */
+  /** @type {shaka.extern.DrmConfiguration} */
   let config;
 
   let mockMediaKeySystemAccess;
@@ -1899,7 +1899,7 @@ describe('DrmEngine', function() {
 
   /**
    * @param {Uint8Array} serverCert
-   * @return {shakaExtern.AdvancedDrmConfiguration}
+   * @return {shaka.extern.AdvancedDrmConfiguration}
    */
   function createAdvancedConfig(serverCert) {
     return {

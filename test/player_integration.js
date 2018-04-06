@@ -22,7 +22,7 @@ describe('Player', function() {
   /** @type {!jasmine.Spy} */
   let onErrorSpy;
 
-  /** @type {shakaExtern.SupportType} */
+  /** @type {shaka.extern.SupportType} */
   let support;
   /** @type {!HTMLVideoElement} */
   let video;
@@ -621,7 +621,7 @@ describe('Player', function() {
   /**
    * @param {!Object.<string, string>} headers
    * @param {shaka.net.NetworkingEngine.RequestType} requestType
-   * @param {shakaExtern.Request} request
+   * @param {shaka.extern.Request} request
    */
   function addLicenseRequestHeaders(headers, requestType, request) {
     const RequestType = compiledShaka.net.NetworkingEngine.RequestType;

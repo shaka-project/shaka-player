@@ -390,7 +390,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
     });
 
     it('fills in defaults for partial request objects', function(done) {
-      let originalRequest = /** @type {shakaExtern.Request} */ ({
+      let originalRequest = /** @type {shaka.extern.Request} */ ({
         uris: ['resolve://foo']
       });
 
@@ -1142,8 +1142,8 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
 
   /**
    * @param {string} uri
-   * @param {shakaExtern.RetryParameters=} opt_retryParameters
-   * @return {shakaExtern.Request}
+   * @param {shaka.extern.RetryParameters=} opt_retryParameters
+   * @return {shaka.extern.Request}
    */
   function createRequest(uri, opt_retryParameters) {
     let retryParameters = opt_retryParameters ||

@@ -62,7 +62,7 @@ describe('StreamingEngine', function() {
   let variant2;
   let textStream2;
 
-  /** @type {shakaExtern.Manifest} */
+  /** @type {shaka.extern.Manifest} */
   let manifest;
 
   /** @type {!jasmine.Spy} */
@@ -405,7 +405,7 @@ describe('StreamingEngine', function() {
     alternateVideoStream1.getSegmentReference.and.returnValue(null);
     let variant = {
       audio: null,
-      video: /** @type {shakaExtern.Stream} */ (alternateVideoStream1),
+      video: /** @type {shaka.extern.Stream} */ (alternateVideoStream1),
       id: 0,
       language: 'und',
       primary: false,
@@ -425,7 +425,7 @@ describe('StreamingEngine', function() {
   /**
    * Creates the StreamingEngine.
    **
-   * @param {shakaExtern.StreamingConfiguration=} opt_config Optional
+   * @param {shaka.extern.StreamingConfiguration=} opt_config Optional
    *   configuration object which overrides the default one.
    */
   function createStreamingEngine(opt_config) {
@@ -472,7 +472,7 @@ describe('StreamingEngine', function() {
       onStartupComplete: Util.spyFunc(onStartupComplete)
     };
     streamingEngine = new shaka.media.StreamingEngine(
-        /** @type {shakaExtern.Manifest} */(manifest), playerInterface);
+        /** @type {shaka.extern.Manifest} */(manifest), playerInterface);
     streamingEngine.configure(config);
   }
 
@@ -2928,8 +2928,8 @@ describe('StreamingEngine', function() {
   /**
    * Choose streams for the given period.
    *
-   * @param {shakaExtern.Period} period
-   * @return {!Object.<string, !shakaExtern.Stream>}
+   * @param {shaka.extern.Period} period
+   * @return {!Object.<string, !shaka.extern.Stream>}
    */
   function defaultOnChooseStreams(period) {
     if (period == manifest.periods[0]) {
@@ -2945,8 +2945,8 @@ describe('StreamingEngine', function() {
    * Choose streams for the given period, used for testing unload text stream.
    * The text stream of the second period is not choosen.
    *
-   * @param {shakaExtern.Period} period
-   * @return {!Object.<string, !shakaExtern.Stream>}
+   * @param {shaka.extern.Period} period
+   * @return {!Object.<string, !shaka.extern.Stream>}
    */
   function onChooseStreamsWithUnloadedText(period) {
     if (period == manifest.periods[0]) {
