@@ -483,15 +483,15 @@ describe('Storage', function() {
 
           switch (progress.calls.count()) {
             case 1:
-              expect(percent).toBeCloseTo(54 / 101);
+              expect(percent).toBeCloseTo(0.53);
               expect(storedContent.size).toBe(54);
               break;
             case 2:
-              expect(percent).toBeCloseTo(64 / 101);
+              expect(percent).toBeCloseTo(0.64);
               expect(storedContent.size).toBe(67);
               break;
             case 3:
-              expect(percent).toBeCloseTo(84 / 101);
+              expect(percent).toBeCloseTo(0.84);
               expect(storedContent.size).toBe(133);
               break;
             default:
