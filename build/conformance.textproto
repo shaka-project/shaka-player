@@ -49,6 +49,9 @@ requirement {
   java_class: 'com.google.javascript.jscomp.ConformanceRules$BanUnknownThis'
   error_message: 'Failed to infer type of "this"; '
                  'please be explicit or use bind!'
+  # Until we can get this rule updated for ES6 static methods
+  # (https://github.com/google/closure-compiler/issues/2880):
+  whitelist_regexp: 'test/test/util/canned_idb.js'
 }
 
 
