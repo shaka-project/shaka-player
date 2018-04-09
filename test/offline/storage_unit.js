@@ -91,6 +91,110 @@ describe('Storage', function() {
     }).catch(fail).then(done);
   });
 
+  describe('reports progress on store', function() {
+    /** @type {shakaExtern.Manifest} */
+    let manifest;
+
+    beforeEach(function() {
+      manifest = new shaka.test.ManifestGenerator()
+          .setPresentationDuration(20)
+          .addPeriod(0)
+            .addVariant(0).language('en')
+              .addVideo(1).size(100, 200)
+              .addAudio(2).language('en')
+          .build();
+
+      netEngine.setResponseMap({'fake:0': new ArrayBuffer(16)});
+
+      let segments = [
+        new SegmentReference(0, 0, 1, makeUris('fake:0'), 0, null),
+        new SegmentReference(1, 1, 2, makeUris('fake:0'), 0, null),
+        new SegmentReference(2, 2, 3, makeUris('fake:0'), 0, null),
+        new SegmentReference(3, 3, 4, makeUris('fake:0'), 0, null)
+      ];
+
+      let audio = manifest.periods[0].variants[0].audio;
+      let audioIndex = new shaka.media.SegmentIndex(segments);
+      audio.findSegmentPosition = (i) => audioIndex.find(i);
+      audio.getSegmentReference = (i) => audioIndex.get(i);
+
+      let video = manifest.periods[0].variants[0].video;
+      let videoIndex = new shaka.media.SegmentIndex(segments);
+      video.findSegmentPosition = (i) => videoIndex.find(i);
+      video.getSegmentReference = (i) => videoIndex.get(i);
+
+      let drmEngine = new shaka.test.FakeDrmEngine();
+
+      storage.loadInternal = () => {
+        return Promise.resolve().then(() => {
+          return {
+            manifest: manifest,
+            drmEngine: drmEngine
+          };
+        });
+      };
+    });
+
+    it('uses stream bandwidth', function(done) {
+      let videoBitRate = 12 * 1024 * 1024;
+      let audioBitRate = 12 * 1024 * 1024;
+
+      // Set the bandwidth for each stream - progress should be based off the
+      // stream specific bandwidths.
+      let variant = manifest.periods[0].variants[0];
+      variant.bandwidth = videoBitRate + audioBitRate;
+      variant.audio.bandwidth = audioBitRate;
+      variant.video.bandwidth = videoBitRate;
+
+      let progress = jasmine.createSpy('onProgress');
+
+      let steps = [
+        0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1
+      ];
+
+      progress.and.callFake((storedContent, percent) => {
+        expect(percent).toBeCloseTo(steps.shift());
+      });
+
+      storage.configure({progressCallback: progress});
+      storage.store('').then(() => {
+        expect(steps).toEqual([]);
+      }).catch(fail).then(done);
+    });
+
+    it('uses variant bandwidth when stream bandwidth is unavailable',
+       function(done) {
+         // Even through audio and video are equal, the audio will be assumed
+         // to be close to its actual value and will use the default audio.
+         let videoBitRate = 8 * 1024 * 1024;
+         let audioBitRate = 128 * 1024;
+
+         // Ensure that the bandwidth is only set on the variant and not
+         // the streams.
+         let variant = manifest.periods[0].variants[0];
+         variant.bandwidth = videoBitRate + audioBitRate;
+         variant.audio.bandwidth = undefined;
+         variant.video.bandwidth = undefined;
+
+         let progress = jasmine.createSpy('onProgress');
+
+         // Because the video will so wildly out-weight the audio, audio won't
+         // update the progress that much.
+         let steps = [
+           0.24, 0.25, 0.49, 0.5, 0.74, 0.75, 0.99, 1
+         ];
+
+         progress.and.callFake((storedContent, percent) => {
+           expect(percent).toBeCloseTo(steps.shift());
+         });
+
+         storage.configure({progressCallback: progress});
+         storage.store('').then(() => {
+           expect(steps).toEqual([]);
+         }).catch(fail).then(done);
+       });
+  });
+
   describe('store', function() {
     const originalWarning = shaka.log.warning;
 
@@ -392,124 +496,6 @@ describe('Storage', function() {
       let p2 = storage.destroy();
       Promise.all([p1, p2]).catch(fail).then(done);
     });
-
-    describe('reports progress', function() {
-      it('when byte ranges given', function(done) {
-        netEngine.setResponseMap({
-          'fake:0': new ArrayBuffer(54),
-          'fake:1': new ArrayBuffer(13),
-          'fake:2': new ArrayBuffer(66),
-          'fake:3': new ArrayBuffer(17)
-        });
-
-        stream1Index.merge([
-          new SegmentReference(0, 0, 1, makeUris('fake:0'), 0, 53),
-          new SegmentReference(1, 1, 2, makeUris('fake:1'), 31, 43),
-          new SegmentReference(2, 2, 3, makeUris('fake:2'), 291, 356),
-          new SegmentReference(3, 3, 4, makeUris('fake:3'), 11, 27)
-        ]);
-
-        let originalUri = 'fake:123';
-        let progress = jasmine.createSpy('onProgress');
-        progress.and.callFake(function(storedContent, percent) {
-          expect(storedContent).toEqual({
-            offlineUri: null,
-            originalManifestUri: originalUri,
-            duration: 20, // original manifest duration
-            size: jasmine.any(Number),
-            expiration: Infinity,
-            tracks: tracks,
-            appMetadata: {}
-          });
-
-          switch (progress.calls.count()) {
-            case 1:
-              expect(percent).toBeCloseTo(54 / 150);
-              expect(storedContent.size).toBeCloseTo(54);
-              break;
-            case 2:
-              expect(percent).toBeCloseTo(67 / 150);
-              expect(storedContent.size).toBeCloseTo(67);
-              break;
-            case 3:
-              expect(percent).toBeCloseTo(133 / 150);
-              expect(storedContent.size).toBeCloseTo(133);
-              break;
-            default:
-              expect(percent).toBeCloseTo(1);
-              expect(storedContent.size).toBeCloseTo(150);
-              break;
-          }
-        });
-
-        storage.configure({progressCallback: progress});
-        storage.store(originalUri)
-            .then(function() {
-              expect(progress.calls.count()).toBe(4);
-            })
-            .catch(fail)
-            .then(done);
-      });
-
-      it('approximates when byte range not given', function(done) {
-        netEngine.setResponseMap({
-          'fake:0': new ArrayBuffer(54),
-          'fake:1': new ArrayBuffer(13),
-          'fake:2': new ArrayBuffer(66),
-          'fake:3': new ArrayBuffer(17)
-        });
-
-        stream1Index.merge([
-          new SegmentReference(0, 0, 1, makeUris('fake:0'), 0, 53),
-          // Estimate: 10
-          new SegmentReference(1, 1, 2, makeUris('fake:1'), 0, null),
-          // Estimate: 20
-          new SegmentReference(2, 2, 4, makeUris('fake:2'), 0, null),
-          new SegmentReference(3, 4, 5, makeUris('fake:3'), 11, 27)
-        ]);
-
-        let originalUri = 'fake:123';
-        let progress = jasmine.createSpy('onProgress');
-        progress.and.callFake(function(storedContent, percent) {
-          expect(storedContent).toEqual({
-            offlineUri: null,
-            originalManifestUri: originalUri,
-            duration: 20, // Original manifest duration
-            size: jasmine.any(Number),
-            expiration: Infinity,
-            tracks: tracks,
-            appMetadata: {}
-          });
-
-          switch (progress.calls.count()) {
-            case 1:
-              expect(percent).toBeCloseTo(0.53);
-              expect(storedContent.size).toBe(54);
-              break;
-            case 2:
-              expect(percent).toBeCloseTo(0.64);
-              expect(storedContent.size).toBe(67);
-              break;
-            case 3:
-              expect(percent).toBeCloseTo(0.84);
-              expect(storedContent.size).toBe(133);
-              break;
-            default:
-              expect(percent).toBeCloseTo(1);
-              expect(storedContent.size).toBe(150);
-              break;
-          }
-        });
-
-        storage.configure({progressCallback: progress});
-        storage.store(originalUri)
-            .then(function() {
-              expect(progress.calls.count()).toBe(4);
-            })
-            .catch(fail)
-            .then(done);
-      });
-    });  // describe('reports progress')
 
     describe('segments', function() {
       it('stores media segments', function(done) {
