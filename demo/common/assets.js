@@ -101,6 +101,8 @@ shakaAssets.Feature = {
   HIGH_DEFINITION: 'high definition',
   ULTRA_HIGH_DEFINITION: 'ultra-high definition',
 
+  SURROUND: 'surround sound',
+
   HLS: 'HLS'
 };
 
@@ -522,6 +524,19 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.TTML,
+      shakaAssets.Feature.WEBM
+    ]
+  },
+  {
+    name: 'Tears of Steel (multicodec, surround + stereo)',
+    manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/tos-surround/dash.mpd',
+    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
+    source: shakaAssets.Source.SHAKA,
+    drm: [],
+    features: [
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_BASE,
+      shakaAssets.Feature.SURROUND,
       shakaAssets.Feature.WEBM
     ]
   },
