@@ -50,7 +50,7 @@ jasmine.Fetch.install = function() {
   jasmine.Fetch.container_.oldAbortController = window.AbortController;
 
   window.Headers = /** @type {function (new:Headers,
-        (Array<Array<string>>|Headers|IObject<string,string>)=)} */(
+        (!Array<!Array<string>>|Headers|Object<string,string>)=)} */(
       jasmine.Fetch.Headers);
 
   window.AbortController = /** @type {function (new:AbortController)} */
@@ -190,7 +190,7 @@ jasmine.Fetch.AbortController.prototype.abort = function() {
 
 
 /**
- * @param {(Array<Array<string>>|Headers|IObject<string,string>)=} opt_headers
+ * @param {(!Array<!Array<string>>|Headers|Object<string,string>)=} opt_headers
  *
  * @constructor
  * @struct

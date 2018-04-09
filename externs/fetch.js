@@ -27,18 +27,3 @@
  * @param {function(string, string)} apply
  */
 Headers.prototype.forEach = function(apply) {};
-
-
-
-/**
- * @constructor
- * @struct
- */
-var AbortController = function() {};
-
-
-AbortController.prototype.signal = function() {};
-
-
-AbortController.prototype.abort = function() {};
-
