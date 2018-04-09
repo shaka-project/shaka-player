@@ -54,7 +54,7 @@ jasmine.Spec.prototype.result;
 
 
 /**
- * @return {!string}
+ * @return {string}
  */
 jasmine.Spec.prototype.getFullName = function() {};
 

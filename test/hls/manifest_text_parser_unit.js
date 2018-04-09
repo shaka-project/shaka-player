@@ -82,7 +82,7 @@ describe('ManifestTextParser', function() {
     });
 
     /**
-     * @param {!string} string
+     * @param {string} string
      * @param {shaka.util.Error.Code} code
      */
     function verifyError(string, code) {

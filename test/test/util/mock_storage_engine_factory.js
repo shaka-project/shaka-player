@@ -24,9 +24,9 @@ goog.provide('shaka.test.MockStorageEngineFactory');
  * @struct
  */
 shaka.test.MockStorageEngineFactory = function() {
-  /** @private {!function():boolean} */
+  /** @private {function():boolean} */
   this.originalIsSupported_ = shaka.offline.StorageEngineFactory.isSupported;
-  /** @private {!function():!Promise<!shaka.offline.IStorageEngine>} */
+  /** @private {function():!Promise<!shaka.offline.IStorageEngine>} */
   this.originalCreate_ = shaka.offline.StorageEngineFactory.createStorageEngine;
 };
 
@@ -62,7 +62,7 @@ shaka.test.MockStorageEngineFactory.prototype.resetCreate = function() {
 
 /**
  * Change the type of storage engine the platform creates.
- * @param {!function():!Promise<!shaka.offline.IStorageEngine>} createEngine
+ * @param {function():!Promise<!shaka.offline.IStorageEngine>} createEngine
  */
 shaka.test.MockStorageEngineFactory.prototype.overrideCreate =
     function(createEngine) {

@@ -286,8 +286,8 @@ describe('CastReceiver', function() {
    * to be uninstalled afterwards.
    * The replaced method is expected to be a method that returns a promise.
    * @param {!Object} prototype
-   * @param {!string} name
-   * @param {!string} methodName
+   * @param {string} name
+   * @param {string} methodName
    */
   function waitForUpdateMessageWrapper(prototype, name, methodName) {
     pendingWaitWrapperCalls += 1;
