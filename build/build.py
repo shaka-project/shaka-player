@@ -53,6 +53,10 @@ common_closure_opts = [
 
     '--jscomp_error=*',
 
+    # Turn off complaints like:
+    #   "Private property foo_ is never modified, use the @const annotation"
+    '--jscomp_off=jsdocMissingConst',
+
     '--extra_annotation_name=listens',
     '--extra_annotation_name=exportDoc',
     '--extra_annotation_name=exportInterface',

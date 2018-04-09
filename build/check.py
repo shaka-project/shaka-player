@@ -41,23 +41,6 @@ def get_lint_files():
   return get('test') + get('lib') + get('externs') + get('demo')
 
 
-def check_closure_compiler_linter(_):
-  """Runs the Closure Compiler linter."""
-  logging.info('Running Closure Compiler linter...')
-
-  base = shakaBuildHelpers.get_source_base()
-  closure_linter_path = os.path.join(base, 'third_party', 'closure', 'linter.jar')
-  cmd_line = ['java', '-jar', closure_linter_path] + get_lint_files()
-
-  # The compiler's linter tool doesn't return a status code (as of v20171203)
-  # and has no options.  Instead of checking status, success is no output.
-  output = shakaBuildHelpers.execute_get_output(cmd_line)
-  if output != '':
-    print output
-    return False
-  return True
-
-
 def check_js_lint(args):
   """Runs the JavaScript linter."""
   # TODO: things not enforced: property doc requirements
@@ -216,7 +199,6 @@ def main(args):
     return 1
 
   steps = [
-      check_closure_compiler_linter,
       check_js_lint,
       check_html_lint,
       check_complete,
