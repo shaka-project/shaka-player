@@ -331,7 +331,7 @@ describe('Player', function() {
         let config = {abr: {}, drm: {}, manifest: {dash: {}}};
         config.abr.enabled = false;
         config.manifest.dash.clockSyncUri =
-            '//shaka-player-demo.appspot.com/time.txt';
+            'https://shaka-player-demo.appspot.com/time.txt';
         if (asset.licenseServers) {
           config.drm.servers = asset.licenseServers;
         }

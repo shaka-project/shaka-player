@@ -252,7 +252,7 @@ shakaAssets.testAssets = [
   // Shaka assets {{{
   {
     name: 'Angel One (multicodec, multilingual)',
-    manifestUri: '//storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd',
 
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
@@ -268,7 +268,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Angel One (multicodec, multilingual, Widevine)',
-    manifestUri: '//storage.googleapis.com/shaka-demo-assets/angel-one-widevine/dash.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/angel-one-widevine/dash.mpd',
 
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
@@ -283,12 +283,12 @@ shakaAssets.testAssets = [
     ],
 
     licenseServers: {
-      'com.widevine.alpha': '//cwip-shaka-proxy.appspot.com/no_auth'
+      'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth'
     }
   },
   {
     name: 'Angel One (multicodec, multilingual, ClearKey server)',
-    manifestUri: '//storage.googleapis.com/shaka-demo-assets/angel-one-clearkey/dash.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/angel-one-clearkey/dash.mpd',
 
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
@@ -303,12 +303,12 @@ shakaAssets.testAssets = [
     ],
 
     licenseServers: {
-      'org.w3.clearkey': '//cwip-shaka-proxy.appspot.com/clearkey?_u3wDe7erb7v8Lqt8A3QDQ=ABEiM0RVZneImaq7zN3u_w'  // eslint-disable-line max-len
+      'org.w3.clearkey': 'https://cwip-shaka-proxy.appspot.com/clearkey?_u3wDe7erb7v8Lqt8A3QDQ=ABEiM0RVZneImaq7zN3u_w'
     }
   },
   {
     name: 'Angel One (HLS, MP4, multilingual)',
-    manifestUri: '//storage.googleapis.com/shaka-demo-assets/angel-one-hls/hls.m3u8',  // eslint-disable-line max-len
+    manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/angel-one-hls/hls.m3u8',
 
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
@@ -321,7 +321,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Angel One (HLS, MP4, multilingual, Widevine)',
-    manifestUri: '//storage.googleapis.com/shaka-demo-assets/angel-one-widevine-hls/hls.m3u8',  // eslint-disable-line max-len
+    manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/angel-one-widevine-hls/hls.m3u8',
 
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
@@ -333,12 +333,12 @@ shakaAssets.testAssets = [
     ],
 
     licenseServers: {
-      'com.widevine.alpha': '//cwip-shaka-proxy.appspot.com/no_auth'
+      'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth'
     }
   },
   {
     name: 'Sintel 4k (multicodec)',
-    manifestUri: '//storage.googleapis.com/shaka-demo-assets/sintel/dash.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/sintel/dash.mpd',
 
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
@@ -355,7 +355,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Sintel w/ trick mode (MP4 only, 720p)',
-    manifestUri: '//storage.googleapis.com/shaka-demo-assets/sintel-trickplay/dash.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/sintel-trickplay/dash.mpd',
 
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
@@ -371,7 +371,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Sintel 4k (WebM only)',
-    manifestUri: '//storage.googleapis.com/shaka-demo-assets/sintel-webm-only/dash.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/sintel-webm-only/dash.mpd',
     // NOTE: hanging in Firefox
     // https://bugzilla.mozilla.org/show_bug.cgi?id=1291451
 
@@ -389,7 +389,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Sintel 4k (MP4 only)',
-    manifestUri: '//storage.googleapis.com/shaka-demo-assets/sintel-mp4-only/dash.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-only/dash.mpd',
 
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
@@ -405,7 +405,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Sintel 4k (multicodec, Widevine)',
-    manifestUri: '//storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd',
 
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
@@ -422,12 +422,12 @@ shakaAssets.testAssets = [
     ],
 
     licenseServers: {
-      'com.widevine.alpha': '//cwip-shaka-proxy.appspot.com/no_auth'
+      'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth'
     }
   },
   {
     name: 'Sintel 4k (multicodec, VTT in MP4)',
-    manifestUri: '//storage.googleapis.com/shaka-demo-assets/sintel-mp4-wvtt/dash.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-wvtt/dash.mpd',
 
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
@@ -445,7 +445,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Heliocentrism (multicodec, multiperiod)',
-    manifestUri: '//storage.googleapis.com/shaka-demo-assets/heliocentrism/heliocentrism.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/heliocentrism/heliocentrism.mpd',
 
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
@@ -459,7 +459,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Heliocentrism (multicodec, multiperiod, xlink)',
-    manifestUri: '//storage.googleapis.com/shaka-demo-assets/heliocentrism-xlink/heliocentrism.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/heliocentrism-xlink/heliocentrism.mpd',
 
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
@@ -473,12 +473,12 @@ shakaAssets.testAssets = [
     ]
   },
   {
-    name: '"Dig the Uke" by Stefan Kartenberg (audio only, multicodec)',  // eslint-disable-line max-len
+    name: '"Dig the Uke" by Stefan Kartenberg (audio only, multicodec)',
     // From: http://dig.ccmixter.org/files/JeffSpeed68/53327
     // Licensed under Creative Commons BY-NC 3.0.
     // Free for non-commercial use with attribution.
     // http://creativecommons.org/licenses/by-nc/3.0/
-    manifestUri: '//storage.googleapis.com/shaka-demo-assets/dig-the-uke-clear/dash.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/dig-the-uke-clear/dash.mpd',
 
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
@@ -495,7 +495,7 @@ shakaAssets.testAssets = [
     // Licensed under Creative Commons BY-NC 3.0.
     // Free for non-commercial use with attribution.
     // http://creativecommons.org/licenses/by-nc/3.0/
-    manifestUri: '//storage.googleapis.com/shaka-demo-assets/dig-the-uke/dash.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/dig-the-uke/dash.mpd',
 
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
@@ -507,12 +507,12 @@ shakaAssets.testAssets = [
     ],
 
     licenseServers: {
-      'com.widevine.alpha': '//cwip-shaka-proxy.appspot.com/no_auth'
+      'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth'
     }
   },
   {
     name: 'Tears of Steel (multicodec, TTML)',
-    manifestUri: '//storage.googleapis.com/shaka-demo-assets/tos-ttml/dash.mpd',
+    manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/tos-ttml/dash.mpd',
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [],
@@ -527,7 +527,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Shaka Player History (multicodec, live, DASH)',
-    manifestUri: '//storage.googleapis.com/shaka-live-assets/player-source.mpd',
+    manifestUri: 'https://storage.googleapis.com/shaka-live-assets/player-source.mpd',
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [],
@@ -541,7 +541,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Shaka Player History (live, HLS)',
-    manifestUri: '//storage.googleapis.com/shaka-live-assets/player-source.m3u8',  // eslint-disable-line max-len
+    manifestUri: 'https://storage.googleapis.com/shaka-live-assets/player-source.m3u8',
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [],
@@ -558,7 +558,7 @@ shakaAssets.testAssets = [
   // Src: https://github.com/Axinom/dash-test-vectors
   {
     name: 'Multi-DRM',
-    manifestUri: '//media.axprod.net/TestVectors/v7-MultiDRM-SingleKey/Manifest.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://media.axprod.net/TestVectors/v7-MultiDRM-SingleKey/Manifest.mpd',
 
     encoder: shakaAssets.Encoder.AXINOM,
     source: shakaAssets.Source.AXINOM,
@@ -577,8 +577,8 @@ shakaAssets.testAssets = [
     ],
 
     licenseServers: {
-      'com.widevine.alpha': '//drm-widevine-licensing.axtest.net/AcquireLicense',  // eslint-disable-line max-len
-      'com.microsoft.playready': '//drm-playready-licensing.axtest.net/AcquireLicense'  // eslint-disable-line max-len
+      'com.widevine.alpha': 'https://drm-widevine-licensing.axtest.net/AcquireLicense',
+      'com.microsoft.playready': 'https://drm-playready-licensing.axtest.net/AcquireLicense'
     },
     licenseRequestHeaders: {
       'X-AxDRM-Message': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYjMzNjRlYjUtNTFmNi00YWUzLThjOTgtMzNjZWQ1ZTMxYzc4IiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIjoiOWViNDA1MGQtZTQ0Yi00ODAyLTkzMmUtMjdkNzUwODNlMjY2IiwiZW5jcnlwdGVkX2tleSI6ImxLM09qSExZVzI0Y3Iya3RSNzRmbnc9PSJ9XX19.4lWwW46k-oWcah8oN18LPj5OLS5ZU-_AQv7fe0JhNjA'  // eslint-disable-line max-len
@@ -586,7 +586,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Multi-DRM, multi-key',
-    manifestUri: '//media.axprod.net/TestVectors/v7-MultiDRM-MultiKey/Manifest.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://media.axprod.net/TestVectors/v7-MultiDRM-MultiKey/Manifest.mpd',
 
     encoder: shakaAssets.Encoder.AXINOM,
     source: shakaAssets.Source.AXINOM,
@@ -606,8 +606,8 @@ shakaAssets.testAssets = [
     ],
 
     licenseServers: {
-      'com.widevine.alpha': '//drm-widevine-licensing.axtest.net/AcquireLicense',  // eslint-disable-line max-len
-      'com.microsoft.playready': '//drm-playready-licensing.axtest.net/AcquireLicense'  // eslint-disable-line max-len
+      'com.widevine.alpha': 'https://drm-widevine-licensing.axtest.net/AcquireLicense',
+      'com.microsoft.playready': 'https://drm-playready-licensing.axtest.net/AcquireLicense'
     },
     licenseRequestHeaders: {
       'X-AxDRM-Message': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYjMzNjRlYjUtNTFmNi00YWUzLThjOTgtMzNjZWQ1ZTMxYzc4IiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIjoiODAzOTliZjUtOGEyMS00MDE0LTgwNTMtZTI3ZTc0OGU5OGMwIiwiZW5jcnlwdGVkX2tleSI6ImxpTkpxVmFZa05oK01LY3hKRms3SWc9PSJ9LHsiaWQiOiI5MDk1M2UwOS02Y2IyLTQ5YTMtYTI2MC03YTVmZWZlYWQ0OTkiLCJlbmNyeXB0ZWRfa2V5Ijoia1l0SEh2cnJmQ01lVmRKNkxrYmtuZz09In0seyJpZCI6IjBlNGRhOTJiLWQwZTgtNGE2Ni04YzNmLWMyNWE5N2ViNjUzMiIsImVuY3J5cHRlZF9rZXkiOiI3dzdOWkhITE1nSjRtUUtFSzVMVE1RPT0ifSx7ImlkIjoiNTg1ZjIzM2YtMzA3Mi00NmYxLTlmYTQtNmRjMjJjNjZhMDE0IiwiZW5jcnlwdGVkX2tleSI6IkFjNFVVbVl0Qko1blBROU4xNXJjM2c9PSJ9LHsiaWQiOiI0MjIyYmQ3OC1iYzQ1LTQxYmYtYjYzZS02ZjgxNGRjMzkxZGYiLCJlbmNyeXB0ZWRfa2V5IjoiTzZGTzBmcVNXb3BwN2JqYy9ENGxNQT09In1dfX0.uF6YlKAREOmbniAeYiH070HSJhV0YS7zSKjlCtiDR5Y'  // eslint-disable-line max-len
@@ -615,7 +615,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Multi-DRM, multi-key, multi-Period',
-    manifestUri: '//media.axprod.net/TestVectors/v7-MultiDRM-MultiKey-MultiPeriod/Manifest.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://media.axprod.net/TestVectors/v7-MultiDRM-MultiKey-MultiPeriod/Manifest.mpd',
 
     encoder: shakaAssets.Encoder.AXINOM,
     source: shakaAssets.Source.AXINOM,
@@ -636,8 +636,8 @@ shakaAssets.testAssets = [
     ],
 
     licenseServers: {
-      'com.widevine.alpha': '//drm-widevine-licensing.axtest.net/AcquireLicense',  // eslint-disable-line max-len
-      'com.microsoft.playready': '//drm-playready-licensing.axtest.net/AcquireLicense'  // eslint-disable-line max-len
+      'com.widevine.alpha': 'https://drm-widevine-licensing.axtest.net/AcquireLicense',
+      'com.microsoft.playready': 'https://drm-playready-licensing.axtest.net/AcquireLicense'
     },
     licenseRequestHeaders: {
       'X-AxDRM-Message': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYjMzNjRlYjUtNTFmNi00YWUzLThjOTgtMzNjZWQ1ZTMxYzc4IiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIjoiMDg3Mjc4NmUtZjllNy00NjVmLWEzYTItNGU1YjBlZjhmYTQ1IiwiZW5jcnlwdGVkX2tleSI6IlB3NitlRVlOY3ZqWWJmc2gzWDNmbWc9PSJ9LHsiaWQiOiJjMTRmMDcwOS1mMmI5LTQ0MjctOTE2Yi02MWI1MjU4NjUwNmEiLCJlbmNyeXB0ZWRfa2V5IjoiLzErZk5paDM4bXFSdjR5Y1l6bnQvdz09In0seyJpZCI6IjhiMDI5ZTUxLWQ1NmEtNDRiZC05MTBmLWQ0YjVmZDkwZmJhMiIsImVuY3J5cHRlZF9rZXkiOiJrcTBKdVpFanBGTjhzYVRtdDU2ME9nPT0ifSx7ImlkIjoiMmQ2ZTkzODctNjBjYS00MTQ1LWFlYzItYzQwODM3YjRiMDI2IiwiZW5jcnlwdGVkX2tleSI6IlRjUlFlQld4RW9IT0tIcmFkNFNlVlE9PSJ9LHsiaWQiOiJkZTAyZjA3Zi1hMDk4LTRlZTAtYjU1Ni05MDdjMGQxN2ZiYmMiLCJlbmNyeXB0ZWRfa2V5IjoicG9lbmNTN0dnbWVHRmVvSjZQRUFUUT09In0seyJpZCI6IjkxNGU2OWY0LTBhYjMtNDUzNC05ZTlmLTk4NTM2MTVlMjZmNiIsImVuY3J5cHRlZF9rZXkiOiJlaUkvTXNsbHJRNHdDbFJUL0xObUNBPT0ifSx7ImlkIjoiZGE0NDQ1YzItZGI1ZS00OGVmLWIwOTYtM2VmMzQ3YjE2YzdmIiwiZW5jcnlwdGVkX2tleSI6IjJ3K3pkdnFycERWM3hSMGJKeTR1Z3c9PSJ9LHsiaWQiOiIyOWYwNWU4Zi1hMWFlLTQ2ZTQtODBlOS0yMmRjZDQ0Y2Q3YTEiLCJlbmNyeXB0ZWRfa2V5IjoiL3hsU0hweHdxdTNnby9nbHBtU2dhUT09In0seyJpZCI6IjY5ZmU3MDc3LWRhZGQtNGI1NS05NmNkLWMzZWRiMzk5MTg1MyIsImVuY3J5cHRlZF9rZXkiOiJ6dTZpdXpOMnBzaTBaU3hRaUFUa1JRPT0ifV19fQ.BXr93Et1krYMVs-CUnf7F3ywJWFRtxYdkR7Qn4w3-to'  // eslint-disable-line max-len
@@ -645,7 +645,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Clear, single-Period',
-    manifestUri: '//media.axprod.net/TestVectors/v7-Clear/Manifest.mpd',
+    manifestUri: 'https://media.axprod.net/TestVectors/v7-Clear/Manifest.mpd',
 
     encoder: shakaAssets.Encoder.AXINOM,
     source: shakaAssets.Source.AXINOM,
@@ -662,7 +662,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Clear, multi-Period',
-    manifestUri: '//media.axprod.net/TestVectors/v7-Clear/Manifest_MultiPeriod.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://media.axprod.net/TestVectors/v7-Clear/Manifest_MultiPeriod.mpd',
 
     encoder: shakaAssets.Encoder.AXINOM,
     source: shakaAssets.Source.AXINOM,
@@ -684,7 +684,7 @@ shakaAssets.testAssets = [
   // Src: http://demo.unified-streaming.com/features.html
   {
     name: 'Tears of Steel',
-    manifestUri: '//demo.unified-streaming.com/video/tears-of-steel/tears-of-steel.ism/.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://demo.unified-streaming.com/video/tears-of-steel/tears-of-steel.ism/.mpd',
 
     encoder: shakaAssets.Encoder.UNIFIED_STREAMING,
     source: shakaAssets.Source.UNIFIED_STREAMING,
@@ -698,7 +698,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Tears of Steel (Widevine)',
-    manifestUri: '//demo.unified-streaming.com/video/tears-of-steel/tears-of-steel-dash-widevine.ism/.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://demo.unified-streaming.com/video/tears-of-steel/tears-of-steel-dash-widevine.ism/.mpd',
 
     encoder: shakaAssets.Encoder.UNIFIED_STREAMING,
     source: shakaAssets.Source.UNIFIED_STREAMING,
@@ -716,12 +716,12 @@ shakaAssets.testAssets = [
     ],
 
     licenseServers: {
-      'com.widevine.alpha': '//cwip-shaka-proxy.appspot.com/no_auth'
+      'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth'
     }
   },
   {
     name: 'Tears of Steel (PlayReady)',
-    manifestUri: '//demo.unified-streaming.com/video/tears-of-steel/tears-of-steel-dash-playready.ism/.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://demo.unified-streaming.com/video/tears-of-steel/tears-of-steel-dash-playready.ism/.mpd',
 
     encoder: shakaAssets.Encoder.UNIFIED_STREAMING,
     source: shakaAssets.Source.UNIFIED_STREAMING,
@@ -739,12 +739,12 @@ shakaAssets.testAssets = [
     ],
 
     licenseServers: {
-      'com.microsoft.playready': '//test.playready.microsoft.com/service/rightsmanager.asmx?PlayRight=1&UseSimpleNonPersistentLicense=1'  // eslint-disable-line max-len
+      'com.microsoft.playready': 'https://test.playready.microsoft.com/service/rightsmanager.asmx?PlayRight=1&UseSimpleNonPersistentLicense=1'
     }
   },
   {
     name: 'Tears of Steel (subtitles)',
-    manifestUri: '//demo.unified-streaming.com/video/tears-of-steel/tears-of-steel-ru.ism/.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://demo.unified-streaming.com/video/tears-of-steel/tears-of-steel-en.ism/.mpd',
 
     encoder: shakaAssets.Encoder.UNIFIED_STREAMING,
     source: shakaAssets.Source.UNIFIED_STREAMING,
@@ -765,20 +765,8 @@ shakaAssets.testAssets = [
   // DASH-IF assets {{{
   // Src: http://dashif.org/test-vectors/
   {
-    name: 'Big Buck Bunny',
-    manifestUri: '//dash.edgesuite.net/dash264/TestCases/1c/qualcomm/2/MultiRate.mpd',  // eslint-disable-line max-len
-
-    encoder: shakaAssets.Encoder.UNKNOWN,
-    source: shakaAssets.Source.DASH_IF,
-    drm: [],
-    features: [
-      shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE
-    ]
-  },
-  {
     name: 'Live sim (2s segments)',
-    manifestUri: '//vm2.dashif.org/livesim/utc_head/testpic_2s/Manifest.mpd',
+    manifestUri: 'https://vm2.dashif.org/livesim/utc_head/testpic_2s/Manifest.mpd',
 
     encoder: shakaAssets.Encoder.UNKNOWN,
     source: shakaAssets.Source.DASH_IF,
@@ -791,7 +779,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Live sim (6s segments)',
-    manifestUri: '//vm2.dashif.org/livesim/utc_head/testpic_6s/Manifest.mpd',
+    manifestUri: 'https://vm2.dashif.org/livesim/utc_head/testpic_6s/Manifest.mpd',
 
     encoder: shakaAssets.Encoder.UNKNOWN,
     source: shakaAssets.Source.DASH_IF,
@@ -804,7 +792,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Live sim (multi-period)',
-    manifestUri: '//vm2.dashif.org/livesim/utc_head/periods_20/testpic_2s/Manifest.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://vm2.dashif.org/livesim/utc_head/periods_20/testpic_2s/Manifest.mpd',
 
     encoder: shakaAssets.Encoder.UNKNOWN,
     source: shakaAssets.Source.DASH_IF,
@@ -822,7 +810,7 @@ shakaAssets.testAssets = [
   // Src: http://www.dash-player.com/demo/streaming-server-and-encoder-support/
   {
     name: 'Big Buck Bunny (Live)',
-    manifestUri: '//wowzaec2demo.streamlock.net/live/bigbuckbunny/manifest_mpm4sav_mvtime.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://wowzaec2demo.streamlock.net/live/bigbuckbunny/manifest_mpm4sav_mvtime.mpd',
 
     encoder: shakaAssets.Encoder.WOWZA,
     source: shakaAssets.Encoder.WOWZA,
@@ -840,7 +828,7 @@ shakaAssets.testAssets = [
   // Src: https://bitmovin.com/mpeg-dash-hls-examples-sample-streams/
   {
     name: 'Art of Motion (DASH)',
-    manifestUri: '//bitdash-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://bitdash-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd',
 
     encoder: shakaAssets.Encoder.BITCODIN,
     source: shakaAssets.Source.BITCODIN,
@@ -853,7 +841,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Art of Motion (HLS, TS)',
-    manifestUri: '//bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8',  // eslint-disable-line max-len
+    manifestUri: 'https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8',
 
     encoder: shakaAssets.Encoder.BITCODIN,
     source: shakaAssets.Source.BITCODIN,
@@ -866,7 +854,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Sintel (HLS, TS, 4k)',
-    manifestUri: '//bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+    manifestUri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
 
     encoder: shakaAssets.Encoder.BITCODIN,
     source: shakaAssets.Source.BITCODIN,
@@ -884,7 +872,7 @@ shakaAssets.testAssets = [
   // Src: http://www.dash-player.com/demo/streaming-server-and-encoder-support/
   {
     name: 'Big Buck Bunny',
-    manifestUri: '//video.wmspanel.com/local/raw/BigBuckBunny_320x180.mp4/manifest.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://video.wmspanel.com/local/raw/BigBuckBunny_320x180.mp4/manifest.mpd',
     // As of 2017-08-04, there is a common name mismatch error with this site's
     // SSL certificate.  See https://github.com/google/shaka-player/issues/955
     disabled: true,
@@ -903,7 +891,7 @@ shakaAssets.testAssets = [
   // Src: http://amp.azure.net/libs/amp/latest/docs/samples.html
   {
     name: 'Azure Trailer',
-    manifestUri: '//amssamples.streaming.mediaservices.windows.net/91492735-c523-432b-ba01-faba6c2206a2/AzureMediaServicesPromo.ism/manifest(format=mpd-time-csf)',  // eslint-disable-line max-len
+    manifestUri: 'https://amssamples.streaming.mediaservices.windows.net/91492735-c523-432b-ba01-faba6c2206a2/AzureMediaServicesPromo.ism/manifest(format=mpd-time-csf)',
 
     encoder: shakaAssets.Encoder.AZURE_MEDIA_SERVICES,
     source: shakaAssets.Source.AZURE_MEDIA_SERVICES,
@@ -915,7 +903,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Big Buck Bunny',
-    manifestUri: '//amssamples.streaming.mediaservices.windows.net/622b189f-ec39-43f2-93a2-201ac4e31ce1/BigBuckBunny.ism/manifest(format=mpd-time-csf)',  // eslint-disable-line max-len
+    manifestUri: 'https://amssamples.streaming.mediaservices.windows.net/622b189f-ec39-43f2-93a2-201ac4e31ce1/BigBuckBunny.ism/manifest(format=mpd-time-csf)',
     // NOTE: License servers are timing out as of 2016-03-23.
     // NOTE: Still timing out as of 2016-08-02.
     disabled: true,
@@ -932,28 +920,28 @@ shakaAssets.testAssets = [
     ],
 
     licenseServers: {
-      'com.widevine.alpha': '//amssamples.keydelivery.mediaservices.windows.net/Widevine/?KID=1ab45440-532c-4399-94dc-5c5ad9584bac',  // eslint-disable-line max-len
-      'com.microsoft.playready': '//amssamples.keydelivery.mediaservices.windows.net/PlayReady/'  // eslint-disable-line max-len
+      'com.widevine.alpha': 'https://amssamples.keydelivery.mediaservices.windows.net/Widevine/?KID=1ab45440-532c-4399-94dc-5c5ad9584bac',
+      'com.microsoft.playready': 'https://amssamples.keydelivery.mediaservices.windows.net/PlayReady/'
     }
   },
   {
     name: 'Tears Of Steel (external text)',
-    manifestUri: '//ams-samplescdn.streaming.mediaservices.windows.net/11196e3d-2f40-4835-9a4d-fc52751b0323/TearsOfSteel_WAMEH264SmoothStreaming720p.ism/manifest(format=mpd-time-csf)',  // eslint-disable-line max-len
+    manifestUri: 'https://ams-samplescdn.streaming.mediaservices.windows.net/11196e3d-2f40-4835-9a4d-fc52751b0323/TearsOfSteel_WAMEH264SmoothStreaming720p.ism/manifest(format=mpd-time-csf)',
     extraText: [
       {
-        uri: '//ams-samplescdn.streaming.mediaservices.windows.net/11196e3d-2f40-4835-9a4d-fc52751b0323/TOS-en.vtt',  // eslint-disable-line max-len
+        uri: 'https://ams-samplescdn.streaming.mediaservices.windows.net/11196e3d-2f40-4835-9a4d-fc52751b0323/TOS-en.vtt',
         language: 'en',
         kind: 'subtitle',
         mime: 'text/vtt'
       },
       {
-        uri: '//ams-samplescdn.streaming.mediaservices.windows.net/11196e3d-2f40-4835-9a4d-fc52751b0323/TOS-es.vtt',  // eslint-disable-line max-len
+        uri: 'https://ams-samplescdn.streaming.mediaservices.windows.net/11196e3d-2f40-4835-9a4d-fc52751b0323/TOS-es.vtt',
         language: 'es',
         kind: 'subtitle',
         mime: 'text/vtt'
       },
       {
-        uri: '//ams-samplescdn.streaming.mediaservices.windows.net/11196e3d-2f40-4835-9a4d-fc52751b0323/TOS-fr.vtt',  // eslint-disable-line max-len
+        uri: 'https://ams-samplescdn.streaming.mediaservices.windows.net/11196e3d-2f40-4835-9a4d-fc52751b0323/TOS-fr.vtt',
         language: 'fr',
         kind: 'subtitle',
         mime: 'text/vtt'
@@ -978,7 +966,7 @@ shakaAssets.testAssets = [
   // "live streams".  The content is still static, as is the timeline.
   {
     name: 'live profile',
-    manifestUri: '//download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-live/mp4-live-mpd-AV-BS.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-live/mp4-live-mpd-AV-BS.mpd',
     // NOTE: Multiple SPS/PPS in init segment, no sample duration
     // NOTE: Decoder errors on Mac
     // https://github.com/gpac/gpac/issues/600
@@ -995,7 +983,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'live profile with five periods',
-    manifestUri: '//download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-live-periods/mp4-live-periods-mpd.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-live-periods/mp4-live-periods-mpd.mpd',
 
     encoder: shakaAssets.Encoder.MP4BOX,
     source: shakaAssets.Source.GPAC,
@@ -1008,7 +996,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'main profile, single file',
-    manifestUri: '//download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-main-single/mp4-main-single-mpd-AV-NBS.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-main-single/mp4-main-single-mpd-AV-NBS.mpd',
 
     encoder: shakaAssets.Encoder.MP4BOX,
     source: shakaAssets.Source.GPAC,
@@ -1020,7 +1008,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'main profile, mutiple files',
-    manifestUri: '//download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-main-multi/mp4-main-multi-mpd-AV-BS.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-main-multi/mp4-main-multi-mpd-AV-BS.mpd',
     // NOTE: Multiple SPS/PPS in init segment, no sample duration
     // NOTE: Decoder errors on Mac
     // https://github.com/gpac/gpac/issues/600
@@ -1037,7 +1025,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'onDemand profile',
-    manifestUri: '//download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-onDemand/mp4-onDemand-mpd-AV.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-onDemand/mp4-onDemand-mpd-AV.mpd',
 
     encoder: shakaAssets.Encoder.MP4BOX,
     source: shakaAssets.Source.GPAC,
@@ -1049,7 +1037,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'main profile, open GOP',
-    manifestUri: '//download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-main-ogop/mp4-main-ogop-mpd-AV-BS.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-main-ogop/mp4-main-ogop-mpd-AV-BS.mpd',
     // NOTE: Segments do not start with keyframes
     // NOTE: Decoder errors on Safari
     // https://bugs.webkit.org/show_bug.cgi?id=160460
@@ -1065,7 +1053,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'full profile, gradual decoding refresh',
-    manifestUri: '//download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-full-gdr/mp4-full-gdr-mpd-AV-BS.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-full-gdr/mp4-full-gdr-mpd-AV-BS.mpd',
     // NOTE: segments do not start with keyframes
     // NOTE: Decoder errors on Safari
     // https://bugs.webkit.org/show_bug.cgi?id=160460
@@ -1086,7 +1074,7 @@ shakaAssets.testAssets = [
     name: 'Multi DRM - 8 Byte IV',
     // Reliable Playready playback requires Edge 16+
     // The playenabler and sl url parameters allow for playback in VMs
-    manifestUri: 'https://content.uplynk.com/847859273a4b4a81959d8fea181672a4.mpd?pr.version=2&pr.playenabler=B621D91F-EDCC-4035-8D4B-DC71760D43E9&pr.securitylevel=150', // eslint-disable-line max-len
+    manifestUri: 'https://content.uplynk.com/847859273a4b4a81959d8fea181672a4.mpd?pr.version=2&pr.playenabler=B621D91F-EDCC-4035-8D4B-DC71760D43E9&pr.securitylevel=150',
     encoder: shakaAssets.Encoder.UPLYNK,
     source: shakaAssets.Source.UPLYNK,
     drm: [
@@ -1112,7 +1100,7 @@ shakaAssets.testAssets = [
     name: 'Multi DRM - MultiPeriod - 8 Byte IV',
     // Reliable Playready playback requires Edge 16+
     // The playenabler and sl url parameters allow for playback in VMs
-    manifestUri: 'https://content.uplynk.com/054225d59be2454fabdca3e96912d847.mpd?ad=cleardash&pr.version=2&pr.playenabler=B621D91F-EDCC-4035-8D4B-DC71760D43E9&pr.securitylevel=150', // eslint-disable-line max-len
+    manifestUri: 'https://content.uplynk.com/054225d59be2454fabdca3e96912d847.mpd?ad=cleardash&pr.version=2&pr.playenabler=B621D91F-EDCC-4035-8D4B-DC71760D43E9&pr.securitylevel=150',
     encoder: shakaAssets.Encoder.UPLYNK,
     source: shakaAssets.Source.UPLYNK,
     drm: [
@@ -1137,7 +1125,7 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Widevine - 16 Byte IV',
-    manifestUri: 'https://content.uplynk.com/224ac8717e714b68831997ab6cea4015.mpd', // eslint-disable-line max-len
+    manifestUri: 'https://content.uplynk.com/224ac8717e714b68831997ab6cea4015.mpd',
     encoder: shakaAssets.Encoder.UPLYNK,
     source: shakaAssets.Source.UPLYNK,
     drm: [
@@ -1161,7 +1149,7 @@ shakaAssets.testAssets = [
     name: 'Widevine - 16 Byte IV - (mix of encrypted and unencrypted periods)',
     // Unencrypted periods interspersed with protected periods
     // Doesn't work on Chrome < 58
-    manifestUri: 'https://content.uplynk.com/1eb40d8e64234f5c9879db7045c3d48c.mpd?ad=cleardash&rays=cdefg', // eslint-disable-line max-len
+    manifestUri: 'https://content.uplynk.com/1eb40d8e64234f5c9879db7045c3d48c.mpd?ad=cleardash&rays=cdefg',
 
     encoder: shakaAssets.Encoder.UPLYNK,
     source: shakaAssets.Source.UPLYNK,

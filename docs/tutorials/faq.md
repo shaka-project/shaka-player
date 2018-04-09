@@ -37,7 +37,8 @@ This can also happen with mixed-content restrictions.  If the site is using
 
 <hr>
 
-**Q:** I am getting `REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE` or error code 6001.
+**Q:** I am getting `REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE` or error code
+6001.
 
 **A:** The most common cause is that you are not using a secure origin.  The
 EME API in the browser requires a secure origin, which means `https` or

@@ -39,7 +39,8 @@ MyManifestParser.prototype.stop = function() {
 
 
 shaka.media.ManifestParser.registerParserByExtension('json', MyManifestParser);
-shaka.media.ManifestParser.registerParserByMime('application/json', MyManifestParser);
+shaka.media.ManifestParser.registerParserByMime(
+    'application/json', MyManifestParser);
 ```
 
 First, this defines a constructor called `MyManifestParser`.  This is called by
@@ -55,12 +56,13 @@ from the Player.
 #### start
 
 This method is called to load the manifest.  This is called with a string URI
-that is passed to `load()` and a {@link shakaExtern.ManifestParser.PlayerInterface}
-object.  The interface object contains a number of fields that are used to
-interact with the Player.  This includes the `NetworkingEngine` instance to make
-network requests.  This also includes callback methods that allow the parser to
-raise Player events and filter Periods.  This method should return a Promise
-that will resolve with the parsed manifest.
+that is passed to `load()` and a
+{@link shakaExtern.ManifestParser.PlayerInterface} object.  The interface object
+contains a number of fields that are used to interact with the Player.  This
+includes the `NetworkingEngine` instance to make network requests.  This also
+includes callback methods that allow the parser to raise Player events and
+filter Periods.  This method should return a Promise that will resolve with the
+parsed manifest.
 
 #### stop
 
@@ -296,7 +298,8 @@ MyManifestParser.prototype.loadStream_ = function(type) {
     getSegmentReference:    index.get.bind(index),
     initSegmentReference:   init,
     presentationTimeOffset: 0,  // seconds
-    mimeType : type == 'video' ? 'video/webm' : (type == 'audio' ? 'audio/webm' : 'text/vtt'),
+    mimeType: type == 'video' ?
+        'video/webm' : (type == 'audio' ? 'audio/webm' : 'text/vtt'),
     codecs:    type == 'video' ? 'vp9' : (type == 'audio' ? 'vorbis' : ''),
     frameRate: type == 'video' ? 24 : undefined,
     bandwidth: 4000,  // bits/sec

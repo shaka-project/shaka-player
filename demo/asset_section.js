@@ -203,7 +203,7 @@ shakaDemo.preparePlayer_ = function(asset) {
         /** @type {shakaExtern.AdvancedDrmConfiguration} */({});
   });
   config.manifest.dash.clockSyncUri =
-      '//shaka-player-demo.appspot.com/time.txt';
+      'https://shaka-player-demo.appspot.com/time.txt';
 
   if (!asset) {
     // Use the custom fields.

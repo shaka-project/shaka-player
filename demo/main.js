@@ -71,7 +71,8 @@ shakaDemo.startTime_ = undefined;
  * @private
  * @const {string}
  */
-shakaDemo.mainPoster_ = '//shaka-player-demo.appspot.com/assets/poster.jpg';
+shakaDemo.mainPoster_ =
+    'https://shaka-player-demo.appspot.com/assets/poster.jpg';
 
 
 /**
@@ -79,7 +80,7 @@ shakaDemo.mainPoster_ = '//shaka-player-demo.appspot.com/assets/poster.jpg';
  * @const {string}
  */
 shakaDemo.audioOnlyPoster_ =
-    '//shaka-player-demo.appspot.com/assets/audioOnly.gif';
+    'https://shaka-player-demo.appspot.com/assets/audioOnly.gif';
 
 
 /**

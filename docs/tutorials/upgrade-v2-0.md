@@ -387,7 +387,8 @@ MyManifestParser.prototype.start =
   return this.networkingEngine_.request(type, request).promise
       .then(function(response) {
         this.manifest_ = this.parseInternal_(response.data);
-        this.updateInterval_ = setInterval(this.updateManifest_.bind(this), 5000);
+        this.updateInterval_ =
+            setInterval(this.updateManifest_.bind(this), 5000);
         return this.manifest_;
       });
 };
@@ -420,7 +421,8 @@ MyManifestParser.prototype.start = function(uri, playerInterface) {
   return this.playerInterface_.networkingEngine.request(type, request).then(
       function(response) {
         this.manifest_ = this.parseInternal_(response.data);
-        this.updateInterval_ = setInterval(this.updateManifest_.bind(this), 5000);
+        this.updateInterval_ =
+            setInterval(this.updateManifest_.bind(this), 5000);
         return this.manifest_;
       });
 };
