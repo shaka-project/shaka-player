@@ -50,17 +50,16 @@ shaka.test.FakeAbrManager = function() {
     'getBandwidthEstimate', 'chooseVariant', 'setVariants', 'configure'
   ]);
 
-  /** @type {!Array.<shaka.extern.Variant>} */
-  let variants = [];
+  ret.variants = [];
 
   ret.chooseIndex = 0;
 
   ret.init.and.callFake(function(switchCallback) {
     ret.switchCallback = switchCallback;
   });
-  ret.setVariants.and.callFake(function(arg) { variants = arg; });
+  ret.setVariants.and.callFake(function(arg) { ret.variants = arg; });
   ret.chooseVariant.and.callFake(function() {
-    return variants[ret.chooseIndex];
+    return ret.variants[ret.chooseIndex];
   });
 
   return ret;
@@ -69,6 +68,10 @@ shaka.test.FakeAbrManager = function() {
 
 /** @type {number} */
 shaka.test.FakeAbrManager.prototype.chooseIndex;
+
+
+/** @type {!Array.<shaka.extern.Variant>} */
+shaka.test.FakeAbrManager.prototype.variants;
 
 
 /** @type {shaka.extern.AbrManager.SwitchCallback} */
