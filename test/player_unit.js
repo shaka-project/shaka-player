@@ -1230,7 +1230,7 @@ describe('Player', function() {
       variantTracks = [
         {
           id: 1,
-          active: false,
+          active: true,
           type: 'variant',
           bandwidth: 1300,
           language: 'en',
@@ -1276,7 +1276,7 @@ describe('Player', function() {
         },
         {
           id: 3,
-          active: true,
+          active: false,
           type: 'variant',
           bandwidth: 1100,
           language: 'en',
@@ -1751,7 +1751,88 @@ describe('Player', function() {
       expect(args[0].language).toBe('en');
       expect(getActiveTextTrack().language).toBe('en');
     });
-  });
+
+    it('remembers the channel count when ABR is reenabled', () => {
+      streamingEngine.onCanSwitch();
+
+      // We prefer 6 channels, and we are currently playing 6 channels.
+      expect(player.getConfiguration().preferredAudioChannelCount).toBe(6);
+      expect(getActiveVariantTrack().channelsCount).toBe(6);
+
+      // Manually turn off ABR and select a 2-channel track.
+      player.configure({abr: {enabled: false}});
+      const newTrack =
+          player.getVariantTracks().filter((t) => t.channelsCount == 2)[0];
+      player.selectVariantTrack(newTrack);
+
+      // See that we are playing a 2-channel track now.
+      expect(getActiveVariantTrack().channelsCount).toBe(2);
+
+      // See that AbrManager has a list of 2-channel tracks now.
+      expect(abrManager.variants.length).toBeGreaterThan(0);
+      abrManager.variants.forEach((v) => {
+        expect(v.audio.channelsCount).toBe(2);
+      });
+
+      // Re-enable ABR.
+      player.configure({abr: {enabled: true}});
+
+      // See that AbrManager still has a list of 2-channel tracks.
+      expect(abrManager.variants.length).toBeGreaterThan(0);
+      abrManager.variants.forEach((v) => {
+        expect(v.audio.channelsCount).toBe(2);
+      });
+      // See that we are still playing a 2-channel track.
+      expect(getActiveVariantTrack().channelsCount).toBe(2);
+    });
+
+    it('remembers the channel count across key status changes', () => {
+      // Simulate an encrypted stream.  Mark half of the audio streams with key
+      // ID 'aaa', and the other half with 'bbb'.  Remove all roles, so that our
+      // choices are limited only by channel count and key status.
+      manifest.periods[0].variants.forEach((variant) => {
+        const keyId = (variant.audio.id % 2) ? 'aaa' : 'bbb';
+        variant.audio.keyId = keyId;
+        variant.video.roles = [];
+        variant.audio.roles = [];
+      });
+
+      streamingEngine.onCanSwitch();
+
+      // We prefer 6 channels, and we are currently playing 6 channels.
+      expect(player.getConfiguration().preferredAudioChannelCount).toBe(6);
+      expect(getActiveVariantTrack().channelsCount).toBe(6);
+
+      // Manually select a 2-channel track.
+      const newTrack =
+          player.getVariantTracks().filter((t) => t.channelsCount == 2)[0];
+      player.selectVariantTrack(newTrack);
+
+      // See that we are playing a 2-channel track now.
+      expect(getActiveVariantTrack().channelsCount).toBe(2);
+
+      // See that AbrManager has a list of 2-channel tracks now.
+      expect(abrManager.variants.length).toBeGreaterThan(0);
+      abrManager.variants.forEach((v) => {
+        expect(v.audio.channelsCount).toBe(2);
+      });
+
+      // Simulate a key status event that would trigger the removal of some
+      // tracks.
+      onKeyStatus({
+        'aaa': 'usable',
+        'bbb': 'output-restricted',
+      });
+
+      // See that AbrManager still has a list of 2-channel tracks.
+      expect(abrManager.variants.length).toBeGreaterThan(0);
+      abrManager.variants.forEach((v) => {
+        expect(v.audio.channelsCount).toBe(2);
+      });
+      // See that we are still playing a 2-channel track.
+      expect(getActiveVariantTrack().channelsCount).toBe(2);
+    });
+  });  // describe('tracks')
 
   describe('languages', function() {
     it('chooses the first as default', function(done) {
@@ -2809,14 +2890,6 @@ describe('Player', function() {
     });
 
     /**
-     * @param {!Object.<string, string>} keyStatusMap
-     * @suppress {accessControls}
-     */
-    function onKeyStatus(keyStatusMap) {
-      player.onKeyStatus_(keyStatusMap);
-    }
-
-    /**
      * @return {!Promise}
      */
     function setupPlayer() {
@@ -3133,5 +3206,13 @@ describe('Player', function() {
         return actual.indexOf(substring) >= 0;
       }
     };
+  }
+
+  /**
+   * @param {!Object.<string, string>} keyStatusMap
+   * @suppress {accessControls}
+   */
+  function onKeyStatus(keyStatusMap) {
+    player.onKeyStatus_(keyStatusMap);
   }
 });
