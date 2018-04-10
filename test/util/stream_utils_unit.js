@@ -554,11 +554,11 @@ describe('StreamUtils', function() {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addVariant(0)
-            .addAudio(0).channelCount(2)
+            .addAudio(0).channelsCount(2)
           .addVariant(1)
-            .addAudio(1).channelCount(6)
+            .addAudio(1).channelsCount(6)
           .addVariant(2)
-            .addAudio(2).channelCount(2)
+            .addAudio(2).channelsCount(2)
         .build();
 
       let chosen = filterVariantsByAudioChannelCount(
@@ -573,11 +573,11 @@ describe('StreamUtils', function() {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addVariant(0)
-            .addAudio(0).channelCount(2)
+            .addAudio(0).channelsCount(2)
           .addVariant(1)
-            .addAudio(1).channelCount(8)
+            .addAudio(1).channelsCount(8)
           .addVariant(2)
-            .addAudio(2).channelCount(2)
+            .addAudio(2).channelsCount(2)
         .build();
 
       let chosen = filterVariantsByAudioChannelCount(
@@ -592,11 +592,11 @@ describe('StreamUtils', function() {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addVariant(0)
-            .addAudio(0).channelCount(6)
+            .addAudio(0).channelsCount(6)
           .addVariant(1)
-            .addAudio(1).channelCount(8)
+            .addAudio(1).channelsCount(8)
           .addVariant(2)
-            .addAudio(2).channelCount(6)
+            .addAudio(2).channelsCount(6)
         .build();
 
       let chosen = filterVariantsByAudioChannelCount(

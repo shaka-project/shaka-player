@@ -408,7 +408,7 @@ describe('ManifestConverter', function() {
       trickModeVideo: null,
       containsEmsgBoxes: false,
       roles: [],
-      channelCount: null
+      channelsCount: null
     };
 
     expect(stream).toEqual(expectedStream);

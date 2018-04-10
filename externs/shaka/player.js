@@ -188,7 +188,7 @@ shakaExtern.BufferedInfo;
  *   roles: !Array.<string>,
  *   videoId: ?number,
  *   audioId: ?number,
- *   channelCount: ?number,
+ *   channelsCount: ?number,
  *   audioBandwidth: ?number,
  *   videoBandwidth: ?number
  * }}
@@ -244,7 +244,7 @@ shakaExtern.BufferedInfo;
  *   (only for variant tracks) The video stream id.
  * @property {?number} audioId
  *   (only for variant tracks) The audio stream id.
- * @property {?number} channelCount
+ * @property {?number} channelsCount
  *   The count of the audio track channels.
  * @property {?number} audioBandwidth
  *   (only for variant tracks) The audio stream's bandwidth if known.

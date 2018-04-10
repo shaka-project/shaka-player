@@ -483,7 +483,7 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
     trickModeVideo: null,
     containsEmsgBoxes: false,
     roles: [],
-    channelCount: null
+    channelsCount: null
   };
   return stream;
 };
@@ -729,9 +729,9 @@ shaka.test.ManifestGenerator.prototype.roles = function(roles) {
  * @param {number} count
  * @return {!shaka.test.ManifestGenerator}
  */
-shaka.test.ManifestGenerator.prototype.channelCount = function(count) {
+shaka.test.ManifestGenerator.prototype.channelsCount = function(count) {
   let stream = this.currentStream_();
-  stream.channelCount = count;
+  stream.channelsCount = count;
   return this;
 };
 // }}}

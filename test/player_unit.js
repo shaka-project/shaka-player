@@ -1094,7 +1094,7 @@ describe('Player', function() {
           roles: [],
           videoId: 4,
           audioId: 1,
-          channelCount: null,
+          channelsCount: null,
           audioBandwidth: 200,
           videoBandwidth: 200
         }
@@ -1119,7 +1119,7 @@ describe('Player', function() {
           roles: [],
           videoId: 4,
           audioId: 1,
-          channelCount: null,
+          channelsCount: null,
           audioBandwidth: 200,
           videoBandwidth: 200
         }
@@ -1220,7 +1220,7 @@ describe('Player', function() {
           roles: ['main'],
           videoId: 4,
           audioId: 1,
-          channelCount: null,
+          channelsCount: null,
           audioBandwidth: 100,
           videoBandwidth: 100
         },
@@ -1243,7 +1243,7 @@ describe('Player', function() {
           roles: ['main'],
           videoId: 5,
           audioId: 1,
-          channelCount: null,
+          channelsCount: null,
           audioBandwidth: 100,
           videoBandwidth: 200
         },
@@ -1266,7 +1266,7 @@ describe('Player', function() {
           roles: ['commentary'],
           videoId: 4,
           audioId: 2,
-          channelCount: null,
+          channelsCount: null,
           audioBandwidth: 100,
           videoBandwidth: 100
         },
@@ -1289,7 +1289,7 @@ describe('Player', function() {
           roles: ['commentary'],
           videoId: 5,
           audioId: 2,
-          channelCount: null,
+          channelsCount: null,
           audioBandwidth: 100,
           videoBandwidth: 200
         },
@@ -1312,7 +1312,7 @@ describe('Player', function() {
           roles: [],
           videoId: 5,
           audioId: 8,
-          channelCount: null,
+          channelsCount: null,
           audioBandwidth: 100,
           videoBandwidth: 200
         }
@@ -1332,7 +1332,7 @@ describe('Player', function() {
           videoCodec: null,
           primary: false,
           roles: [],
-          channelCount: null,
+          channelsCount: null,
           audioBandwidth: null,
           videoBandwidth: null,
           bandwidth: 0,
@@ -1355,7 +1355,7 @@ describe('Player', function() {
           videoCodec: null,
           primary: false,
           roles: ['main'],
-          channelCount: null,
+          channelsCount: null,
           audioBandwidth: null,
           videoBandwidth: null,
           bandwidth: 0,
@@ -1378,7 +1378,7 @@ describe('Player', function() {
           videoCodec: null,
           primary: false,
           roles: ['commentary'],
-          channelCount: null,
+          channelsCount: null,
           audioBandwidth: null,
           videoBandwidth: null,
           bandwidth: 0,
