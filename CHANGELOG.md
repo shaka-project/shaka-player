@@ -1,3 +1,19 @@
+## 2.3.6 (2018-04-11)
+
+Bugfixes:
+  - Handle HLS segments tags that occur before playlist tags
+    - https://github.com/google/shaka-player/issues/1382
+  - Avoid telling AbrManager about key-system-restricted streams, to simplify
+    building AbrManager plugins.
+  - Fixed exported enum definition for network plugin priorities
+  - Fixed ES5 strict mode compatibility in our module wrapper
+    - https://github.com/google/shaka-player/pull/1398
+
+Demo app:
+  - Fixed playback of VDMS assets by updating the license request details
+    - https://github.com/google/shaka-player/pull/1388
+
+
 ## 2.3.5 (2018-03-29)
 
 New features:
