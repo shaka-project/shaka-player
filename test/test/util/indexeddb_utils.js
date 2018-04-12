@@ -110,6 +110,25 @@ shaka.test.IndexedDBUtils.dbOpenNew_ = function(name, version, upgrade) {
 
 
 /**
+ * If the database exists, open the current version. If the database does
+ * not exist, the returned promise will be rejected.
+ *
+ * @param {string} name
+ * @return {!Promise.<IDBDatabase>}
+ */
+shaka.test.IndexedDBUtils.open = function(name) {
+  /** @type {!shaka.util.PublicPromise} */
+  let p = new shaka.util.PublicPromise();
+
+  let open = window.indexedDB.open(name);
+  open.onerror = (e) => { p.reject(); };
+  open.onsuccess = (e) => { p.resolve(open.result); };
+
+  return p;
+};
+
+
+/**
  * @param {number} ms
  * @return {!Promise}
  * @private
