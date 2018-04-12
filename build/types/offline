@@ -5,6 +5,7 @@
 +../../lib/offline/i_storage_engine.js
 +../../lib/offline/indexeddb/db_connection.js
 +../../lib/offline/indexeddb/db_operation.js
++../../lib/offline/indexeddb/storage_mechanism.js
 +../../lib/offline/indexeddb/v2_storage_cell.js
 +../../lib/offline/manifest_converter.js
 +../../lib/offline/memory/storage_cell.js

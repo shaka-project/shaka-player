@@ -37,7 +37,7 @@ goog.require('shaka.net.HttpPlugin');
 goog.require('shaka.offline.OfflineManifestParser');
 goog.require('shaka.offline.OfflineScheme');
 goog.require('shaka.offline.Storage');
-goog.require('shaka.offline.indexeddb.V2StorageCell');
+goog.require('shaka.offline.indexeddb.StorageMechanism');
 goog.require('shaka.offline.memory.StorageCell');
 goog.require('shaka.offline.memory.StorageMechanism');
 goog.require('shaka.polyfill.Fullscreen');
