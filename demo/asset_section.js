@@ -110,11 +110,11 @@ shakaDemo.setupAssets_ = function() {
   document.getElementById('unloadButton').addEventListener(
       'click', shakaDemo.unload);
   document.getElementById('licenseServerInput').addEventListener(
-      'keyup', shakaDemo.onAssetKeyUp_);
+      'input', shakaDemo.onAssetInput_);
   document.getElementById('manifestInput').addEventListener(
-      'keyup', shakaDemo.onAssetKeyUp_);
+      'input', shakaDemo.onAssetInput_);
   document.getElementById('certificateInput').addEventListener(
-      'keyup', shakaDemo.onAssetKeyUp_);
+      'input', shakaDemo.onAssetInput_);
 
   return asyncOfflineSetup;
 };
@@ -124,12 +124,9 @@ shakaDemo.setupAssets_ = function() {
  * @param {!Event} event
  * @private
  */
-shakaDemo.onAssetKeyUp_ = function(event) {
+shakaDemo.onAssetInput_ = function(event) {
   // Mirror the users input as they type.
   shakaDemo.hashShouldChange_();
-  // Load the asset if the user presses enter.
-  if (event.keyCode != 13) return;
-  shakaDemo.load();
 };
 
 
