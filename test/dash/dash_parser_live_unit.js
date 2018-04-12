@@ -578,8 +578,8 @@ describe('DashParser Live', function() {
       expect(fakeNetEngine.request).toHaveBeenCalled();
       fakeNetEngine.request.calls.reset();
 
-      // Make the update take an extra 5 seconds, then end the delay.
-      const extraWaitTimeMs = 5.0;
+      // Make the update take an extra 15 seconds, then end the delay.
+      const extraWaitTimeMs = 15.0;
       jasmine.clock().tick(extraWaitTimeMs * 1000);
       delay.resolve();
       shaka.polyfill.Promise.flush();
