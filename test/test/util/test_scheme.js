@@ -268,7 +268,8 @@ shaka.test.TestScheme.setupPlayer = function(player, name) {
   goog.asserts.assert(asset, 'Unknown asset');
   if (!asset) return;
   if (asset.licenseRequestHeaders) {
-    player.getNetworkingEngine().registerRequestFilter(
+    let netEngine = player.getNetworkingEngine();
+    netEngine.registerRequestFilter(
         function(type, request) {
           if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) return;
 
