@@ -675,6 +675,35 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.WEBVTT
     ]
   },
+  {
+    name: 'Clear, Live DASH',
+    manifestUri: 'https://akamai-axtest.akamaized.net/routes/lapd-v1-acceptance/www_c4/Manifest.mpd',
+
+    encoder: shakaAssets.Encoder.AXINOM,
+    source: shakaAssets.Source.AXINOM,
+    drm: [],
+    features: [
+      shakaAssets.Feature.EMBEDDED_TEXT,
+      shakaAssets.Feature.LIVE,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
+      shakaAssets.Feature.WEBVTT
+    ]
+  },
+  {
+    name: 'Clear, Live HLS',
+    manifestUri: 'https://akamai-axtest.akamaized.net/routes/lapd-v1-acceptance/www_c4/Manifest.m3u8',
+
+    encoder: shakaAssets.Encoder.AXINOM,
+    source: shakaAssets.Source.AXINOM,
+    drm: [],
+    features: [
+      shakaAssets.Feature.HLS,
+      shakaAssets.Feature.LIVE,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.WEBVTT
+    ]
+  },
   // }}}
 
   // Unified Streaming {{{
