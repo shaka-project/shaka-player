@@ -106,6 +106,8 @@ shakaDemo.init = function() {
   document.getElementById('preferredAudioLanguage').value = language;
   document.getElementById('preferredTextLanguage').value = language;
 
+  document.getElementById('preferredAudioChannelCount').value = '2';
+
   let params = shakaDemo.getParams_();
 
   shakaDemo.setupLogging_();
@@ -272,6 +274,10 @@ shakaDemo.preBrowserCheckParams_ = function(params) {
   }
   if ('textlang' in params) {
     document.getElementById('preferredTextLanguage').value = params['textlang'];
+  }
+  if ('channels' in params) {
+    document.getElementById('preferredAudioChannelCount').value =
+        params['channels'];
   }
   if ('asset' in params) {
     document.getElementById('manifestInput').value = params['asset'];
@@ -521,6 +527,10 @@ shakaDemo.hashShouldChange_ = function() {
     params.push('textlang=' + textLang);
   } else {
     params.push('lang=' + audioLang);
+  }
+  let channels = document.getElementById('preferredAudioChannelCount').value;
+  if (channels != '2') {
+    params.push('channels=' + channels);
   }
   if (document.getElementById('logToScreen').checked) {
     params.push('logtoscreen');
