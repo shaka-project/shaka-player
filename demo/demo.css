@@ -105,10 +105,12 @@ h1 {
   padding: 0 0 0.2em 0;
 }
 
+input[type=number],
 input[type=text] {
   font-family: Roboto, sans-serif;
   font-size: 0.9em;
   padding: 1px 2px 3px 6px;
+  height: 19px;
 }
 
 label, .label {
@@ -358,6 +360,7 @@ summary {
     font-size: 1.4em;
   }
 
+  input[type=number],
   input[type=text] {
     font-size: 0.8em;
   }

@@ -246,6 +246,12 @@ shakaDemo.preparePlayer_ = function(asset) {
       document.getElementById('preferredAudioLanguage').value;
   config.preferredTextLanguage =
       document.getElementById('preferredTextLanguage').value;
+  const preferredAudioChannelCount =
+      document.getElementById('preferredAudioChannelCount').valueAsNumber;
+  if (!isNaN(preferredAudioChannelCount)) {
+    config.preferredAudioChannelCount = preferredAudioChannelCount;
+  }
+
   config.abr.enabled =
       document.getElementById('enableAdaptation').checked;
   let smallGapLimit = document.getElementById('smallGapLimit').value;

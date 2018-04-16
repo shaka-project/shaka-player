@@ -37,6 +37,8 @@ shakaDemo.setupConfiguration_ = function() {
       'input', shakaDemo.onConfigInput_);
   document.getElementById('preferredTextLanguage').addEventListener(
       'input', shakaDemo.onConfigInput_);
+  document.getElementById('preferredAudioChannelCount').addEventListener(
+      'input', shakaDemo.onConfigInput_);
   document.getElementById('showNative').addEventListener(
       'change', shakaDemo.onNativeChange_);
   document.getElementById('showTrickPlay').addEventListener(
@@ -152,7 +154,9 @@ shakaDemo.onConfigInput_ = function(event) {
     preferredAudioLanguage:
         document.getElementById('preferredAudioLanguage').value,
     preferredTextLanguage:
-        document.getElementById('preferredTextLanguage').value
+        document.getElementById('preferredTextLanguage').value,
+    preferredAudioChannelCount:
+        document.getElementById('preferredAudioChannelCount').value,
   }));
   // Change the hash, to mirror this.
   shakaDemo.hashShouldChange_();
