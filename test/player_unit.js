@@ -2889,6 +2889,30 @@ describe('Player', function() {
       }).catch(fail).then(done);
     });
 
+    it('chooses codecs after considering 6-channel preference', async () => {
+      manifest = new shaka.test.ManifestGenerator()
+          .addPeriod(0)
+            // Surround sound AC-3, preferred by config
+            .addVariant(0).bandwidth(300)
+              .addAudio(0).channelsCount(6).mime('audio/mp4', 'ac-3')
+            // Stereo AAC, would win out based on bandwidth alone
+            .addVariant(1).bandwidth(100)
+              .addAudio(1).channelsCount(2).mime('audio/mp4', 'mp4a.40.2')
+          .build();
+
+      // Configure for 6 channels.
+      player.configure({
+        preferredAudioChannelCount: 6,
+      });
+      await setupPlayer();
+      expect(abrManager.setVariants).toHaveBeenCalled();
+      // We've chosen codecs, so only 1 track should remain.
+      expect(abrManager.variants.length).toBe(1);
+      // It should be the 6-channel variant, based on our preference.
+      expect(abrManager.variants[0].audio.channelsCount).toEqual(6);
+      expect(abrManager.variants[0].audio.codecs).toEqual('ac-3');
+    });
+
     /**
      * @return {!Promise}
      */
