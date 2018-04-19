@@ -561,12 +561,12 @@ describe('Playhead', function() {
     seekCount = 0;
     currentTime = 1030.062441;
     jasmine.clock().tick(500);
-    currentTime = 1029.9233;
+    currentTime = 1027.9233;
     jasmine.clock().tick(500);
     expect(seekCount).toBe(0);
 
     // Got too far away.
-    currentTime = 1029;
+    currentTime = 1026;
     jasmine.clock().tick(500);
     expect(currentTime).toBe(1030);
     expect(seekCount).toBe(1);
