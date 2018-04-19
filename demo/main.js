@@ -339,6 +339,41 @@ shakaDemo.preBrowserCheckParams_ = function(params) {
 
 
 /**
+ * Decide if a license server from the demo app URI matches the configuration
+ * of a demo asset.
+ *
+ * @param {!shakaAssets.AssetInfo} assetInfo
+ * @param {?string} licenseUri
+ * @return {boolean}
+ * @private
+ */
+shakaDemo.licenseServerMatch_ = function(assetInfo, licenseUri) {
+  // If no license server was specified, assume that this is a match.
+  // This provides backward compatibility and shorter URIs.
+  if (!licenseUri) {
+    return true;
+  }
+
+  // If a server is specified in the URI, but not in the asset, it's not a
+  // match.  It's not clear when this would ever be meaningful, so the decision
+  // not to match is arbitrary.
+  if (licenseUri && !assetInfo.licenseServers) {
+    return false;
+  }
+
+  // Otherwise, it's a match only if the license server in the URI matches what
+  // is in the asset config.
+  for (let k in assetInfo.licenseServers) {
+    if (licenseUri == assetInfo.licenseServers[k]) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+
+/**
  * @param {!Object.<string, string>} params
  * @private
  */
@@ -347,11 +382,13 @@ shakaDemo.postBrowserCheckParams_ = function(params) {
   if ('asset' in params) {
     let assetList = document.getElementById('assetList');
     let assetUri = params['asset'];
+    let licenseUri = params['license'];
     let isDefault = false;
     // Check all options except the last, which is 'custom asset'.
     for (let index = 0; index < assetList.options.length - 1; index++) {
       if (assetList[index].asset &&
-          assetList[index].asset.manifestUri == assetUri) {
+          assetList[index].asset.manifestUri == assetUri &&
+          shakaDemo.licenseServerMatch_(assetList[index].asset, licenseUri)) {
         assetList.selectedIndex = index;
         isDefault = true;
         break;
