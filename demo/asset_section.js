@@ -247,7 +247,7 @@ shakaDemo.preparePlayer_ = function(asset) {
   config.preferredTextLanguage =
       document.getElementById('preferredTextLanguage').value;
   const preferredAudioChannelCount =
-      document.getElementById('preferredAudioChannelCount').valueAsNumber;
+      Number(document.getElementById('preferredAudioChannelCount').value);
   if (!isNaN(preferredAudioChannelCount)) {
     config.preferredAudioChannelCount = preferredAudioChannelCount;
   }
