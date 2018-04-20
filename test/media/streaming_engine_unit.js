@@ -85,12 +85,12 @@ describe('StreamingEngine', function() {
 
   /**
    * Runs the fake event loop.
-   * @param {function()=} opt_callback An optional callback that is executed
+   * @param {function()=} callback An optional callback that is executed
    *   each time the clock ticks.
    */
-  function runTest(opt_callback) {
+  function runTest(callback) {
     function onTick(currentTime) {
-      if (opt_callback) opt_callback();
+      if (callback) callback();
       if (playing) {
         playheadTime++;
       }
@@ -106,8 +106,8 @@ describe('StreamingEngine', function() {
     PromiseMock.install();
   });
 
-  /** @param {boolean=} opt_trickMode */
-  function setupVod(opt_trickMode) {
+  /** @param {boolean=} trickMode */
+  function setupVod(trickMode) {
     // For VOD, we fake a presentation that has 2 Periods of equal duration
     // (20 seconds), where each Period has 1 Variant and 1 text stream.
     //
@@ -167,7 +167,7 @@ describe('StreamingEngine', function() {
         segmentDuration: 10
       }
     };
-    if (opt_trickMode) {
+    if (trickMode) {
       segmentData.trickvideo = {
         initSegments: [
           makeBuffer(initSegmentSizeVideo), makeBuffer(initSegmentSizeVideo)
@@ -425,10 +425,10 @@ describe('StreamingEngine', function() {
   /**
    * Creates the StreamingEngine.
    **
-   * @param {shaka.extern.StreamingConfiguration=} opt_config Optional
+   * @param {shaka.extern.StreamingConfiguration=} config Optional
    *   configuration object which overrides the default one.
    */
-  function createStreamingEngine(opt_config) {
+  function createStreamingEngine(config) {
     onChooseStreams = jasmine.createSpy('onChooseStreams');
     onCanSwitch = jasmine.createSpy('onCanSwitch');
     onInitialStreamsSetup = jasmine.createSpy('onInitialStreamsSetup');
@@ -438,10 +438,7 @@ describe('StreamingEngine', function() {
     onEvent = jasmine.createSpy('onEvent');
     onManifestUpdate = jasmine.createSpy('onManifestUpdate');
 
-    let config;
-    if (opt_config) {
-      config = opt_config;
-    } else {
+    if (!config) {
       config = {
         rebufferingGoal: 2,
         bufferingGoal: 5,

@@ -445,10 +445,10 @@ describe('PlayheadObserver', function() {
     /**
      * @param {string} name
      * @param {shaka.extern.TimelineRegionInfo} info
-     * @param {number=} opt_index
+     * @param {number=} index
      */
-    function expectTimelineEvent(name, info, opt_index) {
-      let event = onEvent.calls.argsFor(opt_index || 0)[0];
+    function expectTimelineEvent(name, info, index) {
+      let event = onEvent.calls.argsFor(index || 0)[0];
       expect(event.type).toBe(name);
       expect(event.detail).toEqual(info);
       // This should be a copy by reference, not just a value match.

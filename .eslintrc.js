@@ -56,7 +56,6 @@ module.exports = {
         // Temporary Google style overrides while we get in compliance with the latest style guide {{{
         "block-spacing": "off",
         "brace-style": "off",
-        "camelcase": "off",
         "comma-dangle": "off",
         "comma-spacing": "off",
         "new-cap": "off",

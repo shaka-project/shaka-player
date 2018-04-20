@@ -350,9 +350,9 @@ function httpPluginTests(usingFetch) {
   /**
    * @param {string} uri
    * @param {function()} done
-   * @param {string=} opt_overrideUri
+   * @param {string=} overrideUri
    */
-  function testSucceeds(uri, done, opt_overrideUri) {
+  function testSucceeds(uri, done, overrideUri) {
     let request = shaka.net.NetworkingEngine.makeRequest(
         [uri], retryParameters);
     plugin(uri, request, requestType).promise
@@ -360,7 +360,7 @@ function httpPluginTests(usingFetch) {
         .then(function(response) {
           expect(mostRecentRequest().url).toBe(uri);
           expect(response).toBeTruthy();
-          expect(response.uri).toBe(opt_overrideUri || uri);
+          expect(response.uri).toBe(overrideUri || uri);
           expect(response.data).toBeTruthy();
           expect(response.data.byteLength).toBe(10);
           expect(response.fromCache).toBe(false);
@@ -374,11 +374,11 @@ function httpPluginTests(usingFetch) {
   /**
    * @param {string} uri
    * @param {function()} done
-   * @param {shaka.util.Error.Severity=} opt_severity
-   * @param {shaka.util.Error.Code=} opt_code
-   * @param {Array<*>=} opt_errorData
+   * @param {shaka.util.Error.Severity=} severity
+   * @param {shaka.util.Error.Code=} code
+   * @param {Array<*>=} errorData
    */
-  function testFails(uri, done, opt_severity, opt_code, opt_errorData) {
+  function testFails(uri, done, severity, code, errorData) {
     let request = shaka.net.NetworkingEngine.makeRequest(
         [uri], retryParameters);
     plugin(uri, request, requestType).promise
@@ -386,13 +386,13 @@ function httpPluginTests(usingFetch) {
         .catch(function(error) {
           expect(error).toBeTruthy();
           expect(error.severity)
-              .toBe(opt_severity || shaka.util.Error.Severity.RECOVERABLE);
-          if (opt_code) {
-            expect(error.code).toBe(opt_code);
+              .toBe(severity || shaka.util.Error.Severity.RECOVERABLE);
+          if (code) {
+            expect(error.code).toBe(code);
           }
           expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
-          if (opt_errorData) {
-            expect(error.data).toEqual(opt_errorData);
+          if (errorData) {
+            expect(error.data).toEqual(errorData);
           }
 
           expect(mostRecentRequest().url).toBe(uri);
@@ -405,9 +405,9 @@ function httpPluginTests(usingFetch) {
    * character ('\n'), we need to trim the response header.
    * @param {string} uri
    * @param {function()} done
-   * @param {string=} opt_overrideUri
+   * @param {string=} overrideUri
    */
-  function testSucceedsWithEmptyLine(uri, done, opt_overrideUri) {
+  function testSucceedsWithEmptyLine(uri, done, overrideUri) {
     let request = shaka.net.NetworkingEngine.makeRequest(
         [uri], retryParameters);
     plugin(uri, request, requestType).promise
@@ -415,7 +415,7 @@ function httpPluginTests(usingFetch) {
         .then(function(response) {
           expect(mostRecentRequest().url).toBe(uri);
           expect(response).toBeTruthy();
-          expect(response.uri).toBe(opt_overrideUri || uri);
+          expect(response.uri).toBe(overrideUri || uri);
           expect(response.data).toBeTruthy();
           expect(response.fromCache).toBe(false);
           expect(response.headers).toBeTruthy();

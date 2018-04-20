@@ -100,20 +100,20 @@ shaka.test.Dash.testFails = function(done, manifestText, expectedError) {
  * Makes a simple manifest with the given representation contents.
  *
  * @param {!Array.<string>} lines
- * @param {number=} opt_duration
- * @param {number=} opt_start
+ * @param {number=} duration
+ * @param {number=} startTime
  * @return {string}
  */
 shaka.test.Dash.makeSimpleManifestText =
-    function(lines, opt_duration, opt_start) {
+    function(lines, duration, startTime) {
   let periodAttr = '';
   let mpdAttr = 'type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"';
-  if (opt_duration) {
-    periodAttr = 'duration="PT' + opt_duration + 'S"';
+  if (duration) {
+    periodAttr = 'duration="PT' + duration + 'S"';
     mpdAttr = 'type="static"';
   }
-  if (opt_start) {
-    periodAttr += ' start="PT' + opt_start + 'S"';
+  if (startTime) {
+    periodAttr += ' start="PT' + startTime + 'S"';
   }
 
   let start = [
@@ -159,14 +159,14 @@ shaka.test.Dash.makeManifestFromVariants = function(variants) {
  * @param {string} uri The URI of the initialization segment.
  * @param {number} startByte
  * @param {?number} endByte
- * @param {number=} opt_pto The presentationTimeOffset of the stream.
+ * @param {number=} pto The presentationTimeOffset of the stream.
  * @return {shaka.extern.Manifest}
  */
 shaka.test.Dash.makeManifestFromInit = function(
-    uri, startByte, endByte, opt_pto) {
+    uri, startByte, endByte, pto) {
   return shaka.test.Dash.makeManifestFromVariants([jasmine.objectContaining({
     video: jasmine.objectContaining({
-      presentationTimeOffset: (opt_pto || 0),
+      presentationTimeOffset: (pto || 0),
       createSegmentIndex: jasmine.any(Function),
       findSegmentPosition: jasmine.any(Function),
       initSegmentReference: new shaka.media.InitSegmentReference(
@@ -209,15 +209,15 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
     /**
      * @param {!Array.<string>} timeline
      * @param {string} testAttrs
-     * @param {number=} opt_dur
-     * @param {number=} opt_start
+     * @param {number=} dur
+     * @param {number=} startTime
      * @return {string}
      */
-    function makeManifestText(timeline, testAttrs, opt_dur, opt_start) {
+    function makeManifestText(timeline, testAttrs, dur, startTime) {
       let start = '<' + type + ' ' + extraAttrs + ' ' + testAttrs + '>';
       let end = '</' + type + '>';
       let lines = [].concat(start, extraChildren, timeline, end);
-      return Dash.makeSimpleManifestText(lines, opt_dur, opt_start);
+      return Dash.makeSimpleManifestText(lines, dur, startTime);
     }
 
     // All tests should have 5 segments and have the relative URIs:

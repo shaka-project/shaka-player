@@ -400,13 +400,13 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
   // Custom generators:
 
   let data = DATA['sintel'];
-  let period_duration = 10;
-  let num_periods = 10;
+  let periodDuration = 10;
+  let numPeriods = 10;
   let gen = new windowShaka.test.ManifestGenerator(shaka)
-      .setPresentationDuration(period_duration * num_periods);
+      .setPresentationDuration(periodDuration * numPeriods);
 
-  for (let i = 0; i < num_periods; i++) {
-    gen.addPeriod(period_duration * i);
+  for (let i = 0; i < numPeriods; i++) {
+    gen.addPeriod(periodDuration * i);
 
     gen.addVariant(2 * i).language('en');
     gen.addVideo(4 * i);

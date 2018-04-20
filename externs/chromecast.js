@@ -119,11 +119,11 @@ cast.receiver.CastReceiverManager.getInstance = function() {};
 
 /**
  * @param {string} namespace
- * @param {string=} opt_messageType
+ * @param {string=} messageType
  * @return {cast.receiver.CastMessageBus}
  */
 cast.receiver.CastReceiverManager.prototype.getCastMessageBus = function(
-    namespace, opt_messageType) {};
+    namespace, messageType) {};
 
 
 /** @return {Array.<string>} */
@@ -208,10 +208,10 @@ chrome.cast.initialize = function(apiConfig, successCallback, errorCallback) {};
 /**
  * @param {Function} successCallback
  * @param {Function} errorCallback
- * @param {chrome.cast.SessionRequest=} opt_sessionRequest
+ * @param {chrome.cast.SessionRequest=} sessionRequest
  */
 chrome.cast.requestSession = function(
-    successCallback, errorCallback, opt_sessionRequest) {};
+    successCallback, errorCallback, sessionRequest) {};
 
 
 
@@ -219,8 +219,8 @@ chrome.cast.requestSession = function(
  * @param {chrome.cast.SessionRequest} sessionRequest
  * @param {Function} sessionListener
  * @param {Function} receiverListener
- * @param {string=} opt_autoJoinPolicy
- * @param {string=} opt_defaultActionPolicy
+ * @param {string=} autoJoinPolicy
+ * @param {string=} defaultActionPolicy
  * @constructor
  * @struct
  */
@@ -228,19 +228,19 @@ chrome.cast.ApiConfig = function(
     sessionRequest,
     sessionListener,
     receiverListener,
-    opt_autoJoinPolicy,
-    opt_defaultActionPolicy) {};
+    autoJoinPolicy,
+    defaultActionPolicy) {};
 
 
 
 /**
  * @param {string} code
- * @param {string=} opt_description
- * @param {Object=} opt_details
+ * @param {string=} description
+ * @param {Object=} details
  * @constructor
  * @struct
  */
-chrome.cast.Error = function(code, opt_description, opt_details) {};
+chrome.cast.Error = function(code, description, details) {};
 
 
 /** @type {string} */

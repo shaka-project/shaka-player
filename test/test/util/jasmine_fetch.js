@@ -190,16 +190,15 @@ jasmine.Fetch.AbortController.prototype.abort = function() {
 
 
 /**
- * @param {(!Array<!Array<string>>|Headers|Object<string,string>)=} opt_headers
+ * @param {(!Array<!Array<string>>|Headers|Object<string,string>)=} headers
  *
  * @constructor
  * @struct
  */
-jasmine.Fetch.Headers = function(opt_headers) {
+jasmine.Fetch.Headers = function(headers) {
   this.contents = {};
 
-  if (opt_headers) {
-    let headers = opt_headers;
+  if (headers) {
     if (headers instanceof jasmine.Fetch.Headers) {
       // Extract contents, to be read as a generic object below.
       headers = headers.contents;

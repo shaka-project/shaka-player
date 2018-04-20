@@ -25,12 +25,12 @@ goog.provide('shaka.test.FakeNetworkingEngine');
  * A fake networking engine that returns constant data.  The request member
  * is a jasmine spy and can be used to check the actual calls that occurred.
  *
- * @param {Object.<string, !ArrayBuffer>=} opt_responseMap A map from URI to
+ * @param {Object.<string, !ArrayBuffer>=} responseMap A map from URI to
  *   the data to return.
- * @param {!ArrayBuffer=} opt_defaultResponse The default value to return; if
+ * @param {!ArrayBuffer=} defaultResponse The default value to return; if
  *   null, a jasmine expect will fail if a request is made that is not in
- *   |opt_data|.
- * @param {Object.<string, !Object.<string, string>>=} opt_headersMap
+ *   |data|.
+ * @param {Object.<string, !Object.<string, string>>=} headersMap
  *   A map from URI to the headers to return.
  *
  * @constructor
@@ -38,15 +38,15 @@ goog.provide('shaka.test.FakeNetworkingEngine');
  * @extends {shaka.net.NetworkingEngine}
  */
 shaka.test.FakeNetworkingEngine = function(
-    opt_responseMap, opt_defaultResponse, opt_headersMap) {
+    responseMap, defaultResponse, headersMap) {
   /** @private {!Object.<string, !ArrayBuffer>} */
-  this.responseMap_ = opt_responseMap || {};
+  this.responseMap_ = responseMap || {};
 
   /** @private {!Object.<string, !Object.<string, string>>} */
-  this.headersMap_ = opt_headersMap || {};
+  this.headersMap_ = headersMap || {};
 
   /** @private {ArrayBuffer} */
-  this.defaultResponse_ = opt_defaultResponse || null;
+  this.defaultResponse_ = defaultResponse || null;
 
   /** @private {?shaka.util.PublicPromise} */
   this.delayNextRequestPromise_ = null;

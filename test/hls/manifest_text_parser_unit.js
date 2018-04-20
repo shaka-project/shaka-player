@@ -362,10 +362,9 @@ describe('ManifestTextParser', function() {
   /**
    * @param {Object} expectedPlaylist
    * @param {string} playlistText
-   * @param {string=} opt_manifestUri
+   * @param {string=} manifestUri
    */
-  function verifyPlaylist(expectedPlaylist, playlistText, opt_manifestUri) {
-    let manifestUri = opt_manifestUri || '';
+  function verifyPlaylist(expectedPlaylist, playlistText, manifestUri = '') {
     let playlistBuffer = shaka.util.StringUtils.toUTF8(playlistText);
     let actualPlaylist = parser.parsePlaylist(playlistBuffer, manifestUri);
 

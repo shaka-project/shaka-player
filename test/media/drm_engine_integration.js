@@ -165,7 +165,7 @@ describe('DrmEngine', function() {
   });
 
   describe('basic flow', function() {
-    drm_it('gets a license and can play encrypted segments',
+    drmIt('gets a license and can play encrypted segments',
         checkAndRun((done) => {
           // The error callback should not be invoked.
           onErrorSpy.and.callFake(fail);

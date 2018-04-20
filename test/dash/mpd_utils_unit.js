@@ -727,12 +727,12 @@ describe('MpdUtils', function() {
     }
 
     /**
-     * @param {string=} opt_toReplaceOne
-     * @param {string=} opt_toReplaceTwo
+     * @param {string=} toReplaceOne
+     * @param {string=} toReplaceTwo
      * @return {string}
      * @private
      */
-    function inBaseContainer(opt_toReplaceOne, opt_toReplaceTwo) {
+    function inBaseContainer(toReplaceOne = '', toReplaceTwo = '') {
       let format =
           '<Container xmlns="urn:mpeg:dash:schema:mpd:2011" ' +
           'xmlns:xlink="http://www.w3.org/1999/xlink">' +
@@ -742,8 +742,8 @@ describe('MpdUtils', function() {
           '%(toReplaceTwo)s' +
           '</Container>';
       return sprintf(format, {
-        toReplaceOne: opt_toReplaceOne || '',
-        toReplaceTwo: opt_toReplaceTwo || ''});
+        toReplaceOne: toReplaceOne,
+        toReplaceTwo: toReplaceTwo});
     }
 
     function testRequest(baseXMLString) {

@@ -25,13 +25,13 @@ goog.provide('shaka.test.ManifestGenerator');
  * point and will apply to the most recent substructure.  For example, the
  * language() method sets the language of the most recent variant.
  *
- * @param {*=} opt_shaka
+ * @param {*=} shaka
  * @constructor
  * @struct
  */
-shaka.test.ManifestGenerator = function(opt_shaka) {
+shaka.test.ManifestGenerator = function(shaka) {
   /** @private {?} */
-  this.shaka_ = opt_shaka || window['shaka'];
+  this.shaka_ = shaka || window['shaka'];
 
   let timeline = new this.shaka_.media.PresentationTimeline(0, 0);
   timeline.setSegmentAvailabilityDuration(Infinity);
@@ -622,13 +622,13 @@ shaka.test.ManifestGenerator.prototype.presentationTimeOffset = function(pto) {
  * Sets the MIME type of the current stream.
  *
  * @param {string} mime
- * @param {string=} opt_codecs
+ * @param {string=} codecs
  * @return {!shaka.test.ManifestGenerator}
  */
-shaka.test.ManifestGenerator.prototype.mime = function(mime, opt_codecs) {
+shaka.test.ManifestGenerator.prototype.mime = function(mime, codecs) {
   let stream = this.currentStream_();
   stream.mimeType = mime;
-  stream.codecs = opt_codecs || '';
+  stream.codecs = codecs || '';
   return this;
 };
 

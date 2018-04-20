@@ -85,11 +85,11 @@ shaka.test.MemoryStorageEngine.prototype.updateManifest = function(
 
 /** @override */
 shaka.test.MemoryStorageEngine.prototype.removeManifests =
-    function(keys, opt_onRemoveKey) {
+    function(keys, onRemoveKey) {
   let noop = function(key) { };
 
   shaka.test.MemoryStorageEngine.removeKeys_(
-      this.manifests_, keys, opt_onRemoveKey || noop);
+      this.manifests_, keys, onRemoveKey || noop);
 
   return Promise.resolve();
 };
@@ -130,11 +130,11 @@ shaka.test.MemoryStorageEngine.prototype.addSegment = function(segment) {
 
 /** @override */
 shaka.test.MemoryStorageEngine.prototype.removeSegments =
-    function(keys, opt_onRemoveKey) {
+    function(keys, onRemoveKey) {
   let noop = function(key) { };
 
   shaka.test.MemoryStorageEngine.removeKeys_(
-      this.segments_, keys, opt_onRemoveKey || noop);
+      this.segments_, keys, onRemoveKey || noop);
 
   return Promise.resolve();
 };

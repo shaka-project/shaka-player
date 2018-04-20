@@ -47,7 +47,7 @@ shaka.offline.Storage.prototype.configure({
 
 // Store content and metadata.
 shaka.offline.Storage.prototype.store(manifestUri, appMetadata,
-opt_manifestParser) => Promise.<StoredContent>
+manifestParser) => Promise.<StoredContent>
 
 // Remove stored content and metadata.
 shaka.offline.Storage.prototype.remove(storedContent) => Promise

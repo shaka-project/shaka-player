@@ -307,7 +307,7 @@ describe('Player', function() {
       let testName =
           asset.source + ' / ' + asset.name + ' : ' + asset.manifestUri;
 
-      let wit = asset.focus ? fit : external_it;
+      let wit = asset.focus ? fit : externalIt;
       wit(testName, function(done) {
         if (asset.drm.length && !asset.drm.some(
             function(keySystem) { return support.drm[keySystem]; })) {

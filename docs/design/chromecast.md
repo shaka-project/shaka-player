@@ -66,7 +66,7 @@ shaka.cast.CastProxy.prototype.disconnect()
 #### `CastReceiver` API sketch
 
 ```js
-new shaka.cast.CastReceiver(video, player, opt_appDataCallback)
+new shaka.cast.CastReceiver(video, player, appDataCallback)
 
 // True if there are cast senders connected
 shaka.cast.CastReceiver.prototype.isConnected() => boolean

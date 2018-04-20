@@ -56,12 +56,12 @@ describe('CastReceiver', function() {
    * Before running the test, check if this is Chrome or Chromecast, and maybe
    * if Widevine is supported.
    * @param {function(function()=)} test
-   * @param {boolean=} opt_checkKeySystems
+   * @param {boolean=} checkKeySystems
    * @return {function(function())}
    */
-  function checkAndRun(test, opt_checkKeySystems) {
+  function checkAndRun(test, checkKeySystems) {
     let check = function(done) {
-      if (opt_checkKeySystems && !support['com.widevine.alpha']) {
+      if (checkKeySystems && !support['com.widevine.alpha']) {
         pending('Skipping DrmEngine tests.');
       } else if (!isChromecast && !isChrome) {
         pending(
@@ -84,7 +84,7 @@ describe('CastReceiver', function() {
   * @return {function(function())}
   */
  function checkAndRunWithDrm(test) {
-   return checkAndRun(test, /* opt_checkKeySystems */ true);
+   return checkAndRun(test, /* checkKeySystems */ true);
  }
 
   beforeAll(function(done) {
@@ -191,7 +191,7 @@ describe('CastReceiver', function() {
     }
   });
 
-  drm_it('sends reasonably-sized updates', checkAndRunWithDrm((done) => {
+  drmIt('sends reasonably-sized updates', checkAndRunWithDrm((done) => {
     // Use an encrypted asset, to make sure DRM info doesn't balloon the size.
     fakeInitState.manifest = 'test:sintel-enc';
 
@@ -213,7 +213,7 @@ describe('CastReceiver', function() {
     }, mockShakaMessageBus);
   }));
 
-  drm_it('has a reasonable average message size', checkAndRunWithDrm((done) => {
+  drmIt('has a reasonable average message size', checkAndRunWithDrm((done) => {
     // Use an encrypted asset, to make sure DRM info doesn't balloon the size.
     fakeInitState.manifest = 'test:sintel-enc';
 
@@ -391,12 +391,12 @@ describe('CastReceiver', function() {
   /**
    * @param {?} message
    * @param {!Object} bus
-   * @param {string=} opt_senderId
+   * @param {string=} senderId
    */
-  function fakeIncomingMessage(message, bus, opt_senderId) {
+  function fakeIncomingMessage(message, bus, senderId) {
     let serialized = CastUtils.serialize(message);
     let messageEvent = {
-      senderId: opt_senderId,
+      senderId: senderId,
       data: serialized
     };
     bus.onMessage(messageEvent);

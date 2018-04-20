@@ -1142,11 +1142,11 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
 
   /**
    * @param {string} uri
-   * @param {shaka.extern.RetryParameters=} opt_retryParameters
+   * @param {shaka.extern.RetryParameters=} retryParameters
    * @return {shaka.extern.Request}
    */
-  function createRequest(uri, opt_retryParameters) {
-    let retryParameters = opt_retryParameters ||
+  function createRequest(uri, retryParameters) {
+    retryParameters = retryParameters ||
                           shaka.net.NetworkingEngine.defaultRetryParameters();
     return shaka.net.NetworkingEngine.makeRequest([uri], retryParameters);
   }

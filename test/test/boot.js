@@ -39,12 +39,12 @@ function getClientArg(name) {
    * A version of assert() which hooks into jasmine and converts all failed
    * assertions into failed tests.
    * @param {*} condition
-   * @param {string=} opt_message
+   * @param {string=} message
    */
-  function jasmineAssert(condition, opt_message) {
-    realAssert(condition, opt_message);
+  function jasmineAssert(condition, message) {
+    realAssert(condition, message);
     if (!condition) {
-      let message = opt_message || 'Assertion failed.';
+      message = message || 'Assertion failed.';
       console.error(message);
       try {
         throw new Error(message);
@@ -156,7 +156,7 @@ function getClientArg(name) {
    * @param {string} name
    * @param {jasmine.Callback} callback
    */
-  window.external_it = function(name, callback) {
+  window.externalIt = function(name, callback) {
     it(name, filterShim(callback, 'external',
         'Skipping tests that use external content.'));
   };
@@ -167,7 +167,7 @@ function getClientArg(name) {
    * @param {string} name
    * @param {jasmine.Callback} callback
    */
-  window.drm_it = function(name, callback) {
+  window.drmIt = function(name, callback) {
     it(name, filterShim(callback, 'drm',
         'Skipping tests that use a DRM license server.'));
   };
@@ -178,7 +178,7 @@ function getClientArg(name) {
    * @param {string} name
    * @param {jasmine.Callback} callback
    */
-  window.quarantined_it = function(name, callback) {
+  window.quarantinedIt = function(name, callback) {
     it(name, filterShim(callback, 'quarantined',
         'Skipping tests that are quarantined.'));
   };

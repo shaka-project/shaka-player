@@ -317,16 +317,16 @@ shaka.test.FakeManifestParser.prototype.playerInterface;
 
 /**
  * Creates a fake video element.
- * @param {number=} opt_currentTime
+ * @param {number=} currentTime
  *
  * @constructor
  * @struct
  * @extends {HTMLVideoElement}
  * @return {!Object}
  */
-shaka.test.FakeVideo = function(opt_currentTime) {
+shaka.test.FakeVideo = function(currentTime) {
   let video = {
-    currentTime: opt_currentTime || 0,
+    currentTime: currentTime || 0,
     readyState: 0,
     playbackRate: 1,
     volume: 1,

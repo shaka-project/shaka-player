@@ -92,14 +92,14 @@ describe('DashParser Live', function() {
    *
    * @param {!Array.<string>} lines
    * @param {number?} updateTime
-   * @param {number=} opt_duration
+   * @param {number=} duration
    * @return {string}
    */
-  function makeSimpleLiveManifestText(lines, updateTime, opt_duration) {
+  function makeSimpleLiveManifestText(lines, updateTime, duration) {
     let updateAttr = updateTime != null ?
         'minimumUpdatePeriod="PT' + updateTime + 'S"' : '';
-    let durationAttr = opt_duration != undefined ?
-        'duration="PT' + opt_duration + 'S"' : '';
+    let durationAttr = duration != undefined ?
+        'duration="PT' + duration + 'S"' : '';
     let template = [
       '<MPD type="dynamic" %(updateAttr)s',
       '    availabilityStartTime="1970-01-01T00:00:00Z">',
