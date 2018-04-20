@@ -150,13 +150,14 @@ shakaDemo.onGapInput_ = function(event) {
  * @private
  */
 shakaDemo.onConfigInput_ = function(event) {
+  let preferredAudioChannelCount =
+      Number(document.getElementById('preferredAudioChannelCount').value) || 2;
   shakaDemo.player_.configure(/** @type {shakaExtern.PlayerConfiguration} */({
     preferredAudioLanguage:
         document.getElementById('preferredAudioLanguage').value,
     preferredTextLanguage:
         document.getElementById('preferredTextLanguage').value,
-    preferredAudioChannelCount:
-        document.getElementById('preferredAudioChannelCount').value,
+    preferredAudioChannelCount: preferredAudioChannelCount,
   }));
   // Change the hash, to mirror this.
   shakaDemo.hashShouldChange_();

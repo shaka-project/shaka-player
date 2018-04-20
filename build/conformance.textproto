@@ -120,6 +120,14 @@ requirement: {
 }
 
 
+# Disallow Input.valueAsNumber.
+requirement: {
+  type: BANNED_PROPERTY
+  value: 'HTMLInputElement.prototype.valueAsNumber'
+  error_message: '"Input.valueAsNumber" is not supported on IE11'
+}
+
+
 # Disallow fdescribe.
 requirement: {
   type: BANNED_NAME
