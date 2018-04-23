@@ -75,7 +75,10 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      // closure base first
+      // Babel polyfill, required for async/await
+      'node_modules/babel-polyfill/dist/polyfill.js',
+
+      // closure base
       'third_party/closure/goog/base.js',
 
       // deps next
@@ -113,6 +116,7 @@ module.exports = function(config) {
       {pattern: 'third_party/closure/goog/**/*.js', included: false},
       {pattern: 'test/test/assets/*', included: false},
       {pattern: 'dist/shaka-player.compiled.js', included: false},
+      {pattern: 'node_modules/**/*.js', included: false},
     ],
 
     // NOTE: Do not use proxies at all!  They cannot be used with the --hostname

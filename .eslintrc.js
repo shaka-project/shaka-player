@@ -23,6 +23,9 @@ module.exports = {
         "browser": true,
         "es6": true
     },
+    "parserOptions": {
+        "ecmaVersion": 2017
+    },
     "extends": ["eslint:recommended", "google"],
     "rules": {
         // Things the compiler already takes care of, with more precision: {{{
