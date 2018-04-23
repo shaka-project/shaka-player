@@ -1,3 +1,19 @@
+## 2.3.7 (2018-04-24)
+
+Bugfixes:
+  - Fixed manifest update frequency calculations
+    - https://github.com/google/shaka-player/issues/1399
+  - Fixed repeated seeking during HLS live streaming on Chromecast
+    - https://github.com/google/shaka-player/issues/1411
+
+Demo app:
+  - Fixed updating of the app URL on Android when pasting into the custom asset
+    field
+    - https://github.com/google/shaka-player/issues/1079
+  - Added Axinom live test assets
+    - https://github.com/google/shaka-player/pull/1409
+
+
 ## 2.3.6 (2018-04-11)
 
 Bugfixes:
