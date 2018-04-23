@@ -117,26 +117,21 @@ function getClientArg(name) {
    * @return {jasmine.Callback}
    */
   function filterShim(callback, clientArg, skipMessage) {
-    if (callback.length) {
-      // This callback is for an async test.  Replace it with an async shim.
-      return function(done) {
-        if (getClientArg(clientArg)) {
-          callback(done);
-        } else {
-          pending(skipMessage);
-          done();
-        }
-      };
-    } else {
-      // This callback is for a synchronous test.  Use a synchronous shim.
-      return function() {
-        if (getClientArg(clientArg)) {
-          callback();
-        } else {
-          pending(skipMessage);
-        }
-      };
-    }
+    return async function() {
+      if (!getClientArg(clientArg)) {
+        pending(skipMessage);
+        return;
+      }
+
+      if (callback.length) {
+        // If this has a done callback, wrap in a Promise so we can await it.
+        await new Promise((resolve) => callback(resolve));
+      } else {
+        // If this is an async test, this will wait for it to complete; if this
+        // is a synchronous test, await will do nothing.
+        await callback();
+      }
+    };
   }
 
   /**
