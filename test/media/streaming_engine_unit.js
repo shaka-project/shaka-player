@@ -636,7 +636,8 @@ describe('StreamingEngine', function() {
         if (playheadTime == 20) {
           mediaSourceEngine.clear.calls.reset();
           mediaSourceEngine.init.calls.reset();
-          streamingEngine.loadNewTextStream(textStream1);
+          streamingEngine.loadNewTextStream(textStream1,
+                                            /* createMediaState */ true);
           expect(mediaSourceEngine.clear).toHaveBeenCalledWith('text');
           expect(mediaSourceEngine.init).toHaveBeenCalledWith(
               {text: jasmine.any(Object)});
