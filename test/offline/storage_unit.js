@@ -752,7 +752,9 @@ describe('Storage', function() {
         // There should be way more than one segment.
         let keys = stream.segments.map((segment) => segment.dataKey);
         expect(keys.length).toBeGreaterThan(0);
-        await cell.removeSegments(keys);
+
+        const noop = () => {};
+        await cell.removeSegments(keys, noop);
       });
 
       await storage.remove(uri.toString());

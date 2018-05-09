@@ -279,9 +279,12 @@ shakaExtern.StorageCell.prototype.addSegments = function(segments) {};
  * is not found, then that removal should be considered successful.
  *
  * @param {!Array.<number>} keys
+ * @param {function(number)} onRemove A callback for when a segment is removed
+ *                                    from the cell. The key of the segment
+ *                                    will be passed to the callback.
  * @return {!Promise}
  */
-shakaExtern.StorageCell.prototype.removeSegments = function(keys) {};
+shakaExtern.StorageCell.prototype.removeSegments = function(keys, onRemove) {};
 
 
 /**
@@ -323,9 +326,13 @@ shakaExtern.StorageCell.prototype.updateManifestExpiration =
  * is not found, then that removal should be considered successful.
  *
  * @param {!Array.<number>} keys
+ * @param {function(number)} onRemove A callback for when a manifest is removed
+ *                                    from the cell. The key of the manifest
+ *                                    will be passed to the callback.
  * @return {!Promise}
  */
-shakaExtern.StorageCell.prototype.removeManifests = function(keys) {};
+shakaExtern.StorageCell.prototype.removeManifests =
+    function(keys, onRemove) {};
 
 
 /**

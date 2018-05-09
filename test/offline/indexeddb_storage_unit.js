@@ -25,6 +25,8 @@ describe('IndexeddbStorageCell', function() {
   const segmentStore = 'segment-store';
   const manifestStore = 'manifest-store';
 
+  const noop = () => {};
+
   /** @type {!Array.<shakaExtern.StorageCell>} */
   let cells = [];
 
@@ -78,7 +80,7 @@ describe('IndexeddbStorageCell', function() {
       OfflineUtils.expectSegmentToEqual(found[1], segments[1]);
       OfflineUtils.expectSegmentToEqual(found[2], segments[2]);
 
-      return cell.removeSegments(keys);
+      return cell.removeSegments(keys, noop);
     }).then(() => {
       // The get should fail as there should be no entries under the keys
       // anymore.
@@ -121,7 +123,7 @@ describe('IndexeddbStorageCell', function() {
       expect(found[1]).toEqual(manifests[1]);
       expect(found[2]).toEqual(manifests[2]);
 
-      return cell.removeManifests(keys);
+      return cell.removeManifests(keys, noop);
     }).then(() => {
       // The get should fail as there should be no entries under the keys
       // anymore.
