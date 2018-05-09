@@ -3121,6 +3121,53 @@ describe('Player', function() {
       // Before the fix, load() would fail assertions and throw errors.
       player.load('', 0, parserFactory).catch(fail).then(done);
     });
+
+    it('respects startTime of 0', async () => {
+      // What we shouldn't do is treat start time of 0 as the same as startTime
+      // of null/undefined.  0 means timestamp 0, whereas null/undefined means
+      // "default".  For VOD, the default is 0, but for live streams, the
+      // default is the live edge.
+
+      // Create a live timeline and manifest.
+      let timeline = new shaka.media.PresentationTimeline(300, 0);
+      timeline.setStatic(false);
+
+      manifest = new shaka.test.ManifestGenerator()
+          .setTimeline(timeline)
+          .addPeriod(0)
+            .addVariant(0)
+            .addVideo(1)
+          .build();
+
+      let parser = new shaka.test.FakeManifestParser(manifest);
+      let parserFactory = function() { return parser; };
+
+      // To ensure that Playhead is correctly created, we must use the original
+      // playhead injector.  To inspect the real Playhead instance, though, we
+      // must shim this method and keep a copy of the real Playhead.  Otherwise,
+      // we would be merely inspecting the mock Playhead.
+      /** @type {shaka.media.Playhead} */
+      let realPlayhead = null;
+
+      /**
+       * @this {shaka.Player}
+       * @return {!shaka.media.Playhead}
+       */
+      player.createPlayhead = function() {
+        realPlayhead =
+            shaka.Player.prototype.createPlayhead.apply(this, arguments);
+        return realPlayhead;
+      };
+
+      await player.load('', /* startTime */ 0, parserFactory);
+
+      // Ensure this is seen as a live stream, or else the test is invalid.
+      expect(player.isLive()).toBe(true);
+
+      // If startTime of 0 was treated as null, then getTime() would point to
+      // the live edge instead of 0.
+      expect(realPlayhead.getTime()).toBe(0);
+    });
   });
 
   describe('language methods', function() {
