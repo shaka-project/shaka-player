@@ -106,7 +106,8 @@ describe('OfflineManifestParser', function() {
           handle.path.mechanism, handle.path.cell, keys[0]);
 
       // Remove the manifest so that the uri will point to nothing.
-      await handle.cell.removeManifests(keys);
+      const noop = () => {};
+      await handle.cell.removeManifests(keys, noop);
     });
 
     try {
@@ -149,7 +150,8 @@ describe('OfflineManifestParser', function() {
 
           // Remove the manifest after we have parsed it so that the
           // update won't find it. Oh, we are sneaky.
-          await handle.cell.removeManifests(keys);
+          const noop = () => {};
+          await handle.cell.removeManifests(keys, noop);
           await parser.onExpirationUpdated(sessionId, newExpiration);
         });
       }));

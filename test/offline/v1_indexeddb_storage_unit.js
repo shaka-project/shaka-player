@@ -170,8 +170,9 @@ describe('V1IndexeddbStorageCell', function() {
     expect(segmentKeys.length).toBe(6);
 
     // Remove all the segments.
-    await cell.removeManifests(manifestKeys);
-    await cell.removeSegments(segmentKeys);
+    const noop = () => {};
+    await cell.removeManifests(manifestKeys, noop);
+    await cell.removeSegments(segmentKeys, noop);
 
     let checkMissingSegment = async (key) => {
       try {
