@@ -244,17 +244,27 @@ function getIdentifierString(node) {
  */
 function getFunctionParameters(node) {
   console.assert(node.type == 'FunctionExpression');
-  // Example code: function(x, y) {...}
+  // Example code: function(x, y, z = null) {...}
   // Example node: {
   //   params: [
   //     { type: 'Identifier', name: 'x' },
   //     { type: 'Identifier', name: 'y' },
+  //     {
+  //       type: 'AssignmentPattern',
+  //       left: { type: 'Identifier', name: 'z' },
+  //       right: { type: 'Literal', raw: 'null' },
+  //     },
   //   ],
   //   body: {...},
   // }
   return node.params.map(function(param) {
-    console.assert(param.type == 'Identifier');
-    return param.name;
+    console.assert(param.type == 'Identifier' ||
+                   param.type == 'AssignmentPattern');
+    if (param.type == 'Identifier') {
+      return param.name;
+    } else if (param.type == 'AssignmentPattern') {
+      return param.left.name;
+    }
   });
 }
 
