@@ -123,9 +123,9 @@ shakaExtern.Response;
 /**
  * Defines a plugin that handles a specific scheme.
  *
- * @typedef {!function(string,
- *                     shakaExtern.Request,
- *                     shaka.net.NetworkingEngine.RequestType):
+ * @typedef {function(string,
+ *                    shakaExtern.Request,
+ *                    shaka.net.NetworkingEngine.RequestType):
  *     !Promise.<shakaExtern.Response>}
  * @exportDoc
  */
@@ -138,8 +138,8 @@ shakaExtern.SchemePlugin;
  * A request filter can run asynchronously by returning a promise; in this case,
  * the request will not be sent until the promise is resolved.
  *
- * @typedef {!function(shaka.net.NetworkingEngine.RequestType,
- *                     shakaExtern.Request):
+ * @typedef {function(shaka.net.NetworkingEngine.RequestType,
+ *                    shakaExtern.Request):
              (Promise|undefined)}
  * @exportDoc
  */
@@ -151,8 +151,8 @@ shakaExtern.RequestFilter;
  * it before it is returned.
  * A response filter can run asynchronously by returning a promise.
  *
- * @typedef {!function(shaka.net.NetworkingEngine.RequestType,
- *                     shakaExtern.Response):
+ * @typedef {function(shaka.net.NetworkingEngine.RequestType,
+ *                    shakaExtern.Response):
               (Promise|undefined)}
  * @exportDoc
  */

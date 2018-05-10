@@ -70,7 +70,7 @@ shakaExtern.Cue.prototype.endTime;
 
 /**
  * The text payload of the cue.
- * @type {!string}
+ * @type {string}
  */
 shakaExtern.Cue.prototype.payload;
 
@@ -161,7 +161,7 @@ shakaExtern.Cue.prototype.displayAlign;
  * Text color represented by any string that would be
  * accepted in CSS.
  * E. g. '#FFFFFF' or 'white'.
- * @type {!string}
+ * @type {string}
  */
 shakaExtern.Cue.prototype.color;
 
@@ -170,7 +170,7 @@ shakaExtern.Cue.prototype.color;
  * Text background color represented by any string that would be
  * accepted in CSS.
  * E. g. '#FFFFFF' or 'white'.
- * @type {!string}
+ * @type {string}
  */
 shakaExtern.Cue.prototype.backgroundColor;
 
@@ -198,7 +198,7 @@ shakaExtern.Cue.prototype.fontStyle;
 
 /**
  * Text font family.
- * @type {!string}
+ * @type {string}
  */
 shakaExtern.Cue.prototype.fontFamily;
 
@@ -221,7 +221,7 @@ shakaExtern.Cue.prototype.wrapLine;
 
 /**
  * Id of the cue.
- * @type {!string}
+ * @type {string}
  */
 shakaExtern.Cue.prototype.id;
 

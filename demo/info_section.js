@@ -99,7 +99,7 @@ shakaDemo.updateTextTracks_ = function() {
 /**
  * @param {Element} list
  * @param {!Array.<!shakaExtern.Track>} tracks
- * @param {!string} languageAndRole
+ * @param {string} languageAndRole
  * @private
  */
 shakaDemo.updateTrackOptions_ = function(list, tracks, languageAndRole) {

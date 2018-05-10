@@ -744,6 +744,7 @@ describe('Promise polyfill', function() {
    * @return {{
    *   promise: shaka.polyfill.Promise,
    *   resolve: function(*=),
+   *   resolved: boolean,
    *   reject: function(*=)
    * }}
    */
@@ -758,6 +759,7 @@ describe('Promise polyfill', function() {
     return {
       promise: p,
       resolve: resolveLocal,
+      resolved: false,
       reject: rejectLocal
     };
   }

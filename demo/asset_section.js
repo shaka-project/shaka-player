@@ -131,7 +131,7 @@ shakaDemo.onAssetInput_ = function(event) {
 
 
 /**
- * @param {!string} uri
+ * @param {string} uri
  * @return {!Promise.<ArrayBuffer>}
  * @private
  */
