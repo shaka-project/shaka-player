@@ -55,6 +55,6 @@
   },
   "license": "Apache-2.0",
   "scripts": {
-    "prepublish": "in-publish && python build/checkversion.py && python build/docs.py && python build/all.py --force || not-in-publish"
+    "prepublish": "in-publish && python build/checkversion.py && python build/all.py --force || not-in-publish"
   }
 }

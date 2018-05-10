@@ -19,6 +19,7 @@
 import argparse
 import build
 import check
+import docs
 import gendeps
 import shakaBuildHelpers
 
@@ -53,6 +54,11 @@ def main(args):
     return code
 
   code = check.main([])
+  if code != 0:
+    return code
+
+  docs_args = []
+  code = docs.build_docs(docs_args)
   if code != 0:
     return code
 
