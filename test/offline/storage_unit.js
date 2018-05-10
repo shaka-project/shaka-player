@@ -35,6 +35,108 @@ describe('Storage', function() {
 
   const kbps = 1000;
 
+  describe('storage delete all', function() {
+    /** @type {!shaka.Player} */
+    let player;
+
+    beforeEach(function() {
+      // Use a real Player since Storage only uses the configuration and
+      // networking engine.  This allows us to use Player.configure in these
+      // tests.
+      player = new shaka.Player(new shaka.test.FakeVideo());
+    });
+
+    afterEach(async function() {
+      await player.destroy();
+    });
+
+    it('removes all content from storage', checkAndRun(async function() {
+      const TestManifestParser = shaka.test.TestScheme.ManifestParser;
+      const manifestUri = 'test:sintel';
+
+      // Store a piece of content.
+      await withStorage((storage) => {
+        return storage.store(manifestUri, noMetadata, TestManifestParser);
+      });
+
+      // Make sure that the content can be found.
+      await withStorage(async (storage) => {
+        let content = await storage.list();
+        expect(content).toBeTruthy();
+        expect(content.length).toBe(1);
+      });
+
+      // Ask storage to erase everything.
+      await shaka.offline.Storage.deleteAll(player);
+
+      // Make sure that all content that was previously found is no gone.
+      await withStorage(async (storage) => {
+        let content = await storage.list();
+        expect(content).toBeTruthy();
+        expect(content.length).toBe(0);
+      });
+    }));
+
+    drm_it('removes licenses', drmCheckAndRun(async function() {
+      const TestManifestParser = shaka.test.TestScheme.ManifestParser;
+      const manifestUri = 'test:sintel-enc';
+
+      // PART 1 - Store a piece of content.
+      let storedContent = await withStorage((storage) => {
+        return storage.store(manifestUri, noMetadata, TestManifestParser);
+      });
+
+      let offlineUri = shaka.offline.OfflineUri.parse(storedContent.offlineUri);
+      goog.asserts.assert(offlineUri, 'Store should give us a valid uri');
+      expect(offlineUri).toBeTruthy();
+      expect(offlineUri.isManifest()).toBeTruthy();
+
+      /** @type {!shakaExtern.Manifest} */
+      let manifest = await getStoredManifest(offlineUri);
+      expect(manifest);
+      expect(manifest.offlineSessionIds).toBeTruthy();
+      expect(manifest.offlineSessionIds.length).toBeTruthy();
+
+      // PART 2 - Check that the licences are stored.
+      await withDrm(player, manifest, (drm) => {
+        return Promise.all(manifest.offlineSessionIds.map(async (session) => {
+          let foundSession = await loadOfflineSession(drm, session);
+          expect(foundSession).toBeTruthy();
+        }));
+      });
+
+      // PART 3 - Ask storage to erase everything.
+      await shaka.offline.Storage.deleteAll(player);
+
+      // PART 4 - Check that the licenses were removed.
+      try {
+        await withDrm(player, manifest, (drm) => {
+          return Promise.all(manifest.offlineSessionIds.map(async (session) => {
+            let notFoundSession = await loadOfflineSession(drm, session);
+            expect(notFoundSession).toBeFalsy();
+          }));
+        });
+
+        return Promise.reject('Expected drm to throw OFFLINE_SESSION_REMOVED');
+      } catch (e) {
+        expect(e).toBeTruthy();
+        expect(e.code).toBe(shaka.util.Error.Code.OFFLINE_SESSION_REMOVED);
+      }
+    }));
+
+    /**
+     * @param {function(!shaka.offline.Storage)|
+     *         function(!shaka.offline.Storage):!Promise} action
+     * @return {!Promise}
+     */
+    function withStorage(action) {
+      let storage = new shaka.offline.Storage(player);
+      return shaka.util.IDestroyable.with([storage], () => {
+        return action(storage);
+      });
+    }
+  });
+
   describe('persistent license', function() {
     /** @type {!shaka.Player} */
     let player;
@@ -62,7 +164,6 @@ describe('Storage', function() {
 
     drm_it('removes persistent license', drmCheckAndRun(async function() {
       const TestManifestParser = shaka.test.TestScheme.ManifestParser;
-      const storeOfflineLicense = true;
 
       // PART 1 - Download and store content that has a persistent license
       //          associated with it.
@@ -78,50 +179,32 @@ describe('Storage', function() {
       expect(manifest.offlineSessionIds).toBeTruthy();
       expect(manifest.offlineSessionIds.length).toBeTruthy();
 
-      let error = null;
-
-      /** @type {function():!shaka.media.DrmEngine} */
-      let getDrm = () => {
-        let drm = new shaka.media.DrmEngine({
-          netEngine: getNetEngine(player),
-          onError: (e) => { error = error || e; },
-          onKeyStatus: () => {},
-          onExpirationUpdated: () => {},
-          onEvent: () => {}
-        });
-        drm.configure(player.getConfiguration().drm);
-
-        return drm;
-      };
-
       // PART 2 - Check that the licences are stored.
-      let drm = getDrm();
-      await shaka.util.IDestroyable.with([drm], async () => {
-        await drm.init(manifest, storeOfflineLicense);
-        await Promise.all(manifest.offlineSessionIds.map(async (session) => {
+      await withDrm(player, manifest, (drm) => {
+        return Promise.all(manifest.offlineSessionIds.map(async (session) => {
           let foundSession = await loadOfflineSession(drm, session);
           expect(foundSession).toBeTruthy();
         }));
       });
-
-      expect(error).toBeFalsy();
 
       // PART 3 - Remove the manifest from storage. This should remove all the
       // sessions.
       await storage.remove(uri.toString());
 
       // PART 4 - Check that the licenses were removed.
-      drm = getDrm();
-      await shaka.util.IDestroyable.with([drm], async () => {
-        await drm.init(manifest, storeOfflineLicense);
-        await Promise.all(manifest.offlineSessionIds.map(async (session) => {
-          let notFoundSession = await loadOfflineSession(drm, session);
-          expect(notFoundSession).toBeFalsy();
-        }));
-      });
+      try {
+        await withDrm(player, manifest, (drm) => {
+          return Promise.all(manifest.offlineSessionIds.map(async (session) => {
+            let notFoundSession = await loadOfflineSession(drm, session);
+            expect(notFoundSession).toBeFalsy();
+          }));
+        });
 
-      expect(error).toBeTruthy();
-      expect(error.code).toBe(shaka.util.Error.Code.OFFLINE_SESSION_REMOVED);
+        return Promise.reject('Expected drm to throw OFFLINE_SESSION_REMOVED');
+      } catch (e) {
+        expect(e).toBeTruthy();
+        expect(e.code).toBe(shaka.util.Error.Code.OFFLINE_SESSION_REMOVED);
+      }
     }));
   });
 
@@ -1115,12 +1198,38 @@ describe('Storage', function() {
 
   /**
    * @param {!shaka.Player} player
-   * @return {!shaka.net.NetworkingEngine}
+   * @param {shakaExtern.Manifest} manifest
+   * @param {function(!shaka.media.DrmEngine):Promise} action
+   * @return {!Promise}
    */
-  function getNetEngine(player) {
+  function withDrm(player, manifest, action) {
+    const offlineLicense = true;
+
     let net = player.getNetworkingEngine();
     goog.asserts.assert(net, 'Player should have a net engine right now');
-    return net;
+
+    let error = null;
+
+    let drm = new shaka.media.DrmEngine({
+      netEngine: net,
+      onError: (e) => { error = error || e; },
+      onKeyStatus: () => {},
+      onExpirationUpdated: () => {},
+      onEvent: () => {}
+    });
+
+    return shaka.util.IDestroyable.with([drm], async () => {
+      drm.configure(player.getConfiguration().drm);
+      await drm.init(manifest, offlineLicense);
+
+      return action(drm);
+    }).then((result) => {
+      if (error) {
+        throw error;
+      }
+
+      return result;
+    });
   }
 
   /**

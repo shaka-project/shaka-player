@@ -41,7 +41,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
 
     if (supportsStorage()) {
       // Make sure we are starting with a blank slate.
-      await clearStorage();
+      await shaka.offline.Storage.deleteAll(player);
       storage = new shaka.offline.Storage(player);
     }
   });
@@ -51,13 +51,13 @@ describe('Offline', /** @suppress {accessControls} */ function() {
       await storage.destroy();
     }
 
-    if (player) {
-      await player.destroy();
-    }
-
     // Make sure we don't leave anything in storage after the test.
     if (supportsStorage()) {
-      await clearStorage();
+      await shaka.offline.Storage.deleteAll(player);
+    }
+
+    if (player) {
+      await player.destroy();
     }
   });
 
@@ -161,13 +161,6 @@ describe('Offline', /** @suppress {accessControls} */ function() {
         await player.unload();
         await storage.remove(contentUri);
       });
-
-  /**
-   * @return {!Promise}
-   */
-  function clearStorage() {
-    return shaka.offline.Storage.deleteAll();
-  }
 
   /** @return {boolean} */
   function supportsStorage() {
