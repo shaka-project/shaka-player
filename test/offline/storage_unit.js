@@ -759,6 +759,51 @@ describe('Storage', function() {
 
       await storage.remove(uri.toString());
     }));
+
+    it('tracks progress on remove', checkAndRun(async function() {
+      let selectOneTrack = (tracks) => {
+        let allVariants = tracks.filter((t) => {
+          return t.type == 'variant';
+        });
+        expect(allVariants).toBeTruthy();
+        expect(allVariants.length).toBeGreaterThan(0);
+
+        let frenchVariants = allVariants.filter((t) => {
+          return t.language == frenchCanadian;
+        });
+        expect(frenchVariants).toBeTruthy();
+        expect(frenchVariants.length).toBe(1);
+
+        return frenchVariants;
+      };
+
+      // Store a manifest with one track. We are using only one track so that it
+      // will be easier to understand the progress values.
+      storage.configure({trackSelectionCallback: selectOneTrack});
+      let content = await storage.store(
+          manifestWithPerStreamBandwidthUri,
+          noMetadata,
+          FakeManifestParser);
+
+      /**
+       * @type {!Array.<number>}
+       */
+      let progressSteps = [
+        0.111, 0.222, 0.333, 0.444, 0.555, 0.666, 0.777, 0.888, 1.0
+      ];
+
+      let progressCallback = (content, progress) => {
+        expect(progress).toBeCloseTo(progressSteps.shift());
+      };
+
+      storage.configure({
+        progressCallback: progressCallback
+      });
+
+      await storage.remove(content.offlineUri);
+      expect(progressSteps).toBeTruthy();
+      expect(progressSteps.length).toBe(0);
+    }));
   });
 
   /**
