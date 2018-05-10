@@ -83,7 +83,7 @@ describe('Storage', function() {
       /** @type {function():!shaka.media.DrmEngine} */
       let getDrm = () => {
         let drm = new shaka.media.DrmEngine({
-          netEngine: player.getNetworkingEngine(),
+          netEngine: getNetEngine(player),
           onError: (e) => { error = error || e; },
           onKeyStatus: () => {},
           onExpirationUpdated: () => {},
@@ -1113,6 +1113,16 @@ describe('Storage', function() {
         uri.mechanism(), uri.cell());
 
     return converter.fromManifestDB(manifestDB);
+  }
+
+  /**
+   * @param {!shaka.Player} player
+   * @return {!shaka.net.NetworkingEngine}
+   */
+  function getNetEngine(player) {
+    let net = player.getNetworkingEngine();
+    goog.asserts.assert(net, 'Player should have a net engine right now');
+    return net;
   }
 
   /**
