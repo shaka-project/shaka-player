@@ -667,7 +667,7 @@ describe('Storage', function() {
     it('stops for networking errors', checkAndRun(async function() {
       // Force all network requests to fail.
       netEngine.request.and.callFake(() => {
-        return shaka.util.AbortableOperation.failed(new shaka.util.Error(
+        return Promise.reject(new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.NETWORK,
             shaka.util.Error.Code.HTTP_ERROR

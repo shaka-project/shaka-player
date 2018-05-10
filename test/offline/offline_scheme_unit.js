@@ -35,7 +35,7 @@ describe('OfflineScheme', function() {
             'mechanism', 'cell', 1024);
 
         let response = await shaka.offline.OfflineScheme(
-            uri.toString(), request).promise;
+            uri.toString(), request);
 
         expect(response).toBeTruthy();
         expect(response.uri).toBe(uri.toString());
@@ -60,7 +60,7 @@ describe('OfflineScheme', function() {
     });
 
     let response = await shaka.offline.OfflineScheme(
-        uri.toString(), request).promise;
+        uri.toString(), request);
 
     expect(response).toBeTruthy();
     expect(response.data.byteLength).toBe(segment.data.byteLength);
@@ -86,7 +86,7 @@ describe('OfflineScheme', function() {
     });
 
     try {
-      await shaka.offline.OfflineScheme(uri.toString(), request).promise;
+      await shaka.offline.OfflineScheme(uri.toString(), request);
       fail();
     } catch (e) {
       expect(e.code).toBe(shaka.util.Error.Code.KEY_NOT_FOUND);
@@ -98,7 +98,7 @@ describe('OfflineScheme', function() {
     const uri = 'this-in-an-invalid-uri';
 
     try {
-      await shaka.offline.OfflineScheme(uri, request).promise;
+      await shaka.offline.OfflineScheme(uri, request);
       fail();
     } catch (e) {
       expect(e.code).toBe(shaka.util.Error.Code.MALFORMED_OFFLINE_URI);
