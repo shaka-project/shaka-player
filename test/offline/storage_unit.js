@@ -356,7 +356,8 @@ describe('Storage', function() {
           progressCallback: progressCallback
         });
 
-        // Store manifest 1 as it will have per-stream bandwidth.
+        // Store a manifest with per stream bandwidth. This should result with
+        // a more accurate progression of progress values.
         await storage.store(
             manifestWithPerStreamBandwidthUri, noMetadata, FakeManifestParser);
         expect(progressSteps.length).toBe(0);
@@ -400,7 +401,9 @@ describe('Storage', function() {
               progressCallback: progressCallback
             });
 
-            // Store manifest 2 as it won't have per-stream bandwidth.
+            // Store a manifest with bandwidth only for the variant (no per
+            // stream bandwidth). This should result in a less accurate
+            // progression of progress values as default values will be used.
             await storage.store(
                 manifestWithoutPerStreamBandwidthUri,
                 noMetadata,
@@ -410,36 +413,30 @@ describe('Storage', function() {
     });
 
     it('stores and lists content', checkAndRun(async function() {
-      // Manifest 1 and 2 use zero start times.
-      await storage.store(
-          manifestWithPerStreamBandwidthUri,
-          noMetadata,
-          FakeManifestParser);
-      await storage.store(
-          manifestWithoutPerStreamBandwidthUri,
-          noMetadata,
-          FakeManifestParser);
-      // Make sure to use manifest 3 as it has a non-zero start time.
-      await storage.store(
-          manifestWithNonZeroStartUri,
-          noMetadata,
-          FakeManifestParser);
+      // Just use any three manifests as we don't care about the manifests
+      // right now.
+      const manifestUris = [
+        manifestWithPerStreamBandwidthUri,
+        manifestWithoutPerStreamBandwidthUri,
+        manifestWithNonZeroStartUri
+      ];
+
+      // TODO(vaage): This can be changed to use Array.map once storage is
+      //              allowed to do multiple store command on the same instance.
+      await storage.store(manifestUris[0], noMetadata, FakeManifestParser);
+      await storage.store(manifestUris[1], noMetadata, FakeManifestParser);
+      await storage.store(manifestUris[2], noMetadata, FakeManifestParser);
 
       let content = await storage.list();
-
       expect(content).toBeTruthy();
-      expect(content.length).toBe(3);
 
-      expect(content[0]).toBeTruthy();
-      expect(content[0].originalManifestUri)
-          .toBe(manifestWithPerStreamBandwidthUri);
+      let originalUris = content.map((c) => c.originalManifestUri);
+      expect(originalUris).toBeTruthy();
+      expect(originalUris.length).toBe(3);
 
-      expect(content[1]).toBeTruthy();
-      expect(content[1].originalManifestUri)
-          .toBe(manifestWithoutPerStreamBandwidthUri);
-
-      expect(content[2]).toBeTruthy();
-      expect(content[2].originalManifestUri).toBe(manifestWithNonZeroStartUri);
+      originalUris.forEach((uri) => {
+        expect(originalUris).toContain(uri);
+      });
     }));
 
     it('only stores chosen tracks', checkAndRun(async function() {
@@ -744,7 +741,7 @@ describe('Storage', function() {
         let manifest = manifests[0];
 
         // Get the stream from the manifest. The segment count is based on how
-        // we created manifest 1.
+        // we created manifest in the "make*Manifest" functions.
         let stream = manifest.periods[0].streams[0];
         expect(stream).toBeTruthy();
         expect(stream.segments.length).toBe(4);
