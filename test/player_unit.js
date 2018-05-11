@@ -630,6 +630,27 @@ describe('Player', function() {
           p.resolve();
         });
       });
+
+      it('StreamingEngine init w/ exception', function(done) {
+        // Block StreamingEngine init.
+        let p = new shaka.util.PublicPromise();
+        streamingEngine.init.and.returnValue(p);
+
+        player.load('', 0, factory1).then(fail).catch(Util.spyFunc(checkError))
+            .then(done);
+
+        shaka.test.Util.delay(1.5).then(function() {
+          // Make sure we're blocked.
+          expect(streamingEngine.init).toHaveBeenCalled();
+          // Interrupt load().
+          player.unload();
+          // Fail StreamingEngine init with an exception.
+          p.reject(new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
+              shaka.util.Error.Category.MANIFEST,
+              shaka.util.Error.Code.OPERATION_ABORTED));
+        });
+      });
     });  // describe('interruption during')
   });  // describe('load/unload')
 
