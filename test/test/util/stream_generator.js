@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.test.DashLiveStreamGenerator');
-goog.provide('shaka.test.DashVodStreamGenerator');
 goog.provide('shaka.test.IStreamGenerator');
+goog.provide('shaka.test.Mp4LiveStreamGenerator');
+goog.provide('shaka.test.Mp4VodStreamGenerator');
 goog.provide('shaka.test.StreamGenerator');
+goog.provide('shaka.test.TSVodStreamGenerator');
 
 
 
@@ -73,7 +74,53 @@ shaka.test.IStreamGenerator.prototype.getSegment = function(
 
 
 /**
- * Creates a DashVodStreamGenerator, which simulates a DASH, video-on-demand,
+ * Creates an TSVodStreamGenerator, which simulates an HLS, video-on-demand,
+ * ts stream.
+ *
+ * The StreamGenerator assumes the stream contains a single segment.
+ *
+ * @param {string} segmentUri The URI of the segment.
+ *
+ * @constructor
+ * @struct
+ * @implements {shaka.test.IStreamGenerator}
+ */
+shaka.test.TSVodStreamGenerator = function(segmentUri) {
+  /** @private {string} */
+  this.segmentUri_ = segmentUri;
+
+  /** @private {ArrayBuffer} */
+  this.segment_ = null;
+};
+
+
+/** @override */
+shaka.test.TSVodStreamGenerator.prototype.init = function() {
+  return shaka.test.Util.fetch(this.segmentUri_).then((segment) => {
+    this.segment_ = segment;
+  });
+};
+
+/** @override */
+shaka.test.TSVodStreamGenerator.prototype.getInitSegment = function(time) {
+  goog.asserts.assert(false, 'getInitSegment not implemented for HLS VOD.');
+  return new ArrayBuffer(0);
+};
+
+/** @override */
+shaka.test.TSVodStreamGenerator.prototype.getSegment = function(
+    position, segmentOffset, wallClockTime) {
+  goog.asserts.assert(
+      this.segment_,
+      'init() must be called before getSegment().');
+  // TODO: complete implementation; this should change the timestamps based on
+  // the given segmentOffset and wallClockTime, so as to simulate a long stream.
+  return this.segment_;
+};
+
+
+/**
+ * Creates a Mp4VodStreamGenerator, which simulates a DASH, video-on-demand,
  * MP4 stream.
  *
  * The StreamGenerator loops a single segment.
@@ -91,7 +138,7 @@ shaka.test.IStreamGenerator.prototype.getSegment = function(
  * @struct
  * @implements {shaka.test.IStreamGenerator}
  */
-shaka.test.DashVodStreamGenerator = function(
+shaka.test.Mp4VodStreamGenerator = function(
     initSegmentUri,
     mvhdOffset,
     segmentTemplateUri,
@@ -134,8 +181,8 @@ shaka.test.DashVodStreamGenerator = function(
 
 
 /** @override */
-shaka.test.DashVodStreamGenerator.prototype.init = function() {
-  var async = [
+shaka.test.Mp4VodStreamGenerator.prototype.init = function() {
+  let async = [
     shaka.test.Util.fetch(this.initSegmentUri_),
     shaka.test.Util.fetch(this.segmentTemplateUri_)
   ];
@@ -153,7 +200,7 @@ shaka.test.DashVodStreamGenerator.prototype.init = function() {
 
 
 /** @override */
-shaka.test.DashVodStreamGenerator.prototype.getInitSegment = function(time) {
+shaka.test.Mp4VodStreamGenerator.prototype.getInitSegment = function(time) {
   goog.asserts.assert(
       this.initSegment_,
       'init() must be called before getInitSegment().');
@@ -162,7 +209,7 @@ shaka.test.DashVodStreamGenerator.prototype.getInitSegment = function(time) {
 
 
 /** @override */
-shaka.test.DashVodStreamGenerator.prototype.getSegment = function(
+shaka.test.Mp4VodStreamGenerator.prototype.getSegment = function(
     position, segmentOffset, wallClockTime) {
   goog.asserts.assert(
       this.segmentTemplate_,
@@ -173,9 +220,9 @@ shaka.test.DashVodStreamGenerator.prototype.getSegment = function(
   goog.asserts.assert((position % 1 === 0) && (position >= 1),
                       'segment number must be an integer >= 1');
 
-  var segmentStartTime = (position - 1) * this.segmentDuration_;
+  let segmentStartTime = (position - 1) * this.segmentDuration_;
 
-  var mediaTimestamp = segmentStartTime + this.presentationTimeOffset_;
+  let mediaTimestamp = segmentStartTime + this.presentationTimeOffset_;
 
   return shaka.test.StreamGenerator.setBaseMediaDecodeTime_(
       this.segmentTemplate_, this.tfdtOffset_, mediaTimestamp, this.timescale_);
@@ -184,7 +231,7 @@ shaka.test.DashVodStreamGenerator.prototype.getSegment = function(
 
 
 /**
- * Creates a DashLiveStreamGenerator, which simulates a DASH, live, MP4 stream.
+ * Creates a Mp4LiveStreamGenerator, which simulates a DASH, live, MP4 stream.
  *
  * @param {string} initSegmentUri The URI of the initialization segment.
  * @param {number} mvhdOffset The offset of the initialization segment's
@@ -209,7 +256,7 @@ shaka.test.DashVodStreamGenerator.prototype.getSegment = function(
  * @struct
  * @implements {shaka.test.IStreamGenerator}
  */
-shaka.test.DashLiveStreamGenerator = function(
+shaka.test.Mp4LiveStreamGenerator = function(
     initSegmentUri,
     mvhdOffset,
     segmentTemplateUri,
@@ -272,8 +319,8 @@ shaka.test.DashLiveStreamGenerator = function(
 
 
 /** @override */
-shaka.test.DashLiveStreamGenerator.prototype.init = function() {
-  var async = [
+shaka.test.Mp4LiveStreamGenerator.prototype.init = function() {
+  let async = [
     shaka.test.Util.fetch(this.initSegmentUri_),
     shaka.test.Util.fetch(this.segmentTemplateUri_)
   ];
@@ -291,7 +338,7 @@ shaka.test.DashLiveStreamGenerator.prototype.init = function() {
 
 
 /** @override */
-shaka.test.DashLiveStreamGenerator.prototype.getInitSegment = function(
+shaka.test.Mp4LiveStreamGenerator.prototype.getInitSegment = function(
     wallClockTime) {
   goog.asserts.assert(
       this.initSegment_,
@@ -301,7 +348,7 @@ shaka.test.DashLiveStreamGenerator.prototype.getInitSegment = function(
 
 
 /** @override */
-shaka.test.DashLiveStreamGenerator.prototype.getSegment = function(
+shaka.test.Mp4LiveStreamGenerator.prototype.getSegment = function(
     position, segmentOffset, wallClockTime) {
   goog.asserts.assert(
       this.initSegment_,
@@ -312,15 +359,15 @@ shaka.test.DashLiveStreamGenerator.prototype.getSegment = function(
   goog.asserts.assert((position % 1 === 0) && (position >= 1),
                       'segment number must be an integer >= 1');
 
-  var segmentStartTime = (position - 1) * this.segmentDuration_;
+  let segmentStartTime = (position - 1) * this.segmentDuration_;
 
   // Compute the segment's availability start time and end time.
   // (See section 5.3.9.5.3 of the DASH spec.)
-  var segmentAvailabilityStartTime = this.availabilityStartTime_ +
+  let segmentAvailabilityStartTime = this.availabilityStartTime_ +
                                      segmentStartTime +
                                      (segmentOffset * this.segmentDuration_) +
                                      this.segmentDuration_;
-  var segmentAvailabiltyEndTime = segmentAvailabilityStartTime +
+  let segmentAvailabiltyEndTime = segmentAvailabilityStartTime +
                                   this.segmentDuration_ +
                                   this.timeShiftBufferDepth_;
 
@@ -342,9 +389,9 @@ shaka.test.DashLiveStreamGenerator.prototype.getSegment = function(
 
   // |availabilityStartTime| may be less than |broadcastStartTime| to align the
   // stream if the Period's first segment's first timestamp does not equal 0.
-  var artificialPresentationTimeOffset =
+  let artificialPresentationTimeOffset =
       this.broadcastStartTime_ - this.availabilityStartTime_;
-  var mediaTimestamp = segmentStartTime +
+  let mediaTimestamp = segmentStartTime +
                        this.presentationTimeOffset_ +
                        artificialPresentationTimeOffset;
 
@@ -367,24 +414,24 @@ shaka.test.DashLiveStreamGenerator.prototype.getSegment = function(
  */
 shaka.test.StreamGenerator.getTimescale_ = function(
     initSegment, mvhdOffset) {
-  var dataView = new DataView(initSegment);
-  var reader = new shaka.util.DataViewReader(
+  let dataView = new DataView(initSegment);
+  let reader = new shaka.util.DataViewReader(
       dataView, shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
   reader.skip(mvhdOffset);
 
-  var size = reader.readUint32();
-  var type = reader.readUint32();
+  let size = reader.readUint32();
+  let type = reader.readUint32();
   goog.asserts.assert(
       type == 0x6d766864 /* mvhd */,
       'initSegment does not contain an mvhd box at the specified offset.');
 
-  var largesizePresent = size == 1;
+  let largesizePresent = size == 1;
   if (largesizePresent) {
     shaka.log.debug('\'largesize\' field is present.');
     reader.skip(8);  // Skip 'largesize' field.
   }
 
-  var version = reader.readUint8();
+  let version = reader.readUint8();
   reader.skip(3);  // Skip 'flags' field.
 
   // Skip 'creation_time' and 'modification_time' fields.
@@ -396,7 +443,7 @@ shaka.test.StreamGenerator.getTimescale_ = function(
     reader.skip(16);
   }
 
-  var timescale = reader.readUint32();
+  let timescale = reader.readUint32();
   return timescale;
 };
 
@@ -423,30 +470,30 @@ shaka.test.StreamGenerator.setBaseMediaDecodeTime_ = function(
   // NOTE from Microsoft on the lack of ArrayBuffer.prototype.slice in IE11:
   // "At this time we do not plan to fix this issue." ~ https://goo.gl/pTQN1K
   // This is the best replacement for segment.slice(0) I could come up with:
-  var buffer = new ArrayBuffer(segment.byteLength);
+  let buffer = new ArrayBuffer(segment.byteLength);
   (new Uint8Array(buffer)).set(new Uint8Array(segment));
 
-  var dataView = new DataView(buffer);
-  var reader = new shaka.util.DataViewReader(
+  let dataView = new DataView(buffer);
+  let reader = new shaka.util.DataViewReader(
       dataView, shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
   reader.skip(tfdtOffset);
 
-  var size = reader.readUint32();
-  var type = reader.readUint32();
+  let size = reader.readUint32();
+  let type = reader.readUint32();
   goog.asserts.assert(
       type == 0x74666474 /* tfdt */,
       'segment does not contain a tfdt box at the specified offset.');
 
-  var largesizePresent = size == 1;
+  let largesizePresent = size == 1;
   if (largesizePresent) {
     shaka.log.debug('\'largesize\' field is present.');
     reader.skip(8);  // Skip 'largesize' field.
   }
 
-  var version = reader.readUint8();
+  let version = reader.readUint8();
   reader.skip(3);  // Skip 'flags' field.
 
-  var pos = reader.getPosition();
+  let pos = reader.getPosition();
   if (version == 0) {
     shaka.log.debug('tfdt box is version 0.');
     dataView.setUint32(pos, baseMediaDecodeTime * timescale);

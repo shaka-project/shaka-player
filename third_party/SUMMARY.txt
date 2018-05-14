@@ -1,10 +1,5 @@
 closure/compiler.jar
-  The closure compiler, v20171203, by Google.
-  Apache v2.0 license.
-  https://github.com/google/closure-compiler
-
-closure/linter.jar
-  The closure compiler linter, v20171203, by Google.
+  The closure compiler, v20180402, by Google.
   Apache v2.0 license.
   https://github.com/google/closure-compiler
 

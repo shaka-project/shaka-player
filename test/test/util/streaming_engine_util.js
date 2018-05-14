@@ -40,37 +40,47 @@ goog.provide('shaka.test.StreamingEngineUtil');
  */
 shaka.test.StreamingEngineUtil.createFakeNetworkingEngine = function(
     getInitSegment, getSegment) {
-  var netEngine = {
-    request: jasmine.createSpy('request')
+  let netEngine = {
+    request: jasmine.createSpy('request'),
+    delays: {  // Artificial delays per content type, in seconds.
+      audio: 0,
+      video: 0,
+      text: 0,
+    },
   };
 
   netEngine.request.and.callFake(function(requestType, request) {
     expect(requestType).toBeTruthy();
     expect(request.uris.length).toBe(1);
 
-    var parts = request.uris[0].split('_');
+    let parts = request.uris[0].split('_');
     expect(parts.length).toBe(3);
 
-    var periodNumber = Number(parts[0]);
+    let periodNumber = Number(parts[0]);
     expect(periodNumber).not.toBeNaN();
     expect(periodNumber).toBeGreaterThan(0);
     expect(Math.floor(periodNumber)).toEqual(periodNumber);
 
-    var contentType = parts[1];
+    let contentType = parts[1];
 
-    var buffer;
+    let buffer;
     if (parts[2] == 'init') {
       buffer = getInitSegment(contentType, periodNumber);
     } else {
-      var position = Number(parts[2]);
+      let position = Number(parts[2]);
       expect(position).not.toBeNaN();
       expect(position).toBeGreaterThan(0);
       expect(Math.floor(position)).toEqual(position);
       buffer = getSegment(contentType, periodNumber, position);
     }
 
-    var response = {uri: request.uris[0], data: buffer, headers: {}};
-    return shaka.util.AbortableOperation.completed(response);
+    const response = {uri: request.uris[0], data: buffer, headers: {}};
+    const p = new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(response);
+      }, netEngine.delays[contentType] * 1000);
+    });
+    return shaka.util.AbortableOperation.notAbortable(p);
   });
 
   netEngine.expectRequest = function(uri, type) {
@@ -113,7 +123,7 @@ shaka.test.StreamingEngineUtil.createFakeNetworkingEngine = function(
 shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
     segmentAvailabilityStart, segmentAvailabilityEnd, presentationDuration,
     maxSegmentDuration, isLive) {
-  var timeline = {
+  let timeline = {
     getDuration: jasmine.createSpy('getDuration'),
     setDuration: jasmine.createSpy('setDuration'),
     getMaxSegmentDuration: jasmine.createSpy('getMaxSegmentDuration'),
@@ -121,10 +131,10 @@ shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
     getEarliestStart: jasmine.createSpy('getEarliestStart'),
     getSegmentAvailabilityStart:
         jasmine.createSpy('getSegmentAvailabilityStart'),
-    getSafeAvailabilityStart:
-        jasmine.createSpy('getSafeAvailabilityStart'),
     getSegmentAvailabilityEnd:
         jasmine.createSpy('getSegmentAvailabilityEnd'),
+    getSafeSeekRangeStart: jasmine.createSpy('getSafeSeekRangeStart'),
+    getSeekRangeStart: jasmine.createSpy('getSeekRangeStart'),
     getSeekRangeEnd: jasmine.createSpy('getSeekRangeEnd'),
     segmentAvailabilityStart: segmentAvailabilityStart,
     segmentAvailabilityEnd: segmentAvailabilityEnd
@@ -146,21 +156,22 @@ shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
     return timeline.segmentAvailabilityStart;
   });
 
-  timeline.getSafeAvailabilityStart.and.callFake(function(delay) {
-    return timeline.segmentAvailabilityStart + delay;
-  });
-
   timeline.getSegmentAvailabilityEnd.and.callFake(function() {
     return timeline.segmentAvailabilityEnd;
+  });
+
+  timeline.getSafeSeekRangeStart.and.callFake(function(delay) {
+    return shaka.test.Util.invokeSpy(timeline.getSegmentAvailabilityStart) +
+        delay;
+  });
+
+  timeline.getSeekRangeStart.and.callFake(function() {
+    return shaka.test.Util.invokeSpy(timeline.getSegmentAvailabilityStart);
   });
 
   timeline.getSeekRangeEnd.and.callFake(function() {
     return shaka.test.Util.invokeSpy(timeline.getSegmentAvailabilityEnd);
   });
-
-  // These methods should not be invoked.
-  timeline.setDuration.and.throwError(
-      new Error('unexpected call to setDuration()'));
 
   return timeline;
 };
@@ -183,11 +194,11 @@ shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
  * @param {number} presentationDuration
  * @param {!Object.<string, number>} segmentDurations The duration of each
  *   type of segment.
- * @return {shakaExtern.Manifest}
+ * @return {shaka.extern.Manifest}
  */
 shaka.test.StreamingEngineUtil.createManifest = function(
     periodStartTimes, presentationDuration, segmentDurations) {
-  var boundsCheckPosition =
+  let boundsCheckPosition =
       shaka.test.StreamingEngineUtil.boundsCheckPosition.bind(
           null, periodStartTimes, presentationDuration, segmentDurations);
 
@@ -199,7 +210,7 @@ shaka.test.StreamingEngineUtil.createManifest = function(
    */
   function find(type, periodNumber, time) {
     // Note: |time| is relative to a Period's start time.
-    var position = Math.floor(time / segmentDurations[type]) + 1;
+    let position = Math.floor(time / segmentDurations[type]) + 1;
     return boundsCheckPosition(type, periodNumber, position);
   }
 
@@ -210,42 +221,43 @@ shaka.test.StreamingEngineUtil.createManifest = function(
    * @return {shaka.media.SegmentReference} A SegmentReference.
    */
   function get(type, periodNumber, position) {
-    if (boundsCheckPosition(type, periodNumber, position) == null)
+    if (boundsCheckPosition(type, periodNumber, position) == null) {
       return null;
+    }
 
-    var d = segmentDurations[type];
-    var getUris = function() {
+    let d = segmentDurations[type];
+    let getUris = function() {
       return ['' + periodNumber + '_' + type + '_' + position];
     };
     return new shaka.media.SegmentReference(
         position, (position - 1) * d, position * d, getUris, 0, null);
   }
 
-  var manifest = {
+  let manifest = {
     presentationTimeline: undefined,  // Should be set externally.
     minBufferTime: undefined,  // Should be set externally.
     periods: []
   };
 
   // Populate the Manifest.
-  var id = 0;
-  for (var i = 0; i < periodStartTimes.length; ++i) {
-    var period = {
+  let id = 0;
+  for (let i = 0; i < periodStartTimes.length; ++i) {
+    let period = {
       startTime: periodStartTimes[i],
       variants: [],
       textStreams: []
     };
 
-    var variant = {};
-    var trickModeVideo;
+    let variant = {};
+    let trickModeVideo;
 
-    for (var type in segmentDurations) {
-      var stream = shaka.test.StreamingEngineUtil.createMockStream(type, id++);
+    for (let type in segmentDurations) {
+      let stream = shaka.test.StreamingEngineUtil.createMockStream(type, id++);
       stream.createSegmentIndex.and.returnValue(Promise.resolve());
       stream.findSegmentPosition.and.callFake(find.bind(null, type, i + 1));
       stream.getSegmentReference.and.callFake(get.bind(null, type, i + 1));
 
-      var ContentType = shaka.util.ManifestParserUtils.ContentType;
+      const ContentType = shaka.util.ManifestParserUtils.ContentType;
       if (type == ContentType.TEXT) period.textStreams.push(stream);
       else if (type == ContentType.AUDIO) variant.audio = stream;
       else if (type == 'trickvideo') trickModeVideo = stream;
@@ -257,7 +269,7 @@ shaka.test.StreamingEngineUtil.createManifest = function(
     manifest.periods.push(period);
   }
 
-  return /** @type {shakaExtern.Manifest} */ (manifest);
+  return /** @type {shaka.extern.Manifest} */ (manifest);
 };
 
 
@@ -277,7 +289,7 @@ shaka.test.StreamingEngineUtil.createManifest = function(
 shaka.test.StreamingEngineUtil.boundsCheckPosition = function(
     periodStartTimes, presentationDuration, segmentDurations,
     type, periodNumber, position) {
-  var numSegments = shaka.test.StreamingEngineUtil.getNumSegments(
+  let numSegments = shaka.test.StreamingEngineUtil.getNumSegments(
       periodStartTimes, presentationDuration, segmentDurations,
       type, periodNumber);
   return position >= 1 && position <= numSegments ? position : null;
@@ -295,11 +307,11 @@ shaka.test.StreamingEngineUtil.boundsCheckPosition = function(
 shaka.test.StreamingEngineUtil.getNumSegments = function(
     periodStartTimes, presentationDuration, segmentDurations,
     type, periodNumber) {
-  var periodIndex = periodNumber - 1;
-  var nextStartTime = periodIndex < periodStartTimes.length - 1 ?
+  let periodIndex = periodNumber - 1;
+  let nextStartTime = periodIndex < periodStartTimes.length - 1 ?
                       periodStartTimes[periodIndex + 1] :
                       presentationDuration;
-  var periodDuration = nextStartTime - periodStartTimes[periodIndex];
+  let periodDuration = nextStartTime - periodStartTimes[periodIndex];
   return Math.ceil(periodDuration / segmentDurations[type]);
 };
 
@@ -328,7 +340,7 @@ shaka.test.StreamingEngineUtil.createMockStream = function(type, id) {
  * @return {!Object}
  */
 shaka.test.StreamingEngineUtil.createMockAudioStream = function(id) {
-  var ContentType = shaka.util.ManifestParserUtils.ContentType;
+  const ContentType = shaka.util.ManifestParserUtils.ContentType;
   return {
     id: id,
     createSegmentIndex: jasmine.createSpy('createSegmentIndex'),
@@ -351,7 +363,7 @@ shaka.test.StreamingEngineUtil.createMockAudioStream = function(id) {
  * @return {!Object}
  */
 shaka.test.StreamingEngineUtil.createMockVideoStream = function(id) {
-  var ContentType = shaka.util.ManifestParserUtils.ContentType;
+  const ContentType = shaka.util.ManifestParserUtils.ContentType;
   return {
     id: id,
     createSegmentIndex: jasmine.createSpy('createSegmentIndex'),
@@ -376,7 +388,7 @@ shaka.test.StreamingEngineUtil.createMockVideoStream = function(id) {
  * @return {!Object}
  */
 shaka.test.StreamingEngineUtil.createMockTextStream = function(id) {
-  var ManifestParserUtils = shaka.util.ManifestParserUtils;
+  const ManifestParserUtils = shaka.util.ManifestParserUtils;
   return {
     id: id,
     createSegmentIndex: jasmine.createSpy('createSegmentIndex'),

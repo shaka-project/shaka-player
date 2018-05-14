@@ -24,7 +24,7 @@
 
 
 /** @suppress {duplicate} */
-var shakaDemo = shakaDemo || {};
+var shakaDemo = shakaDemo || {};  // eslint-disable-line no-var
 
 
 /** @private {!Object.<string, Function>} */
@@ -49,8 +49,8 @@ shakaDemo.patchedConsoleMethods_ = {
 
 /** @private */
 shakaDemo.setupLogging_ = function() {
-  var logToScreen = document.getElementById('logToScreen');
-  var log = document.getElementById('log');
+  let logToScreen = document.getElementById('logToScreen');
+  let log = document.getElementById('log');
 
   if (!shaka['log']) {
     // This may be the compiled library, which has no logging by default.
@@ -65,8 +65,8 @@ shakaDemo.setupLogging_ = function() {
 
   // Store the original and to-screen versions of logging methods.
   Object.keys(shakaDemo.originalConsoleMethods_).forEach(function(k) {
-    var original = console[k].bind(console);
-    var className = k + 'Log';
+    let original = console[k].bind(console);
+    let className = k + 'Log';
     shakaDemo.originalConsoleMethods_[k] = original;
     shakaDemo.patchedConsoleMethods_[k] = function() {
       // Pass the call on to the original:
@@ -85,16 +85,16 @@ shakaDemo.setupLogging_ = function() {
 shakaDemo.onLogChange_ = function() {
   if (!shaka['log']) return;
 
-  var logToScreen = document.getElementById('logToScreen');
-  var logSection = document.getElementById('logSection');
+  let logToScreen = document.getElementById('logToScreen');
+  let logSection = document.getElementById('logSection');
   if (logToScreen.checked) {
     logSection.style.display = 'block';
-    for (var k in shakaDemo.patchedConsoleMethods_) {
+    for (let k in shakaDemo.patchedConsoleMethods_) {
       console[k] = shakaDemo.patchedConsoleMethods_[k];
     }
   } else {
     logSection.style.display = 'none';
-    for (var k in shakaDemo.originalConsoleMethods_) {
+    for (let k in shakaDemo.originalConsoleMethods_) {
       console[k] = shakaDemo.originalConsoleMethods_[k];
     }
   }
@@ -113,12 +113,12 @@ shakaDemo.onLogChange_ = function() {
  */
 shakaDemo.formatLog_ = function(log, className, logArguments) {
   // Format the log and append it to the HTML:
-  var div = document.createElement('div');
+  let div = document.createElement('div');
   div.className = className;
-  for (var i = 0; i < logArguments.length; ++i) {
-    var span = document.createElement('span');
-    var arg = logArguments[i];
-    var text;
+  for (let i = 0; i < logArguments.length; ++i) {
+    let span = document.createElement('span');
+    let arg = logArguments[i];
+    let text;
     if (arg === null) {
       text = 'null';
     } else if (arg === undefined) {

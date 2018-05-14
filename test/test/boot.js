@@ -22,28 +22,29 @@
  * @return {?string|boolean}
  */
 function getClientArg(name) {
-  if (window.__karma__ && __karma__.config.args.length)
+  if (window.__karma__ && __karma__.config.args.length) {
     return __karma__.config.args[0][name] || null;
-  else
+  } else {
     return null;
+  }
 }
 
 
 // Executed before test utilities and tests are loaded, but after Shaka Player
 // is loaded in uncompiled mode.
 (function() {
-  var realAssert = console.assert.bind(console);
+  let realAssert = console.assert.bind(console);
 
   /**
    * A version of assert() which hooks into jasmine and converts all failed
    * assertions into failed tests.
    * @param {*} condition
-   * @param {string=} opt_message
+   * @param {string=} message
    */
-  function jasmineAssert(condition, opt_message) {
-    realAssert(condition, opt_message);
+  function jasmineAssert(condition, message) {
+    realAssert(condition, message);
     if (!condition) {
-      var message = opt_message || 'Assertion failed.';
+      message = message || 'Assertion failed.';
       console.error(message);
       try {
         throw new Error(message);
@@ -55,8 +56,23 @@ function getClientArg(name) {
   goog.asserts.assert = jasmineAssert;
   console.assert = /** @type {?} */(jasmineAssert);
 
+  // As of Feb 2018, this is only implemented in Chrome.
+  // https://developer.mozilla.org/en-US/docs/Web/Events/unhandledrejection
+  window.addEventListener('unhandledrejection', (event) => {
+    /** @type {?} */
+    const error = event.reason;
+    let message = 'Unhandled rejection in Promise: ' + error;
+
+    // Shaka errors have the stack trace in their toString() already, so don't
+    // add it again.  For native errors, we need to see where it came from.
+    if (error && error.stack && !(error instanceof shaka.util.Error)) {
+      message += '\n' + error.stack;
+    }
+    fail(message);
+  });
+
   // Use a RegExp if --specFilter is set, else empty string will match all.
-  var specFilterRegExp = new RegExp(getClientArg('specFilter') || '');
+  let specFilterRegExp = new RegExp(getClientArg('specFilter') || '');
 
   /**
    * A filter over all Jasmine specs.
@@ -89,7 +105,7 @@ function getClientArg(name) {
   // Set the default timeout to 120s for all asynchronous tests.
   jasmine.DEFAULT_TIMEOUT_INTERVAL = 120 * 1000;
 
-  var logLevel = getClientArg('logLevel');
+  let logLevel = getClientArg('logLevel');
   if (logLevel) {
     shaka.log.setLevel(Number(logLevel));
   } else {
@@ -100,7 +116,7 @@ function getClientArg(name) {
   if (getClientArg('random')) {
     jasmine.getEnv().randomizeTests(true);
 
-    var seed = getClientArg('seed');
+    let seed = getClientArg('seed');
     if (seed) {
       jasmine.getEnv().seed(seed.toString());
     }
@@ -117,26 +133,21 @@ function getClientArg(name) {
    * @return {jasmine.Callback}
    */
   function filterShim(callback, clientArg, skipMessage) {
-    if (callback.length) {
-      // This callback is for an async test.  Replace it with an async shim.
-      return function(done) {
-        if (getClientArg(clientArg)) {
-          callback(done);
-        } else {
-          pending(skipMessage);
-          done();
-        }
-      };
-    } else {
-      // This callback is for a synchronous test.  Use a synchronous shim.
-      return function() {
-        if (getClientArg(clientArg)) {
-          callback();
-        } else {
-          pending(skipMessage);
-        }
-      };
-    }
+    return async function() {
+      if (!getClientArg(clientArg)) {
+        pending(skipMessage);
+        return;
+      }
+
+      if (callback.length) {
+        // If this has a done callback, wrap in a Promise so we can await it.
+        await new Promise((resolve) => callback(resolve));
+      } else {
+        // If this is an async test, this will wait for it to complete; if this
+        // is a synchronous test, await will do nothing.
+        await callback();
+      }
+    };
   }
 
   /**
@@ -145,7 +156,7 @@ function getClientArg(name) {
    * @param {string} name
    * @param {jasmine.Callback} callback
    */
-  window.external_it = function(name, callback) {
+  window.externalIt = function(name, callback) {
     it(name, filterShim(callback, 'external',
         'Skipping tests that use external content.'));
   };
@@ -156,7 +167,7 @@ function getClientArg(name) {
    * @param {string} name
    * @param {jasmine.Callback} callback
    */
-  window.drm_it = function(name, callback) {
+  window.drmIt = function(name, callback) {
     it(name, filterShim(callback, 'drm',
         'Skipping tests that use a DRM license server.'));
   };
@@ -167,7 +178,7 @@ function getClientArg(name) {
    * @param {string} name
    * @param {jasmine.Callback} callback
    */
-  window.quarantined_it = function(name, callback) {
+  window.quarantinedIt = function(name, callback) {
     it(name, filterShim(callback, 'quarantined',
         'Skipping tests that are quarantined.'));
   };
@@ -200,13 +211,20 @@ function getClientArg(name) {
       // Patch a new convenience method into PromiseMock.
       // See https://github.com/taylorhakes/promise-mock/issues/7
       PromiseMock.flush = () => {
-        // PromiseMock.runAll() throws is waiting is empty.
-        if (PromiseMock.waiting.length) {
-          PromiseMock.runAll();
-        }
+        // Pass strict == false so it does not throw.
+        PromiseMock.runAll(false /* strict */);
       };
 
       done();
     });
   });
+
+  const delayTests = getClientArg('delayTests');
+  if (delayTests) {
+    const originalSetTimeout = window.setTimeout;
+    afterEach((done) => {
+      console.log('DELAYING...');
+      originalSetTimeout(done, delayTests * 1000);
+    });
+  }
 })();

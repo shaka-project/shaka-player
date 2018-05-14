@@ -46,8 +46,7 @@ shaka.offline.Storage.prototype.configure({
 });
 
 // Store content and metadata.
-shaka.offline.Storage.prototype.store(manifestUri, appMetadata,
-opt_manifestParser) => Promise.<StoredContent>
+shaka.offline.Storage.prototype.store(manifestUri, appMetadata, manifestParser) => Promise.<StoredContent>
 
 // Remove stored content and metadata.
 shaka.offline.Storage.prototype.remove(storedContent) => Promise
@@ -57,13 +56,11 @@ shaka.offline.Storage.prototype.list() => Promise.<Array.<StoredContent>>
 
 StoredContent:
   offlineUri: string  // at which the stored content can be accessed
-  originalManifestUri: string  // the original manifest URI of the content we
-stored
+  originalManifestUri: string  // the original manifest URI of the content we stored
   duration: number  // length of the stored content in seconds
   size: number  // size of the stored content in bytes
-  tracks: !Array.<shakaExtern.Track>  // the tracks we stored
-  appMetadata: object  // arbitrary format, provided by the application to
-store()
+  tracks: !Array.<shaka.extern.Track>  // the tracks we stored
+  appMetadata: object  // arbitrary format, provided by the application to store()
 ```
 
 
@@ -155,8 +152,7 @@ to be to avoid autoincrement and to constructing string IDs for each object
 which are unique across all object stores.
 
 [caniuse]: http://caniuse.com/#feat=indexeddb
-[this blog post]:
-https://www.raymondcamden.com/2014/09/25/IndexedDB-on-iOS-8-Broken-Bad/
+[this blog post]: https://www.raymondcamden.com/2014/09/25/IndexedDB-on-iOS-8-Broken-Bad/
 
 
 #### Error conditions

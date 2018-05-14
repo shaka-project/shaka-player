@@ -17,7 +17,7 @@
 
 
 /** @namespace */
-var ShakaDemoUtils = {};
+let ShakaDemoUtils = {};
 
 
 /**
@@ -25,43 +25,49 @@ var ShakaDemoUtils = {};
  * @param {shaka.Player} player
  */
 ShakaDemoUtils.setupAssetMetadata = function(asset, player) {
-  var config = /** @type {shakaExtern.PlayerConfiguration} */(
-      { drm: {}, manifest: { dash: {} } });
+  let config = /** @type {shaka.extern.PlayerConfiguration} */(
+      {drm: {}, manifest: {dash: {}}});
 
   // Add config from this asset.
-  if (asset.licenseServers)
+  if (asset.licenseServers) {
     config.drm.servers = asset.licenseServers;
-  if (asset.drmCallback)
+  }
+  if (asset.drmCallback) {
     config.manifest.dash.customScheme = asset.drmCallback;
-  if (asset.clearKeys)
+  }
+  if (asset.clearKeys) {
     config.drm.clearKeys = asset.clearKeys;
+  }
   player.configure(config);
 
   // Configure network filters.
-  var networkingEngine = player.getNetworkingEngine();
+  let networkingEngine = player.getNetworkingEngine();
   networkingEngine.clearAllRequestFilters();
   networkingEngine.clearAllResponseFilters();
 
   if (asset.licenseRequestHeaders) {
-    var filter = ShakaDemoUtils.addLicenseRequestHeaders_.bind(
+    let filter = ShakaDemoUtils.addLicenseRequestHeaders_.bind(
         null, asset.licenseRequestHeaders);
     networkingEngine.registerRequestFilter(filter);
   }
 
-  if (asset.requestFilter)
+  if (asset.requestFilter) {
     networkingEngine.registerRequestFilter(asset.requestFilter);
-  if (asset.responseFilter)
+  }
+  if (asset.responseFilter) {
     networkingEngine.registerResponseFilter(asset.responseFilter);
-  if (asset.extraConfig)
-    player.configure(/** @type {shakaExtern.PlayerConfiguration} */(
-        asset.extraConfig));
+  }
+  if (asset.extraConfig) {
+    player.configure(
+        /** @type {shaka.extern.PlayerConfiguration} */ (asset.extraConfig));
+  }
 };
 
 
 /**
  * @param {!Object.<string, string>} headers
  * @param {shaka.net.NetworkingEngine.RequestType} requestType
- * @param {shakaExtern.Request} request
+ * @param {shaka.extern.Request} request
  * @private
  */
 ShakaDemoUtils.addLicenseRequestHeaders_ =
@@ -70,25 +76,25 @@ ShakaDemoUtils.addLicenseRequestHeaders_ =
 
   // Add these to the existing headers.  Do not clobber them!
   // For PlayReady, there will already be headers in the request.
-  for (var k in headers) {
+  for (let k in headers) {
     request.headers[k] = headers[k];
   }
 };
 
 
 /**
- * Return true if the content is Transport Stream.
- * Used to decide if caption button is shown all the time in the demo,
+ * Return true if the current content is in the Transport Stream format.
+ * Used to decide if the caption button is shown all the time in the demo,
  * and whether to show 'Default Text' as a Text Track option.
  *
  * @param {shaka.Player} player
  * @return {boolean}
  */
 ShakaDemoUtils.isTsContent = function(player) {
-  var activeTracks = player.getVariantTracks().filter(function(track) {
+  let activeTracks = player.getVariantTracks().filter(function(track) {
     return track.active == true;
   });
-  var activeTrack = activeTracks[0];
+  let activeTrack = activeTracks[0];
   if (activeTrack) {
     return activeTrack.mimeType == 'video/mp2t';
   }

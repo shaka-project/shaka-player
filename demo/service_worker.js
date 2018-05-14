@@ -27,7 +27,7 @@
  *
  * @const {string}
  */
-var CACHE_NAME = 'shaka-player-v2';
+const CACHE_NAME = 'shaka-player-v2';
 
 
 /**
@@ -37,7 +37,7 @@ var CACHE_NAME = 'shaka-player-v2';
  *
  * @const {string}
  */
-var CACHE_NAME_PREFIX = 'shaka-player';
+const CACHE_NAME_PREFIX = 'shaka-player';
 
 
 console.assert(CACHE_NAME.indexOf(CACHE_NAME_PREFIX) == 0,
@@ -50,7 +50,7 @@ console.assert(CACHE_NAME.indexOf(CACHE_NAME_PREFIX) == 0,
  *
  * @const {number}
  */
-var NETWORK_TIMEOUT = 2;
+const NETWORK_TIMEOUT = 2;
 
 
 /**
@@ -59,9 +59,9 @@ var NETWORK_TIMEOUT = 2;
  *
  * @const {!Array.<string>}
  */
-var CRITICAL_RESOURCES = [
-  '.',  // this resolves to the page
-  'index.html',  // another way to access the page
+const CRITICAL_RESOURCES = [
+  '.',  // This resolves to the page.
+  'index.html',  // Another way to access the page.
   'app_manifest.json',
 
   'demo.css',
@@ -82,10 +82,10 @@ var CRITICAL_RESOURCES = [
  *
  * @const {!Array.<string>}
  */
-var OPTIONAL_RESOURCES = [
+const OPTIONAL_RESOURCES = [
   'favicon.ico',
-  '//shaka-player-demo.appspot.com/assets/poster.jpg',
-  '//shaka-player-demo.appspot.com/assets/audioOnly.gif',
+  'https://shaka-player-demo.appspot.com/assets/poster.jpg',
+  'https://shaka-player-demo.appspot.com/assets/audioOnly.gif',
   '../node_modules/mux.js/dist/mux.js'
 ];
 
@@ -97,8 +97,8 @@ var OPTIONAL_RESOURCES = [
  *
  * @const {!Array.<string>}
  */
-var NO_CORS_RESOURCES = [
-  '//www.gstatic.com/cv/js/sender/v1/cast_sender.js'
+const NO_CORS_RESOURCES = [
+  'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js'
 ];
 
 
@@ -109,7 +109,7 @@ var NO_CORS_RESOURCES = [
  *
  * @const {!Array.<string>}
  */
-var CACHE_FIRST = [
+const CACHE_FIRST = [
   // Google Web Fonts should be cached when first seen, without being explicitly
   // listed, and should be preferred from cache for speed.
   'https://fonts.googleapis.com/'
@@ -128,7 +128,7 @@ function onInstall(event) {
     // No-cors resources: failure on these will NOT fail the Promise chain.
     // For some reason, this doesn't work with addAll, so we use fetchAndCache.
     NO_CORS_RESOURCES.forEach(function(url) {
-      fetchAndCache(cache, new Request(url, { mode: 'no-cors' }));
+      fetchAndCache(cache, new Request(url, {mode: 'no-cors'}));
     });
 
     // Critical resources: failure on these will fail the Promise chain.
@@ -171,7 +171,7 @@ function onActivate(event) {
 function onFetch(event) {
   event.respondWith(caches.open(CACHE_NAME).then(function(cache) {
     return cache.match(event.request).then(function(cachedResponse) {
-      var preferCache = false;
+      let preferCache = false;
       CACHE_FIRST.forEach(function(prefix) {
         if (event.request.referrer.startsWith(prefix)) {
           preferCache = true;

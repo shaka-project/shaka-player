@@ -24,7 +24,7 @@
 
 
 /** @suppress {duplicate} */
-var shakaDemo = shakaDemo || {};
+var shakaDemo = shakaDemo || {};  // eslint-disable-line no-var
 
 
 /** @private {?HTMLOptGroupElement} */
@@ -41,17 +41,17 @@ shakaDemo.offlineOperationInProgress_ = false;
  * @private
  */
 shakaDemo.updateButtons_ = function(canHide) {
-  var assetList = document.getElementById('assetList');
-  var inProgress = shakaDemo.offlineOperationInProgress_;
+  let assetList = document.getElementById('assetList');
+  let inProgress = shakaDemo.offlineOperationInProgress_;
 
   document.getElementById('progressDiv').style.display =
       canHide && !inProgress ? 'none' : 'block';
 
-  var option = assetList.options[assetList.selectedIndex];
-  var storedContent = option.storedContent;
+  let option = assetList.options[assetList.selectedIndex];
+  let storedContent = option.storedContent;
   // True if there is no DRM or if the browser supports persistent licenses for
   // any given DRM system.
-  var supportsDrm = !option.asset || !option.asset.drm ||
+  let supportsDrm = !option.asset || !option.asset.drm ||
       !option.asset.drm.length || option.asset.drm.some(function(drm) {
         return shakaDemo.support_.drm[drm] &&
             shakaDemo.support_.drm[drm].persistentState;
@@ -61,19 +61,20 @@ shakaDemo.updateButtons_ = function(canHide) {
   document.getElementById('offlineNameDiv').style.display =
       option.asset ? 'none' : 'block';
 
-  var button = document.getElementById('storeDeleteButton');
+  let button = document.getElementById('storeDeleteButton');
   button.disabled = (inProgress || !supportsDrm || option.isStored);
-  button.innerText = storedContent ? 'Delete' : 'Store';
-  var helpText = document.getElementById('storeDeleteHelpText');
-  if (inProgress)
+  button.textContent = storedContent ? 'Delete' : 'Store';
+  let helpText = document.getElementById('storeDeleteHelpText');
+  if (inProgress) {
     helpText.textContent = 'Operation is in progress...';
-  else if (!supportsDrm)
+  } else if (!supportsDrm) {
     helpText.textContent = 'This browser does not support persistent licenses.';
-  else if (button.disabled)
+  } else if (button.disabled) {
     helpText.textContent = 'The asset is stored offline. ' +
         'Checkout the "Offline" section in the "Asset" list';
-  else
+  } else {
     helpText.textContent = '';
+  }
 };
 
 
@@ -92,16 +93,16 @@ shakaDemo.setupOffline_ = function() {
  * @private
  */
 shakaDemo.setupOfflineAssets_ = function() {
-  var Storage = shaka.offline.Storage;
+  const Storage = shaka.offline.Storage;
   if (!Storage.support()) {
-    var section = document.getElementById('offlineSection');
+    let section = document.getElementById('offlineSection');
     section.style.display = 'none';
     return Promise.resolve();
   }
 
   /** @type {!HTMLOptGroupElement} */
-  var group;
-  var assetList = document.getElementById('assetList');
+  let group;
+  let assetList = document.getElementById('assetList');
   if (!shakaDemo.offlineOptGroup_) {
     group =
         /** @type {!HTMLOptGroupElement} */ (
@@ -113,20 +114,20 @@ shakaDemo.setupOfflineAssets_ = function() {
     group = shakaDemo.offlineOptGroup_;
   }
 
-  var db = new Storage(shakaDemo.localPlayer_);
+  let db = new Storage(shakaDemo.localPlayer_);
   return db.list().then(function(storedContents) {
     storedContents.forEach(function(storedContent) {
-      for (var i = 0; i < assetList.options.length; i++) {
-        var option = assetList.options[i];
+      for (let i = 0; i < assetList.options.length; i++) {
+        let option = assetList.options[i];
         if (option.asset &&
             option.asset.manifestUri == storedContent.originalManifestUri) {
           option.isStored = true;
           break;
         }
       }
-      var asset = {manifestUri: storedContent.offlineUri};
+      let asset = {manifestUri: storedContent.offlineUri};
 
-      var option = document.createElement('option');
+      let option = document.createElement('option');
       option.textContent =
           storedContent.appMetadata ? storedContent.appMetadata.name : '';
       option.asset = asset;
@@ -136,16 +137,6 @@ shakaDemo.setupOfflineAssets_ = function() {
 
     shakaDemo.updateButtons_(true);
     return db.destroy();
-  }).catch(function(error) {
-    if (error.code == shaka.util.Error.Code.UNSUPPORTED_UPGRADE_REQUEST) {
-      console.warn('Warning: storage cleared.  For details, see ' +
-                   'https://github.com/google/shaka-player/issues/1248');
-      shaka.offline.Storage.deleteAll();
-      return;
-    }
-
-    // Let another component deal with it.
-    throw error;
   });
 };
 
@@ -156,28 +147,28 @@ shakaDemo.storeDeleteAsset_ = function() {
   shakaDemo.offlineOperationInProgress_ = true;
   shakaDemo.updateButtons_(false);
 
-  var assetList = document.getElementById('assetList');
-  var progress = document.getElementById('progress');
-  var option = assetList.options[assetList.selectedIndex];
+  let assetList = document.getElementById('assetList');
+  let progress = document.getElementById('progress');
+  let option = assetList.options[assetList.selectedIndex];
 
   progress.textContent = '0';
 
-  var storage = new shaka.offline.Storage(shakaDemo.localPlayer_);
-  storage.configure(/** @type {shakaExtern.OfflineConfiguration} */ ({
+  let storage = new shaka.offline.Storage(shakaDemo.localPlayer_);
+  storage.configure(/** @type {shaka.extern.OfflineConfiguration} */ ({
     progressCallback: function(data, percent) {
       progress.textContent = (percent * 100).toFixed(2);
     }
   }));
 
-  var p;
+  let p;
   if (option.storedContent) {
-    var offlineUri = option.storedContent.offlineUri;
-    var originalManifestUri = option.storedContent.originalManifestUri;
+    let offlineUri = option.storedContent.offlineUri;
+    let originalManifestUri = option.storedContent.originalManifestUri;
 
     // If this is a stored demo asset, we'll need to configure the player with
     // license server authentication so we can delete the offline license.
-    for (var i = 0; i < shakaAssets.testAssets.length; i++) {
-      var originalAsset = shakaAssets.testAssets[i];
+    for (let i = 0; i < shakaAssets.testAssets.length; i++) {
+      let originalAsset = shakaAssets.testAssets[i];
       if (originalManifestUri == originalAsset.manifestUri) {
         shakaDemo.preparePlayer_(originalAsset);
         break;
@@ -185,26 +176,28 @@ shakaDemo.storeDeleteAsset_ = function() {
     }
 
     p = storage.remove(offlineUri).then(function() {
-      for (var i = 0; i < assetList.options.length; i++) {
-        var option = assetList.options[i];
-        if (option.asset && option.asset.manifestUri == originalManifestUri)
+      for (let i = 0; i < assetList.options.length; i++) {
+        let option = assetList.options[i];
+        if (option.asset && option.asset.manifestUri == originalManifestUri) {
           option.isStored = false;
+        }
       }
       return shakaDemo.refreshAssetList_();
     });
   } else {
-    var asset = shakaDemo.preparePlayer_(option.asset);
-    var nameField = document.getElementById('offlineName').value;
-    var assetName = asset.name ? '[OFFLINE] ' + asset.name : null;
-    var metadata = {name: assetName || nameField || asset.manifestUri};
+    let asset = shakaDemo.preparePlayer_(option.asset);
+    let nameField = document.getElementById('offlineName').value;
+    let assetName = asset.name ? '[OFFLINE] ' + asset.name : null;
+    let metadata = {name: assetName || nameField || asset.manifestUri};
     p = storage.store(asset.manifestUri, metadata).then(function() {
-      if (option.asset)
+      if (option.asset) {
         option.isStored = true;
+      }
       return shakaDemo.refreshAssetList_().then(function() {
         // Auto-select offline copy of asset after storing.
-        var group = shakaDemo.offlineOptGroup_;
-        for (var i = 0; i < group.childNodes.length; i++) {
-          var option = group.childNodes[i];
+        let group = shakaDemo.offlineOptGroup_;
+        for (let i = 0; i < group.childNodes.length; i++) {
+          let option = group.childNodes[i];
           if (option.textContent == assetName) {
             assetList.selectedIndex = option.index;
           }
@@ -214,7 +207,7 @@ shakaDemo.storeDeleteAsset_ = function() {
   }
 
   p.catch(function(reason) {
-    var error = /** @type {!shaka.util.Error} */(reason);
+    let error = /** @type {!shaka.util.Error} */(reason);
     shakaDemo.onError_(error);
   }).then(function() {
     shakaDemo.offlineOperationInProgress_ = false;
@@ -230,7 +223,7 @@ shakaDemo.storeDeleteAsset_ = function() {
  */
 shakaDemo.refreshAssetList_ = function() {
   // Remove all child elements.
-  var group = shakaDemo.offlineOptGroup_;
+  let group = shakaDemo.offlineOptGroup_;
   while (group.firstChild) {
     group.removeChild(group.firstChild);
   }
@@ -253,8 +246,8 @@ shakaDemo.onCastStatusChange_ = function(connected) {
   shakaDemo.offlineOptGroup_.disabled = connected;
 
   if (connected) {
-    var assetList = document.getElementById('assetList');
-    var option = assetList.options[assetList.selectedIndex];
+    let assetList = document.getElementById('assetList');
+    let option = assetList.options[assetList.selectedIndex];
     if (option.storedContent) {
       // This is an offline asset.  Select something else.
       assetList.selectedIndex = 0;

@@ -20,7 +20,7 @@ goog.provide('shaka.test.OfflineUtils');
 
 /**
  * @param {string} originalUri
- * @return {shakaExtern.ManifestDB}
+ * @return {shaka.extern.ManifestDB}
  */
 shaka.test.OfflineUtils.createManifest = function(originalUri) {
   return {
@@ -39,7 +39,7 @@ shaka.test.OfflineUtils.createManifest = function(originalUri) {
 /**
  * @param {number} id
  * @param {string} type
- * @return {shakaExtern.StreamDB}
+ * @return {shaka.extern.StreamDB}
  */
 shaka.test.OfflineUtils.createStream = function(id, type) {
   return {
@@ -66,11 +66,11 @@ shaka.test.OfflineUtils.createStream = function(id, type) {
 
 /**
  * @param {!Array.<number>} data
- * @return {shakaExtern.SegmentDataDB}
+ * @return {shaka.extern.SegmentDataDB}
  */
 shaka.test.OfflineUtils.createSegmentData = function(data) {
   /** @type {Uint8Array} */
-  var array = new Uint8Array(data);
+  let array = new Uint8Array(data);
 
   return {
     data: array.buffer
@@ -79,33 +79,33 @@ shaka.test.OfflineUtils.createSegmentData = function(data) {
 
 
 /**
- * @param {!Array.<shakaExtern.SegmentDataDB>} segments
- * @param {shakaExtern.SegmentDataDB} expected
+ * @param {!Array.<shaka.extern.SegmentDataDB>} segments
+ * @param {shaka.extern.SegmentDataDB} expected
  */
 shaka.test.OfflineUtils.expectSegmentsToContain = function(segments,
                                                            expected) {
-  var actualData = segments.map(function(segment) {
+  let actualData = segments.map(function(segment) {
     expect(segment.data).toBeTruthy();
     return new Uint8Array(segment.data);
   });
 
   expect(expected.data).toBeTruthy();
-  var expectedData = new Uint8Array(expected.data);
+  let expectedData = new Uint8Array(expected.data);
 
   expect(actualData).toContain(expectedData);
 };
 
 
 /**
- * @param {shakaExtern.SegmentDataDB} actual
- * @param {shakaExtern.SegmentDataDB} expected
+ * @param {shaka.extern.SegmentDataDB} actual
+ * @param {shaka.extern.SegmentDataDB} expected
  */
 shaka.test.OfflineUtils.expectSegmentToEqual = function(actual, expected) {
   expect(actual.data).toBeTruthy();
   expect(expected.data).toBeTruthy();
 
-  var actualData = new Uint8Array(actual.data);
-  var expectedData = new Uint8Array(expected.data);
+  let actualData = new Uint8Array(actual.data);
+  let expectedData = new Uint8Array(expected.data);
 
   expect(actualData).toEqual(expectedData);
 };

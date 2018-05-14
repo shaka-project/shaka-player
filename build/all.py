@@ -19,6 +19,7 @@
 import argparse
 import build
 import check
+import docs
 import gendeps
 import shakaBuildHelpers
 
@@ -27,6 +28,11 @@ def main(args):
   parser = argparse.ArgumentParser(
       description='User facing build script for building the Shaka'
                   ' Player Project.')
+
+  parser.add_argument(
+      '--fix',
+      help='Automatically fix style violations.',
+      action='store_true')
 
   parser.add_argument(
       '--force',
@@ -52,7 +58,13 @@ def main(args):
   if code != 0:
     return code
 
-  code = check.main([])
+  check_args = ['--fix'] if parsed_args.fix else []
+  code = check.main(check_args)
+  if code != 0:
+    return code
+
+  docs_args = []
+  code = docs.build_docs(docs_args)
   if code != 0:
     return code
 

@@ -26,11 +26,11 @@ describe('Cue', function() {
   it('handles offsets', function() {
     // Offsets must be handled early.
     // See issue #502
-    var cues = parseVtt(
+    let cues = parseVtt(
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000\n' +
         'Test',
-        {periodStart: 0, segmentStart: 7, segmentEnd: 0 });
+        {periodStart: 0, segmentStart: 7, segmentEnd: 0});
     expect(cues.length).toBe(1);
     expect(cues[0].startTime).toBe(27);
     expect(cues[0].endTime).toBe(47);
@@ -40,22 +40,22 @@ describe('Cue', function() {
     // To simplify refactoring, we are no longer checking for VTTCue before
     // setting properties that only exist on VTTCue.  So we want to ensure that
     // errors are not thrown when the extra settings are assigned.
-    var cues = parseVtt(
+    let cues = parseVtt(
         'WEBVTT\n\n' +
         'ID1\n' +
         '00:00:20.000 --> 00:00:40.000 align:middle size:56% vertical:lr\n' +
         'Test',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0 });
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
     expect(cues.length).toBe(1);
   });
 
   /**
    * @param {string} text
-   * @param {!shakaExtern.TextParser.TimeContext} time
-   * @return {!Array.<!shakaExtern.Cue>}
+   * @param {!shaka.extern.TextParser.TimeContext} time
+   * @return {!Array.<!shaka.extern.Cue>}
    */
   function parseVtt(text, time) {
-    var data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
+    let data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
     return new shaka.text.VttTextParser().parseMedia(data, time);
   }
 });

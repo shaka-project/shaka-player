@@ -15,8 +15,9 @@ To start, we're going to use the code from {@tutorial basic-usage}, but use this
 manifest and license server:
 
 ```js
-var manifestUri = '//storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd';
-var licenseServer = '//cwip-shaka-proxy.appspot.com/no_auth';
+var manifestUri =
+    'https://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd';
+var licenseServer = 'https://cwip-shaka-proxy.appspot.com/no_auth';
 ```
 
 We'll also need to configure the player to use this license server before it
@@ -43,7 +44,7 @@ Since the endpoint is `/no_auth`, this should play without authentication.
 First, we'll try authentication using headers.  Change the license server to:
 
 ```js
-var licenseServer = '//cwip-shaka-proxy.appspot.com/header_auth';
+var licenseServer = 'https://cwip-shaka-proxy.appspot.com/header_auth';
 ```
 
 This endpoint requires a specific header value to deliver a license.  If you
@@ -78,7 +79,7 @@ Next, we'll try authentication using URL parameters.  Change the license server
 to:
 
 ```js
-var licenseServer = '//cwip-shaka-proxy.appspot.com/param_auth';
+var licenseServer = 'https://cwip-shaka-proxy.appspot.com/param_auth';
 ```
 
 This endpoint requires a specific URL parameter to deliver a license.  If you
@@ -109,7 +110,7 @@ Finally, let's try using cookies for authentication.  Change the license server
 to:
 
 ```js
-var licenseServer = '//cwip-shaka-proxy.appspot.com/cookie_auth';
+var licenseServer = 'https://cwip-shaka-proxy.appspot.com/cookie_auth';
 ```
 
 This endpoint requires a specific cookie to deliver a license.  If you try to
@@ -160,7 +161,7 @@ pointing your browser to the server's [delete\_cookie][] page.  Then set your
 license server back to:
 
 ```js
-var licenseServer = '//cwip-shaka-proxy.appspot.com/no_auth';
+var licenseServer = 'https://cwip-shaka-proxy.appspot.com/no_auth';
 ```
 
 Since `allowCrossSiteCredentials` is `true` and that endpoint doesn't
@@ -193,8 +194,8 @@ of an asynchronous filter.
 To start, change the license server and add two additional variables:
 
 ```js
-var licenseServer = '//cwip-shaka-proxy.appspot.com/header_auth';
-var authTokenServer = '//cwip-shaka-proxy.appspot.com/get_auth_token';
+var licenseServer = 'https://cwip-shaka-proxy.appspot.com/header_auth';
+var authTokenServer = 'https://cwip-shaka-proxy.appspot.com/get_auth_token';
 var authToken = null;
 ```
 

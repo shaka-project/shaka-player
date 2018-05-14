@@ -24,7 +24,7 @@
 
 
 /** @suppress {duplicate} */
-var shakaDemo = shakaDemo || {};
+var shakaDemo = shakaDemo || {};  // eslint-disable-line no-var
 
 
 /** @private */
@@ -36,6 +36,8 @@ shakaDemo.setupConfiguration_ = function() {
   document.getElementById('preferredAudioLanguage').addEventListener(
       'input', shakaDemo.onConfigInput_);
   document.getElementById('preferredTextLanguage').addEventListener(
+      'input', shakaDemo.onConfigInput_);
+  document.getElementById('preferredAudioChannelCount').addEventListener(
       'input', shakaDemo.onConfigInput_);
   document.getElementById('showNative').addEventListener(
       'change', shakaDemo.onNativeChange_);
@@ -52,13 +54,13 @@ shakaDemo.setupConfiguration_ = function() {
   document.getElementById('drmSettingsAudioRobustness').addEventListener(
       'input', shakaDemo.onDrmSettingsChange_);
 
-  var robustnessSuggestions = document.getElementById('robustnessSuggestions');
+  let robustnessSuggestions = document.getElementById('robustnessSuggestions');
   if (shakaDemo.support_.drm['com.widevine.alpha']) {
-    var widevineSuggestions = ['SW_SECURE_CRYPTO', 'SW_SECURE_DECODE',
+    let widevineSuggestions = ['SW_SECURE_CRYPTO', 'SW_SECURE_DECODE',
       'HW_SECURE_CRYPTO', 'HW_SECURE_DECODE', 'HW_SECURE_ALL'];
     // Add Widevine robustness suggestions if it is supported.
     widevineSuggestions.forEach(function(suggestion) {
-      var option = document.createElement('option');
+      let option = document.createElement('option');
       option.value = suggestion;
       option.textContent = 'Widevine';
       robustnessSuggestions.appendChild(option);
@@ -90,9 +92,9 @@ shakaDemo.onDrmSettingsChange_ = function(event) {
  */
 shakaDemo.onLogLevelChange_ = function(event) {
   // shaka.log is not set if logging isn't enabled.
-  // I.E. if using the compiled version of shaka.
+  // I.E. if using the release version of shaka.
   if (shaka.log) {
-    var logLevel = event.target[event.target.selectedIndex];
+    let logLevel = event.target[event.target.selectedIndex];
     switch (logLevel.value) {
       case 'info':
         shaka.log.setLevel(shaka.log.Level.INFO);
@@ -119,7 +121,7 @@ shakaDemo.onLogLevelChange_ = function(event) {
  */
 shakaDemo.onJumpLargeGapsChange_ = function(event) {
   shakaDemo.player_.configure(({
-    streaming: { jumpLargeGaps: event.target.checked }
+    streaming: {jumpLargeGaps: event.target.checked}
   }));
   // Change the hash, to mirror this.
   shakaDemo.hashShouldChange_();
@@ -131,8 +133,8 @@ shakaDemo.onJumpLargeGapsChange_ = function(event) {
  * @private
  */
 shakaDemo.onGapInput_ = function(event) {
-  var smallGapLimit = Number(event.target.value);
-  var useDefault = isNaN(smallGapLimit) || event.target.value.length == 0;
+  let smallGapLimit = Number(event.target.value);
+  let useDefault = isNaN(smallGapLimit) || event.target.value.length == 0;
   shakaDemo.player_.configure(({
     streaming: {
       smallGapLimit: useDefault ? undefined : smallGapLimit
@@ -148,11 +150,14 @@ shakaDemo.onGapInput_ = function(event) {
  * @private
  */
 shakaDemo.onConfigInput_ = function(event) {
-  shakaDemo.player_.configure(/** @type {shakaExtern.PlayerConfiguration} */({
+  let preferredAudioChannelCount =
+      Number(document.getElementById('preferredAudioChannelCount').value) || 2;
+  shakaDemo.player_.configure(/** @type {shaka.extern.PlayerConfiguration} */({
     preferredAudioLanguage:
         document.getElementById('preferredAudioLanguage').value,
     preferredTextLanguage:
-        document.getElementById('preferredTextLanguage').value
+        document.getElementById('preferredTextLanguage').value,
+    preferredAudioChannelCount: preferredAudioChannelCount,
   }));
   // Change the hash, to mirror this.
   shakaDemo.hashShouldChange_();
@@ -165,9 +170,9 @@ shakaDemo.onConfigInput_ = function(event) {
  */
 shakaDemo.onAdaptationChange_ = function(event) {
   // Update adaptation config.
-  shakaDemo.player_.configure(/** @type {shakaExtern.PlayerConfiguration} */({
-    abr: { enabled: event.target.checked }
-  }));
+  shakaDemo.player_.configure({
+    abr: {enabled: event.target.checked}
+  });
   // Change the hash, to mirror this.
   shakaDemo.hashShouldChange_();
 };
@@ -178,7 +183,7 @@ shakaDemo.onAdaptationChange_ = function(event) {
  * @private
  */
 shakaDemo.onNativeChange_ = function(event) {
-  var showTrickPlay = document.getElementById('showTrickPlay');
+  let showTrickPlay = document.getElementById('showTrickPlay');
 
   if (event.target.checked) {
     showTrickPlay.checked = false;
@@ -189,6 +194,14 @@ shakaDemo.onNativeChange_ = function(event) {
     showTrickPlay.disabled = false;
     shakaDemo.controls_.setEnabled(true);
   }
+
+  // Update text streaming config.  When we use native controls, we must always
+  // stream text.  This is because the native controls can't send an event when
+  // the text display state changes, so we can't use the display state to choose
+  // when to stream text.
+  shakaDemo.player_.configure({
+    streaming: {alwaysStreamText: event.target.checked}
+  });
 
   // Change the hash, to mirror this.
   shakaDemo.hashShouldChange_();

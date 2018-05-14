@@ -16,7 +16,17 @@
  */
 
 
-/** @externs */
+/**
+ * @externs
+ * @suppress {duplicate} To prevent compiler errors with the namespace
+ *   being declared both here and by goog.provide in the library.
+ */
+
+/** @namespace */
+var shaka = {};
+
+/** @namespace */
+shaka.extern = {};
 
 
 /**
@@ -31,24 +41,24 @@
  *   A map of key system name to whether it supports offline playback.
  * @exportDoc
  */
-shakaExtern.OfflineSupport;
+shaka.extern.OfflineSupport;
 
 
 /**
  * @typedef {{
  *   trackSelectionCallback:
- *       function(!Array.<shakaExtern.Track>):!Array.<shakaExtern.Track>,
- *   progressCallback: function(shakaExtern.StoredContent,number),
+ *       function(!Array.<shaka.extern.Track>):!Array.<shaka.extern.Track>,
+ *   progressCallback: function(shaka.extern.StoredContent,number),
  *   usePersistentLicense: boolean
  * }}
  *
- * @property {function(!Array.<shakaExtern.Track>):!Array.<shakaExtern.Track>}
+ * @property {function(!Array.<shaka.extern.Track>):!Array.<shaka.extern.Track>}
  *     trackSelectionCallback
  *   Called inside store() to determine which tracks to save from a manifest.
  *   It is passed an array of Tracks from the manifest and it should return
  *   an array of the tracks to store.  This is called for each Period in the
  *   manifest (in order).
- * @property {function(shakaExtern.StoredContent,number)} progressCallback
+ * @property {function(shaka.extern.StoredContent,number)} progressCallback
  *   Called inside store() to give progress info back to the app.  It is given
  *   the current manifest being stored and the progress of it being stored.
  * @property {boolean} usePersistentLicense
@@ -59,7 +69,7 @@ shakaExtern.OfflineSupport;
  *   Defaults to true.
  * @exportDoc
  */
-shakaExtern.OfflineConfiguration;
+shaka.extern.OfflineConfiguration;
 
 
 /**
@@ -69,7 +79,7 @@ shakaExtern.OfflineConfiguration;
  *   duration: number,
  *   size: number,
  *   expiration: number,
- *   tracks: !Array.<shakaExtern.Track>,
+ *   tracks: !Array.<shaka.extern.Track>,
  *   appMetadata: Object
  * }}
  *
@@ -86,14 +96,14 @@ shakaExtern.OfflineConfiguration;
  * @property {number} expiration
  *   The time that the encrypted license expires, in milliseconds.  If the media
  *   is clear or the license never expires, this will equal Infinity.
- * @property {!Array.<shakaExtern.Track>} tracks
+ * @property {!Array.<shaka.extern.Track>} tracks
  *   The tracks that are stored.  This only lists those found in the first
  *   Period.
  * @property {Object} appMetadata
  *   The metadata passed to store().
  * @exportDoc
  */
-shakaExtern.StoredContent;
+shaka.extern.StoredContent;
 
 
 /**
@@ -102,9 +112,9 @@ shakaExtern.StoredContent;
  *   duration: number,
  *   size: number,
  *   expiration: number,
- *   periods: !Array.<shakaExtern.PeriodDB>,
+ *   periods: !Array.<shaka.extern.PeriodDB>,
  *   sessionIds: !Array.<string>,
- *   drmInfo: ?shakaExtern.DrmInfo,
+ *   drmInfo: ?shaka.extern.DrmInfo,
  *   appMetadata: Object
  * }}
  *
@@ -116,30 +126,30 @@ shakaExtern.StoredContent;
  *   The total size of all stored segments, in bytes.
  * @property {number} expiration
  *   The license expiration, in milliseconds; or Infinity if not applicable.
- * @property {!Array.<shakaExtern.PeriodDB>} periods
+ * @property {!Array.<shaka.extern.PeriodDB>} periods
  *   The Periods that are stored.
  * @property {!Array.<string>} sessionIds
  *   The DRM offline session IDs for the media.
- * @property {?shakaExtern.DrmInfo} drmInfo
+ * @property {?shaka.extern.DrmInfo} drmInfo
  *   The DRM info used to initialize EME.
  * @property {Object} appMetadata
  *   A metadata object passed from the application.
  */
-shakaExtern.ManifestDB;
+shaka.extern.ManifestDB;
 
 
 /**
  * @typedef {{
  *   startTime: number,
- *   streams: !Array.<shakaExtern.StreamDB>
+ *   streams: !Array.<shaka.extern.StreamDB>
  * }}
  *
  * @property {number} startTime
  *   The start time of the period, in seconds.
- * @property {!Array.<shakaExtern.StreamDB>} streams
+ * @property {!Array.<shaka.extern.StreamDB>} streams
  *   The streams that define the Period.
  */
-shakaExtern.PeriodDB;
+shaka.extern.PeriodDB;
 
 
 /**
@@ -159,7 +169,7 @@ shakaExtern.PeriodDB;
  *   initSegmentKey: ?number,
  *   encrypted: boolean,
  *   keyId: ?string,
- *   segments: !Array.<shakaExtern.SegmentDB>,
+ *   segments: !Array.<shaka.extern.SegmentDB>,
  *   variantIds: !Array.<number>
  * }}
  *
@@ -176,7 +186,7 @@ shakaExtern.PeriodDB;
  * @property {string} codecs
  *   The codecs of the stream.
  * @property {(number|undefined)} frameRate
- *   The Stream's framerate in frames per second
+ *   The Stream's framerate in frames per second.
  * @property {(string|undefined)} kind
  *   The kind of text stream; undefined for audio/video.
  * @property {string} language
@@ -193,12 +203,12 @@ shakaExtern.PeriodDB;
  *   Whether this stream is encrypted.
  * @property {?string} keyId
  *   The key ID this stream is encrypted with.
- * @property {!Array.<shakaExtern.SegmentDB>} segments
- *   An array of segments that make up the stream
+ * @property {!Array.<shaka.extern.SegmentDB>} segments
+ *   An array of segments that make up the stream.
  * @property {!Array.<number>} variantIds
  *   An array of ids of variants the stream is a part of.
  */
-shakaExtern.StreamDB;
+shaka.extern.StreamDB;
 
 
 /**
@@ -215,7 +225,7 @@ shakaExtern.StreamDB;
  * @property {number} dataKey
  *   The key to the data in storage.
  */
-shakaExtern.SegmentDB;
+shaka.extern.SegmentDB;
 
 
 /**
@@ -226,4 +236,184 @@ shakaExtern.SegmentDB;
  * @property {!ArrayBuffer} data
  *   The data contents of the segment.
  */
-shakaExtern.SegmentDataDB;
+shaka.extern.SegmentDataDB;
+
+
+/**
+ * An interface that defines access to collection of segments and manifests. All
+ * methods are designed to be batched operations allowing the implementations to
+ * optimize their operations based on how they store data.
+ *
+ * The storage cell is one of two exposed APIs used to control where and how
+ * offline content is saved. The storage cell is responsible for converting
+ * information between its internal structures and the external (library)
+ * structures.
+ *
+ * @interface
+ */
+shaka.extern.StorageCell = function() {};
+
+
+/**
+ * Free all resources used by this cell. This should not affect the stored
+ * content.
+ *
+ * @return {!Promise}
+ */
+shaka.extern.StorageCell.prototype.destroy = function() {};
+
+
+/**
+ * Check if the cell can support new keys. If a cell has a fixed key space,
+ * then all add-operations will fail as no new keys can be added. All
+ * remove-operations and update-operations should still work.
+ *
+ * @return {boolean}
+ */
+shaka.extern.StorageCell.prototype.hasFixedKeySpace = function() {};
+
+
+/**
+ * Add a group of segments. Will return a promise that resolves with a list
+ * of keys for each segment. If one segment fails to be added, all segments
+ * should fail to be added.
+ *
+ * @param {!Array.<shaka.extern.SegmentDataDB>} segments
+ * @return {!Promise.<!Array.<number>>}
+ */
+shaka.extern.StorageCell.prototype.addSegments = function(segments) {};
+
+
+/**
+ * Remove a group of segments using their keys to identify them. If a key
+ * is not found, then that removal should be considered successful.
+ *
+ * @param {!Array.<number>} keys
+ * @param {function(number)} onRemove A callback for when a segment is removed
+ *                                    from the cell. The key of the segment
+ *                                    will be passed to the callback.
+ * @return {!Promise}
+ */
+shaka.extern.StorageCell.prototype.removeSegments = function(keys, onRemove) {};
+
+
+/**
+ * Get a group of segments using their keys to identify them. If any key is
+ * not found, the promise chain will be rejected.
+ *
+ * @param {!Array.<number>} keys
+ * @return {!Promise.<!Array.<shaka.extern.SegmentDataDB>>}
+ */
+shaka.extern.StorageCell.prototype.getSegments = function(keys) {};
+
+
+/**
+ * Add a group of manifests. Will return a promise that resolves with a list
+ * of keys for each manifest. If one manifest fails to be added, all manifests
+ * should fail to be added.
+ *
+ * @param {!Array.<shaka.extern.ManifestDB>} manifests
+ * @return {!Promise<!Array.<number>>} keys
+ */
+shaka.extern.StorageCell.prototype.addManifests = function(manifests) {};
+
+
+/**
+ * Replace the expiration time of the manifest stored under |key| with
+ * |newExpiration|. If no manifest is found under |key| then this should
+ * act as a no-op.
+ *
+ * @param {number} key
+ * @param {number} expiration
+ * @return {!Promise}
+ */
+shaka.extern.StorageCell.prototype.updateManifestExpiration =
+    function(key, expiration) {};
+
+
+/**
+ * Remove a group of manifests using their keys to identify them. If a key
+ * is not found, then that removal should be considered successful.
+ *
+ * @param {!Array.<number>} keys
+ * @param {function(number)} onRemove A callback for when a manifest is removed
+ *                                    from the cell. The key of the manifest
+ *                                    will be passed to the callback.
+ * @return {!Promise}
+ */
+shaka.extern.StorageCell.prototype.removeManifests =
+    function(keys, onRemove) {};
+
+
+/**
+ * Get a group of manifests using their keys to identify them. If any key is
+ * not found, the promise chain will be rejected.
+ *
+ * @param {!Array.<number>} keys
+ * @return {!Promise<!Array.<shaka.extern.ManifestDB>>}
+ */
+shaka.extern.StorageCell.prototype.getManifests = function(keys) {};
+
+
+/**
+ * Get all manifests stored in this cell. Since manifests are small compared to
+ * the asset they describe, it is assumed that it is feasible to have them all
+ * in main memory at one time.
+ *
+ * @return {!Promise<!Object.<number, shaka.extern.ManifestDB>>}
+ */
+shaka.extern.StorageCell.prototype.getAllManifests = function() {};
+
+
+/**
+ * Storage mechanisms are one of two exported storage APIs. Storage mechanisms
+ * are groups of storage cells (shaka.extern.StorageCell). Storage mechanisms
+ * are responsible for managing the life cycle of resources shared between
+ * storage cells in the same block.
+ *
+ * For example, a storage mechanism may manage a single database connection
+ * while each cell would manage different tables in the database via the same
+ * connection.
+ *
+ * @interface
+ */
+shaka.extern.StorageMechanism = function() {};
+
+
+/**
+ * Initialize the storage mechanism for first use. This should only be called
+ * once. Calling |init| multiple times has an undefined behaviour.
+ *
+ * @return {!Promise}
+ */
+shaka.extern.StorageMechanism.prototype.init = function() {};
+
+
+/**
+ * Free all resources used by the storage mechanism and its cells. This should
+ * not affect the stored content.
+ *
+ * @return {!Promise}
+ */
+shaka.extern.StorageMechanism.prototype.destroy = function() {};
+
+
+/**
+ * Get a map of all the cells managed by the storage mechanism. Editing the map
+ * should have no effect on the storage mechanism. The map key is the cell's
+ * address in the mechanism and should be consistent between calls to
+ * |getCells|.
+ *
+ * @return {!Object.<string, !shaka.extern.StorageCell>}
+ */
+shaka.extern.StorageMechanism.prototype.getCells = function() {};
+
+
+/**
+ * Erase all content from storage and leave storage in an empty state. It is
+ * expected that |erase| will be called after |init| and will still be
+ * initialized for use after calling |erase|.
+ *
+ * @return {!Promise}
+ */
+shaka.extern.StorageMechanism.prototype.erase = function() {};

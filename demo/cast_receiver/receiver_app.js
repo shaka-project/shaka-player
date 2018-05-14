@@ -102,7 +102,7 @@ ShakaReceiver.prototype.appDataCallback_ = function(appData) {
   // appData is null if we start the app without any media loaded.
   if (!appData) return;
 
-  var asset = /** @type {shakaAssets.AssetInfo} */(appData['asset']);
+  let asset = /** @type {shakaAssets.AssetInfo} */(appData['asset']);
   ShakaDemoUtils.setupAssetMetadata(asset, this.player_);
 };
 
@@ -124,7 +124,7 @@ ShakaReceiver.prototype.checkIdle_ = function() {
     // Set a special poster for audio-only assets.
     if (this.player_.isAudioOnly()) {
       this.video_.poster =
-          '//shaka-player-demo.appspot.com/assets/audioOnly.gif';
+          'https://shaka-player-demo.appspot.com/assets/audioOnly.gif';
     } else {
       // The cast receiver never shows the poster for assets with video streams.
       this.video_.removeAttribute('poster');

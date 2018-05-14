@@ -22,6 +22,7 @@ This checks:
  * Run the linter to check for style violations.
 """
 
+import argparse
 import logging
 import os
 import re
@@ -40,34 +41,19 @@ def get_lint_files():
   return get('test') + get('lib') + get('externs') + get('demo')
 
 
-def check_closure_compiler_linter():
-  """Runs the Closure Compiler linter."""
-  logging.info('Running Closure Compiler linter...')
-
-  base = shakaBuildHelpers.get_source_base()
-  closure_linter_path = os.path.join(base, 'third_party', 'closure', 'linter.jar')
-  cmd_line = ['java', '-jar', closure_linter_path] + get_lint_files()
-
-  # The compiler's linter tool doesn't return a status code (as of v20171203)
-  # and has no options.  Instead of checking status, success is no output.
-  output = shakaBuildHelpers.execute_get_output(cmd_line)
-  if output != '':
-    print output
-    return False
-  return True
-
-
-def check_js_lint():
+def check_js_lint(args):
   """Runs the JavaScript linter."""
   # TODO: things not enforced: property doc requirements
   logging.info('Running eslint...')
 
   eslint = shakaBuildHelpers.get_node_binary('eslint')
   cmd_line = eslint + get_lint_files()
+  if args.fix:
+    cmd_line += ['--fix']
   return shakaBuildHelpers.execute_get_code(cmd_line) == 0
 
 
-def check_html_lint():
+def check_html_lint(_):
   """Runs the HTML linter over the HTML files.
 
   Returns:
@@ -83,7 +69,7 @@ def check_html_lint():
   return shakaBuildHelpers.execute_get_code(cmd_line) == 0
 
 
-def check_complete():
+def check_complete(_):
   """Checks whether the 'complete' build references every file.
 
   This is used by the build script to ensure that every file is included in at
@@ -116,7 +102,7 @@ def check_complete():
   return True
 
 
-def check_tests():
+def check_tests(_):
   """Runs an extra compile pass over the test code to check for type errors.
 
   Returns:
@@ -145,7 +131,7 @@ def check_tests():
   return test_build.build_raw(closure_opts)
 
 
-def check_externs():
+def check_externs(_):
   """Runs an extra compile pass over the generated externs to ensure that they
   are usable.
 
@@ -199,29 +185,28 @@ def usage():
 
 
 def main(args):
-  for arg in args:
-    if arg == '--help':
-      usage()
-      return 0
-    else:
-      logging.error('Unknown option: %s', arg)
-      usage()
-      return 1
+  parser = argparse.ArgumentParser(
+      description=__doc__,
+      formatter_class=argparse.RawDescriptionHelpFormatter)
+  parser.add_argument('--fix',
+                      help='Automatically fix style violations.',
+                      action='store_true')
+
+  parsed_args = parser.parse_args(args)
 
   # Update node modules if needed.
   if not shakaBuildHelpers.update_node_modules():
     return 1
 
   steps = [
-    check_closure_compiler_linter,
-    check_js_lint,
-    check_html_lint,
-    check_complete,
-    check_tests,
-    check_externs,
+      check_js_lint,
+      check_html_lint,
+      check_complete,
+      check_tests,
+      check_externs,
   ]
   for step in steps:
-    if not step():
+    if not step(parsed_args):
       return 1
   return 0
 

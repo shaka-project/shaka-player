@@ -4,7 +4,6 @@
 +../../lib/polyfill/indexed_db.js
 +../../lib/polyfill/input_event.js
 +../../lib/polyfill/mathround.js
-+../../lib/polyfill/mediakeys.js
 +../../lib/polyfill/mediasource.js
 +../../lib/polyfill/patchedmediakeys_ms.js
 +../../lib/polyfill/patchedmediakeys_nop.js

@@ -25,12 +25,12 @@ goog.provide('shaka.test.FakeNetworkingEngine');
  * A fake networking engine that returns constant data.  The request member
  * is a jasmine spy and can be used to check the actual calls that occurred.
  *
- * @param {Object.<string, !ArrayBuffer>=} opt_responseMap A map from URI to
+ * @param {Object.<string, !ArrayBuffer>=} responseMap A map from URI to
  *   the data to return.
- * @param {!ArrayBuffer=} opt_defaultResponse The default value to return; if
+ * @param {!ArrayBuffer=} defaultResponse The default value to return; if
  *   null, a jasmine expect will fail if a request is made that is not in
- *   |opt_data|.
- * @param {Object.<string, !Object.<string, string>>=} opt_headersMap
+ *   |data|.
+ * @param {Object.<string, !Object.<string, string>>=} headersMap
  *   A map from URI to the headers to return.
  *
  * @constructor
@@ -38,15 +38,15 @@ goog.provide('shaka.test.FakeNetworkingEngine');
  * @extends {shaka.net.NetworkingEngine}
  */
 shaka.test.FakeNetworkingEngine = function(
-    opt_responseMap, opt_defaultResponse, opt_headersMap) {
+    responseMap, defaultResponse, headersMap) {
   /** @private {!Object.<string, !ArrayBuffer>} */
-  this.responseMap_ = opt_responseMap || {};
+  this.responseMap_ = responseMap || {};
 
   /** @private {!Object.<string, !Object.<string, string>>} */
-  this.headersMap_ = opt_headersMap || {};
+  this.headersMap_ = headersMap || {};
 
   /** @private {ArrayBuffer} */
-  this.defaultResponse_ = opt_defaultResponse || null;
+  this.defaultResponse_ = defaultResponse || null;
 
   /** @private {?shaka.util.PublicPromise} */
   this.delayNextRequestPromise_ = null;
@@ -65,7 +65,7 @@ shaka.test.FakeNetworkingEngine = function(
       jasmine.createSpy('unregisterResponseFilter')
           .and.callFake(this.unregisterResponseFilterImpl_.bind(this));
 
-  /** @private {?shakaExtern.ResponseFilter} */
+  /** @private {?shaka.extern.ResponseFilter} */
   this.responseFilter_ = null;
 
   // The prototype has already been applied; create spies for the
@@ -118,7 +118,7 @@ shaka.test.FakeNetworkingEngine.expectNoRequest = function(
  */
 shaka.test.FakeNetworkingEngine.expectRangeRequest = function(
     requestSpy, uri, startByte, endByte) {
-  var range = 'bytes=' + startByte + '-';
+  let range = 'bytes=' + startByte + '-';
   if (endByte != null) range += endByte;
 
   expect(requestSpy).toHaveBeenCalledWith(
@@ -132,8 +132,8 @@ shaka.test.FakeNetworkingEngine.expectRangeRequest = function(
 
 /**
  * @param {shaka.net.NetworkingEngine.RequestType} type
- * @param {shakaExtern.Request} request
- * @return {!shakaExtern.IAbortableOperation.<shakaExtern.Response>}
+ * @param {shaka.extern.Request} request
+ * @return {!shaka.extern.IAbortableOperation.<shaka.extern.Response>}
  * @private
  */
 shaka.test.FakeNetworkingEngine.prototype.requestImpl_ = function(
@@ -141,27 +141,27 @@ shaka.test.FakeNetworkingEngine.prototype.requestImpl_ = function(
   expect(request).toBeTruthy();
   expect(request.uris.length).toBe(1);
 
-  var headers = this.headersMap_[request.uris[0]] || {};
-  var result = this.responseMap_[request.uris[0]] || this.defaultResponse_;
+  let headers = this.headersMap_[request.uris[0]] || {};
+  let result = this.responseMap_[request.uris[0]] || this.defaultResponse_;
   if (!result && request.method != 'HEAD') {
     // Give a more helpful error message to jasmine.
     expect(request.uris[0]).toBe('in the response map');
-    var error = new shaka.util.Error(
+    let error = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.NETWORK,
         shaka.util.Error.Code.UNEXPECTED_TEST_REQUEST);
     return shaka.util.AbortableOperation.failed(error);
   }
 
-  /** @type {shakaExtern.Response} */
-  var response = {uri: request.uris[0], data: result, headers: headers};
+  /** @type {shaka.extern.Response} */
+  let response = {uri: request.uris[0], data: result, headers: headers};
 
   if (this.responseFilter_) {
     this.responseFilter_(type, response);
   }
 
   if (this.delayNextRequestPromise_) {
-    var delay = this.delayNextRequestPromise_;
+    let delay = this.delayNextRequestPromise_;
     this.delayNextRequestPromise_ = null;
     return shaka.util.AbortableOperation.notAbortable(
         delay.then(function() { return response; }));
@@ -175,7 +175,7 @@ shaka.test.FakeNetworkingEngine.prototype.requestImpl_ = function(
  * Useable by tests directly.  Library code will only call this via the Spy on
  * registerResponseFilter.
  *
- * @param {shakaExtern.ResponseFilter} filter
+ * @param {shaka.extern.ResponseFilter} filter
  */
 shaka.test.FakeNetworkingEngine.prototype.setResponseFilter = function(filter) {
   expect(filter).toEqual(jasmine.any(Function));
@@ -184,7 +184,7 @@ shaka.test.FakeNetworkingEngine.prototype.setResponseFilter = function(filter) {
 
 
 /**
- * @param {shakaExtern.ResponseFilter} filter
+ * @param {shaka.extern.ResponseFilter} filter
  * @private
  */
 shaka.test.FakeNetworkingEngine.prototype.unregisterResponseFilterImpl_ =
@@ -199,8 +199,9 @@ shaka.test.FakeNetworkingEngine.prototype.unregisterResponseFilterImpl_ =
  * @return {!shaka.util.PublicPromise}
  */
 shaka.test.FakeNetworkingEngine.prototype.delayNextRequest = function() {
-  if (!this.delayNextRequestPromise_)
+  if (!this.delayNextRequestPromise_) {
     this.delayNextRequestPromise_ = new shaka.util.PublicPromise();
+  }
   return this.delayNextRequestPromise_;
 };
 
@@ -261,7 +262,7 @@ shaka.test.FakeNetworkingEngine.prototype.setResponseMap = function(
 shaka.test.FakeNetworkingEngine.prototype.setResponseMapAsText = function(
     textMap) {
   this.responseMap_ = Object.keys(textMap).reduce(function(obj, key) {
-    var data = shaka.util.StringUtils.toUTF8(textMap[key]);
+    let data = shaka.util.StringUtils.toUTF8(textMap[key]);
     obj[key] = data;
     return obj;
   }, {});
@@ -299,7 +300,7 @@ shaka.test.FakeNetworkingEngine.prototype.setDefaultValue = function(
  */
 shaka.test.FakeNetworkingEngine.prototype.setDefaultText = function(
     defaultText) {
-  var data = null;
+  let data = null;
   if (defaultText) {
     data = shaka.util.StringUtils.toUTF8(defaultText);
   }

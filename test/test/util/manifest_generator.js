@@ -25,19 +25,19 @@ goog.provide('shaka.test.ManifestGenerator');
  * point and will apply to the most recent substructure.  For example, the
  * language() method sets the language of the most recent variant.
  *
- * @param {*=} opt_shaka
+ * @param {*=} shaka
  * @constructor
  * @struct
  */
-shaka.test.ManifestGenerator = function(opt_shaka) {
+shaka.test.ManifestGenerator = function(shaka) {
   /** @private {?} */
-  this.shaka_ = opt_shaka || window['shaka'];
+  this.shaka_ = shaka || window['shaka'];
 
-  var timeline = new this.shaka_.media.PresentationTimeline(0, 0);
+  let timeline = new this.shaka_.media.PresentationTimeline(0, 0);
   timeline.setSegmentAvailabilityDuration(Infinity);
   timeline.notifyMaxSegmentDuration(10);
 
-  /** @private {shakaExtern.Manifest} */
+  /** @private {shaka.extern.Manifest} */
   this.manifest_ = {
     presentationTimeline: timeline,
     periods: [],
@@ -45,15 +45,15 @@ shaka.test.ManifestGenerator = function(opt_shaka) {
     minBufferTime: 0
   };
 
-  /** @private {shakaExtern.Stream|shakaExtern.Variant|null} */
+  /** @private {shaka.extern.Stream|shaka.extern.Variant|null} */
   this.lastObjectAdded_ = null;
 
-  /** @private {?shakaExtern.Stream} */
+  /** @private {?shaka.extern.Stream} */
   this.lastStreamAdded_ = null;
 };
 
 
-/** @return {shakaExtern.Manifest} */
+/** @return {shaka.extern.Manifest} */
 shaka.test.ManifestGenerator.prototype.build = function() {
   return this.manifest_;
 };
@@ -135,8 +135,8 @@ shaka.test.ManifestGenerator.prototype.addPeriod = function(startTime) {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.addVariant = function(id) {
-  var period = this.currentPeriod_();
-  var variant = {
+  let period = this.currentPeriod_();
+  let variant = {
     id: id,
     language: 'und',
     bandwidth: 0,
@@ -195,7 +195,7 @@ shaka.test.ManifestGenerator.prototype.bandwidth = function(bandwidth) {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.disallowByApplication = function() {
-  var variant = this.currentVariant_();
+  let variant = this.currentVariant_();
   variant.allowedByApplication = false;
   return this;
 };
@@ -207,7 +207,7 @@ shaka.test.ManifestGenerator.prototype.disallowByApplication = function() {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.disallowByKeySystem = function() {
-  var variant = this.currentVariant_();
+  let variant = this.currentVariant_();
   variant.allowedByKeySystem = false;
   return this;
 };
@@ -222,7 +222,7 @@ shaka.test.ManifestGenerator.prototype.disallowByKeySystem = function() {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.addDrmInfo = function(keySystem) {
-  var variant = this.currentVariant_();
+  let variant = this.currentVariant_();
   variant.drmInfos.push({
     keySystem: keySystem,
     licenseServerUri: '',
@@ -245,7 +245,7 @@ shaka.test.ManifestGenerator.prototype.addDrmInfo = function(keySystem) {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.licenseServerUri = function(uri) {
-  var drmInfo = this.currentDrmInfo_();
+  let drmInfo = this.currentDrmInfo_();
   drmInfo.licenseServerUri = uri;
   return this;
 };
@@ -258,7 +258,7 @@ shaka.test.ManifestGenerator.prototype.licenseServerUri = function(uri) {
  */
 shaka.test.ManifestGenerator.prototype.distinctiveIdentifierRequired =
     function() {
-  var drmInfo = this.currentDrmInfo_();
+  let drmInfo = this.currentDrmInfo_();
   drmInfo.distinctiveIdentifierRequired = true;
   return this;
 };
@@ -270,7 +270,7 @@ shaka.test.ManifestGenerator.prototype.distinctiveIdentifierRequired =
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.persistentStateRequired = function() {
-  var drmInfo = this.currentDrmInfo_();
+  let drmInfo = this.currentDrmInfo_();
   drmInfo.persistentStateRequired = true;
   return this;
 };
@@ -283,7 +283,7 @@ shaka.test.ManifestGenerator.prototype.persistentStateRequired = function() {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.audioRobustness = function(robustness) {
-  var drmInfo = this.currentDrmInfo_();
+  let drmInfo = this.currentDrmInfo_();
   drmInfo.audioRobustness = robustness;
   return this;
 };
@@ -296,7 +296,7 @@ shaka.test.ManifestGenerator.prototype.audioRobustness = function(robustness) {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.videoRobustness = function(robustness) {
-  var drmInfo = this.currentDrmInfo_();
+  let drmInfo = this.currentDrmInfo_();
   drmInfo.videoRobustness = robustness;
   return this;
 };
@@ -310,9 +310,10 @@ shaka.test.ManifestGenerator.prototype.videoRobustness = function(robustness) {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.addInitData = function(type, buffer) {
-  var drmInfo = this.currentDrmInfo_();
-  if (!drmInfo.initData)
+  let drmInfo = this.currentDrmInfo_();
+  if (!drmInfo.initData) {
     drmInfo.initData = [];
+  }
   drmInfo.initData.push({initData: buffer, initDataType: type, keyId: null});
   return this;
 };
@@ -325,11 +326,12 @@ shaka.test.ManifestGenerator.prototype.addInitData = function(type, buffer) {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.addCencInitData = function(base64) {
-  var drmInfo = this.currentDrmInfo_();
-  if (!drmInfo.initData)
+  let drmInfo = this.currentDrmInfo_();
+  if (!drmInfo.initData) {
     drmInfo.initData = [];
+  }
 
-  var buffer = shaka.util.Uint8ArrayUtils.fromBase64(base64);
+  let buffer = shaka.util.Uint8ArrayUtils.fromBase64(base64);
   drmInfo.initData.push({initData: buffer, initDataType: 'cenc'});
   return this;
 };
@@ -344,23 +346,24 @@ shaka.test.ManifestGenerator.prototype.addCencInitData = function(base64) {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.addVideo = function(id) {
-  var ContentType = shaka.util.ManifestParserUtils.ContentType;
-  var variant = this.currentVariant_();
-  var period = this.currentPeriod_();
-  var stream;
+  const ContentType = shaka.util.ManifestParserUtils.ContentType;
+  let variant = this.currentVariant_();
+  let period = this.currentPeriod_();
+  let stream;
   // A stream can be a part of multiple variants.
   // If we already have a stream with this id, reuse it instead of
   // adding a new one.
-  var variants = period.variants;
-  for (var i = 0; i < variants.length; i++) {
+  let variants = period.variants;
+  for (let i = 0; i < variants.length; i++) {
     if (variants[i].video && (variants[i].video.id == id)) {
       stream = variants[i].video;
       break;
     }
   }
 
-  if (!stream)
+  if (!stream) {
     stream = this.createStream_(id, ContentType.VIDEO, 'und');
+  }
 
   variant.video = stream;
   this.lastStreamAdded_ = stream;
@@ -377,23 +380,24 @@ shaka.test.ManifestGenerator.prototype.addVideo = function(id) {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.addAudio = function(id) {
-  var ContentType = shaka.util.ManifestParserUtils.ContentType;
-  var variant = this.currentVariant_();
-  var period = this.currentPeriod_();
-  var stream;
+  const ContentType = shaka.util.ManifestParserUtils.ContentType;
+  let variant = this.currentVariant_();
+  let period = this.currentPeriod_();
+  let stream;
   // A stream can be a part of multiple variants.
   // If we already have a stream with this id, reuse it instead of
   // adding a new one.
-  var variants = period.variants;
-  for (var i = 0; i < variants.length; i++) {
+  let variants = period.variants;
+  for (let i = 0; i < variants.length; i++) {
     if (variants[i].audio && (variants[i].audio.id == id)) {
       stream = variants[i].audio;
       break;
     }
   }
 
-  if (!stream)
+  if (!stream) {
     stream = this.createStream_(id, ContentType.AUDIO, variant.language);
+  }
 
   variant.audio = stream;
   this.lastStreamAdded_ = stream;
@@ -410,9 +414,9 @@ shaka.test.ManifestGenerator.prototype.addAudio = function(id) {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.addTextStream = function(id) {
-  var ContentType = shaka.util.ManifestParserUtils.ContentType;
-  var period = this.currentPeriod_();
-  var stream = this.createStream_(id, ContentType.TEXT, 'und');
+  const ContentType = shaka.util.ManifestParserUtils.ContentType;
+  let period = this.currentPeriod_();
+  let stream = this.createStream_(id, ContentType.TEXT, 'und');
   period.textStreams.push(stream);
   this.lastObjectAdded_ = stream;
   this.lastStreamAdded_ = stream;
@@ -427,7 +431,7 @@ shaka.test.ManifestGenerator.prototype.addTextStream = function(id) {
  * @param {number} id
  * @param {string} type
  * @param {string} language
- * @return {!shakaExtern.Stream}
+ * @return {!shaka.extern.Stream}
  * @private
  */
 shaka.test.ManifestGenerator.prototype.createStream_ =
@@ -435,9 +439,9 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
   goog.asserts.assert(!this.isIdUsed_(id),
                       'Streams should have unique ids!');
 
-  var ContentType = shaka.util.ManifestParserUtils.ContentType;
-  var defaultMimeType = 'text/plain';
-  var defaultCodecs = '';
+  const ContentType = shaka.util.ManifestParserUtils.ContentType;
+  let defaultMimeType = 'text/plain';
+  let defaultCodecs = '';
 
   if (type == ContentType.AUDIO) {
     defaultMimeType = 'audio/mp4';
@@ -449,14 +453,14 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
     defaultMimeType = 'text/vtt';
   }
 
-  var create = jasmine.createSpy('createSegmentIndex').and.callFake(function() {
+  let create = jasmine.createSpy('createSegmentIndex').and.callFake(function() {
     return Promise.resolve();
   });
-  var find = jasmine.createSpy('findSegmentPosition').and.returnValue(null);
-  var get = jasmine.createSpy('getSegmentReference').and.returnValue(null);
+  let find = jasmine.createSpy('findSegmentPosition').and.returnValue(null);
+  let get = jasmine.createSpy('getSegmentReference').and.returnValue(null);
 
-  /** @type {shakaExtern.Stream} */
-  var stream = {
+  /** @type {shaka.extern.Stream} */
+  let stream = {
     id: id,
     createSegmentIndex: shaka.test.Util.spyFunc(create),
     findSegmentPosition: shaka.test.Util.spyFunc(find),
@@ -491,7 +495,7 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.anySegmentFunctions = function() {
-  var stream = this.currentStream_();
+  let stream = this.currentStream_();
   stream.createSegmentIndex = jasmine.any(Function);
   stream.findSegmentPosition = jasmine.any(Function);
   stream.getSegmentReference = jasmine.any(Function);
@@ -509,19 +513,20 @@ shaka.test.ManifestGenerator.prototype.anySegmentFunctions = function() {
  */
 shaka.test.ManifestGenerator.prototype.useSegmentTemplate = function(
     template, segmentDuration) {
-  var stream = this.currentStream_();
-  var totalDuration = this.manifest_.presentationTimeline.getDuration();
-  var segmentCount = totalDuration / segmentDuration;
+  let stream = this.currentStream_();
+  let totalDuration = this.manifest_.presentationTimeline.getDuration();
+  let segmentCount = totalDuration / segmentDuration;
   stream.createSegmentIndex = function() { return Promise.resolve(); };
   stream.findSegmentPosition = function(time) {
     return Math.floor(time / segmentDuration);
   };
   stream.getSegmentReference = (function(index) {
-    if (index < 0 || index >= segmentCount)
+    if (index < 0 || index >= segmentCount) {
       return null;
-    var getUris = function() { return [sprintf(template, index)]; };
-    var start = index * segmentDuration;
-    var end = Math.min(totalDuration, (index + 1) * segmentDuration);
+    }
+    let getUris = function() { return [sprintf(template, index)]; };
+    let start = index * segmentDuration;
+    let end = Math.min(totalDuration, (index + 1) * segmentDuration);
     return new this.shaka_.media.SegmentReference(
         index, start, end, getUris, 0, null);
   }.bind(this));
@@ -537,9 +542,9 @@ shaka.test.ManifestGenerator.prototype.useSegmentTemplate = function(
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.textStream = function(uri) {
-  var stream = this.currentStream_();
-  var duration = this.manifest_.presentationTimeline.getDuration();
-  var getUris = function() { return [uri]; };
+  let stream = this.currentStream_();
+  let duration = this.manifest_.presentationTimeline.getDuration();
+  let getUris = function() { return [uri]; };
 
   stream.createSegmentIndex = function() { return Promise.resolve(); };
   stream.findSegmentPosition = function(time) {
@@ -547,7 +552,7 @@ shaka.test.ManifestGenerator.prototype.textStream = function(uri) {
   };
   stream.getSegmentReference = (function(position) {
     if (position != 1) return null;
-    var startTime = 0;
+    let startTime = 0;
     return new this.shaka_.media.SegmentReference(
         position, startTime, duration, getUris, 0, null);
   }.bind(this));
@@ -562,7 +567,7 @@ shaka.test.ManifestGenerator.prototype.textStream = function(uri) {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.anyInitSegment = function() {
-  var stream = this.currentStream_();
+  let stream = this.currentStream_();
   stream.initSegmentReference =
       /** @type {shaka.media.InitSegmentReference} */ (
           jasmine.any(this.shaka_.media.InitSegmentReference));
@@ -576,7 +581,7 @@ shaka.test.ManifestGenerator.prototype.anyInitSegment = function() {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.nullInitSegment = function() {
-  var stream = this.currentStream_();
+  let stream = this.currentStream_();
   stream.initSegmentReference = null;
   return this;
 };
@@ -592,8 +597,8 @@ shaka.test.ManifestGenerator.prototype.nullInitSegment = function() {
  */
 shaka.test.ManifestGenerator.prototype.initSegmentReference = function(
     uris, startByte, endByte) {
-  var stream = this.currentStream_();
-  var getUris = function() { return uris; };
+  let stream = this.currentStream_();
+  let getUris = function() { return uris; };
   stream.initSegmentReference =
       new this.shaka_.media.InitSegmentReference(getUris, startByte, endByte);
   return this;
@@ -607,7 +612,7 @@ shaka.test.ManifestGenerator.prototype.initSegmentReference = function(
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.presentationTimeOffset = function(pto) {
-  var stream = this.currentStream_();
+  let stream = this.currentStream_();
   stream.presentationTimeOffset = pto;
   return this;
 };
@@ -617,13 +622,13 @@ shaka.test.ManifestGenerator.prototype.presentationTimeOffset = function(pto) {
  * Sets the MIME type of the current stream.
  *
  * @param {string} mime
- * @param {string=} opt_codecs
+ * @param {string=} codecs
  * @return {!shaka.test.ManifestGenerator}
  */
-shaka.test.ManifestGenerator.prototype.mime = function(mime, opt_codecs) {
-  var stream = this.currentStream_();
+shaka.test.ManifestGenerator.prototype.mime = function(mime, codecs) {
+  let stream = this.currentStream_();
   stream.mimeType = mime;
-  stream.codecs = opt_codecs || '';
+  stream.codecs = codecs || '';
   return this;
 };
 
@@ -635,7 +640,7 @@ shaka.test.ManifestGenerator.prototype.mime = function(mime, opt_codecs) {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.frameRate = function(frameRate) {
-  var stream = this.currentStream_();
+  let stream = this.currentStream_();
   stream.frameRate = frameRate;
   return this;
 };
@@ -649,7 +654,7 @@ shaka.test.ManifestGenerator.prototype.frameRate = function(frameRate) {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.size = function(width, height) {
-  var stream = this.currentStream_();
+  let stream = this.currentStream_();
   stream.width = width;
   stream.height = height;
   return this;
@@ -663,7 +668,7 @@ shaka.test.ManifestGenerator.prototype.size = function(width, height) {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.kind = function(kind) {
-  var stream = this.currentStream_();
+  let stream = this.currentStream_();
   stream.kind = kind;
   return this;
 };
@@ -676,7 +681,7 @@ shaka.test.ManifestGenerator.prototype.kind = function(kind) {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.encrypted = function(encrypted) {
-  var stream = this.currentStream_();
+  let stream = this.currentStream_();
   stream.encrypted = encrypted;
   return this;
 };
@@ -689,7 +694,7 @@ shaka.test.ManifestGenerator.prototype.encrypted = function(encrypted) {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.keyId = function(keyId) {
-  var stream = this.currentStream_();
+  let stream = this.currentStream_();
   stream.keyId = keyId;
   return this;
 };
@@ -713,7 +718,7 @@ shaka.test.ManifestGenerator.prototype.label = function(label) {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.roles = function(roles) {
-  var stream = this.currentStream_();
+  let stream = this.currentStream_();
   stream.roles = roles;
   return this;
 };
@@ -725,7 +730,7 @@ shaka.test.ManifestGenerator.prototype.roles = function(roles) {
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.channelsCount = function(count) {
-  var stream = this.currentStream_();
+  let stream = this.currentStream_();
   stream.channelsCount = count;
   return this;
 };
@@ -735,7 +740,7 @@ shaka.test.ManifestGenerator.prototype.channelsCount = function(count) {
 // Private methods {{{
 /**
  * Gets the most recent period.
- * @return {shakaExtern.Period}
+ * @return {shaka.extern.Period}
  * @private
  */
 shaka.test.ManifestGenerator.prototype.currentPeriod_ = function() {
@@ -747,11 +752,11 @@ shaka.test.ManifestGenerator.prototype.currentPeriod_ = function() {
 
 /**
  * Gets the most recent variant.
- * @return {shakaExtern.Variant}
+ * @return {shaka.extern.Variant}
  * @private
  */
 shaka.test.ManifestGenerator.prototype.currentVariant_ = function() {
-  var period = this.currentPeriod_();
+  let period = this.currentPeriod_();
   goog.asserts.assert(period.variants.length > 0,
                       'Must call addVariant() at least once.');
   return period.variants[period.variants.length - 1];
@@ -760,7 +765,7 @@ shaka.test.ManifestGenerator.prototype.currentVariant_ = function() {
 
 /**
  * Gets the most recent variant or text stream.
- * @return {shakaExtern.Stream|shakaExtern.Variant}
+ * @return {shaka.extern.Stream|shaka.extern.Variant}
  * @private
  */
 shaka.test.ManifestGenerator.prototype.currentStreamOrVariant_ = function() {
@@ -773,11 +778,11 @@ shaka.test.ManifestGenerator.prototype.currentStreamOrVariant_ = function() {
 
 /**
  * Gets the most recent DRM info.
- * @return {shakaExtern.DrmInfo}
+ * @return {shaka.extern.DrmInfo}
  * @private
  */
 shaka.test.ManifestGenerator.prototype.currentDrmInfo_ = function() {
-  var variant = this.currentVariant_();
+  let variant = this.currentVariant_();
   goog.asserts.assert(variant.drmInfos.length > 0,
                       'Must call addDrmInfo() at least once.');
   return variant.drmInfos[variant.drmInfos.length - 1];
@@ -786,7 +791,7 @@ shaka.test.ManifestGenerator.prototype.currentDrmInfo_ = function() {
 
 /**
  * Gets the most recent stream.
- * @return {shakaExtern.Stream}
+ * @return {shaka.extern.Stream}
  * @private
  */
 shaka.test.ManifestGenerator.prototype.currentStream_ = function() {
@@ -804,18 +809,18 @@ shaka.test.ManifestGenerator.prototype.currentStream_ = function() {
  * @private
  */
 shaka.test.ManifestGenerator.prototype.isIdUsed_ = function(id) {
-  var period = this.currentPeriod_();
-  var variants = period.variants;
-  var textStreams = period.textStreams;
+  let period = this.currentPeriod_();
+  let variants = period.variants;
+  let textStreams = period.textStreams;
 
-  for (var i = 0; i < variants.length; i++) {
+  for (let i = 0; i < variants.length; i++) {
     if ((variants[i].video && (variants[i].video.id == id)) ||
         (variants[i].audio && (variants[i].audio.id == id))) {
       return true;
     }
   }
 
-  for (var i = 0; i < textStreams.length; i++) {
+  for (let i = 0; i < textStreams.length; i++) {
     if (textStreams[i].id == id) {
       return true;
     }

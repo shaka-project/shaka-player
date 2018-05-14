@@ -16,11 +16,11 @@
  */
 
 describe('Mp4SegmentIndexParser', function() {
-  var indexSegmentUri = '/base/test/test/assets/index-segment.mp4';
-  var mediaSegmentUri = '/base/test/test/assets/sintel-audio-segment.mp4';
+  const indexSegmentUri = '/base/test/test/assets/index-segment.mp4';
+  const mediaSegmentUri = '/base/test/test/assets/sintel-audio-segment.mp4';
 
-  var indexSegment;
-  var mediaSegment;
+  let indexSegment;
+  let mediaSegment;
 
   beforeAll(function(done) {
     Promise.all([
@@ -33,7 +33,7 @@ describe('Mp4SegmentIndexParser', function() {
   });
 
   it('rejects a non-index segment ', function() {
-    var error = new shaka.util.Error(
+    let error = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.MEDIA,
         shaka.util.Error.Code.MP4_SIDX_WRONG_BOX_TYPE);
@@ -46,8 +46,8 @@ describe('Mp4SegmentIndexParser', function() {
   });
 
   it('parses index segment ', function() {
-    var result = shaka.media.Mp4SegmentIndexParser(indexSegment, 0, [], 0);
-    var references =
+    let result = shaka.media.Mp4SegmentIndexParser(indexSegment, 0, [], 0);
+    let references =
         [
          {startTime: 0, endTime: 12, startByte: 92, endByte: 194960},
          {startTime: 12, endTime: 24, startByte: 194961, endByte: 294059},
@@ -58,7 +58,7 @@ describe('Mp4SegmentIndexParser', function() {
 
     expect(result).toBeTruthy();
     expect(result.length).toBe(references.length);
-    for (var i = 0; i < result.length; i++) {
+    for (let i = 0; i < result.length; i++) {
       expect(result[i].position).toBe(i);
       expect(result[i].startTime).toBe(references[i].startTime);
       expect(result[i].endTime).toBe(references[i].endTime);
@@ -68,8 +68,8 @@ describe('Mp4SegmentIndexParser', function() {
   });
 
   it('takes a scaled presentationTimeOffset in seconds', function() {
-    var result = shaka.media.Mp4SegmentIndexParser(indexSegment, 0, [], 2);
-    var references =
+    let result = shaka.media.Mp4SegmentIndexParser(indexSegment, 0, [], 2);
+    let references =
         [
          {startTime: -2, endTime: 10},
          {startTime: 10, endTime: 22},
@@ -80,7 +80,7 @@ describe('Mp4SegmentIndexParser', function() {
 
     expect(result).toBeTruthy();
     expect(result.length).toBe(references.length);
-    for (var i = 0; i < result.length; i++) {
+    for (let i = 0; i < result.length; i++) {
       expect(result[i].position).toBe(i);
       expect(result[i].startTime).toBe(references[i].startTime);
       expect(result[i].endTime).toBe(references[i].endTime);

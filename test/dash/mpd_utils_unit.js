@@ -152,6 +152,13 @@ describe('MpdUtils', function() {
               '/example/$Time.mp4',
               '1', 2, 3, 4).toString()).toBe('/example/$Time.mp4');
     });
+
+    it('handles non-decimal format specifiers', function() {
+      expect(
+          MpdUtils.fillUriTemplate(
+              '/$Number%05x$_$Number%01X$_$Number%01u$_$Number%01o$.mp4',
+              '', 180, 0, 0).toString()).toBe('/000b4_B4_180_264.mp4');
+    });
   });
 
   describe('createTimeline', function() {
@@ -162,9 +169,9 @@ describe('MpdUtils', function() {
         createTimePoint(20, 10, 0)
       ];
       let result = [
-        { start: 0, end: 10 },
-        { start: 10, end: 20 },
-        { start: 20, end: 30 }
+        {start: 0, end: 10},
+        {start: 10, end: 20},
+        {start: 20, end: 30}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -176,9 +183,9 @@ describe('MpdUtils', function() {
         createTimePoint(null, 10, 0)
       ];
       let result = [
-        { start: 0, end: 10 },
-        { start: 10, end: 20 },
-        { start: 20, end: 30 }
+        {start: 0, end: 10},
+        {start: 10, end: 20},
+        {start: 20, end: 30}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -189,8 +196,8 @@ describe('MpdUtils', function() {
         createTimePoint(15, 10, 0)
       ];
       let result = [
-        { start: 0, end: 15 },
-        { start: 15, end: 25 }
+        {start: 0, end: 15},
+        {start: 15, end: 25}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -201,8 +208,8 @@ describe('MpdUtils', function() {
         createTimePoint(10, 10, 0)
       ];
       let result = [
-        { start: 0, end: 10 },
-        { start: 10, end: 20 }
+        {start: 0, end: 10},
+        {start: 10, end: 20}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -213,13 +220,13 @@ describe('MpdUtils', function() {
         createTimePoint(60, 10, 0)
       ];
       let result = [
-        { start: 0, end: 10 },
-        { start: 10, end: 20 },
-        { start: 20, end: 30 },
-        { start: 30, end: 40 },
-        { start: 40, end: 50 },
-        { start: 50, end: 60 },
-        { start: 60, end: 70 }
+        {start: 0, end: 10},
+        {start: 10, end: 20},
+        {start: 20, end: 30},
+        {start: 30, end: 40},
+        {start: 40, end: 50},
+        {start: 50, end: 60},
+        {start: 60, end: 70}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -231,9 +238,9 @@ describe('MpdUtils', function() {
         createTimePoint(20, 10, 0)
       ];
       let result = [
-        { start: 0, end: 10 },
-        { start: 10, end: 20 },
-        { start: 20, end: 30 }
+        {start: 0, end: 10},
+        {start: 10, end: 20},
+        {start: 20, end: 30}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -244,10 +251,10 @@ describe('MpdUtils', function() {
         createTimePoint(35, 10, 0)
       ];
       let result = [
-        { start: 0, end: 10 },
-        { start: 10, end: 20 },
-        { start: 20, end: 35 },
-        { start: 35, end: 45 }
+        {start: 0, end: 10},
+        {start: 10, end: 20},
+        {start: 20, end: 35},
+        {start: 35, end: 45}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -259,11 +266,11 @@ describe('MpdUtils', function() {
         createTimePoint(40, 10, 0)
       ];
       let result = [
-        { start: 0, end: 10 },
-        { start: 10, end: 20 },
-        { start: 20, end: 30 },
-        { start: 30, end: 40 },
-        { start: 40, end: 50 }
+        {start: 0, end: 10},
+        {start: 10, end: 20},
+        {start: 20, end: 30},
+        {start: 30, end: 40},
+        {start: 40, end: 50}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -275,12 +282,12 @@ describe('MpdUtils', function() {
         createTimePoint(45, 5, 0)
       ];
       let result = [
-        { start: 0, end: 10 },
-        { start: 10, end: 20 },
-        { start: 20, end: 30 },
-        { start: 30, end: 40 },
-        { start: 40, end: 45 },
-        { start: 45, end: 50 }
+        {start: 0, end: 10},
+        {start: 10, end: 20},
+        {start: 20, end: 30},
+        {start: 30, end: 40},
+        {start: 40, end: 45},
+        {start: 45, end: 50}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -292,7 +299,7 @@ describe('MpdUtils', function() {
         createTimePoint(5, 10, 0)
       ];
       let result = [
-        { start: 0, end: 10 }
+        {start: 0, end: 10}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -304,7 +311,7 @@ describe('MpdUtils', function() {
         createTimePoint(null, 10, 0)
       ];
       let result = [
-        { start: 0, end: 10 }
+        {start: 0, end: 10}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -315,10 +322,10 @@ describe('MpdUtils', function() {
         createTimePoint(10, 5, -1)
       ];
       let result = [
-        { start: 0, end: 10 },
-        { start: 10, end: 15 },
-        { start: 15, end: 20 },
-        { start: 20, end: 25 }
+        {start: 0, end: 10},
+        {start: 10, end: 15},
+        {start: 15, end: 20},
+        {start: 20, end: 25}
       ];
       checkTimePoints(timePoints, result, 1, 0, 25);
     });
@@ -329,7 +336,7 @@ describe('MpdUtils', function() {
         createTimePoint(10, 5, -1)
       ];
       let result = [
-        { start: 0, end: 10 }
+        {start: 0, end: 10}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -341,8 +348,8 @@ describe('MpdUtils', function() {
         createTimePoint(25, 5, -1)
       ];
       let result = [
-        { start: 0, end: 10 },
-        { start: 10, end: 20 }
+        {start: 0, end: 10},
+        {start: 10, end: 20}
       ];
       checkTimePoints(timePoints, result, 1, 0, 20);
     });
@@ -356,8 +363,8 @@ describe('MpdUtils', function() {
         createTimePoint(40, 10, 0)
       ];
       let result = [
-        { start: 0, end: 10 },
-        { start: 10, end: 20 }
+        {start: 0, end: 10},
+        {start: 10, end: 20}
       ];
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
@@ -370,10 +377,10 @@ describe('MpdUtils', function() {
         createTimePoint(40, 10, 0)
       ];
       let result = [
-        { start: 0, end: 10 },
-        { start: 10, end: 20 },
-        { start: 20, end: 30 },
-        { start: 30, end: 40 }
+        {start: 0, end: 10},
+        {start: 10, end: 20},
+        {start: 20, end: 30},
+        {start: 30, end: 40}
       ];
       checkTimePoints(timePoints, result, 1, 10, Infinity);
     });
@@ -387,7 +394,7 @@ describe('MpdUtils', function() {
      * @return {{t: ?number, d: ?number, r: ?number}}
      */
     function createTimePoint(t, d, r) {
-      return { t: t, d: d, r: r };
+      return {t: t, d: d, r: r};
     }
 
     /**
@@ -435,7 +442,7 @@ describe('MpdUtils', function() {
 
     /** @type {!shaka.test.FakeNetworkingEngine} */
     let fakeNetEngine;
-    /** @type {shakaExtern.RetryParameters} */
+    /** @type {shaka.extern.RetryParameters} */
     let retry;
     /** @type {!DOMParser} */
     let parser;
@@ -695,8 +702,9 @@ describe('MpdUtils', function() {
     function testFails(baseXMLString, desiredError, desiredNetCalls, done) {
       testRequest(baseXMLString).then(fail).catch(function(error) {
         expect(fakeNetEngine.request).toHaveBeenCalledTimes(desiredNetCalls);
-        if (desiredError)
+        if (desiredError) {
           shaka.test.Util.expectToEqualError(error, desiredError);
+        }
         return Promise.resolve();
       }).then(done);
     }
@@ -719,12 +727,12 @@ describe('MpdUtils', function() {
     }
 
     /**
-     * @param {string=} opt_toReplaceOne
-     * @param {string=} opt_toReplaceTwo
+     * @param {string=} toReplaceOne
+     * @param {string=} toReplaceTwo
      * @return {string}
      * @private
      */
-    function inBaseContainer(opt_toReplaceOne, opt_toReplaceTwo) {
+    function inBaseContainer(toReplaceOne = '', toReplaceTwo = '') {
       let format =
           '<Container xmlns="urn:mpeg:dash:schema:mpd:2011" ' +
           'xmlns:xlink="http://www.w3.org/1999/xlink">' +
@@ -734,8 +742,8 @@ describe('MpdUtils', function() {
           '%(toReplaceTwo)s' +
           '</Container>';
       return sprintf(format, {
-        toReplaceOne: opt_toReplaceOne || '',
-        toReplaceTwo: opt_toReplaceTwo || ''});
+        toReplaceOne: toReplaceOne,
+        toReplaceTwo: toReplaceTwo});
     }
 
     function testRequest(baseXMLString) {

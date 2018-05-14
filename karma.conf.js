@@ -75,18 +75,19 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      // closure base first
-      'third_party/closure/goog/base.js',
-
-      // deps next
-      'dist/deps.js',
-      'shaka-player.uncompiled.js',
-
-      // Promise polyfill for IE11 and some older TVs
+      // Polyfills first, primarily for IE 11 and older TVs:
+      //   Promise polyfill
       'node_modules/es6-promise-polyfill/promise.js',
+      //   Babel polyfill, required for async/await
+      'node_modules/babel-polyfill/dist/polyfill.js',
 
       // muxjs module next
       'node_modules/mux.js/dist/mux.js',
+
+      // load closure base, the deps tree, and the uncompiled library
+      'third_party/closure/goog/base.js',
+      'dist/deps.js',
+      'shaka-player.uncompiled.js',
 
       // cajon module (an AMD variant of requirejs) next
       'node_modules/cajon/cajon.js',
@@ -173,7 +174,11 @@ module.exports = function(config) {
         specFilter: settings.filter,
 
         // Set what level of logs for the player to print.
-        logLevel: SHAKA_LOG_MAP[settings.logging]
+        logLevel: SHAKA_LOG_MAP[settings.logging],
+
+        // Delay tests to aid in debugging async failures that pollute
+        // subsequent tests.
+        delayTests: settings.delay_tests,
       }],
     },
 

@@ -40,10 +40,12 @@ describe('CastUtils', function() {
 
     let castMembers = CastUtils.PlayerVoidMethods
                           .concat(CastUtils.PlayerPromiseMethods);
-    for (let name in CastUtils.PlayerGetterMethods)
+    for (let name in CastUtils.PlayerGetterMethods) {
       castMembers.push(name);
-    for (let name in CastUtils.PlayerGetterMethodsThatRequireLive)
+    }
+    for (let name in CastUtils.PlayerGetterMethodsThatRequireLive) {
       castMembers.push(name);
+    }
     let playerMembers = Object.keys(shaka.Player.prototype).filter(
         function(name) {
           // Private members end with _.
@@ -194,7 +196,6 @@ describe('CastUtils', function() {
       beforeEach(function(done) {
         // The TimeRanges constructor cannot be used directly, so we load a clip
         // to get ranges to use.
-        let mediaSource = new MediaSource();
         let fakeVideoStream = {
           mimeType: 'video/mp4',
           codecs: 'avc1.42c01e'
@@ -204,35 +205,31 @@ describe('CastUtils', function() {
 
         // Wait for the media source to be open.
         eventManager = new shaka.util.EventManager();
-        video.src = window.URL.createObjectURL(mediaSource);
         eventManager.listen(video, 'error', onError);
-        eventManager.listen(mediaSource, 'sourceopen', onSourceOpen);
 
         function onError() {
           fail('Error code ' + (video.error ? video.error.code : 0));
         }
 
-        function onSourceOpen() {
-          const ContentType = shaka.util.ManifestParserUtils.ContentType;
-          eventManager.unlisten(mediaSource, 'sourceopen');
-          mediaSourceEngine = new shaka.media.MediaSourceEngine(
-              video, mediaSource, /* TextTrack */ null);
+        mediaSourceEngine = new shaka.media.MediaSourceEngine(video);
 
-          // Create empty object first and initialize the fields through
-          // [] to allow field names to be expressions.
-          let initObject = {};
-          initObject[ContentType.VIDEO] = fakeVideoStream;
-          mediaSourceEngine.init(initObject);
-          shaka.test.Util.fetch(initSegmentUrl).then(function(data) {
-            return mediaSourceEngine.appendBuffer(ContentType.VIDEO, data,
-                                                  null, null);
-          }).then(function() {
-            return shaka.test.Util.fetch(videoSegmentUrl);
-          }).then(function(data) {
-            return mediaSourceEngine.appendBuffer(ContentType.VIDEO, data,
-                                                  null, null);
-          }).catch(fail).then(done);
-        }
+        // Create empty object first and initialize the fields through
+        // [] to allow field names to be expressions.
+        let initObject = {};
+        const ContentType = shaka.util.ManifestParserUtils.ContentType;
+        initObject[ContentType.VIDEO] = fakeVideoStream;
+
+        mediaSourceEngine.init(initObject, false).then(function() {
+          return shaka.test.Util.fetch(initSegmentUrl);
+        }).then(function(data) {
+          return mediaSourceEngine.appendBuffer(ContentType.VIDEO, data,
+                                                null, null);
+        }).then(function() {
+          return shaka.test.Util.fetch(videoSegmentUrl);
+        }).then(function(data) {
+          return mediaSourceEngine.appendBuffer(ContentType.VIDEO, data,
+                                                null, null);
+        }).catch(fail).then(done);
       });
 
       afterEach(function(done) {
@@ -251,7 +248,7 @@ describe('CastUtils', function() {
         document.body.removeChild(video);
       });
 
-      it('deserialize into equivalent objects', function() {
+      quarantinedIt('deserialize into equivalent objects', function() {
         let buffered = video.buffered;
 
         // The test is less interesting if the ranges are empty.

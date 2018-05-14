@@ -17,9 +17,9 @@
 
 describe('Uint8Array', function() {
   it('checks equality', function() {
-    var subject = new Uint8Array([0, 1, 2, 3]);
-    var same = new Uint8Array([0, 1, 2, 3]);
-    var different = new Uint8Array([4, 5, 6, 7]);
+    let subject = new Uint8Array([0, 1, 2, 3]);
+    let same = new Uint8Array([0, 1, 2, 3]);
+    let different = new Uint8Array([4, 5, 6, 7]);
 
     expect(subject).toBe(subject);
     expect(subject).toEqual(subject);

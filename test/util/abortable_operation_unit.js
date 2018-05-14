@@ -552,7 +552,7 @@ describe('AbortableOperation', function() {
       // Since the issue was with the calling of operation.abort, rather than
       // the onAbort_ callback, we make an operation-like thing instead of using
       // the AbortableOperation constructor.
-      innerOperation = { promise: p, abort: abort };
+      innerOperation = {promise: p, abort: abort};
 
       // The second stage of the chain returns innerOperation.  A brief moment
       // later, the outer chain is aborted.

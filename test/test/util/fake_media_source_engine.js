@@ -28,13 +28,13 @@ goog.provide('shaka.test.FakeMediaSourceEngine');
  *
  * @param {!Object.<string, shaka.test.FakeMediaSourceEngine.SegmentData>}
  *   segmentData
- * @param {number=} opt_drift Optional drift. Defaults to 0.
+ * @param {number=} drift Optional drift. Defaults to 0.
  *
  * @constructor
  * @struct
  * @extends {shaka.media.MediaSourceEngine}
  */
-shaka.test.FakeMediaSourceEngine = function(segmentData, opt_drift) {
+shaka.test.FakeMediaSourceEngine = function(segmentData, drift) {
   /** @type {!Object.<string, shaka.test.FakeMediaSourceEngine.SegmentData>} */
   this.segmentData = segmentData;
 
@@ -45,7 +45,7 @@ shaka.test.FakeMediaSourceEngine = function(segmentData, opt_drift) {
   this.segments = {};
 
   /** @private {number} */
-  this.drift_ = opt_drift || 0;
+  this.drift_ = drift || 0;
 
   /** @private {!Object.<string, number>} */
   this.timestampOffsets_ = {};
@@ -53,16 +53,16 @@ shaka.test.FakeMediaSourceEngine = function(segmentData, opt_drift) {
   /** @private {number} */
   this.duration_ = Infinity;
 
-  for (var type in segmentData) {
-    var data = segmentData[type];
+  for (let type in segmentData) {
+    let data = segmentData[type];
 
     this.initSegments[type] = [];
-    for (var i = 0; i < data.initSegments.length; ++i) {
+    for (let i = 0; i < data.initSegments.length; ++i) {
       this.initSegments[type].push(false);
     }
 
     this.segments[type] = [];
-    for (var i = 0; i < data.segments.length; ++i) {
+    for (let i = 0; i < data.segments.length; ++i) {
       this.segments[type].push(false);
     }
 
@@ -70,10 +70,16 @@ shaka.test.FakeMediaSourceEngine = function(segmentData, opt_drift) {
   }
 
   /** @type {!jasmine.Spy} */
-  this.init = jasmine.createSpy('init').and.stub();
+  this.init = jasmine.createSpy('init').and.returnValue(Promise.resolve());
+
+  /** @type {!jasmine.Spy} */
+  this.open = jasmine.createSpy('open').and.returnValue(Promise.resolve());
 
   /** @type {!jasmine.Spy} */
   this.reinitText = jasmine.createSpy('reinitText').and.stub();
+
+  /** @type {!jasmine.Spy} */
+  this.ended = jasmine.createSpy('ended').and.returnValue(false);
 
   /** @type {!jasmine.Spy} */
   this.endOfStream =
@@ -109,7 +115,7 @@ shaka.test.FakeMediaSourceEngine = function(segmentData, opt_drift) {
 
   /** @type {!jasmine.Spy} */
   this.bufferedAheadOf = jasmine.createSpy('bufferedAheadOf')
-                   .and.callFake(this.bufferedAheadOfImpl_.bind(this));
+                   .and.callFake(this.bufferedAheadOfImpl.bind(this));
 
   /** @type {!jasmine.Spy} */
   this.setStreamProperties = jasmine.createSpy('setStreamProperties')
@@ -164,9 +170,10 @@ shaka.test.FakeMediaSourceEngine.SegmentData;
 shaka.test.FakeMediaSourceEngine.prototype.bufferStartImpl_ = function(type) {
   if (this.segments[type] === undefined) throw new Error('unexpected type');
 
-  var first = this.segments[type].indexOf(true);
-  if (first < 0)
+  let first = this.segments[type].indexOf(true);
+  if (first < 0) {
     return null;
+  }
 
   return this.toTime_(type, first);
 };
@@ -180,9 +187,10 @@ shaka.test.FakeMediaSourceEngine.prototype.bufferStartImpl_ = function(type) {
 shaka.test.FakeMediaSourceEngine.prototype.bufferEndImpl_ = function(type) {
   if (this.segments[type] === undefined) throw new Error('unexpected type');
 
-  var last = this.segments[type].lastIndexOf(true);
-  if (last < 0)
+  let last = this.segments[type].lastIndexOf(true);
+  if (last < 0) {
     return null;
+  }
 
   return this.toTime_(type, last + 1);
 };
@@ -198,10 +206,11 @@ shaka.test.FakeMediaSourceEngine.prototype.isBufferedImpl_ =
     function(type, time) {
   if (this.segments[type] === undefined) throw new Error('unexpected type');
 
-  var first = this.segments[type].indexOf(true);
-  var last = this.segments[type].lastIndexOf(true);
-  if (first < 0 || last < 0)
+  let first = this.segments[type].indexOf(true);
+  let last = this.segments[type].lastIndexOf(true);
+  if (first < 0 || last < 0) {
     return false;
+  }
 
   return time >= this.toTime_(type, first) && time < this.toTime_(type, last);
 };
@@ -211,14 +220,13 @@ shaka.test.FakeMediaSourceEngine.prototype.isBufferedImpl_ =
  * @param {string} type
  * @param {number} start
  * @return {number}
- * @private
  */
-shaka.test.FakeMediaSourceEngine.prototype.bufferedAheadOfImpl_ = function(
+shaka.test.FakeMediaSourceEngine.prototype.bufferedAheadOfImpl = function(
     type, start) {
   if (this.segments[type] === undefined) throw new Error('unexpected type');
 
-  var ContentType = shaka.util.ManifestParserUtils.ContentType;
-  var hasSegment = (function(i) {
+  const ContentType = shaka.util.ManifestParserUtils.ContentType;
+  let hasSegment = (function(i) {
     return this.segments[type][i] ||
         (type === ContentType.VIDEO && this.segments['trickvideo'] &&
          this.segments['trickvideo'][i]);
@@ -226,14 +234,16 @@ shaka.test.FakeMediaSourceEngine.prototype.bufferedAheadOfImpl_ = function(
 
   // Note: |start| may equal the end of the last segment, so |first|
   // may equal segments[type].length
-  var first = this.toIndex_(type, start);
-  if (!hasSegment(first))
-    return 0;  // Unbuffered.
+  let first = this.toIndex_(type, start);
+  if (!hasSegment(first)) {
+    return 0;
+  }  // Unbuffered.
 
   // Find the first gap.
-  var last = first;
-  while (last < this.segments[type].length && hasSegment(last))
+  let last = first;
+  while (last < this.segments[type].length && hasSegment(last)) {
     last++;
+  }
 
   return this.toTime_(type, last) - start;
 };
@@ -251,11 +261,11 @@ shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl = function(
   if (this.segments[type] === undefined) throw new Error('unexpected type');
 
   // Remains 'video' even when we detect a 'trickvideo' segment.
-  var originalType = type;
-  var ContentType = shaka.util.ManifestParserUtils.ContentType;
+  let originalType = type;
+  const ContentType = shaka.util.ManifestParserUtils.ContentType;
 
   // Set init segment.
-  var i = this.segmentData[type].initSegments.indexOf(data);
+  let i = this.segmentData[type].initSegments.indexOf(data);
   if (i < 0 && type == ContentType.VIDEO &&
       this.segmentData['trickvideo']) {
     // appendBuffer('video', ...) might be for 'trickvideo' data.
@@ -270,7 +280,7 @@ shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl = function(
   if (i >= 0) {
     expect(startTime).toBe(null);
     expect(endTime).toBe(null);
-    for (var j = 0; j < this.segmentData[type].initSegments.length; ++j) {
+    for (let j = 0; j < this.segmentData[type].initSegments.length; ++j) {
       this.initSegments[type][j] = false;
     }
     this.initSegments[type][i] = true;
@@ -290,16 +300,17 @@ shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl = function(
           'trickvideo');
     }
   }
-  if (i < 0)
+  if (i < 0) {
     throw new Error('unexpected data');
+  }
 
   expect(startTime).toBe(this.segmentData[type].segmentStartTimes[i]);
   expect(endTime).toBe(startTime + this.segmentData[type].segmentDuration);
 
   // Verify that the segment is aligned.
-  var start = this.segmentData[type].segmentStartTimes[i] +
+  let start = this.segmentData[type].segmentStartTimes[i] +
               this.timestampOffsets_[originalType];
-  var expectedStart = i * this.segmentData[type].segmentDuration;
+  let expectedStart = i * this.segmentData[type].segmentDuration;
   expect(start).toBe(expectedStart);
 
   this.segments[type][i] = true;
@@ -317,19 +328,22 @@ shaka.test.FakeMediaSourceEngine.prototype.removeImpl =
     function(type, start, end) {
   if (this.segments[type] === undefined) throw new Error('unexpected type');
 
-  var first = this.toIndex_(type, start);
-  if (first < 0 || first >= this.segments[type].length)
+  let first = this.toIndex_(type, start);
+  if (first < 0 || first >= this.segments[type].length) {
     throw new Error('unexpected start');
+  }
 
   // Note: |end| is exclusive.
-  var last = this.toIndex_(type, end - 0.000001);
-  if (last < 0)
+  let last = this.toIndex_(type, end - 0.000001);
+  if (last < 0) {
     throw new Error('unexpected end');
+  }
 
-  if (first > last)
+  if (first > last) {
     throw new Error('unexpected start and end');
+  }
 
-  for (var i = first; i <= last; ++i) {
+  for (let i = first; i <= last; ++i) {
     this.segments[type][i] = false;
   }
 
@@ -345,11 +359,11 @@ shaka.test.FakeMediaSourceEngine.prototype.removeImpl =
 shaka.test.FakeMediaSourceEngine.prototype.clearImpl_ = function(type) {
   if (this.segments[type] === undefined) throw new Error('unexpected type');
 
-  for (var i = 0; i < this.segments[type].length; ++i) {
+  for (let i = 0; i < this.segments[type].length; ++i) {
     this.segments[type][i] = false;
   }
 
-  var ContentType = shaka.util.ManifestParserUtils.ContentType;
+  const ContentType = shaka.util.ManifestParserUtils.ContentType;
 
   // If we're clearing video, clear the segment list for 'trickvideo', too.
   if (type == ContentType.VIDEO && this.segments['trickvideo']) {

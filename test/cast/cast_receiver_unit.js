@@ -59,8 +59,9 @@ describe('CastReceiver', function() {
      }
    };
    // Account for tests with a done argument, and tests without.
-   if (test.length == 1)
+   if (test.length == 1) {
      return (done) => check(done);
+   }
    return () => check(undefined);
   }
 
@@ -96,7 +97,7 @@ describe('CastReceiver', function() {
     // don't need this mock strictly type-checked.
     window['cast'] = {
       receiver: mockReceiverApi,
-      __platform__: { canDisplayType: mockCanDisplayType }
+      __platform__: {canDisplayType: mockCanDisplayType}
     };
 
     mockReceiverManager = createMockReceiverManager();
@@ -481,7 +482,7 @@ describe('CastReceiver', function() {
       shaka.test.Util.delay(0.1).then(function() {
         expect(mockPlayer.load).toHaveBeenCalled();
         expect(mockPlayer.dispatchEvent).toHaveBeenCalledWith(
-            jasmine.objectContaining({ type: 'error', detail: fakeError }));
+            jasmine.objectContaining({type: 'error', detail: fakeError}));
       }).catch(fail).then(done);
     }));
   });
@@ -682,7 +683,7 @@ describe('CastReceiver', function() {
       };
       fakeIncomingMessage({
         type: 'init',
-        initState: { manifest: 'URI A' },
+        initState: {manifest: 'URI A'},
         appData: {}
       }, mockShakaMessageBus);
 
@@ -762,8 +763,9 @@ describe('CastReceiver', function() {
 
     function expectMediaInfo(expectedUri, expectedDuration) {
       expect(mockGenericMessageBus.messages.length).toBeGreaterThan(0);
-      if (mockGenericMessageBus.messages.length == 0)
+      if (mockGenericMessageBus.messages.length == 0) {
         return;
+      }
       expect(mockGenericMessageBus.messages[0]).toEqual(
         {
           requestId: 0,
@@ -962,10 +964,11 @@ describe('CastReceiver', function() {
       setSystemVolumeMuted:
           jasmine.createSpy('CastReceiverManager.setSystemVolumeMuted'),
       getSenders: jasmine.createSpy('CastReceiverManager.getSenders'),
-      getSystemVolume: function() { return { level: 1, muted: false }; },
+      getSystemVolume: function() { return {level: 1, muted: false}; },
       getCastMessageBus: function(namespace) {
-        if (namespace == shaka.cast.CastUtils.SHAKA_MESSAGE_NAMESPACE)
+        if (namespace == shaka.cast.CastUtils.SHAKA_MESSAGE_NAMESPACE) {
           return mockShakaMessageBus;
+        }
 
         return mockGenericMessageBus;
       }
@@ -999,6 +1002,9 @@ describe('CastReceiver', function() {
 
       addEventListener: function(eventName, listener) {
         player.listeners[eventName] = listener;
+      },
+      removeEventListener: function(eventName, listener) {
+        player.listeners[eventName] = null;
       },
       dispatchEvent: jasmine.createSpy('dispatchEvent'),
       // For convenience:
@@ -1037,12 +1043,12 @@ describe('CastReceiver', function() {
   /**
    * @param {?} message
    * @param {!Object} bus
-   * @param {string=} opt_senderId
+   * @param {string=} senderId
    */
-  function fakeIncomingMessage(message, bus, opt_senderId) {
+  function fakeIncomingMessage(message, bus, senderId) {
     let serialized = CastUtils.serialize(message);
     let messageEvent = {
-      senderId: opt_senderId,
+      senderId: senderId,
       data: serialized
     };
     bus.onMessage(messageEvent);

@@ -24,7 +24,7 @@ describe('DashParser SegmentBase', function() {
   let fakeNetEngine;
   /** @type {!shaka.dash.DashParser} */
   let parser;
-  /** @type {shakaExtern.ManifestParser.PlayerInterface} */
+  /** @type {shaka.extern.ManifestParser.PlayerInterface} */
   let playerInterface;
   /** @type {ArrayBuffer} */
   let indexSegment;

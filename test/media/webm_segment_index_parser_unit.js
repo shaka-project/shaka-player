@@ -16,12 +16,12 @@
  */
 
 describe('WebmSegmentIndexParser', function() {
-  var indexSegmentUri = '/base/test/test/assets/index-segment.webm';
-  var initSegmentUri = '/base/test/test/assets/init-segment.webm';
+  const indexSegmentUri = '/base/test/test/assets/index-segment.webm';
+  const initSegmentUri = '/base/test/test/assets/init-segment.webm';
 
-  var indexSegment;
-  var initSegment;
-  var parser = new shaka.media.WebmSegmentIndexParser();
+  let indexSegment;
+  let initSegment;
+  let parser = new shaka.media.WebmSegmentIndexParser();
 
   beforeAll(function(done) {
     Promise.all([
@@ -34,7 +34,7 @@ describe('WebmSegmentIndexParser', function() {
   });
 
   it('rejects a non-index segment ', function() {
-    var error = new shaka.util.Error(
+    let error = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.MEDIA,
         shaka.util.Error.Code.WEBM_CUES_ELEMENT_MISSING);
@@ -47,7 +47,7 @@ describe('WebmSegmentIndexParser', function() {
   });
 
   it('rejects an invalid init segment ', function() {
-    var error = new shaka.util.Error(
+    let error = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.MEDIA,
         shaka.util.Error.Code.WEBM_EBML_HEADER_ELEMENT_MISSING);
@@ -60,8 +60,8 @@ describe('WebmSegmentIndexParser', function() {
   });
 
   it('parses index segment ', function() {
-    var result = parser.parse(indexSegment, initSegment, [], 0);
-    var references =
+    let result = parser.parse(indexSegment, initSegment, [], 0);
+    let references =
         [
          {startTime: 0, endTime: 12, startByte: 281, endByte: 95911},
          {startTime: 12, endTime: 24, startByte: 95912, endByte: 209663},
@@ -72,7 +72,7 @@ describe('WebmSegmentIndexParser', function() {
 
     expect(result).toBeTruthy();
     expect(result.length).toBe(references.length);
-    for (var i = 0; i < result.length; i++) {
+    for (let i = 0; i < result.length; i++) {
       expect(result[i].position).toBe(i);
       expect(result[i].startTime).toBe(references[i].startTime);
       expect(result[i].endTime).toBe(references[i].endTime);
@@ -82,8 +82,8 @@ describe('WebmSegmentIndexParser', function() {
   });
 
   it('takes a scaled presentationTimeOffset in seconds', function() {
-    var result = parser.parse(indexSegment, initSegment, [], 2);
-    var references =
+    let result = parser.parse(indexSegment, initSegment, [], 2);
+    let references =
         [
          {startTime: -2, endTime: 10},
          {startTime: 10, endTime: 22},
@@ -94,7 +94,7 @@ describe('WebmSegmentIndexParser', function() {
 
     expect(result).toBeTruthy();
     expect(result.length).toBe(references.length);
-    for (var i = 0; i < result.length; i++) {
+    for (let i = 0; i < result.length; i++) {
       expect(result[i].position).toBe(i);
       expect(result[i].startTime).toBe(references[i].startTime);
       expect(result[i].endTime).toBe(references[i].endTime);

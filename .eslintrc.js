@@ -23,6 +23,9 @@ module.exports = {
         "browser": true,
         "es6": true
     },
+    "parserOptions": {
+        "ecmaVersion": 2017
+    },
     "extends": ["eslint:recommended", "google"],
     "rules": {
         // Things the compiler already takes care of, with more precision: {{{
@@ -34,12 +37,6 @@ module.exports = {
         // }}}
 
         // Things we should probably fix, but in stages in multiple commits: {{{
-
-        // In many cases, we should change scoped var to let.
-        "block-scoped-var": "off",
-        "no-inner-declarations": "off",
-        "no-redeclare": "off",
-        "no-shadow": "off",
 
         // These could catch real bugs
         "consistent-return": "off",
@@ -53,20 +50,17 @@ module.exports = {
         "complexity": "off",
         "dot-location": "off",
         "no-negated-condition": "off",
+        "no-shadow": "off",
         // }}}
 
         // Temporary Google style overrides while we get in compliance with the latest style guide {{{
         "block-spacing": "off",
         "brace-style": "off",
-        "camelcase": "off",
         "comma-dangle": "off",
         "comma-spacing": "off",
-        "curly": "off",
         "new-cap": "off",
         "no-multi-spaces": "off",
         "no-multiple-empty-lines": "off",
-        "no-var": "off",
-        "object-curly-spacing": "off",
         "one-var": "off",
         "padded-blocks": "off",
         "prefer-rest-params": "off",
@@ -75,7 +69,7 @@ module.exports = {
         // }}}
 
         // "Possible error" rules in "eslint:recommended" that need options: {{{
-	"no-empty": ["error", {"allowEmptyCatch": true}],
+        "no-empty": ["error", {"allowEmptyCatch": true}],
         // }}}
 
         // "Possible error" rules we should be able to pass, but are not part of "eslint:recommended": {{{
@@ -88,7 +82,6 @@ module.exports = {
         // "Best practices" rules we should be able to pass, but are not part of "eslint:recommended": {{{
         "accessor-pairs": "error",
         "array-callback-return": "error",
-        "class-methods-use-this": "error",
         "no-alert": "error",
         "no-caller": "error",
         "no-catch-shadow": "error",
@@ -125,6 +118,7 @@ module.exports = {
         // }}}
 
         // Style rules we don't need: {{{
+        "class-methods-use-this": "off",  // causes issues when implementing an interface
         "dot-notation": "off",  // We use bracket notation in tests on purpose
         "eqeqeq": "off",  // Compiler handles type checking in advance
         "guard-for-in": "off",
@@ -142,5 +136,20 @@ module.exports = {
         // Style rules that don't seem to be in the Google style config: {{{
         "array-bracket-newline": ["error", "consistent"],
         // }}}
-    }
+    },
+    "overrides": [
+        {
+            "files": [
+                // Closure requires using var in externs.
+                "externs/**/*.js",
+                "test/test/externs/*.js",
+                // Use var in load.js so it works in old browsers.  We'll use
+                // compiled mode for the main library and the demo.
+                "demo/load.js",
+            ],
+            "rules": {
+                "no-var": "off",
+            },
+        },
+    ],
 };

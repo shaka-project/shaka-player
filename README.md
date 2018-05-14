@@ -148,7 +148,7 @@ Subtitles are rendered by the browser by default.  Applications can create a
 attributes.
 
 [cueing data]: https://www.webmproject.org/docs/container/#cueing-data
-[text display plugin]: https://nightly-dot-shaka-player-demo.appspot.com/docs/api/shakaExtern.TextDisplayer.html
+[text display plugin]: https://nightly-dot-shaka-player-demo.appspot.com/docs/api/shaka.extern.TextDisplayer.html
 <!-- TODO: replace with a link to a TextDisplayer tutorial -->
 
 

@@ -16,30 +16,27 @@
  */
 
 describe('PlayheadObserver', function() {
-  /** @const */
-  var Util = shaka.test.Util;
+  const Util = shaka.test.Util;
 
   /** @type {!shaka.media.PlayheadObserver} */
-  var observer;
+  let observer;
   /** @type {!shaka.test.FakeVideo} */
-  var video;
-  /** @type {{readyState: string}} */
-  var mockMediaSource;
-  /** @type {?} */
-  var mediaSource;
+  let video;
+  /** @type {!shaka.test.FakeMediaSourceEngine} */
+  let mockMediaSourceEngine;
   /** @type {!shaka.test.FakePresentationTimeline} */
-  var timeline;
-  /** @type {shakaExtern.Manifest} */
-  var manifest;
-  /** @type {shakaExtern.StreamingConfiguration} */
-  var config;
+  let timeline;
+  /** @type {shaka.extern.Manifest} */
+  let manifest;
+  /** @type {shaka.extern.StreamingConfiguration} */
+  let config;
 
   /** @type {!jasmine.Spy} */
-  var onBuffering;
+  let onBuffering;
   /** @type {!jasmine.Spy} */
-  var onChangePeriod;
+  let onChangePeriod;
   /** @type {!jasmine.Spy} */
-  var onEvent;
+  let onEvent;
 
   beforeAll(function() {
     jasmine.clock().install();
@@ -55,8 +52,7 @@ describe('PlayheadObserver', function() {
     video.duration = 60;
     video.buffered = createFakeBuffered([]);
 
-    mockMediaSource = { readyState: 'open' };
-    mediaSource = /** @type {?} */(mockMediaSource);
+    mockMediaSourceEngine = new shaka.test.FakeMediaSourceEngine({});
 
     timeline = new shaka.test.FakePresentationTimeline();
 
@@ -74,11 +70,13 @@ describe('PlayheadObserver', function() {
       failureCallback: function() {},
       bufferBehind: 15,
       ignoreTextStreamFailures: false,
+      alwaysStreamText: false,
       useRelativeCueTimestamps: false,
       startAtSegmentBoundary: false,
       smallGapLimit: 0.5,
       jumpLargeGaps: false,
-      durationBackoff: 1
+      durationBackoff: 1,
+      forceTransmuxTS: false
     };
 
     onBuffering = jasmine.createSpy('onBuffering');
@@ -100,8 +98,9 @@ describe('PlayheadObserver', function() {
       video.buffered = createFakeBuffered([{start: 0, end: 20}]);
       video.currentTime = 0;
       observer = new shaka.media.PlayheadObserver(
-          video, mediaSource, manifest, config, Util.spyFunc(onBuffering),
-          Util.spyFunc(onEvent), Util.spyFunc(onChangePeriod));
+          video, mockMediaSourceEngine, manifest, config,
+          Util.spyFunc(onBuffering), Util.spyFunc(onEvent),
+          Util.spyFunc(onChangePeriod));
 
       observer.seeked();
       jasmine.clock().tick(1000);
@@ -112,8 +111,9 @@ describe('PlayheadObserver', function() {
       video.buffered = createFakeBuffered([{start: 0, end: 20}]);
       video.currentTime = 0;
       observer = new shaka.media.PlayheadObserver(
-          video, mediaSource, manifest, config, Util.spyFunc(onBuffering),
-          Util.spyFunc(onEvent), Util.spyFunc(onChangePeriod));
+          video, mockMediaSourceEngine, manifest, config,
+          Util.spyFunc(onBuffering), Util.spyFunc(onEvent),
+          Util.spyFunc(onChangePeriod));
 
       video.currentTime = 20;
       jasmine.clock().tick(1000);
@@ -125,8 +125,9 @@ describe('PlayheadObserver', function() {
       video.buffered = createFakeBuffered([{start: 0, end: 20}]);
       video.currentTime = 0;
       observer = new shaka.media.PlayheadObserver(
-          video, mediaSource, manifest, config, Util.spyFunc(onBuffering),
-          Util.spyFunc(onEvent), Util.spyFunc(onChangePeriod));
+          video, mockMediaSourceEngine, manifest, config,
+          Util.spyFunc(onBuffering), Util.spyFunc(onEvent),
+          Util.spyFunc(onChangePeriod));
 
       video.currentTime = 40;
       observer.seeked();
@@ -139,8 +140,9 @@ describe('PlayheadObserver', function() {
       video.buffered = createFakeBuffered([{start: 0, end: 20}]);
       video.currentTime = 0;
       observer = new shaka.media.PlayheadObserver(
-          video, mediaSource, manifest, config, Util.spyFunc(onBuffering),
-          Util.spyFunc(onEvent), Util.spyFunc(onChangePeriod));
+          video, mockMediaSourceEngine, manifest, config,
+          Util.spyFunc(onBuffering), Util.spyFunc(onEvent),
+          Util.spyFunc(onChangePeriod));
 
       video.currentTime = 22;
       jasmine.clock().tick(1000);
@@ -158,8 +160,9 @@ describe('PlayheadObserver', function() {
       video.buffered = createFakeBuffered([]);
       video.currentTime = 0;
       observer = new shaka.media.PlayheadObserver(
-          video, mediaSource, manifest, config, Util.spyFunc(onBuffering),
-          Util.spyFunc(onEvent), Util.spyFunc(onChangePeriod));
+          video, mockMediaSourceEngine, manifest, config,
+          Util.spyFunc(onBuffering), Util.spyFunc(onEvent),
+          Util.spyFunc(onChangePeriod));
 
       jasmine.clock().tick(1000);
       expect(onBuffering).toHaveBeenCalledTimes(1);
@@ -176,8 +179,9 @@ describe('PlayheadObserver', function() {
       video.buffered = createFakeBuffered([]);
       video.currentTime = 0;
       observer = new shaka.media.PlayheadObserver(
-          video, mediaSource, manifest, config, Util.spyFunc(onBuffering),
-          Util.spyFunc(onEvent), Util.spyFunc(onChangePeriod));
+          video, mockMediaSourceEngine, manifest, config,
+          Util.spyFunc(onBuffering), Util.spyFunc(onEvent),
+          Util.spyFunc(onChangePeriod));
 
       jasmine.clock().tick(1000);
       expect(onBuffering).toHaveBeenCalledTimes(1);
@@ -198,14 +202,15 @@ describe('PlayheadObserver', function() {
       timeline.getSegmentAvailabilityEnd.and.returnValue(60);
 
       observer = new shaka.media.PlayheadObserver(
-          video, mediaSource, manifest, config, Util.spyFunc(onBuffering),
-          Util.spyFunc(onEvent), Util.spyFunc(onChangePeriod));
+          video, mockMediaSourceEngine, manifest, config,
+          Util.spyFunc(onBuffering), Util.spyFunc(onEvent),
+          Util.spyFunc(onChangePeriod));
 
       jasmine.clock().tick(1000);
       expect(onBuffering).not.toHaveBeenCalled();
 
       video.currentTime = 60;
-      mockMediaSource.readyState = 'ended';
+      mockMediaSourceEngine.ended.and.returnValue(true);
       jasmine.clock().tick(1000);
       expect(onBuffering).not.toHaveBeenCalled();
     });
@@ -218,8 +223,9 @@ describe('PlayheadObserver', function() {
       timeline.getSegmentAvailabilityEnd.and.returnValue(60);
 
       observer = new shaka.media.PlayheadObserver(
-          video, mediaSource, manifest, config, Util.spyFunc(onBuffering),
-          Util.spyFunc(onEvent), Util.spyFunc(onChangePeriod));
+          video, mockMediaSourceEngine, manifest, config,
+          Util.spyFunc(onBuffering), Util.spyFunc(onEvent),
+          Util.spyFunc(onChangePeriod));
 
       jasmine.clock().tick(1000);
       expect(onBuffering).not.toHaveBeenCalled();
@@ -236,7 +242,7 @@ describe('PlayheadObserver', function() {
   });
 
   describe('timeline regions', function() {
-    var regionInfo;
+    let regionInfo;
 
     beforeEach(function() {
       regionInfo = {
@@ -254,8 +260,9 @@ describe('PlayheadObserver', function() {
       video.buffered = createFakeBuffered([{start: 0, end: 60}]);
       video.currentTime = 0;
       observer = new shaka.media.PlayheadObserver(
-          video, mediaSource, manifest, config, Util.spyFunc(onBuffering),
-          Util.spyFunc(onEvent), Util.spyFunc(onChangePeriod));
+          video, mockMediaSourceEngine, manifest, config,
+          Util.spyFunc(onBuffering), Util.spyFunc(onEvent),
+          Util.spyFunc(onChangePeriod));
     });
 
     describe('adding regions', function() {
@@ -374,7 +381,7 @@ describe('PlayheadObserver', function() {
       });
 
       it('fires an enter/exit event for zero-duration regions', function() {
-        var otherInfo = {
+        let otherInfo = {
           schemeIdUri: 'http://example.com',
           value: 'something',
           startTime: 3,
@@ -402,7 +409,7 @@ describe('PlayheadObserver', function() {
         //           10        20        30
         // 1: regionInfo, 2: nestedInfo, 3: overlapInfo
 
-        var nestedInfo = {
+        let nestedInfo = {
           schemeIdUri: 'http://example.com',
           value: 'something',
           startTime: 13,
@@ -410,7 +417,7 @@ describe('PlayheadObserver', function() {
           id: 'abc',
           eventElement: null
         };
-        var overlapInfo = {
+        let overlapInfo = {
           schemeIdUri: 'http://example.com',
           value: 'something',
           startTime: 18,
@@ -437,11 +444,11 @@ describe('PlayheadObserver', function() {
 
     /**
      * @param {string} name
-     * @param {shakaExtern.TimelineRegionInfo} info
-     * @param {number=} opt_index
+     * @param {shaka.extern.TimelineRegionInfo} info
+     * @param {number=} index
      */
-    function expectTimelineEvent(name, info, opt_index) {
-      var event = onEvent.calls.argsFor(opt_index || 0)[0];
+    function expectTimelineEvent(name, info, index) {
+      let event = onEvent.calls.argsFor(index || 0)[0];
       expect(event.type).toBe(name);
       expect(event.detail).toEqual(info);
       // This should be a copy by reference, not just a value match.
@@ -451,7 +458,7 @@ describe('PlayheadObserver', function() {
     /**
      * @param {number} newTime
      * @param {string} eventName
-     * @param {shakaExtern.TimelineRegionInfo} info
+     * @param {shaka.extern.TimelineRegionInfo} info
      */
     function moveToAndExpectEvent(newTime, eventName, info) {
       video.currentTime = newTime;
@@ -472,8 +479,9 @@ describe('PlayheadObserver', function() {
       ];
 
       observer = new shaka.media.PlayheadObserver(
-          video, mediaSource, manifest, config, Util.spyFunc(onBuffering),
-          Util.spyFunc(onEvent), Util.spyFunc(onChangePeriod));
+          video, mockMediaSourceEngine, manifest, config,
+          Util.spyFunc(onBuffering), Util.spyFunc(onEvent),
+          Util.spyFunc(onChangePeriod));
 
       // Ignore the call for the initial Period.
       jasmine.clock().tick(1000);

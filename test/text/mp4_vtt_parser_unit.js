@@ -16,42 +16,43 @@
  */
 
 describe('Mp4VttParser', function() {
-  /** @const */
-  var vttInitSegmentUri = '/base/test/test/assets/vtt-init.mp4';
-  /** @const */
-  var vttSegmentUri = '/base/test/test/assets/vtt-segment.mp4';
-  /** @const */
-  var vttSegSettingsUri = '/base/test/test/assets/vtt-segment-settings.mp4';
-  /** @const */
-  var vttSegNoDurationUri =
+  const vttInitSegmentUri = '/base/test/test/assets/vtt-init.mp4';
+  const vttSegmentUri = '/base/test/test/assets/vtt-segment.mp4';
+  const vttSegmentMultiPayloadUri =
+      '/base/test/test/assets/vtt-segment-multi-payload.mp4';
+  const vttSegSettingsUri = '/base/test/test/assets/vtt-segment-settings.mp4';
+  const vttSegNoDurationUri =
       '/base/test/test/assets/vtt-segment-no-duration.mp4';
-  /** @const */
-  var audioInitSegmentUri = '/base/test/test/assets/sintel-audio-init.mp4';
+  const audioInitSegmentUri = '/base/test/test/assets/sintel-audio-init.mp4';
 
   /** @type {!Uint8Array} */
-  var vttInitSegment;
+  let vttInitSegment;
   /** @type {!Uint8Array} */
-  var vttSegment;
+  let vttSegment;
   /** @type {!Uint8Array} */
-  var vttSegSettings;
+  let vttSegmentMultiPayload;
   /** @type {!Uint8Array} */
-  var vttSegNoDuration;
+  let vttSegSettings;
   /** @type {!Uint8Array} */
-  var audioInitSegment;
+  let vttSegNoDuration;
+  /** @type {!Uint8Array} */
+  let audioInitSegment;
 
   beforeAll(function(done) {
     Promise.all([
       shaka.test.Util.fetch(vttInitSegmentUri),
       shaka.test.Util.fetch(vttSegmentUri),
+      shaka.test.Util.fetch(vttSegmentMultiPayloadUri),
       shaka.test.Util.fetch(vttSegSettingsUri),
       shaka.test.Util.fetch(vttSegNoDurationUri),
       shaka.test.Util.fetch(audioInitSegmentUri)
     ]).then(function(responses) {
       vttInitSegment = new Uint8Array(responses[0]);
       vttSegment = new Uint8Array(responses[1]);
-      vttSegSettings = new Uint8Array(responses[2]);
-      vttSegNoDuration = new Uint8Array(responses[3]);
-      audioInitSegment = new Uint8Array(responses[4]);
+      vttSegmentMultiPayload = new Uint8Array(responses[2]);
+      vttSegSettings = new Uint8Array(responses[3]);
+      vttSegNoDuration = new Uint8Array(responses[4]);
+      audioInitSegment = new Uint8Array(responses[5]);
     }).catch(fail).then(done);
   });
 
@@ -60,7 +61,7 @@ describe('Mp4VttParser', function() {
   });
 
   it('parses media segment', function() {
-    var cues = [
+    let cues = [
       {
         start: 111.8,
         end: 115.8,
@@ -74,16 +75,44 @@ describe('Mp4VttParser', function() {
       }
     ];
 
-    var parser = new shaka.text.Mp4VttParser();
+    let parser = new shaka.text.Mp4VttParser();
     parser.parseInit(vttInitSegment);
-    var time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
-    var result = parser.parseMedia(vttSegment, time);
+    let time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
+    let result = parser.parseMedia(vttSegment, time);
+    verifyHelper(cues, result);
+  });
+
+  it('plays multiple payloads at one time if specified by size', () => {
+    let cues = [
+      {
+        start: 110,
+        end: 113,
+        payload: 'Hello'
+      },
+      // This cue is part of the same presentation as the previous one, so it
+      // shares the same start time and duration.
+      {
+        start: 110,
+        end: 113,
+        payload: 'and'
+      },
+      {
+        start: 113,
+        end: 116.276,
+        payload: 'goodbye'
+      }
+    ];
+
+    let parser = new shaka.text.Mp4VttParser();
+    parser.parseInit(vttInitSegment);
+    let time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
+    let result = parser.parseMedia(vttSegmentMultiPayload, time);
     verifyHelper(cues, result);
   });
 
   it('parses media segment containing settings', function() {
-    var Cue = shaka.text.Cue;
-    var cues = [
+    const Cue = shaka.text.Cue;
+    let cues = [
       {
         start: 111.8,
         end: 115.8,
@@ -102,37 +131,37 @@ describe('Mp4VttParser', function() {
       }
     ];
 
-    var parser = new shaka.text.Mp4VttParser();
+    let parser = new shaka.text.Mp4VttParser();
     parser.parseInit(vttInitSegment);
-    var time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
-    var result = parser.parseMedia(vttSegSettings, time);
+    let time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
+    let result = parser.parseMedia(vttSegSettings, time);
     verifyHelper(cues, result);
   });
 
   it('parses media segments without a sample duration', function() {
     // Regression test for https://github.com/google/shaka-player/issues/919
-    var cues = [
-      { start: 10, end: 11, payload: 'cue 10' },
-      { start: 11, end: 12, payload: 'cue 11' },
-      { start: 12, end: 13, payload: 'cue 12' },
-      { start: 13, end: 14, payload: 'cue 13' },
-      { start: 14, end: 15, payload: 'cue 14' },
-      { start: 15, end: 16, payload: 'cue 15' },
-      { start: 16, end: 17, payload: 'cue 16' },
-      { start: 17, end: 18, payload: 'cue 17' },
-      { start: 18, end: 19, payload: 'cue 18' },
-      { start: 19, end: 20, payload: 'cue 19' }
+    let cues = [
+      {start: 10, end: 11, payload: 'cue 10'},
+      {start: 11, end: 12, payload: 'cue 11'},
+      {start: 12, end: 13, payload: 'cue 12'},
+      {start: 13, end: 14, payload: 'cue 13'},
+      {start: 14, end: 15, payload: 'cue 14'},
+      {start: 15, end: 16, payload: 'cue 15'},
+      {start: 16, end: 17, payload: 'cue 16'},
+      {start: 17, end: 18, payload: 'cue 17'},
+      {start: 18, end: 19, payload: 'cue 18'},
+      {start: 19, end: 20, payload: 'cue 19'}
     ];
 
-    var parser = new shaka.text.Mp4VttParser();
+    let parser = new shaka.text.Mp4VttParser();
     parser.parseInit(vttInitSegment);
-    var time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
-    var result = parser.parseMedia(vttSegNoDuration, time);
+    let time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
+    let result = parser.parseMedia(vttSegNoDuration, time);
     verifyHelper(cues, result);
   });
 
   it('accounts for offset', function() {
-    var cues = [
+    let cues = [
       {
         start: 121.8,
         end: 125.8,
@@ -146,15 +175,15 @@ describe('Mp4VttParser', function() {
       }
     ];
 
-    var parser = new shaka.text.Mp4VttParser();
+    let parser = new shaka.text.Mp4VttParser();
     parser.parseInit(vttInitSegment);
-    var time = {periodStart: 10, segmentStart: 0, segmentEnd: 0};
-    var result = parser.parseMedia(vttSegment, time);
+    let time = {periodStart: 10, segmentStart: 0, segmentEnd: 0};
+    let result = parser.parseMedia(vttSegment, time);
     verifyHelper(cues, result);
   });
 
   it('rejects init segment with no vtt', function() {
-    var error = new shaka.util.Error(
+    let error = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.TEXT,
         shaka.util.Error.Code.INVALID_MP4_VTT);
@@ -170,21 +199,26 @@ describe('Mp4VttParser', function() {
   function verifyHelper(expected, actual) {
     expect(actual).toBeTruthy();
     expect(actual.length).toBe(expected.length);
-    for (var i = 0; i < actual.length; i++) {
+    for (let i = 0; i < actual.length; i++) {
       expect(actual[i].startTime).toBe(expected[i].start);
       expect(actual[i].endTime).toBe(expected[i].end);
       expect(actual[i].payload).toBe(expected[i].payload);
 
-      if ('line' in expected[i])
+      if ('line' in expected[i]) {
         expect(actual[i].line).toBe(expected[i].line);
-      if ('writingDirection' in expected[i])
+      }
+      if ('writingDirection' in expected[i]) {
         expect(actual[i].writingDirection).toBe(expected[i].writingDirection);
-      if ('textAlign' in expected[i])
+      }
+      if ('textAlign' in expected[i]) {
         expect(actual[i].textAlign).toBe(expected[i].textAlign);
-      if ('size' in expected[i])
+      }
+      if ('size' in expected[i]) {
         expect(actual[i].size).toBe(expected[i].size);
-      if ('position' in expected[i])
+      }
+      if ('position' in expected[i]) {
         expect(actual[i].position).toBe(expected[i].position);
+      }
     }
   }
 });

@@ -16,7 +16,17 @@
  */
 
 
-/** @externs */
+/**
+ * @externs
+ * @suppress {duplicate} To prevent compiler errors with the namespace
+ *   being declared both here and by goog.provide in the library.
+ */
+
+/** @namespace */
+var shaka = {};
+
+/** @namespace */
+shaka.extern = {};
 
 
 /**
@@ -47,7 +57,7 @@
  *
  * @exportDoc
  */
-shakaExtern.RetryParameters;
+shaka.extern.RetryParameters;
 
 
 /**
@@ -57,7 +67,7 @@ shakaExtern.RetryParameters;
  *   body: ArrayBuffer,
  *   headers: !Object.<string, string>,
  *   allowCrossSiteCredentials: boolean,
- *   retryParameters: !shakaExtern.RetryParameters
+ *   retryParameters: !shaka.extern.RetryParameters
  * }}
  *
  * @description
@@ -77,12 +87,12 @@ shakaExtern.RetryParameters;
  * @property {boolean} allowCrossSiteCredentials
  *   Make requests with credentials.  This will allow cookies in cross-site
  *   requests.  See <a href="http://goo.gl/YBRKPe">http://goo.gl/YBRKPe</a>.
- * @property {!shakaExtern.RetryParameters} retryParameters
+ * @property {!shaka.extern.RetryParameters} retryParameters
  *   An object used to define how often to make retries.
  *
  * @exportDoc
  */
-shakaExtern.Request;
+shaka.extern.Request;
 
 
 /**
@@ -117,19 +127,19 @@ shakaExtern.Request;
  *
  * @exportDoc
  */
-shakaExtern.Response;
+shaka.extern.Response;
 
 
 /**
  * Defines a plugin that handles a specific scheme.
  *
  * @typedef {!function(string,
- *                     shakaExtern.Request,
+ *                     shaka.extern.Request,
  *                     shaka.net.NetworkingEngine.RequestType):
- *     !shakaExtern.IAbortableOperation.<shakaExtern.Response>}
+ *     !shaka.extern.IAbortableOperation.<shaka.extern.Response>}
  * @exportDoc
  */
-shakaExtern.SchemePlugin;
+shaka.extern.SchemePlugin;
 
 
 /**
@@ -139,11 +149,11 @@ shakaExtern.SchemePlugin;
  * the request will not be sent until the promise is resolved.
  *
  * @typedef {!function(shaka.net.NetworkingEngine.RequestType,
- *                     shakaExtern.Request):
+ *                     shaka.extern.Request):
              (Promise|undefined)}
  * @exportDoc
  */
-shakaExtern.RequestFilter;
+shaka.extern.RequestFilter;
 
 
 /**
@@ -152,8 +162,8 @@ shakaExtern.RequestFilter;
  * A response filter can run asynchronously by returning a promise.
  *
  * @typedef {!function(shaka.net.NetworkingEngine.RequestType,
- *                     shakaExtern.Response):
+ *                     shaka.extern.Response):
               (Promise|undefined)}
  * @exportDoc
  */
-shakaExtern.ResponseFilter;
+shaka.extern.ResponseFilter;

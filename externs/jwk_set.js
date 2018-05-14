@@ -50,9 +50,9 @@ function JWK() {
 
   /**
    * A key type.  One of:
-   *   "oct" (symmetric key octect sequence)
-   *   "RSA" (RSA key)
-   *   "EC" (elliptical curve key)
+   *   1. "oct" (symmetric key octect sequence)
+   *   2. "RSA" (RSA key)
+   *   3. "EC" (elliptical curve key)
    * Use "oct" for clearkey.
    * @type {string}
    */

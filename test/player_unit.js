@@ -16,56 +16,50 @@
  */
 
 describe('Player', function() {
-  /** @const */
-  var ContentType = shaka.util.ManifestParserUtils.ContentType;
-  /** @const */
-  var Util = shaka.test.Util;
+  const ContentType = shaka.util.ManifestParserUtils.ContentType;
+  const Util = shaka.test.Util;
 
-  /** @const */
-  var originalLogError = shaka.log.error;
-  /** @const */
-  var originalLogWarn = shaka.log.warning;
-  /** @const */
-  var originalLogAlwaysWarn = shaka.log.alwaysWarn;
-  /** @const */
-  var originalIsTypeSupported = window.MediaSource.isTypeSupported;
+  const originalLogError = shaka.log.error;
+  const originalLogWarn = shaka.log.warning;
+  const originalLogAlwaysWarn = shaka.log.alwaysWarn;
+  const originalIsTypeSupported = window.MediaSource.isTypeSupported;
 
   /** @type {!jasmine.Spy} */
-  var logErrorSpy;
+  let logErrorSpy;
   /** @type {!jasmine.Spy} */
-  var logWarnSpy;
+  let logWarnSpy;
   /** @type {!jasmine.Spy} */
-  var onError;
-  /** @type {shakaExtern.Manifest} */
-  var manifest;
+  let onError;
+  /** @type {shaka.extern.Manifest} */
+  let manifest;
   /** @type {number} */
-  var periodIndex;
+  let periodIndex;
   /** @type {!shaka.Player} */
-  var player;
+  let player;
   /** @type {!shaka.test.FakeAbrManager} */
-  var abrManager;
-  /** @type {function():shakaExtern.AbrManager} */
-  var abrFactory;
+  let abrManager;
+  /** @type {function():shaka.extern.AbrManager} */
+  let abrFactory;
 
   /** @type {!shaka.test.FakeNetworkingEngine} */
-  var networkingEngine;
+  let networkingEngine;
   /** @type {!shaka.test.FakeStreamingEngine} */
-  var streamingEngine;
+  let streamingEngine;
   /** @type {!shaka.test.FakeDrmEngine} */
-  var drmEngine;
+  let drmEngine;
   /** @type {!shaka.test.FakePlayhead} */
-  var playhead;
+  let playhead;
   /** @type {!shaka.test.FakePlayheadObserver} */
-  var playheadObserver;
+  let playheadObserver;
   /** @type {!shaka.test.FakeTextDisplayer} */
-  var textDisplayer;
-  /** @type {function():shakaExtern.TextDisplayer} */
-  var textDisplayFactory;
+  let textDisplayer;
+  /** @type {function():shaka.extern.TextDisplayer} */
+  let textDisplayFactory;
 
-  var mediaSourceEngine;
+  let mediaSourceEngine;
 
   /** @type {!shaka.test.FakeVideo} */
-  var video;
+  let video;
 
   beforeAll(function() {
     logErrorSpy = jasmine.createSpy('shaka.log.error');
@@ -86,7 +80,7 @@ describe('Player', function() {
     // fail assertions based on browser support for types.  Pretend that all
     // video and audio types are supported.
     window.MediaSource.isTypeSupported = function(mimeType) {
-      var type = mimeType.split('/')[0];
+      let type = mimeType.split('/')[0];
       return type == 'video' || type == 'audio';
     };
 
@@ -119,25 +113,27 @@ describe('Player', function() {
       streamingEngine = new shaka.test.FakeStreamingEngine(
           onChooseStreams, onCanSwitch);
       mediaSourceEngine = {
+        init: jasmine.createSpy('init').and.returnValue(Promise.resolve()),
+        open: jasmine.createSpy('open').and.returnValue(Promise.resolve()),
         destroy: jasmine.createSpy('destroy').and.
             returnValue(Promise.resolve()),
         setUseEmbeddedText: jasmine.createSpy('setUseEmbeddedText'),
-        getUseEmbeddedText: jasmine.createSpy('getUseEmbeddedText')
+        getUseEmbeddedText: jasmine.createSpy('getUseEmbeddedText'),
+        setTextDisplayer: jasmine.createSpy('setTextDisplayer')
       };
 
       player.createDrmEngine = function() { return drmEngine; };
       player.createNetworkingEngine = function() { return networkingEngine; };
       player.createPlayhead = function() { return playhead; };
       player.createPlayheadObserver = function() { return playheadObserver; };
-      player.createMediaSource = function() { return Promise.resolve(); };
       player.createMediaSourceEngine = function() { return mediaSourceEngine; };
       player.createStreamingEngine = function() {
         // This captures the variable |manifest| so this should only be used
         // after the manifest has been set.
-        // Subtle: because this captures var manifest above, there cannot be any
+        // Subtle: because this captures let manifest above, there cannot be any
         // other location for manifests in these tests.
         // TODO: fix this to use the manifest currently loaded by the player.
-        var period = manifest.periods[0];
+        let period = manifest.periods[0];
         streamingEngine.getCurrentPeriod.and.returnValue(period);
         return streamingEngine;
       };
@@ -173,8 +169,8 @@ describe('Player', function() {
   describe('destroy', function() {
     it('cleans up all dependencies', function(done) {
       goog.asserts.assert(manifest, 'Manifest should be non-null');
-      var parser = new shaka.test.FakeManifestParser(manifest);
-      var factory = function() { return parser; };
+      let parser = new shaka.test.FakeManifestParser(manifest);
+      let factory = function() { return parser; };
 
       player.load('', 0, factory).then(function() {
         return player.destroy();
@@ -191,17 +187,17 @@ describe('Player', function() {
     });
 
     it('destroys parser first when interrupting load', function(done) {
-      var p = shaka.test.Util.delay(0.3);
-      var parser = new shaka.test.FakeManifestParser(manifest);
+      let p = shaka.test.Util.delay(0.3);
+      let parser = new shaka.test.FakeManifestParser(manifest);
       parser.start.and.returnValue(p);
       parser.stop.and.callFake(function() {
         expect(abrManager.stop).not.toHaveBeenCalled();
         expect(networkingEngine.destroy).not.toHaveBeenCalled();
         expect(textDisplayer.destroy).not.toHaveBeenCalled();
       });
-      var factory = function() { return parser; };
+      let factory = function() { return parser; };
 
-      player.load('', 0, factory).then(fail);
+      player.load('', 0, factory).then(fail).catch(() => {});
       shaka.test.Util.delay(0.1).then(function() {
         player.destroy().catch(fail).then(function() {
           expect(abrManager.stop).toHaveBeenCalled();
@@ -215,15 +211,15 @@ describe('Player', function() {
 
   describe('load/unload', function() {
     /** @type {!shaka.test.FakeManifestParser} */
-    var parser1;
+    let parser1;
     /** @type {!shaka.test.FakeManifestParser} */
-    var parser2;
+    let parser2;
     /** @type {!Function} */
-    var factory1;
+    let factory1;
     /** @type {!Function} */
-    var factory2;
+    let factory2;
     /** @type {!jasmine.Spy} */
-    var checkError;
+    let checkError;
 
     beforeEach(function() {
       goog.asserts.assert(manifest, 'manifest must be non-null');
@@ -244,11 +240,11 @@ describe('Player', function() {
       // https://github.com/google/shaka-player/issues/612
       player.load('', 0, factory1).then(function() {
         // Delay the promise to destroy the parser.
-        var p = new shaka.util.PublicPromise();
+        let p = new shaka.util.PublicPromise();
         parser1.stop.and.returnValue(p);
 
-        var unloadDone = false;
-        spyOn(player, 'createMediaSourceEngine');
+        let unloadDone = false;
+        spyOn(player, 'createMediaSourceEngine').and.callThrough();
 
         shaka.test.Util.delay(0.5).then(function() {
           // Should not start loading yet.
@@ -277,6 +273,15 @@ describe('Player', function() {
           expect(textDisplayer.destroy).toHaveBeenCalled();
           done();
         });
+      });
+    });
+
+    it('sets TextDisplayer and passes it to MediaSource on load',
+        function(done) {
+      player.load('', 0, factory1).then(function() {
+        expect(mediaSourceEngine.setTextDisplayer)
+               .toHaveBeenCalledWith(textDisplayer);
+        done();
       });
     });
 
@@ -410,51 +415,112 @@ describe('Player', function() {
       player.unload().catch(fail);
     });
 
-    it('streaming event', function(done) {
-      var streamingListener = jasmine.createSpy('listener');
-      streamingListener.and.callFake(function() {
-        var tracks = player.getVariantTracks();
-        expect(tracks).toBeDefined();
-        expect(tracks.length).toEqual(1);
-        var activeTracks = player.getVariantTracks().filter(function(track) {
-          return track.active;
-        });
-        expect(activeTracks.length).toEqual(0);
+    describe('streaming event', function() {
+      /** @type {jasmine.Spy} */
+      let streamingListener;
+
+      beforeEach(function() {
+        streamingListener = jasmine.createSpy('listener');
+        player.addEventListener('streaming', Util.spyFunc(streamingListener));
+
+        // We must have two different sets of codecs for some of our tests.
+        manifest = new shaka.test.ManifestGenerator()
+          .addPeriod(0)
+            .addVariant(0)
+              .addAudio(1).mime('audio/mp4', 'mp4a.40.2')
+              .addVideo(2).mime('video/mp4', 'avc1.4d401f')
+            .addVariant(1)
+              .addAudio(3).mime('audio/webm', 'opus')
+              .addVideo(4).mime('video/webm', 'vp9')
+          .build();
+
+        parser1 = new shaka.test.FakeManifestParser(manifest);
       });
 
-      player.addEventListener('streaming', Util.spyFunc(streamingListener));
-      expect(streamingListener).not.toHaveBeenCalled();
-      player.load('', 0, factory1).then(function() {
-        expect(streamingListener).toHaveBeenCalled();
-      }).catch(fail).then(done);
+      function runTest(done) {
+        expect(streamingListener).not.toHaveBeenCalled();
+        player.load('', 0, factory1).then(function() {
+          expect(streamingListener).toHaveBeenCalled();
+        }).catch(fail).then(done);
+      }
+
+      it('fires after tracks exist', function(done) {
+        streamingListener.and.callFake(function() {
+          const tracks = player.getVariantTracks();
+          expect(tracks).toBeDefined();
+          expect(tracks.length).toBeGreaterThan(0);
+        });
+        runTest(done);
+      });
+
+      it('fires before any tracks are active', function(done) {
+        streamingListener.and.callFake(function() {
+          const activeTracks =
+            player.getVariantTracks().filter((t) => t.active);
+          expect(activeTracks.length).toEqual(0);
+        });
+        runTest(done);
+      });
+
+      // We used to fire the event /before/ filtering, which meant that for
+      // multi-codec content, the application might select something which will
+      // later be removed during filtering.
+      // https://github.com/google/shaka-player/issues/1119
+      it('fires after tracks have been filtered', function(done) {
+        streamingListener.and.callFake(function() {
+          const tracks = player.getVariantTracks();
+          // Either WebM, or MP4, but not both.
+          expect(tracks.length).toEqual(1);
+        });
+        runTest(done);
+      });
     });
 
     describe('setTextTrackVisibility', function() {
       beforeEach(function() {
         manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addVariant(0)
-            .addAudio(1)
-            .addVideo(2)
-          .addTextStream(3)
-            .language('es').label('Spanish')
-            .bandwidth(100).mime('text/vtt')
-            .kind('caption')
-        .build();
+          .addPeriod(0)
+            .addVariant(0)
+              .addAudio(1)
+              .addVideo(2)
+            .addTextStream(3)
+              .language('es').label('Spanish')
+              .bandwidth(100).mime('text/vtt')
+              .kind('caption')
+          .build();
       });
 
       it('load text stream if caption is visible', function(done) {
         player.load('', 0, factory1).then(function() {
           player.setTextTrackVisibility(true);
           expect(streamingEngine.loadNewTextStream).toHaveBeenCalled();
+          expect(streamingEngine.getActiveText()).not.toBe(null);
         }).catch(fail).then(done);
       });
 
-      it('do not load text stream if caption is invisible', function(done) {
+      it('does not load text stream if caption is invisible', function(done) {
         player.load('', 0, factory1).then(function() {
           player.setTextTrackVisibility(false);
           expect(streamingEngine.loadNewTextStream).not.toHaveBeenCalled();
           expect(streamingEngine.unloadTextStream).toHaveBeenCalled();
+          expect(streamingEngine.getActiveText()).toBe(null);
+        }).catch(fail).then(done);
+      });
+
+      it('loads text stream if alwaysStreamText is set', function(done) {
+        player.setTextTrackVisibility(false);
+        player.configure({streaming: {alwaysStreamText: true}});
+
+        player.load('', 0, factory1).then(function() {
+          expect(streamingEngine.getActiveText()).not.toBe(null);
+
+          player.setTextTrackVisibility(true);
+          expect(streamingEngine.loadNewTextStream).not.toHaveBeenCalled();
+          expect(streamingEngine.unloadTextStream).not.toHaveBeenCalled();
+
+          player.setTextTrackVisibility(false);
+          expect(streamingEngine.loadNewTextStream).not.toHaveBeenCalled();
+          expect(streamingEngine.unloadTextStream).not.toHaveBeenCalled();
         }).catch(fail).then(done);
       });
     });
@@ -472,7 +538,7 @@ describe('Player', function() {
 
       it('manifest type check', function(done) {
         // Block the network request.
-        var p = networkingEngine.delayNextRequest();
+        let p = networkingEngine.delayNextRequest();
         // Give the stage a factory so that it can succeed and get canceled.
         shaka.media.ManifestParser.registerParserByMime('undefined', factory1);
 
@@ -485,7 +551,7 @@ describe('Player', function() {
 
         shaka.test.Util.delay(0.5).then(function() {
           // Make sure we're blocked.
-          var requestType = shaka.net.NetworkingEngine.RequestType.MANIFEST;
+          const requestType = shaka.net.NetworkingEngine.RequestType.MANIFEST;
           networkingEngine.expectRequest('', requestType);
           // Interrupt load().
           player.unload();
@@ -495,7 +561,7 @@ describe('Player', function() {
 
       it('parser startup', function(done) {
         // Block parser startup.
-        var p = new shaka.util.PublicPromise();
+        let p = new shaka.util.PublicPromise();
         parser1.start.and.returnValue(p);
 
         player.load('', 0, factory1).then(fail).catch(Util.spyFunc(checkError))
@@ -512,8 +578,8 @@ describe('Player', function() {
 
       it('DrmEngine init', function(done) {
         // Block DrmEngine init.
-        var p = new shaka.util.PublicPromise();
-        var drmEngine = new shaka.test.FakeDrmEngine();
+        let p = new shaka.util.PublicPromise();
+        let drmEngine = new shaka.test.FakeDrmEngine();
         drmEngine.init.and.returnValue(p);
         player.createDrmEngine = function() { return drmEngine; };
 
@@ -531,8 +597,8 @@ describe('Player', function() {
 
       it('DrmEngine attach', function(done) {
         // Block DrmEngine attach.
-        var p = new shaka.util.PublicPromise();
-        var drmEngine = new shaka.test.FakeDrmEngine();
+        let p = new shaka.util.PublicPromise();
+        let drmEngine = new shaka.test.FakeDrmEngine();
         drmEngine.attach.and.returnValue(p);
         player.createDrmEngine = function() { return drmEngine; };
 
@@ -550,7 +616,7 @@ describe('Player', function() {
 
       it('StreamingEngine init', function(done) {
         // Block StreamingEngine init.
-        var p = new shaka.util.PublicPromise();
+        let p = new shaka.util.PublicPromise();
         streamingEngine.init.and.returnValue(p);
 
         player.load('', 0, factory1).then(fail).catch(Util.spyFunc(checkError))
@@ -564,14 +630,35 @@ describe('Player', function() {
           p.resolve();
         });
       });
+
+      it('StreamingEngine init w/ exception', function(done) {
+        // Block StreamingEngine init.
+        let p = new shaka.util.PublicPromise();
+        streamingEngine.init.and.returnValue(p);
+
+        player.load('', 0, factory1).then(fail).catch(Util.spyFunc(checkError))
+            .then(done);
+
+        shaka.test.Util.delay(1.5).then(function() {
+          // Make sure we're blocked.
+          expect(streamingEngine.init).toHaveBeenCalled();
+          // Interrupt load().
+          player.unload();
+          // Fail StreamingEngine init with an exception.
+          p.reject(new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
+              shaka.util.Error.Category.MANIFEST,
+              shaka.util.Error.Code.OPERATION_ABORTED));
+        });
+      });
     });  // describe('interruption during')
   });  // describe('load/unload')
 
   describe('getConfiguration', function() {
     it('returns a copy of the configuration', function() {
-      var config1 = player.getConfiguration();
+      let config1 = player.getConfiguration();
       config1.streaming.bufferBehind = -99;
-      var config2 = player.getConfiguration();
+      let config2 = player.getConfiguration();
       expect(config1.streaming.bufferBehind).not.toEqual(
           config2.streaming.bufferBehind);
     });
@@ -579,18 +666,18 @@ describe('Player', function() {
 
   describe('configure', function() {
     it('overwrites defaults', function() {
-      var defaultConfig = player.getConfiguration();
+      let defaultConfig = player.getConfiguration();
       // Make sure the default differs from our test value:
       expect(defaultConfig.drm.retryParameters.backoffFactor).not.toBe(5);
       expect(defaultConfig.manifest.retryParameters.backoffFactor).not.toBe(5);
 
       player.configure({
         drm: {
-          retryParameters: { backoffFactor: 5 }
+          retryParameters: {backoffFactor: 5}
         }
       });
 
-      var newConfig = player.getConfiguration();
+      let newConfig = player.getConfiguration();
       // Make sure we changed the backoff for DRM, but not for manifests:
       expect(newConfig.drm.retryParameters.backoffFactor).toBe(5);
       expect(newConfig.manifest.retryParameters.backoffFactor).not.toBe(5);
@@ -599,12 +686,12 @@ describe('Player', function() {
     it('reverts to defaults when undefined is given', function() {
       player.configure({
         streaming: {
-          retryParameters: { backoffFactor: 5 },
+          retryParameters: {backoffFactor: 5},
           bufferBehind: 7
         }
       });
 
-      var newConfig = player.getConfiguration();
+      let newConfig = player.getConfiguration();
       expect(newConfig.streaming.retryParameters.backoffFactor).toBe(5);
       expect(newConfig.streaming.bufferBehind).toBe(7);
 
@@ -625,14 +712,14 @@ describe('Player', function() {
 
     it('restricts the types of config values', function() {
       logErrorSpy.and.stub();
-      var defaultConfig = player.getConfiguration();
+      let defaultConfig = player.getConfiguration();
 
       // Try a bogus bufferBehind (string instead of number)
       player.configure({
-        streaming: { bufferBehind: '77' }
+        streaming: {bufferBehind: '77'}
       });
 
-      var newConfig = player.getConfiguration();
+      let newConfig = player.getConfiguration();
       expect(newConfig).toEqual(defaultConfig);
       expect(logErrorSpy).toHaveBeenCalledWith(
           stringContaining('.streaming.bufferBehind'));
@@ -651,16 +738,16 @@ describe('Player', function() {
 
     it('expands dictionaries that allow arbitrary keys', function() {
       player.configure({
-        drm: { servers: { 'com.widevine.alpha': 'http://foo/widevine' } }
+        drm: {servers: {'com.widevine.alpha': 'http://foo/widevine'}}
       });
 
-      var newConfig = player.getConfiguration();
+      let newConfig = player.getConfiguration();
       expect(newConfig.drm.servers).toEqual({
         'com.widevine.alpha': 'http://foo/widevine'
       });
 
       player.configure({
-        drm: { servers: { 'com.microsoft.playready': 'http://foo/playready' } }
+        drm: {servers: {'com.microsoft.playready': 'http://foo/playready'}}
       });
 
       newConfig = player.getConfiguration();
@@ -674,10 +761,10 @@ describe('Player', function() {
       // Try a bogus server value (number instead of string)
       logErrorSpy.and.stub();
       player.configure({
-        drm: { servers: { 'com.widevine.alpha': 7 } }
+        drm: {servers: {'com.widevine.alpha': 7}}
       });
 
-      var newConfig = player.getConfiguration();
+      let newConfig = player.getConfiguration();
       expect(newConfig.drm.servers).toEqual({});
       expect(logErrorSpy).toHaveBeenCalledWith(
           stringContaining('.drm.servers.com.widevine.alpha'));
@@ -685,19 +772,19 @@ describe('Player', function() {
       // Try a valid advanced config.
       logErrorSpy.calls.reset();
       player.configure({
-        drm: { advanced: { 'ks1': { distinctiveIdentifierRequired: true } } }
+        drm: {advanced: {'ks1': {distinctiveIdentifierRequired: true}}}
       });
 
       newConfig = player.getConfiguration();
       expect(newConfig.drm.advanced).toEqual({
-        'ks1': jasmine.objectContaining({ distinctiveIdentifierRequired: true })
+        'ks1': jasmine.objectContaining({distinctiveIdentifierRequired: true})
       });
       expect(logErrorSpy).not.toHaveBeenCalled();
-      var lastGoodConfig = newConfig;
+      let lastGoodConfig = newConfig;
 
       // Try an invalid advanced config key.
       player.configure({
-        drm: { advanced: { 'ks1': { bogus: true } } }
+        drm: {advanced: {'ks1': {bogus: true}}}
       });
 
       newConfig = player.getConfiguration();
@@ -716,14 +803,14 @@ describe('Player', function() {
         }
       });
 
-      var newConfig = player.getConfiguration();
+      let newConfig = player.getConfiguration();
       expect(newConfig.drm.servers).toEqual({
         'com.widevine.alpha': 'http://foo/widevine',
         'com.microsoft.playready': 'http://foo/playready'
       });
 
       player.configure({
-        drm: { servers: { 'com.widevine.alpha': undefined } }
+        drm: {servers: {'com.widevine.alpha': undefined}}
       });
 
       newConfig = player.getConfiguration();
@@ -732,7 +819,7 @@ describe('Player', function() {
       });
 
       player.configure({
-        drm: { servers: undefined }
+        drm: {servers: undefined}
       });
 
       newConfig = player.getConfiguration();
@@ -740,23 +827,23 @@ describe('Player', function() {
     });
 
     it('checks the number of arguments to functions', function() {
-      var goodCustomScheme = function(node) {};
-      var badCustomScheme1 = function() {};  // too few args
-      var badCustomScheme2 = function(x, y) {};  // too many args
+      let goodCustomScheme = function(node) {};
+      let badCustomScheme1 = function() {};  // too few args
+      let badCustomScheme2 = function(x, y) {};  // too many args
 
       // Takes good callback.
       player.configure({
-        manifest: { dash: { customScheme: goodCustomScheme } }
+        manifest: {dash: {customScheme: goodCustomScheme}}
       });
 
-      var newConfig = player.getConfiguration();
+      let newConfig = player.getConfiguration();
       expect(newConfig.manifest.dash.customScheme).toBe(goodCustomScheme);
       expect(logWarnSpy).not.toHaveBeenCalled();
 
       // Warns about bad callback #1, still takes it.
       logWarnSpy.calls.reset();
       player.configure({
-        manifest: { dash: { customScheme: badCustomScheme1 } }
+        manifest: {dash: {customScheme: badCustomScheme1}}
       });
 
       newConfig = player.getConfiguration();
@@ -767,7 +854,7 @@ describe('Player', function() {
       // Warns about bad callback #2, still takes it.
       logWarnSpy.calls.reset();
       player.configure({
-        manifest: { dash: { customScheme: badCustomScheme2 } }
+        manifest: {dash: {customScheme: badCustomScheme2}}
       });
 
       newConfig = player.getConfiguration();
@@ -778,7 +865,7 @@ describe('Player', function() {
       // Resets to default if undefined.
       logWarnSpy.calls.reset();
       player.configure({
-        manifest: { dash: { customScheme: undefined } }
+        manifest: {dash: {customScheme: undefined}}
       });
 
       newConfig = player.getConfiguration();
@@ -844,7 +931,7 @@ describe('Player', function() {
       logErrorSpy.and.stub();
 
       player.configure({
-        drm: { advanced: null }
+        drm: {advanced: null}
       });
 
       expect(logErrorSpy).toHaveBeenCalledWith(
@@ -853,7 +940,7 @@ describe('Player', function() {
 
     it('configures play and seek range for VOD', function(done) {
       player.configure({playRangeStart: 5, playRangeEnd: 10});
-      var timeline = new shaka.media.PresentationTimeline(300, 0);
+      let timeline = new shaka.media.PresentationTimeline(300, 0);
       timeline.setStatic(true);
       manifest = new shaka.test.ManifestGenerator()
           .setTimeline(timeline)
@@ -862,10 +949,10 @@ describe('Player', function() {
             .addVideo(1)
           .build();
       goog.asserts.assert(manifest, 'manifest must be non-null');
-      var parser = new shaka.test.FakeManifestParser(manifest);
-      var factory = function() { return parser; };
+      let parser = new shaka.test.FakeManifestParser(manifest);
+      let factory = function() { return parser; };
       player.load('', 0, factory).then(function() {
-        var seekRange = player.seekRange();
+        let seekRange = player.seekRange();
         expect(seekRange.start).toBe(5);
         expect(seekRange.end).toBe(10);
       })
@@ -874,10 +961,10 @@ describe('Player', function() {
     });
 
     it('does not switch for plain configuration changes', function(done) {
-      var parser = new shaka.test.FakeManifestParser(manifest);
-      var factory = function() { return parser; };
+      let parser = new shaka.test.FakeManifestParser(manifest);
+      let factory = function() { return parser; };
 
-      var switchVariantSpy = spyOn(player, 'switchVariant_');
+      let switchVariantSpy = spyOn(player, 'switchVariant_');
 
       player.load('', 0, factory)
           .then(function() {
@@ -893,13 +980,60 @@ describe('Player', function() {
           .catch(fail)
           .then(done);
     });
+
+    it('accepts parameters in a (fieldName, value) format', function() {
+      let oldConfig = player.getConfiguration();
+      let oldDelayLicense = oldConfig.drm.delayLicenseRequestUntilPlayed;
+      let oldSwitchInterval = oldConfig.abr.switchInterval;
+      let oldPreferredLang = oldConfig.preferredAudioLanguage;
+
+      expect(oldDelayLicense).toBe(false);
+      expect(oldSwitchInterval).toBe(8);
+      expect(oldPreferredLang).toBe('en');
+
+      player.configure('drm.delayLicenseRequestUntilPlayed', true);
+      player.configure('abr.switchInterval', 10);
+      player.configure('preferredAudioLanguage', 'fr');
+
+      let newConfig = player.getConfiguration();
+      let newDelayLicense = newConfig.drm.delayLicenseRequestUntilPlayed;
+      let newSwitchInterval = newConfig.abr.switchInterval;
+      let newPreferredLang = newConfig.preferredAudioLanguage;
+
+      expect(newDelayLicense).toBe(true);
+      expect(newSwitchInterval).toBe(10);
+      expect(newPreferredLang).toBe('fr');
+    });
+
+    it('accepts escaped "." in names',
+       /** @suppress {accessControls} */ (function() {
+         expect(player.convertToConfigObject_('foo', 1)).toEqual({foo: 1});
+         expect(player.convertToConfigObject_('foo.bar', 1))
+             .toEqual({foo: {bar: 1}});
+         expect(player.convertToConfigObject_('foo..bar', 1))
+             .toEqual({foo: {'': {bar: 1}}});
+         expect(player.convertToConfigObject_('foo.bar.baz', 1))
+             .toEqual({foo: {bar: {baz: 1}}});
+         expect(player.convertToConfigObject_('foo.bar\\.baz', 1))
+             .toEqual({foo: {'bar.baz': 1}});
+         expect(player.convertToConfigObject_('foo.baz.', 1))
+             .toEqual({foo: {baz: {'': 1}}});
+         expect(player.convertToConfigObject_('foo.baz\\.', 1))
+             .toEqual({foo: {'baz.': 1}});
+         expect(player.convertToConfigObject_('foo\\.bar', 1))
+             .toEqual({'foo.bar': 1});
+         expect(player.convertToConfigObject_('.foo', 1))
+             .toEqual({'': {foo: 1}});
+         expect(player.convertToConfigObject_('\\.foo', 1))
+             .toEqual({'.foo': 1});
+       }));
   });
 
   describe('AbrManager', function() {
     /** @type {!shaka.test.FakeManifestParser} */
-    var parser;
+    let parser;
     /** @type {!Function} */
-    var parserFactory;
+    let parserFactory;
 
     beforeEach(function() {
       goog.asserts.assert(manifest, 'manifest must be non-null');
@@ -1008,7 +1142,7 @@ describe('Player', function() {
             .frameRate(1000000 / 42000)
         .build();
 
-      var variantTracks1 = [
+      let variantTracks1 = [
         {
           id: 2,
           active: true,
@@ -1033,7 +1167,7 @@ describe('Player', function() {
           videoBandwidth: 200
         }
       ];
-      var variantTracks2 = [
+      let variantTracks2 = [
         {
           id: 3,
           active: false,
@@ -1059,79 +1193,106 @@ describe('Player', function() {
         }
       ];
 
-      var parser = new shaka.test.FakeManifestParser(manifest);
-      var parserFactory = function() { return parser; };
+      let parser = new shaka.test.FakeManifestParser(manifest);
+      let parserFactory = function() { return parser; };
       player.load('', 0, parserFactory).catch(fail).then(function() {
         // Check the first period's variant tracks.
-        var actualVariantTracks1 = player.getVariantTracks();
+        let actualVariantTracks1 = player.getVariantTracks();
         expect(actualVariantTracks1).toEqual(variantTracks1);
 
         // Check the second period's variant tracks.
         playhead.getTime.and.callFake(function() {
           return 100;
         });
-        var actualVariantTracks2 = player.getVariantTracks();
+        let actualVariantTracks2 = player.getVariantTracks();
         expect(actualVariantTracks2).toEqual(variantTracks2);
       }).then(done);
     });
   });
 
   describe('tracks', function() {
-    /** @type {!Array.<shakaExtern.Track>} */
-    var variantTracks;
-    /** @type {!Array.<shakaExtern.Track>} */
-    var textTracks;
+    /** @type {!Array.<shaka.extern.Track>} */
+    let variantTracks;
+    /** @type {!Array.<shaka.extern.Track>} */
+    let textTracks;
 
     beforeEach(function(done) {
       // A manifest we can use to test track expectations.
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
-          .addVariant(1)
-            .bandwidth(200)
+          .addVariant(1)  // main surround, low res
+            .bandwidth(1300)
             .language('en')
-            .addAudio(1).bandwidth(100)
-            .addVideo(4).bandwidth(100).size(100, 200)
-            .frameRate(1000000 / 42000)
-          .addVariant(2)
-            .bandwidth(300)
+            .addVideo(1).bandwidth(1000).size(100, 200)
+              .frameRate(1000000 / 42000)
+            .addAudio(3).bandwidth(300).channelsCount(6).roles(['main'])
+
+          .addVariant(2)  // main surround, high res
+            .bandwidth(2300)
             .language('en')
-            .addAudio(1).bandwidth(100).roles(['main'])
-            .addVideo(5).bandwidth(200).size(200, 400).frameRate(24)
-          .addVariant(3)
-            .bandwidth(200)
+            .addVideo(2).bandwidth(2000).size(200, 400).frameRate(24)
+            .addAudio(3)  // already defined above
+
+          .addVariant(3)  // main stereo, low res
+            .bandwidth(1100)
             .language('en')
-            .addAudio(2).bandwidth(100).roles(['commentary'])
-            .addVideo(4).bandwidth(100).size(100, 200)
-            .frameRate(1000000 / 42000)
-          .addVariant(4)
-            .bandwidth(300)
+            .addVideo(1)  // already defined above
+            .addAudio(4).bandwidth(100).channelsCount(2).roles(['main'])
+
+          .addVariant(4)  // main stereo, high res
+            .bandwidth(2100)
             .language('en')
-            .addAudio(2).bandwidth(100)
-            .addVideo(5).bandwidth(200).size(200, 400).frameRate(24)
-          .addVariant(5)
+            .addVideo(2)  // already defined above
+            .addAudio(4)  // already defined above
+
+          .addVariant(5)  // commentary stereo, low res
+            .bandwidth(1100)
+            .language('en')
+            .addVideo(1)  // already defined above
+            .addAudio(5).bandwidth(100).channelsCount(2).roles(['commentary'])
+
+          .addVariant(6)  // commentary stereo, low res
+            .bandwidth(2100)
+            .language('en')
+            .addVideo(2)  // already defined above
+            .addAudio(5)  // already defined above
+
+          .addVariant(7)  // spanish stereo, low res
             .language('es')
-            .bandwidth(300)
-            .addAudio(8).bandwidth(100)
-            .addVideo(5).bandwidth(200).size(200, 400).frameRate(24)
-          .addTextStream(6)
-            .language('es').label('Spanish')
-            .bandwidth(100).mime('text/vtt')
-            .kind('caption')
-          .addTextStream(7)
-            .language('en').label('English')
-            .bandwidth(100).mime('application/ttml+xml')
-            .kind('caption').roles(['main'])
-           .addTextStream(11)
-            .language('en').label('English')
-            .bandwidth(100).mime('application/ttml+xml')
-            .kind('caption').roles(['commentary'])
+            .bandwidth(1100)
+            .addVideo(1)  // already defined above
+            .addAudio(6).bandwidth(100).channelsCount(2)
+
+          .addVariant(8)  // spanish stereo, high res
+            .language('es')
+            .bandwidth(2100)
+            .addVideo(2)  // already defined above
+            .addAudio(6)  // already defined above
+
           // All text tracks should remain, even with different MIME types.
+          .addTextStream(7)
+            .language('es').label('Spanish')
+            .bandwidth(10).mime('text/vtt')
+            .kind('caption')
+          .addTextStream(8)
+            .language('en').label('English')
+            .bandwidth(10).mime('application/ttml+xml')
+            .kind('caption').roles(['main'])
+           .addTextStream(9)
+            .language('en').label('English')
+            .bandwidth(10).mime('application/ttml+xml')
+            .kind('caption').roles(['commentary'])
         .addPeriod(1)
-          .addVariant(8)
-            .bandwidth(200)
+          .addVariant(9)
+            .bandwidth(1100)
             .language('en')
-            .addAudio(9).bandwidth(100)
-            .addVideo(10).bandwidth(100).size(100, 200)
+            .addVideo(10).bandwidth(1000).size(100, 200)
+            .addAudio(11).bandwidth(100).channelsCount(2)
+          .addVariant(10)
+            .bandwidth(1300)
+            .language('en')
+            .addVideo(10)  // already defined above
+            .addAudio(12).bandwidth(300).channelsCount(6)
         .build();
 
       variantTracks = [
@@ -1139,7 +1300,7 @@ describe('Player', function() {
           id: 1,
           active: true,
           type: 'variant',
-          bandwidth: 200,
+          bandwidth: 1300,
           language: 'en',
           label: null,
           kind: null,
@@ -1152,17 +1313,17 @@ describe('Player', function() {
           videoCodec: 'avc1.4d401f',
           primary: false,
           roles: ['main'],
-          videoId: 4,
-          audioId: 1,
-          channelsCount: null,
-          audioBandwidth: 100,
-          videoBandwidth: 100
+          videoId: 1,
+          audioId: 3,
+          channelsCount: 6,
+          audioBandwidth: 300,
+          videoBandwidth: 1000,
         },
         {
           id: 2,
           active: false,
           type: 'variant',
-          bandwidth: 300,
+          bandwidth: 2300,
           language: 'en',
           label: null,
           kind: null,
@@ -1175,17 +1336,63 @@ describe('Player', function() {
           videoCodec: 'avc1.4d401f',
           primary: false,
           roles: ['main'],
-          videoId: 5,
-          audioId: 1,
-          channelsCount: null,
-          audioBandwidth: 100,
-          videoBandwidth: 200
+          videoId: 2,
+          audioId: 3,
+          channelsCount: 6,
+          audioBandwidth: 300,
+          videoBandwidth: 2000,
         },
         {
           id: 3,
           active: false,
           type: 'variant',
-          bandwidth: 200,
+          bandwidth: 1100,
+          language: 'en',
+          label: null,
+          kind: null,
+          width: 100,
+          height: 200,
+          frameRate: 1000000 / 42000,
+          mimeType: 'video/mp4',
+          codecs: 'avc1.4d401f, mp4a.40.2',
+          audioCodec: 'mp4a.40.2',
+          videoCodec: 'avc1.4d401f',
+          primary: false,
+          roles: ['main'],
+          videoId: 1,
+          audioId: 4,
+          channelsCount: 2,
+          audioBandwidth: 100,
+          videoBandwidth: 1000,
+        },
+        {
+          id: 4,
+          active: false,
+          type: 'variant',
+          bandwidth: 2100,
+          language: 'en',
+          label: null,
+          kind: null,
+          width: 200,
+          height: 400,
+          frameRate: 24,
+          mimeType: 'video/mp4',
+          codecs: 'avc1.4d401f, mp4a.40.2',
+          audioCodec: 'mp4a.40.2',
+          videoCodec: 'avc1.4d401f',
+          primary: false,
+          roles: ['main'],
+          videoId: 2,
+          audioId: 4,
+          channelsCount: 2,
+          audioBandwidth: 100,
+          videoBandwidth: 2000,
+        },
+        {
+          id: 5,
+          active: false,
+          type: 'variant',
+          bandwidth: 1100,
           language: 'en',
           label: null,
           kind: null,
@@ -1198,17 +1405,17 @@ describe('Player', function() {
           videoCodec: 'avc1.4d401f',
           primary: false,
           roles: ['commentary'],
-          videoId: 4,
-          audioId: 2,
-          channelsCount: null,
+          videoId: 1,
+          audioId: 5,
+          channelsCount: 2,
           audioBandwidth: 100,
-          videoBandwidth: 100
+          videoBandwidth: 1000,
         },
         {
-          id: 4,
+          id: 6,
           active: false,
           type: 'variant',
-          bandwidth: 300,
+          bandwidth: 2100,
           language: 'en',
           label: null,
           kind: null,
@@ -1221,17 +1428,40 @@ describe('Player', function() {
           videoCodec: 'avc1.4d401f',
           primary: false,
           roles: ['commentary'],
-          videoId: 5,
-          audioId: 2,
-          channelsCount: null,
+          videoId: 2,
+          audioId: 5,
+          channelsCount: 2,
           audioBandwidth: 100,
-          videoBandwidth: 200
+          videoBandwidth: 2000,
         },
         {
-          id: 5,
+          id: 7,
           active: false,
           type: 'variant',
-          bandwidth: 300,
+          bandwidth: 1100,
+          language: 'es',
+          label: null,
+          kind: null,
+          width: 100,
+          height: 200,
+          frameRate: 1000000 / 42000,
+          mimeType: 'video/mp4',
+          codecs: 'avc1.4d401f, mp4a.40.2',
+          audioCodec: 'mp4a.40.2',
+          videoCodec: 'avc1.4d401f',
+          primary: false,
+          roles: [],
+          videoId: 1,
+          audioId: 6,
+          channelsCount: 2,
+          audioBandwidth: 100,
+          videoBandwidth: 1000,
+        },
+        {
+          id: 8,
+          active: false,
+          type: 'variant',
+          bandwidth: 2100,
           language: 'es',
           label: null,
           kind: null,
@@ -1244,17 +1474,17 @@ describe('Player', function() {
           videoCodec: 'avc1.4d401f',
           primary: false,
           roles: [],
-          videoId: 5,
-          audioId: 8,
-          channelsCount: null,
+          videoId: 2,
+          audioId: 6,
+          channelsCount: 2,
           audioBandwidth: 100,
-          videoBandwidth: 200
-        }
+          videoBandwidth: 2000,
+        },
       ];
 
       textTracks = [
         {
-          id: 6,
+          id: 7,
           active: true,
           type: ContentType.TEXT,
           language: 'es',
@@ -1274,10 +1504,10 @@ describe('Player', function() {
           height: null,
           frameRate: null,
           videoId: null,
-          audioId: null
+          audioId: null,
         },
         {
-          id: 7,
+          id: 8,
           active: false,
           type: ContentType.TEXT,
           language: 'en',
@@ -1297,10 +1527,10 @@ describe('Player', function() {
           height: null,
           frameRate: null,
           videoId: null,
-          audioId: null
+          audioId: null,
         },
         {
-          id: 11,
+          id: 9,
           active: false,
           type: ContentType.TEXT,
           language: 'en',
@@ -1320,19 +1550,20 @@ describe('Player', function() {
           height: null,
           frameRate: null,
           videoId: null,
-          audioId: null
-        }
+          audioId: null,
+        },
       ];
 
       goog.asserts.assert(manifest, 'manifest must be non-null');
-      var parser = new shaka.test.FakeManifestParser(manifest);
-      var parserFactory = function() { return parser; };
+      let parser = new shaka.test.FakeManifestParser(manifest);
+      let parserFactory = function() { return parser; };
 
-      // Language prefs must be set before load.  Used in select*Language()
-      // tests.
+      // Language/channel prefs must be set before load.  Used in
+      // select*Language() tests.
       player.configure({
         preferredAudioLanguage: 'en',
-        preferredTextLanguage: 'es'
+        preferredTextLanguage: 'es',
+        preferredAudioChannelCount: 6,
       });
 
       player.load('', 0, parserFactory).catch(fail).then(done);
@@ -1346,8 +1577,8 @@ describe('Player', function() {
     });
 
     it('returns empty arrays before tracks can be determined', function(done) {
-      var parser = new shaka.test.FakeManifestParser(manifest);
-      var parserFactory = function() { return parser; };
+      let parser = new shaka.test.FakeManifestParser(manifest);
+      let parserFactory = function() { return parser; };
       parser.start.and.callFake(function(manifestUri, playerInterface) {
         // The player does not yet have a manifest.
         expect(player.getVariantTracks()).toEqual([]);
@@ -1373,10 +1604,12 @@ describe('Player', function() {
     it('doesn\'t disable AbrManager if switching variants', function() {
       streamingEngine.onCanSwitch();
 
-      var config = player.getConfiguration();
+      let config = player.getConfiguration();
       expect(config.abr.enabled).toBe(true);
-      expect(variantTracks[1].type).toBe('variant');
-      player.selectVariantTrack(variantTracks[1]);
+
+      const newTrack = player.getVariantTracks().filter((t) => !t.active)[0];
+      player.selectVariantTrack(newTrack);
+
       config = player.getConfiguration();
       expect(config.abr.enabled).toBe(true);
     });
@@ -1384,10 +1617,12 @@ describe('Player', function() {
     it('doesn\'t disable AbrManager if switching text', function() {
       streamingEngine.onCanSwitch();
 
-      var config = player.getConfiguration();
+      let config = player.getConfiguration();
       expect(config.abr.enabled).toBe(true);
-      expect(textTracks[0].type).toBe(ContentType.TEXT);
-      player.selectTextTrack(textTracks[0]);
+
+      const newTrack = player.getTextTracks().filter((t) => !t.active)[0];
+      player.selectTextTrack(newTrack);
+
       config = player.getConfiguration();
       expect(config.abr.enabled).toBe(true);
     });
@@ -1395,32 +1630,29 @@ describe('Player', function() {
     it('switches streams', function() {
       streamingEngine.onCanSwitch();
 
-      var track = variantTracks[3];
-      var variant = manifest.periods[0].variants[3];
-      expect(track.id).toEqual(variant.id);
+      const newTrack = player.getVariantTracks().filter((t) => !t.active)[0];
+      player.selectVariantTrack(newTrack);
 
-      player.selectVariantTrack(track);
-      expect(streamingEngine.switchVariant)
-          .toHaveBeenCalledWith(variant, false);
+      expect(streamingEngine.switchVariant).toHaveBeenCalled();
+      const variant = streamingEngine.switchVariant.calls.argsFor(0)[0];
+      expect(variant.id).toEqual(newTrack.id);
     });
 
     it('still switches streams if called during startup', function() {
       // startup is not complete until onCanSwitch is called.
 
       // pick a track
-      var track = variantTracks[1];
+      const newTrack = player.getVariantTracks().filter((t) => !t.active)[0];
       // ask the player to switch to it
-      player.selectVariantTrack(track);
+      player.selectVariantTrack(newTrack);
       // nothing happens yet
       expect(streamingEngine.switchVariant).not.toHaveBeenCalled();
 
-      var variant = manifest.periods[0].variants[1];
-      expect(variant.id).toEqual(track.id);
-
       // after startup is complete, the manual selection takes effect.
       streamingEngine.onCanSwitch();
-      expect(streamingEngine.switchVariant)
-          .toHaveBeenCalledWith(variant, false);
+      expect(streamingEngine.switchVariant).toHaveBeenCalled();
+      const variant = streamingEngine.switchVariant.calls.argsFor(0)[0];
+      expect(variant.id).toEqual(newTrack.id);
     });
 
     it('still switches streams if called while switching Periods', function() {
@@ -1430,21 +1662,21 @@ describe('Player', function() {
       // startup doesn't call switchVariant
       expect(streamingEngine.switchVariant).not.toHaveBeenCalled();
 
-      var track = variantTracks[3];
-      var variant = manifest.periods[0].variants[3];
-      expect(variant.id).toEqual(track.id);
+      // pick a track
+      const newTrack = player.getVariantTracks().filter((t) => !t.active)[0];
 
       // simulate the transition to period 1
       transitionPeriod(1);
 
       // select the new track (from period 0, which is fine)
-      player.selectVariantTrack(track);
+      player.selectVariantTrack(newTrack);
       expect(streamingEngine.switchVariant).not.toHaveBeenCalled();
 
       // after transition is completed by onCanSwitch, switchVariant is called
       streamingEngine.onCanSwitch();
-      expect(streamingEngine.switchVariant)
-          .toHaveBeenCalledWith(variant, false);
+      expect(streamingEngine.switchVariant).toHaveBeenCalled();
+      const variant = streamingEngine.switchVariant.calls.argsFor(0)[0];
+      expect(variant.id).toEqual(newTrack.id);
     });
 
     it('switching audio doesn\'t change selected text track', function() {
@@ -1453,133 +1685,222 @@ describe('Player', function() {
         preferredTextLanguage: 'es'
       });
 
-      var textStream = manifest.periods[0].textStreams[1];
-      expect(textTracks[1].type).toBe(ContentType.TEXT);
-      expect(textTracks[1].language).toBe('en');
+      // We will manually switch from Spanish to English.
+      const englishTextTrack =
+          player.getTextTracks().filter((t) => t.language == 'en')[0];
 
-      var textTrack = textTracks[1];
       streamingEngine.switchTextStream.calls.reset();
-      player.selectTextTrack(textTrack);
-      expect(streamingEngine.switchTextStream).toHaveBeenCalledWith(textStream);
+      player.selectTextTrack(englishTextTrack);
+      expect(streamingEngine.switchTextStream).toHaveBeenCalled();
       // We have selected an English text track explicitly.
-      expect(getActiveTextTrack().id).toBe(textTrack.id);
+      expect(getActiveTextTrack().id).toBe(englishTextTrack.id);
 
-      var variantTrack = variantTracks[2];
-      var variant = manifest.periods[0].variants[2];
-      expect(variantTrack.id).toBe(variant.id);
-      player.selectVariantTrack(variantTrack);
+      const newVariantTrack =
+          player.getVariantTracks().filter((t) => !t.active)[0];
+      player.selectVariantTrack(newVariantTrack);
 
       // The active text track has not changed, even though the text language
       // preference is Spanish.
-      expect(getActiveTextTrack().id).toBe(textTrack.id);
+      expect(getActiveTextTrack().id).toBe(englishTextTrack.id);
     });
 
     it('selectAudioLanguage() takes precedence over ' +
        'preferredAudioLanguage', function() {
-          streamingEngine.onCanSwitch();
+      streamingEngine.onCanSwitch();
 
-          // This preference is set in beforeEach, before load().
-          expect(player.getConfiguration().preferredAudioLanguage).toBe('en');
+      // This preference is set in beforeEach, before load().
+      expect(player.getConfiguration().preferredAudioLanguage).toBe('en');
+      expect(getActiveVariantTrack().language).toBe('en');
 
-          expect(getActiveVariantTrack().language).toBe('en');
+      streamingEngine.switchVariant.calls.reset();
+      player.selectAudioLanguage('es');
 
-          var period = manifest.periods[0];
-          var spanishVariant = period.variants[4];
-          expect(spanishVariant.language).toBe('es');
+      expect(streamingEngine.switchVariant).toHaveBeenCalled();
+      const args = streamingEngine.switchVariant.calls.argsFor(0);
+      expect(args[0].language).toBe('es');
+      expect(args[1]).toBe(true);
+      expect(getActiveVariantTrack().language).toBe('es');
+    });
 
-          streamingEngine.switchVariant.calls.reset();
-          player.selectAudioLanguage('es');
+    it('selectAudioLanguage() respects selected role', function() {
+      streamingEngine.onCanSwitch();
+      expect(getActiveVariantTrack().roles).not.toContain('commentary');
 
-          expect(streamingEngine.switchVariant)
-              .toHaveBeenCalledWith(spanishVariant, true);
-          expect(getActiveVariantTrack().language).toBe('es');
-        });
+      streamingEngine.switchVariant.calls.reset();
+      player.selectAudioLanguage('en', 'commentary');
 
-    it('selectAudioLanguage() respects selected role',
-        function() {
-          streamingEngine.onCanSwitch();
-          expect(getActiveVariantTrack().id).toBe(1);
+      expect(streamingEngine.switchVariant).toHaveBeenCalled();
+      const args = streamingEngine.switchVariant.calls.argsFor(0);
+      expect(args[0].audio.roles).toContain('commentary');
+      expect(args[1]).toBe(true);
+      expect(getActiveVariantTrack().roles).toContain('commentary');
+    });
 
-          var period = manifest.periods[0];
-          var variantWithCommentaryRole = period.variants[2];
-          expect(variantWithCommentaryRole.audio.roles[0]).toBe('commentary');
+    it('selectAudioLanguage() does not change selected text track', function() {
+      // This came up in a custom application that allows to select
+      // from all tracks regardless of selected language.
+      // We imitate this behavior by calling selectTextLanguage()
+      // with one language and then selecting a track in a different
+      // language.
+      player.selectTextLanguage('en');
+      const spanishTextTrack = textTracks.filter((t) => t.language == 'es')[0];
+      player.selectTextTrack(spanishTextTrack);
+      player.selectAudioLanguage('es');
+      expect(getActiveTextTrack().id).toBe(spanishTextTrack.id);
+    });
 
-          streamingEngine.switchVariant.calls.reset();
-          player.selectAudioLanguage('en', 'commentary');
-
-          expect(streamingEngine.switchVariant)
-              .toHaveBeenCalledWith(variantWithCommentaryRole, true);
-          expect(getActiveVariantTrack().roles[0]).toBe('commentary');
-        });
+    it('selectTextLanguage() does not change selected variant track', () => {
+      // This came up in a custom application that allows to select
+      // from all tracks regardless of selected language.
+      // We imitate this behavior by calling selectAudioLanguage()
+      // with one language and then selecting a track in a different
+      // language.
+      player.selectAudioLanguage('es');
+      const englishVariantTrack =
+          variantTracks.filter((t) => t.language == 'en')[0];
+      player.selectVariantTrack(englishVariantTrack);
+      player.selectTextLanguage('es');
+      expect(getActiveVariantTrack().id).toBe(englishVariantTrack.id);
+    });
 
     it('selectTextLanguage() takes precedence over ' +
        'preferredTextLanguage', function() {
-          streamingEngine.onCanSwitch();
+      streamingEngine.onCanSwitch();
 
-          // This preference is set in beforeEach, before load().
-          expect(player.getConfiguration().preferredTextLanguage).toBe('es');
+      // This preference is set in beforeEach, before load().
+      expect(player.getConfiguration().preferredTextLanguage).toBe('es');
+      expect(getActiveTextTrack().language).toBe('es');
 
-          expect(getActiveTextTrack().language).toBe('es');
+      streamingEngine.switchTextStream.calls.reset();
+      player.selectTextLanguage('en');
 
-          var period = manifest.periods[0];
-          var englishStream = period.textStreams[1];
-          expect(englishStream.language).toBe('en');
+      expect(streamingEngine.switchTextStream).toHaveBeenCalled();
+      const args = streamingEngine.switchTextStream.calls.argsFor(0);
+      expect(args[0].language).toBe('en');
+      expect(getActiveTextTrack().language).toBe('en');
+    });
 
-          streamingEngine.switchTextStream.calls.reset();
-          player.selectTextLanguage('en');
+    it('selectTextLanguage() respects selected role', function() {
+      streamingEngine.onCanSwitch();
+      expect(getActiveTextTrack().roles).not.toContain('commentary');
 
-          expect(streamingEngine.switchTextStream)
-              .toHaveBeenCalledWith(englishStream);
-          expect(getActiveTextTrack().language).toBe('en');
-        });
+      streamingEngine.switchTextStream.calls.reset();
+      player.selectTextLanguage('en', 'commentary');
 
-    it('selectTextLanguage() respects selected role',
-        function() {
-          streamingEngine.onCanSwitch();
-          expect(getActiveTextTrack().id).toBe(6);
-
-          var period = manifest.periods[0];
-          var streamWithCommentaryRole = period.textStreams[2];
-          expect(streamWithCommentaryRole.roles[0]).toBe('commentary');
-
-          streamingEngine.switchTextStream.calls.reset();
-          player.selectTextLanguage('en', 'commentary');
-
-          expect(streamingEngine.switchTextStream)
-              .toHaveBeenCalledWith(streamWithCommentaryRole);
-          expect(getActiveTextTrack().roles[0]).toBe('commentary');
-        });
+      expect(streamingEngine.switchTextStream).toHaveBeenCalled();
+      const args = streamingEngine.switchTextStream.calls.argsFor(0);
+      expect(args[0].roles).toContain('commentary');
+      expect(getActiveTextTrack().roles).toContain('commentary');
+    });
 
     it('changing current audio language changes active stream', function() {
       streamingEngine.onCanSwitch();
-
-      var spanishVariant = manifest.periods[0].variants[4];
-      expect(spanishVariant.language).toBe('es');
 
       expect(getActiveVariantTrack().language).not.toBe('es');
       expect(streamingEngine.switchVariant).not.toHaveBeenCalled();
       player.selectAudioLanguage('es');
 
-      expect(streamingEngine.switchVariant)
-          .toHaveBeenCalledWith(spanishVariant, true);
+      expect(streamingEngine.switchVariant).toHaveBeenCalled();
+      const args = streamingEngine.switchVariant.calls.argsFor(0);
+      expect(args[0].language).toBe('es');
+      expect(args[1]).toBe(true);
       expect(getActiveVariantTrack().language).toBe('es');
     });
 
-    it('changing currentTextLanguage changes active stream', function() {
+    it('changing current text language changes active stream', function() {
       streamingEngine.onCanSwitch();
-
-      var englishStream = manifest.periods[0].textStreams[1];
-      expect(englishStream.language).toBe('en');
 
       expect(getActiveTextTrack().language).not.toBe('en');
       expect(streamingEngine.switchTextStream).not.toHaveBeenCalled();
       player.selectTextLanguage('en');
 
-      expect(streamingEngine.switchTextStream)
-          .toHaveBeenCalledWith(englishStream);
+      expect(streamingEngine.switchTextStream).toHaveBeenCalled();
+      const args = streamingEngine.switchTextStream.calls.argsFor(0);
+      expect(args[0].language).toBe('en');
       expect(getActiveTextTrack().language).toBe('en');
     });
-  });
+
+    it('remembers the channel count when ABR is reenabled', () => {
+      streamingEngine.onCanSwitch();
+
+      // We prefer 6 channels, and we are currently playing 6 channels.
+      expect(player.getConfiguration().preferredAudioChannelCount).toBe(6);
+      expect(getActiveVariantTrack().channelsCount).toBe(6);
+
+      // Manually turn off ABR and select a 2-channel track.
+      player.configure({abr: {enabled: false}});
+      const newTrack =
+          player.getVariantTracks().filter((t) => t.channelsCount == 2)[0];
+      player.selectVariantTrack(newTrack);
+
+      // See that we are playing a 2-channel track now.
+      expect(getActiveVariantTrack().channelsCount).toBe(2);
+
+      // See that AbrManager has a list of 2-channel tracks now.
+      expect(abrManager.variants.length).toBeGreaterThan(0);
+      abrManager.variants.forEach((v) => {
+        expect(v.audio.channelsCount).toBe(2);
+      });
+
+      // Re-enable ABR.
+      player.configure({abr: {enabled: true}});
+
+      // See that AbrManager still has a list of 2-channel tracks.
+      expect(abrManager.variants.length).toBeGreaterThan(0);
+      abrManager.variants.forEach((v) => {
+        expect(v.audio.channelsCount).toBe(2);
+      });
+      // See that we are still playing a 2-channel track.
+      expect(getActiveVariantTrack().channelsCount).toBe(2);
+    });
+
+    it('remembers the channel count across key status changes', () => {
+      // Simulate an encrypted stream.  Mark half of the audio streams with key
+      // ID 'aaa', and the other half with 'bbb'.  Remove all roles, so that our
+      // choices are limited only by channel count and key status.
+      manifest.periods[0].variants.forEach((variant) => {
+        const keyId = (variant.audio.id % 2) ? 'aaa' : 'bbb';
+        variant.audio.keyId = keyId;
+        variant.video.roles = [];
+        variant.audio.roles = [];
+      });
+
+      streamingEngine.onCanSwitch();
+
+      // We prefer 6 channels, and we are currently playing 6 channels.
+      expect(player.getConfiguration().preferredAudioChannelCount).toBe(6);
+      expect(getActiveVariantTrack().channelsCount).toBe(6);
+
+      // Manually select a 2-channel track.
+      const newTrack =
+          player.getVariantTracks().filter((t) => t.channelsCount == 2)[0];
+      player.selectVariantTrack(newTrack);
+
+      // See that we are playing a 2-channel track now.
+      expect(getActiveVariantTrack().channelsCount).toBe(2);
+
+      // See that AbrManager has a list of 2-channel tracks now.
+      expect(abrManager.variants.length).toBeGreaterThan(0);
+      abrManager.variants.forEach((v) => {
+        expect(v.audio.channelsCount).toBe(2);
+      });
+
+      // Simulate a key status event that would trigger the removal of some
+      // tracks.
+      onKeyStatus({
+        'aaa': 'usable',
+        'bbb': 'output-restricted',
+      });
+
+      // See that AbrManager still has a list of 2-channel tracks.
+      expect(abrManager.variants.length).toBeGreaterThan(0);
+      abrManager.variants.forEach((v) => {
+        expect(v.audio.channelsCount).toBe(2);
+      });
+      // See that we are still playing a 2-channel track.
+      expect(getActiveVariantTrack().channelsCount).toBe(2);
+    });
+  });  // describe('tracks')
 
   describe('languages', function() {
     it('chooses the first as default', function(done) {
@@ -1625,8 +1946,8 @@ describe('Player', function() {
 
           expect(player.isTextTrackVisible()).toBe(false);
 
-          var parser = new shaka.test.FakeManifestParser(manifest);
-          var factory = function() { return parser; };
+          let parser = new shaka.test.FakeManifestParser(manifest);
+          let factory = function() { return parser; };
           player.load('', 0, factory)
               .then(function() {
                 // Text was turned on during startup.
@@ -1657,14 +1978,14 @@ describe('Player', function() {
         preferredAudioLanguage: undefined
       });
 
-      var parser = new shaka.test.FakeManifestParser(manifest);
-      var parserFactory = function() { return parser; };
+      let parser = new shaka.test.FakeManifestParser(manifest);
+      let parserFactory = function() { return parser; };
       player.load('', 0, parserFactory).then(function() {
         expect(abrManager.setVariants).toHaveBeenCalled();
 
         // If we have chosen any arbitrary language, setVariants is provided
         // with exactly one variant.
-        var variants = abrManager.setVariants.calls.argsFor(0)[0];
+        let variants = abrManager.setVariants.calls.argsFor(0)[0];
         expect(variants.length).toBe(1);
       }).catch(fail).then(done);
     });
@@ -1676,10 +1997,10 @@ describe('Player', function() {
      * @param {function()} done
      */
     function runTest(languages, preference, expectedIndex, done) {
-      var generator = new shaka.test.ManifestGenerator().addPeriod(0);
+      let generator = new shaka.test.ManifestGenerator().addPeriod(0);
 
-      for (var i = 0; i < languages.length; i++) {
-        var lang = languages[i];
+      for (let i = 0; i < languages.length; i++) {
+        let lang = languages[i];
         if (lang.charAt(0) == '*') {
           generator
             .addVariant(i)
@@ -1698,8 +2019,8 @@ describe('Player', function() {
         preferredAudioLanguage: preference
       });
 
-      var parser = new shaka.test.FakeManifestParser(manifest);
-      var factory = function() { return parser; };
+      let parser = new shaka.test.FakeManifestParser(manifest);
+      let factory = function() { return parser; };
       player.load('', 0, factory).then(function() {
         expect(getActiveVariantTrack().id).toBe(expectedIndex);
       }).catch(fail).then(done);
@@ -1734,8 +2055,8 @@ describe('Player', function() {
             .addVideo(5).bandwidth(200).size(200, 400)
         .build();
 
-      var parser = new shaka.test.FakeManifestParser(manifest);
-      var parserFactory = function() { return parser; };
+      let parser = new shaka.test.FakeManifestParser(manifest);
+      let parserFactory = function() { return parser; };
       player.load('', 0, parserFactory)
           .then(function() {
             // Initialize the fake streams.
@@ -1756,19 +2077,19 @@ describe('Player', function() {
         player = new shaka.Player(video);
 
         // In #968, getStats() throws an exception:
-        var stats = player.getStats();
+        let stats = player.getStats();
         expect(stats).toBeTruthy();
       }).catch(fail).then(done);
     });
 
     it('tracks estimated bandwidth', function() {
       abrManager.getBandwidthEstimate.and.returnValue(25);
-      var stats = player.getStats();
+      let stats = player.getStats();
       expect(stats.estimatedBandwidth).toBe(25);
     });
 
     it('tracks info about current stream', function() {
-      var stats = player.getStats();
+      let stats = player.getStats();
       // Should have chosen the first of each type of stream.
       expect(stats.width).toBe(100);
       expect(stats.height).toBe(200);
@@ -1777,7 +2098,7 @@ describe('Player', function() {
 
     it('tracks frame info', function() {
       // getVideoPlaybackQuality does not exist yet.
-      var stats = player.getStats();
+      let stats = player.getStats();
       expect(stats.decodedFrames).toBeNaN();
       expect(stats.droppedFrames).toBeNaN();
 
@@ -1799,7 +2120,7 @@ describe('Player', function() {
 
     describe('buffer/play times', function() {
       it('tracks play time', function() {
-        var stats = player.getStats();
+        let stats = player.getStats();
         expect(stats.playTime).toBeCloseTo(0);
         expect(stats.bufferingTime).toBeCloseTo(0);
 
@@ -1811,7 +2132,7 @@ describe('Player', function() {
       });
 
       it('tracks buffering time', function() {
-        var stats = player.getStats();
+        let stats = player.getStats();
         expect(stats.playTime).toBeCloseTo(0);
         expect(stats.bufferingTime).toBeCloseTo(0);
 
@@ -1833,7 +2154,7 @@ describe('Player', function() {
         buffering(false);
         jasmine.clock().tick(1000);
 
-        var stats = player.getStats();
+        let stats = player.getStats();
         expect(stats.playTime).toBeCloseTo(4);
         expect(stats.bufferingTime).toBeCloseTo(14);
       });
@@ -1854,11 +2175,11 @@ describe('Player', function() {
       });
 
       it('includes selectVariantTrack choices', function() {
-        var track = player.getVariantTracks()[3];
+        let track = player.getVariantTracks()[3];
         player.selectVariantTrack(track);
 
-        var period = manifest.periods[0];
-        var variant =
+        let period = manifest.periods[0];
+        let variant =
             shaka.util.StreamUtils.findVariantForTrack(period, track);
 
         checkHistory([{
@@ -1872,7 +2193,7 @@ describe('Player', function() {
       });
 
       it('includes adaptation choices', function() {
-        var variant = manifest.periods[0].variants[3];
+        let variant = manifest.periods[0].variants[3];
 
         switch_(variant);
         checkHistory(jasmine.arrayContaining([
@@ -1888,10 +2209,10 @@ describe('Player', function() {
 
       /**
        * Checks that the switch history is correct.
-       * @param {!Array.<shakaExtern.TrackChoice>} additional
+       * @param {!Array.<shaka.extern.TrackChoice>} additional
        */
       function checkHistory(additional) {
-        var prefix = {
+        let prefix = {
           timestamp: jasmine.any(Number),
           id: 0,
           type: 'variant',
@@ -1899,14 +2220,14 @@ describe('Player', function() {
           bandwidth: 200
         };
 
-        var switchHistory = player.getStats().switchHistory;
+        let switchHistory = player.getStats().switchHistory;
 
         expect(switchHistory[0]).toEqual(prefix);
         expect(switchHistory.slice(1)).toEqual(additional);
       }
 
       /**
-       * @param {shakaExtern.Variant} variant
+       * @param {shaka.extern.Variant} variant
        * @suppress {accessControls}
        */
       function switch_(variant) {
@@ -1986,7 +2307,7 @@ describe('Player', function() {
 
       it('accumulates duration as time passes', function() {
         // We are using a mock date, so this is not a race.
-        var bufferingStarts = Date.now() / 1000;
+        let bufferingStarts = Date.now() / 1000;
         setBuffering(true);
 
         expect(player.getStats().stateHistory).toEqual([
@@ -2006,7 +2327,7 @@ describe('Player', function() {
           }
         ]);
 
-        var playbackStarts = Date.now() / 1000;
+        let playbackStarts = Date.now() / 1000;
         setBuffering(false);
         jasmine.clock().tick(9000);
         expect(player.getStats().stateHistory).toEqual([
@@ -2048,8 +2369,8 @@ describe('Player', function() {
                 .addVariant(0)
                   .addVideo(0).mime('video/mp4', 'good')
               .build();
-      var parser = new shaka.test.FakeManifestParser(manifest);
-      var factory = function() { return parser; };
+      let parser = new shaka.test.FakeManifestParser(manifest);
+      let factory = function() { return parser; };
       player.load('', 0, factory).catch(fail).then(done);
     });
 
@@ -2062,8 +2383,8 @@ describe('Player', function() {
                 .addVariant(1)
                   .addVideo(1).mime('video/mp4', 'good')
               .build();
-      var parser = new shaka.test.FakeManifestParser(manifest);
-      var factory = function() { return parser; };
+      let parser = new shaka.test.FakeManifestParser(manifest);
+      let factory = function() { return parser; };
       player.load('', 0, factory).catch(fail).then(done);
     });
 
@@ -2077,8 +2398,8 @@ describe('Player', function() {
                 .addVariant(1).bandwidth(500)
                   .addVideo(1).mime('video/mp4', 'bad')
               .build();
-          var parser = new shaka.test.FakeManifestParser(manifest);
-          var factory = function() { return parser; };
+          let parser = new shaka.test.FakeManifestParser(manifest);
+          let factory = function() { return parser; };
           player.load('', 0, factory).then(fail).catch(function(error) {
             shaka.test.Util.expectToEqualError(
                 error,
@@ -2096,8 +2417,8 @@ describe('Player', function() {
                 .addVariant(0).bandwidth(500)
                   .addVideo(0).mime('video/mp4', 'bad')
               .build();
-          var parser = new shaka.test.FakeManifestParser(manifest);
-          var factory = function() { return parser; };
+          let parser = new shaka.test.FakeManifestParser(manifest);
+          let factory = function() { return parser; };
           player.load('', 0, factory).then(fail).catch(function(error) {
             shaka.test.Util.expectToEqualError(
                 error,
@@ -2121,8 +2442,8 @@ describe('Player', function() {
                   .addVideo(2).mime('video/mp4', 'bad')
               .build();
 
-          var parser = new shaka.test.FakeManifestParser(manifest);
-          var factory = function() { return parser; };
+          let parser = new shaka.test.FakeManifestParser(manifest);
+          let factory = function() { return parser; };
           player.load('', 0, factory).then(fail).catch(function(error) {
             shaka.test.Util.expectToEqualError(
                 error,
@@ -2142,10 +2463,10 @@ describe('Player', function() {
                 .addVariant(1).bandwidth(500)
                   .addVideo(1).mime('video/mp4', 'good')
               .build();
-          var parser = new shaka.test.FakeManifestParser(manifest);
-          var factory = function() { return parser; };
+          let parser = new shaka.test.FakeManifestParser(manifest);
+          let factory = function() { return parser; };
           player.load('', 0, factory).catch(fail).then(function() {
-            var manifest2 = new shaka.test.ManifestGenerator()
+            let manifest2 = new shaka.test.ManifestGenerator()
               .addPeriod(0)
                 .addVariant(0).bandwidth(500)
                   .addVideo(0).mime('video/mp4', 'bad')
@@ -2177,7 +2498,7 @@ describe('Player', function() {
               .build();
 
       setupPlayer().then(function() {
-        var activeVariant = getActiveVariantTrack();
+        let activeVariant = getActiveVariantTrack();
         expect(activeVariant.id).toBe(0);
 
         // Ask AbrManager to choose the 0th variant from those it is given.
@@ -2187,7 +2508,7 @@ describe('Player', function() {
         // This restriction should make it so that the first variant (bandwidth
         // 500, id 0) cannot be selected.
         player.configure({
-          restrictions: { maxBandwidth: 200 }
+          restrictions: {maxBandwidth: 200}
         });
 
         // The restriction change should trigger a call to AbrManager.
@@ -2214,14 +2535,14 @@ describe('Player', function() {
               .build();
 
       setupPlayer().then(function() {
-        var activeVariant = getActiveVariantTrack();
+        let activeVariant = getActiveVariantTrack();
         expect(activeVariant.id).toBe(0);
 
         abrManager.chooseIndex = 0;
         abrManager.chooseVariant.calls.reset();
 
         // This restricts the first variant, which triggers chooseVariant.
-        onKeyStatus({ 'abc': 'output-restricted' });
+        onKeyStatus({'abc': 'output-restricted'});
         expect(abrManager.chooseVariant).toHaveBeenCalled();
 
         // The first variant is disallowed.
@@ -2245,7 +2566,7 @@ describe('Player', function() {
               .build();
 
       setupPlayer().then(function() {
-        var activeVariant = getActiveVariantTrack();
+        let activeVariant = getActiveVariantTrack();
         expect(activeVariant.id).toBe(0);
 
         // AbrManager should choose the second track since the first is
@@ -2276,7 +2597,7 @@ describe('Player', function() {
           setupPlayer().then(function() {
             abrManager.chooseVariant.calls.reset();
 
-            var activeVariant = getActiveVariantTrack();
+            let activeVariant = getActiveVariantTrack();
             expect(activeVariant.id).toBe(0);
 
             onKeyStatus({'abc': 'usable'});
@@ -2301,7 +2622,7 @@ describe('Player', function() {
 
         onKeyStatus({'abc': 'output-restricted'});
 
-        var tracks = player.getVariantTracks();
+        let tracks = player.getVariantTracks();
         expect(tracks.length).toBe(1);
         expect(tracks[0].id).toBe(1);
       }).catch(fail).then(done);
@@ -2321,7 +2642,7 @@ describe('Player', function() {
 
         onKeyStatus({'abc': 'internal-error'});
 
-        var tracks = player.getVariantTracks();
+        let tracks = player.getVariantTracks();
         expect(tracks.length).toBe(1);
         expect(tracks[0].id).toBe(1);
       }).catch(fail).then(done);
@@ -2342,7 +2663,7 @@ describe('Player', function() {
         // We have some key statuses, but not for the key IDs we know.
         onKeyStatus({'foo': 'usable'});
 
-        var tracks = player.getVariantTracks();
+        let tracks = player.getVariantTracks();
         expect(tracks.length).toBe(1);
         expect(tracks[0].id).toBe(2);
       }).catch(fail).then(done);
@@ -2364,7 +2685,7 @@ describe('Player', function() {
         // when using PlayReady.  See #1070.
         onKeyStatus({});
 
-        var tracks = player.getVariantTracks();
+        let tracks = player.getVariantTracks();
         expect(tracks.length).toBe(2);
       }).catch(fail).then(done);
     });
@@ -2408,7 +2729,7 @@ describe('Player', function() {
                 // '00'.
                 onKeyStatus({'00': 'internal-error'});
 
-                var tracks = player.getVariantTracks();
+                let tracks = player.getVariantTracks();
                 expect(tracks.length).toBe(1);
                 expect(tracks[0].id).toBe(4);
               })
@@ -2432,7 +2753,7 @@ describe('Player', function() {
       // FakeDrmEngine's getSupportedTypes() returns video/mp4 by default.
 
       setupPlayer().then(function() {
-        var tracks = player.getVariantTracks();
+        let tracks = player.getVariantTracks();
         expect(tracks.length).toBe(1);
         expect(tracks[0].id).toBe(1);
       }).catch(fail).then(done);
@@ -2455,7 +2776,7 @@ describe('Player', function() {
         player.configure(
             {restrictions: {minBandwidth: 100, maxBandwidth: 1000}});
 
-        var tracks = player.getVariantTracks();
+        let tracks = player.getVariantTracks();
         expect(tracks.length).toBe(1);
         expect(tracks[0].id).toBe(2);
       }).catch(fail).then(done);
@@ -2478,7 +2799,7 @@ describe('Player', function() {
         player.configure(
             {restrictions: {minPixels: 100, maxPixels: 800 * 800}});
 
-        var tracks = player.getVariantTracks();
+        let tracks = player.getVariantTracks();
         expect(tracks.length).toBe(1);
         expect(tracks[0].id).toBe(2);
       }).catch(fail).then(done);
@@ -2500,7 +2821,7 @@ describe('Player', function() {
 
         player.configure({restrictions: {minWidth: 100, maxWidth: 1000}});
 
-        var tracks = player.getVariantTracks();
+        let tracks = player.getVariantTracks();
         expect(tracks.length).toBe(1);
         expect(tracks[0].id).toBe(2);
       }).catch(fail).then(done);
@@ -2522,7 +2843,7 @@ describe('Player', function() {
 
         player.configure({restrictions: {minHeight: 100, maxHeight: 1000}});
 
-        var tracks = player.getVariantTracks();
+        let tracks = player.getVariantTracks();
         expect(tracks.length).toBe(1);
         expect(tracks[0].id).toBe(2);
       }).catch(fail).then(done);
@@ -2545,7 +2866,7 @@ describe('Player', function() {
 
             player.configure({restrictions: {minHeight: 100, maxHeight: 1000}});
 
-            var tracks = player.getVariantTracks();
+            let tracks = player.getVariantTracks();
             expect(tracks.length).toBe(1);
             expect(tracks[0].id).toBe(1);
           }).catch(fail).then(done);
@@ -2566,7 +2887,7 @@ describe('Player', function() {
         expect(player.getVariantTracks().length).toBe(3);
 
         onError.and.callFake(function(e) {
-          var error = e.detail;
+          let error = e.detail;
           shaka.test.Util.expectToEqualError(
               error,
               new shaka.util.Error(
@@ -2601,7 +2922,7 @@ describe('Player', function() {
 
       setupPlayer().then(function() {
         expect(abrManager.setVariants).toHaveBeenCalled();
-        var variants = abrManager.setVariants.calls.argsFor(0)[0];
+        let variants = abrManager.setVariants.calls.argsFor(0)[0];
         // We've already chosen codecs, so only 3 tracks should remain.
         expect(variants.length).toBe(3);
         // They should be the low-bandwidth ones.
@@ -2611,20 +2932,61 @@ describe('Player', function() {
       }).catch(fail).then(done);
     });
 
-    /**
-     * @param {!Object.<string, string>} keyStatusMap
-     * @suppress {accessControls}
-     */
-    function onKeyStatus(keyStatusMap) {
-      player.onKeyStatus_(keyStatusMap);
-    }
+    it('updates AbrManager about restricted variants', function(done) {
+      manifest = new shaka.test.ManifestGenerator()
+              .addPeriod(0)
+                .addVariant(0)
+                  .addVideo(1).keyId('abc')
+                .addVariant(2)
+                  .addVideo(3)
+              .build();
+
+      let abrManager = new shaka.test.FakeAbrManager();
+      player.configure({abrFactory: function() { return abrManager; }});
+      setupPlayer().then(function() {
+        expect(player.getVariantTracks().length).toBe(2);
+
+        // We have some key statuses, but not for the key IDs we know.
+        abrManager.setVariants.calls.reset();
+        onKeyStatus({'foo': 'usable'});
+
+        expect(abrManager.setVariants).toHaveBeenCalled();
+        let variants = abrManager.setVariants.calls.argsFor(0)[0];
+        expect(variants.length).toBe(1);
+        expect(variants[0].id).toBe(2);
+      }).catch(fail).then(done);
+    });
+
+    it('chooses codecs after considering 6-channel preference', async () => {
+      manifest = new shaka.test.ManifestGenerator()
+          .addPeriod(0)
+            // Surround sound AC-3, preferred by config
+            .addVariant(0).bandwidth(300)
+              .addAudio(0).channelsCount(6).mime('audio/mp4', 'ac-3')
+            // Stereo AAC, would win out based on bandwidth alone
+            .addVariant(1).bandwidth(100)
+              .addAudio(1).channelsCount(2).mime('audio/mp4', 'mp4a.40.2')
+          .build();
+
+      // Configure for 6 channels.
+      player.configure({
+        preferredAudioChannelCount: 6,
+      });
+      await setupPlayer();
+      expect(abrManager.setVariants).toHaveBeenCalled();
+      // We've chosen codecs, so only 1 track should remain.
+      expect(abrManager.variants.length).toBe(1);
+      // It should be the 6-channel variant, based on our preference.
+      expect(abrManager.variants[0].audio.channelsCount).toEqual(6);
+      expect(abrManager.variants[0].audio.codecs).toEqual('ac-3');
+    });
 
     /**
      * @return {!Promise}
      */
     function setupPlayer() {
-      var parser = new shaka.test.FakeManifestParser(manifest);
-      var parserFactory = function() { return parser; };
+      let parser = new shaka.test.FakeManifestParser(manifest);
+      let parserFactory = function() { return parser; };
       return player.load('', 0, parserFactory).then(function() {
         // Initialize the fake streams.
         streamingEngine.onCanSwitch();
@@ -2634,7 +2996,7 @@ describe('Player', function() {
 
   describe('getPlayheadTimeAsDate()', function() {
     beforeEach(function(done) {
-      var timeline = new shaka.media.PresentationTimeline(300, 0);
+      let timeline = new shaka.media.PresentationTimeline(300, 0);
       timeline.setStatic(false);
       manifest = new shaka.test.ManifestGenerator()
           .setTimeline(timeline)
@@ -2643,21 +3005,21 @@ describe('Player', function() {
             .addVideo(1)
           .build();
       goog.asserts.assert(manifest, 'manifest must be non-null');
-      var parser = new shaka.test.FakeManifestParser(manifest);
-      var factory = function() { return parser; };
+      let parser = new shaka.test.FakeManifestParser(manifest);
+      let factory = function() { return parser; };
       player.load('', 0, factory).catch(fail).then(done);
     });
 
     it('gets current wall clock time in UTC', function() {
-      var liveTimeUtc = player.getPlayheadTimeAsDate();
+      let liveTimeUtc = player.getPlayheadTimeAsDate();
       expect(liveTimeUtc).toEqual(new Date(320000));
     });
   });
 
   it('rejects empty manifests', function(done) {
     manifest = new shaka.test.ManifestGenerator().build();
-    var emptyParser = new shaka.test.FakeManifestParser(manifest);
-    var emptyFactory = function() { return emptyParser; };
+    let emptyParser = new shaka.test.FakeManifestParser(manifest);
+    let emptyFactory = function() { return emptyParser; };
 
     player.load('', 0, emptyFactory).then(fail).catch(function(error) {
       shaka.test.Util.expectToEqualError(
@@ -2688,8 +3050,8 @@ describe('Player', function() {
                 .addAudio(9)  // reuse audio stream from variant 0
             .build();
 
-    var parser = new shaka.test.FakeManifestParser(manifest);
-    var parserFactory = function() { return parser; };
+    let parser = new shaka.test.FakeManifestParser(manifest);
+    let parserFactory = function() { return parser; };
 
     player.load('', 0, parserFactory).then(function() {
       streamingEngine.onCanSwitch();
@@ -2716,7 +3078,7 @@ describe('Player', function() {
     it('detects audio-only content', function(done) {
       // This factory recreates the parser each time, so updates to |manifest|
       // affect the next load() call.
-      var parserFactory = function() {
+      let parserFactory = function() {
         return new shaka.test.FakeManifestParser(manifest);
       };
 
@@ -2774,17 +3136,64 @@ describe('Player', function() {
                   .addVideo(2).mime('video/mp4', 'good')
               .build();
 
-      var parser = new shaka.test.FakeManifestParser(manifest);
-      var parserFactory = function() { return parser; };
+      let parser = new shaka.test.FakeManifestParser(manifest);
+      let parserFactory = function() { return parser; };
 
       // Before the fix, load() would fail assertions and throw errors.
       player.load('', 0, parserFactory).catch(fail).then(done);
     });
+
+    it('respects startTime of 0', async () => {
+      // What we shouldn't do is treat start time of 0 as the same as startTime
+      // of null/undefined.  0 means timestamp 0, whereas null/undefined means
+      // "default".  For VOD, the default is 0, but for live streams, the
+      // default is the live edge.
+
+      // Create a live timeline and manifest.
+      let timeline = new shaka.media.PresentationTimeline(300, 0);
+      timeline.setStatic(false);
+
+      manifest = new shaka.test.ManifestGenerator()
+          .setTimeline(timeline)
+          .addPeriod(0)
+            .addVariant(0)
+            .addVideo(1)
+          .build();
+
+      let parser = new shaka.test.FakeManifestParser(manifest);
+      let parserFactory = function() { return parser; };
+
+      // To ensure that Playhead is correctly created, we must use the original
+      // playhead injector.  To inspect the real Playhead instance, though, we
+      // must shim this method and keep a copy of the real Playhead.  Otherwise,
+      // we would be merely inspecting the mock Playhead.
+      /** @type {shaka.media.Playhead} */
+      let realPlayhead = null;
+
+      /**
+       * @this {shaka.Player}
+       * @return {!shaka.media.Playhead}
+       */
+      player.createPlayhead = function() {
+        realPlayhead =
+            shaka.Player.prototype.createPlayhead.apply(this, arguments);
+        return realPlayhead;
+      };
+
+      await player.load('', /* startTime */ 0, parserFactory);
+
+      // Ensure this is seen as a live stream, or else the test is invalid.
+      expect(player.isLive()).toBe(true);
+
+      // If startTime of 0 was treated as null, then getTime() would point to
+      // the live edge instead of 0.
+      expect(realPlayhead.getTime()).toBe(0);
+    });
   });
 
   describe('language methods', function() {
-    var videoOnlyManifest;
-    var parserFactory = function() {
+    let videoOnlyManifest;
+    let parserFactory = function() {
       return new shaka.test.FakeManifestParser(manifest);
     };
 
@@ -2848,18 +3257,18 @@ describe('Player', function() {
       it('returns a list of language/role combinations', function(done) {
         player.load('', 0, parserFactory).then(function() {
           expect(player.getAudioLanguagesAndRoles()).toEqual([
-            { language: 'fr', role: '' },
-            { language: 'en', role: 'main' },
-            { language: 'en', role: 'commentary' },
-            { language: 'de', role: 'foo' },
-            { language: 'de', role: 'bar' }
+            {language: 'fr', role: ''},
+            {language: 'en', role: 'main'},
+            {language: 'en', role: 'commentary'},
+            {language: 'de', role: 'foo'},
+            {language: 'de', role: 'bar'}
           ]);
           expect(player.getTextLanguagesAndRoles()).toEqual([
-            { language: 'es', role: 'baz' },
-            { language: 'es', role: 'qwerty' },
-            { language: 'en', role: 'main' },
-            { language: 'en', role: 'caption' },
-            { language: 'en', role: 'subtitle' }
+            {language: 'es', role: 'baz'},
+            {language: 'es', role: 'qwerty'},
+            {language: 'en', role: 'main'},
+            {language: 'en', role: 'caption'},
+            {language: 'en', role: 'subtitle'}
           ]);
         }).catch(fail).then(done);
       });
@@ -2869,7 +3278,7 @@ describe('Player', function() {
 
         player.load('', 0, parserFactory).then(function() {
           expect(player.getAudioLanguagesAndRoles()).toEqual([
-            { language: 'und', role: '' }
+            {language: 'und', role: ''}
           ]);
           expect(player.getTextLanguagesAndRoles()).toEqual([]);
         }).catch(fail).then(done);
@@ -2879,10 +3288,10 @@ describe('Player', function() {
 
   /**
    * Gets the currently active variant track.
-   * @return {shakaExtern.Track}
+   * @return {shaka.extern.Track}
    */
   function getActiveVariantTrack() {
-    var activeTracks = player.getVariantTracks().filter(function(track) {
+    let activeTracks = player.getVariantTracks().filter(function(track) {
       return track.active;
     });
 
@@ -2892,10 +3301,10 @@ describe('Player', function() {
 
   /**
    * Gets the currently active text track.
-   * @return {shakaExtern.Track}
+   * @return {shaka.extern.Track}
    */
   function getActiveTextTrack() {
-    var activeTracks = player.getTextTracks().filter(function(track) {
+    let activeTracks = player.getTextTracks().filter(function(track) {
       return track.active;
     });
 
@@ -2936,5 +3345,13 @@ describe('Player', function() {
         return actual.indexOf(substring) >= 0;
       }
     };
+  }
+
+  /**
+   * @param {!Object.<string, string>} keyStatusMap
+   * @suppress {accessControls}
+   */
+  function onKeyStatus(keyStatusMap) {
+    player.onKeyStatus_(keyStatusMap);
   }
 });

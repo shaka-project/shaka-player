@@ -16,24 +16,22 @@
  */
 
 describe('Player', function() {
-  /** @const */
-  var Util = shaka.test.Util;
-  /** @const */
-  var Feature = shakaAssets.Feature;
+  const Util = shaka.test.Util;
+  const Feature = shakaAssets.Feature;
 
   /** @type {!jasmine.Spy} */
-  var onErrorSpy;
+  let onErrorSpy;
 
-  /** @type {shakaExtern.SupportType} */
-  var support;
+  /** @type {shaka.extern.SupportType} */
+  let support;
   /** @type {!HTMLVideoElement} */
-  var video;
+  let video;
   /** @type {shaka.Player} */
-  var player;
+  let player;
   /** @type {shaka.util.EventManager} */
-  var eventManager;
+  let eventManager;
 
-  var compiledShaka;
+  let compiledShaka;
 
   beforeAll(function(done) {
     video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
@@ -42,7 +40,7 @@ describe('Player', function() {
     video.muted = true;
     document.body.appendChild(video);
 
-    var loaded = new shaka.util.PublicPromise();
+    let loaded = new shaka.util.PublicPromise();
     if (getClientArg('uncompiled')) {
       // For debugging purposes, use the uncompiled library.
       compiledShaka = shaka;
@@ -99,6 +97,87 @@ describe('Player', function() {
     document.body.removeChild(video);
   });
 
+  describe('constructor', function() {
+    beforeEach(async function() {
+      // To test the constructor, destroy the player that was constructed
+      // in the outermost beforeEach().  Then we can control the details in
+      // each constructor test.
+      await player.destroy();
+    });
+
+    it('sets video.src when video is provided', async function() {
+      expect(video.src).toBeFalsy();
+      player = new compiledShaka.Player(video);
+
+      // This should always be enough time to set up MediaSource.
+      await Util.delay(2);
+      expect(video.src).toBeTruthy();
+    });
+
+    it('does not set video.src when no video is provided', async function() {
+      expect(video.src).toBeFalsy();
+      player = new compiledShaka.Player();
+
+      // This should always be enough time to set up MediaSource.
+      await Util.delay(2);
+      expect(video.src).toBeFalsy();
+    });
+  });
+
+  describe('attach', function() {
+    beforeEach(async function() {
+      // To test attach, we want to construct a player without a video element
+      // attached in advance.  To do that, we destroy the player that was
+      // constructed in the outermost beforeEach(), then construct a new one
+      // without a video element.
+      await player.destroy();
+      player = new compiledShaka.Player();
+    });
+
+    it('sets video.src when initializeMediaSource is true', async function() {
+      expect(video.src).toBeFalsy();
+      await player.attach(video, true);
+      expect(video.src).toBeTruthy();
+    });
+
+    it('does not set video.src when initializeMediaSource is false',
+        async function() {
+          expect(video.src).toBeFalsy();
+          await player.attach(video, false);
+          expect(video.src).toBeFalsy();
+        });
+
+    it('can be used before load()', async function() {
+      await player.attach(video);
+      await player.load('test:sintel_compiled');
+    });
+  });
+
+  describe('unload', function() {
+    it('unsets video.src when reinitializeMediaSource is false',
+        async function() {
+          await player.load('test:sintel_compiled');
+          expect(video.src).toBeTruthy();
+
+          await player.unload(false);
+          expect(video.src).toBeFalsy();
+
+          await Util.delay(0.4);
+          // After a long delay, we have not implicitly set MediaSource up
+          // again.  video.src stays unset.
+          expect(video.src).toBeFalsy();
+        });
+
+    it('resets video.src when reinitializeMediaSource is true',
+        async function() {
+          await player.load('test:sintel_compiled');
+          expect(video.src).toBeTruthy();
+
+          await player.unload(true);
+          expect(video.src).toBeTruthy();
+        });
+  });
+
   describe('getStats', function() {
     it('gives stats about current stream', function(done) {
       // This is tested more in player_unit.js.  This is here to test the public
@@ -107,8 +186,8 @@ describe('Player', function() {
         video.play();
         return waitUntilPlayheadReaches(video, 1, 10);
       }).then(function() {
-        var stats = player.getStats();
-        var expected = {
+        let stats = player.getStats();
+        let expected = {
           width: jasmine.any(Number),
           height: jasmine.any(Number),
           streamBandwidth: jasmine.any(Number),
@@ -153,7 +232,7 @@ describe('Player', function() {
       }).then(function() {
         // This TextTrack was created as part of load() when we set up the
         // TextDisplayer.
-        var textTrack = video.textTracks[0];
+        let textTrack = video.textTracks[0];
         expect(textTrack).not.toBe(null);
 
         if (textTrack) {
@@ -177,16 +256,16 @@ describe('Player', function() {
       player.load('test:sintel_no_text_compiled').then(function() {
         // For some reason, using path-absolute URLs (i.e. without the hostname)
         // like this doesn't work on Safari.  So manually resolve the URL.
-        var locationUri = new goog.Uri(location.href);
-        var partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
-        var absoluteUri = locationUri.resolve(partialUri);
+        let locationUri = new goog.Uri(location.href);
+        let partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
+        let absoluteUri = locationUri.resolve(partialUri);
         player.addTextTrack(absoluteUri.toString(), 'en', 'subtitles',
                             'text/vtt');
 
         video.play();
         return Util.delay(5);
       }).then(function() {
-        var textTracks = player.getTextTracks();
+        let textTracks = player.getTextTracks();
         expect(textTracks).toBeTruthy();
         expect(textTracks.length).toBe(1);
 
@@ -207,7 +286,7 @@ describe('Player', function() {
         expect(video.currentTime).toBeLessThan(9);
         // The two periods might not be in a single contiguous buffer, so don't
         // check end(0).  Gap-jumping will deal with any discontinuities.
-        var bufferEnd = video.buffered.end(video.buffered.length - 1);
+        let bufferEnd = video.buffered.end(video.buffered.length - 1);
         expect(bufferEnd).toBeGreaterThan(11);
 
         // Change to a different language; this should clear the buffers and
@@ -225,38 +304,43 @@ describe('Player', function() {
     shakaAssets.testAssets.forEach(function(asset) {
       if (asset.disabled) return;
 
-      var testName =
+      let testName =
           asset.source + ' / ' + asset.name + ' : ' + asset.manifestUri;
 
-      var wit = asset.focus ? fit : external_it;
+      let wit = asset.focus ? fit : externalIt;
       wit(testName, function(done) {
         if (asset.drm.length && !asset.drm.some(
             function(keySystem) { return support.drm[keySystem]; })) {
           pending('None of the required key systems are supported.');
         }
 
-        var mimeTypes = [];
-        if (asset.features.indexOf(Feature.WEBM) >= 0)
+        let mimeTypes = [];
+        if (asset.features.indexOf(Feature.WEBM) >= 0) {
           mimeTypes.push('video/webm');
-        if (asset.features.indexOf(Feature.MP4) >= 0)
+        }
+        if (asset.features.indexOf(Feature.MP4) >= 0) {
           mimeTypes.push('video/mp4');
+        }
         if (!mimeTypes.some(
             function(type) { return support.media[type]; })) {
           pending('None of the required MIME types are supported.');
         }
 
-        var isLive = asset.features.indexOf(Feature.LIVE) >= 0;
+        let isLive = asset.features.indexOf(Feature.LIVE) >= 0;
 
-        var config = { abr: {}, drm: {}, manifest: { dash: {} } };
+        let config = {abr: {}, drm: {}, manifest: {dash: {}}};
         config.abr.enabled = false;
         config.manifest.dash.clockSyncUri =
-            '//shaka-player-demo.appspot.com/time.txt';
-        if (asset.licenseServers)
+            'https://shaka-player-demo.appspot.com/time.txt';
+        if (asset.licenseServers) {
           config.drm.servers = asset.licenseServers;
-        if (asset.drmCallback)
+        }
+        if (asset.drmCallback) {
           config.manifest.dash.customScheme = asset.drmCallback;
-        if (asset.clearKeys)
+        }
+        if (asset.clearKeys) {
           config.drm.clearKeys = asset.clearKeys;
+        }
         player.configure(config);
 
         if (asset.licenseRequestHeaders) {
@@ -264,13 +348,16 @@ describe('Player', function() {
               addLicenseRequestHeaders.bind(null, asset.licenseRequestHeaders));
         }
 
-        var networkingEngine = player.getNetworkingEngine();
-        if (asset.requestFilter)
+        let networkingEngine = player.getNetworkingEngine();
+        if (asset.requestFilter) {
           networkingEngine.registerRequestFilter(asset.requestFilter);
-        if (asset.responseFilter)
+        }
+        if (asset.responseFilter) {
           networkingEngine.registerResponseFilter(asset.responseFilter);
-        if (asset.extraConfig)
+        }
+        if (asset.extraConfig) {
           player.configure(asset.extraConfig);
+        }
 
         player.load(asset.manifestUri).then(function() {
           expect(player.isLive()).toEqual(isLive);
@@ -304,7 +391,7 @@ describe('Player', function() {
      * @return {string}
      */
     function getActiveLanguage() {
-      var tracks = player.getVariantTracks().filter(function(t) {
+      let tracks = player.getVariantTracks().filter(function(t) {
         return t.active;
       });
       expect(tracks.length).toBeGreaterThan(0);
@@ -314,13 +401,13 @@ describe('Player', function() {
 
   describe('abort', function() {
     /** @type {!jasmine.Spy} */
-    var schemeSpy;
+    let schemeSpy;
 
     beforeAll(function() {
       schemeSpy = jasmine.createSpy('reject scheme');
       schemeSpy.and.callFake(function() {
         // Throw a recoverable error so it will retry.
-        var error = new shaka.util.Error(
+        let error = new shaka.util.Error(
             shaka.util.Error.Severity.RECOVERABLE,
             shaka.util.Error.Category.NETWORK,
             shaka.util.Error.Code.HTTP_ERROR);
@@ -341,7 +428,7 @@ describe('Player', function() {
     function testTemplate(operationFn) {
       // No data will be loaded for this test, so it can use a real manifest
       // parser safely.
-      player.load('reject://www.foo.com/bar.mpd').then(fail);
+      player.load('reject://www.foo.com/bar.mpd').then(fail).catch(() => {});
       return shaka.test.Util.delay(0.1).then(operationFn).then(function() {
         expect(schemeSpy.calls.count()).toBe(1);
       });
@@ -358,7 +445,7 @@ describe('Player', function() {
 
   describe('TextDisplayer plugin', function() {
     // Simulate the use of an external TextDisplayer plugin.
-    var textDisplayer;
+    let textDisplayer;
     beforeEach(function() {
       textDisplayer = {
         destroy: jasmine.createSpy('destroy'),
@@ -376,8 +463,8 @@ describe('Player', function() {
       });
 
       // Make sure the configuration was taken.
-      var configuredFactory = player.getConfiguration().textDisplayFactory;
-      var configuredTextDisplayer = new configuredFactory();
+      let configuredFactory = player.getConfiguration().textDisplayFactory;
+      let configuredTextDisplayer = new configuredFactory();
       expect(configuredTextDisplayer).toBe(textDisplayer);
     });
 
@@ -411,6 +498,87 @@ describe('Player', function() {
     });
   });
 
+  describe('streaming event', function() {
+    // Calling switch early during load() caused a failed assertion in Player
+    // and the track selection was ignored.  Because this bug involved
+    // interactions between Player and StreamingEngine, it is an integration
+    // test and not a unit test.
+    // https://github.com/google/shaka-player/issues/1119
+    it('allows early selection of specific tracks', function(done) {
+      const streamingListener = jasmine.createSpy('listener');
+
+      // Because this is an issue with failed assertions, destroy the existing
+      // player from the compiled version, and create a new one using the
+      // uncompiled version.  Then we will get assertions.
+      eventManager.unlisten(player, 'error');
+      player.destroy().then(() => {
+        player = new shaka.Player(video);
+        player.configure({abr: {enabled: false}});
+        eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
+
+        // When 'streaming' fires, select the first track explicitly.
+        player.addEventListener('streaming', Util.spyFunc(streamingListener));
+        streamingListener.and.callFake(() => {
+          const tracks = player.getVariantTracks();
+          player.selectVariantTrack(tracks[0]);
+        });
+
+        // Now load the content.
+        return player.load('test:sintel');
+      }).then(() => {
+        // When the bug triggers, we fail assertions in Player.
+        // Make sure the listener was triggered, so that it could trigger the
+        // code path in this bug.
+        expect(streamingListener).toHaveBeenCalled();
+      }).catch(fail).then(done);
+    });
+
+    // After fixing the issue above, calling switch early during a second load()
+    // caused a failed assertion in StreamingEngine, because we did not reset
+    // switchingPeriods_ in Player.  Because this bug involved interactions
+    // between Player and StreamingEngine, it is an integration test and not a
+    // unit test.
+    // https://github.com/google/shaka-player/issues/1119
+    it('allows selection of tracks in subsequent loads', function(done) {
+      const streamingListener = jasmine.createSpy('listener');
+
+      // Because this is an issue with failed assertions, destroy the existing
+      // player from the compiled version, and create a new one using the
+      // uncompiled version.  Then we will get assertions.
+      eventManager.unlisten(player, 'error');
+      player.destroy().then(() => {
+        player = new shaka.Player(video);
+        player.configure({abr: {enabled: false}});
+        eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
+
+        // This bug only triggers when you do this on the second load.
+        // So we load one piece of content, then set up the streaming listener
+        // to change tracks, then we load a second piece of content.
+        return player.load('test:sintel');
+      }).then(() => {
+        // Give StreamingEngine time to complete all setup and to call back into
+        // the Player with canSwitch_.  If you move on too quickly to the next
+        // load(), the bug does not reproduce.
+        return shaka.test.Util.delay(1);
+      }).then(() => {
+        player.addEventListener('streaming', Util.spyFunc(streamingListener));
+
+        streamingListener.and.callFake(() => {
+          const track = player.getVariantTracks()[0];
+          player.selectVariantTrack(track);
+        });
+
+        // Now load again to trigger the failed assertion.
+        return player.load('test:sintel');
+      }).then(() => {
+        // When the bug triggers, we fail assertions in StreamingEngine.
+        // So just make sure the listener was triggered, so that it could
+        // trigger the code path in this bug.
+        expect(streamingListener).toHaveBeenCalled();
+      }).catch(fail).then(done);
+    });
+  });
+
   /**
    * @param {!HTMLMediaElement} video
    * @param {number} playheadTime The time to wait for.
@@ -418,7 +586,7 @@ describe('Player', function() {
    * @return {!Promise}
    */
   function waitUntilPlayheadReaches(video, playheadTime, timeout) {
-    var curEventManager = eventManager;
+    let curEventManager = eventManager;
     return new Promise(function(resolve, reject) {
       curEventManager.listen(video, 'timeupdate', function() {
         if (video.currentTime >= playheadTime) {
@@ -439,9 +607,9 @@ describe('Player', function() {
    * @return {!Promise}
    */
   function waitForTimeOrEnd(target, timeout) {
-    var curEventManager = eventManager;
+    let curEventManager = eventManager;
     return new Promise(function(resolve, reject) {
-      var callback = function() {
+      let callback = function() {
         curEventManager.unlisten(target, 'ended');
         resolve();
       };
@@ -453,15 +621,15 @@ describe('Player', function() {
   /**
    * @param {!Object.<string, string>} headers
    * @param {shaka.net.NetworkingEngine.RequestType} requestType
-   * @param {shakaExtern.Request} request
+   * @param {shaka.extern.Request} request
    */
   function addLicenseRequestHeaders(headers, requestType, request) {
-    var RequestType = compiledShaka.net.NetworkingEngine.RequestType;
+    const RequestType = compiledShaka.net.NetworkingEngine.RequestType;
     if (requestType != RequestType.LICENSE) return;
 
     // Add these to the existing headers.  Do not clobber them!
     // For PlayReady, there will already be headers in the request.
-    for (var k in headers) {
+    for (let k in headers) {
       request.headers[k] = headers[k];
     }
   }

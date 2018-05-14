@@ -29,15 +29,15 @@ describe('SimpleAbrManager', function() {
     maxBandwidth: Infinity
   };
 
-  /** @type {shakaExtern.AbrConfiguration} */
+  /** @type {shaka.extern.AbrConfiguration} */
   let config;
   /** @type {!jasmine.Spy} */
   let switchCallback;
   /** @type {!shaka.abr.SimpleAbrManager} */
   let abrManager;
-  /** @type {shakaExtern.Manifest} */
+  /** @type {shaka.extern.Manifest} */
   let manifest;
-  /** @type {!Array.<shakaExtern.Variant>} */
+  /** @type {!Array.<shaka.extern.Variant>} */
   let variants;
 
 

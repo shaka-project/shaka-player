@@ -215,7 +215,7 @@ describe('CastProxy', function() {
         mockSender.hasRemoteProperties.and.returnValue(true);
 
         // Simulate remote values:
-        let cache = { video: {
+        let cache = {video: {
           currentTime: 24,
           paused: false,
           play: jasmine.createSpy('play')
@@ -374,7 +374,7 @@ describe('CastProxy', function() {
 
         // Simulate remote values:
         let fakeConfig2 = {key2: 'value2'};
-        let cache = { player: {
+        let cache = {player: {
           getConfiguration: fakeConfig2,
           isTextTrackVisible: true,
           trickPlay: jasmine.createSpy('trickPlay')
@@ -646,7 +646,7 @@ describe('CastProxy', function() {
       shaka.test.Util.delay(0.1).then(function() {
         expect(mockPlayer.load).toHaveBeenCalled();
         expect(mockPlayer.dispatchEvent).toHaveBeenCalledWith(
-            jasmine.objectContaining({ type: 'error', detail: fakeError }));
+            jasmine.objectContaining({type: 'error', detail: fakeError}));
       }).catch(fail).then(done);
     });
   });
