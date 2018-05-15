@@ -792,7 +792,7 @@ shakaAssets.testAssets = [
   // Src: http://dashif.org/test-vectors/
   {
     name: 'Big Buck Bunny',
-    manifestUri: '//dash.edgesuite.net/dash264/TestCases/1c/qualcomm/2/MultiRate.mpd',  // eslint-disable-line max-len
+    manifestUri: 'https://dash.akamaized.net/dash264/TestCases/1c/qualcomm/2/MultiRate.mpd',
 
     encoder: shakaAssets.Encoder.UNKNOWN,
     source: shakaAssets.Source.DASH_IF,
