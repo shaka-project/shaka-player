@@ -198,7 +198,7 @@ describe('Player', function() {
       });
       var factory = function() { return parser; };
 
-      player.load('', 0, factory).then(fail);
+      player.load('', 0, factory).then(fail).catch(function() {});
       shaka.test.Util.delay(0.1).then(function() {
         player.destroy().catch(fail).then(function() {
           expect(abrManager.stop).toHaveBeenCalled();
