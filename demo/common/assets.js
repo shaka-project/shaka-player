@@ -810,6 +810,18 @@ shakaAssets.testAssets = [
   // DASH-IF assets {{{
   // Src: http://dashif.org/test-vectors/
   {
+    name: 'Big Buck Bunny',
+    manifestUri: 'https://dash.akamaized.net/dash264/TestCases/1c/qualcomm/2/MultiRate.mpd',
+
+    encoder: shakaAssets.Encoder.UNKNOWN,
+    source: shakaAssets.Source.DASH_IF,
+    drm: [],
+    features: [
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE
+    ]
+  },
+  {
     name: 'Live sim (2s segments)',
     manifestUri: 'https://vm2.dashif.org/livesim/utc_head/testpic_2s/Manifest.mpd',
 
