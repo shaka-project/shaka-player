@@ -658,6 +658,28 @@ describe('DashParser ContentProtection', function() {
     testDashParser(done, source, expected);
   });
 
+  it('handles non-default namespace names', function(done) {
+    let source = [
+      '<MPD xmlns="urn:mpeg:DASH:schema:MPD:2011"',
+      '    xmlns:foo="urn:mpeg:cenc:2013">',
+      '  <Period duration="PT30S">',
+      '    <SegmentTemplate media="s.mp4" duration="2" />',
+      '    <AdaptationSet mimeType="video/mp4" codecs="avc1.4d401f">',
+      '      <ContentProtection',
+      '          schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed">',
+      '        <foo:pssh>b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs</foo:pssh>',
+      '      </ContentProtection>',
+      '      <Representation bandwidth="50" width="576" height="432" />',
+      '      <Representation bandwidth="100" width="576" height="432" />',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'
+    ].join('\n');
+    let expected = buildExpectedManifest([buildDrmInfo(
+        'com.widevine.alpha', [], ['b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'])]);
+    testDashParser(done, source, expected);
+  });
+
   it('fails for no schemes common', function(done) {
     let source = buildManifestText([
       // AdaptationSet lines
