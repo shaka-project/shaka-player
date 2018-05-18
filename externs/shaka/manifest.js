@@ -209,7 +209,7 @@ shaka.extern.DrmInfo;
  *   audio: ?shaka.extern.Stream,
  *   video: ?shaka.extern.Stream,
  *   bandwidth: number,
- *   drmInfos: !Array.<!shaka.extern.DrmInfo>,
+ *   drmInfos: !Array.<shaka.extern.DrmInfo>,
  *   allowedByApplication: boolean,
  *   allowedByKeySystem: boolean
  * }}
