@@ -1,3 +1,26 @@
+## 2.3.8 (2018-05-23)
+
+Bugfixes:
+  - Fix non-default namespace names in DASH
+    - https://github.com/google/shaka-player/issues/1438
+  - Fix use after destroy() in CastProxy
+    - https://github.com/google/shaka-player/issues/1423
+  - Fix text track visibility state
+    - https://github.com/google/shaka-player/issues/1412
+  - Remove licenses when wiping offline storage
+    - https://github.com/google/shaka-player/issues/1277
+  - Restore backward compatibility for v2.2.x offline storage
+    - https://github.com/google/shaka-player/issues/1248
+
+Demo app:
+  - Update DASH-IF Big Buck Bunny asset
+
+Docs:
+  - Fix typos and formatting
+  - Build docs as part of build/all.py
+    - https://github.com/google/shaka-player/issues/1421
+
+
 ## 2.3.7 (2018-04-24)
 
 Bugfixes:
