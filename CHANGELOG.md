@@ -1,3 +1,63 @@
+## 2.4.0 (2018-05-24)
+
+New features:
+  - Support for TTML and VTT regions
+    - https://github.com/google/shaka-player/issues/1188
+  - Support for CEA captions in TS content
+    - https://github.com/google/shaka-player/issues/276
+  - A video element is no longer required when `Player` is constructed
+    - https://github.com/google/shaka-player/issues/1087
+  - New `attach()` and `detach()` methods have been added to `Player` to manage
+    attachment to video elements
+    - https://github.com/google/shaka-player/issues/1087
+  - Allow apps to specify a preferred audio channel count
+    - https://github.com/google/shaka-player/issues/1013
+  - Live stream playback can begin at a negative offset from the live edge
+    - https://github.com/google/shaka-player/issues/1178
+  - Add new configure() syntax for easily setting single fields
+    - https://github.com/google/shaka-player/issues/763
+  - player.configure() returns false if player configuration is invalid
+  - Fetch is now preferred over XHR when available
+    - https://github.com/google/shaka-player/issues/829
+  - Request type now appears in shaka.util.Error data for HTTP errors
+    - https://github.com/google/shaka-player/issues/1253
+
+Broken compatibility:
+  - A third-party Promise polyfill is now required for IE 11 support
+    - https://github.com/lahmatiy/es6-promise-polyfill
+    - https://github.com/google/shaka-player/issues/1260
+  - Text parser plugins now take a nullable segmentStart in TextContext.  All
+    application-specific text-parsing plugins MUST be updated.
+  - Text-parsing plugins that produce region information must do so with the new
+    CueRegion class.  Any application-specific text-parsing plugins that produce
+    region information MUST be updated.
+  - TextDisplayer plugins that handle region information must do so with the new
+    CueRegion interface.  Any application-specific TextDisplayer plugins that
+    handle region information MUST be updated.
+  - The API for PresentationTimeline has changed.  Manifest parser plugins that
+    use certain PresentationTimeline methods MUST be updated:
+    - `setAvailabilityStart()` was renamed to `setUserSeekStart()`.
+    - `notifySegments()` now takes a reference array and a boolean called
+      `isFirstPeriod`, instead of a period start time and a reference array.
+
+Deprecated:
+  - NetworkingEngine.request() now returns an instance of IAbortableOperation
+    instead of Promise.  Applications which make application-level requests
+    SHOULD update to use the new interface.
+    - The old interface will be removed in v2.5.
+  - Network scheme plugins now return an instance of IAbortableOperation instead
+    of Promise.  Application-specific network scheme plugins SHOULD update to
+    the new interface.
+    - The old interface will be removed in v2.5.
+
+Demo app:
+  - Improve support for custom assets and license servers in demo app URI
+
+Misc:
+  - We have started transitioning the code to ES6 and the new JS style guide
+    - https://google.github.io/styleguide/jsguide.html
+
+
 ## 2.3.8 (2018-05-23)
 
 Bugfixes:
