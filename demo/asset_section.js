@@ -189,8 +189,12 @@ shakaDemo.preparePlayer_ = function(asset) {
   let audioRobustness =
       document.getElementById('drmSettingsAudioRobustness').value;
 
-  let commonDrmSystems =
-      ['com.widevine.alpha', 'com.microsoft.playready', 'com.adobe.primetime'];
+  let commonDrmSystems = [
+    'com.widevine.alpha',
+    'com.microsoft.playready',
+    'com.adobe.primetime',
+    'org.w3.clearkey',
+  ];
   let config = /** @type {shakaExtern.PlayerConfiguration} */(
       {abr: {}, streaming: {}, manifest: {dash: {}}});
   config.drm = /** @type {shakaExtern.DrmConfiguration} */({
