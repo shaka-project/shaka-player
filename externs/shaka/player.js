@@ -270,9 +270,13 @@ shakaExtern.Track;
  *
  * @description
  * An object describing application restrictions on what tracks can play.  All
- * restrictions must be fulfilled for a track to be playable.  If a track does
- * not meet the restrictions, it will not appear in the track list and it will
- * not be played.
+ * restrictions must be fulfilled for a track to be playable/selectable.
+ * The restrictions system behaves somewhat differently at the ABR level and the
+ * player level, so please refer to the documentation for those specific
+ * settings.
+ *
+ * @see shakaExtern.PlayerConfiguration
+ * @see shakaExtern.AbrConfiguration
  *
  * @property {number} minWidth
  *   The minimum width of a video track, in pixels.
@@ -621,9 +625,13 @@ shakaExtern.StreamingConfiguration;
  *   The default bandwidth estimate to use if there is not enough data, in
  *   bit/sec.
  * @property {shakaExtern.Restrictions} restrictions
- *   The restrictions to apply to ABR decisions.  The AbrManager will not
- *   choose any streams that do not meet these restrictions.  (Note that
- *   they can still be chosen by the application)
+ *   The restrictions to apply to ABR decisions.  These are "soft" restrictions.
+ *   Any track that fails to meet these restrictions will not be selected
+ *   automatically, but will still appear in the track list and can still be
+ *   selected via selectVariantTrack().  If no tracks meet these restrictions,
+ *   AbrManager should not fail, but choose a low-res or low-bandwidth variant
+ *   instead.  It is the responsibiliy of AbrManager implementations to follow
+ *   these rules and implement this behavior.
  * @property {number} switchInterval
  *   The minimum amount of time that must pass between switches, in
  *   seconds. This keeps us from changing too often and annoying the user.
@@ -673,8 +681,10 @@ shakaExtern.AbrConfiguration;
  *   the text track will be shown.
  *   Changing this during playback will not affect the current playback.
  * @property {shakaExtern.Restrictions} restrictions
- *   The application restrictions to apply to the tracks.  The track must
- *   meet all the restrictions to be playable.
+ *   The application restrictions to apply to the tracks.  These are "hard"
+ *   restrictions.  Any track that fails to meet these restrictions will not
+ *   appear in the track list.  If no tracks meet these restrictions, playback
+ *   will fail.
  * @property {number} playRangeStart
  *   Optional playback and seek start time in seconds. Defaults to 0 if
  *   not provided.

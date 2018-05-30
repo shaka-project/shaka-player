@@ -16,21 +16,8 @@
  */
 
 describe('SimpleAbrManager', function() {
-  /** @const */
-  var sufficientBWMultiplier = 1.06;
-  /** @const */
-  var defaultBandwidthEstimate = 500e3; // 500kbps
-  /** @const */
-  var defaultRestrictions = {
-    minWidth: 0,
-    maxWidth: Infinity,
-    minHeight: 0,
-    maxHeight: Infinity,
-    minPixels: 0,
-    maxPixels: Infinity,
-    minBandwidth: 0,
-    maxBandwidth: Infinity
-  };
+  const sufficientBWMultiplier = 1.06;
+  const defaultBandwidthEstimate = 500e3; // 500kbps
 
   /** @type {shakaExtern.AbrConfiguration} */
   var config;
@@ -85,15 +72,22 @@ describe('SimpleAbrManager', function() {
       switchInterval: 8,
       bandwidthUpgradeTarget: 0.85,
       bandwidthDowngradeTarget: 0.95,
-      restrictions: defaultRestrictions
+      restrictions: {  // Must be inline to avoid cross-test pollution!
+        minWidth: 0,
+        maxWidth: Infinity,
+        minHeight: 0,
+        maxHeight: Infinity,
+        minPixels: 0,
+        maxPixels: Infinity,
+        minBandwidth: 0,
+        maxBandwidth: Infinity
+      },
     };
 
     variants = manifest.periods[0].variants;
 
     abrManager = new shaka.abr.SimpleAbrManager();
     abrManager.init(shaka.test.Util.spyFunc(switchCallback));
-    config.defaultBandwidthEstimate = defaultBandwidthEstimate;
-    config.restrictions = defaultRestrictions;
     abrManager.configure(config);
     abrManager.setVariants(variants);
   });
@@ -353,7 +347,7 @@ describe('SimpleAbrManager', function() {
         .addVariant(0).bandwidth(1e5)
           .addVideo(0).size(50, 50)
         .addVariant(1).bandwidth(2e5)
-          .addVideo(2).size(200, 200)
+          .addVideo(1).size(200, 200)
       .build();
 
     abrManager.setVariants(manifest.periods[0].variants);
@@ -362,6 +356,28 @@ describe('SimpleAbrManager', function() {
 
     config.restrictions.maxWidth = 100;
     abrManager.configure(config);
+
+    chosen = abrManager.chooseVariant();
+    expect(chosen.id).toBe(0);
+  });
+
+  it('uses lowest-bandwidth variant when restrictions cannot be met', () => {
+    manifest = new shaka.test.ManifestGenerator()
+      .addPeriod(0)
+        .addVariant(0).bandwidth(1e5)
+          .addVideo(0).size(50, 50)
+        .addVariant(1).bandwidth(2e5)
+          .addVideo(1).size(200, 200)
+      .build();
+
+    abrManager.setVariants(manifest.periods[0].variants);
+    let chosen = abrManager.chooseVariant();
+    expect(chosen.id).toBe(1);
+
+    // This restriction cannot be met, but we shouldn't fail.
+    config.restrictions.maxWidth = 1;
+    abrManager.configure(config);
+
     chosen = abrManager.chooseVariant();
     expect(chosen.id).toBe(0);
   });
