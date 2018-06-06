@@ -171,8 +171,7 @@ describe('DrmEngine', function() {
       try {
         await drmEngine.init(manifest, /* offline */ false);
         fail();
-      }
-      catch (error) {
+      } catch (error) {
         expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
         // These should be in the same order as the key systems appear in the
         // manifest.
@@ -196,8 +195,7 @@ describe('DrmEngine', function() {
       try {
         await drmEngine.init(manifest, /* offline */ false);
         fail();
-      }
-      catch (error) {
+      } catch (error) {
         expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
         // Although drm.def appears second in the manifest, it is queried first
         // because it has a server configured.
@@ -249,8 +247,7 @@ describe('DrmEngine', function() {
       try {
         await drmEngine.init(manifest, false);
         fail();
-      }
-      catch (error) {
+      } catch (error) {
         expect(drmEngine.initialized()).toBe(false);
 
         // Both key systems were tried, since the first one failed.
@@ -275,8 +272,7 @@ describe('DrmEngine', function() {
       try {
         await drmEngine.init(manifest, false);
         fail();
-      }
-      catch (error) {
+      } catch (error) {
         expect(drmEngine.initialized()).toBe(false);
 
         // No key systems were tried, since the dummy placeholder was detected.
@@ -296,8 +292,7 @@ describe('DrmEngine', function() {
       try {
         await drmEngine.init(manifest, false);
         fail();
-      }
-      catch (error) {
+      } catch (error) {
         expect(drmEngine.initialized()).toBe(false);
 
         expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
@@ -318,8 +313,7 @@ describe('DrmEngine', function() {
       try {
         await drmEngine.init(manifest, /* offline */ false);
         fail();
-      }
-      catch (error) {
+      } catch (error) {
         expect(drmEngine.initialized()).toBe(false);
         expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
         expect(requestMediaKeySystemAccessSpy)
@@ -352,8 +346,7 @@ describe('DrmEngine', function() {
       try {
         await drmEngine.init(manifest, /* offline */ true);
         fail();
-      }
-      catch (error) {
+      } catch (error) {
         expect(drmEngine.initialized()).toBe(false);
         expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
         expect(requestMediaKeySystemAccessSpy)
@@ -382,8 +375,7 @@ describe('DrmEngine', function() {
       try {
         await drmEngine.init(manifest, /* offline */ false);
         fail();
-      }
-      catch (error) {
+      } catch (error) {
         expect(drmEngine.initialized()).toBe(false);
         expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
         expect(requestMediaKeySystemAccessSpy)
@@ -455,8 +447,7 @@ describe('DrmEngine', function() {
       try {
         await drmEngine.init(manifest, /* offline */ false);
         fail();
-      }
-      catch (error) {
+      } catch (error) {
         expect(drmEngine.initialized()).toBe(false);
         expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
         expect(requestMediaKeySystemAccessSpy)
@@ -508,8 +499,7 @@ describe('DrmEngine', function() {
       try {
         await drmEngine.init(manifest, /* offline */ false);
         fail();
-      }
-      catch (error) {
+      } catch (error) {
         expect(drmEngine.initialized()).toBe(false);
         expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
         expect(requestMediaKeySystemAccessSpy)
@@ -536,8 +526,7 @@ describe('DrmEngine', function() {
       try {
         await drmEngine.init(manifest, /* offline */ false);
         fail();
-      }
-      catch (error) {
+      } catch (error) {
         shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.DRM,
@@ -694,8 +683,7 @@ describe('DrmEngine', function() {
       try {
         await initAndAttach();
         fail();
-      }
-      catch (error) {
+      } catch (error) {
         shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.DRM,
@@ -717,8 +705,7 @@ describe('DrmEngine', function() {
       try {
         await initAndAttach();
         fail();
-      }
-      catch (error) {
+      } catch (error) {
         shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.DRM,
@@ -1757,8 +1744,7 @@ describe('DrmEngine', function() {
       try {
         await drmEngine.removeSessions(['abc', 'def']);
         fail();
-      }
-      catch (error) {
+      } catch (error) {
         shaka.test.Util.expectToEqualError(
             error,
             new shaka.util.Error(
@@ -1778,8 +1764,7 @@ describe('DrmEngine', function() {
       try {
         await drmEngine.removeSessions(['abc', 'def']);
         fail();
-      }
-      catch (error) {
+      } catch (error) {
         shaka.test.Util.expectToEqualError(
             error,
             new shaka.util.Error(

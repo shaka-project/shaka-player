@@ -42,11 +42,11 @@ shaka.test.Dash.makeDashParser = function() {
 /**
  * Tests the segment index produced by the DASH manifest parser.
  *
- * @param {function()} done
  * @param {string} manifestText
  * @param {!Array.<shaka.media.SegmentReference>} references
+ * @return {!Promise}
  */
-shaka.test.Dash.testSegmentIndex = function(done, manifestText, references) {
+shaka.test.Dash.testSegmentIndex = async function(manifestText, references) {
   let buffer = shaka.util.StringUtils.toUTF8(manifestText);
   let dashParser = shaka.test.Dash.makeDashParser();
   let playerInterface = {
@@ -58,24 +58,20 @@ shaka.test.Dash.testSegmentIndex = function(done, manifestText, references) {
     onEvent: fail,
     onError: fail
   };
-  dashParser.start('dummy://foo', playerInterface)
-      .then(function(manifest) {
-        let stream = manifest.periods[0].variants[0].video;
-        shaka.test.ManifestParser.verifySegmentIndex(stream, references);
-      })
-      .catch(fail)
-      .then(done);
+  let manifest = await dashParser.start('dummy://foo', playerInterface);
+  let stream = manifest.periods[0].variants[0].video;
+  shaka.test.ManifestParser.verifySegmentIndex(stream, references);
 };
 
 
 /**
  * Tests that the DASH manifest parser fails to parse the given manifest.
  *
- * @param {function()} done
  * @param {string} manifestText
  * @param {!shaka.util.Error} expectedError
+ * @return {!Promise}
  */
-shaka.test.Dash.testFails = function(done, manifestText, expectedError) {
+shaka.test.Dash.testFails = async function(manifestText, expectedError) {
   let manifestData = shaka.util.StringUtils.toUTF8(manifestText);
   let dashParser = shaka.test.Dash.makeDashParser();
   let playerInterface = {
@@ -87,12 +83,12 @@ shaka.test.Dash.testFails = function(done, manifestText, expectedError) {
     onEvent: fail,
     onError: fail
   };
-  dashParser.start('dummy://foo', playerInterface)
-      .then(fail)
-      .catch(function(error) {
-        shaka.test.Util.expectToEqualError(error, expectedError);
-      })
-      .then(done);
+  try {
+    await dashParser.start('dummy://foo', playerInterface);
+    fail();
+  } catch (error) {
+    shaka.test.Util.expectToEqualError(error, expectedError);
+  }
 };
 
 
@@ -222,7 +218,7 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
 
     // All tests should have 5 segments and have the relative URIs:
     // s1.mp4  s2.mp4  s3.mp4  s4.mp4  s5.mp4
-    it('basic support', function(done) {
+    it('basic support', async () => {
       let timeline = [
         '<SegmentTimeline>',
         '  <S d="12" t="34" />',
@@ -240,10 +236,10 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
         ManifestParser.makeReference('s4.mp4', 4, 111, 121, baseUri),
         ManifestParser.makeReference('s5.mp4', 5, 121, 131, baseUri)
       ];
-      Dash.testSegmentIndex(done, source, references);
+      await Dash.testSegmentIndex(source, references);
     });
 
-    it('supports repetitions', function(done) {
+    it('supports repetitions', async () => {
       let timeline = [
         '<SegmentTimeline>',
         '  <S d="12" t="34" />',
@@ -259,10 +255,10 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
         ManifestParser.makeReference('s4.mp4', 4, 66, 76, baseUri),
         ManifestParser.makeReference('s5.mp4', 5, 76, 120, baseUri)
       ];
-      Dash.testSegmentIndex(done, source, references);
+      await Dash.testSegmentIndex(source, references);
     });
 
-    it('supports negative repetitions', function(done) {
+    it('supports negative repetitions', async () => {
       let timeline = [
         '<SegmentTimeline>',
         '  <S d="8" t="22" />',
@@ -279,10 +275,10 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
         ManifestParser.makeReference('s4.mp4', 4, 50, 62, baseUri),
         ManifestParser.makeReference('s5.mp4', 5, 62, 72, baseUri)
       ];
-      Dash.testSegmentIndex(done, source, references);
+      await Dash.testSegmentIndex(source, references);
     });
 
-    it('supports negative repetitions at end', function(done) {
+    it('supports negative repetitions at end', async () => {
       let timeline = [
         '<SegmentTimeline>',
         '  <S d="5" t="5" />',
@@ -297,10 +293,10 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
         ManifestParser.makeReference('s4.mp4', 4, 30, 40, baseUri),
         ManifestParser.makeReference('s5.mp4', 5, 40, 50, baseUri)
       ];
-      Dash.testSegmentIndex(done, source, references);
+      await Dash.testSegmentIndex(source, references);
     });
 
-    it('gives times relative to period', function(done) {
+    it('gives times relative to period', async () => {
       let timeline = [
         '<SegmentTimeline>',
         '  <S t="0" d="10" r="-1" />',
@@ -315,10 +311,10 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
         ManifestParser.makeReference('s4.mp4', 4, 30, 40, baseUri),
         ManifestParser.makeReference('s5.mp4', 5, 40, 50, baseUri)
       ];
-      Dash.testSegmentIndex(done, source, references);
+      await Dash.testSegmentIndex(source, references);
     });
 
-    it('supports @timescale', function(done) {
+    it('supports @timescale', async () => {
       let timeline = [
         '<SegmentTimeline>',
         '  <S d="4500" t="18000" />',
@@ -336,7 +332,7 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
         ManifestParser.makeReference('s4.mp4', 4, 7, 8, baseUri),
         ManifestParser.makeReference('s5.mp4', 5, 8, 9, baseUri)
       ];
-      Dash.testSegmentIndex(done, source, references);
+      await Dash.testSegmentIndex(source, references);
     });
   });
 };

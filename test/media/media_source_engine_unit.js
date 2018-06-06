@@ -347,8 +347,7 @@ describe('MediaSourceEngine', function() {
         await mediaSourceEngine.appendBuffer(
             ContentType.AUDIO, buffer, null, null);
         fail('not reached');
-      }
-      catch (error) {
+      } catch (error) {
         expect(error.code).toBe(
             shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_THREW);
         expect(error.data).toEqual(
@@ -367,8 +366,7 @@ describe('MediaSourceEngine', function() {
         await mediaSourceEngine.appendBuffer(
             ContentType.AUDIO, buffer, null, null);
         fail('not reached');
-      }
-      catch (error) {
+      } catch (error) {
         expect(error.code).toBe(shaka.util.Error.Code.QUOTA_EXCEEDED_ERROR);
         expect(error.data).toEqual([ContentType.AUDIO]);
         expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
@@ -553,8 +551,7 @@ describe('MediaSourceEngine', function() {
       try {
         await mediaSourceEngine.remove(ContentType.AUDIO, 1, 5);
         fail('not reached');
-      }
-      catch (error) {
+      } catch (error) {
         expect(error.code).toBe(
             shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_THREW);
         expect(error.data).toEqual(
@@ -818,8 +815,7 @@ describe('MediaSourceEngine', function() {
       try {
         await p1;
         fail('not reached');
-      }
-      catch (error) {
+      } catch (error) {
         expect(mockMediaSource.endOfStream).toHaveBeenCalled();
         await Util.delay(0.1);
         expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
@@ -911,8 +907,7 @@ describe('MediaSourceEngine', function() {
       try {
         await p1;
         fail('not reached');
-      }
-      catch (error) {
+      } catch (error) {
         expect(mockMediaSource.durationSetter_).toHaveBeenCalled();
         await Util.delay(0.1);
         expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
