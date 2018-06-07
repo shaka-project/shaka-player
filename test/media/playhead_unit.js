@@ -170,8 +170,8 @@ describe('Playhead', function() {
     };
   });
 
-  afterEach(function(done) {
-    playhead.destroy().then(done);
+  afterEach(async () => {
+    await playhead.destroy();
   });
 
   describe('getTime', function() {

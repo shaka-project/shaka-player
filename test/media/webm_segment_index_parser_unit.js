@@ -23,14 +23,13 @@ describe('WebmSegmentIndexParser', function() {
   let initSegment;
   let parser = new shaka.media.WebmSegmentIndexParser();
 
-  beforeAll(function(done) {
-    Promise.all([
+  beforeAll(async () => {
+    let responses = await Promise.all([
       shaka.test.Util.fetch(indexSegmentUri),
       shaka.test.Util.fetch(initSegmentUri)
-    ]).then(function(responses) {
-      indexSegment = responses[0];
-      initSegment = responses[1];
-    }).catch(fail).then(done);
+    ]);
+    indexSegment = responses[0];
+    initSegment = responses[1];
   });
 
   it('rejects a non-index segment ', function() {
