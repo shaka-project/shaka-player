@@ -190,7 +190,7 @@ player.load(manifestUri);
 ```
 
 For more on what you can specify for a custom scheme, see the docs for
-{@link shakaExtern.DrmInfo}.
+{@link shaka.extern.DrmInfo}.
 
 
 #### Detailed DrmInfo
@@ -306,8 +306,8 @@ function licensePostProcessor(type, response) {
 ```
 
 For more on request filters, see the docs for
-{@link shaka.net.NetworkingEngine.RequestFilter}, {@link shakaExtern.Request},
-{@link shaka.net.NetworkingEngine.ResponseFilter}, {@link shakaExtern.Response}.
+{@link shaka.net.NetworkingEngine.RequestFilter}, {@link shaka.extern.Request},
+{@link shaka.net.NetworkingEngine.ResponseFilter}, {@link shaka.extern.Response}.
 
 
 #### ClearKey configuration
@@ -388,7 +388,7 @@ player.load(manifestUri);
 ```
 
 For more on the AbrManager interface, see the docs for
-{@link shakaExtern.AbrManager}.
+{@link shaka.extern.AbrManager}.
 
 
 #### Selecting tracks
@@ -433,7 +433,7 @@ In v2, this becomes `player.setTextTrackVisibility()`:
 player.setTextTrackVisibility(true);
 ```
 
-See also the {@link shakaExtern.Track} structure which is used for all track
+See also the {@link shaka.extern.Track} structure which is used for all track
 types (variant and text).
 
 
@@ -511,7 +511,7 @@ instead of constructing an object, simply create an anonymous JavaScript object.
 `minPixels`/`maxPixels` were added to limit total pixels. Also `minBandwidth`
 and `maxBandwidth` were split into `minAudioBandwidth`, `maxAudioBandwidth`,
 `minVideoBandwidth`, and `maxVideoBandwidth`, see
-{@link shakaExtern.Restrictions}.
+{@link shaka.extern.Restrictions}.
 
 For more information on configuration in v2, see {@tutorial config},
 {@tutorial network-and-buffering-config}, and {@tutorial drm-config}.
@@ -577,7 +577,7 @@ player.getStats()
     duration: number  // seconds in this state
 ```
 
-For more on stats in v2, see {@link shakaExtern.Stats}.
+For more on stats in v2, see {@link shaka.extern.Stats}.
 
 
 #### Player events
@@ -643,7 +643,7 @@ if (!shaka.Player.isBrowserSupported()) {
 }
 ```
 
-For more on the support object, check out {@link shakaExtern.SupportType}.
+For more on the support object, check out {@link shaka.extern.SupportType}.
 You can also see the full `probeSupport()` report for your browser at:
 {@link http://shaka-player-demo.appspot.com/support.html}
 

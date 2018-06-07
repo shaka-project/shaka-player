@@ -15,51 +15,17 @@
  * limitations under the License.
  */
 
-
 /**
  * @externs
+ * @suppress {duplicate} To prevent compiler errors with the namespace
+ *   being declared both here and by goog.provide in the library.
  */
 
-
+/** @namespace */
+var shaka = {};
 
 /**
- * @interface
+ * @namespace
  * @exportDoc
  */
-shaka.extern.Error = function() {};
-
-
-/**
- * @type {shaka.util.Error.Severity}
- * @exportDoc
- */
-shaka.extern.Error.prototype.severity;
-
-
-/**
- * @const {shaka.util.Error.Category}
- * @exportDoc
- */
-shaka.extern.Error.prototype.category;
-
-
-/**
- * @const {shaka.util.Error.Code}
- * @exportDoc
- */
-shaka.extern.Error.prototype.code;
-
-
-/**
- * @const {!Array.<*>}
- * @exportDoc
- */
-shaka.extern.Error.prototype.data;
-
-
-/**
- * @type {boolean}
- * @exportDoc
- */
-shaka.extern.Error.prototype.handled;
-
+shaka.extern = {};

@@ -18,15 +18,7 @@
 
 /**
  * @externs
- * @suppress {duplicate} To prevent compiler errors with the namespace
- *   being declared both here and by goog.provide in the library.
  */
-
-/** @namespace */
-var shaka = {};
-
-/** @namespace */
-shaka.extern = {};
 
 
 /**
@@ -735,5 +727,6 @@ shaka.extern.PlayerConfiguration;
  * @property {string} role
  *    The role name for the stream. If the stream has no role, |role| will be
  *    ''.
+ * @exportDoc
  */
 shaka.extern.LanguageRole;
