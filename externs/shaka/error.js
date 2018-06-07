@@ -29,30 +29,35 @@ shakaExtern.Error = function() {};
 
 /**
  * @type {shaka.util.Error.Severity}
+ * @exportDoc
  */
 shakaExtern.Error.prototype.severity;
 
 
 /**
  * @const {shaka.util.Error.Category}
+ * @exportDoc
  */
 shakaExtern.Error.prototype.category;
 
 
 /**
  * @const {shaka.util.Error.Code}
+ * @exportDoc
  */
 shakaExtern.Error.prototype.code;
 
 
 /**
  * @const {!Array.<*>}
+ * @exportDoc
  */
 shakaExtern.Error.prototype.data;
 
 
 /**
  * @type {boolean}
+ * @exportDoc
  */
 shakaExtern.Error.prototype.handled;
 

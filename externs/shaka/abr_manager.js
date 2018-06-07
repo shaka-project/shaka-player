@@ -19,7 +19,6 @@
 /** @externs */
 
 
-
 /**
  * An object which selects Streams from a set of possible choices.  This also
  * watches for system changes to automatically adapt for the current streaming

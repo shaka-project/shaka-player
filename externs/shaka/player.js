@@ -725,5 +725,6 @@ shakaExtern.PlayerConfiguration;
  * @property {string} role
  *    The role name for the stream. If the stream has no role, |role| will be
  *    ''.
+ * @exportDoc
  */
 shakaExtern.LanguageRole;

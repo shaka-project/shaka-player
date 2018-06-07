@@ -43,7 +43,7 @@ accurate representation of both TTML and VTT regions.
 All application-specific text-parsing plugins MUST to be updated.
 v2.4 does not have backward compatibility for this!
 
-See {@link shakaExtern.TextParser.TimeContext} and {@link shaka.text.CueRegion}
+See {@link shaka.extern.TextParser.TimeContext} and {@link shaka.text.CueRegion}
 for details.
 
 
@@ -58,7 +58,7 @@ TTML and VTT regions.
 All application-specific TextDisplayer plugins MUST to be updated.
 v2.4 does not have backward compatibility for this!
 
-See {@link shakaExtern.CueRegion} for details.
+See {@link shaka.extern.CueRegion} for details.
 
 
 #### NetworkingEngine API changes
