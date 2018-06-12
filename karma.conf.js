@@ -144,6 +144,7 @@ module.exports = function(config) {
     browserDisconnectTimeout: 10 * 1000,  // 10s to reconnect
     browserDisconnectTolerance: 1,  // max of 1 disconnect is OK
     browserNoActivityTimeout: 5 * 60 * 1000,  // disconnect after 5m silence
+    processKillTimeout: 5 * 1000,  // allow up to 5s for process to shut down
     captureTimeout: settings.capture_timeout,
     // https://support.saucelabs.com/customer/en/portal/articles/2440724
 
