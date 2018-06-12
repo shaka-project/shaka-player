@@ -1,3 +1,26 @@
+## 2.4.1 (2018-06-13)
+
+Bugfixes:
+  - Default to a maximum of 360p for ABR when saveData == true
+    - https://github.com/google/shaka-player/issues/855
+  - Make AbrManager restrictions "soft" so they do not fail playback
+  - Patch Closure Compiler to fix polyfill+wrapper
+    - https://github.com/google/shaka-player/issues/1455
+  - Fix assertion spam when merging a period into itself
+    - https://github.com/google/shaka-player/issues/1448
+  - Upgrade WebDriver module to new W3C protocol, fixes WD tests on Firefox & IE
+  - Work around potential hang in transmuxer with multiplexed TS content.
+    - https://github.com/google/shaka-player/issues/1449
+
+Demo app:
+  - Support clearkey license-servers in the demo UI
+
+Misc:
+  - Fix nodejs import (still not a supported environment, but does not throw)
+    - https://github.com/google/shaka-player/issues/1445
+    - https://github.com/google/shaka-player/pull/1446
+
+
 ## 2.4.0 (2018-05-24)
 
 New features:
