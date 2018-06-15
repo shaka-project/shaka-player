@@ -1,10 +1,7 @@
 closure/compiler.jar
-  The closure compiler, v20180402 (modified), by Google.
+  The closure compiler, v20180402, by Google.
   Apache v2.0 license.
   https://github.com/google/closure-compiler
-  Local mods:
-    - Fixed issues with Symbol polyfill interactions with output wrappers
-      - https://github.com/google/closure-compiler/issues/2957
 
 closure/goog
   The closure library (modified), possibly v20150315, by Google.
