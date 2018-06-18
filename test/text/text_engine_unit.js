@@ -239,6 +239,17 @@ describe('TextEngine', function() {
         expect(textEngine.bufferEnd()).toBe(null);
       }).catch(fail).then(done);
     });
+
+    it('handles timestamp offset', async function() {
+      textEngine.setTimestampOffset(60);
+      await textEngine.appendBuffer(dummyData, 0, 3);
+      expect(textEngine.bufferStart()).toBe(60);
+      expect(textEngine.bufferEnd()).toBe(63);
+
+      await textEngine.appendBuffer(dummyData, 3, 6);
+      expect(textEngine.bufferStart()).toBe(60);
+      expect(textEngine.bufferEnd()).toBe(66);
+    });
   });
 
   describe('bufferedAheadOf', function() {
@@ -270,6 +281,12 @@ describe('TextEngine', function() {
         expect(textEngine.bufferedAheadOf(1)).toBe(2);
         expect(textEngine.bufferedAheadOf(2.5)).toBeCloseTo(0.5);
       }).catch(fail).then(done);
+    });
+
+    it('handles timestamp offset', async function() {
+      textEngine.setTimestampOffset(60);
+      await textEngine.appendBuffer(dummyData, 3, 6);
+      expect(textEngine.bufferedAheadOf(64)).toBe(2);
     });
   });
 
