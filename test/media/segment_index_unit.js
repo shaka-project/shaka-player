@@ -166,7 +166,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
       index.fit(/* periodDuration */ 15);
       let newReferences = [
         /* ref 0 dropped because it ends before the period starts */
-        makeReference(1, 0, 4, uri(1)),  // start time clamped to 0
+        makeReference(1, -3, 4, uri(1)),
         makeReference(2, 4, 11, uri(2)),
         makeReference(3, 11, 15, uri(3))  // end time clamped to period
         /* ref 4 dropped because it starts after the period ends */

@@ -267,7 +267,7 @@ describe('DashParser SegmentBase', function() {
         .then(done);
   });
 
-  it('does not assume the same timescale as media', function(done) {
+  it('does not assume the same timescale as media', async () => {
     let source = [
       '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
@@ -288,19 +288,13 @@ describe('DashParser SegmentBase', function() {
       'http://example.com/index.mp4': indexSegment
     });
 
-    let video;
-    parser.start('dummy://foo', playerInterface)
-        .then(function(manifest) {
-          video = manifest.periods[0].variants[0].video;
-          return video.createSegmentIndex();  // real data, should succeed
-        })
-        .then(function() {
-          let reference = video.getSegmentReference(0);
-          expect(reference.startTime).toEqual(0);  // clamped to 0 by fit()
-          expect(reference.endTime).toEqual(10);  // would be 12 without PTO
-        })
-        .catch(fail)
-        .then(done);
+    let manifest = await parser.start('dummy://foo', playerInterface);
+    let video = manifest.periods[0].variants[0].video;
+    await video.createSegmentIndex();  // real data, should succeed
+
+    let reference = video.getSegmentReference(0);
+    expect(reference.startTime).toEqual(-2);
+    expect(reference.endTime).toEqual(10);  // would be 12 without PTO
   });
 
   describe('fails for', function() {
