@@ -371,7 +371,6 @@ describe('DashParser ContentProtection', function() {
 
     var expected = buildExpectedManifest(
         [
-          buildDrmInfo('org.w3.clearkey', keyIds),
           buildDrmInfo('com.widevine.alpha', keyIds),
           buildDrmInfo('com.microsoft.playready', keyIds),
           buildDrmInfo('com.adobe.primetime', keyIds)
