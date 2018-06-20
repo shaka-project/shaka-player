@@ -174,6 +174,13 @@ describe('Playhead', function() {
     await playhead.destroy();
   });
 
+  function setMockDate(seconds) {
+    let minutes = Math.floor(seconds / 60);
+    seconds = seconds % 60;
+    let mockDate = new Date(2013, 9, 23, 7, minutes, seconds);
+    jasmine.clock().mockDate(mockDate);
+  }
+
   describe('getTime', function() {
     it('returns current time when the video is paused', function() {
       video.readyState = HTMLMediaElement.HAVE_METADATA;
@@ -387,10 +394,14 @@ describe('Playhead', function() {
         Util.spyFunc(onSeek),
         Util.spyFunc(onEvent));
 
+    // This has to periodically increment the mock date to allow the onSeeking_
+    // handler to seek, if appropriate.
+
     // Calling on['seeking']() is like dispatching a 'seeking' event. So, each
     // time we change the video's current time or Playhead changes the video's
     // current time we must call on['seeking'](),
 
+    setMockDate(0);
     video.on['seeking']();
     expect(video.currentTime).toBe(5);
     expect(playhead.getTime()).toBe(5);
@@ -399,6 +410,7 @@ describe('Playhead', function() {
     // safeSeek = safeSeek + 5 = 15 + 5 = 20
 
     // Seek in safe region & in buffered region.
+    setMockDate(10);
     video.currentTime = 26;
     video.on['seeking']();
     expect(video.currentTime).toBe(26);
@@ -408,6 +420,7 @@ describe('Playhead', function() {
     onSeek.calls.reset();
 
     // Seek in safe region & in unbuffered region.
+    setMockDate(20);
     video.currentTime = 24;
     video.on['seeking']();
     expect(video.currentTime).toBe(24);
@@ -417,11 +430,13 @@ describe('Playhead', function() {
     onSeek.calls.reset();
 
     // Seek before start, start is unbuffered.
+    setMockDate(30);
     video.currentTime = 1;
     video.on['seeking']();
     expect(video.currentTime).toBe(20);
     expect(playhead.getTime()).toBe(20);
     expect(onSeek).not.toHaveBeenCalled();
+    setMockDate(40);
     video.on['seeking']();
     expect(onSeek).toHaveBeenCalled();
 
@@ -430,6 +445,7 @@ describe('Playhead', function() {
     video.buffered = createFakeBuffered([{start: 10, end: 40}]);
 
     // Seek outside safe region & in buffered region.
+    setMockDate(50);
     video.currentTime = 11;
     video.on['seeking']();
     expect(video.currentTime).toBe(11);
@@ -439,33 +455,39 @@ describe('Playhead', function() {
     onSeek.calls.reset();
 
     // Seek outside safe region & in unbuffered region.
+    setMockDate(60);
     video.currentTime = 9;
     video.on['seeking']();
     expect(video.currentTime).toBe(20);
     expect(playhead.getTime()).toBe(20);
     expect(onSeek).not.toHaveBeenCalled();
+    setMockDate(70);
     video.on['seeking']();
     expect(onSeek).toHaveBeenCalled();
 
     onSeek.calls.reset();
 
     // Seek past end.
+    setMockDate(80);
     video.currentTime = 120;
     video.on['seeking']();
     expect(video.currentTime).toBe(60);
     expect(playhead.getTime()).toBe(60);
     expect(onSeek).not.toHaveBeenCalled();
+    setMockDate(90);
     video.on['seeking']();
     expect(onSeek).toHaveBeenCalled();
 
     onSeek.calls.reset();
 
     // Seek before start, start is buffered.
+    setMockDate(100);
     video.currentTime = 1;
     video.on['seeking']();
     expect(video.currentTime).toBe(10);
     expect(playhead.getTime()).toBe(10);
     expect(onSeek).not.toHaveBeenCalled();
+    setMockDate(110);
     video.on['seeking']();
     expect(onSeek).toHaveBeenCalled();
 
@@ -476,33 +498,39 @@ describe('Playhead', function() {
     timeline.getSafeSeekRangeStart.and.returnValue(12);
 
     // Seek before start
+    setMockDate(120);
     video.currentTime = 4;
     video.on['seeking']();
     expect(video.currentTime).toBe(12);
     expect(playhead.getTime()).toBe(12);
     expect(onSeek).not.toHaveBeenCalled();
+    setMockDate(130);
     video.on['seeking']();
     expect(onSeek).toHaveBeenCalled();
 
     onSeek.calls.reset();
 
     // Seek in window.
+    setMockDate(140);
     video.currentTime = 8;
     video.on['seeking']();
     expect(video.currentTime).toBe(12);
     expect(playhead.getTime()).toBe(12);
     expect(onSeek).not.toHaveBeenCalled();
+    setMockDate(150);
     video.on['seeking']();
     expect(onSeek).toHaveBeenCalled();
 
     onSeek.calls.reset();
 
     // Seek past end.
+    setMockDate(160);
     video.currentTime = 13;
     video.on['seeking']();
     expect(video.currentTime).toBe(12);
     expect(playhead.getTime()).toBe(12);
     expect(onSeek).not.toHaveBeenCalled();
+    setMockDate(170);
     video.on['seeking']();
     expect(onSeek).toHaveBeenCalled();
   });  // clamps playhead after seeking for live
@@ -526,30 +554,87 @@ describe('Playhead', function() {
         Util.spyFunc(onSeek),
         Util.spyFunc(onEvent));
 
+    setMockDate(0);
     video.on['seeking']();
     expect(video.currentTime).toBe(5);
     expect(playhead.getTime()).toBe(5);
 
     // Seek past end.
+    setMockDate(10);
     video.currentTime = 120;
     video.on['seeking']();
     expect(video.currentTime).toBe(59);  // duration - durationBackoff
     expect(playhead.getTime()).toBe(59);  // duration - durationBackoff
     expect(onSeek).not.toHaveBeenCalled();
+    setMockDate(20);
     video.on['seeking']();
     expect(onSeek).toHaveBeenCalled();
 
     onSeek.calls.reset();
 
     // Seek before start.
+    setMockDate(30);
     video.currentTime = 1;
     video.on['seeking']();
     expect(video.currentTime).toBe(5);
     expect(playhead.getTime()).toBe(5);
     expect(onSeek).not.toHaveBeenCalled();
+    setMockDate(40);
     video.on['seeking']();
     expect(onSeek).toHaveBeenCalled();
   });  // clamps playhead after seeking for VOD
+
+  it('doesn\'t repeatedly re-seek', function() {
+    video.readyState = HTMLMediaElement.HAVE_METADATA;
+
+    video.buffered = createFakeBuffered([{start: 25, end: 55}]);
+
+    timeline.isLive.and.returnValue(false);
+    timeline.getSeekRangeStart.and.returnValue(5);
+    timeline.getSafeSeekRangeStart.and.returnValue(5);
+    timeline.getSeekRangeEnd.and.returnValue(60);
+    timeline.getDuration.and.returnValue(60);
+
+    playhead = new shaka.media.Playhead(
+        video,
+        manifest,
+        config,
+        5 /* startTime */,
+        Util.spyFunc(onSeek),
+        Util.spyFunc(onEvent));
+
+    // First, seek to start time.
+    video.currentTime = 0;
+    video.on['seeking']();
+
+    // The first time, it should re-seek without issue.
+    setMockDate(0);
+    video.currentTime = 0;
+    video.on['seeking']();
+    expect(video.currentTime).toBe(5);
+    expect(playhead.getTime()).toBe(5);
+    expect(onSeek).not.toHaveBeenCalled();
+
+    onSeek.calls.reset();
+
+    // No time passes, so it shouldn't be willing to re-seek.
+    video.currentTime = 0;
+    video.on['seeking']();
+    expect(video.currentTime).toBe(0);
+    // The playhead wanted to seek ahead to 5, but was unable to.
+    expect(playhead.getTime()).toBe(5);
+    expect(onSeek).toHaveBeenCalled();
+
+    onSeek.calls.reset();
+
+    // Wait 10 seconds, so it should be willing to re-seek.
+    setMockDate(10);
+    video.currentTime = 0;
+    video.on['seeking']();
+    expect(video.currentTime).toBe(5);
+    expect(playhead.getTime()).toBe(5);
+    expect(onSeek).not.toHaveBeenCalled();
+  });  // doesn't repeatedly re-seek
 
   it('handles live manifests with no seek range', function() {
     video.buffered = createFakeBuffered([{start: 1000, end: 1030}]);
