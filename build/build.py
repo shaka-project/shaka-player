@@ -43,6 +43,7 @@ import argparse
 import logging
 import os
 import re
+import subprocess
 import sys
 
 import shakaBuildHelpers
@@ -353,7 +354,9 @@ class Build(object):
 
     jar = self._get_closure_jar_path()
     cmd_line = ['java', '-jar', jar, '-O', 'WHITESPACE_ONLY']
-    proc = shakaBuildHelpers.execute_subprocess(cmd_line)
+    proc = shakaBuildHelpers.execute_subprocess(
+        cmd_line, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE)
     stripped_wrapper_code = proc.communicate(wrapper_code)[0]
 
     if proc.returncode != 0:
