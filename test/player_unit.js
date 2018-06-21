@@ -1002,6 +1002,25 @@ describe('Player', function() {
          expect(player.convertToConfigObject_('\\.foo', 1))
              .toEqual({'.foo': 1});
        }));
+
+    it('returns whether the config was valid', function() {
+      logErrorSpy.and.stub();
+      expect(player.configure({streaming: {bufferBehind: '77'}})).toBe(false);
+      expect(player.configure({streaming: {bufferBehind: 77}})).toBe(true);
+    });
+
+    it('still sets other fields when there are errors', function() {
+      logErrorSpy.and.stub();
+
+      let changes = {
+        manifest: {foobar: false},
+        streaming: {bufferBehind: 77},
+      };
+      expect(player.configure(changes)).toBe(false);
+
+      let newConfig = player.getConfiguration();
+      expect(newConfig.streaming.bufferBehind).toEqual(77);
+    });
   });
 
   describe('AbrManager', function() {
