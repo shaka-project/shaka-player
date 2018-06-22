@@ -204,7 +204,7 @@ Bugfixes:
     - https://github.com/google/shaka-player/issues/1119
   - Work around MSE rounding errors in Edge
     - https://github.com/google/shaka-player/issues/1281
-    - Edge bug: https://goo.gl/3ZTzse
+    - Edge bug: https://bit.ly/2ttKiBU
   - Fix IE stuck buffering at the end after replay
     - https://github.com/google/shaka-player/issues/979
   - Fix catastrophic backtracking in TTML text parser
@@ -2152,7 +2152,7 @@ Features:
 Broken Compatibility:
   - System IDs in PSSH objects are now hex strings instead of raw strings.
 
-[Feb 9 2015 EME spec]: http://goo.gl/5gifok
+[Feb 9 2015 EME spec]: https://bit.ly/EmeFeb15
 [npm]: https://www.npmjs.com/package/shaka-player
 [cdnjs]: https://cdnjs.com/libraries/shaka-player
 [semantic versioning spec]: http://semver.org/

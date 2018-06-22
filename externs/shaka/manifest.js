@@ -122,7 +122,7 @@ shaka.extern.Period;
  * @description
  * Explicit initialization data, which override any initialization data in the
  * content. The initDataType values and the formats that they correspond to
- * are specified {@link https://goo.gl/TNjYwn here}.
+ * are specified {@link https://bit.ly/EmeInitTypes here}.
  *
  * @property {!Uint8Array} initData
  *   Initialization data in the format indicated by initDataType.
@@ -363,7 +363,7 @@ shaka.extern.GetSegmentReferenceFunction;
  * @property {(string|undefined)} kind
  *   <i>Text streams only.</i> <br>
  *   The kind of text stream.  For example, 'caption' or 'subtitle'.
- *   @see https://goo.gl/k1HWA6
+ *   @see https://bit.ly/TextKind
  * @property {boolean} encrypted
  *   <i>Defaults to false.</i><br>
  *   True if the stream is encrypted.

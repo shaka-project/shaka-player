@@ -1281,7 +1281,7 @@ describe('Playhead', function() {
      * @return {number}
      */
     function calculateReadyState(b, time) {
-      // See: https://goo.gl/L8qxfD
+      // See: https://bit.ly/2JYh8WX
       for (let i = 0; i < b.length; i++) {
         if (time >= b[i].start) {
           if (time == b[i].end) {

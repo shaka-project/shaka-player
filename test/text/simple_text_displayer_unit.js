@@ -65,7 +65,7 @@ describe('SimpleTextDisplayer', function() {
 
   describe('append', function() {
     it('sorts cues before inserting', function() {
-      // See: https://goo.gl/BirBy9
+      // See: https://bit.ly/2K9VX3s
       verifyHelper(
           [
             {start: 10, end: 20, text: 'Test1'},

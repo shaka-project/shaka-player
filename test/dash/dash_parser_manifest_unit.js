@@ -873,7 +873,7 @@ describe('DashParser Manifest', function() {
       '</MPD>'
     ].join('\n');
 
-    // See https://goo.gl/BAM3mi
+    // See https://bit.ly/2tx7f7A
     // The old error was that with SegmentTimeline, duplicate Representation IDs
     // would use the same segment index, so they would have the same references.
     // This test proves that duplicate Representation IDs are allowed for VOD
