@@ -129,15 +129,35 @@ shaka.extern.Response;
 
 
 /**
- * Defines a plugin that handles a specific scheme.
- *
  * @typedef {!function(string,
  *                     shaka.extern.Request,
- *                     shaka.net.NetworkingEngine.RequestType):
+ *                     shaka.net.NetworkingEngine.RequestType,
+ *                     shaka.extern.ProgressUpdated=):
  *     !shaka.extern.IAbortableOperation.<shaka.extern.Response>}
+ * @description
+ * Defines a plugin that handles a specific scheme.
+ * The functions accepts four parameters, uri string, request, request type,
+ * and an optional progressUpdated function.
+
  * @exportDoc
  */
 shaka.extern.SchemePlugin;
+
+
+/**
+ * @typedef {function(number, number)}
+ *
+ * @description
+ * A callback function to handle progress event through networking engine in
+ * player.
+ * The first argument is a number for duration in milliseconds, that the request
+ * took to complete.
+ * The second argument is the the total number of bytes downloaded during that
+ * time.
+ *
+ * @exportDoc
+ */
+shaka.extern.ProgressUpdated;
 
 
 /**

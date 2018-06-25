@@ -60,7 +60,8 @@ function httpPluginTests(usingFetch) {
       const MockXHR = function() {
         const instance = new JasmineXHRMock();
 
-        ['abort', 'load', 'error', 'timeout'].forEach(function(eventName) {
+        const events = ['abort', 'load', 'error', 'timeout', 'progress'];
+        for (const eventName of events) {
           const eventHandlerName = 'on' + eventName;
           let eventHandler = null;
 
@@ -81,7 +82,7 @@ function httpPluginTests(usingFetch) {
               return eventHandler;
             },
           });
-        });
+        }
 
         return instance;
       };
