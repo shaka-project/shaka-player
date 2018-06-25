@@ -13,7 +13,7 @@ different views of the library.  You can choose the "exported", "public", or
 In all modes, exported symbols are shown in red.
 
 "Public" means everything which is public in the sources.  This is used in the
-sense of [public/protected/private](http://goo.gl/jg5iKD) in object-oriented
+sense of [public/protected/private](https://bit.ly/2IcJyX6) in object-oriented
 programming languages.
 
 "Everything" shows all symbols, even private ones.

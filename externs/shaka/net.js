@@ -18,15 +18,7 @@
 
 /**
  * @externs
- * @suppress {duplicate} To prevent compiler errors with the namespace
- *   being declared both here and by goog.provide in the library.
  */
-
-/** @namespace */
-var shaka = {};
-
-/** @namespace */
-shaka.extern = {};
 
 
 /**
@@ -86,7 +78,7 @@ shaka.extern.RetryParameters;
  *   A mapping of headers for the request.  e.g.: {'HEADER': 'VALUE'}
  * @property {boolean} allowCrossSiteCredentials
  *   Make requests with credentials.  This will allow cookies in cross-site
- *   requests.  See <a href="http://goo.gl/YBRKPe">http://goo.gl/YBRKPe</a>.
+ *   requests.  See {@link https://bit.ly/CorsCred}.
  * @property {!shaka.extern.RetryParameters} retryParameters
  *   An object used to define how often to make retries.
  *

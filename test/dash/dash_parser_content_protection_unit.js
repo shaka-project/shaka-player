@@ -22,14 +22,14 @@ describe('DashParser ContentProtection', function() {
   /**
    * Tests that the parser produces the correct results.
    *
-   * @param {function()} done
    * @param {string} manifestText
    * @param {Object} expected A Manifest-like object.  The parser output is
    *   expected to match this.
    * @param {shaka.extern.DashContentProtectionCallback=} callback
    * @param {boolean=} ignoreDrmInfo
+   * @return {!Promise}
    */
-  function testDashParser(done, manifestText, expected, callback,
+  function testDashParser(manifestText, expected, callback,
       ignoreDrmInfo = false) {
     let retry = shaka.net.NetworkingEngine.defaultRetryParameters();
     let netEngine = new shaka.test.FakeNetworkingEngine();
@@ -55,10 +55,8 @@ describe('DashParser ContentProtection', function() {
       onError: fail
     };
 
-    dashParser.start('http://example.com', playerEvents)
-        .then(function(actual) { expect(actual).toEqual(expected); })
-        .catch(fail)
-        .then(done);
+    return dashParser.start('http://example.com', playerEvents)
+        .then(function(actual) { expect(actual).toEqual(expected); });
   }
 
   /**
@@ -154,10 +152,10 @@ describe('DashParser ContentProtection', function() {
     return jasmine.objectContaining(containing);
   }
 
-  it('handles clear content', function(done) {
+  it('handles clear content', async () => {
     let source = buildManifestText([], [], []);
     let expected = buildExpectedManifest([]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
   describe('maps standard scheme IDs', function() {
@@ -167,7 +165,7 @@ describe('DashParser ContentProtection', function() {
      * @param {!Array.<string>} keySystems expected key system IDs
      */
     function testKeySystemMappings(name, uuids, keySystems) {
-      it(name, function(done) {
+      it(name, async () => {
         let adaptationSetLines = uuids.map(function(uri) {
           return sprintf('<ContentProtection schemeIdUri="urn:uuid:%s" />',
                          uri);
@@ -177,7 +175,7 @@ describe('DashParser ContentProtection', function() {
           return buildDrmInfo(keySystem);
         });
         let expected = buildExpectedManifest(drmInfos);
-        testDashParser(done, source, expected);
+        await testDashParser(source, expected);
       });
     }
 
@@ -209,7 +207,7 @@ describe('DashParser ContentProtection', function() {
         ]);
   });
 
-  it('inherits key IDs from AdaptationSet to Representation', function(done) {
+  it('inherits key IDs from AdaptationSet to Representation', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
@@ -226,10 +224,10 @@ describe('DashParser ContentProtection', function() {
         'deadbeeffeedbaadf00d000008675309',
       ])
     ]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('sets key IDs for the init data', function(done) {
+  it('sets key IDs for the init data', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
     ], [
@@ -248,10 +246,10 @@ describe('DashParser ContentProtection', function() {
           ['bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5'], // initData
           ['deadbeeffeedbaadf00d000008675309']) // key Id for initData
     ]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('lets Representations override key IDs', function(done) {
+  it('lets Representations override key IDs', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
@@ -278,10 +276,10 @@ describe('DashParser ContentProtection', function() {
         'baadf00dfeeddeafbeef018006492568',
       ])
     ]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('extracts embedded PSSHs', function(done) {
+  it('extracts embedded PSSHs', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
@@ -301,10 +299,10 @@ describe('DashParser ContentProtection', function() {
         'bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5'
       ])
     ]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('assumes all known key systems for generic CENC', function(done) {
+  it('assumes all known key systems for generic CENC', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
@@ -317,37 +315,36 @@ describe('DashParser ContentProtection', function() {
           buildDrmInfo('com.microsoft.playready'),
           buildDrmInfo('com.adobe.primetime')
         ])));
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('assumes all known key systems when ignoreDrmInfo flag is set',
-      function(done) {
-        let source = buildManifestText([
-          // AdaptationSet lines
-          '<ContentProtection',
-          '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed">',
-          '  <cenc:pssh>ZmFrZSBXaWRldmluZSBQU1NI</cenc:pssh>',
-          '</ContentProtection>',
-          '<ContentProtection',
-          '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95">',
-          '  <cenc:pssh>bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcm</cenc:pssh>',
-          '</ContentProtection>'
-        ], [], []);
+  it('assumes all known key systems when ignoreDrmInfo is set', async () => {
+    let source = buildManifestText([
+      // AdaptationSet lines
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed">',
+      '  <cenc:pssh>ZmFrZSBXaWRldmluZSBQU1NI</cenc:pssh>',
+      '</ContentProtection>',
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95">',
+      '  <cenc:pssh>bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcm</cenc:pssh>',
+      '</ContentProtection>'
+    ], [], []);
 
 
-        let expected = buildExpectedManifest(
-            // The order does not matter here, so use arrayContaining.
-            // NOTE: the buildDrmInfo calls here specify no init data
-            /** @type {!Array.<!Object>} */(jasmine.arrayContaining([
-              buildDrmInfo('com.widevine.alpha'),
-              buildDrmInfo('com.microsoft.playready'),
-              buildDrmInfo('com.adobe.primetime')
-            ])));
-        testDashParser(done, source, expected, /* callback */ undefined,
-                       /* ignoreDrmInfo */ true);
-      });
+    let expected = buildExpectedManifest(
+        // The order does not matter here, so use arrayContaining.
+        // NOTE: the buildDrmInfo calls here specify no init data
+        /** @type {!Array.<!Object>} */(jasmine.arrayContaining([
+          buildDrmInfo('com.widevine.alpha'),
+          buildDrmInfo('com.microsoft.playready'),
+          buildDrmInfo('com.adobe.primetime')
+        ])));
+    await testDashParser(source, expected, /* callback */ undefined,
+                         /* ignoreDrmInfo */ true);
+  });
 
-  it('parses key IDs when ignoreDrmInfo flag is set', function(done) {
+  it('parses key IDs when ignoreDrmInfo flag is set', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
@@ -366,16 +363,15 @@ describe('DashParser ContentProtection', function() {
 
     let expected = buildExpectedManifest(
         [
-          buildDrmInfo('org.w3.clearkey', keyIds),
           buildDrmInfo('com.widevine.alpha', keyIds),
           buildDrmInfo('com.microsoft.playready', keyIds),
           buildDrmInfo('com.adobe.primetime', keyIds)
         ]);
-    testDashParser(done, source, expected, /* callback */ undefined,
-                   /* ignoreDrmInfo */ true);
+    await testDashParser(source, expected, /* callback */ undefined,
+                         /* ignoreDrmInfo */ true);
   });
 
-  it('inherits PSSH from generic CENC into all key systems', function(done) {
+  it('inherits PSSH from generic CENC into all key systems', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
@@ -395,10 +391,10 @@ describe('DashParser ContentProtection', function() {
         'b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'
       ])
     ]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('lets key systems override generic PSSH', function(done) {
+  it('lets key systems override generic PSSH', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
@@ -422,10 +418,10 @@ describe('DashParser ContentProtection', function() {
         'b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'
       ])
     ]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('ignores custom or unknown schemes', function(done) {
+  it('ignores custom or unknown schemes', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
@@ -438,10 +434,10 @@ describe('DashParser ContentProtection', function() {
     let expected = buildExpectedManifest([
       buildDrmInfo('com.widevine.alpha')
     ]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('invokes a callback for unknown schemes', function(done) {
+  it('invokes a callback for unknown schemes', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
@@ -493,10 +489,10 @@ describe('DashParser ContentProtection', function() {
       buildDrmInfo('com.example.drm')
     ]);
 
-    testDashParser(done, source, expected, callback);
+    await testDashParser(source, expected, callback);
   });
 
-  it('inserts a placeholder for unrecognized schemes', function(done) {
+  it('inserts a placeholder for unrecognized schemes', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
@@ -516,10 +512,10 @@ describe('DashParser ContentProtection', function() {
           'deadbeeffeedbaadf00d000008675309',
         ])
     ]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('can specify ContentProtection in Representation only', function(done) {
+  it('can specify ContentProtection in Representation only', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
     ], [
@@ -533,10 +529,10 @@ describe('DashParser ContentProtection', function() {
     ]);
     let expected = buildExpectedManifest(
         [buildDrmInfo('com.widevine.alpha')]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('only keeps key systems common to all Representations', function(done) {
+  it('only keeps key systems common to all Representations', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
     ], [
@@ -552,10 +548,10 @@ describe('DashParser ContentProtection', function() {
     ]);
     let expected = buildExpectedManifest(
         [buildDrmInfo('com.widevine.alpha')]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('still keeps per-Representation key IDs when merging', function(done) {
+  it('still keeps per-Representation key IDs when merging', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
     ], [
@@ -581,10 +577,10 @@ describe('DashParser ContentProtection', function() {
         'baadf00dfeeddeafbeef000004390116',
       ]),
     ]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('parses key IDs from non-cenc in Representation', function(done) {
+  it('parses key IDs from non-cenc in Representation', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
     ], [
@@ -615,10 +611,10 @@ describe('DashParser ContentProtection', function() {
           buildDrmInfo('com.microsoft.playready', keyIds),
           buildDrmInfo('com.widevine.alpha', keyIds)
         ]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('parses key IDs from non-cenc in AdaptationSet', function(done) {
+  it('parses key IDs from non-cenc in AdaptationSet', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
@@ -639,10 +635,10 @@ describe('DashParser ContentProtection', function() {
           buildDrmInfo('com.microsoft.playready', keyIds),
           buildDrmInfo('com.widevine.alpha', keyIds)
         ]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('ignores elements missing @schemeIdUri', function(done) {
+  it('ignores elements missing @schemeIdUri', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection />',
@@ -651,10 +647,32 @@ describe('DashParser ContentProtection', function() {
     ], [], []);
     let expected = buildExpectedManifest(
         [buildDrmInfo('com.widevine.alpha')]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('fails for no schemes common', function(done) {
+  it('handles non-default namespace names', async () => {
+    let source = [
+      '<MPD xmlns="urn:mpeg:DASH:schema:MPD:2011"',
+      '    xmlns:foo="urn:mpeg:cenc:2013">',
+      '  <Period duration="PT30S">',
+      '    <SegmentTemplate media="s.mp4" duration="2" />',
+      '    <AdaptationSet mimeType="video/mp4" codecs="avc1.4d401f">',
+      '      <ContentProtection',
+      '          schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed">',
+      '        <foo:pssh>b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs</foo:pssh>',
+      '      </ContentProtection>',
+      '      <Representation bandwidth="50" width="576" height="432" />',
+      '      <Representation bandwidth="100" width="576" height="432" />',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'
+    ].join('\n');
+    let expected = buildExpectedManifest([buildDrmInfo(
+        'com.widevine.alpha', [], ['b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'])]);
+    await testDashParser(source, expected);
+  });
+
+  it('fails for no schemes common', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
     ], [
@@ -670,10 +688,10 @@ describe('DashParser ContentProtection', function() {
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.MANIFEST,
         shaka.util.Error.Code.DASH_NO_COMMON_KEY_SYSTEM);
-    Dash.testFails(done, source, expected);
+    await Dash.testFails(source, expected);
   });
 
-  it('fails for invalid PSSH encoding', function(done) {
+  it('fails for invalid PSSH encoding', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
@@ -685,10 +703,10 @@ describe('DashParser ContentProtection', function() {
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.MANIFEST,
         shaka.util.Error.Code.DASH_PSSH_BAD_ENCODING);
-    Dash.testFails(done, source, expected);
+    await Dash.testFails(source, expected);
   });
 
-  it('fails for conflicting default key IDs', function(done) {
+  it('fails for conflicting default key IDs', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
@@ -702,10 +720,10 @@ describe('DashParser ContentProtection', function() {
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.MANIFEST,
         shaka.util.Error.Code.DASH_CONFLICTING_KEY_IDS);
-    Dash.testFails(done, source, expected);
+    await Dash.testFails(source, expected);
   });
 
-  it('fails for multiple key IDs', function(done) {
+  it('fails for multiple key IDs', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
@@ -718,6 +736,6 @@ describe('DashParser ContentProtection', function() {
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.MANIFEST,
         shaka.util.Error.Code.DASH_MULTIPLE_KEY_IDS_NOT_SUPPORTED);
-    Dash.testFails(done, source, expected);
+    await Dash.testFails(source, expected);
   });
 });

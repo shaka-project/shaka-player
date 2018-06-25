@@ -34,23 +34,22 @@ describe('Transmuxer', function() {
   let transmuxer;
 
 
-  beforeAll(function(done) {
-    Promise.all([
+  beforeAll(async () => {
+    let responses = await Promise.all([
       shaka.test.Util.fetch(videoSegmentUri),
       shaka.test.Util.fetch(audioSegmentUri)
-    ]).then(function(responses) {
-      videoSegment = responses[0];
-      audioSegment = responses[1];
-      emptySegment = new ArrayBuffer(0);
-    }).catch(fail).then(done);
+    ]);
+    videoSegment = responses[0];
+    audioSegment = responses[1];
+    emptySegment = new ArrayBuffer(0);
   });
 
   beforeEach(function() {
     transmuxer = new shaka.media.Transmuxer();
   });
 
-  afterEach(function(done) {
-    transmuxer.destroy().catch(fail).then(done);
+  afterEach(async () => {
+    await transmuxer.destroy();
   });
 
   describe('isSupported', function() {
@@ -90,79 +89,75 @@ describe('Transmuxer', function() {
   });
 
   describe('transmuxing', function() {
-    it('transmux video from TS to MP4', function(done) {
+    it('transmux video from TS to MP4', async () => {
       let sawMDAT = false;
 
-      transmuxer.transmux(videoSegment).then(function(transmuxedData) {
-        expect(transmuxedData.data).toEqual(jasmine.any(Uint8Array));
-        expect(transmuxedData.data.length).toBeGreaterThan(0);
-        expect(transmuxedData.cues).toEqual(jasmine.any(Array));
-        new shaka.util.Mp4Parser()
-            .box('mdat', shaka.util.Mp4Parser.allData(function(data) {
-              sawMDAT = true;
-              expect(data.buffer.byteLength).toBeGreaterThan(0);
-            }))
-            .parse(transmuxedData.data.buffer);
-        expect(sawMDAT).toBeTruthy();
-      }).catch(fail).then(done);
+      let transmuxedData = await transmuxer.transmux(videoSegment);
+      expect(transmuxedData.data).toEqual(jasmine.any(Uint8Array));
+      expect(transmuxedData.data.length).toBeGreaterThan(0);
+      expect(transmuxedData.cues).toEqual(jasmine.any(Array));
+      new shaka.util.Mp4Parser()
+          .box('mdat', shaka.util.Mp4Parser.allData(function(data) {
+            sawMDAT = true;
+            expect(data.buffer.byteLength).toBeGreaterThan(0);
+          }))
+          .parse(transmuxedData.data.buffer);
+      expect(sawMDAT).toBeTruthy();
     });
 
-    it('transmux audio from TS to MP4', function(done) {
+    it('transmux audio from TS to MP4', async () => {
       let sawMDAT = false;
-      transmuxer.transmux(audioSegment).then(function(transmuxedData) {
-        expect(transmuxedData.data).toEqual(jasmine.any(Uint8Array));
-        expect(transmuxedData.data.length).toBeGreaterThan(0);
-        expect(transmuxedData.cues).toEqual(jasmine.any(Array));
-        new shaka.util.Mp4Parser()
-            .box('mdat', shaka.util.Mp4Parser.allData(function(data) {
-              sawMDAT = true;
-              expect(data.buffer.byteLength).toBeGreaterThan(0);
-            }))
-            .parse(transmuxedData.data.buffer);
-        expect(sawMDAT).toBeTruthy();
-      }).catch(fail).then(done);
+      let transmuxedData = await transmuxer.transmux(audioSegment);
+      expect(transmuxedData.data).toEqual(jasmine.any(Uint8Array));
+      expect(transmuxedData.data.length).toBeGreaterThan(0);
+      expect(transmuxedData.cues).toEqual(jasmine.any(Array));
+      new shaka.util.Mp4Parser()
+          .box('mdat', shaka.util.Mp4Parser.allData(function(data) {
+            sawMDAT = true;
+            expect(data.buffer.byteLength).toBeGreaterThan(0);
+          }))
+          .parse(transmuxedData.data.buffer);
+      expect(sawMDAT).toBeTruthy();
     });
 
-    it('transmux empty video from TS to MP4', function(done) {
+    it('transmux empty video from TS to MP4', async () => {
       let sawMDAT = false;
-      transmuxer.transmux(emptySegment).then(function(transmuxedData) {
-        expect(transmuxedData.data).toEqual(jasmine.any(Uint8Array));
-        expect(transmuxedData.data.length).toBeGreaterThan(0);
-        expect(transmuxedData.cues).toEqual(jasmine.any(Array));
-        new shaka.util.Mp4Parser()
-            .box('mdat', shaka.util.Mp4Parser.allData(function(data) {
-              sawMDAT = true;
-            }))
-            .parse(transmuxedData.data.buffer);
-        expect(sawMDAT).toBeFalsy();
-      }).catch(fail).then(done);
+      let transmuxedData = await transmuxer.transmux(emptySegment);
+      expect(transmuxedData.data).toEqual(jasmine.any(Uint8Array));
+      expect(transmuxedData.data.length).toBeGreaterThan(0);
+      expect(transmuxedData.cues).toEqual(jasmine.any(Array));
+      new shaka.util.Mp4Parser()
+          .box('mdat', shaka.util.Mp4Parser.allData(function(data) {
+            sawMDAT = true;
+          }))
+          .parse(transmuxedData.data.buffer);
+      expect(sawMDAT).toBeFalsy();
     });
 
-    it('passes through true timestamps', function(done) {
+    it('passes through true timestamps', async () => {
       let parsed = false;
       let expectedMp4Timestamp = 5166000;  // in timescale units
       let mp4Timestamp;
 
-      transmuxer.transmux(videoSegment).then(function(transmuxedData) {
-        let Mp4Parser = shaka.util.Mp4Parser;
+      let transmuxedData = await transmuxer.transmux(videoSegment);
+      let Mp4Parser = shaka.util.Mp4Parser;
 
-        new Mp4Parser()
-            .box('moof', Mp4Parser.children)
-            .box('traf', Mp4Parser.children)
-            .fullBox('tfdt', function(box) {
-              goog.asserts.assert(
-                  box.version == 0 || box.version == 1,
-                  'TFDT version can only be 0 or 1');
-              mp4Timestamp = (box.version == 0) ?
-                  box.reader.readUint32() :
-                  box.reader.readUint64();
-              parsed = true;
-            })
-            .parse(transmuxedData.data.buffer);
+      new Mp4Parser()
+          .box('moof', Mp4Parser.children)
+          .box('traf', Mp4Parser.children)
+          .fullBox('tfdt', function(box) {
+            goog.asserts.assert(
+                box.version == 0 || box.version == 1,
+                'TFDT version can only be 0 or 1');
+            mp4Timestamp = (box.version == 0) ?
+                box.reader.readUint32() :
+                box.reader.readUint64();
+            parsed = true;
+          })
+          .parse(transmuxedData.data.buffer);
 
-        expect(parsed).toBe(true);
-        expect(mp4Timestamp).toEqual(expectedMp4Timestamp);
-      }).catch(fail).then(done);
+      expect(parsed).toBe(true);
+      expect(mp4Timestamp).toEqual(expectedMp4Timestamp);
     });
   });
 });

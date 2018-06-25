@@ -80,8 +80,8 @@ accurate representation of both TTML and VTT regions.
 All application-specific text-parsing plugins MUST to be updated.
 v2.4 does not have backward compatibility for this!
 
-See {@link shakaExtern.TextParser.prototype.parseInit} and
-{@link shakaExtern.TextParser.prototype.parseMedia} for details.
+See {@link shaka.extern.TextParser.prototype.parseInit} and
+{@link shaka.extern.TextParser.prototype.parseMedia} for details.
 
 
 #### Text displayer plugin API changes
@@ -95,7 +95,7 @@ TTML and VTT regions.
 All application-specific TextDisplayer plugins MUST to be updated.
 v2.4 does not have backward compatibility for this!
 
-See {@link shakaExtern.CueRegion} for details.
+See {@link shaka.extern.CueRegion} for details.
 
 
 #### Offline storage API changes

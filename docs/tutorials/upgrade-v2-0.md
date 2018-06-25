@@ -76,7 +76,7 @@ var i = /* choose an index somehow */;
 player.selectVariantTrack(variantTracks[i]);
 ```
 
-See also the {@link shakaExtern.Track} structure which is used for all track
+See also the {@link shaka.extern.Track} structure which is used for all track
 types (variant and text).
 
 
@@ -104,7 +104,7 @@ In v2.0, default bandwidth estimate and restrictions were set through
 `setDefaultEstimate()` and `setRestrictions()` methods.
 
 In v2.4, they are set through `configure()` method which accepts a
-{@link shakaExtern.AbrConfiguration} structure. The new method is more general,
+{@link shaka.extern.AbrConfiguration} structure. The new method is more general,
 and allows for the configuration of bandwidth upgrade and downgrade targets
 as well.
 
@@ -327,8 +327,8 @@ v2.4 does not have backward compatibility on this!
 The `Shaka.text.Cue` class contains the same information about a text cue as
 the VTTCue class, plus extra information about text style.
 
-For more information, see the {@link shakaExtern.TextParser.TimeContext},
-{@link shaka.text.Cue} and {@link shakaExtern.TextParser} definitions in
+For more information, see the {@link shaka.extern.TextParser.TimeContext},
+{@link shaka.text.Cue} and {@link shaka.extern.TextParser} definitions in
 the API docs.
 
 
@@ -465,8 +465,8 @@ Shaka v2.4 changed some details of the `shaka.media.PresentationTimeline` API.
   - `notifySegments()` now takes a reference array and a boolean called
     `isFirstPeriod`, instead of a period start time and a reference array.
 
-For more information, see the {@link shakaExtern.ManifestParser.PlayerInterface}
-and {@link shakaExtern.ManifestParser} definitions in the API docs.
+For more information, see the {@link shaka.extern.ManifestParser.PlayerInterface}
+and {@link shaka.extern.ManifestParser} definitions in the API docs.
 
 
 #### Retry after streaming failure

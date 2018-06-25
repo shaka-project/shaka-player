@@ -18,16 +18,7 @@
 
 /**
  * @externs
- * @suppress {duplicate} To prevent compiler errors with the namespace
- *   being declared both here and by goog.provide in the library.
  */
-
-/** @namespace */
-var shaka = {};
-
-/** @namespace */
-shaka.extern = {};
-
 
 
 /**
@@ -149,7 +140,10 @@ shaka.extern.AbrManager.prototype.getBandwidthEstimate = function() {};
 
 
 /**
- * Sets the abr configurations.
+ * Sets the ABR configuration.
+ *
+ * It is the responsibility of the AbrManager implementation to implement the
+ * restrictions behavior described in shaka.extern.AbrConfiguration.
  *
  * @param {shaka.extern.AbrConfiguration} config
  * @exportDoc

@@ -17,7 +17,7 @@
 
 /**
  * @fileoverview Google Cast API externs.
- * Based on the {@link https://goo.gl/psEjEh Google Cast API}.
+ * Based on the {@link https://bit.ly/CastApi Google Cast API}.
  * @externs
  */
 

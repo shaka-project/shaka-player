@@ -17,15 +17,7 @@
 
 /**
  * @externs
- * @suppress {duplicate} To prevent compiler errors with the namespace
- *   being declared both here and by goog.provide in the library.
  */
-
-/** @namespace */
-var shaka = {};
-
-/** @namespace */
-shaka.extern = {};
 
 
 /**

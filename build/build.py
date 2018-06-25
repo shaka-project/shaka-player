@@ -43,6 +43,7 @@ import argparse
 import logging
 import os
 import re
+import subprocess
 import sys
 
 import shakaBuildHelpers
@@ -85,8 +86,6 @@ debug_closure_defines = [
           shakaBuildHelpers.calculate_version()),
 ]
 release_closure_opts = [
-    ('--output_wrapper_file=%s/build/wrapper.template.js' %
-     shakaBuildHelpers.cygwin_safe_path(shakaBuildHelpers.get_source_base())),
     '-O', 'ADVANCED',
 ]
 release_closure_defines = [
@@ -142,6 +141,11 @@ class Build(object):
     exclude_all = self.exclude | other.exclude
     self.include = include_all - exclude_all
     self.exclude = exclude_all - include_all
+
+  def _get_closure_jar_path(self):
+    jar = os.path.join(shakaBuildHelpers.get_source_base(),
+                       'third_party', 'closure', 'compiler.jar')
+    return shakaBuildHelpers.cygwin_safe_path(jar)
 
   def reverse(self):
     return Build(self.exclude, self.include)
@@ -242,9 +246,7 @@ class Build(object):
     Returns:
       True on success; False on failure.
     """
-    jar = os.path.join(shakaBuildHelpers.get_source_base(),
-                       'third_party', 'closure', 'compiler.jar')
-    jar = shakaBuildHelpers.cygwin_safe_path(jar)
+    jar = self._get_closure_jar_path()
     files = [shakaBuildHelpers.cygwin_safe_path(f) for f in self.include]
     files.sort()
 
@@ -311,6 +313,8 @@ class Build(object):
       closure_opts += debug_closure_opts + debug_closure_defines
     else:
       closure_opts += release_closure_opts + release_closure_defines
+      # The output wrapper is only used in the release build.
+      closure_opts += self.add_wrapper()
 
     closure_opts += [
         '--create_source_map', result_map, '--js_output_file', result_file,
@@ -332,6 +336,36 @@ class Build(object):
     # source locations.
     with open(result_file, 'a') as f:
       f.write('//# sourceMappingURL=%s' % os.path.basename(result_map))
+
+  def add_wrapper(self):
+    """Prepares an output wrapper and returns a list of command line arguments
+       for Closure Compiler to use it."""
+
+    # Load the wrapper and use Closure to strip whitespace and comments.
+    # This requires %output% in the template to be protected, so Closure doesn't
+    # fail to parse it.
+    base = shakaBuildHelpers.cygwin_safe_path(
+        shakaBuildHelpers.get_source_base())
+    wrapper_input_path = '%s/build/wrapper.template.js' % base
+    wrapper_output_path = '%s/dist/wrapper.js' % base
+
+    with open(wrapper_input_path, 'rb') as f:
+      wrapper_code = f.read().replace('%output%', '"%output%"')
+
+    jar = self._get_closure_jar_path()
+    cmd_line = ['java', '-jar', jar, '-O', 'WHITESPACE_ONLY']
+    proc = shakaBuildHelpers.execute_subprocess(
+        cmd_line, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE)
+    stripped_wrapper_code = proc.communicate(wrapper_code)[0]
+
+    if proc.returncode != 0:
+      raise RuntimeError('Failed to strip whitespace from wrapper!')
+
+    with open(wrapper_output_path, 'wb') as f:
+      f.write(stripped_wrapper_code.replace('"%output%"', '%output%'))
+
+    return ['--output_wrapper_file=%s' % wrapper_output_path]
 
   def should_build(self, result_file):
     if not os.path.isfile(result_file):

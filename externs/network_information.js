@@ -15,25 +15,13 @@
  * limitations under the License.
  */
 
-
 /**
- * @fileoverview Externs for MediaSession based on
- * {@link https://bit.ly/2Id3dGD Editor's Draft, 12 January 2017}
+ * @fileoverview Externs for NetworkInformation which were missing in the
+ * Closure compiler.
  *
  * @externs
  */
 
 
-
-/**
- * @constructor
- */
-var MediaMetadata = function(options) {};
-
-
-/** @type {string} */
-MediaMetadata.prototype.title;
-
-
-/** @type {MediaMetadata} */
-Navigator.prototype.mediaSession;
+/** @type {boolean} */
+NetworkInformation.prototype.saveData;

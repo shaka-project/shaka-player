@@ -89,8 +89,8 @@ describe('PlayheadObserver', function() {
     timeline.getSegmentAvailabilityEnd.and.returnValue(60);
   });
 
-  afterEach(function(done) {
-    observer.destroy().catch(fail).then(done);
+  afterEach(async () => {
+    await observer.destroy();
   });
 
   describe('buffering', function() {
@@ -305,19 +305,18 @@ describe('PlayheadObserver', function() {
         expect(onEvent).toHaveBeenCalled();
       });
 
-      it('fires an enter event when adding a region the playhead is in',
-         function() {
-           video.currentTime = 15;
-           jasmine.clock().tick(1000);
+      it('fires an enter event when adding a region the playhead is in', () => {
+        video.currentTime = 15;
+        jasmine.clock().tick(1000);
 
-           expect(onEvent).not.toHaveBeenCalled();
-           observer.addTimelineRegion(regionInfo);
-           jasmine.clock().tick(1000);
+        expect(onEvent).not.toHaveBeenCalled();
+        observer.addTimelineRegion(regionInfo);
+        jasmine.clock().tick(1000);
 
-           expect(onEvent).toHaveBeenCalledTimes(2);
-           expectTimelineEvent('timelineregionadded', regionInfo, 0);
-           expectTimelineEvent('timelineregionenter', regionInfo, 1);
-         });
+        expect(onEvent).toHaveBeenCalledTimes(2);
+        expectTimelineEvent('timelineregionadded', regionInfo, 0);
+        expectTimelineEvent('timelineregionenter', regionInfo, 1);
+      });
     });
 
     describe('seeking', function() {

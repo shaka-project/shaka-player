@@ -133,7 +133,7 @@ In v2.1, default bandwidth estimate and restrictions were set through
 `setDefaultEstimate()` and `setRestrictions()` methods.
 
 In v2.4, they are set through `configure()` method which accepts a
-{@link shakaExtern.AbrConfiguration} structure. The new method is more general,
+{@link shaka.extern.AbrConfiguration} structure. The new method is more general,
 and allows for the configuration of bandwidth upgrade and downgrade targets
 as well.
 

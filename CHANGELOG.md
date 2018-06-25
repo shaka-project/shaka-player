@@ -1,3 +1,109 @@
+## 2.3.9 and 2.4.1 (2018-06-13)
+
+Bugfixes:
+  - Default to a maximum of 360p for ABR when saveData == true
+    - https://github.com/google/shaka-player/issues/855
+  - Make AbrManager restrictions "soft" so they do not fail playback
+  - Patch Closure Compiler to fix polyfill+wrapper
+    - https://github.com/google/shaka-player/issues/1455
+  - Fix assertion spam when merging a period into itself
+    - https://github.com/google/shaka-player/issues/1448
+  - Upgrade WebDriver module to new W3C protocol, fixes WD tests on Firefox & IE
+  - Work around potential hang in transmuxer with multiplexed TS content.
+    - https://github.com/google/shaka-player/issues/1449
+
+Demo app:
+  - Support clearkey license-servers in the demo UI
+
+Misc:
+  - Fix nodejs import (still not a supported environment, but does not throw)
+    - https://github.com/google/shaka-player/issues/1445
+    - https://github.com/google/shaka-player/pull/1446
+
+
+## 2.4.0 (2018-05-24)
+
+New features:
+  - Support for TTML and VTT regions
+    - https://github.com/google/shaka-player/issues/1188
+  - Support for CEA captions in TS content
+    - https://github.com/google/shaka-player/issues/276
+  - A video element is no longer required when `Player` is constructed
+    - https://github.com/google/shaka-player/issues/1087
+  - New `attach()` and `detach()` methods have been added to `Player` to manage
+    attachment to video elements
+    - https://github.com/google/shaka-player/issues/1087
+  - Allow apps to specify a preferred audio channel count
+    - https://github.com/google/shaka-player/issues/1013
+  - Live stream playback can begin at a negative offset from the live edge
+    - https://github.com/google/shaka-player/issues/1178
+  - Add new configure() syntax for easily setting single fields
+    - https://github.com/google/shaka-player/issues/763
+  - player.configure() returns false if player configuration is invalid
+  - Fetch is now preferred over XHR when available
+    - https://github.com/google/shaka-player/issues/829
+  - Request type now appears in shaka.util.Error data for HTTP errors
+    - https://github.com/google/shaka-player/issues/1253
+
+Broken compatibility:
+  - A third-party Promise polyfill is now required for IE 11 support
+    - https://github.com/lahmatiy/es6-promise-polyfill
+    - https://github.com/google/shaka-player/issues/1260
+  - Text parser plugins now take a nullable segmentStart in TextContext.  All
+    application-specific text-parsing plugins MUST be updated.
+  - Text-parsing plugins that produce region information must do so with the new
+    CueRegion class.  Any application-specific text-parsing plugins that produce
+    region information MUST be updated.
+  - TextDisplayer plugins that handle region information must do so with the new
+    CueRegion interface.  Any application-specific TextDisplayer plugins that
+    handle region information MUST be updated.
+  - The API for PresentationTimeline has changed.  Manifest parser plugins that
+    use certain PresentationTimeline methods MUST be updated:
+    - `setAvailabilityStart()` was renamed to `setUserSeekStart()`.
+    - `notifySegments()` now takes a reference array and a boolean called
+      `isFirstPeriod`, instead of a period start time and a reference array.
+
+Deprecated:
+  - NetworkingEngine.request() now returns an instance of IAbortableOperation
+    instead of Promise.  Applications which make application-level requests
+    SHOULD update to use the new interface.
+    - The old interface will be removed in v2.5.
+  - Network scheme plugins now return an instance of IAbortableOperation instead
+    of Promise.  Application-specific network scheme plugins SHOULD update to
+    the new interface.
+    - The old interface will be removed in v2.5.
+
+Demo app:
+  - Improve support for custom assets and license servers in demo app URI
+
+Misc:
+  - We have started transitioning the code to ES6 and the new JS style guide
+    - https://google.github.io/styleguide/jsguide.html
+
+
+## 2.3.8 (2018-05-23)
+
+Bugfixes:
+  - Fix non-default namespace names in DASH
+    - https://github.com/google/shaka-player/issues/1438
+  - Fix use after destroy() in CastProxy
+    - https://github.com/google/shaka-player/issues/1423
+  - Fix text track visibility state
+    - https://github.com/google/shaka-player/issues/1412
+  - Remove licenses when wiping offline storage
+    - https://github.com/google/shaka-player/issues/1277
+  - Restore backward compatibility for v2.2.x offline storage
+    - https://github.com/google/shaka-player/issues/1248
+
+Demo app:
+  - Update DASH-IF Big Buck Bunny asset
+
+Docs:
+  - Fix typos and formatting
+  - Build docs as part of build/all.py
+    - https://github.com/google/shaka-player/issues/1421
+
+
 ## 2.3.7 (2018-04-24)
 
 Bugfixes:
@@ -98,7 +204,7 @@ Bugfixes:
     - https://github.com/google/shaka-player/issues/1119
   - Work around MSE rounding errors in Edge
     - https://github.com/google/shaka-player/issues/1281
-    - Edge bug: https://goo.gl/3ZTzse
+    - Edge bug: https://bit.ly/2ttKiBU
   - Fix IE stuck buffering at the end after replay
     - https://github.com/google/shaka-player/issues/979
   - Fix catastrophic backtracking in TTML text parser
@@ -2046,7 +2152,7 @@ Features:
 Broken Compatibility:
   - System IDs in PSSH objects are now hex strings instead of raw strings.
 
-[Feb 9 2015 EME spec]: http://goo.gl/5gifok
+[Feb 9 2015 EME spec]: https://bit.ly/EmeFeb15
 [npm]: https://www.npmjs.com/package/shaka-player
 [cdnjs]: https://cdnjs.com/libraries/shaka-player
 [semantic versioning spec]: http://semver.org/

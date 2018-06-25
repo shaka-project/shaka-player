@@ -15,25 +15,17 @@
  * limitations under the License.
  */
 
-
 /**
- * @fileoverview Externs for MediaSession based on
- * {@link https://bit.ly/2Id3dGD Editor's Draft, 12 January 2017}
- *
  * @externs
+ * @suppress {duplicate} To prevent compiler errors with the namespace
+ *   being declared both here and by goog.provide in the library.
  */
 
-
+/** @namespace */
+var shaka = {};
 
 /**
- * @constructor
+ * @namespace
+ * @exportDoc
  */
-var MediaMetadata = function(options) {};
-
-
-/** @type {string} */
-MediaMetadata.prototype.title;
-
-
-/** @type {MediaMetadata} */
-Navigator.prototype.mediaSession;
+shaka.extern = {};

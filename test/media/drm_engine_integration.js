@@ -60,7 +60,7 @@ describe('DrmEngine', function() {
   /** @type {!ArrayBuffer} */
   let audioSegment;
 
-  beforeAll(function(done) {
+  beforeAll(async () => {
     let supportTest = shaka.media.DrmEngine.probeSupport()
         .then(function(result) { support = result; })
         .catch(fail);
@@ -71,21 +71,20 @@ describe('DrmEngine', function() {
     video.muted = true;
     document.body.appendChild(video);
 
-    Promise.all([
+    let responses = await Promise.all([
       supportTest,
       shaka.test.Util.fetch(videoInitSegmentUri),
       shaka.test.Util.fetch(videoSegmentUri),
       shaka.test.Util.fetch(audioInitSegmentUri),
       shaka.test.Util.fetch(audioSegmentUri)
-    ]).then(function(responses) {
-      videoInitSegment = responses[1];
-      videoSegment = responses[2];
-      audioInitSegment = responses[3];
-      audioSegment = responses[4];
-    }).catch(fail).then(done);
+    ]);
+    videoInitSegment = responses[1];
+    videoSegment = responses[2];
+    audioInitSegment = responses[3];
+    audioSegment = responses[4];
   });
 
-  beforeEach(function(done) {
+  beforeEach(async () => {
     onErrorSpy = jasmine.createSpy('onError');
     onKeyStatusSpy = jasmine.createSpy('onKeyStatus');
     onExpirationSpy = jasmine.createSpy('onExpirationUpdated');
@@ -148,16 +147,16 @@ describe('DrmEngine', function() {
     let expectedObject = {};
     expectedObject[ContentType.AUDIO] = audioStream;
     expectedObject[ContentType.VIDEO] = videoStream;
-    mediaSourceEngine.init(expectedObject, false).then(done);
+    await mediaSourceEngine.init(expectedObject, false);
   });
 
-  afterEach(function(done) {
-    Promise.all([
+  afterEach(async () => {
+    await Promise.all([
       eventManager.destroy(),
       mediaSourceEngine.destroy(),
       networkingEngine.destroy(),
       drmEngine.destroy()
-    ]).then(done);
+    ]);
   });
 
   afterAll(function() {
