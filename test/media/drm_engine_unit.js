@@ -259,6 +259,28 @@ describe('DrmEngine', function() {
       }).then(done);
     });
 
+    it('silences errors for unencrypted assets', function(done) {
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addVariant(0)
+            .addVideo(1).mime('video/foo', 'vbar')
+            .addAudio(2).mime('audio/foo', 'abar')
+        .build();
+
+      // Accept no key systems.
+      requestMediaKeySystemAccessSpy.and.callFake(
+          fakeRequestMediaKeySystemAccess.bind(null, []));
+
+      drmEngine.init(manifest, false).then(function() {
+        // Both key systems were tried, since the first one failed.
+        expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
+        expect(requestMediaKeySystemAccessSpy)
+            .toHaveBeenCalledWith('drm.abc', jasmine.any(Object));
+        expect(requestMediaKeySystemAccessSpy)
+            .toHaveBeenCalledWith('drm.def', jasmine.any(Object));
+      }).catch(fail).then(done);
+    });
+
     it('fails to initialize if no key systems are recognized', function(done) {
       // Simulate the DASH parser inserting a blank placeholder when only
       // unrecognized custom schemes are found.
