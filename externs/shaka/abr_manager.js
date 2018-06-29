@@ -141,7 +141,7 @@ shakaExtern.AbrManager.prototype.getBandwidthEstimate = function() {};
  * Sets the ABR configuration.
  *
  * It is the responsibility of the AbrManager implementation to implement the
- * restrictions behavior described in shaka.extern.AbrConfiguration.
+ * restrictions behavior described in shakaExtern.AbrConfiguration.
  *
  * @param {shakaExtern.AbrConfiguration} config
  * @exportDoc
