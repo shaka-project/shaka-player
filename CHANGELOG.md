@@ -1,3 +1,19 @@
+## 2.3.10 (2018-06-29)
+
+Bugfixes:
+  - Silence DRM engine errors for unencrypted assets
+    - https://github.com/google/shaka-player/issues/1479
+  - Fix infinite seeking with HLS on V1 Chromecasts
+    - https://github.com/google/shaka-player/issues/1411
+  - Fix module wrapper to work with CommonJS, AMD, ES modules, as well as
+    Closure and Electron
+    - https://github.com/google/shaka-player/issues/1463
+  - Fix TextEngine buffered range calculations
+
+Demo App:
+  - Fix custom encrypted assets in the demo app
+
+
 ## 2.3.9 (2018-06-13)
 
 Bugfixes:
