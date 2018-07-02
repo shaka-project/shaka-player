@@ -1027,4 +1027,26 @@ describe('DashParser Manifest', function() {
       });
     });
   });
+
+  it('does not fail on AdaptationSets without segment info', async () => {
+    let manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" contentType="text">',
+      '      <Representation mimeType="application/mp4" codecs="stpp">',
+      '        <SegmentTemplate media="$Number$.mp4" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <Representation bandwidth="1">',
+      '        <SegmentTemplate media="2.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'
+    ].join('\n');
+
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
+    await parser.start('dummy://foo', playerInterface);
+  });
 });
