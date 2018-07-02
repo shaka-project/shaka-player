@@ -1112,25 +1112,25 @@ describe('DashParser Manifest', function() {
     });
   });
 
-  /**
-   * @param {string} manifestText
-   * @param {Uint8Array} emsgUpdate
-   * @param {Function} done
-   */
-  function emsgBoxPresenceHelper(manifestText, emsgUpdate, done) {
+  it('does not fail on AdaptationSets without segment info', async () => {
+    let manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" contentType="text">',
+      '      <Representation mimeType="application/mp4" codecs="stpp">',
+      '        <SegmentTemplate media="$Number$.mp4" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <Representation bandwidth="1">',
+      '        <SegmentTemplate media="2.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>'
+    ].join('\n');
+
     fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
-    parser.start('dummy://foo', playerInterface)
-        .then(function() {
-          expect(fakeNetEngine.registerResponseFilter).toHaveBeenCalled();
-          let filter = /** @type {!Function} */ (
-              fakeNetEngine.registerResponseFilter.calls.mostRecent().args[0]);
-          const type = shaka.net.NetworkingEngine.RequestType.SEGMENT;
-          let response = {data: emsgUpdate.buffer};
-          fakeNetEngine.request.calls.reset();
-          filter(type, response);
-          expect(fakeNetEngine.request).toHaveBeenCalled();
-        })
-        .catch(fail)
-        .then(done);
-  }
+    await parser.start('dummy://foo', playerInterface);
+  });
 });
