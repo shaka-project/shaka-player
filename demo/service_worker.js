@@ -73,7 +73,7 @@ const CRITICAL_RESOURCES = [
 
   'load.js',
   '../dist/shaka-player.compiled.js',
-  '../dist/demo.compiled.js'
+  '../dist/demo.compiled.js',
 ];
 
 
@@ -86,7 +86,7 @@ const OPTIONAL_RESOURCES = [
   'favicon.ico',
   'https://shaka-player-demo.appspot.com/assets/poster.jpg',
   'https://shaka-player-demo.appspot.com/assets/audioOnly.gif',
-  '../node_modules/mux.js/dist/mux.js'
+  '../node_modules/mux.js/dist/mux.js',
 ];
 
 
@@ -98,7 +98,7 @@ const OPTIONAL_RESOURCES = [
  * @const {!Array.<string>}
  */
 const NO_CORS_RESOURCES = [
-  'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js'
+  'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js',
 ];
 
 
@@ -112,7 +112,7 @@ const NO_CORS_RESOURCES = [
 const CACHE_FIRST = [
   // Google Web Fonts should be cached when first seen, without being explicitly
   // listed, and should be preferred from cache for speed.
-  'https://fonts.googleapis.com/'
+  'https://fonts.googleapis.com/',
 ];
 
 
@@ -254,7 +254,7 @@ function timeout(seconds, asyncProcess) {
     asyncProcess,
     new Promise(function(_, reject) {
       setTimeout(reject, seconds * 1000);
-    })
+    }),
   ]);
 }
 

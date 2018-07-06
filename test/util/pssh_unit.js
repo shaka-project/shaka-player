@@ -104,7 +104,7 @@ describe('Pssh', function() {
       fromHex(PLAYREADY_PSSH + TRUNCATED_WIDEVINE_PSSH),
       fromHex(PLAYREADY_PSSH + TRUNCATED_GENERIC_PSSH),
       fromHex(GENERIC_PSSH + TRUNCATED_WIDEVINE_PSSH),
-      fromHex(GENERIC_PSSH + TRUNCATED_PLAYREADY_PSSH)
+      fromHex(GENERIC_PSSH + TRUNCATED_PLAYREADY_PSSH),
     ];
 
     for (let i = 0; i < psshs.length; ++i) {

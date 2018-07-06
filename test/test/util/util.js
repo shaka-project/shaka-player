@@ -19,7 +19,6 @@ goog.provide('shaka.test.StatusPromise');
 goog.provide('shaka.test.Util');
 
 
-
 /**
  * @param {!Promise} p
  * @constructor
@@ -115,9 +114,9 @@ shaka.test.Util.registerElementMatcher_ = function() {
   jasmine.addMatchers({
     toEqualElement: function(util, customEqualityTesters) {
       return {
-        compare: shaka.test.Util.expectToEqualElementCompare_
+        compare: shaka.test.Util.expectToEqualElementCompare_,
       };
-    }
+    },
   });
 };
 

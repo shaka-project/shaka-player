@@ -546,7 +546,6 @@ describe('StreamUtils', function() {
           expect(chosen[0].primary).toBe(false);
           expect(chosen[1].primary).toBe(false);
         });
-
   });
 
   describe('filterVariantsByAudioChannelCount', function() {

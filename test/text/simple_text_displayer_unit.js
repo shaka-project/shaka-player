@@ -70,12 +70,12 @@ describe('SimpleTextDisplayer', function() {
           [
             {start: 10, end: 20, text: 'Test1'},
             {start: 20, end: 30, text: 'Test2'},
-            {start: 30, end: 40, text: 'Test3'}
+            {start: 30, end: 40, text: 'Test3'},
           ],
           [
             new shaka.text.Cue(20, 30, 'Test2'),
             new shaka.text.Cue(30, 40, 'Test3'),
-            new shaka.text.Cue(10, 20, 'Test1')
+            new shaka.text.Cue(10, 20, 'Test1'),
           ]);
     });
 
@@ -85,12 +85,12 @@ describe('SimpleTextDisplayer', function() {
           [
             {start: 20, end: 40, text: 'Test1'},
             {start: 20, end: 40, text: 'Test2'},
-            {start: 20, end: 40, text: 'Test3'}
+            {start: 20, end: 40, text: 'Test3'},
           ],
           [
             new shaka.text.Cue(20, 40, 'Test3'),
             new shaka.text.Cue(20, 40, 'Test2'),
-            new shaka.text.Cue(20, 40, 'Test1')
+            new shaka.text.Cue(20, 40, 'Test1'),
           ]);
     });
   });
@@ -135,10 +135,10 @@ describe('SimpleTextDisplayer', function() {
     it('converts shaka.text.Cues to VttCues', function() {
       verifyHelper(
           [
-            {start: 20, end: 40, text: 'Test'}
+            {start: 20, end: 40, text: 'Test'},
           ],
           [
-            new shaka.text.Cue(20, 40, 'Test')
+            new shaka.text.Cue(20, 40, 'Test'),
           ]);
 
       let cue1 = new shaka.text.Cue(20, 40, 'Test');
@@ -164,8 +164,8 @@ describe('SimpleTextDisplayer', function() {
               vertical: 'lr',
               snapToLines: true,
               line: 5,
-              position: 10
-            }
+              position: 10,
+            },
           ], [cue1]);
 
       let cue2 = new shaka.text.Cue(30, 50, 'Test');
@@ -187,8 +187,8 @@ describe('SimpleTextDisplayer', function() {
               align: 'right',
               vertical: 'rl',
               snapToLines: false,
-              line: 5
-            }
+              line: 5,
+            },
           ], [cue2]);
 
       let cue3 = new shaka.text.Cue(40, 60, 'Test');
@@ -206,8 +206,8 @@ describe('SimpleTextDisplayer', function() {
               lineAlign: 'center',
               positionAlign: 'center',
               align: 'start',
-              vertical: undefined
-            }
+              vertical: undefined,
+            },
           ], [cue3]);
 
       let cue4 = new shaka.text.Cue(40, 60, 'Test');
@@ -223,8 +223,8 @@ describe('SimpleTextDisplayer', function() {
               // In a real VTTCue, these would be the default of "auto".
               // With our mock, we leave them unset and they are undefined.
               line: undefined,
-              position: undefined
-            }
+              position: undefined,
+            },
           ], [cue4]);
 
       let cue5 = new shaka.text.Cue(40, 60, 'Test');
@@ -238,8 +238,8 @@ describe('SimpleTextDisplayer', function() {
               end: 60,
               text: 'Test',
               line: 0,
-              position: 0
-            }
+              position: 0,
+            },
           ], [cue5]);
     });
 
@@ -256,7 +256,7 @@ describe('SimpleTextDisplayer', function() {
           get: function() { return align; },
           set: function(newValue) {
             if (newValue != 'center') align = newValue;
-          }
+          },
         });
         this.startTime = start;
         this.endTime = end;
@@ -273,8 +273,8 @@ describe('SimpleTextDisplayer', function() {
               start: 20,
               end: 40,
               text: 'Test',
-              align: 'middle'
-            }
+              align: 'middle',
+            },
           ],
           [cue1]);
     });
@@ -312,9 +312,9 @@ describe('SimpleTextDisplayer', function() {
                 regionAnchorY: 0,
                 width: 50,
                 lines: 3,
-                scroll: 'up'
-              }
-            }
+                scroll: 'up',
+              },
+            },
           ], [cue1]);
     });
 
@@ -339,9 +339,9 @@ describe('SimpleTextDisplayer', function() {
               region: {
                 viewportAnchorX: 10,
                 viewportAnchorY: 10,
-                width: 50
-              }
-            }
+                width: 50,
+              },
+            },
           ], [cue1]);
     });
   });

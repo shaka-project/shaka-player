@@ -119,7 +119,7 @@ describe('Player', function() {
             returnValue(Promise.resolve()),
         setUseEmbeddedText: jasmine.createSpy('setUseEmbeddedText'),
         getUseEmbeddedText: jasmine.createSpy('getUseEmbeddedText'),
-        setTextDisplayer: jasmine.createSpy('setTextDisplayer')
+        setTextDisplayer: jasmine.createSpy('setTextDisplayer'),
       };
 
       player.createDrmEngine = function() { return drmEngine; };
@@ -145,7 +145,7 @@ describe('Player', function() {
       // Ensures we don't get a warning about missing preference.
       preferredAudioLanguage: 'en',
       abrFactory: abrFactory,
-      textDisplayFactory: textDisplayFactory
+      textDisplayFactory: textDisplayFactory,
     });
 
     onError = jasmine.createSpy('error event');
@@ -655,8 +655,8 @@ describe('Player', function() {
 
       player.configure({
         drm: {
-          retryParameters: {backoffFactor: 5}
-        }
+          retryParameters: {backoffFactor: 5},
+        },
       });
 
       let newConfig = player.getConfiguration();
@@ -669,8 +669,8 @@ describe('Player', function() {
       player.configure({
         streaming: {
           retryParameters: {backoffFactor: 5},
-          bufferBehind: 7
-        }
+          bufferBehind: 7,
+        },
       });
 
       let newConfig = player.getConfiguration();
@@ -679,8 +679,8 @@ describe('Player', function() {
 
       player.configure({
         streaming: {
-          retryParameters: undefined
-        }
+          retryParameters: undefined,
+        },
       });
 
       newConfig = player.getConfiguration();
@@ -698,7 +698,7 @@ describe('Player', function() {
 
       // Try a bogus bufferBehind (string instead of number)
       player.configure({
-        streaming: {bufferBehind: '77'}
+        streaming: {bufferBehind: '77'},
       });
 
       let newConfig = player.getConfiguration();
@@ -709,7 +709,7 @@ describe('Player', function() {
       // Try a bogus streaming config (number instead of Object)
       logErrorSpy.calls.reset();
       player.configure({
-        streaming: 5
+        streaming: 5,
       });
 
       newConfig = player.getConfiguration();
@@ -720,22 +720,22 @@ describe('Player', function() {
 
     it('expands dictionaries that allow arbitrary keys', function() {
       player.configure({
-        drm: {servers: {'com.widevine.alpha': 'http://foo/widevine'}}
+        drm: {servers: {'com.widevine.alpha': 'http://foo/widevine'}},
       });
 
       let newConfig = player.getConfiguration();
       expect(newConfig.drm.servers).toEqual({
-        'com.widevine.alpha': 'http://foo/widevine'
+        'com.widevine.alpha': 'http://foo/widevine',
       });
 
       player.configure({
-        drm: {servers: {'com.microsoft.playready': 'http://foo/playready'}}
+        drm: {servers: {'com.microsoft.playready': 'http://foo/playready'}},
       });
 
       newConfig = player.getConfiguration();
       expect(newConfig.drm.servers).toEqual({
         'com.widevine.alpha': 'http://foo/widevine',
-        'com.microsoft.playready': 'http://foo/playready'
+        'com.microsoft.playready': 'http://foo/playready',
       });
     });
 
@@ -743,7 +743,7 @@ describe('Player', function() {
       // Try a bogus server value (number instead of string)
       logErrorSpy.and.stub();
       player.configure({
-        drm: {servers: {'com.widevine.alpha': 7}}
+        drm: {servers: {'com.widevine.alpha': 7}},
       });
 
       let newConfig = player.getConfiguration();
@@ -754,19 +754,19 @@ describe('Player', function() {
       // Try a valid advanced config.
       logErrorSpy.calls.reset();
       player.configure({
-        drm: {advanced: {'ks1': {distinctiveIdentifierRequired: true}}}
+        drm: {advanced: {'ks1': {distinctiveIdentifierRequired: true}}},
       });
 
       newConfig = player.getConfiguration();
       expect(newConfig.drm.advanced).toEqual({
-        'ks1': jasmine.objectContaining({distinctiveIdentifierRequired: true})
+        'ks1': jasmine.objectContaining({distinctiveIdentifierRequired: true}),
       });
       expect(logErrorSpy).not.toHaveBeenCalled();
       let lastGoodConfig = newConfig;
 
       // Try an invalid advanced config key.
       player.configure({
-        drm: {advanced: {'ks1': {bogus: true}}}
+        drm: {advanced: {'ks1': {bogus: true}}},
       });
 
       newConfig = player.getConfiguration();
@@ -780,28 +780,28 @@ describe('Player', function() {
         drm: {
           servers: {
             'com.widevine.alpha': 'http://foo/widevine',
-            'com.microsoft.playready': 'http://foo/playready'
-          }
-        }
+            'com.microsoft.playready': 'http://foo/playready',
+          },
+        },
       });
 
       let newConfig = player.getConfiguration();
       expect(newConfig.drm.servers).toEqual({
         'com.widevine.alpha': 'http://foo/widevine',
-        'com.microsoft.playready': 'http://foo/playready'
+        'com.microsoft.playready': 'http://foo/playready',
       });
 
       player.configure({
-        drm: {servers: {'com.widevine.alpha': undefined}}
+        drm: {servers: {'com.widevine.alpha': undefined}},
       });
 
       newConfig = player.getConfiguration();
       expect(newConfig.drm.servers).toEqual({
-        'com.microsoft.playready': 'http://foo/playready'
+        'com.microsoft.playready': 'http://foo/playready',
       });
 
       player.configure({
-        drm: {servers: undefined}
+        drm: {servers: undefined},
       });
 
       newConfig = player.getConfiguration();
@@ -815,7 +815,7 @@ describe('Player', function() {
 
       // Takes good callback.
       player.configure({
-        manifest: {dash: {customScheme: goodCustomScheme}}
+        manifest: {dash: {customScheme: goodCustomScheme}},
       });
 
       let newConfig = player.getConfiguration();
@@ -825,7 +825,7 @@ describe('Player', function() {
       // Warns about bad callback #1, still takes it.
       logWarnSpy.calls.reset();
       player.configure({
-        manifest: {dash: {customScheme: badCustomScheme1}}
+        manifest: {dash: {customScheme: badCustomScheme1}},
       });
 
       newConfig = player.getConfiguration();
@@ -836,7 +836,7 @@ describe('Player', function() {
       // Warns about bad callback #2, still takes it.
       logWarnSpy.calls.reset();
       player.configure({
-        manifest: {dash: {customScheme: badCustomScheme2}}
+        manifest: {dash: {customScheme: badCustomScheme2}},
       });
 
       newConfig = player.getConfiguration();
@@ -847,7 +847,7 @@ describe('Player', function() {
       // Resets to default if undefined.
       logWarnSpy.calls.reset();
       player.configure({
-        manifest: {dash: {customScheme: undefined}}
+        manifest: {dash: {customScheme: undefined}},
       });
 
       newConfig = player.getConfiguration();
@@ -861,20 +861,20 @@ describe('Player', function() {
         drm: {
           advanced: {
             'com.widevine.alpha': {
-              serverCertificate: new Uint8Array(1)
-            }
-          }
-        }
+              serverCertificate: new Uint8Array(1),
+            },
+          },
+        },
       });
 
       player.configure({
         drm: {
           advanced: {
             'com.widevine.alpha': {
-              serverCertificate: new Uint8Array(2)
-            }
-          }
-        }
+              serverCertificate: new Uint8Array(2),
+            },
+          },
+        },
       });
     });
 
@@ -885,10 +885,10 @@ describe('Player', function() {
         drm: {
           advanced: {
             'com.widevine.alpha': {
-              serverCertificate: null
-            }
-          }
-        }
+              serverCertificate: null,
+            },
+          },
+        },
       });
 
       expect(logErrorSpy).toHaveBeenCalledWith(
@@ -899,10 +899,10 @@ describe('Player', function() {
         drm: {
           advanced: {
             'com.widevine.alpha': {
-              serverCertificate: 'foobar'
-            }
-          }
-        }
+              serverCertificate: 'foobar',
+            },
+          },
+        },
       });
 
       expect(logErrorSpy).toHaveBeenCalledWith(
@@ -913,7 +913,7 @@ describe('Player', function() {
       logErrorSpy.and.stub();
 
       player.configure({
-        drm: {advanced: null}
+        drm: {advanced: null},
       });
 
       expect(logErrorSpy).toHaveBeenCalledWith(
@@ -1140,8 +1140,8 @@ describe('Player', function() {
           audioId: 1,
           channelsCount: null,
           audioBandwidth: 200,
-          videoBandwidth: 200
-        }
+          videoBandwidth: 200,
+        },
       ];
       let variantTracks2 = [
         {
@@ -1165,8 +1165,8 @@ describe('Player', function() {
           audioId: 1,
           channelsCount: null,
           audioBandwidth: 200,
-          videoBandwidth: 200
-        }
+          videoBandwidth: 200,
+        },
       ];
 
       let parser = new shaka.test.FakeManifestParser(manifest);
@@ -1658,7 +1658,7 @@ describe('Player', function() {
     it('switching audio doesn\'t change selected text track', function() {
       streamingEngine.onCanSwitch();
       player.configure({
-        preferredTextLanguage: 'es'
+        preferredTextLanguage: 'es',
       });
 
       // We will manually switch from Spanish to English.
@@ -1915,7 +1915,7 @@ describe('Player', function() {
 
       player.configure({
         preferredAudioLanguage: 'en',
-        preferredTextLanguage: 'fr'
+        preferredTextLanguage: 'fr',
       });
 
       expect(player.isTextTrackVisible()).toBe(false);
@@ -1948,7 +1948,7 @@ describe('Player', function() {
        .build();
 
       player.configure({
-        preferredAudioLanguage: undefined
+        preferredAudioLanguage: undefined,
       });
 
       let parser = new shaka.test.FakeManifestParser(manifest);
@@ -1989,7 +1989,7 @@ describe('Player', function() {
 
       // Set the user preferences, which must happen before load().
       player.configure({
-        preferredAudioLanguage: preference
+        preferredAudioLanguage: preference,
       });
 
       let parser = new shaka.test.FakeManifestParser(manifest);
@@ -2077,7 +2077,7 @@ describe('Player', function() {
           creationTime: 0,
           totalFrameDelay: 0,
           totalVideoFrames: 75,
-          droppedVideoFrames: 125
+          droppedVideoFrames: 125,
         };
       };
 
@@ -2157,7 +2157,7 @@ describe('Player', function() {
           id: variant.id,
           type: 'variant',
           fromAdaptation: false,
-          bandwidth: variant.bandwidth
+          bandwidth: variant.bandwidth,
         }]);
       });
 
@@ -2171,8 +2171,8 @@ describe('Player', function() {
             id: variant.id,
             type: 'variant',
             fromAdaptation: true,
-            bandwidth: variant.bandwidth
-          }
+            bandwidth: variant.bandwidth,
+          },
         ]));
       });
 
@@ -2186,7 +2186,7 @@ describe('Player', function() {
           id: 0,
           type: 'variant',
           fromAdaptation: true,
-          bandwidth: 200
+          bandwidth: 200,
         };
 
         let switchHistory = player.getStats().switchHistory;
@@ -2212,8 +2212,8 @@ describe('Player', function() {
             // We are using a mock date, so this is not a race.
             timestamp: Date.now() / 1000,
             duration: 0,
-            state: 'buffering'
-          }
+            state: 'buffering',
+          },
         ]);
       });
 
@@ -2225,13 +2225,13 @@ describe('Player', function() {
           {
             timestamp: jasmine.any(Number),
             duration: jasmine.any(Number),
-            state: 'buffering'
+            state: 'buffering',
           },
           {
             timestamp: jasmine.any(Number),
             duration: jasmine.any(Number),
-            state: 'paused'
-          }
+            state: 'paused',
+          },
         ]);
       });
 
@@ -2243,13 +2243,13 @@ describe('Player', function() {
           {
             timestamp: jasmine.any(Number),
             duration: jasmine.any(Number),
-            state: 'buffering'
+            state: 'buffering',
           },
           {
             timestamp: jasmine.any(Number),
             duration: jasmine.any(Number),
-            state: 'playing'
-          }
+            state: 'playing',
+          },
         ]);
       });
 
@@ -2264,13 +2264,13 @@ describe('Player', function() {
           {
             timestamp: jasmine.any(Number),
             duration: jasmine.any(Number),
-            state: 'playing'
+            state: 'playing',
           },
           {
             timestamp: jasmine.any(Number),
             duration: jasmine.any(Number),
-            state: 'ended'
-          }
+            state: 'ended',
+          },
         ]);
       });
 
@@ -2283,8 +2283,8 @@ describe('Player', function() {
           {
             timestamp: bufferingStarts,
             duration: 0,
-            state: 'buffering'
-          }
+            state: 'buffering',
+          },
         ]);
 
         jasmine.clock().tick(1500);
@@ -2292,8 +2292,8 @@ describe('Player', function() {
           {
             timestamp: bufferingStarts,
             duration: 1.5,
-            state: 'buffering'
-          }
+            state: 'buffering',
+          },
         ]);
 
         let playbackStarts = Date.now() / 1000;
@@ -2303,15 +2303,14 @@ describe('Player', function() {
           {
             timestamp: bufferingStarts,
             duration: 1.5,
-            state: 'buffering'
+            state: 'buffering',
           },
           {
             timestamp: playbackStarts,
             duration: 9,
-            state: 'playing'
-          }
+            state: 'playing',
+          },
         ]);
-
       });
 
       /**
@@ -2484,7 +2483,7 @@ describe('Player', function() {
       // This restriction should make it so that the first variant (bandwidth
       // 500, id 0) cannot be selected.
       player.configure({
-        restrictions: {maxBandwidth: 200}
+        restrictions: {maxBandwidth: 200},
       });
 
       // The restriction change should trigger a call to AbrManager.
@@ -3204,14 +3203,14 @@ describe('Player', function() {
           {language: 'en', role: 'main'},
           {language: 'en', role: 'commentary'},
           {language: 'de', role: 'foo'},
-          {language: 'de', role: 'bar'}
+          {language: 'de', role: 'bar'},
         ]);
         expect(player.getTextLanguagesAndRoles()).toEqual([
           {language: 'es', role: 'baz'},
           {language: 'es', role: 'qwerty'},
           {language: 'en', role: 'main'},
           {language: 'en', role: 'caption'},
-          {language: 'en', role: 'subtitle'}
+          {language: 'en', role: 'subtitle'},
         ]);
       });
 
@@ -3220,7 +3219,7 @@ describe('Player', function() {
 
         await player.load('', 0, parserFactory);
         expect(player.getAudioLanguagesAndRoles()).toEqual([
-          {language: 'und', role: ''}
+          {language: 'und', role: ''},
         ]);
         expect(player.getTextLanguagesAndRoles()).toEqual([]);
       });
@@ -3284,7 +3283,7 @@ describe('Player', function() {
     return {
       asymmetricMatch: function(actual) {
         return actual.indexOf(substring) >= 0;
-      }
+      },
     };
   }
 

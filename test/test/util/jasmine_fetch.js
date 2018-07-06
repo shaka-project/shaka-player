@@ -104,7 +104,7 @@ jasmine.Fetch.impl_ = function(url, init) {
     method: init.method,
     requestHeaders: headers,
     withCredentials: init.credentials == 'include',
-    aborted: false
+    aborted: false,
   });
   jasmine.Fetch.container_.lastFetchRequestStub = newStub;
 
@@ -130,7 +130,7 @@ jasmine.Fetch.impl_ = function(url, init) {
       url: stubbed.response.responseURL || url,
       arrayBuffer: function() {
         return Promise.resolve(stubbed.response.response);
-      }
+      },
     });
     return Promise.resolve(response);
   } else if (stubbed.error) {
@@ -167,7 +167,6 @@ jasmine.Fetch.uninstall = function() {
 };
 
 
-
 /**
  * @constructor
  * @struct
@@ -186,7 +185,6 @@ jasmine.Fetch.AbortController = function() {
 jasmine.Fetch.AbortController.prototype.abort = function() {
   this.aborted_ = true;
 };
-
 
 
 /**
@@ -250,7 +248,7 @@ jasmine.Fetch.Headers.prototype.keys = function() {
       return index < contentsNames.length ?
           {value: contentsNames[index++], done: false} :
           {done: true};
-    }
+    },
   };
 };
 
@@ -286,7 +284,6 @@ jasmine.Fetch.stubRequest = function(url) {
 jasmine.Fetch.requests.mostRecent = function() {
   return jasmine.Fetch.container_.lastFetchRequestStub;
 };
-
 
 
 /**

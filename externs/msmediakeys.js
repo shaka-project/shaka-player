@@ -22,7 +22,6 @@
  */
 
 
-
 /**
  * @constructor
  * @param {string} keySystem
@@ -46,7 +45,6 @@ MSMediaKeys.isTypeSupported = function(keySystem, contentType) {};
  */
 MSMediaKeys.prototype.createSession =
     function(contentType, initData, cdmData) {};
-
 
 
 /**
@@ -87,7 +85,6 @@ MSMediaKeySession.prototype.dispatchEvent = function(evt) {};
  * @param {MSMediaKeys} mediaKeys
  */
 HTMLMediaElement.prototype.msSetMediaKeys = function(mediaKeys) {};
-
 
 
 /** @constructor */

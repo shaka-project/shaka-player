@@ -128,7 +128,7 @@ describe('MediaSourceEngine', function() {
       error: null,
       currentTime: 0,
       buffered: {
-        length: 0
+        length: 0,
       },
       removeAttribute: /** @this {HTMLVideoElement} */ function(attr) {
         // Only called with attr == 'src'.
@@ -1073,12 +1073,12 @@ describe('MediaSourceEngine', function() {
       buffered: {
         length: 0,
         start: jasmine.createSpy('buffered.start'),
-        end: jasmine.createSpy('buffered.end')
+        end: jasmine.createSpy('buffered.end'),
       },
       timestampOffset: 0,
       appendWindowEnd: Infinity,
       updateend: function() {},
-      error: function() {}
+      error: function() {},
     };
   }
 
@@ -1090,7 +1090,7 @@ describe('MediaSourceEngine', function() {
       mockTextEngine = jasmine.createSpyObj('TextEngine', [
         'initParser', 'destroy', 'appendBuffer', 'remove', 'setTimestampOffset',
         'setAppendWindow', 'bufferStart', 'bufferEnd', 'bufferedAheadOf',
-        'setDisplayer', 'appendCues'
+        'setDisplayer', 'appendCues',
       ]);
 
       let resolve = Promise.resolve.bind(Promise);

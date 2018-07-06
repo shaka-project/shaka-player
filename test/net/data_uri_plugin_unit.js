@@ -67,6 +67,7 @@ describe('DataUriPlugin', function() {
   function testSucceeds(uri, contentType, text, done) {
     let request =
         shaka.net.NetworkingEngine.makeRequest([uri], retryParameters);
+    // eslint-disable-next-line new-cap
     shaka.net.DataUriPlugin(uri, request).promise
         .then(function(response) {
           expect(response).toBeTruthy();
@@ -83,6 +84,7 @@ describe('DataUriPlugin', function() {
   function testFails(uri, done, code) {
     let request =
         shaka.net.NetworkingEngine.makeRequest([uri], retryParameters);
+    // eslint-disable-next-line new-cap
     shaka.net.DataUriPlugin(uri, request).promise
         .then(fail)
         .catch(function(error) { expect(error.code).toBe(code); })

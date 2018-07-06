@@ -137,7 +137,7 @@ shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
     getSeekRangeStart: jasmine.createSpy('getSeekRangeStart'),
     getSeekRangeEnd: jasmine.createSpy('getSeekRangeEnd'),
     segmentAvailabilityStart: segmentAvailabilityStart,
-    segmentAvailabilityEnd: segmentAvailabilityEnd
+    segmentAvailabilityEnd: segmentAvailabilityEnd,
   };
 
   timeline.getDuration.and.returnValue(presentationDuration);
@@ -236,7 +236,7 @@ shaka.test.StreamingEngineUtil.createManifest = function(
   let manifest = {
     presentationTimeline: undefined,  // Should be set externally.
     minBufferTime: undefined,  // Should be set externally.
-    periods: []
+    periods: [],
   };
 
   // Populate the Manifest.
@@ -245,7 +245,7 @@ shaka.test.StreamingEngineUtil.createManifest = function(
     let period = {
       startTime: periodStartTimes[i],
       variants: [],
-      textStreams: []
+      textStreams: [],
     };
 
     let variant = {};
@@ -328,7 +328,7 @@ shaka.test.StreamingEngineUtil.createMockStream = function(type, id) {
     audio: shaka.test.StreamingEngineUtil.createMockAudioStream,
     video: shaka.test.StreamingEngineUtil.createMockVideoStream,
     trickvideo: shaka.test.StreamingEngineUtil.createMockVideoStream,
-    text: shaka.test.StreamingEngineUtil.createMockTextStream
+    text: shaka.test.StreamingEngineUtil.createMockTextStream,
   }[type](id);
 };
 
@@ -351,7 +351,7 @@ shaka.test.StreamingEngineUtil.createMockAudioStream = function(id) {
     mimeType: 'audio/mp4',
     codecs: 'mp4a.40.2',
     bandwidth: 192000,
-    type: ContentType.AUDIO
+    type: ContentType.AUDIO,
   };
 };
 
@@ -376,7 +376,7 @@ shaka.test.StreamingEngineUtil.createMockVideoStream = function(id) {
     bandwidth: 5000000,
     width: 600,
     height: 400,
-    type: ContentType.VIDEO
+    type: ContentType.VIDEO,
   };
 };
 
@@ -398,7 +398,7 @@ shaka.test.StreamingEngineUtil.createMockTextStream = function(id) {
     presentationTimeOffset: 0,
     mimeType: 'text/vtt',
     kind: ManifestParserUtils.TextStreamKind.SUBTITLE,
-    type: ManifestParserUtils.ContentType.TEXT
+    type: ManifestParserUtils.ContentType.TEXT,
   };
 };
 

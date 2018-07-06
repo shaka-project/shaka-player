@@ -204,7 +204,7 @@ describe('OfflineManifestParser', function() {
       periods: [],
       sessionIds: [sessionId],
       drmInfo: null,
-      appMetadata: {}
+      appMetadata: {},
     };
 
     return manifest;

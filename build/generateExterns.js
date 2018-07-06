@@ -244,7 +244,7 @@ function getIdentifierString(node) {
  */
 function getFunctionParameters(node) {
   console.assert(node.type == 'FunctionExpression');
-  // Example code: function(x, y, z = null) {...}
+  // Example code: function(x, y, z = null, ...varArgs) {...}
   // Example node: {
   //   params: [
   //     { type: 'Identifier', name: 'x' },
@@ -254,16 +254,23 @@ function getFunctionParameters(node) {
   //       left: { type: 'Identifier', name: 'z' },
   //       right: { type: 'Literal', raw: 'null' },
   //     },
+  //     {
+  //       type: 'RestElement',
+  //       argument: { type: 'Identifier', name: 'varArgs' },
+  //     },
   //   ],
   //   body: {...},
   // }
   return node.params.map(function(param) {
     console.assert(param.type == 'Identifier' ||
-                   param.type == 'AssignmentPattern');
+                   param.type == 'AssignmentPattern' ||
+                   param.type == 'RestElement');
     if (param.type == 'Identifier') {
       return param.name;
     } else if (param.type == 'AssignmentPattern') {
       return param.left.name;
+    } else if (param.type == 'RestElement') {
+      return '...' + param.argument.name;
     }
   });
 }

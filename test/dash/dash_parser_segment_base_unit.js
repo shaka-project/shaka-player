@@ -43,7 +43,7 @@ describe('DashParser SegmentBase', function() {
       filterAllPeriods: function() {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
-      onError: fail
+      onError: fail,
     };
   });
 
@@ -66,7 +66,7 @@ describe('DashParser SegmentBase', function() {
     fakeNetEngine.setResponseMapAsText({
       'dummy://foo': source,
       'http://example.com': '',
-      'http://example.com/init.webm': ''
+      'http://example.com/init.webm': '',
     });
     let manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest).toEqual(Dash.makeManifestFromInit('init.webm', 201, 300));
@@ -94,7 +94,7 @@ describe('DashParser SegmentBase', function() {
 
     fakeNetEngine.setResponseMapAsText({
       'dummy://foo': source,
-      'http://example.com': ''
+      'http://example.com': '',
     });
     let manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest).toEqual(Dash.makeManifestFromInit('init.mp4', 201, 300));
@@ -121,7 +121,7 @@ describe('DashParser SegmentBase', function() {
 
     fakeNetEngine.setResponseMapAsText({
       'dummy://foo': source,
-      'http://example.com': ''
+      'http://example.com': '',
     });
     let manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest).toEqual(Dash.makeManifestFromInit('init.mp4', 201, 300));
@@ -149,7 +149,7 @@ describe('DashParser SegmentBase', function() {
 
     fakeNetEngine.setResponseMapAsText({
       'dummy://foo': source,
-      'http://example.com/stream.mp4': ''
+      'http://example.com/stream.mp4': '',
     });
     let manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest).toEqual(Dash.makeManifestFromInit('stream.mp4', 201, 300));
@@ -183,7 +183,7 @@ describe('DashParser SegmentBase', function() {
 
     fakeNetEngine.setResponseMapAsText({
       'dummy://foo': source,
-      'http://example.com/index.mp4': ''
+      'http://example.com/index.mp4': '',
     });
     let manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest).toEqual(
@@ -217,7 +217,7 @@ describe('DashParser SegmentBase', function() {
 
     fakeNetEngine.setResponseMapAsText({
       'dummy://foo': source,
-      'http://example.com': ''
+      'http://example.com': '',
     });
     let manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest).toEqual(
@@ -246,7 +246,7 @@ describe('DashParser SegmentBase', function() {
 
     fakeNetEngine.setResponseMap({
       'dummy://foo': shaka.util.StringUtils.toUTF8(source),
-      'http://example.com/index.mp4': indexSegment
+      'http://example.com/index.mp4': indexSegment,
     });
 
     let manifest = await parser.start('dummy://foo', playerInterface);

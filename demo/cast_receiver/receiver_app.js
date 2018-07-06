@@ -16,7 +16,6 @@
  */
 
 
-
 /**
  * A Chromecast receiver demo app.
  * @constructor

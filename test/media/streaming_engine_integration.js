@@ -89,7 +89,7 @@ describe('StreamingEngine', function() {
       smallGapLimit: 0.5,
       jumpLargeGaps: false,
       durationBackoff: 1,
-      forceTransmuxTS: false
+      forceTransmuxTS: false,
     };
 
     onChooseStreams = jasmine.createSpy('onChooseStreams');
@@ -109,7 +109,7 @@ describe('StreamingEngine', function() {
     await Promise.all([
       mediaSourceEngine.destroy(),
       playhead.destroy(),
-      eventManager.destroy()
+      eventManager.destroy(),
     ]);
     // Work-around: allow the Tizen media pipeline to cool down.
     // Without this, Tizen's pipeline seems to hang in subsequent tests.
@@ -124,7 +124,7 @@ describe('StreamingEngine', function() {
   function setupVod() {
     return Promise.all([
       createVodStreamGenerator(metadata.audio, ContentType.AUDIO),
-      createVodStreamGenerator(metadata.video, ContentType.VIDEO)
+      createVodStreamGenerator(metadata.video, ContentType.VIDEO),
     ]).then(function() {
       timeline = shaka.test.StreamingEngineUtil.createFakePresentationTimeline(
           0 /* segmentAvailabilityStart */,
@@ -157,7 +157,7 @@ describe('StreamingEngine', function() {
           20 /* timeShiftBufferDepth */),
       createLiveStreamGenerator(
           metadata.video, ContentType.VIDEO,
-          20 /* timeShiftBufferDepth */)
+          20 /* timeShiftBufferDepth */),
     ]).then(function() {
       // The generator's AST is set to 295 seconds in the past, so the live-edge
       // is at 295 - 10 seconds.
@@ -310,7 +310,7 @@ describe('StreamingEngine', function() {
       onManifestUpdate: function() {},
       onSegmentAppended: playhead.onSegmentAppended.bind(playhead),
       onInitialStreamsSetup: Util.spyFunc(onInitialStreamsSetup),
-      onStartupComplete: Util.spyFunc(onStartupComplete)
+      onStartupComplete: Util.spyFunc(onStartupComplete),
     };
     streamingEngine = new shaka.media.StreamingEngine(
         /** @type {shaka.extern.Manifest} */(manifest), playerInterface);
@@ -667,7 +667,7 @@ describe('StreamingEngine', function() {
       // should not be downloaded.
       return Promise.all([
         createVodStreamGenerator(metadata.audio, ContentType.AUDIO),
-        createVodStreamGenerator(metadata.video, ContentType.VIDEO)
+        createVodStreamGenerator(metadata.video, ContentType.VIDEO),
       ]).then(function() {
         timeline =
             shaka.test.StreamingEngineUtil.createFakePresentationTimeline(
@@ -763,7 +763,7 @@ describe('StreamingEngine', function() {
               bandwidth: 5000000,
               width: 600,
               height: 400,
-              type: shaka.util.ManifestParserUtils.ContentType.VIDEO
+              type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
             },
             audio: {
               id: 3,
@@ -775,10 +775,10 @@ describe('StreamingEngine', function() {
               mimeType: 'audio/mp4',
               codecs: 'mp4a.40.2',
               bandwidth: 192000,
-              type: shaka.util.ManifestParserUtils.ContentType.AUDIO
-            }
-          }]
-        }]
+              type: shaka.util.ManifestParserUtils.ContentType.AUDIO,
+            },
+          }],
+        }],
       };
     }
 

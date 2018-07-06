@@ -159,14 +159,14 @@ shakaDemo.configureCertificate_ = function(certificate) {
 
   for (let keySystem in config.drm.advanced) {
     certConfig[keySystem] = {
-      serverCertificate: new Uint8Array(certificate)
+      serverCertificate: new Uint8Array(certificate),
     };
   }
 
   player.configure({
     drm: {
-      advanced: certConfig
-    }
+      advanced: certConfig,
+    },
   });
 };
 
@@ -223,7 +223,7 @@ shakaDemo.preparePlayer_ = function(asset) {
       // They will simply fill in a Widevine license server on Chrome, etc.
       licenseServers: licenseServers,
       // Use a custom certificate for all key systems as well
-      certificateUri: document.getElementById('certificateInput').value
+      certificateUri: document.getElementById('certificateInput').value,
     });
   }
 

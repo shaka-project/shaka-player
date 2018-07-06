@@ -53,12 +53,12 @@ function httpPluginTests(usingFetch) {
       // Install the mock only briefly in the global namespace, to get a handle
       // to the mocked XHR implementation.
       jasmine.Ajax.install();
-      const jasmineXHRMock = window.XMLHttpRequest;
+      const JasmineXHRMock = window.XMLHttpRequest;
       jasmine.Ajax.uninstall();
 
       // Wrap event handlers to catch errors
       const MockXHR = function() {
-        const instance = new jasmineXHRMock();
+        const instance = new JasmineXHRMock();
 
         ['abort', 'load', 'error', 'timeout'].forEach(function(eventName) {
           const eventHandlerName = 'on' + eventName;
@@ -79,7 +79,7 @@ function httpPluginTests(usingFetch) {
             },
             get: function() {
               return eventHandler;
-            }
+            },
           });
         });
 
@@ -90,7 +90,7 @@ function httpPluginTests(usingFetch) {
       // Now plug this mock into HttpRequest directly, so it does not interfere
       // with other requests, such as those made by karma frameworks like
       // source-map-support.
-      shaka.net.HttpXHRPlugin['xhr_'] = MockXHR;
+      shaka.net.HttpXHRPlugin['Xhr_'] = MockXHR;
     }
 
     jasmine.clock().install();
@@ -98,45 +98,45 @@ function httpPluginTests(usingFetch) {
     stubRequest('https://foo.bar/').andReturn({
       'response': new ArrayBuffer(10),
       'status': 200,
-      'responseHeaders': {'FOO': 'BAR'}
+      'responseHeaders': {'FOO': 'BAR'},
     });
     stubRequest('https://foo.bar/202').andReturn({
       'response': new ArrayBuffer(0),
-      'status': 202
+      'status': 202,
     });
     stubRequest('https://foo.bar/204').andReturn({
       'response': new ArrayBuffer(10),
       'status': 204,
-      'responseHeaders': {'FOO': 'BAR'}
+      'responseHeaders': {'FOO': 'BAR'},
     });
     stubRequest('https://foo.bar/withemptyline').andReturn({
       'response': new ArrayBuffer(0),
       'status': 200,
-      'responseHeaders': {'\nFOO': 'BAR'}
+      'responseHeaders': {'\nFOO': 'BAR'},
     });
     stubRequest('https://foo.bar/302').andReturn({
       'response': new ArrayBuffer(10),
       'status': 200,
       'responseHeaders': {'FOO': 'BAR'},
-      'responseURL': 'https://foo.bar/after/302'
+      'responseURL': 'https://foo.bar/after/302',
     });
     stubRequest('https://foo.bar/401').andReturn({
       'response': new ArrayBuffer(0),
-      'status': 401
+      'status': 401,
     });
     stubRequest('https://foo.bar/403').andReturn({
       'response': new ArrayBuffer(0),
-      'status': 403
+      'status': 403,
     });
     stubRequest('https://foo.bar/404').andReturn({
       'response': new Uint8Array([65, 66, 67]).buffer, // "ABC"
       'status': 404,
-      'responseHeaders': {'FOO': 'BAR'}
+      'responseHeaders': {'FOO': 'BAR'},
     });
     stubRequest('https://foo.bar/cache').andReturn({
       'response': new ArrayBuffer(0),
       'status': 200,
-      'responseHeaders': {'X-Shaka-From-Cache': 'true'}
+      'responseHeaders': {'X-Shaka-From-Cache': 'true'},
     });
 
     stubRequest('https://foo.bar/timeout').andTimeout();
@@ -152,7 +152,7 @@ function httpPluginTests(usingFetch) {
       shaka.net.HttpFetchPlugin['AbortController_'] = window.AbortController;
       shaka.net.HttpFetchPlugin['Headers_'] = window.Headers;
     } else {
-      shaka.net.HttpXHRPlugin['xhr_'] = window.XMLHttpRequest;
+      shaka.net.HttpXHRPlugin['Xhr_'] = window.XMLHttpRequest;
     }
     jasmine.clock().uninstall();
     PromiseMock.uninstall();
@@ -276,7 +276,7 @@ function httpPluginTests(usingFetch) {
   it('aborts the request when the operation is aborted', function(done) {
     let abortPromise;
     let requestPromise;
-    let oldXHRMock = shaka.net.HttpXHRPlugin['xhr_'];
+    let oldXHRMock = shaka.net.HttpXHRPlugin['Xhr_'];
     if (usingFetch) {
       let request = shaka.net.NetworkingEngine.makeRequest(
           ['https://foo.bar/timeout'], retryParameters);
@@ -318,7 +318,7 @@ function httpPluginTests(usingFetch) {
           }.bind(this));
         };
       };
-      shaka.net.HttpXHRPlugin['xhr_'] = newXHRMock;
+      shaka.net.HttpXHRPlugin['Xhr_'] = newXHRMock;
 
       let request = shaka.net.NetworkingEngine.makeRequest(
           ['https://foo.bar/'], retryParameters);
@@ -332,7 +332,7 @@ function httpPluginTests(usingFetch) {
 
     Promise.all([abortPromise, requestPromise]).catch(fail).then(done);
     PromiseMock.flush();
-    shaka.net.HttpXHRPlugin['xhr_'] = oldXHRMock;
+    shaka.net.HttpXHRPlugin['Xhr_'] = oldXHRMock;
   });
 
   /**
@@ -439,7 +439,7 @@ function httpPluginTests(usingFetch) {
           data: mostRecent.data,
           method: mostRecent.method,
           requestHeaders: mostRecent.requestHeaders,
-          withCredentials: mostRecent.withCredentials
+          withCredentials: mostRecent.withCredentials,
         });
       }
     }

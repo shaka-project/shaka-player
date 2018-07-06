@@ -121,7 +121,7 @@ shakaDemo.onLogLevelChange_ = function(event) {
  */
 shakaDemo.onJumpLargeGapsChange_ = function(event) {
   shakaDemo.player_.configure(({
-    streaming: {jumpLargeGaps: event.target.checked}
+    streaming: {jumpLargeGaps: event.target.checked},
   }));
   // Change the hash, to mirror this.
   shakaDemo.hashShouldChange_();
@@ -137,8 +137,8 @@ shakaDemo.onGapInput_ = function(event) {
   let useDefault = isNaN(smallGapLimit) || event.target.value.length == 0;
   shakaDemo.player_.configure(({
     streaming: {
-      smallGapLimit: useDefault ? undefined : smallGapLimit
-    }
+      smallGapLimit: useDefault ? undefined : smallGapLimit,
+    },
   }));
   // Change the hash, to mirror this.
   shakaDemo.hashShouldChange_();
@@ -171,7 +171,7 @@ shakaDemo.onConfigInput_ = function(event) {
 shakaDemo.onAdaptationChange_ = function(event) {
   // Update adaptation config.
   shakaDemo.player_.configure({
-    abr: {enabled: event.target.checked}
+    abr: {enabled: event.target.checked},
   });
   // Change the hash, to mirror this.
   shakaDemo.hashShouldChange_();
@@ -200,7 +200,7 @@ shakaDemo.onNativeChange_ = function(event) {
   // the text display state changes, so we can't use the display state to choose
   // when to stream text.
   shakaDemo.player_.configure({
-    streaming: {alwaysStreamText: event.target.checked}
+    streaming: {alwaysStreamText: event.target.checked},
   });
 
   // Change the hash, to mirror this.

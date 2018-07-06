@@ -158,7 +158,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
         makeReference(1, -3, 4, uri(1)),
         makeReference(2, 4, 11, uri(2)),
         makeReference(3, 11, 18, uri(3)),
-        makeReference(4, 18, 25, uri(4))
+        makeReference(4, 18, 25, uri(4)),
       ];
       let index = new shaka.media.SegmentIndex(references);
       expect(index.references_).toEqual(references);
@@ -168,7 +168,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
         /* ref 0 dropped because it ends before the period starts */
         makeReference(1, 0, 4, uri(1)),  // start time clamped to 0
         makeReference(2, 4, 11, uri(2)),
-        makeReference(3, 11, 15, uri(3))  // end time clamped to period
+        makeReference(3, 11, 15, uri(3)),  // end time clamped to period
         /* ref 4 dropped because it starts after the period ends */
       ];
       expect(index.references_).toEqual(newReferences);
@@ -179,7 +179,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
       // (after PTO adjustments) should be dropped.
       let references = [
         makeReference(0, -10, 0, uri(0)),
-        makeReference(1, 0, 10, uri(1))
+        makeReference(1, 0, 10, uri(1)),
       ];
       let index = new shaka.media.SegmentIndex(references);
       expect(index.references_).toEqual(references);
@@ -187,7 +187,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
       index.fit(/* periodDuration */ 10);
       let newReferences = [
         /* ref 0 dropped because it ends before the period starts (at 0) */
-        makeReference(1, 0, 10, uri(1))
+        makeReference(1, 0, 10, uri(1)),
       ];
       expect(index.references_).toEqual(newReferences);
     });
@@ -228,7 +228,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
     it('one reference into two references at end', function() {
       let references1 = [
         makeReference(1, 10, 20, uri(10)),
-        makeReference(2, 20, 30, uri(20))
+        makeReference(2, 20, 30, uri(20)),
       ];
       let index1 = new shaka.media.SegmentIndex(references1);
 
@@ -247,7 +247,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
 
       let references2 = [
         makeReference(3, 30, 40, uri(30)),
-        makeReference(4, 40, 50, uri(40))
+        makeReference(4, 40, 50, uri(40)),
       ];
 
       index1.merge(references2);
@@ -261,7 +261,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
       let references1 = [
         makeReference(1, 10, 20, uri(10)),
         makeReference(2, 20, 30, uri(20)),
-        makeReference(3, 30, 49.887, uri(30))
+        makeReference(3, 30, 49.887, uri(30)),
       ];
       let index1 = new shaka.media.SegmentIndex(references1);
 
@@ -270,7 +270,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
       // done that.
       let references2 = [
         makeReference(2, 20, 30, uri(20)),
-        makeReference(3, 30, 50, uri(30))
+        makeReference(3, 30, 50, uri(30)),
       ];
 
       index1.merge(references2);
@@ -287,14 +287,14 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
       let references1 = [
         makeReference(1, 10, 20, uri(10)),
         makeReference(2, 20, 30, uri(20)),
-        makeReference(3, 30, 49.887, uri(30))
+        makeReference(3, 30, 49.887, uri(30)),
       ];
       let index1 = new shaka.media.SegmentIndex(references1);
 
       // segment position always start from 1 for time-based segment templates
       let references2 = [
         makeReference(1, 20, 30, uri(20)),
-        makeReference(2, 30, 50, uri(30))
+        makeReference(2, 30, 50, uri(30)),
       ];
 
       let lastReference = makeReference(3, 30, 50, uri(30));

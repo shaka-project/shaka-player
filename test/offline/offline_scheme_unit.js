@@ -34,6 +34,7 @@ describe('OfflineScheme', function() {
         const uri = shaka.offline.OfflineUri.manifest(
             'mechanism', 'cell', 1024);
 
+        // eslint-disable-next-line new-cap
         let response = await shaka.offline.OfflineScheme(
             uri.toString(), request).promise;
 
@@ -59,6 +60,7 @@ describe('OfflineScheme', function() {
           handle.path.mechanism, handle.path.cell, keys[0]);
     });
 
+    // eslint-disable-next-line new-cap
     let response = await shaka.offline.OfflineScheme(
         uri.toString(), request).promise;
 
@@ -86,6 +88,7 @@ describe('OfflineScheme', function() {
     });
 
     try {
+      // eslint-disable-next-line new-cap
       await shaka.offline.OfflineScheme(uri.toString(), request).promise;
       fail();
     } catch (e) {
@@ -98,6 +101,7 @@ describe('OfflineScheme', function() {
     const uri = 'this-in-an-invalid-uri';
 
     try {
+      // eslint-disable-next-line new-cap
       await shaka.offline.OfflineScheme(uri, request).promise;
       fail();
     } catch (e) {
@@ -122,7 +126,7 @@ describe('OfflineScheme', function() {
     const dataLength = 12;
 
     let segment = {
-      data: new ArrayBuffer(dataLength)
+      data: new ArrayBuffer(dataLength),
     };
 
     return segment;

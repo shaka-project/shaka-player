@@ -43,8 +43,8 @@ describe('DashParser ContentProtection', function() {
         customScheme: callback,
         ignoreDrmInfo: ignoreDrmInfo,
         xlinkFailGracefully: false,
-        defaultPresentationDelay: 10
-      }
+        defaultPresentationDelay: 10,
+      },
     });
     let playerEvents = {
       networkingEngine: netEngine,
@@ -52,7 +52,7 @@ describe('DashParser ContentProtection', function() {
       filterAllPeriods: function() {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
-      onError: fail
+      onError: fail,
     };
 
     return dashParser.start('http://example.com', playerEvents)
@@ -85,12 +85,12 @@ describe('DashParser ContentProtection', function() {
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
-      '</MPD>'
+      '</MPD>',
     ].join('\n');
     return sprintf(template, {
       adaptationSetLines: adaptationSetLines.join('\n'),
       representation1Lines: representation1Lines.join('\n'),
-      representation2Lines: representation2Lines.join('\n')
+      representation2Lines: representation2Lines.join('\n'),
     });
   }
 
@@ -112,8 +112,8 @@ describe('DashParser ContentProtection', function() {
       let variant = jasmine.objectContaining({
         drmInfos: drmInfos,
         video: jasmine.objectContaining({
-          keyId: keyIds[i] || null
-        })
+          keyId: keyIds[i] || null,
+        }),
       });
       variants.push(variant);
     }
@@ -122,9 +122,9 @@ describe('DashParser ContentProtection', function() {
       periods: [
         jasmine.objectContaining({
           variants: variants,
-          textStreams: []
-        })
-      ]  // periods
+          textStreams: [],
+        }),
+      ],  // periods
     });
   }
 
@@ -144,7 +144,7 @@ describe('DashParser ContentProtection', function() {
       let initData = {
         initDataType: 'cenc',
         initData: shaka.util.Uint8ArrayUtils.fromBase64(base64),
-        keyId: initDataKeyIds ? initDataKeyIds[index] : null
+        keyId: initDataKeyIds ? initDataKeyIds[index] : null,
       };
       return initData;
     });
@@ -189,21 +189,21 @@ describe('DashParser ContentProtection', function() {
     testKeySystemMappings('for multiple DRMs in the specified order',
         [
           'edef8ba9-79d6-4ace-a3c8-27dcd51d21ed',
-          '9a04f079-9840-4286-ab92-e65be0885f95'
+          '9a04f079-9840-4286-ab92-e65be0885f95',
         ], [
           'com.widevine.alpha',
-          'com.microsoft.playready'
+          'com.microsoft.playready',
         ]);
 
     testKeySystemMappings('in a case-insensitive way',
         [
           'EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED',
           '9A04F079-9840-4286-AB92-E65BE0885F95',
-          'F239E769-EFA3-4850-9C16-A903C6932EFB'
+          'F239E769-EFA3-4850-9C16-A903C6932EFB',
         ], [
           'com.widevine.alpha',
           'com.microsoft.playready',
-          'com.adobe.primetime'
+          'com.adobe.primetime',
         ]);
   });
 
@@ -214,7 +214,7 @@ describe('DashParser ContentProtection', function() {
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
       '<ContentProtection',
       '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
-      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />'
+      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
     ], [], []);
     let expected = buildExpectedManifest([
       buildDrmInfo('com.widevine.alpha', [
@@ -222,7 +222,7 @@ describe('DashParser ContentProtection', function() {
         'deadbeeffeedbaadf00d000008675309',
         // Representation 2 key ID
         'deadbeeffeedbaadf00d000008675309',
-      ])
+      ]),
     ]);
     await testDashParser(source, expected);
   });
@@ -237,14 +237,14 @@ describe('DashParser ContentProtection', function() {
       '    value="cenc"',
       '    cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309">',
       '  <cenc:pssh>bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5</cenc:pssh>',
-      '</ContentProtection>'
+      '</ContentProtection>',
     ], []);
 
     let expected = buildExpectedManifest([
       buildDrmInfo('com.widevine.alpha',
           ['deadbeeffeedbaadf00d000008675309'], // key Id
           ['bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5'], // initData
-          ['deadbeeffeedbaadf00d000008675309']) // key Id for initData
+          ['deadbeeffeedbaadf00d000008675309']), // key Id for initData
     ]);
     await testDashParser(source, expected);
   });
@@ -256,17 +256,17 @@ describe('DashParser ContentProtection', function() {
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
       '<ContentProtection',
       '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
-      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />'
+      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
     ], [
       // Representation 1 lines
       '<ContentProtection',
       '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
-      '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />'
+      '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />',
     ], [
       // Representation 2 lines
       '<ContentProtection',
       '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
-      '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-018006492568" />'
+      '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-018006492568" />',
     ]);
     let expected = buildExpectedManifest([
       buildDrmInfo('com.widevine.alpha', [
@@ -274,7 +274,7 @@ describe('DashParser ContentProtection', function() {
         'baadf00dfeeddeafbeef000004390116',
         // Representation 2 key ID
         'baadf00dfeeddeafbeef018006492568',
-      ])
+      ]),
     ]);
     await testDashParser(source, expected);
   });
@@ -289,15 +289,15 @@ describe('DashParser ContentProtection', function() {
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95">',
       '  <cenc:pssh>bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5</cenc:pssh>',
-      '</ContentProtection>'
+      '</ContentProtection>',
     ], [], []);
     let expected = buildExpectedManifest([
       buildDrmInfo('com.widevine.alpha', [], [
-        'ZmFrZSBXaWRldmluZSBQU1NI'
+        'ZmFrZSBXaWRldmluZSBQU1NI',
       ]),
       buildDrmInfo('com.microsoft.playready', [], [
-        'bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5'
-      ])
+        'bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5',
+      ]),
     ]);
     await testDashParser(source, expected);
   });
@@ -306,14 +306,14 @@ describe('DashParser ContentProtection', function() {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
-      '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc" />'
+      '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc" />',
     ], [], []);
     let expected = buildExpectedManifest(
         // The order does not matter here, so use arrayContaining.
         /** @type {!Array.<!Object>} */(jasmine.arrayContaining([
           buildDrmInfo('com.widevine.alpha'),
           buildDrmInfo('com.microsoft.playready'),
-          buildDrmInfo('com.adobe.primetime')
+          buildDrmInfo('com.adobe.primetime'),
         ])));
     await testDashParser(source, expected);
   });
@@ -328,7 +328,7 @@ describe('DashParser ContentProtection', function() {
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95">',
       '  <cenc:pssh>bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcm</cenc:pssh>',
-      '</ContentProtection>'
+      '</ContentProtection>',
     ], [], []);
 
 
@@ -338,7 +338,7 @@ describe('DashParser ContentProtection', function() {
         /** @type {!Array.<!Object>} */(jasmine.arrayContaining([
           buildDrmInfo('com.widevine.alpha'),
           buildDrmInfo('com.microsoft.playready'),
-          buildDrmInfo('com.adobe.primetime')
+          buildDrmInfo('com.adobe.primetime'),
         ])));
     await testDashParser(source, expected, /* callback */ undefined,
                          /* ignoreDrmInfo */ true);
@@ -352,20 +352,20 @@ describe('DashParser ContentProtection', function() {
       '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"',
-      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />'
+      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
     ], [], []);
     let keyIds = [
       // Representation 1 key ID
       'deadbeeffeedbaadf00d000008675309',
       // Representation 2 key ID
-      'deadbeeffeedbaadf00d000008675309'
+      'deadbeeffeedbaadf00d000008675309',
     ];
 
     let expected = buildExpectedManifest(
         [
           buildDrmInfo('com.widevine.alpha', keyIds),
           buildDrmInfo('com.microsoft.playready', keyIds),
-          buildDrmInfo('com.adobe.primetime', keyIds)
+          buildDrmInfo('com.adobe.primetime', keyIds),
         ]);
     await testDashParser(source, expected, /* callback */ undefined,
                          /* ignoreDrmInfo */ true);
@@ -381,15 +381,15 @@ describe('DashParser ContentProtection', function() {
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
       '<ContentProtection',
-      '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95" />'
+      '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95" />',
     ], [], []);
     let expected = buildExpectedManifest([
       buildDrmInfo('com.widevine.alpha', [], [
-        'b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'
+        'b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs',
       ]),
       buildDrmInfo('com.microsoft.playready', [], [
-        'b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'
-      ])
+        'b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs',
+      ]),
     ]);
     await testDashParser(source, expected);
   });
@@ -408,15 +408,15 @@ describe('DashParser ContentProtection', function() {
       '  </cenc:pssh>',
       '</ContentProtection>',
       '<ContentProtection',
-      '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95" />'
+      '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95" />',
     ], [], []);
     let expected = buildExpectedManifest([
       buildDrmInfo('com.widevine.alpha', [], [
-        'VGltZSBpcyBhbiBpbGx1c2lvbi4gTHVuY2h0aW1lIGRvdWJseSBzby4='
+        'VGltZSBpcyBhbiBpbGx1c2lvbi4gTHVuY2h0aW1lIGRvdWJseSBzby4=',
       ]),
       buildDrmInfo('com.microsoft.playready', [], [
-        'b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'
-      ])
+        'b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs',
+      ]),
     ]);
     await testDashParser(source, expected);
   });
@@ -429,10 +429,10 @@ describe('DashParser ContentProtection', function() {
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
       '<ContentProtection',
-      '  schemeIdUri="http://example.com/drm" />'
+      '  schemeIdUri="http://example.com/drm" />',
     ], [], []);
     let expected = buildExpectedManifest([
-      buildDrmInfo('com.widevine.alpha')
+      buildDrmInfo('com.widevine.alpha'),
     ]);
     await testDashParser(source, expected);
   });
@@ -445,7 +445,7 @@ describe('DashParser ContentProtection', function() {
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
       '<ContentProtection',
-      '  schemeIdUri="http://example.com/drm" />'
+      '  schemeIdUri="http://example.com/drm" />',
     ], [], []);
 
     /**
@@ -464,7 +464,7 @@ describe('DashParser ContentProtection', function() {
           audioRobustness: '',
           serverCertificate: null,
           initData: [],
-          keyIds: []
+          keyIds: [],
         }];
       } else if (schemeIdUri == 'http://example.com/drm') {
         return [{
@@ -476,7 +476,7 @@ describe('DashParser ContentProtection', function() {
           audioRobustness: '',
           serverCertificate: null,
           initData: [],
-          keyIds: []
+          keyIds: [],
         }];
       } else {
         return null;
@@ -486,7 +486,7 @@ describe('DashParser ContentProtection', function() {
     let expected = buildExpectedManifest([
       buildDrmInfo('com.custom.baadd00d'),
       buildDrmInfo('com.widevine.alpha'),
-      buildDrmInfo('com.example.drm')
+      buildDrmInfo('com.example.drm'),
     ]);
 
     await testDashParser(source, expected, callback);
@@ -501,7 +501,7 @@ describe('DashParser ContentProtection', function() {
       '  schemeIdUri="http://example.com/drm" />',
       '<ContentProtection',
       '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
-      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />'
+      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
     ], [], []);
     let expected = buildExpectedManifest([
       buildDrmInfo('', // placeholder: only unrecognized schemes found
@@ -510,7 +510,7 @@ describe('DashParser ContentProtection', function() {
           'deadbeeffeedbaadf00d000008675309',
           // Representation 2 key ID
           'deadbeeffeedbaadf00d000008675309',
-        ])
+        ]),
     ]);
     await testDashParser(source, expected);
   });
@@ -521,11 +521,11 @@ describe('DashParser ContentProtection', function() {
     ], [
       // Representation 1 lines
       '<ContentProtection',
-      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />'
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
     ], [
       // Representation 2 lines
       '<ContentProtection',
-      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />'
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
     ]);
     let expected = buildExpectedManifest(
         [buildDrmInfo('com.widevine.alpha')]);
@@ -540,11 +540,11 @@ describe('DashParser ContentProtection', function() {
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95" />',
       '<ContentProtection',
-      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />'
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
     ], [
       // Representation 2 lines
       '<ContentProtection',
-      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />'
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
     ]);
     let expected = buildExpectedManifest(
         [buildDrmInfo('com.widevine.alpha')]);
@@ -560,14 +560,14 @@ describe('DashParser ContentProtection', function() {
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
       '<ContentProtection',
       '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
-      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />'
+      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
     ], [
       // Representation 2 lines
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
       '<ContentProtection',
       '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
-      '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />'
+      '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />',
     ]);
     let expected = buildExpectedManifest([
       buildDrmInfo('com.widevine.alpha', [
@@ -590,7 +590,7 @@ describe('DashParser ContentProtection', function() {
       '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"',
-      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />'
+      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
     ], [
       // Representation 2 lines
       '<ContentProtection',
@@ -598,7 +598,7 @@ describe('DashParser ContentProtection', function() {
       '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />',
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"',
-      '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />'
+      '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />',
     ]);
     let keyIds = [
       // Representation 1 key ID
@@ -609,7 +609,7 @@ describe('DashParser ContentProtection', function() {
     let expected = buildExpectedManifest(
         [
           buildDrmInfo('com.microsoft.playready', keyIds),
-          buildDrmInfo('com.widevine.alpha', keyIds)
+          buildDrmInfo('com.widevine.alpha', keyIds),
         ]);
     await testDashParser(source, expected);
   });
@@ -622,18 +622,18 @@ describe('DashParser ContentProtection', function() {
       '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"',
-      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />'
+      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
     ], [], []);
     let keyIds = [
       // Representation 1 key ID
       'deadbeeffeedbaadf00d000008675309',
       // Representation 2 key ID
-      'deadbeeffeedbaadf00d000008675309'
+      'deadbeeffeedbaadf00d000008675309',
     ];
     let expected = buildExpectedManifest(
         [
           buildDrmInfo('com.microsoft.playready', keyIds),
-          buildDrmInfo('com.widevine.alpha', keyIds)
+          buildDrmInfo('com.widevine.alpha', keyIds),
         ]);
     await testDashParser(source, expected);
   });
@@ -643,7 +643,7 @@ describe('DashParser ContentProtection', function() {
       // AdaptationSet lines
       '<ContentProtection />',
       '<ContentProtection',
-      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />'
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
     ], [], []);
     let expected = buildExpectedManifest(
         [buildDrmInfo('com.widevine.alpha')]);
@@ -665,7 +665,7 @@ describe('DashParser ContentProtection', function() {
       '      <Representation bandwidth="100" width="576" height="432" />',
       '    </AdaptationSet>',
       '  </Period>',
-      '</MPD>'
+      '</MPD>',
     ].join('\n');
     let expected = buildExpectedManifest([buildDrmInfo(
         'com.widevine.alpha', [], ['b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'])]);
@@ -678,11 +678,11 @@ describe('DashParser ContentProtection', function() {
     ], [
       // Representation 1 lines
       '<ContentProtection',
-      '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95" />'
+      '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95" />',
     ], [
       // Representation 2 lines
       '<ContentProtection',
-      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />'
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
     ]);
     let expected = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
@@ -697,7 +697,7 @@ describe('DashParser ContentProtection', function() {
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed">',
       '  <cenc:pssh>foobar!</cenc:pssh>',
-      '</ContentProtection>'
+      '</ContentProtection>',
     ], [], []);
     let expected = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
@@ -714,7 +714,7 @@ describe('DashParser ContentProtection', function() {
       '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"',
-      '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />'
+      '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />',
     ], [], []);
     let expected = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
@@ -730,7 +730,7 @@ describe('DashParser ContentProtection', function() {
       '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
       '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116 foobar" />',
       '<ContentProtection',
-      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />'
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
     ], [], []);
     let expected = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,

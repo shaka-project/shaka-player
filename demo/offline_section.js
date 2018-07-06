@@ -157,7 +157,7 @@ shakaDemo.storeDeleteAsset_ = function() {
   storage.configure(/** @type {shaka.extern.OfflineConfiguration} */ ({
     progressCallback: function(data, percent) {
       progress.textContent = (percent * 100).toFixed(2);
-    }
+    },
   }));
 
   let p;

@@ -33,7 +33,7 @@ shakaDemo.originalConsoleMethods_ = {
   'warn': function() {},
   'info': function() {},
   'log': function() {},
-  'debug': function() {}
+  'debug': function() {},
 };
 
 
@@ -43,7 +43,7 @@ shakaDemo.patchedConsoleMethods_ = {
   'warn': function() {},
   'info': function() {},
   'log': function() {},
-  'debug': function() {}
+  'debug': function() {},
 };
 
 

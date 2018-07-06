@@ -132,7 +132,7 @@ describe('CastReceiver', function() {
     // don't need this mock strictly type-checked.
     window['cast'] = {
       receiver: mockReceiverApi,
-      __platform__: {canDisplayType: mockCanDisplayType}
+      __platform__: {canDisplayType: mockCanDisplayType},
     };
 
     mockReceiverManager = createMockReceiverManager();
@@ -153,17 +153,17 @@ describe('CastReceiver', function() {
 
     fakeInitState = {
       player: {
-        configure: {}
+        configure: {},
       },
       playerAfterLoad: {
-        setTextTrackVisibility: true
+        setTextTrackVisibility: true,
       },
       video: {
         loop: true,
-        playbackRate: 5
+        playbackRate: 5,
       },
       manifest: 'test:sintel_no_text',
-      startTime: 0
+      startTime: 0,
     };
   }));
 
@@ -209,7 +209,7 @@ describe('CastReceiver', function() {
     fakeIncomingMessage({
       type: 'init',
       initState: fakeInitState,
-      appData: {}
+      appData: {},
     }, mockShakaMessageBus);
   }));
 
@@ -242,7 +242,7 @@ describe('CastReceiver', function() {
     fakeIncomingMessage({
       type: 'init',
       initState: fakeInitState,
-      appData: {}
+      appData: {},
     }, mockShakaMessageBus);
   }));
 
@@ -276,7 +276,7 @@ describe('CastReceiver', function() {
     fakeIncomingMessage({
       type: 'init',
       initState: fakeInitState,
-      appData: {}
+      appData: {},
     }, mockShakaMessageBus);
   }));
 
@@ -323,8 +323,8 @@ describe('CastReceiver', function() {
   function createMockReceiverApi() {
     return {
       CastReceiverManager: {
-        getInstance: function() { return mockReceiverManager; }
-      }
+        getInstance: function() { return mockReceiverManager; },
+      },
     };
   }
 
@@ -344,7 +344,7 @@ describe('CastReceiver', function() {
         }
 
         return mockGenericMessageBus;
-      }
+      },
     };
   }
 
@@ -352,7 +352,7 @@ describe('CastReceiver', function() {
     let bus = {
       messages: [],
       broadcast: jasmine.createSpy('CastMessageBus.broadcast'),
-      getCastChannel: jasmine.createSpy('CastMessageBus.getCastChannel')
+      getCastChannel: jasmine.createSpy('CastMessageBus.getCastChannel'),
     };
     // For convenience, deserialize and store sent messages.
     bus.broadcast.and.callFake(function(message) {
@@ -369,7 +369,7 @@ describe('CastReceiver', function() {
       messages: [],
       send: function(message) {
         channel.messages.push(CastUtils.deserialize(message));
-      }
+      },
     };
     bus.getCastChannel.and.returnValue(channel);
     return bus;
@@ -397,7 +397,7 @@ describe('CastReceiver', function() {
     let serialized = CastUtils.serialize(message);
     let messageEvent = {
       senderId: senderId,
-      data: serialized
+      data: serialized,
     };
     bus.onMessage(messageEvent);
   }

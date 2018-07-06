@@ -37,7 +37,7 @@ describe('Transmuxer', function() {
   beforeAll(async () => {
     let responses = await Promise.all([
       shaka.test.Util.fetch(videoSegmentUri),
-      shaka.test.Util.fetch(audioSegmentUri)
+      shaka.test.Util.fetch(audioSegmentUri),
     ]);
     videoSegment = responses[0];
     audioSegment = responses[1];

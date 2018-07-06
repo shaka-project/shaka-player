@@ -29,7 +29,6 @@ var muxjs = {};
 muxjs.mp4 = {};
 
 
-
 /**
  * @constructor
  * @struct

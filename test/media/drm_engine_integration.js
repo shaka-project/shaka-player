@@ -76,7 +76,7 @@ describe('DrmEngine', function() {
       shaka.test.Util.fetch(videoInitSegmentUri),
       shaka.test.Util.fetch(videoSegmentUri),
       shaka.test.Util.fetch(audioInitSegmentUri),
-      shaka.test.Util.fetch(audioSegmentUri)
+      shaka.test.Util.fetch(audioSegmentUri),
     ]);
     videoInitSegment = responses[1];
     videoSegment = responses[2];
@@ -99,7 +99,7 @@ describe('DrmEngine', function() {
         'IjoiNjllNTQwODgtZTllMC00NTMwLThjMWEtMWViNmRjZDBkMTRlIiwibWVzc2FnZSI6e',
         'yJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIjoiNmU1YTFkMj',
         'YtMjc1Ny00N2Q3LTgwNDYtZWFhNWQxZDM0YjVhIn1dfX0.yF7PflOPv9qHnu3ZWJNZ12j',
-        'gkqTabmwXbDWk_47tLNE'
+        'gkqTabmwXbDWk_47tLNE',
       ].join('');
     });
 
@@ -108,7 +108,7 @@ describe('DrmEngine', function() {
       onError: shaka.test.Util.spyFunc(onErrorSpy),
       onKeyStatus: shaka.test.Util.spyFunc(onKeyStatusSpy),
       onExpirationUpdated: shaka.test.Util.spyFunc(onExpirationSpy),
-      onEvent: shaka.test.Util.spyFunc(onEventSpy)
+      onEvent: shaka.test.Util.spyFunc(onEventSpy),
     };
 
     drmEngine = new shaka.media.DrmEngine(playerInterface);
@@ -121,8 +121,8 @@ describe('DrmEngine', function() {
         'com.widevine.alpha':
             'https://drm-widevine-licensing.axtest.net/AcquireLicense',
         'com.microsoft.playready':
-            'https://drm-playready-licensing.axtest.net/AcquireLicense'
-      }
+            'https://drm-playready-licensing.axtest.net/AcquireLicense',
+      },
     };
     drmEngine.configure(config);
 
@@ -155,7 +155,7 @@ describe('DrmEngine', function() {
       eventManager.destroy(),
       mediaSourceEngine.destroy(),
       networkingEngine.destroy(),
-      drmEngine.destroy()
+      drmEngine.destroy(),
     ]);
   });
 

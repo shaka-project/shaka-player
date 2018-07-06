@@ -16,7 +16,6 @@
  */
 
 
-
 /**
  * A container for custom video controls.
  * @constructor

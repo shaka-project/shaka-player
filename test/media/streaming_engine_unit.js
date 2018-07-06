@@ -128,31 +128,31 @@ describe('StreamingEngine', function() {
     segmentData = {
       audio: {
         initSegments: [
-          makeBuffer(initSegmentSizeAudio), makeBuffer(initSegmentSizeAudio)
+          makeBuffer(initSegmentSizeAudio), makeBuffer(initSegmentSizeAudio),
         ],
         segments: [
           makeBuffer(segmentSizes[ContentType.AUDIO]),
           makeBuffer(segmentSizes[ContentType.AUDIO]),
           makeBuffer(segmentSizes[ContentType.AUDIO]),
-          makeBuffer(segmentSizes[ContentType.AUDIO])
+          makeBuffer(segmentSizes[ContentType.AUDIO]),
         ],
         segmentStartTimes: [0, 10, 0, 10],
         segmentPeriodTimes: [0, 0, 20, 20],
-        segmentDuration: 10
+        segmentDuration: 10,
       },
       video: {
         initSegments: [
-          makeBuffer(initSegmentSizeVideo), makeBuffer(initSegmentSizeVideo)
+          makeBuffer(initSegmentSizeVideo), makeBuffer(initSegmentSizeVideo),
         ],
         segments: [
           makeBuffer(segmentSizes[ContentType.VIDEO]),
           makeBuffer(segmentSizes[ContentType.VIDEO]),
           makeBuffer(segmentSizes[ContentType.VIDEO]),
-          makeBuffer(segmentSizes[ContentType.VIDEO])
+          makeBuffer(segmentSizes[ContentType.VIDEO]),
         ],
         segmentStartTimes: [0, 10, 0, 10],
         segmentPeriodTimes: [0, 0, 20, 20],
-        segmentDuration: 10
+        segmentDuration: 10,
       },
       text: {
         initSegments: [],
@@ -160,27 +160,27 @@ describe('StreamingEngine', function() {
           makeBuffer(segmentSizes[ContentType.TEXT]),
           makeBuffer(segmentSizes[ContentType.TEXT]),
           makeBuffer(segmentSizes[ContentType.TEXT]),
-          makeBuffer(segmentSizes[ContentType.TEXT])
+          makeBuffer(segmentSizes[ContentType.TEXT]),
         ],
         segmentStartTimes: [0, 10, 0, 10],
         segmentPeriodTimes: [0, 0, 20, 20],
-        segmentDuration: 10
-      }
+        segmentDuration: 10,
+      },
     };
     if (trickMode) {
       segmentData.trickvideo = {
         initSegments: [
-          makeBuffer(initSegmentSizeVideo), makeBuffer(initSegmentSizeVideo)
+          makeBuffer(initSegmentSizeVideo), makeBuffer(initSegmentSizeVideo),
         ],
         segments: [
           makeBuffer(segmentSizes[ContentType.VIDEO]),
           makeBuffer(segmentSizes[ContentType.VIDEO]),
           makeBuffer(segmentSizes[ContentType.VIDEO]),
-          makeBuffer(segmentSizes[ContentType.VIDEO])
+          makeBuffer(segmentSizes[ContentType.VIDEO]),
         ],
         segmentStartTimes: [0, 10, 0, 10],
         segmentPeriodTimes: [0, 0, 20, 20],
-        segmentDuration: 10
+        segmentDuration: 10,
       };
     }
 
@@ -235,7 +235,7 @@ describe('StreamingEngine', function() {
         segments: [],
         segmentStartTimes: [],
         segmentPeriodTimes: [],
-        segmentDuration: 10
+        segmentDuration: 10,
       },
       video: {
         initSegments:
@@ -244,15 +244,15 @@ describe('StreamingEngine', function() {
         segments: [],
         segmentStartTimes: [],
         segmentPeriodTimes: [],
-        segmentDuration: 10
+        segmentDuration: 10,
       },
       text: {
         initSegments: [],
         segments: [],
         segmentStartTimes: [],
         segmentPeriodTimes: [],
-        segmentDuration: 10
-      }
+        segmentDuration: 10,
+      },
     };
 
     let segmentsInFirstPeriod = 12;
@@ -317,7 +317,6 @@ describe('StreamingEngine', function() {
 
   function setupNetworkingEngine(
       segmentsInFirstPeriod, segmentsInSecondPeriod) {
-
     // Create the fake NetworkingEngine. Note: the StreamingEngine should never
     // request a segment that does not exist.
     netEngine = shaka.test.StreamingEngineUtil.createFakeNetworkingEngine(
@@ -341,7 +340,7 @@ describe('StreamingEngine', function() {
     let segmentDurations = {
       audio: segmentData[ContentType.AUDIO].segmentDuration,
       video: segmentData[ContentType.VIDEO].segmentDuration,
-      text: segmentData[ContentType.TEXT].segmentDuration
+      text: segmentData[ContentType.TEXT].segmentDuration,
     };
     if (segmentData['trickvideo']) {
       segmentDurations['trickvideo'] =
@@ -412,7 +411,7 @@ describe('StreamingEngine', function() {
       bandwidth: 0,
       drmInfos: [],
       allowedByApplication: true,
-      allowedByKeySystem: true
+      allowedByKeySystem: true,
     };
     manifest.periods[0].variants.push(variant);
 
@@ -451,7 +450,7 @@ describe('StreamingEngine', function() {
         smallGapLimit: 0.5,
         jumpLargeGaps: false,
         durationBackoff: 1,
-        forceTransmuxTS: false
+        forceTransmuxTS: false,
       };
     }
 
@@ -466,7 +465,7 @@ describe('StreamingEngine', function() {
       onManifestUpdate: Util.spyFunc(onManifestUpdate),
       onSegmentAppended: function() {},
       onInitialStreamsSetup: Util.spyFunc(onInitialStreamsSetup),
-      onStartupComplete: Util.spyFunc(onStartupComplete)
+      onStartupComplete: Util.spyFunc(onStartupComplete),
     };
     streamingEngine = new shaka.media.StreamingEngine(
         /** @type {shaka.extern.Manifest} */(manifest), playerInterface);
@@ -517,12 +516,12 @@ describe('StreamingEngine', function() {
       expect(mediaSourceEngine.initSegments).toEqual({
         audio: [true, false],
         video: [true, false],
-        text: []
+        text: [],
       });
       expect(mediaSourceEngine.segments).toEqual({
         audio: [true, false, false, false],
         video: [true, false, false, false],
-        text: [true, false, false, false]
+        text: [true, false, false, false],
       });
 
       setupFakeGetTime(0);
@@ -548,12 +547,12 @@ describe('StreamingEngine', function() {
         expect(mediaSourceEngine.initSegments).toEqual({
           audio: [true, false],
           video: [true, false],
-          text: []
+          text: [],
         });
         expect(mediaSourceEngine.segments).toEqual({
           audio: [true, true, false, false],
           video: [true, true, false, false],
-          text: [true, true, false, false]
+          text: [true, true, false, false],
         });
 
         verifyNetworkingEngineRequestCalls(1);
@@ -608,12 +607,12 @@ describe('StreamingEngine', function() {
     expect(mediaSourceEngine.initSegments).toEqual({
       audio: [false, true],
       video: [false, true],
-      text: []
+      text: [],
     });
     expect(mediaSourceEngine.segments).toEqual({
       audio: [true, true, true, true],
       video: [true, true, true, true],
-      text: [true, true, true, true]
+      text: [true, true, true, true],
     });
 
     verifyNetworkingEngineRequestCalls(2);
@@ -625,7 +624,7 @@ describe('StreamingEngine', function() {
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
       createStreamingEngine();
       playhead.getTime.and.returnValue(0);
-      onStartupComplete.and.callFake(function() {setupFakeGetTime(0);});
+      onStartupComplete.and.callFake(function() { setupFakeGetTime(0); });
       onChooseStreams.and.callFake(onChooseStreamsWithUnloadedText);
 
       streamingEngine.init();
@@ -650,7 +649,7 @@ describe('StreamingEngine', function() {
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
       createStreamingEngine();
       playhead.getTime.and.returnValue(0);
-      onStartupComplete.and.callFake(function() {setupFakeGetTime(0);});
+      onStartupComplete.and.callFake(function() { setupFakeGetTime(0); });
       onChooseStreams.and.callFake(onChooseStreamsWithUnloadedText);
 
       streamingEngine.init();
@@ -696,7 +695,7 @@ describe('StreamingEngine', function() {
     expect(mediaSourceEngine.initSegments).toEqual({
       audio: [false, true],
       video: [false, true],
-      text: []
+      text: [],
     });
 
     // Since we started playback from segment 11, segments 10 through 14
@@ -755,12 +754,12 @@ describe('StreamingEngine', function() {
     expect(mediaSourceEngine.initSegments).toEqual({
       audio: [false, true],
       video: [false, true],
-      text: []
+      text: [],
     });
     expect(mediaSourceEngine.segments).toEqual({
       audio: [true, true, true, true],
       video: [true, true, true, true],
-      text: [true, true, true, true]
+      text: [true, true, true, true],
     });
   });
 
@@ -801,12 +800,12 @@ describe('StreamingEngine', function() {
     expect(mediaSourceEngine.initSegments).toEqual({
       audio: [false, true],
       video: [false, true],
-      text: []
+      text: [],
     });
     expect(mediaSourceEngine.segments).toEqual({
       audio: [false, false, true, true],
       video: [false, false, true, true],
-      text: [false, false, true, true]
+      text: [false, false, true, true],
     });
   });
 
@@ -852,7 +851,7 @@ describe('StreamingEngine', function() {
     expect(mediaSourceEngine.segments).toEqual({
       audio: [true, true, true, true],
       video: [true, true, true, true],
-      text: [false, false, true, true]
+      text: [false, false, true, true],
     });
   });
 
@@ -893,7 +892,7 @@ describe('StreamingEngine', function() {
     expect(mediaSourceEngine.segments).toEqual({
       audio: [true, true, true, true],
       video: [true, true, true, true],
-      text: [false, false, true, true]
+      text: [false, false, true, true],
     });
   });
 
@@ -948,7 +947,7 @@ describe('StreamingEngine', function() {
     expect(mediaSourceEngine.segments).toEqual({
       audio: [true, true, true, true],
       video: [true, true, true, true],
-      text: [true, true, false, false]
+      text: [true, true, false, false],
     });
   });
 
@@ -1023,7 +1022,7 @@ describe('StreamingEngine', function() {
     let lt20 = {
       asymmetricMatch: function(val) {
         return val >= 19.9 && val < 20;
-      }
+      },
     };
     expect(mediaSourceEngine.setStreamProperties)
         .toHaveBeenCalledWith('video', 20, lt20, 40);
@@ -1048,7 +1047,7 @@ describe('StreamingEngine', function() {
       smallGapLimit: 0.5,
       jumpLargeGaps: false,
       durationBackoff: 1,
-      forceTransmuxTS: false
+      forceTransmuxTS: false,
     };
     createStreamingEngine(config);
 
@@ -1125,7 +1124,7 @@ describe('StreamingEngine', function() {
           let buffer = new ArrayBuffer(0);
           let response = {uri: request.uris[0], data: buffer, headers: {}};
           return shaka.util.AbortableOperation.completed(response);
-        }
+        },
       };
 
       // For these tests, we also don't need FakeMediaSourceEngine to verify
@@ -1238,12 +1237,12 @@ describe('StreamingEngine', function() {
             expect(mediaSourceEngine.initSegments).toEqual({
               audio: [true, false],
               video: [true, false],
-              text: []
+              text: [],
             });
             expect(mediaSourceEngine.segments).toEqual({
               audio: [true, true, false, false],
               video: [true, true, false, false],
-              text: [true, true, false, false]
+              text: [true, true, false, false],
             });
 
             onChooseStreams.and.throwError(new Error());
@@ -1269,12 +1268,12 @@ describe('StreamingEngine', function() {
       expect(mediaSourceEngine.initSegments).toEqual({
         audio: [false, true],
         video: [false, true],
-        text: []
+        text: [],
       });
       expect(mediaSourceEngine.segments).toEqual({
         audio: [true, true, true, true],
         video: [true, true, true, true],
-        text: [true, true, true, true]
+        text: [true, true, true, true],
       });
     });
 
@@ -1316,12 +1315,12 @@ describe('StreamingEngine', function() {
       expect(mediaSourceEngine.initSegments).toEqual({
         audio: [false, true],
         video: [false, true],
-        text: []
+        text: [],
       });
       expect(mediaSourceEngine.segments).toEqual({
         audio: [true, true, true, true],
         video: [true, true, true, true],
-        text: [true, true, true, true]
+        text: [true, true, true, true],
       });
     });
 
@@ -1363,12 +1362,12 @@ describe('StreamingEngine', function() {
           expect(mediaSourceEngine.initSegments).toEqual({
             audio: [true, false],
             video: [true, false],
-            text: []
+            text: [],
           });
           expect(mediaSourceEngine.segments).toEqual({
             audio: [true, true, false, false],
             video: [true, true, false, false],
-            text: [true, true, false, false]
+            text: [true, true, false, false],
           });
 
           onChooseStreams.and.throwError(new Error());
@@ -1386,12 +1385,12 @@ describe('StreamingEngine', function() {
       expect(mediaSourceEngine.initSegments).toEqual({
         audio: [false, true],
         video: [false, true],
-        text: []
+        text: [],
       });
       expect(mediaSourceEngine.segments).toEqual({
         audio: [true, true, true, true],
         video: [true, true, true, true],
-        text: [true, true, true, true]
+        text: [true, true, true, true],
       });
     });
 
@@ -1415,12 +1414,12 @@ describe('StreamingEngine', function() {
         expect(mediaSourceEngine.initSegments).toEqual({
           audio: [false, true],
           video: [false, true],
-          text: []
+          text: [],
         });
         expect(mediaSourceEngine.segments).toEqual({
           audio: [false, false, true, true],
           video: [false, false, true, true],
-          text: [false, false, true, true]
+          text: [false, false, true, true],
         });
 
         // Seek backwards to an unbuffered region in the first Period. Note
@@ -1452,12 +1451,12 @@ describe('StreamingEngine', function() {
             expect(mediaSourceEngine.initSegments).toEqual({
               audio: [true, false],
               video: [true, false],
-              text: []
+              text: [],
             });
             expect(mediaSourceEngine.segments).toEqual({
               audio: [true, true, false, false],
               video: [true, true, false, false],
-              text: [true, true, false, false]
+              text: [true, true, false, false],
             });
 
             onChooseStreams.and.throwError(new Error());
@@ -1482,12 +1481,12 @@ describe('StreamingEngine', function() {
       expect(mediaSourceEngine.initSegments).toEqual({
         audio: [false, true],
         video: [false, true],
-        text: []
+        text: [],
       });
       expect(mediaSourceEngine.segments).toEqual({
         audio: [true, true, true, true],
         video: [true, true, true, true],
-        text: [true, true, true, true]
+        text: [true, true, true, true],
       });
     });
 
@@ -1522,12 +1521,12 @@ describe('StreamingEngine', function() {
           expect(mediaSourceEngine.initSegments).toEqual({
             audio: [true, false],
             video: [true, false],
-            text: []
+            text: [],
           });
           expect(mediaSourceEngine.segments).toEqual({
             audio: [true, true, false, false],
             video: [true, true, false, false],
-            text: [true, true, false, false]
+            text: [true, true, false, false],
           });
 
           onChooseStreams.and.throwError(new Error());
@@ -1549,12 +1548,12 @@ describe('StreamingEngine', function() {
       expect(mediaSourceEngine.initSegments).toEqual({
         audio: [false, true],
         video: [false, true],
-        text: []
+        text: [],
       });
       expect(mediaSourceEngine.segments).toEqual({
         audio: [true, true, true, true],
         video: [true, true, true, true],
-        text: [true, true, true, true]
+        text: [true, true, true, true],
       });
     });
 
@@ -1590,12 +1589,12 @@ describe('StreamingEngine', function() {
       expect(mediaSourceEngine.initSegments).toEqual({
         audio: [false, true],
         video: [false, true],
-        text: []
+        text: [],
       });
       expect(mediaSourceEngine.segments).toEqual({
         audio: [false, false, true, true],
         video: [false, false, true, true],
-        text: [false, false, true, true]
+        text: [false, false, true, true],
       });
     });
 
@@ -1636,12 +1635,12 @@ describe('StreamingEngine', function() {
       expect(mediaSourceEngine.initSegments).toEqual({
         audio: [false, true],
         video: [false, true],
-        text: []
+        text: [],
       });
       expect(mediaSourceEngine.segments).toEqual({
         audio: [true, true, true, true],
         video: [true, true, true, true],
-        text: [true, true, true, true]
+        text: [true, true, true, true],
       });
     });
 
@@ -1665,12 +1664,12 @@ describe('StreamingEngine', function() {
             expect(mediaSourceEngine.initSegments).toEqual({
               audio: [false, true],
               video: [false, true],
-              text: []
+              text: [],
             });
             expect(mediaSourceEngine.segments).toEqual({
               audio: [true, true, true, true],
               video: [true, true, true, true],
-              text: [true, true, true, true]
+              text: [true, true, true, true],
             });
 
             // Fake the audio/video buffers being removed.
@@ -1704,12 +1703,12 @@ describe('StreamingEngine', function() {
       expect(mediaSourceEngine.initSegments).toEqual({
         audio: [false, true],
         video: [false, true],
-        text: []
+        text: [],
       });
       expect(mediaSourceEngine.segments).toEqual({
         audio: [true, true, true, true],
         video: [true, true, true, true],
-        text: [true, true, true, true]
+        text: [true, true, true, true],
       });
     });
   });
@@ -1785,7 +1784,7 @@ describe('StreamingEngine', function() {
       expect(mediaSourceEngine.initSegments).toEqual({
         audio: [false, true],
         video: [false, true],
-        text: []
+        text: [],
       });
 
       // Since we performed an unbuffered seek into the second Period, the
@@ -1941,7 +1940,7 @@ describe('StreamingEngine', function() {
       let textUri = '1_text_1';
       let originalNetEngine = netEngine;
       netEngine = {
-        request: jasmine.createSpy('request')
+        request: jasmine.createSpy('request'),
       };
       netEngine.request.and.callFake(function(requestType, request) {
         if (request.uris[0] == textUri) {
@@ -1965,7 +1964,7 @@ describe('StreamingEngine', function() {
         smallGapLimit: 0.5,
         jumpLargeGaps: false,
         durationBackoff: 1,
-        forceTransmuxTS: false
+        forceTransmuxTS: false,
       };
       createStreamingEngine(config);
 
@@ -2005,7 +2004,7 @@ describe('StreamingEngine', function() {
         smallGapLimit: 0.5,
         jumpLargeGaps: false,
         durationBackoff: 1,
-        forceTransmuxTS: false
+        forceTransmuxTS: false,
       };
       createStreamingEngine(config);
 
@@ -2052,7 +2051,7 @@ describe('StreamingEngine', function() {
         smallGapLimit: 0.5,
         jumpLargeGaps: false,
         durationBackoff: 1,
-        forceTransmuxTS: false
+        forceTransmuxTS: false,
       };
       createStreamingEngine(config);
 
@@ -2101,7 +2100,7 @@ describe('StreamingEngine', function() {
         smallGapLimit: 0.5,
         jumpLargeGaps: false,
         durationBackoff: 1,
-        forceTransmuxTS: false
+        forceTransmuxTS: false,
       };
       createStreamingEngine(config);
 
@@ -2146,7 +2145,7 @@ describe('StreamingEngine', function() {
           baseDelay: 10000,
           backoffFactor: 1,
           fuzzFactor: 0,
-          timeout: 0
+          timeout: 0,
         },
         failureCallback: shaka.test.Util.spyFunc(failureCallback),
         bufferBehind: Infinity,
@@ -2156,7 +2155,7 @@ describe('StreamingEngine', function() {
         smallGapLimit: 0.5,
         jumpLargeGaps: false,
         durationBackoff: 1,
-        forceTransmuxTS: false
+        forceTransmuxTS: false,
       };
       createStreamingEngine(config);
 
@@ -2317,7 +2316,7 @@ describe('StreamingEngine', function() {
         smallGapLimit: 0.5,
         jumpLargeGaps: false,
         durationBackoff: 1,
-        forceTransmuxTS: false
+        forceTransmuxTS: false,
       };
 
       playhead.getTime.and.returnValue(0);
@@ -2382,12 +2381,12 @@ describe('StreamingEngine', function() {
       expect(mediaSourceEngine.initSegments).toEqual({
         audio: [false, true],
         video: [false, true],
-        text: []
+        text: [],
       });
       expect(mediaSourceEngine.segments).toEqual({
         audio: [false, false, true, true],
         video: [false, false, true, true],
-        text: [false, false, true, true]
+        text: [false, false, true, true],
       });
     });
 
@@ -2439,7 +2438,7 @@ describe('StreamingEngine', function() {
         smallGapLimit: 0.5,
         jumpLargeGaps: false,
         durationBackoff: 1,
-        forceTransmuxTS: false
+        forceTransmuxTS: false,
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -2485,12 +2484,12 @@ describe('StreamingEngine', function() {
       expect(mediaSourceEngine.initSegments).toEqual({
         audio: [false, true],
         video: [false, true],
-        text: []
+        text: [],
       });
       expect(mediaSourceEngine.segments).toEqual({
         audio: [false, false, true, true],
         video: [false, false, true, true],
-        text: [false, false, true, true]
+        text: [false, false, true, true],
       });
     });
 
@@ -2512,7 +2511,7 @@ describe('StreamingEngine', function() {
         smallGapLimit: 0.5,
         jumpLargeGaps: false,
         durationBackoff: 1,
-        forceTransmuxTS: false
+        forceTransmuxTS: false,
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -2593,12 +2592,12 @@ describe('StreamingEngine', function() {
       expect(mediaSourceEngine.initSegments).toEqual({
         audio: [false, true],
         video: [false, true],
-        text: []
+        text: [],
       });
       expect(mediaSourceEngine.segments).toEqual({
         audio: [true, true, true, true],
         video: [true, true, true, true],
-        text: [true, true, true, true]
+        text: [true, true, true, true],
       });
     }
 
@@ -2625,12 +2624,12 @@ describe('StreamingEngine', function() {
       expect(mediaSourceEngine.initSegments).toEqual({
         audio: [false, true],
         video: [false, true],
-        text: []
+        text: [],
       });
       expect(mediaSourceEngine.segments).toEqual({
         audio: [true, true, true, true],
         video: [true, true, true, true],
-        text: [true, true, true, true]
+        text: [true, true, true, true],
       });
     }
 
@@ -2667,7 +2666,7 @@ describe('StreamingEngine', function() {
       expect(mediaSourceEngine.initSegments).toEqual({
         audio: [false, true],
         video: [false, true],
-        text: []
+        text: [],
       });
 
       for (let i = 0; i <= 8; ++i) {
@@ -2704,7 +2703,7 @@ describe('StreamingEngine', function() {
         smallGapLimit: 0.5,
         jumpLargeGaps: false,
         durationBackoff: 1,
-        forceTransmuxTS: false
+        forceTransmuxTS: false,
       });
 
       playhead.getTime.and.returnValue(0);
@@ -2721,13 +2720,13 @@ describe('StreamingEngine', function() {
             audio: [true, false],
             video: [true, false],
             trickvideo: [false, false],
-            text: []
+            text: [],
           });
           expect(mediaSourceEngine.segments).toEqual({
             audio: [true, false, false, false],
             video: [true, false, false, false],
             trickvideo: [false, false, false, false],
-            text: [true, false, false, false]
+            text: [true, false, false, false],
           });
 
           // Engage trick play.
@@ -2738,13 +2737,13 @@ describe('StreamingEngine', function() {
             audio: [true, false],
             video: [true, false],
             trickvideo: [true, false],
-            text: []
+            text: [],
           });
           expect(mediaSourceEngine.segments).toEqual({
             audio: [true, true, false, false],
             video: [true, false, false, false],
             trickvideo: [false, true, false, false],
-            text: [true, true, false, false]
+            text: [true, true, false, false],
           });
         } else if (playheadTime == 21) {
           // We've started the second period, still in trick play mode.
@@ -2752,13 +2751,13 @@ describe('StreamingEngine', function() {
             audio: [false, true],
             video: [true, false],  // no init segment fetched for normal video
             trickvideo: [false, true],
-            text: []
+            text: [],
           });
           expect(mediaSourceEngine.segments).toEqual({
             audio: [true, true, true, false],
             video: [true, false, false, false],
             trickvideo: [false, true, true, false],
-            text: [true, true, true, false]
+            text: [true, true, true, false],
           });
         } else if (playheadTime == 31) {
           // We've started the final segment, still in trick play mode.
@@ -2766,13 +2765,13 @@ describe('StreamingEngine', function() {
             audio: [false, true],
             video: [true, false],  // no init segment appended for normal video
             trickvideo: [false, true],
-            text: []
+            text: [],
           });
           expect(mediaSourceEngine.segments).toEqual({
             audio: [true, true, true, true],
             video: [true, false, false, false],
             trickvideo: [false, true, true, true],
-            text: [true, true, true, true]
+            text: [true, true, true, true],
           });
 
           // Disengage trick play mode, which will clear the video buffer.
@@ -2783,13 +2782,13 @@ describe('StreamingEngine', function() {
             audio: [false, true],
             video: [false, true],  // init segment appended for normal video now
             trickvideo: [false, true],
-            text: []
+            text: [],
           });
           expect(mediaSourceEngine.segments).toEqual({
             audio: [true, true, true, true],
             video: [false, false, true, true],  // starts buffering one seg back
             trickvideo: [false, false, false, false],  // cleared
-            text: [true, true, true, true]
+            text: [true, true, true, true],
           });
         }
       });
@@ -2810,7 +2809,7 @@ describe('StreamingEngine', function() {
       presentationTimeDelta: 8,
       eventDuration: 0xffff,
       id: 1,
-      messageData: new Uint8Array([0x74, 0x65, 0x73, 0x74])
+      messageData: new Uint8Array([0x74, 0x65, 0x73, 0x74]),
     };
 
     beforeEach(function() {
@@ -3011,6 +3010,5 @@ describe('StreamingEngine', function() {
           return originalNetEngineRequest(requestType, request);
         });
   }
-
 });
 

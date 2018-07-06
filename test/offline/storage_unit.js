@@ -427,7 +427,7 @@ describe('Storage', function() {
          * @type {!Array.<number>}
          */
         let progressSteps = [
-          0.19, 0.25, 0.44, 0.5, 0.69, 0.75, 0.94, 1.0
+          0.19, 0.25, 0.44, 0.5, 0.69, 0.75, 0.94, 1.0,
         ];
 
         let progressCallback = (content, progress) => {
@@ -436,7 +436,7 @@ describe('Storage', function() {
 
         storage.configure({
           trackSelectionCallback: selectTrack,
-          progressCallback: progressCallback
+          progressCallback: progressCallback,
         });
 
         // Store a manifest with per stream bandwidth. This should result with
@@ -472,7 +472,7 @@ describe('Storage', function() {
              * @type {!Array.<number>}
              */
             let progressSteps = [
-              0.01, 0.25, 0.26, 0.5, 0.51, 0.75, 0.76, 1.0
+              0.01, 0.25, 0.26, 0.5, 0.51, 0.75, 0.76, 1.0,
             ];
 
             let progressCallback = (content, progress) => {
@@ -481,7 +481,7 @@ describe('Storage', function() {
 
             storage.configure({
               trackSelectionCallback: selectTrack,
-              progressCallback: progressCallback
+              progressCallback: progressCallback,
             });
 
             // Store a manifest with bandwidth only for the variant (no per
@@ -501,7 +501,7 @@ describe('Storage', function() {
       const manifestUris = [
         manifestWithPerStreamBandwidthUri,
         manifestWithoutPerStreamBandwidthUri,
-        manifestWithNonZeroStartUri
+        manifestWithNonZeroStartUri,
       ];
 
       // TODO(vaage): This can be changed to use Array.map once storage is
@@ -531,7 +531,7 @@ describe('Storage', function() {
         return selected;
       };
       storage.configure({
-        trackSelectionCallback: selectTrack
+        trackSelectionCallback: selectTrack,
       });
 
       // Stored content should reflect the tracks in the first period, so we
@@ -870,7 +870,7 @@ describe('Storage', function() {
        * @type {!Array.<number>}
        */
       let progressSteps = [
-        0.111, 0.222, 0.333, 0.444, 0.555, 0.666, 0.777, 0.888, 1.0
+        0.111, 0.222, 0.333, 0.444, 0.555, 0.666, 0.777, 0.888, 1.0,
       ];
 
       let progressCallback = (content, progress) => {
@@ -878,7 +878,7 @@ describe('Storage', function() {
       };
 
       storage.configure({
-        progressCallback: progressCallback
+        progressCallback: progressCallback,
       });
 
       await storage.remove(content.offlineUri);
@@ -916,7 +916,7 @@ describe('Storage', function() {
       audioId: id * 2 + 1,
       channelsCount: 2,
       audioBandwidth: bandwidth * 0.33,
-      videoBandwidth: bandwidth * 0.67
+      videoBandwidth: bandwidth * 0.67,
     };
   }
 
@@ -947,7 +947,7 @@ describe('Storage', function() {
       audioId: null,
       channelsCount: null,
       audioBandwidth: null,
-      videoBandwidth: null
+      videoBandwidth: null,
     };
   }
 
@@ -983,7 +983,7 @@ describe('Storage', function() {
         new SegmentReference(0, 0, 1, uris(segment1Uri), 0, null),
         new SegmentReference(1, 1, 2, uris(segment2Uri), 0, null),
         new SegmentReference(2, 2, 3, uris(segment3Uri), 0, null),
-        new SegmentReference(3, 3, 4, uris(segment4Uri), 0, null)
+        new SegmentReference(3, 3, 4, uris(segment4Uri), 0, null),
       ];
 
       overrideSegmentIndex(stream, refs);
@@ -1019,7 +1019,7 @@ describe('Storage', function() {
         new SegmentReference(0, 10, 11, uris(segment1Uri), 0, null),
         new SegmentReference(1, 11, 12, uris(segment2Uri), 0, null),
         new SegmentReference(2, 12, 13, uris(segment3Uri), 0, null),
-        new SegmentReference(3, 13, 14, uris(segment4Uri), 0, null)
+        new SegmentReference(3, 13, 14, uris(segment4Uri), 0, null),
       ];
 
       overrideSegmentIndex(stream, refs);
@@ -1049,7 +1049,6 @@ describe('Storage', function() {
       period.variants.forEach((variant) => {
         if (variant.audio) { streams.push(variant.audio); }
         if (variant.video) { streams.push(variant.video); }
-
       });
       period.textStreams.forEach((stream) => {
         streams.push(stream);
@@ -1104,7 +1103,7 @@ describe('Storage', function() {
      */
     let ret = {
       drmEngine: drm,
-      manifest: manifest
+      manifest: manifest,
     };
 
     storage.loadInternal = () => Promise.resolve(ret);
@@ -1123,7 +1122,7 @@ describe('Storage', function() {
       keyIds: null,
       serverCertificate: null,
       audioRobustness: 'HARDY',
-      videoRobustness: 'OTHER'
+      videoRobustness: 'OTHER',
     };
 
     return drmInfo;
@@ -1217,7 +1216,7 @@ describe('Storage', function() {
       onError: (e) => { error = error || e; },
       onKeyStatus: () => {},
       onExpirationUpdated: () => {},
-      onEvent: () => {}
+      onEvent: () => {},
     });
 
     return shaka.util.IDestroyable.with([drm], async () => {

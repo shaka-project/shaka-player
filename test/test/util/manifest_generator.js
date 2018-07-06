@@ -18,7 +18,6 @@
 goog.provide('shaka.test.ManifestGenerator');
 
 
-
 /**
  * A helper class used to generate manifests.  This is done by chaining multiple
  * calls together that build the manifest.  All the methods can appear at any
@@ -42,7 +41,7 @@ shaka.test.ManifestGenerator = function(shaka) {
     presentationTimeline: timeline,
     periods: [],
     offlineSessionIds: [],
-    minBufferTime: 0
+    minBufferTime: 0,
   };
 
   /** @private {shaka.extern.Stream|shaka.extern.Variant|null} */
@@ -119,7 +118,7 @@ shaka.test.ManifestGenerator.prototype.addPeriod = function(startTime) {
       {
         startTime: startTime,
         variants: [],
-        textStreams: []
+        textStreams: [],
       });
   this.lastObjectAdded_ = null;
   this.lastStreamAdded_ = null;
@@ -145,7 +144,7 @@ shaka.test.ManifestGenerator.prototype.addVariant = function(id) {
     audio: null,
     video: null,
     allowedByApplication: true,
-    allowedByKeySystem: true
+    allowedByKeySystem: true,
   };
   period.variants.push(variant);
   this.lastObjectAdded_ = variant;
@@ -232,7 +231,7 @@ shaka.test.ManifestGenerator.prototype.addDrmInfo = function(keySystem) {
     videoRobustness: '',
     serverCertificate: null,
     initData: null,
-    keyIds: []
+    keyIds: [],
   });
   return this;
 };
@@ -483,7 +482,7 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
     trickModeVideo: null,
     containsEmsgBoxes: false,
     roles: [],
-    channelsCount: null
+    channelsCount: null,
   };
   return stream;
 };

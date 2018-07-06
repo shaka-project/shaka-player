@@ -218,7 +218,7 @@ describe('CastProxy', function() {
         let cache = {video: {
           currentTime: 24,
           paused: false,
-          play: jasmine.createSpy('play')
+          play: jasmine.createSpy('play'),
         }};
         mockSender.get.and.callFake(function(targetName, property) {
           expect(targetName).toEqual('video');
@@ -307,7 +307,7 @@ describe('CastProxy', function() {
         mockVideo.on['timeupdate'](fakeEvent);
         expect(proxyListener).toHaveBeenCalledWith(jasmine.objectContaining({
           type: 'timeupdate',
-          detail: 8675309
+          detail: 8675309,
         }));
       });
 
@@ -342,7 +342,7 @@ describe('CastProxy', function() {
         mockSender.onRemoteEvent('video', fakeEvent);
         expect(proxyListener).toHaveBeenCalledWith(jasmine.objectContaining({
           type: 'timeupdate',
-          detail: 8675309
+          detail: 8675309,
         }));
       });
     });
@@ -377,7 +377,7 @@ describe('CastProxy', function() {
         let cache = {player: {
           getConfiguration: fakeConfig2,
           isTextTrackVisible: true,
-          trickPlay: jasmine.createSpy('trickPlay')
+          trickPlay: jasmine.createSpy('trickPlay'),
         }};
         mockSender.get.and.callFake(function(targetName, property) {
           expect(targetName).toEqual('player');
@@ -453,7 +453,7 @@ describe('CastProxy', function() {
         mockPlayer.listeners['buffering'](fakeEvent);
         expect(proxyListener).toHaveBeenCalledWith(jasmine.objectContaining({
           type: 'buffering',
-          detail: 8675309
+          detail: 8675309,
         }));
       });
 
@@ -488,7 +488,7 @@ describe('CastProxy', function() {
         mockSender.onRemoteEvent('player', fakeEvent);
         expect(proxyListener).toHaveBeenCalledWith(jasmine.objectContaining({
           type: 'buffering',
-          detail: 8675309
+          detail: 8675309,
         }));
       });
     });
@@ -501,7 +501,7 @@ describe('CastProxy', function() {
       expect(listener).not.toHaveBeenCalled();
       mockSender.onCastStatusChanged();
       expect(listener).toHaveBeenCalledWith(jasmine.objectContaining({
-        type: 'caststatuschanged'
+        type: 'caststatuschanged',
       }));
     });
   });
@@ -534,12 +534,12 @@ describe('CastProxy', function() {
       cache = {
         video: {
           loop: true,
-          playbackRate: 5
+          playbackRate: 5,
         },
         player: {
           getConfiguration: {key: 'value'},
-          isTextTrackVisisble: true
-        }
+          isTextTrackVisisble: true,
+        },
       };
       mockSender.get.and.callFake(function(targetName, property) {
         if (targetName == 'player') {
@@ -706,7 +706,7 @@ describe('CastProxy', function() {
       onCastStatusChanged: onCastStatusChanged,
       onFirstCastStateUpdate: onFirstCastStateUpdate,
       onRemoteEvent: onRemoteEvent,
-      onResumeLocal: onResumeLocal
+      onResumeLocal: onResumeLocal,
     };
     mockSender.cast.and.returnValue(Promise.resolve());
     return mockSender;
@@ -732,7 +732,7 @@ describe('CastProxy', function() {
       },
       dispatchEvent: jasmine.createSpy('dispatchEvent'),
       // For convenience:
-      listeners: {}
+      listeners: {},
     };
     player.load.and.returnValue(Promise.resolve());
     player.unload.and.returnValue(Promise.resolve());

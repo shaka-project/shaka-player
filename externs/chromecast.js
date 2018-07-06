@@ -38,7 +38,6 @@ cast.receiver = {};
 cast.receiver.system = {};
 
 
-
 /**
  * @constructor
  * @struct
@@ -52,7 +51,6 @@ cast.receiver.system.SystemVolumeData.prototype.level;
 
 /** @type {boolean} */
 cast.receiver.system.SystemVolumeData.prototype.muted;
-
 
 
 /**
@@ -77,7 +75,6 @@ cast.receiver.CastMessageBus.prototype.getCastChannel = function(senderId) {};
 cast.receiver.CastMessageBus.prototype.onMessage;
 
 
-
 /**
  * @constructor
  * @struct
@@ -93,7 +90,6 @@ cast.receiver.CastMessageBus.Event.prototype.data;
 cast.receiver.CastMessageBus.Event.prototype.senderId;
 
 
-
 /**
  * @constructor
  * @struct
@@ -103,7 +99,6 @@ cast.receiver.CastChannel = function() {};
 
 /** @param {*} message */
 cast.receiver.CastChannel.prototype.send = function(message) {};
-
 
 
 /**
@@ -214,7 +209,6 @@ chrome.cast.requestSession = function(
     successCallback, errorCallback, sessionRequest) {};
 
 
-
 /**
  * @param {chrome.cast.SessionRequest} sessionRequest
  * @param {Function} sessionListener
@@ -230,7 +224,6 @@ chrome.cast.ApiConfig = function(
     receiverListener,
     autoJoinPolicy,
     defaultActionPolicy) {};
-
 
 
 /**
@@ -255,7 +248,6 @@ chrome.cast.Error.prototype.description;
 chrome.cast.Error.prototype.details;
 
 
-
 /**
  * @constructor
  * @struct
@@ -265,7 +257,6 @@ chrome.cast.Receiver = function() {};
 
 /** @const {string} */
 chrome.cast.Receiver.prototype.friendlyName;
-
 
 
 /**
@@ -339,7 +330,6 @@ chrome.cast.Session.prototype.sendMessage = function(
  */
 chrome.cast.Session.prototype.stop = function(
     successCallback, errorCallback) {};
-
 
 
 /**
