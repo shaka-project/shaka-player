@@ -53,6 +53,8 @@ shakaDemo.setupConfiguration_ = function() {
       'input', shakaDemo.onDrmSettingsChange_);
   document.getElementById('drmSettingsAudioRobustness').addEventListener(
       'input', shakaDemo.onDrmSettingsChange_);
+  document.getElementById('availabilityWindowOverride').addEventListener(
+      'input', shakaDemo.onAvailabilityWindowOverrideChange_);
 
   let robustnessSuggestions = document.getElementById('robustnessSuggestions');
   if (shakaDemo.support_.drm['com.widevine.alpha']) {
@@ -81,6 +83,16 @@ shakaDemo.onLoadOnRefreshChange_ = function() {
  * @private
  */
 shakaDemo.onDrmSettingsChange_ = function(event) {
+  // Change the hash, to mirror this.
+  shakaDemo.hashShouldChange_();
+};
+
+
+/**
+ * @param {!Event} event
+ * @private
+ */
+shakaDemo.onAvailabilityWindowOverrideChange_ = function(event) {
   // Change the hash, to mirror this.
   shakaDemo.hashShouldChange_();
 };

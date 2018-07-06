@@ -39,6 +39,7 @@ describe('DashParser ContentProtection', function() {
     let ignoreDrmInfo = opt_ignoreDrmInfo || false;
     dashParser.configure({
       retryParameters: retry,
+      availabilityWindowOverride: NaN,
       dash: {
         clockSyncUri: '',
         customScheme: callback,

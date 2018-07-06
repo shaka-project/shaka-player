@@ -44,6 +44,7 @@ describe('DashParser Live', function() {
     parser = new shaka.dash.DashParser();
     parser.configure({
       retryParameters: retry,
+      availabilityWindowOverride: NaN,
       dash: {
         clockSyncUri: '',
         customScheme: function(node) { return null; },

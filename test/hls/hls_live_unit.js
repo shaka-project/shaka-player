@@ -120,6 +120,7 @@ describe('HlsParser live', function() {
     let retry = shaka.net.NetworkingEngine.defaultRetryParameters();
     config = {
       retryParameters: retry,
+      availabilityWindowOverride: NaN,
       dash: {
         customScheme: function(node) { return null; },
         clockSyncUri: '',

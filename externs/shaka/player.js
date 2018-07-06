@@ -527,11 +527,15 @@ shakaExtern.DashManifestConfiguration;
 /**
  * @typedef {{
  *   retryParameters: shakaExtern.RetryParameters,
+ *   availabilityWindowOverride: number,
  *   dash: shakaExtern.DashManifestConfiguration
  * }}
  *
  * @property {shakaExtern.RetryParameters} retryParameters
  *   Retry parameters for manifest requests.
+ * @property (number) availabilityWindowOverride
+ *   A number, in seconds, that overrides the availability window in the
+ *   manifest, or NaN if the default value should be used.
  * @property {shakaExtern.DashManifestConfiguration} dash
  *   Advanced parameters used by the DASH manifest parser.
  *
