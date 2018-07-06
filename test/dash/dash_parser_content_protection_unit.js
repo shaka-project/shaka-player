@@ -38,6 +38,7 @@ describe('DashParser ContentProtection', function() {
     callback = callback || function(node) { return null; };
     dashParser.configure({
       retryParameters: retry,
+      availabilityWindowOverride: NaN,
       dash: {
         clockSyncUri: '',
         customScheme: callback,

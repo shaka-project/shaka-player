@@ -255,6 +255,16 @@ shakaDemo.preparePlayer_ = function(asset) {
   if (!isNaN(preferredAudioChannelCount)) {
     config.preferredAudioChannelCount = preferredAudioChannelCount;
   }
+  let availabilityWindowOverrideRaw =
+      document.getElementById('availabilityWindowOverride').value;
+  let availabilityWindowOverride = Number(availabilityWindowOverrideRaw);
+  if (!isNaN(availabilityWindowOverride) &&
+      availabilityWindowOverrideRaw.length) {
+    // Don't configure if the field contains an empty string; this is because
+    // Number('') evaluates to 0, which is a valid (if fairly useless) override
+    // value, while we would rather it mean "don't override".
+    config.manifest.availabilityWindowOverride = availabilityWindowOverride;
+  }
 
   config.abr.enabled =
       document.getElementById('enableAdaptation').checked;
