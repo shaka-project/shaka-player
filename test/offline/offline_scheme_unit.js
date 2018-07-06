@@ -52,7 +52,7 @@ describe('OfflineScheme', function() {
 
     /** @type {!shaka.offline.StorageMuxer} */
     let muxer = new shaka.offline.StorageMuxer();
-    await shaka.util.IDestroyable.with([muxer], async () => {
+    await shaka.util.Destroyer.with([muxer], async () => {
       await muxer.init();
       let handle = await muxer.getActive();
       let keys = await handle.cell.addSegments([segment]);
@@ -76,7 +76,7 @@ describe('OfflineScheme', function() {
 
     /** @type {!shaka.offline.StorageMuxer} */
     let muxer = new shaka.offline.StorageMuxer();
-    await shaka.util.IDestroyable.with([muxer], async () => {
+    await shaka.util.Destroyer.with([muxer], async () => {
       await muxer.init();
       let handle = await muxer.getActive();
 
@@ -138,7 +138,7 @@ describe('OfflineScheme', function() {
   function clearStorage() {
     /** @type {!shaka.offline.StorageMuxer} */
     let muxer = new shaka.offline.StorageMuxer();
-    return shaka.util.IDestroyable.with([muxer], async () => {
+    return shaka.util.Destroyer.with([muxer], async () => {
       await muxer.init();
       await muxer.erase();
     });

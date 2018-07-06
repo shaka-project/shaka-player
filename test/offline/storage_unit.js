@@ -131,9 +131,7 @@ describe('Storage', function() {
      */
     function withStorage(action) {
       let storage = new shaka.offline.Storage(player);
-      return shaka.util.IDestroyable.with([storage], () => {
-        return action(storage);
-      });
+      return shaka.util.Destroyer.with([storage], () => action(storage));
     }
   });
 
@@ -551,7 +549,7 @@ describe('Storage', function() {
 
       /** @type {!shaka.offline.StorageMuxer} */
       let muxer = new shaka.offline.StorageMuxer();
-      await shaka.util.IDestroyable.with([muxer], async () => {
+      await shaka.util.Destroyer.with([muxer], async () => {
         await muxer.init();
         let cell = await muxer.getCell(uri.mechanism(), uri.cell());
         let manifests = await cell.getManifests([uri.key()]);
@@ -601,7 +599,7 @@ describe('Storage', function() {
 
       /** @type {!shaka.offline.StorageMuxer} */
       let muxer = new shaka.offline.StorageMuxer();
-      await shaka.util.IDestroyable.with([muxer], async () => {
+      await shaka.util.Destroyer.with([muxer], async () => {
         await muxer.init();
         let cell = await muxer.getCell(uri.mechanism(), uri.cell());
         let manifests = await cell.getManifests([uri.key()]);
@@ -647,7 +645,7 @@ describe('Storage', function() {
 
           /** @type {!shaka.offline.StorageMuxer} */
           let muxer = new shaka.offline.StorageMuxer();
-          await shaka.util.IDestroyable.with([muxer], async () => {
+          await shaka.util.Destroyer.with([muxer], async () => {
             await muxer.init();
             let cell = await muxer.getCell(uri.mechanism(), uri.cell());
             let manifests = await cell.getManifests([uri.key()]);
@@ -817,7 +815,7 @@ describe('Storage', function() {
 
       /** @type {!shaka.offline.StorageMuxer} */
       let muxer = new shaka.offline.StorageMuxer();
-      await shaka.util.IDestroyable.with([muxer], async () => {
+      await shaka.util.Destroyer.with([muxer], async () => {
         await muxer.init();
         let cell = await muxer.getCell(uri.mechanism(), uri.cell());
         let manifests = await cell.getManifests([uri.key()]);
@@ -1083,7 +1081,7 @@ describe('Storage', function() {
 
   function eraseStorage() {
     let muxer = new shaka.offline.StorageMuxer();
-    return shaka.util.IDestroyable.with([muxer], async () => {
+    return shaka.util.Destroyer.with([muxer], async () => {
       await muxer.init();
       await muxer.erase();
     });
@@ -1180,7 +1178,7 @@ describe('Storage', function() {
   async function getStoredManifest(uri) {
     /** @type {!shaka.offline.StorageMuxer} */
     let muxer = new shaka.offline.StorageMuxer();
-    let manifestDB = await shaka.util.IDestroyable.with([muxer], async () => {
+    let manifestDB = await shaka.util.Destroyer.with([muxer], async () => {
       await muxer.init();
       let cell = await muxer.getCell(uri.mechanism(), uri.cell());
       let manifests = await cell.getManifests([uri.key()]);
@@ -1219,7 +1217,7 @@ describe('Storage', function() {
       onEvent: () => {},
     });
 
-    return shaka.util.IDestroyable.with([drm], async () => {
+    return shaka.util.Destroyer.with([drm], async () => {
       drm.configure(player.getConfiguration().drm);
       await drm.init(manifest, offlineLicense);
 
