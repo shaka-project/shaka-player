@@ -184,7 +184,7 @@ describe('Playhead', function() {
   describe('getTime', function() {
     it('returns current time when the video is paused', function() {
       video.readyState = HTMLMediaElement.HAVE_METADATA;
-      playhead = new shaka.media.Playhead(
+      playhead = makePlayhead(
           video,
           manifest,
           config,
@@ -205,7 +205,7 @@ describe('Playhead', function() {
     });
 
     it('returns the correct time when readyState starts at 0', function() {
-      playhead = new shaka.media.Playhead(
+      playhead = makePlayhead(
           video,
           manifest,
           config,
@@ -245,7 +245,7 @@ describe('Playhead', function() {
     it('returns the correct time when readyState starts at 1', function() {
       video.readyState = HTMLMediaElement.HAVE_METADATA;
 
-      playhead = new shaka.media.Playhead(
+      playhead = makePlayhead(
           video,
           manifest,
           config,
@@ -267,7 +267,7 @@ describe('Playhead', function() {
       timeline.getSeekRangeStart.and.returnValue(0);
       timeline.getSeekRangeEnd.and.returnValue(60);
 
-      playhead = new shaka.media.Playhead(
+      playhead = makePlayhead(
           video, manifest, config, 0 /* startTime */, Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
@@ -281,7 +281,7 @@ describe('Playhead', function() {
       timeline.getSeekRangeEnd.and.returnValue(60);
       timeline.getDuration.and.returnValue(60);
 
-      playhead = new shaka.media.Playhead(
+      playhead = makePlayhead(
           video, manifest, config, 60 /* startTime */, Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
@@ -296,7 +296,7 @@ describe('Playhead', function() {
       timeline.getSeekRangeStart.and.returnValue(0);
       timeline.getSeekRangeEnd.and.returnValue(60);
 
-      playhead = new shaka.media.Playhead(
+      playhead = makePlayhead(
           video, manifest, config, -15 /* startTime */, Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
@@ -311,7 +311,7 @@ describe('Playhead', function() {
       timeline.getSeekRangeEnd.and.returnValue(60);
       // If the live stream's playback offset time is not available, start
       // playing from the seek range start time.
-      playhead = new shaka.media.Playhead(
+      playhead = makePlayhead(
           video, manifest, config, -40 /* startTime */, Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
@@ -319,7 +319,7 @@ describe('Playhead', function() {
     });
 
     it('does not change currentTime if it\'s not 0', function() {
-      playhead = new shaka.media.Playhead(
+      playhead = makePlayhead(
           video,
           manifest,
           config,
@@ -352,7 +352,7 @@ describe('Playhead', function() {
       timeline.getSeekRangeEnd.and.returnValue(60);
       timeline.getSeekRangeEnd.and.returnValue(60);
 
-      playhead = new shaka.media.Playhead(
+      playhead = makePlayhead(
           video,
           manifest,
           config,
@@ -385,7 +385,7 @@ describe('Playhead', function() {
     timeline.getSeekRangeStart.and.returnValue(5);
     timeline.getSeekRangeEnd.and.returnValue(60);
 
-    playhead = new shaka.media.Playhead(
+    playhead = makePlayhead(
         video,
         manifest,
         config,
@@ -545,7 +545,7 @@ describe('Playhead', function() {
     timeline.getSeekRangeEnd.and.returnValue(60);
     timeline.getDuration.and.returnValue(60);
 
-    playhead = new shaka.media.Playhead(
+    playhead = makePlayhead(
         video,
         manifest,
         config,
@@ -594,7 +594,7 @@ describe('Playhead', function() {
     timeline.getSeekRangeEnd.and.returnValue(60);
     timeline.getDuration.and.returnValue(60);
 
-    playhead = new shaka.media.Playhead(
+    playhead = makePlayhead(
         video,
         manifest,
         config,
@@ -655,7 +655,7 @@ describe('Playhead', function() {
       },
     });
 
-    playhead = new shaka.media.Playhead(
+    playhead = makePlayhead(
         video,
         manifest,
         config,
@@ -701,7 +701,7 @@ describe('Playhead', function() {
       timeline.getSeekRangeStart.and.returnValue(5);
       timeline.getSeekRangeEnd.and.returnValue(60);
 
-      playhead = new shaka.media.Playhead(
+      playhead = makePlayhead(
           video,
           manifest,
           config,
@@ -733,7 +733,7 @@ describe('Playhead', function() {
       timeline.getSeekRangeEnd.and.returnValue(60);
       timeline.getDuration.and.returnValue(60);
 
-      playhead = new shaka.media.Playhead(
+      playhead = makePlayhead(
           video,
           manifest,
           config,
@@ -768,7 +768,7 @@ describe('Playhead', function() {
     timeline.getSeekRangeStart.and.returnValue(5);
     timeline.getSeekRangeEnd.and.returnValue(60);
 
-    playhead = new shaka.media.Playhead(
+    playhead = makePlayhead(
         video,
         manifest,
         config,
@@ -913,7 +913,7 @@ describe('Playhead', function() {
           });
 
           config.jumpLargeGaps = !!data.jumpLargeGaps;
-          playhead = new shaka.media.Playhead(
+          playhead = makePlayhead(
               video,
               manifest,
               config,
@@ -1155,9 +1155,13 @@ describe('Playhead', function() {
       video.readyState = HTMLMediaElement.HAVE_ENOUGH_DATA;
 
       config.jumpLargeGaps = true;
-      playhead = new shaka.media.Playhead(video, manifest, config, 12,
-                                          Util.spyFunc(onSeek),
-                                          Util.spyFunc(onEvent));
+      playhead = makePlayhead(
+          video,
+          manifest,
+          config,
+          12 /* startTime */,
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
 
       jasmine.clock().tick(1000);
       expect(onEvent).not.toHaveBeenCalled();
@@ -1200,9 +1204,13 @@ describe('Playhead', function() {
       });
 
       config.jumpLargeGaps = true;
-      playhead = new shaka.media.Playhead(video, manifest, config, 0,
-                                          Util.spyFunc(onSeek),
-                                          Util.spyFunc(onEvent));
+      playhead = makePlayhead(
+          video,
+          manifest,
+          config,
+          0 /* startTime */,
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
 
       playhead.onSegmentAppended();
       jasmine.clock().tick(1000);
@@ -1228,7 +1236,7 @@ describe('Playhead', function() {
         });
 
         config.jumpLargeGaps = !!data.jumpLargeGaps;
-        playhead = new shaka.media.Playhead(
+        playhead = makePlayhead(
             video,
             manifest,
             config,
@@ -1299,7 +1307,7 @@ describe('Playhead', function() {
 
   describe('rate changes', function() {
     beforeEach(function() {
-      playhead = new shaka.media.Playhead(
+      playhead = makePlayhead(
           video,
           manifest,
           config,
@@ -1361,4 +1369,25 @@ describe('Playhead', function() {
       expect(playhead.getPlaybackRate()).toBe(1);
     });
   });  // rate changes
+
+
+  /**
+   * @param {!HTMLMediaElement} video
+   * @param {!shaka.extern.Manifest} manifest
+   * @param {shaka.extern.StreamingConfiguration} config
+   * @param {?number} startTime
+   * @param {function()} onSeek
+   * @param {function(!Event)} onEvent
+   * @return {!shaka.media.Playhead}
+   */
+  function makePlayhead(video, manifest, config, startTime, onSeek, onEvent) {
+    return new shaka.media.Playhead(
+        video,
+        manifest.presentationTimeline,
+        manifest.minBufferTime || 0,
+        config,
+        startTime,
+        onSeek,
+        onEvent);
+  }
 });

@@ -265,7 +265,8 @@ describe('StreamingEngine', function() {
     let onSeek = function() { streamingEngine.seeked(); };
     playhead = new shaka.media.Playhead(
         /** @type {!HTMLVideoElement} */(video),
-        /** @type {shaka.extern.Manifest} */ (manifest),
+        manifest.presentationTimeline,
+        manifest.minBufferTime || 0,
         config,
         null /* startTime */,
         onSeek,
