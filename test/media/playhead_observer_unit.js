@@ -97,7 +97,7 @@ describe('PlayheadObserver', function() {
     it('doesn\'t change buffering state when enough is buffered', function() {
       video.buffered = createFakeBuffered([{start: 0, end: 20}]);
       video.currentTime = 0;
-      observer = new shaka.media.PlayheadObserver(
+      observer = makePlayheadObserver(
           video, mockMediaSourceEngine, manifest, config,
           Util.spyFunc(onBuffering), Util.spyFunc(onEvent),
           Util.spyFunc(onChangePeriod));
@@ -110,7 +110,7 @@ describe('PlayheadObserver', function() {
     it('enters buffering state when playing to end of buffer', function() {
       video.buffered = createFakeBuffered([{start: 0, end: 20}]);
       video.currentTime = 0;
-      observer = new shaka.media.PlayheadObserver(
+      observer = makePlayheadObserver(
           video, mockMediaSourceEngine, manifest, config,
           Util.spyFunc(onBuffering), Util.spyFunc(onEvent),
           Util.spyFunc(onChangePeriod));
@@ -124,7 +124,7 @@ describe('PlayheadObserver', function() {
     it('enters buffering state when seeking to unbuffered region', function() {
       video.buffered = createFakeBuffered([{start: 0, end: 20}]);
       video.currentTime = 0;
-      observer = new shaka.media.PlayheadObserver(
+      observer = makePlayheadObserver(
           video, mockMediaSourceEngine, manifest, config,
           Util.spyFunc(onBuffering), Util.spyFunc(onEvent),
           Util.spyFunc(onChangePeriod));
@@ -139,7 +139,7 @@ describe('PlayheadObserver', function() {
     it('leaves buffering state when enough is buffered', function() {
       video.buffered = createFakeBuffered([{start: 0, end: 20}]);
       video.currentTime = 0;
-      observer = new shaka.media.PlayheadObserver(
+      observer = makePlayheadObserver(
           video, mockMediaSourceEngine, manifest, config,
           Util.spyFunc(onBuffering), Util.spyFunc(onEvent),
           Util.spyFunc(onChangePeriod));
@@ -159,7 +159,7 @@ describe('PlayheadObserver', function() {
     it('leaves buffering state with small non-zero start time', function() {
       video.buffered = createFakeBuffered([]);
       video.currentTime = 0;
-      observer = new shaka.media.PlayheadObserver(
+      observer = makePlayheadObserver(
           video, mockMediaSourceEngine, manifest, config,
           Util.spyFunc(onBuffering), Util.spyFunc(onEvent),
           Util.spyFunc(onChangePeriod));
@@ -178,7 +178,7 @@ describe('PlayheadObserver', function() {
     it('leaves buffering state with exact amount buffered', function() {
       video.buffered = createFakeBuffered([]);
       video.currentTime = 0;
-      observer = new shaka.media.PlayheadObserver(
+      observer = makePlayheadObserver(
           video, mockMediaSourceEngine, manifest, config,
           Util.spyFunc(onBuffering), Util.spyFunc(onEvent),
           Util.spyFunc(onChangePeriod));
@@ -201,7 +201,7 @@ describe('PlayheadObserver', function() {
       timeline.isLive.and.returnValue(false);
       timeline.getSegmentAvailabilityEnd.and.returnValue(60);
 
-      observer = new shaka.media.PlayheadObserver(
+      observer = makePlayheadObserver(
           video, mockMediaSourceEngine, manifest, config,
           Util.spyFunc(onBuffering), Util.spyFunc(onEvent),
           Util.spyFunc(onChangePeriod));
@@ -222,7 +222,7 @@ describe('PlayheadObserver', function() {
       timeline.isLive.and.returnValue(true);
       timeline.getSegmentAvailabilityEnd.and.returnValue(60);
 
-      observer = new shaka.media.PlayheadObserver(
+      observer = makePlayheadObserver(
           video, mockMediaSourceEngine, manifest, config,
           Util.spyFunc(onBuffering), Util.spyFunc(onEvent),
           Util.spyFunc(onChangePeriod));
@@ -259,7 +259,7 @@ describe('PlayheadObserver', function() {
 
       video.buffered = createFakeBuffered([{start: 0, end: 60}]);
       video.currentTime = 0;
-      observer = new shaka.media.PlayheadObserver(
+      observer = makePlayheadObserver(
           video, mockMediaSourceEngine, manifest, config,
           Util.spyFunc(onBuffering), Util.spyFunc(onEvent),
           Util.spyFunc(onChangePeriod));
@@ -477,7 +477,7 @@ describe('PlayheadObserver', function() {
         {startTime: 30},
       ];
 
-      observer = new shaka.media.PlayheadObserver(
+      observer = makePlayheadObserver(
           video, mockMediaSourceEngine, manifest, config,
           Util.spyFunc(onBuffering), Util.spyFunc(onEvent),
           Util.spyFunc(onChangePeriod));
@@ -556,4 +556,37 @@ describe('PlayheadObserver', function() {
       expect(onChangePeriod).toHaveBeenCalledTimes(1);
     });
   });
+
+
+  /**
+   * @param {!HTMLMediaElement} video
+   * @param {!shaka.media.MediaSourceEngine} mediaSourceEngine
+   * @param {shaka.extern.Manifest} manifest
+   * @param {shaka.extern.StreamingConfiguration} config
+   * @param {function(boolean)} onBuffering
+   * @param {function(!Event)} onEvent
+   * @param {function()} onChangePeriod
+   * @return {!shaka.media.PlayheadObserver}
+   */
+  function makePlayheadObserver(video,
+                                mediaSourceEngine,
+                                manifest,
+                                config,
+                                onBuffering,
+                                onEvent,
+                                onChangePeriod) {
+    let impl = new shaka.media.MediaSourcePlayheadObserver(
+        video,
+        mediaSourceEngine,
+        manifest);
+
+    return new shaka.media.PlayheadObserver(
+        video,
+        manifest.minBufferTime,
+        config,
+        onBuffering,
+        onEvent,
+        onChangePeriod,
+        impl);
+  }
 });
