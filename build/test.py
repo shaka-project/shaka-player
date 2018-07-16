@@ -45,6 +45,21 @@ class _HandleMixedListsAction(argparse.Action):
     setattr(namespace, self.dest, merged)
 
 
+class _HandleKeyValuePairs(argparse.Action):
+  '''Action to handle key-value pairs and convert to a dictionary.
+
+     Input is a key-value pair separated by '='.
+     These keys and values are stored in a dictionary which can accumulate
+     multiple values from the command-line.
+  '''
+
+  def __call__(self, parser, namespace, new_argument, option_string=None):
+    merged = getattr(namespace, self.dest) or {}
+    key, value = new_argument.split('=', 1)
+    merged[key] = value
+    setattr(namespace, self.dest, merged)
+
+
 def _IntGreaterThanZero(x):
   i = int(x)
   if i <= 0:
@@ -214,6 +229,19 @@ class Launcher:
         default=None,
         const=2,
         nargs='?')
+    running_commands.add_argument(
+        '--test-custom-asset',
+        help='Run asset playback tests on a custom manifest URI.',
+        type=str,
+        default=None)
+    running_commands.add_argument(
+        '--test-custom-license-server',
+        help='Configure license servers for the custom asset playback test. '
+             'May be specified multiple times to configure multiple key '
+             'systems.',
+        type=str,
+        metavar='KEY_SYSTEM_ID=LICENSE_SERVER_URI',
+        action=_HandleKeyValuePairs)
 
 
     logging_commands.add_argument(
@@ -318,6 +346,8 @@ class Launcher:
       'single_run',
       'uncompiled',
       'delay_tests',
+      'test_custom_asset',
+      'test_custom_license_server',
     ]
 
     # Check each value before setting it to avoid passing null values.

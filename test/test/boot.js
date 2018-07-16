@@ -19,7 +19,7 @@
 /**
  * Gets the value of an argument passed from karma.
  * @param {string} name
- * @return {?string|boolean}
+ * @return {?}
  */
 function getClientArg(name) {
   if (window.__karma__ && __karma__.config.args.length) {

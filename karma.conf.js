@@ -180,6 +180,10 @@ module.exports = function(config) {
         // Delay tests to aid in debugging async failures that pollute
         // subsequent tests.
         delayTests: settings.delay_tests,
+
+        // Run playback tests on a custom manifest URI.
+        testCustomAsset: settings.test_custom_asset,
+        testCustomLicenseServer: settings.test_custom_license_server,
       }],
     },
 

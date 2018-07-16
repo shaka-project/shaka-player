@@ -297,7 +297,7 @@ describe('Player', function() {
       expect(getActiveLanguage()).toBe('es');
     });
 
-    shakaAssets.testAssets.forEach(function(asset) {
+    function createAssetTest(asset) {
       if (asset.disabled) return;
 
       let testName =
@@ -310,19 +310,19 @@ describe('Player', function() {
           pending('None of the required key systems are supported.');
         }
 
-        let mimeTypes = [];
-        if (asset.features.indexOf(Feature.WEBM) >= 0) {
-          mimeTypes.push('video/webm');
+        if (asset.features) {
+          let mimeTypes = [];
+          if (asset.features.indexOf(Feature.WEBM) >= 0) {
+            mimeTypes.push('video/webm');
+          }
+          if (asset.features.indexOf(Feature.MP4) >= 0) {
+            mimeTypes.push('video/mp4');
+          }
+          if (!mimeTypes.some(
+              function(type) { return support.media[type]; })) {
+            pending('None of the required MIME types are supported.');
+          }
         }
-        if (asset.features.indexOf(Feature.MP4) >= 0) {
-          mimeTypes.push('video/mp4');
-        }
-        if (!mimeTypes.some(
-            function(type) { return support.media[type]; })) {
-          pending('None of the required MIME types are supported.');
-        }
-
-        let isLive = asset.features.indexOf(Feature.LIVE) >= 0;
 
         let config = {abr: {}, drm: {}, manifest: {dash: {}}};
         config.abr.enabled = false;
@@ -356,7 +356,10 @@ describe('Player', function() {
         }
 
         player.load(asset.manifestUri).then(function() {
-          expect(player.isLive()).toEqual(isLive);
+          if (asset.features) {
+            const isLive = asset.features.indexOf(Feature.LIVE) >= 0;
+            expect(player.isLive()).toEqual(isLive);
+          }
           video.play();
           // 30 seconds or video ended, whichever comes first.
           return waitForTimeOrEnd(video, 40);
@@ -380,7 +383,29 @@ describe('Player', function() {
           }
         }).catch(fail).then(done);
       });
-    });
+    }
+
+    // Create a test for each asset in the demo asset list.
+    shakaAssets.testAssets.forEach(createAssetTest);
+
+    // The user can run tests on a specific manifest URI that is not in the
+    // asset list.
+    const testCustomAsset = getClientArg('testCustomAsset');
+    if (testCustomAsset) {
+      // Construct an "asset" structure to reuse the test logic above.
+      /** @type {Object} */
+      const licenseServers = getClientArg('testCustomLicenseServer');
+      const keySystems = Object.keys(licenseServers || {});
+      const asset = {
+        source: 'command line',
+        name: 'custom',
+        manifestUri: testCustomAsset,
+        focus: true,
+        licenseServers: licenseServers,
+        drm: keySystems,
+      };
+      createAssetTest(asset);
+    }
 
     /**
      * Gets the language of the active Variant.
