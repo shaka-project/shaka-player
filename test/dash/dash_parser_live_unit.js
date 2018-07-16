@@ -790,7 +790,7 @@ describe('DashParser Live', function() {
 
   describe('stop', function() {
     const manifestRequestType = shaka.net.NetworkingEngine.RequestType.MANIFEST;
-    const dateRequestType = shaka.net.NetworkingEngine.RequestType.MANIFEST;
+    const dateRequestType = shaka.net.NetworkingEngine.RequestType.TIMING;
     const manifestUri = 'dummy://foo';
     const dateUri = 'http://foo.bar/date';
 
