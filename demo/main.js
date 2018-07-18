@@ -233,7 +233,7 @@ shakaDemo.init = function() {
 
 /**
  * Initialize the application plugin
- *
+ * @param {!Object.<string, string>} params
  * @private
  */
 shakaDemo.initAppPlugin_ = function(params) {
@@ -260,7 +260,7 @@ shakaDemo.initAppPlugin_ = function(params) {
 
 
 /**
-  * @return {!Object.<string, string>} params
+  * @return {!Object.<string, string|!Object<string,string>>} params
   */
 shakaDemo.getParams = function() {
   // Read URL parameters.
@@ -287,11 +287,13 @@ shakaDemo.getParams = function() {
 };
 
 /**
+ * @param {string} paramString
  * @return {!Object.<string, string>} params
+ * @private
  */
 shakaDemo.getFormattedPluginParams_ = function(paramString) {
-  const params = {};
-  kvPairs = paramString.split('&');
+  let params = {};
+  let kvPairs = paramString.split('&');
   kvPairs.forEach(function(pair) {
     pair = pair.split('=');
     params[pair[0]] = pair[1];
@@ -676,7 +678,7 @@ shakaDemo.hashShouldChange_ = function() {
 
   if ('pluginParams' in oldParams) {
     let pluginParamString = '';
-    pluginParams = oldParams['pluginParams'];
+    let pluginParams = oldParams['pluginParams'];
     for (let param in pluginParams) {
       pluginParamString = pluginParamString ?
         pluginParamString + '&' : 'pluginParams=';

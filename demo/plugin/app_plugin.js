@@ -32,7 +32,7 @@ shakaDemo.AppPlugin = function(player) {};
  *
  * @private
  */
-shakaDemo.AppPlugin.appPlugin_;
+shakaDemo.AppPlugin.Plugin_;
 
 /**
  * Register a plugin constructor. Expects a constructor that can either override
@@ -56,7 +56,7 @@ shakaDemo.AppPlugin.registerPlugin = function(plugin) {
   // reassign plugin prototype
   plugin.prototype = proto;
   plugin.prototype.constructor = plugin;
-  shakaDemo.AppPlugin.appPlugin_ = plugin;
+  shakaDemo.AppPlugin.Plugin_ = plugin;
 };
 
 /**
@@ -66,8 +66,8 @@ shakaDemo.AppPlugin.registerPlugin = function(plugin) {
  * @return {shakaDemo.AppPlugin}
  */
 shakaDemo.AppPlugin.getPluginInstance = function(player) {
-  if (shakaDemo.AppPlugin.appPlugin_) {
-    return new shakaDemo.AppPlugin.appPlugin_(player);
+  if (shakaDemo.AppPlugin.Plugin_) {
+    return new shakaDemo.AppPlugin.Plugin_(player);
   } else {
     return null;
   }
@@ -77,7 +77,7 @@ shakaDemo.AppPlugin.getPluginInstance = function(player) {
  * Invoked at application startup to perform a one-time action
  * (e.g. user login), and obtain a reference to the player.
  *
- * @param {string=} params Arbitrary params to be interpreted by the plugin.
+ * @param {!Object.<string,string>|string} params Arbitrary plugin params.
  * @return {Promise}
  */
 shakaDemo.AppPlugin.prototype.onStart = function(params) {};
@@ -87,7 +87,7 @@ shakaDemo.AppPlugin.prototype.onStart = function(params) {};
  * AssetInfo, and configure the player.
  *
  * @param {shakaAssets.AssetInfo} asset The asset to populate.
- * @param {string} params Arbitrary params to be interpreted by the plugin.
+ * @param {!Object.<string,string>|string} params Arbitrary plugin params.
  * @return {Promise}
  */
 shakaDemo.AppPlugin.prototype.onBeforeLoad = function(asset, params) {};
