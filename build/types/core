@@ -8,6 +8,7 @@
 +../../lib/debug/asserts.js
 +../../lib/debug/log.js
 
++../../lib/media/active_stream_map.js
 +../../lib/media/drm_engine.js
 +../../lib/media/gap_jumping_controller.js
 +../../lib/media/manifest_parser.js
