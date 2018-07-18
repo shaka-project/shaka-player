@@ -222,7 +222,7 @@ shakaDemo.init = function() {
         window.addEventListener('hashchange', shakaDemo.updateFromHash_);
       });
 
-      shakaDemo.initAppPlugin_();
+      shakaDemo.initAppPlugin_(params.pluginParams);
     }).catch(function(error) {
       // Some part of the setup of the demo app threw an error.
       // Notify the user of this.
@@ -236,28 +236,26 @@ shakaDemo.init = function() {
  *
  * @private
  */
-shakaDemo.initAppPlugin_ = function() {
+shakaDemo.initAppPlugin_ = function(params) {
   let player = shakaDemo.player_;
   let plugin = shakaDemo.AppPlugin.getPluginInstance(player);
-  if (plugin) {
-    shakaDemo.appPlugin = plugin;
-
-    let listeners = plugin.getListeners();
-    for (let eventName in listeners) {
-      player.addEventListener(eventName, listeners[eventName]);
-    }
-
-    let netEngine = player.getNetworkingEngine();
-    netEngine.registerRequestFilter(plugin.onRequest);
-    netEngine.registerResponseFilter(plugin.onResponse);
-
-    plugin.onStart().catch(function(error) {
-      if (shaka.log) {
-        shaka.log.error('Error setting up plugin ' + error);
-      }
-      // TODO: `error` could be anything. How to handle?
-    });
+  if (!plugin) {
+    return;
   }
+  shakaDemo.appPlugin = plugin;
+  let listeners = plugin.getListeners();
+  for (let eventName in listeners) {
+    player.addEventListener(eventName, listeners[eventName]);
+  }
+  let netEngine = player.getNetworkingEngine();
+  netEngine.registerRequestFilter(plugin.onRequest);
+  netEngine.registerResponseFilter(plugin.onResponse);
+  plugin.onStart(params).catch(function(error) {
+    if (shaka.log) {
+      shaka.log.error('Error setting up plugin ' + error);
+    }
+    // TODO: `error` could be anything. How to handle?
+  });
 };
 
 
@@ -281,6 +279,23 @@ shakaDemo.getParams = function() {
     let kv = combined[i].split('=');
     params[kv[0]] = kv.slice(1).join('=');
   }
+  if (params.pluginParams) {
+    params.pluginParams =
+      shakaDemo.getFormattedPluginParams_(params.pluginParams);
+  }
+  return params;
+};
+
+/**
+ * @return {!Object.<string, string>} params
+ */
+shakaDemo.getFormattedPluginParams_ = function(paramString) {
+  const params = {};
+  kvPairs = paramString.split('&');
+  kvPairs.forEach(function(pair) {
+    pair = pair.split('=');
+    params[pair[0]] = pair[1];
+  });
   return params;
 };
 
@@ -653,6 +668,21 @@ shakaDemo.hashShouldChange_ = function() {
       document.getElementById('drmSettingsAudioRobustness').value;
   if (audioRobustness) {
     params.push('audioRobustness=' + audioRobustness);
+  }
+
+  if ('plugin' in oldParams) {
+    params.push('plugin=' + oldParams.plugin);
+  }
+
+  if ('pluginParams' in oldParams) {
+    let pluginParamString = '';
+    pluginParams = oldParams['pluginParams'];
+    for (let param in pluginParams) {
+      pluginParamString = pluginParamString ?
+        pluginParamString + '&' : 'pluginParams=';
+      pluginParamString += param + '=' + pluginParams[param];
+    }
+    params.push(pluginParamString);
   }
 
   // These parameters must be added manually, so preserve them.

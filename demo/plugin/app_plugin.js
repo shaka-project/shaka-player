@@ -96,14 +96,14 @@ shakaDemo.AppPlugin.prototype.onBeforeLoad = function(asset, params) {};
  * This is registered as a request filter with NetworkingEngine.
  *
  * @param {shaka.net.NetworkingEngine.RequestType} requestType
- * @param {shakaExtern.Request} request
+ * @param {shaka.extern.Request} request
  */
 shakaDemo.AppPlugin.prototype.onRequest = function(requestType, request) {};
 
 /**
  * This is registered as a response filter with NetworkingEngine.
  * @param {shaka.net.NetworkingEngine.RequestType} requestType
- * @param {shakaExtern.Response} response
+ * @param {shaka.extern.Response} response
  */
 shakaDemo.AppPlugin.prototype.onResponse = function(requestType, response) {};
 

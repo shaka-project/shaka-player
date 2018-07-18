@@ -25,8 +25,10 @@ import webbrowser
 try:
     # python 3
     from http.server import SimpleHTTPRequestHandler
+    from urllib.parse import urlencode
 except ImportError:
     # python 2
+    from urllib import urlencode
     from SimpleHTTPServer import SimpleHTTPRequestHandler
 
 from server import StoppableHTTPServer
@@ -37,13 +39,15 @@ def main(args):
 
   args = get_arg_parser().parse_args()
 
+  registry = PluginRegistry()
+
   if (args.which == 'register'):
-    PluginRegistry().register_plugin(args.name, args.src)
+    registry.register_plugin(args.name, args.src, args.params)
 
   if (args.which == 'launch'):
-    host = args.address[0].strip() if args.address else None
-    port = args.port[0] if args.port else None
-    PluginLauncher(host=host or "127.0.0.1", port=port or 8080).run(args.name)
+    host = args.address[0].strip() if args.address else "127.0.0.1"
+    port = args.port[0] if args.port else 8080
+    PluginLauncher(registry, host, port, args.params).run(args.name)
 
 
 def get_arg_parser():
@@ -66,6 +70,13 @@ def get_arg_parser():
   register_parser.add_argument(
     'src',
     help='The source url of the plugin to register')
+  register_parser.add_argument(
+    'params',
+    nargs='*',
+    help='''Optional parameters to pass to the plugin when it is launched,
+      expressed as Key=Value. e.g. username=test_user. These will be passed
+      to the plugin via the launch URL when the application starts.'''
+  )
 
   # arguments and help text for the launch subcommand
   launch_parser = subparsers.add_parser(
@@ -89,6 +100,15 @@ def get_arg_parser():
     nargs=1,
     metavar=('address'),
     help='Launch the demo application on a specific host address (default 127.0.0.1).')
+  launch_parser.add_argument(
+    'params',
+    nargs='*',
+    help='''Optional parameters to pass to the plugin when it is launched,
+      expressed as Key=Value. e.g. username=test_user. These will be passed
+      to the plugin via the launch URL when the application starts. Paramaters
+      provided in this manner will override parameters with the same key stored
+      for the plugin.'''
+  )
 
 
   return parser
@@ -100,9 +120,11 @@ application with the appropriate application plugin enabled
 
 class PluginLauncher:
 
-  def __init__(self, host, port):
+  def __init__(self, registry, host, port, launchParams={}):
+    self.registry = registry
     self.host = host
     self.port = port
+    self.launchParams = launchParams
     self.base_url = "http://{}:{}/demo/index.html".format(self.host, self.port)
     self.server = StoppableHTTPServer((self.host, self.port), SimpleHTTPRequestHandler)
 
@@ -111,7 +133,7 @@ class PluginLauncher:
     self.server.start()
 
   def launch_demo_app(self, name):
-    url = self.base_url + "#plugin={}".format(PluginRegistry().get_src(name))
+    url = self.base_url + self.registry.get_param_string(name, self.launchParams)
     logging.info("Launching {}".format(url))
     webbrowser.open(url)
 
@@ -141,16 +163,41 @@ class PluginRegistry:
     with self.open_registry('w') as registry:
       if registry: json.dump(data, registry, indent=1)
 
-  def register_plugin(self, name, src):
+  def parse_params(self, params):
+    formatted_params = {}
+    for param in params:
+      try:
+        param_pair = param.split('=')
+        formatted_params[param_pair[0]] = param_pair[1]
+      except:
+        logging.warning('Could not parse malformed param {}'.format(param))
+    return formatted_params
+
+  def merge_params(self, oldParams, newParams):
+    merged = oldParams.copy()
+    merged.update(newParams)
+    return merged
+
+
+  def register_plugin(self, name, src, params):
     plugin_data = self.read_json()
-    plugin_data[name] = src
+    formatted_params = self.parse_params(params)
+    plugin_data[name] = {
+      'src': src,
+      'params': formatted_params
+    }
     self.write_json(plugin_data)
     logging.info("Added plugin {} to {}".format(name, self.registry_path))
 
-  def get_src(self, name):
+  def get_param_string(self, name, additionalParams={}):
     plugin_data = self.read_json()
     try:
-      return plugin_data[name]
+      plugin = plugin_data[name]
+      if bool(additionalParams):
+        formatted_launch_params = self.parse_params(additionalParams)
+        if formatted_launch_params:
+          plugin['params'] = self.merge_params(plugin['params'], formatted_launch_params)
+      return "#plugin={};pluginParams={}".format( plugin['src'], urlencode(plugin['params']) )
     except KeyError:
       return ''
 
