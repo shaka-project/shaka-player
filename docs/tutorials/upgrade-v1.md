@@ -37,6 +37,14 @@ Shaka v2 has several improvements over v1, including:
   - Captions are not streamed until they are shown
   - Use NetworkInformation API to get initial bandwidth estimate
   - The demo app is now a Progressive Web App (PWA) and can be used offline
+  - Support for CEA captions in TS content
+  - Support for TTML and VTT regions
+  - A video element is no longer required when `Player` is constructed
+  - New `attach()` and `detach()` methods have been added to `Player` to manage
+    attachment to video elements
+  - Fetch is now preferred over XHR when available
+  - Network requests are now abortable
+  - Live stream playback can begin at a negative offset from the live edge
 
 
 #### Shaka Plugins
@@ -83,6 +91,16 @@ player.load(manifestUri);
 ```
 
 
+#### Promise polyfill for IE
+
+Prior to v2.4, we had our own polyfill of `Promise` for IE 11 support.  In v2.4,
+we have dropped that polyfill.  To support IE 11 in your application, you MUST
+install a `Promise` polyfill separately.  We recommend [es6-promise-polyfill][]
+for that purpose.
+
+[es6-promise-polyfill]: https://github.com/lahmatiy/es6-promise-polyfill
+
+
 #### ContentProtection callbacks
 
 Shaka v1's `DashVideoSource` had a parameter for a `ContentProtection` callback.
@@ -98,14 +116,15 @@ function interpretContentProtection(schemeIdUri, contentProtectionElement) {
     // This is the UUID which represents Widevine.
     return [{
       'keySystem': 'com.widevine.alpha',
-      'licenseServerUrl': '//proxy.uat.widevine.com/proxy'
+      'licenseServerUrl': 'https://proxy.uat.widevine.com/proxy'
     }];
   } else if (schemeIdUri.toLowerCase() ==
       'urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95') {
     // This is the UUID which represents PlayReady.
     return [{
       'keySystem': 'com.microsoft.playready',
-      'licenseServerUrl': '//playready.directtaps.net/pr/svc/rightsmanager.asmx'
+      'licenseServerUrl':
+          'https://playready.directtaps.net/pr/svc/rightsmanager.asmx'
     }];
   } else {
     return null;
@@ -128,8 +147,9 @@ var player = new shaka.Player(video);
 player.configure({
   drm: {
     servers: {
-      'com.widevine.alpha': '//proxy.uat.widevine.com/proxy'
-      'com.microsoft.playready': '//playready.directtaps.net/pr/svc/rightsmanager.asmx'
+      'com.widevine.alpha': 'https://proxy.uat.widevine.com/proxy'
+      'com.microsoft.playready':
+          'https://playready.directtaps.net/pr/svc/rightsmanager.asmx'
     }
   }
 });
@@ -170,7 +190,7 @@ player.load(manifestUri);
 ```
 
 For more on what you can specify for a custom scheme, see the docs for
-{@link shakaExtern.DrmInfo}.
+{@link shaka.extern.DrmInfo}.
 
 
 #### Detailed DrmInfo
@@ -185,7 +205,7 @@ function interpretContentProtection(schemeIdUri, contentProtectionElement) {
       'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed') {
     return [{
       'keySystem': 'com.widevine.alpha',
-      'licenseServerUrl': '//proxy.uat.widevine.com/proxy',
+      'licenseServerUrl': 'https://proxy.uat.widevine.com/proxy',
 
       'distinctiveIdentifierRequired': true,
       'persistentStateRequired': false,
@@ -286,8 +306,8 @@ function licensePostProcessor(type, response) {
 ```
 
 For more on request filters, see the docs for
-{@link shaka.net.NetworkingEngine.RequestFilter}, {@link shakaExtern.Request},
-{@link shaka.net.NetworkingEngine.ResponseFilter}, {@link shakaExtern.Response}.
+{@link shaka.net.NetworkingEngine.RequestFilter}, {@link shaka.extern.Request},
+{@link shaka.net.NetworkingEngine.ResponseFilter}, {@link shaka.extern.Response}.
 
 
 #### ClearKey configuration
@@ -368,7 +388,7 @@ player.load(manifestUri);
 ```
 
 For more on the AbrManager interface, see the docs for
-{@link shakaExtern.AbrManager}.
+{@link shaka.extern.AbrManager}.
 
 
 #### Selecting tracks
@@ -413,7 +433,7 @@ In v2, this becomes `player.setTextTrackVisibility()`:
 player.setTextTrackVisibility(true);
 ```
 
-See also the {@link shakaExtern.Track} structure which is used for all track
+See also the {@link shaka.extern.Track} structure which is used for all track
 types (variant and text).
 
 
@@ -491,7 +511,7 @@ instead of constructing an object, simply create an anonymous JavaScript object.
 `minPixels`/`maxPixels` were added to limit total pixels. Also `minBandwidth`
 and `maxBandwidth` were split into `minAudioBandwidth`, `maxAudioBandwidth`,
 `minVideoBandwidth`, and `maxVideoBandwidth`, see
-{@link shakaExtern.Restrictions}.
+{@link shaka.extern.Restrictions}.
 
 For more information on configuration in v2, see {@tutorial config},
 {@tutorial network-and-buffering-config}, and {@tutorial drm-config}.
@@ -542,7 +562,7 @@ player.getStats()
   decodedFrames: number  // same as v1
   droppedFrames: number  // same as v1
   estimatedBandwidth: number  // bits/sec, same as v1
-  loadLatency: number,  // seconds between load() and the video's 'loadend' event
+  loadLatency: number,  // seconds between load() and the video's loadend event
   playTime: number  // seconds, same as v1
   bufferingTime: number  // seconds, same as v1
   switchHistory: Array of Objects  // replaces v1's streamHistory
@@ -557,7 +577,7 @@ player.getStats()
     duration: number  // seconds in this state
 ```
 
-For more on stats in v2, see {@link shakaExtern.Stats}.
+For more on stats in v2, see {@link shaka.extern.Stats}.
 
 
 #### Player events
@@ -623,7 +643,7 @@ if (!shaka.Player.isBrowserSupported()) {
 }
 ```
 
-For more on the support object, check out {@link shakaExtern.SupportType}.
+For more on the support object, check out {@link shaka.extern.SupportType}.
 You can also see the full `probeSupport()` report for your browser at:
 {@link http://shaka-player-demo.appspot.com/support.html}
 

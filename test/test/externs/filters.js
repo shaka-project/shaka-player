@@ -25,18 +25,18 @@
  * @param {string} name
  * @param {jasmine.Callback} callback
  */
-var external_it = function(name, callback) {};
+var externalIt = function(name, callback) {};
 
 
 /**
  * @param {string} name
  * @param {jasmine.Callback} callback
  */
-var drm_it = function(name, callback) {};
+var drmIt = function(name, callback) {};
 
 
 /**
  * @param {string} name
  * @param {jasmine.Callback} callback
  */
-var quarantined_it = function(name, callback) {};
+var quarantinedIt = function(name, callback) {};

@@ -21,18 +21,18 @@ describe('ManifestConverter', function() {
     const videoType = 'video';
 
     it('will create variants with variant ids', function() {
-      /** @type {!Array.<shakaExtern.StreamDB>} */
+      /** @type {!Array.<shaka.extern.StreamDB>} */
       let audios = [
         createStreamDB(0, audioType, [0]),
-        createStreamDB(1, audioType, [1])
+        createStreamDB(1, audioType, [1]),
       ];
-      /** @type {!Array.<shakaExtern.StreamDB>} */
+      /** @type {!Array.<shaka.extern.StreamDB>} */
       let videos = [
         createStreamDB(2, videoType, [0]),
-        createStreamDB(3, videoType, [1])
+        createStreamDB(3, videoType, [1]),
       ];
 
-      /** @type {!Array.<shakaExtern.Variant>} */
+      /** @type {!Array.<shaka.extern.Variant>} */
       let variants = createConverter().createVariants(audios, videos);
 
       expect(variants.length).toBe(2);
@@ -45,30 +45,30 @@ describe('ManifestConverter', function() {
     });
 
     it('will create variants when there is only audio', function() {
-      /** @type {!Array.<shakaExtern.StreamDB>} */
+      /** @type {!Array.<shaka.extern.StreamDB>} */
       let audios = [
         createStreamDB(0, audioType, [0]),
-        createStreamDB(1, audioType, [1])
+        createStreamDB(1, audioType, [1]),
       ];
-      /** @type {!Array.<shakaExtern.StreamDB>} */
+      /** @type {!Array.<shaka.extern.StreamDB>} */
       let videos = [];
 
-      /** @type {!Array.<shakaExtern.Variant>} */
+      /** @type {!Array.<shaka.extern.Variant>} */
       let variants = createConverter().createVariants(audios, videos);
 
       expect(variants.length).toBe(2);
     });
 
     it('will create variants when there is only video', function() {
-      /** @type {!Array.<shakaExtern.StreamDB>} */
+      /** @type {!Array.<shaka.extern.StreamDB>} */
       let audios = [];
-      /** @type {!Array.<shakaExtern.StreamDB>} */
+      /** @type {!Array.<shaka.extern.StreamDB>} */
       let videos = [
         createStreamDB(2, videoType, [0]),
-        createStreamDB(3, videoType, [1])
+        createStreamDB(3, videoType, [1]),
       ];
 
-      /** @type {!Array.<shakaExtern.Variant>} */
+      /** @type {!Array.<shaka.extern.Variant>} */
       let variants = createConverter().createVariants(audios, videos);
 
       expect(variants.length).toBe(2);
@@ -77,10 +77,10 @@ describe('ManifestConverter', function() {
 
   describe('fromPeriodDB', function() {
     it('will reconstruct Periods correctly', function() {
-      /** @type {shakaExtern.PeriodDB} */
+      /** @type {shaka.extern.PeriodDB} */
       let periodDb = {
         startTime: 60,
-        streams: [createVideoStreamDB(1, [0]), createAudioStreamDB(2, [0])]
+        streams: [createVideoStreamDB(1, [0]), createAudioStreamDB(2, [0])],
       };
 
       let timeline = createTimeline();
@@ -104,10 +104,10 @@ describe('ManifestConverter', function() {
     });
 
     it('supports video-only content', function() {
-      /** @type {shakaExtern.PeriodDB} */
+      /** @type {shaka.extern.PeriodDB} */
       let periodDb = {
         startTime: 60,
-        streams: [createVideoStreamDB(1, [0]), createVideoStreamDB(2, [1])]
+        streams: [createVideoStreamDB(1, [0]), createVideoStreamDB(2, [1])],
       };
 
       let timeline = createTimeline();
@@ -120,10 +120,10 @@ describe('ManifestConverter', function() {
     });
 
     it('supports audio-only content', function() {
-      /** @type {shakaExtern.PeriodDB} */
+      /** @type {shaka.extern.PeriodDB} */
       let periodDb = {
         startTime: 60,
-        streams: [createAudioStreamDB(1, [0]), createAudioStreamDB(2, [1])]
+        streams: [createAudioStreamDB(1, [0]), createAudioStreamDB(2, [1])],
       };
 
       let timeline = createTimeline();
@@ -136,13 +136,13 @@ describe('ManifestConverter', function() {
     });
 
     it('supports text streams', function() {
-      /** @type {shakaExtern.PeriodDB} */
+      /** @type {shaka.extern.PeriodDB} */
       let periodDb = {
         startTime: 60,
         streams: [
           createVideoStreamDB(1, [0]),
-          createTextStreamDB(2)
-        ]
+          createTextStreamDB(2),
+        ],
       };
 
       let timeline = createTimeline();
@@ -165,7 +165,7 @@ describe('ManifestConverter', function() {
       const variant2 = 1;
       const variant3 = 2;
 
-      /** @type {shakaExtern.PeriodDB} */
+      /** @type {shaka.extern.PeriodDB} */
       let periodDb = {
         startTime: 60,
         streams: [
@@ -175,13 +175,13 @@ describe('ManifestConverter', function() {
 
           // Video
           createVideoStreamDB(video1, [variant1]),
-          createVideoStreamDB(video2, [variant2, variant3])
-        ]
+          createVideoStreamDB(video2, [variant2, variant3]),
+        ],
       };
 
       let timeline = createTimeline();
 
-      /** @type {shakaExtern.Period} */
+      /** @type {shaka.extern.Period} */
       let period = createConverter().fromPeriodDB(periodDb, timeline);
 
       expect(period).toBeTruthy();
@@ -210,10 +210,10 @@ describe('ManifestConverter', function() {
    * @param {number} id
    * @param {string} type
    * @param {!Array.<number>} variants
-   * @return {shakaExtern.StreamDB}
+   * @return {shaka.extern.StreamDB}
    */
   function createStreamDB(id, type, variants) {
-    /** @type {shakaExtern.StreamDB} */
+    /** @type {shaka.extern.StreamDB} */
     let streamDB = {
       id: id,
       primary: false,
@@ -229,7 +229,7 @@ describe('ManifestConverter', function() {
       encrypted: false,
       keyId: null,
       segments: [],
-      variantIds: variants
+      variantIds: variants,
     };
 
     return streamDB;
@@ -239,14 +239,14 @@ describe('ManifestConverter', function() {
    * @param {number} startTime
    * @param {number} endTime
    * @param {number} dataKey
-   * @return {shakaExtern.SegmentDB}
+   * @return {shaka.extern.SegmentDB}
    */
   function createSegmentDB(startTime, endTime, dataKey) {
-    /** @type {shakaExtern.SegmentDB} */
+    /** @type {shaka.extern.SegmentDB} */
     let segment = {
       startTime: startTime,
       endTime: endTime,
-      dataKey: dataKey
+      dataKey: dataKey,
     };
 
     return segment;
@@ -255,7 +255,7 @@ describe('ManifestConverter', function() {
   /**
    * @param {number} id
    * @param {!Array.<number>} variantIds
-   * @return {shakaExtern.StreamDB}
+   * @return {shaka.extern.StreamDB}
    */
   function createVideoStreamDB(id, variantIds) {
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
@@ -287,16 +287,16 @@ describe('ManifestConverter', function() {
         createSegmentDB(
             /* start time */ 20,
             /* end time */ 25,
-            /* data key */ 3)
+            /* data key */ 3),
       ],
-      variantIds: variantIds
+      variantIds: variantIds,
     };
   }
 
   /**
    * @param {number} id
    * @param {!Array.<number>} variantIds
-   * @return {shakaExtern.StreamDB}
+   * @return {shaka.extern.StreamDB}
    */
   function createAudioStreamDB(id, variantIds) {
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
@@ -328,15 +328,15 @@ describe('ManifestConverter', function() {
         createSegmentDB(
             /* start time */ 20,
             /* end time */ 25,
-            /* data key */ 3)
+            /* data key */ 3),
       ],
-      variantIds: variantIds
+      variantIds: variantIds,
     };
   }
 
   /**
    * @param {number} id
-   * @return {shakaExtern.StreamDB}
+   * @return {shaka.extern.StreamDB}
    */
   function createTextStreamDB(id) {
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
@@ -368,15 +368,15 @@ describe('ManifestConverter', function() {
         createSegmentDB(
             /* start time */ 20,
             /* end time */ 25,
-            /* data key */ 3)
+            /* data key */ 3),
       ],
-      variantIds: [5]
+      variantIds: [5],
     };
   }
 
   /**
-   * @param {?shakaExtern.Stream} stream
-   * @param {?shakaExtern.StreamDB} streamDb
+   * @param {?shaka.extern.Stream} stream
+   * @param {?shaka.extern.StreamDB} streamDb
    */
   function verifyStream(stream, streamDb) {
     if (!streamDb) {
@@ -408,7 +408,7 @@ describe('ManifestConverter', function() {
       trickModeVideo: null,
       containsEmsgBoxes: false,
       roles: [],
-      channelsCount: null
+      channelsCount: null,
     };
 
     expect(stream).toEqual(expectedStream);
@@ -435,20 +435,19 @@ describe('ManifestConverter', function() {
   }
 
   /**
-   * @param {!Array.<shakaExtern.Variant>} variants
+   * @param {!Array.<shaka.extern.Variant>} variants
    * @param {?number} audioId
    * @param {?number} videoId
-   * @return {?shakaExtern.Variant}
+   * @return {?shaka.extern.Variant}
    */
   function findVariant(variants, audioId, videoId) {
-    /** @type {?shakaExtern.Variant} */
+    /** @type {?shaka.extern.Variant} */
     let found = null;
 
     variants.forEach(function(variant) {
-
-      /** @type {?shakaExtern.Stream} */
+      /** @type {?shaka.extern.Stream} */
       let audio = variant.audio;
-      /** @type {?shakaExtern.Stream} */
+      /** @type {?shaka.extern.Stream} */
       let video = variant.video;
 
       /** @type {boolean } */

@@ -18,42 +18,41 @@
 goog.provide('shaka.test.ManifestGenerator');
 
 
-
 /**
  * A helper class used to generate manifests.  This is done by chaining multiple
  * calls together that build the manifest.  All the methods can appear at any
  * point and will apply to the most recent substructure.  For example, the
  * language() method sets the language of the most recent variant.
  *
- * @param {*=} opt_shaka
+ * @param {*=} shaka
  * @constructor
  * @struct
  */
-shaka.test.ManifestGenerator = function(opt_shaka) {
+shaka.test.ManifestGenerator = function(shaka) {
   /** @private {?} */
-  this.shaka_ = opt_shaka || window['shaka'];
+  this.shaka_ = shaka || window['shaka'];
 
   let timeline = new this.shaka_.media.PresentationTimeline(0, 0);
   timeline.setSegmentAvailabilityDuration(Infinity);
   timeline.notifyMaxSegmentDuration(10);
 
-  /** @private {shakaExtern.Manifest} */
+  /** @private {shaka.extern.Manifest} */
   this.manifest_ = {
     presentationTimeline: timeline,
     periods: [],
     offlineSessionIds: [],
-    minBufferTime: 0
+    minBufferTime: 0,
   };
 
-  /** @private {shakaExtern.Stream|shakaExtern.Variant|null} */
+  /** @private {shaka.extern.Stream|shaka.extern.Variant|null} */
   this.lastObjectAdded_ = null;
 
-  /** @private {?shakaExtern.Stream} */
+  /** @private {?shaka.extern.Stream} */
   this.lastStreamAdded_ = null;
 };
 
 
-/** @return {shakaExtern.Manifest} */
+/** @return {shaka.extern.Manifest} */
 shaka.test.ManifestGenerator.prototype.build = function() {
   return this.manifest_;
 };
@@ -119,7 +118,7 @@ shaka.test.ManifestGenerator.prototype.addPeriod = function(startTime) {
       {
         startTime: startTime,
         variants: [],
-        textStreams: []
+        textStreams: [],
       });
   this.lastObjectAdded_ = null;
   this.lastStreamAdded_ = null;
@@ -145,7 +144,7 @@ shaka.test.ManifestGenerator.prototype.addVariant = function(id) {
     audio: null,
     video: null,
     allowedByApplication: true,
-    allowedByKeySystem: true
+    allowedByKeySystem: true,
   };
   period.variants.push(variant);
   this.lastObjectAdded_ = variant;
@@ -232,7 +231,7 @@ shaka.test.ManifestGenerator.prototype.addDrmInfo = function(keySystem) {
     videoRobustness: '',
     serverCertificate: null,
     initData: null,
-    keyIds: []
+    keyIds: [],
   });
   return this;
 };
@@ -431,7 +430,7 @@ shaka.test.ManifestGenerator.prototype.addTextStream = function(id) {
  * @param {number} id
  * @param {string} type
  * @param {string} language
- * @return {!shakaExtern.Stream}
+ * @return {!shaka.extern.Stream}
  * @private
  */
 shaka.test.ManifestGenerator.prototype.createStream_ =
@@ -459,7 +458,7 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
   let find = jasmine.createSpy('findSegmentPosition').and.returnValue(null);
   let get = jasmine.createSpy('getSegmentReference').and.returnValue(null);
 
-  /** @type {shakaExtern.Stream} */
+  /** @type {shaka.extern.Stream} */
   let stream = {
     id: id,
     createSegmentIndex: shaka.test.Util.spyFunc(create),
@@ -483,7 +482,7 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
     trickModeVideo: null,
     containsEmsgBoxes: false,
     roles: [],
-    channelsCount: null
+    channelsCount: null,
   };
   return stream;
 };
@@ -622,13 +621,13 @@ shaka.test.ManifestGenerator.prototype.presentationTimeOffset = function(pto) {
  * Sets the MIME type of the current stream.
  *
  * @param {string} mime
- * @param {string=} opt_codecs
+ * @param {string=} codecs
  * @return {!shaka.test.ManifestGenerator}
  */
-shaka.test.ManifestGenerator.prototype.mime = function(mime, opt_codecs) {
+shaka.test.ManifestGenerator.prototype.mime = function(mime, codecs) {
   let stream = this.currentStream_();
   stream.mimeType = mime;
-  stream.codecs = opt_codecs || '';
+  stream.codecs = codecs || '';
   return this;
 };
 
@@ -740,7 +739,7 @@ shaka.test.ManifestGenerator.prototype.channelsCount = function(count) {
 // Private methods {{{
 /**
  * Gets the most recent period.
- * @return {shakaExtern.Period}
+ * @return {shaka.extern.Period}
  * @private
  */
 shaka.test.ManifestGenerator.prototype.currentPeriod_ = function() {
@@ -752,7 +751,7 @@ shaka.test.ManifestGenerator.prototype.currentPeriod_ = function() {
 
 /**
  * Gets the most recent variant.
- * @return {shakaExtern.Variant}
+ * @return {shaka.extern.Variant}
  * @private
  */
 shaka.test.ManifestGenerator.prototype.currentVariant_ = function() {
@@ -765,7 +764,7 @@ shaka.test.ManifestGenerator.prototype.currentVariant_ = function() {
 
 /**
  * Gets the most recent variant or text stream.
- * @return {shakaExtern.Stream|shakaExtern.Variant}
+ * @return {shaka.extern.Stream|shaka.extern.Variant}
  * @private
  */
 shaka.test.ManifestGenerator.prototype.currentStreamOrVariant_ = function() {
@@ -778,7 +777,7 @@ shaka.test.ManifestGenerator.prototype.currentStreamOrVariant_ = function() {
 
 /**
  * Gets the most recent DRM info.
- * @return {shakaExtern.DrmInfo}
+ * @return {shaka.extern.DrmInfo}
  * @private
  */
 shaka.test.ManifestGenerator.prototype.currentDrmInfo_ = function() {
@@ -791,7 +790,7 @@ shaka.test.ManifestGenerator.prototype.currentDrmInfo_ = function() {
 
 /**
  * Gets the most recent stream.
- * @return {shakaExtern.Stream}
+ * @return {shaka.extern.Stream}
  * @private
  */
 shaka.test.ManifestGenerator.prototype.currentStream_ = function() {

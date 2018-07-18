@@ -21,7 +21,7 @@ goog.provide('shaka.test.ManifestParser');
 /**
  * Verifies the segment references of a stream.
  *
- * @param {?shakaExtern.Stream} stream
+ * @param {?shaka.extern.Stream} stream
  * @param {!Array.<shaka.media.SegmentReference>} references
  */
 shaka.test.ManifestParser.verifySegmentIndex = function(stream, references) {
@@ -67,18 +67,15 @@ shaka.test.ManifestParser.verifySegmentIndex = function(stream, references) {
  * @param {number} position
  * @param {number} start
  * @param {number} end
- * @param {string=} opt_baseUri
- * @param {number=} opt_startByte
- * @param {?number=} opt_endByte
+ * @param {string=} baseUri
+ * @param {number=} startByte
+ * @param {?number=} endByte
  * @return {!shaka.media.SegmentReference}
  */
 shaka.test.ManifestParser.makeReference =
-    function(uri, position, start, end, opt_baseUri,
-             opt_startByte, opt_endByte) {
-  let base = opt_baseUri || '';
-  let startByte = opt_startByte || 0;
-  let endByte = opt_endByte || null;
-  let getUris = function() { return [base + uri]; };
+    function(uri, position, start, end, baseUri = '',
+             startByte = 0, endByte = null) {
+  let getUris = function() { return [baseUri + uri]; };
   return new shaka.media.SegmentReference(
       position, start, end, getUris, startByte, endByte);
 };

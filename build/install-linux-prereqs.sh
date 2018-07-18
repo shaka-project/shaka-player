@@ -77,6 +77,7 @@ else
       # Remove any old packaged copy of nodejs/npm.  Some of these commands may
       # fail, for example if a package does not exist.  Ignore errors here.
       sudo apt -y remove --purge nodejs || true
+      sudo apt -y remove --purge nodejs-dev || true
       sudo apt -y remove --purge npm || true
       sudo apt -y autoremove || true
 

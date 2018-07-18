@@ -15,7 +15,10 @@
  * limitations under the License.
  */
 
-/** @externs */
+/**
+ * @externs
+ */
+
 
 /**
  * A representation of an abortable operation.  Note that these are not
@@ -26,7 +29,7 @@
  * @template T
  * @exportDoc
  */
-shakaExtern.IAbortableOperation;
+shaka.extern.IAbortableOperation = function() {};
 
 
 /**
@@ -38,7 +41,7 @@ shakaExtern.IAbortableOperation;
  * @const {!Promise.<T>}
  * @exportDoc
  */
-shakaExtern.IAbortableOperation.prototype.promise;
+shaka.extern.IAbortableOperation.prototype.promise;
 
 
 /**
@@ -51,14 +54,14 @@ shakaExtern.IAbortableOperation.prototype.promise;
  * @return {!Promise}
  * @exportDoc
  */
-shakaExtern.IAbortableOperation.prototype.abort = function() {};
+shaka.extern.IAbortableOperation.prototype.abort = function() {};
 
 
 /**
  * @param {function(boolean)} onFinal A callback to be invoked after the
  *   operation succeeds or fails.  The boolean argument is true if the operation
  *   succeeded and false if it failed.
- * @return {!shakaExtern.IAbortableOperation.<T>} Returns this.
+ * @return {!shaka.extern.IAbortableOperation.<T>} Returns this.
  * @exportDoc
  */
-shakaExtern.IAbortableOperation.prototype.finally = function(onFinal) {};
+shaka.extern.IAbortableOperation.prototype.finally = function(onFinal) {};

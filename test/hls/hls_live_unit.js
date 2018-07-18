@@ -25,16 +25,16 @@ describe('HlsParser live', function() {
     '#EXTM3U\n',
     '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
     'RESOLUTION=960x540,FRAME-RATE=60\n',
-    'test:/video\n'
+    'test:/video\n',
   ].join('');
 
   /** @type {!shaka.test.FakeNetworkingEngine} */
   let fakeNetEngine;
   /** @type {!shaka.hls.HlsParser} */
   let parser;
-  /** @type {shakaExtern.ManifestParser.PlayerInterface} */
+  /** @type {shaka.extern.ManifestParser.PlayerInterface} */
   let playerInterface;
-  /** @type {shakaExtern.ManifestConfiguration} */
+  /** @type {shaka.extern.ManifestConfiguration} */
   let config;
   /** @type {ArrayBuffer} */
   let initSegmentData;
@@ -78,7 +78,7 @@ describe('HlsParser live', function() {
       0x74, 0x66, 0x64, 0x74, // type (tfdt)
       0x01, 0x00, 0x00, 0x00, // version and flags
       0x00, 0x00, 0x00, 0x00, // baseMediaDecodeTime first 4 bytes
-      0x00, 0x00, 0x07, 0xd0  // baseMediaDecodeTime last 4 bytes (2000)
+      0x00, 0x00, 0x07, 0xd0,  // baseMediaDecodeTime last 4 bytes (2000)
     ]).buffer;
     tsSegmentData = new Uint8Array([
       0x47, // TS sync byte (fixed value)
@@ -90,7 +90,7 @@ describe('HlsParser live', function() {
       0x80, // marker bits (fixed value), not scrambled, not priority
       0x80, // PTS only, no DTS, other flags 0 (don't matter)
       0x05, // remaining PES header length == 5 (one timestamp)
-      0x21, 0x00, 0x0b, 0x7e, 0x41 // PTS = 180000, encoded into 5 bytes
+      0x21, 0x00, 0x0b, 0x7e, 0x41, // PTS = 180000, encoded into 5 bytes
     ]).buffer;
     // 180000 divided by TS timescale (90000) = segment starts at 2s.
     segmentDataStartTime = 2;
@@ -104,7 +104,7 @@ describe('HlsParser live', function() {
       0x74, 0x66, 0x64, 0x74, // type (tfdt)
       0x01, 0x00, 0x00, 0x00, // version and flags
       0x00, 0x00, 0x00, 0x00, // baseMediaDecodeTime first 4 bytes
-      0x0b, 0x60, 0xbc, 0x28  // baseMediaDecodeTime last 4 bytes (190889000)
+      0x0b, 0x60, 0xbc, 0x28,  // baseMediaDecodeTime last 4 bytes (190889000)
     ]).buffer;
 
     // The timestamp above would roll over twice, so this rollover offset should
@@ -120,13 +120,14 @@ describe('HlsParser live', function() {
     let retry = shaka.net.NetworkingEngine.defaultRetryParameters();
     config = {
       retryParameters: retry,
+      availabilityWindowOverride: NaN,
       dash: {
         customScheme: function(node) { return null; },
         clockSyncUri: '',
         ignoreDrmInfo: false,
         xlinkFailGracefully: false,
-        defaultPresentationDelay: 10
-      }
+        defaultPresentationDelay: 10,
+      },
     };
 
     playerInterface = {
@@ -135,7 +136,7 @@ describe('HlsParser live', function() {
       networkingEngine: fakeNetEngine,
       onError: fail,
       onEvent: fail,
-      onTimelineRegionAdded: fail
+      onTimelineRegionAdded: fail,
     };
 
     parser = new shaka.hls.HlsParser();
@@ -182,7 +183,7 @@ describe('HlsParser live', function() {
             'test:/master': master,
             'test:/video': updatedMedia,
             'test:/video2': updatedMedia,
-            'test:/audio': updatedMedia
+            'test:/audio': updatedMedia,
           });
 
           delayForUpdatePeriod();
@@ -206,7 +207,7 @@ describe('HlsParser live', function() {
       '#EXT-X-TARGETDURATION:5\n',
       '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:2,\n',
-      'test:/main.mp4\n'
+      'test:/main.mp4\n',
     ].join('');
 
     const mediaWithAdditionalSegment = [
@@ -217,7 +218,7 @@ describe('HlsParser live', function() {
       '#EXTINF:2,\n',
       'test:/main.mp4\n',
       '#EXTINF:2,\n',
-      'test:/main2.mp4\n'
+      'test:/main2.mp4\n',
     ].join('');
 
     it('treats already ended presentation like VOD', function(done) {
@@ -225,7 +226,7 @@ describe('HlsParser live', function() {
         'test:/master': toUTF8(master),
         'test:/video': toUTF8(media + '#EXT-X-ENDLIST'),
         'test:/init.mp4': initSegmentData,
-        'test:/main.mp4': segmentData
+        'test:/main.mp4': segmentData,
       });
 
       parser.start('test:/master', playerInterface)
@@ -263,7 +264,7 @@ describe('HlsParser live', function() {
         const secondVariant = [
           '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1",',
           'RESOLUTION=1200x940,FRAME-RATE=60\n',
-          'test:/video2'
+          'test:/video2',
         ].join('');
 
         let masterWithTwoVariants = master + secondVariant;
@@ -279,7 +280,7 @@ describe('HlsParser live', function() {
       it('updates all streams', function(done) {
         const audio = [
           '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
-          'URI="test:/audio"\n'
+          'URI="test:/audio"\n',
         ].join('');
 
         let masterWithAudio = master + audio;
@@ -295,12 +296,12 @@ describe('HlsParser live', function() {
       it('handles multiple updates', function(done) {
         const newSegment1 = [
           '#EXTINF:2,\n',
-          'test:/main2.mp4\n'
+          'test:/main2.mp4\n',
         ].join('');
 
         const newSegment2 = [
           '#EXTINF:2,\n',
-          'test:/main3.mp4\n'
+          'test:/main3.mp4\n',
         ].join('');
 
         let updatedMedia1 = media + newSegment1;
@@ -316,7 +317,7 @@ describe('HlsParser live', function() {
           'test:/master': toUTF8(master),
           'test:/video': toUTF8(media),
           'test:/init.mp4': initSegmentData,
-          'test:/main.mp4': segmentData
+          'test:/main.mp4': segmentData,
         });
         parser.start('test:/master', playerInterface)
           .then(function(manifest) {
@@ -325,7 +326,7 @@ describe('HlsParser live', function() {
 
               fakeNetEngine.setResponseMapAsText({
                 'test:/master': master,
-                'test:/video': updatedMedia1
+                'test:/video': updatedMedia1,
               });
 
               delayForUpdatePeriod();
@@ -333,7 +334,7 @@ describe('HlsParser live', function() {
 
               fakeNetEngine.setResponseMapAsText({
                 'test:/master': master,
-                'test:/video': updatedMedia2
+                'test:/video': updatedMedia2,
               });
 
               delayForUpdatePeriod();
@@ -347,14 +348,14 @@ describe('HlsParser live', function() {
           'test:/master': toUTF8(master),
           'test:/video': toUTF8(media),
           'test:/init.mp4': initSegmentData,
-          'test:/main.mp4': segmentData
+          'test:/main.mp4': segmentData,
         });
 
         parser.start('test:/master', playerInterface).then(function(manifest) {
           expect(manifest.presentationTimeline.isLive()).toBe(true);
           fakeNetEngine.setResponseMapAsText({
             'test:/master': master,
-            'test:/video': mediaWithAdditionalSegment + '#EXT-X-ENDLIST\n'
+            'test:/video': mediaWithAdditionalSegment + '#EXT-X-ENDLIST\n',
           });
 
           delayForUpdatePeriod();
@@ -368,7 +369,7 @@ describe('HlsParser live', function() {
           'test:/master': toUTF8(master),
           'test:/video': toUTF8(media + '#EXT-X-ENDLIST'),
           'test:/init.mp4': initSegmentData,
-          'test:/main.mp4': segmentData
+          'test:/main.mp4': segmentData,
         });
 
         parser.start('test:/master', playerInterface).then(function(manifest) {
@@ -386,7 +387,7 @@ describe('HlsParser live', function() {
       '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
       '#EXT-X-MEDIA-SEQUENCE:0\n',
       '#EXTINF:2,\n',
-      'test:/main.mp4\n'
+      'test:/main.mp4\n',
     ].join('');
 
     const mediaWithoutSequenceNumber = [
@@ -394,7 +395,7 @@ describe('HlsParser live', function() {
       '#EXT-X-TARGETDURATION:5\n',
       '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:2,\n',
-      'test:/main.mp4\n'
+      'test:/main.mp4\n',
     ].join('');
 
     const mediaWithByteRange = [
@@ -404,7 +405,7 @@ describe('HlsParser live', function() {
       '#EXT-X-MEDIA-SEQUENCE:0\n',
       '#EXT-X-BYTERANGE:121090@616\n',
       '#EXTINF:2,\n',
-      'test:/main.mp4\n'
+      'test:/main.mp4\n',
     ].join('');
 
     const expectedStartByte = 616;
@@ -418,7 +419,7 @@ describe('HlsParser live', function() {
       '#EXTINF:2,\n',
       'test:/main.mp4\n',
       '#EXTINF:2,\n',
-      'test:/main2.mp4\n'
+      'test:/main2.mp4\n',
     ].join('');
 
     const mediaWithRemovedSegment = [
@@ -427,7 +428,7 @@ describe('HlsParser live', function() {
       '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
       '#EXT-X-MEDIA-SEQUENCE:1\n',
       '#EXTINF:2,\n',
-      'test:/main2.mp4\n'
+      'test:/main2.mp4\n',
     ].join('');
 
     it('starts presentation as VOD when ENDLIST is present', function(done) {
@@ -435,7 +436,7 @@ describe('HlsParser live', function() {
         'test:/master': toUTF8(master),
         'test:/video': toUTF8(media + '#EXT-X-ENDLIST'),
         'test:/init.mp4': initSegmentData,
-        'test:/main.mp4': segmentData
+        'test:/main.mp4': segmentData,
       });
 
       parser.start('test:/master', playerInterface).then(function(manifest) {
@@ -448,7 +449,7 @@ describe('HlsParser live', function() {
         'test:/master': toUTF8(master),
         'test:/video': toUTF8(mediaWithoutSequenceNumber),
         'test:/init.mp4': initSegmentData,
-        'test:/main.mp4': segmentData
+        'test:/main.mp4': segmentData,
       });
 
       parser.start('test:/master', playerInterface).catch(fail).then(done);
@@ -553,7 +554,7 @@ describe('HlsParser live', function() {
           'test:/master': toUTF8(master),
           'test:/video': toUTF8(media),
           'test:/init.mp4': initSegmentData,
-          'test:/main.mp4': segmentData
+          'test:/main.mp4': segmentData,
         });
 
         let ref = ManifestParser.makeReference(
@@ -575,7 +576,7 @@ describe('HlsParser live', function() {
           'test:/master': toUTF8(master),
           'test:/video': toUTF8(mediaWithAdditionalSegment),
           'test:/init.mp4': initSegmentData,
-          'test:/main.mp4': segmentData
+          'test:/main.mp4': segmentData,
         });
 
         let ref1 = ManifestParser.makeReference(
@@ -595,7 +596,7 @@ describe('HlsParser live', function() {
             'test:/video': toUTF8(mediaWithRemovedSegment),
             'test:/init.mp4': initSegmentData,
             'test:/main.mp4': segmentData,
-            'test:/main2.mp4': segmentData
+            'test:/main2.mp4': segmentData,
           });
 
           fakeNetEngine.request.calls.reset();
@@ -620,7 +621,7 @@ describe('HlsParser live', function() {
         fakeNetEngine.setResponseMap({
           'test:/master': toUTF8(master),
           'test:/video': toUTF8(tsMediaPlaylist),
-          'test:/main2.ts': tsSegmentData
+          'test:/main2.ts': tsSegmentData,
         });
 
         let ref = ManifestParser.makeReference(
@@ -645,7 +646,7 @@ describe('HlsParser live', function() {
           'test:/master': toUTF8(master),
           'test:/video': toUTF8(mediaWithByteRange),
           'test:/init.mp4': initSegmentData,
-          'test:/main.mp4': segmentData
+          'test:/main.mp4': segmentData,
         });
 
         let ref = ManifestParser.makeReference(

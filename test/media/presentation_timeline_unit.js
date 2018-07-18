@@ -88,15 +88,15 @@ describe('PresentationTimeline', function() {
    * Creates a IPR PresentationTimeline.
    *
    * @param {number} duration
-   * @param {number=} opt_delay
+   * @param {number=} delay
    * @return {shaka.media.PresentationTimeline}
    */
-  function makeIprTimeline(duration, opt_delay) {
+  function makeIprTimeline(duration, delay) {
     let now = Date.now() / 1000;
     let timeline = makePresentationTimeline(
         /* static */ false, duration, /* start time */ now,
         /* availability */ Infinity, /* max seg dur */ 10,
-        /* clock offset */ 0, opt_delay || 0);
+        /* clock offset */ 0, delay || 0);
     expect(timeline.isLive()).toBe(false);
     expect(timeline.isInProgress()).toBe(true);
     return timeline;
@@ -106,15 +106,15 @@ describe('PresentationTimeline', function() {
    * Creates a live PresentationTimeline.
    *
    * @param {number} availability
-   * @param {number=} opt_delay
+   * @param {number=} delay
    * @return {shaka.media.PresentationTimeline}
    */
-  function makeLiveTimeline(availability, opt_delay) {
+  function makeLiveTimeline(availability, delay) {
     let now = Date.now() / 1000;
     let timeline = makePresentationTimeline(
         /* static */ false, /* duration */ Infinity, /* start time */ now,
         availability, /* max seg dur */ 10,
-        /* clock offset */ 0, opt_delay || 0);
+        /* clock offset */ 0, delay || 0);
     expect(timeline.isLive()).toBe(true);
     expect(timeline.isInProgress()).toBe(false);
     return timeline;

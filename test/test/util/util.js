@@ -19,7 +19,6 @@ goog.provide('shaka.test.StatusPromise');
 goog.provide('shaka.test.Util');
 
 
-
 /**
  * @param {!Promise} p
  * @constructor
@@ -46,12 +45,12 @@ shaka.test.StatusPromise.prototype.status;
 /**
  * Fakes an event loop. Each tick processes some number of instantaneous
  * operations and advances the simulated clock forward by 1 second. Calls
- * opt_onTick just before each tick if it's specified.
+ * onTick just before each tick if it's specified.
  *
  * @param {number} duration The number of seconds of simulated time.
- * @param {function(number)=} opt_onTick
+ * @param {function(number)=} onTick
  */
-shaka.test.Util.fakeEventLoop = function(duration, opt_onTick) {
+shaka.test.Util.fakeEventLoop = function(duration, onTick) {
   expect(window.Promise).toBe(PromiseMock);
 
   // Run this synchronously:
@@ -62,8 +61,8 @@ shaka.test.Util.fakeEventLoop = function(duration, opt_onTick) {
       PromiseMock.flush();
     }
 
-    if (opt_onTick) {
-      opt_onTick(time);
+    if (onTick) {
+      onTick(time);
     }
     jasmine.clock().tick(1000);
     PromiseMock.flush();
@@ -75,12 +74,12 @@ shaka.test.Util.fakeEventLoop = function(duration, opt_onTick) {
  * Returns a Promise which is resolved after the given delay.
  *
  * @param {number} seconds The delay in seconds.
- * @param {function(function(), number)=} opt_setTimeout
+ * @param {function(function(), number)=} realSetTimeout
  * @return {!Promise}
  */
-shaka.test.Util.delay = function(seconds, opt_setTimeout) {
+shaka.test.Util.delay = function(seconds, realSetTimeout) {
   return new Promise(function(resolve, reject) {
-    let timeout = opt_setTimeout || setTimeout;
+    let timeout = realSetTimeout || setTimeout;
     timeout(function() {
       resolve();
       // Play nicely with PromiseMock by flushing automatically.
@@ -115,9 +114,9 @@ shaka.test.Util.registerElementMatcher_ = function() {
   jasmine.addMatchers({
     toEqualElement: function(util, customEqualityTesters) {
       return {
-        compare: shaka.test.Util.expectToEqualElementCompare_
+        compare: shaka.test.Util.expectToEqualElementCompare_,
       };
-    }
+    },
   });
 };
 
@@ -292,10 +291,10 @@ shaka.test.Util.spyFunc = function(spy) {
 
 /**
  * @param {!jasmine.Spy} spy
- * @param {...*} var_args
+ * @param {...*} varArgs
  * @return {*}
  */
-shaka.test.Util.invokeSpy = function(spy, var_args) {
+shaka.test.Util.invokeSpy = function(spy, varArgs) {
   return spy.apply(null, Array.prototype.slice.call(arguments, 1));
 };
 

@@ -18,11 +18,10 @@
 
 /**
  * @fileoverview Externs for MediaSession based on
- * {@link https://goo.gl/8QS094 Editor's Draft, 12 January 2017}
+ * {@link https://bit.ly/2Id3dGD Editor's Draft, 12 January 2017}
  *
  * @externs
  */
-
 
 
 /**

@@ -26,9 +26,9 @@ describe('PlayheadObserver', function() {
   let mockMediaSourceEngine;
   /** @type {!shaka.test.FakePresentationTimeline} */
   let timeline;
-  /** @type {shakaExtern.Manifest} */
+  /** @type {shaka.extern.Manifest} */
   let manifest;
-  /** @type {shakaExtern.StreamingConfiguration} */
+  /** @type {shaka.extern.StreamingConfiguration} */
   let config;
 
   /** @type {!jasmine.Spy} */
@@ -60,7 +60,7 @@ describe('PlayheadObserver', function() {
       periods: [],
       offlineSessionIds: [],
       minBufferTime: 0,
-      presentationTimeline: timeline
+      presentationTimeline: timeline,
     };
 
     config = {
@@ -76,7 +76,7 @@ describe('PlayheadObserver', function() {
       smallGapLimit: 0.5,
       jumpLargeGaps: false,
       durationBackoff: 1,
-      forceTransmuxTS: false
+      forceTransmuxTS: false,
     };
 
     onBuffering = jasmine.createSpy('onBuffering');
@@ -89,8 +89,8 @@ describe('PlayheadObserver', function() {
     timeline.getSegmentAvailabilityEnd.and.returnValue(60);
   });
 
-  afterEach(function(done) {
-    observer.destroy().catch(fail).then(done);
+  afterEach(async () => {
+    await observer.destroy();
   });
 
   describe('buffering', function() {
@@ -254,7 +254,7 @@ describe('PlayheadObserver', function() {
         // This should be an actual object, but it doesn't matter what.
         // It will be checked with jasmine's toBe() to make sure it was copied
         // by reference.
-        eventElement: /** @type {?} */({})
+        eventElement: /** @type {?} */({}),
       };
 
       video.buffered = createFakeBuffered([{start: 0, end: 60}]);
@@ -288,7 +288,7 @@ describe('PlayheadObserver', function() {
           startTime: 10,
           endTime: 20,
           id: 'xyz',
-          eventElement: null
+          eventElement: null,
         });
         observer.addTimelineRegion(regionInfo);
 
@@ -300,24 +300,23 @@ describe('PlayheadObserver', function() {
           startTime: 0,
           endTime: 50,
           id: '123',
-          eventElement: null
+          eventElement: null,
         });
         expect(onEvent).toHaveBeenCalled();
       });
 
-      it('fires an enter event when adding a region the playhead is in',
-         function() {
-           video.currentTime = 15;
-           jasmine.clock().tick(1000);
+      it('fires an enter event when adding a region the playhead is in', () => {
+        video.currentTime = 15;
+        jasmine.clock().tick(1000);
 
-           expect(onEvent).not.toHaveBeenCalled();
-           observer.addTimelineRegion(regionInfo);
-           jasmine.clock().tick(1000);
+        expect(onEvent).not.toHaveBeenCalled();
+        observer.addTimelineRegion(regionInfo);
+        jasmine.clock().tick(1000);
 
-           expect(onEvent).toHaveBeenCalledTimes(2);
-           expectTimelineEvent('timelineregionadded', regionInfo, 0);
-           expectTimelineEvent('timelineregionenter', regionInfo, 1);
-         });
+        expect(onEvent).toHaveBeenCalledTimes(2);
+        expectTimelineEvent('timelineregionadded', regionInfo, 0);
+        expectTimelineEvent('timelineregionenter', regionInfo, 1);
+      });
     });
 
     describe('seeking', function() {
@@ -387,7 +386,7 @@ describe('PlayheadObserver', function() {
           startTime: 3,
           endTime: 3,
           id: 'abc',
-          eventElement: null
+          eventElement: null,
         };
         observer.addTimelineRegion(otherInfo);
         onEvent.calls.reset();
@@ -415,7 +414,7 @@ describe('PlayheadObserver', function() {
           startTime: 13,
           endTime: 16,
           id: 'abc',
-          eventElement: null
+          eventElement: null,
         };
         let overlapInfo = {
           schemeIdUri: 'http://example.com',
@@ -423,7 +422,7 @@ describe('PlayheadObserver', function() {
           startTime: 18,
           endTime: 23,
           id: 'abc',
-          eventElement: null
+          eventElement: null,
         };
         observer.addTimelineRegion(nestedInfo);
         observer.addTimelineRegion(overlapInfo);
@@ -444,11 +443,11 @@ describe('PlayheadObserver', function() {
 
     /**
      * @param {string} name
-     * @param {shakaExtern.TimelineRegionInfo} info
-     * @param {number=} opt_index
+     * @param {shaka.extern.TimelineRegionInfo} info
+     * @param {number=} index
      */
-    function expectTimelineEvent(name, info, opt_index) {
-      let event = onEvent.calls.argsFor(opt_index || 0)[0];
+    function expectTimelineEvent(name, info, index) {
+      let event = onEvent.calls.argsFor(index || 0)[0];
       expect(event.type).toBe(name);
       expect(event.detail).toEqual(info);
       // This should be a copy by reference, not just a value match.
@@ -458,7 +457,7 @@ describe('PlayheadObserver', function() {
     /**
      * @param {number} newTime
      * @param {string} eventName
-     * @param {shakaExtern.TimelineRegionInfo} info
+     * @param {shaka.extern.TimelineRegionInfo} info
      */
     function moveToAndExpectEvent(newTime, eventName, info) {
       video.currentTime = newTime;
@@ -475,7 +474,7 @@ describe('PlayheadObserver', function() {
       manifest.periods = [
         {startTime: 0},
         {startTime: 20},
-        {startTime: 30}
+        {startTime: 30},
       ];
 
       observer = new shaka.media.PlayheadObserver(

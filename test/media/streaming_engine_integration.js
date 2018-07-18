@@ -30,7 +30,7 @@ describe('StreamingEngine', function() {
 
   /** @type {!shaka.media.Playhead} */
   let playhead;
-  /** @type {shakaExtern.StreamingConfiguration} */
+  /** @type {shaka.extern.StreamingConfiguration} */
   let config;
 
   let netEngine;
@@ -40,12 +40,12 @@ describe('StreamingEngine', function() {
   let streamingEngine;
 
 
-  /** @type {shakaExtern.Variant} */
+  /** @type {shaka.extern.Variant} */
   let variant1;
-  /** @type {shakaExtern.Variant} */
+  /** @type {shaka.extern.Variant} */
   let variant2;
 
-  /** @type {shakaExtern.Manifest} */
+  /** @type {shaka.extern.Manifest} */
   let manifest;
 
   /** @type {!jasmine.Spy} */
@@ -75,7 +75,7 @@ describe('StreamingEngine', function() {
   });
 
   beforeEach(function() {
-    // shakaExtern.StreamingConfiguration
+    // shaka.extern.StreamingConfiguration
     config = {
       rebufferingGoal: 2,
       bufferingGoal: 5,
@@ -89,7 +89,7 @@ describe('StreamingEngine', function() {
       smallGapLimit: 0.5,
       jumpLargeGaps: false,
       durationBackoff: 1,
-      forceTransmuxTS: false
+      forceTransmuxTS: false,
     };
 
     onChooseStreams = jasmine.createSpy('onChooseStreams');
@@ -104,19 +104,17 @@ describe('StreamingEngine', function() {
     mediaSourceEngine = new shaka.media.MediaSourceEngine(video);
   });
 
-  afterEach(function(done) {
-    streamingEngine.destroy().then(function() {
-      return Promise.all([
-        mediaSourceEngine.destroy(),
-        playhead.destroy(),
-        eventManager.destroy()
-      ]);
-    }).then(function() {
-      // Work-around: allow the Tizen media pipeline to cool down.
-      // Without this, Tizen's pipeline seems to hang in subsequent tests.
-      // TODO: file a bug on Tizen
-      return Util.delay(0.1);
-    }).catch(fail).then(done);
+  afterEach(async () => {
+    await streamingEngine.destroy();
+    await Promise.all([
+      mediaSourceEngine.destroy(),
+      playhead.destroy(),
+      eventManager.destroy(),
+    ]);
+    // Work-around: allow the Tizen media pipeline to cool down.
+    // Without this, Tizen's pipeline seems to hang in subsequent tests.
+    // TODO: file a bug on Tizen
+    await Util.delay(0.1);
   });
 
   afterAll(function() {
@@ -126,7 +124,7 @@ describe('StreamingEngine', function() {
   function setupVod() {
     return Promise.all([
       createVodStreamGenerator(metadata.audio, ContentType.AUDIO),
-      createVodStreamGenerator(metadata.video, ContentType.VIDEO)
+      createVodStreamGenerator(metadata.video, ContentType.VIDEO),
     ]).then(function() {
       timeline = shaka.test.StreamingEngineUtil.createFakePresentationTimeline(
           0 /* segmentAvailabilityStart */,
@@ -159,7 +157,7 @@ describe('StreamingEngine', function() {
           20 /* timeShiftBufferDepth */),
       createLiveStreamGenerator(
           metadata.video, ContentType.VIDEO,
-          20 /* timeShiftBufferDepth */)
+          20 /* timeShiftBufferDepth */),
     ]).then(function() {
       // The generator's AST is set to 295 seconds in the past, so the live-edge
       // is at 295 - 10 seconds.
@@ -267,7 +265,8 @@ describe('StreamingEngine', function() {
     let onSeek = function() { streamingEngine.seeked(); };
     playhead = new shaka.media.Playhead(
         /** @type {!HTMLVideoElement} */(video),
-        /** @type {shakaExtern.Manifest} */ (manifest),
+        manifest.presentationTimeline,
+        manifest.minBufferTime || 0,
         config,
         null /* startTime */,
         onSeek,
@@ -312,16 +311,16 @@ describe('StreamingEngine', function() {
       onManifestUpdate: function() {},
       onSegmentAppended: playhead.onSegmentAppended.bind(playhead),
       onInitialStreamsSetup: Util.spyFunc(onInitialStreamsSetup),
-      onStartupComplete: Util.spyFunc(onStartupComplete)
+      onStartupComplete: Util.spyFunc(onStartupComplete),
     };
     streamingEngine = new shaka.media.StreamingEngine(
-        /** @type {shakaExtern.Manifest} */(manifest), playerInterface);
+        /** @type {shaka.extern.Manifest} */(manifest), playerInterface);
     streamingEngine.configure(config);
   }
 
   describe('VOD', function() {
-    beforeEach(function(done) {
-      setupVod().catch(fail).then(done);
+    beforeEach(async () => {
+      await setupVod();
     });
 
     it('plays', function(done) {
@@ -436,13 +435,12 @@ describe('StreamingEngine', function() {
   describe('Live', function() {
     let slideSegmentAvailabilityWindow;
 
-    beforeEach(function(done) {
-      setupLive().then(function() {
-        slideSegmentAvailabilityWindow = window.setInterval(function() {
-          timeline.segmentAvailabilityStart++;
-          timeline.segmentAvailabilityEnd++;
-        }, 1000);
-      }).catch(fail).then(done);
+    beforeEach(async () => {
+      await setupLive();
+      slideSegmentAvailabilityWindow = window.setInterval(function() {
+        timeline.segmentAvailabilityStart++;
+        timeline.segmentAvailabilityEnd++;
+      }, 1000);
     });
 
     afterEach(function() {
@@ -477,40 +475,39 @@ describe('StreamingEngine', function() {
       });
     });
 
-    it('can handle seeks ahead of availability window',
-        function(done) {
-          onStartupComplete.and.callFake(function() {
-            video.play();
+    it('can handle seeks ahead of availability window', function(done) {
+      onStartupComplete.and.callFake(function() {
+        video.play();
 
-            // Use setTimeout to ensure the playhead has performed it's initial
-            // seeking.
-            setTimeout(function() {
-              // Seek outside the availability window right away. The playhead
-              // should adjust the video's current time.
-              video.currentTime = timeline.segmentAvailabilityEnd + 120;
+        // Use setTimeout to ensure the playhead has performed it's initial
+        // seeking.
+        setTimeout(function() {
+          // Seek outside the availability window right away. The playhead
+          // should adjust the video's current time.
+          video.currentTime = timeline.segmentAvailabilityEnd + 120;
 
-              // Wait until the repositioning is complete so we don't
-              // immediately hit this case.
-              setTimeout(function() {
-                let onTimeUpdate = function() {
-                  if (video.currentTime >= 305) {
-                    // We've played through the Period transition!
-                    eventManager.unlisten(video, 'timeupdate');
-                    done();
-                  }
-                };
-                eventManager.listen(video, 'timeupdate', onTimeUpdate);
-              }, 1000);
-            }, 50);
-          });
+          // Wait until the repositioning is complete so we don't
+          // immediately hit this case.
+          setTimeout(function() {
+            let onTimeUpdate = function() {
+              if (video.currentTime >= 305) {
+                // We've played through the Period transition!
+                eventManager.unlisten(video, 'timeupdate');
+                done();
+              }
+            };
+            eventManager.listen(video, 'timeupdate', onTimeUpdate);
+          }, 1000);
+        }, 50);
+      });
 
-          // Let's go!
-          onChooseStreams.and.callFake(defaultOnChooseStreams);
-          streamingEngine.init().catch(function(error) {
-            fail(error);
-            done();
-          });
-        });
+      // Let's go!
+      onChooseStreams.and.callFake(defaultOnChooseStreams);
+      streamingEngine.init().catch(function(error) {
+        fail(error);
+        done();
+      });
+    });
 
     it('can handle seeks behind availability window', function(done) {
       onStartupComplete.and.callFake(function() {
@@ -566,85 +563,71 @@ describe('StreamingEngine', function() {
   // This tests gaps created by missing segments.
   // TODO: Consider also adding tests for missing frames.
   describe('gap jumping', function() {
-    it('jumps small gaps at the beginning', function(done) {
+    it('jumps small gaps at the beginning', async () => {
       config.smallGapLimit = 5;
-      setupGappyContent(/* gapAtStart */ 1, /* dropSegment */ false)
-          .then(function() {
-            onStartupComplete.and.callFake(function() {
-              expect(video.buffered.length).toBeGreaterThan(0);
-              expect(video.buffered.start(0)).toBeCloseTo(1);
+      await setupGappyContent(/* gapAtStart */ 1, /* dropSegment */ false);
+      onStartupComplete.and.callFake(function() {
+        expect(video.buffered.length).toBeGreaterThan(0);
+        expect(video.buffered.start(0)).toBeCloseTo(1);
 
-              video.play();
-            });
+        video.play();
+      });
 
-            // Let's go!
-            onChooseStreams.and.callFake(defaultOnChooseStreams);
-            return streamingEngine.init();
-          }).then(function() {
-            return waitForTime(5);
-          }).catch(fail).then(done);
+      // Let's go!
+      onChooseStreams.and.callFake(defaultOnChooseStreams);
+      await streamingEngine.init();
+      await waitForTime(5);
     });
 
-    it('jumps large gaps at the beginning', function(done) {
+    it('jumps large gaps at the beginning', async () => {
       config.smallGapLimit = 1;
       config.jumpLargeGaps = true;
-      setupGappyContent(/* gapAtStart */ 5, /* dropSegment */ false)
-          .then(function() {
-            onStartupComplete.and.callFake(function() {
-              expect(video.buffered.length).toBeGreaterThan(0);
-              expect(video.buffered.start(0)).toBeCloseTo(5);
+      await setupGappyContent(/* gapAtStart */ 5, /* dropSegment */ false);
+      onStartupComplete.and.callFake(function() {
+        expect(video.buffered.length).toBeGreaterThan(0);
+        expect(video.buffered.start(0)).toBeCloseTo(5);
 
-              video.play();
-            });
+        video.play();
+      });
 
-            // Let's go!
-            onChooseStreams.and.callFake(defaultOnChooseStreams);
-            return streamingEngine.init();
-          }).then(function() {
-            return waitForTime(8);
-          }).catch(fail).then(done);
+      // Let's go!
+      onChooseStreams.and.callFake(defaultOnChooseStreams);
+      await streamingEngine.init();
+      await waitForTime(8);
     });
 
-    it('jumps small gaps in the middle', function(done) {
+    it('jumps small gaps in the middle', async () => {
       config.smallGapLimit = 20;
-      setupGappyContent(/* gapAtStart */ 0, /* dropSegment */ true)
-          .then(function() {
-            onStartupComplete.and.callFake(function() {
-              video.currentTime = 8;
-              video.play();
-            });
+      await setupGappyContent(/* gapAtStart */ 0, /* dropSegment */ true);
+      onStartupComplete.and.callFake(function() {
+        video.currentTime = 8;
+        video.play();
+      });
 
-            // Let's go!
-            onChooseStreams.and.callFake(defaultOnChooseStreams);
-            return streamingEngine.init();
-          }).then(function() {
-            return waitForTime(23);
-          }).then(function() {
-            // Should be close enough to still have the gap buffered.
-            expect(video.buffered.length).toBe(2);
-            expect(onEvent).not.toHaveBeenCalled();
-          }).catch(fail).then(done);
+      // Let's go!
+      onChooseStreams.and.callFake(defaultOnChooseStreams);
+      await streamingEngine.init();
+      await waitForTime(23);
+      // Should be close enough to still have the gap buffered.
+      expect(video.buffered.length).toBe(2);
+      expect(onEvent).not.toHaveBeenCalled();
     });
 
-    it('jumps large gaps in the middle', function(done) {
+    it('jumps large gaps in the middle', async () => {
       config.jumpLargeGaps = true;
-      setupGappyContent(/* gapAtStart */ 0, /* dropSegment */ true)
-          .then(function() {
-            onStartupComplete.and.callFake(function() {
-              video.currentTime = 8;
-              video.play();
-            });
+      await setupGappyContent(/* gapAtStart */ 0, /* dropSegment */ true);
+      onStartupComplete.and.callFake(function() {
+        video.currentTime = 8;
+        video.play();
+      });
 
-            // Let's go!
-            onChooseStreams.and.callFake(defaultOnChooseStreams);
-            return streamingEngine.init();
-          }).then(function() {
-            return waitForTime(23);
-          }).then(function() {
-            // Should be close enough to still have the gap buffered.
-            expect(video.buffered.length).toBe(2);
-            expect(onEvent).toHaveBeenCalled();
-          }).catch(fail).then(done);
+      // Let's go!
+      onChooseStreams.and.callFake(defaultOnChooseStreams);
+      await streamingEngine.init();
+      await waitForTime(23);
+      // Should be close enough to still have the gap buffered.
+      expect(video.buffered.length).toBe(2);
+      expect(onEvent).toHaveBeenCalled();
     });
 
     it('won\'t jump large gaps with preventDefault()', function(done) {
@@ -685,7 +668,7 @@ describe('StreamingEngine', function() {
       // should not be downloaded.
       return Promise.all([
         createVodStreamGenerator(metadata.audio, ContentType.AUDIO),
-        createVodStreamGenerator(metadata.video, ContentType.VIDEO)
+        createVodStreamGenerator(metadata.video, ContentType.VIDEO),
       ]).then(function() {
         timeline =
             shaka.test.StreamingEngineUtil.createFakePresentationTimeline(
@@ -714,7 +697,7 @@ describe('StreamingEngine', function() {
      * TODO: Consolidate with StreamingEngineUtils.createManifest?
      * @param {number} gapAtStart
      * @param {boolean} dropSegment
-     * @return {shakaExtern.Manifest}
+     * @return {shaka.extern.Manifest}
      */
     function setupGappyManifest(gapAtStart, dropSegment) {
       /**
@@ -781,7 +764,7 @@ describe('StreamingEngine', function() {
               bandwidth: 5000000,
               width: 600,
               height: 400,
-              type: shaka.util.ManifestParserUtils.ContentType.VIDEO
+              type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
             },
             audio: {
               id: 3,
@@ -793,10 +776,10 @@ describe('StreamingEngine', function() {
               mimeType: 'audio/mp4',
               codecs: 'mp4a.40.2',
               bandwidth: 192000,
-              type: shaka.util.ManifestParserUtils.ContentType.AUDIO
-            }
-          }]
-        }]
+              type: shaka.util.ManifestParserUtils.ContentType.AUDIO,
+            },
+          }],
+        }],
       };
     }
 
@@ -822,8 +805,8 @@ describe('StreamingEngine', function() {
   /**
    * Choose streams for the given period.
    *
-   * @param {shakaExtern.Period} period
-   * @return {!Object.<string, !shakaExtern.Stream>}
+   * @param {shaka.extern.Period} period
+   * @return {!Object.<string, !shaka.extern.Stream>}
    */
   function defaultOnChooseStreams(period) {
     if (period == manifest.periods[0]) {

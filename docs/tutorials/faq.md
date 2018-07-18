@@ -37,7 +37,8 @@ This can also happen with mixed-content restrictions.  If the site is using
 
 <hr>
 
-**Q:** I am getting `REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE` or error code 6001.
+**Q:** I am getting `REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE` or error code
+6001.
 
 **A:** The most common cause is that you are not using a secure origin.  The
 EME API in the browser requires a secure origin, which means `https` or
@@ -164,10 +165,10 @@ In order to force those platforms to transmux, set the
 [743]: https://github.com/google/shaka-player/issues/743
 [887]: https://github.com/google/shaka-player/issues/887
 [999]: https://github.com/google/shaka-player/issues/999
-[AbrConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shakaExtern.html#AbrConfiguration
+[AbrConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.AbrConfiguration
 [CORS]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
-[DashManifestConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shakaExtern.html#DashManifestConfiguration
-[StreamingConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shakaExtern.html#StreamingConfiguration
+[DashManifestConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.DashManifestConfiguration
+[StreamingConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.StreamingConfiguration
 [auth]: https://shaka-player-demo.appspot.com/docs/api/tutorial-license-server-auth.html
 [buffering]: https://shaka-player-demo.appspot.com/docs/api/tutorial-network-and-buffering-config.html
 [drm_tutorial]: https://shaka-player-demo.appspot.com/docs/api/tutorial-drm-config.html

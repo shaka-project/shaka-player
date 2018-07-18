@@ -9,7 +9,8 @@ and make a bad change.
 First, let's change `manifestUri` by removing the last letter.
 
 ```js
-var manifestUri = '//storage.googleapis.com/shaka-demo-assets/angel-one/dash.mp';
+var manifestUri =
+    'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mp';
 ```
 
 Now reload the page.  This causes an error in the JS console that says "Error

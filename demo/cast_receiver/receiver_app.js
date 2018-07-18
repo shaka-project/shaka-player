@@ -16,7 +16,6 @@
  */
 
 
-
 /**
  * A Chromecast receiver demo app.
  * @constructor
@@ -124,7 +123,7 @@ ShakaReceiver.prototype.checkIdle_ = function() {
     // Set a special poster for audio-only assets.
     if (this.player_.isAudioOnly()) {
       this.video_.poster =
-          '//shaka-player-demo.appspot.com/assets/audioOnly.gif';
+          'https://shaka-player-demo.appspot.com/assets/audioOnly.gif';
     } else {
       // The cast receiver never shows the poster for assets with video streams.
       this.video_.removeAttribute('poster');

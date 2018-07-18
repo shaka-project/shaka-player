@@ -46,7 +46,7 @@ shakaDemo.localVideo_ = null;
 shakaDemo.localPlayer_ = null;
 
 
-/** @private {shakaExtern.SupportType} */
+/** @private {shaka.extern.SupportType} */
 shakaDemo.support_;
 
 
@@ -70,7 +70,8 @@ shakaDemo.startTime_ = undefined;
  * @private
  * @const {string}
  */
-shakaDemo.mainPoster_ = '//shaka-player-demo.appspot.com/assets/poster.jpg';
+shakaDemo.mainPoster_ =
+    'https://shaka-player-demo.appspot.com/assets/poster.jpg';
 
 
 /**
@@ -78,15 +79,15 @@ shakaDemo.mainPoster_ = '//shaka-player-demo.appspot.com/assets/poster.jpg';
  * @const {string}
  */
 shakaDemo.audioOnlyPoster_ =
-    '//shaka-player-demo.appspot.com/assets/audioOnly.gif';
+    'https://shaka-player-demo.appspot.com/assets/audioOnly.gif';
 
 
 /**
- * The registered ID of the v2.3 Chromecast receiver demo.
+ * The registered ID of the v2.4 Chromecast receiver demo.
  * @const {string}
  * @private
  */
-shakaDemo.CC_APP_ID_ = 'A15A181D';
+shakaDemo.CC_APP_ID_ = '00A3C5E8';
 
 /**
  * @type {shakaDemo.AppPlugin}
@@ -108,6 +109,8 @@ shakaDemo.init = function() {
   let language = navigator.language || 'en-us';
   document.getElementById('preferredAudioLanguage').value = language;
   document.getElementById('preferredTextLanguage').value = language;
+
+  document.getElementById('preferredAudioChannelCount').value = '2';
 
   let params = shakaDemo.getParams();
 
@@ -220,7 +223,6 @@ shakaDemo.init = function() {
       });
 
       shakaDemo.initAppPlugin_();
-
     }).catch(function(error) {
       // Some part of the setup of the demo app threw an error.
       // Notify the user of this.
@@ -307,6 +309,10 @@ shakaDemo.preBrowserCheckParams_ = function(params) {
   if ('textlang' in params) {
     document.getElementById('preferredTextLanguage').value = params['textlang'];
   }
+  if ('channels' in params) {
+    document.getElementById('preferredAudioChannelCount').value =
+        params['channels'];
+  }
   if ('asset' in params) {
     document.getElementById('manifestInput').value = params['asset'];
   }
@@ -315,6 +321,10 @@ shakaDemo.preBrowserCheckParams_ = function(params) {
   }
   if ('certificate' in params) {
     document.getElementById('certificateInput').value = params['certificate'];
+  }
+  if ('availabilityWindowOverride' in params) {
+    document.getElementById('availabilityWindowOverride').value =
+        params['availabilityWindowOverride'];
   }
   if ('logtoscreen' in params) {
     document.getElementById('logToScreen').checked = true;
@@ -367,6 +377,41 @@ shakaDemo.preBrowserCheckParams_ = function(params) {
 
 
 /**
+ * Decide if a license server from the demo app URI matches the configuration
+ * of a demo asset.
+ *
+ * @param {!shakaAssets.AssetInfo} assetInfo
+ * @param {?string} licenseUri
+ * @return {boolean}
+ * @private
+ */
+shakaDemo.licenseServerMatch_ = function(assetInfo, licenseUri) {
+  // If no license server was specified, assume that this is a match.
+  // This provides backward compatibility and shorter URIs.
+  if (!licenseUri) {
+    return true;
+  }
+
+  // If a server is specified in the URI, but not in the asset, it's not a
+  // match.  It's not clear when this would ever be meaningful, so the decision
+  // not to match is arbitrary.
+  if (licenseUri && !assetInfo.licenseServers) {
+    return false;
+  }
+
+  // Otherwise, it's a match only if the license server in the URI matches what
+  // is in the asset config.
+  for (let k in assetInfo.licenseServers) {
+    if (licenseUri == assetInfo.licenseServers[k]) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+
+/**
  * @param {!Object.<string, string>} params
  * @private
  */
@@ -375,11 +420,13 @@ shakaDemo.postBrowserCheckParams_ = function(params) {
   if ('asset' in params) {
     let assetList = document.getElementById('assetList');
     let assetUri = params['asset'];
+    let licenseUri = params['license'];
     let isDefault = false;
     // Check all options except the last, which is 'custom asset'.
     for (let index = 0; index < assetList.options.length - 1; index++) {
       if (assetList[index].asset &&
-          assetList[index].asset.manifestUri == assetUri) {
+          assetList[index].asset.manifestUri == assetUri &&
+          shakaDemo.licenseServerMatch_(assetList[index].asset, licenseUri)) {
         assetList.selectedIndex = index;
         isDefault = true;
         break;
@@ -556,6 +603,10 @@ shakaDemo.hashShouldChange_ = function() {
   } else {
     params.push('lang=' + audioLang);
   }
+  let channels = document.getElementById('preferredAudioChannelCount').value;
+  if (channels != '2') {
+    params.push('channels=' + channels);
+  }
   if (document.getElementById('logToScreen').checked) {
     params.push('logtoscreen');
   }
@@ -567,6 +618,11 @@ shakaDemo.hashShouldChange_ = function() {
   }
   if (document.getElementById('showNative').checked) {
     params.push('nativecontrols');
+  }
+  let availabilityWindowOverride =
+      document.getElementById('availabilityWindowOverride').value;
+  if (availabilityWindowOverride) {
+    params.push('availabilityWindowOverride=' + availabilityWindowOverride);
   }
   if (shaka.log) {
     let logLevelList = document.getElementById('logLevelList');

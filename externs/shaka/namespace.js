@@ -15,11 +15,17 @@
  * limitations under the License.
  */
 
-
 /**
  * @externs
+ * @suppress {duplicate} To prevent compiler errors with the namespace
+ *   being declared both here and by goog.provide in the library.
+ */
+
+/** @namespace */
+var shaka = {};
+
+/**
  * @namespace
- * @summary Types and interfaces which are used outside the library.
  * @exportDoc
  */
-var shakaExtern;
+shaka.extern = {};

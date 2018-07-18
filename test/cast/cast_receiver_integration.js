@@ -47,7 +47,7 @@ describe('CastReceiver', function() {
   let isChrome;
   /** @type {boolean} */
   let isChromecast;
-  /** @type {!Object.<string, ?shakaExtern.DrmSupportType>} */
+  /** @type {!Object.<string, ?shaka.extern.DrmSupportType>} */
   let support = {};
 
   let fakeInitState;
@@ -56,12 +56,12 @@ describe('CastReceiver', function() {
    * Before running the test, check if this is Chrome or Chromecast, and maybe
    * if Widevine is supported.
    * @param {function(function()=)} test
-   * @param {boolean=} opt_checkKeySystems
+   * @param {boolean=} checkKeySystems
    * @return {function(function())}
    */
-  function checkAndRun(test, opt_checkKeySystems) {
+  function checkAndRun(test, checkKeySystems) {
     let check = function(done) {
-      if (opt_checkKeySystems && !support['com.widevine.alpha']) {
+      if (checkKeySystems && !support['com.widevine.alpha']) {
         pending('Skipping DrmEngine tests.');
       } else if (!isChromecast && !isChrome) {
         pending(
@@ -84,7 +84,7 @@ describe('CastReceiver', function() {
   * @return {function(function())}
   */
  function checkAndRunWithDrm(test) {
-   return checkAndRun(test, /* opt_checkKeySystems */ true);
+   return checkAndRun(test, /* checkKeySystems */ true);
  }
 
   beforeAll(function(done) {
@@ -132,7 +132,7 @@ describe('CastReceiver', function() {
     // don't need this mock strictly type-checked.
     window['cast'] = {
       receiver: mockReceiverApi,
-      __platform__: {canDisplayType: mockCanDisplayType}
+      __platform__: {canDisplayType: mockCanDisplayType},
     };
 
     mockReceiverManager = createMockReceiverManager();
@@ -153,17 +153,17 @@ describe('CastReceiver', function() {
 
     fakeInitState = {
       player: {
-        configure: {}
+        configure: {},
       },
       playerAfterLoad: {
-        setTextTrackVisibility: true
+        setTextTrackVisibility: true,
       },
       video: {
         loop: true,
-        playbackRate: 5
+        playbackRate: 5,
       },
       manifest: 'test:sintel_no_text',
-      startTime: 0
+      startTime: 0,
     };
   }));
 
@@ -191,7 +191,7 @@ describe('CastReceiver', function() {
     }
   });
 
-  drm_it('sends reasonably-sized updates', checkAndRunWithDrm((done) => {
+  drmIt('sends reasonably-sized updates', checkAndRunWithDrm((done) => {
     // Use an encrypted asset, to make sure DRM info doesn't balloon the size.
     fakeInitState.manifest = 'test:sintel-enc';
 
@@ -209,11 +209,11 @@ describe('CastReceiver', function() {
     fakeIncomingMessage({
       type: 'init',
       initState: fakeInitState,
-      appData: {}
+      appData: {},
     }, mockShakaMessageBus);
   }));
 
-  drm_it('has a reasonable average message size', checkAndRunWithDrm((done) => {
+  drmIt('has a reasonable average message size', checkAndRunWithDrm((done) => {
     // Use an encrypted asset, to make sure DRM info doesn't balloon the size.
     fakeInitState.manifest = 'test:sintel-enc';
 
@@ -242,7 +242,7 @@ describe('CastReceiver', function() {
     fakeIncomingMessage({
       type: 'init',
       initState: fakeInitState,
-      appData: {}
+      appData: {},
     }, mockShakaMessageBus);
   }));
 
@@ -276,7 +276,7 @@ describe('CastReceiver', function() {
     fakeIncomingMessage({
       type: 'init',
       initState: fakeInitState,
-      appData: {}
+      appData: {},
     }, mockShakaMessageBus);
   }));
 
@@ -286,8 +286,8 @@ describe('CastReceiver', function() {
    * to be uninstalled afterwards.
    * The replaced method is expected to be a method that returns a promise.
    * @param {!Object} prototype
-   * @param {!string} name
-   * @param {!string} methodName
+   * @param {string} name
+   * @param {string} methodName
    */
   function waitForUpdateMessageWrapper(prototype, name, methodName) {
     pendingWaitWrapperCalls += 1;
@@ -323,8 +323,8 @@ describe('CastReceiver', function() {
   function createMockReceiverApi() {
     return {
       CastReceiverManager: {
-        getInstance: function() { return mockReceiverManager; }
-      }
+        getInstance: function() { return mockReceiverManager; },
+      },
     };
   }
 
@@ -344,7 +344,7 @@ describe('CastReceiver', function() {
         }
 
         return mockGenericMessageBus;
-      }
+      },
     };
   }
 
@@ -352,7 +352,7 @@ describe('CastReceiver', function() {
     let bus = {
       messages: [],
       broadcast: jasmine.createSpy('CastMessageBus.broadcast'),
-      getCastChannel: jasmine.createSpy('CastMessageBus.getCastChannel')
+      getCastChannel: jasmine.createSpy('CastMessageBus.getCastChannel'),
     };
     // For convenience, deserialize and store sent messages.
     bus.broadcast.and.callFake(function(message) {
@@ -369,7 +369,7 @@ describe('CastReceiver', function() {
       messages: [],
       send: function(message) {
         channel.messages.push(CastUtils.deserialize(message));
-      }
+      },
     };
     bus.getCastChannel.and.returnValue(channel);
     return bus;
@@ -391,13 +391,13 @@ describe('CastReceiver', function() {
   /**
    * @param {?} message
    * @param {!Object} bus
-   * @param {string=} opt_senderId
+   * @param {string=} senderId
    */
-  function fakeIncomingMessage(message, bus, opt_senderId) {
+  function fakeIncomingMessage(message, bus, senderId) {
     let serialized = CastUtils.serialize(message);
     let messageEvent = {
-      senderId: opt_senderId,
-      data: serialized
+      senderId: senderId,
+      data: serialized,
     };
     bus.onMessage(messageEvent);
   }

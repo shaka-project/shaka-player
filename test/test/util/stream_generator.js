@@ -22,7 +22,6 @@ goog.provide('shaka.test.StreamGenerator');
 goog.provide('shaka.test.TSVodStreamGenerator');
 
 
-
 /**
  * Defines an interface to generate streams.
  *
@@ -70,7 +69,6 @@ shaka.test.IStreamGenerator.prototype.getInitSegment = function(
  */
 shaka.test.IStreamGenerator.prototype.getSegment = function(
     position, segmentOffset, wallClockTime) {};
-
 
 
 /**
@@ -184,7 +182,7 @@ shaka.test.Mp4VodStreamGenerator = function(
 shaka.test.Mp4VodStreamGenerator.prototype.init = function() {
   let async = [
     shaka.test.Util.fetch(this.initSegmentUri_),
-    shaka.test.Util.fetch(this.segmentTemplateUri_)
+    shaka.test.Util.fetch(this.segmentTemplateUri_),
   ];
 
   return Promise.all(async).then(
@@ -227,7 +225,6 @@ shaka.test.Mp4VodStreamGenerator.prototype.getSegment = function(
   return shaka.test.StreamGenerator.setBaseMediaDecodeTime_(
       this.segmentTemplate_, this.tfdtOffset_, mediaTimestamp, this.timescale_);
 };
-
 
 
 /**
@@ -322,7 +319,7 @@ shaka.test.Mp4LiveStreamGenerator = function(
 shaka.test.Mp4LiveStreamGenerator.prototype.init = function() {
   let async = [
     shaka.test.Util.fetch(this.initSegmentUri_),
-    shaka.test.Util.fetch(this.segmentTemplateUri_)
+    shaka.test.Util.fetch(this.segmentTemplateUri_),
   ];
 
   return Promise.all(async).then(
@@ -468,7 +465,7 @@ shaka.test.StreamGenerator.setBaseMediaDecodeTime_ = function(
                       'Specied baseMediaDecodeTime is too big.');
 
   // NOTE from Microsoft on the lack of ArrayBuffer.prototype.slice in IE11:
-  // "At this time we do not plan to fix this issue." ~ https://goo.gl/pTQN1K
+  // "At this time we do not plan to fix this issue." ~ https://bit.ly/2ywEkpQ
   // This is the best replacement for segment.slice(0) I could come up with:
   let buffer = new ArrayBuffer(segment.byteLength);
   (new Uint8Array(buffer)).set(new Uint8Array(segment));

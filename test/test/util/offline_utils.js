@@ -20,7 +20,7 @@ goog.provide('shaka.test.OfflineUtils');
 
 /**
  * @param {string} originalUri
- * @return {shakaExtern.ManifestDB}
+ * @return {shaka.extern.ManifestDB}
  */
 shaka.test.OfflineUtils.createManifest = function(originalUri) {
   return {
@@ -31,7 +31,7 @@ shaka.test.OfflineUtils.createManifest = function(originalUri) {
     originalManifestUri: originalUri,
     periods: [],
     sessionIds: [],
-    size: 1024
+    size: 1024,
   };
 };
 
@@ -39,7 +39,7 @@ shaka.test.OfflineUtils.createManifest = function(originalUri) {
 /**
  * @param {number} id
  * @param {string} type
- * @return {shakaExtern.StreamDB}
+ * @return {shaka.extern.StreamDB}
  */
 shaka.test.OfflineUtils.createStream = function(id, type) {
   return {
@@ -59,28 +59,28 @@ shaka.test.OfflineUtils.createStream = function(id, type) {
     encrypted: false,
     keyId: null,
     segments: [],
-    variantIds: []
+    variantIds: [],
   };
 };
 
 
 /**
  * @param {!Array.<number>} data
- * @return {shakaExtern.SegmentDataDB}
+ * @return {shaka.extern.SegmentDataDB}
  */
 shaka.test.OfflineUtils.createSegmentData = function(data) {
   /** @type {Uint8Array} */
   let array = new Uint8Array(data);
 
   return {
-    data: array.buffer
+    data: array.buffer,
   };
 };
 
 
 /**
- * @param {!Array.<shakaExtern.SegmentDataDB>} segments
- * @param {shakaExtern.SegmentDataDB} expected
+ * @param {!Array.<shaka.extern.SegmentDataDB>} segments
+ * @param {shaka.extern.SegmentDataDB} expected
  */
 shaka.test.OfflineUtils.expectSegmentsToContain = function(segments,
                                                            expected) {
@@ -97,8 +97,8 @@ shaka.test.OfflineUtils.expectSegmentsToContain = function(segments,
 
 
 /**
- * @param {shakaExtern.SegmentDataDB} actual
- * @param {shakaExtern.SegmentDataDB} expected
+ * @param {shaka.extern.SegmentDataDB} actual
+ * @param {shaka.extern.SegmentDataDB} expected
  */
 shaka.test.OfflineUtils.expectSegmentToEqual = function(actual, expected) {
   expect(actual.data).toBeTruthy();

@@ -39,7 +39,8 @@ MyManifestParser.prototype.stop = function() {
 
 
 shaka.media.ManifestParser.registerParserByExtension('json', MyManifestParser);
-shaka.media.ManifestParser.registerParserByMime('application/json', MyManifestParser);
+shaka.media.ManifestParser.registerParserByMime(
+    'application/json', MyManifestParser);
 ```
 
 First, this defines a constructor called `MyManifestParser`.  This is called by
@@ -49,18 +50,19 @@ the `Player` to create new parser instances.  A new instance is created for
 #### configure
 
 This method is called right after creating the object and when the configuration
-changes.  This is passed a {@link shakaExtern.ManifestConfiguration} object
+changes.  This is passed a {@link shaka.extern.ManifestConfiguration} object
 from the Player.
 
 #### start
 
 This method is called to load the manifest.  This is called with a string URI
-that is passed to `load()` and a {@link shakaExtern.ManifestParser.PlayerInterface}
-object.  The interface object contains a number of fields that are used to
-interact with the Player.  This includes the `NetworkingEngine` instance to make
-network requests.  This also includes callback methods that allow the parser to
-raise Player events and filter Periods.  This method should return a Promise
-that will resolve with the parsed manifest.
+that is passed to `load()` and a
+{@link shaka.extern.ManifestParser.PlayerInterface} object.  The interface object
+contains a number of fields that are used to interact with the Player.  This
+includes the `NetworkingEngine` instance to make network requests.  This also
+includes callback methods that allow the parser to raise Player events and
+filter Periods.  This method should return a Promise that will resolve with the
+parsed manifest.
 
 #### stop
 
@@ -296,7 +298,8 @@ MyManifestParser.prototype.loadStream_ = function(type) {
     getSegmentReference:    index.get.bind(index),
     initSegmentReference:   init,
     presentationTimeOffset: 0,  // seconds
-    mimeType : type == 'video' ? 'video/webm' : (type == 'audio' ? 'audio/webm' : 'text/vtt'),
+    mimeType: type == 'video' ?
+        'video/webm' : (type == 'audio' ? 'audio/webm' : 'text/vtt'),
     codecs:    type == 'video' ? 'vp9' : (type == 'audio' ? 'vorbis' : ''),
     frameRate: type == 'video' ? 24 : undefined,
     bandwidth: 4000,  // bits/sec
@@ -327,7 +330,7 @@ MyManifestParser.prototype.loadReference_ = function(i, start, end) {
 
 If your content is encrypted, there are a few changes to the manifest you need
 to do.  First, for each Variant that contains encrypted content, you need to set
-`variant.drmInfos` to an array of {@link shakaExtern.DrmInfo} objects.  All the
+`variant.drmInfos` to an array of {@link shaka.extern.DrmInfo} objects.  All the
 fields (except the key-system name) can be set to the default and will be
 replaced by settings from the Player configuration.  If the `drmInfos` array
 is empty, the content is expected to be clear.

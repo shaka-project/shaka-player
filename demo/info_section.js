@@ -103,7 +103,7 @@ shakaDemo.updateTextTracks_ = function() {
   if (ShakaDemoUtils.isTsContent(shakaDemo.player_)) {
     let option = document.createElement('option');
     option.textContent = 'Default Text';
-    option.selected = shakaDemo.player_.getUseEmbeddedTextTrack();
+    option.selected = shakaDemo.player_.usingEmbeddedTextTrack();
     trackList.appendChild(option);
   }
 };
@@ -111,8 +111,8 @@ shakaDemo.updateTextTracks_ = function() {
 
 /**
  * @param {Element} list
- * @param {!Array.<!shakaExtern.Track>} tracks
- * @param {!string} languageAndRole
+ * @param {!Array.<!shaka.extern.Track>} tracks
+ * @param {string} languageAndRole
  * @private
  */
 shakaDemo.updateTrackOptions_ = function(list, tracks, languageAndRole) {
@@ -127,9 +127,12 @@ shakaDemo.updateTrackOptions_ = function(list, tracks, languageAndRole) {
       if (track.width && track.height) {
         trackInfo += track.width + 'x' + track.height + ', ';
       }
+      if (track.channelsCount) {
+        trackInfo += 'channels: ' + track.channelsCount + ', ';
+      }
       trackInfo += track.bandwidth + ' bits/s';
       return trackInfo;
-    } ,
+    },
     text: function(track) {
       let trackInfo = 'language: ' + track.language + ', ';
       if (track.label) trackInfo += 'label: ' + track.label + ', ';
@@ -138,7 +141,7 @@ shakaDemo.updateTrackOptions_ = function(list, tracks, languageAndRole) {
       }
       trackInfo += 'kind: ' + track.kind;
       return trackInfo;
-    }
+    },
   };
   // Remove old tracks.
   while (list.firstChild) {
@@ -207,7 +210,7 @@ shakaDemo.updateAudioLanguages_ = function() {
 /**
  * @param {Element} list
  * @param {!Array.<{language: string, role: string}>} languagesAndRoles
- * @param {!Array.<shakaExtern.Track>} tracks
+ * @param {!Array.<shaka.extern.Track>} tracks
  * @private
  */
 shakaDemo.updateLanguageOptions_ =

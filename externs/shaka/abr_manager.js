@@ -16,8 +16,9 @@
  */
 
 
-/** @externs */
-
+/**
+ * @externs
+ */
 
 
 /**
@@ -35,7 +36,7 @@
  * @interface
  * @exportDoc
  */
-shakaExtern.AbrManager = function() {};
+shaka.extern.AbrManager = function() {};
 
 
 /**
@@ -47,28 +48,28 @@ shakaExtern.AbrManager = function() {};
  * The second argument is an optional boolean.  If true, all data will be
  * from the buffer, which will result in a buffering event.
  *
- * @typedef {function(shakaExtern.Variant, boolean=)}
+ * @typedef {function(shaka.extern.Variant, boolean=)}
  * @exportDoc
  */
-shakaExtern.AbrManager.SwitchCallback;
+shaka.extern.AbrManager.SwitchCallback;
 
 
 /**
  * A factory for creating the abr manager.  This will be called with 'new'.
  *
- * @typedef {function(new:shakaExtern.AbrManager)}
+ * @typedef {function(new:shaka.extern.AbrManager)}
  * @exportDoc
  */
-shakaExtern.AbrManager.Factory;
+shaka.extern.AbrManager.Factory;
 
 
 /**
  * Initializes the AbrManager.
  *
- * @param {shakaExtern.AbrManager.SwitchCallback} switchCallback
+ * @param {shaka.extern.AbrManager.SwitchCallback} switchCallback
  * @exportDoc
  */
-shakaExtern.AbrManager.prototype.init = function(switchCallback) {};
+shaka.extern.AbrManager.prototype.init = function(switchCallback) {};
 
 
 /**
@@ -77,24 +78,24 @@ shakaExtern.AbrManager.prototype.init = function(switchCallback) {};
  *
  * @exportDoc
  */
-shakaExtern.AbrManager.prototype.stop = function() {};
+shaka.extern.AbrManager.prototype.stop = function() {};
 
 
 /**
  * Updates manager's variants collection.
  *
- * @param {!Array.<!shakaExtern.Variant>} variants
+ * @param {!Array.<!shaka.extern.Variant>} variants
  * @exportDoc
  */
-shakaExtern.AbrManager.prototype.setVariants = function(variants) {};
+shaka.extern.AbrManager.prototype.setVariants = function(variants) {};
 
 
 /**
  * Chooses one variant to switch to.  Called by the Player.
- * @return {shakaExtern.Variant}
+ * @return {shaka.extern.Variant}
  * @exportDoc
  */
-shakaExtern.AbrManager.prototype.chooseVariant = function() {};
+shaka.extern.AbrManager.prototype.chooseVariant = function() {};
 
 
 /**
@@ -103,7 +104,7 @@ shakaExtern.AbrManager.prototype.chooseVariant = function() {};
  *
  * @exportDoc
  */
-shakaExtern.AbrManager.prototype.enable = function() {};
+shaka.extern.AbrManager.prototype.enable = function() {};
 
 
 /**
@@ -112,7 +113,7 @@ shakaExtern.AbrManager.prototype.enable = function() {};
  *
  * @exportDoc
  */
-shakaExtern.AbrManager.prototype.disable = function() {};
+shaka.extern.AbrManager.prototype.disable = function() {};
 
 
 /**
@@ -124,7 +125,7 @@ shakaExtern.AbrManager.prototype.disable = function() {};
  * @param {number} numBytes The total number of bytes transferred.
  * @exportDoc
  */
-shakaExtern.AbrManager.prototype.segmentDownloaded = function(
+shaka.extern.AbrManager.prototype.segmentDownloaded = function(
     deltaTimeMs, numBytes) {};
 
 
@@ -135,13 +136,16 @@ shakaExtern.AbrManager.prototype.segmentDownloaded = function(
  * @return {number}
  * @exportDoc
  */
-shakaExtern.AbrManager.prototype.getBandwidthEstimate = function() {};
+shaka.extern.AbrManager.prototype.getBandwidthEstimate = function() {};
 
 
 /**
- * Sets the abr configurations.
+ * Sets the ABR configuration.
  *
- * @param {shakaExtern.AbrConfiguration} config
+ * It is the responsibility of the AbrManager implementation to implement the
+ * restrictions behavior described in shaka.extern.AbrConfiguration.
+ *
+ * @param {shaka.extern.AbrConfiguration} config
  * @exportDoc
  */
-shakaExtern.AbrManager.prototype.configure = function(config) {};
+shaka.extern.AbrManager.prototype.configure = function(config) {};

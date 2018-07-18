@@ -35,7 +35,6 @@ jasmine.Callback;
 jasmine.addMatchers = function(matchers) {};
 
 
-
 /**
  * @constructor
  * @struct
@@ -43,8 +42,8 @@ jasmine.addMatchers = function(matchers) {};
 jasmine.Spec;
 
 
-/** @param {string=} opt_message */
-jasmine.Spec.prototype.pend = function(opt_message) {};
+/** @param {string=} message */
+jasmine.Spec.prototype.pend = function(message) {};
 
 
 /**
@@ -54,10 +53,9 @@ jasmine.Spec.prototype.result;
 
 
 /**
- * @return {!string}
+ * @return {string}
  */
 jasmine.Spec.prototype.getFullName = function() {};
-
 
 
 /**
@@ -74,8 +72,8 @@ jasmine.Matchers = function() {};
 var expect = function(value) {};
 
 
-/** @param {string=} opt_message */
-var pending = function(opt_message) {};
+/** @param {string=} message */
+var pending = function(message) {};
 
 
 /** @const {!jasmine.Matchers} */
@@ -88,9 +86,9 @@ jasmine.Matchers.prototype.toBe = function(value) {};
 
 /**
  * @param {number} value
- * @param {number=} opt_precision A number of decimal places, default 2.
+ * @param {number=} precision A number of decimal places, default 2.
  */
-jasmine.Matchers.prototype.toBeCloseTo = function(value, opt_precision) {};
+jasmine.Matchers.prototype.toBeCloseTo = function(value, precision) {};
 
 
 jasmine.Matchers.prototype.toBeDefined = function() {};
@@ -127,12 +125,12 @@ jasmine.Matchers.prototype.toContain = function(value) {};
 jasmine.Matchers.prototype.toEqual = function(value) {};
 
 
-/** @param {*=} opt_value */
-jasmine.Matchers.prototype.toHaveBeenCalled = function(opt_value) {};
+/** @param {*=} value */
+jasmine.Matchers.prototype.toHaveBeenCalled = function(value) {};
 
 
-/** @param {...*} var_args */
-jasmine.Matchers.prototype.toHaveBeenCalledWith = function(var_args) {};
+/** @param {...*} varArgs */
+jasmine.Matchers.prototype.toHaveBeenCalledWith = function(varArgs) {};
 
 
 /** @param {number} times */
@@ -158,7 +156,6 @@ jasmine.Matchers.prototype.toThrowError = function(value) {};
 jasmine.Matchers.prototype.toEqualElement = function(expected) {};
 
 
-
 /**
  * @constructor
  * @struct
@@ -167,10 +164,10 @@ jasmine.SpyStrategy = function() {};
 
 
 /**
- * @param {...*} var_args
+ * @param {...*} varArgs
  * @return {*}
  */
-jasmine.SpyStrategy.prototype.exec = function(var_args) {};
+jasmine.SpyStrategy.prototype.exec = function(varArgs) {};
 
 
 /** @return {!jasmine.Spy} */
@@ -185,17 +182,17 @@ jasmine.SpyStrategy.prototype.returnValue = function(value) {};
 
 
 /**
- * @param {...*} var_args
+ * @param {...*} varArgs
  * @return {!jasmine.Spy}
  */
-jasmine.SpyStrategy.prototype.returnValues = function(var_args) {};
+jasmine.SpyStrategy.prototype.returnValues = function(varArgs) {};
 
 
 /**
- * @param {*=} opt_value
+ * @param {*=} value
  * @return {!jasmine.Spy}
  */
-jasmine.SpyStrategy.prototype.throwError = function(opt_value) {};
+jasmine.SpyStrategy.prototype.throwError = function(value) {};
 
 
 /**
@@ -207,7 +204,6 @@ jasmine.SpyStrategy.prototype.callFake = function(value) {};
 
 /** @return {!jasmine.Spy} */
 jasmine.SpyStrategy.prototype.stub = function() {};
-
 
 
 /**
@@ -227,7 +223,6 @@ jasmine.CallContext.prototype.args;
 
 /** @const {*} */
 jasmine.CallContext.prototype.returnValue;
-
 
 
 /**
@@ -269,7 +264,6 @@ jasmine.CallTracker.prototype.first = function() {};
 
 
 jasmine.CallTracker.prototype.reset = function() {};
-
 
 
 /**
@@ -369,8 +363,8 @@ var afterEach = function(callback) {};
 var afterAll = function(callback) {};
 
 
-/** @param {*=} opt_reason */
-var fail = function(opt_reason) {};
+/** @param {*=} reason */
+var fail = function(reason) {};
 
 
 /**
@@ -415,7 +409,6 @@ var fit = function(name, callback) {};
 var xit = function(name, callback) {};
 
 
-
 /**
  * @constructor
  * @struct
@@ -451,7 +444,6 @@ jasmine.getEnv = function() {};
 jasmine.addCustomEqualityTester;
 
 
-
 /**
  * @constructor
  * @struct
@@ -473,8 +465,8 @@ jasmine.Clock.prototype.uninstall = function() {};
 jasmine.Clock.prototype.tick = function(value) {};
 
 
-/** @param {(number|Date)=} opt_value */
-jasmine.Clock.prototype.mockDate = function(opt_value) {};
+/** @param {(number|Date)=} value */
+jasmine.Clock.prototype.mockDate = function(value) {};
 
 
 /** @const */
@@ -485,7 +477,6 @@ jasmine.Ajax.install = function() {};
 
 
 jasmine.Ajax.uninstall = function() {};
-
 
 
 /**
@@ -510,7 +501,6 @@ jasmine.Ajax.Stub.prototype.andTimeout = function() {};
 
 
 jasmine.Ajax.Stub.prototype.andError = function() {};
-
 
 
 /**
@@ -561,7 +551,6 @@ jasmine.Ajax.RequestStub.prototype.andTimeout = function() {};
 
 /** @return {boolean} */
 jasmine.Ajax.RequestStub.prototype.isTimeout = function() {};
-
 
 
 /**

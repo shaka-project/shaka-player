@@ -23,14 +23,13 @@ describe('WebmSegmentIndexParser', function() {
   let initSegment;
   let parser = new shaka.media.WebmSegmentIndexParser();
 
-  beforeAll(function(done) {
-    Promise.all([
+  beforeAll(async () => {
+    let responses = await Promise.all([
       shaka.test.Util.fetch(indexSegmentUri),
-      shaka.test.Util.fetch(initSegmentUri)
-    ]).then(function(responses) {
-      indexSegment = responses[0];
-      initSegment = responses[1];
-    }).catch(fail).then(done);
+      shaka.test.Util.fetch(initSegmentUri),
+    ]);
+    indexSegment = responses[0];
+    initSegment = responses[1];
   });
 
   it('rejects a non-index segment ', function() {
@@ -67,7 +66,7 @@ describe('WebmSegmentIndexParser', function() {
          {startTime: 12, endTime: 24, startByte: 95912, endByte: 209663},
          {startTime: 24, endTime: 36, startByte: 209664, endByte: 346545},
          {startTime: 36, endTime: 48, startByte: 346546, endByte: 458817},
-         {startTime: 48, endTime: 60, startByte: 458818, endByte: null}
+         {startTime: 48, endTime: 60, startByte: 458818, endByte: null},
         ];
 
     expect(result).toBeTruthy();
@@ -89,7 +88,7 @@ describe('WebmSegmentIndexParser', function() {
          {startTime: 10, endTime: 22},
          {startTime: 22, endTime: 34},
          {startTime: 34, endTime: 46},
-         {startTime: 46, endTime: 58}
+         {startTime: 46, endTime: 58},
         ];
 
     expect(result).toBeTruthy();

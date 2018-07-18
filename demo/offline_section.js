@@ -137,16 +137,6 @@ shakaDemo.setupOfflineAssets_ = function() {
 
     shakaDemo.updateButtons_(true);
     return db.destroy();
-  }).catch(function(error) {
-    if (error.code == shaka.util.Error.Code.UNSUPPORTED_UPGRADE_REQUEST) {
-      console.warn('Warning: storage cleared.  For details, see ' +
-                   'https://github.com/google/shaka-player/issues/1248');
-      shaka.offline.Storage.deleteAll();
-      return;
-    }
-
-    // Let another component deal with it.
-    throw error;
   });
 };
 
@@ -164,10 +154,10 @@ shakaDemo.storeDeleteAsset_ = function() {
   progress.textContent = '0';
 
   let storage = new shaka.offline.Storage(shakaDemo.localPlayer_);
-  storage.configure(/** @type {shakaExtern.OfflineConfiguration} */ ({
+  storage.configure(/** @type {shaka.extern.OfflineConfiguration} */ ({
     progressCallback: function(data, percent) {
       progress.textContent = (percent * 100).toFixed(2);
-    }
+    },
   }));
 
   let p;

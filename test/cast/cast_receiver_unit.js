@@ -97,7 +97,7 @@ describe('CastReceiver', function() {
     // don't need this mock strictly type-checked.
     window['cast'] = {
       receiver: mockReceiverApi,
-      __platform__: {canDisplayType: mockCanDisplayType}
+      __platform__: {canDisplayType: mockCanDisplayType},
     };
 
     mockReceiverManager = createMockReceiverManager();
@@ -281,13 +281,13 @@ describe('CastReceiver', function() {
       expect(mockShakaMessageBus.messages).toEqual([
         {
           type: 'update',
-          update: jasmine.any(Object)
+          update: jasmine.any(Object),
         },
         {
           type: 'event',
           targetName: 'video',
-          event: jasmine.objectContaining(fakeEvent)
-        }
+          event: jasmine.objectContaining(fakeEvent),
+        },
       ]);
     }));
   });
@@ -305,15 +305,15 @@ describe('CastReceiver', function() {
 
       fakeInitState = {
         player: {
-          configure: fakeConfig
+          configure: fakeConfig,
         },
         playerAfterLoad: {
-          setTextTrackVisibility: true
+          setTextTrackVisibility: true,
         },
         video: {
           loop: true,
-          playbackRate: 5
-        }
+          playbackRate: 5,
+        },
       };
     });
 
@@ -325,7 +325,7 @@ describe('CastReceiver', function() {
       fakeIncomingMessage({
         type: 'init',
         initState: fakeInitState,
-        appData: fakeAppData
+        appData: fakeAppData,
       }, mockShakaMessageBus);
 
       // Initial Player state first:
@@ -359,7 +359,7 @@ describe('CastReceiver', function() {
       fakeIncomingMessage({
         type: 'init',
         initState: fakeInitState,
-        appData: fakeAppData
+        appData: fakeAppData,
       }, mockShakaMessageBus);
 
       expect(mockPlayer.getConfiguration).toHaveBeenCalled();
@@ -367,9 +367,9 @@ describe('CastReceiver', function() {
         type: 'update',
         update: jasmine.objectContaining({
           player: jasmine.objectContaining({
-            getConfiguration: fakeConfig
-          })
-        })
+            getConfiguration: fakeConfig,
+          }),
+        }),
       }));
     }));
 
@@ -383,7 +383,7 @@ describe('CastReceiver', function() {
       fakeIncomingMessage({
         type: 'init',
         initState: fakeInitState,
-        appData: fakeAppData
+        appData: fakeAppData,
       }, mockShakaMessageBus);
 
       expect(mockPlayer.getPlayheadTimeAsDate).not.toHaveBeenCalled();
@@ -399,7 +399,7 @@ describe('CastReceiver', function() {
       fakeIncomingMessage({
         type: 'init',
         initState: fakeInitState,
-        appData: fakeAppData
+        appData: fakeAppData,
       }, mockShakaMessageBus);
 
       expect(mockPlayer.getPlayheadTimeAsDate).toHaveBeenCalled();
@@ -413,7 +413,7 @@ describe('CastReceiver', function() {
       fakeIncomingMessage({
         type: 'init',
         initState: fakeInitState,
-        appData: fakeAppData
+        appData: fakeAppData,
       }, mockShakaMessageBus);
 
       expect(mockPlayer.load).toHaveBeenCalledWith('foo://bar', 12);
@@ -426,7 +426,7 @@ describe('CastReceiver', function() {
       fakeIncomingMessage({
         type: 'init',
         initState: fakeInitState,
-        appData: fakeAppData
+        appData: fakeAppData,
       }, mockShakaMessageBus);
 
       // Video autoplay inhibited:
@@ -444,7 +444,7 @@ describe('CastReceiver', function() {
       fakeIncomingMessage({
         type: 'init',
         initState: fakeInitState,
-        appData: fakeAppData
+        appData: fakeAppData,
       }, mockShakaMessageBus);
 
       shaka.test.Util.delay(0.1).then(function() {
@@ -476,7 +476,7 @@ describe('CastReceiver', function() {
       fakeIncomingMessage({
         type: 'init',
         initState: fakeInitState,
-        appData: fakeAppData
+        appData: fakeAppData,
       }, mockShakaMessageBus);
 
       shaka.test.Util.delay(0.1).then(function() {
@@ -499,7 +499,7 @@ describe('CastReceiver', function() {
       let fakeAppData = {myFakeAppData: 1234};
       fakeIncomingMessage({
         type: 'appData',
-        appData: fakeAppData
+        appData: fakeAppData,
       }, mockShakaMessageBus);
 
       expect(mockAppDataCallback).toHaveBeenCalledWith(fakeAppData);
@@ -518,7 +518,7 @@ describe('CastReceiver', function() {
         type: 'set',
         targetName: 'video',
         property: 'currentTime',
-        value: 12
+        value: 12,
       }, mockShakaMessageBus);
       expect(mockVideo.currentTime).toEqual(12);
 
@@ -527,7 +527,7 @@ describe('CastReceiver', function() {
         type: 'set',
         targetName: 'player',
         property: 'arbitraryName',
-        value: 'arbitraryValue'
+        value: 'arbitraryValue',
       }, mockShakaMessageBus);
       expect(mockPlayer['arbitraryName']).toEqual('arbitraryValue');
     }));
@@ -542,13 +542,13 @@ describe('CastReceiver', function() {
         type: 'set',
         targetName: 'video',
         property: 'volume',
-        value: 0.5
+        value: 0.5,
       }, mockShakaMessageBus);
       fakeIncomingMessage({
         type: 'set',
         targetName: 'video',
         property: 'muted',
-        value: true
+        value: true,
       }, mockShakaMessageBus);
 
       expect(mockVideo.volume).toBe(1);
@@ -572,7 +572,7 @@ describe('CastReceiver', function() {
         type: 'call',
         targetName: 'video',
         methodName: 'play',
-        args: [1, 2, 3]
+        args: [1, 2, 3],
       }, mockShakaMessageBus);
       expect(mockVideo.play).toHaveBeenCalledWith(1, 2, 3);
 
@@ -581,7 +581,7 @@ describe('CastReceiver', function() {
         type: 'call',
         targetName: 'player',
         methodName: 'configure',
-        args: [42]
+        args: [42],
       }, mockShakaMessageBus);
       expect(mockPlayer.configure).toHaveBeenCalledWith(42);
     }));
@@ -609,7 +609,7 @@ describe('CastReceiver', function() {
         id: fakeCallId,
         targetName: 'player',
         methodName: 'load',
-        args: ['foo://bar', 12]
+        args: ['foo://bar', 12],
       }, mockShakaMessageBus, fakeSenderId);
     });
 
@@ -634,7 +634,7 @@ describe('CastReceiver', function() {
         expect(senderChannel.messages).toEqual([{
           type: 'asyncComplete',
           id: fakeCallId,
-          error: null
+          error: null,
         }]);
       }).catch(fail).then(done);
     }));
@@ -659,7 +659,7 @@ describe('CastReceiver', function() {
         expect(senderChannel.messages).toEqual([{
           type: 'asyncComplete',
           id: fakeCallId,
-          error: jasmine.any(Object)
+          error: jasmine.any(Object),
         }]);
         if (senderChannel.messages.length) {
           let error = senderChannel.messages[0].error;
@@ -684,7 +684,7 @@ describe('CastReceiver', function() {
       fakeIncomingMessage({
         type: 'init',
         initState: {manifest: 'URI A'},
-        appData: {}
+        appData: {},
       }, mockShakaMessageBus);
 
       // The messages will show up asychronously:
@@ -723,7 +723,7 @@ describe('CastReceiver', function() {
         id: '5',
         targetName: 'player',
         methodName: 'load',
-        args: ['URI B']
+        args: ['URI B'],
       }, mockShakaMessageBus, 'senderId');
 
       // Wait for the mockPlayer to finish 'loading' before checking again.
@@ -750,8 +750,8 @@ describe('CastReceiver', function() {
         'media': {
           'contentId': 'URI B',
           'contentType': 'video/mp4',
-          'streamType': 'BUFFERED'
-        }
+          'streamType': 'BUFFERED',
+        },
       };
       fakeIncomingMessage(message, mockGenericMessageBus);
 
@@ -775,9 +775,9 @@ describe('CastReceiver', function() {
               contentId: expectedUri,
               streamType: 'BUFFERED',
               duration: expectedDuration,
-              contentType: ''
-            }
-          })]
+              contentType: '',
+            },
+          })],
         }
       );
       mockGenericMessageBus.messages.shift();
@@ -795,7 +795,7 @@ describe('CastReceiver', function() {
       let message = {
         // Arbitrary number
         'requestId': 0,
-        'type': 'GET_STATUS'
+        'type': 'GET_STATUS',
       };
 
       fakeIncomingMessage(message, mockGenericMessageBus);
@@ -808,7 +808,7 @@ describe('CastReceiver', function() {
       let message = {
         // Arbitrary number
         'requestId': 0,
-        'type': 'PLAY'
+        'type': 'PLAY',
       };
 
       fakeIncomingMessage(message, mockGenericMessageBus);
@@ -819,7 +819,7 @@ describe('CastReceiver', function() {
       let message = {
         // Arbitrary number
         'requestId': 0,
-        'type': 'PAUSE'
+        'type': 'PAUSE',
       };
 
       fakeIncomingMessage(message, mockGenericMessageBus);
@@ -832,7 +832,7 @@ describe('CastReceiver', function() {
         'requestId': 0,
         'type': 'SEEK',
         'resumeState': 'PLAYBACK_START',
-        'currentTime': 10
+        'currentTime': 10,
       };
 
       fakeIncomingMessage(message, mockGenericMessageBus);
@@ -844,7 +844,7 @@ describe('CastReceiver', function() {
       let message = {
         // Arbitrary number
         'requestId': 0,
-        'type': 'STOP'
+        'type': 'STOP',
       };
 
       fakeIncomingMessage(message, mockGenericMessageBus);
@@ -858,8 +858,8 @@ describe('CastReceiver', function() {
         'type': 'VOLUME',
         'volume': {
           'level': 0.5,
-          'muted': true
-        }
+          'muted': true,
+        },
       };
 
       fakeIncomingMessage(message, mockGenericMessageBus);
@@ -877,8 +877,8 @@ describe('CastReceiver', function() {
         'media': {
           'contentId': 'manifestUri',
           'contentType': 'video/mp4',
-          'streamType': 'BUFFERED'
-        }
+          'streamType': 'BUFFERED',
+        },
       };
 
       fakeIncomingMessage(message, mockGenericMessageBus);
@@ -889,7 +889,7 @@ describe('CastReceiver', function() {
       let message = {
         // Arbitrary number
         'requestId': 0,
-        'type': 'UNKNOWN_TYPE'
+        'type': 'UNKNOWN_TYPE',
       };
 
       fakeIncomingMessage(message, mockGenericMessageBus);
@@ -920,7 +920,7 @@ describe('CastReceiver', function() {
       fakeIncomingMessage({
         type: 'init',
         initState: {},
-        appData: {}
+        appData: {},
       }, mockShakaMessageBus);
 
       mockPlayer.getConfiguration.calls.reset();
@@ -950,8 +950,8 @@ describe('CastReceiver', function() {
   function createMockReceiverApi() {
     return {
       CastReceiverManager: {
-        getInstance: function() { return mockReceiverManager; }
-      }
+        getInstance: function() { return mockReceiverManager; },
+      },
     };
   }
 
@@ -971,7 +971,7 @@ describe('CastReceiver', function() {
         }
 
         return mockGenericMessageBus;
-      }
+      },
     };
   }
 
@@ -979,7 +979,7 @@ describe('CastReceiver', function() {
     let bus = {
       messages: [],
       broadcast: jasmine.createSpy('CastMessageBus.broadcast'),
-      getCastChannel: jasmine.createSpy('CastMessageBus.getCastChannel')
+      getCastChannel: jasmine.createSpy('CastMessageBus.getCastChannel'),
     };
     // For convenience, deserialize and store sent messages.
     bus.broadcast.and.callFake(function(message) {
@@ -989,7 +989,7 @@ describe('CastReceiver', function() {
       messages: [],
       send: function(message) {
         channel.messages.push(CastUtils.deserialize(message));
-      }
+      },
     };
     bus.getCastChannel.and.returnValue(channel);
     return bus;
@@ -1008,7 +1008,7 @@ describe('CastReceiver', function() {
       },
       dispatchEvent: jasmine.createSpy('dispatchEvent'),
       // For convenience:
-      listeners: {}
+      listeners: {},
     };
 
     CastUtils.PlayerVoidMethods.forEach(function(name) {
@@ -1043,13 +1043,13 @@ describe('CastReceiver', function() {
   /**
    * @param {?} message
    * @param {!Object} bus
-   * @param {string=} opt_senderId
+   * @param {string=} senderId
    */
-  function fakeIncomingMessage(message, bus, opt_senderId) {
+  function fakeIncomingMessage(message, bus, senderId) {
     let serialized = CastUtils.serialize(message);
     let messageEvent = {
-      senderId: opt_senderId,
-      data: serialized
+      senderId: senderId,
+      data: serialized,
     };
     bus.onMessage(messageEvent);
   }

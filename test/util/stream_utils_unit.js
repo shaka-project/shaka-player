@@ -20,6 +20,8 @@ describe('StreamUtils', function() {
       shaka.util.StreamUtils.filterVariantsByLanguageAndRole;
   const filterStreamsByLanguageAndRole =
       shaka.util.StreamUtils.filterStreamsByLanguageAndRole;
+  const filterVariantsByAudioChannelCount =
+      shaka.util.StreamUtils.filterVariantsByAudioChannelCount;
 
   let manifest;
 
@@ -544,7 +546,64 @@ describe('StreamUtils', function() {
           expect(chosen[0].primary).toBe(false);
           expect(chosen[1].primary).toBe(false);
         });
+  });
 
+  describe('filterVariantsByAudioChannelCount', function() {
+    it('chooses variants with preferred audio channels count', function() {
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addVariant(0)
+            .addAudio(0).channelsCount(2)
+          .addVariant(1)
+            .addAudio(1).channelsCount(6)
+          .addVariant(2)
+            .addAudio(2).channelsCount(2)
+        .build();
+
+      let chosen = filterVariantsByAudioChannelCount(
+          manifest.periods[0].variants, 2);
+      expect(chosen.length).toBe(2);
+      expect(chosen[0]).toBe(manifest.periods[0].variants[0]);
+      expect(chosen[1]).toBe(manifest.periods[0].variants[2]);
+    });
+
+    it('chooses variants with largest audio channel count less than config' +
+        ' when no exact audio channel count match is possible', function() {
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addVariant(0)
+            .addAudio(0).channelsCount(2)
+          .addVariant(1)
+            .addAudio(1).channelsCount(8)
+          .addVariant(2)
+            .addAudio(2).channelsCount(2)
+        .build();
+
+      let chosen = filterVariantsByAudioChannelCount(
+          manifest.periods[0].variants, 6);
+      expect(chosen.length).toBe(2);
+      expect(chosen[0]).toBe(manifest.periods[0].variants[0]);
+      expect(chosen[1]).toBe(manifest.periods[0].variants[2]);
+    });
+
+    it('chooses variants with fewest audio channels when none fit in the ' +
+        'config', function() {
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addVariant(0)
+            .addAudio(0).channelsCount(6)
+          .addVariant(1)
+            .addAudio(1).channelsCount(8)
+          .addVariant(2)
+            .addAudio(2).channelsCount(6)
+        .build();
+
+      let chosen = filterVariantsByAudioChannelCount(
+          manifest.periods[0].variants, 2);
+      expect(chosen.length).toBe(2);
+      expect(chosen[0]).toBe(manifest.periods[0].variants[0]);
+      expect(chosen[1]).toBe(manifest.periods[0].variants[2]);
+    });
   });
 
   describe('filterNewPeriod', function() {

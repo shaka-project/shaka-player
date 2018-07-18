@@ -16,7 +16,9 @@
  */
 
 
-/** @externs */
+/**
+ * @externs
+ */
 
 
 /**
@@ -42,7 +44,7 @@
  *   The bandwidth of the chosen track (null for text).
  * @exportDoc
  */
-shakaExtern.TrackChoice;
+shaka.extern.TrackChoice;
 
 
 /**
@@ -64,7 +66,7 @@ shakaExtern.TrackChoice;
  *   continue to increase.
  * @exportDoc
  */
-shakaExtern.StateChange;
+shaka.extern.StateChange;
 
 
 /**
@@ -81,8 +83,8 @@ shakaExtern.StateChange;
  *   playTime: number,
  *   bufferingTime: number,
  *
- *   switchHistory: !Array.<shakaExtern.TrackChoice>,
- *   stateHistory: !Array.<shakaExtern.StateChange>
+ *   switchHistory: !Array.<shaka.extern.TrackChoice>,
+ *   stateHistory: !Array.<shaka.extern.StateChange>
  * }}
  *
  * @description
@@ -115,13 +117,13 @@ shakaExtern.StateChange;
  * @property {number} bufferingTime
  *   The total time spent in a buffering state in seconds.
  *
- * @property {!Array.<shakaExtern.TrackChoice>} switchHistory
+ * @property {!Array.<shaka.extern.TrackChoice>} switchHistory
  *   A history of the stream changes.
- * @property {!Array.<shakaExtern.StateChange>} stateHistory
+ * @property {!Array.<shaka.extern.StateChange>} stateHistory
  *   A history of the state changes.
  * @exportDoc
  */
-shakaExtern.Stats;
+shaka.extern.Stats;
 
 
 /**
@@ -139,31 +141,31 @@ shakaExtern.Stats;
  *   The end time of the range, in seconds.
  * @exportDoc
  */
-shakaExtern.BufferedRange;
+shaka.extern.BufferedRange;
 
 
 /**
  * @typedef {{
- *   total: !Array.<shakaExtern.BufferedRange>,
- *   audio: !Array.<shakaExtern.BufferedRange>,
- *   video: !Array.<shakaExtern.BufferedRange>,
- *   text: !Array.<shakaExtern.BufferedRange>
+ *   total: !Array.<shaka.extern.BufferedRange>,
+ *   audio: !Array.<shaka.extern.BufferedRange>,
+ *   video: !Array.<shaka.extern.BufferedRange>,
+ *   text: !Array.<shaka.extern.BufferedRange>
  * }}
  *
  * @description
  * Contains information about the current buffered ranges.
  *
- * @property {!Array.<shakaExtern.BufferedRange>} total
+ * @property {!Array.<shaka.extern.BufferedRange>} total
  *   The combined audio/video buffered ranges, reported by |video.buffered|.
- * @property {!Array.<shakaExtern.BufferedRange>} audio
+ * @property {!Array.<shaka.extern.BufferedRange>} audio
  *   The buffered ranges for audio content.
- * @property {!Array.<shakaExtern.BufferedRange>} video
+ * @property {!Array.<shaka.extern.BufferedRange>} video
  *   The buffered ranges for video content.
- * @property {!Array.<shakaExtern.BufferedRange>} text
+ * @property {!Array.<shaka.extern.BufferedRange>} text
  *   The buffered ranges for text content.
  * @exportDoc
  */
-shakaExtern.BufferedInfo;
+shaka.extern.BufferedInfo;
 
 
 /**
@@ -252,7 +254,7 @@ shakaExtern.BufferedInfo;
  *   (only for variant tracks) The video stream's bandwidth if known.
  * @exportDoc
  */
-shakaExtern.Track;
+shaka.extern.Track;
 
 
 /**
@@ -270,9 +272,13 @@ shakaExtern.Track;
  *
  * @description
  * An object describing application restrictions on what tracks can play.  All
- * restrictions must be fulfilled for a track to be playable.  If a track does
- * not meet the restrictions, it will not appear in the track list and it will
- * not be played.
+ * restrictions must be fulfilled for a track to be playable/selectable.
+ * The restrictions system behaves somewhat differently at the ABR level and the
+ * player level, so please refer to the documentation for those specific
+ * settings.
+ *
+ * @see shaka.extern.PlayerConfiguration
+ * @see shaka.extern.AbrConfiguration
  *
  * @property {number} minWidth
  *   The minimum width of a video track, in pixels.
@@ -293,7 +299,7 @@ shakaExtern.Track;
  *   The maximum bandwidth of a variant track, in bit/sec.
  * @exportDoc
  */
-shakaExtern.Restrictions;
+shaka.extern.Restrictions;
 
 
 /**
@@ -305,14 +311,14 @@ shakaExtern.Restrictions;
  *   Whether this key system supports persistent state.
  * @exportDoc
  */
-shakaExtern.DrmSupportType;
+shaka.extern.DrmSupportType;
 
 
 /**
  * @typedef {{
  *   manifest: !Object.<string, boolean>,
  *   media: !Object.<string, boolean>,
- *   drm: !Object.<string, ?shakaExtern.DrmSupportType>
+ *   drm: !Object.<string, ?shaka.extern.DrmSupportType>
  * }}
  *
  * @description
@@ -324,14 +330,14 @@ shakaExtern.DrmSupportType;
  * @property {!Object.<string, boolean>} media
  *   A map of supported media types.
  *   The keys are media MIME types.
- * @property {!Object.<string, ?shakaExtern.DrmSupportType>} drm
+ * @property {!Object.<string, ?shaka.extern.DrmSupportType>} drm
  *   A map of supported key systems.
  *   The keys are the key system names.  The value is null if it is not
  *   supported.  Key systems not probed will not be in this dictionary.
  *
  * @exportDoc
  */
-shakaExtern.SupportType;
+shaka.extern.SupportType;
 
 
 /**
@@ -363,7 +369,7 @@ shakaExtern.SupportType;
  *   The XML element that defines the Event.
  * @exportDoc
  */
-shakaExtern.TimelineRegionInfo;
+shaka.extern.TimelineRegionInfo;
 
 
 /**
@@ -403,15 +409,15 @@ shakaExtern.TimelineRegionInfo;
  *   Body of the message.
  * @exportDoc
  */
-shakaExtern.EmsgInfo;
+shaka.extern.EmsgInfo;
 
 
 /**
- * @typedef {function(!Element):Array.<shakaExtern.DrmInfo>}
- * @see shakaExtern.DashManifestConfiguration
+ * @typedef {function(!Element):Array.<shaka.extern.DrmInfo>}
+ * @see shaka.extern.DashManifestConfiguration
  * @exportDoc
  */
-shakaExtern.DashContentProtectionCallback;
+shaka.extern.DashContentProtectionCallback;
 
 
 /**
@@ -450,19 +456,19 @@ shakaExtern.DashContentProtectionCallback;
  *
  * @exportDoc
  */
-shakaExtern.AdvancedDrmConfiguration;
+shaka.extern.AdvancedDrmConfiguration;
 
 
 /**
  * @typedef {{
- *   retryParameters: shakaExtern.RetryParameters,
+ *   retryParameters: shaka.extern.RetryParameters,
  *   servers: !Object.<string, string>,
  *   clearKeys: !Object.<string, string>,
  *   delayLicenseRequestUntilPlayed: boolean,
- *   advanced: Object.<string, shakaExtern.AdvancedDrmConfiguration>
+ *   advanced: Object.<string, shaka.extern.AdvancedDrmConfiguration>
  * }}
  *
- * @property {shakaExtern.RetryParameters} retryParameters
+ * @property {shaka.extern.RetryParameters} retryParameters
  *   Retry parameters for license requests.
  * @property {!Object.<string, string>} servers
  *   <i>Required for all but the clear key CDM.</i> <br>
@@ -475,26 +481,26 @@ shakaExtern.AdvancedDrmConfiguration;
  *   <i>Defaults to false.</i> <br>
  *   True to configure drm to delay sending a license request until a user
  *   actually starts playing content.
- * @property {Object.<string, shakaExtern.AdvancedDrmConfiguration>} advanced
+ * @property {Object.<string, shaka.extern.AdvancedDrmConfiguration>} advanced
  *   <i>Optional.</i> <br>
  *   A dictionary which maps key system IDs to advanced DRM configuration for
  *   those key systems.
  *
  * @exportDoc
  */
-shakaExtern.DrmConfiguration;
+shaka.extern.DrmConfiguration;
 
 
 /**
  * @typedef {{
- *   customScheme: shakaExtern.DashContentProtectionCallback,
+ *   customScheme: shaka.extern.DashContentProtectionCallback,
  *   clockSyncUri: string,
  *   ignoreDrmInfo: boolean,
  *   xlinkFailGracefully: boolean,
  *   defaultPresentationDelay: number
  * }}
  *
- * @property {shakaExtern.DashContentProtectionCallback} customScheme
+ * @property {shaka.extern.DashContentProtectionCallback} customScheme
  *   If given, invoked by a DASH manifest parser to interpret custom or
  *   non-standard DRM schemes found in the manifest.  The argument is a
  *   ContentProtection node.  Return null if not recognized.
@@ -517,28 +523,32 @@ shakaExtern.DrmConfiguration;
  *
  * @exportDoc
  */
-shakaExtern.DashManifestConfiguration;
+shaka.extern.DashManifestConfiguration;
 
 
 /**
  * @typedef {{
- *   retryParameters: shakaExtern.RetryParameters,
- *   dash: shakaExtern.DashManifestConfiguration
+ *   retryParameters: shaka.extern.RetryParameters,
+ *   availabilityWindowOverride: number,
+ *   dash: shaka.extern.DashManifestConfiguration
  * }}
  *
- * @property {shakaExtern.RetryParameters} retryParameters
+ * @property {shaka.extern.RetryParameters} retryParameters
  *   Retry parameters for manifest requests.
- * @property {shakaExtern.DashManifestConfiguration} dash
+ * @property (number) availabilityWindowOverride
+ *   A number, in seconds, that overrides the availability window in the
+ *   manifest, or NaN if the default value should be used.
+ * @property {shaka.extern.DashManifestConfiguration} dash
  *   Advanced parameters used by the DASH manifest parser.
  *
  * @exportDoc
  */
-shakaExtern.ManifestConfiguration;
+shaka.extern.ManifestConfiguration;
 
 
 /**
  * @typedef {{
- *   retryParameters: shakaExtern.RetryParameters,
+ *   retryParameters: shaka.extern.RetryParameters,
  *   failureCallback: function(!shaka.util.Error),
  *   rebufferingGoal: number,
  *   bufferingGoal: number,
@@ -555,7 +565,7 @@ shakaExtern.ManifestConfiguration;
  * @description
  * The StreamingEngine's configuration options.
  *
- * @property {shakaExtern.RetryParameters} retryParameters
+ * @property {shaka.extern.RetryParameters} retryParameters
  *   Retry parameters for segment requests.
  * @property {function(!shaka.util.Error)} failureCallback
  *   A callback to decide what to do on a streaming failure.  Default behavior
@@ -609,14 +619,14 @@ shakaExtern.ManifestConfiguration;
  *   This value defaults to false.
  * @exportDoc
  */
-shakaExtern.StreamingConfiguration;
+shaka.extern.StreamingConfiguration;
 
 
 /**
  * @typedef {{
  *   enabled: boolean,
  *   defaultBandwidthEstimate: number,
- *   restrictions: shakaExtern.Restrictions,
+ *   restrictions: shaka.extern.Restrictions,
  *   switchInterval: number,
  *   bandwidthUpgradeTarget: number,
  *   bandwidthDowngradeTarget: number
@@ -627,10 +637,14 @@ shakaExtern.StreamingConfiguration;
  * @property {number} defaultBandwidthEstimate
  *   The default bandwidth estimate to use if there is not enough data, in
  *   bit/sec.
- * @property {shakaExtern.Restrictions} restrictions
- *   The restrictions to apply to ABR decisions.  The AbrManager will not
- *   choose any streams that do not meet these restrictions.  (Note that
- *   they can still be chosen by the application)
+ * @property {shaka.extern.Restrictions} restrictions
+ *   The restrictions to apply to ABR decisions.  These are "soft" restrictions.
+ *   Any track that fails to meet these restrictions will not be selected
+ *   automatically, but will still appear in the track list and can still be
+ *   selected via selectVariantTrack().  If no tracks meet these restrictions,
+ *   AbrManager should not fail, but choose a low-res or low-bandwidth variant
+ *   instead.  It is the responsibiliy of AbrManager implementations to follow
+ *   these rules and implement this behavior.
  * @property {number} switchInterval
  *   The minimum amount of time that must pass between switches, in
  *   seconds. This keeps us from changing too often and annoying the user.
@@ -642,33 +656,36 @@ shakaExtern.StreamingConfiguration;
  *   downgrade to avoid this.
  * @exportDoc
  */
-shakaExtern.AbrConfiguration;
+shaka.extern.AbrConfiguration;
 
 
 /**
  * @typedef {{
- *   drm: shakaExtern.DrmConfiguration,
- *   manifest: shakaExtern.ManifestConfiguration,
- *   streaming: shakaExtern.StreamingConfiguration,
- *   abrFactory: shakaExtern.AbrManager.Factory,
- *   abr: shakaExtern.AbrConfiguration,
+ *   drm: shaka.extern.DrmConfiguration,
+ *   manifest: shaka.extern.ManifestConfiguration,
+ *   streaming: shaka.extern.StreamingConfiguration,
+ *   abrFactory: shaka.extern.AbrManager.Factory,
+ *   abr: shaka.extern.AbrConfiguration,
  *   preferredAudioLanguage: string,
  *   preferredTextLanguage: string,
- *   restrictions: shakaExtern.Restrictions,
+ *   preferredVariantRole: string,
+ *   preferredTextRole: string,
+ *   preferredAudioChannelCount: number,
+ *   restrictions: shaka.extern.Restrictions,
  *   playRangeStart: number,
  *   playRangeEnd: number,
- *   textDisplayFactory: shakaExtern.TextDisplayer.Factory
+ *   textDisplayFactory: shaka.extern.TextDisplayer.Factory
  * }}
  *
- * @property {shakaExtern.DrmConfiguration} drm
+ * @property {shaka.extern.DrmConfiguration} drm
  *   DRM configuration and settings.
- * @property {shakaExtern.ManifestConfiguration} manifest
+ * @property {shaka.extern.ManifestConfiguration} manifest
  *   Manifest configuration and settings.
- * @property {shakaExtern.StreamingConfiguration} streaming
+ * @property {shaka.extern.StreamingConfiguration} streaming
  *   Streaming configuration and settings.
- * @property {shakaExtern.AbrManager.Factory} abrFactory
+ * @property {shaka.extern.AbrManager.Factory} abrFactory
  *   A factory to construct an abr manager.
- * @property {shakaExtern.AbrConfiguration} abr
+ * @property {shaka.extern.AbrConfiguration} abr
  *   ABR configuration and settings.
  * @property {string} preferredAudioLanguage
  *   The preferred language to use for audio tracks.  If not given it will use
@@ -679,20 +696,28 @@ shakaExtern.AbrConfiguration;
  *   is found, and the selected audio and text tracks have different languages,
  *   the text track will be shown.
  *   Changing this during playback will not affect the current playback.
- * @property {shakaExtern.Restrictions} restrictions
- *   The application restrictions to apply to the tracks.  The track must
- *   meet all the restrictions to be playable.
+ * @property {string} preferredVariantRole
+ *   The preferred role to use for variants.
+ * @property {string} preferredTextRole
+ *   The preferred role to use for text tracks.
+ * @property {number} preferredAudioChannelCount
+ *   The preferred number of audio channels.
+ * @property {shaka.extern.Restrictions} restrictions
+ *   The application restrictions to apply to the tracks.  These are "hard"
+ *   restrictions.  Any track that fails to meet these restrictions will not
+ *   appear in the track list.  If no tracks meet these restrictions, playback
+ *   will fail.
  * @property {number} playRangeStart
  *   Optional playback and seek start time in seconds. Defaults to 0 if
  *   not provided.
  * @property {number} playRangeEnd
  *   Optional playback and seek end time in seconds. Defaults to the end of
  *   the presentation if not provided.
- * @property {shakaExtern.TextDisplayer.Factory} textDisplayFactory
+ * @property {shaka.extern.TextDisplayer.Factory} textDisplayFactory
  *   A factory to construct text displayer.
  * @exportDoc
  */
-shakaExtern.PlayerConfiguration;
+shaka.extern.PlayerConfiguration;
 
 
 /**
@@ -706,5 +731,6 @@ shakaExtern.PlayerConfiguration;
  * @property {string} role
  *    The role name for the stream. If the stream has no role, |role| will be
  *    ''.
+ * @exportDoc
  */
-shakaExtern.LanguageRole;
+shaka.extern.LanguageRole;

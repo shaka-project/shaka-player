@@ -113,11 +113,11 @@ shakaDemo.setupAssets_ = function() {
   document.getElementById('unloadButton').addEventListener(
       'click', shakaDemo.unload);
   document.getElementById('licenseServerInput').addEventListener(
-      'keyup', shakaDemo.onAssetKeyUp_);
+      'input', shakaDemo.onAssetInput_);
   document.getElementById('manifestInput').addEventListener(
-      'keyup', shakaDemo.onAssetKeyUp_);
+      'input', shakaDemo.onAssetInput_);
   document.getElementById('certificateInput').addEventListener(
-      'keyup', shakaDemo.onAssetKeyUp_);
+      'input', shakaDemo.onAssetInput_);
 
   return asyncOfflineSetup;
 };
@@ -127,24 +127,21 @@ shakaDemo.setupAssets_ = function() {
  * @param {!Event} event
  * @private
  */
-shakaDemo.onAssetKeyUp_ = function(event) {
+shakaDemo.onAssetInput_ = function(event) {
   // Mirror the users input as they type.
   shakaDemo.hashShouldChange_();
-  // Load the asset if the user presses enter.
-  if (event.keyCode != 13) return;
-  shakaDemo.load();
 };
 
 
 /**
- * @param {!string} uri
+ * @param {string} uri
  * @return {!Promise.<ArrayBuffer>}
  * @private
  */
 shakaDemo.requestCertificate_ = function(uri) {
   let netEngine = shakaDemo.player_.getNetworkingEngine();
   const requestType = shaka.net.NetworkingEngine.RequestType.APP;
-  let request = /** @type {shakaExtern.Request} */ ({uris: [uri]});
+  let request = /** @type {shaka.extern.Request} */ ({uris: [uri]});
 
   return netEngine.request(requestType, request).promise
       .then((response) => response.data);
@@ -162,14 +159,14 @@ shakaDemo.configureCertificate_ = function(certificate) {
 
   for (let keySystem in config.drm.advanced) {
     certConfig[keySystem] = {
-      serverCertificate: new Uint8Array(certificate)
+      serverCertificate: new Uint8Array(certificate),
     };
   }
 
   player.configure({
     drm: {
-      advanced: certConfig
-    }
+      advanced: certConfig,
+    },
   });
 };
 
@@ -192,18 +189,22 @@ shakaDemo.preparePlayer_ = function(asset) {
   let audioRobustness =
       document.getElementById('drmSettingsAudioRobustness').value;
 
-  let commonDrmSystems =
-      ['com.widevine.alpha', 'com.microsoft.playready', 'com.adobe.primetime'];
-  let config = /** @type {shakaExtern.PlayerConfiguration} */(
+  let commonDrmSystems = [
+    'com.widevine.alpha',
+    'com.microsoft.playready',
+    'com.adobe.primetime',
+    'org.w3.clearkey',
+  ];
+  let config = /** @type {shaka.extern.PlayerConfiguration} */(
       {abr: {}, streaming: {}, manifest: {dash: {}}});
-  config.drm = /** @type {shakaExtern.DrmConfiguration} */({
+  config.drm = /** @type {shaka.extern.DrmConfiguration} */({
     advanced: {}});
   commonDrmSystems.forEach(function(system) {
     config.drm.advanced[system] =
-        /** @type {shakaExtern.AdvancedDrmConfiguration} */({});
+        /** @type {shaka.extern.AdvancedDrmConfiguration} */({});
   });
   config.manifest.dash.clockSyncUri =
-      '//shaka-player-demo.appspot.com/time.txt';
+      'https://shaka-player-demo.appspot.com/time.txt';
 
   if (!asset) {
     // Use the custom fields.
@@ -222,7 +223,7 @@ shakaDemo.preparePlayer_ = function(asset) {
       // They will simply fill in a Widevine license server on Chrome, etc.
       licenseServers: licenseServers,
       // Use a custom certificate for all key systems as well
-      certificateUri: document.getElementById('certificateInput').value
+      certificateUri: document.getElementById('certificateInput').value,
     });
   }
 
@@ -249,6 +250,22 @@ shakaDemo.preparePlayer_ = function(asset) {
       document.getElementById('preferredAudioLanguage').value;
   config.preferredTextLanguage =
       document.getElementById('preferredTextLanguage').value;
+  const preferredAudioChannelCount =
+      Number(document.getElementById('preferredAudioChannelCount').value);
+  if (!isNaN(preferredAudioChannelCount)) {
+    config.preferredAudioChannelCount = preferredAudioChannelCount;
+  }
+  let availabilityWindowOverrideRaw =
+      document.getElementById('availabilityWindowOverride').value;
+  let availabilityWindowOverride = Number(availabilityWindowOverrideRaw);
+  if (!isNaN(availabilityWindowOverride) &&
+      availabilityWindowOverrideRaw.length) {
+    // Don't configure if the field contains an empty string; this is because
+    // Number('') evaluates to 0, which is a valid (if fairly useless) override
+    // value, while we would rather it mean "don't override".
+    config.manifest.availabilityWindowOverride = availabilityWindowOverride;
+  }
+
   config.abr.enabled =
       document.getElementById('enableAdaptation').checked;
   let smallGapLimit = document.getElementById('smallGapLimit').value;

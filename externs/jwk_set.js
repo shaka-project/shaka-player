@@ -21,7 +21,6 @@
  */
 
 
-
 /**
  * A JSON Web Key set.
  *
@@ -32,7 +31,6 @@ function JWKSet() {
   /** @type {Array.<JWK>} */
   this.keys = [];
 }
-
 
 
 /**

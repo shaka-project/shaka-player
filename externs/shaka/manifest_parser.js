@@ -16,8 +16,9 @@
  */
 
 
-/** @externs */
-
+/**
+ * @externs
+ */
 
 
 /**
@@ -32,15 +33,15 @@
  * @interface
  * @exportDoc
  */
-shakaExtern.ManifestParser = function() {};
+shaka.extern.ManifestParser = function() {};
 
 
 /**
  * @typedef {{
  *   networkingEngine: !shaka.net.NetworkingEngine,
- *   filterNewPeriod: function(shakaExtern.Period),
- *   filterAllPeriods: function(!Array.<!shakaExtern.Period>),
- *   onTimelineRegionAdded: function(shakaExtern.TimelineRegionInfo),
+ *   filterNewPeriod: function(shaka.extern.Period),
+ *   filterAllPeriods: function(!Array.<!shaka.extern.Period>),
+ *   onTimelineRegionAdded: function(shaka.extern.TimelineRegionInfo),
  *   onEvent: function(!Event),
  *   onError: function(!shaka.util.Error)
  * }}
@@ -53,11 +54,11 @@ shakaExtern.ManifestParser = function() {};
  *
  * @property {!shaka.net.NetworkingEngine} networkingEngine
  *   The networking engine to use for network requests.
- * @property {function(shakaExtern.Period)} filterNewPeriod
+ * @property {function(shaka.extern.Period)} filterNewPeriod
  *   Should be called on a new Period so that it can be filtered.
- * @property {function(!Array.<!shakaExtern.Period>)} filterAllPeriods
+ * @property {function(!Array.<!shaka.extern.Period>)} filterAllPeriods
  *   Should be called on all Periods so that they can be filtered.
- * @property {function(shakaExtern.TimelineRegionInfo)} onTimelineRegionAdded
+ * @property {function(shaka.extern.TimelineRegionInfo)} onTimelineRegionAdded
  *   Should be called when a new timeline region is added.
  * @property {function(!Event)} onEvent
  *   Should be called to raise events.
@@ -65,7 +66,7 @@ shakaExtern.ManifestParser = function() {};
  *   Should be called when an error occurs.
  * @exportDoc
  */
-shakaExtern.ManifestParser.PlayerInterface;
+shaka.extern.ManifestParser.PlayerInterface;
 
 
 /**
@@ -73,20 +74,20 @@ shakaExtern.ManifestParser.PlayerInterface;
  * This function is registered with shaka.media.ManifestParser to create parser
  * instances.
  *
- * @typedef {function(new:shakaExtern.ManifestParser)}
+ * @typedef {function(new:shaka.extern.ManifestParser)}
  * @exportDoc
  */
-shakaExtern.ManifestParser.Factory;
+shaka.extern.ManifestParser.Factory;
 
 
 /**
  * Called by the Player to provide an updated configuration any time the
  * configuration changes.  Will be called at least once before start().
  *
- * @param {shakaExtern.ManifestConfiguration} config
+ * @param {shaka.extern.ManifestConfiguration} config
  * @exportDoc
  */
-shakaExtern.ManifestParser.prototype.configure = function(config) {};
+shaka.extern.ManifestParser.prototype.configure = function(config) {};
 
 
 /**
@@ -94,12 +95,12 @@ shakaExtern.ManifestParser.prototype.configure = function(config) {};
  * background timers that are needed.  This will only be called once.
  *
  * @param {string} uri The URI of the manifest.
- * @param {shakaExtern.ManifestParser.PlayerInterface} playerInterface Contains
+ * @param {shaka.extern.ManifestParser.PlayerInterface} playerInterface Contains
  *   the interface to the Player.
- * @return {!Promise.<shakaExtern.Manifest>}
+ * @return {!Promise.<shaka.extern.Manifest>}
  * @exportDoc
  */
-shakaExtern.ManifestParser.prototype.start = function(uri, playerInterface) {};
+shaka.extern.ManifestParser.prototype.start = function(uri, playerInterface) {};
 
 
 /**
@@ -110,7 +111,7 @@ shakaExtern.ManifestParser.prototype.start = function(uri, playerInterface) {};
  * @return {!Promise}
  * @exportDoc
  */
-shakaExtern.ManifestParser.prototype.stop = function() {};
+shaka.extern.ManifestParser.prototype.stop = function() {};
 
 
 /**
@@ -118,7 +119,7 @@ shakaExtern.ManifestParser.prototype.stop = function() {};
  * optional.  This is only called when 'emsg' boxes are present.
  * @exportDoc
  */
-shakaExtern.ManifestParser.prototype.update = function() {};
+shaka.extern.ManifestParser.prototype.update = function() {};
 
 
 /**
@@ -129,5 +130,5 @@ shakaExtern.ManifestParser.prototype.update = function() {};
  * @param {number} expiration
  * @exportDoc
  */
-shakaExtern.ManifestParser.prototype.onExpirationUpdated = function(
+shaka.extern.ManifestParser.prototype.onExpirationUpdated = function(
     sessionId, expiration) {};

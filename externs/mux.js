@@ -29,13 +29,12 @@ var muxjs = {};
 muxjs.mp4 = {};
 
 
-
 /**
  * @constructor
  * @struct
- * @param {Object=} opt_options
+ * @param {Object=} options
  */
-muxjs.mp4.Transmuxer = function(opt_options) {};
+muxjs.mp4.Transmuxer = function(options) {};
 
 
 /**

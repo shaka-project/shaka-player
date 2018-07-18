@@ -55,23 +55,23 @@ goog.require('goog.uri.utils.ComponentIndex');
  * All setters return <code>this</code> and so may be chained, a la
  * <code>new goog.Uri('/foo').setFragment('part').toString()</code>.
  *
- * @param {*=} opt_uri Optional string URI to parse, or if a goog.Uri is
+ * @param {*=} uri Optional string URI to parse, or if a goog.Uri is
  *        passed, a clone is created.
  *
  * @constructor
  */
-goog.Uri = function(opt_uri) {
+goog.Uri = function(uri) {
   // Parse in the uri string
   var m;
-  if (opt_uri instanceof goog.Uri) {
-    this.setScheme(opt_uri.getScheme());
-    this.setUserInfo(opt_uri.getUserInfo());
-    this.setDomain(opt_uri.getDomain());
-    this.setPort(opt_uri.getPort());
-    this.setPath(opt_uri.getPath());
-    this.setQueryData(opt_uri.getQueryData().clone());
-    this.setFragment(opt_uri.getFragment());
-  } else if (opt_uri && (m = goog.uri.utils.split(String(opt_uri)))) {
+  if (uri instanceof goog.Uri) {
+    this.setScheme(uri.getScheme());
+    this.setUserInfo(uri.getUserInfo());
+    this.setDomain(uri.getDomain());
+    this.setPort(uri.getPort());
+    this.setPath(uri.getPath());
+    this.setQueryData(uri.getQueryData().clone());
+    this.setFragment(uri.getFragment());
+  } else if (uri && (m = goog.uri.utils.split(String(uri)))) {
     // Set the parts -- decoding as we do so.
     // COMPATABILITY NOTE - In IE, unmatched fields may be empty strings,
     // whereas in other browsers they will be undefined.
@@ -314,11 +314,11 @@ goog.Uri.prototype.getScheme = function() {
 /**
  * Sets the scheme/protocol.
  * @param {string} newScheme New scheme value.
- * @param {boolean=} opt_decode Optional param for whether to decode new value.
+ * @param {boolean=} decode Optional param for whether to decode new value.
  * @return {!goog.Uri} Reference to this URI object.
  */
-goog.Uri.prototype.setScheme = function(newScheme, opt_decode) {
-  this.scheme_ = opt_decode ? goog.Uri.decodeOrEmpty_(newScheme, true) :
+goog.Uri.prototype.setScheme = function(newScheme, decode) {
+  this.scheme_ = decode ? goog.Uri.decodeOrEmpty_(newScheme, true) :
       newScheme;
 
   // remove an : at the end of the scheme so somebody can pass in
@@ -349,11 +349,11 @@ goog.Uri.prototype.getUserInfo = function() {
 /**
  * Sets the userInfo.
  * @param {string} newUserInfo New userInfo value.
- * @param {boolean=} opt_decode Optional param for whether to decode new value.
+ * @param {boolean=} decode Optional param for whether to decode new value.
  * @return {!goog.Uri} Reference to this URI object.
  */
-goog.Uri.prototype.setUserInfo = function(newUserInfo, opt_decode) {
-  this.userInfo_ = opt_decode ? goog.Uri.decodeOrEmpty_(newUserInfo) :
+goog.Uri.prototype.setUserInfo = function(newUserInfo, decode) {
+  this.userInfo_ = decode ? goog.Uri.decodeOrEmpty_(newUserInfo) :
                    newUserInfo;
   return this;
 };
@@ -378,11 +378,11 @@ goog.Uri.prototype.getDomain = function() {
 /**
  * Sets the domain.
  * @param {string} newDomain New domain value.
- * @param {boolean=} opt_decode Optional param for whether to decode new value.
+ * @param {boolean=} decode Optional param for whether to decode new value.
  * @return {!goog.Uri} Reference to this URI object.
  */
-goog.Uri.prototype.setDomain = function(newDomain, opt_decode) {
-  this.domain_ = opt_decode ? goog.Uri.decodeOrEmpty_(newDomain, true) :
+goog.Uri.prototype.setDomain = function(newDomain, decode) {
+  this.domain_ = decode ? goog.Uri.decodeOrEmpty_(newDomain, true) :
       newDomain;
   return this;
 };
@@ -443,11 +443,11 @@ goog.Uri.prototype.getPath = function() {
 /**
  * Sets the path.
  * @param {string} newPath New path value.
- * @param {boolean=} opt_decode Optional param for whether to decode new value.
+ * @param {boolean=} decode Optional param for whether to decode new value.
  * @return {!goog.Uri} Reference to this URI object.
  */
-goog.Uri.prototype.setPath = function(newPath, opt_decode) {
-  this.path_ = opt_decode ? goog.Uri.decodeOrEmpty_(newPath, true) : newPath;
+goog.Uri.prototype.setPath = function(newPath, decode) {
+  this.path_ = decode ? goog.Uri.decodeOrEmpty_(newPath, true) : newPath;
   return this;
 };
 
@@ -471,17 +471,17 @@ goog.Uri.prototype.hasQuery = function() {
 /**
  * Sets the query data.
  * @param {goog.Uri.QueryData|string|undefined} queryData QueryData object.
- * @param {boolean=} opt_decode Optional param for whether to decode new value.
+ * @param {boolean=} decode Optional param for whether to decode new value.
  *     Applies only if queryData is a string.
  * @return {!goog.Uri} Reference to this URI object.
  */
-goog.Uri.prototype.setQueryData = function(queryData, opt_decode) {
+goog.Uri.prototype.setQueryData = function(queryData, decode) {
   if (queryData instanceof goog.Uri.QueryData) {
     this.queryData_ = queryData;
   } else {
-    if (!opt_decode) {
+    if (!decode) {
       // QueryData accepts encoded query string, so encode it if
-      // opt_decode flag is not true.
+      // decode flag is not true.
       queryData = goog.Uri.encodeSpecialChars_(queryData,
                                                goog.Uri.reDisallowedInQuery_);
     }
@@ -528,11 +528,11 @@ goog.Uri.prototype.getFragment = function() {
 /**
  * Sets the URI fragment.
  * @param {string} newFragment New fragment value.
- * @param {boolean=} opt_decode Optional param for whether to decode new value.
+ * @param {boolean=} decode Optional param for whether to decode new value.
  * @return {!goog.Uri} Reference to this URI object.
  */
-goog.Uri.prototype.setFragment = function(newFragment, opt_decode) {
-  this.fragment_ = opt_decode ? goog.Uri.decodeOrEmpty_(newFragment) :
+goog.Uri.prototype.setFragment = function(newFragment, decode) {
+  this.fragment_ = decode ? goog.Uri.decodeOrEmpty_(newFragment) :
                    newFragment;
   return this;
 };
@@ -601,18 +601,18 @@ goog.Uri.removeDotSegments = function(path) {
 /**
  * Decodes a value or returns the empty string if it isn't defined or empty.
  * @param {string|undefined} val Value to decode.
- * @param {boolean=} opt_preserveReserved If true, restricted characters will
+ * @param {boolean=} preserveReserved If true, restricted characters will
  *     not be decoded.
  * @return {string} Decoded value.
  * @private
  */
-goog.Uri.decodeOrEmpty_ = function(val, opt_preserveReserved) {
+goog.Uri.decodeOrEmpty_ = function(val, preserveReserved) {
   // Don't use UrlDecode() here because val is not a query parameter.
   if (!val) {
     return '';
   }
 
-  return opt_preserveReserved ? decodeURI(val) : decodeURIComponent(val);
+  return preserveReserved ? decodeURI(val) : decodeURIComponent(val);
 };
 
 
@@ -623,17 +623,17 @@ goog.Uri.decodeOrEmpty_ = function(val, opt_preserveReserved) {
  *
  * @param {*} unescapedPart The string to encode.
  * @param {RegExp} extra A character set of characters in [\01-\177].
- * @param {boolean=} opt_removeDoubleEncoding If true, remove double percent
+ * @param {boolean=} removeDoubleEncoding If true, remove double percent
  *     encoding.
  * @return {?string} null iff unescapedPart == null.
  * @private
  */
 goog.Uri.encodeSpecialChars_ = function(unescapedPart, extra,
-    opt_removeDoubleEncoding) {
+    removeDoubleEncoding) {
   if (goog.isString(unescapedPart)) {
     var encoded = encodeURI(unescapedPart).
         replace(extra, goog.Uri.encodeChar_);
-    if (opt_removeDoubleEncoding) {
+    if (removeDoubleEncoding) {
       // encodeURI double-escapes %XX sequences used to represent restricted
       // characters in some URI components, remove the double escaping here.
       encoded = goog.Uri.removeDoubleEncoding_(encoded);
@@ -716,21 +716,21 @@ goog.Uri.reDisallowedInFragment_ = /#/g;
  *
  * Has the same interface as the collections in goog.structs.
  *
- * @param {?string=} opt_query Optional encoded query string to parse into
+ * @param {?string=} query Optional encoded query string to parse into
  *     the object.
- * @param {goog.Uri=} opt_uri Optional uri object that should have its
+ * @param {goog.Uri=} uri Optional uri object that should have its
  *     cache invalidated when this object updates. Deprecated -- this
  *     is no longer required.
  * @constructor
  * @final
  */
-goog.Uri.QueryData = function(opt_query, opt_uri) {
+goog.Uri.QueryData = function(query, uri) {
   /**
    * Encoded query string, or null if it requires computing from the key map.
    * @type {?string}
    * @private
    */
-  this.encodedQuery_ = opt_query || null;
+  this.encodedQuery_ = query || null;
 };
 
 

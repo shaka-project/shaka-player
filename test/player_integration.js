@@ -22,7 +22,7 @@ describe('Player', function() {
   /** @type {!jasmine.Spy} */
   let onErrorSpy;
 
-  /** @type {shakaExtern.SupportType} */
+  /** @type {shaka.extern.SupportType} */
   let support;
   /** @type {!HTMLVideoElement} */
   let video;
@@ -81,16 +81,16 @@ describe('Player', function() {
     eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
   });
 
-  afterEach(function(done) {
-    Promise.all([
+  afterEach(async () => {
+    await Promise.all([
       eventManager.destroy(),
-      player.destroy()
-    ]).then(function() {
-      // Work-around: allow the Tizen media pipeline to cool down.
-      // Without this, Tizen's pipeline seems to hang in subsequent tests.
-      // TODO: file a bug on Tizen
-      return Util.delay(0.1);
-    }).catch(fail).then(done);
+      player.destroy(),
+    ]);
+
+    // Work-around: allow the Tizen media pipeline to cool down.
+    // Without this, Tizen's pipeline seems to hang in subsequent tests.
+    // TODO: file a bug on Tizen
+    await Util.delay(0.1);
   });
 
   afterAll(function() {
@@ -179,45 +179,44 @@ describe('Player', function() {
   });
 
   describe('getStats', function() {
-    it('gives stats about current stream', function(done) {
+    it('gives stats about current stream', async () => {
       // This is tested more in player_unit.js.  This is here to test the public
       // API and to check for renaming.
-      player.load('test:sintel_compiled').then(function() {
-        video.play();
-        return waitUntilPlayheadReaches(video, 1, 10);
-      }).then(function() {
-        let stats = player.getStats();
-        let expected = {
-          width: jasmine.any(Number),
-          height: jasmine.any(Number),
-          streamBandwidth: jasmine.any(Number),
+      await player.load('test:sintel_compiled');
+      video.play();
+      await waitUntilPlayheadReaches(video, 1, 10);
 
-          decodedFrames: jasmine.any(Number),
-          droppedFrames: jasmine.any(Number),
-          estimatedBandwidth: jasmine.any(Number),
+      let stats = player.getStats();
+      let expected = {
+        width: jasmine.any(Number),
+        height: jasmine.any(Number),
+        streamBandwidth: jasmine.any(Number),
 
-          loadLatency: jasmine.any(Number),
-          playTime: jasmine.any(Number),
-          bufferingTime: jasmine.any(Number),
+        decodedFrames: jasmine.any(Number),
+        droppedFrames: jasmine.any(Number),
+        estimatedBandwidth: jasmine.any(Number),
 
-          // We should have loaded the first Period by now, so we should have a
-          // history.
-          switchHistory: jasmine.arrayContaining([{
-            timestamp: jasmine.any(Number),
-            id: jasmine.any(Number),
-            type: 'variant',
-            fromAdaptation: true,
-            bandwidth: 0
-          }]),
+        loadLatency: jasmine.any(Number),
+        playTime: jasmine.any(Number),
+        bufferingTime: jasmine.any(Number),
 
-          stateHistory: jasmine.arrayContaining([{
-            state: 'playing',
-            timestamp: jasmine.any(Number),
-            duration: jasmine.any(Number)
-          }])
-        };
-        expect(stats).toEqual(expected);
-      }).catch(fail).then(done);
+        // We should have loaded the first Period by now, so we should have a
+        // history.
+        switchHistory: jasmine.arrayContaining([{
+          timestamp: jasmine.any(Number),
+          id: jasmine.any(Number),
+          type: 'variant',
+          fromAdaptation: true,
+          bandwidth: 0,
+        }]),
+
+        stateHistory: jasmine.arrayContaining([{
+          state: 'playing',
+          timestamp: jasmine.any(Number),
+          duration: jasmine.any(Number),
+        }]),
+      };
+      expect(stats).toEqual(expected);
     });
   });
 
@@ -225,80 +224,77 @@ describe('Player', function() {
     // Using mode='disabled' on TextTrack causes cues to go null, which leads
     // to a crash in TextEngine.  This validates that we do not trigger this
     // behavior when changing visibility of text.
-    it('does not cause cues to be null', function(done) {
-      player.load('test:sintel_compiled').then(function() {
-        video.play();
-        return waitUntilPlayheadReaches(video, 1, 10);
-      }).then(function() {
-        // This TextTrack was created as part of load() when we set up the
-        // TextDisplayer.
-        let textTrack = video.textTracks[0];
-        expect(textTrack).not.toBe(null);
+    it('does not cause cues to be null', async () => {
+      await player.load('test:sintel_compiled');
+      video.play();
+      await waitUntilPlayheadReaches(video, 1, 10);
 
-        if (textTrack) {
-          // This should not be null initially.
-          expect(textTrack.cues).not.toBe(null);
+      // This TextTrack was created as part of load() when we set up the
+      // TextDisplayer.
+      let textTrack = video.textTracks[0];
+      expect(textTrack).not.toBe(null);
 
-          player.setTextTrackVisibility(true);
-          // This should definitely not be null when visible.
-          expect(textTrack.cues).not.toBe(null);
+      if (textTrack) {
+        // This should not be null initially.
+        expect(textTrack.cues).not.toBe(null);
 
-          player.setTextTrackVisibility(false);
-          // This should not transition to null when invisible.
-          expect(textTrack.cues).not.toBe(null);
-        }
-      }).catch(fail).then(done);
+        player.setTextTrackVisibility(true);
+        // This should definitely not be null when visible.
+        expect(textTrack.cues).not.toBe(null);
+
+        player.setTextTrackVisibility(false);
+        // This should not transition to null when invisible.
+        expect(textTrack.cues).not.toBe(null);
+      }
     });
   });
 
   describe('plays', function() {
-    it('with external text tracks', function(done) {
-      player.load('test:sintel_no_text_compiled').then(function() {
-        // For some reason, using path-absolute URLs (i.e. without the hostname)
-        // like this doesn't work on Safari.  So manually resolve the URL.
-        let locationUri = new goog.Uri(location.href);
-        let partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
-        let absoluteUri = locationUri.resolve(partialUri);
-        player.addTextTrack(absoluteUri.toString(), 'en', 'subtitles',
-                            'text/vtt');
+    it('with external text tracks', async () => {
+      await player.load('test:sintel_no_text_compiled');
+      // For some reason, using path-absolute URLs (i.e. without the hostname)
+      // like this doesn't work on Safari.  So manually resolve the URL.
+      let locationUri = new goog.Uri(location.href);
+      let partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
+      let absoluteUri = locationUri.resolve(partialUri);
+      player.addTextTrack(absoluteUri.toString(), 'en', 'subtitles',
+                          'text/vtt');
 
-        video.play();
-        return Util.delay(5);
-      }).then(function() {
-        let textTracks = player.getTextTracks();
-        expect(textTracks).toBeTruthy();
-        expect(textTracks.length).toBe(1);
+      video.play();
+      await Util.delay(5);
 
-        expect(textTracks[0].active).toBe(true);
-        expect(textTracks[0].language).toEqual('en');
-      }).catch(fail).then(done);
+      let textTracks = player.getTextTracks();
+      expect(textTracks).toBeTruthy();
+      expect(textTracks.length).toBe(1);
+
+      expect(textTracks[0].active).toBe(true);
+      expect(textTracks[0].language).toEqual('en');
     });
 
-    it('while changing languages with short Periods', function(done) {
+    it('while changing languages with short Periods', async () => {
       // See: https://github.com/google/shaka-player/issues/797
       player.configure({preferredAudioLanguage: 'en'});
-      player.load('test:sintel_short_periods_compiled').then(function() {
-        video.play();
-        return waitUntilPlayheadReaches(video, 8, 30);
-      }).then(function() {
-        // The Period changes at 10 seconds.  Assert that we are in the previous
-        // Period and have buffered into the next one.
-        expect(video.currentTime).toBeLessThan(9);
-        // The two periods might not be in a single contiguous buffer, so don't
-        // check end(0).  Gap-jumping will deal with any discontinuities.
-        let bufferEnd = video.buffered.end(video.buffered.length - 1);
-        expect(bufferEnd).toBeGreaterThan(11);
+      await player.load('test:sintel_short_periods_compiled');
+      video.play();
+      await waitUntilPlayheadReaches(video, 8, 30);
 
-        // Change to a different language; this should clear the buffers and
-        // cause a Period transition again.
-        expect(getActiveLanguage()).toBe('en');
-        player.selectAudioLanguage('es');
-        return waitUntilPlayheadReaches(video, 21, 30);
-      }).then(function() {
-        // Should have gotten past the next Period transition and still be
-        // playing the new language.
-        expect(getActiveLanguage()).toBe('es');
-      }).catch(fail).then(done);
+      // The Period changes at 10 seconds.  Assert that we are in the previous
+      // Period and have buffered into the next one.
+      expect(video.currentTime).toBeLessThan(9);
+      // The two periods might not be in a single contiguous buffer, so don't
+      // check end(0).  Gap-jumping will deal with any discontinuities.
+      let bufferEnd = video.buffered.end(video.buffered.length - 1);
+      expect(bufferEnd).toBeGreaterThan(11);
+
+      // Change to a different language; this should clear the buffers and
+      // cause a Period transition again.
+      expect(getActiveLanguage()).toBe('en');
+      player.selectAudioLanguage('es');
+      await waitUntilPlayheadReaches(video, 21, 30);
+
+      // Should have gotten past the next Period transition and still be
+      // playing the new language.
+      expect(getActiveLanguage()).toBe('es');
     });
 
     shakaAssets.testAssets.forEach(function(asset) {
@@ -307,7 +303,7 @@ describe('Player', function() {
       let testName =
           asset.source + ' / ' + asset.name + ' : ' + asset.manifestUri;
 
-      let wit = asset.focus ? fit : external_it;
+      let wit = asset.focus ? fit : externalIt;
       wit(testName, function(done) {
         if (asset.drm.length && !asset.drm.some(
             function(keySystem) { return support.drm[keySystem]; })) {
@@ -331,7 +327,7 @@ describe('Player', function() {
         let config = {abr: {}, drm: {}, manifest: {dash: {}}};
         config.abr.enabled = false;
         config.manifest.dash.clockSyncUri =
-            '//shaka-player-demo.appspot.com/time.txt';
+            'https://shaka-player-demo.appspot.com/time.txt';
         if (asset.licenseServers) {
           config.drm.servers = asset.licenseServers;
         }
@@ -434,12 +430,12 @@ describe('Player', function() {
       });
     }
 
-    it('unload prevents further manifest load retries', function(done) {
-      testTemplate(function() { return player.unload(); }).then(done);
+    it('unload prevents further manifest load retries', async () => {
+      await testTemplate(() => player.unload());
     });
 
-    it('destroy prevents further manifest load retries', function(done) {
-      testTemplate(function() { return player.destroy(); }).then(done);
+    it('destroy prevents further manifest load retries', async () => {
+      await testTemplate(() => player.destroy());
     });
   });
 
@@ -452,49 +448,45 @@ describe('Player', function() {
         append: jasmine.createSpy('append'),
         remove: jasmine.createSpy('remove'),
         isTextVisible: jasmine.createSpy('isTextVisible'),
-        setTextVisibility: jasmine.createSpy('setTextVisibility')
+        setTextVisibility: jasmine.createSpy('setTextVisibility'),
       };
 
       textDisplayer.destroy.and.returnValue(Promise.resolve());
       textDisplayer.isTextVisible.and.returnValue(true);
 
       player.configure({
-        textDisplayFactory: function() { return textDisplayer; }
+        textDisplayFactory: function() { return textDisplayer; },
       });
 
       // Make sure the configuration was taken.
-      let configuredFactory = player.getConfiguration().textDisplayFactory;
-      let configuredTextDisplayer = new configuredFactory();
+      const ConfiguredFactory = player.getConfiguration().textDisplayFactory;
+      const configuredTextDisplayer = new ConfiguredFactory();
       expect(configuredTextDisplayer).toBe(textDisplayer);
     });
 
     // Regression test for https://github.com/google/shaka-player/issues/1187
-    it('does not throw on destroy', function(done) {
-      player.load('test:sintel_compiled').then(function() {
-        video.play();
-        return waitUntilPlayheadReaches(video, 1, 10);
-      }).then(function() {
-        return player.unload();
-      }).then(function() {
-        // Before we fixed #1187, the call to destroy() on textDisplayer was
-        // renamed in the compiled version and could not be called.
-        expect(textDisplayer.destroy).toHaveBeenCalled();
-      }).catch(fail).then(done);
+    it('does not throw on destroy', async () => {
+      await player.load('test:sintel_compiled');
+      video.play();
+      await waitUntilPlayheadReaches(video, 1, 10);
+      await player.unload();
+      // Before we fixed #1187, the call to destroy() on textDisplayer was
+      // renamed in the compiled version and could not be called.
+      expect(textDisplayer.destroy).toHaveBeenCalled();
     });
   });
 
   describe('TextAndRoles', function() {
     // Regression Test. Makes sure that the language and role fields have been
     // properly exported from the player.
-    it('exports language and roles fields', function(done) {
-      player.load('test:sintel_compiled').then(() => {
-        let languagesAndRoles = player.getTextLanguagesAndRoles();
-        expect(languagesAndRoles.length).toBeTruthy();
-        languagesAndRoles.forEach((languageAndRole) => {
-          expect(languageAndRole.language).not.toBeUndefined();
-          expect(languageAndRole.role).not.toBeUndefined();
-        });
-      }).catch(fail).then(done);
+    it('exports language and roles fields', async () => {
+      await player.load('test:sintel_compiled');
+      let languagesAndRoles = player.getTextLanguagesAndRoles();
+      expect(languagesAndRoles.length).toBeTruthy();
+      languagesAndRoles.forEach((languageAndRole) => {
+        expect(languageAndRole.language).not.toBeUndefined();
+        expect(languageAndRole.role).not.toBeUndefined();
+      });
     });
   });
 
@@ -621,7 +613,7 @@ describe('Player', function() {
   /**
    * @param {!Object.<string, string>} headers
    * @param {shaka.net.NetworkingEngine.RequestType} requestType
-   * @param {shakaExtern.Request} request
+   * @param {shaka.extern.Request} request
    */
   function addLicenseRequestHeaders(headers, requestType, request) {
     const RequestType = compiledShaka.net.NetworkingEngine.RequestType;

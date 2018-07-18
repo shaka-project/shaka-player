@@ -45,7 +45,7 @@ describe('Mp4VttParser', function() {
       shaka.test.Util.fetch(vttSegmentMultiPayloadUri),
       shaka.test.Util.fetch(vttSegSettingsUri),
       shaka.test.Util.fetch(vttSegNoDurationUri),
-      shaka.test.Util.fetch(audioInitSegmentUri)
+      shaka.test.Util.fetch(audioInitSegmentUri),
     ]).then(function(responses) {
       vttInitSegment = new Uint8Array(responses[0]);
       vttSegment = new Uint8Array(responses[1]);
@@ -65,14 +65,14 @@ describe('Mp4VttParser', function() {
       {
         start: 111.8,
         end: 115.8,
-        payload: 'It has shed much innocent blood.\n'
+        payload: 'It has shed much innocent blood.\n',
       },
       {
         start: 118,
         end: 120,
         payload:
-            'You\'re a fool for traveling alone,\nso completely unprepared.\n'
-      }
+            'You\'re a fool for traveling alone,\nso completely unprepared.\n',
+      },
     ];
 
     let parser = new shaka.text.Mp4VttParser();
@@ -87,20 +87,20 @@ describe('Mp4VttParser', function() {
       {
         start: 110,
         end: 113,
-        payload: 'Hello'
+        payload: 'Hello',
       },
       // This cue is part of the same presentation as the previous one, so it
       // shares the same start time and duration.
       {
         start: 110,
         end: 113,
-        payload: 'and'
+        payload: 'and',
       },
       {
         start: 113,
         end: 116.276,
-        payload: 'goodbye'
-      }
+        payload: 'goodbye',
+      },
     ];
 
     let parser = new shaka.text.Mp4VttParser();
@@ -119,7 +119,7 @@ describe('Mp4VttParser', function() {
         payload: 'It has shed much innocent blood.\n',
         align: 'right',
         size: 50,
-        position: 10
+        position: 10,
       },
       {
         start: 118,
@@ -127,8 +127,8 @@ describe('Mp4VttParser', function() {
         payload:
             'You\'re a fool for traveling alone,\nso completely unprepared.\n',
         writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT,
-        line: 1
-      }
+        line: 1,
+      },
     ];
 
     let parser = new shaka.text.Mp4VttParser();
@@ -150,7 +150,7 @@ describe('Mp4VttParser', function() {
       {start: 16, end: 17, payload: 'cue 16'},
       {start: 17, end: 18, payload: 'cue 17'},
       {start: 18, end: 19, payload: 'cue 18'},
-      {start: 19, end: 20, payload: 'cue 19'}
+      {start: 19, end: 20, payload: 'cue 19'},
     ];
 
     let parser = new shaka.text.Mp4VttParser();
@@ -165,14 +165,14 @@ describe('Mp4VttParser', function() {
       {
         start: 121.8,
         end: 125.8,
-        payload: 'It has shed much innocent blood.\n'
+        payload: 'It has shed much innocent blood.\n',
       },
       {
         start: 128,
         end: 130,
         payload:
-            'You\'re a fool for traveling alone,\nso completely unprepared.\n'
-      }
+            'You\'re a fool for traveling alone,\nso completely unprepared.\n',
+      },
     ];
 
     let parser = new shaka.text.Mp4VttParser();

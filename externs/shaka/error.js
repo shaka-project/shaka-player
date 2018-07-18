@@ -16,43 +16,49 @@
  */
 
 
-/** @externs */
-
+/**
+ * @externs
+ */
 
 
 /**
  * @interface
  * @exportDoc
  */
-shakaExtern.Error = function() {};
+shaka.extern.Error = function() {};
 
 
 /**
  * @type {shaka.util.Error.Severity}
+ * @exportDoc
  */
-shakaExtern.Error.prototype.severity;
+shaka.extern.Error.prototype.severity;
 
 
 /**
  * @const {shaka.util.Error.Category}
+ * @exportDoc
  */
-shakaExtern.Error.prototype.category;
+shaka.extern.Error.prototype.category;
 
 
 /**
  * @const {shaka.util.Error.Code}
+ * @exportDoc
  */
-shakaExtern.Error.prototype.code;
+shaka.extern.Error.prototype.code;
 
 
 /**
  * @const {!Array.<*>}
+ * @exportDoc
  */
-shakaExtern.Error.prototype.data;
+shaka.extern.Error.prototype.data;
 
 
 /**
  * @type {boolean}
+ * @exportDoc
  */
-shakaExtern.Error.prototype.handled;
+shaka.extern.Error.prototype.handled;
 

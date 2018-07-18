@@ -37,9 +37,9 @@ describe('DrmEngine', function() {
   let fakeNetEngine;
   /** @type {!shaka.media.DrmEngine} */
   let drmEngine;
-  /** @type {shakaExtern.Manifest} */
+  /** @type {shaka.extern.Manifest} */
   let manifest;
-  /** @type {shakaExtern.DrmConfiguration} */
+  /** @type {shaka.extern.DrmConfiguration} */
   let config;
 
   let mockMediaKeySystemAccess;
@@ -120,7 +120,7 @@ describe('DrmEngine', function() {
       onError: shaka.test.Util.spyFunc(onErrorSpy),
       onKeyStatus: shaka.test.Util.spyFunc(onKeyStatusSpy),
       onExpirationUpdated: shaka.test.Util.spyFunc(onExpirationSpy),
-      onEvent: shaka.test.Util.spyFunc(onEventSpy)
+      onEvent: shaka.test.Util.spyFunc(onEventSpy),
     };
 
     drmEngine = new shaka.media.DrmEngine(playerInterface);
@@ -129,16 +129,16 @@ describe('DrmEngine', function() {
       delayLicenseRequestUntilPlayed: false,
       servers: {
         'drm.abc': 'http://abc.drm/license',
-        'drm.def': 'http://def.drm/license'
+        'drm.def': 'http://def.drm/license',
       },
       advanced: {},
-      clearKeys: {}
+      clearKeys: {},
     };
     drmEngine.configure(config);
   });
 
-  afterEach(function(done) {
-    drmEngine.destroy().then(done);
+  afterEach(async () => {
+    await drmEngine.destroy();
   });
 
   afterAll(function() {
@@ -148,38 +148,40 @@ describe('DrmEngine', function() {
   });
 
   describe('init', function() {
-    it('stops on first available key system', function(done) {
+    it('stops on first available key system', async () => {
       // Accept both drm.abc and drm.def.  Only one can be chosen.
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, ['drm.abc', 'drm.def']));
 
-      drmEngine.init(manifest, /* offline */ false).then(function() {
-        expect(drmEngine.initialized()).toBe(true);
-        expect(drmEngine.keySystem()).toBe('drm.abc');
+      await drmEngine.init(manifest, /* offline */ false);
+      expect(drmEngine.initialized()).toBe(true);
+      expect(drmEngine.keySystem()).toBe('drm.abc');
 
-        // Only one call, since the first key system worked.
-        expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
-        expect(requestMediaKeySystemAccessSpy)
-            .toHaveBeenCalledWith('drm.abc', jasmine.any(Object));
-      }).catch(fail).then(done);
+      // Only one call, since the first key system worked.
+      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
+      expect(requestMediaKeySystemAccessSpy)
+          .toHaveBeenCalledWith('drm.abc', jasmine.any(Object));
     });
 
-    it('tries systems in the order they appear in', function(done) {
+    it('tries systems in the order they appear in', async () => {
       // Fail both key systems.
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, []));
 
-      drmEngine.init(manifest, /* offline */ false).then(fail, function() {
+      try {
+        await drmEngine.init(manifest, /* offline */ false);
+        fail();
+      } catch (error) {
         expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
         // These should be in the same order as the key systems appear in the
         // manifest.
         let calls = requestMediaKeySystemAccessSpy.calls;
         expect(calls.argsFor(0)[0]).toBe('drm.abc');
         expect(calls.argsFor(1)[0]).toBe('drm.def');
-      }).then(done);
+      }
     });
 
-    it('tries systems with configured license servers first', function(done) {
+    it('tries systems with configured license servers first', async () => {
       // Fail both key systems.
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, []));
@@ -190,58 +192,62 @@ describe('DrmEngine', function() {
       // Ignore error logs, which we expect to occur due to the missing server.
       logErrorSpy.and.stub();
 
-      drmEngine.init(manifest, /* offline */ false).then(fail, function() {
+      try {
+        await drmEngine.init(manifest, /* offline */ false);
+        fail();
+      } catch (error) {
         expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
         // Although drm.def appears second in the manifest, it is queried first
         // because it has a server configured.
         let calls = requestMediaKeySystemAccessSpy.calls;
         expect(calls.argsFor(0)[0]).toBe('drm.def');
         expect(calls.argsFor(1)[0]).toBe('drm.abc');
-      }).then(done);
+      }
     });
 
-    it('detects content type capabilities of key system', function(done) {
+    it('detects content type capabilities of key system', async () => {
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, ['drm.abc']));
 
-      drmEngine.init(manifest, /* offline */ false).then(function() {
-        expect(drmEngine.initialized()).toBe(true);
-        let supportedTypes = drmEngine.getSupportedTypes();
-        // This is conditional because Edge 14 has a bug that prevents us from
-        // getting the types at all.  TODO: Remove the condition once Edge has
-        // released a fix for https://goo.gl/qMeV7v
-        if (supportedTypes) {
-          expect(supportedTypes).toEqual([
-            'audio/webm', 'video/mp4; codecs="fake"'
-          ]);
-        }
-      }).catch(fail).then(done);
+      await drmEngine.init(manifest, /* offline */ false);
+      expect(drmEngine.initialized()).toBe(true);
+      let supportedTypes = drmEngine.getSupportedTypes();
+      // This is conditional because Edge 14 has a bug that prevents us from
+      // getting the types at all.  TODO: Remove the condition once Edge has
+      // released a fix for https://bit.ly/2IcEgv0
+      if (supportedTypes) {
+        expect(supportedTypes).toEqual([
+          'audio/webm', 'video/mp4; codecs="fake"',
+        ]);
+      }
     });
 
-    it('tries the second key system if the first fails', function(done) {
+    it('tries the second key system if the first fails', async () => {
       // Accept drm.def, but not drm.abc.
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, ['drm.def']));
 
-      drmEngine.init(manifest, /* offline */ false).then(function() {
-        expect(drmEngine.initialized()).toBe(true);
-        expect(drmEngine.keySystem()).toBe('drm.def');
+      await drmEngine.init(manifest, /* offline */ false);
+      expect(drmEngine.initialized()).toBe(true);
+      expect(drmEngine.keySystem()).toBe('drm.def');
 
-        // Both key systems were tried, since the first one failed.
-        expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
-        expect(requestMediaKeySystemAccessSpy)
-            .toHaveBeenCalledWith('drm.abc', jasmine.any(Object));
-        expect(requestMediaKeySystemAccessSpy)
-            .toHaveBeenCalledWith('drm.def', jasmine.any(Object));
-      }).catch(fail).then(done);
+      // Both key systems were tried, since the first one failed.
+      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
+      expect(requestMediaKeySystemAccessSpy)
+          .toHaveBeenCalledWith('drm.abc', jasmine.any(Object));
+      expect(requestMediaKeySystemAccessSpy)
+          .toHaveBeenCalledWith('drm.def', jasmine.any(Object));
     });
 
-    it('fails to initialize if no key systems are available', function(done) {
+    it('fails to initialize if no key systems are available', async () => {
       // Accept no key systems.
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, []));
 
-      drmEngine.init(manifest, false).then(fail).catch(function(error) {
+      try {
+        await drmEngine.init(manifest, false);
+        fail();
+      } catch (error) {
         expect(drmEngine.initialized()).toBe(false);
 
         // Both key systems were tried, since the first one failed.
@@ -254,16 +260,41 @@ describe('DrmEngine', function() {
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.DRM,
             shaka.util.Error.Code.REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE));
-      }).then(done);
+      }
     });
 
-    it('fails to initialize if no key systems are recognized', function(done) {
+    it('silences errors for unencrypted assets', async () => {
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addVariant(0)
+            .addVideo(1).mime('video/foo', 'vbar')
+            .addAudio(2).mime('audio/foo', 'abar')
+        .build();
+
+      // Accept no key systems.
+      requestMediaKeySystemAccessSpy.and.callFake(
+          fakeRequestMediaKeySystemAccess.bind(null, []));
+
+      await drmEngine.init(manifest, false);
+
+      // Both key systems were tried, since the first one failed.
+      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
+      expect(requestMediaKeySystemAccessSpy)
+          .toHaveBeenCalledWith('drm.abc', jasmine.any(Object));
+      expect(requestMediaKeySystemAccessSpy)
+          .toHaveBeenCalledWith('drm.def', jasmine.any(Object));
+    });
+
+    it('fails to initialize if no key systems are recognized', async () => {
       // Simulate the DASH parser inserting a blank placeholder when only
       // unrecognized custom schemes are found.
       manifest.periods[0].variants[0].drmInfos[0].keySystem = '';
       manifest.periods[0].variants[0].drmInfos[1].keySystem = '';
 
-      drmEngine.init(manifest, false).then(fail).catch(function(error) {
+      try {
+        await drmEngine.init(manifest, false);
+        fail();
+      } catch (error) {
         expect(drmEngine.initialized()).toBe(false);
 
         // No key systems were tried, since the dummy placeholder was detected.
@@ -273,14 +304,17 @@ describe('DrmEngine', function() {
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.DRM,
             shaka.util.Error.Code.NO_RECOGNIZED_KEY_SYSTEMS));
-      }).then(done);
+      }
     });
 
-    it('fails to initialize if the CDM cannot be created', function(done) {
+    it('fails to initialize if the CDM cannot be created', async () => {
       // The query succeeds, but we fail to create the CDM.
       mockMediaKeySystemAccess.createMediaKeys.and.throwError('whoops!');
 
-      drmEngine.init(manifest, false).then(fail).catch(function(error) {
+      try {
+        await drmEngine.init(manifest, false);
+        fail();
+      } catch (error) {
         expect(drmEngine.initialized()).toBe(false);
 
         expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
@@ -291,62 +325,68 @@ describe('DrmEngine', function() {
             shaka.util.Error.Category.DRM,
             shaka.util.Error.Code.FAILED_TO_CREATE_CDM,
             'whoops!'));
-      }).then(done);
+      }
     });
 
-    it('queries audio/video capabilities', function(done) {
+    it('queries audio/video capabilities', async () => {
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, []));
 
-      drmEngine.init(manifest, /* offline */ false).then(fail, function() {
+      try {
+        await drmEngine.init(manifest, /* offline */ false);
+        fail();
+      } catch (error) {
         expect(drmEngine.initialized()).toBe(false);
         expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
         expect(requestMediaKeySystemAccessSpy)
             .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
               // audioCapabilities not present.
               videoCapabilities: [jasmine.objectContaining({
-                contentType: 'video/foo; codecs="vbar"'
+                contentType: 'video/foo; codecs="vbar"',
               })],
               distinctiveIdentifier: 'optional',
               persistentState: 'optional',
-              sessionTypes: ['temporary']
+              sessionTypes: ['temporary'],
             })]);
         expect(requestMediaKeySystemAccessSpy)
             .toHaveBeenCalledWith('drm.def', [jasmine.objectContaining({
               audioCapabilities: [jasmine.objectContaining({
-                contentType: 'audio/foo; codecs="abar"'
+                contentType: 'audio/foo; codecs="abar"',
               })],
               // videoCapabilities not present.
               distinctiveIdentifier: 'optional',
               persistentState: 'optional',
-              sessionTypes: ['temporary']
+              sessionTypes: ['temporary'],
             })]);
-      }).then(done);
+      }
     });
 
-    it('asks for persistent state and license for offline', function(done) {
+    it('asks for persistent state and license for offline', async () => {
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, []));
 
-      drmEngine.init(manifest, /* offline */ true).then(fail, function() {
+      try {
+        await drmEngine.init(manifest, /* offline */ true);
+        fail();
+      } catch (error) {
         expect(drmEngine.initialized()).toBe(false);
         expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
         expect(requestMediaKeySystemAccessSpy)
             .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
               distinctiveIdentifier: 'optional',
               persistentState: 'required',
-              sessionTypes: ['persistent-license']
+              sessionTypes: ['persistent-license'],
             })]);
         expect(requestMediaKeySystemAccessSpy)
             .toHaveBeenCalledWith('drm.def', [jasmine.objectContaining({
               distinctiveIdentifier: 'optional',
               persistentState: 'required',
-              sessionTypes: ['persistent-license']
+              sessionTypes: ['persistent-license'],
             })]);
-      }).then(done);
+      }
     });
 
-    it('honors distinctive identifier and persistent state', function(done) {
+    it('honors distinctive identifier and persistent state', async () => {
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, []));
       manifest.periods[0].variants[0].drmInfos[0]
@@ -354,25 +394,28 @@ describe('DrmEngine', function() {
       manifest.periods[0].variants[0].drmInfos[1]
           .persistentStateRequired = true;
 
-      drmEngine.init(manifest, /* offline */ false).then(fail, function() {
+      try {
+        await drmEngine.init(manifest, /* offline */ false);
+        fail();
+      } catch (error) {
         expect(drmEngine.initialized()).toBe(false);
         expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
         expect(requestMediaKeySystemAccessSpy)
             .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
               distinctiveIdentifier: 'required',
               persistentState: 'optional',
-              sessionTypes: ['temporary']
+              sessionTypes: ['temporary'],
             })]);
         expect(requestMediaKeySystemAccessSpy)
             .toHaveBeenCalledWith('drm.def', [jasmine.objectContaining({
               distinctiveIdentifier: 'optional',
               persistentState: 'required',
-              sessionTypes: ['temporary']
+              sessionTypes: ['temporary'],
             })]);
-      }).then(done);
+      }
     });
 
-    it('makes no queries for clear content if no key config', function(done) {
+    it('makes no queries for clear content if no key config', async () => {
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, []));
       manifest.periods[0].variants[0].drmInfos = [];
@@ -380,30 +423,28 @@ describe('DrmEngine', function() {
       config.advanced = {};
 
       drmEngine.configure(config);
-      drmEngine.init(manifest, /* offline */ false).then(function() {
-        expect(drmEngine.initialized()).toBe(true);
-        expect(drmEngine.keySystem()).toBe('');
-        expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(0);
-      }).catch(fail).then(done);
+      await drmEngine.init(manifest, /* offline */ false);
+      expect(drmEngine.initialized()).toBe(true);
+      expect(drmEngine.keySystem()).toBe('');
+      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(0);
     });
 
-    it('makes queries for clear content if key is configured', function(done) {
+    it('makes queries for clear content if key is configured', async () => {
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, ['drm.abc']));
       manifest.periods[0].variants[0].drmInfos = [];
       config.servers = {
-        'drm.abc': 'http://abc.drm/license'
+        'drm.abc': 'http://abc.drm/license',
       };
 
       drmEngine.configure(config);
-      drmEngine.init(manifest, /* offline */ false).then(function() {
-        expect(drmEngine.initialized()).toBe(true);
-        expect(drmEngine.keySystem()).toBe('drm.abc');
-        expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
-      }).then(done);
+      await drmEngine.init(manifest, /* offline */ false);
+      expect(drmEngine.initialized()).toBe(true);
+      expect(drmEngine.keySystem()).toBe('drm.abc');
+      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
     });
 
-    it('uses advanced config to override DrmInfo fields', function(done) {
+    it('uses advanced config to override DrmInfo fields', async () => {
       // Leave only one drmInfo
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
@@ -421,28 +462,31 @@ describe('DrmEngine', function() {
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: null,
         distinctiveIdentifierRequired: true,
-        persistentStateRequired: true
+        persistentStateRequired: true,
       };
       drmEngine.configure(config);
 
-      drmEngine.init(manifest, /* offline */ false).then(fail, function() {
+      try {
+        await drmEngine.init(manifest, /* offline */ false);
+        fail();
+      } catch (error) {
         expect(drmEngine.initialized()).toBe(false);
         expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
         expect(requestMediaKeySystemAccessSpy)
             .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
               audioCapabilities: [jasmine.objectContaining({
-                robustness: 'good'
+                robustness: 'good',
               })],
               videoCapabilities: [jasmine.objectContaining({
-                robustness: 'really_really_ridiculously_good'
+                robustness: 'really_really_ridiculously_good',
               })],
               distinctiveIdentifier: 'required',
-              persistentState: 'required'
+              persistentState: 'required',
             })]);
-      }).then(done);
+      }
     });
 
-    it('does not use config if DrmInfo already filled out', function(done) {
+    it('does not use config if DrmInfo already filled out', async () => {
       // Leave only one drmInfo
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
@@ -470,40 +514,46 @@ describe('DrmEngine', function() {
         videoRobustness: 'so_bad_it_hurts',
         serverCertificate: null,
         distinctiveIdentifierRequired: false,
-        persistentStateRequired: false
+        persistentStateRequired: false,
       };
       drmEngine.configure(config);
 
-      drmEngine.init(manifest, /* offline */ false).then(fail, function() {
+      try {
+        await drmEngine.init(manifest, /* offline */ false);
+        fail();
+      } catch (error) {
         expect(drmEngine.initialized()).toBe(false);
         expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
         expect(requestMediaKeySystemAccessSpy)
             .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
               audioCapabilities: [jasmine.objectContaining({
-                robustness: 'good'
+                robustness: 'good',
               })],
               videoCapabilities: [jasmine.objectContaining({
-                robustness: 'really_really_ridiculously_good'
+                robustness: 'really_really_ridiculously_good',
               })],
               distinctiveIdentifier: 'required',
-              persistentState: 'required'
+              persistentState: 'required',
             })]);
-      }).then(done);
+      }
     });
 
-    it('fails if license server is not configured', function(done) {
+    it('fails if license server is not configured', async () => {
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, ['drm.abc']));
 
       config.servers = {};
       drmEngine.configure(config);
 
-      drmEngine.init(manifest, /* offline */ false).then(fail, function(error) {
+      try {
+        await drmEngine.init(manifest, /* offline */ false);
+        fail();
+      } catch (error) {
         shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.DRM,
             shaka.util.Error.Code.NO_LICENSE_SERVER_GIVEN));
-      }).then(done);
+      }
     });
   });  // describe('init')
 
@@ -519,35 +569,32 @@ describe('DrmEngine', function() {
         .build();
     });
 
-    it('does nothing for unencrypted content', function(done) {
+    it('does nothing for unencrypted content', async () => {
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, []));
       manifest.periods[0].variants[0].drmInfos = [];
       config.servers = {};
       config.advanced = {};
 
-      initAndAttach().then(function() {
-        expect(mockVideo.setMediaKeys).not.toHaveBeenCalled();
-      }).catch(fail).then(done);
+      await initAndAttach();
+      expect(mockVideo.setMediaKeys).not.toHaveBeenCalled();
     });
 
-    it('sets MediaKeys for encrypted content', function(done) {
-      initAndAttach().then(function() {
-        expect(mockVideo.setMediaKeys).toHaveBeenCalledWith(mockMediaKeys);
-      }).catch(fail).then(done);
+    it('sets MediaKeys for encrypted content', async () => {
+      await initAndAttach();
+      expect(mockVideo.setMediaKeys).toHaveBeenCalledWith(mockMediaKeys);
     });
 
-    it('sets server certificate if present in config', function(done) {
+    it('sets server certificate if present in config', async () => {
       let cert = new Uint8Array(1);
       config.advanced['drm.abc'] = createAdvancedConfig(cert);
       drmEngine.configure(config);
 
-      initAndAttach().then(function() {
-        expect(mockMediaKeys.setServerCertificate).toHaveBeenCalledWith(cert);
-      }).catch(fail).then(done);
+      await initAndAttach();
+      expect(mockMediaKeys.setServerCertificate).toHaveBeenCalledWith(cert);
     });
 
-    it('prefers server certificate from DrmInfo', function(done) {
+    it('prefers server certificate from DrmInfo', async () => {
       let cert1 = new Uint8Array(5);
       let cert2 = new Uint8Array(1);
       manifest.periods[0].variants[0].drmInfos[0].serverCertificate = cert1;
@@ -555,15 +602,13 @@ describe('DrmEngine', function() {
       config.advanced['drm.abc'] = createAdvancedConfig(cert2);
       drmEngine.configure(config);
 
-      initAndAttach().then(function() {
-        expect(mockMediaKeys.setServerCertificate).toHaveBeenCalledWith(cert1);
-      }).catch(fail).then(done);
+      await initAndAttach();
+      expect(mockMediaKeys.setServerCertificate).toHaveBeenCalledWith(cert1);
     });
 
-    it('does not set server certificate if absent', function(done) {
-      initAndAttach().then(function() {
-        expect(mockMediaKeys.setServerCertificate).not.toHaveBeenCalled();
-      }).catch(fail).then(done);
+    it('does not set server certificate if absent', async () => {
+      await initAndAttach();
+      expect(mockMediaKeys.setServerCertificate).not.toHaveBeenCalled();
     });
 
     it('creates sessions for init data overrides', function(done) {
@@ -574,7 +619,7 @@ describe('DrmEngine', function() {
       manifest.periods[0].variants[0].drmInfos[0].initData = [
         {initData: initData1, initDataType: 'cenc', keyId: null},
         {initData: initData2, initDataType: 'webm', keyId: null},
-        {initData: initData3, initDataType: 'cenc', keyId: null}
+        {initData: initData3, initDataType: 'cenc', keyId: null},
       ];
 
       initAndAttach().then(function() {
@@ -601,7 +646,7 @@ describe('DrmEngine', function() {
       manifest.periods[0].variants[0].drmInfos[0].initData = [
         {initData: initData1, initDataType: 'cenc', keyId: 'abc'},
         {initData: initData2, initDataType: 'cenc', keyId: 'def'},
-        {initData: initData3, initDataType: 'cenc', keyId: 'abc'}
+        {initData: initData3, initDataType: 'cenc', keyId: 'abc'},
       ];
 
       initAndAttach().then(function() {
@@ -611,7 +656,7 @@ describe('DrmEngine', function() {
       }).catch(fail).then(done);
     });
 
-    it('uses clearKeys config to override DrmInfo', function(done) {
+    it('uses clearKeys config to override DrmInfo', async () => {
       manifest.periods[0].variants[0].drmInfos[0].keySystem =
           'com.fake.NOT.clearkey';
 
@@ -621,7 +666,7 @@ describe('DrmEngine', function() {
       // Configure clear keys (map of hex key IDs to keys)
       config.clearKeys = {
         'deadbeefdeadbeefdeadbeefdeadbeef': '18675309186753091867530918675309',
-        '02030507011013017019023029031037': '03050701302303204201080425098033'
+        '02030507011013017019023029031037': '03050701302303204201080425098033',
       };
       drmEngine.configure(config);
 
@@ -631,286 +676,279 @@ describe('DrmEngine', function() {
         return session;
       });
 
-      initAndAttach().then(function() {
-        let Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
+      await initAndAttach();
+      let Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
 
-        expect(manifest.periods[0].variants[0].drmInfos.length).toBe(1);
-        expect(manifest.periods[0].variants[0].drmInfos[0].keySystem).
-            toBe('org.w3.clearkey');
+      expect(manifest.periods[0].variants[0].drmInfos.length).toBe(1);
+      expect(manifest.periods[0].variants[0].drmInfos[0].keySystem).
+          toBe('org.w3.clearkey');
 
-        expect(session.generateRequest).
-            toHaveBeenCalledWith('keyids', jasmine.any(ArrayBuffer));
+      expect(session.generateRequest).
+          toHaveBeenCalledWith('keyids', jasmine.any(ArrayBuffer));
 
-        let initData = JSON.parse(shaka.util.StringUtils.fromUTF8(
-            session.generateRequest.calls.argsFor(0)[1]));
-        let keyId1 = Uint8ArrayUtils.toHex(
-            Uint8ArrayUtils.fromBase64(initData.kids[0]));
-        let keyId2 = Uint8ArrayUtils.toHex(
-            Uint8ArrayUtils.fromBase64(initData.kids[1]));
-        expect(keyId1).toBe('deadbeefdeadbeefdeadbeefdeadbeef');
-        expect(keyId2).toBe('02030507011013017019023029031037');
-      }).catch(fail).then(done);
+      let initData = JSON.parse(shaka.util.StringUtils.fromUTF8(
+          session.generateRequest.calls.argsFor(0)[1]));
+      let keyId1 = Uint8ArrayUtils.toHex(
+          Uint8ArrayUtils.fromBase64(initData.kids[0]));
+      let keyId2 = Uint8ArrayUtils.toHex(
+          Uint8ArrayUtils.fromBase64(initData.kids[1]));
+      expect(keyId1).toBe('deadbeefdeadbeefdeadbeefdeadbeef');
+      expect(keyId2).toBe('02030507011013017019023029031037');
     });
 
-    it('fails with an error if setMediaKeys fails', function(done) {
+    it('fails with an error if setMediaKeys fails', async () => {
       // Fail setMediaKeys.
       mockVideo.setMediaKeys.and.returnValue(Promise.reject({
-        message: 'whoops!'
+        message: 'whoops!',
       }));
 
-      initAndAttach().then(fail).catch(function(error) {
+      try {
+        await initAndAttach();
+        fail();
+      } catch (error) {
         shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.DRM,
             shaka.util.Error.Code.FAILED_TO_ATTACH_TO_VIDEO,
             'whoops!'));
-      }).then(done);
+      }
     });
 
-    it('fails with an error if setServerCertificate fails', function(done) {
+    it('fails with an error if setServerCertificate fails', async () => {
       let cert = new Uint8Array(1);
       config.advanced['drm.abc'] = createAdvancedConfig(cert);
       drmEngine.configure(config);
 
       // Fail setServerCertificate.
       mockMediaKeys.setServerCertificate.and.returnValue(Promise.reject({
-        message: 'whoops!'
+        message: 'whoops!',
       }));
 
-      initAndAttach().then(fail).catch(function(error) {
+      try {
+        await initAndAttach();
+        fail();
+      } catch (error) {
         shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.DRM,
             shaka.util.Error.Code.INVALID_SERVER_CERTIFICATE,
             'whoops!'));
-      }).then(done);
+      }
     });
 
-    it('dispatches an error if generateRequest fails', function(done) {
+    it('dispatches an error if generateRequest fails', async () => {
       // Set up an init data override in the manifest to get an immediate call
       // to generateRequest:
       let initData1 = new Uint8Array(5);
       manifest.periods[0].variants[0].drmInfos[0].initData = [
-        {initData: initData1, initDataType: 'cenc', keyId: null}
+        {initData: initData1, initDataType: 'cenc', keyId: null},
       ];
 
       // Fail generateRequest.
       let session1 = createMockSession();
       session1.generateRequest.and.returnValue(Promise.reject({
-        message: 'whoops!'
+        message: 'whoops!',
       }));
       mockMediaKeys.createSession.and.returnValue(session1);
 
       onErrorSpy.and.stub();
-      initAndAttach().then(function() {
-        expect(onErrorSpy).toHaveBeenCalled();
-        let error = onErrorSpy.calls.argsFor(0)[0];
-        shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
-            shaka.util.Error.Severity.CRITICAL,
-            shaka.util.Error.Category.DRM,
-            shaka.util.Error.Code.FAILED_TO_GENERATE_LICENSE_REQUEST,
-            'whoops!'));
-      }).catch(fail).then(done);
+      await initAndAttach();
+      expect(onErrorSpy).toHaveBeenCalled();
+      let error = onErrorSpy.calls.argsFor(0)[0];
+      shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.DRM,
+          shaka.util.Error.Code.FAILED_TO_GENERATE_LICENSE_REQUEST,
+          'whoops!'));
     });
   });  // describe('attach')
 
   describe('events', function() {
     describe('encrypted', function() {
-      it('is listened for', function(done) {
-        initAndAttach().then(function() {
-          expect(mockVideo.addEventListener).toHaveBeenCalledWith(
-              'encrypted', jasmine.any(Function), false);
-        }).catch(fail).then(done);
+      it('is listened for', async () => {
+        await initAndAttach();
+        expect(mockVideo.addEventListener).toHaveBeenCalledWith(
+            'encrypted', jasmine.any(Function), false);
       });
 
-      it('triggers the creation of a session', function(done) {
-        initAndAttach().then(function() {
-          let initData1 = new Uint8Array(1);
-          let initData2 = new Uint8Array(2);
+      it('triggers the creation of a session', async () => {
+        await initAndAttach();
+        let initData1 = new Uint8Array(1);
+        let initData2 = new Uint8Array(2);
 
-          mockVideo.on['encrypted'](
-              {initDataType: 'webm', initData: initData1, keyId: null});
-          mockVideo.on['encrypted'](
-              {initDataType: 'cenc', initData: initData2, keyId: null});
+        mockVideo.on['encrypted'](
+            {initDataType: 'webm', initData: initData1, keyId: null});
+        mockVideo.on['encrypted'](
+            {initDataType: 'cenc', initData: initData2, keyId: null});
 
-          expect(mockMediaKeys.createSession.calls.count()).toBe(2);
-          expect(session1.generateRequest).
-              toHaveBeenCalledWith('webm', initData1.buffer);
-          expect(session2.generateRequest).
-              toHaveBeenCalledWith('cenc', initData2.buffer);
-        }).catch(fail).then(done);
+        expect(mockMediaKeys.createSession.calls.count()).toBe(2);
+        expect(session1.generateRequest).
+            toHaveBeenCalledWith('webm', initData1.buffer);
+        expect(session2.generateRequest).
+            toHaveBeenCalledWith('cenc', initData2.buffer);
       });
 
-      it('suppresses duplicate initDatas', function(done) {
-        initAndAttach().then(function() {
-          let initData1 = new Uint8Array(1);
-          let initData2 = new Uint8Array(1);  // identical to initData1
+      it('suppresses duplicate initDatas', async () => {
+        await initAndAttach();
+        let initData1 = new Uint8Array(1);
+        let initData2 = new Uint8Array(1);  // identical to initData1
 
-          mockVideo.on['encrypted'](
-              {initDataType: 'webm', initData: initData1, keyId: null});
-          mockVideo.on['encrypted'](
-              {initDataType: 'cenc', initData: initData2, keyId: null});
+        mockVideo.on['encrypted'](
+            {initDataType: 'webm', initData: initData1, keyId: null});
+        mockVideo.on['encrypted'](
+            {initDataType: 'cenc', initData: initData2, keyId: null});
 
-          expect(mockMediaKeys.createSession.calls.count()).toBe(1);
-          expect(session1.generateRequest).
-              toHaveBeenCalledWith('webm', initData1.buffer);
-        }).catch(fail).then(done);
+        expect(mockMediaKeys.createSession.calls.count()).toBe(1);
+        expect(session1.generateRequest).
+            toHaveBeenCalledWith('webm', initData1.buffer);
       });
 
-      it('is ignored when init data is in DrmInfo', function(done) {
+      it('is ignored when init data is in DrmInfo', async () => {
         // Set up an init data override in the manifest:
         manifest.periods[0].variants[0].drmInfos[0].initData = [
-          {initData: new Uint8Array(0), initDataType: 'cenc', keyId: null}
+          {initData: new Uint8Array(0), initDataType: 'cenc', keyId: null},
         ];
 
-        initAndAttach().then(function() {
-          // We already created a session for the init data override.
-          expect(mockMediaKeys.createSession.calls.count()).toBe(1);
-          // We aren't even listening for 'encrypted' events.
-          expect(mockVideo.on['encrypted']).toBe(undefined);
-        }).catch(fail).then(done);
+        await initAndAttach();
+        // We already created a session for the init data override.
+        expect(mockMediaKeys.createSession.calls.count()).toBe(1);
+        // We aren't even listening for 'encrypted' events.
+        expect(mockVideo.on['encrypted']).toBe(undefined);
       });
 
-      it('dispatches an error if createSession fails', function(done) {
+      it('dispatches an error if createSession fails', async () => {
         mockMediaKeys.createSession.and.throwError('whoops!');
         onErrorSpy.and.stub();
 
-        initAndAttach().then(function() {
-          let initData1 = new Uint8Array(1);
-          mockVideo.on['encrypted'](
-              {initDataType: 'webm', initData: initData1, keyId: null});
+        await initAndAttach();
+        let initData1 = new Uint8Array(1);
+        mockVideo.on['encrypted'](
+            {initDataType: 'webm', initData: initData1, keyId: null});
 
-          expect(onErrorSpy).toHaveBeenCalled();
-          let error = onErrorSpy.calls.argsFor(0)[0];
-          shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
-              shaka.util.Error.Severity.CRITICAL,
-              shaka.util.Error.Category.DRM,
-              shaka.util.Error.Code.FAILED_TO_CREATE_SESSION,
-              'whoops!'));
-        }).catch(fail).then(done);
+        expect(onErrorSpy).toHaveBeenCalled();
+        let error = onErrorSpy.calls.argsFor(0)[0];
+        shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
+            shaka.util.Error.Category.DRM,
+            shaka.util.Error.Code.FAILED_TO_CREATE_SESSION,
+            'whoops!'));
       });
 
-      it('dispatches an error if manifest says unencrypted', function(done) {
+      it('dispatches an error if manifest says unencrypted', async () => {
         manifest.periods[0].variants[0].drmInfos = [];
         config.servers = {};
         config.advanced = {};
 
         onErrorSpy.and.stub();
 
-        initAndAttach().then(function() {
-          let initData1 = new Uint8Array(1);
-          mockVideo.on['encrypted'](
-              {initDataType: 'webm', initData: initData1, keyId: null});
+        await initAndAttach();
+        let initData1 = new Uint8Array(1);
+        mockVideo.on['encrypted'](
+            {initDataType: 'webm', initData: initData1, keyId: null});
 
-          expect(onErrorSpy).toHaveBeenCalled();
-          let error = onErrorSpy.calls.argsFor(0)[0];
-          shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
-              shaka.util.Error.Severity.CRITICAL,
-              shaka.util.Error.Category.DRM,
-              shaka.util.Error.Code.ENCRYPTED_CONTENT_WITHOUT_DRM_INFO));
-        }).catch(fail).then(done);
+        expect(onErrorSpy).toHaveBeenCalled();
+        let error = onErrorSpy.calls.argsFor(0)[0];
+        shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
+            shaka.util.Error.Category.DRM,
+            shaka.util.Error.Code.ENCRYPTED_CONTENT_WITHOUT_DRM_INFO));
       });
     });  // describe('encrypted')
 
     describe('message', function() {
-      it('is listened for', function(done) {
-        initAndAttach().then(function() {
-          let initData = new Uint8Array(0);
-          mockVideo.on['encrypted'](
-              {initDataType: 'webm', initData: initData, keyId: null});
+      it('is listened for', async () => {
+        await initAndAttach();
+        let initData = new Uint8Array(0);
+        mockVideo.on['encrypted'](
+            {initDataType: 'webm', initData: initData, keyId: null});
 
-          expect(session1.addEventListener).toHaveBeenCalledWith(
-              'message', jasmine.any(Function), false);
-        }).catch(fail).then(done);
+        expect(session1.addEventListener).toHaveBeenCalledWith(
+            'message', jasmine.any(Function), false);
       });
 
-      it('triggers a license request', function(done) {
-        initAndAttach().then(function() {
-          let initData = new Uint8Array(0);
-          mockVideo.on['encrypted'](
-              {initDataType: 'webm', initData: initData, keyId: null});
+      it('triggers a license request', async () => {
+        await initAndAttach();
+        let initData = new Uint8Array(0);
+        mockVideo.on['encrypted'](
+            {initDataType: 'webm', initData: initData, keyId: null});
 
-          let operation = shaka.util.AbortableOperation.completed({});
-          fakeNetEngine.request.and.returnValue(operation);
-          let message = new Uint8Array(0);
-          session1.on['message']({target: session1, message: message});
+        let operation = shaka.util.AbortableOperation.completed({});
+        fakeNetEngine.request.and.returnValue(operation);
+        let message = new Uint8Array(0);
+        session1.on['message']({target: session1, message: message});
 
-          expect(fakeNetEngine.request).toHaveBeenCalledWith(
-              shaka.net.NetworkingEngine.RequestType.LICENSE,
-              jasmine.objectContaining({
-                uris: ['http://abc.drm/license'],
-                method: 'POST',
-                body: message
-              }));
-        }).catch(fail).then(done);
+        expect(fakeNetEngine.request).toHaveBeenCalledWith(
+            shaka.net.NetworkingEngine.RequestType.LICENSE,
+            jasmine.objectContaining({
+              uris: ['http://abc.drm/license'],
+              method: 'POST',
+              body: message,
+            }));
       });
 
-      it('prefers a license server URI from DrmInfo', function(done) {
+      it('prefers a license server URI from DrmInfo', async () => {
         manifest.periods[0].variants[0].drmInfos[0].licenseServerUri =
             'http://foo.bar/drm';
 
-        initAndAttach().then(function() {
-          let initData = new Uint8Array(0);
-          mockVideo.on['encrypted'](
-              {initDataType: 'webm', initData: initData, keyId: null});
+        await initAndAttach();
+        let initData = new Uint8Array(0);
+        mockVideo.on['encrypted'](
+            {initDataType: 'webm', initData: initData, keyId: null});
 
-          let operation = shaka.util.AbortableOperation.completed({});
-          fakeNetEngine.request.and.returnValue(operation);
-          let message = new Uint8Array(0);
-          session1.on['message']({target: session1, message: message});
+        let operation = shaka.util.AbortableOperation.completed({});
+        fakeNetEngine.request.and.returnValue(operation);
+        let message = new Uint8Array(0);
+        session1.on['message']({target: session1, message: message});
 
-          expect(fakeNetEngine.request).toHaveBeenCalledWith(
-              shaka.net.NetworkingEngine.RequestType.LICENSE,
-              jasmine.objectContaining({uris: ['http://foo.bar/drm']}));
-        }).catch(fail).then(done);
+        expect(fakeNetEngine.request).toHaveBeenCalledWith(
+            shaka.net.NetworkingEngine.RequestType.LICENSE,
+            jasmine.objectContaining({uris: ['http://foo.bar/drm']}));
       });
 
-      it('dispatches an error if license request fails', function(done) {
+      it('dispatches an error if license request fails', async () => {
         onErrorSpy.and.stub();
 
-        initAndAttach().then(function() {
-          let initData = new Uint8Array(0);
-          mockVideo.on['encrypted'](
-              {initDataType: 'webm', initData: initData, keyId: null});
+        await initAndAttach();
+        let initData = new Uint8Array(0);
+        mockVideo.on['encrypted'](
+            {initDataType: 'webm', initData: initData, keyId: null});
 
-          // Simulate a permission error from the web server.
-          let netError = new shaka.util.Error(
-              shaka.util.Error.Severity.CRITICAL,
-              shaka.util.Error.Category.NETWORK,
-              shaka.util.Error.Code.BAD_HTTP_STATUS,
-              'http://abc.drm/license', 403);
-          let operation = shaka.util.AbortableOperation.failed(netError);
-          fakeNetEngine.request.and.returnValue(operation);
+        // Simulate a permission error from the web server.
+        let netError = new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
+            shaka.util.Error.Category.NETWORK,
+            shaka.util.Error.Code.BAD_HTTP_STATUS,
+            'http://abc.drm/license', 403);
+        let operation = shaka.util.AbortableOperation.failed(netError);
+        fakeNetEngine.request.and.returnValue(operation);
 
-          let message = new Uint8Array(0);
-          session1.on['message']({target: session1, message: message});
-          return shaka.test.Util.delay(0.5);
-        }).then(function() {
-          expect(onErrorSpy).toHaveBeenCalled();
-          let error = onErrorSpy.calls.argsFor(0)[0];
-          shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
-              shaka.util.Error.Severity.CRITICAL,
-              shaka.util.Error.Category.DRM,
-              shaka.util.Error.Code.LICENSE_REQUEST_FAILED,
-              jasmine.objectContaining({
-                category: shaka.util.Error.Category.NETWORK,
-                code: shaka.util.Error.Code.BAD_HTTP_STATUS,
-                data: ['http://abc.drm/license', 403]
-              })));
-        }).catch(fail).then(done);
+        let message = new Uint8Array(0);
+        session1.on['message']({target: session1, message: message});
+        await shaka.test.Util.delay(0.5);
+
+        expect(onErrorSpy).toHaveBeenCalled();
+        let error = onErrorSpy.calls.argsFor(0)[0];
+        shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
+            shaka.util.Error.Category.DRM,
+            shaka.util.Error.Code.LICENSE_REQUEST_FAILED,
+            jasmine.objectContaining({
+              category: shaka.util.Error.Category.NETWORK,
+              code: shaka.util.Error.Code.BAD_HTTP_STATUS,
+              data: ['http://abc.drm/license', 403],
+            })));
       });
     });  // describe('message')
 
     describe('keystatuseschange', function() {
-      it('is listened for', function(done) {
-        initAndAttach().then(function() {
-          let initData = new Uint8Array(0);
-          mockVideo.on['encrypted'](
-              {initDataType: 'webm', initData: initData, keyId: null});
+      it('is listened for', async () => {
+        await initAndAttach();
+        let initData = new Uint8Array(0);
+        mockVideo.on['encrypted'](
+            {initDataType: 'webm', initData: initData, keyId: null});
 
-          expect(session1.addEventListener).toHaveBeenCalledWith(
-              'keystatuseschange', jasmine.any(Function), false);
-        }).catch(fail).then(done);
+        expect(session1.addEventListener).toHaveBeenCalledWith(
+            'keystatuseschange', jasmine.any(Function), false);
       });
 
       it('triggers callback', function(done) {
@@ -931,7 +969,7 @@ describe('DrmEngine', function() {
           onKeyStatusSpy.and.callFake(function(statusMap) {
             expect(statusMap).toEqual({
               '00': status1,
-              '0000': status2
+              '0000': status2,
             });
             done();
           });
@@ -1038,26 +1076,24 @@ describe('DrmEngine', function() {
   });  // describe('events')
 
   describe('update', function() {
-    it('receives a license', function(done) {
+    it('receives a license', async () => {
       let license = (new Uint8Array(0)).buffer;
 
-      initAndAttach().then(function() {
-        let initData = new Uint8Array(0);
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData, keyId: null});
+      await initAndAttach();
+      let initData = new Uint8Array(0);
+      mockVideo.on['encrypted'](
+          {initDataType: 'webm', initData: initData, keyId: null});
 
-        fakeNetEngine.setResponseMap({'http://abc.drm/license': license});
-        let message = new Uint8Array(0);
-        session1.on['message']({target: session1, message: message});
-        session1.update.and.returnValue(Promise.resolve());
+      fakeNetEngine.setResponseMap({'http://abc.drm/license': license});
+      let message = new Uint8Array(0);
+      session1.on['message']({target: session1, message: message});
+      session1.update.and.returnValue(Promise.resolve());
 
-        return shaka.test.Util.delay(0.5);
-      }).then(function() {
-        expect(session1.update).toHaveBeenCalledWith(license);
-      }).catch(fail).then(done);
+      await shaka.test.Util.delay(0.5);
+      expect(session1.update).toHaveBeenCalledWith(license);
     });
 
-    it('uses clearKeys config to override DrmInfo', function(done) {
+    it('uses clearKeys config to override DrmInfo', async () => {
       manifest.periods[0].variants[0].drmInfos[0].keySystem =
           'com.fake.NOT.clearkey';
       requestMediaKeySystemAccessSpy.and.callFake(
@@ -1066,153 +1102,141 @@ describe('DrmEngine', function() {
       // Configure clear keys (map of hex key IDs to keys)
       config.clearKeys = {
         'deadbeefdeadbeefdeadbeefdeadbeef': '18675309186753091867530918675309',
-        '02030507011013017019023029031037': '03050701302303204201080425098033'
+        '02030507011013017019023029031037': '03050701302303204201080425098033',
       };
       drmEngine.configure(config);
 
       // Not mocked.  Run data through real data URI parser to ensure that it is
       // correctly formatted.
       fakeNetEngine.request.and.callFake(function(type, request) {
+        // eslint-disable-next-line new-cap
         return shaka.net.DataUriPlugin(request.uris[0], request);
       });
 
-      initAndAttach().then(function() {
-        let message = new Uint8Array(0);
-        session1.on['message']({target: session1, message: message});
-        session1.update.and.returnValue(Promise.resolve());
-        return shaka.test.Util.delay(0.5);
-      }).then(function() {
-        expect(session1.update.calls.count()).toBe(1);
-        let licenseBuffer = session1.update.calls.argsFor(0)[0];
-        let licenseJson =
-            shaka.util.StringUtils.fromBytesAutoDetect(licenseBuffer);
-        let license = JSON.parse(licenseJson);
-        expect(license).toEqual({
-          keys: [
-            {kid: '3q2-796tvu_erb7v3q2-7w',
-              k: 'GGdTCRhnUwkYZ1MJGGdTCQ', kty: 'oct'},
-            {kid: 'AgMFBwEQEwFwGQIwKQMQNw',
-              k: 'AwUHATAjAyBCAQgEJQmAMw', kty: 'oct'}
-          ]
-        });
-      }).catch(fail).then(done);
+      await initAndAttach();
+      let message = new Uint8Array(0);
+      session1.on['message']({target: session1, message: message});
+      session1.update.and.returnValue(Promise.resolve());
+
+      await shaka.test.Util.delay(0.5);
+      expect(session1.update.calls.count()).toBe(1);
+      let licenseBuffer = session1.update.calls.argsFor(0)[0];
+      let licenseJson =
+          shaka.util.StringUtils.fromBytesAutoDetect(licenseBuffer);
+      let license = JSON.parse(licenseJson);
+      expect(license).toEqual({
+        keys: [
+          {kid: '3q2-796tvu_erb7v3q2-7w',
+            k: 'GGdTCRhnUwkYZ1MJGGdTCQ', kty: 'oct'},
+          {kid: 'AgMFBwEQEwFwGQIwKQMQNw',
+            k: 'AwUHATAjAyBCAQgEJQmAMw', kty: 'oct'},
+        ],
+      });
     });
 
-    it('publishes an event if update succeeds', function(done) {
-      initAndAttach().then(function() {
-        let initData = new Uint8Array(1);
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData, keyId: null});
-        let message = new Uint8Array(0);
-        session1.on['message']({target: session1, message: message});
-        session1.update.and.returnValue(Promise.resolve());
+    it('publishes an event if update succeeds', async () => {
+      await initAndAttach();
+      let initData = new Uint8Array(1);
+      mockVideo.on['encrypted'](
+          {initDataType: 'webm', initData: initData, keyId: null});
+      let message = new Uint8Array(0);
+      session1.on['message']({target: session1, message: message});
+      session1.update.and.returnValue(Promise.resolve());
 
-        return shaka.test.Util.delay(0.5);
-      }).then(function() {
-        expect(onEventSpy).toHaveBeenCalledWith(
-            jasmine.objectContaining({type: 'drmsessionupdate'}));
-        done();
-      }).catch(fail);
+      await shaka.test.Util.delay(0.5);
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({type: 'drmsessionupdate'}));
     });
 
-    it('dispatches an error if update fails', function(done) {
+    it('dispatches an error if update fails', async () => {
       onErrorSpy.and.stub();
 
       let license = (new Uint8Array(0)).buffer;
 
-      initAndAttach().then(function() {
-        let initData = new Uint8Array(0);
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData, keyId: null});
+      await initAndAttach();
+      let initData = new Uint8Array(0);
+      mockVideo.on['encrypted'](
+          {initDataType: 'webm', initData: initData, keyId: null});
 
-        fakeNetEngine.setResponseMap({'http://abc.drm/license': license});
-        let message = new Uint8Array(0);
-        session1.on['message']({target: session1, message: message});
-        session1.update.and.throwError('whoops!');
+      fakeNetEngine.setResponseMap({'http://abc.drm/license': license});
+      let message = new Uint8Array(0);
+      session1.on['message']({target: session1, message: message});
+      session1.update.and.throwError('whoops!');
 
-        return shaka.test.Util.delay(0.5);
-      }).then(function() {
-        expect(onErrorSpy).toHaveBeenCalled();
-        let error = onErrorSpy.calls.argsFor(0)[0];
-        shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
-            shaka.util.Error.Severity.CRITICAL,
-            shaka.util.Error.Category.DRM,
-            shaka.util.Error.Code.LICENSE_RESPONSE_REJECTED,
-            'whoops!'));
-      }).catch(fail).then(done);
+      await shaka.test.Util.delay(0.5);
+      expect(onErrorSpy).toHaveBeenCalled();
+      let error = onErrorSpy.calls.argsFor(0)[0];
+      shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.DRM,
+          shaka.util.Error.Code.LICENSE_RESPONSE_REJECTED,
+          'whoops!'));
     });
   });  // describe('update')
 
   describe('destroy', function() {
-    it('tears down MediaKeys and active sessions', function(done) {
-      initAndAttach().then(function() {
-        let initData1 = new Uint8Array(1);
-        let initData2 = new Uint8Array(2);
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData1, keyId: null});
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData2, keyId: null});
+    it('tears down MediaKeys and active sessions', async () => {
+      await initAndAttach();
+      let initData1 = new Uint8Array(1);
+      let initData2 = new Uint8Array(2);
+      mockVideo.on['encrypted'](
+          {initDataType: 'webm', initData: initData1, keyId: null});
+      mockVideo.on['encrypted'](
+          {initDataType: 'webm', initData: initData2, keyId: null});
 
-        let message = new Uint8Array(0);
-        session1.on['message']({target: session1, message: message});
-        session1.update.and.returnValue(Promise.resolve());
-        session2.on['message']({target: session2, message: message});
-        session2.update.and.returnValue(Promise.resolve());
+      let message = new Uint8Array(0);
+      session1.on['message']({target: session1, message: message});
+      session1.update.and.returnValue(Promise.resolve());
+      session2.on['message']({target: session2, message: message});
+      session2.update.and.returnValue(Promise.resolve());
 
-        return shaka.test.Util.delay(0.5);
-      }).then(function() {
-        mockVideo.setMediaKeys.calls.reset();
-        return drmEngine.destroy();
-      }).then(function() {
-        expect(session1.close).toHaveBeenCalled();
-        expect(session2.close).toHaveBeenCalled();
-        expect(mockVideo.setMediaKeys).toHaveBeenCalledWith(null);
-      }).catch(fail).then(done);
+      await shaka.test.Util.delay(0.5);
+      mockVideo.setMediaKeys.calls.reset();
+      await drmEngine.destroy();
+      expect(session1.close).toHaveBeenCalled();
+      expect(session2.close).toHaveBeenCalled();
+      expect(mockVideo.setMediaKeys).toHaveBeenCalledWith(null);
     });
 
-    it('swallows errors when closing sessions', function(done) {
-      initAndAttach().then(function() {
-        let initData1 = new Uint8Array(1);
-        let initData2 = new Uint8Array(2);
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData1, keyId: null});
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData2, keyId: null});
+    it('swallows errors when closing sessions', async () => {
+      await initAndAttach();
+      let initData1 = new Uint8Array(1);
+      let initData2 = new Uint8Array(2);
+      mockVideo.on['encrypted'](
+          {initDataType: 'webm', initData: initData1, keyId: null});
+      mockVideo.on['encrypted'](
+          {initDataType: 'webm', initData: initData2, keyId: null});
 
-        let message = new Uint8Array(0);
-        session1.on['message']({target: session1, message: message});
-        session1.update.and.returnValue(Promise.resolve());
-        session2.on['message']({target: session2, message: message});
-        session2.update.and.returnValue(Promise.resolve());
+      let message = new Uint8Array(0);
+      session1.on['message']({target: session1, message: message});
+      session1.update.and.returnValue(Promise.resolve());
+      session2.on['message']({target: session2, message: message});
+      session2.update.and.returnValue(Promise.resolve());
 
-        return shaka.test.Util.delay(0.5);
-      }).then(function() {
-        session1.close.and.returnValue(Promise.reject());
-        session2.close.and.returnValue(Promise.reject());
-        return drmEngine.destroy();
-      }).catch(fail).then(done);
+      await shaka.test.Util.delay(0.5);
+      session1.close.and.returnValue(Promise.reject());
+      session2.close.and.returnValue(Promise.reject());
+      await drmEngine.destroy();
     });
 
-    it('swallows errors when clearing MediaKeys', function(done) {
-      initAndAttach().then(function() {
-        let initData1 = new Uint8Array(1);
-        let initData2 = new Uint8Array(2);
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData1, keyId: null});
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData2, keyId: null});
+    it('swallows errors when clearing MediaKeys', async () => {
+      await initAndAttach();
+      let initData1 = new Uint8Array(1);
+      let initData2 = new Uint8Array(2);
+      mockVideo.on['encrypted'](
+          {initDataType: 'webm', initData: initData1, keyId: null});
+      mockVideo.on['encrypted'](
+          {initDataType: 'webm', initData: initData2, keyId: null});
 
-        let message = new Uint8Array(0);
-        session1.on['message']({target: session1, message: message});
-        session1.update.and.returnValue(Promise.resolve());
-        session2.on['message']({target: session2, message: message});
-        session2.update.and.returnValue(Promise.resolve());
+      let message = new Uint8Array(0);
+      session1.on['message']({target: session1, message: message});
+      session1.update.and.returnValue(Promise.resolve());
+      session2.on['message']({target: session2, message: message});
+      session2.update.and.returnValue(Promise.resolve());
 
-        return shaka.test.Util.delay(0.5);
-      }).then(function() {
-        mockVideo.setMediaKeys.and.returnValue(Promise.reject());
-        return drmEngine.destroy();
-      }).catch(fail).then(done);
+      await shaka.test.Util.delay(0.5);
+      mockVideo.setMediaKeys.and.returnValue(Promise.reject());
+      await drmEngine.destroy();
     });
 
     it('interrupts failing MediaKeys queries', function(done) {
@@ -1478,48 +1502,46 @@ describe('DrmEngine', function() {
       // onError is a failure by default.
     });
 
-    it('still completes if session is not callable', function(done) {
+    it('still completes if session is not callable', async () => {
       // Before, we would use |session.closed| as part of destroy().  However,
       // this doesn't work if the session is not callable (no license request
       // sent).  So |session.closed| should never resolve and |session.close()|
       // should be rejected and destroy() should still succeed.
       // https://github.com/google/shaka-player/issues/664
-      initAndAttach().then(function() {
-        session1.closed = new shaka.util.PublicPromise();
-        session2.closed = new shaka.util.PublicPromise();
+      await initAndAttach();
+      session1.closed = new shaka.util.PublicPromise();
+      session2.closed = new shaka.util.PublicPromise();
 
-        // Since this won't be attached to anything until much later, we must
-        // silence unhandled rejection errors.
-        const rejected = Promise.reject();
-        rejected.catch(() => {});
+      // Since this won't be attached to anything until much later, we must
+      // silence unhandled rejection errors.
+      const rejected = Promise.reject();
+      rejected.catch(() => {});
 
-        session1.close.and.returnValue(rejected);
-        session2.close.and.returnValue(rejected);
+      session1.close.and.returnValue(rejected);
+      session2.close.and.returnValue(rejected);
 
-        let initData1 = new Uint8Array(1);
-        let initData2 = new Uint8Array(2);
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData1, keyId: null});
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData2, keyId: null});
+      let initData1 = new Uint8Array(1);
+      let initData2 = new Uint8Array(2);
+      mockVideo.on['encrypted'](
+          {initDataType: 'webm', initData: initData1, keyId: null});
+      mockVideo.on['encrypted'](
+          {initDataType: 'webm', initData: initData2, keyId: null});
 
-        // Still resolve these since we are mocking close and closed.  This
-        // ensures DrmEngine is in the correct state.
-        let message = new Uint8Array(0);
-        session1.on['message']({target: session1, message: message});
-        session1.update.and.returnValue(Promise.resolve());
-        session2.on['message']({target: session2, message: message});
-        session2.update.and.returnValue(Promise.resolve());
+      // Still resolve these since we are mocking close and closed.  This
+      // ensures DrmEngine is in the correct state.
+      let message = new Uint8Array(0);
+      session1.on['message']({target: session1, message: message});
+      session1.update.and.returnValue(Promise.resolve());
+      session2.on['message']({target: session2, message: message});
+      session2.update.and.returnValue(Promise.resolve());
 
-        return shaka.test.Util.delay(0.5);
-      }).then(function() {
-        return drmEngine.destroy();
-      }).catch(fail).then(done);
+      await shaka.test.Util.delay(0.5);
+      await drmEngine.destroy();
     });
   });  // describe('destroy')
 
   describe('getDrmInfo', function() {
-    it('includes correct info', function(done) {
+    it('includes correct info', async () => {
       // Leave only one drmInfo
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
@@ -1540,30 +1562,29 @@ describe('DrmEngine', function() {
         videoRobustness: 'really_really_ridiculously_good',
         distinctiveIdentifierRequired: true,
         serverCertificate: null,
-        persistentStateRequired: true
+        persistentStateRequired: true,
       };
       drmEngine.configure(config);
 
-      drmEngine.init(manifest, /* offline */ false).then(function() {
-        expect(drmEngine.initialized()).toBe(true);
-        let drmInfo = drmEngine.getDrmInfo();
-        expect(drmInfo).toEqual({
-          keySystem: 'drm.abc',
-          licenseServerUri: 'http://abc.drm/license',
-          distinctiveIdentifierRequired: true,
-          persistentStateRequired: true,
-          audioRobustness: 'good',
-          videoRobustness: 'really_really_ridiculously_good',
-          serverCertificate: undefined,
-          initData: [],
-          keyIds: ['deadbeefdeadbeefdeadbeefdeadbeef']
-        });
-      }).catch(fail).then(done);
+      await drmEngine.init(manifest, /* offline */ false);
+      expect(drmEngine.initialized()).toBe(true);
+      let drmInfo = drmEngine.getDrmInfo();
+      expect(drmInfo).toEqual({
+        keySystem: 'drm.abc',
+        licenseServerUri: 'http://abc.drm/license',
+        distinctiveIdentifierRequired: true,
+        persistentStateRequired: true,
+        audioRobustness: 'good',
+        videoRobustness: 'really_really_ridiculously_good',
+        serverCertificate: undefined,
+        initData: [],
+        keyIds: ['deadbeefdeadbeefdeadbeefdeadbeef'],
+      });
     });
   });  // describe('getDrmInfo')
 
   describe('getCommonDrmInfos', function() {
-    it('returns one array if the other is empty', function(done) {
+    it('returns one array if the other is empty', () => {
       let drmInfo = {
         keySystem: 'drm.abc',
         licenseServerUri: 'http://abc.drm/license',
@@ -1573,16 +1594,15 @@ describe('DrmEngine', function() {
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: undefined,
         initData: [],
-        keyIds: ['deadbeefdeadbeefdeadbeefdeadbeef']
+        keyIds: ['deadbeefdeadbeefdeadbeefdeadbeef'],
       };
       let returnedOne = shaka.media.DrmEngine.getCommonDrmInfos([drmInfo], []);
       let returnedTwo = shaka.media.DrmEngine.getCommonDrmInfos([], [drmInfo]);
       expect(returnedOne).toEqual([drmInfo]);
       expect(returnedTwo).toEqual([drmInfo]);
-      done();
     });
 
-    it('merges drmInfos if two exist', function(done) {
+    it('merges drmInfos if two exist', () => {
       let serverCert = new Uint8Array(0);
       let drmInfoVideo = {
         keySystem: 'drm.abc',
@@ -1592,7 +1612,7 @@ describe('DrmEngine', function() {
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: serverCert,
         initData: ['blah'],
-        keyIds: ['deadbeefdeadbeefdeadbeefdeadbeef']
+        keyIds: ['deadbeefdeadbeefdeadbeefdeadbeef'],
       };
       let drmInfoAudio = {
         keySystem: 'drm.abc',
@@ -1602,7 +1622,7 @@ describe('DrmEngine', function() {
         audioRobustness: 'good',
         serverCertificate: undefined,
         initData: ['init data'],
-        keyIds: ['eadbeefdeadbeefdeadbeefdeadbeefd']
+        keyIds: ['eadbeefdeadbeefdeadbeefdeadbeefd'],
       };
       let drmInfoDesired = {
         keySystem: 'drm.abc',
@@ -1614,86 +1634,83 @@ describe('DrmEngine', function() {
         serverCertificate: serverCert,
         initData: ['blah', 'init data'],
         keyIds: ['deadbeefdeadbeefdeadbeefdeadbeef',
-                 'eadbeefdeadbeefdeadbeefdeadbeefd']
+                 'eadbeefdeadbeefdeadbeefdeadbeefd'],
       };
       let returned = shaka.media.DrmEngine.getCommonDrmInfos([drmInfoVideo],
           [drmInfoAudio]);
       expect(returned).toEqual([drmInfoDesired]);
-      done();
     });
   }); // describe('getCommonDrmInfos')
 
   describe('configure', function() {
-    it('delays initial license requests if configured to', function(done) {
+    it('delays initial license requests if configured to', async () => {
       config.delayLicenseRequestUntilPlayed = true;
       drmEngine.configure(config);
       mockVideo.paused = true;
 
-      initAndAttach().then(function() {
-        let initData = new Uint8Array(0);
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData, keyId: null});
+      await initAndAttach();
+      let initData = new Uint8Array(0);
+      mockVideo.on['encrypted'](
+          {initDataType: 'webm', initData: initData, keyId: null});
 
-        let operation = shaka.util.AbortableOperation.completed({});
-        fakeNetEngine.request.and.returnValue(operation);
-        let message = new Uint8Array(0);
-        session1.on['message']({target: session1, message: message});
+      let operation = shaka.util.AbortableOperation.completed({});
+      fakeNetEngine.request.and.returnValue(operation);
+      let message = new Uint8Array(0);
+      session1.on['message']({target: session1, message: message});
 
-        expect(fakeNetEngine.request).not.toHaveBeenCalled();
+      expect(fakeNetEngine.request).not.toHaveBeenCalled();
 
-        mockVideo.on['play']();
+      mockVideo.on['play']();
 
-        expect(fakeNetEngine.request).toHaveBeenCalledWith(
-            shaka.net.NetworkingEngine.RequestType.LICENSE,
-            jasmine.objectContaining({
-              uris: ['http://abc.drm/license'],
-              method: 'POST',
-              body: message
-            }));
-      }).catch(fail).then(done);
+      expect(fakeNetEngine.request).toHaveBeenCalledWith(
+          shaka.net.NetworkingEngine.RequestType.LICENSE,
+          jasmine.objectContaining({
+            uris: ['http://abc.drm/license'],
+            method: 'POST',
+            body: message,
+          }));
     });
 
-    it('does not delay license renewal requests', function(done) {
+    it('does not delay license renewal requests', async () => {
       config.delayLicenseRequestUntilPlayed = true;
       drmEngine.configure(config);
       mockVideo.paused = true;
 
-      initAndAttach().then(function() {
-        let initData = new Uint8Array(0);
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData, keyId: null});
+      await initAndAttach();
+      let initData = new Uint8Array(0);
+      mockVideo.on['encrypted'](
+          {initDataType: 'webm', initData: initData, keyId: null});
 
-        let operation = shaka.util.AbortableOperation.completed({});
-        fakeNetEngine.request.and.returnValue(operation);
-        let message = new Uint8Array(0);
-        session1.on['message']({target: session1, message: message});
+      let operation = shaka.util.AbortableOperation.completed({});
+      fakeNetEngine.request.and.returnValue(operation);
+      let message = new Uint8Array(0);
+      session1.on['message']({target: session1, message: message});
 
-        expect(fakeNetEngine.request).not.toHaveBeenCalled();
+      expect(fakeNetEngine.request).not.toHaveBeenCalled();
 
-        mockVideo.on['play']();
+      mockVideo.on['play']();
 
-        expect(fakeNetEngine.request).toHaveBeenCalledWith(
-            shaka.net.NetworkingEngine.RequestType.LICENSE,
-            jasmine.objectContaining({
-              uris: ['http://abc.drm/license'],
-              method: 'POST',
-              body: message
-            }));
+      expect(fakeNetEngine.request).toHaveBeenCalledWith(
+          shaka.net.NetworkingEngine.RequestType.LICENSE,
+          jasmine.objectContaining({
+            uris: ['http://abc.drm/license'],
+            method: 'POST',
+            body: message,
+          }));
 
-        fakeNetEngine.request.calls.reset();
+      fakeNetEngine.request.calls.reset();
 
-        mockVideo.paused = true;
-        session1.on['message']({target: session1, message: message});
+      mockVideo.paused = true;
+      session1.on['message']({target: session1, message: message});
 
-        expect(fakeNetEngine.request).toHaveBeenCalledWith(
-            shaka.net.NetworkingEngine.RequestType.LICENSE,
-            jasmine.objectContaining({
-              uris: ['http://abc.drm/license'],
-              method: 'POST',
-              body: message
-            }));
-        expect(fakeNetEngine.request.calls.count()).toBe(1);
-      }).catch(fail).then(done);
+      expect(fakeNetEngine.request).toHaveBeenCalledWith(
+          shaka.net.NetworkingEngine.RequestType.LICENSE,
+          jasmine.objectContaining({
+            uris: ['http://abc.drm/license'],
+            method: 'POST',
+            body: message,
+          }));
+      expect(fakeNetEngine.request.calls.count()).toBe(1);
     });
   }); // describe('configure')
 
@@ -1703,7 +1720,7 @@ describe('DrmEngine', function() {
     /** @type {!shaka.util.PublicPromise} */
     let updatePromise2;
 
-    beforeEach(function(done) {
+    beforeEach(async () => {
       session1.load.and.returnValue(Promise.resolve(true));
       session2.load.and.returnValue(Promise.resolve(true));
 
@@ -1724,22 +1741,21 @@ describe('DrmEngine', function() {
         return Promise.resolve();
       });
 
-      drmEngine.init(manifest, /* offline */ true).catch(fail).then(done);
+      await drmEngine.init(manifest, /* offline */ true);
     });
 
-    it('waits until update() is complete', function(done) {
+    it('waits until update() is complete', async () => {
       shaka.test.Util.delay(0.1).then(
           updatePromise1.resolve.bind(updatePromise1));
       shaka.test.Util.delay(0.3).then(
           updatePromise2.resolve.bind(updatePromise2));
 
-      drmEngine.removeSessions(['abc', 'def']).then(function() {
-        expect(session1.update).toHaveBeenCalled();
-        expect(session2.update).toHaveBeenCalled();
-      }).catch(fail).then(done);
+      await drmEngine.removeSessions(['abc', 'def']);
+      expect(session1.update).toHaveBeenCalled();
+      expect(session2.update).toHaveBeenCalled();
     });
 
-    it('is rejected when network request fails', function(done) {
+    it('is rejected when network request fails', async () => {
       let p = fakeNetEngine.delayNextRequest();
       let networkError = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
@@ -1748,9 +1764,12 @@ describe('DrmEngine', function() {
       p.reject(networkError);
       onErrorSpy.and.stub();
 
-      drmEngine.removeSessions(['abc', 'def']).then(fail).catch(function(err) {
+      try {
+        await drmEngine.removeSessions(['abc', 'def']);
+        fail();
+      } catch (error) {
         shaka.test.Util.expectToEqualError(
-            err,
+            error,
             new shaka.util.Error(
                 shaka.util.Error.Severity.CRITICAL,
                 shaka.util.Error.Category.DRM,
@@ -1758,22 +1777,25 @@ describe('DrmEngine', function() {
                 networkError));
         // The first session's request was rejected.
         expect(session1.update).not.toHaveBeenCalled();
-      }).catch(fail).then(done);
+      }
     });
 
-    it('is rejected when update() is rejected', function(done) {
+    it('is rejected when update() is rejected', async () => {
       updatePromise1.reject({message: 'Error'});
       onErrorSpy.and.stub();
 
-      drmEngine.removeSessions(['abc', 'def']).then(fail).catch(function(err) {
+      try {
+        await drmEngine.removeSessions(['abc', 'def']);
+        fail();
+      } catch (error) {
         shaka.test.Util.expectToEqualError(
-            err,
+            error,
             new shaka.util.Error(
                 shaka.util.Error.Severity.CRITICAL,
                 shaka.util.Error.Category.DRM,
                 shaka.util.Error.Code.LICENSE_RESPONSE_REJECTED,
                 'Error'));
-      }).catch(fail).then(done);
+      }
     });
   });
 
@@ -1786,20 +1808,19 @@ describe('DrmEngine', function() {
       jasmine.clock().uninstall();
     });
 
-    beforeEach(function(done) {
+    beforeEach(async () => {
       session1.sessionId = 'abc';
       session1.expiration = NaN;
 
-      initAndAttach().then(function() {
-        let initData = new Uint8Array(0);
-        let message = new Uint8Array(0);
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData, keyId: null});
-        session1.on['message']({target: session1, message: message});
-        session1.update.and.returnValue(Promise.resolve());
+      await initAndAttach();
+      let initData = new Uint8Array(0);
+      let message = new Uint8Array(0);
+      mockVideo.on['encrypted'](
+          {initDataType: 'webm', initData: initData, keyId: null});
+      session1.on['message']({target: session1, message: message});
+      session1.update.and.returnValue(Promise.resolve());
 
-        jasmine.clock().tick(1000);
-      }).catch(fail).then(done);
+      jasmine.clock().tick(1000);
     });
 
     it('calls the callback when the expiration changes', function() {
@@ -1850,12 +1871,12 @@ describe('DrmEngine', function() {
     let mksa = {
       keySystem: '',
       getConfiguration: jasmine.createSpy('getConfiguration'),
-      createMediaKeys: jasmine.createSpy('createMediaKeys')
+      createMediaKeys: jasmine.createSpy('createMediaKeys'),
     };
     mksa.getConfiguration.and.callFake(function() {
       return {
         audioCapabilities: [{contentType: 'audio/webm'}],
-        videoCapabilities: [{contentType: 'video/mp4; codecs="fake"'}]
+        videoCapabilities: [{contentType: 'video/mp4; codecs="fake"'}],
       };
     });
     mksa.createMediaKeys.and.callFake(function() {
@@ -1867,7 +1888,7 @@ describe('DrmEngine', function() {
   function createMockMediaKeys() {
     return {
       createSession: jasmine.createSpy('createSession'),
-      setServerCertificate: jasmine.createSpy('setServerCertificate')
+      setServerCertificate: jasmine.createSpy('setServerCertificate'),
     };
   }
 
@@ -1876,7 +1897,7 @@ describe('DrmEngine', function() {
       expiration: NaN,
       closed: Promise.resolve(),
       keyStatuses: {
-        forEach: jasmine.createSpy('forEach')
+        forEach: jasmine.createSpy('forEach'),
       },
       generateRequest: jasmine.createSpy('generateRequest'),
       load: jasmine.createSpy('load'),
@@ -1886,7 +1907,7 @@ describe('DrmEngine', function() {
       addEventListener: jasmine.createSpy('addEventListener'),
       removeEventListener: jasmine.createSpy('removeEventListener'),
       dispatchEvent: jasmine.createSpy('dispatchEvent'),
-      on: {}  // event listeners
+      on: {},  // event listeners
     };
     session.generateRequest.and.returnValue(Promise.resolve());
     session.close.and.returnValue(Promise.resolve());
@@ -1899,7 +1920,7 @@ describe('DrmEngine', function() {
 
   /**
    * @param {Uint8Array} serverCert
-   * @return {shakaExtern.AdvancedDrmConfiguration}
+   * @return {shaka.extern.AdvancedDrmConfiguration}
    */
   function createAdvancedConfig(serverCert) {
     return {
@@ -1907,7 +1928,7 @@ describe('DrmEngine', function() {
       distinctiveIdentifierRequired: false,
       persistentStateRequired: false,
       serverCertificate: serverCert,
-      videoRobustness: ''
+      videoRobustness: '',
     };
   }
 });

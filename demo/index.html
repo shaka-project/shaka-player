@@ -173,6 +173,10 @@ UNCOMPILED_JS = [
           <label for="preferredTextLanguage">Preferred text language:</label>
           <input id="preferredTextLanguage" class="flex-grow" type="text">
         </div>
+        <div class="flex">
+          <label for="preferredAudioChannelCount">Preferred audio channel count:</label>
+          <input id="preferredAudioChannelCount" type="number">
+        </div>
         <div>
           <label for="showNative">Show native browser controls:</label>
           <input id="showNative" type="checkbox">
@@ -217,6 +221,10 @@ UNCOMPILED_JS = [
         <div>
           <label for="drmSettingsAudioRobustness">Audio Robustness:</label>
           <input id="drmSettingsAudioRobustness" type="text" class="flex-grow" list="robustnessSuggestions">
+        </div>
+        <div>
+          <label for="availabilityWindowOverride">Availability Window Override:</label>
+          <input id="availabilityWindowOverride" type="number" step="30" min="0">
         </div>
 	<datalist id="robustnessSuggestions"></datalist>
       </details>

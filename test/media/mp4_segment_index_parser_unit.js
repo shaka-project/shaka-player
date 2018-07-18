@@ -22,14 +22,13 @@ describe('Mp4SegmentIndexParser', function() {
   let indexSegment;
   let mediaSegment;
 
-  beforeAll(function(done) {
-    Promise.all([
+  beforeAll(async () => {
+    let responses = await Promise.all([
       shaka.test.Util.fetch(indexSegmentUri),
-      shaka.test.Util.fetch(mediaSegmentUri)
-    ]).then(function(responses) {
-      indexSegment = responses[0];
-      mediaSegment = responses[1];
-    }).catch(fail).then(done);
+      shaka.test.Util.fetch(mediaSegmentUri),
+    ]);
+    indexSegment = responses[0];
+    mediaSegment = responses[1];
   });
 
   it('rejects a non-index segment ', function() {
@@ -38,6 +37,7 @@ describe('Mp4SegmentIndexParser', function() {
         shaka.util.Error.Category.MEDIA,
         shaka.util.Error.Code.MP4_SIDX_WRONG_BOX_TYPE);
     try {
+      // eslint-disable-next-line new-cap
       shaka.media.Mp4SegmentIndexParser(mediaSegment, 0, [], 0);
       fail('non-index segment is supported');
     } catch (e) {
@@ -46,6 +46,7 @@ describe('Mp4SegmentIndexParser', function() {
   });
 
   it('parses index segment ', function() {
+    // eslint-disable-next-line new-cap
     let result = shaka.media.Mp4SegmentIndexParser(indexSegment, 0, [], 0);
     let references =
         [
@@ -53,7 +54,7 @@ describe('Mp4SegmentIndexParser', function() {
          {startTime: 12, endTime: 24, startByte: 194961, endByte: 294059},
          {startTime: 24, endTime: 36, startByte: 294060, endByte: 466352},
          {startTime: 36, endTime: 48, startByte: 466353, endByte: 615511},
-         {startTime: 48, endTime: 60, startByte: 615512, endByte: 743301}
+         {startTime: 48, endTime: 60, startByte: 615512, endByte: 743301},
         ];
 
     expect(result).toBeTruthy();
@@ -68,6 +69,7 @@ describe('Mp4SegmentIndexParser', function() {
   });
 
   it('takes a scaled presentationTimeOffset in seconds', function() {
+    // eslint-disable-next-line new-cap
     let result = shaka.media.Mp4SegmentIndexParser(indexSegment, 0, [], 2);
     let references =
         [
@@ -75,7 +77,7 @@ describe('Mp4SegmentIndexParser', function() {
          {startTime: 10, endTime: 22},
          {startTime: 22, endTime: 34},
          {startTime: 34, endTime: 46},
-         {startTime: 46, endTime: 58}
+         {startTime: 46, endTime: 58},
         ];
 
     expect(result).toBeTruthy();

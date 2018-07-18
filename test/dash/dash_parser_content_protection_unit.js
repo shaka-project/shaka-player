@@ -22,30 +22,30 @@ describe('DashParser ContentProtection', function() {
   /**
    * Tests that the parser produces the correct results.
    *
-   * @param {function()} done
    * @param {string} manifestText
    * @param {Object} expected A Manifest-like object.  The parser output is
    *   expected to match this.
-   * @param {shakaExtern.DashContentProtectionCallback=} opt_callback
-   * @param {boolean=} opt_ignoreDrmInfo
+   * @param {shaka.extern.DashContentProtectionCallback=} callback
+   * @param {boolean=} ignoreDrmInfo
+   * @return {!Promise}
    */
-  function testDashParser(done, manifestText, expected, opt_callback,
-      opt_ignoreDrmInfo) {
+  function testDashParser(manifestText, expected, callback,
+      ignoreDrmInfo = false) {
     let retry = shaka.net.NetworkingEngine.defaultRetryParameters();
     let netEngine = new shaka.test.FakeNetworkingEngine();
     netEngine.setDefaultText(manifestText);
     let dashParser = new shaka.dash.DashParser();
-    let callback = opt_callback || function(node) { return null; };
-    let ignoreDrmInfo = opt_ignoreDrmInfo || false;
+    callback = callback || function(node) { return null; };
     dashParser.configure({
       retryParameters: retry,
+      availabilityWindowOverride: NaN,
       dash: {
         clockSyncUri: '',
         customScheme: callback,
         ignoreDrmInfo: ignoreDrmInfo,
         xlinkFailGracefully: false,
-        defaultPresentationDelay: 10
-      }
+        defaultPresentationDelay: 10,
+      },
     });
     let playerEvents = {
       networkingEngine: netEngine,
@@ -53,13 +53,11 @@ describe('DashParser ContentProtection', function() {
       filterAllPeriods: function() {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
-      onError: fail
+      onError: fail,
     };
 
-    dashParser.start('http://example.com', playerEvents)
-        .then(function(actual) { expect(actual).toEqual(expected); })
-        .catch(fail)
-        .then(done);
+    return dashParser.start('http://example.com', playerEvents)
+        .then(function(actual) { expect(actual).toEqual(expected); });
   }
 
   /**
@@ -88,12 +86,12 @@ describe('DashParser ContentProtection', function() {
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
-      '</MPD>'
+      '</MPD>',
     ].join('\n');
     return sprintf(template, {
       adaptationSetLines: adaptationSetLines.join('\n'),
       representation1Lines: representation1Lines.join('\n'),
-      representation2Lines: representation2Lines.join('\n')
+      representation2Lines: representation2Lines.join('\n'),
     });
   }
 
@@ -101,11 +99,10 @@ describe('DashParser ContentProtection', function() {
    * Build an expected manifest which checks DRM-related fields.
    *
    * @param {!Array.<!Object>} drmInfos A list of DrmInfo-like objects.
-   * @param {number=} opt_numVariants The number of variants, default 2.
+   * @param {number=} numVariants The number of variants, default 2.
    * @return {Object} A Manifest-like object.
    */
-  function buildExpectedManifest(drmInfos, opt_numVariants) {
-    let numVariants = opt_numVariants || 2;
+  function buildExpectedManifest(drmInfos, numVariants = 2) {
     let keyIds = [];
     if (drmInfos.length > 0) {
       keyIds = drmInfos[0].sample.keyIds;
@@ -116,8 +113,8 @@ describe('DashParser ContentProtection', function() {
       let variant = jasmine.objectContaining({
         drmInfos: drmInfos,
         video: jasmine.objectContaining({
-          keyId: keyIds[i] || null
-        })
+          keyId: keyIds[i] || null,
+        }),
       });
       variants.push(variant);
     }
@@ -126,9 +123,9 @@ describe('DashParser ContentProtection', function() {
       periods: [
         jasmine.objectContaining({
           variants: variants,
-          textStreams: []
-        })
-      ]  // periods
+          textStreams: [],
+        }),
+      ],  // periods
     });
   }
 
@@ -136,32 +133,30 @@ describe('DashParser ContentProtection', function() {
    * Build an expected DrmInfo based on a key system and optional PSSHs.
    *
    * @param {string} keySystem
-   * @param {Array.<string>=} opt_keyIds
-   * @param {Array.<string>=} opt_base64Psshs
-   * @param {Array.<string>=} opt_initDataKeyIds
+   * @param {Array.<string>=} keyIds
+   * @param {Array.<string>=} base64Psshs
+   * @param {Array.<string>=} initDataKeyIds
    * @return {Object} A DrmInfo-like object.
    */
-  function buildDrmInfo(keySystem, opt_keyIds,
-      opt_base64Psshs, opt_initDataKeyIds) {
-    let base64Psshs = opt_base64Psshs || [];
+  function buildDrmInfo(keySystem, keyIds = [],
+      base64Psshs = [], initDataKeyIds) {
     let initData = base64Psshs.map(function(base64, index) {
-      /** @type {shakaExtern.InitDataOverride} */
+      /** @type {shaka.extern.InitDataOverride} */
       let initData = {
         initDataType: 'cenc',
         initData: shaka.util.Uint8ArrayUtils.fromBase64(base64),
-        keyId: opt_initDataKeyIds ? opt_initDataKeyIds[index] : null
+        keyId: initDataKeyIds ? initDataKeyIds[index] : null,
       };
       return initData;
     });
-    let keyIds = opt_keyIds || [];
     let containing = {keySystem: keySystem, initData: initData, keyIds: keyIds};
     return jasmine.objectContaining(containing);
   }
 
-  it('handles clear content', function(done) {
+  it('handles clear content', async () => {
     let source = buildManifestText([], [], []);
     let expected = buildExpectedManifest([]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
   describe('maps standard scheme IDs', function() {
@@ -171,7 +166,7 @@ describe('DashParser ContentProtection', function() {
      * @param {!Array.<string>} keySystems expected key system IDs
      */
     function testKeySystemMappings(name, uuids, keySystems) {
-      it(name, function(done) {
+      it(name, async () => {
         let adaptationSetLines = uuids.map(function(uri) {
           return sprintf('<ContentProtection schemeIdUri="urn:uuid:%s" />',
                          uri);
@@ -181,7 +176,7 @@ describe('DashParser ContentProtection', function() {
           return buildDrmInfo(keySystem);
         });
         let expected = buildExpectedManifest(drmInfos);
-        testDashParser(done, source, expected);
+        await testDashParser(source, expected);
       });
     }
 
@@ -195,32 +190,32 @@ describe('DashParser ContentProtection', function() {
     testKeySystemMappings('for multiple DRMs in the specified order',
         [
           'edef8ba9-79d6-4ace-a3c8-27dcd51d21ed',
-          '9a04f079-9840-4286-ab92-e65be0885f95'
+          '9a04f079-9840-4286-ab92-e65be0885f95',
         ], [
           'com.widevine.alpha',
-          'com.microsoft.playready'
+          'com.microsoft.playready',
         ]);
 
     testKeySystemMappings('in a case-insensitive way',
         [
           'EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED',
           '9A04F079-9840-4286-AB92-E65BE0885F95',
-          'F239E769-EFA3-4850-9C16-A903C6932EFB'
+          'F239E769-EFA3-4850-9C16-A903C6932EFB',
         ], [
           'com.widevine.alpha',
           'com.microsoft.playready',
-          'com.adobe.primetime'
+          'com.adobe.primetime',
         ]);
   });
 
-  it('inherits key IDs from AdaptationSet to Representation', function(done) {
+  it('inherits key IDs from AdaptationSet to Representation', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
       '<ContentProtection',
       '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
-      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />'
+      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
     ], [], []);
     let expected = buildExpectedManifest([
       buildDrmInfo('com.widevine.alpha', [
@@ -228,12 +223,12 @@ describe('DashParser ContentProtection', function() {
         'deadbeeffeedbaadf00d000008675309',
         // Representation 2 key ID
         'deadbeeffeedbaadf00d000008675309',
-      ])
+      ]),
     ]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('sets key IDs for the init data', function(done) {
+  it('sets key IDs for the init data', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
     ], [
@@ -243,36 +238,36 @@ describe('DashParser ContentProtection', function() {
       '    value="cenc"',
       '    cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309">',
       '  <cenc:pssh>bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5</cenc:pssh>',
-      '</ContentProtection>'
+      '</ContentProtection>',
     ], []);
 
     let expected = buildExpectedManifest([
       buildDrmInfo('com.widevine.alpha',
           ['deadbeeffeedbaadf00d000008675309'], // key Id
           ['bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5'], // initData
-          ['deadbeeffeedbaadf00d000008675309']) // key Id for initData
+          ['deadbeeffeedbaadf00d000008675309']), // key Id for initData
     ]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('lets Representations override key IDs', function(done) {
+  it('lets Representations override key IDs', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
       '<ContentProtection',
       '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
-      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />'
+      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
     ], [
       // Representation 1 lines
       '<ContentProtection',
       '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
-      '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />'
+      '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />',
     ], [
       // Representation 2 lines
       '<ContentProtection',
       '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
-      '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-018006492568" />'
+      '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-018006492568" />',
     ]);
     let expected = buildExpectedManifest([
       buildDrmInfo('com.widevine.alpha', [
@@ -280,12 +275,12 @@ describe('DashParser ContentProtection', function() {
         'baadf00dfeeddeafbeef000004390116',
         // Representation 2 key ID
         'baadf00dfeeddeafbeef018006492568',
-      ])
+      ]),
     ]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('extracts embedded PSSHs', function(done) {
+  it('extracts embedded PSSHs', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
@@ -295,63 +290,62 @@ describe('DashParser ContentProtection', function() {
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95">',
       '  <cenc:pssh>bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5</cenc:pssh>',
-      '</ContentProtection>'
+      '</ContentProtection>',
     ], [], []);
     let expected = buildExpectedManifest([
       buildDrmInfo('com.widevine.alpha', [], [
-        'ZmFrZSBXaWRldmluZSBQU1NI'
+        'ZmFrZSBXaWRldmluZSBQU1NI',
       ]),
       buildDrmInfo('com.microsoft.playready', [], [
-        'bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5'
-      ])
+        'bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5',
+      ]),
     ]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('assumes all known key systems for generic CENC', function(done) {
+  it('assumes all known key systems for generic CENC', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
-      '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc" />'
+      '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc" />',
     ], [], []);
     let expected = buildExpectedManifest(
         // The order does not matter here, so use arrayContaining.
         /** @type {!Array.<!Object>} */(jasmine.arrayContaining([
           buildDrmInfo('com.widevine.alpha'),
           buildDrmInfo('com.microsoft.playready'),
-          buildDrmInfo('com.adobe.primetime')
+          buildDrmInfo('com.adobe.primetime'),
         ])));
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('assumes all known key systems when ignoreDrmInfo flag is set',
-      function(done) {
-        let source = buildManifestText([
-          // AdaptationSet lines
-          '<ContentProtection',
-          '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed">',
-          '  <cenc:pssh>ZmFrZSBXaWRldmluZSBQU1NI</cenc:pssh>',
-          '</ContentProtection>',
-          '<ContentProtection',
-          '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95">',
-          '  <cenc:pssh>bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcm</cenc:pssh>',
-          '</ContentProtection>'
-        ], [], []);
+  it('assumes all known key systems when ignoreDrmInfo is set', async () => {
+    let source = buildManifestText([
+      // AdaptationSet lines
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed">',
+      '  <cenc:pssh>ZmFrZSBXaWRldmluZSBQU1NI</cenc:pssh>',
+      '</ContentProtection>',
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95">',
+      '  <cenc:pssh>bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcm</cenc:pssh>',
+      '</ContentProtection>',
+    ], [], []);
 
 
-        let expected = buildExpectedManifest(
-            // The order does not matter here, so use arrayContaining.
-            // NOTE: the buildDrmInfo calls here specify no init data
-            /** @type {!Array.<!Object>} */(jasmine.arrayContaining([
-              buildDrmInfo('com.widevine.alpha'),
-              buildDrmInfo('com.microsoft.playready'),
-              buildDrmInfo('com.adobe.primetime')
-            ])));
-        testDashParser(done, source, expected, /* opt_callback */ undefined,
-                       /* opt_ignoreDrmInfo */ true);
-      });
+    let expected = buildExpectedManifest(
+        // The order does not matter here, so use arrayContaining.
+        // NOTE: the buildDrmInfo calls here specify no init data
+        /** @type {!Array.<!Object>} */(jasmine.arrayContaining([
+          buildDrmInfo('com.widevine.alpha'),
+          buildDrmInfo('com.microsoft.playready'),
+          buildDrmInfo('com.adobe.primetime'),
+        ])));
+    await testDashParser(source, expected, /* callback */ undefined,
+                         /* ignoreDrmInfo */ true);
+  });
 
-  it('parses key IDs when ignoreDrmInfo flag is set', function(done) {
+  it('parses key IDs when ignoreDrmInfo flag is set', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
@@ -359,27 +353,26 @@ describe('DashParser ContentProtection', function() {
       '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"',
-      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />'
+      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
     ], [], []);
     let keyIds = [
       // Representation 1 key ID
       'deadbeeffeedbaadf00d000008675309',
       // Representation 2 key ID
-      'deadbeeffeedbaadf00d000008675309'
+      'deadbeeffeedbaadf00d000008675309',
     ];
 
     let expected = buildExpectedManifest(
         [
-          buildDrmInfo('org.w3.clearkey', keyIds),
           buildDrmInfo('com.widevine.alpha', keyIds),
           buildDrmInfo('com.microsoft.playready', keyIds),
-          buildDrmInfo('com.adobe.primetime', keyIds)
+          buildDrmInfo('com.adobe.primetime', keyIds),
         ]);
-    testDashParser(done, source, expected, /* opt_callback */ undefined,
-                   /* opt_ignoreDrmInfo */ true);
+    await testDashParser(source, expected, /* callback */ undefined,
+                         /* ignoreDrmInfo */ true);
   });
 
-  it('inherits PSSH from generic CENC into all key systems', function(done) {
+  it('inherits PSSH from generic CENC into all key systems', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
@@ -389,20 +382,20 @@ describe('DashParser ContentProtection', function() {
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
       '<ContentProtection',
-      '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95" />'
+      '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95" />',
     ], [], []);
     let expected = buildExpectedManifest([
       buildDrmInfo('com.widevine.alpha', [], [
-        'b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'
+        'b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs',
       ]),
       buildDrmInfo('com.microsoft.playready', [], [
-        'b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'
-      ])
+        'b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs',
+      ]),
     ]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('lets key systems override generic PSSH', function(done) {
+  it('lets key systems override generic PSSH', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
@@ -416,20 +409,20 @@ describe('DashParser ContentProtection', function() {
       '  </cenc:pssh>',
       '</ContentProtection>',
       '<ContentProtection',
-      '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95" />'
+      '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95" />',
     ], [], []);
     let expected = buildExpectedManifest([
       buildDrmInfo('com.widevine.alpha', [], [
-        'VGltZSBpcyBhbiBpbGx1c2lvbi4gTHVuY2h0aW1lIGRvdWJseSBzby4='
+        'VGltZSBpcyBhbiBpbGx1c2lvbi4gTHVuY2h0aW1lIGRvdWJseSBzby4=',
       ]),
       buildDrmInfo('com.microsoft.playready', [], [
-        'b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'
-      ])
+        'b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs',
+      ]),
     ]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('ignores custom or unknown schemes', function(done) {
+  it('ignores custom or unknown schemes', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
@@ -437,15 +430,15 @@ describe('DashParser ContentProtection', function() {
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
       '<ContentProtection',
-      '  schemeIdUri="http://example.com/drm" />'
+      '  schemeIdUri="http://example.com/drm" />',
     ], [], []);
     let expected = buildExpectedManifest([
-      buildDrmInfo('com.widevine.alpha')
+      buildDrmInfo('com.widevine.alpha'),
     ]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('invokes a callback for unknown schemes', function(done) {
+  it('invokes a callback for unknown schemes', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
@@ -453,12 +446,12 @@ describe('DashParser ContentProtection', function() {
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
       '<ContentProtection',
-      '  schemeIdUri="http://example.com/drm" />'
+      '  schemeIdUri="http://example.com/drm" />',
     ], [], []);
 
     /**
      * @param {!Element} contentProtection
-     * @return {Array.<shakaExtern.DrmInfo>}
+     * @return {Array.<shaka.extern.DrmInfo>}
      */
     let callback = function(contentProtection) {
       let schemeIdUri = contentProtection.getAttribute('schemeIdUri');
@@ -472,7 +465,7 @@ describe('DashParser ContentProtection', function() {
           audioRobustness: '',
           serverCertificate: null,
           initData: [],
-          keyIds: []
+          keyIds: [],
         }];
       } else if (schemeIdUri == 'http://example.com/drm') {
         return [{
@@ -484,7 +477,7 @@ describe('DashParser ContentProtection', function() {
           audioRobustness: '',
           serverCertificate: null,
           initData: [],
-          keyIds: []
+          keyIds: [],
         }];
       } else {
         return null;
@@ -494,13 +487,13 @@ describe('DashParser ContentProtection', function() {
     let expected = buildExpectedManifest([
       buildDrmInfo('com.custom.baadd00d'),
       buildDrmInfo('com.widevine.alpha'),
-      buildDrmInfo('com.example.drm')
+      buildDrmInfo('com.example.drm'),
     ]);
 
-    testDashParser(done, source, expected, callback);
+    await testDashParser(source, expected, callback);
   });
 
-  it('inserts a placeholder for unrecognized schemes', function(done) {
+  it('inserts a placeholder for unrecognized schemes', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
@@ -509,7 +502,7 @@ describe('DashParser ContentProtection', function() {
       '  schemeIdUri="http://example.com/drm" />',
       '<ContentProtection',
       '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
-      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />'
+      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
     ], [], []);
     let expected = buildExpectedManifest([
       buildDrmInfo('', // placeholder: only unrecognized schemes found
@@ -518,29 +511,29 @@ describe('DashParser ContentProtection', function() {
           'deadbeeffeedbaadf00d000008675309',
           // Representation 2 key ID
           'deadbeeffeedbaadf00d000008675309',
-        ])
+        ]),
     ]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('can specify ContentProtection in Representation only', function(done) {
+  it('can specify ContentProtection in Representation only', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
     ], [
       // Representation 1 lines
       '<ContentProtection',
-      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />'
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
     ], [
       // Representation 2 lines
       '<ContentProtection',
-      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />'
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
     ]);
     let expected = buildExpectedManifest(
         [buildDrmInfo('com.widevine.alpha')]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('only keeps key systems common to all Representations', function(done) {
+  it('only keeps key systems common to all Representations', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
     ], [
@@ -548,18 +541,18 @@ describe('DashParser ContentProtection', function() {
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95" />',
       '<ContentProtection',
-      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />'
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
     ], [
       // Representation 2 lines
       '<ContentProtection',
-      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />'
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
     ]);
     let expected = buildExpectedManifest(
         [buildDrmInfo('com.widevine.alpha')]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('still keeps per-Representation key IDs when merging', function(done) {
+  it('still keeps per-Representation key IDs when merging', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
     ], [
@@ -568,14 +561,14 @@ describe('DashParser ContentProtection', function() {
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
       '<ContentProtection',
       '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
-      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />'
+      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
     ], [
       // Representation 2 lines
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
       '<ContentProtection',
       '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
-      '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />'
+      '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />',
     ]);
     let expected = buildExpectedManifest([
       buildDrmInfo('com.widevine.alpha', [
@@ -585,10 +578,10 @@ describe('DashParser ContentProtection', function() {
         'baadf00dfeeddeafbeef000004390116',
       ]),
     ]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('parses key IDs from non-cenc in Representation', function(done) {
+  it('parses key IDs from non-cenc in Representation', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
     ], [
@@ -598,7 +591,7 @@ describe('DashParser ContentProtection', function() {
       '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"',
-      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />'
+      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
     ], [
       // Representation 2 lines
       '<ContentProtection',
@@ -606,7 +599,7 @@ describe('DashParser ContentProtection', function() {
       '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />',
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"',
-      '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />'
+      '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />',
     ]);
     let keyIds = [
       // Representation 1 key ID
@@ -617,12 +610,12 @@ describe('DashParser ContentProtection', function() {
     let expected = buildExpectedManifest(
         [
           buildDrmInfo('com.microsoft.playready', keyIds),
-          buildDrmInfo('com.widevine.alpha', keyIds)
+          buildDrmInfo('com.widevine.alpha', keyIds),
         ]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('parses key IDs from non-cenc in AdaptationSet', function(done) {
+  it('parses key IDs from non-cenc in AdaptationSet', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
@@ -630,69 +623,91 @@ describe('DashParser ContentProtection', function() {
       '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"',
-      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />'
+      '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
     ], [], []);
     let keyIds = [
       // Representation 1 key ID
       'deadbeeffeedbaadf00d000008675309',
       // Representation 2 key ID
-      'deadbeeffeedbaadf00d000008675309'
+      'deadbeeffeedbaadf00d000008675309',
     ];
     let expected = buildExpectedManifest(
         [
           buildDrmInfo('com.microsoft.playready', keyIds),
-          buildDrmInfo('com.widevine.alpha', keyIds)
+          buildDrmInfo('com.widevine.alpha', keyIds),
         ]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('ignores elements missing @schemeIdUri', function(done) {
+  it('ignores elements missing @schemeIdUri', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection />',
       '<ContentProtection',
-      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />'
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
     ], [], []);
     let expected = buildExpectedManifest(
         [buildDrmInfo('com.widevine.alpha')]);
-    testDashParser(done, source, expected);
+    await testDashParser(source, expected);
   });
 
-  it('fails for no schemes common', function(done) {
+  it('handles non-default namespace names', async () => {
+    let source = [
+      '<MPD xmlns="urn:mpeg:DASH:schema:MPD:2011"',
+      '    xmlns:foo="urn:mpeg:cenc:2013">',
+      '  <Period duration="PT30S">',
+      '    <SegmentTemplate media="s.mp4" duration="2" />',
+      '    <AdaptationSet mimeType="video/mp4" codecs="avc1.4d401f">',
+      '      <ContentProtection',
+      '          schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed">',
+      '        <foo:pssh>b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs</foo:pssh>',
+      '      </ContentProtection>',
+      '      <Representation bandwidth="50" width="576" height="432" />',
+      '      <Representation bandwidth="100" width="576" height="432" />',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+    let expected = buildExpectedManifest([buildDrmInfo(
+        'com.widevine.alpha', [], ['b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'])]);
+    await testDashParser(source, expected);
+  });
+
+  it('fails for no schemes common', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
     ], [
       // Representation 1 lines
       '<ContentProtection',
-      '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95" />'
+      '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95" />',
     ], [
       // Representation 2 lines
       '<ContentProtection',
-      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />'
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
     ]);
     let expected = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.MANIFEST,
         shaka.util.Error.Code.DASH_NO_COMMON_KEY_SYSTEM);
-    Dash.testFails(done, source, expected);
+    await Dash.testFails(source, expected);
   });
 
-  it('fails for invalid PSSH encoding', function(done) {
+  it('fails for invalid PSSH encoding', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed">',
       '  <cenc:pssh>foobar!</cenc:pssh>',
-      '</ContentProtection>'
+      '</ContentProtection>',
     ], [], []);
     let expected = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.MANIFEST,
         shaka.util.Error.Code.DASH_PSSH_BAD_ENCODING);
-    Dash.testFails(done, source, expected);
+    await Dash.testFails(source, expected);
   });
 
-  it('fails for conflicting default key IDs', function(done) {
+  it('fails for conflicting default key IDs', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
@@ -700,28 +715,28 @@ describe('DashParser ContentProtection', function() {
       '  cenc:default_KID="DEADBEEF-FEED-BAAD-F00D-000008675309" />',
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"',
-      '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />'
+      '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116" />',
     ], [], []);
     let expected = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.MANIFEST,
         shaka.util.Error.Code.DASH_CONFLICTING_KEY_IDS);
-    Dash.testFails(done, source, expected);
+    await Dash.testFails(source, expected);
   });
 
-  it('fails for multiple key IDs', function(done) {
+  it('fails for multiple key IDs', async () => {
     let source = buildManifestText([
       // AdaptationSet lines
       '<ContentProtection',
       '  schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"',
       '  cenc:default_KID="BAADF00D-FEED-DEAF-BEEF-000004390116 foobar" />',
       '<ContentProtection',
-      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />'
+      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
     ], [], []);
     let expected = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.MANIFEST,
         shaka.util.Error.Code.DASH_MULTIPLE_KEY_IDS_NOT_SUPPORTED);
-    Dash.testFails(done, source, expected);
+    await Dash.testFails(source, expected);
   });
 });

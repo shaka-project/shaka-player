@@ -58,22 +58,21 @@ HTMLMediaElement.prototype.generateKeyRequest =
 
 /**
  * @param {string} mimeType
- * @param {string=} opt_keySystem
+ * @param {string=} keySystem
  * @return {string} '', 'maybe', or 'probably'
  * @override the standard one-argument version
  */
 HTMLVideoElement.prototype.canPlayType =
-    function(mimeType, opt_keySystem) {};
-
+    function(mimeType, keySystem) {};
 
 
 /**
  * @constructor
  * @param {string} type
- * @param {Object=} opt_eventInitDict
+ * @param {Object=} eventInitDict
  * @extends {Event}
  */
-function MediaKeyEvent(type, opt_eventInitDict) {}
+function MediaKeyEvent(type, eventInitDict) {}
 
 
 /**
@@ -130,7 +129,6 @@ MediaKeyEvent.prototype.systemCode;
  * @const
  */
 MediaKeyEvent.prototype.target;
-
 
 
 /** @constructor */

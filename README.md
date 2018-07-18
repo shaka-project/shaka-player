@@ -87,13 +87,13 @@ HLS features supported:
  - ISO-BMFF / MP4 / CMAF support
  - MPEG-2 TS support (transmuxing provided by [mux.js][] v4.4+, must be separately included)
  - WebVTT and TTML
+ - CEA-608/708 captions
 
 HLS features **not** supported:
  - Encrypted content with FairPlay: https://github.com/google/shaka-player/issues/382
  - Encrypted content with PlayReady: https://github.com/google/shaka-player/issues/1145
  - Key rotation: https://github.com/google/shaka-player/issues/917
  - I-frame-only playlists: https://github.com/google/shaka-player/issues/742
- - CEA-608/708 captions: https://github.com/google/shaka-player/issues/276
  - Raw AAC (without an MP4 container): https://github.com/google/shaka-player/issues/1083
 
 [mux.js]: https://github.com/videojs/mux.js/releases
@@ -148,7 +148,7 @@ Subtitles are rendered by the browser by default.  Applications can create a
 attributes.
 
 [cueing data]: https://www.webmproject.org/docs/container/#cueing-data
-[text display plugin]: https://nightly-dot-shaka-player-demo.appspot.com/docs/api/shakaExtern.TextDisplayer.html
+[text display plugin]: https://nightly-dot-shaka-player-demo.appspot.com/docs/api/shaka.extern.TextDisplayer.html
 <!-- TODO: replace with a link to a TextDisplayer tutorial -->
 
 
@@ -158,7 +158,8 @@ attributes.
  * [hosted builds on cdnjs](https://cdnjs.com/libraries/shaka-player)
  * [hosted builds on Google Hosted Libraries](https://developers.google.com/speed/libraries/#shaka-player)
  * [announcement list](https://groups.google.com/forum/#!forum/shaka-player-users)
-     (join for release and survey announcements)
+     ([join](docs/announcement-list-join-group.png) for release and survey
+      announcements)
  * [hosted API docs](http://shaka-player-demo.appspot.com/docs/api/index.html)
  * [tutorials](http://shaka-player-demo.appspot.com/docs/api/tutorial-welcome.html)
 

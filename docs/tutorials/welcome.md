@@ -56,7 +56,7 @@ cd shaka-player
 ```
 
 
-#### Compile the library
+#### Compile the library and generate the docs
 
 ```sh
 python build/all.py
@@ -67,15 +67,7 @@ The output is:
  * dist/shaka-player.compiled.debug.js (debug bundle)
  * dist/shaka-player.compiled.externs.js
    (generated externs, for Closure-based projects)
-
-
-#### Generate the documentation
-
-```sh
-python build/docs.py
-```
-
-The output will be in `docs/api/`.
+ * docs/api/index.html (generated documentation)
 
 
 #### Run the tests

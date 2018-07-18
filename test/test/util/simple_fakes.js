@@ -35,7 +35,6 @@ goog.provide('shaka.test.FakeVideo');
  */
 
 
-
 /**
  * A fake AbrManager.
  *
@@ -47,20 +46,19 @@ goog.provide('shaka.test.FakeVideo');
 shaka.test.FakeAbrManager = function() {
   let ret = jasmine.createSpyObj('FakeAbrManager', [
     'stop', 'init', 'enable', 'disable', 'segmentDownloaded',
-    'getBandwidthEstimate', 'chooseVariant', 'setVariants', 'configure'
+    'getBandwidthEstimate', 'chooseVariant', 'setVariants', 'configure',
   ]);
 
-  /** @type {!Array.<shakaExtern.Variant>} */
-  let variants = [];
+  ret.variants = [];
 
   ret.chooseIndex = 0;
 
   ret.init.and.callFake(function(switchCallback) {
     ret.switchCallback = switchCallback;
   });
-  ret.setVariants.and.callFake(function(arg) { variants = arg; });
+  ret.setVariants.and.callFake(function(arg) { ret.variants = arg; });
   ret.chooseVariant.and.callFake(function() {
-    return variants[ret.chooseIndex];
+    return ret.variants[ret.chooseIndex];
   });
 
   return ret;
@@ -71,7 +69,11 @@ shaka.test.FakeAbrManager = function() {
 shaka.test.FakeAbrManager.prototype.chooseIndex;
 
 
-/** @type {shakaExtern.AbrManager.SwitchCallback} */
+/** @type {!Array.<shaka.extern.Variant>} */
+shaka.test.FakeAbrManager.prototype.variants;
+
+
+/** @type {shaka.extern.AbrManager.SwitchCallback} */
 shaka.test.FakeAbrManager.prototype.switchCallback;
 
 
@@ -111,7 +113,6 @@ shaka.test.FakeAbrManager.prototype.setVariants;
 shaka.test.FakeAbrManager.prototype.configure;
 
 
-
 /**
  * A fake DrmEngine.
  *
@@ -128,7 +129,7 @@ shaka.test.FakeDrmEngine = function() {
   let ret = jasmine.createSpyObj('FakeDrmEngine', [
     'attach', 'configure', 'destroy', 'getDrmInfo', 'getExpiration',
     'getSessionIds', 'getSupportedTypes', 'init', 'initialized',
-    'isSupportedByKeySystem', 'keySystem'
+    'isSupportedByKeySystem', 'keySystem',
   ]);
   ret.attach.and.callFake(resolve);
   ret.destroy.and.callFake(resolve);
@@ -166,13 +167,12 @@ shaka.test.FakeDrmEngine.prototype.attach;
 shaka.test.FakeDrmEngine.prototype.getExpiration;
 
 
-/** @param {?shakaExtern.DrmInfo} info */
+/** @param {?shaka.extern.DrmInfo} info */
 shaka.test.FakeDrmEngine.prototype.setDrmInfo;
 
 
 /** @param {!Array.<string>} sessions */
 shaka.test.FakeDrmEngine.prototype.setSessionIds;
-
 
 
 /**
@@ -196,7 +196,7 @@ shaka.test.FakeStreamingEngine = function(onChooseStreams, onCanSwitch) {
     'destroy', 'configure', 'init', 'getCurrentPeriod', 'getActivePeriod',
     'getActiveAudio', 'getActiveVideo', 'getActiveText', 'loadNewTextStream',
     'switchVariant', 'switchTextStream', 'seeked',
-    'unloadTextStream'
+    'unloadTextStream',
   ]);
   ret.destroy.and.callFake(resolve);
   ret.getCurrentPeriod.and.returnValue(null);
@@ -262,19 +262,18 @@ shaka.test.FakeStreamingEngine.prototype.onChooseStreams;
 shaka.test.FakeStreamingEngine.prototype.onCanSwitch;
 
 
-
 /**
  * Creates a fake manifest parser.
  *
  * @constructor
- * @param {shakaExtern.Manifest} manifest
+ * @param {shaka.extern.Manifest} manifest
  * @struct
- * @implements {shakaExtern.ManifestParser}
+ * @implements {shaka.extern.ManifestParser}
  * @return {!Object}
  */
 shaka.test.FakeManifestParser = function(manifest) {
   let ret = jasmine.createSpyObj('FakeManifestParser', [
-    'start', 'stop', 'configure', 'update', 'onExpirationUpdated'
+    'start', 'stop', 'configure', 'update', 'onExpirationUpdated',
   ]);
   ret.start.and.callFake(function(manifestUri, playerInterface) {
     ret.playerInterface = playerInterface;
@@ -307,23 +306,22 @@ shaka.test.FakeManifestParser.prototype.onExpirationUpdated;
 shaka.test.FakeManifestParser.prototype.configure;
 
 
-/** @type {shakaExtern.ManifestParser.PlayerInterface} */
+/** @type {shaka.extern.ManifestParser.PlayerInterface} */
 shaka.test.FakeManifestParser.prototype.playerInterface;
-
 
 
 /**
  * Creates a fake video element.
- * @param {number=} opt_currentTime
+ * @param {number=} currentTime
  *
  * @constructor
  * @struct
  * @extends {HTMLVideoElement}
  * @return {!Object}
  */
-shaka.test.FakeVideo = function(opt_currentTime) {
+shaka.test.FakeVideo = function(currentTime) {
   let video = {
-    currentTime: opt_currentTime || 0,
+    currentTime: currentTime || 0,
     readyState: 0,
     playbackRate: 1,
     volume: 1,
@@ -347,7 +345,7 @@ shaka.test.FakeVideo = function(opt_currentTime) {
     pause: jasmine.createSpy('pause'),
     dispatchEvent: jasmine.createSpy('dispatchEvent'),
 
-    on: {}  // event listeners
+    on: {},  // event listeners
   };
   video.setMediaKeys.and.returnValue(Promise.resolve());
   video.addTextTrack.and.callFake(function(kind, id) {
@@ -391,10 +389,9 @@ function createFakeBuffered(ranges) {
     end: function(i) {
       if (i >= 0 && i < ranges.length) return ranges[i].end;
       throw new Error('Unexpected index');
-    }
+    },
   });
 }
-
 
 
 /**
@@ -490,7 +487,6 @@ shaka.test.FakePresentationTimeline.prototype.getSeekRangeStart;
 shaka.test.FakePresentationTimeline.prototype.getSeekRangeEnd;
 
 
-
 /**
  * Creates a fake Playhead object.
  *
@@ -507,7 +503,7 @@ shaka.test.FakePlayhead = function() {
     getTime: jasmine.createSpy('getTime').and.returnValue(0),
     setBuffering: jasmine.createSpy('setBuffering'),
     getPlaybackRate: jasmine.createSpy('getPlaybackRate').and.returnValue(1),
-    setPlaybackRate: jasmine.createSpy('setPlaybackRate')
+    setPlaybackRate: jasmine.createSpy('setPlaybackRate'),
   };
 };
 
@@ -540,7 +536,6 @@ shaka.test.FakePlayhead.prototype.getPlaybackRate;
 shaka.test.FakePlayhead.prototype.setPlaybackRate;
 
 
-
 /**
  * Creates a fake PlayheadObserver object.
  *
@@ -554,7 +549,7 @@ shaka.test.FakePlayheadObserver = function() {
     destroy: jasmine.createSpy('destroy').and.returnValue(Promise.resolve()),
     seeked: jasmine.createSpy('seeked'),
     setRebufferingGoal: jasmine.createSpy('setRebufferingGoal'),
-    addTimelineRegion: jasmine.createSpy('addTimelineRegion')
+    addTimelineRegion: jasmine.createSpy('addTimelineRegion'),
   };
 };
 
@@ -571,7 +566,6 @@ shaka.test.FakePlayheadObserver.prototype.setRebufferingGoal;
 shaka.test.FakePlayheadObserver.prototype.addTimelineRegion;
 
 
-
 /**
  * Creates a text track.
  *
@@ -584,7 +578,7 @@ shaka.test.FakeTextTrack = function() {
   let track = {
     addCue: jasmine.createSpy('addCue'),
     removeCue: jasmine.createSpy('removeCue'),
-    cues: []
+    cues: [],
   };
   track.addCue.and.callFake(function(cue) {
     track.cues.push(cue);
@@ -606,7 +600,6 @@ shaka.test.FakeTextTrack.prototype.addCue;
 shaka.test.FakeTextTrack.prototype.removeCue;
 
 
-
 /**
  * Creates a text track.
  *
@@ -623,7 +616,7 @@ shaka.test.FakeTextDisplayer = function() {
         jasmine.createSpy('destroy').and.returnValue(Promise.resolve()),
     isTextVisible: jasmine.createSpy('isTextVisible'),
     setTextVisibility: jasmine.createSpy('setTextVisibility'),
-    textVisible: false
+    textVisible: false,
   };
 
   displayer.isTextVisible.and.callFake(function() {
@@ -650,7 +643,6 @@ shaka.test.FakeTextDisplayer.prototype.append;
 shaka.test.FakeTextDisplayer.prototype.destroy;
 
 
-
 /**
  * Creates a transmuxer.
  *
@@ -662,12 +654,12 @@ shaka.test.FakeTextDisplayer.prototype.destroy;
 shaka.test.FakeTransmuxer = function() {
   let output = {
     data: new Uint8Array(),
-    captions: []
+    captions: [],
   };
   let transmuxer = {
     destroy: jasmine.createSpy('destroy').and.returnValue(Promise.resolve()),
     transmux: jasmine.createSpy('transmux').and
-        .returnValue(Promise.resolve(output))
+        .returnValue(Promise.resolve(output)),
   };
   return transmuxer;
 };

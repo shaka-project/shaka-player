@@ -25,12 +25,12 @@ describe('DrmEngine', function() {
   const audioInitSegmentUri = '/base/test/test/assets/multidrm-audio-init.mp4';
   const audioSegmentUri = '/base/test/test/assets/multidrm-audio-segment.mp4';
 
-  /** @type {!Object.<string, ?shakaExtern.DrmSupportType>} */
+  /** @type {!Object.<string, ?shaka.extern.DrmSupportType>} */
   let support = {};
 
   /** @type {!HTMLVideoElement} */
   let video;
-  /** @type {shakaExtern.Manifest} */
+  /** @type {shaka.extern.Manifest} */
   let manifest;
 
   /** @type {!jasmine.Spy} */
@@ -60,7 +60,7 @@ describe('DrmEngine', function() {
   /** @type {!ArrayBuffer} */
   let audioSegment;
 
-  beforeAll(function(done) {
+  beforeAll(async () => {
     let supportTest = shaka.media.DrmEngine.probeSupport()
         .then(function(result) { support = result; })
         .catch(fail);
@@ -71,21 +71,20 @@ describe('DrmEngine', function() {
     video.muted = true;
     document.body.appendChild(video);
 
-    Promise.all([
+    let responses = await Promise.all([
       supportTest,
       shaka.test.Util.fetch(videoInitSegmentUri),
       shaka.test.Util.fetch(videoSegmentUri),
       shaka.test.Util.fetch(audioInitSegmentUri),
-      shaka.test.Util.fetch(audioSegmentUri)
-    ]).then(function(responses) {
-      videoInitSegment = responses[1];
-      videoSegment = responses[2];
-      audioInitSegment = responses[3];
-      audioSegment = responses[4];
-    }).catch(fail).then(done);
+      shaka.test.Util.fetch(audioSegmentUri),
+    ]);
+    videoInitSegment = responses[1];
+    videoSegment = responses[2];
+    audioInitSegment = responses[3];
+    audioSegment = responses[4];
   });
 
-  beforeEach(function(done) {
+  beforeEach(async () => {
     onErrorSpy = jasmine.createSpy('onError');
     onKeyStatusSpy = jasmine.createSpy('onKeyStatus');
     onExpirationSpy = jasmine.createSpy('onExpirationUpdated');
@@ -100,7 +99,7 @@ describe('DrmEngine', function() {
         'IjoiNjllNTQwODgtZTllMC00NTMwLThjMWEtMWViNmRjZDBkMTRlIiwibWVzc2FnZSI6e',
         'yJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIjoiNmU1YTFkMj',
         'YtMjc1Ny00N2Q3LTgwNDYtZWFhNWQxZDM0YjVhIn1dfX0.yF7PflOPv9qHnu3ZWJNZ12j',
-        'gkqTabmwXbDWk_47tLNE'
+        'gkqTabmwXbDWk_47tLNE',
       ].join('');
     });
 
@@ -109,7 +108,7 @@ describe('DrmEngine', function() {
       onError: shaka.test.Util.spyFunc(onErrorSpy),
       onKeyStatus: shaka.test.Util.spyFunc(onKeyStatusSpy),
       onExpirationUpdated: shaka.test.Util.spyFunc(onExpirationSpy),
-      onEvent: shaka.test.Util.spyFunc(onEventSpy)
+      onEvent: shaka.test.Util.spyFunc(onEventSpy),
     };
 
     drmEngine = new shaka.media.DrmEngine(playerInterface);
@@ -122,8 +121,8 @@ describe('DrmEngine', function() {
         'com.widevine.alpha':
             'https://drm-widevine-licensing.axtest.net/AcquireLicense',
         'com.microsoft.playready':
-            'https://drm-playready-licensing.axtest.net/AcquireLicense'
-      }
+            'https://drm-playready-licensing.axtest.net/AcquireLicense',
+      },
     };
     drmEngine.configure(config);
 
@@ -148,16 +147,16 @@ describe('DrmEngine', function() {
     let expectedObject = {};
     expectedObject[ContentType.AUDIO] = audioStream;
     expectedObject[ContentType.VIDEO] = videoStream;
-    mediaSourceEngine.init(expectedObject, false).then(done);
+    await mediaSourceEngine.init(expectedObject, false);
   });
 
-  afterEach(function(done) {
-    Promise.all([
+  afterEach(async () => {
+    await Promise.all([
       eventManager.destroy(),
       mediaSourceEngine.destroy(),
       networkingEngine.destroy(),
-      drmEngine.destroy()
-    ]).then(done);
+      drmEngine.destroy(),
+    ]);
   });
 
   afterAll(function() {
@@ -165,7 +164,7 @@ describe('DrmEngine', function() {
   });
 
   describe('basic flow', function() {
-    drm_it('gets a license and can play encrypted segments',
+    drmIt('gets a license and can play encrypted segments',
         checkAndRun((done) => {
           // The error callback should not be invoked.
           onErrorSpy.and.callFake(fail);

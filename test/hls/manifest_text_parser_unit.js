@@ -42,8 +42,8 @@ describe('ManifestTextParser', function() {
           {
             type: shaka.hls.PlaylistType.MEDIA,
             tags: [
-              new shaka.hls.Tag(/* id */ 0, 'EXT-X-TARGETDURATION', [], '6')
-            ]
+              new shaka.hls.Tag(/* id */ 0, 'EXT-X-TARGETDURATION', [], '6'),
+            ],
           },
           '#EXTM3U\n' +
           '#EXT-X-TARGETDURATION:6\n');
@@ -58,9 +58,9 @@ describe('ManifestTextParser', function() {
               new shaka.hls.Tag(/* id */ 1, 'EXT-X-STREAM-INF',
                   [
                     new shaka.hls.Attribute('BANDWIDTH', '2165224'),
-                    new shaka.hls.Attribute('URI', 'prog_index.m3u8')
-                  ])
-            ]
+                    new shaka.hls.Attribute('URI', 'prog_index.m3u8'),
+                  ]),
+            ],
           },
           '#EXTM3U\n' +
           '#EXT-X-TARGETDURATION:6\n' +
@@ -73,8 +73,8 @@ describe('ManifestTextParser', function() {
           {
             type: shaka.hls.PlaylistType.MEDIA,
             tags: [
-              new shaka.hls.Tag(/* id */ 0, 'EXT-X-TARGETDURATION', [], '6')
-            ]
+              new shaka.hls.Tag(/* id */ 0, 'EXT-X-TARGETDURATION', [], '6'),
+            ],
           },
           '#EXTM3U\n' +
           '#Comment\n' +
@@ -82,7 +82,7 @@ describe('ManifestTextParser', function() {
     });
 
     /**
-     * @param {!string} string
+     * @param {string} string
      * @param {shaka.util.Error.Code} code
      */
     function verifyError(string, code) {
@@ -106,8 +106,8 @@ describe('ManifestTextParser', function() {
           {
             type: shaka.hls.PlaylistType.MASTER,
             tags: [
-              new shaka.hls.Tag(/* id */ 0, 'EXT-X-INDEPENDENT-SEGMENTS', [])
-            ]
+              new shaka.hls.Tag(/* id */ 0, 'EXT-X-INDEPENDENT-SEGMENTS', []),
+            ],
           },
           '#EXTM3U\n' +
           '#EXT-X-INDEPENDENT-SEGMENTS');
@@ -116,8 +116,8 @@ describe('ManifestTextParser', function() {
           {
             type: shaka.hls.PlaylistType.MEDIA,
             tags: [
-              new shaka.hls.Tag(/* id */ 1, 'EXT-X-PLAYLIST-TYPE', [], 'VOD')
-            ]
+              new shaka.hls.Tag(/* id */ 1, 'EXT-X-PLAYLIST-TYPE', [], 'VOD'),
+            ],
           },
           '#EXTM3U\n' +
           '#EXT-X-PLAYLIST-TYPE:VOD');
@@ -126,8 +126,8 @@ describe('ManifestTextParser', function() {
           {
             type: shaka.hls.PlaylistType.MEDIA,
             tags: [
-              new shaka.hls.Tag(/* id */ 2, 'EXT-X-MEDIA-SEQUENCE', [], '1')
-            ]
+              new shaka.hls.Tag(/* id */ 2, 'EXT-X-MEDIA-SEQUENCE', [], '1'),
+            ],
           },
           '#EXTM3U\n' +
           '#EXT-X-MEDIA-SEQUENCE:1');
@@ -139,8 +139,8 @@ describe('ManifestTextParser', function() {
             type: shaka.hls.PlaylistType.MASTER,
             tags: [
               new shaka.hls.Tag(/* id */ 0, 'EXT-X-MEDIA',
-                  [new shaka.hls.Attribute('TYPE', 'CLOSED-CAPTIONS')])
-            ]
+                  [new shaka.hls.Attribute('TYPE', 'CLOSED-CAPTIONS')]),
+            ],
           },
           '#EXTM3U\n' +
           '#EXT-X-MEDIA:TYPE=CLOSED-CAPTIONS');
@@ -152,9 +152,9 @@ describe('ManifestTextParser', function() {
               new shaka.hls.Tag(/* id */ 1, 'EXT-X-MEDIA',
                   [
                     new shaka.hls.Attribute('URI', 'main.mp4'),
-                    new shaka.hls.Attribute('BYTERANGE', '720@0')
-                  ])
-            ]
+                    new shaka.hls.Attribute('BYTERANGE', '720@0'),
+                  ]),
+            ],
           },
           '#EXTM3U\n' +
           '#EXT-X-MEDIA:URI="main.mp4",BYTERANGE="720@0"');
@@ -167,9 +167,9 @@ describe('ManifestTextParser', function() {
             tags: [
               new shaka.hls.Tag(/* id */ 0, 'EXT-X-MEDIA',
                   [
-                    new shaka.hls.Attribute('CODECS', 'avc1.64002a,mp4a.40.2')
-                  ])
-            ]
+                    new shaka.hls.Attribute('CODECS', 'avc1.64002a,mp4a.40.2'),
+                  ]),
+            ],
           },
           '#EXTM3U\n' +
           '#EXT-X-MEDIA:CODECS="avc1.64002a,mp4a.40.2"');
@@ -181,9 +181,9 @@ describe('ManifestTextParser', function() {
               new shaka.hls.Tag(/* id */ 1, 'EXT-X-MEDIA',
                   [
                     new shaka.hls.Attribute('CODECS',
-                                            'avc1.64002a,mp4a.40.2,avc2.64000')
-                  ])
-            ]
+                                            'avc1.64002a,mp4a.40.2,avc2.64000'),
+                  ]),
+            ],
           },
           '#EXTM3U\n' +
           '#EXT-X-MEDIA:CODECS="avc1.64002a,mp4a.40.2,avc2.64000"');
@@ -196,9 +196,9 @@ describe('ManifestTextParser', function() {
                   [
                     new shaka.hls.Attribute('CODECS',
                                             'avc1.64002a,mp4a.40.2'),
-                    new shaka.hls.Attribute('AUDIO', 'a1,a2')
-                  ])
-            ]
+                    new shaka.hls.Attribute('AUDIO', 'a1,a2'),
+                  ]),
+            ],
           },
           '#EXTM3U\n' +
           '#EXT-X-MEDIA:CODECS="avc1.64002a,mp4a.40.2",AUDIO="a1,a2"');
@@ -246,14 +246,14 @@ describe('ManifestTextParser', function() {
           {
             type: shaka.hls.PlaylistType.MEDIA,
             tags: [
-              new shaka.hls.Tag(/* id */ 0, 'EXT-X-MEDIA-SEQUENCE', [], '1')
+              new shaka.hls.Tag(/* id */ 0, 'EXT-X-MEDIA-SEQUENCE', [], '1'),
             ],
             segments: [
               new shaka.hls.Segment('https://test/test.mp4',
                   [
-                    new shaka.hls.Tag(/* id */ 2, 'EXTINF', [], '5.99467')
-                  ])
-            ]
+                    new shaka.hls.Tag(/* id */ 2, 'EXTINF', [], '5.99467'),
+                  ]),
+            ],
           },
           '#EXTM3U\n' +
           '#EXT-X-MEDIA-SEQUENCE:1\n' +
@@ -266,7 +266,7 @@ describe('ManifestTextParser', function() {
           {
             type: shaka.hls.PlaylistType.MEDIA,
             tags: [
-              new shaka.hls.Tag(/* id */ 2, 'EXT-X-TARGETDURATION', [], '6')
+              new shaka.hls.Tag(/* id */ 2, 'EXT-X-TARGETDURATION', [], '6'),
             ],
             segments: [
               new shaka.hls.Segment('https://test/test.mp4',
@@ -275,11 +275,11 @@ describe('ManifestTextParser', function() {
                     [
                       new shaka.hls.Attribute('METHOD', 'AES-128'),
                       new shaka.hls.Attribute('URI', 'http://key.com'),
-                      new shaka.hls.Attribute('IV', '123')
+                      new shaka.hls.Attribute('IV', '123'),
                     ]),
-                  new shaka.hls.Tag(/* id */ 3, 'EXTINF', [], '5.99467')
-                ])
-            ]
+                  new shaka.hls.Tag(/* id */ 3, 'EXTINF', [], '5.99467'),
+                ]),
+            ],
           },
           '#EXTM3U\n' +
           '#EXT-X-KEY:METHOD="AES-128",URI="http://key.com",IV="123"\n' +
@@ -294,14 +294,14 @@ describe('ManifestTextParser', function() {
             uri: 'https://test/manifest.m3u8',
             type: shaka.hls.PlaylistType.MEDIA,
             tags: [
-              new shaka.hls.Tag(/* id */ 0, 'EXT-X-MEDIA-SEQUENCE', [], '1')
+              new shaka.hls.Tag(/* id */ 0, 'EXT-X-MEDIA-SEQUENCE', [], '1'),
             ],
             segments: [
               new shaka.hls.Segment('test.mp4',
                   [
-                    new shaka.hls.Tag(/* id */ 2, 'EXTINF', [], '5.99467')
-                  ])
-            ]
+                    new shaka.hls.Tag(/* id */ 2, 'EXTINF', [], '5.99467'),
+                  ]),
+            ],
           },
           // playlist text:
           '#EXTM3U\n' +
@@ -326,14 +326,14 @@ describe('ManifestTextParser', function() {
           {
             type: shaka.hls.PlaylistType.MEDIA,
             tags: [
-              new shaka.hls.Tag(/* id */ 0, 'EXT-X-TARGETDURATION', [], '6')
+              new shaka.hls.Tag(/* id */ 0, 'EXT-X-TARGETDURATION', [], '6'),
             ],
             segments: [
               new shaka.hls.Segment('uri',
                                     [new shaka.hls.Tag(2, 'EXTINF', [], '5')]),
               new shaka.hls.Segment('uri2',
-                                    [new shaka.hls.Tag(3, 'EXTINF', [], '4')])
-            ]
+                                    [new shaka.hls.Tag(3, 'EXTINF', [], '4')]),
+            ],
           },
           manifestText);
     });
@@ -343,14 +343,14 @@ describe('ManifestTextParser', function() {
             type: shaka.hls.PlaylistType.MEDIA,
             tags: [
               new shaka.hls.Tag(/* id */ 0, 'EXT-X-TARGETDURATION', [], '6'),
-              new shaka.hls.Tag(/* id */ 4, 'EXT-X-ENDLIST', [])
+              new shaka.hls.Tag(/* id */ 4, 'EXT-X-ENDLIST', []),
             ],
             segments: [
               new shaka.hls.Segment('uri',
                                     [new shaka.hls.Tag(2, 'EXTINF', [], '5')]),
               new shaka.hls.Segment('uri2',
-                                    [new shaka.hls.Tag(3, 'EXTINF', [], '4')])
-            ]
+                                    [new shaka.hls.Tag(3, 'EXTINF', [], '4')]),
+            ],
           },
           // Append a playlist tag to the manifest text so it appears after
           // segment-related tags.
@@ -362,10 +362,9 @@ describe('ManifestTextParser', function() {
   /**
    * @param {Object} expectedPlaylist
    * @param {string} playlistText
-   * @param {string=} opt_manifestUri
+   * @param {string=} manifestUri
    */
-  function verifyPlaylist(expectedPlaylist, playlistText, opt_manifestUri) {
-    let manifestUri = opt_manifestUri || '';
+  function verifyPlaylist(expectedPlaylist, playlistText, manifestUri = '') {
     let playlistBuffer = shaka.util.StringUtils.toUTF8(playlistText);
     let actualPlaylist = parser.parsePlaylist(playlistBuffer, manifestUri);
 

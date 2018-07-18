@@ -39,12 +39,12 @@ function getClientArg(name) {
    * A version of assert() which hooks into jasmine and converts all failed
    * assertions into failed tests.
    * @param {*} condition
-   * @param {string=} opt_message
+   * @param {string=} message
    */
-  function jasmineAssert(condition, opt_message) {
-    realAssert(condition, opt_message);
+  function jasmineAssert(condition, message) {
+    realAssert(condition, message);
     if (!condition) {
-      let message = opt_message || 'Assertion failed.';
+      message = message || 'Assertion failed.';
       console.error(message);
       try {
         throw new Error(message);
@@ -133,26 +133,21 @@ function getClientArg(name) {
    * @return {jasmine.Callback}
    */
   function filterShim(callback, clientArg, skipMessage) {
-    if (callback.length) {
-      // This callback is for an async test.  Replace it with an async shim.
-      return function(done) {
-        if (getClientArg(clientArg)) {
-          callback(done);
-        } else {
-          pending(skipMessage);
-          done();
-        }
-      };
-    } else {
-      // This callback is for a synchronous test.  Use a synchronous shim.
-      return function() {
-        if (getClientArg(clientArg)) {
-          callback();
-        } else {
-          pending(skipMessage);
-        }
-      };
-    }
+    return async function() {
+      if (!getClientArg(clientArg)) {
+        pending(skipMessage);
+        return;
+      }
+
+      if (callback.length) {
+        // If this has a done callback, wrap in a Promise so we can await it.
+        await new Promise((resolve) => callback(resolve));
+      } else {
+        // If this is an async test, this will wait for it to complete; if this
+        // is a synchronous test, await will do nothing.
+        await callback();
+      }
+    };
   }
 
   /**
@@ -161,7 +156,7 @@ function getClientArg(name) {
    * @param {string} name
    * @param {jasmine.Callback} callback
    */
-  window.external_it = function(name, callback) {
+  window.externalIt = function(name, callback) {
     it(name, filterShim(callback, 'external',
         'Skipping tests that use external content.'));
   };
@@ -172,7 +167,7 @@ function getClientArg(name) {
    * @param {string} name
    * @param {jasmine.Callback} callback
    */
-  window.drm_it = function(name, callback) {
+  window.drmIt = function(name, callback) {
     it(name, filterShim(callback, 'drm',
         'Skipping tests that use a DRM license server.'));
   };
@@ -183,7 +178,7 @@ function getClientArg(name) {
    * @param {string} name
    * @param {jasmine.Callback} callback
    */
-  window.quarantined_it = function(name, callback) {
+  window.quarantinedIt = function(name, callback) {
     it(name, filterShim(callback, 'quarantined',
         'Skipping tests that are quarantined.'));
   };

@@ -244,17 +244,34 @@ function getIdentifierString(node) {
  */
 function getFunctionParameters(node) {
   console.assert(node.type == 'FunctionExpression');
-  // Example code: function(x, y) {...}
+  // Example code: function(x, y, z = null, ...varArgs) {...}
   // Example node: {
   //   params: [
   //     { type: 'Identifier', name: 'x' },
   //     { type: 'Identifier', name: 'y' },
+  //     {
+  //       type: 'AssignmentPattern',
+  //       left: { type: 'Identifier', name: 'z' },
+  //       right: { type: 'Literal', raw: 'null' },
+  //     },
+  //     {
+  //       type: 'RestElement',
+  //       argument: { type: 'Identifier', name: 'varArgs' },
+  //     },
   //   ],
   //   body: {...},
   // }
   return node.params.map(function(param) {
-    console.assert(param.type == 'Identifier');
-    return param.name;
+    console.assert(param.type == 'Identifier' ||
+                   param.type == 'AssignmentPattern' ||
+                   param.type == 'RestElement');
+    if (param.type == 'Identifier') {
+      return param.name;
+    } else if (param.type == 'AssignmentPattern') {
+      return param.left.name;
+    } else if (param.type == 'RestElement') {
+      return '...' + param.argument.name;
+    }
   });
 }
 
@@ -328,7 +345,7 @@ function createExternFromExportNode(names, node) {
       //   }
       // }
       name = getIdentifierString(node.expression.left);
-      assignment = createExternAssignment(node.expression.right);
+      assignment = createExternAssignment(name, node.expression.right);
       break;
 
     case 'MemberExpression':
@@ -362,11 +379,70 @@ function createExternFromExportNode(names, node) {
 
 
 /**
+ * @param {ASTNode} node A method node from the abstract syntax tree.
+ * @return {string} The extern string for this method.
+ */
+function createExternMethod(node) {
+  // Example code: foo.bar = class {
+  //   baz() { ... }
+  // };
+  // Example node: {
+  //   leadingComments: [ ... ],
+  //   static: false,
+  //   key: Identifier,
+  //   value: FunctionExpression,
+  // }
+  let comment = getLeadingBlockComment(node);
+  comment = removeExportAnnotationsFromComment(comment);
+
+  const params = getFunctionParameters(node.value);
+  const id = getIdentifierString(node.key);
+
+  let methodString = '  ' + comment + '\n  ';
+  if (node.static) methodString += 'static ';
+  methodString += id + '(' + params + ') {}';
+  return methodString;
+}
+
+
+/**
+ * @param {string} name The name of the thing we are assigning.
  * @param {ASTNode} node An assignment node from the abstract syntax tree.
  * @return {string} The assignment part of the extern string for this node.
  */
-function createExternAssignment(node) {
+function createExternAssignment(name, node) {
   switch (node.type) {
+    case 'ClassExpression':
+      // Example code: foo.bar = class bar2 extends foo.baz { /* ... */ };
+      // Example node: {
+      //   id: { name: 'bar' },   // or null
+      //   superClass: { type: 'MemberExpression', ... },  // or null
+      //   body: { body: [ ... ] },
+      // }
+      let classString = ' = class ';
+      if (node.id) {
+        classString += getIdentifierString(node.id) + ' ';
+      }
+      if (node.superClass) {
+        classString += 'extends ' + getIdentifierString(node.superClass) + ' ';
+      }
+      classString += '{\n';
+      node.body.body.forEach((member) => {
+        // Only look at exported members.  Constructors are exported implicitly
+        // when the class is exported.
+        var comment = getLeadingBlockComment(member);
+        if (!EXPORT_REGEX.test(comment) && member.key.name != 'constructor') {
+          return;
+        }
+
+        console.assert(member.type == 'MethodDefinition',
+                       'Unexpected exported member type in exported class!');
+
+        classString += createExternMethod(member) + '\n';
+      });
+      classString += '}';
+      return classString;
+
     case 'FunctionExpression':
       // Example code: foo.square = function(x) { return x * x; };
       // Example node: { params: [ { type: 'Identifier', name: 'x' } ] }

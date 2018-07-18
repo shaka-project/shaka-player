@@ -21,7 +21,6 @@ goog.require('shaka.util.PublicPromise');
 
 
 shaka.test.SimpleIDB = class {
-
   /**
    * @param {!IDBDatabase} db
    */

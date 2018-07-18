@@ -51,13 +51,13 @@ describe('ConfigUtils', function() {
             {
               sed: null,
               do_: undefined,
-              eiusmod: []
-            }
-          ]
+              eiusmod: [],
+            },
+          ],
         },
         player: {
-          other: 123
-        }
+          other: 123,
+        },
       };
       let copy = cloneObject(o);
       expect(copy).not.toBe(o);

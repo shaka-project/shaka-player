@@ -32,7 +32,8 @@ Basic usage of Shaka Player is very easy:
 ```js
 // myapp.js
 
-var manifestUri = '//storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd';
+var manifestUri =
+    'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd';
 
 function initApp() {
   // Install built-in polyfills to patch browser incompatibilities.

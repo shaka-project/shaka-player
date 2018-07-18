@@ -42,7 +42,7 @@ describe('TextEngine', function() {
     mockParserPlugIn = function() {
       return {
         parseInit: mockParseInit,
-        parseMedia: mockParseMedia
+        parseMedia: mockParseMedia,
       };
     };
 
@@ -149,7 +149,7 @@ describe('TextEngine', function() {
           createFakeCue(time.periodStart + 0,
                         time.periodStart + 1),
           createFakeCue(time.periodStart + 2,
-                        time.periodStart + 3)
+                        time.periodStart + 3),
         ];
       });
 
@@ -161,7 +161,7 @@ describe('TextEngine', function() {
         expect(mockDisplayer.append).toHaveBeenCalledWith(
             [
               createFakeCue(0, 1),
-              createFakeCue(2, 3)
+              createFakeCue(2, 3),
             ]);
 
         mockDisplayer.append.calls.reset();
@@ -174,7 +174,7 @@ describe('TextEngine', function() {
         expect(mockDisplayer.append).toHaveBeenCalledWith(
             [
               createFakeCue(4, 5),
-              createFakeCue(6, 7)
+              createFakeCue(6, 7),
             ]);
       }).catch(fail).then(done);
     });
@@ -239,6 +239,17 @@ describe('TextEngine', function() {
         expect(textEngine.bufferEnd()).toBe(null);
       }).catch(fail).then(done);
     });
+
+    it('handles timestamp offset', async function() {
+      textEngine.setTimestampOffset(60);
+      await textEngine.appendBuffer(dummyData, 0, 3);
+      expect(textEngine.bufferStart()).toBe(60);
+      expect(textEngine.bufferEnd()).toBe(63);
+
+      await textEngine.appendBuffer(dummyData, 3, 6);
+      expect(textEngine.bufferStart()).toBe(60);
+      expect(textEngine.bufferEnd()).toBe(66);
+    });
   });
 
   describe('bufferedAheadOf', function() {
@@ -271,6 +282,12 @@ describe('TextEngine', function() {
         expect(textEngine.bufferedAheadOf(2.5)).toBeCloseTo(0.5);
       }).catch(fail).then(done);
     });
+
+    it('handles timestamp offset', async function() {
+      textEngine.setTimestampOffset(60);
+      await textEngine.appendBuffer(dummyData, 3, 6);
+      expect(textEngine.bufferedAheadOf(64)).toBe(2);
+    });
   });
 
   describe('setAppendWindow', function() {
@@ -286,7 +303,7 @@ describe('TextEngine', function() {
         expect(mockDisplayer.append).toHaveBeenCalledWith(
             [
               createFakeCue(0, 1),
-              createFakeCue(1, 2)
+              createFakeCue(1, 2),
             ]);
 
         mockDisplayer.append.calls.reset();
@@ -296,7 +313,7 @@ describe('TextEngine', function() {
         expect(mockDisplayer.append).toHaveBeenCalledWith(
             [
               createFakeCue(1, 2),
-              createFakeCue(2, 3)
+              createFakeCue(2, 3),
             ]);
       }).catch(fail).then(done);
     });
