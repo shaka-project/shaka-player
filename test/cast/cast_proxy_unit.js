@@ -139,7 +139,7 @@ describe('CastProxy', function() {
       mockPlayer.getConfiguration.and.returnValue(fakeConfig);
       mockPlayer.isTextTrackVisible.and.returnValue(false);
       let fakeManifestUri = 'foo://bar';
-      mockPlayer.getManifestUri.and.returnValue(fakeManifestUri);
+      mockPlayer.getAssetUri.and.returnValue(fakeManifestUri);
 
       proxy.cast();
       let calls = mockSender.cast.calls;
@@ -579,7 +579,7 @@ describe('CastProxy', function() {
 
     it('loads the manifest', function() {
       cache.video.currentTime = 12;
-      cache.player.getManifestUri = 'foo://bar';
+      cache.player.getAssetUri = 'foo://bar';
       expect(mockPlayer.load).not.toHaveBeenCalled();
 
       mockSender.onResumeLocal();
@@ -590,7 +590,7 @@ describe('CastProxy', function() {
     it('does not provide a start time if the video has ended', function() {
       cache.video.currentTime = 12;
       cache.video.ended = true;
-      cache.player.getManifestUri = 'foo://bar';
+      cache.player.getAssetUri = 'foo://bar';
       expect(mockPlayer.load).not.toHaveBeenCalled();
 
       mockSender.onResumeLocal();
@@ -599,7 +599,7 @@ describe('CastProxy', function() {
     });
 
     it('plays the video after loading', function(done) {
-      cache.player.getManifestUri = 'foo://bar';
+      cache.player.getAssetUri = 'foo://bar';
       // Should play even if the video was paused remotely.
       cache.video.paused = true;
       mockVideo.autoplay = true;
@@ -616,7 +616,7 @@ describe('CastProxy', function() {
     });
 
     it('does not load or play without a manifest URI', function(done) {
-      cache.player.getManifestUri = null;
+      cache.player.getAssetUri = null;
 
       mockSender.onResumeLocal();
 
@@ -634,7 +634,7 @@ describe('CastProxy', function() {
     });
 
     it('triggers an "error" event if load fails', function(done) {
-      cache.player.getManifestUri = 'foo://bar';
+      cache.player.getAssetUri = 'foo://bar';
       let fakeError = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
@@ -717,7 +717,7 @@ describe('CastProxy', function() {
       load: jasmine.createSpy('load'),
       unload: jasmine.createSpy('unload'),
       getNetworkingEngine: jasmine.createSpy('getNetworkingEngine'),
-      getManifestUri: jasmine.createSpy('getManifestUri'),
+      getAssetUri: jasmine.createSpy('getAssetUri'),
       getConfiguration: jasmine.createSpy('getConfiguration'),
       configure: jasmine.createSpy('configure'),
       isTextTrackVisible: jasmine.createSpy('isTextTrackVisible'),

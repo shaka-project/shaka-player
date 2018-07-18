@@ -676,7 +676,7 @@ describe('CastReceiver', function() {
       fakeConnectedSenders(1);
       mockPlayer.load = function() {
         mockVideo.duration = 1;
-        mockPlayer.getManifestUri = function() {
+        mockPlayer.getAssetUri = function() {
           return 'URI A';
         };
         return Promise.resolve();
@@ -713,7 +713,7 @@ describe('CastReceiver', function() {
       mockPlayer.load = function() {
         return Util.delay(0.5).then(function() {
           mockVideo.duration = 2;
-          mockPlayer.getManifestUri = function() {
+          mockPlayer.getAssetUri = function() {
             return 'URI B';
           };
         });
@@ -736,7 +736,7 @@ describe('CastReceiver', function() {
     it('after LOAD system message', checkAndRun((done) => {
       mockPlayer.load = function() {
         mockVideo.duration = 2;
-        mockPlayer.getManifestUri = function() {
+        mockPlayer.getAssetUri = function() {
           return 'URI B';
         };
         return Promise.resolve();

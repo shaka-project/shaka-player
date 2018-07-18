@@ -27,6 +27,11 @@ describe('CastUtils', function() {
       'setMaxHardwareResolution',
       'destroy',  // Should use CastProxy.destroy instead
       'getManifest', // Too large to proxy
+      // TODO(vaage): Remove |getManiestUri| when |getManifestUri| is removed
+      //              from the player interface in v2.6.
+      // Depreciated and replaced with |getAssetUri|. Proxy will redirect calls
+      // for |getManifestUri| to |getAssetUri|.
+      'getManifestUri',
 
       // Test helper methods (not @export'd)
       'createDrmEngine',
