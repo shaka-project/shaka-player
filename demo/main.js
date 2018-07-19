@@ -243,13 +243,6 @@ shakaDemo.initAppPlugin_ = function(params) {
     return;
   }
   shakaDemo.appPlugin = plugin;
-  let listeners = plugin.getListeners();
-  for (let eventName in listeners) {
-    player.addEventListener(eventName, listeners[eventName]);
-  }
-  let netEngine = player.getNetworkingEngine();
-  netEngine.registerRequestFilter(plugin.onRequest);
-  netEngine.registerResponseFilter(plugin.onResponse);
   plugin.onStart(params).catch(function(error) {
     if (shaka.log) {
       shaka.log.error('Error setting up plugin ' + error);

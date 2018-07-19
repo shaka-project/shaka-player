@@ -315,6 +315,13 @@ shakaDemo.load = function() {
 
   if (shakaDemo.appPlugin) {
     let pluginParams = shakaDemo.getParams()['pluginParams'];
+    let listeners = shakaDemo.appPlugin.getListeners() || {};
+    for (let eventName in listeners) {
+      player.addEventListener(eventName, listeners[eventName]);
+    }
+    let netEngine = player.getNetworkingEngine();
+    netEngine.registerRequestFilter(shakaDemo.appPlugin.onRequest);
+    netEngine.registerResponseFilter(shakaDemo.appPlugin.onResponse);
     beforeLoadPromise = beforeLoadPromise.then(function() {
       return shakaDemo.appPlugin.onBeforeLoad(asset, pluginParams);
     });

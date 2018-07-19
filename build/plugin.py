@@ -125,7 +125,7 @@ class PluginLauncher:
     self.host = host
     self.port = port
     self.launchParams = launchParams
-    self.base_url = "http://{}:{}/demo/index.html".format(self.host, self.port)
+    self.base_url = "http://{}:{}/demo/".format(self.host, self.port)
     self.server = StoppableHTTPServer((self.host, self.port), SimpleHTTPRequestHandler)
 
   def run(self, name):
