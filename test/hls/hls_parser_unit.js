@@ -313,6 +313,51 @@ describe('HlsParser', function() {
     testHlsParser(master, media, manifest, done);
   });
 
+  it('sets maxFirstSegmentStartTime', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+      'RESOLUTION=960x540,FRAME-RATE=60\n',
+      'test:/video',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MEDIA-SEQUENCE:131\n',
+      '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'test:/main.mp4',
+    ].join('');
+
+    segmentData = new Uint8Array([
+      0x00, 0x00, 0x00, 0x24, // size (36)
+      0x6D, 0x6F, 0x6F, 0x66, // type (moof)
+      0x00, 0x00, 0x00, 0x1C, // traf size (28)
+      0x74, 0x72, 0x61, 0x66, // type (traf)
+
+      0x00, 0x00, 0x00, 0x14, // tfdt size (20)
+      0x74, 0x66, 0x64, 0x74, // type (tfdt)
+      0x01, 0x00, 0x00, 0x00, // version and flags
+
+      0x00, 0x00, 0x00, 0x00, // baseMediaDecodeTime first 4 bytes (0)
+      0x00, 0x0A, 0x00, 0x00,  // baseMediaDecodeTime last 4 bytes (655360)
+    ]).buffer;
+
+    fakeNetEngine.setResponseMap({
+      'test:/master': toUTF8(master),
+      'test:/video': toUTF8(media),
+      'test:/init.mp4': initSegmentData,
+      'test:/main.mp4': segmentData,
+    });
+
+    let manifest = await parser.start('test:/master', playerInterface);
+    let presentationTimeline = manifest.presentationTimeline;
+    // baseMediaDecodeTime (655360) / timescale (1000)
+    expect(presentationTimeline.getSeekRangeStart()).toBe(655.36);
+  });
+
   it('parses multiplexed variant', function(done) {
     const master = [
       '#EXTM3U\n',
