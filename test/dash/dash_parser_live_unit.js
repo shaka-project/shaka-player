@@ -678,6 +678,55 @@ describe('DashParser Live', function() {
     PromiseMock.flush();
   });
 
+  describe('availabilityWindowOverride', function() {
+    it('overrides @timeShiftBufferDepth', function(done) {
+      let manifest = [
+        '<MPD type="dynamic" suggestedPresentationDelay="PT60S"',
+        '    minimumUpdatePeriod="PT5S"',
+        '    timeShiftBufferDepth="PT2M"',
+        '    maxSegmentDuration="PT10S"',
+        '    availabilityStartTime="1970-01-01T00:05:00Z">',
+        '  <Period id="1">',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation id="3" bandwidth="500">',
+        '        <BaseURL>http://example.com</BaseURL>',
+        '        <SegmentTemplate media="s$Number$.mp4" duration="2" />',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+      fakeNetEngine.setResponseMapAsText({'dummy://foo': manifest});
+
+      parser.configure({
+        retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+        availabilityWindowOverride: 4 * 60,
+        dash: {
+          clockSyncUri: '',
+          customScheme: function(node) { return null; },
+          ignoreDrmInfo: false,
+          xlinkFailGracefully: false,
+          defaultPresentationDelay: 10,
+        },
+      });
+
+      Date.now = function() { return 600000; /* 10 minutes */ };
+      parser.start('dummy://foo', playerInterface)
+          .then(function(manifest) {
+            expect(manifest).toBeTruthy();
+            let timeline = manifest.presentationTimeline;
+            expect(timeline).toBeTruthy();
+
+            // The parser was configured to have a manifest availability window
+            // of 4 minutes.
+            let end = timeline.getSegmentAvailabilityEnd();
+            let start = timeline.getSegmentAvailabilityStart();
+            expect(end - start).toEqual(4 * 60);
+          }).catch(fail).then(done);
+      PromiseMock.flush();
+    });
+  });
+
   describe('maxSegmentDuration', function() {
     it('uses @maxSegmentDuration', function(done) {
       let manifest = [

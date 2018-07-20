@@ -3135,45 +3135,6 @@ describe('Player', function() {
     });
   });
 
-  describe('live', function() {
-    function availabilityWindowTest(expectedAvailabilityWindow) {
-      // Create a live timeline and manifest.
-      let timeline = new shaka.media.PresentationTimeline(300, 0);
-      timeline.setStatic(false);
-      timeline.setSegmentAvailabilityDuration(100);
-
-      manifest = new shaka.test.ManifestGenerator()
-          .setTimeline(timeline)
-          .addPeriod(0)
-            .addVariant(0)
-            .addVideo(1)
-          .build();
-
-      let parser = new shaka.test.FakeManifestParser(manifest);
-      let parserFactory = function() { return parser; };
-
-      return player.load('', /* startTime */ 0, parserFactory).then(() => {
-        // Availability window can be determined by finding the time difference
-        // between the avalability end and start.  Thus, we can compare the
-        // expected and actual window.
-        let end = timeline.getSegmentAvailabilityEnd();
-        expect(end - timeline.getSegmentAvailabilityStart())
-            .toBeCloseTo(expectedAvailabilityWindow, 1);
-      });
-    }
-
-    it('uses normal availability window when not overridden', async () => {
-      // The availability start should be what was in the timeline (100).
-      await availabilityWindowTest(100);
-    });
-
-    it('honors availabilityWindowOverride', async () => {
-      player.configure({manifest: {availabilityWindowOverride: 200}});
-      // The availability start should be what was configured (200).
-      await availabilityWindowTest(200);
-    });
-  });
-
   describe('language methods', function() {
     let videoOnlyManifest;
     let parserFactory = function() {

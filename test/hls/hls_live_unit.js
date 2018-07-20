@@ -431,6 +431,17 @@ describe('HlsParser live', function() {
       'test:/main2.mp4\n',
     ].join('');
 
+    let mediaWithManySegments = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MEDIA-SEQUENCE:0\n',
+    ].join('');
+    for (let i = 0; i < 1000; ++i) {
+      mediaWithManySegments += '#EXTINF:2,\n';
+      mediaWithManySegments += 'test:/main.mp4\n';
+    }
+
     it('starts presentation as VOD when ENDLIST is present', function(done) {
       fakeNetEngine.setResponseMap({
         'test:/master': toUTF8(master),
@@ -453,6 +464,48 @@ describe('HlsParser live', function() {
       });
 
       parser.start('test:/master', playerInterface).catch(fail).then(done);
+    });
+
+    describe('availabilityWindowOverride', function() {
+      async function testWindowOverride(expectedWindow) {
+        fakeNetEngine.setResponseMap({
+          'test:/master': toUTF8(master),
+          'test:/video': toUTF8(mediaWithManySegments),
+          'test:/init.mp4': initSegmentData,
+          'test:/main.mp4': segmentData,
+        });
+
+        let manifest = await parser.start('test:/master', playerInterface);
+        expect(manifest).toBeTruthy();
+        let timeline = manifest.presentationTimeline;
+        expect(timeline).toBeTruthy();
+
+        const start = timeline.getSegmentAvailabilityStart();
+        const end = timeline.getSegmentAvailabilityEnd();
+        expect(end - start).toEqual(expectedWindow);
+      }
+
+      it('does not affect seek range if unset', async () => {
+        // 15 seconds is three segment durations.
+        await testWindowOverride(15);
+      });
+
+      it('overrides default seek range if set', async () => {
+        parser.configure({
+          retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+          availabilityWindowOverride: 240,
+          dash: {
+            customScheme: function(node) { return null; },
+            clockSyncUri: '',
+            ignoreDrmInfo: false,
+            xlinkFailGracefully: false,
+            defaultPresentationDelay: 10,
+          },
+        });
+
+        // 240 is the availabilityWindowOverride setting.
+        await testWindowOverride(240);
+      });
     });
 
     it('offsets VTT text with rolled over TS timestamps', function(done) {

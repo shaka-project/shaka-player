@@ -537,7 +537,9 @@ shaka.extern.DashManifestConfiguration;
  *   Retry parameters for manifest requests.
  * @property (number) availabilityWindowOverride
  *   A number, in seconds, that overrides the availability window in the
- *   manifest, or NaN if the default value should be used.
+ *   manifest, or NaN if the default value should be used.  This is enforced by
+ *   the manifest parser, so custom manifest parsers should take care to honor
+ *   this parameter.
  * @property {shaka.extern.DashManifestConfiguration} dash
  *   Advanced parameters used by the DASH manifest parser.
  *
