@@ -54,18 +54,15 @@ module.exports = {
         // }}}
 
         // Temporary Google style overrides while we get in compliance with the latest style guide {{{
-        "block-spacing": "off",
-        "brace-style": "off",
-        "comma-dangle": "off",
-        "comma-spacing": "off",
-        "new-cap": "off",
-        "no-multi-spaces": "off",
-        "no-multiple-empty-lines": "off",
-        "one-var": "off",
-        "padded-blocks": "off",
-        "prefer-rest-params": "off",
         "prefer-spread": "off",
         "require-jsdoc": "off",
+        // }}}
+
+        // Google style rules that need options: {{{
+        "block-spacing": ["error", "always"],
+        "brace-style": ["error", "1tbs", { "allowSingleLine": true }],
+        "key-spacing": ["error", {"beforeColon": false, "afterColon": true}],
+        "no-multi-spaces": ["error", { "ignoreEOLComments": true }],
         // }}}
 
         // "Possible error" rules in "eslint:recommended" that need options: {{{
@@ -122,7 +119,6 @@ module.exports = {
         "dot-notation": "off",  // We use bracket notation in tests on purpose
         "eqeqeq": "off",  // Compiler handles type checking in advance
         "guard-for-in": "off",
-        "key-spacing": ["error", {"beforeColon": false, "afterColon": true}],
         "no-div-regex": "off",  // Conflicts with no-useless-escape
         "no-undef-init": "off",  // Sometimes necessary with hacky compiler casts
         "no-undefined": "off",  // We use undefined in many places, legitimately
@@ -139,6 +135,9 @@ module.exports = {
     },
     "overrides": [
         {
+            "rules": {
+                "no-var": "off",
+            },
             "files": [
                 // Closure requires using var in externs.
                 "externs/**/*.js",
@@ -147,9 +146,22 @@ module.exports = {
                 // compiled mode for the main library and the demo.
                 "demo/load.js",
             ],
+        },
+        {
             "rules": {
-                "no-var": "off",
+                "prefer-rest-params": "off",
             },
+            "files": [
+                // Test code should still use "arguments", since the alternate
+                // "rest parameter" syntax won't work in uncompiled code on IE.
+                "test/**/*.js",
+                // These two files use "arguments" to patch over functions.  It
+                // is difficult to reason about whether or not these instances
+                // would always work with rest parameters, so just allow them to
+                // use "arguments".
+                "demo/log_section.js",
+                "lib/debug/asserts.js",
+            ],
         },
     ],
 };

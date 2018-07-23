@@ -60,7 +60,7 @@ describe('PlayheadObserver', function() {
       periods: [],
       offlineSessionIds: [],
       minBufferTime: 0,
-      presentationTimeline: timeline
+      presentationTimeline: timeline,
     };
 
     config = {
@@ -76,7 +76,7 @@ describe('PlayheadObserver', function() {
       smallGapLimit: 0.5,
       jumpLargeGaps: false,
       durationBackoff: 1,
-      forceTransmuxTS: false
+      forceTransmuxTS: false,
     };
 
     onBuffering = jasmine.createSpy('onBuffering');
@@ -254,7 +254,7 @@ describe('PlayheadObserver', function() {
         // This should be an actual object, but it doesn't matter what.
         // It will be checked with jasmine's toBe() to make sure it was copied
         // by reference.
-        eventElement: /** @type {?} */({})
+        eventElement: /** @type {?} */({}),
       };
 
       video.buffered = createFakeBuffered([{start: 0, end: 60}]);
@@ -288,7 +288,7 @@ describe('PlayheadObserver', function() {
           startTime: 10,
           endTime: 20,
           id: 'xyz',
-          eventElement: null
+          eventElement: null,
         });
         observer.addTimelineRegion(regionInfo);
 
@@ -300,7 +300,7 @@ describe('PlayheadObserver', function() {
           startTime: 0,
           endTime: 50,
           id: '123',
-          eventElement: null
+          eventElement: null,
         });
         expect(onEvent).toHaveBeenCalled();
       });
@@ -386,7 +386,7 @@ describe('PlayheadObserver', function() {
           startTime: 3,
           endTime: 3,
           id: 'abc',
-          eventElement: null
+          eventElement: null,
         };
         observer.addTimelineRegion(otherInfo);
         onEvent.calls.reset();
@@ -414,7 +414,7 @@ describe('PlayheadObserver', function() {
           startTime: 13,
           endTime: 16,
           id: 'abc',
-          eventElement: null
+          eventElement: null,
         };
         let overlapInfo = {
           schemeIdUri: 'http://example.com',
@@ -422,7 +422,7 @@ describe('PlayheadObserver', function() {
           startTime: 18,
           endTime: 23,
           id: 'abc',
-          eventElement: null
+          eventElement: null,
         };
         observer.addTimelineRegion(nestedInfo);
         observer.addTimelineRegion(overlapInfo);
@@ -474,7 +474,7 @@ describe('PlayheadObserver', function() {
       manifest.periods = [
         {startTime: 0},
         {startTime: 20},
-        {startTime: 30}
+        {startTime: 30},
       ];
 
       observer = new shaka.media.PlayheadObserver(

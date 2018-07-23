@@ -114,7 +114,7 @@ shakaDemo.setupOfflineAssets_ = function() {
     group = shakaDemo.offlineOptGroup_;
   }
 
-  let db = new Storage(shakaDemo.localPlayer_);
+  let db = new Storage(/** @type {!shaka.Player} */ (shakaDemo.localPlayer_));
   return db.list().then(function(storedContents) {
     storedContents.forEach(function(storedContent) {
       for (let i = 0; i < assetList.options.length; i++) {
@@ -153,11 +153,12 @@ shakaDemo.storeDeleteAsset_ = function() {
 
   progress.textContent = '0';
 
-  let storage = new shaka.offline.Storage(shakaDemo.localPlayer_);
+  let storage = new shaka.offline.Storage(
+      /** @type {!shaka.Player} */ (shakaDemo.localPlayer_));
   storage.configure(/** @type {shaka.extern.OfflineConfiguration} */ ({
     progressCallback: function(data, percent) {
       progress.textContent = (percent * 100).toFixed(2);
-    }
+    },
   }));
 
   let p;

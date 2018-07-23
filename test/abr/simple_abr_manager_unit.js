@@ -80,7 +80,7 @@ describe('SimpleAbrManager', function() {
         minPixels: 0,
         maxPixels: Infinity,
         minBandwidth: 0,
-        maxBandwidth: Infinity
+        maxBandwidth: Infinity,
       },
     };
 

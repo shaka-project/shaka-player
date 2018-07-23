@@ -83,14 +83,14 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         baseDelay: 0,
         backoffFactor: 0,
         fuzzFactor: 0,
-        timeout: 0
+        timeout: 0,
       });
       rejectScheme.and.callFake(function() {
         if (rejectScheme.calls.count() == 1) {
           return shaka.util.AbortableOperation.failed(error);
         } else {
           return shaka.util.AbortableOperation.completed({
-            uri: '', data: new ArrayBuffer(0), headers: {}
+            uri: '', data: new ArrayBuffer(0), headers: {},
           });
         }
       });
@@ -108,14 +108,14 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         baseDelay: 0,
         backoffFactor: 0,
         fuzzFactor: 0,
-        timeout: 0
+        timeout: 0,
       });
       rejectScheme.and.callFake(function() {
         if (rejectScheme.calls.count() < 3) {
           return shaka.util.AbortableOperation.failed(error);
         } else {
           return shaka.util.AbortableOperation.completed({
-            uri: '', data: new ArrayBuffer(0), headers: {}
+            uri: '', data: new ArrayBuffer(0), headers: {},
           });
         }
       });
@@ -133,7 +133,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         baseDelay: 0,
         backoffFactor: 0,
         fuzzFactor: 0,
-        timeout: 0
+        timeout: 0,
       });
       networkingEngine.request(requestType, request).promise
           .then(fail)
@@ -174,7 +174,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
           baseDelay: baseDelay,
           fuzzFactor: 0,
           backoffFactor: 2,
-          timeout: 0
+          timeout: 0,
         });
         networkingEngine.request(requestType, request).promise
             .then(fail)
@@ -192,7 +192,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
           baseDelay: baseDelay,
           fuzzFactor: 0,
           backoffFactor: 2,
-          timeout: 0
+          timeout: 0,
         });
         networkingEngine.request(requestType, request).promise
             .then(fail)
@@ -212,7 +212,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
           baseDelay: baseDelay,
           fuzzFactor: 1,
           backoffFactor: 1,
-          timeout: 0
+          timeout: 0,
         });
         networkingEngine.request(requestType, request).promise
             .then(fail)
@@ -234,7 +234,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         baseDelay: 0,
         backoffFactor: 0,
         fuzzFactor: 0,
-        timeout: 0
+        timeout: 0,
       });
       request.uris = ['reject://foo', 'resolve://foo'];
       networkingEngine.request(requestType, request).promise
@@ -252,7 +252,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         baseDelay: 0,
         backoffFactor: 0,
         fuzzFactor: 0,
-        timeout: 0
+        timeout: 0,
       });
 
       error.severity = shaka.util.Error.Severity.CRITICAL;
@@ -391,7 +391,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
 
     it('fills in defaults for partial request objects', function(done) {
       let originalRequest = /** @type {shaka.extern.Request} */ ({
-        uris: ['resolve://foo']
+        uris: ['resolve://foo'],
       });
 
       resolveScheme.and.callFake(function(uri, request, requestTypePassed) {
@@ -580,7 +580,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         baseDelay: 0,
         backoffFactor: 0,
         fuzzFactor: 0,
-        timeout: 0
+        timeout: 0,
       });
       filter.and.returnValue(Promise.reject());
       networkingEngine.request(requestType, request).promise
@@ -598,7 +598,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         baseDelay: 0,
         backoffFactor: 0,
         fuzzFactor: 0,
-        timeout: 0
+        timeout: 0,
       });
       filter.and.throwError(error);
       networkingEngine.request(requestType, request).promise
@@ -625,7 +625,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
       networkingEngine.registerResponseFilter(Util.spyFunc(filter));
       resolveScheme.and.callFake(function(request) {
         let response = {
-          uri: '', data: new ArrayBuffer(100), headers: {}
+          uri: '', data: new ArrayBuffer(100), headers: {},
         };
         return shaka.util.AbortableOperation.completed(response);
       });
@@ -824,7 +824,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         baseDelay: 0,
         backoffFactor: 0,
         fuzzFactor: 0,
-        timeout: 0
+        timeout: 0,
       });
       let r = new StatusPromise(
           networkingEngine.request(requestType, request).promise);
@@ -905,7 +905,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         baseDelay: 0,
         backoffFactor: 0,
         fuzzFactor: 0,
-        timeout: 0
+        timeout: 0,
       });
 
       let p1 = new shaka.util.PublicPromise();
@@ -964,7 +964,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
               uri: '',
               data: new ArrayBuffer(5),
               headers: {},
-              fromCache: true
+              fromCache: true,
             });
           });
           return networkingEngine.request(

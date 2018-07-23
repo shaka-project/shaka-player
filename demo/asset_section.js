@@ -159,14 +159,14 @@ shakaDemo.configureCertificate_ = function(certificate) {
 
   for (let keySystem in config.drm.advanced) {
     certConfig[keySystem] = {
-      serverCertificate: new Uint8Array(certificate)
+      serverCertificate: new Uint8Array(certificate),
     };
   }
 
   player.configure({
     drm: {
-      advanced: certConfig
-    }
+      advanced: certConfig,
+    },
   });
 };
 
@@ -223,7 +223,7 @@ shakaDemo.preparePlayer_ = function(asset) {
       // They will simply fill in a Widevine license server on Chrome, etc.
       licenseServers: licenseServers,
       // Use a custom certificate for all key systems as well
-      certificateUri: document.getElementById('certificateInput').value
+      certificateUri: document.getElementById('certificateInput').value,
     });
   }
 
@@ -254,6 +254,16 @@ shakaDemo.preparePlayer_ = function(asset) {
       Number(document.getElementById('preferredAudioChannelCount').value);
   if (!isNaN(preferredAudioChannelCount)) {
     config.preferredAudioChannelCount = preferredAudioChannelCount;
+  }
+  let availabilityWindowOverrideRaw =
+      document.getElementById('availabilityWindowOverride').value;
+  let availabilityWindowOverride = Number(availabilityWindowOverrideRaw);
+  if (!isNaN(availabilityWindowOverride) &&
+      availabilityWindowOverrideRaw.length) {
+    // Don't configure if the field contains an empty string; this is because
+    // Number('') evaluates to 0, which is a valid (if fairly useless) override
+    // value, while we would rather it mean "don't override".
+    config.manifest.availabilityWindowOverride = availabilityWindowOverride;
   }
 
   config.abr.enabled =

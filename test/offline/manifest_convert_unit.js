@@ -24,12 +24,12 @@ describe('ManifestConverter', function() {
       /** @type {!Array.<shaka.extern.StreamDB>} */
       let audios = [
         createStreamDB(0, audioType, [0]),
-        createStreamDB(1, audioType, [1])
+        createStreamDB(1, audioType, [1]),
       ];
       /** @type {!Array.<shaka.extern.StreamDB>} */
       let videos = [
         createStreamDB(2, videoType, [0]),
-        createStreamDB(3, videoType, [1])
+        createStreamDB(3, videoType, [1]),
       ];
 
       /** @type {!Array.<shaka.extern.Variant>} */
@@ -48,7 +48,7 @@ describe('ManifestConverter', function() {
       /** @type {!Array.<shaka.extern.StreamDB>} */
       let audios = [
         createStreamDB(0, audioType, [0]),
-        createStreamDB(1, audioType, [1])
+        createStreamDB(1, audioType, [1]),
       ];
       /** @type {!Array.<shaka.extern.StreamDB>} */
       let videos = [];
@@ -65,7 +65,7 @@ describe('ManifestConverter', function() {
       /** @type {!Array.<shaka.extern.StreamDB>} */
       let videos = [
         createStreamDB(2, videoType, [0]),
-        createStreamDB(3, videoType, [1])
+        createStreamDB(3, videoType, [1]),
       ];
 
       /** @type {!Array.<shaka.extern.Variant>} */
@@ -80,7 +80,7 @@ describe('ManifestConverter', function() {
       /** @type {shaka.extern.PeriodDB} */
       let periodDb = {
         startTime: 60,
-        streams: [createVideoStreamDB(1, [0]), createAudioStreamDB(2, [0])]
+        streams: [createVideoStreamDB(1, [0]), createAudioStreamDB(2, [0])],
       };
 
       let timeline = createTimeline();
@@ -107,7 +107,7 @@ describe('ManifestConverter', function() {
       /** @type {shaka.extern.PeriodDB} */
       let periodDb = {
         startTime: 60,
-        streams: [createVideoStreamDB(1, [0]), createVideoStreamDB(2, [1])]
+        streams: [createVideoStreamDB(1, [0]), createVideoStreamDB(2, [1])],
       };
 
       let timeline = createTimeline();
@@ -123,7 +123,7 @@ describe('ManifestConverter', function() {
       /** @type {shaka.extern.PeriodDB} */
       let periodDb = {
         startTime: 60,
-        streams: [createAudioStreamDB(1, [0]), createAudioStreamDB(2, [1])]
+        streams: [createAudioStreamDB(1, [0]), createAudioStreamDB(2, [1])],
       };
 
       let timeline = createTimeline();
@@ -141,8 +141,8 @@ describe('ManifestConverter', function() {
         startTime: 60,
         streams: [
           createVideoStreamDB(1, [0]),
-          createTextStreamDB(2)
-        ]
+          createTextStreamDB(2),
+        ],
       };
 
       let timeline = createTimeline();
@@ -175,8 +175,8 @@ describe('ManifestConverter', function() {
 
           // Video
           createVideoStreamDB(video1, [variant1]),
-          createVideoStreamDB(video2, [variant2, variant3])
-        ]
+          createVideoStreamDB(video2, [variant2, variant3]),
+        ],
       };
 
       let timeline = createTimeline();
@@ -229,7 +229,7 @@ describe('ManifestConverter', function() {
       encrypted: false,
       keyId: null,
       segments: [],
-      variantIds: variants
+      variantIds: variants,
     };
 
     return streamDB;
@@ -246,7 +246,7 @@ describe('ManifestConverter', function() {
     let segment = {
       startTime: startTime,
       endTime: endTime,
-      dataKey: dataKey
+      dataKey: dataKey,
     };
 
     return segment;
@@ -287,9 +287,9 @@ describe('ManifestConverter', function() {
         createSegmentDB(
             /* start time */ 20,
             /* end time */ 25,
-            /* data key */ 3)
+            /* data key */ 3),
       ],
-      variantIds: variantIds
+      variantIds: variantIds,
     };
   }
 
@@ -328,9 +328,9 @@ describe('ManifestConverter', function() {
         createSegmentDB(
             /* start time */ 20,
             /* end time */ 25,
-            /* data key */ 3)
+            /* data key */ 3),
       ],
-      variantIds: variantIds
+      variantIds: variantIds,
     };
   }
 
@@ -368,9 +368,9 @@ describe('ManifestConverter', function() {
         createSegmentDB(
             /* start time */ 20,
             /* end time */ 25,
-            /* data key */ 3)
+            /* data key */ 3),
       ],
-      variantIds: [5]
+      variantIds: [5],
     };
   }
 
@@ -408,7 +408,7 @@ describe('ManifestConverter', function() {
       trickModeVideo: null,
       containsEmsgBoxes: false,
       roles: [],
-      channelsCount: null
+      channelsCount: null,
     };
 
     expect(stream).toEqual(expectedStream);
@@ -445,7 +445,6 @@ describe('ManifestConverter', function() {
     let found = null;
 
     variants.forEach(function(variant) {
-
       /** @type {?shaka.extern.Stream} */
       let audio = variant.audio;
       /** @type {?shaka.extern.Stream} */

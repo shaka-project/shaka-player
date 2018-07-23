@@ -20,7 +20,6 @@ goog.provide('shaka.test.FakeNetworkingEngine');
 /** @fileoverview @suppress {missingRequire} */
 
 
-
 /**
  * A fake networking engine that returns constant data.  The request member
  * is a jasmine spy and can be used to check the actual calls that occurred.
@@ -125,7 +124,7 @@ shaka.test.FakeNetworkingEngine.expectRangeRequest = function(
       shaka.net.NetworkingEngine.RequestType.SEGMENT,
       jasmine.objectContaining({
         uris: [uri],
-        headers: jasmine.objectContaining({'Range': range})
+        headers: jasmine.objectContaining({'Range': range}),
       }));
 };
 

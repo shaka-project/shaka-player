@@ -41,7 +41,7 @@ shakaAssets.Encoder = {
   AZURE_MEDIA_SERVICES: 'Azure Media Services',
   MP4BOX: 'MP4Box',
   APPLE: 'Apple',
-  UPLYNK: 'Verizon Digital Media Services'
+  UPLYNK: 'Verizon Digital Media Services',
 };
 
 
@@ -56,7 +56,7 @@ shakaAssets.Source = {
   NIMBLE_STREAMER: 'Nimble Streamer',
   AZURE_MEDIA_SERVICES: 'Azure Media Services',
   GPAC: 'GPAC',
-  UPLYNK: 'Verizon Digital Media Services'
+  UPLYNK: 'Verizon Digital Media Services',
 };
 
 
@@ -64,7 +64,7 @@ shakaAssets.Source = {
 shakaAssets.KeySystem = {
   CLEAR_KEY: 'org.w3.clearkey',
   PLAYREADY: 'com.microsoft.playready',
-  WIDEVINE: 'com.widevine.alpha'
+  WIDEVINE: 'com.widevine.alpha',
 };
 
 
@@ -103,7 +103,7 @@ shakaAssets.Feature = {
 
   SURROUND: 'surround sound',
 
-  HLS: 'HLS'
+  HLS: 'HLS',
 };
 
 
@@ -266,8 +266,8 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.WEBM,
-      shakaAssets.Feature.WEBVTT
-    ]
+      shakaAssets.Feature.WEBVTT,
+    ],
   },
   {
     name: 'Angel One (multicodec, multilingual, Widevine)',
@@ -282,12 +282,12 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.WEBM,
-      shakaAssets.Feature.WEBVTT
+      shakaAssets.Feature.WEBVTT,
     ],
 
     licenseServers: {
-      'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth'
-    }
+      'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
+    },
   },
   {
     name: 'Angel One (multicodec, multilingual, ClearKey server)',
@@ -302,12 +302,12 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.WEBM,
-      shakaAssets.Feature.WEBVTT
+      shakaAssets.Feature.WEBVTT,
     ],
 
     licenseServers: {
-      'org.w3.clearkey': 'https://cwip-shaka-proxy.appspot.com/clearkey?_u3wDe7erb7v8Lqt8A3QDQ=ABEiM0RVZneImaq7zN3u_w'
-    }
+      'org.w3.clearkey': 'https://cwip-shaka-proxy.appspot.com/clearkey?_u3wDe7erb7v8Lqt8A3QDQ=ABEiM0RVZneImaq7zN3u_w',
+    },
   },
   {
     name: 'Angel One (HLS, MP4, multilingual)',
@@ -319,8 +319,8 @@ shakaAssets.testAssets = [
     features: [
       shakaAssets.Feature.HLS,
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.MULTIPLE_LANGUAGES
-    ]
+      shakaAssets.Feature.MULTIPLE_LANGUAGES,
+    ],
   },
   {
     name: 'Angel One (HLS, MP4, multilingual, Widevine)',
@@ -332,12 +332,12 @@ shakaAssets.testAssets = [
     features: [
       shakaAssets.Feature.HLS,
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.MULTIPLE_LANGUAGES
+      shakaAssets.Feature.MULTIPLE_LANGUAGES,
     ],
 
     licenseServers: {
-      'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth'
-    }
+      'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
+    },
   },
   {
     name: 'Sintel 4k (multicodec)',
@@ -353,8 +353,8 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
       shakaAssets.Feature.WEBM,
-      shakaAssets.Feature.WEBVTT
-    ]
+      shakaAssets.Feature.WEBVTT,
+    ],
   },
   {
     name: 'Sintel w/ trick mode (MP4 only, 720p)',
@@ -369,8 +369,8 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.TRICK_MODE,
-      shakaAssets.Feature.WEBVTT
-    ]
+      shakaAssets.Feature.WEBVTT,
+    ],
   },
   {
     name: 'Sintel 4k (WebM only)',
@@ -387,8 +387,8 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
       shakaAssets.Feature.WEBM,
-      shakaAssets.Feature.WEBVTT
-    ]
+      shakaAssets.Feature.WEBVTT,
+    ],
   },
   {
     name: 'Sintel 4k (MP4 only)',
@@ -403,8 +403,8 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
-      shakaAssets.Feature.WEBVTT
-    ]
+      shakaAssets.Feature.WEBVTT,
+    ],
   },
   {
     name: 'Sintel 4k (multicodec, Widevine)',
@@ -421,12 +421,12 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
       shakaAssets.Feature.WEBM,
-      shakaAssets.Feature.WEBVTT
+      shakaAssets.Feature.WEBVTT,
     ],
 
     licenseServers: {
-      'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth'
-    }
+      'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
+    },
   },
   {
     name: 'Sintel 4k (multicodec, VTT in MP4)',
@@ -443,8 +443,8 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
       shakaAssets.Feature.WEBM,
-      shakaAssets.Feature.WEBVTT
-    ]
+      shakaAssets.Feature.WEBVTT,
+    ],
   },
   {
     name: 'Heliocentrism (multicodec, multiperiod)',
@@ -457,8 +457,8 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.MULTIPERIOD,
       shakaAssets.Feature.SEGMENT_BASE,
-      shakaAssets.Feature.WEBM
-    ]
+      shakaAssets.Feature.WEBM,
+    ],
   },
   {
     name: 'Heliocentrism (multicodec, multiperiod, xlink)',
@@ -472,8 +472,8 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.MULTIPERIOD,
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.WEBM,
-      shakaAssets.Feature.XLINK
-    ]
+      shakaAssets.Feature.XLINK,
+    ],
   },
   {
     name: '"Dig the Uke" by Stefan Kartenberg (audio only, multicodec)',
@@ -489,8 +489,8 @@ shakaAssets.testAssets = [
     features: [
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_BASE,
-      shakaAssets.Feature.WEBM
-    ]
+      shakaAssets.Feature.WEBM,
+    ],
   },
   {
     name: '"Dig the Uke" by Stefan Kartenberg (audio only, multicodec, Widevine)',  // eslint-disable-line max-len
@@ -506,12 +506,12 @@ shakaAssets.testAssets = [
     features: [
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_BASE,
-      shakaAssets.Feature.WEBM
+      shakaAssets.Feature.WEBM,
     ],
 
     licenseServers: {
-      'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth'
-    }
+      'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
+    },
   },
   {
     name: 'Tears of Steel (multicodec, TTML)',
@@ -525,8 +525,8 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.TTML,
-      shakaAssets.Feature.WEBM
-    ]
+      shakaAssets.Feature.WEBM,
+    ],
   },
   {
     name: 'Tears of Steel (multicodec, surround + stereo)',
@@ -538,8 +538,8 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.SURROUND,
-      shakaAssets.Feature.WEBM
-    ]
+      shakaAssets.Feature.WEBM,
+    ],
   },
   {
     name: 'Shaka Player History (multicodec, live, DASH)',
@@ -552,8 +552,8 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.LIVE,
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
-      shakaAssets.Feature.WEBM
-    ]
+      shakaAssets.Feature.WEBM,
+    ],
   },
   {
     name: 'Shaka Player History (live, HLS)',
@@ -565,8 +565,8 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.HIGH_DEFINITION,
       shakaAssets.Feature.HLS,
       shakaAssets.Feature.LIVE,
-      shakaAssets.Feature.MP4
-    ]
+      shakaAssets.Feature.MP4,
+    ],
   },
   // }}}
 
@@ -580,7 +580,7 @@ shakaAssets.testAssets = [
     source: shakaAssets.Source.AXINOM,
     drm: [
       shakaAssets.KeySystem.PLAYREADY,
-      shakaAssets.KeySystem.WIDEVINE
+      shakaAssets.KeySystem.WIDEVINE,
     ],
     features: [
       shakaAssets.Feature.EMBEDDED_TEXT,
@@ -589,16 +589,16 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
       shakaAssets.Feature.TTML,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
-      shakaAssets.Feature.WEBVTT
+      shakaAssets.Feature.WEBVTT,
     ],
 
     licenseServers: {
       'com.widevine.alpha': 'https://drm-widevine-licensing.axtest.net/AcquireLicense',
-      'com.microsoft.playready': 'https://drm-playready-licensing.axtest.net/AcquireLicense'
+      'com.microsoft.playready': 'https://drm-playready-licensing.axtest.net/AcquireLicense',
     },
     licenseRequestHeaders: {
-      'X-AxDRM-Message': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYjMzNjRlYjUtNTFmNi00YWUzLThjOTgtMzNjZWQ1ZTMxYzc4IiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIjoiOWViNDA1MGQtZTQ0Yi00ODAyLTkzMmUtMjdkNzUwODNlMjY2IiwiZW5jcnlwdGVkX2tleSI6ImxLM09qSExZVzI0Y3Iya3RSNzRmbnc9PSJ9XX19.4lWwW46k-oWcah8oN18LPj5OLS5ZU-_AQv7fe0JhNjA'  // eslint-disable-line max-len
-    }
+      'X-AxDRM-Message': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYjMzNjRlYjUtNTFmNi00YWUzLThjOTgtMzNjZWQ1ZTMxYzc4IiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIjoiOWViNDA1MGQtZTQ0Yi00ODAyLTkzMmUtMjdkNzUwODNlMjY2IiwiZW5jcnlwdGVkX2tleSI6ImxLM09qSExZVzI0Y3Iya3RSNzRmbnc9PSJ9XX19.4lWwW46k-oWcah8oN18LPj5OLS5ZU-_AQv7fe0JhNjA',  // eslint-disable-line max-len
+    },
   },
   {
     name: 'Multi-DRM, multi-key',
@@ -608,7 +608,7 @@ shakaAssets.testAssets = [
     source: shakaAssets.Source.AXINOM,
     drm: [
       shakaAssets.KeySystem.PLAYREADY,
-      shakaAssets.KeySystem.WIDEVINE
+      shakaAssets.KeySystem.WIDEVINE,
     ],
     features: [
       shakaAssets.Feature.EMBEDDED_TEXT,
@@ -618,16 +618,16 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
       shakaAssets.Feature.TTML,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
-      shakaAssets.Feature.WEBVTT
+      shakaAssets.Feature.WEBVTT,
     ],
 
     licenseServers: {
       'com.widevine.alpha': 'https://drm-widevine-licensing.axtest.net/AcquireLicense',
-      'com.microsoft.playready': 'https://drm-playready-licensing.axtest.net/AcquireLicense'
+      'com.microsoft.playready': 'https://drm-playready-licensing.axtest.net/AcquireLicense',
     },
     licenseRequestHeaders: {
-      'X-AxDRM-Message': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYjMzNjRlYjUtNTFmNi00YWUzLThjOTgtMzNjZWQ1ZTMxYzc4IiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIjoiODAzOTliZjUtOGEyMS00MDE0LTgwNTMtZTI3ZTc0OGU5OGMwIiwiZW5jcnlwdGVkX2tleSI6ImxpTkpxVmFZa05oK01LY3hKRms3SWc9PSJ9LHsiaWQiOiI5MDk1M2UwOS02Y2IyLTQ5YTMtYTI2MC03YTVmZWZlYWQ0OTkiLCJlbmNyeXB0ZWRfa2V5Ijoia1l0SEh2cnJmQ01lVmRKNkxrYmtuZz09In0seyJpZCI6IjBlNGRhOTJiLWQwZTgtNGE2Ni04YzNmLWMyNWE5N2ViNjUzMiIsImVuY3J5cHRlZF9rZXkiOiI3dzdOWkhITE1nSjRtUUtFSzVMVE1RPT0ifSx7ImlkIjoiNTg1ZjIzM2YtMzA3Mi00NmYxLTlmYTQtNmRjMjJjNjZhMDE0IiwiZW5jcnlwdGVkX2tleSI6IkFjNFVVbVl0Qko1blBROU4xNXJjM2c9PSJ9LHsiaWQiOiI0MjIyYmQ3OC1iYzQ1LTQxYmYtYjYzZS02ZjgxNGRjMzkxZGYiLCJlbmNyeXB0ZWRfa2V5IjoiTzZGTzBmcVNXb3BwN2JqYy9ENGxNQT09In1dfX0.uF6YlKAREOmbniAeYiH070HSJhV0YS7zSKjlCtiDR5Y'  // eslint-disable-line max-len
-    }
+      'X-AxDRM-Message': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYjMzNjRlYjUtNTFmNi00YWUzLThjOTgtMzNjZWQ1ZTMxYzc4IiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIjoiODAzOTliZjUtOGEyMS00MDE0LTgwNTMtZTI3ZTc0OGU5OGMwIiwiZW5jcnlwdGVkX2tleSI6ImxpTkpxVmFZa05oK01LY3hKRms3SWc9PSJ9LHsiaWQiOiI5MDk1M2UwOS02Y2IyLTQ5YTMtYTI2MC03YTVmZWZlYWQ0OTkiLCJlbmNyeXB0ZWRfa2V5Ijoia1l0SEh2cnJmQ01lVmRKNkxrYmtuZz09In0seyJpZCI6IjBlNGRhOTJiLWQwZTgtNGE2Ni04YzNmLWMyNWE5N2ViNjUzMiIsImVuY3J5cHRlZF9rZXkiOiI3dzdOWkhITE1nSjRtUUtFSzVMVE1RPT0ifSx7ImlkIjoiNTg1ZjIzM2YtMzA3Mi00NmYxLTlmYTQtNmRjMjJjNjZhMDE0IiwiZW5jcnlwdGVkX2tleSI6IkFjNFVVbVl0Qko1blBROU4xNXJjM2c9PSJ9LHsiaWQiOiI0MjIyYmQ3OC1iYzQ1LTQxYmYtYjYzZS02ZjgxNGRjMzkxZGYiLCJlbmNyeXB0ZWRfa2V5IjoiTzZGTzBmcVNXb3BwN2JqYy9ENGxNQT09In1dfX0.uF6YlKAREOmbniAeYiH070HSJhV0YS7zSKjlCtiDR5Y',  // eslint-disable-line max-len
+    },
   },
   {
     name: 'Multi-DRM, multi-key, multi-Period',
@@ -637,7 +637,7 @@ shakaAssets.testAssets = [
     source: shakaAssets.Source.AXINOM,
     drm: [
       shakaAssets.KeySystem.PLAYREADY,
-      shakaAssets.KeySystem.WIDEVINE
+      shakaAssets.KeySystem.WIDEVINE,
     ],
     features: [
       shakaAssets.Feature.EMBEDDED_TEXT,
@@ -648,16 +648,16 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
       shakaAssets.Feature.TTML,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
-      shakaAssets.Feature.WEBVTT
+      shakaAssets.Feature.WEBVTT,
     ],
 
     licenseServers: {
       'com.widevine.alpha': 'https://drm-widevine-licensing.axtest.net/AcquireLicense',
-      'com.microsoft.playready': 'https://drm-playready-licensing.axtest.net/AcquireLicense'
+      'com.microsoft.playready': 'https://drm-playready-licensing.axtest.net/AcquireLicense',
     },
     licenseRequestHeaders: {
-      'X-AxDRM-Message': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYjMzNjRlYjUtNTFmNi00YWUzLThjOTgtMzNjZWQ1ZTMxYzc4IiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIjoiMDg3Mjc4NmUtZjllNy00NjVmLWEzYTItNGU1YjBlZjhmYTQ1IiwiZW5jcnlwdGVkX2tleSI6IlB3NitlRVlOY3ZqWWJmc2gzWDNmbWc9PSJ9LHsiaWQiOiJjMTRmMDcwOS1mMmI5LTQ0MjctOTE2Yi02MWI1MjU4NjUwNmEiLCJlbmNyeXB0ZWRfa2V5IjoiLzErZk5paDM4bXFSdjR5Y1l6bnQvdz09In0seyJpZCI6IjhiMDI5ZTUxLWQ1NmEtNDRiZC05MTBmLWQ0YjVmZDkwZmJhMiIsImVuY3J5cHRlZF9rZXkiOiJrcTBKdVpFanBGTjhzYVRtdDU2ME9nPT0ifSx7ImlkIjoiMmQ2ZTkzODctNjBjYS00MTQ1LWFlYzItYzQwODM3YjRiMDI2IiwiZW5jcnlwdGVkX2tleSI6IlRjUlFlQld4RW9IT0tIcmFkNFNlVlE9PSJ9LHsiaWQiOiJkZTAyZjA3Zi1hMDk4LTRlZTAtYjU1Ni05MDdjMGQxN2ZiYmMiLCJlbmNyeXB0ZWRfa2V5IjoicG9lbmNTN0dnbWVHRmVvSjZQRUFUUT09In0seyJpZCI6IjkxNGU2OWY0LTBhYjMtNDUzNC05ZTlmLTk4NTM2MTVlMjZmNiIsImVuY3J5cHRlZF9rZXkiOiJlaUkvTXNsbHJRNHdDbFJUL0xObUNBPT0ifSx7ImlkIjoiZGE0NDQ1YzItZGI1ZS00OGVmLWIwOTYtM2VmMzQ3YjE2YzdmIiwiZW5jcnlwdGVkX2tleSI6IjJ3K3pkdnFycERWM3hSMGJKeTR1Z3c9PSJ9LHsiaWQiOiIyOWYwNWU4Zi1hMWFlLTQ2ZTQtODBlOS0yMmRjZDQ0Y2Q3YTEiLCJlbmNyeXB0ZWRfa2V5IjoiL3hsU0hweHdxdTNnby9nbHBtU2dhUT09In0seyJpZCI6IjY5ZmU3MDc3LWRhZGQtNGI1NS05NmNkLWMzZWRiMzk5MTg1MyIsImVuY3J5cHRlZF9rZXkiOiJ6dTZpdXpOMnBzaTBaU3hRaUFUa1JRPT0ifV19fQ.BXr93Et1krYMVs-CUnf7F3ywJWFRtxYdkR7Qn4w3-to'  // eslint-disable-line max-len
-    }
+      'X-AxDRM-Message': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYjMzNjRlYjUtNTFmNi00YWUzLThjOTgtMzNjZWQ1ZTMxYzc4IiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIjoiMDg3Mjc4NmUtZjllNy00NjVmLWEzYTItNGU1YjBlZjhmYTQ1IiwiZW5jcnlwdGVkX2tleSI6IlB3NitlRVlOY3ZqWWJmc2gzWDNmbWc9PSJ9LHsiaWQiOiJjMTRmMDcwOS1mMmI5LTQ0MjctOTE2Yi02MWI1MjU4NjUwNmEiLCJlbmNyeXB0ZWRfa2V5IjoiLzErZk5paDM4bXFSdjR5Y1l6bnQvdz09In0seyJpZCI6IjhiMDI5ZTUxLWQ1NmEtNDRiZC05MTBmLWQ0YjVmZDkwZmJhMiIsImVuY3J5cHRlZF9rZXkiOiJrcTBKdVpFanBGTjhzYVRtdDU2ME9nPT0ifSx7ImlkIjoiMmQ2ZTkzODctNjBjYS00MTQ1LWFlYzItYzQwODM3YjRiMDI2IiwiZW5jcnlwdGVkX2tleSI6IlRjUlFlQld4RW9IT0tIcmFkNFNlVlE9PSJ9LHsiaWQiOiJkZTAyZjA3Zi1hMDk4LTRlZTAtYjU1Ni05MDdjMGQxN2ZiYmMiLCJlbmNyeXB0ZWRfa2V5IjoicG9lbmNTN0dnbWVHRmVvSjZQRUFUUT09In0seyJpZCI6IjkxNGU2OWY0LTBhYjMtNDUzNC05ZTlmLTk4NTM2MTVlMjZmNiIsImVuY3J5cHRlZF9rZXkiOiJlaUkvTXNsbHJRNHdDbFJUL0xObUNBPT0ifSx7ImlkIjoiZGE0NDQ1YzItZGI1ZS00OGVmLWIwOTYtM2VmMzQ3YjE2YzdmIiwiZW5jcnlwdGVkX2tleSI6IjJ3K3pkdnFycERWM3hSMGJKeTR1Z3c9PSJ9LHsiaWQiOiIyOWYwNWU4Zi1hMWFlLTQ2ZTQtODBlOS0yMmRjZDQ0Y2Q3YTEiLCJlbmNyeXB0ZWRfa2V5IjoiL3hsU0hweHdxdTNnby9nbHBtU2dhUT09In0seyJpZCI6IjY5ZmU3MDc3LWRhZGQtNGI1NS05NmNkLWMzZWRiMzk5MTg1MyIsImVuY3J5cHRlZF9rZXkiOiJ6dTZpdXpOMnBzaTBaU3hRaUFUa1JRPT0ifV19fQ.BXr93Et1krYMVs-CUnf7F3ywJWFRtxYdkR7Qn4w3-to',  // eslint-disable-line max-len
+    },
   },
   {
     name: 'Clear, single-Period',
@@ -673,8 +673,8 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
       shakaAssets.Feature.TTML,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
-      shakaAssets.Feature.WEBVTT
-    ]
+      shakaAssets.Feature.WEBVTT,
+    ],
   },
   {
     name: 'Clear, multi-Period',
@@ -691,8 +691,8 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
       shakaAssets.Feature.TTML,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
-      shakaAssets.Feature.WEBVTT
-    ]
+      shakaAssets.Feature.WEBVTT,
+    ],
   },
   {
     name: 'Clear, Live DASH',
@@ -706,8 +706,8 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.LIVE,
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
-      shakaAssets.Feature.WEBVTT
-    ]
+      shakaAssets.Feature.WEBVTT,
+    ],
   },
   {
     name: 'Clear, Live HLS',
@@ -720,8 +720,8 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.HLS,
       shakaAssets.Feature.LIVE,
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.WEBVTT
-    ]
+      shakaAssets.Feature.WEBVTT,
+    ],
   },
   // }}}
 
@@ -738,8 +738,8 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.HIGH_DEFINITION,
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
-      shakaAssets.Feature.ULTRA_HIGH_DEFINITION
-    ]
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
+    ],
   },
   {
     name: 'Tears of Steel (Widevine)',
@@ -748,7 +748,7 @@ shakaAssets.testAssets = [
     encoder: shakaAssets.Encoder.UNIFIED_STREAMING,
     source: shakaAssets.Source.UNIFIED_STREAMING,
     drm: [
-      shakaAssets.KeySystem.WIDEVINE
+      shakaAssets.KeySystem.WIDEVINE,
     ],
     features: [
       shakaAssets.Feature.EMBEDDED_TEXT,
@@ -757,12 +757,12 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.TTML,
-      shakaAssets.Feature.ULTRA_HIGH_DEFINITION
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
     ],
 
     licenseServers: {
-      'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth'
-    }
+      'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
+    },
   },
   {
     name: 'Tears of Steel (PlayReady)',
@@ -771,7 +771,7 @@ shakaAssets.testAssets = [
     encoder: shakaAssets.Encoder.UNIFIED_STREAMING,
     source: shakaAssets.Source.UNIFIED_STREAMING,
     drm: [
-      shakaAssets.KeySystem.PLAYREADY
+      shakaAssets.KeySystem.PLAYREADY,
     ],
     features: [
       shakaAssets.Feature.EMBEDDED_TEXT,
@@ -780,12 +780,12 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.TTML,
-      shakaAssets.Feature.ULTRA_HIGH_DEFINITION
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
     ],
 
     licenseServers: {
-      'com.microsoft.playready': 'https://test.playready.microsoft.com/service/rightsmanager.asmx?PlayRight=1&UseSimpleNonPersistentLicense=1'
-    }
+      'com.microsoft.playready': 'https://test.playready.microsoft.com/service/rightsmanager.asmx?PlayRight=1&UseSimpleNonPersistentLicense=1',
+    },
   },
   {
     name: 'Tears of Steel (subtitles)',
@@ -802,8 +802,8 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENTED_TEXT,
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.TTML,
-      shakaAssets.Feature.ULTRA_HIGH_DEFINITION
-    ]
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
+    ],
   },
   // }}}
 
@@ -818,8 +818,8 @@ shakaAssets.testAssets = [
     drm: [],
     features: [
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE
-    ]
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
+    ],
   },
   {
     name: 'Live sim (2s segments)',
@@ -831,8 +831,8 @@ shakaAssets.testAssets = [
     features: [
       shakaAssets.Feature.LIVE,
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE
-    ]
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
+    ],
   },
   {
     name: 'Live sim (6s segments)',
@@ -844,8 +844,8 @@ shakaAssets.testAssets = [
     features: [
       shakaAssets.Feature.LIVE,
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE
-    ]
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
+    ],
   },
   {
     name: 'Live sim (multi-period)',
@@ -858,8 +858,8 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.LIVE,
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.MULTIPERIOD,
-      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE
-    ]
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
+    ],
   },
   // }}}
 
@@ -875,8 +875,8 @@ shakaAssets.testAssets = [
     features: [
       shakaAssets.Feature.LIVE,
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE
-    ]
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
+    ],
   },
   // }}}
 
@@ -893,8 +893,8 @@ shakaAssets.testAssets = [
     features: [
       shakaAssets.Feature.HIGH_DEFINITION,
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION
-    ]
+      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
+    ],
   },
   {
     name: 'Art of Motion (HLS, TS)',
@@ -906,8 +906,8 @@ shakaAssets.testAssets = [
     features: [
       shakaAssets.Feature.HIGH_DEFINITION,
       shakaAssets.Feature.HLS,
-      shakaAssets.Feature.MP2TS
-    ]
+      shakaAssets.Feature.MP2TS,
+    ],
   },
   {
     name: 'Sintel (HLS, TS, 4k)',
@@ -920,8 +920,8 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.HIGH_DEFINITION,
       shakaAssets.Feature.HLS,
       shakaAssets.Feature.MP2TS,
-      shakaAssets.Feature.ULTRA_HIGH_DEFINITION
-    ]
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
+    ],
   },
   // }}}
 
@@ -939,8 +939,8 @@ shakaAssets.testAssets = [
     drm: [],
     features: [
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE
-    ]
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
+    ],
   },
   // }}}
 
@@ -955,8 +955,8 @@ shakaAssets.testAssets = [
     drm: [],
     features: [
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE
-    ]
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
+    ],
   },
   {
     name: 'Big Buck Bunny',
@@ -969,17 +969,17 @@ shakaAssets.testAssets = [
     source: shakaAssets.Source.AZURE_MEDIA_SERVICES,
     drm: [
       shakaAssets.KeySystem.PLAYREADY,
-      shakaAssets.KeySystem.WIDEVINE
+      shakaAssets.KeySystem.WIDEVINE,
     ],
     features: [
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
     ],
 
     licenseServers: {
       'com.widevine.alpha': 'https://amssamples.keydelivery.mediaservices.windows.net/Widevine/?KID=1ab45440-532c-4399-94dc-5c5ad9584bac',
-      'com.microsoft.playready': 'https://amssamples.keydelivery.mediaservices.windows.net/PlayReady/'
-    }
+      'com.microsoft.playready': 'https://amssamples.keydelivery.mediaservices.windows.net/PlayReady/',
+    },
   },
   {
     name: 'Tears Of Steel (external text)',
@@ -989,20 +989,20 @@ shakaAssets.testAssets = [
         uri: 'https://ams-samplescdn.streaming.mediaservices.windows.net/11196e3d-2f40-4835-9a4d-fc52751b0323/TOS-en.vtt',
         language: 'en',
         kind: 'subtitle',
-        mime: 'text/vtt'
+        mime: 'text/vtt',
       },
       {
         uri: 'https://ams-samplescdn.streaming.mediaservices.windows.net/11196e3d-2f40-4835-9a4d-fc52751b0323/TOS-es.vtt',
         language: 'es',
         kind: 'subtitle',
-        mime: 'text/vtt'
+        mime: 'text/vtt',
       },
       {
         uri: 'https://ams-samplescdn.streaming.mediaservices.windows.net/11196e3d-2f40-4835-9a4d-fc52751b0323/TOS-fr.vtt',
         language: 'fr',
         kind: 'subtitle',
-        mime: 'text/vtt'
-      }
+        mime: 'text/vtt',
+      },
     ],
 
     encoder: shakaAssets.Encoder.AZURE_MEDIA_SERVICES,
@@ -1012,8 +1012,8 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
       shakaAssets.Feature.SUBTITLES,
-      shakaAssets.Feature.WEBVTT
-    ]
+      shakaAssets.Feature.WEBVTT,
+    ],
   },
   // }}}
 
@@ -1035,8 +1035,8 @@ shakaAssets.testAssets = [
     drm: [],
     features: [
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION
-    ]
+      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
+    ],
   },
   {
     name: 'live profile with five periods',
@@ -1048,8 +1048,8 @@ shakaAssets.testAssets = [
     features: [
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.MULTIPERIOD,
-      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION
-    ]
+      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
+    ],
   },
   {
     name: 'main profile, single file',
@@ -1060,8 +1060,8 @@ shakaAssets.testAssets = [
     drm: [],
     features: [
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_LIST_DURATION
-    ]
+      shakaAssets.Feature.SEGMENT_LIST_DURATION,
+    ],
   },
   {
     name: 'main profile, mutiple files',
@@ -1077,8 +1077,8 @@ shakaAssets.testAssets = [
     drm: [],
     features: [
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_LIST_DURATION
-    ]
+      shakaAssets.Feature.SEGMENT_LIST_DURATION,
+    ],
   },
   {
     name: 'onDemand profile',
@@ -1089,8 +1089,8 @@ shakaAssets.testAssets = [
     drm: [],
     features: [
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_BASE
-    ]
+      shakaAssets.Feature.SEGMENT_BASE,
+    ],
   },
   {
     name: 'main profile, open GOP',
@@ -1105,8 +1105,8 @@ shakaAssets.testAssets = [
     drm: [],
     features: [
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION
-    ]
+      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
+    ],
   },
   {
     name: 'full profile, gradual decoding refresh',
@@ -1121,8 +1121,8 @@ shakaAssets.testAssets = [
     drm: [],
     features: [
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION
-    ]
+      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
+    ],
   },
   // }}}
 
@@ -1136,7 +1136,7 @@ shakaAssets.testAssets = [
     source: shakaAssets.Source.UPLYNK,
     drm: [
       shakaAssets.KeySystem.PLAYREADY,
-      shakaAssets.KeySystem.WIDEVINE
+      shakaAssets.KeySystem.WIDEVINE,
     ],
     features: [
       shakaAssets.Feature.MP4,
@@ -1144,14 +1144,14 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.MULTIKEY,
       shakaAssets.Feature.AESCTR_8_BYTE_IV,
       shakaAssets.Feature.SEGMENT_LIST_DURATION,
-      shakaAssets.Feature.HIGH_DEFINITION
+      shakaAssets.Feature.HIGH_DEFINITION,
     ],
     licenseServers: {
       'com.microsoft.playready': 'https://content.uplynk.com/pr',
-      'com.widevine.alpha': 'https://content.uplynk.com/wv'
+      'com.widevine.alpha': 'https://content.uplynk.com/wv',
     },
     requestFilter: shakaAssets.UplynkRequestFilter,
-    responseFilter: shakaAssets.UplynkResponseFilter
+    responseFilter: shakaAssets.UplynkResponseFilter,
   },
   {
     name: 'Multi DRM - MultiPeriod - 8 Byte IV',
@@ -1162,7 +1162,7 @@ shakaAssets.testAssets = [
     source: shakaAssets.Source.UPLYNK,
     drm: [
       shakaAssets.KeySystem.PLAYREADY,
-      shakaAssets.KeySystem.WIDEVINE
+      shakaAssets.KeySystem.WIDEVINE,
     ],
     features: [
       shakaAssets.Feature.MP4,
@@ -1171,14 +1171,14 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.MULTIPERIOD,
       shakaAssets.Feature.SEGMENT_LIST_DURATION,
       shakaAssets.Feature.AESCTR_8_BYTE_IV,
-      shakaAssets.Feature.HIGH_DEFINITION
+      shakaAssets.Feature.HIGH_DEFINITION,
     ],
     licenseServers: {
       'com.microsoft.playready': 'https://content.uplynk.com/pr',
-      'com.widevine.alpha': 'https://content.uplynk.com/wv'
+      'com.widevine.alpha': 'https://content.uplynk.com/wv',
     },
     requestFilter: shakaAssets.UplynkRequestFilter,
-    responseFilter: shakaAssets.UplynkResponseFilter
+    responseFilter: shakaAssets.UplynkResponseFilter,
   },
   {
     name: 'Widevine - 16 Byte IV',
@@ -1186,7 +1186,7 @@ shakaAssets.testAssets = [
     encoder: shakaAssets.Encoder.UPLYNK,
     source: shakaAssets.Source.UPLYNK,
     drm: [
-      shakaAssets.KeySystem.WIDEVINE
+      shakaAssets.KeySystem.WIDEVINE,
     ],
     features: [
       shakaAssets.Feature.MP4,
@@ -1194,13 +1194,13 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.MULTIKEY,
       shakaAssets.Feature.AESCTR_16_BYTE_IV,
       shakaAssets.Feature.SEGMENT_LIST_DURATION,
-      shakaAssets.Feature.HIGH_DEFINITION
+      shakaAssets.Feature.HIGH_DEFINITION,
     ],
     licenseServers: {
-      'com.widevine.alpha': 'https://content.uplynk.com/wv'
+      'com.widevine.alpha': 'https://content.uplynk.com/wv',
     },
     requestFilter: shakaAssets.UplynkRequestFilter,
-    responseFilter: shakaAssets.UplynkResponseFilter
+    responseFilter: shakaAssets.UplynkResponseFilter,
   },
   {
     name: 'Widevine - 16 Byte IV - (mix of encrypted and unencrypted periods)',
@@ -1211,7 +1211,7 @@ shakaAssets.testAssets = [
     encoder: shakaAssets.Encoder.UPLYNK,
     source: shakaAssets.Source.UPLYNK,
     drm: [
-      shakaAssets.KeySystem.WIDEVINE
+      shakaAssets.KeySystem.WIDEVINE,
     ],
     features: [
       shakaAssets.Feature.MP4,
@@ -1222,13 +1222,13 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.MULTIPERIOD,
       shakaAssets.Feature.MULTIKEY,
       shakaAssets.Feature.AESCTR_16_BYTE_IV,
-      shakaAssets.Feature.ENCRYPTED_WITH_CLEAR
+      shakaAssets.Feature.ENCRYPTED_WITH_CLEAR,
     ],
     licenseServers: {
-      'com.widevine.alpha': 'https://content.uplynk.com/wv'
+      'com.widevine.alpha': 'https://content.uplynk.com/wv',
     },
     requestFilter: shakaAssets.UplynkRequestFilter,
-    responseFilter: shakaAssets.UplynkResponseFilter
-  }
+    responseFilter: shakaAssets.UplynkResponseFilter,
+  },
   // }}}
 ];

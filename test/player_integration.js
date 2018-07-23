@@ -84,7 +84,7 @@ describe('Player', function() {
   afterEach(async () => {
     await Promise.all([
       eventManager.destroy(),
-      player.destroy()
+      player.destroy(),
     ]);
 
     // Work-around: allow the Tizen media pipeline to cool down.
@@ -207,14 +207,14 @@ describe('Player', function() {
           id: jasmine.any(Number),
           type: 'variant',
           fromAdaptation: true,
-          bandwidth: 0
+          bandwidth: 0,
         }]),
 
         stateHistory: jasmine.arrayContaining([{
           state: 'playing',
           timestamp: jasmine.any(Number),
-          duration: jasmine.any(Number)
-        }])
+          duration: jasmine.any(Number),
+        }]),
       };
       expect(stats).toEqual(expected);
     });
@@ -448,19 +448,19 @@ describe('Player', function() {
         append: jasmine.createSpy('append'),
         remove: jasmine.createSpy('remove'),
         isTextVisible: jasmine.createSpy('isTextVisible'),
-        setTextVisibility: jasmine.createSpy('setTextVisibility')
+        setTextVisibility: jasmine.createSpy('setTextVisibility'),
       };
 
       textDisplayer.destroy.and.returnValue(Promise.resolve());
       textDisplayer.isTextVisible.and.returnValue(true);
 
       player.configure({
-        textDisplayFactory: function() { return textDisplayer; }
+        textDisplayFactory: function() { return textDisplayer; },
       });
 
       // Make sure the configuration was taken.
-      let configuredFactory = player.getConfiguration().textDisplayFactory;
-      let configuredTextDisplayer = new configuredFactory();
+      const ConfiguredFactory = player.getConfiguration().textDisplayFactory;
+      const configuredTextDisplayer = new ConfiguredFactory();
       expect(configuredTextDisplayer).toBe(textDisplayer);
     });
 

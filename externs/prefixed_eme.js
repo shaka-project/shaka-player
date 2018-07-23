@@ -66,7 +66,6 @@ HTMLVideoElement.prototype.canPlayType =
     function(mimeType, keySystem) {};
 
 
-
 /**
  * @constructor
  * @param {string} type
@@ -130,7 +129,6 @@ MediaKeyEvent.prototype.systemCode;
  * @const
  */
 MediaKeyEvent.prototype.target;
-
 
 
 /** @constructor */

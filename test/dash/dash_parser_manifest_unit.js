@@ -38,7 +38,7 @@ describe('DashParser Manifest', function() {
       filterAllPeriods: function() {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: shaka.test.Util.spyFunc(onEventSpy),
-      onError: fail
+      onError: fail,
     };
   });
 
@@ -76,7 +76,7 @@ describe('DashParser Manifest', function() {
       let source = makeTestManifest([
         '    <SegmentBase indexRange="100-200" timescale="9000">',
         '      <Initialization sourceURL="init.mp4" range="201-300" />',
-        '    </SegmentBase>'
+        '    </SegmentBase>',
       ]);
       await testDashParser(source);
     });
@@ -86,7 +86,7 @@ describe('DashParser Manifest', function() {
         '    <SegmentList startNumber="1" duration="10">',
         '      <Initialization sourceURL="init.mp4" range="201-300" />',
         '      <SegmentURL media="s1.mp4" />',
-        '    </SegmentList>'
+        '    </SegmentList>',
       ]);
       await testDashParser(source);
     });
@@ -99,7 +99,7 @@ describe('DashParser Manifest', function() {
         '      <SegmentTimeline>',
         '        <S t="0" d="30" />',
         '      </SegmentTimeline>',
-        '    </SegmentTemplate>'
+        '    </SegmentTemplate>',
       ]);
       await testDashParser(source);
     });
@@ -110,7 +110,7 @@ describe('DashParser Manifest', function() {
         [
           '<MPD minBufferTime="PT75S">',
           '  <Period id="1" duration="PT30S">',
-          '    <BaseURL>http://example.com</BaseURL>'
+          '    <BaseURL>http://example.com</BaseURL>',
         ],
         [
           '    <AdaptationSet contentType="video" mimeType="video/mp4"',
@@ -130,7 +130,7 @@ describe('DashParser Manifest', function() {
           '      <Representation bandwidth="100" />',
           '    </AdaptationSet>',
           '  </Period>',
-          '</MPD>'
+          '</MPD>',
         ],
         new shaka.test.ManifestGenerator()
           .anyTimeline()
@@ -199,7 +199,7 @@ describe('DashParser Manifest', function() {
       '          <Initialization sourceURL="init.mp4" range="201-300" />',
       '        </SegmentBase>',
       '      </Representation>',
-      '    </AdaptationSet>'
+      '    </AdaptationSet>',
     ].join('\n');
     let template = [
       '<MPD mediaPresentationDuration="PT75S">',
@@ -209,7 +209,7 @@ describe('DashParser Manifest', function() {
       '  <Period id="2">',
       '%(periodContents)s',
       '  </Period>',
-      '</MPD>'
+      '</MPD>',
     ].join('\n');
     let source = sprintf(template, {periodContents: periodContents});
 
@@ -226,7 +226,7 @@ describe('DashParser Manifest', function() {
       '          <Initialization sourceURL="init.mp4" range="201-300" />',
       '        </SegmentBase>',
       '      </Representation>',
-      '    </AdaptationSet>'
+      '    </AdaptationSet>',
     ].join('\n');
     let template = [
       '<MPD mediaPresentationDuration="PT75S">',
@@ -239,7 +239,7 @@ describe('DashParser Manifest', function() {
       '  <Period id="3" duration="PT10S">',
       '%(periodContents)s',
       '  </Period>',
-      '</MPD>'
+      '</MPD>',
     ].join('\n');
     let source = sprintf(template, {periodContents: periodContents});
 
@@ -259,7 +259,7 @@ describe('DashParser Manifest', function() {
       '<SegmentList presentationTimeOffset="2" duration="10">',
       '  <Initialization sourceURL="init.mp4" range="201-300" />',
       '  <SegmentURL media="s1.mp4" />',
-      '</SegmentList>'
+      '</SegmentList>',
     ]);
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
@@ -280,7 +280,7 @@ describe('DashParser Manifest', function() {
       '  <SegmentTimeline>',
       '    <S t="0" d="30" />',
       '  </SegmentTimeline>',
-      '</SegmentTemplate>'
+      '</SegmentTemplate>',
     ]);
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
@@ -304,7 +304,7 @@ describe('DashParser Manifest', function() {
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
-      '</MPD>'
+      '</MPD>',
     ].join('\n');
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
@@ -332,7 +332,7 @@ describe('DashParser Manifest', function() {
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
-      '</MPD>'
+      '</MPD>',
     ].join('\n');
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
@@ -376,7 +376,7 @@ describe('DashParser Manifest', function() {
         '      </Representation>',
         '    </AdaptationSet>',
         '  </Period>',
-        '</MPD>'
+        '</MPD>',
       ].join('\n');
       return sprintf(template, lines.join('\n'));
     }
@@ -396,7 +396,7 @@ describe('DashParser Manifest', function() {
     it('with direct', async () => {
       let source = makeManifest([
         '<UTCTiming schemeIdUri="urn:mpeg:dash:utc:direct:2014"',
-        '    value="1970-01-01T00:00:30Z" />'
+        '    value="1970-01-01T00:00:30Z" />',
       ]);
 
       fakeNetEngine.setResponseMapAsText({'http://foo.bar/manifest': source});
@@ -405,7 +405,7 @@ describe('DashParser Manifest', function() {
 
     it('does not produce errors', async () => {
       let source = makeManifest([
-        '<UTCTiming schemeIdUri="unknown scheme" value="foobar" />'
+        '<UTCTiming schemeIdUri="unknown scheme" value="foobar" />',
       ]);
 
       fakeNetEngine.setResponseMapAsText({'http://foo.bar/manifest': source});
@@ -416,7 +416,7 @@ describe('DashParser Manifest', function() {
       let source = makeManifest([
         '<UTCTiming schemeIdUri="unknown scheme" value="foobar" />',
         '<UTCTiming schemeIdUri="urn:mpeg:dash:utc:direct:2014"',
-        '    value="1970-01-01T00:00:55Z" />'
+        '    value="1970-01-01T00:00:55Z" />',
       ]);
 
       fakeNetEngine.setResponseMapAsText({'http://foo.bar/manifest': source});
@@ -426,7 +426,7 @@ describe('DashParser Manifest', function() {
     it('with HEAD', async () => {
       let source = makeManifest([
         '<UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-head:2014"',
-        '    value="http://foo.bar/date" />'
+        '    value="http://foo.bar/date" />',
       ]);
 
       fakeNetEngine.request.and.callFake(function(type, request) {
@@ -452,12 +452,12 @@ describe('DashParser Manifest', function() {
     it('with xsdate', async () => {
       let source = makeManifest([
         '<UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-xsdate:2014"',
-        '    value="http://foo.bar/date" />'
+        '    value="http://foo.bar/date" />',
       ]);
 
       fakeNetEngine.setResponseMapAsText({
         'http://foo.bar/manifest': source,
-        'http://foo.bar/date': '1970-01-01T00:00:50Z'
+        'http://foo.bar/date': '1970-01-01T00:00:50Z',
       });
       await runTest(45);
     });
@@ -465,12 +465,12 @@ describe('DashParser Manifest', function() {
     it('with relative paths', async () => {
       let source = makeManifest([
         '<UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-xsdate:2014"',
-        '    value="/date" />'
+        '    value="/date" />',
       ]);
 
       fakeNetEngine.setResponseMapAsText({
         'http://foo.bar/manifest': source,
-        'http://foo.bar/date': '1970-01-01T00:00:50Z'
+        'http://foo.bar/date': '1970-01-01T00:00:50Z',
       });
       await runTest(45);
     });
@@ -479,12 +479,12 @@ describe('DashParser Manifest', function() {
       let source = makeManifest([
         '<BaseURL>http://example.com</BaseURL>',
         '<UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-xsdate:2014"',
-        '    value="/date" />'
+        '    value="/date" />',
       ]);
 
       fakeNetEngine.setResponseMapAsText({
         'http://foo.bar/manifest': source,
-        'http://example.com/date': '1970-01-01T00:00:50Z'
+        'http://example.com/date': '1970-01-01T00:00:50Z',
       });
       await runTest(45);
     });
@@ -501,7 +501,7 @@ describe('DashParser Manifest', function() {
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
-      '</MPD>'
+      '</MPD>',
     ].join('\n');
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
@@ -527,7 +527,7 @@ describe('DashParser Manifest', function() {
         '      <Representation />',
         '    </AdaptationSet>',
         '  </Period>',
-        '</MPD>'
+        '</MPD>',
       ].join('\n');
 
       fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
@@ -549,7 +549,7 @@ describe('DashParser Manifest', function() {
         '      <Representation />',
         '    </AdaptationSet>',
         '  </Period>',
-        '</MPD>'
+        '</MPD>',
       ].join('\n');
 
       fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
@@ -571,7 +571,7 @@ describe('DashParser Manifest', function() {
         '      <Representation mimeType="text/vtt" />',
         '    </AdaptationSet>',
         '  </Period>',
-        '</MPD>'
+        '</MPD>',
       ].join('\n');
 
       fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
@@ -602,7 +602,7 @@ describe('DashParser Manifest', function() {
         '      </Representation', // Missing a close bracket.
         '    </AdaptationSet>',
         '  </Period>',
-        '</MPD>'
+        '</MPD>',
       ].join('\n');
       let error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
@@ -624,7 +624,7 @@ describe('DashParser Manifest', function() {
         '      </Representation>',
         '    </AdaptationSet>',
         '  </Period>',
-        '</MPD>'
+        '</MPD>',
       ].join('\n');
       let error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
@@ -665,7 +665,7 @@ describe('DashParser Manifest', function() {
         '  <Period id="1" duration="PT30S">',
         '    <AdaptationSet mimeType="video/mp4" lang="en" group="1" />',
         '  </Period>',
-        '</MPD>'
+        '</MPD>',
       ].join('\n');
       let error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
@@ -678,7 +678,7 @@ describe('DashParser Manifest', function() {
       let source = [
         '<MPD minBufferTime="PT75S">',
         '  <Period id="1" duration="PT30S" />',
-        '</MPD>'
+        '</MPD>',
       ].join('\n');
       let error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
@@ -702,7 +702,7 @@ describe('DashParser Manifest', function() {
         '      </Representation>',
         '    </AdaptationSet>',
         '  </Period>',
-        '</MPD>'
+        '</MPD>',
       ].join('\n');
       let error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
@@ -729,7 +729,7 @@ describe('DashParser Manifest', function() {
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
-      '</MPD>'
+      '</MPD>',
     ].join('\n');
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
@@ -743,7 +743,7 @@ describe('DashParser Manifest', function() {
                          variant.video.trickModeVideo;
     expect(trickModeVideo).toEqual(jasmine.objectContaining({
       id: 2,
-      type: shaka.util.ManifestParserUtils.ContentType.VIDEO
+      type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
     }));
   });
 
@@ -763,7 +763,7 @@ describe('DashParser Manifest', function() {
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
-      '</MPD>'
+      '</MPD>',
     ].join('\n');
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
@@ -803,7 +803,7 @@ describe('DashParser Manifest', function() {
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
-      '</MPD>'
+      '</MPD>',
     ].join('\n');
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
@@ -832,7 +832,7 @@ describe('DashParser Manifest', function() {
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
-      '</MPD>'
+      '</MPD>',
     ].join('\n');
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
@@ -870,7 +870,7 @@ describe('DashParser Manifest', function() {
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
-      '</MPD>'
+      '</MPD>',
     ].join('\n');
 
     // See https://bit.ly/2tx7f7A
@@ -912,7 +912,7 @@ describe('DashParser Manifest', function() {
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
-      '</MPD>'
+      '</MPD>',
     ].join('\n');
 
     fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
@@ -942,7 +942,7 @@ describe('DashParser Manifest', function() {
         '<MPD minBufferTime="PT75S">',
         '  <Period id="1" duration="PT30S">',
         '    <AdaptationSet mimeType="audio/mp4">',
-        '      <Representation id="1" bandwidth="1">'
+        '      <Representation id="1" bandwidth="1">',
       ].join('\n');
 
       let configs = [];
@@ -957,7 +957,7 @@ describe('DashParser Manifest', function() {
         '      </Representation>',
         '    </AdaptationSet>',
         '  </Period>',
-        '</MPD>'
+        '</MPD>',
       ].join('\n');
 
       let source = header + configs.join('\n') + footer;
@@ -1023,8 +1023,30 @@ describe('DashParser Manifest', function() {
 
       await testAudioChannelConfiguration(2, {
         'foo': 'bar',
-        'urn:mpeg:dash:23003:3:audio_channel_configuration:2011': '2'
+        'urn:mpeg:dash:23003:3:audio_channel_configuration:2011': '2',
       });
     });
+  });
+
+  it('does not fail on AdaptationSets without segment info', async () => {
+    let manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" contentType="text">',
+      '      <Representation mimeType="application/mp4" codecs="stpp">',
+      '        <SegmentTemplate media="$Number$.mp4" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <Representation bandwidth="1">',
+      '        <SegmentTemplate media="2.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
+    await parser.start('dummy://foo', playerInterface);
   });
 });

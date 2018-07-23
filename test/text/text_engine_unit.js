@@ -42,7 +42,7 @@ describe('TextEngine', function() {
     mockParserPlugIn = function() {
       return {
         parseInit: mockParseInit,
-        parseMedia: mockParseMedia
+        parseMedia: mockParseMedia,
       };
     };
 
@@ -149,7 +149,7 @@ describe('TextEngine', function() {
           createFakeCue(time.periodStart + 0,
                         time.periodStart + 1),
           createFakeCue(time.periodStart + 2,
-                        time.periodStart + 3)
+                        time.periodStart + 3),
         ];
       });
 
@@ -161,7 +161,7 @@ describe('TextEngine', function() {
         expect(mockDisplayer.append).toHaveBeenCalledWith(
             [
               createFakeCue(0, 1),
-              createFakeCue(2, 3)
+              createFakeCue(2, 3),
             ]);
 
         mockDisplayer.append.calls.reset();
@@ -174,7 +174,7 @@ describe('TextEngine', function() {
         expect(mockDisplayer.append).toHaveBeenCalledWith(
             [
               createFakeCue(4, 5),
-              createFakeCue(6, 7)
+              createFakeCue(6, 7),
             ]);
       }).catch(fail).then(done);
     });
@@ -303,7 +303,7 @@ describe('TextEngine', function() {
         expect(mockDisplayer.append).toHaveBeenCalledWith(
             [
               createFakeCue(0, 1),
-              createFakeCue(1, 2)
+              createFakeCue(1, 2),
             ]);
 
         mockDisplayer.append.calls.reset();
@@ -313,7 +313,7 @@ describe('TextEngine', function() {
         expect(mockDisplayer.append).toHaveBeenCalledWith(
             [
               createFakeCue(1, 2),
-              createFakeCue(2, 3)
+              createFakeCue(2, 3),
             ]);
       }).catch(fail).then(done);
     });

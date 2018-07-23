@@ -34,7 +34,7 @@ describe('ManifestParserUtils', function() {
         'http://example.com/page.html',
         'http://example.com/site.css',
         'http://example.org/page.html',
-        'http://example.org/site.css'
+        'http://example.org/site.css',
       ];
       let actual = ManifestParserUtils.resolveUris(base, relative);
       expect(actual).toEqual(expected);
@@ -50,14 +50,14 @@ describe('ManifestParserUtils', function() {
     it('handles manifest file as base URI', function() {
       let base = [
         'http://example.com/manifest.mpd',
-        'http://example.org/path/to/manifest.mpd'
+        'http://example.org/path/to/manifest.mpd',
       ];
       let relative = ['segment.mp4', 'other/location/segment.webm'];
       let expected = [
         'http://example.com/segment.mp4',
         'http://example.com/other/location/segment.webm',
         'http://example.org/path/to/segment.mp4',
-        'http://example.org/path/to/other/location/segment.webm'
+        'http://example.org/path/to/other/location/segment.webm',
       ];
       let actual = ManifestParserUtils.resolveUris(base, relative);
       expect(actual).toEqual(expected);

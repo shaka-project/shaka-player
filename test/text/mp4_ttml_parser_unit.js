@@ -36,7 +36,7 @@ describe('Mp4TtmlParser', function() {
       shaka.test.Util.fetch(ttmlInitSegmentUri),
       shaka.test.Util.fetch(ttmlSegmentUri),
       shaka.test.Util.fetch(ttmlSegmentMultipleMDATUri),
-      shaka.test.Util.fetch(audioInitSegmentUri)
+      shaka.test.Util.fetch(audioInitSegmentUri),
     ]).then(function(responses) {
       ttmlInitSegment = new Uint8Array(responses[0]);
       ttmlSegment = new Uint8Array(responses[1]);

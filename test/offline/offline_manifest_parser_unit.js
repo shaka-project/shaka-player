@@ -47,7 +47,7 @@ describe('OfflineManifestParser', function() {
 
     /** @type {!shaka.offline.StorageMuxer} */
     let muxer = new shaka.offline.StorageMuxer();
-    await shaka.util.IDestroyable.with([muxer], async () => {
+    await shaka.util.Destroyer.with([muxer], async () => {
       await muxer.init();
       let handle = await muxer.getActive();
       let keys = await handle.cell.addManifests([inputManifest]);
@@ -71,7 +71,7 @@ describe('OfflineManifestParser', function() {
 
     /** @type {!shaka.offline.StorageMuxer} */
     let muxer = new shaka.offline.StorageMuxer();
-    await shaka.util.IDestroyable.with([muxer], async () => {
+    await shaka.util.Destroyer.with([muxer], async () => {
       await muxer.init();
       let handle = await muxer.getActive();
       let keys = await handle.cell.addManifests([inputManifest]);
@@ -97,7 +97,7 @@ describe('OfflineManifestParser', function() {
     let uri;
 
     muxer = new shaka.offline.StorageMuxer();
-    await shaka.util.IDestroyable.with([muxer], async () => {
+    await shaka.util.Destroyer.with([muxer], async () => {
       await muxer.init();
       let handle = await muxer.getActive();
       let keys = await handle.cell.addManifests([inputManifest]);
@@ -138,7 +138,7 @@ describe('OfflineManifestParser', function() {
         let muxer;
 
         muxer = new shaka.offline.StorageMuxer();
-        await shaka.util.IDestroyable.with([muxer], async () => {
+        await shaka.util.Destroyer.with([muxer], async () => {
           await muxer.init();
           let handle = await muxer.getActive();
           let keys = await handle.cell.addManifests([inputManifest]);
@@ -171,7 +171,7 @@ describe('OfflineManifestParser', function() {
         let muxer;
 
         muxer = new shaka.offline.StorageMuxer();
-        await shaka.util.IDestroyable.with([muxer], async () => {
+        await shaka.util.Destroyer.with([muxer], async () => {
           await muxer.init();
           let handle = await muxer.getActive();
           let keys = await handle.cell.addManifests([inputManifest]);
@@ -204,7 +204,7 @@ describe('OfflineManifestParser', function() {
       periods: [],
       sessionIds: [sessionId],
       drmInfo: null,
-      appMetadata: {}
+      appMetadata: {},
     };
 
     return manifest;
@@ -216,7 +216,7 @@ describe('OfflineManifestParser', function() {
   function clearStorage() {
     /** @type {!shaka.offline.StorageMuxer} */
     let muxer = new shaka.offline.StorageMuxer();
-    return shaka.util.IDestroyable.with([muxer], async () => {
+    return shaka.util.Destroyer.with([muxer], async () => {
       await muxer.init();
       await muxer.erase();
     });

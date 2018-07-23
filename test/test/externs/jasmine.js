@@ -35,7 +35,6 @@ jasmine.Callback;
 jasmine.addMatchers = function(matchers) {};
 
 
-
 /**
  * @constructor
  * @struct
@@ -57,7 +56,6 @@ jasmine.Spec.prototype.result;
  * @return {string}
  */
 jasmine.Spec.prototype.getFullName = function() {};
-
 
 
 /**
@@ -158,7 +156,6 @@ jasmine.Matchers.prototype.toThrowError = function(value) {};
 jasmine.Matchers.prototype.toEqualElement = function(expected) {};
 
 
-
 /**
  * @constructor
  * @struct
@@ -209,7 +206,6 @@ jasmine.SpyStrategy.prototype.callFake = function(value) {};
 jasmine.SpyStrategy.prototype.stub = function() {};
 
 
-
 /**
  * @constructor
  * @struct
@@ -227,7 +223,6 @@ jasmine.CallContext.prototype.args;
 
 /** @const {*} */
 jasmine.CallContext.prototype.returnValue;
-
 
 
 /**
@@ -269,7 +264,6 @@ jasmine.CallTracker.prototype.first = function() {};
 
 
 jasmine.CallTracker.prototype.reset = function() {};
-
 
 
 /**
@@ -415,7 +409,6 @@ var fit = function(name, callback) {};
 var xit = function(name, callback) {};
 
 
-
 /**
  * @constructor
  * @struct
@@ -449,7 +442,6 @@ jasmine.getEnv = function() {};
 
 /** @param {function(*, *)} comparer */
 jasmine.addCustomEqualityTester;
-
 
 
 /**
@@ -487,7 +479,6 @@ jasmine.Ajax.install = function() {};
 jasmine.Ajax.uninstall = function() {};
 
 
-
 /**
  * @constructor
  * @struct
@@ -510,7 +501,6 @@ jasmine.Ajax.Stub.prototype.andTimeout = function() {};
 
 
 jasmine.Ajax.Stub.prototype.andError = function() {};
-
 
 
 /**
@@ -561,7 +551,6 @@ jasmine.Ajax.RequestStub.prototype.andTimeout = function() {};
 
 /** @return {boolean} */
 jasmine.Ajax.RequestStub.prototype.isTimeout = function() {};
-
 
 
 /**

@@ -288,6 +288,10 @@ shakaDemo.preBrowserCheckParams_ = function(params) {
   if ('certificate' in params) {
     document.getElementById('certificateInput').value = params['certificate'];
   }
+  if ('availabilityWindowOverride' in params) {
+    document.getElementById('availabilityWindowOverride').value =
+        params['availabilityWindowOverride'];
+  }
   if ('logtoscreen' in params) {
     document.getElementById('logToScreen').checked = true;
     // Call onLogChange_ manually, because setting checked
@@ -580,6 +584,11 @@ shakaDemo.hashShouldChange_ = function() {
   }
   if (document.getElementById('showNative').checked) {
     params.push('nativecontrols');
+  }
+  let availabilityWindowOverride =
+      document.getElementById('availabilityWindowOverride').value;
+  if (availabilityWindowOverride) {
+    params.push('availabilityWindowOverride=' + availabilityWindowOverride);
   }
   if (shaka.log) {
     let logLevelList = document.getElementById('logLevelList');

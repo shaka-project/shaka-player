@@ -31,7 +31,7 @@ shaka.test.OfflineUtils.createManifest = function(originalUri) {
     originalManifestUri: originalUri,
     periods: [],
     sessionIds: [],
-    size: 1024
+    size: 1024,
   };
 };
 
@@ -59,7 +59,7 @@ shaka.test.OfflineUtils.createStream = function(id, type) {
     encrypted: false,
     keyId: null,
     segments: [],
-    variantIds: []
+    variantIds: [],
   };
 };
 
@@ -73,7 +73,7 @@ shaka.test.OfflineUtils.createSegmentData = function(data) {
   let array = new Uint8Array(data);
 
   return {
-    data: array.buffer
+    data: array.buffer,
   };
 };
 

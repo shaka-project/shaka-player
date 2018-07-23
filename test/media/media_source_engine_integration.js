@@ -82,7 +82,7 @@ describe('MediaSourceEngine', function() {
   function getFakeStream(streamMetadata) {
     return {
       mimeType: streamMetadata.mimeType,
-      codecs: streamMetadata.codecs
+      codecs: streamMetadata.codecs,
     };
   }
 
@@ -114,7 +114,7 @@ describe('MediaSourceEngine', function() {
     await Promise.all([
       append(ContentType.VIDEO, 1),
       append(ContentType.VIDEO, 2),
-      append(ContentType.VIDEO, 3)
+      append(ContentType.VIDEO, 3),
     ]);
     expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(30);
     await remove(ContentType.VIDEO, 1);
@@ -144,7 +144,7 @@ describe('MediaSourceEngine', function() {
     await Promise.all([
       append(ContentType.VIDEO, 2),
       append(ContentType.VIDEO, 3),
-      append(ContentType.VIDEO, 4)
+      append(ContentType.VIDEO, 4),
     ]);
     expect(mediaSource.duration).toBeCloseTo(40);
     await mediaSourceEngine.setDuration(60);
@@ -329,7 +329,7 @@ describe('MediaSourceEngine', function() {
     // Create a mock text displayer, to intercept text cues.
     let cues = [];
     let mockTextDisplayer = /** @type {shaka.extern.TextDisplayer} */ ({
-      append: (newCues) => { cues = cues.concat(newCues); }
+      append: (newCues) => { cues = cues.concat(newCues); },
     });
     mediaSourceEngine.setTextDisplayer(mockTextDisplayer);
 

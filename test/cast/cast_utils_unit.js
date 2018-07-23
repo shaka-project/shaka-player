@@ -35,7 +35,7 @@ describe('CastUtils', function() {
       'createPlayheadObserver',
       'createMediaSource',
       'createMediaSourceEngine',
-      'createStreamingEngine'
+      'createStreamingEngine',
     ];
 
     let castMembers = CastUtils.PlayerVoidMethods
@@ -75,7 +75,7 @@ describe('CastUtils', function() {
         'true': true,
         'false': false,
         'one': 1,
-        'string': 'a string'
+        'string': 'a string',
       };
 
       let serialized = CastUtils.serialize(orig);
@@ -100,12 +100,12 @@ describe('CastUtils', function() {
         'bubbles',
         'type',
         'cancelable',
-        'defaultPrevented'
+        'defaultPrevented',
       ];
       let extraProperties = {
         'key': 'value',
         'true': true,
-        'one': 1
+        'one': 1,
       };
 
       for (let k in extraProperties) {
@@ -140,12 +140,12 @@ describe('CastUtils', function() {
         'bubbles',
         'type',
         'cancelable',
-        'defaultPrevented'
+        'defaultPrevented',
       ];
       let extraProperties = {
         'key': 'value',
         'true': true,
-        'one': 1
+        'one': 1,
       };
 
       for (let k in extraProperties) {
@@ -198,7 +198,7 @@ describe('CastUtils', function() {
         // to get ranges to use.
         let fakeVideoStream = {
           mimeType: 'video/mp4',
-          codecs: 'avc1.42c01e'
+          codecs: 'avc1.42c01e',
         };
         let initSegmentUrl = '/base/test/test/assets/sintel-video-init.mp4';
         let videoSegmentUrl = '/base/test/test/assets/sintel-video-segment.mp4';

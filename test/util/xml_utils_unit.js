@@ -27,7 +27,7 @@ describe('XmlUtils', function() {
         '<?xml version="1.0"?>',
         '<Root>',
         '  <Child></Child>',
-        '</Root>'
+        '</Root>',
       ].join('\n');
       let xml = new DOMParser().parseFromString(xmlString, 'application/xml');
       goog.asserts.assert(xml, 'parseFromString should succeed');
@@ -45,7 +45,7 @@ describe('XmlUtils', function() {
         '<Root>',
         '  <Child></Child>',
         '  <Child></Child>',
-        '</Root>'
+        '</Root>',
       ].join('\n');
       let xml = new DOMParser().parseFromString(xmlString, 'application/xml');
       goog.asserts.assert(xml, 'parseFromString should succeed');
@@ -63,7 +63,7 @@ describe('XmlUtils', function() {
       '<Root>',
       '  <Child></Child>',
       '  <Child></Child>',
-      '</Root>'
+      '</Root>',
     ].join('\n');
     let xml = new DOMParser().parseFromString(xmlString, 'application/xml');
     goog.asserts.assert(xml, 'parseFromString should succeed');
@@ -85,7 +85,7 @@ describe('XmlUtils', function() {
         '<?xml version="1.0"?>',
         '<Root>',
         '  foo bar',
-        '</Root>'
+        '</Root>',
       ].join('\n');
       let xml = new DOMParser().parseFromString(xmlString, 'application/xml');
       goog.asserts.assert(xml, 'parseFromString should succeed');
@@ -99,7 +99,7 @@ describe('XmlUtils', function() {
       let xmlString = [
         '<?xml version="1.0"?>',
         '<Root>',
-        '</Root>'
+        '</Root>',
       ].join('\n');
       let xml = new DOMParser().parseFromString(xmlString, 'application/xml');
       goog.asserts.assert(xml, 'parseFromString should succeed');
@@ -113,7 +113,7 @@ describe('XmlUtils', function() {
       let xmlString = [
         '<?xml version="1.0"?>',
         '<Root>',
-        '</Root>'
+        '</Root>',
       ].join('\n');
       let xml = new DOMParser().parseFromString(xmlString, 'application/xml');
       goog.asserts.assert(xml, 'parseFromString should succeed');
@@ -130,7 +130,7 @@ describe('XmlUtils', function() {
       let xmlString = [
         '<?xml version="1.0"?>',
         '<Root a="2-7" b="-5" c="">',
-        '</Root>'
+        '</Root>',
       ].join('\n');
       xml = /** @type {!Document} */ (
           new DOMParser().parseFromString(xmlString, 'application/xml'));

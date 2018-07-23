@@ -37,7 +37,7 @@ describe('DashParser SegmentTemplate', function() {
       filterAllPeriods: function() {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
-      onError: fail
+      onError: fail,
     };
   });
 
@@ -48,7 +48,7 @@ describe('DashParser SegmentTemplate', function() {
     it('basic support', async () => {
       let source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="1" media="s$Number$.mp4"',
-        '  duration="10" />'
+        '  duration="10" />',
       ], 60 /* duration */);
       let references = [
         ManifestParser.makeReference('s1.mp4', 0, 0, 10, baseUri),
@@ -56,7 +56,7 @@ describe('DashParser SegmentTemplate', function() {
         ManifestParser.makeReference('s3.mp4', 2, 20, 30, baseUri),
         ManifestParser.makeReference('s4.mp4', 3, 30, 40, baseUri),
         ManifestParser.makeReference('s5.mp4', 4, 40, 50, baseUri),
-        ManifestParser.makeReference('s6.mp4', 5, 50, 60, baseUri)
+        ManifestParser.makeReference('s6.mp4', 5, 50, 60, baseUri),
       ];
       await Dash.testSegmentIndex(source, references);
     });
@@ -64,12 +64,12 @@ describe('DashParser SegmentTemplate', function() {
     it('with @startNumber > 1', async () => {
       let source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="10" media="s$Number$.mp4"',
-        '   duration="10" />'
+        '   duration="10" />',
       ], 30 /* duration */);
       let references = [
         ManifestParser.makeReference('s10.mp4', 0, 0, 10, baseUri),
         ManifestParser.makeReference('s11.mp4', 1, 10, 20, baseUri),
-        ManifestParser.makeReference('s12.mp4', 2, 20, 30, baseUri)
+        ManifestParser.makeReference('s12.mp4', 2, 20, 30, baseUri),
       ];
       await Dash.testSegmentIndex(source, references);
     });
@@ -77,7 +77,7 @@ describe('DashParser SegmentTemplate', function() {
     it('honors presentationTimeOffset', function(done) {
       let source = Dash.makeSimpleManifestText([
         '<SegmentTemplate media="s$Number$.mp4" duration="10"',
-        ' presentationTimeOffset="50" />'
+        ' presentationTimeOffset="50" />',
       ], 30 /* duration */);
 
       fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
@@ -99,13 +99,13 @@ describe('DashParser SegmentTemplate', function() {
 
     it('handles segments larger than the period', async () => {
       let source = Dash.makeSimpleManifestText([
-        '<SegmentTemplate media="s$Number$.mp4" duration="60" />'
+        '<SegmentTemplate media="s$Number$.mp4" duration="60" />',
       ], 30 /* duration */);
       // The first segment is number 1 and position 0.
       // Although the segment is 60 seconds long, it is clipped to the period
       // duration of 30 seconds.
       let references = [
-        ManifestParser.makeReference('s1.mp4', 0, 0, 30, baseUri)
+        ManifestParser.makeReference('s1.mp4', 0, 0, 30, baseUri),
       ];
       await Dash.testSegmentIndex(source, references);
     });
@@ -115,12 +115,12 @@ describe('DashParser SegmentTemplate', function() {
     it('basic support', async () => {
       let source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="1" index="index-$Bandwidth$.mp4"',
-        '    initialization="init-$Bandwidth$.mp4" />'
+        '    initialization="init-$Bandwidth$.mp4" />',
       ]);
 
       fakeNetEngine.setResponseMapAsText({
         'dummy://foo': source,
-        'http://example.com/index-500.mp4': ''
+        'http://example.com/index-500.mp4': '',
       });
       let manifest = await parser.start('dummy://foo', playerInterface);
       expect(manifest).toEqual(
@@ -139,12 +139,12 @@ describe('DashParser SegmentTemplate', function() {
         '  <SegmentTimeline>',
         '    <S t="0" d="3" r="12" />',
         '  </SegmentTimeline>',
-        '</SegmentTemplate>'
+        '</SegmentTemplate>',
       ]);
 
       fakeNetEngine.setResponseMapAsText({
         'dummy://foo': source,
-        'http://example.com/index-500.mp4': ''
+        'http://example.com/index-500.mp4': '',
       });
       let manifest = await parser.start('dummy://foo', playerInterface);
       expect(manifest).toEqual(
@@ -169,13 +169,13 @@ describe('DashParser SegmentTemplate', function() {
         '      </Representation>',
         '    </AdaptationSet>',
         '  </Period>',
-        '</MPD>'
+        '</MPD>',
       ].join('\n');
 
       fakeNetEngine.setResponseMapAsText({
         'dummy://foo': source,
         'http://example.com/index-500.webm': '',
-        'http://example.com/init-500.webm': ''
+        'http://example.com/init-500.webm': '',
       });
       let manifest = await parser.start('dummy://foo', playerInterface);
       expect(manifest).toEqual(
@@ -200,12 +200,12 @@ describe('DashParser SegmentTemplate', function() {
         '      <Representation bandwidth="500" />',
         '    </AdaptationSet>',
         '  </Period>',
-        '</MPD>'
+        '</MPD>',
       ].join('\n');
 
       fakeNetEngine.setResponseMapAsText({
         'dummy://foo': source,
-        'http://example.com/index-500.mp4': ''
+        'http://example.com/index-500.mp4': '',
       });
       let manifest = await parser.start('dummy://foo', playerInterface);
       expect(manifest).toEqual(
@@ -228,12 +228,12 @@ describe('DashParser SegmentTemplate', function() {
         '      <Representation bandwidth="500" />',
         '    </AdaptationSet>',
         '  </Period>',
-        '</MPD>'
+        '</MPD>',
       ].join('\n');
 
       fakeNetEngine.setResponseMapAsText({
         'dummy://foo': source,
-        'http://example.com/index-500.mp4': ''
+        'http://example.com/index-500.mp4': '',
       });
       let manifest = await parser.start('dummy://foo', playerInterface);
       expect(manifest).toEqual(
@@ -254,12 +254,12 @@ describe('DashParser SegmentTemplate', function() {
         '  <SegmentTimeline>',
         '    <S t="0" d="15" r="2" />',
         '  </SegmentTimeline>',
-        '</SegmentTemplate>'
+        '</SegmentTemplate>',
       ], 45 /* duration */);
       let references = [
         ManifestParser.makeReference('0-0-500.mp4', 0, 0, 15, baseUri),
         ManifestParser.makeReference('1-15-500.mp4', 1, 15, 30, baseUri),
-        ManifestParser.makeReference('2-30-500.mp4', 2, 30, 45, baseUri)
+        ManifestParser.makeReference('2-30-500.mp4', 2, 30, 45, baseUri),
       ];
       await Dash.testSegmentIndex(source, references);
     });
@@ -267,12 +267,12 @@ describe('DashParser SegmentTemplate', function() {
     it('with @startnumber = 0', async () => {
       let source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="0" duration="10"',
-        '    media="$Number$-$Time$-$Bandwidth$.mp4" />'
+        '    media="$Number$-$Time$-$Bandwidth$.mp4" />',
       ], 30 /* duration */);
       let references = [
         ManifestParser.makeReference('0-0-500.mp4', 0, 0, 10, baseUri),
         ManifestParser.makeReference('1-10-500.mp4', 1, 10, 20, baseUri),
-        ManifestParser.makeReference('2-20-500.mp4', 2, 20, 30, baseUri)
+        ManifestParser.makeReference('2-20-500.mp4', 2, 20, 30, baseUri),
       ];
       await Dash.testSegmentIndex(source, references);
     });
@@ -280,12 +280,12 @@ describe('DashParser SegmentTemplate', function() {
     it('with @startNumber = 1', async () => {
       let source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="1" duration="10"',
-        '    media="$Number$-$Time$-$Bandwidth$.mp4" />'
+        '    media="$Number$-$Time$-$Bandwidth$.mp4" />',
       ], 30 /* duration */);
       let references = [
         ManifestParser.makeReference('1-0-500.mp4', 0, 0, 10, baseUri),
         ManifestParser.makeReference('2-10-500.mp4', 1, 10, 20, baseUri),
-        ManifestParser.makeReference('3-20-500.mp4', 2, 20, 30, baseUri)
+        ManifestParser.makeReference('3-20-500.mp4', 2, 20, 30, baseUri),
       ];
       await Dash.testSegmentIndex(source, references);
     });
@@ -293,12 +293,12 @@ describe('DashParser SegmentTemplate', function() {
     it('with @startNumber > 1', async () => {
       let source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="10" duration="10"',
-        '    media="$Number$-$Time$-$Bandwidth$.mp4" />'
+        '    media="$Number$-$Time$-$Bandwidth$.mp4" />',
       ], 30 /* duration */);
       let references = [
         ManifestParser.makeReference('10-0-500.mp4', 0, 0, 10, baseUri),
         ManifestParser.makeReference('11-10-500.mp4', 1, 10, 20, baseUri),
-        ManifestParser.makeReference('12-20-500.mp4', 2, 20, 30, baseUri)
+        ManifestParser.makeReference('12-20-500.mp4', 2, 20, 30, baseUri),
       ];
       await Dash.testSegmentIndex(source, references);
     });
@@ -306,12 +306,12 @@ describe('DashParser SegmentTemplate', function() {
     it('with @timescale > 1', async () => {
       let source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="1" timescale="9000" duration="9000"',
-        '    media="$Number$-$Time$-$Bandwidth$.mp4" />'
+        '    media="$Number$-$Time$-$Bandwidth$.mp4" />',
       ], 3 /* duration */);
       let references = [
         ManifestParser.makeReference('1-0-500.mp4', 0, 0, 1, baseUri),
         ManifestParser.makeReference('2-9000-500.mp4', 1, 1, 2, baseUri),
-        ManifestParser.makeReference('3-18000-500.mp4', 2, 2, 3, baseUri)
+        ManifestParser.makeReference('3-18000-500.mp4', 2, 2, 3, baseUri),
       ];
       await Dash.testSegmentIndex(source, references);
     });
@@ -329,7 +329,7 @@ describe('DashParser SegmentTemplate', function() {
         '      <Representation bandwidth="300" />',
         '    </AdaptationSet>',
         '  </Period>',
-        '</MPD>'
+        '</MPD>',
       ].join('\n');
 
       fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
@@ -374,7 +374,7 @@ describe('DashParser SegmentTemplate', function() {
         '      </Representation>',
         '    </AdaptationSet>',
         '  </Period>',
-        '</MPD>'
+        '</MPD>',
       ].join('\n');
       let error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
@@ -395,7 +395,7 @@ describe('DashParser SegmentTemplate', function() {
         '      </Representation>',
         '    </AdaptationSet>',
         '  </Period>',
-        '</MPD>'
+        '</MPD>',
       ].join('\n');
       let error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
@@ -406,7 +406,7 @@ describe('DashParser SegmentTemplate', function() {
 
     it('not enough segment info', async () => {
       let source = Dash.makeSimpleManifestText([
-        '<SegmentTemplate startNumber="1" />'
+        '<SegmentTemplate startNumber="1" />',
       ]);
       let error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
@@ -421,7 +421,7 @@ describe('DashParser SegmentTemplate', function() {
         '  <SegmentTimeline>',
         '    <S d="10" />',
         '  </SegmentTimeline>',
-        '</SegmentTemplate>'
+        '</SegmentTemplate>',
       ]);
       let error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,

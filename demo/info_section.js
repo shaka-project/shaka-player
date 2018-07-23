@@ -132,7 +132,7 @@ shakaDemo.updateTrackOptions_ = function(list, tracks, languageAndRole) {
       }
       trackInfo += track.bandwidth + ' bits/s';
       return trackInfo;
-    } ,
+    },
     text: function(track) {
       let trackInfo = 'language: ' + track.language + ', ';
       if (track.label) trackInfo += 'label: ' + track.label + ', ';
@@ -141,7 +141,7 @@ shakaDemo.updateTrackOptions_ = function(list, tracks, languageAndRole) {
       }
       trackInfo += 'kind: ' + track.kind;
       return trackInfo;
-    }
+    },
   };
   // Remove old tracks.
   while (list.firstChild) {

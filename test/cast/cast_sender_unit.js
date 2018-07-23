@@ -27,7 +27,7 @@ describe('CastSender', function() {
     manifest: null,
     player: null,
     startTime: null,
-    video: null
+    video: null,
   };
 
   /** @type {!jasmine.Spy} */
@@ -179,7 +179,7 @@ describe('CastSender', function() {
         expect(sender.isCasting()).toBe(true);
         expect(mockSession.messages).toContain(jasmine.objectContaining({
           type: 'init',
-          initState: fakeInitState
+          initState: fakeInitState,
         }));
       }).catch(fail).then(done);
     });
@@ -191,23 +191,23 @@ describe('CastSender', function() {
       {
         condition: 'canceled by the user',
         castErrorCode: 'cancel',
-        shakaErrorCode: 8004  // Code.CAST_CANCELED_BY_USER
+        shakaErrorCode: 8004,  // Code.CAST_CANCELED_BY_USER
       },
       {
         condition: 'the connection times out',
         castErrorCode: 'timeout',
-        shakaErrorCode: 8005  // Code.CAST_CONNECTION_TIMED_OUT
+        shakaErrorCode: 8005,  // Code.CAST_CONNECTION_TIMED_OUT
       },
       {
         condition: 'the receiver is unavailable',
         castErrorCode: 'receiver_unavailable',
-        shakaErrorCode: 8006  // Code.CAST_RECEIVER_APP_UNAVAILABLE
+        shakaErrorCode: 8006,  // Code.CAST_RECEIVER_APP_UNAVAILABLE
       },
       {
         condition: 'an unexpected error occurs',
         castErrorCode: 'anything else',
-        shakaErrorCode: 8003  // Code.UNEXPECTED_CAST_ERROR
-      }
+        shakaErrorCode: 8003,  // Code.UNEXPECTED_CAST_ERROR
+      },
     ];
 
     connectionFailures.forEach(function(metadata) {
@@ -274,7 +274,7 @@ describe('CastSender', function() {
       expect(mockSession.messages.length).toBe(0);
       expect(oldMockSession.messages).toContain(jasmine.objectContaining({
         type: 'init',
-        initState: fakeInitState
+        initState: fakeInitState,
       }));
     }).catch(fail).then(done);
   });
@@ -313,7 +313,7 @@ describe('CastSender', function() {
       expect(onInitStateRequired).toHaveBeenCalled();
       expect(mockSession.messages).toContain(jasmine.objectContaining({
         type: 'init',
-        initState: fakeInitState
+        initState: fakeInitState,
       }));
     }).catch(fail).then(done);
   });
@@ -321,7 +321,7 @@ describe('CastSender', function() {
   describe('setAppData', function() {
     let fakeAppData = {
       myKey1: 'myValue1',
-      myKey2: 'myValue2'
+      myKey2: 'myValue2',
     };
 
     it('sets "appData" for "init" message if not casting', function(done) {
@@ -331,7 +331,7 @@ describe('CastSender', function() {
       sender.cast(fakeInitState).then(function() {
         expect(mockSession.messages).toContain(jasmine.objectContaining({
           type: 'init',
-          appData: fakeAppData
+          appData: fakeAppData,
         }));
       }).catch(fail).then(done);
       fakeSessionConnection();
@@ -344,18 +344,18 @@ describe('CastSender', function() {
         // init message has no appData
         expect(mockSession.messages).toContain(jasmine.objectContaining({
           type: 'init',
-          appData: null
+          appData: null,
         }));
         // no appData message yet
         expect(mockSession.messages).not.toContain(jasmine.objectContaining({
-          type: 'appData'
+          type: 'appData',
         }));
 
         sender.setAppData(fakeAppData);
         // now there is an appData message
         expect(mockSession.messages).toContain(jasmine.objectContaining({
           type: 'appData',
-          appData: fakeAppData
+          appData: fakeAppData,
         }));
       }).catch(fail).then(done);
       fakeSessionConnection();
@@ -374,7 +374,7 @@ describe('CastSender', function() {
 
         fakeSessionMessage({
           type: 'update',
-          update: {video: {currentTime: 12}, player: {isLive: false}}
+          update: {video: {currentTime: 12}, player: {isLive: false}},
         });
         expect(onFirstCastStateUpdate).toHaveBeenCalled();
       }).catch(fail).then(done);
@@ -386,7 +386,7 @@ describe('CastSender', function() {
       sender.cast(fakeInitState).then(function() {
         fakeSessionMessage({
           type: 'update',
-          update: {video: {currentTime: 12}, player: {isLive: false}}
+          update: {video: {currentTime: 12}, player: {isLive: false}},
         });
         expect(onFirstCastStateUpdate).not.toHaveBeenCalled();
       }).catch(fail).then(done);
@@ -401,14 +401,14 @@ describe('CastSender', function() {
       Util.delay(0.1).then(function() {
         fakeSessionMessage({
           type: 'update',
-          update: {video: {currentTime: 12}, player: {isLive: false}}
+          update: {video: {currentTime: 12}, player: {isLive: false}},
         });
         expect(onFirstCastStateUpdate).toHaveBeenCalled();
         onFirstCastStateUpdate.calls.reset();
 
         fakeSessionMessage({
           type: 'update',
-          update: {video: {currentTime: 12}, player: {isLive: false}}
+          update: {video: {currentTime: 12}, player: {isLive: false}},
         });
         expect(onFirstCastStateUpdate).not.toHaveBeenCalled();
         onFirstCastStateUpdate.calls.reset();
@@ -419,7 +419,7 @@ describe('CastSender', function() {
       }).then(function() {
         fakeSessionMessage({
           type: 'update',
-          update: {video: {currentTime: 12}, player: {isLive: false}}
+          update: {video: {currentTime: 12}, player: {isLive: false}},
         });
         expect(onFirstCastStateUpdate).toHaveBeenCalled();
       }).catch(fail).then(done);
@@ -433,12 +433,12 @@ describe('CastSender', function() {
       sender.cast(fakeInitState).then(function() {
         let fakeEvent = {
           type: 'eventName',
-          detail: {key1: 'value1'}
+          detail: {key1: 'value1'},
         };
         fakeSessionMessage({
           type: 'event',
           targetName: 'video',
-          event: fakeEvent
+          event: fakeEvent,
         });
 
         expect(onRemoteEvent).toHaveBeenCalledWith(
@@ -496,16 +496,16 @@ describe('CastSender', function() {
         let update = {
           video: {
             currentTime: 12,
-            paused: false
+            paused: false,
           },
           player: {
             isBuffering: true,
-            seekRange: {start: 5, end: 17}
-          }
+            seekRange: {start: 5, end: 17},
+          },
         };
         fakeSessionMessage({
           type: 'update',
-          update: update
+          update: update,
         });
 
         // These are properties:
@@ -543,7 +543,7 @@ describe('CastSender', function() {
           type: 'call',
           targetName: 'video',
           methodName: 'play',
-          args: [123, 'abc']
+          args: [123, 'abc'],
         }));
       }).catch(fail).then(done);
       fakeSessionConnection();
@@ -577,7 +577,7 @@ describe('CastSender', function() {
           targetName: 'player',
           methodName: 'load',
           args: [123, 'abc'],
-          id: jasmine.any(String)
+          id: jasmine.any(String),
         }));
       });
 
@@ -591,7 +591,7 @@ describe('CastSender', function() {
           fakeSessionMessage({
             type: 'asyncComplete',
             id: id,
-            error: null
+            error: null,
           });
 
           // Wait a tick for the Promise status to change.
@@ -616,7 +616,7 @@ describe('CastSender', function() {
           fakeSessionMessage({
             type: 'asyncComplete',
             id: id,
-            error: originalError
+            error: originalError,
           });
 
           // Wait a tick for the Promise status to change.
@@ -658,11 +658,11 @@ describe('CastSender', function() {
       fakeReceiverAvailability(true);
       sender.cast(fakeInitState).then(function() {
         let update = {
-          video: {muted: false}
+          video: {muted: false},
         };
         fakeSessionMessage({
           type: 'update',
-          update: update
+          update: update,
         });
         expect(sender.get('video', 'muted')).toBe(false);
 
@@ -681,7 +681,7 @@ describe('CastSender', function() {
           type: 'set',
           targetName: 'video',
           property: 'muted',
-          value: true
+          value: true,
         }));
       }).catch(fail).then(done);
       fakeSessionConnection();
@@ -708,7 +708,7 @@ describe('CastSender', function() {
 
         fakeSessionMessage({
           type: 'update',
-          update: {video: {currentTime: 12}, player: {isLive: false}}
+          update: {video: {currentTime: 12}, player: {isLive: false}},
         });
         expect(sender.hasRemoteProperties()).toBe(true);
       }).catch(fail).then(done);
@@ -800,7 +800,7 @@ describe('CastSender', function() {
       SessionStatus: {STOPPED: 'stopped'},
       ApiConfig: jasmine.createSpy('chrome.cast.ApiConfig'),
       initialize: jasmine.createSpy('chrome.cast.initialize'),
-      requestSession: jasmine.createSpy('chrome.cast.requestSession')
+      requestSession: jasmine.createSpy('chrome.cast.requestSession'),
     };
   }
 
@@ -815,7 +815,7 @@ describe('CastSender', function() {
       removeMessageListener: jasmine.createSpy('Session.removeMessageListener'),
       leave: jasmine.createSpy('Session.leave'),
       sendMessage: jasmine.createSpy('Session.sendMessage'),
-      stop: jasmine.createSpy('Session.stop')
+      stop: jasmine.createSpy('Session.stop'),
     };
 
     // For convenience, deserialize and store sent messages.

@@ -18,7 +18,6 @@
 goog.provide('shaka.test.FakeMediaSourceEngine');
 
 
-
 /**
  * Creates a FakeMediaSourceEngine.
  *

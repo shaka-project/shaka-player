@@ -321,7 +321,6 @@ shaka.extern.Cue.prototype.wrapLine;
 shaka.extern.Cue.prototype.id;
 
 
-
 /**
  * An interface for plugins that parse text tracks.
  *
@@ -385,7 +384,6 @@ shaka.extern.TextParser.prototype.parseMedia = function(data, timeContext) {};
  * @exportDoc
  */
 shaka.extern.TextParserPlugin;
-
 
 
 /**

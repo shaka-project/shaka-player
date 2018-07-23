@@ -120,7 +120,7 @@ describe('DrmEngine', function() {
       onError: shaka.test.Util.spyFunc(onErrorSpy),
       onKeyStatus: shaka.test.Util.spyFunc(onKeyStatusSpy),
       onExpirationUpdated: shaka.test.Util.spyFunc(onExpirationSpy),
-      onEvent: shaka.test.Util.spyFunc(onEventSpy)
+      onEvent: shaka.test.Util.spyFunc(onEventSpy),
     };
 
     drmEngine = new shaka.media.DrmEngine(playerInterface);
@@ -129,10 +129,10 @@ describe('DrmEngine', function() {
       delayLicenseRequestUntilPlayed: false,
       servers: {
         'drm.abc': 'http://abc.drm/license',
-        'drm.def': 'http://def.drm/license'
+        'drm.def': 'http://def.drm/license',
       },
       advanced: {},
-      clearKeys: {}
+      clearKeys: {},
     };
     drmEngine.configure(config);
   });
@@ -217,7 +217,7 @@ describe('DrmEngine', function() {
       // released a fix for https://bit.ly/2IcEgv0
       if (supportedTypes) {
         expect(supportedTypes).toEqual([
-          'audio/webm', 'video/mp4; codecs="fake"'
+          'audio/webm', 'video/mp4; codecs="fake"',
         ]);
       }
     });
@@ -261,6 +261,28 @@ describe('DrmEngine', function() {
             shaka.util.Error.Category.DRM,
             shaka.util.Error.Code.REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE));
       }
+    });
+
+    it('silences errors for unencrypted assets', async () => {
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addVariant(0)
+            .addVideo(1).mime('video/foo', 'vbar')
+            .addAudio(2).mime('audio/foo', 'abar')
+        .build();
+
+      // Accept no key systems.
+      requestMediaKeySystemAccessSpy.and.callFake(
+          fakeRequestMediaKeySystemAccess.bind(null, []));
+
+      await drmEngine.init(manifest, false);
+
+      // Both key systems were tried, since the first one failed.
+      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
+      expect(requestMediaKeySystemAccessSpy)
+          .toHaveBeenCalledWith('drm.abc', jasmine.any(Object));
+      expect(requestMediaKeySystemAccessSpy)
+          .toHaveBeenCalledWith('drm.def', jasmine.any(Object));
     });
 
     it('fails to initialize if no key systems are recognized', async () => {
@@ -320,21 +342,21 @@ describe('DrmEngine', function() {
             .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
               // audioCapabilities not present.
               videoCapabilities: [jasmine.objectContaining({
-                contentType: 'video/foo; codecs="vbar"'
+                contentType: 'video/foo; codecs="vbar"',
               })],
               distinctiveIdentifier: 'optional',
               persistentState: 'optional',
-              sessionTypes: ['temporary']
+              sessionTypes: ['temporary'],
             })]);
         expect(requestMediaKeySystemAccessSpy)
             .toHaveBeenCalledWith('drm.def', [jasmine.objectContaining({
               audioCapabilities: [jasmine.objectContaining({
-                contentType: 'audio/foo; codecs="abar"'
+                contentType: 'audio/foo; codecs="abar"',
               })],
               // videoCapabilities not present.
               distinctiveIdentifier: 'optional',
               persistentState: 'optional',
-              sessionTypes: ['temporary']
+              sessionTypes: ['temporary'],
             })]);
       }
     });
@@ -353,13 +375,13 @@ describe('DrmEngine', function() {
             .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
               distinctiveIdentifier: 'optional',
               persistentState: 'required',
-              sessionTypes: ['persistent-license']
+              sessionTypes: ['persistent-license'],
             })]);
         expect(requestMediaKeySystemAccessSpy)
             .toHaveBeenCalledWith('drm.def', [jasmine.objectContaining({
               distinctiveIdentifier: 'optional',
               persistentState: 'required',
-              sessionTypes: ['persistent-license']
+              sessionTypes: ['persistent-license'],
             })]);
       }
     });
@@ -382,13 +404,13 @@ describe('DrmEngine', function() {
             .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
               distinctiveIdentifier: 'required',
               persistentState: 'optional',
-              sessionTypes: ['temporary']
+              sessionTypes: ['temporary'],
             })]);
         expect(requestMediaKeySystemAccessSpy)
             .toHaveBeenCalledWith('drm.def', [jasmine.objectContaining({
               distinctiveIdentifier: 'optional',
               persistentState: 'required',
-              sessionTypes: ['temporary']
+              sessionTypes: ['temporary'],
             })]);
       }
     });
@@ -412,7 +434,7 @@ describe('DrmEngine', function() {
           fakeRequestMediaKeySystemAccess.bind(null, ['drm.abc']));
       manifest.periods[0].variants[0].drmInfos = [];
       config.servers = {
-        'drm.abc': 'http://abc.drm/license'
+        'drm.abc': 'http://abc.drm/license',
       };
 
       drmEngine.configure(config);
@@ -440,7 +462,7 @@ describe('DrmEngine', function() {
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: null,
         distinctiveIdentifierRequired: true,
-        persistentStateRequired: true
+        persistentStateRequired: true,
       };
       drmEngine.configure(config);
 
@@ -453,13 +475,13 @@ describe('DrmEngine', function() {
         expect(requestMediaKeySystemAccessSpy)
             .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
               audioCapabilities: [jasmine.objectContaining({
-                robustness: 'good'
+                robustness: 'good',
               })],
               videoCapabilities: [jasmine.objectContaining({
-                robustness: 'really_really_ridiculously_good'
+                robustness: 'really_really_ridiculously_good',
               })],
               distinctiveIdentifier: 'required',
-              persistentState: 'required'
+              persistentState: 'required',
             })]);
       }
     });
@@ -492,7 +514,7 @@ describe('DrmEngine', function() {
         videoRobustness: 'so_bad_it_hurts',
         serverCertificate: null,
         distinctiveIdentifierRequired: false,
-        persistentStateRequired: false
+        persistentStateRequired: false,
       };
       drmEngine.configure(config);
 
@@ -505,13 +527,13 @@ describe('DrmEngine', function() {
         expect(requestMediaKeySystemAccessSpy)
             .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
               audioCapabilities: [jasmine.objectContaining({
-                robustness: 'good'
+                robustness: 'good',
               })],
               videoCapabilities: [jasmine.objectContaining({
-                robustness: 'really_really_ridiculously_good'
+                robustness: 'really_really_ridiculously_good',
               })],
               distinctiveIdentifier: 'required',
-              persistentState: 'required'
+              persistentState: 'required',
             })]);
       }
     });
@@ -597,7 +619,7 @@ describe('DrmEngine', function() {
       manifest.periods[0].variants[0].drmInfos[0].initData = [
         {initData: initData1, initDataType: 'cenc', keyId: null},
         {initData: initData2, initDataType: 'webm', keyId: null},
-        {initData: initData3, initDataType: 'cenc', keyId: null}
+        {initData: initData3, initDataType: 'cenc', keyId: null},
       ];
 
       initAndAttach().then(function() {
@@ -624,7 +646,7 @@ describe('DrmEngine', function() {
       manifest.periods[0].variants[0].drmInfos[0].initData = [
         {initData: initData1, initDataType: 'cenc', keyId: 'abc'},
         {initData: initData2, initDataType: 'cenc', keyId: 'def'},
-        {initData: initData3, initDataType: 'cenc', keyId: 'abc'}
+        {initData: initData3, initDataType: 'cenc', keyId: 'abc'},
       ];
 
       initAndAttach().then(function() {
@@ -644,7 +666,7 @@ describe('DrmEngine', function() {
       // Configure clear keys (map of hex key IDs to keys)
       config.clearKeys = {
         'deadbeefdeadbeefdeadbeefdeadbeef': '18675309186753091867530918675309',
-        '02030507011013017019023029031037': '03050701302303204201080425098033'
+        '02030507011013017019023029031037': '03050701302303204201080425098033',
       };
       drmEngine.configure(config);
 
@@ -677,7 +699,7 @@ describe('DrmEngine', function() {
     it('fails with an error if setMediaKeys fails', async () => {
       // Fail setMediaKeys.
       mockVideo.setMediaKeys.and.returnValue(Promise.reject({
-        message: 'whoops!'
+        message: 'whoops!',
       }));
 
       try {
@@ -699,7 +721,7 @@ describe('DrmEngine', function() {
 
       // Fail setServerCertificate.
       mockMediaKeys.setServerCertificate.and.returnValue(Promise.reject({
-        message: 'whoops!'
+        message: 'whoops!',
       }));
 
       try {
@@ -719,13 +741,13 @@ describe('DrmEngine', function() {
       // to generateRequest:
       let initData1 = new Uint8Array(5);
       manifest.periods[0].variants[0].drmInfos[0].initData = [
-        {initData: initData1, initDataType: 'cenc', keyId: null}
+        {initData: initData1, initDataType: 'cenc', keyId: null},
       ];
 
       // Fail generateRequest.
       let session1 = createMockSession();
       session1.generateRequest.and.returnValue(Promise.reject({
-        message: 'whoops!'
+        message: 'whoops!',
       }));
       mockMediaKeys.createSession.and.returnValue(session1);
 
@@ -784,7 +806,7 @@ describe('DrmEngine', function() {
       it('is ignored when init data is in DrmInfo', async () => {
         // Set up an init data override in the manifest:
         manifest.periods[0].variants[0].drmInfos[0].initData = [
-          {initData: new Uint8Array(0), initDataType: 'cenc', keyId: null}
+          {initData: new Uint8Array(0), initDataType: 'cenc', keyId: null},
         ];
 
         await initAndAttach();
@@ -860,7 +882,7 @@ describe('DrmEngine', function() {
             jasmine.objectContaining({
               uris: ['http://abc.drm/license'],
               method: 'POST',
-              body: message
+              body: message,
             }));
       });
 
@@ -913,7 +935,7 @@ describe('DrmEngine', function() {
             jasmine.objectContaining({
               category: shaka.util.Error.Category.NETWORK,
               code: shaka.util.Error.Code.BAD_HTTP_STATUS,
-              data: ['http://abc.drm/license', 403]
+              data: ['http://abc.drm/license', 403],
             })));
       });
     });  // describe('message')
@@ -947,7 +969,7 @@ describe('DrmEngine', function() {
           onKeyStatusSpy.and.callFake(function(statusMap) {
             expect(statusMap).toEqual({
               '00': status1,
-              '0000': status2
+              '0000': status2,
             });
             done();
           });
@@ -1080,13 +1102,14 @@ describe('DrmEngine', function() {
       // Configure clear keys (map of hex key IDs to keys)
       config.clearKeys = {
         'deadbeefdeadbeefdeadbeefdeadbeef': '18675309186753091867530918675309',
-        '02030507011013017019023029031037': '03050701302303204201080425098033'
+        '02030507011013017019023029031037': '03050701302303204201080425098033',
       };
       drmEngine.configure(config);
 
       // Not mocked.  Run data through real data URI parser to ensure that it is
       // correctly formatted.
       fakeNetEngine.request.and.callFake(function(type, request) {
+        // eslint-disable-next-line new-cap
         return shaka.net.DataUriPlugin(request.uris[0], request);
       });
 
@@ -1106,8 +1129,8 @@ describe('DrmEngine', function() {
           {kid: '3q2-796tvu_erb7v3q2-7w',
             k: 'GGdTCRhnUwkYZ1MJGGdTCQ', kty: 'oct'},
           {kid: 'AgMFBwEQEwFwGQIwKQMQNw',
-            k: 'AwUHATAjAyBCAQgEJQmAMw', kty: 'oct'}
-        ]
+            k: 'AwUHATAjAyBCAQgEJQmAMw', kty: 'oct'},
+        ],
       });
     });
 
@@ -1539,7 +1562,7 @@ describe('DrmEngine', function() {
         videoRobustness: 'really_really_ridiculously_good',
         distinctiveIdentifierRequired: true,
         serverCertificate: null,
-        persistentStateRequired: true
+        persistentStateRequired: true,
       };
       drmEngine.configure(config);
 
@@ -1555,7 +1578,7 @@ describe('DrmEngine', function() {
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: undefined,
         initData: [],
-        keyIds: ['deadbeefdeadbeefdeadbeefdeadbeef']
+        keyIds: ['deadbeefdeadbeefdeadbeefdeadbeef'],
       });
     });
   });  // describe('getDrmInfo')
@@ -1571,7 +1594,7 @@ describe('DrmEngine', function() {
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: undefined,
         initData: [],
-        keyIds: ['deadbeefdeadbeefdeadbeefdeadbeef']
+        keyIds: ['deadbeefdeadbeefdeadbeefdeadbeef'],
       };
       let returnedOne = shaka.media.DrmEngine.getCommonDrmInfos([drmInfo], []);
       let returnedTwo = shaka.media.DrmEngine.getCommonDrmInfos([], [drmInfo]);
@@ -1589,7 +1612,7 @@ describe('DrmEngine', function() {
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: serverCert,
         initData: ['blah'],
-        keyIds: ['deadbeefdeadbeefdeadbeefdeadbeef']
+        keyIds: ['deadbeefdeadbeefdeadbeefdeadbeef'],
       };
       let drmInfoAudio = {
         keySystem: 'drm.abc',
@@ -1599,7 +1622,7 @@ describe('DrmEngine', function() {
         audioRobustness: 'good',
         serverCertificate: undefined,
         initData: ['init data'],
-        keyIds: ['eadbeefdeadbeefdeadbeefdeadbeefd']
+        keyIds: ['eadbeefdeadbeefdeadbeefdeadbeefd'],
       };
       let drmInfoDesired = {
         keySystem: 'drm.abc',
@@ -1611,7 +1634,7 @@ describe('DrmEngine', function() {
         serverCertificate: serverCert,
         initData: ['blah', 'init data'],
         keyIds: ['deadbeefdeadbeefdeadbeefdeadbeef',
-                 'eadbeefdeadbeefdeadbeefdeadbeefd']
+                 'eadbeefdeadbeefdeadbeefdeadbeefd'],
       };
       let returned = shaka.media.DrmEngine.getCommonDrmInfos([drmInfoVideo],
           [drmInfoAudio]);
@@ -1644,7 +1667,7 @@ describe('DrmEngine', function() {
           jasmine.objectContaining({
             uris: ['http://abc.drm/license'],
             method: 'POST',
-            body: message
+            body: message,
           }));
     });
 
@@ -1672,7 +1695,7 @@ describe('DrmEngine', function() {
           jasmine.objectContaining({
             uris: ['http://abc.drm/license'],
             method: 'POST',
-            body: message
+            body: message,
           }));
 
       fakeNetEngine.request.calls.reset();
@@ -1685,7 +1708,7 @@ describe('DrmEngine', function() {
           jasmine.objectContaining({
             uris: ['http://abc.drm/license'],
             method: 'POST',
-            body: message
+            body: message,
           }));
       expect(fakeNetEngine.request.calls.count()).toBe(1);
     });
@@ -1848,12 +1871,12 @@ describe('DrmEngine', function() {
     let mksa = {
       keySystem: '',
       getConfiguration: jasmine.createSpy('getConfiguration'),
-      createMediaKeys: jasmine.createSpy('createMediaKeys')
+      createMediaKeys: jasmine.createSpy('createMediaKeys'),
     };
     mksa.getConfiguration.and.callFake(function() {
       return {
         audioCapabilities: [{contentType: 'audio/webm'}],
-        videoCapabilities: [{contentType: 'video/mp4; codecs="fake"'}]
+        videoCapabilities: [{contentType: 'video/mp4; codecs="fake"'}],
       };
     });
     mksa.createMediaKeys.and.callFake(function() {
@@ -1865,7 +1888,7 @@ describe('DrmEngine', function() {
   function createMockMediaKeys() {
     return {
       createSession: jasmine.createSpy('createSession'),
-      setServerCertificate: jasmine.createSpy('setServerCertificate')
+      setServerCertificate: jasmine.createSpy('setServerCertificate'),
     };
   }
 
@@ -1874,7 +1897,7 @@ describe('DrmEngine', function() {
       expiration: NaN,
       closed: Promise.resolve(),
       keyStatuses: {
-        forEach: jasmine.createSpy('forEach')
+        forEach: jasmine.createSpy('forEach'),
       },
       generateRequest: jasmine.createSpy('generateRequest'),
       load: jasmine.createSpy('load'),
@@ -1884,7 +1907,7 @@ describe('DrmEngine', function() {
       addEventListener: jasmine.createSpy('addEventListener'),
       removeEventListener: jasmine.createSpy('removeEventListener'),
       dispatchEvent: jasmine.createSpy('dispatchEvent'),
-      on: {}  // event listeners
+      on: {},  // event listeners
     };
     session.generateRequest.and.returnValue(Promise.resolve());
     session.close.and.returnValue(Promise.resolve());
@@ -1905,7 +1928,7 @@ describe('DrmEngine', function() {
       distinctiveIdentifierRequired: false,
       persistentStateRequired: false,
       serverCertificate: serverCert,
-      videoRobustness: ''
+      videoRobustness: '',
     };
   }
 });
