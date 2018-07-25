@@ -153,7 +153,8 @@ describe('DrmEngine', function() {
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, ['drm.abc', 'drm.def']));
 
-      await drmEngine.initForPlayback(manifest);
+      const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       expect(drmEngine.initialized()).toBe(true);
       expect(drmEngine.keySystem()).toBe('drm.abc');
 
@@ -169,7 +170,8 @@ describe('DrmEngine', function() {
           fakeRequestMediaKeySystemAccess.bind(null, []));
 
       try {
-        await drmEngine.initForPlayback(manifest);
+        const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+        await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
         fail();
       } catch (error) {
         expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
@@ -193,7 +195,8 @@ describe('DrmEngine', function() {
       logErrorSpy.and.stub();
 
       try {
-        await drmEngine.initForPlayback(manifest);
+        const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+        await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
         fail();
       } catch (error) {
         expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
@@ -209,7 +212,8 @@ describe('DrmEngine', function() {
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, ['drm.abc']));
 
-      await drmEngine.initForPlayback(manifest);
+      const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       expect(drmEngine.initialized()).toBe(true);
       let supportedTypes = drmEngine.getSupportedTypes();
       // This is conditional because Edge 14 has a bug that prevents us from
@@ -227,7 +231,8 @@ describe('DrmEngine', function() {
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, ['drm.def']));
 
-      await drmEngine.initForPlayback(manifest);
+      const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       expect(drmEngine.initialized()).toBe(true);
       expect(drmEngine.keySystem()).toBe('drm.def');
 
@@ -245,7 +250,8 @@ describe('DrmEngine', function() {
           fakeRequestMediaKeySystemAccess.bind(null, []));
 
       try {
-        await drmEngine.initForPlayback(manifest);
+        const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+        await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
         fail();
       } catch (error) {
         expect(drmEngine.initialized()).toBe(false);
@@ -275,7 +281,8 @@ describe('DrmEngine', function() {
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, []));
 
-      await drmEngine.initForPlayback(manifest);
+      const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
 
       // Both key systems were tried, since the first one failed.
       expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
@@ -292,7 +299,8 @@ describe('DrmEngine', function() {
       manifest.periods[0].variants[0].drmInfos[1].keySystem = '';
 
       try {
-        await drmEngine.initForPlayback(manifest);
+        const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+        await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
         fail();
       } catch (error) {
         expect(drmEngine.initialized()).toBe(false);
@@ -312,7 +320,8 @@ describe('DrmEngine', function() {
       mockMediaKeySystemAccess.createMediaKeys.and.throwError('whoops!');
 
       try {
-        await drmEngine.initForPlayback(manifest);
+        const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+        await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
         fail();
       } catch (error) {
         expect(drmEngine.initialized()).toBe(false);
@@ -333,7 +342,8 @@ describe('DrmEngine', function() {
           fakeRequestMediaKeySystemAccess.bind(null, []));
 
       try {
-        await drmEngine.initForPlayback(manifest);
+        const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+        await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
         fail();
       } catch (error) {
         expect(drmEngine.initialized()).toBe(false);
@@ -366,8 +376,9 @@ describe('DrmEngine', function() {
           fakeRequestMediaKeySystemAccess.bind(null, []));
 
       try {
+        const variants = shaka.util.StreamUtils.getAllVariants(manifest);
         await drmEngine.initForStorage(
-            manifest, /* use persistent state */ true);
+            variants, /* usePersistentLicense */ true);
         fail();
       } catch (error) {
         expect(drmEngine.initialized()).toBe(false);
@@ -396,7 +407,8 @@ describe('DrmEngine', function() {
           .persistentStateRequired = true;
 
       try {
-        await drmEngine.initForPlayback(manifest);
+        const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+        await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
         fail();
       } catch (error) {
         expect(drmEngine.initialized()).toBe(false);
@@ -424,7 +436,8 @@ describe('DrmEngine', function() {
       config.advanced = {};
 
       drmEngine.configure(config);
-      await drmEngine.initForPlayback(manifest);
+      const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       expect(drmEngine.initialized()).toBe(true);
       expect(drmEngine.keySystem()).toBe('');
       expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(0);
@@ -439,7 +452,8 @@ describe('DrmEngine', function() {
       };
 
       drmEngine.configure(config);
-      await drmEngine.initForPlayback(manifest);
+      const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       expect(drmEngine.initialized()).toBe(true);
       expect(drmEngine.keySystem()).toBe('drm.abc');
       expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
@@ -468,7 +482,8 @@ describe('DrmEngine', function() {
       drmEngine.configure(config);
 
       try {
-        await drmEngine.initForPlayback(manifest);
+        const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+        await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
         fail();
       } catch (error) {
         expect(drmEngine.initialized()).toBe(false);
@@ -520,7 +535,8 @@ describe('DrmEngine', function() {
       drmEngine.configure(config);
 
       try {
-        await drmEngine.initForPlayback(manifest);
+        const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+        await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
         fail();
       } catch (error) {
         expect(drmEngine.initialized()).toBe(false);
@@ -547,7 +563,8 @@ describe('DrmEngine', function() {
       drmEngine.configure(config);
 
       try {
-        await drmEngine.initForPlayback(manifest);
+        const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+        await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
         fail();
       } catch (error) {
         shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
@@ -1320,7 +1337,9 @@ describe('DrmEngine', function() {
       requestMediaKeySystemAccessSpy.and.returnValue(p);
 
       // This chain should still return "success" when DrmEngine is destroyed.
-      drmEngine.initForPlayback(manifest).catch(fail);
+      const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+      drmEngine.initForPlayback(
+          variants, manifest.offlineSessionIds).catch(fail);
 
       shaka.test.Util.delay(1.0).then(function() {
         // The first query has been made, which we are blocking.
@@ -1344,7 +1363,9 @@ describe('DrmEngine', function() {
       requestMediaKeySystemAccessSpy.and.returnValue(p);
 
       // This chain should still return "success" when DrmEngine is destroyed.
-      drmEngine.initForPlayback(manifest).catch(fail);
+      const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+      drmEngine.initForPlayback(
+          variants, manifest.offlineSessionIds).catch(fail);
 
       shaka.test.Util.delay(1.0).then(function() {
         // The first query has been made, which we are blocking.
@@ -1368,7 +1389,8 @@ describe('DrmEngine', function() {
       mockMediaKeySystemAccess.createMediaKeys.and.returnValue(p);
 
       // This chain should still return "success" when DrmEngine is destroyed.
-      drmEngine.initForPlayback(manifest).catch(fail);
+      const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+      drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
 
       shaka.test.Util.delay(1.0).then(function() {
         // We are blocked on createMediaKeys:
@@ -1641,7 +1663,8 @@ describe('DrmEngine', function() {
       };
       drmEngine.configure(config);
 
-      await drmEngine.initForPlayback(manifest);
+      const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       expect(drmEngine.initialized()).toBe(true);
       let drmInfo = drmEngine.getDrmInfo();
       expect(drmInfo).toEqual({
@@ -1816,8 +1839,8 @@ describe('DrmEngine', function() {
         return Promise.resolve();
       });
 
-      await drmEngine.initForStorage(
-          manifest, /* use persistent licenses */ true);
+      const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
     });
 
     it('waits until update() is complete', async () => {
@@ -1929,10 +1952,10 @@ describe('DrmEngine', function() {
     });
   });
 
-  function initAndAttach() {
-    return drmEngine.initForPlayback(manifest).then(function() {
-      return drmEngine.attach(mockVideo);
-    });
+  async function initAndAttach() {
+    const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+    await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
+    await drmEngine.attach(mockVideo);
   }
 
   function fakeRequestMediaKeySystemAccess(acceptableKeySystems, keySystem) {

@@ -1399,8 +1399,6 @@ describe('Storage', function() {
    * @return {!Promise}
    */
   function withDrm(player, manifest, action) {
-    const offlineLicense = true;
-
     let net = player.getNetworkingEngine();
     goog.asserts.assert(net, 'Player should have a net engine right now');
 
@@ -1416,8 +1414,8 @@ describe('Storage', function() {
 
     return shaka.util.Destroyer.with([drm], async () => {
       drm.configure(player.getConfiguration().drm);
-      await drm.initForStorage(manifest, offlineLicense);
-
+      const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+      await drm.initForStorage(variants, /* usePersistentLicenses */ true);
       return action(drm);
     }).then((result) => {
       if (error) {
