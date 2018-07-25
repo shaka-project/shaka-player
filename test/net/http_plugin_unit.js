@@ -300,7 +300,7 @@ function httpPluginTests(usingFetch) {
       // actually insert a call to abort in the middle.
       // Instead, install a very elementary mock.
       /** @constructor */
-      let newXHRMock = function() {
+      let NewXHRMock = function() {
         this.abort = shaka.test.Util.spyFunc(jasmine.createSpy('abort'));
 
         this.open = shaka.test.Util.spyFunc(jasmine.createSpy('open'));
@@ -318,7 +318,7 @@ function httpPluginTests(usingFetch) {
           }.bind(this));
         };
       };
-      shaka.net.HttpXHRPlugin['Xhr_'] = newXHRMock;
+      shaka.net.HttpXHRPlugin['Xhr_'] = NewXHRMock;
 
       let request = shaka.net.NetworkingEngine.makeRequest(
           ['https://foo.bar/'], retryParameters);
