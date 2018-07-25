@@ -49,37 +49,27 @@ shakaDemo.updateButtons_ = function(canHide) {
 
   let option = assetList.options[assetList.selectedIndex];
   let storedContent = option.storedContent;
-  let hasDrm = option.asset && option.asset.drm && option.asset.drm.length;
-  let supportsPersistentStateForDrm = option.asset.drm.some(function(drm) {
+  // True if there is no DRM or if the browser supports persistent licenses for
+  // any given DRM system.
+  let supportsDrm = !option.asset || !option.asset.drm ||
+      !option.asset.drm.length || option.asset.drm.some(function(drm) {
         return shakaDemo.support_.drm[drm] &&
             shakaDemo.support_.drm[drm].persistentState;
       });
-  let supportsPersistentStateForAnyDrm =
-      Object.keys(shakaDemo.support_.drm).some((drm) => {
-    return shakaDemo.support_.drm[drm] &&
-           shakaDemo.support_.drm[drm].persistentState;
-  });
 
   // Only show when the custom asset option is selected.
   document.getElementById('offlineNameDiv').style.display =
       option.asset ? 'none' : 'block';
 
   let button = document.getElementById('storeDeleteButton');
-  button.disabled = false;
+  button.disabled = (inProgress || !supportsDrm || option.isStored);
   button.textContent = storedContent ? 'Delete' : 'Store';
   let helpText = document.getElementById('storeDeleteHelpText');
   if (inProgress) {
-    button.disabled = true;
     helpText.textContent = 'Operation is in progress...';
-  } else if (hasDrm && !supportsPersistentStateForAnyDrm) {
-    button.disabled = true;
+  } else if (!supportsDrm) {
     helpText.textContent = 'This browser does not support persistent licenses.';
-  } else if (hasDrm && !supportsPersistentStateForDrm) {
-    button.disabled = true;
-    helpText.textContent = 'This browser does not support persistent ' +
-                           'licenses for any DRM system in this asset.';
-  } else if (option.isStored) {
-    button.disabled = true;
+  } else if (button.disabled) {
     helpText.textContent = 'The asset is stored offline. ' +
         'Checkout the "Offline" section in the "Asset" list';
   } else {
