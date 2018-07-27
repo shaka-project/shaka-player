@@ -113,9 +113,9 @@ describe('HlsParser', function() {
    * @param {string} master
    * @param {string} media
    * @param {shaka.extern.Manifest} manifest
-   * @param {function()} done
+   * @return {!Promise.<shaka.extern.Manifest>}
    */
-  function testHlsParser(master, media, manifest, done) {
+  async function testHlsParser(master, media, manifest) {
     fakeNetEngine.setResponseMap({
       'test:/master': toUTF8(master),
       'test:/audio': toUTF8(media),
@@ -129,13 +129,12 @@ describe('HlsParser', function() {
       'test:/selfInit.mp4': selfInitializingSegmentData,
     });
 
-    parser.start('test:/master', playerInterface)
-        .then(function(actual) { expect(actual).toEqual(manifest); })
-        .catch(fail)
-        .then(done);
+    let actual = await parser.start('test:/master', playerInterface);
+    expect(actual).toEqual(manifest);
+    return actual;
   }
 
-  it('parses video-only variant', function(done) {
+  it('parses video-only variant', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
@@ -167,10 +166,10 @@ describe('HlsParser', function() {
                   .size(960, 540)
           .build();
 
-    testHlsParser(master, media, manifest, done);
+    await testHlsParser(master, media, manifest);
   });
 
-  it('guesses video-only variant by codecs', function(done) {
+  it('guesses video-only variant by codecs', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1"\n',
@@ -199,10 +198,10 @@ describe('HlsParser', function() {
                   .mime('video/mp4', 'avc1')
           .build();
 
-    testHlsParser(master, media, manifest, done);
+    await testHlsParser(master, media, manifest);
   });
 
-  it('parses audio-only variant', function(done) {
+  it('parses audio-only variant', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="mp4a"\n',
@@ -231,10 +230,10 @@ describe('HlsParser', function() {
                   .mime('audio/mp4', 'mp4a')
           .build();
 
-    testHlsParser(master, media, manifest, done);
+    await testHlsParser(master, media, manifest);
   });
 
-  it('parses audio+video variant', function(done) {
+  it('parses audio+video variant', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
@@ -275,10 +274,10 @@ describe('HlsParser', function() {
                   .channelsCount(2)
           .build();
 
-    testHlsParser(master, media, manifest, done);
+    await testHlsParser(master, media, manifest);
   });
 
-  it('handles audio tags on audio streams', function(done) {
+  it('handles audio tags on audio streams', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="mp4a",AUDIO="aud1"\n',
@@ -310,7 +309,7 @@ describe('HlsParser', function() {
                   .mime('audio/mp4', 'mp4a')
           .build();
 
-    testHlsParser(master, media, manifest, done);
+    await testHlsParser(master, media, manifest);
   });
 
   it('sets maxFirstSegmentStartTime', async () => {
@@ -358,7 +357,7 @@ describe('HlsParser', function() {
     expect(presentationTimeline.getSeekRangeStart()).toBe(655.36);
   });
 
-  it('parses multiplexed variant', function(done) {
+  it('parses multiplexed variant', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
@@ -390,10 +389,10 @@ describe('HlsParser', function() {
                   .size(960, 540)
           .build();
 
-    testHlsParser(master, media, manifest, done);
+    await testHlsParser(master, media, manifest);
   });
 
-  it('parses multiplexed variant without codecs', function(done) {
+  it('parses multiplexed variant without codecs', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,',
@@ -425,10 +424,10 @@ describe('HlsParser', function() {
                   .size(960, 540)
           .build();
 
-    testHlsParser(master, media, manifest, done);
+    await testHlsParser(master, media, manifest);
   });
 
-  it('parses audio+video variant without codecs', function(done) {
+  it('parses audio+video variant without codecs', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,',
@@ -468,10 +467,10 @@ describe('HlsParser', function() {
                   .mime('audio/mp4', jasmine.any(String))
           .build();
 
-    testHlsParser(master, media, manifest, done);
+    await testHlsParser(master, media, manifest);
   });
 
-  it('parses multiple variants', function(done) {
+  it('parses multiple variants', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
@@ -532,10 +531,10 @@ describe('HlsParser', function() {
                   .mime('audio/mp4', 'mp4a')
           .build();
 
-    testHlsParser(master, media, manifest, done);
+    await testHlsParser(master, media, manifest);
   });
 
-  it('parses multiple streams with the same group id', function(done) {
+  it('parses multiple streams with the same group id', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
@@ -593,7 +592,7 @@ describe('HlsParser', function() {
                   .mime('audio/mp4', 'mp4a')
           .build();
 
-    testHlsParser(master, media, manifest, done);
+    await testHlsParser(master, media, manifest);
   });
 
   it('should call filterAllPeriods for parsing', function(done) {
@@ -630,7 +629,7 @@ describe('HlsParser', function() {
         }).catch(fail).then(done);
   });
 
-  it('gets mime type from header request', function(done) {
+  it('gets mime type from header request', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
@@ -668,10 +667,10 @@ describe('HlsParser', function() {
       'test:/main.test': headers,
     });
 
-    testHlsParser(master, media, manifest, done);
+    await testHlsParser(master, media, manifest);
   });
 
-  it('parses manifest with text streams', function(done) {
+  it('parses manifest with text streams', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
@@ -751,12 +750,11 @@ describe('HlsParser', function() {
       'test:/main.mp4': segmentData,
     });
 
-    parser.start('test:/master', playerInterface)
-        .then(function(actual) { expect(actual).toEqual(manifest); })
-        .catch(fail).then(done);
+    let actual = await parser.start('test:/master', playerInterface);
+    expect(actual).toEqual(manifest);
   });
 
-  it('parses manifest with text streams without SUBTITLES', function(done) {
+  it('parses manifest with text streams without SUBTITLES', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
@@ -833,12 +831,11 @@ describe('HlsParser', function() {
       'test:/main.mp4': segmentData,
     });
 
-    parser.start('test:/master', playerInterface)
-        .then(function(actual) { expect(actual).toEqual(manifest); })
-        .catch(fail).then(done);
+    let actual = await parser.start('test:/master', playerInterface);
+    expect(actual).toEqual(manifest);
   });
 
-  it('calculates duration from stream lengths', function(done) {
+  it('calculates duration from stream lengths', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
@@ -890,23 +887,20 @@ describe('HlsParser', function() {
       'test:/main.mp4': segmentData,
     });
 
-    parser.start('test:/master', playerInterface)
-        .then((actual) => {
-          // Duration should be the minimum of the streams, but ignore the text
-          // stream.
-          let timeline = actual.presentationTimeline;
-          expect(timeline.getDuration()).toBe(10);
+    let actual = await parser.start('test:/master', playerInterface);
+    // Duration should be the minimum of the streams, but ignore the text
+    // stream.
+    let timeline = actual.presentationTimeline;
+    expect(timeline.getDuration()).toBe(10);
 
-          let period = actual.periods[0];
-          expect(period.textStreams.length).toBe(1);
-          expect(period.variants.length).toBe(1);
-          expect(period.variants[0].audio).toBeTruthy();
-          expect(period.variants[0].video).toBeTruthy();
-        })
-        .catch(fail).then(done);
+    let period = actual.periods[0];
+    expect(period.textStreams.length).toBe(1);
+    expect(period.variants.length).toBe(1);
+    expect(period.variants[0].audio).toBeTruthy();
+    expect(period.variants[0].video).toBeTruthy();
   });
 
-  it('parses manifest with MP4+TTML streams', function(done) {
+  it('parses manifest with MP4+TTML streams', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
@@ -955,12 +949,11 @@ describe('HlsParser', function() {
       'test:/main.mp4': segmentData,
     });
 
-    parser.start('test:/master', playerInterface)
-        .then(function(actual) { expect(actual).toEqual(manifest); })
-        .catch(fail).then(done);
+    let actual = await parser.start('test:/master', playerInterface);
+    expect(actual).toEqual(manifest);
   });
 
-  it('detects VTT streams by codec', function(done) {
+  it('detects VTT streams by codec', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
@@ -1018,9 +1011,8 @@ describe('HlsParser', function() {
       'test:/main.mp4': segmentData,
     });
 
-    parser.start('test:/master', playerInterface)
-        .then(function(actual) { expect(actual).toEqual(manifest); })
-        .catch(fail).then(done);
+    let actual = await parser.start('test:/master', playerInterface);
+    expect(actual).toEqual(manifest);
   });
 
   it('allows init segments in text streams', function(done) {
@@ -1077,7 +1069,7 @@ describe('HlsParser', function() {
         .catch(fail).then(done);
   });
 
-  it('parses video described by a media tag', function(done) {
+  it('parses video described by a media tag', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
@@ -1114,7 +1106,7 @@ describe('HlsParser', function() {
                   .mime('audio/mp4', 'mp4a')
           .build();
 
-    testHlsParser(master, media, manifest, done);
+    await testHlsParser(master, media, manifest);
   });
 
   it('constructs relative URIs', function(done) {
@@ -1191,7 +1183,7 @@ describe('HlsParser', function() {
         }).catch(fail).then(done);
   });
 
-  it('allows streams with no init segment', function(done) {
+  it('allows streams with no init segment', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
@@ -1228,10 +1220,10 @@ describe('HlsParser', function() {
                   .mime('audio/mp4', 'mp4a')
           .build();
 
-    testHlsParser(master, media, manifest, done);
+    await testHlsParser(master, media, manifest);
   });
 
-  it('constructs DrmInfo for Widevine', function(done) {
+  it('constructs DrmInfo for Widevine', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
@@ -1273,7 +1265,7 @@ describe('HlsParser', function() {
                   .addCencInitData(initDataBase64)
           .build();
 
-    testHlsParser(master, media, manifest, done);
+    await testHlsParser(master, media, manifest);
   });
 
   describe('Errors out', function() {
@@ -1543,7 +1535,7 @@ describe('HlsParser', function() {
       segmentDataStartTime = 2;
     });
 
-    it('parses start time from mp4 segment', function(done) {
+    it('parses start time from mp4 segment', async () => {
       fakeNetEngine.setResponseMap({
         'test:/master': toUTF8(master),
         'test:/video': toUTF8(media),
@@ -1560,24 +1552,23 @@ describe('HlsParser', function() {
           expectedStartByte,
           expectedEndByte);
 
-      parser.start('test:/master', playerInterface).then(function(manifest) {
-        let video = manifest.periods[0].variants[0].video;
-        ManifestParser.verifySegmentIndex(video, [ref]);
+      let manifest = await parser.start('test:/master', playerInterface);
+      let video = manifest.periods[0].variants[0].video;
+      ManifestParser.verifySegmentIndex(video, [ref]);
 
-        // Make sure the segment data was fetched with the correct byte
-        // range.
-        fakeNetEngine.expectRangeRequest(
-            'test:/main.mp4',
-            expectedStartByte,
-            partialEndByte);
+      // Make sure the segment data was fetched with the correct byte
+      // range.
+      fakeNetEngine.expectRangeRequest(
+          'test:/main.mp4',
+          expectedStartByte,
+          partialEndByte);
 
-        // In VOD content, we set the presentationTimeOffset to align the
-        // content to presentation time 0.
-        expect(video.presentationTimeOffset).toEqual(segmentDataStartTime);
-      }).catch(fail).then(done);
+      // In VOD content, we set the presentationTimeOffset to align the
+      // content to presentation time 0.
+      expect(video.presentationTimeOffset).toEqual(segmentDataStartTime);
     });
 
-    it('parses start time from ts segments', function(done) {
+    it('parses start time from ts segments', async () => {
       let tsMediaPlaylist = media.replace(/\.mp4/g, '.ts');
 
       fakeNetEngine.setResponseMap({
@@ -1595,24 +1586,23 @@ describe('HlsParser', function() {
           expectedStartByte,
           expectedEndByte);
 
-      parser.start('test:/master', playerInterface).then(function(manifest) {
-        let video = manifest.periods[0].variants[0].video;
-        ManifestParser.verifySegmentIndex(video, [ref]);
+      let manifest = await parser.start('test:/master', playerInterface);
+      let video = manifest.periods[0].variants[0].video;
+      ManifestParser.verifySegmentIndex(video, [ref]);
 
-        // Make sure the segment data was fetched with the correct byte
-        // range.
-        fakeNetEngine.expectRangeRequest(
-            'test:/main.ts',
-            expectedStartByte,
-            partialEndByte);
+      // Make sure the segment data was fetched with the correct byte
+      // range.
+      fakeNetEngine.expectRangeRequest(
+          'test:/main.ts',
+          expectedStartByte,
+          partialEndByte);
 
-        // In VOD content, we set the presentationTimeOffset to align the
-        // content to presentation time 0.
-        expect(video.presentationTimeOffset).toEqual(segmentDataStartTime);
-      }).catch(fail).then(done);
+      // In VOD content, we set the presentationTimeOffset to align the
+      // content to presentation time 0.
+      expect(video.presentationTimeOffset).toEqual(segmentDataStartTime);
     });
 
-    it('sets duration with respect to presentation offset', function(done) {
+    it('sets duration with respect to presentation offset', async () => {
       fakeNetEngine.setResponseMap({
         'test:/master': toUTF8(master),
         'test:/video': toUTF8(media),
@@ -1620,22 +1610,21 @@ describe('HlsParser', function() {
         'test:/main.mp4': segmentData,
       });
 
-      parser.start('test:/master', playerInterface).then(function(manifest) {
-        let presentationTimeline = manifest.presentationTimeline;
-        let video = manifest.periods[0].variants[0].video;
-        let ref = video.getSegmentReference(0);
-        expect(video.getSegmentReference(1)).toBe(null);  // No more references.
+      let manifest = await parser.start('test:/master', playerInterface);
+      let presentationTimeline = manifest.presentationTimeline;
+      let video = manifest.periods[0].variants[0].video;
+      let ref = video.getSegmentReference(0);
+      expect(video.getSegmentReference(1)).toBe(null);  // No more references.
 
-        expect(video.presentationTimeOffset).toEqual(segmentDataStartTime);
-        // The duration should be set to the sum of the segment durations (5),
-        // even though the endTime of the segment is larger.
-        expect(ref.endTime - ref.startTime).toEqual(5);
-        expect(presentationTimeline.getDuration()).toEqual(5);
-      }).catch(fail).then(done);
+      expect(video.presentationTimeOffset).toEqual(segmentDataStartTime);
+      // The duration should be set to the sum of the segment durations (5),
+      // even though the endTime of the segment is larger.
+      expect(ref.endTime - ref.startTime).toEqual(5);
+      expect(presentationTimeline.getDuration()).toEqual(5);
     });
   });
 
-  it('correctly detects VOD streams as non-live', function(done) {
+  it('correctly detects VOD streams as non-live', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
@@ -1659,12 +1648,11 @@ describe('HlsParser', function() {
       'test:/main.mp4': segmentData,
     });
 
-    parser.start('test:/master', playerInterface).then(function(manifest) {
-      expect(manifest.presentationTimeline.isLive()).toBe(false);
-    }).catch(fail).then(done);
+    let manifest = await parser.start('test:/master', playerInterface);
+    expect(manifest.presentationTimeline.isLive()).toBe(false);
   });
 
-  it('correctly detects streams with ENDLIST as non-live', function(done) {
+  it('correctly detects streams with ENDLIST as non-live', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
@@ -1688,12 +1676,11 @@ describe('HlsParser', function() {
       'test:/main.mp4': segmentData,
     });
 
-    parser.start('test:/master', playerInterface).then(function(manifest) {
-      expect(manifest.presentationTimeline.isLive()).toBe(false);
-    }).catch(fail).then(done);
+    let manifest = await parser.start('test:/master', playerInterface);
+    expect(manifest.presentationTimeline.isLive()).toBe(false);
   });
 
-  it('guesses MIME types for known extensions', function(done) {
+  it('guesses MIME types for known extensions', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
@@ -1717,13 +1704,12 @@ describe('HlsParser', function() {
       'test:/main.mp4': segmentData,
     });
 
-    parser.start('test:/master', playerInterface).then(function(manifest) {
-      let video = manifest.periods[0].variants[0].video;
-      expect(video.mimeType).toBe('video/mp4');
-    }).catch(fail).then(done);
+    let manifest = await parser.start('test:/master', playerInterface);
+    let video = manifest.periods[0].variants[0].video;
+    expect(video.mimeType).toBe('video/mp4');
   });
 
-  it('guesses MIME types for known extensions with parameters', function(done) {
+  it('guesses MIME types for known extensions with parameters', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
@@ -1747,13 +1733,12 @@ describe('HlsParser', function() {
       'test:/main.mp4?foo=bar': segmentData,
     });
 
-    parser.start('test:/master', playerInterface).then(function(manifest) {
-      let video = manifest.periods[0].variants[0].video;
-      expect(video.mimeType).toBe('video/mp4');
-    }).catch(fail).then(done);
+    let manifest = await parser.start('test:/master', playerInterface);
+    let video = manifest.periods[0].variants[0].video;
+    expect(video.mimeType).toBe('video/mp4');
   });
 
-  it('does not produce multiple Streams for one playlist', function(done) {
+  it('does not produce multiple Streams for one playlist', async () => {
     // Regression test for a bug in our initial HLS live implementation
     const master = [
       '#EXTM3U\n',
@@ -1784,14 +1769,13 @@ describe('HlsParser', function() {
       'test:/main.mp4': segmentData,
     });
 
-    parser.start('test:/master', playerInterface).then(function(manifest) {
-      expect(manifest.periods[0].variants.length).toBe(2);
-      let audio0 = manifest.periods[0].variants[0].audio;
-      let audio1 = manifest.periods[0].variants[1].audio;
-      // These should be the exact same memory address, not merely equal.
-      // Otherwise, the parser will only be replacing one of the SegmentIndexes
-      // on update, which will lead to live streaming issues.
-      expect(audio0).toBe(audio1);
-    }).catch(fail).then(done);
+    let manifest = await parser.start('test:/master', playerInterface);
+    expect(manifest.periods[0].variants.length).toBe(2);
+    let audio0 = manifest.periods[0].variants[0].audio;
+    let audio1 = manifest.periods[0].variants[1].audio;
+    // These should be the exact same memory address, not merely equal.
+    // Otherwise, the parser will only be replacing one of the SegmentIndexes
+    // on update, which will lead to live streaming issues.
+    expect(audio0).toBe(audio1);
   });
 });
