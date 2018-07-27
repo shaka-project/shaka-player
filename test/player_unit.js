@@ -2724,7 +2724,12 @@ describe('Player', function() {
       // because of MSE support.  We are specifically testing EME-based
       // filtering of codecs.
       expect(MediaSource.isTypeSupported('video/unsupported')).toBe(true);
-      // FakeDrmEngine's getSupportedTypes() returns video/mp4 by default.
+
+      // Make sure that drm engine will reject the variant with an unsupported
+      // video mime type.
+      drmEngine.supportsVariant.and.callFake((variant) => {
+        return variant.video.mimeType != 'video/unsupported';
+      });
 
       await setupPlayer();
       let tracks = player.getVariantTracks();

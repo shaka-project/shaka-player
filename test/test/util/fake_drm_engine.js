@@ -65,13 +65,6 @@ shaka.test.FakeDrmEngine = class {
     this.getSessionIds = jasmine.createSpy('getSessionIds');
     this.getSessionIds.and.callFake(() => this.offlineSessions_);
 
-    /**
-     * See |shaka.test.ManifestGenerator.protototype.createStream|.
-     * @type {!jasmine.Spy}
-     */
-    this.getSupportedTypes = jasmine.createSpy('getSupportedTypes');
-    this.getSupportedTypes.and.returnValue(['video/mp4; codecs="avc1.4d401f"']);
-
     /** @type {!jasmine.Spy} */
     this.init = jasmine.createSpy('init');
     this.init.and.returnValue(resolved);
@@ -81,12 +74,12 @@ shaka.test.FakeDrmEngine = class {
     this.initialized.and.returnValue(true);
 
     /** @type {!jasmine.Spy} */
-    this.isSupportedByKeySystem = jasmine.createSpy('isSupportedByKeySystem');
-    this.isSupportedByKeySystem.and.returnValue(true);
-
-    /** @type {!jasmine.Spy} */
     this.keySystem = jasmine.createSpy('keySystem');
     this.keySystem.and.returnValue('com.example.fake');
+
+    /** @type {!jasmine.Spy} */
+    this.supportsVariant = jasmine.createSpy('supportsVariant');
+    this.supportsVariant.and.returnValue(true);
   }
 
   /**
