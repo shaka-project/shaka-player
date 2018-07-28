@@ -414,6 +414,8 @@ shaka.test.FakePresentationTimeline = function() {
   return {
     getDuration: jasmine.createSpy('getDuration'),
     setDuration: jasmine.createSpy('setDuration'),
+    getDelay: jasmine.createSpy('getDelay'),
+    setDelay: jasmine.createSpy('setDelay'),
     getPresentationStartTime: jasmine.createSpy('getPresentationStartTime'),
     setClockOffset: jasmine.createSpy('setClockOffset'),
     setStatic: jasmine.createSpy('setStatic'),
@@ -437,6 +439,14 @@ shaka.test.FakePresentationTimeline.prototype.getDuration;
 
 /** @type {jasmine.Spy} */
 shaka.test.FakePresentationTimeline.prototype.setDuration;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.getDelay;
+
+
+/** @type {jasmine.Spy} */
+shaka.test.FakePresentationTimeline.prototype.setDelay;
 
 
 /** @type {jasmine.Spy} */

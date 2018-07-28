@@ -183,7 +183,7 @@ describe('DashParser Live', function() {
     it('evicts old references for single-period live stream', function(done) {
       let template = [
         '<MPD type="dynamic" minimumUpdatePeriod="PT%(updateTime)dS"',
-        '    timeShiftBufferDepth="PT1S"',
+        '    timeShiftBufferDepth="PT30S"',
         '    suggestedPresentationDelay="PT5S"',
         '    availabilityStartTime="1970-01-01T00:00:00Z">',
         '  <Period id="1">',
@@ -211,9 +211,12 @@ describe('DashParser Live', function() {
             expect(stream.findSegmentPosition(0)).toBe(1);
             ManifestParser.verifySegmentIndex(stream, basicRefs);
 
-            // 15 seconds for @timeShiftBufferDepth and the first segment
-            // duration.
-            Date.now = function() { return 2 * 15 * 1000; };
+            // The 30 second availability window is initially full in all cases
+            // (SegmentTemplate+Timeline, etc.)  The first segment is always 10
+            // seconds long in all of these cases.  So 11 seconds after the
+            // manifest was parsed, the first segment should have fallen out of
+            // the availability window.
+            Date.now = function() { return 11 * 1000; };
             delayForUpdatePeriod();
             // The first reference should have been evicted.
             expect(stream.findSegmentPosition(0)).toBe(2);
@@ -225,7 +228,7 @@ describe('DashParser Live', function() {
     it('evicts old references for multi-period live stream', function(done) {
       let template = [
         '<MPD type="dynamic" minimumUpdatePeriod="PT%(updateTime)dS"',
-        '    timeShiftBufferDepth="PT1S"',
+        '    timeShiftBufferDepth="PT30S"',
         '    suggestedPresentationDelay="PT5S"',
         '    availabilityStartTime="1970-01-01T00:00:00Z">',
         '  <Period id="1">',
@@ -266,16 +269,19 @@ describe('DashParser Live', function() {
             ManifestParser.verifySegmentIndex(stream1, basicRefs);
             ManifestParser.verifySegmentIndex(stream2, basicRefs);
 
-            // 15 seconds for @timeShiftBufferDepth and the first segment
-            // duration.
-            Date.now = function() { return 2 * 15 * 1000; };
+            // The 30 second availability window is initially full in all cases
+            // (SegmentTemplate+Timeline, etc.)  The first segment is always 10
+            // seconds long in all of these cases.  So 11 seconds after the
+            // manifest was parsed, the first segment should have fallen out of
+            // the availability window.
+            Date.now = function() { return 11 * 1000; };
             delayForUpdatePeriod();
             // The first reference should have been evicted.
             ManifestParser.verifySegmentIndex(stream1, basicRefs.slice(1));
             ManifestParser.verifySegmentIndex(stream2, basicRefs);
 
             // Same as above, but 1 period length later
-            Date.now = function() { return (2 * 15 + pStart) * 1000; };
+            Date.now = function() { return (11 + pStart) * 1000; };
             delayForUpdatePeriod();
             ManifestParser.verifySegmentIndex(stream1, []);
             ManifestParser.verifySegmentIndex(stream2, basicRefs.slice(1));
@@ -753,8 +759,7 @@ describe('DashParser Live', function() {
             expect(manifest).toBeTruthy();
             let timeline = manifest.presentationTimeline;
             expect(timeline).toBeTruthy();
-            expect(timeline.getSegmentAvailabilityStart()).toBe(165);
-            expect(timeline.getSegmentAvailabilityEnd()).toBe(285);
+            expect(timeline.getMaxSegmentDuration()).toBe(15);
           }).catch(fail).then(done);
       PromiseMock.flush();
     });
@@ -831,12 +836,11 @@ describe('DashParser Live', function() {
             expect(timeline).toBeTruthy();
 
             // NOTE: the largest segment is 8 seconds long in each test.
-            expect(timeline.getSegmentAvailabilityStart()).toBe(172);
-            expect(timeline.getSegmentAvailabilityEnd()).toBe(292);
+            expect(timeline.getMaxSegmentDuration()).toBe(8);
           }).catch(fail).then(done);
       PromiseMock.flush();
     }
-  });
+  });  // describe('maxSegmentDuration')
 
   describe('stop', function() {
     const manifestRequestType = shaka.net.NetworkingEngine.RequestType.MANIFEST;
