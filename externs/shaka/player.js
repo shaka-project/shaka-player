@@ -663,11 +663,40 @@ shaka.extern.AbrConfiguration;
 
 /**
  * @typedef {{
+ *   trackSelectionCallback:
+ *       function(!Array.<shaka.extern.Track>):!Array.<shaka.extern.Track>,
+ *   progressCallback: function(shaka.extern.StoredContent,number),
+ *   usePersistentLicense: boolean
+ * }}
+ *
+ * @property {function(!Array.<shaka.extern.Track>):!Array.<shaka.extern.Track>}
+ *     trackSelectionCallback
+ *   Called inside store() to determine which tracks to save from a manifest.
+ *   It is passed an array of Tracks from the manifest and it should return
+ *   an array of the tracks to store.  This is called for each Period in the
+ *   manifest (in order).
+ * @property {function(shaka.extern.StoredContent,number)} progressCallback
+ *   Called inside store() to give progress info back to the app.  It is given
+ *   the current manifest being stored and the progress of it being stored.
+ * @property {boolean} usePersistentLicense
+ *   If true, store protected content with a persistent license so that no
+ *   network is required to view.
+ *   If false, store protected content without a persistent license.  A network
+ *   will be required to retrieve a temporary license to view.
+ *   Defaults to true.
+ * @exportDoc
+ */
+shaka.extern.OfflineConfiguration;
+
+
+/**
+ * @typedef {{
  *   drm: shaka.extern.DrmConfiguration,
  *   manifest: shaka.extern.ManifestConfiguration,
  *   streaming: shaka.extern.StreamingConfiguration,
  *   abrFactory: shaka.extern.AbrManager.Factory,
  *   abr: shaka.extern.AbrConfiguration,
+ *   offline: shaka.extern.OfflineConfiguration,
  *   preferredAudioLanguage: string,
  *   preferredTextLanguage: string,
  *   preferredVariantRole: string,

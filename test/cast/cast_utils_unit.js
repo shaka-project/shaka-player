@@ -22,6 +22,7 @@ describe('CastUtils', function() {
   it('includes every Player member', function() {
     let ignoredMembers = [
       'constructor',  // JavaScript added field
+      'getSharedConfiguration',  // Handled specially
       'getNetworkingEngine',  // Handled specially
       'getMediaElement',  // Handled specially
       'setMaxHardwareResolution',

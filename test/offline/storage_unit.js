@@ -207,7 +207,7 @@ describe('Storage', function() {
   });
 
   describe('default track selection callback', function() {
-    const select = shaka.offline.Storage.defaultTrackSelect;
+    const select = shaka.util.PlayerConfiguration.defaultTrackSelect;
 
     it('selects the largest SD video with middle quality audio', function() {
       const tracks = [
@@ -219,7 +219,7 @@ describe('Storage', function() {
         variantTrack(5, 1080, englishUS, 4 * kbps),
       ];
 
-      let selected = select(englishUS, tracks);
+      let selected = select(tracks, englishUS);
       expect(selected).toBeTruthy();
       expect(selected.length).toBe(1);
       expect(selected[0]).toBeTruthy();
@@ -234,7 +234,7 @@ describe('Storage', function() {
         textTrack(1, frenchCanadian),
       ];
 
-      let selected = select(englishUS, tracks);
+      let selected = select(tracks, englishUS);
       expect(selected).toBeTruthy();
       expect(selected.length).toBe(2);
       tracks.forEach((track) => {
@@ -250,7 +250,7 @@ describe('Storage', function() {
           variantTrack(2, 480, 'eng-ca', 1 * kbps),
         ];
 
-        let selected = select('eng-us', tracks);
+        let selected = select(tracks, 'eng-us');
         expect(selected).toBeTruthy();
         expect(selected.length).toBe(1);
         expect(selected[0]).toBeTruthy();
@@ -265,7 +265,7 @@ describe('Storage', function() {
           variantTrack(3, 480, 'eng', 1 * kbps),
         ];
 
-        let selected = select('eng', tracks);
+        let selected = select(tracks, 'eng');
         expect(selected).toBeTruthy();
         expect(selected.length).toBe(1);
         expect(selected[0]).toBeTruthy();
@@ -279,7 +279,7 @@ describe('Storage', function() {
           variantTrack(2, 480, 'eng-ca', 1 * kbps),
         ];
 
-        let selected = select('fr', tracks);
+        let selected = select(tracks, 'fr');
         expect(selected).toBeTruthy();
         expect(selected.length).toBe(1);
         expect(selected[0]).toBeTruthy();
@@ -293,7 +293,7 @@ describe('Storage', function() {
           variantTrack(2, 480, 'eng-ca', 1 * kbps),
         ];
 
-        let selected = select('fr-uk', tracks);
+        let selected = select(tracks, 'fr-uk');
         expect(selected).toBeTruthy();
         expect(selected.length).toBe(1);
         expect(selected[0]).toBeTruthy();
@@ -309,7 +309,7 @@ describe('Storage', function() {
 
         tracks[0].primary = true;
 
-        let selected = select('de', tracks);
+        let selected = select(tracks, 'de');
         expect(selected).toBeTruthy();
         expect(selected.length).toBe(1);
         expect(selected[0]).toBeTruthy();
@@ -433,8 +433,10 @@ describe('Storage', function() {
         };
 
         storage.configure({
-          trackSelectionCallback: selectTrack,
-          progressCallback: progressCallback,
+          offline: {
+            trackSelectionCallback: selectTrack,
+            progressCallback: progressCallback,
+          },
         });
 
         // Store a manifest with per stream bandwidth. This should result with
@@ -478,8 +480,10 @@ describe('Storage', function() {
             };
 
             storage.configure({
-              trackSelectionCallback: selectTrack,
-              progressCallback: progressCallback,
+              offline: {
+                trackSelectionCallback: selectTrack,
+                progressCallback: progressCallback,
+              },
             });
 
             // Store a manifest with bandwidth only for the variant (no per
@@ -529,7 +533,9 @@ describe('Storage', function() {
         return selected;
       };
       storage.configure({
-        trackSelectionCallback: selectTrack,
+        offline: {
+          trackSelectionCallback: selectTrack,
+        },
       });
 
       // Stored content should reflect the tracks in the first period, so we
@@ -635,7 +641,11 @@ describe('Storage', function() {
               storage,
               drm,
               makeManifestWithPerStreamBandwidth());
-          storage.configure({usePersistentLicense: false});
+          storage.configure({
+            offline: {
+              usePersistentLicense: false,
+            },
+          });
 
           let stored = await storage.store(manifestWithPerStreamBandwidthUri);
 
@@ -858,7 +868,11 @@ describe('Storage', function() {
 
       // Store a manifest with one track. We are using only one track so that it
       // will be easier to understand the progress values.
-      storage.configure({trackSelectionCallback: selectOneTrack});
+      storage.configure({
+        offline: {
+          trackSelectionCallback: selectOneTrack,
+        },
+      });
       let content = await storage.store(
           manifestWithPerStreamBandwidthUri,
           noMetadata,
@@ -876,7 +890,9 @@ describe('Storage', function() {
       };
 
       storage.configure({
-        progressCallback: progressCallback,
+        offline: {
+          progressCallback: progressCallback,
+        },
       });
 
       await storage.remove(content.offlineUri);
