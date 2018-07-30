@@ -120,6 +120,21 @@ describe('XmlUtils', function() {
 
       expect(XmlUtils.getContents(xml)).toBeNull();
     });
+
+    it('handles CDATA sections', function() {
+      let xmlString = [
+        '<?xml version="1.0"?>',
+        '<Root>',
+        '<![CDATA[<Foo> Bar]]>',
+        '</Root>',
+      ].join('\n');
+      let xml = new DOMParser().parseFromString(xmlString, 'application/xml');
+      goog.asserts.assert(xml, 'parseFromString should succeed');
+
+      let root = XmlUtils.findChild(xml, 'Root');
+      goog.asserts.assert(root, 'findChild should find element');
+      expect(XmlUtils.getContents(root)).toBe('<Foo> Bar');
+    });
   });
 
   describe('parseAttr', function() {
