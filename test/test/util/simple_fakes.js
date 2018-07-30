@@ -128,8 +128,8 @@ shaka.test.FakeDrmEngine = function() {
 
   let ret = jasmine.createSpyObj('FakeDrmEngine', [
     'attach', 'configure', 'destroy', 'getDrmInfo', 'getExpiration',
-    'getSessionIds', 'getSupportedTypes', 'init', 'initialized',
-    'isSupportedByKeySystem', 'keySystem',
+    'getKeyStatuses', 'getSessionIds', 'getSupportedTypes', 'init',
+    'initialized', 'isSupportedByKeySystem', 'keySystem',
   ]);
   ret.attach.and.callFake(resolve);
   ret.destroy.and.callFake(resolve);
@@ -137,6 +137,7 @@ shaka.test.FakeDrmEngine = function() {
   ret.initialized.and.returnValue(true);
   ret.keySystem.and.returnValue('com.example.fake');
   ret.getExpiration.and.returnValue(Infinity);
+  ret.getKeyStatuses.and.returnValue({});
   // See shaka.test.ManifestGenerator.protototype.createStream.
   ret.getSupportedTypes.and.returnValue(
       ['video/mp4; codecs="avc1.4d401f"']);

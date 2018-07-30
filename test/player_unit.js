@@ -2868,7 +2868,11 @@ describe('Player', function() {
             new shaka.util.Error(
                 shaka.util.Error.Severity.CRITICAL,
                 shaka.util.Error.Category.MANIFEST,
-                shaka.util.Error.Code.RESTRICTIONS_CANNOT_BE_MET));
+                shaka.util.Error.Code.RESTRICTIONS_CANNOT_BE_MET, {
+                  hasAppRestrictions: true,
+                  missingKeys: [],
+                  restrictedKeyStatuses: [],
+                }));
       });
 
       player.configure({restrictions: {minHeight: 1000, maxHeight: 2000}});
