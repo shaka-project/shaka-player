@@ -141,7 +141,7 @@ requirement: {
   type: BANNED_NAME
   value: 'fit'
   error_message: 'Using "fit" is not allowed'
-  whitelist_regexp: 'test/player_integration.js'
+  whitelist_regexp: 'test/player_external.js'
 }
 
 

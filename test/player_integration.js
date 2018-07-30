@@ -17,13 +17,10 @@
 
 describe('Player', function() {
   const Util = shaka.test.Util;
-  const Feature = shakaAssets.Feature;
 
   /** @type {!jasmine.Spy} */
   let onErrorSpy;
 
-  /** @type {shaka.extern.SupportType} */
-  let support;
   /** @type {!HTMLVideoElement} */
   let video;
   /** @type {shaka.Player} */
@@ -33,14 +30,15 @@ describe('Player', function() {
 
   let compiledShaka;
 
-  beforeAll(function(done) {
+  beforeAll(async () => {
     video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
     video.width = 600;
     video.height = 400;
     video.muted = true;
     document.body.appendChild(video);
 
-    let loaded = new shaka.util.PublicPromise();
+    /** @type {!shaka.util.PublicPromise} */
+    const loaded = new shaka.util.PublicPromise();
     if (getClientArg('uncompiled')) {
       // For debugging purposes, use the uncompiled library.
       compiledShaka = shaka;
@@ -48,7 +46,7 @@ describe('Player', function() {
     } else {
       // Load the compiled library as a module.
       // All tests in this suite will use the compiled library.
-      require(['/base/dist/shaka-player.compiled.js'], function(shakaModule) {
+      require(['/base/dist/shaka-player.compiled.js'], (shakaModule) => {
         compiledShaka = shakaModule;
         compiledShaka.net.NetworkingEngine.registerScheme(
             'test', shaka.test.TestScheme);
@@ -60,14 +58,8 @@ describe('Player', function() {
       });
     }
 
-    loaded.then(function() {
-      return shaka.test.TestScheme.createManifests(compiledShaka, '_compiled');
-    }).then(function() {
-      return compiledShaka.Player.probeSupport();
-    }).then(function(supportResults) {
-      support = supportResults;
-      done();
-    });
+    await loaded;
+    await shaka.test.TestScheme.createManifests(compiledShaka, '_compiled');
   });
 
   beforeEach(function() {
@@ -297,116 +289,6 @@ describe('Player', function() {
       expect(getActiveLanguage()).toBe('es');
     });
 
-    function createAssetTest(asset) {
-      if (asset.disabled) return;
-
-      let testName =
-          asset.source + ' / ' + asset.name + ' : ' + asset.manifestUri;
-
-      let wit = asset.focus ? fit : externalIt;
-      wit(testName, function(done) {
-        if (asset.drm.length && !asset.drm.some(
-            function(keySystem) { return support.drm[keySystem]; })) {
-          pending('None of the required key systems are supported.');
-        }
-
-        if (asset.features) {
-          let mimeTypes = [];
-          if (asset.features.indexOf(Feature.WEBM) >= 0) {
-            mimeTypes.push('video/webm');
-          }
-          if (asset.features.indexOf(Feature.MP4) >= 0) {
-            mimeTypes.push('video/mp4');
-          }
-          if (!mimeTypes.some(
-              function(type) { return support.media[type]; })) {
-            pending('None of the required MIME types are supported.');
-          }
-        }
-
-        let config = {abr: {}, drm: {}, manifest: {dash: {}}};
-        config.abr.enabled = false;
-        config.manifest.dash.clockSyncUri =
-            'https://shaka-player-demo.appspot.com/time.txt';
-        if (asset.licenseServers) {
-          config.drm.servers = asset.licenseServers;
-        }
-        if (asset.drmCallback) {
-          config.manifest.dash.customScheme = asset.drmCallback;
-        }
-        if (asset.clearKeys) {
-          config.drm.clearKeys = asset.clearKeys;
-        }
-        player.configure(config);
-
-        if (asset.licenseRequestHeaders) {
-          player.getNetworkingEngine().registerRequestFilter(
-              addLicenseRequestHeaders.bind(null, asset.licenseRequestHeaders));
-        }
-
-        let networkingEngine = player.getNetworkingEngine();
-        if (asset.requestFilter) {
-          networkingEngine.registerRequestFilter(asset.requestFilter);
-        }
-        if (asset.responseFilter) {
-          networkingEngine.registerResponseFilter(asset.responseFilter);
-        }
-        if (asset.extraConfig) {
-          player.configure(asset.extraConfig);
-        }
-
-        player.load(asset.manifestUri).then(function() {
-          if (asset.features) {
-            const isLive = asset.features.indexOf(Feature.LIVE) >= 0;
-            expect(player.isLive()).toEqual(isLive);
-          }
-          video.play();
-          // 30 seconds or video ended, whichever comes first.
-          return waitForTimeOrEnd(video, 40);
-        }).then(function() {
-          if (video.ended) {
-            expect(video.currentTime).toBeCloseTo(video.duration, 1);
-          } else {
-            expect(video.currentTime).toBeGreaterThan(20);
-            // If it were very close to duration, why !video.ended?
-            expect(video.currentTime).not.toBeCloseTo(video.duration);
-
-            if (!player.isLive()) {
-              // Seek and play out the end.
-              video.currentTime = video.duration - 15;
-              // 30 seconds or video ended, whichever comes first.
-              return waitForTimeOrEnd(video, 40).then(function() {
-                expect(video.ended).toBe(true);
-                expect(video.currentTime).toBeCloseTo(video.duration, 1);
-              });
-            }
-          }
-        }).catch(fail).then(done);
-      });
-    }
-
-    // Create a test for each asset in the demo asset list.
-    shakaAssets.testAssets.forEach(createAssetTest);
-
-    // The user can run tests on a specific manifest URI that is not in the
-    // asset list.
-    const testCustomAsset = getClientArg('testCustomAsset');
-    if (testCustomAsset) {
-      // Construct an "asset" structure to reuse the test logic above.
-      /** @type {Object} */
-      const licenseServers = getClientArg('testCustomLicenseServer');
-      const keySystems = Object.keys(licenseServers || {});
-      const asset = {
-        source: 'command line',
-        name: 'custom',
-        manifestUri: testCustomAsset,
-        focus: true,
-        licenseServers: licenseServers,
-        drm: keySystems,
-      };
-      createAssetTest(asset);
-    }
-
     /**
      * Gets the language of the active Variant.
      * @return {string}
@@ -616,38 +498,5 @@ describe('Player', function() {
         reject('Timeout waiting for time');
       });
     });
-  }
-
-  /**
-   * @param {!EventTarget} target
-   * @param {number} timeout in seconds, after which the Promise succeeds
-   * @return {!Promise}
-   */
-  function waitForTimeOrEnd(target, timeout) {
-    let curEventManager = eventManager;
-    return new Promise(function(resolve, reject) {
-      let callback = function() {
-        curEventManager.unlisten(target, 'ended');
-        resolve();
-      };
-      curEventManager.listen(target, 'ended', callback);
-      Util.delay(timeout).then(callback);
-    });
-  }
-
-  /**
-   * @param {!Object.<string, string>} headers
-   * @param {shaka.net.NetworkingEngine.RequestType} requestType
-   * @param {shaka.extern.Request} request
-   */
-  function addLicenseRequestHeaders(headers, requestType, request) {
-    const RequestType = compiledShaka.net.NetworkingEngine.RequestType;
-    if (requestType != RequestType.LICENSE) return;
-
-    // Add these to the existing headers.  Do not clobber them!
-    // For PlayReady, there will already be headers in the request.
-    for (let k in headers) {
-      request.headers[k] = headers[k];
-    }
   }
 });
