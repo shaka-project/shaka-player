@@ -104,7 +104,8 @@ module.exports = function(config) {
       // unit tests last
       'test/**/*_unit.js',
 
-      // if --quick is not present, we will add integration tests.
+      // if --quick *is not* present, we will add integration tests.
+      // if --external *is* present, we will add external asset tests.
 
       // source files - these are only watched and served
       {pattern: 'lib/**/*.js', included: false},
@@ -236,8 +237,13 @@ module.exports = function(config) {
   if (!settings.quick) {
     // If --quick is present, we don't serve integration tests.
     config.files.push('test/**/*_integration.js');
-    // We just modified the config in-place.  No need for config.set().
   }
+  if (settings.external) {
+    // If --external is present, we serve external asset tests.
+    config.files.push('test/player_external.js');
+  }
+  // We just modified the config in-place.  No need for config.set() after we
+  // push to config.files.
 
   var reporters = [];
 
