@@ -501,7 +501,7 @@ shakaDemo.hashShouldChange_ = function() {
   let assetUri;
   let licenseServerUri;
   if (shakaDemo.player_) {
-    assetUri = shakaDemo.player_.getManifestUri();
+    assetUri = shakaDemo.player_.getAssetUri();
     let drmInfo = shakaDemo.player_.drmInfo();
     if (drmInfo) {
       licenseServerUri = drmInfo.licenseServerUri;
