@@ -900,17 +900,31 @@ describe('Storage', function() {
         }));
 
     it('throws an error if destroyed mid-store', checkAndRun(async function() {
-      // Block the network so that we won't finish the store command.
-      netEngine.delayNextRequest();
-      let storePromise = storage.store(
-          manifestWithPerStreamBandwidthUri, noMetadata, FakeManifestParser);
+      const manifest = makeManifestWithPerStreamBandwidth();
 
-      // Destroy storage. This should cause the store command to reject the
-      // promise.
-      await storage.destroy();
+      /**
+       * Block storage when it goes to parse the manifest. Since we don't want
+       * to change the flow, return a valid manifest once it resolves.
+       * @type {shaka.util.PublicPromise}
+       */
+      const stallStorage = new shaka.util.PublicPromise();
+      storage.parseManifest = async () => {
+        await stallStorage;
+        return manifest;
+      };
 
+      // The uri won't matter as we have override |parseManifest|.
+      const waitOnStore = storage.store('uri-does-not-matter');
+
+      // Request for storage to be destroyed. Before waiting for it to resolve,
+      // resolve the promise that we are using to stall the store operation.
+      const waitOnDestroy = storage.destroy();
+      stallStorage.resolve();
+      await waitOnDestroy;
+
+      // The store request should not resolve, but instead be rejected.
       try {
-        await storePromise;
+        await waitOnStore;
         fail();
       } catch (e) {
         expect(e.code).toBe(shaka.util.Error.Code.OPERATION_ABORTED);
@@ -1289,18 +1303,8 @@ describe('Storage', function() {
    * @param {shaka.extern.Manifest} manifest
    */
   function overrideDrmAndManifest(storage, drm, manifest) {
-    /**
-     * @type {{
-     *  drmEngine: !shaka.media.DrmEngine,
-     *  manifest: shaka.extern.Manifest
-     *  }}
-     */
-    let ret = {
-      drmEngine: drm,
-      manifest: manifest,
-    };
-
-    storage.loadInternal = () => Promise.resolve(ret);
+    storage.parseManifest = () => Promise.resolve(manifest);
+    storage.createDrmEngine = () => Promise.resolve(drm);
   }
 
   /**
