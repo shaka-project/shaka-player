@@ -1062,6 +1062,21 @@ describe('Storage', function() {
     }));
   });
 
+  describe('storage without player', function() {
+    const TestManifestParser = shaka.test.TestScheme.ManifestParser;
+    const manifestUri = 'test:sintel';
+
+    it('stores content', checkAndRun(async function() {
+      /** @type {shaka.offline.Storage} */
+      const storage = new shaka.offline.Storage();
+      try {
+        await storage.store(manifestUri, noMetadata, TestManifestParser);
+      } finally {
+        await storage.destroy();
+      }
+    }));
+  });
+
   /**
    * @param {number} id
    * @param {number} height
