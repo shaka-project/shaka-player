@@ -66,8 +66,12 @@ shaka.test.FakeDrmEngine = class {
     this.getSessionIds.and.callFake(() => this.offlineSessions_);
 
     /** @type {!jasmine.Spy} */
-    this.init = jasmine.createSpy('init');
-    this.init.and.returnValue(resolved);
+    this.initForPlayback = jasmine.createSpy('initForPlayback');
+    this.initForPlayback.and.returnValue(resolved);
+
+    /** @type {!jasmine.Spy} */
+    this.initForStorage = jasmine.createSpy('initForStorage');
+    this.initForStorage.and.returnValue(resolved);
 
     /** @type {!jasmine.Spy} */
     this.initialized = jasmine.createSpy('initialized');

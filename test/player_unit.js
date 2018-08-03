@@ -576,25 +576,40 @@ describe('Player', function() {
         });
       });
 
-      it('DrmEngine init', function(done) {
-        // Block DrmEngine init.
-        let p = new shaka.util.PublicPromise();
-        let drmEngine = new shaka.test.FakeDrmEngine();
-        drmEngine.init.and.returnValue(p);
-        player.createDrmEngine = function() { return drmEngine; };
+      it('DrmEngine init', async function() {
+        /** @type {!shaka.test.FakeDrmEngine} */
+        const drmEngine = new shaka.test.FakeDrmEngine();
 
-        player.load(fakeManifestUri, 0, factory1)
-            .then(fail)
-            .catch(Util.spyFunc(checkError))
-            .then(done);
+        // Block DrmEngine init at the drm engine init phase by returning a
+        // promise we can resolve later.
+        /** @type {shaka.util.PublicPromise} */
+        const p = new shaka.util.PublicPromise();
+        drmEngine.initForPlayback.and.returnValue(p);
 
-        shaka.test.Util.delay(1.0).then(function() {
+        // We don't use "await" there because we need to this happen at the
+        // same time as the next path.
+        shaka.test.Util.delay(1.0).then(() => {
           // Make sure we're blocked.
-          expect(drmEngine.init).toHaveBeenCalled();
+          expect(drmEngine.initForPlayback).toHaveBeenCalled();
+
           // Interrupt load().
           player.unload();
+
+          // Unblock the player. It should detect that it was asked to unload
+          // which should throw the |LOAD_INTERRUPTED| error.
           p.resolve();
         });
+
+        // Initialize the player. Loading should get blocked by drm init (using
+        // the public promise above) and then the player should be unloaded.
+        player.createDrmEngine = () => { return drmEngine; };
+
+        try {
+          await player.load(fakeManifestUri, 0, factory1);
+          fail();
+        } catch (error) {
+          expect(error.code).toBe(shaka.util.Error.Code.LOAD_INTERRUPTED);
+        }
       });
 
       it('DrmEngine attach', function(done) {
@@ -1577,10 +1592,12 @@ describe('Player', function() {
         parser.playerInterface = playerInterface;
         return Promise.resolve(manifest);
       });
-      drmEngine.init.and.callFake(function(manifest, isOffline) {
+      drmEngine.initForPlayback.and.callFake(() => {
         // The player does not yet have a playhead.
         expect(player.getVariantTracks()).toEqual([]);
         expect(player.getTextTracks()).toEqual([]);
+
+        return Promise.resolve();
       });
 
       await player.load(fakeManifestUri, 0, parserFactory);

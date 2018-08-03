@@ -1416,7 +1416,7 @@ describe('Storage', function() {
 
     return shaka.util.Destroyer.with([drm], async () => {
       drm.configure(player.getConfiguration().drm);
-      await drm.init(manifest, offlineLicense);
+      await drm.initForStorage(manifest, offlineLicense);
 
       return action(drm);
     }).then((result) => {

@@ -200,7 +200,7 @@ describe('DrmEngine', function() {
             keyStatusEventSeen.resolve();
           });
 
-          drmEngine.init(manifest, /* offline */ false).then(function() {
+          drmEngine.initForPlayback(manifest).then(function() {
             return drmEngine.attach(video);
           }).then(function() {
             return mediaSourceEngine.appendBuffer(ContentType.VIDEO,

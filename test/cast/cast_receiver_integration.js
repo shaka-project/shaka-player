@@ -257,7 +257,7 @@ describe('CastReceiver', function() {
     waitForUpdateMessageWrapper(shaka.test.TestScheme.ManifestParser.prototype,
         'ManifestParser', 'start');
     waitForUpdateMessageWrapper(
-        shaka.media.DrmEngine.prototype, 'DrmEngine', 'init');
+        shaka.media.DrmEngine.prototype, 'DrmEngine', 'initForPlayback');
     waitForUpdateMessageWrapper(
         shaka.media.DrmEngine.prototype, 'DrmEngine', 'attach');
     waitForUpdateMessageWrapper(
