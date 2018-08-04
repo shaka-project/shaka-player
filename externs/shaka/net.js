@@ -145,7 +145,7 @@ shaka.extern.SchemePlugin;
 
 
 /**
- * @typedef {function(number, number)}
+ * @typedef {function(number, number, number)}
  *
  * @description
  * A callback function to handle progress event through networking engine in
@@ -154,7 +154,8 @@ shaka.extern.SchemePlugin;
  * took to complete.
  * The second argument is the total number of bytes downloaded during that
  * time.
- *
+ * The third argument is the number of bytes remaining to be loaded in a
+ * segment.
  * @exportDoc
  */
 shaka.extern.ProgressUpdated;

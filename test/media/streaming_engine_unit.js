@@ -77,7 +77,8 @@ describe('StreamingEngine', function() {
   let onInitialStreamsSetup;
   /** @type {!jasmine.Spy} */
   let onStartupComplete;
-
+  /** @type {!jasmine.Spy} */
+  let onSegmentAppended;
   /** @type {!shaka.media.StreamingEngine} */
   let streamingEngine;
 
@@ -432,6 +433,7 @@ describe('StreamingEngine', function() {
     onError.and.callFake(fail);
     onEvent = jasmine.createSpy('onEvent');
     onManifestUpdate = jasmine.createSpy('onManifestUpdate');
+    onSegmentAppended = jasmine.createSpy('onSegmentAppended');
 
     if (!config) {
       config = shaka.util.PlayerConfiguration.createDefault().streaming;
@@ -449,7 +451,7 @@ describe('StreamingEngine', function() {
       onError: Util.spyFunc(onError),
       onEvent: Util.spyFunc(onEvent),
       onManifestUpdate: Util.spyFunc(onManifestUpdate),
-      onSegmentAppended: function() {},
+      onSegmentAppended: Util.spyFunc(onSegmentAppended),
       onInitialStreamsSetup: Util.spyFunc(onInitialStreamsSetup),
       onStartupComplete: Util.spyFunc(onStartupComplete),
     };
