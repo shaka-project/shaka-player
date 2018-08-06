@@ -1,3 +1,29 @@
+## 2.4.3 (2018-08-06)
+
+New Features:
+  - Add availabilityWindowOverride configuration
+    - https://github.com/google/shaka-player/issues/1177
+    - https://github.com/google/shaka-player/issues/1307
+
+Bugfixes:
+  - Fix repeated download of the same segment in live DASH
+    - https://github.com/google/shaka-player/issues/1464
+    - https://github.com/google/shaka-player/issues/1486
+  - Don't clear buffer with a small gap between playhead and buffer start
+    - https://github.com/google/shaka-player/issues/1508
+  - Allow CDATA in text nodes.
+    - https://github.com/google/shaka-player/issues/1508
+  - Skip text AdaptationSets with no segment info
+    - https://github.com/google/shaka-player/issues/1484
+  - Add error code for side-loaded text with live streams
+
+Demo app:
+  - Clarify persistent license error messages
+
+Docs:
+  - Update docs for RESTRICTIONS_CANNOT_BE_MET
+
+
 ## 2.3.10 and 2.4.2 (2018-06-29)
 
 Bugfixes:
