@@ -29,11 +29,8 @@ describe('CastUtils', function() {
       'destroy',  // Should use CastProxy.destroy instead
       'drmInfo',  // Too large to proxy
       'getManifest', // Too large to proxy
-      // TODO(vaage): Remove |getManiestUri| when |getManifestUri| is removed
-      //              from the player interface in v2.6.
-      // Depreciated and replaced with |getAssetUri|. Proxy will redirect calls
-      // for |getManifestUri| to |getAssetUri|.
-      'getManifestUri',
+      // TODO(vaage): Remove |getManifestUri| references in v2.6.
+      'getManifestUri',  // Handled specially by CastProxy
 
       // Test helper methods (not @export'd)
       'createDrmEngine',
