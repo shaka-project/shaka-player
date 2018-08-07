@@ -192,7 +192,10 @@ shaka.extern.BufferedInfo;
  *   audioId: ?number,
  *   channelsCount: ?number,
  *   audioBandwidth: ?number,
- *   videoBandwidth: ?number
+ *   videoBandwidth: ?number,
+ *   originalVideoId: ?string,
+ *   originalAudioId: ?string,
+ *   originalTextId: ?string
  * }}
  *
  * @description
@@ -252,6 +255,15 @@ shaka.extern.BufferedInfo;
  *   (only for variant tracks) The audio stream's bandwidth if known.
  * @property {?number} videoBandwidth
  *   (only for variant tracks) The video stream's bandwidth if known.
+ * @property {?string} originalVideoId
+ *   (variant tracks only) The original ID of the video part of the track, if
+ *   any, as it appeared in the original manifest.
+ * @property {?string} originalAudioId
+ *   (variant tracks only) The original ID of the audio part of the track, if
+ *   any, as it appeared in the original manifest.
+ * @property {?string} originalTextId
+ *   (text tracks only) The original ID of the text track, if any, as it
+ *   appeared in the original manifest.
  * @exportDoc
  */
 shaka.extern.Track;

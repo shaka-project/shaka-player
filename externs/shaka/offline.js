@@ -119,6 +119,7 @@ shaka.extern.PeriodDB;
 /**
  * @typedef {{
  *   id: number,
+ *   originalId: ?string,
  *   primary: boolean,
  *   presentationTimeOffset: number,
  *   contentType: string,
@@ -139,6 +140,9 @@ shaka.extern.PeriodDB;
  *
  * @property {number} id
  *   The unique id of the stream.
+ * @property {?string} originalId
+ *   The original ID, if any, that appeared in the manifest.  For example, in
+ *   DASH, this is the "id" attribute of the Representation element.
  * @property {boolean} primary
  *   Whether the stream set was primary.
  * @property {number} presentationTimeOffset

@@ -1165,6 +1165,9 @@ describe('Player', function() {
           channelsCount: null,
           audioBandwidth: 200,
           videoBandwidth: 200,
+          originalAudioId: null,
+          originalVideoId: null,
+          originalTextId: null,
         },
       ];
       let variantTracks2 = [
@@ -1190,6 +1193,9 @@ describe('Player', function() {
           channelsCount: null,
           audioBandwidth: 200,
           videoBandwidth: 200,
+          originalAudioId: null,
+          originalVideoId: null,
+          originalTextId: null,
         },
       ];
 
@@ -1223,21 +1229,24 @@ describe('Player', function() {
           .addVariant(1)  // main surround, low res
             .bandwidth(1300)
             .language('en')
-            .addVideo(1).bandwidth(1000).size(100, 200)
-              .frameRate(1000000 / 42000)
-            .addAudio(3).bandwidth(300).channelsCount(6).roles(['main'])
+            .addVideo(1).originalId('video-1kbps').bandwidth(1000)
+              .size(100, 200).frameRate(1000000 / 42000)
+            .addAudio(3).originalId('audio-en-6c').bandwidth(300)
+              .channelsCount(6).roles(['main'])
 
           .addVariant(2)  // main surround, high res
             .bandwidth(2300)
             .language('en')
-            .addVideo(2).bandwidth(2000).size(200, 400).frameRate(24)
+            .addVideo(2).originalId('video-2kbps').bandwidth(2000)
+              .size(200, 400).frameRate(24)
             .addAudio(3)  // already defined above
 
           .addVariant(3)  // main stereo, low res
             .bandwidth(1100)
             .language('en')
             .addVideo(1)  // already defined above
-            .addAudio(4).bandwidth(100).channelsCount(2).roles(['main'])
+            .addAudio(4).originalId('audio-en-2c').bandwidth(100)
+              .channelsCount(2).roles(['main'])
 
           .addVariant(4)  // main stereo, high res
             .bandwidth(2100)
@@ -1249,7 +1258,8 @@ describe('Player', function() {
             .bandwidth(1100)
             .language('en')
             .addVideo(1)  // already defined above
-            .addAudio(5).bandwidth(100).channelsCount(2).roles(['commentary'])
+            .addAudio(5).originalId('audio-commentary').bandwidth(100)
+              .channelsCount(2).roles(['commentary'])
 
           .addVariant(6)  // commentary stereo, low res
             .bandwidth(2100)
@@ -1261,7 +1271,8 @@ describe('Player', function() {
             .language('es')
             .bandwidth(1100)
             .addVideo(1)  // already defined above
-            .addAudio(6).bandwidth(100).channelsCount(2)
+            .addAudio(6).originalId('audio-es').bandwidth(100)
+              .channelsCount(2)
 
           .addVariant(8)  // spanish stereo, high res
             .language('es')
@@ -1270,15 +1281,15 @@ describe('Player', function() {
             .addAudio(6)  // already defined above
 
           // All text tracks should remain, even with different MIME types.
-          .addTextStream(7)
+          .addTextStream(7).originalId('text-es')
             .language('es').label('Spanish')
             .bandwidth(10).mime('text/vtt')
             .kind('caption')
-          .addTextStream(8)
+          .addTextStream(8).originalId('text-en')
             .language('en').label('English')
             .bandwidth(10).mime('application/ttml+xml')
             .kind('caption').roles(['main'])
-           .addTextStream(9)
+           .addTextStream(9).originalId('text-commentary')
             .language('en').label('English')
             .bandwidth(10).mime('application/ttml+xml')
             .kind('caption').roles(['commentary'])
@@ -1318,6 +1329,9 @@ describe('Player', function() {
           channelsCount: 6,
           audioBandwidth: 300,
           videoBandwidth: 1000,
+          originalAudioId: 'audio-en-6c',
+          originalVideoId: 'video-1kbps',
+          originalTextId: null,
         },
         {
           id: 2,
@@ -1341,6 +1355,9 @@ describe('Player', function() {
           channelsCount: 6,
           audioBandwidth: 300,
           videoBandwidth: 2000,
+          originalAudioId: 'audio-en-6c',
+          originalVideoId: 'video-2kbps',
+          originalTextId: null,
         },
         {
           id: 3,
@@ -1364,6 +1381,9 @@ describe('Player', function() {
           channelsCount: 2,
           audioBandwidth: 100,
           videoBandwidth: 1000,
+          originalAudioId: 'audio-en-2c',
+          originalVideoId: 'video-1kbps',
+          originalTextId: null,
         },
         {
           id: 4,
@@ -1387,6 +1407,9 @@ describe('Player', function() {
           channelsCount: 2,
           audioBandwidth: 100,
           videoBandwidth: 2000,
+          originalAudioId: 'audio-en-2c',
+          originalVideoId: 'video-2kbps',
+          originalTextId: null,
         },
         {
           id: 5,
@@ -1410,6 +1433,9 @@ describe('Player', function() {
           channelsCount: 2,
           audioBandwidth: 100,
           videoBandwidth: 1000,
+          originalAudioId: 'audio-commentary',
+          originalVideoId: 'video-1kbps',
+          originalTextId: null,
         },
         {
           id: 6,
@@ -1433,6 +1459,9 @@ describe('Player', function() {
           channelsCount: 2,
           audioBandwidth: 100,
           videoBandwidth: 2000,
+          originalAudioId: 'audio-commentary',
+          originalVideoId: 'video-2kbps',
+          originalTextId: null,
         },
         {
           id: 7,
@@ -1456,6 +1485,9 @@ describe('Player', function() {
           channelsCount: 2,
           audioBandwidth: 100,
           videoBandwidth: 1000,
+          originalAudioId: 'audio-es',
+          originalVideoId: 'video-1kbps',
+          originalTextId: null,
         },
         {
           id: 8,
@@ -1479,6 +1511,9 @@ describe('Player', function() {
           channelsCount: 2,
           audioBandwidth: 100,
           videoBandwidth: 2000,
+          originalAudioId: 'audio-es',
+          originalVideoId: 'video-2kbps',
+          originalTextId: null,
         },
       ];
 
@@ -1505,6 +1540,9 @@ describe('Player', function() {
           frameRate: null,
           videoId: null,
           audioId: null,
+          originalAudioId: null,
+          originalVideoId: null,
+          originalTextId: 'text-es',
         },
         {
           id: 8,
@@ -1528,6 +1566,9 @@ describe('Player', function() {
           frameRate: null,
           videoId: null,
           audioId: null,
+          originalAudioId: null,
+          originalVideoId: null,
+          originalTextId: 'text-en',
         },
         {
           id: 9,
@@ -1551,6 +1592,9 @@ describe('Player', function() {
           frameRate: null,
           videoId: null,
           audioId: null,
+          originalAudioId: null,
+          originalVideoId: null,
+          originalTextId: 'text-commentary',
         },
       ];
 

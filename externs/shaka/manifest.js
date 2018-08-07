@@ -284,6 +284,7 @@ shaka.extern.GetSegmentReferenceFunction;
 /**
  * @typedef {{
  *   id: number,
+ *   originalId: ?string,
  *   createSegmentIndex: shaka.extern.CreateSegmentIndexFunction,
  *   findSegmentPosition: shaka.extern.FindSegmentPositionFunction,
  *   getSegmentReference: shaka.extern.GetSegmentReferenceFunction,
@@ -314,6 +315,11 @@ shaka.extern.GetSegmentReferenceFunction;
  * @property {number} id
  *   <i>Required.</i> <br>
  *   A unique ID among all Stream objects within the same Manifest.
+ * @property {?string} originalId
+ *   <i>Optional.</i> <br>
+ *   The original ID, if any, that appeared in the manifest.  For example, in
+ *   DASH, this is the "id" attribute of the Representation element.  In HLS,
+ *   this is the "NAME" attribute.
  * @property {shaka.extern.CreateSegmentIndexFunction} createSegmentIndex
  *   <i>Required.</i> <br>
  *   Creates the Stream's SegmentIndex (asynchronously).

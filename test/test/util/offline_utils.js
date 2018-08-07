@@ -44,6 +44,7 @@ shaka.test.OfflineUtils.createManifest = function(originalUri) {
 shaka.test.OfflineUtils.createStream = function(id, type) {
   return {
     id: id,
+    originalId: id.toString(),
     primary: false,
     presentationTimeOffset: 0,
     contentType: type,

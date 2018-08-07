@@ -461,6 +461,7 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
   /** @type {shaka.extern.Stream} */
   let stream = {
     id: id,
+    originalId: null,
     createSegmentIndex: shaka.test.Util.spyFunc(create),
     findSegmentPosition: shaka.test.Util.spyFunc(find),
     getSegmentReference: shaka.test.Util.spyFunc(get),
@@ -731,6 +732,19 @@ shaka.test.ManifestGenerator.prototype.roles = function(roles) {
 shaka.test.ManifestGenerator.prototype.channelsCount = function(count) {
   let stream = this.currentStream_();
   stream.channelsCount = count;
+  return this;
+};
+
+
+/**
+ * Sets the original ID of the current stream.
+ *
+ * @param {?string} originalId
+ * @return {!shaka.test.ManifestGenerator}
+ */
+shaka.test.ManifestGenerator.prototype.originalId = function(originalId) {
+  let stream = this.currentStream_();
+  stream.originalId = originalId;
   return this;
 };
 // }}}

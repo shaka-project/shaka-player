@@ -909,6 +909,8 @@ describe('Storage', function() {
    * @return {shaka.extern.Track}
    */
   function variantTrack(id, height, language, bandwidth) {
+    const videoId = id * 2;
+    const audioId = id * 2 + 1;
     return {
       id: id,
       active: false,
@@ -926,11 +928,14 @@ describe('Storage', function() {
       videoCodec: 'mp4',
       primary: false,
       roles: [],
-      videoId: id * 2,
-      audioId: id * 2 + 1,
+      videoId: videoId,
+      audioId: audioId,
       channelsCount: 2,
       audioBandwidth: bandwidth * 0.33,
       videoBandwidth: bandwidth * 0.67,
+      originalVideoId: videoId.toString(),
+      originalAudioId: audioId.toString(),
+      originalTextId: null,
     };
   }
 
@@ -962,6 +967,9 @@ describe('Storage', function() {
       channelsCount: null,
       audioBandwidth: null,
       videoBandwidth: null,
+      originalVideoId: null,
+      originalAudioId: null,
+      originalTextId: id.toString(),
     };
   }
 

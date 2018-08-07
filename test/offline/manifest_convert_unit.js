@@ -216,6 +216,7 @@ describe('ManifestConverter', function() {
     /** @type {shaka.extern.StreamDB} */
     let streamDB = {
       id: id,
+      originalId: id.toString(),
       primary: false,
       presentationTimeOffset: 0,
       contentType: type,
@@ -261,6 +262,7 @@ describe('ManifestConverter', function() {
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
     return {
       id: id,
+      originalId: id.toString(),
       primary: false,
       presentationTimeOffset: 25,
       contentType: ContentType.VIDEO,
@@ -302,6 +304,7 @@ describe('ManifestConverter', function() {
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
     return {
       id: id,
+      originalId: id.toString(),
       primary: false,
       presentationTimeOffset: 10,
       contentType: ContentType.AUDIO,
@@ -342,6 +345,7 @@ describe('ManifestConverter', function() {
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
     return {
       id: id,
+      originalId: id.toString(),
       primary: false,
       presentationTimeOffset: 10,
       contentType: ContentType.TEXT,
@@ -386,6 +390,7 @@ describe('ManifestConverter', function() {
 
     let expectedStream = {
       id: jasmine.any(Number),
+      originalId: jasmine.any(String),
       createSegmentIndex: jasmine.any(Function),
       findSegmentPosition: jasmine.any(Function),
       getSegmentReference: jasmine.any(Function),
