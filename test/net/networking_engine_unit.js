@@ -977,6 +977,68 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         .then(done);
   });
 
+  describe('\'retry\' event', function() {
+    /** @type {shaka.extern.Request} */
+    let request;
+    /** @type {jasmine.Spy} */
+    let retrySpy;
+
+    beforeEach(() => {
+      request = createRequest('reject://foo', {
+        maxAttempts: 3,
+        baseDelay: 0,
+        backoffFactor: 0,
+        fuzzFactor: 0,
+        timeout: 0,
+      });
+
+      retrySpy = jasmine.createSpy('retry listener');
+      networkingEngine.addEventListener('retry', Util.spyFunc(retrySpy));
+    });
+
+    it('is called on recoverable error', async () => {
+      let error1 = new shaka.util.Error(
+        shaka.util.Error.Severity.RECOVERABLE,
+        shaka.util.Error.Category.NETWORK,
+        shaka.util.Error.Code.HTTP_ERROR);
+      let error2 = new shaka.util.Error(
+        shaka.util.Error.Severity.RECOVERABLE,
+        shaka.util.Error.Category.NETWORK,
+        shaka.util.Error.Code.BAD_HTTP_STATUS);
+      let resolve = {
+        uri: '', data: new ArrayBuffer(0), headers: {},
+      };
+      rejectScheme.and.callFake(() => {
+        switch (rejectScheme.calls.count()) {
+          case 1: return shaka.util.AbortableOperation.failed(error1);
+          case 2: return shaka.util.AbortableOperation.failed(error2);
+          default: return shaka.util.AbortableOperation.completed(resolve);
+        }
+      });
+      await networkingEngine.request(requestType, request).promise;
+      expect(retrySpy.calls.count()).toEqual(2);
+      if (retrySpy.calls.count() == 2) {
+        const event1 = retrySpy.calls.argsFor(0)[0];
+        const event2 = retrySpy.calls.argsFor(1)[0];
+        expect(event1.error).toBe(error1);
+        expect(event2.error).toBe(error2);
+      }
+    });
+
+    it('is not called on critical errors', async () => {
+      error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.HTTP_ERROR);
+      try {
+        await networkingEngine.request(requestType, request).promise;
+        fail('not reached');
+      } catch (unused) {
+        expect(retrySpy).not.toHaveBeenCalled();
+      }
+    });
+  });
+
   describe('abort', function() {
     /** @type {!shaka.util.Error} */
     let abortError;
