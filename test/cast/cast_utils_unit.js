@@ -27,6 +27,7 @@ describe('CastUtils', function() {
       'getMediaElement',  // Handled specially
       'setMaxHardwareResolution',
       'destroy',  // Should use CastProxy.destroy instead
+      'drmInfo',  // Too large to proxy
       'getManifest', // Too large to proxy
       // TODO(vaage): Remove |getManiestUri| when |getManifestUri| is removed
       //              from the player interface in v2.6.
