@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-describe('ConfigUtils', function() {
-  const ConfigUtils = shaka.util.ConfigUtils;
+describe('ObjectUtils', function() {
+  const ObjectUtils = shaka.util.ObjectUtils;
 
   describe('cloneObject', function() {
-    const cloneObject = ConfigUtils.cloneObject;
+    const cloneObject = ObjectUtils.cloneObject;
 
     it('clones values and plain objects', function() {
       expect(cloneObject(2)).toBe(2);
