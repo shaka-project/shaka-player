@@ -198,8 +198,10 @@ describe('CastReceiver', function() {
     eventManager.listenOnce(video, 'loadeddata', function() {
       // Wait for an update message.
       waitForUpdateMessage().then(function(message) {
-        // Check that the update message is of a reasonable size.
-        expect(message.length).toBeLessThan(5000);
+        // Check that the update message is of a reasonable size. From previous
+        // testing we found that the socket would silently reject data that got
+        // too big. 5KB is safely below the limit.
+        expect(message.length).toBeLessThan(5 * 1024);
       }).then(done);
     });
     addOnError(done);
