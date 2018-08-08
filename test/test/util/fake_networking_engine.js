@@ -38,8 +38,12 @@ goog.provide('shaka.test.FakeNetworkingEngine');
  */
 shaka.test.FakeNetworkingEngine = function(
     responseMap, defaultResponse, headersMap) {
-  /** @private {!Object.<string, !ArrayBuffer>} */
-  this.responseMap_ = responseMap || {};
+  /**
+   * @private {!Object.<
+   *    string,
+   *    shaka.test.FakeNetworkingEngine.MockedResponse>} */
+  this.responseMap_ = {};
+  this.setResponseMap(responseMap || {});
 
   /** @private {!Object.<string, !Object.<string, string>>} */
   this.headersMap_ = headersMap || {};
@@ -71,6 +75,12 @@ shaka.test.FakeNetworkingEngine = function(
   // methods but still call it by default.
   spyOn(this, 'destroy').and.callThrough();
 };
+
+
+/**
+ * @typedef {function():!Promise.<!ArrayBuffer>}
+ */
+shaka.test.FakeNetworkingEngine.MockedResponse;
 
 
 /** @override */
@@ -140,33 +150,57 @@ shaka.test.FakeNetworkingEngine.prototype.requestImpl_ = function(
   expect(request).toBeTruthy();
   expect(request.uris.length).toBe(1);
 
-  let headers = this.headersMap_[request.uris[0]] || {};
-  let result = this.responseMap_[request.uris[0]] || this.defaultResponse_;
-  if (!result && request.method != 'HEAD') {
-    // Give a more helpful error message to jasmine.
-    expect(request.uris[0]).toBe('in the response map');
-    let error = new shaka.util.Error(
-        shaka.util.Error.Severity.CRITICAL,
-        shaka.util.Error.Category.NETWORK,
-        shaka.util.Error.Code.UNEXPECTED_TEST_REQUEST);
-    return shaka.util.AbortableOperation.failed(error);
-  }
+  const requestedUri = request.uris[0];
 
-  /** @type {shaka.extern.Response} */
-  let response = {uri: request.uris[0], data: result, headers: headers};
+  const headers = this.headersMap_[requestedUri] || {};
 
-  if (this.responseFilter_) {
-    this.responseFilter_(type, response);
-  }
+  const defaultCallback = () => {
+    return Promise.resolve(this.defaultResponse_);
+  };
 
-  if (this.delayNextRequestPromise_) {
-    let delay = this.delayNextRequestPromise_;
-    this.delayNextRequestPromise_ = null;
-    return shaka.util.AbortableOperation.notAbortable(
-        delay.then(function() { return response; }));
-  } else {
-    return shaka.util.AbortableOperation.completed(response);
-  }
+  const resultCallback = this.responseMap_[requestedUri] || defaultCallback;
+
+  // Cache the delay for this request now so that it does not change if another
+  // request comes through.
+  const delay = this.delayNextRequestPromise_;
+  this.delayNextRequestPromise_ = null;
+
+  // Wrap all the async operations into one function so that we can pass it to
+  // abortable operation.
+  const asyncOp = Promise.resolve().then(async () => {
+    if (delay) {
+      await delay;
+    }
+
+    const result = await resultCallback();
+
+    if (!result && request.method != 'HEAD') {
+      // Provide some more useful information.
+      shaka.log.error('Expected', requestedUri, 'to be in the response map');
+
+      throw new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.UNEXPECTED_TEST_REQUEST);
+    }
+
+    /** @type {shaka.extern.Response} */
+    const response = {
+      uri: requestedUri,
+      data: result,
+      headers: headers,
+    };
+
+    // Modify the response using the response filter, this allows the app
+    // to modify the response before giving it to the player.
+    if (this.responseFilter_) {
+      this.responseFilter_(type, response);
+    }
+
+    return response;
+  });
+
+  return shaka.util.AbortableOperation.notAbortable(asyncOp);
 };
 
 
@@ -243,13 +277,57 @@ shaka.test.FakeNetworkingEngine.prototype.expectRangeRequest = function(
 
 
 /**
+ * Set a callback for when the given uri is called.
+ *
+ * @param {string} uri
+ * @param {function():!Promise<!ArrayBuffer>} callback
+ * @return {!shaka.test.FakeNetworkingEngine}
+ */
+shaka.test.FakeNetworkingEngine.prototype.setResponse = function(
+    uri, callback) {
+  this.responseMap_[uri] = callback;
+  return this;
+};
+
+
+/**
+ * Set a single value in the response map.
+ *
+ * @param {string} uri
+ * @param {!ArrayBuffer} value
+ * @return {!shaka.test.FakeNetworkingEngine}
+ */
+shaka.test.FakeNetworkingEngine.prototype.setResponseValue = function(
+    uri, value) {
+  return this.setResponse(uri, () => Promise.resolve(value));
+};
+
+
+/**
+ * Set a single value as text in the response map.
+ *
+ * @param {string} uri
+ * @param {string} value
+ * @return {!shaka.test.FakeNetworkingEngine}
+ */
+shaka.test.FakeNetworkingEngine.prototype.setResponseText = function(
+    uri, value) {
+  const utf8 = shaka.util.StringUtils.toUTF8(value);
+  return this.setResponseValue(uri, utf8);
+};
+
+
+/**
  * Sets the response map.
  *
  * @param {!Object.<string, !ArrayBuffer>} responseMap
  */
 shaka.test.FakeNetworkingEngine.prototype.setResponseMap = function(
     responseMap) {
-  this.responseMap_ = responseMap;
+  this.responseMap_ = {};
+  shaka.util.MapUtils.forEach(responseMap, (key, value) => {
+    this.setResponseValue(key, value);
+  });
 };
 
 
@@ -260,11 +338,10 @@ shaka.test.FakeNetworkingEngine.prototype.setResponseMap = function(
  */
 shaka.test.FakeNetworkingEngine.prototype.setResponseMapAsText = function(
     textMap) {
-  this.responseMap_ = Object.keys(textMap).reduce(function(obj, key) {
-    let data = shaka.util.StringUtils.toUTF8(textMap[key]);
-    obj[key] = data;
-    return obj;
-  }, {});
+  this.responseMap_ = {};
+  shaka.util.MapUtils.forEach(textMap, (key, value) => {
+    this.setResponseText(key, value);
+  });
 };
 
 

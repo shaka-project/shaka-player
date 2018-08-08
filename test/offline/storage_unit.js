@@ -367,6 +367,260 @@ describe('Storage', function() {
     });
   });
 
+  // Test that progress will be reported as we expect when manifests have
+  // stream-level bandwidth information and when manifests only have
+  // variant-level bandwidth information.
+  //
+  // Since we build our promise chains to allow each stream to be downloaded
+  // in parallel (implementation detail) progress can be non-deterministic
+  // as we see different promise resolution orders between browsers (and
+  // runs). So to control this, we force resolution order for our network
+  // requests in these tests.
+  //
+  // To allow us to control the network order, our manifests for these tests
+  // could not repeat/reuse segments uris.
+  describe('reports progress on store', function() {
+    const audioSegment1Uri = 'audio-segment-1';
+    const audioSegment2Uri = 'audio-segment-2';
+    const audioSegment3Uri = 'audio-segment-3';
+    const audioSegment4Uri = 'audio-segment-4';
+
+    const videoSegment1Uri = 'video-segment-1';
+    const videoSegment2Uri = 'video-segment-2';
+    const videoSegment3Uri = 'video-segment-3';
+    const videoSegment4Uri = 'video-segment-4';
+
+    /** @type {!shaka.Player} */
+    let player;
+    /** @type {!shaka.offline.Storage} */
+    let storage;
+
+    beforeEach(checkAndRun(async function() {
+      // Make sure we start with a clean slate between each run.
+      await eraseStorage();
+
+      // Use these promises to ensure that the data from networking
+      // engine arrives in the correct order.
+      const delays = {};
+      delays[audioSegment1Uri] = new shaka.util.PublicPromise();
+      delays[audioSegment2Uri] = new shaka.util.PublicPromise();
+      delays[audioSegment3Uri] = new shaka.util.PublicPromise();
+      delays[audioSegment4Uri] = new shaka.util.PublicPromise();
+      delays[videoSegment1Uri] = new shaka.util.PublicPromise();
+      delays[videoSegment2Uri] = new shaka.util.PublicPromise();
+      delays[videoSegment3Uri] = new shaka.util.PublicPromise();
+      delays[videoSegment4Uri] = new shaka.util.PublicPromise();
+
+      /** @type {!shaka.test.FakeNetworkingEngine} */
+      const netEngine = new shaka.test.FakeNetworkingEngine();
+
+      // Since the promise chains will be built so that each stream can be
+      // downloaded in parallel, we can force the network requests to
+      // resolve in lock-step (audio seg 0, video seg 0, audio seg 1,
+      // video seg 1, ...).
+      const setResponseFor = (segment, dependingOn) => {
+        netEngine.setResponse(segment, async () => {
+          if (dependingOn) {
+            await delays[dependingOn];
+          }
+
+          // Tell anyone waiting on |segment| that they are clear to execute
+          // now.
+          delays[segment].resolve();
+          return new ArrayBuffer(16);
+        });
+      };
+      setResponseFor(audioSegment1Uri, /* depending on */ null);
+      setResponseFor(audioSegment2Uri, /* depending on */ videoSegment1Uri);
+      setResponseFor(audioSegment3Uri, /* depending on */ videoSegment2Uri);
+      setResponseFor(audioSegment4Uri, /* depending on */ videoSegment3Uri);
+      setResponseFor(videoSegment1Uri, /* depending on */ audioSegment1Uri);
+      setResponseFor(videoSegment2Uri, /* depending on */ audioSegment2Uri);
+      setResponseFor(videoSegment3Uri, /* depending on */ audioSegment3Uri);
+      setResponseFor(videoSegment4Uri, /* depending on */ audioSegment4Uri);
+
+      // Use a real Player as Storage will use it to get a networking
+      // engine.
+      player = new shaka.Player(new shaka.test.FakeVideo(), (player) => {
+        player.createNetworkingEngine = () => netEngine;
+      });
+
+      storage = new shaka.offline.Storage(player);
+      // Since we are using specific manifest with only one video and one audio
+      // we can return all the tracks.
+      storage.configure({
+        offline: {
+          trackSelectionCallback: (tracks) => { return tracks; },
+        },
+      });
+    }));
+
+    afterEach(checkAndRun(async function() {
+      await storage.destroy();
+      await player.destroy();
+
+      // Make sure we don't leave anything behind.
+      await eraseStorage();
+    }));
+
+    it('uses stream bandwidth', checkAndRun(async function() {
+      /**
+       * These numbers are the overall progress based on the segment sizes
+       * per stream. We assume a specific download order for the content
+       * based on the order of the streams and segments.
+       *
+       * Since the audio stream has smaller segments, its contribution to
+       * the overall progress is much smaller than the video stream segments.
+       *
+       * @type {!Array.<number>}
+       */
+      const progressSteps = [
+        0.057, 0.250, 0.307, 0.500, 0.557, 0.750, 0.807, 1.000,
+      ];
+      const manifest = makeWithStreamBandwidth();
+      await runProgressTest(manifest, progressSteps);
+    }));
+
+    it('uses variant bandwidth when stream bandwidth is unavailable',
+        checkAndRun(async function() {
+          /**
+           * These numbers are the overall progress based on the segment sizes
+           * per stream. We assume a specific download order for the content
+           * based on the order of the streams and segments.
+           *
+           * Since we do not have per-stream bandwidth, the amount each
+           * influences the overall progress is based on the stream type,
+           * storage's default bandwidth assumptions, and the variant's
+           * bandwidth.
+           *
+           * In this example we see a larger difference between the audio and
+           * video contributions to progress.
+           *
+           * @type {!Array.<number>}
+           */
+          const progressSteps = [
+            0.241, 0.250, 0.491, 0.500, 0.741, 0.750, 0.991, 1.000,
+          ];
+          const manifest = makeWithVariantBandwidth();
+          await runProgressTest(manifest, progressSteps);
+       }));
+
+    /**
+     * Download |manifest| and make sure that the reported progress matches
+     * |expectedProgressSteps|.
+     *
+     * @param {shaka.extern.Manifest} manifest
+     * @param {!Array.<number>} expectedProgressSteps
+     */
+    async function runProgressTest(manifest, expectedProgressSteps) {
+      /**
+       * Create a copy of the array so that we are not modifying the original
+       * while we are tracking progress.
+       *
+       * @type {!Array.<number>}
+       */
+      const remainingProgress =
+          shaka.util.ArrayUtils.copy(expectedProgressSteps);
+
+      const progressCallback = (content, progress) => {
+        expect(progress).toBeCloseTo(remainingProgress.shift());
+      };
+
+      storage.configure({
+        offline: {
+          progressCallback: progressCallback,
+        },
+      });
+
+      // Store a manifest with bandwidth only for the variant (no per
+      // stream bandwidth). This should result in a less accurate
+      // progression of progress values as default values will be used.
+      await storage.store(
+          'uri-wont-matter',
+          noMetadata, () => new shaka.test.FakeManifestParser(manifest));
+
+      // We should have hit all the progress steps.
+      expect(remainingProgress.length).toBe(0);
+    }
+
+    /**
+     * Build a custom manifest for testing progress. Each segment will be
+     * unique so that there will only be one request per segment uri (we
+     * often reuse segments in our tests).
+     *
+     * This manifest will have the variant-level bandwidth value and per-stream
+     * bandwidth values.
+     *
+     * @return {shaka.extern.Manifest}
+     */
+    function makeWithStreamBandwidth() {
+      const SegmentReference = shaka.media.SegmentReference;
+
+      const manifest = new shaka.test.ManifestGenerator()
+          .setPresentationDuration(20)
+          .addPeriod(0)
+              .addVariant(0).language(englishUS).bandwidth(13 * kbps)
+                  .addVideo(1).size(100, 200).bandwidth(10 * kbps)
+                  .addAudio(2).language(englishUS).bandwidth(3 * kbps)
+          .build();
+
+      const audio = manifest.periods[0].variants[0].audio;
+      goog.asserts.assert(audio, 'Created manifest with audio, where is it?');
+      overrideSegmentIndex(audio, [
+        new SegmentReference(0, 0, 1, uris(audioSegment1Uri), 0, null),
+        new SegmentReference(1, 1, 2, uris(audioSegment2Uri), 0, null),
+        new SegmentReference(2, 2, 3, uris(audioSegment3Uri), 0, null),
+        new SegmentReference(3, 3, 4, uris(audioSegment4Uri), 0, null),
+      ]);
+
+      const video = manifest.periods[0].variants[0].video;
+      goog.asserts.assert(video, 'Created manifest with video, where is it?');
+      overrideSegmentIndex(video, [
+        new SegmentReference(0, 0, 1, uris(videoSegment1Uri), 0, null),
+        new SegmentReference(1, 1, 2, uris(videoSegment2Uri), 0, null),
+        new SegmentReference(2, 2, 3, uris(videoSegment3Uri), 0, null),
+        new SegmentReference(3, 3, 4, uris(videoSegment4Uri), 0, null),
+      ]);
+
+      return manifest;
+    }
+
+    /**
+     * Build a custom manifest for testing progress. Each segment will be
+     * unique so that there will only be one request per segment uri (we
+     * often reuse segments in our tests).
+     *
+     * This manifest will only have the variant-level bandwidth value.
+     *
+     * @return {shaka.extern.Manifest}
+     */
+    function makeWithVariantBandwidth() {
+      // Start with the manifest that had per-stream bandwidths. Then remove
+      // the per-stream values.
+      const manifest = makeWithStreamBandwidth();
+      goog.asserts.assert(
+          manifest.periods.length == 1,
+          'Expecting manifest to only have one period');
+      goog.asserts.assert(
+          manifest.periods[0].variants.length == 1,
+          'Expecting manifest to only have one variant');
+
+      const variant = manifest.periods[0].variants[0];
+      goog.asserts.assert(
+          variant.audio,
+          'Expecting manifest to have audio stream');
+      goog.asserts.assert(
+          variant.video,
+          'Expecting manigest to have video stream');
+
+      // Remove the per stream bandwidth information.
+      variant.audio.bandwidth = undefined;
+      variant.video.bandwidth = undefined;
+
+      return manifest;
+    }
+  });
+
   describe('basic function', function() {
     /**
      * Keep a reference to the networking engine so that we can interrupt
@@ -403,99 +657,6 @@ describe('Storage', function() {
       // Make sure we don't leave anything behind.
       await eraseStorage();
     }));
-
-    describe('reports progress on store', function() {
-      it('uses stream bandwidth', checkAndRun(async function() {
-        // Change storage to only store one track so that it will be easy
-        // for use to ensure that only the one track was stored.
-        let selectTrack = (tracks) => {
-          let selected = tracks.filter((t) => t.language == frenchCanadian);
-          expect(selected.length).toBe(1);
-          return selected;
-        };
-
-        /**
-         * These numbers are the overall progress based on the segment sizes
-         * per stream. We assume a specific download order for the content
-         * based on the order of the streams and segments.
-         *
-         * Since the audio stream has smaller segments, its contribution to
-         * the overall progress is much smaller than the video stream segments.
-         *
-         * @type {!Array.<number>}
-         */
-        let progressSteps = [
-          0.19, 0.25, 0.44, 0.5, 0.69, 0.75, 0.94, 1.0,
-        ];
-
-        let progressCallback = (content, progress) => {
-          expect(progress).toBeCloseTo(progressSteps.shift());
-        };
-
-        storage.configure({
-          offline: {
-            trackSelectionCallback: selectTrack,
-            progressCallback: progressCallback,
-          },
-        });
-
-        // Store a manifest with per stream bandwidth. This should result with
-        // a more accurate progression of progress values.
-        await storage.store(
-            manifestWithPerStreamBandwidthUri, noMetadata, FakeManifestParser);
-        expect(progressSteps.length).toBe(0);
-      }));
-
-      it('uses variant bandwidth when stream bandwidth is unavailable',
-          checkAndRun(async function() {
-            // Change storage to only store one track so that it will be easy
-            // for use to ensure that only the one track was stored.
-            let selectTrack = (tracks) => {
-              let selected = tracks.filter((t) => t.language == frenchCanadian);
-              expect(selected.length).toBe(1);
-              return selected;
-            };
-
-            /**
-             * These numbers are the overall progress based on the segment sizes
-             * per stream. We assume a specific download order for the content
-             * based on the order of the streams and segments.
-             *
-             * Since we do not have per-stream bandwidth, the amount each
-             * influences the overall progress is based on the stream type,
-             * storage's default bandwidth assumptions, and the variant's
-             * bandwidth.
-             *
-             * In this example we see a larger difference between the audio and
-             * video contributions to progress.
-             *
-             * @type {!Array.<number>}
-             */
-            let progressSteps = [
-              0.01, 0.25, 0.26, 0.5, 0.51, 0.75, 0.76, 1.0,
-            ];
-
-            let progressCallback = (content, progress) => {
-              expect(progress).toBeCloseTo(progressSteps.shift());
-            };
-
-            storage.configure({
-              offline: {
-                trackSelectionCallback: selectTrack,
-                progressCallback: progressCallback,
-              },
-            });
-
-            // Store a manifest with bandwidth only for the variant (no per
-            // stream bandwidth). This should result in a less accurate
-            // progression of progress values as default values will be used.
-            await storage.store(
-                manifestWithoutPerStreamBandwidthUri,
-                noMetadata,
-                FakeManifestParser);
-            expect(progressSteps.length).toBe(0);
-         }));
-    });
 
     it('stores and lists content', checkAndRun(async function() {
       // Just use any three manifests as we don't care about the manifests
@@ -1092,15 +1253,11 @@ describe('Storage', function() {
 
   /** @return {!shaka.test.FakeNetworkingEngine} */
   function makeNetworkEngine() {
-    let map = {};
-    map[segment1Uri] = new ArrayBuffer(16);
-    map[segment2Uri] = new ArrayBuffer(16);
-    map[segment3Uri] = new ArrayBuffer(16);
-    map[segment4Uri] = new ArrayBuffer(16);
-
-    let net = new shaka.test.FakeNetworkingEngine();
-    net.setResponseMap(map);
-    return net;
+    return new shaka.test.FakeNetworkingEngine()
+        .setResponseValue(segment1Uri, new ArrayBuffer(16))
+        .setResponseValue(segment2Uri, new ArrayBuffer(16))
+        .setResponseValue(segment3Uri, new ArrayBuffer(16))
+        .setResponseValue(segment4Uri, new ArrayBuffer(16));
   }
 
   function eraseStorage() {
@@ -1150,6 +1307,7 @@ describe('Storage', function() {
     return drmInfo;
   }
 
+  // TODO(vaage): Replace this with |shaka.test.FakeManifestParser|
   /** @implements {shaka.extern.ManifestParser} */
   let FakeManifestParser = class {
     constructor() {
