@@ -463,7 +463,7 @@ describe('MpdUtils', function() {
       let desiredXMLString = inBaseContainer(
           '<ToReplace variable="1"><Contents /></ToReplace>');
 
-      fakeNetEngine.setResponseMapAsText({'https://xlink1': xlinkXMLString});
+      fakeNetEngine.setResponseText('https://xlink1', xlinkXMLString);
       await testSucceeds(baseXMLString, desiredXMLString, 1);
     });
 
@@ -475,7 +475,7 @@ describe('MpdUtils', function() {
       let desiredXMLString = inBaseContainer(
           '<ToReplace otherVariable="q" variable="1"><Contents /></ToReplace>');
 
-      fakeNetEngine.setResponseMapAsText({'https://xlink1': xlinkXMLString});
+      fakeNetEngine.setResponseText('https://xlink1', xlinkXMLString);
       await testSucceeds(baseXMLString, desiredXMLString, 1);
     });
 
@@ -487,7 +487,7 @@ describe('MpdUtils', function() {
       let desiredXMLString = inBaseContainer(
           '<ToReplace variable="1">TEXT CONTAINED WITHIN</ToReplace>');
 
-      fakeNetEngine.setResponseMapAsText({'https://xlink1': xlinkXMLString});
+      fakeNetEngine.setResponseText('https://xlink1', xlinkXMLString);
       await testSucceeds(baseXMLString, desiredXMLString, 1);
     });
 
@@ -504,10 +504,10 @@ describe('MpdUtils', function() {
           '<ToReplace otherVariable="blue" /></ToReplace>',
           '<ToReplace variable="2"><Contents /></ToReplace>');
 
-      fakeNetEngine.setResponseMapAsText({
-        'https://xlink1': xlinkXMLString1,
-        'https://xlink2': xlinkXMLString2,
-        'https://xlink3': xlinkXMLString3});
+      fakeNetEngine
+          .setResponseText('https://xlink1', xlinkXMLString1)
+          .setResponseText('https://xlink2', xlinkXMLString2)
+          .setResponseText('https://xlink3', xlinkXMLString3);
       await testSucceeds(baseXMLString, desiredXMLString, 3);
     });
 
@@ -520,7 +520,7 @@ describe('MpdUtils', function() {
           Error.Severity.CRITICAL, Error.Category.MANIFEST,
           Error.Code.DASH_INVALID_XML, 'https://xlink1');
 
-      fakeNetEngine.setResponseMapAsText({'https://xlink1': xlinkXMLString});
+      fakeNetEngine.setResponseText('https://xlink1', xlinkXMLString);
       await testFails(baseXMLString, expectedError, 1);
     });
 
@@ -529,16 +529,16 @@ describe('MpdUtils', function() {
           '<ToReplace xlink:href="https://xlink1" xlink:actuate="onLoad" />');
       // Create a large but finite number of links, so this won't
       // infinitely recurse if there isn't a depth limit.
-      let responseMap = {};
       for (let i = 1; i < 20; i++) {
-        responseMap['https://xlink' + i] =
-            makeRecursiveXMLString(0, 'https://xlink' + (i + 1) + '');
+        const key = 'https://xlink' + i;
+        const value = makeRecursiveXMLString(0, 'https://xlink' + (i + 1) + '');
+
+        fakeNetEngine.setResponseText(key, value);
       }
       let expectedError = new shaka.util.Error(
           Error.Severity.CRITICAL, Error.Category.MANIFEST,
           Error.Code.DASH_XLINK_DEPTH_LIMIT);
 
-      fakeNetEngine.setResponseMapAsText(responseMap);
       await testFails(baseXMLString, expectedError, 5);
     });
 
@@ -550,8 +550,8 @@ describe('MpdUtils', function() {
       let desiredXMLString = inBaseContainer(
           '<ToReplace variable="1"><Contents /></ToReplace>');
 
-      fakeNetEngine.setResponseMapAsText(
-          {'https://xlink1?parameter': xlinkXMLString});
+      fakeNetEngine.setResponseText(
+          'https://xlink1?parameter', xlinkXMLString);
       await testSucceeds(baseXMLString, desiredXMLString, 1);
     });
 
@@ -563,7 +563,7 @@ describe('MpdUtils', function() {
       let desiredXMLString = inBaseContainer(
           '<ToReplace variable="1"><Contents /></ToReplace>');
 
-      fakeNetEngine.setResponseMapAsText({'https://xlink1': xlinkXMLString});
+      fakeNetEngine.setResponseText('https://xlink1', xlinkXMLString);
       await testSucceeds(baseXMLString, desiredXMLString, 1);
     });
 
@@ -577,17 +577,17 @@ describe('MpdUtils', function() {
           '<ToReplace variable="2"><Contents /></ToReplace>';
       let xlinkXMLString3 = // This is loaded relative to string1.
           '<ToReplace variable="3" />';
-      let responseMap = {};
-      responseMap['https://base/xlink1'] = xlinkXMLString1;
-      responseMap['https://base/xlink2'] = xlinkXMLString2;
-      responseMap['https://base/xlink3'] = xlinkXMLString3;
+      fakeNetEngine
+          .setResponseText('https://base/xlink1', xlinkXMLString1)
+          .setResponseText('https://base/xlink2', xlinkXMLString2)
+          .setResponseText('https://base/xlink3', xlinkXMLString3);
+
       let desiredXMLString = inBaseContainer(
           '<ToReplace xmlns="urn:mpeg:dash:schema:mpd:2011" ' +
           'xmlns:xlink="http://www.w3.org/1999/xlink" variable="1">' +
           '<ToReplace variable="3" /></ToReplace>',
           '<ToReplace variable="2"><Contents /></ToReplace>');
 
-      fakeNetEngine.setResponseMapAsText(responseMap);
       await testSucceeds(baseXMLString, desiredXMLString, 3);
     });
 
@@ -600,7 +600,7 @@ describe('MpdUtils', function() {
           Error.Severity.CRITICAL, Error.Category.MANIFEST,
           Error.Code.DASH_UNSUPPORTED_XLINK_ACTUATE);
 
-      fakeNetEngine.setResponseMapAsText({'https://xlink1': xlinkXMLString});
+      fakeNetEngine.setResponseText('https://xlink1', xlinkXMLString);
       await testFails(baseXMLString, expectedError, 0);
     });
 
@@ -612,7 +612,7 @@ describe('MpdUtils', function() {
           Error.Severity.CRITICAL, Error.Category.MANIFEST,
           Error.Code.DASH_UNSUPPORTED_XLINK_ACTUATE);
 
-      fakeNetEngine.setResponseMapAsText({'https://xlink1': xlinkXMLString});
+      fakeNetEngine.setResponseText('https://xlink1', xlinkXMLString);
       await testFails(baseXMLString, expectedError, 0);
     });
 
@@ -629,7 +629,7 @@ describe('MpdUtils', function() {
           '<ToReplace xlink:href="https://xlink1" xlink:actuate="onLoad" />');
       let xlinkXMLString = '<BadTagName</BadTagName>';
 
-      fakeNetEngine.setResponseMapAsText({'https://xlink1': xlinkXMLString});
+      fakeNetEngine.setResponseText('https://xlink1', xlinkXMLString);
       await testFails(baseXMLString, null, 1);
     });
 
@@ -643,7 +643,7 @@ describe('MpdUtils', function() {
       let desiredXMLString = inBaseContainer(
           '<ToReplace><DefaultContents /></ToReplace>');
 
-      fakeNetEngine.setResponseMapAsText({'https://xlink1': xlinkXMLString});
+      fakeNetEngine.setResponseText('https://xlink1', xlinkXMLString);
       await testSucceeds(baseXMLString, desiredXMLString, 1);
     });
 
@@ -652,12 +652,12 @@ describe('MpdUtils', function() {
           '<ToReplace xlink:href="https://xlink1" xlink:actuate="onLoad" />');
       // Create a few links.  This is few enough that it would succeed if we
       // didn't abort it.
-      let responseMap = {};
       for (let i = 1; i < 3; i++) {
-        responseMap['https://xlink' + i] =
-            makeRecursiveXMLString(0, 'https://xlink' + (i + 1) + '');
+        const key = 'https://xlink' + i;
+        const value = makeRecursiveXMLString(0, 'https://xlink' + (i + 1) + '');
+
+        fakeNetEngine.setResponseText(key, value);
       }
-      fakeNetEngine.setResponseMapAsText(responseMap);
       let continuePromise = fakeNetEngine.delayNextRequest();
 
       let xml = parser.parseFromString(baseXMLString, 'text/xml')

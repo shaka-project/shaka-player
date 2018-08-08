@@ -50,9 +50,12 @@ shaka.test.Dash.makeDashParser = function() {
 shaka.test.Dash.testSegmentIndex = async function(manifestText, references) {
   let buffer = shaka.util.StringUtils.toUTF8(manifestText);
   let dashParser = shaka.test.Dash.makeDashParser();
+
+  const networkingEngine = new shaka.test.FakeNetworkingEngine()
+      .setResponseValue('dummy://foo', buffer);
+
   let playerInterface = {
-    networkingEngine:
-        new shaka.test.FakeNetworkingEngine({'dummy://foo': buffer}),
+    networkingEngine: networkingEngine,
     filterNewPeriod: function() {},
     filterAllPeriods: function() {},
     onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
@@ -75,9 +78,12 @@ shaka.test.Dash.testSegmentIndex = async function(manifestText, references) {
 shaka.test.Dash.testFails = async function(manifestText, expectedError) {
   let manifestData = shaka.util.StringUtils.toUTF8(manifestText);
   let dashParser = shaka.test.Dash.makeDashParser();
+
+  const networkingEngine = new shaka.test.FakeNetworkingEngine()
+      .setResponseValue('dummy://foo', manifestData);
+
   let playerInterface = {
-    networkingEngine:
-        new shaka.test.FakeNetworkingEngine({'dummy://foo': manifestData}),
+    networkingEngine: networkingEngine,
     filterNewPeriod: function() {},
     filterAllPeriods: function() {},
     onTimelineRegionAdded: fail,  // Should not have any EventStream elements.

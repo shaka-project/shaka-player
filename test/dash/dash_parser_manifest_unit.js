@@ -67,7 +67,7 @@ describe('DashParser Manifest', function() {
      * @return {!Promise}
      */
     async function testDashParser(manifestText) {
-      fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
+      fakeNetEngine.setResponseText('dummy://foo', manifestText);
       let actual = await parser.start('dummy://foo', playerInterface);
       expect(actual).toEqual(expected);
     }
@@ -213,7 +213,7 @@ describe('DashParser Manifest', function() {
     ].join('\n');
     let source = sprintf(template, {periodContents: periodContents});
 
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+    fakeNetEngine.setResponseText('dummy://foo', source);
     let manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.periods.length).toBe(1);
   });
@@ -243,7 +243,7 @@ describe('DashParser Manifest', function() {
     ].join('\n');
     let source = sprintf(template, {periodContents: periodContents});
 
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+    fakeNetEngine.setResponseText('dummy://foo', source);
     let manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.periods.length).toBe(3);
     expect(manifest.periods[0].startTime).toBe(10);
@@ -262,7 +262,7 @@ describe('DashParser Manifest', function() {
       '</SegmentList>',
     ]);
 
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+    fakeNetEngine.setResponseText('dummy://foo', source);
     let manifest = await parser.start('dummy://foo', playerInterface);
     let stream = manifest.periods[0].variants[0].video;
     expect(stream.presentationTimeOffset).toBe(1);
@@ -283,7 +283,7 @@ describe('DashParser Manifest', function() {
       '</SegmentTemplate>',
     ]);
 
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+    fakeNetEngine.setResponseText('dummy://foo', source);
     let manifest = await parser.start('dummy://foo', playerInterface);
     let stream = manifest.periods[0].variants[0].video;
     expect(stream.presentationTimeOffset).toBe(2);
@@ -307,7 +307,7 @@ describe('DashParser Manifest', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+    fakeNetEngine.setResponseText('dummy://foo', source);
 
     let manifest = await parser.start('dummy://foo', playerInterface);
     let stream = manifest.periods[0].textStreams[0];
@@ -335,7 +335,7 @@ describe('DashParser Manifest', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+    fakeNetEngine.setResponseText('dummy://foo', source);
 
     let manifest = await parser.start('dummy://foo', playerInterface);
     let variant = manifest.periods[0].variants[0];
@@ -399,7 +399,7 @@ describe('DashParser Manifest', function() {
         '    value="1970-01-01T00:00:30Z" />',
       ]);
 
-      fakeNetEngine.setResponseMapAsText({'http://foo.bar/manifest': source});
+      fakeNetEngine.setResponseText('http://foo.bar/manifest', source);
       await runTest(25);
     });
 
@@ -408,7 +408,7 @@ describe('DashParser Manifest', function() {
         '<UTCTiming schemeIdUri="unknown scheme" value="foobar" />',
       ]);
 
-      fakeNetEngine.setResponseMapAsText({'http://foo.bar/manifest': source});
+      fakeNetEngine.setResponseText('http://foo.bar/manifest', source);
       await runTest(5);
     });
 
@@ -419,7 +419,7 @@ describe('DashParser Manifest', function() {
         '    value="1970-01-01T00:00:55Z" />',
       ]);
 
-      fakeNetEngine.setResponseMapAsText({'http://foo.bar/manifest': source});
+      fakeNetEngine.setResponseText('http://foo.bar/manifest', source);
       await runTest(50);
     });
 
@@ -455,10 +455,9 @@ describe('DashParser Manifest', function() {
         '    value="http://foo.bar/date" />',
       ]);
 
-      fakeNetEngine.setResponseMapAsText({
-        'http://foo.bar/manifest': source,
-        'http://foo.bar/date': '1970-01-01T00:00:50Z',
-      });
+      fakeNetEngine
+          .setResponseText('http://foo.bar/manifest', source)
+          .setResponseText('http://foo.bar/date', '1970-01-01T00:00:50Z');
       await runTest(45);
     });
 
@@ -468,10 +467,9 @@ describe('DashParser Manifest', function() {
         '    value="/date" />',
       ]);
 
-      fakeNetEngine.setResponseMapAsText({
-        'http://foo.bar/manifest': source,
-        'http://foo.bar/date': '1970-01-01T00:00:50Z',
-      });
+      fakeNetEngine
+          .setResponseText('http://foo.bar/manifest', source)
+          .setResponseText('http://foo.bar/date', '1970-01-01T00:00:50Z');
       await runTest(45);
     });
 
@@ -482,10 +480,9 @@ describe('DashParser Manifest', function() {
         '    value="/date" />',
       ]);
 
-      fakeNetEngine.setResponseMapAsText({
-        'http://foo.bar/manifest': source,
-        'http://example.com/date': '1970-01-01T00:00:50Z',
-      });
+      fakeNetEngine
+          .setResponseText('http://foo.bar/manifest', source)
+          .setResponseText('http://example.com/date', '1970-01-01T00:00:50Z');
       await runTest(45);
     });
   });
@@ -504,7 +501,7 @@ describe('DashParser Manifest', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+    fakeNetEngine.setResponseText('dummy://foo', source);
 
     let manifest = await parser.start('dummy://foo', playerInterface);
     // First Representation should be dropped.
@@ -530,7 +527,7 @@ describe('DashParser Manifest', function() {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+      fakeNetEngine.setResponseText('dummy://foo', source);
 
       let manifest = await parser.start('dummy://foo', playerInterface);
       expect(manifest.periods[0].textStreams.length).toBe(1);
@@ -552,7 +549,7 @@ describe('DashParser Manifest', function() {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+      fakeNetEngine.setResponseText('dummy://foo', source);
 
       let manifest = await parser.start('dummy://foo', playerInterface);
       expect(manifest.periods[0].textStreams.length).toBe(1);
@@ -574,7 +571,7 @@ describe('DashParser Manifest', function() {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+      fakeNetEngine.setResponseText('dummy://foo', source);
 
       let manifest = await parser.start('dummy://foo', playerInterface);
       expect(manifest.periods[0].textStreams.length).toBe(1);
@@ -732,7 +729,7 @@ describe('DashParser Manifest', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
     let manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.periods.length).toBe(1);
     expect(manifest.periods[0].variants.length).toBe(1);
@@ -766,7 +763,7 @@ describe('DashParser Manifest', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
     let manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.periods.length).toBe(1);
 
@@ -806,7 +803,7 @@ describe('DashParser Manifest', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
     let manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.periods.length).toBe(1);
     expect(manifest.periods[0].textStreams.length).toBe(2);
@@ -835,7 +832,7 @@ describe('DashParser Manifest', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
     let manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.periods.length).toBe(1);
 
@@ -878,7 +875,7 @@ describe('DashParser Manifest', function() {
     // would use the same segment index, so they would have the same references.
     // This test proves that duplicate Representation IDs are allowed for VOD
     // and that error doesn't occur.
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+    fakeNetEngine.setResponseText('dummy://foo', source);
     let manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.periods.length).toBe(1);
     expect(manifest.periods[0].variants.length).toBe(2);
@@ -915,7 +912,7 @@ describe('DashParser Manifest', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+    fakeNetEngine.setResponseText('dummy://foo', source);
     let manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.periods.length).toBe(1);
     expect(manifest.periods[0].variants.length).toBe(2);
@@ -966,7 +963,7 @@ describe('DashParser Manifest', function() {
       // together.
       parser = shaka.test.Dash.makeDashParser();
 
-      fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+      fakeNetEngine.setResponseText('dummy://foo', source);
       return parser.start('dummy://foo', playerInterface)
           .then(function(manifest) {
             expect(manifest.periods.length).toBe(1);
@@ -1046,7 +1043,7 @@ describe('DashParser Manifest', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
     await parser.start('dummy://foo', playerInterface);
   });
 

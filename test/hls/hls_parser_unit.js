@@ -19,7 +19,6 @@ describe('HlsParser', function() {
   const Util = shaka.test.Util;
   const ManifestParser = shaka.test.ManifestParser;
   const TextStreamKind = shaka.util.ManifestParserUtils.TextStreamKind;
-  const toUTF8 = shaka.util.StringUtils.toUTF8;
 
   const vttText = [
     'WEBVTT\n',
@@ -36,11 +35,11 @@ describe('HlsParser', function() {
   let playerInterface;
   /** @type {shaka.extern.ManifestConfiguration} */
   let config;
-  /** @type {ArrayBuffer} */
+  /** @type {!ArrayBuffer} */
   let initSegmentData;
-  /** @type {ArrayBuffer} */
+  /** @type {!ArrayBuffer} */
   let segmentData;
-  /** @type {ArrayBuffer} */
+  /** @type {!ArrayBuffer} */
   let selfInitializingSegmentData;
 
   beforeEach(function() {
@@ -116,18 +115,17 @@ describe('HlsParser', function() {
    * @return {!Promise.<shaka.extern.Manifest>}
    */
   async function testHlsParser(master, media, manifest) {
-    fakeNetEngine.setResponseMap({
-      'test:/master': toUTF8(master),
-      'test:/audio': toUTF8(media),
-      'test:/audio2': toUTF8(media),
-      'test:/video': toUTF8(media),
-      'test:/video2': toUTF8(media),
-      'test:/main.vtt': toUTF8(vttText),
-      'test:/init.mp4': initSegmentData,
-      'test:/main.mp4': segmentData,
-      'test:/main.test': segmentData,
-      'test:/selfInit.mp4': selfInitializingSegmentData,
-    });
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', media)
+        .setResponseText('test:/audio2', media)
+        .setResponseText('test:/video', media)
+        .setResponseText('test:/video2', media)
+        .setResponseText('test:/main.vtt', vttText)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData)
+        .setResponseValue('test:/main.test', segmentData)
+        .setResponseValue('test:/selfInit.mp4', selfInitializingSegmentData);
 
     let actual = await parser.start('test:/master', playerInterface);
     expect(actual).toEqual(manifest);
@@ -344,12 +342,11 @@ describe('HlsParser', function() {
       0x00, 0x0A, 0x00, 0x00,  // baseMediaDecodeTime last 4 bytes (655360)
     ]).buffer;
 
-    fakeNetEngine.setResponseMap({
-      'test:/master': toUTF8(master),
-      'test:/video': toUTF8(media),
-      'test:/init.mp4': initSegmentData,
-      'test:/main.mp4': segmentData,
-    });
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/video', media)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
 
     let manifest = await parser.start('test:/master', playerInterface);
     let presentationTimeline = manifest.presentationTimeline;
@@ -612,13 +609,12 @@ describe('HlsParser', function() {
       'test:/main.mp4',
     ].join('');
 
-    fakeNetEngine.setResponseMap({
-      'test:/master': toUTF8(master),
-      'test:/audio': toUTF8(media),
-      'test:/video': toUTF8(media),
-      'test:/init.mp4': initSegmentData,
-      'test:/main.mp4': segmentData,
-    });
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', media)
+        .setResponseText('test:/video', media)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
 
     let filterAllPeriods = jasmine.createSpy('filterAllPeriods');
     playerInterface.filterAllPeriods = Util.spyFunc(filterAllPeriods);
@@ -662,10 +658,10 @@ describe('HlsParser', function() {
           .build();
 
     // The extra parameters should be stripped by the parser.
-    let headers = {'content-type': 'video/mp4; foo=bar'};
-    fakeNetEngine.setHeadersMap({
-      'test:/main.test': headers,
-    });
+    fakeNetEngine.setHeaders(
+        'test:/main.test', {
+          'content-type': 'video/mp4; foo=bar',
+        });
 
     await testHlsParser(master, media, manifest);
   });
@@ -739,16 +735,15 @@ describe('HlsParser', function() {
                 .kind(TextStreamKind.SUBTITLE)
           .build();
 
-    fakeNetEngine.setResponseMap({
-      'test:/master': toUTF8(master),
-      'test:/audio': toUTF8(media),
-      'test:/video': toUTF8(media),
-      'test:/text': toUTF8(textMedia),
-      'test:/text2': toUTF8(textMedia),
-      'test:/main.vtt': toUTF8(vttText),
-      'test:/init.mp4': initSegmentData,
-      'test:/main.mp4': segmentData,
-    });
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', media)
+        .setResponseText('test:/video', media)
+        .setResponseText('test:/text', textMedia)
+        .setResponseText('test:/text2', textMedia)
+        .setResponseText('test:/main.vtt', vttText)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
 
     let actual = await parser.start('test:/master', playerInterface);
     expect(actual).toEqual(manifest);
@@ -820,16 +815,15 @@ describe('HlsParser', function() {
                 .kind(TextStreamKind.SUBTITLE)
           .build();
 
-    fakeNetEngine.setResponseMap({
-      'test:/master': toUTF8(master),
-      'test:/audio': toUTF8(media),
-      'test:/video': toUTF8(media),
-      'test:/text': toUTF8(textMedia),
-      'test:/text2': toUTF8(textMedia),
-      'test:/main.vtt': toUTF8(vttText),
-      'test:/init.mp4': initSegmentData,
-      'test:/main.mp4': segmentData,
-    });
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', media)
+        .setResponseText('test:/video', media)
+        .setResponseText('test:/text', textMedia)
+        .setResponseText('test:/text2', textMedia)
+        .setResponseText('test:/main.vtt', vttText)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
 
     let actual = await parser.start('test:/master', playerInterface);
     expect(actual).toEqual(manifest);
@@ -877,15 +871,14 @@ describe('HlsParser', function() {
       'test:/main.vtt',
     ].join('');
 
-    fakeNetEngine.setResponseMap({
-      'test:/master': toUTF8(master),
-      'test:/audio': toUTF8(audio),
-      'test:/video': toUTF8(video),
-      'test:/text': toUTF8(text),
-      'test:/main.vtt': toUTF8(vttText),
-      'test:/init.mp4': initSegmentData,
-      'test:/main.mp4': segmentData,
-    });
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', audio)
+        .setResponseText('test:/video', video)
+        .setResponseText('test:/text', text)
+        .setResponseText('test:/main.vtt', vttText)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
 
     let actual = await parser.start('test:/master', playerInterface);
     // Duration should be the minimum of the streams, but ignore the text
@@ -940,14 +933,13 @@ describe('HlsParser', function() {
                 .kind(TextStreamKind.SUBTITLE)
           .build();
 
-    fakeNetEngine.setResponseMap({
-      'test:/master': toUTF8(master),
-      'test:/audio': toUTF8(media),
-      'test:/video': toUTF8(media),
-      'test:/text': toUTF8(media),
-      'test:/init.mp4': initSegmentData,
-      'test:/main.mp4': segmentData,
-    });
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', media)
+        .setResponseText('test:/video', media)
+        .setResponseText('test:/text', media)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
 
     let actual = await parser.start('test:/master', playerInterface);
     expect(actual).toEqual(manifest);
@@ -1001,15 +993,14 @@ describe('HlsParser', function() {
                 .kind(TextStreamKind.SUBTITLE)
           .build();
 
-    fakeNetEngine.setResponseMap({
-      'test:/master': toUTF8(master),
-      'test:/audio': toUTF8(media),
-      'test:/video': toUTF8(media),
-      'test:/text': toUTF8(textMedia),
-      'test:/main.foo': toUTF8(vttText),
-      'test:/init.mp4': initSegmentData,
-      'test:/main.mp4': segmentData,
-    });
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', media)
+        .setResponseText('test:/video', media)
+        .setResponseText('test:/text', textMedia)
+        .setResponseText('test:/main.foo', vttText)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
 
     let actual = await parser.start('test:/master', playerInterface);
     expect(actual).toEqual(manifest);
@@ -1055,14 +1046,13 @@ describe('HlsParser', function() {
                 .kind(TextStreamKind.SUBTITLE)
           .build();
 
-    fakeNetEngine.setResponseMap({
-      'test:/master': toUTF8(master),
-      'test:/audio': toUTF8(media),
-      'test:/video': toUTF8(media),
-      'test:/text': toUTF8(media),
-      'test:/init.mp4': initSegmentData,
-      'test:/main.mp4': segmentData,
-    });
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', media)
+        .setResponseText('test:/video', media)
+        .setResponseText('test:/text', media)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
 
     parser.start('test:/master', playerInterface)
         .then(function(actual) { expect(actual).toEqual(manifest); })
@@ -1145,15 +1135,14 @@ describe('HlsParser', function() {
                   .mime('audio/mp4', 'mp4a')
           .build();
 
-    fakeNetEngine.setResponseMap({
-      'test:/host/master.m3u8': toUTF8(master),
-      'test:/host/audio/audio.m3u8': toUTF8(media),
-      'test:/host/video/video.m3u8': toUTF8(media),
-      'test:/host/audio/init.mp4': initSegmentData,
-      'test:/host/audio/segment.mp4': segmentData,
-      'test:/host/video/init.mp4': initSegmentData,
-      'test:/host/video/segment.mp4': segmentData,
-    });
+    fakeNetEngine
+        .setResponseText('test:/host/master.m3u8', master)
+        .setResponseText('test:/host/audio/audio.m3u8', media)
+        .setResponseText('test:/host/video/video.m3u8', media)
+        .setResponseValue('test:/host/audio/init.mp4', initSegmentData)
+        .setResponseValue('test:/host/audio/segment.mp4', segmentData)
+        .setResponseValue('test:/host/video/init.mp4', initSegmentData)
+        .setResponseValue('test:/host/video/segment.mp4', segmentData);
 
     parser.start('test:/host/master.m3u8', playerInterface)
         .then(function(actual) {
@@ -1278,14 +1267,13 @@ describe('HlsParser', function() {
      * @param {function()} done
      */
     function verifyError(master, media, error, done) {
-      fakeNetEngine.setResponseMap({
-        'test:/master': toUTF8(master),
-        'test:/audio': toUTF8(media),
-        'test:/video': toUTF8(media),
-        'test:/main.exe': segmentData,
-        'test:/init.mp4': initSegmentData,
-        'test:/main.mp4': segmentData,
-      });
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/audio', media)
+          .setResponseText('test:/video', media)
+          .setResponseValue('test:/main.exe', segmentData)
+          .setResponseValue('test:/init.mp4', initSegmentData)
+          .setResponseValue('test:/main.mp4', segmentData);
 
       parser.start('test:/master', playerInterface)
             .then(fail)
@@ -1478,7 +1466,7 @@ describe('HlsParser', function() {
   describe('getStartTime_', function() {
     /** @type {number} */
     let segmentDataStartTime;
-    /** @type {ArrayBuffer} */
+    /** @type {!ArrayBuffer} */
     let tsSegmentData;
 
     const master = [
@@ -1536,12 +1524,11 @@ describe('HlsParser', function() {
     });
 
     it('parses start time from mp4 segment', async () => {
-      fakeNetEngine.setResponseMap({
-        'test:/master': toUTF8(master),
-        'test:/video': toUTF8(media),
-        'test:/init.mp4': initSegmentData,
-        'test:/main.mp4': segmentData,
-      });
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', media)
+          .setResponseValue('test:/init.mp4', initSegmentData)
+          .setResponseValue('test:/main.mp4', segmentData);
 
       let ref = ManifestParser.makeReference(
           'test:/main.mp4' /* uri */,
@@ -1571,11 +1558,10 @@ describe('HlsParser', function() {
     it('parses start time from ts segments', async () => {
       let tsMediaPlaylist = media.replace(/\.mp4/g, '.ts');
 
-      fakeNetEngine.setResponseMap({
-        'test:/master': toUTF8(master),
-        'test:/video': toUTF8(tsMediaPlaylist),
-        'test:/main.ts': tsSegmentData,
-      });
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', tsMediaPlaylist)
+          .setResponseValue('test:/main.ts', tsSegmentData);
 
       let ref = ManifestParser.makeReference(
           'test:/main.ts' /* uri */,
@@ -1603,12 +1589,11 @@ describe('HlsParser', function() {
     });
 
     it('sets duration with respect to presentation offset', async () => {
-      fakeNetEngine.setResponseMap({
-        'test:/master': toUTF8(master),
-        'test:/video': toUTF8(media),
-        'test:/init.mp4': initSegmentData,
-        'test:/main.mp4': segmentData,
-      });
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', media)
+          .setResponseValue('test:/init.mp4', initSegmentData)
+          .setResponseValue('test:/main.mp4', segmentData);
 
       let manifest = await parser.start('test:/master', playerInterface);
       let presentationTimeline = manifest.presentationTimeline;
@@ -1641,12 +1626,11 @@ describe('HlsParser', function() {
       'test:/main.mp4',
     ].join('');
 
-    fakeNetEngine.setResponseMap({
-      'test:/master': toUTF8(master),
-      'test:/video': toUTF8(media),
-      'test:/init.mp4': initSegmentData,
-      'test:/main.mp4': segmentData,
-    });
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/video', media)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
 
     let manifest = await parser.start('test:/master', playerInterface);
     expect(manifest.presentationTimeline.isLive()).toBe(false);
@@ -1669,12 +1653,11 @@ describe('HlsParser', function() {
       '#EXT-X-ENDLIST',
     ].join('');
 
-    fakeNetEngine.setResponseMap({
-      'test:/master': toUTF8(master),
-      'test:/video': toUTF8(media),
-      'test:/init.mp4': initSegmentData,
-      'test:/main.mp4': segmentData,
-    });
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/video', media)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
 
     let manifest = await parser.start('test:/master', playerInterface);
     expect(manifest.presentationTimeline.isLive()).toBe(false);
@@ -1697,12 +1680,11 @@ describe('HlsParser', function() {
       '#EXT-X-ENDLIST',
     ].join('');
 
-    fakeNetEngine.setResponseMap({
-      'test:/master': toUTF8(master),
-      'test:/video': toUTF8(media),
-      'test:/init.mp4': initSegmentData,
-      'test:/main.mp4': segmentData,
-    });
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/video', media)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
 
     let manifest = await parser.start('test:/master', playerInterface);
     let video = manifest.periods[0].variants[0].video;
@@ -1726,12 +1708,11 @@ describe('HlsParser', function() {
       '#EXT-X-ENDLIST',
     ].join('');
 
-    fakeNetEngine.setResponseMap({
-      'test:/master': toUTF8(master),
-      'test:/video': toUTF8(media),
-      'test:/init.mp4': initSegmentData,
-      'test:/main.mp4?foo=bar': segmentData,
-    });
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/video', media)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4?foo=bar', segmentData);
 
     let manifest = await parser.start('test:/master', playerInterface);
     let video = manifest.periods[0].variants[0].video;
@@ -1760,14 +1741,13 @@ describe('HlsParser', function() {
       'test:/main.mp4',
     ].join('');
 
-    fakeNetEngine.setResponseMap({
-      'test:/master': toUTF8(master),
-      'test:/video0': toUTF8(media),
-      'test:/video1': toUTF8(media),
-      'test:/audio': toUTF8(media),
-      'test:/init.mp4': initSegmentData,
-      'test:/main.mp4': segmentData,
-    });
+    fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video0', media)
+          .setResponseText('test:/video1', media)
+          .setResponseText('test:/audio', media)
+          .setResponseValue('test:/init.mp4', initSegmentData)
+          .setResponseValue('test:/main.mp4', segmentData);
 
     let manifest = await parser.start('test:/master', playerInterface);
     expect(manifest.periods[0].variants.length).toBe(2);

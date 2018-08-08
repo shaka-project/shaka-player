@@ -80,7 +80,7 @@ describe('DashParser SegmentTemplate', function() {
         ' presentationTimeOffset="50" />',
       ], 30 /* duration */);
 
-      fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+      fakeNetEngine.setResponseText('dummy://foo', source);
       parser.start('dummy://foo', playerInterface)
           .then(function(manifest) {
             expect(manifest.periods.length).toBe(1);
@@ -118,10 +118,10 @@ describe('DashParser SegmentTemplate', function() {
         '    initialization="init-$Bandwidth$.mp4" />',
       ]);
 
-      fakeNetEngine.setResponseMapAsText({
-        'dummy://foo': source,
-        'http://example.com/index-500.mp4': '',
-      });
+      fakeNetEngine
+          .setResponseText('dummy://foo', source)
+          .setResponseText('http://example.com/index-500.mp4', '');
+
       let manifest = await parser.start('dummy://foo', playerInterface);
       expect(manifest).toEqual(
           Dash.makeManifestFromInit('init-500.mp4', 0, null));
@@ -142,10 +142,10 @@ describe('DashParser SegmentTemplate', function() {
         '</SegmentTemplate>',
       ]);
 
-      fakeNetEngine.setResponseMapAsText({
-        'dummy://foo': source,
-        'http://example.com/index-500.mp4': '',
-      });
+      fakeNetEngine
+          .setResponseText('dummy://foo', source)
+          .setResponseText('http://example.com/index-500.mp4', '');
+
       let manifest = await parser.start('dummy://foo', playerInterface);
       expect(manifest).toEqual(
           Dash.makeManifestFromInit('init-500.mp4', 0, null));
@@ -172,11 +172,11 @@ describe('DashParser SegmentTemplate', function() {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseMapAsText({
-        'dummy://foo': source,
-        'http://example.com/index-500.webm': '',
-        'http://example.com/init-500.webm': '',
-      });
+      fakeNetEngine
+          .setResponseText('dummy://foo', source)
+          .setResponseText('http://example.com/index-500.webm', '')
+          .setResponseText('http://example.com/init-500.webm', '');
+
       let manifest = await parser.start('dummy://foo', playerInterface);
       expect(manifest).toEqual(
           Dash.makeManifestFromInit('init-500.webm', 0, null));
@@ -203,10 +203,10 @@ describe('DashParser SegmentTemplate', function() {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseMapAsText({
-        'dummy://foo': source,
-        'http://example.com/index-500.mp4': '',
-      });
+      fakeNetEngine
+          .setResponseText('dummy://foo', source)
+          .setResponseText('http://example.com/index-500.mp4', '');
+
       let manifest = await parser.start('dummy://foo', playerInterface);
       expect(manifest).toEqual(
           Dash.makeManifestFromInit('init-500.mp4', 0, null));
@@ -231,10 +231,10 @@ describe('DashParser SegmentTemplate', function() {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseMapAsText({
-        'dummy://foo': source,
-        'http://example.com/index-500.mp4': '',
-      });
+      fakeNetEngine
+          .setResponseText('dummy://foo', source)
+          .setResponseText('http://example.com/index-500.mp4', '');
+
       let manifest = await parser.start('dummy://foo', playerInterface);
       expect(manifest).toEqual(
           Dash.makeManifestFromInit('init-500.mp4', 0, null));
@@ -332,7 +332,7 @@ describe('DashParser SegmentTemplate', function() {
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+      fakeNetEngine.setResponseText('dummy://foo', source);
       let actual = await parser.start('dummy://foo', playerInterface);
       expect(actual).toBeTruthy();
 

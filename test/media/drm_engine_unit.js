@@ -113,7 +113,7 @@ describe('DrmEngine', function() {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
 
     license = (new Uint8Array(0)).buffer;
-    fakeNetEngine.setResponseMap({'http://abc.drm/license': license});
+    fakeNetEngine.setResponseValue('http://abc.drm/license', license);
 
     let playerInterface = {
       netEngine: fakeNetEngine,
@@ -1084,7 +1084,7 @@ describe('DrmEngine', function() {
       mockVideo.on['encrypted'](
           {initDataType: 'webm', initData: initData, keyId: null});
 
-      fakeNetEngine.setResponseMap({'http://abc.drm/license': license});
+      fakeNetEngine.setResponseValue('http://abc.drm/license', license);
       let message = new Uint8Array(0);
       session1.on['message']({target: session1, message: message});
       session1.update.and.returnValue(Promise.resolve());
@@ -1158,7 +1158,7 @@ describe('DrmEngine', function() {
       mockVideo.on['encrypted'](
           {initDataType: 'webm', initData: initData, keyId: null});
 
-      fakeNetEngine.setResponseMap({'http://abc.drm/license': license});
+      fakeNetEngine.setResponseValue('http://abc.drm/license', license);
       let message = new Uint8Array(0);
       session1.on['message']({target: session1, message: message});
       session1.update.and.throwError('whoops!');

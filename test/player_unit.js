@@ -107,8 +107,10 @@ describe('Player', function() {
     textDisplayFactory = function() { return textDisplayer; };
 
     function dependencyInjector(player) {
-      networkingEngine =
-          new shaka.test.FakeNetworkingEngine({}, new ArrayBuffer(0));
+      // Create a networking engine that always returns an empty buffer.
+      networkingEngine = new shaka.test.FakeNetworkingEngine();
+      networkingEngine.setDefaultValue(new ArrayBuffer(0));
+
       drmEngine = new shaka.test.FakeDrmEngine();
       playhead = new shaka.test.FakePlayhead();
       playheadObserver = new shaka.test.FakePlayheadObserver();

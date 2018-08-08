@@ -24,32 +24,22 @@ goog.provide('shaka.test.FakeNetworkingEngine');
  * A fake networking engine that returns constant data.  The request member
  * is a jasmine spy and can be used to check the actual calls that occurred.
  *
- * @param {Object.<string, !ArrayBuffer>=} responseMap A map from URI to
- *   the data to return.
- * @param {!ArrayBuffer=} defaultResponse The default value to return; if
- *   null, a jasmine expect will fail if a request is made that is not in
- *   |data|.
- * @param {Object.<string, !Object.<string, string>>=} headersMap
- *   A map from URI to the headers to return.
- *
  * @constructor
  * @struct
  * @extends {shaka.net.NetworkingEngine}
  */
-shaka.test.FakeNetworkingEngine = function(
-    responseMap, defaultResponse, headersMap) {
+shaka.test.FakeNetworkingEngine = function() {
   /**
    * @private {!Object.<
    *    string,
    *    shaka.test.FakeNetworkingEngine.MockedResponse>} */
   this.responseMap_ = {};
-  this.setResponseMap(responseMap || {});
 
   /** @private {!Object.<string, !Object.<string, string>>} */
-  this.headersMap_ = headersMap || {};
+  this.headersMap_ = {};
 
   /** @private {ArrayBuffer} */
-  this.defaultResponse_ = defaultResponse || null;
+  this.defaultResponse_ = null;
 
   /** @private {?shaka.util.PublicPromise} */
   this.delayNextRequestPromise_ = null;
@@ -318,41 +308,21 @@ shaka.test.FakeNetworkingEngine.prototype.setResponseText = function(
 
 
 /**
- * Sets the response map.
+ * Sets the headers for a specific uri.
  *
- * @param {!Object.<string, !ArrayBuffer>} responseMap
+ * @param {string} uri
+ * @param {!Object.<string, string>} headers
+ * @return {!shaka.test.FakeNetworkingEngine}
  */
-shaka.test.FakeNetworkingEngine.prototype.setResponseMap = function(
-    responseMap) {
-  this.responseMap_ = {};
-  shaka.util.MapUtils.forEach(responseMap, (key, value) => {
-    this.setResponseValue(key, value);
+shaka.test.FakeNetworkingEngine.prototype.setHeaders = function(
+    uri, headers) {
+  const copy = {};
+  shaka.util.MapUtils.forEach(headers, (key, value) => {
+    copy[key] = value;
   });
-};
 
-
-/**
- * Sets the response map as text.
- *
- * @param {!Object.<string, string>} textMap
- */
-shaka.test.FakeNetworkingEngine.prototype.setResponseMapAsText = function(
-    textMap) {
-  this.responseMap_ = {};
-  shaka.util.MapUtils.forEach(textMap, (key, value) => {
-    this.setResponseText(key, value);
-  });
-};
-
-
-/**
- * Sets the response map.
- *
- * @param {!Object.<string, !Object.<string, string>>} headersMap
- */
-shaka.test.FakeNetworkingEngine.prototype.setHeadersMap = function(
-    headersMap) {
-  this.headersMap_ = headersMap;
+  this.headersMap_[uri] = copy;
+  return this;
 };
 
 

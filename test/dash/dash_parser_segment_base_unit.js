@@ -26,7 +26,7 @@ describe('DashParser SegmentBase', function() {
   let parser;
   /** @type {shaka.extern.ManifestParser.PlayerInterface} */
   let playerInterface;
-  /** @type {ArrayBuffer} */
+  /** @type {!ArrayBuffer} */
   let indexSegment;
 
   beforeAll(async () => {
@@ -63,11 +63,11 @@ describe('DashParser SegmentBase', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMapAsText({
-      'dummy://foo': source,
-      'http://example.com': '',
-      'http://example.com/init.webm': '',
-    });
+    fakeNetEngine
+        .setResponseText('dummy://foo', source)
+        .setResponseText('http://example.com', '')
+        .setResponseText('http://example.com/init.webm', '');
+
     let manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest).toEqual(Dash.makeManifestFromInit('init.webm', 201, 300));
     await Dash.callCreateSegmentIndex(manifest);
@@ -92,10 +92,10 @@ describe('DashParser SegmentBase', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMapAsText({
-      'dummy://foo': source,
-      'http://example.com': '',
-    });
+    fakeNetEngine
+        .setResponseText('dummy://foo', source)
+        .setResponseText('http://example.com', '');
+
     let manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest).toEqual(Dash.makeManifestFromInit('init.mp4', 201, 300));
     await Dash.callCreateSegmentIndex(manifest);
@@ -119,10 +119,10 @@ describe('DashParser SegmentBase', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMapAsText({
-      'dummy://foo': source,
-      'http://example.com': '',
-    });
+    fakeNetEngine
+        .setResponseText('dummy://foo', source)
+        .setResponseText('http://example.com', '');
+
     let manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest).toEqual(Dash.makeManifestFromInit('init.mp4', 201, 300));
     await Dash.callCreateSegmentIndex(manifest);
@@ -147,10 +147,10 @@ describe('DashParser SegmentBase', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMapAsText({
-      'dummy://foo': source,
-      'http://example.com/stream.mp4': '',
-    });
+    fakeNetEngine
+        .setResponseText('dummy://foo', source)
+        .setResponseText('http://example.com/stream.mp4', '');
+
     let manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest).toEqual(Dash.makeManifestFromInit('stream.mp4', 201, 300));
     await Dash.callCreateSegmentIndex(manifest);
@@ -181,10 +181,10 @@ describe('DashParser SegmentBase', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMapAsText({
-      'dummy://foo': source,
-      'http://example.com/index.mp4': '',
-    });
+    fakeNetEngine
+        .setResponseText('dummy://foo', source)
+        .setResponseText('http://example.com/index.mp4', '');
+
     let manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest).toEqual(
         Dash.makeManifestFromInit('init.mp4', 201, 300, 10));
@@ -215,10 +215,10 @@ describe('DashParser SegmentBase', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMapAsText({
-      'dummy://foo': source,
-      'http://example.com': '',
-    });
+    fakeNetEngine
+        .setResponseText('dummy://foo', source)
+        .setResponseText('http://example.com', '');
+
     let manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest).toEqual(
         Dash.makeManifestFromInit('special.mp4', 0, null, 20));
@@ -244,10 +244,9 @@ describe('DashParser SegmentBase', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMap({
-      'dummy://foo': shaka.util.StringUtils.toUTF8(source),
-      'http://example.com/index.mp4': indexSegment,
-    });
+    fakeNetEngine
+        .setResponseText('dummy://foo', source)
+        .setResponseValue('http://example.com/index.mp4', indexSegment);
 
     let manifest = await parser.start('dummy://foo', playerInterface);
     let video = manifest.periods[0].variants[0].video;
