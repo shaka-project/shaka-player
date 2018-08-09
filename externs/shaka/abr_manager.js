@@ -45,10 +45,16 @@ shaka.extern.AbrManager = function() {};
  *
  * The first argument is a variant to switch to.
  *
- * The second argument is an optional boolean.  If true, all data will be
- * from the buffer, which will result in a buffering event.
+ * The second argument is an optional boolean. If true, all data will be removed
+ * from the buffer, which will result in a buffering event. Unless a third
+ * argument is passed.
  *
- * @typedef {function(shaka.extern.Variant, boolean=)}
+ * The third argument in an optional number that specifies how much data (in
+ * seconds) should be retained when clearing the buffer. This can help achieve
+ * a fast switch that doesn't involve a buffering event. A minimum of two video
+ * segments should always be kept buffered to avoid temporary hiccups.
+ *
+ * @typedef {function(shaka.extern.Variant, boolean=, number=)}
  * @exportDoc
  */
 shaka.extern.AbrManager.SwitchCallback;
