@@ -306,7 +306,8 @@ shaka.extern.GetSegmentReferenceFunction;
  *   trickModeVideo: ?shaka.extern.Stream,
  *   containsEmsgBoxes: boolean,
  *   roles: !Array.<string>,
- *   channelsCount: ?number
+ *   channelsCount: ?number,
+ *   closedCaptions: Object.<string, string>
  * }}
  *
  * @description
@@ -403,6 +404,12 @@ shaka.extern.GetSegmentReferenceFunction;
  *   e.g. 'main', 'caption', or 'commentary'.
  * @property {?number} channelsCount
  *   The channel count information for the audio stream.
+ * @property {Object.<string, string>} closedCaptions
+ *   A map containing the description of closed captions, with the caption
+ *   channel number (CC1 | CC2 | CC3 | CC4) as the key and the language code
+ *   as the value. If the channel number is not provided by the description,
+ *   we'll set an 0-based index as the key.
+ *   Example: {'CC1': 'eng'; 'CC3': 'swe'}, or {'1', 'eng'; '2': 'swe'}, etc.
  * @exportDoc
  */
 shaka.extern.Stream;

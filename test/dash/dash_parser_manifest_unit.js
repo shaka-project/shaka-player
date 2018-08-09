@@ -311,6 +311,61 @@ describe('DashParser Manifest', function() {
         }, 0, null));
   });
 
+
+  it('correctly parses closed captions with channel numbers', async () => {
+    let source = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
+      '      <Accessibility schemeIdUri="urn:scte:dash:cc:cea-608:2015"',
+      '         value="CC1=eng;CC3=swe"/>',
+      '      <Representation bandwidth="200">',
+      '        <SegmentTemplate media="1.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+
+    let manifest = await parser.start('dummy://foo', playerInterface);
+    // First Representation should be dropped.
+    let period = manifest.periods[0];
+    let stream = period.variants[0].video;
+    expect(stream.closedCaptions).toEqual(jasmine.objectContaining({
+      CC1: shaka.util.LanguageUtils.normalize('eng'),
+      CC3: shaka.util.LanguageUtils.normalize('swe'),
+    }));
+  });
+
+
+  it('correctly parses closed captions without channel numbers', async () => {
+    let source = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
+      '      <Accessibility schemeIdUri="urn:scte:dash:cc:cea-608:2015"',
+      '         value="eng;swe"/>',
+      '      <Representation bandwidth="200">',
+      '        <SegmentTemplate media="1.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+
+    let manifest = await parser.start('dummy://foo', playerInterface);
+    let stream = manifest.periods[0].variants[0].video;
+    expect(stream.closedCaptions).toEqual(jasmine.objectContaining({
+      0: shaka.util.LanguageUtils.normalize('eng'),
+      1: shaka.util.LanguageUtils.normalize('swe'),
+    }));
+  });
+
+
   it('correctly parses UTF-8', async () => {
     let source = [
       '<MPD>',

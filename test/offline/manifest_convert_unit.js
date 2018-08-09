@@ -414,6 +414,7 @@ describe('ManifestConverter', function() {
       containsEmsgBoxes: false,
       roles: [],
       channelsCount: null,
+      closedCaptions: {},
     };
 
     expect(stream).toEqual(expectedStream);

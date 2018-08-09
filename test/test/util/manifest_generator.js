@@ -559,6 +559,7 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
     containsEmsgBoxes: false,
     roles: [],
     channelsCount: null,
+    closedCaptions: {},
   };
   return stream;
 };
