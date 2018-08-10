@@ -1072,7 +1072,7 @@ describe('DashParser Manifest', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
     const manifest = await parser.start('dummy://foo', playerInterface);
     const variant = manifest.periods[0].variants[0];
     const textStream = manifest.periods[0].textStreams[0];
