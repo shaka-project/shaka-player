@@ -16,7 +16,6 @@
  */
 
 goog.provide('shaka.test.FakeAbrManager');
-goog.provide('shaka.test.FakeDrmEngine');
 goog.provide('shaka.test.FakeManifestParser');
 goog.provide('shaka.test.FakePlayhead');
 goog.provide('shaka.test.FakePlayheadObserver');
@@ -111,69 +110,6 @@ shaka.test.FakeAbrManager.prototype.setVariants;
 
 /** @type {!jasmine.Spy} */
 shaka.test.FakeAbrManager.prototype.configure;
-
-
-/**
- * A fake DrmEngine.
- *
- * @constructor
- * @struct
- * @extends {shaka.media.DrmEngine}
- * @return {!Object}
- */
-shaka.test.FakeDrmEngine = function() {
-  let resolve = Promise.resolve.bind(Promise);
-  let offlineSessionIds = [];
-  let drmInfo = null;
-
-  let ret = jasmine.createSpyObj('FakeDrmEngine', [
-    'attach', 'configure', 'destroy', 'getDrmInfo', 'getExpiration',
-    'getKeyStatuses', 'getSessionIds', 'getSupportedTypes', 'init',
-    'initialized', 'isSupportedByKeySystem', 'keySystem',
-  ]);
-  ret.attach.and.callFake(resolve);
-  ret.destroy.and.callFake(resolve);
-  ret.init.and.callFake(resolve);
-  ret.initialized.and.returnValue(true);
-  ret.keySystem.and.returnValue('com.example.fake');
-  ret.getExpiration.and.returnValue(Infinity);
-  ret.getKeyStatuses.and.returnValue({});
-  // See shaka.test.ManifestGenerator.protototype.createStream.
-  ret.getSupportedTypes.and.returnValue(
-      ['video/mp4; codecs="avc1.4d401f"']);
-
-  ret.setSessionIds = function(sessions) {
-    offlineSessionIds = sessions;
-  };
-  ret.setDrmInfo = function(info) { drmInfo = info; };
-  ret.getDrmInfo.and.callFake(function() { return drmInfo; });
-  ret.getSessionIds.and.callFake(function() {
-    return offlineSessionIds;
-  });
-  ret.isSupportedByKeySystem.and.returnValue(true);
-
-  return ret;
-};
-
-
-/** @type {jasmine.Spy} */
-shaka.test.FakeDrmEngine.prototype.init;
-
-
-/** @type {jasmine.Spy} */
-shaka.test.FakeDrmEngine.prototype.attach;
-
-
-/** @type {jasmine.Spy} */
-shaka.test.FakeDrmEngine.prototype.getExpiration;
-
-
-/** @param {?shaka.extern.DrmInfo} info */
-shaka.test.FakeDrmEngine.prototype.setDrmInfo;
-
-
-/** @param {!Array.<string>} sessions */
-shaka.test.FakeDrmEngine.prototype.setSessionIds;
 
 
 /**
