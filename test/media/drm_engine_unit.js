@@ -962,6 +962,80 @@ describe('DrmEngine', function() {
         }).catch(fail);
       });
 
+      // See https://github.com/google/shaka-player/issues/1541
+      it('does not update public key statuses before callback', async () => {
+        await initAndAttach();
+
+        let initData = new Uint8Array(0);
+        mockVideo.on['encrypted'](
+            {initDataType: 'webm', initData: initData, keyId: null});
+
+        let keyId1 = (new Uint8Array(1)).buffer;
+        let keyId2 = (new Uint8Array(2)).buffer;
+        let status1 = 'usable';
+        let status2 = 'expired';
+        session1.keyStatuses.forEach.and.callFake(function(callback) {
+          callback(keyId1, status1);
+          callback(keyId2, status2);
+        });
+
+        session1.on['keystatuseschange']({target: session1});
+
+        // The callback waits for some time to pass, to batch up status changes.
+        expect(onKeyStatusSpy).not.toHaveBeenCalled();
+
+        // The publicly-accessible key statuses should not show these new
+        // changes yet.  This shows that we have solved the race between the
+        // callback and any polling done by any other component.
+        let keyIds = Object.keys(drmEngine.getKeyStatuses());
+        expect(keyIds.length).toEqual(0);
+
+        // Wait for the callback to occur, then end the test.
+        await new Promise((resolve) => {
+          onKeyStatusSpy.and.callFake(resolve);
+        });
+
+        // Now key statuses are available.
+        keyIds = Object.keys(drmEngine.getKeyStatuses());
+        expect(keyIds.length).toEqual(2);
+      });
+
+      // See https://github.com/google/shaka-player/issues/1541
+      it('does not invoke callback until all sessions are loaded', async () => {
+        // Set up init data overrides in the manifest so that we get multiple
+        // sessions.
+        let initData1 = new Uint8Array(10);
+        let initData2 = new Uint8Array(11);
+        manifest.periods[0].variants[0].drmInfos[0].initData = [
+          {initData: initData1, initDataType: 'cenc', keyId: null},
+          {initData: initData2, initDataType: 'cenc', keyId: null},
+        ];
+
+        let keyId1 = (new Uint8Array(1)).buffer;
+        let keyId2 = (new Uint8Array(2)).buffer;
+        session1.keyStatuses.forEach.and.callFake(function(callback) {
+          callback(keyId1, 'usable');
+        });
+        session2.keyStatuses.forEach.and.callFake(function(callback) {
+          callback(keyId2, 'usable');
+        });
+
+        await initAndAttach();
+
+        // The callback waits for some time to pass, to batch up status changes.
+        // But even after some time has passed, we should not have invoked the
+        // callback, because we don't have a status for session2 yet.
+        session1.on['keystatuseschange']({target: session1});
+        await shaka.test.Util.delay(keyStatusBatchTime() + 0.5);
+        expect(onKeyStatusSpy).not.toHaveBeenCalled();
+
+        // After both sessions have been loaded, we will finally invoke the
+        // callback.
+        session2.on['keystatuseschange']({target: session2});
+        await shaka.test.Util.delay(keyStatusBatchTime() + 0.5);
+        expect(onKeyStatusSpy).toHaveBeenCalled();
+      });
+
       it('causes an EXPIRED error when all keys expire', function(done) {
         onErrorSpy.and.stub();
 
@@ -1931,5 +2005,13 @@ describe('DrmEngine', function() {
       serverCertificate: serverCert,
       videoRobustness: ''
     };
+  }
+
+  /**
+   * @suppress {visibility}
+   * @return {number}
+   */
+  function keyStatusBatchTime() {
+    return shaka.media.DrmEngine.KEY_STATUS_BATCH_TIME_;
   }
 });
