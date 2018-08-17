@@ -228,7 +228,7 @@ describe('DashParser Live', function() {
     it('evicts old references for multi-period live stream', function(done) {
       let template = [
         '<MPD type="dynamic" minimumUpdatePeriod="PT%(updateTime)dS"',
-        '    timeShiftBufferDepth="PT30S"',
+        '    timeShiftBufferDepth="PT60S"',
         '    suggestedPresentationDelay="PT5S"',
         '    availabilityStartTime="1970-01-01T00:00:00Z">',
         '  <Period id="1">',
@@ -269,7 +269,7 @@ describe('DashParser Live', function() {
             ManifestParser.verifySegmentIndex(stream1, basicRefs);
             ManifestParser.verifySegmentIndex(stream2, basicRefs);
 
-            // The 30 second availability window is initially full in all cases
+            // The 60 second availability window is initially full in all cases
             // (SegmentTemplate+Timeline, etc.)  The first segment is always 10
             // seconds long in all of these cases.  So 11 seconds after the
             // manifest was parsed, the first segment should have fallen out of
