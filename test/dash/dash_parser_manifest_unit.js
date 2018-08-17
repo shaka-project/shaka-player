@@ -327,7 +327,7 @@ describe('DashParser Manifest', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+    fakeNetEngine.setResponseText('dummy://foo', source);
 
     let manifest = await parser.start('dummy://foo', playerInterface);
     // First Representation should be dropped.
@@ -355,7 +355,7 @@ describe('DashParser Manifest', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': source});
+    fakeNetEngine.setResponseText('dummy://foo', source);
 
     let manifest = await parser.start('dummy://foo', playerInterface);
     let stream = manifest.periods[0].variants[0].video;
