@@ -2824,9 +2824,9 @@ describe('StreamingEngine', function() {
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
     });
 
-    it('raises an event for embedded emsg boxes', function() {
-      videoStream1.containsEmsgBoxes = true;
+    it('raises an event for registered embedded emsg boxes', function() {
       segmentData[ContentType.VIDEO].segments[0] = emsgSegment.buffer;
+      videoStream1.emsgSchemeIdUris = [emsgObj.schemeIdUri];
 
       // Here we go!
       streamingEngine.init();
@@ -2839,13 +2839,12 @@ describe('StreamingEngine', function() {
     });
 
     it('raises multiple events', function() {
-      videoStream1.containsEmsgBoxes = true;
-
       const dummyBox =
           shaka.util.Uint8ArrayUtils.fromHex('0000000c6672656501020304');
       segmentData[ContentType.VIDEO].segments[0] =
           shaka.util.Uint8ArrayUtils.concat(emsgSegment, dummyBox, emsgSegment)
               .buffer;
+      videoStream1.emsgSchemeIdUris = [emsgObj.schemeIdUri];
 
       // Here we go!
       streamingEngine.init();
@@ -2855,7 +2854,6 @@ describe('StreamingEngine', function() {
     });
 
     it('won\'t raise an event without stream field set', function() {
-      videoStream1.containsEmsgBoxes = false;
       segmentData[ContentType.VIDEO].segments[0] = emsgSegment.buffer;
 
       // Here we go!
@@ -2866,7 +2864,17 @@ describe('StreamingEngine', function() {
     });
 
     it('won\'t raise an event when no emsg boxes present', function() {
-      videoStream1.containsEmsgBoxes = true;
+      videoStream1.emsgSchemeIdUris = [emsgObj.schemeIdUri];
+
+      // Here we go!
+      streamingEngine.init();
+      runTest();
+
+      expect(onEvent).not.toHaveBeenCalled();
+    });
+
+    it('won\'t raise an event for an unregistered emsg box', function() {
+      segmentData[ContentType.VIDEO].segments[0] = emsgSegment.buffer;
 
       // Here we go!
       streamingEngine.init();
@@ -2876,15 +2884,17 @@ describe('StreamingEngine', function() {
     });
 
     it('triggers manifest updates', function() {
-      videoStream1.containsEmsgBoxes = true;
       // This is an 'emsg' box that contains a scheme of
       // urn:mpeg:dash:event:2012 to indicate a manifest update.
       segmentData[ContentType.VIDEO].segments[0] =
-          Uint8ArrayUtils.fromHex(
-              '0000003a656d73670000000075726e3a' +
-              '6d7065673a646173683a6576656e743a' +
-              '32303132000000000031000000080000' +
-              '00ff0000000c74657374').buffer;
+          Uint8ArrayUtils
+              .fromHex(
+                  '0000003a656d73670000000075726e3a' +
+                  '6d7065673a646173683a6576656e743a' +
+                  '32303132000000000031000000080000' +
+                  '00ff0000000c74657374')
+              .buffer;
+      videoStream1.emsgSchemeIdUris = ['urn:mpeg:dash:event:2012'];
 
       // Here we go!
       streamingEngine.init();
@@ -3013,4 +3023,3 @@ describe('StreamingEngine', function() {
         });
   }
 });
-

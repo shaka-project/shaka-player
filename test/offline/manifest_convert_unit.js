@@ -411,7 +411,7 @@ describe('ManifestConverter', function() {
       type: streamDb.contentType,
       primary: streamDb.primary,
       trickModeVideo: null,
-      containsEmsgBoxes: false,
+      emsgSchemeIdUris: null,
       roles: [],
       channelsCount: null,
       closedCaptions: {},

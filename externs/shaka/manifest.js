@@ -304,7 +304,7 @@ shaka.extern.GetSegmentReferenceFunction;
  *   type: string,
  *   primary: boolean,
  *   trickModeVideo: ?shaka.extern.Stream,
- *   containsEmsgBoxes: boolean,
+ *   emsgSchemeIdUris: ?Array.<string>,
  *   roles: !Array.<string>,
  *   channelsCount: ?number,
  *   closedCaptions: Object.<string, string>
@@ -395,9 +395,9 @@ shaka.extern.GetSegmentReferenceFunction;
  * @property {?shaka.extern.Stream} trickModeVideo
  *   <i>Video streams only.</i> <br>
  *   An alternate video stream to use for trick mode playback.
- * @property {boolean} containsEmsgBoxes
- *   <i>Defaults to false.</i><br>
- *   Whether the stream contains embedded 'emsg' boxes that should result in
+ * @property {?Array.<string>} emsgSchemeIdUris
+ *   <i>Defaults to empty.</i><br>
+ *   Array of registered emsg box scheme_id_uri that should result in
  *   Player events.
  * @property {!Array.<string>} roles
  *   The roles of the stream as they appear on the manifest,

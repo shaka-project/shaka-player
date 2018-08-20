@@ -556,7 +556,7 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
     type: type,
     primary: false,
     trickModeVideo: null,
-    containsEmsgBoxes: false,
+    emsgSchemeIdUris: null,
     roles: [],
     channelsCount: null,
     closedCaptions: {},
