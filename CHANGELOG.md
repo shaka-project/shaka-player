@@ -1,3 +1,23 @@
+## 2.4.4 (2018-08-23)
+
+Bugfixes:
+  - Fix spurious restrictions errors
+    - https://github.com/google/shaka-player/issues/1541
+  - Don't error when skipping mp4 boxes with bad size
+    - https://github.com/google/shaka-player/issues/1535
+  - Refactor HttpFetchPlugin to clarify error outcomes
+    - https://github.com/google/shaka-player/issues/1519
+    - https://github.com/google/shaka-player/pull/1532
+  - Avoid assertions about $Time$ when it is not used
+  - Stop proxying drmInfo() to reduce cast message sizes
+  - Fix compiler renaming in ParsedBox
+    - https://github.com/google/shaka-player/issues/1522
+
+Docs:
+  - Fixed docs for availabilityWindowOverride
+    - https://github.com/google/shaka-player/issues/1530
+
+
 ## 2.4.3 (2018-08-06)
 
 New Features:
