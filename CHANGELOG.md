@@ -30,7 +30,7 @@ Bugfixes:
     - https://github.com/google/shaka-player/issues/1464
     - https://github.com/google/shaka-player/issues/1486
   - Don't clear buffer with a small gap between playhead and buffer start
-    - https://github.com/google/shaka-player/issues/1508
+    - https://github.com/google/shaka-player/issues/1459
   - Allow CDATA in text nodes.
     - https://github.com/google/shaka-player/issues/1508
   - Skip text AdaptationSets with no segment info
