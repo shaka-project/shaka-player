@@ -1,3 +1,36 @@
+## 2.5.0-beta (2018-08-24)
+
+New Features:
+  - Drift is now tolerated in DASH live streams
+    - https://github.com/google/shaka-player/issues/999
+  - Storage can be initialized without Player
+    - https://github.com/google/shaka-player/issues/1297
+  - DASH Representation IDs are now exposed in a new field in Track
+  - A safe margin parameter was added for clearing the buffer
+    - https://github.com/google/shaka-player/pull/1154
+  - Added 'retry' event to networking engine
+    - https://github.com/google/shaka-player/issues/1529
+  - Emsg not referenced in MPD will now be ignored
+    - https://github.com/google/shaka-player/issues/1548
+  - Extra data given for RESTRICTIONS_CANNOT_BE_MET
+    - https://github.com/google/shaka-player/issues/1368
+  - A mime type option was added to Player.load
+  - Added Widevine SAMPLE-AES support in HLS
+    - https://github.com/google/shaka-player/issues/1515
+  - The |manifestUri| method on Player was changed to |assetUri|
+  - Added new request type TIMING for clock sync requests
+    - https://github.com/google/shaka-player/issues/1488
+    - https://github.com/google/shaka-player/pull/1489
+
+Deprecated:
+  - Passing a ManifestParser factory to Player.load is deprecated and support
+    will be removed in v2.6. Instead, please register any custom parsers with a
+    MIME type, and pass a MIME type instead.  MIME types can also be used to
+    force the selection of any built-in manifest parsers.
+  - The |manifestUri| method on Player was changed to |assetUri|. The old method
+    is deprecated and will be removed in v2.6.
+
+
 ## 2.4.4 (2018-08-23)
 
 Bugfixes:
