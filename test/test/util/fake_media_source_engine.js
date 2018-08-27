@@ -303,8 +303,12 @@ shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl = function(
     throw new Error('unexpected data');
   }
 
-  expect(startTime).toBe(this.segmentData[type].segmentStartTimes[i]);
-  expect(endTime).toBe(startTime + this.segmentData[type].segmentDuration);
+  const segmentData = this.segmentData[type];
+  const expectedStartTime =
+      segmentData.segmentPeriodTimes[i] + segmentData.segmentStartTimes[i];
+  const expectedEndTime = expectedStartTime + segmentData.segmentDuration;
+  expect(startTime).toBe(expectedStartTime);
+  expect(endTime).toBe(expectedEndTime);
 
   // Verify that the segment is aligned.
   let start = this.segmentData[type].segmentStartTimes[i] +
