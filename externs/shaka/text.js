@@ -127,7 +127,8 @@ shakaExtern.Cue = function() {};
 
 
 /**
- * The start time of the cue in seconds and fractions of a second.
+ * The start time of the cue in seconds, relative to the start of the
+ * presentation.
  * @type {number}
  * @exportDoc
  */
@@ -135,7 +136,8 @@ shakaExtern.Cue.prototype.startTime;
 
 
 /**
- * The end time of the cue in seconds and fractions of a second.
+ * The end time of the cue in seconds, relative to the start of the
+ * presentation.
  * @type {number}
  * @exportDoc
  */
@@ -417,13 +419,13 @@ shakaExtern.TextDisplayer.prototype.append = function(cues) {};
 /**
  * Remove cues in a given time range.
  *
- * @param {number} start
- * @param {number} end
+ * @param {number} startTime relative to the start of the presentation
+ * @param {number} endTime relative to the start of the presentation
  * @return {boolean}
  *
  * @exportDoc
  */
-shakaExtern.TextDisplayer.prototype.remove = function(start, end) {};
+shakaExtern.TextDisplayer.prototype.remove = function(startTime, endTime) {};
 
 
 /**
