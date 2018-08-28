@@ -576,33 +576,18 @@ describe('Player', function() {
         });
       });
 
-      it('DrmEngine init', async function() {
-        /** @type {!shaka.test.FakeDrmEngine} */
-        const drmEngine = new shaka.test.FakeDrmEngine();
-
-        // Block DrmEngine init at the drm engine init phase by returning a
-        // promise we can resolve later.
-        /** @type {shaka.util.PublicPromise} */
-        const p = new shaka.util.PublicPromise();
-        drmEngine.initForPlayback.and.returnValue(p);
-
-        // We don't use "await" there because we need to this happen at the
-        // same time as the next path.
-        shaka.test.Util.delay(1.0).then(() => {
-          // Make sure we're blocked.
-          expect(drmEngine.initForPlayback).toHaveBeenCalled();
-
-          // Interrupt load().
+      it('during drm engine creation', async function() {
+        // Interrupt |load| by asking the player to unload when it goes to
+        // create and initialize drm engine.
+        player.createDrmEngine = () => {
+          // Interrupt load(). It should detect that it was asked to unload
+          // which should throw the |LOAD_INTERRUPTED| error.
           player.unload();
 
-          // Unblock the player. It should detect that it was asked to unload
-          // which should throw the |LOAD_INTERRUPTED| error.
-          p.resolve();
-        });
-
-        // Initialize the player. Loading should get blocked by drm init (using
-        // the public promise above) and then the player should be unloaded.
-        player.createDrmEngine = () => { return drmEngine; };
+          /** @type {!shaka.media.DrmEngine} */
+          const drmEngine = new shaka.test.FakeDrmEngine();
+          return Promise.resolve(drmEngine);
+        };
 
         try {
           await player.load(fakeManifestUri, 0, factory1);
@@ -612,25 +597,24 @@ describe('Player', function() {
         }
       });
 
-      it('DrmEngine attach', function(done) {
-        // Block DrmEngine attach.
-        let p = new shaka.util.PublicPromise();
-        let drmEngine = new shaka.test.FakeDrmEngine();
-        drmEngine.attach.and.returnValue(p);
-        player.createDrmEngine = function() { return drmEngine; };
-
-        player.load(fakeManifestUri, 0, factory1)
-            .then(fail)
-            .catch(Util.spyFunc(checkError))
-            .then(done);
-
-        shaka.test.Util.delay(1.0).then(function() {
-          // Make sure we're blocked.
-          expect(drmEngine.attach).toHaveBeenCalled();
+      it('during drm engine attach', async function() {
+        const drmEngine = new shaka.test.FakeDrmEngine();
+        drmEngine.attach.and.callFake(() => {
           // Interrupt load().
           player.unload();
-          p.resolve();
         });
+
+        player.createDrmEngine = () => {
+          const cast = /** @type {!shaka.media.DrmEngine} */ (drmEngine);
+          return Promise.resolve(cast);
+        };
+
+        try {
+          await player.load(fakeManifestUri, 0, factory1);
+          fail();
+        } catch (error) {
+          expect(error.code).toBe(shaka.util.Error.Code.LOAD_INTERRUPTED);
+        }
       });
 
       it('StreamingEngine init', function(done) {
