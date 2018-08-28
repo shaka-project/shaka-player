@@ -1046,6 +1046,22 @@ describe('Player', function() {
       let newConfig = player.getConfiguration();
       expect(newConfig.streaming.bufferBehind).toEqual(77);
     });
+
+    // https://github.com/google/shaka-player/issues/1524
+    it('does not pollute other advanced DRM configs', () => {
+      player.configure('drm.advanced.foo', {});
+      player.configure('drm.advanced.bar', {});
+      const fooConfig1 = player.getConfiguration().drm.advanced.foo;
+      const barConfig1 = player.getConfiguration().drm.advanced.bar;
+      expect(fooConfig1.distinctiveIdentifierRequired).toEqual(false);
+      expect(barConfig1.distinctiveIdentifierRequired).toEqual(false);
+
+      player.configure('drm.advanced.foo.distinctiveIdentifierRequired', true);
+      const fooConfig2 = player.getConfiguration().drm.advanced.foo;
+      const barConfig2 = player.getConfiguration().drm.advanced.bar;
+      expect(fooConfig2.distinctiveIdentifierRequired).toEqual(true);
+      expect(barConfig2.distinctiveIdentifierRequired).toEqual(false);
+    });
   });
 
   describe('AbrManager', function() {
