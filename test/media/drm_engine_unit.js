@@ -493,6 +493,7 @@ describe('DrmEngine', function() {
         audioRobustness: 'good',
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: null,
+        individualizationServer: '',
         distinctiveIdentifierRequired: true,
         persistentStateRequired: true,
       };
@@ -546,6 +547,7 @@ describe('DrmEngine', function() {
         audioRobustness: 'bad',
         videoRobustness: 'so_bad_it_hurts',
         serverCertificate: null,
+        individualizationServer: '',
         distinctiveIdentifierRequired: false,
         persistentStateRequired: false,
       };
@@ -902,43 +904,33 @@ describe('DrmEngine', function() {
       });
 
       it('triggers a license request', async () => {
-        await initAndAttach();
-        let initData = new Uint8Array(0);
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData, keyId: null});
-
-        let operation = shaka.util.AbortableOperation.completed({});
-        fakeNetEngine.request.and.returnValue(operation);
-        let message = new Uint8Array(0);
-        session1.on['message']({target: session1, message: message});
-
-        expect(fakeNetEngine.request).toHaveBeenCalledWith(
-            shaka.net.NetworkingEngine.RequestType.LICENSE,
-            jasmine.objectContaining({
-              uris: ['http://abc.drm/license'],
-              method: 'POST',
-              body: message,
-            }));
+        await sendMessageTest('http://abc.drm/license');
       });
 
       it('prefers a license server URI from DrmInfo', async () => {
         manifest.periods[0].variants[0].drmInfos[0].licenseServerUri =
             'http://foo.bar/drm';
-
-        await initAndAttach();
-        let initData = new Uint8Array(0);
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData, keyId: null});
-
-        let operation = shaka.util.AbortableOperation.completed({});
-        fakeNetEngine.request.and.returnValue(operation);
-        let message = new Uint8Array(0);
-        session1.on['message']({target: session1, message: message});
-
-        expect(fakeNetEngine.request).toHaveBeenCalledWith(
-            shaka.net.NetworkingEngine.RequestType.LICENSE,
-            jasmine.objectContaining({uris: ['http://foo.bar/drm']}));
+        await sendMessageTest('http://foo.bar/drm');
       });
+
+      it('handles "individualization-request" messages special', async () => {
+        config.advanced['drm.abc'] = createAdvancedConfig(null);
+        config.advanced['drm.abc'].individualizationServer =
+            'http://foo.bar/drm';
+        expect(config.servers['drm.abc']).not.toBe('http://foo.bar/drm');
+
+        await sendMessageTest(
+            'http://foo.bar/drm', 'individualization-request');
+      });
+
+      it('uses license server for "individualization-request" by default',
+         async () => {
+           config.advanced['drm.abc'] = createAdvancedConfig(null);
+           config.advanced['drm.abc'].individualizationServer = '';
+
+           await sendMessageTest(
+               'http://abc.drm/license', 'individualization-request');
+         });
 
       it('dispatches an error if license request fails', async () => {
         onErrorSpy.and.stub();
@@ -973,6 +965,34 @@ describe('DrmEngine', function() {
               data: ['http://abc.drm/license', 403],
             })));
       });
+
+      /**
+       * @param {string=} expectedUrl
+       * @param {string=} messageType
+       * @return {!Promise}
+       */
+      async function sendMessageTest(
+          expectedUrl, messageType = 'license-request') {
+        await initAndAttach();
+        let initData = new Uint8Array(0);
+        mockVideo.on['encrypted'](
+            {initDataType: 'webm', initData: initData, keyId: null});
+
+        let operation = shaka.util.AbortableOperation.completed({});
+        fakeNetEngine.request.and.returnValue(operation);
+        let message = new Uint8Array(0);
+        session1.on['message'](
+            {target: session1, message: message, messageType: messageType});
+
+        expect(fakeNetEngine.request).toHaveBeenCalledWith(
+            shaka.net.NetworkingEngine.RequestType.LICENSE,
+            jasmine.objectContaining({
+              uris: [expectedUrl],
+              method: 'POST',
+              body: message,
+              licenseRequestType: messageType,
+            }));
+      }
     });  // describe('message')
 
     describe('keystatuseschange', function() {
@@ -1676,6 +1696,7 @@ describe('DrmEngine', function() {
         videoRobustness: 'really_really_ridiculously_good',
         distinctiveIdentifierRequired: true,
         serverCertificate: null,
+        individualizationServer: '',
         persistentStateRequired: true,
       };
       drmEngine.configure(config);
@@ -2044,6 +2065,7 @@ describe('DrmEngine', function() {
       distinctiveIdentifierRequired: false,
       persistentStateRequired: false,
       serverCertificate: serverCert,
+      individualizationServer: '',
       videoRobustness: '',
     };
   }

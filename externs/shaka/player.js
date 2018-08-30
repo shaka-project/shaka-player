@@ -438,7 +438,8 @@ shaka.extern.DashContentProtectionCallback;
  *   persistentStateRequired: boolean,
  *   videoRobustness: string,
  *   audioRobustness: string,
- *   serverCertificate: Uint8Array
+ *   serverCertificate: Uint8Array,
+ *   individualizationServer: string
  * }}
  *
  * @property {boolean} distinctiveIdentifierRequired
@@ -465,6 +466,9 @@ shaka.extern.DashContentProtectionCallback;
  *   A key-system-specific server certificate used to encrypt license requests.
  *   Its use is optional and is meant as an optimization to avoid a round-trip
  *   to request a certificate.
+ * @property {string} individualizationServer
+ *   The server that handles an 'individualiation-request'.  If the server isn't
+ *   given, it will default to the license server.
  *
  * @exportDoc
  */
@@ -485,7 +489,7 @@ shaka.extern.AdvancedDrmConfiguration;
  * @property {!Object.<string, string>} servers
  *   <i>Required for all but the clear key CDM.</i> <br>
  *   A dictionary which maps key system IDs to their license servers.
- *   For example, {'com.widevine.alpha': 'http://example.com/drm'}.
+ *   For example, {'com.widevine.alpha': 'https://example.com/drm'}.
  * @property {!Object.<string, string>} clearKeys
  *   <i>Forces the use of the Clear Key CDM.</i>
  *   A map of key IDs (hex) to keys (hex).

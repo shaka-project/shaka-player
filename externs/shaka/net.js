@@ -59,7 +59,8 @@ shaka.extern.RetryParameters;
  *   body: ArrayBuffer,
  *   headers: !Object.<string, string>,
  *   allowCrossSiteCredentials: boolean,
- *   retryParameters: !shaka.extern.RetryParameters
+ *   retryParameters: !shaka.extern.RetryParameters,
+ *   licenseRequestType: ?string
  * }}
  *
  * @description
@@ -81,6 +82,11 @@ shaka.extern.RetryParameters;
  *   requests.  See {@link https://bit.ly/CorsCred}.
  * @property {!shaka.extern.RetryParameters} retryParameters
  *   An object used to define how often to make retries.
+ * @property {?string} licenseRequestType
+ *   If this is a LICENSE request, this field contains the type of license
+ *   request it is (not the type of license).  This is the |messageType| field
+ *   of the EME message.  For example, this could be 'license-request' or
+ *   'license-renewal'.
  *
  * @exportDoc
  */
