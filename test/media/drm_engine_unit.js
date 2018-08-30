@@ -147,6 +147,23 @@ describe('DrmEngine', function() {
     shaka.log.error = originalLogError;
   });
 
+  describe('supportsVariants', function() {
+    it('supports all clear variants', async function() {
+      const manifest = new shaka.test.ManifestGenerator()
+          .addPeriod(0)
+            .addVariant(0)
+              .addDrmInfo('drm.abc')
+              .addDrmInfo('drm.def')
+              .addVideo(1).mime('video/foo', 'vbar').encrypted(false)
+          .build();
+
+      const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
+
+      expect(drmEngine.supportsVariant(variants[0])).toBeTruthy();
+    });
+  });
+
   describe('init', function() {
     it('stops on first available key system', async () => {
       // Accept both drm.abc and drm.def.  Only one can be chosen.
