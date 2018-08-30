@@ -490,14 +490,14 @@ describe('Player', function() {
       });
 
       it('load text stream if caption is visible', async () => {
-        await player.load(fakeManifestUri, 0, factory1);
+        await player.load(fakeManifestUri, 0, returnManifest(manifest));
         player.setTextTrackVisibility(true);
         expect(streamingEngine.loadNewTextStream).toHaveBeenCalled();
         expect(streamingEngine.getActiveText()).not.toBe(null);
       });
 
       it('does not load text stream if caption is invisible', async () => {
-        await player.load(fakeManifestUri, 0, factory1);
+        await player.load(fakeManifestUri, 0, returnManifest(manifest));
         player.setTextTrackVisibility(false);
         expect(streamingEngine.loadNewTextStream).not.toHaveBeenCalled();
         expect(streamingEngine.unloadTextStream).toHaveBeenCalled();
@@ -508,7 +508,7 @@ describe('Player', function() {
         player.setTextTrackVisibility(false);
         player.configure({streaming: {alwaysStreamText: true}});
 
-        await player.load(fakeManifestUri, 0, factory1);
+        await player.load(fakeManifestUri, 0, returnManifest(manifest));
         expect(streamingEngine.getActiveText()).not.toBe(null);
 
         player.setTextTrackVisibility(true);
@@ -3397,5 +3397,15 @@ describe('Player', function() {
    */
   function onKeyStatus(keyStatusMap) {
     player.onKeyStatus_(keyStatusMap);
+  }
+
+  /**
+   * @param {shaka.extern.Manifest} manifest
+   * @return {function():shaka.extern.ManifestParser}
+   */
+  function returnManifest(manifest) {
+    return () => {
+      return new shaka.test.FakeManifestParser(manifest);
+    };
   }
 });

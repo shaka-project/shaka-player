@@ -66,25 +66,6 @@ describe('StreamUtils', function() {
       expect(chosen[1]).toBe(manifest.periods[0].variants[3]);
     });
 
-    it('filters out resctricted variants', function() {
-      manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addVariant(0)
-          .addVariant(1)
-          .addVariant(2)
-        .build();
-
-      manifest.periods[0].variants[0].allowedByKeySystem = false;
-      manifest.periods[0].variants[1].allowedByApplication = false;
-
-      let chosen = filterVariantsByLanguageAndRole(
-          manifest.periods[0].variants,
-          'en',
-          '');
-      expect(chosen.length).toBe(1);
-      expect(chosen[0]).toBe(manifest.periods[0].variants[2]);
-    });
-
     it('chooses variants in preferred language and role', function() {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
