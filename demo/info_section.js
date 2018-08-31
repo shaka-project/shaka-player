@@ -93,19 +93,6 @@ shakaDemo.updateTextTracks_ = function() {
   let tracks = shakaDemo.player_.getTextTracks();
 
   shakaDemo.updateTrackOptions_(trackList, tracks, languageAndRole);
-
-  // CEA 608/708 captions data is embedded inside the video stream.
-  // Showing a 'Default Text' option in the Text Track list.
-  // Use Default Text Track if there's no external text tracks available.
-  if (tracks.length == 0) {
-    shakaDemo.player_.selectEmbeddedTextTrack();
-  }
-  if (ShakaDemoUtils.isTsContent(shakaDemo.player_)) {
-    let option = document.createElement('option');
-    option.textContent = 'Default Text';
-    option.selected = shakaDemo.player_.usingEmbeddedTextTrack();
-    trackList.appendChild(option);
-  }
 };
 
 
@@ -242,7 +229,7 @@ shakaDemo.updateLanguageOptions_ =
     option.value = language + ':' + role;
     let isSelected = false;
 
-    if (selectedTrack.language == language) {
+    if (selectedTrack && selectedTrack.language == language) {
       if (selectedTrack.roles.length) {
         selectedTrack.roles.forEach(function(selectedRole) {
           if (selectedRole == role) {

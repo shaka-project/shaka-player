@@ -57,13 +57,15 @@ describe('MediaSourceEngine', function() {
 
   function appendInit(type) {
     let segment = generators[type].getInitSegment(Date.now() / 1000);
-    return mediaSourceEngine.appendBuffer(type, segment, null, null);
+    return mediaSourceEngine.appendBuffer(
+        type, segment, null, null, /* hasClosedCaptions */ false);
   }
 
   function append(type, segmentNumber) {
     let segment = generators[type].
         getSegment(segmentNumber, 0, Date.now() / 1000);
-    return mediaSourceEngine.appendBuffer(type, segment, null, null);
+    return mediaSourceEngine.appendBuffer(
+        type, segment, null, null, /* hasClosedCaptions */ false);
   }
 
   function buffered(type, time) {

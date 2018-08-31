@@ -225,12 +225,12 @@ describe('CastUtils', function() {
           return shaka.test.Util.fetch(initSegmentUrl);
         }).then(function(data) {
           return mediaSourceEngine.appendBuffer(ContentType.VIDEO, data,
-                                                null, null);
+              null, null, /* hasClosedCaptions */ false);
         }).then(function() {
           return shaka.test.Util.fetch(videoSegmentUrl);
         }).then(function(data) {
           return mediaSourceEngine.appendBuffer(ContentType.VIDEO, data,
-                                                null, null);
+              null, null, /* hasClosedCaptions */ false);
         }).catch(fail).then(done);
       });
 

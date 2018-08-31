@@ -333,10 +333,11 @@ describe('DashParser Manifest', function() {
     // First Representation should be dropped.
     let period = manifest.periods[0];
     let stream = period.variants[0].video;
-    expect(stream.closedCaptions).toEqual(jasmine.objectContaining({
-      CC1: shaka.util.LanguageUtils.normalize('eng'),
-      CC3: shaka.util.LanguageUtils.normalize('swe'),
-    }));
+    const expectedClosedCaptions = new Map(
+      [['CC1', shaka.util.LanguageUtils.normalize('eng')],
+       ['CC3', shaka.util.LanguageUtils.normalize('swe')]]
+    );
+    expect(stream.closedCaptions).toEqual(expectedClosedCaptions);
   });
 
 
@@ -359,10 +360,11 @@ describe('DashParser Manifest', function() {
 
     let manifest = await parser.start('dummy://foo', playerInterface);
     let stream = manifest.periods[0].variants[0].video;
-    expect(stream.closedCaptions).toEqual(jasmine.objectContaining({
-      0: shaka.util.LanguageUtils.normalize('eng'),
-      1: shaka.util.LanguageUtils.normalize('swe'),
-    }));
+    const expectedClosedCaptions = new Map(
+      [['CC1', shaka.util.LanguageUtils.normalize('eng')],
+       ['CC3', shaka.util.LanguageUtils.normalize('swe')]]
+    );
+    expect(stream.closedCaptions).toEqual(expectedClosedCaptions);
   });
 
 

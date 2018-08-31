@@ -28,6 +28,8 @@ var muxjs = {};
 /** @const */
 muxjs.mp4 = {};
 
+/** @const */
+muxjs.mp4.probe = {};
 
 /**
  * @constructor
@@ -125,7 +127,7 @@ muxjs.mp4.CaptionParser.prototype.isNewInit = function(
  *    init segment.
  * @param {!Object.<number, number>} timescales The timescales found in the
  *    init segment.
- * @return {Object} Parsed captions
+ * @return {muxjs.mp4.ParsedClosedCaptions}
  */
 muxjs.mp4.CaptionParser.prototype.parse = function(
     segment, videoTrackIds, timescales) {};
@@ -135,3 +137,63 @@ muxjs.mp4.CaptionParser.prototype.parse = function(
  * Clear the parsed closed captions data for new data.
  */
 muxjs.mp4.CaptionParser.prototype.clearParsedCaptions = function() {};
+
+
+/**
+ * Reset the captions stream.
+ */
+muxjs.mp4.CaptionParser.prototype.resetCaptionStream = function() {};
+
+
+/**
+ * Parses an MP4 initialization segment and extracts the timescale
+ * values for any declared tracks.
+ *
+ * @param {Uint8Array} init The bytes of the init segment
+ * @return {!Object.<number, number>} a hash of track ids to timescale
+ * values or null if the init segment is malformed.
+ */
+muxjs.mp4.probe.timescale = function(init) {};
+
+
+/**
+  * Find the trackIds of the video tracks in this source.
+  * Found by parsing the Handler Reference and Track Header Boxes:
+  *
+  * @param {Uint8Array} init The bytes of the init segment for this source
+  * @return {!Array.<number>} A list of trackIds
+ **/
+muxjs.mp4.probe.videoTrackIds = function(init) {};
+
+/**
+ * @typedef {{
+ *   captionStreams: Object.<string, boolean>,
+ *   captions: !Array.<muxjs.mp4.ClosedCaption>
+ * }}
+ *
+ * @description closed captions data parsed from mux.js caption parser.
+ * @property {Object.<string, boolean>} captionStreams
+ * @property {Array.<muxjs.mp4.ClosedCaption>} captions
+ */
+muxjs.mp4.ParsedClosedCaptions;
+
+
+/**
+ * @typedef {{
+ *   startPts: number,
+ *   endPts: number,
+ *   startTime: number,
+ *   endTime: number,
+ *   stream: string,
+ *   text: string
+ * }}
+ *
+ * @description closed caption parsed from mux.js caption parser.
+ * @property {number} startPts
+ * @property {number} endPts
+ * @property {number} startTime
+ * @property {number} endTime
+ * @property {string} stream The channel id of the closed caption.
+ * @property {string} text The content of the closed caption.
+ */
+muxjs.mp4.ClosedCaption;

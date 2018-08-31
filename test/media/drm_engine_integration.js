@@ -204,12 +204,10 @@ describe('DrmEngine', function() {
             return drmEngine.attach(video);
           }).then(function() {
             return mediaSourceEngine.appendBuffer(ContentType.VIDEO,
-                                                  videoInitSegment,
-                                                  null, null);
+                videoInitSegment, null, null, /* hasClosedCaptions */ false);
           }).then(function() {
             return mediaSourceEngine.appendBuffer(ContentType.AUDIO,
-                                                  audioInitSegment,
-                                                  null, null);
+                audioInitSegment, null, null, /* hasClosedCaptions */ false);
           }).then(function() {
             return encryptedEventSeen;
           }).then(function() {
@@ -244,12 +242,10 @@ describe('DrmEngine', function() {
             }
 
             return mediaSourceEngine.appendBuffer(ContentType.VIDEO,
-                                                  videoSegment,
-                                                  null, null);
+                videoSegment, null, null, /* hasClosedCaptions */ false);
           }).then(function() {
             return mediaSourceEngine.appendBuffer(ContentType.AUDIO,
-                                                  audioSegment,
-                                                  null, null);
+                audioSegment, null, null, /* hasClosedCaptions */ false);
           }).then(function() {
             expect(video.buffered.end(0)).toBeGreaterThan(0);
             video.play();

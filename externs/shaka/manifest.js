@@ -307,7 +307,7 @@ shaka.extern.GetSegmentReferenceFunction;
  *   emsgSchemeIdUris: ?Array.<string>,
  *   roles: !Array.<string>,
  *   channelsCount: ?number,
- *   closedCaptions: Object.<string, string>
+ *   closedCaptions: Map.<string, string>
  * }}
  *
  * @description
@@ -404,7 +404,7 @@ shaka.extern.GetSegmentReferenceFunction;
  *   e.g. 'main', 'caption', or 'commentary'.
  * @property {?number} channelsCount
  *   The channel count information for the audio stream.
- * @property {Object.<string, string>} closedCaptions
+ * @property {Map.<string, string>} closedCaptions
  *   A map containing the description of closed captions, with the caption
  *   channel number (CC1 | CC2 | CC3 | CC4) as the key and the language code
  *   as the value. If the channel number is not provided by the description,

@@ -413,7 +413,7 @@ describe('ManifestConverter', function() {
       emsgSchemeIdUris: null,
       roles: [],
       channelsCount: null,
-      closedCaptions: {},
+      closedCaptions: null,
     };
 
     expect(stream).toEqual(expectedStream);
