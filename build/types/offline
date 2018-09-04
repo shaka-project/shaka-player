@@ -11,6 +11,7 @@
 +../../lib/offline/offline_manifest_parser.js
 +../../lib/offline/offline_scheme.js
 +../../lib/offline/offline_uri.js
++../../lib/offline/session_deleter.js
 +../../lib/offline/storage.js
 +../../lib/offline/storage_muxer.js
 +../../lib/offline/stored_content_utils.js
