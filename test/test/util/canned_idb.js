@@ -199,54 +199,37 @@ shaka.test.CannedIDB = class {
    *   savedDatabase.stores.
    * @private
    */
-  static dumpStore_(db, name, savedDatabase) {
-    return new Promise((resolve, reject) => {
-      const transactionType = 'readonly';
-      const transaction = db.transaction([name], transactionType);
-      const store = transaction.objectStore(name);
-      shaka.log.debug('Dumping store', name);
+  static async dumpStore_(db, name, savedDatabase) {
+    const transactionType = 'readonly';
+    const transaction = db.transaction([name], transactionType);
+    /** @type {!IDBObjectStore} */
+    const store = transaction.objectStore(name);
+    /** @type {!shaka.offline.indexeddb.DBOperation} */
+    const op = new shaka.offline.indexeddb.DBOperation(transaction, name);
+    shaka.log.debug('Dumping store', name);
 
-      /** @type {shaka.test.CannedIDB.SavedStore} */
-      const savedStore = {
-        parameters: {
-          keyPath: store.keyPath,
-          autoIncrement: store.autoIncrement,
-        },
-        data: [],
-      };
+    /** @type {shaka.test.CannedIDB.SavedStore} */
+    const savedStore = {
+      parameters: {
+        keyPath: store.keyPath,
+        autoIncrement: store.autoIncrement,
+      },
+      data: [],
+    };
 
-      const request = store.openCursor();
-
-      request.onsuccess = (event) => {
-        /** @type {IDBCursorWithValue} */
-        const cursor = event.target.result;
-        if (!cursor) {
-          // No more data.
-          return;
-        }
-
-        // Only store the key if there is no explicit keyPath for this store.
-        const data = {value: cursor.value};
-        if (!store.keyPath) {
-          data.key = cursor.key;
-        }
-        savedStore.data.push(data);
-
-        cursor.continue();
-      };
-
-      transaction.oncomplete = (event) => {
-        shaka.log.debug('Dumped', savedStore.data.length, 'entries from store',
-                        name);
-        savedDatabase.stores[name] = savedStore;
-        resolve();
-      };
-
-      transaction.onerror = (event) => {
-        reject(event.error);
-        event.preventDefault();
-      };
+    await op.forEachEntry((key, value) => {
+      // Only store the key if there is no explicit keyPath for this store.
+      const data = {value: value};
+      if (!store.keyPath) {
+        data.key = key;
+      }
+      savedStore.data.push(data);
     });
+
+    await op.promise();
+    shaka.log.debug('Dumped', savedStore.data.length, 'entries from store',
+                    name);
+    savedDatabase.stores[name] = savedStore;
   }
 
   /**
