@@ -24,6 +24,11 @@ describe('ArrayUtils', function() {
       expect(ArrayUtils.removeDuplicates(arr)).toEqual([1, 2, 5, 6, 3]);
     });
 
+    it('removes duplicate NaN', function() {
+      let arr = [NaN, 1, NaN, 2, NaN, NaN];
+      expect(ArrayUtils.removeDuplicates(arr)).toEqual([NaN, 1, 2]);
+    });
+
     it('does nothing if no duplicates', function() {
       let arr = [1, 2, 3, 6, 5, 4];
       expect(ArrayUtils.removeDuplicates(arr)).toEqual(arr);
