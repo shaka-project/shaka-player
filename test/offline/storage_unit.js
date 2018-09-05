@@ -35,6 +35,16 @@ describe('Storage', function() {
 
   const kbps = 1000;
 
+  beforeEach(async () => {
+    // Make sure we start with a clean slate between each run.
+    await eraseStorage();
+  });
+
+  afterEach(async () => {
+    // Make sure we don't leave anything behind.
+    await eraseStorage();
+  });
+
   describe('storage delete all', function() {
     /** @type {!shaka.Player} */
     let player;
@@ -141,24 +151,18 @@ describe('Storage', function() {
     /** @type {!shaka.offline.Storage} */
     let storage;
 
-    beforeEach(drmCheckAndRun(async function() {
-      // Make sure we start with a clean slate between each run.
-      await eraseStorage();
-
+    beforeEach(function() {
       // Use a real Player since Storage only uses the configuration and
       // networking engine.  This allows us to use Player.configure in these
       // tests.
       player = new shaka.Player(new shaka.test.FakeVideo());
       storage = new shaka.offline.Storage(player);
-    }));
+    });
 
-    afterEach(drmCheckAndRun(async function() {
+    afterEach(async function() {
       await storage.destroy();
       await player.destroy();
-
-      // Make sure we don't leave anything behind.
-      await eraseStorage();
-    }));
+    });
 
     drmIt('removes persistent license', drmCheckAndRun(async function() {
       const TestManifestParser = shaka.test.TestScheme.ManifestParser;
@@ -395,10 +399,7 @@ describe('Storage', function() {
     /** @type {!shaka.offline.Storage} */
     let storage;
 
-    beforeEach(checkAndRun(async function() {
-      // Make sure we start with a clean slate between each run.
-      await eraseStorage();
-
+    beforeEach(function() {
       // Use these promises to ensure that the data from networking
       // engine arrives in the correct order.
       const delays = {};
@@ -453,15 +454,12 @@ describe('Storage', function() {
           trackSelectionCallback: (tracks) => { return tracks; },
         },
       });
-    }));
+    });
 
-    afterEach(checkAndRun(async function() {
+    afterEach(async function() {
       await storage.destroy();
       await player.destroy();
-
-      // Make sure we don't leave anything behind.
-      await eraseStorage();
-    }));
+    });
 
     it('uses stream bandwidth', checkAndRun(async function() {
       /**
@@ -634,10 +632,7 @@ describe('Storage', function() {
     /** @type {!shaka.offline.Storage} */
     let storage;
 
-    beforeEach(checkAndRun(async function() {
-      // Make sure we start with a clean slate between each run.
-      await eraseStorage();
-
+    beforeEach(function() {
       netEngine = makeNetworkEngine();
 
       // Use a real Player since Storage only uses the configuration and
@@ -648,15 +643,12 @@ describe('Storage', function() {
       });
 
       storage = new shaka.offline.Storage(player);
-    }));
+    });
 
-    afterEach(checkAndRun(async function() {
+    afterEach(async function() {
       await storage.destroy();
       await player.destroy();
-
-      // Make sure we don't leave anything behind.
-      await eraseStorage();
-    }));
+    });
 
     it('stores and lists content', checkAndRun(async function() {
       // Just use any three manifests as we don't care about the manifests
