@@ -48,6 +48,9 @@ jasmine.Fetch.install = function() {
   jasmine.Fetch.container_.oldFetch = window.fetch;
   jasmine.Fetch.container_.oldHeaders = window.Headers;
   jasmine.Fetch.container_.oldAbortController = window.AbortController;
+  jasmine.Fetch.container_.oldResponse = window.Response;
+  /** @type {!Response} */
+  jasmine.Fetch.container_.latestResponse;
 
   window.Headers = /** @type {function (new:Headers,
         (!Array<!Array<string>>|Headers|Object<string,string>)=)} */(
@@ -55,6 +58,9 @@ jasmine.Fetch.install = function() {
 
   window.AbortController = /** @type {function (new:AbortController)} */
       (jasmine.Fetch.AbortController);
+
+  window.Response = /** @type {function (new:Response)} */
+      (jasmine.Fetch.Response);
 
   window.fetch = function(input, init) {
     // TODO: this does not support input in Request form
@@ -121,18 +127,35 @@ jasmine.Fetch.impl_ = function(url, init) {
       responseHeaders.append(key, stubbed.response.responseHeaders[key]);
     }
 
+    let body = {
+      getReader: () => {
+        let sequence = [{
+          done: false, value: {byteLength: 100},
+        }, {
+          done: true, value: null,
+        }];
+        let read = () => {
+          return Promise.resolve(sequence.shift());
+        };
+        return {read: read};
+      },
+    };
+
     // This creates an anonymous object instead of using the
     // built-in response constructor, because the fetch API
     // does not include a very good constructor for Response.
     let response = /** @type {!Response} */ ({
       status: stubbed.response.status,
+      body: body,
       headers: responseHeaders,
       url: stubbed.response.responseURL || url,
       arrayBuffer: function() {
         return Promise.resolve(stubbed.response.response);
       },
+      clone: () => response,
     });
-    return Promise.resolve(response);
+    jasmine.Fetch.container_.latestResponse = response;
+    return Promise.resolve(jasmine.Fetch.container_.latestResponse);
   } else if (stubbed.error) {
     return Promise.reject({message: 'fake error'});
   } else if (stubbed.timeout) {
@@ -162,6 +185,7 @@ jasmine.Fetch.uninstall = function() {
     window.fetch = jasmine.Fetch.container_.oldFetch;
     window.Headers = jasmine.Fetch.container_.oldHeaders;
     window.AbortController = jasmine.Fetch.container_.oldAbortController;
+    window.Response = jasmine.Fetch.container_.oldResponse;
     jasmine.Fetch.container_.installed_ = false;
   }
 };
@@ -176,6 +200,22 @@ jasmine.Fetch.AbortController = function() {
   // but it works for our tests
   this.aborted_ = false;
   this.signal = (function() { return this.aborted_; }).bind(this);
+};
+
+
+/**
+ * @constructor
+ * @struct
+ */
+jasmine.Fetch.Response = function() {
+  // Returns a copy of the most recent fake response.
+  const latest = jasmine.Fetch.container_.latestResponse;
+  this.status = latest.status;
+  this.body = latest.body;
+  this.headers = latest.headers;
+  this.url = latest.url;
+  let arrayBuffer = latest.arrayBuffer;
+  this.arrayBuffer = () => arrayBuffer;
 };
 
 
