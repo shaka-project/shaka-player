@@ -2530,6 +2530,36 @@ describe('Player', function() {
       expect(activeVariant.id).toBe(1);
     });
 
+    it('updates AbrManager for restriction changes', async () => {
+      manifest = new shaka.test.ManifestGenerator()
+              .addPeriod(0)
+                .addVariant(1).bandwidth(500)
+                  .addVideo(10)
+                .addVariant(2).bandwidth(100)
+                  .addVideo(20)
+              .build();
+
+      await setupPlayer();
+      abrManager.setVariants.calls.reset();
+
+      player.configure({restrictions: {maxBandwidth: 200}});
+
+      // AbrManager should have been updated with the restricted tracks.
+      // The first variant is disallowed.
+      expect(abrManager.setVariants).toHaveBeenCalledTimes(1);
+      const variants = abrManager.setVariants.calls.argsFor(0)[0];
+      expect(variants.length).toBe(1);
+      expect(variants[0].id).toBe(2);
+
+      // Now increase the restriction, AbrManager should still be updated.
+      // https://github.com/google/shaka-player/issues/1533
+      abrManager.setVariants.calls.reset();
+      player.configure({restrictions: {maxBandwidth: Infinity}});
+      expect(abrManager.setVariants).toHaveBeenCalledTimes(1);
+      const newVariants = abrManager.setVariants.calls.argsFor(0)[0];
+      expect(newVariants.length).toBe(2);
+    });
+
     it('switches if active key status is "output-restricted"', async () => {
       manifest = new shaka.test.ManifestGenerator()
               .addPeriod(0)
