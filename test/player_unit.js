@@ -1122,6 +1122,40 @@ describe('Player', function() {
       streamingEngine.onCanSwitch();
       expect(abrManager.enable).toHaveBeenCalled();
     });
+
+    it('reuses AbrManager instance', async () => {
+      /** @type {!jasmine.Spy} */
+      const spy =
+          jasmine.createSpy('AbrManagerFactory').and.returnValue(abrManager);
+      player.configure({abrFactory: spy});
+
+      await player.load(fakeManifestUri, 0, parserFactory);
+      expect(spy).toHaveBeenCalled();
+      spy.calls.reset();
+
+      await player.load(fakeManifestUri, 0, parserFactory);
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+    it('creates new AbrManager if factory changes', async () => {
+      /** @type {!jasmine.Spy} */
+      const spy1 =
+          jasmine.createSpy('AbrManagerFactory').and.returnValue(abrManager);
+      /** @type {!jasmine.Spy} */
+      const spy2 =
+          jasmine.createSpy('AbrManagerFactory').and.returnValue(abrManager);
+      player.configure({abrFactory: spy1});
+
+      await player.load(fakeManifestUri, 0, parserFactory);
+      expect(spy1).toHaveBeenCalled();
+      expect(spy2).not.toHaveBeenCalled();
+      spy1.calls.reset();
+
+      player.configure({abrFactory: spy2});
+      await player.load(fakeManifestUri, 0, parserFactory);
+      expect(spy1).not.toHaveBeenCalled();
+      expect(spy2).toHaveBeenCalled();
+    });
   });
 
   describe('filterTracks', function() {
