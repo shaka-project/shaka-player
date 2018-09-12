@@ -112,14 +112,29 @@ shakaDemo.setupAssets_ = function() {
       'click', shakaDemo.load);
   document.getElementById('unloadButton').addEventListener(
       'click', shakaDemo.unload);
-  document.getElementById('licenseServerInput').addEventListener(
-      'input', shakaDemo.onAssetInput_);
-  document.getElementById('manifestInput').addEventListener(
-      'input', shakaDemo.onAssetInput_);
-  document.getElementById('certificateInput').addEventListener(
-      'input', shakaDemo.onAssetInput_);
+
+  const assetInputs = [
+    document.getElementById('licenseServerInput'),
+    document.getElementById('manifestInput'),
+    document.getElementById('certificateInput'),
+  ];
+  for (const input of assetInputs) {
+    input.addEventListener('input', shakaDemo.onAssetInput_);
+    input.addEventListener('keydown', shakaDemo.onAssetKeyDown_);
+  }
 
   return asyncOfflineSetup;
+};
+
+
+/**
+ * @param {!Event} event
+ * @private
+ */
+shakaDemo.onAssetKeyDown_ = function(event) {
+  if (event.key == 'Enter') {
+    shakaDemo.load();
+  }
 };
 
 
