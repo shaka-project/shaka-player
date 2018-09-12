@@ -162,7 +162,7 @@ describe('IndexeddbStorageCell', function() {
     }).then((found) => {
       expect(found).toBeTruthy();
 
-      let actual = keys.map((key) => found[key]);
+      let actual = keys.map((key) => found.get(key));
       expect(actual[0]).toEqual(manifests[0]);
       expect(actual[1]).toEqual(manifests[1]);
       expect(actual[2]).toEqual(manifests[2]);

@@ -32,16 +32,17 @@ describe('ManifestConverter', function() {
         createStreamDB(3, videoType, [1]),
       ];
 
-      /** @type {!Array.<shaka.extern.Variant>} */
-      let variants = createConverter().createVariants(audios, videos);
+      /** @type {!Map.<number, shaka.extern.Variant>} */
+      const variants = createConverter().createVariants(audios, videos);
+      expect(variants.size).toBe(2);
 
-      expect(variants.length).toBe(2);
+      expect(variants.has(0)).toBeTruthy();
+      expect(variants.get(0).audio.id).toBe(0);
+      expect(variants.get(0).video.id).toBe(2);
 
-      expect(variants[0].audio.id).toBe(0);
-      expect(variants[0].video.id).toBe(2);
-
-      expect(variants[1].audio.id).toBe(1);
-      expect(variants[1].video.id).toBe(3);
+      expect(variants.has(1)).toBeTruthy();
+      expect(variants.get(1).audio.id).toBe(1);
+      expect(variants.get(1).video.id).toBe(3);
     });
 
     it('will create variants when there is only audio', function() {
@@ -53,10 +54,9 @@ describe('ManifestConverter', function() {
       /** @type {!Array.<shaka.extern.StreamDB>} */
       let videos = [];
 
-      /** @type {!Array.<shaka.extern.Variant>} */
-      let variants = createConverter().createVariants(audios, videos);
-
-      expect(variants.length).toBe(2);
+      /** @type {!Map.<number, shaka.extern.Variant>} */
+      const variants = createConverter().createVariants(audios, videos);
+      expect(variants.size).toBe(2);
     });
 
     it('will create variants when there is only video', function() {
@@ -68,10 +68,9 @@ describe('ManifestConverter', function() {
         createStreamDB(3, videoType, [1]),
       ];
 
-      /** @type {!Array.<shaka.extern.Variant>} */
-      let variants = createConverter().createVariants(audios, videos);
-
-      expect(variants.length).toBe(2);
+      /** @type {!Map.<number, shaka.extern.Variant>} */
+      const variants = createConverter().createVariants(audios, videos);
+      expect(variants.size).toBe(2);
     });
   }); // describe('createVariants')
 

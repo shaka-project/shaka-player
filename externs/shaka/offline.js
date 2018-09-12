@@ -328,7 +328,7 @@ shaka.extern.StorageCell.prototype.getManifests = function(keys) {};
  * the asset they describe, it is assumed that it is feasible to have them all
  * in main memory at one time.
  *
- * @return {!Promise<!Object.<number, shaka.extern.ManifestDB>>}
+ * @return {!Promise<!Map.<number, shaka.extern.ManifestDB>>}
  */
 shaka.extern.StorageCell.prototype.getAllManifests = function() {};
 
@@ -372,7 +372,7 @@ shaka.extern.StorageMechanism.prototype.destroy = function() {};
  * address in the mechanism and should be consistent between calls to
  * |getCells|.
  *
- * @return {!Object.<string, !shaka.extern.StorageCell>}
+ * @return {!Map.<string, !shaka.extern.StorageCell>}
  */
 shaka.extern.StorageMechanism.prototype.getCells = function() {};
 

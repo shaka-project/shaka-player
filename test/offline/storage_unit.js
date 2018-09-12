@@ -330,7 +330,7 @@ describe('Storage', function() {
     let storage;
 
     beforeEach(function() {
-      shaka.offline.StorageMuxer.overrideSupport({});
+      shaka.offline.StorageMuxer.overrideSupport(new Map());
 
       player = new shaka.Player(new shaka.test.FakeVideo());
       storage = new shaka.offline.Storage(player);

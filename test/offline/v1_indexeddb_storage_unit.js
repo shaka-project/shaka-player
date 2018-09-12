@@ -60,7 +60,7 @@ describe('V1IndexeddbStorageCell', function() {
 
     // There should be one manifest.
     let manifests = await cell.getAllManifests();
-    let manifest = manifests[0];
+    let manifest = manifests.get(0);
     expect(manifest).toBeTruthy();
 
     // Make sure that the request fails.
@@ -98,10 +98,8 @@ describe('V1IndexeddbStorageCell', function() {
     // There should be one manifest.
     let map = await cell.getAllManifests();
     expect(map).toBeTruthy();
-    let manifests = shaka.util.MapUtils.values(map);
-    expect(manifests).toBeTruthy();
-    expect(manifests.length).toBe(1);
-    expect(manifests[0]).toBeTruthy();
+    expect(map.size).toBe(1);
+    expect(map.get(0)).toBeTruthy();
   }));
 
   it('can get manifest and all segments', checkAndRun(async function() {
@@ -151,22 +149,21 @@ describe('V1IndexeddbStorageCell', function() {
     let connection = await makeConnection();
     let cell = makeCell(connection);
 
-    let manifests = await cell.getAllManifests();
+    /** @type {!Array.<number>} */
+    const manifestKeys = [];
+    /** @type {!Array.<number>} */
+    const segmentKeys = [];
 
-    let manifestKeys = [];
-    shaka.util.MapUtils.forEach(manifests, (key, value) => {
-      let keys = /** @type {!Array.<number>} */(manifestKeys);
-      keys.push(Number(key));
+    const manifests = await cell.getAllManifests();
+    manifests.forEach((manifest, manifestKey) => {
+      manifestKeys.push(manifestKey);
+
+      for (const key of getAllSegmentKeys(manifest)) {
+        segmentKeys.push(key);
+      }
     });
+
     expect(manifestKeys.length).toBe(1);
-
-    let segmentKeys = [];
-    shaka.util.MapUtils.values(manifests).forEach((manifest) => {
-      getAllSegmentKeys(manifest).forEach((segmentKey) => {
-        let keys = /** @type {!Array.<number>} */(segmentKeys);
-        keys.push(Number(segmentKey));
-      });
-    });
     expect(segmentKeys.length).toBe(6);
 
     // Remove all the segments.
