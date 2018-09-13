@@ -31,13 +31,13 @@ goog.provide('shaka.test.FakeNetworkingEngine');
 shaka.test.FakeNetworkingEngine = class {
   constructor() {
     /**
-     * @private {!Object.<
+     * @private {!Map.<
      *    string,
      *    shaka.test.FakeNetworkingEngine.MockedResponse>} */
-    this.responseMap_ = {};
+    this.responseMap_ = new Map();
 
-    /** @private {!Object.<string, !Object.<string, string>>} */
-    this.headersMap_ = {};
+    /** @private {!Map.<string, !Object.<string, string>>} */
+    this.headersMap_ = new Map();
 
     /** @private {ArrayBuffer} */
     this.defaultResponse_ = null;
@@ -84,13 +84,14 @@ shaka.test.FakeNetworkingEngine = class {
 
     const requestedUri = request.uris[0];
 
-    const headers = this.headersMap_[requestedUri] || {};
+    const headers = this.headersMap_.get(requestedUri) || {};
 
     const defaultCallback = () => {
       return Promise.resolve(this.defaultResponse_);
     };
 
-    const resultCallback = this.responseMap_[requestedUri] || defaultCallback;
+    const responses = this.responseMap_;
+    const resultCallback = responses.get(requestedUri) || defaultCallback;
 
     // Cache the delay for this request now so that it does not change if
     // another request comes through.
@@ -206,7 +207,7 @@ shaka.test.FakeNetworkingEngine = class {
    * @return {!shaka.test.FakeNetworkingEngine}
    */
   setResponse(uri, callback) {
-    this.responseMap_[uri] = callback;
+    this.responseMap_.set(uri, callback);
     return this;
   }
 
@@ -241,12 +242,10 @@ shaka.test.FakeNetworkingEngine = class {
    * @return {!shaka.test.FakeNetworkingEngine}
    */
   setHeaders(uri, headers) {
-    const copy = {};
-    shaka.util.MapUtils.forEach(headers, (key, value) => {
-      copy[key] = value;
-    });
-
-    this.headersMap_[uri] = copy;
+    // Copy the header over to a map and then back to an object. This makes
+    // a copy of the original header.
+    const map = shaka.util.MapUtils.asMap(headers);
+    this.headersMap_.set(uri, shaka.util.MapUtils.asObject(map));
     return this;
   }
 
