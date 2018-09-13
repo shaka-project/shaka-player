@@ -40,11 +40,9 @@ NOTES:
  - ¹: Only the latest stable version is tested and supported. Older releases may still be usable, and we will accept pull requests for them, but they will not be officially tested or supported.
  - ²: Latest stable Chromecast firmware is tested. Both sender and receiver can be implemented with Shaka Player.
  - ³: Tizen 2017 model is actively tested and supported by the Shaka Player team. Tizen 2016 model is community-supported and untested by us.
- - ⁴: IE 11 offers PlayReady support on Windows 8.1 and Windows 10 only. IE 11 can play clear content on Windows 8.0. IE 11 does not support adaptive playback on Windows 7 and under. A separate [Promise polyfill][] is required for IE 11.
+ - ⁴: IE 11 offers PlayReady support on Windows 8.1 and Windows 10 only. IE 11 can play clear content on Windows 8.0. IE 11 does not support adaptive playback on Windows 7 and under.
  - ⁵: These are expected to work, but are not actively tested by the Shaka Player team.
  - ⁶: All iOS browers use the same HTML engine (Apple WebKit) and are not supported because they lack MediaSource support. For more information, see: https://github.com/google/shaka-player/issues/997
-
-[Promise polyfill]: https://github.com/lahmatiy/es6-promise-polyfill
 
 
 ## Manifest format support matrix

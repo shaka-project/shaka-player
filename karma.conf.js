@@ -76,7 +76,7 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       // Polyfills first, primarily for IE 11 and older TVs:
-      //   Promise polyfill
+      //   Promise polyfill, required since we test uncompiled code on IE11
       'node_modules/es6-promise-polyfill/promise.js',
       //   Babel polyfill, required for async/await
       'node_modules/babel-polyfill/dist/polyfill.js',
