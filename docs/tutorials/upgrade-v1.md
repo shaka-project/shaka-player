@@ -91,16 +91,6 @@ player.load(manifestUri);
 ```
 
 
-#### Promise polyfill for IE
-
-Prior to v2.4, we had our own polyfill of `Promise` for IE 11 support.  In v2.4,
-we have dropped that polyfill.  To support IE 11 in your application, you MUST
-install a `Promise` polyfill separately.  We recommend [es6-promise-polyfill][]
-for that purpose.
-
-[es6-promise-polyfill]: https://github.com/lahmatiy/es6-promise-polyfill
-
-
 #### ContentProtection callbacks
 
 Shaka v1's `DashVideoSource` had a parameter for a `ContentProtection` callback.
