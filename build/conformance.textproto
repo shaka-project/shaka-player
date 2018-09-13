@@ -192,34 +192,6 @@ requirement: {
 # Disallow ES6 methods.
 requirement: {
   type: BANNED_PROPERTY
-  value: 'Array.prototype.entries'
-  value: 'Array.prototype.keys'
-  value: 'Array.prototype.values'
-  value: 'Array.prototype.find'
-  value: 'Array.prototype.findIndex'
-  value: 'Array.prototype.copyWithin'
-  value: 'Array.prototype.fill'
-  value: 'Array.prototype.includes'
-  error_message: 'ES6 Array methods are not allowed '
-                 'because they are not supported in IE11'
-}
-requirement: {
-  type: BANNED_NAME
-  value: 'Array.from'
-  value: 'Array.of'
-  error_message: 'ES6 Array methods are not allowed '
-                 'because they are not supported in IE11'
-}
-requirement: {
-  type: BANNED_PROPERTY
-  value: 'String.prototype.startsWith'
-  value: 'String.prototype.endsWith'
-  value: 'String.prototype.includes'
-  error_message: 'ES6 String methods are not allowed '
-                 'because they are not supported in IE11'
-}
-requirement: {
-  type: BANNED_PROPERTY
   value: 'ArrayBuffer.prototype.slice'
   error_message: 'ArrayBuffer.slice is not allowed because it '
                  'is not supported on Tizen 2016'
@@ -257,12 +229,5 @@ requirement: {
   value: 'Float64Array.of'
   value: 'Float64Array.from'
   error_message: 'ES6 TypedArray methods are not allowed '
-                 'because they are not supported in IE11'
-}
-requirement: {
-  type: BANNED_NAME
-  value: 'WeakMap'
-  value: 'WeakSet'
-  error_message: 'WeakMaps and WeakSets are not allowed '
                  'because they are not supported in IE11'
 }
