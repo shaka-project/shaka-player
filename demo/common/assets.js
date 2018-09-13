@@ -235,13 +235,13 @@ shakaAssets.UplynkResponseFilter = function(type, response) {
 shakaAssets.UplynkRequestFilter = function(type, request) {
   if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
     // Modify the license request URL based on our cookie.
-    if (request.uris[0].indexOf('wv') !== -1 &&
+    if (request.uris[0].includes('wv') &&
         shakaAssets.uplynk_prefix) {
       request.uris[0] = shakaAssets.uplynk_prefix.concat('/wv');
-    } else if (request.uris[0].indexOf('ck') !== -1 &&
+    } else if (request.uris[0].includes('ck') &&
                shakaAssets.uplynk_prefix) {
       request.uris[0] = shakaAssets.uplynk_prefix.concat('/ck');
-    } else if (request.uris[0].indexOf('pr') !== -1 &&
+    } else if (request.uris[0].includes('pr') &&
                shakaAssets.uplynk_prefix) {
       request.uris[0] = shakaAssets.uplynk_prefix.concat('/pr');
     }

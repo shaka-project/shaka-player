@@ -44,7 +44,7 @@ module.exports = function(config) {
 
   // Find the settings JSON object in the command arguments
   var args = process.argv;
-  var settingsIndex = args.indexOf('--settings')
+  var settingsIndex = args.indexOf('--settings');
   var settings = settingsIndex >= 0 ? JSON.parse(args[settingsIndex + 1]) : {};
 
   if (settings.browsers && settings.browsers.length == 1 &&

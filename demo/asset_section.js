@@ -66,13 +66,13 @@ shakaDemo.setupAssets_ = function() {
     }
 
     let mimeTypes = [];
-    if (asset.features.indexOf(shakaAssets.Feature.WEBM) >= 0) {
+    if (asset.features.includes(shakaAssets.Feature.WEBM)) {
       mimeTypes.push('video/webm');
     }
-    if (asset.features.indexOf(shakaAssets.Feature.MP4) >= 0) {
+    if (asset.features.includes(shakaAssets.Feature.MP4)) {
       mimeTypes.push('video/mp4');
     }
-    if (asset.features.indexOf(shakaAssets.Feature.MP2TS) >= 0) {
+    if (asset.features.includes(shakaAssets.Feature.MP2TS)) {
       mimeTypes.push('video/mp2t');
     }
     if (!mimeTypes.some(
@@ -348,7 +348,7 @@ shakaDemo.load = function() {
     }
 
     // Disallow the casting of offline content.
-    let isOffline = asset.manifestUri.indexOf('offline:') == 0;
+    let isOffline = asset.manifestUri.startsWith('offline:');
     shakaDemo.controls_.allowCast(!isOffline);
 
     (asset.extraText || []).forEach(function(extraText) {

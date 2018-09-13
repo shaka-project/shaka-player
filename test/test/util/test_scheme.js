@@ -318,7 +318,7 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
    * @return {shaka.test.IStreamGenerator}
    */
   function createStreamGenerator(metadata) {
-    if (metadata.segmentUri.indexOf('.ts') != -1) {
+    if (metadata.segmentUri.includes('.ts')) {
       return new windowShaka.test.TSVodStreamGenerator(
           metadata.segmentUri);
     }

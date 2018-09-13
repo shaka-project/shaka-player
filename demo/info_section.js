@@ -155,7 +155,7 @@ shakaDemo.updateTrackOptions_ = function(list, tracks, languageAndRole) {
 
   tracks = tracks.filter(function(track) {
     let langMatch = track.language == language;
-    let roleMatch = role == '' || track.roles.indexOf(role) > -1;
+    let roleMatch = role == '' || track.roles.includes(role);
     return langMatch && roleMatch;
   });
 

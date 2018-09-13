@@ -102,10 +102,10 @@ describe('Player', function() {
 
         if (asset.features) {
           let mimeTypes = [];
-          if (asset.features.indexOf(Feature.WEBM) >= 0) {
+          if (asset.features.includes(Feature.WEBM)) {
             mimeTypes.push('video/webm');
           }
-          if (asset.features.indexOf(Feature.MP4) >= 0) {
+          if (asset.features.includes(Feature.MP4)) {
             mimeTypes.push('video/mp4');
           }
           if (!mimeTypes.some(
@@ -147,7 +147,7 @@ describe('Player', function() {
 
         await player.load(asset.manifestUri);
         if (asset.features) {
-          const isLive = asset.features.indexOf(Feature.LIVE) >= 0;
+          const isLive = asset.features.includes(Feature.LIVE);
           expect(player.isLive()).toEqual(isLive);
         }
         video.play();

@@ -96,10 +96,10 @@ describe('CastReceiver', function() {
     // ability to use modern APIs there that may not be available on all of the
     // browsers our library supports.  Because of this, CastReceiver tests will
     // only be run on Chrome and Chromecast.
-    isChromecast = navigator.userAgent.indexOf('CrKey') >= 0;
-    let isEdge = navigator.userAgent.indexOf('Edge/') >= 0;
+    isChromecast = navigator.userAgent.includes('CrKey');
+    let isEdge = navigator.userAgent.includes('Edge/');
     // Edge also has "Chrome/" in its user agent string.
-    isChrome = navigator.userAgent.indexOf('Chrome/') >= 0 && !isEdge;
+    isChrome = navigator.userAgent.includes('Chrome/') && !isEdge;
 
     // Don't do any more work here if the tests will not end up running.
     if (!isChromecast && !isChrome) return;

@@ -293,7 +293,7 @@ function retryOnSpecificHttpErrorsCallback(error) {
   if (error.code == shaka.util.Error.Code.BAD_HTTP_STATUS) {
     var statusCode = error.data[1];
     var retryCodes = [ 502, 503, 504, 520 ];
-    if (retryCodes.indexOf(statusCode) >= 0) {
+    if (retryCodes.includes(statusCode)) {
       player.retryStreaming();
     }
   }

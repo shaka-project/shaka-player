@@ -42,20 +42,6 @@ describe('ArrayUtils', function() {
     });
   });
 
-  describe('indexOf', function() {
-    it('will find a matching element', function() {
-      let arr = ['aaa', 'bbb', 'ccc'];
-      let comparator = function(a, b) { return a[0] === b[0]; };
-      expect(ArrayUtils.indexOf(arr, 'bat', comparator)).toBe(1);
-    });
-
-    it('will return -1 if not found', function() {
-      let arr = ['aaa', 'bbb', 'ccc'];
-      let comparator = function(a, b) { return a[0] === b[0]; };
-      expect(ArrayUtils.indexOf(arr, 'zoo', comparator)).toBe(-1);
-    });
-  });
-
   describe('hasSameElements', function() {
     it('determines same elements', () => {
       expectEqual([], []);

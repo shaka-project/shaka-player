@@ -2392,7 +2392,7 @@ describe('Player', function() {
     beforeEach(function() {
       // overriding for good / bad codecs.
       window.MediaSource.isTypeSupported = function(mimeType) {
-        return mimeType.indexOf('good') >= 0;
+        return mimeType.includes('good');
       };
     });
 
@@ -3386,7 +3386,7 @@ describe('Player', function() {
   function stringContaining(substring) {
     return {
       asymmetricMatch: function(actual) {
-        return actual.indexOf(substring) >= 0;
+        return actual.includes(substring);
       },
     };
   }

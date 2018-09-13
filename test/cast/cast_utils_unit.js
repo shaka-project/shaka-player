@@ -53,17 +53,17 @@ describe('CastUtils', function() {
     let playerMembers = Object.keys(shaka.Player.prototype).filter(
         function(name) {
           // Private members end with _.
-          return ignoredMembers.indexOf(name) < 0 &&
+          return !ignoredMembers.includes(name) &&
               name.substr(name.length - 1) != '_';
         });
 
     // To make debugging easier, don't check that they are equal; instead check
     // that neither has any extra entries.
     let extraCastMembers = castMembers.filter(function(name) {
-      return playerMembers.indexOf(name) < 0;
+      return !playerMembers.includes(name);
     });
     let extraPlayerMembers = playerMembers.filter(function(name) {
-      return castMembers.indexOf(name) < 0;
+      return !castMembers.includes(name);
     });
     expect(extraCastMembers).toEqual([]);
     expect(extraPlayerMembers).toEqual([]);

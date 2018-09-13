@@ -1997,7 +1997,7 @@ describe('DrmEngine', function() {
   }
 
   function fakeRequestMediaKeySystemAccess(acceptableKeySystems, keySystem) {
-    if (acceptableKeySystems.indexOf(keySystem) < 0) {
+    if (!acceptableKeySystems.includes(keySystem)) {
       return Promise.reject();
     }
     mockMediaKeySystemAccess.keySystem = keySystem;

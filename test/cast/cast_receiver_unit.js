@@ -70,10 +70,10 @@ describe('CastReceiver', function() {
     // ability to use modern APIs there that may not be available on all of the
     // browsers our library supports.  Because of this, CastReceiver tests will
     // only be run on Chrome and Chromecast.
-    isChromecast = navigator.userAgent.indexOf('CrKey') >= 0;
-    let isEdge = navigator.userAgent.indexOf('Edge/') >= 0;
+    isChromecast = navigator.userAgent.includes('CrKey');
+    let isEdge = navigator.userAgent.includes('Edge/');
     // Edge also has "Chrome/" in its user agent string.
-    isChrome = navigator.userAgent.indexOf('Chrome/') >= 0 && !isEdge;
+    isChrome = navigator.userAgent.includes('Chrome/') && !isEdge;
 
     // Don't do any more work here if the tests will not end up running.
     if (!isChromecast && !isChrome) return;
@@ -800,8 +800,8 @@ describe('CastReceiver', function() {
 
       fakeIncomingMessage(message, mockGenericMessageBus);
       expect(mockGenericMessageBus.broadcast.calls.count()).toEqual(1);
-      expect(mockGenericMessageBus.broadcast.calls.argsFor(0)[0].indexOf(
-          '"requestId":0,"type":"MEDIA_STATUS"') != -1).toBe(true);
+      expect(mockGenericMessageBus.broadcast.calls.argsFor(0)[0].includes(
+          '"requestId":0,"type":"MEDIA_STATUS"')).toBe(true);
     }));
 
     it('play', checkAndRun(() => {
@@ -894,10 +894,10 @@ describe('CastReceiver', function() {
 
       fakeIncomingMessage(message, mockGenericMessageBus);
       expect(mockGenericMessageBus.broadcast.calls.count()).toEqual(1);
-      expect(mockGenericMessageBus.broadcast.calls.argsFor(0)[0].indexOf(
+      expect(mockGenericMessageBus.broadcast.calls.argsFor(0)[0].includes(
           '"requestId":0,' +
           '"type":"INVALID_REQUEST",' +
-          '"reason":"INVALID_COMMAND"') != -1)
+          '"reason":"INVALID_COMMAND"'))
           .toBe(true);
     }));
   });

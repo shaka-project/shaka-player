@@ -591,7 +591,7 @@ describe('HlsParser live', function() {
 
         fakeNetEngine.setResponseFilter(function(type, response) {
           // Simulate a redirect by changing the response URI
-          if (response.uri.indexOf('test:/redirected/') == 0) return;
+          if (response.uri.startsWith('test:/redirected/')) return;
           response.uri = response.uri.replace('test:/', 'test:/redirected/');
         });
 

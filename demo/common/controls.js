@@ -210,10 +210,10 @@ ShakaControls.prototype.onScreenRotation_ = function() {
       this.video_.readyState == 0 ||
       this.castProxy_.isCasting()) return;
 
-  if (screen.orientation.type.indexOf('landscape') >= 0 &&
+  if (screen.orientation.type.includes('landscape') &&
       !document.fullscreenElement) {
     this.videoContainer_.requestFullscreen();
-  } else if (screen.orientation.type.indexOf('portrait') >= 0 &&
+  } else if (screen.orientation.type.includes('portrait') &&
       document.fullscreenElement) {
     document.exitFullscreen();
   }

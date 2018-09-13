@@ -517,8 +517,7 @@ describe('Storage', function() {
        *
        * @type {!Array.<number>}
        */
-      const remainingProgress =
-          shaka.util.ArrayUtils.copy(expectedProgressSteps);
+      const remainingProgress = expectedProgressSteps.slice();
 
       const progressCallback = (content, progress) => {
         expect(progress).toBeCloseTo(remainingProgress.shift());

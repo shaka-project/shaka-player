@@ -1104,7 +1104,7 @@ describe('MediaSourceEngine', function() {
 
   function captureEvents(object, targetEventNames) {
     object.addEventListener.and.callFake(function(eventName, listener) {
-      if (targetEventNames.indexOf(eventName) != -1) {
+      if (targetEventNames.includes(eventName)) {
         object[eventName] = listener;
       }
     });
