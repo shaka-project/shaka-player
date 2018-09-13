@@ -1850,30 +1850,21 @@ describe('DrmEngine', function() {
     });
   }); // describe('configure')
 
-  describe('removeSessions', function() {
+  describe('removeSession', function() {
     /** @type {!shaka.util.PublicPromise} */
-    let updatePromise1;
-    /** @type {!shaka.util.PublicPromise} */
-    let updatePromise2;
+    let updatePromise;
 
     beforeEach(async () => {
       session1.load.and.returnValue(Promise.resolve(true));
-      session2.load.and.returnValue(Promise.resolve(true));
 
       // When remove() is called, it should resolve quickly and raise a
       // 'message' event of type 'license-release'.  The removeSessions method
       // should wait until update() is complete with the response.
-      updatePromise1 = new shaka.util.PublicPromise();
-      updatePromise2 = new shaka.util.PublicPromise();
+      updatePromise = new shaka.util.PublicPromise();
       session1.remove.and.callFake(function() {
         // Raise the event synchronously, even though it doesn't normally.
         session1.on['message']({target: session1, message: new ArrayBuffer(0)});
-        session1.update.and.returnValue(updatePromise1);
-        return Promise.resolve();
-      });
-      session2.remove.and.callFake(function() {
-        session2.on['message']({target: session2, message: new ArrayBuffer(0)});
-        session2.update.and.returnValue(updatePromise2);
+        session1.update.and.returnValue(updatePromise);
         return Promise.resolve();
       });
 
@@ -1882,14 +1873,11 @@ describe('DrmEngine', function() {
     });
 
     it('waits until update() is complete', async () => {
-      shaka.test.Util.delay(0.1).then(
-          updatePromise1.resolve.bind(updatePromise1));
       shaka.test.Util.delay(0.3).then(
-          updatePromise2.resolve.bind(updatePromise2));
+          updatePromise.resolve.bind(updatePromise));
 
-      await drmEngine.removeSessions(['abc', 'def']);
+      await drmEngine.removeSession('abc');
       expect(session1.update).toHaveBeenCalled();
-      expect(session2.update).toHaveBeenCalled();
     });
 
     it('is rejected when network request fails', async () => {
@@ -1902,7 +1890,7 @@ describe('DrmEngine', function() {
       onErrorSpy.and.stub();
 
       try {
-        await drmEngine.removeSessions(['abc', 'def']);
+        await drmEngine.removeSession('abc');
         fail();
       } catch (error) {
         shaka.test.Util.expectToEqualError(
@@ -1912,17 +1900,16 @@ describe('DrmEngine', function() {
                 shaka.util.Error.Category.DRM,
                 shaka.util.Error.Code.LICENSE_REQUEST_FAILED,
                 networkError));
-        // The first session's request was rejected.
         expect(session1.update).not.toHaveBeenCalled();
       }
     });
 
     it('is rejected when update() is rejected', async () => {
-      updatePromise1.reject({message: 'Error'});
+      updatePromise.reject({message: 'Error'});
       onErrorSpy.and.stub();
 
       try {
-        await drmEngine.removeSessions(['abc', 'def']);
+        await drmEngine.removeSession('abc');
         fail();
       } catch (error) {
         shaka.test.Util.expectToEqualError(
