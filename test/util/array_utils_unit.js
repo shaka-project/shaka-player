@@ -18,30 +18,6 @@
 describe('ArrayUtils', function() {
   const ArrayUtils = shaka.util.ArrayUtils;
 
-  describe('removeDuplicates', function() {
-    it('will remove duplicate elements', function() {
-      let arr = [1, 2, 2, 5, 6, 3, 1, 2];
-      expect(ArrayUtils.removeDuplicates(arr)).toEqual([1, 2, 5, 6, 3]);
-    });
-
-    it('removes duplicate NaN', function() {
-      let arr = [NaN, 1, NaN, 2, NaN, NaN];
-      expect(ArrayUtils.removeDuplicates(arr)).toEqual([NaN, 1, 2]);
-    });
-
-    it('does nothing if no duplicates', function() {
-      let arr = [1, 2, 3, 6, 5, 4];
-      expect(ArrayUtils.removeDuplicates(arr)).toEqual(arr);
-    });
-
-    it('accepts an optional comparator', function() {
-      let arr = ['aaa', 'abc', 'bat', 'car', 'cat'];
-      let comparator = function(a, b) { return a[0] === b[0]; };
-      expect(ArrayUtils.removeDuplicates(arr, comparator))
-          .toEqual(['aaa', 'bat', 'car']);
-    });
-  });
-
   describe('hasSameElements', function() {
     it('determines same elements', () => {
       expectEqual([], []);
