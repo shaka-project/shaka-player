@@ -53,8 +53,7 @@ describe('CastUtils', function() {
     let playerMembers = Object.keys(shaka.Player.prototype).filter(
         function(name) {
           // Private members end with _.
-          return !ignoredMembers.includes(name) &&
-              name.substr(name.length - 1) != '_';
+          return !ignoredMembers.includes(name) && !name.endsWith('_');
         });
 
     // To make debugging easier, don't check that they are equal; instead check
