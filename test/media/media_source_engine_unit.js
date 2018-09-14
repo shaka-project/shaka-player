@@ -190,11 +190,9 @@ describe('MediaSourceEngine', function() {
 
   describe('init', function() {
     it('creates SourceBuffers for the given types', async () => {
-      // Create empty object first and initialize the fields through
-      // [] to allow field names to be expressions.
-      let initObject = {};
-      initObject[ContentType.AUDIO] = fakeAudioStream;
-      initObject[ContentType.VIDEO] = fakeVideoStream;
+      const initObject = new Map();
+      initObject.set(ContentType.AUDIO, fakeAudioStream);
+      initObject.set(ContentType.VIDEO, fakeVideoStream);
       await mediaSourceEngine.init(initObject, false);
       expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledWith('audio/foo');
       expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledWith('video/foo');
@@ -202,10 +200,8 @@ describe('MediaSourceEngine', function() {
     });
 
     it('creates TextEngines for text types', async () => {
-      // Create empty object first and initialize the fields through
-      // [] to allow field names to be expressions.
-      let initObject = {};
-      initObject[ContentType.TEXT] = fakeTextStream;
+      const initObject = new Map();
+      initObject.set(ContentType.TEXT, fakeTextStream);
       await mediaSourceEngine.init(initObject, false);
       expect(mockMediaSource.addSourceBuffer).not.toHaveBeenCalled();
       expect(shaka.text.TextEngine).toHaveBeenCalled();
@@ -214,11 +210,9 @@ describe('MediaSourceEngine', function() {
 
   describe('bufferStart and bufferEnd', function() {
     beforeEach(async () => {
-      // Create empty object first and initialize the fields through
-      // [] to allow field names to be expressions.
-      let initObject = {};
-      initObject[ContentType.AUDIO] = fakeAudioStream;
-      initObject[ContentType.TEXT] = fakeTextStream;
+      const initObject = new Map();
+      initObject.set(ContentType.AUDIO, fakeAudioStream);
+      initObject.set(ContentType.TEXT, fakeTextStream);
       await mediaSourceEngine.init(initObject, false);
     });
 
@@ -260,11 +254,9 @@ describe('MediaSourceEngine', function() {
 
   describe('bufferedAheadOf', function() {
     beforeEach(async () => {
-      // Create empty object first and initialize the fields through
-      // [] to allow field names to be expressions.
-      let initObject = {};
-      initObject[ContentType.AUDIO] = fakeAudioStream;
-      initObject[ContentType.TEXT] = fakeTextStream;
+      const initObject = new Map();
+      initObject.set(ContentType.AUDIO, fakeAudioStream);
+      initObject.set(ContentType.TEXT, fakeTextStream);
       await mediaSourceEngine.init(initObject, false);
     });
 
@@ -322,12 +314,10 @@ describe('MediaSourceEngine', function() {
     beforeEach(async () => {
       captureEvents(audioSourceBuffer, ['updateend', 'error']);
       captureEvents(videoSourceBuffer, ['updateend', 'error']);
-      // Create empty object first and initialize the fields through
-      // [] to allow field names to be expressions.
-      let initObject = {};
-      initObject[ContentType.AUDIO] = fakeAudioStream;
-      initObject[ContentType.VIDEO] = fakeVideoStream;
-      initObject[ContentType.TEXT] = fakeTextStream;
+      const initObject = new Map();
+      initObject.set(ContentType.AUDIO, fakeAudioStream);
+      initObject.set(ContentType.VIDEO, fakeVideoStream);
+      initObject.set(ContentType.TEXT, fakeTextStream);
       await mediaSourceEngine.init(initObject, false);
     });
 
@@ -480,8 +470,8 @@ describe('MediaSourceEngine', function() {
     });
 
     it('appends transmuxed data and captions', function(done) {
-      let initObject = {};
-      initObject[ContentType.VIDEO] = fakeTransportStream;
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, fakeTransportStream);
 
       mediaSourceEngine.init(initObject, false).then(() => {
         mediaSourceEngine.setUseEmbeddedText(true);
@@ -502,8 +492,8 @@ describe('MediaSourceEngine', function() {
     });
 
     it('appends only transmuxed data without embedded text', function(done) {
-      let initObject = {};
-      initObject[ContentType.VIDEO] = fakeTransportStream;
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, fakeTransportStream);
 
       mediaSourceEngine.init(initObject, false).then(() => {
         mediaSourceEngine.setUseEmbeddedText(false);
@@ -528,12 +518,10 @@ describe('MediaSourceEngine', function() {
     beforeEach(async () => {
       captureEvents(audioSourceBuffer, ['updateend', 'error']);
       captureEvents(videoSourceBuffer, ['updateend', 'error']);
-      // Create empty object first and initialize the fields through
-      // [] to allow field names to be expressions.
-      let initObject = {};
-      initObject[ContentType.AUDIO] = fakeAudioStream;
-      initObject[ContentType.VIDEO] = fakeVideoStream;
-      initObject[ContentType.TEXT] = fakeTextStream;
+      const initObject = new Map();
+      initObject.set(ContentType.AUDIO, fakeAudioStream);
+      initObject.set(ContentType.VIDEO, fakeVideoStream);
+      initObject.set(ContentType.TEXT, fakeTextStream);
       await mediaSourceEngine.init(initObject, false);
     });
 
@@ -668,12 +656,10 @@ describe('MediaSourceEngine', function() {
     beforeEach(async () => {
       captureEvents(audioSourceBuffer, ['updateend', 'error']);
       captureEvents(videoSourceBuffer, ['updateend', 'error']);
-      // Create empty object first and initialize the fields through
-      // [] to allow field names to be expressions.
-      let initObject = {};
-      initObject[ContentType.AUDIO] = fakeAudioStream;
-      initObject[ContentType.VIDEO] = fakeVideoStream;
-      initObject[ContentType.TEXT] = fakeTextStream;
+      const initObject = new Map();
+      initObject.set(ContentType.AUDIO, fakeAudioStream);
+      initObject.set(ContentType.VIDEO, fakeVideoStream);
+      initObject.set(ContentType.TEXT, fakeTextStream);
       await mediaSourceEngine.init(initObject, false);
     });
 
@@ -738,11 +724,9 @@ describe('MediaSourceEngine', function() {
     beforeEach(async () => {
       captureEvents(audioSourceBuffer, ['updateend', 'error']);
       captureEvents(videoSourceBuffer, ['updateend', 'error']);
-      // Create empty object first and initialize the fields through
-      // [] to allow field names to be expressions.
-      let initObject = {};
-      initObject[ContentType.AUDIO] = fakeAudioStream;
-      initObject[ContentType.VIDEO] = fakeVideoStream;
+      const initObject = new Map();
+      initObject.set(ContentType.AUDIO, fakeAudioStream);
+      initObject.set(ContentType.VIDEO, fakeVideoStream);
       await mediaSourceEngine.init(initObject, false);
     });
 
@@ -829,11 +813,9 @@ describe('MediaSourceEngine', function() {
       mockMediaSource.durationGetter_.and.returnValue(0);
       captureEvents(audioSourceBuffer, ['updateend', 'error']);
       captureEvents(videoSourceBuffer, ['updateend', 'error']);
-      // Create empty object first and initialize the fields through
-      // [] to allow field names to be expressions.
-      let initObject = {};
-      initObject[ContentType.AUDIO] = fakeAudioStream;
-      initObject[ContentType.VIDEO] = fakeVideoStream;
+      const initObject = new Map();
+      initObject.set(ContentType.AUDIO, fakeAudioStream);
+      initObject.set(ContentType.VIDEO, fakeVideoStream);
       await mediaSourceEngine.init(initObject, false);
     });
 
@@ -920,11 +902,9 @@ describe('MediaSourceEngine', function() {
     beforeEach(async () => {
       captureEvents(audioSourceBuffer, ['updateend', 'error']);
       captureEvents(videoSourceBuffer, ['updateend', 'error']);
-      // Create empty object first and initialize the fields through
-      // [] to allow field names to be expressions.
-      let initObject = {};
-      initObject[ContentType.AUDIO] = fakeAudioStream;
-      initObject[ContentType.VIDEO] = fakeVideoStream;
+      const initObject = new Map();
+      initObject.set(ContentType.AUDIO, fakeAudioStream);
+      initObject.set(ContentType.VIDEO, fakeVideoStream);
       await mediaSourceEngine.init(initObject, false);
     });
 

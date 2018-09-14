@@ -575,12 +575,10 @@ describe('StreamingEngine', function() {
     });
 
     onInitialStreamsSetup.and.callFake(function() {
-      // Create empty object first and initialize the fields through
-      // [] to allow field names to be expressions.
-      let expectedObject = {};
-      expectedObject[ContentType.AUDIO] = audioStream1;
-      expectedObject[ContentType.VIDEO] = videoStream1;
-      expectedObject[ContentType.TEXT] = textStream1;
+      const expectedObject = new Map();
+      expectedObject.set(ContentType.AUDIO, audioStream1);
+      expectedObject.set(ContentType.VIDEO, videoStream1);
+      expectedObject.set(ContentType.TEXT, textStream1);
       expect(mediaSourceEngine.init)
           .toHaveBeenCalledWith(expectedObject, false);
       expect(mediaSourceEngine.init.calls.count()).toBe(1);
@@ -636,8 +634,11 @@ describe('StreamingEngine', function() {
           streamingEngine.loadNewTextStream(textStream1,
                                             /* createMediaState */ true);
           expect(mediaSourceEngine.clear).toHaveBeenCalledWith('text');
+
+          const expectedObject = new Map();
+          expectedObject.set(ContentType.TEXT, jasmine.any(Object));
           expect(mediaSourceEngine.init).toHaveBeenCalledWith(
-              {text: jasmine.any(Object)}, false);
+              expectedObject, false);
         }
       });
     });

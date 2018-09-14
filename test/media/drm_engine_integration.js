@@ -142,11 +142,9 @@ describe('DrmEngine', function() {
 
     mediaSourceEngine = new shaka.media.MediaSourceEngine(video);
 
-    // Create empty object first and initialize the fields through
-    // [] to allow field names to be expressions.
-    let expectedObject = {};
-    expectedObject[ContentType.AUDIO] = audioStream;
-    expectedObject[ContentType.VIDEO] = videoStream;
+    const expectedObject = new Map();
+    expectedObject.set(ContentType.AUDIO, audioStream);
+    expectedObject.set(ContentType.VIDEO, videoStream);
     await mediaSourceEngine.init(expectedObject, false);
   });
 
