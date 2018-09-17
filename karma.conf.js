@@ -101,9 +101,7 @@ module.exports = function(config) {
       // list of test assets next
       'demo/common/assets.js',
 
-      // unit tests last
-      'test/**/*_unit.js',
-
+      // if --test-custom-asset *is not* present, we will add unit tests.
       // if --quick *is not* present, we will add integration tests.
       // if --external *is* present, we will add external asset tests.
 
@@ -234,13 +232,23 @@ module.exports = function(config) {
     return config.client.args[0];
   }
 
-  if (!settings.quick) {
-    // If --quick is present, we don't serve integration tests.
-    config.files.push('test/**/*_integration.js');
-  }
-  if (settings.external) {
-    // If --external is present, we serve external asset tests.
+  if (settings.test_custom_asset) {
+    // If testing custom assets, we don't serve other unit or integration tests.
+    // External asset tests are the basis for custom asset testing, so this file
+    // is automatically included.
     config.files.push('test/player_external.js');
+  } else {
+    // In a normal test run, we serve unit tests.
+    config.files.push('test/**/*_unit.js');
+
+    if (!settings.quick) {
+      // If --quick is present, we don't serve integration tests.
+      config.files.push('test/**/*_integration.js');
+    }
+    if (settings.external) {
+      // If --external is present, we serve external asset tests.
+      config.files.push('test/player_external.js');
+    }
   }
   // We just modified the config in-place.  No need for config.set() after we
   // push to config.files.

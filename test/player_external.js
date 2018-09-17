@@ -175,9 +175,6 @@ describe('Player', function() {
       });
     }
 
-    // Create a test for each asset in the demo asset list.
-    shakaAssets.testAssets.forEach(createAssetTest);
-
     // The user can run tests on a specific manifest URI that is not in the
     // asset list.
     const testCustomAsset = getClientArg('testCustomAsset');
@@ -195,6 +192,9 @@ describe('Player', function() {
         drm: keySystems,
       };
       createAssetTest(asset);
+    } else {
+      // No custom assets? Create a test for each asset in the demo asset list.
+      shakaAssets.testAssets.forEach(createAssetTest);
     }
   });
 
