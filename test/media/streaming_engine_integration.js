@@ -328,12 +328,16 @@ describe('StreamingEngine', function() {
         video.play();
       });
 
-      let onEnded = function() {
-        // Some browsers may not end at exactly 60 seconds.
-        expect(Math.round(video.currentTime)).toBe(60);
-        done();
+      let onTimeUpdate = function() {
+        // Safari has a bug where it sometimes doesn't fire the 'ended' event,
+        // so use 'timeupdate' instead.
+        if (video.ended) {
+          // Some browsers may not end at exactly 60 seconds.
+          expect(Math.round(video.currentTime)).toBe(60);
+          done();
+        }
       };
-      eventManager.listen(video, 'ended', onEnded);
+      eventManager.listen(video, 'timeupdate', onTimeUpdate);
 
       // Let's go!
       onChooseStreams.and.callFake(defaultOnChooseStreams);
@@ -358,12 +362,16 @@ describe('StreamingEngine', function() {
         }
       });
 
-      let onEnded = function() {
-        // Some browsers may not end at exactly 60 seconds.
-        expect(Math.round(video.currentTime)).toBe(60);
-        done();
+      let onTimeUpdate = function() {
+        // Safari has a bug where it sometimes doesn't fire the 'ended' event,
+        // so use 'timeupdate' instead.
+        if (video.ended) {
+          // Some browsers may not end at exactly 60 seconds.
+          expect(Math.round(video.currentTime)).toBe(60);
+          done();
+        }
       };
-      eventManager.listen(video, 'ended', onEnded);
+      eventManager.listen(video, 'timeupdate', onTimeUpdate);
 
       // Let's go!
       onChooseStreams.and.callFake(defaultOnChooseStreams);
@@ -379,20 +387,22 @@ describe('StreamingEngine', function() {
       });
 
       // After 35 seconds seek back 10 seconds into the first Period.
+      let didSeek = false;
       let onTimeUpdate = function() {
-        if (video.currentTime >= 35) {
-          eventManager.unlisten(video, 'timeupdate');
-          video.currentTime = 25;
+        if (!didSeek) {
+          if (video.currentTime >= 35) {
+            didSeek = true;
+            video.currentTime = 25;
+          }
+        } else if (video.ended) {
+          // Safari has a bug where it sometimes doesn't fire the 'ended' event,
+          // so use 'timeupdate' instead.
+          // Some browsers may not end at exactly 60 seconds.
+          expect(Math.round(video.currentTime)).toBe(60);
+          done();
         }
       };
       eventManager.listen(video, 'timeupdate', onTimeUpdate);
-
-      let onEnded = function() {
-        // Some browsers may not end at exactly 60 seconds.
-        expect(Math.round(video.currentTime)).toBe(60);
-        done();
-      };
-      eventManager.listen(video, 'ended', onEnded);
 
       // Let's go!
       onChooseStreams.and.callFake(defaultOnChooseStreams);
@@ -408,20 +418,22 @@ describe('StreamingEngine', function() {
       });
 
       // After 20 seconds seek 10 seconds into the second Period.
+      let didSeek = false;
       let onTimeUpdate = function() {
-        if (video.currentTime >= 20) {
-          eventManager.unlisten(video, 'timeupdate');
-          video.currentTime = 40;
+        if (!didSeek) {
+          if (video.currentTime >= 20) {
+            didSeek = true;
+            video.currentTime = 40;
+          }
+        } else if (video.ended) {
+          // Safari has a bug where it sometimes doesn't fire the 'ended' event,
+          // so use 'timeupdate' instead.
+          // Some browsers may not end at exactly 60 seconds.
+          expect(Math.round(video.currentTime)).toBe(60);
+          done();
         }
       };
       eventManager.listen(video, 'timeupdate', onTimeUpdate);
-
-      let onEnded = function() {
-        // Some browsers may not end at exactly 60 seconds.
-        expect(Math.round(video.currentTime)).toBe(60);
-        done();
-      };
-      eventManager.listen(video, 'ended', onEnded);
 
       // Let's go!
       onChooseStreams.and.callFake(defaultOnChooseStreams);
