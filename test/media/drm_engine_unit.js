@@ -1368,78 +1368,72 @@ describe('DrmEngine', function() {
       await drmEngine.destroy();
     });
 
-    it('interrupts failing MediaKeys queries', function(done) {
+    it('interrupts failing MediaKeys queries', async function() {
       // Hold the MediaKeys query:
-      let p = new shaka.util.PublicPromise();
+      /** @type {!shaka.util.PublicPromise} */
+      const p = new shaka.util.PublicPromise();
       requestMediaKeySystemAccessSpy.and.returnValue(p);
 
-      // This chain should still return "success" when DrmEngine is destroyed.
       const variants = shaka.util.StreamUtils.getAllVariants(manifest);
       drmEngine.initForPlayback(
           variants, manifest.offlineSessionIds).catch(fail);
 
-      shaka.test.Util.delay(1.0).then(function() {
-        // The first query has been made, which we are blocking.
-        expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
-        expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledWith(
-            'drm.abc', jasmine.any(Array));
-        return drmEngine.destroy();
-      }).then(function() {
-        p.reject();  // Fail drm.abc.
-        return shaka.test.Util.delay(1.5);
-      }).then(function() {
-        // A second query was not made.
-        expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
-        expect(drmEngine.initialized()).toBe(false);
-      }).catch(fail).then(done);
+      // This flow should still return "success" when DrmEngine is destroyed.
+      await shaka.test.Util.delay(1.0);
+      // The first query has been made, which we are blocking.
+      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
+      expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledWith(
+          'drm.abc', jasmine.any(Array));
+      await drmEngine.destroy();
+      p.reject();  // Fail drm.abc.
+      await shaka.test.Util.delay(1.5);
+      // A second query was not made.
+      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
+      expect(drmEngine.initialized()).toBe(false);
     });
 
-    it('interrupts successful MediaKeys queries', function(done) {
+    it('interrupts successful MediaKeys queries', async function() {
       // Hold the MediaKeys query:
-      let p = new shaka.util.PublicPromise();
+      /** @type {!shaka.util.PublicPromise} */
+      const p = new shaka.util.PublicPromise();
       requestMediaKeySystemAccessSpy.and.returnValue(p);
 
-      // This chain should still return "success" when DrmEngine is destroyed.
+      // This flow should still return "success" when DrmEngine is destroyed.
       const variants = shaka.util.StreamUtils.getAllVariants(manifest);
       drmEngine.initForPlayback(
           variants, manifest.offlineSessionIds).catch(fail);
 
-      shaka.test.Util.delay(1.0).then(function() {
-        // The first query has been made, which we are blocking.
-        expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
-        expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledWith(
-            'drm.abc', jasmine.any(Array));
-        return drmEngine.destroy();
-      }).then(function() {
-        p.resolve();  // Success for drm.abc.
-        return shaka.test.Util.delay(1.5);
-      }).then(function() {
-        // Due to the interruption, we never created MediaKeys.
-        expect(drmEngine.keySystem()).toBe('');
-        expect(drmEngine.initialized()).toBe(false);
-      }).catch(fail).then(done);
+      await shaka.test.Util.delay(1.0);
+      // The first query has been made, which we are blocking.
+      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
+      expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledWith(
+          'drm.abc', jasmine.any(Array));
+      await drmEngine.destroy();
+      p.resolve();  // Success for drm.abc.
+      await shaka.test.Util.delay(1.5);
+      // Due to the interruption, we never created MediaKeys.
+      expect(drmEngine.keySystem()).toBe('');
+      expect(drmEngine.initialized()).toBe(false);
     });
 
-    it('interrupts successful calls to createMediaKeys', function(done) {
+    it('interrupts successful calls to createMediaKeys', async function() {
       // Hold createMediaKeys:
-      let p = new shaka.util.PublicPromise();
+      /** @type {!shaka.util.PublicPromise} */
+      const p = new shaka.util.PublicPromise();
       mockMediaKeySystemAccess.createMediaKeys.and.returnValue(p);
 
-      // This chain should still return "success" when DrmEngine is destroyed.
+      // This flow should still return "success" when DrmEngine is destroyed.
       const variants = shaka.util.StreamUtils.getAllVariants(manifest);
       drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
 
-      shaka.test.Util.delay(1.0).then(function() {
-        // We are blocked on createMediaKeys:
-        expect(mockMediaKeySystemAccess.createMediaKeys).toHaveBeenCalled();
-        return drmEngine.destroy();
-      }).then(function() {
-        p.resolve();  // Success for createMediaKeys().
-        return shaka.test.Util.delay(1.5);
-      }).then(function() {
-        // Due to the interruption, we never finished initialization.
-        expect(drmEngine.initialized()).toBe(false);
-      }).catch(fail).then(done);
+      await shaka.test.Util.delay(1.0);
+      // We are blocked on createMediaKeys:
+      expect(mockMediaKeySystemAccess.createMediaKeys).toHaveBeenCalled();
+      await drmEngine.destroy();
+      p.resolve();  // Success for createMediaKeys().
+      await shaka.test.Util.delay(1.5);
+      // Due to the interruption, we never finished initialization.
+      expect(drmEngine.initialized()).toBe(false);
     });
 
     it('interrupts failed calls to setMediaKeys', function(done) {
