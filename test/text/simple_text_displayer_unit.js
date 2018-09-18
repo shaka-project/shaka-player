@@ -18,9 +18,7 @@
 
 describe('SimpleTextDisplayer', function() {
   const originalVTTCue = window.VTTCue;
-  const originalVTTRegion = window.VTTRegion;
   const Cue = shaka.text.Cue;
-  const CueRegion = shaka.text.CueRegion;
   const SimpleTextDisplayer = shaka.text.SimpleTextDisplayer;
 
   /** @type {!shaka.test.FakeVideo} */
@@ -50,17 +48,10 @@ describe('SimpleTextDisplayer', function() {
       this.text = text;
     }
     window.VTTCue = /** @type {?} */(FakeVTTCue);
-
-    /**
-     * @constructor
-     */
-    function FakeVTTRegion() {}
-    window.VTTRegion = /** @type {?} */(FakeVTTRegion);
   });
 
   afterAll(function() {
     window.VTTCue = originalVTTCue;
-    window.VTTRegion = originalVTTRegion;
   });
 
   describe('append', function() {
@@ -287,65 +278,6 @@ describe('SimpleTextDisplayer', function() {
     });
   });
 
-  describe('ConvertToVttRegion', function() {
-    it('converts shaka.text.CueRegions to VTTRegions', function() {
-      let region1 = new shaka.text.CueRegion();
-      region1.id = 'reg1';
-      region1.width = 50;
-      region1.scroll = CueRegion.scrollMode.UP;
-      region1.height = 3;
-      region1.heightUnits = CueRegion.units.LINES;
-
-      let cue1 = new shaka.text.Cue(20, 40, 'Test');
-      cue1.region = region1;
-
-      verifyHelper(
-          [
-            {
-              start: 20,
-              end: 40,
-              text: 'Test',
-              region: {
-                viewportAnchorX: 0,
-                viewportAnchorY: 0,
-                regionAnchorX: 0,
-                regionAnchorY: 0,
-                width: 50,
-                lines: 3,
-                scroll: 'up',
-              },
-            },
-          ], [cue1]);
-    });
-
-    it('converts pixel values to percentage', function() {
-      let region1 = new shaka.text.CueRegion();
-      region1.id = 'reg1';
-      region1.width = 500;
-      region1.widthUnits = CueRegion.units.PX;
-      region1.viewportAnchorX = 100;
-      region1.viewportAnchorY = 100;
-      region1.viewportAnchorUnits = CueRegion.units.PX;
-
-      let cue1 = new shaka.text.Cue(20, 40, 'Test');
-      cue1.region = region1;
-
-      verifyHelper(
-          [
-            {
-              start: 20,
-              end: 40,
-              text: 'Test',
-              region: {
-                viewportAnchorX: 10,
-                viewportAnchorY: 10,
-                width: 50,
-              },
-            },
-          ], [cue1]);
-    });
-  });
-
   function createFakeCue(startTime, endTime) {
     return {startTime: startTime, endTime: endTime};
   }
@@ -385,36 +317,6 @@ describe('SimpleTextDisplayer', function() {
       if ('position' in vttCues[i]) {
         expect(result[i].position).toBe(vttCues[i].position);
       }
-      if ('region' in vttCues[i]) {
-        verifyRegion(result[i].region, vttCues[i].region);
-      }
-    }
-  }
-
-  function verifyRegion(actual, expected) {
-    if ('id' in expected) {
-      expect(actual.id).toBe(expected.id);
-    }
-    if ('width' in expected) {
-      expect(actual.width).toBe(expected.width);
-    }
-    if ('lines' in expected) {
-      expect(actual.lines).toBe(expected.lines);
-    }
-    if ('regionAnchorX' in expected) {
-      expect(actual.regionAnchorX).toBe(expected.regionAnchorX);
-    }
-    if ('regionAnchorY' in expected) {
-      expect(actual.regionAnchorY).toBe(expected.regionAnchorY);
-    }
-    if ('viewportAnchorX' in expected) {
-      expect(actual.viewportAnchorX).toBe(expected.viewportAnchorX);
-    }
-    if ('viewportAnchorY' in expected) {
-      expect(actual.viewportAnchorY).toBe(expected.viewportAnchorY);
-    }
-    if ('scroll' in expected) {
-      expect(actual.scroll).toBe(expected.scroll);
     }
   }
 });
