@@ -113,7 +113,7 @@ describe('TtmlTextParser', function() {
         [
           {start: 615.5, end: 663, payload: 'Test'},
         ],
-        '<tt xmlns:ttp="ttml#parameter" ' +
+        '<tt xmlns:ttp="http://www.w3.org/ns/ttml#parameter" ' +
         'ttp:frameRate="30"> ' +
         '<body>' +
         '<p begin="00:10:15:15" end="00:11:02:30">Test</p>' +
@@ -127,7 +127,7 @@ describe('TtmlTextParser', function() {
         [
           {start: 615.5, end: 663, payload: 'Test'},
         ],
-        '<tt xmlns:ttp="ttml#parameter" ' +
+        '<tt xmlns:ttp="http://www.w3.org/ns/ttml#parameter" ' +
         'ttp:frameRate="60" ' +
         'ttp:frameRateMultiplier="1 2"> ' +
         '<body>' +
@@ -142,7 +142,7 @@ describe('TtmlTextParser', function() {
         [
           {start: 615.517, end: 663, payload: 'Test'},
         ],
-        '<tt xmlns:ttp="ttml#parameter" ' +
+        '<tt xmlns:ttp="http://www.w3.org/ns/ttml#parameter" ' +
         'ttp:frameRate="30" ' +
         'ttp:subFrameRate="2"> ' +
         '<body>' +
@@ -157,7 +157,7 @@ describe('TtmlTextParser', function() {
         [
           {start: 2.5, end: 10.01, payload: 'Test'},
         ],
-        '<tt xmlns:ttp="ttml#parameter" ' +
+        '<tt xmlns:ttp="http://www.w3.org/ns/ttml#parameter" ' +
         'ttp:frameRate="60" ' +
         'ttp:frameRateMultiplier="1 2">' +
         '<body>' +
@@ -172,7 +172,7 @@ describe('TtmlTextParser', function() {
         [
           {start: 5, end: 6.02, payload: 'Test'},
         ],
-        '<tt xmlns:ttp="ttml#parameter" ' +
+        '<tt xmlns:ttp="http://www.w3.org/ns/ttml#parameter" ' +
         'ttp:frameRate="60" ' +
         'ttp:tickRate="10">' +
         '<body>' +
@@ -202,9 +202,30 @@ describe('TtmlTextParser', function() {
             lineAlign: Cue.textAlign.START,
           },
         ],
-        '<tt xmlns:tts="ttml#styling">' +
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<layout>' +
         '<region xml:id="subtitleArea" tts:textAlign="start" />' +
+        '</layout>' +
+        '<body region="subtitleArea">' +
+        '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '</body>' +
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
+  it('allows non-standard namespace names', function() {
+    verifyHelper(
+        [
+          {
+            start: 62.05,
+            end: 3723.2,
+            payload: 'Test',
+            lineAlign: Cue.textAlign.START,
+          },
+        ],
+        '<tt xmlns:p1="http://www.w3.org/ns/ttml#styling">' +
+        '<layout>' +
+        '<region xml:id="subtitleArea" p1:textAlign="start" />' +
         '</layout>' +
         '<body region="subtitleArea">' +
         '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
@@ -223,11 +244,11 @@ describe('TtmlTextParser', function() {
             lineAlign: Cue.textAlign.END,
           },
         ],
-        '<tt xmlns:tts="ttml#styling">' +
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<styling>' +
         '<style xml:id="s1" tts:textAlign="end"/>' +
         '</styling>' +
-        '<layout xmlns:tts="ttml#styling">' +
+        '<layout>' +
         '<region xml:id="subtitleArea" style="s1" />' +
         '</layout>' +
         '<body region="subtitleArea">' +
@@ -247,11 +268,11 @@ describe('TtmlTextParser', function() {
             lineAlign: Cue.textAlign.END,
           },
         ],
-        '<tt xmlns:tts="ttml#styling">' +
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<styling>' +
         '<style xml:id="s1" tts:textAlign="end"/>' +
         '</styling>' +
-        '<layout xmlns:tts="ttml#styling">' +
+        '<layout>' +
         '<region xml:id="subtitleArea" />' +
         '</layout>' +
         '<body region="subtitleArea">' +
@@ -277,7 +298,7 @@ describe('TtmlTextParser', function() {
            },
          },
         ],
-        '<tt xmlns:tts="ttml#styling">' +
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<layout>' +
         '<region xml:id="subtitleArea" tts:origin="50% 16%"/>' +
         '</layout>' +
@@ -300,7 +321,7 @@ describe('TtmlTextParser', function() {
            },
          },
         ],
-        '<tt xmlns:tts="ttml#styling">' +
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<layout>' +
         '<region xml:id="subtitleArea" tts:origin="50% 16%" ' +
         'tts:writingMode="lrtb" />' +
@@ -324,7 +345,7 @@ describe('TtmlTextParser', function() {
            },
          },
         ],
-        '<tt xmlns:tts="ttml#styling">' +
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<layout>' +
         '<region xml:id="subtitleArea" tts:origin="50% 16%" ' +
         'tts:writingMode="lr" />' +
@@ -358,7 +379,7 @@ describe('TtmlTextParser', function() {
            },
          },
         ],
-        '<tt xmlns:tts="ttml#styling">' +
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<layout>' +
         '<region xml:id="subtitleArea" tts:origin="50px 16px"/>' +
         '</layout>' +
@@ -388,7 +409,7 @@ describe('TtmlTextParser', function() {
             },
          },
         ],
-        '<tt xmlns:tts="ttml#styling">' +
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<layout>' +
         '<region xml:id="subtitleArea" tts:extent="50px 16px" ' +
         'tts:writingMode="lrtb" />' +
@@ -416,7 +437,7 @@ describe('TtmlTextParser', function() {
            },
          },
         ],
-        '<tt xmlns:tts="ttml#styling">' +
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<layout>' +
         '<region xml:id="subtitleArea" tts:origin="50% 16%" ' +
         'tts:writingMode="tb" />' +
@@ -440,7 +461,7 @@ describe('TtmlTextParser', function() {
            },
          },
         ],
-        '<tt xmlns:tts="ttml#styling">' +
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<layout>' +
         '<region xml:id="subtitleArea" tts:origin="50% 16%" ' +
         'tts:writingMode="tblr" />' +
@@ -464,7 +485,7 @@ describe('TtmlTextParser', function() {
            },
          },
         ],
-        '<tt xmlns:tts="ttml#styling">' +
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<layout>' +
         '<region xml:id="subtitleArea" tts:origin="50% 16%" ' +
         'tts:writingMode="tbrl" />' +
@@ -486,7 +507,7 @@ describe('TtmlTextParser', function() {
             writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT,
           },
         ],
-        '<tt xmlns:tts="ttml#styling">' +
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<layout>' +
         '<region xml:id="subtitleArea" ' +
         'tts:writingMode="tb" />' +
@@ -505,7 +526,7 @@ describe('TtmlTextParser', function() {
             writingDirection: Cue.writingDirection.VERTICAL_RIGHT_TO_LEFT,
           },
         ],
-        '<tt xmlns:tts="ttml#styling">' +
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<layout>' +
         '<region xml:id="subtitleArea" ' +
         'tts:writingMode="tbrl" />' +
@@ -524,7 +545,7 @@ describe('TtmlTextParser', function() {
             writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT,
           },
         ],
-        '<tt xmlns:tts="ttml#styling">' +
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<layout>' +
         '<region xml:id="subtitleArea" ' +
         'tts:writingMode="tblr" />' +
@@ -543,7 +564,7 @@ describe('TtmlTextParser', function() {
             writingDirection: Cue.writingDirection.HORIZONTAL_RIGHT_TO_LEFT,
           },
         ],
-        '<tt xmlns:tts="ttml#styling">' +
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<layout>' +
         '<region xml:id="subtitleArea" ' +
         'tts:direction="rtl" />' +
@@ -562,7 +583,7 @@ describe('TtmlTextParser', function() {
             writingDirection: Cue.writingDirection.HORIZONTAL_LEFT_TO_RIGHT,
           },
         ],
-        '<tt xmlns:tts="ttml#styling">' +
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<layout>' +
         '<region xml:id="subtitleArea" ' +
         'tts:direction="rtl" tts:writingMode="lrtb"/>' +
@@ -643,11 +664,11 @@ describe('TtmlTextParser', function() {
             positionAlign: Cue.positionAlign.LEFT,
           },
         ],
-        '<tt xmlns:tts="ttml#styling">' +
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<styling>' +
         '<style xml:id="s1" tts:textAlign="left"/>' +
         '</styling>' +
-        '<layout xmlns:tts="ttml#styling">' +
+        '<layout>' +
         '<region xml:id="subtitleArea" />' +
         '</layout>' +
         '<body region="subtitleArea">' +
@@ -673,7 +694,7 @@ describe('TtmlTextParser', function() {
             fontSize: '10em',
           },
         ],
-        '<tt xmlns:tts="ttml#styling">' +
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<styling>' +
         '<style xml:id="s1" tts:color="red" ' +
         'tts:backgroundColor="blue" ' +
@@ -683,7 +704,7 @@ describe('TtmlTextParser', function() {
         'tts:lineHeight="20px" ' +
         'tts:fontSize="10em"/>' +
         '</styling>' +
-        '<layout xmlns:tts="ttml#styling">' +
+        '<layout>' +
         '<region xml:id="subtitleArea" />' +
         '</layout>' +
         '<body region="subtitleArea">' +
@@ -703,11 +724,11 @@ describe('TtmlTextParser', function() {
             wrapLine: false,
           },
         ],
-        '<tt xmlns:tts="ttml#styling">' +
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<styling>' +
         '<style xml:id="s1" tts:wrapOption="noWrap"/>' +
         '</styling>' +
-        '<layout xmlns:tts="ttml#styling">' +
+        '<layout xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<region xml:id="subtitleArea" />' +
         '</layout>' +
         '<body region="subtitleArea">' +
@@ -728,13 +749,13 @@ describe('TtmlTextParser', function() {
                              Cue.textDecoration.OVERLINE],
           },
         ],
-        '<tt xmlns:tts="ttml#styling">' +
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<styling>' +
         '<style xml:id="s1" tts:textDecoration="underline ' +
         'overline lineThrough"/>' +
         '<style xml:id="s2" tts:textDecoration="noLineThrough"/>' +
         '</styling>' +
-        '<layout xmlns:tts="ttml#styling">' +
+        '<layout>' +
         '<region xml:id="subtitleArea" style="s1"/>' +
         '</layout>' +
         '<body region="subtitleArea">' +
@@ -754,12 +775,12 @@ describe('TtmlTextParser', function() {
             color: 'blue',
           },
         ],
-        '<tt xmlns:tts="ttml#styling">' +
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<styling>' +
         '<style xml:id="s1" tts:color="red"/>' +
         '<style xml:id="s2" tts:color="blue"/>' +
         '</styling>' +
-        '<layout xmlns:tts="ttml#styling">' +
+        '<layout>' +
         '<region xml:id="subtitleArea" style="s1"/>' +
         '</layout>' +
         '<body region="subtitleArea">' +
