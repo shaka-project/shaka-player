@@ -46,6 +46,7 @@
 +../../lib/util/fake_event_target.js
 +../../lib/util/functional.js
 +../../lib/util/i_destroyable.js
++../../lib/util/iterables.js
 +../../lib/util/language_utils.js
 +../../lib/util/manifest_parser_utils.js
 +../../lib/util/map_utils.js
