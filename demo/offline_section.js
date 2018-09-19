@@ -169,11 +169,13 @@ shakaDemo.storeDeleteAsset_ = function() {
 
   let storage = new shaka.offline.Storage(
       /** @type {!shaka.Player} */ (shakaDemo.localPlayer_));
-  storage.configure(/** @type {shaka.extern.OfflineConfiguration} */ ({
-    progressCallback: function(data, percent) {
-      progress.textContent = (percent * 100).toFixed(2);
+  storage.configure({
+    offline: {
+      progressCallback: (data, percent) => {
+        progress.textContent = (percent * 100).toFixed(2);
+      },
     },
-  }));
+  });
 
   let p;
   if (option.storedContent) {
