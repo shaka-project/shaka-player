@@ -424,7 +424,7 @@ shaka.test.StreamGenerator.getTimescale_ = function(
 
   let largesizePresent = size == 1;
   if (largesizePresent) {
-    shaka.log.debug('\'largesize\' field is present.');
+    shaka.log.v2('\'largesize\' field is present.');
     reader.skip(8);  // Skip 'largesize' field.
   }
 
@@ -433,10 +433,10 @@ shaka.test.StreamGenerator.getTimescale_ = function(
 
   // Skip 'creation_time' and 'modification_time' fields.
   if (version == 0) {
-    shaka.log.debug('mvhd box is version 0.');
+    shaka.log.v2('mvhd box is version 0.');
     reader.skip(8);
   } else {
-    shaka.log.debug('mvhd box is version 1.');
+    shaka.log.v2('mvhd box is version 1.');
     reader.skip(16);
   }
 
@@ -483,7 +483,7 @@ shaka.test.StreamGenerator.setBaseMediaDecodeTime_ = function(
 
   let largesizePresent = size == 1;
   if (largesizePresent) {
-    shaka.log.debug('\'largesize\' field is present.');
+    shaka.log.v2('\'largesize\' field is present.');
     reader.skip(8);  // Skip 'largesize' field.
   }
 
@@ -492,10 +492,10 @@ shaka.test.StreamGenerator.setBaseMediaDecodeTime_ = function(
 
   let pos = reader.getPosition();
   if (version == 0) {
-    shaka.log.debug('tfdt box is version 0.');
+    shaka.log.v2('tfdt box is version 0.');
     dataView.setUint32(pos, baseMediaDecodeTime * timescale);
   } else {
-    shaka.log.debug('tfdt box is version 1.');
+    shaka.log.v2('tfdt box is version 1.');
     // tfdt box version 1 supports 64-bit 'baseMediaDecodeTime' fields;
     // however, we restrict the intput to 32 bits above.
     dataView.setUint32(pos, 0);
