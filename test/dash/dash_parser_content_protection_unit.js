@@ -45,6 +45,7 @@ describe('DashParser ContentProtection', function() {
         ignoreDrmInfo: ignoreDrmInfo,
         xlinkFailGracefully: false,
         defaultPresentationDelay: 10,
+        ignoreMinBufferTime: false,
       },
     });
     let playerEvents = {

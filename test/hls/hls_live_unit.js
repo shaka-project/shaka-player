@@ -126,6 +126,7 @@ describe('HlsParser live', function() {
         ignoreDrmInfo: false,
         xlinkFailGracefully: false,
         defaultPresentationDelay: 10,
+        ignoreMinBufferTime: false,
       },
     };
 
@@ -498,6 +499,7 @@ describe('HlsParser live', function() {
             ignoreDrmInfo: false,
             xlinkFailGracefully: false,
             defaultPresentationDelay: 10,
+            ignoreMinBufferTime: false,
           },
         });
 

@@ -34,6 +34,7 @@ shaka.test.Dash.makeDashParser = function() {
       ignoreDrmInfo: false,
       xlinkFailGracefully: false,
       defaultPresentationDelay: 10,
+      ignoreMinBufferTime: false,
     },
   });
   return parser;
