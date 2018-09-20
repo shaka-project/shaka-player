@@ -16,6 +16,17 @@
  */
 
 
+function shakaUncompiledModeSupported() {
+  // Check if ES6 arrow function syntax and ES7 async are usable.  Both are
+  // needed for uncompiled builds to work.
+  try {
+    eval('async ()=>{}');
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 /**
  * Loads both library and application sources.  Chooses compiled or debug
  * version of the sources based on the presence or absence of the URL parameter
@@ -54,21 +65,13 @@
   fragments = fragments ? fragments.split(';') : [];
   var combined = fields.concat(fragments);
 
-  // Check if ES6 is usable by evaluating arrow function syntax.
-  var es6Available = true;
-  try {
-    eval('()=>{}');
-  } catch (e) {
-    es6Available = false;
-  }
-
   var scripts = window['UNCOMPILED_JS'];
   var buildType = 'uncompiled';
   var buildSpecified = false;
 
-  if (!es6Available) {
-    // If ES6 arrow syntax is not supported (IE11), default to the compiled
-    // debug version, which should still work.
+  if (!shakaUncompiledModeSupported()) {
+    // If uncompiled mode is not supported, default to the compiled debug
+    // version, which should still work.
     scripts = window['COMPILED_DEBUG_JS'];
     buildType = 'debug_compiled';
   }
