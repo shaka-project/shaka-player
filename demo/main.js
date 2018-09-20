@@ -650,15 +650,14 @@ shakaDemo.hashShouldChange_ = function() {
     }
   });
 
-  // Check if ES6 is usable by evaluating arrow function syntax.
-  try {
-    eval('()=>{}');
-  } catch (e) {
-    // If ES6 is not usable, neither is the uncompiled version of the app.
+  // Check if uncompiled mode is supported.  This function is provided by the
+  // bootstrapping system in load.js.
+  if (!window['shakaUncompiledModeSupported']()) {
     let uncompiledLink = document.getElementById('uncompiled_link');
     uncompiledLink.classList.add('disabled_link');
     uncompiledLink.removeAttribute('href');
-    uncompiledLink.title = 'requires ES6';
+    uncompiledLink.title = 'requires a newer browser';
+    uncompiledLink.onclick = null;
   }
 
   let newHash = '#' + params.join(';');
