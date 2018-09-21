@@ -1126,4 +1126,68 @@ describe('DashParser Manifest', function() {
     expect(variant.video.originalId).toEqual('video-sd');
     expect(textStream.originalId).toEqual('text-en');
   });
+
+  it('override manifest value if ignoreMinBufferTime is true', async () => {
+    let manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation id="video-sd" width="640" height="480">',
+      '        <BaseURL>v-sd.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    parser.configure({
+      retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+      availabilityWindowOverride: NaN,
+      dash: {
+        clockSyncUri: '',
+        customScheme: function(node) { return null; },
+        ignoreDrmInfo: false,
+        xlinkFailGracefully: false,
+        defaultPresentationDelay: 10,
+        ignoreMinBufferTime: true,
+      },
+    });
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const minBufferTime = manifest.minBufferTime;
+    expect(minBufferTime).toEqual(0);
+  });
+
+  it('get manifest value if ignoreMinBufferTime is false', async () => {
+    let manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation id="video-sd" width="640" height="480">',
+      '        <BaseURL>v-sd.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    parser.configure({
+      retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+      availabilityWindowOverride: NaN,
+      dash: {
+        clockSyncUri: '',
+        customScheme: function(node) { return null; },
+        ignoreDrmInfo: false,
+        xlinkFailGracefully: false,
+        defaultPresentationDelay: 10,
+        ignoreMinBufferTime: false,
+      },
+    });
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const minBufferTime = manifest.minBufferTime;
+    expect(minBufferTime).toEqual(75);
+  });
 });
