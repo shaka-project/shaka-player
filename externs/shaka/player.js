@@ -513,7 +513,8 @@ shaka.extern.DrmConfiguration;
  *   clockSyncUri: string,
  *   ignoreDrmInfo: boolean,
  *   xlinkFailGracefully: boolean,
- *   defaultPresentationDelay: number
+ *   defaultPresentationDelay: number,
+ *   ignoreMinBufferTime: boolean
  * }}
  *
  * @property {shaka.extern.DashContentProtectionCallback} customScheme
@@ -536,6 +537,10 @@ shaka.extern.DrmConfiguration;
  * @property {number} defaultPresentationDelay
  *   A default presentationDelay if suggestedPresentationDelay is missing
  *   in the MPEG DASH manifest. This has to be bigger than minBufferTime * 1.5.
+ * @property {boolean} ignoreMinBufferTime
+ *   If true will cause DASH parser to ignore minBufferTime from manifest.
+ *   It allows player config to take precedence over manifest for
+ *   rebufferingGoal. Defaults to false if not provided.
  *
  * @exportDoc
  */
