@@ -49,6 +49,7 @@ jasmine.Fetch.install = function() {
   jasmine.Fetch.container_.oldHeaders = window.Headers;
   jasmine.Fetch.container_.oldAbortController = window.AbortController;
   jasmine.Fetch.container_.oldResponse = window.Response;
+  jasmine.Fetch.container_.oldReadableStream = window.ReadableStream;
   /** @type {!Response} */
   jasmine.Fetch.container_.latestResponse;
 
@@ -61,6 +62,9 @@ jasmine.Fetch.install = function() {
 
   window.Response = /** @type {function (new:Response)} */
       (jasmine.Fetch.Response);
+
+  window.ReadableStream = /** @type {function (new:ReadableStream)} */
+      (jasmine.Fetch.ReadableStream);
 
   window.fetch = function(input, init) {
     // TODO: this does not support input in Request form
@@ -186,6 +190,7 @@ jasmine.Fetch.uninstall = function() {
     window.Headers = jasmine.Fetch.container_.oldHeaders;
     window.AbortController = jasmine.Fetch.container_.oldAbortController;
     window.Response = jasmine.Fetch.container_.oldResponse;
+    window.ReadableStream = jasmine.Fetch.container_.oldReadableStream;
     jasmine.Fetch.container_.installed_ = false;
   }
 };
@@ -200,6 +205,21 @@ jasmine.Fetch.AbortController = function() {
   // but it works for our tests
   this.aborted_ = false;
   this.signal = (function() { return this.aborted_; }).bind(this);
+};
+
+
+/**
+ * @param {!Object} underlyingSource
+ * @constructor
+ * @struct
+ */
+jasmine.Fetch.ReadableStream = function(underlyingSource) {
+  const noop = () => {};
+  let controller = {
+    close: noop,
+    enqueue: noop,
+  };
+  underlyingSource.start(controller);
 };
 
 

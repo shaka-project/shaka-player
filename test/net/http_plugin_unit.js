@@ -41,6 +41,7 @@ function httpPluginTests(usingFetch) {
       jasmine.Fetch.install();
       let MockFetch = window.fetch;
       const MockAbortController = window.AbortController;
+      const MockReadableStream = window.ReadableStream;
       const MockHeaders = window.Headers;
       jasmine.Fetch.uninstall();
       // Now plug this mock into HttpRequest directly, so it does not interfere
@@ -48,6 +49,7 @@ function httpPluginTests(usingFetch) {
       // source-map-support.
       shaka.net.HttpFetchPlugin['fetch_'] = MockFetch;
       shaka.net.HttpFetchPlugin['AbortController_'] = MockAbortController;
+      shaka.net.HttpFetchPlugin['ReadableStream_'] = MockReadableStream;
       shaka.net.HttpFetchPlugin['Headers_'] = MockHeaders;
     } else {
       // Install the mock only briefly in the global namespace, to get a handle
@@ -151,6 +153,7 @@ function httpPluginTests(usingFetch) {
     if (usingFetch) {
       shaka.net.HttpFetchPlugin['fetch_'] = window.fetch;
       shaka.net.HttpFetchPlugin['AbortController_'] = window.AbortController;
+      shaka.net.HttpFetchPlugin['ReadableStream_'] = window.ReadableStream;
       shaka.net.HttpFetchPlugin['Headers_'] = window.Headers;
     } else {
       shaka.net.HttpXHRPlugin['Xhr_'] = window.XMLHttpRequest;
