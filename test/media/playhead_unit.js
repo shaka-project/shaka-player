@@ -922,11 +922,22 @@ describe('Playhead', function() {
               Util.spyFunc(onEvent));
 
           jasmine.clock().tick(500);
-          for (let time = data.start; time < data.waitingAt; time += 0.5) {
+          for (let time = data.start; time < data.waitingAt; time++) {
+            // We don't want to run tick() for 1 second because it will trigger
+            // the stall-detection, which will move the playhead; on the other
+            // hand, we don't want to be 0.5 seconds from the gap because on
+            // IE/Edge/Tizen, gap jumping will treat that as in the gap.
+            // See shaka.media.TimeRangesUtils.getGapIndex.
+
             video.currentTime = time;
-            jasmine.clock().tick(500);
+            jasmine.clock().tick(400);
             // Make sure Playhead didn't adjust the time yet.
             expect(video.currentTime).toBe(time);
+
+            video.currentTime = time + 0.4;
+            jasmine.clock().tick(600);
+            // Make sure Playhead didn't adjust the time yet.
+            expect(video.currentTime).toBe(time + 0.4);
           }
 
           expect(onEvent).not.toHaveBeenCalled();
