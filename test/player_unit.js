@@ -1064,6 +1064,32 @@ describe('Player', function() {
     });
   });
 
+  describe('resetConfiguration', function() {
+    it('resets configurations to default', () => {
+      const default_ = player.getConfiguration().streaming.bufferingGoal;
+      expect(default_).not.toBe(100);
+      player.configure('streaming.bufferingGoal', 100);
+      expect(player.getConfiguration().streaming.bufferingGoal).toBe(100);
+      player.resetConfiguration();
+      expect(player.getConfiguration().streaming.bufferingGoal).toBe(default_);
+    });
+
+    it('resets the arbitrary keys', () => {
+      player.configure('drm.servers.org\\.w3\\.clearKey', 'http://foo.com');
+      expect(player.getConfiguration().drm.servers).toEqual({
+        'org.w3.clearKey': 'http://foo.com',
+      });
+      player.resetConfiguration();
+      expect(player.getConfiguration().drm.servers).toEqual({});
+    });
+
+    it('keeps shared configuration the same', () => {
+      const config = player.getSharedConfiguration();
+      player.resetConfiguration();
+      expect(player.getSharedConfiguration()).toBe(config);
+    });
+  });
+
   describe('AbrManager', function() {
     /** @type {!shaka.test.FakeManifestParser} */
     let parser;
