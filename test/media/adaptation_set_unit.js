@@ -113,6 +113,31 @@ describe('AdaptationSet', function() {
     expect(set.canInclude(variants[1])).toBeFalsy();
   });
 
+  it('rejects mis-aligned transmuxed streams', function() {
+    const variants = [
+      makeVariant(
+          1,  // variant id
+          null, // no audio
+          makeStream(10, 'a', ['a.35', 'b.12'], [])),
+
+      // Can't mix transmuxed and non-transmuxed streams.
+      makeVariant(
+          2,  // variant id
+          makeStream(11, 'a', ['a.35'], []),
+          makeStream(12, 'a', ['b.12'], [])),
+
+      // Can't mix transmuxed streams with different bases.
+      makeVariant(
+          3,  // variant id
+          null, // no audio
+          makeStream(13, 'a', ['a.35', 'c.12'], [])),
+    ];
+
+    const set = new shaka.media.AdaptationSet(variants[0]);
+    expect(set.canInclude(variants[1])).toBeFalsy();
+    expect(set.canInclude(variants[2])).toBeFalsy();
+  });
+
   /**
    * Create a variant where the audio stream is optional but the video stream
    * is required. For the cases where audio and video are in the same stream,
