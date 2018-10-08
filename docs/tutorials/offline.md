@@ -135,9 +135,9 @@ function selectTracks(tracks) {
   // Store the highest bandwidth variant.
   var found = tracks
       .filter(function(track) { return track.type == 'variant'; })
-      .sort(function(a, b) { return a.bandwidth > b.bandwidth; })
+      .sort(function(a, b) { return a.bandwidth - b.bandwidth; })
       .pop();
-  console.log('Offline Track: ' + found);
+  console.log('Offline Track bandwidth: ' + found.bandwidth);
   return [ found ];
 }
 
@@ -487,9 +487,9 @@ function selectTracks(tracks) {
   // Store the highest bandwidth variant.
   var found = tracks
       .filter(function(track) { return track.type == 'variant'; })
-      .sort(function(a, b) { return a.bandwidth > b.bandwidth; })
+      .sort(function(a, b) { return a.bandwidth - b.bandwidth; })
       .pop();
-  console.log('Offline Track: ' + found);
+  console.log('Offline Track bandwidth: ' + found.bandwidth);
   return [ found ];
 }
 
