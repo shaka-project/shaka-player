@@ -76,6 +76,8 @@ shakaAssets.Feature = {
   SEGMENT_LIST_TIMELINE: 'SegmentList w/ SegmentTimeline',
   SEGMENT_TEMPLATE_DURATION: 'SegmentTemplate w/ @duration',
   SEGMENT_TEMPLATE_TIMELINE: 'SegmentTemplate w/ SegmentTimeline',
+  SEGMENT_TEMPLATE_TIMELINE_TIME: 'SegmentTemplate w/ SegmentTimeline $Time$',
+  SEGMENT_TEMPLATE_TIMELINE_NUMBER: 'SegmentTemplate w/ SegTimeline $Number$',
 
   PSSH: 'embedded PSSH',
   MULTIKEY: 'multiple keys',
@@ -909,7 +911,20 @@ shakaAssets.testAssets = [
   },
   {
     name: 'Live sim (2s segments)',
-    manifestUri: 'https://vm2.dashif.org/livesim/utc_head/testpic_2s/Manifest.mpd',
+    manifestUri: 'https://livesim.dashif.org/livesim/utc_head/testpic_2s/Manifest.mpd',
+
+    encoder: shakaAssets.Encoder.UNKNOWN,
+    source: shakaAssets.Source.DASH_IF,
+    drm: [],
+    features: [
+      shakaAssets.Feature.LIVE,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
+    ],
+  },
+  {
+    name: 'Live sim SegmentTimeline w $Time$ (6s segments)',
+    manifestUri: 'https://livesim.dashif.org/livesim/segtimeline_1/utc_head/testpic_6s/Manifest.mpd',
 
     encoder: shakaAssets.Encoder.UNKNOWN,
     source: shakaAssets.Source.DASH_IF,
@@ -918,12 +933,12 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.DASH,
       shakaAssets.Feature.LIVE,
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE_TIME,
     ],
   },
   {
-    name: 'Live sim (6s segments)',
-    manifestUri: 'https://vm2.dashif.org/livesim/utc_head/testpic_6s/Manifest.mpd',
+    name: 'Live sim SegmentTimeline w $Number$ (6s segments)',
+    manifestUri: 'https://livesim.dashif.org/livesim/segtimelinenr_1/utc_head/testpic_6s/Manifest.mpd',
 
     encoder: shakaAssets.Encoder.UNKNOWN,
     source: shakaAssets.Source.DASH_IF,
@@ -932,12 +947,40 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.DASH,
       shakaAssets.Feature.LIVE,
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE_NUMBER,
     ],
   },
   {
-    name: 'Live sim (multi-period)',
-    manifestUri: 'https://vm2.dashif.org/livesim/utc_head/periods_20/testpic_2s/Manifest.mpd',
+    name: 'Live sim SegmentTimeline StartOver [-20s, +20s] (2s segments)',
+    manifestUri: 'https://livesim.dashif.org/livesim/segtimeline_1/startrel_-20/stoprel_20/timeoffset_0/testpic_2s/Manifest.mpd',
+
+    encoder: shakaAssets.Encoder.UNKNOWN,
+    source: shakaAssets.Source.DASH_IF,
+    drm: [],
+    features: [
+      shakaAssets.Feature.DASH,
+      shakaAssets.Feature.LIVE,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE_TIME,
+    ],
+  },
+  {
+    name: 'Live sim StartOver SegTmpl Duration [-20s, +20s] (2s segments)',
+    manifestUri: 'https://livesim.dashif.org/livesim/startrel_-20/stoprel_20/timeoffset_0/testpic_2s/Manifest.mpd',
+
+    encoder: shakaAssets.Encoder.UNKNOWN,
+    source: shakaAssets.Source.DASH_IF,
+    drm: [],
+    features: [
+      shakaAssets.Feature.DASH,
+      shakaAssets.Feature.LIVE,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
+    ],
+  },
+  {
+    name: 'Live sim SegTmpl Duration (multi-period 60s)',
+    manifestUri: 'https://livesim.dashif.org/livesim/utc_head/periods_60/testpic_2s/Manifest.mpd',
 
     encoder: shakaAssets.Encoder.UNKNOWN,
     source: shakaAssets.Source.DASH_IF,
@@ -947,7 +990,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.LIVE,
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.MULTIPERIOD,
-      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
+      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
     ],
   },
   // }}}
