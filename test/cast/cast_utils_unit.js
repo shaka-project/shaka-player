@@ -191,6 +191,7 @@ describe('CastUtils', function() {
       beforeAll(function() {
         video =
             /** @type {!HTMLVideoElement} */ (document.createElement('video'));
+        video.muted = true;
         document.body.appendChild(video);
       });
 
