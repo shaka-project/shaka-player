@@ -16,6 +16,26 @@
  */
 
 describe('LanguageUtils', function() {
+  describe('normalize', function() {
+    const normalize = shaka.util.LanguageUtils.normalize;
+
+    it('standardizes base language', function() {
+      expect(normalize('eng')).toBe('en');
+      expect(normalize('ENG')).toBe('en');
+      expect(normalize('EN')).toBe('en');
+    });
+
+    it('standardized region', function() {
+      expect(normalize('en-US')).toBe('en-US');
+      expect(normalize('en-us')).toBe('en-US');
+    });
+
+    it('ignored unknown base languages', function() {
+      expect(normalize('elvish')).toBe('elvish');
+      expect(normalize('elvish-woodland')).toBe('elvish-WOODLAND');
+    });
+  });
+
   describe('getLanguageForText', function() {
     const getLanguageForText = shaka.util.LanguageUtils.getLanguageForText;
 
