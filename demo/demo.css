@@ -212,6 +212,17 @@ summary {
   padding: 0;
 }
 
+body.noinput #logSection #log {
+  /* noinput mode: if displayed, put the logs higher up on screen, over the top
+     of the video. */
+  position: fixed;
+  top: 0;
+  left: 0;
+  margin: 10px;
+  width: auto;
+  height: calc(100% - 30px);
+}
+
 #customAsset {
   display: none;
 }
