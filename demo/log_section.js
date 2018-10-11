@@ -89,6 +89,7 @@ shakaDemo.onLogChange_ = function() {
   let logSection = document.getElementById('logSection');
   if (logToScreen.checked) {
     logSection.style.display = 'block';
+    logSection.open = true;  // Open the details to show the logs.
     for (let k in shakaDemo.patchedConsoleMethods_) {
       console[k] = shakaDemo.patchedConsoleMethods_[k];
     }
