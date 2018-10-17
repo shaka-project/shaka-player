@@ -313,7 +313,7 @@ describe('HlsParser', function() {
     testHlsParser(master, media, manifest, done);
   });
 
-  it('sets maxFirstSegmentStartTime', async () => {
+  it('sets seek range correctly for non-zero start', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
@@ -354,8 +354,14 @@ describe('HlsParser', function() {
 
     let manifest = await parser.start('test:/master', playerInterface);
     let presentationTimeline = manifest.presentationTimeline;
+    const stream = manifest.periods[0].variants[0].video;
     // baseMediaDecodeTime (655360) / timescale (1000)
-    expect(presentationTimeline.getSeekRangeStart()).toBe(655.36);
+    expect(stream.presentationTimeOffset).toBe(655.36);
+    const pos = stream.findSegmentPosition(0);
+    expect(pos).not.toBe(null);
+    expect(stream.getSegmentReference(pos).startTime).toBe(0);
+    expect(presentationTimeline.getSeekRangeStart()).toBe(0);
+    expect(presentationTimeline.getSeekRangeEnd()).toBe(5);
   });
 
   it('parses multiplexed variant', function(done) {
