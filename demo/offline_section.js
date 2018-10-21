@@ -202,11 +202,20 @@ shakaDemo.storeDeleteAsset_ = function() {
       return shakaDemo.refreshAssetList_();
     });
   } else {
+    let configureCertificate = Promise.resolve();
+
     let asset = shakaDemo.preparePlayer_(option.asset);
+
+    if (asset.certificateUri) {
+      configureCertificate = shakaDemo.requestCertificate_(asset.certificateUri)
+        .then(shakaDemo.configureCertificate_);
+    }
+
+    p = configureCertificate.then(function() {
     let nameField = document.getElementById('offlineName').value;
     let assetName = asset.name ? '[OFFLINE] ' + asset.name : null;
     let metadata = {name: assetName || nameField || asset.manifestUri};
-    p = storage.store(asset.manifestUri, metadata).then(function() {
+      return storage.store(asset.manifestUri, metadata).then(function() {
       if (option.asset) {
         option.isStored = true;
       }
@@ -220,6 +229,7 @@ shakaDemo.storeDeleteAsset_ = function() {
           }
         }
       });
+    });
     });
   }
 
