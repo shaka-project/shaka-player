@@ -29,9 +29,13 @@ This script can output four different stats in two different formats:
 - All tokens in the source map.
 
 The dependencies can be outputted in DOT format which can be used with graph
-programs to display a visual layout of the dependencies.
+programs to display a visual layout of the dependencies.  For example, using
+graphviz:
+
+  ./stats.py -c -d | fdb -Goverlap=prism | neato -n2 -Tsvg > out.svg
 """
 
+import argparse
 import json
 import logging
 import math
@@ -715,17 +719,6 @@ def print_deps(results, in_dot):
   print '}'
 
 
-class Options(object):
-  """Defines options to the script."""
-
-  def __init__(self):
-    self.print_deps = False
-    self.print_sizes = False
-    self.print_tokens = False
-    self.in_dot = False
-    self.is_class = False
-
-
 def process(text, options):
   """Decodes a JSON string containing source map data.
 
@@ -743,91 +736,56 @@ def process(text, options):
   data = json.loads(text)
   # Paths are relative to the output directory.
   base = os.path.join(shakaBuildHelpers.get_source_base(), 'dist')
-  file_lines = open(os.path.join(base, data['file'])).readlines()
+  with open(os.path.join(base, data['file']), 'r') as f:
+    file_lines = f.readlines()
   names = data['names']
   mappings = data['mappings']
   tokens = decode_mappings(mappings, names)
   sizes = process_sizes(tokens, file_lines)
 
   # Print out one of the results.
-  if options.print_tokens:
+  if options.all_tokens:
     print_tokens(tokens, file_lines, sizes)
-  elif options.print_sizes:
+  elif options.function_sizes:
     print_sizes(sizes)
-  elif options.print_deps or options.is_class:
-    temp = process_deps(tokens, file_lines, options.is_class)
-    print_deps(temp, options.in_dot)
-
-
-def print_help():
-  """Prints the help docs.
-  """
-
-  print 'Usage:', sys.argv[0], """[options] [--] [source_map]
-
-source_map must be either the path to the source map, or the name of the build
-type.  You must build Shaka first.
-
-Types(must include exactly one):
- -c --class-deps         : Prints the class dependencies
- -f --function-deps      : Prints the function dependencies
- -s --function-sizes     : Prints the function sizes (in number of characters)
- -t --all-tokens         : Prints all tokens in the source map
-
-Options:
- -d --dot-format         : Prints in DOT format; only valid with \
---function-deps or --class-dep
- -h --help               : Prints this help page
-
-Token Format:
- prefix line col token name => Token
- X functionName size        => end function
-
-Prefixes:
- > - start a function
- ! - not in a function
- - - end curly brace
- + - start curly brace
-   - other token
-
-DOT Format:
-  This can print the dependency graph in DOT format.  This can be used with
-  graph programs to display a visual graph of dependencies.  For example
-  using graphviz:
-
- """, sys.argv[0], """-c -d | fdp -Goverlap=prism | neato -n2 -Tsvg > out.svg"""
+  elif options.function_deps or options.class_deps:
+    temp = process_deps(tokens, file_lines, options.class_deps)
+    print_deps(temp, options.dot_format)
 
 
 def main(args):
-  options = Options()
-  done_args = False
-  name = 'shaka-player.compiled.debug.map'
+  parser = argparse.ArgumentParser(
+      description=__doc__,
+      formatter_class=argparse.RawDescriptionHelpFormatter)
 
-  # Process the command-line arguments.
-  for arg in args:
-    if done_args or arg[0] != '-':
-      name = arg
-    elif arg == '-f' or arg == '--function-deps':
-      options.print_deps = True
-    elif arg == '-t' or arg == '--all-tokens':
-      options.print_tokens = True
-    elif arg == '-s' or arg == '--function-sizes':
-      options.print_sizes = True
-    elif arg == '-c' or arg == '--class-deps':
-      options.is_class = True
-    elif arg == '-d' or arg == '--dot-format':
-      options.in_dot = True
-    elif arg == '--':
-      done_args = True
-    elif arg == '-h' or arg == '--help':
-      print_help()
-      return 0
-    else:
-      logging.error('Unrecognized argument: %s', arg)
-      print_help()
-      return 1
+  parser.add_argument('-d', '--dot-format', action='store_true',
+                      help='Prints in DOT format.')
+  parser.add_argument('source_map', nargs='?',
+                      default='shaka-player.compiled.map',
+                      help='The source map or the name of the build to use.')
+
+  print_types = parser.add_mutually_exclusive_group(required=True)
+  print_types.add_argument('-c', '--class-deps', action='store_true',
+                           help='Prints the class dependencies.')
+  print_types.add_argument('-f', '--function-deps', action='store_true',
+                           help='Prints the function dependencies.')
+  print_types.add_argument(
+      '-s', '--function-sizes', action='store_true',
+      help='Prints the function sizes (in number of characters).')
+  print_types.add_argument(
+      '-t', '--all-tokens', action='store_true',
+      help='Prints all tokens in the source map.')
+
+  options = parser.parse_args(args)
+
+  # Verify arguments are correct.
+  if (options.dot_format and not options.function_deps
+      and not options.class_deps):
+    parser.error('--dot-format only valid with --function-deps or '
+                 '--class-deps.')
 
   # Try to find the file
+  name = options.source_map
   if not os.path.isfile(name):
     # Get the source code base directory
     base = shakaBuildHelpers.get_source_base()
@@ -848,19 +806,9 @@ def main(args):
       logging.error('"%s" not found; build Shaka first.', name)
       return 1
 
-  # Verify arguments are correct.
-  if (options.print_sizes + options.print_deps + options.print_tokens +
-      options.is_class) != 1:
-    logging.error('Must include exactly one output type.')
-    print_help()
-    return 1
-  elif options.in_dot and not options.print_deps and not options.is_class:
-    logging.error('--dot-format only valid with --function-deps or '
-                  '--class-deps.')
-    return 1
-  else:
-    process(open(name).read(), options)
-    return 0
+  with open(name, 'r') as f:
+    process(f.read(), options)
+  return 0
 
 
 if __name__ == '__main__':
