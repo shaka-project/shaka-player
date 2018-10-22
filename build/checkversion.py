@@ -16,6 +16,8 @@
 
 """Checks that all the versions match."""
 
+from __future__ import print_function
+
 import logging
 import os
 import re
@@ -46,10 +48,10 @@ def check_version(_):
   git = shakaBuildHelpers.git_version()
   npm = shakaBuildHelpers.npm_version()
 
-  print 'git version:', git
-  print 'npm version:', npm
-  print 'player version:', player
-  print 'changelog version:', changelog
+  print('git version: ' + git)
+  print('npm version: ' + npm)
+  print('player version: ' + player)
+  print('changelog version: ' + changelog)
 
   ret = 0
   if 'dirty' in git:

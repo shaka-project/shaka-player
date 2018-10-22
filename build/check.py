@@ -178,12 +178,6 @@ def check_externs(_):
   return ok
 
 
-def usage():
-  print 'Usage:', sys.argv[0]
-  print
-  print __doc__
-
-
 def main(args):
   parser = argparse.ArgumentParser(
       description=__doc__,

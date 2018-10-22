@@ -35,6 +35,8 @@ graphviz:
   ./stats.py -c -d | fdb -Goverlap=prism | neato -n2 -Tsvg > out.svg
 """
 
+from __future__ import print_function
+
 import argparse
 import json
 import logging
@@ -356,8 +358,8 @@ def print_tokens(tokens, lines, funcs):
         if next_.dst_line == token.dst_line:
           partial_line = lines[token.dst_line][token.dst_col:next_.dst_col]
       token_text = partial_line[:10].replace('\n', '').rjust(12)
-      print '%s %4d %4d %12s %s' % (prefix, token.dst_line, token.dst_col,
-                                    token_text, token.name)
+      print('%s %4d %4d %12s %s' % (prefix, token.dst_line, token.dst_col,
+                                    token_text, token.name))
 
     def add(self, token, index):
       """Parses the given token.
@@ -389,7 +391,7 @@ def print_tokens(tokens, lines, funcs):
       this_func = [t for t in funcs if t.name == self.name]
       if this_func:
         size = this_func[0].size
-      print 'X', self.name, size
+      print('X %s %d' % (self.name, size))
 
   traverse_tokens(tokens, lines, State)
 
@@ -441,7 +443,7 @@ def process_deps(tokens, lines, is_class):
 
       # Strip function names if class graph; also remove it from the name.
       if is_class:
-        if parts[-1][0] in string.lowercase:
+        if parts[-1][0] in string.ascii_lowercase:
           del parts[-1]
           name = '.'.join(parts)
 
@@ -645,13 +647,13 @@ def print_sizes(sizes):
     def callback(title, indent, results):
       if title:
         size = sum([k.size for k in results])
-        print '%s %*d %s' % (indent * '  ', padding, size, title)
+        print('%s %*d %s' % (indent * '  ', padding, size, title))
     return callback
 
   total = sum([k.size for k in sizes])
   padding = int(math.ceil(math.log10(total)))
 
-  print '%*d %s' % (padding, total, 'TOTAL')
+  print('%*d %s' % (padding, total, 'TOTAL'))
   print_tree(sizes, 0, callback_factory(padding), None)
 
 
@@ -668,10 +670,10 @@ def print_deps(results, in_dot):
 
       # Ignore items with no dependencies.
       if deps:
-        print name
+        print(name)
 
       for dep in deps:
-        print '  ', dep
+        print('   ' + dep)
 
     return
 
@@ -679,24 +681,24 @@ def print_deps(results, in_dot):
 
   # Use the printTree to produce clusters for each namespace and type.  This
   # will print boxes around each class and show dependencies between types.
-  print 'digraph {'
+  print('digraph {')
   def callback_factory(dep_map, temp):
     """Creates a callback function."""
     def callback(title, indent, results):
       if title:
         if len(results) > 1:
-          print '\t' * indent, 'subgraph', 'cluster' + str(len(temp)), '{'
+          print('%s subgraph cluster%d {' % ('\t' * indent, len(temp)))
           temp.append(1)
         else:
-          print('\t' * indent, len(dep_map), '[',
-                'label="' + results[0].name + '"', ']', ';')
+          print('%s %d [label="%s"];' % ('\t' * indent, len(dep_map),
+                                         results[0].name))
           dep_map[results[0].name] = len(dep_map)
 
     return callback
 
   def end_callback(indent):
     if indent > 1:
-      print '\t' * (indent - 1), '}'
+      print('\t' * (indent - 1), '}')
 
   print_tree(results, 1, callback_factory(dep_map, []), end_callback)
 
@@ -707,16 +709,16 @@ def print_deps(results, in_dot):
     if deps:
       if name not in dep_map:
         dep_map[name] = len(dep_map)
-        print '\t', dep_map[name], '[', 'label="' + name + '"', ']', ';'
+        print('\t%s [label="%s"];' % (dep_map[name], name))
 
     for dep in deps:
       if dep not in dep_map:
         dep_map[dep] = len(dep_map)
-        print '\t', dep_map[dep], '[', 'label="' + dep + '"', ']', ';'
+        print('\t%s [label="%s"];' % (dep_map[dep], dep))
 
-      print '\t', dep_map[name], '->', dep_map[dep], ';'
+      print('\t%s -> %s;' % (dep_map[name], dep_map[dep]))
 
-  print '}'
+  print('}')
 
 
 def process(text, options):
