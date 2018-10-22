@@ -186,6 +186,25 @@ describe('Player', function() {
       }).catch(fail).then(done);
     });
 
+    it('destroys mediaSourceEngine before drmEngine', async () => {
+      goog.asserts.assert(manifest, 'Manifest should be non-null');
+      let parser = new shaka.test.FakeManifestParser(manifest);
+      let factory = function() { return parser; };
+
+      mediaSourceEngine.destroy.and.callFake(() => {
+        expect(drmEngine.destroy).not.toHaveBeenCalled();
+        return Util.delay(0.01).then(() => {
+          expect(drmEngine.destroy).not.toHaveBeenCalled();
+        });
+      });
+
+      await player.load('', 0, factory);
+      await player.destroy();
+
+      expect(mediaSourceEngine.destroy).toHaveBeenCalled();
+      expect(drmEngine.destroy).toHaveBeenCalled();
+    });
+
     it('destroys parser first when interrupting load', function(done) {
       let p = shaka.test.Util.delay(0.3);
       let parser = new shaka.test.FakeManifestParser(manifest);

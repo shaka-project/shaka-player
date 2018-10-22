@@ -33,7 +33,7 @@ let MockTimeRanges;
  *   remove: jasmine.Spy,
  *   updating: boolean,
  *   addEventListener: jasmine.Spy,
- *   removeEventListener: function(),
+ *   removeEventListener: jasmine.Spy,
  *   buffered: (MockTimeRanges|TimeRanges),
  *   timestampOffset: number,
  *   appendWindowEnd: number,
@@ -1115,7 +1115,7 @@ describe('MediaSourceEngine', function() {
       remove: jasmine.createSpy('remove'),
       updating: false,
       addEventListener: jasmine.createSpy('addEventListener'),
-      removeEventListener: function() {},
+      removeEventListener: jasmine.createSpy('removeEventListener'),
       buffered: {
         length: 0,
         start: jasmine.createSpy('buffered.start'),
@@ -1152,6 +1152,12 @@ describe('MediaSourceEngine', function() {
     object.addEventListener.and.callFake(function(eventName, listener) {
       if (targetEventNames.indexOf(eventName) != -1) {
         object[eventName] = listener;
+      }
+    });
+    object.removeEventListener.and.callFake(function(eventName, listener) {
+      if (targetEventNames.includes(eventName)) {
+        expect(object[eventName]).toBe(listener);
+        object[eventName] = null;
       }
     });
   }

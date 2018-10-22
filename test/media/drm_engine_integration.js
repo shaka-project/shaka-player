@@ -151,13 +151,13 @@ describe('DrmEngine', function() {
     mediaSourceEngine.init(expectedObject, false).then(done);
   });
 
-  afterEach(function(done) {
-    Promise.all([
+  afterEach(async function() {
+    await Promise.all([
       eventManager.destroy(),
       mediaSourceEngine.destroy(),
       networkingEngine.destroy(),
-      drmEngine.destroy()
-    ]).then(done);
+    ]);
+    await drmEngine.destroy();
   });
 
   afterAll(function() {
