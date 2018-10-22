@@ -445,7 +445,7 @@ def Run(args):
 
 
 def main(args):
-  Run(args)
+  return Run(args)
 
 
 if __name__ == '__main__':
