@@ -153,8 +153,8 @@ describe('DrmEngine', function() {
       eventManager.destroy(),
       mediaSourceEngine.destroy(),
       networkingEngine.destroy(),
-      drmEngine.destroy(),
     ]);
+    await drmEngine.destroy();
   });
 
   afterAll(function() {
