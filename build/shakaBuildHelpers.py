@@ -166,7 +166,7 @@ def git_version():
     try:
       # Check git tags for a version number, noting if the sources are dirty.
       cmd_line = ['git', '-C', get_source_base(), 'describe', '--tags', '--dirty']
-      return execute_get_output(cmd_line).strip()
+      return execute_get_output(cmd_line).decode('utf8').strip()
     except subprocess.CalledProcessError:
       raise RuntimeError('Unable to determine library version!')
 
@@ -177,9 +177,9 @@ def npm_version(is_dirty=False):
     base = cygwin_safe_path(get_source_base())
     cmd = 'npm.cmd' if is_windows() else 'npm'
     cmd_line = [cmd, '--prefix', base, 'ls', 'shaka-player']
-    text = execute_get_output(cmd_line)
+    text = execute_get_output(cmd_line).decode('utf8')
   except subprocess.CalledProcessError as e:
-    text = e.output
+    text = e.output.decode('utf8')
   match = re.search(r'shaka-player@(.*) ', text)
   if match:
     return match.group(1) + ('-npm-dirty' if is_dirty else '')
@@ -262,7 +262,7 @@ def update_node_modules():
   cmd = 'npm.cmd' if is_windows() else 'npm'
 
   # Check the version of npm.
-  version = execute_get_output([cmd, '-v'])
+  version = execute_get_output([cmd, '-v']).decode('utf8')
 
   if _parse_version(version) < _parse_version('1.3.12'):
     logging.error('npm version is too old, please upgrade.  e.g.:')

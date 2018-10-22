@@ -350,20 +350,21 @@ class Build(object):
     wrapper_output_path = '%s/dist/wrapper.js' % base
 
     with open(wrapper_input_path, 'rb') as f:
-      wrapper_code = f.read().replace('%output%', '"%output%"')
+      wrapper_code = f.read().decode('utf8').replace('%output%', '"%output%"')
 
     jar = self._get_closure_jar_path()
     cmd_line = ['java', '-jar', jar, '-O', 'WHITESPACE_ONLY']
     proc = shakaBuildHelpers.execute_subprocess(
         cmd_line, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
         stderr=subprocess.PIPE)
-    stripped_wrapper_code = proc.communicate(wrapper_code)[0]
+    stripped_wrapper_code = proc.communicate(wrapper_code.encode('utf8'))[0]
 
     if proc.returncode != 0:
       raise RuntimeError('Failed to strip whitespace from wrapper!')
 
     with open(wrapper_output_path, 'wb') as f:
-      f.write(stripped_wrapper_code.replace('"%output%"', '%output%'))
+      code = stripped_wrapper_code.decode('utf8')
+      f.write(code.replace('"%output%"', '%output%').encode('utf8'))
 
     return ['--output_wrapper_file=%s' % wrapper_output_path]
 
