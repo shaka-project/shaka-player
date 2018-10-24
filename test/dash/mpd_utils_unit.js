@@ -688,6 +688,15 @@ describe('MpdUtils', function() {
       operation.finally(done);
     });
 
+    it('ignores SegmentTimeline children', (done) => {
+      let baseXMLString = inBaseContainer(
+          '<SegmentTimeline>' +
+          '  <ToReplace xlink:href="https://xlink1" ' +
+          '     xlink:actuate="onRequest" />' +
+          '</SegmentTimeline>');
+      testSucceeds(baseXMLString, baseXMLString, 0, done);
+    });
+
     function testSucceeds(
         baseXMLString, desiredXMLString, desiredNetCalls, done) {
       let desiredXML = parser.parseFromString(desiredXMLString, 'text/xml')
