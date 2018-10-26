@@ -746,10 +746,10 @@ describe('In-manifest PlayReady and Widevine', function() {
   let ContentProtection = shaka.dash.ContentProtection;
   let strToXml = function(str) {
     let parser = new DOMParser();
-     return parser.parseFromString(str, 'application/xml').documentElement;
+    return parser.parseFromString(str, 'application/xml').documentElement;
   };
 
-   describe('getWidevineLicenseUrl', function() {
+  describe('getWidevineLicenseUrl', function() {
     it('valid ms:laurl node', function() {
       let input = {
         init: null,
@@ -788,7 +788,7 @@ describe('In-manifest PlayReady and Widevine', function() {
     });
   });
 
-  describe('getPlayReadyLicenseServerURL', function() {
+  describe('getPlayReadyLicenseURL', function() {
     it('mspro', function() {
       let laurl = '<test><LA_URL>www.example.com</LA_URL></test>';
       let laurlCodes = laurl.split('').map(function(c) {
@@ -814,7 +814,7 @@ describe('In-manifest PlayReady and Widevine', function() {
         node:
           strToXml('<test><mspr:pro>' + encodedPrObject + '</mspr:pro></test>'),
       };
-      let actual = ContentProtection.getPlayReadyLicenseServerURL(input);
+      let actual = ContentProtection.getPlayReadyLicenseURL(input);
       let expected = 'www.example.com';
       expect(actual).toEqual(expected);
     });
@@ -826,7 +826,7 @@ describe('In-manifest PlayReady and Widevine', function() {
         schemeUri: '',
         node: strToXml('<test></test>'),
       };
-      let actual = ContentProtection.getPlayReadyLicenseServerURL(input);
+      let actual = ContentProtection.getPlayReadyLicenseURL(input);
       let expected = '';
       expect(actual).toEqual(expected);
     });
