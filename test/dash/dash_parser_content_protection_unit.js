@@ -755,8 +755,11 @@ describe('In-manifest PlayReady and Widevine', function() {
         init: null,
         keyId: null,
         schemeUri: '',
-        node: strToXml(
-          '<test><ms:laurl licenseUrl="www.example.com"></ms:laurl></test>'),
+        node: strToXml([
+          '<test xmlns:ms="urn:microsoft">',
+          '  <ms:laurl licenseUrl="www.example.com"></ms:laurl>',
+          '</test>',
+        ].join('\n')),
       };
       let actual = ContentProtection.getWidevineLicenseUrl(input);
       let expected = 'www.example.com';
@@ -768,7 +771,11 @@ describe('In-manifest PlayReady and Widevine', function() {
         init: null,
         keyId: null,
         schemeUri: '',
-        node: strToXml('<test><ms:laurl></ms:laurl></test>'),
+        node: strToXml([
+          '<test xmlns:ms="urn:microsoft">',
+          '  <ms:laurl></ms:laurl>',
+          '</test>',
+        ].join('\n')),
       };
       let actual = ContentProtection.getWidevineLicenseUrl(input);
       let expected = '';
@@ -812,7 +819,11 @@ describe('In-manifest PlayReady and Widevine', function() {
         keyId: null,
         schemeUri: '',
         node:
-          strToXml('<test><mspr:pro>' + encodedPrObject + '</mspr:pro></test>'),
+          strToXml([
+            '<test xmlns:mspr="urn:microsoft:playready">',
+            '  <mspr:pro>' + encodedPrObject + '</mspr:pro>',
+            '</test>',
+          ].join('\n')),
       };
       let actual = ContentProtection.getPlayReadyLicenseURL(input);
       let expected = 'www.example.com';
