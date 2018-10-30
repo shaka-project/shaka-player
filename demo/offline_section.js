@@ -162,20 +162,18 @@ shakaDemo.storeDeleteAsset_ = function() {
   shakaDemo.updateButtons_(false);
 
   let assetList = document.getElementById('assetList');
-  let progress = document.getElementById('progress');
   let option = assetList.options[assetList.selectedIndex];
 
-  progress.textContent = '0';
-
+  // This will use the configuration from the player, so we need to set all
+  // our configurations on the player and not here.
   let storage = new shaka.offline.Storage(
       /** @type {!shaka.Player} */ (shakaDemo.localPlayer_));
-  storage.configure({
-    offline: {
-      progressCallback: (data, percent) => {
-        progress.textContent = (percent * 100).toFixed(2);
-      },
-    },
-  });
+
+
+  // Clear the progress display so that we will start at zero.
+  let percent = 0;
+  let progress = document.getElementById('progress');
+  progress.textContent = (percent * 100).toFixed(2);
 
   let p;
   if (option.storedContent) {
