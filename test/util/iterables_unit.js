@@ -65,4 +65,23 @@ describe('Iterables', function() {
       expect(some(input, (x) => x < 0)).toBeFalsy();
     });
   });
+
+  describe('filter', function() {
+    const filter = Iterables.filter;
+
+    it('works with no items', function() {
+      const input = new Set([]);
+      expect(filter(input, (x) => x >= 2)).toEqual([]);
+    });
+
+    it('works with items', function() {
+      const input = new Set([0, 1, 2, 3]);
+      // Everything
+      expect(filter(input, (x) => x < 7)).toEqual([0, 1, 2, 3]);
+      // Some things
+      expect(filter(input, (x) => x < 2)).toEqual([0, 1]);
+      // Nothing
+      expect(filter(input, (x) => x < 0)).toEqual([]);
+    });
+  });
 });
