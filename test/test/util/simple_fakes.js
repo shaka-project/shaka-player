@@ -16,6 +16,7 @@
  */
 
 goog.provide('shaka.test.FakeAbrManager');
+goog.provide('shaka.test.FakeCaptionParser');
 goog.provide('shaka.test.FakeManifestParser');
 goog.provide('shaka.test.FakePlayhead');
 goog.provide('shaka.test.FakePlayheadObserver');
@@ -546,6 +547,28 @@ shaka.test.FakeTextTrack.prototype.addCue;
 /** @type {!jasmine.Spy} */
 shaka.test.FakeTextTrack.prototype.removeCue;
 
+
+/**
+ * Creates a mux.js closed caption parser.
+ *
+ * @constructor
+ * @struct
+ * @extends {muxjs.mp4.CaptionParser}
+ * @return {muxjs.mp4.CaptionParser}
+ */
+shaka.test.FakeCaptionParser = function() {
+  let parsedData = {
+      captionStreams: {},
+      captions: ['foo', 'bar'],
+  };
+  let captionParser = {
+    init: jasmine.createSpy('init'),
+    parse: jasmine.createSpy('parse'),
+    clearParsedCaptions: jasmine.createSpy('clearParsedCaptions'),
+  };
+  captionParser.parse.and.returnValue(parsedData);
+  return captionParser;
+};
 
 /**
  * Creates a text track.

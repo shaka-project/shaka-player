@@ -72,6 +72,8 @@ describe('MediaSourceEngine', function() {
   let video;
   let mockMediaSource;
   let mockTextEngine;
+  /** @type {shaka.test.FakeCaptionParser} */
+  let mockCaptionParser;
   /** @type {!jasmine.Spy} */
   let createMediaSourceSpy;
 
@@ -143,6 +145,7 @@ describe('MediaSourceEngine', function() {
     };
     video = /** @type {HTMLMediaElement} */(mockVideo);
     mediaSourceEngine = new shaka.media.MediaSourceEngine(video);
+    mockCaptionParser = new shaka.test.FakeCaptionParser();
   });
 
   afterEach(function() {
@@ -523,6 +526,63 @@ describe('MediaSourceEngine', function() {
       Util.delay(0.1).then(function() {
         videoSourceBuffer.updateend();
       });
+    });
+
+    it('appends parsed closed captions from CaptionParser', async () => {
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, fakeVideoStream);
+      await mediaSourceEngine.init(initObject, false);
+
+      mediaSourceEngine.setUseEmbeddedText(false);
+      // Initialize the closed caption parser.
+      const appendInit = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, null, null, true);
+      // In MediaSourceEngine, appendBuffer() is async and Promise-based, but
+      // at the browser level, it's event-based.
+      // MediaSourceEngine waits for the 'updateend' event from the
+      // SourceBuffer, and uses that to resolve the appendBuffer Promise.
+      // Here, we must trigger the event on the fake/mock SourceBuffer before
+      // waiting on the appendBuffer Promise.
+      videoSourceBuffer.updateend();
+      await appendInit;
+
+      mediaSourceEngine.setCaptionParser(mockCaptionParser);
+      expect(mockTextEngine.storeAndAppendClosedCaptions).not.
+          toHaveBeenCalled();
+      // Parse and append the closed captions embedded in video stream.
+      const appendVideo = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, 0, Infinity, true);
+      videoSourceBuffer.updateend();
+      await appendVideo;
+
+      expect(mockTextEngine.storeAndAppendClosedCaptions).toHaveBeenCalled();
+    });
+
+    it('appends closed caption data only when mux.js is available',
+        async () => {
+      const originalMuxjs = window.muxjs;
+      try {
+        window['muxjs'] = null;
+        const initObject = new Map();
+        initObject.set(ContentType.VIDEO, fakeVideoStream);
+        await mediaSourceEngine.init(initObject, false);
+
+        mediaSourceEngine.setUseEmbeddedText(false);
+        const appendBuffer = mediaSourceEngine.appendBuffer(
+            ContentType.VIDEO, buffer, null, null, true);
+        // In MediaSourceEngine, appendBuffer() is async and Promise-based, but
+        // at the browser level, it's event-based.
+        // MediaSourceEngine waits for the 'updateend' event from the
+        // SourceBuffer, and uses that to resolve the appendBuffer Promise.
+        // Here, we must trigger the event on the fake/mock SourceBuffer before
+        // waiting on the appendBuffer Promise.
+        videoSourceBuffer.updateend();
+        await appendBuffer;
+
+        expect(mediaSourceEngine.getCaptionParser()).toBeNull();
+      } finally {
+        window['muxjs'] = originalMuxjs;
+      }
     });
   });
 
@@ -1101,7 +1161,7 @@ describe('MediaSourceEngine', function() {
       mockTextEngine = jasmine.createSpyObj('TextEngine', [
         'initParser', 'destroy', 'appendBuffer', 'remove', 'setTimestampOffset',
         'setAppendWindow', 'bufferStart', 'bufferEnd', 'bufferedAheadOf',
-        'setDisplayer', 'appendCues',
+        'setDisplayer', 'appendCues', 'storeAndAppendClosedCaptions',
       ]);
 
       let resolve = Promise.resolve.bind(Promise);

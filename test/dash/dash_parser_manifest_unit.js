@@ -181,7 +181,6 @@ describe('DashParser Manifest', function() {
         .build());
   });
 
-
   it('skips any periods after one without duration', async () => {
     let periodContents = [
       '    <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
@@ -359,7 +358,6 @@ describe('DashParser Manifest', function() {
     expect(stream3.closedCaptions).toEqual(expectedClosedCaptions);
   });
 
-
   it('correctly parses closed captions without channel numbers', async () => {
     const source = [
       '<MPD minBufferTime="PT75S">',
@@ -386,7 +384,6 @@ describe('DashParser Manifest', function() {
     expect(stream.closedCaptions).toEqual(expectedClosedCaptions);
   });
 
-
   it('correctly parses closed captions with no channel and language info',
       async () => {
     const source = [
@@ -409,7 +406,6 @@ describe('DashParser Manifest', function() {
     const expectedClosedCaptions = new Map([['CC1', 'und']]);
     expect(stream.closedCaptions).toEqual(expectedClosedCaptions);
   });
-
 
   it('correctly parses UTF-8', async () => {
     let source = [
