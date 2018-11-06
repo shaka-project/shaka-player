@@ -109,6 +109,19 @@ describe('DashParser SegmentTemplate', function() {
       ];
       await Dash.testSegmentIndex(source, references);
     });
+
+    it('presentation start is parsed correctly', function(done) {
+      let source = Dash.makeSimpleManifestText([
+        '<SegmentTemplate media="s$Number$.mp4" duration="60" />',
+      ], 30 /* duration */, /* startTime */ 30);
+
+      fakeNetEngine.setResponseText('dummy://foo', source);
+      parser.start('dummy://foo', playerInterface)
+          .then(function(manifest) {
+            expect(manifest.presentationTimeline.getSeekRangeStart()).toBe(30);
+          })
+          .catch(fail).then(done);
+    });
   });
 
   describe('index', function() {
