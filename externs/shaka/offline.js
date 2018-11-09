@@ -400,9 +400,11 @@ shakaExtern.StorageMechanism.prototype.getCells = function() {};
 
 
 /**
- * Erase all content from storage and leave storage in an empty state. It is
- * expected that |erase| will be called after |init| and will still be
- * initialized for use after calling |erase|.
+ * Erase all content from storage and leave storage in an empty state. Erase may
+ * be called with or without |init|.  This allows for storage to be wiped in
+ * case of a version mismatch.
+ *
+ * After calling |erase|, the mechanism will be in an initialized state.
  *
  * @return {!Promise}
  */
