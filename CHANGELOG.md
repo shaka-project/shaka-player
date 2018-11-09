@@ -1,3 +1,40 @@
+## 2.5.0-beta2 (2018-11-09)
+
+Contains everything in v2.4.5, plus...
+
+Bugfixes:
+  - Fix Chromecast receiver id in the demo, broken since v2.5.0-beta
+    - https://github.com/google/shaka-player/issues/1656
+  - Fix multi-period playback issues introduced in v2.5.0-beta
+    - https://github.com/google/shaka-player/issues/1601
+  - Fix seekable range with non-zero start
+    - https://github.com/google/shaka-player/issues/1602
+  - Misc Storage and demo fixes
+  - Fix support for restriction changes after playback
+    - https://github.com/google/shaka-player/issues/1533
+  - Fix TextEngine buffered range calculations
+    - https://github.com/google/shaka-player/issues/1562
+
+New Features:
+  - Add support for CEA captions in DASH
+    - https://github.com/google/shaka-player/issues/1404
+  - Set server certificate before Store and Delete
+    - https://github.com/google/shaka-player/issues/1623
+    - https://github.com/google/shaka-player/pull/1639
+  - Allow deferring deleting offline sessions.
+    - https://github.com/google/shaka-player/issues/1326
+  - Added progress events for Fetch plugin.
+    - https://github.com/google/shaka-player/issues/1504
+  - Add config field to ignore manifest minBufferTime #1547
+    - https://github.com/google/shaka-player/issues/1547
+    - https://github.com/google/shaka-player/pull/1581
+  - Add support for 'individualization-request' messages in EME
+    - https://github.com/google/shaka-player/issues/1565
+
+Docs:
+  - Update Language Normalization Documentation
+
+
 ## 2.4.5 (2018-11-09)
 
 Bugfixes:
