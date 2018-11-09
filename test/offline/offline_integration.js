@@ -41,7 +41,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
 
     if (supportsStorage()) {
       // Make sure we are starting with a blank slate.
-      await shaka.offline.Storage.deleteAll(player);
+      await shaka.offline.Storage.deleteAll();
       storage = new shaka.offline.Storage(player);
     }
   });
@@ -53,7 +53,7 @@ describe('Offline', /** @suppress {accessControls} */ function() {
 
     // Make sure we don't leave anything in storage after the test.
     if (supportsStorage()) {
-      await shaka.offline.Storage.deleteAll(player);
+      await shaka.offline.Storage.deleteAll();
     }
 
     if (player) {
