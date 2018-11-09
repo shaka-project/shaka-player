@@ -1,3 +1,55 @@
+## 2.4.5 (2018-11-09)
+
+Bugfixes:
+  - Fix erasure of the database with storage.deleteAll()
+  - Fix MediaSource tear down race
+  - Fix exception when destroying MediaSourceEngine twice
+  - Fix gap jumping test failures on IE/Edge/Tizen
+  - Fix stalls on Tizen TV
+  - Fix display of external subtitles
+    - https://github.com/google/shaka-player/issues/1596
+  - Fix test failures on Safari
+  - Fix filtering of HLS audio-only content
+  - Preserve bandwidth estimate between loads
+    - https://github.com/google/shaka-player/issues/1366
+  - Retry streaming when we get back online
+    - https://github.com/google/shaka-player/issues/1427
+  - Fix Storage test contamination
+  - Fix advanced DRM settings pollution across key systems
+    - https://github.com/google/shaka-player/issues/1524
+  - Fix TextEngine buffered range calculations
+    - https://github.com/google/shaka-player/issues/1562
+
+New Features:
+  - Optimize processXlinks
+    - https://github.com/google/shaka-player/issues/1640
+  - Add support for Python3 in build scripts
+  - Allow new Periods to add EME init data
+    - https://github.com/google/shaka-player/issues/1360
+  - Add namespace-aware parsing to TTML parser
+    - https://github.com/google/shaka-player/issues/1585
+  - An external Promise polyfill is no longer required!
+
+Demo App:
+  - Show logs prominently in noinput mode
+    - https://github.com/google/shaka-player/issues/1610
+  - Disable uncompiled mode on browsers without async
+  - Restore using Enter key to load asset
+
+Docs:
+  - Fix tracks sorting in Offline tutorial sample code
+    - https://github.com/google/shaka-player/issues/1608
+    - https://github.com/google/shaka-player/pull/1609
+  - Add a note about blank receiver IDs
+  - Rename 'video' to 'mediaElem' to make it clear that audio elements work, too
+    - https://github.com/google/shaka-player/issues/1555
+
+Un-Features:
+  - Un-ship VTTRegion support, which is currently broken in Chrome and does more
+    harm than good
+    - https://github.com/google/shaka-player/issues/1584
+
+
 ## 2.5.0-beta (2018-08-24)
 
 New Features:
