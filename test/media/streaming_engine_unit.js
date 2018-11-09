@@ -641,27 +641,6 @@ describe('StreamingEngine', function() {
         }
       });
     });
-
-    it('only clears MediaSourceEngine when it loads a different text stream',
-        function() {
-      setupVod();
-      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
-      createStreamingEngine();
-      playhead.getTime.and.returnValue(0);
-      onStartupComplete.and.callFake(function() { setupFakeGetTime(0); });
-      onChooseStreams.and.callFake(onChooseStreamsWithUnloadedText);
-
-      streamingEngine.init();
-
-      runTest(function() {
-        if (playheadTime == 20) {
-          mediaSourceEngine.clear.calls.reset();
-          mediaSourceEngine.init.calls.reset();
-          streamingEngine.loadNewTextStream(textStream1);
-          expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('text');
-        }
-      });
-    });
   });
 
   describe('unloadTextStream', function() {
