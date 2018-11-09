@@ -88,7 +88,7 @@ shakaDemo.audioOnlyPoster_ =
  * @const {string}
  * @private
  */
-shakaDemo.CC_APP_ID_ = '00A3C5E8';
+shakaDemo.CC_APP_ID_ = '7B25EC44';
 
 
 /**
