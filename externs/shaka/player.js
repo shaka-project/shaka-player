@@ -739,6 +739,8 @@ shaka.extern.OfflineConfiguration;
  *   A factory to construct an abr manager.
  * @property {shaka.extern.AbrConfiguration} abr
  *   ABR configuration and settings.
+ * @property {shaka.extern.OfflineConfiguration} offline
+ *   Offline configuration and settings.
  * @property {string} preferredAudioLanguage
  *   The preferred language to use for audio tracks.  If not given it will use
  *   the 'main' track.
