@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('Player', function() {
+describe('Player', () => {
   const Util = shaka.test.Util;
   const Feature = shakaAssets.Feature;
 
@@ -59,14 +59,14 @@ describe('Player', function() {
     support = await compiledShaka.Player.probeSupport();
   });
 
-  beforeEach(function() {
+  beforeEach(() => {
     player = new compiledShaka.Player(video);
 
     // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();
 
     onErrorSpy = jasmine.createSpy('onError');
-    onErrorSpy.and.callFake(function(event) { fail(event.detail); });
+    onErrorSpy.and.callFake((event) => fail(event.detail));
     eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
   });
 
@@ -82,11 +82,11 @@ describe('Player', function() {
     await Util.delay(0.1);
   });
 
-  afterAll(function() {
+  afterAll(() => {
     document.body.removeChild(video);
   });
 
-  describe('plays', function() {
+  describe('plays', () => {
     function createAssetTest(asset) {
       if (asset.disabled) return;
 
@@ -95,8 +95,8 @@ describe('Player', function() {
 
       let wit = asset.focus ? fit : it;
       wit(testName, async () => {
-        if (asset.drm.length && !asset.drm.some(
-            function(keySystem) { return support.drm[keySystem]; })) {
+        if (asset.drm.length &&
+            !asset.drm.some((keySystem) => support.drm[keySystem])) {
           pending('None of the required key systems are supported.');
         }
 
@@ -108,39 +108,59 @@ describe('Player', function() {
           if (asset.features.includes(Feature.MP4)) {
             mimeTypes.push('video/mp4');
           }
-          if (!mimeTypes.some(
-              function(type) { return support.media[type]; })) {
+          if (!mimeTypes.some((type) => support.media[type])) {
             pending('None of the required MIME types are supported.');
           }
         }
 
-        let config = {abr: {}, drm: {}, manifest: {dash: {}}};
-        config.abr.enabled = false;
-        config.manifest.dash.clockSyncUri =
-            'https://shaka-player-demo.appspot.com/time.txt';
+        // Make sure we are playing the lowest res available to avoid test flake
+        // based on network issues.  Note that disabling ABR and setting a low
+        // abr.defaultBandwidthEstimate would not be sufficient, because it
+        // would only affect the choice of track on the first period.  When we
+        // cross a period boundary, the default bandwidth estimate will no
+        // longer be in effect, and AbrManager may choose higher res tracks for
+        // the new period.  Using abr.restrictions.maxHeight will let us force
+        // AbrManager to the lowest resolution, which is its fallback when these
+        // soft restrictions cannot be met.
+        player.configure('abr.restrictions.maxHeight', 1);
+
+        // Make sure that live streams are synced against a good clock.
+        player.configure('manifest.dash.clockSyncUri',
+            'https://shaka-player-demo.appspot.com/time.txt');
+
+        // Make sure we don't get stuck on gaps that only appear in some
+        // browsers (Safari, Firefox).
+        // TODO(https://github.com/google/shaka-player/issues/1702):
+        // Is this necessary because of a bug in Shaka Player?
+        player.configure('streaming.jumpLargeGaps', true);
+
+        // Configure DRM for this asset.
         if (asset.licenseServers) {
-          config.drm.servers = asset.licenseServers;
+          player.configure('drm.servers', asset.licenseServers);
         }
         if (asset.drmCallback) {
-          config.manifest.dash.customScheme = asset.drmCallback;
+          player.configure('manifest.dash.customScheme', asset.drmCallback);
         }
         if (asset.clearKeys) {
-          config.drm.clearKeys = asset.clearKeys;
+          player.configure('drm.clearKeys', asset.clearKeys);
         }
-        player.configure(config);
 
+        // Configure networking for this asset.
+        const networkingEngine = player.getNetworkingEngine();
         if (asset.licenseRequestHeaders) {
-          player.getNetworkingEngine().registerRequestFilter(
-              addLicenseRequestHeaders.bind(null, asset.licenseRequestHeaders));
+          const headers = asset.licenseRequestHeaders;
+          networkingEngine.registerRequestFilter((requestType, request) => {
+            addLicenseRequestHeaders(headers, requestType, request);
+          });
         }
-
-        let networkingEngine = player.getNetworkingEngine();
         if (asset.requestFilter) {
           networkingEngine.registerRequestFilter(asset.requestFilter);
         }
         if (asset.responseFilter) {
           networkingEngine.registerResponseFilter(asset.responseFilter);
         }
+
+        // Add any extra configuration for this asset.
         if (asset.extraConfig) {
           player.configure(asset.extraConfig);
         }
@@ -152,28 +172,43 @@ describe('Player', function() {
         }
         video.play();
 
-        // 30 seconds or video ended, whichever comes first.
-        await waitForTimeOrEnd(video, 40);
+        // Wait for the video to start playback.  If it takes longer than 20
+        // seconds, fail the test.
+        await waitForMovementOrFailOnTimeout(video, 20);
+
+        // Play for 30 seconds, but stop early if the video ends.
+        await waitForEndOrTimeout(video, 30);
 
         if (video.ended) {
-          expect(video.currentTime).toBeCloseTo(video.duration, 1);
+          checkEndedTime();
         } else {
+          // Expect that in 30 seconds of playback, we go through at least 20
+          // seconds of content.  This allows for some buffering or network
+          // flake.
           expect(video.currentTime).toBeGreaterThan(20);
-          // If it were very close to duration, why !video.ended?
-          expect(video.currentTime).not.toBeCloseTo(video.duration);
+
+          // Since video.ended is false, we expect the current time to be before
+          // the video duration.
+          expect(video.currentTime).toBeLessThan(video.duration);
 
           if (!player.isLive()) {
-            // Seek and play out the end.
+            // Seek close to the end and play the rest of the content.
             video.currentTime = video.duration - 15;
-            // 30 seconds or video ended, whichever comes first.
-            await waitForTimeOrEnd(video, 40);
 
+            // Wait for the video to start playback again after seeking.  If it
+            // takes longer than 20 seconds, fail the test.
+            await waitForMovementOrFailOnTimeout(video, 20);
+
+            // Play for 30 seconds, but stop early if the video ends.
+            await waitForEndOrTimeout(video, 30);
+
+            // By now, ended should be true.
             expect(video.ended).toBe(true);
-            expect(video.currentTime).toBeCloseTo(video.duration, 1);
+            checkEndedTime();
           }
         }
-      });
-    }
+      });  // actual test
+    }  // createAssetTest
 
     // The user can run tests on a specific manifest URI that is not in the
     // asset list.
@@ -199,20 +234,92 @@ describe('Player', function() {
   });
 
   /**
-   * @param {!EventTarget} target
+   * Wait for the video playhead to move forward by some meaningful delta.
+   * If this happens before |timeout| seconds pass, the Promise is resolved.
+   * Otherwise, the Promise is rejected.
+   *
+   * @param {!HTMLMediaElement} target
+   * @param {number} timeout in seconds, after which the Promise fails
+   * @return {!Promise}
+   */
+  function waitForMovementOrFailOnTimeout(target, timeout) {
+    const curEventManager = eventManager;
+    const timeGoal = target.currentTime + 1;
+    let goalMet = false;
+    const startTime = Date.now();
+    shaka.log.info('Waiting for movement from', target.currentTime,
+                   'to', timeGoal);
+
+    return new Promise((resolve, reject) => {
+      curEventManager.listen(target, 'timeupdate', () => {
+        if (target.currentTime >= timeGoal) {
+          goalMet = true;
+          const endTime = Date.now();
+          const seconds = ((endTime - startTime) / 1000).toFixed(2);
+          shaka.log.info('Movement goal met after ' + seconds + ' seconds');
+
+          curEventManager.unlisten(target, 'timeupdate');
+          resolve();
+        }
+      });
+
+      Util.delay(timeout).then(() => {
+        // This check is only necessary to supress the error log.  It's fine to
+        // unlisten twice or to reject after resolve.  Neither of those actions
+        // matter.  But the error log can be confusing during debugging if we
+        // have already met the movement goal.
+        if (!goalMet) {
+          shaka.log.error('Timeout waiting for playback.',
+                          'current time', target.currentTime,
+                          'ready state', target.readyState,
+                          'playback rate', target.playbackRate,
+                          'paused', target.paused,
+                          'buffered', JSON.stringify(player.getBufferedInfo()));
+
+          curEventManager.unlisten(target, 'timeupdate');
+          reject(new Error('Timeout while waiting for playback!'));
+        }
+      });
+    });
+  }
+
+  /**
+   * Wait for the video to end or for |timeout| seconds to pass, whichever
+   * occurs first.  The Promise is resolved when either of these happens.
+   *
+   * @param {!HTMLMediaElement} target
    * @param {number} timeout in seconds, after which the Promise succeeds
    * @return {!Promise}
    */
-  function waitForTimeOrEnd(target, timeout) {
-    let curEventManager = eventManager;
-    return new Promise(function(resolve, reject) {
-      let callback = function() {
+  function waitForEndOrTimeout(target, timeout) {
+    const curEventManager = eventManager;
+
+    return new Promise((resolve, reject) => {
+      const callback = () => {
         curEventManager.unlisten(target, 'ended');
         resolve();
       };
+
+      // Whichever happens first resolves the Promise.
       curEventManager.listen(target, 'ended', callback);
       Util.delay(timeout).then(callback);
     });
+  }
+
+  /**
+   * Check the video time for videos that we expect to have ended.
+   */
+  function checkEndedTime() {
+    if (video.currentTime >= video.duration) {
+      // On some platforms, currentTime surpasses duration by more than 0.1s.
+      // For the purposes of this test, this is fine, so don't set any precise
+      // expectations on currentTime if it's larger.
+    } else {
+      // On some platforms, currentTime is less than duration, but it should be
+      // close.
+      expect(video.currentTime).toBeCloseTo(
+          video.duration, 1 /* decimal place */);
+    }
   }
 
   /**
