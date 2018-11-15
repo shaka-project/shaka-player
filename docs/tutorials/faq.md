@@ -147,13 +147,28 @@ thus are not required to transmux.
 In order to force those platforms to transmux, set the
 [`.streaming.forceTransmuxTS`][StreamingConfiguration] configuration to true.
 
+<hr>
+
+**Q:** Why do I get 404 errors with very large timescales?
+
+**A:** We can't handle content that creates timestamps too large to be
+represented as Numbers in JavaScript (2^53).  Very large timescales require very
+large timestamps (in timescale units), which means we are unable to substitute
+the correct values for `$Time$` in a `<SegmentTemplate>`.  [BigInteger.js][] is
+too large to become a required dependency for Shaka Player.
+
+We recommend reducing your timescale or avoiding `$Time` in `<SegmentTemplate>`.
+See discussion in [#1667][1667] for details.
+
 
 [386]: https://github.com/google/shaka-player/issues/386#issuecomment-227898001
 [489]: https://github.com/google/shaka-player/issues/489#issuecomment-240466224
 [743]: https://github.com/google/shaka-player/issues/743
 [887]: https://github.com/google/shaka-player/issues/887
 [999]: https://github.com/google/shaka-player/issues/999
+[1667]: https://github.com/google/shaka-player/issues/1667
 [AbrConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.AbrConfiguration
+[BigInteger.js]: https://github.com/peterolson/BigInteger.js
 [CORS]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
 [DashManifestConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.DashManifestConfiguration
 [StreamingConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.StreamingConfiguration

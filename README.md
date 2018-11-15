@@ -75,6 +75,7 @@ DASH features **not** supported:
  - Manifests without any segment info: https://github.com/google/shaka-player/issues/1088
  - Changing codecs during a presentation (unsupported by MSE)
  - Multiple trick mode tracks for the same resolution at varying framerates or bitrates
+ - Timescales so large that timestamps cannot be represented as integers in JavaScript (2^53): https://github.com/google/shaka-player/issues/1667
 
 
 ## HLS features
