@@ -961,9 +961,6 @@ shakaAssets.testAssets = [
   {
     name: 'Big Buck Bunny',
     manifestUri: 'https://amssamples.streaming.mediaservices.windows.net/622b189f-ec39-43f2-93a2-201ac4e31ce1/BigBuckBunny.ism/manifest(format=mpd-time-csf)',
-    // NOTE: License servers are timing out as of 2016-03-23.
-    // NOTE: Still timing out as of 2016-08-02.
-    disabled: true,
 
     encoder: shakaAssets.Encoder.AZURE_MEDIA_SERVICES,
     source: shakaAssets.Source.AZURE_MEDIA_SERVICES,
