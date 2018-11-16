@@ -14,3 +14,8 @@ closure/deps
   The closure dependency generator, part of the closure library, by Google.
   Apache v2.0 license.
   https://github.com/google/closure-library
+
+language-mapping-list
+  A map of languages to their names, v0.0.16, by Ali Al Dallal / Mozilla.
+  MIT license.
+  https://github.com/mozilla/language-mapping-list

@@ -72,7 +72,7 @@ const CRITICAL_RESOURCES = [
   'https://fonts.googleapis.com/icon?family=Material+Icons',
 
   'load.js',
-  '../dist/shaka-player.compiled.js',
+  '../dist/shaka-player.ui.js',
   '../dist/demo.compiled.js',
 ];
 

@@ -51,7 +51,7 @@ shakaDemo.localPlayer_ = null;
 shakaDemo.support_;
 
 
-/** @private {ShakaControls} */
+/** @private {shaka.ui.Controls} */
 shakaDemo.controls_ = null;
 
 
@@ -84,14 +84,6 @@ shakaDemo.audioOnlyPoster_ =
 
 
 /**
- * The registered ID of the v2.4 Chromecast receiver demo.
- * @const {string}
- * @private
- */
-shakaDemo.CC_APP_ID_ = '7B25EC44';
-
-
-/**
  * Initialize the application.
  */
 shakaDemo.init = function() {
@@ -102,9 +94,11 @@ shakaDemo.init = function() {
   document.getElementById('version').textContent = shaka.Player.version;
 
   // Fill in the language preferences based on browser config, if available.
-  let language = navigator.language || 'en-us';
-  document.getElementById('preferredAudioLanguage').value = language;
-  document.getElementById('preferredTextLanguage').value = language;
+  const languages = navigator.languages || ['en-us'];
+  document.getElementById('preferredAudioLanguage').value = languages[0];
+  document.getElementById('preferredTextLanguage').value = languages[0];
+  document.getElementById('preferredUILanguage').value = languages[0];
+  // TODO(#1591): Support multiple language preferences
 
   document.getElementById('preferredAudioChannelCount').value = '2';
 
@@ -113,8 +107,6 @@ shakaDemo.init = function() {
   shakaDemo.setupLogging_();
 
   shakaDemo.preBrowserCheckParams_(params);
-
-  shaka.polyfill.installAll();
 
   // Display uncaught exceptions.
   window.addEventListener('error', function(event) {
@@ -187,9 +179,12 @@ shakaDemo.init = function() {
 
       let localVideo =
           /** @type {!HTMLVideoElement} */(document.getElementById('video'));
-      let localPlayer = new shaka.Player(localVideo);
-      shakaDemo.castProxy_ = new shaka.cast.CastProxy(
-          localVideo, localPlayer, shakaDemo.CC_APP_ID_);
+
+      let videoContainer = localVideo.parentElement;
+      let ui = localVideo['ui'];
+
+      let localPlayer = ui.getPlayer();
+      shakaDemo.castProxy_ = ui.getControls().getCastProxy();
 
       shakaDemo.video_ = shakaDemo.castProxy_.getVideo();
       shakaDemo.player_ = shakaDemo.castProxy_.getPlayer();
@@ -202,12 +197,30 @@ shakaDemo.init = function() {
 
       let asyncSetup = shakaDemo.setupAssets_();
       shakaDemo.setupOffline_();
-      shakaDemo.setupConfiguration_();
       shakaDemo.setupInfo_();
+      shakaDemo.setupConfiguration_();
 
-      shakaDemo.controls_ = new ShakaControls();
-      shakaDemo.controls_.init(shakaDemo.castProxy_, shakaDemo.onError_,
-                               shakaDemo.onCastStatusChange_);
+      // Workarond for goog.asserts not working yet
+      if (videoContainer == null) {
+        return;
+      }
+
+      shakaDemo.controls_ = ui.getControls();
+
+      const uiLang = document.getElementById('preferredUILanguage').value;
+      shakaDemo.controls_.getLocalization().changeLocale([uiLang]);
+      // TODO(#1591): Support multiple language preferences
+
+      shakaDemo.controls_.addEventListener('error', (event) => {
+        shakaDemo.onError_(event['errorDetails']);
+      });
+
+      shakaDemo.controls_.addEventListener('caststatuschanged', (event) => {
+        shakaDemo.onCastStatusChange_(event['newStatus']);
+      });
+
+      // Disable controls until something is loaded
+      shakaDemo.controls_.setEnabledShakaControls(false);
 
       asyncSetup.catch(function(error) {
         // shakaDemo.setupOfflineAssets_ errored while trying to
@@ -267,6 +280,7 @@ shakaDemo.preBrowserCheckParams_ = function(params) {
   if ('lang' in params) {
     document.getElementById('preferredAudioLanguage').value = params['lang'];
     document.getElementById('preferredTextLanguage').value = params['lang'];
+    document.getElementById('preferredUILanguage').value = params['lang'];
   }
   if ('audiolang' in params) {
     document.getElementById('preferredAudioLanguage').value =
@@ -274,6 +288,9 @@ shakaDemo.preBrowserCheckParams_ = function(params) {
   }
   if ('textlang' in params) {
     document.getElementById('preferredTextLanguage').value = params['textlang'];
+  }
+  if ('uilang' in params) {
+    document.getElementById('preferredUILanguage').value = params['uilang'];
   }
   if ('channels' in params) {
     document.getElementById('preferredAudioChannelCount').value =
@@ -445,15 +462,6 @@ shakaDemo.postBrowserCheckParams_ = function(params) {
     shakaDemo.onAdaptationChange_(fakeEvent);
   }
 
-  if ('trickplay' in params) {
-    let showTrickPlay = document.getElementById('showTrickPlay');
-    showTrickPlay.checked = true;
-    // Call onTrickPlayChange_ manually, because setting checked
-    // programatically doesn't fire a 'change' event.
-    let fakeEvent = /** @type {!Event} */({target: showTrickPlay});
-    shakaDemo.onTrickPlayChange_(fakeEvent);
-  }
-
   if ('nativecontrols' in params) {
     let showNative = document.getElementById('showNative');
     showNative.checked = true;
@@ -561,13 +569,15 @@ shakaDemo.hashShouldChange_ = function() {
   if (document.getElementById('jumpLargeGaps').checked) {
     params.push('jumpLargeGaps');
   }
-  let audioLang = document.getElementById('preferredAudioLanguage').value;
-  let textLang = document.getElementById('preferredTextLanguage').value;
-  if (textLang != audioLang) {
+  const audioLang = document.getElementById('preferredAudioLanguage').value;
+  const textLang = document.getElementById('preferredTextLanguage').value;
+  const uiLang = document.getElementById('preferredUILanguage').value;
+  if (textLang == audioLang && audioLang == uiLang) {
+    params.push('lang=' + audioLang);
+  } else {
     params.push('audiolang=' + audioLang);
     params.push('textlang=' + textLang);
-  } else {
-    params.push('lang=' + audioLang);
+    params.push('uilang=' + uiLang);
   }
   let channels = document.getElementById('preferredAudioChannelCount').value;
   if (channels != '2') {
@@ -578,9 +588,6 @@ shakaDemo.hashShouldChange_ = function() {
   }
   if (!document.getElementById('enableAdaptation').checked) {
     params.push('noadaptation');
-  }
-  if (document.getElementById('showTrickPlay').checked) {
-    params.push('trickplay');
   }
   if (document.getElementById('showNative').checked) {
     params.push('nativecontrols');
@@ -615,6 +622,7 @@ shakaDemo.hashShouldChange_ = function() {
   if (videoRobustness) {
     params.push('videoRobustness=' + videoRobustness);
   }
+
   let audioRobustness =
       document.getElementById('drmSettingsAudioRobustness').value;
   if (audioRobustness) {
@@ -634,8 +642,11 @@ shakaDemo.hashShouldChange_ = function() {
     buildType = 'compiled';
   }
 
+  // Make the build links smart enough to preserve the app state while changing
+  // the build type.
   (['compiled', 'debug_compiled', 'uncompiled']).forEach(function(type) {
     let elem = document.getElementById(type + '_link');
+    elem.href = '#';
     if (buildType == type) {
       elem.classList.add('disabled_link');
       elem.removeAttribute('href');
@@ -739,28 +750,4 @@ shakaDemo.closeError = function() {
 };
 
 
-// IE 9 fires DOMContentLoaded, and enters the "interactive" readyState, before
-// document.body has been initialized, so wait for window.load.
-if (document.readyState == 'loading' ||
-    document.readyState == 'interactive') {
-  if (window.attachEvent) {
-    // IE8
-    window.attachEvent('onload', shakaDemo.init);
-  } else {
-    window.addEventListener('load', shakaDemo.init);
-  }
-} else {
-  /**
-   * Poll for Shaka Player on window.  On IE 11, the document is "ready", but
-   * there are still deferred scripts being loaded.  This does not occur on
-   * Chrome or Edge, which set the document's state at the correct time.
-   */
-  let pollForShakaPlayer = function() {
-    if (window.shaka) {
-      shakaDemo.init();
-    } else {
-      setTimeout(pollForShakaPlayer, 100);
-    }
-  };
-  pollForShakaPlayer();
-}
+document.addEventListener('shaka-ui-loaded', shakaDemo.init);

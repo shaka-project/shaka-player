@@ -5,6 +5,7 @@
   "source": {
     "include": [
       "lib",
+      "ui",
       "externs/shaka"
     ]
   },

@@ -26,9 +26,9 @@ import argparse
 import logging
 import os
 import re
-import sys
 
 import build
+import compiler
 import shakaBuildHelpers
 
 
@@ -38,35 +38,32 @@ def get_lint_files():
   base = shakaBuildHelpers.get_source_base()
   def get(arg):
     return shakaBuildHelpers.get_all_files(os.path.join(base, arg), match)
-  return get('test') + get('lib') + get('externs') + get('demo')
+  return get('test') + get('lib') + get('externs') + get('demo') + get('ui')
 
 
 def check_js_lint(args):
   """Runs the JavaScript linter."""
   # TODO: things not enforced: property doc requirements
-  logging.info('Running eslint...')
+  logging.info('Linting JavaScript...')
 
-  eslint = shakaBuildHelpers.get_node_binary('eslint')
-  cmd_line = eslint + get_lint_files()
-  if args.fix:
-    cmd_line += ['--fix']
-  return shakaBuildHelpers.execute_get_code(cmd_line) == 0
+  base = shakaBuildHelpers.get_source_base()
+  config_path = os.path.join(base, '.eslintrc.js')
+
+  linter = compiler.Linter(get_lint_files(), config_path)
+  return linter.lint(fix=args.fix, force=args.force)
 
 
-def check_html_lint(_):
-  """Runs the HTML linter over the HTML files.
+def check_html_lint(args):
+  """Runs the HTML linter."""
+  logging.info('Linting HTML...')
 
-  Returns:
-    True on success, False on failure.
-  """
-  logging.info('Running htmlhint...')
-  htmlhint = shakaBuildHelpers.get_node_binary('htmlhint')
   base = shakaBuildHelpers.get_source_base()
   files = ['index.html', 'demo/index.html', 'support.html']
   file_paths = [os.path.join(base, x) for x in files]
   config_path = os.path.join(base, '.htmlhintrc')
-  cmd_line = htmlhint + ['--config=' + config_path] + file_paths
-  return shakaBuildHelpers.execute_get_code(cmd_line) == 0
+
+  htmllinter = compiler.HtmlLinter(file_paths, config_path)
+  return htmllinter.lint(force=args.force)
 
 
 def check_complete(_):
@@ -102,7 +99,7 @@ def check_complete(_):
   return True
 
 
-def check_tests(_):
+def check_tests(args):
   """Runs an extra compile pass over the test code to check for type errors.
 
   Returns:
@@ -112,12 +109,12 @@ def check_tests(_):
 
   match = re.compile(r'.*\.js$')
   base = shakaBuildHelpers.get_source_base()
-  def get(*args):
-    return shakaBuildHelpers.get_all_files(os.path.join(base, *args), match)
-  files = set(get('lib') + get('externs') + get('test') +
-              get('third_party', 'closure'))
-  files.add(os.path.join(base, 'demo', 'common', 'assets.js'))
-  test_build = build.Build(files)
+  def get(path):
+    return shakaBuildHelpers.get_all_files(os.path.join(base, path), match)
+  files = set(get('lib') + get('externs') + get('test') + get('ui') +
+              get('third_party/closure') +
+              get('third_party/language-mapping-list'))
+  files.add(os.path.join(base, 'demo/common/assets.js'))
 
   closure_opts = build.common_closure_opts + build.common_closure_defines
   closure_opts += build.debug_closure_opts + build.debug_closure_defines
@@ -128,63 +125,31 @@ def check_tests(_):
       '--jscomp_off=missingRequire', '--jscomp_off=strictMissingRequire',
       '--checks-only', '-O', 'SIMPLE'
   ]
-  return test_build.build_raw(closure_opts)
 
-
-def check_externs(_):
-  """Runs an extra compile pass over the generated externs to ensure that they
-  are usable.
-
-  Returns:
-    True on success, False on failure.
-  """
-  logging.info('Checking the usability of generated externs...')
-
-  # Create a complete "build" object.
-  externs_build = build.Build()
-  if not externs_build.parse_build(['+@complete'], os.getcwd()):
-    return False
-  externs_build.add_core()
-
-  # Use it to generate externs for the next check.
-  if not externs_build.generate_externs('check'):
-    return False
-
-  # Create a custom "build" object, add all manually-written externs, then add
-  # the generated externs we just generated.
-  source_base = shakaBuildHelpers.get_source_base()
-  manual_externs = shakaBuildHelpers.get_all_files(
-      os.path.join(source_base, 'externs'), re.compile(r'.*\.js$'))
-  generated_externs = os.path.join(
-      source_base, 'dist', 'shaka-player.check.externs.js')
-
-  check_build = build.Build()
-  check_build.include = set(manual_externs)
-  check_build.include.add(generated_externs)
-
-  # Build with the complete set of externs, but without any application code.
-  # This will help find issues in the generated externs, independent of the app.
-  # Since we have no app, don't use the defines.  Unused defines cause a
-  # compilation error.
-  closure_opts = build.common_closure_opts + build.debug_closure_opts + [
-      '--checks-only', '-O', 'SIMPLE'
-  ]
-  ok = check_build.build_raw(closure_opts)
-
-  # Clean up the temporary externs we just generated.
-  os.unlink(generated_externs)
-
-  # Return the success/failure of the build above.
-  return ok
+  # Set up a build with the build name of "dummy".  With output_compiled_bundle
+  # set to False, the build name is irrelevant, since we won't generate any
+  # compiled output.
+  closure = compiler.ClosureCompiler(files, 'dummy')
+  closure.output_compiled_bundle = False
+  # Instead of creating a compiled bundle, we will touch a timestamp file to
+  # keep track of how recently we've run this check.
+  closure.timestamp_file = os.path.join(base, 'dist', '.testcheckstamp')
+  return closure.compile(closure_opts, args.force)
 
 
 def main(args):
   parser = argparse.ArgumentParser(
       description=__doc__,
       formatter_class=argparse.RawDescriptionHelpFormatter)
-  parser.add_argument('--fix',
-                      help='Automatically fix style violations.',
-                      action='store_true')
+  parser.add_argument(
+      '--fix',
+      help='Automatically fix style violations.',
+      action='store_true')
+  parser.add_argument(
+      '--force',
+      '-f',
+      help='Force checks even if no files have changed.',
+      action='store_true')
 
   parsed_args = parser.parse_args(args)
 
@@ -197,7 +162,6 @@ def main(args):
       check_html_lint,
       check_complete,
       check_tests,
-      check_externs,
   ]
   for step in steps:
     if not step(parsed_args):

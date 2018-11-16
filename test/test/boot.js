@@ -189,13 +189,19 @@ function getClientArg(name) {
           name: 'sprintf-js',
           main: 'src/sprintf',
         },
+        {
+          name: 'less',
+          main: 'dist/less',
+        },
       ],
     });
 
     // Load required AMD modules, then proceed with tests.
-    require(['promise-mock', 'sprintf-js'], (PromiseMock, sprintfJs) => {
+    require(['promise-mock', 'sprintf-js', 'less'],
+        (PromiseMock, sprintfJs, less) => {
       window.PromiseMock = PromiseMock;
       window.sprintf = sprintfJs.sprintf;
+      window.less = less;
 
       // Patch a new convenience method into PromiseMock.
       // See https://github.com/taylorhakes/promise-mock/issues/7

@@ -60,4 +60,7 @@ goog.require('shaka.text.SimpleTextDisplayer');
 goog.require('shaka.text.TextEngine');
 goog.require('shaka.text.TtmlTextParser');
 goog.require('shaka.text.VttTextParser');
+goog.require('shaka.ui.Localization');
+goog.require('shaka.ui.Overlay');
 goog.require('shaka.util.Error');
+goog.require('shaka.util.Iterables');

@@ -43,7 +43,6 @@ import logging
 import math
 import os
 import string
-import sys
 
 import shakaBuildHelpers
 

@@ -172,20 +172,29 @@ requirement: {
 }
 
 
-# Disallow eval, except when testing for ES6 syntax in demo
+# Disallow eval, except when testing for modern JS syntax in demo
 requirement: {
   type: BANNED_NAME
   value: 'window.eval'
   error_message: 'Using "eval" is not allowed'
-  whitelist_regexp: 'demo/load.js'
-  whitelist_regexp: 'demo/main.js'
+  whitelist_regexp: 'demo/common/demo_utils.js'
 }
 requirement: {
   type: BANNED_NAME
   value: 'eval'
   error_message: 'Using "eval" is not allowed'
-  whitelist_regexp: 'demo/load.js'
-  whitelist_regexp: 'demo/main.js'
+  whitelist_regexp: 'demo/common/demo_utils.js'
+}
+
+
+# Disallow the Event constructor, since Event is not constructable on IE.
+requirement: {
+  type: BANNED_CODE_PATTERN
+  value: '/** @param {*} name */ '
+         'function template(name) { new Event(name); }'
+  error_message: 'Event is not constructable on IE.  Instead, use '
+                 'document.createEvent(\'CustomEvent\') to create an event and '
+                 'event.initCustomEvent(\'my-event-type\') to initialize it.'
 }
 
 

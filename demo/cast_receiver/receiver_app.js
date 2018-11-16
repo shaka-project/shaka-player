@@ -16,6 +16,9 @@
  */
 
 
+goog.require('goog.asserts');
+
+
 /**
  * A Chromecast receiver demo app.
  * @constructor
@@ -31,14 +34,11 @@ function ShakaReceiver() {
   /** @private {shaka.cast.CastReceiver} */
   this.receiver_ = null;
 
-  /** @private {Element} */
-  this.pauseIcon_ = null;
+  /** @private {HTMLElement} */
+  this.playButton_ = null;
 
-  /** @private {Element} */
+  /** @private {HTMLElement} */
   this.controlsElement_ = null;
-
-  /** @private {ShakaControls} */
-  this.controlsUi_ = null;
 
   /** @private {?number} */
   this.controlsTimerId_ = null;
@@ -62,17 +62,30 @@ function ShakaReceiver() {
  * Initialize the application.
  */
 ShakaReceiver.prototype.init = function() {
+  // TODO: Check if this is needed after fixing IE
   shaka.polyfill.installAll();
 
-  this.video_ =
-      /** @type {!HTMLMediaElement} */(document.getElementById('video'));
-  this.player_ = new shaka.Player(this.video_);
+  /** @type {HTMLMediaElement} */
+  let video = /** @type {HTMLMediaElement} */
+      (document.getElementById('video'));
+  goog.asserts.assert(video, 'Video element should be available!');
+  this.video_ = video;
 
-  this.controlsUi_ = new ShakaControls();
-  this.controlsUi_.initMinimal(this.video_, this.player_);
+  /** @type {!shaka.ui.Overlay} */
+  let ui = this.video_['ui'];
+  goog.asserts.assert(ui, 'UI should be available!');
 
-  this.controlsElement_ = document.getElementById('controls');
-  this.pauseIcon_ = document.getElementById('pauseIcon');
+  this.player_ = ui.getPlayer();
+  goog.asserts.assert(this.player_, 'Player should be available!');
+
+  let videoContainer = /** @type {HTMLElement} */
+      (document.getElementById('videoContainer'));
+  goog.asserts.assert(videoContainer, 'Video container should be available!');
+
+  this.controlsElement_ = shaka.ui.Utils.getFirstDescendantWithClassName(
+      videoContainer, 'controlsContainer');
+  this.playButton_ = shaka.ui.Utils.getFirstDescendantWithClassName(
+      videoContainer, 'playButtonContainer');
   this.idle_ = document.getElementById('idle');
 
   this.video_.addEventListener(
@@ -85,7 +98,8 @@ ShakaReceiver.prototype.init = function() {
       'emptied', this.onPlayStateChange_.bind(this));
 
   this.receiver_ = new shaka.cast.CastReceiver(
-      this.video_, this.player_, this.appDataCallback_.bind(this));
+      this.video_, /** @type {!shaka.Player} */ (this.player_),
+      this.appDataCallback_.bind(this));
   this.receiver_.addEventListener(
       'caststatuschanged', this.checkIdle_.bind(this));
 
@@ -157,9 +171,9 @@ ShakaReceiver.prototype.onPlayStateChange_ = function() {
   }
 
   if (this.video_.paused) {
-    this.pauseIcon_.textContent = 'pause';
+    this.playButton_.style.display = 'inline';
   } else {
-    this.pauseIcon_.textContent = 'play_arrow';
+    this.playButton_.style.display = 'none';
   }
 
   if (this.video_.paused && this.video_.readyState > 0) {
@@ -184,9 +198,4 @@ function receiverAppInit() {
 }
 
 
-if (document.readyState == 'loading' ||
-    document.readyState == 'interactive') {
-  window.addEventListener('load', receiverAppInit);
-} else {
-  receiverAppInit();
-}
+document.addEventListener('shaka-ui-loaded', receiverAppInit);

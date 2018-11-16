@@ -405,7 +405,7 @@ class Launcher:
     # There is no need to print a status here as the gendep and build
     # calls will print their own status updates.
     if self.parsed_args.build:
-      if gendeps.gen_deps([]) != 0:
+      if gendeps.main([]) != 0:
         logging.error('Failed to generate project dependencies')
         return 1
 

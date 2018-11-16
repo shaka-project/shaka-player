@@ -24,7 +24,7 @@
 
 
 /** @suppress {duplicate} */
-var shakaDemo = shakaDemo || {};  // eslint-disable-line no-var
+var shakaDemo = shakaDemo || {}; // eslint-disable-line no-var
 
 
 /** @private */
@@ -37,12 +37,12 @@ shakaDemo.setupConfiguration_ = function() {
       'input', shakaDemo.onConfigInput_);
   document.getElementById('preferredTextLanguage').addEventListener(
       'input', shakaDemo.onConfigInput_);
+  document.getElementById('preferredUILanguage').addEventListener(
+      'input', shakaDemo.onConfigInput_);
   document.getElementById('preferredAudioChannelCount').addEventListener(
       'input', shakaDemo.onConfigInput_);
   document.getElementById('showNative').addEventListener(
       'change', shakaDemo.onNativeChange_);
-  document.getElementById('showTrickPlay').addEventListener(
-      'change', shakaDemo.onTrickPlayChange_);
   document.getElementById('enableAdaptation').addEventListener(
       'change', shakaDemo.onAdaptationChange_);
   document.getElementById('logLevelList').addEventListener(
@@ -104,7 +104,7 @@ shakaDemo.onAvailabilityWindowOverrideChange_ = function(event) {
  */
 shakaDemo.onLogLevelChange_ = function(event) {
   // shaka.log is not set if logging isn't enabled.
-  // I.E. if using the release version of shaka.
+  // I.E. if using the compiled version of shaka.
   if (shaka.log) {
     let logLevel = event.target[event.target.selectedIndex];
     switch (logLevel.value) {
@@ -171,6 +171,11 @@ shakaDemo.onConfigInput_ = function(event) {
         document.getElementById('preferredTextLanguage').value,
     preferredAudioChannelCount: preferredAudioChannelCount,
   }));
+
+  const uiLang = document.getElementById('preferredUILanguage').value;
+  shakaDemo.controls_.getLocalization().changeLocale([uiLang]);
+  // TODO(#1591): Support multiple language preferences
+
   // Change the hash, to mirror this.
   shakaDemo.hashShouldChange_();
 };
@@ -195,16 +200,10 @@ shakaDemo.onAdaptationChange_ = function(event) {
  * @private
  */
 shakaDemo.onNativeChange_ = function(event) {
-  let showTrickPlay = document.getElementById('showTrickPlay');
-
   if (event.target.checked) {
-    showTrickPlay.checked = false;
-    showTrickPlay.disabled = true;
-    shakaDemo.controls_.showTrickPlay(false);
-    shakaDemo.controls_.setEnabled(false);
+    shakaDemo.controls_.setEnabledNativeControls(true);
   } else {
-    showTrickPlay.disabled = false;
-    shakaDemo.controls_.setEnabled(true);
+    shakaDemo.controls_.setEnabledShakaControls(true);
   }
 
   // Update text streaming config.  When we use native controls, we must always
@@ -215,18 +214,6 @@ shakaDemo.onNativeChange_ = function(event) {
     streaming: {alwaysStreamText: event.target.checked},
   });
 
-  // Change the hash, to mirror this.
-  shakaDemo.hashShouldChange_();
-};
-
-
-/**
- * @param {!Event} event
- * @private
- */
-shakaDemo.onTrickPlayChange_ = function(event) {
-  // Show/hide trick play controls.
-  shakaDemo.controls_.showTrickPlay(event.target.checked);
   // Change the hash, to mirror this.
   shakaDemo.hashShouldChange_();
 };

@@ -41,7 +41,7 @@ def changelog_version():
     return match.group(1) if match else ''
 
 
-def check_version(_):
+def main(_):
   """Checks that all the versions in the library match."""
   changelog = changelog_version()
   player = player_version()
@@ -81,4 +81,4 @@ def check_version(_):
 
 
 if __name__ == '__main__':
-  shakaBuildHelpers.run_main(check_version)
+  shakaBuildHelpers.run_main(main)

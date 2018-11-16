@@ -107,9 +107,12 @@ module.exports = function(config) {
 
       // source files - these are only watched and served
       {pattern: 'lib/**/*.js', included: false},
+      {pattern: 'ui/**/*.js', included: false},
+      {pattern: 'ui/**/*.css', included: false},
+      {pattern: 'ui/**/*.less', included: false},
       {pattern: 'third_party/closure/goog/**/*.js', included: false},
       {pattern: 'test/test/assets/*', included: false},
-      {pattern: 'dist/shaka-player.compiled.js', included: false},
+      {pattern: 'dist/shaka-player.ui.js', included: false},
       {pattern: 'node_modules/**/*.js', included: false},
     ],
 
@@ -122,9 +125,12 @@ module.exports = function(config) {
       'lib/!(debug|polyfill)/*.js': ['coverage'],
       // Player is not matched by the above, so add it explicitly
       'lib/player.js': ['coverage'],
+      // Compute coverage over UI, too
+      'ui/*.js': ['coverage'],
 
       // Convert ES6 to ES5 so we can still run tests on IE11.
       'lib/**/*.js': ['babel'],
+      'ui/**/*.js': ['babel'],
       'test/**/*.js': ['babel'],
     },
 

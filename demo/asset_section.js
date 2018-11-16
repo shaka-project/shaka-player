@@ -346,6 +346,12 @@ shakaDemo.load = function() {
     // Update the control state in case autoplay is disabled.
     shakaDemo.controls_.loadComplete();
 
+    if (shakaDemo.video_.controls) {
+      shakaDemo.controls_.setEnabledNativeControls(true);
+    } else {
+      shakaDemo.controls_.setEnabledShakaControls(true);
+    }
+
     shakaDemo.hashShouldChange_();
 
     // Set a different poster for audio-only assets.
@@ -389,4 +395,7 @@ shakaDemo.load = function() {
 /** Unload any current asset. */
 shakaDemo.unload = function() {
   shakaDemo.player_.unload();
+  if (!shakaDemo.castProxy_.isCasting()) {
+    shakaDemo.controls_.setEnabledShakaControls(false);
+  }
 };

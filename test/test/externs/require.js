@@ -22,8 +22,8 @@
 
 
 /**
- * @param {!Array.<string>} moduleNames
- * @param {Function} callback
+ * @param {!Array.<string>|string} moduleNames
+ * @param {Function=} callback
  */
 var require = function(moduleNames, callback) {};
 

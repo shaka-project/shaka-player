@@ -47,6 +47,22 @@ function shakaUncompiledModeSupported() {
     importScript(baseUrl + src);
   }
 
+  // NOTE: This is a quick-and-easy hack based on assumption that the old
+  // demo page will be replaced in the near future.
+  function loadCss(buildType) {
+    var link = document.createElement('link');
+    link.type = 'text/css';
+    if (buildType == 'uncompiled') {
+      link.rel = 'stylesheet/less';
+      link.href = baseUrl + '../ui/controls.less';
+    } else {
+      link.rel = 'stylesheet';
+      link.href = baseUrl + '../dist/controls.css';
+    }
+
+    document.head.appendChild(link);
+  }
+
   function importScript(src) {
     var script = document.createElement('script');
     script.type = 'text/javascript';
@@ -57,6 +73,7 @@ function shakaUncompiledModeSupported() {
     script.async = false;
     document.head.appendChild(script);
   }
+
   window.CLOSURE_IMPORT_SCRIPT = importScript;
 
   var fields = location.search.substr(1);
@@ -85,7 +102,7 @@ function shakaUncompiledModeSupported() {
 
   // Very old browsers do not have Array.prototype.indexOf, so we loop.
   for (var i = 0; i < combined.length; ++i) {
-    if (combined[i] == 'compiled' || combined[i] == 'build=compiled') {
+    if (combined[i] == 'build=compiled') {
       scripts = window['COMPILED_JS'];
       buildType = 'compiled';
       buildSpecified = true;
@@ -97,6 +114,31 @@ function shakaUncompiledModeSupported() {
       buildSpecified = true;
       break;
     }
+    if (combined[i] == 'build=uncompiled') {
+      scripts = window['UNCOMPILED_JS'];
+      buildType = 'uncompiled';
+      buildSpecified = true;
+      break;
+    }
+  }
+
+  if (!shakaUncompiledModeSupported() && buildType == 'uncompiled') {
+    // The URL says uncompiled, but we know it won't work.  This URL was
+    // probably copied from some other browser, but it won't work in this one.
+    // Force the use of the compiled debug build and update the hash.
+    scripts = window['COMPILED_DEBUG_JS'];
+    buildType = 'debug_compiled';
+
+    // Replace the build type in either the hash or the URL parameters.
+    // At this point, we don't know precisely which contained the build type.
+    location.hash = location.hash.replace(
+        'build=uncompiled', 'build=debug_compiled');
+    location.href = location.href.replace(
+        'build=uncompiled', 'build=debug_compiled');
+    // Changing location.href will trigger a refresh of the page.  If the
+    // build type was in the URL parameters, the page will now be refreshed.
+    // If the build type was in the hash, the page will continue to load with
+    // an updated hash and the correct library type.
   }
 
   // If no build was specified in the URL, update the fragment with the default
@@ -107,6 +149,8 @@ function shakaUncompiledModeSupported() {
     }
     location.hash += 'build=' + buildType;
   }
+
+  loadCss(buildType);
 
   // The application must define its list of compiled and uncompiled sources
   // before including this loader.  The URLs should be relative to the page.

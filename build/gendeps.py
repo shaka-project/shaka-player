@@ -26,11 +26,14 @@ import shakaBuildHelpers
 
 deps_args = [
     '--root_with_prefix=lib ../../../lib',
-    '--root_with_prefix=third_party/closure ../../../third_party/closure'
+    '--root_with_prefix=ui ../../../ui',
+    '--root_with_prefix=third_party/closure ../../../third_party/closure',
+    '--root_with_prefix=third_party/language-mapping-list ' +
+        '../../../third_party/language-mapping-list',
 ]
 
 
-def gen_deps(_):
+def main(_):
   """Generates the uncompiled dependencies files."""
   logging.info('Generating Closure dependencies...')
 
@@ -54,4 +57,4 @@ def gen_deps(_):
 
 
 if __name__ == '__main__':
-  shakaBuildHelpers.run_main(gen_deps)
+  shakaBuildHelpers.run_main(main)

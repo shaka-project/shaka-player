@@ -2,6 +2,7 @@
   { "welcome": { "title": "Welcome to Shaka Player" } },
   { "basic-usage": { "title": "Basic Usage" } },
   { "debugging": { "title": "Debugging" } },
+  { "ui": { "title": "UI Library" } },
   { "config": { "title": "Configuration" } },
   { "network-and-buffering-config": { "title": "Network and Buffering Configuration" } },
   { "drm-config": { "title": "DRM Configuration" } },
