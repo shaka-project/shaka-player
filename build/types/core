@@ -11,6 +11,7 @@
 +../../lib/media/active_stream_map.js
 +../../lib/media/adaptation_set.js
 +../../lib/media/adaptation_set_criteria.js
++../../lib/media/closed_caption_parser.js
 +../../lib/media/drm_engine.js
 +../../lib/media/gap_jumping_controller.js
 +../../lib/media/manifest_parser.js

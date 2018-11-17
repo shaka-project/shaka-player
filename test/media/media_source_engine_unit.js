@@ -72,8 +72,8 @@ describe('MediaSourceEngine', function() {
   let video;
   let mockMediaSource;
   let mockTextEngine;
-  /** @type {shaka.test.FakeCaptionParser} */
-  let mockCaptionParser;
+  /** @type {!shaka.test.FakeClosedCaptionParser} */
+  let mockClosedCaptionParser;
   /** @type {!jasmine.Spy} */
   let createMediaSourceSpy;
 
@@ -145,7 +145,7 @@ describe('MediaSourceEngine', function() {
     };
     video = /** @type {HTMLMediaElement} */(mockVideo);
     mediaSourceEngine = new shaka.media.MediaSourceEngine(video);
-    mockCaptionParser = new shaka.test.FakeCaptionParser();
+    mockClosedCaptionParser = new shaka.test.FakeClosedCaptionParser();
   });
 
   afterEach(function() {
@@ -529,6 +529,12 @@ describe('MediaSourceEngine', function() {
     it('appends parsed closed captions from CaptionParser', async () => {
       const initObject = new Map();
       initObject.set(ContentType.VIDEO, fakeVideoStream);
+
+      mockClosedCaptionParser.parseFromSpy.and.callFake((data, onCaptions) => {
+        onCaptions(['foo', 'bar']);
+      });
+
+      mediaSourceEngine.setCaptionParser(mockClosedCaptionParser);
       await mediaSourceEngine.init(initObject, false);
 
       // Initialize the closed caption parser.
@@ -543,7 +549,6 @@ describe('MediaSourceEngine', function() {
       videoSourceBuffer.updateend();
       await appendInit;
 
-      mediaSourceEngine.setCaptionParser(mockCaptionParser);
       expect(mockTextEngine.storeAndAppendClosedCaptions).not.
           toHaveBeenCalled();
       // Parse and append the closed captions embedded in video stream.
@@ -558,6 +563,7 @@ describe('MediaSourceEngine', function() {
     it('appends closed caption data only when mux.js is available',
         async () => {
       const originalMuxjs = window.muxjs;
+
       try {
         window['muxjs'] = null;
         const initObject = new Map();
@@ -574,8 +580,9 @@ describe('MediaSourceEngine', function() {
         // waiting on the appendBuffer Promise.
         videoSourceBuffer.updateend();
         await appendBuffer;
-
-        expect(mediaSourceEngine.getCaptionParser()).toBeNull();
+        expect(mockClosedCaptionParser.initSpy).not.toHaveBeenCalled();
+        expect(mockTextEngine.storeAndAppendClosedCaptions).not.
+            toHaveBeenCalled();
       } finally {
         window['muxjs'] = originalMuxjs;
       }

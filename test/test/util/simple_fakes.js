@@ -16,7 +16,7 @@
  */
 
 goog.provide('shaka.test.FakeAbrManager');
-goog.provide('shaka.test.FakeCaptionParser');
+goog.provide('shaka.test.FakeClosedCaptionParser');
 goog.provide('shaka.test.FakeManifestParser');
 goog.provide('shaka.test.FakePlayhead');
 goog.provide('shaka.test.FakePlayheadObserver');
@@ -551,24 +551,36 @@ shaka.test.FakeTextTrack.prototype.removeCue;
 /**
  * Creates a mux.js closed caption parser.
  *
- * @constructor
- * @struct
- * @extends {muxjs.mp4.CaptionParser}
- * @return {muxjs.mp4.CaptionParser}
+ * @implements {shaka.media.IClosedCaptionParser}
  */
-shaka.test.FakeCaptionParser = function() {
-  let parsedData = {
-      captionStreams: {},
-      captions: ['foo', 'bar'],
-  };
-  let captionParser = {
-    init: jasmine.createSpy('init'),
-    parse: jasmine.createSpy('parse'),
-    clearParsedCaptions: jasmine.createSpy('clearParsedCaptions'),
-  };
-  captionParser.parse.and.returnValue(parsedData);
-  return captionParser;
+shaka.test.FakeClosedCaptionParser = class {
+  constructor() {
+    /** @type {!jasmine.Spy} */
+    this.initSpy = jasmine.createSpy('init');
+    /** @type {!jasmine.Spy} */
+    this.parseFromSpy = jasmine.createSpy('parseFrom');
+    /** @type {!jasmine.Spy} */
+    this.resetSpy = jasmine.createSpy('reset');
+  }
+  /** @override */
+  init() {
+    const func = shaka.test.Util.spyFunc(this.initSpy);
+    func();
+  }
+
+  /** @override */
+  parseFrom(data, onCaptions) {
+    const func = shaka.test.Util.spyFunc(this.parseFromSpy);
+    func(data, onCaptions);
+  }
+
+  /** @override */
+  reset() {
+    const func = shaka.test.Util.spyFunc(this.resetSpy);
+    func();
+  }
 };
+
 
 /**
  * Creates a text track.
