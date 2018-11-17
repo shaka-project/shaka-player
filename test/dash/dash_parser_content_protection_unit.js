@@ -825,7 +825,7 @@ describe('In-manifest PlayReady and Widevine', function() {
             '</test>',
           ].join('\n')),
       };
-      let actual = ContentProtection.getPlayReadyLicenseURL(input);
+      let actual = ContentProtection.getPlayReadyLicenseUrl(input);
       let expected = 'www.example.com';
       expect(actual).toEqual(expected);
     });
@@ -837,7 +837,7 @@ describe('In-manifest PlayReady and Widevine', function() {
         schemeUri: '',
         node: strToXml('<test></test>'),
       };
-      let actual = ContentProtection.getPlayReadyLicenseURL(input);
+      let actual = ContentProtection.getPlayReadyLicenseUrl(input);
       let expected = '';
       expect(actual).toEqual(expected);
     });
