@@ -808,16 +808,18 @@ describe('In-manifest PlayReady and Widevine', function() {
         return c.charCodeAt();
       });
       const prBytes = new Uint16Array([
-        // pr object size (unused)
-        0, 0,
+        // pr object size (in num bytes).
+        // + 10 for PRO size, count, and type
+        laurl.length * 2 + 10, 0,
         // record count
         1,
         // type
-        0x0001,
-        // record size
+        ContentProtection.PLAYREADY_RECORD_TYPES.RIGHTS_MANAGEMENT,
+        // record size (in num bytes)
         laurl.length * 2,
         // value
       ].concat(laurlCodes));
+
       const encodedPrObject =
         btoa(String.fromCharCode.apply(null, new Uint8Array(prBytes.buffer)));
         const input = {
