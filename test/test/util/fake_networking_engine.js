@@ -281,6 +281,35 @@ shaka.test.FakeNetworkingEngine.prototype.setHeadersMap = function(
 
 
 /**
+ * Set a single value in the response map.
+ *
+ * @param {string} uri
+ * @param {!ArrayBuffer} value
+ * @return {!shaka.test.FakeNetworkingEngine}
+ */
+shaka.test.FakeNetworkingEngine.prototype.setResponseValue =
+    function(uri, value) {
+  this.responseMap_[uri] = value;
+  return this;
+};
+
+
+/**
+ * Set a single value as text in the response map.
+ *
+ * @param {string} uri
+ * @param {string} value
+ * @return {!shaka.test.FakeNetworkingEngine}
+ */
+shaka.test.FakeNetworkingEngine.prototype.setResponseText =
+    function(uri, value) {
+  const utf8 = shaka.util.StringUtils.toUTF8(value);
+  this.responseMap_[uri] = utf8;
+  return this;
+};
+
+
+/**
  * Sets the default return value.
  *
  * @param {ArrayBuffer} defaultResponse The default value to return; or null to
