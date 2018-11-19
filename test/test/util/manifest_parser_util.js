@@ -46,6 +46,8 @@ shaka.test.ManifestParser.verifySegmentIndex = function(stream, references) {
     expect(position).not.toBe(null);
     let actualRef =
         stream.getSegmentReference(/** @type {number} */ (position));
+    // NOTE: A custom matcher for SegmentReferences is installed, so this checks
+    // the URIs as well.
     expect(actualRef).toEqual(expectedRef);
   }
 
