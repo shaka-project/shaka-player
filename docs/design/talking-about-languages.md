@@ -17,7 +17,7 @@ A locale is not required to use every component but must follow one of three pat
 ## Relationships
 Locales follow a tree-like structure, so we use tree-like terms to talk about the relationships between locales:
 
-![Locale Tree](locale_tree.svg)
+![Locale Tree](locales_tree.svg)
 
  - "en" is the parent of "en-US".
  - "en-US" is the parent of "en-US-tx".
@@ -43,4 +43,4 @@ There are three types of compatibility:
   - "en" and "en-US-wa"
   - "en-US" and "en-US-wa"
 
-![Locale Compatibility](locale_copmatibility.svg)
+![Locale Compatibility](locale_compatibility.svg)
