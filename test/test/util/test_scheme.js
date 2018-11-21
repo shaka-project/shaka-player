@@ -270,6 +270,9 @@ shaka.test.TestScheme.DATA = {
       mimeType: 'video/mp2t',
       codecs: 'avc1.64001e',
     },
+    text: {
+      mimeType: 'application/cea-608',
+    },
     duration: 30,
   },
 };

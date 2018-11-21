@@ -696,6 +696,20 @@ shaka.test.ManifestGenerator.prototype.mime = function(mime, codecs) {
 
 
 /**
+ * Sets the closed captions of the current stream.
+ *
+ * @param {Map.<string, string>} closedCaptions
+ * @return {!shaka.test.ManifestGenerator}
+ */
+shaka.test.ManifestGenerator.prototype.closedCaptions =
+    function(closedCaptions) {
+  const stream = this.currentStream_();
+  stream.closedCaptions = closedCaptions;
+  return this;
+};
+
+
+/**
  * Sets the framerate of the current stream.
  *
  * @param {number} frameRate

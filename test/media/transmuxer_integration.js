@@ -95,7 +95,7 @@ describe('Transmuxer', function() {
       let transmuxedData = await transmuxer.transmux(videoSegment);
       expect(transmuxedData.data).toEqual(jasmine.any(Uint8Array));
       expect(transmuxedData.data.length).toBeGreaterThan(0);
-      expect(transmuxedData.cues).toEqual(jasmine.any(Array));
+      expect(transmuxedData.captions).toEqual(jasmine.any(Array));
       new shaka.util.Mp4Parser()
           .box('mdat', shaka.util.Mp4Parser.allData(function(data) {
             sawMDAT = true;
@@ -110,7 +110,7 @@ describe('Transmuxer', function() {
       let transmuxedData = await transmuxer.transmux(audioSegment);
       expect(transmuxedData.data).toEqual(jasmine.any(Uint8Array));
       expect(transmuxedData.data.length).toBeGreaterThan(0);
-      expect(transmuxedData.cues).toEqual(jasmine.any(Array));
+      expect(transmuxedData.captions).toEqual(jasmine.any(Array));
       new shaka.util.Mp4Parser()
           .box('mdat', shaka.util.Mp4Parser.allData(function(data) {
             sawMDAT = true;
@@ -125,7 +125,7 @@ describe('Transmuxer', function() {
       let transmuxedData = await transmuxer.transmux(emptySegment);
       expect(transmuxedData.data).toEqual(jasmine.any(Uint8Array));
       expect(transmuxedData.data.length).toBeGreaterThan(0);
-      expect(transmuxedData.cues).toEqual(jasmine.any(Array));
+      expect(transmuxedData.captions).toEqual(jasmine.any(Array));
       new shaka.util.Mp4Parser()
           .box('mdat', shaka.util.Mp4Parser.allData(function(data) {
             sawMDAT = true;

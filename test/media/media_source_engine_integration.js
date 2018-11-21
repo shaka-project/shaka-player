@@ -320,10 +320,11 @@ describe('MediaSourceEngine', function() {
 
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
-    mediaSourceEngine.setUseEmbeddedText(true);
+    initObject.set(ContentType.TEXT, getFakeStream(metadata.text));
     // Call with forceTransmuxTS = true, so that it will transmux even on
     // platforms with native TS support.
     await mediaSourceEngine.init(initObject, /** forceTransmuxTS */ true);
+    mediaSourceEngine.setSelectedClosedCaptionId('CC1');
     await append(ContentType.VIDEO, 0);
     expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(1, 0);
     expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(20, 1);

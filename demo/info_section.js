@@ -288,12 +288,7 @@ shakaDemo.onTrackSelected_ = function(event) {
 
     player.selectVariantTrack(track, /* clearBuffer */ true);
   } else {
-    // CEA 608/708 captions data is embedded inside the video stream.
-    if (option.textContent == 'Default Text') {
-      player.selectEmbeddedTextTrack();
-    } else {
-      player.selectTextTrack(track);
-    }
+    player.selectTextTrack(track);
   }
 
   // Adaptation might have been changed by calling selectTrack().

@@ -488,12 +488,11 @@ describe('MediaSourceEngine', function() {
       initObject.set(ContentType.VIDEO, fakeTransportStream);
 
       mediaSourceEngine.init(initObject, false).then(() => {
-        mediaSourceEngine.setUseEmbeddedText(true);
         return mediaSourceEngine.appendBuffer(
             ContentType.VIDEO, buffer, null, null,
             /* hasClosedCaptions */ false);
       }).then(() => {
-        expect(mockTextEngine.appendCues).toHaveBeenCalled();
+        expect(mockTextEngine.storeAndAppendClosedCaptions).toHaveBeenCalled();
         expect(videoSourceBuffer.appendBuffer).toHaveBeenCalled();
       }).catch(fail).then(done);
 
@@ -511,7 +510,6 @@ describe('MediaSourceEngine', function() {
       initObject.set(ContentType.VIDEO, fakeTransportStream);
 
       mediaSourceEngine.init(initObject, false).then(() => {
-        mediaSourceEngine.setUseEmbeddedText(false);
         return mediaSourceEngine.appendBuffer(ContentType.VIDEO, buffer, null,
             null, /* hasClosedCaptions */ false);
       }).then(() => {
@@ -533,7 +531,6 @@ describe('MediaSourceEngine', function() {
       initObject.set(ContentType.VIDEO, fakeVideoStream);
       await mediaSourceEngine.init(initObject, false);
 
-      mediaSourceEngine.setUseEmbeddedText(false);
       // Initialize the closed caption parser.
       const appendInit = mediaSourceEngine.appendBuffer(
           ContentType.VIDEO, buffer, null, null, true);
@@ -567,7 +564,6 @@ describe('MediaSourceEngine', function() {
         initObject.set(ContentType.VIDEO, fakeVideoStream);
         await mediaSourceEngine.init(initObject, false);
 
-        mediaSourceEngine.setUseEmbeddedText(false);
         const appendBuffer = mediaSourceEngine.appendBuffer(
             ContentType.VIDEO, buffer, null, null, true);
         // In MediaSourceEngine, appendBuffer() is async and Promise-based, but
