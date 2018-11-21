@@ -405,17 +405,19 @@ shaka.ui.Controls.prototype.addControlsContainer_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.addPlayButton_ = function() {
-  const playButtonContainer = document.createElement('div');
-  playButtonContainer.classList.add('shaka-play-button-container');
-  playButtonContainer.classList.add('shaka-overlay-parent');
-  this.controlsContainer_.appendChild(playButtonContainer);
+  /** @private {!HTMLElement} */
+  this.playButtonContainer_ =
+      /** @type {!HTMLElement} */ (document.createElement('div'));
+  this.playButtonContainer_.classList.add('shaka-play-button-container');
+  this.playButtonContainer_.classList.add('shaka-overlay-parent');
+  this.controlsContainer_.appendChild(this.playButtonContainer_);
 
   /** @private {!HTMLElement} */
   this.playButton_ =
-    /** @type {!HTMLElement} */ (document.createElement('button'));
+      /** @type {!HTMLElement} */ (document.createElement('button'));
   this.playButton_.classList.add('shaka-play-button');
   this.playButton_.setAttribute('icon', 'play');
-  playButtonContainer.appendChild(this.playButton_);
+  this.playButtonContainer_.appendChild(this.playButton_);
 };
 
 
@@ -423,21 +425,26 @@ shaka.ui.Controls.prototype.addPlayButton_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.addBufferingSpinner_ = function() {
+  goog.asserts.assert(this.playButtonContainer_,
+                      'Must have play button container before spinner!');
+
   /** @private {!HTMLElement} */
   this.bufferingSpinner_ =
-    /** @type {!HTMLElement} */ (document.createElement('div'));
+      /** @type {!HTMLElement} */ (document.createElement('div'));
   this.bufferingSpinner_.classList.add('shaka-buffering-spinner');
   this.bufferingSpinner_.classList.add('shaka-overlay');
-  this.controlsContainer_.appendChild(this.bufferingSpinner_);
+  this.playButtonContainer_.appendChild(this.bufferingSpinner_);
 
   // Svg elements have to be created with the svg xml namespace.
   const xmlns = 'http://www.w3.org/2000/svg';
 
-  const spinnerSvg = document.createElementNS(xmlns, 'svg');
+  /** @private {!HTMLElement} */
+  this.spinnerSvg_ =
+      /** @type {!HTMLElement} */(document.createElementNS(xmlns, 'svg'));
   // NOTE: SVG elements do not have a classList on IE, so use setAttribute.
-  spinnerSvg.setAttribute('class', 'shaka-spinner-svg');
-  spinnerSvg.setAttribute('viewBox', '25 25 50 50');
-  this.bufferingSpinner_.appendChild(spinnerSvg);
+  this.spinnerSvg_.setAttribute('class', 'shaka-spinner-svg');
+  this.spinnerSvg_.setAttribute('viewBox', '25 25 50 50');
+  this.bufferingSpinner_.appendChild(this.spinnerSvg_);
 
   const spinnerCircle = document.createElementNS(xmlns, 'circle');
   spinnerCircle.setAttribute('class', 'shaka-spinner-path');
@@ -447,7 +454,7 @@ shaka.ui.Controls.prototype.addBufferingSpinner_ = function() {
   spinnerCircle.setAttribute('fill', 'none');
   spinnerCircle.setAttribute('stroke-width', '1');
   spinnerCircle.setAttribute('stroke-miterlimit', '10');
-  spinnerSvg.appendChild(spinnerCircle);
+  this.spinnerSvg_.appendChild(spinnerCircle);
 };
 
 
@@ -2298,8 +2305,8 @@ shaka.ui.Controls.prototype.resizePlayButtonAndSpinner_ = function() {
   // size, b is the spinner size and c is equal to BUFFERING_SPINNER_DELIMETER_.
   const delimeter = Controls.BUFFERING_SPINNER_DELIMETER_;
   const spinnerSize = (playButtonSize * delimeter) / (1 - delimeter);
-  this.bufferingSpinner_.style.width = spinnerSize + 'px';
-  this.bufferingSpinner_.style.height = spinnerSize + 'px';
+  this.spinnerSvg_.style.width = spinnerSize + 'px';
+  this.spinnerSvg_.style.height = spinnerSize + 'px';
 };
 
 
