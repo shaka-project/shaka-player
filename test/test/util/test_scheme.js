@@ -275,6 +275,20 @@ shaka.test.TestScheme.DATA = {
     },
     duration: 30,
   },
+  'cea-708_mp4': {
+    video: {
+      initSegmentUri: '/base/test/test/assets/cea-init.mp4',
+      mvhdOffset: 0x28,
+      segmentUri: '/base/test/test/assets/cea-segment.mp4',
+      tfdtOffset: 0x48,
+      segmentDuration: 2,
+      presentationTimeOffset: 0,
+      mimeType: 'video/mp4',
+      codecs: 'avc1.64001e',
+      closedCaptions: new Map([['CC1', 'en']]),
+    },
+    duration: 30,
+  },
 };
 
 
@@ -344,7 +358,8 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
       .initSegmentReference(
             ['test:' + name + '/' + contentType + '/init'], 0, null)
       .useSegmentTemplate('test:' + name + '/' + contentType + '/%d',
-                          data[contentType].segmentDuration);
+                          data[contentType].segmentDuration)
+      .closedCaptions(data[contentType].closedCaptions);
 
     if (data.licenseServers) {
       for (let keySystem in data.licenseServers) {

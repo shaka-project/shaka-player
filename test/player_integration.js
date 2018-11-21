@@ -263,6 +263,16 @@ describe('Player', function() {
       expect(textTracks[0].language).toEqual('en');
     });
 
+    it('with cea closed captions', async () => {
+      await player.load('test:cea-708_mp4_compiled');
+
+      const textTracks = player.getTextTracks();
+      expect(textTracks).toBeTruthy();
+      expect(textTracks.length).toBe(1);
+      expect(textTracks[0].language).toEqual('en');
+    });
+
+
     it('while changing languages with short Periods', async () => {
       // See: https://github.com/google/shaka-player/issues/797
       player.configure({preferredAudioLanguage: 'en'});
