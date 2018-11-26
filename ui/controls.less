@@ -61,11 +61,6 @@
   height: 100%;
 }
 
-.shaka-buffering-spinner svg {
-  width: 100px;
-  height: 100px;
-}
-
 .shaka-controls-container {
   width: 100%;
   height: 100%;
@@ -467,9 +462,11 @@ SOFTWARE.
 
 .shaka-spinner-svg {
   animation: rotate 2s linear infinite;
-  height: 100%;
   transform-origin: center center;
-  width: 100%;
+
+  width: 100px;
+  height: 100px;
+
   position: absolute;
   top: 0; bottom: 0; left: 0; right: 0;
   margin: auto;
@@ -482,9 +479,7 @@ SOFTWARE.
   stroke-dasharray: 20, 200;
   stroke-dashoffset: 0;
 
-  animation:
-    dash 1.5s ease-in-out infinite,
-    color 6s ease-in-out infinite;
+  animation: dash 1.5s ease-in-out infinite;
   stroke-linecap: round;
 }
 
