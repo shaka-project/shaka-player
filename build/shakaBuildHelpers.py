@@ -61,11 +61,7 @@ def _parse_version(version):
 
 def get_source_base():
   """Returns the absolute path to the source code base."""
-  source_base = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-  # In the build files, we use '/' in the paths, however Windows uses '\'.
-  # Although Windows supports both, the source mapping will not work with '\'.
-  # So we use Linux-style paths for everything.
-  return source_base.replace('\\', '/')
+  return os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 
 def is_linux():

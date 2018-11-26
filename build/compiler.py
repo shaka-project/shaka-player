@@ -113,15 +113,21 @@ class ClosureCompiler(object):
       if self.add_source_map:
         source_base = _get_source_path('')
 
-        # The source map below would be silently broken if the format of
-        # source_base changed without updating the source_map_location_mapping
-        # argument below.  This assertion ensures that this doesn't happen.
-        assert source_base[-1] == '/', 'Source base format changed!'
-
         output_options += [
             '--create_source_map', self.source_map_path,
+            # This uses a simple string replacement to create relative paths.
+            # "source|replacement".
             '--source_map_location_mapping', source_base + '|../',
         ]
+        if shakaBuildHelpers.is_windows() or shakaBuildHelpers.is_cygwin():
+          output_options += [
+              # On Windows, the source map needs to use '/' for paths, so we
+              # need to have this mapping so it creates the correct relative
+              # paths.  For some reason, we still need the mapping above for
+              # other parts of the source map.
+              '--source_map_location_mapping',
+              source_base.replace('\\', '/') + '|../',
+          ]
 
       if self.add_wrapper:
         output_options += self._prepare_wrapper()
