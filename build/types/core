@@ -8,6 +8,8 @@
 +../../lib/debug/asserts.js
 +../../lib/debug/log.js
 
++../../lib/deprecate/version.js
+
 +../../lib/media/active_stream_map.js
 +../../lib/media/adaptation_set.js
 +../../lib/media/adaptation_set_criteria.js
