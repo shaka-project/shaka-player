@@ -57,6 +57,7 @@ shaka.ui.Controls = function(player, videoContainer, video, config) {
     ['fast_forward', () => { this.addFastForwardButton_(); }],
     ['quality', () => { this.addResolutionButton_(); }],
     ['language', () => { this.addLanguagesButton_(); }],
+    ['picture_in_picture', () => { this.addPipButton_(); }],
   ]);
 
   /** @private {boolean} */
@@ -340,6 +341,18 @@ shaka.ui.Controls.prototype.initOptionalElementsToNull_ = function() {
 
   /** @private {HTMLElement} */
   this.backFromCaptionsButton_ = null;
+
+  /** @private {HTMLElement} */
+  this.pipButton_ = null;
+
+  /** @private {HTMLElement} */
+  this.pipNameSpan_ = null;
+
+  /** @private {HTMLElement} */
+  this.currentPipState_ = null;
+
+  /** @private {HTMLElement} */
+  this.pipIcon_ = null;
 };
 
 
@@ -579,6 +592,11 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
   if (this.castButton_) {
     this.castButton_.addEventListener(
       'click', this.onCastClick_.bind(this));
+  }
+
+  if (this.pipButton_) {
+    this.pipButton_.addEventListener(
+      'click', this.onPipClick_.bind(this));
   }
 
   this.controlsContainer_.addEventListener(
@@ -1107,6 +1125,50 @@ shaka.ui.Controls.prototype.addLanguagesButton_ = function() {
   this.languagesButton_.appendChild(label);
 
   this.overflowMenu_.appendChild(this.languagesButton_);
+};
+
+
+/**
+ * @private
+ */
+shaka.ui.Controls.prototype.addPipButton_ = function() {
+  this.pipButton_ =
+    /** @type {!HTMLElement} */ (document.createElement('button'));
+
+  this.pipIcon_ =
+    /** @type {!HTMLElement} */ (document.createElement('i'));
+  this.pipIcon_.classList.add('material-icons');
+  // This text content is actually a material design icon.
+  // DO NOT LOCALIZE
+  this.pipIcon_.textContent = 'picture_in_picture_alt';
+  this.pipButton_.appendChild(this.pipIcon_);
+
+  const label = document.createElement('label');
+  label.classList.add('shaka-overflow-button-label');
+  this.pipNameSpan_ =
+    /** @type {!HTMLElement} */ (document.createElement('span'));
+  // TODO: localize
+  this.pipNameSpan_.textContent = 'Picture-in-picture';
+  label.appendChild(this.pipNameSpan_);
+
+  this.currentPipState_ =
+    /** @type {!HTMLElement} */ (document.createElement('span'));
+  this.currentPipState_.classList.add('shaka-current-selection-span');
+  // TODO: localize
+  this.currentPipState_.textContent = 'Off';
+  label.appendChild(this.currentPipState_);
+
+  this.pipButton_.appendChild(label);
+
+  this.overflowMenu_.appendChild(this.pipButton_);
+
+  // Don't display the button if PiP is not supported or not allowed
+  // TODO: Can this ever change? Is it worth creating the button if the below
+  // condition is true?
+  if (!document.pictureInPictureEnabled ||
+      this.video_.disablePictureInPicture) {
+    shaka.ui.Controls.setDisplay_(this.pipButton_, false);
+  }
 };
 
 
@@ -2010,6 +2072,46 @@ shaka.ui.Controls.prototype.onCastClick_ = function() {
 
 
 /** @private */
+shaka.ui.Controls.prototype.onPipClick_ = function() {
+  if (!this.enabled_) {
+    return;
+  }
+
+  const Controls = shaka.ui.Controls;
+  if (!document.pictureInPictureElement) {
+      this.video_.requestPictureInPicture().catch((error) => {
+        this.dispatchEvent(new shaka.util.FakeEvent('error', {
+          errorDetails: error,
+        }));
+      });
+      // 'branding_watermark' material icon looks like a "dark version"
+      // of the p-i-p icon. We use "dark version" icons to signal that the
+      // feature is turned on.
+      // This text content is actually a material design icon.
+      // DO NOT LOCALIZE
+      this.pipIcon_.textContent = 'branding_watermark';
+      // TODO: localize
+      this.pipButton_.setAttribute(Controls.ARIA_LABEL_,
+          'exit picture in picture mode');
+      this.currentPipState_.textContent = 'On';
+    } else {
+      document.exitPictureInPicture().catch((error) => {
+        this.dispatchEvent(new shaka.util.FakeEvent('error', {
+          errorDetails: error,
+        }));
+      });
+      // This text content is actually a material design icon.
+      // DO NOT LOCALIZE
+      this.pipIcon_.textContent = 'picture_in_picture_alt';
+      // TODO: localize
+      this.pipButton_.setAttribute(Controls.ARIA_LABEL_,
+          'enter picture in picture mode');
+      this.currentPipState_.textContent = 'Off';
+    }
+};
+
+
+/** @private */
 shaka.ui.Controls.prototype.onOverflowMenuButtonClick_ = function() {
   if (this.anySettingsMenusAreOpen_()) {
     this.hideSettingsMenus_();
@@ -2587,6 +2689,7 @@ shaka.ui.Controls.overflowButtons_ = [
   'cast',
   'quality',
   'language',
+  'picture_in_picture',
 ];
 
 

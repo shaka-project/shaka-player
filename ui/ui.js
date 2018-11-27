@@ -104,6 +104,7 @@ shaka.ui.Overlay.prototype.defaultConfig_ = function() {
       'captions',
       'quality',
       'language',
+      'picture_in_picture',
     ],
     addSeekBar: true,
     adaptPlayButtonSize: true,
