@@ -788,7 +788,7 @@ shaka.ui.Controls.prototype.addMuteButton_ = function() {
     /** @type {!HTMLElement} */ (document.createElement('button'));
   this.muteButton_.classList.add('shaka-mute-button');
   this.muteButton_.classList.add('material-icons');
-  this.muteButton_.textContent = 'volume_up';
+  this.muteButton_.textContent = shaka.ui.Controls.MaterialDesignIcons_.MUTE;
   this.controlsButtonPanel_.appendChild(this.muteButton_);
 };
 
@@ -817,9 +817,8 @@ shaka.ui.Controls.prototype.addFullscreenButton_ = function() {
     /** @type {!HTMLElement} */ (document.createElement('button'));
   this.fullscreenButton_.classList.add('shaka-fullscreen-button');
   this.fullscreenButton_.classList.add('material-icons');
-  // This text content is actually a material design icon.
-  // DO NOT LOCALIZE
-  this.fullscreenButton_.textContent = 'fullscreen';
+  this.fullscreenButton_.textContent =
+    shaka.ui.Controls.MaterialDesignIcons_.FULLSCREEN;
   this.controlsButtonPanel_.appendChild(this.fullscreenButton_);
 };
 
@@ -833,7 +832,8 @@ shaka.ui.Controls.prototype.addOverflowMenuButton_ = function() {
   this.overflowMenuButton_.classList.add('shaka-overflow-menu-button');
   this.overflowMenuButton_.classList.add('shaka-no-propagation');
   this.overflowMenuButton_.classList.add('material-icons');
-  this.overflowMenuButton_.textContent = 'more_vert';
+  this.overflowMenuButton_.textContent =
+    shaka.ui.Controls.MaterialDesignIcons_.OPEN_OVERFLOW;
   this.controlsButtonPanel_.appendChild(this.overflowMenuButton_);
 };
 
@@ -848,9 +848,8 @@ shaka.ui.Controls.prototype.addCaptionButton_ = function() {
   this.captionButton_.classList.add('shaka-caption-button');
   this.captionIcon_ = /** @type {!HTMLElement} */ (document.createElement('i'));
   this.captionIcon_.classList.add('material-icons');
-  // This text content is actually a material design icon.
-  // DO NOT LOCALIZE
-  this.captionIcon_.textContent = 'closed_caption';
+  this.captionIcon_.textContent =
+    shaka.ui.Controls.MaterialDesignIcons_.CLOSED_CAPTIONS;
 
   if (this.player_ && this.player_.isTextTrackVisible()) {
     this.captionButton_.setAttribute('aria-pressed', 'true');
@@ -894,7 +893,7 @@ shaka.ui.Controls.prototype.addTextLangMenu_ = function() {
 
   const backIcon = document.createElement('i');
   backIcon.classList.add('material-icons');
-  backIcon.textContent = 'arrow_back';
+  backIcon.textContent = shaka.ui.Controls.MaterialDesignIcons_.BACK;
   this.backFromCaptionsButton_.appendChild(backIcon);
 
   this.backFromCaptionsSpan_ =
@@ -911,7 +910,7 @@ shaka.ui.Controls.prototype.addTextLangMenu_ = function() {
   chosenIcon.classList.add('shaka-chosen-item');
   // This text content is actually a material design icon.
   // DO NOT LOCALIZE
-  chosenIcon.textContent = 'done';
+  chosenIcon.textContent = shaka.ui.Controls.MaterialDesignIcons_.CHECKMARK;
   // Screen reader should ignore 'done'.
   chosenIcon.setAttribute('aria-hidden', 'true');
   off.appendChild(chosenIcon);
@@ -941,7 +940,7 @@ shaka.ui.Controls.prototype.addCastButton_ = function() {
   this.castIcon_.classList.add('material-icons');
   // This text content is actually a material design icon.
   // DO NOT LOCALIZE
-  this.castIcon_.textContent = 'cast';
+  this.castIcon_.textContent = shaka.ui.Controls.MaterialDesignIcons_.CAST;
   this.castButton_.appendChild(this.castIcon_);
 
   const label = document.createElement('label');
@@ -967,7 +966,8 @@ shaka.ui.Controls.prototype.addRewindButton_ = function() {
     /** @type {!HTMLElement} */ (document.createElement('button'));
   this.rewindButton_.classList.add('shaka-rewind-button');
   this.rewindButton_.classList.add('material-icons');
-  this.rewindButton_.textContent = 'fast_rewind';
+  this.rewindButton_.textContent =
+    shaka.ui.Controls.MaterialDesignIcons_.REWIND;
   this.controlsButtonPanel_.appendChild(this.rewindButton_);
 };
 
@@ -980,7 +980,8 @@ shaka.ui.Controls.prototype.addFastForwardButton_ = function() {
     /** @type {!HTMLElement} */ (document.createElement('button'));
   this.fastForwardButton_.classList.add('shaka-fast-forward-button');
   this.fastForwardButton_.classList.add('material-icons');
-  this.fastForwardButton_.textContent = 'fast_forward';
+  this.fastForwardButton_.textContent =
+    shaka.ui.Controls.MaterialDesignIcons_.FAST_FORWARD;
   this.controlsButtonPanel_.appendChild(this.fastForwardButton_);
 };
 
@@ -1003,7 +1004,7 @@ shaka.ui.Controls.prototype.addResolutionMenu_ = function() {
 
   const backIcon = document.createElement('i');
   backIcon.classList.add('material-icons');
-  backIcon.textContent = 'arrow_back';
+  backIcon.textContent = shaka.ui.Controls.MaterialDesignIcons_.BACK;
   this.backFromResolutionButton_.appendChild(backIcon);
 
   this.backFromResolutionSpan_ =
@@ -1019,9 +1020,8 @@ shaka.ui.Controls.prototype.addResolutionMenu_ = function() {
   const chosenIcon = document.createElement('i');
   chosenIcon.classList.add('material-icons');
   chosenIcon.classList.add('shaka-chosen-item');
-  // In material-icons 'done' stands for a check mark.
-  chosenIcon.textContent = 'done';
-  // Screen reader should ignore 'done'.
+  chosenIcon.textContent = shaka.ui.Controls.MaterialDesignIcons_.CHECKMARK;
+  // Screen reader should ignore the checkmark.
   chosenIcon.setAttribute('aria-hidden', 'true');
   auto.appendChild(chosenIcon);
 
@@ -1045,7 +1045,7 @@ shaka.ui.Controls.prototype.addResolutionButton_ = function() {
 
   const icon = document.createElement('i');
   icon.classList.add('material-icons');
-  icon.textContent = 'settings';
+  icon.textContent = shaka.ui.Controls.MaterialDesignIcons_.RESOLUTION;
   this.resolutionButton_.appendChild(icon);
 
   const label = document.createElement('label');
@@ -1082,7 +1082,7 @@ shaka.ui.Controls.prototype.addAudioLangMenu_ = function() {
 
   const backIcon = document.createElement('i');
   backIcon.classList.add('material-icons');
-  backIcon.textContent = 'arrow_back';
+  backIcon.textContent = shaka.ui.Controls.MaterialDesignIcons_.BACK;
   this.backFromLanguageButton_.appendChild(backIcon);
 
   this.backFromLanguageSpan_ =
@@ -1103,9 +1103,7 @@ shaka.ui.Controls.prototype.addLanguagesButton_ = function() {
 
   const icon = document.createElement('i');
   icon.classList.add('material-icons');
-  // This text content is actually a material design icon.
-  // DO NOT LOCALIZE
-  icon.textContent = 'language';
+  icon.textContent = shaka.ui.Controls.MaterialDesignIcons_.LANGUAGE;
   this.languagesButton_.appendChild(icon);
 
   const label = document.createElement('label');
@@ -1140,7 +1138,7 @@ shaka.ui.Controls.prototype.addPipButton_ = function() {
   this.pipIcon_.classList.add('material-icons');
   // This text content is actually a material design icon.
   // DO NOT LOCALIZE
-  this.pipIcon_.textContent = 'picture_in_picture_alt';
+  this.pipIcon_.textContent = shaka.ui.Controls.MaterialDesignIcons_.PIP;
   this.pipButton_.appendChild(this.pipIcon_);
 
   const label = document.createElement('label');
@@ -1324,7 +1322,7 @@ shaka.ui.Controls.prototype.onMouseMove_ = function(event) {
   // Use the cursor specified in the CSS file.
   this.videoContainer_.style.cursor = '';
   // Show the controls.
-  this.setControlsOpacity_(shaka.ui.Controls.opacity_.OPAQUE);
+  this.setControlsOpacity_(shaka.ui.Controls.Opacity_.OPAQUE);
   this.hideSettingsMenusTimer_.cancel();
   this.updateTimeAndSeekRange_();
 
@@ -1372,9 +1370,9 @@ shaka.ui.Controls.prototype.onMouseStill_ = function() {
   // is hovered.
   if ((this.video_.paused && !this.isSeeking_) ||
        this.overrideCssShowControls_) {
-    this.setControlsOpacity_(shaka.ui.Controls.opacity_.OPAQUE);
+    this.setControlsOpacity_(shaka.ui.Controls.Opacity_.OPAQUE);
   } else {
-    this.setControlsOpacity_(shaka.ui.Controls.opacity_.TRANSPARENT);
+    this.setControlsOpacity_(shaka.ui.Controls.Opacity_.TRANSPARENT);
   }
 };
 
@@ -1587,7 +1585,8 @@ shaka.ui.Controls.prototype.onVolumeStateChange_ = function() {
   const Controls = shaka.ui.Controls;
   if (this.video_.muted) {
     if (this.muteButton_) {
-      this.muteButton_.textContent = 'volume_off';
+      this.muteButton_.textContent =
+        shaka.ui.Controls.MaterialDesignIcons_.UNMUTE;
       this.muteButton_.setAttribute(Controls.ARIA_LABEL_,
         this.localization_.resolve(shaka.ui.Locales.Ids.ARIA_LABEL_UNMUTE));
     }
@@ -1596,7 +1595,8 @@ shaka.ui.Controls.prototype.onVolumeStateChange_ = function() {
     }
   } else {
     if (this.muteButton_) {
-      this.muteButton_.textContent = 'volume_up';
+      this.muteButton_.textContent =
+        shaka.ui.Controls.MaterialDesignIcons_.MUTE;
       this.muteButton_.setAttribute(Controls.ARIA_LABEL_,
         this.localization_.resolve(shaka.ui.Locales.Ids.ARIA_LABEL_MUTE));
     }
@@ -1958,10 +1958,7 @@ shaka.ui.Controls.prototype.focusOnTheChosenItem_ = function(menu) {
 shaka.ui.Controls.prototype.chosenIcon_ = function() {
   let chosenIcon = document.createElement('i');
   chosenIcon.classList.add('material-icons');
-  // In material-icons 'done' stands for a check mark.
-  // Go figure.
-  // DO NOT LOCALIZE
-  chosenIcon.textContent = 'done';
+  chosenIcon.textContent = shaka.ui.Controls.MaterialDesignIcons_.CHECKMARK;
   // Screen reader should ignore 'done'.
   chosenIcon.setAttribute('aria-hidden', 'true');
   return chosenIcon;
@@ -1990,13 +1987,14 @@ shaka.ui.Controls.prototype.onFullscreenClick_ = async function() {
   const LocIds = shaka.ui.Locales.Ids;
   if (document.fullscreenElement) {
     document.exitFullscreen();
-    // DO NOT LOCALIZE
-    this.fullscreenButton_.textContent = 'fullscreen';
+    this.fullscreenButton_.textContent =
+      shaka.ui.Controls.MaterialDesignIcons_.FULLSCREEN;
     this.fullscreenButton_.setAttribute(Controls.ARIA_LABEL_,
       this.localization_.resolve(LocIds.ARIA_LABEL_FULL_SCREEN));
   } else {
     await this.videoContainer_.requestFullscreen();
-    this.fullscreenButton_.textContent = 'fullscreen_exit';
+    this.fullscreenButton_.textContent =
+      shaka.ui.Controls.MaterialDesignIcons_.EXIT_FULLSCREEN;
     this.fullscreenButton_.setAttribute(Controls.ARIA_LABEL_,
       this.localization_.resolve(LocIds.ARIA_LABEL_EXIT_FULL_SCREEN));
   }
@@ -2084,12 +2082,8 @@ shaka.ui.Controls.prototype.onPipClick_ = function() {
           errorDetails: error,
         }));
       });
-      // 'branding_watermark' material icon looks like a "dark version"
-      // of the p-i-p icon. We use "dark version" icons to signal that the
-      // feature is turned on.
-      // This text content is actually a material design icon.
-      // DO NOT LOCALIZE
-      this.pipIcon_.textContent = 'branding_watermark';
+      this.pipIcon_.textContent =
+        shaka.ui.Controls.MaterialDesignIcons_.EXIT_PIP;
       // TODO: localize
       this.pipButton_.setAttribute(Controls.ARIA_LABEL_,
           'exit picture in picture mode');
@@ -2100,9 +2094,7 @@ shaka.ui.Controls.prototype.onPipClick_ = function() {
           errorDetails: error,
         }));
       });
-      // This text content is actually a material design icon.
-      // DO NOT LOCALIZE
-      this.pipIcon_.textContent = 'picture_in_picture_alt';
+      this.pipIcon_.textContent = shaka.ui.Controls.MaterialDesignIcons_.PIP;
       // TODO: localize
       this.pipButton_.setAttribute(Controls.ARIA_LABEL_,
           'enter picture in picture mode');
@@ -2147,8 +2139,11 @@ shaka.ui.Controls.prototype.onCastStatusChange_ = function(event) {
   }));
 
   if (this.castButton_) {
+    const materialDesignIcons = shaka.ui.Controls.MaterialDesignIcons_;
     shaka.ui.Controls.setDisplay_(this.castButton_, canCast);
-    this.castIcon_.textContent = isCasting ? 'cast_connected' : 'cast';
+    this.castIcon_.textContent = isCasting ?
+                                 materialDesignIcons.EXIT_CAST :
+                                 materialDesignIcons.CAST;
 
     // Aria-pressed set to true when casting, set to false otherwise.
     if (canCast) {
@@ -2491,11 +2486,11 @@ shaka.ui.Controls.prototype.anySettingsMenusAreOpen_ = function() {
 
 
 /**
- * @param {!shaka.ui.Controls.opacity_} opacity
+ * @param {!shaka.ui.Controls.Opacity_} opacity
  * @private
  */
 shaka.ui.Controls.prototype.setControlsOpacity_ = function(opacity) {
-  if (opacity == shaka.ui.Controls.opacity_.OPAQUE) {
+  if (opacity == shaka.ui.Controls.Opacity_.OPAQUE) {
     this.controlsContainer_.classList.add('shaka-opaque');
     this.controlsContainer_.classList.remove('shaka-transparent');
   } else {
@@ -2651,7 +2646,7 @@ shaka.ui.Controls.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR_ = 5; // seconds
  * @enum {number}
  * @private
  */
-shaka.ui.Controls.opacity_ = {
+shaka.ui.Controls.Opacity_ = {
   'TRANSPARENT': 0,
   'OPAQUE': 1,
 };
@@ -2698,3 +2693,32 @@ shaka.ui.Controls.overflowButtons_ = [
  * @private
  */
 shaka.ui.Controls.ARIA_LABEL_= 'aria-label';
+
+
+/**
+ * These strings are used to insert material design icons
+ * and should never be localized.
+ * @enum {string}
+ * @private
+ */
+shaka.ui.Controls.MaterialDesignIcons_ = {
+  'FULLSCREEN': 'fullscreen',
+  'EXIT_FULLSCREEN': 'fullscreen_exit',
+  'CLOSED_CAPTIONS': 'closed_caption',
+  'CHECKMARK': 'done',
+  'LANGUAGE': 'language',
+  'PIP': 'picture_in_picture_alt',
+  // 'branding_watermark' material icon looks like a "dark version"
+  // of the p-i-p icon. We use "dark version" icons to signal that the
+  // feature is turned on.
+  'EXIT_PIP': 'branding_watermark',
+  'BACK': 'arrow_back',
+  'RESOLUTION': 'settings',
+  'MUTE': 'volume_up',
+  'UNMUTE': 'volume_off',
+  'CAST': 'cast',
+  'EXIT_CAST': 'cast_connected',
+  'OPEN_OVERFLOW': 'more_vert',
+  'REWIND': 'fast_rewind',
+  'FAST_FORWARD': 'fast_forward',
+};
