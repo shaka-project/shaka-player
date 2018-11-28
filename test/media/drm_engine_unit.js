@@ -783,9 +783,8 @@ describe('DrmEngine', function() {
 
       // Fail generateRequest.
       let session1 = createMockSession();
-      session1.generateRequest.and.returnValue(Promise.reject({
-        message: 'whoops!',
-      }));
+      const nativeError = {message: 'whoops!'};
+      session1.generateRequest.and.returnValue(Promise.reject(nativeError));
       mockMediaKeys.createSession.and.returnValue(session1);
 
       onErrorSpy.and.stub();
@@ -796,7 +795,7 @@ describe('DrmEngine', function() {
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.DRM,
           shaka.util.Error.Code.FAILED_TO_GENERATE_LICENSE_REQUEST,
-          'whoops!'));
+          nativeError.message, nativeError, undefined));
     });
   });  // describe('attach')
 
