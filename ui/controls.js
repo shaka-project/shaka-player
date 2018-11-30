@@ -863,12 +863,6 @@ shaka.ui.Controls.prototype.addCaptionButton_ = function() {
   this.captionIcon_.classList.add('material-icons');
   this.captionIcon_.textContent =
     shaka.ui.Controls.MaterialDesignIcons_.CLOSED_CAPTIONS;
-
-  if (this.player_ && this.player_.isTextTrackVisible()) {
-    this.captionButton_.setAttribute('aria-pressed', 'true');
-  } else {
-    this.captionButton_.setAttribute('aria-pressed', 'false');
-  }
   this.captionButton_.appendChild(this.captionIcon_);
 
   const label = shaka.ui.Controls.createHTMLElement_('label');
