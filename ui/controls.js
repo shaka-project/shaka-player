@@ -79,6 +79,9 @@ shaka.ui.Controls = function(player, videoContainer, video, config) {
   /** @private {!HTMLMediaElement} */
   this.video_ = this.castProxy_.getVideo();
 
+  /** @private {!HTMLMediaElement} */
+  this.localVideo_ = video;
+
   /** @private {!shaka.Player} */
   this.player_ = this.castProxy_.getPlayer();
 
@@ -592,6 +595,10 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
   if (this.pipButton_) {
     this.pipButton_.addEventListener(
       'click', this.onPipClick_.bind(this));
+    this.localVideo_.addEventListener(
+      'enterpictureinpicture', this.onEnterPictureInPicture_.bind(this));
+    this.localVideo_.addEventListener(
+      'leavepictureinpicture', this.onLeavePictureInPicture_.bind(this));
   }
 
   this.controlsContainer_.addEventListener(
@@ -2036,31 +2043,49 @@ shaka.ui.Controls.prototype.onPipClick_ = function() {
     return;
   }
 
-  const Controls = shaka.ui.Controls;
   if (!document.pictureInPictureElement) {
-      this.video_.requestPictureInPicture().catch((error) => {
-        this.dispatchEvent(new shaka.util.FakeEvent('error', {
-          errorDetails: error,
-        }));
-      });
-      this.pipIcon_.textContent =
-        shaka.ui.Controls.MaterialDesignIcons_.EXIT_PIP;
-      // TODO: localize
-      this.pipButton_.setAttribute(Controls.ARIA_LABEL_,
-          'exit picture in picture mode');
-      this.currentPipState_.textContent = 'On';
-    } else {
-      document.exitPictureInPicture().catch((error) => {
-        this.dispatchEvent(new shaka.util.FakeEvent('error', {
-          errorDetails: error,
-        }));
-      });
-      this.pipIcon_.textContent = shaka.ui.Controls.MaterialDesignIcons_.PIP;
-      // TODO: localize
-      this.pipButton_.setAttribute(Controls.ARIA_LABEL_,
-          'enter picture in picture mode');
-      this.currentPipState_.textContent = 'Off';
-    }
+    this.video_.requestPictureInPicture().catch((error) => {
+      this.dispatchEvent(new shaka.util.FakeEvent('error', {
+        errorDetails: error,
+      }));
+    });
+  } else {
+    document.exitPictureInPicture().catch((error) => {
+      this.dispatchEvent(new shaka.util.FakeEvent('error', {
+        errorDetails: error,
+      }));
+    });
+  }
+};
+
+
+/** @private */
+shaka.ui.Controls.prototype.onEnterPictureInPicture_ = function() {
+  if (!this.enabled_) {
+    return;
+  }
+
+  const Controls = shaka.ui.Controls;
+  this.pipIcon_.textContent = Controls.MaterialDesignIcons_.EXIT_PIP;
+  // TODO: localize
+  this.pipButton_.setAttribute(Controls.ARIA_LABEL_,
+      'exit picture in picture mode');
+  this.currentPipState_.textContent = 'On';
+};
+
+
+/** @private */
+shaka.ui.Controls.prototype.onLeavePictureInPicture_ = function() {
+  if (!this.enabled_) {
+    return;
+  }
+
+  const Controls = shaka.ui.Controls;
+  this.pipIcon_.textContent = Controls.MaterialDesignIcons_.PIP;
+  // TODO: localize
+  this.pipButton_.setAttribute(Controls.ARIA_LABEL_,
+      'enter picture in picture mode');
+  this.currentPipState_.textContent = 'Off';
 };
 
 
