@@ -491,6 +491,22 @@ shakaAssets.testAssets = [
     ],
   },
   {
+    name: 'Sintel w/ 44 subtitle languages',
+    manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/sintel-many-subs/dash.mpd',
+
+    encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
+    source: shakaAssets.Source.SHAKA,
+    drm: [],
+    features: [
+      shakaAssets.Feature.DASH,
+      shakaAssets.Feature.HIGH_DEFINITION,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SEGMENT_BASE,
+      shakaAssets.Feature.SUBTITLES,
+      shakaAssets.Feature.WEBVTT,
+    ],
+  },
+  {
     name: 'Heliocentrism (multicodec, multiperiod)',
     manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/heliocentrism/heliocentrism.mpd',
 
