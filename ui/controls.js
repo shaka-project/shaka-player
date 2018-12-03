@@ -594,7 +594,9 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
 
   if (this.pipButton_) {
     this.pipButton_.addEventListener(
-      'click', this.onPipClick_.bind(this));
+      'click', () => {
+        this.onPipClick_();
+      });
     this.localVideo_.addEventListener(
       'enterpictureinpicture', this.onEnterPictureInPicture_.bind(this));
     this.localVideo_.addEventListener(
@@ -1131,10 +1133,19 @@ shaka.ui.Controls.prototype.addPipButton_ = function() {
   // Don't display the button if PiP is not supported or not allowed
   // TODO: Can this ever change? Is it worth creating the button if the below
   // condition is true?
-  if (!document.pictureInPictureEnabled ||
-      this.video_.disablePictureInPicture) {
+  if (!this.isPipAllowed_()) {
     shaka.ui.Controls.setDisplay_(this.pipButton_, false);
   }
+};
+
+
+/**
+ * @return {boolean}
+ * @private
+ */
+shaka.ui.Controls.prototype.isPipAllowed_ = function() {
+  return document.pictureInPictureEnabled &&
+      !this.video_.disablePictureInPicture;
 };
 
 
@@ -2015,7 +2026,7 @@ shaka.ui.Controls.prototype.onFastForwardClick_ = function() {
 
 
 /** @private */
-shaka.ui.Controls.prototype.onCastClick_ = function() {
+shaka.ui.Controls.prototype.onCastClick_ = async function() {
   if (!this.enabled_) return;
 
   if (this.castProxy_.isCasting()) {
@@ -2033,28 +2044,34 @@ shaka.ui.Controls.prototype.onCastClick_ = function() {
         }));
       }
     }.bind(this));
+
+    // If we're in picture-in-picture state, exit
+    if (document.pictureInPictureElement && this.pipButton_ != null) {
+      await this.onPipClick_();
+    }
   }
 };
 
 
-/** @private */
-shaka.ui.Controls.prototype.onPipClick_ = function() {
+/**
+ * @return {!Promise}
+ * @private
+ */
+shaka.ui.Controls.prototype.onPipClick_ = async function() {
   if (!this.enabled_) {
     return;
   }
 
-  if (!document.pictureInPictureElement) {
-    this.video_.requestPictureInPicture().catch((error) => {
-      this.dispatchEvent(new shaka.util.FakeEvent('error', {
-        errorDetails: error,
-      }));
-    });
-  } else {
-    document.exitPictureInPicture().catch((error) => {
-      this.dispatchEvent(new shaka.util.FakeEvent('error', {
-        errorDetails: error,
-      }));
-    });
+  try {
+    if (!document.pictureInPictureElement) {
+      await this.video_.requestPictureInPicture();
+    } else {
+      await document.exitPictureInPicture();
+    }
+  } catch (error) {
+    this.dispatchEvent(new shaka.util.FakeEvent('error', {
+      errorDetails: error,
+    }));
   }
 };
 
@@ -2118,8 +2135,8 @@ shaka.ui.Controls.prototype.onOverflowMenuButtonClick_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.onCastStatusChange_ = function(event) {
-  let canCast = this.castProxy_.canCast() && this.castAllowed_;
-  let isCasting = this.castProxy_.isCasting();
+  const canCast = this.castProxy_.canCast() && this.castAllowed_;
+  const isCasting = this.castProxy_.isCasting();
   this.dispatchEvent(new shaka.util.FakeEvent('caststatuschanged', {
     newStatus: isCasting,
   }));
@@ -2143,10 +2160,18 @@ shaka.ui.Controls.prototype.onCastStatusChange_ = function(event) {
 
   this.setCurrentCastSelection_();
 
+  const pipIsEnabled = (this.isPipAllowed_() && (this.pipButton_ != null));
   if (isCasting) {
     this.controlsButtonPanel_.classList.add('shaka-casting');
+    // Picture-in-picture is not applicable if we're casting
+    if (pipIsEnabled) {
+      shaka.ui.Controls.setDisplay_(this.pipButton_, false);
+    }
   } else {
     this.controlsButtonPanel_.classList.remove('shaka-casting');
+    if (pipIsEnabled) {
+      shaka.ui.Controls.setDisplay_(this.pipButton_, true);
+    }
   }
 };
 
