@@ -821,24 +821,24 @@ describe('In-manifest PlayReady and Widevine', function() {
       ].concat(laurlCodes));
 
       const encodedPrObject =
-        btoa(String.fromCharCode.apply(null, new Uint8Array(prBytes.buffer)));
-        const input = {
-        init: null,
-        keyId: null,
-        schemeUri: '',
-        node:
-          strToXml([
-            '<test xmlns:mspr="urn:microsoft:playready">',
-            '  <mspr:pro>' + encodedPrObject + '</mspr:pro>',
-            '</test>',
-          ].join('\n')),
+        shaka.util.Uint8ArrayUtils.toBase64(new Uint8Array(prBytes.buffer));
+      const input = {
+      init: null,
+      keyId: null,
+      schemeUri: '',
+      node:
+        strToXml([
+          '<test xmlns:mspr="urn:microsoft:playready">',
+          '  <mspr:pro>' + encodedPrObject + '</mspr:pro>',
+          '</test>',
+        ].join('\n')),
       };
       const actual = ContentProtection.getPlayReadyLicenseUrl(input);
       const expected = 'www.example.com';
       expect(actual).toEqual(expected);
     });
 
-     it('no mspro', function() {
+    it('no mspro', function() {
       const input = {
         init: null,
         keyId: null,
