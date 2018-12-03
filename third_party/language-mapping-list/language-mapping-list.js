@@ -493,6 +493,10 @@ mozilla.LanguageMapping = {
     nativeName: "한국어 (韩国)",
     englishName: "Korean (Korea)"
   },
+  'ku': {
+    nativeName: "Kurdî",
+    englishName: "Kurdish"
+  },
   'ku-TR': {
     nativeName: "Kurdî",
     englishName: "Kurdish"
@@ -585,10 +589,6 @@ mozilla.LanguageMapping = {
     nativeName: "ဗမာစကာ",
     englishName: "Burmese"
   },
-  'no': {
-    nativeName: "Norsk",
-    englishName: "Norwegian"
-  },
   'nb': {
     nativeName: "Norsk (bokmål)",
     englishName: "Norwegian (bokmal)"
@@ -620,6 +620,10 @@ mozilla.LanguageMapping = {
   'nn-NO': {
     nativeName: "Norsk (nynorsk)",
     englishName: "Norwegian (nynorsk)"
+  },
+  'no': {
+    nativeName: "Norsk",
+    englishName: "Norwegian"
   },
   'oc': {
     nativeName: "Occitan",
@@ -857,11 +861,11 @@ mozilla.LanguageMapping = {
     nativeName: "中文",
     englishName: "Chinese"
   },
-  'zh-Hans': {
+  'zh-HANS': {
     nativeName: "中文简体",
     englishName: "Chinese Simplified"
   },
-  'zh-Hant': {
+  'zh-HANT': {
     nativeName: "中文繁體",
     englishName: "Chinese Traditional"
   },
