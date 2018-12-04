@@ -239,6 +239,88 @@ describe('Player', function() {
         expect(textTrack.cues).not.toBe(null);
       }
     });
+
+    it('is called automatically if language prefs match', async () => {
+      // If the text is a match for the user's preferences, and audio differs
+      // from text, we enable text display automatically.
+
+      // NOTE: This is also a regression test for #1696, in which a change
+      // to this feature broke StreamingEngine initialization.
+
+      const preferredTextLanguage = 'fa';  // The same as in the content itself
+      player.configure({preferredTextLanguage: preferredTextLanguage});
+
+      // Now load a version of Sintel with delayed setup of video & audio
+      // streams and wait for completion.
+      await player.load('test:sintel_realistic_compiled');
+      // By this point, a MediaSource error would be thrown in a repro of bug
+      // #1696.
+
+      // Make sure the automatic setting took effect.
+      expect(player.isTextTrackVisible()).toBe(true);
+
+      // Make sure the content we tested with has text tracks, that the config
+      // we used matches the text language, and that the audio language differs.
+      // These will catch any changes to the underlying content that would
+      // invalidate the test setup.
+      expect(player.getTextTracks().length).not.toBe(0);
+      const textTrack = player.getTextTracks()[0];
+      expect(textTrack.language).toEqual(preferredTextLanguage);
+
+      const variantTrack = player.getVariantTracks()[0];
+      expect(variantTrack.language).not.toEqual(textTrack.language);
+    });
+
+    it('is not called automatically without language pref match', async () => {
+      // If the text preference doesn't match the content, we do not enable text
+      // display automatically.
+
+      const preferredTextLanguage = 'xx';  // Differs from the content itself
+      player.configure({preferredTextLanguage: preferredTextLanguage});
+
+      // Now load the content and wait for completion.
+      await player.load('test:sintel_realistic_compiled');
+
+      // Make sure the automatic setting did not happen.
+      expect(player.isTextTrackVisible()).toBe(false);
+
+      // Make sure the content we tested with has text tracks, that the config
+      // we used does not match the text language, and that the text and audio
+      // languages do not match each other (to keep this distinct from the next
+      // test case).  This will catch any changes to the underlying content that
+      // would invalidate the test setup.
+      expect(player.getTextTracks().length).not.toBe(0);
+      const textTrack = player.getTextTracks()[0];
+      expect(textTrack.language).not.toEqual(preferredTextLanguage);
+
+      const variantTrack = player.getVariantTracks()[0];
+      expect(variantTrack.language).not.toEqual(textTrack.language);
+    });
+
+    it('is not called automatically with audio and text match', async () => {
+      // If the audio and text tracks use the same language, we do not enable
+      // text display automatically, no matter the text preference.
+
+      const preferredTextLanguage = 'und';  // The same as in the content itself
+      player.configure({preferredTextLanguage: preferredTextLanguage});
+
+      // Now load the content and wait for completion.
+      await player.load('test:sintel_compiled');
+
+      // Make sure the automatic setting did not happen.
+      expect(player.isTextTrackVisible()).toBe(false);
+
+      // Make sure the content we tested with has text tracks, that the
+      // config we used matches the content, and that the text and audio
+      // languages match each other.  This will catch any changes to the
+      // underlying content that would invalidate the test setup.
+      expect(player.getTextTracks().length).not.toBe(0);
+      const textTrack = player.getTextTracks()[0];
+      expect(textTrack.language).toEqual(preferredTextLanguage);
+
+      const variantTrack = player.getVariantTracks()[0];
+      expect(variantTrack.language).toEqual(textTrack.language);
+    });
   });
 
   describe('plays', function() {

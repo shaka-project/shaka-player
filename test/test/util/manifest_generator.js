@@ -624,6 +624,18 @@ shaka.test.ManifestGenerator.prototype.textStream = function(uri) {
 
 
 /**
+ * Force a delay in createSegmentIndex to delay setup.  This can be useful in
+ * certain tests.
+ *
+ * @return {!shaka.test.ManifestGenerator}
+ */
+shaka.test.ManifestGenerator.prototype.delayCreateSegmentIndex = function() {
+  this.currentStream_().createSegmentIndex = () => shaka.test.Util.delay(1);
+  return this;
+};
+
+
+/**
  * Converts the init segment of the current stream into jasmine.any.
  *
  * @return {!shaka.test.ManifestGenerator}
