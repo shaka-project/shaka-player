@@ -135,7 +135,8 @@ shaka.ui.Controls = function(player, videoContainer, video, config) {
     .set(this.resolutionNameSpan_, LocIds.LABEL_RESOLUTION)
     .set(this.abrOnSpan_, LocIds.LABEL_AUTO_QUALITY)
     .set(this.languageNameSpan_, LocIds.LABEL_LANGUAGE)
-    .set(this.backFromLanguageSpan_, LocIds.LABEL_LANGUAGE);
+    .set(this.backFromLanguageSpan_, LocIds.LABEL_LANGUAGE)
+    .set(this.pipNameSpan_, LocIds.LABEL_PICTURE_IN_PICTURE);
 
   this.updateLocalizedStrings_();
 
@@ -215,6 +216,21 @@ shaka.ui.Controls.prototype.updateLocalizedStrings_ = function() {
                                 LocIds.ARIA_LABEL_FULL_SCREEN;
     this.fullscreenButton_.setAttribute(Controls.ARIA_LABEL_,
         this.localization_.resolve(fullscreenAriaLabel));
+  }
+
+  if (this.pipButton_) {
+    const pipAriaLabel = document.pictureInPictureElement ?
+                         LocIds.ARIA_LABEL_EXIT_PICTURE_IN_PICTURE :
+                         LocIds.ARIA_LABEL_ENTER_PICTURE_IN_PICTURE;
+    this.pipButton_.setAttribute(Controls.ARIA_LABEL_,
+        this.localization_.resolve(pipAriaLabel));
+
+    const currentPipState = document.pictureInPictureElement ?
+                            LocIds.LABEL_PICTURE_IN_PICTURE_ON :
+                            LocIds.LABEL_PICTURE_IN_PICTURE_OFF;
+
+    this.currentPipState_.textContent =
+        this.localization_.resolve(currentPipState);
   }
 
   // If we're not casting, string "not casting" will be displayed,
@@ -1104,6 +1120,7 @@ shaka.ui.Controls.prototype.addLanguagesButton_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.addPipButton_ = function() {
+  const LocIds = shaka.ui.Locales.Ids;
   this.pipButton_ = shaka.ui.Controls.createHTMLElement_('button');
 
   this.pipIcon_ = shaka.ui.Controls.createHTMLElement_('i');
@@ -1116,14 +1133,14 @@ shaka.ui.Controls.prototype.addPipButton_ = function() {
   const label = shaka.ui.Controls.createHTMLElement_('label');
   label.classList.add('shaka-overflow-button-label');
   this.pipNameSpan_ = shaka.ui.Controls.createHTMLElement_('span');
-  // TODO: localize
-  this.pipNameSpan_.textContent = 'Picture-in-picture';
+  this.pipNameSpan_.textContent =
+      this.localization_.resolve(LocIds.LABEL_PICTURE_IN_PICTURE);
   label.appendChild(this.pipNameSpan_);
 
   this.currentPipState_ = shaka.ui.Controls.createHTMLElement_('span');
   this.currentPipState_.classList.add('shaka-current-selection-span');
-  // TODO: localize
-  this.currentPipState_.textContent = 'Off';
+  this.currentPipState_.textContent =
+      this.localization_.resolve(LocIds.LABEL_PICTURE_IN_PICTURE_OFF);
   label.appendChild(this.currentPipState_);
 
   this.pipButton_.appendChild(label);
@@ -2082,12 +2099,13 @@ shaka.ui.Controls.prototype.onEnterPictureInPicture_ = function() {
     return;
   }
 
+  const LocIds = shaka.ui.Locales.Ids;
   const Controls = shaka.ui.Controls;
   this.pipIcon_.textContent = Controls.MaterialDesignIcons_.EXIT_PIP;
-  // TODO: localize
   this.pipButton_.setAttribute(Controls.ARIA_LABEL_,
-      'exit picture in picture mode');
-  this.currentPipState_.textContent = 'On';
+      this.localization_.resolve(LocIds.ARIA_LABEL_EXIT_PICTURE_IN_PICTURE));
+  this.currentPipState_.textContent =
+      this.localization_.resolve(LocIds.LABEL_PICTURE_IN_PICTURE_ON);
 };
 
 
@@ -2097,12 +2115,13 @@ shaka.ui.Controls.prototype.onLeavePictureInPicture_ = function() {
     return;
   }
 
+  const LocIds = shaka.ui.Locales.Ids;
   const Controls = shaka.ui.Controls;
   this.pipIcon_.textContent = Controls.MaterialDesignIcons_.PIP;
-  // TODO: localize
   this.pipButton_.setAttribute(Controls.ARIA_LABEL_,
-      'enter picture in picture mode');
-  this.currentPipState_.textContent = 'Off';
+      this.localization_.resolve(LocIds.ARIA_LABEL_ENTER_PICTURE_IN_PICTURE));
+  this.currentPipState_.textContent =
+      this.localization_.resolve(LocIds.LABEL_PICTURE_IN_PICTURE_OFF);
 };
 
 
