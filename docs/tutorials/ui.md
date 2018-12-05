@@ -213,7 +213,7 @@ creating the UI overlay:
 config['addSeekBar'] = false;
 ```
 
-See the docs on [UIConfiguration][UIConfiguration] for more information.
+See the docs for {@link shaka.extern.UIConfiguration} for more information.
 
 #### Customizing the number and order of controls
 
@@ -274,5 +274,3 @@ To customize the colors, change the values of `shaka.ui.Controls.SEEK_BAR_BASE_C
 #### Continue the Tutorials
 
 Next, check out {@tutorial config}.
-
-[UIConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.UIConfiguration
