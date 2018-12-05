@@ -614,6 +614,7 @@ describe('DashParser Live', function() {
       '    minimumUpdatePeriod="PT' + updateTime + 'S">',
       '  <Location>http://foobar</Location>',
       '  <Location>http://foobar2</Location>',
+      '  <Location>foobar3</Location>',
       '  <Period id="1" duration="PT10S">',
       '    <AdaptationSet mimeType="video/mp4">',
       '      <Representation id="3" bandwidth="500">',
@@ -633,9 +634,12 @@ describe('DashParser Live', function() {
           fakeNetEngine.request.calls.reset();
 
           // Create a mock so we can verify it gives two URIs.
+          // The third location is a relative url, and should be resolved as an
+          // absolute url.
           fakeNetEngine.request.and.callFake(function(type, request) {
             expect(type).toBe(manifestRequest);
-            expect(request.uris).toEqual(['http://foobar', 'http://foobar2']);
+            expect(request.uris).toEqual(
+              ['http://foobar', 'http://foobar2', 'dummy://foo/foobar3']);
             let data = shaka.util.StringUtils.toUTF8(manifestText);
             return shaka.util.AbortableOperation.completed(
                 {uri: request.uris[0], data: data, headers: {}});
