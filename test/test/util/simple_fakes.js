@@ -552,6 +552,7 @@ shaka.test.FakeTextTrack.prototype.removeCue;
  * Creates a mux.js closed caption parser.
  *
  * @implements {shaka.media.IClosedCaptionParser}
+ * @final
  */
 shaka.test.FakeClosedCaptionParser = class {
   constructor() {
