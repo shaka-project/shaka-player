@@ -562,6 +562,7 @@ shaka.test.FakeClosedCaptionParser = class {
     /** @type {!jasmine.Spy} */
     this.resetSpy = jasmine.createSpy('reset');
   }
+
   /** @override */
   init() {
     const func = shaka.test.Util.spyFunc(this.initSpy);
