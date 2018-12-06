@@ -549,7 +549,9 @@ shaka.test.FakeTextTrack.prototype.removeCue;
 
 
 /**
- * Creates a mux.js closed caption parser.
+ * Create a test-focused closed caption parser that requires the creator to
+ * provide behaviours for the underlying spies. If no behaviour is provided all
+ * calls to the parser will act as NO-OPs.
  *
  * @implements {shaka.media.IClosedCaptionParser}
  * @final
