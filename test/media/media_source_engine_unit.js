@@ -144,8 +144,9 @@ describe('MediaSourceEngine', function() {
       },
     };
     video = /** @type {HTMLMediaElement} */(mockVideo);
-    mediaSourceEngine = new shaka.media.MediaSourceEngine(video);
     mockClosedCaptionParser = new shaka.test.FakeClosedCaptionParser();
+    mediaSourceEngine = new shaka.media.MediaSourceEngine(
+        video, mockClosedCaptionParser);
   });
 
   afterEach(function() {
@@ -184,7 +185,9 @@ describe('MediaSourceEngine', function() {
     });
 
     it('creates a MediaSource object and sets video.src', function() {
-      mediaSourceEngine = new shaka.media.MediaSourceEngine(video);
+      mediaSourceEngine = new shaka.media.MediaSourceEngine(
+          video, new shaka.test.FakeClosedCaptionParser());
+
       expect(createMediaSourceSpy).toHaveBeenCalled();
       expect(createObjectURLSpy).toHaveBeenCalled();
       expect(mockVideo.src).toEqual('blob:foo');
@@ -534,7 +537,6 @@ describe('MediaSourceEngine', function() {
         onCaptions(['foo', 'bar']);
       });
 
-      mediaSourceEngine.setCaptionParser(mockClosedCaptionParser);
       await mediaSourceEngine.init(initObject, false);
 
       // Initialize the closed caption parser.

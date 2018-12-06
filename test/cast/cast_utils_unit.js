@@ -215,7 +215,8 @@ describe('CastUtils', function() {
           fail('Error code ' + (video.error ? video.error.code : 0));
         }
 
-        mediaSourceEngine = new shaka.media.MediaSourceEngine(video);
+        mediaSourceEngine = new shaka.media.MediaSourceEngine(
+            video, new shaka.test.FakeClosedCaptionParser());
 
         const ContentType = shaka.util.ManifestParserUtils.ContentType;
         const initObject = new Map();

@@ -101,7 +101,8 @@ describe('StreamingEngine', function() {
     onEvent = jasmine.createSpy('onEvent');
 
     eventManager = new shaka.util.EventManager();
-    mediaSourceEngine = new shaka.media.MediaSourceEngine(video);
+    mediaSourceEngine = new shaka.media.MediaSourceEngine(
+        video, new shaka.test.FakeClosedCaptionParser());
   });
 
   afterEach(async () => {

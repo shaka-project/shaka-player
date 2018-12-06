@@ -41,7 +41,9 @@ describe('MediaSourceEngine', function() {
     metadata = shaka.test.TestScheme.DATA['sintel'];
     generators = shaka.test.TestScheme.GENERATORS['sintel'];
 
-    mediaSourceEngine = new shaka.media.MediaSourceEngine(video);
+    mediaSourceEngine = new shaka.media.MediaSourceEngine(
+        video,
+        new shaka.media.ClosedCaptionParser());
     mediaSource = /** @type {?} */(mediaSourceEngine)['mediaSource_'];
     expect(video.src).toBeTruthy();
     await mediaSourceEngine.init(new Map(), false);
