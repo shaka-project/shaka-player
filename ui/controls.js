@@ -260,14 +260,22 @@ shaka.ui.Controls.prototype.updateLocalizedStrings_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.initOptionalElementsToNull_ = function() {
+  // TODO: encapsulate/abstract range inputs and their containers
+
+  /** @private {HTMLElement} */
+  this.seekBarContainer_ = null;
+
   /** @private {HTMLInputElement} */
   this.seekBar_ = null;
 
   /** @private {HTMLElement} */
-  this.muteButton_ = null;
+  this.volumeBarContainer_ = null;
 
   /** @private {HTMLInputElement} */
   this.volumeBar_ = null;
+
+  /** @private {HTMLElement} */
+  this.muteButton_ = null;
 
   /** @private {HTMLElement} */
   this.captionButton_ = null;
@@ -725,17 +733,26 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.addSeekBar_ = function() {
+  // This container is to support IE 11.  See detailed notes in
+  // less/range_elements.less for a complete explanation.
+  // TODO: Factor this into a range-element component.
+  this.seekBarContainer_ = shaka.ui.Controls.createHTMLElement_('div');
+  this.seekBarContainer_.classList.add('shaka-seek-bar-container');
+
   this.seekBar_ =
     /** @type {!HTMLInputElement} */ (document.createElement('input'));
   this.seekBar_.classList.add('shaka-seek-bar');
   this.seekBar_.type = 'range';
+  // NOTE: step=any causes keyboard nav problems on IE 11.
   this.seekBar_.setAttribute('step', 'any');
   this.seekBar_.setAttribute('min', '0');
   this.seekBar_.setAttribute('max', '1');
   this.seekBar_.value = '0';
   this.seekBar_.classList.add('shaka-no-propagation');
   this.seekBar_.classList.add('shaka-show-controls-on-mouse-over');
-  this.controlsContainer_.appendChild(this.seekBar_);
+
+  this.seekBarContainer_.appendChild(this.seekBar_);
+  this.controlsContainer_.appendChild(this.seekBarContainer_);
 };
 
 
@@ -808,15 +825,24 @@ shaka.ui.Controls.prototype.addMuteButton_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.addVolumeBar_ = function() {
+  // This container is to support IE 11.  See detailed notes in
+  // less/range_elements.less for a complete explanation.
+  // TODO: Factor this into a range-element component.
+  this.volumeBarContainer_ = shaka.ui.Controls.createHTMLElement_('div');
+  this.volumeBarContainer_.classList.add('shaka-volume-bar-container');
+
   this.volumeBar_ =
     /** @type {!HTMLInputElement} */ (document.createElement('input'));
   this.volumeBar_.classList.add('shaka-volume-bar');
   this.volumeBar_.setAttribute('type', 'range');
+  // NOTE: step=any causes keyboard nav problems on IE 11.
   this.volumeBar_.setAttribute('step', 'any');
   this.volumeBar_.setAttribute('min', '0');
   this.volumeBar_.setAttribute('max', '1');
   this.volumeBar_.setAttribute('value', '0');
-  this.controlsButtonPanel_.appendChild(this.volumeBar_);
+
+  this.volumeBarContainer_.appendChild(this.volumeBar_);
+  this.controlsButtonPanel_.appendChild(this.volumeBarContainer_);
 };
 
 
@@ -1596,7 +1622,7 @@ shaka.ui.Controls.prototype.onVolumeStateChange_ = function() {
     gradient.push(shaka.ui.Controls.VOLUME_BAR_BASE_COLOR_ +
                  (this.volumeBar_.value * 100) + '%');
     gradient.push(shaka.ui.Controls.VOLUME_BAR_BASE_COLOR_ + '100%');
-    this.volumeBar_.style.background =
+    this.volumeBarContainer_.style.background =
         'linear-gradient(' + gradient.join(',') + ')';
   }
 };
@@ -2319,12 +2345,12 @@ shaka.ui.Controls.prototype.updateTimeAndSeekRange_ = function() {
     const seekRange = this.player_.seekRange();
     const seekWindow = seekRange.end - seekRange.start;
     if (seekWindow < shaka.ui.Controls.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR_ ) {
-      shaka.ui.Controls.setDisplay_(this.seekBar_, false);
+      shaka.ui.Controls.setDisplay_(this.seekBarContainer_, false);
       for (let menu of this.settingsMenus_) {
         menu.classList.add('shaka-low-position');
       }
     } else {
-      shaka.ui.Controls.setDisplay_(this.seekBar_, true);
+      shaka.ui.Controls.setDisplay_(this.seekBarContainer_, true);
       for (let menu of this.settingsMenus_) {
         menu.classList.remove('shaka-low-position');
       }
@@ -2358,7 +2384,7 @@ shaka.ui.Controls.prototype.updateTimeAndSeekRange_ = function() {
         gradient.push(Controls.SEEK_BAR_BASE_COLOR_ + ' ' +
                      (bufferEndFraction * 100) + '%');
       }
-      this.seekBar_.style.background =
+      this.seekBarContainer_.style.background =
           'linear-gradient(' + gradient.join(',') + ')';
     }
   }

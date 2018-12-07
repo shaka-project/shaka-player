@@ -14,89 +14,170 @@
  * limitations under the License.
  */
 
-/* NOTE: pseudo-elements for different browsers can't be combined with commas.
- * Browsers will ignore styles if any pseudo-element in the list is unknown.
- */
+/* Special styles for input elements with type "range".
+ *
+ * These elements are composed of two main parts: a "track", which is the
+ * horizontal bar, and the "thumb", which is the knob which slides along that
+ * bar.
+ *
+ * In order to style the track across browsers (cough, IE 11), we need to do
+ * something a bit tricky.  Styling the track is a nightmare, especially if you
+ * want the thumb to be larger.  On IE 11, this gets clipped at the track size.
+ * So a tiny track with a large thumb is not easily achieved.  It can be done,
+ * but the techniques for it are incompatible with the gradient background we
+ * want to apply to it.
+ *
+ * The solution is to put the input inside a div container, and apply the
+ * background gradient styles to the container.  The container will act as a
+ * visible, virtual track, inside which is contained a larger, invisible track,
+ * in which is contained a visible thumb.  This way, the thumb is not larger
+ * than the actual track (for IE 11's sake), but can be larger than the virtual
+ * track.  And since we are still using a semantically correct input element,
+ * the element is inherently accessible. */
 
-/* Styles applied to the thumb. */
-.thumb-style() {
-  width: 10px;
-  height: 10px;
-  background-color: rgb(255, 255, 255);
-  border-radius: 5px;
+/* These control the color and size of the various pieces. */
+@thumb-color: white;
+@track-default-color: white;
+@thumb-size: 10px;
+@track-height: 3.4px;
+
+/* The range container is the div that contains a range element.
+ * This div will act as a virtual track to allow us to style the track space.
+ * An actual track still exists inside the range element, but is transparent. */
+.range-container() {
+  /* This contains an input element which overlays it. */
+  .overlay-parent();
+
+  /* Vertical margins to occupy the same space as the thumb. */
+  margin: (@thumb-size - @track-height)/2 6px;
+  /* Smaller height to contain the background for the virtual track. */
+  height: @track-height;
+  /* Rounded ends on the virtual track. */
+  border-radius: @track-height;
+
+  /* Until we set a gradient background in JS, this will be the track color. */
+  background: @track-default-color;
 }
 
-/* Styles applied to the track. */
-.track-style() {
-  background-color: transparent;
-  outline: none;
+/* The "track" is the pseudo-element inside the range element which represents
+ * the horizontal bar on which the "thumb" (knob) moves. */
+.track() {
+  /* The track should fill the range element. */
+  width: 100%;
+
+  /* The track should be tall enough to contain the thumb without clipping it.
+   * It is very tricky to make the thumb show outside the track on IE 11, and
+   * it is incompatible with our background gradients. */
+  height: @thumb-size;
+
+  /* Some browsers have default backgrounds, colors, or borders for this.
+   * Hide them all. */
+  background: transparent;
+  color: transparent;
+  border: none;
 }
 
-/* The seek bar. */
-.shaka-seek-bar {
-  margin: 9px 0 0 0;
-  width: 96.5%;
-  height: 4px;
-  border-radius: 2px;
-  /* Make sure clicking at the very top of the seek bar still takes effect and
-   * is not confused with clicking the video to play/pause it */
-  z-index: 1;
-}
-
-/* The volume bar. */
-.shaka-volume-bar {
-  min-width: 15px;
-  max-width: 100px;
-  position: relative;
-  /* TODO: find a better way to center this thing and remove top */
-  top: 13px;
-  height: 3px;
-  /* spacing consistent with padding in the buttons it lives with */
-  margin: 1px 6px;
-}
-
-/* Hide volume slider on mobile-sized screens. */
-@media screen and (max-width: 550px) {
- .shaka-volume-bar {
-    .hidden();
-  }
-}
-
-/* Styles common to both bars. */
-.shaka-seek-bar, .shaka-volume-bar {
-  /* Remove browser default styles. */
+/* The "thumb" is the pseudo-element inside the range element which represents
+ * the knob which moves along the "track" (bar). */
+.thumb() {
+  /* Remove default styles on WebKit-based and Blink-based browsers. */
   -webkit-appearance: none;
 
-  /* Explicitly set padding to 0 for IE */
-  padding: 0;
+  /* On some browsers (IE 11), the thumb has a border, which affects the size.
+   * Disable it. */
+  border: none;
 
-  /* Pseudo element styles for various browsers. */
+  /* Make the thumb a circle and set its diameter. */
+  border-radius: @thumb-size;
+  height: @thumb-size;
+  width: @thumb-size;
 
+  /* Give it the desired color. */
+  background: @thumb-color;
+}
+
+/* This is the actual range input element. */
+.range-element() {
+  /* Remove any browser styling of the range element. */
+  -webkit-appearance: none;
+  background: transparent;
+
+  /* Overlay and fill the container div. */
+  .overlay-child();
+
+  /* The range element should be big enough to contain the thumb without
+   * clipping it.  It is very tricky to make the thumb show outside the track
+   * on IE 11. */
+  height: @thumb-size;
+
+  /* Position the top of the range element so that it is centered on the
+   * container. Note that the container is actually smaller than the thumb. */
+  top: (@track-height - @thumb-size) / 2;
+
+  /* Make sure clicking at the very top of the bar still takes effect and is not
+   * confused with clicking the video to play/pause it. */
+  z-index: 1;
+
+  /* Pseudo-elements for Blink-based or WebKit-based browsers. */
+  &::-webkit-slider-runnable-track {
+    .track();
+  }
   &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    .thumb-style();
+    .thumb();
   }
 
+  /* Pseudo-elements for Gecko-based browsers. */
+  &::-moz-range-track {
+    .track();
+  }
   &::-moz-range-thumb {
-    .thumb-style();
+    .thumb();
   }
 
+  /* Pseudo-elements for IE 11. */
+  &::-ms-track {
+    .track();
+  }
   &::-ms-thumb {
-    .thumb-style();
+    .thumb();
   }
 
-  /* turn off tooltips for the seekBar and volumeBar on IE */
+  /* Turn off tooltips for range element values, unique to IE. */
   &::-ms-tooltip {
     .hidden();
   }
 
-  /* removes mozilla default styling */
-  &::-moz-range-track {
-    .track-style()
+  /* Hide the "lower" and "upper" regions of the track, unique to IE. */
+  &::-ms-fill-lower {
+    .hidden();
   }
+  &::-ms-fill-upper {
+    .hidden();
+  }
+}
 
-  /* removes IE default styling */
-  &::-ms-track, &::-ms-fill-lower, &::-ms-fill-upper {
-    .track-style()
+.shaka-volume-bar-container {
+  .range-container();
+
+  width: 100px;
+
+  /* Hide volume slider on mobile-sized screens. */
+  @media screen and (max-width: 550px) {
+    .hidden();
   }
+}
+
+.shaka-seek-bar-container {
+  .range-container();
+
+  /* TODO: Document why! */
+  width: 96.5%;
+}
+
+.shaka-seek-bar {
+  .range-element();
+}
+
+.shaka-volume-bar {
+  .range-element();
 }
