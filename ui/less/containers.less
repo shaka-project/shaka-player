@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/* All of the top-level containers into which various visible features go. */
+
+/* A container for the entire video + controls combo.  This is the auto-setup
+ * div which we populate. */
+.shaka-video-container {
+}
 
 /* NOTE: These fullscreen pseudo-classes can't be combined.  Browsers ignore
  * the rest of the list once they hit one prefix they don't support.
@@ -23,95 +29,121 @@
 .shaka-video-container:-moz-full-screen { .fullscreen; }
 .shaka-video-container:-ms-fullscreen { .fullscreen; }
 
-/* This insures video and the container have the same height. */
+/* The actual video element.  Sits inside .shaka-video-container and gives it a
+ * size in non-fullscreen mode.  In fullscreen mode, the sizing relationship
+ * flips.  CSS is just great like that.  :-( */
 .shaka-video {
   display: block;
 }
 
+/* A container for all controls, including the giant play button, seek bar, etc.
+ * Sits inside .shaka-video-container, on top of (Z axis) .shaka-video, and
+ * below (Y axis) .shaka-play-button-container. */
 .shaka-controls-container {
   width: 100%;
   height: 100%;
 
-  /* The two-value settings are shorthand for setting-top=setting-bottom &
-  setting-left=setting-right. */
+  /* The padding defines a region around the video in which controls cannot
+   * exist.  The two-value settings are shorthand for vertical followed by
+   * horizontal. */
   padding: 12px 5px;
   margin: auto;
   box-sizing: border-box;
 
-  /* marks this as a flex container */
+  /* A flex container, to make layout of children easier to reason about. */
   display: flex;
-  /* Flex-direction property defines in which
-  direction the container wants to stack it's children */
+  /* Defines in which direction the children should flow. */
   flex-direction: column;
-  /* Justify-content is used to align the flex items.
-   Flex-end value aligns the flex items at the end of the
-   container. */
+  /* Pushes the children toward the bottom of the container. */
   justify-content: flex-end;
+  /* Centers children horizontally. */
   align-items: center;
   transition: opacity 0.3s;
 
   bottom: 0px;
-  background-image:
-    linear-gradient(to top,
-          rgba(0, 0, 0, 1) 0,
-          rgba(0, 0, 0, 0) 92px);
+
+  /* A black gradient at the bottom, behind the controls, but only so high. */
+  background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 1) 0,
+      rgba(0, 0, 0, 0) 92px);
 }
 
+/* This is the container for the horizontal row of controls above the seek bar.
+ * It sits above (Y axis) the seek bar, and below (Y axis) the giant play button
+ * in the middle. */
 .shaka-controls-button-panel {
+  /* Fill the space horizontally, with no extra padding or margin. */
   width: 100%;
   margin-right: 16px;
+  min-width: 48px;
+
+  /* This is itself a flex container, with children layed out horizontally. */
   display: flex;
   flex-direction: row;
+  /* Push children to the right. */
   justify-content: flex-end;
   z-index: 0;
   overflow: hidden;
   bottom: auto;
 
-  min-width: 48px;
-
+  /* Make sure we don't inherit odd font sizes and styles from the environment.
+   * TODO: When did this happen?  What forced us to do this? */
   font-size: 12px;
-  font-weight: normal;  /* Make sure that we don't inherit non-defaults. */
+  font-weight: normal;
   font-style: normal;
 
   .user-select();
 
   button {
+    /* White text or button icons. */
     color: white;
+
+    /* 32px tall controls. */
     height: 32px;
     padding: 1px 6px;
+
+    /* Transparent backgrounds, no borders, and a pointer when you mouse over
+     * them. */
     background: transparent;
     border: 0;
     cursor: pointer;
   }
 
+  /* Active and disabled buttons will change colors. */
   button:active {
     background: rgba(100, 100, 100, 0.4);
   }
-
   button:disabled {
     color: rgba(255, 255, 255, 0.3);
   }
 
+  /* Make all range elements inside this context use the pointer cursor. */
   input[type="range"] {
     cursor: pointer;
   }
 
+  /* Any contained divs should themselves by flex containers. */
+  /* TODO: What divs? Why? */
   div {
     display: flex;
     width: 100%;
   }
 
-  /* Always show controls while casting */
+  /* Always show controls while casting. */
   &.shaka-casting {
     opacity: 1;
 
+    /* Hide fullscreen button while casting. */
     .shaka-fullscreen-button {
-      /* Hide fullscreen button while casting */
       display: none;
     }
   }
 }
 
+/* The container for the giant play button and spinner.  Sits above (Y axis) the
+ * other video controls and seek bar, in the middle of the video frame, on top
+ * of (Z axis) the video. */
 .shaka-play-button-container {
   /* These settings keep the container in the middle
   of the video, above the controls */
@@ -125,8 +157,7 @@
   width: 100%;
   height: 100%;
 
-  /* These settings keep the button in the middle
-  of the container */
+  /* Keep the play button in the middle of this container. */
   display: flex;
   justify-content: center;
   align-items: center;

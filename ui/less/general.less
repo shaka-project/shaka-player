@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-/* Mixins */
+/* General utility mixins and classes with broad applicability. */
+
+/* Set the selectability of a thing, defaulting to none. */
 .user-select(@value: none) {
   user-select: @value;
   -webkit-user-select: @value;
@@ -31,13 +33,29 @@
   display: none;
 }
 
+/* For containers which host elements overlaying other things. */
 .shaka-overlay-parent {
-  /* Makes this a positioned ancestor of .overlay */
+  /* For a detailed explanation of how this achieves an overlay, please refer
+   * to https://developer.mozilla.org/en-US/docs/Web/CSS/position .
+   *
+   * But you don't have to, because we've encapsulated these high level
+   * concepts into classes.
+   *
+   * This makes it possible for some children of this container to overlay the
+   * others using .shaka-overlay. */
   position: relative;
 }
 
+/* For things which overlay other things. */
 .shaka-overlay {
-  /* Allows this to be positioned relative to a containing .overlay-parent */
+  /* For a detailed explanation of how this achieves an overlay, please refer
+   * to https://developer.mozilla.org/en-US/docs/Web/CSS/position .
+   *
+   * But you don't have to, because we've encapsulated these high level
+   * concepts into classes.
+   *
+   * This makes it possible for this child to overlay the other children of a
+   * .shaka-overlay-parent object. */
   position: absolute;
 }
 

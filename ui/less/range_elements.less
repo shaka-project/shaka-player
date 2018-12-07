@@ -18,7 +18,7 @@
  * Browsers will ignore styles if any pseudo-element in the list is unknown.
  */
 
-/* Seek bar and volume bar */
+/* Styles applied to the thumb. */
 .thumb-style() {
   width: 10px;
   height: 10px;
@@ -26,21 +26,24 @@
   border-radius: 5px;
 }
 
+/* Styles applied to the track. */
 .track-style() {
   background-color: transparent;
   outline: none;
 }
 
+/* The seek bar. */
 .shaka-seek-bar {
   margin: 9px 0 0 0;
   width: 96.5%;
   height: 4px;
   border-radius: 2px;
   /* Make sure clicking at the very top of the seek bar still takes effect and
-  is not confused with clicking the video to play/pause it */
+   * is not confused with clicking the video to play/pause it */
   z-index: 1;
 }
 
+/* The volume bar. */
 .shaka-volume-bar {
   min-width: 15px;
   max-width: 100px;
@@ -52,18 +55,22 @@
   margin: 1px 6px;
 }
 
-/* hide volume slider on mobile-sized screens */
+/* Hide volume slider on mobile-sized screens. */
 @media screen and (max-width: 550px) {
  .shaka-volume-bar {
     display: none;
   }
 }
 
+/* Styles common to both bars. */
 .shaka-seek-bar, .shaka-volume-bar {
+  /* Remove browser default styles. */
   -webkit-appearance: none;
 
   /* Explicitly set padding to 0 for IE */
   padding: 0;
+
+  /* Pseudo element styles for various browsers. */
 
   &::-webkit-slider-thumb {
     -webkit-appearance: none;
