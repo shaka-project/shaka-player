@@ -24,9 +24,10 @@ import check
 import compiler
 import docs
 import gendeps
-import os
 import shakaBuildHelpers
 
+import os
+import re
 
 def main(args):
   parser = argparse.ArgumentParser(
@@ -75,10 +76,14 @@ def main(args):
   if docs.main(docs_args) != 0:
     return 1
 
-  src = os.path.join(shakaBuildHelpers.get_source_base(), 'ui', 'controls.less')
-  output = os.path.join(
-    shakaBuildHelpers.get_source_base(), 'dist', 'controls.css')
-  less = compiler.Less([src], output)
+  match = re.compile(r'.*\.less$')
+  base = shakaBuildHelpers.get_source_base()
+  main_less_src = os.path.join(base, 'ui', 'controls.less')
+  all_less_srcs = shakaBuildHelpers.get_all_files(
+      os.path.join(base, 'ui'), match)
+  output = os.path.join(base, 'dist', 'controls.css')
+
+  less = compiler.Less(main_less_src, all_less_srcs, output)
   if not less.compile(parsed_args.force):
     return 1
 

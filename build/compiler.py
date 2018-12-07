@@ -213,13 +213,17 @@ class ExternGenerator(object):
 
 
 class Less(object):
-  def __init__(self, source_files, output):
-    self.source_files = _canonicalize_source_files(source_files)
+  def __init__(self, main_source_file, all_source_files, output):
+    # Less only takes one input file, but that input may import others.
+    # We use main_source_file for compilation, but all_source_files to detect
+    # if it needs to be rebuilt.
+    self.main_source_file = _canonicalize_source_files([main_source_file])[0]
+    self.all_source_files = _canonicalize_source_files(all_source_files)
     self.output = output
 
   def compile(self, force=False):
-    """Compiles the less files in |self.source_files| into the |self.output|
-       css file.
+    """Compiles the main less file in |self.main_source_file| into the
+       |self.output| css file.
 
     Args:
       force: Generate the output even if the inputs have not changed.
@@ -227,12 +231,12 @@ class Less(object):
     Returns:
       True on success; False on failure.
     """
-    if not force and not _must_build(self.output, self.source_files):
+    if not force and not _must_build(self.output, self.all_source_files):
       return True
 
     lessc = shakaBuildHelpers.get_node_binary('less', 'lessc')
 
-    cmd_line = lessc + self.source_files + [self.output]
+    cmd_line = lessc + [self.main_source_file, self.output]
 
     if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
       logging.error('Externs generation failed')
