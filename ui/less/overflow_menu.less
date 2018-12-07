@@ -34,7 +34,7 @@
   min-width: 180px;
 
   /* The menu is hidden by default. */
-  display: none;
+  .hidden();
 
   /* When displayed as a flex container, elements inside will flow in a
    * vertical column. */
@@ -68,12 +68,14 @@
   /* These are the elements which contain the material design icons. */
   /* TODO: Pull MD icon details out of JS. */
   i {
+    /* TODO(b/116651454): eliminate hard-coded offsets */
     padding-left: 10px;
   }
 
   /* If the seekbar is missing, this is positioned lower. */
   /* TODO: Solve with flex layout instead? */
   &.shaka-low-position {
+    /* TODO(b/116651454): eliminate hard-coded offsets */
     bottom: 15px;
   }
 }
@@ -88,6 +90,7 @@
   text-align: left;
   position: relative;
   font-family: Roboto-Regular, Roboto, sans-serif;
+  /* TODO(b/116651454): eliminate hard-coded offsets */
   left: 13px;
 }
 
@@ -115,6 +118,7 @@
 .shaka-audio-languages,
 .shaka-text-languages {
   span {
+    /* TODO(b/116651454): eliminate hard-coded offsets */
     margin-left: 54px;
   }
 }
@@ -124,17 +128,20 @@
 .shaka-back-to-overflow-button {
   /* The label inside the button, which says something like "back". */
   span {
+    /* TODO(b/116651454): eliminate hard-coded offsets */
     margin-left: 0;
   }
 
   /* The MD icon for the "back" arrow. */
   i {
+    /* TODO(b/116651454): eliminate hard-coded offsets */
     padding-right: 20px;
   }
 }
 
 /* The menu item for resolutions which contains "auto". */
 .shaka-auto-span {
+  /* TODO(b/116651454): eliminate hard-coded offsets */
   left: 17px;
 }
 

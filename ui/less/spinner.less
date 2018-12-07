@@ -24,11 +24,8 @@
 
 /* This is a div that contains the SVG element. */
 .shaka-buffering-spinner {
-  /* IE-specific workaround for centering the actual spinner SVG inside */
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  /* Make this div container overlay & fill its container. */
+  .overlay-child();
 }
 
 /* This is the spinner SVG itself, which contains a circular path element. */
@@ -37,12 +34,12 @@
   animation: rotate 2s linear infinite;
   transform-origin: center center;
 
+  /* Overlay and fill the container. */
+  .overlay-child();
+
   /* The SVG itself will only be 100x100 and centered with margins. */
   width: 100px;
   height: 100px;
-
-  position: absolute;
-  top: 0; bottom: 0; left: 0; right: 0;
   margin: auto;
 }
 

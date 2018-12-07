@@ -50,9 +50,6 @@
   /* A background color behind the play arrow. */
   background-color: rgba(255, 255, 255, .9);
 
-  /* Gradually change opacity using cubic-bezier timing function */
-  transition: opacity cubic-bezier(0.4, 0.0, 0.6, 1) 600ms;
-
   /* Actual icon images for the two states this could be in.
    * These will be inlined as data URIs when compiled, and so do not need to be
    * deployed separately from the compiled CSS. */
@@ -71,20 +68,22 @@
  * will not. */
 .shaka-time-container {
   /* Use Roboto if available. */
+  /* TODO: Factor this out! */
   font-family: Roboto-Regular, Roboto, sans-serif;
   font-size: 16px;
   color: rgb(255, 255, 255);
-  /* TODO: Why is this here? */
-  letter-spacing: 0px;
 
-  /* Positioning settings */
-  padding-left: 19px;
-  margin-bottom: 5px;
-  /* Make the time container align to the bottom of its container. */
-  align-self: flex-end;
+  /* Make the time container the right size for the text, instead of defaulting
+   * to the same size as the rest of the controls. */
+  height: auto;
+
+  /* Make the container fill space horizontally, but shrink to accommodate
+   * things to the right. */
+  width: 100%;
+  .shrinkable();
 
   cursor: default;
-  .user-select();
+  .unselectable();
 }
 
 /* Outline on focus is important for accessibility, but
@@ -96,6 +95,7 @@
     outline: none;
   }
 
+  /* TODO: try putting border & outline on both, to solve keyboard FF issue */
   button::-moz-focus-inner,
   input::-moz-focus-outer {
     border: 0;

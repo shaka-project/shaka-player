@@ -19,35 +19,46 @@
 /* A container for the entire video + controls combo.  This is the auto-setup
  * div which we populate. */
 .shaka-video-container {
+  .overlay-parent();
 }
 
-/* NOTE: These fullscreen pseudo-classes can't be combined.  Browsers ignore
- * the rest of the list once they hit one prefix they don't support.
- */
-.shaka-video-container:fullscreen { .fullscreen; }
-.shaka-video-container:-webkit-full-screen { .fullscreen; }
-.shaka-video-container:-moz-full-screen { .fullscreen; }
-.shaka-video-container:-ms-fullscreen { .fullscreen; }
+/* Each browser has a different prefixed pseudo-class for fullscreened elements.
+ * Define the properties of a fullscreened element in a mixin, then apply to
+ * each of the browser-specific pseudo-classes.
+ * NOTE: These fullscreen pseudo-classes can't be combined with commas into a
+ * single delcaration.  Browsers ignore the rest of the list once they hit one
+ * pseudo-class they don't support. */
+.fullscreen-container() {
+  width: 100%;
+  height: 100%;
+}
+.shaka-video-container:fullscreen { .fullscreen-container(); }
+.shaka-video-container:-webkit-full-screen { .fullscreen-container(); }
+.shaka-video-container:-moz-full-screen { .fullscreen-container(); }
+.shaka-video-container:-ms-fullscreen { .fullscreen-container(); }
 
 /* The actual video element.  Sits inside .shaka-video-container and gives it a
  * size in non-fullscreen mode.  In fullscreen mode, the sizing relationship
  * flips.  CSS is just great like that.  :-( */
 .shaka-video {
-  display: block;
+  /* At the moment, nothing special is required here.
+   * Note that this should NOT be an overlay-child, as its size should dictate
+   * the size of the container, not vice-versa. */
 }
 
 /* A container for all controls, including the giant play button, seek bar, etc.
  * Sits inside .shaka-video-container, on top of (Z axis) .shaka-video, and
  * below (Y axis) .shaka-play-button-container. */
+/* FIXME: a tad too big, something (padding?) is pushing it out vertically */
 .shaka-controls-container {
-  width: 100%;
-  height: 100%;
+  .overlay-child();
 
   /* The padding defines a region around the video in which controls cannot
    * exist.  The two-value settings are shorthand for vertical followed by
    * horizontal. */
   padding: 12px 5px;
-  margin: auto;
+
+  /* TODO: Document why. */
   box-sizing: border-box;
 
   /* A flex container, to make layout of children easier to reason about. */
@@ -58,15 +69,36 @@
   justify-content: flex-end;
   /* Centers children horizontally. */
   align-items: center;
-  transition: opacity 0.3s;
-
-  bottom: 0px;
 
   /* A black gradient at the bottom, behind the controls, but only so high. */
   background: linear-gradient(
       to top,
       rgba(0, 0, 0, 1) 0,
       rgba(0, 0, 0, 0) 92px);
+
+  /* By default, do not allow any of our controls to shrink.
+   * Specific controls can use .shrinkable() to override. */
+  * { .unshrinkable(); }
+
+  /* Transparent unless explicitly made opaque through "shown=true" attribute */
+  opacity: 0;
+
+  /* When we show/hide this, do it gradually using cubic-bezier timing. */
+  transition: opacity cubic-bezier(0.4, 0.0, 0.6, 1) 600ms;
+
+  &[shown="true"] {
+    opacity: 1;
+  }
+
+  /* Always show controls while casting. */
+  &[casting="true"] {
+    opacity: 1;
+
+    /* Hide fullscreen button while casting. */
+    .shaka-fullscreen-button {
+      .hidden();
+    }
+  }
 }
 
 /* This is the container for the horizontal row of controls above the seek bar.
@@ -75,17 +107,20 @@
 .shaka-controls-button-panel {
   /* Fill the space horizontally, with no extra padding or margin. */
   width: 100%;
-  margin-right: 16px;
-  min-width: 48px;
+  padding: 0;
+  margin: 0;
 
   /* This is itself a flex container, with children layed out horizontally. */
   display: flex;
   flex-direction: row;
   /* Push children to the right. */
   justify-content: flex-end;
-  z-index: 0;
+  /* Center children vertically. */
+  align-items: center;
+
+  /* TODO: Document why. */
   overflow: hidden;
-  bottom: auto;
+  min-width: 48px;
 
   /* Make sure we don't inherit odd font sizes and styles from the environment.
    * TODO: When did this happen?  What forced us to do this? */
@@ -93,15 +128,21 @@
   font-weight: normal;
   font-style: normal;
 
-  .user-select();
+  /* Make sure contents cannot be selected. */
+  .unselectable();
 
-  button {
+  /* All buttons, divs, and other controls directly inside this panel should
+   * have these characteristics by default. */
+  & > * {
     /* White text or button icons. */
     color: white;
 
     /* 32px tall controls. */
     height: 32px;
-    padding: 1px 6px;
+
+    /* Consistent margins (external) and padding (internal) between controls. */
+    margin: 1px 6px;
+    padding: 0;
 
     /* Transparent backgrounds, no borders, and a pointer when you mouse over
      * them. */
@@ -117,45 +158,20 @@
   button:disabled {
     color: rgba(255, 255, 255, 0.3);
   }
-
-  /* Make all range elements inside this context use the pointer cursor. */
-  input[type="range"] {
-    cursor: pointer;
-  }
-
-  /* Any contained divs should themselves by flex containers. */
-  /* TODO: What divs? Why? */
-  div {
-    display: flex;
-    width: 100%;
-  }
-
-  /* Always show controls while casting. */
-  &.shaka-casting {
-    opacity: 1;
-
-    /* Hide fullscreen button while casting. */
-    .shaka-fullscreen-button {
-      display: none;
-    }
-  }
 }
 
 /* The container for the giant play button and spinner.  Sits above (Y axis) the
  * other video controls and seek bar, in the middle of the video frame, on top
  * of (Z axis) the video. */
 .shaka-play-button-container {
-  /* These settings keep the container in the middle
-  of the video, above the controls */
-  margin: 0;
-  top: 0;
-  left: 0;
-  bottom: 17px;
-  right: 0;
+  .overlay-parent();
 
-  /* IE-specific hack for vertical centering */
+  /* Take up as much space as possible, but shrink (vertically) to accomodate
+   * the controls at the bottom. */
+  margin: 0;
   width: 100%;
   height: 100%;
+  .shrinkable();
 
   /* Keep the play button in the middle of this container. */
   display: flex;

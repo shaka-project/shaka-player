@@ -16,17 +16,13 @@
 
 /* General utility mixins and classes with broad applicability. */
 
-/* Set the selectability of a thing, defaulting to none. */
-.user-select(@value: none) {
-  user-select: @value;
-  -webkit-user-select: @value;
-  -moz-user-select: @value;
-  -ms-user-select: @value;
-}
-
-.fullscreen() {
-  width: 100%;
-  height: 100%;
+/* Make a thing unselectable.  There are currently no cases where we make it
+ * selectable again. */
+.unselectable() {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .hidden() {
@@ -34,7 +30,7 @@
 }
 
 /* For containers which host elements overlaying other things. */
-.shaka-overlay-parent {
+.overlay-parent() {
   /* For a detailed explanation of how this achieves an overlay, please refer
    * to https://developer.mozilla.org/en-US/docs/Web/CSS/position .
    *
@@ -42,12 +38,18 @@
    * concepts into classes.
    *
    * This makes it possible for some children of this container to overlay the
-   * others using .shaka-overlay. */
+   * others using .overlay-child(). */
   position: relative;
+
+  /* Make sure any top or left styles applied from outside don't move this from
+   * it's original position, now that it's relative to that original position.
+   * This is a defensive move that came out of intensive debugging on IE 11. */
+  top: 0;
+  left: 0;
 }
 
 /* For things which overlay other things. */
-.shaka-overlay {
+.overlay-child() {
   /* For a detailed explanation of how this achieves an overlay, please refer
    * to https://developer.mozilla.org/en-US/docs/Web/CSS/position .
    *
@@ -55,14 +57,28 @@
    * concepts into classes.
    *
    * This makes it possible for this child to overlay the other children of a
-   * .shaka-overlay-parent object. */
+   * .overlay-parent() object. */
   position: absolute;
+
+  /* Fill the container by default. */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
-.shaka-opaque {
-  opacity: 1;
+/* For things that should not shrink inside a flex container.
+ * This will be used for all controls by default. */
+.unshrinkable() {
+  flex-shrink: 0;
 }
 
-.shaka-transparent {
-  opacity: 0;
+/* Use this to override .unshrinkable() in particular cases that *should* shrink
+ * inside a flex container. */
+.shrinkable() {
+  flex-shrink: 1;
 }

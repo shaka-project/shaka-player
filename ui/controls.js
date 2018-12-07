@@ -260,8 +260,6 @@ shaka.ui.Controls.prototype.updateLocalizedStrings_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.initOptionalElementsToNull_ = function() {
-  // TODO: JSDoc needs to pick up UI classes. Make sure it picks up all
-  // the members of Controls. b/117615943
   /** @private {HTMLInputElement} */
   this.seekBar_ = null;
 
@@ -382,7 +380,6 @@ shaka.ui.Controls.prototype.createDOM_ = function() {
   this.initOptionalElementsToNull_();
 
   this.videoContainer_.classList.add('shaka-video-container');
-  this.videoContainer_.classList.add('shaka-overlay-parent');
   this.video_.classList.add('shaka-video');
 
   this.addControlsContainer_();
@@ -427,7 +424,6 @@ shaka.ui.Controls.prototype.addControlsContainer_ = function() {
   /** @private {!HTMLElement} */
   this.controlsContainer_ = shaka.ui.Controls.createHTMLElement_('div');
   this.controlsContainer_.classList.add('shaka-controls-container');
-  this.controlsContainer_.classList.add('shaka-overlay');
   this.videoContainer_.appendChild(this.controlsContainer_);
 };
 
@@ -439,7 +435,6 @@ shaka.ui.Controls.prototype.addPlayButton_ = function() {
   /** @private {!HTMLElement} */
   this.playButtonContainer_ = shaka.ui.Controls.createHTMLElement_('div');
   this.playButtonContainer_.classList.add('shaka-play-button-container');
-  this.playButtonContainer_.classList.add('shaka-overlay-parent');
   this.controlsContainer_.appendChild(this.playButtonContainer_);
 
   /** @private {!HTMLElement} */
@@ -460,7 +455,6 @@ shaka.ui.Controls.prototype.addBufferingSpinner_ = function() {
   /** @private {!HTMLElement} */
   this.bufferingSpinner_ = shaka.ui.Controls.createHTMLElement_('div');
   this.bufferingSpinner_.classList.add('shaka-buffering-spinner');
-  this.bufferingSpinner_.classList.add('shaka-overlay');
   this.playButtonContainer_.appendChild(this.bufferingSpinner_);
 
   // Svg elements have to be created with the svg xml namespace.
@@ -1996,8 +1990,8 @@ shaka.ui.Controls.prototype.onCurrentTimeClick_ = function() {
   if (!this.enabled_) return;
 
   // Jump to LIVE if the user clicks on the current time.
-  if (this.player_.isLive() && this.seekBar_) {
-    this.video_.currentTime = Number(this.seekBar_.max);
+  if (this.player_.isLive()) {
+    this.video_.currentTime = this.player_.seekRange().end;
   }
 };
 
@@ -2175,13 +2169,13 @@ shaka.ui.Controls.prototype.onCastStatusChange_ = function(event) {
 
   const pipIsEnabled = (this.isPipAllowed_() && (this.pipButton_ != null));
   if (isCasting) {
-    this.controlsButtonPanel_.classList.add('shaka-casting');
+    this.controlsContainer_.setAttribute('casting', 'true');
     // Picture-in-picture is not applicable if we're casting
     if (pipIsEnabled) {
       shaka.ui.Controls.setDisplay_(this.pipButton_, false);
     }
   } else {
-    this.controlsButtonPanel_.classList.remove('shaka-casting');
+    this.controlsContainer_.removeAttribute('casting');
     if (pipIsEnabled) {
       shaka.ui.Controls.setDisplay_(this.pipButton_, true);
     }
@@ -2196,10 +2190,8 @@ shaka.ui.Controls.prototype.onCastStatusChange_ = function(event) {
 shaka.ui.Controls.prototype.onBufferingStateChange_ = function(event) {
   // Using [] notation to access buffering property to work around
   // a compiler error.
-  const classToAdd = event['buffering'] ? 'shaka-displayed' : 'shaka-hidden';
-  const classToRemove = event['buffering'] ? 'shaka-hidden' : 'shaka-displayed';
-  this.bufferingSpinner_.classList.add(classToAdd);
-  this.bufferingSpinner_.classList.remove(classToRemove);
+  const isBuffering = event['buffering'];
+  shaka.ui.Controls.setDisplay_(this.bufferingSpinner_, isBuffering);
 };
 
 
@@ -2227,10 +2219,11 @@ shaka.ui.Controls.prototype.setCurrentCastSelection_ = function() {
 shaka.ui.Controls.prototype.isOpaque_ = function() {
   if (!this.enabled_) return false;
 
+  // TODO: refactor into a single property
   // While you are casting, the UI is always opaque.
   if (this.castProxy_ && this.castProxy_.isCasting()) return true;
 
-  return this.controlsContainer_.classList.contains('shaka-opaque');
+  return this.controlsContainer_.getAttribute('shown') != null;
 };
 
 
@@ -2326,14 +2319,12 @@ shaka.ui.Controls.prototype.updateTimeAndSeekRange_ = function() {
     const seekRange = this.player_.seekRange();
     const seekWindow = seekRange.end - seekRange.start;
     if (seekWindow < shaka.ui.Controls.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR_ ) {
-      this.seekBar_.classList.add('shaka-hidden');
+      shaka.ui.Controls.setDisplay_(this.seekBar_, false);
       for (let menu of this.settingsMenus_) {
         menu.classList.add('shaka-low-position');
       }
     } else {
-      // Removing a non-existent class doesn't throw, so, even if
-      // the element is not hidden, this should be fine.
-      this.seekBar_.classList.remove('shaka-hidden');
+      shaka.ui.Controls.setDisplay_(this.seekBar_, true);
       for (let menu of this.settingsMenus_) {
         menu.classList.remove('shaka-low-position');
       }
@@ -2515,11 +2506,9 @@ shaka.ui.Controls.prototype.anySettingsMenusAreOpen_ = function() {
  */
 shaka.ui.Controls.prototype.setControlsOpacity_ = function(opacity) {
   if (opacity == shaka.ui.Controls.Opacity_.OPAQUE) {
-    this.controlsContainer_.classList.add('shaka-opaque');
-    this.controlsContainer_.classList.remove('shaka-transparent');
+    this.controlsContainer_.setAttribute('shown', 'true');
   } else {
-    this.controlsContainer_.classList.add('shaka-transparent');
-    this.controlsContainer_.classList.remove('shaka-opaque');
+    this.controlsContainer_.removeAttribute('shown');
     // If there's an overflow menu open, keep it this way for a couple of
     // seconds in case a user immidiately initiaites another mouse move to
     // interact with the menus. If that didn't happen, go ahead and hide
