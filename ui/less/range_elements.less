@@ -1,0 +1,95 @@
+/**
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* NOTE: pseudo-elements for different browsers can't be combined with commas.
+ * Browsers will ignore styles if any pseudo-element in the list is unknown.
+ */
+
+/* Seek bar and volume bar */
+.thumb-style() {
+  width: 10px;
+  height: 10px;
+  background-color: rgb(255, 255, 255);
+  border-radius: 5px;
+}
+
+.track-style() {
+  background-color: transparent;
+  outline: none;
+}
+
+.shaka-seek-bar {
+  margin: 9px 0 0 0;
+  width: 96.5%;
+  height: 4px;
+  border-radius: 2px;
+  /* Make sure clicking at the very top of the seek bar still takes effect and
+  is not confused with clicking the video to play/pause it */
+  z-index: 1;
+}
+
+.shaka-volume-bar {
+  min-width: 15px;
+  max-width: 100px;
+  position: relative;
+  /* TODO: find a better way to center this thing and remove top */
+  top: 13px;
+  height: 3px;
+  /* spacing consistent with padding in the buttons it lives with */
+  margin: 1px 6px;
+}
+
+/* hide volume slider on mobile-sized screens */
+@media screen and (max-width: 550px) {
+ .shaka-volume-bar {
+    display: none;
+  }
+}
+
+.shaka-seek-bar, .shaka-volume-bar {
+  -webkit-appearance: none;
+
+  /* Explicitly set padding to 0 for IE */
+  padding: 0;
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    .thumb-style();
+  }
+
+  &::-moz-range-thumb {
+    .thumb-style();
+  }
+
+  &::-ms-thumb {
+    .thumb-style();
+  }
+
+  /* turn off tooltips for the seekBar and volumeBar on IE */
+  &::-ms-tooltip {
+    .hidden();
+  }
+
+  /* removes mozilla default styling */
+  &::-moz-range-track {
+    .track-style()
+  }
+
+  /* removes IE default styling */
+  &::-ms-track, &::-ms-fill-lower, &::-ms-fill-upper {
+    .track-style()
+  }
+}

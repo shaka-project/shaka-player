@@ -1,0 +1,81 @@
+/**
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.shaka-play-button {
+  /* TODO(b/116328412): resize play button in CSS only, not in JS */
+  /* Button width and height will be changed when
+  the dimensions of the video change.
+  See shaka.ui.Controls.prototype.resizePlayButton_ */
+  width: 56px;
+  height: 56px;
+  /* To be properly positioned in the center, this should have no margin or
+  padding.  These might have been set for buttons generally by the app or
+  user-agent. */
+  margin: 0;
+  padding: 0;
+
+  border-radius: 50%;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 20px 0px;
+  border: none;
+  /* The play arrow is a picture. It is treated a background image.
+  The following settings insure it shows only once and in the
+  center of the button. */
+  background-size: 50%;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-color: rgba(255, 255, 255, .9);
+
+  /* Gradually change opacity using cubic-bezier timing function */
+  transition: opacity cubic-bezier(0.4, 0.0, 0.6, 1) 600ms;
+
+  &[icon="play"] {
+    background-image: data-uri('play_arrow.svg');
+  }
+
+  &[icon="pause"] {
+    background-image: data-uri('pause.svg');
+  }
+}
+
+.shaka-time-container {
+  font-family: Roboto-Regular, Roboto, sans-serif;
+  font-size: 16px;
+  color: rgb(255, 255, 255);
+  letter-spacing: 0px;
+
+  /* Positioning settings */
+  padding-left: 19px;
+  margin-bottom: 5px;
+  align-self: flex-end;
+
+  cursor: default;
+  .user-select();
+}
+
+/* Outline on focus is important for accessibility, but
+it doesn't look great. This removes the outline for
+mouse users while leaving it for keyboard users. */
+.shaka-controls-container:not(.shaka-keyboard-navigation) {
+  button:focus,
+  input:focus {
+    outline: none;
+  }
+
+  button::-moz-focus-inner,
+  input::-moz-focus-outer {
+    border: 0;
+  }
+}

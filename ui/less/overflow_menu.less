@@ -1,0 +1,106 @@
+/**
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.shaka-settings-menu {
+  max-height: 250px;
+  min-width: 180px;
+
+  /* It's okay to add a vertical scroll if there are too many items,
+  but not a horizontal one. */
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  white-space: nowrap; /* Don't wrap text to the next line. */
+  background: #FFFFFF;
+  box-shadow: 0 1px 9px 0 rgba(0,0,0,0.40);
+  border-radius: 2px;
+  display: none;
+  flex-direction: column;
+  position: absolute;
+  z-index: 1;
+  right: 15px;
+  bottom: 30px;
+
+  button {
+    font-size: 14px;
+    background: transparent;
+    color: black;
+    display: flex;
+    align-items: center;
+    border: none;
+    min-height: 30px;
+    padding: 3.5px 6px;
+
+    &:hover {
+      background: rgb(224, 224, 224);
+    }
+  }
+
+  i {
+    padding-left: 10px;
+  }
+
+  &.shaka-low-position {
+    bottom: 15px;
+  }
+}
+
+.shaka-overflow-menu span {
+  text-align: left;
+  position: relative;
+  font-family: Roboto-Regular, Roboto, sans-serif;
+  left: 13px;
+}
+
+.shaka-overflow-button-label {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.shaka-current-selection-span {
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.shaka-resolutions,
+.shaka-audio-languages,
+.shaka-text-languages {
+  span {
+    margin-left: 54px;
+  }
+}
+
+.shaka-back-to-overflow-button {
+  span {
+    margin-left: 0;
+  }
+
+  i {
+    padding-right: 20px;
+  }
+}
+
+.shaka-auto-span {
+  left: 17px;
+}
+
+.shaka-captions-on {
+  color: black;
+}
+
+.shaka-captions-off {
+  color: grey;
+}
