@@ -86,6 +86,27 @@
   .unselectable();
 }
 
+/* Use a consistent outline focus style across browsers. */
+.shaka-controls-container {
+  button:focus,
+  input:focus {
+    /* Most browsers will fall back to "Highlight" (system setting) color for
+     * the focus outline. */
+    outline: 1px solid Highlight;
+    /* WebKit-based and Blink-based browsers have this as their default outline
+     * color. */
+    outline: 1px solid -webkit-focus-ring-color;
+  }
+
+  /* Disable this Mozilla-specific focus ring, since we have an outline defined
+   * for focus. */
+  button::-moz-focus-inner,
+  input::-moz-focus-outer {
+    outline: none;
+    border: 0;
+  }
+}
+
 /* Outline on focus is important for accessibility, but
  * it doesn't look great. This removes the outline for
  * mouse users while leaving it for keyboard users. */
@@ -93,11 +114,6 @@
   button:focus,
   input:focus {
     outline: none;
-  }
-
-  /* TODO: try putting border & outline on both, to solve keyboard FF issue */
-  button::-moz-focus-inner,
-  input::-moz-focus-outer {
     border: 0;
   }
 }

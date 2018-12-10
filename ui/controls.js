@@ -1238,6 +1238,10 @@ shaka.ui.Controls.prototype.setEnabledShakaControls = function(enabled) {
   if (enabled) {
     shaka.ui.Controls.setDisplay_(
       this.controlsButtonPanel_.parentElement, true);
+
+    // If we're hiding native controls, make sure the video element itself is
+    // not tab-navigable.  Our custom controls will still be tab-navigable.
+    this.video_.tabIndex = -1;
     this.video_.controls = false;
   } else {
     shaka.ui.Controls.setDisplay_(
@@ -1258,7 +1262,12 @@ shaka.ui.Controls.prototype.setEnabledShakaControls = function(enabled) {
  * @export
  */
 shaka.ui.Controls.prototype.setEnabledNativeControls = function(enabled) {
+  // If we enable the native controls, the element must be tab-navigable.
+  // If we disable the native controls, we want to make sure that the video
+  // element itself is not tab-navigable, so that the element is skipped over
+  // when tabbing through the page.
   this.video_.controls = enabled;
+  this.video_.tabIndex = enabled ? 0 : -1;
 
   if (enabled) {
     this.setEnabledShakaControls(false);
