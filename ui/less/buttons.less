@@ -19,12 +19,12 @@
 /* The giant play button, which sits inside .shaka-player-button-container and
  * contains the buffering spinner. */
 .shaka-play-button {
-  /* Button width and height will be changed when the dimensions of the video
-   * change. See shaka.ui.Controls.prototype.resizePlayButton_.
-   * Note that the resizing appears to be broken on IE 11. */
-  width: 61px;
-  height: 61px;
-  /* TODO(b/116328412): resize play button in CSS only, not in JS. */
+  /* Without this, we get a mysterious extra 3px height. */
+  display: flex;
+
+  /* Set width relative to the video element.  Height will automatically
+   * conform to width. */
+  width: 15%;
 
   /* To be properly positioned in the center, this should have no margin or
    * padding.  These might have been set for buttons generally by the app or

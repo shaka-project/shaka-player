@@ -537,11 +537,6 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
   this.video_.addEventListener(
       'ended', this.onPlayStateChange_.bind(this));
 
-  if (this.config_.adaptPlayButtonSize) {
-    this.video_.addEventListener(
-        'resize', this.resizePlayButtonAndSpinner_.bind(this));
-  }
-
   if (this.seekBar_) {
     this.seekBar_.addEventListener(
         'mousedown', this.onSeekStart_.bind(this));
@@ -2442,34 +2437,6 @@ shaka.ui.Controls.prototype.buildTimeString_ = function(displayTime, showHour) {
 
 
 /**
- * @private
- */
-shaka.ui.Controls.prototype.resizePlayButtonAndSpinner_ = function() {
-  // Play button size depends on the video dimensions and is
-  // calculated by taking the max of the smallest size we allow
-  // and the black magic Chrome designers came up with aka
-  // take min(video.width, video.height) and multiply it by a
-  // pre-determined ratio, depending on how big the video is.
-  const Controls = shaka.ui.Controls;
-  const width = this.video_.clientWidth;
-  const height = this.video_.clientHeight;
-  let sizingRatio = Controls.LARGE_PLAY_BUTTON_SIZE_RATIO_;
-  if (width < Controls.SIZING_MEDIUM_THRESHHOLD_) {
-    sizingRatio = Controls.SMALL_PLAY_BUTTON_SIZE_RATIO_;
-  } else if (width < Controls.SIZING_LARGE_THRESHHOLD_) {
-    sizingRatio = Controls.MEDIUM_PLAY_BUTTON_SIZE_RATIO_;
-  }
-
-  const minDimention = Math.min(width, height);
-  const playButtonSize =
-    Math.max(Controls.MIN_PLAY_BUTTON_WIDTH_, minDimention * sizingRatio);
-
-  this.playButton_.style.width = playButtonSize + 'px';
-  this.playButton_.style.height = playButtonSize + 'px';
-};
-
-
-/**
  * Adds class for keyboard navigation if tab was pressed.
  *
  * @param {!Event} event
@@ -2647,57 +2614,6 @@ shaka.ui.Controls.VOLUME_BAR_VOLUME_LEVEL_COLOR_ = 'rgb(255, 255, 255)';
  * @private
  */
 shaka.ui.Controls.VOLUME_BAR_BASE_COLOR_ = 'rgba(255, 255, 255, 0.54)';
-
-
-/**
- * Video width (in pixels) used for determining play button size.
- * @const {number}
- * @private
- */
-shaka.ui.Controls.SIZING_MEDIUM_THRESHHOLD_ = 741;
-
-
-/**
- * Video width (in pixels) used for determining play button size.
- * @const {number}
- * @private
- */
-shaka.ui.Controls.SIZING_LARGE_THRESHHOLD_ = 1441;
-
-
-/**
- * The ratio of width/height used for play button size.
- * (Dependant on sizing threashhold).
- * @const {number}
- * @private
- */
-shaka.ui.Controls.SMALL_PLAY_BUTTON_SIZE_RATIO_ = 0.25;
-
-
-/**
- * The ratio of width/height used for play button size.
- * (Dependant on sizing threashhold).
- * @const {number}
- * @private
- */
-shaka.ui.Controls.MEDIUM_PLAY_BUTTON_SIZE_RATIO_ = 0.15;
-
-
-/**
- * The ratio of width/height used for play button size.
- * (Dependant on sizing threashhold).
- * @const {number}
- * @private
- */
-shaka.ui.Controls.LARGE_PLAY_BUTTON_SIZE_RATIO_ = 0.11;
-
-
-/**
- * Minimal width (in pixels) a play button should have;
- * @const {number}
- * @private
- */
-shaka.ui.Controls.MIN_PLAY_BUTTON_WIDTH_ = 48;
 
 
 /**
