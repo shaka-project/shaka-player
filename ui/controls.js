@@ -19,14 +19,14 @@
 goog.provide('shaka.ui.Controls');
 
 goog.require('goog.asserts');
-goog.require('mozilla.LanguageMapping');
+goog.require('shaka.ui.Constants');
+goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.EventManager');
 goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.FakeEventTarget');
-goog.require('shaka.util.LanguageUtils');
 goog.require('shaka.util.Timer');
 
 
@@ -44,22 +44,6 @@ goog.require('shaka.util.Timer');
  */
 shaka.ui.Controls = function(player, videoContainer, video, config) {
   shaka.util.FakeEventTarget.call(this);
-
-  /** @private {!Map.<string, !Function>} */
-  this.elementNamesToFunctions_ = new Map([
-    ['time_and_duration', () => { this.addCurrentTime_(); }],
-    ['mute', () => { this.addMuteButton_(); }],
-    ['volume', () => { this.addVolumeBar_(); }],
-    ['fullscreen', () => { this.addFullscreenButton_(); }],
-    ['overflow_menu', () => { this.addOverflowMenuButton_(); }],
-    ['captions', () => { this.addCaptionButton_(); }],
-    ['cast', () => { this.addCastButton_(); }],
-    ['rewind', () => { this.addRewindButton_(); }],
-    ['fast_forward', () => { this.addFastForwardButton_(); }],
-    ['quality', () => { this.addResolutionButton_(); }],
-    ['language', () => { this.addLanguagesButton_(); }],
-    ['picture_in_picture', () => { this.addPipButton_(); }],
-  ]);
 
   /** @private {boolean} */
   this.enabled_ = true;
@@ -92,9 +76,6 @@ shaka.ui.Controls = function(player, videoContainer, video, config) {
   /** @private {boolean} */
   this.isSeeking_ = false;
 
-  /** @private {number} */
-  this.trickPlayRate_ = 1;
-
   /** @private {?number} */
   this.seekTimeoutId_ = null;
 
@@ -104,40 +85,13 @@ shaka.ui.Controls = function(player, videoContainer, video, config) {
   /** @private {?number} */
   this.lastTouchEventTime_ = null;
 
+  /** @private {!Array.<!shaka.extern.IUIElement>} */
+  this.elements_ = [];
+
   /** @private {shaka.ui.Localization} */
   this.localization_ = shaka.ui.Controls.createLocalization_();
 
   this.createDOM_();
-
-  const LocIds = shaka.ui.Locales.Ids;
-
-  /** @private {!Map.<HTMLElement, string>} */
-  this.ariaLabels_ = new Map()
-    .set(this.seekBar_, LocIds.ARIA_LABEL_SEEK)
-    .set(this.captionButton_, LocIds.ARIA_LABEL_CAPTIONS)
-    .set(this.backFromCaptionsButton_, LocIds.ARIA_LABEL_BACK)
-    .set(this.backFromResolutionButton_, LocIds.ARIA_LABEL_BACK)
-    .set(this.backFromLanguageButton_, LocIds.ARIA_LABEL_BACK)
-    .set(this.rewindButton_, LocIds.ARIA_LABEL_REWIND)
-    .set(this.fastForwardButton_, LocIds.ARIA_LABEL_FAST_FORWARD)
-    .set(this.resolutionButton_, LocIds.ARIA_LABEL_RESOLUTION)
-    .set(this.languagesButton_, LocIds.ARIA_LABEL_LANGUAGE)
-    .set(this.castButton_, LocIds.ARIA_LABEL_CAST)
-    .set(this.volumeBar_, LocIds.ARIA_LABEL_VOLUME)
-    .set(this.overflowMenuButton_, LocIds.ARIA_LABEL_MORE_SETTINGS);
-
-  /** @private {!Map.<HTMLElement, string>} */
-  this.textContentToLocalize_ = new Map()
-    .set(this.captionsNameSpan_, LocIds.LABEL_CAPTIONS)
-    .set(this.backFromCaptionsSpan_, LocIds.LABEL_CAPTIONS)
-    .set(this.captionsOffSpan_, LocIds.LABEL_CAPTIONS_OFF)
-    .set(this.castNameSpan_, LocIds.LABEL_CAST)
-    .set(this.backFromResolutionSpan_, LocIds.LABEL_RESOLUTION)
-    .set(this.resolutionNameSpan_, LocIds.LABEL_RESOLUTION)
-    .set(this.abrOnSpan_, LocIds.LABEL_AUTO_QUALITY)
-    .set(this.languageNameSpan_, LocIds.LABEL_LANGUAGE)
-    .set(this.backFromLanguageSpan_, LocIds.LABEL_LANGUAGE)
-    .set(this.pipNameSpan_, LocIds.LABEL_PICTURE_IN_PICTURE);
 
   this.updateLocalizedStrings_();
 
@@ -154,11 +108,9 @@ shaka.ui.Controls = function(player, videoContainer, video, config) {
 
   this.hideSettingsMenusTimer_ =
     new shaka.util.Timer(() => {
-      this.hideSettingsMenus_();
+      this.hideSettingsMenus();
     });
 
-  // Initialize caption state with a fake event.
-  this.onCaptionStateChange_();
 
   // We might've missed a caststatuschanged event from the proxy between
   // the controls creation and initializing. Run onCastStatusChange_()
@@ -167,6 +119,10 @@ shaka.ui.Controls = function(player, videoContainer, video, config) {
 };
 
 goog.inherits(shaka.ui.Controls, shaka.util.FakeEventTarget);
+
+
+/** @private {!Map.<string, !shaka.extern.IUIElement.Factory>} */
+shaka.ui.Controls.elementNamesToFactories_ = new Map();
 
 
 /**
@@ -194,81 +150,276 @@ shaka.ui.Controls.prototype.destroy = function() {
 
 
 /**
+ * @param {string} name
+ * @param {!shaka.extern.IUIElement.Factory} factory
+ * @export
+ */
+shaka.ui.Controls.registerElement = function(name, factory) {
+  shaka.ui.Controls.elementNamesToFactories_.set(name, factory);
+};
+
+
+/**
+ * This allows the application to inhibit casting.
+ *
+ * @param {boolean} allow
+ * @export
+ */
+shaka.ui.Controls.prototype.allowCast = function(allow) {
+  this.castAllowed_ = allow;
+  this.onCastStatusChange_(null);
+};
+
+
+/**
+ * Used by the application to notify the controls that a load operation is
+ * complete.  This allows the controls to recalculate play/paused state, which
+ * is important for platforms like Android where autoplay is disabled.
+ * @export
+ */
+shaka.ui.Controls.prototype.loadComplete = function() {
+  // If we are on Android or if autoplay is false, video.paused should be true.
+  // Otherwise, video.paused is false and the content is autoplaying.
+  this.onPlayStateChange_();
+};
+
+
+/**
+ * Enable or disable the custom controls. Enabling disables native
+ * browser controls.
+ *
+ * @param {boolean} enabled
+ * @export
+ */
+shaka.ui.Controls.prototype.setEnabledShakaControls = function(enabled) {
+  this.enabled_ = enabled;
+  if (enabled) {
+    shaka.ui.Controls.setDisplay(
+      this.controlsButtonPanel_.parentElement, true);
+
+    // If we're hiding native controls, make sure the video element itself is
+    // not tab-navigable.  Our custom controls will still be tab-navigable.
+    this.video_.tabIndex = -1;
+    this.video_.controls = false;
+  } else {
+    shaka.ui.Controls.setDisplay(
+      this.controlsButtonPanel_.parentElement, false);
+  }
+
+  // The effects of play state changes are inhibited while showing native
+  // browser controls.  Recalculate that state now.
+  this.onPlayStateChange_();
+};
+
+
+/**
+ * Enable or disable native browser controls. Enabling disables shaka
+ * controls.
+ *
+ * @param {boolean} enabled
+ * @export
+ */
+shaka.ui.Controls.prototype.setEnabledNativeControls = function(enabled) {
+  // If we enable the native controls, the element must be tab-navigable.
+  // If we disable the native controls, we want to make sure that the video
+  // element itself is not tab-navigable, so that the element is skipped over
+  // when tabbing through the page.
+  this.video_.controls = enabled;
+  this.video_.tabIndex = enabled ? 0 : -1;
+
+  if (enabled) {
+    this.setEnabledShakaControls(false);
+  }
+};
+
+
+/**
+ * @export
+ * @return {!shaka.cast.CastProxy}
+ */
+shaka.ui.Controls.prototype.getCastProxy = function() {
+  return this.castProxy_;
+};
+
+
+/**
+ * @return {shaka.ui.Localization}
+ * @export
+ */
+shaka.ui.Controls.prototype.getLocalization = function() {
+  return this.localization_;
+};
+
+
+/**
+ * @return {!HTMLElement}
+ * @export
+ */
+shaka.ui.Controls.prototype.getVideoContainer = function() {
+  return this.videoContainer_;
+};
+
+
+/**
+ * @return {!HTMLMediaElement}
+ * @export
+ */
+shaka.ui.Controls.prototype.getVideo = function() {
+  return this.video_;
+};
+
+
+/**
+ * @return {!HTMLMediaElement}
+ * @export
+ */
+shaka.ui.Controls.prototype.getLocalVideo = function() {
+  return this.localVideo_;
+};
+
+
+/**
+ * @return {!shaka.Player}
+ * @export
+ */
+shaka.ui.Controls.prototype.getPlayer = function() {
+  return this.player_;
+};
+
+
+/**
+ * @return {!HTMLElement}
+ * @export
+ */
+shaka.ui.Controls.prototype.getControlsContainer = function() {
+  return this.controlsContainer_;
+};
+
+
+/**
+ * @return {!shaka.extern.UIConfiguration}
+ * @export
+ */
+shaka.ui.Controls.prototype.getConfig = function() {
+  return this.config_;
+};
+
+
+/**
+ * @return {boolean}
+ * @export
+ */
+shaka.ui.Controls.prototype.isSeeking = function() {
+  return this.isSeeking_;
+};
+
+
+/**
+ * @return {boolean}
+ * @export
+ */
+shaka.ui.Controls.prototype.isCastAllowed = function() {
+  return this.castAllowed_;
+};
+
+
+/**
+ * @return {number}
+ * @export
+ */
+shaka.ui.Controls.prototype.getDisplayTime = function() {
+  const displayTime = this.isSeeking_ ?
+        Number(this.seekBar_.value) :
+        Number(this.video_.currentTime);
+
+  return displayTime;
+};
+
+
+/**
+ * @param {?number} time
+ * @export
+ */
+shaka.ui.Controls.prototype.setLastTouchEventTime = function(time) {
+  this.lastTouchEventTime_ = time;
+};
+
+
+/**
+ * Depending on the value of display, sets/removes css class of element to
+ * either display it or hide.
+ *
+ * @param {Element} element
+ * @param {boolean} display
+ * @export
+ */
+shaka.ui.Controls.setDisplay = function(element, display) {
+  if (!element) return;
+  if (display) {
+    element.classList.add('shaka-displayed');
+    // Removing a non-existent class doesn't throw, so, even if
+    // the element is not hidden, this should be fine. Same for displayed
+    // below.
+    element.classList.remove('shaka-hidden');
+  } else {
+    element.classList.add('shaka-hidden');
+    element.classList.remove('shaka-displayed');
+  }
+};
+
+
+/**
+ * Display controls even if css says overwise.
+ * Normally, controls opacity is controled by CSS, but there are
+ * a few special cases where we want controls to be displayed no
+ * matter what. For example, if the focus is on one of the settings
+ * menus. This method is called when we want to signal an exception
+ * to normal CSS opacity rules and keep the controls visible.
+ *
+ * @export
+ */
+shaka.ui.Controls.prototype.overrideCssShowControls = function() {
+  this.overrideCssShowControls_ = true;
+};
+
+
+/**
+ * @return {boolean}
+ * @export
+ */
+shaka.ui.Controls.prototype.anySettingsMenusAreOpen = function() {
+  return this.settingsMenus_.some(
+      (menu) => menu.classList.contains('shaka-displayed'));
+};
+
+
+/**
+ * @export
+ */
+shaka.ui.Controls.prototype.hideSettingsMenus = function() {
+  for (let menu of this.settingsMenus_) {
+    shaka.ui.Controls.setDisplay(/** @type {!HTMLElement} */ (menu), false);
+  }
+};
+
+
+/**
  * @private
  */
 shaka.ui.Controls.prototype.updateLocalizedStrings_ = function() {
-  const Controls = shaka.ui.Controls;
   const LocIds = shaka.ui.Locales.Ids;
 
-  // Localize aria labels
-  let elements = this.ariaLabels_.keys();
-  for (const element of elements) {
-    if (element == null) {
-      continue;
-    }
-
-    const id = this.ariaLabels_.get(element);
-    element.setAttribute(Controls.ARIA_LABEL_,
-        this.localization_.resolve(id));
+  if (this.seekBar_) {
+    this.seekBar_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
+          this.localization_.resolve(LocIds.ARIA_LABEL_SEEK));
   }
 
   // Localize state-dependant labels
   const makePlayNotPause = this.video_.paused && !this.isSeeking_;
   const playButtonAriaLabelId = makePlayNotPause ? LocIds.ARIA_LABEL_PLAY :
                                                    LocIds.ARIA_LABEL_PAUSE;
-  this.playButton_.setAttribute(Controls.ARIA_LABEL_,
+  this.playButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
       this.localization_.resolve(playButtonAriaLabelId));
-
-  if (this.muteButton_) {
-    const muteButtonAriaLabelId = this.video_.muted ? LocIds.ARIA_LABEL_UNMUTE :
-                                                      LocIds.ARIA_LABEL_MUTE;
-    this.muteButton_.setAttribute(Controls.ARIA_LABEL_,
-        this.localization_.resolve(muteButtonAriaLabelId));
-  }
-
-  if (this.fullscreenButton_) {
-    const fullscreenAriaLabel = document.fullscreenElement ?
-                                LocIds.ARIA_LABEL_EXIT_FULL_SCREEN :
-                                LocIds.ARIA_LABEL_FULL_SCREEN;
-    this.fullscreenButton_.setAttribute(Controls.ARIA_LABEL_,
-        this.localization_.resolve(fullscreenAriaLabel));
-  }
-
-  if (this.pipButton_) {
-    const pipAriaLabel = document.pictureInPictureElement ?
-                         LocIds.ARIA_LABEL_EXIT_PICTURE_IN_PICTURE :
-                         LocIds.ARIA_LABEL_ENTER_PICTURE_IN_PICTURE;
-    this.pipButton_.setAttribute(Controls.ARIA_LABEL_,
-        this.localization_.resolve(pipAriaLabel));
-
-    const currentPipState = document.pictureInPictureElement ?
-                            LocIds.LABEL_PICTURE_IN_PICTURE_ON :
-                            LocIds.LABEL_PICTURE_IN_PICTURE_OFF;
-
-    this.currentPipState_.textContent =
-        this.localization_.resolve(currentPipState);
-  }
-
-  // If we're not casting, string "not casting" will be displayed,
-  // which needs localization.
-  this.setCurrentCastSelection_();
-
-  // If we're at "auto" resolution, this string needs localization.
-  this.updateResolutionSelection_();
-
-  // If captions/subtitles are off, this string needs localization.
-  this.updateTextLanguages_();
-
-  // Localize text
-  elements = this.textContentToLocalize_.keys();
-  for (const element of elements) {
-    if (element == null) {
-      continue;
-    }
-
-    const id = this.textContentToLocalize_.get(element);
-    element.textContent = this.localization_.resolve(id);
-  }
 };
 
 
@@ -283,117 +434,6 @@ shaka.ui.Controls.prototype.initOptionalElementsToNull_ = function() {
 
   /** @private {HTMLInputElement} */
   this.seekBar_ = null;
-
-  /** @private {HTMLElement} */
-  this.volumeBarContainer_ = null;
-
-  /** @private {HTMLInputElement} */
-  this.volumeBar_ = null;
-
-  /** @private {HTMLElement} */
-  this.muteButton_ = null;
-
-  /** @private {HTMLElement} */
-  this.captionButton_ = null;
-
-    /** @private {HTMLElement} */
-  this.captionIcon_ = null;
-
-  /** @private {HTMLElement} */
-  this.fullscreenButton_ = null;
-
-  /** @private {HTMLElement} */
-  this.currentTime_ = null;
-
-  /** @private {HTMLElement} */
-  this.castButton_ = null;
-
-  /** @private {HTMLElement} */
-  this.castIcon_ = null;
-
-  /** @private {HTMLElement} */
-  this.overflowMenuButton_ = null;
-
-  /** @private {HTMLElement} */
-  this.rewindButton_ = null;
-
-  /** @private {HTMLElement} */
-  this.fastForwardButton_ = null;
-
-  /** @private {HTMLElement} */
-  this.resolutionButton_ = null;
-
-  /** @private {HTMLElement} */
-  this.languagesButton_ = null;
-
-  /** @private {HTMLElement} */
-  this.resolutionMenu_ = null;
-
-  /** @private {HTMLElement} */
-  this.audioLangMenu_ = null;
-
-  /** @private {HTMLElement} */
-  this.textLangMenu_ = null;
-
-  /** @private {HTMLElement} */
-  this.currentResolution_ = null;
-
-  /** @private {HTMLElement} */
-  this.castNameSpan_ = null;
-
-  /** @private {HTMLElement} */
-  this.currentAudioLanguage_ = null;
-
-  /** @private {HTMLElement} */
-  this.currentCaptions_ = null;
-
-  /** @private {HTMLElement} */
-  this.captionsNameSpan_ = null;
-
-  /** @private {HTMLElement} */
-  this.backFromCaptionsSpan_ = null;
-
-  /** @private {HTMLElement} */
-  this.backFromResolutionButton_ = null;
-
-  /** @private {HTMLElement} */
-  this.backFromLanguageButton_ = null;
-
-  /** @private {HTMLElement} */
-  this.captionsOffSpan_ = null;
-
-  /** @private {HTMLElement} */
-  this.castCurrentSelectionSpan_ = null;
-
-  /** @private {HTMLElement} */
-  this.backFromResolutionSpan_ = null;
-
-  /** @private {HTMLElement} */
-  this.resolutionNameSpan_ = null;
-
-  /** @private {HTMLElement} */
-  this.languageNameSpan_ = null;
-
-  /** @private {HTMLElement} */
-  this.backFromLanguageSpan_ = null;
-
-  /** @private {HTMLElement} */
-  this.abrOnSpan_ = null;
-
-  /** @private {HTMLElement} */
-  this.backFromCaptionsButton_ = null;
-
-  /** @private {HTMLElement} */
-  this.pipButton_ = null;
-
-  /** @private {HTMLElement} */
-  this.pipNameSpan_ = null;
-
-  /** @private {HTMLElement} */
-  this.currentPipState_ = null;
-
-  /** @private {HTMLElement} */
-  this.pipIcon_ = null;
 };
 
 
@@ -414,19 +454,10 @@ shaka.ui.Controls.prototype.createDOM_ = function() {
 
   this.addControlsButtonPanel_();
 
-  // Overflow menu
-  // Adding the overflow menu after the controls button panel, since the
-  // screen reader follows DOM orders.
-  this.addOverflowMenu_();
-
   // Seek bar
   if (this.config_.addSeekBar) {
     this.addSeekBar_();
   }
-
-  /** @private {!NodeList.<!Element>} */
-  this.backToOverflowMenuButtons_ = this.videoContainer_.
-    getElementsByClassName('shaka-back-to-overflow-button');
 
   /** @private {!Array.<!Element>} */
   this.settingsMenus_ = Array.from(
@@ -517,14 +548,15 @@ shaka.ui.Controls.prototype.addControlsButtonPanel_ = function() {
   // Create the elements specified by controlPanelElements
   for (let i = 0; i < this.config_.controlPanelElements.length; i++) {
     const name = this.config_.controlPanelElements[i];
-    if (this.elementNamesToFunctions_.get(name)) {
+    if (shaka.ui.Controls.elementNamesToFactories_.get(name)) {
       if (shaka.ui.Controls.controlPanelElements_.indexOf(name) == -1) {
         // Not a control panel element, skip
         shaka.log.warning('Element is not part of control panel ' +
           'elements and will be skipped', name);
         continue;
       }
-      this.elementNamesToFunctions_.get(name)();
+      const factory = shaka.ui.Controls.elementNamesToFactories_.get(name);
+      this.elements_.push(factory.create(this.controlsButtonPanel_, this));
     }
   }
 };
@@ -566,83 +598,10 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
         'mouseup', this.onSeekEnd_.bind(this));
   }
 
-  if (this.muteButton_) {
-    this.muteButton_.addEventListener(
-      'click', this.onMuteButtonClick_.bind(this));
-  }
-
-  if (this.volumeBar_) {
-    this.volumeBar_.addEventListener(
-      'input', this.onVolumeInput_.bind(this));
-  }
-
-  this.video_.addEventListener(
-      'volumechange', this.onVolumeStateChange_.bind(this));
-  // Initialize volume display with a fake event.
-  this.onVolumeStateChange_();
-
-  if (this.captionButton_) {
-    this.captionButton_.addEventListener(
-      'click', this.onCaptionClick_.bind(this));
-  }
-
-  this.player_.addEventListener(
-      'texttrackvisibility', this.onCaptionStateChange_.bind(this));
-  this.player_.addEventListener(
-      'trackschanged', this.onTracksChange_.bind(this));
-  this.player_.addEventListener(
-      'variantchanged', this.onVariantChange_.bind(this));
-  this.player_.addEventListener(
-      'textchanged', this.updateTextLanguages_.bind(this));
-
-  if (this.fullscreenButton_) {
-    this.fullscreenButton_.addEventListener(
-        'click', this.onFullscreenClick_.bind(this));
-    document.addEventListener(
-        'fullscreenchange', this.onFullscreenChange_.bind(this));
-  }
-
-  if (this.currentTime_) {
-    this.currentTime_.addEventListener(
-      'click', this.onCurrentTimeClick_.bind(this));
-  }
-
-  if (this.rewindButton_) {
-    this.rewindButton_.addEventListener(
-      'click', this.onRewindClick_.bind(this));
-  }
-
-  if (this.fastForwardButton_) {
-    this.fastForwardButton_.addEventListener(
-      'click', this.onFastForwardClick_.bind(this));
-  }
-
-  if (this.castButton_) {
-    this.castButton_.addEventListener(
-      'click', this.onCastClick_.bind(this));
-  }
-
-  if (this.pipButton_) {
-    this.pipButton_.addEventListener(
-      'click', () => {
-        this.onPipClick_();
-      });
-    this.localVideo_.addEventListener(
-      'enterpictureinpicture', this.onEnterPictureInPicture_.bind(this));
-    this.localVideo_.addEventListener(
-      'leavepictureinpicture', this.onLeavePictureInPicture_.bind(this));
-  }
-
   this.controlsContainer_.addEventListener(
       'touchstart', this.onContainerTouch_.bind(this), {passive: false});
   this.controlsContainer_.addEventListener(
       'click', this.onContainerClick_.bind(this));
-
-  this.overflowMenu_.addEventListener(
-      'touchstart', function(event) {
-        this.lastTouchEventTime_ = Date.now();
-        event.stopPropagation();
-      }.bind(this));
 
   // Elements that should not propagate clicks (controls panel, menus)
   const noPropagationElements = this.videoContainer_.getElementsByClassName(
@@ -669,21 +628,6 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
       });
   }
 
-  if (this.overflowMenuButton_) {
-    this.overflowMenuButton_.addEventListener(
-      'click', this.onOverflowMenuButtonClick_.bind(this));
-  }
-
-  if (this.resolutionButton_) {
-    this.resolutionButton_.addEventListener(
-        'click', this.onResolutionClick_.bind(this));
-  }
-
-  if (this.languagesButton_) {
-    this.languagesButton_.addEventListener(
-        'click', this.onLanguagesClick_.bind(this));
-  }
-
   this.videoContainer_.addEventListener(
       'mousemove', this.onMouseMove_.bind(this));
   this.videoContainer_.addEventListener(
@@ -698,38 +642,17 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
   // However, clicks on controls panel don't propagate to the container,
   // so we have to explicitely hide the menus onclick here.
   this.controlsButtonPanel_.addEventListener('click', () => {
-    if (this.anySettingsMenusAreOpen_()) {
-      this.hideSettingsMenus_();
+    if (this.anySettingsMenusAreOpen()) {
+      this.hideSettingsMenus();
     }
   });
 
   this.castProxy_.addEventListener(
-      'caststatuschanged', this.onCastStatusChange_.bind(this));
+      'caststatuschanged', (e) => {
+        this.onCastStatusChange_(e);
+      });
 
   this.videoContainer_.addEventListener('keyup', this.onKeyUp_.bind(this));
-
-  for (let i = 0; i < this.backToOverflowMenuButtons_.length; i++) {
-    let button = this.backToOverflowMenuButtons_[i];
-    button.addEventListener('click', () => {
-      // Hide the submenus, display the overflow menu
-      this.hideSettingsMenus_();
-      shaka.ui.Controls.setDisplay_(this.overflowMenu_, true);
-
-      // If there are back to overflow menu buttons, there must be
-      // overflow menu buttons, but oh well
-      if (this.overflowMenu_.childNodes.length) {
-        /** @type {!HTMLElement} */ (this.overflowMenu_.childNodes[0]).focus();
-      }
-
-      // Make sure controls are displayed
-      this.overrideCssShowControls_ = true;
-    });
-  }
-
-  if (screen.orientation) {
-    screen.orientation.addEventListener(
-        'change', this.onScreenRotation_.bind(this));
-  }
 
   this.localization_.addEventListener(
       shaka.ui.Localization.LOCALE_UPDATED,
@@ -769,606 +692,6 @@ shaka.ui.Controls.prototype.addSeekBar_ = function() {
 
 
 /**
- * @private
- */
-shaka.ui.Controls.prototype.addOverflowMenu_ = function() {
-  /** @private {!HTMLElement} */
-  this.overflowMenu_ = shaka.ui.Utils.createHTMLElement('div');
-  this.overflowMenu_.classList.add('shaka-overflow-menu');
-  this.overflowMenu_.classList.add('shaka-no-propagation');
-  this.overflowMenu_.classList.add('shaka-show-controls-on-mouse-over');
-  this.overflowMenu_.classList.add('shaka-settings-menu');
-  this.controlsContainer_.appendChild(this.overflowMenu_);
-
-  for (let i = 0; i < this.config_.overflowMenuButtons.length; i++) {
-    const name = this.config_.overflowMenuButtons[i];
-    if (this.elementNamesToFunctions_.get(name)) {
-      if (shaka.ui.Controls.overflowButtons_.indexOf(name) == -1) {
-        // Not an overflow button, skip
-        shaka.log.warning('Element is not part of overflow ' +
-          'button collection and will be skipped', name);
-        continue;
-      }
-      this.elementNamesToFunctions_.get(name)();
-    }
-  }
-
-  // Add settings menus
-  if (this.config_.overflowMenuButtons.indexOf('quality') > -1) {
-    this.addResolutionMenu_();
-  }
-
-  if (this.config_.overflowMenuButtons.indexOf('language') > -1) {
-    this.addAudioLangMenu_();
-  }
-
-  if (this.config_.overflowMenuButtons.indexOf('captions') > -1) {
-    this.addTextLangMenu_();
-  }
-};
-
-
-/**
- * @private
- */
-shaka.ui.Controls.prototype.addCurrentTime_ = function() {
-  const timeContainer = shaka.ui.Utils.createHTMLElement('div');
-  timeContainer.classList.add('shaka-time-container');
-  this.currentTime_ = shaka.ui.Utils.createHTMLElement('div');
-  this.currentTime_.textContent = '0:00';
-  timeContainer.appendChild(this.currentTime_);
-  this.controlsButtonPanel_.appendChild(timeContainer);
-};
-
-
-/**
- * @private
- */
-shaka.ui.Controls.prototype.addMuteButton_ = function() {
-  this.muteButton_ = shaka.ui.Utils.createHTMLElement('button');
-  this.muteButton_.classList.add('shaka-mute-button');
-  this.muteButton_.classList.add('material-icons');
-  this.muteButton_.textContent = shaka.ui.Controls.MaterialDesignIcons_.MUTE;
-  this.controlsButtonPanel_.appendChild(this.muteButton_);
-};
-
-
-/**
- * @private
- */
-shaka.ui.Controls.prototype.addVolumeBar_ = function() {
-  // This container is to support IE 11.  See detailed notes in
-  // less/range_elements.less for a complete explanation.
-  // TODO: Factor this into a range-element component.
-  this.volumeBarContainer_ = shaka.ui.Utils.createHTMLElement('div');
-  this.volumeBarContainer_.classList.add('shaka-volume-bar-container');
-
-  this.volumeBar_ =
-    /** @type {!HTMLInputElement} */ (document.createElement('input'));
-  this.volumeBar_.classList.add('shaka-volume-bar');
-  this.volumeBar_.setAttribute('type', 'range');
-  // NOTE: step=any causes keyboard nav problems on IE 11.
-  this.volumeBar_.setAttribute('step', 'any');
-  this.volumeBar_.setAttribute('min', '0');
-  this.volumeBar_.setAttribute('max', '1');
-  this.volumeBar_.setAttribute('value', '0');
-
-  this.volumeBarContainer_.appendChild(this.volumeBar_);
-  this.controlsButtonPanel_.appendChild(this.volumeBarContainer_);
-};
-
-
-/**
- * @private
- */
-shaka.ui.Controls.prototype.addFullscreenButton_ = function() {
-  this.fullscreenButton_ = shaka.ui.Utils.createHTMLElement('button');
-  this.fullscreenButton_.classList.add('shaka-fullscreen-button');
-  this.fullscreenButton_.classList.add('material-icons');
-  this.fullscreenButton_.textContent =
-    shaka.ui.Controls.MaterialDesignIcons_.FULLSCREEN;
-  this.controlsButtonPanel_.appendChild(this.fullscreenButton_);
-};
-
-
-/**
- * @private
- */
-shaka.ui.Controls.prototype.addOverflowMenuButton_ = function() {
-  this.overflowMenuButton_ = shaka.ui.Utils.createHTMLElement('button');
-  this.overflowMenuButton_.classList.add('shaka-overflow-menu-button');
-  this.overflowMenuButton_.classList.add('shaka-no-propagation');
-  this.overflowMenuButton_.classList.add('material-icons');
-  this.overflowMenuButton_.textContent =
-    shaka.ui.Controls.MaterialDesignIcons_.OPEN_OVERFLOW;
-  this.controlsButtonPanel_.appendChild(this.overflowMenuButton_);
-};
-
-
-/**
- * @private
- */
-shaka.ui.Controls.prototype.addCaptionButton_ = function() {
-  this.captionButton_ = shaka.ui.Utils.createHTMLElement('button');
-  this.captionButton_.classList.add('shaka-caption-button');
-  this.captionIcon_ = shaka.ui.Utils.createHTMLElement('i');
-  this.captionIcon_.classList.add('material-icons');
-  this.captionIcon_.textContent =
-    shaka.ui.Controls.MaterialDesignIcons_.CLOSED_CAPTIONS;
-  this.captionButton_.appendChild(this.captionIcon_);
-
-  const label = shaka.ui.Utils.createHTMLElement('label');
-  label.classList.add('shaka-overflow-button-label');
-
-  this.captionsNameSpan_ = shaka.ui.Utils.createHTMLElement('span');
-
-  label.appendChild(this.captionsNameSpan_);
-
-  this.currentCaptions_ = shaka.ui.Utils.createHTMLElement('span');
-  this.currentCaptions_.classList.add('shaka-current-selection-span');
-  label.appendChild(this.currentCaptions_);
-  this.captionButton_.appendChild(label);
-  this.overflowMenu_.appendChild(this.captionButton_);
-};
-
-
-/**
- * @private
- */
-shaka.ui.Controls.prototype.addTextLangMenu_ = function() {
-  this.textLangMenu_ = shaka.ui.Utils.createHTMLElement('div');
-  this.textLangMenu_.classList.add('shaka-text-languages');
-  this.textLangMenu_.classList.add('shaka-no-propagation');
-  this.textLangMenu_.classList.add('shaka-show-controls-on-mouse-over');
-  this.textLangMenu_.classList.add('shaka-settings-menu');
-
-  this.backFromCaptionsButton_ = shaka.ui.Utils.createHTMLElement('button');
-  this.backFromCaptionsButton_.classList.add('shaka-back-to-overflow-button');
-  this.textLangMenu_.appendChild(this.backFromCaptionsButton_);
-
-  const backIcon = shaka.ui.Utils.createHTMLElement('i');
-  backIcon.classList.add('material-icons');
-  backIcon.textContent = shaka.ui.Controls.MaterialDesignIcons_.BACK;
-  this.backFromCaptionsButton_.appendChild(backIcon);
-
-  this.backFromCaptionsSpan_ = shaka.ui.Utils.createHTMLElement('span');
-  this.backFromCaptionsButton_.appendChild(this.backFromCaptionsSpan_);
-
-  // Add the off option
-  const off = shaka.ui.Utils.createHTMLElement('button');
-  off.setAttribute('aria-selected', 'true');
-  this.textLangMenu_.appendChild(off);
-
-  const chosenIcon = shaka.ui.Utils.createHTMLElement('i');
-  chosenIcon.classList.add('material-icons');
-  chosenIcon.classList.add('shaka-chosen-item');
-  // This text content is actually a material design icon.
-  // DO NOT LOCALIZE
-  chosenIcon.textContent = shaka.ui.Controls.MaterialDesignIcons_.CHECKMARK;
-  // Screen reader should ignore 'done'.
-  chosenIcon.setAttribute('aria-hidden', 'true');
-  off.appendChild(chosenIcon);
-
-  this.captionsOffSpan_ = shaka.ui.Utils.createHTMLElement('span');
-
-  this.captionsOffSpan_.classList.add('shaka-auto-span');
-  off.appendChild(this.captionsOffSpan_);
-
-  this.controlsContainer_.appendChild(this.textLangMenu_);
-};
-
-
-/**
- * @private
- */
-shaka.ui.Controls.prototype.addCastButton_ = function() {
-  this.castButton_ = shaka.ui.Utils.createHTMLElement('button');
-
-  this.castButton_.classList.add('shaka-cast-button');
-  this.castButton_.classList.add('shaka-hidden');
-  this.castButton_.setAttribute('aria-pressed', 'false');
-
-  this.castIcon_ = shaka.ui.Utils.createHTMLElement('i');
-  this.castIcon_.classList.add('material-icons');
-  // This text content is actually a material design icon.
-  // DO NOT LOCALIZE
-  this.castIcon_.textContent = shaka.ui.Controls.MaterialDesignIcons_.CAST;
-  this.castButton_.appendChild(this.castIcon_);
-
-  const label = shaka.ui.Utils.createHTMLElement('label');
-  label.classList.add('shaka-overflow-button-label');
-  this.castNameSpan_ = shaka.ui.Utils.createHTMLElement('span');
-  label.appendChild(this.castNameSpan_);
-
-  this.castCurrentSelectionSpan_ = shaka.ui.Utils.createHTMLElement('span');
-  this.castCurrentSelectionSpan_.classList.add('shaka-current-selection-span');
-  label.appendChild(this.castCurrentSelectionSpan_);
-  this.castButton_.appendChild(label);
-  this.overflowMenu_.appendChild(this.castButton_);
-};
-
-
-/**
- * @private
- */
-shaka.ui.Controls.prototype.addRewindButton_ = function() {
-  this.rewindButton_ = shaka.ui.Utils.createHTMLElement('button');
-  this.rewindButton_.classList.add('shaka-rewind-button');
-  this.rewindButton_.classList.add('material-icons');
-  this.rewindButton_.textContent =
-    shaka.ui.Controls.MaterialDesignIcons_.REWIND;
-  this.controlsButtonPanel_.appendChild(this.rewindButton_);
-};
-
-
-/**
- * @private
- */
-shaka.ui.Controls.prototype.addFastForwardButton_ = function() {
-  this.fastForwardButton_ = shaka.ui.Utils.createHTMLElement('button');
-  this.fastForwardButton_.classList.add('shaka-fast-forward-button');
-  this.fastForwardButton_.classList.add('material-icons');
-  this.fastForwardButton_.textContent =
-    shaka.ui.Controls.MaterialDesignIcons_.FAST_FORWARD;
-  this.controlsButtonPanel_.appendChild(this.fastForwardButton_);
-};
-
-
-/**
- * @private
- */
-shaka.ui.Controls.prototype.addResolutionMenu_ = function() {
-  this.resolutionMenu_ = shaka.ui.Utils.createHTMLElement('div');
-  this.resolutionMenu_.classList.add('shaka-resolutions');
-  this.resolutionMenu_.classList.add('shaka-no-propagation');
-  this.resolutionMenu_.classList.add('shaka-show-controls-on-mouse-over');
-  this.resolutionMenu_.classList.add('shaka-settings-menu');
-
-  this.backFromResolutionButton_ =
-    shaka.ui.Utils.createHTMLElement('button');
-  this.backFromResolutionButton_.classList.add('shaka-back-to-overflow-button');
-  this.resolutionMenu_.appendChild(this.backFromResolutionButton_);
-
-  const backIcon = shaka.ui.Utils.createHTMLElement('i');
-  backIcon.classList.add('material-icons');
-  backIcon.textContent = shaka.ui.Controls.MaterialDesignIcons_.BACK;
-  this.backFromResolutionButton_.appendChild(backIcon);
-
-  this.backFromResolutionSpan_ = shaka.ui.Utils.createHTMLElement('span');
-  this.backFromResolutionButton_.appendChild(this.backFromResolutionSpan_);
-
-
-  // Add the abr option
-  const auto = shaka.ui.Utils.createHTMLElement('button');
-  auto.setAttribute('aria-selected', 'true');
-  this.resolutionMenu_.appendChild(auto);
-
-  const chosenIcon = shaka.ui.Utils.createHTMLElement('i');
-  chosenIcon.classList.add('material-icons');
-  chosenIcon.classList.add('shaka-chosen-item');
-  chosenIcon.textContent = shaka.ui.Controls.MaterialDesignIcons_.CHECKMARK;
-  // Screen reader should ignore the checkmark.
-  chosenIcon.setAttribute('aria-hidden', 'true');
-  auto.appendChild(chosenIcon);
-
-  this.abrOnSpan_ = shaka.ui.Utils.createHTMLElement('span');
-  this.abrOnSpan_.classList.add('shaka-auto-span');
-  auto.appendChild(this.abrOnSpan_);
-
-  this.controlsContainer_.appendChild(this.resolutionMenu_);
-};
-
-
-/**
- * @private
- */
-shaka.ui.Controls.prototype.addResolutionButton_ = function() {
-  this.resolutionButton_ = shaka.ui.Utils.createHTMLElement('button');
-
-  this.resolutionButton_.classList.add('shaka-resolution-button');
-
-  const icon = shaka.ui.Utils.createHTMLElement('i');
-  icon.classList.add('material-icons');
-  icon.textContent = shaka.ui.Controls.MaterialDesignIcons_.RESOLUTION;
-  this.resolutionButton_.appendChild(icon);
-
-  const label = shaka.ui.Utils.createHTMLElement('label');
-  label.classList.add('shaka-overflow-button-label');
-  this.resolutionNameSpan_ = shaka.ui.Utils.createHTMLElement('span');
-  label.appendChild(this.resolutionNameSpan_);
-
-  this.currentResolution_ = shaka.ui.Utils.createHTMLElement('span');
-  this.currentResolution_.classList.add('shaka-current-selection-span');
-  label.appendChild(this.currentResolution_);
-  this.resolutionButton_.appendChild(label);
-
-  this.overflowMenu_.appendChild(this.resolutionButton_);
-};
-
-
-/**
- * @private
- */
-shaka.ui.Controls.prototype.addAudioLangMenu_ = function() {
-  this.audioLangMenu_ = shaka.ui.Utils.createHTMLElement('div');
-  this.audioLangMenu_.classList.add('shaka-audio-languages');
-  this.audioLangMenu_.classList.add('shaka-no-propagation');
-  this.audioLangMenu_.classList.add('shaka-show-controls-on-mouse-over');
-  this.audioLangMenu_.classList.add('shaka-settings-menu');
-
-  this.backFromLanguageButton_ = shaka.ui.Utils.createHTMLElement('button');
-  this.backFromLanguageButton_.classList.add('shaka-back-to-overflow-button');
-  this.audioLangMenu_.appendChild(this.backFromLanguageButton_);
-
-  const backIcon = shaka.ui.Utils.createHTMLElement('i');
-  backIcon.classList.add('material-icons');
-  backIcon.textContent = shaka.ui.Controls.MaterialDesignIcons_.BACK;
-  this.backFromLanguageButton_.appendChild(backIcon);
-
-  this.backFromLanguageSpan_ = shaka.ui.Utils.createHTMLElement('span');
-  this.backFromLanguageButton_.appendChild(this.backFromLanguageSpan_);
-
-  this.controlsContainer_.appendChild(this.audioLangMenu_);
-};
-
-
-/**
- * @private
- */
-shaka.ui.Controls.prototype.addLanguagesButton_ = function() {
-  this.languagesButton_ = shaka.ui.Utils.createHTMLElement('button');
-  this.languagesButton_.classList.add('shaka-language-button');
-
-  const icon = shaka.ui.Utils.createHTMLElement('i');
-  icon.classList.add('material-icons');
-  icon.textContent = shaka.ui.Controls.MaterialDesignIcons_.LANGUAGE;
-  this.languagesButton_.appendChild(icon);
-
-  const label = shaka.ui.Utils.createHTMLElement('label');
-  label.classList.add('shaka-overflow-button-label');
-  this.languageNameSpan_ = shaka.ui.Utils.createHTMLElement('span');
-  this.languageNameSpan_.classList.add('languageSpan');
-  label.appendChild(this.languageNameSpan_);
-
-  this.currentAudioLanguage_ = shaka.ui.Utils.createHTMLElement('span');
-  this.currentAudioLanguage_.classList.add('shaka-current-selection-span');
-  const language = this.player_.getConfiguration().preferredAudioLanguage;
-  this.currentAudioLanguage_.textContent = this.getLanguageName_(language);
-  label.appendChild(this.currentAudioLanguage_);
-
-  this.languagesButton_.appendChild(label);
-
-  this.overflowMenu_.appendChild(this.languagesButton_);
-};
-
-
-/**
- * @private
- */
-shaka.ui.Controls.prototype.addPipButton_ = function() {
-  const LocIds = shaka.ui.Locales.Ids;
-  this.pipButton_ = shaka.ui.Utils.createHTMLElement('button');
-
-  this.pipIcon_ = shaka.ui.Utils.createHTMLElement('i');
-  this.pipIcon_.classList.add('material-icons');
-  // This text content is actually a material design icon.
-  // DO NOT LOCALIZE
-  this.pipIcon_.textContent = shaka.ui.Controls.MaterialDesignIcons_.PIP;
-  this.pipButton_.appendChild(this.pipIcon_);
-
-  const label = shaka.ui.Utils.createHTMLElement('label');
-  label.classList.add('shaka-overflow-button-label');
-  this.pipNameSpan_ = shaka.ui.Utils.createHTMLElement('span');
-  this.pipNameSpan_.textContent =
-      this.localization_.resolve(LocIds.LABEL_PICTURE_IN_PICTURE);
-  label.appendChild(this.pipNameSpan_);
-
-  this.currentPipState_ = shaka.ui.Utils.createHTMLElement('span');
-  this.currentPipState_.classList.add('shaka-current-selection-span');
-  this.currentPipState_.textContent =
-      this.localization_.resolve(LocIds.LABEL_PICTURE_IN_PICTURE_OFF);
-  label.appendChild(this.currentPipState_);
-
-  this.pipButton_.appendChild(label);
-
-  this.overflowMenu_.appendChild(this.pipButton_);
-
-  // Don't display the button if PiP is not supported or not allowed
-  // TODO: Can this ever change? Is it worth creating the button if the below
-  // condition is true?
-  if (!this.isPipAllowed_()) {
-    shaka.ui.Controls.setDisplay_(this.pipButton_, false);
-  }
-};
-
-
-/**
- * @return {boolean}
- * @private
- */
-shaka.ui.Controls.prototype.isPipAllowed_ = function() {
-  return document.pictureInPictureEnabled &&
-      !this.video_.disablePictureInPicture;
-};
-
-
-/**
- * Returns the language's name for itself in its own script (autoglottonym), if
- * we have it.
- *
- * If the locale, including region, can be mapped to a name, we return a very
- * specific name including the region.  For example, "de-AT" would map to
- * "Deutsch (Österreich)" or Austrian German.
- *
- * If only the language part of the locale is in our map, we append the locale
- * itself for specificity.  For example, "ar-EG" (Egyptian Arabic) would map
- * to "ﺎﻠﻋﺮﺒﻳﺓ (ar-EG)".  In this way, multiple versions of Arabic whose
- * regions are not in our map would not all look the same in the language
- * list, but could be distinguished by their locale.
- *
- * Finally, if language part of the locale is not in our map, we label it
- * "unknown", as translated to the UI locale, and we append the locale itself
- * for specificity.  For example, "sjn" would map to "Unknown (sjn)".  In this
- * way, multiple unrecognized languages would not all look the same in the
- * language list, but could be distinguished by their locale.
- *
- * @param {string} locale
- * @return {string} The language's name for itself in its own script, or as
- *   close as we can get with the information we have.
- * @private
- */
-shaka.ui.Controls.prototype.getLanguageName_ = function(locale) {
-  if (!locale) {
-    return '';
-  }
-
-  // Shorthand for resolving a localization ID.
-  const resolve = (id) => this.localization_.resolve(id);
-
-  // Handle some special cases first.  These are reserved language tags that
-  // are used to indicate something that isn't one specific language.
-  switch (locale) {
-    case 'mul':
-      return resolve(shaka.ui.Locales.Ids.LABEL_MULTIPLE_LANGUAGES);
-    case 'zxx':
-      return resolve(shaka.ui.Locales.Ids.LABEL_NOT_APPLICABLE);
-  }
-
-  // Extract the base language from the locale as a fallback step.
-  const language = shaka.util.LanguageUtils.getBase(locale);
-
-  // First try to resolve the full language name.
-  // If that fails, try the base.
-  // Finally, report "unknown".
-  // When there is a loss of specificity (either to a base language or to
-  // "unknown"), we should append the original language code.  Otherwise, there
-  // may be multiple identical-looking items in the list.
-  if (locale in mozilla.LanguageMapping) {
-    return mozilla.LanguageMapping[locale].nativeName;
-  } else if (language in mozilla.LanguageMapping) {
-    return mozilla.LanguageMapping[language].nativeName +
-        ' (' + locale + ')';
-  } else {
-    return resolve(shaka.ui.Locales.Ids.LABEL_UNKNOWN_LANGUAGE) +
-        ' (' + locale + ')';
-  }
-};
-
-
-/**
- * This allows the application to inhibit casting.
- *
- * @param {boolean} allow
- * @export
- */
-shaka.ui.Controls.prototype.allowCast = function(allow) {
-  this.castAllowed_ = allow;
-  this.onCastStatusChange_(null);
-};
-
-
-/**
- * Used by the application to notify the controls that a load operation is
- * complete.  This allows the controls to recalculate play/paused state, which
- * is important for platforms like Android where autoplay is disabled.
- * @export
- */
-shaka.ui.Controls.prototype.loadComplete = function() {
-  // If we are on Android or if autoplay is false, video.paused should be true.
-  // Otherwise, video.paused is false and the content is autoplaying.
-  this.onPlayStateChange_();
-};
-
-
-/**
- * Enable or disable the custom controls. Enabling disables native
- * browser controls.
- *
- * @param {boolean} enabled
- * @export
- */
-shaka.ui.Controls.prototype.setEnabledShakaControls = function(enabled) {
-  this.enabled_ = enabled;
-  if (enabled) {
-    shaka.ui.Controls.setDisplay_(
-      this.controlsButtonPanel_.parentElement, true);
-
-    // If we're hiding native controls, make sure the video element itself is
-    // not tab-navigable.  Our custom controls will still be tab-navigable.
-    this.video_.tabIndex = -1;
-    this.video_.controls = false;
-  } else {
-    shaka.ui.Controls.setDisplay_(
-      this.controlsButtonPanel_.parentElement, false);
-  }
-
-  // The effects of play state changes are inhibited while showing native
-  // browser controls.  Recalculate that state now.
-  this.onPlayStateChange_();
-};
-
-
-/**
- * Enable or disable native browser controls. Enabling disables shaka
- * controls.
- *
- * @param {boolean} enabled
- * @export
- */
-shaka.ui.Controls.prototype.setEnabledNativeControls = function(enabled) {
-  // If we enable the native controls, the element must be tab-navigable.
-  // If we disable the native controls, we want to make sure that the video
-  // element itself is not tab-navigable, so that the element is skipped over
-  // when tabbing through the page.
-  this.video_.controls = enabled;
-  this.video_.tabIndex = enabled ? 0 : -1;
-
-  if (enabled) {
-    this.setEnabledShakaControls(false);
-  }
-};
-
-
-/**
- * @export
- * @return {!shaka.cast.CastProxy}
- */
-shaka.ui.Controls.prototype.getCastProxy = function() {
-  return this.castProxy_;
-};
-
-
-/**
- * @return {shaka.ui.Localization}
- * @export
- */
-shaka.ui.Controls.prototype.getLocalization = function() {
-  return this.localization_;
-};
-
-
-/**
- * When a mobile device is rotated to landscape layout, and the video is loaded,
- * make the demo app go into fullscreen.
- * Similarly, exit fullscreen when the device is rotated to portrait layout.
- * @private
- */
-shaka.ui.Controls.prototype.onScreenRotation_ = function() {
-  if (!this.video_ ||
-      this.video_.readyState == 0 ||
-      this.castProxy_.isCasting()) return;
-
-  if (screen.orientation.type.includes('landscape') &&
-      !document.fullscreenElement) {
-    this.videoContainer_.requestFullscreen();
-  } else if (screen.orientation.type.includes('portrait') &&
-      document.fullscreenElement) {
-    document.exitFullscreen();
-  }
-};
-
-
-/**
  * Hiding the cursor when the mouse stops moving seems to be the only decent UX
  * in fullscreen mode.  Since we can't use pure CSS for that, we use events both
  * in and out of fullscreen mode.
@@ -1395,7 +718,7 @@ shaka.ui.Controls.prototype.onMouseMove_ = function(event) {
   // Use the cursor specified in the CSS file.
   this.videoContainer_.style.cursor = '';
   // Show the controls.
-  this.setControlsOpacity_(shaka.ui.Controls.Opacity_.OPAQUE);
+  this.setControlsOpacity_(shaka.ui.Enums.Opacity.OPAQUE);
   this.hideSettingsMenusTimer_.stop();
   this.updateTimeAndSeekRange_();
 
@@ -1443,9 +766,9 @@ shaka.ui.Controls.prototype.onMouseStill_ = function() {
   // is hovered.
   if ((this.video_.paused && !this.isSeeking_) ||
        this.overrideCssShowControls_) {
-    this.setControlsOpacity_(shaka.ui.Controls.Opacity_.OPAQUE);
+    this.setControlsOpacity_(shaka.ui.Enums.Opacity.OPAQUE);
   } else {
-    this.setControlsOpacity_(shaka.ui.Controls.Opacity_.TRANSPARENT);
+    this.setControlsOpacity_(shaka.ui.Enums.Opacity.TRANSPARENT);
   }
 };
 
@@ -1458,13 +781,6 @@ shaka.ui.Controls.prototype.onContainerTouch_ = function(event) {
   if (!this.video_.duration) {
     // Can't play yet.  Ignore.
     return;
-  }
-
-  // If the overflow menu is showing, hide it on a touch event
-  if (this.overflowMenu_.classList.contains('shaka-displayed')) {
-    shaka.ui.Controls.setDisplay_(this.overflowMenu_, false);
-    // Stop this event from becoming a click event.
-    event.preventDefault();
   }
 
   if (this.isOpaque_()) {
@@ -1487,8 +803,8 @@ shaka.ui.Controls.prototype.onContainerTouch_ = function(event) {
 shaka.ui.Controls.prototype.onContainerClick_ = function(event) {
   if (!this.enabled_) return;
 
-  if (this.anySettingsMenusAreOpen_()) {
-    this.hideSettingsMenus_();
+  if (this.anySettingsMenusAreOpen()) {
+    this.hideSettingsMenus();
   } else {
     this.onPlayPauseClick_();
   }
@@ -1505,12 +821,29 @@ shaka.ui.Controls.prototype.onPlayPauseClick_ = function() {
   }
 
   this.player_.cancelTrickPlay();
-  this.trickPlayRate_ = 1;
 
   if (this.video_.paused) {
     this.video_.play();
   } else {
     this.video_.pause();
+  }
+};
+
+
+/**
+ * @param {Event} event
+ * @private
+ */
+shaka.ui.Controls.prototype.onCastStatusChange_ = function(event) {
+  const isCasting = this.castProxy_.isCasting();
+  this.dispatchEvent(new shaka.util.FakeEvent('caststatuschanged', {
+    newStatus: isCasting,
+  }));
+
+  if (isCasting) {
+    this.controlsContainer_.setAttribute('casting', 'true');
+  } else {
+    this.controlsContainer_.removeAttribute('casting');
   }
 };
 
@@ -1524,15 +857,14 @@ shaka.ui.Controls.prototype.onPlayStateChange_ = function() {
     this.video_.pause();
   }
 
-  const Controls = shaka.ui.Controls;
   // Video is paused during seek, so don't show the play arrow while seeking:
   if (this.enabled_ && this.video_.paused && !this.isSeeking_) {
     this.playButton_.setAttribute('icon', 'play');
-    this.playButton_.setAttribute(Controls.ARIA_LABEL_,
+    this.playButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
       this.localization_.resolve(shaka.ui.Locales.Ids.ARIA_LABEL_PLAY));
   } else {
     this.playButton_.setAttribute('icon', 'pause');
-    this.playButton_.setAttribute(Controls.ARIA_LABEL_,
+    this.playButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
       this.localization_.resolve(shaka.ui.Locales.Ids.ARIA_LABEL_PAUSE));
   }
 };
@@ -1642,654 +974,6 @@ shaka.ui.Controls.prototype.onKeyUp_ = function(event) {
 };
 
 
-/** @private */
-shaka.ui.Controls.prototype.onMuteButtonClick_ = function() {
-  if (!this.enabled_) return;
-
-  this.video_.muted = !this.video_.muted;
-};
-
-
-/**
- * Updates the controls to reflect volume changes.
- * @private
- */
-shaka.ui.Controls.prototype.onVolumeStateChange_ = function() {
-  const Controls = shaka.ui.Controls;
-  if (this.video_.muted) {
-    if (this.muteButton_) {
-      this.muteButton_.textContent =
-        shaka.ui.Controls.MaterialDesignIcons_.UNMUTE;
-      this.muteButton_.setAttribute(Controls.ARIA_LABEL_,
-        this.localization_.resolve(shaka.ui.Locales.Ids.ARIA_LABEL_UNMUTE));
-    }
-    if (this.volumeBar_) {
-      this.volumeBar_.value = 0;
-    }
-  } else {
-    if (this.muteButton_) {
-      this.muteButton_.textContent =
-        shaka.ui.Controls.MaterialDesignIcons_.MUTE;
-      this.muteButton_.setAttribute(Controls.ARIA_LABEL_,
-        this.localization_.resolve(shaka.ui.Locales.Ids.ARIA_LABEL_MUTE));
-    }
-    if (this.volumeBar_) {
-      this.volumeBar_.value = this.video_.volume;
-    }
-  }
-
-  if (this.volumeBar_) {
-    let gradient = ['to right'];
-    gradient.push(shaka.ui.Controls.VOLUME_BAR_VOLUME_LEVEL_COLOR_ +
-                 (this.volumeBar_.value * 100) + '%');
-    gradient.push(shaka.ui.Controls.VOLUME_BAR_BASE_COLOR_ +
-                 (this.volumeBar_.value * 100) + '%');
-    gradient.push(shaka.ui.Controls.VOLUME_BAR_BASE_COLOR_ + '100%');
-    this.volumeBarContainer_.style.background =
-        'linear-gradient(' + gradient.join(',') + ')';
-  }
-};
-
-
-/** @private */
-shaka.ui.Controls.prototype.onVolumeInput_ = function() {
-  this.video_.volume = parseFloat(this.volumeBar_.value);
-  if (this.video_.volume == 0) {
-    this.video_.muted = true;
-  } else {
-    this.video_.muted = false;
-  }
-};
-
-
-/** @private */
-shaka.ui.Controls.prototype.onCaptionClick_ = function() {
-  if (!this.enabled_) return;
-
-  shaka.ui.Controls.setDisplay_(this.overflowMenu_, false);
-  shaka.ui.Controls.setDisplay_(this.textLangMenu_, true);
-  // Focus on the currently selected language button.
-  this.focusOnTheChosenItem_(this.textLangMenu_);
-};
-
-
-/** @private */
-shaka.ui.Controls.prototype.onResolutionClick_ = function() {
-  if (!this.enabled_) return;
-  shaka.ui.Controls.setDisplay_(this.overflowMenu_, false);
-  shaka.ui.Controls.setDisplay_(this.resolutionMenu_, true);
-  // Focus on the currently selected resolution button.
-  this.focusOnTheChosenItem_(this.resolutionMenu_);
-};
-
-
-/** @private */
-shaka.ui.Controls.prototype.onLanguagesClick_ = function() {
-  if (!this.enabled_) return;
-  shaka.ui.Controls.setDisplay_(this.overflowMenu_, false);
-  shaka.ui.Controls.setDisplay_(this.audioLangMenu_, true);
-  // Focus on the currently selected language button.
-  this.focusOnTheChosenItem_(this.audioLangMenu_);
-};
-
-
-/** @private */
-shaka.ui.Controls.prototype.onTracksChange_ = function() {
-  // TS content might have captions embedded in video stream, we can't know
-  // until we start transmuxing. So, always show caption button if we're
-  // playing TS content.
-  if (this.captionButton_) {
-    if (shaka.ui.Utils.isTsContent(this.player_)) {
-      shaka.ui.Controls.setDisplay_(this.captionButton_, true);
-    } else {
-      let hasText = this.player_.getTextTracks().length;
-      shaka.ui.Controls.setDisplay_(this.captionButton_, hasText > 0);
-    }
-  }
-
-  // Update language and resolution selections
-  this.updateResolutionSelection_();
-  this.updateAudioLanguages_();
-  this.updateTextLanguages_();
-};
-
-
-/** @private */
-shaka.ui.Controls.prototype.onVariantChange_ = function() {
-  // Update language and resolution selections
-  this.updateResolutionSelection_();
-  this.updateAudioLanguages_();
-};
-
-
-/** @private */
-shaka.ui.Controls.prototype.updateResolutionSelection_ = function() {
-  // Only applicable if resolution button is a part of the UI
-  if (!this.resolutionButton_ || !this.resolutionMenu_) {
-    return;
-  }
-
-  let tracks = this.player_.getVariantTracks();
-  // Hide resolution menu and button for audio-only content.
-  if (tracks.length && !tracks[0].height) {
-    shaka.ui.Controls.setDisplay_(this.resolutionMenu_, false);
-    shaka.ui.Controls.setDisplay_(this.resolutionButton_, false);
-    return;
-  }
-  tracks.sort(function(t1, t2) {
-    return t1.height - t2.height;
-  });
-  tracks.reverse();
-
-  // If there is a selected variant track, then we filtering out any tracks in
-  // a different language.  Then we use those remaining tracks to display the
-  // available resolutions.
-  const selectedTrack = tracks.find((track) => track.active);
-  if (selectedTrack) {
-    const language = selectedTrack.language;
-    // Filter by current audio language.
-    tracks = tracks.filter(function(track) {
-      return track.language == language;
-    });
-  }
-
-  // Remove old shaka-resolutions
-  // 1. Save the back to menu button
-  const backButton = shaka.ui.Utils.getFirstDescendantWithClassName(
-      this.resolutionMenu_, 'shaka-back-to-overflow-button');
-
-  // 2. Remove everything
-  while (this.resolutionMenu_.firstChild) {
-    this.resolutionMenu_.removeChild(this.resolutionMenu_.firstChild);
-  }
-
-  // 3. Add the backTo Menu button back
-  this.resolutionMenu_.appendChild(backButton);
-
-  const abrEnabled = this.player_.getConfiguration().abr.enabled;
-
-  // Add new ones
-  tracks.forEach((track) => {
-    let button = shaka.ui.Utils.createHTMLElement('button');
-    button.classList.add('explicit-resolution');
-    button.addEventListener('click',
-        this.onTrackSelected_.bind(this, track));
-
-    let span = shaka.ui.Utils.createHTMLElement('span');
-    span.textContent = track.height + 'p';
-    button.appendChild(span);
-
-    if (!abrEnabled && track == selectedTrack) {
-      // If abr is disabled, mark the selected track's
-      // resolution.
-      button.setAttribute('aria-selected', 'true');
-      button.appendChild(this.chosenIcon_());
-      span.classList.add('shaka-chosen-item');
-      this.currentResolution_.textContent = span.textContent;
-    }
-    this.resolutionMenu_.appendChild(button);
-  });
-
-  // Add the Auto button
-  let autoButton = shaka.ui.Utils.createHTMLElement('button');
-  autoButton.addEventListener('click', function() {
-    let config = {abr: {enabled: true}};
-    this.player_.configure(config);
-    this.updateResolutionSelection_();
-  }.bind(this));
-
-  let autoSpan = shaka.ui.Utils.createHTMLElement('span');
-  autoSpan.textContent =
-    this.localization_.resolve(shaka.ui.Locales.Ids.LABEL_AUTO_QUALITY);
-  autoButton.appendChild(autoSpan);
-
-  // If abr is enabled reflect it by marking 'Auto'
-  // as selected.
-  if (abrEnabled) {
-    autoButton.setAttribute('aria-selected', 'true');
-    autoButton.appendChild(this.chosenIcon_());
-
-    autoSpan.classList.add('shaka-chosen-item');
-
-    this.currentResolution_.textContent =
-      this.localization_.resolve(shaka.ui.Locales.Ids.LABEL_AUTO_QUALITY);
-  }
-
-  this.resolutionMenu_.appendChild(autoButton);
-  this.focusOnTheChosenItem_(this.resolutionMenu_);
-};
-
-
-/** @private */
-shaka.ui.Controls.prototype.updateAudioLanguages_ = function() {
-  // Only applicable if language button is a part of the UI
-  if (!this.languagesButton_ ||
-      !this.audioLangMenu_ || !this.currentAudioLanguage_) {
-    return;
-  }
-
-  const tracks = this.player_.getVariantTracks();
-
-  const languagesAndRoles = this.player_.getAudioLanguagesAndRoles();
-  const languages = languagesAndRoles.map((langAndRole) => {
-    return langAndRole.language;
-  });
-
-  this.updateLanguages_(tracks, this.audioLangMenu_, languages,
-    this.onAudioLanguageSelected_, /* updateChosen */ true,
-    this.currentAudioLanguage_);
-  this.focusOnTheChosenItem_(this.audioLangMenu_);
-};
-
-
-/** @private */
-shaka.ui.Controls.prototype.updateTextLanguages_ = function() {
-  // Only applicable if captions button is a part of the UI
-  if (!this.captionButton_ || !this.textLangMenu_ ||
-      !this.currentCaptions_) {
-    return;
-  }
-
-  const tracks = this.player_.getTextTracks();
-
-  const languagesAndRoles = this.player_.getTextLanguagesAndRoles();
-  const languages = languagesAndRoles.map((langAndRole) => {
-    return langAndRole.language;
-  });
-
-  this.updateLanguages_(tracks, this.textLangMenu_, languages,
-    this.onTextLanguageSelected_,
-    /* Don't mark current text language as chosen unless captions are enabled */
-    this.player_.isTextTrackVisible(),
-    this.currentCaptions_);
-
-  // Add the Off button
-  let offButton = shaka.ui.Utils.createHTMLElement('button');
-  offButton.addEventListener('click', () => {
-    this.player_.setTextTrackVisibility(false);
-    this.updateTextLanguages_();
-  });
-
-  offButton.appendChild(this.captionsOffSpan_);
-
-  this.textLangMenu_.appendChild(offButton);
-
-  if (!this.player_.isTextTrackVisible()) {
-    offButton.setAttribute('aria-selected', 'true');
-    offButton.appendChild(this.chosenIcon_());
-    this.captionsOffSpan_.classList.add('shaka-chosen-item');
-    this.currentCaptions_.textContent =
-        this.localization_.resolve(shaka.ui.Locales.Ids.LABEL_CAPTIONS_OFF);
-  }
-
-  this.focusOnTheChosenItem_(this.textLangMenu_);
-};
-
-
-/**
- * @param {!Array.<shaka.extern.Track>} tracks
- * @param {!HTMLElement} langMenu
- * @param {!Array.<string>} languages
- * @param {function(string)} onLanguageSelected
- * @param {boolean} updateChosen
- * @param {!HTMLElement} currentSelectionElement
- * @private
- */
-shaka.ui.Controls.prototype.updateLanguages_ = function(tracks, langMenu,
-  languages, onLanguageSelected, updateChosen, currentSelectionElement) {
-  // Using array.filter(f)[0] as an alternative to array.find(f) which is
-  // not supported in IE11.
-  const activeTracks = tracks.filter(function(track) {
-    return track.active == true;
-  });
-  const selectedTrack = activeTracks[0];
-
-  // Remove old languages
-  // 1. Save the back to menu button
-  const backButton = shaka.ui.Utils.getFirstDescendantWithClassName(
-    langMenu, 'shaka-back-to-overflow-button');
-
-  // 2. Remove everything
-  while (langMenu.firstChild) {
-    langMenu.removeChild(langMenu.firstChild);
-  }
-
-  // 3. Add the backTo Menu button back
-  langMenu.appendChild(backButton);
-
-  // 4. Add new buttons
-  languages.forEach((language) => {
-    let button = shaka.ui.Utils.createHTMLElement('button');
-    button.addEventListener('click', onLanguageSelected.bind(this, language));
-
-    let span = shaka.ui.Utils.createHTMLElement('span');
-    span.textContent = this.getLanguageName_(language);
-    button.appendChild(span);
-
-    if (updateChosen && (language == selectedTrack.language)) {
-      button.appendChild(this.chosenIcon_());
-      span.classList.add('shaka-chosen-item');
-      button.setAttribute('aria-selected', 'true');
-      currentSelectionElement.textContent = span.textContent;
-    }
-    langMenu.appendChild(button);
-  });
-};
-
-
-/**
- * @param {!shaka.extern.Track} track
- * @private
- */
-shaka.ui.Controls.prototype.onTrackSelected_ = function(track) {
-  // Disable abr manager before changing tracks.
-  let config = {abr: {enabled: false}};
-  this.player_.configure(config);
-
-  this.player_.selectVariantTrack(track, /* clearBuffer */ true);
-};
-
-
-/**
- * @param {string} language
- * @private
- */
-shaka.ui.Controls.prototype.onAudioLanguageSelected_ = function(language) {
-  this.player_.selectAudioLanguage(language);
-};
-
-
-/**
- * @param {string} language
- * @return {!Promise}
- * @private
- */
-shaka.ui.Controls.prototype.onTextLanguageSelected_ = async function(language) {
-  await this.player_.setTextTrackVisibility(true);
-  this.player_.selectTextLanguage(language);
-};
-
-
-/**
- * @param {HTMLElement} menu
- * @private
- */
-shaka.ui.Controls.prototype.focusOnTheChosenItem_ = function(menu) {
-  if (!menu) return;
-  const chosenItem = shaka.ui.Utils.getDescendantIfExists(
-    menu, 'shaka-chosen-item');
-  if (chosenItem) {
-    chosenItem.parentElement.focus();
-  }
-};
-
-
-/**
- * @return {!Element}
- * @private
- */
-shaka.ui.Controls.prototype.chosenIcon_ = function() {
-  let chosenIcon = shaka.ui.Utils.createHTMLElement('i');
-  chosenIcon.classList.add('material-icons');
-  chosenIcon.textContent = shaka.ui.Controls.MaterialDesignIcons_.CHECKMARK;
-  // Screen reader should ignore 'done'.
-  chosenIcon.setAttribute('aria-hidden', 'true');
-  return chosenIcon;
-};
-
-
-/** @private */
-shaka.ui.Controls.prototype.onCaptionStateChange_ = function() {
-  if (this.captionIcon_) {
-    if (this.player_.isTextTrackVisible()) {
-      this.captionIcon_.classList.add('shaka-captions-on');
-      this.captionIcon_.classList.remove('shaka-captions-off');
-    } else {
-      this.captionIcon_.classList.add('shaka-captions-off');
-      this.captionIcon_.classList.remove('shaka-captions-on');
-    }
-  }
-};
-
-
-/** @private */
-shaka.ui.Controls.prototype.onFullscreenClick_ = async function() {
-  if (!this.enabled_) return;
-
-  // This is called when the button is clicked.  Whichever state we're in, go
-  // to the other one.
-  if (document.fullscreenElement) {
-    document.exitFullscreen();
-  } else {
-    await this.videoContainer_.requestFullscreen();
-  }
-};
-
-
-/** @private */
-shaka.ui.Controls.prototype.onFullscreenChange_ = function() {
-  if (!this.enabled_) return;
-
-  // This is called after the change has taken effect.  It could be initiated
-  // by a click on the fullscreen button, but it could also be initiated by the
-  // user agent in some other way.
-
-  const Controls = shaka.ui.Controls;
-  const LocIds = shaka.ui.Locales.Ids;
-  if (document.fullscreenElement) {
-    // We are in fullscreen mode, so offer a button to leave it.
-    this.fullscreenButton_.textContent =
-      shaka.ui.Controls.MaterialDesignIcons_.EXIT_FULLSCREEN;
-    this.fullscreenButton_.setAttribute(Controls.ARIA_LABEL_,
-      this.localization_.resolve(LocIds.ARIA_LABEL_EXIT_FULL_SCREEN));
-  } else {
-    // We are not in fullscreen mode, so offer a button to enter it.
-    this.fullscreenButton_.textContent =
-      shaka.ui.Controls.MaterialDesignIcons_.FULLSCREEN;
-    this.fullscreenButton_.setAttribute(Controls.ARIA_LABEL_,
-      this.localization_.resolve(LocIds.ARIA_LABEL_FULL_SCREEN));
-  }
-};
-
-
-/** @private */
-shaka.ui.Controls.prototype.onCurrentTimeClick_ = function() {
-  if (!this.enabled_) return;
-
-  // Jump to LIVE if the user clicks on the current time.
-  if (this.player_.isLive()) {
-    this.video_.currentTime = this.player_.seekRange().end;
-  }
-};
-
-
-/**
- * Cycles trick play rate between -1, -2, -4, and -8.
- * @private
- */
-shaka.ui.Controls.prototype.onRewindClick_ = function() {
-  if (!this.enabled_) return;
-
-  if (!this.video_.duration) {
-    return;
-  }
-
-  this.trickPlayRate_ = (this.trickPlayRate_ > 0 || this.trickPlayRate_ < -4) ?
-      -1 : this.trickPlayRate_ * 2;
-  this.player_.trickPlay(this.trickPlayRate_);
-};
-
-
-/**
- * Cycles trick play rate between 1, 2, 4, and 8.
- * @private
- */
-shaka.ui.Controls.prototype.onFastForwardClick_ = function() {
-  if (!this.enabled_) return;
-
-  if (!this.video_.duration) {
-    return;
-  }
-
-  this.trickPlayRate_ = (this.trickPlayRate_ < 0 || this.trickPlayRate_ > 4) ?
-      1 : this.trickPlayRate_ * 2;
-  this.player_.trickPlay(this.trickPlayRate_);
-};
-
-
-/** @private */
-shaka.ui.Controls.prototype.onCastClick_ = async function() {
-  if (!this.enabled_) return;
-
-  if (this.castProxy_.isCasting()) {
-    this.castProxy_.suggestDisconnect();
-  } else {
-    this.castButton_.disabled = true;
-    this.castProxy_.cast().then(function() {
-      this.castButton_.disabled = false;
-      // Success!
-    }.bind(this), function(error) {
-      this.castButton_.disabled = false;
-      if (error.code != shaka.util.Error.Code.CAST_CANCELED_BY_USER) {
-        this.dispatchEvent(new shaka.util.FakeEvent('error', {
-          errorDetails: error,
-        }));
-      }
-    }.bind(this));
-
-    // If we're in picture-in-picture state, exit
-    if (document.pictureInPictureElement && this.pipButton_ != null) {
-      await this.onPipClick_();
-    }
-  }
-};
-
-
-/**
- * @return {!Promise}
- * @private
- */
-shaka.ui.Controls.prototype.onPipClick_ = async function() {
-  if (!this.enabled_) {
-    return;
-  }
-
-  try {
-    if (!document.pictureInPictureElement) {
-      await this.video_.requestPictureInPicture();
-    } else {
-      await document.exitPictureInPicture();
-    }
-  } catch (error) {
-    this.dispatchEvent(new shaka.util.FakeEvent('error', {
-      errorDetails: error,
-    }));
-  }
-};
-
-
-/** @private */
-shaka.ui.Controls.prototype.onEnterPictureInPicture_ = function() {
-  if (!this.enabled_) {
-    return;
-  }
-
-  const LocIds = shaka.ui.Locales.Ids;
-  const Controls = shaka.ui.Controls;
-  this.pipIcon_.textContent = Controls.MaterialDesignIcons_.EXIT_PIP;
-  this.pipButton_.setAttribute(Controls.ARIA_LABEL_,
-      this.localization_.resolve(LocIds.ARIA_LABEL_EXIT_PICTURE_IN_PICTURE));
-  this.currentPipState_.textContent =
-      this.localization_.resolve(LocIds.LABEL_PICTURE_IN_PICTURE_ON);
-};
-
-
-/** @private */
-shaka.ui.Controls.prototype.onLeavePictureInPicture_ = function() {
-  if (!this.enabled_) {
-    return;
-  }
-
-  const LocIds = shaka.ui.Locales.Ids;
-  const Controls = shaka.ui.Controls;
-  this.pipIcon_.textContent = Controls.MaterialDesignIcons_.PIP;
-  this.pipButton_.setAttribute(Controls.ARIA_LABEL_,
-      this.localization_.resolve(LocIds.ARIA_LABEL_ENTER_PICTURE_IN_PICTURE));
-  this.currentPipState_.textContent =
-      this.localization_.resolve(LocIds.LABEL_PICTURE_IN_PICTURE_OFF);
-};
-
-
-/** @private */
-shaka.ui.Controls.prototype.onOverflowMenuButtonClick_ = function() {
-  if (this.anySettingsMenusAreOpen_()) {
-    this.hideSettingsMenus_();
-  } else {
-    shaka.ui.Controls.setDisplay_(this.overflowMenu_, true);
-    this.overrideCssShowControls_ = true;
-    // If overflow menu has currently visible buttons, focus on the
-    // first one, when the menu opens.
-    const isDisplayed = function(element) {
-      return element.classList.contains('shaka-hidden') == false;
-    };
-
-    const Iterables = shaka.util.Iterables;
-    if (Iterables.some(this.overflowMenu_.childNodes, isDisplayed)) {
-      // Focus on the first visible child of the overflow menu
-      const visibleElements =
-        Iterables.filter(this.overflowMenu_.childNodes, isDisplayed);
-      /** @type {!HTMLElement} */ (visibleElements[0]).focus();
-    }
-  }
-};
-
-
-/**
- * @param {Event} event
- * @private
- */
-shaka.ui.Controls.prototype.onCastStatusChange_ = function(event) {
-  const canCast = this.castProxy_.canCast() && this.castAllowed_;
-  const isCasting = this.castProxy_.isCasting();
-  this.dispatchEvent(new shaka.util.FakeEvent('caststatuschanged', {
-    newStatus: isCasting,
-  }));
-
-  if (this.castButton_) {
-    const materialDesignIcons = shaka.ui.Controls.MaterialDesignIcons_;
-    shaka.ui.Controls.setDisplay_(this.castButton_, canCast);
-    this.castIcon_.textContent = isCasting ?
-                                 materialDesignIcons.EXIT_CAST :
-                                 materialDesignIcons.CAST;
-
-    // Aria-pressed set to true when casting, set to false otherwise.
-    if (canCast) {
-      if (isCasting) {
-        this.castButton_.setAttribute('aria-pressed', 'true');
-      } else {
-        this.castButton_.setAttribute('aria-pressed', 'false');
-      }
-    }
-  }
-
-  this.setCurrentCastSelection_();
-
-  const pipIsEnabled = (this.isPipAllowed_() && (this.pipButton_ != null));
-  if (isCasting) {
-    this.controlsContainer_.setAttribute('casting', 'true');
-    // Picture-in-picture is not applicable if we're casting
-    if (pipIsEnabled) {
-      shaka.ui.Controls.setDisplay_(this.pipButton_, false);
-    }
-  } else {
-    this.controlsContainer_.removeAttribute('casting');
-    if (pipIsEnabled) {
-      shaka.ui.Controls.setDisplay_(this.pipButton_, true);
-    }
-  }
-};
-
-
 /**
  * @param {!Event} event
  * @private
@@ -2307,23 +991,6 @@ shaka.ui.Controls.prototype.onBufferingStateChange_ = function(event) {
   } else {
     this.bufferingSpinner_.setAttribute(
         'class', 'shaka-spinner-svg shaka-hidden');
-  }
-};
-
-
-/**
- * @private
- */
-shaka.ui.Controls.prototype.setCurrentCastSelection_ = function() {
-  if (!this.castCurrentSelectionSpan_) {
-    return;
-  }
-
-  if (this.castProxy_.isCasting()) {
-    this.castCurrentSelectionSpan_.textContent = this.castProxy_.receiverName();
-  } else {
-    this.castCurrentSelectionSpan_.textContent =
-        this.localization_.resolve(shaka.ui.Locales.Ids.LABEL_NOT_CASTING);
   }
 };
 
@@ -2364,11 +1031,12 @@ shaka.ui.Controls.prototype.updateTimeAndSeekRange_ = function() {
     return;
   }
 
-  let Controls = shaka.ui.Controls;
+  this.dispatchEvent(new shaka.util.FakeEvent('timeandseekrangeupdated'));
+
+  const Constants = shaka.ui.Constants;
   let displayTime = this.isSeeking_ ?
       Number(this.seekBar_.value) :
       Number(this.video_.currentTime);
-  let duration = this.video_.duration;
   let bufferedLength = this.video_.buffered.length;
   let bufferedStart = bufferedLength ? this.video_.buffered.start(0) : 0;
   let bufferedEnd =
@@ -2386,47 +1054,12 @@ shaka.ui.Controls.prototype.updateTimeAndSeekRange_ = function() {
     let behindLive = Math.floor(seekRange.end - displayTime);
     displayTime = Math.max(0, behindLive);
 
-    let showHour = seekRangeSize >= 3600;
-
-    // Consider "LIVE" when less than 1 second behind the live-edge.  Always
-    // show the full time string when seeking, including the leading '-';
-    // otherwise, the time string "flickers" near the live-edge.
-    if (this.currentTime_) {
-      if ((displayTime >= 1) || this.isSeeking_) {
-        this.currentTime_.textContent =
-            '- ' + this.buildTimeString_(displayTime, showHour);
-        this.currentTime_.style.cursor = 'pointer';
-      } else {
-        this.currentTime_.textContent =
-          this.localization_.resolve(shaka.ui.Locales.Ids.LABEL_LIVE);
-        this.currentTime_.style.cursor = '';
-      }
-    }
-
-
     if (!this.isSeeking_ && this.seekBar_) {
       this.seekBar_.value = seekRange.end - displayTime;
     }
   } else {
-    let showHour = duration >= 3600;
-
-    if (this.currentTime_) {
-      this.currentTime_.textContent =
-      this.buildTimeString_(displayTime, showHour);
-    }
-
-
-    if (duration && this.currentTime_) {
-      this.currentTime_.textContent += ' / ' +
-          this.buildTimeString_(duration, showHour);
-    }
-
     if (!this.isSeeking_ && this.seekBar_) {
       this.seekBar_.value = displayTime;
-    }
-
-    if (this.currentTime_) {
-      this.currentTime_.style.cursor = '';
     }
   }
 
@@ -2434,13 +1067,13 @@ shaka.ui.Controls.prototype.updateTimeAndSeekRange_ = function() {
     // Hide seekbar seek window is very small.
     const seekRange = this.player_.seekRange();
     const seekWindow = seekRange.end - seekRange.start;
-    if (seekWindow < shaka.ui.Controls.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR_ ) {
-      shaka.ui.Controls.setDisplay_(this.seekBarContainer_, false);
+    if (seekWindow < Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR) {
+      shaka.ui.Controls.setDisplay(this.seekBarContainer_, false);
       for (let menu of this.settingsMenus_) {
         menu.classList.add('shaka-low-position');
       }
     } else {
-      shaka.ui.Controls.setDisplay_(this.seekBarContainer_, true);
+      shaka.ui.Controls.setDisplay(this.seekBarContainer_, true);
       for (let menu of this.settingsMenus_) {
         menu.classList.remove('shaka-low-position');
       }
@@ -2461,17 +1094,17 @@ shaka.ui.Controls.prototype.updateTimeAndSeekRange_ = function() {
         const bufferEndFraction = (bufferEndDistance / seekRangeSize) || 0;
         const playheadFraction = (playheadDistance / seekRangeSize) || 0;
 
-        gradient.push(Controls.SEEK_BAR_BASE_COLOR_ + ' ' +
+        gradient.push(Constants.SEEK_BAR_BASE_COLOR + ' ' +
                      (bufferStartFraction * 100) + '%');
-        gradient.push(Controls.SEEK_BAR_PLAYED_COLOR_ + ' ' +
+        gradient.push(Constants.SEEK_BAR_PLAYED_COLOR + ' ' +
                      (bufferStartFraction * 100) + '%');
-        gradient.push(Controls.SEEK_BAR_PLAYED_COLOR_ + ' ' +
+        gradient.push(Constants.SEEK_BAR_PLAYED_COLOR + ' ' +
                      (playheadFraction * 100) + '%');
-        gradient.push(Controls.SEEK_BAR_BUFFERED_COLOR_ + ' ' +
+        gradient.push(Constants.SEEK_BAR_BUFFERED_COLOR + ' ' +
                      (playheadFraction * 100) + '%');
-        gradient.push(Controls.SEEK_BAR_BUFFERED_COLOR_ + ' ' +
+        gradient.push(Constants.SEEK_BAR_BUFFERED_COLOR + ' ' +
                      (bufferEndFraction * 100) + '%');
-        gradient.push(Controls.SEEK_BAR_BASE_COLOR_ + ' ' +
+        gradient.push(Constants.SEEK_BAR_BASE_COLOR + ' ' +
                      (bufferEndFraction * 100) + '%');
       }
       this.seekBarContainer_.style.background =
@@ -2482,43 +1115,21 @@ shaka.ui.Controls.prototype.updateTimeAndSeekRange_ = function() {
 
 
 /**
- * Builds a time string, e.g., 01:04:23, from |displayTime|.
- *
- * @param {number} displayTime
- * @param {boolean} showHour
- * @return {string}
- * @private
- */
-shaka.ui.Controls.prototype.buildTimeString_ = function(displayTime, showHour) {
-  let h = Math.floor(displayTime / 3600);
-  let m = Math.floor((displayTime / 60) % 60);
-  let s = Math.floor(displayTime % 60);
-  if (s < 10) s = '0' + s;
-  let text = m + ':' + s;
-  if (showHour) {
-    if (m < 10) text = '0' + text;
-    text = h + ':' + text;
-  }
-  return text;
-};
-
-
-/**
  * Adds class for keyboard navigation if tab was pressed.
  *
  * @param {!Event} event
  * @private
  */
 shaka.ui.Controls.prototype.onKeyDown_ = function(event) {
-  if (event.keyCode == shaka.ui.Controls.KEYCODE_TAB_) {
+  if (event.keyCode == shaka.ui.Constants.KEYCODE_TAB) {
     // Enable blue outline for focused elements for keyboard
     // navigation.
     this.controlsContainer_.classList.add('shaka-keyboard-navigation');
     this.eventManager_.listen(window, 'mousedown',
                               this.onMouseDown_.bind(this));
-  } else if (event.keyCode == shaka.ui.Controls.KEYCODE_ESCAPE_ &&
-      this.anySettingsMenusAreOpen_()) {
-        this.hideSettingsMenus_();
+  } else if (event.keyCode == shaka.ui.Constants.KEYCODE_TAB &&
+      this.anySettingsMenusAreOpen()) {
+        this.hideSettingsMenus();
   }
 };
 
@@ -2539,54 +1150,11 @@ shaka.ui.Controls.prototype.onMouseDown_ = function() {
 
 
 /**
- * Depending on the value of display, sets/removes css class of element to
- * either display it or hide.
- *
- * @param {Element} element
- * @param {boolean} display
- * @private
- */
-shaka.ui.Controls.setDisplay_ = function(element, display) {
-  if (!element) return;
-  if (display) {
-    element.classList.add('shaka-displayed');
-    // Removing a non-existent class doesn't throw, so, even if
-    // the element is not hidden, this should be fine. Same for displayed
-    // below.
-    element.classList.remove('shaka-hidden');
-  } else {
-    element.classList.add('shaka-hidden');
-    element.classList.remove('shaka-displayed');
-  }
-};
-
-
-/**
- * @private
- */
-shaka.ui.Controls.prototype.hideSettingsMenus_ = function() {
-  for (let menu of this.settingsMenus_) {
-    shaka.ui.Controls.setDisplay_(/** @type {!HTMLElement} */ (menu), false);
-  }
-};
-
-
-/**
- * @private
- * @return {boolean}
- */
-shaka.ui.Controls.prototype.anySettingsMenusAreOpen_ = function() {
-  return this.settingsMenus_.some(
-    (menu) => menu.classList.contains('shaka-displayed'));
-};
-
-
-/**
- * @param {!shaka.ui.Controls.Opacity_} opacity
+ * @param {!shaka.ui.Enums.Opacity} opacity
  * @private
  */
 shaka.ui.Controls.prototype.setControlsOpacity_ = function(opacity) {
-  if (opacity == shaka.ui.Controls.Opacity_.OPAQUE) {
+  if (opacity == shaka.ui.Enums.Opacity.OPAQUE) {
     this.controlsContainer_.setAttribute('shown', 'true');
   } else {
     this.controlsContainer_.removeAttribute('shown');
@@ -2620,72 +1188,6 @@ shaka.ui.Controls.createLocalization_ = function() {
 };
 
 
-/**
- * @const {string}
- * @private
- */
-shaka.ui.Controls.SEEK_BAR_BASE_COLOR_ = 'rgba(255, 255, 255, 0.3)';
-
-
-/**
- * @const {string}
- * @private
- */
-shaka.ui.Controls.SEEK_BAR_PLAYED_COLOR_ = 'rgb(255, 255, 255)';
-
-
-/**
- * @const {string}
- * @private
- */
-shaka.ui.Controls.SEEK_BAR_BUFFERED_COLOR_ = 'rgba(255, 255, 255, 0.54)';
-
-
-/**
- * @const {string}
- * @private
- */
-shaka.ui.Controls.VOLUME_BAR_VOLUME_LEVEL_COLOR_ = 'rgb(255, 255, 255)';
-
-
-/**
- * @const {string}
- * @private
- */
-shaka.ui.Controls.VOLUME_BAR_BASE_COLOR_ = 'rgba(255, 255, 255, 0.54)';
-
-
-/**
- * @const {number}
- * @private
- */
-shaka.ui.Controls.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR_ = 5; // seconds
-
-
-/**
- * @enum {number}
- * @private
- */
-shaka.ui.Controls.Opacity_ = {
-  'TRANSPARENT': 0,
-  'OPAQUE': 1,
-};
-
-
-/**
- * @const {number}
- * @private
- */
-shaka.ui.Controls.KEYCODE_TAB_ = 9;
-
-
-/**
- * @const {number}
- * @private
- */
-shaka.ui.Controls.KEYCODE_ESCAPE_ = 27;
-
-
 /** @private {!Array.<string>} */
 shaka.ui.Controls.controlPanelElements_ = [
   'time_and_duration',
@@ -2696,49 +1198,3 @@ shaka.ui.Controls.controlPanelElements_ = [
   'rewind',
   'fast_forward',
 ];
-
-
-/** @private {!Array.<string>} */
-shaka.ui.Controls.overflowButtons_ = [
-  'captions',
-  'cast',
-  'quality',
-  'language',
-  'picture_in_picture',
-];
-
-
-/**
- * @const {string}
- * @private
- */
-shaka.ui.Controls.ARIA_LABEL_= 'aria-label';
-
-
-/**
- * These strings are used to insert material design icons
- * and should never be localized.
- * @enum {string}
- * @private
- */
-shaka.ui.Controls.MaterialDesignIcons_ = {
-  'FULLSCREEN': 'fullscreen',
-  'EXIT_FULLSCREEN': 'fullscreen_exit',
-  'CLOSED_CAPTIONS': 'closed_caption',
-  'CHECKMARK': 'done',
-  'LANGUAGE': 'language',
-  'PIP': 'picture_in_picture_alt',
-  // 'branding_watermark' material icon looks like a "dark version"
-  // of the p-i-p icon. We use "dark version" icons to signal that the
-  // feature is turned on.
-  'EXIT_PIP': 'branding_watermark',
-  'BACK': 'arrow_back',
-  'RESOLUTION': 'settings',
-  'MUTE': 'volume_up',
-  'UNMUTE': 'volume_off',
-  'CAST': 'cast',
-  'EXIT_CAST': 'cast_connected',
-  'OPEN_OVERFLOW': 'more_vert',
-  'REWIND': 'fast_rewind',
-  'FAST_FORWARD': 'fast_forward',
-};

@@ -23,7 +23,7 @@
  */
 
 /** @namespace */
-var shaka = {};
+var shaka = {}; // eslint-disable-line no-var
 
 /** @namespace */
 shaka.extern = {};
@@ -48,3 +48,35 @@ shaka.extern = {};
  * @exportDoc
  */
 shaka.extern.UIConfiguration;
+
+
+/**
+ * Interface for UI elements.
+ *
+ * @extends {shaka.util.IDestroyable}
+ * @interface
+ * @exportDoc
+ */
+shaka.extern.IUIElement = class {};
+
+
+/**
+ * A factory for creating a UI element.
+ *
+ * @interface
+ * @exportDoc
+ */
+shaka.extern.IUIElement.Factory = class {
+  /**
+   * @param {!HTMLElement} rootElement
+   * @param {!shaka.ui.Controls} controls
+   * @return {!shaka.extern.IUIElement}
+   */
+  create(rootElement, controls) {}
+};
+
+
+/**
+ * @exportDoc
+ */
+shaka.extern.IUIElement.prototype.destroy = function() {};

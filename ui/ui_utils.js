@@ -72,6 +72,7 @@ shaka.ui.Utils.isTsContent = function(player) {
 
 /**
  * Creates an element, and cast the type from Element to HTMLElement.
+ *
  * @param {string} tagName
  * @return {!HTMLElement}
  */
