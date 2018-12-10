@@ -20,6 +20,10 @@
  * div which we populate. */
 .shaka-video-container {
   .overlay-parent();
+
+  /* Without this, the container somehow winds up being a tad taller than it
+   * should be (484px vs 480px). */
+  display: flex;
 }
 
 /* Each browser has a different prefixed pseudo-class for fullscreened elements.
@@ -49,7 +53,6 @@
 /* A container for all controls, including the giant play button, seek bar, etc.
  * Sits inside .shaka-video-container, on top of (Z axis) .shaka-video, and
  * below (Y axis) .shaka-play-button-container. */
-/* FIXME: a tad too big, something (padding?) is pushing it out vertically */
 .shaka-controls-container {
   .overlay-child();
 
@@ -58,7 +61,7 @@
    * horizontal. */
   padding: 12px 5px;
 
-  /* TODO: Document why. */
+  /* Without this, the controls container overflows the video container. */
   box-sizing: border-box;
 
   /* A flex container, to make layout of children easier to reason about. */
