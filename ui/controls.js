@@ -587,7 +587,9 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
 
   if (this.fullscreenButton_) {
     this.fullscreenButton_.addEventListener(
-      'click', this.onFullscreenClick_.bind(this));
+        'click', this.onFullscreenClick_.bind(this));
+    document.addEventListener(
+        'fullscreenchange', this.onFullscreenChange_.bind(this));
   }
 
   if (this.currentTime_) {
@@ -2002,20 +2004,38 @@ shaka.ui.Controls.prototype.onCaptionStateChange_ = function() {
 shaka.ui.Controls.prototype.onFullscreenClick_ = async function() {
   if (!this.enabled_) return;
 
+  // This is called when the button is clicked.  Whichever state we're in, go
+  // to the other one.
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  } else {
+    await this.videoContainer_.requestFullscreen();
+  }
+};
+
+
+/** @private */
+shaka.ui.Controls.prototype.onFullscreenChange_ = function() {
+  if (!this.enabled_) return;
+
+  // This is called after the change has taken effect.  It could be initiated
+  // by a click on the fullscreen button, but it could also be initiated by the
+  // user agent in some other way.
+
   const Controls = shaka.ui.Controls;
   const LocIds = shaka.ui.Locales.Ids;
   if (document.fullscreenElement) {
-    document.exitFullscreen();
-    this.fullscreenButton_.textContent =
-      shaka.ui.Controls.MaterialDesignIcons_.FULLSCREEN;
-    this.fullscreenButton_.setAttribute(Controls.ARIA_LABEL_,
-      this.localization_.resolve(LocIds.ARIA_LABEL_FULL_SCREEN));
-  } else {
-    await this.videoContainer_.requestFullscreen();
+    // We are in fullscreen mode, so offer a button to leave it.
     this.fullscreenButton_.textContent =
       shaka.ui.Controls.MaterialDesignIcons_.EXIT_FULLSCREEN;
     this.fullscreenButton_.setAttribute(Controls.ARIA_LABEL_,
       this.localization_.resolve(LocIds.ARIA_LABEL_EXIT_FULL_SCREEN));
+  } else {
+    // We are not in fullscreen mode, so offer a button to enter it.
+    this.fullscreenButton_.textContent =
+      shaka.ui.Controls.MaterialDesignIcons_.FULLSCREEN;
+    this.fullscreenButton_.setAttribute(Controls.ARIA_LABEL_,
+      this.localization_.resolve(LocIds.ARIA_LABEL_FULL_SCREEN));
   }
 };
 
