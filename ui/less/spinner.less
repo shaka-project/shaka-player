@@ -22,25 +22,18 @@
  * SOFTWARE.
  */
 
-/* This is a div that contains the SVG element. */
-.shaka-buffering-spinner {
-  /* Make this div container overlay & fill its container. */
-  .overlay-child();
-}
-
-/* This is the spinner SVG itself, which contains a circular path element. */
+/* This is the spinner SVG itself, which contains a circular path element.
+ * It sits inside the play button and fills it. */
 .shaka-spinner-svg {
   /* Keep it spinning! */
   animation: rotate 2s linear infinite;
   transform-origin: center center;
 
-  /* Overlay and fill the container. */
-  .overlay-child();
-
-  /* The SVG itself will only be 100x100 and centered with margins. */
-  width: 100px;
-  height: 100px;
-  margin: auto;
+  /* The SVG should fill its container. */
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 /* This is the path element, which draws a circle. */

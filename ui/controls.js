@@ -460,31 +460,30 @@ shaka.ui.Controls.prototype.addBufferingSpinner_ = function() {
   goog.asserts.assert(this.playButtonContainer_,
                       'Must have play button container before spinner!');
 
-  /** @private {!HTMLElement} */
-  this.bufferingSpinner_ = shaka.ui.Controls.createHTMLElement_('div');
-  this.bufferingSpinner_.classList.add('shaka-buffering-spinner');
-  this.playButtonContainer_.appendChild(this.bufferingSpinner_);
-
   // Svg elements have to be created with the svg xml namespace.
   const xmlns = 'http://www.w3.org/2000/svg';
 
   /** @private {!HTMLElement} */
-  this.spinnerSvg_ =
+  this.bufferingSpinner_ =
       /** @type {!HTMLElement} */(document.createElementNS(xmlns, 'svg'));
   // NOTE: SVG elements do not have a classList on IE, so use setAttribute.
-  this.spinnerSvg_.setAttribute('class', 'shaka-spinner-svg');
-  this.spinnerSvg_.setAttribute('viewBox', '25 25 50 50');
-  this.bufferingSpinner_.appendChild(this.spinnerSvg_);
+  this.bufferingSpinner_.setAttribute('class', 'shaka-spinner-svg');
+  this.bufferingSpinner_.setAttribute('viewBox', '0 0 30 30');
+  this.playButton_.appendChild(this.bufferingSpinner_);
 
+  // These coordinates are relative to the SVG viewBox above.  This is distinct
+  // from the actual display size in the page, since the "S" is for "Scalable."
+  // The radius of 14.5 is so that the edges of the 1-px-wide stroke will touch
+  // the edges of the viewBox.
   const spinnerCircle = document.createElementNS(xmlns, 'circle');
   spinnerCircle.setAttribute('class', 'shaka-spinner-path');
-  spinnerCircle.setAttribute('cx', '50');
-  spinnerCircle.setAttribute('cy', '50');
-  spinnerCircle.setAttribute('r', '15');
+  spinnerCircle.setAttribute('cx', '15');
+  spinnerCircle.setAttribute('cy', '15');
+  spinnerCircle.setAttribute('r', '14.5');
   spinnerCircle.setAttribute('fill', 'none');
   spinnerCircle.setAttribute('stroke-width', '1');
   spinnerCircle.setAttribute('stroke-miterlimit', '10');
-  this.spinnerSvg_.appendChild(spinnerCircle);
+  this.bufferingSpinner_.appendChild(spinnerCircle);
 };
 
 
@@ -2467,13 +2466,6 @@ shaka.ui.Controls.prototype.resizePlayButtonAndSpinner_ = function() {
 
   this.playButton_.style.width = playButtonSize + 'px';
   this.playButton_.style.height = playButtonSize + 'px';
-
-  // The spinner-to-button ratio is b/a+b = c where a is the play button
-  // size, b is the spinner size and c is equal to BUFFERING_SPINNER_DELIMETER_.
-  const delimeter = Controls.BUFFERING_SPINNER_DELIMETER_;
-  const spinnerSize = (playButtonSize * delimeter) / (1 - delimeter);
-  this.spinnerSvg_.style.width = spinnerSize + 'px';
-  this.spinnerSvg_.style.height = spinnerSize + 'px';
 };
 
 
@@ -2706,13 +2698,6 @@ shaka.ui.Controls.LARGE_PLAY_BUTTON_SIZE_RATIO_ = 0.11;
  * @private
  */
 shaka.ui.Controls.MIN_PLAY_BUTTON_WIDTH_ = 48;
-
-
-/**
- * @const {number}
- * @private
- */
-shaka.ui.Controls.BUFFERING_SPINNER_DELIMETER_ = 0.62;
 
 
 /**

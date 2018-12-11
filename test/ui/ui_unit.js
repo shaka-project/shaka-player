@@ -592,7 +592,7 @@ describe('UI', function() {
     expect(playButtons.length).toBe(1);
 
     let bufferingSpinners =
-        container.getElementsByClassName('shaka-buffering-spinner');
+        container.getElementsByClassName('shaka-spinner-svg');
     expect(bufferingSpinners.length).toBe(1);
 
     let overflowMenus =
