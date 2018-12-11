@@ -167,6 +167,7 @@ describe('Playhead', function() {
       jumpLargeGaps: false,
       durationBackoff: 1,
       forceTransmuxTS: false,
+      safeSeekOffset: 5,
     };
   });
 

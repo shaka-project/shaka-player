@@ -90,6 +90,7 @@ describe('StreamingEngine', function() {
       jumpLargeGaps: false,
       durationBackoff: 1,
       forceTransmuxTS: false,
+      safeSeekOffset: 5,
     };
 
     onChooseStreams = jasmine.createSpy('onChooseStreams');

@@ -451,6 +451,7 @@ describe('StreamingEngine', function() {
         jumpLargeGaps: false,
         durationBackoff: 1,
         forceTransmuxTS: false,
+        safeSeekOffset: 5,
       };
     }
 
@@ -1048,6 +1049,7 @@ describe('StreamingEngine', function() {
       jumpLargeGaps: false,
       durationBackoff: 1,
       forceTransmuxTS: false,
+      safeSeekOffset: 5,
     };
     createStreamingEngine(config);
 
@@ -1967,6 +1969,7 @@ describe('StreamingEngine', function() {
         jumpLargeGaps: false,
         durationBackoff: 1,
         forceTransmuxTS: false,
+        safeSeekOffset: 5,
       };
       createStreamingEngine(config);
 
@@ -2007,6 +2010,7 @@ describe('StreamingEngine', function() {
         jumpLargeGaps: false,
         durationBackoff: 1,
         forceTransmuxTS: false,
+        safeSeekOffset: 5,
       };
       createStreamingEngine(config);
 
@@ -2054,6 +2058,7 @@ describe('StreamingEngine', function() {
         jumpLargeGaps: false,
         durationBackoff: 1,
         forceTransmuxTS: false,
+        safeSeekOffset: 5,
       };
       createStreamingEngine(config);
 
@@ -2103,6 +2108,7 @@ describe('StreamingEngine', function() {
         jumpLargeGaps: false,
         durationBackoff: 1,
         forceTransmuxTS: false,
+        safeSeekOffset: 5,
       };
       createStreamingEngine(config);
 
@@ -2158,6 +2164,7 @@ describe('StreamingEngine', function() {
         jumpLargeGaps: false,
         durationBackoff: 1,
         forceTransmuxTS: false,
+        safeSeekOffset: 5,
       };
       createStreamingEngine(config);
 
@@ -2319,6 +2326,7 @@ describe('StreamingEngine', function() {
         jumpLargeGaps: false,
         durationBackoff: 1,
         forceTransmuxTS: false,
+        safeSeekOffset: 5,
       };
 
       playhead.getTime.and.returnValue(0);
@@ -2441,6 +2449,7 @@ describe('StreamingEngine', function() {
         jumpLargeGaps: false,
         durationBackoff: 1,
         forceTransmuxTS: false,
+        safeSeekOffset: 5,
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -2514,6 +2523,7 @@ describe('StreamingEngine', function() {
         jumpLargeGaps: false,
         durationBackoff: 1,
         forceTransmuxTS: false,
+        safeSeekOffset: 5,
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -2706,6 +2716,7 @@ describe('StreamingEngine', function() {
         jumpLargeGaps: false,
         durationBackoff: 1,
         forceTransmuxTS: false,
+        safeSeekOffset: 5,
       });
 
       playhead.getTime.and.returnValue(0);

@@ -582,7 +582,8 @@ shaka.extern.ManifestConfiguration;
  *   smallGapLimit: number,
  *   jumpLargeGaps: boolean,
  *   durationBackoff: number,
- *   forceTransmuxTS: boolean
+ *   forceTransmuxTS: boolean,
+ *   safeSeekOffset: number
  * }}
  *
  * @description
@@ -640,6 +641,12 @@ shaka.extern.ManifestConfiguration;
  *   captions by transmuxing, so this value is necessary for enabling them on
  *   platforms with native TS support like Edge or Chromecast.
  *   This value defaults to false.
+ * @property {number} safeSeekOffset
+ *   The amount of seconds that should be added when repositioning the playhead
+ *   after falling out of the availability window or seek. This gives the player
+ *   more time to buffer before falling outside again, but increases the forward
+ *   jump in the stream skipping more content. This is helpful for lower
+ *   bandwidth scenarios. Defaults to 5 if not provided.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
