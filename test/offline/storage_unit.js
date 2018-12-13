@@ -220,9 +220,16 @@ describe('Storage', function() {
       // PART 4 - Verify the media was deleted but the session still exists.
       const storedContents = await storage.list();
       expect(storedContents).toEqual([]);
-      // TODO: Chrome doesn't allow loading the session a second time, so we
-      // can't check EME for the session.  Instead check the database.
-      // https://crbug.com/883895
+
+      // TODO: Chrome has a bug that prevents loading the session a second time,
+      // so we can't check EME for the session.  Instead, check the database.
+      // This can be changed when http://crbug.com/887635 is fixed.
+      // TODO: Whether checking the database or loading the EME session, this
+      // will fail because of another Chrome bug.  Calling remove() causes the
+      // session to be removed without waiting for update.  So this entire
+      // feature is non-functional on Chrome.  The test can probably be made to
+      // pass once https://crbug.com/883895 is fixed, possibly after using a
+      // delay to work around http://crbug.com/887535 .
       const sessions = await getEmeSessions();
       expect(sessions.length).toBeGreaterThan(0);
 
