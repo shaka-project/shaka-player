@@ -119,7 +119,14 @@ describe('Storage', function() {
       await player.destroy();
     });
 
-    drm_it('removes persistent license', drmCheckAndRun(async function() {
+    // TODO: Still failing in Chrome canary 73 on 2018-12-12.
+    // Some combination of these bugs is preventing this test from working:
+    //   http://crbug.com/690583
+    //   http://crbug.com/887535
+    //   http://crbug.com/887635
+    //   http://crbug.com/883895
+    quarantined_it('removes persistent license',
+        drmCheckAndRun(async function() {
       const TestManifestParser = shaka.test.TestScheme.ManifestParser;
 
       // PART 1 - Download and store content that has a persistent license
