@@ -86,7 +86,13 @@ describe('Offline', /** @suppress {accessControls} */ function() {
   });
 
   // TODO: Add a PlayReady version once Edge supports offline.
-  drmIt(
+  // TODO: Still failing in Chrome canary 73 on 2018-12-12.
+  // Some combination of these bugs is preventing this test from working:
+  //   http://crbug.com/690583
+  //   http://crbug.com/887535
+  //   http://crbug.com/887635
+  //   http://crbug.com/883895
+  quarantinedIt(
       'stores, plays, and deletes protected content with a persistent license',
       async function() {
         if (!supportsStorage()) {

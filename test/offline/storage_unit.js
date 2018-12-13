@@ -117,7 +117,14 @@ describe('Storage', function() {
       await player.destroy();
     });
 
-    drmIt('removes persistent license', drmCheckAndRun(async function() {
+    // TODO: Still failing in Chrome canary 73 on 2018-12-12.
+    // Some combination of these bugs is preventing this test from working:
+    //   http://crbug.com/690583
+    //   http://crbug.com/887535
+    //   http://crbug.com/887635
+    //   http://crbug.com/883895
+    quarantinedIt('removes persistent license',
+        drmCheckAndRun(async function() {
       const TestManifestParser = shaka.test.TestScheme.ManifestParser;
 
       // PART 1 - Download and store content that has a persistent license
@@ -162,11 +169,14 @@ describe('Storage', function() {
       }
     }));
 
-    // TODO: This test doesn't work on Chrome since it will hang closing the
-    // offline session if there is a pending release message.  We work around
-    // this with a timeout, but that means we'll get an error later trying to
-    // open the session multiple times.  See https://crbug.com/690583.
-    xit('defers removing licenses on error', drmCheckAndRun(async function() {
+    // TODO: Still failing in Chrome canary 73 on 2018-12-12.
+    // Some combination of these bugs is preventing this test from working:
+    //   http://crbug.com/690583
+    //   http://crbug.com/887535
+    //   http://crbug.com/887635
+    //   http://crbug.com/883895
+    quarantinedIt('defers removing licenses on error',
+        drmCheckAndRun(async function() {
       const TestManifestParser = shaka.test.TestScheme.ManifestParser;
       const getEmeSessions = async () => {
         /** @type {!shaka.offline.StorageMuxer} */
