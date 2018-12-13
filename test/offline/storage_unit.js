@@ -141,6 +141,13 @@ describe('Storage', function() {
       expect(manifest.offlineSessionIds).toBeTruthy();
       expect(manifest.offlineSessionIds.length).toBeTruthy();
 
+      // Work around http://crbug.com/887535 in which load cannot happen right
+      // after close.  Experimentally, we seem to need a ~1s delay, so we're
+      // using a 3s delay to ensure it doesn't flake.  Without this, we get
+      // error 6005 (FAILED_TO_CREATE_SESSION) with system code 70.
+      // TODO: Remove when Chrome is fixed
+      await shaka.test.Util.delay(3);
+
       // PART 2 - Check that the licences are stored.
       await withDrm(player, manifest, (drm) => {
         return Promise.all(manifest.offlineSessionIds.map(async (session) => {
@@ -153,11 +160,20 @@ describe('Storage', function() {
       // sessions.
       await storage.remove(uri.toString());
 
+      // Work around http://crbug.com/887535 in which load cannot happen right
+      // after close.  Experimentally, we seem to need a ~1s delay, so we're
+      // using a 3s delay to ensure it doesn't flake.  Without this, we get
+      // error 6005 (FAILED_TO_CREATE_SESSION) with system code 70.
+      // TODO: Remove when Chrome is fixed
+      await shaka.test.Util.delay(3);
+
       // PART 4 - Check that the licenses were removed.
       try {
         await withDrm(player, manifest, (drm) => {
           return Promise.all(manifest.offlineSessionIds.map(async (session) => {
             let notFoundSession = await loadOfflineSession(drm, session);
+            // TODO: This is failing.  The session is actually found, possibly
+            // due to http://crbug.com/690583, but this is unclear.
             expect(notFoundSession).toBeFalsy();
           }));
         });
