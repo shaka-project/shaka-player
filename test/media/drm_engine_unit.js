@@ -906,10 +906,10 @@ describe('DrmEngine', function() {
         await sendMessageTest('http://abc.drm/license');
       });
 
-      it('prefers a license server URI from DrmInfo', async () => {
+      it('prefers a license server URI from configuration', async () => {
         manifest.periods[0].variants[0].drmInfos[0].licenseServerUri =
             'http://foo.bar/drm';
-        await sendMessageTest('http://foo.bar/drm');
+        await sendMessageTest('http://abc.drm/license');
       });
 
       it('handles "individualization-request" messages special', async () => {
