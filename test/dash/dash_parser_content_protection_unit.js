@@ -741,3 +741,113 @@ describe('DashParser ContentProtection', function() {
     await Dash.testFails(source, expected);
   });
 });
+
+describe('In-manifest PlayReady and Widevine', function() {
+  const ContentProtection = shaka.dash.ContentProtection;
+  const strToXml = function(str) {
+    const parser = new DOMParser();
+    return parser.parseFromString(str, 'application/xml').documentElement;
+  };
+
+  describe('getWidevineLicenseUrl', function() {
+    it('valid ms:laurl node', function() {
+      const input = {
+        init: null,
+        keyId: null,
+        schemeUri: '',
+        node: strToXml([
+          '<test xmlns:ms="urn:microsoft">',
+          '  <ms:laurl licenseUrl="www.example.com"></ms:laurl>',
+          '</test>',
+        ].join('\n')),
+      };
+      const actual = ContentProtection.getWidevineLicenseUrl(input);
+      const expected = 'www.example.com';
+      expect(actual).toEqual(expected);
+    });
+
+     it('ms:laurl without license url', function() {
+      const input = {
+        init: null,
+        keyId: null,
+        schemeUri: '',
+        node: strToXml([
+          '<test xmlns:ms="urn:microsoft">',
+          '  <ms:laurl></ms:laurl>',
+          '</test>',
+        ].join('\n')),
+      };
+      const actual = ContentProtection.getWidevineLicenseUrl(input);
+      const expected = '';
+      expect(actual).toEqual(expected);
+    });
+
+     it('no ms:laurl node', function() {
+      const input = {
+        init: null,
+        keyId: null,
+        schemeUri: '',
+        node: strToXml('<test></test>'),
+      };
+      const actual = ContentProtection.getWidevineLicenseUrl(input);
+      const expected = '';
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('getPlayReadyLicenseURL', function() {
+    it('mspro', function() {
+      const laurl = [
+        '<WRMHEADER>',
+        '  <DATA>',
+        '    <LA_URL>www.example.com</LA_URL>',
+        '  </DATA>',
+        '</WRMHEADER>',
+      ].join('\n');
+      const laurlCodes = laurl.split('').map(function(c) {
+        return c.charCodeAt();
+      });
+      const prBytes = new Uint16Array([
+        // pr object size (in num bytes).
+        // + 10 for PRO size, count, and type
+        laurl.length * 2 + 10, 0,
+        // record count
+        1,
+        // type
+        ContentProtection.PLAYREADY_RECORD_TYPES.RIGHTS_MANAGEMENT,
+        // record size (in num bytes)
+        laurl.length * 2,
+        // value
+      ].concat(laurlCodes));
+
+      const encodedPrObject =
+        shaka.util.Uint8ArrayUtils.toBase64(new Uint8Array(prBytes.buffer));
+      const input = {
+      init: null,
+      keyId: null,
+      schemeUri: '',
+      node:
+        strToXml([
+          '<test xmlns:mspr="urn:microsoft:playready">',
+          '  <mspr:pro>' + encodedPrObject + '</mspr:pro>',
+          '</test>',
+        ].join('\n')),
+      };
+      const actual = ContentProtection.getPlayReadyLicenseUrl(input);
+      const expected = 'www.example.com';
+      expect(actual).toEqual(expected);
+    });
+
+    it('no mspro', function() {
+      const input = {
+        init: null,
+        keyId: null,
+        schemeUri: '',
+        node: strToXml('<test></test>'),
+      };
+      const actual = ContentProtection.getPlayReadyLicenseUrl(input);
+      const expected = '';
+      expect(actual).toEqual(expected);
+    });
+  });
+});
