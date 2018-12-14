@@ -78,6 +78,7 @@ player.getConfiguration();
        retryParameters: Object
        smallGapLimit: 0.5
        startAtSegmentBoundary: false
+       safeSeekOffset: 5
      textDisplayFactory: Function
 
 
