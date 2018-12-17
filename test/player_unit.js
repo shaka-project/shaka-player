@@ -3343,8 +3343,23 @@ describe('Player', function() {
       });
     });
 
-    describe('get*LanguageAndRoles', function() {
-      it('returns a list of language/role combinations', async () => {
+    describe('getAudioLanguagesAndRoles', () => {
+      it('ignores video roles', async () => {
+        manifest = new shaka.test.ManifestGenerator()
+            .addPeriod(0)
+            .addVariant(0)
+            .addVideo(1).roles(['video-only-role'])
+            .addAudio(2).roles(['audio-only-role']).language('en')
+            .build();
+
+        await player.load(fakeManifestUri, 0, parserFactory);
+
+        expect(player.getAudioLanguagesAndRoles()).toEqual([
+          {language: 'en', role: 'audio-only-role'},
+        ]);
+      });
+
+      it('lists all language-role combinations', async () => {
         await player.load(fakeManifestUri, 0, parserFactory);
         expect(player.getAudioLanguagesAndRoles()).toEqual([
           {language: 'fr', role: ''},
@@ -3353,6 +3368,25 @@ describe('Player', function() {
           {language: 'de', role: 'foo'},
           {language: 'de', role: 'bar'},
         ]);
+      });
+
+      it('uses "und" for video-only tracks', async () => {
+        manifest = new shaka.test.ManifestGenerator()
+            .addPeriod(0)
+            .addVariant(0)
+            .addVideo(1).roles(['video-only-role'])
+            .build();
+
+        await player.load(fakeManifestUri, 0, parserFactory);
+        expect(player.getAudioLanguagesAndRoles()).toEqual([
+          {language: 'und', role: ''},
+        ]);
+      });
+    });
+
+    describe('getTextLanguageAndRoles', function() {
+      it('lists all language-role combinations', async () => {
+        await player.load(fakeManifestUri, 0, parserFactory);
         expect(player.getTextLanguagesAndRoles()).toEqual([
           {language: 'es', role: 'baz'},
           {language: 'es', role: 'qwerty'},
@@ -3360,16 +3394,6 @@ describe('Player', function() {
           {language: 'en', role: 'caption'},
           {language: 'en', role: 'subtitle'},
         ]);
-      });
-
-      it('returns "und" for video-only tracks', async () => {
-        manifest = videoOnlyManifest;
-
-        await player.load(fakeManifestUri, 0, parserFactory);
-        expect(player.getAudioLanguagesAndRoles()).toEqual([
-          {language: 'und', role: ''},
-        ]);
-        expect(player.getTextLanguagesAndRoles()).toEqual([]);
       });
     });
   });
