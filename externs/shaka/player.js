@@ -514,7 +514,8 @@ shaka.extern.DrmConfiguration;
  *   ignoreDrmInfo: boolean,
  *   xlinkFailGracefully: boolean,
  *   defaultPresentationDelay: number,
- *   ignoreMinBufferTime: boolean
+ *   ignoreMinBufferTime: boolean,
+ *   autoCorrectDrift: boolean
  * }}
  *
  * @property {shaka.extern.DashContentProtectionCallback} customScheme
@@ -541,6 +542,11 @@ shaka.extern.DrmConfiguration;
  *   If true will cause DASH parser to ignore minBufferTime from manifest.
  *   It allows player config to take precedence over manifest for
  *   rebufferingGoal. Defaults to false if not provided.
+ * @property {boolean} autoCorrectDrift
+ *   If true, ignore the availabilityStartTime in the manifest and instead use
+ *   the segments to determine the live edge.  This allows us to play streams
+ *   that have a lot of drift.  If false, we can't play content where the
+ *   manifest specifies segments in the future. Defaults to true.
  *
  * @exportDoc
  */

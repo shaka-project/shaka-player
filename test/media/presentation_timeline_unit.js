@@ -46,6 +46,7 @@ describe('PresentationTimeline', function() {
    * @param {number} maxSegmentDuration
    * @param {number} clockOffset
    * @param {number} presentationDelay
+   * @param {boolean=} autoCorrectDrift
    *
    * @return {shaka.media.PresentationTimeline}
    */
@@ -56,9 +57,10 @@ describe('PresentationTimeline', function() {
       segmentAvailabilityDuration,
       maxSegmentDuration,
       clockOffset,
-      presentationDelay) {
+      presentationDelay,
+      autoCorrectDrift = true) {
     let timeline = new shaka.media.PresentationTimeline(
-        presentationStartTime, presentationDelay);
+        presentationStartTime, presentationDelay, autoCorrectDrift);
     timeline.setStatic(isStatic);
     timeline.setDuration(duration || Infinity);
     timeline.setSegmentAvailabilityDuration(segmentAvailabilityDuration);
@@ -107,14 +109,15 @@ describe('PresentationTimeline', function() {
    *
    * @param {number} availability
    * @param {number=} delay
+   * @param {boolean=} autoCorrectDrift
    * @return {shaka.media.PresentationTimeline}
    */
-  function makeLiveTimeline(availability, delay) {
+  function makeLiveTimeline(availability, delay, autoCorrectDrift = true) {
     let now = Date.now() / 1000;
     let timeline = makePresentationTimeline(
         /* static */ false, /* duration */ Infinity, /* start time */ now,
         availability, /* max seg dur */ 10,
-        /* clock offset */ 0, delay || 0);
+        /* clock offset */ 0, delay || 0, autoCorrectDrift);
     expect(timeline.isLive()).toBe(true);
     expect(timeline.isInProgress()).toBe(false);
     return timeline;
@@ -211,6 +214,24 @@ describe('PresentationTimeline', function() {
 
       // last segment time (50) - availability (20)
       expect(timeline.getSegmentAvailabilityStart()).toBe(30);
+    });
+
+    it('ignores segment times when configured to', () => {
+      const timeline = makeLiveTimeline(
+          /* availability */ 20, /* drift */ 0, /* autoCorrectDrift */ false);
+
+      const ref1 = makeSegmentReference(0, 10);
+      const ref2 = makeSegmentReference(10, 20);
+      const ref3 = makeSegmentReference(20, 30);
+      const ref4 = makeSegmentReference(30, 40);
+      const ref5 = makeSegmentReference(40, 50);
+
+      setElapsed(100);
+      timeline.notifySegments([ref1, ref2, ref3, ref4, ref5],
+                              /* periodStart */ 0);
+
+      // now (100) - max segment duration (10) - availability start time (0)
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(90);
     });
   });
 
