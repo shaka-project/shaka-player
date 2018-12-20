@@ -112,18 +112,11 @@ describe('DrmEngine', function() {
     };
 
     drmEngine = new shaka.media.DrmEngine(playerInterface);
-    let config = {
-      retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-      clearKeys: {},
-      delayLicenseRequestUntilPlayed: false,
-      advanced: {},
-      servers: {
-        'com.widevine.alpha':
-            'https://drm-widevine-licensing.axtest.net/AcquireLicense',
-        'com.microsoft.playready':
-            'https://drm-playready-licensing.axtest.net/AcquireLicense',
-      },
-    };
+    const config = shaka.util.PlayerConfiguration.createDefault().drm;
+    config.servers['com.widevine.alpha'] =
+        'https://drm-widevine-licensing.axtest.net/AcquireLicense';
+    config.servers['com.microsoft.playready'] =
+        'https://drm-playready-licensing.axtest.net/AcquireLicense';
     drmEngine.configure(config);
 
     manifest = new shaka.test.ManifestGenerator()

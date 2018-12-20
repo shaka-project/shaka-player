@@ -438,21 +438,10 @@ describe('StreamingEngine', function() {
     onManifestUpdate = jasmine.createSpy('onManifestUpdate');
 
     if (!config) {
-      config = {
-        rebufferingGoal: 2,
-        bufferingGoal: 5,
-        retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        failureCallback: function() {},
-        bufferBehind: Infinity,
-        ignoreTextStreamFailures: false,
-        alwaysStreamText: false,
-        startAtSegmentBoundary: false,
-        smallGapLimit: 0.5,
-        jumpLargeGaps: false,
-        durationBackoff: 1,
-        forceTransmuxTS: false,
-        safeSeekOffset: 5,
-      };
+      config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.rebufferingGoal = 2;
+      config.bufferingGoal = 5;
+      config.bufferBehind = Infinity;
     }
 
     let playerInterface = {
@@ -1033,24 +1022,9 @@ describe('StreamingEngine', function() {
     setupVod();
     mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
 
-    // Configure StreamingEngine with a high buffering goal.  The rest are
-    // defaults.
-    const config = {
-      bufferingGoal: 60,
-
-      rebufferingGoal: 2,
-      retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-      failureCallback: function() { streamingEngine.retry(); },  // retry
-      bufferBehind: Infinity,
-      ignoreTextStreamFailures: false,
-      alwaysStreamText: false,
-      startAtSegmentBoundary: false,
-      smallGapLimit: 0.5,
-      jumpLargeGaps: false,
-      durationBackoff: 1,
-      forceTransmuxTS: false,
-      safeSeekOffset: 5,
-    };
+    const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+    config.bufferingGoal = 60;
+    config.failureCallback = () => streamingEngine.retry();
     createStreamingEngine(config);
 
     // Make requests for different types take different amounts of time.
@@ -1956,21 +1930,8 @@ describe('StreamingEngine', function() {
         return originalNetEngine.request(requestType, request);
       });
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
-      let config = {
-        rebufferingGoal: 2,
-        bufferingGoal: 5,
-        retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        failureCallback: function() {},
-        bufferBehind: Infinity,
-        ignoreTextStreamFailures: true,
-        alwaysStreamText: false,
-        startAtSegmentBoundary: false,
-        smallGapLimit: 0.5,
-        jumpLargeGaps: false,
-        durationBackoff: 1,
-        forceTransmuxTS: false,
-        safeSeekOffset: 5,
-      };
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.ignoreTextStreamFailures = true;
       createStreamingEngine(config);
 
       playhead.getTime.and.returnValue(0);
@@ -1997,21 +1958,8 @@ describe('StreamingEngine', function() {
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
 
-      let config = {
-        rebufferingGoal: 2,
-        bufferingGoal: 5,
-        retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        failureCallback: function() { streamingEngine.retry(); },  // retry
-        bufferBehind: Infinity,
-        ignoreTextStreamFailures: false,
-        alwaysStreamText: false,
-        startAtSegmentBoundary: false,
-        smallGapLimit: 0.5,
-        jumpLargeGaps: false,
-        durationBackoff: 1,
-        forceTransmuxTS: false,
-        safeSeekOffset: 5,
-      };
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.failureCallback = () => streamingEngine.retry();
       createStreamingEngine(config);
 
       playhead.getTime.and.returnValue(100);
@@ -2045,21 +1993,8 @@ describe('StreamingEngine', function() {
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
 
-      let config = {
-        rebufferingGoal: 2,
-        bufferingGoal: 5,
-        retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        failureCallback: function() {},  // no retry
-        bufferBehind: Infinity,
-        ignoreTextStreamFailures: false,
-        alwaysStreamText: false,
-        startAtSegmentBoundary: false,
-        smallGapLimit: 0.5,
-        jumpLargeGaps: false,
-        durationBackoff: 1,
-        forceTransmuxTS: false,
-        safeSeekOffset: 5,
-      };
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.failureCallback = () => {};
       createStreamingEngine(config);
 
       playhead.getTime.and.returnValue(100);
@@ -2094,22 +2029,9 @@ describe('StreamingEngine', function() {
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
 
       // Configure with a failure callback
-      let failureCallback = jasmine.createSpy('failureCallback');
-      let config = {
-        rebufferingGoal: 2,
-        bufferingGoal: 5,
-        retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        failureCallback: shaka.test.Util.spyFunc(failureCallback),
-        bufferBehind: Infinity,
-        ignoreTextStreamFailures: false,
-        alwaysStreamText: false,
-        startAtSegmentBoundary: false,
-        smallGapLimit: 0.5,
-        jumpLargeGaps: false,
-        durationBackoff: 1,
-        forceTransmuxTS: false,
-        safeSeekOffset: 5,
-      };
+      const failureCallback = jasmine.createSpy('failureCallback');
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.failureCallback = shaka.test.Util.spyFunc(failureCallback);
       createStreamingEngine(config);
 
       playhead.getTime.and.returnValue(100);
@@ -2145,27 +2067,11 @@ describe('StreamingEngine', function() {
       let failureCallback = jasmine.createSpy('failureCallback');
       failureCallback.and.callFake(function() { callbackTime = Date.now(); });
 
-      let config = {
-        rebufferingGoal: 2,
-        bufferingGoal: 5,
-        retryParameters: {
-          maxAttempts: 2,
-          baseDelay: 10000,
-          backoffFactor: 1,
-          fuzzFactor: 0,
-          timeout: 0,
-        },
-        failureCallback: shaka.test.Util.spyFunc(failureCallback),
-        bufferBehind: Infinity,
-        ignoreTextStreamFailures: false,
-        alwaysStreamText: false,
-        startAtSegmentBoundary: false,
-        smallGapLimit: 0.5,
-        jumpLargeGaps: false,
-        durationBackoff: 1,
-        forceTransmuxTS: false,
-        safeSeekOffset: 5,
-      };
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.failureCallback = shaka.test.Util.spyFunc(failureCallback);
+      config.retryParameters.maxAttempts = 2;
+      config.retryParameters.baseDelay = 10000;
+      config.retryParameters.fuzzFactor = 0;
       createStreamingEngine(config);
 
       playhead.getTime.and.returnValue(100);
@@ -2313,21 +2219,10 @@ describe('StreamingEngine', function() {
 
       manifest.minBufferTime = 1;
 
-      config = {
-        rebufferingGoal: 1,
-        bufferingGoal: 1,
-        retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        failureCallback: function() {},
-        bufferBehind: 10,
-        ignoreTextStreamFailures: false,
-        alwaysStreamText: false,
-        startAtSegmentBoundary: false,
-        smallGapLimit: 0.5,
-        jumpLargeGaps: false,
-        durationBackoff: 1,
-        forceTransmuxTS: false,
-        safeSeekOffset: 5,
-      };
+      config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.rebufferingGoal = 1;
+      config.bufferingGoal = 1;
+      config.bufferBehind = 10;
 
       playhead.getTime.and.returnValue(0);
     });
@@ -2436,21 +2331,10 @@ describe('StreamingEngine', function() {
       manifest.minBufferTime = 1;
 
       // Create StreamingEngine.
-      let config = {
-        rebufferingGoal: 1,
-        bufferingGoal: 1,
-        retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        failureCallback: function() {},
-        bufferBehind: 10,
-        ignoreTextStreamFailures: false,
-        alwaysStreamText: false,
-        startAtSegmentBoundary: false,
-        smallGapLimit: 0.5,
-        jumpLargeGaps: false,
-        durationBackoff: 1,
-        forceTransmuxTS: false,
-        safeSeekOffset: 5,
-      };
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.rebufferingGoal = 1;
+      config.bufferingGoal = 1;
+      config.bufferBehind = 10;
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
       createStreamingEngine(config);
@@ -2510,21 +2394,9 @@ describe('StreamingEngine', function() {
       manifest.minBufferTime = 1;
 
       // Create StreamingEngine.
-      let config = {
-        rebufferingGoal: 1,
-        bufferingGoal: 1,
-        retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        failureCallback: function() {},
-        bufferBehind: 10,
-        ignoreTextStreamFailures: false,
-        alwaysStreamText: false,
-        startAtSegmentBoundary: false,
-        smallGapLimit: 0.5,
-        jumpLargeGaps: false,
-        durationBackoff: 1,
-        forceTransmuxTS: false,
-        safeSeekOffset: 5,
-      };
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.rebufferingGoal = 1;
+      config.bufferingGoal = 1;
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
       createStreamingEngine(config);
@@ -2701,23 +2573,13 @@ describe('StreamingEngine', function() {
     it('uses trick mode track when requested', function() {
       setupVod(/* trickMode */ true);
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
-      createStreamingEngine({
-        retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        failureCallback: function() {},
-        bufferBehind: Infinity,
-        ignoreTextStreamFailures: false,
-        alwaysStreamText: false,
-        startAtSegmentBoundary: false,
-        // Only buffer ahead 1 second to make it easier to set segment
-        // expectations based on playheadTime.
-        rebufferingGoal: 1,
-        bufferingGoal: 1,
-        smallGapLimit: 0.5,
-        jumpLargeGaps: false,
-        durationBackoff: 1,
-        forceTransmuxTS: false,
-        safeSeekOffset: 5,
-      });
+
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      // Only buffer ahead 1 second to make it easier to set segment
+      // expectations based on playheadTime.
+      config.rebufferingGoal = 1;
+      config.bufferingGoal = 1;
+      createStreamingEngine(config);
 
       playhead.getTime.and.returnValue(0);
 

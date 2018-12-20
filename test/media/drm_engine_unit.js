@@ -109,7 +109,6 @@ describe('DrmEngine', function() {
     });
     mockMediaKeys.setServerCertificate.and.returnValue(Promise.resolve());
 
-    let retryParameters = shaka.net.NetworkingEngine.defaultRetryParameters();
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
 
     license = (new Uint8Array(0)).buffer;
@@ -124,15 +123,10 @@ describe('DrmEngine', function() {
     };
 
     drmEngine = new shaka.media.DrmEngine(playerInterface);
-    config = {
-      retryParameters: retryParameters,
-      delayLicenseRequestUntilPlayed: false,
-      servers: {
-        'drm.abc': 'http://abc.drm/license',
-        'drm.def': 'http://def.drm/license',
-      },
-      advanced: {},
-      clearKeys: {},
+    config = shaka.util.PlayerConfiguration.createDefault().drm;
+    config.servers = {
+      'drm.abc': 'http://abc.drm/license',
+      'drm.def': 'http://def.drm/license',
     };
     drmEngine.configure(config);
   });

@@ -66,23 +66,8 @@ describe('SimpleAbrManager', function() {
         .addTextStream(21)
       .build();
 
-    config = {
-      enabled: true,
-      defaultBandwidthEstimate: defaultBandwidthEstimate,
-      switchInterval: 8,
-      bandwidthUpgradeTarget: 0.85,
-      bandwidthDowngradeTarget: 0.95,
-      restrictions: {  // Must be inline to avoid cross-test pollution!
-        minWidth: 0,
-        maxWidth: Infinity,
-        minHeight: 0,
-        maxHeight: Infinity,
-        minPixels: 0,
-        maxPixels: Infinity,
-        minBandwidth: 0,
-        maxBandwidth: Infinity,
-      },
-    };
+    config = shaka.util.PlayerConfiguration.createDefault().abr;
+    config.defaultBandwidthEstimate = defaultBandwidthEstimate;
 
     variants = manifest.periods[0].variants;
 

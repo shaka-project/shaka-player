@@ -116,20 +116,7 @@ describe('HlsParser live', function() {
 
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
 
-    let retry = shaka.net.NetworkingEngine.defaultRetryParameters();
-    config = {
-      retryParameters: retry,
-      availabilityWindowOverride: NaN,
-      dash: {
-        customScheme: function(node) { return null; },
-        clockSyncUri: '',
-        ignoreDrmInfo: false,
-        xlinkFailGracefully: false,
-        defaultPresentationDelay: 10,
-        ignoreMinBufferTime: false,
-      },
-    };
-
+    config = shaka.util.PlayerConfiguration.createDefault().manifest;
     playerInterface = {
       filterNewPeriod: function() {},
       filterAllPeriods: function() {},
@@ -492,20 +479,8 @@ describe('HlsParser live', function() {
       });
 
       it('overrides default seek range if set', async () => {
-        parser.configure({
-          retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-          availabilityWindowOverride: 240,
-          dash: {
-            customScheme: function(node) { return null; },
-            clockSyncUri: '',
-            ignoreDrmInfo: false,
-            xlinkFailGracefully: false,
-            defaultPresentationDelay: 10,
-            ignoreMinBufferTime: false,
-          },
-        });
-
-        // 240 is the availabilityWindowOverride setting.
+        config.availabilityWindowOverride = 240;
+        parser.configure(config);
         await testWindowOverride(240);
       });
     });

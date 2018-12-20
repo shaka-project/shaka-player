@@ -23,20 +23,9 @@ goog.provide('shaka.test.Dash');
  * @return {!shaka.dash.DashParser}
  */
 shaka.test.Dash.makeDashParser = function() {
-  let retry = shaka.net.NetworkingEngine.defaultRetryParameters();
-  let parser = new shaka.dash.DashParser();
-  parser.configure({
-    retryParameters: retry,
-    availabilityWindowOverride: NaN,
-    dash: {
-      customScheme: function(node) { return null; },
-      clockSyncUri: '',
-      ignoreDrmInfo: false,
-      xlinkFailGracefully: false,
-      defaultPresentationDelay: 10,
-      ignoreMinBufferTime: false,
-    },
-  });
+  const parser = new shaka.dash.DashParser();
+  const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+  parser.configure(config);
   return parser;
 };
 

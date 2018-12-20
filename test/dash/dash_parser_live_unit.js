@@ -39,21 +39,9 @@ describe('DashParser Live', function() {
     // This Promise mock is required for fakeEventLoop.
     PromiseMock.install();
 
-    let retry = shaka.net.NetworkingEngine.defaultRetryParameters();
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = new shaka.dash.DashParser();
-    parser.configure({
-      retryParameters: retry,
-      availabilityWindowOverride: NaN,
-      dash: {
-        clockSyncUri: '',
-        customScheme: function(node) { return null; },
-        ignoreDrmInfo: false,
-        xlinkFailGracefully: false,
-        defaultPresentationDelay: 10,
-        ignoreMinBufferTime: false,
-      },
-    });
+    parser.configure(shaka.util.PlayerConfiguration.createDefault().manifest);
     playerInterface = {
       networkingEngine: fakeNetEngine,
       filterNewPeriod: function() {},
@@ -709,18 +697,9 @@ describe('DashParser Live', function() {
       ].join('\n');
       fakeNetEngine.setResponseText('dummy://foo', manifest);
 
-      parser.configure({
-        retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        availabilityWindowOverride: 4 * 60,
-        dash: {
-          clockSyncUri: '',
-          customScheme: function(node) { return null; },
-          ignoreDrmInfo: false,
-          xlinkFailGracefully: false,
-          defaultPresentationDelay: 10,
-          ignoreMinBufferTime: false,
-        },
-      });
+      const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+      config.availabilityWindowOverride = 4 * 60;
+      parser.configure(config);
 
       Date.now = function() { return 600000; /* 10 minutes */ };
       parser.start('dummy://foo', playerInterface)

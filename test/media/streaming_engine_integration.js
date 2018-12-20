@@ -75,23 +75,7 @@ describe('StreamingEngine', function() {
   });
 
   beforeEach(function() {
-    // shaka.extern.StreamingConfiguration
-    config = {
-      rebufferingGoal: 2,
-      bufferingGoal: 5,
-      retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-      failureCallback: function() {},
-      bufferBehind: 15,
-      ignoreTextStreamFailures: false,
-      alwaysStreamText: false,
-      useRelativeCueTimestamps: false,
-      startAtSegmentBoundary: false,
-      smallGapLimit: 0.5,
-      jumpLargeGaps: false,
-      durationBackoff: 1,
-      forceTransmuxTS: false,
-      safeSeekOffset: 5,
-    };
+    config = shaka.util.PlayerConfiguration.createDefault().streaming;
 
     onChooseStreams = jasmine.createSpy('onChooseStreams');
     onCanSwitch = jasmine.createSpy('onCanSwitch');

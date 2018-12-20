@@ -31,23 +31,17 @@ describe('DashParser ContentProtection', function() {
    */
   function testDashParser(manifestText, expected, callback,
       ignoreDrmInfo = false) {
-    let retry = shaka.net.NetworkingEngine.defaultRetryParameters();
     let netEngine = new shaka.test.FakeNetworkingEngine();
     netEngine.setDefaultText(manifestText);
     let dashParser = new shaka.dash.DashParser();
-    callback = callback || function(node) { return null; };
-    dashParser.configure({
-      retryParameters: retry,
-      availabilityWindowOverride: NaN,
-      dash: {
-        clockSyncUri: '',
-        customScheme: callback,
-        ignoreDrmInfo: ignoreDrmInfo,
-        xlinkFailGracefully: false,
-        defaultPresentationDelay: 10,
-        ignoreMinBufferTime: false,
-      },
-    });
+
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.dash.ignoreDrmInfo = ignoreDrmInfo;
+    if (callback) {
+      config.dash.customScheme = callback;
+    }
+    dashParser.configure(config);
+
     let playerEvents = {
       networkingEngine: netEngine,
       filterNewPeriod: function() {},

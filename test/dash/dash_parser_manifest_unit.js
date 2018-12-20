@@ -1183,18 +1183,10 @@ describe('DashParser Manifest', function() {
     ].join('\n');
 
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
-    parser.configure({
-      retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-      availabilityWindowOverride: NaN,
-      dash: {
-        clockSyncUri: '',
-        customScheme: function(node) { return null; },
-        ignoreDrmInfo: false,
-        xlinkFailGracefully: false,
-        defaultPresentationDelay: 10,
-        ignoreMinBufferTime: true,
-      },
-    });
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.dash.ignoreMinBufferTime = true;
+    parser.configure(config);
+
     const manifest = await parser.start('dummy://foo', playerInterface);
     const minBufferTime = manifest.minBufferTime;
     expect(minBufferTime).toEqual(0);
@@ -1215,18 +1207,10 @@ describe('DashParser Manifest', function() {
     ].join('\n');
 
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
-    parser.configure({
-      retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-      availabilityWindowOverride: NaN,
-      dash: {
-        clockSyncUri: '',
-        customScheme: function(node) { return null; },
-        ignoreDrmInfo: false,
-        xlinkFailGracefully: false,
-        defaultPresentationDelay: 10,
-        ignoreMinBufferTime: false,
-      },
-    });
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.dash.ignoreMinBufferTime = false;
+    parser.configure(config);
+
     const manifest = await parser.start('dummy://foo', playerInterface);
     const minBufferTime = manifest.minBufferTime;
     expect(minBufferTime).toEqual(75);

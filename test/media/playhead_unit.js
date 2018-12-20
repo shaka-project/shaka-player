@@ -153,22 +153,7 @@ describe('Playhead', function() {
       offlineSessionIds: [],
     };
 
-    config = {
-      rebufferingGoal: 10,
-      bufferingGoal: 5,
-      retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-      failureCallback: function() {},
-      bufferBehind: 15,
-      ignoreTextStreamFailures: false,
-      alwaysStreamText: false,
-      useRelativeCueTimestamps: false,
-      startAtSegmentBoundary: false,
-      smallGapLimit: 0.5,
-      jumpLargeGaps: false,
-      durationBackoff: 1,
-      forceTransmuxTS: false,
-      safeSeekOffset: 5,
-    };
+    config = shaka.util.PlayerConfiguration.createDefault().streaming;
   });
 
   afterEach(async () => {
