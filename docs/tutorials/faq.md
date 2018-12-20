@@ -160,6 +160,19 @@ too large to become a required dependency for Shaka Player.
 We recommend reducing your timescale or avoiding `$Time` in `<SegmentTemplate>`.
 See discussion in [#1667][1667] for details.
 
+<hr>
+
+**Q:** I get logs like: `It is recommended that a robustness level be
+specified...`.
+
+**A:** This is a warning from Chrome about setting the robustness level for EME.
+For most content, this warning can be safely ignored (see
+<https://crbug.com/720013>).  If your content requires a specific robustness
+level, it is suggested to set it in the player configuration to ensure playback
+works: `.drm.advanced.<key_system>.audioRobustness` and
+`.drm.advanced.<key_system>.videoRobustness` (see
+[docs][AdvancedDrmConfiguration]).
+
 
 [386]: https://github.com/google/shaka-player/issues/386#issuecomment-227898001
 [489]: https://github.com/google/shaka-player/issues/489#issuecomment-240466224
@@ -168,6 +181,7 @@ See discussion in [#1667][1667] for details.
 [999]: https://github.com/google/shaka-player/issues/999
 [1667]: https://github.com/google/shaka-player/issues/1667
 [AbrConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.AbrConfiguration
+[AdvancedDrmConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shakaExtern.html#.AdvancedDrmConfiguration
 [BigInteger.js]: https://github.com/peterolson/BigInteger.js
 [CORS]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
 [DashManifestConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.DashManifestConfiguration
