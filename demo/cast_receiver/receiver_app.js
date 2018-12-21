@@ -83,9 +83,9 @@ ShakaReceiver.prototype.init = function() {
   goog.asserts.assert(videoContainer, 'Video container should be available!');
 
   this.controlsElement_ = shaka.ui.Utils.getFirstDescendantWithClassName(
-      videoContainer, 'controlsContainer');
+      videoContainer, 'shaka-controls-container');
   this.playButton_ = shaka.ui.Utils.getFirstDescendantWithClassName(
-      videoContainer, 'playButtonContainer');
+      videoContainer, 'shaka-play-button-container');
   this.idle_ = document.getElementById('idle');
 
   this.video_.addEventListener(
