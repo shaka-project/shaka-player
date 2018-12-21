@@ -140,10 +140,11 @@ shaka.ui.Controls = function(player, videoContainer, video, config) {
 
   this.updateLocalizedStrings_();
 
+  /** @private {shaka.util.Timer} */
   this.timeAndSeekRangeTimer_ =
-    new shaka.util.Timer(this.updateTimeAndSeekRange_.bind(this));
-
-  this.timeAndSeekRangeTimer_.scheduleRepeated(0.125);
+      new shaka.util.Timer(() => this.updateTimeAndSeekRange_());
+  this.timeAndSeekRangeTimer_.start(
+      /* seconds= */ 0.125, /* repeating= */ true);
 
   /** @private {shaka.util.EventManager} */
   this.eventManager_ = new shaka.util.EventManager();
@@ -171,9 +172,23 @@ goog.inherits(shaka.ui.Controls, shaka.util.FakeEventTarget);
  * @override
  * @export
  */
-shaka.ui.Controls.prototype.destroy = async function() {
-  await this.eventManager_.destroy();
+shaka.ui.Controls.prototype.destroy = function() {
+  /** @type {!Array.<!Promise>} */
+  const waitFor = [];
+
+  if (this.eventManager_) {
+    waitFor.push(this.eventManager_.destroy());
+  }
+
+  if (this.timeAndSeekRangeTimer_) {
+    this.timeAndSeekRangeTimer_.stop();
+  }
+
+  this.eventManager_ = null;
   this.localization_ = null;
+  this.timeAndSeekRangeTimer_ = null;
+
+  return Promise.all(waitFor);
 };
 
 
@@ -1338,7 +1353,7 @@ shaka.ui.Controls.prototype.onMouseMove_ = function(event) {
   this.videoContainer_.style.cursor = '';
   // Show the controls.
   this.setControlsOpacity_(shaka.ui.Controls.Opacity_.OPAQUE);
-  this.hideSettingsMenusTimer_.cancel();
+  this.hideSettingsMenusTimer_.stop();
   this.updateTimeAndSeekRange_();
 
   // Hide the cursor when the mouse stops moving.
@@ -2527,7 +2542,8 @@ shaka.ui.Controls.prototype.setControlsOpacity_ = function(opacity) {
     // seconds in case a user immidiately initiaites another mouse move to
     // interact with the menus. If that didn't happen, go ahead and hide
     // the menus.
-    this.hideSettingsMenusTimer_.schedule(2);
+    this.hideSettingsMenusTimer_.start(/* seconds= */ 2,
+                                       /* repeating= */ false);
   }
 };
 
