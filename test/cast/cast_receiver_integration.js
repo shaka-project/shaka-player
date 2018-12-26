@@ -43,10 +43,6 @@ describe('CastReceiver', function() {
   let toRestore;
   let pendingWaitWrapperCalls = 0;
 
-  /** @type {boolean} */
-  let isChrome;
-  /** @type {boolean} */
-  let isChromecast;
   /** @type {!Object.<string, ?shaka.extern.DrmSupportType>} */
   let support = {};
 
@@ -60,14 +56,18 @@ describe('CastReceiver', function() {
    * @return {function(function())}
    */
   function checkAndRun(test, checkKeySystems) {
+    const Platform = shaka.util.Platform;
+
     let check = function(done) {
       if (checkKeySystems && !support['com.widevine.alpha']) {
         pending('Skipping DrmEngine tests.');
-      } else if (!isChromecast && !isChrome) {
+      } else if (Platform.isChromecast()) {
+        test(done);
+      } else if (Platform.isChrome()) {
+        test(done);
+      } else {
         pending(
             'Skipping CastReceiver tests for non-Chrome and non-Chromecast');
-      } else {
-        test(done);
       }
     };
     // Account for tests with a done argument, and tests without.
@@ -96,13 +96,10 @@ describe('CastReceiver', function() {
     // ability to use modern APIs there that may not be available on all of the
     // browsers our library supports.  Because of this, CastReceiver tests will
     // only be run on Chrome and Chromecast.
-    isChromecast = navigator.userAgent.includes('CrKey');
-    let isEdge = navigator.userAgent.includes('Edge/');
-    // Edge also has "Chrome/" in its user agent string.
-    isChrome = navigator.userAgent.includes('Chrome/') && !isEdge;
-
-    // Don't do any more work here if the tests will not end up running.
-    if (!isChromecast && !isChrome) return;
+    const Platform = shaka.util.Platform;
+    if (!(Platform.isChromecast() || Platform.isChrome())) {
+      return;
+    }
 
     // In uncompiled mode, there is a UA check for Chromecast in order to make
     // manual testing easier.  For these automated tests, we want to act as if
