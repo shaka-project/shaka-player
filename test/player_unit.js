@@ -2223,7 +2223,7 @@ describe('Player', function() {
       });
 
       it('tracks correct time when switching states', function() {
-        // buffering(false)
+        buffering(false);
         jasmine.clock().tick(3000);
         buffering(true);
         jasmine.clock().tick(5000);
