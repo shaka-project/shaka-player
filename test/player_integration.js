@@ -458,7 +458,7 @@ describe('Player', function() {
 
       // Make sure the configuration was taken.
       const ConfiguredFactory = player.getConfiguration().textDisplayFactory;
-      const configuredTextDisplayer = new ConfiguredFactory(video);
+      const configuredTextDisplayer = new ConfiguredFactory();
       expect(configuredTextDisplayer).toBe(textDisplayer);
     });
 

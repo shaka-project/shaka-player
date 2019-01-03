@@ -472,7 +472,7 @@ shaka.extern.TextDisplayer.prototype.setTextVisibility = function(on) {};
 /**
  * A factory for creating a TextDisplayer.
  *
- * @typedef {function(new:shaka.extern.TextDisplayer, !HTMLMediaElement)}
+ * @typedef {function(new:shaka.extern.TextDisplayer)}
  * @exportDoc
  */
 shaka.extern.TextDisplayer.Factory;

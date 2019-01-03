@@ -30,7 +30,7 @@ shaka.ui.TextDisplayer = class {
   /**
    * Constructor.
    * @param {HTMLMediaElement} video
-   * @param {!HTMLElement} videoContainer
+   * @param {HTMLElement} videoContainer
    */
   constructor(video, videoContainer) {
     /** @private {boolean} */
@@ -74,15 +74,6 @@ shaka.ui.TextDisplayer = class {
   append(cues) {
     // Add the cues.
     this.cues_ = this.cues_.concat(cues);
-
-    // Sort all the cues based on the start time and end time.
-    this.cues_ = this.cues_.slice().sort((a, b) => {
-      if (a.startTime != b.startTime) {
-        return a.startTime - b.startTime;
-      } else {
-        return a.endTime - b.endTime;
-      }
-    });
   }
 
 
@@ -159,22 +150,34 @@ shaka.ui.TextDisplayer = class {
    * @private
    */
   updateCaptions_() {
+    const currentTime = this.video_.currentTime;
+
+    // Return true if the cue should be displayed at the current time point.
+    const shouldCueBeDisplayed = (cue) => {
+      return cue.startTime <= currentTime && cue.endTime >= currentTime;
+    };
+
     // For each cue in the current cues map, if the cue's end time has passed,
     // remove the entry from the map, and remove the captions from the page.
     for (const cue of this.currentCuesMap_.keys()) {
-      if (cue.startTime > this.video_.currentTime ||
-          cue.endTime < this.video_.currentTime) {
+        if (!shouldCueBeDisplayed(cue)) {
         const captionsText = this.currentCuesMap_.get(cue);
         this.textContainer_.removeChild(captionsText);
         this.currentCuesMap_.delete(cue);
       }
     }
 
-    // Get the current cues that should be displayed. If the cue is not being
-    // displayed already, add it to the map, and add the captions onto the page.
+    // Get the current cues that should be added to display. If the cue is not
+    // being displayed already, add it to the map, and add the captions onto the
+    // page.
     const currentCues = this.cues_.filter((cue) => {
-      return cue.startTime <= this.video_.currentTime &&
-             cue.endTime > this.video_.currentTime;
+      return shouldCueBeDisplayed(cue) && !this.currentCuesMap_.has(cue);
+    }).sort((a, b) => {
+      if (a.startTime != b.startTime) {
+        return a.startTime - b.startTime;
+      } else {
+        return a.endTime - b.endTime;
+      }
     });
 
     for (const cue of currentCues) {

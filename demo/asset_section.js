@@ -301,6 +301,11 @@ shakaDemo.preparePlayer_ = function(asset) {
   config.streaming.alwaysStreamText =
       document.getElementById('showNative').checked;
 
+  const videoContainer = shakaDemo.controls_.getVideoContainer();
+  config.textDisplayFactory = function() {
+    return new shaka.ui.TextDisplayer(shakaDemo.video_, videoContainer);
+  };
+
   player.configure(config);
 
   // TODO: Document demo app debugging features.

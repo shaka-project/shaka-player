@@ -21,6 +21,7 @@ goog.provide('shaka.ui.Overlay');
 goog.require('goog.asserts');
 goog.require('shaka.polyfill.installAll');
 goog.require('shaka.ui.Controls');
+goog.require('shaka.ui.TextDisplayer');
 
 
 /**
@@ -236,6 +237,13 @@ shaka.ui.Overlay.scanPageForShakaElements_ = function() {
 shaka.ui.Overlay.createUI_ = function(container, video, config) {
   const player = new shaka.Player(video);
   const ui = new shaka.ui.Overlay(player, container, video, config);
+
+  // If the browser's native controls are disabled, use UI TextDisplayer.
+  if (!video.controls) {
+    player.configure('textDisplayerFactory',
+      () => new shaka.ui.TextDisplayer(video, container));
+  }
+
   container['ui'] = ui;
   video['ui'] = ui;
   return ui;
