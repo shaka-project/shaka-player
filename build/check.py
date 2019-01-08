@@ -36,8 +36,9 @@ def get_lint_files():
   """Returns the absolute paths to all the files to run the linter over."""
   match = re.compile(r'.*\.js$')
   base = shakaBuildHelpers.get_source_base()
-  def get(arg):
-    return shakaBuildHelpers.get_all_files(os.path.join(base, arg), match)
+  def get(*path_components):
+    return shakaBuildHelpers.get_all_files(
+        os.path.join(base, *path_components), match)
   return get('test') + get('lib') + get('externs') + get('demo')
 
 
@@ -62,7 +63,7 @@ def check_html_lint(_):
   logging.info('Running htmlhint...')
   htmlhint = shakaBuildHelpers.get_node_binary('htmlhint')
   base = shakaBuildHelpers.get_source_base()
-  files = ['index.html', 'demo/index.html', 'support.html']
+  files = ['index.html', os.path.join('demo', 'index.html'), 'support.html']
   file_paths = [os.path.join(base, x) for x in files]
   config_path = os.path.join(base, '.htmlhintrc')
   cmd_line = htmlhint + ['--config=' + config_path] + file_paths
@@ -112,8 +113,9 @@ def check_tests(_):
 
   match = re.compile(r'.*\.js$')
   base = shakaBuildHelpers.get_source_base()
-  def get(*args):
-    return shakaBuildHelpers.get_all_files(os.path.join(base, *args), match)
+  def get(*path_components):
+    return shakaBuildHelpers.get_all_files(
+        os.path.join(base, *path_components), match)
   files = set(get('lib') + get('externs') + get('test') +
               get('third_party', 'closure'))
   files.add(os.path.join(base, 'demo', 'common', 'assets.js'))
