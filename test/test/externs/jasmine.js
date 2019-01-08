@@ -155,6 +155,21 @@ jasmine.Matchers.prototype.toThrowError = function(value) {};
  */
 jasmine.Matchers.prototype.toEqualElement = function(expected) {};
 
+/**
+ * A custom matcher for checking if a spy has been called once. This
+ * will reset the call count after each call.
+ */
+jasmine.Matchers.prototype.toHaveBeenCalledOnceMore = function() {};
+
+/**
+ * A customer matcher for checking if a spy has been called once and
+ * with specific arguments. This will reset the call count after each
+ * call.
+ *
+ * @param {!Array.<*>} args
+ */
+jasmine.Matchers.prototype.toHaveBeenCalledOnceMoreWith = function(args) {};
+
 
 /**
  * @constructor

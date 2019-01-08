@@ -107,21 +107,6 @@ shaka.test.Util.expectToEqualError = function(actual, expected) {
 
 
 /**
-  * Registers a custom matcher for Element objects, called 'toEqualElement'.
-  * @private
-  */
-shaka.test.Util.registerElementMatcher_ = function() {
-  jasmine.addMatchers({
-    toEqualElement: function(util, customEqualityTesters) {
-      return {
-        compare: shaka.test.Util.expectToEqualElementCompare_,
-      };
-    },
-  });
-};
-
-
-/**
  * @param {?} actual
  * @param {!Element} expected
  * @return {!Object} result
@@ -299,7 +284,67 @@ shaka.test.Util.invokeSpy = function(spy, varArgs) {
 };
 
 
+/**
+ * @const
+ * @private
+ */
+shaka.test.Util.customMatchers_ = {
+  // Custom matcher for Element objects.
+  toEqualElement: (util, customEqualityTesters) =>{
+    return {
+      compare: shaka.test.Util.expectToEqualElementCompare_,
+    };
+  },
+  // Custom matcher for working with spies.
+  toHaveBeenCalledOnceMore: (util, customEqualityTesters) => {
+    return {
+      compare: (actual, expected) => {
+        const callCount = actual.calls.count();
+
+        const result = {};
+
+        if (callCount != 1) {
+          result.pass = false;
+          result.message = 'Expected to be called once, not ' + callCount;
+        } else {
+          result.pass = true;
+        }
+
+        actual.calls.reset();
+
+        return result;
+      },
+    };
+  },
+  toHaveBeenCalledOnceMoreWith: (util, customEqualityTesters) => {
+    return {
+      compare: (actual, expected) => {
+        const callCount = actual.calls.count();
+        const callArgs = actual.calls.mostRecent().args;
+
+        const result = {};
+
+        if (callCount != 1) {
+          result.pass = false;
+          result.message = 'Expected to be called once, not ' + callCount;
+        } else if (!util.equals(callArgs, expected, customEqualityTesters)) {
+          result.pass = false;
+          result.message =
+              'Expected to be called with ' + expected + ' not ' + callArgs;
+        } else {
+          result.pass = true;
+        }
+
+        actual.calls.reset();
+
+        return result;
+      },
+    };
+  },
+};
+
+
 beforeEach(function() {
   jasmine.addCustomEqualityTester(shaka.test.Util.compareReferences);
-  shaka.test.Util.registerElementMatcher_();
+  jasmine.addMatchers(shaka.test.Util.customMatchers_);
 });

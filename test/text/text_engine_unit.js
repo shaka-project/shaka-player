@@ -88,32 +88,37 @@ describe('TextEngine', function() {
       expect(mockDisplayer.append).not.toHaveBeenCalled();
     });
 
-    it('calls displayer.append()', function(done) {
+    it('calls displayer.append()', async () => {
       let cue1 = createFakeCue(1, 2);
       let cue2 = createFakeCue(2, 3);
       let cue3 = createFakeCue(3, 4);
       let cue4 = createFakeCue(4, 5);
       mockParseMedia.and.returnValue([cue1, cue2]);
 
-      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
-        expect(mockParseMedia).toHaveBeenCalledWith(
-            new Uint8Array(dummyData),
-            {periodStart: 0, segmentStart: 0, segmentEnd: 3});
-        expect(mockDisplayer.append).toHaveBeenCalledWith([cue1, cue2]);
+      await textEngine.appendBuffer(dummyData, 0, 3);
+      expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
+          new Uint8Array(dummyData),
+          {periodStart: 0, segmentStart: 0, segmentEnd: 3},
+      ]);
 
-        expect(mockDisplayer.remove).not.toHaveBeenCalled();
+      expect(mockDisplayer.append).toHaveBeenCalledOnceMoreWith([
+        [cue1, cue2],
+      ]);
 
-        mockDisplayer.append.calls.reset();
-        mockParseMedia.calls.reset();
+      expect(mockDisplayer.remove).not.toHaveBeenCalled();
 
-        mockParseMedia.and.returnValue([cue3, cue4]);
-        return textEngine.appendBuffer(dummyData, 3, 5);
-      }).then(function() {
-        expect(mockParseMedia).toHaveBeenCalledWith(
-            new Uint8Array(dummyData),
-            {periodStart: 0, segmentStart: 3, segmentEnd: 5});
-        expect(mockDisplayer.append).toHaveBeenCalledWith([cue3, cue4]);
-      }).catch(fail).then(done);
+      mockParseMedia.and.returnValue([cue3, cue4]);
+
+      await textEngine.appendBuffer(dummyData, 3, 5);
+
+      expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
+        new Uint8Array(dummyData),
+        {periodStart: 0, segmentStart: 3, segmentEnd: 5},
+      ]);
+
+      expect(mockDisplayer.append).toHaveBeenCalledOnceMoreWith([
+        [cue3, cue4],
+      ]);
     });
 
     it('does not throw if called right before destroy', function(done) {
@@ -235,8 +240,8 @@ describe('TextEngine', function() {
   });
 
   describe('setTimestampOffset', function() {
-    it('passes the offset to the parser', function(done) {
-      mockParseMedia.and.callFake(function(data, time) {
+    it('passes the offset to the parser', async () => {
+      mockParseMedia.and.callFake((data, time) => {
         return [
           createFakeCue(time.periodStart + 0,
                         time.periodStart + 1),
@@ -245,30 +250,32 @@ describe('TextEngine', function() {
         ];
       });
 
-      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
-        expect(mockParseMedia).toHaveBeenCalledWith(
-            new Uint8Array(dummyData),
-            {periodStart: 0, segmentStart: 0, segmentEnd: 3});
+      await textEngine.appendBuffer(dummyData, 0, 3);
 
-        expect(mockDisplayer.append).toHaveBeenCalledWith(
-            [
-              createFakeCue(0, 1),
-              createFakeCue(2, 3),
-            ]);
+      expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
+        new Uint8Array(dummyData),
+        {periodStart: 0, segmentStart: 0, segmentEnd: 3},
+      ]);
+      expect(mockDisplayer.append).toHaveBeenCalledOnceMoreWith([
+        [
+          createFakeCue(0, 1),
+          createFakeCue(2, 3),
+        ],
+      ]);
 
-        mockDisplayer.append.calls.reset();
-        textEngine.setTimestampOffset(4);
-        return textEngine.appendBuffer(dummyData, 4, 7);
-      }).then(function() {
-        expect(mockParseMedia).toHaveBeenCalledWith(
-            new Uint8Array(dummyData),
-            {periodStart: 4, segmentStart: 4, segmentEnd: 7});
-        expect(mockDisplayer.append).toHaveBeenCalledWith(
-            [
-              createFakeCue(4, 5),
-              createFakeCue(6, 7),
-            ]);
-      }).catch(fail).then(done);
+      textEngine.setTimestampOffset(4);
+      await textEngine.appendBuffer(dummyData, 4, 7);
+
+      expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
+        new Uint8Array(dummyData),
+        {periodStart: 4, segmentStart: 4, segmentEnd: 7},
+      ]);
+      expect(mockDisplayer.append).toHaveBeenCalledOnceMoreWith([
+        [
+          createFakeCue(4, 5),
+          createFakeCue(6, 7),
+        ],
+      ]);
     });
   });
 
@@ -396,25 +403,26 @@ describe('TextEngine', function() {
       });
     });
 
-    it('limits appended cues', function(done) {
+    it('limits appended cues', async () => {
       textEngine.setAppendWindow(0, 1.9);
-      textEngine.appendBuffer(dummyData, 0, 3).then(function() {
-        expect(mockDisplayer.append).toHaveBeenCalledWith(
-            [
-              createFakeCue(0, 1),
-              createFakeCue(1, 2),
-            ]);
+      await textEngine.appendBuffer(dummyData, 0, 3);
 
-        mockDisplayer.append.calls.reset();
-        textEngine.setAppendWindow(1, 2.1);
-        return textEngine.appendBuffer(dummyData, 0, 3);
-      }).then(function() {
-        expect(mockDisplayer.append).toHaveBeenCalledWith(
-            [
-              createFakeCue(1, 2),
-              createFakeCue(2, 3),
-            ]);
-      }).catch(fail).then(done);
+      expect(mockDisplayer.append).toHaveBeenCalledOnceMoreWith([
+        [
+          createFakeCue(0, 1),
+          createFakeCue(1, 2),
+        ],
+      ]);
+
+      textEngine.setAppendWindow(1, 2.1);
+      await textEngine.appendBuffer(dummyData, 0, 3);
+
+      expect(mockDisplayer.append).toHaveBeenCalledOnceMoreWith([
+        [
+          createFakeCue(1, 2),
+          createFakeCue(2, 3),
+        ],
+      ]);
     });
 
     it('limits bufferStart', function(done) {
