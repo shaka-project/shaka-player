@@ -36,8 +36,9 @@ def get_lint_files():
   """Returns the absolute paths to all the files to run the linter over."""
   match = re.compile(r'.*\.js$')
   base = shakaBuildHelpers.get_source_base()
-  def get(arg):
-    return shakaBuildHelpers.get_all_files(os.path.join(base, arg), match)
+  def get(*path_components):
+    return shakaBuildHelpers.get_all_files(
+        os.path.join(base, *path_components), match)
   return get('test') + get('lib') + get('externs') + get('demo') + get('ui')
 
 
@@ -58,7 +59,7 @@ def check_html_lint(args):
   logging.info('Linting HTML...')
 
   base = shakaBuildHelpers.get_source_base()
-  files = ['index.html', 'demo/index.html', 'support.html']
+  files = ['index.html', os.path.join('demo', 'index.html'), 'support.html']
   file_paths = [os.path.join(base, x) for x in files]
   config_path = os.path.join(base, '.htmlhintrc')
 
@@ -109,12 +110,13 @@ def check_tests(args):
 
   match = re.compile(r'.*\.js$')
   base = shakaBuildHelpers.get_source_base()
-  def get(path):
-    return shakaBuildHelpers.get_all_files(os.path.join(base, path), match)
+  def get(*path_components):
+    return shakaBuildHelpers.get_all_files(
+        os.path.join(base, *path_components), match)
   files = set(get('lib') + get('externs') + get('test') + get('ui') +
-              get('third_party/closure') +
-              get('third_party/language-mapping-list'))
-  files.add(os.path.join(base, 'demo/common/assets.js'))
+              get('third_party', 'closure') +
+              get('third_party', 'language-mapping-list'))
+  files.add(os.path.join(base, 'demo', 'common', 'assets.js'))
 
   closure_opts = build.common_closure_opts + build.common_closure_defines
   closure_opts += build.debug_closure_opts + build.debug_closure_defines

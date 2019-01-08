@@ -41,10 +41,11 @@ def compile_demo(force, is_debug):
 
   match = re.compile(r'.*\.js$')
   base = shakaBuildHelpers.get_source_base()
-  def get(path):
-    return shakaBuildHelpers.get_all_files(os.path.join(base, path), match)
+  def get(*path_components):
+    return shakaBuildHelpers.get_all_files(
+        os.path.join(base, *path_components), match)
 
-  files = set(get('demo') + get('externs')) - set(get('demo/cast_receiver'))
+  files = set(get('demo') + get('externs')) - set(get('demo', 'cast_receiver'))
   # Make sure we don't compile in load.js, which will be used to bootstrap
   # everything else.  If we build that into the output, we will get an
   # infinite loop of scripts adding themselves.
@@ -95,13 +96,14 @@ def compile_receiver(force, is_debug):
 
   match = re.compile(r'.*\.js$')
   base = shakaBuildHelpers.get_source_base()
-  def get(path):
-    return shakaBuildHelpers.get_all_files(os.path.join(base, path), match)
+  def get(*path_components):
+    return shakaBuildHelpers.get_all_files(
+        os.path.join(base, *path_components), match)
 
-  files = set(get('demo/common') +
-              get('demo/cast_receiver') +
-              get('externs') + get('lib/debug') +
-              get('third_party/closure'))
+  files = set(get('demo', 'common') +
+              get('demo', 'cast_receiver') +
+              get('externs') + get('lib', 'debug') +
+              get('third_party', 'closure'))
 
   # Add in the generated externs, so that the receiver compilation knows the
   # definitions of the library APIs.
