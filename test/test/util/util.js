@@ -320,7 +320,9 @@ shaka.test.Util.customMatchers_ = {
     return {
       compare: (actual, expected) => {
         const callCount = actual.calls.count();
-        const callArgs = actual.calls.mostRecent().args;
+        const callArgs = callCount > 0 ?
+                         actual.calls.mostRecent().args :
+                         [];
 
         const result = {};
 
