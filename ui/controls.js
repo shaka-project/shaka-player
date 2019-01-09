@@ -26,6 +26,7 @@ goog.require('shaka.ui.Utils');
 goog.require('shaka.util.EventManager');
 goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.FakeEventTarget');
+goog.require('shaka.util.LanguageUtils');
 goog.require('shaka.util.Timer');
 
 
@@ -1132,7 +1133,7 @@ shaka.ui.Controls.prototype.addLanguagesButton_ = function() {
   this.currentAudioLanguage_ = shaka.ui.Controls.createHTMLElement_('span');
   this.currentAudioLanguage_.classList.add('shaka-current-selection-span');
   const language = this.player_.getConfiguration().preferredAudioLanguage;
-  this.setChosenLanguageName_(this.currentAudioLanguage_, language);
+  this.currentAudioLanguage_.textContent = this.getLanguageName_(language);
   label.appendChild(this.currentAudioLanguage_);
 
   this.languagesButton_.appendChild(label);
@@ -1192,22 +1193,64 @@ shaka.ui.Controls.prototype.isPipAllowed_ = function() {
 
 
 /**
- * @param {!Element} element
- * @param {string} language
+ * Returns the language's name for itself in its own script (autoglottonym), if
+ * we have it.
+ *
+ * If the locale, including region, can be mapped to a name, we return a very
+ * specific name including the region.  For example, "de-AT" would map to
+ * "Deutsch (Österreich)" or Austrian German.
+ *
+ * If only the language part of the locale is in our map, we append the locale
+ * itself for specificity.  For example, "ar-EG" (Egyptian Arabic) would map
+ * to "ﺎﻠﻋﺮﺒﻳﺓ (ar-EG)".  In this way, multiple versions of Arabic whose
+ * regions are not in our map would not all look the same in the language
+ * list, but could be distinguished by their locale.
+ *
+ * Finally, if language part of the locale is not in our map, we label it
+ * "unknown", as translated to the UI locale, and we append the locale itself
+ * for specificity.  For example, "sjn" would map to "Unknown (sjn)".  In this
+ * way, multiple unrecognized languages would not all look the same in the
+ * language list, but could be distinguished by their locale.
+ *
+ * @param {string} locale
+ * @return {string} The language's name for itself in its own script, or as
+ *   close as we can get with the information we have.
  * @private
  */
-shaka.ui.Controls.prototype.setChosenLanguageName_ =
-  function(element, language) {
-  if (language.length) {
-    let languageName;
-    if (mozilla.LanguageMapping[language]) {
-      languageName = mozilla.LanguageMapping[language].nativeName;
-    } else {
-      // We don't know this language
-      languageName = this.localization_.resolve(
-        shaka.ui.Controls.resolveSpecialLanguageCode_(language));
-    }
-    element.textContent = languageName;
+shaka.ui.Controls.prototype.getLanguageName_ = function(locale) {
+  if (!locale) {
+    return '';
+  }
+
+  // Shorthand for resolving a localization ID.
+  const resolve = (id) => this.localization_.resolve(id);
+
+  // Handle some special cases first.  These are reserved language tags that
+  // are used to indicate something that isn't one specific language.
+  switch (locale) {
+    case 'mul':
+      return resolve(shaka.ui.Locales.Ids.LABEL_MULTIPLE_LANGUAGES);
+    case 'zxx':
+      return resolve(shaka.ui.Locales.Ids.LABEL_NOT_APPLICABLE);
+  }
+
+  // Extract the base language from the locale as a fallback step.
+  const language = shaka.util.LanguageUtils.getBase(locale);
+
+  // First try to resolve the full language name.
+  // If that fails, try the base.
+  // Finally, report "unknown".
+  // When there is a loss of specificity (either to a base language or to
+  // "unknown"), we should append the original language code.  Otherwise, there
+  // may be multiple identical-looking items in the list.
+  if (locale in mozilla.LanguageMapping) {
+    return mozilla.LanguageMapping[locale].nativeName;
+  } else if (language in mozilla.LanguageMapping) {
+    return mozilla.LanguageMapping[language].nativeName +
+        ' (' + locale + ')';
+  } else {
+    return resolve(shaka.ui.Locales.Ids.LABEL_UNKNOWN_LANGUAGE) +
+        ' (' + locale + ')';
   }
 };
 
@@ -1920,7 +1963,7 @@ shaka.ui.Controls.prototype.updateLanguages_ = function(tracks, langMenu,
     button.addEventListener('click', onLanguageSelected.bind(this, language));
 
     let span = shaka.ui.Controls.createHTMLElement_('span');
-    this.setChosenLanguageName_(span, language);
+    span.textContent = this.getLanguageName_(language);
     button.appendChild(span);
 
     if (updateChosen && (language == selectedTrack.language)) {
@@ -2574,23 +2617,6 @@ shaka.ui.Controls.createLocalization_ = function() {
   localization.changeLocale(navigator.languages || []);
 
   return localization;
-};
-
-
-/**
- * Resolve a special language code to a name/description enum.
- *
- * @param {string} lang
- * @return {string}
- */
-shaka.ui.Controls.resolveSpecialLanguageCode_ = function(lang) {
-  if (lang == 'mul') {
-    return shaka.ui.Locales.Ids.LABEL_MULTIPLE_LANGUAGES;
-  } else if (lang == 'zxx') {
-    return shaka.ui.Locales.Ids.LABEL_NOT_APPLICABLE;
-  } else {
-    return shaka.ui.Locales.Ids.LABEL_UNKNOWN_LANGUAGE;
-  }
 };
 
 
