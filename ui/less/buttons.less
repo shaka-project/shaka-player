@@ -16,21 +16,31 @@
 
 /* The main buttons in the UI controls. */
 
+@play-button-size-percentage: 15%;
+
 /* The giant play button, which sits inside .shaka-player-button-container and
  * contains the buffering spinner. */
 .shaka-play-button {
-  /* Without this, we get a mysterious extra 3px height. */
-  display: flex;
+  /* Set width & height in a round-about way.  By using padding, we can keep
+   * a 1:1 aspect ratio and size the button relative to the container width.
+   *
+   * Since padding is applied equally to top, bottom, left, and right, only use
+   * half of the intended percentage for each.
+   *
+   * Based on tips from https://stackoverflow.com/a/12925343 */
+  box-sizing: border-box;
+  padding: @play-button-size-percentage / 2;
+  width: 0;
+  height: 0;
 
-  /* Set width relative to the video element.  Height will automatically
-   * conform to width. */
-  width: 15%;
+  /* The width/height hack above requires this to behave as an overlay
+   * container, and the spinner to behave as an overlay child.  Otherwise, the
+   * spinner constrains to the content area size (0x0). */
+  .overlay-parent();
 
-  /* To be properly positioned in the center, this should have no margin or
-   * padding.  These might have been set for buttons generally by the app or
-   * user-agent. */
+  /* To be properly positioned in the center, this should have no margin.
+   * This might have been set for buttons generally by the app or user-agent. */
   margin: 0;
-  padding: 0;
 
   /* This makes the button a circle. */
   border-radius: 50%;

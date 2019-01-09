@@ -25,6 +25,11 @@
 /* This is the spinner SVG itself, which contains a circular path element.
  * It sits inside the play button and fills it. */
 .shaka-spinner-svg {
+  /* Because of some sizing hacks in the play button (see comments there), this
+   * spinner needs to be an overlay child to be properly sized and positioned
+   * within the button. */
+  .overlay-child();
+
   /* Keep it spinning! */
   animation: rotate 2s linear infinite;
   transform-origin: center center;
