@@ -4,5 +4,6 @@
 +../../ui/controls.js
 +../../ui/localization.js
 +../../ui/locales.js
++../../ui/text_displayer.js
 +../../ui/ui.js
 +../../ui/ui_utils.js
