@@ -2255,7 +2255,16 @@ shaka.ui.Controls.prototype.onBufferingStateChange_ = function(event) {
   // Using [] notation to access buffering property to work around
   // a compiler error.
   const isBuffering = event['buffering'];
-  shaka.ui.Controls.setDisplay_(this.bufferingSpinner_, isBuffering);
+
+  // Don't use setDisplay_ here, since the SVG spinner doesn't have classList
+  // on IE.
+  if (isBuffering) {
+    this.bufferingSpinner_.setAttribute(
+        'class', 'shaka-spinner-svg');
+  } else {
+    this.bufferingSpinner_.setAttribute(
+        'class', 'shaka-spinner-svg shaka-hidden');
+  }
 };
 
 
