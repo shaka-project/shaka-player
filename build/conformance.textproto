@@ -120,6 +120,18 @@ requirement: {
 }
 
 
+# Disallow Element.innerHTML and outerHTML.
+requirement: {
+  type: BANNED_PROPERTY
+  value: 'Element.prototype.innerHTML'
+  value: 'Element.prototype.outerHTML'
+  error_message: 'Using "Element.innerHTML" or "Element.outerHTML" is not '
+                 'allowed due to security concerns; use textContent, '
+                 'appendChild, or removeChild instead'
+  whitelist_regexp: 'test/test/util/util.js'
+}
+
+
 # Disallow Input.valueAsNumber.
 requirement: {
   type: BANNED_PROPERTY
