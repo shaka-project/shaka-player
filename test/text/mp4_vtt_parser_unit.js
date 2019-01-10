@@ -126,7 +126,7 @@ describe('Mp4VttParser', function() {
         end: 120,
         payload:
             'You\'re a fool for traveling alone,\nso completely unprepared.\n',
-        writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT,
+        writingMode: Cue.writingMode.VERTICAL_LEFT_TO_RIGHT,
         line: 1,
       },
     ];
@@ -207,8 +207,8 @@ describe('Mp4VttParser', function() {
       if ('line' in expected[i]) {
         expect(actual[i].line).toBe(expected[i].line);
       }
-      if ('writingDirection' in expected[i]) {
-        expect(actual[i].writingDirection).toBe(expected[i].writingDirection);
+      if ('writingMode' in expected[i]) {
+        expect(actual[i].writingMode).toBe(expected[i].writingMode);
       }
       if ('textAlign' in expected[i]) {
         expect(actual[i].textAlign).toBe(expected[i].textAlign);

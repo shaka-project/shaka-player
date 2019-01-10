@@ -215,13 +215,13 @@ describe('VttTextParser', function() {
             start: 20,
             end: 40,
             payload: 'Test',
-            writingDirection: Cue.writingDirection.VERTICAL_RIGHT_TO_LEFT,
+            writingMode: Cue.writingMode.VERTICAL_RIGHT_TO_LEFT,
           },
           {
             start: 40,
             end: 50,
             payload: 'Test2',
-            writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT,
+            writingMode: Cue.writingMode.VERTICAL_LEFT_TO_RIGHT,
           },
         ],
         'WEBVTT\n\n' +
@@ -354,7 +354,7 @@ describe('VttTextParser', function() {
             payload: 'Test',
             textAlign: Cue.textAlign.CENTER,
             size: 56,
-            writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT,
+            writingMode: Cue.writingMode.VERTICAL_LEFT_TO_RIGHT,
           },
         ],
         'WEBVTT\n\n' +
@@ -372,7 +372,7 @@ describe('VttTextParser', function() {
             payload: 'Test',
             textAlign: Cue.textAlign.CENTER,
             size: 56,
-            writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT,
+            writingMode: Cue.writingMode.VERTICAL_LEFT_TO_RIGHT,
           },
         ],
         'WEBVTT\n\n' +
@@ -390,7 +390,7 @@ describe('VttTextParser', function() {
             payload: 'Test',
             textAlign: Cue.textAlign.CENTER,
             size: 56,
-            writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT,
+            writingMode: Cue.writingMode.VERTICAL_LEFT_TO_RIGHT,
           },
         ],
         'WEBVTT\n\n' +
@@ -408,7 +408,7 @@ describe('VttTextParser', function() {
             payload: 'Test',
             align: 'center',
             size: 56,
-            writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT,
+            writingMode: Cue.writingMode.VERTICAL_LEFT_TO_RIGHT,
           },
         ],
         'WEBVTT\n\n' +
@@ -426,7 +426,7 @@ describe('VttTextParser', function() {
             payload: 'Test',
             align: 'center',
             size: 56,
-            writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT,
+            writingMode: Cue.writingMode.VERTICAL_LEFT_TO_RIGHT,
           },
         ],
         'WEBVTT\n\n' +
@@ -608,7 +608,7 @@ describe('VttTextParser', function() {
         expect(result[i].id).toBe(cues[i].id);
       }
       if ('vertical' in cues[i]) {
-        expect(result[i].writingDirection).toBe(cues[i].writingDirection);
+        expect(result[i].writingMode).toBe(cues[i].writingMode);
       }
       if ('line' in cues[i]) {
         expect(result[i].line).toBe(cues[i].line);

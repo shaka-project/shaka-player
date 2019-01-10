@@ -497,14 +497,14 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports writingDirection setting', function() {
+  it('supports writingMode setting', function() {
     verifyHelper(
         [
           {
             start: 62.05,
             end: 3723.2,
             payload: 'Test',
-            writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT,
+            writingMode: Cue.writingMode.VERTICAL_LEFT_TO_RIGHT,
           },
         ],
         '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
@@ -523,7 +523,7 @@ describe('TtmlTextParser', function() {
             start: 62.05,
             end: 3723.2,
             payload: 'Test',
-            writingDirection: Cue.writingDirection.VERTICAL_RIGHT_TO_LEFT,
+            writingMode: Cue.writingMode.VERTICAL_RIGHT_TO_LEFT,
           },
         ],
         '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
@@ -542,7 +542,7 @@ describe('TtmlTextParser', function() {
             start: 62.05,
             end: 3723.2,
             payload: 'Test',
-            writingDirection: Cue.writingDirection.VERTICAL_LEFT_TO_RIGHT,
+            writingMode: Cue.writingMode.VERTICAL_LEFT_TO_RIGHT,
           },
         ],
         '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
@@ -561,7 +561,7 @@ describe('TtmlTextParser', function() {
             start: 62.05,
             end: 3723.2,
             payload: 'Test',
-            writingDirection: Cue.writingDirection.HORIZONTAL_RIGHT_TO_LEFT,
+            direction: Cue.direction.HORIZONTAL_RIGHT_TO_LEFT,
           },
         ],
         '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
@@ -580,7 +580,7 @@ describe('TtmlTextParser', function() {
             start: 62.05,
             end: 3723.2,
             payload: 'Test',
-            writingDirection: Cue.writingDirection.HORIZONTAL_LEFT_TO_RIGHT,
+            direction: Cue.direction.HORIZONTAL_LEFT_TO_RIGHT,
           },
         ],
         '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
@@ -800,7 +800,7 @@ describe('TtmlTextParser', function() {
     let data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
     let result = new shaka.text.TtmlTextParser().parseMedia(data, time);
     let properties = ['textAlign', 'lineAlign', 'positionAlign', 'size',
-                      'line', 'position', 'writingDirection', 'color',
+                      'line', 'position', 'direction', 'color', 'writingMode',
                       'backgroundColor', 'fontWeight', 'fontFamily',
                       'wrapLine', 'lineHeight', 'fontStyle', 'fontSize'];
     expect(result).toBeTruthy();

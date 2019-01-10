@@ -196,11 +196,19 @@ shaka.extern.Cue.prototype.textAlign;
 
 
 /**
- * Text writing direction of the cue.
- * @type {shaka.text.Cue.writingDirection}
+ * Text direction of the cue.
+ * @type {shaka.text.Cue.direction}
  * @exportDoc
  */
-shaka.extern.Cue.prototype.writingDirection;
+shaka.extern.Cue.prototype.direction;
+
+
+/**
+ * Text writing mode of the cue.
+ * @type {shaka.text.Cue.writingMode}
+ * @exportDoc
+ */
+shaka.extern.Cue.prototype.writingMode;
 
 
 /**
