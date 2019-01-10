@@ -56,7 +56,18 @@ def _modules_need_update():
 
 def _parse_version(version):
   """Converts the given string version to a tuple of numbers."""
-  return tuple([int(i) for i in version.split('.')])
+  # Handle any prerelease or build metadata, such as -beta or -g1234
+  if '-' in version:
+    version, trailer = version.split('-')
+  else:
+    # Versions without a trailer should sort later than those with a trailer.
+    # For example, 2.5.0-beta comes before 2.5.0.
+    # To accomplish this, we synthesize a trailer which sorts later than any
+    # _reasonable_ alphanumeric version trailer would.  These characters have a
+    # high value in ASCII.
+    trailer = '}}}'
+  numeric_parts = [int(i) for i in version.split('.')]
+  return tuple(numeric_parts + [trailer])
 
 
 def get_source_base():
