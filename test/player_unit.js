@@ -131,16 +131,7 @@ describe('Player', function() {
       player.createPlayhead = function() { return playhead; };
       player.createPlayheadObserver = function() { return playheadObserver; };
       player.createMediaSourceEngine = function() { return mediaSourceEngine; };
-      player.createStreamingEngine = function() {
-        // This captures the variable |manifest| so this should only be used
-        // after the manifest has been set.
-        // Subtle: because this captures let manifest above, there cannot be any
-        // other location for manifests in these tests.
-        // TODO: fix this to use the manifest currently loaded by the player.
-        let period = manifest.periods[0];
-        streamingEngine.getCurrentPeriod.and.returnValue(period);
-        return streamingEngine;
-      };
+      player.createStreamingEngine = function() { return streamingEngine; };
     }
 
     video = new shaka.test.FakeVideo(20);

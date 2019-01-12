@@ -131,13 +131,12 @@ shaka.test.FakeStreamingEngine = function(onChooseStreams, onCanSwitch) {
   let activeText = null;
 
   let ret = jasmine.createSpyObj('fakeStreamingEngine', [
-    'destroy', 'configure', 'init', 'getCurrentPeriod', 'getActivePeriod',
+    'destroy', 'configure', 'init', 'getActivePeriod',
     'getActiveAudio', 'getActiveVideo', 'getActiveText', 'loadNewTextStream',
     'switchVariant', 'switchTextStream', 'seeked',
     'unloadTextStream',
   ]);
   ret.destroy.and.callFake(resolve);
-  ret.getCurrentPeriod.and.returnValue(null);
   ret.getActivePeriod.and.returnValue(null);
   ret.getActiveAudio.and.callFake(function() { return activeAudio; });
   ret.getActiveVideo.and.callFake(function() { return activeVideo; });
@@ -186,10 +185,6 @@ shaka.test.FakeStreamingEngine.prototype.switchVariant;
 
 /** @type {jasmine.Spy} */
 shaka.test.FakeStreamingEngine.prototype.switchTextStream;
-
-
-/** @type {jasmine.Spy} */
-shaka.test.FakeStreamingEngine.prototype.getCurrentPeriod;
 
 
 /** @type {function()} */
