@@ -503,14 +503,14 @@ describe('Player', function() {
         await player.load(fakeManifestUri, 0, returnManifest(manifest));
         player.setTextTrackVisibility(true);
         expect(streamingEngine.loadNewTextStream).toHaveBeenCalled();
-        expect(streamingEngine.getActiveText()).not.toBe(null);
+        expect(streamingEngine.getBufferingText()).not.toBe(null);
       });
 
       it('does not load text stream if caption is invisible', async () => {
         await player.load(fakeManifestUri, 0, returnManifest(manifest));
         player.setTextTrackVisibility(false);
         expect(streamingEngine.loadNewTextStream).not.toHaveBeenCalled();
-        expect(streamingEngine.getActiveText()).toBe(null);
+        expect(streamingEngine.getBufferingText()).toBe(null);
       });
 
       it('loads text stream if alwaysStreamText is set', async () => {
@@ -518,7 +518,7 @@ describe('Player', function() {
         player.configure({streaming: {alwaysStreamText: true}});
 
         await player.load(fakeManifestUri, 0, returnManifest(manifest));
-        expect(streamingEngine.getActiveText()).not.toBe(null);
+        expect(streamingEngine.getBufferingText()).not.toBe(null);
 
         player.setTextTrackVisibility(true);
         expect(streamingEngine.loadNewTextStream).not.toHaveBeenCalled();
