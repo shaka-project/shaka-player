@@ -446,7 +446,7 @@ shaka.ui.Controls.prototype.createDOM_ = function() {
  */
 shaka.ui.Controls.prototype.addControlsContainer_ = function() {
   /** @private {!HTMLElement} */
-  this.controlsContainer_ = shaka.ui.Controls.createHTMLElement_('div');
+  this.controlsContainer_ = shaka.ui.Utils.createHTMLElement('div');
   this.controlsContainer_.classList.add('shaka-controls-container');
   this.videoContainer_.appendChild(this.controlsContainer_);
 };
@@ -457,12 +457,12 @@ shaka.ui.Controls.prototype.addControlsContainer_ = function() {
  */
 shaka.ui.Controls.prototype.addPlayButton_ = function() {
   /** @private {!HTMLElement} */
-  this.playButtonContainer_ = shaka.ui.Controls.createHTMLElement_('div');
+  this.playButtonContainer_ = shaka.ui.Utils.createHTMLElement('div');
   this.playButtonContainer_.classList.add('shaka-play-button-container');
   this.controlsContainer_.appendChild(this.playButtonContainer_);
 
   /** @private {!HTMLElement} */
-  this.playButton_ = shaka.ui.Controls.createHTMLElement_('button');
+  this.playButton_ = shaka.ui.Utils.createHTMLElement('button');
   this.playButton_.classList.add('shaka-play-button');
   this.playButton_.setAttribute('icon', 'play');
   this.playButtonContainer_.appendChild(this.playButton_);
@@ -508,7 +508,7 @@ shaka.ui.Controls.prototype.addBufferingSpinner_ = function() {
  */
 shaka.ui.Controls.prototype.addControlsButtonPanel_ = function() {
   /** @private {!HTMLElement} */
-  this.controlsButtonPanel_ = shaka.ui.Controls.createHTMLElement_('div');
+  this.controlsButtonPanel_ = shaka.ui.Utils.createHTMLElement('div');
   this.controlsButtonPanel_.classList.add('shaka-controls-button-panel');
   this.controlsButtonPanel_.classList.add('shaka-no-propagation');
   this.controlsButtonPanel_.classList.add('shaka-show-controls-on-mouse-over');
@@ -748,7 +748,7 @@ shaka.ui.Controls.prototype.addSeekBar_ = function() {
   // This container is to support IE 11.  See detailed notes in
   // less/range_elements.less for a complete explanation.
   // TODO: Factor this into a range-element component.
-  this.seekBarContainer_ = shaka.ui.Controls.createHTMLElement_('div');
+  this.seekBarContainer_ = shaka.ui.Utils.createHTMLElement('div');
   this.seekBarContainer_.classList.add('shaka-seek-bar-container');
 
   this.seekBar_ =
@@ -773,7 +773,7 @@ shaka.ui.Controls.prototype.addSeekBar_ = function() {
  */
 shaka.ui.Controls.prototype.addOverflowMenu_ = function() {
   /** @private {!HTMLElement} */
-  this.overflowMenu_ = shaka.ui.Controls.createHTMLElement_('div');
+  this.overflowMenu_ = shaka.ui.Utils.createHTMLElement('div');
   this.overflowMenu_.classList.add('shaka-overflow-menu');
   this.overflowMenu_.classList.add('shaka-no-propagation');
   this.overflowMenu_.classList.add('shaka-show-controls-on-mouse-over');
@@ -812,9 +812,9 @@ shaka.ui.Controls.prototype.addOverflowMenu_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.addCurrentTime_ = function() {
-  const timeContainer = shaka.ui.Controls.createHTMLElement_('div');
+  const timeContainer = shaka.ui.Utils.createHTMLElement('div');
   timeContainer.classList.add('shaka-time-container');
-  this.currentTime_ = shaka.ui.Controls.createHTMLElement_('div');
+  this.currentTime_ = shaka.ui.Utils.createHTMLElement('div');
   this.currentTime_.textContent = '0:00';
   timeContainer.appendChild(this.currentTime_);
   this.controlsButtonPanel_.appendChild(timeContainer);
@@ -825,7 +825,7 @@ shaka.ui.Controls.prototype.addCurrentTime_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.addMuteButton_ = function() {
-  this.muteButton_ = shaka.ui.Controls.createHTMLElement_('button');
+  this.muteButton_ = shaka.ui.Utils.createHTMLElement('button');
   this.muteButton_.classList.add('shaka-mute-button');
   this.muteButton_.classList.add('material-icons');
   this.muteButton_.textContent = shaka.ui.Controls.MaterialDesignIcons_.MUTE;
@@ -840,7 +840,7 @@ shaka.ui.Controls.prototype.addVolumeBar_ = function() {
   // This container is to support IE 11.  See detailed notes in
   // less/range_elements.less for a complete explanation.
   // TODO: Factor this into a range-element component.
-  this.volumeBarContainer_ = shaka.ui.Controls.createHTMLElement_('div');
+  this.volumeBarContainer_ = shaka.ui.Utils.createHTMLElement('div');
   this.volumeBarContainer_.classList.add('shaka-volume-bar-container');
 
   this.volumeBar_ =
@@ -862,7 +862,7 @@ shaka.ui.Controls.prototype.addVolumeBar_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.addFullscreenButton_ = function() {
-  this.fullscreenButton_ = shaka.ui.Controls.createHTMLElement_('button');
+  this.fullscreenButton_ = shaka.ui.Utils.createHTMLElement('button');
   this.fullscreenButton_.classList.add('shaka-fullscreen-button');
   this.fullscreenButton_.classList.add('material-icons');
   this.fullscreenButton_.textContent =
@@ -875,7 +875,7 @@ shaka.ui.Controls.prototype.addFullscreenButton_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.addOverflowMenuButton_ = function() {
-  this.overflowMenuButton_ = shaka.ui.Controls.createHTMLElement_('button');
+  this.overflowMenuButton_ = shaka.ui.Utils.createHTMLElement('button');
   this.overflowMenuButton_.classList.add('shaka-overflow-menu-button');
   this.overflowMenuButton_.classList.add('shaka-no-propagation');
   this.overflowMenuButton_.classList.add('material-icons');
@@ -889,22 +889,22 @@ shaka.ui.Controls.prototype.addOverflowMenuButton_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.addCaptionButton_ = function() {
-  this.captionButton_ = shaka.ui.Controls.createHTMLElement_('button');
+  this.captionButton_ = shaka.ui.Utils.createHTMLElement('button');
   this.captionButton_.classList.add('shaka-caption-button');
-  this.captionIcon_ = shaka.ui.Controls.createHTMLElement_('i');
+  this.captionIcon_ = shaka.ui.Utils.createHTMLElement('i');
   this.captionIcon_.classList.add('material-icons');
   this.captionIcon_.textContent =
     shaka.ui.Controls.MaterialDesignIcons_.CLOSED_CAPTIONS;
   this.captionButton_.appendChild(this.captionIcon_);
 
-  const label = shaka.ui.Controls.createHTMLElement_('label');
+  const label = shaka.ui.Utils.createHTMLElement('label');
   label.classList.add('shaka-overflow-button-label');
 
-  this.captionsNameSpan_ = shaka.ui.Controls.createHTMLElement_('span');
+  this.captionsNameSpan_ = shaka.ui.Utils.createHTMLElement('span');
 
   label.appendChild(this.captionsNameSpan_);
 
-  this.currentCaptions_ = shaka.ui.Controls.createHTMLElement_('span');
+  this.currentCaptions_ = shaka.ui.Utils.createHTMLElement('span');
   this.currentCaptions_.classList.add('shaka-current-selection-span');
   label.appendChild(this.currentCaptions_);
   this.captionButton_.appendChild(label);
@@ -916,30 +916,30 @@ shaka.ui.Controls.prototype.addCaptionButton_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.addTextLangMenu_ = function() {
-  this.textLangMenu_ = shaka.ui.Controls.createHTMLElement_('div');
+  this.textLangMenu_ = shaka.ui.Utils.createHTMLElement('div');
   this.textLangMenu_.classList.add('shaka-text-languages');
   this.textLangMenu_.classList.add('shaka-no-propagation');
   this.textLangMenu_.classList.add('shaka-show-controls-on-mouse-over');
   this.textLangMenu_.classList.add('shaka-settings-menu');
 
-  this.backFromCaptionsButton_ = shaka.ui.Controls.createHTMLElement_('button');
+  this.backFromCaptionsButton_ = shaka.ui.Utils.createHTMLElement('button');
   this.backFromCaptionsButton_.classList.add('shaka-back-to-overflow-button');
   this.textLangMenu_.appendChild(this.backFromCaptionsButton_);
 
-  const backIcon = shaka.ui.Controls.createHTMLElement_('i');
+  const backIcon = shaka.ui.Utils.createHTMLElement('i');
   backIcon.classList.add('material-icons');
   backIcon.textContent = shaka.ui.Controls.MaterialDesignIcons_.BACK;
   this.backFromCaptionsButton_.appendChild(backIcon);
 
-  this.backFromCaptionsSpan_ = shaka.ui.Controls.createHTMLElement_('span');
+  this.backFromCaptionsSpan_ = shaka.ui.Utils.createHTMLElement('span');
   this.backFromCaptionsButton_.appendChild(this.backFromCaptionsSpan_);
 
   // Add the off option
-  const off = shaka.ui.Controls.createHTMLElement_('button');
+  const off = shaka.ui.Utils.createHTMLElement('button');
   off.setAttribute('aria-selected', 'true');
   this.textLangMenu_.appendChild(off);
 
-  const chosenIcon = shaka.ui.Controls.createHTMLElement_('i');
+  const chosenIcon = shaka.ui.Utils.createHTMLElement('i');
   chosenIcon.classList.add('material-icons');
   chosenIcon.classList.add('shaka-chosen-item');
   // This text content is actually a material design icon.
@@ -949,7 +949,7 @@ shaka.ui.Controls.prototype.addTextLangMenu_ = function() {
   chosenIcon.setAttribute('aria-hidden', 'true');
   off.appendChild(chosenIcon);
 
-  this.captionsOffSpan_ = shaka.ui.Controls.createHTMLElement_('span');
+  this.captionsOffSpan_ = shaka.ui.Utils.createHTMLElement('span');
 
   this.captionsOffSpan_.classList.add('shaka-auto-span');
   off.appendChild(this.captionsOffSpan_);
@@ -962,25 +962,25 @@ shaka.ui.Controls.prototype.addTextLangMenu_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.addCastButton_ = function() {
-  this.castButton_ = shaka.ui.Controls.createHTMLElement_('button');
+  this.castButton_ = shaka.ui.Utils.createHTMLElement('button');
 
   this.castButton_.classList.add('shaka-cast-button');
   this.castButton_.classList.add('shaka-hidden');
   this.castButton_.setAttribute('aria-pressed', 'false');
 
-  this.castIcon_ = shaka.ui.Controls.createHTMLElement_('i');
+  this.castIcon_ = shaka.ui.Utils.createHTMLElement('i');
   this.castIcon_.classList.add('material-icons');
   // This text content is actually a material design icon.
   // DO NOT LOCALIZE
   this.castIcon_.textContent = shaka.ui.Controls.MaterialDesignIcons_.CAST;
   this.castButton_.appendChild(this.castIcon_);
 
-  const label = shaka.ui.Controls.createHTMLElement_('label');
+  const label = shaka.ui.Utils.createHTMLElement('label');
   label.classList.add('shaka-overflow-button-label');
-  this.castNameSpan_ = shaka.ui.Controls.createHTMLElement_('span');
+  this.castNameSpan_ = shaka.ui.Utils.createHTMLElement('span');
   label.appendChild(this.castNameSpan_);
 
-  this.castCurrentSelectionSpan_ = shaka.ui.Controls.createHTMLElement_('span');
+  this.castCurrentSelectionSpan_ = shaka.ui.Utils.createHTMLElement('span');
   this.castCurrentSelectionSpan_.classList.add('shaka-current-selection-span');
   label.appendChild(this.castCurrentSelectionSpan_);
   this.castButton_.appendChild(label);
@@ -992,7 +992,7 @@ shaka.ui.Controls.prototype.addCastButton_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.addRewindButton_ = function() {
-  this.rewindButton_ = shaka.ui.Controls.createHTMLElement_('button');
+  this.rewindButton_ = shaka.ui.Utils.createHTMLElement('button');
   this.rewindButton_.classList.add('shaka-rewind-button');
   this.rewindButton_.classList.add('material-icons');
   this.rewindButton_.textContent =
@@ -1005,7 +1005,7 @@ shaka.ui.Controls.prototype.addRewindButton_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.addFastForwardButton_ = function() {
-  this.fastForwardButton_ = shaka.ui.Controls.createHTMLElement_('button');
+  this.fastForwardButton_ = shaka.ui.Utils.createHTMLElement('button');
   this.fastForwardButton_.classList.add('shaka-fast-forward-button');
   this.fastForwardButton_.classList.add('material-icons');
   this.fastForwardButton_.textContent =
@@ -1018,32 +1018,32 @@ shaka.ui.Controls.prototype.addFastForwardButton_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.addResolutionMenu_ = function() {
-  this.resolutionMenu_ = shaka.ui.Controls.createHTMLElement_('div');
+  this.resolutionMenu_ = shaka.ui.Utils.createHTMLElement('div');
   this.resolutionMenu_.classList.add('shaka-resolutions');
   this.resolutionMenu_.classList.add('shaka-no-propagation');
   this.resolutionMenu_.classList.add('shaka-show-controls-on-mouse-over');
   this.resolutionMenu_.classList.add('shaka-settings-menu');
 
   this.backFromResolutionButton_ =
-    shaka.ui.Controls.createHTMLElement_('button');
+    shaka.ui.Utils.createHTMLElement('button');
   this.backFromResolutionButton_.classList.add('shaka-back-to-overflow-button');
   this.resolutionMenu_.appendChild(this.backFromResolutionButton_);
 
-  const backIcon = shaka.ui.Controls.createHTMLElement_('i');
+  const backIcon = shaka.ui.Utils.createHTMLElement('i');
   backIcon.classList.add('material-icons');
   backIcon.textContent = shaka.ui.Controls.MaterialDesignIcons_.BACK;
   this.backFromResolutionButton_.appendChild(backIcon);
 
-  this.backFromResolutionSpan_ = shaka.ui.Controls.createHTMLElement_('span');
+  this.backFromResolutionSpan_ = shaka.ui.Utils.createHTMLElement('span');
   this.backFromResolutionButton_.appendChild(this.backFromResolutionSpan_);
 
 
   // Add the abr option
-  const auto = shaka.ui.Controls.createHTMLElement_('button');
+  const auto = shaka.ui.Utils.createHTMLElement('button');
   auto.setAttribute('aria-selected', 'true');
   this.resolutionMenu_.appendChild(auto);
 
-  const chosenIcon = shaka.ui.Controls.createHTMLElement_('i');
+  const chosenIcon = shaka.ui.Utils.createHTMLElement('i');
   chosenIcon.classList.add('material-icons');
   chosenIcon.classList.add('shaka-chosen-item');
   chosenIcon.textContent = shaka.ui.Controls.MaterialDesignIcons_.CHECKMARK;
@@ -1051,7 +1051,7 @@ shaka.ui.Controls.prototype.addResolutionMenu_ = function() {
   chosenIcon.setAttribute('aria-hidden', 'true');
   auto.appendChild(chosenIcon);
 
-  this.abrOnSpan_ = shaka.ui.Controls.createHTMLElement_('span');
+  this.abrOnSpan_ = shaka.ui.Utils.createHTMLElement('span');
   this.abrOnSpan_.classList.add('shaka-auto-span');
   auto.appendChild(this.abrOnSpan_);
 
@@ -1063,21 +1063,21 @@ shaka.ui.Controls.prototype.addResolutionMenu_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.addResolutionButton_ = function() {
-  this.resolutionButton_ = shaka.ui.Controls.createHTMLElement_('button');
+  this.resolutionButton_ = shaka.ui.Utils.createHTMLElement('button');
 
   this.resolutionButton_.classList.add('shaka-resolution-button');
 
-  const icon = shaka.ui.Controls.createHTMLElement_('i');
+  const icon = shaka.ui.Utils.createHTMLElement('i');
   icon.classList.add('material-icons');
   icon.textContent = shaka.ui.Controls.MaterialDesignIcons_.RESOLUTION;
   this.resolutionButton_.appendChild(icon);
 
-  const label = shaka.ui.Controls.createHTMLElement_('label');
+  const label = shaka.ui.Utils.createHTMLElement('label');
   label.classList.add('shaka-overflow-button-label');
-  this.resolutionNameSpan_ = shaka.ui.Controls.createHTMLElement_('span');
+  this.resolutionNameSpan_ = shaka.ui.Utils.createHTMLElement('span');
   label.appendChild(this.resolutionNameSpan_);
 
-  this.currentResolution_ = shaka.ui.Controls.createHTMLElement_('span');
+  this.currentResolution_ = shaka.ui.Utils.createHTMLElement('span');
   this.currentResolution_.classList.add('shaka-current-selection-span');
   label.appendChild(this.currentResolution_);
   this.resolutionButton_.appendChild(label);
@@ -1090,22 +1090,22 @@ shaka.ui.Controls.prototype.addResolutionButton_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.addAudioLangMenu_ = function() {
-  this.audioLangMenu_ = shaka.ui.Controls.createHTMLElement_('div');
+  this.audioLangMenu_ = shaka.ui.Utils.createHTMLElement('div');
   this.audioLangMenu_.classList.add('shaka-audio-languages');
   this.audioLangMenu_.classList.add('shaka-no-propagation');
   this.audioLangMenu_.classList.add('shaka-show-controls-on-mouse-over');
   this.audioLangMenu_.classList.add('shaka-settings-menu');
 
-  this.backFromLanguageButton_ = shaka.ui.Controls.createHTMLElement_('button');
+  this.backFromLanguageButton_ = shaka.ui.Utils.createHTMLElement('button');
   this.backFromLanguageButton_.classList.add('shaka-back-to-overflow-button');
   this.audioLangMenu_.appendChild(this.backFromLanguageButton_);
 
-  const backIcon = shaka.ui.Controls.createHTMLElement_('i');
+  const backIcon = shaka.ui.Utils.createHTMLElement('i');
   backIcon.classList.add('material-icons');
   backIcon.textContent = shaka.ui.Controls.MaterialDesignIcons_.BACK;
   this.backFromLanguageButton_.appendChild(backIcon);
 
-  this.backFromLanguageSpan_ = shaka.ui.Controls.createHTMLElement_('span');
+  this.backFromLanguageSpan_ = shaka.ui.Utils.createHTMLElement('span');
   this.backFromLanguageButton_.appendChild(this.backFromLanguageSpan_);
 
   this.controlsContainer_.appendChild(this.audioLangMenu_);
@@ -1116,21 +1116,21 @@ shaka.ui.Controls.prototype.addAudioLangMenu_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.addLanguagesButton_ = function() {
-  this.languagesButton_ = shaka.ui.Controls.createHTMLElement_('button');
+  this.languagesButton_ = shaka.ui.Utils.createHTMLElement('button');
   this.languagesButton_.classList.add('shaka-language-button');
 
-  const icon = shaka.ui.Controls.createHTMLElement_('i');
+  const icon = shaka.ui.Utils.createHTMLElement('i');
   icon.classList.add('material-icons');
   icon.textContent = shaka.ui.Controls.MaterialDesignIcons_.LANGUAGE;
   this.languagesButton_.appendChild(icon);
 
-  const label = shaka.ui.Controls.createHTMLElement_('label');
+  const label = shaka.ui.Utils.createHTMLElement('label');
   label.classList.add('shaka-overflow-button-label');
-  this.languageNameSpan_ = shaka.ui.Controls.createHTMLElement_('span');
+  this.languageNameSpan_ = shaka.ui.Utils.createHTMLElement('span');
   this.languageNameSpan_.classList.add('languageSpan');
   label.appendChild(this.languageNameSpan_);
 
-  this.currentAudioLanguage_ = shaka.ui.Controls.createHTMLElement_('span');
+  this.currentAudioLanguage_ = shaka.ui.Utils.createHTMLElement('span');
   this.currentAudioLanguage_.classList.add('shaka-current-selection-span');
   const language = this.player_.getConfiguration().preferredAudioLanguage;
   this.currentAudioLanguage_.textContent = this.getLanguageName_(language);
@@ -1147,23 +1147,23 @@ shaka.ui.Controls.prototype.addLanguagesButton_ = function() {
  */
 shaka.ui.Controls.prototype.addPipButton_ = function() {
   const LocIds = shaka.ui.Locales.Ids;
-  this.pipButton_ = shaka.ui.Controls.createHTMLElement_('button');
+  this.pipButton_ = shaka.ui.Utils.createHTMLElement('button');
 
-  this.pipIcon_ = shaka.ui.Controls.createHTMLElement_('i');
+  this.pipIcon_ = shaka.ui.Utils.createHTMLElement('i');
   this.pipIcon_.classList.add('material-icons');
   // This text content is actually a material design icon.
   // DO NOT LOCALIZE
   this.pipIcon_.textContent = shaka.ui.Controls.MaterialDesignIcons_.PIP;
   this.pipButton_.appendChild(this.pipIcon_);
 
-  const label = shaka.ui.Controls.createHTMLElement_('label');
+  const label = shaka.ui.Utils.createHTMLElement('label');
   label.classList.add('shaka-overflow-button-label');
-  this.pipNameSpan_ = shaka.ui.Controls.createHTMLElement_('span');
+  this.pipNameSpan_ = shaka.ui.Utils.createHTMLElement('span');
   this.pipNameSpan_.textContent =
       this.localization_.resolve(LocIds.LABEL_PICTURE_IN_PICTURE);
   label.appendChild(this.pipNameSpan_);
 
-  this.currentPipState_ = shaka.ui.Controls.createHTMLElement_('span');
+  this.currentPipState_ = shaka.ui.Utils.createHTMLElement('span');
   this.currentPipState_.classList.add('shaka-current-selection-span');
   this.currentPipState_.textContent =
       this.localization_.resolve(LocIds.LABEL_PICTURE_IN_PICTURE_OFF);
@@ -1810,12 +1810,12 @@ shaka.ui.Controls.prototype.updateResolutionSelection_ = function() {
 
   // Add new ones
   tracks.forEach((track) => {
-    let button = shaka.ui.Controls.createHTMLElement_('button');
+    let button = shaka.ui.Utils.createHTMLElement('button');
     button.classList.add('explicit-resolution');
     button.addEventListener('click',
         this.onTrackSelected_.bind(this, track));
 
-    let span = shaka.ui.Controls.createHTMLElement_('span');
+    let span = shaka.ui.Utils.createHTMLElement('span');
     span.textContent = track.height + 'p';
     button.appendChild(span);
 
@@ -1831,14 +1831,14 @@ shaka.ui.Controls.prototype.updateResolutionSelection_ = function() {
   });
 
   // Add the Auto button
-  let autoButton = shaka.ui.Controls.createHTMLElement_('button');
+  let autoButton = shaka.ui.Utils.createHTMLElement('button');
   autoButton.addEventListener('click', function() {
     let config = {abr: {enabled: true}};
     this.player_.configure(config);
     this.updateResolutionSelection_();
   }.bind(this));
 
-  let autoSpan = shaka.ui.Controls.createHTMLElement_('span');
+  let autoSpan = shaka.ui.Utils.createHTMLElement('span');
   autoSpan.textContent =
     this.localization_.resolve(shaka.ui.Locales.Ids.LABEL_AUTO_QUALITY);
   autoButton.appendChild(autoSpan);
@@ -1904,7 +1904,7 @@ shaka.ui.Controls.prototype.updateTextLanguages_ = function() {
     this.currentCaptions_);
 
   // Add the Off button
-  let offButton = shaka.ui.Controls.createHTMLElement_('button');
+  let offButton = shaka.ui.Utils.createHTMLElement('button');
   offButton.addEventListener('click', () => {
     this.player_.setTextTrackVisibility(false);
     this.updateTextLanguages_();
@@ -1959,10 +1959,10 @@ shaka.ui.Controls.prototype.updateLanguages_ = function(tracks, langMenu,
 
   // 4. Add new buttons
   languages.forEach((language) => {
-    let button = shaka.ui.Controls.createHTMLElement_('button');
+    let button = shaka.ui.Utils.createHTMLElement('button');
     button.addEventListener('click', onLanguageSelected.bind(this, language));
 
-    let span = shaka.ui.Controls.createHTMLElement_('span');
+    let span = shaka.ui.Utils.createHTMLElement('span');
     span.textContent = this.getLanguageName_(language);
     button.appendChild(span);
 
@@ -2029,7 +2029,7 @@ shaka.ui.Controls.prototype.focusOnTheChosenItem_ = function(menu) {
  * @private
  */
 shaka.ui.Controls.prototype.chosenIcon_ = function() {
-  let chosenIcon = shaka.ui.Controls.createHTMLElement_('i');
+  let chosenIcon = shaka.ui.Utils.createHTMLElement('i');
   chosenIcon.classList.add('material-icons');
   chosenIcon.textContent = shaka.ui.Controls.MaterialDesignIcons_.CHECKMARK;
   // Screen reader should ignore 'done'.
@@ -2617,18 +2617,6 @@ shaka.ui.Controls.createLocalization_ = function() {
   localization.changeLocale(navigator.languages || []);
 
   return localization;
-};
-
-
-/**
- * @param {string} tagName
- * @return {!HTMLElement}
- * @private
- */
-shaka.ui.Controls.createHTMLElement_ = function(tagName) {
-  const element =
-    /** @type {!HTMLElement} */ (document.createElement(tagName));
-  return element;
 };
 
 
