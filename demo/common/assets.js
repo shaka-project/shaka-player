@@ -92,6 +92,7 @@ shakaAssets.Feature = {
   SEGMENTED_TEXT: 'segmented text',
   EMBEDDED_TEXT: 'embedded text',
   MULTIPLE_LANGUAGES: 'multiple languages',
+  OFFLINE: 'offline',
 
   LIVE: 'live',
   WEBM: 'WebM',
@@ -267,8 +268,9 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.WEBM,
-      shakaAssets.Feature.WEBVTT
-    ]
+      shakaAssets.Feature.WEBVTT,
+      shakaAssets.Feature.OFFLINE,
+    ],
   },
   {
     name: 'Angel One (multicodec, multilingual, Widevine)',
@@ -283,7 +285,8 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.WEBM,
-      shakaAssets.Feature.WEBVTT
+      shakaAssets.Feature.WEBVTT,
+      shakaAssets.Feature.OFFLINE,
     ],
 
     licenseServers: {
@@ -303,7 +306,8 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.WEBM,
-      shakaAssets.Feature.WEBVTT
+      shakaAssets.Feature.WEBVTT,
+      shakaAssets.Feature.OFFLINE,
     ],
 
     licenseServers: {
@@ -320,8 +324,9 @@ shakaAssets.testAssets = [
     features: [
       shakaAssets.Feature.HLS,
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.MULTIPLE_LANGUAGES
-    ]
+      shakaAssets.Feature.MULTIPLE_LANGUAGES,
+      shakaAssets.Feature.OFFLINE,
+    ],
   },
   {
     name: 'Angel One (HLS, MP4, multilingual, Widevine)',
@@ -333,7 +338,8 @@ shakaAssets.testAssets = [
     features: [
       shakaAssets.Feature.HLS,
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.MULTIPLE_LANGUAGES
+      shakaAssets.Feature.MULTIPLE_LANGUAGES,
+      shakaAssets.Feature.OFFLINE,
     ],
 
     licenseServers: {
@@ -354,8 +360,9 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
       shakaAssets.Feature.WEBM,
-      shakaAssets.Feature.WEBVTT
-    ]
+      shakaAssets.Feature.WEBVTT,
+      shakaAssets.Feature.OFFLINE,
+    ],
   },
   {
     name: 'Sintel w/ trick mode (MP4 only, 720p)',
@@ -370,8 +377,9 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.TRICK_MODE,
-      shakaAssets.Feature.WEBVTT
-    ]
+      shakaAssets.Feature.WEBVTT,
+      shakaAssets.Feature.OFFLINE,
+    ],
   },
   {
     name: 'Sintel 4k (WebM only)',
@@ -388,8 +396,9 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
       shakaAssets.Feature.WEBM,
-      shakaAssets.Feature.WEBVTT
-    ]
+      shakaAssets.Feature.WEBVTT,
+      shakaAssets.Feature.OFFLINE,
+    ],
   },
   {
     name: 'Sintel 4k (MP4 only)',
@@ -404,8 +413,9 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
-      shakaAssets.Feature.WEBVTT
-    ]
+      shakaAssets.Feature.WEBVTT,
+      shakaAssets.Feature.OFFLINE,
+    ],
   },
   {
     name: 'Sintel 4k (multicodec, Widevine)',
@@ -422,7 +432,8 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
       shakaAssets.Feature.WEBM,
-      shakaAssets.Feature.WEBVTT
+      shakaAssets.Feature.WEBVTT,
+      shakaAssets.Feature.OFFLINE,
     ],
 
     licenseServers: {
@@ -444,8 +455,9 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
       shakaAssets.Feature.WEBM,
-      shakaAssets.Feature.WEBVTT
-    ]
+      shakaAssets.Feature.WEBVTT,
+      shakaAssets.Feature.OFFLINE,
+    ],
   },
   {
     name: 'Heliocentrism (multicodec, multiperiod)',
@@ -458,8 +470,9 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.MULTIPERIOD,
       shakaAssets.Feature.SEGMENT_BASE,
-      shakaAssets.Feature.WEBM
-    ]
+      shakaAssets.Feature.WEBM,
+      shakaAssets.Feature.OFFLINE,
+    ],
   },
   {
     name: 'Heliocentrism (multicodec, multiperiod, xlink)',
@@ -473,8 +486,9 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.MULTIPERIOD,
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.WEBM,
-      shakaAssets.Feature.XLINK
-    ]
+      shakaAssets.Feature.XLINK,
+      shakaAssets.Feature.OFFLINE,
+    ],
   },
   {
     name: '"Dig the Uke" by Stefan Kartenberg (audio only, multicodec)',
@@ -490,8 +504,9 @@ shakaAssets.testAssets = [
     features: [
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_BASE,
-      shakaAssets.Feature.WEBM
-    ]
+      shakaAssets.Feature.WEBM,
+      shakaAssets.Feature.OFFLINE,
+    ],
   },
   {
     name: '"Dig the Uke" by Stefan Kartenberg (audio only, multicodec, Widevine)',  // eslint-disable-line max-len
@@ -507,7 +522,8 @@ shakaAssets.testAssets = [
     features: [
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_BASE,
-      shakaAssets.Feature.WEBM
+      shakaAssets.Feature.WEBM,
+      shakaAssets.Feature.OFFLINE,
     ],
 
     licenseServers: {
@@ -526,8 +542,9 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.TTML,
-      shakaAssets.Feature.WEBM
-    ]
+      shakaAssets.Feature.WEBM,
+      shakaAssets.Feature.OFFLINE,
+    ],
   },
   {
     name: 'Tears of Steel (multicodec, surround + stereo)',
@@ -539,8 +556,9 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.SURROUND,
-      shakaAssets.Feature.WEBM
-    ]
+      shakaAssets.Feature.WEBM,
+      shakaAssets.Feature.OFFLINE,
+    ],
   },
   {
     name: 'Shaka Player History (multicodec, live, DASH)',
@@ -674,8 +692,9 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
       shakaAssets.Feature.TTML,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
-      shakaAssets.Feature.WEBVTT
-    ]
+      shakaAssets.Feature.WEBVTT,
+      shakaAssets.Feature.OFFLINE,
+    ],
   },
   {
     name: 'Clear, multi-Period',
@@ -692,8 +711,9 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
       shakaAssets.Feature.TTML,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
-      shakaAssets.Feature.WEBVTT
-    ]
+      shakaAssets.Feature.WEBVTT,
+      shakaAssets.Feature.OFFLINE,
+    ],
   },
   {
     name: 'Clear, Live DASH',
@@ -739,8 +759,9 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.HIGH_DEFINITION,
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
-      shakaAssets.Feature.ULTRA_HIGH_DEFINITION
-    ]
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
+      shakaAssets.Feature.OFFLINE,
+    ],
   },
   {
     name: 'Tears of Steel (Widevine)',
@@ -803,8 +824,9 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENTED_TEXT,
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.TTML,
-      shakaAssets.Feature.ULTRA_HIGH_DEFINITION
-    ]
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
+      shakaAssets.Feature.OFFLINE,
+    ],
   },
   // }}}
 
@@ -819,8 +841,9 @@ shakaAssets.testAssets = [
     drm: [],
     features: [
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE
-    ]
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
+      shakaAssets.Feature.OFFLINE,
+    ],
   },
   {
     name: 'Live sim (2s segments)',
@@ -933,8 +956,9 @@ shakaAssets.testAssets = [
     features: [
       shakaAssets.Feature.HIGH_DEFINITION,
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION
-    ]
+      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
+      shakaAssets.Feature.OFFLINE,
+    ],
   },
   {
     name: 'Art of Motion (HLS, TS)',
@@ -946,8 +970,9 @@ shakaAssets.testAssets = [
     features: [
       shakaAssets.Feature.HIGH_DEFINITION,
       shakaAssets.Feature.HLS,
-      shakaAssets.Feature.MP2TS
-    ]
+      shakaAssets.Feature.MP2TS,
+      shakaAssets.Feature.OFFLINE,
+    ],
   },
   {
     name: 'Sintel (HLS, TS, 4k)',
@@ -960,8 +985,9 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.HIGH_DEFINITION,
       shakaAssets.Feature.HLS,
       shakaAssets.Feature.MP2TS,
-      shakaAssets.Feature.ULTRA_HIGH_DEFINITION
-    ]
+      shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
+      shakaAssets.Feature.OFFLINE,
+    ],
   },
   // }}}
 
@@ -995,8 +1021,9 @@ shakaAssets.testAssets = [
     drm: [],
     features: [
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE
-    ]
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
+      shakaAssets.Feature.OFFLINE,
+    ],
   },
   {
     name: 'Big Buck Bunny',
@@ -1010,7 +1037,8 @@ shakaAssets.testAssets = [
     ],
     features: [
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE
+      shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
+      shakaAssets.Feature.OFFLINE,
     ],
 
     licenseServers: {
@@ -1049,8 +1077,9 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
       shakaAssets.Feature.SUBTITLES,
-      shakaAssets.Feature.WEBVTT
-    ]
+      shakaAssets.Feature.WEBVTT,
+      shakaAssets.Feature.OFFLINE,
+    ],
   },
   // }}}
 
@@ -1085,8 +1114,9 @@ shakaAssets.testAssets = [
     features: [
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.MULTIPERIOD,
-      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION
-    ]
+      shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
+      shakaAssets.Feature.OFFLINE,
+    ],
   },
   {
     name: 'main profile, single file',
@@ -1097,8 +1127,9 @@ shakaAssets.testAssets = [
     drm: [],
     features: [
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_LIST_DURATION
-    ]
+      shakaAssets.Feature.SEGMENT_LIST_DURATION,
+      shakaAssets.Feature.OFFLINE,
+    ],
   },
   {
     name: 'main profile, mutiple files',
@@ -1126,8 +1157,9 @@ shakaAssets.testAssets = [
     drm: [],
     features: [
       shakaAssets.Feature.MP4,
-      shakaAssets.Feature.SEGMENT_BASE
-    ]
+      shakaAssets.Feature.SEGMENT_BASE,
+      shakaAssets.Feature.OFFLINE,
+    ],
   },
   {
     name: 'main profile, open GOP',
