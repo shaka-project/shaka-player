@@ -51,6 +51,7 @@ shakaDemo.updateButtons_ = function(canHide) {
   let storedContent = option.storedContent;
   let supportsPersistentStateForAsset = true;
   let supportsPersistentState = true;
+  let supportsOfflineStorage = true;
   // Persistent state support only matters if the asset has DRM.
   if (option.asset && option.asset.drm && option.asset.drm.length) {
     supportsPersistentStateForAsset = option.asset.drm.some(function(drm) {
@@ -62,6 +63,12 @@ shakaDemo.updateButtons_ = function(canHide) {
       return shakaDemo.support_.drm[drm] &&
              shakaDemo.support_.drm[drm].persistentState;
     });
+  }
+  if (option.asset) {
+    if (!option.asset.features.includes(shakaAssets.Feature.OFFLINE)) {
+      // For whatever reason, this asset can't handle offline storage.
+      supportsOfflineStorage = false;
+    }
   }
 
   // Only show when the custom asset option is selected.
@@ -86,6 +93,9 @@ shakaDemo.updateButtons_ = function(canHide) {
     button.disabled = true;
     helpText.textContent = 'The asset is stored offline. ' +
         'Checkout the "Offline" section in the "Asset" list';
+  } else if (!supportsOfflineStorage) {
+    button.disabled = true;
+    helpText.textContent = 'The asset does not support offline storage.';
   } else {
     helpText.textContent = '';
   }

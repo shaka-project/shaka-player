@@ -93,6 +93,7 @@ shakaAssets.Feature = {
   SEGMENTED_TEXT: 'segmented text',
   EMBEDDED_TEXT: 'embedded text',
   MULTIPLE_LANGUAGES: 'multiple languages',
+  OFFLINE: 'offline',
 
   LIVE: 'live',
   WEBM: 'WebM',
@@ -136,29 +137,11 @@ shakaAssets.ExtraText;
 
 /**
  * @typedef {{
- *   icon: string,
- *   shortName: string,
- *   description: string
- * }}
- *
- * @property {string} icon
- *   An URI pointing to an icon.
- * @property {string} shortName
- *   A shorter, snappier name for the asset.
- * @property {string} description
- *   A line or two of text describing the asset.
- */
-shakaAssets.FeaturedInfo;
-
-
-/**
- * @typedef {{
  *   name: string,
  *   manifestUri: string,
  *   certificateUri: (string|undefined),
  *   focus: (boolean|undefined),
  *   disabled: (boolean|undefined),
- *   featuredInfo: (shakaAssets.FeaturedInfo|undefined),
  *   extraText: (!Array.<shakaAssets.ExtraText>|undefined),
  *
  *   encoder: shakaAssets.Encoder,
@@ -189,10 +172,6 @@ shakaAssets.FeaturedInfo;
  * @property {(boolean|undefined)} disabled
  *   (optional) If true, disables tests for this asset and hides it in the demo
  *   app.
- * @property {(shakaAssets.FeaturedInfo|undefined)} featuredInfo
- *   (optional) A structure containing data for the featured panel for this
- *   asset in the demo app's main panel.
- *   If not set, this asset will not appear in the main panel.
  * @property {(!Array.<shakaAssets.ExtraText>|undefined)} extraText
  *   (optional) An array of extra text sources (e.g. external captions).
  *
@@ -294,6 +273,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.WEBM,
       shakaAssets.Feature.WEBVTT,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   {
@@ -311,6 +291,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.WEBM,
       shakaAssets.Feature.WEBVTT,
+      shakaAssets.Feature.OFFLINE,
     ],
 
     licenseServers: {
@@ -332,6 +313,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.WEBM,
       shakaAssets.Feature.WEBVTT,
+      shakaAssets.Feature.OFFLINE,
     ],
 
     licenseServers: {
@@ -345,15 +327,11 @@ shakaAssets.testAssets = [
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [],
-    featuredInfo: {
-      icon: 'https://storage.googleapis.com/shaka-asset-icons/angel_one.png',
-      shortName: 'Angel One',
-      description: 'A classic Star Trek TNG episode, presented in HLS.',
-    },
     features: [
       shakaAssets.Feature.HLS,
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.MULTIPLE_LANGUAGES,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   {
@@ -367,6 +345,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.HLS,
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.MULTIPLE_LANGUAGES,
+      shakaAssets.Feature.OFFLINE,
     ],
 
     licenseServers: {
@@ -389,6 +368,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
       shakaAssets.Feature.WEBM,
       shakaAssets.Feature.WEBVTT,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   {
@@ -406,6 +386,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.TRICK_MODE,
       shakaAssets.Feature.WEBVTT,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   {
@@ -425,6 +406,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
       shakaAssets.Feature.WEBM,
       shakaAssets.Feature.WEBVTT,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   {
@@ -442,6 +424,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
       shakaAssets.Feature.WEBVTT,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   {
@@ -451,12 +434,6 @@ shakaAssets.testAssets = [
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [shakaAssets.KeySystem.WIDEVINE],
-    featuredInfo: {
-      icon: 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
-      shortName: 'Sintel',
-      description: 'A Blender Foundation short film, protected by Widevine ' +
-                   'encryption.',
-    },
     features: [
       shakaAssets.Feature.DASH,
       shakaAssets.Feature.HIGH_DEFINITION,
@@ -467,6 +444,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
       shakaAssets.Feature.WEBM,
       shakaAssets.Feature.WEBVTT,
+      shakaAssets.Feature.OFFLINE,
     ],
 
     licenseServers: {
@@ -490,6 +468,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
       shakaAssets.Feature.WEBM,
       shakaAssets.Feature.WEBVTT,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   {
@@ -506,6 +485,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.WEBVTT,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   {
@@ -521,6 +501,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.MULTIPERIOD,
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.WEBM,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   {
@@ -537,6 +518,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.WEBM,
       shakaAssets.Feature.XLINK,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   {
@@ -550,16 +532,12 @@ shakaAssets.testAssets = [
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [],
-    featuredInfo: {
-      icon: 'https://storage.googleapis.com/shaka-asset-icons/audio_only.png',
-      shortName: 'Dig the Uke',
-      description: 'An audio-only presentation performed by Stefan Kartenberg.',
-    },
     features: [
       shakaAssets.Feature.DASH,
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.WEBM,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   {
@@ -578,6 +556,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.WEBM,
+      shakaAssets.Feature.OFFLINE,
     ],
 
     licenseServers: {
@@ -598,6 +577,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.TTML,
       shakaAssets.Feature.WEBM,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   {
@@ -612,6 +592,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_BASE,
       shakaAssets.Feature.SURROUND,
       shakaAssets.Feature.WEBM,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   {
@@ -620,11 +601,6 @@ shakaAssets.testAssets = [
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [],
-    featuredInfo: {
-      icon: 'https://storage.googleapis.com/shaka-asset-icons/shaka.png',
-      shortName: 'Shaka Player History',
-      description: 'A self-indulgent DASH livestream.',
-    },
     features: [
       shakaAssets.Feature.DASH,
       shakaAssets.Feature.HIGH_DEFINITION,
@@ -757,6 +733,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.TTML,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
       shakaAssets.Feature.WEBVTT,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   {
@@ -776,6 +753,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.TTML,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
       shakaAssets.Feature.WEBVTT,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   {
@@ -824,6 +802,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   {
@@ -891,6 +870,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.TTML,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   // }}}
@@ -907,6 +887,7 @@ shakaAssets.testAssets = [
     features: [
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   {
@@ -1028,6 +1009,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.HIGH_DEFINITION,
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   {
@@ -1041,6 +1023,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.HIGH_DEFINITION,
       shakaAssets.Feature.HLS,
       shakaAssets.Feature.MP2TS,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   {
@@ -1055,6 +1038,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.HLS,
       shakaAssets.Feature.MP2TS,
       shakaAssets.Feature.ULTRA_HIGH_DEFINITION,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   // }}}
@@ -1092,6 +1076,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.DASH,
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   {
@@ -1108,6 +1093,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.DASH,
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
+      shakaAssets.Feature.OFFLINE,
     ],
 
     licenseServers: {
@@ -1148,6 +1134,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
       shakaAssets.Feature.SUBTITLES,
       shakaAssets.Feature.WEBVTT,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   // }}}
@@ -1186,6 +1173,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.MULTIPERIOD,
       shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   {
@@ -1199,6 +1187,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.DASH,
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_LIST_DURATION,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   {
@@ -1230,6 +1219,7 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.DASH,
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_BASE,
+      shakaAssets.Feature.OFFLINE,
     ],
   },
   {
