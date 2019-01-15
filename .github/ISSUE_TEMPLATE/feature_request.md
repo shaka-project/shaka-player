@@ -7,6 +7,9 @@ assignees: ''
 
 ---
 
+**Have you read the [FAQ](https://bit.ly/ShakaFAQ) and checked for duplicate open issues?**
+
+
 **Is your feature request related to a problem? Please describe.**
 <!-- A clear and concise description of what the problem is. Ex. I'm always frustrated when [...] -->
 
