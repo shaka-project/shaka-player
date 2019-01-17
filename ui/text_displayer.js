@@ -110,14 +110,30 @@ shaka.ui.TextDisplayer = class {
    * @export
    */
   remove(start, end) {
-    this.cues_ = this.cues_.filter((cue) => {
-      return cue.endTime <= start || cue.startTime >= end;
-    });
-    // Clear the previously displayed captions.
-    while (this.textDisplayPanel_.firstChild) {
-      this.textDisplayPanel_.removeChild(this.textDisplayPanel_.firstChild);
+    // Return false if destroy() has been called.
+    if (!this.textDisplayPanel_) {
+      return false;
     }
 
+    // Remove the cues out of the time range from the map, and remove the
+    // captions from the page.
+    const cuesToRemove = new Set();
+    for (const cue of this.cues_) {
+      if (cue.startTime > start && cue.endTime < end) {
+        cuesToRemove.add(cue);
+      }
+    }
+
+    for (const cue of cuesToRemove) {
+        const captionsText = this.currentCuesMap_.get(cue);
+        if (captionsText) {
+          this.textDisplayPanel_.removeChild(captionsText);
+          this.currentCuesMap_.delete(cue);
+        }
+    }
+
+    // Remove the cues out of the time range.
+    this.cues_ = this.cues_.filter((cue) => !cuesToRemove.has(cue));
     return true;
   }
 
