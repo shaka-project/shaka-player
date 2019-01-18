@@ -29,6 +29,8 @@ Core Bugfixes:
     - https://github.com/google/shaka-player/issues/1819
   - Fix broken version definition in compiled build
     - https://github.com/google/shaka-player/issues/1816
+  - Fix video reloading on audio language change
+    - https://github.com/google/shaka-player/issues/1714
 
 UI Bugfixes:
   - Fix missing resolution menu in UI after playing audio-only content

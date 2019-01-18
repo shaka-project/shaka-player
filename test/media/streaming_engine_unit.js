@@ -1142,9 +1142,7 @@ describe('StreamingEngine', function() {
         mediaSourceEngine.clear.calls.reset();
         streamingEngine.switchTextStream(initialTextStream);
         Util.fakeEventLoop(1);
-        expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('audio');
-        expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('video');
-        expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('text');
+        expect(mediaSourceEngine.clear).not.toHaveBeenCalled();
       });
 
       streamingEngine.start().catch(fail);
@@ -1186,28 +1184,6 @@ describe('StreamingEngine', function() {
           presentationTimeInSeconds -= 5;
           streamingEngine.seeked();
 
-          onChooseStreams.and.callFake(function(period) {
-            expect(period).toBe(manifest.periods[1]);
-            expect(presentationTimeInSeconds).toBe(16);
-
-            // Verify buffers.
-            expect(mediaSourceEngine.initSegments).toEqual({
-              audio: [true, false],
-              video: [true, false],
-              text: [],
-            });
-            expect(mediaSourceEngine.segments).toEqual({
-              audio: [true, true, false, false],
-              video: [true, true, false, false],
-              text: [true, true, false, false],
-            });
-
-            onChooseStreams.and.throwError(new Error());
-
-            // Switch to the second Period.
-            return defaultOnChooseStreams(period);
-          });
-
           // Although we're seeking backwards we still have to return some
           // Streams from the second Period here.
           return defaultOnChooseStreams(period);
@@ -1234,6 +1210,76 @@ describe('StreamingEngine', function() {
       });
     });
 
+    it('into partially buffered regions in the same period', function() {
+      // When seeking into a region within the same period, or changing
+      // resolution, and after the seek some states are buffered and some
+      // are unbuffered, StreamingEngine should only clear the unbuffered
+      // states.
+      onChooseStreams.and.callFake(function(period) {
+        expect(period).toBe(manifest.periods[0]);
+
+        onChooseStreams.and.callFake(function(period) {
+          expect(period).toBe(manifest.periods[1]);
+
+          mediaSourceEngine.endOfStream.and.callFake(function() {
+            // Should have the first Period entirely buffered.
+            expect(mediaSourceEngine.initSegments).toEqual({
+              audio: [false, true],
+              video: [false, true],
+              text: [],
+            });
+            expect(mediaSourceEngine.segments).toEqual({
+              audio: [true, true, true, true],
+              video: [true, true, true, true],
+              text: [true, true, true, true],
+            });
+
+            // Fake the audio buffer being removed.
+            mediaSourceEngine.segments[ContentType.AUDIO] =
+                [true, true, false, false];
+
+            // Seek back into the second Period.
+            expect(presentationTimeInSeconds).toBe(26);
+            presentationTimeInSeconds -= 5;
+            streamingEngine.seeked();
+
+
+            mediaSourceEngine.endOfStream.and.returnValue(Promise.resolve());
+            return Promise.resolve();
+          });
+
+          return defaultOnChooseStreams(period);
+        });
+
+        return defaultOnChooseStreams(period);
+      });
+
+      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+
+      // Here we go!
+      streamingEngine.start();
+      runTest();
+
+      // When seeking within the same period, clear the buffer of the
+      // unbuffered streams.
+      expect(mediaSourceEngine.clear).toHaveBeenCalledWith('audio');
+      expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('video');
+      expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('text');
+
+      // Verify buffers.
+      expect(mediaSourceEngine.initSegments).toEqual({
+        audio: [false, true],
+        video: [false, true],
+        text: [],
+      });
+      expect(mediaSourceEngine.segments).toEqual({
+        audio: [false, false, true, true],
+        video: [true, true, true, true],
+        text: [true, true, true, true],
+      });
+    });
+
+
     it('into buffered regions across Periods', function() {
       onChooseStreams.and.callFake(function(period) {
         expect(period).toBe(manifest.periods[0]);
@@ -1255,6 +1301,10 @@ describe('StreamingEngine', function() {
           expect(presentationTimeInSeconds).toBe(26);
           presentationTimeInSeconds -= 20;
           streamingEngine.seeked();
+
+          // Verify that buffers are not cleared.
+          expect(mediaSourceEngine.clear).not.toHaveBeenCalled();
+
           return Promise.resolve();
         });
 
@@ -1593,7 +1643,7 @@ describe('StreamingEngine', function() {
       });
     });
 
-    it('into partially buffered regions', function() {
+    it('into partially buffered regions across periods', function() {
       // Seeking into a region where some buffers (text) are buffered and some
       // are not should work despite the media states requiring different
       // periods.
@@ -1629,6 +1679,12 @@ describe('StreamingEngine', function() {
             expect(presentationTimeInSeconds).toBe(26);
             presentationTimeInSeconds -= 20;
             streamingEngine.seeked();
+
+            // When seeking across periods, if at least one stream is
+            // unbuffered, we clear all the buffers.
+            expect(mediaSourceEngine.clear).toHaveBeenCalledWith('audio');
+            expect(mediaSourceEngine.clear).toHaveBeenCalledWith('video');
+            expect(mediaSourceEngine.clear).toHaveBeenCalledWith('text');
 
             mediaSourceEngine.endOfStream.and.returnValue(Promise.resolve());
             return Promise.resolve();
