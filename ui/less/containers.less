@@ -179,3 +179,24 @@
   justify-content: center;
   align-items: center;
 }
+
+.shaka-text-display {
+  /* Fill the space horizontally, with no extra padding or margin. */
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  min-width: 48px;
+  text-align: center;
+  position: absolute;
+  bottom: 60px;
+
+  span {
+    /* Use Roboto if available. */
+    font-family: Roboto-Regular, Roboto, sans-serif;
+    font-size: 18px;
+    color: rgb(255, 255, 255);
+    margin: 1px 6px;
+    display: block;
+  }
+}
