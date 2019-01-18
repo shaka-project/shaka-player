@@ -471,6 +471,73 @@ describe('HlsParser', function() {
     testHlsParser(master, media, manifest, done);
   });
 
+  it('parses audio variant without URI', function(done) {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
+      'video\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",NAME="audio"\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    let manifest = new shaka.test.ManifestGenerator()
+            .anyTimeline()
+            .addPeriod(0)
+              .addVariant(jasmine.any(Number))
+                .bandwidth(200)
+                .addVideo(jasmine.any(Number))
+                  .anySegmentFunctions()
+                  .anyInitSegment()
+                  .presentationTimeOffset(0)
+                  .mime('video/mp4', jasmine.any(String))
+                  .frameRate(60)
+                  .size(960, 540)
+          .build();
+
+    testHlsParser(master, media, manifest, done);
+  });
+
+  it('parses video variant without URI', function(done) {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="mp4a",VIDEO="vid1"\n',
+      'audio\n',
+      '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid1",NAME="video"\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    let manifest = new shaka.test.ManifestGenerator()
+            .anyTimeline()
+            .addPeriod(0)
+              .addVariant(jasmine.any(Number))
+                .bandwidth(200)
+                .addAudio(jasmine.any(Number))
+                  .anySegmentFunctions()
+                  .anyInitSegment()
+                  .presentationTimeOffset(0)
+                  .mime('audio/mp4', jasmine.any(String))
+          .build();
+
+    testHlsParser(master, media, manifest, done);
+  });
+
   it('parses multiple variants', function(done) {
     const master = [
       '#EXTM3U\n',
@@ -1426,9 +1493,9 @@ describe('HlsParser', function() {
         const master = [
           '#EXTM3U\n',
           '#EXT-X-STREAM-INF:CODECS="avc1,mp4a",BANDWIDTH=200,',
-          'RESOLUTION=960x540,FRAME-RATE=60,VIDEO="vid"\n',
+          'RESOLUTION=960x540,FRAME-RATE=60,SUBTITLES="sub1"\n',
           'audio\n',
-          '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid"',
+          '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1"',
         ].join('');
 
         const media = [
