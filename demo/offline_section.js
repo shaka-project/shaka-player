@@ -64,7 +64,9 @@ shakaDemo.updateButtons_ = function(canHide) {
              shakaDemo.support_.drm[drm].persistentState;
     });
   }
-  if (option.asset) {
+
+  // Note that offline assets are synthetic and do not have a "features" field.
+  if (option.asset && option.asset.features) {
     if (!option.asset.features.includes(shakaAssets.Feature.OFFLINE)) {
       // For whatever reason, this asset can't handle offline storage.
       supportsOfflineStorage = false;
