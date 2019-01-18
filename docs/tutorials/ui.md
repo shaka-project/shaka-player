@@ -1,4 +1,4 @@
-# UI Library
+# UI Library: basic usage
 
 Shaka Player has an optional UI library that provides a high-quality accessible
 localized UI. It is an alternate bundle from the base
@@ -200,79 +200,8 @@ function onCastStatusChanged(event) {
 // The shaka-ui-loaded event won't fire if there are no tagged UI elements to
 // set up, so listen to DOMContentLoaded instead.
 document.addEventListener('DOMContentLoaded', init);
-
 ```
-#### Configuring the UI
-
-When creating the UI via code, you can pass in configuration options that change
-the look and functioning of the UI bar. For example, if you wanted to not have
-a seek bar, you could add the following line to initPlayer, right before
-creating the UI overlay:
-
-```js
-config['addSeekBar'] = false;
-```
-
-See the docs for {@link shaka.extern.UIConfiguration} for more information.
-
-#### Customizing the number and order of controls
-
-For example, let's say that all you care about for your app is rewinding and
-fast-forwarding. You could add the following line to init(), right before
-creating the UI overlay. This will configure UI to ONLY provide these two buttons:
-
-```js
-config['controlPanelElements'] = ['rewind', 'fast_forward'];
-```
-This call will result in the controls panel having only two elements: rewind
-button and fast forward button, in that order. If the reversed order is desired,
-the call should be:
-
-```js
-config['controlPanelElements'] = ['fast_forward', 'rewind'];
-```
-The following elements can be added to the UI bar using this configuration value:
-* time_and_duration: adds an element tracking and displaying current progress of
-  the presentation and the full presentation duration in the "0:10 / 1:00"
-  form where "0:10" (ten seconds) is the number of seconds passed from the start of the presentation
-  and "1:00" (one minute) is the presentation duration.
-* mute: adds a button that mutes/unmutes the video on click.
-* volume: adds a volume slider.
-* fullscreen: adds a button that toggles full screen mode on click.
-* overflow_menu: adds a button that opens an overflow menu with additional settings
-  buttons. It's content is also configurable.
-* rewind: adds a button that rewinds the presentation on click; that is, it starts playing
-  the presentation backwards.
-* fast_forward: adds a button that fast forwards the presentation on click; that is, it
-  starts playing the presentation at an increased speed
-* spacer: adds a chunk of empty space between the adjacent elements.
-<!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
-
-Similarly, the 'overflowMenuButtons' configuration option can be used to control
-the contents of the overflow menu.
-The following buttons can be added to the overflow menu:
-* captions: adds a button that controls the current text track selection (including turning it off).
-  The button is visible only if the content has at least one text track.
-* cast: adds a button that opens a Chromecast dialog. The button is visible only if there is
-  at least one Chromecast device on the same network available for casting.
-* quality: adds a button that controls enabling/disabling of abr and video resolution selection.
-* language: adds a button that controls audio language selection.
-* picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
-  that support it. Button is invisible on other browsers.
-
-Please note that custom layouts might need CSS adjustments to look good.
-
-#### Changing seek bar progress colors
-<!-- TODO: Is there a better way to do this? (The actual thing, not the tutorial) -->
-The seek bar consist of three segments: past (already played part of the presentation),
-future-buffered and future-unbuffered. The segments colors are set when the seek bar is created.
-To customize the colors, change the values of `shaka.ui.Controls.SEEK_BAR_BASE_COLOR_` ,
-`shaka.ui.Controls.SEEK_BAR_PLAYED_COLOR_`, and `shaka.ui.Controls.SEEK_BAR_BUFFERED_COLOR_` in ui/controls.js
-
-<!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
-
-<!-- TODO: Add a custom button tutorial. -->
 
 #### Continue the Tutorials
 
-Next, check out {@tutorial config}.
+Next, check out {@tutorial ui-customization}.
