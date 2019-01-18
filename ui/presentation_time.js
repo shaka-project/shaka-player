@@ -34,13 +34,10 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
-    const timeContainer = shaka.ui.Utils.createHTMLElement('div');
-    // TODO: create a 'spacer' element instead for more layout flexibility
-    timeContainer.classList.add('shaka-time-container');
     this.currentTime_ = shaka.ui.Utils.createHTMLElement('div');
+    this.currentTime_.classList.add('shaka-current-time');
     this.currentTime_.textContent = '0:00';
-    timeContainer.appendChild(this.currentTime_);
-    this.parent.appendChild(timeContainer);
+    this.parent.appendChild(this.currentTime_);
 
     this.eventManager.listen(this.currentTime_, 'click', () => {
       // Jump to LIVE if the user clicks on the current time.

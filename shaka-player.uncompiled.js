@@ -70,6 +70,7 @@ goog.require('shaka.ui.MuteButton');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.PresentationTimeTracker');
 goog.require('shaka.ui.RewindButton');
+goog.require('shaka.ui.Spacer');
 goog.require('shaka.ui.VolumeBar');
 goog.require('shaka.util.Error');
 goog.require('shaka.util.Iterables');

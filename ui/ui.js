@@ -95,6 +95,7 @@ shaka.ui.Overlay.prototype.defaultConfig_ = function() {
   return {
     controlPanelElements: [
       'time_and_duration',
+      'spacer',
       'mute',
       'volume',
       'fullscreen',

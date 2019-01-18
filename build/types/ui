@@ -12,6 +12,7 @@
 +../../ui/overflow_menu.js
 +../../ui/presentation_time.js
 +../../ui/rewind_button.js
++../../ui/spacer.js
 +../../ui/text_displayer.js
 +../../ui/ui.js
 +../../ui/ui_utils.js

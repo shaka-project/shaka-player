@@ -245,8 +245,8 @@ The following elements can be added to the UI bar using this configuration value
   the presentation backwards.
 * fast_forward: adds a button that fast forwards the presentation on click; that is, it
   starts playing the presentation at an increased speed
+* spacer: adds a chunk of empty space between the adjacent elements.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
-At most one button of each type can be added at a time.
 
 Similarly, the 'overflowMenuButtons' configuration option can be used to control
 the contents of the overflow menu.
@@ -257,6 +257,8 @@ The following buttons can be added to the overflow menu:
   at least one Chromecast device on the same network available for casting.
 * quality: adds a button that controls enabling/disabling of abr and video resolution selection.
 * language: adds a button that controls audio language selection.
+* picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
+  that support it. Button is invisible on other browsers.
 
 Please note that custom layouts might need CSS adjustments to look good.
 

@@ -309,7 +309,7 @@ describe('UI', function() {
 
       it('has default elements', function() {
         let currentTimes =
-          controlsButtonPanel.getElementsByClassName('shaka-time-container');
+          controlsButtonPanel.getElementsByClassName('shaka-current-time');
         expect(currentTimes.length).toBe(1);
 
         let shakaMuteButtons =
@@ -439,7 +439,7 @@ describe('UI', function() {
 
       // Only current time and mute button should've been created
       let currentTimes =
-        container.getElementsByClassName('shaka-time-container');
+        container.getElementsByClassName('shaka-current-time');
       expect(currentTimes.length).toBe(1);
 
       let shakaMuteButtons =
@@ -571,7 +571,7 @@ describe('UI', function() {
       expect( /** @type {!HTMLElement} */ (buttons[0]).className)
           .toContain('shaka-mute-button');
       expect( /** @type {!HTMLElement} */ (buttons[1]).className)
-          .toContain('shaka-time-container');
+          .toContain('shaka-current-time');
       expect( /** @type {!HTMLElement} */ (buttons[2]).className)
           .toContain('shaka-fullscreen');
     });

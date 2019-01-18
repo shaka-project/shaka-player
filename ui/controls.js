@@ -1197,4 +1197,5 @@ shaka.ui.Controls.controlPanelElements_ = [
   'overflow_menu',
   'rewind',
   'fast_forward',
+  'spacer',
 ];
