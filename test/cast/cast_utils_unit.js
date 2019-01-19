@@ -216,7 +216,9 @@ describe('CastUtils', function() {
         }
 
         mediaSourceEngine = new shaka.media.MediaSourceEngine(
-            video, new shaka.test.FakeClosedCaptionParser());
+            video,
+            new shaka.test.FakeClosedCaptionParser(),
+            new shaka.test.FakeTextDisplayer());
 
         const ContentType = shaka.util.ManifestParserUtils.ContentType;
         const initObject = new Map();

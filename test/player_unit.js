@@ -123,7 +123,7 @@ describe('Player', function() {
             returnValue(Promise.resolve()),
         setUseEmbeddedText: jasmine.createSpy('setUseEmbeddedText'),
         getUseEmbeddedText: jasmine.createSpy('getUseEmbeddedText'),
-        setTextDisplayer: jasmine.createSpy('setTextDisplayer'),
+        getTextDisplayer: () => textDisplayer,
       };
 
       player.createDrmEngine = function() { return drmEngine; };
@@ -177,7 +177,6 @@ describe('Player', function() {
       expect(playheadObserver.destroy).toHaveBeenCalled();
       expect(mediaSourceEngine.destroy).toHaveBeenCalled();
       expect(streamingEngine.destroy).toHaveBeenCalled();
-      expect(textDisplayer.destroySpy).toHaveBeenCalled();
     });
 
     it('destroys mediaSourceEngine before drmEngine', async () => {
@@ -206,7 +205,6 @@ describe('Player', function() {
       parser.stop.and.callFake(function() {
         expect(abrManager.stop).not.toHaveBeenCalled();
         expect(networkingEngine.destroy).not.toHaveBeenCalled();
-        expect(textDisplayer.destroySpy).not.toHaveBeenCalled();
       });
       let factory = function() { return parser; };
 
@@ -215,7 +213,6 @@ describe('Player', function() {
         player.destroy().catch(fail).then(function() {
           expect(abrManager.stop).toHaveBeenCalled();
           expect(networkingEngine.destroy).toHaveBeenCalled();
-          expect(textDisplayer.destroySpy).toHaveBeenCalled();
           expect(parser.stop).toHaveBeenCalled();
         }).then(done);
       });
@@ -276,20 +273,6 @@ describe('Player', function() {
           done();
         });
       });
-    });
-
-    it('destroys TextDisplayer on unload', async () => {
-      // Regression test for https://github.com/google/shaka-player/issues/984
-      await player.load(fakeManifestUri, 0, factory1);
-      textDisplayer.destroySpy.calls.reset();
-      await player.unload();
-      expect(textDisplayer.destroySpy).toHaveBeenCalled();
-    });
-
-    it('sets TextDisplayer and passes it to MediaSource on load', async () => {
-      await player.load(fakeManifestUri, 0, factory1);
-      expect(mediaSourceEngine.setTextDisplayer)
-             .toHaveBeenCalledWith(textDisplayer);
     });
 
     it('handles repeated load/unload', async () => {

@@ -29,6 +29,14 @@ describe('MediaSourceEngine', function() {
   let metadata;
   // TODO: add text streams to MSE integration tests
 
+  /**
+   * We use a fake text displayer so that we can check if CEA text is being
+   * passed through the system correctly.
+   *
+   * @type {!shaka.test.FakeTextDisplayer}
+   */
+  let textDisplayer;
+
   beforeAll(function() {
     video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
     video.width = 600;
@@ -45,9 +53,13 @@ describe('MediaSourceEngine', function() {
         shaka.media.MuxJSClosedCaptionParser.isSupported(),
         'Where is MuxJS?');
 
+    textDisplayer = new shaka.test.FakeTextDisplayer();
+
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
-        new shaka.media.MuxJSClosedCaptionParser());
+        new shaka.media.MuxJSClosedCaptionParser(),
+        textDisplayer);
+
     mediaSource = /** @type {?} */(mediaSourceEngine)['mediaSource_'];
     expect(video.src).toBeTruthy();
     await mediaSourceEngine.init(new Map(), false);
@@ -334,10 +346,6 @@ describe('MediaSourceEngine', function() {
     metadata = shaka.test.TestScheme.DATA['cea-708_ts'];
     generators = shaka.test.TestScheme.GENERATORS['cea-708_ts'];
 
-    /** @type {!shaka.test.FakeTextDisplayer} */
-    const textDisplayer = new shaka.test.FakeTextDisplayer();
-    mediaSourceEngine.setTextDisplayer(textDisplayer);
-
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
     initObject.set(ContentType.TEXT, getFakeStream(metadata.text));
@@ -354,10 +362,6 @@ describe('MediaSourceEngine', function() {
     // Load MP4 file with CEA-708 closed captions.
     metadata = shaka.test.TestScheme.DATA['cea-708_mp4'];
     generators = shaka.test.TestScheme.GENERATORS['cea-708_mp4'];
-
-    /** @type {!shaka.test.FakeTextDisplayer} */
-    const textDisplayer = new shaka.test.FakeTextDisplayer();
-    mediaSourceEngine.setTextDisplayer(textDisplayer);
 
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));

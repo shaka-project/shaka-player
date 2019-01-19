@@ -87,7 +87,9 @@ describe('StreamingEngine', () => {
 
     eventManager = new shaka.util.EventManager();
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
-        video, new shaka.test.FakeClosedCaptionParser());
+        video,
+        new shaka.test.FakeClosedCaptionParser(),
+        new shaka.test.FakeTextDisplayer());
   });
 
   afterEach(async () => {

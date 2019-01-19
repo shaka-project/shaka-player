@@ -71,9 +71,13 @@ describe('MediaSourceEngine', function() {
   /** @type {HTMLMediaElement} */
   let video;
   let mockMediaSource;
+
   let mockTextEngine;
+  /** @type {!shaka.test.FakeTextDisplayer} */
+  let mockTextDisplayer;
   /** @type {!shaka.test.FakeClosedCaptionParser} */
   let mockClosedCaptionParser;
+
   /** @type {!jasmine.Spy} */
   let createMediaSourceSpy;
 
@@ -145,8 +149,11 @@ describe('MediaSourceEngine', function() {
     };
     video = /** @type {HTMLMediaElement} */(mockVideo);
     mockClosedCaptionParser = new shaka.test.FakeClosedCaptionParser();
+    mockTextDisplayer = new shaka.test.FakeTextDisplayer();
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
-        video, mockClosedCaptionParser);
+        video,
+        mockClosedCaptionParser,
+        mockTextDisplayer);
   });
 
   afterEach(function() {
@@ -186,7 +193,9 @@ describe('MediaSourceEngine', function() {
 
     it('creates a MediaSource object and sets video.src', function() {
       mediaSourceEngine = new shaka.media.MediaSourceEngine(
-          video, new shaka.test.FakeClosedCaptionParser());
+          video,
+          new shaka.test.FakeClosedCaptionParser(),
+          new shaka.test.FakeTextDisplayer());
 
       expect(createMediaSourceSpy).toHaveBeenCalled();
       expect(createObjectURLSpy).toHaveBeenCalled();
@@ -1119,6 +1128,12 @@ describe('MediaSourceEngine', function() {
       expect(mockTextEngine).toBeTruthy();
       expect(mockTextEngine.destroy).toHaveBeenCalled();
     });
+
+    // Regression test for https://github.com/google/shaka-player/issues/984
+    it('destroys TextDisplayer on destroy', async () => {
+      await mediaSourceEngine.destroy();
+      expect(mockTextDisplayer.destroySpy).toHaveBeenCalled();
+    });
   });
 
   function createMockMediaSource() {
@@ -1166,7 +1181,7 @@ describe('MediaSourceEngine', function() {
       mockTextEngine = jasmine.createSpyObj('TextEngine', [
         'initParser', 'destroy', 'appendBuffer', 'remove', 'setTimestampOffset',
         'setAppendWindow', 'bufferStart', 'bufferEnd', 'bufferedAheadOf',
-        'setDisplayer', 'appendCues', 'storeAndAppendClosedCaptions',
+        'appendCues', 'storeAndAppendClosedCaptions',
       ]);
 
       let resolve = Promise.resolve.bind(Promise);
