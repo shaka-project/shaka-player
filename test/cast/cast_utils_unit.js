@@ -36,7 +36,6 @@ describe('CastUtils', function() {
       'createDrmEngine',
       'createNetworkingEngine',
       'createPlayhead',
-      'createPlayheadObserver',
       'createMediaSource',
       'createMediaSourceEngine',
       'createStreamingEngine',

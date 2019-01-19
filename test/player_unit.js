@@ -51,8 +51,6 @@ describe('Player', function() {
   let drmEngine;
   /** @type {!shaka.test.FakePlayhead} */
   let playhead;
-  /** @type {!shaka.test.FakePlayheadObserver} */
-  let playheadObserver;
   /** @type {!shaka.test.FakeTextDisplayer} */
   let textDisplayer;
   /** @type {function():shaka.extern.TextDisplayer} */
@@ -113,7 +111,6 @@ describe('Player', function() {
 
       drmEngine = new shaka.test.FakeDrmEngine();
       playhead = new shaka.test.FakePlayhead();
-      playheadObserver = new shaka.test.FakePlayheadObserver();
       streamingEngine = new shaka.test.FakeStreamingEngine(
           onChooseStreams, onCanSwitch);
       mediaSourceEngine = {
@@ -124,12 +121,12 @@ describe('Player', function() {
         setUseEmbeddedText: jasmine.createSpy('setUseEmbeddedText'),
         getUseEmbeddedText: jasmine.createSpy('getUseEmbeddedText'),
         getTextDisplayer: () => textDisplayer,
+        ended: jasmine.createSpy('ended').and.returnValue(false),
       };
 
       player.createDrmEngine = function() { return drmEngine; };
       player.createNetworkingEngine = function() { return networkingEngine; };
       player.createPlayhead = function() { return playhead; };
-      player.createPlayheadObserver = function() { return playheadObserver; };
       player.createMediaSourceEngine = function() { return mediaSourceEngine; };
       player.createStreamingEngine = function() { return streamingEngine; };
     }
@@ -174,7 +171,6 @@ describe('Player', function() {
       expect(networkingEngine.destroy).toHaveBeenCalled();
       expect(drmEngine.destroy).toHaveBeenCalled();
       expect(playhead.release).toHaveBeenCalled();
-      expect(playheadObserver.destroy).toHaveBeenCalled();
       expect(mediaSourceEngine.destroy).toHaveBeenCalled();
       expect(streamingEngine.destroy).toHaveBeenCalled();
     });
