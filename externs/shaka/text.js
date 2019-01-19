@@ -425,12 +425,14 @@ shaka.extern.TextDisplayer.prototype.append = function(cues) {};
 
 
 /**
- * Remove cues in a given time range. |remove| should only return |false|
- * if the displayer has been destroyed. If the displayer has not been destroyed
- * |remove| should return |true|.
+ * Remove all cues that are fully contained by the given time range (relative
+ * to the presentation). |endTime| will be greater to equal to |startTime|.
+ * |remove| should only return |false| if the displayer has been destroyed. If
+ * the displayer has not been destroyed |remove| should return |true|.
  *
- * @param {number} startTime relative to the start of the presentation
- * @param {number} endTime relative to the start of the presentation
+ * @param {number} startTime
+ * @param {number} endTime
+ *
  * @return {boolean}
  *
  * @exportDoc
