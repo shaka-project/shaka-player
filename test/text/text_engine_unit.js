@@ -47,6 +47,8 @@ describe('TextEngine', function() {
     };
 
     mockDisplayer = new shaka.test.FakeTextDisplayer();
+    mockDisplayer.removeSpy.and.returnValue(true);
+
     TextEngine.registerParser(dummyMimeType, mockParserPlugIn);
     textEngine = new TextEngine(mockDisplayer);
     textEngine.initParser(dummyMimeType);
@@ -85,7 +87,7 @@ describe('TextEngine', function() {
     it('works asynchronously', function(done) {
       mockParseMedia.and.returnValue([1, 2, 3]);
       textEngine.appendBuffer(dummyData, 0, 3).catch(fail).then(done);
-      expect(mockDisplayer.append).not.toHaveBeenCalled();
+      expect(mockDisplayer.appendSpy).not.toHaveBeenCalled();
     });
 
     it('calls displayer.append()', async () => {
@@ -101,11 +103,11 @@ describe('TextEngine', function() {
           {periodStart: 0, segmentStart: 0, segmentEnd: 3},
       ]);
 
-      expect(mockDisplayer.append).toHaveBeenCalledOnceMoreWith([
+      expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
         [cue1, cue2],
       ]);
 
-      expect(mockDisplayer.remove).not.toHaveBeenCalled();
+      expect(mockDisplayer.removeSpy).not.toHaveBeenCalled();
 
       mockParseMedia.and.returnValue([cue3, cue4]);
 
@@ -116,7 +118,7 @@ describe('TextEngine', function() {
         {periodStart: 0, segmentStart: 3, segmentEnd: 5},
       ]);
 
-      expect(mockDisplayer.append).toHaveBeenCalledOnceMoreWith([
+      expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
         [cue3, cue4],
       ]);
     });
@@ -141,7 +143,7 @@ describe('TextEngine', function() {
 
       textEngine.setSelectedClosedCaptionId('CC1', 0);
       textEngine.storeAndAppendClosedCaptions([caption], 0, 2);
-      expect(mockDisplayer.append).toHaveBeenCalled();
+      expect(mockDisplayer.appendSpy).toHaveBeenCalled();
     });
 
     it('does not append closed captions without selected id', function() {
@@ -156,7 +158,7 @@ describe('TextEngine', function() {
 
       textEngine.setSelectedClosedCaptionId('CC3', 0);
       textEngine.storeAndAppendClosedCaptions([caption], 0, 2);
-      expect(mockDisplayer.append).not.toHaveBeenCalled();
+      expect(mockDisplayer.appendSpy).not.toHaveBeenCalled();
     });
 
     it('stores closed captions', function() {
@@ -222,14 +224,14 @@ describe('TextEngine', function() {
     it('works asynchronously', function(done) {
       textEngine.appendBuffer(dummyData, 0, 3).then(function() {
         let p = textEngine.remove(0, 1);
-        expect(mockDisplayer.remove).not.toHaveBeenCalled();
+        expect(mockDisplayer.removeSpy).not.toHaveBeenCalled();
         return p;
       }).catch(fail).then(done);
     });
 
     it('calls displayer.remove()', function(done) {
       textEngine.remove(0, 1).then(function() {
-        expect(mockDisplayer.remove).toHaveBeenCalledWith(0, 1);
+        expect(mockDisplayer.removeSpy).toHaveBeenCalledWith(0, 1);
       }).catch(fail).then(done);
     });
 
@@ -256,7 +258,7 @@ describe('TextEngine', function() {
         new Uint8Array(dummyData),
         {periodStart: 0, segmentStart: 0, segmentEnd: 3},
       ]);
-      expect(mockDisplayer.append).toHaveBeenCalledOnceMoreWith([
+      expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
         [
           createFakeCue(0, 1),
           createFakeCue(2, 3),
@@ -270,7 +272,7 @@ describe('TextEngine', function() {
         new Uint8Array(dummyData),
         {periodStart: 4, segmentStart: 4, segmentEnd: 7},
       ]);
-      expect(mockDisplayer.append).toHaveBeenCalledOnceMoreWith([
+      expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
         [
           createFakeCue(4, 5),
           createFakeCue(6, 7),
@@ -407,7 +409,7 @@ describe('TextEngine', function() {
       textEngine.setAppendWindow(0, 1.9);
       await textEngine.appendBuffer(dummyData, 0, 3);
 
-      expect(mockDisplayer.append).toHaveBeenCalledOnceMoreWith([
+      expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
         [
           createFakeCue(0, 1),
           createFakeCue(1, 2),
@@ -417,7 +419,7 @@ describe('TextEngine', function() {
       textEngine.setAppendWindow(1, 2.1);
       await textEngine.appendBuffer(dummyData, 0, 3);
 
-      expect(mockDisplayer.append).toHaveBeenCalledOnceMoreWith([
+      expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
         [
           createFakeCue(1, 2),
           createFakeCue(2, 3),

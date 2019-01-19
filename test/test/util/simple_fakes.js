@@ -22,7 +22,6 @@ goog.provide('shaka.test.FakePlayhead');
 goog.provide('shaka.test.FakePlayheadObserver');
 goog.provide('shaka.test.FakePresentationTimeline');
 goog.provide('shaka.test.FakeStreamingEngine');
-goog.provide('shaka.test.FakeTextDisplayer');
 goog.provide('shaka.test.FakeTextTrack');
 goog.provide('shaka.test.FakeTransmuxer');
 goog.provide('shaka.test.FakeVideo');
@@ -579,49 +578,6 @@ shaka.test.FakeClosedCaptionParser = class {
     func();
   }
 };
-
-
-/**
- * Creates a text track.
- *
- * @constructor
- * @struct
- * @extends {shaka.text.SimpleTextDisplayer}
- * @return {!Object}
- */
-shaka.test.FakeTextDisplayer = function() {
-  let displayer = {
-    append: jasmine.createSpy('append'),
-    remove: jasmine.createSpy('remove').and.returnValue(true),
-    destroy:
-        jasmine.createSpy('destroy').and.returnValue(Promise.resolve()),
-    isTextVisible: jasmine.createSpy('isTextVisible'),
-    setTextVisibility: jasmine.createSpy('setTextVisibility'),
-    textVisible: false,
-  };
-
-  displayer.isTextVisible.and.callFake(function() {
-    return displayer.textVisible;
-  });
-
-  displayer.setTextVisibility.and.callFake(function(on) {
-    displayer.textVisible = on;
-  });
-
-  return displayer;
-};
-
-
-/** @type {!jasmine.Spy} */
-shaka.test.FakeTextDisplayer.prototype.remove;
-
-
-/** @type {!jasmine.Spy} */
-shaka.test.FakeTextDisplayer.prototype.append;
-
-
-/** @type {!jasmine.Spy} */
-shaka.test.FakeTextDisplayer.prototype.destroy;
 
 
 /**

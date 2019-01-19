@@ -334,12 +334,9 @@ describe('MediaSourceEngine', function() {
     metadata = shaka.test.TestScheme.DATA['cea-708_ts'];
     generators = shaka.test.TestScheme.GENERATORS['cea-708_ts'];
 
-    // Create a mock text displayer, to intercept text cues.
-    let cues = [];
-    let mockTextDisplayer = /** @type {shaka.extern.TextDisplayer} */ ({
-      append: (newCues) => { cues = cues.concat(newCues); },
-    });
-    mediaSourceEngine.setTextDisplayer(mockTextDisplayer);
+    /** @type {!shaka.test.FakeTextDisplayer} */
+    const textDisplayer = new shaka.test.FakeTextDisplayer();
+    mediaSourceEngine.setTextDisplayer(textDisplayer);
 
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
@@ -350,7 +347,7 @@ describe('MediaSourceEngine', function() {
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
     await append(ContentType.VIDEO, 0);
 
-    expect(cues.length).toBe(3);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(3);
   });
 
   it('extracts CEA-708 captions from dash', async () => {
@@ -358,12 +355,9 @@ describe('MediaSourceEngine', function() {
     metadata = shaka.test.TestScheme.DATA['cea-708_mp4'];
     generators = shaka.test.TestScheme.GENERATORS['cea-708_mp4'];
 
-    // Create a mock text displayer, to intercept text cues.
-    let cues = [];
-    const mockTextDisplayer = /** @type {shaka.extern.TextDisplayer} */ ({
-      append: (newCues) => { cues = cues.concat(newCues); },
-    });
-    mediaSourceEngine.setTextDisplayer(mockTextDisplayer);
+    /** @type {!shaka.test.FakeTextDisplayer} */
+    const textDisplayer = new shaka.test.FakeTextDisplayer();
+    mediaSourceEngine.setTextDisplayer(textDisplayer);
 
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
@@ -374,6 +368,6 @@ describe('MediaSourceEngine', function() {
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
     await appendWithClosedCaptions(ContentType.VIDEO, 1);
 
-    expect(cues.length).toBe(1);
+    expect(textDisplayer.appendSpy).toHaveBeenCalled();
   });
 });

@@ -103,7 +103,7 @@ describe('Player', function() {
     abrManager = new shaka.test.FakeAbrManager();
     abrFactory = function() { return abrManager; };
 
-    textDisplayer = new shaka.test.FakeTextDisplayer();
+    textDisplayer = createTextDisplayer();
     textDisplayFactory = function() { return textDisplayer; };
 
     function dependencyInjector(player) {
@@ -177,7 +177,7 @@ describe('Player', function() {
       expect(playheadObserver.destroy).toHaveBeenCalled();
       expect(mediaSourceEngine.destroy).toHaveBeenCalled();
       expect(streamingEngine.destroy).toHaveBeenCalled();
-      expect(textDisplayer.destroy).toHaveBeenCalled();
+      expect(textDisplayer.destroySpy).toHaveBeenCalled();
     });
 
     it('destroys mediaSourceEngine before drmEngine', async () => {
@@ -206,7 +206,7 @@ describe('Player', function() {
       parser.stop.and.callFake(function() {
         expect(abrManager.stop).not.toHaveBeenCalled();
         expect(networkingEngine.destroy).not.toHaveBeenCalled();
-        expect(textDisplayer.destroy).not.toHaveBeenCalled();
+        expect(textDisplayer.destroySpy).not.toHaveBeenCalled();
       });
       let factory = function() { return parser; };
 
@@ -215,7 +215,7 @@ describe('Player', function() {
         player.destroy().catch(fail).then(function() {
           expect(abrManager.stop).toHaveBeenCalled();
           expect(networkingEngine.destroy).toHaveBeenCalled();
-          expect(textDisplayer.destroy).toHaveBeenCalled();
+          expect(textDisplayer.destroySpy).toHaveBeenCalled();
           expect(parser.stop).toHaveBeenCalled();
         }).then(done);
       });
@@ -281,9 +281,9 @@ describe('Player', function() {
     it('destroys TextDisplayer on unload', async () => {
       // Regression test for https://github.com/google/shaka-player/issues/984
       await player.load(fakeManifestUri, 0, factory1);
-      textDisplayer.destroy.calls.reset();
+      textDisplayer.destroySpy.calls.reset();
       await player.unload();
-      expect(textDisplayer.destroy).toHaveBeenCalled();
+      expect(textDisplayer.destroySpy).toHaveBeenCalled();
     });
 
     it('sets TextDisplayer and passes it to MediaSource on load', async () => {
@@ -3466,5 +3466,27 @@ describe('Player', function() {
     return () => {
       return new shaka.test.FakeManifestParser(manifest);
     };
+  }
+
+  /**
+   * Create a fake text displayer with a little extra logic to work with the
+   * test cases.
+   *
+   * @return {!shaka.test.FakeTextDisplayer}
+   */
+  function createTextDisplayer() {
+    /** @type {!shaka.test.FakeTextDisplayer} */
+    const displayer = new shaka.test.FakeTextDisplayer();
+
+    // Allow the tests to set and check if we are showing text.
+    let isVisible = false;
+    displayer.isTextVisibleSpy.and.callFake(() => {
+      return isVisible;
+    });
+    displayer.setTextVisibilitySpy.and.callFake((on) => {
+      isVisible = on;
+    });
+
+    return displayer;
   }
 });
