@@ -41,8 +41,8 @@ describe('EventManager', function() {
     event2.initEvent('eventtype2', false, false);
   });
 
-  afterEach(function() {
-    eventManager.destroy();
+  afterEach(() => {
+    eventManager.release();
   });
 
   it('listens for an event', function() {

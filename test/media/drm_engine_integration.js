@@ -143,11 +143,10 @@ describe('DrmEngine', function() {
   });
 
   afterEach(async () => {
-    await Promise.all([
-      eventManager.destroy(),
-      mediaSourceEngine.destroy(),
-      networkingEngine.destroy(),
-    ]);
+    eventManager.release();
+
+    await mediaSourceEngine.destroy();
+    await networkingEngine.destroy();
     await drmEngine.destroy();
   });
 

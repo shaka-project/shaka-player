@@ -71,10 +71,9 @@ describe('Player', () => {
   });
 
   afterEach(async () => {
-    await Promise.all([
-      eventManager.destroy(),
-      player.destroy(),
-    ]);
+    eventManager.release();
+
+    await player.destroy();
 
     // Work-around: allow the Tizen media pipeline to cool down.
     // Without this, Tizen's pipeline seems to hang in subsequent tests.

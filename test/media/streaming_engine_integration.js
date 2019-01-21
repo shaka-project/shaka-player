@@ -91,12 +91,12 @@ describe('StreamingEngine', () => {
   });
 
   afterEach(async () => {
+    eventManager.release();
+
     await streamingEngine.destroy();
-    await Promise.all([
-      mediaSourceEngine.destroy(),
-      playhead.destroy(),
-      eventManager.destroy(),
-    ]);
+    await mediaSourceEngine.destroy();
+    await playhead.destroy();
+
     // Work-around: allow the Tizen media pipeline to cool down.
     // Without this, Tizen's pipeline seems to hang in subsequent tests.
     // TODO: file a bug on Tizen

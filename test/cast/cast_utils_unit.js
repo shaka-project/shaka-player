@@ -235,16 +235,16 @@ describe('CastUtils', function() {
         }).catch(fail).then(done);
       });
 
-      afterEach(function(done) {
-        eventManager.destroy().then(function() {
-          if (mediaSourceEngine) {
-            return mediaSourceEngine.destroy();
-          }
-        }).then(function() {
-          video.removeAttribute('src');
-          video.load();
-          done();
-        });
+      afterEach(async () => {
+        eventManager.release();
+
+        if (mediaSourceEngine) {
+          await mediaSourceEngine.destroy();
+        }
+
+        // "unload" the video element.
+        video.removeAttribute('src');
+        video.load();
       });
 
       afterAll(function() {

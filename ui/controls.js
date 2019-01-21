@@ -130,22 +130,19 @@ shaka.ui.Controls.elementNamesToFactories_ = new Map();
  * @export
  */
 shaka.ui.Controls.prototype.destroy = function() {
-  /** @type {!Array.<!Promise>} */
-  const waitFor = [];
-
   if (this.eventManager_) {
-    waitFor.push(this.eventManager_.destroy());
+    this.eventManager_.release();
+    this.eventManager_ = null;
   }
 
   if (this.timeAndSeekRangeTimer_) {
     this.timeAndSeekRangeTimer_.stop();
+    this.timeAndSeekRangeTimer_ = null;
   }
 
-  this.eventManager_ = null;
   this.localization_ = null;
-  this.timeAndSeekRangeTimer_ = null;
 
-  return Promise.all(waitFor);
+  return Promise.resolve();
 };
 
 

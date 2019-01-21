@@ -18,6 +18,8 @@
 
 goog.provide('shaka.ui.Element');
 
+goog.require('shaka.util.EventManager');
+
 
 /**
  * @implements {shaka.extern.IUIElement}
@@ -53,7 +55,8 @@ shaka.ui.Element = class {
    * @override
    * @export
    */
-  async destroy() {
-    await this.eventManager.destroy();
+  destroy() {
+    this.eventManager.release();
+    return Promise.resolve();
   }
 };
