@@ -173,7 +173,7 @@ describe('Player', function() {
       expect(abrManager.stop).toHaveBeenCalled();
       expect(networkingEngine.destroy).toHaveBeenCalled();
       expect(drmEngine.destroy).toHaveBeenCalled();
-      expect(playhead.destroy).toHaveBeenCalled();
+      expect(playhead.release).toHaveBeenCalled();
       expect(playheadObserver.destroy).toHaveBeenCalled();
       expect(mediaSourceEngine.destroy).toHaveBeenCalled();
       expect(streamingEngine.destroy).toHaveBeenCalled();

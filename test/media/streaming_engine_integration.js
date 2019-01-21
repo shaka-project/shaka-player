@@ -95,7 +95,8 @@ describe('StreamingEngine', () => {
 
     await streamingEngine.destroy();
     await mediaSourceEngine.destroy();
-    await playhead.destroy();
+
+    playhead.release();
 
     // Work-around: allow the Tizen media pipeline to cool down.
     // Without this, Tizen's pipeline seems to hang in subsequent tests.

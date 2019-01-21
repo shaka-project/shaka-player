@@ -156,8 +156,8 @@ describe('Playhead', function() {
     config = shaka.util.PlayerConfiguration.createDefault().streaming;
   });
 
-  afterEach(async () => {
-    await playhead.destroy();
+  afterEach(() => {
+    playhead.release();
   });
 
   function setMockDate(seconds) {

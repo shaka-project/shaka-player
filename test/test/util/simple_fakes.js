@@ -439,7 +439,7 @@ shaka.test.FakePresentationTimeline.prototype.getSeekRangeEnd;
  */
 shaka.test.FakePlayhead = function() {
   return {
-    destroy: jasmine.createSpy('destroy').and.returnValue(Promise.resolve()),
+    release: jasmine.createSpy('release'),
     setRebufferingGoal: jasmine.createSpy('setRebufferingGoal'),
     setStartTime: jasmine.createSpy('setStartTime'),
     getTime: jasmine.createSpy('getTime').and.returnValue(0),
@@ -451,7 +451,7 @@ shaka.test.FakePlayhead = function() {
 
 
 /** @type {!jasmine.Spy} */
-shaka.test.FakePlayhead.prototype.destroy;
+shaka.test.FakePlayhead.prototype.release;
 
 
 /** @type {!jasmine.Spy} */
