@@ -180,25 +180,31 @@
   align-items: center;
 }
 
-.shaka-text-display {
-  /* Fill the space horizontally, with no extra padding or margin. */
+.shaka-text-container {
+  bottom: 12%;
   width: 100%;
-  padding: 0;
-  margin: 0;
+  min-width: 48px;
+
+  /* Set the captions in the middle horizontally by default. */
+  display: flex;
+  justify-content: center;
+
+  /* Set the captions at the bottom by default. */
+  align-items: flex-end;
+
   /* If the captions are too long to fit in the video container, hide the
    * overflow content. */
   overflow: hidden;
-  min-width: 48px;
+
   text-align: center;
   position: absolute;
-  bottom: 60px;
 
   span {
     /* Use Roboto if available. */
     font-family: Roboto-Regular, Roboto, sans-serif;
     font-size: 18px;
     color: rgb(255, 255, 255);
-    margin: 1px 6px;
     display: block;
+    max-width:95%;
   }
 }

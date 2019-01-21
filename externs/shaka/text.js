@@ -241,6 +241,13 @@ shaka.extern.Cue.prototype.lineHeight;
 
 /**
  * Line alignment of the cue box.
+ * Start alignment means the cue box’s top side (for horizontal cues), left side
+ * (for vertical growing right), or right side (for vertical growing left) is
+ * aligned at the line.
+ * Center alignment means the cue box is centered at the line.
+ * End alignment The cue box’s bottom side (for horizontal cues), right side
+ * (for vertical growing right), or left side (for vertical growing left) is
+ * aligned at the line.
  * @type {shaka.text.Cue.lineAlign}
  * @exportDoc
  */
@@ -249,6 +256,8 @@ shaka.extern.Cue.prototype.lineAlign;
 
 /**
  * Vertical alignments of the cues within their extents.
+ * 'BEFORE' means displaying the captions at the top of the text display
+ * container box, 'CENTER' means in the middle, 'AFTER' means at the bottom.
  * @type {shaka.text.Cue.displayAlign}
  * @exportDoc
  */

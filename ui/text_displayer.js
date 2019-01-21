@@ -46,9 +46,9 @@ shaka.ui.TextDisplayer = class {
     this.videoContainer_ = videoContainer;
 
     /** @type {HTMLElement} */
-    this.textDisplayPanel_ = shaka.ui.Utils.createHTMLElement('div');
-    this.textDisplayPanel_.classList.add('shaka-text-display');
-    this.videoContainer_.appendChild(this.textDisplayPanel_);
+    this.textContainer_ = shaka.ui.Utils.createHTMLElement('div');
+    this.textContainer_.classList.add('shaka-text-container');
+    this.videoContainer_.appendChild(this.textContainer_);
 
     /**
      * The captions' update period in seconds.
@@ -91,9 +91,9 @@ shaka.ui.TextDisplayer = class {
    * @export
    */
   destroy() {
-    // Remove the text display panel element from the UI.
-    this.videoContainer_.removeChild(this.textDisplayPanel_);
-    this.textDisplayPanel_ = null;
+    // Remove the text container element from the UI.
+    this.videoContainer_.removeChild(this.textContainer_);
+    this.textContainer_ = null;
 
     this.isTextVisible_ = false;
     this.cues_ = [];
@@ -111,7 +111,7 @@ shaka.ui.TextDisplayer = class {
    */
   remove(start, end) {
     // Return false if destroy() has been called.
-    if (!this.textDisplayPanel_) {
+    if (!this.textContainer_) {
       return false;
     }
 
@@ -127,7 +127,7 @@ shaka.ui.TextDisplayer = class {
     for (const cue of cuesToRemove) {
         const captionsText = this.currentCuesMap_.get(cue);
         if (captionsText) {
-          this.textDisplayPanel_.removeChild(captionsText);
+          this.textContainer_.removeChild(captionsText);
           this.currentCuesMap_.delete(cue);
         }
     }
@@ -165,7 +165,7 @@ shaka.ui.TextDisplayer = class {
       if (cue.startTime > this.video_.currentTime ||
           cue.endTime < this.video_.currentTime) {
         const captionsText = this.currentCuesMap_.get(cue);
-        this.textDisplayPanel_.removeChild(captionsText);
+        this.textContainer_.removeChild(captionsText);
         this.currentCuesMap_.delete(cue);
       }
     }
@@ -180,10 +180,122 @@ shaka.ui.TextDisplayer = class {
     for (const cue of currentCues) {
       if (!this.currentCuesMap_.has(cue)) {
         const captionsText = shaka.ui.Utils.createHTMLElement('span');
-        captionsText.textContent = cue.payload;
-        this.textDisplayPanel_.appendChild(captionsText);
+        this.setCaptionStyles_(captionsText, cue);
         this.currentCuesMap_.set(cue, captionsText);
+        this.textContainer_.appendChild(captionsText);
       }
     }
+  }
+
+  /**
+   * @param {!HTMLElement} captionsText
+   * @param {!shaka.extern.Cue} cue
+   * @private
+   */
+  setCaptionStyles_(captionsText, cue) {
+    const Cue = shaka.text.Cue;
+    const captionsStyle = captionsText.style;
+    const panelStyle = this.textContainer_.style;
+
+    captionsText.textContent = cue.payload;
+    captionsStyle.backgroundColor = cue.backgroundColor;
+    captionsStyle.color = cue.color;
+    captionsStyle.direction = cue.direction;
+
+    // The displayAlign attribute specifys the vertical alignment of the
+    // captions inside the text container. Before means at the top of the
+    // text container, and after means at the bottom.
+    if (cue.displayAlign == Cue.displayAlign.BEFORE) {
+      panelStyle.alignItems = 'flex-start';
+    } else if (cue.displayAlign == Cue.displayAlign.CENTER) {
+      panelStyle.alignItems = 'flex-top';
+    } else {
+      panelStyle.alignItems = 'flex-end';
+    }
+
+    captionsStyle.fontFamily = cue.fontFamily;
+    captionsStyle.fontWeight = cue.fontWeight.toString();
+    captionsStyle.fontSize = cue.fontSize;
+    captionsStyle.fontStyle = cue.fontStyle;
+
+    // The line attribute defines the positioning of the text container inside
+    // the video container.
+    // - The line offsets the text container from the top, the right or left of
+    //   the video viewport as defined by the writing direction.
+    // - The value of the line is either as a number of lines, or a percentage
+    //   of the video viewport height or width.
+    // The lineAlign is an alignment for the text container's line.
+    // - The Start alignment means the text container’s top side (for horizontal
+    //   cues), left side (for vertical growing right), or right side (for
+    //   vertical growing left) is aligned at the line.
+    // - The Center alignment means the text container is centered at the line
+    //   (to be implemented).
+    // - The End Alignment means The text container’s bottom side (for
+    //   horizontal cues), right side (for vertical growing right), or left side
+    //   (for vertical growing left) is aligned at the line.
+    // TODO: Implement line alignment with line number.
+    // TODO: Implement lineAlignment of 'CENTER'.
+    if (cue.line) {
+      if (cue.lineInterpretation == Cue.lineInterpretation.PERCENTAGE) {
+        if (cue.writingMode == Cue.writingMode.HORIZONTAL_TOP_TO_BOTTOM) {
+          if (cue.lineAlign == Cue.lineAlign.START) {
+            this.textContainer_.top = cue.line + '%';
+          } else if (cue.lineAlign == Cue.lineAlign.END) {
+            this.textContainer_.bottom = cue.line + '%';
+          }
+        } else if (cue.writingMode == Cue.writingMode.VERTICAL_LEFT_TO_RIGHT) {
+          if (cue.lineAlign == Cue.lineAlign.START) {
+            this.textContainer_.left = cue.line + '%';
+          } else if (cue.lineAlign == Cue.lineAlign.END) {
+            this.textContainer_.right = cue.line + '%';
+          }
+        } else {
+          if (cue.lineAlign == Cue.lineAlign.START) {
+            this.textContainer_.right = cue.line + '%';
+          } else if (cue.lineAlign == Cue.lineAlign.END) {
+            this.textContainer_.left = cue.line + '%';
+          }
+        }
+      }
+    }
+
+    captionsStyle.lineHeight = cue.lineHeight;
+
+    // The position defines the indent of the text container in the
+    // direction defined by the writing direction.
+    if (cue.position) {
+      if (cue.writingMode == Cue.writingMode.HORIZONTAL_TOP_TO_BOTTOM) {
+        this.textContainer_.paddingLeft = cue.position;
+      } else {
+        this.textContainer_.paddingTop = cue.position;
+      }
+    }
+
+    // The positionAlign attribute is an alignment for the text container in
+    // the dimension of the writing direction.
+    if (cue.positionAlign == Cue.positionAlign.LEFT) {
+      panelStyle.float = 'left';
+    } else if (cue.positionAlign == Cue.positionAlign.RIGHT) {
+      panelStyle.float = 'right';
+    } else {
+      panelStyle.margin = 'auto';
+    }
+
+    captionsStyle.textAlign = cue.textAlign;
+    captionsStyle.textDecoration = cue.textDecoration.join(' ');
+    captionsStyle.writingMode = cue.writingMode;
+
+    // The size is a number giving the size of the text container, to be
+    // interpreted as a percentage of the video, as defined by the writing
+    // direction.
+    if (cue.writingMode == Cue.writingMode.HORIZONTAL_TOP_TO_BOTTOM) {
+      this.textContainer_.width = cue.size + '%';
+    } else {
+      this.textContainer_.height = cue.size + '%';
+    }
+
+    captionsStyle.textAlign = cue.textAlign;
+    captionsStyle.textDecoration = cue.textDecoration.join(' ');
+    captionsStyle.writingMode = cue.writingMode;
   }
 };
