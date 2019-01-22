@@ -1,3 +1,48 @@
+## 2.4.6 (2019-01-22)
+
+Bugfixes:
+  - Fix HLS without URI attribute
+    - https://github.com/google/shaka-player/issues/1086
+    - https://github.com/google/shaka-player/issues/1730
+    - https://github.com/google/shaka-player/pull/1732
+  - Handle prereleases of npm and node in build scripts
+    - https://github.com/google/shaka-player/issues/1758
+  - Fix windows path handling in build scripts
+    - https://github.com/google/shaka-player/issues/1759
+  - Fix cast receiver errors in getStats
+    - https://github.com/google/shaka-player/issues/1760
+  - Fix spurious teardown exception on smart TVs
+    - https://github.com/google/shaka-player/issues/1728
+  - Loosen gap thresholds on Chromecast
+    - https://github.com/google/shaka-player/issues/1720
+  - Fix support for Safari 12
+  - Fix support for relative Location URLs in DASH
+    - https://github.com/google/shaka-player/issues/1668
+  - Fix compliance issues in IE11 EME polyfill
+    - https://github.com/google/shaka-player/issues/1689
+  - Fix PlayReady playback on Tizen
+    - https://github.com/google/shaka-player/issues/1712
+  - Fix chopped playback in MS Edge
+    - https://github.com/google/shaka-player/issues/1597
+  - Fix assertions when EME sessions expire
+    - https://github.com/google/shaka-player/issues/1599
+  - Fix relative URIs in HLS
+    - https://github.com/google/shaka-player/issues/1664
+  - Fix compilation error
+    - https://github.com/google/shaka-player/issues/1658
+    - https://github.com/google/shaka-player/pull/1660
+
+New Features:
+  - Add extended error code for failed license request
+    - https://github.com/google/shaka-player/issues/1689
+
+Demo App:
+  - Disable offline storage on some assets
+    - https://github.com/google/shaka-player/issues/1768
+  - Update DASH-IF livesim URLs
+    - https://github.com/google/shaka-player/pull/1736
+
+
 ## 2.5.0-beta2 (2018-11-09)
 
 Contains everything in v2.4.5, plus...
