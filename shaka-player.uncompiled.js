@@ -54,6 +54,7 @@ goog.require('shaka.polyfill.VTTCue');
 goog.require('shaka.polyfill.VideoPlayPromise');
 goog.require('shaka.polyfill.VideoPlaybackQuality');
 goog.require('shaka.polyfill.installAll');
+goog.require('shaka.routing.Walker');
 goog.require('shaka.text.Cue');
 goog.require('shaka.text.Mp4TtmlParser');
 goog.require('shaka.text.Mp4VttParser');

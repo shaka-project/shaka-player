@@ -44,6 +44,10 @@
 
 +../../lib/polyfill/all.js
 
++../../lib/routing/node.js
++../../lib/routing/payload.js
++../../lib/routing/walker.js
+
 +../../lib/text/cue.js
 +../../lib/text/simple_text_displayer.js
 +../../lib/text/text_engine.js
