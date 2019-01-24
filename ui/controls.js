@@ -1018,6 +1018,7 @@ shaka.ui.Controls.prototype.seek_ = function(currentTime, event) {
   this.updateTimeAndSeekRange_();
 };
 
+
 /**
  * Called when the seek range or current time need to be updated.
  * @private
