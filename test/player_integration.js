@@ -55,6 +55,9 @@ describe('Player', function() {
             shaka.test.TestScheme.ManifestParser);
 
         loaded.resolve();
+      }, (error) => {
+        loaded.reject('Failed to load compiled player.');
+        shaka.log.error('Error loading compiled player.', error);
       });
     }
 
