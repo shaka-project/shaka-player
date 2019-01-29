@@ -107,6 +107,7 @@ shaka.ui.Overlay.prototype.defaultConfig_ = function() {
       'quality',
       'language',
       'picture_in_picture',
+      'cast',
     ],
     addSeekBar: true,
     castReceiverAppId: '',

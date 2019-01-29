@@ -81,3 +81,57 @@ shaka.ui.Utils.createHTMLElement = function(tagName) {
     /** @type {!HTMLElement} */ (document.createElement(tagName));
   return element;
 };
+
+
+/**
+ * Finds a descendant of |menu| that has a 'shaka-chosen-item' class
+ * and focuses on its' parent.
+ *
+ * @param {HTMLElement} menu
+ */
+shaka.ui.Utils.focusOnTheChosenItem = function(menu) {
+  if (!menu) return;
+  const chosenItem = shaka.ui.Utils.getDescendantIfExists(
+    menu, 'shaka-chosen-item');
+  if (chosenItem) {
+    chosenItem.parentElement.focus();
+  }
+};
+
+
+/**
+ * @return {!Element}
+ */
+shaka.ui.Utils.checkmarkIcon = function() {
+  let icon = shaka.ui.Utils.createHTMLElement('i');
+  icon.classList.add('material-icons');
+  icon.classList.add('shaka-chosen-item');
+  icon.textContent = shaka.ui.Enums.MaterialDesignIcons.CHECKMARK;
+  // Screen reader should ignore icon text.
+  icon.setAttribute('aria-hidden', 'true');
+  return icon;
+};
+
+
+/**
+ * Depending on the value of display, sets/removes the css class of element to
+ * either display it or hide it.
+ *
+ * @param {Element} element
+ * @param {boolean} display
+ * @export
+ */
+shaka.ui.Utils.setDisplay = function(element, display) {
+  if (!element) return;
+  if (display) {
+    element.classList.add('shaka-displayed');
+    // Removing a non-existent class doesn't throw, so, even if
+    // the element is not hidden, this should be fine. Same for displayed
+    // below.
+    element.classList.remove('shaka-hidden');
+  } else {
+    element.classList.add('shaka-hidden');
+    element.classList.remove('shaka-displayed');
+  }
+};
+

@@ -17,6 +17,7 @@
 
 
 goog.provide('shaka.ui.Controls');
+goog.provide('shaka.ui.ControlsPanel');
 
 goog.require('goog.asserts');
 goog.require('shaka.ui.Constants');
@@ -109,7 +110,7 @@ shaka.ui.Controls = function(player, videoContainer, video, config) {
   this.hideSettingsMenusTimer_ = new shaka.util.Timer(() => {
     /** type {function(!HTMLElement)} */
     const hide = (control) => {
-      shaka.ui.Controls.setDisplay(control, /* visible= */ false);
+      shaka.ui.Utils.setDisplay(control, /* visible= */ false);
     };
 
     for (const menu of this.settingsMenus_) {
@@ -170,7 +171,7 @@ goog.inherits(shaka.ui.Controls, shaka.util.FakeEventTarget);
 
 
 /** @private {!Map.<string, !shaka.extern.IUIElement.Factory>} */
-shaka.ui.Controls.elementNamesToFactories_ = new Map();
+shaka.ui.ControlsPanel.elementNamesToFactories_ = new Map();
 
 
 /**
@@ -216,7 +217,7 @@ shaka.ui.Controls.prototype.destroy = function() {
  * @export
  */
 shaka.ui.Controls.registerElement = function(name, factory) {
-  shaka.ui.Controls.elementNamesToFactories_.set(name, factory);
+  shaka.ui.ControlsPanel.elementNamesToFactories_.set(name, factory);
 };
 
 
@@ -255,7 +256,7 @@ shaka.ui.Controls.prototype.loadComplete = function() {
 shaka.ui.Controls.prototype.setEnabledShakaControls = function(enabled) {
   this.enabled_ = enabled;
   if (enabled) {
-    shaka.ui.Controls.setDisplay(
+    shaka.ui.Utils.setDisplay(
       this.controlsButtonPanel_.parentElement, true);
 
     // If we're hiding native controls, make sure the video element itself is
@@ -263,7 +264,7 @@ shaka.ui.Controls.prototype.setEnabledShakaControls = function(enabled) {
     this.video_.tabIndex = -1;
     this.video_.controls = false;
   } else {
-    shaka.ui.Controls.setDisplay(
+    shaka.ui.Utils.setDisplay(
       this.controlsButtonPanel_.parentElement, false);
   }
 
@@ -403,29 +404,6 @@ shaka.ui.Controls.prototype.getDisplayTime = function() {
  */
 shaka.ui.Controls.prototype.setLastTouchEventTime = function(time) {
   this.lastTouchEventTime_ = time;
-};
-
-
-/**
- * Depending on the value of display, sets/removes css class of element to
- * either display it or hide.
- *
- * @param {Element} element
- * @param {boolean} display
- * @export
- */
-shaka.ui.Controls.setDisplay = function(element, display) {
-  if (!element) return;
-  if (display) {
-    element.classList.add('shaka-displayed');
-    // Removing a non-existent class doesn't throw, so, even if
-    // the element is not hidden, this should be fine. Same for displayed
-    // below.
-    element.classList.remove('shaka-hidden');
-  } else {
-    element.classList.add('shaka-hidden');
-    element.classList.remove('shaka-displayed');
-  }
 };
 
 
@@ -607,14 +585,8 @@ shaka.ui.Controls.prototype.addControlsButtonPanel_ = function() {
   // Create the elements specified by controlPanelElements
   for (let i = 0; i < this.config_.controlPanelElements.length; i++) {
     const name = this.config_.controlPanelElements[i];
-    if (shaka.ui.Controls.elementNamesToFactories_.get(name)) {
-      if (shaka.ui.Controls.controlPanelElements_.indexOf(name) == -1) {
-        // Not a control panel element, skip
-        shaka.log.warning('Element is not part of control panel ' +
-          'elements and will be skipped', name);
-        continue;
-      }
-      const factory = shaka.ui.Controls.elementNamesToFactories_.get(name);
+    if (shaka.ui.ControlsPanel.elementNamesToFactories_.get(name)) {
+      const factory = shaka.ui.ControlsPanel.elementNamesToFactories_.get(name);
       this.elements_.push(factory.create(this.controlsButtonPanel_, this));
     }
   }
@@ -745,15 +717,6 @@ shaka.ui.Controls.prototype.addSeekBar_ = function() {
 
   this.seekBarContainer_.appendChild(this.seekBar_);
   this.controlsContainer_.appendChild(this.seekBarContainer_);
-};
-
-
-/**
- * Checks if the cast proxy can cast.
- * @return {boolean}
- */
-shaka.ui.Controls.prototype.canCast = function() {
-  return this.castProxy_.canCast();
 };
 
 
@@ -1135,12 +1098,12 @@ shaka.ui.Controls.prototype.updateTimeAndSeekRange_ = function() {
     const seekRange = this.player_.seekRange();
     const seekWindow = seekRange.end - seekRange.start;
     if (seekWindow < Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR) {
-      shaka.ui.Controls.setDisplay(this.seekBarContainer_, false);
+      shaka.ui.Utils.setDisplay(this.seekBarContainer_, false);
       for (let menu of this.settingsMenus_) {
         menu.classList.add('shaka-low-position');
       }
     } else {
-      shaka.ui.Controls.setDisplay(this.seekBarContainer_, true);
+      shaka.ui.Utils.setDisplay(this.seekBarContainer_, true);
       for (let menu of this.settingsMenus_) {
         menu.classList.remove('shaka-low-position');
       }
@@ -1321,16 +1284,3 @@ shaka.ui.Controls.createLocalization_ = function() {
 
   return localization;
 };
-
-
-/** @private {!Array.<string>} */
-shaka.ui.Controls.controlPanelElements_ = [
-  'time_and_duration',
-  'mute',
-  'volume',
-  'fullscreen',
-  'overflow_menu',
-  'rewind',
-  'fast_forward',
-  'spacer',
-];

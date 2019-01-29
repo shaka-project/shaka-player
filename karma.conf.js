@@ -111,6 +111,7 @@ module.exports = function(config) {
       {pattern: 'ui/**/*.css', included: false},
       {pattern: 'ui/**/*.less', included: false},
       {pattern: 'third_party/closure/goog/**/*.js', included: false},
+      {pattern: 'third_party/language-mapping-list/**/*.js', included: false},
       {pattern: 'test/test/assets/*', included: false},
       {pattern: 'dist/shaka-player.ui.js', included: false},
       {pattern: 'node_modules/**/*.js', included: false},
