@@ -134,4 +134,4 @@ uiConfig['controlPanelElements'] = ['rewind', 'fast_forward', 'skip'];
 
 #### Continue the Tutorials
 
-Next, check out {@tutorial config}.
+Next, check out {@tutorial a11y} to make your custom buttons accessible to screen readers.

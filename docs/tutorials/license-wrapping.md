@@ -167,4 +167,4 @@ CDM.  Open the JavaScript console to see what the server sent back.
 
 #### Continue the Tutorials
 
-Next, check out {@tutorial plugins}.
+Next, check out {@tutorial ui}.

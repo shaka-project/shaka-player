@@ -191,4 +191,4 @@ To sum up, remember these points when debugging your application:
 
 #### Continue the Tutorials
 
-Next, check out {@tutorial ui}.
+Next, check out {@tutorial config}.
