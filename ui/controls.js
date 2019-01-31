@@ -111,6 +111,13 @@ shaka.ui.Controls = function(player, videoContainer, video, config) {
       this.hideSettingsMenus();
     });
 
+  /**
+   * The pressed keys set is used to record which keys are currently pressed
+   * down, so we can know what keys are pressed at the same time.
+   * Used by the focusInsideOverflowMenu_() function.
+   * @private {!Set.<number>}
+   */
+  this.pressedKeys_ = new Set();
 
   // We might've missed a caststatuschanged event from the proxy between
   // the controls creation and initializing. Run onCastStatusChange_()
@@ -141,6 +148,7 @@ shaka.ui.Controls.prototype.destroy = function() {
   }
 
   this.localization_ = null;
+  this.pressedKeys_.clear();
 
   return Promise.resolve();
 };
@@ -942,6 +950,10 @@ shaka.ui.Controls.prototype.onKeyUp_ = function(event) {
     this.onMouseMove_(event);
   }
 
+  // When the key is released, remove it from the pressed keys set.
+  this.pressedKeys_.delete(event.keyCode);
+
+
   switch (key) {
     case 'ArrowLeft':
       // If it's not focused on the volume bar, move the seek time backward
@@ -1117,12 +1129,21 @@ shaka.ui.Controls.prototype.updateTimeAndSeekRange_ = function() {
 
 
 /**
- * Adds class for keyboard navigation if tab was pressed.
+ * Add behaviors for keyboard navigation.
+ * 1. Add blue outline for focused elements.
+ * 2. Allow exiting overflow settings menus by pressing Esc key.
+ * 3. When navigating on overflow settings menu by pressing Tab
+ *    key or Shift+Tab keys keep the focus inside overflow menu.
  *
  * @param {!Event} event
  * @private
  */
 shaka.ui.Controls.prototype.onKeyDown_ = function(event) {
+  // Add the key code to the pressed keys set when it's pressed.
+  this.pressedKeys_.add(event.keyCode);
+
+  const anySettingsMenusAreOpen = this.anySettingsMenusAreOpen();
+
   if (event.keyCode == shaka.ui.Constants.KEYCODE_TAB) {
     // Enable blue outline for focused elements for keyboard
     // navigation.
@@ -1130,9 +1151,69 @@ shaka.ui.Controls.prototype.onKeyDown_ = function(event) {
     this.eventManager_.listen(window, 'mousedown',
                               this.onMouseDown_.bind(this));
   } else if (event.keyCode == shaka.ui.Constants.KEYCODE_ESCAPE &&
-      this.anySettingsMenusAreOpen()) {
-        // Press Escape key to exit the overflow menu.
-        this.hideSettingsMenus();
+        anySettingsMenusAreOpen) {
+      // If escape key was pressed, close any open settings menus.
+      this.hideSettingsMenus();
+  }
+  if (anySettingsMenusAreOpen &&
+        this.pressedKeys_.has(shaka.ui.Constants.KEYCODE_TAB)) {
+      // If Tab key or Shift+Tab keys are pressed when navigating through
+      // an overflow settings menu, keep the focus to loop inside the
+      // overflow menu.
+      this.keepFocusInMenu_(event);
+  }
+};
+
+
+/**
+ * When the user is using keyboard to navigate inside the overflow settings
+ * menu (pressing Tab key to go forward, or pressing Shift + Tab keys to go
+ * backward), make sure it's focused only on the elements of the overflow
+ * panel.
+ * This is called by onKeyDown_() function, when there's a settings overflow
+ * menu open, and the Tab key / Shift+Tab keys are pressed.
+ * @param {!Event} event
+ * @private
+ */
+shaka.ui.Controls.prototype.keepFocusInMenu_ = function(event) {
+  const openSettingsMenus = this.settingsMenus_.filter(
+      (menu) => menu.classList.contains('shaka-displayed'));
+  const settingsMenu = openSettingsMenus[0];
+  if (settingsMenu.childNodes.length) {
+    // Get the first and the last displaying child element from the overflow
+    // menu.
+    let firstShownChild = settingsMenu.firstElementChild;
+    while (firstShownChild &&
+           firstShownChild.classList.contains('shaka-hidden')) {
+      firstShownChild = firstShownChild.nextElementSibling;
+    }
+
+    let lastShownChild = settingsMenu.lastElementChild;
+    while (lastShownChild &&
+           lastShownChild.classList.contains('shaka-hidden')) {
+      lastShownChild = lastShownChild.previousElementSibling;
+    }
+
+    const activeElement = document.activeElement;
+    // When only Tab key is pressed, navigate to the next elememnt.
+    // If it's currently focused on the last shown child element of the
+    // overflow menu, let the focus move to the first child element of the
+    // menu.
+    // When Tab + Shift keys are pressed at the same time, navigate to the
+    // previous element. If it's currently focused on the first shown child
+    // element of the overflow menu, let the focus move to the last child
+    // element of the menu.
+    if (this.pressedKeys_.has(shaka.ui.Constants.KEYCODE_SHIFT)) {
+      if (activeElement == firstShownChild) {
+        event.preventDefault();
+        lastShownChild.focus();
+      }
+    } else {
+      if (activeElement == lastShownChild) {
+        event.preventDefault();
+        firstShownChild.focus();
+      }
+    }
   }
 };
 

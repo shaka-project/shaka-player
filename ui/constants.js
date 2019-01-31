@@ -70,4 +70,10 @@ shaka.ui.Constants.KEYCODE_TAB = 9;
 /**
  * @const {number}
  */
+shaka.ui.Constants.KEYCODE_SHIFT = 16;
+
+
+/**
+ * @const {number}
+ */
 shaka.ui.Constants.KEYCODE_ESCAPE = 27;
