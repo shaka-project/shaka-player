@@ -1129,8 +1129,9 @@ shaka.ui.Controls.prototype.onKeyDown_ = function(event) {
     this.controlsContainer_.classList.add('shaka-keyboard-navigation');
     this.eventManager_.listen(window, 'mousedown',
                               this.onMouseDown_.bind(this));
-  } else if (event.keyCode == shaka.ui.Constants.KEYCODE_TAB &&
+  } else if (event.keyCode == shaka.ui.Constants.KEYCODE_ESCAPE &&
       this.anySettingsMenusAreOpen()) {
+        // Press Escape key to exit the overflow menu.
         this.hideSettingsMenus();
   }
 };
