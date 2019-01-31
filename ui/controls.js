@@ -640,7 +640,7 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
   this.videoContainer_.addEventListener(
       'touchend', this.onMouseMove_.bind(this), {passive: true});
   this.videoContainer_.addEventListener(
-      'mouseout', this.onMouseOut_.bind(this));
+      'mouseleave', this.onMouseLeave_.bind(this));
 
   // Overflow menus are supposed to hide once you click elsewhere
   // on the video element. The code in onContainerClick_ ensures that.
@@ -748,7 +748,7 @@ shaka.ui.Controls.prototype.onMouseMove_ = function(event) {
 
 
 /** @private */
-shaka.ui.Controls.prototype.onMouseOut_ = function() {
+shaka.ui.Controls.prototype.onMouseLeave_ = function() {
   // We sometimes get 'mouseout' events with touches.  Since we can never leave
   // the video element when touching, ignore.
   if (this.lastTouchEventTime_) return;
