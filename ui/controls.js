@@ -697,6 +697,10 @@ shaka.ui.Controls.prototype.addSeekBar_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.onMouseMove_ = function(event) {
+  // Disable blue outline for focused elements for mouse navigation.
+  if (event.type == 'mousemove') {
+    this.controlsContainer_.classList.remove('shaka-keyboard-navigation');
+  }
   if (event.type == 'touchstart' || event.type == 'touchmove' ||
       event.type == 'touchend' || event.type == 'keyup') {
     this.lastTouchEventTime_ = Date.now();
@@ -1138,10 +1142,6 @@ shaka.ui.Controls.prototype.onKeyDown_ = function(event) {
  * @private
  */
 shaka.ui.Controls.prototype.onMouseDown_ = function() {
-  // Disable blue outline for focused elements for mouse
-  // navigation.
-  this.controlsContainer_.classList.remove('shaka-keyboard-navigation');
-
   this.eventManager_.unlisten(window, 'mousedown');
   this.eventManager_.listen(window, 'keydown', this.onKeyDown_.bind(this));
 };
