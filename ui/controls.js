@@ -76,11 +76,59 @@ shaka.ui.Controls = function(player, videoContainer, video, config) {
   /** @private {boolean} */
   this.isSeeking_ = false;
 
-  /** @private {?number} */
-  this.seekTimeoutId_ = null;
+  /**
+   * This timer is used to introduce a delay between the user scrubbing across
+   * the seek bar and the seek being sent to the player.
+   *
+   * @private {shaka.util.Timer}
+   */
+  this.seekTimer_ = new shaka.util.Timer(() => {
+    goog.asserts.assert(this.seekBar_ != null, 'Seekbar should not be null!');
+    this.video_.currentTime = parseFloat(this.seekBar_.value);
+  });
 
-  /** @private {?number} */
-  this.mouseStillTimeoutId_ = null;
+  /**
+   * This timer is used to detect when the user has stopped moving the mouse
+   * and we should fade out the ui.
+   *
+   * @private {shaka.util.Timer}
+   */
+  this.mouseStillTimer_ = new shaka.util.Timer(() => {
+    this.onMouseStill_();
+  });
+
+  /**
+   * This timer will be used to hide all settings menus. When the timer ticks
+   * it will force all controls to invisible.
+   *
+   * Rather than calling the callback directly, |Controls| will always call it
+   * through the timer to avoid conflicts.
+   *
+   * @private {shaka.util.Timer}
+   */
+  this.hideSettingsMenusTimer_ = new shaka.util.Timer(() => {
+    /** type {function(!HTMLElement)} */
+    const hide = (control) => {
+      shaka.ui.Controls.setDisplay(control, /* visible= */ false);
+    };
+
+    for (const menu of this.settingsMenus_) {
+      hide(/** @type {!HTMLElement} */ (menu));
+    }
+  });
+
+  /**
+   * This timer is used to regularly update the time and seek range elements
+   * so that we are communicating the current state as accurately as possibly.
+   *
+   * Unlike the other timers, this timer does not "own" the callback because
+   * this timer is acting like a heartbeat.
+   *
+   * @private {shaka.util.Timer}
+   */
+  this.timeAndSeekRangeTimer_ = new shaka.util.Timer(() => {
+    this.updateTimeAndSeekRange_();
+  });
 
   /** @private {?number} */
   this.lastTouchEventTime_ = null;
@@ -95,21 +143,10 @@ shaka.ui.Controls = function(player, videoContainer, video, config) {
 
   this.updateLocalizedStrings_();
 
-  /** @private {shaka.util.Timer} */
-  this.timeAndSeekRangeTimer_ =
-      new shaka.util.Timer(() => this.updateTimeAndSeekRange_());
-  this.timeAndSeekRangeTimer_.start(
-      /* seconds= */ 0.125, /* repeating= */ true);
-
   /** @private {shaka.util.EventManager} */
   this.eventManager_ = new shaka.util.EventManager();
 
   this.addEventListeners_();
-
-  this.hideSettingsMenusTimer_ =
-    new shaka.util.Timer(() => {
-      this.hideSettingsMenus();
-    });
 
   /**
    * The pressed keys set is used to record which keys are currently pressed
@@ -123,6 +160,10 @@ shaka.ui.Controls = function(player, videoContainer, video, config) {
   // the controls creation and initializing. Run onCastStatusChange_()
   // to ensure we have the casting state right.
   this.onCastStatusChange_(null);
+
+  // Start this timer after we are finished initializing everything,
+  this.timeAndSeekRangeTimer_.start(/* seconds= */ 0.125,
+                                    /* repeating= */ true);
 };
 
 goog.inherits(shaka.ui.Controls, shaka.util.FakeEventTarget);
@@ -140,6 +181,21 @@ shaka.ui.Controls.prototype.destroy = function() {
   if (this.eventManager_) {
     this.eventManager_.release();
     this.eventManager_ = null;
+  }
+
+  if (this.seekTimer_) {
+    this.seekTimer_.stop();
+    this.seekTimer_ = null;
+  }
+
+  if (this.mouseStillTimer_) {
+    this.mouseStillTimer_.stop();
+    this.mouseStillTimer_ = null;
+  }
+
+  if (this.hideSettingsMenusTimer_) {
+    this.hideSettingsMenusTimer_.stop();
+    this.hideSettingsMenusTimer_ = null;
   }
 
   if (this.timeAndSeekRangeTimer_) {
@@ -402,9 +458,7 @@ shaka.ui.Controls.prototype.anySettingsMenusAreOpen = function() {
  * @export
  */
 shaka.ui.Controls.prototype.hideSettingsMenus = function() {
-  for (let menu of this.settingsMenus_) {
-    shaka.ui.Controls.setDisplay(/** @type {!HTMLElement} */ (menu), false);
-  }
+  this.hideSettingsMenusTimer_.tick();
 };
 
 
@@ -647,9 +701,7 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
   // However, clicks on controls panel don't propagate to the container,
   // so we have to explicitely hide the menus onclick here.
   this.controlsButtonPanel_.addEventListener('click', () => {
-    if (this.anySettingsMenusAreOpen()) {
-      this.hideSettingsMenus();
-    }
+    this.hideSettingsMenusTimer_.tick();
   });
 
   this.castProxy_.addEventListener(
@@ -726,23 +778,21 @@ shaka.ui.Controls.prototype.onMouseMove_ = function(event) {
 
   // Use the cursor specified in the CSS file.
   this.videoContainer_.style.cursor = '';
-  // Show the controls.
-  this.setControlsOpacity_(shaka.ui.Enums.Opacity.OPAQUE);
+
+  // Make sure we are not about to hide the settings menus and then force them
+  // open.
   this.hideSettingsMenusTimer_.stop();
+  this.setControlsOpacity_(shaka.ui.Enums.Opacity.OPAQUE);
   this.updateTimeAndSeekRange_();
 
   // Hide the cursor when the mouse stops moving.
   // Only applies while the cursor is over the video container.
-  if (this.mouseStillTimeoutId_) {
-    // Reset the timer.
-    window.clearTimeout(this.mouseStillTimeoutId_);
-  }
+  this.mouseStillTimer_.stop();
 
   // Only start a timeout on 'touchend' or for 'mousemove' with no touch events.
   if (event.type == 'touchend' ||
       event.type == 'keyup'|| !this.lastTouchEventTime_) {
-    this.mouseStillTimeoutId_ = window.setTimeout(
-        this.onMouseStill_.bind(this), 3000);
+    this.mouseStillTimer_.start(/* seconds= */ 3, /* repeating= */ false);
   }
 };
 
@@ -753,21 +803,22 @@ shaka.ui.Controls.prototype.onMouseLeave_ = function() {
   // the video element when touching, ignore.
   if (this.lastTouchEventTime_) return;
 
-  // Expire the timer early.
-  if (this.mouseStillTimeoutId_) {
-    window.clearTimeout(this.mouseStillTimeoutId_);
-  }
-  // Run the timeout callback to hide the controls.
-  // If we don't, the opacity style we set in onMouseMove_ will continue to
-  // override the opacity in CSS and force the controls to stay visible.
-  this.onMouseStill_();
+  // Stop the timer and invoke the callback now to hide the controls.  If we
+  // don't, the opacity style we set in onMouseMove_ will continue to override
+  // the opacity in CSS and force the controls to stay visible.
+  this.mouseStillTimer_.tick();
 };
 
 
-/** @private */
+/**
+ * This callback is for when we are pretty sure that the mouse has stopped
+ * moving (aka the mouse is still). This method should only be called via
+ * |mouseStillTimer_|. If this behaviour needs to be invoked directly, use
+ * |mouseStillTimer_.tick()|.
+ *
+ * @private
+ */
 shaka.ui.Controls.prototype.onMouseStill_ = function() {
-  // The mouse has stopped moving.
-  this.mouseStillTimeoutId_ = null;
   // Hide the cursor.  (NOTE: not supported on IE)
   this.videoContainer_.style.cursor = 'none';
 
@@ -813,7 +864,7 @@ shaka.ui.Controls.prototype.onContainerClick_ = function(event) {
   if (!this.enabled_) return;
 
   if (this.anySettingsMenusAreOpen()) {
-    this.hideSettingsMenus();
+    this.hideSettingsMenusTimer_.tick();
   } else {
     this.onPlayPauseClick_();
   }
@@ -900,20 +951,15 @@ shaka.ui.Controls.prototype.onSeekInput_ = function() {
   // Update the UI right away.
   this.updateTimeAndSeekRange_();
 
-  // Collect input events and seek when things have been stable for 125ms.
-  if (this.seekTimeoutId_ != null) {
-    window.clearTimeout(this.seekTimeoutId_);
-  }
-  this.seekTimeoutId_ = window.setTimeout(
-      this.onSeekInputTimeout_.bind(this), 125);
-};
-
-
-/** @private */
-shaka.ui.Controls.prototype.onSeekInputTimeout_ = function() {
-  goog.asserts.assert(this.seekBar_ != null, 'Seekbar should not be null!');
-  this.seekTimeoutId_ = null;
-  this.video_.currentTime = parseFloat(this.seekBar_.value);
+  // We want to wait until the user has stopped moving the seek bar for a
+  // little bit to avoid the number of times we ask the player to seek.
+  //
+  // To do this, we will start a timer that will fire in a little bit, but if
+  // we see another seek bar change, we will cancel that timer and re-start it.
+  //
+  // Calling |start| on an already pending timer will cancel the old request
+  // and start the new one.
+  this.seekTimer_.start(/* seconds= */ 0.125, /* repeating */ false);
 };
 
 
@@ -921,11 +967,9 @@ shaka.ui.Controls.prototype.onSeekInputTimeout_ = function() {
 shaka.ui.Controls.prototype.onSeekEnd_ = function() {
   if (!this.enabled_) return;
 
-  if (this.seekTimeoutId_ != null) {
-    // They just let go of the seek bar, so end the timer early.
-    window.clearTimeout(this.seekTimeoutId_);
-    this.onSeekInputTimeout_();
-  }
+  // They just let go of the seek bar, so cancel the timer and manually
+  // call the event so that we can respond immediately.
+  this.seekTimer_.tick();
 
   this.isSeeking_ = false;
   this.video_.play();
@@ -1150,11 +1194,13 @@ shaka.ui.Controls.prototype.onKeyDown_ = function(event) {
     this.controlsContainer_.classList.add('shaka-keyboard-navigation');
     this.eventManager_.listen(window, 'mousedown',
                               this.onMouseDown_.bind(this));
-  } else if (event.keyCode == shaka.ui.Constants.KEYCODE_ESCAPE &&
-        anySettingsMenusAreOpen) {
-      // If escape key was pressed, close any open settings menus.
-      this.hideSettingsMenus();
   }
+
+  // If escape key was pressed, close any open settings menus.
+  if (event.keyCode == shaka.ui.Constants.KEYCODE_ESCAPE) {
+    this.hideSettingsMenusTimer_.tick();
+  }
+
   if (anySettingsMenusAreOpen &&
         this.pressedKeys_.has(shaka.ui.Constants.KEYCODE_TAB)) {
       // If Tab key or Shift+Tab keys are pressed when navigating through
