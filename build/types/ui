@@ -6,6 +6,8 @@
 +../../ui/constants.js
 +../../ui/enums.js
 +../../ui/element.js
++../../ui/fast_forward_button.js
++../../ui/fullscreen_button.js
 +../../ui/localization.js
 +../../ui/locales.js
 +../../ui/mute_button.js
