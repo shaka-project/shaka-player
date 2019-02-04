@@ -88,8 +88,10 @@ def check_complete(_):
 
   match = re.compile(r'.*\.js$')
   base = shakaBuildHelpers.get_source_base()
-  all_files = shakaBuildHelpers.get_all_files(os.path.join(base, 'lib'), match)
-  missing_files = set(all_files) - complete.include
+  all_files = set()
+  all_files.update(shakaBuildHelpers.get_all_files(os.path.join(base, 'lib'), match))
+  all_files.update(shakaBuildHelpers.get_all_files(os.path.join(base, 'ui'), match))
+  missing_files = all_files - complete.include
 
   if missing_files:
     logging.error('There are files missing from the complete build:')
