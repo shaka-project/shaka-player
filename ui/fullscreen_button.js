@@ -43,6 +43,7 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
     this.button_.classList.add('material-icons');
     this.button_.textContent = shaka.ui.Enums.MaterialDesignIcons.FULLSCREEN;
     this.parent.appendChild(this.button_);
+    this.updateAriaLabel_();
 
     /** @private {!HTMLElement} */
     this.videoContainer_ = this.controls.getVideoContainer();

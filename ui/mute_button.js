@@ -43,6 +43,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
     this.button_.classList.add('material-icons');
     this.button_.textContent = shaka.ui.Enums.MaterialDesignIcons.MUTE;
     this.parent.appendChild(this.button_);
+    this.updateAriaLabel_();
 
     this.eventManager.listen(
       this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {

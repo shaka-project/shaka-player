@@ -273,9 +273,17 @@ describe('UI', function() {
       });
 
       it('has default buttons', function() {
-        let captionButtons =
-          overflowMenu.getElementsByClassName('shaka-caption-button');
-        expect(captionButtons.length).toBe(1);
+        const defaultButtonsClassNames = [
+          'shaka-caption-button',
+          'shaka-resolution-button',
+          'shaka-language-button',
+          'shaka-pip-button',
+        ];
+
+        for (const className of defaultButtonsClassNames) {
+          const buttons = overflowMenu.getElementsByClassName(className);
+          expect(buttons.length).toBe(1);
+        }
       });
 
       it('becomes visible if overflowMenuButton was clicked', function() {
@@ -291,6 +299,13 @@ describe('UI', function() {
         display = overflowMenu.style.display;
         expect(display).not.toEqual('none');
       });
+
+      it('is accessible', function() {
+        for (let button of overflowMenu.childNodes) {
+          expect(/** @type {!HTMLElement} */ (button)
+              .hasAttribute('aria-label')).toBe(true);
+        }
+      });
     });
 
 
@@ -298,35 +313,64 @@ describe('UI', function() {
        /** @type {!HTMLElement} */
       let controlsButtonPanel;
 
-      beforeEach(function() {
+      it('has default elements', function() {
         createUIThroughAPI(videoContainer, video);
         let controlsButtonPanels = videoContainer.getElementsByClassName(
           'shaka-controls-button-panel');
         expect(controlsButtonPanels.length).toBe(1);
+
         controlsButtonPanel =
             /** @type {!HTMLElement} */ (controlsButtonPanels[0]);
+
+      const defaultElementsClassNames = [
+          'shaka-current-time',
+          'shaka-mute-button',
+          'shaka-volume-bar',
+          'shaka-fullscreen-button',
+          'shaka-overflow-menu-button',
+        ];
+
+        for (const className of defaultElementsClassNames) {
+          const elements =
+              controlsButtonPanel.getElementsByClassName(className);
+          expect(elements.length).toBe(1);
+        }
       });
 
-      it('has default elements', function() {
-        let currentTimes =
-          controlsButtonPanel.getElementsByClassName('shaka-current-time');
-        expect(currentTimes.length).toBe(1);
+      it('is accessible', function() {
+        const config = {
+          controlPanelElements: [
+            'mute',
+            'volume',
+            'fullscreen',
+            'overflow_menu',
+            'fast_forward',
+            'rewind',
+          ],
+        };
+        createUIThroughAPI(videoContainer, video, config);
+        const controlsButtonPanels = videoContainer.getElementsByClassName(
+          'shaka-controls-button-panel');
+        expect(controlsButtonPanels.length).toBe(1);
 
-        let shakaMuteButtons =
-          controlsButtonPanel.getElementsByClassName('shaka-mute-button');
-        expect(shakaMuteButtons.length).toBe(1);
+        controlsButtonPanel =
+            /** @type {!HTMLElement} */ (controlsButtonPanels[0]);
 
-        let volumeBars =
-          controlsButtonPanel.getElementsByClassName('shaka-volume-bar');
-        expect(volumeBars.length).toBe(1);
+        const elementsClassNames = [
+          'shaka-mute-button',
+          'shaka-volume-bar',
+          'shaka-fullscreen-button',
+          'shaka-overflow-menu-button',
+          'shaka-fast-forward-button',
+          'shaka-rewind-button',
+        ];
 
-        let fullscreenButtons =
-          controlsButtonPanel.getElementsByClassName('shaka-fullscreen-button');
-        expect(fullscreenButtons.length).toBe(1);
-
-        let overflowMenuButtons = controlsButtonPanel.getElementsByClassName(
-          'shaka-overflow-menu-button');
-        expect(overflowMenuButtons.length).toBe(1);
+        for (const className of elementsClassNames) {
+          const elements =
+              controlsButtonPanel.getElementsByClassName(className);
+          expect(elements.length).toBe(1);
+          expect(elements[0].hasAttribute('aria-label')).toBe(true);
+        }
       });
     });
 

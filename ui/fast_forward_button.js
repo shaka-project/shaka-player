@@ -39,9 +39,11 @@ shaka.ui.FastForwardButton = class extends shaka.ui.Element {
 
     this.button_ = shaka.ui.Utils.createHTMLElement('button');
     this.button_.classList.add('material-icons');
+    this.button_.classList.add('shaka-fast-forward-button');
     this.button_.textContent =
       shaka.ui.Enums.MaterialDesignIcons.FAST_FORWARD;
     this.parent.appendChild(this.button_);
+    this.updateAriaLabel_();
 
     this.eventManager.listen(
       this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {

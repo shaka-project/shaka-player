@@ -387,6 +387,7 @@ goog.require('shaka.ui.Utils');
     } else {
       this.captionButton_.setAttribute('aria-pressed', 'false');
     }
+
     this.captionButton_.appendChild(this.captionIcon_);
 
     const label = shaka.ui.Utils.createHTMLElement('label');
@@ -618,6 +619,7 @@ goog.require('shaka.ui.Utils');
 
     this.pipIcon_ = shaka.ui.Utils.createHTMLElement('i');
     this.pipIcon_.classList.add('material-icons');
+    this.pipIcon_.classList.add('shaka-pip-button');
     // This text content is actually a material design icon.
     // DO NOT LOCALIZE
     this.pipIcon_.textContent = shaka.ui.Enums.MaterialDesignIcons.PIP;

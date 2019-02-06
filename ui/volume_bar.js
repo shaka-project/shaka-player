@@ -55,6 +55,7 @@ shaka.ui.VolumeBar = class extends shaka.ui.Element {
 
     this.container_.appendChild(this.bar_);
     this.parent.appendChild(this.container_);
+    this.updateAriaLabel_();
 
     this.eventManager.listen(this.video, 'volumechange', () => {
       this.onVolumeStateChange_();
