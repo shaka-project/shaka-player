@@ -116,9 +116,9 @@ shaka.ui.TextDisplayer = class {
     }
 
     for (const cue of cuesToRemove) {
-        const captionsText = this.currentCuesMap_.get(cue);
-        if (captionsText) {
-          this.textContainer_.removeChild(captionsText);
+        const captions = this.currentCuesMap_.get(cue);
+        if (captions) {
+          this.textContainer_.removeChild(captions);
           this.currentCuesMap_.delete(cue);
         }
     }
@@ -161,8 +161,8 @@ shaka.ui.TextDisplayer = class {
     // remove the entry from the map, and remove the captions from the page.
     for (const cue of this.currentCuesMap_.keys()) {
         if (!shouldCueBeDisplayed(cue)) {
-        const captionsText = this.currentCuesMap_.get(cue);
-        this.textContainer_.removeChild(captionsText);
+        const captions = this.currentCuesMap_.get(cue);
+        this.textContainer_.removeChild(captions);
         this.currentCuesMap_.delete(cue);
       }
     }
@@ -181,26 +181,24 @@ shaka.ui.TextDisplayer = class {
     });
 
     for (const cue of currentCues) {
-      if (!this.currentCuesMap_.has(cue)) {
-        const captionsText = shaka.ui.Utils.createHTMLElement('span');
-        this.setCaptionStyles_(captionsText, cue);
-        this.currentCuesMap_.set(cue, captionsText);
-        this.textContainer_.appendChild(captionsText);
-      }
+      const captions = shaka.ui.Utils.createHTMLElement('span');
+      this.setCaptionStyles_(captions, cue);
+      this.currentCuesMap_.set(cue, captions);
+      this.textContainer_.appendChild(captions);
     }
   }
 
   /**
-   * @param {!HTMLElement} captionsText
+   * @param {!HTMLElement} captions
    * @param {!shaka.extern.Cue} cue
    * @private
    */
-  setCaptionStyles_(captionsText, cue) {
+  setCaptionStyles_(captions, cue) {
     const Cue = shaka.text.Cue;
-    const captionsStyle = captionsText.style;
+    const captionsStyle = captions.style;
     const panelStyle = this.textContainer_.style;
 
-    captionsText.textContent = cue.payload;
+    captions.textContent = cue.payload;
     captionsStyle.backgroundColor = cue.backgroundColor;
     captionsStyle.color = cue.color;
     captionsStyle.direction = cue.direction;
