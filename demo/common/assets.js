@@ -144,6 +144,11 @@ shakaAssets.ExtraText;
  *   disabled: (boolean|undefined),
  *   extraText: (!Array.<shakaAssets.ExtraText>|undefined),
  *
+ *   iconUri: (string|undefined),
+ *   shortName: (string|undefined),
+ *   description: (string|undefined),
+ *   isFeatured: (boolean|undefined),
+ *
  *   encoder: shakaAssets.Encoder,
  *   source: shakaAssets.Source,
  *   drm: !Array.<shakaAssets.KeySystem>,
@@ -174,6 +179,15 @@ shakaAssets.ExtraText;
  *   app.
  * @property {(!Array.<shakaAssets.ExtraText>|undefined)} extraText
  *   (optional) An array of extra text sources (e.g. external captions).
+ *
+ * @property {string} iconUri
+ *   An URI pointing to an icon.
+ * @property {string} shortName
+ *   A shorter, snappier name for the asset.
+ * @property {string} description
+ *   A line or two of text describing the asset.
+ * @property {(boolean|undefined)} isFeatured
+ *   (optional) If this is true, the asset will appear in the main page.
  *
  * @property {shakaAssets.Encoder} encoder
  *   The encoder that created the asset.
@@ -262,6 +276,9 @@ shakaAssets.testAssets = [
     name: 'Angel One (multicodec, multilingual)',
     manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd',
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/angel_one.png',
+    shortName: 'Angel One',
+
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [],
@@ -279,6 +296,9 @@ shakaAssets.testAssets = [
   {
     name: 'Angel One (multicodec, multilingual, Widevine)',
     manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/angel-one-widevine/dash.mpd',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/angel_one.png',
+    shortName: 'Angel One',
 
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
@@ -302,6 +322,9 @@ shakaAssets.testAssets = [
     name: 'Angel One (multicodec, multilingual, ClearKey server)',
     manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/angel-one-clearkey/dash.mpd',
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/angel_one.png',
+    shortName: 'Angel One',
+
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [shakaAssets.KeySystem.CLEAR_KEY],
@@ -324,6 +347,12 @@ shakaAssets.testAssets = [
     name: 'Angel One (HLS, MP4, multilingual)',
     manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/angel-one-hls/hls.m3u8',
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/angel_one.png',
+    shortName: 'Angel One',
+    description: 'A clip from a classic Star Trek TNG episode, presented in ' +
+                 'HLS.',
+    isFeatured: true,
+
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [],
@@ -337,6 +366,9 @@ shakaAssets.testAssets = [
   {
     name: 'Angel One (HLS, MP4, multilingual, Widevine)',
     manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/angel-one-widevine-hls/hls.m3u8',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/angel_one.png',
+    shortName: 'Angel One',
 
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
@@ -356,6 +388,9 @@ shakaAssets.testAssets = [
     name: 'Sintel 4k (multicodec)',
     manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/sintel/dash.mpd',
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
+    shortName: 'Sintel',
+
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [],
@@ -374,6 +409,9 @@ shakaAssets.testAssets = [
   {
     name: 'Sintel w/ trick mode (MP4 only, 720p)',
     manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/sintel-trickplay/dash.mpd',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
+    shortName: 'Sintel',
 
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
@@ -395,6 +433,9 @@ shakaAssets.testAssets = [
     // NOTE: hanging in Firefox
     // https://bugzilla.mozilla.org/show_bug.cgi?id=1291451
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
+    shortName: 'Sintel',
+
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [],
@@ -413,6 +454,9 @@ shakaAssets.testAssets = [
     name: 'Sintel 4k (MP4 only)',
     manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-only/dash.mpd',
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
+    shortName: 'Sintel',
+
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [],
@@ -430,6 +474,12 @@ shakaAssets.testAssets = [
   {
     name: 'Sintel 4k (multicodec, Widevine)',
     manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
+    shortName: 'Sintel',
+    description: 'A Blender Foundation short film, protected by Widevine ' +
+                 'encryption.',
+    isFeatured: true,
 
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
@@ -455,6 +505,9 @@ shakaAssets.testAssets = [
     name: 'Sintel 4k (multicodec, VTT in MP4)',
     manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-wvtt/dash.mpd',
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
+    shortName: 'Sintel',
+
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [],
@@ -475,6 +528,9 @@ shakaAssets.testAssets = [
     name: 'Sintel w/ 44 subtitle languages',
     manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/sintel-many-subs/dash.mpd',
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
+    shortName: 'Sintel',
+
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [],
@@ -492,6 +548,9 @@ shakaAssets.testAssets = [
     name: 'Heliocentrism (multicodec, multiperiod)',
     manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/heliocentrism/heliocentrism.mpd',
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/heliocentricism.png',
+    shortName: 'Heliocentrism',
+
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [],
@@ -507,6 +566,9 @@ shakaAssets.testAssets = [
   {
     name: 'Heliocentrism (multicodec, multiperiod, xlink)',
     manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/heliocentrism-xlink/heliocentrism.mpd',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/heliocentricism.png',
+    shortName: 'Heliocentrism',
 
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
@@ -529,6 +591,11 @@ shakaAssets.testAssets = [
     // http://creativecommons.org/licenses/by-nc/3.0/
     manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/dig-the-uke-clear/dash.mpd',
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/audio_only.png',
+    shortName: 'Dig the Uke',
+    description: 'An audio-only presentation performed by Stefan Kartenberg.',
+    isFeatured: true,
+
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [],
@@ -548,6 +615,9 @@ shakaAssets.testAssets = [
     // http://creativecommons.org/licenses/by-nc/3.0/
     manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/dig-the-uke/dash.mpd',
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/audio_only.png',
+    shortName: 'Dig the Uke',
+
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [shakaAssets.KeySystem.WIDEVINE],
@@ -566,6 +636,10 @@ shakaAssets.testAssets = [
   {
     name: 'Tears of Steel (multicodec, TTML)',
     manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/tos-ttml/dash.mpd',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+    shortName: 'Tears of Steel',
+
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [],
@@ -583,6 +657,10 @@ shakaAssets.testAssets = [
   {
     name: 'Tears of Steel (multicodec, surround + stereo)',
     manifestUri: 'https://storage.googleapis.com/shaka-demo-assets/tos-surround/dash.mpd',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+    shortName: 'Tears of Steel',
+
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [],
@@ -598,6 +676,12 @@ shakaAssets.testAssets = [
   {
     name: 'Shaka Player History (multicodec, live, DASH)',
     manifestUri: 'https://storage.googleapis.com/shaka-live-assets/player-source.mpd',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/shaka.png',
+    shortName: 'Shaka Player History',
+    description: 'A self-indulgent DASH livestream.',
+    isFeatured: true,
+
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [],
@@ -613,6 +697,10 @@ shakaAssets.testAssets = [
   {
     name: 'Shaka Player History (live, HLS)',
     manifestUri: 'https://storage.googleapis.com/shaka-live-assets/player-source.m3u8',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/shaka.png',
+    shortName: 'Shaka Player History',
+
     encoder: shakaAssets.Encoder.SHAKA_PACKAGER,
     source: shakaAssets.Source.SHAKA,
     drm: [],
@@ -630,6 +718,9 @@ shakaAssets.testAssets = [
   {
     name: 'Multi-DRM',
     manifestUri: 'https://media.axprod.net/TestVectors/v7-MultiDRM-SingleKey/Manifest.mpd',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+    shortName: 'Tears of Steel',
 
     encoder: shakaAssets.Encoder.AXINOM,
     source: shakaAssets.Source.AXINOM,
@@ -660,6 +751,9 @@ shakaAssets.testAssets = [
     name: 'Multi-DRM, multi-key',
     manifestUri: 'https://media.axprod.net/TestVectors/v7-MultiDRM-MultiKey/Manifest.mpd',
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+    shortName: 'Tears of Steel',
+
     encoder: shakaAssets.Encoder.AXINOM,
     source: shakaAssets.Source.AXINOM,
     drm: [
@@ -689,6 +783,9 @@ shakaAssets.testAssets = [
   {
     name: 'Multi-DRM, multi-key, multi-Period',
     manifestUri: 'https://media.axprod.net/TestVectors/v7-MultiDRM-MultiKey-MultiPeriod/Manifest.mpd',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+    shortName: 'Tears of Steel',
 
     encoder: shakaAssets.Encoder.AXINOM,
     source: shakaAssets.Source.AXINOM,
@@ -721,6 +818,9 @@ shakaAssets.testAssets = [
     name: 'Clear, single-Period',
     manifestUri: 'https://media.axprod.net/TestVectors/v7-Clear/Manifest.mpd',
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+    shortName: 'Tears of Steel',
+
     encoder: shakaAssets.Encoder.AXINOM,
     source: shakaAssets.Source.AXINOM,
     drm: [],
@@ -739,6 +839,9 @@ shakaAssets.testAssets = [
   {
     name: 'Clear, multi-Period',
     manifestUri: 'https://media.axprod.net/TestVectors/v7-Clear/Manifest_MultiPeriod.mpd',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+    shortName: 'Tears of Steel',
 
     encoder: shakaAssets.Encoder.AXINOM,
     source: shakaAssets.Source.AXINOM,
@@ -760,6 +863,9 @@ shakaAssets.testAssets = [
     name: 'Clear, Live DASH',
     manifestUri: 'https://akamai-axtest.akamaized.net/routes/lapd-v1-acceptance/www_c4/Manifest.mpd',
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/weird_rainbow_test_pattern.png',
+    shortName: 'Test Pattern',
+
     encoder: shakaAssets.Encoder.AXINOM,
     source: shakaAssets.Source.AXINOM,
     drm: [],
@@ -774,6 +880,9 @@ shakaAssets.testAssets = [
   {
     name: 'Clear, Live HLS',
     manifestUri: 'https://akamai-axtest.akamaized.net/routes/lapd-v1-acceptance/www_c4/Manifest.m3u8',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/weird_rainbow_test_pattern.png',
+    shortName: 'Test Pattern',
 
     encoder: shakaAssets.Encoder.AXINOM,
     source: shakaAssets.Source.AXINOM,
@@ -793,6 +902,9 @@ shakaAssets.testAssets = [
     name: 'Tears of Steel',
     manifestUri: 'https://demo.unified-streaming.com/video/tears-of-steel/tears-of-steel.ism/.mpd',
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+    shortName: 'Tears of Steel',
+
     encoder: shakaAssets.Encoder.UNIFIED_STREAMING,
     source: shakaAssets.Source.UNIFIED_STREAMING,
     drm: [],
@@ -808,6 +920,9 @@ shakaAssets.testAssets = [
   {
     name: 'Tears of Steel (Widevine)',
     manifestUri: 'https://demo.unified-streaming.com/video/tears-of-steel/tears-of-steel-dash-widevine.ism/.mpd',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+    shortName: 'Tears of Steel',
 
     encoder: shakaAssets.Encoder.UNIFIED_STREAMING,
     source: shakaAssets.Source.UNIFIED_STREAMING,
@@ -833,6 +948,9 @@ shakaAssets.testAssets = [
     name: 'Tears of Steel (PlayReady)',
     manifestUri: 'https://demo.unified-streaming.com/video/tears-of-steel/tears-of-steel-dash-playready.ism/.mpd',
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+    shortName: 'Tears of Steel',
+
     encoder: shakaAssets.Encoder.UNIFIED_STREAMING,
     source: shakaAssets.Source.UNIFIED_STREAMING,
     drm: [
@@ -856,6 +974,9 @@ shakaAssets.testAssets = [
   {
     name: 'Tears of Steel (subtitles)',
     manifestUri: 'https://demo.unified-streaming.com/video/tears-of-steel/tears-of-steel-en.ism/.mpd',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+    shortName: 'Tears of Steel',
 
     encoder: shakaAssets.Encoder.UNIFIED_STREAMING,
     source: shakaAssets.Source.UNIFIED_STREAMING,
@@ -881,6 +1002,8 @@ shakaAssets.testAssets = [
     name: 'Big Buck Bunny',
     manifestUri: 'https://dash.akamaized.net/dash264/TestCases/1c/qualcomm/2/MultiRate.mpd',
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
+
     encoder: shakaAssets.Encoder.UNKNOWN,
     source: shakaAssets.Source.DASH_IF,
     drm: [],
@@ -894,6 +1017,8 @@ shakaAssets.testAssets = [
     name: 'Live sim (2s segments)',
     manifestUri: 'https://livesim.dashif.org/livesim/utc_head/testpic_2s/Manifest.mpd',
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
+
     encoder: shakaAssets.Encoder.UNKNOWN,
     source: shakaAssets.Source.DASH_IF,
     drm: [],
@@ -906,6 +1031,8 @@ shakaAssets.testAssets = [
   {
     name: 'Live sim SegmentTimeline w $Time$ (6s segments)',
     manifestUri: 'https://livesim.dashif.org/livesim/segtimeline_1/utc_head/testpic_6s/Manifest.mpd',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
 
     encoder: shakaAssets.Encoder.UNKNOWN,
     source: shakaAssets.Source.DASH_IF,
@@ -921,6 +1048,8 @@ shakaAssets.testAssets = [
     name: 'Live sim SegmentTimeline w $Number$ (6s segments)',
     manifestUri: 'https://livesim.dashif.org/livesim/segtimelinenr_1/utc_head/testpic_6s/Manifest.mpd',
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
+
     encoder: shakaAssets.Encoder.UNKNOWN,
     source: shakaAssets.Source.DASH_IF,
     drm: [],
@@ -934,6 +1063,8 @@ shakaAssets.testAssets = [
   {
     name: 'Live sim SegmentTimeline StartOver [-20s, +20s] (2s segments)',
     manifestUri: 'https://livesim.dashif.org/livesim/segtimeline_1/startrel_-20/stoprel_20/timeoffset_0/testpic_2s/Manifest.mpd',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
 
     encoder: shakaAssets.Encoder.UNKNOWN,
     source: shakaAssets.Source.DASH_IF,
@@ -949,6 +1080,8 @@ shakaAssets.testAssets = [
     name: 'Live sim StartOver SegTmpl Duration [-20s, +20s] (2s segments)',
     manifestUri: 'https://livesim.dashif.org/livesim/startrel_-20/stoprel_20/timeoffset_0/testpic_2s/Manifest.mpd',
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
+
     encoder: shakaAssets.Encoder.UNKNOWN,
     source: shakaAssets.Source.DASH_IF,
     drm: [],
@@ -962,6 +1095,8 @@ shakaAssets.testAssets = [
   {
     name: 'Live sim SegTmpl Duration (multi-period 60s)',
     manifestUri: 'https://livesim.dashif.org/livesim/utc_head/periods_60/testpic_2s/Manifest.mpd',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
 
     encoder: shakaAssets.Encoder.UNKNOWN,
     source: shakaAssets.Source.DASH_IF,
@@ -982,6 +1117,9 @@ shakaAssets.testAssets = [
     name: 'Big Buck Bunny (Live)',
     manifestUri: 'https://wowzaec2demo.streamlock.net/live/bigbuckbunny/manifest_mpm4sav_mvtime.mpd',
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
+    shortName: 'Big Buck Bunny',
+
     encoder: shakaAssets.Encoder.WOWZA,
     source: shakaAssets.Encoder.WOWZA,
     drm: [],
@@ -1001,6 +1139,9 @@ shakaAssets.testAssets = [
     name: 'Art of Motion (DASH)',
     manifestUri: 'https://bitdash-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd',
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/art_of_motion.png',
+    shortName: 'Art of Motion',
+
     encoder: shakaAssets.Encoder.BITCODIN,
     source: shakaAssets.Source.BITCODIN,
     drm: [],
@@ -1016,6 +1157,9 @@ shakaAssets.testAssets = [
     name: 'Art of Motion (HLS, TS)',
     manifestUri: 'https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8',
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/art_of_motion.png',
+    shortName: 'Art of Motion',
+
     encoder: shakaAssets.Encoder.BITCODIN,
     source: shakaAssets.Source.BITCODIN,
     drm: [],
@@ -1029,6 +1173,9 @@ shakaAssets.testAssets = [
   {
     name: 'Sintel (HLS, TS, 4k)',
     manifestUri: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
+    shortName: 'Sintel',
 
     encoder: shakaAssets.Encoder.BITCODIN,
     source: shakaAssets.Source.BITCODIN,
@@ -1052,6 +1199,8 @@ shakaAssets.testAssets = [
     // SSL certificate.  See https://github.com/google/shaka-player/issues/955
     disabled: true,
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
+
     encoder: shakaAssets.Encoder.NIMBLE_STREAMER,
     source: shakaAssets.Source.NIMBLE_STREAMER,
     drm: [],
@@ -1069,6 +1218,8 @@ shakaAssets.testAssets = [
     name: 'Azure Trailer',
     manifestUri: 'https://amssamples.streaming.mediaservices.windows.net/91492735-c523-432b-ba01-faba6c2206a2/AzureMediaServicesPromo.ism/manifest(format=mpd-time-csf)',
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/azure.png',
+
     encoder: shakaAssets.Encoder.AZURE_MEDIA_SERVICES,
     source: shakaAssets.Source.AZURE_MEDIA_SERVICES,
     drm: [],
@@ -1082,6 +1233,8 @@ shakaAssets.testAssets = [
   {
     name: 'Big Buck Bunny',
     manifestUri: 'https://amssamples.streaming.mediaservices.windows.net/622b189f-ec39-43f2-93a2-201ac4e31ce1/BigBuckBunny.ism/manifest(format=mpd-time-csf)',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
 
     encoder: shakaAssets.Encoder.AZURE_MEDIA_SERVICES,
     source: shakaAssets.Source.AZURE_MEDIA_SERVICES,
@@ -1125,6 +1278,9 @@ shakaAssets.testAssets = [
       },
     ],
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+    shortName: 'Tears of Steel',
+
     encoder: shakaAssets.Encoder.AZURE_MEDIA_SERVICES,
     source: shakaAssets.Source.AZURE_MEDIA_SERVICES,
     drm: [],
@@ -1152,6 +1308,9 @@ shakaAssets.testAssets = [
     // https://bugs.webkit.org/show_bug.cgi?id=160459
     disabled: true,
 
+    // TODO: Get actual icon?
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
+
     encoder: shakaAssets.Encoder.MP4BOX,
     source: shakaAssets.Source.GPAC,
     drm: [],
@@ -1164,6 +1323,8 @@ shakaAssets.testAssets = [
   {
     name: 'live profile with five periods',
     manifestUri: 'https://download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-live-periods/mp4-live-periods-mpd.mpd',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/gpac_test_pattern.png',
 
     encoder: shakaAssets.Encoder.MP4BOX,
     source: shakaAssets.Source.GPAC,
@@ -1179,6 +1340,8 @@ shakaAssets.testAssets = [
   {
     name: 'main profile, single file',
     manifestUri: 'https://download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-main-single/mp4-main-single-mpd-AV-NBS.mpd',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/gpac_test_pattern.png',
 
     encoder: shakaAssets.Encoder.MP4BOX,
     source: shakaAssets.Source.GPAC,
@@ -1199,6 +1362,8 @@ shakaAssets.testAssets = [
     // https://bugs.webkit.org/show_bug.cgi?id=160459
     disabled: true,
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/gpac_test_pattern.png',
+
     encoder: shakaAssets.Encoder.MP4BOX,
     source: shakaAssets.Source.GPAC,
     drm: [],
@@ -1211,6 +1376,8 @@ shakaAssets.testAssets = [
   {
     name: 'onDemand profile',
     manifestUri: 'https://download.tsi.telecom-paristech.fr/gpac/DASH_CONFORMANCE/TelecomParisTech/mp4-onDemand/mp4-onDemand-mpd-AV.mpd',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/gpac_test_pattern.png',
 
     encoder: shakaAssets.Encoder.MP4BOX,
     source: shakaAssets.Source.GPAC,
@@ -1230,6 +1397,8 @@ shakaAssets.testAssets = [
     // https://bugs.webkit.org/show_bug.cgi?id=160460
     disabled: true,
 
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/gpac_test_pattern.png',
+
     encoder: shakaAssets.Encoder.MP4BOX,
     source: shakaAssets.Source.GPAC,
     drm: [],
@@ -1246,6 +1415,8 @@ shakaAssets.testAssets = [
     // NOTE: Decoder errors on Safari
     // https://bugs.webkit.org/show_bug.cgi?id=160460
     disabled: true,
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/gpac_test_pattern.png',
 
     encoder: shakaAssets.Encoder.MP4BOX,
     source: shakaAssets.Source.GPAC,
@@ -1264,6 +1435,9 @@ shakaAssets.testAssets = [
     // Reliable Playready playback requires Edge 16+
     // The playenabler and sl url parameters allow for playback in VMs
     manifestUri: 'https://content.uplynk.com/847859273a4b4a81959d8fea181672a4.mpd?pr.version=2&pr.playenabler=B621D91F-EDCC-4035-8D4B-DC71760D43E9&pr.securitylevel=150',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/azure.png',
+
     encoder: shakaAssets.Encoder.UPLYNK,
     source: shakaAssets.Source.UPLYNK,
     drm: [
@@ -1291,6 +1465,9 @@ shakaAssets.testAssets = [
     // Reliable Playready playback requires Edge 16+
     // The playenabler and sl url parameters allow for playback in VMs
     manifestUri: 'https://content.uplynk.com/054225d59be2454fabdca3e96912d847.mpd?ad=cleardash&pr.version=2&pr.playenabler=B621D91F-EDCC-4035-8D4B-DC71760D43E9&pr.securitylevel=150',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
+
     encoder: shakaAssets.Encoder.UPLYNK,
     source: shakaAssets.Source.UPLYNK,
     drm: [
@@ -1317,6 +1494,9 @@ shakaAssets.testAssets = [
   {
     name: 'Widevine - 16 Byte IV',
     manifestUri: 'https://content.uplynk.com/224ac8717e714b68831997ab6cea4015.mpd',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
+
     encoder: shakaAssets.Encoder.UPLYNK,
     source: shakaAssets.Source.UPLYNK,
     drm: [
@@ -1342,6 +1522,8 @@ shakaAssets.testAssets = [
     // Unencrypted periods interspersed with protected periods
     // Doesn't work on Chrome < 58
     manifestUri: 'https://content.uplynk.com/1eb40d8e64234f5c9879db7045c3d48c.mpd?ad=cleardash&rays=cdefg',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
 
     encoder: shakaAssets.Encoder.UPLYNK,
     source: shakaAssets.Source.UPLYNK,
