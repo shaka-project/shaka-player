@@ -35,11 +35,10 @@
   .unselectable();
 }
 
-/* This is a spacer element used to separate elements within the contol
+/* This is a spacer element used to separate elements within the control
  * buttons panel. It's just an empty div of certain width. */
 .shaka-spacer {
-  width: 48%;
 
-  /* Make the element shrink to accommodate things to the right. */
-  .shrinkable();
+  /* Make the element grow to take up the remaining space. */
+  flex-grow: 1;
 }
