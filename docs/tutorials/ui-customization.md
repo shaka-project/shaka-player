@@ -98,7 +98,7 @@ myapp.SkipButton = class extends shaka.ui.Element {
       let nextManifest = /* Your logic to pick the next video to be played */
         myapp.getNextManifest();
 
-      // shaka.ui.Element gives us access to the player object as memeber of the class
+      // shaka.ui.Element gives us access to the player object as member of the class
       this.player.load(nextManifest);
     });
   }
