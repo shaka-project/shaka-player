@@ -75,7 +75,10 @@ describe('Player', function() {
       await player.destroy();
     });
 
-    it('sets video.src when video is provided', async function() {
+    // TODO(vaage): Re-enable this test when we add back support for
+    //              initializing media source during attach (via the
+    //              constructor).
+    xit('sets video.src when video is provided', async function() {
       expect(video.src).toBeFalsy();
       player = new compiledShaka.Player(video);
 
@@ -104,7 +107,10 @@ describe('Player', function() {
       player = new compiledShaka.Player();
     });
 
-    it('sets video.src when initializeMediaSource is true', async function() {
+    // TODO(vaage): Re-enable this test when we add back support for
+    //              initializing media source during attach (via the
+    //              constructor).
+    xit('sets video.src when initializeMediaSource is true', async function() {
       expect(video.src).toBeFalsy();
       await player.attach(video, true);
       expect(video.src).toBeTruthy();
@@ -138,7 +144,10 @@ describe('Player', function() {
           expect(video.src).toBeFalsy();
         });
 
-    it('resets video.src when reinitializeMediaSource is true',
+    // TODO(vaage): Re-enable this test when we add back support for
+    //              initializing media source during attach (via the
+    //              constructor).
+    xit('resets video.src when reinitializeMediaSource is true',
         async function() {
           await player.load('test:sintel_compiled');
           expect(video.src).toBeTruthy();
@@ -407,11 +416,15 @@ describe('Player', function() {
       });
     }
 
-    it('unload prevents further manifest load retries', async () => {
+    // TODO(vaage): Re-enable when aborting manifest load retries is integrated
+    //              with the load graph.
+    xit('unload prevents further manifest load retries', async () => {
       await testTemplate(() => player.unload());
     });
 
-    it('destroy prevents further manifest load retries', async () => {
+    // TODO(vaage): Re-enable when aborting manifest load retries is integrated
+    //              with the load graph.
+    xit('destroy prevents further manifest load retries', async () => {
       await testTemplate(() => player.destroy());
     });
   });
@@ -568,5 +581,277 @@ describe('Player', function() {
         reject('Timeout waiting for time');
       });
     });
+  }
+});
+
+// This test suite focuses on how the player moves through the different load
+// states.
+//
+// TODO(vaage): Some test cases are missing and need to be added when the
+//              the required load states are added:
+//                - Creating the manifest parser
+//                - Parsing the manifest
+//                - Creating drm engine
+//                - Creating streaming engine
+describe('Player Load Path', () => {
+  /** @type {!HTMLVideoElement} */
+  let video;
+  /** @type {shaka.Player} */
+  let player;
+
+  /** @type {!jasmine.Spy} */
+  let stateChangeSpy;
+
+  beforeAll(async () => {
+    video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
+    video.width = 600;
+    video.height = 400;
+    video.muted = true;
+    document.body.appendChild(video);
+
+    await shaka.test.TestScheme.createManifests(shaka, '_compiled');
+  });
+
+  afterAll(() => {
+    document.body.removeChild(video);
+  });
+
+  beforeEach(() => {
+    stateChangeSpy = jasmine.createSpy('stateChange');
+
+    player = new shaka.Player();
+    player.addEventListener(
+        'onstatechange',
+        shaka.test.Util.spyFunc(stateChangeSpy));
+  });
+
+  // Even though some test will destroy the player, we want to make sure that
+  // we don't allow the player to stay attached to the video element.
+  afterEach(async () => {
+    await player.destroy();
+  });
+
+  // There was a bug when calling unload before calling load would cause
+  // the load to continue before the (first) unload was complete.
+  // https://github.com/google/shaka-player/issues/612
+  it('load will wait for unload to finish', async () => {
+    await player.attach(video);
+    await player.load('test:sintel');
+
+    // We are going to call |unload| and |load| right after each other. What
+    // we expect to see is that the player is fully unloaded before the load
+    // occurs.
+
+    const unload = player.unload();
+    const load = player.load('test:sintel');
+
+    await unload;
+    await load;
+
+    expect(getVisitedStates()).toEqual([
+      'attach',
+
+      // First call to |load|.
+      'load',
+
+      // Our call to |unload| would have started the transition to
+      // "unloaded", but since we called |load| right away, the transition
+      // to "unloaded" was most likely done by the call to |load|.
+      'unload',
+      'attach',
+      'load',
+    ]);
+  });
+
+  it('load and unload can be called multiple times', async () => {
+    await player.attach(video);
+
+    await player.load('test:sintel');
+    await player.unload();
+
+    await player.load('test:sintel');
+    await player.unload();
+
+    expect(getVisitedStates()).toEqual([
+      'attach',
+
+      // Load and unload 1
+      'load',
+      'unload',
+      'attach',
+
+      // Load and unload 2
+      'load',
+      'unload',
+      'attach',
+    ]);
+  });
+
+  it('load can be called multiple times', async () => {
+    await player.attach(video);
+
+    await player.load('test:sintel');
+    await player.load('test:sintel');
+    await player.load('test:sintel');
+
+    expect(getVisitedStates()).toEqual([
+      'attach',
+
+      // Load 1
+      'load',
+
+      // Load 2
+      'unload',
+      'attach',
+      'load',
+
+      // Load 3
+      'unload',
+      'attach',
+      'load',
+    ]);
+  });
+
+  // TODO: When we have more states as part of the loading path, update
+  //       this test to interrupt part-way through the load.
+  it('load will interrupt load', async () => {
+    await player.attach(video);
+
+    const load1 = player.load('test:sintel');
+    const load2 = player.load('test:sintel');
+
+    // Load 1 should have been interrupted because of load 2.
+    await rejected(load1);
+    // Load 2 should finish with no issues.
+    await load2;
+  });
+
+  // TODO: When we have more states as part of the loading path, update
+  //       this test to interrupt part-way through the load.
+  it('unload will interupt load', async () => {
+    await player.attach(video);
+
+    const load = player.load('test:sintel');
+    const unload = player.unload();
+
+    await rejected(load);
+    await unload;
+
+    // We should never have gotten into the loaded state.
+    expect(getVisitedStates()).not.toContain('load');
+  });
+
+  // TODO: When we have more states as part of the loading path, update
+  //       this test to interrupt part-way through the load.
+  it('destroy will interrupt load', async () => {
+    await player.attach(video);
+
+    const load = player.load('test:sintel');
+    const destroy = player.destroy();
+
+    await rejected(load);
+    await destroy;
+
+    // We should never have gotten into the loaded state.
+    expect(getVisitedStates()).not.toContain('load');
+  });
+
+  // When |destroy| is called, the player should move through the unload state
+  // on its way to the detached state.
+  it('destroy will unload and then detach', async () => {
+    await player.attach(video);
+
+    await player.load('test:sintel');
+    await player.destroy();
+
+    // We really only care about the last two elements (unload and detach),
+    // however the test is easier to read if we list the full chain.
+    expect(getVisitedStates()).toEqual([
+      'attach',
+      'load',
+      'unload',
+      'detach',
+    ]);
+  });
+
+  // Calling |unload| multiple times should not cause any problems. Calling
+  // |unload| after another |unload| call should just have the player re-enter
+  // the state it was waiting in.
+  it('unloading multiple times is okay', async () => {
+    await player.attach(video);
+
+    await player.load('test:sintel');
+    await player.unload();
+    await player.unload();
+
+    expect(getVisitedStates()).toEqual([
+      'attach',
+
+      // First call to |load|.
+      'load',
+
+      // First call to unload will unload everything and then move us to the
+      // attached state.
+      'unload',
+      'attach',
+
+      // Second call to unload will make us re-enter the attached state since
+      // there is nothing to unload.
+      'attach',
+    ]);
+  });
+
+  // When we destroy, it will allow a current unload operation to occur even
+  // though we are going to unload and detach as part of |destroy|.
+  it('destroy will not interrupt unload', async () => {
+    await player.attach(video);
+    await player.load('test:sintel');
+
+    const unload = player.unload();
+    const destroy = player.destroy();
+
+    await unload;
+    await destroy;
+  });
+
+  // While out tests will naturally test this (because we destroy in
+  // afterEach), this test will explicitly express our intentions to support
+  // the use-case of calling |destroy| multiple times on a player instance.
+  it('destroying multiple times is okay', async () => {
+    await player.attach(video);
+    await player.load('test:sintel');
+
+    await player.destroy();
+    await player.destroy();
+  });
+
+  /**
+   * Wait for |p| to be rejected. If |p| is not rejected, this will fail the
+   * test;
+   *
+   * @param {!Promise} p
+   * @return {!Promise}
+   */
+  async function rejected(p) {
+    try {
+      await p;
+      fail();
+    } catch (e) {
+      expect(e).toBeTruthy();
+    }
+  }
+
+  /**
+   * Get a list of all the states that the walker went through after
+   * |beforeEach| finished.
+   *
+   * @return {!Array.<string>}
+   */
+  function getVisitedStates() {
+    const states = [];
+    for (const call of stateChangeSpy.calls.allArgs()) {
+      states.push(call[0].state);
+    }
+    return states;
   }
 });
