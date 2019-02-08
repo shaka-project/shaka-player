@@ -39,6 +39,12 @@
  * buttons panel. It's just an empty div of certain width. */
 .shaka-spacer {
 
+  /* Make the element shrink to accommodate things to the right. */
+  .shrinkable();
+
   /* Make the element grow to take up the remaining space. */
   flex-grow: 1;
+
+  /* Margins don't shrink. Remove margins in order to be more flexible when shrinking. */
+  margin: 0;
 }
