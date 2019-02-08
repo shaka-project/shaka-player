@@ -382,12 +382,6 @@ goog.require('shaka.ui.Utils');
     this.captionIcon_.textContent =
       shaka.ui.Enums.MaterialDesignIcons.CLOSED_CAPTIONS;
 
-    if (this.player && this.player.isTextTrackVisible()) {
-      this.captionButton_.setAttribute('aria-pressed', 'true');
-    } else {
-      this.captionButton_.setAttribute('aria-pressed', 'false');
-    }
-
     this.captionButton_.appendChild(this.captionIcon_);
 
     const label = shaka.ui.Utils.createHTMLElement('label');
@@ -616,10 +610,10 @@ goog.require('shaka.ui.Utils');
   addPipButton_() {
     const LocIds = shaka.ui.Locales.Ids;
     this.pipButton_ = shaka.ui.Utils.createHTMLElement('button');
+    this.pipButton_.classList.add('shaka-pip-button');
 
     this.pipIcon_ = shaka.ui.Utils.createHTMLElement('i');
     this.pipIcon_.classList.add('material-icons');
-    this.pipIcon_.classList.add('shaka-pip-button');
     // This text content is actually a material design icon.
     // DO NOT LOCALIZE
     this.pipIcon_.textContent = shaka.ui.Enums.MaterialDesignIcons.PIP;
