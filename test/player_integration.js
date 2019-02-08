@@ -67,36 +67,6 @@ describe('Player', function() {
     document.body.removeChild(video);
   });
 
-  describe('constructor', function() {
-    beforeEach(async function() {
-      // To test the constructor, destroy the player that was constructed
-      // in the outermost beforeEach().  Then we can control the details in
-      // each constructor test.
-      await player.destroy();
-    });
-
-    // TODO(vaage): Re-enable this test when we add back support for
-    //              initializing media source during attach (via the
-    //              constructor).
-    xit('sets video.src when video is provided', async function() {
-      expect(video.src).toBeFalsy();
-      player = new compiledShaka.Player(video);
-
-      // This should always be enough time to set up MediaSource.
-      await Util.delay(2);
-      expect(video.src).toBeTruthy();
-    });
-
-    it('does not set video.src when no video is provided', async function() {
-      expect(video.src).toBeFalsy();
-      player = new compiledShaka.Player();
-
-      // This should always be enough time to set up MediaSource.
-      await Util.delay(2);
-      expect(video.src).toBeFalsy();
-    });
-  });
-
   describe('attach', function() {
     beforeEach(async function() {
       // To test attach, we want to construct a player without a video element
@@ -107,54 +77,10 @@ describe('Player', function() {
       player = new compiledShaka.Player();
     });
 
-    // TODO(vaage): Re-enable this test when we add back support for
-    //              initializing media source during attach (via the
-    //              constructor).
-    xit('sets video.src when initializeMediaSource is true', async function() {
-      expect(video.src).toBeFalsy();
-      await player.attach(video, true);
-      expect(video.src).toBeTruthy();
-    });
-
-    it('does not set video.src when initializeMediaSource is false',
-        async function() {
-          expect(video.src).toBeFalsy();
-          await player.attach(video, false);
-          expect(video.src).toBeFalsy();
-        });
-
     it('can be used before load()', async function() {
       await player.attach(video);
       await player.load('test:sintel_compiled');
     });
-  });
-
-  describe('unload', function() {
-    it('unsets video.src when reinitializeMediaSource is false',
-        async function() {
-          await player.load('test:sintel_compiled');
-          expect(video.src).toBeTruthy();
-
-          await player.unload(false);
-          expect(video.src).toBeFalsy();
-
-          await Util.delay(0.4);
-          // After a long delay, we have not implicitly set MediaSource up
-          // again.  video.src stays unset.
-          expect(video.src).toBeFalsy();
-        });
-
-    // TODO(vaage): Re-enable this test when we add back support for
-    //              initializing media source during attach (via the
-    //              constructor).
-    xit('resets video.src when reinitializeMediaSource is true',
-        async function() {
-          await player.load('test:sintel_compiled');
-          expect(video.src).toBeTruthy();
-
-          await player.unload(true);
-          expect(video.src).toBeTruthy();
-        });
   });
 
   describe('getStats', function() {
@@ -584,6 +510,28 @@ describe('Player', function() {
   }
 });
 
+// TODO(vaage): Try to group the stat tests together.
+describe('Player Stats', () => {
+  let player;
+
+  // Destroy the player in |afterEach| so that it will be destroyed
+  // regardless of if the test succeeded or failed.
+  afterEach(async () => {
+    await player.destroy();
+  });
+
+  // Regression test for Issue #968 where trying to get the stats before
+  // calling load would fail because not all components had been initialized.
+  it('can get stats before loading content', () => {
+    // We are opting not to initialize the player with a video element so that
+    // it is in the least loaded state possible.
+    player = new shaka.Player();
+
+    const stats = player.getStats();
+    expect(stats).toBeTruthy();
+  });
+});
+
 // This test suite focuses on how the player moves through the different load
 // states.
 //
@@ -618,12 +566,17 @@ describe('Player Load Path', () => {
 
   beforeEach(() => {
     stateChangeSpy = jasmine.createSpy('stateChange');
+  });
 
-    player = new shaka.Player();
+  /**
+   * @param {HTMLMediaElement} attachedTo
+   */
+  function createPlayer(attachedTo) {
+    player = new shaka.Player(attachedTo);
     player.addEventListener(
         'onstatechange',
         shaka.test.Util.spyFunc(stateChangeSpy));
-  });
+  }
 
   // Even though some test will destroy the player, we want to make sure that
   // we don't allow the player to stay attached to the video element.
@@ -631,10 +584,84 @@ describe('Player Load Path', () => {
     await player.destroy();
   });
 
+  it('attach and initialize media source when constructed with media element',
+      async () => {
+        expect(video.src).toBeFalsy();
+
+        createPlayer(/* attachedTo= */ video);
+
+        // Wait until we enter the media source state.
+        await new Promise((resolve) => {
+          stateChangeSpy.and.callFake((event) => {
+            shaka.log.info(event);
+            if (event.state == 'media-source') {
+              resolve();
+            }
+          });
+        });
+
+        expect(video.src).toBeTruthy();
+      });
+
+  // TODO(vaage): Create a way for the load graph to notify us when it enters
+  //              an idle state (waiting for more work). That will make it
+  //              easier to test these scenarios.
+  it('does not set video.src when no video is provided', async function() {
+    expect(video.src).toBeFalsy();
+
+    createPlayer(/* attachedTo= */ null);
+
+    // This should always be enough time to set up MediaSource.
+    await shaka.test.Util.delay(2);
+    expect(video.src).toBeFalsy();
+  });
+
+  it('attach + initializeMediaSource=true will initialize media source',
+      async () => {
+        createPlayer(/* attachedTo= */ null);
+
+        expect(video.src).toBeFalsy();
+        await player.attach(video, /* initializeMediaSource= */ true);
+        expect(video.src).toBeTruthy();
+      });
+
+  it('attach + initializeMediaSource=false will not intialize media source',
+      async () => {
+        createPlayer(/* attachedTo= */ null);
+
+        expect(video.src).toBeFalsy();
+        await player.attach(video, /* initializeMediaSource= */ false);
+        expect(video.src).toBeFalsy();
+      });
+
+  it('unload + initializeMediaSource=false does not initialize media source',
+      async () => {
+        createPlayer(/* attachedTo= */ null);
+
+        await player.attach(video);
+        await player.load('test:sintel');
+
+        await player.unload(/* initializeMediaSource= */ false);
+        expect(video.src).toBeFalsy();
+      });
+
+  it('unload + initializeMediaSource=true initializes media source',
+      async () => {
+        createPlayer(/* attachedTo= */ null);
+
+        await player.attach(video);
+        await player.load('test:sintel');
+
+        await player.unload(/* initializeMediaSource= */ true);
+        expect(video.src).toBeTruthy();
+      });
+
   // There was a bug when calling unload before calling load would cause
   // the load to continue before the (first) unload was complete.
   // https://github.com/google/shaka-player/issues/612
   it('load will wait for unload to finish', async () => {
+    createPlayer(/* attachedTo= */ null);
+
     await player.attach(video);
     await player.load('test:sintel');
 
@@ -652,6 +679,7 @@ describe('Player Load Path', () => {
       'attach',
 
       // First call to |load|.
+      'media-source',
       'load',
 
       // Our call to |unload| would have started the transition to
@@ -659,11 +687,14 @@ describe('Player Load Path', () => {
       // to "unloaded" was most likely done by the call to |load|.
       'unload',
       'attach',
+      'media-source',
       'load',
     ]);
   });
 
   it('load and unload can be called multiple times', async () => {
+    createPlayer(/* attachedTo= */ null);
+
     await player.attach(video);
 
     await player.load('test:sintel');
@@ -676,11 +707,13 @@ describe('Player Load Path', () => {
       'attach',
 
       // Load and unload 1
+      'media-source',
       'load',
       'unload',
       'attach',
 
       // Load and unload 2
+      'media-source',
       'load',
       'unload',
       'attach',
@@ -688,6 +721,8 @@ describe('Player Load Path', () => {
   });
 
   it('load can be called multiple times', async () => {
+    createPlayer(/* attachedTo= */ null);
+
     await player.attach(video);
 
     await player.load('test:sintel');
@@ -698,23 +733,54 @@ describe('Player Load Path', () => {
       'attach',
 
       // Load 1
+      'media-source',
       'load',
 
       // Load 2
       'unload',
       'attach',
+      'media-source',
       'load',
 
       // Load 3
       'unload',
       'attach',
+      'media-source',
       'load',
     ]);
   });
 
-  // TODO: When we have more states as part of the loading path, update
-  //       this test to interrupt part-way through the load.
+  // We want to make sure that we can interrupt the load path right
+  // after it finishes initializing media source engine. To test this
+  // we will ask the player to load some content and as it enters the
+  // media source initialized state, we will unload the player.
+  it('can interrupt between media source and load', async () => {
+    createPlayer(/* attachedTo= */ null);
+
+    // We are going to wait until we finish entering the media source
+    // initialized state and then interrupt our load request by
+    // unloading.
+    let unload;
+    stateChangeSpy.and.callFake((event) => {
+      if (event.state == 'media-source') {
+        unload = player.unload();
+      }
+    });
+
+    // We attach manually so that we had time to override the state change
+    // spy's action.
+    await player.attach(video);
+    await rejected(player.load('test:sintel'));
+
+    // By the time that |player.load| failed, we should have started
+    // |player.unload|.
+    expect(unload).toBeTruthy();
+    await unload;
+  });
+
   it('load will interrupt load', async () => {
+    createPlayer(/* attachedTo= */ null);
+
     await player.attach(video);
 
     const load1 = player.load('test:sintel');
@@ -726,9 +792,9 @@ describe('Player Load Path', () => {
     await load2;
   });
 
-  // TODO: When we have more states as part of the loading path, update
-  //       this test to interrupt part-way through the load.
   it('unload will interupt load', async () => {
+    createPlayer(/* attachedTo= */ null);
+
     await player.attach(video);
 
     const load = player.load('test:sintel');
@@ -741,9 +807,9 @@ describe('Player Load Path', () => {
     expect(getVisitedStates()).not.toContain('load');
   });
 
-  // TODO: When we have more states as part of the loading path, update
-  //       this test to interrupt part-way through the load.
   it('destroy will interrupt load', async () => {
+    createPlayer(/* attachedTo= */ null);
+
     await player.attach(video);
 
     const load = player.load('test:sintel');
@@ -759,6 +825,8 @@ describe('Player Load Path', () => {
   // When |destroy| is called, the player should move through the unload state
   // on its way to the detached state.
   it('destroy will unload and then detach', async () => {
+    createPlayer(/* attachedTo= */ null);
+
     await player.attach(video);
 
     await player.load('test:sintel');
@@ -768,6 +836,7 @@ describe('Player Load Path', () => {
     // however the test is easier to read if we list the full chain.
     expect(getVisitedStates()).toEqual([
       'attach',
+      'media-source',
       'load',
       'unload',
       'detach',
@@ -778,6 +847,8 @@ describe('Player Load Path', () => {
   // |unload| after another |unload| call should just have the player re-enter
   // the state it was waiting in.
   it('unloading multiple times is okay', async () => {
+    createPlayer(/* attachedTo= */ null);
+
     await player.attach(video);
 
     await player.load('test:sintel');
@@ -788,6 +859,7 @@ describe('Player Load Path', () => {
       'attach',
 
       // First call to |load|.
+      'media-source',
       'load',
 
       // First call to unload will unload everything and then move us to the
@@ -804,6 +876,8 @@ describe('Player Load Path', () => {
   // When we destroy, it will allow a current unload operation to occur even
   // though we are going to unload and detach as part of |destroy|.
   it('destroy will not interrupt unload', async () => {
+    createPlayer(/* attachedTo= */ null);
+
     await player.attach(video);
     await player.load('test:sintel');
 
@@ -818,12 +892,39 @@ describe('Player Load Path', () => {
   // afterEach), this test will explicitly express our intentions to support
   // the use-case of calling |destroy| multiple times on a player instance.
   it('destroying multiple times is okay', async () => {
+    createPlayer(/* attachedTo= */ null);
+
     await player.attach(video);
     await player.load('test:sintel');
 
     await player.destroy();
     await player.destroy();
   });
+
+  // As a regression test for Issue #1570, this checks that when we
+  // pre-initialize media source engine, we do not re-create the media source
+  // instance when loading.
+  it('pre-initialized media source is used when player continues loading',
+    async () => {
+      createPlayer(/* attachedTo= */ null);
+
+      // After we attach and initialize media source, we should just see
+      // two states in our history.
+      await player.attach(video, /* initializeMediaSource= */ true);
+      expect(getVisitedStates()).toEqual([
+        'attach',
+        'media-source',
+      ]);
+
+      // When we load, the only change in the visited states should be that
+      // we added "load".
+      await player.load('test:sintel');
+      expect(getVisitedStates()).toEqual([
+        'attach',
+        'media-source',
+        'load',
+      ]);
+    });
 
   /**
    * Wait for |p| to be rejected. If |p| is not rejected, this will fail the

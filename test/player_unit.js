@@ -1812,17 +1812,6 @@ describe('Player', function() {
       jasmine.clock().uninstall();
     });
 
-    it('can be called before player.load()', async () => {
-      // Regression test for https://github.com/google/shaka-player/issues/968
-      // Create a fresh Player, since all other tests start after load()
-      await player.destroy();
-      player = new shaka.Player(video);
-
-      // In #968, getStats() throws an exception:
-      let stats = player.getStats();
-      expect(stats).toBeTruthy();
-    });
-
     it('tracks estimated bandwidth', function() {
       abrManager.getBandwidthEstimate.and.returnValue(25);
       let stats = player.getStats();
