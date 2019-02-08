@@ -250,7 +250,7 @@ describe('CastReceiver', function() {
     // at each stage, the cast receiver can form an update message without
     // causing an error.
     waitForUpdateMessageWrapper(
-        shaka.media.ManifestParser, 'ManifestParser', 'getFactory');
+        shaka.media.ManifestParser, 'ManifestParser', 'create');
     waitForUpdateMessageWrapper(shaka.test.TestScheme.ManifestParser.prototype,
         'ManifestParser', 'start');
     waitForUpdateMessageWrapper(
