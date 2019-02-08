@@ -53,7 +53,7 @@ describe('Storage', function() {
       // Use a real Player since Storage only uses the configuration and
       // networking engine.  This allows us to use Player.configure in these
       // tests.
-      player = new shaka.Player(new shaka.test.FakeVideo());
+      player = new shaka.Player();
     });
 
     afterEach(async function() {
@@ -108,7 +108,7 @@ describe('Storage', function() {
       // Use a real Player since Storage only uses the configuration and
       // networking engine.  This allows us to use Player.configure in these
       // tests.
-      player = new shaka.Player(new shaka.test.FakeVideo());
+      player = new shaka.Player();
       storage = new shaka.offline.Storage(player);
     });
 
@@ -395,7 +395,7 @@ describe('Storage', function() {
     beforeEach(function() {
       shaka.offline.StorageMuxer.overrideSupport(new Map());
 
-      player = new shaka.Player(new shaka.test.FakeVideo());
+      player = new shaka.Player();
       storage = new shaka.offline.Storage(player);
     });
 
@@ -505,7 +505,7 @@ describe('Storage', function() {
 
       // Use a real Player as Storage will use it to get a networking
       // engine.
-      player = new shaka.Player(new shaka.test.FakeVideo(), (player) => {
+      player = new shaka.Player(null, (player) => {
         player.createNetworkingEngine = () => netEngine;
       });
 
@@ -700,7 +700,7 @@ describe('Storage', function() {
       // Use a real Player since Storage only uses the configuration and
       // networking engine.  This allows us to use Player.configure in these
       // tests.
-      player = new shaka.Player(new shaka.test.FakeVideo(), function(player) {
+      player = new shaka.Player(null, function(player) {
         player.createNetworkingEngine = () => netEngine;
       });
 
