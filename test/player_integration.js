@@ -592,12 +592,7 @@ describe('Player Load Path', () => {
 
         // Wait until we enter the media source state.
         await new Promise((resolve) => {
-          stateChangeSpy.and.callFake((event) => {
-            shaka.log.info(event);
-            if (event.state == 'media-source') {
-              resolve();
-            }
-          });
+          whenEnteringState('media-source', resolve);
         });
 
         expect(video.src).toBeTruthy();
@@ -680,6 +675,7 @@ describe('Player Load Path', () => {
 
       // First call to |load|.
       'media-source',
+      'manifest',
       'load',
 
       // Our call to |unload| would have started the transition to
@@ -688,6 +684,7 @@ describe('Player Load Path', () => {
       'unload',
       'attach',
       'media-source',
+      'manifest',
       'load',
     ]);
   });
@@ -708,12 +705,14 @@ describe('Player Load Path', () => {
 
       // Load and unload 1
       'media-source',
+      'manifest',
       'load',
       'unload',
       'attach',
 
       // Load and unload 2
       'media-source',
+      'manifest',
       'load',
       'unload',
       'attach',
@@ -734,18 +733,21 @@ describe('Player Load Path', () => {
 
       // Load 1
       'media-source',
+      'manifest',
       'load',
 
       // Load 2
       'unload',
       'attach',
       'media-source',
+      'manifest',
       'load',
 
       // Load 3
       'unload',
       'attach',
       'media-source',
+      'manifest',
       'load',
     ]);
   });
@@ -754,17 +756,41 @@ describe('Player Load Path', () => {
   // after it finishes initializing media source engine. To test this
   // we will ask the player to load some content and as it enters the
   // media source initialized state, we will unload the player.
-  it('can interrupt between media source and load', async () => {
+  it('can interrupt between media source and manifest', async () => {
     createPlayer(/* attachedTo= */ null);
 
     // We are going to wait until we finish entering the media source
     // initialized state and then interrupt our load request by
     // unloading.
     let unload;
-    stateChangeSpy.and.callFake((event) => {
-      if (event.state == 'media-source') {
-        unload = player.unload();
-      }
+    whenEnteringState('media-source', () => {
+      unload = player.unload();
+    });
+
+    // We attach manually so that we had time to override the state change
+    // spy's action.
+    await player.attach(video);
+    await rejected(player.load('test:sintel'));
+
+    // By the time that |player.load| failed, we should have started
+    // |player.unload|.
+    expect(unload).toBeTruthy();
+    await unload;
+  });
+
+  // We want to make sure that we can interrupt the load path right after it
+  // finishes parsing the manifest. To test this we will ask the player to load
+  // some content and as it enters the manifest state, we will unload the
+  // player.
+  it('can interrupt between media source and manifest', async () => {
+    createPlayer(/* attachedTo= */ null);
+
+    // We are going to wait until we finish entering the media source
+    // initialized state and then interrupt our load request by
+    // unloading.
+    let unload;
+    whenEnteringState('manifest', () => {
+      unload = player.unload();
     });
 
     // We attach manually so that we had time to override the state change
@@ -837,6 +863,7 @@ describe('Player Load Path', () => {
     expect(getVisitedStates()).toEqual([
       'attach',
       'media-source',
+      'manifest',
       'load',
       'unload',
       'detach',
@@ -860,6 +887,7 @@ describe('Player Load Path', () => {
 
       // First call to |load|.
       'media-source',
+      'manifest',
       'load',
 
       // First call to unload will unload everything and then move us to the
@@ -922,6 +950,7 @@ describe('Player Load Path', () => {
       expect(getVisitedStates()).toEqual([
         'attach',
         'media-source',
+        'manifest',
         'load',
       ]);
     });
@@ -954,5 +983,21 @@ describe('Player Load Path', () => {
       states.push(call[0].state);
     }
     return states;
+  }
+
+  /**
+   * Overwrite our |stateChangeSpy| so that it will do |doThis| when we
+   * enter |state|. |doThis| will be executed synchronously to ensure that
+   * it is done before the walker does its next action.
+   *
+   * @param {string} state
+   * @param {function()} doThis
+   */
+  function whenEnteringState(state, doThis) {
+    stateChangeSpy.and.callFake((event) => {
+      if (event.state == state) {
+        doThis();
+      }
+    });
   }
 });
