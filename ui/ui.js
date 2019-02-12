@@ -241,7 +241,7 @@ shaka.ui.Overlay.createUI_ = function(container, video, config) {
   // If the browser's native controls are disabled, use UI TextDisplayer.
   if (!video.controls) {
     player.configure('textDisplayFactory',
-      () => new shaka.ui.TextDisplayer(video, container));
+        function() { return new shaka.ui.TextDisplayer(video, container); });
   }
 
   container['ui'] = ui;
