@@ -131,7 +131,7 @@ describe('TextEngine', function() {
   });
 
   describe('storeAndAppendClosedCaptions', function() {
-    it('append closed captions with selected id', function() {
+    it('appends closed captions with selected id', function() {
       const caption = {
         startPts: 0,
         endPts: 100,
@@ -142,7 +142,8 @@ describe('TextEngine', function() {
       };
 
       textEngine.setSelectedClosedCaptionId('CC1', 0);
-      textEngine.storeAndAppendClosedCaptions([caption], 0, 2);
+      textEngine.storeAndAppendClosedCaptions(
+          [caption], /* startTime */ 0, /* endTime */ 2, /* offset */ 0);
       expect(mockDisplayer.appendSpy).toHaveBeenCalled();
     });
 
@@ -157,7 +158,8 @@ describe('TextEngine', function() {
       };
 
       textEngine.setSelectedClosedCaptionId('CC3', 0);
-      textEngine.storeAndAppendClosedCaptions([caption], 0, 2);
+      textEngine.storeAndAppendClosedCaptions(
+          [caption], /* startTime */ 0, /* endTime */ 2, /* offset */ 0);
       expect(mockDisplayer.appendSpy).not.toHaveBeenCalled();
     });
 
@@ -190,21 +192,45 @@ describe('TextEngine', function() {
       textEngine.setSelectedClosedCaptionId('CC1', 0);
       // Text Engine stores all the closed captions as a two layer map.
       // {closed caption id -> {start and end time -> cues}}
-      textEngine.storeAndAppendClosedCaptions([caption0], 0, 1);
+      textEngine.storeAndAppendClosedCaptions(
+          [caption0], /* startTime */ 0, /* endTime */ 1, /* offset */ 0);
       expect(textEngine.getNumberOfClosedCaptionChannels()).toEqual(1);
       expect(textEngine.getNumberOfClosedCaptionsInChannel('CC1')).toEqual(1);
 
-      textEngine.storeAndAppendClosedCaptions([caption1], 1, 2);
+      textEngine.storeAndAppendClosedCaptions(
+          [caption1], /* startTime */ 1, /* endTime */ 2, /* offset */ 0);
       // Caption1 has the same stream id with caption0, but different start and
       // end time. The closed captions map should have 1 key CC1, and two values
       // for two start and end times.
       expect(textEngine.getNumberOfClosedCaptionChannels()).toEqual(1);
       expect(textEngine.getNumberOfClosedCaptionsInChannel('CC1')).toEqual(2);
 
-      textEngine.storeAndAppendClosedCaptions([caption2], 1, 2);
+      textEngine.storeAndAppendClosedCaptions(
+          [caption2], /* startTime */ 1, /* endTime */ 2, /* offset */ 0);
       // Caption2 has a different stream id CC3, so the closed captions map
       // should have two different keys, CC1 and CC3.
       expect(textEngine.getNumberOfClosedCaptionChannels()).toEqual(2);
+    });
+
+    it('offsets closed captions to account for video offset', function() {
+      const caption = {
+        startPts: 0,
+        endPts: 100,
+        startTime: 0,
+        endTime: 1,
+        stream: 'CC1',
+        text: 'captions',
+      };
+
+      textEngine.setSelectedClosedCaptionId('CC1', 0);
+      textEngine.storeAndAppendClosedCaptions(
+          [caption], /* startTime */ 0, /* endTime */ 2, /* offset */ 1000);
+      expect(mockDisplayer.appendSpy).toHaveBeenCalledWith([
+        jasmine.objectContaining({
+          startTime: 1000,
+          endTime: 1001,
+        }),
+      ]);
     });
   });
 
