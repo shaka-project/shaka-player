@@ -1105,7 +1105,6 @@ describe('DashParser Live', function() {
     });
   });
 
-
   describe('EventStream', function() {
     const originalManifest = [
       '<MPD type="dynamic" minimumUpdatePeriod="PT' + updateTime + 'S"',
@@ -1232,5 +1231,42 @@ describe('DashParser Live', function() {
       PromiseMock.flush();
     });
   });
-});
 
+  it('honors clockSyncUri for in-progress recordings', (done) => {
+    const manifestText = [
+      '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:05:00Z"',
+      '      mediaPresentationDuration="PT3600S">',
+      '  <Period id="1">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation id="3" bandwidth="500">',
+      '        <BaseURL>http://example.com</BaseURL>',
+      '        <SegmentTemplate media="s$Number$.mp4" duration="2" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    // Simulate a realistic clock sync URI.
+    fakeNetEngine.setResponseText('dummy://time', '');
+    fakeNetEngine.setHeaders('dummy://time', {
+      'date': (new Date()).toUTCString(),
+    });
+
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.dash.clockSyncUri = 'dummy://time';
+    parser.configure(config);
+
+    parser.start('dummy://foo', playerInterface).then((manifest) => {
+      // Make sure we're testing what we think we're testing.
+      // This should be seen as in-progress.
+      expect(manifest.presentationTimeline.isInProgress()).toBe(true);
+
+      // Now make sure we made the time sync request.
+      const timingRequest = shaka.net.NetworkingEngine.RequestType.TIMING;
+      fakeNetEngine.expectRequest('dummy://time', timingRequest);
+    }).catch(fail).then(done);
+    PromiseMock.flush();
+  });
+});
