@@ -67,13 +67,12 @@ const CRITICAL_RESOURCES = [
   'demo.css',
   'https://fonts.googleapis.com/css?family=Roboto',
   'https://fonts.googleapis.com/css?family=Roboto+Condensed',
-
-  'common/controls.css',
   'https://fonts.googleapis.com/icon?family=Material+Icons',
 
   'load.js',
   '../dist/shaka-player.ui.js',
   '../dist/demo.compiled.js',
+  '../dist/controls.css',
 ];
 
 
