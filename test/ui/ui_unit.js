@@ -273,17 +273,10 @@ describe('UI', function() {
       });
 
       it('has default buttons', function() {
-        const defaultButtonsClassNames = [
-          'shaka-caption-button',
-          'shaka-resolution-button',
-          'shaka-language-button',
-          'shaka-pip-button',
-        ];
-
-        for (const className of defaultButtonsClassNames) {
-          const buttons = overflowMenu.getElementsByClassName(className);
-          expect(buttons.length).toBe(1);
-        }
+        confirmElementFound(overflowMenu, 'shaka-caption-button');
+        confirmElementFound(overflowMenu, 'shaka-resolution-button');
+        confirmElementFound(overflowMenu, 'shaka-language-button');
+        confirmElementFound(overflowMenu, 'shaka-pip-button');
       });
 
       it('becomes visible if overflowMenuButton was clicked', function() {
@@ -322,22 +315,21 @@ describe('UI', function() {
         controlsButtonPanel =
             /** @type {!HTMLElement} */ (controlsButtonPanels[0]);
 
-      const defaultElementsClassNames = [
-          'shaka-current-time',
-          'shaka-mute-button',
-          'shaka-volume-bar',
-          'shaka-fullscreen-button',
-          'shaka-overflow-menu-button',
-        ];
-
-        for (const className of defaultElementsClassNames) {
-          const elements =
-              controlsButtonPanel.getElementsByClassName(className);
-          expect(elements.length).toBe(1);
-        }
+        confirmElementFound(controlsButtonPanel, 'shaka-current-time');
+        confirmElementFound(controlsButtonPanel, 'shaka-mute-button');
+        confirmElementFound(controlsButtonPanel, 'shaka-volume-bar');
+        confirmElementFound(controlsButtonPanel, 'shaka-fullscreen-button');
+        confirmElementFound(controlsButtonPanel, 'shaka-overflow-menu-button');
       });
 
       it('is accessible', function() {
+        function confirmAriaLabel(className) {
+          const elements =
+              controlsButtonPanel.getElementsByClassName(className);
+          expect(elements.length).toBe(1);
+          expect(elements[0].hasAttribute('aria-label')).toBe(true);
+        }
+
         const config = {
           controlPanelElements: [
             'mute',
@@ -348,6 +340,7 @@ describe('UI', function() {
             'rewind',
           ],
         };
+
         createUIThroughAPI(videoContainer, video, config);
         const controlsButtonPanels = videoContainer.getElementsByClassName(
           'shaka-controls-button-panel');
@@ -356,21 +349,12 @@ describe('UI', function() {
         controlsButtonPanel =
             /** @type {!HTMLElement} */ (controlsButtonPanels[0]);
 
-        const elementsClassNames = [
-          'shaka-mute-button',
-          'shaka-volume-bar',
-          'shaka-fullscreen-button',
-          'shaka-overflow-menu-button',
-          'shaka-fast-forward-button',
-          'shaka-rewind-button',
-        ];
-
-        for (const className of elementsClassNames) {
-          const elements =
-              controlsButtonPanel.getElementsByClassName(className);
-          expect(elements.length).toBe(1);
-          expect(elements[0].hasAttribute('aria-label')).toBe(true);
-        }
+        confirmAriaLabel('shaka-mute-button');
+        confirmAriaLabel('shaka-volume-bar');
+        confirmAriaLabel('shaka-fullscreen-button');
+        confirmAriaLabel('shaka-overflow-menu-button');
+        confirmAriaLabel('shaka-fast-forward-button');
+        confirmAriaLabel('shaka-rewind-button');
       });
     });
 
@@ -482,86 +466,35 @@ describe('UI', function() {
       createUIThroughAPI(container, video, config);
 
       // Only current time and mute button should've been created
-      let currentTimes =
-        container.getElementsByClassName('shaka-current-time');
-      expect(currentTimes.length).toBe(1);
+      confirmElementFound(container, 'shaka-current-time');
+      confirmElementFound(container, 'shaka-mute-button');
 
-      let shakaMuteButtons =
-        container.getElementsByClassName('shaka-mute-button');
-      expect(shakaMuteButtons.length).toBe(1);
-
-      let volumeBars =
-        container.getElementsByClassName('shaka-volume-bar');
-      expect(volumeBars.length).toBe(0);
-
-      let fullscreenButtons =
-        container.getElementsByClassName('fullscreenButton');
-      expect(fullscreenButtons.length).toBe(0);
-
-      let overflowMenuButtons =
-        container.getElementsByClassName('shaka-overflow-menu-button');
-      expect(overflowMenuButtons.length).toBe(0);
+      confirmElementMissing(container, 'shaka-volume-bar');
+      confirmElementMissing(container, 'shaka-fullscreen-button');
+      confirmElementMissing(container, 'shaka-overflow-menu-button');
     });
 
     it('only the specified overflow menu buttons are created', function() {
       config = {overflowMenuButtons: ['cast']};
       createUIThroughAPI(container, video, config);
 
-      let castButtons =
-        container.getElementsByClassName('shaka-cast-button');
-      expect(castButtons.length).toBe(1);
+      confirmElementFound(container, 'shaka-cast-button');
 
-      let captionButtons =
-        container.getElementsByClassName('shaka-caption-button');
-      expect(captionButtons.length).toBe(0);
-    });
-
-    // TODO(ismena): I'm not sure how and if this should be enforced after the
-    // redesign. Disabling the tests until we have an approach figured out.
-    xit('overlfow menu elements are not created in control button panel',
-        function() {
-      expect(warning).not.toHaveBeenCalled();
-      config = {controlPanelElements: ['cast']};
-      createUIThroughAPI(container, video, config);
-
-      // We do not provide captions button as part of controls button panel,
-      // only in overflow menu
-      let castButtons =
-        container.getElementsByClassName('shaka-cast-button');
-      expect(castButtons.length).toBe(0);
-      expect(warning).toHaveBeenCalled();
-    });
-
-    xit('control button panel elements are not created in overlfow menu',
-        function() {
-      expect(warning).not.toHaveBeenCalled();
-      config = {overflowMenuButtons: ['rewind']};
-      createUIThroughAPI(container, video, config);
-
-      // We do not provide captions button as part of controls button panel,
-      // only in overflow menu
-      let rewindButtons =
-        container.getElementsByClassName('shaka-rewind-button');
-      expect(rewindButtons.length).toBe(0);
-      expect(warning).toHaveBeenCalled();
+      confirmElementMissing(container, 'shaka-caption-button');
     });
 
     it('seek bar is not created unless configured', function() {
       config = {addSeekBar: false};
       createUIThroughAPI(container, video, config);
 
-      let seekBars =
-        container.getElementsByClassName('shaka-seek-bar');
-      expect(seekBars.length).toBe(0);
+      confirmElementMissing(container, 'shaka-seek-bar');
     });
 
     it('seek bar is created when configured', function() {
       config = {addSeekBar: true};
       createUIThroughAPI(container, video, config);
 
-      let seekBars =
-        container.getElementsByClassName('shaka-seek-bar');
-      expect(seekBars.length).toBe(1);
+      confirmElementFound(container, 'shaka-seek-bar');
     });
 
     it('settings menus are positioned lower when seek bar is absent',
@@ -569,33 +502,19 @@ describe('UI', function() {
       config = {addSeekBar: false};
       createUIThroughAPI(container, video, config);
 
-      let seekBars =
-        container.getElementsByClassName('shaka-seek-bar');
-      expect(seekBars.length).toBe(0);
+      function confirmLowPosition(className) {
+        const elements =
+              container.getElementsByClassName(className);
+        expect(elements.length).toBe(1);
+        expect(elements[0].classList.contains('shaka-low-position')).toBe(true);
+      }
 
-      let overflowMenus =
-        container.getElementsByClassName('shaka-overflow-menu');
-      expect(overflowMenus.length).toBe(1);
-      expect(overflowMenus[0].classList.contains(
-        'shaka-low-position')).toBe(true);
+      confirmElementMissing(container, 'shaka-seek-bar');
 
-      let resolutionMenus =
-        container.getElementsByClassName('shaka-resolutions');
-      expect(resolutionMenus.length).toBe(1);
-      expect(resolutionMenus[0].classList.contains(
-        'shaka-low-position')).toBe(true);
-
-      let audioLangMenus =
-        container.getElementsByClassName('shaka-audio-languages');
-      expect(audioLangMenus.length).toBe(1);
-      expect(audioLangMenus[0].classList.contains(
-        'shaka-low-position')).toBe(true);
-
-      let textLangMenus =
-        container.getElementsByClassName('shaka-text-languages');
-      expect(textLangMenus.length).toBe(1);
-      expect(textLangMenus[0].classList.contains(
-        'shaka-low-position')).toBe(true);
+      confirmLowPosition('shaka-overflow-menu');
+      confirmLowPosition('shaka-resolutions');
+      confirmLowPosition('shaka-audio-languages');
+      confirmLowPosition('shaka-text-languages');
     });
 
     it('controls are created in specified order', function() {
@@ -626,32 +545,15 @@ describe('UI', function() {
    * @suppress {visibility}
    */
   function checkBasicUIElements(container) {
-    let videos = container.getElementsByTagName('video');
+    const videos = container.getElementsByTagName('video');
     expect(videos.length).not.toBe(0);
 
-    let playButtonContainers =
-        container.getElementsByClassName('shaka-play-button-container');
-    expect(playButtonContainers.length).toBe(1);
-
-    let playButtons =
-        container.getElementsByClassName('shaka-play-button');
-    expect(playButtons.length).toBe(1);
-
-    let bufferingSpinners =
-        container.getElementsByClassName('shaka-spinner-svg');
-    expect(bufferingSpinners.length).toBe(1);
-
-    let overflowMenus =
-        container.getElementsByClassName('shaka-overflow-menu');
-    expect(overflowMenus.length).toBe(1);
-
-    let controlsButtonPanels =
-        container.getElementsByClassName('shaka-controls-button-panel');
-    expect(controlsButtonPanels.length).toBe(1);
-
-    let seekBars =
-        container.getElementsByClassName('shaka-seek-bar');
-    expect(seekBars.length).toBe(1);
+    confirmElementFound(container, 'shaka-play-button-container');
+    confirmElementFound(container, 'shaka-play-button');
+    confirmElementFound(container, 'shaka-spinner-svg');
+    confirmElementFound(container, 'shaka-overflow-menu');
+    confirmElementFound(container, 'shaka-controls-button-panel');
+    confirmElementFound(container, 'shaka-seek-bar');
   }
 
   /**
@@ -688,6 +590,26 @@ describe('UI', function() {
     // Call UI's private method to scan the page for shaka
     // elements and create the UI.
     shaka.ui.Overlay.scanPageForShakaElements_();
+  }
+
+  /**
+   * @param {!HTMLElement} parent
+   * @param {string} className
+   * @suppress {visibility}
+   */
+  function confirmElementFound(parent, className) {
+    const elements = parent.getElementsByClassName(className);
+    expect(elements.length).toBe(1);
+  }
+
+  /**
+   * @param {!HTMLElement} parent
+   * @param {string} className
+   * @suppress {visibility}
+   */
+  function confirmElementMissing(parent, className) {
+    const elements = parent.getElementsByClassName(className);
+    expect(elements.length).toBe(0);
   }
 });
 
