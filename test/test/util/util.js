@@ -285,6 +285,41 @@ shaka.test.Util.invokeSpy = function(spy, varArgs) {
 
 
 /**
+ * @param {boolean} loadUncompiled
+ * @return {*}
+ */
+shaka.test.Util.loadShaka = async function(loadUncompiled) {
+  /** @type {!shaka.util.PublicPromise} */
+  const loaded = new shaka.util.PublicPromise();
+  let compiledShaka;
+  if (loadUncompiled) {
+    // For debugging purposes, use the uncompiled library.
+    compiledShaka = shaka;
+    loaded.resolve();
+  } else {
+    // Load the compiled library as a module.
+    // All tests in this suite will use the compiled library.
+    require(['/base/dist/shaka-player.ui.js'], (shakaModule) => {
+      compiledShaka = shakaModule;
+      compiledShaka.net.NetworkingEngine.registerScheme(
+          'test', shaka.test.TestScheme);
+      compiledShaka.media.ManifestParser.registerParserByMime(
+          'application/x-test-manifest',
+          shaka.test.TestScheme.ManifestParser);
+
+      loaded.resolve();
+    }, (error) => {
+      loaded.reject('Failed to load compiled player.');
+      shaka.log.error('Error loading compiled player.', error);
+    });
+  }
+
+  await loaded;
+  return compiledShaka;
+};
+
+
+/**
  * @const
  * @private
  */

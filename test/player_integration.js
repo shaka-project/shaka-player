@@ -37,31 +37,7 @@ describe('Player', function() {
     video.muted = true;
     document.body.appendChild(video);
 
-    /** @type {!shaka.util.PublicPromise} */
-    const loaded = new shaka.util.PublicPromise();
-    if (getClientArg('uncompiled')) {
-      // For debugging purposes, use the uncompiled library.
-      compiledShaka = shaka;
-      loaded.resolve();
-    } else {
-      // Load the compiled library as a module.
-      // All tests in this suite will use the compiled library.
-      require(['/base/dist/shaka-player.ui.js'], (shakaModule) => {
-        compiledShaka = shakaModule;
-        compiledShaka.net.NetworkingEngine.registerScheme(
-            'test', shaka.test.TestScheme);
-        compiledShaka.media.ManifestParser.registerParserByMime(
-            'application/x-test-manifest',
-            shaka.test.TestScheme.ManifestParser);
-
-        loaded.resolve();
-      }, (error) => {
-        loaded.reject('Failed to load compiled player.');
-        shaka.log.error('Error loading compiled player.', error);
-      });
-    }
-
-    await loaded;
+    compiledShaka = await Util.loadShaka(getClientArg('uncompiled'));
     await shaka.test.TestScheme.createManifests(compiledShaka, '_compiled');
   });
 
