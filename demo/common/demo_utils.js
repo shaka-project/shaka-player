@@ -155,7 +155,7 @@ ShakaDemoUtils.createAssetButtons = function(
 ShakaDemoUtils.runThroughHashParams = (callback, config) => {
   // Override the "natural" name for a config value in the hash.
   // This exists for legacy reasons; the previous demo page had some hash values
-  // set to names that did not match the names of their corresonding config
+  // set to names that did not match the names of their corresponding config
   // object name.
   let overridden = [];
   let configOverride = (hashName, configName) => {
