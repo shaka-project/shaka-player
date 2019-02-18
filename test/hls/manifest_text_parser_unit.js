@@ -321,6 +321,36 @@ describe('ManifestTextParser', function() {
           'https://test/manifest.m3u8');
     });
 
+    it('handles tags with both value and attributes', function() {
+      verifyPlaylist(
+          {
+            type: shaka.hls.PlaylistType.MEDIA,
+            tags: [
+              new shaka.hls.Tag(/* id */ 0, 'EXT-X-MEDIA-SEQUENCE', [], '1'),
+            ],
+            segments: [
+              new shaka.hls.Segment('https://test/test.mp4',
+                  [
+                    new shaka.hls.Tag(
+                      /* id */ 2,
+                      'EXTINF',
+                      [new shaka.hls.Attribute('pid', '180')],
+                      '5.99467'
+                    ),
+                  ]),
+            ],
+          },
+
+          // playlist text:
+          '#EXTM3U\n' +
+          '#EXT-X-MEDIA-SEQUENCE:1\n' +
+          '#EXTINF:5.99467,pid=180\n' +
+          'https://test/test.mp4\n',
+
+          // manifest URI:
+          'https://test/manifest.m3u8');
+    });
+
     it('handles manifests with a segment tag before a playlist tag', () => {
       verifyPlaylist(
           {
