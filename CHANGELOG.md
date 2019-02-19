@@ -1,3 +1,12 @@
+## 2.4.7 (2019-02-19)
+
+Bugfixes:
+  - Reject opus content on Tizen
+    - https://github.com/google/shaka-player/issues/1751
+  - Fix seekable range on HLS content with non-zero start time
+    - https://github.com/google/shaka-player/issues/1602
+
+
 ## 2.4.6 (2019-01-22)
 
 Bugfixes:
