@@ -293,6 +293,12 @@ describe('ManifestTextParser', function() {
       let tag = shaka.hls.ManifestTextParser.parseTag(0, text);
       expect(text).toEqual(tag.toString());
     });
+
+    it('recreates valid tag with both value and attributes', function() {
+      const text = '#EXTINF:5.99467,pid=180';
+      let tag = shaka.hls.ManifestTextParser.parseTag(0, text);
+      expect(text).toEqual(tag.toString());
+    });
   });
 
   describe('parseSegments', function() {
