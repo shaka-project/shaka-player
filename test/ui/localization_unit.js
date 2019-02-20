@@ -439,7 +439,7 @@ describe('Localization', function() {
           expect(events[0].missing).toEqual(['Do you understand']);
         });
 
-    it('fires when key/value is missing from some preferred langauges',
+    it('fires when key/value is missing from some preferred languages',
         function() {
           // Initialize the localization system so that we have an entry for
           // "may your forge burn bright" in our second preference but not our

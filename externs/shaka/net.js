@@ -152,7 +152,7 @@ shaka.extern.SchemePlugin;
  * player.
  * The first argument is a number for duration in milliseconds, that the request
  * took to complete.
- * The second argument is the the total number of bytes downloaded during that
+ * The second argument is the total number of bytes downloaded during that
  * time.
  *
  * @exportDoc

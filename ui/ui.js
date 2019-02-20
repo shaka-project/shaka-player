@@ -214,8 +214,8 @@ shaka.ui.Overlay.scanPageForShakaElements_ = function() {
   }
 
   // After scanning the page for elements, fire the "loaded" event.  This will
-  // let apps know they can use the UI library programatically now, even if they
-  // didn't have any Shaka-related elements declared in their HTML.
+  // let apps know they can use the UI library programmatically now, even if
+  // they didn't have any Shaka-related elements declared in their HTML.
 
   // "Event" is not constructable on IE, so we use this CustomEvent pattern.
   const uiLoadedEvent = /** @type {!CustomEvent} */(

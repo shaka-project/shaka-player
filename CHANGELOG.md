@@ -2133,7 +2133,7 @@ Bugfixes:
 Features:
   - The version indicator on the demo page now displays the NPM version (if
     available) when the git version is unavailable.
-  - Added support to clear the the audio buffer when switching tracks.
+  - Added support to clear the audio buffer when switching tracks.
     - https://github.com/google/shaka-player/issues/119
   - Added the ability to detect and recover from multiple buffered ranges.
     - https://github.com/google/shaka-player/issues/121

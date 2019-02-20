@@ -699,7 +699,7 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
   // Overflow menus are supposed to hide once you click elsewhere
   // on the video element. The code in onContainerClick_ ensures that.
   // However, clicks on controls panel don't propagate to the container,
-  // so we have to explicitely hide the menus onclick here.
+  // so we have to explicitly hide the menus onclick here.
   this.controlsButtonPanel_.addEventListener('click', () => {
     this.hideSettingsMenusTimer_.tick();
   });
