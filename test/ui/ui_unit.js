@@ -23,19 +23,8 @@ describe('UI', function() {
 
   beforeAll(async function() {
     // Add css file
-    let head = document.head;
     cssLink = document.createElement('link');
-    cssLink.type = 'text/css';
-    cssLink.rel = 'stylesheet/less';
-    cssLink.href ='/base/ui/controls.less';
-    head.appendChild(cssLink);
-
-    // LESS script has been added at the beginning of the test pass
-    // (in test/test/boot.js). This tells it that we've added a new
-    // stylesheet, so LESS can process it.
-    less.registerStylesheetsImmediately();
-    await less.refresh(/* reload */ true,
-      /* modifyVars*/ false, /* clearFileCache */ false);
+    await shaka.test.Util.setupCSS(cssLink);
   });
 
 

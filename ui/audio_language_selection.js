@@ -164,6 +164,9 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.Element {
       this.currentAudioLanguage_,
       this.localization);
     shaka.ui.Utils.focusOnTheChosenItem(this.audioLangMenu_);
+
+    this.controls.dispatchEvent(
+        new shaka.util.FakeEvent('languageselectionupdated'));
   }
 
 

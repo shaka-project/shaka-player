@@ -456,7 +456,7 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
 
     let gen = new windowShaka.test.ManifestGenerator(shaka)
         .setPresentationDuration(data.duration)
-        .addPeriod(0)
+        .addPeriod(/* startTime= */ 0)
         .addVariant(0)
           .addVideo(1);
     addStreamInfo(gen, data, ContentType.VIDEO, name);
@@ -489,7 +489,7 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
       .setPresentationDuration(periodDuration * numPeriods);
 
   for (let i = 0; i < numPeriods; i++) {
-    gen.addPeriod(periodDuration * i);
+    gen.addPeriod(/* startTime= */ periodDuration * i);
 
     gen.addVariant(2 * i).language('en');
     gen.addVideo(4 * i);
@@ -510,7 +510,9 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
   let idCount = 1;
   gen = new windowShaka.test.ManifestGenerator(shaka)
       .setPresentationDuration(periodDuration);
-  gen.addPeriod(periodDuration);
+  gen.addPeriod(/* startTime= */ 0);
+
+  // Variant in English, res 426x182
   gen.addVariant(idCount++).language('en');
   gen.addVideo(idCount++).size(426, 182);
   addStreamInfo(gen, data, ContentType.VIDEO, 'sintel');
@@ -525,7 +527,7 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
   addStreamInfo(gen, data, ContentType.AUDIO, 'sintel');
 
   // Same resolution, different language
-  gen.addVariant(idCount++).language('en');
+  gen.addVariant(idCount++).language('es');
   gen.addVideo(idCount++).size(640, 272);
   addStreamInfo(gen, data, ContentType.VIDEO, 'sintel');
   gen.addAudio(idCount++).language('es');
