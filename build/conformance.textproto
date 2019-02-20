@@ -170,7 +170,7 @@ requirement: {
   type: BANNED_NAME
   value: 'window.setInterval'
   error_message: 'Using "setInterval" is not allowed; '
-                 'use shaka.util.Timer.prototype.scheduleRepeated instead.'
+                 'use shaka.util.Timer instead.'
   whitelist_regexp: 'demo/'
   whitelist_regexp: 'test/'
 }
@@ -178,7 +178,7 @@ requirement: {
   type: BANNED_NAME
   value: 'setInterval'
   error_message: 'Using "setInterval" is not allowed; '
-                 'use shaka.util.Timer.prototype.scheduleRepeated instead.'
+                 'use shaka.util.Timer instead.'
   whitelist_regexp: 'demo/'
   whitelist_regexp: 'test/'
 }
