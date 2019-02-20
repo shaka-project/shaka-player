@@ -1,3 +1,49 @@
+## 2.5.0-beta3 (2019-02-20)
+
+New Features:
+  - Introduction of Shaka Player UI library! (beta)
+    - Load dist/shaka-player.ui.js
+    - See tutorial in docs/tutorials/ui.md
+  - Add option to disable drift-tolerance feature for certain live streams
+    - https://github.com/google/shaka-player/issues/1729
+  - Upgrade mux.js to the latest (5.1.0)
+  - Support HLS playlists without URI in EXT-X-MEDIA
+    - https://github.com/google/shaka-player/pull/1732
+  - Add safeSeekOffset to StreamingConfiguration
+    - https://github.com/google/shaka-player/issues/1723
+    - https://github.com/google/shaka-player/pull/1726
+  - Add PlayReady license URL parsing (ms:laurl)
+    - https://github.com/google/shaka-player/issues/484
+    - https://github.com/google/shaka-player/pull/1644
+  - Add support for HLS tags with both value and attributes
+    - https://github.com/google/shaka-player/issues/1808
+    - https://github.com/google/shaka-player/pull/1810
+
+Bugfixes:
+  - Fixed various typos in comments and docs
+    - https://github.com/google/shaka-player/pull/1797
+    - https://github.com/google/shaka-player/pull/1805
+  - Fix CEA timestamps with presentationTimeOffset
+  - Fix config-based clock sync for IPR content
+  - Fix cast serialization of Uint8Array types
+    - https://github.com/google/shaka-player/issues/1716
+  - Fix event dispatch when text tracks change
+  - Don't include video roles in audio-language-role pairs
+    - https://github.com/google/shaka-player/issues/1731
+  - Fix MediaSource failures with certain language settings
+    - https://github.com/google/shaka-player/issues/1696
+  - Fix build paths on Windows
+    - https://github.com/google/shaka-player/issues/1700
+
+Docs:
+  - Update docs to mention ignoreMinBufferTime
+    - https://github.com/google/shaka-player/issues/1547
+    - https://github.com/google/shaka-player/issues/1666
+  - Document restrictions on large timescales
+    - https://github.com/google/shaka-player/issues/1667
+  - Various small docs improvements
+
+
 ## 2.4.7 (2019-02-19)
 
 Bugfixes:
