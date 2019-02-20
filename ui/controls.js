@@ -749,6 +749,15 @@ shaka.ui.Controls.prototype.addSeekBar_ = function() {
 
 
 /**
+ * Checks if the cast proxy can cast.
+ * @return {boolean}
+ */
+shaka.ui.Controls.prototype.canCast = function() {
+  return this.castProxy_.canCast();
+};
+
+
+/**
  * Hiding the cursor when the mouse stops moving seems to be the only decent UX
  * in fullscreen mode.  Since we can't use pure CSS for that, we use events both
  * in and out of fullscreen mode.

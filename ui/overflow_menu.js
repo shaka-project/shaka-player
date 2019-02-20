@@ -178,7 +178,7 @@ goog.require('shaka.ui.Utils');
     }
 
     this.eventManager.listen(
-      this.controls, 'caststatuschange', (e) => {
+      this.controls, 'caststatuschanged', (e) => {
         this.onCastStatusChange_(e);
       });
 
@@ -451,7 +451,9 @@ goog.require('shaka.ui.Utils');
     this.castButton_ = shaka.ui.Utils.createHTMLElement('button');
 
     this.castButton_.classList.add('shaka-cast-button');
-    this.castButton_.classList.add('shaka-hidden');
+    if (!this.controls.canCast()) {
+      this.castButton_.classList.add('shaka-hidden');
+    }
     this.castButton_.setAttribute('aria-pressed', 'false');
 
     this.castIcon_ = shaka.ui.Utils.createHTMLElement('i');
