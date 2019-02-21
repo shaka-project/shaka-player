@@ -238,9 +238,12 @@ shaka.ui.Overlay.createUI_ = function(container, video, config) {
   const player = new shaka.Player(video);
   const ui = new shaka.ui.Overlay(player, container, video, config);
 
-  // If the browser's native controls are disabled, use UI TextDisplayer.
+  // If the browser's native controls are disabled, use UI TextDisplayer. Right
+  // now because the factory must be a constructor and () => {} can't be a
+  // constructor.
   if (!video.controls) {
-    player.configure('textDisplayFactory',
+    player.configure(
+        'textDisplayFactory',
         function() { return new shaka.ui.TextDisplayer(video, container); });
   }
 
