@@ -193,7 +193,9 @@ describe('DrmEngine', function() {
             keyStatusEventSeen.resolve();
           });
 
-          const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+          const periods = manifest.periods;
+          const variants = shaka.util.Periods.getAllVariantsFrom(periods);
+
           drmEngine.initForPlayback(
               variants, manifest.offlineSessionIds).then(function() {
             return drmEngine.attach(video);

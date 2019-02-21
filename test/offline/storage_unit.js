@@ -1471,7 +1471,7 @@ describe('Storage', function() {
 
     return shaka.util.Destroyer.with([drm], async () => {
       drm.configure(player.getConfiguration().drm);
-      const variants = shaka.util.StreamUtils.getAllVariants(manifest);
+      const variants = shaka.util.Periods.getAllVariantsFrom(manifest.periods);
       await drm.initForStorage(variants, /* usePersistentLicenses */ true);
       return action(drm);
     }).then((result) => {
