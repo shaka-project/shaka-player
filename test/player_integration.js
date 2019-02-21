@@ -309,19 +309,15 @@ describe('Player', function() {
 
   describe('TextDisplayer plugin', function() {
     // Simulate the use of an external TextDisplayer plugin.
+    /** @type {shaka.test.FakeTextDisplayer} */
     let textDisplayer;
     beforeEach(function() {
-      textDisplayer = {
-        destroy: jasmine.createSpy('destroy'),
-        append: jasmine.createSpy('append'),
-        remove: jasmine.createSpy('remove'),
-        isTextVisible: jasmine.createSpy('isTextVisible'),
-        setTextVisibility: jasmine.createSpy('setTextVisibility'),
-      };
+      textDisplayer = new shaka.test.FakeTextDisplayer();
 
-      textDisplayer.destroy.and.returnValue(Promise.resolve());
-      textDisplayer.isTextVisible.and.returnValue(true);
-
+      textDisplayer.isTextVisibleSpy.and.callFake(() => {
+        return false;
+      });
+      textDisplayer.destroySpy.and.returnValue(Promise.resolve());
       player.configure({
         textDisplayFactory: function() { return textDisplayer; },
       });
@@ -340,7 +336,7 @@ describe('Player', function() {
       await player.unload();
       // Before we fixed #1187, the call to destroy() on textDisplayer was
       // renamed in the compiled version and could not be called.
-      expect(textDisplayer.destroy).toHaveBeenCalled();
+      expect(textDisplayer.destroySpy).toHaveBeenCalled();
     });
   });
 
