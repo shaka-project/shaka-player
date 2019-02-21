@@ -50,6 +50,8 @@ import compiler
 import shakaBuildHelpers
 
 
+shaka_version = shakaBuildHelpers.calculate_version()
+
 common_closure_opts = [
     '--language_out', 'ECMASCRIPT3',
 
@@ -74,6 +76,7 @@ common_closure_defines = [
     '-D', 'goog.STRICT_MODE_COMPATIBLE=true',
     '-D', 'goog.ENABLE_DEBUG_LOADER=false',
 ]
+
 debug_closure_opts = [
     # Don't use a wrapper script in debug mode so all the internals are visible
     # on the global object.
@@ -83,6 +86,7 @@ debug_closure_defines = [
     '-D', 'goog.DEBUG=true',
     '-D', 'goog.asserts.ENABLE_ASSERTS=true',
     '-D', 'shaka.log.MAX_LOG_LEVEL=4',  # shaka.log.Level.DEBUG
+    '-D', 'shaka.Player.version="%s-debug"' % shaka_version,
 ]
 
 release_closure_opts = [
@@ -92,6 +96,7 @@ release_closure_defines = [
     '-D', 'goog.DEBUG=false',
     '-D', 'goog.asserts.ENABLE_ASSERTS=false',
     '-D', 'shaka.log.MAX_LOG_LEVEL=0',
+    '-D', 'shaka.Player.version="%s"' % shaka_version,
 ]
 
 
