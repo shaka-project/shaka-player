@@ -307,54 +307,6 @@ describe('Player', function() {
     }
   });
 
-  describe('abort', function() {
-    /** @type {!jasmine.Spy} */
-    let schemeSpy;
-
-    beforeAll(function() {
-      schemeSpy = jasmine.createSpy('reject scheme');
-      schemeSpy.and.callFake(function() {
-        // Throw a recoverable error so it will retry.
-        let error = new shaka.util.Error(
-            shaka.util.Error.Severity.RECOVERABLE,
-            shaka.util.Error.Category.NETWORK,
-            shaka.util.Error.Code.HTTP_ERROR);
-        return shaka.util.AbortableOperation.failed(error);
-      });
-      compiledShaka.net.NetworkingEngine.registerScheme('reject',
-          Util.spyFunc(schemeSpy));
-    });
-
-    afterEach(function() {
-      schemeSpy.calls.reset();
-    });
-
-    afterAll(function() {
-      compiledShaka.net.NetworkingEngine.unregisterScheme('reject');
-    });
-
-    function testTemplate(operationFn) {
-      // No data will be loaded for this test, so it can use a real manifest
-      // parser safely.
-      player.load('reject://www.foo.com/bar.mpd').then(fail).catch(() => {});
-      return shaka.test.Util.delay(0.1).then(operationFn).then(function() {
-        expect(schemeSpy.calls.count()).toBe(1);
-      });
-    }
-
-    // TODO(vaage): Re-enable when aborting manifest load retries is integrated
-    //              with the load graph.
-    xit('unload prevents further manifest load retries', async () => {
-      await testTemplate(() => player.unload());
-    });
-
-    // TODO(vaage): Re-enable when aborting manifest load retries is integrated
-    //              with the load graph.
-    xit('destroy prevents further manifest load retries', async () => {
-      await testTemplate(() => player.destroy());
-    });
-  });
-
   describe('TextDisplayer plugin', function() {
     // Simulate the use of an external TextDisplayer plugin.
     let textDisplayer;
@@ -531,6 +483,113 @@ describe('Player Stats', () => {
     expect(stats).toBeTruthy();
   });
 });
+
+
+// This test suite checks that we can interrupt manifest parsing using other
+// methods. This ensures that if someone accidentally loads a bad uri, they
+// don't need to wait for a time-out before being able to load a good uri.
+//
+// TODO: Any call to |load|, |attach|, etc. should abort manifest retries.
+//       Add the missing tests for |load| and |attach|.
+describe('Player Manifest Retries', function() {
+  /** @type {!HTMLVideoElement} */
+  let video;
+  /** @type {shaka.Player} */
+  let player;
+
+  beforeAll(() => {
+    video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
+    video.width = 600;
+    video.height = 400;
+    video.muted = true;
+    document.body.appendChild(video);
+
+    // For these tests, we don't want any network requests to succeed. We want
+    // to force the networking engine to run-out of retries for our manifest
+    // requests.
+    shaka.net.NetworkingEngine.registerScheme(
+        'reject',
+        alwaysFailNetworkScheme);
+  });
+
+  afterAll(() => {
+    shaka.net.NetworkingEngine.unregisterScheme('reject');
+    document.body.removeChild(video);
+  });
+
+  beforeEach(async () => {
+    player = new shaka.Player();
+    await player.attach(video);
+  });
+
+  afterEach(async () => {
+    await player.destroy();
+  });
+
+  it('unload prevents further manifest load retries', async () => {
+    const loading = player.load('reject://www.foo.com/bar.mpd');
+
+    // TODO: We don't need to do time based waits here anymore, we can wait
+    //       until we enter a load state.
+    await shaka.test.Util.delay(0.1);
+    await player.unload();
+
+    try {
+      await loading;
+      fail();
+    } catch (e) {
+      expect(e.code).toBe(shaka.util.Error.Code.LOAD_INTERRUPTED);
+    }
+  });
+
+  it('detach prevents further manifest load retries', async () => {
+    const loading = player.load('reject://www.foo.com/bar.mpd');
+
+    // TODO: We don't need to do time based waits here anymore, we can wait
+    //       until we enter a load state.
+    await shaka.test.Util.delay(0.1);
+    await player.detach();
+
+    try {
+      await loading;
+      fail();
+    } catch (e) {
+      expect(e.code).toBe(shaka.util.Error.Code.LOAD_INTERRUPTED);
+    }
+  });
+
+  it('destroy prevents further manifest load retries', async () => {
+    const loading = player.load('reject://www.foo.com/bar.mpd');
+
+    // TODO: We don't need to do time based waits here anymore, we can wait
+    //       until we enter a load state.
+    await shaka.test.Util.delay(0.1);
+    await player.destroy();
+
+    try {
+      await loading;
+      fail();
+    } catch (e) {
+      expect(e.code).toBe(shaka.util.Error.Code.LOAD_INTERRUPTED);
+    }
+  });
+
+  /**
+   * A networking scheme that will ways throw a recoverable error so that
+   * networking engine will keep retrying.
+   *
+   * @return {!shaka.util.AbortableOperation}
+   */
+  function alwaysFailNetworkScheme() {
+    const error = new shaka.util.Error(
+        shaka.util.Error.Severity.RECOVERABLE,
+        shaka.util.Error.Category.NETWORK,
+        shaka.util.Error.Code.HTTP_ERROR);
+
+    return shaka.util.AbortableOperation.failed(error);
+  }
+});
+
 
 // This test suite focuses on how the player moves through the different load
 // states.
