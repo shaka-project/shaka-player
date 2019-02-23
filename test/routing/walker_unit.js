@@ -17,6 +17,8 @@
 
 
 describe('Walker', () => {
+  const AbortableOperation = shaka.util.AbortableOperation;
+
   // For our tests, we will not use the payload in our routing logic. To
   // avoid distracting the reader with payload details, hide them here.
   const payload = {
@@ -90,6 +92,8 @@ describe('Walker', () => {
 
   beforeEach(() => {
     enterNodeSpy = jasmine.createSpy('enterNode');
+    enterNodeSpy.and.returnValue(AbortableOperation.completed(undefined));
+
     handleErrorSpy = jasmine.createSpy('handleError');
 
     const implementation = {
@@ -137,23 +141,17 @@ describe('Walker', () => {
 
     /** @type {!shaka.util.PublicPromise} */
     const atA = new shaka.util.PublicPromise();
-    let interrupt = () => {
+    const interrupt = () => {
       const goToA = startNewRoute(nodeA, /* interruptible= */ false);
       goToA.onEnd = () => atA.resolve();
     };
 
-    // Create a "trap" so that once we enter node B (the fork) that we will
-    // issue a new route - this will ensure that we are interrupting a route
-    // mid-execution.
-    enterNodeSpy.and.callFake((node) => {
-      // Make sure we only interrupt once.
-      if (node == nodeB && interrupt) {
+    const goingToE = startNewRoute(nodeE, /* interruptible= */ true);
+    goingToE.onEnter = (node) => {
+      if (node == nodeB) {
         interrupt();
-        interrupt = null;
       }
-    });
-
-    startNewRoute(nodeE, /* interruptible= */ true);
+    };
 
     await atA;
 
@@ -176,7 +174,7 @@ describe('Walker', () => {
     /** @type {!shaka.util.PublicPromise} */
     const atE = new shaka.util.PublicPromise();
 
-    let interrupt = () => {
+    const interrupt = () => {
       const goToE = startNewRoute(nodeE, /* interruptible= */ false);
       goToE.onEnd = () => atE.resolve();
     };
@@ -184,15 +182,11 @@ describe('Walker', () => {
     // Create a "trap" so that once we enter node B (the fork) that we will
     // issue a new route - this will ensure that we are trying to interrupt a
     // route mid-execution.
-    enterNodeSpy.and.callFake((node) => {
-      // Make sure we only interrupt once.
-      if (node == nodeB && interrupt) {
-        interrupt();
-        interrupt = null;
-      }
-    });
+    const goingToC = startNewRoute(nodeC, /* interruptible= */ false);
+    goingToC.onEnter = (node) => {
+      interrupt();
+    };
 
-    startNewRoute(nodeC, /* interruptible= */ false);
     await atE;
 
     const steps = getStepsTaken();
@@ -232,6 +226,7 @@ describe('Walker', () => {
 
     enterNodeSpy.and.callFake((node) => {
       tookSteps.push(currentRoute);
+      return AbortableOperation.completed(undefined);
     });
 
     const route1 = startNewRoute(nodeD, /* interruptible= */ false);
@@ -282,6 +277,59 @@ describe('Walker', () => {
     expect(canceledBSpy).toHaveBeenCalled();
   });
 
+  // When we interrupt a route that has a step that can be aborted, it should
+  // abort the operation and enter the error recovery mode.
+  //
+  // To model this we will make a node be a never-resolving node. We will enter
+  // the node and then get stuck. From there we will request a new route, the
+  // blocked op will abort, and then we will go to our new destination.
+  it('can abort current step', async () => {
+    // Because we need a node to start at after resetting, we will just use A.
+    // There is no special reason for node A.
+    handleErrorSpy.and.returnValue(Promise.resolve(nodeA));
+
+    // Block when we enter node C so that we can re-route to node E and finish a
+    // path.
+    blockWalkerAt(nodeC);
+
+    // Wait for us to enter node d before continuing. We introduce a small delay
+    // to ensure that we are "stuck" on the abortable operation.
+    const goingToD = startNewRoute(nodeD, /* interruptible */ true);
+    await waitUntilEntering(goingToD, nodeC);
+    await shaka.test.Util.delay(0.1);
+
+    const goingToE = startNewRoute(nodeE, /* interruptible */ true);
+    await new Promise((resolve) => {
+      goingToE.onEnd = resolve;
+    });
+
+    expect(handleErrorSpy).toHaveBeenCalled();
+  });
+
+  // If we are in the middle of a node and |destroy| is called, we want to
+  // ensure that we exit as soon as possible. If the current step is abortable
+  // then we want to abort.
+  it('can abort current step with destroy', async () => {
+    // Because we need a node to start at after resetting, we will just use A.
+    // There is no special reason for node A.
+    handleErrorSpy.and.returnValue(Promise.resolve(nodeA));
+
+    // Block when we enter node C so that we can re-route to node E and finish a
+    // path.
+    blockWalkerAt(nodeC);
+
+    // Wait for us to enter node d before continuing. We introduce a small delay
+    // to ensure that we are "stuck" on the abortable operation.
+    const goingToD = startNewRoute(nodeD, /* interruptible */ true);
+    await waitUntilEntering(goingToD, nodeC);
+    await shaka.test.Util.delay(0.1);
+
+    // We are "stuck" in nodeC. We will now destroy the walker which should
+    // abort the nodeC step, enter error recovery mode, and then shutdown.
+    await walker.destroy();
+    expect(handleErrorSpy).toHaveBeenCalled();
+  });
+
   /**
    * Ask the walker to start a new route. Since the requests from our tests
    * are very basic, wrapping the call should not hide too much information.
@@ -309,5 +357,53 @@ describe('Walker', () => {
   function getStepsTaken() {
     // Use |onNode| to get the steps that completed.
     return enterNodeSpy.calls.allArgs().map((args) => args[0]);
+  }
+
+  /**
+   * Configure the |enterNodeSpy| so that we will block when we enter |node|. In
+   * order to unblock, the route will need to be interrupted.
+   *
+   * @param {shaka.routing.Node} node
+   */
+  function blockWalkerAt(node) {
+    /** @type {!shaka.util.AbortableOperation} */
+    const completedOp = AbortableOperation.completed(undefined);
+
+    /** @type {!shaka.util.PublicPromise} */
+    const waitForever = new shaka.util.PublicPromise();
+
+    /** @type {!shaka.util.AbortableOperation} */
+    const blockingOp = new AbortableOperation(
+        waitForever,
+        () => {
+          waitForever.reject(new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
+              shaka.util.Error.Category.PLAYER,
+              shaka.util.Error.Code.OPERATION_ABORTED));
+
+          return waitForever;
+        });
+
+    enterNodeSpy.and.callFake((at) => {
+      return at == node ? blockingOp : completedOp;
+    });
+  }
+
+  /**
+   * Create a promise that will resolve when we enter |node| while on the route
+   * that produced |events|.
+   *
+   * @param {shaka.routing.Walker.Listeners} events
+   * @param {shaka.routing.Node} node
+   * @return {!Promise}
+   */
+  function waitUntilEntering(events, node) {
+    return new Promise((resolve) => {
+      events.onEnter = (node) => {
+        if (node == nodeC) {
+          resolve();
+        }
+      };
+    });
   }
 });
