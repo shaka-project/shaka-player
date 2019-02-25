@@ -57,7 +57,6 @@ goog.require('shaka.polyfill.installAll');
 goog.require('shaka.text.Cue');
 goog.require('shaka.text.Mp4TtmlParser');
 goog.require('shaka.text.Mp4VttParser');
-goog.require('shaka.text.SimpleTextDisplayer');
 goog.require('shaka.text.TextEngine');
 goog.require('shaka.text.TtmlTextParser');
 goog.require('shaka.text.VttTextParser');
