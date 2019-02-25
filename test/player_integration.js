@@ -734,6 +734,7 @@ describe('Player Load Path', () => {
 
       // First call to |load|.
       'media-source',
+      'manifest-parser',
       'manifest',
       'load',
 
@@ -743,6 +744,7 @@ describe('Player Load Path', () => {
       'unload',
       'attach',
       'media-source',
+      'manifest-parser',
       'manifest',
       'load',
     ]);
@@ -764,6 +766,7 @@ describe('Player Load Path', () => {
 
       // Load and unload 1
       'media-source',
+      'manifest-parser',
       'manifest',
       'load',
       'unload',
@@ -771,6 +774,7 @@ describe('Player Load Path', () => {
 
       // Load and unload 2
       'media-source',
+      'manifest-parser',
       'manifest',
       'load',
       'unload',
@@ -792,6 +796,7 @@ describe('Player Load Path', () => {
 
       // Load 1
       'media-source',
+      'manifest-parser',
       'manifest',
       'load',
 
@@ -799,6 +804,7 @@ describe('Player Load Path', () => {
       'unload',
       'attach',
       'media-source',
+      'manifest-parser',
       'manifest',
       'load',
 
@@ -806,6 +812,7 @@ describe('Player Load Path', () => {
       'unload',
       'attach',
       'media-source',
+      'manifest-parser',
       'manifest',
       'load',
     ]);
@@ -922,6 +929,7 @@ describe('Player Load Path', () => {
     expect(getVisitedStates()).toEqual([
       'attach',
       'media-source',
+      'manifest-parser',
       'manifest',
       'load',
       'unload',
@@ -946,6 +954,7 @@ describe('Player Load Path', () => {
 
       // First call to |load|.
       'media-source',
+      'manifest-parser',
       'manifest',
       'load',
 
@@ -1009,6 +1018,7 @@ describe('Player Load Path', () => {
       expect(getVisitedStates()).toEqual([
         'attach',
         'media-source',
+        'manifest-parser',
         'manifest',
         'load',
       ]);
