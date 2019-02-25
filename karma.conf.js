@@ -133,6 +133,7 @@ module.exports = function(config) {
       'lib/**/*.js': ['babel'],
       'ui/**/*.js': ['babel'],
       'test/**/*.js': ['babel'],
+      'third_party/language-mapping-list/**/*.js': ['babel'],
     },
 
     babelPreprocessor: {
