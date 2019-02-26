@@ -146,85 +146,85 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
 
     describe('backoff', function() {
       const baseDelay = 200;
-      const origSetTimeout = shaka.net.Backoff.setTimeout_;
+      const originalDefer = shaka.net.Backoff.defer;
       const realRandom = Math.random;
 
       /** @type {!jasmine.Spy} */
-      let setTimeoutSpy;
+      let deferSpy;
 
-      beforeAll(function() {
-        setTimeoutSpy = jasmine.createSpy('setTimeout');
-        setTimeoutSpy.and.callFake(origSetTimeout);
-        shaka.net.Backoff.setTimeout_ = Util.spyFunc(setTimeoutSpy);
-        Math.random = function() { return 0.75; };
-      });
-
-      afterAll(function() {
+      afterAll(() => {
         Math.random = realRandom;
-        shaka.net.Backoff.setTimeout_ = origSetTimeout;
+        shaka.net.Backoff.defer = originalDefer;
       });
 
-      beforeEach(function() {
-        setTimeoutSpy.calls.reset();
+      beforeEach(() => {
+        Math.random = () => 0.75;
+
+        deferSpy = jasmine.createSpy('defer');
+        deferSpy.and.callFake(originalDefer);
+        shaka.net.Backoff.defer = Util.spyFunc(deferSpy);
       });
 
-      it('uses baseDelay', function(done) {
-        let request = createRequest('reject://foo', {
+      it('uses baseDelay', async () => {
+        const request = createRequest('reject://foo', {
           maxAttempts: 2,
           baseDelay: baseDelay,
           fuzzFactor: 0,
           backoffFactor: 2,
           timeout: 0,
         });
-        networkingEngine.request(requestType, request).promise
-            .then(fail)
-            .catch(function() {
-              expect(setTimeoutSpy.calls.count()).toBe(1);
-              expect(setTimeoutSpy)
-                  .toHaveBeenCalledWith(jasmine.any(Function), baseDelay);
-            })
-            .then(done);
+
+        try {
+          await networkingEngine.request(requestType, request).promise;
+          fail();
+        } catch (e) {
+          expect(deferSpy.calls.count()).toBe(1);
+          expect(deferSpy).toHaveBeenCalledWith(baseDelay,
+                                                jasmine.any(Function));
+        }
       });
 
-      it('uses backoffFactor', function(done) {
-        let request = createRequest('reject://foo', {
+      it('uses backoffFactor', async () => {
+        const request = createRequest('reject://foo', {
           maxAttempts: 3,
           baseDelay: baseDelay,
           fuzzFactor: 0,
           backoffFactor: 2,
           timeout: 0,
         });
-        networkingEngine.request(requestType, request).promise
-            .then(fail)
-            .catch(function() {
-              expect(setTimeoutSpy.calls.count()).toBe(2);
-              expect(setTimeoutSpy)
-                  .toHaveBeenCalledWith(jasmine.any(Function), baseDelay);
-              expect(setTimeoutSpy)
-                  .toHaveBeenCalledWith(jasmine.any(Function), baseDelay * 2);
-            })
-            .then(done);
+
+        try {
+          await networkingEngine.request(requestType, request).promise;
+          fail();
+        } catch (e) {
+          expect(deferSpy.calls.count()).toBe(2);
+          expect(deferSpy).toHaveBeenCalledWith(baseDelay,
+                                                jasmine.any(Function));
+          expect(deferSpy).toHaveBeenCalledWith(baseDelay * 2,
+                                                jasmine.any(Function));
+        }
       });
 
-      it('uses fuzzFactor', function(done) {
-        let request = createRequest('reject://foo', {
+      it('uses fuzzFactor', async () => {
+        const request = createRequest('reject://foo', {
           maxAttempts: 2,
           baseDelay: baseDelay,
           fuzzFactor: 1,
           backoffFactor: 1,
           timeout: 0,
         });
-        networkingEngine.request(requestType, request).promise
-            .then(fail)
-            .catch(function() {
-              // (rand * 2.0) - 1.0 = (0.75 * 2.0) - 1.0 = 0.5
-              // 0.5 * fuzzFactor = 0.5 * 1 = 0.5
-              // delay * (1 + 0.5) = baseDelay * (1 + 0.5)
-              expect(setTimeoutSpy.calls.count()).toBe(1);
-              expect(setTimeoutSpy)
-                  .toHaveBeenCalledWith(jasmine.any(Function), baseDelay * 1.5);
-            })
-            .then(done);
+
+        try {
+          await networkingEngine.request(requestType, request).promise;
+          fail();
+        } catch (e) {
+          // (rand * 2.0) - 1.0 = (0.75 * 2.0) - 1.0 = 0.5
+          // 0.5 * fuzzFactor = 0.5 * 1 = 0.5
+          // delay * (1 + 0.5) = baseDelay * (1 + 0.5)
+          expect(deferSpy.calls.count()).toBe(1);
+          expect(deferSpy).toHaveBeenCalledWith(baseDelay * 1.5,
+                                                jasmine.any(Function));
+        }
       });
     });  // describe('backoff')
 

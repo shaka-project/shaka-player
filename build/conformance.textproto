@@ -169,16 +169,41 @@ requirement: {
 requirement: {
   type: BANNED_NAME
   value: 'window.setInterval'
-  error_message: 'Using "setInterval" is not allowed; '
-                 'use shaka.util.Timer instead.'
+  error_message: 'setInterval has several drawbacks, most of '
+                 'all difficulty canceling and surprising behavior '
+                 'when the device goes to sleep. Please use '
+                 'shaka.util.Timer instead.'
   whitelist_regexp: 'demo/'
   whitelist_regexp: 'test/'
 }
 requirement: {
   type: BANNED_NAME
   value: 'setInterval'
-  error_message: 'Using "setInterval" is not allowed; '
-                 'use shaka.util.Timer instead.'
+  error_message: 'setInterval has several drawbacks, most of '
+                 'all difficulty canceling and surprising behavior '
+                 'when the device goes to sleep. Please use '
+                 'shaka.util.Timer instead.'
+  whitelist_regexp: 'demo/'
+  whitelist_regexp: 'test/'
+}
+
+# Disallow setTimeout.
+requirement: {
+  type: BANNED_NAME
+  value: 'window.setTimeout'
+  error_message: 'setTimeout has several drawbacks, most of '
+                 'all difficulty canceling it. Please use '
+                 'shaka.util.Timer instead.'
+  whitelist_regexp: 'demo/'
+  whitelist_regexp: 'test/'
+  whitelist_regexp: 'lib/util/delayed_tick.js'
+}
+requirement: {
+  type: BANNED_NAME
+  value: 'setTimeout'
+  error_message: 'setTimeout has several drawbacks, most of '
+                 'all difficulty canceling it. Please use '
+                 'shaka.util.Timer instead.'
   whitelist_regexp: 'demo/'
   whitelist_regexp: 'test/'
 }
