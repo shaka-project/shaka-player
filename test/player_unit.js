@@ -1905,12 +1905,12 @@ describe('Player', function() {
       });
 
       it('includes selectVariantTrack choices', function() {
-        let track = player.getVariantTracks()[3];
-        player.selectVariantTrack(track);
+        const track = player.getVariantTracks()[3];
 
-        let period = manifest.periods[0];
-        let variant =
-            shaka.util.StreamUtils.findVariantForTrack(period, track);
+        const variants = manifest.periods[0].variants;
+        const variant = variants.find((variant) => variant.id == track.id);
+
+        player.selectVariantTrack(track);
 
         checkHistory([{
           // We are using a mock date, so this is not a race.
