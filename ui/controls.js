@@ -163,8 +163,7 @@ shaka.ui.Controls = function(player, videoContainer, video, config) {
   this.onCastStatusChange_(null);
 
   // Start this timer after we are finished initializing everything,
-  this.timeAndSeekRangeTimer_.start(/* seconds= */ 0.125,
-                                    /* repeating= */ true);
+  this.timeAndSeekRangeTimer_.tickEvery(/* seconds= */ 0.125);
 };
 
 goog.inherits(shaka.ui.Controls, shaka.util.FakeEventTarget);
@@ -436,7 +435,7 @@ shaka.ui.Controls.prototype.anySettingsMenusAreOpen = function() {
  * @export
  */
 shaka.ui.Controls.prototype.hideSettingsMenus = function() {
-  this.hideSettingsMenusTimer_.tick();
+  this.hideSettingsMenusTimer_.tickNow();
 };
 
 
@@ -673,7 +672,7 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
   // However, clicks on controls panel don't propagate to the container,
   // so we have to explicitly hide the menus onclick here.
   this.controlsButtonPanel_.addEventListener('click', () => {
-    this.hideSettingsMenusTimer_.tick();
+    this.hideSettingsMenusTimer_.tickNow();
   });
 
   this.castProxy_.addEventListener(
@@ -764,7 +763,7 @@ shaka.ui.Controls.prototype.onMouseMove_ = function(event) {
   // Only start a timeout on 'touchend' or for 'mousemove' with no touch events.
   if (event.type == 'touchend' ||
       event.type == 'keyup'|| !this.lastTouchEventTime_) {
-    this.mouseStillTimer_.start(/* seconds= */ 3, /* repeating= */ false);
+    this.mouseStillTimer_.tickAfter(/* seconds= */ 3);
   }
 };
 
@@ -778,7 +777,7 @@ shaka.ui.Controls.prototype.onMouseLeave_ = function() {
   // Stop the timer and invoke the callback now to hide the controls.  If we
   // don't, the opacity style we set in onMouseMove_ will continue to override
   // the opacity in CSS and force the controls to stay visible.
-  this.mouseStillTimer_.tick();
+  this.mouseStillTimer_.tickNow();
 };
 
 
@@ -786,7 +785,7 @@ shaka.ui.Controls.prototype.onMouseLeave_ = function() {
  * This callback is for when we are pretty sure that the mouse has stopped
  * moving (aka the mouse is still). This method should only be called via
  * |mouseStillTimer_|. If this behaviour needs to be invoked directly, use
- * |mouseStillTimer_.tick()|.
+ * |mouseStillTimer_.tickNow()|.
  *
  * @private
  */
@@ -836,7 +835,7 @@ shaka.ui.Controls.prototype.onContainerClick_ = function(event) {
   if (!this.enabled_) return;
 
   if (this.anySettingsMenusAreOpen()) {
-    this.hideSettingsMenusTimer_.tick();
+    this.hideSettingsMenusTimer_.tickNow();
   } else {
     this.onPlayPauseClick_();
   }
@@ -931,7 +930,7 @@ shaka.ui.Controls.prototype.onSeekInput_ = function() {
   //
   // Calling |start| on an already pending timer will cancel the old request
   // and start the new one.
-  this.seekTimer_.start(/* seconds= */ 0.125, /* repeating */ false);
+  this.seekTimer_.tickAfter(/* seconds= */ 0.125);
 };
 
 
@@ -941,7 +940,7 @@ shaka.ui.Controls.prototype.onSeekEnd_ = function() {
 
   // They just let go of the seek bar, so cancel the timer and manually
   // call the event so that we can respond immediately.
-  this.seekTimer_.tick();
+  this.seekTimer_.tickNow();
 
   this.isSeeking_ = false;
   this.video_.play();
@@ -1170,7 +1169,7 @@ shaka.ui.Controls.prototype.onKeyDown_ = function(event) {
 
   // If escape key was pressed, close any open settings menus.
   if (event.keyCode == shaka.ui.Constants.KEYCODE_ESCAPE) {
-    this.hideSettingsMenusTimer_.tick();
+    this.hideSettingsMenusTimer_.tickNow();
   }
 
   if (anySettingsMenusAreOpen &&
@@ -1257,11 +1256,10 @@ shaka.ui.Controls.prototype.setControlsOpacity_ = function(opacity) {
   } else {
     this.controlsContainer_.removeAttribute('shown');
     // If there's an overflow menu open, keep it this way for a couple of
-    // seconds in case a user immidiately initiaites another mouse move to
+    // seconds in case a user immediately initiates another mouse move to
     // interact with the menus. If that didn't happen, go ahead and hide
     // the menus.
-    this.hideSettingsMenusTimer_.start(/* seconds= */ 2,
-                                       /* repeating= */ false);
+    this.hideSettingsMenusTimer_.tickAfter(/* seconds= */ 2);
   }
 };
 

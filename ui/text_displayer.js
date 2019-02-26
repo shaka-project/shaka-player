@@ -57,10 +57,9 @@ shaka.ui.TextDisplayer = class {
     const updatePeriod = 0.25;
 
     /** @private {shaka.util.Timer} */
-    this.captionsTimer_ =
-      new shaka.util.Timer(() => this.updateCaptions_());
-
-    this.captionsTimer_.start(updatePeriod, /* repeating= */ true);
+    this.captionsTimer_ = new shaka.util.Timer(() => {
+      this.updateCaptions_();
+    }).tickEvery(updatePeriod);
 
     /** private {Map.<!shaka.extern.Cue, !HTMLElement>} */
     this.currentCuesMap_ = new Map();
