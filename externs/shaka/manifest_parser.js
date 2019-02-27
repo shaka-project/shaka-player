@@ -30,6 +30,23 @@
  * If the manifest requires updates (e.g. for live media), the parser will use
  * background timers to update the same Manifest object.
  *
+ * There are many ways for |start| and |stop| to be called. Implementations
+ * should support all cases:
+ *
+ *  BASIC
+ *    await parser.start(uri, playerInterface);
+ *    await parser.stop();
+ *
+ *  INTERRUPTING
+ *    const p = parser.start(uri, playerInterface);
+ *    await parser.stop();
+ *    await p;
+ *
+ *    |p| should be rejected with an OPERATION_ABORTED error.
+ *
+ *  STOPPED BEFORE STARTING
+ *    await parser.stop();
+ *
  * @interface
  * @exportDoc
  */
@@ -91,12 +108,14 @@ shaka.extern.ManifestParser.prototype.configure = function(config) {};
 
 
 /**
- * Parses the given manifest data into a Manifest object and starts any
- * background timers that are needed.  This will only be called once.
+ * Initialize and start the parser. When |start| resolves, it should return the
+ * initial version of the manifest. |start| will only be called once. If |stop|
+ * is called while |start| is pending, |start| should reject.
  *
  * @param {string} uri The URI of the manifest.
- * @param {shaka.extern.ManifestParser.PlayerInterface} playerInterface Contains
- *   the interface to the Player.
+ * @param {shaka.extern.ManifestParser.PlayerInterface} playerInterface
+ *    The player interface contains the callbacks and members that the parser
+ *    can use to communicate with the player and outside world.
  * @return {!Promise.<shaka.extern.Manifest>}
  * @exportDoc
  */
@@ -104,9 +123,12 @@ shaka.extern.ManifestParser.prototype.start = function(uri, playerInterface) {};
 
 
 /**
- * Stops any background timers and frees any objects held by this instance.
- * This will only be called after a successful call to start.  This will only
- * be called once.
+ * Tell the parser that it must stop and free all internal resources as soon as
+ * possible. Only once all internal resources are stopped and freed will the
+ * promise resolve. Once stopped a parser will not be started again.
+ *
+ * The parser should support having |stop| called multiple times and the promise
+ * should always resolve.
  *
  * @return {!Promise}
  * @exportDoc
