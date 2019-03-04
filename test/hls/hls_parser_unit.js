@@ -1566,6 +1566,48 @@ describe('HlsParser', function() {
       expect(video.presentationTimeOffset).toEqual(segmentDataStartTime);
     });
 
+    // We want to make sure that we can interrupt the parser while it is getting
+    // the start time. This is a regression test for Issue #1788 where
+    // interrupting the partial network request would be misinterpreted as the
+    // server not supporting range requests.
+    it('can be interrupted', async () => {
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', media)
+          .setResponseValue('test:/init.mp4', initSegmentData);
+
+      // We are assuming that the time will be pulled out of the main mp4
+      // segment, so if we see a request that has a range header, we will stop
+      // the parser.
+      /** @type {!Map.<string, !ArrayBuffer>} */
+      const responses = new Map();
+      responses.set('test:/main.mp4', segmentData);
+      responses.set('test:/init.mp4', initSegmentData);
+
+      responses.forEach((data, uri) => {
+        fakeNetEngine.setResponse(uri, () => {
+          // Now that we are stopping the parser, we don't want to see any more
+          // requests. So if there is another request, fail the test.
+          responses.forEach((data, uri) => {
+            fakeNetEngine.setResponse(uri, fail);
+          });
+
+          // Stop the parser, but don't wait on it or else we will hit deadlock.
+          parser.stop();
+
+          return Promise.resolve(data);
+        });
+      });
+
+      try {
+        await parser.start('test:/master', playerInterface);
+        fail();
+      } catch (e) {
+        expect(e).toBeTruthy();
+        expect(e.code).toBe(shaka.util.Error.Code.OPERATION_ABORTED);
+      }
+    });
+
     it('sets duration with respect to presentation offset', async () => {
       fakeNetEngine
           .setResponseText('test:/master', master)
