@@ -256,7 +256,7 @@ module.exports = function(config) {
     }
     if (settings.external) {
       // If --external is present, we serve external asset tests.
-      config.files.push('test/player_external.js');
+      config.files.push('test/**/*_external.js');
     }
   }
   // We just modified the config in-place.  No need for config.set() after we
