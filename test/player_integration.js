@@ -736,6 +736,7 @@ describe('Player Load Path', () => {
       'media-source',
       'manifest-parser',
       'manifest',
+      'drm-engine',
       'load',
 
       // Our call to |unload| would have started the transition to
@@ -746,6 +747,7 @@ describe('Player Load Path', () => {
       'media-source',
       'manifest-parser',
       'manifest',
+      'drm-engine',
       'load',
     ]);
   });
@@ -768,6 +770,7 @@ describe('Player Load Path', () => {
       'media-source',
       'manifest-parser',
       'manifest',
+      'drm-engine',
       'load',
       'unload',
       'attach',
@@ -776,6 +779,7 @@ describe('Player Load Path', () => {
       'media-source',
       'manifest-parser',
       'manifest',
+      'drm-engine',
       'load',
       'unload',
       'attach',
@@ -798,6 +802,7 @@ describe('Player Load Path', () => {
       'media-source',
       'manifest-parser',
       'manifest',
+      'drm-engine',
       'load',
 
       // Load 2
@@ -806,6 +811,7 @@ describe('Player Load Path', () => {
       'media-source',
       'manifest-parser',
       'manifest',
+      'drm-engine',
       'load',
 
       // Load 3
@@ -814,6 +820,7 @@ describe('Player Load Path', () => {
       'media-source',
       'manifest-parser',
       'manifest',
+      'drm-engine',
       'load',
     ]);
   });
@@ -856,6 +863,31 @@ describe('Player Load Path', () => {
     // unloading.
     let unload;
     whenEnteringState('manifest', () => {
+      unload = player.unload();
+    });
+
+    // We attach manually so that we had time to override the state change
+    // spy's action.
+    await player.attach(video);
+    await rejected(player.load('test:sintel'));
+
+    // By the time that |player.load| failed, we should have started
+    // |player.unload|.
+    expect(unload).toBeTruthy();
+    await unload;
+  });
+
+  // We want to make sure that we can interrupt the load path right after it
+  // finishes initializing drm engine. To Test this we will ask the player to
+  // load some content and as it enters the drm state, we will unload the
+  // player.
+  it('can interrupt between manifest and drm', async () => {
+    createPlayer(/* attachedTo= */ null);
+
+    // Wait until we enter drm to unload the player. This means we should
+    // stop between manifest and drm, never getting to load.
+    let unload;
+    whenEnteringState('drm-engine', () => {
       unload = player.unload();
     });
 
@@ -931,6 +963,7 @@ describe('Player Load Path', () => {
       'media-source',
       'manifest-parser',
       'manifest',
+      'drm-engine',
       'load',
       'unload',
       'detach',
@@ -956,6 +989,7 @@ describe('Player Load Path', () => {
       'media-source',
       'manifest-parser',
       'manifest',
+      'drm-engine',
       'load',
 
       // First call to unload will unload everything and then move us to the
@@ -1020,6 +1054,7 @@ describe('Player Load Path', () => {
         'media-source',
         'manifest-parser',
         'manifest',
+        'drm-engine',
         'load',
       ]);
     });
