@@ -825,83 +825,6 @@ describe('Player Load Path', () => {
     ]);
   });
 
-  // We want to make sure that we can interrupt the load path right
-  // after it finishes initializing media source engine. To test this
-  // we will ask the player to load some content and as it enters the
-  // media source initialized state, we will unload the player.
-  it('can interrupt between media source and manifest', async () => {
-    createPlayer(/* attachedTo= */ null);
-
-    // We are going to wait until we finish entering the media source
-    // initialized state and then interrupt our load request by
-    // unloading.
-    let unload;
-    whenEnteringState('media-source', () => {
-      unload = player.unload();
-    });
-
-    // We attach manually so that we had time to override the state change
-    // spy's action.
-    await player.attach(video);
-    await rejected(player.load('test:sintel'));
-
-    // By the time that |player.load| failed, we should have started
-    // |player.unload|.
-    expect(unload).toBeTruthy();
-    await unload;
-  });
-
-  // We want to make sure that we can interrupt the load path right after it
-  // finishes parsing the manifest. To test this we will ask the player to load
-  // some content and as it enters the manifest state, we will unload the
-  // player.
-  it('can interrupt between media source and manifest', async () => {
-    createPlayer(/* attachedTo= */ null);
-
-    // We are going to wait until we finish entering the media source
-    // initialized state and then interrupt our load request by
-    // unloading.
-    let unload;
-    whenEnteringState('manifest', () => {
-      unload = player.unload();
-    });
-
-    // We attach manually so that we had time to override the state change
-    // spy's action.
-    await player.attach(video);
-    await rejected(player.load('test:sintel'));
-
-    // By the time that |player.load| failed, we should have started
-    // |player.unload|.
-    expect(unload).toBeTruthy();
-    await unload;
-  });
-
-  // We want to make sure that we can interrupt the load path right after it
-  // finishes initializing drm engine. To Test this we will ask the player to
-  // load some content and as it enters the drm state, we will unload the
-  // player.
-  it('can interrupt between manifest and drm', async () => {
-    createPlayer(/* attachedTo= */ null);
-
-    // Wait until we enter drm to unload the player. This means we should
-    // stop between manifest and drm, never getting to load.
-    let unload;
-    whenEnteringState('drm-engine', () => {
-      unload = player.unload();
-    });
-
-    // We attach manually so that we had time to override the state change
-    // spy's action.
-    await player.attach(video);
-    await rejected(player.load('test:sintel'));
-
-    // By the time that |player.load| failed, we should have started
-    // |player.unload|.
-    expect(unload).toBeTruthy();
-    await unload;
-  });
-
   it('load will interrupt load', async () => {
     createPlayer(/* attachedTo= */ null);
 
@@ -1058,6 +981,58 @@ describe('Player Load Path', () => {
         'load',
       ]);
     });
+
+  // We want to make sure that we can interrupt the load process at key-points
+  // in time. After each node in the graph, we should be able to reroute and do
+  // something different.
+  //
+  // To test this, we test that we can successfully unload the player after each
+  // node after attached. We exclude the nodes before (and including) attach
+  // since unloading will put us back at attach (creating a infinite loop).
+  describe('interrupt after', () => {
+    /**
+     * Given the name of a state, tell the player to load content but unload
+     * when it reaches |state|. The load should be interrupted and the player
+     * should return to the unloaded state.
+     *
+     * @param {string} state
+     * @return {!Promise}
+     */
+    async function testInterruptAfter(state) {
+      createPlayer(/* attachedTo= */ null);
+
+      let pendingUnload;
+      whenEnteringState(state, () => {
+        pendingUnload = player.unload();
+      });
+
+      // We attach manually so that we had time to override the state change
+      // spy's action.
+      await player.attach(video);
+      await rejected(player.load('test:sintel'));
+
+      // By the time that |player.load| failed, we should have started
+      // |player.unload|.
+      expect(pendingUnload).toBeTruthy();
+      await pendingUnload;
+    }
+
+    it('media source', async () => {
+      await testInterruptAfter('media-source');
+    });
+
+    it('manifest-parser', async () => {
+      await testInterruptAfter('manifest-parser');
+    });
+
+    it('manifest', async () => {
+      await testInterruptAfter('manifest');
+    });
+
+    it('drm-engine', async () => {
+      await testInterruptAfter('drm-engine');
+    });
+  });
 
   /**
    * Wait for |p| to be rejected. If |p| is not rejected, this will fail the
