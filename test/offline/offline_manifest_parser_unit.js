@@ -46,15 +46,18 @@ describe('OfflineManifestParser', function() {
     let uri;
 
     /** @type {!shaka.offline.StorageMuxer} */
-    let muxer = new shaka.offline.StorageMuxer();
-    await shaka.util.Destroyer.with([muxer], async () => {
+    const muxer = new shaka.offline.StorageMuxer();
+
+    try {
       await muxer.init();
       let handle = await muxer.getActive();
       let keys = await handle.cell.addManifests([inputManifest]);
 
       uri = shaka.offline.OfflineUri.manifest(
           handle.path.mechanism, handle.path.cell, keys[0]);
-    });
+    } finally {
+      await muxer.destroy();
+    }
 
     let outputManifest = await parser.start(uri.toString(), playerInterface);
     expect(outputManifest).toBeTruthy();
@@ -70,8 +73,9 @@ describe('OfflineManifestParser', function() {
     expect(inputManifest.expiration).not.toBe(newExpiration);
 
     /** @type {!shaka.offline.StorageMuxer} */
-    let muxer = new shaka.offline.StorageMuxer();
-    await shaka.util.Destroyer.with([muxer], async () => {
+    const muxer = new shaka.offline.StorageMuxer();
+
+    try {
       await muxer.init();
       let handle = await muxer.getActive();
       let keys = await handle.cell.addManifests([inputManifest]);
@@ -85,19 +89,21 @@ describe('OfflineManifestParser', function() {
 
       let found = await handle.cell.getManifests(keys);
       expect(found[0].expiration).toBe(newExpiration);
-    });
+    } finally {
+      await muxer.destroy();
+    }
   }));
 
   it('fails if manifest was not found', checkAndRun(async function() {
     let inputManifest = makeManifest();
 
-    /** @type {!shaka.offline.StorageMuxer} */
-    let muxer;
     /** @type {!shaka.offline.OfflineUri} */
     let uri;
 
-    muxer = new shaka.offline.StorageMuxer();
-    await shaka.util.Destroyer.with([muxer], async () => {
+    /** @type {!shaka.offline.StorageMuxer} */
+    const muxer = new shaka.offline.StorageMuxer();
+
+    try {
       await muxer.init();
       let handle = await muxer.getActive();
       let keys = await handle.cell.addManifests([inputManifest]);
@@ -108,7 +114,9 @@ describe('OfflineManifestParser', function() {
       // Remove the manifest so that the uri will point to nothing.
       const noop = () => {};
       await handle.cell.removeManifests(keys, noop);
-    });
+    } finally {
+      await muxer.destroy();
+    }
 
     try {
       await parser.start(uri.toString(), playerInterface);
@@ -135,10 +143,8 @@ describe('OfflineManifestParser', function() {
         let inputManifest = makeManifest();
 
         /** @type {!shaka.offline.StorageMuxer} */
-        let muxer;
-
-        muxer = new shaka.offline.StorageMuxer();
-        await shaka.util.Destroyer.with([muxer], async () => {
+        const muxer = new shaka.offline.StorageMuxer();
+        try {
           await muxer.init();
           let handle = await muxer.getActive();
           let keys = await handle.cell.addManifests([inputManifest]);
@@ -153,7 +159,9 @@ describe('OfflineManifestParser', function() {
           const noop = () => {};
           await handle.cell.removeManifests(keys, noop);
           await parser.onExpirationUpdated(sessionId, newExpiration);
-        });
+        } finally {
+          await muxer.destroy();
+        }
       }));
 
   it('ignores update expiration with unknown session',
@@ -168,10 +176,9 @@ describe('OfflineManifestParser', function() {
         expect(oldExpiration).not.toBe(newExpiration);
 
         /** @type {!shaka.offline.StorageMuxer} */
-        let muxer;
+        const muxer = new shaka.offline.StorageMuxer();
 
-        muxer = new shaka.offline.StorageMuxer();
-        await shaka.util.Destroyer.with([muxer], async () => {
+        try {
           await muxer.init();
           let handle = await muxer.getActive();
           let keys = await handle.cell.addManifests([inputManifest]);
@@ -185,7 +192,9 @@ describe('OfflineManifestParser', function() {
           // Make sure that the expiration was not updated.
           let found = await handle.cell.getManifests(keys);
           expect(found[0].expiration).toBe(oldExpiration);
-        });
+        } finally {
+          await muxer.destroy();
+        }
       }));
 
   /**
@@ -213,12 +222,14 @@ describe('OfflineManifestParser', function() {
   /**
    * @return {!Promise}
    */
-  function clearStorage() {
+  async function clearStorage() {
     /** @type {!shaka.offline.StorageMuxer} */
-    let muxer = new shaka.offline.StorageMuxer();
-    return shaka.util.Destroyer.with([muxer], async () => {
+    const muxer = new shaka.offline.StorageMuxer();
+    try {
       await muxer.erase();
-    });
+    } finally {
+      await muxer.destroy();
+    }
   }
 
   /**

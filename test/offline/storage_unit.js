@@ -92,9 +92,15 @@ describe('Storage', function() {
      *         function(!shaka.offline.Storage):!Promise} action
      * @return {!Promise}
      */
-    function withStorage(action) {
-      let storage = new shaka.offline.Storage(player);
-      return shaka.util.Destroyer.with([storage], () => action(storage));
+    async function withStorage(action) {
+      /** @type {!shaka.offline.Storage} */
+      const storage = new shaka.offline.Storage(player);
+
+      try {
+        await action(storage);
+      } finally {
+        await storage.destroy();
+      }
     }
   });
 
@@ -769,8 +775,9 @@ describe('Storage', function() {
       expect(uri).toBeTruthy();
 
       /** @type {!shaka.offline.StorageMuxer} */
-      let muxer = new shaka.offline.StorageMuxer();
-      await shaka.util.Destroyer.with([muxer], async () => {
+      const muxer = new shaka.offline.StorageMuxer();
+
+      try {
         await muxer.init();
         let cell = await muxer.getCell(uri.mechanism(), uri.cell());
         let manifests = await cell.getManifests([uri.key()]);
@@ -791,7 +798,9 @@ describe('Storage', function() {
         let audio = period.streams.filter((s) => s.contentType == 'audio')[0];
         expect(audio).toBeTruthy();
         expect(audio.language).toBe(frenchCanadian);
-      });
+      } finally {
+        await muxer.destroy();
+      }
     }));
 
     it('stores drm info without license', checkAndRun(async function() {
@@ -819,8 +828,9 @@ describe('Storage', function() {
       expect(uri).toBeTruthy();
 
       /** @type {!shaka.offline.StorageMuxer} */
-      let muxer = new shaka.offline.StorageMuxer();
-      await shaka.util.Destroyer.with([muxer], async () => {
+      const muxer = new shaka.offline.StorageMuxer();
+
+      try {
         await muxer.init();
         let cell = await muxer.getCell(uri.mechanism(), uri.cell());
         let manifests = await cell.getManifests([uri.key()]);
@@ -835,7 +845,9 @@ describe('Storage', function() {
         expect(manifest.sessionIds.length).toBe(2);
         expect(manifest.sessionIds).toContain(session1);
         expect(manifest.sessionIds).toContain(session2);
-      });
+      } finally {
+        await muxer.destroy();
+      }
     }));
 
     // Make sure that when we configure storage to NOT store persistent
@@ -869,8 +881,9 @@ describe('Storage', function() {
           expect(uri).toBeTruthy();
 
           /** @type {!shaka.offline.StorageMuxer} */
-          let muxer = new shaka.offline.StorageMuxer();
-          await shaka.util.Destroyer.with([muxer], async () => {
+          const muxer = new shaka.offline.StorageMuxer();
+
+          try {
             await muxer.init();
             let cell = await muxer.getCell(uri.mechanism(), uri.cell());
             let manifests = await cell.getManifests([uri.key()]);
@@ -884,7 +897,9 @@ describe('Storage', function() {
 
             expect(manifest.sessionIds).toBeTruthy();
             expect(manifest.sessionIds.length).toBe(0);
-          });
+          } finally {
+            await muxer.destroy();
+          }
         }));
 
     // TODO(vaage): Remove the need to limit the number of store commands. With
@@ -1053,8 +1068,9 @@ describe('Storage', function() {
       expect(uri).toBeTruthy();
 
       /** @type {!shaka.offline.StorageMuxer} */
-      let muxer = new shaka.offline.StorageMuxer();
-      await shaka.util.Destroyer.with([muxer], async () => {
+      const muxer = new shaka.offline.StorageMuxer();
+
+      try {
         await muxer.init();
         let cell = await muxer.getCell(uri.mechanism(), uri.cell());
         let manifests = await cell.getManifests([uri.key()]);
@@ -1073,7 +1089,9 @@ describe('Storage', function() {
 
         const noop = () => {};
         await cell.removeSegments(keys, noop);
-      });
+      } finally {
+        await muxer.destroy();
+      }
 
       await storage.remove(uri.toString());
     }));
@@ -1343,11 +1361,15 @@ describe('Storage', function() {
         .setResponseValue(segment4Uri, new ArrayBuffer(16));
   }
 
-  function eraseStorage() {
-    let muxer = new shaka.offline.StorageMuxer();
-    return shaka.util.Destroyer.with([muxer], async () => {
+  async function eraseStorage() {
+    /** @type {!shaka.offline.StorageMuxer} */
+    const muxer = new shaka.offline.StorageMuxer();
+
+    try {
       await muxer.erase();
-    });
+    } finally {
+      await muxer.destroy();
+    }
   }
 
   /**
@@ -1430,23 +1452,24 @@ describe('Storage', function() {
    * @return {!Promise.<shaka.extern.Manifest>}
    */
   async function getStoredManifest(uri) {
-    /** @type {!shaka.offline.StorageMuxer} */
-    let muxer = new shaka.offline.StorageMuxer();
-    let manifestDB = await shaka.util.Destroyer.with([muxer], async () => {
-      await muxer.init();
-      let cell = await muxer.getCell(uri.mechanism(), uri.cell());
-      let manifests = await cell.getManifests([uri.key()]);
-      let manifest = manifests[0];
-
-      return manifest;
-    });
-
-    goog.asserts.assert(manifestDB, 'A manifest should have been found');
-
-    let converter = new shaka.offline.ManifestConverter(
+    /** @type {!shaka.offline.ManifestConverter} */
+    const converter = new shaka.offline.ManifestConverter(
         uri.mechanism(), uri.cell());
 
-    return converter.fromManifestDB(manifestDB);
+    /** @type {!shaka.offline.StorageMuxer} */
+    const muxer = new shaka.offline.StorageMuxer();
+
+    try {
+      await muxer.init();
+      const cell = await muxer.getCell(uri.mechanism(), uri.cell());
+      const manifests = await cell.getManifests([uri.key()]);
+      const manifest = manifests[0];
+
+      goog.asserts.assert(manifest, 'A manifest should have been found');
+      return converter.fromManifestDB(manifest);
+    } finally {
+      await muxer.destroy();
+    }
   }
 
   /**
@@ -1455,13 +1478,14 @@ describe('Storage', function() {
    * @param {function(!shaka.media.DrmEngine):Promise} action
    * @return {!Promise}
    */
-  function withDrm(player, manifest, action) {
-    let net = player.getNetworkingEngine();
+  async function withDrm(player, manifest, action) {
+    const net = player.getNetworkingEngine();
     goog.asserts.assert(net, 'Player should have a net engine right now');
 
     let error = null;
 
-    let drm = new shaka.media.DrmEngine({
+    /** @type {!shaka.media.DrmEngine} */
+    const drm = new shaka.media.DrmEngine({
       netEngine: net,
       onError: (e) => { error = error || e; },
       onKeyStatus: () => {},
@@ -1469,18 +1493,18 @@ describe('Storage', function() {
       onEvent: () => {},
     });
 
-    return shaka.util.Destroyer.with([drm], async () => {
+    try {
       drm.configure(player.getConfiguration().drm);
       const variants = shaka.util.Periods.getAllVariantsFrom(manifest.periods);
       await drm.initForStorage(variants, /* usePersistentLicenses */ true);
-      return action(drm);
-    }).then((result) => {
-      if (error) {
-        throw error;
-      }
+      await action(drm);
+    } finally {
+      await drm.destroy();
+    }
 
-      return result;
-    });
+    if (error) {
+      throw error;
+    }
   }
 
   /**

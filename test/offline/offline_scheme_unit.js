@@ -51,14 +51,17 @@ describe('OfflineScheme', function() {
     let uri;
 
     /** @type {!shaka.offline.StorageMuxer} */
-    let muxer = new shaka.offline.StorageMuxer();
-    await shaka.util.Destroyer.with([muxer], async () => {
+    const muxer = new shaka.offline.StorageMuxer();
+
+    try {
       await muxer.init();
       let handle = await muxer.getActive();
       let keys = await handle.cell.addSegments([segment]);
       uri = shaka.offline.OfflineUri.segment(
           handle.path.mechanism, handle.path.cell, keys[0]);
-    });
+    } finally {
+      await muxer.destroy();
+    }
 
     // eslint-disable-next-line new-cap
     let response = await shaka.offline.OfflineScheme(
@@ -75,8 +78,9 @@ describe('OfflineScheme', function() {
     let uri;
 
     /** @type {!shaka.offline.StorageMuxer} */
-    let muxer = new shaka.offline.StorageMuxer();
-    await shaka.util.Destroyer.with([muxer], async () => {
+    const muxer = new shaka.offline.StorageMuxer();
+
+    try {
       await muxer.init();
       let handle = await muxer.getActive();
 
@@ -85,7 +89,9 @@ describe('OfflineScheme', function() {
       const badKey = 1000000;
       uri = shaka.offline.OfflineUri.segment(
           handle.path.mechanism, handle.path.cell, badKey);
-    });
+    } finally {
+      await muxer.destroy();
+    }
 
     try {
       // eslint-disable-next-line new-cap
@@ -135,12 +141,15 @@ describe('OfflineScheme', function() {
   /**
    * @return {!Promise}
    */
-  function clearStorage() {
+  async function clearStorage() {
     /** @type {!shaka.offline.StorageMuxer} */
-    let muxer = new shaka.offline.StorageMuxer();
-    return shaka.util.Destroyer.with([muxer], async () => {
+    const muxer = new shaka.offline.StorageMuxer();
+
+    try {
       await muxer.erase();
-    });
+    } finally {
+      await muxer.destroy;
+    }
   }
 
   /**
