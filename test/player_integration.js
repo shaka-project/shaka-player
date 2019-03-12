@@ -534,15 +534,7 @@ describe('Player Manifest Retries', function() {
   it('unload prevents further manifest load retries', async () => {
     const loading = player.load('reject://www.foo.com/bar.mpd');
 
-    // Wait until we are part way through the load process so that we can ensure
-    // we are interrupting mid-way.
-    await new Promise((resolve) => stateChangeSpy.and.callFake((event) => {
-      if (event.state == 'manifest-parser') {
-        resolve();
-      }
-    }));
-
-    await player.unload();
+    entersState('manifest-parser', () => player.unload());
 
     try {
       await loading;
@@ -555,15 +547,7 @@ describe('Player Manifest Retries', function() {
   it('detach prevents further manifest load retries', async () => {
     const loading = player.load('reject://www.foo.com/bar.mpd');
 
-    // Wait until we are part way through the load process so that we can ensure
-    // we are interrupting mid-way.
-    await new Promise((resolve) => stateChangeSpy.and.callFake((event) => {
-      if (event.state == 'manifest-parser') {
-        resolve();
-      }
-    }));
-
-    await player.detach();
+    entersState('manifest-parser', () => player.detach());
 
     try {
       await loading;
@@ -576,15 +560,7 @@ describe('Player Manifest Retries', function() {
   it('destroy prevents further manifest load retries', async () => {
     const loading = player.load('reject://www.foo.com/bar.mpd');
 
-    // Wait until we are part way through the load process so that we can ensure
-    // we are interrupting mid-way.
-    await new Promise((resolve) => stateChangeSpy.and.callFake((event) => {
-      if (event.state == 'manifest-parser') {
-        resolve();
-      }
-    }));
-
-    await player.destroy();
+    entersState('manifest-parser', () => player.destroy());
 
     try {
       await loading;
@@ -608,18 +584,25 @@ describe('Player Manifest Retries', function() {
 
     return shaka.util.AbortableOperation.failed(error);
   }
+
+  /**
+   * Call |doThis| when the player enters a specific state.
+   *
+   * @param {string} stateName
+   * @param {function()} doThis
+   */
+  function entersState(stateName, doThis) {
+    stateChangeSpy.and.callFake((event) => {
+      if (event.state == stateName) {
+        doThis();
+      }
+    });
+  }
 });
 
 
 // This test suite focuses on how the player moves through the different load
 // states.
-//
-// TODO(vaage): Some test cases are missing and need to be added when the
-//              the required load states are added:
-//                - Creating the manifest parser
-//                - Parsing the manifest
-//                - Creating drm engine
-//                - Creating streaming engine
 describe('Player Load Path', () => {
   /** @type {!HTMLVideoElement} */
   let video;
@@ -691,7 +674,7 @@ describe('Player Load Path', () => {
 
     // Wait until the player has hit an idle state (no more internal loading
     // actions).
-    await new Promise((resolve) => stateIdleSpy.and.callFake(resolve));
+    await spyIsCalled(stateIdleSpy);
 
     expect(video.src).toBeFalsy();
   });
@@ -791,24 +774,25 @@ describe('Player Load Path', () => {
 
     expect(getVisitedStates()).toEqual([
       'attach',
+      'media-source',
 
       // Load and unload 1
-      'media-source',
       'manifest-parser',
       'manifest',
       'drm-engine',
       'load',
       'unload',
       'attach',
+      'media-source',
 
       // Load and unload 2
-      'media-source',
       'manifest-parser',
       'manifest',
       'drm-engine',
       'load',
       'unload',
       'attach',
+      'media-source',
     ]);
   });
 
@@ -932,23 +916,25 @@ describe('Player Load Path', () => {
     await player.unload();
 
     expect(getVisitedStates()).toEqual([
+      // |player.attach|
       'attach',
-
-      // First call to |load|.
       'media-source',
+
+      // |player.load|
       'manifest-parser',
       'manifest',
       'drm-engine',
       'load',
 
-      // First call to unload will unload everything and then move us to the
-      // attached state.
+      // |player.unload| (first call)
       'unload',
       'attach',
+      'media-source',
 
-      // Second call to unload will make us re-enter the attached state since
-      // there is nothing to unload.
+      // |player.unload| (second call)
+      'unload',
       'attach',
+      'media-source',
     ]);
   });
 
@@ -1029,7 +1015,7 @@ describe('Player Load Path', () => {
 
       let pendingUnload;
       whenEnteringState(state, () => {
-        pendingUnload = player.unload();
+        pendingUnload = player.unload(/* initMediaSource= */ false);
       });
 
       // We attach manually so that we had time to override the state change
@@ -1078,10 +1064,6 @@ describe('Player Load Path', () => {
             shaka.util.Error.Code.REQUEST_FILTER_ERROR);
       });
 
-      /** @type {jasmine.Spy} */
-      const idleSpy = jasmine.createSpy('idle state');
-      player.addEventListener('onstateidle', shaka.test.Util.spyFunc(idleSpy));
-
       // Make the two requests one-after-another so that we don't have any idle
       // time between them.
       const attachRequest = player.attach(video);
@@ -1092,15 +1074,455 @@ describe('Player Load Path', () => {
 
       // Wait a couple interrupter cycles to allow the player to enter idle
       // state.
-      const event = await new Promise((resolve) => {
-        idleSpy.and.callFake(resolve);
-      });
+      const event = await spyIsCalled(stateIdleSpy);
 
       // Since attached and loaded in the same interrupter cycle, there won't be
       // any idle time until we finish failing to load. We expect to idle in
       // attach.
       expect(event.state).toBe('attach');
     });
+  });
+
+  // Some platforms will not have media source support, so we want to make sure
+  // that the player will behave as expected when media source is missing.
+  describe('without media source', () => {
+    let mediaSource;
+
+    beforeEach(async () => {
+      // Remove our media source support. In order to remove it, we need to set
+      // it via [] notation or else closure will stop us.
+      mediaSource = window.MediaSource;
+      window['MediaSource'] = undefined;
+
+      createPlayer(/* attachTo= */ null);
+      await spyIsCalled(stateIdleSpy);
+    });
+
+    afterEach(() => {
+      // Restore our media source support to what it was before. If we did not
+      // have support before, this will do nothing.
+      window['MediaSource'] = mediaSource;
+    });
+
+    it('attaching ignores init media source flag', async () => {
+      // Normally the player would initialize media source after attaching to
+      // the media element, however since we don't support media source, it
+      // should stop at the attach state.
+      player.attach(video, /* initMediaSource= */ true);
+
+      const event = await spyIsCalled(stateIdleSpy);
+      expect(event.state).toBe('attach');
+    });
+
+    it('loading ignores media source path', async () => {
+      await player.attach(video, /* initMediaSource= */ false);
+
+      // Normally the player would load content like this with the media source
+      // path, but since we don't have media source support, it should use the
+      // src= path.
+      player.load('test:sintel');
+
+      const event = await spyIsCalled(stateIdleSpy);
+      expect(event.state).toBe('src-equals');
+    });
+
+    it('unloading ignores init media source flag', async () => {
+      await player.attach(video, /* initMediaSource= */ false);
+      await player.load('test:sintel');
+
+      // Normally the player would try to go to the media source state because
+      // we are saying to initialize media source after unloading, but since we
+      // don't have media source, it should stop at the attach state.
+      player.unload(/* initMediaSource= */ true);
+
+      const event = await spyIsCalled(stateIdleSpy);
+      expect(event.state).toBe('attach');
+    });
+  });
+
+  // We want to make sure that we can move from any state to any of our
+  // destination states. This means moving to a state (directly or indirectly)
+  // and then telling it to go to one of our destination states (e.g. attach,
+  // load with media source, load with src=).
+  describe('routing', () => {
+    beforeEach(async () => {
+      createPlayer(/* attachedTo= */ null);
+      await spyIsCalled(stateIdleSpy);
+    });
+
+    it('goes from detach to detach', async () => {
+      await startIn('detach');
+      await goTo('detach');
+    });
+
+    it('goes from detach to attach', async () => {
+      await startIn('detach');
+      await goTo('attach');
+    });
+
+    it('goes from detach to media source', async () => {
+      await startIn('detach');
+      await goTo('media-source');
+    });
+
+    it('goes from attach to detach', async () => {
+      await startIn('attach');
+      await goTo('detach');
+    });
+
+    it('goes from attach to attach', async () => {
+      await startIn('attach');
+      await goTo('attach');
+    });
+
+    it('goes from attach to media source', async () => {
+      await startIn('attach');
+      await goTo('media-source');
+    });
+
+    it('goes from attach to load', async () => {
+      await startIn('attach');
+      await goTo('load');
+    });
+
+    it('goes from attach to src equals', async () => {
+      await startIn('attach');
+      await goTo('src-equals');
+    });
+
+    it('goes from media source to detach', async () => {
+      await startIn('media-source');
+      await goTo('detach');
+    });
+
+    it('goes from media source to attach', async () => {
+      await startIn('media-source');
+      await goTo('attach');
+    });
+
+    it('goes from media source to media source', async () => {
+      await startIn('media-source');
+      await goTo('media-source');
+    });
+
+    it('goes from media source to load', async () => {
+      await startIn('media-source');
+      await goTo('load');
+    });
+
+    it('goes from media source to src equals', async () => {
+      await startIn('media-source');
+      await goTo('src-equals');
+    });
+
+    it('goes from load to detach', async () => {
+      await startIn('load');
+      await goTo('detach');
+    });
+
+    it('goes from load to attach', async () => {
+      await startIn('load');
+      await goTo('attach');
+    });
+
+    it('goes from load to media source', async () => {
+      await startIn('load');
+      await goTo('media-source');
+    });
+
+    it('goes from load to load', async () => {
+      await startIn('load');
+      await goTo('load');
+    });
+
+    it('goes from load to src equals', async () => {
+      await startIn('load');
+      await goTo('src-equals');
+    });
+
+    it('goes from src equals to detach', async () => {
+      await startIn('src-equals');
+      await goTo('detach');
+    });
+
+    it('goes from src equals to attach', async () => {
+      await startIn('src-equals');
+      await goTo('attach');
+    });
+
+    it('goes from src equals to media source', async () => {
+      await startIn('src-equals');
+      await goTo('media-source');
+    });
+
+    it('goes from src equals to load', async () => {
+      await startIn('src-equals');
+      await goTo('load');
+    });
+
+    it('goes from src equals to src equals', async () => {
+      await startIn('src-equals');
+      await goTo('src-equals');
+    });
+
+    it('goes from manifest parser to detach', async () => {
+      await passingThrough('manifest-parser', () => {
+        return goTo('detach');
+      });
+    });
+
+    it('goes from manifest parser to attach', async () => {
+      await passingThrough('manifest-parser', () => {
+        return goTo('attach');
+      });
+    });
+
+    it('goes from manifest parser to media source', async () => {
+      await passingThrough('manifest-parser', () => {
+        return goTo('media-source');
+      });
+    });
+
+    it('goes from manifest parser to load', async () => {
+      await passingThrough('manifest-parser', () => {
+        return goTo('load');
+      });
+    });
+
+    it('goes from manifest parser to src equals', async () => {
+      await passingThrough('manifest-parser', () => {
+        return goTo('src-equals');
+      });
+    });
+
+    it('goes from manifest to detach', async () => {
+      await passingThrough('manifest', () => {
+        return goTo('detach');
+      });
+    });
+
+    it('goes from manifest to attach', async () => {
+      await passingThrough('manifest', () => {
+        return goTo('attach');
+      });
+    });
+
+    it('goes from manifest to media source', async () => {
+      await passingThrough('manifest', () => {
+        return goTo('media-source');
+      });
+    });
+
+    it('goes from manifest to load', async () => {
+      await passingThrough('manifest', () => {
+        return goTo('load');
+      });
+    });
+
+    it('goes from manifest to src equals', async () => {
+      await passingThrough('manifest', () => {
+        return goTo('src-equals');
+      });
+    });
+
+    it('goes from drm engine to detach', async () => {
+      await passingThrough('drm-engine', () => {
+        return goTo('detach');
+      });
+    });
+
+    it('goes from drm engine to attach', async () => {
+      await passingThrough('drm-engine', () => {
+        return goTo('attach');
+      });
+    });
+
+    it('goes from drm engine to media source', async () => {
+      await passingThrough('drm-engine', () => {
+        return goTo('media-source');
+      });
+    });
+
+    it('goes from drm engine to load', async () => {
+      await passingThrough('drm-engine', () => {
+        return goTo('load');
+      });
+    });
+
+    it('goes from drm engine to src equals', async () => {
+      await passingThrough('drm-engine', () => {
+        return goTo('src-equals');
+      });
+    });
+
+    it('goes from unload to detach', async () => {
+      await passingThrough('unload', () => {
+        return goTo('detach');
+      });
+    });
+
+    it('goes from unload to attach', async () => {
+      await passingThrough('unload', () => {
+        return goTo('attach');
+      });
+    });
+
+    it('goes from unload to media source', async () => {
+      await passingThrough('unload', () => {
+        return goTo('media-source');
+      });
+    });
+
+    it('goes from unload to load', async () => {
+      await passingThrough('unload', () => {
+        return goTo('load');
+      });
+    });
+
+    it('goes from unload to src equals', async () => {
+      await passingThrough('unload', () => {
+        return goTo('src-equals');
+      });
+    });
+
+    /**
+     * Put the player into the specific state. This method's purpose is to make
+     * it easier to see when the test is assuming the starting state of the
+     * player.
+     *
+     * For states that require the player to be attached to a media element,
+     * this will ensure that |attach| is called before making the call to move
+     * to the specific state.
+     *
+     * @param {string} state
+     * @return {!Promise}
+     */
+    async function startIn(state) {
+      /** @type {!Map.<string, function():!Promise>} */
+      const actions = new Map()
+          .set('detach', async () => {
+            await player.detach();
+          })
+          .set('attach', async () => {
+            await player.attach(video, /* initMediaSource= */ false);
+          })
+          .set('media-source', async () => {
+            await player.attach(video, /* initMediaSource= */ true);
+          })
+          .set('load', async () => {
+            await player.attach(video, /* initMediaSource= */ true);
+            await player.load('test:sintel');
+          })
+          .set('src-equals', async () => {
+            await player.attach(video, /* initMediaSource= */ false);
+            await player.load('test:sintel', 0, 'video/mp4');
+          });
+
+      const action = actions.get(state);
+      expect(action).toBeTruthy();
+
+      // Do not wait for the action to complete, our idle spy makes us wait. We
+      // want to know where we stop, so using the idle spy is more accurate in
+      // this situation.
+      action();
+
+      // Make sure that the player stops in the state that we asked it go to.
+      const event = await spyIsCalled(stateIdleSpy);
+      expect(event.state).toBe(state);
+    }
+
+    /**
+     * Some states are intermediaries, making it impossible to "start" in them.
+     * Instead this method calls |doThis| when we are passing through the state.
+     * The goal of this method is to make it possible to test routing when the
+     * current route is interrupted to go somewhere.
+     *
+     * @param {string} state
+     * @param {function():!Promise} doThis
+     * @return {!Promise}
+     */
+    async function passingThrough(state, doThis) {
+      /** @type {!Set.<string>} */
+      const preLoadStates = new Set([
+        'manifest-parser',
+        'manifest',
+        'drm-engine',
+      ]);
+
+      /** @type {!Set.<string>} */
+      const postLoadStates = new Set([
+        'unload',
+      ]);
+
+      // Only a subset of the possible states are actually intermediary states.
+      const validState = preLoadStates.has(state) || postLoadStates.has(state);
+      expect(validState).toBeTruthy();
+
+      // We don't await the last action because it should not finish, however we
+      // need to handle the failure or else Jasmine will fail with "Unhandled
+      // rejection".
+      if (preLoadStates.has(state)) {
+        await player.attach(video);
+        player.load('test:sintel').catch(() => {});
+      } else {
+        await player.attach(video);
+        await player.load('test:sintel');
+        player.unload().catch(() => {});
+      }
+
+      return new Promise((resolve) => {
+        let called = false;
+
+        whenEnteringState(state, () => {
+          // Make sure we don't execute more than once per promise.
+          if (called) { return; }
+          called = true;
+
+          // We need to call doThis in-sync with entering the state so that it
+          // can start in the same interpreter cycle. If we did not do this, the
+          // player could have changed states before |doThis| was called.
+          doThis().then(resolve);
+        });
+      });
+    }
+
+    /**
+     * Go to a specific state. This does not ensure the current state before
+     * starting the state change.
+     *
+     * @param {string} state
+     * @return {!Promise}
+     */
+    async function goTo(state) {
+      /** @type {!Map.<string, function():!Promise>} */
+      const actions = new Map()
+          .set('detach', () => {
+            return player.detach();
+          })
+          .set('attach', () => {
+            return player.attach(video, /* initMediaSource= */ false);
+          })
+          .set('media-source', () => {
+            return player.attach(video, /* initMediaSource= */ true);
+          })
+          .set('load', () => {
+            return player.load('test:sintel');
+          })
+          .set('src-equals', () => {
+            return player.load('test:sintel', 0, 'video/mp4');
+          });
+
+      const action = actions.get(state);
+      expect(action).toBeTruthy();
+
+      // Do not wait for the action to complete, our idle spy make us wait. We
+      // want to know where we stop, so using the idle spy is more accurate in
+      // this situation.
+      action();
+
+      const event = await spyIsCalled(stateIdleSpy);
+      expect(event.state).toBe(state);
+    }
   });
 
   /**
@@ -1146,6 +1568,18 @@ describe('Player Load Path', () => {
       if (event.state == state) {
         doThis();
       }
+    });
+  }
+
+  /**
+   * Wrap a spy in a promise so that it will resolve when the spy is called.
+   *
+   * @param {!jasmine.Spy} spy
+   * @return {!Promise}
+   */
+  function spyIsCalled(spy) {
+    return new Promise((resolve) => {
+      spy.and.callFake(resolve);
     });
   }
 });
