@@ -493,6 +493,9 @@ describe('Player Manifest Retries', function() {
   /** @type {shaka.Player} */
   let player;
 
+  /** @type {!jasmine.Spy} */
+  let stateChangeSpy;
+
   beforeAll(() => {
     video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
     video.width = 600;
@@ -514,7 +517,12 @@ describe('Player Manifest Retries', function() {
   });
 
   beforeEach(async () => {
+    stateChangeSpy = jasmine.createSpy('stateChange');
+
     player = new shaka.Player();
+    player.addEventListener(
+        'onstatechange', shaka.test.Util.spyFunc(stateChangeSpy));
+
     await player.attach(video);
   });
 
@@ -525,9 +533,14 @@ describe('Player Manifest Retries', function() {
   it('unload prevents further manifest load retries', async () => {
     const loading = player.load('reject://www.foo.com/bar.mpd');
 
-    // TODO: We don't need to do time based waits here anymore, we can wait
-    //       until we enter a load state.
-    await shaka.test.Util.delay(0.1);
+    // Wait until we are part way through the load process so that we can ensure
+    // we are interrupting mid-way.
+    await new Promise((resolve) => stateChangeSpy.and.callFake((event) => {
+      if (event.state == 'manifest-parser') {
+        resolve();
+      }
+    }));
+
     await player.unload();
 
     try {
@@ -541,9 +554,14 @@ describe('Player Manifest Retries', function() {
   it('detach prevents further manifest load retries', async () => {
     const loading = player.load('reject://www.foo.com/bar.mpd');
 
-    // TODO: We don't need to do time based waits here anymore, we can wait
-    //       until we enter a load state.
-    await shaka.test.Util.delay(0.1);
+    // Wait until we are part way through the load process so that we can ensure
+    // we are interrupting mid-way.
+    await new Promise((resolve) => stateChangeSpy.and.callFake((event) => {
+      if (event.state == 'manifest-parser') {
+        resolve();
+      }
+    }));
+
     await player.detach();
 
     try {
@@ -557,9 +575,14 @@ describe('Player Manifest Retries', function() {
   it('destroy prevents further manifest load retries', async () => {
     const loading = player.load('reject://www.foo.com/bar.mpd');
 
-    // TODO: We don't need to do time based waits here anymore, we can wait
-    //       until we enter a load state.
-    await shaka.test.Util.delay(0.1);
+    // Wait until we are part way through the load process so that we can ensure
+    // we are interrupting mid-way.
+    await new Promise((resolve) => stateChangeSpy.and.callFake((event) => {
+      if (event.state == 'manifest-parser') {
+        resolve();
+      }
+    }));
+
     await player.destroy();
 
     try {
@@ -605,6 +628,9 @@ describe('Player Load Path', () => {
   /** @type {!jasmine.Spy} */
   let stateChangeSpy;
 
+  /** @type {!jasmine.Spy} */
+  let stateIdleSpy;
+
   beforeAll(async () => {
     video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
     video.width = 600;
@@ -621,6 +647,7 @@ describe('Player Load Path', () => {
 
   beforeEach(() => {
     stateChangeSpy = jasmine.createSpy('stateChange');
+    stateIdleSpy = jasmine.createSpy('stateIdle');
   });
 
   /**
@@ -631,6 +658,9 @@ describe('Player Load Path', () => {
     player.addEventListener(
         'onstatechange',
         shaka.test.Util.spyFunc(stateChangeSpy));
+    player.addEventListener(
+        'onstateidle',
+        shaka.test.Util.spyFunc(stateIdleSpy));
   }
 
   // Even though some test will destroy the player, we want to make sure that
@@ -653,16 +683,15 @@ describe('Player Load Path', () => {
         expect(video.src).toBeTruthy();
       });
 
-  // TODO(vaage): Create a way for the load graph to notify us when it enters
-  //              an idle state (waiting for more work). That will make it
-  //              easier to test these scenarios.
   it('does not set video.src when no video is provided', async function() {
     expect(video.src).toBeFalsy();
 
     createPlayer(/* attachedTo= */ null);
 
-    // This should always be enough time to set up MediaSource.
-    await shaka.test.Util.delay(2);
+    // Wait until the player has hit an idle state (no more internal loading
+    // actions).
+    await new Promise((resolve) => stateIdleSpy.and.callFake(resolve));
+
     expect(video.src).toBeFalsy();
   });
 

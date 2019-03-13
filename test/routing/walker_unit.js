@@ -83,12 +83,14 @@ describe('Walker', () => {
   /** @type {!shaka.routing.Walker} */
   let walker;
 
-
   /** @type {!jasmine.Spy} */
   let enterNodeSpy;
 
   /** @type {!jasmine.Spy} */
   let handleErrorSpy;
+
+  /** @type {!jasmine.Spy} */
+  let idleSpy;
 
   beforeEach(() => {
     enterNodeSpy = jasmine.createSpy('enterNode');
@@ -96,10 +98,13 @@ describe('Walker', () => {
 
     handleErrorSpy = jasmine.createSpy('handleError');
 
+    idleSpy = jasmine.createSpy('idle');
+
     const implementation = {
       getNext: (at, has, goingTo, wants) => getNext(at, goingTo),
       enterNode: shaka.test.Util.spyFunc(enterNodeSpy),
       handleError: shaka.test.Util.spyFunc(handleErrorSpy),
+      onIdle: shaka.test.Util.spyFunc(idleSpy),
     };
 
     walker = new shaka.routing.Walker(nodeA, payload, implementation);
@@ -107,6 +112,40 @@ describe('Walker', () => {
 
   afterEach(async () => {
     await walker.destroy();
+  });
+
+  it('enters idle after initialization', async () => {
+    await waitOnSpy(idleSpy);
+  });
+
+  it('enters idle after completing route', async () => {
+    // Execute a route but then wait a couple interrupter cycles to allow the
+    // walker time to idle.
+    await completesRoute(startNewRoute(nodeD, /* interruptible= */ false));
+    await waitOnSpy(idleSpy);
+  });
+
+  it('enters idle after error', async () => {
+    // The specific error does not matter.
+    const error = new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.TEXT,
+        shaka.util.Error.Code.BAD_ENCODING);
+
+    enterNodeSpy.and.callFake((at) => {
+      return at == nodeC ?
+          shaka.util.AbortableOperation.failed(error) :
+          shaka.util.AbortableOperation.completed(undefined);
+    });
+
+    handleErrorSpy.and.returnValue(nodeA);
+
+    // Go to nodeD, passing through nodeC. This will fail, calling handleError,
+    // and returning the walker to nodeA. Wait a couple interrupter cycles to
+    // allow the walker time to idle. The route needs to be interruptible since
+    // we are going to return an aborted operation.
+    await failsRoute(startNewRoute(nodeD, /* interruptible= */ true));
+    await waitOnSpy(idleSpy);
   });
 
   // The walker should move node-by-node, so starting in node A (see beforeEach)
@@ -117,13 +156,7 @@ describe('Walker', () => {
     // We don't expect any errors in this test.
     handleErrorSpy.and.callFake(fail);
 
-    const events = startNewRoute(nodeD, /* interruptible= */ false);
-
-    await new Promise((resolve, reject) => {
-      events.onEnd = resolve;
-      events.onCancel = reject;
-      events.onError = reject;
-    });
+    await completesRoute(startNewRoute(nodeD, /* interruptible= */ false));
 
     const steps = getStepsTaken();
     expect(steps).toEqual([nodeB, nodeC, nodeD]);
@@ -239,7 +272,7 @@ describe('Walker', () => {
     route3.onStart = () => { currentRoute = 3; };
 
     // Wait until we get to the end of route 3, that should be the end.
-    await new Promise((resolve) => { route3.onEnd = resolve; });
+    await completesRoute(route3);
 
     // Make sure we had the correct routes when taking each step.
     expect(tookSteps).toEqual([
@@ -277,6 +310,33 @@ describe('Walker', () => {
     expect(canceledBSpy).toHaveBeenCalled();
   });
 
+  it('calls handleError when step fails', async () => {
+    // The specific error does not matter.
+    const error = new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.TEXT,
+        shaka.util.Error.Code.BAD_ENCODING);
+
+    // Make the walker fail when it hits node C. This should allow us to
+    // exercise the |handleError| path.
+    enterNodeSpy.and.callFake((at) => {
+      return at == nodeC ?
+          shaka.util.AbortableOperation.failed(error) :
+          shaka.util.AbortableOperation.completed(undefined);
+    });
+
+    // We want to handle the error and return to a safe state, so just put the
+    // walker back at node A.
+    handleErrorSpy.and.returnValue(nodeA);
+
+    // Go to D (passing through C). This should throw an error, so wait for the
+    // error to be seen. The route must be abortable because we are going to
+    // throw an abortable error.
+    await failsRoute(startNewRoute(nodeD, /* interruptible */ true));
+
+    expect(handleErrorSpy).toHaveBeenCalled();
+  });
+
   // When we interrupt a route that has a step that can be aborted, it should
   // abort the operation and enter the error recovery mode.
   //
@@ -298,11 +358,7 @@ describe('Walker', () => {
     await waitUntilEntering(goingToD, nodeC);
     await shaka.test.Util.delay(0.1);
 
-    const goingToE = startNewRoute(nodeE, /* interruptible */ true);
-    await new Promise((resolve) => {
-      goingToE.onEnd = resolve;
-    });
-
+    await completesRoute(startNewRoute(nodeE, /* interruptible */ true));
     expect(handleErrorSpy).toHaveBeenCalled();
   });
 
@@ -404,6 +460,51 @@ describe('Walker', () => {
           resolve();
         }
       };
+    });
+  }
+
+  /**
+   * Create a promise from a walker's route's listeners. This assumes that the
+   * route should finish. The promise will resolve if the route completes and
+   * will reject if the route fails to complete for any reason.
+   *
+   * @param {shaka.routing.Walker.Listeners} events
+   * @return {!Promise}
+   */
+  function completesRoute(events) {
+    return new Promise((resolve, reject) => {
+      events.onEnd = resolve;
+      events.onCancel = reject;
+      events.onError = reject;
+    });
+  }
+
+  /**
+   * Create a promise from a walker's route's listeners. This assumes that the
+   * route should not finish. The promise will resolve if the route fails and
+   * will reject if the route completes.
+   *
+   * @param {shaka.routing.Walker.Listeners} events
+   * @return {!Promise}
+   */
+  function failsRoute(events) {
+    return new Promise((resolve, reject) => {
+      events.onEnd = reject;
+      events.onCancel = resolve;
+      events.onError = resolve;
+    });
+  }
+
+  /**
+   * Wrap a spy in a promise so that the promise will resolve once the spy is
+   * called.
+   *
+   * @param {!jasmine.Spy} spy
+   * @return {!Promise}
+   */
+  function waitOnSpy(spy) {
+    return new Promise((resolve) => {
+      spy.and.callFake(resolve);
     });
   }
 });
