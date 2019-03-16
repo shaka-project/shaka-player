@@ -161,7 +161,8 @@ describe('MediaSourceEngine', function() {
   });
 
   describe('constructor', function() {
-    const originalCreateObjectURL = window.URL.createObjectURL;
+    const originalCreateObjectURL =
+      shaka.media.MediaSourceEngine.createObjectURL;
     const originalMediaSource = window.MediaSource;
     /** @type {jasmine.Spy} */
     let createObjectURLSpy;
@@ -176,7 +177,8 @@ describe('MediaSourceEngine', function() {
 
       createObjectURLSpy = jasmine.createSpy('createObjectURL');
       createObjectURLSpy.and.returnValue('blob:foo');
-      window.URL.createObjectURL = Util.spyFunc(createObjectURLSpy);
+      shaka.media.MediaSourceEngine.createObjectURL =
+        Util.spyFunc(createObjectURLSpy);
 
       let mediaSourceSpy = jasmine.createSpy('MediaSource').and.callFake(() => {
         return mockMediaSource;
@@ -187,7 +189,7 @@ describe('MediaSourceEngine', function() {
     });
 
     afterAll(function() {
-      window.URL.createObjectURL = originalCreateObjectURL;
+      shaka.media.MediaSourceEngine.createObjectURL = originalCreateObjectURL;
       window.MediaSource = originalMediaSource;
     });
 
