@@ -589,7 +589,10 @@ shaka.extern.ManifestConfiguration;
  *   jumpLargeGaps: boolean,
  *   durationBackoff: number,
  *   forceTransmuxTS: boolean,
- *   safeSeekOffset: number
+ *   safeSeekOffset: number,
+ *   stallEnabled: boolean,
+ *   stallThreshold: number,
+ *   stallSkip: number
  * }}
  *
  * @description
@@ -653,6 +656,16 @@ shaka.extern.ManifestConfiguration;
  *   more time to buffer before falling outside again, but increases the forward
  *   jump in the stream skipping more content. This is helpful for lower
  *   bandwidth scenarios. Defaults to 5 if not provided.
+ * @property {boolean} stallEnabled
+ *   When set to |true|, the stall detector logic will run, skipping forward
+ *   |stallSkip| seconds whenever the playhead stops moving for |stallThreshold|
+ *   seconds.
+ * @property {number} stallThreshold
+ *   The maximum number of seconds that may elapse without the playhead moving
+ *   (when playback is expected) before it will be labeled as a stall.
+ * @property {number} stallSkip
+ *   The number of seconds that the player will skip forward when a stall has
+ *   been detected.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
