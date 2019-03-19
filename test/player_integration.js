@@ -1059,6 +1059,49 @@ describe('Player Load Path', () => {
     });
   });
 
+  describe('error handling', () => {
+    beforeEach(() => {
+      createPlayer(/* attachedTo= */ null);
+    });
+
+    it('returns to attach after load error', async () => {
+      // The easiest way we can inject an error is to fail fetching the
+      // manifest. To do this, we force the network request by throwing an error
+      // in a request filter. The specific error does not matter.
+      const networkingEngine = player.getNetworkingEngine();
+      expect(networkingEngine).toBeTruthy();
+      networkingEngine.registerRequestFilter(() => {
+        throw new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
+            shaka.util.Error.Category.NETWORK,
+            shaka.util.Error.Code.REQUEST_FILTER_ERROR);
+      });
+
+      /** @type {jasmine.Spy} */
+      const idleSpy = jasmine.createSpy('idle state');
+      player.addEventListener('onstateidle', shaka.test.Util.spyFunc(idleSpy));
+
+      // Make the two requests one-after-another so that we don't have any idle
+      // time between them.
+      const attachRequest = player.attach(video);
+      const loadRequest = player.load('test:sintel');
+
+      await attachRequest;
+      await rejected(loadRequest);
+
+      // Wait a couple interrupter cycles to allow the player to enter idle
+      // state.
+      const event = await new Promise((resolve) => {
+        idleSpy.and.callFake(resolve);
+      });
+
+      // Since attached and loaded in the same interrupter cycle, there won't be
+      // any idle time until we finish failing to load. We expect to idle in
+      // attach.
+      expect(event.state).toBe('attach');
+    });
+  });
+
   /**
    * Wait for |p| to be rejected. If |p| is not rejected, this will fail the
    * test;
