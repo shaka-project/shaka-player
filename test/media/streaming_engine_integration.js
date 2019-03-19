@@ -252,10 +252,9 @@ describe('StreamingEngine', () => {
   function setupPlayhead() {
     onBuffering = jasmine.createSpy('onBuffering');
     let onSeek = () => { streamingEngine.seeked(); };
-    playhead = new shaka.media.Playhead(
+    playhead = new shaka.media.MediaSourcePlayhead(
         /** @type {!HTMLVideoElement} */(video),
-        manifest.presentationTimeline,
-        manifest.minBufferTime || 0,
+        manifest,
         config,
         null /* startTime */,
         onSeek,
@@ -298,7 +297,7 @@ describe('StreamingEngine', () => {
       onError: Util.spyFunc(onError),
       onEvent: Util.spyFunc(onEvent),
       onManifestUpdate: () => {},
-      onSegmentAppended: playhead.onSegmentAppended.bind(playhead),
+      onSegmentAppended: () => playhead.notifyOfBufferingChange(),
       onInitialStreamsSetup: Util.spyFunc(onInitialStreamsSetup),
       onStartupComplete: Util.spyFunc(onStartupComplete),
     };
