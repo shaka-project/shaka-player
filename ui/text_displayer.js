@@ -293,9 +293,5 @@ shaka.ui.TextDisplayer = class {
     } else {
       this.textContainer_.height = cue.size + '%';
     }
-
-    captionsStyle.textAlign = cue.textAlign;
-    captionsStyle.textDecoration = cue.textDecoration.join(' ');
-    captionsStyle.writingMode = cue.writingMode;
   }
 };
