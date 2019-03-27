@@ -2035,45 +2035,6 @@ describe('Player', function() {
         ]);
       });
 
-      it('accumulates duration as time passes', function() {
-        // We are using a mock date, so this is not a race.
-        let bufferingStarts = Date.now() / 1000;
-        setBuffering(true);
-
-        expect(player.getStats().stateHistory).toEqual([
-          {
-            timestamp: bufferingStarts,
-            duration: 0,
-            state: 'buffering',
-          },
-        ]);
-
-        jasmine.clock().tick(1500);
-        expect(player.getStats().stateHistory).toEqual([
-          {
-            timestamp: bufferingStarts,
-            duration: 1.5,
-            state: 'buffering',
-          },
-        ]);
-
-        let playbackStarts = Date.now() / 1000;
-        setBuffering(false);
-        jasmine.clock().tick(9000);
-        expect(player.getStats().stateHistory).toEqual([
-          {
-            timestamp: bufferingStarts,
-            duration: 1.5,
-            state: 'buffering',
-          },
-          {
-            timestamp: playbackStarts,
-            duration: 9,
-            state: 'playing',
-          },
-        ]);
-      });
-
       /**
        * @param {boolean} buffering
        * @suppress {accessControls}
