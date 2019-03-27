@@ -1859,8 +1859,7 @@ describe('Player', function() {
         expect(stats.bufferingTime).toBeCloseTo(0);
 
         // Stop buffering and start "playing".
-        buffering(false);
-
+        forceBufferingTo(false);
         jasmine.clock().tick(5000);
 
         stats = player.getStats();
@@ -1873,7 +1872,7 @@ describe('Player', function() {
         expect(stats.playTime).toBeCloseTo(0);
         expect(stats.bufferingTime).toBeCloseTo(0);
 
-        buffering(true);
+        forceBufferingTo(true);
         jasmine.clock().tick(5000);
 
         stats = player.getStats();
@@ -1882,27 +1881,19 @@ describe('Player', function() {
       });
 
       it('tracks correct time when switching states', function() {
-        buffering(false);
+        forceBufferingTo(false);
         jasmine.clock().tick(3000);
-        buffering(true);
+        forceBufferingTo(true);
         jasmine.clock().tick(5000);
-        buffering(true);
+        forceBufferingTo(true);
         jasmine.clock().tick(9000);
-        buffering(false);
+        forceBufferingTo(false);
         jasmine.clock().tick(1000);
 
         let stats = player.getStats();
         expect(stats.playTime).toBeCloseTo(4);
         expect(stats.bufferingTime).toBeCloseTo(14);
       });
-
-      /**
-       * @param {boolean} buffering
-       * @suppress {accessControls}
-       */
-      function buffering(buffering) {
-        player.onBuffering_(buffering);
-      }
     });
 
     describe('.switchHistory', function() {
@@ -1973,27 +1964,45 @@ describe('Player', function() {
     });
 
     describe('.stateHistory', function() {
+      function history() {
+        return player.getStats().stateHistory;
+      }
+
+      // We expect that the player will start us in the buffering state after
+      // loading. We should see that the only entry is a buffering entry.
       it('begins with buffering state', function() {
-        setBuffering(true);
-        expect(player.getStats().stateHistory).toEqual([
+        expect(history()).toEqual([
           {
-            // We are using a mock date, so this is not a race.
-            timestamp: Date.now() / 1000,
+            timestamp: jasmine.any(Number),
             duration: 0,
             state: 'buffering',
           },
         ]);
       });
 
+      // We expect that the player will start us in the buffering state, but
+      // when the media element is paused, we should see that we change to the
+      // paused state.
       it('transitions to paused if the video is paused', function() {
-        setBuffering(true);
+        // Start playback, we must be playing in order to be paused. The
+        // buffering state takes precedent over other states, so if we are
+        // buffering and then paused, it will only report buffering.
+        forceBufferingTo(false);
+
+        // Trigger a pause event.
         video.paused = true;
-        setBuffering(false);
-        expect(player.getStats().stateHistory).toEqual([
+        video.on['pause']();
+
+        expect(history()).toEqual([
           {
             timestamp: jasmine.any(Number),
             duration: jasmine.any(Number),
             state: 'buffering',
+          },
+          {
+            timestamp: jasmine.any(Number),
+            duration: jasmine.any(Number),
+            state: 'playing',
           },
           {
             timestamp: jasmine.any(Number),
@@ -2003,11 +2012,13 @@ describe('Player', function() {
         ]);
       });
 
+      // We expect that the player will start us in the buffering state, but
+      // once we leave that state, we should be playing.
       it('transitions to playing if the video is playing', function() {
-        setBuffering(true);
-        video.paused = false;
-        setBuffering(false);
-        expect(player.getStats().stateHistory).toEqual([
+        // Leave buffering (and enter playing).
+        forceBufferingTo(false);
+
+        expect(history()).toEqual([
           {
             timestamp: jasmine.any(Number),
             duration: jasmine.any(Number),
@@ -2021,14 +2032,19 @@ describe('Player', function() {
         ]);
       });
 
+      // We expect that the player will start us in the buffering state. We
+      // expect that once we reach the end, we will enter the ended state. Since
+      // we must be first playing before reaching the end, this test will
+      // reflect that.
       it('transitions to ended when the video ends', function() {
-        setBuffering(false);
+        // Stop buffering (and start playing);
+        forceBufferingTo(false);
 
+        // Signal the playhead reaching the end of the content.
         video.ended = true;
-        // Fire an 'ended' event on the mock video.
         video.on['ended']();
 
-        expect(player.getStats().stateHistory).toEqual([
+        expect(history()).toEqual([
           {
             timestamp: jasmine.any(Number),
             duration: jasmine.any(Number),
@@ -2046,15 +2062,25 @@ describe('Player', function() {
           },
         ]);
       });
-
-      /**
-       * @param {boolean} buffering
-       * @suppress {accessControls}
-       */
-      function setBuffering(buffering) {
-        player.onBuffering_(buffering);
-      }
     });
+
+    /**
+     * @param {boolean} buffering
+     * @suppress {accessControls}
+     */
+    function forceBufferingTo(buffering) {
+      const State = shaka.media.BufferingObserver.State;
+
+      // Replace the |getState| method on the buffer controllers so that any
+      // others calls relying on the state will get the state that we want them
+      // to have.
+      player.bufferObserver_.getState = () => {
+        return buffering ? State.STARVING : State.SATISFIED;
+      };
+
+      // Force the update.
+      player.updateBufferState_();
+    }
   });
 
   describe('unplayable periods', function() {
