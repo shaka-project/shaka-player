@@ -71,4 +71,40 @@ describe('StateHistory', () => {
     expect(entries[1].state).toBe('b');
     expect(entries[1].duration).toBe(0);
   });
+
+  it('sum of missing entry is zero', () => {
+    expect(history.getTimeSpentIn('a')).toBe(0);
+  });
+
+  it('sum of open entry is zero', () => {
+    history.update('a');
+    expect(history.getTimeSpentIn('a')).toBe(0);
+  });
+
+  it('sums all entries of one state', () => {
+    history.update('a');
+    jasmine.clock().tick(1000);
+
+    history.update('a');
+    jasmine.clock().tick(5000);
+
+    history.update('b');
+    jasmine.clock().tick(3000);
+
+    history.update('a');
+    jasmine.clock().tick(1500);
+
+    history.update('c');
+    jasmine.clock().tick(4000);
+
+    history.update('b');
+    jasmine.clock().tick(7500);
+
+    // Add another 'b' entry so that the elapsed time will be updated.
+    history.update('b');
+
+    expect(history.getTimeSpentIn('a')).toBe(7.5);
+    expect(history.getTimeSpentIn('b')).toBe(10.5);
+    expect(history.getTimeSpentIn('c')).toBe(4);
+  });
 });
