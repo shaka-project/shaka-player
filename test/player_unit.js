@@ -1779,6 +1779,10 @@ describe('Player', function() {
     });
 
     beforeEach(async () => {
+      // The media element may be paused in a test, make sure that it is reset
+      // to avoid cross-test contamination.
+      video.paused = false;
+
       // A manifest we can use to test stats.
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
@@ -1853,6 +1857,9 @@ describe('Player', function() {
         let stats = player.getStats();
         expect(stats.playTime).toBeCloseTo(0);
         expect(stats.bufferingTime).toBeCloseTo(0);
+
+        // Stop buffering and start "playing".
+        buffering(false);
 
         jasmine.clock().tick(5000);
 
@@ -2022,6 +2029,11 @@ describe('Player', function() {
         video.on['ended']();
 
         expect(player.getStats().stateHistory).toEqual([
+          {
+            timestamp: jasmine.any(Number),
+            duration: jasmine.any(Number),
+            state: 'buffering',
+          },
           {
             timestamp: jasmine.any(Number),
             duration: jasmine.any(Number),
