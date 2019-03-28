@@ -130,7 +130,7 @@ shaka.test.FakeStreamingEngine = function(onChooseStreams, onCanSwitch) {
   let activeText = null;
 
   let ret = jasmine.createSpyObj('fakeStreamingEngine', [
-    'destroy', 'configure', 'init', 'getBufferingPeriod',
+    'destroy', 'configure', 'start', 'getBufferingPeriod',
     'getBufferingAudio', 'getBufferingVideo', 'getBufferingText',
     'loadNewTextStream', 'switchVariant', 'switchTextStream', 'seeked',
     'unloadTextStream',
@@ -147,7 +147,7 @@ shaka.test.FakeStreamingEngine = function(onChooseStreams, onCanSwitch) {
   ret.unloadTextStream.and.callFake(function() {
     activeText = null;
   });
-  ret.init.and.callFake(function() {
+  ret.start.and.callFake(function() {
     let chosen = onChooseStreams();
     return Promise.resolve().then(function() {
       if (chosen.variant && chosen.variant.audio) {
@@ -175,7 +175,7 @@ shaka.test.FakeStreamingEngine = function(onChooseStreams, onCanSwitch) {
 
 
 /** @type {jasmine.Spy} */
-shaka.test.FakeStreamingEngine.prototype.init;
+shaka.test.FakeStreamingEngine.prototype.start;
 
 
 /** @type {jasmine.Spy} */

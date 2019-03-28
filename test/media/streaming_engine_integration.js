@@ -318,7 +318,7 @@ describe('StreamingEngine', () => {
 
       // Let's go!
       onChooseStreams.and.callFake(defaultOnChooseStreams);
-      await streamingEngine.init();
+      await streamingEngine.start();
       await reachesTheEnd();
     });
 
@@ -339,7 +339,7 @@ describe('StreamingEngine', () => {
 
       // Let's go!
       onChooseStreams.and.callFake(defaultOnChooseStreams);
-      await streamingEngine.init();
+      await streamingEngine.start();
       await reachesTheEnd();
     });
 
@@ -350,7 +350,7 @@ describe('StreamingEngine', () => {
 
       // Let's go!
       onChooseStreams.and.callFake(defaultOnChooseStreams);
-      await streamingEngine.init();
+      await streamingEngine.start();
 
       // After 35 seconds seek back 10 seconds into the first Period.
       await passesTime(35);
@@ -365,7 +365,7 @@ describe('StreamingEngine', () => {
 
       // Let's go!
       onChooseStreams.and.callFake(defaultOnChooseStreams);
-      await streamingEngine.init();
+      await streamingEngine.start();
       await passesTime(20);
       video.currentTime = 40;
       await reachesTheEnd();
@@ -400,7 +400,7 @@ describe('StreamingEngine', () => {
 
       // Let's go!
       onChooseStreams.and.callFake(defaultOnChooseStreams);
-      await streamingEngine.init();
+      await streamingEngine.start();
       await passesTime(305);
     });
 
@@ -414,7 +414,7 @@ describe('StreamingEngine', () => {
 
       // Let's go!
       onChooseStreams.and.callFake(defaultOnChooseStreams);
-      await streamingEngine.init();
+      await streamingEngine.start();
 
       await startUpCompleted;
       // Seek outside the availability window right away. The playhead
@@ -446,7 +446,7 @@ describe('StreamingEngine', () => {
 
       // Let's go!
       onChooseStreams.and.callFake(defaultOnChooseStreams);
-      await streamingEngine.init();
+      await streamingEngine.start();
       await passesTime(305);
 
       // We are playing close to the beginning of the availability window.
@@ -479,7 +479,7 @@ describe('StreamingEngine', () => {
 
       // Let's go!
       onChooseStreams.and.callFake(defaultOnChooseStreams);
-      await streamingEngine.init();
+      await streamingEngine.start();
       await passesTime(5);
     });
 
@@ -496,7 +496,7 @@ describe('StreamingEngine', () => {
 
       // Let's go!
       onChooseStreams.and.callFake(defaultOnChooseStreams);
-      await streamingEngine.init();
+      await streamingEngine.start();
       await passesTime(8);
     });
 
@@ -510,7 +510,7 @@ describe('StreamingEngine', () => {
 
       // Let's go!
       onChooseStreams.and.callFake(defaultOnChooseStreams);
-      await streamingEngine.init();
+      await streamingEngine.start();
       await passesTime(23);
       // Should be close enough to still have the gap buffered.
       expect(video.buffered.length).toBe(2);
@@ -527,7 +527,7 @@ describe('StreamingEngine', () => {
 
       // Let's go!
       onChooseStreams.and.callFake(defaultOnChooseStreams);
-      await streamingEngine.init();
+      await streamingEngine.start();
       await passesTime(23);
       // Should be close enough to still have the gap buffered.
       expect(video.buffered.length).toBe(2);
@@ -556,7 +556,7 @@ describe('StreamingEngine', () => {
 
             // Let's go!
             onChooseStreams.and.callFake(defaultOnChooseStreams);
-            return streamingEngine.init();
+            return streamingEngine.start();
           }).catch(done.fail);
     });
 

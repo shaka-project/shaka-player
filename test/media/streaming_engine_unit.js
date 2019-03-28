@@ -471,7 +471,7 @@ describe('StreamingEngine', function() {
   // This test initializes the StreamingEngine (SE) and allows it to play
   // through both Periods.
   //
-  // After calling init() the following should occur:
+  // After calling start() the following should occur:
   //   1. SE should immediately call onChooseStreams() with the first Period.
   //   2. SE should setup each of the initial Streams and then call
   //      onInitialStreamsSetup().
@@ -580,7 +580,7 @@ describe('StreamingEngine', function() {
     });
 
     // Here we go!
-    streamingEngine.init();
+    streamingEngine.start();
 
     runTest();
     expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
@@ -608,7 +608,7 @@ describe('StreamingEngine', function() {
       onStartupComplete.and.callFake(function() { setupFakeGetTime(0); });
       onChooseStreams.and.callFake(onChooseStreamsWithUnloadedText);
 
-      streamingEngine.init();
+      streamingEngine.start();
 
       runTest(function() {
         if (presentationTimeInSeconds == 20) {
@@ -634,7 +634,7 @@ describe('StreamingEngine', function() {
       onStartupComplete.and.callFake(function() { setupFakeGetTime(0); });
       onChooseStreams.and.callFake(onChooseStreamsWithUnloadedText);
 
-      streamingEngine.init();
+      streamingEngine.start();
       const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
 
       // Verify that after unloading text stream, no network request for text
@@ -668,7 +668,7 @@ describe('StreamingEngine', function() {
     onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
 
     // Here we go!
-    streamingEngine.init();
+    streamingEngine.start();
 
     runTest(slideSegmentAvailabilityWindow);
     expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
@@ -695,7 +695,7 @@ describe('StreamingEngine', function() {
     }
   });
 
-  // Start the playhead in the first Period but pass init() Streams from the
+  // Start the playhead in the first Period but pass start() Streams from the
   // second Period.
   it('plays from 1st Period when passed Streams from 2nd', function() {
     setupVod();
@@ -728,7 +728,7 @@ describe('StreamingEngine', function() {
       return {variant: variant2, text: textStream2};
     });
 
-    streamingEngine.init();
+    streamingEngine.start();
 
     runTest();
     // Verify buffers.
@@ -744,7 +744,7 @@ describe('StreamingEngine', function() {
     });
   });
 
-  // Start the playhead in the second Period but pass init() Streams from the
+  // Start the playhead in the second Period but pass start() Streams from the
   // first Period.
   it('plays from 2nd Period when passed Streams from 1st', function() {
     setupVod();
@@ -774,7 +774,7 @@ describe('StreamingEngine', function() {
       return {variant: variant1, text: textStream1};
     });
 
-    streamingEngine.init();
+    streamingEngine.start();
 
     runTest();
     // Verify buffers.
@@ -800,7 +800,7 @@ describe('StreamingEngine', function() {
 
     // Here we go!
     onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-    streamingEngine.init();
+    streamingEngine.start();
 
     runTest();
     expect(onStartupComplete).toHaveBeenCalled();
@@ -823,7 +823,7 @@ describe('StreamingEngine', function() {
     });
 
     // Here we go!
-    streamingEngine.init();
+    streamingEngine.start();
     runTest();
 
     expect(mediaSourceEngine.segments).toEqual({
@@ -863,7 +863,7 @@ describe('StreamingEngine', function() {
     });
 
     // Here we go!
-    streamingEngine.init();
+    streamingEngine.start();
     runTest();
 
     expect(mediaSourceEngine.segments).toEqual({
@@ -893,7 +893,7 @@ describe('StreamingEngine', function() {
     });
 
     // Here we go!
-    streamingEngine.init();
+    streamingEngine.start();
     runTest();
 
     expect(mediaSourceEngine.reinitText).not.toHaveBeenCalled();
@@ -916,7 +916,7 @@ describe('StreamingEngine', function() {
     });
 
     // Here we go!
-    streamingEngine.init();
+    streamingEngine.start();
     runTest();
 
     expect(mediaSourceEngine.segments).toEqual({
@@ -944,7 +944,7 @@ describe('StreamingEngine', function() {
     });
 
     // Here we go!
-    streamingEngine.init();
+    streamingEngine.start();
 
     runTest();
     expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
@@ -970,7 +970,7 @@ describe('StreamingEngine', function() {
     });
 
     // Here we go!
-    streamingEngine.init();
+    streamingEngine.start();
 
     runTest();
     expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
@@ -986,7 +986,7 @@ describe('StreamingEngine', function() {
     onChooseStreams.and.callFake(defaultOnChooseStreams);
 
     // Here we go!
-    streamingEngine.init();
+    streamingEngine.start();
     runTest();
 
     // The second Period starts at 20, so we should set the appendWindowStart to
@@ -1039,7 +1039,7 @@ describe('StreamingEngine', function() {
     // Here we go!
     onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
     onChooseStreams.and.callFake(defaultOnChooseStreams);
-    streamingEngine.init();
+    streamingEngine.start();
 
     runTest();
     // Make sure appendBuffer was called, so that we know that we executed the
@@ -1144,7 +1144,7 @@ describe('StreamingEngine', function() {
         expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('text');
       });
 
-      streamingEngine.init().catch(fail);
+      streamingEngine.start().catch(fail);
 
       Util.fakeEventLoop(1);
 
@@ -1215,7 +1215,7 @@ describe('StreamingEngine', function() {
       });
 
       // Here we go!
-      streamingEngine.init();
+      streamingEngine.start();
 
       runTest();
       // Verify buffers.
@@ -1260,7 +1260,7 @@ describe('StreamingEngine', function() {
       });
 
       // Here we go!
-      streamingEngine.init();
+      streamingEngine.start();
 
       runTest();
       // Verify buffers.
@@ -1328,7 +1328,7 @@ describe('StreamingEngine', function() {
       });
 
       // Here we go!
-      streamingEngine.init();
+      streamingEngine.start();
 
       runTest(Util.spyFunc(onTick));
       // Verify buffers.
@@ -1424,7 +1424,7 @@ describe('StreamingEngine', function() {
       });
 
       // Here we go!
-      streamingEngine.init();
+      streamingEngine.start();
 
       runTest(Util.spyFunc(onTick));
       // Verify buffers.
@@ -1489,7 +1489,7 @@ describe('StreamingEngine', function() {
       onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 15));
 
       // Here we go!
-      streamingEngine.init();
+      streamingEngine.start();
 
       runTest(Util.spyFunc(onTick));
       // Verify buffers.
@@ -1529,7 +1529,7 @@ describe('StreamingEngine', function() {
       });
 
       // Here we go!
-      streamingEngine.init();
+      streamingEngine.start();
 
       runTest();
       // Verify buffers. Segment 3 should not be buffered since we never
@@ -1574,7 +1574,7 @@ describe('StreamingEngine', function() {
       });
 
       // Here we go!
-      streamingEngine.init();
+      streamingEngine.start();
 
       runTest();
       // Verify buffers.
@@ -1640,7 +1640,7 @@ describe('StreamingEngine', function() {
       onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
 
       // Here we go!
-      streamingEngine.init();
+      streamingEngine.start();
       runTest();
 
       // Verify buffers.
@@ -1721,7 +1721,7 @@ describe('StreamingEngine', function() {
       });
 
       // Here we go!
-      streamingEngine.init();
+      streamingEngine.start();
 
       runTest(slideSegmentAvailabilityWindow);
       // Verify buffers.
@@ -1767,7 +1767,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init().then(fail).catch(Util.spyFunc(onInitError));
+      streamingEngine.start().then(fail).catch(Util.spyFunc(onInitError));
 
       runTest();
       expect(onInitError).toHaveBeenCalled();
@@ -1786,7 +1786,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init().catch(fail);
+      streamingEngine.start().catch(fail);
       runTest();
       expect(onError).toHaveBeenCalled();
     });
@@ -1825,7 +1825,7 @@ describe('StreamingEngine', function() {
       });
 
       // Here we go!
-      streamingEngine.init().catch(fail);
+      streamingEngine.start().catch(fail);
       runTest();
       expect(onError).toHaveBeenCalled();
     });
@@ -1864,7 +1864,7 @@ describe('StreamingEngine', function() {
       });
 
       // Here we go!
-      streamingEngine.init().catch(fail);
+      streamingEngine.start().catch(fail);
       runTest();
       expect(onError).toHaveBeenCalled();
     });
@@ -1898,7 +1898,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.start();
 
       runTest();
       expect(onError.calls.count()).toBe(0);
@@ -1932,7 +1932,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.start();
 
       runTest();
       expect(onError.calls.count()).toBe(1);
@@ -1967,7 +1967,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.start();
 
       runTest();
       expect(onError.calls.count()).toBe(1);
@@ -2002,7 +2002,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.start();
 
       runTest();
       expect(onError.calls.count()).toBe(1);
@@ -2039,7 +2039,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.start();
 
       let startTime = Date.now();
       runTest();
@@ -2076,7 +2076,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.start();
 
       runTest();
       // We definitely called onError().
@@ -2120,7 +2120,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.start();
 
       runTest();
 
@@ -2144,7 +2144,7 @@ describe('StreamingEngine', function() {
       });
 
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.start();
 
       // Here we go!
       let count = 0;
@@ -2209,7 +2209,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.start();
 
       // Since StreamingEngine is free to peform audio, video, and text updates
       // in any order, there are many valid ways in which StreamingEngine can
@@ -2256,7 +2256,7 @@ describe('StreamingEngine', function() {
       createStreamingEngine(config);
       onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.start();
 
       runTest(() => {
         if (presentationTimeInSeconds == 8) {
@@ -2320,7 +2320,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.start();
 
       runTest();
       expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
@@ -2384,7 +2384,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.start();
 
       // Stop the playhead after 10 seconds since will not append any
       // segments after this time.
@@ -2413,7 +2413,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.start();
 
       runTest();
       expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
@@ -2443,7 +2443,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.start();
 
       runTest();
       expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
@@ -2485,7 +2485,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.start();
 
       runTest(slideSegmentAvailabilityWindow);
       expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
@@ -2529,7 +2529,7 @@ describe('StreamingEngine', function() {
 
       // Here we go!
       onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.init();
+      streamingEngine.start();
 
       runTest(function() {
         if (presentationTimeInSeconds == 1) {
@@ -2643,7 +2643,7 @@ describe('StreamingEngine', function() {
       videoStream1.emsgSchemeIdUris = [emsgObj.schemeIdUri];
 
       // Here we go!
-      streamingEngine.init();
+      streamingEngine.start();
       runTest();
 
       expect(onEvent).toHaveBeenCalledTimes(1);
@@ -2661,7 +2661,7 @@ describe('StreamingEngine', function() {
       videoStream1.emsgSchemeIdUris = [emsgObj.schemeIdUri];
 
       // Here we go!
-      streamingEngine.init();
+      streamingEngine.start();
       runTest();
 
       expect(onEvent).toHaveBeenCalledTimes(2);
@@ -2671,7 +2671,7 @@ describe('StreamingEngine', function() {
       segmentData[ContentType.VIDEO].segments[0] = emsgSegment.buffer;
 
       // Here we go!
-      streamingEngine.init();
+      streamingEngine.start();
       runTest();
 
       expect(onEvent).not.toHaveBeenCalled();
@@ -2681,7 +2681,7 @@ describe('StreamingEngine', function() {
       videoStream1.emsgSchemeIdUris = [emsgObj.schemeIdUri];
 
       // Here we go!
-      streamingEngine.init();
+      streamingEngine.start();
       runTest();
 
       expect(onEvent).not.toHaveBeenCalled();
@@ -2691,7 +2691,7 @@ describe('StreamingEngine', function() {
       segmentData[ContentType.VIDEO].segments[0] = emsgSegment.buffer;
 
       // Here we go!
-      streamingEngine.init();
+      streamingEngine.start();
       runTest();
 
       expect(onEvent).not.toHaveBeenCalled();
@@ -2711,7 +2711,7 @@ describe('StreamingEngine', function() {
       videoStream1.emsgSchemeIdUris = ['urn:mpeg:dash:event:2012'];
 
       // Here we go!
-      streamingEngine.init();
+      streamingEngine.start();
       runTest();
 
       expect(onEvent).not.toHaveBeenCalled();

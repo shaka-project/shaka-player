@@ -258,7 +258,7 @@ describe('CastReceiver', function() {
     waitForUpdateMessageWrapper(
         shaka.media.DrmEngine.prototype, 'DrmEngine', 'attach');
     waitForUpdateMessageWrapper(
-        shaka.media.StreamingEngine.prototype, 'StreamingEngine', 'init');
+        shaka.media.StreamingEngine.prototype, 'StreamingEngine', 'start');
 
     eventManager.listenOnce(video, 'loadeddata', function() {
       // Make sure that each of the methods covered by
