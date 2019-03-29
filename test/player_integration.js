@@ -103,6 +103,7 @@ describe('Player', function() {
 
         loadLatency: jasmine.any(Number),
         playTime: jasmine.any(Number),
+        pauseTime: jasmine.any(Number),
         bufferingTime: jasmine.any(Number),
 
         // We should have loaded the first Period by now, so we should have a

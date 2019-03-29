@@ -81,6 +81,7 @@ shaka.extern.StateChange;
  *
  *   loadLatency: number,
  *   playTime: number,
+ *   pauseTime: number,
  *   bufferingTime: number,
  *
  *   switchHistory: !Array.<shaka.extern.TrackChoice>,
@@ -114,6 +115,8 @@ shaka.extern.StateChange;
  *   the time the 'loadeddata' event is fired by the media element.
  * @property {number} playTime
  *   The total time spent in a playing state in seconds.
+ * @property {number} pauseTime
+ *   The total time spent in a paused state in seconds.
  * @property {number} bufferingTime
  *   The total time spent in a buffering state in seconds.
  *
