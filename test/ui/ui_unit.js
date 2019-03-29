@@ -293,6 +293,33 @@ describe('UI', function() {
         expect(display).not.toEqual('none');
       });
 
+      it('allows picture-in-picture only when the content has video',
+          async () => {
+        // Load fake content that contains only audio.
+        const manifest = new shaka.test.ManifestGenerator()
+            .addPeriod(/* startTime= */ 0)
+              .addVariant(/* id= */ 0)
+                .addAudio(/* id= */ 1)
+            .build();
+
+        const parser = new shaka.test.FakeManifestParser(manifest);
+        const factory = function() { return parser; };
+
+        await player.load(/* uri= */ 'fake', /* startTime= */ 0, factory);
+        const pipButtons =
+            videoContainer.getElementsByClassName('shaka-pip-button');
+        expect(pipButtons.length).toBe(1);
+        const pipButton = pipButtons[0];
+
+        // The picture-in-picture button should not be shown when the content
+        // only has audio.
+        expect(pipButton.classList.contains('shaka-hidden')).toBe(true);
+
+        // The picture-in-picture window should not be open when the content
+        // only has audio.
+        expect(document.pictureInPictureElement).toBeFalsy();
+      });
+
       it('is accessible', function() {
         for (let button of overflowMenu.childNodes) {
           expect(/** @type {!HTMLElement} */ (button)

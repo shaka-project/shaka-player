@@ -104,6 +104,10 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     this.eventManager.listen(this.controls, 'caststatuschange', (e) => {
         this.onCastStatusChange_(e);
       });
+
+    this.eventManager.listen(this.player, 'trackschanged', () => {
+        this.onTracksChanged_();
+      });
   }
 
 
@@ -197,6 +201,25 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
       if (this.isPipAllowed_()) {
         shaka.ui.Utils.setDisplay(this.pipButton_, true);
       }
+    }
+  }
+
+
+  /**
+   * Display the picture-in-picture button only when the content contains video.
+   * If it's displaying in picture-in-picture mode, and an audio only content is
+   * loaded, exit the picture-in-picture display.
+   * @return {!Promise}
+   * @private
+   */
+  async onTracksChanged_() {
+    if (this.player && this.player.isAudioOnly()) {
+      shaka.ui.Utils.setDisplay(this.pipButton_, false);
+      if (document.pictureInPictureElement) {
+        await document.exitPictureInPicture();
+      }
+    } else {
+      shaka.ui.Utils.setDisplay(this.pipButton_, true);
     }
   }
 };
