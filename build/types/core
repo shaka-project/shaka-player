@@ -23,6 +23,7 @@
 +../../lib/media/media_source_engine.js
 +../../lib/media/mp4_segment_index_parser.js
 +../../lib/media/period_observer.js
++../../lib/media/play_rate_controller.js
 +../../lib/media/playhead.js
 +../../lib/media/playhead_observer.js
 +../../lib/media/presentation_timeline.js
