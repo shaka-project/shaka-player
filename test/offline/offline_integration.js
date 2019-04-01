@@ -75,9 +75,10 @@ describe('Offline', () => {
         contentUri, 'Stored content should have an offline uri.');
 
     await player.load(content.offlineUri);
-    video.play();
 
-    await shaka.test.Util.delay(10);
+    video.play();
+    await playTo(/* end= */ 3, /* timeout= */ 10);
+
     expect(video.currentTime).toBeGreaterThan(3);
     expect(video.ended).toBe(false);
 
@@ -119,9 +120,10 @@ describe('Offline', () => {
             contentUri, 'Stored content should have an offline uri.');
 
         await player.load(contentUri);
-        video.play();
 
-        await shaka.test.Util.delay(10);
+        video.play();
+        await playTo(/* end= */ 3, /* timeout= */ 10);
+
         expect(video.currentTime).toBeGreaterThan(3);
         expect(video.ended).toBe(false);
 
@@ -159,15 +161,47 @@ describe('Offline', () => {
             contentUri, 'Stored content should have an offline uri.');
 
         await player.load(contentUri);
-        video.play();
 
-        await shaka.test.Util.delay(10);
+        video.play();
+        await playTo(/* end= */ 3, /* timeout= */ 10);
+
         expect(video.currentTime).toBeGreaterThan(3);
         expect(video.ended).toBe(false);
 
         await player.unload();
         await storage.remove(contentUri);
       });
+
+  /**
+   * Assume that the media element is playing content from time=0. This will
+   * wait until the media element has passed |time=endSeconds| or until
+   * |timeoutSeconds| has passed (in real time).
+   *
+   * The promise returned will only resolve. To know if playback was
+   * successful, check |currentTime| on the media element.
+   *
+   * @param {number} endSeconds
+   * @param {number} timeoutSeconds
+   * @return {!Promise}
+   */
+  async function playTo(endSeconds, timeoutSeconds) {
+    /** @type {number} */
+    const timeoutMs = timeoutSeconds * 1000;
+    /** @type {number} */
+    const startMs = Date.now();
+
+    while (Date.now() - startMs < timeoutMs) {
+      if (video.currentTime > endSeconds) {
+        return;
+      }
+
+      // |await| in loops is black-listed by eslint because it means you are not
+      // using parallelism to its fullest, but here we want serialization.
+      //
+      // eslint-disable-next-line no-await-in-loop
+      await shaka.test.Util.delay(/* seconds= */ 1);
+    }
+  }
 
   /** @return {boolean} */
   function supportsStorage() {
