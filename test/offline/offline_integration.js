@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('Offline', /** @suppress {accessControls} */ function() {
+describe('Offline', () => {
   /** @type {!shaka.Player} */
   let player;
   /** @type {!shaka.offline.Storage} */
