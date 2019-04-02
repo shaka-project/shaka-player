@@ -114,9 +114,11 @@ shaka.ui.LanguageUtils = class {
     // are used to indicate something that isn't one specific language.
     switch (locale) {
       case 'mul':
-        return resolve(shaka.ui.Locales.Ids.LABEL_MULTIPLE_LANGUAGES);
+        return resolve(shaka.ui.Locales.Ids.MULTIPLE_LANGUAGES);
+      case 'und':
+        return resolve(shaka.ui.Locales.Ids.UNDETERMINED_LANGUAGE);
       case 'zxx':
-        return resolve(shaka.ui.Locales.Ids.LABEL_NOT_APPLICABLE);
+        return resolve(shaka.ui.Locales.Ids.NOT_APPLICABLE);
     }
 
     // Extract the base language from the locale as a fallback step.
@@ -134,7 +136,7 @@ shaka.ui.LanguageUtils = class {
       return mozilla.LanguageMapping[language].nativeName +
           ' (' + locale + ')';
     } else {
-      return resolve(shaka.ui.Locales.Ids.LABEL_UNKNOWN_LANGUAGE) +
+      return resolve(shaka.ui.Locales.Ids.UNRECOGNIZED_LANGUAGE) +
           ' (' + locale + ')';
     }
   }

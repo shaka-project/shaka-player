@@ -188,13 +188,13 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.Element {
     const LocIds = shaka.ui.Locales.Ids;
 
     this.backFromLanguageButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.ARIA_LABEL_BACK));
+        this.localization.resolve(LocIds.BACK));
     this.languagesButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.ARIA_LABEL_LANGUAGE));
+        this.localization.resolve(LocIds.LANGUAGE));
     this.languageNameSpan_.textContent =
-      this.localization.resolve(LocIds.LABEL_LANGUAGE);
+        this.localization.resolve(LocIds.LANGUAGE);
     this.backFromLanguageSpan_.textContent =
-      this.localization.resolve(LocIds.LABEL_LANGUAGE);
+        this.localization.resolve(LocIds.LANGUAGE);
   }
 };
 

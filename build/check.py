@@ -120,6 +120,10 @@ def check_tests(args):
               get('third_party', 'language-mapping-list'))
   files.add(os.path.join(base, 'demo', 'common', 'assets.js'))
 
+  localizations = compiler.GenerateLocalizations(None)
+  localizations.generate(args.force)
+  files.add(localizations.output)
+
   closure_opts = build.common_closure_opts + build.common_closure_defines
   closure_opts += build.debug_closure_opts + build.debug_closure_defines
 

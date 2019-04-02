@@ -202,7 +202,7 @@ goog.require('shaka.util.Dom');
   updateAriaLabel_() {
     const LocIds = shaka.ui.Locales.Ids;
     this.overflowMenuButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.ARIA_LABEL_MORE_SETTINGS));
+        this.localization.resolve(LocIds.MORE_SETTINGS));
   }
 };
 

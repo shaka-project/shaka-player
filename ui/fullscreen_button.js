@@ -80,8 +80,7 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
   updateAriaLabel_() {
     const LocIds = shaka.ui.Locales.Ids;
     const label = document.fullscreenElement ?
-                   LocIds.ARIA_LABEL_EXIT_FULL_SCREEN :
-                   LocIds.ARIA_LABEL_FULL_SCREEN;
+        LocIds.EXIT_FULL_SCREEN : LocIds.FULL_SCREEN;
 
     this.button_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
         this.localization.resolve(label));

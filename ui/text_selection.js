@@ -225,7 +225,7 @@ shaka.ui.TextSelection = class extends shaka.ui.Element {
       offButton.appendChild(shaka.ui.Utils.checkmarkIcon());
       this.captionsOffSpan_.classList.add('shaka-chosen-item');
       this.currentCaptions_.textContent =
-          this.localization.resolve(shaka.ui.Locales.Ids.LABEL_CAPTIONS_OFF);
+          this.localization.resolve(shaka.ui.Locales.Ids.OFF);
     }
 
     shaka.ui.Utils.focusOnTheChosenItem(this.textLangMenu_);
@@ -254,15 +254,15 @@ shaka.ui.TextSelection = class extends shaka.ui.Element {
     const LocIds = shaka.ui.Locales.Ids;
 
     this.captionButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.ARIA_LABEL_CAPTIONS));
+        this.localization.resolve(LocIds.CAPTIONS));
     this.backFromCaptionsButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.ARIA_LABEL_BACK));
+        this.localization.resolve(LocIds.BACK));
     this.captionsNameSpan_.textContent =
-      this.localization.resolve(LocIds.LABEL_CAPTIONS);
+        this.localization.resolve(LocIds.CAPTIONS);
     this.backFromCaptionsSpan_.textContent =
-      this.localization.resolve(LocIds.LABEL_CAPTIONS);
+        this.localization.resolve(LocIds.CAPTIONS);
     this.captionsOffSpan_.textContent =
-      this.localization.resolve(LocIds.LABEL_CAPTIONS_OFF);
+        this.localization.resolve(LocIds.OFF);
   }
 
 

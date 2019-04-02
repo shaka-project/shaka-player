@@ -120,7 +120,7 @@ shaka.ui.VolumeBar = class extends shaka.ui.Element {
    */
   updateAriaLabel_() {
     this.bar_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(shaka.ui.Locales.Ids.ARIA_LABEL_VOLUME));
+        this.localization.resolve(shaka.ui.Locales.Ids.VOLUME));
   }
 };
 

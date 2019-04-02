@@ -114,6 +114,7 @@ module.exports = function(config) {
       {pattern: 'third_party/language-mapping-list/**/*.js', included: false},
       {pattern: 'test/test/assets/*', included: false},
       {pattern: 'dist/shaka-player.ui.js', included: false},
+      {pattern: 'dist/locales.js', included: false},
       {pattern: 'node_modules/**/*.js', included: false},
     ],
 

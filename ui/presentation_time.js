@@ -85,7 +85,7 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
         this.currentTime_.disabled = false;
       } else {
         this.currentTime_.textContent =
-          this.localization.resolve(shaka.ui.Locales.Ids.LABEL_LIVE);
+            this.localization.resolve(shaka.ui.Locales.Ids.LIVE);
         this.currentTime_.disabled = true;
       }
     } else {
@@ -129,7 +129,7 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
    */
   onTracksChanged_() {
     if (this.player.isLive()) {
-      const ariaLabel = shaka.ui.Locales.Ids.ARIA_LABEL_LIVE;
+      const ariaLabel = shaka.ui.Locales.Ids.SKIP_TO_LIVE;
       this.currentTime_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
           this.localization.resolve(ariaLabel));
     }

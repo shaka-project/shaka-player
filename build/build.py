@@ -47,6 +47,7 @@ import os
 import re
 
 import compiler
+import generateLocalizations
 import shakaBuildHelpers
 
 
@@ -170,6 +171,18 @@ class Build(object):
       logging.error('Cannot exclude files from core')
     self.include |= core_files
 
+  def has_ui(self):
+    """Returns True if the UI library is in the build."""
+    for path in self.include:
+      if '/ui/' in path:
+        return True
+    return False
+
+  def generate_localizations(self, locales, force):
+    localizations = compiler.GenerateLocalizations(locales)
+    localizations.generate(force)
+    self.include.add(os.path.abspath(localizations.output))
+
   def parse_build(self, lines, root):
     """Parses a Build object from the given lines of commands.
 
@@ -238,11 +251,12 @@ class Build(object):
 
     return True
 
-  def build_library(self, name, force, is_debug):
+  def build_library(self, name, locales, force, is_debug):
     """Builds Shaka Player using the files in |self.include|.
 
     Args:
       name: The name of the build.
+      locales: A list of strings of locale identifiers.
       force: True to rebuild, False to ignore if no changes are detected.
       is_debug: True to compile for debugging, false for release.
 
@@ -251,6 +265,8 @@ class Build(object):
     """
     self.add_closure()
     self.add_core()
+    if self.has_ui():
+      self.generate_localizations(locales, force)
 
     if is_debug:
       name += '.debug'
@@ -280,6 +296,13 @@ def main(args):
   parser = argparse.ArgumentParser(
       description=__doc__,
       formatter_class=argparse.RawDescriptionHelpFormatter)
+
+  parser.add_argument(
+      '--locales',
+      type=str,
+      nargs='+',
+      default=generateLocalizations.DEFAULT_LOCALES,
+      help='The list of locales to compile in (requires UI, default %(default)r)')
 
   parser.add_argument(
       '--force',
@@ -325,10 +348,11 @@ def main(args):
     return 1
 
   name = parsed_args.name
+  locales = parsed_args.locales
   force = parsed_args.force
   is_debug = parsed_args.mode == 'debug'
 
-  if not custom_build.build_library(name, force, is_debug):
+  if not custom_build.build_library(name, locales, force, is_debug):
     return 1
 
   return 0

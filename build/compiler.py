@@ -22,6 +22,7 @@ import re
 import shutil
 import subprocess
 
+import generateLocalizations
 import shakaBuildHelpers
 
 
@@ -353,4 +354,52 @@ class Jsdoc(object):
       if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
         return False
 
+    return True
+
+
+class GenerateLocalizations(object):
+  def __init__(self, locales):
+    self.locales = locales
+    self.source_files = shakaBuildHelpers.get_all_files(
+        _get_source_path('ui/locales'))
+    self.output = _get_source_path('dist/locales.js')
+
+  def _locales_changed(self):
+    # If locales is None, it means we are being called by a caller who doesn't
+    # care what locales are in use.  This is true, for example, when we are
+    # running a compiler pass over the tests.
+    if self.locales is None:
+      return False
+
+    # Find out what locales we used before.  If they have changed, we must
+    # regenerate the output.
+    last_locales = None
+    try:
+      prefix = '// LOCALES: '
+      with open(self.output, 'r') as f:
+        for line in f:
+          if line.startswith(prefix):
+            last_locales = line.replace(prefix, '').strip().split(', ')
+    except IOError:
+      # The file wasn't found or couldn't be read, so it needs to be redone.
+      return True
+
+    return set(last_locales) != set(self.locales)
+
+  def generate(self, force=False):
+    """Generate runtime localizations.
+
+    Args:
+      force: Generate the localizations even if the inputs and locales have not
+             changed.
+
+    Returns:
+      True on success; False on failure.
+    """
+
+    if (not force and not _must_build(self.output, self.source_files) and
+        not self._locales_changed()):
+      return True
+
+    generateLocalizations.main(['--locales'] + self.locales)
     return True

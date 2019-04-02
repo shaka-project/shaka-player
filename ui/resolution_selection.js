@@ -226,7 +226,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
 
     const autoSpan = shaka.util.Dom.createHTMLElement('span');
     autoSpan.textContent =
-      this.localization.resolve(shaka.ui.Locales.Ids.LABEL_AUTO_QUALITY);
+        this.localization.resolve(shaka.ui.Locales.Ids.AUTO_QUALITY);
     autoButton.appendChild(autoSpan);
 
     // If abr is enabled reflect it by marking 'Auto' as selected.
@@ -237,7 +237,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
       autoSpan.classList.add('shaka-chosen-item');
 
       this.currentResolution_.textContent =
-        this.localization.resolve(shaka.ui.Locales.Ids.LABEL_AUTO_QUALITY);
+          this.localization.resolve(shaka.ui.Locales.Ids.AUTO_QUALITY);
     }
 
     this.resolutionMenu_.appendChild(autoButton);
@@ -272,15 +272,15 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
     const LocIds = shaka.ui.Locales.Ids;
 
     this.resolutionButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.ARIA_LABEL_RESOLUTION));
+        this.localization.resolve(LocIds.RESOLUTION));
     this.backFromResolutionButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.ARIA_LABEL_RESOLUTION));
+        this.localization.resolve(LocIds.RESOLUTION));
     this.backFromResolutionSpan_.textContent =
-      this.localization.resolve(LocIds.LABEL_RESOLUTION);
+        this.localization.resolve(LocIds.RESOLUTION);
     this.resolutionNameSpan_.textContent =
-      this.localization.resolve(LocIds.LABEL_RESOLUTION);
+        this.localization.resolve(LocIds.RESOLUTION);
     this.abrOnSpan_.textContent =
-      this.localization.resolve(LocIds.LABEL_AUTO_QUALITY);
+        this.localization.resolve(LocIds.AUTO_QUALITY);
   }
 };
 

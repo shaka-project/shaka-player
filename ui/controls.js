@@ -448,13 +448,12 @@ shaka.ui.Controls.prototype.updateLocalizedStrings_ = function() {
 
   if (this.seekBar_) {
     this.seekBar_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-          this.localization_.resolve(LocIds.ARIA_LABEL_SEEK));
+          this.localization_.resolve(LocIds.SEEK));
   }
 
   // Localize state-dependant labels
   const makePlayNotPause = this.video_.paused && !this.isSeeking_;
-  const playButtonAriaLabelId = makePlayNotPause ? LocIds.ARIA_LABEL_PLAY :
-                                                   LocIds.ARIA_LABEL_PAUSE;
+  const playButtonAriaLabelId = makePlayNotPause ? LocIds.PLAY : LocIds.PAUSE;
   this.playButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
       this.localization_.resolve(playButtonAriaLabelId));
 };
@@ -893,11 +892,11 @@ shaka.ui.Controls.prototype.onPlayStateChange_ = function() {
   if (this.enabled_ && this.video_.paused && !this.isSeeking_) {
     this.playButton_.setAttribute('icon', 'play');
     this.playButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-      this.localization_.resolve(shaka.ui.Locales.Ids.ARIA_LABEL_PLAY));
+      this.localization_.resolve(shaka.ui.Locales.Ids.PLAY));
   } else {
     this.playButton_.setAttribute('icon', 'pause');
     this.playButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-      this.localization_.resolve(shaka.ui.Locales.Ids.ARIA_LABEL_PAUSE));
+      this.localization_.resolve(shaka.ui.Locales.Ids.PAUSE));
   }
 };
 

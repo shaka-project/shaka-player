@@ -30,6 +30,7 @@ deps_args = [
     '--root_with_prefix=third_party/closure ../../../third_party/closure',
     '--root_with_prefix=third_party/language-mapping-list ' +
         '../../../third_party/language-mapping-list',
+    '--root_with_prefix=dist ../../../dist',
 ]
 
 

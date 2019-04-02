@@ -71,8 +71,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
    */
   updateAriaLabel_() {
     const LocIds = shaka.ui.Locales.Ids;
-    const label =
-      this.video.muted ? LocIds.ARIA_LABEL_UNMUTE : LocIds.ARIA_LABEL_MUTE;
+    const label = this.video.muted ? LocIds.UNMUTE : LocIds.MUTE;
 
     this.button_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
         this.localization.resolve(label));

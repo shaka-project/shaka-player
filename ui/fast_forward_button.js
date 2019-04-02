@@ -65,8 +65,7 @@ shaka.ui.FastForwardButton = class extends shaka.ui.Element {
    */
   updateAriaLabel_() {
     this.button_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(
-          shaka.ui.Locales.Ids.ARIA_LABEL_FAST_FORWARD));
+        this.localization.resolve(shaka.ui.Locales.Ids.FAST_FORWARD));
   }
 
   /**

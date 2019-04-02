@@ -147,7 +147,7 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
           this.castProxy_.receiverName();
     } else {
       this.castCurrentSelectionSpan_.textContent =
-          this.localization.resolve(shaka.ui.Locales.Ids.LABEL_NOT_CASTING);
+          this.localization.resolve(shaka.ui.Locales.Ids.OFF);
     }
   }
 
@@ -159,9 +159,9 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
     const LocIds = shaka.ui.Locales.Ids;
 
     this.castButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.ARIA_LABEL_CAST));
+        this.localization.resolve(LocIds.CAST));
     this.castNameSpan_.textContent =
-      this.localization.resolve(LocIds.LABEL_CAST);
+        this.localization.resolve(LocIds.CAST);
 
     // If we're not casting, string "not casting" will be displayed,
     // which needs localization.

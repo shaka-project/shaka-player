@@ -1,0 +1,124 @@
+{
+  "FULL_SCREEN": {
+    "message": "Full screen",
+    "description": "Label for a button used to enter full screen mode in the video player."
+  },
+  "EXIT_FULL_SCREEN": {
+    "message": "Exit full screen",
+    "description": "Label for a button used to exit full screen mode in the video player."
+  },
+  "FAST_FORWARD": {
+    "message": "Fast-forward",
+    "description": "Label for a button used to play video at a higher rate than normal."
+  },
+  "REWIND": {
+    "message": "Rewind",
+    "description": "Label for a button used to rewind video by seeking repeatedly backward."
+  },
+  "MUTE": {
+    "message": "Mute",
+    "description": "Label for a button used to mute the sound in the video player."
+  },
+  "UNMUTE": {
+    "message": "Unmute",
+    "description": "Label for a button used to unmute the sound in the video player."
+  },
+  "PAUSE": {
+    "message": "Pause",
+    "description": "Label for a button used to pause a video in the video player."
+  },
+  "PLAY": {
+    "message": "Play",
+    "description": "Label for a button used to play or unpause video in a video player."
+  },
+  "SEEK": {
+    "message": "Seek",
+    "description": "Label for a slider used to show progress or seek to a particular time in a video."
+  },
+  "VOLUME": {
+    "message": "Volume",
+    "description": "Label for a slider used to set the volume level of the video player."
+  },
+  "SKIP_TO_LIVE": {
+    "message": "Skip ahead to live",
+    "description": "Label for a button used to skip ahead to the live edge of a live video stream."
+  },
+  "LIVE": {
+    "message": "Live",
+    "description": "Label to indicate that a video is already playing at the live edge of a live video stream."
+  },
+  "MORE_SETTINGS": {
+    "message": "More settings",
+    "description": "Label for a button used to open a menu with additional settings in the video player."
+  },
+
+  "BACK": {
+    "message": "Back",
+    "meaning": "Return to previous menu",
+    "description": "Label for a button used to return to the previous menu in the video player's settings."
+  },
+
+  "CAPTIONS": {
+    "message": "Captions",
+    "description": "Label for a button used to navigate to a submenu to choose captions/subtitles in the video player."
+  },
+
+  "RESOLUTION": {
+    "message": "Resolution",
+    "meaning": "Visual quality",
+    "description": "Label for a button used to open a submenu to choose a video resolution in the video player."
+  },
+  "AUTO_QUALITY": {
+    "message": "Auto",
+    "meaning": "Automatic",
+    "description": "Label for a button used to allow the video player to select the resolution/quality of the video automatically."
+  },
+
+  "CAST": {
+    "message": "Cast...",
+    "description": "Label for a button used to open the native Cast dialog in the browser and select a destination to Cast to."
+  },
+
+  "LANGUAGE": {
+    "message": "Language",
+    "description": "Label for a button used to navigate to a submenu to choose the audio language in the video player."
+  },
+  "UNRECOGNIZED_LANGUAGE": {
+    "message": "Unrecognized",
+    "description": "Label for a button used to select an audio language whose language code we do not recognize.  This will be followed by the language code in parentheses.  For example, \"Unrecognized (sjn)\"."
+  },
+  "UNDETERMINED_LANGUAGE": {
+    "message": "Undetermined",
+    "description": "Label for a button used to select an audio track whose language is undetermined or unknown."
+  },
+  "MULTIPLE_LANGUAGES": {
+    "message": "Multiple languages",
+    "description": "Label for a button used to select an audio track which contains content in multiple languages."
+  },
+  "NOT_APPLICABLE": {
+    "message": "Not applicable",
+    "description": "Label for a button used to select an audio track for which language is not applicable, such as content without spoken words."
+  },
+
+  "ENTER_PICTURE_IN_PICTURE": {
+    "message": "Enter Picture-in-Picture",
+    "description": "Label for a button used to enter Picture-in-Picture mode in a video player.  This mode will float the video on top of the user's desktop and allow them to continue viewing while using other applications."
+  },
+  "EXIT_PICTURE_IN_PICTURE": {
+    "message": "Exit Picture-in-Picture",
+    "description": "Label for a button used to exit Picture-in-Picture mode in a video player.  This will bring the video back into the web page, rather than floating on top of the user's desktop."
+  },
+  "PICTURE_IN_PICTURE": {
+    "message": "Picture-in-Picture",
+    "description": "Label for a button used to control the Picture-in-Picture mode of a video player.  This mode will float the video on top of the user's desktop and allow them to continue viewing while using other applications."
+  },
+
+  "ON": {
+    "message": "On",
+    "description": "Title beneath a button showing that this feature of the video player is current enabled.  Currently used for Picture-in-Picture, but could apply to other features in the future."
+  },
+  "OFF": {
+    "message": "Off",
+    "description": "Title beneath a button showing that this feature of the video player is not currently enabled.  Currently used for Cast, Picture-in-Picture, and Captions/Subtitles, but could apply to other features in the future."
+  }
+}

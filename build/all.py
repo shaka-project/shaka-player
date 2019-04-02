@@ -24,6 +24,7 @@ import check
 import compiler
 import docs
 import gendeps
+import generateLocalizations
 import shakaBuildHelpers
 
 import os
@@ -33,6 +34,13 @@ def main(args):
   parser = argparse.ArgumentParser(
       description='User facing build script for building the Shaka'
                   ' Player Project.')
+
+  parser.add_argument(
+      '--locales',
+      type=str,
+      nargs='+',
+      default=generateLocalizations.DEFAULT_LOCALES,
+      help='The list of locales to compile in (default %(default)r)')
 
   parser.add_argument(
       '--fix',
@@ -59,6 +67,20 @@ def main(args):
 
   parsed_args = parser.parse_args(args)
 
+  # Make the dist/ folder, ignore errors.
+  base = shakaBuildHelpers.get_source_base()
+  try:
+    os.mkdir(os.path.join(base, 'dist'))
+  except OSError:
+    pass
+
+  # Generate localizations before running gendeps, so the output is available
+  # to the deps system.
+  # TODO(#1858): It might be time to look at a third-party build system.
+  localizations = compiler.GenerateLocalizations(parsed_args.locales)
+  if not localizations.generate(parsed_args.force):
+    return 1
+
   if gendeps.main([]) != 0:
     return 1
 
@@ -77,7 +99,6 @@ def main(args):
     return 1
 
   match = re.compile(r'.*\.less$')
-  base = shakaBuildHelpers.get_source_base()
   main_less_src = os.path.join(base, 'ui', 'controls.less')
   all_less_srcs = shakaBuildHelpers.get_all_files(
       os.path.join(base, 'ui'), match)
@@ -88,6 +109,7 @@ def main(args):
     return 1
 
   build_args_with_ui = ['--name', 'ui', '+@complete']
+  build_args_with_ui += ['--locales'] + parsed_args.locales
   build_args_without_ui = ['--name', 'compiled', '+@complete', '-@ui']
 
   if parsed_args.force:

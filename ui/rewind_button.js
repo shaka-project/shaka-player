@@ -67,7 +67,7 @@ shaka.ui.RewindButton = class extends shaka.ui.Element {
    */
   updateAriaLabel_() {
     this.button_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(shaka.ui.Locales.Ids.ARIA_LABEL_REWIND));
+        this.localization.resolve(shaka.ui.Locales.Ids.REWIND));
   }
 
   /**

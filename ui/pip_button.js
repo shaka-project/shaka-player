@@ -57,7 +57,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     label.classList.add('shaka-overflow-button-label');
     this.pipNameSpan_ = shaka.util.Dom.createHTMLElement('span');
     this.pipNameSpan_.textContent =
-      this.localization.resolve(LocIds.LABEL_PICTURE_IN_PICTURE);
+      this.localization.resolve(LocIds.PICTURE_IN_PICTURE);
     label.appendChild(this.pipNameSpan_);
 
     /** @private {!HTMLElement} */
@@ -144,9 +144,9 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     const LocIds = shaka.ui.Locales.Ids;
     this.pipIcon_.textContent = shaka.ui.Enums.MaterialDesignIcons.EXIT_PIP;
     this.pipButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.ARIA_LABEL_EXIT_PICTURE_IN_PICTURE));
+        this.localization.resolve(LocIds.EXIT_PICTURE_IN_PICTURE));
     this.currentPipState_.textContent =
-        this.localization.resolve(LocIds.LABEL_PICTURE_IN_PICTURE_ON);
+        this.localization.resolve(LocIds.ON);
   }
 
 
@@ -155,9 +155,9 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     const LocIds = shaka.ui.Locales.Ids;
     this.pipIcon_.textContent = shaka.ui.Enums.MaterialDesignIcons.PIP;
     this.pipButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.ARIA_LABEL_ENTER_PICTURE_IN_PICTURE));
+        this.localization.resolve(LocIds.ENTER_PICTURE_IN_PICTURE));
     this.currentPipState_.textContent =
-        this.localization.resolve(LocIds.LABEL_PICTURE_IN_PICTURE_OFF);
+        this.localization.resolve(LocIds.OFF);
   }
 
 
@@ -168,17 +168,16 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     const LocIds = shaka.ui.Locales.Ids;
 
     this.pipNameSpan_.textContent =
-      this.localization.resolve(LocIds.LABEL_PICTURE_IN_PICTURE);
+      this.localization.resolve(LocIds.PICTURE_IN_PICTURE);
 
     const ariaLabel = document.pictureInPictureElement ?
-                         LocIds.ARIA_LABEL_EXIT_PICTURE_IN_PICTURE :
-                         LocIds.ARIA_LABEL_ENTER_PICTURE_IN_PICTURE;
+        LocIds.EXIT_PICTURE_IN_PICTURE :
+        LocIds.ENTER_PICTURE_IN_PICTURE;
     this.pipButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
         this.localization.resolve(ariaLabel));
 
     const currentPipState = document.pictureInPictureElement ?
-                            LocIds.LABEL_PICTURE_IN_PICTURE_ON :
-                            LocIds.LABEL_PICTURE_IN_PICTURE_OFF;
+        LocIds.ON : LocIds.OFF;
 
     this.currentPipState_.textContent =
         this.localization.resolve(currentPipState);
