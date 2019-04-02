@@ -145,7 +145,7 @@ shaka.ui.Localization = class {
     if (missing.length) {
       /** @type {shaka.ui.Localization.UnknownLocalesEvent} */
       const e = {
-        locales: missing,
+        'locales': missing,
       };
 
       this.events_.dispatchEvent(new shaka.util.FakeEvent(
@@ -377,10 +377,10 @@ shaka.ui.Localization = class {
       /** @type {shaka.ui.Localization.MissingLocalizationsEvent} */
       const e = {
         // Make a copy of the preferred locales to avoid leaking references.
-        locales: Array.from(preferredLocales),
+        'locales': Array.from(preferredLocales),
         // Because most people like arrays more than sets, convert the set to
         // an array.
-        missing: Array.from(missing),
+        'missing': Array.from(missing),
       };
 
       this.events_.dispatchEvent(new shaka.util.FakeEvent(
@@ -429,6 +429,7 @@ shaka.ui.Localization.ConflictResolution = {
  * matches it has.
  *
  * @const {string}
+ * @export
  */
 shaka.ui.Localization.UNKNOWN_LOCALES = 'unknown-locales';
 
@@ -437,6 +438,7 @@ shaka.ui.Localization.UNKNOWN_LOCALES = 'unknown-locales';
  * related locales, or the fallback locale.
  *
  * @const {string}
+ * @export
  */
 shaka.ui.Localization.UNKNOWN_LOCALIZATION = 'unknown-localization';
 
@@ -446,6 +448,7 @@ shaka.ui.Localization.UNKNOWN_LOCALIZATION = 'unknown-localization';
  * locale.
  *
  * @const {string}
+ * @export
  */
 shaka.ui.Localization.MISSING_LOCALIZATIONS = 'missing-localizations';
 
@@ -454,6 +457,7 @@ shaka.ui.Localization.MISSING_LOCALIZATIONS = 'missing-localizations';
  * resolved values should be updated.
  *
  * @const {string}
+ * @export
  */
 shaka.ui.Localization.LOCALE_CHANGED = 'locale-changed';
 
@@ -462,6 +466,7 @@ shaka.ui.Localization.LOCALE_CHANGED = 'locale-changed';
  * affect previously resolved values.
  *
  * @const {string}
+ * @export
  */
 shaka.ui.Localization.LOCALE_UPDATED = 'locale-updated';
 

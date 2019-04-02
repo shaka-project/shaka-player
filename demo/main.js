@@ -211,9 +211,17 @@ shakaDemo.init = function() {
       }
 
       shakaDemo.controls_ = ui.getControls();
+      const localization = shakaDemo.controls_.getLocalization();
+
+      localization.addEventListener(
+          shaka.ui.Localization.UNKNOWN_LOCALES, (event) => {
+        for (let locale of event['locales']) {
+          shakaDemo.loadLocale_(locale);
+        }
+      });
 
       const uiLang = document.getElementById('preferredUILanguage').value;
-      shakaDemo.controls_.getLocalization().changeLocale([uiLang]);
+      localization.changeLocale([uiLang]);
       // TODO(#1591): Support multiple language preferences
 
       shakaDemo.controls_.addEventListener('error', (event) => {
@@ -690,6 +698,29 @@ shakaDemo.hashShouldChange_ = function() {
   if (location.search) {
     location.search = '';
   }
+};
+
+
+/**
+ * @param {string} locale
+ * @private
+ */
+shakaDemo.loadLocale_ = async function(locale) {
+  const url = '../ui/locales/' + locale + '.json';
+  const response = await fetch(url);
+  if (!response.ok) {
+    console.warn('Unable to load locale', locale);
+    return;
+  }
+
+  const obj = await response.json();
+  const map = new Map();
+  for (let key in obj) {
+    map.set(key, obj[key]);
+  }
+
+  const localization = shakaDemo.controls_.getLocalization();
+  localization.insert(locale, map);
 };
 
 

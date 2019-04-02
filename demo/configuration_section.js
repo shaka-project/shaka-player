@@ -172,6 +172,9 @@ shakaDemo.onConfigInput_ = function(event) {
     preferredAudioChannelCount: preferredAudioChannelCount,
   }));
 
+  // TODO: As an optimization, defer this change until the user stops typing.
+  // Currently, this is triggered on each keystroke.  Combine this with
+  // lazy-loading of localization data, and we get a fetch on every keypress.
   const uiLang = document.getElementById('preferredUILanguage').value;
   shakaDemo.controls_.getLocalization().changeLocale([uiLang]);
   // TODO(#1591): Support multiple language preferences

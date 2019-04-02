@@ -112,6 +112,8 @@ const CACHE_FIRST = [
   // Google Web Fonts should be cached when first seen, without being explicitly
   // listed, and should be preferred from cache for speed.
   'https://fonts.googleapis.com/',
+  // TODO: Refactor this to allow for caching of localization resources
+  // on-the-fly.
 ];
 
 
