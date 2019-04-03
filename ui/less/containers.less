@@ -24,6 +24,15 @@
   /* Without this, the container somehow winds up being a tad taller than it
    * should be (484px vs 480px). */
   display: flex;
+
+  /* Set the fonts for all contents, with a special exception for material
+   * design icons. */
+  .material-icons {
+    font-family: 'Material Icons';
+  }
+  * {
+    font-family: Roboto-Regular, Roboto, sans-serif;
+  }
 }
 
 /* Each browser has a different prefixed pseudo-class for fullscreened elements.
@@ -201,8 +210,6 @@
   position: absolute;
 
   span {
-    /* Use Roboto if available. */
-    font-family: Roboto-Regular, Roboto, sans-serif;
     font-size: 18px;
     color: rgb(255, 255, 255);
     display: block;
