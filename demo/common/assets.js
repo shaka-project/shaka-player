@@ -1109,6 +1109,22 @@ shakaAssets.testAssets = [
       shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,
     ],
   },
+  {
+    name: 'Live sim TTML Image Subtitles embedded (VoD)',
+    manifestUri: 'https://livesim.dashif.org/dash/vod/testpic_2s/img_subs.mpd',
+
+    iconUri: 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
+
+    encoder: shakaAssets.Encoder.UNKNOWN,
+    source: shakaAssets.Source.DASH_IF,
+    drm: [],
+    features: [
+      shakaAssets.Feature.DASH,
+      shakaAssets.Feature.MP4,
+      shakaAssets.Feature.SUBTITLES,
+      shakaAssets.Feature.TTML,
+    ],
+  },
   // }}}
 
   // Wowza assets {{{
