@@ -204,6 +204,25 @@ shaka.ui.TextDisplayer = class {
     captionsStyle.color = cue.color;
     captionsStyle.direction = cue.direction;
 
+    if (cue.backgroundImage) {
+      captionsStyle.backgroundImage = 'url(\'' + cue.backgroundImage + '\')';
+      captionsStyle.backgroundRepeat = 'no-repeat';
+      captionsStyle.backgroundSize = 'contain';
+      captionsStyle.backgroundPosition = 'center';
+      if (cue.region) {
+        if (cue.region.heightUnits === shaka.text.CueRegion.units.PERCENTAGE) {
+          captionsStyle.height = cue.region.height + '%';
+        } else {
+          captionsStyle.height = cue.region.height + 'px';
+        }
+        if (cue.region.widthUnits === shaka.text.CueRegion.units.PERCENTAGE) {
+          captionsStyle.width = cue.region.width + '%';
+        } else {
+          captionsStyle.width = cue.region.width + 'px';
+        }
+      }
+    }
+
     // The displayAlign attribute specifys the vertical alignment of the
     // captions inside the text container. Before means at the top of the
     // text container, and after means at the bottom.
