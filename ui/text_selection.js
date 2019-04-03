@@ -181,9 +181,11 @@ shaka.ui.TextSelection = class extends shaka.ui.Element {
       if (this.player.isTextTrackVisible()) {
         this.captionIcon_.classList.add('shaka-captions-on');
         this.captionIcon_.classList.remove('shaka-captions-off');
+        this.captionButton_.setAttribute('aria-pressed', 'true');
       } else {
         this.captionIcon_.classList.add('shaka-captions-off');
         this.captionIcon_.classList.remove('shaka-captions-on');
+        this.captionButton_.setAttribute('aria-pressed', 'false');
       }
     }
   }
