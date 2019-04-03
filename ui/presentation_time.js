@@ -39,6 +39,7 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
     this.currentTime_.textContent = '0:00';
     this.parent.appendChild(this.currentTime_);
 
+    // TODO(#1861): This is not accessible, since it is just a clickable div.
     this.eventManager.listen(this.currentTime_, 'click', () => {
       // Jump to LIVE if the user clicks on the current time.
       if (this.player.isLive()) {
