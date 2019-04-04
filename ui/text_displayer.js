@@ -209,18 +209,13 @@ shaka.ui.TextDisplayer = class {
       captionsStyle.backgroundRepeat = 'no-repeat';
       captionsStyle.backgroundSize = 'contain';
       captionsStyle.backgroundPosition = 'center';
-      if (cue.region) {
-        if (cue.region.heightUnits === shaka.text.CueRegion.units.PERCENTAGE) {
-          captionsStyle.height = cue.region.height + '%';
-        } else {
-          captionsStyle.height = cue.region.height + 'px';
-        }
-        if (cue.region.widthUnits === shaka.text.CueRegion.units.PERCENTAGE) {
-          captionsStyle.width = cue.region.width + '%';
-        } else {
-          captionsStyle.width = cue.region.width + 'px';
-        }
-      }
+    }
+    if (cue.backgroundImage && cue.region) {
+      const percentageUnit = shaka.text.CueRegion.units.PERCENTAGE;
+      const heightUnit = cue.region.heightUnits == percentageUnit ? '%' : 'px';
+      const widthUnit = cue.region.widthUnits == percentageUnit ? '%' : 'px';
+      captionsSytle.height = cue.region.height + heightUnit;
+      captionsSytle.width = cue.region.width + widthUnit;
     }
 
     // The displayAlign attribute specifys the vertical alignment of the
