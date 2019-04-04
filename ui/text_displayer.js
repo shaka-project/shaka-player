@@ -214,8 +214,8 @@ shaka.ui.TextDisplayer = class {
       const percentageUnit = shaka.text.CueRegion.units.PERCENTAGE;
       const heightUnit = cue.region.heightUnits == percentageUnit ? '%' : 'px';
       const widthUnit = cue.region.widthUnits == percentageUnit ? '%' : 'px';
-      captionsSytle.height = cue.region.height + heightUnit;
-      captionsSytle.width = cue.region.width + widthUnit;
+      captionsStyle.height = cue.region.height + heightUnit;
+      captionsStyle.width = cue.region.width + widthUnit;
     }
 
     // The displayAlign attribute specifys the vertical alignment of the
