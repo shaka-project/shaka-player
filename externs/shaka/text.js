@@ -284,6 +284,16 @@ shaka.extern.Cue.prototype.backgroundColor;
 
 
 /**
+ * Image background represented by any string that would be
+ * accepted in image HTML element.
+ * E. g. 'data:[mime type];base64,[data]'.
+ * @type {!string}
+ * @exportDoc
+ */
+shaka.extern.Cue.prototype.backgroundImage;
+
+
+/**
  * Text font size in px or em (e.g. '100px'/'100em').
  * @type {string}
  * @exportDoc
