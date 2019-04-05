@@ -45,12 +45,9 @@ describe('UI', () => {
   });
 
   beforeEach(async () => {
-    video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
-    video.width = 600;
-    video.height = 400;
-    video.muted = true;
+    video = shaka.util.Dom.createVideoElement();
 
-    videoContainer = shaka.ui.Utils.createHTMLElement('div');
+    videoContainer = shaka.util.Dom.createHTMLElement('div');
     videoContainer.appendChild(video);
     document.body.appendChild(videoContainer);
     player = new compiledShaka.Player(video);

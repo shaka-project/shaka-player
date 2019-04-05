@@ -18,7 +18,7 @@
 
 goog.provide('shaka.ui.TextDisplayer');
 
-goog.require('shaka.ui.Utils');
+goog.require('shaka.util.Dom');
 
 
 /**
@@ -46,7 +46,7 @@ shaka.ui.TextDisplayer = class {
     this.videoContainer_ = videoContainer;
 
     /** @type {HTMLElement} */
-    this.textContainer_ = shaka.ui.Utils.createHTMLElement('div');
+    this.textContainer_ = shaka.util.Dom.createHTMLElement('div');
     this.textContainer_.classList.add('shaka-text-container');
     this.videoContainer_.appendChild(this.textContainer_);
 
@@ -180,7 +180,7 @@ shaka.ui.TextDisplayer = class {
     });
 
     for (const cue of currentCues) {
-      const captions = shaka.ui.Utils.createHTMLElement('span');
+      const captions = shaka.util.Dom.createHTMLElement('span');
       this.setCaptionStyles_(captions, cue);
       this.currentCuesMap_.set(cue, captions);
       this.textContainer_.appendChild(captions);

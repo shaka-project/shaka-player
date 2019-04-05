@@ -23,6 +23,7 @@ goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
+goog.require('shaka.util.Dom');
 
 
 /**
@@ -43,24 +44,24 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
 
     const LocIds = shaka.ui.Locales.Ids;
     /** @private {!HTMLElement} */
-    this.pipButton_ = shaka.ui.Utils.createHTMLElement('button');
+    this.pipButton_ = shaka.util.Dom.createHTMLElement('button');
     this.pipButton_.classList.add('shaka-pip-button');
 
     /** @private {!HTMLElement} */
-    this.pipIcon_ = shaka.ui.Utils.createHTMLElement('i');
+    this.pipIcon_ = shaka.util.Dom.createHTMLElement('i');
     this.pipIcon_.classList.add('material-icons');
     this.pipIcon_.textContent = shaka.ui.Enums.MaterialDesignIcons.PIP;
     this.pipButton_.appendChild(this.pipIcon_);
 
-    const label = shaka.ui.Utils.createHTMLElement('label');
+    const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
-    this.pipNameSpan_ = shaka.ui.Utils.createHTMLElement('span');
+    this.pipNameSpan_ = shaka.util.Dom.createHTMLElement('span');
     this.pipNameSpan_.textContent =
       this.localization.resolve(LocIds.LABEL_PICTURE_IN_PICTURE);
     label.appendChild(this.pipNameSpan_);
 
     /** @private {!HTMLElement} */
-    this.currentPipState_ = shaka.ui.Utils.createHTMLElement('span');
+    this.currentPipState_ = shaka.util.Dom.createHTMLElement('span');
     this.currentPipState_.classList.add('shaka-current-selection-span');
     label.appendChild(this.currentPipState_);
 

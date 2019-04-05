@@ -23,6 +23,7 @@ goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
+goog.require('shaka.util.Dom');
 
 
 /**
@@ -82,24 +83,24 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
    */
   addResolutionButton_() {
     /** @private {!HTMLElement}*/
-    this.resolutionButton_ = shaka.ui.Utils.createHTMLElement('button');
+    this.resolutionButton_ = shaka.util.Dom.createHTMLElement('button');
 
     this.resolutionButton_.classList.add('shaka-resolution-button');
 
-    const icon = shaka.ui.Utils.createHTMLElement('i');
+    const icon = shaka.util.Dom.createHTMLElement('i');
     icon.classList.add('material-icons');
     icon.textContent = shaka.ui.Enums.MaterialDesignIcons.RESOLUTION;
     this.resolutionButton_.appendChild(icon);
 
-    const label = shaka.ui.Utils.createHTMLElement('label');
+    const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
 
     /** @private {!HTMLElement}*/
-    this.resolutionNameSpan_ = shaka.ui.Utils.createHTMLElement('span');
+    this.resolutionNameSpan_ = shaka.util.Dom.createHTMLElement('span');
     label.appendChild(this.resolutionNameSpan_);
 
     /** @private {!HTMLElement}*/
-    this.currentResolution_ = shaka.ui.Utils.createHTMLElement('span');
+    this.currentResolution_ = shaka.util.Dom.createHTMLElement('span');
     this.currentResolution_.classList.add('shaka-current-selection-span');
     label.appendChild(this.currentResolution_);
     this.resolutionButton_.appendChild(label);
@@ -113,7 +114,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
    */
    addResolutionMenu_() {
     /** @private {!HTMLElement}*/
-    this.resolutionMenu_ = shaka.ui.Utils.createHTMLElement('div');
+    this.resolutionMenu_ = shaka.util.Dom.createHTMLElement('div');
     this.resolutionMenu_.classList.add('shaka-resolutions');
     this.resolutionMenu_.classList.add('shaka-no-propagation');
     this.resolutionMenu_.classList.add('shaka-show-controls-on-mouse-over');
@@ -121,30 +122,30 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
 
     /** @private {!HTMLElement}*/
     this.backFromResolutionButton_ =
-      shaka.ui.Utils.createHTMLElement('button');
+      shaka.util.Dom.createHTMLElement('button');
     this.backFromResolutionButton_.classList.add(
       'shaka-back-to-overflow-button');
     this.resolutionMenu_.appendChild(this.backFromResolutionButton_);
 
-    const backIcon = shaka.ui.Utils.createHTMLElement('i');
+    const backIcon = shaka.util.Dom.createHTMLElement('i');
     backIcon.classList.add('material-icons');
     backIcon.textContent = shaka.ui.Enums.MaterialDesignIcons.BACK;
     this.backFromResolutionButton_.appendChild(backIcon);
 
     /** @private {!HTMLElement}*/
-    this.backFromResolutionSpan_ = shaka.ui.Utils.createHTMLElement('span');
+    this.backFromResolutionSpan_ = shaka.util.Dom.createHTMLElement('span');
     this.backFromResolutionButton_.appendChild(this.backFromResolutionSpan_);
 
 
     // Add the abr option
-    const auto = shaka.ui.Utils.createHTMLElement('button');
+    const auto = shaka.util.Dom.createHTMLElement('button');
     auto.setAttribute('aria-selected', 'true');
     this.resolutionMenu_.appendChild(auto);
 
     auto.appendChild(shaka.ui.Utils.checkmarkIcon());
 
     /** @private {!HTMLElement}*/
-    this.abrOnSpan_ = shaka.ui.Utils.createHTMLElement('span');
+    this.abrOnSpan_ = shaka.util.Dom.createHTMLElement('span');
     this.abrOnSpan_.classList.add('shaka-auto-span');
     auto.appendChild(this.abrOnSpan_);
 
@@ -196,12 +197,12 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
 
     // Add new ones
     tracks.forEach((track) => {
-      let button = shaka.ui.Utils.createHTMLElement('button');
+      const button = shaka.util.Dom.createHTMLElement('button');
       button.classList.add('explicit-resolution');
       button.addEventListener('click',
           this.onTrackSelected_.bind(this, track));
 
-      let span = shaka.ui.Utils.createHTMLElement('span');
+      const span = shaka.util.Dom.createHTMLElement('span');
       span.textContent = track.height + 'p';
       button.appendChild(span);
 
@@ -216,14 +217,14 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
     });
 
     // Add the Auto button
-    let autoButton = shaka.ui.Utils.createHTMLElement('button');
+    const autoButton = shaka.util.Dom.createHTMLElement('button');
     autoButton.addEventListener('click', function() {
-      let config = {abr: {enabled: true}};
+      const config = {abr: {enabled: true}};
       this.player.configure(config);
       this.updateResolutionSelection_();
     }.bind(this));
 
-    let autoSpan = shaka.ui.Utils.createHTMLElement('span');
+    const autoSpan = shaka.util.Dom.createHTMLElement('span');
     autoSpan.textContent =
       this.localization.resolve(shaka.ui.Locales.Ids.LABEL_AUTO_QUALITY);
     autoButton.appendChild(autoSpan);

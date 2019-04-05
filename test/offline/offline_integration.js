@@ -24,10 +24,7 @@ describe('Offline', () => {
   let video;
 
   beforeAll(function() {
-    video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
-    video.width = 600;
-    video.height = 400;
-    video.muted = true;
+    video = shaka.util.Dom.createVideoElement();
     document.body.appendChild(video);
   });
 

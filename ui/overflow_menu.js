@@ -25,6 +25,7 @@ goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.Utils');
+goog.require('shaka.util.Dom');
 
 
 /**
@@ -133,7 +134,7 @@ goog.require('shaka.ui.Utils');
    */
   addOverflowMenu_() {
     /** @private {!HTMLElement} */
-    this.overflowMenu_ = shaka.ui.Utils.createHTMLElement('div');
+    this.overflowMenu_ = shaka.util.Dom.createHTMLElement('div');
     this.overflowMenu_.classList.add('shaka-overflow-menu');
     this.overflowMenu_.classList.add('shaka-no-propagation');
     this.overflowMenu_.classList.add('shaka-show-controls-on-mouse-over');
@@ -147,7 +148,7 @@ goog.require('shaka.ui.Utils');
    */
   addOverflowMenuButton_() {
     /** @private {!HTMLElement} */
-    this.overflowMenuButton_ = shaka.ui.Utils.createHTMLElement('button');
+    this.overflowMenuButton_ = shaka.util.Dom.createHTMLElement('button');
     this.overflowMenuButton_.classList.add('shaka-overflow-menu-button');
     this.overflowMenuButton_.classList.add('shaka-no-propagation');
     this.overflowMenuButton_.classList.add('material-icons');

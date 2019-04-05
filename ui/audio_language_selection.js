@@ -24,6 +24,7 @@ goog.require('shaka.ui.LanguageUtils');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
+goog.require('shaka.util.Dom');
 
 
 /**
@@ -82,24 +83,24 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.Element {
    */
   addAudioLangMenu_() {
     /** @private {!HTMLElement} */
-    this.audioLangMenu_ = shaka.ui.Utils.createHTMLElement('div');
+    this.audioLangMenu_ = shaka.util.Dom.createHTMLElement('div');
     this.audioLangMenu_.classList.add('shaka-audio-languages');
     this.audioLangMenu_.classList.add('shaka-no-propagation');
     this.audioLangMenu_.classList.add('shaka-show-controls-on-mouse-over');
     this.audioLangMenu_.classList.add('shaka-settings-menu');
 
     /** @private {!HTMLElement} */
-    this.backFromLanguageButton_ = shaka.ui.Utils.createHTMLElement('button');
+    this.backFromLanguageButton_ = shaka.util.Dom.createHTMLElement('button');
     this.backFromLanguageButton_.classList.add('shaka-back-to-overflow-button');
     this.audioLangMenu_.appendChild(this.backFromLanguageButton_);
 
-    const backIcon = shaka.ui.Utils.createHTMLElement('i');
+    const backIcon = shaka.util.Dom.createHTMLElement('i');
     backIcon.classList.add('material-icons');
     backIcon.textContent = shaka.ui.Enums.MaterialDesignIcons.BACK;
     this.backFromLanguageButton_.appendChild(backIcon);
 
     /** @private {!HTMLElement} */
-    this.backFromLanguageSpan_ = shaka.ui.Utils.createHTMLElement('span');
+    this.backFromLanguageSpan_ = shaka.util.Dom.createHTMLElement('span');
     this.backFromLanguageButton_.appendChild(this.backFromLanguageSpan_);
 
     const controlsContainer = this.controls.getControlsContainer();
@@ -112,24 +113,24 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.Element {
    */
   addLanguagesButton_() {
     /** @private {!HTMLElement} */
-    this.languagesButton_ = shaka.ui.Utils.createHTMLElement('button');
+    this.languagesButton_ = shaka.util.Dom.createHTMLElement('button');
     this.languagesButton_.classList.add('shaka-language-button');
 
-    const icon = shaka.ui.Utils.createHTMLElement('i');
+    const icon = shaka.util.Dom.createHTMLElement('i');
     icon.classList.add('material-icons');
     icon.textContent = shaka.ui.Enums.MaterialDesignIcons.LANGUAGE;
     this.languagesButton_.appendChild(icon);
 
-    const label = shaka.ui.Utils.createHTMLElement('label');
+    const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
 
     /** @private {!HTMLElement} */
-    this.languageNameSpan_ = shaka.ui.Utils.createHTMLElement('span');
+    this.languageNameSpan_ = shaka.util.Dom.createHTMLElement('span');
     this.languageNameSpan_.classList.add('languageSpan');
     label.appendChild(this.languageNameSpan_);
 
     /** @private {!HTMLElement} */
-    this.currentAudioLanguage_ = shaka.ui.Utils.createHTMLElement('span');
+    this.currentAudioLanguage_ = shaka.util.Dom.createHTMLElement('span');
     this.currentAudioLanguage_.classList.add('shaka-current-selection-span');
     const language = this.player.getConfiguration().preferredAudioLanguage;
     this.currentAudioLanguage_.textContent =

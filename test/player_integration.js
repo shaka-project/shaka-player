@@ -31,10 +31,7 @@ describe('Player', function() {
   let compiledShaka;
 
   beforeAll(async () => {
-    video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
-    video.width = 600;
-    video.height = 400;
-    video.muted = true;
+    video = shaka.util.Dom.createVideoElement();
     document.body.appendChild(video);
 
     compiledShaka = await Util.loadShaka(getClientArg('uncompiled'));
@@ -498,10 +495,7 @@ describe('Player Manifest Retries', function() {
   let stateChangeSpy;
 
   beforeAll(() => {
-    video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
-    video.width = 600;
-    video.height = 400;
-    video.muted = true;
+    video = shaka.util.Dom.createVideoElement();
     document.body.appendChild(video);
 
     // For these tests, we don't want any network requests to succeed. We want
@@ -616,10 +610,7 @@ describe('Player Load Path', () => {
   let stateIdleSpy;
 
   beforeAll(async () => {
-    video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
-    video.width = 600;
-    video.height = 400;
-    video.muted = true;
+    video = shaka.util.Dom.createVideoElement();
     document.body.appendChild(video);
 
     await shaka.test.TestScheme.createManifests(shaka, '_compiled');

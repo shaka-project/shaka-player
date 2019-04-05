@@ -19,7 +19,7 @@
 goog.provide('shaka.ui.Spacer');
 
 goog.require('shaka.ui.Element');
-goog.require('shaka.ui.Utils');
+goog.require('shaka.util.Dom');
 
 
 /**
@@ -36,7 +36,7 @@ shaka.ui.Spacer = class extends shaka.ui.Element {
     super(parent, controls);
 
     /** @private {!HTMLElement} */
-    const div = shaka.ui.Utils.createHTMLElement('div');
+    const div = shaka.util.Dom.createHTMLElement('div');
     div.classList.add('shaka-spacer');
     // Make screen readers ignore the spacer
     div.setAttribute('aria-hidden', true);

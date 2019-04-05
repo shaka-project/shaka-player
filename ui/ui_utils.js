@@ -71,19 +71,6 @@ shaka.ui.Utils.isTsContent = function(player) {
 
 
 /**
- * Creates an element, and cast the type from Element to HTMLElement.
- *
- * @param {string} tagName
- * @return {!HTMLElement}
- */
-shaka.ui.Utils.createHTMLElement = function(tagName) {
-  const element =
-    /** @type {!HTMLElement} */ (document.createElement(tagName));
-  return element;
-};
-
-
-/**
  * Finds a descendant of |menu| that has a 'shaka-chosen-item' class
  * and focuses on its' parent.
  *
@@ -103,7 +90,7 @@ shaka.ui.Utils.focusOnTheChosenItem = function(menu) {
  * @return {!Element}
  */
 shaka.ui.Utils.checkmarkIcon = function() {
-  let icon = shaka.ui.Utils.createHTMLElement('i');
+  const icon = shaka.util.Dom.createHTMLElement('i');
   icon.classList.add('material-icons');
   icon.classList.add('shaka-chosen-item');
   icon.textContent = shaka.ui.Enums.MaterialDesignIcons.CHECKMARK;

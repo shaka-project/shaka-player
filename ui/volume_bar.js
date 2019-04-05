@@ -40,7 +40,7 @@ shaka.ui.VolumeBar = class extends shaka.ui.Element {
     // less/range_elements.less for a complete explanation.
     // TODO: Factor this into a range-element component.
     /** @private {!HTMLElement} */
-    this.container_ = shaka.ui.Utils.createHTMLElement('div');
+    this.container_ = shaka.util.Dom.createHTMLElement('div');
     this.container_.classList.add('shaka-volume-bar-container');
 
     this.bar_ =

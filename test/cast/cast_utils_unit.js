@@ -190,9 +190,7 @@ describe('CastUtils', function() {
       let mediaSourceEngine;
 
       beforeAll(function() {
-        video =
-            /** @type {!HTMLVideoElement} */ (document.createElement('video'));
-        video.muted = true;
+        video = shaka.util.Dom.createVideoElement();
         document.body.appendChild(video);
       });
 

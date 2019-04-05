@@ -23,6 +23,7 @@ goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
+goog.require('shaka.util.Dom');
 
 
 /**
@@ -42,23 +43,23 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
     this.castProxy_ = this.controls.getCastProxy();
 
     /** @private {!HTMLElement} */
-    this.castButton_ = shaka.ui.Utils.createHTMLElement('button');
+    this.castButton_ = shaka.util.Dom.createHTMLElement('button');
     this.castButton_.classList.add('shaka-cast-button');
     this.castButton_.setAttribute('aria-pressed', 'false');
 
     /** @private {!HTMLElement} */
-    this.castIcon_ = shaka.ui.Utils.createHTMLElement('i');
+    this.castIcon_ = shaka.util.Dom.createHTMLElement('i');
     this.castIcon_.classList.add('material-icons');
     this.castIcon_.textContent = shaka.ui.Enums.MaterialDesignIcons.CAST;
     this.castButton_.appendChild(this.castIcon_);
 
-    const label = shaka.ui.Utils.createHTMLElement('label');
+    const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
-    this.castNameSpan_ = shaka.ui.Utils.createHTMLElement('span');
+    this.castNameSpan_ = shaka.util.Dom.createHTMLElement('span');
     label.appendChild(this.castNameSpan_);
 
     this.castCurrentSelectionSpan_ =
-      shaka.ui.Utils.createHTMLElement('span');
+      shaka.util.Dom.createHTMLElement('span');
     this.castCurrentSelectionSpan_.classList.add(
       'shaka-current-selection-span');
     label.appendChild(this.castCurrentSelectionSpan_);

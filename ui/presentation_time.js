@@ -19,6 +19,7 @@
 goog.provide('shaka.ui.PresentationTimeTracker');
 
 goog.require('shaka.ui.Element');
+goog.require('shaka.util.Dom');
 
 
 /**
@@ -34,7 +35,7 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
-    this.currentTime_ = shaka.ui.Utils.createHTMLElement('div');
+    this.currentTime_ = shaka.util.Dom.createHTMLElement('div');
     this.currentTime_.classList.add('shaka-current-time');
     this.currentTime_.textContent = '0:00';
     this.parent.appendChild(this.currentTime_);

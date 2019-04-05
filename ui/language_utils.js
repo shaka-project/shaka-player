@@ -19,6 +19,7 @@
 goog.provide('shaka.ui.LanguageUtils');
 
 goog.require('mozilla.LanguageMapping');
+goog.require('shaka.util.Dom');
 
 
 shaka.ui.LanguageUtils = class {
@@ -57,10 +58,10 @@ shaka.ui.LanguageUtils = class {
 
     // 4. Add new buttons
     languages.forEach((language) => {
-      let button = shaka.ui.Utils.createHTMLElement('button');
+      let button = shaka.util.Dom.createHTMLElement('button');
       button.addEventListener('click', () => { onLanguageSelected(language); });
 
-      let span = shaka.ui.Utils.createHTMLElement('span');
+      let span = shaka.util.Dom.createHTMLElement('span');
       span.textContent =
         shaka.ui.LanguageUtils.getLanguageName(language, localization);
       button.appendChild(span);

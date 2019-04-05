@@ -65,10 +65,7 @@ describe('DrmEngine', function() {
         .then(function(result) { support = result; })
         .catch(fail);
 
-    video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
-    video.width = 600;
-    video.height = 400;
-    video.muted = true;
+    video = shaka.util.Dom.createVideoElement();
     document.body.appendChild(video);
 
     let responses = await Promise.all([

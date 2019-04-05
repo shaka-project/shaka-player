@@ -21,7 +21,7 @@ goog.provide('shaka.ui.FastForwardButton');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
-goog.require('shaka.ui.Utils');
+goog.require('shaka.util.Dom');
 
 
 /**
@@ -37,7 +37,7 @@ shaka.ui.FastForwardButton = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
-    this.button_ = shaka.ui.Utils.createHTMLElement('button');
+    this.button_ = shaka.util.Dom.createHTMLElement('button');
     this.button_.classList.add('material-icons');
     this.button_.classList.add('shaka-fast-forward-button');
     this.button_.textContent =

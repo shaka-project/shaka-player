@@ -25,6 +25,7 @@ goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.Utils');
+goog.require('shaka.util.Dom');
 goog.require('shaka.util.EventManager');
 goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.FakeEventTarget');
@@ -513,7 +514,7 @@ shaka.ui.Controls.prototype.createDOM_ = function() {
  */
 shaka.ui.Controls.prototype.addControlsContainer_ = function() {
   /** @private {!HTMLElement} */
-  this.controlsContainer_ = shaka.ui.Utils.createHTMLElement('div');
+  this.controlsContainer_ = shaka.util.Dom.createHTMLElement('div');
   this.controlsContainer_.classList.add('shaka-controls-container');
   this.videoContainer_.appendChild(this.controlsContainer_);
 };
@@ -524,12 +525,12 @@ shaka.ui.Controls.prototype.addControlsContainer_ = function() {
  */
 shaka.ui.Controls.prototype.addPlayButton_ = function() {
   /** @private {!HTMLElement} */
-  this.playButtonContainer_ = shaka.ui.Utils.createHTMLElement('div');
+  this.playButtonContainer_ = shaka.util.Dom.createHTMLElement('div');
   this.playButtonContainer_.classList.add('shaka-play-button-container');
   this.controlsContainer_.appendChild(this.playButtonContainer_);
 
   /** @private {!HTMLElement} */
-  this.playButton_ = shaka.ui.Utils.createHTMLElement('button');
+  this.playButton_ = shaka.util.Dom.createHTMLElement('button');
   this.playButton_.classList.add('shaka-play-button');
   this.playButton_.setAttribute('icon', 'play');
   this.playButtonContainer_.appendChild(this.playButton_);
@@ -575,7 +576,7 @@ shaka.ui.Controls.prototype.addBufferingSpinner_ = function() {
  */
 shaka.ui.Controls.prototype.addControlsButtonPanel_ = function() {
   /** @private {!HTMLElement} */
-  this.controlsButtonPanel_ = shaka.ui.Utils.createHTMLElement('div');
+  this.controlsButtonPanel_ = shaka.util.Dom.createHTMLElement('div');
   this.controlsButtonPanel_.classList.add('shaka-controls-button-panel');
   this.controlsButtonPanel_.classList.add('shaka-no-propagation');
   this.controlsButtonPanel_.classList.add('shaka-show-controls-on-mouse-over');
@@ -699,7 +700,7 @@ shaka.ui.Controls.prototype.addSeekBar_ = function() {
   // This container is to support IE 11.  See detailed notes in
   // less/range_elements.less for a complete explanation.
   // TODO: Factor this into a range-element component.
-  this.seekBarContainer_ = shaka.ui.Utils.createHTMLElement('div');
+  this.seekBarContainer_ = shaka.util.Dom.createHTMLElement('div');
   this.seekBarContainer_.classList.add('shaka-seek-bar-container');
 
   this.seekBar_ =
