@@ -75,6 +75,28 @@
   }
 }
 
+/* This button contains the current time and duration of the video.
+ * It's only clickable when the content is live, and current time is behind live
+ * edge. Otherwise, the button is disabled.
+ */
+.shaka-current-time {
+  font-size: 16px;
+  color: rgb(255, 255, 255);
+
+  /* Make the time element the right size for the text, instead of defaulting
+   * to the same size as the rest of the controls. */
+  height: auto;
+  cursor: pointer;
+
+  &[disabled] {
+    /* Set the background and the color, otherwise it might be overwritten by
+     * the css styles in demo. */
+    background-color: transparent;
+    color: white;
+    cursor: default;
+  }
+}
+
 /* Use a consistent outline focus style across browsers. */
 .shaka-controls-container {
   button:focus,

@@ -35,12 +35,11 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
-    this.currentTime_ = shaka.util.Dom.createHTMLElement('div');
+    this.currentTime_ = shaka.util.Dom.createHTMLElement('button');
     this.currentTime_.classList.add('shaka-current-time');
     this.currentTime_.textContent = '0:00';
     this.parent.appendChild(this.currentTime_);
 
-    // TODO(#1861): This is not accessible, since it is just a clickable div.
     this.eventManager.listen(this.currentTime_, 'click', () => {
       // Jump to LIVE if the user clicks on the current time.
       if (this.player.isLive()) {
@@ -50,6 +49,10 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
 
     this.eventManager.listen(this.controls, 'timeandseekrangeupdated', () => {
       this.updateTime_();
+    });
+
+    this.eventManager.listen(this.player, 'trackschanged', () => {
+      this.onTracksChanged_();
     });
   }
 
@@ -74,16 +77,16 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
       // Consider "LIVE" when less than 1 second behind the live-edge.  Always
       // show the full time string when seeking, including the leading '-';
       // otherwise, the time string "flickers" near the live-edge.
+      // The button should only be clickable when it's live stream content, and
+      // the current play time is behind live edge.
       if ((displayTime >= 1) || isSeeking) {
         this.currentTime_.textContent =
             '- ' + this.buildTimeString_(displayTime, showHour);
-        // TODO: move to CSS
-        this.currentTime_.style.cursor = 'pointer';
+        this.currentTime_.disabled = false;
       } else {
         this.currentTime_.textContent =
           this.localization.resolve(shaka.ui.Locales.Ids.LABEL_LIVE);
-        // TODO: move to CSS
-        this.currentTime_.style.cursor = '';
+        this.currentTime_.disabled = true;
       }
     } else {
       let showHour = duration >= 3600;
@@ -95,8 +98,7 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
         this.currentTime_.textContent += ' / ' +
             this.buildTimeString_(duration, showHour);
       }
-      // TODO: move to CSS
-      this.currentTime_.style.cursor = '';
+      this.currentTime_.disabled = true;
     }
   }
 
@@ -120,6 +122,17 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
       text = h + ':' + text;
     }
     return text;
+  }
+
+  /**
+   * Set the aria label to be 'Live' when the content is live stream.
+   */
+  onTracksChanged_() {
+    if (this.player.isLive()) {
+      const ariaLabel = shaka.ui.Locales.Ids.ARIA_LABEL_LIVE;
+      this.currentTime_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
+          this.localization.resolve(ariaLabel));
+    }
   }
 };
 
