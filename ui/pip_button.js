@@ -70,7 +70,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
 
     this.parent.appendChild(this.pipButton_);
 
-    // Don't display the button if PiP is not supported or not allowed
+    // Don't display the button if PiP is not supported or not allowed.
     // TODO: Can this ever change? Is it worth creating the button if the below
     // condition is true?
     if (!this.isPipAllowed_()) {
@@ -80,34 +80,32 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     this.eventManager.listen(
       this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
         this.updateLocalizedStrings_();
-    });
+      });
 
     this.eventManager.listen(
       this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
         this.updateLocalizedStrings_();
-    });
+      });
 
     this.eventManager.listen(this.pipButton_, 'click', () => {
-        this.onPipClick_();
-      });
+      this.onPipClick_();
+    });
 
-    this.eventManager.listen(
-      this.localVideo_, 'enterpictureinpicture', () => {
-        this.onEnterPictureInPicture_();
-      });
+    this.eventManager.listen(this.localVideo_, 'enterpictureinpicture', () => {
+      this.onEnterPictureInPicture_();
+    });
 
-    this.eventManager.listen(
-      this.localVideo_, 'leavepictureinpicture', () => {
-        this.onLeavePictureInPicture_();
-      });
+    this.eventManager.listen(this.localVideo_, 'leavepictureinpicture', () => {
+      this.onLeavePictureInPicture_();
+    });
 
     this.eventManager.listen(this.controls, 'caststatuschange', (e) => {
-        this.onCastStatusChange_(e);
-      });
+      this.onCastStatusChange_(e);
+    });
 
     this.eventManager.listen(this.player, 'trackschanged', () => {
-        this.onTracksChanged_();
-      });
+      this.onTracksChanged_();
+    });
   }
 
 
