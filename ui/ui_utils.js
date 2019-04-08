@@ -27,6 +27,7 @@ goog.require('goog.asserts');
  * @return {!HTMLElement}
  * @export
  */
+ // TODO: This can be replaced by shaka.util.Dom.getElementByClassName
 shaka.ui.Utils.getFirstDescendantWithClassName = function(element, className) {
   let descendant = shaka.ui.Utils.getDescendantIfExists(element, className);
   goog.asserts.assert(descendant != null, 'Should not be null!');

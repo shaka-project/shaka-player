@@ -17,6 +17,8 @@
 
 describe('UI', () => {
   const Util = shaka.test.Util;
+  const asHTMLElement = shaka.util.Dom.asHTMLElement;
+  const getElementByClassName = shaka.util.Dom.getElementByClassName;
 
   /** @type {!jasmine.Spy} */
   let onErrorSpy;
@@ -107,31 +109,131 @@ describe('UI', () => {
   });
 
 
-  describe('language selection', () => {
-    /** @type {!Element} */
-    let languageMenu;
+  describe('language selections', () => {
     /** @type {!Map.<string, !HTMLElement>} */
     let languagesToButtons;
     /** @type {!Array.<string>} */
     let langsFromContent;
     /** @type {!Array.<!HTMLElement>} */
     let languageButtons;
+    /** @type {!Element} */
+    let languageMenu;
+    /** @type {string} */
+    let oldLanguage;
+    /** @type {string} */
+    let newLanguage;
 
-    const oldLanguage = 'en';
-    const newLanguage = 'es';
+    describe('audio', () => {
+      beforeEach(() => {
+        oldLanguage = 'en';
+        newLanguage = 'es';
+        languageMenu = getElementByClassName(
+            'shaka-audio-languages', videoContainer);
+        setupLanguageTests(player.getAudioLanguagesAndRoles());
+      });
 
-    beforeEach(() => {
-      languageMenu = getElementByClassName('shaka-audio-languages');
-      const languagesAndRoles = player.getAudioLanguagesAndRoles();
+      it('contains all the languages', () => {
+        verifyLanguages();
+      });
 
+      it('choosing language through UI has effect on player', () => {
+        verifyLanguageChangeViaUI('variantchanged', player.getVariantTracks());
+      });
+
+      it('choosing language through API has effect on UI', () => {
+        verifyLanguageChangeViaAPI(
+            'languageselectionupdated', player.getVariantTracks());
+      });
+    });
+
+
+    describe('caption selection', () => {
+      beforeEach(() => {
+        oldLanguage = 'zh';
+        newLanguage = 'fr';
+        languageMenu = getElementByClassName(
+            'shaka-text-languages', videoContainer);
+        setupLanguageTests(player.getTextLanguagesAndRoles());
+      });
+
+      it('contains all the languages', () => {
+        verifyLanguages();
+      });
+
+      it('choosing caption language through UI has effect on player', () => {
+        verifyLanguageChangeViaUI('textchanged', player.getTextTracks());
+      });
+
+      it('choosing language through API has effect on UI', () => {
+        verifyLanguageChangeViaAPI(
+            'captionselectionupdated', player.getTextTracks());
+      });
+
+      it('turning captions off through UI has effect on player', async () => {
+        // Enable & verify the text.
+        await player.setTextTrackVisibility(true);
+        expect(player.isTextTrackVisible()).toBe(true);
+
+        // Find and click the 'Off' button
+        getOffButton().click();
+
+        // Wait for the change to take effect
+        await new Promise((resolve) => {
+          eventManager.listenOnce(player, 'texttrackvisibility', resolve);
+        });
+
+        expect(player.isTextTrackVisible()).toBe(false);
+      });
+
+      it('turning captions off through API has effect on UI', async () => {
+        // Disable & verify the text.
+        await player.setTextTrackVisibility(false);
+        expect(player.isTextTrackVisible()).toBe(false);
+
+        // Wait for the change to take effect
+        await new Promise((resolve) => {
+          eventManager.listenOnce(controls, 'captionselectionupdated', resolve);
+        });
+
+        const offButtonChosen =
+            getOffButton().querySelector('.shaka-chosen-item');
+        expect(offButtonChosen).not.toBe(null);
+      });
+
+
+      /**
+       * @return {!HTMLElement}
+       */
+      function getOffButton() {
+        const offButtons =
+          shaka.util.Iterables.filter(languageMenu.childNodes,
+          (node) => {
+            const button = asHTMLElement(node);
+            return button.classList.contains('shaka-turn-captions-off-button');
+          });
+
+        expect(offButtons.length).toBe(1);
+        return asHTMLElement(offButtons[0]);
+      }
+    });
+
+
+    /**
+     * @param {!Array.<shaka.extern.LanguageRole>} languagesAndRoles
+     */
+    function setupLanguageTests(languagesAndRoles) {
       langsFromContent = languagesAndRoles.map((langAndRole) => {
         return langAndRole.language;
       });
 
       languagesToButtons = populateLatestLanguageInfo(languageMenu.childNodes);
-    });
+    }
 
-    it('contains all the languages', () => {
+
+    /**
+     * Make sure languages specified by the manifest match what we show on UI.
+     */
+    function verifyLanguages() {
       const langsFromContentNative = langsFromContent.map((lang) => {
         return mozilla.LanguageMapping[lang].nativeName;
       });
@@ -141,31 +243,39 @@ describe('UI', () => {
         const languageName = button.childNodes[0].textContent;
         expect(langsFromContentNative.indexOf(languageName)).not.toBe(-1);
       }
-    });
+    }
 
-    it('choosing language through UI has effect on player', async () => {
-        expect(getSelectedTrack().language).toEqual(oldLanguage);
 
-        const button = languagesToButtons.get(newLanguage);
-        button.click();
+    /**
+     * @param {string} playerEventName
+     * @param {!Array.<!shaka.extern.Track>} tracks
+     */
+    async function verifyLanguageChangeViaUI(playerEventName, tracks) {
+      expect(getSelectedTrack(tracks).language).toEqual(oldLanguage);
 
-        // Wait for the change to take effect
-        await new Promise((resolve) => {
-            eventManager.listenOnce(player,
-                'variantchanged', resolve);
-        });
-        expect(getSelectedTrack().language).toEqual(newLanguage);
-    });
+      const button = languagesToButtons.get(newLanguage);
+      button.click();
 
-    it('choosing language through API has effect on UI', async () => {
-      expect(getSelectedTrack().language).toEqual(oldLanguage);
+      // Wait for the change to take effect
+      await new Promise((resolve) => {
+          eventManager.listenOnce(player, playerEventName, resolve);
+      });
+      expect(getSelectedTrack(tracks).language).toEqual(newLanguage);
+    }
+
+
+    /**
+     * @param {string} controlsEventName
+     * @param {!Array.<!shaka.extern.Track>} tracks
+     */
+    async function verifyLanguageChangeViaAPI(controlsEventName, tracks) {
+      expect(getSelectedTrack(tracks).language).toEqual(oldLanguage);
 
       player.selectAudioLanguage(newLanguage);
 
       // Wait for the UI to get updated
       await new Promise((resolve) => {
-          eventManager.listenOnce(controls,
-              'languageselectionupdated', resolve);
+          eventManager.listenOnce(controls, controlsEventName, resolve);
       });
 
       // Buttons were re-created on variant change
@@ -175,60 +285,53 @@ describe('UI', () => {
       const isChosen = button.querySelector('.shaka-chosen-item');
 
       expect(isChosen).not.toBe(null);
-    });
-
-
-  /**
-   * @param {!NodeList} allButtons
-   * @return {!Map.<string, !HTMLElement>}
-   */
-   function populateLatestLanguageInfo(allButtons) {
-    // Get languages from the UI.
-    // Language menu should have as many buttons as there are languages plus
-    // a "back to prev menu" button. Filter the back button out.
-    languageButtons =
-        shaka.util.Iterables.filter(allButtons,
-        (node) => {
-          const button = /** @type {!HTMLElement}*/ (node);
-          return !button.classList.contains('shaka-back-to-overflow-button');
-        });
-
-    expect(languageButtons.length).toEqual(langsFromContent.length);
-
-    const map = new Map();
-
-    // Find which language corresponds to which button
-    for (const locale of langsFromContent) {
-      for (const button of languageButtons) {
-        expect(button.childNodes.length).toBeGreaterThan(0);
-        const langNameUI = button.childNodes[0].textContent;
-        const langNameContent = mozilla.LanguageMapping[locale].nativeName;
-        if (langNameUI == langNameContent) {
-          map.set(locale, button);
-        }
-      }
     }
 
-    return map;
-   }
+    /**
+      * @param {!NodeList} allButtons
+      * @return {!Map.<string, !HTMLElement>}
+      */
+    function populateLatestLanguageInfo(allButtons) {
+      // Get languages from the UI.
+      // Language menu should have as many buttons as there are languages plus
+      // a "back to prev menu" button. Filter the back button out.
+      // Captions menu also has an "Off" button, which is not applicable here,
+      // either.
+      languageButtons =
+          shaka.util.Iterables.filter(allButtons,
+          (node) => {
+            const button = asHTMLElement(node);
+            const classes = button.classList;
+            return (!classes.contains('shaka-back-to-overflow-button') &&
+                    !classes.contains('shaka-turn-captions-off-button'));
+          });
+
+      expect(languageButtons.length).toEqual(langsFromContent.length);
+
+      const map = new Map();
+
+      // Find which language corresponds to which button
+      for (const locale of langsFromContent) {
+        for (const button of languageButtons) {
+          expect(button.childNodes.length).toBeGreaterThan(0);
+          const langNameUI = button.childNodes[0].textContent;
+          const langNameContent = mozilla.LanguageMapping[locale].nativeName;
+          if (langNameUI == langNameContent) {
+            map.set(locale, button);
+          }
+        }
+      }
+
+      return map;
+    }
   });
 
 
   /**
-   * @param {string} className
-   * @return {!Element}
-   */
-  function getElementByClassName(className) {
-    const elements = videoContainer.getElementsByClassName(className);
-    expect(elements.length).toBe(1);
-    return elements[0];
-  }
-
-  /**
+   * @param {!Array.<!shaka.extern.Track>} tracks
    * @return {!shaka.extern.Track}
    */
-  function getSelectedTrack() {
-    const tracks = player.getVariantTracks();
+  function getSelectedTrack(tracks) {
     const activeTracks = tracks.filter((track) => {
       return track.active == true;
     });
