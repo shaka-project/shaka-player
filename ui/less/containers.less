@@ -99,6 +99,10 @@
   /* When we show/hide this, do it gradually using cubic-bezier timing. */
   transition: opacity cubic-bezier(0.4, 0.0, 0.6, 1) 600ms;
 
+  /* Position the controls container in front of the text container, so that
+   * the text container doesn't interfere with the control buttons. */
+  z-index: 1;
+
   &[shown="true"] {
     opacity: 1;
   }
@@ -183,14 +187,10 @@
 }
 
 .shaka-text-container {
-  bottom: 12%;
+  bottom: 15%;
   top: 0%;
   width: 100%;
   min-width: 48px;
-
-  /* Position the text container "behind" the overlapping controls
-   * elements, so it doesn't interfere with their work. */
-  z-index: -1;
 
   /* Set the captions in the middle horizontally by default. */
   display: flex;
