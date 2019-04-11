@@ -124,9 +124,13 @@ shaka.ui.Overlay.scanPageForShakaElements_ = function() {
   // Check to see if the browser supports the basic APIs Shaka needs.
   if (!shaka.Player.isBrowserSupported()) {
     shaka.log.error('Shaka Player does not support this browser. ' +
-      'Please see https://tinyurl.com/y7s4j9tr for the list of ' +
-      'supported browsers.');
+        'Please see https://tinyurl.com/y7s4j9tr for the list of ' +
+        'supported browsers.');
 
+    // Although this has failed, fire the "loaded" event.  This will let apps
+    // get on with the business of startup, check isBrowserSupported()
+    // themselves, and show an appropriate error message at the app level.
+    shaka.ui.Overlay.dispatchLoadedEvent_();
     return;
   }
 
@@ -217,7 +221,12 @@ shaka.ui.Overlay.scanPageForShakaElements_ = function() {
   // After scanning the page for elements, fire the "loaded" event.  This will
   // let apps know they can use the UI library programmatically now, even if
   // they didn't have any Shaka-related elements declared in their HTML.
+  shaka.ui.Overlay.dispatchLoadedEvent_();
+};
 
+
+/** @private */
+shaka.ui.Overlay.dispatchLoadedEvent_ = function() {
   // "Event" is not constructable on IE, so we use this CustomEvent pattern.
   const uiLoadedEvent = /** @type {!CustomEvent} */(
       document.createEvent('CustomEvent'));
