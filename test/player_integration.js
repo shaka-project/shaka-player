@@ -840,7 +840,7 @@ describe('Player Load Path', () => {
     await load2;
   });
 
-  it('unload will interupt load', async () => {
+  it('unload will interrupt load', async () => {
     createPlayer(/* attachedTo= */ null);
 
     await player.attach(video);
