@@ -870,6 +870,7 @@ shakaAssets.testAssets = [
     source: shakaAssets.Source.AXINOM,
     drm: [],
     features: [
+      shakaAssets.Feature.DASH,
       shakaAssets.Feature.EMBEDDED_TEXT,
       shakaAssets.Feature.LIVE,
       shakaAssets.Feature.MP4,
@@ -1008,6 +1009,7 @@ shakaAssets.testAssets = [
     source: shakaAssets.Source.DASH_IF,
     drm: [],
     features: [
+      shakaAssets.Feature.DASH,
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_TEMPLATE_TIMELINE,
       shakaAssets.Feature.OFFLINE,
@@ -1023,6 +1025,7 @@ shakaAssets.testAssets = [
     source: shakaAssets.Source.DASH_IF,
     drm: [],
     features: [
+      shakaAssets.Feature.DASH,
       shakaAssets.Feature.LIVE,
       shakaAssets.Feature.MP4,
       shakaAssets.Feature.SEGMENT_TEMPLATE_DURATION,

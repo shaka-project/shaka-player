@@ -80,6 +80,15 @@ shakaDemo.setupAssets_ = function() {
       option.disabled = true;
     }
 
+    if (asset.features.includes(shakaAssets.Feature.DASH) &&
+        !shakaDemo.support_.manifest['mpd']) {
+      option.disabled = true;
+    }
+    if (asset.features.includes(shakaAssets.Feature.HLS) &&
+        !shakaDemo.support_.manifest['m3u8']) {
+      option.disabled = true;
+    }
+
     if (!option.disabled && !group.disabled) {
       first = first || option;
       if (asset.focus) first = option;
