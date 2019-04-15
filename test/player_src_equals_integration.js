@@ -19,12 +19,17 @@
 // |HTMLMediaElement.src=|. These tests are to verify that all |shaka.Player|
 // public methods behaviour correctly when playing content video |src=|.
 describe('Player Src Equals', () => {
+  const Util = shaka.test.Util;
+  const waitForMovementOrFailOnTimeout = Util.waitForMovementOrFailOnTimeout;
+
   const SMALL_MP4_CONTENT_URI = '/base/test/test/assets/small.mp4';
 
   /** @type {!HTMLVideoElement} */
   let video;
   /** @type {!shaka.Player} */
   let player;
+  /** @type {shaka.util.EventManager} */
+  let eventManager;
 
   beforeAll(() => {
     video = shaka.util.Dom.createVideoElement();
@@ -34,10 +39,13 @@ describe('Player Src Equals', () => {
   beforeEach(() => {
     player = new shaka.Player();
     player.addEventListener('error', fail);
+    eventManager = new shaka.util.EventManager;
   });
 
   afterEach(async () => {
     await player.destroy();
+
+    eventManager.release();
 
     // Work-around: allow the Tizen media pipeline to cool down.
     // Without this, Tizen's pipeline seems to hang in subsequent tests.
@@ -93,19 +101,19 @@ describe('Player Src Equals', () => {
     expect(seekRange.end).toBeCloseTo(video.duration);
     expect(video.duration).not.toBeCloseTo(0);
 
-    // Start playback and let it play for a little. We give it a couple second
-    // so that any start-up latency from the media stack will be forgiven.
+    // Start playback and wait for the playhead to move.
     video.play();
-    await shaka.test.Util.delay(2);
+    await waitForMovementOrFailOnTimeout(eventManager, video, /* timeout= */10);
 
     // Make sure the playhead is roughly where we expect it to be before
     // seeking.
     expect(video.currentTime).toBeGreaterThan(0);
     expect(video.currentTime).toBeLessThan(2.0);
 
-    // Trigger a seek and then wait a little to allow the seek to take effect.
+    // Trigger a seek and then wait for the seek to take effect.
+    // This seek target is very close to the duration of the video.
     video.currentTime = 10;
-    await shaka.test.Util.delay(0.5);
+    await waitForMovementOrFailOnTimeout(eventManager, video, /* timeout= */10);
 
     // Make sure the playhead is roughly where we expect it to be after
     // seeking.
@@ -129,9 +137,9 @@ describe('Player Src Equals', () => {
   it('reports buffering information', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
 
-    // Wait one second in hopes that it will allow us to buffer more than one
-    // second of content.
-    await shaka.test.Util.delay(1);
+    // For playback to begin so that we have some content buffered.
+    video.play();
+    await waitForMovementOrFailOnTimeout(eventManager, video, /* timeout= */10);
 
     const buffered = player.getBufferedInfo();
 
@@ -140,13 +148,12 @@ describe('Player Src Equals', () => {
     expect(buffered.video).toEqual([]);
     expect(buffered.text).toEqual([]);
 
-    // We should have an overall view of buffering. We gave ourselves a second
-    // to buffer content, so we should have more than one second worth of
-    // content (hopefully).
+    // We should have an overall view of buffering. We waited for playback,
+    // so we should have some content buffered.
     expect(buffered.total).toBeTruthy();
     expect(buffered.total.length).toBe(1);
     expect(buffered.total[0].start).toBeCloseTo(0);
-    expect(buffered.total[0].end).toBeGreaterThan(1);
+    expect(buffered.total[0].end).toBeGreaterThan(0);
   });
 
   // When we load content via src=, can we use the trick play controls to
@@ -154,17 +161,16 @@ describe('Player Src Equals', () => {
   it('can control trick play rate', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
 
-    video.play();
-
     // Let playback run for a little.
-    await shaka.test.Util.delay(0.1);
+    video.play();
+    await waitForMovementOrFailOnTimeout(eventManager, video, /* timeout= */10);
 
     // Enabling trick play should change our playback rate to the same rate.
     player.trickPlay(2);
     expect(video.playbackRate).toBe(2);
 
     // Let playback continue playing for a bit longer.
-    await shaka.test.Util.delay(0.5);
+    await shaka.test.Util.delay(2);
 
     // Cancelling trick play should return our playback rate to normal.
     player.cancelTrickPlay();
@@ -327,6 +333,7 @@ describe('Player Src Equals', () => {
 
     // Start playback and wait. We should see the playhead move.
     video.play();
+    await waitForMovementOrFailOnTimeout(eventManager, video, /* timeout= */10);
     await shaka.test.Util.delay(1.5);
 
     // When checking if the playhead moved, check for less progress than time we
@@ -342,7 +349,8 @@ describe('Player Src Equals', () => {
 
     // Wait some time for playback to start so that we will have a load latency
     // value.
-    await shaka.test.Util.delay(0.2);
+    video.play();
+    await waitForMovementOrFailOnTimeout(eventManager, video, /* timeout= */10);
 
     // Get the stats and check that some stats have been filled in.
     const stats = player.getStats();

@@ -18,6 +18,8 @@
 describe('Player', () => {
   const Util = shaka.test.Util;
   const Feature = shakaAssets.Feature;
+  const waitForMovementOrFailOnTimeout = Util.waitForMovementOrFailOnTimeout;
+  const waitForEndOrTimeout = Util.waitForEndOrTimeout;
 
   /** @type {!jasmine.Spy} */
   let onErrorSpy;
@@ -170,10 +172,10 @@ describe('Player', () => {
 
         // Wait for the video to start playback.  If it takes longer than 20
         // seconds, fail the test.
-        await waitForMovementOrFailOnTimeout(video, 20);
+        await waitForMovementOrFailOnTimeout(eventManager, video, 20);
 
         // Play for 30 seconds, but stop early if the video ends.
-        await waitForEndOrTimeout(video, 30);
+        await waitForEndOrTimeout(eventManager, video, 30);
 
         if (video.ended) {
           checkEndedTime();
@@ -193,10 +195,10 @@ describe('Player', () => {
 
             // Wait for the video to start playback again after seeking.  If it
             // takes longer than 20 seconds, fail the test.
-            await waitForMovementOrFailOnTimeout(video, 20);
+            await waitForMovementOrFailOnTimeout(eventManager, video, 20);
 
             // Play for 30 seconds, but stop early if the video ends.
-            await waitForEndOrTimeout(video, 30);
+            await waitForEndOrTimeout(eventManager, video, 30);
 
             // By now, ended should be true.
             expect(video.ended).toBe(true);
@@ -228,79 +230,6 @@ describe('Player', () => {
       shakaAssets.testAssets.forEach(createAssetTest);
     }
   });
-
-  /**
-   * Wait for the video playhead to move forward by some meaningful delta.
-   * If this happens before |timeout| seconds pass, the Promise is resolved.
-   * Otherwise, the Promise is rejected.
-   *
-   * @param {!HTMLMediaElement} target
-   * @param {number} timeout in seconds, after which the Promise fails
-   * @return {!Promise}
-   */
-  function waitForMovementOrFailOnTimeout(target, timeout) {
-    const curEventManager = eventManager;
-    const timeGoal = target.currentTime + 1;
-    let goalMet = false;
-    const startTime = Date.now();
-    shaka.log.info('Waiting for movement from', target.currentTime,
-                   'to', timeGoal);
-
-    return new Promise((resolve, reject) => {
-      curEventManager.listen(target, 'timeupdate', () => {
-        if (target.currentTime >= timeGoal) {
-          goalMet = true;
-          const endTime = Date.now();
-          const seconds = ((endTime - startTime) / 1000).toFixed(2);
-          shaka.log.info('Movement goal met after ' + seconds + ' seconds');
-
-          curEventManager.unlisten(target, 'timeupdate');
-          resolve();
-        }
-      });
-
-      Util.delay(timeout).then(() => {
-        // This check is only necessary to supress the error log.  It's fine to
-        // unlisten twice or to reject after resolve.  Neither of those actions
-        // matter.  But the error log can be confusing during debugging if we
-        // have already met the movement goal.
-        if (!goalMet) {
-          shaka.log.error('Timeout waiting for playback.',
-                          'current time', target.currentTime,
-                          'ready state', target.readyState,
-                          'playback rate', target.playbackRate,
-                          'paused', target.paused,
-                          'buffered', JSON.stringify(player.getBufferedInfo()));
-
-          curEventManager.unlisten(target, 'timeupdate');
-          reject(new Error('Timeout while waiting for playback!'));
-        }
-      });
-    });
-  }
-
-  /**
-   * Wait for the video to end or for |timeout| seconds to pass, whichever
-   * occurs first.  The Promise is resolved when either of these happens.
-   *
-   * @param {!HTMLMediaElement} target
-   * @param {number} timeout in seconds, after which the Promise succeeds
-   * @return {!Promise}
-   */
-  function waitForEndOrTimeout(target, timeout) {
-    const curEventManager = eventManager;
-
-    return new Promise((resolve, reject) => {
-      const callback = () => {
-        curEventManager.unlisten(target, 'ended');
-        resolve();
-      };
-
-      // Whichever happens first resolves the Promise.
-      curEventManager.listen(target, 'ended', callback);
-      Util.delay(timeout).then(callback);
-    });
-  }
 
   /**
    * Check the video time for videos that we expect to have ended.
