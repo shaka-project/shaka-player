@@ -25,13 +25,6 @@
  * @param {string} name
  * @param {jasmine.Callback} callback
  */
-var externalIt = function(name, callback) {};
-
-
-/**
- * @param {string} name
- * @param {jasmine.Callback} callback
- */
 var drmIt = function(name, callback) {};
 
 
