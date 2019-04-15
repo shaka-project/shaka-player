@@ -138,7 +138,9 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
 
 
     // Add the abr option
+    // TODO: Get rid of creating Auto button twice - here and on update.
     const auto = shaka.util.Dom.createHTMLElement('button');
+    auto.classList.add('shaka-enable-abr-button');
     auto.setAttribute('aria-selected', 'true');
     this.resolutionMenu_.appendChild(auto);
 
@@ -218,6 +220,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
 
     // Add the Auto button
     const autoButton = shaka.util.Dom.createHTMLElement('button');
+    autoButton.classList.add('shaka-enable-abr-button');
     autoButton.addEventListener('click', function() {
       const config = {abr: {enabled: true}};
       this.player.configure(config);
@@ -242,6 +245,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
 
     this.resolutionMenu_.appendChild(autoButton);
     shaka.ui.Utils.focusOnTheChosenItem(this.resolutionMenu_);
+    this.controls.dispatchEvent(
+        new shaka.util.FakeEvent('resolutionselectionupdated'));
   }
 
 

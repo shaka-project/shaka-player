@@ -27,7 +27,7 @@ describe('UI', () => {
   let video;
   /** @type {!HTMLElement} */
   let videoContainer;
-  /** @type {shaka.Player} */
+  /** @type {!shaka.Player} */
   let player;
   /** @type {shaka.util.EventManager} */
   let eventManager;
@@ -90,10 +90,7 @@ describe('UI', () => {
     eventManager.listen(controls, 'error', Util.spyFunc(onErrorSpy));
 
     await player.load('test:sintel_multi_lingual_multi_res_compiled');
-    await new Promise((resolve) => {
-        eventManager.listenOnce(player,
-            'periodreadyforstreaming', resolve);
-    });
+    await waitForEvent(player, 'periodreadyforstreaming');
   });
 
   afterEach(async () => {
@@ -175,9 +172,7 @@ describe('UI', () => {
         getOffButton().click();
 
         // Wait for the change to take effect
-        await new Promise((resolve) => {
-          eventManager.listenOnce(player, 'texttrackvisibility', resolve);
-        });
+        await waitForEvent(player, 'texttrackvisibility');
 
         expect(player.isTextTrackVisible()).toBe(false);
       });
@@ -188,9 +183,7 @@ describe('UI', () => {
         expect(player.isTextTrackVisible()).toBe(false);
 
         // Wait for the change to take effect
-        await new Promise((resolve) => {
-          eventManager.listenOnce(controls, 'captionselectionupdated', resolve);
-        });
+        await waitForEvent(controls, 'captionselectionupdated');
 
         const offButtonChosen =
             getOffButton().querySelector('.shaka-chosen-item');
@@ -223,7 +216,23 @@ describe('UI', () => {
         return langAndRole.language;
       });
 
-      languagesToButtons = populateLatestLanguageInfo(languageMenu.childNodes);
+      languageButtons = filterButtons(languageMenu.childNodes,
+        ['shaka-back-to-overflow-button', 'shaka-turn-captions-off-button']);
+
+      languagesToButtons = mapChoicesToButtons(
+        /* allButtons= */ languageButtons,
+        /* choices= */ langsFromContent,
+        /* modifier= */ getNativeName,
+      );
+    }
+
+
+    /**
+     * @param {string} language
+     * @return {string}
+     */
+    function getNativeName(language) {
+      return mozilla.LanguageMapping[language].nativeName;
     }
 
 
@@ -232,14 +241,10 @@ describe('UI', () => {
      */
     function verifyLanguages() {
       const langsFromContentNative = langsFromContent.map((lang) => {
-        return mozilla.LanguageMapping[lang].nativeName;
+        return getNativeName(lang);
       });
 
-      for (const button of languageButtons) {
-        expect(button.childNodes.length).toBeGreaterThan(0);
-        const languageName = button.childNodes[0].textContent;
-        expect(langsFromContentNative.indexOf(languageName)).not.toBe(-1);
-      }
+      verifyItems(langsFromContentNative, languageButtons);
     }
 
 
@@ -254,9 +259,7 @@ describe('UI', () => {
       button.click();
 
       // Wait for the change to take effect
-      await new Promise((resolve) => {
-          eventManager.listenOnce(player, playerEventName, resolve);
-      });
+      await waitForEvent(player, playerEventName);
       expect(getSelectedTrack(tracks).language).toEqual(newLanguage);
     }
 
@@ -271,58 +274,229 @@ describe('UI', () => {
       player.selectAudioLanguage(newLanguage);
 
       // Wait for the UI to get updated
-      await new Promise((resolve) => {
-          eventManager.listenOnce(controls, controlsEventName, resolve);
-      });
+      await waitForEvent(controls, controlsEventName);
 
       // Buttons were re-created on variant change
-      languagesToButtons = populateLatestLanguageInfo(languageMenu.childNodes);
+      languagesToButtons = mapChoicesToButtons(
+        /* allButtons= */ languageButtons,
+        /* choices */ langsFromContent,
+        /* modifier */ getNativeName
+      );
 
       const button = languagesToButtons.get(newLanguage);
       const isChosen = button.querySelector('.shaka-chosen-item');
 
       expect(isChosen).not.toBe(null);
     }
-
-    /**
-      * @param {!NodeList} allButtons
-      * @return {!Map.<string, !HTMLElement>}
-      */
-    function populateLatestLanguageInfo(allButtons) {
-      // Get languages from the UI.
-      // Language menu should have as many buttons as there are languages plus
-      // a "back to prev menu" button. Filter the back button out.
-      // Captions menu also has an "Off" button, which is not applicable here,
-      // either.
-      languageButtons =
-          shaka.util.Iterables.filter(allButtons,
-          (node) => {
-            const button = asHTMLElement(node);
-            const classes = button.classList;
-            return (!classes.contains('shaka-back-to-overflow-button') &&
-                    !classes.contains('shaka-turn-captions-off-button'));
-          });
-
-      expect(languageButtons.length).toEqual(langsFromContent.length);
-
-      const map = new Map();
-
-      // Find which language corresponds to which button
-      for (const locale of langsFromContent) {
-        for (const button of languageButtons) {
-          expect(button.childNodes.length).toBeGreaterThan(0);
-          const langNameUI = button.childNodes[0].textContent;
-          const langNameContent = mozilla.LanguageMapping[locale].nativeName;
-          if (langNameUI == langNameContent) {
-            map.set(locale, button);
-          }
-        }
-      }
-
-      return map;
-    }
   });
 
+
+  describe('resolution selection', () => {
+    /** @type {!Map.<number, !HTMLElement>} */
+    let resolutionsToButtons;
+    /** @type {!Array.<number>} */
+    let resolutionsFromContent;
+    /** @type {!Array.<!HTMLElement>} */
+    let resolutionButtons;
+    /** @type {!Element} */
+    let resolutionsMenu;
+    /** @type {number} */
+    let oldResolution;
+    /** @type {number} */
+    let newResolution;
+    /** @type {!Array.<shaka.extern.Track>} */
+    let tracks;
+    /** @type {string} */
+    let preferredLanguage;
+    /** @type {!shaka.extern.Track} */
+    let oldResolutionTrack;
+
+
+    beforeEach(async () => {
+      oldResolution = 182;
+      newResolution = 272;
+      // Chosen language affects which resolutions get
+      // displayed in the UI.
+      preferredLanguage = 'en';
+
+      // Disable abr for the resolution tests
+      const config = {abr: {enabled: false}};
+      player.configure(config);
+
+      player.selectAudioLanguage(preferredLanguage);
+      await waitForEvent(player, 'variantchanged');
+
+      resolutionsMenu = getElementByClassName(
+          'shaka-resolutions', videoContainer);
+
+      updateResolutionButtonsAndMap();
+
+
+      oldResolutionTrack = findTrackWithHeight(tracks, oldResolution);
+    });
+
+
+    it('contains all the relevant resolutions', () => {
+      const formattedResolutions = resolutionsFromContent.map((res) => {
+        return formatResolution(res);
+      });
+      verifyItems(formattedResolutions, resolutionButtons);
+    });
+
+
+    it('changing resolution via UI has effect on the player', async () => {
+      player.selectVariantTrack(oldResolutionTrack);
+
+      // Wait for the change to take effect
+      await waitForEvent(player, 'variantchanged');
+      // Update the tracks
+      tracks = player.getVariantTracks();
+      expect(getSelectedTrack(tracks).height).toEqual(oldResolution);
+
+      const button = resolutionsToButtons.get(newResolution);
+      button.click();
+
+      // Wait for the change to take effect
+      await waitForEvent(player, 'variantchanged');
+      // Update the tracks
+      tracks = player.getVariantTracks();
+      expect(getSelectedTrack(tracks).height).toEqual(newResolution);
+    });
+
+
+    it('changing resolution via API has effect on the UI', async () => {
+      // Start with the old resolution
+      player.selectVariantTrack(oldResolutionTrack);
+
+      // Wait for the change to take effect
+      await waitForEvent(player, 'variantchanged');
+      updateResolutionButtonsAndMap();
+      expect(getSelectedTrack(tracks).height).toEqual(oldResolution);
+
+      const newResolutionTrack = findTrackWithHeight(tracks, newResolution);
+      player.selectVariantTrack(newResolutionTrack);
+
+      // Wait for the change to take effect
+      await waitForEvent(controls, 'resolutionselectionupdated');
+
+      updateResolutionButtonsAndMap();
+
+      expect(getSelectedTrack(tracks).height).toEqual(newResolution);
+
+      const button = resolutionsToButtons.get(newResolution);
+      const isChosen = button.querySelector('.shaka-chosen-item');
+
+      expect(isChosen).not.toBe(null);
+    });
+
+
+    it('selecting Auto via UI enables ABR', async () => {
+      // We disabled abr in beforeEach()
+      expect(player.getConfiguration().abr.enabled).toBe(false);
+
+      // Find the 'Auto' button
+      const auto = getAutoButton();
+      auto.click();
+
+      await waitForEvent(controls, 'resolutionselectionupdated');
+      expect(player.getConfiguration().abr.enabled).toBe(true);
+    });
+
+
+    it('selecting specific resolution disables ABR', async () => {
+      const config = {abr: {enabled: true}};
+      player.configure(config);
+
+      // Any resolution would works
+      const button = resolutionsToButtons.get(newResolution);
+      button.click();
+
+      await waitForEvent(controls, 'resolutionselectionupdated');
+      expect(player.getConfiguration().abr.enabled).toBe(false);
+    });
+
+
+    it('enabling ABR via API gets the Auto button selected', async () => {
+      expect(player.getConfiguration().abr.enabled).toBe(false);
+
+      const config = {abr: {enabled: true}};
+      player.configure(config);
+
+      await waitForEvent(controls, 'resolutionselectionupdated');
+
+      const auto = getAutoButton();
+      const isChosen = auto.querySelector('.shaka-chosen-item');
+
+      expect(isChosen).not.toBe(null);
+    });
+
+
+    /**
+     * @return {Element}
+     */
+    function getAutoButton() {
+      const auto =
+          resolutionsMenu.querySelector('.shaka-enable-abr-button');
+
+      expect(auto).not.toBe(null);
+      return auto;
+    }
+
+
+    /**
+     * Gets the resolution to the same format it
+     * appears in the UI: height + 'p'.
+     *
+     * @param {number} height
+     * @return {string}
+     */
+    function formatResolution(height) {
+      return height.toString() + 'p';
+    }
+
+
+    /**
+     * @param {!Array.<!shaka.extern.Track>} tracks
+     * @param {number} height
+     * @return {shaka.extern.Track}
+     */
+    function findTrackWithHeight(tracks, height) {
+      let trackWithRes = null;
+      for (const track of tracks) {
+        if (track.height == height) {
+          trackWithRes = track;
+        }
+      }
+      goog.asserts.assert(trackWithRes != null,
+          'Should have found track!');
+
+      return trackWithRes;
+    }
+
+
+    function updateResolutionButtonsAndMap() {
+      tracks = player.getVariantTracks();
+      tracks = tracks.filter((track) => {
+        return track.language == preferredLanguage;
+      });
+
+      resolutionsFromContent = tracks.map((track) => {
+        return track.height;
+      });
+
+      resolutionButtons = filterButtons(
+        /* buttons= */ resolutionsMenu.childNodes,
+        /* excludeClasses= */ [
+          'shaka-back-to-overflow-button',
+          'shaka-enable-abr-button',
+      ]);
+
+      resolutionsToButtons = mapChoicesToButtons(
+          /* buttons= */ resolutionButtons,
+          /* choices= */ resolutionsFromContent,
+          /* modifier=*/ formatResolution);
+    }
+  });
 
   /**
    * @param {!Array.<!shaka.extern.Track>} tracks
@@ -334,5 +508,82 @@ describe('UI', () => {
     });
 
     return activeTracks[0];
+  }
+
+  /**
+    * @param {!Array.<!HTMLElement>} buttons
+    * @param {!Array.<string>} choices
+    * @param {function(string):string|function(number):string} modifier
+    * @return {!Map.<string, !HTMLElement>|!Map.<number, !HTMLElement>}
+    */
+  function mapChoicesToButtons(buttons, choices, modifier) {
+    expect(buttons.length).toEqual(choices.length);
+
+    const map = new Map();
+
+    // Find which choice corresponds to which button
+    for (const choice of choices) {
+      for (const button of buttons) {
+        expect(button.childNodes.length).toBeGreaterThan(0);
+        const uiOption = button.childNodes[0].textContent;
+        const contentOption = modifier(choice);
+        if (contentOption == uiOption) {
+          map.set(choice, button);
+        }
+      }
+    }
+
+    return map;
+  }
+
+
+  /**
+   * Filter out buttons with given classes.
+   *
+   * @param {!NodeList} buttons
+   * @param {!Array.<string>} excludeClasses
+   * @return {!Array.<!HTMLElement>}
+   */
+  function filterButtons(buttons, excludeClasses) {
+    return shaka.util.Iterables.filter(buttons,
+        (node) => {
+          const button = asHTMLElement(node);
+          for (const excludeClass of excludeClasses) {
+            if (button.classList.contains(excludeClass)) {
+              return false;
+            }
+          }
+          return true;
+        });
+  }
+
+
+  /**
+   * Make sure elements from content match their UI representation.
+   * (The order doesn't matter).
+   *
+   * @param {!Array.<string>} elementsFromContent
+   * @param {!Array.<!HTMLElement>} elementsFromUI
+   */
+  function verifyItems(elementsFromContent, elementsFromUI) {
+    for (const element of elementsFromUI) {
+      expect(element.childNodes.length).toBeGreaterThan(0);
+      const elementName = element.childNodes[0].textContent;
+      expect(elementsFromContent.indexOf(elementName)).not.toBe(-1);
+    }
+  }
+
+
+  /**
+   * Make sure elements from content match their UI representation.
+   *
+   * @param {!EventTarget} target
+   * @param {string} name
+   * @return {!Promise}
+   */
+  function waitForEvent(target, name) {
+    return new Promise((resolve) => {
+        eventManager.listenOnce(target, name, resolve);
+    });
   }
 });
