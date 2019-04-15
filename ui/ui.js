@@ -206,6 +206,7 @@ shaka.ui.Overlay.scanPageForShakaElements_ = function() {
 
       if (!video) {
         video = document.createElement('video');
+        video.setAttribute('playsinline', '');
         container.appendChild(video);
       }
 
