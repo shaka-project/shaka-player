@@ -396,7 +396,7 @@ describe('DashParser Live', function() {
     PromiseMock.flush();
   });
 
-  it('uses redirect URL for manifest BaseURL', function(done) {
+  it('uses redirect URL for manifest BaseURL and updates', function(done) {
     let template = [
       '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
       '    suggestedPresentationDelay="PT5S"',
@@ -430,9 +430,10 @@ describe('DashParser Live', function() {
     parser.start(originalUri, playerInterface)
         .then(function(manifest) {
           // The manifest request was made to the original URL.
+          // But includes a redirect
           expect(fakeNetEngine.request.calls.count()).toBe(1);
           let netRequest = fakeNetEngine.request.calls.argsFor(0)[1];
-          expect(netRequest.uris).toEqual([originalUri]);
+          expect(netRequest.uris).toEqual([redirectedUri, originalUri]);
 
           // Since the manifest request was redirected, the segment refers to
           // the redirected base.
