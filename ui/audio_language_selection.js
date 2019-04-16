@@ -62,16 +62,16 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.Element {
 
 
     this.eventManager.listen(this.player, 'trackschanged', () => {
-        this.updateAudioLanguages_();
-      });
+      this.onTracksChanged_();
+    });
 
     this.eventManager.listen(this.player, 'variantchanged', () => {
-        this.updateAudioLanguages_();
-      });
+      this.updateAudioLanguages_();
+    });
 
     this.eventManager.listen(this.languagesButton_, 'click', () => {
-          this.onLanguagesClick_();
-      });
+      this.onLanguagesClick_();
+    });
 
     // Set up all the strings in the user's preferred language.
     this.updateLocalizedStrings_();
@@ -171,6 +171,12 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.Element {
         new shaka.util.FakeEvent('languageselectionupdated'));
   }
 
+  /** @private */
+  onTracksChanged_() {
+    const hasVariants = this.player.getVariantTracks().length > 0;
+    shaka.ui.Utils.setDisplay(this.languagesButton_, hasVariants);
+    this.updateAudioLanguages_();
+  }
 
   /**
    * @param {string} language

@@ -52,26 +52,6 @@ shaka.ui.Utils.getDescendantIfExists = function(element, className) {
 
 
 /**
- * Return true if the content is Transport Stream.
- * Used to decide if caption button is shown all the time in the demo,
- * and whether to show 'Default Text' as a Text Track option.
- *
- * @param {shaka.Player} player
- * @return {boolean}
- */
-shaka.ui.Utils.isTsContent = function(player) {
-  let activeTracks = player.getVariantTracks().filter(function(track) {
-    return track.active == true;
-  });
-  let activeTrack = activeTracks[0];
-  if (activeTrack) {
-    return activeTrack.mimeType == 'video/mp2t';
-  }
-  return false;
-};
-
-
-/**
  * Finds a descendant of |menu| that has a 'shaka-chosen-item' class
  * and focuses on its' parent.
  *

@@ -63,20 +63,20 @@ shaka.ui.TextSelection = class extends shaka.ui.Element {
       });
 
     this.eventManager.listen(this.player, 'texttrackvisibility', () => {
-        this.onCaptionStateChange_();
-      });
+      this.onCaptionStateChange_();
+    });
 
     this.eventManager.listen(this.captionButton_, 'click', () => {
-        this.onCaptionClick_();
-      });
+      this.onCaptionClick_();
+    });
 
     this.eventManager.listen(this.player, 'textchanged', () => {
-        this.updateTextLanguages_();
-      });
+      this.updateTextLanguages_();
+    });
 
     this.eventManager.listen(this.player, 'trackschanged', () => {
-        this.onTracksChange_();
-      });
+      this.onTracksChanged_();
+    });
 
     // Initialize caption state with a fake event.
     this.onCaptionStateChange_();
@@ -267,17 +267,9 @@ shaka.ui.TextSelection = class extends shaka.ui.Element {
 
 
   /** @private */
-  onTracksChange_() {
-    // TS content might have captions embedded in video stream, we can't know
-    // until we start transmuxing. So, always show the caption button if we're
-    // playing TS content.
-    if (shaka.ui.Utils.isTsContent(this.player)) {
-        shaka.ui.Utils.setDisplay(this.captionButton_, true);
-    } else {
-      const hasText = this.player.getTextTracks().length;
-      shaka.ui.Utils.setDisplay(this.captionButton_, hasText > 0);
-    }
-
+  onTracksChanged_() {
+    const hasText = this.player.getTextTracks().length > 0;
+    shaka.ui.Utils.setDisplay(this.captionButton_, hasText);
     this.updateTextLanguages_();
   }
 };

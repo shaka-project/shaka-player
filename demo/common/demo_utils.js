@@ -83,26 +83,6 @@ ShakaDemoUtils.addLicenseRequestHeaders_ =
 
 
 /**
- * Return true if the current content is in the Transport Stream format.
- * Used to decide if the caption button is shown all the time in the demo,
- * and whether to show 'Default Text' as a Text Track option.
- *
- * @param {shaka.Player} player
- * @return {boolean}
- */
-ShakaDemoUtils.isTsContent = function(player) {
-  let activeTracks = player.getVariantTracks().filter(function(track) {
-    return track.active == true;
-  });
-  let activeTrack = activeTracks[0];
-  if (activeTrack) {
-    return activeTrack.mimeType == 'video/mp2t';
-  }
-  return false;
-};
-
-
-/**
  * Creates a number of asset buttons, with selection functionality.
  * Clicking one of these elements will add the "selected" tag to it, and remove
  * the "selected" tag from the previously selected element.
