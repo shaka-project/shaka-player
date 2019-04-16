@@ -401,5 +401,6 @@ class GenerateLocalizations(object):
         not self._locales_changed()):
       return True
 
-    generateLocalizations.main(['--locales'] + self.locales)
+    locales = self.locales or ['en']
+    generateLocalizations.main(['--locales'] + locales)
     return True
