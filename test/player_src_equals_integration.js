@@ -46,11 +46,6 @@ describe('Player Src Equals', () => {
     await player.destroy();
 
     eventManager.release();
-
-    // Work-around: allow the Tizen media pipeline to cool down.
-    // Without this, Tizen's pipeline seems to hang in subsequent tests.
-    // TODO: file a bug on Tizen
-    await shaka.test.Util.delay(0.1);
   });
 
   afterAll(() => {

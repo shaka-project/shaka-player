@@ -214,12 +214,21 @@ function getClientArg(name) {
     });
   });
 
+  const originalSetTimeout = window.setTimeout;
   const delayTests = getClientArg('delayTests');
   if (delayTests) {
-    const originalSetTimeout = window.setTimeout;
     afterEach((done) => {
-      console.log('DELAYING...');
+      console.log('Delaying test by ' + delayTests + ' seconds...');
       originalSetTimeout(done, delayTests * 1000);
+    });
+  }
+
+  // Work-around: allow the Tizen media pipeline to cool down.
+  // Without this, Tizen's pipeline seems to hang in subsequent tests.
+  // TODO: file a bug on Tizen
+  if (shaka.util.Platform.isTizen()) {
+    afterEach((done) => {
+      originalSetTimeout(done, 100 /* ms */);
     });
   }
 })();

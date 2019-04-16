@@ -96,11 +96,6 @@ describe('StreamingEngine', () => {
     await mediaSourceEngine.destroy();
 
     playhead.release();
-
-    // Work-around: allow the Tizen media pipeline to cool down.
-    // Without this, Tizen's pipeline seems to hang in subsequent tests.
-    // TODO: file a bug on Tizen
-    await Util.delay(0.1);
   });
 
   afterAll(() => {
