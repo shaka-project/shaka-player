@@ -378,6 +378,7 @@ shaka.test.Util.cleanupUI = async function() {
  */
 shaka.test.Util.waitForMovementOrFailOnTimeout =
     (eventManager, target, timeout) => {
+  // TODO: Refactor all the wait utils into a class that avoids repeated args
   const timeGoal = target.currentTime + 1;
   let goalMet = false;
   const startTime = Date.now();
@@ -427,6 +428,51 @@ shaka.test.Util.waitForMovementOrFailOnTimeout =
 };
 
 /**
+ * @param {shaka.util.EventManager} eventManager
+ * @param {!HTMLMediaElement} target
+ * @param {number} playheadTime The time to wait for.
+ * @param {number} timeout in seconds, after which the Promise fails
+ * @return {!Promise}
+ */
+shaka.test.Util.waitUntilPlayheadReaches =
+    (eventManager, target, playheadTime, timeout) => {
+  let goalMet = false;
+
+  // TODO: Refactor all the wait utils into a class that avoids repeated args
+  return new Promise(function(resolve, reject) {
+    eventManager.listen(target, 'timeupdate', function() {
+      if (target.currentTime >= playheadTime) {
+        goalMet = true;
+        eventManager.unlisten(target, 'timeupdate');
+        resolve();
+      }
+    });
+
+    shaka.test.Util.delay(timeout).then(function() {
+      if (!goalMet) {
+        const buffered = [];
+        for (let i = 0; i < target.buffered.length; ++i) {
+          buffered.push({
+            start: target.buffered.start(i),
+            end: target.buffered.end(i),
+          });
+        }
+
+        shaka.log.error('Timeout waiting for target time', playheadTime,
+                        'current time', target.currentTime,
+                        'ready state', target.readyState,
+                        'playback rate', target.playbackRate,
+                        'paused', target.paused,
+                        'buffered', buffered);
+
+        eventManager.unlisten(target, 'timeupdate');
+        reject(new Error('Timeout waiting for time ' + playheadTime));
+      }
+    });
+  });
+};
+
+/**
  * Wait for the video to end or for |timeout| seconds to pass, whichever
  * occurs first.  The Promise is resolved when either of these happens.
  *
@@ -436,6 +482,7 @@ shaka.test.Util.waitForMovementOrFailOnTimeout =
  * @return {!Promise}
  */
 shaka.test.Util.waitForEndOrTimeout = (eventManager, target, timeout) => {
+  // TODO: Refactor all the wait utils into a class that avoids repeated args
   return new Promise((resolve, reject) => {
     const callback = () => {
       eventManager.unlisten(target, 'ended');

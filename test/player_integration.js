@@ -17,6 +17,7 @@
 
 describe('Player', function() {
   const Util = shaka.test.Util;
+  const waitUntilPlayheadReaches = Util.waitUntilPlayheadReaches;
 
   /** @type {!jasmine.Spy} */
   let onErrorSpy;
@@ -86,7 +87,7 @@ describe('Player', function() {
       // API and to check for renaming.
       await player.load('test:sintel_compiled');
       video.play();
-      await waitUntilPlayheadReaches(video, 1, 10);
+      await waitUntilPlayheadReaches(eventManager, video, 1, 10);
 
       let stats = player.getStats();
       let expected = {
@@ -130,7 +131,7 @@ describe('Player', function() {
     it('does not cause cues to be null', async () => {
       await player.load('test:sintel_compiled');
       video.play();
-      await waitUntilPlayheadReaches(video, 1, 10);
+      await waitUntilPlayheadReaches(eventManager, video, 1, 10);
 
       // This TextTrack was created as part of load() when we set up the
       // TextDisplayer.
@@ -271,7 +272,7 @@ describe('Player', function() {
       player.configure({preferredAudioLanguage: 'en'});
       await player.load('test:sintel_short_periods_compiled');
       video.play();
-      await waitUntilPlayheadReaches(video, 8, 30);
+      await waitUntilPlayheadReaches(eventManager, video, 8, 30);
 
       // The Period changes at 10 seconds.  Assert that we are in the previous
       // Period and have buffered into the next one.
@@ -285,7 +286,7 @@ describe('Player', function() {
       // cause a Period transition again.
       expect(getActiveLanguage()).toBe('en');
       player.selectAudioLanguage('es');
-      await waitUntilPlayheadReaches(video, 21, 30);
+      await waitUntilPlayheadReaches(eventManager, video, 21, 30);
 
       // Should have gotten past the next Period transition and still be
       // playing the new language.
@@ -330,7 +331,7 @@ describe('Player', function() {
     it('does not throw on destroy', async () => {
       await player.load('test:sintel_compiled');
       video.play();
-      await waitUntilPlayheadReaches(video, 1, 10);
+      await waitUntilPlayheadReaches(eventManager, video, 1, 10);
       await player.unload();
       // Before we fixed #1187, the call to destroy() on textDisplayer was
       // renamed in the compiled version and could not be called.
@@ -432,28 +433,6 @@ describe('Player', function() {
       }).catch(fail).then(done);
     });
   });
-
-  /**
-   * @param {!HTMLMediaElement} video
-   * @param {number} playheadTime The time to wait for.
-   * @param {number} timeout in seconds, after which the Promise fails
-   * @return {!Promise}
-   */
-  function waitUntilPlayheadReaches(video, playheadTime, timeout) {
-    let curEventManager = eventManager;
-    return new Promise(function(resolve, reject) {
-      curEventManager.listen(video, 'timeupdate', function() {
-        if (video.currentTime >= playheadTime) {
-          curEventManager.unlisten(video, 'timeupdate');
-          resolve();
-        }
-      });
-      Util.delay(timeout).then(function() {
-        curEventManager.unlisten(video, 'timeupdate');
-        reject('Timeout waiting for time');
-      });
-    });
-  }
 });
 
 // TODO(vaage): Try to group the stat tests together.
