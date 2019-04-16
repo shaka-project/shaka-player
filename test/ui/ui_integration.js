@@ -98,10 +98,7 @@ describe('UI', () => {
 
   afterEach(async () => {
     eventManager.release();
-
-    await player.destroy();
-
-    document.body.removeChild(videoContainer);
+    await shaka.test.Util.cleanupUI();
   });
 
   afterAll(() => {

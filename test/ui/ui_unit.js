@@ -16,19 +16,22 @@
  */
 
 describe('UI', function() {
-  /** @type {!shaka.Player} */
+  /** @type {shaka.Player} */
   let player;
   /** @type {!Element} */
   let cssLink;
 
-  beforeAll(async function() {
+  beforeAll(async () => {
     // Add css file
     cssLink = document.createElement('link');
     await shaka.test.Util.setupCSS(cssLink);
   });
 
+  afterEach(async () => {
+    await shaka.test.Util.cleanupUI();
+  });
 
-  afterAll(function() {
+  afterAll(() => {
     document.head.removeChild(cssLink);
   });
 
@@ -38,7 +41,7 @@ describe('UI', function() {
     /** @type {!HTMLVideoElement} */
     let video;
 
-    beforeAll(function() {
+    beforeEach(() => {
       videoContainer =
           /** @type {!HTMLElement} */ (document.createElement('div'));
       document.body.appendChild(videoContainer);
@@ -46,10 +49,6 @@ describe('UI', function() {
       video = shaka.util.Dom.createVideoElement();
       videoContainer.appendChild(video);
       createUIThroughAPI(videoContainer, video);
-    });
-
-    afterAll(function() {
-      document.body.removeChild(videoContainer);
     });
 
     it('has all the basic elements', function() {
@@ -62,16 +61,12 @@ describe('UI', function() {
       /** @type {!HTMLElement} */
       let container;
 
-      beforeAll(function() {
+      beforeEach(() => {
         container =
             /** @type {!HTMLElement} */ (document.createElement('div'));
         document.body.appendChild(container);
 
         createUIThroughDOMAutoSetup([container], /* videos */ []);
-      });
-
-      afterAll(function() {
-        document.body.removeChild(container);
       });
 
       it('has all the basic elements', function() {
@@ -86,7 +81,7 @@ describe('UI', function() {
       /** @type {!HTMLElement} */
       let container2;
 
-      beforeAll(function() {
+      beforeEach(() => {
         container1 =
             /** @type {!HTMLElement} */ (document.createElement('div'));
         document.body.appendChild(container1);
@@ -96,11 +91,6 @@ describe('UI', function() {
         document.body.appendChild(container2);
 
         createUIThroughDOMAutoSetup([container1, container2], /* videos */ []);
-      });
-
-      afterAll(function() {
-        document.body.removeChild(container1);
-        document.body.removeChild(container2);
       });
 
       it('has all the basic elements', function() {
@@ -113,16 +103,11 @@ describe('UI', function() {
       /** @type {!HTMLVideoElement} */
       let video;
 
-      beforeAll(function() {
+      beforeEach(() => {
         video = shaka.util.Dom.createVideoElement();
         document.body.appendChild(video);
 
         createUIThroughDOMAutoSetup(/* containers */ [], [video]);
-      });
-
-      afterAll(function() {
-        // createUIThroughDOMAutoSetup will add a div between body and the video
-        document.body.removeChild(video.parentElement);
       });
 
       it('has all the basic elements', function() {
@@ -135,7 +120,7 @@ describe('UI', function() {
       /** @type {!Array.<!HTMLVideoElement>} */
       let videos = [];
 
-      beforeAll(function() {
+      beforeEach(() => {
         // Four is just a random number I (ismena) came up with to test a
         // multi-video use case. It could be replaces with any other
         // (reasonable) number.
@@ -148,12 +133,6 @@ describe('UI', function() {
         }
 
         createUIThroughDOMAutoSetup(/* containers */ [], videos);
-      });
-
-      afterAll(function() {
-        videos.forEach(function(video) {
-          document.body.removeChild(video.parentElement);
-        });
       });
 
       it('has all the basic elements', function() {
@@ -170,7 +149,7 @@ describe('UI', function() {
       /** @type {!HTMLVideoElement} */
       let video;
 
-      beforeAll(function() {
+      beforeEach(() => {
         container =
             /** @type {!HTMLElement} */ (document.createElement('div'));
         document.body.appendChild(container);
@@ -179,10 +158,6 @@ describe('UI', function() {
         container.appendChild(video);
 
         createUIThroughDOMAutoSetup([container], [video]);
-      });
-
-      afterAll(function() {
-        document.body.removeChild(container);
       });
 
       it('has all the basic elements', function() {
@@ -204,10 +179,6 @@ describe('UI', function() {
 
       video = shaka.util.Dom.createVideoElement();
       videoContainer.appendChild(video);
-    });
-
-    afterEach(function() {
-      document.body.removeChild(videoContainer);
     });
 
     describe('all the controls', function() {
@@ -468,7 +439,6 @@ describe('UI', function() {
     });
 
     afterEach(function() {
-      document.body.removeChild(container);
       shaka.log.warning = originalWarning;
     });
 

@@ -338,6 +338,35 @@ shaka.test.Util.setupCSS = async function(cssLink) {
 };
 
 /**
+ * Thoroughly clean up after UI-related tests.
+ *
+ * The UI tests can create lots of DOM elements (including videos) that are
+ * easy to lose track of.  This is a universal cleanup system to avoid leaving
+ * anything behind.
+ */
+shaka.test.Util.cleanupUI = async function() {
+  // If we don't clean up the UI, these tests could pollute the environment
+  // for other tests that run later, causing failures in unrelated tests.
+  // This is causing particular issues on Tizen.
+  const containers =
+      document.querySelectorAll('[data-shaka-player-container]');
+
+  const destroys = [];
+  for (let container of containers) {
+    const ui = /** @type {shaka.ui.Overlay} */(container['ui']);
+
+    // Destroying the UI destroys the controls and player inside.
+    destroys.push(ui.destroy());
+  }
+  await Promise.all(destroys);
+
+  // Now remove all the containers from the DOM.
+  for (let container of containers) {
+    container.parentElement.removeChild(container);
+  }
+};
+
+/**
  * Wait for the video playhead to move forward by some meaningful delta.
  * If this happens before |timeout| seconds pass, the Promise is resolved.
  * Otherwise, the Promise is rejected.

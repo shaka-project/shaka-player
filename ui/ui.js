@@ -31,11 +31,12 @@ goog.require('shaka.ui.TextDisplayer');
  * @param {!Object=} config This should follow the form of
  *   {@link shaka.extern.UIConfiguration}, but you may omit
  *   any field you do not wish to change.
+ * @implements {shaka.util.IDestroyable}
  * @constructor
  * @export
  */
 shaka.ui.Overlay = function(player, videoContainer, video, config) {
-  /** @private {!shaka.Player} */
+  /** @private {shaka.Player} */
   this.player_ = player;
 
   /** @private {!shaka.extern.UIConfiguration} */
@@ -53,14 +54,32 @@ shaka.ui.Overlay = function(player, videoContainer, video, config) {
     this.config_.overflowMenuButtons.push('cast');
   }
 
-  /** @private {!shaka.ui.Controls} */
+  /** @private {shaka.ui.Controls} */
   this.controls_ = new shaka.ui.Controls(
       player, videoContainer, video, this.config_);
+
+  // Make sure this container is discoverable and that the UI can be reached
+  // through it.
+  videoContainer['dataset']['shakaPlayerContainer'] = '';
+  videoContainer['ui'] = this;
 };
 
 
 /**
- * @return {!shaka.Player}
+ * @override
+ * @export
+ */
+shaka.ui.Overlay.prototype.destroy = async function() {
+  await this.controls_.destroy();
+  this.controls_ = null;
+
+  await this.player_.destroy();
+  this.player_ = null;
+};
+
+
+/**
+ * @return {shaka.Player}
  * @export
  */
 shaka.ui.Overlay.prototype.getPlayer = function() {
@@ -69,7 +88,7 @@ shaka.ui.Overlay.prototype.getPlayer = function() {
 
 
 /**
- * @return {!shaka.ui.Controls}
+ * @return {shaka.ui.Controls}
  * @export
  */
 shaka.ui.Overlay.prototype.getControls = function() {
@@ -139,6 +158,7 @@ shaka.ui.Overlay.scanPageForShakaElements_ = function() {
   // UI.
   const containers = document.querySelectorAll(
       '[data-shaka-player-container]');
+
   // Look for elements marked 'data-shaka-player'. They will
   // either be used in our default UI or with native browser
   // controls.
@@ -179,7 +199,7 @@ shaka.ui.Overlay.scanPageForShakaElements_ = function() {
       }
     }
   } else {
-      for (let i = 0; i < containers.length; i++) {
+    for (let i = 0; i < containers.length; i++) {
       const container = containers[i];
       goog.asserts.assert(container.tagName.toLowerCase() == 'div',
         'Container should be a div!');
