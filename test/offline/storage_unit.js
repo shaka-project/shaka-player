@@ -869,9 +869,7 @@ describe('Storage', function() {
               drm,
               makeManifestWithPerStreamBandwidth());
           storage.configure({
-            offline: {
-              usePersistentLicense: false,
-            },
+            usePersistentLicense: false,
           });
 
           let stored = await storage.store(manifestWithPerStreamBandwidthUri);
