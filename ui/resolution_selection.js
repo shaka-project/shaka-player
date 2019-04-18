@@ -46,19 +46,11 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
     this.eventManager.listen(
       this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
         this.updateLocalizedStrings_();
-        // If abr is enabled, the 'Auto' string needs localization.
-        // TODO: is there a more efficient way of updating just the strings
-        // we need instead of running the whole resolution update?
-        this.updateResolutionSelection_();
       });
 
     this.eventManager.listen(
       this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
         this.updateLocalizedStrings_();
-        // If abr is enabled, the 'Auto' string needs localization.
-        // TODO: is there a more efficient way of updating just the strings
-        // we need instead of running the whole resolution update?
-        this.updateResolutionSelection_();
       });
 
     this.eventManager.listen(this.resolutionButton_, 'click', () => {
@@ -72,6 +64,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
     this.eventManager.listen(this.player, 'trackschanged', () => {
         this.updateResolutionSelection_();
       });
+
+    this.updateResolutionSelection_();
 
     // Set up all the strings in the user's preferred language.
     this.updateLocalizedStrings_();
@@ -135,21 +129,6 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
     /** @private {!HTMLElement}*/
     this.backFromResolutionSpan_ = shaka.util.Dom.createHTMLElement('span');
     this.backFromResolutionButton_.appendChild(this.backFromResolutionSpan_);
-
-
-    // Add the abr option
-    // TODO: Get rid of creating Auto button twice - here and on update.
-    const auto = shaka.util.Dom.createHTMLElement('button');
-    auto.classList.add('shaka-enable-abr-button');
-    auto.setAttribute('aria-selected', 'true');
-    this.resolutionMenu_.appendChild(auto);
-
-    auto.appendChild(shaka.ui.Utils.checkmarkIcon());
-
-    /** @private {!HTMLElement}*/
-    this.abrOnSpan_ = shaka.util.Dom.createHTMLElement('span');
-    this.abrOnSpan_.classList.add('shaka-auto-span');
-    auto.appendChild(this.abrOnSpan_);
 
     const controlsContainer = this.controls.getControlsContainer();
     controlsContainer.appendChild(this.resolutionMenu_);
@@ -227,17 +206,19 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
       this.updateResolutionSelection_();
     }.bind(this));
 
-    const autoSpan = shaka.util.Dom.createHTMLElement('span');
-    autoSpan.textContent =
+    /** @private {!HTMLElement}*/
+    this.abrOnSpan_ = shaka.util.Dom.createHTMLElement('span');
+    this.abrOnSpan_.classList.add('shaka-auto-span');
+    this.abrOnSpan_.textContent =
         this.localization.resolve(shaka.ui.Locales.Ids.AUTO_QUALITY);
-    autoButton.appendChild(autoSpan);
+    autoButton.appendChild(this.abrOnSpan_);
 
     // If abr is enabled reflect it by marking 'Auto' as selected.
     if (abrEnabled) {
       autoButton.setAttribute('aria-selected', 'true');
       autoButton.appendChild(shaka.ui.Utils.checkmarkIcon());
 
-      autoSpan.classList.add('shaka-chosen-item');
+      this.abrOnSpan_.classList.add('shaka-chosen-item');
 
       this.currentResolution_.textContent =
           this.localization.resolve(shaka.ui.Locales.Ids.AUTO_QUALITY);
@@ -286,6 +267,11 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
         this.localization.resolve(LocIds.RESOLUTION);
     this.abrOnSpan_.textContent =
         this.localization.resolve(LocIds.AUTO_QUALITY);
+
+    if (this.player.getConfiguration().abr.enabled) {
+      this.currentResolution_.textContent =
+          this.localization.resolve(shaka.ui.Locales.Ids.AUTO_QUALITY);
+    }
   }
 };
 

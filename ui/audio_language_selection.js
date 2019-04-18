@@ -47,17 +47,11 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.Element {
     this.eventManager.listen(
       this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
         this.updateLocalizedStrings_();
-        // TODO: is there a more efficient way of updating just the strings
-        // we need instead of running the whole language update?
-        this.updateAudioLanguages_();
       });
 
     this.eventManager.listen(
       this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
         this.updateLocalizedStrings_();
-        // TODO: is there a more efficient way of updating just the strings
-        // we need instead of running the whole language update?
-        this.updateAudioLanguages_();
       });
 
 
