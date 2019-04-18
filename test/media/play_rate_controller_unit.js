@@ -17,8 +17,6 @@
 
 
 describe('PlayRateController', () => {
-  const Modifier = shaka.media.PlayRateController.Modifier;
-
   /** @type {!jasmine.Spy} */
   let getPlayRateSpy;
   /** @type {!jasmine.Spy} */
@@ -65,77 +63,51 @@ describe('PlayRateController', () => {
     expect(setPlayRateSpy).toHaveBeenCalledWith(0);
   });
 
-  it('buffering modifier sets rate to zero', () => {
-    controller.addModifier(Modifier.BUFFERING);
+  it('buffering state sets rate to zero', () => {
+    controller.setBuffering(true);
     expect(setPlayRateSpy).toHaveBeenCalledWith(0);
 
     setPlayRateSpy.calls.reset();
 
-    controller.removeModifier(Modifier.BUFFERING);
+    controller.setBuffering(false);
     expect(setPlayRateSpy).toHaveBeenCalledWith(1);
   });
 
-  it('zero rate modifier sets rate to zero', () => {
-    controller.addModifier(Modifier.ZERO_RATE);
-    expect(setPlayRateSpy).toHaveBeenCalledWith(0);
-
-    setPlayRateSpy.calls.reset();
-
-    controller.removeModifier(Modifier.ZERO_RATE);
-    expect(setPlayRateSpy).toHaveBeenCalledWith(1);
-  });
-
-  it('adding duplicate modifier has no effect', () => {
-    controller.addModifier(Modifier.ZERO_RATE);
+  it('entering buffering state twice has no effect', () => {
+    controller.setBuffering(true);
     expect(setPlayRateSpy).toHaveBeenCalledWith(0);
 
     // Reset the calls so that we can make sure it was not called again.
     setPlayRateSpy.calls.reset();
 
-    controller.addModifier(Modifier.ZERO_RATE);
+    controller.setBuffering(true);
     expect(setPlayRateSpy).not.toHaveBeenCalled();
   });
 
-  it('removing absent modifier has no effect', () => {
-    controller.removeModifier(Modifier.ZERO_RATE);
-    expect(setPlayRateSpy).not.toHaveBeenCalled();
-  });
+  it('leaving buffering state twice has no effect', () => {
+    controller.setBuffering(true);
+    controller.setBuffering(false);
 
-  it('modifiers work with eacher other', () => {
-    controller.addModifier(Modifier.BUFFERING);
-    controller.addModifier(Modifier.ZERO_RATE);
-
-    expect(setPlayRateSpy).toHaveBeenCalledWith(0);
-
-    // Reset the calls so that we can check that no other calls were made.
+    // Reset the calls so that we can make sure it was not called again.
     setPlayRateSpy.calls.reset();
 
-    controller.removeModifier(Modifier.BUFFERING);
-
-    // The rates should not have changed since there is still a modifier in
-    // place.
+    controller.setBuffering(false);
     expect(setPlayRateSpy).not.toHaveBeenCalled();
-
-    controller.removeModifier(Modifier.ZERO_RATE);
-
-    expect(setPlayRateSpy).toHaveBeenCalledWith(1);
   });
 
-  // When we set the rate while modifiers are in-place, we should see the new
-  // rate be used once the modifiers are removed.
-  it('set takes effect after modifiers are removed', () => {
-    controller.addModifier(Modifier.BUFFERING);
-
+  // When we set the rate while in a buffering state, we should see the new
+  // rate be used once we leave the buffering state.
+  it('set takes effect after buffering state ends', () => {
+    controller.setBuffering(true);
     expect(setPlayRateSpy).toHaveBeenCalledWith(0);
 
     // Reset so that we can make sure it was not called after we call |set(4)|.
     setPlayRateSpy.calls.reset();
 
     controller.set(4);
-
     expect(setPlayRateSpy).not.toHaveBeenCalled();
-    controller.removeModifier(Modifier.BUFFERING);
 
+    controller.setBuffering(false);
     expect(setPlayRateSpy).toHaveBeenCalledWith(4);
   });
 
