@@ -212,6 +212,80 @@ shaka.ui.Controls.prototype.destroy = function() {
 
 
 /**
+ * @event shaka.Controls.CastStatusChangedEvent
+ * @description Fired upon receiving a 'caststatuschanged' event from
+ *    the cast proxy.
+ * @property {string} type
+ *   'caststatuschanged'
+ * @property {boolean} newStatus
+ *  The new status of the application. True for 'is casting' and
+ *  false otherwise.
+ * @exportDoc
+ */
+
+
+/**
+ * @event shaka.Controls.SubMenuOpenEvent
+ * @description Fired when one of the overflow submenus is opened
+ *    (e. g. language/resolution/subtitle selection).
+ * @property {string} type
+ *   'submenuopen'
+ * @exportDoc
+ */
+
+
+/**
+ * @event shaka.Controls.CaptionSelectionUpdatedEvent
+ * @description Fired when the captions/subtitles menu has finished updating.
+ * @property {string} type
+ *   'captionselectionupdated'
+ * @exportDoc
+ */
+
+
+ /**
+ * @event shaka.Controls.ResolutionSelectionUpdatedEvent
+ * @description Fired when the resolution menu has finished updating.
+ * @property {string} type
+ *   'resolutionselectionupdated'
+ * @exportDoc
+ */
+
+
+/**
+ * @event shaka.Controls.LanguageSelectionUpdatedEvent
+ * @description Fired when the audio language menu has finished updating.
+ * @property {string} type
+ *   'languageselectionupdated'
+ * @exportDoc
+ */
+
+
+/**
+ * @event shaka.Controls.ErrorEvent
+ * @description Fired when something went wrong with the controls.
+ * @property {string} type
+ *   'error'
+ * @property {!shaka.util.Error} detail
+ *   An object which contains details on the error.  The error's 'category' and
+ *   'code' properties will identify the specific error that occurred.  In an
+ *   uncompiled build, you can also use the 'message' and 'stack' properties
+ *   to debug.
+ * @exportDoc
+ */
+
+
+/**
+ * @event shaka.Controls.TimeAndSeekRangeUpdatedEvent
+ * @description Fired when the time and seek range elements have finished
+ *    updating.
+ * @property {string} type
+ *   'timeandseekrangeupdated'
+ * @exportDoc
+ */
+
+
+/**
  * @param {string} name
  * @param {!shaka.extern.IUIElement.Factory} factory
  * @export
@@ -1060,9 +1134,7 @@ shaka.ui.Controls.prototype.updateTimeAndSeekRange_ = function() {
     return;
   }
 
-  this.dispatchEvent(new shaka.util.FakeEvent('timeandseekrangeupdated'));
-
-  const Constants = shaka.ui.Constants;
+    const Constants = shaka.ui.Constants;
   let displayTime = this.isSeeking_ ?
       Number(this.seekBar_.value) :
       Number(this.video_.currentTime);
@@ -1140,6 +1212,8 @@ shaka.ui.Controls.prototype.updateTimeAndSeekRange_ = function() {
           'linear-gradient(' + gradient.join(',') + ')';
     }
   }
+
+  this.dispatchEvent(new shaka.util.FakeEvent('timeandseekrangeupdated'));
 };
 
 
