@@ -89,12 +89,18 @@ shaka.test.TestScheme.MANIFESTS = {};
 shaka.test.TestScheme.GENERATORS = {};
 
 
+// TODO: The values in mdhdOffset and tfdtOffset are specific to the segments
+// in each test scheme.  These are byte offsets into these segments where
+// certain boxes can be found and easily manipulated.  This predates our more
+// general MP4 box parser.  We could eliminate these hard-coded offsets and use
+// our box parser to find the boxes at runtime after we load the segments.
+
 /** @const */
 shaka.test.TestScheme.DATA = {
   'sintel': {
     video: {
       initSegmentUri: '/base/test/test/assets/sintel-video-init.mp4',
-      mvhdOffset: 0x24,
+      mdhdOffset: 0x1ba,
       segmentUri: '/base/test/test/assets/sintel-video-segment.mp4',
       tfdtOffset: 0x38,
       segmentDuration: 10,
@@ -104,7 +110,7 @@ shaka.test.TestScheme.DATA = {
     },
     audio: {
       initSegmentUri: '/base/test/test/assets/sintel-audio-init.mp4',
-      mvhdOffset: 0x20,
+      mdhdOffset: 0x1b6,
       segmentUri: '/base/test/test/assets/sintel-audio-segment.mp4',
       tfdtOffset: 0x3c,
       segmentDuration: 10.005,
@@ -124,7 +130,7 @@ shaka.test.TestScheme.DATA = {
   'sintel_realistic': {
     video: {
       initSegmentUri: '/base/test/test/assets/sintel-video-init.mp4',
-      mvhdOffset: 0x24,
+      mdhdOffset: 0x1ba,
       segmentUri: '/base/test/test/assets/sintel-video-segment.mp4',
       tfdtOffset: 0x38,
       segmentDuration: 10,
@@ -135,7 +141,7 @@ shaka.test.TestScheme.DATA = {
     },
     audio: {
       initSegmentUri: '/base/test/test/assets/sintel-audio-init.mp4',
-      mvhdOffset: 0x20,
+      mdhdOffset: 0x1b6,
       segmentUri: '/base/test/test/assets/sintel-audio-segment.mp4',
       tfdtOffset: 0x3c,
       segmentDuration: 10.005,
@@ -159,7 +165,7 @@ shaka.test.TestScheme.DATA = {
   'sintel_no_text': {
     video: {
       initSegmentUri: '/base/test/test/assets/sintel-video-init.mp4',
-      mvhdOffset: 0x24,
+      mdhdOffset: 0x1ba,
       segmentUri: '/base/test/test/assets/sintel-video-segment.mp4',
       tfdtOffset: 0x38,
       segmentDuration: 10,
@@ -169,7 +175,7 @@ shaka.test.TestScheme.DATA = {
     },
     audio: {
       initSegmentUri: '/base/test/test/assets/sintel-audio-init.mp4',
-      mvhdOffset: 0x20,
+      mdhdOffset: 0x1b6,
       segmentUri: '/base/test/test/assets/sintel-audio-segment.mp4',
       tfdtOffset: 0x3c,
       segmentDuration: 10.005,
@@ -183,7 +189,7 @@ shaka.test.TestScheme.DATA = {
   'sintel-enc': {
     video: {
       initSegmentUri: '/base/test/test/assets/encrypted-sintel-video-init.mp4',
-      mvhdOffset: 0x24,
+      mdhdOffset: 0x1ba,
       segmentUri: '/base/test/test/assets/encrypted-sintel-video-segment.mp4',
       tfdtOffset: 0x38,
       segmentDuration: 10,
@@ -197,7 +203,7 @@ shaka.test.TestScheme.DATA = {
     },
     audio: {
       initSegmentUri: '/base/test/test/assets/encrypted-sintel-audio-init.mp4',
-      mvhdOffset: 0x20,
+      mdhdOffset: 0x1b6,
       segmentUri: '/base/test/test/assets/encrypted-sintel-audio-segment.mp4',
       tfdtOffset: 0x3c,
       segmentDuration: 10.005,
@@ -222,7 +228,7 @@ shaka.test.TestScheme.DATA = {
   'multidrm': {
     video: {
       initSegmentUri: '/base/test/test/assets/multidrm-video-init.mp4',
-      mvhdOffset: 0x72,
+      mdhdOffset: 0x1d1,
       segmentUri: '/base/test/test/assets/multidrm-video-segment.mp4',
       tfdtOffset: 0x78,
       segmentDuration: 4,
@@ -235,7 +241,7 @@ shaka.test.TestScheme.DATA = {
     },
     audio: {
       initSegmentUri: '/base/test/test/assets/multidrm-audio-init.mp4',
-      mvhdOffset: 0x72,
+      mdhdOffset: 0x192,
       segmentUri: '/base/test/test/assets/multidrm-audio-segment.mp4',
       tfdtOffset: 0x7c,
       segmentDuration: 4,
@@ -270,7 +276,7 @@ shaka.test.TestScheme.DATA = {
   'multidrm_no_init_data': {
     video: {
       initSegmentUri: '/base/test/test/assets/multidrm-video-init.mp4',
-      mvhdOffset: 0x72,
+      mdhdOffset: 0x1d1,
       segmentUri: '/base/test/test/assets/multidrm-video-segment.mp4',
       tfdtOffset: 0x78,
       segmentDuration: 4,
@@ -280,7 +286,7 @@ shaka.test.TestScheme.DATA = {
     },
     audio: {
       initSegmentUri: '/base/test/test/assets/multidrm-audio-init.mp4',
-      mvhdOffset: 0x72,
+      mdhdOffset: 0x192,
       segmentUri: '/base/test/test/assets/multidrm-audio-segment.mp4',
       tfdtOffset: 0x7c,
       segmentDuration: 4,
@@ -320,7 +326,7 @@ shaka.test.TestScheme.DATA = {
   'cea-708_mp4': {
     video: {
       initSegmentUri: '/base/test/test/assets/cea-init.mp4',
-      mvhdOffset: 0x28,
+      mdhdOffset: 0x100,
       segmentUri: '/base/test/test/assets/cea-segment.mp4',
       tfdtOffset: 0x48,
       segmentDuration: 2,
@@ -382,7 +388,7 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
           metadata.segmentUri);
     }
     return new windowShaka.test.Mp4VodStreamGenerator(
-        metadata.initSegmentUri, metadata.mvhdOffset, metadata.segmentUri,
+        metadata.initSegmentUri, metadata.mdhdOffset, metadata.segmentUri,
         metadata.tfdtOffset, metadata.segmentDuration,
         metadata.presentationTimeOffset);
   }

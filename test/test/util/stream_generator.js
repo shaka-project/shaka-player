@@ -124,8 +124,8 @@ shaka.test.TSVodStreamGenerator.prototype.getSegment = function(
  * The StreamGenerator loops a single segment.
  *
  * @param {string} initSegmentUri The URI of the initialization segment.
- * @param {number} mvhdOffset The offset of the initialization segment's
- *   mvhd box.
+ * @param {number} mdhdOffset The offset of the initialization segment's
+ *   mdhd box.
  * @param {string} segmentTemplateUri The URI of the segment to loop.
  * @param {number} tfdtOffset The offset of the segment's tfdt box.
  * @param {number} segmentDuration The duration of a single segment in seconds.
@@ -138,12 +138,12 @@ shaka.test.TSVodStreamGenerator.prototype.getSegment = function(
  */
 shaka.test.Mp4VodStreamGenerator = function(
     initSegmentUri,
-    mvhdOffset,
+    mdhdOffset,
     segmentTemplateUri,
     tfdtOffset,
     segmentDuration,
     presentationTimeOffset) {
-  goog.asserts.assert(mvhdOffset >= 0, 'mvhd offset invalid');
+  goog.asserts.assert(mdhdOffset >= 0, 'mdhd offset invalid');
   goog.asserts.assert(tfdtOffset >= 0, 'tfdt offset invalid');
   goog.asserts.assert(segmentDuration > 0, 'segment duration invalid');
   goog.asserts.assert(presentationTimeOffset >= 0,
@@ -153,7 +153,7 @@ shaka.test.Mp4VodStreamGenerator = function(
   this.initSegmentUri_ = initSegmentUri;
 
   /** @private {number} */
-  this.mvhdOffset_ = mvhdOffset;
+  this.mdhdOffset_ = mdhdOffset;
 
   /** @private {string} */
   this.segmentTemplateUri_ = segmentTemplateUri;
@@ -192,7 +192,7 @@ shaka.test.Mp4VodStreamGenerator.prototype.init = function() {
         this.initSegment_ = results[0];
         this.segmentTemplate_ = results[1];
         this.timescale_ = shaka.test.StreamGenerator.getTimescale_(
-            /** @type {!ArrayBuffer} */ (this.initSegment_), this.mvhdOffset_);
+            /** @type {!ArrayBuffer} */ (this.initSegment_), this.mdhdOffset_);
       }.bind(this));
 };
 
@@ -231,8 +231,8 @@ shaka.test.Mp4VodStreamGenerator.prototype.getSegment = function(
  * Creates a Mp4LiveStreamGenerator, which simulates a DASH, live, MP4 stream.
  *
  * @param {string} initSegmentUri The URI of the initialization segment.
- * @param {number} mvhdOffset The offset of the initialization segment's
- *   mvhd box.
+ * @param {number} mdhdOffset The offset of the initialization segment's
+ *   mdhd box.
  * @param {string} segmentTemplateUri The URI of the segment to loop.
  * @param {number} tfdtOffset The offset of the segment's TFDT box.
  * @param {number} segmentDuration The duration of a single segment in seconds.
@@ -255,7 +255,7 @@ shaka.test.Mp4VodStreamGenerator.prototype.getSegment = function(
  */
 shaka.test.Mp4LiveStreamGenerator = function(
     initSegmentUri,
-    mvhdOffset,
+    mdhdOffset,
     segmentTemplateUri,
     tfdtOffset,
     segmentDuration,
@@ -263,7 +263,7 @@ shaka.test.Mp4LiveStreamGenerator = function(
     broadcastStartTime,
     availabilityStartTime,
     timeShiftBufferDepth) {
-  goog.asserts.assert(mvhdOffset >= 0, 'mvhd offset invalid');
+  goog.asserts.assert(mdhdOffset >= 0, 'mdhd offset invalid');
   goog.asserts.assert(tfdtOffset >= 0, 'tfdt offset invalid');
   goog.asserts.assert(segmentDuration > 0, 'segment duration invalid');
   goog.asserts.assert(presentationTimeOffset >= 0,
@@ -281,7 +281,7 @@ shaka.test.Mp4LiveStreamGenerator = function(
   this.initSegmentUri_ = initSegmentUri;
 
   /** @private {number} */
-  this.mvhdOffset_ = mvhdOffset;
+  this.mdhdOffset_ = mdhdOffset;
 
   /** @private {string} */
   this.segmentTemplateUri_ = segmentTemplateUri;
@@ -329,7 +329,7 @@ shaka.test.Mp4LiveStreamGenerator.prototype.init = function() {
         this.initSegment_ = results[0];
         this.segmentTemplate_ = results[1];
         this.timescale_ = shaka.test.StreamGenerator.getTimescale_(
-            /** @type {!ArrayBuffer} */ (this.initSegment_), this.mvhdOffset_);
+            /** @type {!ArrayBuffer} */ (this.initSegment_), this.mdhdOffset_);
       }.bind(this));
 };
 
@@ -399,28 +399,28 @@ shaka.test.Mp4LiveStreamGenerator.prototype.getSegment = function(
 
 
 /**
- * Gets the given initialization segment's movie header box's (mvhd box)
+ * Gets the given initialization segment's movie header box's (mdhd box)
  * timescale parameter.
  *
  * @param {!ArrayBuffer} initSegment
- * @param {number} mvhdOffset The byte offset of the initialization segment's
- *   mvhd box.
+ * @param {number} mdhdOffset The byte offset of the initialization segment's
+ *   mdhd box.
  * @return {number} The timescale parameter.
  * @throws RangeError
  * @private
  */
 shaka.test.StreamGenerator.getTimescale_ = function(
-    initSegment, mvhdOffset) {
+    initSegment, mdhdOffset) {
   let dataView = new DataView(initSegment);
   let reader = new shaka.util.DataViewReader(
       dataView, shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
-  reader.skip(mvhdOffset);
+  reader.skip(mdhdOffset);
 
   let size = reader.readUint32();
   let type = reader.readUint32();
   goog.asserts.assert(
-      type == 0x6d766864 /* mvhd */,
-      'initSegment does not contain an mvhd box at the specified offset.');
+      type == 0x6d646864 /* mdhd */,
+      'initSegment does not contain an mdhd box at the specified offset.');
 
   let largesizePresent = size == 1;
   if (largesizePresent) {
@@ -433,10 +433,10 @@ shaka.test.StreamGenerator.getTimescale_ = function(
 
   // Skip 'creation_time' and 'modification_time' fields.
   if (version == 0) {
-    shaka.log.v2('mvhd box is version 0.');
+    shaka.log.v2('mdhd box is version 0.');
     reader.skip(8);
   } else {
-    shaka.log.v2('mvhd box is version 1.');
+    shaka.log.v2('mdhd box is version 1.');
     reader.skip(16);
   }
 

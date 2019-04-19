@@ -170,7 +170,7 @@ describe('StreamingEngine', () => {
   function createVodStreamGenerator(metadata, type) {
     let generator = new shaka.test.Mp4VodStreamGenerator(
         metadata.initSegmentUri,
-        metadata.mvhdOffset,
+        metadata.mdhdOffset,
         metadata.segmentUri,
         metadata.tfdtOffset,
         metadata.segmentDuration,
@@ -185,7 +185,7 @@ describe('StreamingEngine', () => {
     let now = Date.now() / 1000;
     let generator = new shaka.test.Mp4LiveStreamGenerator(
         metadata.initSegmentUri,
-        metadata.mvhdOffset,
+        metadata.mdhdOffset,
         metadata.segmentUri,
         metadata.tfdtOffset,
         metadata.segmentDuration,
