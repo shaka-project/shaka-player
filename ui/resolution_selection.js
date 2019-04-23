@@ -65,6 +65,10 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
         this.updateResolutionSelection_();
       });
 
+    this.eventManager.listen(this.player, 'abrstatuschanged', () => {
+        this.updateResolutionSelection_();
+      });
+
     this.updateResolutionSelection_();
 
     // Set up all the strings in the user's preferred language.

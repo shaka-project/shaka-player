@@ -419,10 +419,15 @@ describe('UI', () => {
     it('enabling ABR via API gets the Auto button selected', async () => {
       expect(player.getConfiguration().abr.enabled).toBe(false);
 
+      // Setup listener to the ui event. The event, trigerring the update
+      // is dispatched inside player.configure(), so we need to start
+      // listening before calling it.
+      const uiReady = waitForEvent(controls, 'resolutionselectionupdated');
       const config = {abr: {enabled: true}};
+
       player.configure(config);
 
-      await waitForEvent(controls, 'resolutionselectionupdated');
+      await uiReady;
 
       const auto = getAutoButton();
       const isChosen = auto.querySelector('.shaka-chosen-item');
