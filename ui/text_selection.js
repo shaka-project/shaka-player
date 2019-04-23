@@ -83,6 +83,8 @@ shaka.ui.TextSelection = class extends shaka.ui.Element {
 
     // Set up all the strings in the user's preferred language.
     this.updateLocalizedStrings_();
+
+    this.updateTextLanguages_();
   }
 
 

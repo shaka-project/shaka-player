@@ -546,12 +546,8 @@ describe('UI', function() {
     player = new shaka.Player(video);
     // Create UI
     config = config || {};
-    const ui = new shaka.ui.Overlay(player, videoContainer, video, config);
-
-    // The tests we have at the moment will pass without this, but compiler
-    // complained about not using the ui var, and I(ismena) didn't know
-    // any better.
-    ui.setEnabled(true);
+    const ui = new shaka.ui.Overlay(player, videoContainer, video);
+    ui.configure(config);
   }
 
   /**

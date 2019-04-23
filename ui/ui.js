@@ -28,35 +28,22 @@ goog.require('shaka.ui.TextDisplayer');
  * @param {!shaka.Player} player
  * @param {!HTMLElement} videoContainer
  * @param {!HTMLMediaElement} video
- * @param {!Object=} config This should follow the form of
- *   {@link shaka.extern.UIConfiguration}, but you may omit
- *   any field you do not wish to change.
  * @implements {shaka.util.IDestroyable}
  * @constructor
  * @export
  */
-shaka.ui.Overlay = function(player, videoContainer, video, config) {
+shaka.ui.Overlay = function(player, videoContainer, video) {
   /** @private {shaka.Player} */
   this.player_ = player;
 
+  /** @private {!HTMLElement} */
+  this.videoContainer_ = videoContainer;
+
+  /** @private {!HTMLMediaElement} */
+  this.video_ = video;
+
   /** @private {!shaka.extern.UIConfiguration} */
   this.config_ = this.defaultConfig_();
-
-  if (config) {
-    shaka.util.ConfigUtils.mergeConfigObjects(
-        this.config_, config, this.defaultConfig_(),
-        /* overrides (only used for player config)*/ {}, /* path */ '');
-  }
-
-  // If a cast receiver app id has been given, add a cast button to the UI
-  if (this.config_.castReceiverAppId &&
-      !this.config_.overflowMenuButtons.includes('cast')) {
-    this.config_.overflowMenuButtons.push('cast');
-  }
-
-  /** @private {shaka.ui.Controls} */
-  this.controls_ = new shaka.ui.Controls(
-      player, videoContainer, video, this.config_);
 
   // Make sure this container is discoverable and that the UI can be reached
   // through it.
@@ -75,6 +62,71 @@ shaka.ui.Overlay.prototype.destroy = async function() {
 
   await this.player_.destroy();
   this.player_ = null;
+};
+
+
+/**
+ * @param {!Object} config This should follow the form of
+ *   {@link shaka.extern.UIConfiguration}, but you may omit
+ *   any field you do not wish to change.
+ * @export
+ */
+shaka.ui.Overlay.prototype.configure = function(config) {
+  // TODO: accept flattened config "configure(addSeekBar, false);"
+  const DomUtils = shaka.util.Dom;
+  // Deconstruct the old layout.
+
+  // Save the text container, so subtitles can be displayed with
+  // the new layout.
+  const textContainer =
+    this.videoContainer_.querySelector('.shaka-text-container');
+
+  // Remember whether the controls were shown
+  let shown = false;
+  let controlsContainer =
+      this.videoContainer_.querySelector('.shaka-controls-container');
+  if (controlsContainer != null) {
+    shown = controlsContainer.getAttribute('shown');
+  }
+
+  // Destroy the old layout.
+  shaka.util.Dom.removeAllChildren(this.videoContainer_);
+
+  // Add the video back in
+  this.videoContainer_.appendChild(this.video_);
+
+  shaka.util.ConfigUtils.mergeConfigObjects(
+        this.config_, config, this.defaultConfig_(),
+        /* overrides (only used for player config)*/ {}, /* path */ '');
+
+  // If a cast receiver app id has been given, add a cast button to the UI
+  if (this.config_.castReceiverAppId &&
+      !this.config_.overflowMenuButtons.includes('cast')) {
+    this.config_.overflowMenuButtons.push('cast');
+  }
+
+  goog.asserts.assert(this.player_ != null, 'Should have a player!');
+
+  /** @private {shaka.ui.Controls} */
+  this.controls_ = new shaka.ui.Controls(
+      this.player_, this.videoContainer_, this.video_, this.config_);
+
+  controlsContainer = DomUtils.getElementByClassName(
+      'shaka-controls-container', this.videoContainer_);
+  controlsContainer.setAttribute('shown', shown);
+
+  // Init spinner with the right buffering state
+  const spinner = DomUtils.getElementByClassName(
+      'shaka-spinner-svg', controlsContainer);
+  const isBuffering = this.player_.isBuffering();
+  shaka.ui.Utils.setDisplay(spinner, isBuffering);
+
+  // Add the text container back.
+  if (textContainer) {
+    this.videoContainer_.appendChild(textContainer);
+  }
+
+  this.controls_.dispatchEvent(new shaka.util.FakeEvent('uiupdated'));
 };
 
 
@@ -188,13 +240,13 @@ shaka.ui.Overlay.scanPageForShakaElements_ = function() {
         castAppId = video['dataset']['shakaPlayerCastReceiverId'];
       }
 
-      const videoAsMediaElement = /** @type {!HTMLMediaElement} */ (video);
       const ui = shaka.ui.Overlay.createUI_(
-          /** @type {!HTMLElement} */ (container),
-          videoAsMediaElement,
-          {castReceiverAppId: castAppId});
+          shaka.util.Dom.asHTMLElement(container),
+          shaka.util.Dom.asHTMLMediaElement(video));
 
-      if (videoAsMediaElement.controls) {
+      ui.configure({castReceiverAppId: castAppId});
+
+      if (shaka.util.Dom.asHTMLMediaElement(video).controls) {
         ui.getControls().setEnabledNativeControls(true);
       }
     }
@@ -233,9 +285,11 @@ shaka.ui.Overlay.scanPageForShakaElements_ = function() {
       if (video['dataset'] && video['dataset']['shakaPlayerCastReceiverId']) {
         castAppId = video['dataset']['shakaPlayerCastReceiverId'];
       }
-      shaka.ui.Overlay.createUI_(/** @type {!HTMLElement} */ (container),
-                                 /** @type {!HTMLMediaElement} */ (video),
-                                 {castReceiverAppId: castAppId});
+      const ui = shaka.ui.Overlay.createUI_(
+          shaka.util.Dom.asHTMLElement(container),
+          shaka.util.Dom.asHTMLMediaElement(video));
+
+      ui.configure({castReceiverAppId: castAppId});
     }
   }
 
@@ -260,14 +314,12 @@ shaka.ui.Overlay.dispatchLoadedEvent_ = function() {
 /**
  * @param {!HTMLElement} container
  * @param {!HTMLMediaElement} video
- * @param {!Object} config (Possibly partial) config in the form of
- *   {@link shaka.extern.UIConfiguration}
  * @return {!shaka.ui.Overlay}
  * @private
  */
-shaka.ui.Overlay.createUI_ = function(container, video, config) {
+shaka.ui.Overlay.createUI_ = function(container, video) {
   const player = new shaka.Player(video);
-  const ui = new shaka.ui.Overlay(player, container, video, config);
+  const ui = new shaka.ui.Overlay(player, container, video);
 
   // If the browser's native controls are disabled, use UI TextDisplayer. Right
   // now because the factory must be a constructor and () => {} can't be a

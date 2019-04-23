@@ -76,8 +76,8 @@ describe('UI', () => {
       // TODO: Cast receiver id to test chromecast integration
     };
 
-    const ui =
-        new compiledShaka.ui.Overlay(player, videoContainer, video, config);
+    const ui = new compiledShaka.ui.Overlay(player, videoContainer, video);
+    ui.configure(config);
 
     // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();

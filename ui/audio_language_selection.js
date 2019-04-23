@@ -69,6 +69,8 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.Element {
 
     // Set up all the strings in the user's preferred language.
     this.updateLocalizedStrings_();
+
+    this.updateAudioLanguages_();
   }
 
 

@@ -285,6 +285,16 @@ shaka.ui.Controls.prototype.destroy = function() {
  */
 
 
+ /**
+ * @event shaka.Controls.UIUpdatedEvent
+ * @description Fired after a call to ui.configure() once the UI has finished
+ *    updating.
+ * @property {string} type
+ *   'uiupdated'
+ * @exportDoc
+ */
+
+
 /**
  * @param {string} name
  * @param {!shaka.extern.IUIElement.Factory} factory
