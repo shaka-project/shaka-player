@@ -45,7 +45,7 @@ def compile_demo(force, is_debug):
     return shakaBuildHelpers.get_all_files(
         os.path.join(base, *path_components), match)
 
-  files = set(get('demo') + get('externs') + get('ui', 'externs')) - set(get('demo', 'cast_receiver'))
+  files = set(get('demo') + get('externs') + get('ui', 'externs') + get('third_party', 'closure')) - set(get('demo', 'cast_receiver'))
 
   # Make sure we don't compile in load.js, which will be used to bootstrap
   # everything else.  If we build that into the output, we will get an
@@ -53,6 +53,9 @@ def compile_demo(force, is_debug):
   files.remove(os.path.join(base, 'demo', 'load.js'))
   # Remove service_worker.js as well.  This executes in a different context.
   files.remove(os.path.join(base, 'demo', 'service_worker.js'))
+  # Add lib/debug/asserts.js, which is required for goog.assert.
+  # TODO: This file should be inside third_party/closure instead.
+  files.add(os.path.join(base, 'lib', 'debug', 'asserts.js'))
 
   # Add in the generated externs, so that the demo compilation knows the
   # definitions of the library APIs.

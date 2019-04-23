@@ -205,10 +205,7 @@ shakaDemo.init = function() {
       shakaDemo.setupInfo_();
       shakaDemo.setupConfiguration_();
 
-      // Workarond for goog.asserts not working yet
-      if (videoContainer == null) {
-        return;
-      }
+      goog.asserts.assert(videoContainer, 'Must have a video container.');
 
       shakaDemo.controls_ = ui.getControls();
       const localization = shakaDemo.controls_.getLocalization();
