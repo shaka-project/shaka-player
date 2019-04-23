@@ -24,17 +24,17 @@ build and deploy is in the sources.
 
 ## Platform and browser support matrix
 
-|Browser    |Windows   |Mac      |Linux    |Android  |iOS⁶|ChromeOS|Other|
-|:---------:|:--------:|:-------:|:-------:|:-------:|:--:|:------:|:---:|
-|Chrome¹    |**Y**     |**Y**    |**Y**    |**Y**    | N  |**Y**   | -   |
-|Firefox¹   |**Y**     |**Y**    |**Y**    |untested⁵| N  | -      | -   |
-|Edge¹      |**Y**     | -       | -       | -       | -  | -      | -   |
-|IE ≤ 10    | N        | -       | -       | -       | -  | -      | -   |
-|IE 11      |**Y** ⁴   | -       | -       | -       | -  | -      | -   |
-|Safari¹    | -        |**Y**    | -       | -       | N  | -      | -   |
-|Opera¹     |untested⁵ |untested⁵|untested⁵|untested⁵| N  | -      | -   |
-|Chromecast²| -        | -       | -       | -       | -  | -      |**Y**|
-|Tizen TV³  | -        | -       | -       | -       | -  | -      |**Y**|
+|Browser    |Windows   |Mac      |Linux    |Android  |iOS       |ChromeOS|Other|
+|:---------:|:--------:|:-------:|:-------:|:-------:|:--------:|:------:|:---:|
+|Chrome¹    |**Y**     |**Y**    |**Y**    |**Y**    |**Native**|**Y**   | -   |
+|Firefox¹   |**Y**     |**Y**    |**Y**    |untested⁵|**Native**| -      | -   |
+|Edge¹      |**Y**     | -       | -       | -       | -        | -      | -   |
+|IE ≤ 10    | N        | -       | -       | -       | -        | -      | -   |
+|IE 11      |**Y** ⁴   | -       | -       | -       | -        | -      | -   |
+|Safari¹    | -        |**Y**    | -       | -       |**Native**| -      | -   |
+|Opera¹     |untested⁵ |untested⁵|untested⁵|untested⁵|**Native**| -      | -   |
+|Chromecast²| -        | -       | -       | -       | -        | -      |**Y**|
+|Tizen TV³  | -        | -       | -       | -       | -        | -      |**Y**|
 
 NOTES:
  - ¹: Only the latest stable version is tested and supported. Older releases may still be usable, and we will accept pull requests for them, but they will not be officially tested or supported.
@@ -42,7 +42,19 @@ NOTES:
  - ³: Tizen 2017 model is actively tested and supported by the Shaka Player team. Tizen 2016 model is community-supported and untested by us.
  - ⁴: IE 11 offers PlayReady support on Windows 8.1 and Windows 10 only. IE 11 can play clear content on Windows 8.0. IE 11 does not support adaptive playback on Windows 7 and under.
  - ⁵: These are expected to work, but are not actively tested by the Shaka Player team.
- - ⁶: All iOS browers use the same HTML engine (Apple WebKit) and are not supported because they lack MediaSource support. For more information, see: https://github.com/google/shaka-player/issues/997
+
+We support iOS through Apple's native HLS player.  We provide the same top-level
+API, but we just set the video's `src` element to the manfiest/media.  So we are
+dependent on the browser supporting the manifests.
+
+### Shaka Player Embedded (for native iOS)
+
+We have another project called [Shaka Player Embedded][] that offers the same
+features and similar APIs for native apps on iOS.  This project uses its own
+media stack, which allows it to play content that would otherwise not be
+supported.  This supports both DASH and HLS manifests.
+
+[Shaka Player Embedded]: https://github.com/google/shaka-player-embedded
 
 
 ## Manifest format support matrix

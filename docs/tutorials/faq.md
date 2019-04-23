@@ -173,6 +173,20 @@ works: `.drm.advanced.<key_system>.audioRobustness` and
 `.drm.advanced.<key_system>.videoRobustness` (see
 [docs][AdvancedDrmConfiguration]).
 
+<hr>
+
+**Q:** Does Shaka Player support iOS?
+
+**A:** Starting in v2.5, we support it through Apple's native HLS player.  So
+you can use the same top-level APIs; but we are dependent on the browser
+handling the streaming.  So we won't support DASH on iOS since the browser
+doesn't support it.
+
+We have another project called [Shaka Player Embedded][] that offers the same
+features and similar APIs for native apps on iOS.  This project uses its own
+media stack, which allows it to play content that would otherwise not be
+supported.  This supports both DASH and HLS manifests.
+
 
 [386]: https://github.com/google/shaka-player/issues/386#issuecomment-227898001
 [489]: https://github.com/google/shaka-player/issues/489#issuecomment-240466224
@@ -185,6 +199,7 @@ works: `.drm.advanced.<key_system>.audioRobustness` and
 [BigInteger.js]: https://github.com/peterolson/BigInteger.js
 [CORS]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
 [DashManifestConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.DashManifestConfiguration
+[Shaka Player Embedded]: https://github.com/google/shaka-player-embedded
 [StreamingConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.StreamingConfiguration
 [auth]: https://shaka-player-demo.appspot.com/docs/api/tutorial-license-server-auth.html
 [buffering]: https://shaka-player-demo.appspot.com/docs/api/tutorial-network-and-buffering-config.html
