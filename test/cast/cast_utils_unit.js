@@ -31,6 +31,7 @@ describe('CastUtils', function() {
       'getManifest', // Too large to proxy
       // TODO(vaage): Remove |getManifestUri| references in v2.6.
       'getManifestUri',  // Handled specially by CastProxy
+      'getManifestParserFactory',  // Would not serialize.
 
       // Test helper methods (not @export'd)
       'createDrmEngine',

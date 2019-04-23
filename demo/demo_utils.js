@@ -19,106 +19,6 @@
 /** @namespace */
 let ShakaDemoUtils = {};
 
-
-/**
- * @param {shakaAssets.AssetInfo} asset
- * @param {shaka.Player} player
- */
-ShakaDemoUtils.setupAssetMetadata = function(asset, player) {
-  let config = /** @type {shaka.extern.PlayerConfiguration} */(
-      {drm: {}, manifest: {dash: {}}});
-
-  // Add config from this asset.
-  if (asset.licenseServers) {
-    config.drm.servers = asset.licenseServers;
-  }
-  if (asset.drmCallback) {
-    config.manifest.dash.customScheme = asset.drmCallback;
-  }
-  if (asset.clearKeys) {
-    config.drm.clearKeys = asset.clearKeys;
-  }
-  player.configure(config);
-
-  // Configure network filters.
-  let networkingEngine = player.getNetworkingEngine();
-  networkingEngine.clearAllRequestFilters();
-  networkingEngine.clearAllResponseFilters();
-
-  if (asset.licenseRequestHeaders) {
-    let filter = ShakaDemoUtils.addLicenseRequestHeaders_.bind(
-        null, asset.licenseRequestHeaders);
-    networkingEngine.registerRequestFilter(filter);
-  }
-
-  if (asset.requestFilter) {
-    networkingEngine.registerRequestFilter(asset.requestFilter);
-  }
-  if (asset.responseFilter) {
-    networkingEngine.registerResponseFilter(asset.responseFilter);
-  }
-  if (asset.extraConfig) {
-    player.configure(
-        /** @type {shaka.extern.PlayerConfiguration} */ (asset.extraConfig));
-  }
-};
-
-
-/**
- * @param {!Object.<string, string>} headers
- * @param {shaka.net.NetworkingEngine.RequestType} requestType
- * @param {shaka.extern.Request} request
- * @private
- */
-ShakaDemoUtils.addLicenseRequestHeaders_ =
-    function(headers, requestType, request) {
-  if (requestType != shaka.net.NetworkingEngine.RequestType.LICENSE) return;
-
-  // Add these to the existing headers.  Do not clobber them!
-  // For PlayReady, there will already be headers in the request.
-  for (let k in headers) {
-    request.headers[k] = headers[k];
-  }
-};
-
-
-/**
- * Creates a number of asset buttons, with selection functionality.
- * Clicking one of these elements will add the "selected" tag to it, and remove
- * the "selected" tag from the previously selected element.
- * @param {!Element} parentDiv The div to place the buttons in.
- * @param {!Array.<shakaAssets.AssetInfo>} assets The assets that should be
- *   given buttons.
- * @param {?shakaAssets.AssetInfo} selectedAsset An asset that should start out
- *   selected.
- * @param {function(!Element, shakaAssets.AssetInfo)} layout A function that is
- *   called to lay out the contents of a button.
- * @param {function(shakaAssets.AssetInfo)} onclick A function that is called
- *   when a button is clicked. This is after giving the button the "selected"
- *   tag.
- */
-ShakaDemoUtils.createAssetButtons = function(
-    parentDiv, assets, selectedAsset, layout, onclick) {
-  let assetButtons = [];
-  for (let asset of assets) {
-    let button = document.createElement('div');
-    layout(button, asset);
-    button.onclick = () => {
-      onclick(asset);
-      for (let button of assetButtons) {
-        button.removeAttribute('selected');
-      }
-      button.setAttribute('selected', '');
-    };
-    parentDiv.appendChild(button);
-    assetButtons.push(button);
-
-    if (asset == selectedAsset) {
-      button.setAttribute('selected', '');
-    }
-  }
-};
-
 /**
  * Goes through the various values in shaka.extern.PlayerConfiguration, and
  * calls the given callback on them so that they can be stored to or read from
@@ -151,6 +51,8 @@ ShakaDemoUtils.runThroughHashParams = (callback, config) => {
   // Override config values that are handled manually.
   overridden.push('abr.enabled');
   overridden.push('streaming.jumpLargeGaps');
+  overridden.push('drm.advanced');
+  overridden.push('drm.servers');
 
   // Determine which config values should be given full namespace names.
   // This is to remove ambiguity in situations where there are two objects in

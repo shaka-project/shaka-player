@@ -22,12 +22,12 @@
 
 /**
  * The name of the cache for this version of the application.
- * This should be updated when old, unneded application resources could be
+ * This should be updated when old, unneeded application resources could be
  * cleaned up by a newer version of the application.
  *
  * @const {string}
  */
-const CACHE_NAME = 'shaka-player-v2';
+const CACHE_NAME = 'shaka-player-v2.5+';
 
 
 /**
@@ -62,8 +62,7 @@ const CRITICAL_RESOURCES = [
   '.',  // This resolves to the page.
   'index.html',  // Another way to access the page.
   'app_manifest.json',
-
-  'demo.css',
+  'shaka_logo_trans.png',
 
   // These CSS files will reference Web Fonts which will be cached on sight
   // thanks to CACHEABLE_URL_PREFIXES below.  This means we don't have to
@@ -77,6 +76,11 @@ const CRITICAL_RESOURCES = [
   '../dist/shaka-player.ui.js',
   '../dist/demo.compiled.js',
   '../dist/controls.css',
+  '../dist/demo.css',
+
+  // These files are required for the demo to include MDL.
+  'https://code.getmdl.io/1.3.0/material.indigo-blue.min.css',
+  'https://code.getmdl.io/1.3.0/material.min.js',
 ];
 
 
@@ -117,6 +121,8 @@ const CACHEABLE_URL_PREFIXES = [
   // Google Web Fonts should be cached when first seen, without being explicitly
   // listed, and should be preferred from cache for speed.
   'https://fonts.gstatic.com/',
+  // Same goes for asset icons.
+  'https://storage.googleapis.com/shaka-asset-icons/',
 ];
 
 

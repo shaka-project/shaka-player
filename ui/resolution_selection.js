@@ -174,9 +174,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
         this.resolutionMenu_, 'shaka-back-to-overflow-button');
 
     // 2. Remove everything
-    while (this.resolutionMenu_.firstChild) {
-      this.resolutionMenu_.removeChild(this.resolutionMenu_.firstChild);
-    }
+    shaka.ui.Utils.removeAllChildren(this.resolutionMenu_);
 
     // 3. Add the backTo Menu button back
     this.resolutionMenu_.appendChild(backButton);

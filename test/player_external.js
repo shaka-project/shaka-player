@@ -80,6 +80,7 @@ describe('Player', () => {
   });
 
   describe('plays', () => {
+    /** @param {!ShakaDemoAssetInfo} asset */
     function createAssetTest(asset) {
       if (asset.disabled) return;
 
@@ -211,14 +212,20 @@ describe('Player', () => {
       /** @type {Object} */
       const licenseServers = getClientArg('testCustomLicenseServer');
       const keySystems = Object.keys(licenseServers || {});
-      const asset = {
-        source: 'command line',
-        name: 'custom',
-        manifestUri: testCustomAsset,
-        focus: true,
-        licenseServers: licenseServers,
-        drm: keySystems,
-      };
+      const asset = new ShakaDemoAssetInfo(
+          /* name= */ 'custom',
+          /* iconUri= */ '',
+          /* manifestUri= */ testCustomAsset,
+          /* source= */ shakaAssets.Source.CUSTOM);
+      if (keySystems.length) {
+        for (let keySystem of keySystems) {
+          asset.addKeySystem(/** @type {!shakaAssets.KeySystem} */ (keySystem));
+          const licenseServer = licenseServers[keySystem];
+          if (licenseServer) {
+            asset.addLicenseServer(keySystem, licenseServer);
+          }
+        }
+      }
       createAssetTest(asset);
     } else {
       // No custom assets? Create a test for each asset in the demo asset list.

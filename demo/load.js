@@ -49,18 +49,22 @@ function shakaUncompiledModeSupported() {
 
   // NOTE: This is a quick-and-easy hack based on assumption that the old
   // demo page will be replaced in the near future.
-  function loadCss(buildType) {
+  function loadSpecificCss(href, linkRel) {
     var link = document.createElement('link');
     link.type = 'text/css';
-    if (buildType == 'uncompiled') {
-      link.rel = 'stylesheet/less';
-      link.href = baseUrl + '../ui/controls.less';
-    } else {
-      link.rel = 'stylesheet';
-      link.href = baseUrl + '../dist/controls.css';
-    }
+    link.href = baseUrl + href;
+    link.rel = linkRel;
 
     document.head.appendChild(link);
+  }
+  function loadCss(buildType) {
+    if (buildType == 'uncompiled') {
+      loadSpecificCss('../ui/controls.less', 'stylesheet/less');
+      loadSpecificCss('../demo/demo.less', 'stylesheet/less');
+    } else {
+      loadSpecificCss('../dist/controls.css', 'stylesheet');
+      loadSpecificCss('../dist/demo.css', 'stylesheet');
+    }
   }
 
   function importScript(src) {

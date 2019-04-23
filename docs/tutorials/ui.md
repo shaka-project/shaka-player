@@ -79,8 +79,15 @@ function onUIErrorEvent(errorEvent) {
   // Handle UI error
 }
 
+function initFailed() {
+  // Handle the failure to load
+}
+
 // Listen to the custom shaka-ui-loaded event, to wait until the UI is loaded.
 document.addEventListener('shaka-ui-loaded', init);
+// Listen to the custom shaka-ui-load-failed event, in case Shaka Player fails
+// to load (e.g. due to lack of browser support).
+document.addEventListener('shaka-ui-load-failed, initFailed);
 
 ```
 

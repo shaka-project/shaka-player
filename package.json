@@ -12,10 +12,12 @@
   ],
   "devDependencies": {
     "array-includes": "~3.0.3",
+    "awesomplete": "~1.1.1",
     "babel-core": "^6.26.0",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "cajon": "^0.4.4",
+    "dialog-polyfill": "^0.4.10",
     "es6-promise-polyfill": "^1.2.0",
     "es6-shim": "~0.35.3",
     "eslint": "^4.14.0",

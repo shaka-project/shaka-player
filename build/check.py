@@ -118,6 +118,7 @@ def check_tests(args):
   files = set(get('lib') + get('externs') + get('test') + get('ui') +
               get('third_party', 'closure') +
               get('third_party', 'language-mapping-list'))
+  files.add(os.path.join(base, 'demo', 'common', 'asset.js'))
   files.add(os.path.join(base, 'demo', 'common', 'assets.js'))
 
   localizations = compiler.GenerateLocalizations(None)

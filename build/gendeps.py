@@ -31,6 +31,7 @@ deps_args = [
     '--root_with_prefix=third_party/language-mapping-list ' +
         '../../../third_party/language-mapping-list',
     '--root_with_prefix=dist ../../../dist',
+    '--root_with_prefix=demo ../../../demo',
 ]
 
 

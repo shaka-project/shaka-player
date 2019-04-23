@@ -99,6 +99,7 @@ module.exports = function(config) {
       'test/test/util/*.js',
 
       // list of test assets next
+      'demo/common/asset.js',
       'demo/common/assets.js',
 
       // if --test-custom-asset *is not* present, we will add unit tests.

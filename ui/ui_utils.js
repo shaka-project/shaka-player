@@ -110,3 +110,13 @@ shaka.ui.Utils.setDisplay = function(element, display) {
   }
 };
 
+/**
+ * Remove all of the child nodes of an elements.
+ * @param {!Element} element
+ * @export
+ */
+shaka.ui.Utils.removeAllChildren = function(element) {
+  while (element.firstChild) {
+    element.removeChild(element.firstChild);
+  }
+};

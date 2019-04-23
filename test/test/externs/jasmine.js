@@ -80,8 +80,11 @@ var pending = function(message) {};
 jasmine.Matchers.prototype.not;
 
 
-/** @param {*} value */
-jasmine.Matchers.prototype.toBe = function(value) {};
+/**
+ * @param {*} value
+ * @param {string=} message
+ */
+jasmine.Matchers.prototype.toBe = function(value, message) {};
 
 
 /**

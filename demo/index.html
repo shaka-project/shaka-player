@@ -22,20 +22,25 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#ffffff">
 
-    <base target="_blank">
-
     <title>Shaka Player Demo</title>
 
     <link rel="manifest" href="app_manifest.json">
     <link rel="icon" href="favicon.ico">
-    <link rel="stylesheet" href="demo.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
+    <!-- Load MDL, with the desired color scheme. -->
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
     <script defer src="//www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
     <!-- transmuxing support is enabled by including this: -->
     <script defer src="../node_modules/mux.js/dist/mux.js"></script>
+    <!-- MDL is enabled by including this: -->
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <!-- MDL modal dialogs are enabled by including these: -->
+    <script defer src="../node_modules/dialog-polyfill/dialog-polyfill.js"></script>
+    <link rel="stylesheet" href="../node_modules/dialog-polyfill/dialog-polyfill.css">
+    <!-- Datalist-like fields are enabled by including these: -->
+    <link rel="stylesheet" href="../node_modules/awesomplete/awesomplete.css" />
+    <script src="../node_modules/awesomplete/awesomplete.js" async></script>
 
     <script>
 COMPILED_JS = [
@@ -54,203 +59,97 @@ UNCOMPILED_JS = [
   // Bootstrap the Shaka Player library through the Closure library.
   '../third_party/closure/goog/base.js',
   '../dist/deps.js',
+  // This is required for goog.asserts.
+  '../lib/debug/asserts.js',
   // This file contains goog.require calls for all exported library classes.
   '../shaka-player.uncompiled.js',
   // Enable less, the CSS pre-processor.
   '../node_modules/less/dist/less.js',
   // These are the individual parts of the demo app.
+  'common/asset.js',
   'common/assets.js',
-  'common/demo_utils.js',
+  'demo_utils.js',
+  'asset_card.js',
+  'close_button.js',
+  'input.js',
+  'input_container.js',
+  'tooltip.js',
   'main.js',
-  'asset_section.js',
-  'configuration_section.js',
-  'info_section.js',
-  'log_section.js',
-  'offline_section.js',
+  'front.js',
+  'search.js',
+  'custom.js',
+  'config.js'
 ];
-
-  </script>
+    </script>
 
     <!-- Load the compiled or uncompiled version of the code. -->
     <script defer src="load.js"></script>
   </head>
   <body>
-    <div id="container">
-      <h1>Shaka Player <span id="version"></span></h1>
-
-      <div class="input">
-        <p id="compiled_links">
-          <a target="_self" href="?build=uncompiled" id="uncompiled_link">uncompiled</a> |
-          <a target="_self" href="?build=debug_compiled" id="debug_compiled_link">compiled (debug)</a> |
-          <a target="_self" href="?build=compiled" id="compiled_link">compiled (release)</a>
-        </p>
-        <p>This is a demo of Google's Shaka Player, a JavaScript library for
-           adaptive video streaming.</p>
-
-        <p>Choose an asset and tap <strong>Load</strong>.
-           (On Android, you may also need to press the play button on the
-            video.)</p>
-
-        <p class="links">
-          <a href="../docs/api/index.html">Documentation</a> |
-          <a href="https://github.com/google/shaka-player">Repo</a> |
-          <a href="https://www.npmjs.com/package/shaka-player">NPM</a> |
-          <a href="https://cdnjs.com/libraries/shaka-player">CDNJS</a>
-        </p>
-
-        <div class="flex">
-          <label for="assetList">Asset:</label>
-          <select id="assetList" class="flex-grow"></select>
+    <div id="main-layout" class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+      <header class="app-header mdl-layout__header">
+        <header class="mdl-layout__header-row" id="nav-button-container">
+          <img alt="Shaka Player Logo" src="shaka_logo_trans.png" class="logo" />
+          <button id="nav-button-front" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail" defaultselected>HOME</button>
+          <button id="nav-button-search" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail">SEARCH</button>
+          <button id="nav-button-custom" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail">CUSTOM CONTENT</button>
+          <div class="mdl-layout-spacer"></div>
+          <div id="version-block">
+            <span id="version-string"></span>
+          </div>
+        </header>
+      </header>
+      <div class="mdl-layout__drawer hamburger-menu">
+        <div id="hamburger-menu-title" class="mdl-layout-title">
+          Shaka Player Demo Config
+          <div class="mdl-layout-spacer"></div>
+          <button id="drawer-close-button" class="mdl-button mdl-js-button mdl-button--icon should-disable-on-fail"><i class="material-icons">close</i></button>
         </div>
-        <div id="customAsset">
-          <div class="flex">
-            <label for="manifestInput">Custom manifest:</label>
-            <input id="manifestInput" type="text" class="flex-grow">
-          </div>
-          <div class="flex">
-            <label for="licenseServerInput">Custom license server:</label>
-            <input id="licenseServerInput" type="text" class="flex-grow">
-          </div>
-          <div class="flex">
-            <label for="certificateInput">Custom license certificate URL:</label>
-            <input id="certificateInput" type="text" class="flex-grow">
+        <nav class="mdl-navigation" id="hamburger-menu-contents">
+        </nav>
+      </div>
+      <div id="error-display" class="hidden">
+        <div id="error-display-close-button">x</div>
+        <a id="error-display-link" href="#"></a>
+      </div>
+      <main class="mdl-layout__content" id="main-div">
+        <div id="video-bar" class="hidden">
+          <div id="video-container">
+            <video autoplay playsinline id="video"></video>
           </div>
         </div>
+        <div id="contents"></div>
+        <footer class="mdl-mega-footer">
+          <div class="mdl-mega-footer__middle-section">
 
-        <div>
-          <button id="loadButton" class="appButton">Load</button>
-          <button id="unloadButton" class="appButton">Unload</button>
-        </div>
-      </div>
-
-      <div id="errorDisplay">
-        <div id="errorDisplayCloseButton">x</div>
-        <a id="errorDisplayLink" href="#"></a>
-      </div>
-
-      <div data-shaka-player-container data-shaka-player-cast-receiver-id="7B25EC44">
-        <video autoplay playsinline data-shaka-player id="video"></video>
-      </div>
-
-      <details id="logSection">
-        <summary>Logs</summary>
-        <div id="log"></div>
-      </details>
-
-      <details class="input">
-        <summary>Configuration</summary>
-        <div class="flex">
-          <label for="preferredAudioLanguage">Preferred audio language:</label>
-          <input id="preferredAudioLanguage" class="flex-grow" type="text">
-        </div>
-        <div class="flex">
-          <label for="preferredTextLanguage">Preferred text language:</label>
-          <input id="preferredTextLanguage" class="flex-grow" type="text">
-        </div>
-        <div class="flex">
-          <label for="preferredUILanguage">Preferred UI language:</label>
-          <input id="preferredUILanguage" class="flex-grow" type="text">
-        </div>
-        <div class="flex">
-          <label for="preferredAudioChannelCount">Preferred audio channel count:</label>
-          <input id="preferredAudioChannelCount" type="number">
-        </div>
-        <div>
-          <label for="showNative">Show native browser controls:</label>
-          <input id="showNative" type="checkbox">
-        </div>
-        <div>
-          <label for="enableAdaptation">Enable adaptation:</label>
-          <input id="enableAdaptation" type="checkbox" checked>
-        </div>
-        <div>
-          <label for="enableLoadOnRefresh">Auto-load on page refresh:</label>
-          <input id="enableLoadOnRefresh" type="checkbox">
-        </div>
-        <div>
-          <label for="logToScreen">Log to the screen:</label>
-          <input id="logToScreen" type="checkbox">
-        </div>
-        <div>
-          <label for="smallGapLimit">Maximum small gap size:</label>
-          <input id="smallGapLimit" class="flex-grow" type="text">
-        </div>
-        <div>
-          <label for="jumpLargeGaps">Jump large gaps:</label>
-          <input id="jumpLargeGaps" type="checkbox">
-        </div>
-        <div id="logLevelListDiv" hidden>
-          <label for="logLevelList">Log Level:</label>
-          <select id="logLevelList" class="flex-grow">
-            <option value="info">Info</option>
-            <option value="debug">Debug</option>
-            <option value="v">Verbose</option>
-            <option value="vv">Very Verbose</option>
-          </select>
-        </div>
-        <div>
-          <label for="drmSettingsVideoRobustness">Video Robustness:</label>
-          <input id="drmSettingsVideoRobustness" type="text" class="flex-grow" list="robustnessSuggestions">
-        </div>
-        <div>
-          <label for="drmSettingsAudioRobustness">Audio Robustness:</label>
-          <input id="drmSettingsAudioRobustness" type="text" class="flex-grow" list="robustnessSuggestions">
-        </div>
-        <div>
-          <label for="availabilityWindowOverride">Availability Window Override:</label>
-          <input id="availabilityWindowOverride" type="number" step="30" min="0">
-        </div>
-        <datalist id="robustnessSuggestions"></datalist>
-      </details>
-
-      <details class="input">
-        <summary>Info</summary>
-        <div class="flex">
-          <label for="audioLanguages">Audio languages:</label>
-          <select id="audioLanguages" class="flex-grow"></select>
-        </div>
-
-        <div class="flex">
-          <label for="variantTracks">Video+audio track combinations:</label>
-          <select id="variantTracks" class="flex-grow"></select>
-        </div>
-
-        <div class="flex">
-          <label for="textLanguages">Text languages:</label>
-          <select id="textLanguages" class="flex-grow"></select>
-        </div>
-
-        <div class="flex">
-          <label for="textTracks">Text tracks:</label>
-          <select id="textTracks" class="flex-grow"></select>
-        </div>
-
-        <div>
-          <span class="label">Active resolution:</span>
-          <span id="videoResDebug"></span>
-        </div>
-
-        <div>
-          <span class="label">Buffered:</span>
-          <span id="bufferedDebug"></span>
-        </div>
-      </details>
-
-      <details id="offlineSection" class="input">
-        <summary>Offline</summary>
-        <div>
-          <button id="storeDeleteButton" class="appButton">Store</button>
-          <span id="storeDeleteHelpText"></span>
-        </div>
-        <div id="progressDiv">
-          <span class="label">Progress:</span>
-          <span id="progress">0</span>%
-        </div>
-        <div id="offlineNameDiv">
-          <label for="offlineName">Name:</label>
-          <input id="offlineName" class="flex-grow" type="text">
-        </div>
-      </details>
+            <div class="mdl-mega-footer__drop-down-section">
+              <h1 class="mdl-mega-footer__heading">PROJECT LINKS</h1>
+              <ul class="mdl-mega-footer__link-list">
+                <li><a href="../docs/api/index.html" target="_blank">Documentation</a></li>
+                <li><a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank">Apache License</a></li>
+                <li><a href="https://github.com/google/shaka-player" target="_blank">Source on GitHub</a></li>
+                <li><a href="https://www.npmjs.com/package/shaka-player" target="_blank">Package on NPM</a></li>
+              </ul>
+            </div>
+            <div class="mdl-mega-footer__drop-down-section">
+              <h1 class="mdl-mega-footer__heading">CDN</h1>
+              <ul class="mdl-mega-footer__link-list">
+                <li><a href="https://developers.google.com/speed/libraries/#shaka-player" target="_blank">Google Hosted Libraries</a></li>
+                <li><a href="https://www.jsdelivr.com/package/npm/shaka-player" target="_blank">jsDelivr</a></li>
+                <li><a href="https://cdnjs.com/libraries/shaka-player" target="_blank">CDNJS</a></li>
+              </ul>
+            </div>
+            <div class="mdl-mega-footer__drop-down-section">
+              <h1 class="mdl-mega-footer__heading">DEMO MODE</h1>
+              <ul class="mdl-mega-footer__link-list" id="compiled-links">
+                <li><a href="#build=compiled" id="compiled-link">Compiled (Release)</a></li>
+                <li><a href="#build=debug_compiled" id="debug-compiled-link">Compiled (Debug)</a></li>
+                <li><a href="#build=uncompiled" id="uncompiled-link">Uncompiled</a></li>
+              </ul>
+            </div>
+          </div>
+        </footer>
+      </main>
     </div>
   </body>
 </html>

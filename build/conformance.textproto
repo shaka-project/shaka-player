@@ -52,6 +52,7 @@ requirement {
   # Until we can get this rule updated for ES6 static methods
   # (https://github.com/google/closure-compiler/issues/2880):
   whitelist_regexp: 'test/test/util/canned_idb.js'
+  whitelist_regexp: 'test/assets/assets_integration.js'
 }
 
 
@@ -214,13 +215,13 @@ requirement: {
   type: BANNED_NAME
   value: 'window.eval'
   error_message: 'Using "eval" is not allowed'
-  whitelist_regexp: 'demo/common/demo_utils.js'
+  whitelist_regexp: 'demo/demo_utils.js'
 }
 requirement: {
   type: BANNED_NAME
   value: 'eval'
   error_message: 'Using "eval" is not allowed'
-  whitelist_regexp: 'demo/common/demo_utils.js'
+  whitelist_regexp: 'demo/demo_utils.js'
 }
 
 

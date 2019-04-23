@@ -1,0 +1,83 @@
+# Generate png with: dot -Tpng -O newdemo.gv
+
+digraph new_demo {
+  label = "Shaka Player New Demo Page Architecture Diagram"
+
+  node [ style = filled ]
+
+  "ShakaDemoMain" [ shape = oval ]
+
+  "Shaka Player" [ shape = Mdiamond ]
+
+  subgraph cluster_new_demo_panels {
+    label = "Panels"
+    style = filled
+    color = aliceblue
+    shape = rectangle
+
+    "ShakaDemoConfig" [ shape = oval ]
+    "ShakaDemoCustom" [ shape = oval ]
+    "ShakaDemoSearch" [ shape = oval ]
+    "ShakaDemoFront" [ shape = oval ]
+  }
+
+  subgraph cluster_new_demo_common {
+    label = "Common"
+    style = filled
+    color = lavenderblush
+    shape = rectangle
+
+    "ShakaDemoUtils" [ shape = Msquare ]
+    "ShakaAssets" [ shape = Msquare ]
+    "ShakaDemoAssetInfo" [ shape = Msquare ]
+  }
+
+  subgraph cluster_new_demo_utilities {
+    label = "Misc Utilities"
+    style = filled
+    color = palegoldenrod
+    shape = rectangle
+
+    "ShakaDemoInput" [ shape = Msquare ]
+    "ShakaDemoInputContainer" [ shape = Msquare ]
+    "AssetCard" [ shape = mSquare ]
+  }
+
+  # Dependencies on Shaka Player
+  ShakaDemoMain -> "Shaka Player"
+
+  # Dependencies on ShakaDemoMain
+  ShakaDemoConfig -> ShakaDemoMain
+  ShakaDemoCustom -> ShakaDemoMain
+  ShakaDemoSearch -> ShakaDemoMain
+  ShakaDemoFront -> ShakaDemoMain
+
+  # Dependencies on ShakaDemoUtils
+  ShakaDemoMain -> ShakaDemoUtils [ style = dotted ]
+
+  # Dependencies on ShakaAssets
+  ShakaDemoMain -> ShakaAssets [ style = dotted ]
+  ShakaDemoSearch -> ShakaAssets [ style = dotted ]
+  ShakaDemoFront -> ShakaAssets [ style = dotted ]
+
+  # Dependencies on ShakaDemoAssetInfo
+  ShakaAssets -> ShakaDemoAssetInfo [ style = dotted ]
+  AssetCard -> ShakaDemoAssetInfo [ style = dotted ]
+  ShakaDemoCustom -> ShakaDemoAssetInfo [ style = dotted ]
+
+  # Dependencies on ShakaDemoInput
+  ShakaDemoCustom -> ShakaDemoInput [ style = dotted ]
+  ShakaDemoConfig -> ShakaDemoInput [ style = dotted ]
+  ShakaDemoSearch -> ShakaDemoInput [ style = dotted ]
+  ShakaDemoInputContainer -> ShakaDemoInput
+
+  # Dependencies on ShakaDemoInputContainer
+  ShakaDemoCustom -> ShakaDemoInputContainer [ style = dotted ]
+  ShakaDemoConfig -> ShakaDemoInputContainer [ style = dotted ]
+  ShakaDemoSearch -> ShakaDemoInputContainer [ style = dotted ]
+
+  # Dependencies on AssetCard
+  ShakaDemoSearch -> AssetCard [ style = dotted ]
+  ShakaDemoCustom -> AssetCard [ style = dotted ]
+  ShakaDemoFront -> AssetCard [ style = dotted ]
+}
