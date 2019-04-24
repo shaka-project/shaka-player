@@ -234,8 +234,8 @@ Non-segmented WebVTT text, MP4-embedded VTT, and TTML are not affected by this
 change.
 
 For more information, see discussions here:
- - {@link https://github.com/google/shaka-player/issues/480}
- - {@link https://github.com/google/shaka-player/issues/726}
+ - {@link https://github.com/google/shaka-player/issues/480 #480}
+ - {@link https://github.com/google/shaka-player/issues/726 #726}
 
 
 #### New "text" namespace

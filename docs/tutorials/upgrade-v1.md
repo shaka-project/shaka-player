@@ -634,8 +634,9 @@ if (!shaka.Player.isBrowserSupported()) {
 ```
 
 For more on the support object, check out {@link shaka.extern.SupportType}.
-You can also see the full `probeSupport()` report for your browser at:
-{@link http://shaka-player-demo.appspot.com/support.html}
+You can also see the full `probeSupport()` report for your browser at
+{@link https://shaka-player-demo.appspot.com/support.html our support debug
+page.}
 
 
 #### HttpVideoSource
