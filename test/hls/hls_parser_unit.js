@@ -199,6 +199,34 @@ describe('HlsParser', function() {
         .catch(fail).then(done);
   });
 
+  it('ignores duplicate CODECS', async function() {
+    let master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d001e,avc1.42000d",',
+      'RESOLUTION=960x540,FRAME-RATE=60\n',
+      'video',
+    ].join('');
+
+    let media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    let manifest = new shaka.test.ManifestGenerator()
+            .anyTimeline()
+            .addPeriod(0)
+              .addPartialVariant()
+                .addPartialStream(ContentType.VIDEO)
+                  .mime('video/mp4', 'avc1.4d001e')
+          .build();
+
+    await testHlsParser(master, media, manifest);
+  });
+
   it('parses video-only variant', async function() {
     let master = [
       '#EXTM3U\n',
