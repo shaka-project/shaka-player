@@ -315,7 +315,14 @@ class HtmlLinter(object):
 class Jsdoc(object):
   def __init__(self, config_path):
     self.config_path = config_path
-    self.source_files = []
+    self.source_files = shakaBuildHelpers.get_all_files(
+        _get_source_path('docs/tutorials'))
+    self.source_files += shakaBuildHelpers.get_all_files(
+        _get_source_path('docs/jsdoc-template'))
+    self.source_files += [
+        _get_source_path('docs/jsdoc-plugin.js'),
+        _get_source_path('docs/api-mainpage.md'),
+    ]
 
     # Just one of many output files, used to check the freshness of the docs.
     self.output = _get_source_path('docs/api/index.html')
