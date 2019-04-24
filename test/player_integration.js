@@ -228,6 +228,28 @@ describe('Player', function() {
       const variantTrack = player.getVariantTracks()[0];
       expect(variantTrack.language).toEqual(textTrack.language);
     });
+
+    // Repro for https://github.com/google/shaka-player/issues/1879.
+    it('actually appends cues when enabled initially', async () => {
+      let cues = [];
+      /** @const {!shaka.test.FakeTextDisplayer} */
+      const displayer = new shaka.test.FakeTextDisplayer();
+      displayer.appendSpy.and.callFake((added) => {
+        cues = cues.concat(added);
+      });
+      displayer.removeSpy.and.callFake(() => { cues = []; });
+      player.configure({textDisplayFactory: () => displayer});
+
+      const preferredTextLanguage = 'fa';  // The same as in the content itself
+      player.configure({preferredTextLanguage: preferredTextLanguage});
+
+      await player.load('test:sintel_realistic_compiled');
+      await Util.delay(1);  // Allow the first segments to be appended.
+
+      expect(player.isTextTrackVisible()).toBe(true);
+      expect(displayer.isTextVisible()).toBe(true);
+      expect(cues.length).toBeGreaterThan(0);
+    });
   });
 
   describe('plays', function() {

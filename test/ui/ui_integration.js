@@ -168,11 +168,14 @@ describe('UI', () => {
         await player.setTextTrackVisibility(true);
         expect(player.isTextTrackVisible()).toBe(true);
 
+        // Get the Promise first.  The event can be raised synchronously within
+        // the click() handler.  This ensures we see the event.
+        const p = waitForEvent(player, 'texttrackvisibility');
+
         // Find and click the 'Off' button
         getOffButton().click();
-
         // Wait for the change to take effect
-        await waitForEvent(player, 'texttrackvisibility');
+        await p;
 
         expect(player.isTextTrackVisible()).toBe(false);
       });

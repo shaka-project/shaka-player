@@ -24,6 +24,8 @@ goog.provide('shaka.test.FakeTextDisplayer');
  */
 shaka.test.FakeTextDisplayer = class {
   constructor() {
+    let isVisible = false;
+
     /** @type {!jasmine.Spy} */
     this.destroySpy = jasmine.createSpy('destroy');
     /** @type {!jasmine.Spy} */
@@ -31,9 +33,13 @@ shaka.test.FakeTextDisplayer = class {
     /** @type {!jasmine.Spy} */
     this.removeSpy = jasmine.createSpy('remove');
     /** @type {!jasmine.Spy} */
-    this.isTextVisibleSpy = jasmine.createSpy('isTextVisible');
+    this.isTextVisibleSpy =
+        jasmine.createSpy('isTextVisible').and.callFake(() => isVisible);
     /** @type {!jasmine.Spy} */
-    this.setTextVisibilitySpy = jasmine.createSpy('setTextVisibility');
+    this.setTextVisibilitySpy =
+        jasmine.createSpy('setTextVisibility').and.callFake((on) => {
+          isVisible = on;
+        });
   }
 
   /** @override */

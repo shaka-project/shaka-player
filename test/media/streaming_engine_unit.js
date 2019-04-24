@@ -617,6 +617,7 @@ describe('StreamingEngine', function() {
           mediaSourceEngine.clear.calls.reset();
           mediaSourceEngine.init.calls.reset();
           streamingEngine.loadNewTextStream(textStream2);
+          PromiseMock.flush();
           expect(mediaSourceEngine.clear).toHaveBeenCalledWith('text');
 
           const expectedObject = new Map();
