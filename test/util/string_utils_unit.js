@@ -108,6 +108,20 @@ describe('StringUtils', function() {
     expect(new Uint8Array(buffer)).toEqual(new Uint8Array(arr));
   });
 
+  it('converts toUTF16-LE', function() {
+    const str = 'Xe\u4524\u1952';
+    const arr = [0x58, 0, 0x65, 0, 0x24, 0x45, 0x52, 0x19];
+    const buffer = StringUtils.toUTF16(str, /* littleEndian */ true);
+    expect(new Uint8Array(buffer)).toEqual(new Uint8Array(arr));
+  });
+
+  it('converts toUTF16-BE', function() {
+    const str = 'Xe\u4524\u1952';
+    const arr = [0, 0x58, 0, 0x65, 0x45, 0x24, 0x19, 0x52];
+    const buffer = StringUtils.toUTF16(str, /* littleEndian */ false);
+    expect(new Uint8Array(buffer)).toEqual(new Uint8Array(arr));
+  });
+
   it('does not cause stack overflow, #335', function() {
     let buffer = new Uint8Array(8e5).buffer;  // Well above arg count limit.
     expect(StringUtils.fromUTF8(buffer).length).toBe(buffer.byteLength);

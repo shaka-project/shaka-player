@@ -232,6 +232,7 @@ requirement: {
   error_message: 'Event is not constructable on IE.  Instead, use '
                  'document.createEvent(\'CustomEvent\') to create an event and '
                  'event.initCustomEvent(\'my-event-type\') to initialize it.'
+  whitelist_regexp: 'lib/polyfill/patchedmediakeys_apple.js'
 }
 
 
@@ -247,6 +248,7 @@ requirement: {
   value: 'TypedArray.prototype.slice'
   error_message: 'TypedArray.slice is not allowed because it '
                  'is not supported on IE11'
+  whitelist_regexp: 'lib/polyfill/patchedmediakeys_apple.js'
 }
 requirement: {
   type: BANNED_NAME

@@ -5,6 +5,7 @@
 +../../lib/polyfill/input_event.js
 +../../lib/polyfill/mathround.js
 +../../lib/polyfill/mediasource.js
++../../lib/polyfill/patchedmediakeys_apple.js
 +../../lib/polyfill/patchedmediakeys_ms.js
 +../../lib/polyfill/patchedmediakeys_nop.js
 +../../lib/polyfill/patchedmediakeys_webkit.js

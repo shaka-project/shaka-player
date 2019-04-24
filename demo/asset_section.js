@@ -216,6 +216,7 @@ shakaDemo.preparePlayer_ = function(asset) {
   let commonDrmSystems = [
     'com.widevine.alpha',
     'com.microsoft.playready',
+    'com.apple.fps.1_0',
     'com.adobe.primetime',
     'org.w3.clearkey',
   ];
