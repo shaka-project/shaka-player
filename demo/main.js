@@ -558,17 +558,18 @@ shakaDemo.hashShouldChange_ = function() {
       if (licenseInputValue) {
         params.push('license=' + licenseInputValue);
       }
-
-      let certificateInputValue =
-          document.getElementById('certificateInput').value;
-      if (certificateInputValue) {
-        params.push('certificate=' + certificateInputValue);
-      }
     } else {
       // It's a default asset.
       params.push('asset=' +
           assetList[assetList.selectedIndex].asset.manifestUri);
     }
+  }
+
+  // The certificate URI can't be had from DrmInfo, so always use the UI state.
+  let certificateInputValue =
+      document.getElementById('certificateInput').value;
+  if (certificateInputValue) {
+    params.push('certificate=' + certificateInputValue);
   }
 
   // Save config panel state.
