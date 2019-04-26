@@ -147,11 +147,7 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.Element {
   /** @private */
   updateAudioLanguages_() {
     const tracks = this.player.getVariantTracks();
-
-    const languagesAndRoles = this.player.getAudioLanguagesAndRoles();
-    const languages = languagesAndRoles.map((langAndRole) => {
-      return langAndRole.language;
-    });
+    const languages = this.player.getAudioLanguages();
 
     shaka.ui.LanguageUtils.updateLanguages(tracks, this.audioLangMenu_,
       languages,

@@ -160,9 +160,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
     if (selectedTrack) {
       const language = selectedTrack.language;
       // Filter by current audio language.
-      tracks = tracks.filter(function(track) {
-        return track.language == language;
-      });
+      tracks = tracks.filter((track) => track.language == language);
     }
 
     // Remove old shaka-resolutions
