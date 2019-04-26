@@ -211,7 +211,9 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
    * @private
    */
   async onTracksChanged_() {
-    if (this.player && this.player.isAudioOnly()) {
+    if (!this.isPipAllowed_()) {
+      shaka.ui.Utils.setDisplay(this.pipButton_, false);
+    } else if (this.player && this.player.isAudioOnly()) {
       shaka.ui.Utils.setDisplay(this.pipButton_, false);
       if (document.pictureInPictureElement) {
         await document.exitPictureInPicture();
