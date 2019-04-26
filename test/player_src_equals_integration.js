@@ -70,17 +70,16 @@ describe('Player Src Equals', () => {
     expect(player.getAssetUri()).toBe(SMALL_MP4_CONTENT_URI);
   });
 
-  // Since we don't have any manifest data, we must assume that all content is
-  // VOD; |isLive| and |isInProgress| should always return |false|.
-  it('considers content to be VOD"', async () => {
+  // TODO: test an HLS live stream on platforms supporting native HLS
+  it('considers simple mp4 content to be VOD"', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
     expect(player.isLive()).toBeFalsy();
     expect(player.isInProgress()).toBeFalsy();
   });
 
-  // Since we don't have any manifest data, we must assume that all content is
-  // audio-video; |isAudioOnly| should always return |false|.
-  it('considers content to be audio-video', async () => {
+  // TODO: test an audio-only mp4
+  // TODO: test audio-only HLS on platforms with native HLS
+  it('considers audio-video mp4 content to be audio-video', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
     expect(player.isAudioOnly()).toBeFalsy();
   });
@@ -122,9 +121,10 @@ describe('Player Src Equals', () => {
     expect(video.currentTime).toBeLessThan(10.5);
   });
 
-  // Since we don't have any manifest data, we assume content to be clear.
-  // This means there should be no key systems, drm info, or expiration time.
-  it('considers content to be clear ', async () => {
+  // TODO: test src= with DRM
+  // TODO: test HLS without DRM on platforms with native HLS
+  // TODO: test HLS with DRM on platforms with native HLS
+  it('considers simple content to be clear ', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
 
     expect(player.keySystem()).toBe('');
@@ -158,7 +158,7 @@ describe('Player Src Equals', () => {
   });
 
   // When we load content via src=, can we use the trick play controls to
-  // control the playback rate?
+  // control the playback rate.
   it('can control trick play rate', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
 
@@ -178,108 +178,50 @@ describe('Player Src Equals', () => {
     expect(video.playbackRate).toBe(1);
   });
 
-  // Since we don't have a manifest, we can't report what tracks(s) we are
-  // playing.
-  it('reports no variant tracks after loading', async () => {
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
-    expect(player.getVariantTracks()).toEqual([]);
-  });
-
-  // Since we are not in-charge of managing variant tracks, we can't select
-  // tracks.
-  it('cannot select variant tracks', async () => {
+  // Since we don't have a manifest, we don't have real variant information.
+  // TODO: test audio-video mp4 content on platforms with audioTracks API
+  it('reports no variant tracks for video-only mp4 content', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
 
-    /**
-     * Because we can't get tracks from the player, we need to create a fake
-     * track to ask it to switch to. The player should just ignore this request.
-     *
-     * @type {shaka.extern.Track}
-     * */
-    const track = {
-      active: true,
-      audioBandwidth: null,
-      audioCodec: null,
-      audioId: null,
-      bandwidth: 123456789,
-      channelsCount: null,
-      codecs: null,
-      frameRate: null,
-      height: null,
-      id: 0,
-      kind: null,
-      label: null,
-      language: 'en-US',
-      mimeType: 'text/mp4',
-      originalAudioId: null,
-      originalTextId: null,
-      originalVideoId: null,
-      primary: true,
-      roles: [],
-      type: 'text',
-      videoBandwidth: null,
-      videoCodec: null,
-      videoId: null,
-      width: null,
-    };
-
-    // This call should be a no-op. WE expect to see no errors throws.
-    player.selectVariantTrack(track);
+    expect(player.getVariantTracks().length).toBe(0);
   });
 
-  // Since we don't have a manifest, we can't report what tracks(s) we are
-  // playing.
-  it('reports no text tracks', async () => {
+  // TODO: test HLS on platforms with native HLS
+  it('allows selecting variant tracks', async () => {
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
+
+    // We can only get a variant track here on certain browsers.
+    const tracks = player.getVariantTracks();
+
+    // If we have tracks, we should be able to select them.
+    if (tracks.length) {
+      // The test fails if this throws.
+      player.selectVariantTrack(tracks[0]);
+    }
+  });
+
+  // TODO: test HLS with text tracks on platforms with native HLS
+  it('reports no text tracks for simple mp4 content', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
     expect(player.getTextTracks()).toEqual([]);
   });
 
-  // Since we don't have a manifest, we can't report what tracks(s) we are
-  // playing. Even though we can add additional text tracks, since we don't
-  // initialize any streaming systems, we can't select text tracks.
-  it('cannot select text tracks', async () => {
+  // TODO: test HLS on platforms with native HLS
+  it('allows selecting text tracks', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
 
-    /**
-     * Because we can't get tracks from the player, we need to create a fake
-     * track to ask it to switch to. The player should just ignore this request.
-     *
-     * @type {shaka.extern.Track}
-     * */
-    const track = {
-      active: true,
-      audioBandwidth: null,
-      audioCodec: null,
-      audioId: null,
-      bandwidth: 123456789,
-      channelsCount: null,
-      codecs: null,
-      frameRate: null,
-      height: null,
-      id: 0,
-      kind: null,
-      label: null,
-      language: 'en-US',
-      mimeType: 'text/mp4',
-      originalAudioId: null,
-      originalTextId: null,
-      originalVideoId: null,
-      primary: true,
-      roles: [],
-      type: 'text',
-      videoBandwidth: null,
-      videoCodec: null,
-      videoId: null,
-      width: null,
-    };
+    // We can only get a text track here on certain browsers.
+    const tracks = player.getTextTracks();
 
-    // This call should be a no-op. WE expect to see no errors throws.
-    player.selectTextTrack(track);
+    // If we have tracks, we should be able to select them.
+    if (tracks.length) {
+      // The test fails if this throws.
+      player.selectTextTrack(tracks[0]);
+    }
   });
 
-  // Since we are not managing the tracks, we can't return any language/role
-  // for audio or text.
-  it('returns no languages or roles', async () => {
+  // TODO: test HLS on platforms with native HLS
+  it('returns no languages or roles for simple mp4 content', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
 
     expect(player.getAudioLanguages()).toEqual([]);
@@ -289,9 +231,9 @@ describe('Player Src Equals', () => {
     expect(player.getTextLanguagesAndRoles()).toEqual([]);
   });
 
-  // Since we are not managing the tracks, selecting the language/role or audio
-  // or text should do nothing.
-  it('cannot select language or role', async () => {
+  // TODO: test language selection w/ HLS on platforms with native HLS
+  // This test is disabled until then.
+  xit('cannot select language or role', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
 
     const language = 'en';
@@ -314,7 +256,9 @@ describe('Player Src Equals', () => {
     expect(player.getTextLanguagesAndRoles()).toEqual([]);
   });
 
-  it('persists the text visibility setting', async () => {
+  // TODO: test text visibility w/ HLS on platforms with native HLS
+  // This test is disabled until then.
+  xit('persists the text visibility setting', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
 
     expect(player.isTextTrackVisible()).toBe(false);

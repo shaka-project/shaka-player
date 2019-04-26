@@ -1026,6 +1026,7 @@ describe('Player', function() {
           videoCodec: 'avc1.4d401f',
           primary: false,
           roles: ['main'],
+          audioRoles: ['main'],
           videoId: 1,
           audioId: 3,
           channelsCount: 6,
@@ -1052,6 +1053,7 @@ describe('Player', function() {
           videoCodec: 'avc1.4d401f',
           primary: false,
           roles: ['main'],
+          audioRoles: ['main'],
           videoId: 2,
           audioId: 3,
           channelsCount: 6,
@@ -1078,6 +1080,7 @@ describe('Player', function() {
           videoCodec: 'avc1.4d401f',
           primary: false,
           roles: ['main'],
+          audioRoles: ['main'],
           videoId: 1,
           audioId: 4,
           channelsCount: 2,
@@ -1104,6 +1107,7 @@ describe('Player', function() {
           videoCodec: 'avc1.4d401f',
           primary: false,
           roles: ['main'],
+          audioRoles: ['main'],
           videoId: 2,
           audioId: 4,
           channelsCount: 2,
@@ -1130,6 +1134,7 @@ describe('Player', function() {
           videoCodec: 'avc1.4d401f',
           primary: false,
           roles: ['commentary'],
+          audioRoles: ['commentary'],
           videoId: 1,
           audioId: 5,
           channelsCount: 2,
@@ -1156,6 +1161,7 @@ describe('Player', function() {
           videoCodec: 'avc1.4d401f',
           primary: false,
           roles: ['commentary'],
+          audioRoles: ['commentary'],
           videoId: 2,
           audioId: 5,
           channelsCount: 2,
@@ -1182,6 +1188,7 @@ describe('Player', function() {
           videoCodec: 'avc1.4d401f',
           primary: false,
           roles: [],
+          audioRoles: [],
           videoId: 1,
           audioId: 6,
           channelsCount: 2,
@@ -1208,6 +1215,7 @@ describe('Player', function() {
           videoCodec: 'avc1.4d401f',
           primary: false,
           roles: [],
+          audioRoles: [],
           videoId: 2,
           audioId: 6,
           channelsCount: 2,
@@ -1233,6 +1241,7 @@ describe('Player', function() {
           videoCodec: null,
           primary: false,
           roles: [],
+          audioRoles: null,
           channelsCount: null,
           audioBandwidth: null,
           videoBandwidth: null,
@@ -1259,6 +1268,7 @@ describe('Player', function() {
           videoCodec: null,
           primary: false,
           roles: ['main'],
+          audioRoles: null,
           channelsCount: null,
           audioBandwidth: null,
           videoBandwidth: null,
@@ -1285,6 +1295,7 @@ describe('Player', function() {
           videoCodec: null,
           primary: false,
           roles: ['commentary'],
+          audioRoles: null,
           channelsCount: null,
           audioBandwidth: null,
           videoBandwidth: null,
@@ -2998,7 +3009,7 @@ describe('Player', function() {
       it('ignores video roles', async () => {
         manifest = new shaka.test.ManifestGenerator()
             .addPeriod(0)
-            .addVariant(0)
+            .addVariant(0).language('en')
             .addVideo(1).roles(['video-only-role'])
             .addAudio(2).roles(['audio-only-role']).language('en')
             .build();

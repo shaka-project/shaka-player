@@ -191,6 +191,7 @@ shaka.extern.BufferedInfo;
  *   videoCodec: ?string,
  *   primary: boolean,
  *   roles: !Array.<string>,
+ *   audioRoles: Array.<string>,
  *   videoId: ?number,
  *   audioId: ?number,
  *   channelsCount: ?number,
@@ -248,6 +249,9 @@ shaka.extern.BufferedInfo;
  *   cannot be satisfied.
  * @property {!Array.<string>} roles
  *   The roles of the track, e.g. 'main', 'caption', or 'commentary'.
+ * @property {Array.<string>} audioRoles
+ *   The roles of the audio in the track, e.g. 'main' or 'commentary'.
+ *   Will be null for text tracks or variant tracks without audio.
  * @property {?number} videoId
  *   (only for variant tracks) The video stream id.
  * @property {?number} audioId
