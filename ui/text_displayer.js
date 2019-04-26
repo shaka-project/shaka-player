@@ -153,7 +153,8 @@ shaka.ui.TextDisplayer = class {
 
     // Return true if the cue should be displayed at the current time point.
     const shouldCueBeDisplayed = (cue) => {
-      return cue.startTime <= currentTime && cue.endTime >= currentTime;
+      return this.isTextVisible_ &&
+             cue.startTime <= currentTime && cue.endTime >= currentTime;
     };
 
     // For each cue in the current cues map, if the cue's end time has passed,
