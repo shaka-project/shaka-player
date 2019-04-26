@@ -308,14 +308,16 @@ describe('Player Src Equals', () => {
     expect(player.getTextLanguagesAndRoles()).toEqual([]);
   });
 
-  // Since we are not managing the tracks, we can't control whether or not we
-  // are showing text. Trying to show the tracks should do nothing.
-  it('never shows text', async () => {
+  it('persists the text visibility setting', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
 
-    expect(player.isTextTrackVisible()).toBeFalsy();
+    expect(player.isTextTrackVisible()).toBe(false);
+
     player.setTextTrackVisibility(true);
-    expect(player.isTextTrackVisible()).toBeFalsy();
+    expect(player.isTextTrackVisible()).toBe(true);
+
+    player.setTextTrackVisibility(false);
+    expect(player.isTextTrackVisible()).toBe(false);
   });
 
   // Even though we loaded content using |src=| we should still be able to get

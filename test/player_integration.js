@@ -233,16 +233,14 @@ describe('Player', function() {
   describe('plays', function() {
     it('with external text tracks', async () => {
       await player.load('test:sintel_no_text_compiled');
+
       // For some reason, using path-absolute URLs (i.e. without the hostname)
       // like this doesn't work on Safari.  So manually resolve the URL.
       let locationUri = new goog.Uri(location.href);
       let partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
       let absoluteUri = locationUri.resolve(partialUri);
-      player.addTextTrack(absoluteUri.toString(), 'en', 'subtitles',
-                          'text/vtt');
-
-      video.play();
-      await Util.delay(5);
+      await player.addTextTrack(absoluteUri.toString(), 'en', 'subtitles',
+                                'text/vtt');
 
       let textTracks = player.getTextTracks();
       expect(textTracks).toBeTruthy();
