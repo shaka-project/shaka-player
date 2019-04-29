@@ -3,15 +3,22 @@
 
 #### Configuring the layout
 
-When creating the UI via code, you can pass in configuration options that change
+Once the UI is created, you can pass in configuration options that change
 the look and functioning of the UI bar. For example, if you wanted to not have
 a seek bar, you could add the following line to the init() function from the UI
-basic usage tutorial, right before creating the UI overlay:
+basic usage tutorial, after creating the UI overlay:
 
 ```js
-uiConfig['addSeekBar'] = false;
+const video = document.getElementById('video');
+const ui = video['ui'];
+const config = {
+  addSeekBar: false;
+};
+ui.configure(config);
 ```
 
+Controls will fire a {@link shaka.Controls.UIUpdatedEvent} event once the config
+takes effect.
 See the docs for {@link shaka.extern.UIConfiguration} for more information.
 
 #### Customizing the number and order of controls
@@ -60,6 +67,7 @@ The following buttons can be added to the overflow menu:
   that support it. Button is invisible on other browsers.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
+UI layout can be reconfigured at any point after it's been created.
 Please note that custom layouts might need CSS adjustments to look good.
 
 #### Changing seek bar progress colors

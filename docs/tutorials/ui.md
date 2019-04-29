@@ -9,7 +9,7 @@ declarative style of setup.
 
 Setting up a project with the UI library is even easier than setting one up without.
 
-Option 1: Set up controls with HTML data attributes:
+Set up controls with HTML data attributes:
 
 ```html
 <!DOCTYPE html>
@@ -123,92 +123,6 @@ Next, let's add a listener to the 'caststatuschanged' event in myapp.js:
 ```
 
 <!-- TODO: Also mention the download button, once we add it. -->
-#### Option 2: Setting the UI element programmatically
-
-The most basic way to make an element host the Shaka Player UI is to use the
-data-shaka-player tags in the HTML.
-However, that approach won't necessarily work for every application. For
-instance, if your site lays itself out programmatically, that is not an option.
-In addition, when using data-shaka-player tags, advanced customization options
-are not available.
-For more advanced use, the UI can be assigned to an element in code.
-
-```html
-<!DOCTYPE html>
-<html>
-  <head>
-    <!-- Shaka Player ui compiled library: -->
-    <script src="dist/shaka-player.ui.js"></script>
-    <link rel="stylesheet" type="text/css" href="dist/controls.css">
-    <!-- Google Material Design Icons: -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <!-- Your application source: -->
-    <script src="myapp.js"></script>
-  </head>
-  <body>
-    <div id="videoContainer" style="max-width:40em">
-      <video autoplay id="video" style="width:100%;height:100%"></video>
-    </div>
-  </body>
-</html>
-```
-
-```js
-// myapp.js
-
-var manifestUri =
-    'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd';
-
-async function init() {
-  // Create the UI manually.
-  const video = document.getElementById('video');
-  const videoContainer = document.getElementById('videoContainer');
-  const player = new shaka.Player(video);
-  // Use this to pass in desired config values.  Config values not passed in
-  // will be filled out according to the default config.
-  // See more info on the configuration in the section below.
-  const uiConfig = {};
-  const ui = new shaka.ui.Overlay(player, videoContainer, video, uiConfig);
-  const controls = ui.getControls();
-
-  // Listen for error events.
-  player.addEventListener('error', onPlayerErrorEvent);
-  controls.addEventListener('error', onUIErrorEvent);
-  controls.addEventListener('caststatuschanged', onCastStatusChanged);
-
-  // Try to load a manifest.
-  // This is an asynchronous process.
-  try {
-    await player.load(manifestUri);
-    // This runs if the asynchronous load is successful.
-    console.log('The video has now been loaded!');
-  } catch (error) {
-    onError(error);
-  }
-}
-
-function onPlayerErrorEvent(errorEvent) {
-  // Extract the shaka.util.Error object from the event.
-  onPlayerError(event.detail);
-}
-
-function onPlayerError(error) {
-  // Handle player error
-}
-
-function onUIErrorEvent(errorEvent) {
-  // Handle UI error
-}
-
-function onCastStatusChanged(event) {
-  // Handle cast status change
-}
-
-// The shaka-ui-loaded event won't fire if there are no tagged UI elements to
-// set up, so listen to DOMContentLoaded instead.
-document.addEventListener('DOMContentLoaded', init);
-```
-
 #### Continue the Tutorials
 
 Next, check out {@tutorial ui-customization}.
