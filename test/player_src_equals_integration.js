@@ -90,6 +90,12 @@ describe('Player Src Equals', () => {
   it('allows seeking throughout the presentation', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
 
+    // For src=, the seekRange is based on video.seekable, so wait for this
+    // event before proceeding to check seekRange.
+    await new Promise((resolve) => {
+      eventManager.listenOnce(video, 'canplaythrough', resolve);
+    });
+
     // The seek range should match the duration of the content.
     const seekRange = player.seekRange();
     expect(seekRange.start).toBeCloseTo(0);
@@ -393,9 +399,6 @@ describe('Player Src Equals', () => {
    * @return {!Promise}
    */
   async function loadWithSrcEquals(contentUri) {
-    /** @type {!shaka.util.EventManager} */
-    const eventManager = new shaka.util.EventManager();
-
     const ready = new Promise((resolve) => {
       eventManager.listenOnce(video, 'loadedmetadata', resolve);
     });
@@ -406,7 +409,5 @@ describe('Player Src Equals', () => {
     // Wait until the media element is ready with content. Waiting until this
     // point ensures it is safe to interact with the media element.
     await ready;
-
-    eventManager.release();
   }
 });
