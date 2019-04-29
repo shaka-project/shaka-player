@@ -39,7 +39,6 @@ const CACHE_NAME = 'shaka-player-v2';
  */
 const CACHE_NAME_PREFIX = 'shaka-player';
 
-
 console.assert(CACHE_NAME.startsWith(CACHE_NAME_PREFIX),
                'Cache name does not match prefix!');
 
@@ -65,6 +64,11 @@ const CRITICAL_RESOURCES = [
   'app_manifest.json',
 
   'demo.css',
+
+  // These CSS files will reference Web Fonts which will be cached on sight
+  // thanks to CACHEABLE_URL_PREFIXES below.  This means we don't have to
+  // know the Web Font URL in advance, and Google Web Fonts can serve the
+  // correct version of the font to whatever browser is making the request.
   'https://fonts.googleapis.com/css?family=Roboto',
   'https://fonts.googleapis.com/css?family=Roboto+Condensed',
   'https://fonts.googleapis.com/icon?family=Material+Icons',
@@ -79,24 +83,22 @@ const CRITICAL_RESOURCES = [
 /**
  * An array of resources that SHOULD be cached, but which are not critical.
  *
- * @const {!Array.<string>}
- */
-const OPTIONAL_RESOURCES = [
-  'favicon.ico',
-  'https://shaka-player-demo.appspot.com/assets/poster.jpg',
-  'https://shaka-player-demo.appspot.com/assets/audioOnly.gif',
-  '../node_modules/mux.js/dist/mux.js',
-];
-
-
-/**
- * An array of resources that SHOULD be cached, but which must use the no-cors
- * flag because of CORS restrictions.  They will be cached as "opaque" resources
- * whose contents cannot be read by JavaScript.
+ * The application does not need to read these, so these can use the no-cors
+ * flag and be cached as "opaque" resources.  This is critical for the cast
+ * sender SDK below.
  *
  * @const {!Array.<string>}
  */
-const NO_CORS_RESOURCES = [
+const OPTIONAL_RESOURCES = [
+  // Optional graphics.  Without these, the site won't be broken.
+  'favicon.ico',
+  'https://shaka-player-demo.appspot.com/assets/poster.jpg',
+  'https://shaka-player-demo.appspot.com/assets/audioOnly.gif',
+
+  // The mux.js transmuxing library for MPEG-2 TS and CEA support.
+  '../node_modules/mux.js/dist/mux.js',
+
+  // The cast sender SDK.
   'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js',
 ];
 
@@ -108,59 +110,67 @@ const NO_CORS_RESOURCES = [
  *
  * @const {!Array.<string>}
  */
-const CACHE_FIRST = [
+const CACHEABLE_URL_PREFIXES = [
+  // Anything associated with this application is fair game to cache.
+  location.origin,
+
   // Google Web Fonts should be cached when first seen, without being explicitly
   // listed, and should be preferred from cache for speed.
-  'https://fonts.googleapis.com/',
-  // TODO: Refactor this to allow for caching of localization resources
-  // on-the-fly.
+  'https://fonts.gstatic.com/',
 ];
 
 
 /**
  * This event fires when the service worker is installed.
+ *
  * @param {!InstallEvent} event
  */
 function onInstall(event) {
-  event.waitUntil(caches.open(CACHE_NAME).then(function(cache) {
-    // Optional resources: failure on these will NOT fail the Promise chain.
-    cache.addAll(OPTIONAL_RESOURCES).catch(function() {});
+  const preCacheApplication = async () => {
+    const cache = await caches.open(CACHE_NAME);
 
-    // No-cors resources: failure on these will NOT fail the Promise chain.
-    // For some reason, this doesn't work with addAll, so we use fetchAndCache.
-    NO_CORS_RESOURCES.forEach(function(url) {
-      fetchAndCache(cache, new Request(url, {mode: 'no-cors'}));
-    });
+    // Optional resources: failure on these will NOT fail the Promise chain.
+    // We will also not wait for them to be installed.
+    // Fetching these with addAll fails for CORS-restricted content, so we use
+    // fetchAndCache with no-cors mode to work around it.
+    for (const url of OPTIONAL_RESOURCES) {
+      const request = new Request(url, {mode: 'no-cors'});
+      fetchAndCache(cache, request).catch(() => {});
+    }
 
     // Critical resources: failure on these will fail the Promise chain.
+    // The installation will not be complete until these are all cached.
     return cache.addAll(CRITICAL_RESOURCES);
-  }));
-}
+  };
 
+  event.waitUntil(preCacheApplication());
+}
 
 /**
  * This event fires when the service worker is activated.
- * This can be after installation installation or upgrade.
+ * This can be after installation or upgrade.
  *
  * @param {!ExtendableEvent} event
  */
 function onActivate(event) {
   // Delete old caches to save space.
-  event.waitUntil(caches.keys().then(function(cacheNames) {
-    return Promise.all(cacheNames.filter(function(cacheName) {
-      // Return true on all the caches we want to clean up.
-      // Note that caches are shared across the origin, so only remove
-      // caches we are sure we created.
-      if (cacheName.startsWith(CACHE_NAME_PREFIX) && cacheName != CACHE_NAME) {
-        return true;
-      }
-      return false;
-    }).map(function(cacheName) {
-      return caches.delete(cacheName);
-    }));
-  }));
-}
+  const dropOldCaches = async () => {
+    const cacheNames = await caches.keys();
 
+    // Return true on all the caches we want to clean up.
+    // Note that caches are shared across the origin, so only remove
+    // caches we are sure we created.
+    const cleanTheseUp = cacheNames.filter((cacheName) =>
+        cacheName.startsWith(CACHE_NAME_PREFIX) && cacheName != CACHE_NAME);
+
+    const cleanUpPromises =
+        cleanTheseUp.map((cacheName) => caches.delete(cacheName));
+
+    await Promise.all(cleanUpPromises);
+  };
+
+  event.waitUntil(dropOldCaches());
+}
 
 /**
  * This event fires when any resource is fetched.
@@ -169,53 +179,57 @@ function onActivate(event) {
  * @param {!FetchEvent} event
  */
 function onFetch(event) {
-  event.respondWith(caches.open(CACHE_NAME).then(function(cache) {
-    return cache.match(event.request).then(function(cachedResponse) {
-      let preferCache = false;
-      CACHE_FIRST.forEach(function(prefix) {
-        if (event.request.referrer.startsWith(prefix)) {
-          preferCache = true;
-        }
-      });
+  // Make sure this is a request we should be handling in the first place.
+  // If it's not, it's important to leave it alone and not call respondWith.
+  let cacheable = false;
+  for (const prefix of CACHEABLE_URL_PREFIXES) {
+    if (event.request.url.startsWith(prefix)) {
+      cacheable = true;
+    }
+  }
 
-      if (cachedResponse || preferCache) {
-        // This is one of our cached resources, or it should be cached when
-        // first seen.
-
-        if (!navigator.onLine) {
-          // We are offline, and we know it.  Just return the cached response,
-          // to avoid a bunch of pointless errors in the JS console that will
-          // confuse us developers.
-          return cachedResponse;
-        }
-
-        if (preferCache && cachedResponse) {
-          // We have it in cache, and we prefer the cached version.
-          // Try to update the cache with a new version, but return right away
-          // with whatever was already in cache.
-          fetchAndCache(cache, event.request).catch(function() {});
-          return cachedResponse;
-        }
-
-        // Try to fetch a live version and update the cache, but limit how long
-        // we will wait for the updated version.
-        return timeout(NETWORK_TIMEOUT, fetchAndCache(cache, event.request))
-            .catch(function() {
-              // We tried to fetch a live version, but it either failed or took
-              // too long.  If it took too long, the fetch and cache operation
-              // will continue in the background.  In both cases, we should go
-              // ahead with a cached version.
-              return cachedResponse;
-            });
-      } else {
-        // This is not one of our cached resources.  Fetch a live version and
-        // do not cache it.
-        return fetch(event.request);
-      }
-    });
-  }));
+  if (cacheable) {
+    event.respondWith(fetchCacheableResource(event.request));
+  }
 }
 
+/**
+ * Fetch a cacheable resource.  Decide whether to request from the network,
+ * the cache, or both, and return the appropriate version of the resource.
+ *
+ * @param {!Request} request
+ * @return {!Promise.<!Response>}
+ */
+async function fetchCacheableResource(request) {
+  const cache = await caches.open(CACHE_NAME);
+  const cachedResponse = await cache.match(request);
+
+  if (!navigator.onLine) {
+    // We are offline, and we know it.  Just return the cached response, to
+    // avoid a bunch of pointless errors in the JS console that will confuse
+    // us developers.  If there is no cached response, this will just be a
+    // failed request.
+    return cachedResponse;
+  }
+
+  if (cachedResponse) {
+    // We have it in cache.  Try to fetch a live version and update the cache,
+    // but limit how long we will wait for the updated version.
+    try {
+      return timeout(NETWORK_TIMEOUT, fetchAndCache(cache, request));
+    } catch (error) {
+      // We tried to fetch a live version, but it either failed or took too
+      // long.  If it took too long, the fetch and cache operation will continue
+      // in the background.  In both cases, we should go ahead with a cached
+      // version.
+      return cachedResponse;
+    }
+  } else {
+    // We should have this in cache, but we don't.  Fetch and cache a fresh
+    // copy and then return it.
+    return fetchAndCache(cache, request);
+  }
+}
 
 /**
  * Fetch the resource from the network, then store this new version in the
@@ -225,13 +239,11 @@ function onFetch(event) {
  * @param {!Request} request
  * @return {!Promise.<!Response>}
  */
-function fetchAndCache(cache, request) {
-  return fetch(request).then(function(response) {
-    cache.put(request, response.clone());
-    return response;
-  });
+async function fetchAndCache(cache, request) {
+  const response = await fetch(request);
+  cache.put(request, response.clone());
+  return response;
 }
-
 
 /**
  * Returns a Promise which is resolved only if |asyncProcess| is resolved, and
@@ -257,7 +269,6 @@ function timeout(seconds, asyncProcess) {
     }),
   ]);
 }
-
 
 self.addEventListener('install', /** @type {function(!Event)} */(onInstall));
 self.addEventListener('activate', /** @type {function(!Event)} */(onActivate));
