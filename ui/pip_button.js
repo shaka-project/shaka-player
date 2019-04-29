@@ -133,7 +133,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
       }
     } catch (error) {
       this.controls.dispatchEvent(new shaka.util.FakeEvent('error', {
-        errorDetails: error,
+        detail: error,
       }));
     }
   }

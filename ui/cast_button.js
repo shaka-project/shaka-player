@@ -105,7 +105,7 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
         this.castButton_.disabled = false;
         if (error.code != shaka.util.Error.Code.CAST_CANCELED_BY_USER) {
           this.controls.dispatchEvent(new shaka.util.FakeEvent('error', {
-            errorDetails: error,
+            detail: error,
           }));
         }
       }

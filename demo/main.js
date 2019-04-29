@@ -221,9 +221,7 @@ shakaDemo.init = function() {
       localization.changeLocale([uiLang]);
       // TODO(#1591): Support multiple language preferences
 
-      shakaDemo.controls_.addEventListener('error', (event) => {
-        shakaDemo.onError_(event['errorDetails']);
-      });
+      shakaDemo.controls_.addEventListener('error', shakaDemo.onErrorEvent_);
 
       shakaDemo.controls_.addEventListener('caststatuschanged', (event) => {
         shakaDemo.onCastStatusChange_(event['newStatus']);
