@@ -34,6 +34,10 @@ HTMLDocument.prototype.pictureInPictureElement;
 HTMLDocument.prototype.pictureInPictureEnabled;
 
 
+/** @type {Element} */
+HTMLDocument.prototype.polyfillPictureInPictureElement;
+
+
 /**
  * @return {!Promise}
  */
@@ -42,3 +46,27 @@ HTMLMediaElement.prototype.requestPictureInPicture = function() {};
 
 /** @type {boolean} */
 HTMLMediaElement.prototype.disablePictureInPicture;
+
+
+/** @type {Function} */
+HTMLMediaElement.prototype.webkitSetPresentationMode;
+
+
+/** @type {Function} */
+HTMLMediaElement.prototype.webkitSupportsPresentationMode;
+
+
+/** @type {string} */
+HTMLMediaElement.prototype.webkitPresentationMode;
+
+
+/** @type {Object} */
+HTMLMediaElement.prototype.polyfillEnterpictureinpicture;
+
+
+/** @type {Object} */
+HTMLMediaElement.prototype.polyfillLeavepictureinpicture;
+
+
+/** @type {string} */
+HTMLMediaElement.prototype.polyfillPreviousPresentationMode;
