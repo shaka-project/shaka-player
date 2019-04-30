@@ -314,14 +314,20 @@ shaka.test.FakeNetworkingEngine = class {
    * @param {?number} endByte
    */
   static expectRangeRequest(requestSpy, uri, startByte, endByte) {
-    let range = 'bytes=' + startByte + '-';
-    if (endByte != null) range += endByte;
+    const headers = {};
+    if (startByte == 0 && endByte == null) {
+      // No header required.
+    } else {
+      let range = 'bytes=' + startByte + '-';
+      if (endByte != null) range += endByte;
+      headers['Range'] = range;
+    }
 
     expect(requestSpy).toHaveBeenCalledWith(
         shaka.net.NetworkingEngine.RequestType.SEGMENT,
         jasmine.objectContaining({
           uris: [uri],
-          headers: jasmine.objectContaining({'Range': range}),
+          headers: headers,
         }));
   }
 };

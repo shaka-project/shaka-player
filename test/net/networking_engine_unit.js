@@ -1209,7 +1209,22 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
    */
   function createRequest(uri, retryParameters) {
     retryParameters = retryParameters ||
-                          shaka.net.NetworkingEngine.defaultRetryParameters();
+        shaka.net.NetworkingEngine.defaultRetryParameters();
     return shaka.net.NetworkingEngine.makeRequest([uri], retryParameters);
   }
+
+  describe('createSegmentRequest', () => {
+    it('does not add range headers to requests for the whole segment', () => {
+      // You had _one_ job, createSegmentRequest!
+
+      const request = shaka.util.Networking.createSegmentRequest(
+          /* uris= */ ['/foo.mp4'],
+          /* start= */ 0,
+          /* end= */ null,
+          shaka.net.NetworkingEngine.defaultRetryParameters());
+
+      const keys = Object.keys(request.headers).map((k) => k.toLowerCase());
+      expect(keys).not.toContain('range');
+    });
+  });
 });  // describe('NetworkingEngine')
