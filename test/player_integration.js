@@ -570,6 +570,8 @@ describe('Player Manifest Retries', function() {
 // This test suite focuses on how the player moves through the different load
 // states.
 describe('Player Load Path', () => {
+  const SMALL_MP4_CONTENT_URI = '/base/test/test/assets/small.mp4';
+
   /** @type {!HTMLVideoElement} */
   let video;
   /** @type {shaka.Player} */
@@ -618,17 +620,17 @@ describe('Player Load Path', () => {
 
   it('attach and initialize media source when constructed with media element',
       async () => {
-        expect(video.src).toBeFalsy();
+    expect(video.src).toBeFalsy();
 
-        createPlayer(/* attachedTo= */ video);
+    createPlayer(/* attachedTo= */ video);
 
-        // Wait until we enter the media source state.
-        await new Promise((resolve) => {
-          whenEnteringState('media-source', resolve);
-        });
+    // Wait until we enter the media source state.
+    await new Promise((resolve) => {
+      whenEnteringState('media-source', resolve);
+    });
 
-        expect(video.src).toBeTruthy();
-      });
+    expect(video.src).toBeTruthy();
+  });
 
   it('does not set video.src when no video is provided', async function() {
     expect(video.src).toBeFalsy();
@@ -644,43 +646,43 @@ describe('Player Load Path', () => {
 
   it('attach + initializeMediaSource=true will initialize media source',
       async () => {
-        createPlayer(/* attachedTo= */ null);
+    createPlayer(/* attachedTo= */ null);
 
-        expect(video.src).toBeFalsy();
-        await player.attach(video, /* initializeMediaSource= */ true);
-        expect(video.src).toBeTruthy();
-      });
+    expect(video.src).toBeFalsy();
+    await player.attach(video, /* initializeMediaSource= */ true);
+    expect(video.src).toBeTruthy();
+  });
 
   it('attach + initializeMediaSource=false will not intialize media source',
       async () => {
-        createPlayer(/* attachedTo= */ null);
+    createPlayer(/* attachedTo= */ null);
 
-        expect(video.src).toBeFalsy();
-        await player.attach(video, /* initializeMediaSource= */ false);
-        expect(video.src).toBeFalsy();
-      });
+    expect(video.src).toBeFalsy();
+    await player.attach(video, /* initializeMediaSource= */ false);
+    expect(video.src).toBeFalsy();
+  });
 
   it('unload + initializeMediaSource=false does not initialize media source',
       async () => {
-        createPlayer(/* attachedTo= */ null);
+    createPlayer(/* attachedTo= */ null);
 
-        await player.attach(video);
-        await player.load('test:sintel');
+    await player.attach(video);
+    await player.load('test:sintel');
 
-        await player.unload(/* initializeMediaSource= */ false);
-        expect(video.src).toBeFalsy();
-      });
+    await player.unload(/* initializeMediaSource= */ false);
+    expect(video.src).toBeFalsy();
+  });
 
   it('unload + initializeMediaSource=true initializes media source',
       async () => {
-        createPlayer(/* attachedTo= */ null);
+    createPlayer(/* attachedTo= */ null);
 
-        await player.attach(video);
-        await player.load('test:sintel');
+    await player.attach(video);
+    await player.load('test:sintel');
 
-        await player.unload(/* initializeMediaSource= */ true);
-        expect(video.src).toBeTruthy();
-      });
+    await player.unload(/* initializeMediaSource= */ true);
+    expect(video.src).toBeTruthy();
+  });
 
   // There was a bug when calling unload before calling load would cause
   // the load to continue before the (first) unload was complete.
@@ -1083,7 +1085,7 @@ describe('Player Load Path', () => {
       // Normally the player would load content like this with the media source
       // path, but since we don't have media source support, it should use the
       // src= path.
-      player.load('test:sintel');
+      player.load(SMALL_MP4_CONTENT_URI);
 
       const event = await spyIsCalled(stateIdleSpy);
       expect(event.state).toBe('src-equals');
@@ -1091,7 +1093,7 @@ describe('Player Load Path', () => {
 
     it('unloading ignores init media source flag', async () => {
       await player.attach(video, /* initMediaSource= */ false);
-      await player.load('test:sintel');
+      await player.load(SMALL_MP4_CONTENT_URI);
 
       // Normally the player would try to go to the media source state because
       // we are saying to initialize media source after unloading, but since we
@@ -1378,7 +1380,7 @@ describe('Player Load Path', () => {
           })
           .set('src-equals', async () => {
             await player.attach(video, /* initMediaSource= */ false);
-            await player.load('test:sintel', 0, 'video/mp4');
+            await player.load(SMALL_MP4_CONTENT_URI, 0, 'video/mp4');
           });
 
       const action = actions.get(state);
@@ -1472,7 +1474,7 @@ describe('Player Load Path', () => {
             return player.load('test:sintel');
           })
           .set('src-equals', () => {
-            return player.load('test:sintel', 0, 'video/mp4');
+            return player.load(SMALL_MP4_CONTENT_URI, 0, 'video/mp4');
           });
 
       const action = actions.get(state);
