@@ -115,12 +115,6 @@ shaka.ui.Overlay.prototype.configure = function(config) {
       'shaka-controls-container', this.videoContainer_);
   controlsContainer.setAttribute('shown', shown);
 
-  // Init spinner with the right buffering state
-  const spinner = DomUtils.getElementByClassName(
-      'shaka-spinner-svg', controlsContainer);
-  const isBuffering = this.player_.isBuffering();
-  shaka.ui.Utils.setDisplay(spinner, isBuffering);
-
   // Add the text container back.
   if (textContainer) {
     this.videoContainer_.appendChild(textContainer);

@@ -682,8 +682,11 @@ shaka.ui.Controls.prototype.addControlsButtonPanel_ = function() {
 shaka.ui.Controls.prototype.addEventListeners_ = function() {
   // TODO: Convert adding event listers to the "() =>" form.
 
-  this.player_.addEventListener(
-      'buffering', this.onBufferingStateChange_.bind(this));
+  this.player_.addEventListener('buffering', () => {
+    this.onBufferingStateChange_();
+  });
+  // Set the initial state, as well.
+  this.onBufferingStateChange_();
 
   // Listen for key down events to detect tab and enable outline
   // for focused elements.
@@ -1087,17 +1090,14 @@ shaka.ui.Controls.prototype.onKeyUp_ = function(event) {
 
 
 /**
- * @param {!Event} event
+ * Called both as an event listener and directly by the controls to initialize
+ * the buffering state.
  * @private
  */
-shaka.ui.Controls.prototype.onBufferingStateChange_ = function(event) {
-  // Using [] notation to access buffering property to work around
-  // a compiler error.
-  const isBuffering = event['buffering'];
-
+shaka.ui.Controls.prototype.onBufferingStateChange_ = function() {
   // Don't use setDisplay_ here, since the SVG spinner doesn't have classList
   // on IE.
-  if (isBuffering) {
+  if (this.player_.isBuffering()) {
     this.bufferingSpinner_.setAttribute(
         'class', 'shaka-spinner-svg');
   } else {

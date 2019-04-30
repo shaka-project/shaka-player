@@ -91,6 +91,13 @@ shaka.ui.Utils.checkmarkIcon = function() {
  */
 shaka.ui.Utils.setDisplay = function(element, display) {
   if (!element) return;
+
+  // You can't use setDisplay with SVG on IE, because classList isn't on SVG
+  // elements on that browser.  It's better to find out on Chrome through an
+  // assertion, rather than wait for a failed test pass later on IE.
+  goog.asserts.assert(!(element instanceof SVGElement),
+                      'Do not use setDisplay with SVG elements!');
+
   if (display) {
     element.classList.add('shaka-displayed');
     // Removing a non-existent class doesn't throw, so, even if
