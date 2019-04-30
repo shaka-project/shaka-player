@@ -90,7 +90,7 @@ describe('UI', () => {
     eventManager.listen(controls, 'error', Util.spyFunc(onErrorSpy));
 
     await player.load('test:sintel_multi_lingual_multi_res_compiled');
-    await waitForEvent(video, 'canplaythrough');
+    await waitForEvent(video, 'canplay');
   });
 
   afterEach(async () => {

@@ -92,7 +92,7 @@ describe('Player Src Equals', () => {
     // For src=, the seekRange is based on video.seekable, so wait for this
     // event before proceeding to check seekRange.
     await new Promise((resolve) => {
-      eventManager.listenOnce(video, 'canplaythrough', resolve);
+      eventManager.listenOnce(video, 'canplay', resolve);
     });
 
     // The seek range should match the duration of the content.
