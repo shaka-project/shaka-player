@@ -142,12 +142,17 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
   /** @private */
   updateResolutionSelection_() {
     let tracks = this.player.getVariantTracks();
-    // Hide resolution menu and button for audio-only content.
+
+    // Hide resolution menu and button for audio-only content and src= content
+    // without resolution information.
     if (tracks.length && !tracks[0].height) {
       shaka.ui.Utils.setDisplay(this.resolutionMenu_, false);
       shaka.ui.Utils.setDisplay(this.resolutionButton_, false);
       return;
     }
+    // Otherwise, restore it.
+    shaka.ui.Utils.setDisplay(this.resolutionButton_, true);
+
     tracks.sort(function(t1, t2) {
       return t1.height - t2.height;
     });
