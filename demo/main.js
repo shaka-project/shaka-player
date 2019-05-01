@@ -144,29 +144,16 @@ class ShakaDemoMain {
 
   /** @private */
   setupPlayer_() {
-    const videoContainer = /** @type {!HTMLElement} */ (
-        document.getElementById('video-container'));
     const video = /** @type {!HTMLVideoElement} */ (this.video_);
+    const ui = video['ui'];
+    this.player_ = ui.getPlayer();
 
     // Register custom controls to the UI.
     shaka.ui.Controls.registerElement('close', new CloseButton.Factory());
 
-    // Set up UI.
-    const uiControlPanelElements = [
-      'time_and_duration',
-      'spacer',
-      'mute',
-      'volume',
-      'fullscreen',
-      'overflow_menu',
-      'close',
-    ];
-    const uiConfig = {
-      castReceiverAppId: '7B25EC44',
-      controlPanelElements: uiControlPanelElements,
-    };
-    this.player_ = new shaka.Player(video);
-    const ui = new shaka.ui.Overlay(this.player_, videoContainer, video);
+    // Configure UI.
+    const uiConfig = ui.getConfiguration();
+    uiConfig.controlPanelElements.push('close');
     ui.configure(uiConfig);
 
     // Add application-level default configs here.  These are not the library

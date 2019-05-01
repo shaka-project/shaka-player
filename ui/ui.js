@@ -65,6 +65,16 @@ shaka.ui.Overlay.prototype.destroy = async function() {
 };
 
 
+/** @return {!shaka.extern.UIConfiguration} */
+shaka.ui.Overlay.prototype.getConfiguration = function() {
+  let ret = this.defaultConfig_();
+  shaka.util.ConfigUtils.mergeConfigObjects(
+      ret, this.config_, this.defaultConfig_(),
+      /* overrides (only used for player config)*/ {}, /* path */ '');
+  return ret;
+};
+
+
 /**
  * @param {!Object} config This should follow the form of
  *   {@link shaka.extern.UIConfiguration}, but you may omit
