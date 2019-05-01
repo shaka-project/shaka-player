@@ -60,15 +60,3 @@ HTMLMediaElement.prototype.webkitSupportsPresentationMode = function(mode) {};
 
 /** @type {string} */
 HTMLMediaElement.prototype.webkitPresentationMode;
-
-
-/** @type {Object} */
-HTMLMediaElement.prototype.polyfillEnterpictureinpicture;
-
-
-/** @type {Object} */
-HTMLMediaElement.prototype.polyfillLeavepictureinpicture;
-
-
-/** @type {string} */
-HTMLMediaElement.prototype.polyfillPreviousPresentationMode;
