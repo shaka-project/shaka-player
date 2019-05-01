@@ -143,11 +143,11 @@ const CACHEABLE_URL_PREFIXES = [
 function onInstall(event) {
   const preCacheApplication = async () => {
     const cache = await caches.open(CACHE_NAME);
+    // Fetching these with addAll fails for CORS-restricted content, so we use
+    // fetchAndCache with no-cors mode to work around it.
 
     // Optional resources: failure on these will NOT fail the Promise chain.
     // We will also not wait for them to be installed.
-    // Fetching these with addAll fails for CORS-restricted content, so we use
-    // fetchAndCache with no-cors mode to work around it.
     for (const url of OPTIONAL_RESOURCES) {
       const request = new Request(url, {mode: 'no-cors'});
       fetchAndCache(cache, request).catch(() => {});
@@ -155,7 +155,12 @@ function onInstall(event) {
 
     // Critical resources: failure on these will fail the Promise chain.
     // The installation will not be complete until these are all cached.
-    return cache.addAll(CRITICAL_RESOURCES);
+    const criticalFetches = [];
+    for (const url of CRITICAL_RESOURCES) {
+      const request = new Request(url, {mode: 'no-cors'});
+      criticalFetches.push(fetchAndCache(cache, request));
+    }
+    return Promise.all(criticalFetches);
   };
 
   event.waitUntil(preCacheApplication());
