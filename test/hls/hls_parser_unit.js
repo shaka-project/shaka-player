@@ -1940,4 +1940,61 @@ describe('HlsParser', function() {
         await parser.start('media/master', playerInterface);
     expect(manifest.periods[0].variants.length).toBe(1);
   });
+
+  // https://github.com/google/shaka-player/issues/1908
+  it('correctly pairs variants with multiple video and audio', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="en",',
+      'URI="audio"\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="fr",',
+      'URI="audio2"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=1280x720,FRAME-RATE=30,AUDIO="aud1"\n',
+      'video\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=400,CODECS="avc1,mp4a",',
+      'RESOLUTION=1920x1080,FRAME-RATE=30,AUDIO="aud1"\n',
+      'video2\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    const manifest = new shaka.test.ManifestGenerator()
+            .anyTimeline()
+            .addPeriod(0)
+              .addPartialVariant()
+                .language('en')
+                .addPartialStream(ContentType.VIDEO)
+                  .size(1280, 720)
+                .addPartialStream(ContentType.AUDIO)
+                  .language('en')
+              .addPartialVariant()
+                .language('fr')
+                .addPartialStream(ContentType.VIDEO)
+                  .size(1280, 720)
+                .addPartialStream(ContentType.AUDIO)
+                  .language('fr')
+              .addPartialVariant()
+                .language('en')
+                .addPartialStream(ContentType.VIDEO)
+                  .size(1920, 1080)
+                .addPartialStream(ContentType.AUDIO)
+                  .language('en')
+              .addPartialVariant()
+                .language('fr')
+                .addPartialStream(ContentType.VIDEO)
+                  .size(1920, 1080)
+                .addPartialStream(ContentType.AUDIO)
+                  .language('fr')
+          .build();
+
+    await testHlsParser(master, media, manifest);
+  });
 });
