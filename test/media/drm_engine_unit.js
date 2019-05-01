@@ -221,6 +221,46 @@ describe('DrmEngine', function() {
       }
     });
 
+    it('overrides manifest with configured license servers', async () => {
+      // Accept both drm.abc and drm.def.  Only one can be chosen.
+      requestMediaKeySystemAccessSpy.and.callFake(
+          fakeRequestMediaKeySystemAccess.bind(null, ['drm.abc', 'drm.def']));
+
+      // Add manifest-supplied license servers for both.
+      for (const drmInfo of manifest.periods[0].variants[0].drmInfos) {
+        if (drmInfo.keySystem == 'drm.abc') {
+          drmInfo.licenseServerUri = 'http://foo.bar/abc';
+        } else if (drmInfo.keySystem == 'drm.def') {
+          drmInfo.licenseServerUri = 'http://foo.bar/def';
+        }
+
+        // Make sure we didn't somehow choose manifest-supplied values that
+        // match the config.  This would invalidate parts of the test.
+        const configServer = config.servers[drmInfo.keySystem];
+        expect(drmInfo.licenseServerUri).not.toEqual(configServer);
+      }
+
+      // Remove the server URI for drm.abc from the config, so that only drm.def
+      // could be used, in spite of the manifest-supplied license server URI.
+      delete config.servers['drm.abc'];
+      drmEngine.configure(config);
+
+      // Ignore error logs, which we expect to occur due to the missing server.
+      logErrorSpy.and.stub();
+
+      const variants = Periods.getAllVariantsFrom(manifest.periods);
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
+
+      // Although drm.def appears second in the manifest, it is queried first
+      // because it has a server configured.  The manifest-supplied server for
+      // drm.abc will not be used.
+      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
+      const selectedDrmInfo = drmEngine.getDrmInfo();
+      expect(selectedDrmInfo).not.toBe(null);
+      expect(selectedDrmInfo.keySystem).toBe('drm.def');
+      expect(selectedDrmInfo.licenseServerUri).toBe(config.servers['drm.def']);
+    });
+
     it('detects content type capabilities of key system', async () => {
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, ['drm.abc']));
@@ -472,7 +512,7 @@ describe('DrmEngine', function() {
       expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
     });
 
-    it('uses advanced config to override DrmInfo fields', async () => {
+    it('uses advanced config to fill in DrmInfo', async () => {
       // Leave only one drmInfo
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
@@ -516,7 +556,7 @@ describe('DrmEngine', function() {
       }
     });
 
-    it('does not use config if DrmInfo already filled out', async () => {
+    it('prefers advanced config from manifest if present', async () => {
       // Leave only one drmInfo
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
@@ -585,7 +625,8 @@ describe('DrmEngine', function() {
         shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.DRM,
-            shaka.util.Error.Code.NO_LICENSE_SERVER_GIVEN));
+            shaka.util.Error.Code.NO_LICENSE_SERVER_GIVEN,
+            'drm.abc'));
       }
     });
   });  // describe('init')
