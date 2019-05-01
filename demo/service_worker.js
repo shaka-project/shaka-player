@@ -69,7 +69,6 @@ const CRITICAL_RESOURCES = [
   // know the Web Font URL in advance, and Google Web Fonts can serve the
   // correct version of the font to whatever browser is making the request.
   'https://fonts.googleapis.com/css?family=Roboto',
-  'https://fonts.googleapis.com/css?family=Roboto+Condensed',
   'https://fonts.googleapis.com/icon?family=Material+Icons',
 
   'load.js',
@@ -81,6 +80,14 @@ const CRITICAL_RESOURCES = [
   // These files are required for the demo to include MDL.
   'https://code.getmdl.io/1.3.0/material.indigo-blue.min.css',
   'https://code.getmdl.io/1.3.0/material.min.js',
+
+  // MDL modal dialogs are enabled by including these:
+  '../node_modules/dialog-polyfill/dialog-polyfill.js',
+  '../node_modules/dialog-polyfill/dialog-polyfill.css',
+
+  // Datalist-like fields are enabled by including these:
+  '../node_modules/awesomplete/awesomplete.css',
+  '../node_modules/awesomplete/awesomplete.js',
 ];
 
 
