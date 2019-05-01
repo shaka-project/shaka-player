@@ -99,9 +99,9 @@ HLS features supported:
  - MPEG-2 TS support (transmuxing provided by [mux.js][] v4.4+, must be separately included)
  - WebVTT and TTML
  - CEA-608/708 captions
+ - Encrypted content with FairPlay (Safari on macOS and iOS only)
 
 HLS features **not** supported:
- - Encrypted content with FairPlay: https://github.com/google/shaka-player/issues/382
  - Encrypted content with PlayReady: https://github.com/google/shaka-player/issues/1145
  - Key rotation: https://github.com/google/shaka-player/issues/917
  - I-frame-only playlists: https://github.com/google/shaka-player/issues/742
@@ -112,16 +112,16 @@ HLS features **not** supported:
 
 ## DRM support matrix
 
-|Browser   |Widevine  |PlayReady|FairPlay |ClearKey⁷ |
+|Browser   |Widevine  |PlayReady|FairPlay |ClearKey⁶ |
 |:--------:|:--------:|:-------:|:-------:|:--------:|
 |Chrome¹   |**Y**     | -       | -       |**Y**     |
 |Firefox²  |**Y**     | -       | -       |**Y**     |
 |Edge³     | -        |**Y**    | -       | -        |
 |IE 11⁴    | -        |**Y**    | -       | -        |
-|Safari    | -        | -       |**N** ⁵  | -        |
-|Opera     |untested⁶ | -       | -       |untested⁶ |
-|Chromecast|**Y**     |**Y**    | -       |untested⁶ |
-|Tizen TV  |**Y**     |**Y**    | -       |untested⁶ |
+|Safari    | -        | -       |**Y**    | -        |
+|Opera     |untested⁵ | -       | -       |untested⁵ |
+|Chromecast|**Y**     |**Y**    | -       |untested⁵ |
+|Tizen TV  |**Y**     |**Y**    | -       |untested⁵ |
 
 Other DRM systems should work out of the box if they are interoperable and compliant to the EME spec.
 
@@ -130,9 +130,8 @@ NOTES:
  - ²: DRM must be enabled by the user.  The first time a Firefox user visits a site with encrypted media, the user will be prompted to enable DRM.
  - ³: PlayReady in Edge does not seem to work on a VM or over Remote Desktop.
  - ⁴: IE 11 offers PlayReady support on Windows 8.1 and Windows 10 only.
- - ⁵: FairPlay DRM support in Safari is a work in progress due to a lack of documentation. For more information, see https://github.com/google/shaka-player/issues/382
- - ⁶: These are expected to work, but are not actively tested by the Shaka Player team.
- - ⁷: ClearKey is a useful tool for debugging, and does not provide actual content security.
+ - ⁵: These are expected to work, but are not actively tested by the Shaka Player team.
+ - ⁶: ClearKey is a useful tool for debugging, and does not provide actual content security.
 
 
 ## Media container and subtitle support
