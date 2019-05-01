@@ -34,10 +34,6 @@ HTMLDocument.prototype.pictureInPictureElement;
 HTMLDocument.prototype.pictureInPictureEnabled;
 
 
-/** @type {Element} */
-HTMLDocument.prototype.polyfillPictureInPictureElement;
-
-
 /**
  * @return {!Promise}
  */
