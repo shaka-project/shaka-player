@@ -116,6 +116,8 @@ const OPTIONAL_RESOURCES = [
  */
 const CACHEABLE_URL_PREFIXES = [
   // Anything associated with this application is fair game to cache.
+  // This would not be necessary if this demo were always served from the same
+  // location and always used absolute URLs in the resources lists above.
   location.origin,
 
   // Google Web Fonts should be cached when first seen, without being explicitly
@@ -187,14 +189,29 @@ function onActivate(event) {
 function onFetch(event) {
   // Make sure this is a request we should be handling in the first place.
   // If it's not, it's important to leave it alone and not call respondWith.
-  let cacheable = false;
+  let useCache = false;
   for (const prefix of CACHEABLE_URL_PREFIXES) {
     if (event.request.url.startsWith(prefix)) {
-      cacheable = true;
+      useCache = true;
+      break;
     }
   }
 
-  if (cacheable) {
+  // Now we need to check our resource lists.  The list of prefixes above won't
+  // cover everything that was installed initially, and those things still need
+  // to be read from cache.  So we check if this request URL matches one of
+  // those lists.
+  // The resource lists contain some relative URLs and some absolute URLs.  The
+  // check here will only be able to match the absolute ones, but that's enough,
+  // because the relative ones are covered by the loop above.
+  if (!useCache) {
+    if (CRITICAL_RESOURCES.includes(event.request.url) ||
+        OPTIONAL_RESOURCES.includes(event.request.url)) {
+      useCache = true;
+    }
+  }
+
+  if (useCache) {
     event.respondWith(fetchCacheableResource(event.request));
   }
 }
