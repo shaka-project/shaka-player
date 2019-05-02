@@ -190,7 +190,31 @@ class ShakaDemoMain {
     drawerCloseButton.addEventListener('click', () => {
       const layout = document.getElementById('main-layout');
       layout.MaterialLayout.toggleDrawer();
+      this.dispatchEventWithName_('shaka-main-drawer-state-change');
+      this.hideNode_(drawerCloseButton);
     });
+    // Dispatch drawer state change events when the drawer button or obfuscator
+    // are pressed also.
+    const drawerButton = document.querySelector('.mdl-layout__drawer-button');
+    goog.asserts.assert(drawerButton, 'There should be a drawer button.');
+    drawerButton.addEventListener('click', () => {
+      this.dispatchEventWithName_('shaka-main-drawer-state-change');
+      this.showNode_(drawerCloseButton);
+    });
+    const obfuscator = document.querySelector('.mdl-layout__obfuscator');
+    goog.asserts.assert(obfuscator, 'There should be an obfuscator.');
+    obfuscator.addEventListener('click', () => {
+      this.dispatchEventWithName_('shaka-main-drawer-state-change');
+      this.hideNode_(drawerCloseButton);
+    });
+    this.hideNode_(drawerCloseButton);
+  }
+
+  /** @return {boolean} */
+  getIsDrawerOpen() {
+    const drawer = document.querySelector('.mdl-layout__drawer');
+    goog.asserts.assert(drawer, 'There should be a drawer.');
+    return drawer.classList.contains('is-visible');
   }
 
   /**

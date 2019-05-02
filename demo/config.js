@@ -60,6 +60,22 @@ class ShakaDemoConfig {
       // changes based on the config changes.
       this.reloadAndSaveState_();
     });
+    document.addEventListener('shaka-main-drawer-state-change', () => {
+      this.setContentAvailability_(shakaDemoMain.getIsDrawerOpen());
+    });
+    this.setContentAvailability_(shakaDemoMain.getIsDrawerOpen());
+  }
+
+  /**
+   * @param {boolean} availability
+   * @private
+   */
+  setContentAvailability_(availability) {
+    if (availability) {
+      this.container_.classList.remove('hidden');
+    } else {
+      this.container_.classList.add('hidden');
+    }
   }
 
   /** @private */
