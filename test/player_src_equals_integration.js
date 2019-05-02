@@ -178,12 +178,16 @@ describe('Player Src Equals', () => {
     expect(video.playbackRate).toBe(1);
   });
 
-  // Since we don't have a manifest, we don't have real variant information.
   // TODO: test audio-video mp4 content on platforms with audioTracks API
-  it('reports no variant tracks for video-only mp4 content', async () => {
+  it('reports variant tracks for video-only mp4 content', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
 
-    expect(player.getVariantTracks().length).toBe(0);
+    // On platforms with audioTracks, such as Safari, we get one track here.
+    if (video.audioTracks) {
+      expect(player.getVariantTracks().length).toBe(1);
+    } else {
+      expect(player.getVariantTracks().length).toBe(0);
+    }
   });
 
   // TODO: test HLS on platforms with native HLS
@@ -224,8 +228,19 @@ describe('Player Src Equals', () => {
   it('returns no languages or roles for simple mp4 content', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI);
 
-    expect(player.getAudioLanguages()).toEqual([]);
-    expect(player.getAudioLanguagesAndRoles()).toEqual([]);
+    // On platforms with audioTracks, such as Safari, we get one track, with
+    // language set to whatever is in the mp4.
+    if (video.audioTracks) {
+      expect(player.getAudioLanguages()).toEqual(['en']);
+      // Note that some browsers, such as Safari, say this is the 'main'
+      // role, while others, such as Edge, do not.  For the purposes of this
+      // test, it doesn't matter what the role is.
+      expect(player.getAudioLanguagesAndRoles()).toEqual(
+          [{language: 'en', role: jasmine.any(String)}]);
+    } else {
+      expect(player.getAudioLanguages()).toEqual([]);
+      expect(player.getAudioLanguagesAndRoles()).toEqual([]);
+    }
 
     expect(player.getTextLanguages()).toEqual([]);
     expect(player.getTextLanguagesAndRoles()).toEqual([]);
