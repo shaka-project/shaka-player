@@ -344,40 +344,39 @@ const ShakaDemoAssetInfo = class {
   isStored() {
     return this.storedContent != null;
   }
-};
 
-
-/** @return {!ShakaDemoAssetInfo} */
-ShakaDemoAssetInfo.makeBlankAsset = function() {
-  return new ShakaDemoAssetInfo(
-    /* name= */ '',
-    /* iconUri= */ '',
-    /* manifestUri= */ '',
-    /* source= */ shakaAssets.Source.CUSTOM);
-};
-
-/**
- * @param {!Object} raw
- * @return {!ShakaDemoAssetInfo}
- */
-ShakaDemoAssetInfo.fromJSON = function(raw) {
-  // This handles the special case for Maps in toJSON.
-  const parsed = {};
-  for (let key in raw) {
-    const value = raw[key];
-    if (value && typeof value == 'object' && value['__type__'] == 'map') {
-      const replacement = new Map();
-      for (let key in value) {
-        if (key != '__type__') {
-          replacement.set(key, value[key]);
-        }
-      }
-      parsed[key] = replacement;
-    } else {
-      parsed[key] = value;
-    }
+  /** @return {!ShakaDemoAssetInfo} */
+  static makeBlankAsset() {
+    return new ShakaDemoAssetInfo(
+      /* name= */ '',
+      /* iconUri= */ '',
+      /* manifestUri= */ '',
+      /* source= */ shakaAssets.Source.CUSTOM);
   }
-  const asset = ShakaDemoAssetInfo.makeBlankAsset();
-  Object.assign(asset, parsed);
-  return asset;
+
+  /**
+   * @param {!Object} raw
+   * @return {!ShakaDemoAssetInfo}
+   */
+  static fromJSON(raw) {
+    // This handles the special case for Maps in toJSON.
+    const parsed = {};
+    for (let key in raw) {
+      const value = raw[key];
+      if (value && typeof value == 'object' && value['__type__'] == 'map') {
+        const replacement = new Map();
+        for (let key in value) {
+          if (key != '__type__') {
+            replacement.set(key, value[key]);
+          }
+        }
+        parsed[key] = replacement;
+      } else {
+        parsed[key] = value;
+      }
+    }
+    const asset = ShakaDemoAssetInfo.makeBlankAsset();
+    Object.assign(asset, parsed);
+    return asset;
+  }
 };

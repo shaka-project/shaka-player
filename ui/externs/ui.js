@@ -23,7 +23,7 @@
  */
 
 /** @namespace */
-var shaka = {}; // eslint-disable-line no-var
+var shaka = {};
 
 /** @namespace */
 shaka.extern = {};

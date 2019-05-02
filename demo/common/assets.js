@@ -23,13 +23,9 @@ goog.require('ShakaDemoAssetInfo');
 // Types and enums {{{
 /**
  * A container for demo assets.
- *
- * Note: due to an issue with testing on Tizen 2017, we must use "var" at this
- * scope instead of "let".
- *
  * @class
  */
-var shakaAssets = {};  // eslint-disable-line no-var
+const shakaAssets = {};
 
 
 /** @enum {string} */

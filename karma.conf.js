@@ -131,7 +131,8 @@ module.exports = function(config) {
       // Compute coverage over UI, too
       'ui/*.js': ['coverage'],
 
-      // Convert ES6 to ES5 so we can still run tests on IE11.
+      // Convert ES6 to ES5 so we can still run tests on IE11 and Tizen.
+      'demo/common/*.js': ['babel'],
       'lib/**/*.js': ['babel'],
       'ui/**/*.js': ['babel'],
       'test/**/*.js': ['babel'],

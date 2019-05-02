@@ -140,6 +140,7 @@ module.exports = {
             },
             "files": [
                 // Closure requires using var in externs.
+                "ui/externs/*.js",
                 "externs/**/*.js",
                 "test/test/externs/*.js",
                 // Use var in load.js so it works in old browsers.  We'll use
