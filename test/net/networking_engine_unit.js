@@ -30,6 +30,8 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
   let resolveScheme;
   /** @type {!jasmine.Spy} */
   let rejectScheme;
+  /** @type {!jasmine.Spy} */
+  let onProgress;
   /** @type {!shaka.util.Error} */
   let error;
 
@@ -41,9 +43,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
 
   function makeResolveScheme(spyName) {
     return jasmine.createSpy(spyName).and.callFake(function() {
-      return shaka.util.AbortableOperation.completed({
-        uri: '', data: new ArrayBuffer(5), headers: {},
-      });
+      return shaka.util.AbortableOperation.completed(createResponse());
     });
   }
 
@@ -54,7 +54,8 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         shaka.util.Error.Category.NETWORK,
         shaka.util.Error.Code.HTTP_ERROR);
 
-    networkingEngine = new shaka.net.NetworkingEngine();
+    onProgress = jasmine.createSpy('onProgressUpdated');
+    networkingEngine = new shaka.net.NetworkingEngine(Util.spyFunc(onProgress));
     resolveScheme = makeResolveScheme('resolve scheme');
     rejectScheme = jasmine.createSpy('reject scheme').and.callFake(() =>
         shaka.util.AbortableOperation.failed(error));
@@ -89,9 +90,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         if (rejectScheme.calls.count() == 1) {
           return shaka.util.AbortableOperation.failed(error);
         } else {
-          return shaka.util.AbortableOperation.completed({
-            uri: '', data: new ArrayBuffer(0), headers: {},
-          });
+          return shaka.util.AbortableOperation.completed(createResponse());
         }
       });
       networkingEngine.request(requestType, request).promise
@@ -114,9 +113,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         if (rejectScheme.calls.count() < 3) {
           return shaka.util.AbortableOperation.failed(error);
         } else {
-          return shaka.util.AbortableOperation.completed({
-            uri: '', data: new ArrayBuffer(0), headers: {},
-          });
+          return shaka.util.AbortableOperation.completed(createResponse());
         }
       });
       networkingEngine.request(requestType, request).promise
@@ -372,7 +369,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
             expect(uri).toBe(request.uris[0]);
             expect(requestPassed).toEqual(request);
             expect(requestTypePassed).toEqual(requestType);
-            return shaka.util.AbortableOperation.completed({});
+            return shaka.util.AbortableOperation.completed(createResponse());
           });
       networkingEngine.request(requestType, request)
           .promise.catch(fail).then(done);
@@ -400,7 +397,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         expect(request.headers).toBeTruthy();
         expect(request.retryParameters).toBeTruthy();
 
-        return shaka.util.AbortableOperation.completed({});
+        return shaka.util.AbortableOperation.completed(createResponse());
       });
       networkingEngine.request(requestType, originalRequest).promise
           .catch(fail).then(done);
@@ -624,10 +621,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
       filter = jasmine.createSpy('response filter');
       networkingEngine.registerResponseFilter(Util.spyFunc(filter));
       resolveScheme.and.callFake(function(request) {
-        let response = {
-          uri: '', data: new ArrayBuffer(100), headers: {},
-        };
-        return shaka.util.AbortableOperation.completed(response);
+        return shaka.util.AbortableOperation.completed(createResponse());
       });
     });
 
@@ -960,12 +954,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
           onSegmentDownloaded.calls.reset();
 
           resolveScheme.and.callFake(function() {
-            return shaka.util.AbortableOperation.completed({
-              uri: '',
-              data: new ArrayBuffer(5),
-              headers: {},
-              fromCache: true,
-            });
+            return shaka.util.AbortableOperation.completed(createResponse());
           });
           return networkingEngine.request(
               requestType, createRequest('resolve://foo'));
@@ -1005,9 +994,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         shaka.util.Error.Severity.RECOVERABLE,
         shaka.util.Error.Category.NETWORK,
         shaka.util.Error.Code.BAD_HTTP_STATUS);
-      let resolve = {
-        uri: '', data: new ArrayBuffer(0), headers: {},
-      };
+      let resolve = createResponse();
       rejectScheme.and.callFake(() => {
         switch (rejectScheme.calls.count()) {
           case 1: return shaka.util.AbortableOperation.failed(error1);
@@ -1202,6 +1189,59 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
     });
   });
 
+  describe('progress events', () => {
+    it('forwards progress events to caller', async () => {
+      /** @const {!shaka.util.PublicPromise} */
+      const delay = new shaka.util.PublicPromise();
+      resolveScheme.and.callFake((uri, req, type, progress) => {
+        progress(1, 2, 3);
+
+        const p = (async () => {
+          progress(4, 5, 6);
+          await delay;
+          progress(7, 8, 9);
+          return createResponse();
+        })();
+        return new shaka.util.AbortableOperation(p, () => {});
+      });
+
+      /** @const {shaka.net.NetworkingEngine.PendingRequest} */
+      const resp = networkingEngine.request(
+          requestType, createRequest('resolve://'));
+      await Util.delay(0.01);  // Allow Promises to resolve.
+      expect(onProgress).toHaveBeenCalledTimes(2);
+      expect(onProgress).toHaveBeenCalledWith(1, 2);
+      expect(onProgress).toHaveBeenCalledWith(4, 5);
+      onProgress.calls.reset();
+
+      delay.resolve();
+      await resp.promise;
+      expect(onProgress).toHaveBeenCalledTimes(1);
+      expect(onProgress).toHaveBeenCalledWith(7, 8);
+    });
+
+    it('doesn\'t forward progress events for non-SEGMENT', async () => {
+      resolveScheme.and.callFake((uri, req, type, progress) => {
+        progress(1, 2, 3);
+        progress(4, 5, 6);
+        return shaka.util.AbortableOperation.completed(createResponse());
+      });
+
+      const resp = networkingEngine.request(
+          shaka.net.NetworkingEngine.RequestType.LICENSE,
+          createRequest('resolve://'));
+      await resp.promise;
+      expect(onProgress).not.toHaveBeenCalled();
+    });
+
+    it('repports progress even if plugin doesn\'t report it', async () => {
+      const resp = networkingEngine.request(
+          requestType, createRequest('resolve://'));
+      await resp.promise;
+      expect(onProgress).toHaveBeenCalled();
+    });
+  });
+
   /**
    * @param {string} uri
    * @param {shaka.extern.RetryParameters=} retryParameters
@@ -1227,4 +1267,9 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
       expect(keys).not.toContain('range');
     });
   });
+
+  /** @return {shaka.extern.Response} */
+  function createResponse() {
+    return {uri: '', data: new ArrayBuffer(5), headers: {}};
+  }
 });  // describe('NetworkingEngine')

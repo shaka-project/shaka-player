@@ -571,10 +571,11 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
  * @param {string} template An sprintf template that will take the segment
  *   index and give a URI.
  * @param {number} segmentDuration
+ * @param {?number=} segmentSize
  * @return {!shaka.test.ManifestGenerator}
  */
 shaka.test.ManifestGenerator.prototype.useSegmentTemplate = function(
-    template, segmentDuration) {
+    template, segmentDuration, segmentSize = null) {
   let stream = this.currentStream_();
   let totalDuration = this.manifest_.presentationTimeline.getDuration();
   let segmentCount = totalDuration / segmentDuration;
@@ -590,7 +591,7 @@ shaka.test.ManifestGenerator.prototype.useSegmentTemplate = function(
     let start = index * segmentDuration;
     let end = Math.min(totalDuration, (index + 1) * segmentDuration);
     return new this.shaka_.media.SegmentReference(
-        index, start, end, getUris, 0, null);
+        index, start, end, getUris, 0, segmentSize);
   }.bind(this));
   return this;
 };

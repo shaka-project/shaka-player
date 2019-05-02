@@ -2722,6 +2722,222 @@ describe('StreamingEngine', function() {
     });
   });
 
+  describe('network downgrading', function() {
+    /** @type {shaka.extern.Variant} */
+    let newVariant;
+    /** @type {!Array.<string>} */
+    let requestUris;
+    /** @type {shaka.util.PublicPromise} */
+    let delayedRequest;
+    /** @type {shaka.net.NetworkingEngine.PendingRequest} */
+    let lastResponse;
+    /** @type {boolean} */
+    let shouldDelayRequests;
+
+    beforeEach(function() {
+      manifest = new shaka.test.ManifestGenerator()
+        .setPresentationDuration(60)
+        .addPeriod(0)
+          .addVariant(0)
+            .bandwidth(500)
+            .addVideo(10).useSegmentTemplate('video-10-%d.mp4',
+                                             /* segmentDuration= */ 10,
+                                             /* segmentSize= */ 50)
+          .addVariant(1)
+            .bandwidth(100)
+            .addVideo(11).useSegmentTemplate('video-11-%d.mp4',
+                                             /* segmentDuration= */ 10,
+                                             /* segmentSize= */ 10)
+        .build();
+
+      const initialVariant = manifest.periods[0].variants[0];
+      newVariant = manifest.periods[0].variants[1];
+      requestUris = [];
+      delayedRequest = null;
+      lastResponse = null;
+      shouldDelayRequests = true;
+      playing = false;
+      presentationTimeInSeconds = 0;
+
+      // For these tests, we don't care about specific data appended.
+      // Just return any old ArrayBuffer for any requested segment.
+      netEngine = {
+        request: (requestType, request) => {
+          const buffer = new ArrayBuffer(0);
+          const response = {uri: request.uris[0], data: buffer, headers: {}};
+          const bytes = new shaka.net.NetworkingEngine.NumBytesRemainingClass();
+          bytes.setBytes(200);
+
+          delayedRequest = new shaka.util.PublicPromise();
+          let p = shouldDelayRequests ? delayedRequest : Promise.resolve();
+          p = p.then(() => {
+            // Only add if the segment was appended; if it was aborted this
+            // won't be called.
+            requestUris.push(request.uris[0]);
+            return response;
+          });
+          const abort = () => {
+            delayedRequest.reject(new shaka.util.Error(
+                shaka.util.Error.Severity.CRITICAL,
+                shaka.util.Error.Category.PLAYER,
+                shaka.util.Error.Code.OPERATION_ABORTED));
+            return Promise.resolve();
+          };
+          const ret =
+              new shaka.net.NetworkingEngine.PendingRequest(p, abort, bytes);
+
+          spyOn(ret, 'abort').and.callThrough();
+          lastResponse = ret;
+          return ret;
+        },
+      };
+
+      // For these tests, we also don't need FakeMediaSourceEngine to verify
+      // its input data.
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine({});
+      mediaSourceEngine.bufferStart.and.returnValue(0);
+      mediaSourceEngine.clear.and.returnValue(Promise.resolve());
+      mediaSourceEngine.remove.and.returnValue(Promise.resolve());
+      mediaSourceEngine.setStreamProperties.and.returnValue(Promise.resolve());
+
+      // Naive buffered range tracking that only tracks the buffer end.
+      const bufferEnd = {audio: 0, video: 0, text: 0};
+      mediaSourceEngine.appendBuffer.and.callFake((type, data, start, end) => {
+        bufferEnd[type] = end;
+        return Promise.resolve();
+      });
+      mediaSourceEngine.bufferEnd.and.callFake((type) => bufferEnd[type]);
+      mediaSourceEngine.bufferedAheadOf.and.callFake(
+          (type, start) => Math.max(0, bufferEnd[type] - start));
+      mediaSourceEngine.isBuffered.and.callFake(
+          (type, time) => time >= 0 && time < bufferEnd[type]);
+
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.rebufferingGoal = 30;
+      config.retryParameters.maxAttempts = 1;
+      createStreamingEngine(config);
+
+      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+      onChooseStreams.and.callFake(() => ({variant: initialVariant}));
+    });
+
+    it('aborts pending requests', () => {
+      streamingEngine.start().catch(fail);
+      Util.fakeEventLoop(1);
+
+      // Finish the first request.
+      delayedRequest.resolve();
+      Util.fakeEventLoop(1);
+      // We should have buffered the first segment and finished startup.
+      expect(onCanSwitch).toHaveBeenCalled();
+      expect(Util.invokeSpy(mediaSourceEngine.bufferEnd, 'video')).toBe(10);
+
+      // This should abort the pending request for the second segment.
+      const oldResponse = lastResponse;
+      streamingEngine.switchVariant(
+          newVariant, /* clear_buffer= */ false, /* safe_margin= */ 0);
+      Util.fakeEventLoop(1);
+      expect(oldResponse.abort).toHaveBeenCalled();
+
+      // Finish the second request for the new stream.
+      delayedRequest.resolve();
+      Util.fakeEventLoop(1);
+      expect(Util.invokeSpy(mediaSourceEngine.bufferEnd, 'video')).toBe(20);
+      expect(requestUris).toEqual(['video-10-0.mp4', 'video-11-1.mp4']);
+    });
+
+    it('still aborts if previous segment size unknown', () => {
+      // This should use the "bytes remaining" from the request instead of the
+      // previous stream's size.
+      const oldGet = manifest.periods[0].variants[0].video.getSegmentReference;
+      manifest.periods[0].variants[0].video.getSegmentReference = (idx) => {
+        const seg = oldGet(idx);
+        if (seg) {
+          // With endByte being null, we won't know the segment size.
+          return new shaka.media.SegmentReference(
+              seg.position, seg.startTime, seg.endTime, seg.getUris,
+              /* startByte= */ 0, /* endByte= */ null);
+        } else {
+          return seg;
+        }
+      };
+
+      prepareForAbort();
+      streamingEngine.switchVariant(
+          newVariant, /* clear_buffer= */ false, /* safe_margin= */ 0);
+
+      bufferAndCheck(/* didAbort= */ true);
+    });
+
+    it('doesn\'t abort if close to finished',
+       /** @suppress {accessControls} */ () => {
+         prepareForAbort();
+         lastResponse.bytesRemaining_.setBytes(3);
+         streamingEngine.switchVariant(
+             newVariant, /* clear_buffer= */ false, /* safe_margin= */ 0);
+
+         bufferAndCheck(/* didAbort= */ false);
+       });
+
+    it('accounts for init segment size', () => {
+      newVariant.video.initSegmentReference =
+          new shaka.media.InitSegmentReference(() => ['init-11.mp4'], 0, 500);
+
+      prepareForAbort();
+      streamingEngine.switchVariant(
+          newVariant, /* clear_buffer= */ false, /* safe_margin= */ 0);
+
+      bufferAndCheck(/* didAbort= */ false, /* hasInit= */ true);
+    });
+
+    it('still aborts with small init segment', () => {
+      newVariant.video.initSegmentReference =
+          new shaka.media.InitSegmentReference(() => ['init-11.mp4'], 0, 5);
+
+      prepareForAbort();
+      streamingEngine.switchVariant(
+          newVariant, /* clear_buffer= */ false, /* safe_margin= */ 0);
+
+      bufferAndCheck(/* didAbort= */ true, /* hasInit= */ true);
+    });
+
+    /**
+     * Creates and starts the StreamingEngine instance.  After this returns,
+     * it should be waiting for the second segment request to complete.
+     */
+    function prepareForAbort() {
+      streamingEngine.start().catch(fail);
+      Util.fakeEventLoop(1);
+
+      // Finish the first segment request.
+      delayedRequest.resolve();
+      Util.fakeEventLoop(1);
+      expect(Util.invokeSpy(mediaSourceEngine.bufferEnd, 'video')).toBe(10);
+
+      expect(onCanSwitch).toHaveBeenCalled();
+    }
+
+    /**
+     * Buffers to the buffering goal and checks the correct segment requests
+     * were made.
+     * @param {boolean} didAbort
+     * @param {boolean=} hasInit
+     */
+    function bufferAndCheck(didAbort, hasInit) {
+      shouldDelayRequests = false;
+      delayedRequest.resolve();
+      Util.fakeEventLoop(3);
+
+      expect(Util.invokeSpy(mediaSourceEngine.bufferEnd, 'video')).toBe(30);
+      const expected = ['video-10-0.mp4'];
+      if (!didAbort) { expected.push('video-10-1.mp4'); }
+      if (hasInit) { expected.push('init-11.mp4'); }
+      if (didAbort) { expected.push('video-11-1.mp4'); }
+      expected.push('video-11-2.mp4');
+      expect(requestUris).toEqual(expected);
+    }
+  });
+
   /**
    * Verifies calls to NetworkingEngine.request(). Expects every segment
    * in the given Period to have been requested.
