@@ -181,12 +181,13 @@ describe('UI', () => {
       });
 
       it('turning captions off through API has effect on UI', async () => {
+        const p = waitForEvent(controls, 'captionselectionupdated');
         // Disable & verify the text.
         await player.setTextTrackVisibility(false);
         expect(player.isTextTrackVisible()).toBe(false);
 
         // Wait for the change to take effect
-        await waitForEvent(controls, 'captionselectionupdated');
+        await p;
 
         const offButtonChosen =
             getOffButton().querySelector('.shaka-chosen-item');
@@ -258,11 +259,13 @@ describe('UI', () => {
     async function verifyLanguageChangeViaUI(playerEventName, tracks) {
       expect(getSelectedTrack(tracks).language).toEqual(oldLanguage);
 
+      const p = waitForEvent(player, playerEventName);
+
       const button = languagesToButtons.get(newLanguage);
       button.click();
 
       // Wait for the change to take effect
-      await waitForEvent(player, playerEventName);
+      await p;
       expect(getSelectedTrack(tracks).language).toEqual(newLanguage);
     }
 
@@ -274,10 +277,12 @@ describe('UI', () => {
     async function verifyLanguageChangeViaAPI(controlsEventName, tracks) {
       expect(getSelectedTrack(tracks).language).toEqual(oldLanguage);
 
+      const p = waitForEvent(controls, controlsEventName);
+
       player.selectAudioLanguage(newLanguage);
 
       // Wait for the UI to get updated
-      await waitForEvent(controls, controlsEventName);
+      await p;
 
       // Buttons were re-created on variant change
       languagesToButtons = mapChoicesToButtons(
@@ -375,11 +380,13 @@ describe('UI', () => {
       updateResolutionButtonsAndMap();
       expect(getSelectedTrack(tracks).height).toEqual(oldResolution);
 
+      const p = waitForEvent(controls, 'resolutionselectionupdated');
+
       const newResolutionTrack = findTrackWithHeight(tracks, newResolution);
       player.selectVariantTrack(newResolutionTrack);
 
       // Wait for the change to take effect
-      await waitForEvent(controls, 'resolutionselectionupdated');
+      await p;
 
       updateResolutionButtonsAndMap();
 
@@ -396,11 +403,13 @@ describe('UI', () => {
       // We disabled abr in beforeEach()
       expect(player.getConfiguration().abr.enabled).toBe(false);
 
+      const p = waitForEvent(controls, 'resolutionselectionupdated');
+
       // Find the 'Auto' button
       const auto = getAutoButton();
       auto.click();
 
-      await waitForEvent(controls, 'resolutionselectionupdated');
+      await p;
       expect(player.getConfiguration().abr.enabled).toBe(true);
     });
 
@@ -409,11 +418,13 @@ describe('UI', () => {
       const config = {abr: {enabled: true}};
       player.configure(config);
 
+      const p = waitForEvent(controls, 'resolutionselectionupdated');
+
       // Any resolution would works
       const button = resolutionsToButtons.get(newResolution);
       button.click();
 
-      await waitForEvent(controls, 'resolutionselectionupdated');
+      await p;
       expect(player.getConfiguration().abr.enabled).toBe(false);
     });
 
