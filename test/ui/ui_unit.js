@@ -16,6 +16,8 @@
  */
 
 describe('UI', () => {
+  const UiUtils = shaka.test.UiUtils;
+
   /** @type {shaka.Player} */
   let player;
   /** @type {!Element} */
@@ -24,11 +26,11 @@ describe('UI', () => {
   beforeAll(async () => {
     // Add css file
     cssLink = document.createElement('link');
-    await shaka.test.Util.setupCSS(cssLink);
+    await UiUtils.setupCSS(cssLink);
   });
 
   afterEach(async () => {
-    await shaka.test.Util.cleanupUI();
+    await UiUtils.cleanupUI();
   });
 
   afterAll(() => {
@@ -48,7 +50,7 @@ describe('UI', () => {
 
       video = shaka.util.Dom.createVideoElement();
       videoContainer.appendChild(video);
-      createUIThroughAPI(videoContainer, video);
+      UiUtils.createUIThroughAPI(videoContainer, video);
     });
 
     it('has all the basic elements', () => {
@@ -66,7 +68,7 @@ describe('UI', () => {
           /** @type {!HTMLElement} */ (document.createElement('div'));
         document.body.appendChild(container);
 
-        createUIThroughDOMAutoSetup([container], /* videos */ []);
+        UiUtils.createUIThroughDOMAutoSetup([container], /* videos */ []);
       });
 
       it('has all the basic elements', () => {
@@ -90,7 +92,8 @@ describe('UI', () => {
           /** @type {!HTMLElement} */ (document.createElement('div'));
         document.body.appendChild(container2);
 
-        createUIThroughDOMAutoSetup([container1, container2], /* videos */ []);
+        UiUtils.createUIThroughDOMAutoSetup([container1, container2],
+            /* videos */ []);
       });
 
       it('has all the basic elements', () => {
@@ -107,7 +110,7 @@ describe('UI', () => {
         video = shaka.util.Dom.createVideoElement();
         document.body.appendChild(video);
 
-        createUIThroughDOMAutoSetup(/* containers */ [], [video]);
+        UiUtils.createUIThroughDOMAutoSetup(/* containers */ [], [video]);
       });
 
       it('has all the basic elements', () => {
@@ -132,7 +135,7 @@ describe('UI', () => {
           videos.push(video);
         }
 
-        createUIThroughDOMAutoSetup(/* containers */ [], videos);
+        UiUtils.createUIThroughDOMAutoSetup(/* containers */ [], videos);
       });
 
       it('has all the basic elements', () => {
@@ -157,7 +160,7 @@ describe('UI', () => {
         video = shaka.util.Dom.createVideoElement();
         container.appendChild(video);
 
-        createUIThroughDOMAutoSetup([container], [video]);
+        UiUtils.createUIThroughDOMAutoSetup([container], [video]);
       });
 
       it('has all the basic elements', () => {
@@ -186,7 +189,8 @@ describe('UI', () => {
       let controlsContainer;
 
       beforeEach(() => {
-        createUIThroughAPI(videoContainer, video);
+        const ui = UiUtils.createUIThroughAPI(videoContainer, video);
+        player = ui.getControls().getLocalPlayer();
         const controlsContainers =
             videoContainer.getElementsByClassName('shaka-controls-container');
         expect(controlsContainers.length).toBe(1);
@@ -220,7 +224,8 @@ describe('UI', () => {
             'overflow_menu',
           ],
         };
-        createUIThroughAPI(videoContainer, video, config);
+        const ui = UiUtils.createUIThroughAPI(videoContainer, video, config);
+        player = ui.getControls().getLocalPlayer();
 
         const overflowMenus =
             videoContainer.getElementsByClassName('shaka-overflow-menu');
@@ -229,10 +234,10 @@ describe('UI', () => {
       });
 
       it('has default buttons', () => {
-        confirmElementFound(overflowMenu, 'shaka-caption-button');
-        confirmElementFound(overflowMenu, 'shaka-resolution-button');
-        confirmElementFound(overflowMenu, 'shaka-language-button');
-        confirmElementFound(overflowMenu, 'shaka-pip-button');
+        UiUtils.confirmElementFound(overflowMenu, 'shaka-caption-button');
+        UiUtils.confirmElementFound(overflowMenu, 'shaka-resolution-button');
+        UiUtils.confirmElementFound(overflowMenu, 'shaka-language-button');
+        UiUtils.confirmElementFound(overflowMenu, 'shaka-pip-button');
       });
 
       it('becomes visible if overflowMenuButton was clicked', () => {
@@ -260,7 +265,6 @@ describe('UI', () => {
 
             const parser = new shaka.test.FakeManifestParser(manifest);
             const factory = () => parser;
-
             await player.load(/* uri= */ 'fake', /* startTime= */ 0, factory);
             const pipButtons =
             videoContainer.getElementsByClassName('shaka-pip-button');
@@ -290,19 +294,22 @@ describe('UI', () => {
       let controlsButtonPanel;
 
       it('has default elements', () => {
-        createUIThroughAPI(videoContainer, video);
+        UiUtils.createUIThroughAPI(videoContainer, video);
         const controlsButtonPanels = videoContainer.getElementsByClassName(
             'shaka-controls-button-panel');
+
         expect(controlsButtonPanels.length).toBe(1);
 
         controlsButtonPanel =
           /** @type {!HTMLElement} */ (controlsButtonPanels[0]);
 
-        confirmElementFound(controlsButtonPanel, 'shaka-current-time');
-        confirmElementFound(controlsButtonPanel, 'shaka-mute-button');
-        confirmElementFound(controlsButtonPanel, 'shaka-volume-bar');
-        confirmElementFound(controlsButtonPanel, 'shaka-fullscreen-button');
-        confirmElementFound(controlsButtonPanel, 'shaka-overflow-menu-button');
+        UiUtils.confirmElementFound(controlsButtonPanel, 'shaka-current-time');
+        UiUtils.confirmElementFound(controlsButtonPanel, 'shaka-mute-button');
+        UiUtils.confirmElementFound(controlsButtonPanel, 'shaka-volume-bar');
+        UiUtils.confirmElementFound(controlsButtonPanel,
+            'shaka-fullscreen-button');
+        UiUtils.confirmElementFound(controlsButtonPanel,
+            'shaka-overflow-menu-button');
       });
 
       it('is accessible', () => {
@@ -324,7 +331,7 @@ describe('UI', () => {
           ],
         };
 
-        createUIThroughAPI(videoContainer, video, config);
+        UiUtils.createUIThroughAPI(videoContainer, video, config);
         const controlsButtonPanels = videoContainer.getElementsByClassName(
             'shaka-controls-button-panel');
         expect(controlsButtonPanels.length).toBe(1);
@@ -354,7 +361,8 @@ describe('UI', () => {
             'quality',
           ],
         };
-        createUIThroughAPI(videoContainer, video, config);
+        const ui = UiUtils.createUIThroughAPI(videoContainer, video, config);
+        player = ui.getControls().getLocalPlayer();
 
         const resolutionsMenus =
             videoContainer.getElementsByClassName('shaka-resolutions');
@@ -407,122 +415,9 @@ describe('UI', () => {
         expect(selectVariantTrack).toHaveBeenCalledWith(
             jasmine.any(Object), true);
       });
-
-      // TODO: integration test to ensure all resolutions are
-      // correctly represented
-    });
-
-    // TODO: integration test to test audio language menu.
-  });
-
-  describe('customization', () => {
-    /** @type {!HTMLElement} */
-    let container;
-    /** @type {!HTMLMediaElement} */
-    let video;
-    /** @type {!Object} */
-    let config;
-
-    let warning;
-    let originalWarning;
-
-    beforeEach(() => {
-      originalWarning = shaka.log.warning;
-      warning = jasmine.createSpy('shaka.log.warning');
-
-      shaka.log.warning = shaka.test.Util.spyFunc(warning);
-      warning.calls.reset();
-      container =
-        /** @type {!HTMLElement} */ (document.createElement('div'));
-      document.body.appendChild(container);
-
-      video = shaka.util.Dom.createVideoElement();
-      container.appendChild(video);
-    });
-
-    afterEach(() => {
-      shaka.log.warning = originalWarning;
-    });
-
-    it('only the specified controls are created', () => {
-      config = {controlPanelElements: ['time_and_duration', 'mute']};
-      createUIThroughAPI(container, video, config);
-
-      // Only current time and mute button should've been created
-      confirmElementFound(container, 'shaka-current-time');
-      confirmElementFound(container, 'shaka-mute-button');
-
-      confirmElementMissing(container, 'shaka-volume-bar');
-      confirmElementMissing(container, 'shaka-fullscreen-button');
-      confirmElementMissing(container, 'shaka-overflow-menu-button');
-    });
-
-    it('only the specified overflow menu buttons are created', () => {
-      config = {overflowMenuButtons: ['cast']};
-      createUIThroughAPI(container, video, config);
-
-      confirmElementFound(container, 'shaka-cast-button');
-
-      confirmElementMissing(container, 'shaka-caption-button');
-    });
-
-    it('seek bar is not created unless configured', () => {
-      config = {addSeekBar: false};
-      createUIThroughAPI(container, video, config);
-
-      confirmElementMissing(container, 'shaka-seek-bar');
-    });
-
-    it('seek bar is created when configured', () => {
-      config = {addSeekBar: true};
-      createUIThroughAPI(container, video, config);
-
-      confirmElementFound(container, 'shaka-seek-bar');
-    });
-
-    it('settings menus are positioned lower when seek bar is absent',
-        () => {
-          config = {addSeekBar: false};
-          createUIThroughAPI(container, video, config);
-
-          function confirmLowPosition(className) {
-            const elements =
-              container.getElementsByClassName(className);
-            expect(elements.length).toBe(1);
-            expect(elements[0].classList.contains('shaka-low-position'))
-                .toBe(true);
-          }
-
-          confirmElementMissing(container, 'shaka-seek-bar');
-
-          confirmLowPosition('shaka-overflow-menu');
-          confirmLowPosition('shaka-resolutions');
-          confirmLowPosition('shaka-audio-languages');
-          confirmLowPosition('shaka-text-languages');
-        });
-
-    it('controls are created in specified order', () => {
-      config = {controlPanelElements: ['mute', 'time_and_duration',
-        'fullscreen']};
-      createUIThroughAPI(container, video, config);
-
-      const controlsButtonPanels =
-          container.getElementsByClassName('shaka-controls-button-panel');
-      expect(controlsButtonPanels.length).toBe(1);
-      const controlsButtonPanel =
-      /** @type {!HTMLElement} */ (controlsButtonPanels[0]);
-
-      const buttons = controlsButtonPanel.childNodes;
-      expect(buttons.length).toBe(3);
-
-      expect( /** @type {!HTMLElement} */ (buttons[0]).className)
-          .toContain('shaka-mute-button');
-      expect( /** @type {!HTMLElement} */ (buttons[1]).className)
-          .toContain('shaka-current-time');
-      expect( /** @type {!HTMLElement} */ (buttons[2]).className)
-          .toContain('shaka-fullscreen');
     });
   });
+
 
   /**
    * @param {!HTMLElement} container
@@ -531,64 +426,11 @@ describe('UI', () => {
   function checkBasicUIElements(container) {
     const videos = container.getElementsByTagName('video');
     expect(videos.length).not.toBe(0);
-
-    confirmElementFound(container, 'shaka-play-button-container');
-    confirmElementFound(container, 'shaka-play-button');
-    confirmElementFound(container, 'shaka-spinner');
-    confirmElementFound(container, 'shaka-overflow-menu');
-    confirmElementFound(container, 'shaka-controls-button-panel');
-    confirmElementFound(container, 'shaka-seek-bar');
-  }
-
-  /**
-   * @param {!HTMLElement} videoContainer
-   * @param {!HTMLMediaElement} video
-   * @param {!Object=} config
-   */
-  function createUIThroughAPI(videoContainer, video, config) {
-    player = new shaka.Player(video);
-    // Create UI
-    config = config || {};
-    const ui = new shaka.ui.Overlay(player, videoContainer, video);
-    ui.configure(config);
-  }
-
-  /**
-   * @param {!Array.<!Element>} containers
-   * @param {!Array.<!Element>} videos
-   * @suppress {visibility}
-   */
-  function createUIThroughDOMAutoSetup(containers, videos) {
-    for (const container of containers) {
-      container.setAttribute('data-shaka-player-container', '');
-    }
-
-    for (const video of videos) {
-      video.setAttribute('data-shaka-player', '');
-    }
-
-    // Call UI's private method to scan the page for shaka
-    // elements and create the UI.
-    shaka.ui.Overlay.scanPageForShakaElements_();
-  }
-
-  /**
-   * @param {!HTMLElement} parent
-   * @param {string} className
-   * @suppress {visibility}
-   */
-  function confirmElementFound(parent, className) {
-    const elements = parent.getElementsByClassName(className);
-    expect(elements.length).toBe(1);
-  }
-
-  /**
-   * @param {!HTMLElement} parent
-   * @param {string} className
-   * @suppress {visibility}
-   */
-  function confirmElementMissing(parent, className) {
-    const elements = parent.getElementsByClassName(className);
-    expect(elements.length).toBe(0);
+    UiUtils.confirmElementFound(container, 'shaka-play-button-container');
+    UiUtils.confirmElementFound(container, 'shaka-play-button');
+    UiUtils.confirmElementFound(container, 'shaka-spinner-svg');
+    UiUtils.confirmElementFound(container, 'shaka-overflow-menu');
+    UiUtils.confirmElementFound(container, 'shaka-controls-button-panel');
+    UiUtils.confirmElementFound(container, 'shaka-seek-bar');
   }
 });

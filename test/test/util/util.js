@@ -319,52 +319,6 @@ shaka.test.Util = class {
     return compiledShaka;
   }
 
-  /**
-   * @param {!Element} cssLink
-   */
-  static async setupCSS(cssLink) {
-    const head = document.head;
-    cssLink.type = 'text/css';
-    cssLink.rel = 'stylesheet/less';
-    cssLink.href ='/base/ui/controls.less';
-    head.appendChild(cssLink);
-
-    // LESS script has been added at the beginning of the test pass
-    // (in test/test/boot.js). This tells it that we've added a new
-    // stylesheet, so LESS can process it.
-    less.registerStylesheetsImmediately();
-    await less.refresh(/* reload */ true,
-        /* modifyVars*/ false, /* clearFileCache */ false);
-  }
-
-  /**
-   * Thoroughly clean up after UI-related tests.
-   *
-   * The UI tests can create lots of DOM elements (including videos) that are
-   * easy to lose track of.  This is a universal cleanup system to avoid leaving
-   * anything behind.
-   */
-  static async cleanupUI() {
-    // If we don't clean up the UI, these tests could pollute the environment
-    // for other tests that run later, causing failures in unrelated tests.
-    // This is causing particular issues on Tizen.
-    const containers =
-        document.querySelectorAll('[data-shaka-player-container]');
-
-    const destroys = [];
-    for (const container of containers) {
-      const ui = /** @type {shaka.ui.Overlay} */(container['ui']);
-
-      // Destroying the UI destroys the controls and player inside.
-      destroys.push(ui.destroy());
-    }
-    await Promise.all(destroys);
-
-    // Now remove all the containers from the DOM.
-    for (const container of containers) {
-      container.parentElement.removeChild(container);
-    }
-  }
 
   /**
    * Wait for the video playhead to move forward by some meaningful delta.

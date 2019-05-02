@@ -17,6 +17,7 @@
 
 describe('UI', () => {
   const Util = shaka.test.Util;
+  const UiUtils = shaka.test.UiUtils;
 
   /** @type {!jasmine.Spy} */
   let onErrorSpy;
@@ -40,7 +41,7 @@ describe('UI', () => {
 
   beforeAll(async () => {
     cssLink = document.createElement('link');
-    await Util.setupCSS(cssLink);
+    await UiUtils.setupCSS(cssLink);
 
     compiledShaka = await Util.loadShaka(getClientArg('uncompiled'));
     await shaka.test.TestScheme.createManifests(compiledShaka, '_compiled');
@@ -105,7 +106,7 @@ describe('UI', () => {
   afterEach(async () => {
     eventManager.release();
     waiter = null;
-    await shaka.test.Util.cleanupUI();
+    await UiUtils.cleanupUI();
   });
 
   afterAll(() => {
@@ -487,6 +488,7 @@ describe('UI', () => {
       expect(player.isAudioOnly()).toBe(false);
       expect(resolutionButton.classList.contains('shaka-hidden')).toBe(false);
     });
+
 
     /**
      * @return {Element}
