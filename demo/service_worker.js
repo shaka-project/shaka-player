@@ -87,7 +87,7 @@ const CRITICAL_RESOURCES = [
 
   // Datalist-like fields are enabled by including these:
   '../node_modules/awesomplete/awesomplete.css',
-  '../node_modules/awesomplete/awesomplete.js',
+  '../node_modules/awesomplete/awesomplete.min.js',
 ];
 
 
@@ -107,7 +107,7 @@ const OPTIONAL_RESOURCES = [
   'https://shaka-player-demo.appspot.com/assets/audioOnly.gif',
 
   // The mux.js transmuxing library for MPEG-2 TS and CEA support.
-  '../node_modules/mux.js/dist/mux.js',
+  '../node_modules/mux.js/dist/mux.min.js',
 
   // The cast sender SDK.
   'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js',

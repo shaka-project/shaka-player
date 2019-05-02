@@ -227,8 +227,9 @@ class ShakaDemoCustom {
     const iconSetup = (input, container) => {
       if (assetInProgress.iconUri) {
         input.value = assetInProgress.iconUri;
-        const img = document.createElement('IMG');
+        const img = document.createElement('img');
         img.src = input.value;
+        img.alt = '';  // Not necessary to understand the page
         iconDiv.appendChild(img);
       }
     };
@@ -236,8 +237,9 @@ class ShakaDemoCustom {
       shaka.ui.Utils.removeAllChildren(iconDiv);
       assetInProgress.iconUri = input.value;
       if (input.value) {
-        const img = document.createElement('IMG');
+        const img = document.createElement('img');
         img.src = input.value;
+        img.alt = '';  // Not necessary to understand the page
         iconDiv.appendChild(img);
       }
     };

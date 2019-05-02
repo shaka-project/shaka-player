@@ -54,8 +54,9 @@ class AssetCard {
     titleDiv.appendChild(titleText);
 
     if (asset.iconUri) {
-      const img = document.createElement('IMG');
+      const img = document.createElement('img');
       img.src = asset.iconUri;
+      img.alt = '';  // Not necessary to understand the page
       this.card_.appendChild(img);
     }
 
