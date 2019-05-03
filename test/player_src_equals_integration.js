@@ -333,10 +333,7 @@ describe('Player Src Equals', () => {
     try {
       await pendingAdd;
       fail();
-    } catch (e) {
-      // The player only rejects the promise, but does not provide an error.
-      expect(e).toBeFalsy();
-    }
+    } catch (e) {}
   });
 
   // Since we are not in-charge of streaming, calling |retryStreaming| should

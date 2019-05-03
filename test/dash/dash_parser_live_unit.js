@@ -880,7 +880,7 @@ describe('DashParser Live', function() {
             delayForUpdatePeriod();
             // An update should not occur.
             expect(fakeNetEngine.request).not.toHaveBeenCalled();
-          }).catch(fail).then(done);
+          }).catch(() => {}).then(done);
 
       // start will only begin the network request, calling stop here will be
       // after the request has started but before any parsing has been done.
@@ -944,7 +944,7 @@ describe('DashParser Live', function() {
         expect(fakeNetEngine.request).not.toHaveBeenCalled();
       }).catch(fail).then(done);
 
-      parser.start('dummy://foo', playerInterface).catch(fail);
+      parser.start('dummy://foo', playerInterface).catch(() => {});
       PromiseMock.flush();
     });
   });
