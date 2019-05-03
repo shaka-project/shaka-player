@@ -47,6 +47,9 @@ goog.require('shaka.util.Dom');
     /** @private {!HTMLElement} */
     this.controlsContainer_ = this.controls.getControlsContainer();
 
+    /** @private {!Array.<shaka.extern.IUIElement>} */
+    this.children_ = [];
+
     this.addOverflowMenuButton_();
 
     this.addOverflowMenu_();
@@ -119,6 +122,11 @@ goog.require('shaka.util.Dom');
     this.updateAriaLabel_();
   }
 
+  /** @override */
+  async destroy() {
+    await Promise.all(this.children_.map((child) => child.destroy()));
+  }
+
   /**
    * @param {string} name
    * @param {!shaka.extern.IUIElement.Factory} factory
@@ -163,10 +171,11 @@ goog.require('shaka.util.Dom');
    */
   createChildren_() {
     for (let i = 0; i < this.config_.overflowMenuButtons.length; i++) {
-    const name = this.config_.overflowMenuButtons[i];
-    if (shaka.ui.OverflowMenu.elementNamesToFactories_.get(name)) {
-      const factory = shaka.ui.OverflowMenu.elementNamesToFactories_.get(name);
-      factory.create(this.overflowMenu_, this.controls);
+      const name = this.config_.overflowMenuButtons[i];
+      if (shaka.ui.OverflowMenu.elementNamesToFactories_.get(name)) {
+        const factory =
+            shaka.ui.OverflowMenu.elementNamesToFactories_.get(name);
+        this.children_.push(factory.create(this.overflowMenu_, this.controls));
       }
     }
   }

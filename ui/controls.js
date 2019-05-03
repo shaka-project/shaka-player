@@ -178,7 +178,7 @@ shaka.ui.ControlsPanel.elementNamesToFactories_ = new Map();
  * @override
  * @export
  */
-shaka.ui.Controls.prototype.destroy = function() {
+shaka.ui.Controls.prototype.destroy = async function() {
   if (this.eventManager_) {
     this.eventManager_.release();
     this.eventManager_ = null;
@@ -207,7 +207,7 @@ shaka.ui.Controls.prototype.destroy = function() {
   this.localization_ = null;
   this.pressedKeys_.clear();
 
-  return Promise.resolve();
+  await Promise.all(this.elements_.map((element) => element.destroy()));
 };
 
 
