@@ -265,18 +265,9 @@ class ShakaDemoMain {
         this.dispatchEventWithName_('shaka-main-offline-progress');
       }
     };
-    const trackSelectionCallback = (tracks) => {
-      // Select the highest-bandwidth variant.
-      const bestTrack = tracks
-          .filter((track) => track.type == 'variant')
-          .sort((a, b) => a.bandwidth - b.bandwidth)
-          .pop();
-      return [bestTrack];
-    };
     this.storage_.configure({
       offline: {
         progressCallback: progressCallback,
-        trackSelectionCallback: trackSelectionCallback,
       },
     });
 
