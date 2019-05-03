@@ -194,6 +194,16 @@ class ShakaDemoMain {
       this.onCastStatusChange_(event['newStatus']);
     });
 
+    // Set up localization lazy-loading.
+    const localization = this.controls_.getLocalization();
+    const UNKNOWN_LOCALES = shaka.ui.Localization.UNKNOWN_LOCALES;
+    localization.addEventListener(UNKNOWN_LOCALES, (event) => {
+      for (let locale of event['locales']) {
+        this.loadUILocale_(locale);
+      }
+    });
+    this.loadUILocale_(this.uiLocale_);
+
     // Disable controls until something is loaded
     this.controls_.setEnabledShakaControls(false);
     this.controls_.setEnabledNativeControls(false);
@@ -417,6 +427,32 @@ class ShakaDemoMain {
    */
   getNativeControlsEnabled() {
     return this.nativeControlsEnabled_;
+  }
+
+  /**
+   * @param {string} locale
+   * @return {!Promise}
+   * @private
+   */
+  async loadUILocale_(locale) {
+    if (!locale) {
+      return;
+    }
+    const url = '../ui/locales/' + locale + '.json';
+    const response = await fetch(url);
+    if (!response.ok) {
+      console.warn('Unable to load locale', locale);
+      return;
+    }
+
+    const obj = await response.json();
+    const map = new Map();
+    for (let key in obj) {
+      map.set(key, obj[key]);
+    }
+
+    const localization = this.controls_.getLocalization();
+    localization.insert(locale, map);
   }
 
   /** @param {string} locale */
