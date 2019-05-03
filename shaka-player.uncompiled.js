@@ -51,6 +51,7 @@ goog.require('shaka.polyfill.PatchedMediaKeysApple');
 goog.require('shaka.polyfill.PatchedMediaKeysMs');
 goog.require('shaka.polyfill.PatchedMediaKeysNop');
 goog.require('shaka.polyfill.PatchedMediaKeysWebkit');
+goog.require('shaka.polyfill.PiP');
 goog.require('shaka.polyfill.VTTCue');
 goog.require('shaka.polyfill.VideoPlayPromise');
 goog.require('shaka.polyfill.VideoPlaybackQuality');

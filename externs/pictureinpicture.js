@@ -42,3 +42,21 @@ HTMLMediaElement.prototype.requestPictureInPicture = function() {};
 
 /** @type {boolean} */
 HTMLMediaElement.prototype.disablePictureInPicture;
+
+
+/**
+ * @param {string} mode
+ * @return {boolean}
+ */
+HTMLMediaElement.prototype.webkitSetPresentationMode = function(mode) {};
+
+
+/**
+ * @param {string} mode
+ * @return {boolean}
+ */
+HTMLMediaElement.prototype.webkitSupportsPresentationMode = function(mode) {};
+
+
+/** @type {string} */
+HTMLMediaElement.prototype.webkitPresentationMode;
