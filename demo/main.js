@@ -24,28 +24,28 @@
 class ShakaDemoMain {
   constructor() {
     /** @private {HTMLMediaElement} */
-    this.video_;
+    this.video_ = null;
 
     /** @private {shaka.Player} */
-    this.player_;
+    this.player_ = null;
 
     /** @type {?ShakaDemoAssetInfo} */
-    this.selectedAsset;
+    this.selectedAsset = null;
 
-    /** @private {?shaka.extern.PlayerConfiguration} */
+    /** @private {shaka.extern.PlayerConfiguration} */
     this.defaultConfig_;
 
     /** @private {boolean} */
     this.fullyLoaded_ = false;
 
     /** @private {?shaka.ui.Controls} */
-    this.controls_;
+    this.controls_ = null;
 
     /** @private {boolean} */
     this.nativeControlsEnabled_ = false;
 
     /** @private {?shaka.offline.Storage} */
-    this.storage_;
+    this.storage_ = null;
 
     /** @private {shaka.extern.SupportType} */
     this.support_;
@@ -60,6 +60,18 @@ class ShakaDemoMain {
    * @private
    */
   initCommon_() {
+    // Display uncaught exceptions.  Note that this doesn't seem to work in IE.
+    // See ShakaDemoMain.initWrapper for a failsafe that works for init-time
+    // errors on IE.
+    window.addEventListener('error', (event) => {
+      // Exception to the exceptions we catch: ChromeVox (screenreader) always
+      // throws an error as of Chrome 73.  Screen these out since they are
+      // unrelated to our application and we can't control them.
+      if (event.message.includes('cvox.ApiImplementation')) return;
+
+      this.onError_(/** @type {!shaka.util.Error} */ (event.error));
+    });
+
     // Set up event listeners.
     document.getElementById('error-display-close-button').addEventListener(
         'click', (event) => this.closeError_());
@@ -223,6 +235,10 @@ class ShakaDemoMain {
    */
   async setupStorage_() {
     goog.asserts.assert(this.player_, 'Player must already be initialized.');
+    if (!shaka.offline.Storage.support()) {
+      return;
+    }
+
     this.storage_ = new shaka.offline.Storage(this.player_);
 
     const getIdentifierFromAsset = (asset) => {
@@ -257,12 +273,12 @@ class ShakaDemoMain {
           .pop();
       return [bestTrack];
     };
-    this.storage_.configure({offline: {
-      progressCallback: progressCallback,
-      trackSelectionCallback: trackSelectionCallback,
-    }});
-
-    // TODO: Add support for storing DRM-protected assets.
+    this.storage_.configure({
+      offline: {
+        progressCallback: progressCallback,
+        trackSelectionCallback: trackSelectionCallback,
+      },
+    });
 
     // Setup asset callbacks for storage.
     for (const asset of shakaAssets.testAssets) {
@@ -336,6 +352,10 @@ class ShakaDemoMain {
 
     if (needOffline && !asset.features.includes(shakaAssets.Feature.OFFLINE)) {
       return 'This asset cannot be downloaded.';
+    }
+
+    if (needOffline && !shaka.offline.Storage.support()) {
+      return 'Your browser does not support offline storage.';
     }
 
     if (!asset.drm.includes(shakaAssets.KeySystem.CLEAR)) {
@@ -500,7 +520,7 @@ class ShakaDemoMain {
 
     // Check if uncompiled mode is supported.
     if (!ShakaDemoUtils.browserSupportsUncompiledMode()) {
-      const uncompiledLink = document.getElementById('uncompiled_link');
+      const uncompiledLink = document.getElementById('uncompiled-link');
       uncompiledLink.setAttribute('disabled', '');
       uncompiledLink.removeAttribute('href');
       uncompiledLink.title = 'requires a newer browser';
@@ -681,7 +701,8 @@ class ShakaDemoMain {
     const manifestUri = (asset.storedContent ?
                          asset.storedContent.offlineUri :
                          null) || asset.manifestUri;
-    this.player_.load(manifestUri).then(() => {
+    try {
+      await this.player_.load(manifestUri);
       // Now that something is loaded, enable controls.
       if (this.nativeControlsEnabled_) {
         this.controls_.setEnabledShakaControls(false);
@@ -693,9 +714,9 @@ class ShakaDemoMain {
       if (this.player_.isAudioOnly()) {
         this.video_.poster = ShakaDemoMain.audioOnlyPoster_;
       }
-    }).catch((error) => {
+    } catch (error) {
       this.onError_(/** @type {!shaka.util.Error} */ (error));
-    });
+    }
   }
 
   /** Remakes the location's hash. */
@@ -941,6 +962,7 @@ class ShakaDemoMain {
       href = '../docs/api/shaka.util.Error.html#value:' + error.code;
     }
 
+    console.error(error);
     this.handleError_(severity, message, href);
   }
 
@@ -1003,6 +1025,26 @@ ShakaDemoMain.audioOnlyPoster_ =
     'https://shaka-player-demo.appspot.com/assets/audioOnly.gif';
 
 
-document.addEventListener('shaka-ui-loaded', () => shakaDemoMain.init());
-document.addEventListener('shaka-ui-load-failed',
-                          () => shakaDemoMain.initFailed());
+// If setup fails and the global error handler does, too, (as happened on IE
+// right before the launch of this demo), at least log that error to the console
+// for debugging.  Wrap init functions in an async function with a try/catch to
+// make sure no error goes unseen when debugging.
+/**
+ * @param {function()} initFn
+ * @return {!Promise}
+ * @suppress {accessControls}
+ */
+ShakaDemoMain.initWrapper = async (initFn) => {
+  try {
+    await initFn();
+  } catch (error) {
+    shakaDemoMain.onError_(error);
+    console.error(error);
+  }
+};
+document.addEventListener('shaka-ui-loaded', () => {
+  ShakaDemoMain.initWrapper(() => shakaDemoMain.init());
+});
+document.addEventListener('shaka-ui-load-failed', (event) => {
+  ShakaDemoMain.initWrapper(() => shakaDemoMain.initFailed());
+});
