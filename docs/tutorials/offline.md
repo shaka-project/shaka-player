@@ -132,7 +132,11 @@ function onError(error) {
 }
 
 function selectTracks(tracks) {
-  // Store the highest bandwidth variant.
+  // This example stores the highest bandwidth variant.
+  //
+  // Note that this is just an example of an arbitrary algorithm, and not a best
+  // practice for storing content offline.  Decide what your app needs, or keep
+  // the default (user-pref-matching audio, best SD video, all text).
   var found = tracks
       .filter(function(track) { return track.type == 'variant'; })
       .sort(function(a, b) { return a.bandwidth - b.bandwidth; })
@@ -484,7 +488,11 @@ function onError(error) {
 }
 
 function selectTracks(tracks) {
-  // Store the highest bandwidth variant.
+  // This example stores the highest bandwidth variant.
+  //
+  // Note that this is just an example of an arbitrary algorithm, and not a best
+  // practice for storing content offline.  Decide what your app needs, or keep
+  // the default (user-pref-matching audio, best SD video, all text).
   var found = tracks
       .filter(function(track) { return track.type == 'variant'; })
       .sort(function(a, b) { return a.bandwidth - b.bandwidth; })
