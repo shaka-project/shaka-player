@@ -18,6 +18,7 @@
 
 goog.provide('shaka.ui.OverflowMenu');
 
+goog.require('goog.asserts');
 goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
@@ -44,7 +45,7 @@ goog.require('shaka.util.Dom');
     /** @private {!shaka.extern.UIConfiguration} */
     this.config_ = this.controls.getConfig();
 
-    /** @private {!HTMLElement} */
+    /** @private {HTMLElement} */
     this.controlsContainer_ = this.controls.getControlsContainer();
 
     /** @private {!Array.<shaka.extern.IUIElement>} */
@@ -124,7 +125,12 @@ goog.require('shaka.util.Dom');
 
   /** @override */
   async destroy() {
+    this.controlsContainer_ = null;
+
     await Promise.all(this.children_.map((child) => child.destroy()));
+    this.children_ = [];
+
+    await super.destroy();
   }
 
   /**
@@ -175,6 +181,7 @@ goog.require('shaka.util.Dom');
       if (shaka.ui.OverflowMenu.elementNamesToFactories_.get(name)) {
         const factory =
             shaka.ui.OverflowMenu.elementNamesToFactories_.get(name);
+        goog.asserts.assert(this.controls, 'Controls should not be null!');
         this.children_.push(factory.create(this.overflowMenu_, this.controls));
       }
     }

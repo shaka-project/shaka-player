@@ -208,6 +208,7 @@ shaka.ui.Controls.prototype.destroy = async function() {
   this.pressedKeys_.clear();
 
   await Promise.all(this.elements_.map((element) => element.destroy()));
+  this.elements_ = [];
 };
 
 

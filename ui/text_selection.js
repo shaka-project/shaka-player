@@ -245,7 +245,9 @@ shaka.ui.TextSelection = class extends shaka.ui.Element {
    */
   async onTextLanguageSelected_(language) {
     await this.player.setTextTrackVisibility(true);
-    this.player.selectTextLanguage(language);
+    if (this.player) {  // May have become null while awaiting
+      this.player.selectTextLanguage(language);
+    }
   }
 
 

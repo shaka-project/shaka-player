@@ -32,10 +32,10 @@ shaka.ui.Element = class {
    * @param {!shaka.ui.Controls} controls
    */
   constructor(parent, controls) {
-    /** @protected {!HTMLElement} */
+    /** @protected {HTMLElement} */
     this.parent = parent;
 
-    /** @protected {!shaka.ui.Controls} */
+    /** @protected {shaka.ui.Controls} */
     this.controls = controls;
 
     /** @protected {shaka.util.EventManager} */
@@ -57,6 +57,14 @@ shaka.ui.Element = class {
    */
   destroy() {
     this.eventManager.release();
+
+    this.parent = null;
+    this.controls = null;
+    this.eventManager = null;
+    this.localization = null;
+    this.player = null;
+    this.video = null;
+
     return Promise.resolve();
   }
 };
