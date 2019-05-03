@@ -234,6 +234,7 @@ requirement: {
                  'document.createEvent(\'CustomEvent\') to create an event and '
                  'event.initCustomEvent(\'my-event-type\') to initialize it.'
   whitelist_regexp: 'lib/polyfill/patchedmediakeys_apple.js'
+  whitelist_regexp: 'lib/polyfill/pip_webkit.js'
 }
 
 
