@@ -77,9 +77,9 @@ describe('Enforcer', () => {
    * @return {!shaka.deprecate.Enforcer}
    */
   function createEnforcerFor(currentVersion) {
-    const spyFunc = shaka.test.Util.spyFunc;
+    const Util = shaka.test.Util;
 
     return new Enforcer(
-        currentVersion, spyFunc(onPendingSpy), spyFunc(onExpiredSpy));
+        currentVersion, Util.spyFunc(onPendingSpy), Util.spyFunc(onExpiredSpy));
   }
 });

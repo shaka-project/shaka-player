@@ -280,7 +280,7 @@ describe('Storage', function() {
   });
 
   describe('default track selection callback', function() {
-    const select = shaka.util.PlayerConfiguration.defaultTrackSelect;
+    const PlayerConfiguration = shaka.util.PlayerConfiguration;
 
     it('selects the largest SD video with middle quality audio', function() {
       const tracks = [
@@ -292,7 +292,7 @@ describe('Storage', function() {
         variantTrack(5, 1080, englishUS, 4 * kbps),
       ];
 
-      let selected = select(tracks, englishUS);
+      let selected = PlayerConfiguration.defaultTrackSelect(tracks, englishUS);
       expect(selected).toBeTruthy();
       expect(selected.length).toBe(1);
       expect(selected[0]).toBeTruthy();
@@ -307,7 +307,7 @@ describe('Storage', function() {
         textTrack(1, frenchCanadian),
       ];
 
-      let selected = select(tracks, englishUS);
+      let selected = PlayerConfiguration.defaultTrackSelect(tracks, englishUS);
       expect(selected).toBeTruthy();
       expect(selected.length).toBe(2);
       tracks.forEach((track) => {
@@ -323,7 +323,7 @@ describe('Storage', function() {
           variantTrack(2, 480, 'eng-ca', 1 * kbps),
         ];
 
-        let selected = select(tracks, 'eng-us');
+        let selected = PlayerConfiguration.defaultTrackSelect(tracks, 'eng-us');
         expect(selected).toBeTruthy();
         expect(selected.length).toBe(1);
         expect(selected[0]).toBeTruthy();
@@ -338,7 +338,7 @@ describe('Storage', function() {
           variantTrack(3, 480, 'eng', 1 * kbps),
         ];
 
-        let selected = select(tracks, 'eng');
+        let selected = PlayerConfiguration.defaultTrackSelect(tracks, 'eng');
         expect(selected).toBeTruthy();
         expect(selected.length).toBe(1);
         expect(selected[0]).toBeTruthy();
@@ -352,7 +352,7 @@ describe('Storage', function() {
           variantTrack(2, 480, 'eng-ca', 1 * kbps),
         ];
 
-        let selected = select(tracks, 'fr');
+        let selected = PlayerConfiguration.defaultTrackSelect(tracks, 'fr');
         expect(selected).toBeTruthy();
         expect(selected.length).toBe(1);
         expect(selected[0]).toBeTruthy();
@@ -366,7 +366,7 @@ describe('Storage', function() {
           variantTrack(2, 480, 'eng-ca', 1 * kbps),
         ];
 
-        let selected = select(tracks, 'fr-uk');
+        let selected = PlayerConfiguration.defaultTrackSelect(tracks, 'fr-uk');
         expect(selected).toBeTruthy();
         expect(selected.length).toBe(1);
         expect(selected[0]).toBeTruthy();
@@ -382,7 +382,7 @@ describe('Storage', function() {
 
         tracks[0].primary = true;
 
-        let selected = select(tracks, 'de');
+        let selected = PlayerConfiguration.defaultTrackSelect(tracks, 'de');
         expect(selected).toBeTruthy();
         expect(selected.length).toBe(1);
         expect(selected[0]).toBeTruthy();

@@ -17,8 +17,6 @@
 
 describe('UI', () => {
   const Util = shaka.test.Util;
-  const asHTMLElement = shaka.util.Dom.asHTMLElement;
-  const getElementByClassName = shaka.util.Dom.getElementByClassName;
 
   /** @type {!jasmine.Spy} */
   let onErrorSpy;
@@ -121,7 +119,7 @@ describe('UI', () => {
       beforeEach(() => {
         oldLanguage = 'en';
         newLanguage = 'es';
-        languageMenu = getElementByClassName(
+        languageMenu = shaka.util.Dom.getElementByClassName(
             'shaka-audio-languages', videoContainer);
         setupLanguageTests(player.getAudioLanguagesAndRoles());
       });
@@ -145,7 +143,7 @@ describe('UI', () => {
       beforeEach(() => {
         oldLanguage = 'zh';
         newLanguage = 'fr';
-        languageMenu = getElementByClassName(
+        languageMenu = shaka.util.Dom.getElementByClassName(
             'shaka-text-languages', videoContainer);
         setupLanguageTests(player.getTextLanguagesAndRoles());
       });
@@ -202,12 +200,12 @@ describe('UI', () => {
         const offButtons =
           shaka.util.Iterables.filter(languageMenu.childNodes,
           (node) => {
-            const button = asHTMLElement(node);
+            const button = shaka.util.Dom.asHTMLElement(node);
             return button.classList.contains('shaka-turn-captions-off-button');
           });
 
         expect(offButtons.length).toBe(1);
-        return asHTMLElement(offButtons[0]);
+        return shaka.util.Dom.asHTMLElement(offButtons[0]);
       }
     });
 
@@ -334,7 +332,7 @@ describe('UI', () => {
       player.selectAudioLanguage(preferredLanguage);
       await waitForEvent(player, 'variantchanged');
 
-      resolutionsMenu = getElementByClassName(
+      resolutionsMenu = shaka.util.Dom.getElementByClassName(
           'shaka-resolutions', videoContainer);
 
       updateResolutionButtonsAndMap();
@@ -450,7 +448,7 @@ describe('UI', () => {
 
     it('restores the resolutions menu after audio-only playback', async () => {
       /** @type {HTMLElement} */
-      const resolutionButton = getElementByClassName(
+      const resolutionButton = shaka.util.Dom.getElementByClassName(
           'shaka-resolution-button', videoContainer);
 
       // Load an audio-only clip.  The menu should be hidden.
@@ -580,7 +578,7 @@ describe('UI', () => {
   function filterButtons(buttons, excludeClasses) {
     return shaka.util.Iterables.filter(buttons,
         (node) => {
-          const button = asHTMLElement(node);
+          const button = shaka.util.Dom.asHTMLElement(node);
           for (const excludeClass of excludeClasses) {
             if (button.classList.contains(excludeClass)) {
               return false;
