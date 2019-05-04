@@ -329,22 +329,22 @@ class ShakaDemoCustom {
    */
   createAssetCardFor_(asset) {
     const savedList = this.savedList_;
-    const card = new AssetCard(savedList, asset, /* isFeatured = */ false);
-    card.addButton('Play', () => {
-      shakaDemoMain.loadAsset(asset);
-      this.updateSelected_();
+    return new AssetCard(savedList, asset, /* isFeatured = */ false, (c) => {
+      c.addButton('Play', () => {
+        shakaDemoMain.loadAsset(asset);
+        this.updateSelected_();
+      });
+      // TODO: Add offline support.
+      // TODO: Be sure to un-store if the asset is deleted or edited.
+      c.addButton('Edit', () => {
+        this.showAssetDialog_(asset);
+      });
+      c.addButton('Delete', () => {
+        this.assets_.delete(asset);
+        this.saveAssetInfos_(this.assets_);
+        this.remakeSavedList_();
+      });
     });
-    // TODO: Add offline support.
-    // TODO: Be sure to un-store if the asset is deleted or edited.
-    card.addButton('Edit', () => {
-      this.showAssetDialog_(asset);
-    });
-    card.addButton('Delete', () => {
-      this.assets_.delete(asset);
-      this.saveAssetInfos_(this.assets_);
-      this.remakeSavedList_();
-    });
-    return card;
   }
 
   /**

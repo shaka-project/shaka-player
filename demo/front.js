@@ -114,19 +114,19 @@ class ShakaDemoFront {
    * @private
    */
   createAssetCardFor_(asset, container) {
-    const card = new AssetCard(container, asset, /* isFeatured = */ true);
-    const unsupportedReason = shakaDemoMain.getAssetUnsupportedReason(
-        asset, /* needOffline= */ false);
-    if (unsupportedReason) {
-      card.markAsUnsupported(unsupportedReason);
-    } else {
-      card.addButton('Play', () => {
-        shakaDemoMain.loadAsset(asset);
-        this.updateSelected_();
-      });
-      card.addStoreButton();
-    }
-    return card;
+    return new AssetCard(container, asset, /* isFeatured = */ true, (c) => {
+      const unsupportedReason = shakaDemoMain.getAssetUnsupportedReason(
+          asset, /* needOffline= */ false);
+      if (unsupportedReason) {
+        c.markAsUnsupported(unsupportedReason);
+      } else {
+        c.addButton('Play', () => {
+          shakaDemoMain.loadAsset(asset);
+          this.updateSelected_();
+        });
+        c.addStoreButton();
+      }
+    });
   }
 
   /**
@@ -135,7 +135,7 @@ class ShakaDemoFront {
    */
   updateOfflineProgress_() {
     for (const card of this.assetCards_) {
-      card.updateProgress();
+      card.remakeButtons();
     }
   }
 

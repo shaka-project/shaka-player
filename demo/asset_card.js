@@ -26,8 +26,9 @@ class AssetCard {
    * @param {!ShakaDemoAssetInfo} asset
    * @param {boolean} isFeatured True if this card should use the "featured"
    *   style, which use the asset's short name and have descriptions.
+   * @param {function(!AssetCard)} remakeButtonsFn
    */
-  constructor(parentDiv, asset, isFeatured) {
+  constructor(parentDiv, asset, isFeatured, remakeButtonsFn) {
     /** @private {!Element} */
     this.card_ = document.createElement('div');
     /** @private {!ShakaDemoAssetInfo} */
@@ -38,6 +39,8 @@ class AssetCard {
     this.featureIconsContainer_ = document.createElement('div');
     /** @private {!Element} */
     this.progressBar_ = document.createElement('progress');
+    /** @private {function(!AssetCard)} */
+    this.remakeButtonsFn_ = remakeButtonsFn;
 
     // Lay out the card.
     this.card_.classList.add('mdl-card-wide');
@@ -73,6 +76,7 @@ class AssetCard {
     this.actions_.classList.add('mdl-card__actions');
     this.actions_.classList.add('mdl-card--border');
     this.card_.appendChild(this.actions_);
+    this.remakeButtons();
 
     const progressContainer = document.createElement('div');
     this.progressBar_.classList.add('hidden');
@@ -189,6 +193,13 @@ class AssetCard {
     }
   }
 
+  /** Remake the buttons of the card. */
+  remakeButtons() {
+    shaka.ui.Utils.removeAllChildren(this.actions_);
+    this.remakeButtonsFn_(this);
+    this.updateProgress_();
+  }
+
   /**
    * Adds a button to the bottom of the card that controls storage behavior.
    * This is a separate function because it involves a significant amount of
@@ -213,8 +224,11 @@ class AssetCard {
     }
   }
 
-  /** Updates the progress bar on the card. */
-  updateProgress() {
+  /**
+   * Updates the progress bar on the card.
+   * @private
+   */
+  updateProgress_() {
     if (this.asset_.storedProgress < 1) {
       this.progressBar_.classList.remove('hidden');
       for (const button of this.actions_.childNodes) {

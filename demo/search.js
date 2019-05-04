@@ -71,19 +71,19 @@ class ShakaDemoSearch {
    */
   createAssetCardFor_(asset) {
     const resultsDiv = this.resultsDiv_;
-    const card = new AssetCard(resultsDiv, asset, /* isFeatured = */ false);
-    const unsupportedReason = shakaDemoMain.getAssetUnsupportedReason(
-        asset, /* needOffline= */ false);
-    if (unsupportedReason) {
-      card.markAsUnsupported(unsupportedReason);
-    } else {
-      card.addButton('Play', () => {
-        shakaDemoMain.loadAsset(asset);
-        this.updateSelected_();
-      });
-      card.addStoreButton();
-    }
-    return card;
+    return new AssetCard(resultsDiv, asset, /* isFeatured = */ false, (c) => {
+      const unsupportedReason = shakaDemoMain.getAssetUnsupportedReason(
+          asset, /* needOffline= */ false);
+      if (unsupportedReason) {
+        c.markAsUnsupported(unsupportedReason);
+      } else {
+        c.addButton('Play', () => {
+          shakaDemoMain.loadAsset(asset);
+          this.updateSelected_();
+        });
+        c.addStoreButton();
+      }
+    });
   }
 
   /**
@@ -92,7 +92,7 @@ class ShakaDemoSearch {
    */
   updateOfflineProgress_() {
     for (const card of this.assetCards_) {
-      card.updateProgress();
+      card.remakeButtons();
     }
   }
 
