@@ -62,6 +62,11 @@ class ShakaDemoFront {
 
   /** @private */
   makeMessage_() {
+    const hideName = 'shakaPlayerHideFrontMessage';
+    if (window.localStorage.getItem(hideName)) {
+      return;
+    }
+
     // Add in a message telling you what to do.
     const makeMessage = (textClass, text) => {
       const textElement = document.createElement('h2');
@@ -76,6 +81,18 @@ class ShakaDemoFront {
     makeMessage('body-1',
                 'Choose a video to playback; more assets are available via ' +
                 'the search tab.');
+
+    const hideButton = document.createElement('button');
+    hideButton.classList.add('mdl-button');
+    hideButton.classList.add('mdl-button--colored');
+    hideButton.classList.add('mdl-js-button');
+    hideButton.classList.add('mdl-js-ripple-effect');
+    hideButton.textContent = 'Dismiss'; // TODO: localize
+    hideButton.addEventListener('click', () => {
+      shaka.ui.Utils.removeAllChildren(this.messageDiv_);
+      window.localStorage.setItem(hideName, 'true');
+    });
+    this.messageDiv_.appendChild(hideButton);
   }
 
   /** @private */
