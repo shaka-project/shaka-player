@@ -346,7 +346,9 @@ footer .mdl-mega-footer__link-list {
   padding-top: 1em;
 }
 
-#video-container {
+/* This is an id rather than a class so that it will consistently be applied
+ * before UI CSS values on all platforms. */
+.video-container {
   /* Fixed width, but height will expand based on video aspect ratio.
    * Does not affect fullscreen size. */
   width: 640px;
