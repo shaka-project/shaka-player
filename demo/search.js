@@ -59,9 +59,6 @@ class ShakaDemoSearch {
     document.addEventListener('shaka-main-offline-progress', () => {
       this.updateOfflineProgress_();
     });
-    document.addEventListener('shaka-main-offline-changed', () => {
-      this.remakeResultsDiv_();
-    });
   }
 
   /**
@@ -92,7 +89,7 @@ class ShakaDemoSearch {
    */
   updateOfflineProgress_() {
     for (const card of this.assetCards_) {
-      card.remakeButtons();
+      card.updateProgress();
     }
   }
 

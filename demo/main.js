@@ -42,13 +42,10 @@ class ShakaDemoMain {
     this.controls_ = null;
 
     /** @private {?Array.<shaka.extern.StoredContent>} */
-    this.storedList_;
+    this.initialStoredList_;
 
     /** @private {boolean} */
     this.nativeControlsEnabled_ = false;
-
-    /** @private {?shaka.offline.Storage} */
-    this.storage_ = null;
 
     /** @private {shaka.extern.SupportType} */
     this.support_;
@@ -182,8 +179,8 @@ class ShakaDemoMain {
     // Get default config.
     this.defaultConfig_ = this.player_.getConfiguration();
     const languages = navigator.languages || ['en-us'];
-    this.configure('preferredAudioLanguage', languages[0]);
-    this.configure('preferredTextLanguage', languages[0]);
+    this.player_.configure('preferredAudioLanguage', languages[0]);
+    this.player_.configure('preferredTextLanguage', languages[0]);
     this.uiLocale_ = languages[0];
     // TODO(#1591): Support multiple language preferences
 
@@ -257,71 +254,21 @@ class ShakaDemoMain {
   }
 
   /**
-   * Attaches callbacks to an asset so that it can be downloaded online.
-   * This method does not verify whether storage is or is not possible.
-   * @param {!ShakaDemoAssetInfo} asset
-   */
-  setupOfflineCallbacks(asset) {
-    asset.storeCallback = async () => {
-      await this.drmConfiguration_(asset);
-      const metadata = {
-        'identifier': this.getIdentifierFromAsset_(asset),
-        'downloaded': new Date(),
-      };
-      asset.storedProgress = 0;
-      this.dispatchEventWithName_('shaka-main-offline-progress');
-      const stored = await this.storage_.store(asset.manifestUri, metadata);
-      asset.storedContent = stored;
-      this.dispatchEventWithName_('shaka-main-offline-changed');
-      // Update the componentHandler, to account for any new MDL elements
-      // added.
-      componentHandler.upgradeDom();
-    };
-    asset.unstoreCallback = async () => {
-      if (asset == this.selectedAsset) {
-        this.unload();
-      }
-      if (asset.storedContent && asset.storedContent.offlineUri) {
-        asset.storedProgress = 0;
-        this.dispatchEventWithName_('shaka-main-offline-progress');
-        await this.storage_.remove(asset.storedContent.offlineUri);
-        asset.storedContent = null;
-        this.dispatchEventWithName_('shaka-main-offline-changed');
-        // Update the componentHandler, to account for any new MDL elements
-        // added.
-        componentHandler.upgradeDom();
-      }
-    };
-  }
-
-  /**
-   * If an asset has an associated offline version, load it with that info.
-   * @param {!ShakaDemoAssetInfo} asset
-   */
-  loadOfflineVersion(asset) {
-    goog.asserts.assert(this.storedList_,
-                        'Storage must already be initialized.');
-
-    for (const storedContent of this.storedList_) {
-      const identifier = storedContent.appMetadata['identifier'];
-      if (this.getIdentifierFromAsset_(asset) == identifier) {
-        asset.storedContent = storedContent;
-      }
-    }
-  }
-
-  /**
-   * @return {!Promise}
+   * Creates a storage instance.
+   * If and only if storage is not available, this will return null.
+   * These storage instances are meant to be used once and then destroyed, using
+   * the |Storage.destroy| method.
+   * @return {?shaka.offline.Storage}
    * @private
    */
-  async setupStorage_() {
-    goog.asserts.assert(this.player_, 'Player must already be initialized.');
+  makeStorageInstance_() {
     if (!shaka.offline.Storage.support()) {
-      return;
+      return null;
     }
 
-    this.storage_ = new shaka.offline.Storage(this.player_);
+    const storage = new shaka.offline.Storage();
 
+    // Set the progress callback;
     const getAssetWithIdentifier = (identifier) => {
       for (const asset of shakaAssets.testAssets) {
         if (this.getIdentifierFromAsset_(asset) == identifier) {
@@ -337,7 +284,6 @@ class ShakaDemoMain {
       }
       return null;
     };
-
     const progressCallback = (content, progress) => {
       const identifier = content.appMetadata['identifier'];
       const asset = getAssetWithIdentifier(identifier);
@@ -346,32 +292,106 @@ class ShakaDemoMain {
         this.dispatchEventWithName_('shaka-main-offline-progress');
       }
     };
-    this.storage_.configure({
+    storage.configure({
       offline: {
         progressCallback: progressCallback,
       },
     });
 
-    // Setup asset callbacks for storage.
+    return storage;
+  }
+
+  /**
+   * Attaches callbacks to an asset so that it can be downloaded online.
+   * This method does not verify whether storage is or is not possible.
+   * Also, if an asset has an associated offline version, load it with that
+   * info.
+   * @param {!ShakaDemoAssetInfo} asset
+   */
+  setupOfflineSupport(asset) {
+    goog.asserts.assert(this.initialStoredList_,
+                        'Storage must already be initialized.');
+
+    for (const storedContent of this.initialStoredList_) {
+      const identifier = storedContent.appMetadata['identifier'];
+      if (this.getIdentifierFromAsset_(asset) == identifier) {
+        asset.storedContent = storedContent;
+      }
+    }
+
+    asset.storeCallback = async () => {
+      const storage = this.makeStorageInstance_();
+      if (!storage) {
+        return;
+      }
+      try {
+        await this.drmConfiguration_(asset, storage);
+        const metadata = {
+          'identifier': this.getIdentifierFromAsset_(asset),
+          'downloaded': new Date(),
+        };
+        asset.storedProgress = 0;
+        this.dispatchEventWithName_('shaka-main-offline-progress');
+        const stored = await storage.store(asset.manifestUri, metadata);
+        asset.storedContent = stored;
+      } catch (error) {
+        this.onError_(/** @type {!shaka.util.Error} */ (error));
+        asset.storedContent = null;
+      }
+      storage.destroy();
+      asset.storedProgress = 1;
+      this.dispatchEventWithName_('shaka-main-offline-progress');
+    };
+
+    asset.unstoreCallback = async () => {
+      if (asset == this.selectedAsset) {
+        this.unload();
+      }
+      if (asset.storedContent && asset.storedContent.offlineUri) {
+        const storage = this.makeStorageInstance_();
+        if (!storage) {
+          return;
+        }
+        try {
+          asset.storedProgress = 0;
+          this.dispatchEventWithName_('shaka-main-offline-progress');
+          await storage.remove(asset.storedContent.offlineUri);
+          asset.storedContent = null;
+        } catch (error) {
+          this.onError_(/** @type {!shaka.util.Error} */ (error));
+          // Presumably, if deleting the asset fails, it still exists?
+        }
+        storage.destroy();
+        asset.storedProgress = 1;
+        this.dispatchEventWithName_('shaka-main-offline-progress');
+      }
+    };
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  async setupStorage_() {
+    // Load stored asset infos.
+    const storage = this.makeStorageInstance_();
+    if (!storage) {
+      return;
+    }
+    try {
+      this.initialStoredList_ = await storage.list();
+    } finally {
+      storage.destroy();
+    }
+
+    // Setup asset callbacks for storage, for the test assets.
     for (const asset of shakaAssets.testAssets) {
       if (this.getAssetUnsupportedReason(asset, /* needOffline= */ true)) {
         // Don't bother setting up the callbacks.
         continue;
       }
 
-      this.setupOfflineCallbacks(asset);
-    }
-
-    // Load stored asset infos.
-    this.storedList_ = await this.storage_.list();
-    if (this.storedList_) {
-      for (const storedContent of this.storedList_) {
-        const identifier = storedContent.appMetadata['identifier'];
-        const asset = getAssetWithIdentifier(identifier);
-        if (asset) {
-          asset.storedContent = storedContent;
-        }
-      }
+      this.setupOfflineSupport(asset);
     }
   }
 
@@ -538,7 +558,7 @@ class ShakaDemoMain {
             value = parseFloat(value);
           }
 
-          this.configure(configName, value);
+          this.player_.configure(configName, value);
         }
       };
       const config = this.player_.getConfiguration();
@@ -547,8 +567,8 @@ class ShakaDemoMain {
     if ('lang' in params) {
       // Load the legacy 'lang' hash value.
       const lang = params['lang'];
-      this.configure('preferredAudioLanguage', lang);
-      this.configure('preferredTextLanguage', lang);
+      this.player_.configure('preferredAudioLanguage', lang);
+      this.player_.configure('preferredTextLanguage', lang);
       this.setUILocale(lang);
     }
     if ('uilang' in params) {
@@ -556,10 +576,10 @@ class ShakaDemoMain {
       // TODO(#1591): Support multiple language preferences
     }
     if ('noadaptation' in params) {
-      this.configure('abr.enabled', false);
+      this.player_.configure('abr.enabled', false);
     }
     if ('jumpLargeGaps' in params) {
-      this.configure('streaming.jumpLargeGaps', true);
+      this.player_.configure('streaming.jumpLargeGaps', true);
     }
 
     // Add compiled/uncompiled links.
@@ -694,11 +714,11 @@ class ShakaDemoMain {
 
   /**
    * @param {string} uri
+   * @param {!shaka.net.NetworkingEngine} netEngine
    * @return {!Promise.<ArrayBuffer>}
    * @private
    */
-  async requestCertificate_(uri) {
-    const netEngine = this.player_.getNetworkingEngine();
+  async requestCertificate_(uri, netEngine) {
     const requestType = shaka.net.NetworkingEngine.RequestType.APP;
     const request = /** @type {shaka.extern.Request} */ ({uris: [uri]});
     const response = await netEngine.request(requestType, request).promise;
@@ -720,23 +740,35 @@ class ShakaDemoMain {
 
   /**
    * @param {ShakaDemoAssetInfo} asset
+   * @param {shaka.offline.Storage=} storage
    * @return {!Promise}
    * @private
    */
-  async drmConfiguration_(asset) {
-    asset.applyFilters(this.player_.getNetworkingEngine());
+  async drmConfiguration_(asset, storage) {
+    const netEngine = storage ?
+                      storage.getNetworkingEngine() :
+                      this.player_.getNetworkingEngine();
+    goog.asserts.assert(netEngine, 'There should be a net engine.');
+    asset.applyFilters(netEngine);
+
     const assetConfig = asset.getConfiguration();
-    for (let section in assetConfig) {
-      this.configure(section, assetConfig[section]);
+    if (storage) {
+      storage.configure(assetConfig);
+    } else {
+      this.player_.resetConfiguration();
+      this.player_.configure(assetConfig);
     }
 
-    const config = this.player_.getConfiguration();
+    const config = storage ?
+                   storage.getConfiguration() :
+                   this.player_.getConfiguration();
 
     // Change the config's serverCertificate fields based on
     // asset.certificateUri.
     if (asset.certificateUri) {
       // Fetch the certificate, and apply it to the configuration.
-      const certificate = await this.requestCertificate_(asset.certificateUri);
+      const certificate = await this.requestCertificate_(
+          asset.certificateUri, netEngine);
       const certArray = new Uint8Array(certificate);
       for (const drmSystem of asset.licenseServers.keys()) {
         config.drm.advanced[drmSystem].serverCertificate = certArray;
@@ -750,7 +782,11 @@ class ShakaDemoMain {
       }
     }
 
-    this.configure('drm.advanced', config.drm.advanced);
+    if (storage) {
+      storage.configure(config);
+    } else {
+      this.player_.configure('drm.advanced', config.drm.advanced);
+    }
     shakaDemoMain.remakeHash();
   }
 

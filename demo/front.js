@@ -55,9 +55,6 @@ class ShakaDemoFront {
     document.addEventListener('shaka-main-offline-progress', () => {
       this.updateOfflineProgress_();
     });
-    document.addEventListener('shaka-main-offline-changed', () => {
-      this.remakeAssetCards_();
-    });
   }
 
   /** @private */
@@ -135,7 +132,7 @@ class ShakaDemoFront {
    */
   updateOfflineProgress_() {
     for (const card of this.assetCards_) {
-      card.remakeButtons();
+      card.updateProgress();
     }
   }
 

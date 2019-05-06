@@ -197,7 +197,6 @@ class AssetCard {
   remakeButtons() {
     shaka.ui.Utils.removeAllChildren(this.actions_);
     this.remakeButtonsFn_(this);
-    this.updateProgress_();
   }
 
   /**
@@ -214,21 +213,24 @@ class AssetCard {
       return;
     }
     if (this.asset_.isStored()) {
-      this.addButton('Delete', async () => {
+      const deleteButton = this.addButton('Delete', async () => {
+        deleteButton.disabled = true;
         await this.asset_.unstoreCallback();
+        this.remakeButtons();
       });
     } else {
-      this.addButton('Download', async () => {
+      const downloadButton = this.addButton('Download', async () => {
+        downloadButton.disabled = true;
         await this.asset_.storeCallback();
+        this.remakeButtons();
       });
     }
   }
 
   /**
    * Updates the progress bar on the card.
-   * @private
    */
-  updateProgress_() {
+  updateProgress() {
     if (this.asset_.storedProgress < 1) {
       this.progressBar_.classList.remove('hidden');
       for (const button of this.actions_.childNodes) {

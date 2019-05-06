@@ -67,9 +67,6 @@ class ShakaDemoCustom {
     document.addEventListener('shaka-main-offline-progress', () => {
       this.updateOfflineProgress_();
     });
-    document.addEventListener('shaka-main-offline-changed', () => {
-      this.remakeSavedList_();
-    });
   }
 
   /** @return {!Array.<!ShakaDemoAssetInfo>} */
@@ -83,7 +80,7 @@ class ShakaDemoCustom {
    */
   updateOfflineProgress_() {
     for (const card of this.assetCards_) {
-      card.remakeButtons();
+      card.updateProgress();
     }
   }
 
@@ -277,7 +274,7 @@ class ShakaDemoCustom {
           return;
         }
       }
-      shakaDemoMain.setupOfflineCallbacks(assetInProgress);
+      shakaDemoMain.setupOfflineSupport(assetInProgress);
       this.assets_.add(assetInProgress);
       this.saveAssetInfos_(this.assets_);
       this.remakeSavedList_();
@@ -305,8 +302,7 @@ class ShakaDemoCustom {
       const assets = JSON.parse(savedString);
       return new Set(assets.map((json) => {
         const asset = ShakaDemoAssetInfo.fromJSON(json);
-        shakaDemoMain.setupOfflineCallbacks(asset);
-        shakaDemoMain.loadOfflineVersion(asset);
+        shakaDemoMain.setupOfflineSupport(asset);
         return asset;
       }));
     }
