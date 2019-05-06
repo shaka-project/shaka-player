@@ -128,13 +128,16 @@ describe('UI', () => {
         verifyLanguages();
       });
 
-      it('choosing language through UI has effect on player', () => {
-        verifyLanguageChangeViaUI('variantchanged', player.getVariantTracks());
+      it('choosing language through UI has effect on player', async () => {
+        await verifyLanguageChangeViaUI(
+            'variantchanged', () => player.getVariantTracks());
       });
 
-      it('choosing language through API has effect on UI', () => {
-        verifyLanguageChangeViaAPI(
-            'languageselectionupdated', player.getVariantTracks());
+      it('choosing language through API has effect on UI', async () => {
+        await verifyLanguageChangeViaAPI(
+            'languageselectionupdated',
+            () => player.getVariantTracks(),
+            (language) => player.selectAudioLanguage(language));
       });
     });
 
@@ -152,13 +155,22 @@ describe('UI', () => {
         verifyLanguages();
       });
 
-      it('choosing caption language through UI has effect on player', () => {
-        verifyLanguageChangeViaUI('textchanged', player.getTextTracks());
+      it('choosing caption language through UI has effect on player',
+          async () => {
+        await verifyLanguageChangeViaUI(
+            'textchanged', () => player.getTextTracks());
       });
 
-      it('choosing language through API has effect on UI', () => {
-        verifyLanguageChangeViaAPI(
-            'captionselectionupdated', player.getTextTracks());
+      it('choosing language through API has effect on UI', async () => {
+        // Enable & verify the text, or else the text won't be streamed and the
+        // language selection won't do anything.
+        await player.setTextTrackVisibility(true);
+        expect(player.isTextTrackVisible()).toBe(true);
+
+        await verifyLanguageChangeViaAPI(
+            'captionselectionupdated',
+            () => player.getTextTracks(),
+            (language) => player.selectTextLanguage(language));
       });
 
       it('turning captions off through UI has effect on player', async () => {
@@ -175,6 +187,11 @@ describe('UI', () => {
       });
 
       it('turning captions off through API has effect on UI', async () => {
+        // This test is invalid if the text is not initially visible, because
+        // setTextTrackVisibility() does nothing if there are no changes.
+        await player.setTextTrackVisibility(true);
+        expect(player.isTextTrackVisible()).toBe(true);
+
         const p = waitForEvent(controls, 'captionselectionupdated');
 
         // Disable & verify the text.
@@ -191,18 +208,14 @@ describe('UI', () => {
 
 
       /**
-       * @return {!HTMLElement}
+       * @return {Element}
        */
       function getOffButton() {
-        const offButtons =
-          shaka.util.Iterables.filter(languageMenu.childNodes,
-          (node) => {
-            const button = shaka.util.Dom.asHTMLElement(node);
-            return button.classList.contains('shaka-turn-captions-off-button');
-          });
+        const offButton =
+            languageMenu.querySelector('.shaka-turn-captions-off-button');
 
-        expect(offButtons.length).toBe(1);
-        return shaka.util.Dom.asHTMLElement(offButtons[0]);
+        expect(offButton).not.toBe(null);
+        return offButton;
       }
     });
 
@@ -216,7 +229,7 @@ describe('UI', () => {
       });
 
       languageButtons = filterButtons(languageMenu.childNodes,
-        ['shaka-back-to-overflow-button', 'shaka-turn-captions-off-button']);
+          ['shaka-back-to-overflow-button', 'shaka-turn-captions-off-button']);
 
       languagesToButtons = mapChoicesToButtons(
         /* allButtons= */ languageButtons,
@@ -249,35 +262,40 @@ describe('UI', () => {
 
     /**
      * @param {string} playerEventName
-     * @param {!Array.<!shaka.extern.Track>} tracks
+     * @param {function():!Array.<!shaka.extern.Track>} getTracks
      */
-    async function verifyLanguageChangeViaUI(playerEventName, tracks) {
-      expect(getSelectedTrack(tracks).language).toEqual(oldLanguage);
+    async function verifyLanguageChangeViaUI(playerEventName, getTracks) {
+      expect(getSelectedTrack(getTracks()).language).toEqual(oldLanguage);
 
       const button = languagesToButtons.get(newLanguage);
       button.click();
 
       // Wait for the change to take effect
       await waitForEvent(player, playerEventName);
-      expect(getSelectedTrack(tracks).language).toEqual(newLanguage);
+      expect(getSelectedTrack(getTracks()).language).toEqual(newLanguage);
     }
 
 
     /**
      * @param {string} controlsEventName
-     * @param {!Array.<!shaka.extern.Track>} tracks
+     * @param {function():!Array.<!shaka.extern.Track>} getTracks
+     * @param {function(string)} selectLanguage
      */
-    async function verifyLanguageChangeViaAPI(controlsEventName, tracks) {
-      expect(getSelectedTrack(tracks).language).toEqual(oldLanguage);
+    async function verifyLanguageChangeViaAPI(
+        controlsEventName, getTracks, selectLanguage) {
+      expect(getSelectedTrack(getTracks()).language).toEqual(oldLanguage);
 
       const p = waitForEvent(controls, controlsEventName);
 
-      player.selectAudioLanguage(newLanguage);
+      selectLanguage(newLanguage);
 
       // Wait for the UI to get updated
       await p;
 
       // Buttons were re-created on variant change
+      languageButtons = filterButtons(languageMenu.childNodes,
+          ['shaka-back-to-overflow-button', 'shaka-turn-captions-off-button']);
+
       languagesToButtons = mapChoicesToButtons(
         /* allButtons= */ languageButtons,
         /* choices */ langsFromContent,

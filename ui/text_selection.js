@@ -180,17 +180,19 @@ shaka.ui.TextSelection = class extends shaka.ui.Element {
 
   /** @private */
   onCaptionStateChange_() {
-    if (this.captionIcon_) {
-      if (this.player.isTextTrackVisible()) {
-        this.captionIcon_.classList.add('shaka-captions-on');
-        this.captionIcon_.classList.remove('shaka-captions-off');
-        this.captionButton_.setAttribute('aria-pressed', 'true');
-      } else {
-        this.captionIcon_.classList.add('shaka-captions-off');
-        this.captionIcon_.classList.remove('shaka-captions-on');
-        this.captionButton_.setAttribute('aria-pressed', 'false');
-      }
+    if (this.player.isTextTrackVisible()) {
+      this.captionIcon_.classList.add('shaka-captions-on');
+      this.captionIcon_.classList.remove('shaka-captions-off');
+      this.captionButton_.setAttribute('aria-pressed', 'true');
+    } else {
+      this.captionIcon_.classList.add('shaka-captions-off');
+      this.captionIcon_.classList.remove('shaka-captions-on');
+      this.captionButton_.setAttribute('aria-pressed', 'false');
     }
+
+    // TODO: document this event
+    this.controls.dispatchEvent(
+        new shaka.util.FakeEvent('captionselectionupdated'));
   }
 
   /** @private */
