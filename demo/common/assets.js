@@ -76,9 +76,9 @@ shakaAssets.Feature = {
   MULTIPLE_LANGUAGES: 'multiple languages',
   // Set if the asset is audio-only.
   AUDIO_ONLY: 'audio only',
-  OFFLINE: 'downloadable',
+  OFFLINE: 'Downloadable',
   // A synthetic property used in the search tab. Should not be given to assets.
-  STORED: 'downloaded',
+  STORED: 'Downloaded',
 
   // Set if the asset is a livestream.
   LIVE: 'Live',
