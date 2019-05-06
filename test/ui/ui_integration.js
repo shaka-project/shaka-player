@@ -166,20 +166,17 @@ describe('UI', () => {
         await player.setTextTrackVisibility(true);
         expect(player.isTextTrackVisible()).toBe(true);
 
-        // Get the Promise first.  The event can be raised synchronously within
-        // the click() handler.  This ensures we see the event.
-        const p = waitForEvent(player, 'texttrackvisibility');
-
         // Find and click the 'Off' button
         getOffButton().click();
         // Wait for the change to take effect
-        await p;
+        await waitForEvent(player, 'texttrackvisibility');
 
         expect(player.isTextTrackVisible()).toBe(false);
       });
 
       it('turning captions off through API has effect on UI', async () => {
         const p = waitForEvent(controls, 'captionselectionupdated');
+
         // Disable & verify the text.
         await player.setTextTrackVisibility(false);
         expect(player.isTextTrackVisible()).toBe(false);
@@ -257,13 +254,11 @@ describe('UI', () => {
     async function verifyLanguageChangeViaUI(playerEventName, tracks) {
       expect(getSelectedTrack(tracks).language).toEqual(oldLanguage);
 
-      const p = waitForEvent(player, playerEventName);
-
       const button = languagesToButtons.get(newLanguage);
       button.click();
 
       // Wait for the change to take effect
-      await p;
+      await waitForEvent(player, playerEventName);
       expect(getSelectedTrack(tracks).language).toEqual(newLanguage);
     }
 
