@@ -41,6 +41,12 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
     this.button_ = shaka.util.Dom.createHTMLElement('button');
     this.button_.classList.add('shaka-fullscreen-button');
     this.button_.classList.add('material-icons');
+
+    // Don't show the button if fullscreen is not supported
+    if (!document.fullscreenEnabled) {
+      this.button_.classList.add('shaka-hidden');
+    }
+
     this.button_.textContent = shaka.ui.Enums.MaterialDesignIcons.FULLSCREEN;
     this.parent.appendChild(this.button_);
     this.updateAriaLabel_();
