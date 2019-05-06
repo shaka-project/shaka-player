@@ -29,6 +29,8 @@ describe('UI', () => {
   let player;
   /** @type {shaka.util.EventManager} */
   let eventManager;
+  /** @type {shaka.test.Waiter} */
+  let waiter;
   /** @type {!Element} */
   let cssLink;
   /** @type {!shaka.ui.Controls} */
@@ -79,6 +81,7 @@ describe('UI', () => {
 
     // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();
+    waiter = new shaka.test.Waiter(eventManager);
 
     controls = ui.getControls();
 
@@ -88,11 +91,18 @@ describe('UI', () => {
     eventManager.listen(controls, 'error', Util.spyFunc(onErrorSpy));
 
     await player.load('test:sintel_multi_lingual_multi_res_compiled');
-    await waitForEvent(video, 'canplay');
+    // For this event, we ignore a timeout, since we sometimes miss this event
+    // on Tizen.  But expect that the video is ready anyway.
+    await waiter.failOnTimeout(false).waitForEvent(video, 'canplay');
+    expect(video.readyState).not.toEqual(0);
+
+    // All other events after this should fail on timeout (the default).
+    await waiter.failOnTimeout(true);
   });
 
   afterEach(async () => {
     eventManager.release();
+    waiter = null;
     await shaka.test.Util.cleanupUI();
   });
 
@@ -181,7 +191,7 @@ describe('UI', () => {
         // Find and click the 'Off' button
         getOffButton().click();
         // Wait for the change to take effect
-        await waitForEvent(player, 'texttrackvisibility');
+        await waiter.waitForEvent(player, 'texttrackvisibility');
 
         expect(player.isTextTrackVisible()).toBe(false);
       });
@@ -192,7 +202,7 @@ describe('UI', () => {
         await player.setTextTrackVisibility(true);
         expect(player.isTextTrackVisible()).toBe(true);
 
-        const p = waitForEvent(controls, 'captionselectionupdated');
+        const p = waiter.waitForEvent(controls, 'captionselectionupdated');
 
         // Disable & verify the text.
         await player.setTextTrackVisibility(false);
@@ -271,7 +281,7 @@ describe('UI', () => {
       button.click();
 
       // Wait for the change to take effect
-      await waitForEvent(player, playerEventName);
+      await waiter.waitForEvent(player, playerEventName);
       expect(getSelectedTrack(getTracks()).language).toEqual(newLanguage);
     }
 
@@ -285,7 +295,7 @@ describe('UI', () => {
         controlsEventName, getTracks, selectLanguage) {
       expect(getSelectedTrack(getTracks()).language).toEqual(oldLanguage);
 
-      const p = waitForEvent(controls, controlsEventName);
+      const p = waiter.waitForEvent(controls, controlsEventName);
 
       selectLanguage(newLanguage);
 
@@ -343,7 +353,7 @@ describe('UI', () => {
       player.configure(config);
 
       player.selectAudioLanguage(preferredLanguage);
-      await waitForEvent(player, 'variantchanged');
+      await waiter.waitForEvent(player, 'variantchanged');
 
       resolutionsMenu = shaka.util.Dom.getElementByClassName(
           'shaka-resolutions', videoContainer);
@@ -366,7 +376,7 @@ describe('UI', () => {
       player.selectVariantTrack(oldResolutionTrack);
 
       // Wait for the change to take effect
-      await waitForEvent(player, 'variantchanged');
+      await waiter.waitForEvent(player, 'variantchanged');
       // Update the tracks
       tracks = player.getVariantTracks();
       expect(getSelectedTrack(tracks).height).toEqual(oldResolution);
@@ -375,7 +385,7 @@ describe('UI', () => {
       button.click();
 
       // Wait for the change to take effect
-      await waitForEvent(player, 'variantchanged');
+      await waiter.waitForEvent(player, 'variantchanged');
       // Update the tracks
       tracks = player.getVariantTracks();
       expect(getSelectedTrack(tracks).height).toEqual(newResolution);
@@ -387,11 +397,11 @@ describe('UI', () => {
       player.selectVariantTrack(oldResolutionTrack);
 
       // Wait for the change to take effect
-      await waitForEvent(player, 'variantchanged');
+      await waiter.waitForEvent(player, 'variantchanged');
       updateResolutionButtonsAndMap();
       expect(getSelectedTrack(tracks).height).toEqual(oldResolution);
 
-      const p = waitForEvent(controls, 'resolutionselectionupdated');
+      const p = waiter.waitForEvent(controls, 'resolutionselectionupdated');
 
       const newResolutionTrack = findTrackWithHeight(tracks, newResolution);
       player.selectVariantTrack(newResolutionTrack);
@@ -414,7 +424,7 @@ describe('UI', () => {
       // We disabled abr in beforeEach()
       expect(player.getConfiguration().abr.enabled).toBe(false);
 
-      const p = waitForEvent(controls, 'resolutionselectionupdated');
+      const p = waiter.waitForEvent(controls, 'resolutionselectionupdated');
 
       // Find the 'Auto' button
       const auto = getAutoButton();
@@ -429,7 +439,7 @@ describe('UI', () => {
       const config = {abr: {enabled: true}};
       player.configure(config);
 
-      const p = waitForEvent(controls, 'resolutionselectionupdated');
+      const p = waiter.waitForEvent(controls, 'resolutionselectionupdated');
 
       // Any resolution would works
       const button = resolutionsToButtons.get(newResolution);
@@ -446,7 +456,8 @@ describe('UI', () => {
       // Setup listener to the ui event. The event, trigerring the update
       // is dispatched inside player.configure(), so we need to start
       // listening before calling it.
-      const uiReady = waitForEvent(controls, 'resolutionselectionupdated');
+      const uiReady = waiter.waitForEvent(
+          controls, 'resolutionselectionupdated');
       const config = {abr: {enabled: true}};
 
       player.configure(config);
@@ -615,19 +626,5 @@ describe('UI', () => {
       const elementName = element.childNodes[0].textContent;
       expect(elementsFromContent.indexOf(elementName)).not.toBe(-1);
     }
-  }
-
-
-  /**
-   * Make sure elements from content match their UI representation.
-   *
-   * @param {!EventTarget} target
-   * @param {string} name
-   * @return {!Promise}
-   */
-  function waitForEvent(target, name) {
-    return new Promise((resolve) => {
-        eventManager.listenOnce(target, name, resolve);
-    });
   }
 });
