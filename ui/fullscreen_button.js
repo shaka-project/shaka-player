@@ -109,6 +109,16 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
     if (document.fullscreenElement) {
       document.exitFullscreen();
     } else {
+      // If you are in PiP mode, leave PiP mode first.
+      try {
+        if (document.pictureInPictureElement) {
+          await document.exitPictureInPicture();
+        }
+      } catch (error) {
+        this.controls.dispatchEvent(new shaka.util.FakeEvent('error', {
+          detail: error,
+        }));
+      }
       await this.videoContainer_.requestFullscreen();
     }
   }

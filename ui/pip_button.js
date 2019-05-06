@@ -127,6 +127,10 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
   async onPipClick_() {
     try {
       if (!document.pictureInPictureElement) {
+        // If you were fullscreen, leave fullscreen first.
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+        }
         await this.video.requestPictureInPicture();
       } else {
         await document.exitPictureInPicture();
