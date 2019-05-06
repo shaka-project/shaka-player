@@ -34,6 +34,7 @@ class ShakaDemoCustom {
 
   /** @param {!Element} container */
   constructor(container) {
+    /** @private {!Element} */
     this.dialog_ = document.createElement('dialog');
     this.dialog_.classList.add('mdl-dialog');
     container.appendChild(this.dialog_);
@@ -41,6 +42,7 @@ class ShakaDemoCustom {
       dialogPolyfill.registerDialog(this.dialog_);
     }
 
+    /** @private {!Set.<!ShakaDemoAssetInfo>} */
     this.assets_ = this.loadAssetInfos_();
 
     /** @private {!Array.<!AssetCard>} */
@@ -62,6 +64,27 @@ class ShakaDemoCustom {
     document.addEventListener('shaka-main-selected-asset-changed', () => {
       this.updateSelected_();
     });
+    document.addEventListener('shaka-main-offline-progress', () => {
+      this.updateOfflineProgress_();
+    });
+    document.addEventListener('shaka-main-offline-changed', () => {
+      this.remakeSavedList_();
+    });
+  }
+
+  /** @return {!Array.<!ShakaDemoAssetInfo>} */
+  assets() {
+    return Array.from(this.assets_);
+  }
+
+  /**
+   * Updates progress bars on asset cards.
+   * @private
+   */
+  updateOfflineProgress_() {
+    for (const card of this.assetCards_) {
+      card.remakeButtons();
+    }
   }
 
   /**
@@ -254,6 +277,7 @@ class ShakaDemoCustom {
           return;
         }
       }
+      shakaDemoMain.setupOfflineCallbacks(assetInProgress);
       this.assets_.add(assetInProgress);
       this.saveAssetInfos_(this.assets_);
       this.remakeSavedList_();
@@ -279,7 +303,12 @@ class ShakaDemoCustom {
     const savedString = window.localStorage.getItem(ShakaDemoCustom.saveId_);
     if (savedString) {
       const assets = JSON.parse(savedString);
-      return new Set(assets.map((asset) => ShakaDemoAssetInfo.fromJSON(asset)));
+      return new Set(assets.map((json) => {
+        const asset = ShakaDemoAssetInfo.fromJSON(json);
+        shakaDemoMain.setupOfflineCallbacks(asset);
+        shakaDemoMain.loadOfflineVersion(asset);
+        return asset;
+      }));
     }
     return new Set();
   }
@@ -334,16 +363,21 @@ class ShakaDemoCustom {
         shakaDemoMain.loadAsset(asset);
         this.updateSelected_();
       });
-      // TODO: Add offline support.
-      // TODO: Be sure to un-store if the asset is deleted or edited.
-      c.addButton('Edit', () => {
+      c.addButton('Edit', async () => {
+        if (asset.unstoreCallback) {
+          await asset.unstoreCallback();
+        }
         this.showAssetDialog_(asset);
       });
-      c.addButton('Delete', () => {
+      c.addButton('Discard', async () => {
         this.assets_.delete(asset);
+        if (asset.unstoreCallback) {
+          await asset.unstoreCallback();
+        }
         this.saveAssetInfos_(this.assets_);
         this.remakeSavedList_();
       });
+      c.addStoreButton();
     });
   }
 

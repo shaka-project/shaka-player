@@ -41,6 +41,9 @@ class ShakaDemoMain {
     /** @private {?shaka.ui.Controls} */
     this.controls_ = null;
 
+    /** @private {?Array.<shaka.extern.StoredContent>} */
+    this.storedList_;
+
     /** @private {boolean} */
     this.nativeControlsEnabled_ = false;
 
@@ -240,6 +243,74 @@ class ShakaDemoMain {
   }
 
   /**
+   * Gets a unique storage identifier for an asset.
+   * @param {!ShakaDemoAssetInfo} asset
+   * @return {string}
+   * @private
+   */
+  getIdentifierFromAsset_(asset) {
+    // Custom assets can't have special characters like [ or ] in their name,
+    // and none of the default assets will have that in their name, so we can
+    // be sure that no asset will have [CUSTOM] in its name.
+    return asset.name +
+           (asset.source == shakaAssets.Source.CUSTOM ? ' [CUSTOM]' : '');
+  }
+
+  /**
+   * Attaches callbacks to an asset so that it can be downloaded online.
+   * This method does not verify whether storage is or is not possible.
+   * @param {!ShakaDemoAssetInfo} asset
+   */
+  setupOfflineCallbacks(asset) {
+    asset.storeCallback = async () => {
+      await this.drmConfiguration_(asset);
+      const metadata = {
+        'identifier': this.getIdentifierFromAsset_(asset),
+        'downloaded': new Date(),
+      };
+      asset.storedProgress = 0;
+      this.dispatchEventWithName_('shaka-main-offline-progress');
+      const stored = await this.storage_.store(asset.manifestUri, metadata);
+      asset.storedContent = stored;
+      this.dispatchEventWithName_('shaka-main-offline-changed');
+      // Update the componentHandler, to account for any new MDL elements
+      // added.
+      componentHandler.upgradeDom();
+    };
+    asset.unstoreCallback = async () => {
+      if (asset == this.selectedAsset) {
+        this.unload();
+      }
+      if (asset.storedContent && asset.storedContent.offlineUri) {
+        asset.storedProgress = 0;
+        this.dispatchEventWithName_('shaka-main-offline-progress');
+        await this.storage_.remove(asset.storedContent.offlineUri);
+        asset.storedContent = null;
+        this.dispatchEventWithName_('shaka-main-offline-changed');
+        // Update the componentHandler, to account for any new MDL elements
+        // added.
+        componentHandler.upgradeDom();
+      }
+    };
+  }
+
+  /**
+   * If an asset has an associated offline version, load it with that info.
+   * @param {!ShakaDemoAssetInfo} asset
+   */
+  loadOfflineVersion(asset) {
+    goog.asserts.assert(this.storedList_,
+                        'Storage must already be initialized.');
+
+    for (const storedContent of this.storedList_) {
+      const identifier = storedContent.appMetadata['identifier'];
+      if (this.getIdentifierFromAsset_(asset) == identifier) {
+        asset.storedContent = storedContent;
+      }
+    }
+  }
+
+  /**
    * @return {!Promise}
    * @private
    */
@@ -251,17 +322,17 @@ class ShakaDemoMain {
 
     this.storage_ = new shaka.offline.Storage(this.player_);
 
-    const getIdentifierFromAsset = (asset) => {
-      // Custom assets can't have special characters like [ or ] in their name,
-      // and none of the default assets will have that in their name, so we can
-      // be sure that no asset will have [CUSTOM] in its name.
-      return asset.name +
-             (asset.source == shakaAssets.Source.CUSTOM ? ' [CUSTOM]' : '');
-    };
     const getAssetWithIdentifier = (identifier) => {
       for (const asset of shakaAssets.testAssets) {
-        if (getIdentifierFromAsset(asset) == identifier) {
+        if (this.getIdentifierFromAsset_(asset) == identifier) {
           return asset;
+        }
+      }
+      if (shakaDemoCustom) {
+        for (const asset of shakaDemoCustom.assets()) {
+          if (this.getIdentifierFromAsset_(asset) == identifier) {
+            return asset;
+          }
         }
       }
       return null;
@@ -288,46 +359,18 @@ class ShakaDemoMain {
         continue;
       }
 
-      asset.storeCallback = async () => {
-        await this.drmConfiguration_(asset);
-        const metadata = {
-          'identifier': getIdentifierFromAsset(asset),
-          'downloaded': new Date(),
-        };
-        asset.storedProgress = 0;
-        this.dispatchEventWithName_('shaka-main-offline-progress');
-        const stored = await this.storage_.store(asset.manifestUri, metadata);
-        asset.storedContent = stored;
-        this.dispatchEventWithName_('shaka-main-offline-changed');
-        // Update the componentHandler, to account for any new MDL elements
-        // added.
-        componentHandler.upgradeDom();
-      };
-      asset.unstoreCallback = async () => {
-        if (asset == this.selectedAsset) {
-          this.unload();
-        }
-        if (asset.storedContent && asset.storedContent.offlineUri) {
-          asset.storedProgress = 0;
-          this.dispatchEventWithName_('shaka-main-offline-progress');
-          await this.storage_.remove(asset.storedContent.offlineUri);
-          asset.storedContent = null;
-          this.dispatchEventWithName_('shaka-main-offline-changed');
-          // Update the componentHandler, to account for any new MDL elements
-          // added.
-          componentHandler.upgradeDom();
-        }
-      };
+      this.setupOfflineCallbacks(asset);
     }
 
     // Load stored asset infos.
-    const list = await this.storage_.list();
-    for (const storedContent of list) {
-      console.log(storedContent);
-      const identifier = storedContent.appMetadata['identifier'];
-      const asset = getAssetWithIdentifier(identifier);
-      if (asset) {
-        asset.storedContent = storedContent;
+    this.storedList_ = await this.storage_.list();
+    if (this.storedList_) {
+      for (const storedContent of this.storedList_) {
+        const identifier = storedContent.appMetadata['identifier'];
+        const asset = getAssetWithIdentifier(identifier);
+        if (asset) {
+          asset.storedContent = storedContent;
+        }
       }
     }
   }
@@ -346,6 +389,12 @@ class ShakaDemoMain {
    * @return {?string} unsupportedReason Null if asset is supported.
    */
   getAssetUnsupportedReason(asset, needOffline) {
+    if (asset.source == shakaAssets.Source.CUSTOM) {
+      // We can't be sure if custom assets are supported or not. Just assume
+      // they are.
+      return null;
+    }
+
     // Is the asset disabled?
     if (asset.disabled) {
       return 'This asset is disabled.';
