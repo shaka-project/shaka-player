@@ -38,6 +38,9 @@ class CloseButton {
     this.parent.appendChild(this.button_);
 
     this.button_.addEventListener('click', () => {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      }
       shakaDemoMain.unload();
     });
 
