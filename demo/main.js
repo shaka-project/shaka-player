@@ -790,8 +790,14 @@ class ShakaDemoMain {
       if (this.player_.isAudioOnly()) {
         this.video_.poster = ShakaDemoMain.audioOnlyPoster_;
       }
-    } catch (error) {
-      this.onError_(/** @type {!shaka.util.Error} */ (error));
+    } catch (reason) {
+      const error = /** @type {!shaka.util.Error} */ (reason);
+      if (error.code == shaka.util.Error.Code.LOAD_INTERRUPTED) {
+        // Don't use shaka.log, which is not present in compiled builds.
+        console.debug('load() interrupted');
+      } else {
+        this.onError_(error);
+      }
     }
   }
 
