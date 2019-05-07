@@ -184,7 +184,7 @@ class AssetCard {
    * Select this card if the card's asset matches |asset|.
    * Used to simplify the implementation of "shaka-main-selected-asset-changed"
    * handlers.
-   * @param {!ShakaDemoAssetInfo} asset
+   * @param {ShakaDemoAssetInfo} asset
    */
   selectByAsset(asset) {
     this.card_.classList.remove('selected');

@@ -120,7 +120,7 @@ class ShakaDemoConfig {
     this.addSection_('DRM', docLink)
         .addBoolInput_('Delay License Request Until Played',
                        'drm.delayLicenseRequestUntilPlayed');
-    const advanced = shakaDemoMain.getConfiguration().drm.advanced;
+    const advanced = shakaDemoMain.getConfiguration().drm.advanced || {};
     const robustnessSuggestions = [
       'SW_SECURE_CRYPTO',
       'SW_SECURE_DECODE',
@@ -141,7 +141,14 @@ class ShakaDemoConfig {
         // Add in any common drmSystem not currently in advanced.
         for (let drmSystem of commonDrmSystems) {
           if (!(drmSystem in advanced)) {
-            advanced[commonDrmSystems] = {};
+            advanced[commonDrmSystems] = {
+              distinctiveIdentifierRequired: false,
+              persistentStateRequired: false,
+              videoRobustness: '',
+              audioRobustness: '',
+              serverCertificate: null,
+              individualizationServer: '',
+            };
           }
         }
         // Set the robustness.

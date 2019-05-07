@@ -556,17 +556,21 @@ describe('AbortableOperation', function() {
 
       // The second stage of the chain returns innerOperation.  A brief moment
       // later, the outer chain is aborted.
-      let operation = shaka.util.AbortableOperation.completed(100).chain(() => {
-        shaka.test.Util.delay(0.1).then(() => {
-          operation.abort();
-          p.resolve();
-        });
-        return innerOperation;
-      }).finally((ok) => {
-        expect(ok).toBe(true);  // We resolved the non-abortable inner operation
-        expect(abortCalled).toBe(true);
-        done();
-      });
+      const operation =
+          shaka.util.AbortableOperation.completed(100)
+              .chain(() => {
+                shaka.test.Util.delay(0.1).then(() => {
+                  operation.abort();
+                  p.resolve();
+                });
+                return innerOperation;
+              })
+              .finally((ok) => {
+                // We resolved the non-abortable inner operation
+                expect(ok).toBe(true);
+                expect(abortCalled).toBe(true);
+                done();
+              });
     });
   });  // describe('chain')
 });  // describe('AbortableOperation')
