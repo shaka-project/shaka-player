@@ -41,6 +41,9 @@ class CloseButton {
       if (document.fullscreenElement) {
         document.exitFullscreen();
       }
+      if (document.pictureInPictureElement) {
+        document.exitPictureInPicture();
+      }
       shakaDemoMain.unload();
     });
 
