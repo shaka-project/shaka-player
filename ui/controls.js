@@ -587,7 +587,7 @@ shaka.ui.Controls.prototype.createDOM_ = function() {
 
   // Settings menus need to be positioned lower, if the seekbar is absent.
   if (!this.seekBar_) {
-    for (let menu of this.settingsMenus_) {
+    for (const menu of this.settingsMenus_) {
       menu.classList.add('shaka-low-position');
     }
   }
@@ -729,16 +729,16 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
   const noPropagationElements = this.videoContainer_.getElementsByClassName(
       'shaka-no-propagation');
   for (let i = 0; i < noPropagationElements.length; i++) {
-    let element = noPropagationElements[i];
+    const element = noPropagationElements[i];
     element.addEventListener(
       'click', function(event) { event.stopPropagation(); });
   }
 
   // Keep showing controls if one of those elements is hovered
-  let showControlsElements = this.videoContainer_.getElementsByClassName(
+  const showControlsElements = this.videoContainer_.getElementsByClassName(
       'shaka-show-controls-on-mouse-over');
   for (let i = 0; i < showControlsElements.length; i++) {
-    let element = showControlsElements[i];
+    const element = showControlsElements[i];
     element.addEventListener(
       'mouseover', () => {
         this.overrideCssShowControls_ = true;
@@ -1045,12 +1045,12 @@ shaka.ui.Controls.prototype.onSeekEnd_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.onKeyUp_ = function(event) {
-  let key = event.key;
+  const key = event.key;
 
-  let activeElement = document.activeElement;
-  let isVolumeBar = activeElement && activeElement.classList ?
+  const activeElement = document.activeElement;
+  const isVolumeBar = activeElement && activeElement.classList ?
       activeElement.classList.contains('shaka-volume-bar') : false;
-  let isSeekBar = activeElement && activeElement.classList &&
+  const isSeekBar = activeElement && activeElement.classList &&
       activeElement.classList.contains('shaka-seek-bar');
   // Show the control panel if it is on focus or any button is pressed.
   if (this.controlsContainer_.contains(activeElement)) {
@@ -1153,12 +1153,12 @@ shaka.ui.Controls.prototype.updateTimeAndSeekRange_ = function() {
   let displayTime = this.isSeeking_ ?
       Number(this.seekBar_.value) :
       Number(this.video_.currentTime);
-  let bufferedLength = this.video_.buffered.length;
-  let bufferedStart = bufferedLength ? this.video_.buffered.start(0) : 0;
-  let bufferedEnd =
+  const bufferedLength = this.video_.buffered.length;
+  const bufferedStart = bufferedLength ? this.video_.buffered.start(0) : 0;
+  const bufferedEnd =
       bufferedLength ? this.video_.buffered.end(bufferedLength - 1) : 0;
-  let seekRange = this.player_.seekRange();
-  let seekRangeSize = seekRange.end - seekRange.start;
+  const seekRange = this.player_.seekRange();
+  const seekRangeSize = seekRange.end - seekRange.start;
 
   if (this.seekBar_) {
     this.seekBar_.min = seekRange.start;
@@ -1167,7 +1167,7 @@ shaka.ui.Controls.prototype.updateTimeAndSeekRange_ = function() {
 
   if (this.player_.isLive()) {
     // The amount of time we are behind the live edge.
-    let behindLive = Math.floor(seekRange.end - displayTime);
+    const behindLive = Math.floor(seekRange.end - displayTime);
     displayTime = Math.max(0, behindLive);
 
     if (!this.isSeeking_ && this.seekBar_) {
@@ -1185,16 +1185,16 @@ shaka.ui.Controls.prototype.updateTimeAndSeekRange_ = function() {
     const seekWindow = seekRange.end - seekRange.start;
     if (seekWindow < Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR) {
       shaka.ui.Utils.setDisplay(this.seekBarContainer_, false);
-      for (let menu of this.settingsMenus_) {
+      for (const menu of this.settingsMenus_) {
         menu.classList.add('shaka-low-position');
       }
     } else {
       shaka.ui.Utils.setDisplay(this.seekBarContainer_, true);
-      for (let menu of this.settingsMenus_) {
+      for (const menu of this.settingsMenus_) {
         menu.classList.remove('shaka-low-position');
       }
 
-      let gradient = ['to right'];
+      const gradient = ['to right'];
       if (bufferedLength == 0) {
         gradient.push('#000 0%');
       } else {

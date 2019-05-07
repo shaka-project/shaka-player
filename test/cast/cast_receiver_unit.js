@@ -50,7 +50,7 @@ describe('CastReceiver', function() {
    * @return {function(function())}
    */
   function checkAndRun(test) {
-   let check = function(done) {
+   const check = function(done) {
      if (!isChromecast && !isChrome) {
        pending(
            'Skipping CastReceiver tests for non-Chrome and non-Chromecast');
@@ -71,7 +71,7 @@ describe('CastReceiver', function() {
     // browsers our library supports.  Because of this, CastReceiver tests will
     // only be run on Chrome and Chromecast.
     isChromecast = navigator.userAgent.includes('CrKey');
-    let isEdge = navigator.userAgent.includes('Edge/');
+    const isEdge = navigator.userAgent.includes('Edge/');
     // Edge also has "Chrome/" in its user agent string.
     isChrome = navigator.userAgent.includes('Chrome/') && !isEdge;
 
@@ -141,8 +141,8 @@ describe('CastReceiver', function() {
     it('limits streams to 1080p on Chromecast v1 and v2', checkAndRun(() => {
       // Simulate the canDisplayType reponse of Chromecast v1 or v2
       mockCanDisplayType.and.callFake(function(type) {
-        let matches = /height=(\d+)/.exec(type);
-        let height = matches[1];
+        const matches = /height=(\d+)/.exec(type);
+        const height = matches[1];
         if (height && height > 1080) return false;
         return true;
       });
@@ -156,8 +156,8 @@ describe('CastReceiver', function() {
     it('limits streams to 4k on Chromecast Ultra', checkAndRun(() => {
       // Simulate the canDisplayType reponse of Chromecast Ultra
       mockCanDisplayType.and.callFake(function(type) {
-        let matches = /height=(\d+)/.exec(type);
-        let height = matches[1];
+        const matches = /height=(\d+)/.exec(type);
+        const height = matches[1];
         if (height && height > 2160) return false;
         return true;
       });
@@ -202,7 +202,7 @@ describe('CastReceiver', function() {
     });
 
     it('triggers when senders connect or disconnect', checkAndRun((done) => {
-      let listener = jasmine.createSpy('listener');
+      const listener = jasmine.createSpy('listener');
       receiver.addEventListener('caststatuschanged', Util.spyFunc(listener));
 
       shaka.test.Util.delay(0.2).then(function() {
@@ -220,13 +220,13 @@ describe('CastReceiver', function() {
     }));
 
     it('triggers when idle state changes', checkAndRun((done) => {
-      let listener = jasmine.createSpy('listener');
+      const listener = jasmine.createSpy('listener');
       receiver.addEventListener('caststatuschanged', Util.spyFunc(listener));
 
-      let fakeLoadingEvent = {type: 'loading'};
-      let fakeUnloadingEvent = {type: 'unloading'};
-      let fakeEndedEvent = {type: 'ended'};
-      let fakePlayingEvent = {type: 'playing'};
+      const fakeLoadingEvent = {type: 'loading'};
+      const fakeUnloadingEvent = {type: 'unloading'};
+      const fakeEndedEvent = {type: 'ended'};
+      const fakePlayingEvent = {type: 'playing'};
 
       shaka.test.Util.delay(0.2).then(function() {
         expect(listener).not.toHaveBeenCalled();
@@ -274,7 +274,7 @@ describe('CastReceiver', function() {
 
       // No messages yet.
       expect(mockShakaMessageBus.messages).toEqual([]);
-      let fakeEvent = {type: 'timeupdate'};
+      const fakeEvent = {type: 'timeupdate'};
       mockVideo.on['timeupdate'](fakeEvent);
 
       // There are now "update" and "event" messages, in that order.
@@ -294,9 +294,9 @@ describe('CastReceiver', function() {
 
   describe('"init" message', function() {
     /** @const */
-    let fakeConfig = {key: 'value'};
+    const fakeConfig = {key: 'value'};
     /** @const */
-    let fakeAppData = {myFakeAppData: 1234};
+    const fakeAppData = {myFakeAppData: 1234};
     let fakeInitState;
 
     beforeEach(function() {
@@ -348,7 +348,7 @@ describe('CastReceiver', function() {
     }));
 
     it('starts polling', checkAndRun(() => {
-      let fakeConfig = {key: 'value'};
+      const fakeConfig = {key: 'value'};
       mockPlayer.getConfiguration.and.returnValue(fakeConfig);
 
       fakeConnectedSenders(1);
@@ -463,13 +463,13 @@ describe('CastReceiver', function() {
 
     it('triggers an "error" event if load fails', checkAndRun((done) => {
       fakeInitState.manifest = 'foo://bar';
-      let fakeError = new shaka.util.Error(
+      const fakeError = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.UNABLE_TO_GUESS_MANIFEST_TYPE);
       mockPlayer.load.and.returnValue(Promise.reject(fakeError));
 
-      let listener = jasmine.createSpy('listener');
+      const listener = jasmine.createSpy('listener');
       mockPlayer.addEventListener('error', listener);
       expect(listener).not.toHaveBeenCalled();
 
@@ -496,7 +496,7 @@ describe('CastReceiver', function() {
     it('triggers the app data callback', checkAndRun(() => {
       expect(mockAppDataCallback).not.toHaveBeenCalled();
 
-      let fakeAppData = {myFakeAppData: 1234};
+      const fakeAppData = {myFakeAppData: 1234};
       fakeIncomingMessage({
         type: 'appData',
         appData: fakeAppData,
@@ -589,9 +589,9 @@ describe('CastReceiver', function() {
 
   describe('"asyncCall" message', function() {
     /** @const */
-    let fakeSenderId = 'senderId';
+    const fakeSenderId = 'senderId';
     /** @const */
-    let fakeCallId = '5';
+    const fakeCallId = '5';
     /** @type {!shaka.util.PublicPromise} */
     let p;
 
@@ -630,7 +630,7 @@ describe('CastReceiver', function() {
         expect(mockShakaMessageBus.broadcast).not.toHaveBeenCalled();
         expect(mockShakaMessageBus.getCastChannel).toHaveBeenCalledWith(
             fakeSenderId);
-        let senderChannel = mockShakaMessageBus.getCastChannel();
+        const senderChannel = mockShakaMessageBus.getCastChannel();
         expect(senderChannel.messages).toEqual([{
           type: 'asyncComplete',
           id: fakeCallId,
@@ -644,7 +644,7 @@ describe('CastReceiver', function() {
       expect(mockShakaMessageBus.broadcast).not.toHaveBeenCalled();
       expect(mockShakaMessageBus.getCastChannel).not.toHaveBeenCalled();
 
-      let fakeError = new shaka.util.Error(
+      const fakeError = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.UNABLE_TO_GUESS_MANIFEST_TYPE);
@@ -655,14 +655,14 @@ describe('CastReceiver', function() {
         expect(mockShakaMessageBus.broadcast).not.toHaveBeenCalled();
         expect(mockShakaMessageBus.getCastChannel).toHaveBeenCalledWith(
             fakeSenderId);
-        let senderChannel = mockShakaMessageBus.getCastChannel();
+        const senderChannel = mockShakaMessageBus.getCastChannel();
         expect(senderChannel.messages).toEqual([{
           type: 'asyncComplete',
           id: fakeCallId,
           error: jasmine.any(Object),
         }]);
         if (senderChannel.messages.length) {
-          let error = senderChannel.messages[0].error;
+          const error = senderChannel.messages[0].error;
           shaka.test.Util.expectToEqualError(fakeError, error);
         }
       }).catch(fail).then(done);
@@ -741,7 +741,7 @@ describe('CastReceiver', function() {
         };
         return Promise.resolve();
       };
-      let message = {
+      const message = {
         // Arbitrary number
         'requestId': 0,
         'type': 'LOAD',
@@ -792,7 +792,7 @@ describe('CastReceiver', function() {
     });
 
     it('get status', checkAndRun(() => {
-      let message = {
+      const message = {
         // Arbitrary number
         'requestId': 0,
         'type': 'GET_STATUS',
@@ -805,7 +805,7 @@ describe('CastReceiver', function() {
     }));
 
     it('play', checkAndRun(() => {
-      let message = {
+      const message = {
         // Arbitrary number
         'requestId': 0,
         'type': 'PLAY',
@@ -816,7 +816,7 @@ describe('CastReceiver', function() {
     }));
 
     it('pause', checkAndRun(() => {
-      let message = {
+      const message = {
         // Arbitrary number
         'requestId': 0,
         'type': 'PAUSE',
@@ -827,7 +827,7 @@ describe('CastReceiver', function() {
     }));
 
     it('seek', checkAndRun(() => {
-      let message = {
+      const message = {
         // Arbitrary number
         'requestId': 0,
         'type': 'SEEK',
@@ -841,7 +841,7 @@ describe('CastReceiver', function() {
     }));
 
     it('stop', checkAndRun(() => {
-      let message = {
+      const message = {
         // Arbitrary number
         'requestId': 0,
         'type': 'STOP',
@@ -852,7 +852,7 @@ describe('CastReceiver', function() {
     }));
 
     it('volume', checkAndRun(() => {
-      let message = {
+      const message = {
         // Arbitrary number
         'requestId': 0,
         'type': 'VOLUME',
@@ -868,7 +868,7 @@ describe('CastReceiver', function() {
     }));
 
     it('load', checkAndRun(() => {
-      let message = {
+      const message = {
         // Arbitrary number
         'requestId': 0,
         'type': 'LOAD',
@@ -886,7 +886,7 @@ describe('CastReceiver', function() {
     }));
 
     it('dispatches error on unrecognized request type', checkAndRun(() => {
-      let message = {
+      const message = {
         // Arbitrary number
         'requestId': 0,
         'type': 'UNKNOWN_TYPE',
@@ -976,7 +976,7 @@ describe('CastReceiver', function() {
   }
 
   function createMockMessageBus() {
-    let bus = {
+    const bus = {
       messages: [],
       broadcast: jasmine.createSpy('CastMessageBus.broadcast'),
       getCastChannel: jasmine.createSpy('CastMessageBus.getCastChannel'),
@@ -985,7 +985,7 @@ describe('CastReceiver', function() {
     bus.broadcast.and.callFake(function(message) {
       bus.messages.push(CastUtils.deserialize(message));
     });
-    let channel = {
+    const channel = {
       messages: [],
       send: function(message) {
         channel.messages.push(CastUtils.deserialize(message));
@@ -996,7 +996,7 @@ describe('CastReceiver', function() {
   }
 
   function createMockPlayer() {
-    let player = {
+    const player = {
       destroy: jasmine.createSpy('destroy').and.returnValue(Promise.resolve()),
       setMaxHardwareResolution: jasmine.createSpy('setMaxHardwareResolution'),
 
@@ -1014,10 +1014,10 @@ describe('CastReceiver', function() {
     CastUtils.PlayerVoidMethods.forEach(function(name) {
       player[name] = jasmine.createSpy(name);
     });
-    for (let name in CastUtils.PlayerGetterMethods) {
+    for (const name in CastUtils.PlayerGetterMethods) {
       player[name] = jasmine.createSpy(name);
     }
-    for (let name in CastUtils.PlayerGetterMethodsThatRequireLive) {
+    for (const name in CastUtils.PlayerGetterMethodsThatRequireLive) {
       player[name] = jasmine.createSpy(name);
     }
     CastUtils.PlayerPromiseMethods.forEach(function(name) {
@@ -1031,7 +1031,7 @@ describe('CastReceiver', function() {
    * @param {number} num
    */
   function fakeConnectedSenders(num) {
-    let senderArray = [];
+    const senderArray = [];
     while (num--) {
       senderArray.push('senderId');
     }
@@ -1046,8 +1046,8 @@ describe('CastReceiver', function() {
    * @param {string=} senderId
    */
   function fakeIncomingMessage(message, bus, senderId) {
-    let serialized = CastUtils.serialize(message);
-    let messageEvent = {
+    const serialized = CastUtils.serialize(message);
+    const messageEvent = {
       senderId: senderId,
       data: serialized,
     };

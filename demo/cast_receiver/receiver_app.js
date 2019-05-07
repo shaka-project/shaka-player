@@ -63,13 +63,13 @@ ShakaReceiver.prototype.init = function() {
   shaka.polyfill.installAll();
 
   /** @type {HTMLMediaElement} */
-  let video = /** @type {HTMLMediaElement} */
+  const video = /** @type {HTMLMediaElement} */
       (document.getElementById('video'));
   goog.asserts.assert(video, 'Video element should be available!');
   this.video_ = video;
 
   /** @type {!shaka.ui.Overlay} */
-  let ui = this.video_['ui'];
+  const ui = this.video_['ui'];
   goog.asserts.assert(ui, 'UI should be available!');
 
   // Make sure we don't show extra UI elements we don't need on the TV.

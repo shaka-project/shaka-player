@@ -22,8 +22,8 @@ describe('CastSender', function() {
 
   const originalChrome = window['chrome'];
 
-  let fakeAppId = 'asdf';
-  let fakeInitState = {
+  const fakeAppId = 'asdf';
+  const fakeInitState = {
     manifest: null,
     player: null,
     startTime: null,
@@ -171,7 +171,7 @@ describe('CastSender', function() {
       fakeReceiverAvailability(true);
       expect(sender.hasReceivers()).toBe(true);
 
-      let p = sender.cast(fakeInitState);
+      const p = sender.cast(fakeInitState);
       fakeSessionConnection();
 
       p.then(function() {
@@ -187,7 +187,7 @@ describe('CastSender', function() {
     // The library is not loaded yet during describe(), so we can't refer to
     // Shaka error codes by name here.  Instead, we use the numeric value and
     // put the name in a comment.
-    let connectionFailures = [
+    const connectionFailures = [
       {
         condition: 'canceled by the user',
         castErrorCode: 'cancel',
@@ -215,7 +215,7 @@ describe('CastSender', function() {
         sender.init();
         fakeReceiverAvailability(true);
 
-        let p = sender.cast(fakeInitState);
+        const p = sender.cast(fakeInitState);
         fakeSessionConnectionFailure(metadata.castErrorCode);
 
         p.then(fail).catch(function(error) {
@@ -229,7 +229,7 @@ describe('CastSender', function() {
       sender.init();
       fakeReceiverAvailability(true);
 
-      let p = sender.cast(fakeInitState);
+      const p = sender.cast(fakeInitState);
       fakeSessionConnection();
 
       p.catch(fail).then(function() {
@@ -244,9 +244,9 @@ describe('CastSender', function() {
   it('re-uses old sessions', function(done) {
     sender.init();
     fakeReceiverAvailability(true);
-    let p = sender.cast(fakeInitState);
+    const p = sender.cast(fakeInitState);
     fakeSessionConnection();
-    let oldMockSession = mockSession;
+    const oldMockSession = mockSession;
     p.then(function() {
       return sender.destroy();
     }).then(function() {
@@ -282,7 +282,7 @@ describe('CastSender', function() {
   it('doesn\'t re-use stopped sessions', function(done) {
     sender.init();
     fakeReceiverAvailability(true);
-    let p = sender.cast(fakeInitState);
+    const p = sender.cast(fakeInitState);
     fakeSessionConnection();
     p.then(function() {
       return sender.destroy();
@@ -319,7 +319,7 @@ describe('CastSender', function() {
   });
 
   describe('setAppData', function() {
-    let fakeAppData = {
+    const fakeAppData = {
       myKey1: 'myValue1',
       myKey2: 'myValue2',
     };
@@ -431,7 +431,7 @@ describe('CastSender', function() {
       sender.init();
       fakeReceiverAvailability(true);
       sender.cast(fakeInitState).then(function() {
-        let fakeEvent = {
+        const fakeEvent = {
           type: 'eventName',
           detail: {key1: 'value1'},
         };
@@ -493,7 +493,7 @@ describe('CastSender', function() {
       sender.init();
       fakeReceiverAvailability(true);
       sender.cast(fakeInitState).then(function() {
-        let update = {
+        const update = {
           video: {
             currentTime: 12,
             paused: false,
@@ -535,8 +535,8 @@ describe('CastSender', function() {
       sender.init();
       fakeReceiverAvailability(true);
       sender.cast(fakeInitState).then(function() {
-        let method = sender.get('video', 'play');
-        let retval = method(123, 'abc');
+        const method = sender.get('video', 'play');
+        const retval = method(123, 'abc');
         expect(retval).toBe(undefined);
 
         expect(mockSession.messages).toContain(jasmine.objectContaining({
@@ -563,13 +563,13 @@ describe('CastSender', function() {
       });
 
       it('return Promises', function() {
-        let p = method();
+        const p = method();
         expect(p).toEqual(jasmine.any(Promise));
         p.catch(function() {});  // silence logs about uncaught rejections
       });
 
       it('trigger "asyncCall" messages', function() {
-        let p = method(123, 'abc');
+        const p = method(123, 'abc');
         p.catch(function() {});  // silence logs about uncaught rejections
 
         expect(mockSession.messages).toContain(jasmine.objectContaining({
@@ -582,12 +582,12 @@ describe('CastSender', function() {
       });
 
       it('resolve when "asyncComplete" messages are received', function(done) {
-        let p = new shaka.test.StatusPromise(method(123, 'abc'));
+        const p = new shaka.test.StatusPromise(method(123, 'abc'));
 
         // Wait a tick for the Promise status to be set.
         Util.delay(0.1).then(function() {
           expect(p.status).toBe('pending');
-          let id = mockSession.messages[mockSession.messages.length - 1].id;
+          const id = mockSession.messages[mockSession.messages.length - 1].id;
           fakeSessionMessage({
             type: 'asyncComplete',
             id: id,
@@ -602,17 +602,17 @@ describe('CastSender', function() {
       });
 
       it('reject when "asyncComplete" messages have an error', function(done) {
-        let originalError = new shaka.util.Error(
+        const originalError = new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.MANIFEST,
             shaka.util.Error.Code.UNABLE_TO_GUESS_MANIFEST_TYPE,
             'foo://bar');
-        let p = new shaka.test.StatusPromise(method(123, 'abc'));
+        const p = new shaka.test.StatusPromise(method(123, 'abc'));
 
         // Wait a tick for the Promise status to be set.
         Util.delay(0.1).then(function() {
           expect(p.status).toBe('pending');
-          let id = mockSession.messages[mockSession.messages.length - 1].id;
+          const id = mockSession.messages[mockSession.messages.length - 1].id;
           fakeSessionMessage({
             type: 'asyncComplete',
             id: id,
@@ -630,7 +630,7 @@ describe('CastSender', function() {
       });
 
       it('reject when disconnected remotely', function(done) {
-        let p = new shaka.test.StatusPromise(method(123, 'abc'));
+        const p = new shaka.test.StatusPromise(method(123, 'abc'));
 
         // Wait a tick for the Promise status to be set.
         Util.delay(0.1).then(function() {
@@ -657,7 +657,7 @@ describe('CastSender', function() {
       sender.init();
       fakeReceiverAvailability(true);
       sender.cast(fakeInitState).then(function() {
-        let update = {
+        const update = {
           video: {muted: false},
         };
         fakeSessionMessage({
@@ -727,8 +727,8 @@ describe('CastSender', function() {
         expect(mockSession.removeUpdateListener).not.toHaveBeenCalled();
         expect(mockSession.removeMessageListener).not.toHaveBeenCalled();
 
-        let method = sender.get('player', 'load');
-        let p = new shaka.test.StatusPromise(method());
+        const method = sender.get('player', 'load');
+        const p = new shaka.test.StatusPromise(method());
 
         // Wait a tick for the Promise status to be set.
         return Util.delay(0.1).then(function() {
@@ -765,8 +765,8 @@ describe('CastSender', function() {
         expect(mockSession.removeUpdateListener).not.toHaveBeenCalled();
         expect(mockSession.removeMessageListener).not.toHaveBeenCalled();
 
-        let method = sender.get('player', 'load');
-        let p = new shaka.test.StatusPromise(method());
+        const method = sender.get('player', 'load');
+        const p = new shaka.test.StatusPromise(method());
 
         // Wait a tick for the Promise status to be set.
         return Util.delay(0.1).then(function() {
@@ -805,7 +805,7 @@ describe('CastSender', function() {
   }
 
   function createMockCastSession() {
-    let session = {
+    const session = {
       messages: [],
       status: 'connected',
       receiver: {friendlyName: 'SomeDevice'},
@@ -830,19 +830,19 @@ describe('CastSender', function() {
    * @param {boolean} yes If true, simulate receivers being available.
    */
   function fakeReceiverAvailability(yes) {
-    let calls = mockCastApi.ApiConfig.calls;
+    const calls = mockCastApi.ApiConfig.calls;
     expect(calls.count()).toEqual(1);
     if (calls.count()) {
-      let onReceiverStatusChanged = calls.argsFor(0)[2];
+      const onReceiverStatusChanged = calls.argsFor(0)[2];
       onReceiverStatusChanged(yes ? 'available' : 'unavailable');
     }
   }
 
   function fakeSessionConnection() {
-    let calls = mockCastApi.requestSession.calls;
+    const calls = mockCastApi.requestSession.calls;
     expect(calls.count()).toEqual(1);
     if (calls.count()) {
-      let onSessionInitiated = calls.argsFor(0)[0];
+      const onSessionInitiated = calls.argsFor(0)[0];
       mockSession = createMockCastSession();
       onSessionInitiated(mockSession);
     }
@@ -852,10 +852,10 @@ describe('CastSender', function() {
    * @param {string} code
    */
   function fakeSessionConnectionFailure(code) {
-    let calls = mockCastApi.requestSession.calls;
+    const calls = mockCastApi.requestSession.calls;
     expect(calls.count()).toEqual(1);
     if (calls.count()) {
-      let onSessionError = calls.argsFor(0)[1];
+      const onSessionError = calls.argsFor(0)[1];
       onSessionError({code: code});
     }
   }
@@ -864,31 +864,31 @@ describe('CastSender', function() {
    * @param {?} message
    */
   function fakeSessionMessage(message) {
-    let calls = mockSession.addMessageListener.calls;
+    const calls = mockSession.addMessageListener.calls;
     expect(calls.count()).toEqual(1);
     if (calls.count()) {
-      let namespace = calls.argsFor(0)[0];
-      let listener = calls.argsFor(0)[1];
-      let serialized = CastUtils.serialize(message);
+      const namespace = calls.argsFor(0)[0];
+      const listener = calls.argsFor(0)[1];
+      const serialized = CastUtils.serialize(message);
       listener(namespace, serialized);
     }
   }
 
   function fakeRemoteDisconnect() {
     mockSession.status = 'disconnected';
-    let calls = mockSession.addUpdateListener.calls;
+    const calls = mockSession.addUpdateListener.calls;
     expect(calls.count()).toEqual(1);
     if (calls.count()) {
-      let onConnectionStatus = calls.argsFor(0)[0];
+      const onConnectionStatus = calls.argsFor(0)[0];
       onConnectionStatus();
     }
   }
 
   function fakeJoinExistingSession() {
-    let calls = mockCastApi.ApiConfig.calls;
+    const calls = mockCastApi.ApiConfig.calls;
     expect(calls.count()).toEqual(1);
     if (calls.count()) {
-      let onJoinExistingSession = calls.argsFor(0)[1];
+      const onJoinExistingSession = calls.argsFor(0)[1];
       mockSession = createMockCastSession();
       onJoinExistingSession(mockSession);
     }

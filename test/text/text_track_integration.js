@@ -89,7 +89,7 @@ describe('TextTrackIntegration', function() {
 
 
   describe('addCue', function() {
-    let cues = [
+    const cues = [
       new VTTCue(0, 1000, 'Cue 1 message'),
       new VTTCue(2000, 3000, 'Cue 2 message'),
     ];
@@ -129,7 +129,7 @@ describe('TextTrackIntegration', function() {
   });
 
   describe('removeCue', function() {
-    let cues = [
+    const cues = [
       new VTTCue(0, 1000, 'Cue 1 message'),
       new VTTCue(2000, 3000, 'Cue 2 message'),
     ];

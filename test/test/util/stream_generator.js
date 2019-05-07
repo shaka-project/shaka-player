@@ -180,7 +180,7 @@ shaka.test.Mp4VodStreamGenerator = function(
 
 /** @override */
 shaka.test.Mp4VodStreamGenerator.prototype.init = function() {
-  let async = [
+  const async = [
     shaka.test.Util.fetch(this.initSegmentUri_),
     shaka.test.Util.fetch(this.segmentTemplateUri_),
   ];
@@ -218,9 +218,9 @@ shaka.test.Mp4VodStreamGenerator.prototype.getSegment = function(
   goog.asserts.assert((position % 1 === 0) && (position >= 1),
                       'segment number must be an integer >= 1');
 
-  let segmentStartTime = (position - 1) * this.segmentDuration_;
+  const segmentStartTime = (position - 1) * this.segmentDuration_;
 
-  let mediaTimestamp = segmentStartTime + this.presentationTimeOffset_;
+  const mediaTimestamp = segmentStartTime + this.presentationTimeOffset_;
 
   return shaka.test.StreamGenerator.setBaseMediaDecodeTime_(
       this.segmentTemplate_, this.tfdtOffset_, mediaTimestamp, this.timescale_);
@@ -317,7 +317,7 @@ shaka.test.Mp4LiveStreamGenerator = function(
 
 /** @override */
 shaka.test.Mp4LiveStreamGenerator.prototype.init = function() {
-  let async = [
+  const async = [
     shaka.test.Util.fetch(this.initSegmentUri_),
     shaka.test.Util.fetch(this.segmentTemplateUri_),
   ];
@@ -356,15 +356,15 @@ shaka.test.Mp4LiveStreamGenerator.prototype.getSegment = function(
   goog.asserts.assert((position % 1 === 0) && (position >= 1),
                       'segment number must be an integer >= 1');
 
-  let segmentStartTime = (position - 1) * this.segmentDuration_;
+  const segmentStartTime = (position - 1) * this.segmentDuration_;
 
   // Compute the segment's availability start time and end time.
   // (See section 5.3.9.5.3 of the DASH spec.)
-  let segmentAvailabilityStartTime = this.availabilityStartTime_ +
+  const segmentAvailabilityStartTime = this.availabilityStartTime_ +
                                      segmentStartTime +
                                      (segmentOffset * this.segmentDuration_) +
                                      this.segmentDuration_;
-  let segmentAvailabiltyEndTime = segmentAvailabilityStartTime +
+  const segmentAvailabiltyEndTime = segmentAvailabilityStartTime +
                                   this.segmentDuration_ +
                                   this.timeShiftBufferDepth_;
 
@@ -386,9 +386,9 @@ shaka.test.Mp4LiveStreamGenerator.prototype.getSegment = function(
 
   // |availabilityStartTime| may be less than |broadcastStartTime| to align the
   // stream if the Period's first segment's first timestamp does not equal 0.
-  let artificialPresentationTimeOffset =
+  const artificialPresentationTimeOffset =
       this.broadcastStartTime_ - this.availabilityStartTime_;
-  let mediaTimestamp = segmentStartTime +
+  const mediaTimestamp = segmentStartTime +
                        this.presentationTimeOffset_ +
                        artificialPresentationTimeOffset;
 
@@ -411,24 +411,24 @@ shaka.test.Mp4LiveStreamGenerator.prototype.getSegment = function(
  */
 shaka.test.StreamGenerator.getTimescale_ = function(
     initSegment, mdhdOffset) {
-  let dataView = new DataView(initSegment);
-  let reader = new shaka.util.DataViewReader(
+  const dataView = new DataView(initSegment);
+  const reader = new shaka.util.DataViewReader(
       dataView, shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
   reader.skip(mdhdOffset);
 
-  let size = reader.readUint32();
-  let type = reader.readUint32();
+  const size = reader.readUint32();
+  const type = reader.readUint32();
   goog.asserts.assert(
       type == 0x6d646864 /* mdhd */,
       'initSegment does not contain an mdhd box at the specified offset.');
 
-  let largesizePresent = size == 1;
+  const largesizePresent = size == 1;
   if (largesizePresent) {
     shaka.log.v2('\'largesize\' field is present.');
     reader.skip(8);  // Skip 'largesize' field.
   }
 
-  let version = reader.readUint8();
+  const version = reader.readUint8();
   reader.skip(3);  // Skip 'flags' field.
 
   // Skip 'creation_time' and 'modification_time' fields.
@@ -440,7 +440,7 @@ shaka.test.StreamGenerator.getTimescale_ = function(
     reader.skip(16);
   }
 
-  let timescale = reader.readUint32();
+  const timescale = reader.readUint32();
   return timescale;
 };
 
@@ -467,30 +467,30 @@ shaka.test.StreamGenerator.setBaseMediaDecodeTime_ = function(
   // NOTE from Microsoft on the lack of ArrayBuffer.prototype.slice in IE11:
   // "At this time we do not plan to fix this issue." ~ https://bit.ly/2ywEkpQ
   // This is the best replacement for segment.slice(0) I could come up with:
-  let buffer = new ArrayBuffer(segment.byteLength);
+  const buffer = new ArrayBuffer(segment.byteLength);
   (new Uint8Array(buffer)).set(new Uint8Array(segment));
 
-  let dataView = new DataView(buffer);
-  let reader = new shaka.util.DataViewReader(
+  const dataView = new DataView(buffer);
+  const reader = new shaka.util.DataViewReader(
       dataView, shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
   reader.skip(tfdtOffset);
 
-  let size = reader.readUint32();
-  let type = reader.readUint32();
+  const size = reader.readUint32();
+  const type = reader.readUint32();
   goog.asserts.assert(
       type == 0x74666474 /* tfdt */,
       'segment does not contain a tfdt box at the specified offset.');
 
-  let largesizePresent = size == 1;
+  const largesizePresent = size == 1;
   if (largesizePresent) {
     shaka.log.v2('\'largesize\' field is present.');
     reader.skip(8);  // Skip 'largesize' field.
   }
 
-  let version = reader.readUint8();
+  const version = reader.readUint8();
   reader.skip(3);  // Skip 'flags' field.
 
-  let pos = reader.getPosition();
+  const pos = reader.getPosition();
   if (version == 0) {
     shaka.log.v2('tfdt box is version 0.');
     dataView.setUint32(pos, baseMediaDecodeTime * timescale);

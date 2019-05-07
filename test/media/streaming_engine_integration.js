@@ -168,7 +168,7 @@ describe('StreamingEngine', () => {
   }
 
   function createVodStreamGenerator(metadata, type) {
-    let generator = new shaka.test.Mp4VodStreamGenerator(
+    const generator = new shaka.test.Mp4VodStreamGenerator(
         metadata.initSegmentUri,
         metadata.mdhdOffset,
         metadata.segmentUri,
@@ -182,8 +182,8 @@ describe('StreamingEngine', () => {
   function createLiveStreamGenerator(metadata, type, timeShiftBufferDepth) {
     // Set the generator's AST to 295 seconds in the past so the
     // StreamingEngine begins streaming close to the end of the first Period.
-    let now = Date.now() / 1000;
-    let generator = new shaka.test.Mp4LiveStreamGenerator(
+    const now = Date.now() / 1000;
+    const generator = new shaka.test.Mp4LiveStreamGenerator(
         metadata.initSegmentUri,
         metadata.mdhdOffset,
         metadata.segmentUri,
@@ -199,13 +199,13 @@ describe('StreamingEngine', () => {
 
   function setupNetworkingEngine(firstPeriodStartTime, secondPeriodStartTime,
                                  presentationDuration, segmentDurations) {
-    let periodStartTimes = [firstPeriodStartTime, secondPeriodStartTime];
+    const periodStartTimes = [firstPeriodStartTime, secondPeriodStartTime];
 
-    let boundsCheckPosition =
+    const boundsCheckPosition =
         shaka.test.StreamingEngineUtil.boundsCheckPosition.bind(
             null, periodStartTimes, presentationDuration, segmentDurations);
 
-    let getNumSegments =
+    const getNumSegments =
         shaka.test.StreamingEngineUtil.getNumSegments.bind(
             null, periodStartTimes, presentationDuration, segmentDurations);
 
@@ -215,8 +215,8 @@ describe('StreamingEngine', () => {
         // Init segment generator:
         function(type, periodNumber) {
           expect(periodNumber).toBeLessThan(periodStartTimes.length + 1);
-          let wallClockTime = Date.now() / 1000;
-          let segment = generators[type].getInitSegment(wallClockTime);
+          const wallClockTime = Date.now() / 1000;
+          const segment = generators[type].getInitSegment(wallClockTime);
           expect(segment).not.toBeNull();
           return segment;
         },
@@ -232,9 +232,9 @@ describe('StreamingEngine', () => {
             numPriorSegments += getNumSegments(type, n);
           }
 
-          let wallClockTime = Date.now() / 1000;
+          const wallClockTime = Date.now() / 1000;
 
-          let segment = generators[type].getSegment(
+          const segment = generators[type].getSegment(
               position, numPriorSegments, wallClockTime);
           expect(segment).not.toBeNull();
           return segment;
@@ -243,7 +243,7 @@ describe('StreamingEngine', () => {
 
   function setupPlayhead() {
     onBuffering = jasmine.createSpy('onBuffering');
-    let onSeek = () => { streamingEngine.seeked(); };
+    const onSeek = () => { streamingEngine.seeked(); };
     playhead = new shaka.media.MediaSourcePlayhead(
         /** @type {!HTMLVideoElement} */(video),
         manifest,
@@ -280,7 +280,7 @@ describe('StreamingEngine', () => {
   }
 
   function createStreamingEngine() {
-    let playerInterface = {
+    const playerInterface = {
       getPresentationTime: () => playhead.getTime(),
       mediaSourceEngine: mediaSourceEngine,
       netEngine: /** @type {!shaka.net.NetworkingEngine} */(netEngine),
@@ -599,8 +599,8 @@ describe('StreamingEngine', () => {
        * @return {!shaka.media.SegmentIndex}
        */
       function createIndex(type) {
-        let d = metadata[type].segmentDuration;
-        let refs = [];
+        const d = metadata[type].segmentDuration;
+        const refs = [];
         let i = 1;
         let time = gapAtStart;
         while (time < 30) {
@@ -611,7 +611,7 @@ describe('StreamingEngine', () => {
             end += d;
           }
 
-          let getUris = (function(i) {
+          const getUris = (function(i) {
             // The times in the media are based on the URL; so to drop a
             // segment, we change the URL.
             if (i >= 2 && dropSegment) i++;
@@ -627,14 +627,14 @@ describe('StreamingEngine', () => {
       }
 
       function createInit(type) {
-        let getUris = () => {
+        const getUris = () => {
           return ['1_' + type + '_init'];
         };
         return new shaka.media.InitSegmentReference(getUris, 0, null);
       }
 
-      let videoIndex = createIndex('video');
-      let audioIndex = createIndex('audio');
+      const videoIndex = createIndex('video');
+      const audioIndex = createIndex('audio');
       return {
         presentationTimeline: timeline,
         offlineSessionIds: [],

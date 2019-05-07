@@ -33,7 +33,7 @@ describe('TtmlTextParser', function() {
   });
 
   it('supports xml:space', function() {
-    let ttBody = '\n' +
+    const ttBody = '\n' +
         '  <body>\n' +
         '    <p begin="01:02.03" end="01:02.05">\n' +
         '      <span> A    B   C  </span>\n' +
@@ -797,9 +797,9 @@ describe('TtmlTextParser', function() {
    * @param {shaka.extern.TextParser.TimeContext} time
    */
   function verifyHelper(cues, text, time) {
-    let data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
-    let result = new shaka.text.TtmlTextParser().parseMedia(data, time);
-    let properties = ['textAlign', 'lineAlign', 'positionAlign', 'size',
+    const data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
+    const result = new shaka.text.TtmlTextParser().parseMedia(data, time);
+    const properties = ['textAlign', 'lineAlign', 'positionAlign', 'size',
                       'line', 'position', 'direction', 'color', 'writingMode',
                       'backgroundColor', 'fontWeight', 'fontFamily',
                       'wrapLine', 'lineHeight', 'fontStyle', 'fontSize'];
@@ -815,7 +815,7 @@ describe('TtmlTextParser', function() {
       }
 
       for (let j = 0; j < properties.length; j++) {
-        let property = properties[j];
+        const property = properties[j];
         if (property in cues[i]) {
           expect(result[i][property]).toEqual(cues[i][property]);
         }
@@ -836,14 +836,14 @@ describe('TtmlTextParser', function() {
    * @param {shaka.extern.CueRegion} actual
    */
   function verifyRegion(expected, actual) {
-    let properties = ['id', 'viewportAnchorX', 'viewportAnchorY',
+    const properties = ['id', 'viewportAnchorX', 'viewportAnchorY',
                       'regionAnchorX', 'regionAnchorY', 'width', 'height',
                       'heightUnits', 'widthUnits', 'viewportAnchorUnits',
                       'scroll'];
     expect(actual).toBeTruthy();
 
     for (let i = 0; i < properties.length; i++) {
-      let property = properties[i];
+      const property = properties[i];
       if (property in expected) {
         expect(actual[property]).toEqual(expected[property]);
       }
@@ -856,10 +856,10 @@ describe('TtmlTextParser', function() {
    * @param {string} text
    */
   function errorHelper(code, text) {
-    let error = new shaka.util.Error(
+    const error = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.TEXT,
         code);
-    let data = shaka.util.StringUtils.toUTF8(text);
+    const data = shaka.util.StringUtils.toUTF8(text);
     try {
       new shaka.text.TtmlTextParser().parseMedia(
           new Uint8Array(data),

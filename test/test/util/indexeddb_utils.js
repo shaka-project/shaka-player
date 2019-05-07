@@ -63,9 +63,9 @@ shaka.test.IndexedDBUtils.makeConnection = function(name, version, upgrade) {
  */
 shaka.test.IndexedDBUtils.deleteDB = function(name) {
   /** @type {!shaka.util.PublicPromise} */
-  let p = new shaka.util.PublicPromise();
+  const p = new shaka.util.PublicPromise();
 
-  let goaway = window.indexedDB.deleteDatabase(name);
+  const goaway = window.indexedDB.deleteDatabase(name);
   goaway.onsuccess = (e) => { p.resolve(); };
   goaway.onerror = (e) => { p.reject(); };
 
@@ -85,9 +85,9 @@ shaka.test.IndexedDBUtils.dbOpenNew_ = function(name, version, upgrade) {
   let upgraded = false;
 
   /** @type {!shaka.util.PublicPromise} */
-  let p = new shaka.util.PublicPromise();
+  const p = new shaka.util.PublicPromise();
 
-  let open = window.indexedDB.open(name, version);
+  const open = window.indexedDB.open(name, version);
   open.onerror = (e) => { p.reject(); };
   open.onsuccess = (e) => {
     // Make sure that the database actually upgraded when connecting or else
@@ -118,9 +118,9 @@ shaka.test.IndexedDBUtils.dbOpenNew_ = function(name, version, upgrade) {
  */
 shaka.test.IndexedDBUtils.open = function(name) {
   /** @type {!shaka.util.PublicPromise} */
-  let p = new shaka.util.PublicPromise();
+  const p = new shaka.util.PublicPromise();
 
-  let open = window.indexedDB.open(name);
+  const open = window.indexedDB.open(name);
   open.onerror = (e) => { p.reject(); };
   open.onsuccess = (e) => { p.resolve(open.result); };
 
@@ -135,7 +135,7 @@ shaka.test.IndexedDBUtils.open = function(name) {
  */
 shaka.test.IndexedDBUtils.wait_ = function(ms) {
   /** @type {!shaka.util.PublicPromise} */
-  let p = new shaka.util.PublicPromise();
+  const p = new shaka.util.PublicPromise();
   setTimeout(() => p.resolve(), ms);
   return p;
 };

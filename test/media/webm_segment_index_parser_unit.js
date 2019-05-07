@@ -21,10 +21,10 @@ describe('WebmSegmentIndexParser', function() {
 
   let indexSegment;
   let initSegment;
-  let parser = new shaka.media.WebmSegmentIndexParser();
+  const parser = new shaka.media.WebmSegmentIndexParser();
 
   beforeAll(async () => {
-    let responses = await Promise.all([
+    const responses = await Promise.all([
       shaka.test.Util.fetch(indexSegmentUri),
       shaka.test.Util.fetch(initSegmentUri),
     ]);
@@ -33,7 +33,7 @@ describe('WebmSegmentIndexParser', function() {
   });
 
   it('rejects a non-index segment ', function() {
-    let error = new shaka.util.Error(
+    const error = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.MEDIA,
         shaka.util.Error.Code.WEBM_CUES_ELEMENT_MISSING);
@@ -46,7 +46,7 @@ describe('WebmSegmentIndexParser', function() {
   });
 
   it('rejects an invalid init segment ', function() {
-    let error = new shaka.util.Error(
+    const error = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.MEDIA,
         shaka.util.Error.Code.WEBM_EBML_HEADER_ELEMENT_MISSING);
@@ -59,8 +59,8 @@ describe('WebmSegmentIndexParser', function() {
   });
 
   it('parses index segment ', function() {
-    let result = parser.parse(indexSegment, initSegment, [], 0);
-    let references =
+    const result = parser.parse(indexSegment, initSegment, [], 0);
+    const references =
         [
          {startTime: 0, endTime: 12, startByte: 281, endByte: 95911},
          {startTime: 12, endTime: 24, startByte: 95912, endByte: 209663},
@@ -81,8 +81,8 @@ describe('WebmSegmentIndexParser', function() {
   });
 
   it('takes a scaled presentationTimeOffset in seconds', function() {
-    let result = parser.parse(indexSegment, initSegment, [], 2);
-    let references =
+    const result = parser.parse(indexSegment, initSegment, [], 2);
+    const references =
         [
          {startTime: -2, endTime: 10},
          {startTime: 10, endTime: 22},

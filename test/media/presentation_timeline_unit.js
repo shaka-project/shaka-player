@@ -59,7 +59,7 @@ describe('PresentationTimeline', function() {
       clockOffset,
       presentationDelay,
       autoCorrectDrift = true) {
-    let timeline = new shaka.media.PresentationTimeline(
+    const timeline = new shaka.media.PresentationTimeline(
         presentationStartTime, presentationDelay, autoCorrectDrift);
     timeline.setStatic(isStatic);
     timeline.setDuration(duration || Infinity);
@@ -77,7 +77,7 @@ describe('PresentationTimeline', function() {
    * @return {shaka.media.PresentationTimeline}
    */
   function makeVodTimeline(duration) {
-    let timeline = makePresentationTimeline(
+    const timeline = makePresentationTimeline(
         /* static */ true, duration, /* start time */ null,
         /* availability */ Infinity, /* max seg dur */ 10,
         /* clock offset */ 0, /* presentation delay */ 0);
@@ -94,8 +94,8 @@ describe('PresentationTimeline', function() {
    * @return {shaka.media.PresentationTimeline}
    */
   function makeIprTimeline(duration, delay) {
-    let now = Date.now() / 1000;
-    let timeline = makePresentationTimeline(
+    const now = Date.now() / 1000;
+    const timeline = makePresentationTimeline(
         /* static */ false, duration, /* start time */ now,
         /* availability */ Infinity, /* max seg dur */ 10,
         /* clock offset */ 0, delay || 0);
@@ -113,8 +113,8 @@ describe('PresentationTimeline', function() {
    * @return {shaka.media.PresentationTimeline}
    */
   function makeLiveTimeline(availability, delay, autoCorrectDrift = true) {
-    let now = Date.now() / 1000;
-    let timeline = makePresentationTimeline(
+    const now = Date.now() / 1000;
+    const timeline = makePresentationTimeline(
         /* static */ false, /* duration */ Infinity, /* start time */ now,
         availability, /* max seg dur */ 10,
         /* clock offset */ 0, delay || 0, autoCorrectDrift);
@@ -143,8 +143,8 @@ describe('PresentationTimeline', function() {
 
   describe('getSegmentAvailabilityStart', function() {
     it('returns 0 for VOD and IPR', function() {
-      let timeline1 = makeVodTimeline(/* duration */ 60);
-      let timeline2 = makeIprTimeline(/* duration */ 60);
+      const timeline1 = makeVodTimeline(/* duration */ 60);
+      const timeline2 = makeIprTimeline(/* duration */ 60);
 
       setElapsed(0);
       expect(timeline1.getSegmentAvailabilityStart()).toBe(0);
@@ -156,7 +156,7 @@ describe('PresentationTimeline', function() {
     });
 
     it('calculates time for live with finite availability', function() {
-      let timeline = makeLiveTimeline(/* availability */ 20);
+      const timeline = makeLiveTimeline(/* availability */ 20);
 
       setElapsed(0);
       expect(timeline.getSegmentAvailabilityStart()).toBe(0);
@@ -181,7 +181,7 @@ describe('PresentationTimeline', function() {
     });
 
     it('calculates time for live with infinite availability', function() {
-      let timeline = makeLiveTimeline(/* availability */ Infinity);
+      const timeline = makeLiveTimeline(/* availability */ Infinity);
 
       setElapsed(0);
       expect(timeline.getSegmentAvailabilityStart()).toBe(0);
@@ -197,7 +197,7 @@ describe('PresentationTimeline', function() {
     });
 
     it('calculates time based on segment times when available', () => {
-      let timeline = makeLiveTimeline(/* availability */ 20);
+      const timeline = makeLiveTimeline(/* availability */ 20);
 
       const ref1 = makeSegmentReference(0, 10);
       const ref2 = makeSegmentReference(10, 20);
@@ -237,7 +237,7 @@ describe('PresentationTimeline', function() {
 
   describe('getSegmentAvailabilityEnd', function() {
     it('returns duration for VOD', function() {
-      let timeline = makeVodTimeline(/* duration */ 60);
+      const timeline = makeVodTimeline(/* duration */ 60);
 
       setElapsed(0);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(60);
@@ -247,7 +247,7 @@ describe('PresentationTimeline', function() {
     });
 
     it('calculates time for IPR', function() {
-      let timeline = makeIprTimeline(/* duration */ 60);
+      const timeline = makeIprTimeline(/* duration */ 60);
 
       setElapsed(0);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(0);
@@ -269,8 +269,8 @@ describe('PresentationTimeline', function() {
     });
 
     it('calculates time for live', function() {
-      let timeline1 = makeLiveTimeline(/* availability */ 20);
-      let timeline2 = makeLiveTimeline(/* availability */ Infinity);
+      const timeline1 = makeLiveTimeline(/* availability */ 20);
+      const timeline2 = makeLiveTimeline(/* availability */ Infinity);
 
       setElapsed(0);
       expect(timeline1.getSegmentAvailabilityEnd()).toBe(0);
@@ -298,7 +298,7 @@ describe('PresentationTimeline', function() {
     });
 
     it('calculates time based on segment times when available', () => {
-      let timeline = makeLiveTimeline(/* availability */ 20);
+      const timeline = makeLiveTimeline(/* availability */ 20);
 
       const ref1 = makeSegmentReference(0, 10);
       const ref2 = makeSegmentReference(10, 20);
@@ -321,10 +321,10 @@ describe('PresentationTimeline', function() {
   describe('getDuration', function() {
     it('returns the timeline duration', function() {
       setElapsed(0);
-      let timeline1 = makeVodTimeline(/* duration */ 60);
-      let timeline2 = makeIprTimeline(/* duration */ 60);
-      let timeline3 = makeLiveTimeline(/* availability */ 20);
-      let timeline4 = makeLiveTimeline(/* availability */ Infinity);
+      const timeline1 = makeVodTimeline(/* duration */ 60);
+      const timeline2 = makeIprTimeline(/* duration */ 60);
+      const timeline3 = makeLiveTimeline(/* availability */ 20);
+      const timeline4 = makeLiveTimeline(/* availability */ Infinity);
       expect(timeline1.getDuration()).toBe(60);
       expect(timeline2.getDuration()).toBe(60);
       expect(timeline3.getDuration()).toBe(Infinity);
@@ -335,7 +335,7 @@ describe('PresentationTimeline', function() {
   describe('setDuration', function() {
     it('affects availability end for VOD', function() {
       setElapsed(0);
-      let timeline = makeVodTimeline(/* duration */ 60);
+      const timeline = makeVodTimeline(/* duration */ 60);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(60);
 
       timeline.setDuration(90);
@@ -343,7 +343,7 @@ describe('PresentationTimeline', function() {
     });
 
     it('affects availability end for IPR', function() {
-      let timeline = makeIprTimeline(/* duration */ 60);
+      const timeline = makeIprTimeline(/* duration */ 60);
 
       setElapsed(85);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(60);
@@ -355,7 +355,7 @@ describe('PresentationTimeline', function() {
 
   describe('clockOffset', function() {
     it('offsets availability calculations', function() {
-      let timeline = makeLiveTimeline(/* availability */ 10);
+      const timeline = makeLiveTimeline(/* availability */ 10);
       setElapsed(11);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(1);
 
@@ -366,14 +366,14 @@ describe('PresentationTimeline', function() {
 
   describe('getSafeSeekRangeStart', function() {
     it('ignores offset for VOD', function() {
-      let timeline = makeVodTimeline(/* duration */ 60);
+      const timeline = makeVodTimeline(/* duration */ 60);
       expect(timeline.getSafeSeekRangeStart(0)).toBe(0);
       expect(timeline.getSafeSeekRangeStart(10)).toBe(0);
       expect(timeline.getSafeSeekRangeStart(25)).toBe(0);
     });
 
     it('offsets from live edge', function() {
-      let timeline = makeLiveTimeline(/* availability */ 60, /* delay */ 0);
+      const timeline = makeLiveTimeline(/* availability */ 60, /* delay */ 0);
 
       setElapsed(120);
       // now (120) - availability (60) - segment size (10) = 50
@@ -384,7 +384,7 @@ describe('PresentationTimeline', function() {
     });
 
     it('clamps to end', function() {
-      let timeline = makeLiveTimeline(/* availability */ 60, /* delay */ 0);
+      const timeline = makeLiveTimeline(/* availability */ 60, /* delay */ 0);
 
       setElapsed(120);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(110);
@@ -394,7 +394,7 @@ describe('PresentationTimeline', function() {
     });
 
     it('will return 0 if safe', function() {
-      let timeline = makeLiveTimeline(/* availability */ 60, /* delay */ 0);
+      const timeline = makeLiveTimeline(/* availability */ 60, /* delay */ 0);
 
       setElapsed(50);
       // now (50) - availability (60) - segment size (10) = -20
@@ -405,7 +405,7 @@ describe('PresentationTimeline', function() {
 
     it('adjusts segment times to the presentation timeline', () => {
       // All of these segments fit in the availability window.
-      let timeline = makeLiveTimeline(/* availability */ 100);
+      const timeline = makeLiveTimeline(/* availability */ 100);
 
       // A reference from 30-40, + period start 0
       timeline.notifySegments([makeSegmentReference(30, 40)],
@@ -422,8 +422,8 @@ describe('PresentationTimeline', function() {
 
   describe('getSeekRangeEnd', function() {
     it('accounts for delay for live and IPR', function() {
-      let timeline1 = makeIprTimeline(/* duration */ 60, /* delay */ 7);
-      let timeline2 = makeLiveTimeline(/* duration */ 60, /* delay */ 7);
+      const timeline1 = makeIprTimeline(/* duration */ 60, /* delay */ 7);
+      const timeline2 = makeLiveTimeline(/* duration */ 60, /* delay */ 7);
 
       setElapsed(11);
       expect(timeline1.getSeekRangeEnd()).toBe(0);

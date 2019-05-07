@@ -48,7 +48,7 @@ describe('DashParser SegmentBase', function() {
   });
 
   it('requests init data for WebM', async () => {
-    let source = [
+    const source = [
       '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <AdaptationSet mimeType="video/webm">',
@@ -68,7 +68,7 @@ describe('DashParser SegmentBase', function() {
         .setResponseText('http://example.com', '')
         .setResponseText('http://example.com/init.webm', '');
 
-    let manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest).toEqual(Dash.makeManifestFromInit('init.webm', 201, 300));
     await Dash.callCreateSegmentIndex(manifest);
 
@@ -78,7 +78,7 @@ describe('DashParser SegmentBase', function() {
   });
 
   it('inherits from Period', async () => {
-    let source = [
+    const source = [
       '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <BaseURL>http://example.com</BaseURL>',
@@ -96,7 +96,7 @@ describe('DashParser SegmentBase', function() {
         .setResponseText('dummy://foo', source)
         .setResponseText('http://example.com', '');
 
-    let manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest).toEqual(Dash.makeManifestFromInit('init.mp4', 201, 300));
     await Dash.callCreateSegmentIndex(manifest);
 
@@ -105,7 +105,7 @@ describe('DashParser SegmentBase', function() {
   });
 
   it('inherits from AdaptationSet', async () => {
-    let source = [
+    const source = [
       '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <AdaptationSet mimeType="video/mp4">',
@@ -123,7 +123,7 @@ describe('DashParser SegmentBase', function() {
         .setResponseText('dummy://foo', source)
         .setResponseText('http://example.com', '');
 
-    let manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest).toEqual(Dash.makeManifestFromInit('init.mp4', 201, 300));
     await Dash.callCreateSegmentIndex(manifest);
 
@@ -132,7 +132,7 @@ describe('DashParser SegmentBase', function() {
   });
 
   it('does not require sourceURL in Initialization', async () => {
-    let source = [
+    const source = [
       '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <AdaptationSet mimeType="video/mp4">',
@@ -151,7 +151,7 @@ describe('DashParser SegmentBase', function() {
         .setResponseText('dummy://foo', source)
         .setResponseText('http://example.com/stream.mp4', '');
 
-    let manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest).toEqual(Dash.makeManifestFromInit('stream.mp4', 201, 300));
     await Dash.callCreateSegmentIndex(manifest);
 
@@ -160,7 +160,7 @@ describe('DashParser SegmentBase', function() {
   });
 
   it('merges across levels', async () => {
-    let source = [
+    const source = [
       '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <BaseURL>http://example.com</BaseURL>',
@@ -185,7 +185,7 @@ describe('DashParser SegmentBase', function() {
         .setResponseText('dummy://foo', source)
         .setResponseText('http://example.com/index.mp4', '');
 
-    let manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest).toEqual(
         Dash.makeManifestFromInit('init.mp4', 201, 300, 10));
     await Dash.callCreateSegmentIndex(manifest);
@@ -195,7 +195,7 @@ describe('DashParser SegmentBase', function() {
   });
 
   it('merges and overrides across levels', async () => {
-    let source = [
+    const source = [
       '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <BaseURL>http://example.com</BaseURL>',
@@ -219,7 +219,7 @@ describe('DashParser SegmentBase', function() {
         .setResponseText('dummy://foo', source)
         .setResponseText('http://example.com', '');
 
-    let manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest).toEqual(
         Dash.makeManifestFromInit('special.mp4', 0, null, 20));
     await Dash.callCreateSegmentIndex(manifest);
@@ -229,7 +229,7 @@ describe('DashParser SegmentBase', function() {
   });
 
   it('does not assume the same timescale as media', async () => {
-    let source = [
+    const source = [
       '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <AdaptationSet mimeType="video/mp4">',
@@ -248,18 +248,18 @@ describe('DashParser SegmentBase', function() {
         .setResponseText('dummy://foo', source)
         .setResponseValue('http://example.com/index.mp4', indexSegment);
 
-    let manifest = await parser.start('dummy://foo', playerInterface);
-    let video = manifest.periods[0].variants[0].video;
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const video = manifest.periods[0].variants[0].video;
     await video.createSegmentIndex();  // real data, should succeed
 
-    let reference = video.getSegmentReference(0);
+    const reference = video.getSegmentReference(0);
     expect(reference.startTime).toEqual(-2);
     expect(reference.endTime).toEqual(10);  // would be 12 without PTO
   });
 
   describe('fails for', function() {
     it('unsupported container', async () => {
-      let source = [
+      const source = [
         '<MPD mediaPresentationDuration="PT75S">',
         '  <Period>',
         '    <BaseURL>http://example.com</BaseURL>',
@@ -271,7 +271,7 @@ describe('DashParser SegmentBase', function() {
         '  </Period>',
         '</MPD>',
       ].join('\n');
-      let error = new shaka.util.Error(
+      const error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_UNSUPPORTED_CONTAINER);
@@ -279,7 +279,7 @@ describe('DashParser SegmentBase', function() {
     });
 
     it('missing init segment for WebM', async () => {
-      let source = [
+      const source = [
         '<MPD mediaPresentationDuration="PT75S">',
         '  <Period>',
         '    <BaseURL>http://example.com</BaseURL>',
@@ -291,7 +291,7 @@ describe('DashParser SegmentBase', function() {
         '  </Period>',
         '</MPD>',
       ].join('\n');
-      let error = new shaka.util.Error(
+      const error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_WEBM_MISSING_INIT);
@@ -299,7 +299,7 @@ describe('DashParser SegmentBase', function() {
     });
 
     it('no @indexRange nor RepresentationIndex', async () => {
-      let source = [
+      const source = [
         '<MPD mediaPresentationDuration="PT75S">',
         '  <Period>',
         '    <BaseURL>http://example.com</BaseURL>',
@@ -313,7 +313,7 @@ describe('DashParser SegmentBase', function() {
         '  </Period>',
         '</MPD>',
       ].join('\n');
-      let error = new shaka.util.Error(
+      const error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_NO_SEGMENT_INFO);

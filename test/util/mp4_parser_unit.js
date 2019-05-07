@@ -115,7 +115,7 @@ describe('Mp4Parser', function() {
 
   describe('headerDefinitions', function() {
     it('reads box header', function() {
-      let callback = jasmine.createSpy('parser callback').and.callFake(
+      const callback = jasmine.createSpy('parser callback').and.callFake(
           function(box) {
             expect(box.size).toEqual(12);
             expect(box.version).toEqual(null);
@@ -129,7 +129,7 @@ describe('Mp4Parser', function() {
     });
 
     it('reads full box header', function() {
-      let callback = jasmine.createSpy('parser callback').and.callFake(
+      const callback = jasmine.createSpy('parser callback').and.callFake(
           function(box) {
             expect(box.size).toEqual(16);
             expect(box.version).toEqual(1);
@@ -145,17 +145,17 @@ describe('Mp4Parser', function() {
 
   describe('boxDefinitions', function() {
     it('reads children definition', function() {
-      let parentBox = jasmine.createSpy('parent box').and.callFake(
+      const parentBox = jasmine.createSpy('parent box').and.callFake(
           shaka.util.Mp4Parser.children);
 
-      let childBox1 = jasmine.createSpy('child box 1').and.callFake(
+      const childBox1 = jasmine.createSpy('child box 1').and.callFake(
           function(box) {
             expect(box.size).toEqual(12);
             expect(box.version).toEqual(null);
             expect(box.flags).toEqual(null);
           });
 
-      let childBox2 = jasmine.createSpy('child box 2').and.callFake(
+      const childBox2 = jasmine.createSpy('child box 2').and.callFake(
           function(box) {
             expect(box.size).toEqual(12);
             expect(box.version).toEqual(null);
@@ -173,15 +173,15 @@ describe('Mp4Parser', function() {
     });
 
     it('stops reading children when asked to', function() {
-      let parentBox = jasmine.createSpy('parent box').and.callFake(
+      const parentBox = jasmine.createSpy('parent box').and.callFake(
           shaka.util.Mp4Parser.children);
 
-      let childBox1 = jasmine.createSpy('child box 1').and.callFake(
+      const childBox1 = jasmine.createSpy('child box 1').and.callFake(
           function(box) {
             box.parser.stop();
           });
 
-      let childBox2 = jasmine.createSpy('child box 2');
+      const childBox2 = jasmine.createSpy('child box 2');
 
       new shaka.util.Mp4Parser()
           .box('b003', Util.spyFunc(parentBox))
@@ -210,10 +210,10 @@ describe('Mp4Parser', function() {
     });
 
     it('reads sample description definition', function() {
-      let parentBox = jasmine.createSpy('parent box').and.callFake(
+      const parentBox = jasmine.createSpy('parent box').and.callFake(
           shaka.util.Mp4Parser.sampleDescription);
-      let childBox1 = jasmine.createSpy('child box 1');
-      let childBox2 = jasmine.createSpy('child box 2');
+      const childBox1 = jasmine.createSpy('child box 1');
+      const childBox2 = jasmine.createSpy('child box 2');
 
       new shaka.util.Mp4Parser()
           .box('b003', Util.spyFunc(parentBox))
@@ -226,13 +226,13 @@ describe('Mp4Parser', function() {
     });
 
     it('stops reading sample description when asked to', function() {
-      let parentBox = jasmine.createSpy('parent box').and.callFake(
+      const parentBox = jasmine.createSpy('parent box').and.callFake(
           shaka.util.Mp4Parser.sampleDescription);
-      let childBox1 = jasmine.createSpy('child box 1').and.callFake(
+      const childBox1 = jasmine.createSpy('child box 1').and.callFake(
           function(box) {
             box.parser.stop();
           });
-      let childBox2 = jasmine.createSpy('child box 2');
+      const childBox2 = jasmine.createSpy('child box 2');
 
       new shaka.util.Mp4Parser()
           .box('b003', Util.spyFunc(parentBox))
@@ -247,9 +247,9 @@ describe('Mp4Parser', function() {
 
   describe('parsing', function() {
     it('finds all top level boxes', function() {
-      let box1 = jasmine.createSpy('box 1');
-      let box2 = jasmine.createSpy('box 2');
-      let box3 = jasmine.createSpy('box 3');
+      const box1 = jasmine.createSpy('box 1');
+      const box2 = jasmine.createSpy('box 2');
+      const box3 = jasmine.createSpy('box 3');
 
       new shaka.util.Mp4Parser()
           .box('b001', Util.spyFunc(box1))
@@ -265,8 +265,8 @@ describe('Mp4Parser', function() {
       // By leaving a single box undefined, it should not interfere
       // with the other boxes (on the same level) from being read.
 
-      let box1 = jasmine.createSpy('box 1');
-      let box3 = jasmine.createSpy('box 3');
+      const box1 = jasmine.createSpy('box 1');
+      const box3 = jasmine.createSpy('box 3');
 
       new shaka.util.Mp4Parser()
           .box('b001', Util.spyFunc(box1))
@@ -277,9 +277,9 @@ describe('Mp4Parser', function() {
     });
 
     it('does not parse child boxes with undefined parent box', function() {
-      let box1 = jasmine.createSpy('box 1');
-      let box2Child = jasmine.createSpy('box 2 child');
-      let box3 = jasmine.createSpy('box 3');
+      const box1 = jasmine.createSpy('box 1');
+      const box2Child = jasmine.createSpy('box 2 child');
+      const box3 = jasmine.createSpy('box 3');
 
       // Listing a definition for box 2's child but not for box 2 should mean
       // box 2's child is never parsed.
@@ -294,10 +294,10 @@ describe('Mp4Parser', function() {
     });
 
     it('can parse partial parent box and find first child', function() {
-      let parentBox = jasmine.createSpy('parent box').and.callFake(
+      const parentBox = jasmine.createSpy('parent box').and.callFake(
           shaka.util.Mp4Parser.sampleDescription);
 
-      let childBox1 = jasmine.createSpy('child box 1').and.callFake(
+      const childBox1 = jasmine.createSpy('child box 1').and.callFake(
           function(box) {
             // We found what we were looking for, so stop parsing.
             box.parser.stop();

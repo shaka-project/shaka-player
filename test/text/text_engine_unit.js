@@ -91,10 +91,10 @@ describe('TextEngine', function() {
     });
 
     it('calls displayer.append()', async () => {
-      let cue1 = createFakeCue(1, 2);
-      let cue2 = createFakeCue(2, 3);
-      let cue3 = createFakeCue(3, 4);
-      let cue4 = createFakeCue(4, 5);
+      const cue1 = createFakeCue(1, 2);
+      const cue2 = createFakeCue(2, 3);
+      const cue3 = createFakeCue(3, 4);
+      const cue4 = createFakeCue(4, 5);
       mockParseMedia.and.returnValue([cue1, cue2]);
 
       await textEngine.appendBuffer(dummyData, 0, 3);
@@ -249,7 +249,7 @@ describe('TextEngine', function() {
 
     it('works asynchronously', function(done) {
       textEngine.appendBuffer(dummyData, 0, 3).then(function() {
-        let p = textEngine.remove(0, 1);
+        const p = textEngine.remove(0, 1);
         expect(mockDisplayer.removeSpy).not.toHaveBeenCalled();
         return p;
       }).catch(fail).then(done);

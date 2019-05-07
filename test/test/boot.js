@@ -33,7 +33,7 @@ function getClientArg(name) {
 // Executed before test utilities and tests are loaded, but after Shaka Player
 // is loaded in uncompiled mode.
 (function() {
-  let realAssert = console.assert.bind(console);
+  const realAssert = console.assert.bind(console);
 
   /**
    * A version of assert() which hooks into jasmine and converts all failed
@@ -72,7 +72,7 @@ function getClientArg(name) {
   });
 
   // Use a RegExp if --specFilter is set, else empty string will match all.
-  let specFilterRegExp = new RegExp(getClientArg('specFilter') || '');
+  const specFilterRegExp = new RegExp(getClientArg('specFilter') || '');
 
   /**
    * A filter over all Jasmine specs.
@@ -105,7 +105,7 @@ function getClientArg(name) {
   // Set the default timeout to 120s for all asynchronous tests.
   jasmine.DEFAULT_TIMEOUT_INTERVAL = 120 * 1000;
 
-  let logLevel = getClientArg('logLevel');
+  const logLevel = getClientArg('logLevel');
   if (logLevel) {
     shaka.log.setLevel(Number(logLevel));
   } else {
@@ -116,7 +116,7 @@ function getClientArg(name) {
   if (getClientArg('random')) {
     jasmine.getEnv().randomizeTests(true);
 
-    let seed = getClientArg('seed');
+    const seed = getClientArg('seed');
     if (seed) {
       jasmine.getEnv().seed(seed.toString());
     }

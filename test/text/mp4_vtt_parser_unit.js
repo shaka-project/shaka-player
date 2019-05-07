@@ -61,7 +61,7 @@ describe('Mp4VttParser', function() {
   });
 
   it('parses media segment', function() {
-    let cues = [
+    const cues = [
       {
         start: 111.8,
         end: 115.8,
@@ -75,15 +75,15 @@ describe('Mp4VttParser', function() {
       },
     ];
 
-    let parser = new shaka.text.Mp4VttParser();
+    const parser = new shaka.text.Mp4VttParser();
     parser.parseInit(vttInitSegment);
-    let time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
-    let result = parser.parseMedia(vttSegment, time);
+    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
+    const result = parser.parseMedia(vttSegment, time);
     verifyHelper(cues, result);
   });
 
   it('plays multiple payloads at one time if specified by size', () => {
-    let cues = [
+    const cues = [
       {
         start: 110,
         end: 113,
@@ -103,16 +103,16 @@ describe('Mp4VttParser', function() {
       },
     ];
 
-    let parser = new shaka.text.Mp4VttParser();
+    const parser = new shaka.text.Mp4VttParser();
     parser.parseInit(vttInitSegment);
-    let time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
-    let result = parser.parseMedia(vttSegmentMultiPayload, time);
+    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
+    const result = parser.parseMedia(vttSegmentMultiPayload, time);
     verifyHelper(cues, result);
   });
 
   it('parses media segment containing settings', function() {
     const Cue = shaka.text.Cue;
-    let cues = [
+    const cues = [
       {
         start: 111.8,
         end: 115.8,
@@ -131,16 +131,16 @@ describe('Mp4VttParser', function() {
       },
     ];
 
-    let parser = new shaka.text.Mp4VttParser();
+    const parser = new shaka.text.Mp4VttParser();
     parser.parseInit(vttInitSegment);
-    let time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
-    let result = parser.parseMedia(vttSegSettings, time);
+    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
+    const result = parser.parseMedia(vttSegSettings, time);
     verifyHelper(cues, result);
   });
 
   it('parses media segments without a sample duration', function() {
     // Regression test for https://github.com/google/shaka-player/issues/919
-    let cues = [
+    const cues = [
       {start: 10, end: 11, payload: 'cue 10'},
       {start: 11, end: 12, payload: 'cue 11'},
       {start: 12, end: 13, payload: 'cue 12'},
@@ -153,15 +153,15 @@ describe('Mp4VttParser', function() {
       {start: 19, end: 20, payload: 'cue 19'},
     ];
 
-    let parser = new shaka.text.Mp4VttParser();
+    const parser = new shaka.text.Mp4VttParser();
     parser.parseInit(vttInitSegment);
-    let time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
-    let result = parser.parseMedia(vttSegNoDuration, time);
+    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
+    const result = parser.parseMedia(vttSegNoDuration, time);
     verifyHelper(cues, result);
   });
 
   it('accounts for offset', function() {
-    let cues = [
+    const cues = [
       {
         start: 121.8,
         end: 125.8,
@@ -175,15 +175,15 @@ describe('Mp4VttParser', function() {
       },
     ];
 
-    let parser = new shaka.text.Mp4VttParser();
+    const parser = new shaka.text.Mp4VttParser();
     parser.parseInit(vttInitSegment);
-    let time = {periodStart: 10, segmentStart: 0, segmentEnd: 0};
-    let result = parser.parseMedia(vttSegment, time);
+    const time = {periodStart: 10, segmentStart: 0, segmentEnd: 0};
+    const result = parser.parseMedia(vttSegment, time);
     verifyHelper(cues, result);
   });
 
   it('rejects init segment with no vtt', function() {
-    let error = new shaka.util.Error(
+    const error = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.TEXT,
         shaka.util.Error.Code.INVALID_MP4_VTT);

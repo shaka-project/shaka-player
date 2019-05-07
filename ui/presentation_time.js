@@ -63,16 +63,16 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
   updateTime_() {
     const isSeeking = this.controls.isSeeking();
     let displayTime = this.controls.getDisplayTime();
-    let duration = this.video.duration;
-    let seekRange = this.player.seekRange();
-    let seekRangeSize = seekRange.end - seekRange.start;
+    const duration = this.video.duration;
+    const seekRange = this.player.seekRange();
+    const seekRangeSize = seekRange.end - seekRange.start;
 
     if (this.player.isLive()) {
       // The amount of time we are behind the live edge.
-      let behindLive = Math.floor(seekRange.end - displayTime);
+      const behindLive = Math.floor(seekRange.end - displayTime);
       displayTime = Math.max(0, behindLive);
 
-      let showHour = seekRangeSize >= 3600;
+      const showHour = seekRangeSize >= 3600;
 
       // Consider "LIVE" when less than 1 second behind the live-edge.  Always
       // show the full time string when seeking, including the leading '-';
@@ -89,7 +89,7 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
         this.currentTime_.disabled = true;
       }
     } else {
-      let showHour = duration >= 3600;
+      const showHour = duration >= 3600;
 
       this.currentTime_.textContent =
           this.buildTimeString_(displayTime, showHour);
@@ -112,8 +112,8 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
    * @private
    */
   buildTimeString_(displayTime, showHour) {
-    let h = Math.floor(displayTime / 3600);
-    let m = Math.floor((displayTime / 60) % 60);
+    const h = Math.floor(displayTime / 3600);
+    const m = Math.floor((displayTime / 60) % 60);
     let s = Math.floor(displayTime % 60);
     if (s < 10) s = '0' + s;
     let text = m + ':' + s;

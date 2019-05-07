@@ -101,8 +101,8 @@ describe('ManifestTextParser', function() {
      * @param {shaka.util.Error.Code} code
      */
     function verifyError(string, code) {
-      let data = shaka.util.StringUtils.toUTF8(string);
-      let error = new shaka.util.Error(
+      const data = shaka.util.StringUtils.toUTF8(string);
+      const error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           code);
@@ -260,12 +260,12 @@ describe('ManifestTextParser', function() {
     });
 
     it('rejects invalid tags', function() {
-      let error = new shaka.util.Error(
+      const error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.INVALID_HLS_TAG,
           'invalid tag');
-      let text = shaka.util.StringUtils.toUTF8('#EXTM3U\ninvalid tag');
+      const text = shaka.util.StringUtils.toUTF8('#EXTM3U\ninvalid tag');
       try {
         parser.parsePlaylist(text, /* uri */ '');
         fail('Invalid HLS tags should not be supported!');
@@ -278,25 +278,25 @@ describe('ManifestTextParser', function() {
   describe('tag.toString', function() {
     it('recreates valid tag with attributes', function() {
       const text = '#EXT-X-MEDIA:CODECS="avc1.64002a,mp4a.40.2",AUDIO="a1,a2"';
-      let tag = shaka.hls.ManifestTextParser.parseTag(0, text);
+      const tag = shaka.hls.ManifestTextParser.parseTag(0, text);
       expect(text).toEqual(tag.toString());
     });
 
     it('recreates valid tag with value', function() {
       const text = '#EXT-X-PLAYLIST-TYPE:VOD';
-      let tag = shaka.hls.ManifestTextParser.parseTag(0, text);
+      const tag = shaka.hls.ManifestTextParser.parseTag(0, text);
       expect(text).toEqual(tag.toString());
     });
 
     it('recreates valid tag with no value', function() {
       const text = '#EXTM3U';
-      let tag = shaka.hls.ManifestTextParser.parseTag(0, text);
+      const tag = shaka.hls.ManifestTextParser.parseTag(0, text);
       expect(text).toEqual(tag.toString());
     });
 
     it('recreates valid tag with both value and attributes', function() {
       const text = '#EXTINF:5.99467,pid=180';
-      let tag = shaka.hls.ManifestTextParser.parseTag(0, text);
+      const tag = shaka.hls.ManifestTextParser.parseTag(0, text);
       expect(text).toEqual(tag.toString());
     });
   });

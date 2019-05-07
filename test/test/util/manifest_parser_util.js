@@ -39,12 +39,12 @@ shaka.test.ManifestParser.verifySegmentIndex = function(stream, references) {
   expect(stream.findSegmentPosition(0)).toBe(references[0].position);
 
   for (let i = 0; i < references.length; i++) {
-    let expectedRef = references[i];
+    const expectedRef = references[i];
     // Don't query negative times.  Query 0 instead.
-    let startTime = Math.max(0, expectedRef.startTime);
-    let position = stream.findSegmentPosition(startTime);
+    const startTime = Math.max(0, expectedRef.startTime);
+    const position = stream.findSegmentPosition(startTime);
     expect(position).not.toBe(null);
-    let actualRef =
+    const actualRef =
         stream.getSegmentReference(/** @type {number} */ (position));
     // NOTE: A custom matcher for SegmentReferences is installed, so this checks
     // the URIs as well.
@@ -52,11 +52,11 @@ shaka.test.ManifestParser.verifySegmentIndex = function(stream, references) {
   }
 
   // Make sure that the references stop at the end.
-  let lastExpectedReference = references[references.length - 1];
-  let positionAfterEnd =
+  const lastExpectedReference = references[references.length - 1];
+  const positionAfterEnd =
       stream.findSegmentPosition(lastExpectedReference.endTime);
   expect(positionAfterEnd).toBe(null);
-  let referencePastEnd =
+  const referencePastEnd =
       stream.getSegmentReference(lastExpectedReference.position + 1);
   expect(referencePastEnd).toBe(null);
 };
@@ -77,7 +77,7 @@ shaka.test.ManifestParser.verifySegmentIndex = function(stream, references) {
 shaka.test.ManifestParser.makeReference =
     function(uri, position, start, end, baseUri = '',
              startByte = 0, endByte = null) {
-  let getUris = function() { return [baseUri + uri]; };
+  const getUris = function() { return [baseUri + uri]; };
   return new shaka.media.SegmentReference(
       position, start, end, getUris, startByte, endByte);
 };

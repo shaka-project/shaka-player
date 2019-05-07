@@ -118,14 +118,14 @@ describe('UI', function() {
 
     describe('set up with several videos', function() {
       /** @type {!Array.<!HTMLVideoElement>} */
-      let videos = [];
+      const videos = [];
 
       beforeEach(() => {
         // Four is just a random number I (ismena) came up with to test a
         // multi-video use case. It could be replaces with any other
         // (reasonable) number.
         for (let i = 0; i < 4; i++) {
-          let video = /** @type {!HTMLVideoElement} */
+          const video = /** @type {!HTMLVideoElement} */
               (document.createElement('video'));
 
           document.body.appendChild(video);
@@ -187,22 +187,22 @@ describe('UI', function() {
 
       beforeEach(function() {
         createUIThroughAPI(videoContainer, video);
-        let controlsContainers =
+        const controlsContainers =
             videoContainer.getElementsByClassName('shaka-controls-container');
         expect(controlsContainers.length).toBe(1);
         controlsContainer = /** @type {!HTMLElement} */ (controlsContainers[0]);
       });
 
       it('stay visible if overflow menuButton is open', function() {
-        let overflowMenus =
+        const overflowMenus =
             videoContainer.getElementsByClassName('shaka-overflow-menu');
         expect(overflowMenus.length).toBe(1);
-        let overflowMenu = /** @type {!HTMLElement} */ (overflowMenus[0]);
+        const overflowMenu = /** @type {!HTMLElement} */ (overflowMenus[0]);
 
-        let overflowMenuButtons =
+        const overflowMenuButtons =
             videoContainer.getElementsByClassName('shaka-overflow-menu-button');
         expect(overflowMenuButtons.length).toBe(1);
-        let overflowMenuButton = overflowMenuButtons[0];
+        const overflowMenuButton = overflowMenuButtons[0];
 
         overflowMenuButton.click();
         expect(overflowMenu.style.display).not.toEqual('none');
@@ -215,14 +215,14 @@ describe('UI', function() {
       let overflowMenu;
 
       beforeEach(function() {
-        let config = {
+        const config = {
           controlPanelElements: [
             'overflow_menu',
           ],
         };
         createUIThroughAPI(videoContainer, video, config);
 
-        let overflowMenus =
+        const overflowMenus =
             videoContainer.getElementsByClassName('shaka-overflow-menu');
         expect(overflowMenus.length).toBe(1);
         overflowMenu = /** @type {!HTMLElement} */ (overflowMenus[0]);
@@ -239,10 +239,10 @@ describe('UI', function() {
         let display = window.getComputedStyle(overflowMenu, null).display;
         expect(display).toEqual('none');
 
-        let overflowMenuButtons =
+        const overflowMenuButtons =
             videoContainer.getElementsByClassName('shaka-overflow-menu-button');
         expect(overflowMenuButtons.length).toBe(1);
-        let overflowMenuButton = overflowMenuButtons[0];
+        const overflowMenuButton = overflowMenuButtons[0];
 
         overflowMenuButton.click();
         display = overflowMenu.style.display;
@@ -277,7 +277,7 @@ describe('UI', function() {
       });
 
       it('is accessible', function() {
-        for (let button of overflowMenu.childNodes) {
+        for (const button of overflowMenu.childNodes) {
           expect(/** @type {!HTMLElement} */ (button)
               .hasAttribute('aria-label')).toBe(true);
         }
@@ -291,7 +291,7 @@ describe('UI', function() {
 
       it('has default elements', function() {
         createUIThroughAPI(videoContainer, video);
-        let controlsButtonPanels = videoContainer.getElementsByClassName(
+        const controlsButtonPanels = videoContainer.getElementsByClassName(
           'shaka-controls-button-panel');
         expect(controlsButtonPanels.length).toBe(1);
 
@@ -346,7 +346,7 @@ describe('UI', function() {
       let resolutionsMenu;
 
       beforeEach(function() {
-        let config = {
+        const config = {
           controlPanelElements: [
             'overflow_menu',
           ],
@@ -356,7 +356,7 @@ describe('UI', function() {
         };
         createUIThroughAPI(videoContainer, video, config);
 
-        let resolutionsMenus =
+        const resolutionsMenus =
             videoContainer.getElementsByClassName('shaka-resolutions');
         expect(resolutionsMenus.length).toBe(1);
         resolutionsMenu = /** @type {!HTMLElement} */ (resolutionsMenus[0]);
@@ -366,10 +366,10 @@ describe('UI', function() {
         let display = window.getComputedStyle(resolutionsMenu, null).display;
         expect(display).toEqual('none');
 
-        let resolutionButtons =
+        const resolutionButtons =
             videoContainer.getElementsByClassName('shaka-resolution-button');
         expect(resolutionButtons.length).toBe(1);
-        let resolutionButton = resolutionButtons[0];
+        const resolutionButton = resolutionButtons[0];
 
         resolutionButton.click();
         display = resolutionsMenu.style.display;
@@ -503,13 +503,13 @@ describe('UI', function() {
           'fullscreen']};
       createUIThroughAPI(container, video, config);
 
-      let controlsButtonPanels =
+      const controlsButtonPanels =
           container.getElementsByClassName('shaka-controls-button-panel');
       expect(controlsButtonPanels.length).toBe(1);
-      let controlsButtonPanel =
+      const controlsButtonPanel =
           /** @type {!HTMLElement} */ (controlsButtonPanels[0]);
 
-      let buttons = controlsButtonPanel.childNodes;
+      const buttons = controlsButtonPanel.childNodes;
       expect(buttons.length).toBe(3);
 
       expect( /** @type {!HTMLElement} */ (buttons[0]).className)

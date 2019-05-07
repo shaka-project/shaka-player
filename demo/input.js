@@ -114,7 +114,7 @@ class ShakaDemoSelectInput extends ShakaDemoInput {
     this.input_.classList.add('mdl-textfield__input');
     this.extra_.classList.add('mdl-textfield__label');
     this.extra_.setAttribute('for', this.input_.id);
-    for (let value of Object.keys(values)) {
+    for (const value of Object.keys(values)) {
       const option = document.createElement('option');
       option.textContent = values[value];
       option.value = value;

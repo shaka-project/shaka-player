@@ -198,7 +198,7 @@ class ShakaDemoMain {
     const localization = this.controls_.getLocalization();
     const UNKNOWN_LOCALES = shaka.ui.Localization.UNKNOWN_LOCALES;
     localization.addEventListener(UNKNOWN_LOCALES, (event) => {
-      for (let locale of event['locales']) {
+      for (const locale of event['locales']) {
         this.loadUILocale_(locale);
       }
     });
@@ -458,7 +458,7 @@ class ShakaDemoMain {
     }
 
     // Does the asset contain a playable mime type?
-    let mimeTypes = [];
+    const mimeTypes = [];
     if (asset.features.includes(shakaAssets.Feature.WEBM)) {
       mimeTypes.push('video/webm');
     }
@@ -516,7 +516,7 @@ class ShakaDemoMain {
 
     const obj = await response.json();
     const map = new Map();
-    for (let key in obj) {
+    for (const key in obj) {
       map.set(key, obj[key]);
     }
 
@@ -873,7 +873,7 @@ class ShakaDemoMain {
     params.push('uilang=' + this.getUILocale());
 
     const navButtons = document.getElementById('nav-button-container');
-    for (let button of navButtons.childNodes) {
+    for (const button of navButtons.childNodes) {
       if (button.nodeType == Node.ELEMENT_NODE &&
           button.classList.contains('mdl-button--accent')) {
         params.push('panel=' + button.textContent);
@@ -980,12 +980,12 @@ class ShakaDemoMain {
     // Add a click listener to display this container, and hide the others.
     const switchPage = () => {
       // This element should be the selected one.
-      for (let child of navButtons.childNodes) {
+      for (const child of navButtons.childNodes) {
         if (child.nodeType == Node.ELEMENT_NODE) {
           child.classList.remove('mdl-button--accent');
         }
       }
-      for (let child of contents.childNodes) {
+      for (const child of contents.childNodes) {
         if (child.nodeType == Node.ELEMENT_NODE) {
           this.hideNode_(child);
         }
@@ -1023,7 +1023,7 @@ class ShakaDemoMain {
   setUpVersionString_() {
     const version = shaka.Player.version;
     let split = version.split('-');
-    let inParen = [];
+    const inParen = [];
 
     // Separate out some special terms into parentheses after the rest of the
     // version, to make them stand out visually.
@@ -1125,7 +1125,7 @@ class ShakaDemoMain {
 }
 
 
-let shakaDemoMain = new ShakaDemoMain();
+const shakaDemoMain = new ShakaDemoMain();
 
 
 /**

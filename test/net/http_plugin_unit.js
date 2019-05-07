@@ -39,7 +39,7 @@ function httpPluginTests(usingFetch) {
       // Install the mock only briefly in the global namespace, to get a handle
       // to the mocked fetch implementation.
       jasmine.Fetch.install();
-      let MockFetch = window.fetch;
+      const MockFetch = window.fetch;
       const MockAbortController = window.AbortController;
       const MockReadableStream = window.ReadableStream;
       const MockHeaders = window.Headers;
@@ -163,7 +163,7 @@ function httpPluginTests(usingFetch) {
   });
 
   it('sets the correct fields', function(done) {
-    let request = shaka.net.NetworkingEngine.makeRequest(
+    const request = shaka.net.NetworkingEngine.makeRequest(
         ['https://foo.bar/'], retryParameters);
     request.allowCrossSiteCredentials = true;
     request.method = 'POST';
@@ -171,7 +171,7 @@ function httpPluginTests(usingFetch) {
 
     plugin(request.uris[0], request, requestType).promise
         .then(function() {
-          let actual = mostRecentRequest();
+          const actual = mostRecentRequest();
           expect(actual).toBeTruthy();
           expect(actual.url).toBe(request.uris[0]);
           expect(actual.method).toBe(request.method);
@@ -188,14 +188,14 @@ function httpPluginTests(usingFetch) {
     // Regression test for an issue with Edge, where Fetch fails if the body
     // is set to null but succeeds on undefined.
     it('sets a request\'s null body to undefined', function(done) {
-      let request = shaka.net.NetworkingEngine.makeRequest(
+      const request = shaka.net.NetworkingEngine.makeRequest(
           ['https://foo.bar/'], retryParameters);
       request.body = null;
       request.method = 'GET';
 
       plugin(request.uris[0], request, requestType).promise
           .then(function() {
-            let actual = jasmine.Fetch.requests.mostRecent();
+            const actual = jasmine.Fetch.requests.mostRecent();
             expect(actual).toBeTruthy();
             expect(actual.body).toBeUndefined();
           })
@@ -265,7 +265,7 @@ function httpPluginTests(usingFetch) {
   });
 
   it('detects cache headers', function(done) {
-    let request = shaka.net.NetworkingEngine.makeRequest(
+    const request = shaka.net.NetworkingEngine.makeRequest(
         ['https://foo.bar/cache'], retryParameters);
     plugin(request.uris[0], request, requestType).promise
         .catch(fail)
@@ -280,14 +280,14 @@ function httpPluginTests(usingFetch) {
   it('aborts the request when the operation is aborted', function(done) {
     let abortPromise;
     let requestPromise;
-    let oldXHRMock = shaka.net.HttpXHRPlugin['Xhr_'];
+    const oldXHRMock = shaka.net.HttpXHRPlugin['Xhr_'];
     if (usingFetch) {
-      let request = shaka.net.NetworkingEngine.makeRequest(
+      const request = shaka.net.NetworkingEngine.makeRequest(
           ['https://foo.bar/timeout'], retryParameters);
-      let operation = plugin(request.uris[0], request, requestType);
+      const operation = plugin(request.uris[0], request, requestType);
 
       /** @type {jasmine.Fetch.RequestStub} */
-      let actual = jasmine.Fetch.requests.mostRecent();
+      const actual = jasmine.Fetch.requests.mostRecent();
 
       requestPromise = operation.promise;
 
@@ -304,7 +304,7 @@ function httpPluginTests(usingFetch) {
       // actually insert a call to abort in the middle.
       // Instead, install a very elementary mock.
       /** @constructor */
-      let NewXHRMock = function() {
+      const NewXHRMock = function() {
         this.abort = shaka.test.Util.spyFunc(jasmine.createSpy('abort'));
 
         this.open = shaka.test.Util.spyFunc(jasmine.createSpy('open'));
@@ -324,7 +324,7 @@ function httpPluginTests(usingFetch) {
       };
       shaka.net.HttpXHRPlugin['Xhr_'] = NewXHRMock;
 
-      let request = shaka.net.NetworkingEngine.makeRequest(
+      const request = shaka.net.NetworkingEngine.makeRequest(
           ['https://foo.bar/'], retryParameters);
       operation = plugin(request.uris[0], request, requestType);
       requestPromise = operation.promise;
@@ -357,7 +357,7 @@ function httpPluginTests(usingFetch) {
    * @param {string=} overrideUri
    */
   function testSucceeds(uri, done, overrideUri) {
-    let request = shaka.net.NetworkingEngine.makeRequest(
+    const request = shaka.net.NetworkingEngine.makeRequest(
         [uri], retryParameters);
     plugin(uri, request, requestType).promise
         .catch(fail)
@@ -383,7 +383,7 @@ function httpPluginTests(usingFetch) {
    * @param {Array<*>=} errorData
    */
   function testFails(uri, done, severity, code, errorData) {
-    let request = shaka.net.NetworkingEngine.makeRequest(
+    const request = shaka.net.NetworkingEngine.makeRequest(
         [uri], retryParameters);
     plugin(uri, request, requestType).promise
         .then(fail)
@@ -412,7 +412,7 @@ function httpPluginTests(usingFetch) {
    * @param {string=} overrideUri
    */
   function testSucceedsWithEmptyLine(uri, done, overrideUri) {
-    let request = shaka.net.NetworkingEngine.makeRequest(
+    const request = shaka.net.NetworkingEngine.makeRequest(
         [uri], retryParameters);
     plugin(uri, request, requestType).promise
         .catch(fail)
@@ -434,7 +434,7 @@ function httpPluginTests(usingFetch) {
    */
   function mostRecentRequest() {
     if (usingFetch) {
-      let mostRecent = jasmine.Fetch.requests.mostRecent();
+      const mostRecent = jasmine.Fetch.requests.mostRecent();
       if (mostRecent) {
         // Convert from jasmine.Fetch.RequestStub to jasmine.Ajax.RequestStub
         return /** @type {jasmine.Ajax.RequestStub} */({

@@ -70,10 +70,10 @@ describe('Offline', () => {
       return;
     }
 
-    let content = await storage.store('test:sintel');
+    const content = await storage.store('test:sintel');
     expect(content).toBeTruthy();
 
-    let contentUri = content.offlineUri;
+    const contentUri = content.offlineUri;
     goog.asserts.assert(
         contentUri, 'Stored content should have an offline uri.');
 
@@ -94,8 +94,8 @@ describe('Offline', () => {
           return;
         }
 
-        let support = await shaka.Player.probeSupport();
-        let widevineSupport = support.drm['com.widevine.alpha'];
+        const support = await shaka.Player.probeSupport();
+        const widevineSupport = support.drm['com.widevine.alpha'];
 
         if (!widevineSupport || !widevineSupport.persistentState) {
           pending('Widevine persistent licenses are not supported');
@@ -105,7 +105,7 @@ describe('Offline', () => {
         shaka.test.TestScheme.setupPlayer(player, 'sintel-enc');
 
         storage.configure({usePersistentLicense: true});
-        let content = await storage.store('test:sintel-enc');
+        const content = await storage.store('test:sintel-enc');
 
         // Work around http://crbug.com/887535 in which load cannot happen right
         // after close.  Experimentally, we seem to need a ~1s delay, so we're
@@ -114,7 +114,7 @@ describe('Offline', () => {
         // TODO: Remove when Chrome is fixed
         await shaka.test.Util.delay(3);
 
-        let contentUri = content.offlineUri;
+        const contentUri = content.offlineUri;
         goog.asserts.assert(
             contentUri, 'Stored content should have an offline uri.');
 
@@ -134,9 +134,9 @@ describe('Offline', () => {
           return;
         }
 
-        let support = await shaka.Player.probeSupport();
-        let widevineSupport = support.drm['com.widevine.alpha'];
-        let playreadySupport = support.drm['com.microsoft.playready'];
+        const support = await shaka.Player.probeSupport();
+        const widevineSupport = support.drm['com.widevine.alpha'];
+        const playreadySupport = support.drm['com.microsoft.playready'];
 
         if (!(widevineSupport || playreadySupport)) {
           pending('Widevine and PlayReady are not supported');
@@ -149,9 +149,9 @@ describe('Offline', () => {
         shaka.test.TestScheme.setupPlayer(player, 'multidrm_no_init_data');
 
         storage.configure({usePersistentLicense: false});
-        let content = await storage.store('test:multidrm_no_init_data');
+        const content = await storage.store('test:multidrm_no_init_data');
 
-        let contentUri = content.offlineUri;
+        const contentUri = content.offlineUri;
         goog.asserts.assert(
             contentUri, 'Stored content should have an offline uri.');
 

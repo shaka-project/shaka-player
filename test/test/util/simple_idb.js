@@ -44,9 +44,9 @@ shaka.test.SimpleIDB = class {
    * @return {!Promise<number>}
    */
   add(store, value) {
-    let promise = new shaka.util.PublicPromise();
+    const promise = new shaka.util.PublicPromise();
 
-    let transaction = this.db_.transaction([store], 'readwrite');
+    const transaction = this.db_.transaction([store], 'readwrite');
     transaction.oncomplete = () => promise.resolve();
     transaction.onerror = () => {
       promise.reject('Error adding ' + value + ' to ' + store);
@@ -75,26 +75,26 @@ shaka.test.SimpleIDB = class {
 
     let upgraded = false;
 
-    let wait = () => {
+    const wait = () => {
       const wait = 1000; // 1 second
       return new Promise((resolve) => setTimeout(resolve, wait));
     };
 
-    let tryOpen = () => {
+    const tryOpen = () => {
       /** @type {!shaka.util.PublicPromise} */
-      let promise = new shaka.util.PublicPromise();
+      const promise = new shaka.util.PublicPromise();
 
-      let request = window.indexedDB.open(name, version);
+      const request = window.indexedDB.open(name, version);
       request.onerror = () => promise.reject();
       request.onupgradeneeded = (e) => {
-        let db = e.target.transaction.db;
+        const db = e.target.transaction.db;
         stores.forEach((store) => db.createObjectStore(store, settings));
 
         upgraded = true;
       };
       request.onsuccess = (e) => {
-        let db = e.target.result;
-        let simple = new shaka.test.SimpleIDB(db);
+        const db = e.target.result;
+        const simple = new shaka.test.SimpleIDB(db);
         promise.resolve(simple);
       };
 

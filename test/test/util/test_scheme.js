@@ -28,10 +28,10 @@ goog.provide('shaka.test.TestScheme');
  * @return {!shaka.extern.IAbortableOperation.<shaka.extern.Response>}
  */
 shaka.test.TestScheme = function(uri, request, requestType) {
-  let manifestParts = /^test:([^/]+)$/.exec(uri);
+  const manifestParts = /^test:([^/]+)$/.exec(uri);
   if (manifestParts) {
     /** @type {shaka.extern.Response} */
-    let response = {
+    const response = {
       uri: uri,
       data: new ArrayBuffer(0),
       headers: {'content-type': 'application/x-test-manifest'},
@@ -39,29 +39,29 @@ shaka.test.TestScheme = function(uri, request, requestType) {
     return shaka.util.AbortableOperation.completed(response);
   }
 
-  let malformed = new shaka.util.Error(
+  const malformed = new shaka.util.Error(
       shaka.util.Error.Severity.CRITICAL,
       shaka.util.Error.Category.NETWORK,
       shaka.util.Error.Code.MALFORMED_TEST_URI);
 
-  let re = /^test:([^/]+)\/(video|audio)\/(init|[0-9]+)$/;
-  let segmentParts = re.exec(uri);
+  const re = /^test:([^/]+)\/(video|audio)\/(init|[0-9]+)$/;
+  const segmentParts = re.exec(uri);
   if (!segmentParts) {
     // Use expect so the URI is printed on errors.
     expect(uri).toMatch(re);
     return shaka.util.AbortableOperation.failed(malformed);
   }
 
-  let name = segmentParts[1];
-  let type = segmentParts[2];
+  const name = segmentParts[1];
+  const type = segmentParts[2];
 
-  let generators = shaka.test.TestScheme.GENERATORS[name];
+  const generators = shaka.test.TestScheme.GENERATORS[name];
   expect(generators).toBeTruthy();
   if (!generators) {
     return shaka.util.AbortableOperation.failed(malformed);
   }
 
-  let generator = generators[type];
+  const generator = generators[type];
   expect(generator).toBeTruthy();
   if (!generator) {
     return shaka.util.AbortableOperation.failed(malformed);
@@ -71,12 +71,12 @@ shaka.test.TestScheme = function(uri, request, requestType) {
   if (segmentParts[3] === 'init') {
     responseData = generator.getInitSegment(0);
   } else {
-    let index = Number(segmentParts[3]);
+    const index = Number(segmentParts[3]);
     responseData = generator.getSegment(index + 1, 0, 0);
   }
 
   /** @type {shaka.extern.Response} */
-  let ret = {uri: uri, data: responseData, headers: {}};
+  const ret = {uri: uri, data: responseData, headers: {}};
   return shaka.util.AbortableOperation.completed(ret);
 };
 
@@ -361,22 +361,22 @@ shaka.test.TestScheme.DATA = {
  * @param {string} name
  */
 shaka.test.TestScheme.setupPlayer = function(player, name) {
-  let asset = shaka.test.TestScheme.DATA[name];
+  const asset = shaka.test.TestScheme.DATA[name];
   goog.asserts.assert(asset, 'Unknown asset');
   if (!asset) return;
   if (asset.licenseRequestHeaders) {
-    let netEngine = player.getNetworkingEngine();
+    const netEngine = player.getNetworkingEngine();
     netEngine.registerRequestFilter(
         function(type, request) {
           if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) return;
 
-          for (let header in asset.licenseRequestHeaders) {
+          for (const header in asset.licenseRequestHeaders) {
             request.headers[header] = asset.licenseRequestHeaders[header];
           }
         });
   }
   if (asset.licenseServers) {
-    let config = {drm: {servers: asset.licenseServers}};
+    const config = {drm: {servers: asset.licenseServers}};
     player.configure(config);
   }
 };
@@ -390,7 +390,7 @@ shaka.test.TestScheme.setupPlayer = function(player, name) {
  */
 shaka.test.TestScheme.createManifests = function(shaka, suffix) {
   /** @type {?} */
-  let windowShaka = window['shaka'];
+  const windowShaka = window['shaka'];
 
   /**
    * @param {Object} metadata
@@ -434,7 +434,7 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
     }
 
     if (data.licenseServers) {
-      for (let keySystem in data.licenseServers) {
+      for (const keySystem in data.licenseServers) {
         manifestGenerator.addDrmInfo(keySystem)
             .licenseServerUri(data.licenseServers[keySystem]);
         if (data[contentType].initData) {
@@ -456,25 +456,25 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
     return locationUri.resolve(partialUri).toString();
   }
 
-  let async = [];
+  const async = [];
   // Include 'window' to use uncompiled version version of the library.
   const DATA = windowShaka.test.TestScheme.DATA;
   const GENERATORS = windowShaka.test.TestScheme.GENERATORS;
   const MANIFESTS = windowShaka.test.TestScheme.MANIFESTS;
   const ContentType = windowShaka.util.ManifestParserUtils.ContentType;
 
-  for (let name in DATA) {
+  for (const name in DATA) {
     GENERATORS[name + suffix] = GENERATORS[name + suffix] || {};
-    let data = DATA[name];
+    const data = DATA[name];
     [ContentType.VIDEO, ContentType.AUDIO].forEach(function(type) {
       if (data[type]) {
-        let streamGen = createStreamGenerator(data[type]);
+        const streamGen = createStreamGenerator(data[type]);
         GENERATORS[name + suffix][type] = streamGen;
         async.push(streamGen.init());
       }
     });
 
-    let gen = new windowShaka.test.ManifestGenerator(shaka)
+    const gen = new windowShaka.test.ManifestGenerator(shaka)
         .setPresentationDuration(data.duration)
         .addPeriod(/* startTime= */ 0)
         .addVariant(0);
@@ -592,15 +592,15 @@ shaka.test.TestScheme.ManifestParser.prototype.configure = function(config) {};
 /** @override */
 shaka.test.TestScheme.ManifestParser.prototype.start =
     function(uri, playerInterface) {
-  let re = /^test:([^/]+)$/;
-  let manifestParts = re.exec(uri);
+  const re = /^test:([^/]+)$/;
+  const manifestParts = re.exec(uri);
   if (!manifestParts) {
     // Use expect so the URI is printed on errors.
     expect(uri).toMatch(re);
     return Promise.reject();
   }
 
-  let manifest = shaka.test.TestScheme.MANIFESTS[manifestParts[1]];
+  const manifest = shaka.test.TestScheme.MANIFESTS[manifestParts[1]];
   expect(manifest).toBeTruthy();
   if (!manifest) return Promise.reject();
 

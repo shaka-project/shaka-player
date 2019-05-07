@@ -50,8 +50,8 @@ describe('FakeEventTarget', function() {
   });
 
   it('calls all event listeners', function(done) {
-    let listener1 = jasmine.createSpy('listener1');
-    let listener2 = jasmine.createSpy('listener2');
+    const listener1 = jasmine.createSpy('listener1');
+    const listener2 = jasmine.createSpy('listener2');
 
     target.addEventListener('event', Util.spyFunc(listener1));
     target.addEventListener('event', Util.spyFunc(listener2));
@@ -66,8 +66,8 @@ describe('FakeEventTarget', function() {
   });
 
   it('stops processing on stopImmediatePropagation', function(done) {
-    let listener1 = jasmine.createSpy('listener1');
-    let listener2 = jasmine.createSpy('listener2');
+    const listener1 = jasmine.createSpy('listener1');
+    const listener2 = jasmine.createSpy('listener2');
 
     target.addEventListener('event', Util.spyFunc(listener1));
     target.addEventListener('event', Util.spyFunc(listener2));
@@ -86,8 +86,8 @@ describe('FakeEventTarget', function() {
   });
 
   it('catches exceptions thrown from listeners', function(done) {
-    let listener1 = jasmine.createSpy('listener1');
-    let listener2 = jasmine.createSpy('listener2');
+    const listener1 = jasmine.createSpy('listener1');
+    const listener2 = jasmine.createSpy('listener2');
 
     target.addEventListener('event', Util.spyFunc(listener1));
     target.addEventListener('event', Util.spyFunc(listener2));
@@ -106,14 +106,14 @@ describe('FakeEventTarget', function() {
   });
 
   it('allows events to be re-dispatched', function(done) {
-    let listener1 = jasmine.createSpy('listener1');
-    let listener2 = jasmine.createSpy('listener2');
+    const listener1 = jasmine.createSpy('listener1');
+    const listener2 = jasmine.createSpy('listener2');
 
     target.addEventListener('event', Util.spyFunc(listener1));
     target.addEventListener('event', Util.spyFunc(listener2));
 
-    let target2 = new shaka.util.FakeEventTarget();
-    let target2Listener = jasmine.createSpy('target2Listener');
+    const target2 = new shaka.util.FakeEventTarget();
+    const target2Listener = jasmine.createSpy('target2Listener');
 
     target2.addEventListener('event', Util.spyFunc(target2Listener));
 

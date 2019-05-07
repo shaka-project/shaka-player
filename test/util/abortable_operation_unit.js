@@ -18,10 +18,10 @@
 describe('AbortableOperation', function() {
   describe('promise', function() {
     it('is resolved by the constructor argument', function(done) {
-      let promise = new shaka.util.PublicPromise();
-      let abort = () => Promise.resolve();
+      const promise = new shaka.util.PublicPromise();
+      const abort = () => Promise.resolve();
 
-      let operation = new shaka.util.AbortableOperation(promise, abort);
+      const operation = new shaka.util.AbortableOperation(promise, abort);
       promise.resolve(100);
 
       operation.promise.catch(fail).then((value) => {
@@ -33,23 +33,24 @@ describe('AbortableOperation', function() {
 
   describe('abort', function() {
     it('calls the abort argument from the constructor', function() {
-      let promise = Promise.resolve();
-      let abort = jasmine.createSpy('abort').and.returnValue(Promise.resolve());
+      const promise = Promise.resolve();
+      const abort =
+          jasmine.createSpy('abort').and.returnValue(Promise.resolve());
 
-      let operation = new shaka.util.AbortableOperation(
+      const operation = new shaka.util.AbortableOperation(
           promise, shaka.test.Util.spyFunc(abort));
       operation.abort();
       expect(abort).toHaveBeenCalled();
     });
 
     it('is resolved when the underlying abort() is resolved', function(done) {
-      let p = new shaka.util.PublicPromise();
-      let abort = jasmine.createSpy('abort').and.returnValue(p);
+      const p = new shaka.util.PublicPromise();
+      const abort = jasmine.createSpy('abort').and.returnValue(p);
 
-      let operation = new shaka.util.AbortableOperation(
+      const operation = new shaka.util.AbortableOperation(
           new shaka.util.PublicPromise(), shaka.test.Util.spyFunc(abort));
 
-      let abortComplete = jasmine.createSpy('abort complete');
+      const abortComplete = jasmine.createSpy('abort complete');
       operation.abort()
           .catch(fail).then(shaka.test.Util.spyFunc(abortComplete));
 
@@ -69,12 +70,12 @@ describe('AbortableOperation', function() {
 
   describe('failed', function() {
     it('creates a failed operation with the given error', function(done) {
-      let error = new shaka.util.Error(
+      const error = new shaka.util.Error(
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.NETWORK,
           shaka.util.Error.Code.MALFORMED_DATA_URI);
 
-      let operation = shaka.util.AbortableOperation.failed(error);
+      const operation = shaka.util.AbortableOperation.failed(error);
       operation.promise.then(fail).catch((e) => {
         shaka.test.Util.expectToEqualError(e, error);
       }).then(done);
@@ -83,12 +84,12 @@ describe('AbortableOperation', function() {
 
   describe('aborted', function() {
     it('creates a failed operation with OPERATION_ABORTED', function(done) {
-      let error = new shaka.util.Error(
+      const error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.PLAYER,
           shaka.util.Error.Code.OPERATION_ABORTED);
 
-      let operation = shaka.util.AbortableOperation.aborted();
+      const operation = shaka.util.AbortableOperation.aborted();
       operation.promise.then(fail).catch((e) => {
         shaka.test.Util.expectToEqualError(e, error);
       }).then(done);
@@ -97,7 +98,7 @@ describe('AbortableOperation', function() {
 
   describe('completed', function() {
     it('creates a completed operation with the given value', function(done) {
-      let operation = shaka.util.AbortableOperation.completed(100);
+      const operation = shaka.util.AbortableOperation.completed(100);
       operation.promise.catch(fail).then((value) => {
         expect(value).toEqual(100);
         done();
@@ -107,8 +108,8 @@ describe('AbortableOperation', function() {
 
   describe('notAbortable', function() {
     it('creates an operation from the given promise', function(done) {
-      let promise = new shaka.util.PublicPromise();
-      let operation = shaka.util.AbortableOperation.notAbortable(promise);
+      const promise = new shaka.util.PublicPromise();
+      const operation = shaka.util.AbortableOperation.notAbortable(promise);
 
       let isAborted = false;
       operation.abort().then(() => {
@@ -141,21 +142,21 @@ describe('AbortableOperation', function() {
 
   describe('all', function() {
     it('creates a successful operation when all succeed', function(done) {
-      let p1 = new shaka.util.PublicPromise();
-      let op1 = shaka.util.AbortableOperation.notAbortable(p1);
+      const p1 = new shaka.util.PublicPromise();
+      const op1 = shaka.util.AbortableOperation.notAbortable(p1);
 
-      let p2 = new shaka.util.PublicPromise();
-      let op2 = shaka.util.AbortableOperation.notAbortable(p2);
+      const p2 = new shaka.util.PublicPromise();
+      const op2 = shaka.util.AbortableOperation.notAbortable(p2);
 
-      let p3 = new shaka.util.PublicPromise();
-      let op3 = shaka.util.AbortableOperation.notAbortable(p3);
+      const p3 = new shaka.util.PublicPromise();
+      const op3 = shaka.util.AbortableOperation.notAbortable(p3);
 
-      let all = shaka.util.AbortableOperation.all([op1, op2, op3]);
+      const all = shaka.util.AbortableOperation.all([op1, op2, op3]);
 
-      let onSuccessSpy = jasmine.createSpy('onSuccess');
-      let onSuccess = shaka.test.Util.spyFunc(onSuccessSpy);
-      let onErrorSpy = jasmine.createSpy('onError');
-      let onError = shaka.test.Util.spyFunc(onErrorSpy);
+      const onSuccessSpy = jasmine.createSpy('onSuccess');
+      const onSuccess = shaka.test.Util.spyFunc(onSuccessSpy);
+      const onErrorSpy = jasmine.createSpy('onError');
+      const onError = shaka.test.Util.spyFunc(onErrorSpy);
 
       all.promise.then(onSuccess, onError).catch(fail);
 
@@ -181,21 +182,21 @@ describe('AbortableOperation', function() {
     });
 
     it('creates a failed operation when any fail', function(done) {
-      let p1 = new shaka.util.PublicPromise();
-      let op1 = shaka.util.AbortableOperation.notAbortable(p1);
+      const p1 = new shaka.util.PublicPromise();
+      const op1 = shaka.util.AbortableOperation.notAbortable(p1);
 
-      let p2 = new shaka.util.PublicPromise();
-      let op2 = shaka.util.AbortableOperation.notAbortable(p2);
+      const p2 = new shaka.util.PublicPromise();
+      const op2 = shaka.util.AbortableOperation.notAbortable(p2);
 
-      let p3 = new shaka.util.PublicPromise();
-      let op3 = shaka.util.AbortableOperation.notAbortable(p3);
+      const p3 = new shaka.util.PublicPromise();
+      const op3 = shaka.util.AbortableOperation.notAbortable(p3);
 
-      let all = shaka.util.AbortableOperation.all([op1, op2, op3]);
+      const all = shaka.util.AbortableOperation.all([op1, op2, op3]);
 
-      let onSuccessSpy = jasmine.createSpy('onSuccess');
-      let onSuccess = shaka.test.Util.spyFunc(onSuccessSpy);
-      let onErrorSpy = jasmine.createSpy('onError');
-      let onError = shaka.test.Util.spyFunc(onErrorSpy);
+      const onSuccessSpy = jasmine.createSpy('onSuccess');
+      const onSuccess = shaka.test.Util.spyFunc(onSuccessSpy);
+      const onErrorSpy = jasmine.createSpy('onError');
+      const onError = shaka.test.Util.spyFunc(onErrorSpy);
 
       all.promise.then(onSuccess, onError).catch(fail);
 
@@ -216,30 +217,30 @@ describe('AbortableOperation', function() {
     });
 
     it('aborts all operations on abort', function(done) {
-      let p1 = new shaka.util.PublicPromise();
-      let abort1Spy = jasmine.createSpy('abort1')
+      const p1 = new shaka.util.PublicPromise();
+      const abort1Spy = jasmine.createSpy('abort1')
           .and.callFake(() => p1.reject());
-      let abort1 = shaka.test.Util.spyFunc(abort1Spy);
-      let op1 = new shaka.util.AbortableOperation(p1, abort1);
+      const abort1 = shaka.test.Util.spyFunc(abort1Spy);
+      const op1 = new shaka.util.AbortableOperation(p1, abort1);
 
-      let p2 = new shaka.util.PublicPromise();
-      let abort2Spy = jasmine.createSpy('abort2')
+      const p2 = new shaka.util.PublicPromise();
+      const abort2Spy = jasmine.createSpy('abort2')
           .and.callFake(() => p2.reject());
-      let abort2 = shaka.test.Util.spyFunc(abort2Spy);
-      let op2 = new shaka.util.AbortableOperation(p2, abort2);
+      const abort2 = shaka.test.Util.spyFunc(abort2Spy);
+      const op2 = new shaka.util.AbortableOperation(p2, abort2);
 
-      let p3 = new shaka.util.PublicPromise();
-      let abort3Spy = jasmine.createSpy('abort3')
+      const p3 = new shaka.util.PublicPromise();
+      const abort3Spy = jasmine.createSpy('abort3')
           .and.callFake(() => p3.reject());
-      let abort3 = shaka.test.Util.spyFunc(abort3Spy);
-      let op3 = new shaka.util.AbortableOperation(p3, abort3);
+      const abort3 = shaka.test.Util.spyFunc(abort3Spy);
+      const op3 = new shaka.util.AbortableOperation(p3, abort3);
 
-      let all = shaka.util.AbortableOperation.all([op1, op2, op3]);
+      const all = shaka.util.AbortableOperation.all([op1, op2, op3]);
 
-      let onSuccessSpy = jasmine.createSpy('onSuccess');
-      let onSuccess = shaka.test.Util.spyFunc(onSuccessSpy);
-      let onErrorSpy = jasmine.createSpy('onError');
-      let onError = shaka.test.Util.spyFunc(onErrorSpy);
+      const onSuccessSpy = jasmine.createSpy('onSuccess');
+      const onSuccess = shaka.test.Util.spyFunc(onSuccessSpy);
+      const onErrorSpy = jasmine.createSpy('onError');
+      const onError = shaka.test.Util.spyFunc(onErrorSpy);
 
       all.promise.then(onSuccess, onError).catch(fail);
 
@@ -267,7 +268,7 @@ describe('AbortableOperation', function() {
   describe('finally', function() {
     it('executes after the operation is successful', function(done) {
       let isDone = false;
-      let promise = new shaka.util.PublicPromise();
+      const promise = new shaka.util.PublicPromise();
 
       shaka.util.AbortableOperation.notAbortable(promise).finally((ok) => {
         expect(ok).toBe(true);
@@ -286,7 +287,7 @@ describe('AbortableOperation', function() {
 
     it('executes after the operation fails', function(done) {
       let isDone = false;
-      let promise = new shaka.util.PublicPromise();
+      const promise = new shaka.util.PublicPromise();
 
       shaka.util.AbortableOperation.notAbortable(promise).finally((ok) => {
         expect(ok).toBe(false);
@@ -305,8 +306,8 @@ describe('AbortableOperation', function() {
 
     it('executes after the chain is successful', function(done) {
       let isDone = false;
-      let promise1 = new shaka.util.PublicPromise();
-      let promise2 = new shaka.util.PublicPromise();
+      const promise1 = new shaka.util.PublicPromise();
+      const promise2 = new shaka.util.PublicPromise();
 
       shaka.util.AbortableOperation.notAbortable(promise1).chain(() => {
         return shaka.util.AbortableOperation.notAbortable(promise2);
@@ -331,8 +332,8 @@ describe('AbortableOperation', function() {
 
     it('executes after the chain fails', function(done) {
       let isDone = false;
-      let promise1 = new shaka.util.PublicPromise();
-      let promise2 = new shaka.util.PublicPromise();
+      const promise1 = new shaka.util.PublicPromise();
+      const promise2 = new shaka.util.PublicPromise();
 
       shaka.util.AbortableOperation.notAbortable(promise1).chain(() => {
         return shaka.util.AbortableOperation.notAbortable(promise2);
@@ -374,7 +375,7 @@ describe('AbortableOperation', function() {
 
   describe('chain', function() {
     it('passes the value to the next operation on success', function(done) {
-      let values = [];
+      const values = [];
 
       shaka.util.AbortableOperation.completed(100).chain((value) => {
         values.push(value);
@@ -411,7 +412,7 @@ describe('AbortableOperation', function() {
     });
 
     it('skips the onSuccess callbacks on error', function(done) {
-      let error = new shaka.util.Error(
+      const error = new shaka.util.Error(
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.NETWORK,
           shaka.util.Error.Code.MALFORMED_DATA_URI);
@@ -431,15 +432,15 @@ describe('AbortableOperation', function() {
     });
 
     it('can fall back to other operations in onError callback', function(done) {
-      let error1 = new shaka.util.Error(
+      const error1 = new shaka.util.Error(
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.NETWORK,
           shaka.util.Error.Code.MALFORMED_DATA_URI);
-      let error2 = new shaka.util.Error(
+      const error2 = new shaka.util.Error(
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.TEXT,
           shaka.util.Error.Code.INVALID_XML);
-      let error3 = new shaka.util.Error(
+      const error3 = new shaka.util.Error(
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.MEDIA,
           shaka.util.Error.Code.EBML_BAD_FLOATING_POINT_SIZE);
@@ -462,11 +463,11 @@ describe('AbortableOperation', function() {
     });
 
     it('fails when an error is thrown', function(done) {
-      let error1 = new shaka.util.Error(
+      const error1 = new shaka.util.Error(
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.NETWORK,
           shaka.util.Error.Code.MALFORMED_DATA_URI);
-      let error2 = new shaka.util.Error(
+      const error2 = new shaka.util.Error(
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.TEXT,
           shaka.util.Error.Code.INVALID_XML);
@@ -485,7 +486,7 @@ describe('AbortableOperation', function() {
     });
 
     it('goes to success state when onError returns undefined', function(done) {
-      let error = new shaka.util.Error(
+      const error = new shaka.util.Error(
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.NETWORK,
           shaka.util.Error.Code.MALFORMED_DATA_URI);
@@ -502,7 +503,7 @@ describe('AbortableOperation', function() {
     });
 
     it('does not need return when onSuccess omitted', function(done) {
-      let operation = shaka.util.AbortableOperation.completed(100);
+      const operation = shaka.util.AbortableOperation.completed(100);
       operation.chain(undefined, fail).chain(undefined, fail).chain((value) => {
         expect(value).toEqual(100);
       }).finally((ok) => {
@@ -512,12 +513,12 @@ describe('AbortableOperation', function() {
     });
 
     it('does not need rethrow when onError omitted', function(done) {
-      let error = new shaka.util.Error(
+      const error = new shaka.util.Error(
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.NETWORK,
           shaka.util.Error.Code.MALFORMED_DATA_URI);
 
-      let operation = shaka.util.AbortableOperation.failed(error);
+      const operation = shaka.util.AbortableOperation.failed(error);
       operation.chain(fail).chain(fail).chain(fail).chain(fail, (e) => {
         shaka.test.Util.expectToEqualError(e, error);
       }).finally((ok) => {
@@ -531,7 +532,7 @@ describe('AbortableOperation', function() {
       // sometimes unbind an abort method from an earlier stage of the chain.
       // Make sure this doesn't happen.
       let innerOperation;
-      let p = new shaka.util.PublicPromise();
+      const p = new shaka.util.PublicPromise();
       let abortCalled = false;
 
       /**
@@ -543,7 +544,7 @@ describe('AbortableOperation', function() {
        * called with the "this" of the test itself, regardless of what the
        * library is doing.
        */
-      let abort = function() {
+      const abort = function() {
         expect(this).toBe(innerOperation);
         abortCalled = true;
         return Promise.resolve();

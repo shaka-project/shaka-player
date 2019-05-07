@@ -22,7 +22,7 @@ describe('CastReceiver', function() {
   const originalCast = window['cast'];
   const originalUserAgent = navigator.userAgent;
 
-  let eventManager = new shaka.util.EventManager();
+  const eventManager = new shaka.util.EventManager();
 
   let mockReceiverManager;
   let mockReceiverApi;
@@ -58,7 +58,7 @@ describe('CastReceiver', function() {
   function checkAndRun(test, checkKeySystems) {
     const Platform = shaka.util.Platform;
 
-    let check = function(done) {
+    const check = function(done) {
       if (checkKeySystems && !support['com.widevine.alpha']) {
         pending('Skipping DrmEngine tests.');
       } else if (Platform.isChromecast()) {
@@ -88,7 +88,7 @@ describe('CastReceiver', function() {
  }
 
   beforeAll(function(done) {
-    let supportTest = shaka.media.DrmEngine.probeSupport()
+    const supportTest = shaka.media.DrmEngine.probeSupport()
         .then(function(result) { support = result; })
         .catch(fail);
 
@@ -113,7 +113,7 @@ describe('CastReceiver', function() {
     shaka.media.ManifestParser.registerParserByMime(
         'application/x-test-manifest',
         shaka.test.TestScheme.ManifestParser);
-    let createManifests = shaka.test.TestScheme.createManifests(shaka, '');
+    const createManifests = shaka.test.TestScheme.createManifests(shaka, '');
 
     Promise.all([createManifests, supportTest]).then(done);
   });
@@ -121,7 +121,7 @@ describe('CastReceiver', function() {
   beforeEach(checkAndRun(() => {
     mockReceiverApi = createMockReceiverApi();
 
-    let mockCanDisplayType = jasmine.createSpy('canDisplayType');
+    const mockCanDisplayType = jasmine.createSpy('canDisplayType');
     mockCanDisplayType.and.returnValue(true);
 
     // We're using quotes to access window.cast because the compiler
@@ -288,13 +288,13 @@ describe('CastReceiver', function() {
    */
   function waitForUpdateMessageWrapper(prototype, name, methodName) {
     pendingWaitWrapperCalls += 1;
-    let original = prototype[methodName];
+    const original = prototype[methodName];
     prototype[methodName] = /** @this {Object} @return {*} */ function() {
       pendingWaitWrapperCalls -= 1;
       shaka.log.debug(
           'Waiting for update message before calling ' +
           name + '.' + methodName + '...');
-      let originalArguments = arguments;
+      const originalArguments = arguments;
       return waitForUpdateMessage().then(function() {
         return original.apply(this, originalArguments);
       }.bind(this));
@@ -305,7 +305,7 @@ describe('CastReceiver', function() {
   }
 
   function addOnError(done) {
-    let onError = function(event) {
+    const onError = function(event) {
       fail(event.detail);
       done();
     };
@@ -346,7 +346,7 @@ describe('CastReceiver', function() {
   }
 
   function createMockMessageBus() {
-    let bus = {
+    const bus = {
       messages: [],
       broadcast: jasmine.createSpy('CastMessageBus.broadcast'),
       getCastChannel: jasmine.createSpy('CastMessageBus.getCastChannel'),
@@ -355,14 +355,14 @@ describe('CastReceiver', function() {
     bus.broadcast.and.callFake(function(message) {
       bus.messages.push(CastUtils.deserialize(message));
       // Check to see if it's an update message.
-      let parsed = CastUtils.deserialize(message);
+      const parsed = CastUtils.deserialize(message);
       if (parsed.type == 'update' && messageWaitPromise) {
         shaka.log.debug('Received update message. Proceeding...');
         messageWaitPromise.resolve(message);
         messageWaitPromise = null;
       }
     });
-    let channel = {
+    const channel = {
       messages: [],
       send: function(message) {
         channel.messages.push(CastUtils.deserialize(message));
@@ -376,7 +376,7 @@ describe('CastReceiver', function() {
    * @param {number} num
    */
   function fakeConnectedSenders(num) {
-    let senderArray = [];
+    const senderArray = [];
     while (num--) {
       senderArray.push('senderId');
     }
@@ -391,8 +391,8 @@ describe('CastReceiver', function() {
    * @param {string=} senderId
    */
   function fakeIncomingMessage(message, bus, senderId) {
-    let serialized = CastUtils.serialize(message);
-    let messageEvent = {
+    const serialized = CastUtils.serialize(message);
+    const messageEvent = {
       senderId: senderId,
       data: serialized,
     };

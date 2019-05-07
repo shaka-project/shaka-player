@@ -17,7 +17,7 @@
 
 describe('SegmentReference', function() {
   it('returns in getters values from constructor parameters', function() {
-    let reference = new shaka.media.SegmentReference(1, 2, 3,
+    const reference = new shaka.media.SegmentReference(1, 2, 3,
         function() { return ['x', 'y']; }, 4, 5);
 
     expect(reference.getPosition()).toBe(1);
@@ -31,7 +31,7 @@ describe('SegmentReference', function() {
 
 describe('InitSegmentReference', function() {
   it('returns in getters values from constructor parameters', function() {
-    let reference = new shaka.media.InitSegmentReference(
+    const reference = new shaka.media.InitSegmentReference(
         function() { return ['x', 'y']; }, 4, 5);
 
     expect(reference.createUris()).toEqual(['x', 'y']);

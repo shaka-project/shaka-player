@@ -50,32 +50,32 @@ describe('Mp4TtmlParser', function() {
   });
 
   it('parses media segment', function() {
-    let parser = new shaka.text.Mp4TtmlParser();
+    const parser = new shaka.text.Mp4TtmlParser();
     parser.parseInit(ttmlInitSegment);
-    let time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
-    let ret = parser.parseMedia(ttmlSegment, time);
+    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
+    const ret = parser.parseMedia(ttmlSegment, time);
     expect(ret.length).toBe(10);
   });
 
   it('handles media segments with multiple mdats', function() {
-    let parser = new shaka.text.Mp4TtmlParser();
+    const parser = new shaka.text.Mp4TtmlParser();
     parser.parseInit(ttmlInitSegment);
-    let time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
-    let ret = parser.parseMedia(ttmlSegmentMultipleMDAT, time);
+    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
+    const ret = parser.parseMedia(ttmlSegmentMultipleMDAT, time);
     expect(ret.length).toBe(20);
   });
 
   it('accounts for offset', function() {
-    let time1 = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
-    let time2 = {periodStart: 7, segmentStart: 0, segmentEnd: 0};
+    const time1 = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
+    const time2 = {periodStart: 7, segmentStart: 0, segmentEnd: 0};
 
-    let parser = new shaka.text.Mp4TtmlParser();
+    const parser = new shaka.text.Mp4TtmlParser();
     parser.parseInit(ttmlInitSegment);
 
-    let ret1 = parser.parseMedia(ttmlSegment, time1);
+    const ret1 = parser.parseMedia(ttmlSegment, time1);
     expect(ret1.length).toBeGreaterThan(0);
 
-    let ret2 = parser.parseMedia(ttmlSegment, time2);
+    const ret2 = parser.parseMedia(ttmlSegment, time2);
     expect(ret2.length).toBeGreaterThan(0);
 
     expect(ret2[0].startTime).toEqual(ret1[0].startTime + 7);
@@ -83,7 +83,7 @@ describe('Mp4TtmlParser', function() {
   });
 
   it('rejects init segment with no ttml', function() {
-    let error = new shaka.util.Error(
+    const error = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.TEXT,
         shaka.util.Error.Code.INVALID_MP4_TTML);

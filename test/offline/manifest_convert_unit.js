@@ -22,12 +22,12 @@ describe('ManifestConverter', function() {
 
     it('will create variants with variant ids', function() {
       /** @type {!Array.<shaka.extern.StreamDB>} */
-      let audios = [
+      const audios = [
         createStreamDB(0, audioType, [0]),
         createStreamDB(1, audioType, [1]),
       ];
       /** @type {!Array.<shaka.extern.StreamDB>} */
-      let videos = [
+      const videos = [
         createStreamDB(2, videoType, [0]),
         createStreamDB(3, videoType, [1]),
       ];
@@ -47,12 +47,12 @@ describe('ManifestConverter', function() {
 
     it('will create variants when there is only audio', function() {
       /** @type {!Array.<shaka.extern.StreamDB>} */
-      let audios = [
+      const audios = [
         createStreamDB(0, audioType, [0]),
         createStreamDB(1, audioType, [1]),
       ];
       /** @type {!Array.<shaka.extern.StreamDB>} */
-      let videos = [];
+      const videos = [];
 
       /** @type {!Map.<number, shaka.extern.Variant>} */
       const variants = createConverter().createVariants(audios, videos);
@@ -61,9 +61,9 @@ describe('ManifestConverter', function() {
 
     it('will create variants when there is only video', function() {
       /** @type {!Array.<shaka.extern.StreamDB>} */
-      let audios = [];
+      const audios = [];
       /** @type {!Array.<shaka.extern.StreamDB>} */
-      let videos = [
+      const videos = [
         createStreamDB(2, videoType, [0]),
         createStreamDB(3, videoType, [1]),
       ];
@@ -77,20 +77,20 @@ describe('ManifestConverter', function() {
   describe('fromPeriodDB', function() {
     it('will reconstruct Periods correctly', function() {
       /** @type {shaka.extern.PeriodDB} */
-      let periodDb = {
+      const periodDb = {
         startTime: 60,
         streams: [createVideoStreamDB(1, [0]), createAudioStreamDB(2, [0])],
       };
 
-      let timeline = createTimeline();
+      const timeline = createTimeline();
 
-      let period = createConverter().fromPeriodDB(periodDb, timeline);
+      const period = createConverter().fromPeriodDB(periodDb, timeline);
       expect(period).toBeTruthy();
       expect(period.startTime).toBe(periodDb.startTime);
       expect(period.textStreams).toEqual([]);
       expect(period.variants.length).toBe(1);
 
-      let variant = period.variants[0];
+      const variant = period.variants[0];
       expect(variant.id).toEqual(jasmine.any(Number));
       expect(variant.language).toBe(periodDb.streams[1].language);
       expect(variant.primary).toBe(false);
@@ -104,14 +104,14 @@ describe('ManifestConverter', function() {
 
     it('supports video-only content', function() {
       /** @type {shaka.extern.PeriodDB} */
-      let periodDb = {
+      const periodDb = {
         startTime: 60,
         streams: [createVideoStreamDB(1, [0]), createVideoStreamDB(2, [1])],
       };
 
-      let timeline = createTimeline();
+      const timeline = createTimeline();
 
-      let period = createConverter().fromPeriodDB(periodDb, timeline);
+      const period = createConverter().fromPeriodDB(periodDb, timeline);
       expect(period).toBeTruthy();
       expect(period.variants.length).toBe(2);
       expect(period.variants[0].audio).toBe(null);
@@ -120,14 +120,14 @@ describe('ManifestConverter', function() {
 
     it('supports audio-only content', function() {
       /** @type {shaka.extern.PeriodDB} */
-      let periodDb = {
+      const periodDb = {
         startTime: 60,
         streams: [createAudioStreamDB(1, [0]), createAudioStreamDB(2, [1])],
       };
 
-      let timeline = createTimeline();
+      const timeline = createTimeline();
 
-      let period = createConverter().fromPeriodDB(periodDb, timeline);
+      const period = createConverter().fromPeriodDB(periodDb, timeline);
       expect(period).toBeTruthy();
       expect(period.variants.length).toBe(2);
       expect(period.variants[0].audio).toBeTruthy();
@@ -136,7 +136,7 @@ describe('ManifestConverter', function() {
 
     it('supports text streams', function() {
       /** @type {shaka.extern.PeriodDB} */
-      let periodDb = {
+      const periodDb = {
         startTime: 60,
         streams: [
           createVideoStreamDB(1, [0]),
@@ -144,9 +144,9 @@ describe('ManifestConverter', function() {
         ],
       };
 
-      let timeline = createTimeline();
+      const timeline = createTimeline();
 
-      let period = createConverter().fromPeriodDB(periodDb, timeline);
+      const period = createConverter().fromPeriodDB(periodDb, timeline);
       expect(period).toBeTruthy();
       expect(period.variants.length).toBe(1);
       expect(period.textStreams.length).toBe(1);
@@ -165,7 +165,7 @@ describe('ManifestConverter', function() {
       const variant3 = 2;
 
       /** @type {shaka.extern.PeriodDB} */
-      let periodDb = {
+      const periodDb = {
         startTime: 60,
         streams: [
           // Audio
@@ -178,10 +178,10 @@ describe('ManifestConverter', function() {
         ],
       };
 
-      let timeline = createTimeline();
+      const timeline = createTimeline();
 
       /** @type {shaka.extern.Period} */
-      let period = createConverter().fromPeriodDB(periodDb, timeline);
+      const period = createConverter().fromPeriodDB(periodDb, timeline);
 
       expect(period).toBeTruthy();
       expect(period.variants.length).toBe(3);
@@ -213,7 +213,7 @@ describe('ManifestConverter', function() {
    */
   function createStreamDB(id, type, variants) {
     /** @type {shaka.extern.StreamDB} */
-    let streamDB = {
+    const streamDB = {
       id: id,
       originalId: id.toString(),
       primary: false,
@@ -243,7 +243,7 @@ describe('ManifestConverter', function() {
    */
   function createSegmentDB(startTime, endTime, dataKey) {
     /** @type {shaka.extern.SegmentDB} */
-    let segment = {
+    const segment = {
       startTime: startTime,
       endTime: endTime,
       dataKey: dataKey,
@@ -387,7 +387,7 @@ describe('ManifestConverter', function() {
       return;
     }
 
-    let expectedStream = {
+    const expectedStream = {
       id: jasmine.any(Number),
       originalId: jasmine.any(String),
       createSegmentIndex: jasmine.any(Function),
@@ -421,14 +421,14 @@ describe('ManifestConverter', function() {
     // Assume that we don't have to call createSegmentIndex.
 
     streamDb.segments.forEach(function(segmentDb, i) {
-      let uri = shaka.offline.OfflineUri.segment(
+      const uri = shaka.offline.OfflineUri.segment(
           'mechanism', 'cell', segmentDb.dataKey);
 
       expect(stream.findSegmentPosition(segmentDb.startTime)).toBe(i);
       expect(stream.findSegmentPosition(segmentDb.endTime - 0.1)).toBe(i);
 
       /** @type {shaka.media.SegmentReference} */
-      let segment = stream.getSegmentReference(i);
+      const segment = stream.getSegmentReference(i);
       expect(segment).toBeTruthy();
       expect(segment.position).toBe(i);
       expect(segment.startTime).toBe(segmentDb.startTime);
@@ -451,14 +451,14 @@ describe('ManifestConverter', function() {
 
     variants.forEach(function(variant) {
       /** @type {?shaka.extern.Stream} */
-      let audio = variant.audio;
+      const audio = variant.audio;
       /** @type {?shaka.extern.Stream} */
-      let video = variant.video;
+      const video = variant.video;
 
       /** @type {boolean } */
-      let audioMatch = audio ? audioId == audio.id : audioId == null;
+      const audioMatch = audio ? audioId == audio.id : audioId == null;
       /** @type {boolean } */
-      let videoMatch = video ? videoId == video.id : videoId == null;
+      const videoMatch = video ? videoId == video.id : videoId == null;
 
       if (audioMatch && videoMatch) {
         found = variant;

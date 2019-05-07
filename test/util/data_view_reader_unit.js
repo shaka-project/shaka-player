@@ -52,130 +52,130 @@ describe('DataViewReader', function() {
   });
 
   it('reads a uint8 in big endian', function() {
-    let value1 = bigEndianReader.readUint8();
+    const value1 = bigEndianReader.readUint8();
     expect(value1).toBe(0x00);
 
-    let value2 = bigEndianReader.readUint8();
+    const value2 = bigEndianReader.readUint8();
     expect(value2).toBe(0x01);
 
-    let value3 = bigEndianReader2.readUint8();
+    const value3 = bigEndianReader2.readUint8();
     expect(value3).toBe(0xde);
 
-    let value4 = bigEndianReader2.readUint8();
+    const value4 = bigEndianReader2.readUint8();
     expect(value4).toBe(0xad);
   });
 
   it('reads a uint16 in big endian', function() {
-    let value1 = bigEndianReader.readUint16();
+    const value1 = bigEndianReader.readUint16();
     expect(value1).toBe(0x0001);
 
-    let value2 = bigEndianReader.readUint16();
+    const value2 = bigEndianReader.readUint16();
     expect(value2).toBe(0x0203);
 
-    let value3 = bigEndianReader2.readUint16();
+    const value3 = bigEndianReader2.readUint16();
     expect(value3).toBe(0xdead);
 
-    let value4 = bigEndianReader2.readUint16();
+    const value4 = bigEndianReader2.readUint16();
     expect(value4).toBe(0xbeef);
   });
 
   it('reads a uint32 in big endian', function() {
-    let value1 = bigEndianReader.readUint32();
+    const value1 = bigEndianReader.readUint32();
     expect(value1).toBe(0x00010203);
 
-    let value2 = bigEndianReader.readUint32();
+    const value2 = bigEndianReader.readUint32();
     expect(value2).toBe(0x04050607);
 
-    let value3 = bigEndianReader2.readUint32();
+    const value3 = bigEndianReader2.readUint32();
     expect(value3).toBe(0xdeadbeef);
 
-    let value4 = bigEndianReader2.readUint32();
+    const value4 = bigEndianReader2.readUint32();
     expect(value4).toBe(0xffff0100);
   });
 
   it('reads an int32 in big endian', function() {
-    let value1 = bigEndianReader.readInt32();
+    const value1 = bigEndianReader.readInt32();
     expect(value1).toBe(66051);
 
-    let value2 = bigEndianReader.readInt32();
+    const value2 = bigEndianReader.readInt32();
     expect(value2).toBe(67438087);
 
-    let value3 = bigEndianReader2.readInt32();
+    const value3 = bigEndianReader2.readInt32();
     expect(value3).toBe(-559038737);
 
-    let value4 = bigEndianReader2.readInt32();
+    const value4 = bigEndianReader2.readInt32();
     expect(value4).toBe(-65280);
   });
 
   it('reads a uint64 in big endian', function() {
-    let value = bigEndianReader.readUint64();
+    const value = bigEndianReader.readUint64();
     expect(value).toBe(0x0001020304050607);
   });
 
   it('reads a uint8 in little endian', function() {
-    let value1 = littleEndianReader.readUint8();
+    const value1 = littleEndianReader.readUint8();
     expect(value1).toBe(0x00);
 
-    let value2 = littleEndianReader.readUint8();
+    const value2 = littleEndianReader.readUint8();
     expect(value2).toBe(0x01);
 
-    let value3 = littleEndianReader2.readUint8();
+    const value3 = littleEndianReader2.readUint8();
     expect(value3).toBe(0xde);
 
-    let value4 = littleEndianReader2.readUint8();
+    const value4 = littleEndianReader2.readUint8();
     expect(value4).toBe(0xad);
   });
 
   it('reads a uint16 in little endian', function() {
-    let value1 = littleEndianReader.readUint16();
+    const value1 = littleEndianReader.readUint16();
     expect(value1).toBe(0x0100);
 
-    let value2 = littleEndianReader.readUint16();
+    const value2 = littleEndianReader.readUint16();
     expect(value2).toBe(0x0302);
 
-    let value3 = littleEndianReader2.readUint16();
+    const value3 = littleEndianReader2.readUint16();
     expect(value3).toBe(0xadde);
 
-    let value4 = littleEndianReader2.readUint16();
+    const value4 = littleEndianReader2.readUint16();
     expect(value4).toBe(0xefbe);
   });
 
   it('reads a uint32 in little endian', function() {
-    let value1 = littleEndianReader.readUint32();
+    const value1 = littleEndianReader.readUint32();
     expect(value1).toBe(0x03020100);
 
-    let value2 = littleEndianReader.readUint32();
+    const value2 = littleEndianReader.readUint32();
     expect(value2).toBe(0x07060504);
 
-    let value3 = littleEndianReader2.readUint32();
+    const value3 = littleEndianReader2.readUint32();
     expect(value3).toBe(0xefbeadde);
 
-    let value4 = littleEndianReader2.readUint32();
+    const value4 = littleEndianReader2.readUint32();
     expect(value4).toBe(0x0001ffff);
   });
 
   it('reads an int32 in little endian', function() {
-    let value1 = littleEndianReader.readInt32();
+    const value1 = littleEndianReader.readInt32();
     expect(value1).toBe(50462976);
 
-    let value2 = littleEndianReader.readInt32();
+    const value2 = littleEndianReader.readInt32();
     expect(value2).toBe(117835012);
 
-    let value3 = littleEndianReader2.readInt32();
+    const value3 = littleEndianReader2.readInt32();
     expect(value3).toBe(-272716322);
 
-    let value4 = littleEndianReader2.readInt32();
+    const value4 = littleEndianReader2.readInt32();
     expect(value4).toBe(131071);
   });
 
   it('reads a uint64 in little endian', function() {
-    let value = littleEndianReader2.readUint64();
+    const value = littleEndianReader2.readUint64();
     expect(value).toBe(0x0001ffffefbeadde);
   });
 
   it('skips bytes', function() {
     bigEndianReader.skip(1);
-    let value = bigEndianReader.readUint8();
+    const value = bigEndianReader.readUint8();
     expect(value).toBe(0x01);
   });
 

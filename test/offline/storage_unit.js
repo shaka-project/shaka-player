@@ -71,7 +71,7 @@ describe('Storage', function() {
 
       // Make sure that the content can be found.
       await withStorage(async (storage) => {
-        let content = await storage.list();
+        const content = await storage.list();
         expect(content).toBeTruthy();
         expect(content.length).toBe(1);
       });
@@ -81,7 +81,7 @@ describe('Storage', function() {
 
       // Make sure that all content that was previously found is no gone.
       await withStorage(async (storage) => {
-        let content = await storage.list();
+        const content = await storage.list();
         expect(content).toBeTruthy();
         expect(content.length).toBe(0);
       });
@@ -135,15 +135,15 @@ describe('Storage', function() {
 
       // PART 1 - Download and store content that has a persistent license
       //          associated with it.
-      let stored = await storage.store(
+      const stored = await storage.store(
           'test:sintel-enc', noMetadata, TestManifestParser);
       expect(stored.offlineUri).toBeTruthy();
 
       /** @type {shaka.offline.OfflineUri} */
-      let uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
+      const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
       goog.asserts.assert(uri, 'Stored offline uri should be non-null');
 
-      let manifest = await getStoredManifest(uri);
+      const manifest = await getStoredManifest(uri);
       expect(manifest.offlineSessionIds).toBeTruthy();
       expect(manifest.offlineSessionIds.length).toBeTruthy();
 
@@ -157,7 +157,7 @@ describe('Storage', function() {
       // PART 2 - Check that the licences are stored.
       await withDrm(player, manifest, (drm) => {
         return Promise.all(manifest.offlineSessionIds.map(async (session) => {
-          let foundSession = await loadOfflineSession(drm, session);
+          const foundSession = await loadOfflineSession(drm, session);
           expect(foundSession).toBeTruthy();
         }));
       });
@@ -177,7 +177,7 @@ describe('Storage', function() {
       try {
         await withDrm(player, manifest, (drm) => {
           return Promise.all(manifest.offlineSessionIds.map(async (session) => {
-            let notFoundSession = await loadOfflineSession(drm, session);
+            const notFoundSession = await loadOfflineSession(drm, session);
             // TODO: This is failing.  The session is actually found, possibly
             // due to http://crbug.com/690583, but this is unclear.
             expect(notFoundSession).toBeFalsy();
@@ -292,7 +292,8 @@ describe('Storage', function() {
         variantTrack(5, 1080, englishUS, 4 * kbps),
       ];
 
-      let selected = PlayerConfiguration.defaultTrackSelect(tracks, englishUS);
+      const selected =
+          PlayerConfiguration.defaultTrackSelect(tracks, englishUS);
       expect(selected).toBeTruthy();
       expect(selected.length).toBe(1);
       expect(selected[0]).toBeTruthy();
@@ -307,7 +308,8 @@ describe('Storage', function() {
         textTrack(1, frenchCanadian),
       ];
 
-      let selected = PlayerConfiguration.defaultTrackSelect(tracks, englishUS);
+      const selected =
+          PlayerConfiguration.defaultTrackSelect(tracks, englishUS);
       expect(selected).toBeTruthy();
       expect(selected.length).toBe(2);
       tracks.forEach((track) => {
@@ -323,7 +325,8 @@ describe('Storage', function() {
           variantTrack(2, 480, 'eng-ca', 1 * kbps),
         ];
 
-        let selected = PlayerConfiguration.defaultTrackSelect(tracks, 'eng-us');
+        const selected =
+            PlayerConfiguration.defaultTrackSelect(tracks, 'eng-us');
         expect(selected).toBeTruthy();
         expect(selected.length).toBe(1);
         expect(selected[0]).toBeTruthy();
@@ -338,7 +341,7 @@ describe('Storage', function() {
           variantTrack(3, 480, 'eng', 1 * kbps),
         ];
 
-        let selected = PlayerConfiguration.defaultTrackSelect(tracks, 'eng');
+        const selected = PlayerConfiguration.defaultTrackSelect(tracks, 'eng');
         expect(selected).toBeTruthy();
         expect(selected.length).toBe(1);
         expect(selected[0]).toBeTruthy();
@@ -352,7 +355,7 @@ describe('Storage', function() {
           variantTrack(2, 480, 'eng-ca', 1 * kbps),
         ];
 
-        let selected = PlayerConfiguration.defaultTrackSelect(tracks, 'fr');
+        const selected = PlayerConfiguration.defaultTrackSelect(tracks, 'fr');
         expect(selected).toBeTruthy();
         expect(selected.length).toBe(1);
         expect(selected[0]).toBeTruthy();
@@ -366,7 +369,8 @@ describe('Storage', function() {
           variantTrack(2, 480, 'eng-ca', 1 * kbps),
         ];
 
-        let selected = PlayerConfiguration.defaultTrackSelect(tracks, 'fr-uk');
+        const selected =
+            PlayerConfiguration.defaultTrackSelect(tracks, 'fr-uk');
         expect(selected).toBeTruthy();
         expect(selected.length).toBe(1);
         expect(selected[0]).toBeTruthy();
@@ -382,7 +386,7 @@ describe('Storage', function() {
 
         tracks[0].primary = true;
 
-        let selected = PlayerConfiguration.defaultTrackSelect(tracks, 'de');
+        const selected = PlayerConfiguration.defaultTrackSelect(tracks, 'de');
         expect(selected).toBeTruthy();
         expect(selected.length).toBe(1);
         expect(selected[0]).toBeTruthy();
@@ -733,10 +737,10 @@ describe('Storage', function() {
       await storage.store(manifestUris[1], noMetadata, FakeManifestParser);
       await storage.store(manifestUris[2], noMetadata, FakeManifestParser);
 
-      let content = await storage.list();
+      const content = await storage.list();
       expect(content).toBeTruthy();
 
-      let originalUris = content.map((c) => c.originalManifestUri);
+      const originalUris = content.map((c) => c.originalManifestUri);
       expect(originalUris).toBeTruthy();
       expect(originalUris.length).toBe(3);
 
@@ -748,8 +752,8 @@ describe('Storage', function() {
     it('only stores chosen tracks', checkAndRun(async function() {
       // Change storage to only store one track so that it will be easy
       // for use to ensure that only the one track was stored.
-      let selectTrack = (tracks) => {
-        let selected = tracks.filter((t) => t.language == frenchCanadian);
+      const selectTrack = (tracks) => {
+        const selected = tracks.filter((t) => t.language == frenchCanadian);
         expect(selected.length).toBe(1);
         return selected;
       };
@@ -761,7 +765,7 @@ describe('Storage', function() {
 
       // Stored content should reflect the tracks in the first period, so we
       // should only find track there.
-      let stored = await storage.store(
+      const stored = await storage.store(
           manifestWithPerStreamBandwidthUri, noMetadata, FakeManifestParser);
       expect(stored).toBeTruthy();
       expect(stored.tracks).toBeTruthy();
@@ -771,7 +775,7 @@ describe('Storage', function() {
       // Pull the manifest out of storage so that we can ensure that it only
       // has one variant.
       /** @type {shaka.offline.OfflineUri} */
-      let uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
+      const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
       expect(uri).toBeTruthy();
 
       /** @type {!shaka.offline.StorageMuxer} */
@@ -779,23 +783,23 @@ describe('Storage', function() {
 
       try {
         await muxer.init();
-        let cell = await muxer.getCell(uri.mechanism(), uri.cell());
-        let manifests = await cell.getManifests([uri.key()]);
+        const cell = await muxer.getCell(uri.mechanism(), uri.cell());
+        const manifests = await cell.getManifests([uri.key()]);
         expect(manifests).toBeTruthy();
         expect(manifests.length).toBe(1);
 
-        let manifest = manifests[0];
+        const manifest = manifests[0];
         expect(manifest).toBeTruthy();
         expect(manifest.periods).toBeTruthy();
         expect(manifest.periods.length).toBe(1);
 
-        let period = manifest.periods[0];
+        const period = manifest.periods[0];
         expect(period).toBeTruthy();
         expect(period.streams).toBeTruthy();
         // There should be 2 streams, an audio and a video stream.
         expect(period.streams.length).toBe(2);
 
-        let audio = period.streams.filter((s) => s.contentType == 'audio')[0];
+        const audio = period.streams.filter((s) => s.contentType == 'audio')[0];
         expect(audio).toBeTruthy();
         expect(audio.language).toBe(frenchCanadian);
       } finally {
@@ -811,7 +815,7 @@ describe('Storage', function() {
 
       // TODO(vaage): Is there a way we can set the session ids without needing
       //               to overload an internal call in storage.
-      let drm = new shaka.test.FakeDrmEngine();
+      const drm = new shaka.test.FakeDrmEngine();
       drm.setDrmInfo(drmInfo);
       drm.setSessionIds([session1, session2]);
       drm.getExpiration.and.returnValue(expiration);
@@ -821,10 +825,10 @@ describe('Storage', function() {
           drm,
           makeManifestWithPerStreamBandwidth());
 
-      let stored = await storage.store(manifestWithPerStreamBandwidthUri);
+      const stored = await storage.store(manifestWithPerStreamBandwidthUri);
 
       /** @type {shaka.offline.OfflineUri} */
-      let uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
+      const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
       expect(uri).toBeTruthy();
 
       /** @type {!shaka.offline.StorageMuxer} */
@@ -832,9 +836,9 @@ describe('Storage', function() {
 
       try {
         await muxer.init();
-        let cell = await muxer.getCell(uri.mechanism(), uri.cell());
-        let manifests = await cell.getManifests([uri.key()]);
-        let manifest = manifests[0];
+        const cell = await muxer.getCell(uri.mechanism(), uri.cell());
+        const manifests = await cell.getManifests([uri.key()]);
+        const manifest = manifests[0];
         expect(manifest).toBeTruthy();
 
         expect(manifest.drmInfo).toEqual(drmInfo);
@@ -860,7 +864,7 @@ describe('Storage', function() {
 
           // TODO(vaage): Is there a way we can set the session ids without
           //              needing to overload an internal call in storage.
-          let drm = new shaka.test.FakeDrmEngine();
+          const drm = new shaka.test.FakeDrmEngine();
           drm.setDrmInfo(drmInfo);
           drm.setSessionIds([session1, session2]);
 
@@ -872,10 +876,10 @@ describe('Storage', function() {
             usePersistentLicense: false,
           });
 
-          let stored = await storage.store(manifestWithPerStreamBandwidthUri);
+          const stored = await storage.store(manifestWithPerStreamBandwidthUri);
 
           /** @type {shaka.offline.OfflineUri} */
-          let uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
+          const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
           expect(uri).toBeTruthy();
 
           /** @type {!shaka.offline.StorageMuxer} */
@@ -883,9 +887,9 @@ describe('Storage', function() {
 
           try {
             await muxer.init();
-            let cell = await muxer.getCell(uri.mechanism(), uri.cell());
-            let manifests = await cell.getManifests([uri.key()]);
-            let manifest = manifests[0];
+            const cell = await muxer.getCell(uri.mechanism(), uri.cell());
+            const manifests = await cell.getManifests([uri.key()]);
+            const manifest = manifests[0];
             expect(manifest).toBeTruthy();
 
             expect(manifest.drmInfo).toEqual(drmInfo);
@@ -906,9 +910,9 @@ describe('Storage', function() {
         checkAndRun(async function() {
           // Block the network so that we won't finish the first store command.
           /** @type {!shaka.util.PublicPromise} */
-          let hangingPromise = netEngine.delayNextRequest();
+          const hangingPromise = netEngine.delayNextRequest();
           /** @type {!Promise} */
-          let storePromise = storage.store(
+          const storePromise = storage.store(
               manifestWithPerStreamBandwidthUri,
               noMetadata,
               FakeManifestParser);
@@ -949,7 +953,7 @@ describe('Storage', function() {
 
           // TODO(vaage): Is there a way we can set the session ids without
           //              needing to overload an internal call in storage.
-          let drm = new shaka.test.FakeDrmEngine();
+          const drm = new shaka.test.FakeDrmEngine();
           drm.setDrmInfo(drmInfo);
           drm.setSessionIds(noSessions);
 
@@ -1034,12 +1038,12 @@ describe('Storage', function() {
         checkAndRun(async function() {
           // Store a piece of content, but then change the uri slightly so that
           // it won't be found when we try to remove it (with the wrong uri).
-          let stored = await storage.store(
+          const stored = await storage.store(
               manifestWithPerStreamBandwidthUri,
               noMetadata,
               FakeManifestParser);
-          let storedUri = shaka.offline.OfflineUri.parse(stored.offlineUri);
-          let missingManifestUri = shaka.offline.OfflineUri.manifest(
+          const storedUri = shaka.offline.OfflineUri.parse(stored.offlineUri);
+          const missingManifestUri = shaka.offline.OfflineUri.manifest(
               storedUri.mechanism(), storedUri.cell(), storedUri.key() + 1);
 
           try {
@@ -1051,18 +1055,18 @@ describe('Storage', function() {
         }));
 
     it('removes manifest', checkAndRun(async function() {
-      let stored = await storage.store(
+      const stored = await storage.store(
           manifestWithPerStreamBandwidthUri, noMetadata, FakeManifestParser);
 
       await storage.remove(stored.offlineUri);
     }));
 
     it('removes manifest with missing segments', checkAndRun(async function() {
-      let stored = await storage.store(
+      const stored = await storage.store(
           manifestWithPerStreamBandwidthUri, noMetadata, FakeManifestParser);
 
       /** @type {shaka.offline.OfflineUri} */
-      let uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
+      const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
       expect(uri).toBeTruthy();
 
       /** @type {!shaka.offline.StorageMuxer} */
@@ -1070,19 +1074,19 @@ describe('Storage', function() {
 
       try {
         await muxer.init();
-        let cell = await muxer.getCell(uri.mechanism(), uri.cell());
-        let manifests = await cell.getManifests([uri.key()]);
-        let manifest = manifests[0];
+        const cell = await muxer.getCell(uri.mechanism(), uri.cell());
+        const manifests = await cell.getManifests([uri.key()]);
+        const manifest = manifests[0];
 
         // Get the stream from the manifest. The segment count is based on how
         // we created manifest in the "make*Manifest" functions.
-        let stream = manifest.periods[0].streams[0];
+        const stream = manifest.periods[0].streams[0];
         expect(stream).toBeTruthy();
         expect(stream.segments.length).toBe(4);
 
         // Remove all the segments so that all segments will be missing.
         // There should be way more than one segment.
-        let keys = stream.segments.map((segment) => segment.dataKey);
+        const keys = stream.segments.map((segment) => segment.dataKey);
         expect(keys.length).toBeGreaterThan(0);
 
         const noop = () => {};
@@ -1095,14 +1099,14 @@ describe('Storage', function() {
     }));
 
     it('tracks progress on remove', checkAndRun(async function() {
-      let selectOneTrack = (tracks) => {
-        let allVariants = tracks.filter((t) => {
+      const selectOneTrack = (tracks) => {
+        const allVariants = tracks.filter((t) => {
           return t.type == 'variant';
         });
         expect(allVariants).toBeTruthy();
         expect(allVariants.length).toBeGreaterThan(0);
 
-        let frenchVariants = allVariants.filter((t) => {
+        const frenchVariants = allVariants.filter((t) => {
           return t.language == frenchCanadian;
         });
         expect(frenchVariants).toBeTruthy();
@@ -1118,7 +1122,7 @@ describe('Storage', function() {
           trackSelectionCallback: selectOneTrack,
         },
       });
-      let content = await storage.store(
+      const content = await storage.store(
           manifestWithPerStreamBandwidthUri,
           noMetadata,
           FakeManifestParser);
@@ -1126,11 +1130,11 @@ describe('Storage', function() {
       /**
        * @type {!Array.<number>}
        */
-      let progressSteps = [
+      const progressSteps = [
         0.111, 0.222, 0.333, 0.444, 0.555, 0.666, 0.777, 0.888, 1.0,
       ];
 
-      let progressCallback = (content, progress) => {
+      const progressCallback = (content, progress) => {
         expect(progress).toBeCloseTo(progressSteps.shift());
       };
 
@@ -1249,7 +1253,7 @@ describe('Storage', function() {
   function makeManifestWithPerStreamBandwidth() {
     const SegmentReference = shaka.media.SegmentReference;
 
-    let manifest = new shaka.test.ManifestGenerator()
+    const manifest = new shaka.test.ManifestGenerator()
         .setPresentationDuration(20)
         .addPeriod(0)
             .addVariant(0).language(englishUS).bandwidth(13 * kbps)
@@ -1263,7 +1267,7 @@ describe('Storage', function() {
     getAllStreams(manifest).forEach((stream) => {
       // Make a new copy each time as the segment index can modify
       // each reference.
-      let refs = [
+      const refs = [
         new SegmentReference(0, 0, 1, uris(segment1Uri), 0, null),
         new SegmentReference(1, 1, 2, uris(segment2Uri), 0, null),
         new SegmentReference(2, 2, 3, uris(segment3Uri), 0, null),
@@ -1280,7 +1284,7 @@ describe('Storage', function() {
    * @return {shaka.extern.Manifest}
    */
   function makeManifestWithoutPerStreamBandwidth() {
-    let manifest = makeManifestWithPerStreamBandwidth();
+    const manifest = makeManifestWithPerStreamBandwidth();
 
     // Remove the per stream bandwidth.
     getAllStreams(manifest).forEach((stream) => {
@@ -1296,10 +1300,10 @@ describe('Storage', function() {
   function makeManifestWithNonZeroStart() {
     const SegmentReference = shaka.media.SegmentReference;
 
-    let manifest = makeManifestWithPerStreamBandwidth();
+    const manifest = makeManifestWithPerStreamBandwidth();
 
     getAllStreams(manifest).forEach((stream) => {
-      let refs = [
+      const refs = [
         new SegmentReference(0, 10, 11, uris(segment1Uri), 0, null),
         new SegmentReference(1, 11, 12, uris(segment2Uri), 0, null),
         new SegmentReference(2, 12, 13, uris(segment3Uri), 0, null),
@@ -1316,7 +1320,7 @@ describe('Storage', function() {
    * @return {shaka.extern.Manifest}
    */
   function makeManifestWithLiveTimeline() {
-    let manifest = makeManifestWithPerStreamBandwidth();
+    const manifest = makeManifestWithPerStreamBandwidth();
     manifest.presentationTimeline.setDuration(Infinity);
     manifest.presentationTimeline.setStatic(false);
     return manifest;
@@ -1327,7 +1331,7 @@ describe('Storage', function() {
    * @return {!Array.<shaka.extern.Stream>}
    */
   function getAllStreams(manifest) {
-    let streams = [];
+    const streams = [];
 
     manifest.periods.forEach((period) => {
       period.variants.forEach((variant) => {
@@ -1347,7 +1351,7 @@ describe('Storage', function() {
    * @param {!Array.<shaka.media.SegmentReference>} segments
    */
   function overrideSegmentIndex(stream, segments) {
-    let index = new shaka.media.SegmentIndex(segments);
+    const index = new shaka.media.SegmentIndex(segments);
     stream.findSegmentPosition = (time) => index.find(time);
     stream.getSegmentReference = (time) => index.get(time);
   }
@@ -1386,7 +1390,7 @@ describe('Storage', function() {
    * @return {shaka.extern.DrmInfo}
    */
   function makeDrmInfo() {
-    let drmInfo = {
+    const drmInfo = {
       keySystem: 'com.example.abc',
       licenseServerUri: 'http://example.com',
       persistentStateRequired: true,
@@ -1403,7 +1407,7 @@ describe('Storage', function() {
 
   // TODO(vaage): Replace this with |shaka.test.FakeManifestParser|
   /** @implements {shaka.extern.ManifestParser} */
-  let FakeManifestParser = class {
+  const FakeManifestParser = class {
     constructor() {
       this.map_ = {};
       this.map_[manifestWithPerStreamBandwidthUri] =
@@ -1516,7 +1520,7 @@ describe('Storage', function() {
    */
   function checkAndRun(test) {
     return async () => {
-      let hasSupport = shaka.offline.Storage.support();
+      const hasSupport = shaka.offline.Storage.support();
       if (hasSupport) {
         await test();
       } else {
@@ -1534,10 +1538,10 @@ describe('Storage', function() {
    */
   function drmCheckAndRun(test) {
     return async () => {
-      let support = await shaka.Player.probeSupport();
+      const support = await shaka.Player.probeSupport();
 
-      let widevineSupport = support.drm['com.widevine.alpha'];
-      let storageSupport = shaka.offline.Storage.support();
+      const widevineSupport = support.drm['com.widevine.alpha'];
+      const storageSupport = shaka.offline.Storage.support();
 
       if (!widevineSupport) {
         pending('Widevine is not supported on this platform');

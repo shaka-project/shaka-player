@@ -88,9 +88,9 @@ describe('SimpleTextDisplayer', function() {
 
   describe('remove', function() {
     it('removes cues which overlap the range', function() {
-      let cue1 = new shaka.text.Cue(0, 1, 'Test');
-      let cue2 = new shaka.text.Cue(1, 2, 'Test');
-      let cue3 = new shaka.text.Cue(2, 3, 'Test');
+      const cue1 = new shaka.text.Cue(0, 1, 'Test');
+      const cue2 = new shaka.text.Cue(1, 2, 'Test');
+      const cue3 = new shaka.text.Cue(2, 3, 'Test');
       displayer.append([cue1, cue2, cue3]);
 
       displayer.remove(0, 1);
@@ -132,7 +132,7 @@ describe('SimpleTextDisplayer', function() {
             new shaka.text.Cue(20, 40, 'Test'),
           ]);
 
-      let cue1 = new shaka.text.Cue(20, 40, 'Test');
+      const cue1 = new shaka.text.Cue(20, 40, 'Test');
       cue1.positionAlign = Cue.positionAlign.LEFT;
       cue1.lineAlign = Cue.lineAlign.START;
       cue1.size = 80;
@@ -159,7 +159,7 @@ describe('SimpleTextDisplayer', function() {
             },
           ], [cue1]);
 
-      let cue2 = new shaka.text.Cue(30, 50, 'Test');
+      const cue2 = new shaka.text.Cue(30, 50, 'Test');
       cue2.positionAlign = Cue.positionAlign.RIGHT;
       cue2.lineAlign = Cue.lineAlign.END;
       cue2.textAlign = Cue.textAlign.RIGHT;
@@ -182,7 +182,7 @@ describe('SimpleTextDisplayer', function() {
             },
           ], [cue2]);
 
-      let cue3 = new shaka.text.Cue(40, 60, 'Test');
+      const cue3 = new shaka.text.Cue(40, 60, 'Test');
       cue3.positionAlign = Cue.positionAlign.CENTER;
       cue3.lineAlign = Cue.lineAlign.CENTER;
       cue3.textAlign = Cue.textAlign.START;
@@ -201,7 +201,7 @@ describe('SimpleTextDisplayer', function() {
             },
           ], [cue3]);
 
-      let cue4 = new shaka.text.Cue(40, 60, 'Test');
+      const cue4 = new shaka.text.Cue(40, 60, 'Test');
       cue4.line = null;
       cue4.position = null;
 
@@ -218,7 +218,7 @@ describe('SimpleTextDisplayer', function() {
             },
           ], [cue4]);
 
-      let cue5 = new shaka.text.Cue(40, 60, 'Test');
+      const cue5 = new shaka.text.Cue(40, 60, 'Test');
       cue5.line = 0;
       cue5.position = 0;
 
@@ -255,7 +255,7 @@ describe('SimpleTextDisplayer', function() {
       }
       window.VTTCue = /** @type {?} */(FakeVTTCueWithoutAlignCenter);
 
-      let cue1 = new shaka.text.Cue(20, 40, 'Test');
+      const cue1 = new shaka.text.Cue(20, 40, 'Test');
       cue1.textAlign = Cue.textAlign.CENTER;
 
       verifyHelper(
@@ -271,8 +271,8 @@ describe('SimpleTextDisplayer', function() {
     });
 
     it('ignores cues with startTime >= endTime', function() {
-      let cue1 = new shaka.text.Cue(60, 40, 'Test');
-      let cue2 = new shaka.text.Cue(40, 40, 'Test');
+      const cue1 = new shaka.text.Cue(60, 40, 'Test');
+      const cue2 = new shaka.text.Cue(40, 40, 'Test');
       displayer.append([cue1, cue2]);
       expect(mockTrack.addCue).not.toHaveBeenCalled();
     });
@@ -289,7 +289,7 @@ describe('SimpleTextDisplayer', function() {
   function verifyHelper(vttCues, shakaCues) {
     mockTrack.addCue.calls.reset();
     displayer.append(shakaCues);
-    let result = mockTrack.addCue.calls.allArgs().reduce(
+    const result = mockTrack.addCue.calls.allArgs().reduce(
         shaka.util.Functional.collapseArrays, []);
     expect(result).toBeTruthy();
     expect(result.length).toBe(vttCues.length);

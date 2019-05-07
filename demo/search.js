@@ -128,7 +128,7 @@ class ShakaDemoSearch {
         break;
       case ShakaDemoSearch.TermType.FEATURE:
         // Only this term should be in the desired features.
-        for (let term of others) {
+        for (const term of others) {
           const index = this.desiredFeatures_.indexOf(
               /** @type {shakaAssets.Feature} */ (term));
           if (index != -1) {
@@ -208,7 +208,7 @@ class ShakaDemoSearch {
     searchContainer.addRow(null, null);
     const nullOption = 'Unspecified';
     const valuesObject = {};
-    for (let term of choices) {
+    for (const term of choices) {
       if (type == 'DRM') {
         // The internal names of the keysystems aren't very readable, so use a
         // common name instead.
@@ -304,7 +304,7 @@ class ShakaDemoSearch {
       if (this.desiredSource_ && asset.source != this.desiredSource_) {
         return false;
       }
-      for (let feature of this.desiredFeatures_) {
+      for (const feature of this.desiredFeatures_) {
         if (feature == shakaAssets.Feature.STORED) {
           if (!asset.isStored()) {
             return false;

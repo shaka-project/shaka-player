@@ -84,8 +84,8 @@ describe('Player', function() {
       video.play();
       await waitUntilPlayheadReaches(eventManager, video, 1, 10);
 
-      let stats = player.getStats();
-      let expected = {
+      const stats = player.getStats();
+      const expected = {
         width: jasmine.any(Number),
         height: jasmine.any(Number),
         streamBandwidth: jasmine.any(Number),
@@ -130,7 +130,7 @@ describe('Player', function() {
 
       // This TextTrack was created as part of load() when we set up the
       // TextDisplayer.
-      let textTrack = video.textTracks[0];
+      const textTrack = video.textTracks[0];
       expect(textTrack).not.toBe(null);
 
       if (textTrack) {
@@ -258,13 +258,13 @@ describe('Player', function() {
 
       // For some reason, using path-absolute URLs (i.e. without the hostname)
       // like this doesn't work on Safari.  So manually resolve the URL.
-      let locationUri = new goog.Uri(location.href);
-      let partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
-      let absoluteUri = locationUri.resolve(partialUri);
+      const locationUri = new goog.Uri(location.href);
+      const partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
+      const absoluteUri = locationUri.resolve(partialUri);
       await player.addTextTrack(absoluteUri.toString(), 'en', 'subtitles',
                                 'text/vtt');
 
-      let textTracks = player.getTextTracks();
+      const textTracks = player.getTextTracks();
       expect(textTracks).toBeTruthy();
       expect(textTracks.length).toBe(1);
 
@@ -294,7 +294,7 @@ describe('Player', function() {
       expect(video.currentTime).toBeLessThan(9);
       // The two periods might not be in a single contiguous buffer, so don't
       // check end(0).  Gap-jumping will deal with any discontinuities.
-      let bufferEnd = video.buffered.end(video.buffered.length - 1);
+      const bufferEnd = video.buffered.end(video.buffered.length - 1);
       expect(bufferEnd).toBeGreaterThan(11);
 
       // Change to a different language; this should clear the buffers and
@@ -313,7 +313,7 @@ describe('Player', function() {
      * @return {string}
      */
     function getActiveLanguage() {
-      let tracks = player.getVariantTracks().filter(function(t) {
+      const tracks = player.getVariantTracks().filter(function(t) {
         return t.active;
       });
       expect(tracks.length).toBeGreaterThan(0);
@@ -359,7 +359,7 @@ describe('Player', function() {
     // properly exported from the player.
     it('exports language and roles fields', async () => {
       await player.load('test:sintel_compiled');
-      let languagesAndRoles = player.getTextLanguagesAndRoles();
+      const languagesAndRoles = player.getTextLanguagesAndRoles();
       expect(languagesAndRoles.length).toBeTruthy();
       languagesAndRoles.forEach((languageAndRole) => {
         expect(languageAndRole.language).not.toBeUndefined();

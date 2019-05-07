@@ -52,7 +52,7 @@ describe('IndexeddbStorageCell', function() {
     let cell;
 
     /** @type {!Array.<shaka.extern.SegmentDataDB>} */
-    let segments = [
+    const segments = [
       OfflineUtils.createSegmentData([0]),
       OfflineUtils.createSegmentData([0, 1]),
       OfflineUtils.createSegmentData([0, 1, 2]),
@@ -95,7 +95,7 @@ describe('IndexeddbStorageCell', function() {
     let cell;
 
     /** @type {!Array.<shaka.extern.ManifestDB>} */
-    let manifests = [
+    const manifests = [
       OfflineUtils.createManifest('original-uri-1'),
       OfflineUtils.createManifest('original-uri-2'),
       OfflineUtils.createManifest('original-uri-3'),
@@ -138,7 +138,7 @@ describe('IndexeddbStorageCell', function() {
     let cell;
 
     /** @type {!Array.<shaka.extern.ManifestDB>} */
-    let manifests = [
+    const manifests = [
       OfflineUtils.createManifest('original-uri-1'),
       OfflineUtils.createManifest('original-uri-2'),
       OfflineUtils.createManifest('original-uri-3'),
@@ -162,7 +162,7 @@ describe('IndexeddbStorageCell', function() {
     }).then((found) => {
       expect(found).toBeTruthy();
 
-      let actual = keys.map((key) => found.get(key));
+      const actual = keys.map((key) => found.get(key));
       expect(actual[0]).toEqual(manifests[0]);
       expect(actual[1]).toEqual(manifests[1]);
       expect(actual[2]).toEqual(manifests[2]);
@@ -174,7 +174,7 @@ describe('IndexeddbStorageCell', function() {
     let cell;
 
     /** @type {shaka.extern.ManifestDB} */
-    let originalManifest = OfflineUtils.createManifest('original');
+    const originalManifest = OfflineUtils.createManifest('original');
     originalManifest.expiration = 1000;
 
     /** @type {number} */
@@ -233,7 +233,7 @@ describe('IndexeddbStorageCell', function() {
    * @return {shaka.extern.StorageCell}
    */
   function makeCell(connection) {
-    let cell = new shaka.offline.indexeddb.V2StorageCell(
+    const cell = new shaka.offline.indexeddb.V2StorageCell(
         connection,
         segmentStore,
         manifestStore,

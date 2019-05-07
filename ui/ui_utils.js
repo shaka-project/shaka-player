@@ -29,7 +29,7 @@ goog.require('goog.asserts');
  */
  // TODO: This can be replaced by shaka.util.Dom.getElementByClassName
 shaka.ui.Utils.getFirstDescendantWithClassName = function(element, className) {
-  let descendant = shaka.ui.Utils.getDescendantIfExists(element, className);
+  const descendant = shaka.ui.Utils.getDescendantIfExists(element, className);
   goog.asserts.assert(descendant != null, 'Should not be null!');
 
   return descendant;
@@ -42,7 +42,7 @@ shaka.ui.Utils.getFirstDescendantWithClassName = function(element, className) {
  * @return {?HTMLElement}
  */
 shaka.ui.Utils.getDescendantIfExists = function(element, className) {
-  let childrenWithClassName = element.getElementsByClassName(className);
+  const childrenWithClassName = element.getElementsByClassName(className);
   if (childrenWithClassName.length) {
     return /** @type {!HTMLElement} */ (childrenWithClassName[0]);
   }

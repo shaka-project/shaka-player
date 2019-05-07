@@ -33,7 +33,7 @@ describe('V1IndexeddbStorageCell', function() {
   let connections = [];
 
   beforeAll(async function() {
-    let data = await shaka.test.Util.fetch(dbImagePath);
+    const data = await shaka.test.Util.fetch(dbImagePath);
     dbImageAsString = shaka.util.StringUtils.fromUTF8(data);
   });
 
@@ -55,12 +55,12 @@ describe('V1IndexeddbStorageCell', function() {
     const expectedErrorCode =
         shaka.util.Error.Code.NEW_KEY_OPERATION_NOT_SUPPORTED;
 
-    let connection = await makeConnection();
-    let cell = makeCell(connection);
+    const connection = await makeConnection();
+    const cell = makeCell(connection);
 
     // There should be one manifest.
-    let manifests = await cell.getAllManifests();
-    let manifest = manifests.get(0);
+    const manifests = await cell.getAllManifests();
+    const manifest = manifests.get(0);
     expect(manifest).toBeTruthy();
 
     // Make sure that the request fails.
@@ -76,11 +76,11 @@ describe('V1IndexeddbStorageCell', function() {
     const expectedErrorCode =
         shaka.util.Error.Code.NEW_KEY_OPERATION_NOT_SUPPORTED;
 
-    let connection = await makeConnection();
-    let cell = makeCell(connection);
+    const connection = await makeConnection();
+    const cell = makeCell(connection);
 
     // Update the key to what should be a free key.
-    let segment = {data: new ArrayBuffer(16)};
+    const segment = {data: new ArrayBuffer(16)};
 
     // Make sure that the request fails.
     try {
@@ -92,30 +92,30 @@ describe('V1IndexeddbStorageCell', function() {
   }));
 
   it('can get all manifests', checkAndRun(async function() {
-    let connection = await makeConnection();
-    let cell = makeCell(connection);
+    const connection = await makeConnection();
+    const cell = makeCell(connection);
 
     // There should be one manifest.
-    let map = await cell.getAllManifests();
+    const map = await cell.getAllManifests();
     expect(map).toBeTruthy();
     expect(map.size).toBe(1);
     expect(map.get(0)).toBeTruthy();
   }));
 
   it('can get manifest and all segments', checkAndRun(async function() {
-    let connection = await makeConnection();
-    let cell = makeCell(connection);
+    const connection = await makeConnection();
+    const cell = makeCell(connection);
 
     // There should be one manifest.
-    let manifests = await cell.getManifests([0]);
-    let manifest = manifests[0];
+    const manifests = await cell.getManifests([0]);
+    const manifest = manifests[0];
     expect(manifest).toBeTruthy();
 
     // Collect all the keys for each segment.
-    let dataKeys = getAllSegmentKeys(manifest);
+    const dataKeys = getAllSegmentKeys(manifest);
 
     // Check that each segment was successfully retrieved.
-    let segmentData = await cell.getSegments(dataKeys);
+    const segmentData = await cell.getSegments(dataKeys);
     expect(segmentData).toBeTruthy();
     expect(segmentData.length).toBe(6);
     segmentData.forEach((segment) => {
@@ -129,25 +129,25 @@ describe('V1IndexeddbStorageCell', function() {
     const oldExpiration = Infinity;
     const newExpiration = 1000;
 
-    let connection = await makeConnection();
-    let cell = makeCell(connection);
+    const connection = await makeConnection();
+    const cell = makeCell(connection);
 
-    let original = await cell.getManifests([manifestKey]);
+    const original = await cell.getManifests([manifestKey]);
     expect(original).toBeTruthy();
     expect(original[0]).toBeTruthy();
     expect(original[0].expiration).toBe(oldExpiration);
 
     await cell.updateManifestExpiration(manifestKey, newExpiration);
 
-    let updated = await cell.getManifests([manifestKey]);
+    const updated = await cell.getManifests([manifestKey]);
     expect(updated).toBeTruthy();
     expect(updated[0]).toBeTruthy();
     expect(updated[0].expiration).toBe(newExpiration);
   }));
 
   it('can remove manifests and segments', checkAndRun(async function() {
-    let connection = await makeConnection();
-    let cell = makeCell(connection);
+    const connection = await makeConnection();
+    const cell = makeCell(connection);
 
     /** @type {!Array.<number>} */
     const manifestKeys = [];
@@ -171,7 +171,7 @@ describe('V1IndexeddbStorageCell', function() {
     await cell.removeManifests(manifestKeys, noop);
     await cell.removeSegments(segmentKeys, noop);
 
-    let checkMissingSegment = async (key) => {
+    const checkMissingSegment = async (key) => {
       try {
         await cell.getSegments([key]);
         fail();
@@ -180,7 +180,7 @@ describe('V1IndexeddbStorageCell', function() {
       }
     };
 
-    let checkMissingManifest = async (key) => {
+    const checkMissingManifest = async (key) => {
       try {
         await cell.getManifests([key]);
         fail();
@@ -191,10 +191,10 @@ describe('V1IndexeddbStorageCell', function() {
 
     // Need to check each key on its own to ensure that each key is missing
     // and not just one of the keys is missing.
-    let checkMissingSegments = (keys) => {
+    const checkMissingSegments = (keys) => {
       return Promise.all(keys.map((key) => checkMissingSegment(key)));
     };
-    let checkMissingManifests = (keys) => {
+    const checkMissingManifests = (keys) => {
       return Promise.all(keys.map((key) => checkMissingManifest(key)));
     };
 
@@ -209,7 +209,7 @@ describe('V1IndexeddbStorageCell', function() {
    * @return {!Array.<number>}
    */
   function getAllSegmentKeys(manifest) {
-    let keys = [];
+    const keys = [];
 
     manifest.periods.forEach((period) => {
       period.streams.forEach((stream) => {
@@ -235,7 +235,7 @@ describe('V1IndexeddbStorageCell', function() {
     await CannedIDB.restoreJSON(dbName, dbImageAsString, startFromScratch);
 
     // Track the connection so that we can close it when the test is over.
-    let connection = await shaka.test.IndexedDBUtils.open(dbName);
+    const connection = await shaka.test.IndexedDBUtils.open(dbName);
     connections.push(connection);
     return connection;
   }
@@ -245,7 +245,7 @@ describe('V1IndexeddbStorageCell', function() {
    * @return {shaka.extern.StorageCell}
    */
   function makeCell(connection) {
-    let cell = new shaka.offline.indexeddb.V1StorageCell(
+    const cell = new shaka.offline.indexeddb.V1StorageCell(
         connection,
         segmentStore,
         manifestStore);

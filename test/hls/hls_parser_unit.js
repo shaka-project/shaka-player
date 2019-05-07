@@ -116,7 +116,7 @@ describe('HlsParser', function() {
         .setResponseValue('test:/main.test', segmentData)
         .setResponseValue('test:/selfInit.mp4', selfInitializingSegmentData);
 
-    let actual = await parser.start('test:/master', playerInterface);
+    const actual = await parser.start('test:/master', playerInterface);
     expect(actual).toEqual(manifest);
     return actual;
   }
@@ -200,14 +200,14 @@ describe('HlsParser', function() {
   });
 
   it('ignores duplicate CODECS', async function() {
-    let master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d001e,avc1.42000d",',
       'RESOLUTION=960x540,FRAME-RATE=60\n',
       'video',
     ].join('');
 
-    let media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
@@ -216,7 +216,7 @@ describe('HlsParser', function() {
       'main.mp4',
     ].join('');
 
-    let manifest = new shaka.test.ManifestGenerator()
+    const manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(0)
               .addPartialVariant()
@@ -228,14 +228,14 @@ describe('HlsParser', function() {
   });
 
   it('parses video-only variant', async function() {
-    let master = [
+    const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
       'RESOLUTION=960x540,FRAME-RATE=60\n',
       'video',
     ].join('');
 
-    let media = [
+    const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
@@ -244,7 +244,7 @@ describe('HlsParser', function() {
       'main.mp4',
     ].join('');
 
-    let manifest = new shaka.test.ManifestGenerator()
+    const manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(0)
               .addPartialVariant()
@@ -271,7 +271,7 @@ describe('HlsParser', function() {
       'main.mp4',
     ].join('');
 
-    let manifest = new shaka.test.ManifestGenerator()
+    const manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(0)
               .addPartialVariant()
@@ -298,7 +298,7 @@ describe('HlsParser', function() {
       'main.mp4',
     ].join('');
 
-    let manifest = new shaka.test.ManifestGenerator()
+    const manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(0)
               .addPartialVariant()
@@ -328,7 +328,7 @@ describe('HlsParser', function() {
       'main.mp4',
     ].join('');
 
-    let manifest = new shaka.test.ManifestGenerator()
+    const manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(0)
               .addPartialVariant()
@@ -429,7 +429,7 @@ describe('HlsParser', function() {
       'main.mp4',
     ].join('');
 
-    let manifest = new shaka.test.ManifestGenerator()
+    const manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(0)
               .addPartialVariant()
@@ -478,8 +478,8 @@ describe('HlsParser', function() {
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/main.mp4', segmentData);
 
-    let manifest = await parser.start('test:/master', playerInterface);
-    let presentationTimeline = manifest.presentationTimeline;
+    const manifest = await parser.start('test:/master', playerInterface);
+    const presentationTimeline = manifest.presentationTimeline;
     const stream = manifest.periods[0].variants[0].video;
     // baseMediaDecodeTime (655360) / timescale (1000)
     expect(stream.presentationTimeOffset).toBe(655.36);
@@ -507,7 +507,7 @@ describe('HlsParser', function() {
       'main.mp4',
     ].join('');
 
-    let manifest = new shaka.test.ManifestGenerator()
+    const manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(0)
               .addPartialVariant()
@@ -535,7 +535,7 @@ describe('HlsParser', function() {
       'main.mp4',
     ].join('');
 
-    let manifest = new shaka.test.ManifestGenerator()
+    const manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(0)
               .addPartialVariant()
@@ -565,7 +565,7 @@ describe('HlsParser', function() {
       'main.mp4',
     ].join('');
 
-    let manifest = new shaka.test.ManifestGenerator()
+    const manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(0)
               .addPartialVariant()
@@ -596,7 +596,7 @@ describe('HlsParser', function() {
       'main.mp4',
     ].join('');
 
-    let manifest = new shaka.test.ManifestGenerator()
+    const manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(0)
               .addPartialVariant()
@@ -625,7 +625,7 @@ describe('HlsParser', function() {
       'main.mp4',
     ].join('');
 
-    let manifest = new shaka.test.ManifestGenerator()
+    const manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(0)
               .addPartialVariant()
@@ -660,7 +660,7 @@ describe('HlsParser', function() {
       'main.mp4',
     ].join('');
 
-    let manifest = new shaka.test.ManifestGenerator()
+    const manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(0)
               .addPartialVariant()
@@ -701,7 +701,7 @@ describe('HlsParser', function() {
       'main.mp4',
     ].join('');
 
-    let manifest = new shaka.test.ManifestGenerator()
+    const manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(0)
               .addPartialVariant()
@@ -743,7 +743,7 @@ describe('HlsParser', function() {
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/main.mp4', segmentData);
 
-    let filterAllPeriods = jasmine.createSpy('filterAllPeriods');
+    const filterAllPeriods = jasmine.createSpy('filterAllPeriods');
     playerInterface.filterAllPeriods = Util.spyFunc(filterAllPeriods);
 
     parser.start('test:/master', playerInterface)
@@ -769,7 +769,7 @@ describe('HlsParser', function() {
       'main.test',
     ].join('');
 
-    let manifest = new shaka.test.ManifestGenerator()
+    const manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(0)
               .addPartialVariant()
@@ -820,7 +820,7 @@ describe('HlsParser', function() {
       'main.vtt',
     ].join('');
 
-    let manifest = new shaka.test.ManifestGenerator()
+    const manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(0)
               .addPartialVariant()
@@ -848,7 +848,7 @@ describe('HlsParser', function() {
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/main.mp4', segmentData);
 
-    let actual = await parser.start('test:/master', playerInterface);
+    const actual = await parser.start('test:/master', playerInterface);
     expect(actual).toEqual(manifest);
   });
 
@@ -883,7 +883,7 @@ describe('HlsParser', function() {
       'main.vtt',
     ].join('');
 
-    let manifest = new shaka.test.ManifestGenerator()
+    const manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(0)
               .addPartialVariant()
@@ -907,7 +907,7 @@ describe('HlsParser', function() {
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/main.mp4', segmentData);
 
-    let actual = await parser.start('test:/master', playerInterface);
+    const actual = await parser.start('test:/master', playerInterface);
     expect(actual).toEqual(manifest);
   });
 
@@ -962,13 +962,13 @@ describe('HlsParser', function() {
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/main.mp4', segmentData);
 
-    let actual = await parser.start('test:/master', playerInterface);
+    const actual = await parser.start('test:/master', playerInterface);
     // Duration should be the minimum of the streams, but ignore the text
     // stream.
-    let timeline = actual.presentationTimeline;
+    const timeline = actual.presentationTimeline;
     expect(timeline.getDuration()).toBe(10);
 
-    let period = actual.periods[0];
+    const period = actual.periods[0];
     expect(period.textStreams.length).toBe(1);
     expect(period.variants.length).toBe(1);
     expect(period.variants[0].audio).toBeTruthy();
@@ -994,7 +994,7 @@ describe('HlsParser', function() {
       'main.mp4',
     ].join('');
 
-    let manifest = new shaka.test.ManifestGenerator()
+    const manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(0)
               .addPartialVariant()
@@ -1012,7 +1012,7 @@ describe('HlsParser', function() {
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/main.mp4', segmentData);
 
-    let actual = await parser.start('test:/master', playerInterface);
+    const actual = await parser.start('test:/master', playerInterface);
     expect(actual).toEqual(manifest);
   });
 
@@ -1043,7 +1043,7 @@ describe('HlsParser', function() {
       'main.foo',
     ].join('');
 
-    let manifest = new shaka.test.ManifestGenerator()
+    const manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(0)
               .addPartialVariant()
@@ -1061,7 +1061,7 @@ describe('HlsParser', function() {
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/main.mp4', segmentData);
 
-    let actual = await parser.start('test:/master', playerInterface);
+    const actual = await parser.start('test:/master', playerInterface);
     expect(actual).toEqual(manifest);
   });
 
@@ -1084,7 +1084,7 @@ describe('HlsParser', function() {
       'main.mp4',
     ].join('');
 
-    let manifest = new shaka.test.ManifestGenerator()
+    const manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(jasmine.any(Number))
               .addPartialVariant()
@@ -1125,7 +1125,7 @@ describe('HlsParser', function() {
       'main.mp4',
     ].join('');
 
-    let manifest = new shaka.test.ManifestGenerator()
+    const manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(0)
               .addPartialVariant()
@@ -1167,18 +1167,18 @@ describe('HlsParser', function() {
 
     parser.start('test:/host/master.m3u8', playerInterface)
         .then(function(actual) {
-          let video = actual.periods[0].variants[0].video;
-          let audio = actual.periods[0].variants[0].audio;
+          const video = actual.periods[0].variants[0].video;
+          const audio = actual.periods[0].variants[0].audio;
 
-          let videoPosition = video.findSegmentPosition(0);
-          let audioPosition = audio.findSegmentPosition(0);
+          const videoPosition = video.findSegmentPosition(0);
+          const audioPosition = audio.findSegmentPosition(0);
           goog.asserts.assert(videoPosition != null,
                               'Cannot find first video segment');
           goog.asserts.assert(audioPosition != null,
                               'Cannot find first audio segment');
 
-          let videoReference = video.getSegmentReference(videoPosition);
-          let audioReference = audio.getSegmentReference(audioPosition);
+          const videoReference = video.getSegmentReference(videoPosition);
+          const audioReference = audio.getSegmentReference(audioPosition);
           expect(videoReference).not.toBe(null);
           expect(audioReference).not.toBe(null);
           if (videoReference) {
@@ -1210,7 +1210,7 @@ describe('HlsParser', function() {
       'selfInit.mp4',
     ].join('');
 
-    let manifest = new shaka.test.ManifestGenerator()
+    const manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(0)
               .addPartialVariant()
@@ -1260,7 +1260,7 @@ describe('HlsParser', function() {
       'main.mp4',
     ].join('');
 
-    let manifest = new shaka.test.ManifestGenerator()
+    const manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(0)
               .addPartialVariant()
@@ -1283,7 +1283,7 @@ describe('HlsParser', function() {
         .setResponseValue('test:/main.test', segmentData)
         .setResponseValue('test:/selfInit.mp4', selfInitializingSegmentData);
 
-    let actual = await parser.start('test:/master', playerInterface);
+    const actual = await parser.start('test:/master', playerInterface);
     expect(actual).toEqual(manifest);
     return actual;
   });
@@ -1313,7 +1313,7 @@ describe('HlsParser', function() {
       'main.mp4',
     ].join('');
 
-    let manifest = new shaka.test.ManifestGenerator()
+    const manifest = new shaka.test.ManifestGenerator()
             .anyTimeline()
             .addPeriod(0)
               .addPartialVariant()
@@ -1627,7 +1627,7 @@ describe('HlsParser', function() {
           .setResponseValue('test:/init.mp4', initSegmentData)
           .setResponseValue('test:/main.mp4', segmentData);
 
-      let ref = ManifestParser.makeReference(
+      const ref = ManifestParser.makeReference(
           'test:/main.mp4' /* uri */,
           0 /* position */,
           0 /* startTime */,
@@ -1636,8 +1636,8 @@ describe('HlsParser', function() {
           expectedStartByte,
           expectedEndByte);
 
-      let manifest = await parser.start('test:/master', playerInterface);
-      let video = manifest.periods[0].variants[0].video;
+      const manifest = await parser.start('test:/master', playerInterface);
+      const video = manifest.periods[0].variants[0].video;
       ManifestParser.verifySegmentIndex(video, [ref]);
 
       // Make sure the segment data was fetched with the correct byte
@@ -1653,14 +1653,14 @@ describe('HlsParser', function() {
     });
 
     it('parses start time from ts segments', async () => {
-      let tsMediaPlaylist = media.replace(/\.mp4/g, '.ts');
+      const tsMediaPlaylist = media.replace(/\.mp4/g, '.ts');
 
       fakeNetEngine
           .setResponseText('test:/master', master)
           .setResponseText('test:/video', tsMediaPlaylist)
           .setResponseValue('test:/main.ts', tsSegmentData);
 
-      let ref = ManifestParser.makeReference(
+      const ref = ManifestParser.makeReference(
           'test:/main.ts' /* uri */,
           0 /* position */,
           0 /* startTime */,
@@ -1669,8 +1669,8 @@ describe('HlsParser', function() {
           expectedStartByte,
           expectedEndByte);
 
-      let manifest = await parser.start('test:/master', playerInterface);
-      let video = manifest.periods[0].variants[0].video;
+      const manifest = await parser.start('test:/master', playerInterface);
+      const video = manifest.periods[0].variants[0].video;
       ManifestParser.verifySegmentIndex(video, [ref]);
 
       // Make sure the segment data was fetched with the correct byte
@@ -1734,10 +1734,10 @@ describe('HlsParser', function() {
           .setResponseValue('test:/init.mp4', initSegmentData)
           .setResponseValue('test:/main.mp4', segmentData);
 
-      let manifest = await parser.start('test:/master', playerInterface);
-      let presentationTimeline = manifest.presentationTimeline;
-      let video = manifest.periods[0].variants[0].video;
-      let ref = video.getSegmentReference(0);
+      const manifest = await parser.start('test:/master', playerInterface);
+      const presentationTimeline = manifest.presentationTimeline;
+      const video = manifest.periods[0].variants[0].video;
+      const ref = video.getSegmentReference(0);
       expect(video.getSegmentReference(1)).toBe(null);  // No more references.
 
       expect(video.presentationTimeOffset).toEqual(segmentDataStartTime);
@@ -1771,7 +1771,7 @@ describe('HlsParser', function() {
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/main.mp4', segmentData);
 
-    let manifest = await parser.start('test:/master', playerInterface);
+    const manifest = await parser.start('test:/master', playerInterface);
     expect(manifest.presentationTimeline.isLive()).toBe(false);
   });
 
@@ -1798,7 +1798,7 @@ describe('HlsParser', function() {
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/main.mp4', segmentData);
 
-    let manifest = await parser.start('test:/master', playerInterface);
+    const manifest = await parser.start('test:/master', playerInterface);
     expect(manifest.presentationTimeline.isLive()).toBe(false);
   });
 
@@ -1825,8 +1825,8 @@ describe('HlsParser', function() {
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/main.mp4', segmentData);
 
-    let manifest = await parser.start('test:/master', playerInterface);
-    let video = manifest.periods[0].variants[0].video;
+    const manifest = await parser.start('test:/master', playerInterface);
+    const video = manifest.periods[0].variants[0].video;
     expect(video.mimeType).toBe('video/mp4');
   });
 
@@ -1853,8 +1853,8 @@ describe('HlsParser', function() {
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/main.mp4?foo=bar', segmentData);
 
-    let manifest = await parser.start('test:/master', playerInterface);
-    let video = manifest.periods[0].variants[0].video;
+    const manifest = await parser.start('test:/master', playerInterface);
+    const video = manifest.periods[0].variants[0].video;
     expect(video.mimeType).toBe('video/mp4');
   });
 
@@ -1888,10 +1888,10 @@ describe('HlsParser', function() {
           .setResponseValue('test:/init.mp4', initSegmentData)
           .setResponseValue('test:/main.mp4', segmentData);
 
-    let manifest = await parser.start('test:/master', playerInterface);
+    const manifest = await parser.start('test:/master', playerInterface);
     expect(manifest.periods[0].variants.length).toBe(2);
-    let audio0 = manifest.periods[0].variants[0].audio;
-    let audio1 = manifest.periods[0].variants[1].audio;
+    const audio0 = manifest.periods[0].variants[0].audio;
+    const audio1 = manifest.periods[0].variants[1].audio;
     // These should be the exact same memory address, not merely equal.
     // Otherwise, the parser will only be replacing one of the SegmentIndexes
     // on update, which will lead to live streaming issues.

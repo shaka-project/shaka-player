@@ -68,7 +68,7 @@ jasmine.Fetch.install = function() {
 
   window.fetch = function(input, init) {
     // TODO: this does not support input in Request form
-    let url = /** @type {string} */ (input);
+    const url = /** @type {string} */ (input);
     return jasmine.Fetch.impl_(url, init || null);
   };
 };
@@ -81,7 +81,7 @@ jasmine.Fetch.install = function() {
 jasmine.Fetch.makeAbortError_ = function() {
   // As per the spec, this should be a DOMException, but
   // there is not a public constructor for this
-  let exception = new Error('The operation was aborted. ');
+  const exception = new Error('The operation was aborted. ');
   exception.name = 'AbortError';
   exception.code = 20;
   return exception;
@@ -100,13 +100,13 @@ jasmine.Fetch.impl_ = function(url, init) {
     return Promise.reject(jasmine.Fetch.makeAbortError_());
   }
 
-  let headers = {};
-  let initHeaders = new jasmine.Fetch.Headers(init.headers);
+  const headers = {};
+  const initHeaders = new jasmine.Fetch.Headers(init.headers);
   initHeaders.forEach(function(value, key) {
     headers[key] = value;
   });
 
-  let newStub = /** @type {jasmine.Fetch.RequestStub} */({
+  const newStub = /** @type {jasmine.Fetch.RequestStub} */({
     url: url,
     query: null,
     data: null,
@@ -118,27 +118,27 @@ jasmine.Fetch.impl_ = function(url, init) {
   });
   jasmine.Fetch.container_.lastFetchRequestStub = newStub;
 
-  let stubbed = jasmine.Fetch.container_.stubbedRequests[url];
+  const stubbed = jasmine.Fetch.container_.stubbedRequests[url];
   if (stubbed.callFunc) {
-    let callFunc = stubbed.callFunc;
+    const callFunc = stubbed.callFunc;
     stubbed.callFunc = undefined;
     callFunc(stubbed, self);
     // Call fetch again, in case callFunc changed the stub's action.
     return jasmine.Fetch.impl_(url, init);
   } else if (stubbed.response) {
-    let responseHeaders = new jasmine.Fetch.Headers();
-    for (let key in stubbed.response.responseHeaders) {
+    const responseHeaders = new jasmine.Fetch.Headers();
+    for (const key in stubbed.response.responseHeaders) {
       responseHeaders.append(key, stubbed.response.responseHeaders[key]);
     }
 
-    let body = {
+    const body = {
       getReader: () => {
-        let sequence = [{
+        const sequence = [{
           done: false, value: {byteLength: 100},
         }, {
           done: true, value: null,
         }];
-        let read = () => {
+        const read = () => {
           return Promise.resolve(sequence.shift());
         };
         return {read: read};
@@ -148,7 +148,7 @@ jasmine.Fetch.impl_ = function(url, init) {
     // This creates an anonymous object instead of using the
     // built-in response constructor, because the fetch API
     // does not include a very good constructor for Response.
-    let response = /** @type {!Response} */ ({
+    const response = /** @type {!Response} */ ({
       status: stubbed.response.status,
       body: body,
       headers: responseHeaders,
@@ -166,7 +166,7 @@ jasmine.Fetch.impl_ = function(url, init) {
     // Fetch does not time out yet, so just return a promise that rejects when
     // the user aborts.
     return new Promise(function(resolve, reject) {
-      let interval = setInterval(function() {
+      const interval = setInterval(function() {
         if (init['signal'] && init['signal']()) {
           // TODO: This assumes that this request is still the most recent.
           // If you have multiple requests at once, this could be incorrect.
@@ -215,7 +215,7 @@ jasmine.Fetch.AbortController = function() {
  */
 jasmine.Fetch.ReadableStream = function(underlyingSource) {
   const noop = () => {};
-  let controller = {
+  const controller = {
     close: noop,
     enqueue: noop,
   };
@@ -234,7 +234,7 @@ jasmine.Fetch.Response = function() {
   this.body = latest.body;
   this.headers = latest.headers;
   this.url = latest.url;
-  let arrayBuffer = latest.arrayBuffer;
+  const arrayBuffer = latest.arrayBuffer;
   this.arrayBuffer = () => arrayBuffer;
 };
 
@@ -280,7 +280,7 @@ jasmine.Fetch.Headers = function(headers) {
  */
 jasmine.Fetch.Headers.prototype.append = function(name, value) {
   // Normalize name before setting.
-  let normalized = name.toLowerCase();
+  const normalized = name.toLowerCase();
   this.contents[normalized] = value;
 };
 
@@ -289,9 +289,9 @@ jasmine.Fetch.Headers.prototype.append = function(name, value) {
  * @param {Function} apply
  */
 jasmine.Fetch.Headers.prototype.forEach = function(apply) {
-  let contentsNames = Object.getOwnPropertyNames(this.contents);
+  const contentsNames = Object.getOwnPropertyNames(this.contents);
   for (let i = 0; i < contentsNames.length; i++) {
-    let contentsName = contentsNames[i];
+    const contentsName = contentsNames[i];
     apply(this.get(contentsName), contentsName, this);
   }
 };
@@ -301,7 +301,7 @@ jasmine.Fetch.Headers.prototype.forEach = function(apply) {
  * @return {Object}
  */
 jasmine.Fetch.Headers.prototype.keys = function() {
-  let contentsNames = Object.getOwnPropertyNames(this.contents);
+  const contentsNames = Object.getOwnPropertyNames(this.contents);
   let index = 0;
   return {
     next: function() {
@@ -332,7 +332,7 @@ jasmine.Fetch.Headers.prototype.get = function(header) {
  * @return {jasmine.Fetch.RequestStub}
  */
 jasmine.Fetch.stubRequest = function(url) {
-  let stub = new jasmine.Fetch.RequestStub(url);
+  const stub = new jasmine.Fetch.RequestStub(url);
   jasmine.Fetch.container_.stubbedRequests[url] = stub;
   return stub;
 };

@@ -35,7 +35,7 @@ describe('OfflineScheme', function() {
             'mechanism', 'cell', 1024);
 
         // eslint-disable-next-line new-cap
-        let response = await shaka.offline.OfflineScheme(
+        const response = await shaka.offline.OfflineScheme(
             uri.toString(), request).promise;
 
         expect(response).toBeTruthy();
@@ -55,8 +55,8 @@ describe('OfflineScheme', function() {
 
     try {
       await muxer.init();
-      let handle = await muxer.getActive();
-      let keys = await handle.cell.addSegments([segment]);
+      const handle = await muxer.getActive();
+      const keys = await handle.cell.addSegments([segment]);
       uri = shaka.offline.OfflineUri.segment(
           handle.path.mechanism, handle.path.cell, keys[0]);
     } finally {
@@ -64,7 +64,7 @@ describe('OfflineScheme', function() {
     }
 
     // eslint-disable-next-line new-cap
-    let response = await shaka.offline.OfflineScheme(
+    const response = await shaka.offline.OfflineScheme(
         uri.toString(), request).promise;
 
     expect(response).toBeTruthy();
@@ -82,7 +82,7 @@ describe('OfflineScheme', function() {
 
     try {
       await muxer.init();
-      let handle = await muxer.getActive();
+      const handle = await muxer.getActive();
 
       // Create a bad uri by using the mechanism and cell of the active cell
       // but use a key that is not in use.
@@ -119,8 +119,8 @@ describe('OfflineScheme', function() {
    * @return {shaka.extern.Request}
    */
   function createRequest() {
-    let retry = shaka.net.NetworkingEngine.defaultRetryParameters();
-    let request = shaka.net.NetworkingEngine.makeRequest([], retry);
+    const retry = shaka.net.NetworkingEngine.defaultRetryParameters();
+    const request = shaka.net.NetworkingEngine.makeRequest([], retry);
 
     return request;
   }
@@ -131,7 +131,7 @@ describe('OfflineScheme', function() {
   function createSegment() {
     const dataLength = 12;
 
-    let segment = {
+    const segment = {
       data: new ArrayBuffer(dataLength),
     };
 
@@ -161,7 +161,7 @@ describe('OfflineScheme', function() {
    */
   function checkAndRun(test) {
     return async () => {
-      let hasSupport = shaka.offline.StorageMuxer.support();
+      const hasSupport = shaka.offline.StorageMuxer.support();
       if (hasSupport) {
         await test();
       } else {

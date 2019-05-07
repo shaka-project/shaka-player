@@ -35,7 +35,7 @@ describe('StreamUtils', function() {
             .language('en')
         .build();
 
-      let chosen = filterStreamsByLanguageAndRole(
+      const chosen = filterStreamsByLanguageAndRole(
           manifest.periods[0].textStreams,
           'en',
           '');
@@ -54,7 +54,7 @@ describe('StreamUtils', function() {
             .primary()
         .build();
 
-      let chosen = filterStreamsByLanguageAndRole(
+      const chosen = filterStreamsByLanguageAndRole(
           manifest.periods[0].textStreams,
           'en',
           '');
@@ -76,7 +76,7 @@ describe('StreamUtils', function() {
             .roles(['caption'])
         .build();
 
-      let chosen = filterStreamsByLanguageAndRole(
+      const chosen = filterStreamsByLanguageAndRole(
           manifest.periods[0].textStreams,
           'en',
           'main');
@@ -97,7 +97,7 @@ describe('StreamUtils', function() {
             .roles(['secondary'])
         .build();
 
-      let chosen = filterStreamsByLanguageAndRole(
+      const chosen = filterStreamsByLanguageAndRole(
           manifest.periods[0].textStreams,
           'en',
           '');
@@ -118,7 +118,7 @@ describe('StreamUtils', function() {
             .roles(['secondary'])
         .build();
 
-      let chosen = filterStreamsByLanguageAndRole(
+      const chosen = filterStreamsByLanguageAndRole(
           manifest.periods[0].textStreams,
           'en',
           'main'); // A role that is not present.
@@ -150,7 +150,7 @@ describe('StreamUtils', function() {
             .roles(['main'])
         .build();
 
-      let chosen = filterStreamsByLanguageAndRole(
+      const chosen = filterStreamsByLanguageAndRole(
           manifest.periods[0].textStreams,
           'en',
           '');
@@ -184,7 +184,7 @@ describe('StreamUtils', function() {
             .roles(['main'])
         .build();
 
-      let chosen = filterStreamsByLanguageAndRole(
+      const chosen = filterStreamsByLanguageAndRole(
           manifest.periods[0].textStreams,
           'zh',
           '');
@@ -208,7 +208,7 @@ describe('StreamUtils', function() {
             .language('es').primary()
         .build();
 
-      let chosen = filterStreamsByLanguageAndRole(
+      const chosen = filterStreamsByLanguageAndRole(
           manifest.periods[0].textStreams,
           'zh',
           '');
@@ -242,7 +242,7 @@ describe('StreamUtils', function() {
                 .roles(['main'])
             .build();
 
-          let chosen = filterStreamsByLanguageAndRole(
+          const chosen = filterStreamsByLanguageAndRole(
               manifest.periods[0].textStreams,
               'zh',
               '');
@@ -281,7 +281,7 @@ describe('StreamUtils', function() {
                 .roles(['main'])
             .build();
 
-          let chosen = filterStreamsByLanguageAndRole(
+          const chosen = filterStreamsByLanguageAndRole(
               manifest.periods[0].textStreams,
               'zh',
               '');
@@ -305,7 +305,7 @@ describe('StreamUtils', function() {
             .addAudio(2).channelsCount(2)
         .build();
 
-      let chosen = filterVariantsByAudioChannelCount(
+      const chosen = filterVariantsByAudioChannelCount(
           manifest.periods[0].variants, 2);
       expect(chosen.length).toBe(2);
       expect(chosen[0]).toBe(manifest.periods[0].variants[0]);
@@ -324,7 +324,7 @@ describe('StreamUtils', function() {
             .addAudio(2).channelsCount(2)
         .build();
 
-      let chosen = filterVariantsByAudioChannelCount(
+      const chosen = filterVariantsByAudioChannelCount(
           manifest.periods[0].variants, 6);
       expect(chosen.length).toBe(2);
       expect(chosen[0]).toBe(manifest.periods[0].variants[0]);
@@ -343,7 +343,7 @@ describe('StreamUtils', function() {
             .addAudio(2).channelsCount(6)
         .build();
 
-      let chosen = filterVariantsByAudioChannelCount(
+      const chosen = filterVariantsByAudioChannelCount(
           manifest.periods[0].variants, 2);
       expect(chosen.length).toBe(2);
       expect(chosen[0]).toBe(manifest.periods[0].variants[0]);
@@ -367,8 +367,8 @@ describe('StreamUtils', function() {
           .addTextStream(4).mime('application/mp4', 'bogus')
         .build();
 
-      let noAudio = null;
-      let noVideo = null;
+      const noAudio = null;
+      const noVideo = null;
       shaka.util.StreamUtils.filterNewPeriod(
           fakeDrmEngine, noAudio, noVideo, manifest.periods[0]);
 
@@ -376,7 +376,7 @@ describe('StreamUtils', function() {
       // The last two streams should be removed because their full MIME types
       // are bogus.
       expect(manifest.periods[0].textStreams.length).toBe(2);
-      let textStreams = manifest.periods[0].textStreams;
+      const textStreams = manifest.periods[0].textStreams;
       expect(textStreams[0].id).toBe(1);
       expect(textStreams[1].id).toBe(2);
     });

@@ -71,13 +71,13 @@ describe('MediaSourceEngine', function() {
   });
 
   function appendInit(type) {
-    let segment = generators[type].getInitSegment(Date.now() / 1000);
+    const segment = generators[type].getInitSegment(Date.now() / 1000);
     return mediaSourceEngine.appendBuffer(
         type, segment, null, null, /* hasClosedCaptions */ false);
   }
 
   function append(type, segmentNumber) {
-    let segment = generators[type].
+    const segment = generators[type].
         getSegment(segmentNumber, 0, Date.now() / 1000);
     return mediaSourceEngine.appendBuffer(
         type, segment, null, null, /* hasClosedCaptions */ false);
@@ -86,7 +86,7 @@ describe('MediaSourceEngine', function() {
   // The start time and end time should be null for init segment with closed
   // captions.
   function appendInitWithClosedCaptions(type) {
-    let segment = generators[type].getInitSegment(Date.now() / 1000);
+    const segment = generators[type].getInitSegment(Date.now() / 1000);
     return mediaSourceEngine.appendBuffer(type, segment, /* startTime */ null,
         /* endTime */ null, /* hasClosedCaptions */ true);
   }
@@ -94,7 +94,7 @@ describe('MediaSourceEngine', function() {
   // The start time and end time should be valid for the segments with closed
   // captions.
   function appendWithClosedCaptions(type, segmentNumber) {
-    let segment = generators[type].
+    const segment = generators[type].
         getSegment(segmentNumber, 0, Date.now() / 1000);
     return mediaSourceEngine.appendBuffer(type, segment, /* startTime */ 0,
         /* endTime */ 2, /* hasClosedCaptions */ true);
@@ -109,8 +109,8 @@ describe('MediaSourceEngine', function() {
   }
 
   function remove(type, segmentNumber) {
-    let start = (segmentNumber - 1) * metadata[type].segmentDuration;
-    let end = segmentNumber * metadata[type].segmentDuration;
+    const start = (segmentNumber - 1) * metadata[type].segmentDuration;
+    const end = segmentNumber * metadata[type].segmentDuration;
     return mediaSourceEngine.remove(type, start, end);
   }
 
@@ -194,11 +194,11 @@ describe('MediaSourceEngine', function() {
   });
 
   it('queues operations', function(done) {
-    let resolutionOrder = [];
-    let requests = [];
+    const resolutionOrder = [];
+    const requests = [];
 
     function checkOrder(p) {
-      let nextIndex = requests.length;
+      const nextIndex = requests.length;
       requests.push(p);
       p.then(function() { resolutionOrder.push(nextIndex); });
     }
@@ -244,7 +244,7 @@ describe('MediaSourceEngine', function() {
     await mediaSourceEngine.init(initObject, false);
     await mediaSourceEngine.setDuration(presentationDuration);
 
-    let audioStreaming = appendInit(ContentType.AUDIO).then(() => {
+    const audioStreaming = appendInit(ContentType.AUDIO).then(() => {
       return append(ContentType.AUDIO, 1);
     }).then(() => {
       expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(10, 1);
@@ -265,7 +265,7 @@ describe('MediaSourceEngine', function() {
       expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(60, 1);
     });
 
-    let videoStreaming = appendInit(ContentType.VIDEO).then(() => {
+    const videoStreaming = appendInit(ContentType.VIDEO).then(() => {
       return append(ContentType.VIDEO, 1);
     }).then(() => {
       expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(10);

@@ -84,10 +84,10 @@ describe('Player', () => {
     function createAssetTest(asset) {
       if (asset.disabled) return;
 
-      let testName =
+      const testName =
           asset.source + ' / ' + asset.name + ' : ' + asset.manifestUri;
 
-      let wit = asset.focus ? fit : it;
+      const wit = asset.focus ? fit : it;
       wit(testName, async () => {
         if (asset.drm.length &&
             !asset.drm.some((keySystem) => support.drm[keySystem])) {
@@ -95,7 +95,7 @@ describe('Player', () => {
         }
 
         if (asset.features) {
-          let mimeTypes = [];
+          const mimeTypes = [];
           if (asset.features.includes(Feature.WEBM)) {
             mimeTypes.push('video/webm');
           }
@@ -218,7 +218,7 @@ describe('Player', () => {
           /* manifestUri= */ testCustomAsset,
           /* source= */ shakaAssets.Source.CUSTOM);
       if (keySystems.length) {
-        for (let keySystem of keySystems) {
+        for (const keySystem of keySystems) {
           asset.addKeySystem(/** @type {!shakaAssets.KeySystem} */ (keySystem));
           const licenseServer = licenseServers[keySystem];
           if (licenseServer) {
@@ -260,7 +260,7 @@ describe('Player', () => {
 
     // Add these to the existing headers.  Do not clobber them!
     // For PlayReady, there will already be headers in the request.
-    for (let k in headers) {
+    for (const k in headers) {
       request.headers[k] = headers[k];
     }
   }

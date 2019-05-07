@@ -139,7 +139,7 @@ class ShakaDemoConfig {
       // All robustness fields of a given type are set at once.
       this.addDatalistInput_(name, robustnessSuggestions, (input) => {
         // Add in any common drmSystem not currently in advanced.
-        for (let drmSystem of commonDrmSystems) {
+        for (const drmSystem of commonDrmSystems) {
           if (!(drmSystem in advanced)) {
             advanced[commonDrmSystems] = {
               distinctiveIdentifierRequired: false,
@@ -152,7 +152,7 @@ class ShakaDemoConfig {
           }
         }
         // Set the robustness.
-        for (let drmSystem in advanced) {
+        for (const drmSystem in advanced) {
           advanced[drmSystem][valueName] = input.value;
         }
         shakaDemoMain.configure('drm.advanced', advanced);

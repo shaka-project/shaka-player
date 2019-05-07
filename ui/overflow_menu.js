@@ -64,7 +64,7 @@ goog.require('shaka.util.Dom');
 
 
     for (let i = 0; i < this.backToOverflowMenuButtons_.length; i++) {
-      let button = this.backToOverflowMenuButtons_[i];
+      const button = this.backToOverflowMenuButtons_[i];
       button.addEventListener('click', () => {
         // Hide the submenus, display the overflow menu
         this.controls.hideSettingsMenus();

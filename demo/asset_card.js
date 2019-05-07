@@ -128,7 +128,7 @@ class AssetCard {
       }
     }
 
-    for (let drm of asset.drm) {
+    for (const drm of asset.drm) {
       switch (drm) {
         case KeySystem.WIDEVINE:
           this.addFeatureIcon_('widevine', 'Widevine DRM');

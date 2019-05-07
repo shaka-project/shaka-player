@@ -249,7 +249,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
    */
   onTrackSelected_(track) {
     // Disable abr manager before changing tracks.
-    let config = {abr: {enabled: false}};
+    const config = {abr: {enabled: false}};
     this.player.configure(config);
 
     this.player.selectVariantTrack(track, /* clearBuffer */ true);

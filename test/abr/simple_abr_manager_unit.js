@@ -87,20 +87,20 @@ describe('SimpleAbrManager', function() {
   });
 
   it('can choose audio and video Streams right away', function() {
-    let chosen = abrManager.chooseVariant();
+    const chosen = abrManager.chooseVariant();
     expect(chosen).not.toBe(null);
   });
 
   it('uses custom default estimate', function() {
     config.defaultBandwidthEstimate = 3e6;
     abrManager.configure(config);
-    let chosen = abrManager.chooseVariant();
+    const chosen = abrManager.chooseVariant();
     expect(chosen.id).toBe(104);
   });
 
   it('can handle empty variants', function() {
     abrManager.setVariants([]);
-    let chosen = abrManager.chooseVariant();
+    const chosen = abrManager.chooseVariant();
     expect(chosen).toEqual(null);
   });
 
@@ -114,7 +114,7 @@ describe('SimpleAbrManager', function() {
       .build();
 
     abrManager.setVariants(manifest.periods[0].variants);
-    let chosen = abrManager.chooseVariant();
+    const chosen = abrManager.chooseVariant();
     expect(chosen).not.toBe(null);
     expect(chosen.audio).not.toBe(null);
     expect(chosen.video).toBe(null);
@@ -130,7 +130,7 @@ describe('SimpleAbrManager', function() {
       .build();
 
     abrManager.setVariants(manifest.periods[0].variants);
-    let chosen = abrManager.chooseVariant();
+    const chosen = abrManager.chooseVariant();
     expect(chosen).not.toBe(null);
     expect(chosen.audio).toBe(null);
     expect(chosen.video).not.toBe(null);
@@ -139,11 +139,11 @@ describe('SimpleAbrManager', function() {
   [5e5, 6e5].forEach(function(bandwidth) {
     // Simulate some segments being downloaded just above the desired
     // bandwidth.
-    let bytesPerSecond =
+    const bytesPerSecond =
         sufficientBWMultiplier * bandwidth / 8.0;
 
-    let bandwidthKbps = bandwidth / 1000.0;
-    let description =
+    const bandwidthKbps = bandwidth / 1000.0;
+    const description =
         'picks correct Variant at ' + bandwidthKbps + ' kbps';
 
     it(description, function() {
@@ -161,7 +161,7 @@ describe('SimpleAbrManager', function() {
 
       // Expect variants 2 to be chosen for bandwidth = 5e5
       // and variant 5 - for bandwidth = 6e5
-      let expectedVariant = (bandwidth == 6e5) ? variants[5] : variants[2];
+      const expectedVariant = (bandwidth == 6e5) ? variants[5] : variants[2];
 
       expect(switchCallback).toHaveBeenCalledWith(expectedVariant);
     });
@@ -171,8 +171,8 @@ describe('SimpleAbrManager', function() {
     // Makes sure bandwidth estimate doesn't get set to NaN
     // when a 0 duration segment is encountered.
     // https://github.com/google/shaka-player/issues/582
-    let bandwidth = 5e5;
-    let bytesPerSecond =
+    const bandwidth = 5e5;
+    const bytesPerSecond =
         sufficientBWMultiplier * bandwidth / 8.0;
 
     abrManager.setVariants(variants);
@@ -191,14 +191,14 @@ describe('SimpleAbrManager', function() {
 
   it('picks lowest variant when there is insufficient bandwidth',
       function() {
-        let bandwidth = 2e6;
+        const bandwidth = 2e6;
 
         abrManager.setVariants(variants);
         abrManager.chooseVariant();
 
         // Simulate some segments being downloaded just above the desired
         // bandwidth.
-        let bytesPerSecond =
+        const bytesPerSecond =
             sufficientBWMultiplier * bandwidth / 8.0;
 
         abrManager.segmentDownloaded(1000, bytesPerSecond);
@@ -211,14 +211,14 @@ describe('SimpleAbrManager', function() {
         abrManager.segmentDownloaded(1000, bytesPerSecond);
 
         // Expect variants 4 to be chosen
-        let expectedVariant = variants[4];
+        const expectedVariant = variants[4];
 
         expect(switchCallback).toHaveBeenCalledWith(expectedVariant);
       });
 
   it('does not call switchCallback() if not enabled', function() {
-    let bandwidth = 5e5;
-    let bytesPerSecond =
+    const bandwidth = 5e5;
+    const bytesPerSecond =
         sufficientBWMultiplier * bandwidth / 8.0;
 
     abrManager.setVariants(variants);
@@ -277,8 +277,8 @@ describe('SimpleAbrManager', function() {
   it('does not clear the buffer on upgrade', function() {
     // Simulate some segments being downloaded at a high rate, to trigger an
     // upgrade.
-    let bandwidth = 5e5;
-    let bytesPerSecond =
+    const bandwidth = 5e5;
+    const bytesPerSecond =
         sufficientBWMultiplier * bandwidth / 8.0;
 
     abrManager.setVariants(variants);
@@ -301,8 +301,8 @@ describe('SimpleAbrManager', function() {
   it('does not clear the buffer on downgrade', function() {
     // Simulate some segments being downloaded at a low rate, to trigger a
     // downgrade.
-    let bandwidth = 5e5;
-    let bytesPerSecond =
+    const bandwidth = 5e5;
+    const bytesPerSecond =
         sufficientBWMultiplier * bandwidth / 8.0;
 
     // Set the default high so that the initial choice will be high-quality.

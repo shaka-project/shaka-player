@@ -38,13 +38,13 @@ shaka.test.Dash.makeDashParser = function() {
  * @return {!Promise}
  */
 shaka.test.Dash.testSegmentIndex = async function(manifestText, references) {
-  let buffer = shaka.util.StringUtils.toUTF8(manifestText);
-  let dashParser = shaka.test.Dash.makeDashParser();
+  const buffer = shaka.util.StringUtils.toUTF8(manifestText);
+  const dashParser = shaka.test.Dash.makeDashParser();
 
   const networkingEngine = new shaka.test.FakeNetworkingEngine()
       .setResponseValue('dummy://foo', buffer);
 
-  let playerInterface = {
+  const playerInterface = {
     networkingEngine: networkingEngine,
     filterNewPeriod: function() {},
     filterAllPeriods: function() {},
@@ -52,8 +52,8 @@ shaka.test.Dash.testSegmentIndex = async function(manifestText, references) {
     onEvent: fail,
     onError: fail,
   };
-  let manifest = await dashParser.start('dummy://foo', playerInterface);
-  let stream = manifest.periods[0].variants[0].video;
+  const manifest = await dashParser.start('dummy://foo', playerInterface);
+  const stream = manifest.periods[0].variants[0].video;
   shaka.test.ManifestParser.verifySegmentIndex(stream, references);
 };
 
@@ -66,13 +66,13 @@ shaka.test.Dash.testSegmentIndex = async function(manifestText, references) {
  * @return {!Promise}
  */
 shaka.test.Dash.testFails = async function(manifestText, expectedError) {
-  let manifestData = shaka.util.StringUtils.toUTF8(manifestText);
-  let dashParser = shaka.test.Dash.makeDashParser();
+  const manifestData = shaka.util.StringUtils.toUTF8(manifestText);
+  const dashParser = shaka.test.Dash.makeDashParser();
 
   const networkingEngine = new shaka.test.FakeNetworkingEngine()
       .setResponseValue('dummy://foo', manifestData);
 
-  let playerInterface = {
+  const playerInterface = {
     networkingEngine: networkingEngine,
     filterNewPeriod: function() {},
     filterAllPeriods: function() {},
@@ -109,14 +109,14 @@ shaka.test.Dash.makeSimpleManifestText =
     periodAttr += ' start="PT' + startTime + 'S"';
   }
 
-  let start = [
+  const start = [
     '<MPD ' + mpdAttr + '>',
     '  <Period ' + periodAttr + '>',
     '    <AdaptationSet mimeType="video/mp4">',
     '      <Representation bandwidth="500">',
     '        <BaseURL>http://example.com</BaseURL>',
   ];
-  let end = [
+  const end = [
     '      </Representation>',
     '    </AdaptationSet>',
     '  </Period>',
@@ -179,7 +179,7 @@ shaka.test.Dash.makeManifestFromInit = function(
  * @return {!Promise}
  */
 shaka.test.Dash.callCreateSegmentIndex = function(manifest) {
-  let stream = manifest.periods[0].variants[0].video;
+  const stream = manifest.periods[0].variants[0].video;
   return stream.createSegmentIndex().then(fail).catch(function() {});
 };
 
@@ -197,7 +197,7 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
   describe('SegmentTimeline', function() {
     const Dash = shaka.test.Dash;
     const ManifestParser = shaka.test.ManifestParser;
-    let baseUri = 'http://example.com/';
+    const baseUri = 'http://example.com/';
 
     /**
      * @param {!Array.<string>} timeline
@@ -207,16 +207,16 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
      * @return {string}
      */
     function makeManifestText(timeline, testAttrs, dur, startTime) {
-      let start = '<' + type + ' ' + extraAttrs + ' ' + testAttrs + '>';
-      let end = '</' + type + '>';
-      let lines = [].concat(start, extraChildren, timeline, end);
+      const start = '<' + type + ' ' + extraAttrs + ' ' + testAttrs + '>';
+      const end = '</' + type + '>';
+      const lines = [].concat(start, extraChildren, timeline, end);
       return Dash.makeSimpleManifestText(lines, dur, startTime);
     }
 
     // All tests should have 5 segments and have the relative URIs:
     // s1.mp4  s2.mp4  s3.mp4  s4.mp4  s5.mp4
     it('basic support', async () => {
-      let timeline = [
+      const timeline = [
         '<SegmentTimeline>',
         '  <S d="12" t="34" />',
         '  <S d="21" />',
@@ -225,8 +225,8 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
         '  <S d="10" />',
         '</SegmentTimeline>',
       ];
-      let source = makeManifestText(timeline, '');
-      let references = [
+      const source = makeManifestText(timeline, '');
+      const references = [
         ManifestParser.makeReference('s1.mp4', 1, 34, 46, baseUri),
         ManifestParser.makeReference('s2.mp4', 2, 46, 67, baseUri),
         ManifestParser.makeReference('s3.mp4', 3, 67, 111, baseUri),
@@ -237,15 +237,15 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
     });
 
     it('supports repetitions', async () => {
-      let timeline = [
+      const timeline = [
         '<SegmentTimeline>',
         '  <S d="12" t="34" />',
         '  <S d="10" r="2" />',
         '  <S d="44" />',
         '</SegmentTimeline>',
       ];
-      let source = makeManifestText(timeline, '');
-      let references = [
+      const source = makeManifestText(timeline, '');
+      const references = [
         ManifestParser.makeReference('s1.mp4', 1, 34, 46, baseUri),
         ManifestParser.makeReference('s2.mp4', 2, 46, 56, baseUri),
         ManifestParser.makeReference('s3.mp4', 3, 56, 66, baseUri),
@@ -256,7 +256,7 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
     });
 
     it('supports negative repetitions', async () => {
-      let timeline = [
+      const timeline = [
         '<SegmentTimeline>',
         '  <S d="8" t="22" />',
         '  <S d="10" r="-1" />',
@@ -264,8 +264,8 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
         '  <S d="10" />',
         '</SegmentTimeline>',
       ];
-      let source = makeManifestText(timeline, '');
-      let references = [
+      const source = makeManifestText(timeline, '');
+      const references = [
         ManifestParser.makeReference('s1.mp4', 1, 22, 30, baseUri),
         ManifestParser.makeReference('s2.mp4', 2, 30, 40, baseUri),
         ManifestParser.makeReference('s3.mp4', 3, 40, 50, baseUri),
@@ -276,14 +276,14 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
     });
 
     it('supports negative repetitions at end', async () => {
-      let timeline = [
+      const timeline = [
         '<SegmentTimeline>',
         '  <S d="5" t="5" />',
         '  <S d="10" r="-1" />',
         '</SegmentTimeline>',
       ];
-      let source = makeManifestText(timeline, '', 50 /* duration */);
-      let references = [
+      const source = makeManifestText(timeline, '', 50 /* duration */);
+      const references = [
         ManifestParser.makeReference('s1.mp4', 1, 5, 10, baseUri),
         ManifestParser.makeReference('s2.mp4', 2, 10, 20, baseUri),
         ManifestParser.makeReference('s3.mp4', 3, 20, 30, baseUri),
@@ -294,14 +294,14 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
     });
 
     it('gives times relative to period', async () => {
-      let timeline = [
+      const timeline = [
         '<SegmentTimeline>',
         '  <S t="0" d="10" r="-1" />',
         '</SegmentTimeline>',
       ];
-      let source =
+      const source =
           makeManifestText(timeline, '', 50 /* duration */, 30 /* start */);
-      let references = [
+      const references = [
         ManifestParser.makeReference('s1.mp4', 1, 0, 10, baseUri),
         ManifestParser.makeReference('s2.mp4', 2, 10, 20, baseUri),
         ManifestParser.makeReference('s3.mp4', 3, 20, 30, baseUri),
@@ -312,7 +312,7 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
     });
 
     it('supports @timescale', async () => {
-      let timeline = [
+      const timeline = [
         '<SegmentTimeline>',
         '  <S d="4500" t="18000" />',
         '  <S d="9000" />',
@@ -321,8 +321,8 @@ shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
         '  <S d="9000" />',
         '</SegmentTimeline>',
       ];
-      let source = makeManifestText(timeline, 'timescale="9000"');
-      let references = [
+      const source = makeManifestText(timeline, 'timescale="9000"');
+      const references = [
         ManifestParser.makeReference('s1.mp4', 1, 2, 2.5, baseUri),
         ManifestParser.makeReference('s2.mp4', 2, 2.5, 3.5, baseUri),
         ManifestParser.makeReference('s3.mp4', 3, 3.5, 7, baseUri),

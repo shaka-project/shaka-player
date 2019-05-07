@@ -38,7 +38,7 @@ describe('ObjectUtils', function() {
     });
 
     it('clones nested objects', function() {
-      let o = {
+      const o = {
         foo: 'bar',
         lorem: 'ipsum',
         dolor: {
@@ -59,21 +59,21 @@ describe('ObjectUtils', function() {
           other: 123,
         },
       };
-      let copy = cloneObject(o);
+      const copy = cloneObject(o);
       expect(copy).not.toBe(o);
       expect(copy).toEqual(o);
     });
 
     it('clones Arrays with non-default length', function() {
-      let a = [1, 2, 3];
+      const a = [1, 2, 3];
       a.length = 10;
-      let copy = cloneObject(a);
+      const copy = cloneObject(a);
       expect(copy).toEqual(a);
       expect(copy.length).toEqual(10);
     });
 
     it('ignores cyclic objects', function() {
-      let o = {foo: 'bar'};
+      const o = {foo: 'bar'};
       o['baz'] = o;
       expect(cloneObject(o)).toEqual({foo: 'bar', baz: null});
     });

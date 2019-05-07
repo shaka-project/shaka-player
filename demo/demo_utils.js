@@ -17,7 +17,7 @@
 
 
 /** @namespace */
-let ShakaDemoUtils = {};
+const ShakaDemoUtils = {};
 
 /**
  * Goes through the various values in shaka.extern.PlayerConfiguration, and
@@ -37,8 +37,8 @@ ShakaDemoUtils.runThroughHashParams = (callback, config) => {
   // This exists for legacy reasons; the previous demo page had some hash values
   // set to names that did not match the names of their corresponding config
   // object name.
-  let overridden = [];
-  let configOverride = (hashName, configName) => {
+  const overridden = [];
+  const configOverride = (hashName, configName) => {
     overridden.push(configName);
     callback(hashName, configName);
   };
@@ -58,16 +58,16 @@ ShakaDemoUtils.runThroughHashParams = (callback, config) => {
   // This is to remove ambiguity in situations where there are two objects in
   // the config that share a key with the same name, without wasting space by
   // pointlessly adding namespace information to every value.
-  let added = [];
-  let collisions = [];
-  let findCollisions = (object) => {
-    for (let key in object) {
+  const added = [];
+  const collisions = [];
+  const findCollisions = (object) => {
+    for (const key in object) {
       if (added.includes(key) && !collisions.includes(key)) {
         collisions.push(key);
       }
       added.push(key);
 
-      let value = object[key];
+      const value = object[key];
       if (typeof value != 'number' && typeof value != 'string' &&
           typeof value != 'boolean') {
         findCollisions(value);
@@ -82,16 +82,16 @@ ShakaDemoUtils.runThroughHashParams = (callback, config) => {
   // discard any 'bufferBehind=' values from old hashes.
 
   // Now automatically do other config values.
-  let handleConfig = (object, accumulated) => {
-    for (let key in object) {
+  const handleConfig = (object, accumulated) => {
+    for (const key in object) {
       let hashName = key;
-      let configName = accumulated + key;
+      const configName = accumulated + key;
       if (overridden.includes(configName)) continue;
       if (collisions.includes(key)) {
         hashName = configName;
       }
 
-      let value = object[key];
+      const value = object[key];
       if (typeof value == 'number' || typeof value == 'string' ||
           typeof value == 'boolean') {
         callback(hashName, configName);

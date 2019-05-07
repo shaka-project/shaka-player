@@ -79,7 +79,7 @@ shaka.test.Util.fakeEventLoop = function(duration, onTick) {
  */
 shaka.test.Util.delay = function(seconds, realSetTimeout) {
   return new Promise(function(resolve, reject) {
-    let timeout = realSetTimeout || setTimeout;
+    const timeout = realSetTimeout || setTimeout;
     timeout(function() {
       resolve();
       // Play nicely with PromiseMock by flushing automatically.
@@ -113,8 +113,8 @@ shaka.test.Util.expectToEqualError = function(actual, expected) {
  * @private
  */
 shaka.test.Util.expectToEqualElementCompare_ = function(actual, expected) {
-  let diff = shaka.test.Util.expectToEqualElementRecursive_(actual, expected);
-  let result = {};
+  const diff = shaka.test.Util.expectToEqualElementRecursive_(actual, expected);
+  const result = {};
   result.pass = diff == null;
   if (result.pass) {
     result.message = 'Expected ' + actual.innerHTML + ' not to match ';
@@ -134,7 +134,7 @@ shaka.test.Util.expectToEqualElementCompare_ = function(actual, expected) {
  * @private
  */
 shaka.test.Util.expectToEqualElementRecursive_ = function(actual, expected) {
-  let prospectiveDiff = 'The difference was in ' +
+  const prospectiveDiff = 'The difference was in ' +
       (actual.outerHTML || actual.textContent) + ' vs ' +
       (expected['outerHTML'] || expected.textContent) + ': ';
 
@@ -155,12 +155,12 @@ shaka.test.Util.expectToEqualElementRecursive_ = function(actual, expected) {
       return prospectiveDiff + 'Different attribute list length.';
     }
     for (let i = 0; i < actual.attributes.length; i++) {
-      let aAttrib = actual.attributes[i].nodeName;
-      let aAttribVal = actual.getAttribute(aAttrib);
-      let eAttrib = expected.attributes[i].nodeName;
-      let eAttribVal = expected.getAttribute(eAttrib);
+      const aAttrib = actual.attributes[i].nodeName;
+      const aAttribVal = actual.getAttribute(aAttrib);
+      const eAttrib = expected.attributes[i].nodeName;
+      const eAttribVal = expected.getAttribute(eAttrib);
       if (aAttrib != eAttrib || aAttribVal != eAttribVal) {
-        let diffNote =
+        const diffNote =
             aAttrib + '=' + aAttribVal + ' vs ' + eAttrib + '=' + eAttribVal;
         return prospectiveDiff + 'Attribute #' + i +
             ' was different (' + diffNote + ').';
@@ -171,9 +171,9 @@ shaka.test.Util.expectToEqualElementRecursive_ = function(actual, expected) {
       return prospectiveDiff + 'Different child node list length.';
     }
     for (let i = 0; i < actual.childNodes.length; i++) {
-      let aNode = actual.childNodes[i];
-      let eNode = expected.childNodes[i];
-      let diff = shaka.test.Util.expectToEqualElementRecursive_(aNode, eNode);
+      const aNode = actual.childNodes[i];
+      const eNode = expected.childNodes[i];
+      const diff = shaka.test.Util.expectToEqualElementRecursive_(aNode, eNode);
       if (diff) {
         return diff;
       }
@@ -191,13 +191,13 @@ shaka.test.Util.expectToEqualElementRecursive_ = function(actual, expected) {
  * @return {boolean|undefined}
  */
 shaka.test.Util.compareReferences = function(first, second) {
-  let isSegment = first instanceof shaka.media.SegmentReference &&
+  const isSegment = first instanceof shaka.media.SegmentReference &&
       second instanceof shaka.media.SegmentReference;
-  let isInit = first instanceof shaka.media.InitSegmentReference &&
+  const isInit = first instanceof shaka.media.InitSegmentReference &&
       second instanceof shaka.media.InitSegmentReference;
   if (isSegment || isInit) {
-    let a = first.getUris();
-    let b = second.getUris();
+    const a = first.getUris();
+    const b = second.getUris();
     if (typeof a !== 'object' || typeof b !== 'object' ||
         typeof a.length != 'number' || typeof b.length !== 'number') {
       return false;
@@ -229,7 +229,7 @@ shaka.test.Util.compareReferences = function(first, second) {
  */
 shaka.test.Util.fetch = function(uri) {
   return new Promise(function(resolve, reject) {
-    let xhr = new XMLHttpRequest();
+    const xhr = new XMLHttpRequest();
     xhr.open('GET', uri, true /* asynchronous */);
     xhr.responseType = 'arraybuffer';
 
@@ -259,7 +259,7 @@ shaka.test.Util.fetch = function(uri) {
  * @param {!Object} obj
  */
 shaka.test.Util.makeMockObjectStrict = function(obj) {
-  for (let name in obj) {
+  for (const name in obj) {
     obj[name].and.throwError(new Error(name));
   }
 };
@@ -352,7 +352,7 @@ shaka.test.Util.cleanupUI = async function() {
       document.querySelectorAll('[data-shaka-player-container]');
 
   const destroys = [];
-  for (let container of containers) {
+  for (const container of containers) {
     const ui = /** @type {shaka.ui.Overlay} */(container['ui']);
 
     // Destroying the UI destroys the controls and player inside.
@@ -361,7 +361,7 @@ shaka.test.Util.cleanupUI = async function() {
   await Promise.all(destroys);
 
   // Now remove all the containers from the DOM.
-  for (let container of containers) {
+  for (const container of containers) {
     container.parentElement.removeChild(container);
   }
 };

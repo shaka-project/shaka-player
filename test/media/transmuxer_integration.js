@@ -35,7 +35,7 @@ describe('Transmuxer', function() {
 
 
   beforeAll(async () => {
-    let responses = await Promise.all([
+    const responses = await Promise.all([
       shaka.test.Util.fetch(videoSegmentUri),
       shaka.test.Util.fetch(audioSegmentUri),
     ]);
@@ -53,7 +53,7 @@ describe('Transmuxer', function() {
   });
 
   describe('isSupported', function() {
-    let isSupported = shaka.media.Transmuxer.isSupported;
+    const isSupported = shaka.media.Transmuxer.isSupported;
     it('returns whether the content type is supported', function() {
       expect(isSupported(mp4MimeType, ContentType.VIDEO)).toBeFalsy();
       expect(isSupported(transportStreamVideoMimeType, ContentType.VIDEO))
@@ -62,15 +62,15 @@ describe('Transmuxer', function() {
   });
 
   describe('convertTsCodecs', function() {
-    let convertTsCodecs = shaka.media.Transmuxer.convertTsCodecs;
+    const convertTsCodecs = shaka.media.Transmuxer.convertTsCodecs;
 
     it('returns converted codecs', function() {
-      let convertedVideoCodecs =
+      const convertedVideoCodecs =
           convertTsCodecs(ContentType.VIDEO, transportStreamVideoMimeType);
-      let convertedAudioCodecs =
+      const convertedAudioCodecs =
           convertTsCodecs(ContentType.AUDIO, transportStreamAudioMimeType);
-      let expectedVideoCodecs = 'video/mp4; codecs="avc1.42E01E"';
-      let expectedAudioCodecs = 'audio/mp4; codecs="mp4a.40.2"';
+      const expectedVideoCodecs = 'video/mp4; codecs="avc1.42E01E"';
+      const expectedAudioCodecs = 'audio/mp4; codecs="mp4a.40.2"';
       expect(convertedVideoCodecs).toEqual(expectedVideoCodecs);
       expect(convertedAudioCodecs).toEqual(expectedAudioCodecs);
     });
@@ -92,7 +92,7 @@ describe('Transmuxer', function() {
     it('transmux video from TS to MP4', async () => {
       let sawMDAT = false;
 
-      let transmuxedData = await transmuxer.transmux(videoSegment);
+      const transmuxedData = await transmuxer.transmux(videoSegment);
       expect(transmuxedData.data).toEqual(jasmine.any(Uint8Array));
       expect(transmuxedData.data.length).toBeGreaterThan(0);
       expect(transmuxedData.captions).toEqual(jasmine.any(Array));
@@ -107,7 +107,7 @@ describe('Transmuxer', function() {
 
     it('transmux audio from TS to MP4', async () => {
       let sawMDAT = false;
-      let transmuxedData = await transmuxer.transmux(audioSegment);
+      const transmuxedData = await transmuxer.transmux(audioSegment);
       expect(transmuxedData.data).toEqual(jasmine.any(Uint8Array));
       expect(transmuxedData.data.length).toBeGreaterThan(0);
       expect(transmuxedData.captions).toEqual(jasmine.any(Array));
@@ -122,7 +122,7 @@ describe('Transmuxer', function() {
 
     it('transmux empty video from TS to MP4', async () => {
       let sawMDAT = false;
-      let transmuxedData = await transmuxer.transmux(emptySegment);
+      const transmuxedData = await transmuxer.transmux(emptySegment);
       expect(transmuxedData.data).toEqual(jasmine.any(Uint8Array));
       expect(transmuxedData.data.length).toBeGreaterThan(0);
       expect(transmuxedData.captions).toEqual(jasmine.any(Array));
@@ -136,11 +136,11 @@ describe('Transmuxer', function() {
 
     it('passes through true timestamps', async () => {
       let parsed = false;
-      let expectedMp4Timestamp = 5166000;  // in timescale units
+      const expectedMp4Timestamp = 5166000;  // in timescale units
       let mp4Timestamp;
 
-      let transmuxedData = await transmuxer.transmux(videoSegment);
-      let Mp4Parser = shaka.util.Mp4Parser;
+      const transmuxedData = await transmuxer.transmux(videoSegment);
+      const Mp4Parser = shaka.util.Mp4Parser;
 
       new Mp4Parser()
           .box('moof', Mp4Parser.children)

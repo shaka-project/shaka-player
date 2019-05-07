@@ -251,14 +251,14 @@ const ShakaDemoAssetInfo = class {
     // Construct a generic object with the values of this object, but with the
     // proper formatting.
     const raw = {};
-    for (let key in this) {
+    for (const key in this) {
       const value = this[key];
       if (value instanceof Map) {
         // The built-in JSON functions cannot convert Maps; this converts Maps
         // to objects.
         const replacement = {};
         replacement['__type__'] = 'map';
-        for (let entry of value.entries()) {
+        for (const entry of value.entries()) {
           replacement[entry[0]] = entry[1];
         }
         raw[key] = replacement;
@@ -317,7 +317,7 @@ const ShakaDemoAssetInfo = class {
       });
     }
     if (this.extraConfig) {
-      for (let key in this.extraConfig) {
+      for (const key in this.extraConfig) {
         config[key] = this.extraConfig[key];
       }
     }
@@ -361,11 +361,11 @@ const ShakaDemoAssetInfo = class {
   static fromJSON(raw) {
     // This handles the special case for Maps in toJSON.
     const parsed = {};
-    for (let key in raw) {
+    for (const key in raw) {
       const value = raw[key];
       if (value && typeof value == 'object' && value['__type__'] == 'map') {
         const replacement = new Map();
-        for (let key in value) {
+        for (const key in value) {
           if (key != '__type__') {
             replacement.set(key, value[key]);
           }

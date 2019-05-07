@@ -29,7 +29,7 @@ describe('DashParser SegmentList', function() {
   ]);
 
   it('truncates segments when lengths don\'t match', async () => {
-    let source = Dash.makeSimpleManifestText([
+    const source = Dash.makeSimpleManifestText([
       '<SegmentList>',
       '  <SegmentURL media="s1.mp4" />',
       '  <SegmentURL media="s2.mp4" />',
@@ -42,7 +42,7 @@ describe('DashParser SegmentList', function() {
       '  </SegmentTimeline>',
       '</SegmentList>',
     ], 65 /* duration */);
-    let references = [
+    const references = [
       ManifestParser.makeReference('s1.mp4', 1, 50, 60, baseUri),
       ManifestParser.makeReference('s2.mp4', 2, 60, 65, baseUri),
     ];
@@ -50,19 +50,19 @@ describe('DashParser SegmentList', function() {
   });
 
   it('supports single segment', async () => {
-    let source = Dash.makeSimpleManifestText([
+    const source = Dash.makeSimpleManifestText([
       '<SegmentList>',
       '  <SegmentURL media="s1.mp4" />',
       '</SegmentList>',
     ], 30 /* duration */);
-    let references = [ManifestParser.makeReference('s1.mp4', 1,
+    const references = [ManifestParser.makeReference('s1.mp4', 1,
                                                    0, 30, baseUri)];
     await Dash.testSegmentIndex(source, references);
   });
 
   describe('duration', function() {
     it('basic support', async () => {
-      let source = Dash.makeSimpleManifestText([
+      const source = Dash.makeSimpleManifestText([
         '<SegmentList startNumber="1" duration="10">',
         '  <SegmentURL media="s1.mp4" />',
         '  <SegmentURL media="s2.mp4" />',
@@ -70,7 +70,7 @@ describe('DashParser SegmentList', function() {
         '  <SegmentURL media="s4.mp4" />',
         '</SegmentList>',
       ]);
-      let references = [
+      const references = [
         ManifestParser.makeReference('s1.mp4', 1, 0, 10, baseUri),
         ManifestParser.makeReference('s2.mp4', 2, 10, 20, baseUri),
         ManifestParser.makeReference('s3.mp4', 3, 20, 30, baseUri),
@@ -80,7 +80,7 @@ describe('DashParser SegmentList', function() {
     });
 
     it('uses @startNumber correctly', async () => {
-      let source = Dash.makeSimpleManifestText([
+      const source = Dash.makeSimpleManifestText([
         '<SegmentList startNumber="5" duration="10">',
         '  <SegmentURL media="s1.mp4" />',
         '  <SegmentURL media="s2.mp4" />',
@@ -88,7 +88,7 @@ describe('DashParser SegmentList', function() {
         '  <SegmentURL media="s4.mp4" />',
         '</SegmentList>',
       ]);
-      let references = [
+      const references = [
         ManifestParser.makeReference('s1.mp4', 5, 40, 50, baseUri),
         ManifestParser.makeReference('s2.mp4', 6, 50, 60, baseUri),
         ManifestParser.makeReference('s3.mp4', 7, 60, 70, baseUri),
@@ -98,13 +98,13 @@ describe('DashParser SegmentList', function() {
     });
 
     it('supports @startNumber=0', async () => {
-      let source = Dash.makeSimpleManifestText([
+      const source = Dash.makeSimpleManifestText([
         '<SegmentList startNumber="0" duration="10">',
         '  <SegmentURL media="s1.mp4" />',
         '  <SegmentURL media="s2.mp4" />',
         '</SegmentList>',
       ]);
-      let references = [
+      const references = [
         ManifestParser.makeReference('s1.mp4', 1, 0, 10, baseUri),
         ManifestParser.makeReference('s2.mp4', 2, 10, 20, baseUri),
       ];
@@ -112,7 +112,7 @@ describe('DashParser SegmentList', function() {
     });
 
     it('supports @timescale', async () => {
-      let source = Dash.makeSimpleManifestText([
+      const source = Dash.makeSimpleManifestText([
         '<SegmentList startNumber="1" timescale="9000" duration="18000">',
         '  <SegmentURL media="s1.mp4" />',
         '  <SegmentURL media="s2.mp4" />',
@@ -120,7 +120,7 @@ describe('DashParser SegmentList', function() {
         '  <SegmentURL media="s4.mp4" />',
         '</SegmentList>',
       ]);
-      let references = [
+      const references = [
         ManifestParser.makeReference('s1.mp4', 1, 0, 2, baseUri),
         ManifestParser.makeReference('s2.mp4', 2, 2, 4, baseUri),
         ManifestParser.makeReference('s3.mp4', 3, 4, 6, baseUri),
@@ -132,14 +132,14 @@ describe('DashParser SegmentList', function() {
 
   describe('rejects streams with', function() {
     it('no @duration or SegmentTimeline', async () => {
-      let source = Dash.makeSimpleManifestText([
+      const source = Dash.makeSimpleManifestText([
         '<SegmentList>',
         '  <SegmentURL media="s1.mp4" />',
         '  <SegmentURL media="s2.mp4" />',
         '  <SegmentURL media="s3.mp4" />',
         '</SegmentList>',
       ]);
-      let error = new shaka.util.Error(
+      const error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_NO_SEGMENT_INFO);
@@ -147,12 +147,12 @@ describe('DashParser SegmentList', function() {
     });
 
     it('one segment and no durations', async () => {
-      let source = Dash.makeSimpleManifestText([
+      const source = Dash.makeSimpleManifestText([
         '<SegmentList>',
         '  <SegmentURL media="s1.mp4" />',
         '</SegmentList>',
       ]);
-      let error = new shaka.util.Error(
+      const error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_NO_SEGMENT_INFO);
@@ -160,14 +160,14 @@ describe('DashParser SegmentList', function() {
     });
 
     it('empty SegmentTimeline', async () => {
-      let source = Dash.makeSimpleManifestText([
+      const source = Dash.makeSimpleManifestText([
         '<SegmentList>',
         '  <SegmentURL media="s1.mp4" />',
         '  <SegmentTimeline>',
         '  </SegmentTimeline>',
         '</SegmentList>',
       ]);
-      let error = new shaka.util.Error(
+      const error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_NO_SEGMENT_INFO);
@@ -177,7 +177,7 @@ describe('DashParser SegmentList', function() {
 
   describe('inherits', function() {
     it('attributes', async () => {
-      let source = [
+      const source = [
         '<MPD mediaPresentationDuration="PT200S">',
         '  <Period>',
         '    <SegmentList startNumber="40" />',
@@ -196,7 +196,7 @@ describe('DashParser SegmentList', function() {
         '  </Period>',
         '</MPD>',
       ].join('\n');
-      let references = [
+      const references = [
         ManifestParser.makeReference('s1.mp4', 1, 0, 50, baseUri),
         ManifestParser.makeReference('s2.mp4', 2, 50, 100, baseUri),
         ManifestParser.makeReference('s3.mp4', 3, 100, 150, baseUri),
@@ -206,7 +206,7 @@ describe('DashParser SegmentList', function() {
     });
 
     it('SegmentTimeline', async () => {
-      let source = [
+      const source = [
         '<MPD mediaPresentationDuration="PT73S">',
         '  <Period>',
         '    <SegmentList>',
@@ -229,7 +229,7 @@ describe('DashParser SegmentList', function() {
         '  </Period>',
         '</MPD>',
       ].join('\n');
-      let references = [
+      const references = [
         ManifestParser.makeReference('s1.mp4', 1, 50, 60, baseUri),
         ManifestParser.makeReference('s2.mp4', 2, 60, 65, baseUri),
         ManifestParser.makeReference('s3.mp4', 3, 65, 73, baseUri),
@@ -238,7 +238,7 @@ describe('DashParser SegmentList', function() {
     });
 
     it('SegmentURL', async () => {
-      let source = [
+      const source = [
         '<MPD mediaPresentationDuration="PT73S">',
         '  <Period>',
         '    <SegmentList>',
@@ -261,7 +261,7 @@ describe('DashParser SegmentList', function() {
         '  </Period>',
         '</MPD>',
       ].join('\n');
-      let references = [
+      const references = [
         ManifestParser.makeReference('s1.mp4', 1, 50, 60, baseUri),
         ManifestParser.makeReference('s2.mp4', 2, 60, 65, baseUri),
         ManifestParser.makeReference('s3.mp4', 3, 65, 73, baseUri),
@@ -272,7 +272,7 @@ describe('DashParser SegmentList', function() {
 
   describe('Segment start', function() {
     it('shoud be adjusted with presentationTimeOffset', async () => {
-      let source = [
+      const source = [
         '<MPD mediaPresentationDuration="PT70S">',
         '  <Period>',
         '    <SegmentList>',
@@ -297,7 +297,7 @@ describe('DashParser SegmentList', function() {
         '  </Period>',
         '</MPD>',
       ].join('\n');
-      let references = [
+      const references = [
         ManifestParser.makeReference('s1.mp4', 1, 40, 50, baseUri),
         ManifestParser.makeReference('s2.mp4', 2, 50, 55, baseUri),
         ManifestParser.makeReference('s3.mp4', 3, 55, 63, baseUri),

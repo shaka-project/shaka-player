@@ -594,9 +594,9 @@ describe('VttTextParser', function() {
    * @param {shaka.extern.TextParser.TimeContext} time
    */
   function verifyHelper(cues, text, time) {
-    let data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
+    const data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
 
-    let result = new shaka.text.VttTextParser().parseMedia(data, time);
+    const result = new shaka.text.VttTextParser().parseMedia(data, time);
     expect(result).toBeTruthy();
     expect(result.length).toBe(cues.length);
     for (let i = 0; i < cues.length; i++) {
@@ -634,14 +634,14 @@ describe('VttTextParser', function() {
    * @param {shaka.extern.CueRegion} actual
    */
   function verifyRegion(expected, actual) {
-    let properties = ['id', 'viewportAnchorX', 'viewportAnchorY',
+    const properties = ['id', 'viewportAnchorX', 'viewportAnchorY',
                       'regionAnchorX', 'regionAnchorY', 'width', 'height',
                       'heightUnits', 'widthUnits', 'viewportAnchorUnits',
                       'scroll'];
     expect(actual).toBeTruthy();
 
     for (let i = 0; i < properties.length; i++) {
-      let property = properties[i];
+      const property = properties[i];
       if (property in expected) {
         expect(actual[property]).toEqual(expected[property]);
       }
@@ -654,10 +654,10 @@ describe('VttTextParser', function() {
    * @param {shaka.extern.TextParser.TimeContext} time
    */
   function errorHelper(code, text, time) {
-    let error = new shaka.util.Error(
+    const error = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.TEXT,
         code);
-    let data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
+    const data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
     try {
       new shaka.text.VttTextParser().parseMedia(data, time);
       fail('Invalid WebVTT file supported');

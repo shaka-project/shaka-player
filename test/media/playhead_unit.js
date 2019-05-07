@@ -161,9 +161,9 @@ describe('Playhead', function() {
   });
 
   function setMockDate(seconds) {
-    let minutes = Math.floor(seconds / 60);
+    const minutes = Math.floor(seconds / 60);
     seconds = seconds % 60;
-    let mockDate = new Date(2013, 9, 23, 7, minutes, seconds);
+    const mockDate = new Date(2013, 9, 23, 7, minutes, seconds);
     jasmine.clock().mockDate(mockDate);
   }
 
@@ -1146,7 +1146,7 @@ describe('Playhead', function() {
     });  // with unbuffered seeks
 
     it('doesn\'t gap jump if the seeking event is late', function() {
-      let buffered = [{start: 10, end: 20}];
+      const buffered = [{start: 10, end: 20}];
       video.buffered = createFakeBuffered(buffered);
       video.currentTime = 12;
       video.readyState = HTMLMediaElement.HAVE_ENOUGH_DATA;
@@ -1181,7 +1181,7 @@ describe('Playhead', function() {
       // If the browser sets the time to slightly before where we seek to, we
       // shouldn't get stuck in an infinite loop trying to jump the tiny gap.
       // https://github.com/google/shaka-player/issues/1309
-      let buffered = [{start: 10, end: 20}];
+      const buffered = [{start: 10, end: 20}];
       video.buffered = createFakeBuffered(buffered);
       video.readyState = HTMLMediaElement.HAVE_METADATA;
 

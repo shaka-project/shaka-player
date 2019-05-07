@@ -61,14 +61,14 @@ describe('DrmEngine', function() {
   let audioSegment;
 
   beforeAll(async () => {
-    let supportTest = shaka.media.DrmEngine.probeSupport()
+    const supportTest = shaka.media.DrmEngine.probeSupport()
         .then(function(result) { support = result; })
         .catch(fail);
 
     video = shaka.util.Dom.createVideoElement();
     document.body.appendChild(video);
 
-    let responses = await Promise.all([
+    const responses = await Promise.all([
       supportTest,
       shaka.test.Util.fetch(videoInitSegmentUri),
       shaka.test.Util.fetch(videoSegmentUri),
@@ -100,7 +100,7 @@ describe('DrmEngine', function() {
       ].join('');
     });
 
-    let playerInterface = {
+    const playerInterface = {
       netEngine: networkingEngine,
       onError: shaka.test.Util.spyFunc(onErrorSpy),
       onKeyStatus: shaka.test.Util.spyFunc(onKeyStatusSpy),
@@ -125,8 +125,8 @@ describe('DrmEngine', function() {
           .addAudio(2).mime('audio/mp4', 'mp4a.40.2').encrypted(true)
       .build();
 
-    let videoStream = manifest.periods[0].variants[0].video;
-    let audioStream = manifest.periods[0].variants[0].audio;
+    const videoStream = manifest.periods[0].variants[0].video;
+    const audioStream = manifest.periods[0].variants[0].audio;
 
     eventManager = new shaka.util.EventManager();
 
@@ -159,10 +159,11 @@ describe('DrmEngine', function() {
           // The error callback should not be invoked.
           onErrorSpy.and.callFake(fail);
 
-          let originalRequest = networkingEngine.request.bind(networkingEngine);
+          const originalRequest =
+              networkingEngine.request.bind(networkingEngine);
           let requestComplete;
-          let requestSpy = jasmine.createSpy('request');
-          let requestMade = new shaka.util.PublicPromise();
+          const requestSpy = jasmine.createSpy('request');
+          const requestMade = new shaka.util.PublicPromise();
           requestSpy.and.callFake(function() {
             requestMade.resolve();
             requestComplete = originalRequest.apply(null, arguments);
@@ -170,7 +171,7 @@ describe('DrmEngine', function() {
           });
           networkingEngine.request = shaka.test.Util.spyFunc(requestSpy);
 
-          let encryptedEventSeen = new shaka.util.PublicPromise();
+          const encryptedEventSeen = new shaka.util.PublicPromise();
           eventManager.listen(video, 'encrypted', function() {
             encryptedEventSeen.resolve();
           });
@@ -185,7 +186,7 @@ describe('DrmEngine', function() {
             }
           });
 
-          let keyStatusEventSeen = new shaka.util.PublicPromise();
+          const keyStatusEventSeen = new shaka.util.PublicPromise();
           onKeyStatusSpy.and.callFake(function() {
             keyStatusEventSeen.resolve();
           });
@@ -223,14 +224,14 @@ describe('DrmEngine', function() {
           }).then(function() {
             // Some platforms (notably 2017 Tizen TVs) do not fire key status
             // events.
-            let keyStatusTimeout = shaka.test.Util.delay(5);
+            const keyStatusTimeout = shaka.test.Util.delay(5);
             return Promise.race([keyStatusTimeout, keyStatusEventSeen]);
           }).then(function() {
-            let call = onKeyStatusSpy.calls.mostRecent();
+            const call = onKeyStatusSpy.calls.mostRecent();
             if (call) {
-              let map = /** @type {!Object} */ (call.args[0]);
+              const map = /** @type {!Object} */ (call.args[0]);
               expect(Object.keys(map).length).not.toBe(0);
-              for (let k in map) {
+              for (const k in map) {
                 expect(map[k]).toBe('usable');
               }
             }

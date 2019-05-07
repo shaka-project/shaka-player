@@ -91,7 +91,7 @@ shaka.ui.VolumeBar = class extends shaka.ui.Element {
     }
 
     // TODO: Can we do this with LESS?
-    let gradient = ['to right'];
+    const gradient = ['to right'];
     gradient.push(shaka.ui.Constants.VOLUME_BAR_VOLUME_LEVEL_COLOR +
                  (this.bar_.value * 100) + '%');
     gradient.push(shaka.ui.Constants.VOLUME_BAR_BASE_COLOR +

@@ -63,6 +63,7 @@ module.exports = {
         "brace-style": ["error", "1tbs", { "allowSingleLine": true }],
         "key-spacing": ["error", {"beforeColon": false, "afterColon": true}],
         "no-multi-spaces": ["error", { "ignoreEOLComments": true }],
+        "prefer-const": ["error", {"ignoreReadBeforeAssign": true}],
         // }}}
 
         // "Possible error" rules in "eslint:recommended" that need options: {{{
