@@ -1,13 +1,13 @@
-# Shaka Upgrade Guide, v2.3 => v2.5
+# Shaka Upgrade Guide, v2.4 => v2.5
 
-This is a detailed guide for upgrading from Shaka Player v2.3 to v2.5.
+This is a detailed guide for upgrading from Shaka Player v2.4 to v2.5.
 Feel free to skim or to search for the class and method names you are using in
 your application.
 
 
 #### What's New in v2.5?
 
-Shaka v2.5 introduces several improvements over v2.3, including:
+Shaka v2.5 introduces several improvements over v2.4, including:
   - An official Shaka Player UI library to provide customizable and styleable
     video controls
     - Load dist/shaka-player.ui.js
@@ -21,17 +21,12 @@ Shaka v2.5 introduces several improvements over v2.3, including:
   - Improved service worker in demo app PWA
   - Drift tolerance for live DASH streams (on by default)
   - PlayReady license URL parsing (ms:laurl)
-  - Support for CEA captions
+  - Support for CEA captions in DASH
+  - Merged CEA captions in text tracks API
   - New config field to ignore manifest minBufferTime
   - Offline storage without a Player instance
   - A safe margin parameter was added for clearing the buffer
   - Widevine SAMPLE-AES support in HLS
-  - Support for TTML and VTT regions
-  - A video element is no longer required when `Player` is constructed
-  - New `attach()` and `detach()` methods have been added to `Player` to manage
-    attachment to video elements
-  - Fetch is now preferred over XHR when available
-  - Live stream playback can begin at a negative offset from the live edge
 
 
 #### Extern namespace change
@@ -42,7 +37,7 @@ types.  The namespace has changed from `shakaExtern` to `shaka.extern`.  You
 MUST update any references to `shakaExtern`.
 
 ```js
-// v2.3:
+// v2.4:
 /**
  * @param {shaka.net.NetworkingEngine.RequestType} type
  * @param {shakaExtern.Request} request
@@ -69,7 +64,7 @@ instead of explicit factories.  Any registered factory can be referenced by its
 registered MIME type.
 
 ```js
-// v2.3:
+// v2.4:
 player.load('foo.mpd', /* startTime= */ 0,
     /* factory= */ shaka.dash.DashParser);
 
@@ -89,7 +84,7 @@ SHOULD update to the new method, whose name more accurately reflects our new
 support for non-manifest content.
 
 ```js
-// v2.3:
+// v2.4:
 const uri = player.getManifestUri();
 
 // v2.5:
@@ -97,62 +92,41 @@ const uri = player.getAssetUri();
 ```
 
 
-#### Text parser plugin API changes
+#### Embedded text (CEA 608/708) API change
 
-The TextParser plugin API has changed.
-
-The `segmentStart` attribute of `shakaExtern.TextParser.TimeContext` is now
-nullable.  Your plugin will receive a `segmentStart` of `null` if the
-information is not available, as is the case in HLS.
-
-Text-parsing plugins that produce region information will need to be updated to
-use the new `shaka.text.CueRegion` class.  The new structure allows for more
-accurate representation of both TTML and VTT regions.
-
-All application-specific text-parsing plugins MUST to be updated.
-v2.5 does not have backward compatibility for this!
-
-See {@link shaka.extern.TextParser.TimeContext} and {@link shaka.text.CueRegion}
-for details.
-
-
-#### TextDisplayer plugin API changes
-
-The `Cue` objects consumed by `TextDisplayer` have changed in v2.5.
-
- - `CueRegion` structure has changed to allow for more accurate representation
-   of both TTML and VTT regions
- - `Cue.writingDirection` has been split into `Cue.writingMode` and
-   `Cue.direction` to fix bugs in the handling of these attributes
- - `Cue.backgroundImage` has been added
-
-All application-specific TextDisplayer plugins MUST to be updated.
-v2.5 does not have backward compatibility for this!
-
-See {@link shaka.extern.Cue} and {@link shaka.extern.CueRegion} for details.
-
-
-#### NetworkingEngine API changes
-
-In v2.3, the `request()` method on `shaka.net.NetworkingEngine` returned a
-Promise.  Now, in v2.5, it returns an instance of
-`shakaExtern.IAbortableOperation`, which contains a Promise.
-
-All applications which make application-level requests via `NetworkingEngine`
-MUST update to the new API.  Support for the old API was removed in v2.5.
+The CEA-specific methods `Player.selectEmbeddedTextTrack()` and
+`Player.usingEmbeddedTextTrack()` are now deprecated and will be removed in
+v2.6.  CEA captions now show up in the standard text track APIs:
+`getTextTracks()`, `selectTextTrack()`, `getTextLanguages()`,
+`getTextLanguagesAndRoles()`, and `selectTextLanguage()`.  Applications SHOULD
+update to using the track APIs.  If you have content with VTT or TTML subtitles,
+you should already be using these APIs.
 
 ```js
-// v2.3:
-const response = await player.getNetworkingEngine().request(type, request);
+// v2.4:
+player.selectEmbeddedTextTrack();
 
 // v2.5:
-const operation = player.getNetworkingEngine().request(type, request);
-// The operation can also be aborted on some condition.
-onSomeCondition(() => {
-  operation.abort();
-});
-// Use operation.promise to get the response.
-const response = await operation.promise;
+const tracks = player.getTextTracks();
+const desiredTrack = someProcessToChooseOne(tracks);
+player.selectTextTrack(desiredTrack);
+```
+
+
+#### Manifest parser plugin API changes
+
+The API for `shaka.media.PresentationTimeline` has changed.  `ManifestParser`
+plugins that use these methods MUST be updated:
+
+  - `notifySegments()` now takes a reference array and a boolean called
+    `isFirstPeriod`, instead of a period start time and a reference array.
+
+```js
+// v2.4:
+timeline.notifySegments(segmentList, /* periodStart= */ 0);
+
+// v2.5:
+timeline.notifySegments(segmentList, /* isFirstPeriod= */ true);
 ```
 
 
@@ -186,7 +160,7 @@ function mySchemePlugin(uri, request) {
 }
 shaka.net.NetworkingEngine.registerScheme('foo', mySchemePlugin);
 
-// v2.5:
+// v2.4:
 function mySchemePlugin(uri, request, requestType) {
   let rejectCallback = null;
 
@@ -317,21 +291,15 @@ any offline EME sessions that were not cleanly released:
 See {@link shaka.offline.Storage} for details.
 
 
-#### Manifest parser plugin API changes
+#### TextDisplayer plugin changes
 
-The API for `shaka.media.PresentationTimeline` has changed.  `ManifestParser`
-plugins that use these methods MUST be updated:
+The `Cue` objects consumed by `TextDisplayer` have changed in v2.5.
 
-  - `setAvailabilityStart()` was renamed to `setUserSeekStart()`.
-  - `notifySegments()` now takes a reference array and a boolean called
-    `isFirstPeriod`, instead of a period start time and a reference array.
+ - `Cue.writingDirection` has been split into `Cue.writingMode` and
+   `Cue.direction` to fix bugs in the handling of these attributes
+ - `Cue.backgroundImage` has been added
 
-```js
-// v2.3:
-timeline.setAvailabilityStart(100);
-timeline.notifySegments(segmentList, /* periodStart= */ 0);
+All application-specific TextDisplayer plugins MUST to be updated.
+v2.5 does not have backward compatibility for this!
 
-// v2.5:
-timeline.setUserSeekStart(100);
-timeline.notifySegments(segmentList, /* isFirstPeriod= */ true);
-```
+See {@link shaka.extern.Cue} for details.
