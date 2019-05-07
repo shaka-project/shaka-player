@@ -19,6 +19,7 @@
 goog.provide('shaka.ui.OverflowMenu');
 
 goog.require('goog.asserts');
+goog.require('shaka.log');
 goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
@@ -183,6 +184,9 @@ goog.require('shaka.util.Dom');
             shaka.ui.OverflowMenu.elementNamesToFactories_.get(name);
         goog.asserts.assert(this.controls, 'Controls should not be null!');
         this.children_.push(factory.create(this.overflowMenu_, this.controls));
+      } else {
+        shaka.log.alwaysWarn('Unrecognized overflow menu element requested:',
+                             name);
       }
     }
   }

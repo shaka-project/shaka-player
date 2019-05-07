@@ -15,6 +15,7 @@
 +../../ui/mute_button.js
 +../../ui/overflow_menu.js
 +../../ui/pip_button.js
++../../ui/play_pause_button.js
 +../../ui/presentation_time.js
 +../../ui/resolution_selection.js
 +../../ui/rewind_button.js

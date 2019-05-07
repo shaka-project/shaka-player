@@ -20,6 +20,7 @@ goog.provide('shaka.ui.Controls');
 goog.provide('shaka.ui.ControlsPanel');
 
 goog.require('goog.asserts');
+goog.require('shaka.log');
 goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
@@ -672,6 +673,9 @@ shaka.ui.Controls.prototype.addControlsButtonPanel_ = function() {
     if (shaka.ui.ControlsPanel.elementNamesToFactories_.get(name)) {
       const factory = shaka.ui.ControlsPanel.elementNamesToFactories_.get(name);
       this.elements_.push(factory.create(this.controlsButtonPanel_, this));
+    } else {
+      shaka.log.alwaysWarn('Unrecognized control panel element requested:',
+                           name);
     }
   }
 };

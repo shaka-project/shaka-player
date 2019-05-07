@@ -42,6 +42,7 @@ The following elements can be added to the UI bar using this configuration value
   the presentation and the full presentation duration in the "0:10 / 1:00"
   form where "0:10" (ten seconds) is the number of seconds passed from the start of the presentation
   and "1:00" (one minute) is the presentation duration.
+* play_pause: adds a button that plays/pauses the video on click.
 * mute: adds a button that mutes/unmutes the video on click.
 * volume: adds a volume slider.
 * fullscreen: adds a button that toggles full screen mode on click.
