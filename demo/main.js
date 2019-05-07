@@ -771,6 +771,7 @@ class ShakaDemoMain {
           asset.certificateUri, netEngine);
       const certArray = new Uint8Array(certificate);
       for (const drmSystem of asset.licenseServers.keys()) {
+        config.drm.advanced[drmSystem] = config.drm.advanced[drmSystem] || {};
         config.drm.advanced[drmSystem].serverCertificate = certArray;
       }
     } else {
