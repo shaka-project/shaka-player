@@ -22,6 +22,7 @@ goog.require('goog.asserts');
 goog.require('shaka.polyfill.installAll');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.TextDisplayer');
+goog.require('shaka.util.Platform');
 
 
 /**
@@ -49,6 +50,11 @@ shaka.ui.Overlay = function(player, videoContainer, video) {
   // through it.
   videoContainer['dataset']['shakaPlayerContainer'] = '';
   videoContainer['ui'] = this;
+
+  // Tag the container for mobile platforms, to allow different styles.
+  if (this.isMobile()) {
+    videoContainer.classList.add('shaka-mobile');
+  }
 };
 
 
@@ -65,9 +71,21 @@ shaka.ui.Overlay.prototype.destroy = async function() {
 };
 
 
+/**
+ * Detects if this is a mobile platform, in case you want to choose a different
+ * UI configuration on mobile devices.
+ *
+ * @return {boolean}
+ * @export
+ */
+shaka.ui.Overlay.prototype.isMobile = function() {
+  return shaka.util.Platform.isMobile();
+};
+
+
 /** @return {!shaka.extern.UIConfiguration} */
 shaka.ui.Overlay.prototype.getConfiguration = function() {
-  let ret = this.defaultConfig_();
+  const ret = this.defaultConfig_();
   shaka.util.ConfigUtils.mergeConfigObjects(
       ret, this.config_, this.defaultConfig_(),
       /* overrides (only used for player config)*/ {}, /* path */ '');
@@ -226,7 +244,6 @@ shaka.ui.Overlay.scanPageForShakaElements_ = function() {
     // Just the video elements were provided.
     for (let i = 0; i < videos.length; i++) {
       const video = videos[i];
-      video.classList.add('video');
       goog.asserts.assert(video.tagName.toLowerCase() == 'video',
         'Should be a video element!');
 
