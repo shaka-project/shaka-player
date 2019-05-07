@@ -137,7 +137,7 @@ ShakaReceiver.prototype.checkIdle_ = function() {
     this.cancelIdleTimer_();
 
     // Set a special poster for audio-only assets.
-    if (this.player_.isAudioOnly()) {
+    if (this.video_.readyState != 0 && this.player_.isAudioOnly()) {
       this.video_.poster =
           'https://shaka-player-demo.appspot.com/assets/audioOnly.gif';
     } else {
