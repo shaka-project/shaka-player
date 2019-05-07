@@ -46,56 +46,23 @@ body {
   margin: auto;
 }
 
-#controlsContainer {
-  padding: 0 3%;
-  height: auto;
-}
-
-#controls {
-  height: 100%;
-  max-width: initial;
-}
-
-#controls * {
-  font-size: 35px;
-}
-
-#controls button {
-  width: 50px;
-  height: 50px;
-}
-
-#seekBar {
-  height: 12px;
-  border-radius: 12px;
-}
-
-#seekBar::-webkit-slider-thumb {
-  width: 30px;
-  height: 30px;
-  border-radius: 30px;
-  opacity: 0.5;
-}
-
-#bufferingSpinner {
-  transform: scale(2.0);
-}
-
-.overlay-parent {
-  /* Makes this a positioned ancestor of .overlay */
-  position: relative;
-}
-
-.overlay {
-  /* Allows this to be positioned relative to a containing .overlay-parent */
-  position: absolute;
+/* Until the UI gives us a way to disable the giant play/pause button, do it in
+ * CSS instead. */
+.shaka-play-button {
+  display: none;
 }
 
 #idle {
+  position: absolute;
   top: 0;
   left: 0;
   bottom: 0;
   right: 0;
+
+  /* Make sure the idle cards sit above everything in the Player UI.  That way,
+   * they will be visible on top until we decide to hide them and show the
+   * player. */
+  z-index: 99;
 
   padding-top: 60px;
   padding-left: 0;

@@ -34,10 +34,7 @@ function ShakaReceiver() {
   /** @private {shaka.cast.CastReceiver} */
   this.receiver_ = null;
 
-  /** @private {HTMLElement} */
-  this.playButton_ = null;
-
-  /** @private {HTMLElement} */
+  /** @private {Element} */
   this.controlsElement_ = null;
 
   /** @private {?number} */
@@ -75,17 +72,20 @@ ShakaReceiver.prototype.init = function() {
   let ui = this.video_['ui'];
   goog.asserts.assert(ui, 'UI should be available!');
 
+  // Make sure we don't show extra UI elements we don't need on the TV.
+  ui.configure({
+    controlPanelElements: [
+      'play_pause',
+      'time_and_duration',
+      'spacer',
+    ],
+  });
+
   this.player_ = ui.getPlayer();
   goog.asserts.assert(this.player_, 'Player should be available!');
 
-  let videoContainer = /** @type {HTMLElement} */
-      (document.getElementById('videoContainer'));
-  goog.asserts.assert(videoContainer, 'Video container should be available!');
+  this.controlsElement_ = document.querySelector('.shaka-controls-container');
 
-  this.controlsElement_ = shaka.ui.Utils.getFirstDescendantWithClassName(
-      videoContainer, 'shaka-controls-container');
-  this.playButton_ = shaka.ui.Utils.getFirstDescendantWithClassName(
-      videoContainer, 'shaka-play-button-container');
   this.idle_ = document.getElementById('idle');
 
   this.video_.addEventListener(
@@ -170,12 +170,6 @@ ShakaReceiver.prototype.cancelIdleTimer_ = function() {
 ShakaReceiver.prototype.onPlayStateChange_ = function() {
   if (this.controlsTimerId_ != null) {
     window.clearTimeout(this.controlsTimerId_);
-  }
-
-  if (this.video_.paused) {
-    this.playButton_.style.display = 'inline';
-  } else {
-    this.playButton_.style.display = 'none';
   }
 
   if (this.video_.paused && this.video_.readyState > 0) {
