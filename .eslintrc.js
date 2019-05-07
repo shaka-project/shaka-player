@@ -76,6 +76,7 @@ module.exports = {
         "getter-return": "error",
         "no-await-in-loop": "error",
         "no-template-curly-in-string": "error",
+        "require-atomic-updates": "error",
         // }}}
 
         // "Best practices" rules we should be able to pass, but are not part of "eslint:recommended": {{{
@@ -133,6 +134,14 @@ module.exports = {
 
         // Style rules that don't seem to be in the Google style config: {{{
         "array-bracket-newline": ["error", "consistent"],
+        "arrow-spacing": "error",
+        "lines-between-class-members": "error",
+        "no-mixed-operators": ["error", {
+          "groups": [["&", "|", "^", "~", "<<", ">>", ">>>", "&&", "||"]],
+          "allowSamePrecedence": false,
+        }],
+        "no-useless-constructor": "error",
+        "operator-assignment": "error",
         // }}}
     },
     "overrides": [

@@ -162,7 +162,7 @@ describe('Playhead', function() {
 
   function setMockDate(seconds) {
     const minutes = Math.floor(seconds / 60);
-    seconds = seconds % 60;
+    seconds %= 60;
     const mockDate = new Date(2013, 9, 23, 7, minutes, seconds);
     jasmine.clock().mockDate(mockDate);
   }

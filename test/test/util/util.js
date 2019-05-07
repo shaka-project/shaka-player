@@ -501,7 +501,7 @@ shaka.test.Util.waitForEndOrTimeout = (eventManager, target, timeout) => {
  */
 shaka.test.Util.customMatchers_ = {
   // Custom matcher for Element objects.
-  toEqualElement: (util, customEqualityTesters) =>{
+  toEqualElement: (util, customEqualityTesters) => {
     return {
       compare: shaka.test.Util.expectToEqualElementCompare_,
     };
