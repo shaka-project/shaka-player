@@ -76,7 +76,6 @@ class AssetCard {
     this.actions_.classList.add('mdl-card__actions');
     this.actions_.classList.add('mdl-card--border');
     this.card_.appendChild(this.actions_);
-    this.remakeButtons();
 
     const progressContainer = document.createElement('div');
     this.progressBar_.classList.add('hidden');
@@ -86,6 +85,9 @@ class AssetCard {
     this.card_.appendChild(progressContainer);
 
     parentDiv.appendChild(this.card_);
+    // Remake buttons AFTER appending to parent div, so that any tooltips can
+    // be placed.
+    this.remakeButtons();
   }
 
   /**
