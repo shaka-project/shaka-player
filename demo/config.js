@@ -128,20 +128,13 @@ class ShakaDemoConfig {
       'HW_SECURE_DECODE',
       'HW_SECURE_ALL',
     ];
-    const commonDrmSystems = [
-      'com.widevine.alpha',
-      'com.microsoft.playready',
-      'com.apple.fps.1_0',
-      'com.adobe.primetime',
-      'org.w3.clearkey',
-    ];
     const addRobustnessField = (name, valueName) => {
       // All robustness fields of a given type are set at once.
       this.addDatalistInput_(name, robustnessSuggestions, (input) => {
         // Add in any common drmSystem not currently in advanced.
-        for (const drmSystem of commonDrmSystems) {
+        for (const drmSystem of ShakaDemoMain.commonDrmSystems) {
           if (!(drmSystem in advanced)) {
-            advanced[commonDrmSystems] = {
+            advanced[drmSystem] = {
               distinctiveIdentifierRequired: false,
               persistentStateRequired: false,
               videoRobustness: '',

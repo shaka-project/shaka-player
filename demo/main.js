@@ -150,8 +150,14 @@ class ShakaDemoMain {
     // Update the componentHandler, to account for any new MDL elements added.
     componentHandler.upgradeDom();
 
+    const asset = this.getLastAssetFromHash_();
+
     this.fullyLoaded_ = true;
     this.remakeHash();
+
+    if (asset) {
+      this.loadAsset(asset);
+    }
   }
 
   /** @private */
@@ -539,9 +545,48 @@ class ShakaDemoMain {
     return this.uiLocale_;
   }
 
+  /**
+   * @return {?ShakaDemoAssetInfo}
+   * @private
+   */
+  getLastAssetFromHash_() {
+    const params = this.getParams_();
+
+    const manifest = params['asset'];
+    if (manifest) {
+      // See if it's a default asset.
+      for (const asset of shakaAssets.testAssets) {
+        if (asset.manifestUri == manifest) {
+          return asset;
+        }
+      }
+
+      // Construct a new asset.
+      const asset = new ShakaDemoAssetInfo(
+        /* name= */ 'loaded asset',
+        /* iconUri= */ '',
+        /* manifestUri= */ manifest,
+        /* source= */ shakaAssets.Source.UNKNOWN);
+      if ('license' in params) {
+        let drmSystems = ShakaDemoMain.commonDrmSystems;
+        if ('drmSystem' in params) {
+          drmSystems = [params['drmSystem']];
+        }
+        for (const drmSystem of drmSystems) {
+          asset.addLicenseServer(drmSystem, params['license']);
+        }
+      }
+      if ('certificate' in params) {
+        asset.addCertificateUri(params['certificate']);
+      }
+      return asset;
+    }
+    return null;
+  }
+
   /** @private */
   readHash_() {
-    const params = this.getParams();
+    const params = this.getParams_();
 
     if (this.player_) {
       const readParam = (hashName, configName) => {
@@ -635,8 +680,11 @@ class ShakaDemoMain {
     }
   }
 
-  /** @return {!Object.<string, string>} params */
-  getParams() {
+  /**
+   * @return {!Object.<string, string>} params
+   * @private
+   */
+  getParams_() {
     // Read URL parameters.
     let fields = location.search.substr(1);
     fields = fields ? fields.split(';') : [];
@@ -736,6 +784,9 @@ class ShakaDemoMain {
 
     // The currently-selected asset changed, so update asset cards.
     this.dispatchEventWithName_('shaka-main-selected-asset-changed');
+
+    // Remake hash, to change the current asset.
+    this.remakeHash();
   }
 
   /**
@@ -836,6 +887,9 @@ class ShakaDemoMain {
         this.onError_(error);
       }
     }
+
+    // Remake hash, to change the current asset.
+    this.remakeHash();
   }
 
   /** Remakes the location's hash. */
@@ -871,6 +925,24 @@ class ShakaDemoMain {
       params.push('jumpLargeGaps');
     }
     params.push('uilang=' + this.getUILocale());
+
+    if (this.selectedAsset) {
+      const isDefault = shakaAssets.testAssets.includes(this.selectedAsset);
+      params.push('asset=' + this.selectedAsset.manifestUri);
+      if (!isDefault && this.selectedAsset.licenseServers.size) {
+        const uri = this.selectedAsset.licenseServers.values().next().value;
+        params.push('license=' + uri);
+        for (const drmSystem of this.selectedAsset.licenseServers.keys()) {
+          if (!ShakaDemoMain.commonDrmSystems.includes(drmSystem)) {
+            params.push('drmSystem=' + drmSystem);
+            break;
+          }
+        }
+      }
+      if (!isDefault && this.selectedAsset.certificateUri) {
+        params.push('certificate=' + this.selectedAsset.certificateUri);
+      }
+    }
 
     const navButtons = document.getElementById('nav-button-container');
     for (const button of navButtons.childNodes) {
@@ -965,7 +1037,7 @@ class ShakaDemoMain {
     // TODO: Switch to using MDL tabs.
 
     // Determine if the element is selected.
-    const params = this.getParams();
+    const params = this.getParams_();
     let selected = params['panel'] == encodeURI(button.textContent);
     if (!selected && !params['panel']) {
       // Check if it's selected by default.
@@ -1123,6 +1195,16 @@ class ShakaDemoMain {
     // TODO: Handle.
   }
 }
+
+
+/** @type {!Array.<string>} */
+ShakaDemoMain.commonDrmSystems = [
+  'com.widevine.alpha',
+  'com.microsoft.playready',
+  'com.apple.fps.1_0',
+  'com.adobe.primetime',
+  'org.w3.clearkey',
+];
 
 
 const shakaDemoMain = new ShakaDemoMain();
