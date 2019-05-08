@@ -183,16 +183,25 @@ shakaAssets.UplynkRequestFilter = function(type, request) {
 shakaAssets.testAssets = [
   // Shaka assets {{{
   new ShakaDemoAssetInfo(
-      /* name= */ 'Big Buck Bunny: the Dark Truths of a Video Dev Cartoon',
+      /* name= */ 'Big Buck Bunny: the Dark Truths of a Video Dev Cartoon (DASH)', // eslint-disable-line max-len
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dark_truth.png',
       /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/bbb-dark-truths/dash.mpd',
       /* source= */ shakaAssets.Source.SHAKA)
-    .addDescription('A serious documentary about a problem plaguing video developers.') // eslint-disable-line max-len
-    .markAsFeatured('Big Buck Bunny: the Dark Truths')
     .addFeature(shakaAssets.Feature.DASH)
     .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
     .addFeature(shakaAssets.Feature.MP4)
     .addFeature(shakaAssets.Feature.WEBM)
+    .addFeature(shakaAssets.Feature.OFFLINE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Big Buck Bunny: the Dark Truths of a Video Dev Cartoon (HLS)', // eslint-disable-line max-len
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dark_truth.png',
+      /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/bbb-dark-truths-hls/hls.m3u8',
+      /* source= */ shakaAssets.Source.SHAKA)
+    .addDescription('A serious documentary about a problem plaguing video developers.') // eslint-disable-line max-len
+    .markAsFeatured('Big Buck Bunny: the Dark Truths')
+    .addFeature(shakaAssets.Feature.HLS)
+    .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+    .addFeature(shakaAssets.Feature.MP4)
     .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
       /* name= */ 'Angel One (multicodec, multilingual)',
