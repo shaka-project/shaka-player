@@ -533,7 +533,7 @@ describe('MpdUtils', () => {
       // infinitely recurse if there isn't a depth limit.
       for (let i = 1; i < 20; i++) {
         const key = 'https://xlink' + i;
-        const value = makeRecursiveXMLString(0, 'https://xlink' + (i + 1) + '');
+        const value = makeRecursiveXMLString(0, 'https://xlink' + (i + 1));
 
         fakeNetEngine.setResponseText(key, value);
       }
@@ -656,7 +656,7 @@ describe('MpdUtils', () => {
       // didn't abort it.
       for (let i = 1; i < 3; i++) {
         const key = 'https://xlink' + i;
-        const value = makeRecursiveXMLString(0, 'https://xlink' + (i + 1) + '');
+        const value = makeRecursiveXMLString(0, 'https://xlink' + (i + 1));
 
         fakeNetEngine.setResponseText(key, value);
       }

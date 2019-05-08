@@ -185,7 +185,7 @@ describe('AdaptationSet', () => {
       label: null,
       language: '',
       mimeType: mimeType,
-      originalId: '' + id,
+      originalId: String(id),
       primary: false,
       roles: roles,
       trickModeVideo: null,

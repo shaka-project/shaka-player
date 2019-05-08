@@ -33,7 +33,7 @@ describe('Storage', () => {
 
   const noMetadata = {};
 
-  const kbps = 1000;
+  const kbps = (k) => k * 1000;
 
   beforeEach(async () => {
     // Make sure we start with a clean slate between each run.
@@ -284,12 +284,12 @@ describe('Storage', () => {
 
     it('selects the largest SD video with middle quality audio', () => {
       const tracks = [
-        variantTrack(0, 360, englishUS, 1 * kbps),
-        variantTrack(1, 480, englishUS, 2.0 * kbps),
-        variantTrack(2, 480, englishUS, 2.1 * kbps),
-        variantTrack(3, 480, englishUS, 2.2 * kbps),
-        variantTrack(4, 720, englishUS, 3 * kbps),
-        variantTrack(5, 1080, englishUS, 4 * kbps),
+        variantTrack(0, 360, englishUS, kbps(1.0)),
+        variantTrack(1, 480, englishUS, kbps(2.0)),
+        variantTrack(2, 480, englishUS, kbps(2.1)),
+        variantTrack(3, 480, englishUS, kbps(2.2)),
+        variantTrack(4, 720, englishUS, kbps(3.0)),
+        variantTrack(5, 1080, englishUS, kbps(4.0)),
       ];
 
       const selected =
@@ -299,7 +299,7 @@ describe('Storage', () => {
       expect(selected[0]).toBeTruthy();
       expect(selected[0].language).toBe(englishUS);
       expect(selected[0].height).toBe(480);
-      expect(selected[0].bandwidth).toBe(2.1 * kbps);
+      expect(selected[0].bandwidth).toBe(kbps(2.1));
     });
 
     it('selects all text tracks', () => {
@@ -320,9 +320,9 @@ describe('Storage', () => {
     describe('language matching', () => {
       it('finds exact match', () => {
         const tracks = [
-          variantTrack(0, 480, 'eng-us', 1 * kbps),
-          variantTrack(1, 480, 'fr-ca', 1 * kbps),
-          variantTrack(2, 480, 'eng-ca', 1 * kbps),
+          variantTrack(0, 480, 'eng-us', kbps(1)),
+          variantTrack(1, 480, 'fr-ca', kbps(1)),
+          variantTrack(2, 480, 'eng-ca', kbps(1)),
         ];
 
         const selected =
@@ -335,10 +335,10 @@ describe('Storage', () => {
 
       it('finds exact match with only base', () => {
         const tracks = [
-          variantTrack(0, 480, 'eng-us', 1 * kbps),
-          variantTrack(1, 480, 'fr-ca', 1 * kbps),
-          variantTrack(2, 480, 'eng-ca', 1 * kbps),
-          variantTrack(3, 480, 'eng', 1 * kbps),
+          variantTrack(0, 480, 'eng-us', kbps(1)),
+          variantTrack(1, 480, 'fr-ca', kbps(1)),
+          variantTrack(2, 480, 'eng-ca', kbps(1)),
+          variantTrack(3, 480, 'eng', kbps(1)),
         ];
 
         const selected = PlayerConfiguration.defaultTrackSelect(tracks, 'eng');
@@ -350,9 +350,9 @@ describe('Storage', () => {
 
       it('finds base match when exact match is not found', () => {
         const tracks = [
-          variantTrack(0, 480, 'eng-us', 1 * kbps),
-          variantTrack(1, 480, 'fr-ca', 1 * kbps),
-          variantTrack(2, 480, 'eng-ca', 1 * kbps),
+          variantTrack(0, 480, 'eng-us', kbps(1)),
+          variantTrack(1, 480, 'fr-ca', kbps(1)),
+          variantTrack(2, 480, 'eng-ca', kbps(1)),
         ];
 
         const selected = PlayerConfiguration.defaultTrackSelect(tracks, 'fr');
@@ -364,9 +364,9 @@ describe('Storage', () => {
 
       it('finds common base when exact match is not found', () => {
         const tracks = [
-          variantTrack(0, 480, 'eng-us', 1 * kbps),
-          variantTrack(1, 480, 'fr-ca', 1 * kbps),
-          variantTrack(2, 480, 'eng-ca', 1 * kbps),
+          variantTrack(0, 480, 'eng-us', kbps(1)),
+          variantTrack(1, 480, 'fr-ca', kbps(1)),
+          variantTrack(2, 480, 'eng-ca', kbps(1)),
         ];
 
         const selected =
@@ -379,9 +379,9 @@ describe('Storage', () => {
 
       it('finds primary track when no match is found', () => {
         const tracks = [
-          variantTrack(0, 480, 'eng-us', 1 * kbps),
-          variantTrack(1, 480, 'fr-ca', 1 * kbps),
-          variantTrack(2, 480, 'eng-ca', 1 * kbps),
+          variantTrack(0, 480, 'eng-us', kbps(1)),
+          variantTrack(1, 480, 'fr-ca', kbps(1)),
+          variantTrack(2, 480, 'eng-ca', kbps(1)),
         ];
 
         tracks[0].primary = true;
@@ -629,9 +629,9 @@ describe('Storage', () => {
       const manifest = new shaka.test.ManifestGenerator()
           .setPresentationDuration(20)
           .addPeriod(0)
-              .addVariant(0).language(englishUS).bandwidth(13 * kbps)
-                  .addVideo(1).size(100, 200).bandwidth(10 * kbps)
-                  .addAudio(2).language(englishUS).bandwidth(3 * kbps)
+              .addVariant(0).language(englishUS).bandwidth(kbps(13))
+                  .addVideo(1).size(100, 200).bandwidth(kbps(10))
+                  .addAudio(2).language(englishUS).bandwidth(kbps(3))
           .build();
 
       const audio = manifest.periods[0].variants[0].audio;
@@ -1256,12 +1256,12 @@ describe('Storage', () => {
     const manifest = new shaka.test.ManifestGenerator()
         .setPresentationDuration(20)
         .addPeriod(0)
-            .addVariant(0).language(englishUS).bandwidth(13 * kbps)
-                .addVideo(1).size(100, 200).bandwidth(10 * kbps)
-                .addAudio(2).language(englishUS).bandwidth(3 * kbps)
-            .addVariant(3).language(frenchCanadian).bandwidth(13 * kbps)
-                .addVideo(4).size(100, 200).bandwidth(10 * kbps)
-                .addAudio(5).language(frenchCanadian).bandwidth(3 * kbps)
+            .addVariant(0).language(englishUS).bandwidth(kbps(13))
+                .addVideo(1).size(100, 200).bandwidth(kbps(10))
+                .addAudio(2).language(englishUS).bandwidth(kbps(3))
+            .addVariant(3).language(frenchCanadian).bandwidth(kbps(13))
+                .addVideo(4).size(100, 200).bandwidth(kbps(10))
+                .addAudio(5).language(frenchCanadian).bandwidth(kbps(3))
         .build();
 
     getAllStreams(manifest).forEach((stream) => {

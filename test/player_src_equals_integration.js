@@ -39,7 +39,7 @@ describe('Player Src Equals', () => {
   beforeEach(() => {
     player = new shaka.Player();
     player.addEventListener('error', fail);
-    eventManager = new shaka.util.EventManager;
+    eventManager = new shaka.util.EventManager();
   });
 
   afterEach(async () => {

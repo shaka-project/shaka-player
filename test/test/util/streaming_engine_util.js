@@ -227,7 +227,7 @@ shaka.test.StreamingEngineUtil.createManifest = function(
 
     const d = segmentDurations[type];
     const getUris = function() {
-      return ['' + periodNumber + '_' + type + '_' + position];
+      return [periodNumber + '_' + type + '_' + position];
     };
     return new shaka.media.SegmentReference(
         position, (position - 1) * d, position * d, getUris, 0, null);

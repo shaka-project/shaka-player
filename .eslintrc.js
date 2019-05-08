@@ -58,43 +58,37 @@ module.exports = {
         "require-jsdoc": "off",
         // }}}
 
-        // Google style rules that need options: {{{
-        "block-spacing": ["error", "always"],
-        "brace-style": ["error", "1tbs", { "allowSingleLine": true }],
-        "key-spacing": ["error", {"beforeColon": false, "afterColon": true}],
-        "no-multi-spaces": ["error", { "ignoreEOLComments": true }],
-        "prefer-const": ["error", {"ignoreReadBeforeAssign": true}],
-        // }}}
-
-        // "Possible error" rules in "eslint:recommended" that need options: {{{
-        "no-empty": ["error", {"allowEmptyCatch": true}],
-        // }}}
-
-        // "Possible error" rules we should be able to pass, but are not part of "eslint:recommended": {{{
-        "for-direction": "error",
-        "getter-return": "error",
+        // "Possible error" rules: {{{
+        "no-async-promise-executor": "error",
         "no-await-in-loop": "error",
+        "no-empty": ["error", {"allowEmptyCatch": true}],
+        "no-misleading-character-class": "error",
         "no-template-curly-in-string": "error",
         "require-atomic-updates": "error",
         // }}}
 
-        // "Best practices" rules we should be able to pass, but are not part of "eslint:recommended": {{{
+        // "Best practices" rules: {{{
         "accessor-pairs": "error",
         "array-callback-return": "error",
+        "class-methods-use-this": "off",  // causes issues when implementing an interface
         "consistent-return": "error",
         "dot-location": ["error", "property"],
+        "dot-notation": "off",  // We use bracket notation in tests on purpose
+        "eqeqeq": "off",  // Compiler handles type checking in advance
+        "guard-for-in": "off",
         "no-alert": "error",
         "no-caller": "error",
-        "no-catch-shadow": "error",
+        "no-div-regex": "error",
         "no-extend-native": "error",  // May conflict with future polyfills
         "no-extra-label": "error",
         "no-floating-decimal": "error",
+        "no-implicit-coercion": ["error", {"allow": ["!!"]}],
         "no-implied-eval": "error",
         "no-invalid-this": "error",
         "no-iterator": "error",
-        "no-label-var": "error",
         "no-labels": "error",
         "no-lone-blocks": "error",
+        "no-multi-spaces": ["error", {"ignoreEOLComments": true}],
         "no-multi-str": "error",
         "no-new": "error",
         "no-new-func": "error",
@@ -108,42 +102,46 @@ module.exports = {
         "no-sequences": "error",
         "no-throw-literal": "error",
         "no-unmodified-loop-condition": "error",
+        "no-unused-vars": "off",  // Interface impls may not require all args
         "no-useless-call": "error",
+        "no-useless-catch": "error",
         "no-useless-concat": "error",
         "no-useless-return": "error",
         "no-void": "error",
-        "no-with": "error",
+        "no-warning-comments": "off",  // TODO and FIXME are fine
         "radix": ["error", "always"],
         "require-await": "error",
         "wrap-iife": ["error", "inside"],
-        // }}}
-
-        // Style rules we don't need: {{{
-        "class-methods-use-this": "off",  // causes issues when implementing an interface
-        "dot-notation": "off",  // We use bracket notation in tests on purpose
-        "eqeqeq": "off",  // Compiler handles type checking in advance
-        "guard-for-in": "off",
-        "no-div-regex": "off",  // Conflicts with no-useless-escape
-        "no-undef-init": "off",  // Sometimes necessary with hacky compiler casts
-        "no-undefined": "off",  // We use undefined in many places, legitimately
-        "no-unused-vars": "off",  // Interface impls may not require all args
-        "no-use-before-define": "off",  // Does not know when things are executed, false positives
-        "no-warning-comments": "off",  // TODO and FIXME are fine
-        "vars-on-top": "off",
         "yoda": ["error", "never"],
         // }}}
 
-        // Style rules that don't seem to be in the Google style config: {{{
+        // "Variables" rules: {{{
+        "no-label-var": "error",
+        "no-shadow-restricted-names": "error",
+        "no-undef-init": "off",  // Sometimes necessary with hacky compiler casts
+        "no-undefined": "off",  // We use undefined in many places, legitimately
+        "no-use-before-define": "off",  // Does not know when things are executed, false positives
+        // }}}
+
+        // "Stylistic Issues" rules: {{{
         "array-bracket-newline": ["error", "consistent"],
-        "arrow-spacing": "error",
+        "block-spacing": ["error", "always"],
+        "brace-style": ["error", "1tbs", { "allowSingleLine": true }],
         "lines-between-class-members": "error",
+        "new-parens": "error",
         "no-mixed-operators": ["error", {
           "groups": [["&", "|", "^", "~", "<<", ">>", ">>>", "&&", "||"]],
           "allowSamePrecedence": false,
         }],
-        "no-useless-constructor": "error",
+        "no-whitespace-before-property": "error",
         "operator-assignment": "error",
+        // }}}
+
+        // "ECMAScript 6" rules: {{{
+        "arrow-spacing": "error",
+        "no-useless-constructor": "error",
         "prefer-arrow-callback": "error",
+        "prefer-const": ["error", {"ignoreReadBeforeAssign": true}],
         // }}}
     },
     "overrides": [
