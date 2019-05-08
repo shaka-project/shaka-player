@@ -54,6 +54,7 @@ module.exports = {
         // }}}
 
         // Temporary Google style overrides while we get in compliance with the latest style guide {{{
+        "indent": "off",
         "prefer-spread": "off",
         "require-jsdoc": "off",
         // }}}
