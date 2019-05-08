@@ -1835,13 +1835,17 @@ describe('StreamingEngine', function() {
     });
 
     it('from post startup Stream setup', function() {
+      const expectedError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.HTTP_ERROR);
       alternateVideoStream1.createSegmentIndex.and.returnValue(
-          Promise.reject('FAKE_ERROR'));
+          Promise.reject(expectedError));
 
       onError.and.callFake(function(error) {
         expect(onInitialStreamsSetup).toHaveBeenCalled();
         expect(onStartupComplete).toHaveBeenCalled();
-        expect(error).toBe('FAKE_ERROR');
+        expect(error).toBe(expectedError);
       });
 
       // Here we go!
