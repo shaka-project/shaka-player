@@ -854,26 +854,26 @@ class ShakaDemoMain {
    * @param {ShakaDemoAssetInfo} asset
    */
   async loadAsset(asset) {
-    this.selectedAsset = asset;
-    const videoBar = document.getElementById('video-bar');
-    this.showNode_(videoBar);
-    this.closeError_();
-    this.video_.poster = ShakaDemoMain.mainPoster_;
-
-    // Scroll to the top of the page, so that if the page is scrolled down, the
-    // user won't need to manually scroll up to see the video.
-    videoBar.scrollIntoView({behavior: 'smooth', block: 'start'});
-
-    // The currently-selected asset changed, so update asset cards.
-    this.dispatchEventWithName_('shaka-main-selected-asset-changed');
-
-    await this.drmConfiguration_(asset);
-    this.controls_.getCastProxy().setAppData({'asset': asset});
-
-    const manifestUri = (asset.storedContent ?
-                         asset.storedContent.offlineUri :
-                         null) || asset.manifestUri;
     try {
+      this.selectedAsset = asset;
+      const videoBar = document.getElementById('video-bar');
+      this.showNode_(videoBar);
+      this.closeError_();
+      this.video_.poster = ShakaDemoMain.mainPoster_;
+
+      // Scroll to the top of the page, so that if the page is scrolled down,
+      // the user won't need to manually scroll up to see the video.
+      videoBar.scrollIntoView({behavior: 'smooth', block: 'start'});
+
+      // The currently-selected asset changed, so update asset cards.
+      this.dispatchEventWithName_('shaka-main-selected-asset-changed');
+
+      await this.drmConfiguration_(asset);
+      this.controls_.getCastProxy().setAppData({'asset': asset});
+
+      const manifestUri = (asset.storedContent ?
+                           asset.storedContent.offlineUri :
+                           null) || asset.manifestUri;
       await this.player_.load(manifestUri);
       // Now that something is loaded, enable controls.
       if (this.nativeControlsEnabled_) {
