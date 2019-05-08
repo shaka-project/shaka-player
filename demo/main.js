@@ -565,6 +565,13 @@ class ShakaDemoMain {
         }
       }
 
+      // See if it's a custom asset saved here.
+      for (const asset of shakaDemoCustom.assets()) {
+        if (asset.manifestUri == manifest) {
+          return asset;
+        }
+      }
+
       // Construct a new asset.
       const asset = new ShakaDemoAssetInfo(
         /* name= */ 'loaded asset',
