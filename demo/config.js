@@ -128,20 +128,20 @@ class ShakaDemoConfig {
       'HW_SECURE_DECODE',
       'HW_SECURE_ALL',
     ];
-    const commonDrmSystems = [
-      'com.widevine.alpha',
-      'com.microsoft.playready',
-      'com.apple.fps.1_0',
-      'com.adobe.primetime',
-      'org.w3.clearkey',
-    ];
     const addRobustnessField = (name, valueName) => {
       // All robustness fields of a given type are set at once.
       this.addDatalistInput_(name, robustnessSuggestions, (input) => {
         // Add in any common drmSystem not currently in advanced.
-        for (let drmSystem of commonDrmSystems) {
+        for (const drmSystem of ShakaDemoMain.commonDrmSystems) {
           if (!(drmSystem in advanced)) {
-            advanced[commonDrmSystems] = {};
+            advanced[drmSystem] = {
+              distinctiveIdentifierRequired: false,
+              persistentStateRequired: false,
+              videoRobustness: '',
+              audioRobustness: '',
+              serverCertificate: null,
+              individualizationServer: '',
+            };
           }
         }
         // Set the robustness.
@@ -151,6 +151,7 @@ class ShakaDemoConfig {
         shakaDemoMain.configure('drm.advanced', advanced);
         shakaDemoMain.remakeHash();
       });
+      goog.asserts.assert(advanced, 'Advanced config should exist!');
       const keySystem = Object.keys(advanced)[0];
       if (keySystem) {
         const currentRobustness = advanced[keySystem][valueName];

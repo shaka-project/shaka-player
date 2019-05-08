@@ -101,13 +101,6 @@ class ShakaDemoCustom {
     // An array of inputs which have validity checks which we care about.
     const inputsToCheck = [];
 
-    const commonDrmSystems = new Set([
-      'com.widevine.alpha',
-      'com.microsoft.playready',
-      'com.adobe.primetime',
-      'org.w3.clearkey',
-    ]);
-
     // The license server and drm system fields need to know each others
     // contents, and react to each others changes, to work.
     // To simplify things, this method picks out the process of setting license
@@ -120,7 +113,7 @@ class ShakaDemoCustom {
       if (licenseServerURL) {
         // Make a license server entry for every common DRM plugin.
         assetInProgress.licenseServers.clear();
-        for (const drmSystem of commonDrmSystems.values()) {
+        for (const drmSystem of ShakaDemoMain.commonDrmSystems) {
           assetInProgress.licenseServers.set(drmSystem, licenseServerURL);
         }
         if (customDRMSystem) {
@@ -204,7 +197,7 @@ class ShakaDemoCustom {
       customDrmSystemInput = input;
       const drmSystems = assetInProgress.licenseServers.keys();
       for (const drmSystem of drmSystems) {
-        if (!commonDrmSystems.has(drmSystem)) {
+        if (!ShakaDemoMain.commonDrmSystems.includes(drmSystem)) {
           input.value = drmSystem;
           break;
         }
