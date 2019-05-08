@@ -86,6 +86,7 @@ class ShakaDemoConfig {
     this.addMetaSection_();
     this.addLanguageSection_();
     this.addAbrSection_();
+    this.addOfflineSection_();
     this.addDrmSection_();
     this.addStreamingSection_();
     this.addManifestSection_();
@@ -167,6 +168,8 @@ class ShakaDemoConfig {
     const docLink = this.resolveExternLink_('.ManifestConfiguration');
     this.addSection_('Manifest', docLink)
         .addBoolInput_('Ignore DASH DRM Info', 'manifest.dash.ignoreDrmInfo')
+        .addBoolInput_('Auto-Correct DASH Drift',
+                       'manifest.dash.autoCorrectDrift')
         .addBoolInput_('Xlink Should Fail Gracefully',
                        'manifest.dash.xlinkFailGracefully')
         .addNumberInput_('Availability Window Override',
@@ -249,6 +252,14 @@ class ShakaDemoConfig {
   }
 
   /** @private */
+  addOfflineSection_() {
+    const docLink = this.resolveExternLink_('.OfflineConfiguration');
+    this.addSection_('Offline', docLink)
+        .addBoolInput_('Use Persistent Licenses',
+                       'offline.usePersistentLicense');
+  }
+
+  /** @private */
   addStreamingSection_() {
     const docLink = this.resolveExternLink_('.StreamingConfiguration');
     this.addSection_('Streaming', docLink)
@@ -261,6 +272,12 @@ class ShakaDemoConfig {
         .addNumberInput_('Rebuffering Goal', 'streaming.rebufferingGoal',
                          /* canBeDecimal = */ true)
         .addNumberInput_('Buffer Behind', 'streaming.bufferBehind',
+                         /* canBeDecimal = */ true)
+        .addNumberInput_('Safe Seek Offset', 'streaming.safeSeekOffset',
+                         /* canBeDecimal = */ true)
+        .addNumberInput_('Stall Threshold', 'streaming.stallThreshold',
+                         /* canBeDecimal = */ true)
+        .addNumberInput_('Safe Skip Distance', 'streaming.stallSkip',
                          /* canBeDecimal = */ true);
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
@@ -280,7 +297,8 @@ class ShakaDemoConfig {
         .addBoolInput_('Start At Segment Boundary',
                        'streaming.startAtSegmentBoundary')
         .addBoolInput_('Ignore Text Stream Failures',
-                       'streaming.ignoreTextStreamFailures');
+                       'streaming.ignoreTextStreamFailures')
+        .addBoolInput_('Stall Detector Enabled', 'streaming.stallEnabled');
     this.addRetrySection_('streaming', 'Streaming');
   }
 
@@ -368,7 +386,7 @@ class ShakaDemoConfig {
    * @private
    */
   resolveExternLink_(suffix) {
-    return '../docs/api/shakaExtern.html#' + suffix;
+    return '../docs/api/shaka.extern.html#' + suffix;
   }
 
   /**
