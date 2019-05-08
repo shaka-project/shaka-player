@@ -210,10 +210,6 @@ class ShakaDemoMain {
     });
     this.loadUILocale_(this.uiLocale_);
 
-    // Disable controls until something is loaded
-    this.controls_.setEnabledShakaControls(false);
-    this.controls_.setEnabledNativeControls(false);
-
     const drawerCloseButton = document.getElementById('drawer-close-button');
     drawerCloseButton.addEventListener('click', () => {
       const layout = document.getElementById('main-layout');
@@ -874,8 +870,7 @@ class ShakaDemoMain {
       const manifestUri = (asset.storedContent ?
                            asset.storedContent.offlineUri :
                            null) || asset.manifestUri;
-      await this.player_.load(manifestUri);
-      // Now that something is loaded, enable controls.
+      // Enable the correct set of controls before loading.
       if (this.nativeControlsEnabled_) {
         this.controls_.setEnabledShakaControls(false);
         this.controls_.setEnabledNativeControls(true);
@@ -883,6 +878,7 @@ class ShakaDemoMain {
         this.controls_.setEnabledShakaControls(true);
         this.controls_.setEnabledNativeControls(false);
       }
+      await this.player_.load(manifestUri);
       if (this.player_.isAudioOnly()) {
         this.video_.poster = ShakaDemoMain.audioOnlyPoster_;
       }
