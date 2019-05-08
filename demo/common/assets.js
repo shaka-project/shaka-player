@@ -199,6 +199,8 @@ shakaAssets.testAssets = [
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/angel_one.png',
       /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd',
       /* source= */ shakaAssets.Source.SHAKA)
+    .addDescription('A clip from a classic Star Trek TNG episode, presented in MPEG-DASH.') // eslint-disable-line max-len
+    .markAsFeatured('Angel One')
     .addFeature(shakaAssets.Feature.DASH)
     .addFeature(shakaAssets.Feature.MP4)
     .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
@@ -240,8 +242,6 @@ shakaAssets.testAssets = [
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/angel_one.png',
       /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/angel-one-hls/hls.m3u8',
       /* source= */ shakaAssets.Source.SHAKA)
-    .addDescription('A clip from a classic Star Trek TNG episode, presented in HLS.') // eslint-disable-line max-len
-    .markAsFeatured('Angel One')
     .addFeature(shakaAssets.Feature.HLS)
     .addFeature(shakaAssets.Feature.MP4)
     .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
@@ -435,8 +435,6 @@ shakaAssets.testAssets = [
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/shaka.png',
       /* manifestUri= */ 'https://storage.googleapis.com/shaka-live-assets/player-source.mpd',
       /* source= */ shakaAssets.Source.SHAKA)
-    .addDescription('A self-indulgent DASH livestream.')
-    .markAsFeatured('Shaka Player History')
     .addFeature(shakaAssets.Feature.DASH)
     .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
     .addFeature(shakaAssets.Feature.LIVE)
@@ -447,6 +445,8 @@ shakaAssets.testAssets = [
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/shaka.png',
       /* manifestUri= */ 'https://storage.googleapis.com/shaka-live-assets/player-source.m3u8',
       /* source= */ shakaAssets.Source.SHAKA)
+    .addDescription('A self-indulgent HLS livestream.')
+    .markAsFeatured('Shaka Player History')
     .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
     .addFeature(shakaAssets.Feature.HLS)
     .addFeature(shakaAssets.Feature.LIVE)
