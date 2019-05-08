@@ -656,11 +656,11 @@ shaka.ui.Controls.prototype.addControlsContainer_ = function() {
   this.controlsContainer_.classList.add('shaka-controls-container');
   this.videoContainer_.appendChild(this.controlsContainer_);
 
-  this.controlsContainer_.addEventListener('touchstart', (e) => {
+  this.eventManager_.listen(this.controlsContainer_, 'touchstart', (e) => {
     this.onContainerTouch_(e);
   }, {passive: false});
 
-  this.controlsContainer_.addEventListener('click', (e) => {
+  this.eventManager_.listen(this.controlsContainer_, 'click', (e) => {
     this.onContainerClick_(e);
   });
 };
@@ -757,7 +757,7 @@ shaka.ui.Controls.prototype.addControlsButtonPanel_ = function() {
 shaka.ui.Controls.prototype.addEventListeners_ = function() {
   // TODO: Convert adding event listers to the "() =>" form.
 
-  this.player_.addEventListener('buffering', () => {
+  this.eventManager_.listen(this.player_, 'buffering', () => {
     this.onBufferingStateChange_();
   });
   // Set the initial state, as well.
@@ -767,26 +767,26 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
   // for focused elements.
   this.eventManager_.listen(window, 'keydown', this.onKeyDown_.bind(this));
 
-  this.video_.addEventListener(
+  this.eventManager_.listen(this.video_,
       'play', this.onPlayStateChange_.bind(this));
-  this.video_.addEventListener(
+  this.eventManager_.listen(this.video_,
       'pause', this.onPlayStateChange_.bind(this));
 
   // Since videos go into a paused state at the end, Chrome and Edge both fire
   // the 'pause' event when a video ends.  IE 11 only fires the 'ended' event.
-  this.video_.addEventListener(
+  this.eventManager_.listen(this.video_,
       'ended', this.onPlayStateChange_.bind(this));
 
   if (this.seekBar_) {
-    this.seekBar_.addEventListener(
+    this.eventManager_.listen(this.seekBar_,
         'mousedown', this.onSeekStart_.bind(this));
-    this.seekBar_.addEventListener(
+    this.eventManager_.listen(this.seekBar_,
         'touchstart', this.onSeekStart_.bind(this), {passive: true});
-    this.seekBar_.addEventListener(
+    this.eventManager_.listen(this.seekBar_,
         'input', this.onSeekInput_.bind(this));
-    this.seekBar_.addEventListener(
+    this.eventManager_.listen(this.seekBar_,
         'touchend', this.onSeekEnd_.bind(this));
-    this.seekBar_.addEventListener(
+    this.eventManager_.listen(this.seekBar_,
         'mouseup', this.onSeekEnd_.bind(this));
   }
 
@@ -795,7 +795,7 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
       'shaka-no-propagation');
   for (let i = 0; i < noPropagationElements.length; i++) {
     let element = noPropagationElements[i];
-    element.addEventListener(
+    this.eventManager_.listen(element,
       'click', function(event) { event.stopPropagation(); });
   }
 
@@ -804,46 +804,47 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
       'shaka-show-controls-on-mouse-over');
   for (let i = 0; i < showControlsElements.length; i++) {
     let element = showControlsElements[i];
-    element.addEventListener(
+    this.eventManager_.listen(element,
       'mouseover', () => {
         this.overrideCssShowControls_ = true;
       });
 
-    element.addEventListener(
+    this.eventManager_.listen(element,
       'mouseleave', () => {
        this.overrideCssShowControls_ = false;
       });
   }
 
-  this.videoContainer_.addEventListener(
+  this.eventManager_.listen(this.videoContainer_,
       'mousemove', this.onMouseMove_.bind(this));
-  this.videoContainer_.addEventListener(
+  this.eventManager_.listen(this.videoContainer_,
       'touchmove', this.onMouseMove_.bind(this), {passive: true});
-  this.videoContainer_.addEventListener(
+  this.eventManager_.listen(this.videoContainer_,
       'touchend', this.onMouseMove_.bind(this), {passive: true});
-  this.videoContainer_.addEventListener(
+  this.eventManager_.listen(this.videoContainer_,
       'mouseleave', this.onMouseLeave_.bind(this));
 
   // Overflow menus are supposed to hide once you click elsewhere
   // on the video element. The code in onContainerClick_ ensures that.
   // However, clicks on controls panel don't propagate to the container,
   // so we have to explicitly hide the menus onclick here.
-  this.controlsButtonPanel_.addEventListener('click', () => {
+  this.eventManager_.listen(this.controlsButtonPanel_, 'click', () => {
     this.hideSettingsMenusTimer_.tickNow();
   });
 
-  this.castProxy_.addEventListener(
+  this.eventManager_.listen(this.castProxy_,
       'caststatuschanged', (e) => {
         this.onCastStatusChange_(e);
       });
 
-  this.videoContainer_.addEventListener('keyup', this.onKeyUp_.bind(this));
+  this.eventManager_.listen(this.videoContainer_,
+      'keyup', this.onKeyUp_.bind(this));
 
-  this.localization_.addEventListener(
+  this.eventManager_.listen(this.localization_,
       shaka.ui.Localization.LOCALE_UPDATED,
       (e) => this.updateLocalizedStrings_());
 
-  this.localization_.addEventListener(
+  this.eventManager_.listen(this.localization_,
       shaka.ui.Localization.LOCALE_CHANGED,
       (e) => this.updateLocalizedStrings_());
 };
