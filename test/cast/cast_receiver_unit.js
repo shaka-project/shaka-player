@@ -149,8 +149,8 @@ describe('CastReceiver', () => {
       receiver = new CastReceiver(
           mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
       expect(mockCanDisplayType).toHaveBeenCalled();
-      expect(mockPlayer.setMaxHardwareResolution).
-          toHaveBeenCalledWith(1920, 1080);
+      expect(mockPlayer.setMaxHardwareResolution)
+          .toHaveBeenCalledWith(1920, 1080);
     }));
 
     it('limits streams to 4k on Chromecast Ultra', checkAndRun(() => {
@@ -164,8 +164,8 @@ describe('CastReceiver', () => {
       receiver = new CastReceiver(
           mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
       expect(mockCanDisplayType).toHaveBeenCalled();
-      expect(mockPlayer.setMaxHardwareResolution).
-          toHaveBeenCalledWith(3840, 2160);
+      expect(mockPlayer.setMaxHardwareResolution)
+          .toHaveBeenCalledWith(3840, 2160);
     }));
 
     it('does not start polling', checkAndRun(() => {
@@ -553,10 +553,10 @@ describe('CastReceiver', () => {
 
       expect(mockVideo.volume).toBe(1);
       expect(mockVideo.muted).toBe(false);
-      expect(mockReceiverManager.setSystemVolumeLevel).
-          toHaveBeenCalledWith(0.5);
-      expect(mockReceiverManager.setSystemVolumeMuted).
-          toHaveBeenCalledWith(true);
+      expect(mockReceiverManager.setSystemVolumeLevel)
+          .toHaveBeenCalledWith(0.5);
+      expect(mockReceiverManager.setSystemVolumeMuted)
+          .toHaveBeenCalledWith(true);
     }));
   });
 

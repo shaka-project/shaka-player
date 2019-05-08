@@ -563,8 +563,8 @@ describe('MediaSourceEngine', () => {
       videoSourceBuffer.updateend();
       await appendInit;
 
-      expect(mockTextEngine.storeAndAppendClosedCaptions).not.
-          toHaveBeenCalled();
+      expect(mockTextEngine.storeAndAppendClosedCaptions).not
+          .toHaveBeenCalled();
       // Parse and append the closed captions embedded in video stream.
       const appendVideo = mediaSourceEngine.appendBuffer(
           ContentType.VIDEO, buffer, 0, Infinity, true);
@@ -595,8 +595,8 @@ describe('MediaSourceEngine', () => {
         videoSourceBuffer.updateend();
         await appendBuffer;
         expect(mockClosedCaptionParser.initSpy).not.toHaveBeenCalled();
-        expect(mockTextEngine.storeAndAppendClosedCaptions).not.
-            toHaveBeenCalled();
+        expect(mockTextEngine.storeAndAppendClosedCaptions).not
+            .toHaveBeenCalled();
       } finally {
         window['muxjs'] = originalMuxjs;
       }

@@ -698,12 +698,12 @@ describe('DrmEngine', () => {
 
       initAndAttach().then(() => {
         expect(mockMediaKeys.createSession.calls.count()).toBe(3);
-        expect(session1.generateRequest).
-            toHaveBeenCalledWith('cenc', initData1.buffer);
-        expect(session2.generateRequest).
-            toHaveBeenCalledWith('webm', initData2.buffer);
-        expect(session3.generateRequest).
-            toHaveBeenCalledWith('cenc', initData3.buffer);
+        expect(session1.generateRequest)
+            .toHaveBeenCalledWith('cenc', initData1.buffer);
+        expect(session2.generateRequest)
+            .toHaveBeenCalledWith('webm', initData2.buffer);
+        expect(session3.generateRequest)
+            .toHaveBeenCalledWith('cenc', initData3.buffer);
       }).catch(fail).then(done);
     });
 
@@ -725,8 +725,8 @@ describe('DrmEngine', () => {
 
       initAndAttach().then(() => {
         expect(mockMediaKeys.createSession.calls.count()).toBe(1);
-        expect(session1.generateRequest).
-            toHaveBeenCalledWith('cenc', initData1.buffer);
+        expect(session1.generateRequest)
+            .toHaveBeenCalledWith('cenc', initData1.buffer);
       }).catch(fail).then(done);
     });
 
@@ -754,11 +754,11 @@ describe('DrmEngine', () => {
       const Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
 
       expect(manifest.periods[0].variants[0].drmInfos.length).toBe(1);
-      expect(manifest.periods[0].variants[0].drmInfos[0].keySystem).
-          toBe('org.w3.clearkey');
+      expect(manifest.periods[0].variants[0].drmInfos[0].keySystem)
+          .toBe('org.w3.clearkey');
 
-      expect(session.generateRequest).
-          toHaveBeenCalledWith('keyids', jasmine.any(ArrayBuffer));
+      expect(session.generateRequest)
+          .toHaveBeenCalledWith('keyids', jasmine.any(ArrayBuffer));
 
       const initData = JSON.parse(shaka.util.StringUtils.fromUTF8(
           session.generateRequest.calls.argsFor(0)[1]));
@@ -855,10 +855,10 @@ describe('DrmEngine', () => {
             {initDataType: 'cenc', initData: initData2, keyId: null});
 
         expect(mockMediaKeys.createSession.calls.count()).toBe(2);
-        expect(session1.generateRequest).
-            toHaveBeenCalledWith('webm', initData1.buffer);
-        expect(session2.generateRequest).
-            toHaveBeenCalledWith('cenc', initData2.buffer);
+        expect(session1.generateRequest)
+            .toHaveBeenCalledWith('webm', initData1.buffer);
+        expect(session2.generateRequest)
+            .toHaveBeenCalledWith('cenc', initData2.buffer);
       });
 
       it('suppresses duplicate initDatas', async () => {
@@ -872,8 +872,8 @@ describe('DrmEngine', () => {
             {initDataType: 'cenc', initData: initData2, keyId: null});
 
         expect(mockMediaKeys.createSession.calls.count()).toBe(1);
-        expect(session1.generateRequest).
-            toHaveBeenCalledWith('webm', initData1.buffer);
+        expect(session1.generateRequest)
+            .toHaveBeenCalledWith('webm', initData1.buffer);
       });
 
       it('is ignored when init data is in DrmInfo', async () => {

@@ -77,8 +77,8 @@ describe('MediaSourceEngine', () => {
   }
 
   function append(type, segmentNumber) {
-    const segment = generators[type].
-        getSegment(segmentNumber, 0, Date.now() / 1000);
+    const segment = generators[type]
+        .getSegment(segmentNumber, 0, Date.now() / 1000);
     return mediaSourceEngine.appendBuffer(
         type, segment, null, null, /* hasClosedCaptions */ false);
   }
@@ -94,8 +94,8 @@ describe('MediaSourceEngine', () => {
   // The start time and end time should be valid for the segments with closed
   // captions.
   function appendWithClosedCaptions(type, segmentNumber) {
-    const segment = generators[type].
-        getSegment(segmentNumber, 0, Date.now() / 1000);
+    const segment = generators[type]
+        .getSegment(segmentNumber, 0, Date.now() / 1000);
     return mediaSourceEngine.appendBuffer(type, segment, /* startTime */ 0,
         /* endTime */ 2, /* hasClosedCaptions */ true);
   }

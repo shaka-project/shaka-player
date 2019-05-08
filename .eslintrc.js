@@ -48,7 +48,6 @@ module.exports = {
 
         // These could improve readability
         "complexity": "off",
-        "dot-location": "off",
         "no-negated-condition": "off",
         "no-shadow": "off",
         // }}}
@@ -83,6 +82,7 @@ module.exports = {
         "accessor-pairs": "error",
         "array-callback-return": "error",
         "consistent-return": "error",
+        "dot-location": ["error", "property"],
         "no-alert": "error",
         "no-caller": "error",
         "no-catch-shadow": "error",

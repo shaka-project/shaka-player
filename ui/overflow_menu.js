@@ -59,8 +59,8 @@ goog.require('shaka.util.Dom');
     this.createChildren_();
 
     /** @private {!NodeList.<!Element>} */
-    this.backToOverflowMenuButtons_ = this.controls.getVideoContainer().
-        getElementsByClassName('shaka-back-to-overflow-button');
+    this.backToOverflowMenuButtons_ = this.controls.getVideoContainer()
+        .getElementsByClassName('shaka-back-to-overflow-button');
 
 
     for (let i = 0; i < this.backToOverflowMenuButtons_.length; i++) {

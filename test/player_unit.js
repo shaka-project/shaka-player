@@ -116,8 +116,8 @@ describe('Player', () => {
       mediaSourceEngine = {
         init: jasmine.createSpy('init').and.returnValue(Promise.resolve()),
         open: jasmine.createSpy('open').and.returnValue(Promise.resolve()),
-        destroy: jasmine.createSpy('destroy').and.
-            returnValue(Promise.resolve()),
+        destroy: jasmine.createSpy('destroy').and
+            .returnValue(Promise.resolve()),
         setUseEmbeddedText: jasmine.createSpy('setUseEmbeddedText'),
         getUseEmbeddedText: jasmine.createSpy('getUseEmbeddedText'),
         getTextDisplayer: () => textDisplayer,
