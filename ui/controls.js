@@ -643,11 +643,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.controlsContainer_.classList.add('shaka-controls-container');
     this.videoContainer_.appendChild(this.controlsContainer_);
 
-    this.controlsContainer_.addEventListener('touchstart', (e) => {
+    this.eventManager_.listen(this.controlsContainer_, 'touchstart', (e) => {
       this.onContainerTouch_(e);
     }, {passive: false});
 
-    this.controlsContainer_.addEventListener('click', () => {
+    this.eventManager_.listen(this.controlsContainer_, 'click', () => {
       this.onContainerClick_();
     });
   }
@@ -745,7 +745,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
  * @private
  */
   addEventListeners_() {
-    this.player_.addEventListener('buffering', () => {
+    this.eventManager_.listen(this.player_, 'buffering', () => {
       this.onBufferingStateChange_();
     });
     // Set the initial state, as well.
@@ -755,38 +755,38 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // for focused elements.
     this.eventManager_.listen(window, 'keydown', (e) => this.onKeyDown_(e));
 
-    this.video_.addEventListener('play', () => {
+    this.eventManager_.listen(this.video_, 'play', () => {
       this.onPlayStateChange_();
     });
 
-    this.video_.addEventListener('pause', () => {
+    this.eventManager_.listen(this.video_, 'pause', () => {
       this.onPlayStateChange_();
     });
 
     // Since videos go into a paused state at the end, Chrome and Edge both fire
     // the 'pause' event when a video ends.  IE 11 only fires the 'ended' event.
-    this.video_.addEventListener('ended', () => {
+    this.eventManager_.listen(this.video_, 'ended', () => {
       this.onPlayStateChange_();
     });
 
     if (this.seekBar_) {
-      this.seekBar_.addEventListener('mousedown', () => {
+      this.eventManager_.listen(this.seekBar_, 'mousedown', () => {
         this.onSeekStart_();
       });
 
-      this.seekBar_.addEventListener('touchstart', () => {
+      this.eventManager_.listen(this.seekBar_, 'touchstart', () => {
         this.onSeekStart_();
       }, {passive: true});
 
-      this.seekBar_.addEventListener('input', () => {
+      this.eventManager_.listen(this.seekBar_, 'input', () => {
         this.onSeekInput_();
       });
 
-      this.seekBar_.addEventListener('touchend', () => {
+      this.eventManager_.listen(this.seekBar_, 'touchend', () => {
         this.onSeekEnd_();
       });
 
-      this.seekBar_.addEventListener('mouseup', () => {
+      this.eventManager_.listen(this.seekBar_, 'mouseup', () => {
         this.onSeekEnd_();
       });
     }
@@ -795,7 +795,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     const noPropagationElements = this.videoContainer_.getElementsByClassName(
         'shaka-no-propagation');
     for (const element of noPropagationElements) {
-      element.addEventListener('click', (event) => {
+      this.eventManager_.listen(element, 'click', (event) => {
         event.stopPropagation();
       });
     }
@@ -804,28 +804,28 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     const showControlsElements = this.videoContainer_.getElementsByClassName(
         'shaka-show-controls-on-mouse-over');
     for (const element of showControlsElements) {
-      element.addEventListener('mouseover', () => {
+      this.eventManager_.listen(element, 'mouseover', () => {
         this.overrideCssShowControls_ = true;
       });
 
-      element.addEventListener('mouseleave', () => {
+      this.eventManager_.listen(element, 'mouseleave', () => {
         this.overrideCssShowControls_ = false;
       });
     }
 
-    this.videoContainer_.addEventListener('mousemove', (e) => {
+    this.eventManager_.listen(this.videoContainer_, 'mousemove', (e) => {
       this.onMouseMove_(e);
     });
 
-    this.videoContainer_.addEventListener('touchmove', (e) => {
+    this.eventManager_.listen(this.videoContainer_, 'touchmove', (e) => {
       this.onMouseMove_(e);
     }, {passive: true});
 
-    this.videoContainer_.addEventListener('touchend', (e) => {
+    this.eventManager_.listen(this.videoContainer_, 'touchend', (e) => {
       this.onMouseMove_(e);
     }, {passive: true});
 
-    this.videoContainer_.addEventListener('mouseleave', () => {
+    this.eventManager_.listen(this.videoContainer_, 'mouseleave', () => {
       this.onMouseLeave_();
     });
 
@@ -833,23 +833,23 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // on the video element. The code in onContainerClick_ ensures that.
     // However, clicks on controls panel don't propagate to the container,
     // so we have to explicitly hide the menus onclick here.
-    this.controlsButtonPanel_.addEventListener('click', () => {
+    this.eventManager_.listen(this.controlsButtonPanel_, 'click', () => {
       this.hideSettingsMenus();
     });
 
-    this.castProxy_.addEventListener('caststatuschanged', () => {
+    this.eventManager_.listen(this.castProxy_, 'caststatuschanged', () => {
       this.onCastStatusChange_();
     });
 
-    this.videoContainer_.addEventListener('keyup', (e) => {
+    this.eventManager_.listen(this.videoContainer_, 'keyup', (e) => {
       this.onKeyUp_(e);
     });
 
-    this.localization_.addEventListener(
+    this.eventManager_.listen(this.localization_,
         shaka.ui.Localization.LOCALE_UPDATED,
         (e) => this.updateLocalizedStrings_());
 
-    this.localization_.addEventListener(
+    this.eventManager_.listen(this.localization_,
         shaka.ui.Localization.LOCALE_CHANGED,
         (e) => this.updateLocalizedStrings_());
   }
@@ -1341,8 +1341,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // Enable blue outline for focused elements for keyboard
       // navigation.
       this.controlsContainer_.classList.add('shaka-keyboard-navigation');
-      this.eventManager_.listen(
-          window, 'mousedown', () => this.onMouseDown_());
+      this.eventManager_.listen(window, 'mousedown', () => this.onMouseDown_());
     }
 
     // If escape key was pressed, close any open settings menus.

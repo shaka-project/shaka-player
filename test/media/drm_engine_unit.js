@@ -805,7 +805,7 @@ describe('DrmEngine', () => {
       it('is listened for', async () => {
         await initAndAttach();
         expect(mockVideo.addEventListener).toHaveBeenCalledWith(
-            'encrypted', jasmine.any(Function), false);
+            'encrypted', jasmine.any(Function), jasmine.any(Object));
       });
 
       it('triggers the creation of a session', async () => {
@@ -900,7 +900,7 @@ describe('DrmEngine', () => {
             {initDataType: 'webm', initData: initData, keyId: null});
 
         expect(session1.addEventListener).toHaveBeenCalledWith(
-            'message', jasmine.any(Function), false);
+            'message', jasmine.any(Function), jasmine.any(Object));
       });
 
       it('triggers a license request', async () => {
@@ -1003,7 +1003,7 @@ describe('DrmEngine', () => {
             {initDataType: 'webm', initData: initData, keyId: null});
 
         expect(session1.addEventListener).toHaveBeenCalledWith(
-            'keystatuseschange', jasmine.any(Function), false);
+            'keystatuseschange', jasmine.any(Function), jasmine.any(Object));
       });
 
       it('triggers callback', async () => {
