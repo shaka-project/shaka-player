@@ -39,9 +39,9 @@ module.exports = {
         // Things we should probably fix, but in stages in multiple commits: {{{
 
         // These could catch real bugs
-        "consistent-return": "off",
         "default-case": "off",
-        "no-extra-bind": "off",
+        // TODO: Enable no-loop-func in next eslint release.  We can't use it
+        // now since it doesn't allow capturing "const" variables, which is safe
         "no-loop-func": "off",
         "no-unused-expressions": "off",  // Conflicts with some Closure declarations
         "prefer-promise-reject-errors": "off",
@@ -82,6 +82,7 @@ module.exports = {
         // "Best practices" rules we should be able to pass, but are not part of "eslint:recommended": {{{
         "accessor-pairs": "error",
         "array-callback-return": "error",
+        "consistent-return": "error",
         "no-alert": "error",
         "no-caller": "error",
         "no-catch-shadow": "error",

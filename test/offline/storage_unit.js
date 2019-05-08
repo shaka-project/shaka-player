@@ -184,7 +184,7 @@ describe('Storage', () => {
           }));
         });
 
-        return Promise.reject('Expected drm to throw OFFLINE_SESSION_REMOVED');
+        throw new Error('Expected drm to throw OFFLINE_SESSION_REMOVED');
       } catch (e) {
         expect(e).toBeTruthy();
         expect(e.code).toBe(shaka.util.Error.Code.OFFLINE_SESSION_REMOVED);
@@ -271,7 +271,7 @@ describe('Storage', () => {
           }));
         });
 
-        return Promise.reject('Expected drm to throw OFFLINE_SESSION_REMOVED');
+        throw new Error('Expected drm to throw OFFLINE_SESSION_REMOVED');
       } catch (e) {
         expect(e).toBeTruthy();
         expect(e.code).toBe(shaka.util.Error.Code.OFFLINE_SESSION_REMOVED);
@@ -1545,17 +1545,17 @@ describe('Storage', () => {
 
       if (!widevineSupport) {
         pending('Widevine is not supported on this platform');
-        return;
+        return null;
       }
 
       if (!widevineSupport.persistentState) {
         pending('Widevine persistent state is not supported on this platform');
-        return;
+        return null;
       }
 
       if (!storageSupport) {
         pending('Storage is not supported on this platform.');
-        return;
+        return null;
       }
 
       return test();

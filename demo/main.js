@@ -733,6 +733,7 @@ class ShakaDemoMain {
         return objOn[split[0]];
       }
     }
+    return undefined;
   }
 
   /**

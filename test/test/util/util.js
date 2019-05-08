@@ -218,6 +218,7 @@ shaka.test.Util.compareReferences = function(first, second) {
     return first.startByte == second.startByte &&
         first.endByte == second.endByte;
   }
+  return undefined;
 };
 
 

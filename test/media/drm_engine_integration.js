@@ -220,6 +220,7 @@ describe('DrmEngine', () => {
               return requestComplete;
             } else {
               // This was probably a PlayReady persistent license.
+              return null;
             }
           }).then(() => {
             // Some platforms (notably 2017 Tizen TVs) do not fire key status
