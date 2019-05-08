@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('Mp4SegmentIndexParser', function() {
+describe('Mp4SegmentIndexParser', () => {
   const indexSegmentUri = '/base/test/test/assets/index-segment.mp4';
   const mediaSegmentUri = '/base/test/test/assets/sintel-audio-segment.mp4';
 
@@ -31,7 +31,7 @@ describe('Mp4SegmentIndexParser', function() {
     mediaSegment = responses[1];
   });
 
-  it('rejects a non-index segment ', function() {
+  it('rejects a non-index segment ', () => {
     const error = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.MEDIA,
@@ -45,7 +45,7 @@ describe('Mp4SegmentIndexParser', function() {
     }
   });
 
-  it('parses index segment ', function() {
+  it('parses index segment ', () => {
     // eslint-disable-next-line new-cap
     const result = shaka.media.Mp4SegmentIndexParser(indexSegment, 0, [], 0);
     const references =
@@ -68,7 +68,7 @@ describe('Mp4SegmentIndexParser', function() {
     }
   });
 
-  it('takes a scaled presentationTimeOffset in seconds', function() {
+  it('takes a scaled presentationTimeOffset in seconds', () => {
     // eslint-disable-next-line new-cap
     const result = shaka.media.Mp4SegmentIndexParser(indexSegment, 0, [], 2);
     const references =

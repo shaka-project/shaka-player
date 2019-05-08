@@ -15,20 +15,20 @@
  * limitations under the License.
  */
 
-describe('Iterables', function() {
+describe('Iterables', () => {
   const Iterables = shaka.util.Iterables;
 
-  describe('map', function() {
+  describe('map', () => {
     const map = Iterables.map;
 
-    it('works with no items', function() {
+    it('works with no items', () => {
       const input = new Set([]);
       const output = Array.from(map(input, (x) => -x));
 
       expect(output).toEqual([]);
     });
 
-    it('works with items', function() {
+    it('works with items', () => {
       const input = new Set([1, 2, 3]);
       const output = Array.from(map(input, (x) => -x));
 
@@ -36,45 +36,45 @@ describe('Iterables', function() {
     });
   });
 
-  describe('every', function() {
+  describe('every', () => {
     const every = Iterables.every;
 
-    it('works with no items', function() {
+    it('works with no items', () => {
       const input = new Set([]);
       expect(every(input, (x) => x >= 0)).toBeTruthy();
     });
 
-    it('works with items', function() {
+    it('works with items', () => {
       const input = new Set([0, 1, 2, 3]);
       expect(every(input, (x) => x >= 0)).toBeTruthy();
       expect(every(input, (x) => x > 0)).toBeFalsy();
     });
   });
 
-  describe('some', function() {
+  describe('some', () => {
     const some = Iterables.some;
 
-    it('works with no items', function() {
+    it('works with no items', () => {
       const input = new Set([]);
       expect(some(input, (x) => x >= 2)).toBeFalsy();
     });
 
-    it('works with items', function() {
+    it('works with items', () => {
       const input = new Set([0, 1, 2, 3]);
       expect(some(input, (x) => x > 2)).toBeTruthy();
       expect(some(input, (x) => x < 0)).toBeFalsy();
     });
   });
 
-  describe('filter', function() {
+  describe('filter', () => {
     const filter = Iterables.filter;
 
-    it('works with no items', function() {
+    it('works with no items', () => {
       const input = new Set([]);
       expect(filter(input, (x) => x >= 2)).toEqual([]);
     });
 
-    it('works with items', function() {
+    it('works with items', () => {
       const input = new Set([0, 1, 2, 3]);
       // Everything
       expect(filter(input, (x) => x < 7)).toEqual([0, 1, 2, 3]);

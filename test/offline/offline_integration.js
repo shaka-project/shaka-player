@@ -25,16 +25,16 @@ describe('Offline', () => {
   /** @type {!shaka.util.EventManager} */
   let eventManager;
 
-  beforeAll(function() {
+  beforeAll(() => {
     video = shaka.util.Dom.createVideoElement();
     document.body.appendChild(video);
   });
 
-  afterAll(function() {
+  afterAll(() => {
     document.body.removeChild(video);
   });
 
-  beforeEach(async function() {
+  beforeEach(async () => {
     player = new shaka.Player(video);
     player.addEventListener('error', fail);
 
@@ -47,7 +47,7 @@ describe('Offline', () => {
     }
   });
 
-  afterEach(async function() {
+  afterEach(async () => {
     eventManager.release();
 
     if (storage) {
@@ -64,7 +64,7 @@ describe('Offline', () => {
     }
   });
 
-  it('stores, plays, and deletes clear content', async function() {
+  it('stores, plays, and deletes clear content', async () => {
     if (!supportsStorage()) {
       pending('Storage is not supported.');
       return;
@@ -88,7 +88,7 @@ describe('Offline', () => {
   // TODO: Add a PlayReady version once Edge supports offline.
   drmIt(
       'stores, plays, and deletes protected content with a persistent license',
-      async function() {
+      async () => {
         if (!supportsStorage()) {
           pending('Storage is not supported on this platform.');
           return;
@@ -128,7 +128,7 @@ describe('Offline', () => {
 
   drmIt(
       'stores, plays, and deletes protected content with a temporary license',
-      async function() {
+      async () => {
         if (!supportsStorage()) {
           pending('Storage is not supported.');
           return;

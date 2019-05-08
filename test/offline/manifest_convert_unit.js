@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-describe('ManifestConverter', function() {
-  describe('createVariants', function() {
+describe('ManifestConverter', () => {
+  describe('createVariants', () => {
     const audioType = 'audio';
     const videoType = 'video';
 
-    it('will create variants with variant ids', function() {
+    it('will create variants with variant ids', () => {
       /** @type {!Array.<shaka.extern.StreamDB>} */
       const audios = [
         createStreamDB(0, audioType, [0]),
@@ -45,7 +45,7 @@ describe('ManifestConverter', function() {
       expect(variants.get(1).video.id).toBe(3);
     });
 
-    it('will create variants when there is only audio', function() {
+    it('will create variants when there is only audio', () => {
       /** @type {!Array.<shaka.extern.StreamDB>} */
       const audios = [
         createStreamDB(0, audioType, [0]),
@@ -59,7 +59,7 @@ describe('ManifestConverter', function() {
       expect(variants.size).toBe(2);
     });
 
-    it('will create variants when there is only video', function() {
+    it('will create variants when there is only video', () => {
       /** @type {!Array.<shaka.extern.StreamDB>} */
       const audios = [];
       /** @type {!Array.<shaka.extern.StreamDB>} */
@@ -74,8 +74,8 @@ describe('ManifestConverter', function() {
     });
   }); // describe('createVariants')
 
-  describe('fromPeriodDB', function() {
-    it('will reconstruct Periods correctly', function() {
+  describe('fromPeriodDB', () => {
+    it('will reconstruct Periods correctly', () => {
       /** @type {shaka.extern.PeriodDB} */
       const periodDb = {
         startTime: 60,
@@ -102,7 +102,7 @@ describe('ManifestConverter', function() {
       verifyStream(variant.audio, periodDb.streams[1]);
     });
 
-    it('supports video-only content', function() {
+    it('supports video-only content', () => {
       /** @type {shaka.extern.PeriodDB} */
       const periodDb = {
         startTime: 60,
@@ -118,7 +118,7 @@ describe('ManifestConverter', function() {
       expect(period.variants[0].video).toBeTruthy();
     });
 
-    it('supports audio-only content', function() {
+    it('supports audio-only content', () => {
       /** @type {shaka.extern.PeriodDB} */
       const periodDb = {
         startTime: 60,
@@ -134,7 +134,7 @@ describe('ManifestConverter', function() {
       expect(period.variants[0].video).toBe(null);
     });
 
-    it('supports text streams', function() {
+    it('supports text streams', () => {
       /** @type {shaka.extern.PeriodDB} */
       const periodDb = {
         startTime: 60,
@@ -154,7 +154,7 @@ describe('ManifestConverter', function() {
       verifyStream(period.textStreams[0], periodDb.streams[1]);
     });
 
-    it('combines Variants according to variantIds field', function() {
+    it('combines Variants according to variantIds field', () => {
       const audio1 = 0;
       const audio2 = 1;
       const video1 = 2;
@@ -420,7 +420,7 @@ describe('ManifestConverter', function() {
 
     // Assume that we don't have to call createSegmentIndex.
 
-    streamDb.segments.forEach(function(segmentDb, i) {
+    streamDb.segments.forEach((segmentDb, i) => {
       const uri = shaka.offline.OfflineUri.segment(
           'mechanism', 'cell', segmentDb.dataKey);
 
@@ -449,7 +449,7 @@ describe('ManifestConverter', function() {
     /** @type {?shaka.extern.Variant} */
     let found = null;
 
-    variants.forEach(function(variant) {
+    variants.forEach((variant) => {
       /** @type {?shaka.extern.Stream} */
       const audio = variant.audio;
       /** @type {?shaka.extern.Stream} */

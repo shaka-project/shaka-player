@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-describe('XmlUtils', function() {
+describe('XmlUtils', () => {
   // A number that cannot be represented as a Javascript number.
   const HUGE_NUMBER_STRING = new Array(500).join('7');
 
   const XmlUtils = shaka.util.XmlUtils;
 
-  describe('findChild', function() {
-    it('finds a child node', function() {
+  describe('findChild', () => {
+    it('finds a child node', () => {
       const xmlString = [
         '<?xml version="1.0"?>',
         '<Root>',
@@ -39,7 +39,7 @@ describe('XmlUtils', function() {
       expect(XmlUtils.findChild(root, 'DoesNotExist')).toBeNull();
     });
 
-    it('handles duplicate child nodes', function() {
+    it('handles duplicate child nodes', () => {
       const xmlString = [
         '<?xml version="1.0"?>',
         '<Root>',
@@ -57,7 +57,7 @@ describe('XmlUtils', function() {
     });
   });
 
-  it('findChildren', function() {
+  it('findChildren', () => {
     const xmlString = [
       '<?xml version="1.0"?>',
       '<Root>',
@@ -79,8 +79,8 @@ describe('XmlUtils', function() {
     expect(children.length).toBe(0);
   });
 
-  describe('getContents', function() {
-    it('returns node contents', function() {
+  describe('getContents', () => {
+    it('returns node contents', () => {
       const xmlString = [
         '<?xml version="1.0"?>',
         '<Root>',
@@ -95,7 +95,7 @@ describe('XmlUtils', function() {
       expect(XmlUtils.getContents(root)).toBe('foo bar');
     });
 
-    it('handles empty node contents', function() {
+    it('handles empty node contents', () => {
       const xmlString = [
         '<?xml version="1.0"?>',
         '<Root>',
@@ -109,7 +109,7 @@ describe('XmlUtils', function() {
       expect(XmlUtils.getContents(root)).toBe('');
     });
 
-    it('handles null node contents', function() {
+    it('handles null node contents', () => {
       const xmlString = [
         '<?xml version="1.0"?>',
         '<Root>',
@@ -121,7 +121,7 @@ describe('XmlUtils', function() {
       expect(XmlUtils.getContents(xml)).toBeNull();
     });
 
-    it('handles CDATA sections', function() {
+    it('handles CDATA sections', () => {
       const xmlString = [
         '<?xml version="1.0"?>',
         '<Root>',
@@ -137,11 +137,11 @@ describe('XmlUtils', function() {
     });
   });
 
-  describe('parseAttr', function() {
+  describe('parseAttr', () => {
     /** @type {!Document} */
     let xml;
 
-    beforeEach(function() {
+    beforeEach(() => {
       const xmlString = [
         '<?xml version="1.0"?>',
         '<Root a="2-7" b="-5" c="">',
@@ -151,7 +151,7 @@ describe('XmlUtils', function() {
           new DOMParser().parseFromString(xmlString, 'application/xml'));
     });
 
-    it('delegates to parser function', function() {
+    it('delegates to parser function', () => {
       const root = XmlUtils.findChild(xml, 'Root');
       goog.asserts.assert(root, 'findChild should find element');
       expect(XmlUtils.parseAttr(root, 'a', XmlUtils.parseRange)).toEqual(
@@ -161,14 +161,14 @@ describe('XmlUtils', function() {
       expect(XmlUtils.parseAttr(root, 'd', XmlUtils.parseInt)).toBeNull();
     });
 
-    it('supports default values', function() {
+    it('supports default values', () => {
       const root = XmlUtils.findChild(xml, 'Root');
       goog.asserts.assert(root, 'findChild should find element');
       expect(XmlUtils.parseAttr(root, 'd', XmlUtils.parseInt, 9)).toBe(9);
     });
   });
 
-  it('parseDate', function() {
+  it('parseDate', () => {
     const parseDate = shaka.util.XmlUtils.parseDate;
 
     // Should be parsed as UTC independent of local timezone.
@@ -181,7 +181,7 @@ describe('XmlUtils', function() {
     expect(parseDate('')).toBeNull();
   });
 
-  it('parseDuration', function() {
+  it('parseDuration', () => {
     const parseDuration = shaka.util.XmlUtils.parseDuration;
 
     // No time.
@@ -266,7 +266,7 @@ describe('XmlUtils', function() {
     expect(parseDuration('PT' + HUGE_NUMBER_STRING + 'S')).toBeNull();
   });
 
-  it('parseRange', function() {
+  it('parseRange', () => {
     const parseRange = shaka.util.XmlUtils.parseRange;
 
     expect(parseRange('0-0')).toEqual({start: 0, end: 0});
@@ -289,7 +289,7 @@ describe('XmlUtils', function() {
     expect(parseRange('1-' + HUGE_NUMBER_STRING)).toBeNull();
   });
 
-  it('parseInt', function() {
+  it('parseInt', () => {
     const parseInt = shaka.util.XmlUtils.parseInt;
 
     expect(parseInt('0')).toBe(0);
@@ -314,7 +314,7 @@ describe('XmlUtils', function() {
     expect(parseInt('-' + HUGE_NUMBER_STRING)).toBeNull();
   });
 
-  it('parsePositiveInt', function() {
+  it('parsePositiveInt', () => {
     const parsePositiveInt = shaka.util.XmlUtils.parsePositiveInt;
 
     expect(parsePositiveInt('0')).toBeNull();
@@ -339,7 +339,7 @@ describe('XmlUtils', function() {
     expect(parsePositiveInt('-' + HUGE_NUMBER_STRING)).toBeNull();
   });
 
-  it('parseNonNegativeInt', function() {
+  it('parseNonNegativeInt', () => {
     const parseNonNegativeInt = shaka.util.XmlUtils.parseNonNegativeInt;
 
     expect(parseNonNegativeInt('0')).toBe(0);
@@ -364,7 +364,7 @@ describe('XmlUtils', function() {
     expect(parseNonNegativeInt('-' + HUGE_NUMBER_STRING)).toBeNull();
   });
 
-  it('parseFloat', function() {
+  it('parseFloat', () => {
     const parseFloat = shaka.util.XmlUtils.parseFloat;
 
     expect(parseFloat('0')).toBe(0);

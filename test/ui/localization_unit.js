@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('Localization', function() {
+describe('Localization', () => {
   const Localization = shaka.ui.Localization;
 
   // https://bit.ly/2PbzxlD
@@ -31,10 +31,10 @@ describe('Localization', function() {
   const HALFLING_RIVER = 'halfling-RIVER';
   const HALFLING_SHIRE = 'halfling-SHIRE';
 
-  describe('insert', function() {
+  describe('insert', () => {
     const EN_US = 'en-US';
 
-    it('can add new data', function() {
+    it('can add new data', () => {
       /** @type {!shaka.ui.Localization} */
       const localization = new Localization(EN_US);
       localization.insert(EN_US, new Map([
@@ -46,7 +46,7 @@ describe('Localization', function() {
       expect(localization.resolve('good-bye')).toBe('cheerio');
     });
 
-    it('can replace old data when adding new data', function() {
+    it('can replace old data when adding new data', () => {
       /** @type {!shaka.ui.Localization} */
       const localization = new Localization(EN_US);
       localization.insert(EN_US, new Map([
@@ -67,7 +67,7 @@ describe('Localization', function() {
       expect(localization.resolve('thank-you')).toBe('thank-you');
     });
 
-    it('can keep old data when adding new', function() {
+    it('can keep old data when adding new', () => {
       const USE_OLD = Localization.ConflictResolution.USE_OLD;
 
       /** @type {!shaka.ui.Localization} */
@@ -195,8 +195,8 @@ describe('Localization', function() {
     });
   });
 
-  describe('unknown locales event', function() {
-    it('fires when we change to a locale we have not loaded', function() {
+  describe('unknown locales event', () => {
+    it('fires when we change to a locale we have not loaded', () => {
       const events = [];
 
       const localization = new Localization(/* fallback */ HALFLING_COMMON);
@@ -210,7 +210,7 @@ describe('Localization', function() {
     });
 
 
-    it('will not fire after we add the locale', function() {
+    it('will not fire after we add the locale', () => {
       const events = [];
 
       const localization = new Localization(/* fallback */ HALFLING_COMMON);
@@ -242,7 +242,7 @@ describe('Localization', function() {
     });
   });
 
-  describe('unknown localization event', function() {
+  describe('unknown localization event', () => {
     const HOW_ARE_YOU = 'how are you';
 
     const HALFLING_COMMON_MAP = new Map().set(
@@ -259,7 +259,7 @@ describe('Localization', function() {
     /** @type {!shaka.ui.Localization} */
     let localization;
 
-    beforeEach(function() {
+    beforeEach(() => {
       localization = new shaka.ui.Localization(HALFLING_COMMON);
 
       // Insert every locale into the system but leave them empty. Each test
@@ -272,7 +272,7 @@ describe('Localization', function() {
       localization.insert(HALFLING_SHIRE, emptyMap);
     });
 
-    it('will not fire when key is found in preferred', function() {
+    it('will not fire when key is found in preferred', () => {
       localization.insert(DWARFISH_NORTH, DWARFISH_NORTH_MAP);
       localization.changeLocale([DWARFISH_NORTH]);
 
@@ -285,7 +285,7 @@ describe('Localization', function() {
       expect(events.length).toBe(0);
     });
 
-    it('will not fire when key is found in base', function() {
+    it('will not fire when key is found in base', () => {
       localization.insert(DWARFISH, DWARFISH_MAP);
       localization.changeLocale([DWARFISH_NORTH]);
 
@@ -298,7 +298,7 @@ describe('Localization', function() {
       expect(events.length).toBe(0);
     });
 
-    it('will not fire when key is found in sibling', function() {
+    it('will not fire when key is found in sibling', () => {
       localization.insert(DWARFISH_SOUTH, DWARFISH_SOUTH_MAP);
       localization.changeLocale([DWARFISH_NORTH]);
 
@@ -311,7 +311,7 @@ describe('Localization', function() {
       expect(events.length).toBe(0);
     });
 
-    it('will not fire when key is found in fallback', function() {
+    it('will not fire when key is found in fallback', () => {
       localization.insert(HALFLING_COMMON, HALFLING_COMMON_MAP);
       localization.changeLocale([DWARFISH_NORTH]);
 
@@ -324,7 +324,7 @@ describe('Localization', function() {
       expect(events.length).toBe(0);
     });
 
-    it('fires when key is not found', function() {
+    it('fires when key is not found', () => {
       localization.changeLocale([DWARFISH_NORTH]);
 
       const events = [];
@@ -340,7 +340,7 @@ describe('Localization', function() {
     // here is that the entry can be found in a locale that is not part of
     // search.
     it('fires when key is not found in fallback, siblings, base, or preferred',
-        function() {
+        () => {
           localization.insert(HALFLING_SHIRE, HALFLING_SHIRE_MAP);
           localization.changeLocale([DWARFISH_NORTH]);
 
@@ -358,9 +358,9 @@ describe('Localization', function() {
   // The "missing localizations event" is fired when all preferred locales do
   // not have the requested localization but a related locale does have the
   // requested localization
-  describe('missing localizations event', function() {
+  describe('missing localizations event', () => {
     it('fires when key/value is missing from preferred but found in fallback',
-        function() {
+        () => {
           // Initialize the localization system so that we have an entry for
           // "hello" in our fallback, but not in our preferred locale.
           const localization = new Localization(HALFLING_COMMON);
@@ -386,7 +386,7 @@ describe('Localization', function() {
         });
 
     it('fires when key/value is missing from preferred but found in base',
-        function() {
+        () => {
           // Initialize the localization system so that we have an entry for
           // "Best Wishes" in our base language, but not in our preferred
           // locale.
@@ -413,7 +413,7 @@ describe('Localization', function() {
         });
 
     it('fires when key/value is missing from preferred but found in sibling',
-        function() {
+        () => {
           // Initialize the localization system so that we have an entry for
           // "Do you understand" in a language that shares a base language with
           // our preferred locale, but not in our preferred locale.
@@ -440,7 +440,7 @@ describe('Localization', function() {
         });
 
     it('fires when key/value is missing from some preferred languages',
-        function() {
+        () => {
           // Initialize the localization system so that we have an entry for
           // "may your forge burn bright" in our second preference but not our
           // first.
@@ -467,8 +467,8 @@ describe('Localization', function() {
         });
   });
 
-  describe('locale changed event', function() {
-    it('fires when locale changes', function() {
+  describe('locale changed event', () => {
+    it('fires when locale changes', () => {
       const localization = new Localization(HALFLING_COMMON);
 
       const events = [];
@@ -483,7 +483,7 @@ describe('Localization', function() {
       expect(events.length).toBe(2);
     });
 
-    it('fires when changing to the same locale', function() {
+    it('fires when changing to the same locale', () => {
       const localization = new Localization(HALFLING_COMMON);
 
       const events = [];

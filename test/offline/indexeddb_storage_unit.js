@@ -16,7 +16,7 @@
  */
 
 
-describe('IndexeddbStorageCell', function() {
+describe('IndexeddbStorageCell', () => {
   const IndexedDBUtils = shaka.test.IndexedDBUtils;
   const OfflineUtils = shaka.test.OfflineUtils;
 
@@ -33,12 +33,12 @@ describe('IndexeddbStorageCell', function() {
   /** @type {!Array.<IDBDatabase>} */
   let connections = [];
 
-  beforeEach(function() {
+  beforeEach(() => {
     cells = [];
     connections = [];
   });
 
-  afterEach(async function() {
+  afterEach(async () => {
     // If the test did not run, then there will be no cells and no connections,
     // so we don't need to worry about checking if indexeddb is supported here.
 
@@ -47,7 +47,7 @@ describe('IndexeddbStorageCell', function() {
     connections.forEach((connection) => connection.close());
   });
 
-  it('can add, get, and remove segments', checkAndRun(function(done) {
+  it('can add, get, and remove segments', checkAndRun((done) => {
     /** @type {shaka.extern.StorageCell} */
     let cell;
 
@@ -90,7 +90,7 @@ describe('IndexeddbStorageCell', function() {
     }).catch(fail).then(done);
   }));
 
-  it('can add, get, and remove manifests', checkAndRun(function(done) {
+  it('can add, get, and remove manifests', checkAndRun((done) => {
     /** @type {shaka.extern.StorageCell} */
     let cell;
 
@@ -133,7 +133,7 @@ describe('IndexeddbStorageCell', function() {
     }).catch(fail).then(done);
   }));
 
-  it('can add and get all manifests', checkAndRun(function(done) {
+  it('can add and get all manifests', checkAndRun((done) => {
     /** @type {shaka.extern.StorageCell} */
     let cell;
 
@@ -169,7 +169,7 @@ describe('IndexeddbStorageCell', function() {
     }).catch(fail).then(done);
   }));
 
-  it('can add, get, and update manifests', checkAndRun(function(done) {
+  it('can add, get, and update manifests', checkAndRun((done) => {
     /** @type {shaka.extern.StorageCell} */
     let cell;
 

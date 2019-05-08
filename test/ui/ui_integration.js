@@ -86,7 +86,7 @@ describe('UI', () => {
     controls = ui.getControls();
 
     onErrorSpy = jasmine.createSpy('onError');
-    onErrorSpy.and.callFake(function(event) { fail(event.detail); });
+    onErrorSpy.and.callFake((event) => { fail(event.detail); });
     eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
     eventManager.listen(controls, 'error', Util.spyFunc(onErrorSpy));
 

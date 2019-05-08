@@ -16,7 +16,7 @@
  */
 
 
-describe('SimpleTextDisplayer', function() {
+describe('SimpleTextDisplayer', () => {
   const originalVTTCue = window.VTTCue;
   const Cue = shaka.text.Cue;
   const SimpleTextDisplayer = shaka.text.SimpleTextDisplayer;
@@ -28,7 +28,7 @@ describe('SimpleTextDisplayer', function() {
   /** @type {!shaka.text.SimpleTextDisplayer} */
   let displayer;
 
-  beforeEach(function() {
+  beforeEach(() => {
     video = new shaka.test.FakeVideo();
     displayer = new SimpleTextDisplayer(video);
 
@@ -50,12 +50,12 @@ describe('SimpleTextDisplayer', function() {
     window.VTTCue = /** @type {?} */(FakeVTTCue);
   });
 
-  afterAll(function() {
+  afterAll(() => {
     window.VTTCue = originalVTTCue;
   });
 
-  describe('append', function() {
-    it('sorts cues before inserting', function() {
+  describe('append', () => {
+    it('sorts cues before inserting', () => {
       // See: https://bit.ly/2K9VX3s
       verifyHelper(
           [
@@ -70,7 +70,7 @@ describe('SimpleTextDisplayer', function() {
           ]);
     });
 
-    it('appends equal time cues in reverse order', function() {
+    it('appends equal time cues in reverse order', () => {
       // Regression test for https://github.com/google/shaka-player/issues/848
       verifyHelper(
           [
@@ -86,8 +86,8 @@ describe('SimpleTextDisplayer', function() {
     });
   });
 
-  describe('remove', function() {
-    it('removes cues which overlap the range', function() {
+  describe('remove', () => {
+    it('removes cues which overlap the range', () => {
       const cue1 = new shaka.text.Cue(0, 1, 'Test');
       const cue2 = new shaka.text.Cue(1, 2, 'Test');
       const cue3 = new shaka.text.Cue(2, 3, 'Test');
@@ -116,14 +116,14 @@ describe('SimpleTextDisplayer', function() {
       mockTrack.removeCue.calls.reset();
     });
 
-    it('does nothing when nothing is buffered', function() {
+    it('does nothing when nothing is buffered', () => {
       displayer.remove(0, 1);
       expect(mockTrack.removeCue).not.toHaveBeenCalled();
     });
   });
 
-  describe('convertToTextTrackCue', function() {
-    it('converts shaka.text.Cues to VttCues', function() {
+  describe('convertToTextTrackCue', () => {
+    it('converts shaka.text.Cues to VttCues', () => {
       verifyHelper(
           [
             {start: 20, end: 40, text: 'Test'},
@@ -234,7 +234,7 @@ describe('SimpleTextDisplayer', function() {
           ], [cue5]);
     });
 
-    it('works around browsers not supporting align=center', function() {
+    it('works around browsers not supporting align=center', () => {
       /**
        * @constructor
        * @param {number} start
@@ -270,7 +270,7 @@ describe('SimpleTextDisplayer', function() {
           [cue1]);
     });
 
-    it('ignores cues with startTime >= endTime', function() {
+    it('ignores cues with startTime >= endTime', () => {
       const cue1 = new shaka.text.Cue(60, 40, 'Test');
       const cue2 = new shaka.text.Cue(40, 40, 'Test');
       displayer.append([cue1, cue2]);

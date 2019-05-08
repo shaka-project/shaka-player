@@ -16,7 +16,7 @@
  */
 
 
-describe('V1IndexeddbStorageCell', function() {
+describe('V1IndexeddbStorageCell', () => {
   const dbImagePath = '/base/test/test/assets/db-dump-v1.json';
 
   const dbName = 'shaka-storage-cell-test';
@@ -32,17 +32,17 @@ describe('V1IndexeddbStorageCell', function() {
   /** @type {!Array.<IDBDatabase>} */
   let connections = [];
 
-  beforeAll(async function() {
+  beforeAll(async () => {
     const data = await shaka.test.Util.fetch(dbImagePath);
     dbImageAsString = shaka.util.StringUtils.fromUTF8(data);
   });
 
-  beforeEach(function() {
+  beforeEach(() => {
     cells = [];
     connections = [];
   });
 
-  afterEach(async function() {
+  afterEach(async () => {
     // If the test did not run, then there will be no cells and no connections,
     // so we don't need to worry about checking if indexeddb is supported here.
 
@@ -51,7 +51,7 @@ describe('V1IndexeddbStorageCell', function() {
     connections.forEach((connection) => connection.close());
   });
 
-  it('cannot add new manifests', checkAndRun(async function() {
+  it('cannot add new manifests', checkAndRun(async () => {
     const expectedErrorCode =
         shaka.util.Error.Code.NEW_KEY_OPERATION_NOT_SUPPORTED;
 
@@ -72,7 +72,7 @@ describe('V1IndexeddbStorageCell', function() {
     }
   }));
 
-  it('cannot add new segment', checkAndRun(async function() {
+  it('cannot add new segment', checkAndRun(async () => {
     const expectedErrorCode =
         shaka.util.Error.Code.NEW_KEY_OPERATION_NOT_SUPPORTED;
 
@@ -91,7 +91,7 @@ describe('V1IndexeddbStorageCell', function() {
     }
   }));
 
-  it('can get all manifests', checkAndRun(async function() {
+  it('can get all manifests', checkAndRun(async () => {
     const connection = await makeConnection();
     const cell = makeCell(connection);
 
@@ -102,7 +102,7 @@ describe('V1IndexeddbStorageCell', function() {
     expect(map.get(0)).toBeTruthy();
   }));
 
-  it('can get manifest and all segments', checkAndRun(async function() {
+  it('can get manifest and all segments', checkAndRun(async () => {
     const connection = await makeConnection();
     const cell = makeCell(connection);
 
@@ -123,7 +123,7 @@ describe('V1IndexeddbStorageCell', function() {
     });
   }));
 
-  it('can update expiration', checkAndRun(async function() {
+  it('can update expiration', checkAndRun(async () => {
     // Keys and old values are pulled directly from the db image.
     const manifestKey = 0;
     const oldExpiration = Infinity;
@@ -145,7 +145,7 @@ describe('V1IndexeddbStorageCell', function() {
     expect(updated[0].expiration).toBe(newExpiration);
   }));
 
-  it('can remove manifests and segments', checkAndRun(async function() {
+  it('can remove manifests and segments', checkAndRun(async () => {
     const connection = await makeConnection();
     const cell = makeCell(connection);
 

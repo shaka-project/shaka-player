@@ -186,14 +186,14 @@ shaka.test.Mp4VodStreamGenerator.prototype.init = function() {
   ];
 
   return Promise.all(async).then(
-      function(results) {
+      (results) => {
         goog.asserts.assert(results.length == 2,
                             'did not load both segments');
         this.initSegment_ = results[0];
         this.segmentTemplate_ = results[1];
         this.timescale_ = shaka.test.StreamGenerator.getTimescale_(
             /** @type {!ArrayBuffer} */ (this.initSegment_), this.mdhdOffset_);
-      }.bind(this));
+      });
 };
 
 
@@ -323,14 +323,14 @@ shaka.test.Mp4LiveStreamGenerator.prototype.init = function() {
   ];
 
   return Promise.all(async).then(
-      function(results) {
+      (results) => {
         goog.asserts.assert(results.length == 2,
                             'did not load both segments');
         this.initSegment_ = results[0];
         this.segmentTemplate_ = results[1];
         this.timescale_ = shaka.test.StreamGenerator.getTimescale_(
             /** @type {!ArrayBuffer} */ (this.initSegment_), this.mdhdOffset_);
-      }.bind(this));
+      });
 };
 
 

@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-describe('ManifestParserUtils', function() {
+describe('ManifestParserUtils', () => {
   const ManifestParserUtils = shaka.util.ManifestParserUtils;
 
-  describe('resolveUris', function() {
-    it('resolves relative URIs', function() {
+  describe('resolveUris', () => {
+    it('resolves relative URIs', () => {
       const base = ['http://example.com/'];
       const relative = ['page.html'];
       const expected = ['http://example.com/page.html'];
@@ -27,7 +27,7 @@ describe('ManifestParserUtils', function() {
       expect(actual).toEqual(expected);
     });
 
-    it('resolves URIs multiplicatively', function() {
+    it('resolves URIs multiplicatively', () => {
       const base = ['http://example.com/', 'http://example.org'];
       const relative = ['page.html', 'site.css'];
       const expected = [
@@ -40,14 +40,14 @@ describe('ManifestParserUtils', function() {
       expect(actual).toEqual(expected);
     });
 
-    it('returns base if no relative URIs', function() {
+    it('returns base if no relative URIs', () => {
       const base = ['http://example.com'];
       const relative = [];
       const actual = ManifestParserUtils.resolveUris(base, relative);
       expect(actual).toEqual(base);
     });
 
-    it('handles manifest file as base URI', function() {
+    it('handles manifest file as base URI', () => {
       const base = [
         'http://example.com/manifest.mpd',
         'http://example.org/path/to/manifest.mpd',

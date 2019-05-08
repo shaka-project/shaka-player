@@ -367,7 +367,7 @@ shaka.test.TestScheme.setupPlayer = function(player, name) {
   if (asset.licenseRequestHeaders) {
     const netEngine = player.getNetworkingEngine();
     netEngine.registerRequestFilter(
-        function(type, request) {
+        (type, request) => {
           if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) return;
 
           for (const header in asset.licenseRequestHeaders) {
@@ -466,7 +466,7 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
   for (const name in DATA) {
     GENERATORS[name + suffix] = GENERATORS[name + suffix] || {};
     const data = DATA[name];
-    [ContentType.VIDEO, ContentType.AUDIO].forEach(function(type) {
+    [ContentType.VIDEO, ContentType.AUDIO].forEach((type) => {
       if (data[type]) {
         const streamGen = createStreamGenerator(data[type]);
         GENERATORS[name + suffix][type] = streamGen;
@@ -572,7 +572,7 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
 };
 
 
-beforeAll(function(done) {
+beforeAll((done) => {
   shaka.test.TestScheme.createManifests(shaka, '').catch(fail).then(done);
 });
 
@@ -608,7 +608,7 @@ shaka.test.TestScheme.ManifestParser.prototype.start =
   // This makes sure the filtering functions are covered implicitly by tests.
   // This covers regression https://github.com/google/shaka-player/issues/988
   playerInterface.filterAllPeriods(manifest.periods);
-  manifest.periods.forEach(function(period) {
+  manifest.periods.forEach((period) => {
     playerInterface.filterNewPeriod(period);
   });
 

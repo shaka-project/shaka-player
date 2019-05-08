@@ -153,7 +153,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
     // Otherwise, restore it.
     shaka.ui.Utils.setDisplay(this.resolutionButton_, true);
 
-    tracks.sort(function(t1, t2) {
+    tracks.sort((t1, t2) => {
       return t1.height - t2.height;
     });
     tracks.reverse();
@@ -205,11 +205,11 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
     // Add the Auto button
     const autoButton = shaka.util.Dom.createHTMLElement('button');
     autoButton.classList.add('shaka-enable-abr-button');
-    autoButton.addEventListener('click', function() {
+    autoButton.addEventListener('click', () => {
       const config = {abr: {enabled: true}};
       this.player.configure(config);
       this.updateResolutionSelection_();
-    }.bind(this));
+    });
 
     /** @private {!HTMLElement}*/
     this.abrOnSpan_ = shaka.util.Dom.createHTMLElement('span');

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('Player', function() {
+describe('Player', () => {
   const Util = shaka.test.Util;
   const waitUntilPlayheadReaches = Util.waitUntilPlayheadReaches;
 
@@ -39,14 +39,14 @@ describe('Player', function() {
     await shaka.test.TestScheme.createManifests(compiledShaka, '_compiled');
   });
 
-  beforeEach(function() {
+  beforeEach(() => {
     player = new compiledShaka.Player(video);
 
     // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();
 
     onErrorSpy = jasmine.createSpy('onError');
-    onErrorSpy.and.callFake(function(event) { fail(event.detail); });
+    onErrorSpy.and.callFake((event) => { fail(event.detail); });
     eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
   });
 
@@ -56,12 +56,12 @@ describe('Player', function() {
     await player.destroy();
   });
 
-  afterAll(function() {
+  afterAll(() => {
     document.body.removeChild(video);
   });
 
-  describe('attach', function() {
-    beforeEach(async function() {
+  describe('attach', () => {
+    beforeEach(async () => {
       // To test attach, we want to construct a player without a video element
       // attached in advance.  To do that, we destroy the player that was
       // constructed in the outermost beforeEach(), then construct a new one
@@ -70,13 +70,13 @@ describe('Player', function() {
       player = new compiledShaka.Player();
     });
 
-    it('can be used before load()', async function() {
+    it('can be used before load()', async () => {
       await player.attach(video);
       await player.load('test:sintel_compiled');
     });
   });
 
-  describe('getStats', function() {
+  describe('getStats', () => {
     it('gives stats about current stream', async () => {
       // This is tested more in player_unit.js.  This is here to test the public
       // API and to check for renaming.
@@ -119,7 +119,7 @@ describe('Player', function() {
     });
   });
 
-  describe('setTextTrackVisibility', function() {
+  describe('setTextTrackVisibility', () => {
     // Using mode='disabled' on TextTrack causes cues to go null, which leads
     // to a crash in TextEngine.  This validates that we do not trigger this
     // behavior when changing visibility of text.
@@ -252,7 +252,7 @@ describe('Player', function() {
     });
   });
 
-  describe('plays', function() {
+  describe('plays', () => {
     it('with external text tracks', async () => {
       await player.load('test:sintel_no_text_compiled');
 
@@ -313,7 +313,7 @@ describe('Player', function() {
      * @return {string}
      */
     function getActiveLanguage() {
-      const tracks = player.getVariantTracks().filter(function(t) {
+      const tracks = player.getVariantTracks().filter((t) => {
         return t.active;
       });
       expect(tracks.length).toBeGreaterThan(0);
@@ -321,11 +321,11 @@ describe('Player', function() {
     }
   });
 
-  describe('TextDisplayer plugin', function() {
+  describe('TextDisplayer plugin', () => {
     // Simulate the use of an external TextDisplayer plugin.
     /** @type {shaka.test.FakeTextDisplayer} */
     let textDisplayer;
-    beforeEach(function() {
+    beforeEach(() => {
       textDisplayer = new shaka.test.FakeTextDisplayer();
 
       textDisplayer.isTextVisibleSpy.and.callFake(() => {
@@ -354,7 +354,7 @@ describe('Player', function() {
     });
   });
 
-  describe('TextAndRoles', function() {
+  describe('TextAndRoles', () => {
     // Regression Test. Makes sure that the language and role fields have been
     // properly exported from the player.
     it('exports language and roles fields', async () => {
@@ -368,13 +368,13 @@ describe('Player', function() {
     });
   });
 
-  describe('streaming event', function() {
+  describe('streaming event', () => {
     // Calling switch early during load() caused a failed assertion in Player
     // and the track selection was ignored.  Because this bug involved
     // interactions between Player and StreamingEngine, it is an integration
     // test and not a unit test.
     // https://github.com/google/shaka-player/issues/1119
-    it('allows early selection of specific tracks', function(done) {
+    it('allows early selection of specific tracks', (done) => {
       const streamingListener = jasmine.createSpy('listener');
 
       // Because this is an issue with failed assertions, destroy the existing
@@ -409,7 +409,7 @@ describe('Player', function() {
     // between Player and StreamingEngine, it is an integration test and not a
     // unit test.
     // https://github.com/google/shaka-player/issues/1119
-    it('allows selection of tracks in subsequent loads', function(done) {
+    it('allows selection of tracks in subsequent loads', (done) => {
       const streamingListener = jasmine.createSpy('listener');
 
       // Because this is an issue with failed assertions, destroy the existing
@@ -479,7 +479,7 @@ describe('Player Stats', () => {
 //
 // TODO: Any call to |load|, |attach|, etc. should abort manifest retries.
 //       Add the missing tests for |load| and |attach|.
-describe('Player Manifest Retries', function() {
+describe('Player Manifest Retries', () => {
   /** @type {!HTMLVideoElement} */
   let video;
   /** @type {shaka.Player} */
@@ -654,7 +654,7 @@ describe('Player Load Path', () => {
     expect(video.src).toBeTruthy();
   });
 
-  it('does not set video.src when no video is provided', async function() {
+  it('does not set video.src when no video is provided', async () => {
     expect(video.src).toBeFalsy();
 
     createPlayer(/* attachedTo= */ null);

@@ -655,7 +655,7 @@ class ShakaDemoMain {
         elem.removeAttribute('disabled');
         elem.addEventListener('click', () => {
           const rawParams = location.hash.substr(1).split(';');
-          const newParams = rawParams.filter(function(param) {
+          const newParams = rawParams.filter((param) => {
             // Remove current build type param(s).
             return param != 'compiled' && param.split('=')[0] != 'build';
           });

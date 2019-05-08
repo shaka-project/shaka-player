@@ -15,35 +15,35 @@
  * limitations under the License.
  */
 
-describe('VttTextParser', function() {
+describe('VttTextParser', () => {
   const Cue = shaka.text.Cue;
   const CueRegion = shaka.text.CueRegion;
 
   /** @type {!jasmine.Spy} */
   let logWarningSpy;
 
-  beforeAll(function() {
+  beforeAll(() => {
     logWarningSpy = jasmine.createSpy('shaka.log.warning');
     shaka.log.warning = shaka.test.Util.spyFunc(logWarningSpy);
   });
 
-  beforeEach(function() {
+  beforeEach(() => {
     logWarningSpy.calls.reset();
   });
 
-  it('supports no cues', function() {
+  it('supports no cues', () => {
     verifyHelper([],
         'WEBVTT',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports initial comments', function() {
+  it('supports initial comments', () => {
     verifyHelper([],
         'WEBVTT - Comments',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports comment blocks', function() {
+  it('supports comment blocks', () => {
     verifyHelper([],
         'WEBVTT\n\n' +
         'NOTE\n' +
@@ -51,7 +51,7 @@ describe('VttTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports comment blocks with inital comment', function() {
+  it('supports comment blocks with inital comment', () => {
     verifyHelper([],
         'WEBVTT\n\n' +
         'NOTE - A header comment\n' +
@@ -59,7 +59,7 @@ describe('VttTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('handles a blank line at the end of the file', function() {
+  it('handles a blank line at the end of the file', () => {
     verifyHelper(
         [
           {start: 20, end: 40, payload: 'Test'},
@@ -70,7 +70,7 @@ describe('VttTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('handles no blank line at the end of the file', function() {
+  it('handles no blank line at the end of the file', () => {
     verifyHelper(
         [
           {start: 20, end: 40, payload: 'Test'},
@@ -82,7 +82,7 @@ describe('VttTextParser', function() {
         });
   });
 
-  it('handles no newline after the final text payload', function() {
+  it('handles no newline after the final text payload', () => {
     verifyHelper(
         [
           {start: 20, end: 40, payload: 'Test'},
@@ -93,7 +93,7 @@ describe('VttTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('ignores offset', function() {
+  it('ignores offset', () => {
     verifyHelper(
         [
           {start: 20, end: 40, payload: 'Test'},
@@ -104,7 +104,7 @@ describe('VttTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports cues with no settings', function() {
+  it('supports cues with no settings', () => {
     verifyHelper(
         [
           {start: 20, end: 40, payload: 'Test', id: '1'},
@@ -120,7 +120,7 @@ describe('VttTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports cues with no ID', function() {
+  it('supports cues with no ID', () => {
     verifyHelper(
         [
           {start: 20, end: 40, payload: 'Test'},
@@ -134,7 +134,7 @@ describe('VttTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports comments within cues', function() {
+  it('supports comments within cues', () => {
     verifyHelper(
         [
           {start: 20, end: 40, payload: 'Test'},
@@ -150,7 +150,7 @@ describe('VttTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports non-integer timecodes', function() {
+  it('supports non-integer timecodes', () => {
     verifyHelper(
         [
           {start: 20.1, end: 40.505, payload: 'Test'},
@@ -161,7 +161,7 @@ describe('VttTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports large timecodes', function() {
+  it('supports large timecodes', () => {
     verifyHelper(
         [
           {start: 20, end: 108000, payload: 'Test'},
@@ -172,7 +172,7 @@ describe('VttTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('requires header', function() {
+  it('requires header', () => {
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_HEADER,
                 '',
                 {periodStart: 0, segmentStart: 0, segmentEnd: 0});
@@ -181,7 +181,7 @@ describe('VttTextParser', function() {
                 {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('rejects invalid time values', function() {
+  it('rejects invalid time values', () => {
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
                 'WEBVTT\n\n00.020    --> 0:00.040\nTest',
                 {periodStart: 0, segmentStart: 0, segmentEnd: 0});
@@ -208,7 +208,7 @@ describe('VttTextParser', function() {
                 {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports vertical setting', function() {
+  it('supports vertical setting', () => {
     verifyHelper(
         [
           {
@@ -232,7 +232,7 @@ describe('VttTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports line setting', function() {
+  it('supports line setting', () => {
     verifyHelper(
         [
           {
@@ -264,7 +264,7 @@ describe('VttTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports line setting with optional part', function() {
+  it('supports line setting with optional part', () => {
     verifyHelper(
         [
           {
@@ -286,7 +286,7 @@ describe('VttTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports position setting', function() {
+  it('supports position setting', () => {
     verifyHelper(
         [
           {start: 20, end: 40, payload: 'Test', position: 45},
@@ -300,7 +300,7 @@ describe('VttTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports position setting with optional part', function() {
+  it('supports position setting with optional part', () => {
     verifyHelper(
         [
           {
@@ -320,7 +320,7 @@ describe('VttTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports size setting', function() {
+  it('supports size setting', () => {
     verifyHelper(
         [
           {start: 20, end: 40, payload: 'Test', size: 56},
@@ -334,7 +334,7 @@ describe('VttTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports align setting', function() {
+  it('supports align setting', () => {
     verifyHelper(
         [
           {start: 20, end: 40, payload: 'Test', align: 'center'},
@@ -345,7 +345,7 @@ describe('VttTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports multiple settings', function() {
+  it('supports multiple settings', () => {
     verifyHelper(
         [
           {
@@ -363,7 +363,7 @@ describe('VttTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports timestamps with one-digit hour at start time', function() {
+  it('supports timestamps with one-digit hour at start time', () => {
     verifyHelper(
         [
           {
@@ -381,7 +381,7 @@ describe('VttTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports timestamps with one-digit hour at end time', function() {
+  it('supports timestamps with one-digit hour at end time', () => {
     verifyHelper(
         [
           {
@@ -399,7 +399,7 @@ describe('VttTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports stamps with one-digit hours at start & end time', function() {
+  it('supports stamps with one-digit hours at start & end time', () => {
     verifyHelper(
         [
           {
@@ -417,7 +417,7 @@ describe('VttTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('uses segment time', function() {
+  it('uses segment time', () => {
     verifyHelper(
         [
           {
@@ -436,7 +436,7 @@ describe('VttTextParser', function() {
   });
 
 
-  it('parses VTTRegions', function() {
+  it('parses VTTRegions', () => {
     verifyHelper(
         [
           {
@@ -466,7 +466,7 @@ describe('VttTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('ignores and logs invalid settings', function() {
+  it('ignores and logs invalid settings', () => {
     expect(logWarningSpy.calls.count()).toBe(0);
 
     verifyHelper(
@@ -535,7 +535,7 @@ describe('VttTextParser', function() {
     expect(logWarningSpy.calls.count()).toBe(7);
   });
 
-  it('respects X-TIMESTAMP-MAP header in probes', function() {
+  it('respects X-TIMESTAMP-MAP header in probes', () => {
     verifyHelper(
         [
           {start: 30, end: 50, payload: 'Test'},
@@ -553,7 +553,7 @@ describe('VttTextParser', function() {
         {periodStart: 0, segmentStart: null, segmentEnd: 0});
   });
 
-  it('ignores X-TIMESTAMP-MAP header when segment times are known', function() {
+  it('ignores X-TIMESTAMP-MAP header when segment times are known', () => {
     verifyHelper(
         [
           {start: 120, end: 140, payload: 'Test'},
@@ -572,7 +572,7 @@ describe('VttTextParser', function() {
         {periodStart: 0, segmentStart: 100, segmentEnd: 0});
   });
 
-  it('skips style blocks', function() {
+  it('skips style blocks', () => {
     verifyHelper(
         [
           {start: 20, end: 40, payload: 'Test'},

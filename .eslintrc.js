@@ -142,6 +142,7 @@ module.exports = {
         }],
         "no-useless-constructor": "error",
         "operator-assignment": "error",
+        "prefer-arrow-callback": "error",
         // }}}
     },
     "overrides": [

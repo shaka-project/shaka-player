@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-describe('EbmlParser', /** @suppress {accessControls} */ function() {
+describe('EbmlParser', /** @suppress {accessControls} */ () => {
   const Code = shaka.util.Error.Code;
 
-  it('parses one element', function() {
+  it('parses one element', () => {
     // Set ID to 0x1.
     // Set size to 4 bytes.
     // Set the data to [0x01, 0x02, 0x03, 0x04].
@@ -34,7 +34,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ function() {
     expect(elem.dataView_.getUint8(3)).toBe(0x04);
   });
 
-  it('parses two elements at the same level', function() {
+  it('parses two elements at the same level', () => {
     // For the first element:
     // Set ID to 0x1.
     // Set size to 4 bytes.
@@ -64,7 +64,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ function() {
     expect(elem2.dataView_.getUint8(3)).toBe(0x06);
   });
 
-  it('detects a dynamic size value within an element', function() {
+  it('detects a dynamic size value within an element', () => {
     // Set ID to 0x1.
     // Set size to a dynamic size value.
     // The size should be 5 bytes.
@@ -77,7 +77,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ function() {
     expect(element.dataView_.byteLength).toBe(5);
   });
 
-  it('parses a 1 byte vint', function() {
+  it('parses a 1 byte vint', () => {
     // 7-bit value: 1|100 0001
     const data = new Uint8Array([0xc1]);
 
@@ -91,7 +91,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ function() {
     expect(shaka.util.EbmlParser.getVintValue_(vint)).toBe(0x41);
   });
 
-  it('parses a 2 byte vint', function() {
+  it('parses a 2 byte vint', () => {
     // 14-bit: 01|10 0001, 0001 1001
     const data = new Uint8Array([0x61, 0x19]);
 
@@ -102,7 +102,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ function() {
     expect(shaka.util.EbmlParser.getVintValue_(vint)).toBe(0x2119);
   });
 
-  it('parses a 3 byte vint', function() {
+  it('parses a 3 byte vint', () => {
     // 21-bit: 001|1 0001, 0010 0001, 0001 0011
     const data = new Uint8Array([0x31, 0x21, 0x13]);
 
@@ -113,7 +113,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ function() {
     expect(shaka.util.EbmlParser.getVintValue_(vint)).toBe(0x112113);
   });
 
-  it('parses a 4 byte vint', function() {
+  it('parses a 4 byte vint', () => {
     // 28-bit: 0001 | 1000, 0001 0001, 0001 0001, 0001 0101
     const data = new Uint8Array([0x18, 0x11, 0x11, 0x15]);
 
@@ -124,7 +124,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ function() {
     expect(shaka.util.EbmlParser.getVintValue_(vint)).toBe(0x8111115);
   });
 
-  it('parses a 5 byte vint', function() {
+  it('parses a 5 byte vint', () => {
     // 35-bit: 0000 1|100, 0001 0001, 0001 0001, 0001 0001, 0001 1001
     const data = new Uint8Array([0x0c, 0x11, 0x11, 0x11, 0x19]);
 
@@ -135,7 +135,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ function() {
     expect(shaka.util.EbmlParser.getVintValue_(vint)).toBe(0x411111119);
   });
 
-  it('parses a 6 byte vint', function() {
+  it('parses a 6 byte vint', () => {
     // 42-bit: 0000 01|10, 0001 0010, 0001 0001, 0001 0001, 0001 0001,
     //                     0001 1000
     const data = new Uint8Array([0x06, 0x12, 0x11, 0x11, 0x11, 0x18]);
@@ -147,7 +147,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ function() {
     expect(shaka.util.EbmlParser.getVintValue_(vint)).toBe(0x21211111118);
   });
 
-  it('parses a 7 byte vint', function() {
+  it('parses a 7 byte vint', () => {
     // 49-bit: 0000 001|1, 0001 0010, 0001 0001, 0001 0001, 0001 0001,
     //                     0001 0001, 1001 0001
     const data = new Uint8Array([0x03, 0x12, 0x11, 0x11, 0x11, 0x11, 0x91]);
@@ -159,7 +159,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ function() {
     expect(shaka.util.EbmlParser.getVintValue_(vint)).toBe(0x1121111111191);
   });
 
-  it('parses a 8 byte vint', function() {
+  it('parses a 8 byte vint', () => {
     // 56-bit: 0000 0001 | 0001 0010, 0001 0100, 0001 1000, 0001 0001,
     //                     0001 0001, 0001 1001, 0011 0001
     const data =
@@ -172,7 +172,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ function() {
     expect(shaka.util.EbmlParser.getVintValue_(vint)).toBe(0x12141811111931);
   });
 
-  it('detects vints with too many bytes', function() {
+  it('detects vints with too many bytes', () => {
     let exception = null;
 
     try {
@@ -192,7 +192,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ function() {
     expect(exception.code).toBe(Code.EBML_OVERFLOW);
   });
 
-  it('detects vint values with too many bits', function() {
+  it('detects vint values with too many bits', () => {
     let exception = null;
 
     try {
@@ -242,7 +242,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ function() {
     expect(exception.code).toBe(Code.JS_INTEGER_OVERFLOW);
   });
 
-  it('detects the end of input while reading a vint', function() {
+  it('detects the end of input while reading a vint', () => {
     // 14-bit: 01|10 0001, 0001 0001
     const data = new Uint8Array([0x61]);
     const parser = new shaka.util.EbmlParser(new DataView(data.buffer));
@@ -260,7 +260,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ function() {
     expect(exception.code).toBe(Code.BUFFER_READ_OUT_OF_BOUNDS);
   });
 
-  it('parses a uint', function() {
+  it('parses a uint', () => {
     // Set ID to 0x1.
     // Set size to 4 bytes.
     // Set the data to [0x01, 0x02, 0x03, 0x04].
@@ -272,7 +272,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ function() {
     expect(elem.getUint()).toBe(0x01020304);
   });
 
-  it('detects uints with too many bytes', function() {
+  it('detects uints with too many bytes', () => {
     // Set ID to 0x1.
     // Set size to 9 bytes.
     // Set the data to [0x01, 0x02, 0x03, ..., 0x09].
@@ -296,7 +296,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ function() {
     expect(exception.code).toBe(Code.EBML_OVERFLOW);
   });
 
-  it('detects uints with too many bits', function() {
+  it('detects uints with too many bits', () => {
     // Set ID to 0x1.
     // Set size to 8 bytes.
     // Set the data to [0x2f, 0xff, 0xff, ..., 0xff].
@@ -320,7 +320,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ function() {
     expect(exception.code).toBe(Code.JS_INTEGER_OVERFLOW);
   });
 
-  it('recognizes dynamic-sized values', function() {
+  it('recognizes dynamic-sized values', () => {
     const dynamicSizes = [
       new Uint8Array([0xff]),
       new Uint8Array([0x7f, 0xff]),

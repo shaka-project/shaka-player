@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-describe('OfflineUri', function() {
+describe('OfflineUri', () => {
   const OfflineUri = shaka.offline.OfflineUri;
 
-  it('creates uri from manifest id', function() {
+  it('creates uri from manifest id', () => {
     /** @type {number} */
     const id = 123;
     /** @type {string} */
@@ -27,7 +27,7 @@ describe('OfflineUri', function() {
     expect(uri).toBe('offline:manifest/mech/cell/123');
   });
 
-  it('creates uri from segment id', function() {
+  it('creates uri from segment id', () => {
     /** @type {number} */
     const id = 123;
     /** @type {string} */
@@ -36,7 +36,7 @@ describe('OfflineUri', function() {
     expect(uri).toBe('offline:segment/mech/cell/123');
   });
 
-  it('creates null from invalid uri', function() {
+  it('creates null from invalid uri', () => {
     /** @type {string} */
     const uri = 'invalid-uri';
     const parsed = OfflineUri.parse(uri);
@@ -44,7 +44,7 @@ describe('OfflineUri', function() {
     expect(parsed).toBeNull();
   });
 
-  it('parse manifest uri', function() {
+  it('parse manifest uri', () => {
     /** @type {string} */
     const uri = 'offline:manifest/mech/cell/123';
     const parsed = OfflineUri.parse(uri);
@@ -56,7 +56,7 @@ describe('OfflineUri', function() {
     expect(parsed.key()).toBe(123);
   });
 
-  it('parse segment uri', function() {
+  it('parse segment uri', () => {
     /** @type {string} */
     const uri = 'offline:segment/mech/cell/123';
     const parsed = OfflineUri.parse(uri);

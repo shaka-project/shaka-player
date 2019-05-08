@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-describe('MpdUtils', function() {
+describe('MpdUtils', () => {
   const MpdUtils = shaka.dash.MpdUtils;
 
-  describe('fillUriTemplate', function() {
-    it('handles a single RepresentationID identifier', function() {
+  describe('fillUriTemplate', () => {
+    it('handles a single RepresentationID identifier', () => {
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$RepresentationID$.mp4',
@@ -38,7 +38,7 @@ describe('MpdUtils', function() {
                   .toBe('/example/$RepresentationID$.mp4');
     });
 
-    it('handles a single Number identifier', function() {
+    it('handles a single Number identifier', () => {
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$Number$.mp4',
@@ -56,7 +56,7 @@ describe('MpdUtils', function() {
                   .toBe('/example/$Number$.mp4');
     });
 
-    it('handles a single Bandwidth identifier', function() {
+    it('handles a single Bandwidth identifier', () => {
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$Bandwidth$.mp4',
@@ -74,7 +74,7 @@ describe('MpdUtils', function() {
                   .toBe('/example/$Bandwidth$.mp4');
     });
 
-    it('handles a single Time identifier', function() {
+    it('handles a single Time identifier', () => {
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$Time$.mp4',
@@ -92,7 +92,7 @@ describe('MpdUtils', function() {
                   .toBe('/example/$Time$.mp4');
     });
 
-    it('handles rounding errors for calculated Times', function() {
+    it('handles rounding errors for calculated Times', () => {
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$Time$.mp4',
@@ -104,7 +104,7 @@ describe('MpdUtils', function() {
               null, null, null, 99.9999).toString()).toBe('/example/00100.mp4');
     });
 
-    it('handles multiple identifiers', function() {
+    it('handles multiple identifiers', () => {
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$RepresentationID$_$Number$_$Bandwidth$_$Time$.mp4',
@@ -141,7 +141,7 @@ describe('MpdUtils', function() {
               '1', 2, 3, 4).toString()).toBe('$/1$2$3$4$.$');
     });
 
-    it('handles invalid identifiers', function() {
+    it('handles invalid identifiers', () => {
       expect(
           MpdUtils.fillUriTemplate(
               '/example/$Garbage$.mp4',
@@ -153,7 +153,7 @@ describe('MpdUtils', function() {
               '1', 2, 3, 4).toString()).toBe('/example/$Time.mp4');
     });
 
-    it('handles non-decimal format specifiers', function() {
+    it('handles non-decimal format specifiers', () => {
       expect(
           MpdUtils.fillUriTemplate(
               '/$Number%05x$_$Number%01X$_$Number%01u$_$Number%01o$.mp4',
@@ -161,8 +161,8 @@ describe('MpdUtils', function() {
     });
   });
 
-  describe('createTimeline', function() {
-    it('works in normal case', function() {
+  describe('createTimeline', () => {
+    it('works in normal case', () => {
       const timePoints = [
         createTimePoint(0, 10, 0),
         createTimePoint(10, 10, 0),
@@ -176,7 +176,7 @@ describe('MpdUtils', function() {
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
-    it('handles null start time', function() {
+    it('handles null start time', () => {
       const timePoints = [
         createTimePoint(0, 10, 0),
         createTimePoint(null, 10, 0),
@@ -190,7 +190,7 @@ describe('MpdUtils', function() {
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
-    it('handles gaps', function() {
+    it('handles gaps', () => {
       const timePoints = [
         createTimePoint(0, 10, 0),
         createTimePoint(15, 10, 0),
@@ -202,7 +202,7 @@ describe('MpdUtils', function() {
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
-    it('handles overlap', function() {
+    it('handles overlap', () => {
       const timePoints = [
         createTimePoint(0, 15, 0),
         createTimePoint(10, 10, 0),
@@ -214,7 +214,7 @@ describe('MpdUtils', function() {
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
-    it('handles repetitions', function() {
+    it('handles repetitions', () => {
       const timePoints = [
         createTimePoint(0, 10, 5),
         createTimePoint(60, 10, 0),
@@ -231,7 +231,7 @@ describe('MpdUtils', function() {
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
-    it('handles null repeat', function() {
+    it('handles null repeat', () => {
       const timePoints = [
         createTimePoint(0, 10, 0),
         createTimePoint(10, 10, null),
@@ -245,7 +245,7 @@ describe('MpdUtils', function() {
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
-    it('handles repetitions with gap', function() {
+    it('handles repetitions with gap', () => {
       const timePoints = [
         createTimePoint(0, 10, 2),
         createTimePoint(35, 10, 0),
@@ -259,7 +259,7 @@ describe('MpdUtils', function() {
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
-    it('handles negative repetitions', function() {
+    it('handles negative repetitions', () => {
       const timePoints = [
         createTimePoint(0, 10, 0),
         createTimePoint(10, 10, -1),
@@ -275,7 +275,7 @@ describe('MpdUtils', function() {
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
-    it('handles negative repetitions with uneven border', function() {
+    it('handles negative repetitions with uneven border', () => {
       const timePoints = [
         createTimePoint(0, 10, 0),
         createTimePoint(10, 10, -1),
@@ -292,7 +292,7 @@ describe('MpdUtils', function() {
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
-    it('handles negative repetitions w/ bad next start time', function() {
+    it('handles negative repetitions w/ bad next start time', () => {
       const timePoints = [
         createTimePoint(0, 10, 0),
         createTimePoint(10, 10, -1),
@@ -304,7 +304,7 @@ describe('MpdUtils', function() {
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
-    it('handles negative repetitions w/ null next start time', function() {
+    it('handles negative repetitions w/ null next start time', () => {
       const timePoints = [
         createTimePoint(0, 10, 0),
         createTimePoint(10, 10, -1),
@@ -316,7 +316,7 @@ describe('MpdUtils', function() {
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
-    it('handles negative repetitions at end', function() {
+    it('handles negative repetitions at end', () => {
       const timePoints = [
         createTimePoint(0, 10, 0),
         createTimePoint(10, 5, -1),
@@ -330,7 +330,7 @@ describe('MpdUtils', function() {
       checkTimePoints(timePoints, result, 1, 0, 25);
     });
 
-    it('handles negative repetitions at end w/o Period length', function() {
+    it('handles negative repetitions at end w/o Period length', () => {
       const timePoints = [
         createTimePoint(0, 10, 0),
         createTimePoint(10, 5, -1),
@@ -341,7 +341,7 @@ describe('MpdUtils', function() {
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
-    it('handles negative repetitions at end w/ bad Period length', function() {
+    it('handles negative repetitions at end w/ bad Period length', () => {
       const timePoints = [
         createTimePoint(0, 10, 0),
         createTimePoint(10, 10, 0),
@@ -354,7 +354,7 @@ describe('MpdUtils', function() {
       checkTimePoints(timePoints, result, 1, 0, 20);
     });
 
-    it('ignores elements after null duration', function() {
+    it('ignores elements after null duration', () => {
       const timePoints = [
         createTimePoint(0, 10, 0),
         createTimePoint(10, 10, 0),
@@ -369,7 +369,7 @@ describe('MpdUtils', function() {
       checkTimePoints(timePoints, result, 1, 0, Infinity);
     });
 
-    it('adjust start with presentationTimeOffset', function() {
+    it('adjust start with presentationTimeOffset', () => {
       const timePoints = [
         createTimePoint(10, 10, 0),
         createTimePoint(20, 10, 0),
@@ -438,7 +438,7 @@ describe('MpdUtils', function() {
     }
   });
 
-  describe('processXlinks', function() {
+  describe('processXlinks', () => {
     const Error = shaka.util.Error;
 
     /** @type {!shaka.test.FakeNetworkingEngine} */
@@ -450,7 +450,7 @@ describe('MpdUtils', function() {
     /** @type {boolean} */
     let failGracefully;
 
-    beforeEach(function() {
+    beforeEach(() => {
       failGracefully = false;
       retry = shaka.net.NetworkingEngine.defaultRetryParameters();
       fakeNetEngine = new shaka.test.FakeNetworkingEngine();
@@ -649,7 +649,7 @@ describe('MpdUtils', function() {
       await testSucceeds(baseXMLString, desiredXMLString, 1);
     });
 
-    it('interrupts requests on abort', function(done) {
+    it('interrupts requests on abort', (done) => {
       const baseXMLString = inBaseContainer(
           '<ToReplace xlink:href="https://xlink1" xlink:actuate="onLoad" />');
       // Create a few links.  This is few enough that it would succeed if we
@@ -709,7 +709,7 @@ describe('MpdUtils', function() {
     }
 
     function testFails(baseXMLString, desiredError, desiredNetCalls) {
-      return testRequest(baseXMLString).then(fail).catch(function(error) {
+      return testRequest(baseXMLString).then(fail).catch((error) => {
         expect(fakeNetEngine.request).toHaveBeenCalledTimes(desiredNetCalls);
         if (desiredError) {
           shaka.test.Util.expectToEqualError(error, desiredError);

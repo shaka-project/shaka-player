@@ -15,19 +15,19 @@
  * limitations under the License.
  */
 
-describe('OfflineScheme', function() {
-  beforeEach(checkAndRun(async function() {
+describe('OfflineScheme', () => {
+  beforeEach(checkAndRun(async () => {
     // Make sure we start with a clean slate.
     await clearStorage();
   }));
 
-  afterEach(checkAndRun(async function() {
+  afterEach(checkAndRun(async () => {
     // Make sure that we don't waste storage by leaving stuff in storage.
     await clearStorage();
   }));
 
   it('returns special content-type header for manifests',
-      checkAndRun(async function() {
+      checkAndRun(async () => {
         const expectedContentType = 'application/x-offline-manifest';
         const request = createRequest();
         /** @type {!shaka.offline.OfflineUri} */
@@ -43,7 +43,7 @@ describe('OfflineScheme', function() {
         expect(response.headers['content-type']).toBe(expectedContentType);
       }));
 
-  it('returns segment data from storage', checkAndRun(async function() {
+  it('returns segment data from storage', checkAndRun(async () => {
     const request = createRequest();
     const segment = createSegment();
 
@@ -71,7 +71,7 @@ describe('OfflineScheme', function() {
     expect(response.data.byteLength).toBe(segment.data.byteLength);
   }));
 
-  it('fails if segment not found', checkAndRun(async function() {
+  it('fails if segment not found', checkAndRun(async () => {
     const request = createRequest();
 
     /** @type {!shaka.offline.OfflineUri} */
@@ -102,7 +102,7 @@ describe('OfflineScheme', function() {
     }
   }));
 
-  it('fails for invalid URI', checkAndRun(async function() {
+  it('fails for invalid URI', checkAndRun(async () => {
     const request = createRequest();
     const uri = 'this-in-an-invalid-uri';
 

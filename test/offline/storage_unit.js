@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('Storage', function() {
+describe('Storage', () => {
   const englishUS = 'en-us';
   const frenchCanadian= 'fr-ca';
 
@@ -45,22 +45,22 @@ describe('Storage', function() {
     await eraseStorage();
   });
 
-  describe('storage delete all', function() {
+  describe('storage delete all', () => {
     /** @type {!shaka.Player} */
     let player;
 
-    beforeEach(function() {
+    beforeEach(() => {
       // Use a real Player since Storage only uses the configuration and
       // networking engine.  This allows us to use Player.configure in these
       // tests.
       player = new shaka.Player();
     });
 
-    afterEach(async function() {
+    afterEach(async () => {
       await player.destroy();
     });
 
-    it('removes all content from storage', checkAndRun(async function() {
+    it('removes all content from storage', checkAndRun(async () => {
       const TestManifestParser = shaka.test.TestScheme.ManifestParser;
       const manifestUri = 'test:sintel';
 
@@ -104,13 +104,13 @@ describe('Storage', function() {
     }
   });
 
-  describe('persistent license', function() {
+  describe('persistent license', () => {
     /** @type {!shaka.Player} */
     let player;
     /** @type {!shaka.offline.Storage} */
     let storage;
 
-    beforeEach(function() {
+    beforeEach(() => {
       // Use a real Player since Storage only uses the configuration and
       // networking engine.  This allows us to use Player.configure in these
       // tests.
@@ -118,7 +118,7 @@ describe('Storage', function() {
       storage = new shaka.offline.Storage(player);
     });
 
-    afterEach(async function() {
+    afterEach(async () => {
       await storage.destroy();
       await player.destroy();
     });
@@ -130,7 +130,7 @@ describe('Storage', function() {
     //   http://crbug.com/887635
     //   http://crbug.com/883895
     quarantinedIt('removes persistent license',
-        drmCheckAndRun(async function() {
+        drmCheckAndRun(async () => {
       const TestManifestParser = shaka.test.TestScheme.ManifestParser;
 
       // PART 1 - Download and store content that has a persistent license
@@ -198,7 +198,7 @@ describe('Storage', function() {
     //   http://crbug.com/887635
     //   http://crbug.com/883895
     quarantinedIt('defers removing licenses on error',
-        drmCheckAndRun(async function() {
+        drmCheckAndRun(async () => {
       const TestManifestParser = shaka.test.TestScheme.ManifestParser;
       const getEmeSessions = async () => {
         /** @type {!shaka.offline.StorageMuxer} */
@@ -279,10 +279,10 @@ describe('Storage', function() {
     }));
   });
 
-  describe('default track selection callback', function() {
+  describe('default track selection callback', () => {
     const PlayerConfiguration = shaka.util.PlayerConfiguration;
 
-    it('selects the largest SD video with middle quality audio', function() {
+    it('selects the largest SD video with middle quality audio', () => {
       const tracks = [
         variantTrack(0, 360, englishUS, 1 * kbps),
         variantTrack(1, 480, englishUS, 2.0 * kbps),
@@ -302,7 +302,7 @@ describe('Storage', function() {
       expect(selected[0].bandwidth).toBe(2.1 * kbps);
     });
 
-    it('selects all text tracks', function() {
+    it('selects all text tracks', () => {
       const tracks = [
         textTrack(0, englishUS),
         textTrack(1, frenchCanadian),
@@ -317,8 +317,8 @@ describe('Storage', function() {
       });
     });
 
-    describe('language matching', function() {
-      it('finds exact match', function() {
+    describe('language matching', () => {
+      it('finds exact match', () => {
         const tracks = [
           variantTrack(0, 480, 'eng-us', 1 * kbps),
           variantTrack(1, 480, 'fr-ca', 1 * kbps),
@@ -333,7 +333,7 @@ describe('Storage', function() {
         expect(selected[0].language).toBe('eng-us');
       });
 
-      it('finds exact match with only base', function() {
+      it('finds exact match with only base', () => {
         const tracks = [
           variantTrack(0, 480, 'eng-us', 1 * kbps),
           variantTrack(1, 480, 'fr-ca', 1 * kbps),
@@ -348,7 +348,7 @@ describe('Storage', function() {
         expect(selected[0].language).toBe('eng');
       });
 
-      it('finds base match when exact match is not found', function() {
+      it('finds base match when exact match is not found', () => {
         const tracks = [
           variantTrack(0, 480, 'eng-us', 1 * kbps),
           variantTrack(1, 480, 'fr-ca', 1 * kbps),
@@ -362,7 +362,7 @@ describe('Storage', function() {
         expect(selected[0].language).toBe('fr-ca');
       });
 
-      it('finds common base when exact match is not found', function() {
+      it('finds common base when exact match is not found', () => {
         const tracks = [
           variantTrack(0, 480, 'eng-us', 1 * kbps),
           variantTrack(1, 480, 'fr-ca', 1 * kbps),
@@ -377,7 +377,7 @@ describe('Storage', function() {
         expect(selected[0].language).toBe('fr-ca');
       });
 
-      it('finds primary track when no match is found', function() {
+      it('finds primary track when no match is found', () => {
         const tracks = [
           variantTrack(0, 480, 'eng-us', 1 * kbps),
           variantTrack(1, 480, 'fr-ca', 1 * kbps),
@@ -396,27 +396,27 @@ describe('Storage', function() {
   });  // describe('default track selection callback')
 
 
-  describe('no support', function() {
+  describe('no support', () => {
     /** @type {!shaka.Player} */
     let player;
     /** @type {!shaka.offline.Storage} */
     let storage;
 
-    beforeEach(function() {
+    beforeEach(() => {
       shaka.offline.StorageMuxer.overrideSupport(new Map());
 
       player = new shaka.Player();
       storage = new shaka.offline.Storage(player);
     });
 
-    afterEach(async function() {
+    afterEach(async () => {
       await storage.destroy();
       await player.destroy();
 
       shaka.offline.StorageMuxer.clearOverride();
     });
 
-    it('throws error using list', async function() {
+    it('throws error using list', async () => {
       try {
         await storage.list();
         fail();
@@ -425,7 +425,7 @@ describe('Storage', function() {
       }
     });
 
-    it('throws error using store', async function() {
+    it('throws error using store', async () => {
       try {
         await storage.store('the-uri-wont-matter');
         fail();
@@ -434,7 +434,7 @@ describe('Storage', function() {
       }
     });
 
-    it('throws error using remove', async function() {
+    it('throws error using remove', async () => {
       try {
         await storage.remove('the-uri-wont-matter');
         fail();
@@ -456,7 +456,7 @@ describe('Storage', function() {
   //
   // To allow us to control the network order, our manifests for these tests
   // could not repeat/reuse segments uris.
-  describe('reports progress on store', function() {
+  describe('reports progress on store', () => {
     const audioSegment1Uri = 'audio-segment-1';
     const audioSegment2Uri = 'audio-segment-2';
     const audioSegment3Uri = 'audio-segment-3';
@@ -472,7 +472,7 @@ describe('Storage', function() {
     /** @type {!shaka.offline.Storage} */
     let storage;
 
-    beforeEach(function() {
+    beforeEach(() => {
       // Use these promises to ensure that the data from networking
       // engine arrives in the correct order.
       const delays = {};
@@ -529,12 +529,12 @@ describe('Storage', function() {
       });
     });
 
-    afterEach(async function() {
+    afterEach(async () => {
       await storage.destroy();
       await player.destroy();
     });
 
-    it('uses stream bandwidth', checkAndRun(async function() {
+    it('uses stream bandwidth', checkAndRun(async () => {
       /**
        * These numbers are the overall progress based on the segment sizes
        * per stream. We assume a specific download order for the content
@@ -553,7 +553,7 @@ describe('Storage', function() {
     }));
 
     it('uses variant bandwidth when stream bandwidth is unavailable',
-        checkAndRun(async function() {
+        checkAndRun(async () => {
           /**
            * These numbers are the overall progress based on the segment sizes
            * per stream. We assume a specific download order for the content
@@ -691,7 +691,7 @@ describe('Storage', function() {
     }
   });
 
-  describe('basic function', function() {
+  describe('basic function', () => {
     /**
      * Keep a reference to the networking engine so that we can interrupt
      * networking calls.
@@ -704,25 +704,25 @@ describe('Storage', function() {
     /** @type {!shaka.offline.Storage} */
     let storage;
 
-    beforeEach(function() {
+    beforeEach(() => {
       netEngine = makeNetworkEngine();
 
       // Use a real Player since Storage only uses the configuration and
       // networking engine.  This allows us to use Player.configure in these
       // tests.
-      player = new shaka.Player(null, function(player) {
+      player = new shaka.Player(null, ((player) => {
         player.createNetworkingEngine = () => netEngine;
-      });
+      }));
 
       storage = new shaka.offline.Storage(player);
     });
 
-    afterEach(async function() {
+    afterEach(async () => {
       await storage.destroy();
       await player.destroy();
     });
 
-    it('stores and lists content', checkAndRun(async function() {
+    it('stores and lists content', checkAndRun(async () => {
       // Just use any three manifests as we don't care about the manifests
       // right now.
       const manifestUris = [
@@ -749,7 +749,7 @@ describe('Storage', function() {
       });
     }));
 
-    it('only stores chosen tracks', checkAndRun(async function() {
+    it('only stores chosen tracks', checkAndRun(async () => {
       // Change storage to only store one track so that it will be easy
       // for use to ensure that only the one track was stored.
       const selectTrack = (tracks) => {
@@ -807,7 +807,7 @@ describe('Storage', function() {
       }
     }));
 
-    it('stores drm info without license', checkAndRun(async function() {
+    it('stores drm info without license', checkAndRun(async () => {
       const drmInfo = makeDrmInfo();
       const session1 = 'session-1';
       const session2 = 'session-2';
@@ -857,7 +857,7 @@ describe('Storage', function() {
     // Make sure that when we configure storage to NOT store persistent
     // licenses that we don't store the sessions.
     it('stores drm info with no license',
-        checkAndRun(async function() {
+        checkAndRun(async () => {
           const drmInfo = makeDrmInfo();
           const session1 = 'session-1';
           const session2 = 'session-2';
@@ -907,7 +907,7 @@ describe('Storage', function() {
     // TODO(vaage): Remove the need to limit the number of store commands. With
     //              all the changes, it should be very easy to do now.
     it('throws an error if another store is in progress',
-        checkAndRun(async function() {
+        checkAndRun(async () => {
           // Block the network so that we won't finish the first store command.
           /** @type {!shaka.util.PublicPromise} */
           const hangingPromise = netEngine.delayNextRequest();
@@ -934,7 +934,7 @@ describe('Storage', function() {
         }));
 
     it('throws an error if the content is a live stream',
-        checkAndRun(async function() {
+        checkAndRun(async () => {
           try {
             await storage.store(
                 manifestWithLiveTimelineUri,
@@ -947,7 +947,7 @@ describe('Storage', function() {
         }));
 
     it('throws an error if DRM sessions are not ready',
-        checkAndRun(async function() {
+        checkAndRun(async () => {
           const drmInfo = makeDrmInfo();
           const noSessions = [];
 
@@ -970,7 +970,7 @@ describe('Storage', function() {
           }
         }));
 
-    it('throws an error if destroyed mid-store', checkAndRun(async function() {
+    it('throws an error if destroyed mid-store', checkAndRun(async () => {
       const manifest = makeManifestWithPerStreamBandwidth();
 
       /**
@@ -1002,7 +1002,7 @@ describe('Storage', function() {
       }
     }));
 
-    it('stops for networking errors', checkAndRun(async function() {
+    it('stops for networking errors', checkAndRun(async () => {
       // Force all network requests to fail.
       netEngine.request.and.callFake(() => {
         return shaka.util.AbortableOperation.failed(new shaka.util.Error(
@@ -1024,7 +1024,7 @@ describe('Storage', function() {
     }));
 
     it('throws an error if removing malformed uri',
-        checkAndRun(async function() {
+        checkAndRun(async () => {
           const badUri = 'this-is-an-invalid-uri';
           try {
             await storage.remove(badUri);
@@ -1035,7 +1035,7 @@ describe('Storage', function() {
         }));
 
     it('throws an error if removing missing manifest',
-        checkAndRun(async function() {
+        checkAndRun(async () => {
           // Store a piece of content, but then change the uri slightly so that
           // it won't be found when we try to remove it (with the wrong uri).
           const stored = await storage.store(
@@ -1054,14 +1054,14 @@ describe('Storage', function() {
           }
         }));
 
-    it('removes manifest', checkAndRun(async function() {
+    it('removes manifest', checkAndRun(async () => {
       const stored = await storage.store(
           manifestWithPerStreamBandwidthUri, noMetadata, FakeManifestParser);
 
       await storage.remove(stored.offlineUri);
     }));
 
-    it('removes manifest with missing segments', checkAndRun(async function() {
+    it('removes manifest with missing segments', checkAndRun(async () => {
       const stored = await storage.store(
           manifestWithPerStreamBandwidthUri, noMetadata, FakeManifestParser);
 
@@ -1098,7 +1098,7 @@ describe('Storage', function() {
       await storage.remove(uri.toString());
     }));
 
-    it('tracks progress on remove', checkAndRun(async function() {
+    it('tracks progress on remove', checkAndRun(async () => {
       const selectOneTrack = (tracks) => {
         const allVariants = tracks.filter((t) => {
           return t.type == 'variant';
@@ -1150,11 +1150,11 @@ describe('Storage', function() {
     }));
   });
 
-  describe('storage without player', function() {
+  describe('storage without player', () => {
     const TestManifestParser = shaka.test.TestScheme.ManifestParser;
     const manifestUri = 'test:sintel';
 
-    it('stores content', checkAndRun(async function() {
+    it('stores content', checkAndRun(async () => {
       /** @type {shaka.offline.Storage} */
       const storage = new shaka.offline.Storage();
       try {

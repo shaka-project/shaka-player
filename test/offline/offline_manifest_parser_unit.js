@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('OfflineManifestParser', function() {
+describe('OfflineManifestParser', () => {
   // The offline manifest parser does not need the player interface, so
   // this is a work around to avoid creating one.
   const playerInterface =
@@ -27,19 +27,19 @@ describe('OfflineManifestParser', function() {
   /** @type {!shaka.offline.OfflineManifestParser} */
   let parser;
 
-  beforeEach(checkAndRun(async function() {
+  beforeEach(checkAndRun(async () => {
     // Make sure we start with a clean slate.
     await clearStorage();
     parser = new shaka.offline.OfflineManifestParser();
   }));
 
-  afterEach(checkAndRun(async function() {
+  afterEach(checkAndRun(async () => {
     parser.stop();
     // Make sure that we don't waste storage by leaving stuff in storage.
     await clearStorage();
   }));
 
-  it('returns manifest from storage', checkAndRun(async function() {
+  it('returns manifest from storage', checkAndRun(async () => {
     const inputManifest = makeManifest();
 
     /** @type {!shaka.offline.OfflineUri} */
@@ -63,7 +63,7 @@ describe('OfflineManifestParser', function() {
     expect(outputManifest).toBeTruthy();
   }));
 
-  it('updates expiration', checkAndRun(async function() {
+  it('updates expiration', checkAndRun(async () => {
     const newExpiration = 1000;
 
     const inputManifest = makeManifest();
@@ -94,7 +94,7 @@ describe('OfflineManifestParser', function() {
     }
   }));
 
-  it('fails if manifest was not found', checkAndRun(async function() {
+  it('fails if manifest was not found', checkAndRun(async () => {
     const inputManifest = makeManifest();
 
     /** @type {!shaka.offline.OfflineUri} */
@@ -125,7 +125,7 @@ describe('OfflineManifestParser', function() {
     }
   }));
 
-  it('fails for invalid URI', checkAndRun(async function() {
+  it('fails for invalid URI', checkAndRun(async () => {
     const uri = 'this-is-an-invalid-uri';
 
     try {
@@ -137,7 +137,7 @@ describe('OfflineManifestParser', function() {
   }));
 
   it('ignores update expiration when data is deleted',
-      checkAndRun(async function() {
+      checkAndRun(async () => {
         const newExpiration = 1000;
 
         const inputManifest = makeManifest();
@@ -165,7 +165,7 @@ describe('OfflineManifestParser', function() {
       }));
 
   it('ignores update expiration with unknown session',
-      checkAndRun(async function() {
+      checkAndRun(async () => {
         const wrongSession = 'this-session-wont-be-found';
         const newExpiration = 1000;
 

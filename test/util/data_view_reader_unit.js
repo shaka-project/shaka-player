@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('DataViewReader', function() {
+describe('DataViewReader', () => {
   const Code = shaka.util.Error.Code;
 
   // |data| as interpreted as a 64 bit integer must not be larger than 2^53-1.
@@ -36,7 +36,7 @@ describe('DataViewReader', function() {
   /** @type {!shaka.util.DataViewReader} */
   let littleEndianReader2;
 
-  beforeEach(function() {
+  beforeEach(() => {
     bigEndianReader = new shaka.util.DataViewReader(
         new DataView(data.buffer),
         shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
@@ -51,7 +51,7 @@ describe('DataViewReader', function() {
         shaka.util.DataViewReader.Endianness.LITTLE_ENDIAN);
   });
 
-  it('reads a uint8 in big endian', function() {
+  it('reads a uint8 in big endian', () => {
     const value1 = bigEndianReader.readUint8();
     expect(value1).toBe(0x00);
 
@@ -65,7 +65,7 @@ describe('DataViewReader', function() {
     expect(value4).toBe(0xad);
   });
 
-  it('reads a uint16 in big endian', function() {
+  it('reads a uint16 in big endian', () => {
     const value1 = bigEndianReader.readUint16();
     expect(value1).toBe(0x0001);
 
@@ -79,7 +79,7 @@ describe('DataViewReader', function() {
     expect(value4).toBe(0xbeef);
   });
 
-  it('reads a uint32 in big endian', function() {
+  it('reads a uint32 in big endian', () => {
     const value1 = bigEndianReader.readUint32();
     expect(value1).toBe(0x00010203);
 
@@ -93,7 +93,7 @@ describe('DataViewReader', function() {
     expect(value4).toBe(0xffff0100);
   });
 
-  it('reads an int32 in big endian', function() {
+  it('reads an int32 in big endian', () => {
     const value1 = bigEndianReader.readInt32();
     expect(value1).toBe(66051);
 
@@ -107,12 +107,12 @@ describe('DataViewReader', function() {
     expect(value4).toBe(-65280);
   });
 
-  it('reads a uint64 in big endian', function() {
+  it('reads a uint64 in big endian', () => {
     const value = bigEndianReader.readUint64();
     expect(value).toBe(0x0001020304050607);
   });
 
-  it('reads a uint8 in little endian', function() {
+  it('reads a uint8 in little endian', () => {
     const value1 = littleEndianReader.readUint8();
     expect(value1).toBe(0x00);
 
@@ -126,7 +126,7 @@ describe('DataViewReader', function() {
     expect(value4).toBe(0xad);
   });
 
-  it('reads a uint16 in little endian', function() {
+  it('reads a uint16 in little endian', () => {
     const value1 = littleEndianReader.readUint16();
     expect(value1).toBe(0x0100);
 
@@ -140,7 +140,7 @@ describe('DataViewReader', function() {
     expect(value4).toBe(0xefbe);
   });
 
-  it('reads a uint32 in little endian', function() {
+  it('reads a uint32 in little endian', () => {
     const value1 = littleEndianReader.readUint32();
     expect(value1).toBe(0x03020100);
 
@@ -154,7 +154,7 @@ describe('DataViewReader', function() {
     expect(value4).toBe(0x0001ffff);
   });
 
-  it('reads an int32 in little endian', function() {
+  it('reads an int32 in little endian', () => {
     const value1 = littleEndianReader.readInt32();
     expect(value1).toBe(50462976);
 
@@ -168,18 +168,18 @@ describe('DataViewReader', function() {
     expect(value4).toBe(131071);
   });
 
-  it('reads a uint64 in little endian', function() {
+  it('reads a uint64 in little endian', () => {
     const value = littleEndianReader2.readUint64();
     expect(value).toBe(0x0001ffffefbeadde);
   });
 
-  it('skips bytes', function() {
+  it('skips bytes', () => {
     bigEndianReader.skip(1);
     const value = bigEndianReader.readUint8();
     expect(value).toBe(0x01);
   });
 
-  it('determines the end of the data view', function() {
+  it('determines the end of the data view', () => {
     bigEndianReader.skip(7);
     expect(bigEndianReader.hasMoreData()).toBe(true);
 
@@ -187,7 +187,7 @@ describe('DataViewReader', function() {
     expect(bigEndianReader.hasMoreData()).toBe(false);
   });
 
-  it('gets the byte position', function() {
+  it('gets the byte position', () => {
     expect(bigEndianReader.getPosition()).toBe(0);
 
     bigEndianReader.skip(1);
@@ -197,41 +197,41 @@ describe('DataViewReader', function() {
     expect(bigEndianReader.getPosition()).toBe(8);
   });
 
-  describe('end-of-stream', function() {
-    it('detects when reading a uint8', function() {
+  describe('end-of-stream', () => {
+    it('detects when reading a uint8', () => {
       bigEndianReader.skip(7);
       bigEndianReader.readUint8();
-      runTest(function() { bigEndianReader.readUint8(); });
+      runTest(() => { bigEndianReader.readUint8(); });
     });
 
-    it('detects when reading a uint16', function() {
+    it('detects when reading a uint16', () => {
       bigEndianReader.skip(7);
-      runTest(function() { bigEndianReader.readUint16(); });
+      runTest(() => { bigEndianReader.readUint16(); });
     });
 
-    it('detects when reading a uint32', function() {
+    it('detects when reading a uint32', () => {
       bigEndianReader.skip(5);
-      runTest(function() { bigEndianReader.readUint32(); });
+      runTest(() => { bigEndianReader.readUint32(); });
     });
 
-    it('detects when reading a int32', function() {
+    it('detects when reading a int32', () => {
       bigEndianReader.skip(5);
-      runTest(function() { bigEndianReader.readInt32(); });
+      runTest(() => { bigEndianReader.readInt32(); });
     });
 
-    it('detects when reading a uint64', function() {
+    it('detects when reading a uint64', () => {
       bigEndianReader.skip(3);
-      runTest(function() { bigEndianReader.readUint64(); });
+      runTest(() => { bigEndianReader.readUint64(); });
     });
 
-    it('detects when skipping bytes', function() {
+    it('detects when skipping bytes', () => {
       bigEndianReader.skip(8);
-      runTest(function() { bigEndianReader.skip(1); });
+      runTest(() => { bigEndianReader.skip(1); });
     });
 
-    it('detects when reading bytes', function() {
+    it('detects when reading bytes', () => {
       bigEndianReader.skip(8);
-      runTest(function() { bigEndianReader.readBytes(1); });
+      runTest(() => { bigEndianReader.readBytes(1); });
     });
 
     function runTest(test) {
@@ -246,7 +246,7 @@ describe('DataViewReader', function() {
     }
   });
 
-  it('detects uint64s too large for JavaScript', function() {
+  it('detects uint64s too large for JavaScript', () => {
     let exception = null;
 
     try {

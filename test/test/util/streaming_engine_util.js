@@ -49,7 +49,7 @@ shaka.test.StreamingEngineUtil.createFakeNetworkingEngine = function(
     },
   };
 
-  netEngine.request.and.callFake(function(requestType, request) {
+  netEngine.request.and.callFake((requestType, request) => {
     expect(requestType).toBeTruthy();
     expect(request.uris.length).toBe(1);
 
@@ -144,32 +144,32 @@ shaka.test.StreamingEngineUtil.createFakePresentationTimeline = function(
 
   timeline.getMaxSegmentDuration.and.returnValue(maxSegmentDuration);
 
-  timeline.isLive.and.callFake(function() {
+  timeline.isLive.and.callFake(() => {
     return isLive;
   });
 
-  timeline.getEarliestStart.and.callFake(function() {
+  timeline.getEarliestStart.and.callFake(() => {
     return timeline.segmentAvailabilityStart;
   });
 
-  timeline.getSegmentAvailabilityStart.and.callFake(function() {
+  timeline.getSegmentAvailabilityStart.and.callFake(() => {
     return timeline.segmentAvailabilityStart;
   });
 
-  timeline.getSegmentAvailabilityEnd.and.callFake(function() {
+  timeline.getSegmentAvailabilityEnd.and.callFake(() => {
     return timeline.segmentAvailabilityEnd;
   });
 
-  timeline.getSafeSeekRangeStart.and.callFake(function(delay) {
+  timeline.getSafeSeekRangeStart.and.callFake((delay) => {
     return shaka.test.Util.invokeSpy(timeline.getSegmentAvailabilityStart) +
         delay;
   });
 
-  timeline.getSeekRangeStart.and.callFake(function() {
+  timeline.getSeekRangeStart.and.callFake(() => {
     return shaka.test.Util.invokeSpy(timeline.getSegmentAvailabilityStart);
   });
 
-  timeline.getSeekRangeEnd.and.callFake(function() {
+  timeline.getSeekRangeEnd.and.callFake(() => {
     return shaka.test.Util.invokeSpy(timeline.getSegmentAvailabilityEnd);
   });
 

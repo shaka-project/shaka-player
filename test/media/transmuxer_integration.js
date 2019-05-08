@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-describe('Transmuxer', function() {
+describe('Transmuxer', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
 
   const videoSegmentUri = '/base/test/test/assets/video.ts';
@@ -44,7 +44,7 @@ describe('Transmuxer', function() {
     emptySegment = new ArrayBuffer(0);
   });
 
-  beforeEach(function() {
+  beforeEach(() => {
     transmuxer = new shaka.media.Transmuxer();
   });
 
@@ -52,19 +52,19 @@ describe('Transmuxer', function() {
     await transmuxer.destroy();
   });
 
-  describe('isSupported', function() {
+  describe('isSupported', () => {
     const isSupported = shaka.media.Transmuxer.isSupported;
-    it('returns whether the content type is supported', function() {
+    it('returns whether the content type is supported', () => {
       expect(isSupported(mp4MimeType, ContentType.VIDEO)).toBeFalsy();
       expect(isSupported(transportStreamVideoMimeType, ContentType.VIDEO))
           .toBe(true);
     });
   });
 
-  describe('convertTsCodecs', function() {
+  describe('convertTsCodecs', () => {
     const convertTsCodecs = shaka.media.Transmuxer.convertTsCodecs;
 
-    it('returns converted codecs', function() {
+    it('returns converted codecs', () => {
       const convertedVideoCodecs =
           convertTsCodecs(ContentType.VIDEO, transportStreamVideoMimeType);
       const convertedAudioCodecs =
@@ -75,7 +75,7 @@ describe('Transmuxer', function() {
       expect(convertedAudioCodecs).toEqual(expectedAudioCodecs);
     });
 
-    it('converts legacy avc1 codec strings', function() {
+    it('converts legacy avc1 codec strings', () => {
       expect(convertTsCodecs(ContentType.VIDEO,
           'video/mp2t; codecs="avc1.100.42"')).toEqual(
           'video/mp4; codecs="avc1.64002a"');
@@ -88,7 +88,7 @@ describe('Transmuxer', function() {
     });
   });
 
-  describe('transmuxing', function() {
+  describe('transmuxing', () => {
     it('transmux video from TS to MP4', async () => {
       let sawMDAT = false;
 
@@ -97,7 +97,7 @@ describe('Transmuxer', function() {
       expect(transmuxedData.data.length).toBeGreaterThan(0);
       expect(transmuxedData.captions).toEqual(jasmine.any(Array));
       new shaka.util.Mp4Parser()
-          .box('mdat', shaka.util.Mp4Parser.allData(function(data) {
+          .box('mdat', shaka.util.Mp4Parser.allData((data) => {
             sawMDAT = true;
             expect(data.buffer.byteLength).toBeGreaterThan(0);
           }))
@@ -112,7 +112,7 @@ describe('Transmuxer', function() {
       expect(transmuxedData.data.length).toBeGreaterThan(0);
       expect(transmuxedData.captions).toEqual(jasmine.any(Array));
       new shaka.util.Mp4Parser()
-          .box('mdat', shaka.util.Mp4Parser.allData(function(data) {
+          .box('mdat', shaka.util.Mp4Parser.allData((data) => {
             sawMDAT = true;
             expect(data.buffer.byteLength).toBeGreaterThan(0);
           }))
@@ -127,7 +127,7 @@ describe('Transmuxer', function() {
       expect(transmuxedData.data.length).toBeGreaterThan(0);
       expect(transmuxedData.captions).toEqual(jasmine.any(Array));
       new shaka.util.Mp4Parser()
-          .box('mdat', shaka.util.Mp4Parser.allData(function(data) {
+          .box('mdat', shaka.util.Mp4Parser.allData((data) => {
             sawMDAT = true;
           }))
           .parse(transmuxedData.data.buffer);
@@ -145,7 +145,7 @@ describe('Transmuxer', function() {
       new Mp4Parser()
           .box('moof', Mp4Parser.children)
           .box('traf', Mp4Parser.children)
-          .fullBox('tfdt', function(box) {
+          .fullBox('tfdt', (box) => {
             goog.asserts.assert(
                 box.version == 0 || box.version == 1,
                 'TFDT version can only be 0 or 1');

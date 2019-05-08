@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-describe('CastUtils', function() {
+describe('CastUtils', () => {
   const CastUtils = shaka.cast.CastUtils;
   const FakeEvent = shaka.util.FakeEvent;
 
-  it('includes every Player member', function() {
+  it('includes every Player member', () => {
     const ignoredMembers = [
       'constructor',  // JavaScript added field
       'getSharedConfiguration',  // Handled specially
@@ -51,25 +51,25 @@ describe('CastUtils', function() {
       castMembers.push(name);
     }
     const playerMembers = Object.keys(shaka.Player.prototype).filter(
-        function(name) {
+        (name) => {
           // Private members end with _.
           return !ignoredMembers.includes(name) && !name.endsWith('_');
         });
 
     // To make debugging easier, don't check that they are equal; instead check
     // that neither has any extra entries.
-    const extraCastMembers = castMembers.filter(function(name) {
+    const extraCastMembers = castMembers.filter((name) => {
       return !playerMembers.includes(name);
     });
-    const extraPlayerMembers = playerMembers.filter(function(name) {
+    const extraPlayerMembers = playerMembers.filter((name) => {
       return !castMembers.includes(name);
     });
     expect(extraCastMembers).toEqual([]);
     expect(extraPlayerMembers).toEqual([]);
   });
 
-  describe('serialize/deserialize', function() {
-    it('transfers infinite values and NaN', function() {
+  describe('serialize/deserialize', () => {
+    it('transfers infinite values and NaN', () => {
       const orig = {
         'nan': NaN,
         'positive_infinity': Infinity,
@@ -92,7 +92,7 @@ describe('CastUtils', function() {
       }
     });
 
-    it('transfers real Events', function() {
+    it('transfers real Events', () => {
       // new Event() is not usable on IE11:
       const event =
           /** @type {!CustomEvent} */ (document.createEvent('CustomEvent'));
@@ -127,7 +127,7 @@ describe('CastUtils', function() {
       const fakeEvent = new FakeEvent(deserialized['type'], deserialized);
 
       // The fake event has the same type and properties as the original.
-      nativeProperties.forEach(function(k) {
+      nativeProperties.forEach((k) => {
         expect(fakeEvent[k]).toEqual(event[k]);
       });
       for (const k in extraProperties) {
@@ -135,7 +135,7 @@ describe('CastUtils', function() {
       }
     });
 
-    it('transfers dispatched FakeEvents', function(done) {
+    it('transfers dispatched FakeEvents', (done) => {
       const event = new FakeEvent('custom');
 
       // Properties that can definitely be transferred.
@@ -156,7 +156,7 @@ describe('CastUtils', function() {
       }
 
       const target = new shaka.util.FakeEventTarget();
-      target.addEventListener(event.type, function() {
+      target.addEventListener(event.type, () => {
         try {
           // The event is turned into a string.
           const serialized = CastUtils.serialize(event);
@@ -168,7 +168,7 @@ describe('CastUtils', function() {
 
           // The deserialized event has the same type and properties as the
           // original.
-          nativeProperties.forEach(function(k) {
+          nativeProperties.forEach((k) => {
             expect(deserialized[k]).toEqual(event[k]);
           });
           for (const k in extraProperties) {
@@ -182,7 +182,7 @@ describe('CastUtils', function() {
       target.dispatchEvent(event);
     });
 
-    describe('TimeRanges', function() {
+    describe('TimeRanges', () => {
       /** @type {!HTMLVideoElement} */
       let video;
       /** @type {!shaka.util.EventManager} */
@@ -190,12 +190,12 @@ describe('CastUtils', function() {
       /** @type {!shaka.media.MediaSourceEngine} */
       let mediaSourceEngine;
 
-      beforeAll(function() {
+      beforeAll(() => {
         video = shaka.util.Dom.createVideoElement();
         document.body.appendChild(video);
       });
 
-      beforeEach(function(done) {
+      beforeEach((done) => {
         // The TimeRanges constructor cannot be used directly, so we load a clip
         // to get ranges to use.
         const fakeVideoStream = {
@@ -223,14 +223,14 @@ describe('CastUtils', function() {
         const initObject = new Map();
         initObject.set(ContentType.VIDEO, fakeVideoStream);
 
-        mediaSourceEngine.init(initObject, false).then(function() {
+        mediaSourceEngine.init(initObject, false).then(() => {
           return shaka.test.Util.fetch(initSegmentUrl);
-        }).then(function(data) {
+        }).then((data) => {
           return mediaSourceEngine.appendBuffer(ContentType.VIDEO, data,
               null, null, /* hasClosedCaptions */ false);
-        }).then(function() {
+        }).then(() => {
           return shaka.test.Util.fetch(videoSegmentUrl);
-        }).then(function(data) {
+        }).then((data) => {
           return mediaSourceEngine.appendBuffer(ContentType.VIDEO, data,
               null, null, /* hasClosedCaptions */ false);
         }).catch(fail).then(done);
@@ -248,11 +248,11 @@ describe('CastUtils', function() {
         video.load();
       });
 
-      afterAll(function() {
+      afterAll(() => {
         document.body.removeChild(video);
       });
 
-      quarantinedIt('deserialize into equivalent objects', function() {
+      quarantinedIt('deserialize into equivalent objects', () => {
         const buffered = video.buffered;
 
         // The test is less interesting if the ranges are empty.

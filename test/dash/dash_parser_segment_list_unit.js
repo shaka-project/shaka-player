@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('DashParser SegmentList', function() {
+describe('DashParser SegmentList', () => {
   const Dash = shaka.test.Dash;
   const ManifestParser = shaka.test.ManifestParser;
   const baseUri = 'http://example.com/';
@@ -60,7 +60,7 @@ describe('DashParser SegmentList', function() {
     await Dash.testSegmentIndex(source, references);
   });
 
-  describe('duration', function() {
+  describe('duration', () => {
     it('basic support', async () => {
       const source = Dash.makeSimpleManifestText([
         '<SegmentList startNumber="1" duration="10">',
@@ -130,7 +130,7 @@ describe('DashParser SegmentList', function() {
     });
   });
 
-  describe('rejects streams with', function() {
+  describe('rejects streams with', () => {
     it('no @duration or SegmentTimeline', async () => {
       const source = Dash.makeSimpleManifestText([
         '<SegmentList>',
@@ -175,7 +175,7 @@ describe('DashParser SegmentList', function() {
     });
   });
 
-  describe('inherits', function() {
+  describe('inherits', () => {
     it('attributes', async () => {
       const source = [
         '<MPD mediaPresentationDuration="PT200S">',
@@ -270,7 +270,7 @@ describe('DashParser SegmentList', function() {
     });
   });
 
-  describe('Segment start', function() {
+  describe('Segment start', () => {
     it('shoud be adjusted with presentationTimeOffset', async () => {
       const source = [
         '<MPD mediaPresentationDuration="PT70S">',

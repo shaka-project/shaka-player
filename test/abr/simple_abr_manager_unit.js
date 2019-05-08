@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('SimpleAbrManager', function() {
+describe('SimpleAbrManager', () => {
   const sufficientBWMultiplier = 1.06;
   const defaultBandwidthEstimate = 500e3; // 500kbps
 
@@ -31,14 +31,14 @@ describe('SimpleAbrManager', function() {
   let variants;
 
 
-  beforeAll(function() {
+  beforeAll(() => {
     jasmine.clock().install();
     jasmine.clock().mockDate();
     // This mock is required for fakeEventLoop.
     PromiseMock.install();
   });
 
-  beforeEach(function() {
+  beforeEach(() => {
     switchCallback = jasmine.createSpy('switchCallback');
 
     // Keep unsorted.
@@ -77,34 +77,34 @@ describe('SimpleAbrManager', function() {
     abrManager.setVariants(variants);
   });
 
-  afterEach(function() {
+  afterEach(() => {
     abrManager.stop();
   });
 
-  afterAll(function() {
+  afterAll(() => {
     PromiseMock.uninstall();
     jasmine.clock().uninstall();
   });
 
-  it('can choose audio and video Streams right away', function() {
+  it('can choose audio and video Streams right away', () => {
     const chosen = abrManager.chooseVariant();
     expect(chosen).not.toBe(null);
   });
 
-  it('uses custom default estimate', function() {
+  it('uses custom default estimate', () => {
     config.defaultBandwidthEstimate = 3e6;
     abrManager.configure(config);
     const chosen = abrManager.chooseVariant();
     expect(chosen.id).toBe(104);
   });
 
-  it('can handle empty variants', function() {
+  it('can handle empty variants', () => {
     abrManager.setVariants([]);
     const chosen = abrManager.chooseVariant();
     expect(chosen).toEqual(null);
   });
 
-  it('can choose from audio only variants', function() {
+  it('can choose from audio only variants', () => {
     manifest = new shaka.test.ManifestGenerator()
       .addPeriod(0)
         .addVariant(0).bandwidth(4e5)
@@ -120,7 +120,7 @@ describe('SimpleAbrManager', function() {
     expect(chosen.video).toBe(null);
   });
 
-  it('can choose from video only variants', function() {
+  it('can choose from video only variants', () => {
     manifest = new shaka.test.ManifestGenerator()
       .addPeriod(0)
         .addVariant(0).bandwidth(4e5)
@@ -136,7 +136,7 @@ describe('SimpleAbrManager', function() {
     expect(chosen.video).not.toBe(null);
   });
 
-  [5e5, 6e5].forEach(function(bandwidth) {
+  [5e5, 6e5].forEach((bandwidth) => {
     // Simulate some segments being downloaded just above the desired
     // bandwidth.
     const bytesPerSecond =
@@ -146,7 +146,7 @@ describe('SimpleAbrManager', function() {
     const description =
         'picks correct Variant at ' + bandwidthKbps + ' kbps';
 
-    it(description, function() {
+    it(description, () => {
       abrManager.setVariants(variants);
       abrManager.chooseVariant();
 
@@ -167,7 +167,7 @@ describe('SimpleAbrManager', function() {
     });
   });
 
-  it('can handle 0 duration segments', function() {
+  it('can handle 0 duration segments', () => {
     // Makes sure bandwidth estimate doesn't get set to NaN
     // when a 0 duration segment is encountered.
     // https://github.com/google/shaka-player/issues/582
@@ -190,7 +190,7 @@ describe('SimpleAbrManager', function() {
   });
 
   it('picks lowest variant when there is insufficient bandwidth',
-      function() {
+      () => {
         const bandwidth = 2e6;
 
         abrManager.setVariants(variants);
@@ -216,7 +216,7 @@ describe('SimpleAbrManager', function() {
         expect(switchCallback).toHaveBeenCalledWith(expectedVariant);
       });
 
-  it('does not call switchCallback() if not enabled', function() {
+  it('does not call switchCallback() if not enabled', () => {
     const bandwidth = 5e5;
     const bytesPerSecond =
         sufficientBWMultiplier * bandwidth / 8.0;
@@ -231,7 +231,7 @@ describe('SimpleAbrManager', function() {
     expect(switchCallback).not.toHaveBeenCalled();
   });
 
-  it('does not call switchCallback() in switch interval', function() {
+  it('does not call switchCallback() in switch interval', () => {
     let bandwidth = 5e5;
     let bytesPerSecond =
         sufficientBWMultiplier * bandwidth / 8.0;
@@ -274,7 +274,7 @@ describe('SimpleAbrManager', function() {
     expect(switchCallback).toHaveBeenCalled();
   });
 
-  it('does not clear the buffer on upgrade', function() {
+  it('does not clear the buffer on upgrade', () => {
     // Simulate some segments being downloaded at a high rate, to trigger an
     // upgrade.
     const bandwidth = 5e5;
@@ -298,7 +298,7 @@ describe('SimpleAbrManager', function() {
     expect(switchCallback).toHaveBeenCalledWith(jasmine.any(Object));
   });
 
-  it('does not clear the buffer on downgrade', function() {
+  it('does not clear the buffer on downgrade', () => {
     // Simulate some segments being downloaded at a low rate, to trigger a
     // downgrade.
     const bandwidth = 5e5;
@@ -326,7 +326,7 @@ describe('SimpleAbrManager', function() {
     expect(switchCallback).toHaveBeenCalledWith(jasmine.any(Object));
   });
 
-  it('will respect restrictions', function() {
+  it('will respect restrictions', () => {
     manifest = new shaka.test.ManifestGenerator()
       .addPeriod(0)
         .addVariant(10).bandwidth(1e5)

@@ -31,7 +31,7 @@ function httpPluginTests(usingFetch) {
   /** @type {shaka.extern.SchemePlugin} */
   let plugin;
 
-  beforeAll(function() {
+  beforeAll(() => {
     plugin = usingFetch ? shaka.net.HttpFetchPlugin : shaka.net.HttpXHRPlugin;
     PromiseMock.install();
 
@@ -149,7 +149,7 @@ function httpPluginTests(usingFetch) {
     retryParameters.timeout = 4000;
   });
 
-  afterAll(function() {
+  afterAll(() => {
     if (usingFetch) {
       shaka.net.HttpFetchPlugin['fetch_'] = window.fetch;
       shaka.net.HttpFetchPlugin['AbortController_'] = window.AbortController;
@@ -162,7 +162,7 @@ function httpPluginTests(usingFetch) {
     PromiseMock.uninstall();
   });
 
-  it('sets the correct fields', function(done) {
+  it('sets the correct fields', (done) => {
     const request = shaka.net.NetworkingEngine.makeRequest(
         ['https://foo.bar/'], retryParameters);
     request.allowCrossSiteCredentials = true;
@@ -170,7 +170,7 @@ function httpPluginTests(usingFetch) {
     request.headers['BAZ'] = '123';
 
     plugin(request.uris[0], request, requestType).promise
-        .then(function() {
+        .then(() => {
           const actual = mostRecentRequest();
           expect(actual).toBeTruthy();
           expect(actual.url).toBe(request.uris[0]);
@@ -187,14 +187,14 @@ function httpPluginTests(usingFetch) {
   if (usingFetch) {
     // Regression test for an issue with Edge, where Fetch fails if the body
     // is set to null but succeeds on undefined.
-    it('sets a request\'s null body to undefined', function(done) {
+    it('sets a request\'s null body to undefined', (done) => {
       const request = shaka.net.NetworkingEngine.makeRequest(
           ['https://foo.bar/'], retryParameters);
       request.body = null;
       request.method = 'GET';
 
       plugin(request.uris[0], request, requestType).promise
-          .then(function() {
+          .then(() => {
             const actual = jasmine.Fetch.requests.mostRecent();
             expect(actual).toBeTruthy();
             expect(actual.body).toBeUndefined();
@@ -205,45 +205,45 @@ function httpPluginTests(usingFetch) {
     });
   }
 
-  it('fails with 202 status', function(done) {
+  it('fails with 202 status', (done) => {
     testFails('https://foo.bar/202', done);
     PromiseMock.flush();
   });
 
-  it('succeeds with 204 status', function(done) {
+  it('succeeds with 204 status', (done) => {
     testSucceeds('https://foo.bar/204', done);
     PromiseMock.flush();
   });
 
-  it('succeeds with empty line in response', function(done) {
+  it('succeeds with empty line in response', (done) => {
     testSucceedsWithEmptyLine('https://foo.bar/withemptyline', done);
     PromiseMock.flush();
   });
 
-  it('gets redirect URLs with 302 status', function(done) {
+  it('gets redirect URLs with 302 status', (done) => {
     testSucceeds('https://foo.bar/302', done,
                  'https://foo.bar/after/302');
     PromiseMock.flush();
   });
 
-  it('fails with CRITICAL for 401 status', function(done) {
+  it('fails with CRITICAL for 401 status', (done) => {
     testFails('https://foo.bar/401', done, shaka.util.Error.Severity.CRITICAL);
     PromiseMock.flush();
   });
 
-  it('fails with CRITICAL for 403 status', function(done) {
+  it('fails with CRITICAL for 403 status', (done) => {
     testFails('https://foo.bar/403', done, shaka.util.Error.Severity.CRITICAL);
     PromiseMock.flush();
   });
 
-  it('fails if non-2xx status', function(done) {
+  it('fails if non-2xx status', (done) => {
     const uri = 'https://foo.bar/404';
     testFails(uri, done, undefined, shaka.util.Error.Code.BAD_HTTP_STATUS,
         [uri, 404, 'ABC', {'foo': 'BAR'}, requestType]);
     PromiseMock.flush();
   });
 
-  it('fails on timeout', function(done) {
+  it('fails on timeout', (done) => {
     const uri = 'https://foo.bar/timeout';
     testFails(uri, done, shaka.util.Error.Severity.RECOVERABLE,
         shaka.util.Error.Code.TIMEOUT, [uri, requestType]);
@@ -256,7 +256,7 @@ function httpPluginTests(usingFetch) {
     PromiseMock.flush();
   });
 
-  it('fails on error', function(done) {
+  it('fails on error', (done) => {
     const uri = 'https://foo.bar/error';
     testFails(uri, done, shaka.util.Error.Severity.RECOVERABLE,
         shaka.util.Error.Code.HTTP_ERROR,
@@ -264,12 +264,12 @@ function httpPluginTests(usingFetch) {
     PromiseMock.flush();
   });
 
-  it('detects cache headers', function(done) {
+  it('detects cache headers', (done) => {
     const request = shaka.net.NetworkingEngine.makeRequest(
         ['https://foo.bar/cache'], retryParameters);
     plugin(request.uris[0], request, requestType).promise
         .catch(fail)
-        .then(function(response) {
+        .then((response) => {
           expect(response).toBeTruthy();
           expect(response.fromCache).toBe(true);
         })
@@ -277,7 +277,7 @@ function httpPluginTests(usingFetch) {
     PromiseMock.flush();
   });
 
-  it('aborts the request when the operation is aborted', function(done) {
+  it('aborts the request when the operation is aborted', (done) => {
     let abortPromise;
     let requestPromise;
     const oldXHRMock = shaka.net.HttpXHRPlugin['Xhr_'];
@@ -314,12 +314,12 @@ function httpPluginTests(usingFetch) {
 
         this.send = function() {
           // Delay the effects of send until after operation is defined.
-          Promise.resolve().then(function() {
+          Promise.resolve().then(() => {
             expect(this.abort).not.toHaveBeenCalled();
             operation.abort();
             expect(this.abort).toHaveBeenCalled();
             this.onabort();
-          }.bind(this));
+          });
         };
       };
       shaka.net.HttpXHRPlugin['Xhr_'] = NewXHRMock;
@@ -361,7 +361,7 @@ function httpPluginTests(usingFetch) {
         [uri], retryParameters);
     plugin(uri, request, requestType).promise
         .catch(fail)
-        .then(function(response) {
+        .then((response) => {
           expect(mostRecentRequest().url).toBe(uri);
           expect(response).toBeTruthy();
           expect(response.uri).toBe(overrideUri || uri);
@@ -387,7 +387,7 @@ function httpPluginTests(usingFetch) {
         [uri], retryParameters);
     plugin(uri, request, requestType).promise
         .then(fail)
-        .catch(function(error) {
+        .catch((error) => {
           expect(error).toBeTruthy();
           expect(error.severity)
               .toBe(severity || shaka.util.Error.Severity.RECOVERABLE);
@@ -416,7 +416,7 @@ function httpPluginTests(usingFetch) {
         [uri], retryParameters);
     plugin(uri, request, requestType).promise
         .catch(fail)
-        .then(function(response) {
+        .then((response) => {
           expect(mostRecentRequest().url).toBe(uri);
           expect(response).toBeTruthy();
           expect(response.uri).toBe(overrideUri || uri);

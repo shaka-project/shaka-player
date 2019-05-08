@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('DashParser SegmentBase', function() {
+describe('DashParser SegmentBase', () => {
   const Dash = shaka.test.Dash;
 
   const indexSegmentUri = '/base/test/test/assets/index-segment.mp4';
@@ -33,7 +33,7 @@ describe('DashParser SegmentBase', function() {
     indexSegment = await shaka.test.Util.fetch(indexSegmentUri);
   });
 
-  beforeEach(function() {
+  beforeEach(() => {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = shaka.test.Dash.makeDashParser();
 
@@ -257,7 +257,7 @@ describe('DashParser SegmentBase', function() {
     expect(reference.endTime).toEqual(10);  // would be 12 without PTO
   });
 
-  describe('fails for', function() {
+  describe('fails for', () => {
     it('unsupported container', async () => {
       const source = [
         '<MPD mediaPresentationDuration="PT75S">',

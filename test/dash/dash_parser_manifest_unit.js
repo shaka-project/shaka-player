@@ -16,7 +16,7 @@
  */
 
 // Test basic manifest parsing functionality.
-describe('DashParser Manifest', function() {
+describe('DashParser Manifest', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
   const Dash = shaka.test.Dash;
 
@@ -29,7 +29,7 @@ describe('DashParser Manifest', function() {
   /** @type {shaka.extern.ManifestParser.PlayerInterface} */
   let playerInterface;
 
-  beforeEach(function() {
+  beforeEach(() => {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = shaka.test.Dash.makeDashParser();
     onEventSpy = jasmine.createSpy('onEvent');
@@ -106,7 +106,7 @@ describe('DashParser Manifest', function() {
     });
   }
 
-  describe('parses and inherits attributes', function() {
+  describe('parses and inherits attributes', () => {
     makeTestsForEach(
         [
           '<MPD minBufferTime="PT75S">',
@@ -305,9 +305,9 @@ describe('DashParser Manifest', function() {
     expect(stream.initSegmentReference).toBe(null);
     expect(stream.findSegmentPosition(0)).toBe(1);
     expect(stream.getSegmentReference(1))
-        .toEqual(new shaka.media.SegmentReference(1, 0, 30, function() {
+        .toEqual(new shaka.media.SegmentReference(1, 0, 30, (() => {
           return ['http://example.com/de.vtt'];
-        }, 0, null));
+        }), 0, null));
   });
 
   it('correctly parses closed captions with channels and languages',
@@ -432,14 +432,14 @@ describe('DashParser Manifest', function() {
     expect(variant.language).toBe('\u2603');
   });
 
-  describe('supports UTCTiming', function() {
+  describe('supports UTCTiming', () => {
     const originalNow = Date.now;
 
-    beforeAll(function() {
+    beforeAll(() => {
       Date.now = function() { return 10 * 1000; };
     });
 
-    afterAll(function() {
+    afterAll(() => {
       Date.now = originalNow;
     });
 
@@ -516,7 +516,7 @@ describe('DashParser Manifest', function() {
         '    value="http://foo.bar/date" />',
       ]);
 
-      fakeNetEngine.request.and.callFake(function(type, request) {
+      fakeNetEngine.request.and.callFake((type, request) => {
         if (request.uris[0] == 'http://foo.bar/manifest') {
           const data = shaka.util.StringUtils.toUTF8(source);
           return shaka.util.AbortableOperation.completed({
@@ -597,7 +597,7 @@ describe('DashParser Manifest', function() {
     expect(period.variants[0].bandwidth).toBe(200);
   });
 
-  describe('allows missing Segment* elements for text', function() {
+  describe('allows missing Segment* elements for text', () => {
     it('specified via AdaptationSet@contentType', async () => {
       const source = [
         '<MPD minBufferTime="PT75S">',
@@ -665,7 +665,7 @@ describe('DashParser Manifest', function() {
     });
   });
 
-  describe('fails for', function() {
+  describe('fails for', () => {
     it('invalid XML', async () => {
       const source = '<not XML';
       const error = new shaka.util.Error(
@@ -1013,7 +1013,7 @@ describe('DashParser Manifest', function() {
     expect(variant2.bandwidth).toBeGreaterThan(0);
   });
 
-  describe('AudioChannelConfiguration', function() {
+  describe('AudioChannelConfiguration', () => {
     /**
      * @param {?number} expectedNumChannels The expected number of channels
      * @param {!Object.<string, string>} schemeMap A map where the map key is
@@ -1052,7 +1052,7 @@ describe('DashParser Manifest', function() {
 
       fakeNetEngine.setResponseText('dummy://foo', source);
       return parser.start('dummy://foo', playerInterface)
-          .then(function(manifest) {
+          .then((manifest) => {
             expect(manifest.periods.length).toBe(1);
             expect(manifest.periods[0].variants.length).toBe(1);
 

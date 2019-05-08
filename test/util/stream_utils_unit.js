@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('StreamUtils', function() {
+describe('StreamUtils', () => {
   const filterStreamsByLanguageAndRole =
       shaka.util.StreamUtils.filterStreamsByLanguageAndRole;
   const filterVariantsByAudioChannelCount =
@@ -23,8 +23,8 @@ describe('StreamUtils', function() {
 
   let manifest;
 
-  describe('filterStreamsByLanguageAndRole', function() {
-    it('chooses text streams in user\'s preferred language', function() {
+  describe('filterStreamsByLanguageAndRole', () => {
+    it('chooses text streams in user\'s preferred language', () => {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addTextStream(1)
@@ -44,7 +44,7 @@ describe('StreamUtils', function() {
       expect(chosen[1]).toBe(manifest.periods[0].textStreams[2]);
     });
 
-    it('chooses primary text streams', function() {
+    it('chooses primary text streams', () => {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addTextStream(1)
@@ -63,7 +63,7 @@ describe('StreamUtils', function() {
       expect(chosen[1]).toBe(manifest.periods[0].textStreams[2]);
     });
 
-    it('chooses text streams in preferred language and role', function() {
+    it('chooses text streams in preferred language and role', () => {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addTextStream(1)
@@ -84,7 +84,7 @@ describe('StreamUtils', function() {
       expect(chosen[0]).toBe(manifest.periods[0].textStreams[0]);
     });
 
-    it('prefers no-role streams if there is no preferred role', function() {
+    it('prefers no-role streams if there is no preferred role', () => {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addTextStream(0)
@@ -105,7 +105,7 @@ describe('StreamUtils', function() {
       expect(chosen[0].roles.length).toBe(0); // Pick a stream with no role.
     });
 
-    it('ignores no-role streams if there is a preferred role', function() {
+    it('ignores no-role streams if there is a preferred role', () => {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addTextStream(0)
@@ -126,7 +126,7 @@ describe('StreamUtils', function() {
       expect(chosen[0].roles.length).toBe(1); // Pick a stream with a role.
     });
 
-    it('chooses only one role, even if none is preferred', function() {
+    it('chooses only one role, even if none is preferred', () => {
       // Regression test for https://github.com/google/shaka-player/issues/949
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
@@ -160,7 +160,7 @@ describe('StreamUtils', function() {
       expect(chosen[0].roles[0]).toEqual(chosen[1].roles[0]);
     });
 
-    it('chooses only one role, even if all are primary', function() {
+    it('chooses only one role, even if all are primary', () => {
       // Regression test for https://github.com/google/shaka-player/issues/949
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
@@ -194,7 +194,7 @@ describe('StreamUtils', function() {
       expect(chosen[0].roles[0]).toEqual(chosen[1].roles[0]);
     });
 
-    it('chooses only one language, even if all are primary', function() {
+    it('chooses only one language, even if all are primary', () => {
       // Regression test for https://github.com/google/shaka-player/issues/918
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
@@ -219,7 +219,7 @@ describe('StreamUtils', function() {
     });
 
     it('chooses a role from among primary streams without language match',
-        function() {
+        () => {
           manifest = new shaka.test.ManifestGenerator()
             .addPeriod(0)
               .addTextStream(0)
@@ -258,7 +258,7 @@ describe('StreamUtils', function() {
         });
 
     it('chooses a role from best language match, in spite of primary',
-        function() {
+        () => {
           manifest = new shaka.test.ManifestGenerator()
             .addPeriod(0)
               .addTextStream(0)
@@ -293,8 +293,8 @@ describe('StreamUtils', function() {
         });
   });
 
-  describe('filterVariantsByAudioChannelCount', function() {
-    it('chooses variants with preferred audio channels count', function() {
+  describe('filterVariantsByAudioChannelCount', () => {
+    it('chooses variants with preferred audio channels count', () => {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addVariant(0)
@@ -313,7 +313,7 @@ describe('StreamUtils', function() {
     });
 
     it('chooses variants with largest audio channel count less than config' +
-        ' when no exact audio channel count match is possible', function() {
+        ' when no exact audio channel count match is possible', () => {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addVariant(0)
@@ -332,7 +332,7 @@ describe('StreamUtils', function() {
     });
 
     it('chooses variants with fewest audio channels when none fit in the ' +
-        'config', function() {
+        'config', () => {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addVariant(0)
@@ -351,14 +351,14 @@ describe('StreamUtils', function() {
     });
   });
 
-  describe('filterNewPeriod', function() {
+  describe('filterNewPeriod', () => {
     let fakeDrmEngine;
 
-    beforeAll(function() {
+    beforeAll(() => {
       fakeDrmEngine = new shaka.test.FakeDrmEngine();
     });
 
-    it('filters text streams with the full MIME type', function() {
+    it('filters text streams with the full MIME type', () => {
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addTextStream(1).mime('text/vtt')

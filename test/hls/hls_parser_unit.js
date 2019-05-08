@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('HlsParser', function() {
+describe('HlsParser', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
   const ManifestParser = shaka.test.ManifestParser;
   const TextStreamKind = shaka.util.ManifestParserUtils.TextStreamKind;
@@ -43,7 +43,7 @@ describe('HlsParser', function() {
   /** @type {!ArrayBuffer} */
   let selfInitializingSegmentData;
 
-  beforeEach(function() {
+  beforeEach(() => {
     // TODO: use StreamGenerator?
     initSegmentData = new Uint8Array([
       0x00, 0x00, 0x00, 0x30, // size (48)
@@ -121,7 +121,7 @@ describe('HlsParser', function() {
     return actual;
   }
 
-  it('parses manifest attributes', function(done) {
+  it('parses manifest attributes', (done) => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
@@ -195,11 +195,11 @@ describe('HlsParser', function() {
         .setResponseValue('test:/main.mp4', segmentData);
 
     parser.start('test:/master', playerInterface)
-        .then(function(actual) { expect(actual).toEqual(manifest); })
+        .then((actual) => { expect(actual).toEqual(manifest); })
         .catch(fail).then(done);
   });
 
-  it('ignores duplicate CODECS', async function() {
+  it('ignores duplicate CODECS', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1.4d001e,avc1.42000d",',
@@ -227,7 +227,7 @@ describe('HlsParser', function() {
     await testHlsParser(master, media, manifest);
   });
 
-  it('parses video-only variant', async function() {
+  it('parses video-only variant', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
@@ -719,7 +719,7 @@ describe('HlsParser', function() {
     await testHlsParser(master, media, manifest);
   });
 
-  it('should call filterAllPeriods for parsing', function(done) {
+  it('should call filterAllPeriods for parsing', (done) => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
@@ -747,7 +747,7 @@ describe('HlsParser', function() {
     playerInterface.filterAllPeriods = Util.spyFunc(filterAllPeriods);
 
     parser.start('test:/master', playerInterface)
-        .then(function(manifest) {
+        .then((manifest) => {
           expect(filterAllPeriods.calls.count()).toBe(1);
         }).catch(fail).then(done);
   });
@@ -1065,7 +1065,7 @@ describe('HlsParser', function() {
     expect(actual).toEqual(manifest);
   });
 
-  it('allows init segments in text streams', function(done) {
+  it('allows init segments in text streams', (done) => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
@@ -1103,7 +1103,7 @@ describe('HlsParser', function() {
         .setResponseValue('test:/main.mp4', segmentData);
 
     parser.start('test:/master', playerInterface)
-        .then(function(actual) { expect(actual).toEqual(manifest); })
+        .then((actual) => { expect(actual).toEqual(manifest); })
         .catch(fail).then(done);
   });
 
@@ -1139,7 +1139,7 @@ describe('HlsParser', function() {
     await testHlsParser(master, media, manifest);
   });
 
-  it('constructs relative URIs', function(done) {
+  it('constructs relative URIs', (done) => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
@@ -1166,7 +1166,7 @@ describe('HlsParser', function() {
         .setResponseValue('test:/host/video/segment.mp4', segmentData);
 
     parser.start('test:/host/master.m3u8', playerInterface)
-        .then(function(actual) {
+        .then((actual) => {
           const video = actual.periods[0].variants[0].video;
           const audio = actual.periods[0].variants[0].audio;
 
@@ -1326,7 +1326,7 @@ describe('HlsParser', function() {
     await testHlsParser(master, media, manifest);
   });
 
-  describe('Errors out', function() {
+  describe('Errors out', () => {
     const Code = shaka.util.Error.Code;
 
     /**
@@ -1346,13 +1346,13 @@ describe('HlsParser', function() {
 
       parser.start('test:/master', playerInterface)
             .then(fail)
-            .catch(function(e) {
+            .catch((e) => {
                 shaka.test.Util.expectToEqualError(e, error);
               })
             .then(done);
     }
 
-    it('if multiple init sections were provided', function(done) {
+    it('if multiple init sections were provided', (done) => {
       const master = [
         '#EXTM3U\n',
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
@@ -1379,7 +1379,7 @@ describe('HlsParser', function() {
       verifyError(master, media, error, done);
     });
 
-    it('if unable to guess mime type', function(done) {
+    it('if unable to guess mime type', (done) => {
       const master = [
         '#EXTM3U\n',
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
@@ -1405,7 +1405,7 @@ describe('HlsParser', function() {
       verifyError(master, media, error, done);
     });
 
-    it('if unable to guess codecs', function(done) {
+    it('if unable to guess codecs', (done) => {
       const master = [
         '#EXTM3U\n',
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="aaa,bbb",',
@@ -1433,7 +1433,7 @@ describe('HlsParser', function() {
       verifyError(master, media, error, done);
     });
 
-    it('if all variants are encrypted with AES-128', function(done) {
+    it('if all variants are encrypted with AES-128', (done) => {
       const master = [
         '#EXTM3U\n',
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
@@ -1461,7 +1461,7 @@ describe('HlsParser', function() {
       verifyError(master, media, error, done);
     });
 
-    describe('if required attributes are missing', function() {
+    describe('if required attributes are missing', () => {
       /**
        * @param {string} master
        * @param {string} media
@@ -1478,7 +1478,7 @@ describe('HlsParser', function() {
         verifyError(master, media, error, done);
       }
 
-      it('bandwidth', function(done) {
+      it('bandwidth', (done) => {
         const master = [
           '#EXTM3U\n',
           '#EXT-X-STREAM-INF:CODECS="avc1,mp4a",',
@@ -1499,7 +1499,7 @@ describe('HlsParser', function() {
         verifyMissingAttribute(master, media, 'BANDWIDTH', done);
       });
 
-      it('uri', function(done) {
+      it('uri', (done) => {
         const master = [
           '#EXTM3U\n',
           '#EXT-X-STREAM-INF:CODECS="avc1,mp4a",BANDWIDTH=200,',
@@ -1521,7 +1521,7 @@ describe('HlsParser', function() {
       });
     });
 
-    describe('if required tags are missing', function() {
+    describe('if required tags are missing', () => {
       /**
        * @param {string} master
        * @param {string} media
@@ -1538,7 +1538,7 @@ describe('HlsParser', function() {
         verifyError(master, media, error, done);
       }
 
-      it('EXTINF', function(done) {
+      it('EXTINF', (done) => {
         const master = [
           '#EXTM3U\n',
           '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
@@ -1560,7 +1560,7 @@ describe('HlsParser', function() {
     });
   });  // Errors out
 
-  describe('getStartTime_', function() {
+  describe('getStartTime_', () => {
     /** @type {number} */
     let segmentDataStartTime;
     /** @type {!ArrayBuffer} */
@@ -1589,7 +1589,7 @@ describe('HlsParser', function() {
     // Nit: this value is an implementation detail of the fix for #1106
     const partialEndByte = expectedStartByte + 2048 - 1;
 
-    beforeEach(function() {
+    beforeEach(() => {
       // TODO: use StreamGenerator?
       segmentData = new Uint8Array([
         0x00, 0x00, 0x00, 0x24, // size (36)
@@ -1924,7 +1924,7 @@ describe('HlsParser', function() {
           .setResponseValue('http://foo/media/init.mp4', initSegmentData)
           .setResponseValue('http://foo/media/main.mp4', segmentData);
 
-    fakeNetEngine.setResponseFilter(function(type, response) {
+    fakeNetEngine.setResponseFilter((type, response) => {
       // Simulate support for relative URIs in the browser by setting the
       // absolute URI in response.uri.
       if (response.uri == 'media/master') {

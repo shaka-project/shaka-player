@@ -15,33 +15,33 @@
  * limitations under the License.
  */
 
-describe('LanguageUtils', function() {
+describe('LanguageUtils', () => {
   const LanguageUtils = shaka.util.LanguageUtils;
 
-  describe('areLocaleCompatible', function() {
-    it('works for language', function() {
+  describe('areLocaleCompatible', () => {
+    it('works for language', () => {
       expect(LanguageUtils.areLocaleCompatible('en', 'en')).toBeTruthy();
       expect(LanguageUtils.areLocaleCompatible('en', 'fr')).toBeFalsy();
     });
 
-    it('works for language and region', function() {
+    it('works for language and region', () => {
       expect(LanguageUtils.areLocaleCompatible('en-US', 'en-US')).toBeTruthy();
       expect(LanguageUtils.areLocaleCompatible('en-US', 'en-CA')).toBeFalsy();
     });
 
-    it('ignores dialect', function() {
+    it('ignores dialect', () => {
       expect(LanguageUtils.areLocaleCompatible(
           'en-US-tx', 'en-US-wa')).toBeTruthy();
     });
   });
 
-  describe('areLanguageCompatible', function() {
-    it('works for language', function() {
+  describe('areLanguageCompatible', () => {
+    it('works for language', () => {
       expect(LanguageUtils.areLanguageCompatible('en', 'en')).toBeTruthy();
       expect(LanguageUtils.areLanguageCompatible('en', 'fr')).toBeFalsy();
     });
 
-    it('works for language and region', function() {
+    it('works for language and region', () => {
       expect(LanguageUtils.areLanguageCompatible(
           'en-US', 'en-US')).toBeTruthy();
       expect(LanguageUtils.areLanguageCompatible(
@@ -49,44 +49,44 @@ describe('LanguageUtils', function() {
       expect(LanguageUtils.areLanguageCompatible('en-CA', 'fr-CA')).toBeFalsy();
     });
 
-    it('works for dialects', function() {
+    it('works for dialects', () => {
       expect(LanguageUtils.areLanguageCompatible(
           'en-US-tx', 'en-US-wa')).toBeTruthy();
     });
   });
 
-  describe('isSiblingOf', function() {
-    it('accepts self', function() {
+  describe('isSiblingOf', () => {
+    it('accepts self', () => {
       expect(LanguageUtils.isSiblingOf('en-US', 'en-US')).toBeTruthy();
     });
 
-    it('rejects other languages', function() {
+    it('rejects other languages', () => {
       expect(LanguageUtils.isSiblingOf('en-CA', 'fr-CA')).toBeFalsy();
     });
 
-    it('requires region', function() {
+    it('requires region', () => {
       expect(LanguageUtils.isSiblingOf('en', 'en')).toBeFalsy();
       expect(LanguageUtils.isSiblingOf('en-US', 'en')).toBeFalsy();
     });
   });
 
-  describe('isParentOf', function() {
-    it('rejects self', function() {
+  describe('isParentOf', () => {
+    it('rejects self', () => {
       expect(LanguageUtils.isParentOf('en', 'en')).toBeFalsy();
     });
 
-    it('rejects other languages', function() {
+    it('rejects other languages', () => {
       expect(LanguageUtils.isParentOf('en', 'fr')).toBeFalsy();
     });
 
-    it('requires region', function() {
+    it('requires region', () => {
       expect(LanguageUtils.isParentOf('en', 'en-US')).toBeTruthy();
       expect(LanguageUtils.isParentOf('en', 'en-CA')).toBeTruthy();
     });
   });
 
-  describe('findClosestLocale', function() {
-    it('returns null when nothing is found', function() {
+  describe('findClosestLocale', () => {
+    it('returns null when nothing is found', () => {
       const options = ['fr', 'en', 'es'];
       const empty = [];
 
@@ -94,20 +94,20 @@ describe('LanguageUtils', function() {
       expect(LanguageUtils.findClosestLocale('zh', empty)).toBe(null);
     });
 
-    it('finds locale compatible matches', function() {
+    it('finds locale compatible matches', () => {
       const options = ['fr', 'en', 'en-US', 'es'];
 
       expect(LanguageUtils.findClosestLocale('en', options)).toBe('en');
       expect(LanguageUtils.findClosestLocale('en-US', options)).toBe('en-US');
     });
 
-    it('find language matches', function() {
+    it('find language matches', () => {
       const options = ['en', 'fr', 'en-CA'];
       // Should pick 'en' over 'en-CA'.
       expect(LanguageUtils.findClosestLocale('en-US', options)).toBe('en');
     });
 
-    it('finds language compatible matches', function() {
+    it('finds language compatible matches', () => {
       const options = ['en-CA', 'en-US'];
 
       // Should return the first one that is language-compatible.
@@ -115,30 +115,30 @@ describe('LanguageUtils', function() {
     });
   });
 
-  describe('normalize', function() {
-    it('standardizes base language', function() {
+  describe('normalize', () => {
+    it('standardizes base language', () => {
       expect(LanguageUtils.normalize('eng')).toBe('en');
       expect(LanguageUtils.normalize('ENG')).toBe('en');
       expect(LanguageUtils.normalize('EN')).toBe('en');
     });
 
-    it('standardized region', function() {
+    it('standardized region', () => {
       expect(LanguageUtils.normalize('en-US')).toBe('en-US');
       expect(LanguageUtils.normalize('en-us')).toBe('en-US');
     });
 
-    it('ignored unknown base languages', function() {
+    it('ignored unknown base languages', () => {
       expect(LanguageUtils.normalize('elvish')).toBe('elvish');
       expect(LanguageUtils.normalize(
           'elvish-woodland')).toBe('elvish-WOODLAND');
     });
   });
 
-  describe('getLocaleForText', function() {
+  describe('getLocaleForText', () => {
     const notNormalEnglish = 'eng';
     const english = 'en';
 
-    it('normalizes language', function() {
+    it('normalizes language', () => {
       const stream = makeTextStream(notNormalEnglish);
       expect(LanguageUtils.getLocaleForText(stream)).toBe(english);
     });
@@ -157,62 +157,62 @@ describe('LanguageUtils', function() {
     }
   });
 
-  describe('getLocaleForVariant', function() {
+  describe('getLocaleForVariant', () => {
     const notNormalEnglish = 'eng';
     const english = 'en';
     const french = 'fr';
 
-    it('normalizes language from variant', function() {
+    it('normalizes language from variant', () => {
       const variant = makeVariant(notNormalEnglish, '', '');
       expect(LanguageUtils.getLocaleForVariant(variant)).toBe(english);
     });
 
-    it('normalizes language from audio', function() {
+    it('normalizes language from audio', () => {
       const variant = makeVariant('', notNormalEnglish, '');
       expect(LanguageUtils.getLocaleForVariant(variant)).toBe(english);
     });
 
-    it('normalizes language from video', function() {
+    it('normalizes language from video', () => {
       const variant = makeVariant('', '', notNormalEnglish);
       expect(LanguageUtils.getLocaleForVariant(variant)).toBe(english);
     });
 
-    it('gets language when only in variant', function() {
+    it('gets language when only in variant', () => {
       const variant = makeVariant(english, '', '');
       expect(LanguageUtils.getLocaleForVariant(variant)).toBe(english);
     });
 
-    it('gets language when only in audio stream', function() {
+    it('gets language when only in audio stream', () => {
       const variant = makeVariant('', english, '');
       expect(LanguageUtils.getLocaleForVariant(variant)).toBe(english);
     });
 
-    it('gets language when only in video stream', function() {
+    it('gets language when only in video stream', () => {
       const variant = makeVariant('', '', english);
       expect(LanguageUtils.getLocaleForVariant(variant)).toBe(english);
     });
 
-    it('prefers variant over audio', function() {
+    it('prefers variant over audio', () => {
       const variant = makeVariant(english, french, '');
       expect(LanguageUtils.getLocaleForVariant(variant)).toBe(english);
     });
 
-    it('prefers variant over audio', function() {
+    it('prefers variant over audio', () => {
       const variant = makeVariant(english, french, '');
       expect(LanguageUtils.getLocaleForVariant(variant)).toBe(english);
     });
 
-    it('prefers variant over video', function() {
+    it('prefers variant over video', () => {
       const variant = makeVariant(english, '', french);
       expect(LanguageUtils.getLocaleForVariant(variant)).toBe(english);
     });
 
-    it('prefers audio over video', function() {
+    it('prefers audio over video', () => {
       const variant = makeVariant('', english, french);
       expect(LanguageUtils.getLocaleForVariant(variant)).toBe(english);
     });
 
-    it('falls back to und', function() {
+    it('falls back to und', () => {
       const variant = makeVariant('', '', '');
       expect(LanguageUtils.getLocaleForVariant(variant)).toBe('und');
     });

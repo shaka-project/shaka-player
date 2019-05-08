@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('WebmSegmentIndexParser', function() {
+describe('WebmSegmentIndexParser', () => {
   const indexSegmentUri = '/base/test/test/assets/index-segment.webm';
   const initSegmentUri = '/base/test/test/assets/init-segment.webm';
 
@@ -32,7 +32,7 @@ describe('WebmSegmentIndexParser', function() {
     initSegment = responses[1];
   });
 
-  it('rejects a non-index segment ', function() {
+  it('rejects a non-index segment ', () => {
     const error = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.MEDIA,
@@ -45,7 +45,7 @@ describe('WebmSegmentIndexParser', function() {
     }
   });
 
-  it('rejects an invalid init segment ', function() {
+  it('rejects an invalid init segment ', () => {
     const error = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.MEDIA,
@@ -58,7 +58,7 @@ describe('WebmSegmentIndexParser', function() {
     }
   });
 
-  it('parses index segment ', function() {
+  it('parses index segment ', () => {
     const result = parser.parse(indexSegment, initSegment, [], 0);
     const references =
         [
@@ -80,7 +80,7 @@ describe('WebmSegmentIndexParser', function() {
     }
   });
 
-  it('takes a scaled presentationTimeOffset in seconds', function() {
+  it('takes a scaled presentationTimeOffset in seconds', () => {
     const result = parser.parse(indexSegment, initSegment, [], 2);
     const references =
         [

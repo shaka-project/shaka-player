@@ -52,11 +52,11 @@ shaka.test.FakeAbrManager = function() {
 
   ret.chooseIndex = 0;
 
-  ret.init.and.callFake(function(switchCallback) {
+  ret.init.and.callFake((switchCallback) => {
     ret.switchCallback = switchCallback;
   });
-  ret.setVariants.and.callFake(function(arg) { ret.variants = arg; });
-  ret.chooseVariant.and.callFake(function() {
+  ret.setVariants.and.callFake((arg) => { ret.variants = arg; });
+  ret.chooseVariant.and.callFake(() => {
     return ret.variants[ret.chooseIndex];
   });
 
@@ -137,19 +137,19 @@ shaka.test.FakeStreamingEngine = function(onChooseStreams, onCanSwitch) {
   ]);
   ret.destroy.and.callFake(resolve);
   ret.getBufferingPeriod.and.returnValue(null);
-  ret.getBufferingAudio.and.callFake(function() { return activeAudio; });
-  ret.getBufferingVideo.and.callFake(function() { return activeVideo; });
-  ret.getBufferingText.and.callFake(function() { return activeText; });
-  ret.loadNewTextStream.and.callFake(function(stream) {
+  ret.getBufferingAudio.and.callFake(() => { return activeAudio; });
+  ret.getBufferingVideo.and.callFake(() => { return activeVideo; });
+  ret.getBufferingText.and.callFake(() => { return activeText; });
+  ret.loadNewTextStream.and.callFake((stream) => {
     activeText = stream;
     return Promise.resolve();
   });
-  ret.unloadTextStream.and.callFake(function() {
+  ret.unloadTextStream.and.callFake(() => {
     activeText = null;
   });
-  ret.start.and.callFake(function() {
+  ret.start.and.callFake(() => {
     const chosen = onChooseStreams();
-    return Promise.resolve().then(function() {
+    return Promise.resolve().then(() => {
       if (chosen.variant && chosen.variant.audio) {
         activeAudio = chosen.variant.audio;
       }
@@ -161,11 +161,11 @@ shaka.test.FakeStreamingEngine = function(onChooseStreams, onCanSwitch) {
       }
     });
   });
-  ret.switchVariant.and.callFake(function(variant) {
+  ret.switchVariant.and.callFake((variant) => {
     activeAudio = variant.audio || activeAudio;
     activeVideo = variant.video || activeVideo;
   });
-  ret.switchTextStream.and.callFake(function(textStream) {
+  ret.switchTextStream.and.callFake((textStream) => {
     activeText = textStream;
   });
   ret.onChooseStreams = onChooseStreams;
@@ -207,9 +207,9 @@ shaka.test.FakeManifestParser = function(manifest) {
   const ret = jasmine.createSpyObj('FakeManifestParser', [
     'start', 'stop', 'configure', 'update', 'onExpirationUpdated',
   ]);
-  ret.start.and.callFake(function(manifestUri, playerInterface) {
+  ret.start.and.callFake((manifestUri, playerInterface) => {
     ret.playerInterface = playerInterface;
-    return Promise.resolve().then(function() {
+    return Promise.resolve().then(() => {
       return manifest;
     });
   });
@@ -280,12 +280,12 @@ shaka.test.FakeVideo = function(currentTime) {
     on: {},  // event listeners
   };
   video.setMediaKeys.and.returnValue(Promise.resolve());
-  video.addTextTrack.and.callFake(function(kind, id) {
+  video.addTextTrack.and.callFake((kind, id) => {
     const track = new shaka.test.FakeTextTrack();
     video.textTracks.push(track);
     return track;
   });
-  video.addEventListener.and.callFake(function(name, callback) {
+  video.addEventListener.and.callFake((name, callback) => {
     video.on[name] = callback;
   });
 
@@ -338,7 +338,7 @@ shaka.test.FakePresentationTimeline = function() {
   const getStart = jasmine.createSpy('getSeekRangeStart');
   const getEnd = jasmine.createSpy('getSeekRangeEnd');
   const getSafeStart = jasmine.createSpy('getSafeSeekRangeStart');
-  getSafeStart.and.callFake(function(delay) {
+  getSafeStart.and.callFake((delay) => {
     const end = shaka.test.Util.invokeSpy(getEnd);
     return Math.min(shaka.test.Util.invokeSpy(getStart) + delay, end);
   });
@@ -522,10 +522,10 @@ shaka.test.FakeTextTrack = function() {
     removeCue: jasmine.createSpy('removeCue'),
     cues: [],
   };
-  track.addCue.and.callFake(function(cue) {
+  track.addCue.and.callFake((cue) => {
     track.cues.push(cue);
   });
-  track.removeCue.and.callFake(function(cue) {
+  track.removeCue.and.callFake((cue) => {
     const idx = track.cues.indexOf(cue);
     expect(idx).not.toBeLessThan(0);
     track.cues.splice(idx, 1);

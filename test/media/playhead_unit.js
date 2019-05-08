@@ -99,7 +99,7 @@ let PlayingTestInfo;
 let SeekTestInfo;
 
 
-describe('Playhead', function() {
+describe('Playhead', () => {
   const Util = shaka.test.Util;
 
   /** @type {!shaka.test.FakeVideo} */
@@ -121,15 +121,15 @@ describe('Playhead', function() {
   /** @type {!jasmine.Spy} */
   let onEvent;
 
-  beforeAll(function() {
+  beforeAll(() => {
     jasmine.clock().install();
   });
 
-  afterAll(function() {
+  afterAll(() => {
     jasmine.clock().uninstall();
   });
 
-  beforeEach(function() {
+  beforeEach(() => {
     video = new shaka.test.FakeVideo();
     timeline = new shaka.test.FakePresentationTimeline();
 
@@ -167,8 +167,8 @@ describe('Playhead', function() {
     jasmine.clock().mockDate(mockDate);
   }
 
-  describe('getTime', function() {
-    it('returns current time when the video is paused', function() {
+  describe('getTime', () => {
+    it('returns current time when the video is paused', () => {
       video.readyState = HTMLMediaElement.HAVE_METADATA;
       playhead = new shaka.media.MediaSourcePlayhead(
           video,
@@ -190,7 +190,7 @@ describe('Playhead', function() {
       expect(playhead.getTime()).toBe(5);
     });
 
-    it('returns the correct time when readyState starts at 0', function() {
+    it('returns the correct time when readyState starts at 0', () => {
       playhead = new shaka.media.MediaSourcePlayhead(
           video,
           manifest,
@@ -228,7 +228,7 @@ describe('Playhead', function() {
       expect(playhead.getTime()).toBe(5);
     });
 
-    it('returns the correct time when readyState starts at 1', function() {
+    it('returns the correct time when readyState starts at 1', () => {
       video.readyState = HTMLMediaElement.HAVE_METADATA;
 
       playhead = new shaka.media.MediaSourcePlayhead(
@@ -246,7 +246,7 @@ describe('Playhead', function() {
       expect(playhead.getTime()).toBe(6);
     });
 
-    it('allows using startTime of 0', function() {
+    it('allows using startTime of 0', () => {
       video.readyState = HTMLMediaElement.HAVE_METADATA;
       timeline.isLive.and.returnValue(true);
       timeline.getDuration.and.returnValue(Infinity);
@@ -260,7 +260,7 @@ describe('Playhead', function() {
       expect(playhead.getTime()).toBe(0);
     });
 
-    it('bumps startTime back from duration', function() {
+    it('bumps startTime back from duration', () => {
       video.readyState = HTMLMediaElement.HAVE_METADATA;
       timeline.isLive.and.returnValue(false);
       timeline.getSeekRangeStart.and.returnValue(0);
@@ -275,7 +275,7 @@ describe('Playhead', function() {
       expect(video.currentTime).toBe(59);  // duration - durationBackoff
     });
 
-    it('playback from a certain offset from live edge for live', function() {
+    it('playback from a certain offset from live edge for live', () => {
       video.readyState = HTMLMediaElement.HAVE_METADATA;
       timeline.isLive.and.returnValue(true);
       timeline.getDuration.and.returnValue(Infinity);
@@ -289,7 +289,7 @@ describe('Playhead', function() {
       expect(playhead.getTime()).toBe(45);
     });
 
-    it('playback from segment seek range start time', function() {
+    it('playback from segment seek range start time', () => {
       video.readyState = HTMLMediaElement.HAVE_METADATA;
       timeline.isLive.and.returnValue(true);
       timeline.getDuration.and.returnValue(Infinity);
@@ -304,7 +304,7 @@ describe('Playhead', function() {
       expect(playhead.getTime()).toBe(30);
     });
 
-    it('does not change currentTime if it\'s not 0', function() {
+    it('does not change currentTime if it\'s not 0', () => {
       playhead = new shaka.media.MediaSourcePlayhead(
           video,
           manifest,
@@ -331,7 +331,7 @@ describe('Playhead', function() {
     // This is important for recovering from drift.
     // See: https://github.com/google/shaka-player/issues/1105
     // TODO: Re-evaluate after https://github.com/google/shaka-player/issues/999
-    it('does not change once the initial position is set', function() {
+    it('does not change once the initial position is set', () => {
       timeline.isLive.and.returnValue(true);
       timeline.getDuration.and.returnValue(Infinity);
       timeline.getSeekRangeStart.and.returnValue(0);
@@ -361,7 +361,7 @@ describe('Playhead', function() {
     });
   });  // getTime
 
-  it('clamps playhead after seeking for live', function() {
+  it('clamps playhead after seeking for live', () => {
     video.readyState = HTMLMediaElement.HAVE_METADATA;
 
     video.buffered = createFakeBuffered([{start: 25, end: 55}]);
@@ -520,7 +520,7 @@ describe('Playhead', function() {
     expect(onSeek).toHaveBeenCalled();
   });  // clamps playhead after seeking for live
 
-  it('clamps playhead after seeking for VOD', function() {
+  it('clamps playhead after seeking for VOD', () => {
     video.readyState = HTMLMediaElement.HAVE_METADATA;
 
     video.buffered = createFakeBuffered([{start: 25, end: 55}]);
@@ -569,7 +569,7 @@ describe('Playhead', function() {
     expect(onSeek).toHaveBeenCalled();
   });  // clamps playhead after seeking for VOD
 
-  it('doesn\'t repeatedly re-seek', function() {
+  it('doesn\'t repeatedly re-seek', () => {
     video.readyState = HTMLMediaElement.HAVE_METADATA;
 
     video.buffered = createFakeBuffered([{start: 25, end: 55}]);
@@ -621,7 +621,7 @@ describe('Playhead', function() {
     expect(onSeek).not.toHaveBeenCalled();
   });  // doesn't repeatedly re-seek
 
-  it('handles live manifests with no seek range', function() {
+  it('handles live manifests with no seek range', () => {
     video.buffered = createFakeBuffered([{start: 1000, end: 1030}]);
     video.readyState = HTMLMediaElement.HAVE_METADATA;
 
@@ -674,14 +674,14 @@ describe('Playhead', function() {
     expect(seekCount).toBe(1);
   });  // handles live manifests with no seek range
 
-  describe('clamps playhead after resuming', function() {
-    beforeEach(function() {
+  describe('clamps playhead after resuming', () => {
+    beforeEach(() => {
       video.readyState = HTMLMediaElement.HAVE_METADATA;
 
       video.buffered = createFakeBuffered([{start: 5, end: 35}]);
     });
 
-    it('(live case)', function() {
+    it('(live case)', () => {
       timeline.isLive.and.returnValue(true);
       timeline.getDuration.and.returnValue(Infinity);
       timeline.getSeekRangeStart.and.returnValue(5);
@@ -712,7 +712,7 @@ describe('Playhead', function() {
       expect(onSeek).toHaveBeenCalled();
     });
 
-    it('(VOD case)', function() {
+    it('(VOD case)', () => {
       timeline.isLive.and.returnValue(false);
       timeline.getSeekRangeStart.and.returnValue(5);
       timeline.getSafeSeekRangeStart.and.returnValue(5);
@@ -744,7 +744,7 @@ describe('Playhead', function() {
     });
   });  // clamps playhead after resuming
 
-  it('clamps playhead even before seeking completes', function() {
+  it('clamps playhead even before seeking completes', () => {
     video.readyState = HTMLMediaElement.HAVE_METADATA;
 
     video.buffered = createFakeBuffered([{start: 25, end: 55}]);
@@ -777,8 +777,8 @@ describe('Playhead', function() {
     expect(playhead.getTime()).not.toBeLessThan(5);
   });  // clamps playhead even before seeking completes
 
-  describe('gap jumping', function() {
-    beforeEach(function() {
+  describe('gap jumping', () => {
+    beforeEach(() => {
       timeline.isLive.and.returnValue(false);
       timeline.getSafeSeekRangeStart.and.returnValue(0);
       timeline.getSeekRangeStart.and.returnValue(0);
@@ -788,8 +788,8 @@ describe('Playhead', function() {
       config.smallGapLimit = 1;
     });
 
-    describe('when playing', function() {
-      describe('with small gaps', function() {
+    describe('when playing', () => {
+      describe('with small gaps', () => {
         playingTest('won\'t jump at end of single region', {
           buffered: [{start: 0, end: 10}],
           start: 3,
@@ -833,7 +833,7 @@ describe('Playhead', function() {
         });
       });  // with small gaps
 
-      describe('with large gaps', function() {
+      describe('with large gaps', () => {
         playingTest('will fire an event', {
           buffered: [{start: 0, end: 10}, {start: 30, end: 40}],
           start: 5,
@@ -887,12 +887,12 @@ describe('Playhead', function() {
        * @param {PlayingTestInfo} data
        */
       function playingTest(name, data) {
-        it(name, function() {
+        it(name, () => {
           video.buffered = createFakeBuffered(data.buffered);
           video.currentTime = data.start;
           video.readyState = HTMLMediaElement.HAVE_ENOUGH_DATA;
 
-          onEvent.and.callFake(function(event) {
+          onEvent.and.callFake((event) => {
             if (data.preventDefault) {
               event.preventDefault();
             }
@@ -939,8 +939,8 @@ describe('Playhead', function() {
       }
     });  // when playing
 
-    describe('with buffered seeks', function() {
-      describe('with small gaps', function() {
+    describe('with buffered seeks', () => {
+      describe('with small gaps', () => {
         seekTest('won\'t seek when past the end', {
           buffered: [{start: 0, end: 10}],
           start: 4,
@@ -984,7 +984,7 @@ describe('Playhead', function() {
         });
       });  // with small gaps
 
-      describe('with large gaps', function() {
+      describe('with large gaps', () => {
         seekTest('will raise event', {
           buffered: [{start: 0, end: 10}, {start: 30, end: 40}],
           start: 5,
@@ -1014,8 +1014,8 @@ describe('Playhead', function() {
       });  // with large gaps
     });  // with buffered seeks
 
-    describe('with unbuffered seeks', function() {
-      describe('with small gaps', function() {
+    describe('with unbuffered seeks', () => {
+      describe('with small gaps', () => {
         seekTest('won\'t jump when seeking into buffered range', {
           // [0-10], [20-30], [31-40]
           buffered: [{start: 0, end: 10}],
@@ -1099,7 +1099,7 @@ describe('Playhead', function() {
         });
       });  // with small gaps
 
-      describe('with large gaps', function() {
+      describe('with large gaps', () => {
         seekTest('will jump large gap at beginning', {
           buffered: [{start: 20, end: 30}],
           newBuffered: [{start: 20, end: 30}],
@@ -1145,7 +1145,7 @@ describe('Playhead', function() {
       });  // with large gaps
     });  // with unbuffered seeks
 
-    it('doesn\'t gap jump if the seeking event is late', function() {
+    it('doesn\'t gap jump if the seeking event is late', () => {
       const buffered = [{start: 10, end: 20}];
       video.buffered = createFakeBuffered(buffered);
       video.currentTime = 12;
@@ -1177,7 +1177,7 @@ describe('Playhead', function() {
       expect(video.currentTime).toBe(3);
     });
 
-    it('works with rounding errors when seeking', function() {
+    it('works with rounding errors when seeking', () => {
       // If the browser sets the time to slightly before where we seek to, we
       // shouldn't get stuck in an infinite loop trying to jump the tiny gap.
       // https://github.com/google/shaka-player/issues/1309
@@ -1221,12 +1221,12 @@ describe('Playhead', function() {
      * @param {SeekTestInfo} data
      */
     function seekTest(name, data) {
-      it(name, function() {
+      it(name, () => {
         video.buffered = createFakeBuffered(data.buffered);
         video.currentTime = data.start;
         video.readyState = HTMLMediaElement.HAVE_ENOUGH_DATA;
 
-        onEvent.and.callFake(function(event) {
+        onEvent.and.callFake((event) => {
           if (data.preventDefault) {
             event.preventDefault();
           }

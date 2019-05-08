@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('DashParser SegmentTemplate', function() {
+describe('DashParser SegmentTemplate', () => {
   const Dash = shaka.test.Dash;
   const ManifestParser = shaka.test.ManifestParser;
   const baseUri = 'http://example.com/';
@@ -27,7 +27,7 @@ describe('DashParser SegmentTemplate', function() {
   /** @type {shaka.extern.ManifestParser.PlayerInterface} */
   let playerInterface;
 
-  beforeEach(function() {
+  beforeEach(() => {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = shaka.test.Dash.makeDashParser();
 
@@ -44,7 +44,7 @@ describe('DashParser SegmentTemplate', function() {
   shaka.test.Dash.makeTimelineTests(
       'SegmentTemplate', 'media="s$Number$.mp4"', []);
 
-  describe('duration', function() {
+  describe('duration', () => {
     it('basic support', async () => {
       const source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="1" media="s$Number$.mp4"',
@@ -74,7 +74,7 @@ describe('DashParser SegmentTemplate', function() {
       await Dash.testSegmentIndex(source, references);
     });
 
-    it('honors presentationTimeOffset', function(done) {
+    it('honors presentationTimeOffset', (done) => {
       const source = Dash.makeSimpleManifestText([
         '<SegmentTemplate media="s$Number$.mp4" duration="10"',
         ' presentationTimeOffset="50" />',
@@ -82,7 +82,7 @@ describe('DashParser SegmentTemplate', function() {
 
       fakeNetEngine.setResponseText('dummy://foo', source);
       parser.start('dummy://foo', playerInterface)
-          .then(function(manifest) {
+          .then((manifest) => {
             expect(manifest.periods.length).toBe(1);
             expect(manifest.periods[0].variants.length).toBe(1);
 
@@ -110,21 +110,21 @@ describe('DashParser SegmentTemplate', function() {
       await Dash.testSegmentIndex(source, references);
     });
 
-    it('presentation start is parsed correctly', function(done) {
+    it('presentation start is parsed correctly', (done) => {
       const source = Dash.makeSimpleManifestText([
         '<SegmentTemplate media="s$Number$.mp4" duration="60" />',
       ], 30 /* duration */, /* startTime */ 30);
 
       fakeNetEngine.setResponseText('dummy://foo', source);
       parser.start('dummy://foo', playerInterface)
-          .then(function(manifest) {
+          .then((manifest) => {
             expect(manifest.presentationTimeline.getSeekRangeStart()).toBe(30);
           })
           .catch(fail).then(done);
     });
   });
 
-  describe('index', function() {
+  describe('index', () => {
     it('basic support', async () => {
       const source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="1" index="index-$Bandwidth$.mp4"',
@@ -259,7 +259,7 @@ describe('DashParser SegmentTemplate', function() {
     });
   });
 
-  describe('media template', function() {
+  describe('media template', () => {
     it('defaults to timeline when also has duration', async () => {
       const source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="0" duration="10"',
@@ -373,7 +373,7 @@ describe('DashParser SegmentTemplate', function() {
     });
   });
 
-  describe('rejects streams with', function() {
+  describe('rejects streams with', () => {
     it('bad container type', async () => {
       const source = [
         '<MPD mediaPresentationDuration="PT75S">',

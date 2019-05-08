@@ -350,7 +350,7 @@ shaka.ui.Overlay.createUI_ = function(container, video) {
   if (!video.controls) {
     player.configure(
         'textDisplayFactory',
-        function() { return new shaka.ui.TextDisplayer(video, container); });
+        () => { return new shaka.ui.TextDisplayer(video, container); });
   }
 
   container['ui'] = ui;

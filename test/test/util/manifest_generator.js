@@ -528,7 +528,7 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
   }
 
   const create =
-      jasmine.createSpy('createSegmentIndex').and.callFake(function() {
+      jasmine.createSpy('createSegmentIndex').and.callFake(() => {
         return Promise.resolve();
       });
   const find = jasmine.createSpy('findSegmentPosition').and.returnValue(null);

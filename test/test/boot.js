@@ -100,7 +100,7 @@ function getClientArg(name) {
   // seems to be OK.  I suspect Edge's Promise implementation is actually not in
   // native code, but rather something like a polyfill that binds to timer calls
   // the first time it needs to schedule something.
-  Promise.resolve().then(function() {});
+  Promise.resolve().then(() => {});
 
   // Set the default timeout to 120s for all asynchronous tests.
   jasmine.DEFAULT_TIMEOUT_INTERVAL = 120 * 1000;

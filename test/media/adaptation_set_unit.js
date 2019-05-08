@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-describe('AdaptationSet', function() {
-  describe('roles', function() {
+describe('AdaptationSet', () => {
+  describe('roles', () => {
     const mimeType = 'mime-type';
     const audioCodecs = ['a.35'];
     const videoCodecs = ['b.12'];
 
-    it('accepts matching roles', function() {
+    it('accepts matching roles', () => {
       const variants = [
         makeVariant(
             1,  // variant id
@@ -38,7 +38,7 @@ describe('AdaptationSet', function() {
       expect(set.canInclude(variants[1])).toBeTruthy();
     });
 
-    it('accepts matching empty roles', function() {
+    it('accepts matching empty roles', () => {
       const variants = [
         makeVariant(
             1,  // variant id
@@ -54,7 +54,7 @@ describe('AdaptationSet', function() {
       expect(set.canInclude(variants[1])).toBeTruthy();
     });
 
-    it('reject different roles', function() {
+    it('reject different roles', () => {
       const variants = [
         makeVariant(
             1,  // variant id
@@ -94,7 +94,7 @@ describe('AdaptationSet', function() {
     });
   });
 
-  it('rejects different mime types', function() {
+  it('rejects different mime types', () => {
     const variants = [
       makeVariant(
           1,  // variant id
@@ -113,7 +113,7 @@ describe('AdaptationSet', function() {
     expect(set.canInclude(variants[1])).toBeFalsy();
   });
 
-  it('rejects mis-aligned transmuxed streams', function() {
+  it('rejects mis-aligned transmuxed streams', () => {
     const variants = [
       makeVariant(
           1,  // variant id

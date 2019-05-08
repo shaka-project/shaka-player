@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('MediaSourceEngine', function() {
+describe('MediaSourceEngine', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
   const presentationDuration = 840;
 
@@ -37,7 +37,7 @@ describe('MediaSourceEngine', function() {
    */
   let textDisplayer;
 
-  beforeAll(function() {
+  beforeAll(() => {
     video = shaka.util.Dom.createVideoElement();
     document.body.appendChild(video);
   });
@@ -66,7 +66,7 @@ describe('MediaSourceEngine', function() {
     await mediaSourceEngine.destroy();
   });
 
-  afterAll(function() {
+  afterAll(() => {
     document.body.removeChild(video);
   });
 
@@ -193,14 +193,14 @@ describe('MediaSourceEngine', function() {
     expect(mediaSource.duration).toBeCloseTo(30);
   });
 
-  it('queues operations', function(done) {
+  it('queues operations', (done) => {
     const resolutionOrder = [];
     const requests = [];
 
     function checkOrder(p) {
       const nextIndex = requests.length;
       requests.push(p);
-      p.then(function() { resolutionOrder.push(nextIndex); });
+      p.then(() => { resolutionOrder.push(nextIndex); });
     }
 
     const initObject = new Map();

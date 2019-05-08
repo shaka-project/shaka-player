@@ -16,7 +16,7 @@
  */
 
 // Test DRM-related parsing.
-describe('DashParser ContentProtection', function() {
+describe('DashParser ContentProtection', () => {
   const Dash = shaka.test.Dash;
 
   /**
@@ -52,7 +52,7 @@ describe('DashParser ContentProtection', function() {
     };
 
     return dashParser.start('http://example.com', playerEvents)
-        .then(function(actual) { expect(actual).toEqual(expected); });
+        .then((actual) => { expect(actual).toEqual(expected); });
   }
 
   /**
@@ -135,7 +135,7 @@ describe('DashParser ContentProtection', function() {
    */
   function buildDrmInfo(keySystem, keyIds = [],
       base64Psshs = [], initDataKeyIds) {
-    const initData = base64Psshs.map(function(base64, index) {
+    const initData = base64Psshs.map((base64, index) => {
       /** @type {shaka.extern.InitDataOverride} */
       const initData = {
         initDataType: 'cenc',
@@ -155,7 +155,7 @@ describe('DashParser ContentProtection', function() {
     await testDashParser(source, expected);
   });
 
-  describe('maps standard scheme IDs', function() {
+  describe('maps standard scheme IDs', () => {
     /**
      * @param {string} name A name for the test
      * @param {!Array.<string>} uuids DRM scheme UUIDs
@@ -163,12 +163,12 @@ describe('DashParser ContentProtection', function() {
      */
     function testKeySystemMappings(name, uuids, keySystems) {
       it(name, async () => {
-        const adaptationSetLines = uuids.map(function(uri) {
+        const adaptationSetLines = uuids.map((uri) => {
           return sprintf('<ContentProtection schemeIdUri="urn:uuid:%s" />',
                          uri);
         });
         const source = buildManifestText(adaptationSetLines, [], []);
-        const drmInfos = keySystems.map(function(keySystem) {
+        const drmInfos = keySystems.map((keySystem) => {
           return buildDrmInfo(keySystem);
         });
         const expected = buildExpectedManifest(drmInfos);
@@ -737,15 +737,15 @@ describe('DashParser ContentProtection', function() {
   });
 });
 
-describe('In-manifest PlayReady and Widevine', function() {
+describe('In-manifest PlayReady and Widevine', () => {
   const ContentProtection = shaka.dash.ContentProtection;
   const strToXml = function(str) {
     const parser = new DOMParser();
     return parser.parseFromString(str, 'application/xml').documentElement;
   };
 
-  describe('getWidevineLicenseUrl', function() {
-    it('valid ms:laurl node', function() {
+  describe('getWidevineLicenseUrl', () => {
+    it('valid ms:laurl node', () => {
       const input = {
         init: null,
         keyId: null,
@@ -761,7 +761,7 @@ describe('In-manifest PlayReady and Widevine', function() {
       expect(actual).toEqual(expected);
     });
 
-     it('ms:laurl without license url', function() {
+     it('ms:laurl without license url', () => {
       const input = {
         init: null,
         keyId: null,
@@ -777,7 +777,7 @@ describe('In-manifest PlayReady and Widevine', function() {
       expect(actual).toEqual(expected);
     });
 
-     it('no ms:laurl node', function() {
+     it('no ms:laurl node', () => {
       const input = {
         init: null,
         keyId: null,
@@ -790,8 +790,8 @@ describe('In-manifest PlayReady and Widevine', function() {
     });
   });
 
-  describe('getPlayReadyLicenseURL', function() {
-    it('mspro', function() {
+  describe('getPlayReadyLicenseURL', () => {
+    it('mspro', () => {
       const laurl = [
         '<WRMHEADER>',
         '  <DATA>',
@@ -799,7 +799,7 @@ describe('In-manifest PlayReady and Widevine', function() {
         '  </DATA>',
         '</WRMHEADER>',
       ].join('\n');
-      const laurlCodes = laurl.split('').map(function(c) {
+      const laurlCodes = laurl.split('').map((c) => {
         return c.charCodeAt();
       });
       const prBytes = new Uint16Array([
@@ -833,7 +833,7 @@ describe('In-manifest PlayReady and Widevine', function() {
       expect(actual).toEqual(expected);
     });
 
-    it('no mspro', function() {
+    it('no mspro', () => {
       const input = {
         init: null,
         keyId: null,

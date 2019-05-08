@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-describe('SegmentReference', function() {
-  it('returns in getters values from constructor parameters', function() {
+describe('SegmentReference', () => {
+  it('returns in getters values from constructor parameters', () => {
     const reference = new shaka.media.SegmentReference(1, 2, 3,
-        function() { return ['x', 'y']; }, 4, 5);
+        (() => { return ['x', 'y']; }), 4, 5);
 
     expect(reference.getPosition()).toBe(1);
     expect(reference.getStartTime()).toBe(2);
@@ -29,10 +29,10 @@ describe('SegmentReference', function() {
   });
 });
 
-describe('InitSegmentReference', function() {
-  it('returns in getters values from constructor parameters', function() {
+describe('InitSegmentReference', () => {
+  it('returns in getters values from constructor parameters', () => {
     const reference = new shaka.media.InitSegmentReference(
-        function() { return ['x', 'y']; }, 4, 5);
+        (() => { return ['x', 'y']; }), 4, 5);
 
     expect(reference.createUris()).toEqual(['x', 'y']);
     expect(reference.getStartByte()).toBe(4);

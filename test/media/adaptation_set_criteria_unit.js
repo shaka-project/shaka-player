@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-describe('AdaptationSetCriteria', function() {
-  describe('preference based selection', function() {
+describe('AdaptationSetCriteria', () => {
+  describe('preference based selection', () => {
     function variants(manifest) {
       return manifest.periods[0].variants;
     }
 
-    it('chooses variants in user\'s preferred language', function() {
+    it('chooses variants in user\'s preferred language', () => {
       const manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addVariant(1)
@@ -41,7 +41,7 @@ describe('AdaptationSetCriteria', function() {
       ]);
     });
 
-    it('prefers primary variants', function() {
+    it('prefers primary variants', () => {
       const manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
          .addVariant(1)
@@ -61,7 +61,7 @@ describe('AdaptationSetCriteria', function() {
       ]);
     });
 
-    it('chooses variants in preferred language and role', function() {
+    it('chooses variants in preferred language and role', () => {
       const manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addVariant(1)
@@ -83,7 +83,7 @@ describe('AdaptationSetCriteria', function() {
       ]);
     });
 
-    it('chooses only one role, even if none is preferred', function() {
+    it('chooses only one role, even if none is preferred', () => {
       // Regression test for https://github.com/google/shaka-player/issues/949
       const manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
@@ -118,7 +118,7 @@ describe('AdaptationSetCriteria', function() {
       ]);
     });
 
-    it('chooses only one role, even if all are primary', function() {
+    it('chooses only one role, even if all are primary', () => {
       // Regression test for https://github.com/google/shaka-player/issues/949
       const manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
@@ -153,7 +153,7 @@ describe('AdaptationSetCriteria', function() {
       ]);
     });
 
-    it('chooses only one language, even if all are primary', function() {
+    it('chooses only one language, even if all are primary', () => {
       // Regression test for https://github.com/google/shaka-player/issues/918
       const manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
@@ -183,7 +183,7 @@ describe('AdaptationSetCriteria', function() {
     });
 
     it('chooses a role from among primary variants without language match',
-        function() {
+        () => {
           const manifest = new shaka.test.ManifestGenerator()
             .addPeriod(0)
               .addVariant(1)
@@ -219,7 +219,7 @@ describe('AdaptationSetCriteria', function() {
         });
 
     it('chooses a role from best language match, in spite of primary',
-        function() {
+        () => {
           const manifest = new shaka.test.ManifestGenerator()
             .addPeriod(0)
               .addVariant(1)
@@ -251,7 +251,7 @@ describe('AdaptationSetCriteria', function() {
           ]);
         });
 
-    it('chooses variants with preferred audio channels count', function() {
+    it('chooses variants with preferred audio channels count', () => {
       const manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addVariant(1)
@@ -272,7 +272,7 @@ describe('AdaptationSetCriteria', function() {
     });
 
     it('chooses variants with largest audio channel count less than config' +
-        ' when no exact audio channel count match is possible', function() {
+        ' when no exact audio channel count match is possible', () => {
       const manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addVariant(1)
@@ -293,7 +293,7 @@ describe('AdaptationSetCriteria', function() {
     });
 
     it('chooses variants with fewest audio channels when none fit in the ' +
-        'config', function() {
+        'config', () => {
       const manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
           .addVariant(1)

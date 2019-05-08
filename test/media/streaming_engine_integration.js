@@ -213,7 +213,7 @@ describe('StreamingEngine', () => {
     // request a segment that does not exist.
     netEngine = shaka.test.StreamingEngineUtil.createFakeNetworkingEngine(
         // Init segment generator:
-        function(type, periodNumber) {
+        (type, periodNumber) => {
           expect(periodNumber).toBeLessThan(periodStartTimes.length + 1);
           const wallClockTime = Date.now() / 1000;
           const segment = generators[type].getInitSegment(wallClockTime);
@@ -221,7 +221,7 @@ describe('StreamingEngine', () => {
           return segment;
         },
         // Media segment generator:
-        function(type, periodNumber, position) {
+        (type, periodNumber, position) => {
           expect(boundsCheckPosition(type, periodNumber, position))
               .not.toBeNull();
 
@@ -322,7 +322,7 @@ describe('StreamingEngine', () => {
         video.play();
       });
 
-      onBuffering.and.callFake(function(buffering) {
+      onBuffering.and.callFake((buffering) => {
         if (!buffering) {
           expect(startupComplete).toBeTruthy();
           video.playbackRate = 10;
@@ -526,7 +526,7 @@ describe('StreamingEngine', () => {
       expect(onEvent).toHaveBeenCalled();
     });
 
-    it('won\'t jump large gaps with preventDefault()', function(done) {
+    it('won\'t jump large gaps with preventDefault()', (done) => {
       config.jumpLargeGaps = true;
       setupGappyContent(/* gapAtStart */ 0, /* dropSegment */ true)
           .then(() => {
@@ -535,7 +535,7 @@ describe('StreamingEngine', () => {
               video.play();
             });
 
-            onEvent.and.callFake(function(event) {
+            onEvent.and.callFake((event) => {
               event.preventDefault();
               shaka.test.Util.delay(5).then(() => {
                 // IE/Edge somehow plays inside the gap.  Just make sure we

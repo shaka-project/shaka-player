@@ -178,9 +178,9 @@ ShakaReceiver.prototype.onPlayStateChange_ = function() {
   } else {
     // Show controls for 3 seconds.
     this.controlsElement_.style.opacity = 1;
-    this.controlsTimerId_ = window.setTimeout(function() {
+    this.controlsTimerId_ = window.setTimeout(() => {
       this.controlsElement_.style.opacity = 0;
-    }.bind(this), 3000);
+    }, 3000);
   }
 };
 

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('Mp4TtmlParser', function() {
+describe('Mp4TtmlParser', () => {
   const ttmlInitSegmentUri = '/base/test/test/assets/ttml-init.mp4';
   const ttmlSegmentUri = '/base/test/test/assets/ttml-segment.mp4';
   const ttmlSegmentMultipleMDATUri =
@@ -31,13 +31,13 @@ describe('Mp4TtmlParser', function() {
   /** @type {!Uint8Array} */
   let audioInitSegment;
 
-  beforeAll(function(done) {
+  beforeAll((done) => {
     Promise.all([
       shaka.test.Util.fetch(ttmlInitSegmentUri),
       shaka.test.Util.fetch(ttmlSegmentUri),
       shaka.test.Util.fetch(ttmlSegmentMultipleMDATUri),
       shaka.test.Util.fetch(audioInitSegmentUri),
-    ]).then(function(responses) {
+    ]).then((responses) => {
       ttmlInitSegment = new Uint8Array(responses[0]);
       ttmlSegment = new Uint8Array(responses[1]);
       ttmlSegmentMultipleMDAT = new Uint8Array(responses[2]);
@@ -45,11 +45,11 @@ describe('Mp4TtmlParser', function() {
     }).catch(fail).then(done);
   });
 
-  it('parses init segment', function() {
+  it('parses init segment', () => {
     new shaka.text.Mp4TtmlParser().parseInit(ttmlInitSegment);
   });
 
-  it('parses media segment', function() {
+  it('parses media segment', () => {
     const parser = new shaka.text.Mp4TtmlParser();
     parser.parseInit(ttmlInitSegment);
     const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
@@ -57,7 +57,7 @@ describe('Mp4TtmlParser', function() {
     expect(ret.length).toBe(10);
   });
 
-  it('handles media segments with multiple mdats', function() {
+  it('handles media segments with multiple mdats', () => {
     const parser = new shaka.text.Mp4TtmlParser();
     parser.parseInit(ttmlInitSegment);
     const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
@@ -65,7 +65,7 @@ describe('Mp4TtmlParser', function() {
     expect(ret.length).toBe(20);
   });
 
-  it('accounts for offset', function() {
+  it('accounts for offset', () => {
     const time1 = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
     const time2 = {periodStart: 7, segmentStart: 0, segmentEnd: 0};
 
@@ -82,7 +82,7 @@ describe('Mp4TtmlParser', function() {
     expect(ret2[0].endTime).toEqual(ret1[0].endTime + 7);
   });
 
-  it('rejects init segment with no ttml', function() {
+  it('rejects init segment with no ttml', () => {
     const error = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.TEXT,

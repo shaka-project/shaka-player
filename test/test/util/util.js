@@ -29,9 +29,9 @@ goog.provide('shaka.test.Util');
 shaka.test.StatusPromise = function(p) {
   // TODO: investigate using PromiseMock for this when possible.
   p.status = 'pending';
-  p.then(function() {
+  p.then(() => {
     p.status = 'resolved';
-  }, function() {
+  }, () => {
     p.status = 'rejected';
   });
   return /** @type {!shaka.test.StatusPromise} */(p);
@@ -78,16 +78,16 @@ shaka.test.Util.fakeEventLoop = function(duration, onTick) {
  * @return {!Promise}
  */
 shaka.test.Util.delay = function(seconds, realSetTimeout) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(((resolve, reject) => {
     const timeout = realSetTimeout || setTimeout;
-    timeout(function() {
+    timeout(() => {
       resolve();
       // Play nicely with PromiseMock by flushing automatically.
       if (window.Promise == PromiseMock) {
         PromiseMock.flush();
       }
     }, seconds * 1000.0);
-  });
+  }));
 };
 
 
@@ -203,7 +203,7 @@ shaka.test.Util.compareReferences = function(first, second) {
       return false;
     }
     if (a.length != b.length ||
-        !a.every(function(x, i) { return x == b[i]; })) {
+        !a.every((x, i) => { return x == b[i]; })) {
       return false;
     }
   }
@@ -228,7 +228,7 @@ shaka.test.Util.compareReferences = function(first, second) {
  * @return {!Promise.<!ArrayBuffer>}
  */
 shaka.test.Util.fetch = function(uri) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('GET', uri, true /* asynchronous */);
     xhr.responseType = 'arraybuffer';
@@ -248,7 +248,7 @@ shaka.test.Util.fetch = function(uri) {
     };
 
     xhr.send(null /* body */);
-  });
+  }));
 };
 
 
@@ -439,8 +439,8 @@ shaka.test.Util.waitUntilPlayheadReaches =
   let goalMet = false;
 
   // TODO: Refactor all the wait utils into a class that avoids repeated args
-  return new Promise(function(resolve, reject) {
-    eventManager.listen(target, 'timeupdate', function() {
+  return new Promise(((resolve, reject) => {
+    eventManager.listen(target, 'timeupdate', () => {
       if (target.currentTime >= playheadTime) {
         goalMet = true;
         eventManager.unlisten(target, 'timeupdate');
@@ -448,7 +448,7 @@ shaka.test.Util.waitUntilPlayheadReaches =
       }
     });
 
-    shaka.test.Util.delay(timeout).then(function() {
+    shaka.test.Util.delay(timeout).then(() => {
       if (!goalMet) {
         const buffered = [];
         for (let i = 0; i < target.buffered.length; ++i) {
@@ -469,7 +469,7 @@ shaka.test.Util.waitUntilPlayheadReaches =
         reject(new Error('Timeout waiting for time ' + playheadTime));
       }
     });
-  });
+  }));
 };
 
 /**
@@ -557,7 +557,7 @@ shaka.test.Util.customMatchers_ = {
 };
 
 
-beforeEach(function() {
+beforeEach(() => {
   jasmine.addCustomEqualityTester(shaka.test.Util.compareReferences);
   jasmine.addMatchers(shaka.test.Util.customMatchers_);
 });

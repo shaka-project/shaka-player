@@ -102,7 +102,7 @@ jasmine.Fetch.impl_ = function(url, init) {
 
   const headers = {};
   const initHeaders = new jasmine.Fetch.Headers(init.headers);
-  initHeaders.forEach(function(value, key) {
+  initHeaders.forEach((value, key) => {
     headers[key] = value;
   });
 
@@ -165,8 +165,8 @@ jasmine.Fetch.impl_ = function(url, init) {
   } else if (stubbed.timeout) {
     // Fetch does not time out yet, so just return a promise that rejects when
     // the user aborts.
-    return new Promise(function(resolve, reject) {
-      const interval = setInterval(function() {
+    return new Promise(((resolve, reject) => {
+      const interval = setInterval(() => {
         if (init['signal'] && init['signal']()) {
           // TODO: This assumes that this request is still the most recent.
           // If you have multiple requests at once, this could be incorrect.
@@ -175,7 +175,7 @@ jasmine.Fetch.impl_ = function(url, init) {
           reject(jasmine.Fetch.makeAbortError_());
         }
       }, 200);
-    });
+    }));
   }
   throw new Error('no known action');
 };
@@ -262,13 +262,13 @@ jasmine.Fetch.Headers = function(headers) {
       headers = headers.contents;
     }
     if (Array.isArray(headers)) {
-      headers.forEach(function(header) {
+      headers.forEach((header) => {
         this.append(header[0], header[1]);
-      }.bind(this));
+      });
     } else {
-      Object.getOwnPropertyNames(headers).forEach(function(name) {
+      Object.getOwnPropertyNames(headers).forEach((name) => {
         this.append(name, headers[name]);
-      }.bind(this));
+      });
     }
   }
 };

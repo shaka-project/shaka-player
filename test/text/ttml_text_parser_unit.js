@@ -15,24 +15,24 @@
  * limitations under the License.
  */
 
-describe('TtmlTextParser', function() {
+describe('TtmlTextParser', () => {
   const Cue = shaka.text.Cue;
   const CueRegion = shaka.text.CueRegion;
 
-  it('supports no cues', function() {
+  it('supports no cues', () => {
     verifyHelper([],
         '<tt></tt>',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports div with no cues but whitespace', function() {
+  it('supports div with no cues but whitespace', () => {
     verifyHelper(
         [],
         '<tt><body><div>  \r\n </div></body></tt>',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports xml:space', function() {
+  it('supports xml:space', () => {
     const ttBody = '\n' +
         '  <body>\n' +
         '    <p begin="01:02.03" end="01:02.05">\n' +
@@ -66,19 +66,19 @@ describe('TtmlTextParser', function() {
                 '<tt xml:space="invalid">' + ttBody + '</tt>');
   });
 
-  it('rejects invalid ttml', function() {
+  it('rejects invalid ttml', () => {
     errorHelper(shaka.util.Error.Code.INVALID_XML, '<test></test>');
     errorHelper(shaka.util.Error.Code.INVALID_XML, '');
   });
 
-  it('rejects invalid time format', function() {
+  it('rejects invalid time format', () => {
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
                 '<tt><body><p begin="test" end="test"></p></body></tt>');
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
                 '<tt><body><p begin="3.45" end="1a"></p></body></tt>');
   });
 
-  it('supports colon formatted time', function() {
+  it('supports colon formatted time', () => {
     verifyHelper(
         [
           {start: 62.05, end: 3723.2, payload: 'Test'},
@@ -88,7 +88,7 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('accounts for offset', function() {
+  it('accounts for offset', () => {
     verifyHelper(
         [
           {start: 69.05, end: 3730.2, payload: 'Test'},
@@ -98,7 +98,7 @@ describe('TtmlTextParser', function() {
         {periodStart: 7, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports time in 0.00h 0.00m 0.00s format', function() {
+  it('supports time in 0.00h 0.00m 0.00s format', () => {
     verifyHelper(
         [
           {start: 3567.03, end: 5402.3, payload: 'Test'},
@@ -108,7 +108,7 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports time with frame rate', function() {
+  it('supports time with frame rate', () => {
     verifyHelper(
         [
           {start: 615.5, end: 663, payload: 'Test'},
@@ -122,7 +122,7 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports time with frame rate multiplier', function() {
+  it('supports time with frame rate multiplier', () => {
     verifyHelper(
         [
           {start: 615.5, end: 663, payload: 'Test'},
@@ -137,7 +137,7 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports time with subframes', function() {
+  it('supports time with subframes', () => {
     verifyHelper(
         [
           {start: 615.517, end: 663, payload: 'Test'},
@@ -152,7 +152,7 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports time in frame format', function() {
+  it('supports time in frame format', () => {
     verifyHelper(
         [
           {start: 2.5, end: 10.01, payload: 'Test'},
@@ -167,7 +167,7 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports time in tick format', function() {
+  it('supports time in tick format', () => {
     verifyHelper(
         [
           {start: 5, end: 6.02, payload: 'Test'},
@@ -182,7 +182,7 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports time with duration', function() {
+  it('supports time with duration', () => {
     verifyHelper(
         [
           {start: 62.05, end: 67.05, payload: 'Test'},
@@ -192,7 +192,7 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('parses alignment from textAlign attribute of a region', function() {
+  it('parses alignment from textAlign attribute of a region', () => {
     verifyHelper(
         [
           {
@@ -213,7 +213,7 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('allows non-standard namespace names', function() {
+  it('allows non-standard namespace names', () => {
     verifyHelper(
         [
           {
@@ -234,7 +234,7 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('parses alignment from <style> block with id on region', function() {
+  it('parses alignment from <style> block with id on region', () => {
     verifyHelper(
         [
           {
@@ -258,7 +258,7 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('parses alignment from <style> block with id on p', function() {
+  it('parses alignment from <style> block with id on p', () => {
     verifyHelper(
         [
           {
@@ -282,7 +282,7 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports region settings for horizontal text', function() {
+  it('supports region settings for horizontal text', () => {
     verifyHelper(
         [
           {
@@ -357,7 +357,7 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports region settings in pixels', function() {
+  it('supports region settings in pixels', () => {
     verifyHelper(
         [
           {
@@ -421,7 +421,7 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports region settings for vertical text', function() {
+  it('supports region settings for vertical text', () => {
     verifyHelper(
         [
           {
@@ -497,7 +497,7 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports writingMode setting', function() {
+  it('supports writingMode setting', () => {
     verifyHelper(
         [
           {
@@ -595,7 +595,7 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('disregards empty divs and ps', function() {
+  it('disregards empty divs and ps', () => {
     verifyHelper(
         [
           {start: 62.05, end: 3723.2, payload: 'Test'},
@@ -635,7 +635,7 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('inserts newline characters into <br> tags', function() {
+  it('inserts newline characters into <br> tags', () => {
     verifyHelper(
         [
           {start: 62.05, end: 3723.2, payload: 'Line1\nLine2'},
@@ -652,7 +652,7 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('parses cue alignment from textAlign attribute', function() {
+  it('parses cue alignment from textAlign attribute', () => {
     verifyHelper(
         [
           {
@@ -678,7 +678,7 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('parses text style information', function() {
+  it('parses text style information', () => {
     verifyHelper(
         [
           {
@@ -714,7 +714,7 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('parses wrapping option', function() {
+  it('parses wrapping option', () => {
     verifyHelper(
         [
           {
@@ -738,7 +738,7 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('parses text decoration', function() {
+  it('parses text decoration', () => {
     verifyHelper(
         [
           {
@@ -765,7 +765,7 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('chooses style on element over style on region', function() {
+  it('chooses style on element over style on region', () => {
     verifyHelper(
         [
           {

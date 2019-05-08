@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-describe('AbortableOperation', function() {
-  describe('promise', function() {
-    it('is resolved by the constructor argument', function(done) {
+describe('AbortableOperation', () => {
+  describe('promise', () => {
+    it('is resolved by the constructor argument', (done) => {
       const promise = new shaka.util.PublicPromise();
       const abort = () => Promise.resolve();
 
@@ -31,8 +31,8 @@ describe('AbortableOperation', function() {
     });
   });
 
-  describe('abort', function() {
-    it('calls the abort argument from the constructor', function() {
+  describe('abort', () => {
+    it('calls the abort argument from the constructor', () => {
       const promise = Promise.resolve();
       const abort =
           jasmine.createSpy('abort').and.returnValue(Promise.resolve());
@@ -43,7 +43,7 @@ describe('AbortableOperation', function() {
       expect(abort).toHaveBeenCalled();
     });
 
-    it('is resolved when the underlying abort() is resolved', function(done) {
+    it('is resolved when the underlying abort() is resolved', (done) => {
       const p = new shaka.util.PublicPromise();
       const abort = jasmine.createSpy('abort').and.returnValue(p);
 
@@ -68,8 +68,8 @@ describe('AbortableOperation', function() {
     });
   });
 
-  describe('failed', function() {
-    it('creates a failed operation with the given error', function(done) {
+  describe('failed', () => {
+    it('creates a failed operation with the given error', (done) => {
       const error = new shaka.util.Error(
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.NETWORK,
@@ -82,8 +82,8 @@ describe('AbortableOperation', function() {
     });
   });
 
-  describe('aborted', function() {
-    it('creates a failed operation with OPERATION_ABORTED', function(done) {
+  describe('aborted', () => {
+    it('creates a failed operation with OPERATION_ABORTED', (done) => {
       const error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.PLAYER,
@@ -96,8 +96,8 @@ describe('AbortableOperation', function() {
     });
   });
 
-  describe('completed', function() {
-    it('creates a completed operation with the given value', function(done) {
+  describe('completed', () => {
+    it('creates a completed operation with the given value', (done) => {
       const operation = shaka.util.AbortableOperation.completed(100);
       operation.promise.catch(fail).then((value) => {
         expect(value).toEqual(100);
@@ -106,8 +106,8 @@ describe('AbortableOperation', function() {
     });
   });
 
-  describe('notAbortable', function() {
-    it('creates an operation from the given promise', function(done) {
+  describe('notAbortable', () => {
+    it('creates an operation from the given promise', (done) => {
       const promise = new shaka.util.PublicPromise();
       const operation = shaka.util.AbortableOperation.notAbortable(promise);
 
@@ -140,8 +140,8 @@ describe('AbortableOperation', function() {
     });
   });  // describe('notAbortable')
 
-  describe('all', function() {
-    it('creates a successful operation when all succeed', function(done) {
+  describe('all', () => {
+    it('creates a successful operation when all succeed', (done) => {
       const p1 = new shaka.util.PublicPromise();
       const op1 = shaka.util.AbortableOperation.notAbortable(p1);
 
@@ -181,7 +181,7 @@ describe('AbortableOperation', function() {
       }).catch(fail).then(done);
     });
 
-    it('creates a failed operation when any fail', function(done) {
+    it('creates a failed operation when any fail', (done) => {
       const p1 = new shaka.util.PublicPromise();
       const op1 = shaka.util.AbortableOperation.notAbortable(p1);
 
@@ -216,7 +216,7 @@ describe('AbortableOperation', function() {
       }).catch(fail).then(done);
     });
 
-    it('aborts all operations on abort', function(done) {
+    it('aborts all operations on abort', (done) => {
       const p1 = new shaka.util.PublicPromise();
       const abort1Spy = jasmine.createSpy('abort1')
           .and.callFake(() => p1.reject());
@@ -265,8 +265,8 @@ describe('AbortableOperation', function() {
     });
   });  // describe('all')
 
-  describe('finally', function() {
-    it('executes after the operation is successful', function(done) {
+  describe('finally', () => {
+    it('executes after the operation is successful', (done) => {
       let isDone = false;
       const promise = new shaka.util.PublicPromise();
 
@@ -285,7 +285,7 @@ describe('AbortableOperation', function() {
       });
     });
 
-    it('executes after the operation fails', function(done) {
+    it('executes after the operation fails', (done) => {
       let isDone = false;
       const promise = new shaka.util.PublicPromise();
 
@@ -304,7 +304,7 @@ describe('AbortableOperation', function() {
       });
     });
 
-    it('executes after the chain is successful', function(done) {
+    it('executes after the chain is successful', (done) => {
       let isDone = false;
       const promise1 = new shaka.util.PublicPromise();
       const promise2 = new shaka.util.PublicPromise();
@@ -330,7 +330,7 @@ describe('AbortableOperation', function() {
       });
     });
 
-    it('executes after the chain fails', function(done) {
+    it('executes after the chain fails', (done) => {
       let isDone = false;
       const promise1 = new shaka.util.PublicPromise();
       const promise2 = new shaka.util.PublicPromise();
@@ -352,7 +352,7 @@ describe('AbortableOperation', function() {
       });
     });
 
-    it('executes after a complex chain', function(done) {
+    it('executes after a complex chain', (done) => {
       let isDone = false;
 
       shaka.util.AbortableOperation.completed(0).chain(() => {
@@ -373,8 +373,8 @@ describe('AbortableOperation', function() {
     });
   });  // describe('finally')
 
-  describe('chain', function() {
-    it('passes the value to the next operation on success', function(done) {
+  describe('chain', () => {
+    it('passes the value to the next operation on success', (done) => {
       const values = [];
 
       shaka.util.AbortableOperation.completed(100).chain((value) => {
@@ -411,7 +411,7 @@ describe('AbortableOperation', function() {
       });
     });
 
-    it('skips the onSuccess callbacks on error', function(done) {
+    it('skips the onSuccess callbacks on error', (done) => {
       const error = new shaka.util.Error(
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.NETWORK,
@@ -431,7 +431,7 @@ describe('AbortableOperation', function() {
       });
     });
 
-    it('can fall back to other operations in onError callback', function(done) {
+    it('can fall back to other operations in onError callback', (done) => {
       const error1 = new shaka.util.Error(
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.NETWORK,
@@ -462,7 +462,7 @@ describe('AbortableOperation', function() {
       });
     });
 
-    it('fails when an error is thrown', function(done) {
+    it('fails when an error is thrown', (done) => {
       const error1 = new shaka.util.Error(
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.NETWORK,
@@ -485,7 +485,7 @@ describe('AbortableOperation', function() {
       });
     });
 
-    it('goes to success state when onError returns undefined', function(done) {
+    it('goes to success state when onError returns undefined', (done) => {
       const error = new shaka.util.Error(
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.NETWORK,
@@ -502,7 +502,7 @@ describe('AbortableOperation', function() {
       });
     });
 
-    it('does not need return when onSuccess omitted', function(done) {
+    it('does not need return when onSuccess omitted', (done) => {
       const operation = shaka.util.AbortableOperation.completed(100);
       operation.chain(undefined, fail).chain(undefined, fail).chain((value) => {
         expect(value).toEqual(100);
@@ -512,7 +512,7 @@ describe('AbortableOperation', function() {
       });
     });
 
-    it('does not need rethrow when onError omitted', function(done) {
+    it('does not need rethrow when onError omitted', (done) => {
       const error = new shaka.util.Error(
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.NETWORK,
@@ -527,7 +527,7 @@ describe('AbortableOperation', function() {
       });
     });
 
-    it('ensures abort is called with the correct "this"', function(done) {
+    it('ensures abort is called with the correct "this"', (done) => {
       // During testing and development, an early version of chain() would
       // sometimes unbind an abort method from an earlier stage of the chain.
       // Make sure this doesn't happen.

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('EventManager', function() {
+describe('EventManager', () => {
   const Util = shaka.test.Util;
 
   /** @type {!shaka.util.EventManager} */
@@ -29,7 +29,7 @@ describe('EventManager', function() {
   /** @type {!EventTarget} */
   let target2;
 
-  beforeEach(function() {
+  beforeEach(() => {
     eventManager = new shaka.util.EventManager();
     target1 = document.createElement('div');
     target2 = document.createElement('div');
@@ -46,7 +46,7 @@ describe('EventManager', function() {
   });
 
   describe('listen', () => {
-    it('listens for an event', function() {
+    it('listens for an event', () => {
       const listener = jasmine.createSpy('listener');
 
       eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener));
@@ -55,7 +55,7 @@ describe('EventManager', function() {
       expect(listener).toHaveBeenCalled();
     });
 
-    it('listens for an event from mutiple targets', function() {
+    it('listens for an event from mutiple targets', () => {
       const listener1 = jasmine.createSpy('listener1');
       const listener2 = jasmine.createSpy('listener2');
 
@@ -69,7 +69,7 @@ describe('EventManager', function() {
       expect(listener2).toHaveBeenCalled();
     });
 
-    it('listens for multiple events', function() {
+    it('listens for multiple events', () => {
       const listener1 = jasmine.createSpy('listener1');
       const listener2 = jasmine.createSpy('listener2');
 
@@ -83,7 +83,7 @@ describe('EventManager', function() {
       expect(listener2).toHaveBeenCalled();
     });
 
-    it('listens for multiple events from mutiple targets', function() {
+    it('listens for multiple events from mutiple targets', () => {
       const listener1 = jasmine.createSpy('listener1');
       const listener2 = jasmine.createSpy('listener2');
 
@@ -97,7 +97,7 @@ describe('EventManager', function() {
       expect(listener2).toHaveBeenCalled();
     });
 
-    it('listens for an event with multiple listeners', function() {
+    it('listens for an event with multiple listeners', () => {
       const listener1 = jasmine.createSpy('listener1');
       const listener2 = jasmine.createSpy('listener2');
 
@@ -140,7 +140,7 @@ describe('EventManager', function() {
   });
 
   describe('unlisten', () => {
-    it('stops listening to an event', function() {
+    it('stops listening to an event', () => {
       const listener = jasmine.createSpy('listener');
 
       eventManager.listen(target1, 'eventtype1', Util.spyFunc(listener));
@@ -151,7 +151,7 @@ describe('EventManager', function() {
       expect(listener).not.toHaveBeenCalled();
     });
 
-    it('ignores other targets when removing listeners', function() {
+    it('ignores other targets when removing listeners', () => {
       const listener1 = jasmine.createSpy('listener1');
       const listener2 = jasmine.createSpy('listener2');
 
@@ -166,7 +166,7 @@ describe('EventManager', function() {
   });
 
   describe('removeAll', () => {
-    it('stops listening to multiple events', function() {
+    it('stops listening to multiple events', () => {
       const listener1 = jasmine.createSpy('listener1');
       const listener2 = jasmine.createSpy('listener2');
 
@@ -182,7 +182,7 @@ describe('EventManager', function() {
       expect(listener2).not.toHaveBeenCalled();
     });
 
-    it('stops listening for an event with multiple listeners', function() {
+    it('stops listening for an event with multiple listeners', () => {
       const listener1 = jasmine.createSpy('listener1');
       const listener2 = jasmine.createSpy('listener2');
 

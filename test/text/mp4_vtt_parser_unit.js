@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('Mp4VttParser', function() {
+describe('Mp4VttParser', () => {
   const vttInitSegmentUri = '/base/test/test/assets/vtt-init.mp4';
   const vttSegmentUri = '/base/test/test/assets/vtt-segment.mp4';
   const vttSegmentMultiPayloadUri =
@@ -38,7 +38,7 @@ describe('Mp4VttParser', function() {
   /** @type {!Uint8Array} */
   let audioInitSegment;
 
-  beforeAll(function(done) {
+  beforeAll((done) => {
     Promise.all([
       shaka.test.Util.fetch(vttInitSegmentUri),
       shaka.test.Util.fetch(vttSegmentUri),
@@ -46,7 +46,7 @@ describe('Mp4VttParser', function() {
       shaka.test.Util.fetch(vttSegSettingsUri),
       shaka.test.Util.fetch(vttSegNoDurationUri),
       shaka.test.Util.fetch(audioInitSegmentUri),
-    ]).then(function(responses) {
+    ]).then((responses) => {
       vttInitSegment = new Uint8Array(responses[0]);
       vttSegment = new Uint8Array(responses[1]);
       vttSegmentMultiPayload = new Uint8Array(responses[2]);
@@ -56,11 +56,11 @@ describe('Mp4VttParser', function() {
     }).catch(fail).then(done);
   });
 
-  it('parses init segment', function() {
+  it('parses init segment', () => {
     new shaka.text.Mp4VttParser().parseInit(vttInitSegment);
   });
 
-  it('parses media segment', function() {
+  it('parses media segment', () => {
     const cues = [
       {
         start: 111.8,
@@ -110,7 +110,7 @@ describe('Mp4VttParser', function() {
     verifyHelper(cues, result);
   });
 
-  it('parses media segment containing settings', function() {
+  it('parses media segment containing settings', () => {
     const Cue = shaka.text.Cue;
     const cues = [
       {
@@ -138,7 +138,7 @@ describe('Mp4VttParser', function() {
     verifyHelper(cues, result);
   });
 
-  it('parses media segments without a sample duration', function() {
+  it('parses media segments without a sample duration', () => {
     // Regression test for https://github.com/google/shaka-player/issues/919
     const cues = [
       {start: 10, end: 11, payload: 'cue 10'},
@@ -160,7 +160,7 @@ describe('Mp4VttParser', function() {
     verifyHelper(cues, result);
   });
 
-  it('accounts for offset', function() {
+  it('accounts for offset', () => {
     const cues = [
       {
         start: 121.8,
@@ -182,7 +182,7 @@ describe('Mp4VttParser', function() {
     verifyHelper(cues, result);
   });
 
-  it('rejects init segment with no vtt', function() {
+  it('rejects init segment with no vtt', () => {
     const error = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.TEXT,

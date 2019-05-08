@@ -163,7 +163,7 @@ shaka.test.Dash.makeManifestFromInit = function(
       createSegmentIndex: jasmine.any(Function),
       findSegmentPosition: jasmine.any(Function),
       initSegmentReference: new shaka.media.InitSegmentReference(
-          function() { return ['http://example.com/' + uri]; },
+          (() => { return ['http://example.com/' + uri]; }),
           startByte, endByte),
     }),
   })]);
@@ -180,7 +180,7 @@ shaka.test.Dash.makeManifestFromInit = function(
  */
 shaka.test.Dash.callCreateSegmentIndex = function(manifest) {
   const stream = manifest.periods[0].variants[0].video;
-  return stream.createSegmentIndex().then(fail).catch(function() {});
+  return stream.createSegmentIndex().then(fail).catch(() => {});
 };
 
 
@@ -194,7 +194,7 @@ shaka.test.Dash.callCreateSegmentIndex = function(manifest) {
  * @param {!Array.<string>} extraChildren
  */
 shaka.test.Dash.makeTimelineTests = function(type, extraAttrs, extraChildren) {
-  describe('SegmentTimeline', function() {
+  describe('SegmentTimeline', () => {
     const Dash = shaka.test.Dash;
     const ManifestParser = shaka.test.ManifestParser;
     const baseUri = 'http://example.com/';

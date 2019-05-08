@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('CastReceiver', function() {
+describe('CastReceiver', () => {
   const CastReceiver = shaka.cast.CastReceiver;
   const CastUtils = shaka.cast.CastUtils;
 
@@ -87,9 +87,9 @@ describe('CastReceiver', function() {
    return checkAndRun(test, /* checkKeySystems */ true);
  }
 
-  beforeAll(function(done) {
+  beforeAll((done) => {
     const supportTest = shaka.media.DrmEngine.probeSupport()
-        .then(function(result) { support = result; })
+        .then((result) => { support = result; })
         .catch(fail);
 
     // The receiver is only meant to run on the Chromecast, so we have the
@@ -162,12 +162,12 @@ describe('CastReceiver', function() {
     };
   }));
 
-  afterEach(function(done) {
-    toRestore.forEach(function(restoreCallback) {
+  afterEach((done) => {
+    toRestore.forEach((restoreCallback) => {
       restoreCallback();
     });
 
-    receiver.destroy().catch(fail).then(function() {
+    receiver.destroy().catch(fail).then(() => {
       document.body.removeChild(video);
 
       player = null;
@@ -178,7 +178,7 @@ describe('CastReceiver', function() {
     });
   });
 
-  afterAll(function() {
+  afterAll(() => {
     if (originalUserAgent) {
       window['cast'] = originalCast;
       Object.defineProperty(window['navigator'],
@@ -190,9 +190,9 @@ describe('CastReceiver', function() {
     // Use an encrypted asset, to make sure DRM info doesn't balloon the size.
     fakeInitState.manifest = 'test:sintel-enc';
 
-    eventManager.listenOnce(video, 'loadeddata', function() {
+    eventManager.listenOnce(video, 'loadeddata', () => {
       // Wait for an update message.
-      waitForUpdateMessage().then(function(message) {
+      waitForUpdateMessage().then((message) => {
         // Check that the update message is of a reasonable size. From previous
         // testing we found that the socket would silently reject data that got
         // too big. 5KB is safely below the limit.
@@ -214,7 +214,7 @@ describe('CastReceiver', function() {
     // Use an encrypted asset, to make sure DRM info doesn't balloon the size.
     fakeInitState.manifest = 'test:sintel-enc';
 
-    eventManager.listenOnce(video, 'loadeddata', function() {
+    eventManager.listenOnce(video, 'loadeddata', () => {
       // Collect 50 update messages, and average their length.
       // Not all properties are passed along on every update message, so
       // the average length is expected to be lower than the length of the first
@@ -222,13 +222,13 @@ describe('CastReceiver', function() {
       let totalLength = 0;
       let waitForUpdate = Promise.resolve();
       for (let i = 0; i < 50; i++) {
-        waitForUpdate = waitForUpdate.then(function() {
+        waitForUpdate = waitForUpdate.then(() => {
           return waitForUpdateMessage();
-        }).then(function(message) {
+        }).then((message) => {
           totalLength += message.length;
         });
       }
-      waitForUpdate.then(function() {
+      waitForUpdate.then(() => {
         expect(totalLength / 50).toBeLessThan(3000);
       }).then(done);
     });
@@ -258,7 +258,7 @@ describe('CastReceiver', function() {
     waitForUpdateMessageWrapper(
         shaka.media.StreamingEngine.prototype, 'StreamingEngine', 'start');
 
-    eventManager.listenOnce(video, 'loadeddata', function() {
+    eventManager.listenOnce(video, 'loadeddata', () => {
       // Make sure that each of the methods covered by
       // waitForUpdateMessageWrapper is called by this point.
       expect(pendingWaitWrapperCalls).toBe(0);
@@ -295,11 +295,11 @@ describe('CastReceiver', function() {
           'Waiting for update message before calling ' +
           name + '.' + methodName + '...');
       const originalArguments = arguments;
-      return waitForUpdateMessage().then(function() {
+      return waitForUpdateMessage().then(() => {
         return original.apply(this, originalArguments);
-      }.bind(this));
+      });
     };
-    toRestore.push(function() {
+    toRestore.push(() => {
       prototype[methodName] = original;
     });
   }
@@ -352,7 +352,7 @@ describe('CastReceiver', function() {
       getCastChannel: jasmine.createSpy('CastMessageBus.getCastChannel'),
     };
     // For convenience, deserialize and store sent messages.
-    bus.broadcast.and.callFake(function(message) {
+    bus.broadcast.and.callFake((message) => {
       bus.messages.push(CastUtils.deserialize(message));
       // Check to see if it's an update message.
       const parsed = CastUtils.deserialize(message);

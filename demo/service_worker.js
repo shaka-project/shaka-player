@@ -300,9 +300,9 @@ async function fetchAndCache(cache, request) {
 function timeout(seconds, asyncProcess) {
   return Promise.race([
     asyncProcess,
-    new Promise(function(_, reject) {
+    new Promise(((_, reject) => {
       setTimeout(reject, seconds * 1000);
-    }),
+    })),
   ]);
 }
 

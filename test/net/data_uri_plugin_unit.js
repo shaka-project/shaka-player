@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-describe('DataUriPlugin', function() {
+describe('DataUriPlugin', () => {
   const retryParameters = shaka.net.NetworkingEngine.defaultRetryParameters();
 
-  it('supports MIME types', function(done) {
+  it('supports MIME types', (done) => {
     testSucceeds('data:text/plain,Hello', 'text/plain', 'Hello', done);
   });
 
-  it('supports URI encoded text', function(done) {
+  it('supports URI encoded text', (done) => {
     testSucceeds(
         'data:text/html,%3Ch1%3EHello%2C%20World!%3C%2Fh1%3E',
         'text/html',
@@ -30,37 +30,37 @@ describe('DataUriPlugin', function() {
         done);
   });
 
-  it('supports base64 encoded text', function(done) {
+  it('supports base64 encoded text', (done) => {
     testSucceeds(
         'data:;base64,SGVsbG8sIFdvcmxkIQ%3D%3D', '', 'Hello, World!', done);
   });
 
-  it('supports extra colin', function(done) {
+  it('supports extra colin', (done) => {
     testSucceeds('data:,Hello:', '', 'Hello:', done);
   });
 
-  it('supports extra semi-colin', function(done) {
+  it('supports extra semi-colin', (done) => {
     testSucceeds('data:,Hello;', '', 'Hello;', done);
   });
 
-  it('supports extra comma', function(done) {
+  it('supports extra comma', (done) => {
     testSucceeds('data:,Hello,', '', 'Hello,', done);
   });
 
-  it('fails for empty URI', function(done) {
+  it('fails for empty URI', (done) => {
     testFails('', done, shaka.util.Error.Code.MALFORMED_DATA_URI);
   });
 
-  it('fails for non-data URIs', function(done) {
+  it('fails for non-data URIs', (done) => {
     testFails('http://google.com/', done,
         shaka.util.Error.Code.MALFORMED_DATA_URI);
   });
 
-  it('fails for decoding errors', function(done) {
+  it('fails for decoding errors', (done) => {
     testFails('data:Bad%', done, shaka.util.Error.Code.MALFORMED_DATA_URI);
   });
 
-  it('fails if missing comma', function(done) {
+  it('fails if missing comma', (done) => {
     testFails('data:Bad', done, shaka.util.Error.Code.MALFORMED_DATA_URI);
   });
 
@@ -69,7 +69,7 @@ describe('DataUriPlugin', function() {
         shaka.net.NetworkingEngine.makeRequest([uri], retryParameters);
     // eslint-disable-next-line new-cap
     shaka.net.DataUriPlugin(uri, request).promise
-        .then(function(response) {
+        .then((response) => {
           expect(response).toBeTruthy();
           expect(response.uri).toBe(uri);
           expect(response.data).toBeTruthy();
@@ -88,8 +88,8 @@ describe('DataUriPlugin', function() {
     // eslint-disable-next-line new-cap
     shaka.net.DataUriPlugin(uri, request).promise
         .then(fail)
-        .catch(function(error) { expect(error.code).toBe(code); })
-        .then(function() {
+        .catch((error) => { expect(error.code).toBe(code); })
+        .then(() => {
           done();
         });
   }

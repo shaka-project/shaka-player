@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-describe('DrmEngine', function() {
+describe('DrmEngine', () => {
   const Periods = shaka.util.Periods;
 
   const originalRequestMediaKeySystemAccess =
@@ -55,7 +55,7 @@ describe('DrmEngine', function() {
   /** @type {!ArrayBuffer} */
   let license;
 
-  beforeAll(function() {
+  beforeAll(() => {
     requestMediaKeySystemAccessSpy =
         jasmine.createSpy('requestMediaKeySystemAccess');
     navigator.requestMediaKeySystemAccess =
@@ -70,7 +70,7 @@ describe('DrmEngine', function() {
     onEventSpy = jasmine.createSpy('onEvent');
   });
 
-  beforeEach(function() {
+  beforeEach(() => {
     manifest = new shaka.test.ManifestGenerator()
       .addPeriod(0)
         .addVariant(0)
@@ -105,7 +105,7 @@ describe('DrmEngine', function() {
     mockMediaKeySystemAccess = createMockMediaKeySystemAccess();
 
     mockMediaKeys = createMockMediaKeys();
-    mockMediaKeys.createSession.and.callFake(function() {
+    mockMediaKeys.createSession.and.callFake(() => {
       const index = mockMediaKeys.createSession.calls.count() - 1;
       return [session1, session2, session3][index];
     });
@@ -137,14 +137,14 @@ describe('DrmEngine', function() {
     await drmEngine.destroy();
   });
 
-  afterAll(function() {
+  afterAll(() => {
     navigator.requestMediaKeySystemAccess =
         originalRequestMediaKeySystemAccess;
     shaka.log.error = originalLogError;
   });
 
-  describe('supportsVariants', function() {
-    it('supports all clear variants', async function() {
+  describe('supportsVariants', () => {
+    it('supports all clear variants', async () => {
       const manifest = new shaka.test.ManifestGenerator()
           .addPeriod(0)
             .addVariant(0)
@@ -160,7 +160,7 @@ describe('DrmEngine', function() {
     });
   });
 
-  describe('init', function() {
+  describe('init', () => {
     it('stops on first available key system', async () => {
       // Accept both drm.abc and drm.def.  Only one can be chosen.
       requestMediaKeySystemAccessSpy.and.callFake(
@@ -631,8 +631,8 @@ describe('DrmEngine', function() {
     });
   });  // describe('init')
 
-  describe('attach', function() {
-    beforeEach(function() {
+  describe('attach', () => {
+    beforeEach(() => {
       // Both audio and video with the same key system:
       manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
@@ -685,7 +685,7 @@ describe('DrmEngine', function() {
       expect(mockMediaKeys.setServerCertificate).not.toHaveBeenCalled();
     });
 
-    it('creates sessions for init data overrides', function(done) {
+    it('creates sessions for init data overrides', (done) => {
       // Set up init data overrides in the manifest:
       const initData1 = new Uint8Array(5);
       const initData2 = new Uint8Array(0);
@@ -696,7 +696,7 @@ describe('DrmEngine', function() {
         {initData: initData3, initDataType: 'cenc', keyId: null},
       ];
 
-      initAndAttach().then(function() {
+      initAndAttach().then(() => {
         expect(mockMediaKeys.createSession.calls.count()).toBe(3);
         expect(session1.generateRequest).
             toHaveBeenCalledWith('cenc', initData1.buffer);
@@ -707,7 +707,7 @@ describe('DrmEngine', function() {
       }).catch(fail).then(done);
     });
 
-    it('ignores duplicate init data overrides', function(done) {
+    it('ignores duplicate init data overrides', (done) => {
       // Set up init data overrides in the manifest;
       // The second initData has a different keyId from the first,
       // but the same initData.
@@ -723,7 +723,7 @@ describe('DrmEngine', function() {
         {initData: initData3, initDataType: 'cenc', keyId: 'abc'},
       ];
 
-      initAndAttach().then(function() {
+      initAndAttach().then(() => {
         expect(mockMediaKeys.createSession.calls.count()).toBe(1);
         expect(session1.generateRequest).
             toHaveBeenCalledWith('cenc', initData1.buffer);
@@ -745,7 +745,7 @@ describe('DrmEngine', function() {
       drmEngine.configure(config);
 
       const session = createMockSession();
-      mockMediaKeys.createSession.and.callFake(function() {
+      mockMediaKeys.createSession.and.callFake(() => {
         expect(mockMediaKeys.createSession.calls.count()).toBe(1);
         return session;
       });
@@ -836,8 +836,8 @@ describe('DrmEngine', function() {
     });
   });  // describe('attach')
 
-  describe('events', function() {
-    describe('encrypted', function() {
+  describe('events', () => {
+    describe('encrypted', () => {
       it('is listened for', async () => {
         await initAndAttach();
         expect(mockVideo.addEventListener).toHaveBeenCalledWith(
@@ -928,7 +928,7 @@ describe('DrmEngine', function() {
       });
     });  // describe('encrypted')
 
-    describe('message', function() {
+    describe('message', () => {
       it('is listened for', async () => {
         await initAndAttach();
         const initData = new Uint8Array(0);
@@ -1031,7 +1031,7 @@ describe('DrmEngine', function() {
       }
     });  // describe('message')
 
-    describe('keystatuseschange', function() {
+    describe('keystatuseschange', () => {
       it('is listened for', async () => {
         await initAndAttach();
         const initData = new Uint8Array(0);
@@ -1042,8 +1042,8 @@ describe('DrmEngine', function() {
             'keystatuseschange', jasmine.any(Function), false);
       });
 
-      it('triggers callback', function(done) {
-        initAndAttach().then(function() {
+      it('triggers callback', (done) => {
+        initAndAttach().then(() => {
           const initData = new Uint8Array(0);
           mockVideo.on['encrypted'](
               {initDataType: 'webm', initData: initData, keyId: null});
@@ -1052,12 +1052,12 @@ describe('DrmEngine', function() {
           const keyId2 = (new Uint8Array(2)).buffer;
           const status1 = 'usable';
           const status2 = 'expired';
-          session1.keyStatuses.forEach.and.callFake(function(callback) {
+          session1.keyStatuses.forEach.and.callFake((callback) => {
             callback(keyId1, status1);
             callback(keyId2, status2);
           });
 
-          onKeyStatusSpy.and.callFake(function(statusMap) {
+          onKeyStatusSpy.and.callFake((statusMap) => {
             expect(statusMap).toEqual({
               '00': status1,
               '0000': status2,
@@ -1081,7 +1081,7 @@ describe('DrmEngine', function() {
         const keyId2 = (new Uint8Array(2)).buffer;
         const status1 = 'usable';
         const status2 = 'expired';
-        session1.keyStatuses.forEach.and.callFake(function(callback) {
+        session1.keyStatuses.forEach.and.callFake((callback) => {
           callback(keyId1, status1);
           callback(keyId2, status2);
         });
@@ -1120,10 +1120,10 @@ describe('DrmEngine', function() {
 
         const keyId1 = (new Uint8Array(1)).buffer;
         const keyId2 = (new Uint8Array(2)).buffer;
-        session1.keyStatuses.forEach.and.callFake(function(callback) {
+        session1.keyStatuses.forEach.and.callFake((callback) => {
           callback(keyId1, 'usable');
         });
-        session2.keyStatuses.forEach.and.callFake(function(callback) {
+        session2.keyStatuses.forEach.and.callFake((callback) => {
           callback(keyId2, 'usable');
         });
 
@@ -1143,10 +1143,10 @@ describe('DrmEngine', function() {
         expect(onKeyStatusSpy).toHaveBeenCalled();
       });
 
-      it('causes an EXPIRED error when all keys expire', function(done) {
+      it('causes an EXPIRED error when all keys expire', (done) => {
         onErrorSpy.and.stub();
 
-        initAndAttach().then(function() {
+        initAndAttach().then(() => {
           expect(onErrorSpy).not.toHaveBeenCalled();
 
           const initData = new Uint8Array(0);
@@ -1157,22 +1157,22 @@ describe('DrmEngine', function() {
           const keyId2 = (new Uint8Array(2)).buffer;
 
           // Expire one key.
-          session1.keyStatuses.forEach.and.callFake(function(callback) {
+          session1.keyStatuses.forEach.and.callFake((callback) => {
             callback(keyId1, 'usable');
             callback(keyId2, 'expired');
           });
 
-          onKeyStatusSpy.and.callFake(function(statusMap) {
+          onKeyStatusSpy.and.callFake((statusMap) => {
             // One key is still usable.
             expect(onErrorSpy).not.toHaveBeenCalled();
 
             // Expire both keys.
-            session1.keyStatuses.forEach.and.callFake(function(callback) {
+            session1.keyStatuses.forEach.and.callFake((callback) => {
               callback(keyId1, 'expired');
               callback(keyId2, 'expired');
             });
 
-            onKeyStatusSpy.and.callFake(function(statusMap) {
+            onKeyStatusSpy.and.callFake((statusMap) => {
               // Both keys are expired, so we should have an error.
               expect(onErrorSpy).toHaveBeenCalled();
               // There should be exactly one error.
@@ -1192,10 +1192,10 @@ describe('DrmEngine', function() {
         }).catch(fail);
       });
 
-      it('causes only one error when two keys expire at once', function(done) {
+      it('causes only one error when two keys expire at once', (done) => {
         onErrorSpy.and.stub();
 
-        initAndAttach().then(function() {
+        initAndAttach().then(() => {
           expect(onErrorSpy).not.toHaveBeenCalled();
 
           const initData = new Uint8Array(0);
@@ -1206,12 +1206,12 @@ describe('DrmEngine', function() {
           const keyId2 = (new Uint8Array(2)).buffer;
 
           // Expire both keys at once.
-          session1.keyStatuses.forEach.and.callFake(function(callback) {
+          session1.keyStatuses.forEach.and.callFake((callback) => {
             callback(keyId1, 'expired');
             callback(keyId2, 'expired');
           });
 
-          onKeyStatusSpy.and.callFake(function(statusMap) {
+          onKeyStatusSpy.and.callFake((statusMap) => {
             // Both keys are expired, so we should have an error.
             expect(onErrorSpy).toHaveBeenCalled();
             // There should be exactly one error.
@@ -1225,7 +1225,7 @@ describe('DrmEngine', function() {
             // Ignore the next key status event, sleep for one second, then
             // check to see if another error fired.
             onKeyStatusSpy.and.stub();
-            shaka.test.Util.delay(1).then(function() {
+            shaka.test.Util.delay(1).then(() => {
               // Still only one error.
               expect(onErrorSpy.calls.count()).toEqual(1);
               done();
@@ -1240,7 +1240,7 @@ describe('DrmEngine', function() {
     });  // describe('keystatuseschange')
   });  // describe('events')
 
-  describe('update', function() {
+  describe('update', () => {
     it('receives a license', async () => {
       const license = (new Uint8Array(0)).buffer;
 
@@ -1273,7 +1273,7 @@ describe('DrmEngine', function() {
 
       // Not mocked.  Run data through real data URI parser to ensure that it is
       // correctly formatted.
-      fakeNetEngine.request.and.callFake(function(type, request) {
+      fakeNetEngine.request.and.callFake((type, request) => {
         // eslint-disable-next-line new-cap
         return shaka.net.DataUriPlugin(request.uris[0], request);
       });
@@ -1339,7 +1339,7 @@ describe('DrmEngine', function() {
     });
   });  // describe('update')
 
-  describe('destroy', function() {
+  describe('destroy', () => {
     it('tears down MediaKeys and active sessions', async () => {
       await initAndAttach();
       const initData1 = new Uint8Array(1);
@@ -1404,7 +1404,7 @@ describe('DrmEngine', function() {
       await drmEngine.destroy();
     });
 
-    it('interrupts failing MediaKeys queries', async function() {
+    it('interrupts failing MediaKeys queries', async () => {
       // Hold the MediaKeys query:
       /** @type {!shaka.util.PublicPromise} */
       const p = new shaka.util.PublicPromise();
@@ -1428,7 +1428,7 @@ describe('DrmEngine', function() {
       expect(drmEngine.initialized()).toBe(false);
     });
 
-    it('interrupts successful MediaKeys queries', async function() {
+    it('interrupts successful MediaKeys queries', async () => {
       // Hold the MediaKeys query:
       /** @type {!shaka.util.PublicPromise} */
       const p = new shaka.util.PublicPromise();
@@ -1452,7 +1452,7 @@ describe('DrmEngine', function() {
       expect(drmEngine.initialized()).toBe(false);
     });
 
-    it('interrupts successful calls to createMediaKeys', async function() {
+    it('interrupts successful calls to createMediaKeys', async () => {
       // Hold createMediaKeys:
       /** @type {!shaka.util.PublicPromise} */
       const p = new shaka.util.PublicPromise();
@@ -1472,7 +1472,7 @@ describe('DrmEngine', function() {
       expect(drmEngine.initialized()).toBe(false);
     });
 
-    it('interrupts failed calls to setMediaKeys', function(done) {
+    it('interrupts failed calls to setMediaKeys', (done) => {
       // Hold setMediaKeys:
       const p1 = new shaka.util.PublicPromise();
       mockVideo.setMediaKeys.and.returnValue(p1);
@@ -1480,7 +1480,7 @@ describe('DrmEngine', function() {
       // This chain should still return "success" when DrmEngine is destroyed.
       initAndAttach().catch(fail);
 
-      shaka.test.Util.delay(1.0).then(function() {
+      shaka.test.Util.delay(1.0).then(() => {
         // We are now blocked on setMediaKeys:
         expect(mockVideo.setMediaKeys.calls.count()).toBe(1);
         // DrmEngine.destroy also calls setMediaKeys.
@@ -1493,7 +1493,7 @@ describe('DrmEngine', function() {
       }).catch(fail).then(done);
     });
 
-    it('interrupts successful calls to setMediaKeys', function(done) {
+    it('interrupts successful calls to setMediaKeys', (done) => {
       // Hold setMediaKeys:
       const p1 = new shaka.util.PublicPromise();
       mockVideo.setMediaKeys.and.returnValue(p1);
@@ -1501,7 +1501,7 @@ describe('DrmEngine', function() {
       // This chain should still return "success" when DrmEngine is destroyed.
       initAndAttach().catch(fail);
 
-      shaka.test.Util.delay(1.0).then(function() {
+      shaka.test.Util.delay(1.0).then(() => {
         // We are now blocked on setMediaKeys:
         expect(mockVideo.setMediaKeys.calls.count()).toBe(1);
         // DrmEngine.destroy also calls setMediaKeys.
@@ -1511,13 +1511,13 @@ describe('DrmEngine', function() {
         shaka.test.Util.delay(0.5).then(p1.resolve.bind(p1));  // Success
         shaka.test.Util.delay(1.0).then(p2.resolve.bind(p2));  // Success
         return drmEngine.destroy();
-      }).then(function() {
+      }).then(() => {
         // Due to the interruption, we never listened for 'encrypted' events.
         expect(mockVideo.on['encrypted']).toBe(undefined);
       }).catch(fail).then(done);
     });
 
-    it('interrupts failed calls to setServerCertificate', function(done) {
+    it('interrupts failed calls to setServerCertificate', (done) => {
       const cert = new Uint8Array(1);
       config.advanced['drm.abc'] = createAdvancedConfig(cert);
       drmEngine.configure(config);
@@ -1529,17 +1529,17 @@ describe('DrmEngine', function() {
       // This chain should still return "success" when DrmEngine is destroyed.
       initAndAttach().catch(fail);
 
-      shaka.test.Util.delay(1.0).then(function() {
+      shaka.test.Util.delay(1.0).then(() => {
         // We are now blocked on setServerCertificate:
         expect(mockMediaKeys.setServerCertificate.calls.count()).toBe(1);
         return drmEngine.destroy();
-      }).then(function() {
+      }).then(() => {
         p.reject();  // Fail setServerCertificate.
         return shaka.test.Util.delay(1.5);
       }).catch(fail).then(done);
     });
 
-    it('interrupts successful calls to setServerCertificate', function(done) {
+    it('interrupts successful calls to setServerCertificate', (done) => {
       const cert = new Uint8Array(1);
       config.advanced['drm.abc'] = createAdvancedConfig(cert);
       drmEngine.configure(config);
@@ -1551,24 +1551,24 @@ describe('DrmEngine', function() {
       // This chain should still return "success" when DrmEngine is destroyed.
       initAndAttach().catch(fail);
 
-      shaka.test.Util.delay(1.0).then(function() {
+      shaka.test.Util.delay(1.0).then(() => {
         // We are now blocked on setServerCertificate:
         expect(mockMediaKeys.setServerCertificate.calls.count()).toBe(1);
         return drmEngine.destroy();
-      }).then(function() {
+      }).then(() => {
         p.resolve();  // Success for setServerCertificate.
         return shaka.test.Util.delay(1.5);
-      }).then(function() {
+      }).then(() => {
         // Due to the interruption, we never listened for 'encrypted' events.
         expect(mockVideo.on['encrypted']).toBe(undefined);
       }).catch(fail).then(done);
     });
 
-    it('does not trigger errors if it fails generateRequest', function(done) {
+    it('does not trigger errors if it fails generateRequest', (done) => {
       const p = new shaka.util.PublicPromise();
       session1.generateRequest.and.returnValue(p);
 
-      initAndAttach().then(function() {
+      initAndAttach().then(() => {
         const initData1 = new Uint8Array(1);
         mockVideo.on['encrypted'](
             {initDataType: 'webm', initData: initData1, keyId: null});
@@ -1577,18 +1577,18 @@ describe('DrmEngine', function() {
         expect(session1.generateRequest.calls.count()).toBe(1);
 
         return drmEngine.destroy();
-      }).then(function() {
+      }).then(() => {
         p.reject();  // Fail generateRequest.
       }).catch(fail).then(done);
       // onError is a failure by default.
     });
 
-    it('interrupts successful license requests', function(done) {
+    it('interrupts successful license requests', (done) => {
       const p = new shaka.util.PublicPromise();
       const operation = shaka.util.AbortableOperation.notAbortable(p);
       fakeNetEngine.request.and.returnValue(operation);
 
-      initAndAttach().then(function() {
+      initAndAttach().then(() => {
         const initData1 = new Uint8Array(1);
         mockVideo.on['encrypted'](
             {initDataType: 'webm', initData: initData1, keyId: null});
@@ -1604,22 +1604,22 @@ describe('DrmEngine', function() {
             jasmine.anything());
 
         return drmEngine.destroy();
-      }).then(function() {
+      }).then(() => {
         // Unblock the license request.
         p.resolve({data: (new Uint8Array(0)).buffer});
-      }).then(function() {
+      }).then(() => {
         // Due to the interruption, we never updated the session.
         expect(session1.update).not.toHaveBeenCalled();
       }).catch(fail).then(done);
       // onError is a failure by default.
     });
 
-    it('interrupts failed license requests', function(done) {
+    it('interrupts failed license requests', (done) => {
       const p = new shaka.util.PublicPromise();
       const operation = shaka.util.AbortableOperation.notAbortable(p);
       fakeNetEngine.request.and.returnValue(operation);
 
-      initAndAttach().then(function() {
+      initAndAttach().then(() => {
         const initData1 = new Uint8Array(1);
         mockVideo.on['encrypted'](
             {initDataType: 'webm', initData: initData1, keyId: null});
@@ -1635,18 +1635,18 @@ describe('DrmEngine', function() {
             jasmine.anything());
 
         return drmEngine.destroy();
-      }).then(function() {
+      }).then(() => {
         // Fail the license request.
         p.reject();
       }).catch(fail).then(done);
       // onError is a failure by default.
     });
 
-    it('does not trigger errors if it fails update', function(done) {
+    it('does not trigger errors if it fails update', (done) => {
       const p = new shaka.util.PublicPromise();
       session1.update.and.returnValue(p);
 
-      initAndAttach().then(function() {
+      initAndAttach().then(() => {
         const initData1 = new Uint8Array(1);
         mockVideo.on['encrypted'](
             {initDataType: 'webm', initData: initData1, keyId: null});
@@ -1655,11 +1655,11 @@ describe('DrmEngine', function() {
         session1.on['message']({target: session1, message: message});
 
         return shaka.test.Util.delay(0.1);
-      }).then(function() {
+      }).then(() => {
         // We are now blocked on update:
         expect(session1.update.calls.count()).toBe(1);
         return drmEngine.destroy();
-      }).then(function() {
+      }).then(() => {
         // Fail the update.
         p.reject();
       }).catch(fail).then(done);
@@ -1704,7 +1704,7 @@ describe('DrmEngine', function() {
     });
   });  // describe('destroy')
 
-  describe('getDrmInfo', function() {
+  describe('getDrmInfo', () => {
     it('includes correct info', async () => {
       // Leave only one drmInfo
       manifest = new shaka.test.ManifestGenerator()
@@ -1749,7 +1749,7 @@ describe('DrmEngine', function() {
     });
   });  // describe('getDrmInfo')
 
-  describe('getCommonDrmInfos', function() {
+  describe('getCommonDrmInfos', () => {
     it('returns one array if the other is empty', () => {
       const drmInfo = {
         keySystem: 'drm.abc',
@@ -1810,7 +1810,7 @@ describe('DrmEngine', function() {
     });
   }); // describe('getCommonDrmInfos')
 
-  describe('configure', function() {
+  describe('configure', () => {
     it('delays initial license requests if configured to', async () => {
       config.delayLicenseRequestUntilPlayed = true;
       drmEngine.configure(config);
@@ -1882,7 +1882,7 @@ describe('DrmEngine', function() {
     });
   }); // describe('configure')
 
-  describe('removeSession', function() {
+  describe('removeSession', () => {
     /** @type {!shaka.util.PublicPromise} */
     let updatePromise;
 
@@ -1893,7 +1893,7 @@ describe('DrmEngine', function() {
       // 'message' event of type 'license-release'.  The removeSessions method
       // should wait until update() is complete with the response.
       updatePromise = new shaka.util.PublicPromise();
-      session1.remove.and.callFake(function() {
+      session1.remove.and.callFake(() => {
         // Raise the event synchronously, even though it doesn't normally.
         session1.on['message']({target: session1, message: new ArrayBuffer(0)});
         session1.update.and.returnValue(updatePromise);
@@ -1955,12 +1955,12 @@ describe('DrmEngine', function() {
     });
   });
 
-  describe('expiration', function() {
-    beforeAll(function() {
+  describe('expiration', () => {
+    beforeAll(() => {
       jasmine.clock().install();
     });
 
-    afterAll(function() {
+    afterAll(() => {
       jasmine.clock().uninstall();
     });
 
@@ -1979,7 +1979,7 @@ describe('DrmEngine', function() {
       jasmine.clock().tick(1000);
     });
 
-    it('calls the callback when the expiration changes', function() {
+    it('calls the callback when the expiration changes', () => {
       onExpirationSpy.calls.reset();
 
       session1.expiration = 10000;
@@ -2001,7 +2001,7 @@ describe('DrmEngine', function() {
           .toHaveBeenCalledWith(session1.sessionId, Infinity);
     });
 
-    it('gets the current expiration times', function() {
+    it('gets the current expiration times', () => {
       session1.expiration = NaN;
       expect(drmEngine.getExpiration()).toEqual(Infinity);
       session1.expiration = 12345;
@@ -2029,13 +2029,13 @@ describe('DrmEngine', function() {
       getConfiguration: jasmine.createSpy('getConfiguration'),
       createMediaKeys: jasmine.createSpy('createMediaKeys'),
     };
-    mksa.getConfiguration.and.callFake(function() {
+    mksa.getConfiguration.and.callFake(() => {
       return {
         audioCapabilities: [{contentType: 'audio/webm'}],
         videoCapabilities: [{contentType: 'video/mp4; codecs="fake"'}],
       };
     });
-    mksa.createMediaKeys.and.callFake(function() {
+    mksa.createMediaKeys.and.callFake(() => {
       return Promise.resolve(mockMediaKeys);
     });
     return mksa;
@@ -2068,7 +2068,7 @@ describe('DrmEngine', function() {
     session.generateRequest.and.returnValue(Promise.resolve());
     session.close.and.returnValue(Promise.resolve());
     session.update.and.returnValue(Promise.resolve());
-    session.addEventListener.and.callFake(function(name, callback) {
+    session.addEventListener.and.callFake((name, callback) => {
       session.on[name] = callback;
     });
     return session;

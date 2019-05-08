@@ -22,7 +22,7 @@
 //      track's current mode.
 //   3. Regardless of mode, we can use removeCue to remove cues regardless
 //      of the track's current mode.
-describe('TextTrackIntegration', function() {
+describe('TextTrackIntegration', () => {
   /** @type {HTMLVideoElement} */
   let video;
 
@@ -32,7 +32,7 @@ describe('TextTrackIntegration', function() {
   /** @type {TextTrackCueList} */
   let trackCues;
 
-  beforeEach(function() {
+  beforeEach(() => {
     video = shaka.util.Dom.createVideoElement();
     document.body.appendChild(video);
 
@@ -50,7 +50,7 @@ describe('TextTrackIntegration', function() {
     trackCues = track.cues;
   });
 
-  afterEach(function() {
+  afterEach(() => {
     document.body.removeChild(video);
     video = null;
     track = null;
@@ -61,18 +61,18 @@ describe('TextTrackIntegration', function() {
   // else. Edge and IE will always return a valid list of cues regardless of
   // what the mode is set to. Everyone else will return null for cues when
   // mode is set to "disabled".
-  describe('cues', function() {
-    it('is not null when mode is showing', function() {
+  describe('cues', () => {
+    it('is not null when mode is showing', () => {
       track.mode = 'showing';
       expect(track.cues).not.toBe(null);
     });
 
-    it('is not null when mode is hidden', function() {
+    it('is not null when mode is hidden', () => {
       track.mode = 'hidden';
       expect(track.cues).not.toBe(null);
     });
 
-    it('does not change references', function() {
+    it('does not change references', () => {
       // Flip to the mode from showing to hidden and back. The value
       // of cues should not change.
       track.mode = 'hidden';
@@ -88,13 +88,13 @@ describe('TextTrackIntegration', function() {
   });
 
 
-  describe('addCue', function() {
+  describe('addCue', () => {
     const cues = [
       new VTTCue(0, 1000, 'Cue 1 message'),
       new VTTCue(2000, 3000, 'Cue 2 message'),
     ];
 
-    it('adds cues when showing', function() {
+    it('adds cues when showing', () => {
       track.mode = 'showing';
 
       track.addCue(cues[0]);
@@ -105,7 +105,7 @@ describe('TextTrackIntegration', function() {
       expect(trackCues[1]).toBe(cues[1]);
     });
 
-    it('adds cues when hidden', function() {
+    it('adds cues when hidden', () => {
       track.mode = 'hidden';
 
       track.addCue(cues[0]);
@@ -116,7 +116,7 @@ describe('TextTrackIntegration', function() {
       expect(trackCues[1]).toBe(cues[1]);
     });
 
-    it('adds cues when disabled', function() {
+    it('adds cues when disabled', () => {
       track.mode = 'disabled';
 
       track.addCue(cues[0]);
@@ -128,13 +128,13 @@ describe('TextTrackIntegration', function() {
     });
   });
 
-  describe('removeCue', function() {
+  describe('removeCue', () => {
     const cues = [
       new VTTCue(0, 1000, 'Cue 1 message'),
       new VTTCue(2000, 3000, 'Cue 2 message'),
     ];
 
-    it('removes cues when showing', function() {
+    it('removes cues when showing', () => {
       track.mode = 'showing';
 
       track.addCue(cues[0]);
@@ -148,7 +148,7 @@ describe('TextTrackIntegration', function() {
       expect(trackCues.length).toBe(0);
     });
 
-    it('removes cues when hidden', function() {
+    it('removes cues when hidden', () => {
       track.mode = 'showing';
 
       track.addCue(cues[0]);
@@ -164,7 +164,7 @@ describe('TextTrackIntegration', function() {
       expect(trackCues.length).toBe(0);
     });
 
-    it('removes cues when disabled', function() {
+    it('removes cues when disabled', () => {
       track.mode = 'showing';
 
       track.addCue(cues[0]);

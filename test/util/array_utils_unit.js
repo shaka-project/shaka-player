@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-describe('ArrayUtils', function() {
+describe('ArrayUtils', () => {
   const ArrayUtils = shaka.util.ArrayUtils;
 
-  describe('hasSameElements', function() {
+  describe('hasSameElements', () => {
     it('determines same elements', () => {
       expectEqual([], []);
       expectEqual([1, 2, 3], [1, 2, 3]);

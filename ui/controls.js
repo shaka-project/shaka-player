@@ -731,7 +731,7 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
   for (let i = 0; i < noPropagationElements.length; i++) {
     const element = noPropagationElements[i];
     element.addEventListener(
-      'click', function(event) { event.stopPropagation(); });
+      'click', (event) => { event.stopPropagation(); });
   }
 
   // Keep showing controls if one of those elements is hovered

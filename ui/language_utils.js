@@ -38,7 +38,7 @@ shaka.ui.LanguageUtils = class {
       updateChosen, currentSelectionElement, localization) {
     // Using array.filter(f)[0] as an alternative to array.find(f) which is
     // not supported in IE11.
-    const activeTracks = tracks.filter(function(track) {
+    const activeTracks = tracks.filter((track) => {
       return track.active == true;
     });
     const selectedTrack = activeTracks[0];
