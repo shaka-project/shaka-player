@@ -315,8 +315,10 @@ class ShakaDemoMain {
    * @param {!ShakaDemoAssetInfo} asset
    */
   setupOfflineSupport(asset) {
-    goog.asserts.assert(this.initialStoredList_,
-                        'Storage must already be initialized.');
+    if (!this.initialStoredList_) {
+      // Storage failed to set up, so nothing happened.
+      return;
+    }
 
     for (const storedContent of this.initialStoredList_) {
       const identifier = storedContent.appMetadata['identifier'];
@@ -386,6 +388,12 @@ class ShakaDemoMain {
     }
     try {
       this.initialStoredList_ = await storage.list();
+    } catch (error) {
+      // If this operation errors, it means that storage (while supported) is
+      // being held up by some kind of error.
+      // Log that error, and then pretend that storage is unsupported.
+      console.error(error);
+      this.initialStoredList_ = null;
     } finally {
       storage.destroy();
     }
