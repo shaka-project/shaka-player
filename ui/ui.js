@@ -83,7 +83,10 @@ shaka.ui.Overlay.prototype.isMobile = function() {
 };
 
 
-/** @return {!shaka.extern.UIConfiguration} */
+/**
+ * @return {!shaka.extern.UIConfiguration}
+ * @export
+ */
 shaka.ui.Overlay.prototype.getConfiguration = function() {
   const ret = this.defaultConfig_();
   shaka.util.ConfigUtils.mergeConfigObjects(
