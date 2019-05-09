@@ -1059,19 +1059,21 @@ describe('StreamingEngine', () => {
 
     beforeEach(() => {
       // Set up a manifest with multiple variants and a text stream.
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addVariant(0)
-            .addAudio(10).useSegmentTemplate('audio-10-%d.mp4', 10)
-            .addVideo(11).useSegmentTemplate('video-11-%d.mp4', 10)
-          .addVariant(1)
-            .addExistingStream(10)  // audio
-            .addVideo(12).useSegmentTemplate('video-12-%d.mp4', 10)
-          .addVariant(2)
-            .addAudio(13).useSegmentTemplate('audio-13-%d.mp4', 10)
-            .addExistingStream(12)  // video
-          .addTextStream(20).useSegmentTemplate('text-20-%d.mp4', 10)
-        .build();
+          .addPeriod(0)
+            .addVariant(0)
+              .addAudio(10).useSegmentTemplate('audio-10-%d.mp4', 10)
+              .addVideo(11).useSegmentTemplate('video-11-%d.mp4', 10)
+            .addVariant(1)
+              .addExistingStream(10)  // audio
+              .addVideo(12).useSegmentTemplate('video-12-%d.mp4', 10)
+            .addVariant(2)
+              .addAudio(13).useSegmentTemplate('audio-13-%d.mp4', 10)
+              .addExistingStream(12)  // video
+            .addTextStream(20).useSegmentTemplate('text-20-%d.mp4', 10)
+          .build();
+      /* eslint-enable indent */
 
       initialVariant = manifest.periods[0].variants[0];
       sameAudioVariant = manifest.periods[0].variants[1];
@@ -2796,20 +2798,22 @@ describe('StreamingEngine', () => {
     let shouldDelayRequests;
 
     beforeEach(() => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-        .setPresentationDuration(60)
-        .addPeriod(0)
-          .addVariant(0)
-            .bandwidth(500)
-            .addVideo(10).useSegmentTemplate('video-10-%d.mp4',
-                                             /* segmentDuration= */ 10,
-                                             /* segmentSize= */ 50)
-          .addVariant(1)
-            .bandwidth(100)
-            .addVideo(11).useSegmentTemplate('video-11-%d.mp4',
-                                             /* segmentDuration= */ 10,
-                                             /* segmentSize= */ 10)
-        .build();
+          .setPresentationDuration(60)
+          .addPeriod(0)
+            .addVariant(0)
+              .bandwidth(500)
+              .addVideo(10).useSegmentTemplate('video-10-%d.mp4',
+                                               /* segmentDuration= */ 10,
+                                               /* segmentSize= */ 50)
+            .addVariant(1)
+              .bandwidth(100)
+              .addVideo(11).useSegmentTemplate('video-11-%d.mp4',
+                                               /* segmentDuration= */ 10,
+                                               /* segmentSize= */ 10)
+          .build();
+      /* eslint-enable indent */
 
       const initialVariant = manifest.periods[0].variants[0];
       newVariant = manifest.periods[0].variants[1];

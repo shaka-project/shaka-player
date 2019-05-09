@@ -116,14 +116,16 @@ describe('DrmEngine', () => {
         'https://drm-playready-licensing.axtest.net/AcquireLicense';
     drmEngine.configure(config);
 
+    /* eslint-disable indent */
     manifest = new shaka.test.ManifestGenerator()
-      .addPeriod(0)
-        .addVariant(0)
-          .addDrmInfo('com.widevine.alpha')
-          .addDrmInfo('com.microsoft.playready')
-          .addVideo(1).mime('video/mp4', 'avc1.640015').encrypted(true)
-          .addAudio(2).mime('audio/mp4', 'mp4a.40.2').encrypted(true)
-      .build();
+        .addPeriod(0)
+          .addVariant(0)
+            .addDrmInfo('com.widevine.alpha')
+            .addDrmInfo('com.microsoft.playready')
+            .addVideo(1).mime('video/mp4', 'avc1.640015').encrypted(true)
+            .addAudio(2).mime('audio/mp4', 'mp4a.40.2').encrypted(true)
+        .build();
+    /* eslint-enable indent */
 
     const videoStream = manifest.periods[0].variants[0].video;
     const audioStream = manifest.periods[0].variants[0].audio;

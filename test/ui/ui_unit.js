@@ -378,12 +378,14 @@ describe('UI', () => {
 
       it('clears the buffer when changing resolutions', async () => {
         // Load fake content that has more than one quality level.
+        /* eslint-disable indent */
         const manifest = new shaka.test.ManifestGenerator()
             .addPeriod(0)
               .addVariant(0)
                 .addVideo(1).size(320, 240)
                 .addVideo(2).size(640, 480)
             .build();
+        /* eslint-enable indent */
 
         const parser = new shaka.test.FakeManifestParser(manifest);
         const factory = function() { return parser; };

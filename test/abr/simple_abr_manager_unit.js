@@ -42,29 +42,31 @@ describe('SimpleAbrManager', () => {
     switchCallback = jasmine.createSpy('switchCallback');
 
     // Keep unsorted.
+    /* eslint-disable indent */
     manifest = new shaka.test.ManifestGenerator()
-      .addPeriod(0)
-        .addVariant(100).bandwidth(4e5)  // 400 kbps
-          .addAudio(0)
-          .addVideo(1)
-        .addVariant(101).bandwidth(1e6)  // 1000 kbps
-          .addAudio(2)
-          .addVideo(3)
-        .addVariant(102).bandwidth(5e5)  // 500 kbps
-          .addAudio(4)
-          .addVideo(5)
-        .addVariant(103).bandwidth(2e6)
-          .addAudio(6)
-          .addVideo(7)
-        .addVariant(104).bandwidth(2e6)  // Identical on purpose.
-          .addAudio(8)
-          .addVideo(9)
-        .addVariant(105).bandwidth(6e5)
-          .addAudio(10)
-          .addVideo(11)
-        .addTextStream(20)
-        .addTextStream(21)
-      .build();
+        .addPeriod(0)
+          .addVariant(100).bandwidth(4e5)  // 400 kbps
+            .addAudio(0)
+            .addVideo(1)
+          .addVariant(101).bandwidth(1e6)  // 1000 kbps
+            .addAudio(2)
+            .addVideo(3)
+          .addVariant(102).bandwidth(5e5)  // 500 kbps
+            .addAudio(4)
+            .addVideo(5)
+          .addVariant(103).bandwidth(2e6)
+            .addAudio(6)
+            .addVideo(7)
+          .addVariant(104).bandwidth(2e6)  // Identical on purpose.
+            .addAudio(8)
+            .addVideo(9)
+          .addVariant(105).bandwidth(6e5)
+            .addAudio(10)
+            .addVideo(11)
+          .addTextStream(20)
+          .addTextStream(21)
+        .build();
+    /* eslint-enable indent */
 
     config = shaka.util.PlayerConfiguration.createDefault().abr;
     config.defaultBandwidthEstimate = defaultBandwidthEstimate;
@@ -105,13 +107,15 @@ describe('SimpleAbrManager', () => {
   });
 
   it('can choose from audio only variants', () => {
+    /* eslint-disable indent */
     manifest = new shaka.test.ManifestGenerator()
-      .addPeriod(0)
-        .addVariant(0).bandwidth(4e5)
-          .addAudio(0)
-        .addVariant(1).bandwidth(1e6)
-          .addAudio(2)
-      .build();
+        .addPeriod(0)
+          .addVariant(0).bandwidth(4e5)
+            .addAudio(0)
+          .addVariant(1).bandwidth(1e6)
+            .addAudio(2)
+        .build();
+    /* eslint-enable indent */
 
     abrManager.setVariants(manifest.periods[0].variants);
     const chosen = abrManager.chooseVariant();
@@ -121,13 +125,15 @@ describe('SimpleAbrManager', () => {
   });
 
   it('can choose from video only variants', () => {
+    /* eslint-disable indent */
     manifest = new shaka.test.ManifestGenerator()
-      .addPeriod(0)
-        .addVariant(0).bandwidth(4e5)
-          .addVideo(0)
-        .addVariant(1).bandwidth(1e6)
-          .addVideo(2)
-      .build();
+        .addPeriod(0)
+          .addVariant(0).bandwidth(4e5)
+            .addVideo(0)
+          .addVariant(1).bandwidth(1e6)
+            .addVideo(2)
+        .build();
+    /* eslint-enable indent */
 
     abrManager.setVariants(manifest.periods[0].variants);
     const chosen = abrManager.chooseVariant();
@@ -327,13 +333,15 @@ describe('SimpleAbrManager', () => {
   });
 
   it('will respect restrictions', () => {
+    /* eslint-disable indent */
     manifest = new shaka.test.ManifestGenerator()
-      .addPeriod(0)
-        .addVariant(10).bandwidth(1e5)
-          .addVideo(0).size(50, 50)
-        .addVariant(11).bandwidth(2e5)
-          .addVideo(1).size(200, 200)
-      .build();
+        .addPeriod(0)
+          .addVariant(10).bandwidth(1e5)
+            .addVideo(0).size(50, 50)
+          .addVariant(11).bandwidth(2e5)
+            .addVideo(1).size(200, 200)
+        .build();
+    /* eslint-enable indent */
 
     abrManager.setVariants(manifest.periods[0].variants);
     let chosen = abrManager.chooseVariant();
@@ -347,13 +355,15 @@ describe('SimpleAbrManager', () => {
   });
 
   it('uses lowest-bandwidth variant when restrictions cannot be met', () => {
+    /* eslint-disable indent */
     manifest = new shaka.test.ManifestGenerator()
-      .addPeriod(0)
-        .addVariant(10).bandwidth(1e5)
-          .addVideo(0).size(50, 50)
-        .addVariant(11).bandwidth(2e5)
-          .addVideo(1).size(200, 200)
-      .build();
+        .addPeriod(0)
+          .addVariant(10).bandwidth(1e5)
+            .addVideo(0).size(50, 50)
+          .addVariant(11).bandwidth(2e5)
+            .addVideo(1).size(200, 200)
+        .build();
+    /* eslint-enable indent */
 
     abrManager.setVariants(manifest.periods[0].variants);
     let chosen = abrManager.chooseVariant();

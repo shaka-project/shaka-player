@@ -22,15 +22,17 @@ describe('AdaptationSetCriteria', () => {
     }
 
     it('chooses variants in user\'s preferred language', () => {
+      /* eslint-disable indent */
       const manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addVariant(1)
-            .language('es')
-          .addVariant(2)
-            .language('en')
-          .addVariant(3)
-            .language('en')
-        .build();
+          .addPeriod(0)
+            .addVariant(1)
+              .language('es')
+            .addVariant(2)
+              .language('en')
+            .addVariant(3)
+              .language('en')
+          .build();
+      /* eslint-enable indent */
 
       const builder = new shaka.media.PreferenceBasedCriteria('en', '', 0);
       const set = builder.create(variants(manifest));
@@ -42,15 +44,17 @@ describe('AdaptationSetCriteria', () => {
     });
 
     it('prefers primary variants', () => {
+      /* eslint-disable indent */
       const manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-         .addVariant(1)
-            .primary()
-         .addVariant(2)
-         .addVariant(3)
-         .addVariant(4)
-            .primary()
-        .build();
+          .addPeriod(0)
+           .addVariant(1)
+              .primary()
+           .addVariant(2)
+           .addVariant(3)
+           .addVariant(4)
+              .primary()
+          .build();
+      /* eslint-enable indent */
 
       const builder = new shaka.media.PreferenceBasedCriteria('en', '', 0);
       const set = builder.create(variants(manifest));
@@ -62,18 +66,20 @@ describe('AdaptationSetCriteria', () => {
     });
 
     it('chooses variants in preferred language and role', () => {
+      /* eslint-disable indent */
       const manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addVariant(1)
-            .language('en')
-            .addAudio(10).roles(['main', 'commentary'])
-          .addVariant(2)
-            .language('en')
-            .addAudio(20).roles(['secondary'])
-          .addVariant(3)
-            .language('es')
-            .addAudio(30).roles(['main'])
-        .build();
+          .addPeriod(0)
+            .addVariant(1)
+              .language('en')
+              .addAudio(10).roles(['main', 'commentary'])
+            .addVariant(2)
+              .language('en')
+              .addAudio(20).roles(['secondary'])
+            .addVariant(3)
+              .language('es')
+              .addAudio(30).roles(['main'])
+          .build();
+      /* eslint-enable indent */
 
       const builder = new shaka.media.PreferenceBasedCriteria('en', 'main', 0);
       const set = builder.create(variants(manifest));
@@ -85,27 +91,29 @@ describe('AdaptationSetCriteria', () => {
 
     it('chooses only one role, even if none is preferred', () => {
       // Regression test for https://github.com/google/shaka-player/issues/949
+      /* eslint-disable indent */
       const manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addVariant(1)
-            .language('en')
-            .addAudio(10).roles(['commentary'])
-          .addVariant(2)
-            .language('en')
-            .addAudio(20).roles(['commentary'])
-          .addVariant(3)
-            .language('en')
-            .addAudio(30).roles(['secondary'])
-          .addVariant(4)
-            .language('en')
-            .addAudio(40).roles(['secondary'])
-          .addVariant(5)
-            .language('en')
-            .addAudio(50).roles(['main'])
-          .addVariant(6)
-            .language('en')
-            .addAudio(60).roles(['main'])
-        .build();
+          .addPeriod(0)
+            .addVariant(1)
+              .language('en')
+              .addAudio(10).roles(['commentary'])
+            .addVariant(2)
+              .language('en')
+              .addAudio(20).roles(['commentary'])
+            .addVariant(3)
+              .language('en')
+              .addAudio(30).roles(['secondary'])
+            .addVariant(4)
+              .language('en')
+              .addAudio(40).roles(['secondary'])
+            .addVariant(5)
+              .language('en')
+              .addAudio(50).roles(['main'])
+            .addVariant(6)
+              .language('en')
+              .addAudio(60).roles(['main'])
+          .build();
+      /* eslint-enable indent */
 
       const builder = new shaka.media.PreferenceBasedCriteria('en', '', 0);
       const set = builder.create(variants(manifest));
@@ -120,27 +128,29 @@ describe('AdaptationSetCriteria', () => {
 
     it('chooses only one role, even if all are primary', () => {
       // Regression test for https://github.com/google/shaka-player/issues/949
+      /* eslint-disable indent */
       const manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addVariant(1)
-            .language('en').primary()
-            .addAudio(10).roles(['commentary'])
-          .addVariant(2)
-            .language('en').primary()
-            .addAudio(20).roles(['commentary'])
-          .addVariant(3)
-            .language('en').primary()
-            .addAudio(30).roles(['secondary'])
-          .addVariant(4)
-            .language('en').primary()
-            .addAudio(40).roles(['secondary'])
-          .addVariant(5)
-            .language('en').primary()
-            .addAudio(50).roles(['main'])
-          .addVariant(6)
-            .language('en').primary()
-            .addAudio(60).roles(['main'])
-        .build();
+          .addPeriod(0)
+            .addVariant(1)
+              .language('en').primary()
+              .addAudio(10).roles(['commentary'])
+            .addVariant(2)
+              .language('en').primary()
+              .addAudio(20).roles(['commentary'])
+            .addVariant(3)
+              .language('en').primary()
+              .addAudio(30).roles(['secondary'])
+            .addVariant(4)
+              .language('en').primary()
+              .addAudio(40).roles(['secondary'])
+            .addVariant(5)
+              .language('en').primary()
+              .addAudio(50).roles(['main'])
+            .addVariant(6)
+              .language('en').primary()
+              .addAudio(60).roles(['main'])
+          .build();
+      /* eslint-enable indent */
 
       const builder = new shaka.media.PreferenceBasedCriteria('zh', '', 0);
       const set = builder.create(variants(manifest));
@@ -155,21 +165,23 @@ describe('AdaptationSetCriteria', () => {
 
     it('chooses only one language, even if all are primary', () => {
       // Regression test for https://github.com/google/shaka-player/issues/918
+      /* eslint-disable indent */
       const manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addVariant(1)
-            .language('en').primary()
-            .addAudio(10)
-          .addVariant(2)
-            .language('en').primary()
-            .addAudio(20)
-          .addVariant(3)
-            .language('es').primary()
-            .addAudio(30)
-          .addVariant(4)
-            .language('es').primary()
-            .addAudio(40)
-        .build();
+          .addPeriod(0)
+            .addVariant(1)
+              .language('en').primary()
+              .addAudio(10)
+            .addVariant(2)
+              .language('en').primary()
+              .addAudio(20)
+            .addVariant(3)
+              .language('es').primary()
+              .addAudio(30)
+            .addVariant(4)
+              .language('es').primary()
+              .addAudio(40)
+          .build();
+      /* eslint-enable indent */
 
       const builder = new shaka.media.PreferenceBasedCriteria('zh', '', 0);
       const set = builder.create(variants(manifest));
@@ -184,27 +196,29 @@ describe('AdaptationSetCriteria', () => {
 
     it('chooses a role from among primary variants without language match',
         () => {
+          /* eslint-disable indent */
           const manifest = new shaka.test.ManifestGenerator()
-            .addPeriod(0)
-              .addVariant(1)
-                .language('en').primary()
-                .addAudio(10).roles(['commentary'])
-              .addVariant(2)
-                .language('en').primary()
-                .addAudio(20).roles(['commentary'])
-              .addVariant(3)
-                .language('en')
-                .addAudio(30).roles(['secondary'])
-              .addVariant(4)
-                .language('en')
-                .addAudio(40).roles(['secondary'])
-              .addVariant(5)
-                .language('en').primary()
-                .addAudio(50).roles(['main'])
-              .addVariant(6)
-                .language('en').primary()
-                .addAudio(60).roles(['main'])
-            .build();
+              .addPeriod(0)
+                .addVariant(1)
+                  .language('en').primary()
+                  .addAudio(10).roles(['commentary'])
+                .addVariant(2)
+                  .language('en').primary()
+                  .addAudio(20).roles(['commentary'])
+                .addVariant(3)
+                  .language('en')
+                  .addAudio(30).roles(['secondary'])
+                .addVariant(4)
+                  .language('en')
+                  .addAudio(40).roles(['secondary'])
+                .addVariant(5)
+                  .language('en').primary()
+                  .addAudio(50).roles(['main'])
+                .addVariant(6)
+                  .language('en').primary()
+                  .addAudio(60).roles(['main'])
+              .build();
+          /* eslint-enable indent */
 
           const builder = new shaka.media.PreferenceBasedCriteria('zh', '', 0);
           const set = builder.create(variants(manifest));
@@ -220,27 +234,29 @@ describe('AdaptationSetCriteria', () => {
 
     it('chooses a role from best language match, in spite of primary',
         () => {
+          /* eslint-disable indent */
           const manifest = new shaka.test.ManifestGenerator()
-            .addPeriod(0)
-              .addVariant(1)
-                .language('en').primary()
-                .addAudio(10).roles(['commentary'])
-              .addVariant(2)
-                .language('en').primary()
-                .addAudio(20).roles(['commentary'])
-              .addVariant(3)
-                .language('zh')
-                .addAudio(30).roles(['secondary'])
-              .addVariant(4)
-                .language('zh')
-                .addAudio(40).roles(['secondary'])
-              .addVariant(5)
-                .language('en').primary()
-                .addAudio(50).roles(['main'])
-              .addVariant(6)
-                .language('en').primary()
-                .addAudio(60).roles(['main'])
-            .build();
+              .addPeriod(0)
+                .addVariant(1)
+                  .language('en').primary()
+                  .addAudio(10).roles(['commentary'])
+                .addVariant(2)
+                  .language('en').primary()
+                  .addAudio(20).roles(['commentary'])
+                .addVariant(3)
+                  .language('zh')
+                  .addAudio(30).roles(['secondary'])
+                .addVariant(4)
+                  .language('zh')
+                  .addAudio(40).roles(['secondary'])
+                .addVariant(5)
+                  .language('en').primary()
+                  .addAudio(50).roles(['main'])
+                .addVariant(6)
+                  .language('en').primary()
+                  .addAudio(60).roles(['main'])
+              .build();
+          /* eslint-enable indent */
 
           const builder = new shaka.media.PreferenceBasedCriteria('zh', '', 0);
           const set = builder.create(variants(manifest));
@@ -252,15 +268,17 @@ describe('AdaptationSetCriteria', () => {
         });
 
     it('chooses variants with preferred audio channels count', () => {
+      /* eslint-disable indent */
       const manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addVariant(1)
-            .addAudio(10).channelsCount(2)
-          .addVariant(2)
-            .addAudio(20).channelsCount(6)
-          .addVariant(3)
-            .addAudio(30).channelsCount(2)
-        .build();
+          .addPeriod(0)
+            .addVariant(1)
+              .addAudio(10).channelsCount(2)
+            .addVariant(2)
+              .addAudio(20).channelsCount(6)
+            .addVariant(3)
+              .addAudio(30).channelsCount(2)
+          .build();
+      /* eslint-enable indent */
 
       const builder = new shaka.media.PreferenceBasedCriteria('', '', 2);
       const set = builder.create(variants(manifest));
@@ -273,15 +291,17 @@ describe('AdaptationSetCriteria', () => {
 
     it('chooses variants with largest audio channel count less than config' +
         ' when no exact audio channel count match is possible', () => {
+      /* eslint-disable indent */
       const manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addVariant(1)
-            .addAudio(10).channelsCount(2)
-          .addVariant(2)
-            .addAudio(20).channelsCount(8)
-          .addVariant(3)
-            .addAudio(30).channelsCount(2)
-        .build();
+          .addPeriod(0)
+            .addVariant(1)
+              .addAudio(10).channelsCount(2)
+            .addVariant(2)
+              .addAudio(20).channelsCount(8)
+            .addVariant(3)
+              .addAudio(30).channelsCount(2)
+          .build();
+      /* eslint-enable indent */
 
       const builder = new shaka.media.PreferenceBasedCriteria('', '', 6);
       const set = builder.create(variants(manifest));
@@ -294,15 +314,17 @@ describe('AdaptationSetCriteria', () => {
 
     it('chooses variants with fewest audio channels when none fit in the ' +
         'config', () => {
+      /* eslint-disable indent */
       const manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addVariant(1)
-            .addAudio(10).channelsCount(6)
-          .addVariant(2)
-            .addAudio(20).channelsCount(8)
-          .addVariant(3)
-            .addAudio(30).channelsCount(6)
-        .build();
+          .addPeriod(0)
+            .addVariant(1)
+              .addAudio(10).channelsCount(6)
+            .addVariant(2)
+              .addAudio(20).channelsCount(8)
+            .addVariant(3)
+              .addAudio(30).channelsCount(6)
+          .build();
+      /* eslint-enable indent */
 
       const builder = new shaka.media.PreferenceBasedCriteria('', '', 2);
       const set = builder.create(variants(manifest));

@@ -102,6 +102,78 @@ def check_complete(_):
   return True
 
 
+def check_eslint_disable(_):
+  """Checks that source files correctly use "eslint-disable".
+
+  - Rules are disabled/enabled in nested blocks.
+  - Rules are not disabled multiple times.
+  - Rules are enabled again by the end of the file.
+
+  Returns:
+    True on success, False on failure.
+  """
+  logging.info('Checking correct usage of eslint-disable...')
+
+  complete = build.Build()
+  # Normally we don't need to include @core, but because we look at the build
+  # object directly, we need to include it here.  When using main(), it will
+  # call addCore which will ensure core is included.
+  if not complete.parse_build(['+@complete', '+@core'], os.getcwd()):
+    logging.error('Error parsing complete build')
+    return False
+  base = shakaBuildHelpers.get_source_base()
+  complete.include.update(shakaBuildHelpers.get_all_files(
+      os.path.join(base, 'test'), re.compile(r'.*\.js$')))
+  complete.include.update(shakaBuildHelpers.get_all_files(
+      os.path.join(base, 'demo'), re.compile(r'.*\.js$')))
+
+  has_error = False
+  for path in complete.include:
+    # The stack of rules that are disabled.
+    disabled = []
+
+    with open(path, 'r') as f:
+      rel_path = os.path.relpath(path, base)
+      for i, line in enumerate(f):
+        match = re.match(r'^\s*/\* eslint-(disable|enable) ([\w-]*) \*/$', line)
+        if match:
+          if match.group(1) == 'disable':
+            # |line| disables a rule; validate it isn't already disabled.
+            if match.group(2) in disabled:
+              logging.error('%s:%d Rule %r already disabled',
+                            rel_path, i + 1, match.group(2))
+              has_error = True
+            else:
+              disabled.append(match.group(2))
+          else:
+            # |line| enabled a rule; validate it's already disabled and it's
+            # enabled in the correct order.
+            if not disabled or match.group(2) not in disabled:
+              logging.error("%s:%d Rule %r isn't disabled",
+                            rel_path, i + 1, match.group(2))
+              has_error = True
+            elif disabled[-1] != match.group(2):
+              logging.error('%s:%d Rule %r enabled out of order',
+                            rel_path, i + 1, match.group(2))
+              has_error = True
+              disabled = [x for x in disabled if x != match.group(2)]
+            else:
+              disabled = disabled[:-1]
+        else:
+          # |line| is not a normal eslint-disable or eslint-enable line.  Verify
+          # we don't have this text elsewhere where eslint will ignore it.
+          if re.search(r'eslint-(disable|enable)(?!-(next-)?line)', line):
+            logging.error('%s:%d Invalid eslint-disable',
+                          rel_path, i + 1)
+            has_error = True
+
+      for rule in disabled:
+        logging.error('%s:%d Rule %r still disabled at end of file',
+                      rel_path, i + 1, rule)
+
+  return not has_error
+
+
 def check_tests(args):
   """Runs an extra compile pass over the test code to check for type errors.
 
@@ -170,6 +242,7 @@ def main(args):
       check_js_lint,
       check_html_lint,
       check_complete,
+      check_eslint_disable,
       check_tests,
   ]
   for step in steps:

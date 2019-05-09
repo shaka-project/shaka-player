@@ -152,37 +152,39 @@ describe('HlsParser', () => {
       'main.vtt',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .language('en')
-                .bandwidth(200)
-                .addPartialStream(ContentType.VIDEO)
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
-                  .mime('video/mp4', 'avc1')
-                  .frameRate(60)
-                  .size(960, 540)
-                .addPartialStream(ContentType.AUDIO)
-                  .language('en')
-                  .anyInitSegment()
-                  .presentationTimeOffset(0)
-                  .mime('audio/mp4', 'mp4a')
-                  .channelsCount(2)
-              .addPartialStream(ContentType.TEXT)
-                .language('en')
-                .nullInitSegment()
-                .presentationTimeOffset(0)
-                .mime('text/vtt', '')
-                .kind(TextStreamKind.SUBTITLE)
-              .addPartialStream(ContentType.TEXT)
-                .language('es')
-                .nullInitSegment()
-                .presentationTimeOffset(0)
-                .mime('text/vtt', '')
-                .kind(TextStreamKind.SUBTITLE)
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .language('en')
+            .bandwidth(200)
+            .addPartialStream(ContentType.VIDEO)
+              .anyInitSegment()
+              .presentationTimeOffset(0)
+              .mime('video/mp4', 'avc1')
+              .frameRate(60)
+              .size(960, 540)
+            .addPartialStream(ContentType.AUDIO)
+              .language('en')
+              .anyInitSegment()
+              .presentationTimeOffset(0)
+              .mime('audio/mp4', 'mp4a')
+              .channelsCount(2)
+          .addPartialStream(ContentType.TEXT)
+            .language('en')
+            .nullInitSegment()
+            .presentationTimeOffset(0)
+            .mime('text/vtt', '')
+            .kind(TextStreamKind.SUBTITLE)
+          .addPartialStream(ContentType.TEXT)
+            .language('es')
+            .nullInitSegment()
+            .presentationTimeOffset(0)
+            .mime('text/vtt', '')
+            .kind(TextStreamKind.SUBTITLE)
+        .build();
+    /* eslint-enable indent */
 
     fakeNetEngine
         .setResponseText('test:/master', master)
@@ -216,13 +218,15 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .addPartialStream(ContentType.VIDEO)
-                  .mime('video/mp4', 'avc1.4d001e')
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .addPartialStream(ContentType.VIDEO)
+              .mime('video/mp4', 'avc1.4d001e')
+        .build();
+    /* eslint-enable indent */
 
     await testHlsParser(master, media, manifest);
   });
@@ -244,13 +248,15 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .addPartialStream(ContentType.VIDEO)
-                  .mime('video/mp4', 'avc1')
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .addPartialStream(ContentType.VIDEO)
+              .mime('video/mp4', 'avc1')
+        .build();
+    /* eslint-enable indent */
 
     await testHlsParser(master, media, manifest);
   });
@@ -271,13 +277,15 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .addPartialStream(ContentType.VIDEO)
-                  .mime('video/mp4', 'avc1')
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .addPartialStream(ContentType.VIDEO)
+              .mime('video/mp4', 'avc1')
+        .build();
+    /* eslint-enable indent */
 
     await testHlsParser(master, media, manifest);
   });
@@ -298,13 +306,15 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .addPartialStream(ContentType.AUDIO)
-                  .mime('audio/mp4', 'mp4a')
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .addPartialStream(ContentType.AUDIO)
+              .mime('audio/mp4', 'mp4a')
+        .build();
+    /* eslint-enable indent */
 
     await testHlsParser(master, media, manifest);
   });
@@ -328,15 +338,17 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .addPartialStream(ContentType.VIDEO)
-                  .mime('video/mp4', 'avc1')
-                .addPartialStream(ContentType.AUDIO)
-                  .mime('audio/mp4', 'mp4a')
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .addPartialStream(ContentType.VIDEO)
+              .mime('video/mp4', 'avc1')
+            .addPartialStream(ContentType.AUDIO)
+              .mime('audio/mp4', 'mp4a')
+        .build();
+    /* eslint-enable indent */
 
     await testHlsParser(master, media, manifest);
   });
@@ -363,16 +375,18 @@ describe('HlsParser', () => {
     ].join('');
 
     const closedCaptions = new Map([['CC1', 'en']]);
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .addPartialStream(ContentType.VIDEO)
-                  .mime('video/mp4', 'avc1')
-                  .closedCaptions(closedCaptions)
-                .addPartialStream(ContentType.AUDIO)
-                  .mime('audio/mp4', 'mp4a')
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .addPartialStream(ContentType.VIDEO)
+              .mime('video/mp4', 'avc1')
+              .closedCaptions(closedCaptions)
+            .addPartialStream(ContentType.AUDIO)
+              .mime('audio/mp4', 'mp4a')
+        .build();
+    /* eslint-enable indent */
 
     await testHlsParser(master, media, manifest);
   });
@@ -398,15 +412,17 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .addPartialStream(ContentType.VIDEO)
-                  .mime('video/mp4', 'avc1')
-                .addPartialStream(ContentType.AUDIO)
-                  .mime('audio/mp4', 'mp4a')
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .addPartialStream(ContentType.VIDEO)
+              .mime('video/mp4', 'avc1')
+            .addPartialStream(ContentType.AUDIO)
+              .mime('audio/mp4', 'mp4a')
+        .build();
+    /* eslint-enable indent */
 
     await testHlsParser(master, media, manifest);
   });
@@ -429,13 +445,15 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .addPartialStream(ContentType.AUDIO)
-                  .mime('audio/mp4', 'mp4a')
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .addPartialStream(ContentType.AUDIO)
+              .mime('audio/mp4', 'mp4a')
+        .build();
+    /* eslint-enable indent */
 
     await testHlsParser(master, media, manifest);
   });
@@ -507,13 +525,15 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .addPartialStream(ContentType.VIDEO)
-                  .mime('video/mp4', 'avc1,mp4a')
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .addPartialStream(ContentType.VIDEO)
+              .mime('video/mp4', 'avc1,mp4a')
+        .build();
+    /* eslint-enable indent */
 
     await testHlsParser(master, media, manifest);
   });
@@ -535,13 +555,15 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .addPartialStream(ContentType.VIDEO)
-                  .mime('video/mp4', jasmine.any(String))
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .addPartialStream(ContentType.VIDEO)
+              .mime('video/mp4', jasmine.any(String))
+        .build();
+    /* eslint-enable indent */
 
     await testHlsParser(master, media, manifest);
   });
@@ -565,15 +587,17 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .addPartialStream(ContentType.VIDEO)
-                  .mime('video/mp4', jasmine.any(String))
-                .addPartialStream(ContentType.AUDIO)
-                  .mime('audio/mp4', jasmine.any(String))
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .addPartialStream(ContentType.VIDEO)
+              .mime('video/mp4', jasmine.any(String))
+            .addPartialStream(ContentType.AUDIO)
+              .mime('audio/mp4', jasmine.any(String))
+        .build();
+    /* eslint-enable indent */
 
     await testHlsParser(master, media, manifest);
   });
@@ -596,13 +620,15 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .addPartialStream(ContentType.VIDEO)
-                  .mime('video/mp4', jasmine.any(String))
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .addPartialStream(ContentType.VIDEO)
+              .mime('video/mp4', jasmine.any(String))
+        .build();
+    /* eslint-enable indent */
 
     await testHlsParser(master, media, manifest);
   });
@@ -625,13 +651,15 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .addPartialStream(ContentType.AUDIO)
-                  .mime('audio/mp4', jasmine.any(String))
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .addPartialStream(ContentType.AUDIO)
+              .mime('audio/mp4', jasmine.any(String))
+        .build();
+    /* eslint-enable indent */
 
     await testHlsParser(master, media, manifest);
   });
@@ -660,22 +688,24 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .bandwidth(200)
-                .addPartialStream(ContentType.VIDEO)
-                  .size(960, 540)
-                .addPartialStream(ContentType.AUDIO)
-                  .language('en')
-              .addPartialVariant()
-                .bandwidth(300)
-                .addPartialStream(ContentType.VIDEO)
-                  .size(960, 540)
-                .addPartialStream(ContentType.AUDIO)
-                  .language('fr')
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .bandwidth(200)
+            .addPartialStream(ContentType.VIDEO)
+              .size(960, 540)
+            .addPartialStream(ContentType.AUDIO)
+              .language('en')
+          .addPartialVariant()
+            .bandwidth(300)
+            .addPartialStream(ContentType.VIDEO)
+              .size(960, 540)
+            .addPartialStream(ContentType.AUDIO)
+              .language('fr')
+        .build();
+    /* eslint-enable indent */
 
     await testHlsParser(master, media, manifest);
   });
@@ -701,20 +731,22 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .language('en')
-                .addPartialStream(ContentType.VIDEO)
-                .addPartialStream(ContentType.AUDIO)
-                  .language('en')
-              .addPartialVariant()
-                .language('fr')
-                .addPartialStream(ContentType.VIDEO)
-                .addPartialStream(ContentType.AUDIO)
-                  .language('fr')
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .language('en')
+            .addPartialStream(ContentType.VIDEO)
+            .addPartialStream(ContentType.AUDIO)
+              .language('en')
+          .addPartialVariant()
+            .language('fr')
+            .addPartialStream(ContentType.VIDEO)
+            .addPartialStream(ContentType.AUDIO)
+              .language('fr')
+        .build();
+    /* eslint-enable indent */
 
     await testHlsParser(master, media, manifest);
   });
@@ -769,13 +801,15 @@ describe('HlsParser', () => {
       'main.test',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .addPartialStream(ContentType.VIDEO)
-                  .mime('video/mp4', 'avc1')
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .addPartialStream(ContentType.VIDEO)
+              .mime('video/mp4', 'avc1')
+        .build();
+    /* eslint-enable indent */
 
     // The extra parameters should be stripped by the parser.
     fakeNetEngine.setHeaders(
@@ -820,23 +854,25 @@ describe('HlsParser', () => {
       'main.vtt',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .addPartialStream(ContentType.VIDEO)
-                  .mime('video/mp4', 'avc1')
-                .addPartialStream(ContentType.AUDIO)
-                  .mime('audio/mp4', 'mp4a')
-              .addPartialStream(ContentType.TEXT)
-                .language('en')
-                .mime('text/vtt', '')
-                .kind(TextStreamKind.SUBTITLE)
-              .addPartialStream(ContentType.TEXT)
-                .language('es')
-                .mime('text/vtt', '')
-                .kind(TextStreamKind.SUBTITLE)
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .addPartialStream(ContentType.VIDEO)
+              .mime('video/mp4', 'avc1')
+            .addPartialStream(ContentType.AUDIO)
+              .mime('audio/mp4', 'mp4a')
+          .addPartialStream(ContentType.TEXT)
+            .language('en')
+            .mime('text/vtt', '')
+            .kind(TextStreamKind.SUBTITLE)
+          .addPartialStream(ContentType.TEXT)
+            .language('es')
+            .mime('text/vtt', '')
+            .kind(TextStreamKind.SUBTITLE)
+        .build();
+    /* eslint-enable indent */
 
     fakeNetEngine
         .setResponseText('test:/master', master)
@@ -883,19 +919,21 @@ describe('HlsParser', () => {
       'main.vtt',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .addPartialStream(ContentType.VIDEO)
-                .addPartialStream(ContentType.AUDIO)
-              .addPartialStream(ContentType.TEXT)
-                .mime('text/vtt', '')
-                .kind(TextStreamKind.SUBTITLE)
-              .addPartialStream(ContentType.TEXT)
-                .mime('text/vtt', '')
-                .kind(TextStreamKind.SUBTITLE)
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .addPartialStream(ContentType.VIDEO)
+            .addPartialStream(ContentType.AUDIO)
+          .addPartialStream(ContentType.TEXT)
+            .mime('text/vtt', '')
+            .kind(TextStreamKind.SUBTITLE)
+          .addPartialStream(ContentType.TEXT)
+            .mime('text/vtt', '')
+            .kind(TextStreamKind.SUBTITLE)
+        .build();
+    /* eslint-enable indent */
 
     fakeNetEngine
         .setResponseText('test:/master', master)
@@ -994,15 +1032,17 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .addPartialStream(ContentType.VIDEO)
-              .addPartialStream(ContentType.TEXT)
-                .language('en')
-                .mime('application/mp4', 'stpp.TTML.im1t')
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .addPartialStream(ContentType.VIDEO)
+          .addPartialStream(ContentType.TEXT)
+            .language('en')
+            .mime('application/mp4', 'stpp.TTML.im1t')
+        .build();
+    /* eslint-enable indent */
 
     fakeNetEngine
         .setResponseText('test:/master', master)
@@ -1043,14 +1083,16 @@ describe('HlsParser', () => {
       'main.foo',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .addPartialStream(ContentType.VIDEO)
-              .addPartialStream(ContentType.TEXT)
-                .mime('text/vtt', 'vtt')
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .addPartialStream(ContentType.VIDEO)
+          .addPartialStream(ContentType.TEXT)
+            .mime('text/vtt', 'vtt')
+        .build();
+    /* eslint-enable indent */
 
     fakeNetEngine
         .setResponseText('test:/master', master)
@@ -1084,15 +1126,17 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(jasmine.any(Number))
-              .addPartialVariant()
-                .addPartialStream(ContentType.VIDEO)
-              .addPartialStream(ContentType.TEXT)
-                .anyInitSegment()
-                .kind(TextStreamKind.SUBTITLE)
-          .build();
+        .anyTimeline()
+        .addPeriod(jasmine.any(Number))
+          .addPartialVariant()
+            .addPartialStream(ContentType.VIDEO)
+          .addPartialStream(ContentType.TEXT)
+            .anyInitSegment()
+            .kind(TextStreamKind.SUBTITLE)
+        .build();
+    /* eslint-enable indent */
 
     fakeNetEngine
         .setResponseText('test:/master', master)
@@ -1125,16 +1169,18 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .addPartialStream(ContentType.VIDEO)
-                  .mime('video/mp4', 'avc1')
-                  .frameRate(60)
-                  .size(960, 540)
-                .addPartialStream(ContentType.AUDIO)
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .addPartialStream(ContentType.VIDEO)
+              .mime('video/mp4', 'avc1')
+              .frameRate(60)
+              .size(960, 540)
+            .addPartialStream(ContentType.AUDIO)
+        .build();
+    /* eslint-enable indent */
 
     await testHlsParser(master, media, manifest);
   });
@@ -1210,17 +1256,19 @@ describe('HlsParser', () => {
       'selfInit.mp4',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .addPartialStream(ContentType.VIDEO)
-                  .nullInitSegment()
-                  .mime('video/mp4', 'avc1')
-                .addPartialStream(ContentType.AUDIO)
-                  .nullInitSegment()
-                  .mime('audio/mp4', 'mp4a')
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .addPartialStream(ContentType.VIDEO)
+              .nullInitSegment()
+              .mime('video/mp4', 'avc1')
+            .addPartialStream(ContentType.AUDIO)
+              .nullInitSegment()
+              .mime('audio/mp4', 'mp4a')
+        .build();
+    /* eslint-enable indent */
 
     await testHlsParser(master, media, manifest);
   });
@@ -1260,16 +1308,18 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .bandwidth(200)
-                .addPartialStream(ContentType.VIDEO)
-                  .size(960, 540)
-                .addPartialStream(ContentType.AUDIO)
-                  .language('en')
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .bandwidth(200)
+            .addPartialStream(ContentType.VIDEO)
+              .size(960, 540)
+            .addPartialStream(ContentType.AUDIO)
+              .language('en')
+        .build();
+    /* eslint-enable indent */
 
     fakeNetEngine
         .setResponseText('test:/master', master)
@@ -1313,15 +1363,17 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .addDrmInfo('com.widevine.alpha')
-                  .addCencInitData(initDataBase64)
-                .addPartialStream(ContentType.VIDEO)
-                  .encrypted(true)
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .addDrmInfo('com.widevine.alpha')
+              .addCencInitData(initDataBase64)
+            .addPartialStream(ContentType.VIDEO)
+              .encrypted(true)
+        .build();
+    /* eslint-enable indent */
 
     await testHlsParser(master, media, manifest);
   });
@@ -1966,34 +2018,36 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .addPeriod(0)
-              .addPartialVariant()
-                .language('en')
-                .addPartialStream(ContentType.VIDEO)
-                  .size(1280, 720)
-                .addPartialStream(ContentType.AUDIO)
-                  .language('en')
-              .addPartialVariant()
-                .language('fr')
-                .addPartialStream(ContentType.VIDEO)
-                  .size(1280, 720)
-                .addPartialStream(ContentType.AUDIO)
-                  .language('fr')
-              .addPartialVariant()
-                .language('en')
-                .addPartialStream(ContentType.VIDEO)
-                  .size(1920, 1080)
-                .addPartialStream(ContentType.AUDIO)
-                  .language('en')
-              .addPartialVariant()
-                .language('fr')
-                .addPartialStream(ContentType.VIDEO)
-                  .size(1920, 1080)
-                .addPartialStream(ContentType.AUDIO)
-                  .language('fr')
-          .build();
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .language('en')
+            .addPartialStream(ContentType.VIDEO)
+              .size(1280, 720)
+            .addPartialStream(ContentType.AUDIO)
+              .language('en')
+          .addPartialVariant()
+            .language('fr')
+            .addPartialStream(ContentType.VIDEO)
+              .size(1280, 720)
+            .addPartialStream(ContentType.AUDIO)
+              .language('fr')
+          .addPartialVariant()
+            .language('en')
+            .addPartialStream(ContentType.VIDEO)
+              .size(1920, 1080)
+            .addPartialStream(ContentType.AUDIO)
+              .language('en')
+          .addPartialVariant()
+            .language('fr')
+            .addPartialStream(ContentType.VIDEO)
+              .size(1920, 1080)
+            .addPartialStream(ContentType.AUDIO)
+              .language('fr')
+        .build();
+    /* eslint-enable indent */
 
     await testHlsParser(master, media, manifest);
   });

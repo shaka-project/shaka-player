@@ -71,14 +71,16 @@ describe('DrmEngine', () => {
   });
 
   beforeEach(() => {
+    /* eslint-disable indent */
     manifest = new shaka.test.ManifestGenerator()
-      .addPeriod(0)
-        .addVariant(0)
-          .addDrmInfo('drm.abc')
-          .addDrmInfo('drm.def')
-          .addVideo(1).mime('video/foo', 'vbar').encrypted(true)
-          .addAudio(2).mime('audio/foo', 'abar').encrypted(true)
-      .build();
+        .addPeriod(0)
+          .addVariant(0)
+            .addDrmInfo('drm.abc')
+            .addDrmInfo('drm.def')
+            .addVideo(1).mime('video/foo', 'vbar').encrypted(true)
+            .addAudio(2).mime('audio/foo', 'abar').encrypted(true)
+        .build();
+    /* eslint-enable indent */
 
     // Reset spies.
     requestMediaKeySystemAccessSpy.calls.reset();
@@ -145,6 +147,7 @@ describe('DrmEngine', () => {
 
   describe('supportsVariants', () => {
     it('supports all clear variants', async () => {
+      /* eslint-disable indent */
       const manifest = new shaka.test.ManifestGenerator()
           .addPeriod(0)
             .addVariant(0)
@@ -152,6 +155,7 @@ describe('DrmEngine', () => {
               .addDrmInfo('drm.def')
               .addVideo(1).mime('video/foo', 'vbar').encrypted(false)
           .build();
+      /* eslint-enable indent */
 
       const variants = Periods.getAllVariantsFrom(manifest.periods);
       await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
@@ -323,12 +327,14 @@ describe('DrmEngine', () => {
     });
 
     it('silences errors for unencrypted assets', async () => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addVariant(0)
-            .addVideo(1).mime('video/foo', 'vbar')
-            .addAudio(2).mime('audio/foo', 'abar')
-        .build();
+          .addPeriod(0)
+            .addVariant(0)
+              .addVideo(1).mime('video/foo', 'vbar')
+              .addAudio(2).mime('audio/foo', 'abar')
+          .build();
+      /* eslint-enable indent */
 
       // Accept no key systems.
       requestMediaKeySystemAccessSpy.and.callFake(
@@ -514,13 +520,15 @@ describe('DrmEngine', () => {
 
     it('uses advanced config to fill in DrmInfo', async () => {
       // Leave only one drmInfo
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addVariant(0)
-            .addDrmInfo('drm.abc')
-            .addVideo(1).mime('video/foo', 'vbar').encrypted(true)
-            .addAudio(2).mime('audio/foo', 'abar').encrypted(true)
-        .build();
+          .addPeriod(0)
+            .addVariant(0)
+              .addDrmInfo('drm.abc')
+              .addVideo(1).mime('video/foo', 'vbar').encrypted(true)
+              .addAudio(2).mime('audio/foo', 'abar').encrypted(true)
+          .build();
+      /* eslint-enable indent */
 
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, []));
@@ -558,13 +566,15 @@ describe('DrmEngine', () => {
 
     it('prefers advanced config from manifest if present', async () => {
       // Leave only one drmInfo
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addVariant(0)
-            .addDrmInfo('drm.abc')
-            .addVideo(1).mime('video/foo', 'vbar').encrypted(true)
-            .addAudio(2).mime('audio/foo', 'abar').encrypted(true)
-        .build();
+          .addPeriod(0)
+            .addVariant(0)
+              .addDrmInfo('drm.abc')
+              .addVideo(1).mime('video/foo', 'vbar').encrypted(true)
+              .addAudio(2).mime('audio/foo', 'abar').encrypted(true)
+          .build();
+      /* eslint-enable indent */
 
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, []));
@@ -634,13 +644,15 @@ describe('DrmEngine', () => {
   describe('attach', () => {
     beforeEach(() => {
       // Both audio and video with the same key system:
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addVariant(0)
-            .addDrmInfo('drm.abc')
-            .addVideo(1).mime('video/foo', 'vbar').encrypted(true)
-            .addAudio(2).mime('audio/foo', 'abar').encrypted(true)
-        .build();
+          .addPeriod(0)
+            .addVariant(0)
+              .addDrmInfo('drm.abc')
+              .addVideo(1).mime('video/foo', 'vbar').encrypted(true)
+              .addAudio(2).mime('audio/foo', 'abar').encrypted(true)
+          .build();
+      /* eslint-enable indent */
     });
 
     it('does nothing for unencrypted content', async () => {
@@ -1707,13 +1719,15 @@ describe('DrmEngine', () => {
   describe('getDrmInfo', () => {
     it('includes correct info', async () => {
       // Leave only one drmInfo
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addVariant(0)
-            .addDrmInfo('drm.abc')
-            .addVideo(1).mime('video/foo', 'vbar').encrypted(true)
-            .addAudio(2).mime('audio/foo', 'abar').encrypted(true)
-        .build();
+          .addPeriod(0)
+            .addVariant(0)
+              .addDrmInfo('drm.abc')
+              .addVideo(1).mime('video/foo', 'vbar').encrypted(true)
+              .addAudio(2).mime('audio/foo', 'abar').encrypted(true)
+          .build();
+      /* eslint-enable indent */
       requestMediaKeySystemAccessSpy.and.callFake(
           fakeRequestMediaKeySystemAccess.bind(null, ['drm.abc']));
 

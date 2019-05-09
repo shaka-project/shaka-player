@@ -86,16 +86,18 @@ describe('Player', () => {
 
     // Many tests assume the existence of a manifest, so create a basic one.
     // Test suites can override this with more specific manifests.
+    /* eslint-disable indent */
     manifest = new shaka.test.ManifestGenerator()
-      .addPeriod(0)
-        .addVariant(0)
-          .addAudio(1)
-          .addVideo(2)
-      .addPeriod(1)
-        .addVariant(1)
-          .addAudio(3)
-          .addVideo(4)
-      .build();
+        .addPeriod(0)
+          .addVariant(0)
+            .addAudio(1)
+            .addVideo(2)
+        .addPeriod(1)
+          .addVariant(1)
+            .addAudio(3)
+            .addVideo(4)
+        .build();
+    /* eslint-enable indent */
     periodIndex = 0;
 
     abrManager = new shaka.test.FakeAbrManager();
@@ -245,15 +247,17 @@ describe('Player', () => {
         player.addEventListener('streaming', Util.spyFunc(streamingListener));
 
         // We must have two different sets of codecs for some of our tests.
+        /* eslint-disable indent */
         manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addVariant(0)
-              .addAudio(1).mime('audio/mp4', 'mp4a.40.2')
-              .addVideo(2).mime('video/mp4', 'avc1.4d401f')
-            .addVariant(1)
-              .addAudio(3).mime('audio/webm', 'opus')
-              .addVideo(4).mime('video/webm', 'vp9')
-          .build();
+            .addPeriod(0)
+              .addVariant(0)
+                .addAudio(1).mime('audio/mp4', 'mp4a.40.2')
+                .addVideo(2).mime('video/mp4', 'avc1.4d401f')
+              .addVariant(1)
+                .addAudio(3).mime('audio/webm', 'opus')
+                .addVideo(4).mime('video/webm', 'vp9')
+            .build();
+        /* eslint-enable indent */
 
         parser1 = new shaka.test.FakeManifestParser(manifest);
       });
@@ -298,16 +302,18 @@ describe('Player', () => {
 
     describe('setTextTrackVisibility', () => {
       beforeEach(() => {
+        /* eslint-disable indent */
         manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addVariant(0)
-              .addAudio(1)
-              .addVideo(2)
-            .addTextStream(3)
-              .language('es').label('Spanish')
-              .bandwidth(100).mime('text/vtt')
-              .kind('caption')
-          .build();
+            .addPeriod(0)
+              .addVariant(0)
+                .addAudio(1)
+                .addVideo(2)
+              .addTextStream(3)
+                .language('es').label('Spanish')
+                .bandwidth(100).mime('text/vtt')
+                .kind('caption')
+            .build();
+        /* eslint-enable indent */
       });
 
       it('load text stream if caption is visible', async () => {
@@ -630,12 +636,14 @@ describe('Player', () => {
       player.configure({playRangeStart: 5, playRangeEnd: 10});
       const timeline = new shaka.media.PresentationTimeline(300, 0);
       timeline.setStatic(true);
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
           .setTimeline(timeline)
           .addPeriod(0)
             .addVariant(0)
               .addVideo(1)
           .build();
+      /* eslint-enable indent */
       goog.asserts.assert(manifest, 'manifest must be non-null');
       const parser = new shaka.test.FakeManifestParser(manifest);
       const factory = function() { return parser; };
@@ -861,24 +869,26 @@ describe('Player', () => {
 
   describe('filterTracks', () => {
     it('retains only video+audio variants if they exist', (done) => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addVariant(10)
-            .addAudio(1)
-          .addVariant(11)
-            .addAudio(2)
-            .addVideo(3)
-          .addVariant(12)
-            .addVideo(4)
-        .addPeriod(1)
-          .addVariant(20)
-            .addAudio(5)
-          .addVariant(21)
-            .addVideo(6)
-          .addVariant(22)
-            .addAudio(7)
-            .addVideo(8)
-        .build();
+          .addPeriod(0)
+            .addVariant(10)
+              .addAudio(1)
+            .addVariant(11)
+              .addAudio(2)
+              .addVideo(3)
+            .addVariant(12)
+              .addVideo(4)
+          .addPeriod(1)
+            .addVariant(20)
+              .addAudio(5)
+            .addVariant(21)
+              .addVideo(6)
+            .addVariant(22)
+              .addAudio(7)
+              .addVideo(8)
+          .build();
+      /* eslint-enable indent */
 
       const variantTracks1 = [
         jasmine.objectContaining({
@@ -920,87 +930,89 @@ describe('Player', () => {
 
     beforeEach(async () => {
       // A manifest we can use to test track expectations.
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addVariant(100)  // main surround, low res
-            .bandwidth(1300)
-            .language('en')
-            .addVideo(1).originalId('video-1kbps').bandwidth(1000)
-              .size(100, 200).frameRate(1000000 / 42000)
-            .addAudio(3).originalId('audio-en-6c').bandwidth(300)
-              .channelsCount(6).roles(['main'])
+          .addPeriod(0)
+            .addVariant(100)  // main surround, low res
+              .bandwidth(1300)
+              .language('en')
+              .addVideo(1).originalId('video-1kbps').bandwidth(1000)
+                .size(100, 200).frameRate(1000000 / 42000)
+              .addAudio(3).originalId('audio-en-6c').bandwidth(300)
+                .channelsCount(6).roles(['main'])
 
-          .addVariant(101)  // main surround, high res
-            .bandwidth(2300)
-            .language('en')
-            .addVideo(2).originalId('video-2kbps').bandwidth(2000)
-              .size(200, 400).frameRate(24)
-            .addExistingStream(3)  // audio
+            .addVariant(101)  // main surround, high res
+              .bandwidth(2300)
+              .language('en')
+              .addVideo(2).originalId('video-2kbps').bandwidth(2000)
+                .size(200, 400).frameRate(24)
+              .addExistingStream(3)  // audio
 
-          .addVariant(102)  // main stereo, low res
-            .bandwidth(1100)
-            .language('en')
-            .addExistingStream(1)  // video
-            .addAudio(4).originalId('audio-en-2c').bandwidth(100)
-              .channelsCount(2).roles(['main'])
+            .addVariant(102)  // main stereo, low res
+              .bandwidth(1100)
+              .language('en')
+              .addExistingStream(1)  // video
+              .addAudio(4).originalId('audio-en-2c').bandwidth(100)
+                .channelsCount(2).roles(['main'])
 
-          .addVariant(103)  // main stereo, high res
-            .bandwidth(2100)
-            .language('en')
-            .addExistingStream(2)  // video
-            .addExistingStream(4)  // audio
+            .addVariant(103)  // main stereo, high res
+              .bandwidth(2100)
+              .language('en')
+              .addExistingStream(2)  // video
+              .addExistingStream(4)  // audio
 
-          .addVariant(104)  // commentary stereo, low res
-            .bandwidth(1100)
-            .language('en')
-            .addExistingStream(1)  // video
-            .addAudio(5).originalId('audio-commentary').bandwidth(100)
-              .channelsCount(2).roles(['commentary'])
+            .addVariant(104)  // commentary stereo, low res
+              .bandwidth(1100)
+              .language('en')
+              .addExistingStream(1)  // video
+              .addAudio(5).originalId('audio-commentary').bandwidth(100)
+                .channelsCount(2).roles(['commentary'])
 
-          .addVariant(105)  // commentary stereo, low res
-            .bandwidth(2100)
-            .language('en')
-            .addExistingStream(2)  // video
-            .addExistingStream(5)  // audio
+            .addVariant(105)  // commentary stereo, low res
+              .bandwidth(2100)
+              .language('en')
+              .addExistingStream(2)  // video
+              .addExistingStream(5)  // audio
 
-          .addVariant(106)  // spanish stereo, low res
-            .language('es')
-            .bandwidth(1100)
-            .addExistingStream(1)  // video
-            .addAudio(6).originalId('audio-es').bandwidth(100)
-              .channelsCount(2)
+            .addVariant(106)  // spanish stereo, low res
+              .language('es')
+              .bandwidth(1100)
+              .addExistingStream(1)  // video
+              .addAudio(6).originalId('audio-es').bandwidth(100)
+                .channelsCount(2)
 
-          .addVariant(107)  // spanish stereo, high res
-            .language('es')
-            .bandwidth(2100)
-            .addExistingStream(2)  // video
-            .addExistingStream(6)  // audio
+            .addVariant(107)  // spanish stereo, high res
+              .language('es')
+              .bandwidth(2100)
+              .addExistingStream(2)  // video
+              .addExistingStream(6)  // audio
 
-          // All text tracks should remain, even with different MIME types.
-          .addTextStream(50).originalId('text-es')
-            .language('es').label('Spanish')
-            .bandwidth(10).mime('text/vtt')
-            .kind('caption')
-          .addTextStream(51).originalId('text-en')
-            .language('en').label('English')
-            .bandwidth(10).mime('application/ttml+xml')
-            .kind('caption').roles(['main'])
-           .addTextStream(52).originalId('text-commentary')
-            .language('en').label('English')
-            .bandwidth(10).mime('application/ttml+xml')
-            .kind('caption').roles(['commentary'])
-        .addPeriod(1)
-          .addVariant(200)
-            .bandwidth(1100)
-            .language('en')
-            .addVideo(10).bandwidth(1000).size(100, 200)
-            .addAudio(11).bandwidth(100).channelsCount(2)
-          .addVariant(201)
-            .bandwidth(1300)
-            .language('en')
-            .addExistingStream(10)  // video
-            .addAudio(12).bandwidth(300).channelsCount(6)
-        .build();
+            // All text tracks should remain, even with different MIME types.
+            .addTextStream(50).originalId('text-es')
+              .language('es').label('Spanish')
+              .bandwidth(10).mime('text/vtt')
+              .kind('caption')
+            .addTextStream(51).originalId('text-en')
+              .language('en').label('English')
+              .bandwidth(10).mime('application/ttml+xml')
+              .kind('caption').roles(['main'])
+             .addTextStream(52).originalId('text-commentary')
+              .language('en').label('English')
+              .bandwidth(10).mime('application/ttml+xml')
+              .kind('caption').roles(['commentary'])
+          .addPeriod(1)
+            .addVariant(200)
+              .bandwidth(1100)
+              .language('en')
+              .addVideo(10).bandwidth(1000).size(100, 200)
+              .addAudio(11).bandwidth(100).channelsCount(2)
+            .addVariant(201)
+              .bandwidth(1300)
+              .language('en')
+              .addExistingStream(10)  // video
+              .addAudio(12).bandwidth(300).channelsCount(6)
+          .build();
+      /* eslint-enable indent */
 
       variantTracks = [
         {
@@ -1682,13 +1694,15 @@ describe('Player', () => {
 
     it('enables text if its language differs from audio at start', async () => {
       // A manifest we can use to test text visibility.
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addVariant(0).language('pt').addAudio(0)
-          .addVariant(1).language('en').addAudio(1)
-          .addTextStream(2).language('pt')
-          .addTextStream(3).language('fr')
-       .build();
+          .addPeriod(0)
+            .addVariant(0).language('pt').addAudio(0)
+            .addVariant(1).language('en').addAudio(1)
+            .addTextStream(2).language('pt')
+            .addTextStream(3).language('fr')
+         .build();
+      /* eslint-enable indent */
 
       player.configure({
         preferredAudioLanguage: 'en',
@@ -1718,11 +1732,13 @@ describe('Player', () => {
     it('chooses an arbitrary language when none given', async () => {
       // The Player shouldn't allow changing between languages, so it should
       // choose an arbitrary language when none is given.
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addVariant(0).language('pt').addAudio(0)
-          .addVariant(1).language('en').addAudio(1)
-       .build();
+          .addPeriod(0)
+            .addVariant(0).language('pt').addAudio(0)
+            .addVariant(1).language('en').addAudio(1)
+         .build();
+      /* eslint-enable indent */
 
       player.configure({
         preferredAudioLanguage: undefined,
@@ -1789,25 +1805,27 @@ describe('Player', () => {
       video.paused = false;
 
       // A manifest we can use to test stats.
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addVariant(0)
-            .bandwidth(200)
-            .addAudio(1).bandwidth(100)
-            .addVideo(2).bandwidth(100).size(100, 200)
-          .addVariant(1)
-            .bandwidth(300)
-            .addExistingStream(1)  // audio
-            .addVideo(3).bandwidth(200).size(200, 400)
-          .addVariant(2)
-            .bandwidth(300)
-            .addAudio(4).bandwidth(200)
-            .addExistingStream(2)  // video
-          .addVariant(3)
-            .bandwidth(400)
-            .addExistingStream(4)  // audio
-            .addExistingStream(3)  // video
-        .build();
+          .addPeriod(0)
+            .addVariant(0)
+              .bandwidth(200)
+              .addAudio(1).bandwidth(100)
+              .addVideo(2).bandwidth(100).size(100, 200)
+            .addVariant(1)
+              .bandwidth(300)
+              .addExistingStream(1)  // audio
+              .addVideo(3).bandwidth(200).size(200, 400)
+            .addVariant(2)
+              .bandwidth(300)
+              .addAudio(4).bandwidth(200)
+              .addExistingStream(2)  // video
+            .addVariant(3)
+              .bandwidth(400)
+              .addExistingStream(4)  // audio
+              .addExistingStream(3)  // video
+          .build();
+      /* eslint-enable indent */
 
       const parser = new shaka.test.FakeManifestParser(manifest);
       const parserFactory = function() { return parser; };
@@ -2097,31 +2115,36 @@ describe('Player', () => {
     });
 
     it('success when one period is playable', async () => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addVariant(0)
-                  .addVideo(0).mime('video/mp4', 'good')
-              .build();
+          .addPeriod(0)
+            .addVariant(0)
+              .addVideo(0).mime('video/mp4', 'good')
+          .build();
+      /* eslint-enable indent */
       const parser = new shaka.test.FakeManifestParser(manifest);
       const factory = function() { return parser; };
       await player.load(fakeManifestUri, 0, factory);
     });
 
     it('success when all periods are playable', async () => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addVariant(0)
-                  .addVideo(0).mime('video/mp4', 'good')
-              .addPeriod(1)
-                .addVariant(1)
-                  .addVideo(1).mime('video/mp4', 'good')
-              .build();
+          .addPeriod(0)
+            .addVariant(0)
+              .addVideo(0).mime('video/mp4', 'good')
+          .addPeriod(1)
+            .addVariant(1)
+              .addVideo(1).mime('video/mp4', 'good')
+          .build();
+      /* eslint-enable indent */
       const parser = new shaka.test.FakeManifestParser(manifest);
       const factory = function() { return parser; };
       await player.load(fakeManifestUri, 0, factory);
     });
 
     it('throw UNPLAYABLE_PERIOD when some periods are unplayable', async () => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
           .addPeriod(0)
             .addVariant(0).bandwidth(500)
@@ -2130,6 +2153,7 @@ describe('Player', () => {
             .addVariant(1).bandwidth(500)
               .addVideo(1).mime('video/mp4', 'bad')
           .build();
+      /* eslint-enable indent */
       const parser = new shaka.test.FakeManifestParser(manifest);
       const factory = function() { return parser; };
       try {
@@ -2169,6 +2193,7 @@ describe('Player', () => {
 
     it('throw CONTENT_UNSUPPORTED_BY_BROWSER when all periods are unplayable',
         async () => {
+          /* eslint-disable indent */
           manifest = new shaka.test.ManifestGenerator()
               .addPeriod(0)
                 .addVariant(0).bandwidth(500)
@@ -2179,6 +2204,7 @@ describe('Player', () => {
                 .addVariant(2)
                   .addVideo(2).mime('video/mp4', 'bad')
               .build();
+          /* eslint-enable indent */
 
           const parser = new shaka.test.FakeManifestParser(manifest);
           const factory = function() { return parser; };
@@ -2196,6 +2222,7 @@ describe('Player', () => {
         });
 
     it('throw UNPLAYABLE_PERIOD when the new period is unplayable', (done) => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
           .addPeriod(0)
             .addVariant(0).bandwidth(500)
@@ -2203,14 +2230,17 @@ describe('Player', () => {
             .addVariant(1).bandwidth(500)
               .addVideo(1).mime('video/mp4', 'good')
           .build();
+      /* eslint-enable indent */
       const parser = new shaka.test.FakeManifestParser(manifest);
       const factory = function() { return parser; };
       player.load(fakeManifestUri, 0, factory).catch(fail).then(() => {
+        /* eslint-disable indent */
         const manifest2 = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addVariant(0).bandwidth(500)
-              .addVideo(0).mime('video/mp4', 'bad')
-          .build();
+            .addPeriod(0)
+              .addVariant(0).bandwidth(500)
+                .addVideo(0).mime('video/mp4', 'bad')
+            .build();
+        /* eslint-enable indent */
         manifest.periods.push(manifest2.periods[0]);
         try {
           parser.playerInterface.filterNewPeriod(manifest2.periods[0]);
@@ -2229,13 +2259,15 @@ describe('Player', () => {
 
   describe('restrictions', () => {
     it('switches if active is restricted by application', async () => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addVariant(0).bandwidth(500)
-                  .addVideo(1)
-                .addVariant(1).bandwidth(100)
-                  .addVideo(2)
-              .build();
+          .addPeriod(0)
+            .addVariant(0).bandwidth(500)
+              .addVideo(1)
+            .addVariant(1).bandwidth(100)
+              .addVideo(2)
+          .build();
+      /* eslint-enable indent */
 
       await setupPlayer();
       let activeVariant = getActiveVariantTrack();
@@ -2265,13 +2297,15 @@ describe('Player', () => {
     });
 
     it('updates AbrManager for restriction changes', async () => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addVariant(1).bandwidth(500)
-                  .addVideo(10)
-                .addVariant(2).bandwidth(100)
-                  .addVideo(20)
-              .build();
+          .addPeriod(0)
+            .addVariant(1).bandwidth(500)
+              .addVideo(10)
+            .addVariant(2).bandwidth(100)
+              .addVideo(20)
+          .build();
+      /* eslint-enable indent */
 
       await setupPlayer();
       abrManager.setVariants.calls.reset();
@@ -2295,13 +2329,15 @@ describe('Player', () => {
     });
 
     it('switches if active key status is "output-restricted"', async () => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addVariant(0)
-                  .addVideo(1).keyId('abc')
-                .addVariant(1)
-                  .addVideo(2)
-              .build();
+          .addPeriod(0)
+            .addVariant(0)
+              .addVideo(1).keyId('abc')
+            .addVariant(1)
+              .addVideo(2)
+          .build();
+      /* eslint-enable indent */
 
       await setupPlayer();
       let activeVariant = getActiveVariantTrack();
@@ -2325,13 +2361,15 @@ describe('Player', () => {
     });
 
     it('switches if active key status is "internal-error"', async () => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addVariant(0)
-                  .addVideo(1).keyId('abc')
-                .addVariant(1)
-                  .addVideo(2)
-              .build();
+          .addPeriod(0)
+            .addVariant(0)
+              .addVideo(1).keyId('abc')
+            .addVariant(1)
+              .addVideo(2)
+          .build();
+      /* eslint-enable indent */
 
       await setupPlayer();
       let activeVariant = getActiveVariantTrack();
@@ -2352,6 +2390,7 @@ describe('Player', () => {
     });
 
     it('doesn\'t switch if the active stream isn\'t restricted', async () => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
           .addPeriod(0)
             .addVariant(0)
@@ -2359,6 +2398,7 @@ describe('Player', () => {
             .addVariant(1)
               .addVideo(2)
           .build();
+      /* eslint-enable indent */
 
       await setupPlayer();
       abrManager.chooseVariant.calls.reset();
@@ -2374,13 +2414,15 @@ describe('Player', () => {
     });
 
     it('removes if key status is "output-restricted"', async () => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addVariant(0)
-                  .addVideo(1).keyId('abc')
-                .addVariant(1)
-                  .addVideo(2)
-              .build();
+          .addPeriod(0)
+            .addVariant(0)
+              .addVideo(1).keyId('abc')
+            .addVariant(1)
+              .addVideo(2)
+          .build();
+      /* eslint-enable indent */
 
       await setupPlayer();
       expect(player.getVariantTracks().length).toBe(2);
@@ -2393,13 +2435,15 @@ describe('Player', () => {
     });
 
     it('removes if key status is "internal-error"', async () => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addVariant(0)
-                  .addVideo(1).keyId('abc')
-                .addVariant(1)
-                  .addVideo(2)
-              .build();
+          .addPeriod(0)
+            .addVariant(0)
+              .addVideo(1).keyId('abc')
+            .addVariant(1)
+              .addVideo(2)
+          .build();
+      /* eslint-enable indent */
 
       await setupPlayer();
       expect(player.getVariantTracks().length).toBe(2);
@@ -2412,13 +2456,15 @@ describe('Player', () => {
     });
 
     it('removes if we don\'t have the required key', async () => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addVariant(0)
-                  .addVideo(1).keyId('abc')
-                .addVariant(2)
-                  .addVideo(3)
-              .build();
+          .addPeriod(0)
+            .addVariant(0)
+              .addVideo(1).keyId('abc')
+            .addVariant(2)
+              .addVideo(3)
+          .build();
+      /* eslint-enable indent */
 
       await setupPlayer();
       expect(player.getVariantTracks().length).toBe(2);
@@ -2432,13 +2478,15 @@ describe('Player', () => {
     });
 
     it('does not restrict if no key statuses are available', async () => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addVariant(0)
-                  .addVideo(1).keyId('abc')
-                .addVariant(2)
-                  .addVideo(3)
-              .build();
+          .addPeriod(0)
+            .addVariant(0)
+              .addVideo(1).keyId('abc')
+            .addVariant(2)
+              .addVideo(3)
+          .build();
+      /* eslint-enable indent */
 
       await setupPlayer();
       expect(player.getVariantTracks().length).toBe(2);
@@ -2452,13 +2500,15 @@ describe('Player', () => {
     });
 
     it('doesn\'t remove when using synthetic key status', async () => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addVariant(0)
-                  .addVideo(1).keyId('abc')
-                .addVariant(2)
-                  .addVideo(3)
-              .build();
+          .addPeriod(0)
+            .addVariant(0)
+              .addVideo(1).keyId('abc')
+            .addVariant(2)
+              .addVideo(3)
+          .build();
+      /* eslint-enable indent */
 
       await setupPlayer();
       expect(player.getVariantTracks().length).toBe(2);
@@ -2471,15 +2521,17 @@ describe('Player', () => {
 
     it('removes all encrypted tracks for errors with synthetic key status',
         async () => {
+          /* eslint-disable indent */
           manifest = new shaka.test.ManifestGenerator()
-                  .addPeriod(0)
-                    .addVariant(0)
-                      .addVideo(1).keyId('abc')
-                    .addVariant(2)
-                      .addVideo(3).keyId('xyz')
-                    .addVariant(4)
-                      .addVideo(5)
-                  .build();
+              .addPeriod(0)
+                .addVariant(0)
+                  .addVideo(1).keyId('abc')
+                .addVariant(2)
+                  .addVideo(3).keyId('xyz')
+                .addVariant(4)
+                  .addVideo(5)
+              .build();
+          /* eslint-enable indent */
 
           await setupPlayer();
           expect(player.getVariantTracks().length).toBe(3);
@@ -2493,6 +2545,7 @@ describe('Player', () => {
         });
 
     it('removes if key system does not support codec', async () => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
           .addPeriod(0)
             .addVariant(0).addDrmInfo('foo.bar')
@@ -2500,6 +2553,7 @@ describe('Player', () => {
             .addVariant(1).addDrmInfo('foo.bar')
               .addVideo(2).encrypted(true)
           .build();
+      /* eslint-enable indent */
 
       // We must be careful that our video/unsupported was not filtered out
       // because of MSE support.  We are specifically testing EME-based
@@ -2519,15 +2573,17 @@ describe('Player', () => {
     });
 
     it('removes based on bandwidth', async () => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addVariant(0).bandwidth(10)
-                  .addVideo(1)
-                .addVariant(1).bandwidth(1500)
-                  .addVideo(2)
-                .addVariant(2).bandwidth(500)
-                  .addVideo(3)
-              .build();
+          .addPeriod(0)
+            .addVariant(0).bandwidth(10)
+              .addVideo(1)
+            .addVariant(1).bandwidth(1500)
+              .addVideo(2)
+            .addVariant(2).bandwidth(500)
+              .addVideo(3)
+          .build();
+      /* eslint-enable indent */
 
       await setupPlayer();
       expect(player.getVariantTracks().length).toBe(3);
@@ -2540,15 +2596,17 @@ describe('Player', () => {
     });
 
     it('removes based on pixels', async () => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addVariant(0)
-                  .addVideo(1).size(900, 900)
-                .addVariant(1)
-                  .addVideo(2).size(5, 5)
-                .addVariant(2)
-                  .addVideo(3).size(190, 190)
-              .build();
+          .addPeriod(0)
+            .addVariant(0)
+              .addVideo(1).size(900, 900)
+            .addVariant(1)
+              .addVideo(2).size(5, 5)
+            .addVariant(2)
+              .addVideo(3).size(190, 190)
+          .build();
+      /* eslint-enable indent */
 
       await setupPlayer();
       expect(player.getVariantTracks().length).toBe(3);
@@ -2561,15 +2619,17 @@ describe('Player', () => {
     });
 
     it('removes based on width', async () => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addVariant(0)
-                  .addVideo(1).size(5, 5)
-                .addVariant(1)
-                  .addVideo(2).size(1500, 200)
-                .addVariant(2)
-                  .addVideo(3).size(190, 190)
-              .build();
+          .addPeriod(0)
+            .addVariant(0)
+              .addVideo(1).size(5, 5)
+            .addVariant(1)
+              .addVideo(2).size(1500, 200)
+            .addVariant(2)
+              .addVideo(3).size(190, 190)
+          .build();
+      /* eslint-enable indent */
 
       await setupPlayer();
       expect(player.getVariantTracks().length).toBe(3);
@@ -2582,15 +2642,17 @@ describe('Player', () => {
     });
 
     it('removes based on height', async () => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addVariant(0)
-                  .addVideo(1).size(5, 5)
-                .addVariant(1)
-                  .addVideo(2).size(200, 1500)
-                .addVariant(2)
-                  .addVideo(3).size(190, 190)
-              .build();
+          .addPeriod(0)
+            .addVariant(0)
+              .addVideo(1).size(5, 5)
+            .addVariant(1)
+              .addVideo(2).size(200, 1500)
+            .addVariant(2)
+              .addVideo(3).size(190, 190)
+          .build();
+      /* eslint-enable indent */
 
       await setupPlayer();
       expect(player.getVariantTracks().length).toBe(3);
@@ -2603,6 +2665,7 @@ describe('Player', () => {
     });
 
     it('removes the whole variant if one stream is restricted', async () => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
           .addPeriod(0)
             .addVariant(0)
@@ -2612,6 +2675,7 @@ describe('Player', () => {
               .addVideo(3).size(190, 190)
               .addAudio(4)
           .build();
+      /* eslint-enable indent */
 
       await setupPlayer();
       expect(player.getVariantTracks().length).toBe(2);
@@ -2624,15 +2688,17 @@ describe('Player', () => {
     });
 
     it('issues error if no streams are playable', async () => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addVariant(0)
-                  .addVideo(1).size(5, 5)
-                .addVariant(1)
-                  .addVideo(2).size(200, 300)
-                .addVariant(2)
-                  .addVideo(3).size(190, 190)
-              .build();
+          .addPeriod(0)
+            .addVariant(0)
+              .addVideo(1).size(5, 5)
+            .addVariant(1)
+              .addVideo(2).size(200, 300)
+            .addVariant(2)
+              .addVideo(3).size(190, 190)
+          .build();
+      /* eslint-enable indent */
 
       await setupPlayer();
       expect(player.getVariantTracks().length).toBe(3);
@@ -2656,23 +2722,25 @@ describe('Player', () => {
     });
 
     it('chooses efficient codecs and removes the rest', async () => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-              // More efficient codecs
-                .addVariant(0).bandwidth(100)
-                  .addVideo(0).mime('video/mp4', 'good')
-                .addVariant(1).bandwidth(200)
-                  .addVideo(1).mime('video/mp4', 'good')
-                .addVariant(2).bandwidth(300)
-                  .addVideo(2).mime('video/mp4', 'good')
-              // Less efficient codecs
-                .addVariant(3).bandwidth(10000)
-                  .addVideo(3).mime('video/mp4', 'bad')
-                .addVariant(4).bandwidth(20000)
-                  .addVideo(4).mime('video/mp4', 'bad')
-                .addVariant(5).bandwidth(30000)
-                  .addVideo(5).mime('video/mp4', 'bad')
-              .build();
+          .addPeriod(0)
+          // More efficient codecs
+            .addVariant(0).bandwidth(100)
+              .addVideo(0).mime('video/mp4', 'good')
+            .addVariant(1).bandwidth(200)
+              .addVideo(1).mime('video/mp4', 'good')
+            .addVariant(2).bandwidth(300)
+              .addVideo(2).mime('video/mp4', 'good')
+          // Less efficient codecs
+            .addVariant(3).bandwidth(10000)
+              .addVideo(3).mime('video/mp4', 'bad')
+            .addVariant(4).bandwidth(20000)
+              .addVideo(4).mime('video/mp4', 'bad')
+            .addVariant(5).bandwidth(30000)
+              .addVideo(5).mime('video/mp4', 'bad')
+          .build();
+      /* eslint-enable indent */
 
       await setupPlayer();
       expect(abrManager.setVariants).toHaveBeenCalled();
@@ -2686,13 +2754,15 @@ describe('Player', () => {
     });
 
     it('updates AbrManager about restricted variants', (done) => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addVariant(0)
-                  .addVideo(1).keyId('abc')
-                .addVariant(2)
-                  .addVideo(3)
-              .build();
+          .addPeriod(0)
+            .addVariant(0)
+              .addVideo(1).keyId('abc')
+            .addVariant(2)
+              .addVideo(3)
+          .build();
+      /* eslint-enable indent */
 
       const abrManager = new shaka.test.FakeAbrManager();
       player.configure({abrFactory: function() { return abrManager; }});
@@ -2711,6 +2781,7 @@ describe('Player', () => {
     });
 
     it('chooses codecs after considering 6-channel preference', async () => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
           .addPeriod(0)
             // Surround sound AC-3, preferred by config
@@ -2720,6 +2791,7 @@ describe('Player', () => {
             .addVariant(1).bandwidth(100)
               .addAudio(1).channelsCount(2).mime('audio/mp4', 'mp4a.40.2')
           .build();
+      /* eslint-enable indent */
 
       // Configure for 6 channels.
       player.configure({
@@ -2751,12 +2823,14 @@ describe('Player', () => {
     beforeEach(async () => {
       const timeline = new shaka.media.PresentationTimeline(300, 0);
       timeline.setStatic(false);
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
           .setTimeline(timeline)
           .addPeriod(0)
             .addVariant(0)
             .addVideo(1)
           .build();
+      /* eslint-enable indent */
       goog.asserts.assert(manifest, 'manifest must be non-null');
       const parser = new shaka.test.FakeManifestParser(manifest);
       const factory = function() { return parser; };
@@ -2790,18 +2864,20 @@ describe('Player', () => {
     // Repro only happens with audio+video variants in which we only adapt one
     // type.  This test covers https://github.com/google/shaka-player/issues/954
 
+    /* eslint-disable indent */
     manifest = new shaka.test.ManifestGenerator()
-            .addPeriod(0)
-              .addVariant(0).bandwidth(100)
-                .addVideo(0).mime('video/mp4', 'good')
-                .addAudio(9).mime('audio/mp4', 'good')
-              .addVariant(1).bandwidth(200)
-                .addVideo(1).mime('video/mp4', 'good')
-                .addExistingStream(9)  // audio
-              .addVariant(2).bandwidth(300)
-                .addVideo(2).mime('video/mp4', 'good')
-                .addExistingStream(9)  // audio
-            .build();
+        .addPeriod(0)
+          .addVariant(0).bandwidth(100)
+            .addVideo(0).mime('video/mp4', 'good')
+            .addAudio(9).mime('audio/mp4', 'good')
+          .addVariant(1).bandwidth(200)
+            .addVideo(1).mime('video/mp4', 'good')
+            .addExistingStream(9)  // audio
+          .addVariant(2).bandwidth(300)
+            .addVideo(2).mime('video/mp4', 'good')
+            .addExistingStream(9)  // audio
+        .build();
+    /* eslint-enable indent */
 
     const parser = new shaka.test.FakeManifestParser(manifest);
     const parserFactory = function() { return parser; };
@@ -2837,30 +2913,36 @@ describe('Player', () => {
       // False before we've loaded anything.
       expect(player.isAudioOnly()).toEqual(false);
 
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addVariant(0).bandwidth(100)
-                  .addVideo(0).mime('video/mp4', 'good')
-                  .addAudio(1).mime('audio/mp4', 'good')
-              .build();
+          .addPeriod(0)
+            .addVariant(0).bandwidth(100)
+              .addVideo(0).mime('video/mp4', 'good')
+              .addAudio(1).mime('audio/mp4', 'good')
+          .build();
+      /* eslint-enable indent */
       await player.load(fakeManifestUri, 0, parserFactory);
       // We have audio & video tracks, so this is not audio-only.
       expect(player.isAudioOnly()).toEqual(false);
 
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addVariant(0).bandwidth(100)
-                  .addVideo(0).mime('video/mp4', 'good')
-              .build();
+          .addPeriod(0)
+            .addVariant(0).bandwidth(100)
+              .addVideo(0).mime('video/mp4', 'good')
+          .build();
+      /* eslint-enable indent */
       await player.load(fakeManifestUri, 0, parserFactory);
       // We have video-only tracks, so this is not audio-only.
       expect(player.isAudioOnly()).toEqual(false);
 
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addVariant(0).bandwidth(100)
-                  .addAudio(1).mime('audio/mp4', 'good')
-              .build();
+          .addPeriod(0)
+            .addVariant(0).bandwidth(100)
+              .addAudio(1).mime('audio/mp4', 'good')
+          .build();
+      /* eslint-enable indent */
       await player.load(fakeManifestUri, 0, parserFactory);
       // We have audio-only tracks, so this is audio-only.
       expect(player.isAudioOnly()).toEqual(true);
@@ -2874,15 +2956,17 @@ describe('Player', () => {
   describe('load', () => {
     it('tolerates bandwidth of NaN, undefined, or 0', async () => {
       // Regression test for https://github.com/google/shaka-player/issues/938
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addVariant(0).bandwidth(/** @type {?} */(undefined))
-                  .addVideo(0).mime('video/mp4', 'good')
-                .addVariant(1).bandwidth(NaN)
-                  .addVideo(1).mime('video/mp4', 'good')
-                .addVariant(2).bandwidth(0)
-                  .addVideo(2).mime('video/mp4', 'good')
-              .build();
+          .addPeriod(0)
+            .addVariant(0).bandwidth(/** @type {?} */(undefined))
+              .addVideo(0).mime('video/mp4', 'good')
+            .addVariant(1).bandwidth(NaN)
+              .addVideo(1).mime('video/mp4', 'good')
+            .addVariant(2).bandwidth(0)
+              .addVideo(2).mime('video/mp4', 'good')
+          .build();
+      /* eslint-enable indent */
 
       const parser = new shaka.test.FakeManifestParser(manifest);
       const parserFactory = function() { return parser; };
@@ -2901,12 +2985,14 @@ describe('Player', () => {
       const timeline = new shaka.media.PresentationTimeline(300, 0);
       timeline.setStatic(false);
 
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
           .setTimeline(timeline)
           .addPeriod(0)
             .addVariant(0)
             .addVideo(1)
           .build();
+      /* eslint-enable indent */
 
       const parser = new shaka.test.FakeManifestParser(manifest);
       const parserFactory = function() { return parser; };
@@ -2946,41 +3032,43 @@ describe('Player', () => {
     };
 
     beforeEach(() => {
+      /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addVariant(1).language('fr')
-            .addVideo(0).size(300, 400)
-            .addAudio(1).language('fr')
+          .addPeriod(0)
+            .addVariant(1).language('fr')
+              .addVideo(0).size(300, 400)
+              .addAudio(1).language('fr')
 
-          .addVariant(2).language('en')
-            .addExistingStream(0)  // video
-            .addAudio(2).language('en').roles(['main'])
+            .addVariant(2).language('en')
+              .addExistingStream(0)  // video
+              .addAudio(2).language('en').roles(['main'])
 
-          .addVariant(3).language('en')
-            .addExistingStream(0)  // video
-            .addAudio(3).language('en').roles(['commentary'])
+            .addVariant(3).language('en')
+              .addExistingStream(0)  // video
+              .addAudio(3).language('en').roles(['commentary'])
 
-          .addVariant(4).language('de')
-            .addExistingStream(0)  // video
-            .addAudio(4).language('de').roles(['foo', 'bar'])
+            .addVariant(4).language('de')
+              .addExistingStream(0)  // video
+              .addAudio(4).language('de').roles(['foo', 'bar'])
 
-          .addTextStream(5)
-            .language('es').roles(['baz', 'qwerty'])
-          .addTextStream(6)
-            .language('en').kind('caption').roles(['main', 'caption'])
-          .addTextStream(7)
-            .language('en').kind('subtitle').roles(['main', 'subtitle'])
-        .build();
+            .addTextStream(5)
+              .language('es').roles(['baz', 'qwerty'])
+            .addTextStream(6)
+              .language('en').kind('caption').roles(['main', 'caption'])
+            .addTextStream(7)
+              .language('en').kind('subtitle').roles(['main', 'subtitle'])
+          .build();
 
       videoOnlyManifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addVariant(1)
-            .bandwidth(400)
-            .addVideo(1).size(300, 400)
-          .addVariant(2)
-            .bandwidth(800)
-            .addVideo(2).size(500, 600)
-        .build();
+          .addPeriod(0)
+            .addVariant(1)
+              .bandwidth(400)
+              .addVideo(1).size(300, 400)
+            .addVariant(2)
+              .bandwidth(800)
+              .addVideo(2).size(500, 600)
+          .build();
+      /* eslint-enable indent */
     });
 
     describe('get*Languages', () => {

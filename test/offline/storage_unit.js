@@ -626,6 +626,7 @@ describe('Storage', () => {
     function makeWithStreamBandwidth() {
       const SegmentReference = shaka.media.SegmentReference;
 
+      /* eslint-disable indent */
       const manifest = new shaka.test.ManifestGenerator()
           .setPresentationDuration(20)
           .addPeriod(0)
@@ -633,6 +634,7 @@ describe('Storage', () => {
                   .addVideo(1).size(100, 200).bandwidth(kbps(10))
                   .addAudio(2).language(englishUS).bandwidth(kbps(3))
           .build();
+      /* eslint-enable indent */
 
       const audio = manifest.periods[0].variants[0].audio;
       goog.asserts.assert(audio, 'Created manifest with audio, where is it?');
@@ -1253,6 +1255,7 @@ describe('Storage', () => {
   function makeManifestWithPerStreamBandwidth() {
     const SegmentReference = shaka.media.SegmentReference;
 
+    /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
         .setPresentationDuration(20)
         .addPeriod(0)
@@ -1263,6 +1266,7 @@ describe('Storage', () => {
                 .addVideo(4).size(100, 200).bandwidth(kbps(10))
                 .addAudio(5).language(frenchCanadian).bandwidth(kbps(3))
         .build();
+    /* eslint-enable indent */
 
     getAllStreams(manifest).forEach((stream) => {
       // Make a new copy each time as the segment index can modify
