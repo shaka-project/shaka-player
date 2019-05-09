@@ -55,6 +55,10 @@ shaka.ui.Overlay = function(player, videoContainer, video) {
   if (this.isMobile()) {
     videoContainer.classList.add('shaka-mobile');
   }
+
+  // Run the initial setup so that no configure() call is required for default
+  // settings.
+  this.configure({});
 };
 
 
