@@ -216,7 +216,7 @@ class ShakaDemoCustom {
       // Make an error that shows up if you have an empty/duplicate name.
       const error = document.createElement('span');
       error.classList.add('mdl-textfield__error');
-      error.textContent = 'Must be a unique alphanumeric name.';
+      error.textContent = 'Must be a unique name.';
       container.appendChild(error);
 
       // Make a regex that will detect duplicates.
@@ -227,9 +227,12 @@ class ShakaDemoCustom {
           // If editing an existing asset, it's okay if the name doesn't change.
           continue;
         }
-        input.pattern += '|' + asset.name;
+        const escape = (input) => {
+          return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        };
+        input.pattern += '|' + escape(asset.name);
       }
-      input.pattern += ')$)[a-zA-Z0-9 ]*$';
+      input.pattern += ')$).*$';
     };
     const nameOnChange = (input) => {
       assetInProgress.name = input.value;
