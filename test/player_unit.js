@@ -686,28 +686,22 @@ describe('Player', function() {
       expect(newPreferredLang).toBe('fr');
     });
 
-    it('accepts escaped "." in names',
-       /** @suppress {accessControls} */ (function() {
-         expect(player.convertToConfigObject_('foo', 1)).toEqual({foo: 1});
-         expect(player.convertToConfigObject_('foo.bar', 1))
-             .toEqual({foo: {bar: 1}});
-         expect(player.convertToConfigObject_('foo..bar', 1))
-             .toEqual({foo: {'': {bar: 1}}});
-         expect(player.convertToConfigObject_('foo.bar.baz', 1))
-             .toEqual({foo: {bar: {baz: 1}}});
-         expect(player.convertToConfigObject_('foo.bar\\.baz', 1))
-             .toEqual({foo: {'bar.baz': 1}});
-         expect(player.convertToConfigObject_('foo.baz.', 1))
-             .toEqual({foo: {baz: {'': 1}}});
-         expect(player.convertToConfigObject_('foo.baz\\.', 1))
-             .toEqual({foo: {'baz.': 1}});
-         expect(player.convertToConfigObject_('foo\\.bar', 1))
-             .toEqual({'foo.bar': 1});
-         expect(player.convertToConfigObject_('.foo', 1))
-             .toEqual({'': {foo: 1}});
-         expect(player.convertToConfigObject_('\\.foo', 1))
-             .toEqual({'.foo': 1});
-       }));
+    it('accepts escaped "." in names', () => {
+      const convert = (name, value) => {
+        return shaka.util.ConfigUtils.convertToConfigObject(name, value);
+      };
+
+      expect(convert('foo', 1)).toEqual({foo: 1});
+      expect(convert('foo.bar', 1)).toEqual({foo: {bar: 1}});
+      expect(convert('foo..bar', 1)).toEqual({foo: {'': {bar: 1}}});
+      expect(convert('foo.bar.baz', 1)).toEqual({foo: {bar: {baz: 1}}});
+      expect(convert('foo.bar\\.baz', 1)).toEqual({foo: {'bar.baz': 1}});
+      expect(convert('foo.baz.', 1)).toEqual({foo: {baz: {'': 1}}});
+      expect(convert('foo.baz\\.', 1)).toEqual({foo: {'baz.': 1}});
+      expect(convert('foo\\.bar', 1)).toEqual({'foo.bar': 1});
+      expect(convert('.foo', 1)).toEqual({'': {foo: 1}});
+      expect(convert('\\.foo', 1)).toEqual({'.foo': 1});
+    });
 
     it('returns whether the config was valid', function() {
       logErrorSpy.and.stub();

@@ -97,13 +97,24 @@ shaka.ui.Overlay.prototype.getConfiguration = function() {
 
 
 /**
- * @param {!Object} config This should follow the form of
- *   {@link shaka.extern.UIConfiguration}, but you may omit
- *   any field you do not wish to change.
+ * @param {string|!Object} config This should either be a field name or an
+ *   object following the form of {@link shaka.extern.UIConfiguration}, where
+ *   you may omit any field you do not wish to change.
+ * @param {*=} value This should be provided if the previous parameter
+ *   was a string field name.
  * @export
  */
-shaka.ui.Overlay.prototype.configure = function(config) {
-  // TODO: accept flattened config "configure(addSeekBar, false);"
+shaka.ui.Overlay.prototype.configure = function(config, value) {
+  goog.asserts.assert(typeof(config) == 'object' || arguments.length == 2,
+                      'String configs should have values!');
+
+  // ('fieldName', value) format
+  if (arguments.length == 2 && typeof(config) == 'string') {
+    config = shaka.util.ConfigUtils.convertToConfigObject(config, value);
+  }
+
+  goog.asserts.assert(typeof(config) == 'object', 'Should be an object!');
+
   const DomUtils = shaka.util.Dom;
   // Deconstruct the old layout.
 
