@@ -267,8 +267,8 @@ describe('UI', () => {
             expect(pipButtons.length).toBe(1);
             const pipButton = pipButtons[0];
 
-            // The picture-in-picture button should not be shown when the content
-            // only has audio.
+            // The picture-in-picture button should not be shown when the
+            // content only has audio.
             expect(pipButton.classList.contains('shaka-hidden')).toBe(true);
 
             // The picture-in-picture window should not be open when the content
@@ -489,7 +489,8 @@ describe('UI', () => {
             const elements =
               container.getElementsByClassName(className);
             expect(elements.length).toBe(1);
-            expect(elements[0].classList.contains('shaka-low-position')).toBe(true);
+            expect(elements[0].classList.contains('shaka-low-position'))
+                .toBe(true);
           }
 
           confirmElementMissing(container, 'shaka-seek-bar');

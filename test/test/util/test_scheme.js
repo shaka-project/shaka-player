@@ -610,8 +610,9 @@ shaka.test.TestScheme.ManifestParser.prototype.start =
       }
 
       // Invoke filtering interfaces similar to how a real parser would.
-      // This makes sure the filtering functions are covered implicitly by tests.
-      // This covers regression https://github.com/google/shaka-player/issues/988
+      // This makes sure the filtering functions are covered implicitly by
+      // tests. This covers regression
+      // https://github.com/google/shaka-player/issues/988
       playerInterface.filterAllPeriods(manifest.periods);
       manifest.periods.forEach((period) => {
         playerInterface.filterNewPeriod(period);

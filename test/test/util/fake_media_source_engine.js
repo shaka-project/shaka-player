@@ -217,7 +217,8 @@ shaka.test.FakeMediaSourceEngine.prototype.isBufferedImpl_ =
         return false;
       }
 
-      return time >= this.toTime_(type, first) && time < this.toTime_(type, last);
+      return time >= this.toTime_(type, first) &&
+          time < this.toTime_(type, last);
     };
 
 

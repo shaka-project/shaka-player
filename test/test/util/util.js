@@ -379,7 +379,8 @@ shaka.test.Util.cleanupUI = async function() {
  */
 shaka.test.Util.waitForMovementOrFailOnTimeout =
     (eventManager, target, timeout) => {
-      // TODO: Refactor all the wait utils into a class that avoids repeated args
+      // TODO: Refactor all the wait utils into a class that avoids repeated
+      // args
       const timeGoal = target.currentTime + 1;
       let goalMet = false;
       const startTime = Date.now();
@@ -401,10 +402,10 @@ shaka.test.Util.waitForMovementOrFailOnTimeout =
         });
 
         shaka.test.Util.delay(timeout).then(() => {
-          // This check is only necessary to supress the error log.  It's fine to
-          // unlisten twice or to reject after resolve.  Neither of those actions
-          // matter.  But the error log can be confusing during debugging if we
-          // have already met the movement goal.
+          // This check is only necessary to supress the error log.  It's fine
+          // to unlisten twice or to reject after resolve.  Neither of those
+          // actions matter.  But the error log can be confusing during
+          // debugging if we have already met the movement goal.
           if (!goalMet) {
             const buffered = [];
             for (let i = 0; i < target.buffered.length; ++i) {
@@ -439,7 +440,8 @@ shaka.test.Util.waitUntilPlayheadReaches =
     (eventManager, target, playheadTime, timeout) => {
       let goalMet = false;
 
-      // TODO: Refactor all the wait utils into a class that avoids repeated args
+      // TODO: Refactor all the wait utils into a class that avoids repeated
+      // args
       return new Promise(((resolve, reject) => {
         eventManager.listen(target, 'timeupdate', () => {
           if (target.currentTime >= playheadTime) {

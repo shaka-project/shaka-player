@@ -147,41 +147,45 @@ describe('Storage', () => {
           expect(manifest.offlineSessionIds).toBeTruthy();
           expect(manifest.offlineSessionIds.length).toBeTruthy();
 
-          // Work around http://crbug.com/887535 in which load cannot happen right
-          // after close.  Experimentally, we seem to need a ~1s delay, so we're
-          // using a 3s delay to ensure it doesn't flake.  Without this, we get
-          // error 6005 (FAILED_TO_CREATE_SESSION) with system code 70.
+          // Work around http://crbug.com/887535 in which load cannot happen
+          // right after close.  Experimentally, we seem to need a ~1s delay, so
+          // we're using a 3s delay to ensure it doesn't flake.  Without this,
+          // we get error 6005 (FAILED_TO_CREATE_SESSION) with system code 70.
           // TODO: Remove when Chrome is fixed
           await shaka.test.Util.delay(3);
 
           // PART 2 - Check that the licences are stored.
           await withDrm(player, manifest, (drm) => {
-            return Promise.all(manifest.offlineSessionIds.map(async (session) => {
-              const foundSession = await loadOfflineSession(drm, session);
-              expect(foundSession).toBeTruthy();
-            }));
+            return Promise.all(
+                manifest.offlineSessionIds.map(async (session) => {
+                  const foundSession = await loadOfflineSession(drm, session);
+                  expect(foundSession).toBeTruthy();
+                }));
           });
 
-          // PART 3 - Remove the manifest from storage. This should remove all the
-          // sessions.
+          // PART 3 - Remove the manifest from storage. This should remove all
+          // the sessions.
           await storage.remove(uri.toString());
 
-          // Work around http://crbug.com/887535 in which load cannot happen right
-          // after close.  Experimentally, we seem to need a ~1s delay, so we're
-          // using a 3s delay to ensure it doesn't flake.  Without this, we get
-          // error 6005 (FAILED_TO_CREATE_SESSION) with system code 70.
+          // Work around http://crbug.com/887535 in which load cannot happen
+          // right after close.  Experimentally, we seem to need a ~1s delay, so
+          // we're using a 3s delay to ensure it doesn't flake.  Without this,
+          // we get error 6005 (FAILED_TO_CREATE_SESSION) with system code 70.
           // TODO: Remove when Chrome is fixed
           await shaka.test.Util.delay(3);
 
           // PART 4 - Check that the licenses were removed.
           try {
             await withDrm(player, manifest, (drm) => {
-              return Promise.all(manifest.offlineSessionIds.map(async (session) => {
-                const notFoundSession = await loadOfflineSession(drm, session);
-                // TODO: This is failing.  The session is actually found, possibly
-                // due to http://crbug.com/690583, but this is unclear.
-                expect(notFoundSession).toBeFalsy();
-              }));
+              return Promise.all(
+                  manifest.offlineSessionIds.map(async (session) => {
+                    const notFoundSession =
+                        await loadOfflineSession(drm, session);
+                    // TODO: This is failing.  The session is actually found,
+                    // possibly due to http://crbug.com/690583, but this is
+                    // unclear.
+                    expect(notFoundSession).toBeFalsy();
+                  }));
             });
 
             throw new Error('Expected drm to throw OFFLINE_SESSION_REMOVED');
@@ -210,7 +214,8 @@ describe('Storage', () => {
             muxer.forEachEmeSessionCell((cell) => promises.push(cell.getAll()));
             const cellByMechanism = await Promise.all(promises);
             await muxer.destroy();
-            return cellByMechanism.reduce(shaka.util.Functional.collapseArrays, []);
+            return cellByMechanism.reduce(
+                shaka.util.Functional.collapseArrays, []);
           };
 
           const oldSessions = await getEmeSessions();
@@ -228,30 +233,32 @@ describe('Storage', () => {
           const manifest = await getStoredManifest(uri);
 
           // PART 2 - Add an error so the release license message fails.
-          storage.getNetworkingEngine().registerRequestFilter((type, request) => {
-            if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
-              throw new Error('Error should be ignored');
-            }
-          });
+          storage.getNetworkingEngine().registerRequestFilter(
+              (type, request) => {
+                if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
+                  throw new Error('Error should be ignored');
+                }
+              });
 
           // PART 3 - Remove the manifest from storage. This should ignore the
-          // error with the EME session.  It should also store the session for later
-          // removal.
+          // error with the EME session.  It should also store the session for
+          // later removal.
           await storage.remove(uri.toString());
 
           // PART 4 - Verify the media was deleted but the session still exists.
           const storedContents = await storage.list();
           expect(storedContents).toEqual([]);
 
-          // TODO: Chrome has a bug that prevents loading the session a second time,
-          // so we can't check EME for the session.  Instead, check the database.
-          // This can be changed when http://crbug.com/887635 is fixed.
-          // TODO: Whether checking the database or loading the EME session, this
-          // will fail because of another Chrome bug.  Calling remove() causes the
-          // session to be removed without waiting for update.  So this entire
-          // feature is non-functional on Chrome.  The test can probably be made to
-          // pass once https://crbug.com/883895 is fixed, possibly after using a
-          // delay to work around http://crbug.com/887535 .
+          // TODO: Chrome has a bug that prevents loading the session a second
+          // time, so we can't check EME for the session.  Instead, check the
+          // database. This can be changed when http://crbug.com/887635 is
+          // fixed.
+          // TODO: Whether checking the database or loading the EME session,
+          // this will fail because of another Chrome bug.  Calling remove()
+          // causes the session to be removed without waiting for update.  So
+          // this entire feature is non-functional on Chrome.  The test can
+          // probably be made to pass once https://crbug.com/883895 is fixed,
+          // possibly after using a delay to work around http://crbug.com/887535
           const sessions = await getEmeSessions();
           expect(sessions.length).toBeGreaterThan(0);
 
@@ -265,10 +272,12 @@ describe('Storage', () => {
           expect(endSessions).toEqual([]);
           try {
             await withDrm(player, manifest, (drm) => {
-              return Promise.all(manifest.offlineSessionIds.map(async (session) => {
-                const notFoundSession = await loadOfflineSession(drm, session);
-                expect(notFoundSession).toBeFalsy();
-              }));
+              return Promise.all(
+                  manifest.offlineSessionIds.map(async (session) => {
+                    const notFoundSession =
+                        await loadOfflineSession(drm, session);
+                    expect(notFoundSession).toBeFalsy();
+                  }));
             });
 
             throw new Error('Expected drm to throw OFFLINE_SESSION_REMOVED');

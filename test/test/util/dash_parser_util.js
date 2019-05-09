@@ -100,7 +100,8 @@ shaka.test.Dash.testFails = async function(manifestText, expectedError) {
 shaka.test.Dash.makeSimpleManifestText =
     function(lines, duration, startTime) {
       let periodAttr = '';
-      let mpdAttr = 'type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"';
+      let mpdAttr =
+          'type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"';
       if (duration) {
         periodAttr = 'duration="PT' + duration + 'S"';
         mpdAttr = 'type="static"';

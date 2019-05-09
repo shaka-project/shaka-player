@@ -586,12 +586,12 @@ describe('MediaSourceEngine', () => {
 
             const appendBuffer = mediaSourceEngine.appendBuffer(
                 ContentType.VIDEO, buffer, null, null, true);
-            // In MediaSourceEngine, appendBuffer() is async and Promise-based, but
-            // at the browser level, it's event-based.
-            // MediaSourceEngine waits for the 'updateend' event from the
-            // SourceBuffer, and uses that to resolve the appendBuffer Promise.
-            // Here, we must trigger the event on the fake/mock SourceBuffer before
-            // waiting on the appendBuffer Promise.
+            // In MediaSourceEngine, appendBuffer() is async and Promise-based,
+            // but at the browser level, it's event-based. MediaSourceEngine
+            // waits for the 'updateend' event from the SourceBuffer, and uses
+            // that to resolve the appendBuffer Promise. Here, we must trigger
+            // the event on the fake/mock SourceBuffer before waiting on the
+            // appendBuffer Promise.
             videoSourceBuffer.updateend();
             await appendBuffer;
             expect(mockClosedCaptionParser.initSpy).not.toHaveBeenCalled();
