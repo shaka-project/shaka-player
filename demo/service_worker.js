@@ -64,13 +64,6 @@ const CRITICAL_RESOURCES = [
   'app_manifest.json',
   'shaka_logo_trans.png',
 
-  // These CSS files will reference Web Fonts which will be cached on sight
-  // thanks to CACHEABLE_URL_PREFIXES below.  This means we don't have to
-  // know the Web Font URL in advance, and Google Web Fonts can serve the
-  // correct version of the font to whatever browser is making the request.
-  'https://fonts.googleapis.com/css?family=Roboto',
-  'https://fonts.googleapis.com/icon?family=Material+Icons',
-
   'load.js',
   '../dist/shaka-player.ui.js',
   '../dist/demo.compiled.js',
@@ -78,15 +71,12 @@ const CRITICAL_RESOURCES = [
   '../dist/demo.css',
 
   // These files are required for the demo to include MDL.
-  'https://code.getmdl.io/1.3.0/material.indigo-blue.min.css',
   'https://code.getmdl.io/1.3.0/material.min.js',
 
   // MDL modal dialogs are enabled by including these:
   '../node_modules/dialog-polyfill/dialog-polyfill.js',
-  '../node_modules/dialog-polyfill/dialog-polyfill.css',
 
   // Datalist-like fields are enabled by including these:
-  '../node_modules/awesomplete/awesomplete.css',
   '../node_modules/awesomplete/awesomplete.min.js',
 ];
 

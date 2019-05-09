@@ -58,12 +58,13 @@ function shakaUncompiledModeSupported() {
     document.head.appendChild(link);
   }
   function loadCss(buildType) {
+    // These should override the compiled versions, which have already been
+    // hard-coded into the HTML.  This get us the best balance between avoiding
+    // a flash of unstyled content and allowing the developer to quickly reload
+    // uncompiled LESS in uncompiled mode.
     if (buildType == 'uncompiled') {
       loadSpecificCss('../ui/controls.less', 'stylesheet/less');
       loadSpecificCss('../demo/demo.less', 'stylesheet/less');
-    } else {
-      loadSpecificCss('../dist/controls.css', 'stylesheet');
-      loadSpecificCss('../dist/demo.css', 'stylesheet');
     }
   }
 
