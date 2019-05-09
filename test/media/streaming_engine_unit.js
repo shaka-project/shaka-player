@@ -89,7 +89,9 @@ describe('StreamingEngine', () => {
    */
   function runTest(callback) {
     function onTick(currentTime) {
-      if (callback) callback();
+      if (callback) {
+        callback();
+      }
       if (playing) {
         presentationTimeInSeconds++;
       }
@@ -123,7 +125,7 @@ describe('StreamingEngine', () => {
     const initSegmentSizeVideo = initSegmentRanges[ContentType.VIDEO][1] -
         initSegmentRanges[ContentType.VIDEO][0] + 1;
 
-    function makeBuffer(size) { return new ArrayBuffer(size); }
+    const makeBuffer = (size) => new ArrayBuffer(size);
     segmentData = {
       audio: {
         initSegments: [
@@ -224,7 +226,7 @@ describe('StreamingEngine', () => {
     const initSegmentSizeVideo = initSegmentRanges[ContentType.VIDEO][1] -
         initSegmentRanges[ContentType.VIDEO][0] + 1;
 
-    function makeBuffer(size) { return new ArrayBuffer(size); }
+    const makeBuffer = (size) => new ArrayBuffer(size);
     segmentData = {
       audio: {
         initSegments:
@@ -608,7 +610,9 @@ describe('StreamingEngine', () => {
       setupVod();
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
       createStreamingEngine();
-      onStartupComplete.and.callFake(() => { setupFakeGetTime(0); });
+      onStartupComplete.and.callFake(() => {
+        setupFakeGetTime(0);
+      });
       onChooseStreams.and.callFake(onChooseStreamsWithUnloadedText);
 
       streamingEngine.start();
@@ -635,7 +639,9 @@ describe('StreamingEngine', () => {
       setupVod();
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
       createStreamingEngine();
-      onStartupComplete.and.callFake(() => { setupFakeGetTime(0); });
+      onStartupComplete.and.callFake(() => {
+        setupFakeGetTime(0);
+      });
       onChooseStreams.and.callFake(onChooseStreamsWithUnloadedText);
 
       streamingEngine.start();
@@ -2088,7 +2094,9 @@ describe('StreamingEngine', () => {
       // Configure with a failure callback that records the callback time.
       let callbackTime = null;
       const failureCallback = jasmine.createSpy('failureCallback');
-      failureCallback.and.callFake(() => { callbackTime = Date.now(); });
+      failureCallback.and.callFake(() => {
+        callbackTime = Date.now();
+      });
 
       const config = shaka.util.PlayerConfiguration.createDefault().streaming;
       config.failureCallback = shaka.test.Util.spyFunc(failureCallback);
@@ -2454,7 +2462,9 @@ describe('StreamingEngine', () => {
 
       // Stop the playhead after 10 seconds since will not append any
       // segments after this time.
-      const stopPlayhead = () => { playing = presentationTimeInSeconds < 10; };
+      const stopPlayhead = () => {
+        playing = presentationTimeInSeconds < 10;
+      };
 
       runTest(stopPlayhead);
       expect(onError).toHaveBeenCalled();
@@ -2995,9 +3005,15 @@ describe('StreamingEngine', () => {
 
       expect(Util.invokeSpy(mediaSourceEngine.bufferEnd, 'video')).toBe(30);
       const expected = ['video-10-0.mp4'];
-      if (!didAbort) { expected.push('video-10-1.mp4'); }
-      if (hasInit) { expected.push('init-11.mp4'); }
-      if (didAbort) { expected.push('video-11-1.mp4'); }
+      if (!didAbort) {
+        expected.push('video-10-1.mp4');
+      }
+      if (hasInit) {
+        expected.push('init-11.mp4');
+      }
+      if (didAbort) {
+        expected.push('video-11-1.mp4');
+      }
       expected.push('video-11-2.mp4');
       expect(requestUris).toEqual(expected);
     }

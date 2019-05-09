@@ -110,7 +110,7 @@ shaka.ui.Controls = function(player, videoContainer, video, config) {
    * @private {shaka.util.Timer}
    */
   this.hideSettingsMenusTimer_ = new shaka.util.Timer(() => {
-    /** type {function(!HTMLElement)} */
+    /** @type {function(!HTMLElement)} */
     const hide = (control) => {
       shaka.ui.Utils.setDisplay(control, /* visible= */ false);
     };
@@ -864,7 +864,9 @@ shaka.ui.Controls.prototype.onMouseMove_ = function(event) {
 shaka.ui.Controls.prototype.onMouseLeave_ = function() {
   // We sometimes get 'mouseout' events with touches.  Since we can never leave
   // the video element when touching, ignore.
-  if (this.lastTouchEventTime_) return;
+  if (this.lastTouchEventTime_) {
+    return;
+  }
 
   // Stop the timer and invoke the callback now to hide the controls.  If we
   // don't, the opacity style we set in onMouseMove_ will continue to override
@@ -924,7 +926,9 @@ shaka.ui.Controls.prototype.onContainerTouch_ = function(event) {
  * @private
  */
 shaka.ui.Controls.prototype.onContainerClick_ = function(event) {
-  if (!this.enabled_) return;
+  if (!this.enabled_) {
+    return;
+  }
 
   if (this.anySettingsMenusAreOpen()) {
     this.hideSettingsMenusTimer_.tickNow();
@@ -936,7 +940,9 @@ shaka.ui.Controls.prototype.onContainerClick_ = function(event) {
 
 /** @private */
 shaka.ui.Controls.prototype.onPlayPauseClick_ = function() {
-  if (!this.enabled_) return;
+  if (!this.enabled_) {
+    return;
+  }
 
   if (!this.video_.duration) {
     // Can't play yet.  Ignore.
@@ -995,7 +1001,9 @@ shaka.ui.Controls.prototype.onPlayStateChange_ = function() {
 
 /** @private */
 shaka.ui.Controls.prototype.onSeekStart_ = function() {
-  if (!this.enabled_) return;
+  if (!this.enabled_) {
+    return;
+  }
 
   this.isSeeking_ = true;
   this.video_.pause();
@@ -1004,7 +1012,9 @@ shaka.ui.Controls.prototype.onSeekStart_ = function() {
 
 /** @private */
 shaka.ui.Controls.prototype.onSeekInput_ = function() {
-  if (!this.enabled_) return;
+  if (!this.enabled_) {
+    return;
+  }
 
   if (!this.video_.duration) {
     // Can't seek yet.  Ignore.
@@ -1028,7 +1038,9 @@ shaka.ui.Controls.prototype.onSeekInput_ = function() {
 
 /** @private */
 shaka.ui.Controls.prototype.onSeekEnd_ = function() {
-  if (!this.enabled_) return;
+  if (!this.enabled_) {
+    return;
+  }
 
   // They just let go of the seek bar, so cancel the timer and manually
   // call the event so that we can respond immediately.
@@ -1117,11 +1129,15 @@ shaka.ui.Controls.prototype.onBufferingStateChange_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.isOpaque_ = function() {
-  if (!this.enabled_) return false;
+  if (!this.enabled_) {
+    return false;
+  }
 
   // TODO: refactor into a single property
   // While you are casting, the UI is always opaque.
-  if (this.castProxy_ && this.castProxy_.isCasting()) return true;
+  if (this.castProxy_ && this.castProxy_.isCasting()) {
+    return true;
+  }
 
   return this.controlsContainer_.getAttribute('shown') != null;
 };

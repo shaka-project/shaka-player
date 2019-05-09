@@ -243,7 +243,9 @@ describe('StreamingEngine', () => {
 
   function setupPlayhead() {
     onBuffering = jasmine.createSpy('onBuffering');
-    const onSeek = () => { streamingEngine.seeked(); };
+    const onSeek = () => {
+      streamingEngine.seeked();
+    };
     playhead = new shaka.media.MediaSourcePlayhead(
         /** @type {!HTMLVideoElement} */(video),
         manifest,
@@ -265,7 +267,9 @@ describe('StreamingEngine', () => {
     manifest.minBufferTime = 2;
 
     // Create InitSegmentReferences.
-    function makeUris(uri) { return () => { return [uri]; }; }
+    function makeUris(uri) {
+      return () => [uri];
+    }
     manifest.periods[0].variants[0].audio.initSegmentReference =
         new shaka.media.InitSegmentReference(makeUris('1_audio_init'), 0, null);
     manifest.periods[0].variants[0].video.initSegmentReference =
@@ -434,7 +438,9 @@ describe('StreamingEngine', () => {
       });
 
       let seekCount = 0;
-      eventManager.listen(video, 'seeking', () => { seekCount++; });
+      eventManager.listen(video, 'seeking', () => {
+        seekCount++;
+      });
 
       // Let's go!
       onChooseStreams.and.callFake(defaultOnChooseStreams);
@@ -614,7 +620,9 @@ describe('StreamingEngine', () => {
           const getUris = (function(i) {
             // The times in the media are based on the URL; so to drop a
             // segment, we change the URL.
-            if (i >= 2 && dropSegment) i++;
+            if (i >= 2 && dropSegment) {
+              i++;
+            }
             return ['1_' + type + '_' + i];
           }.bind(null, i));
           refs.push(

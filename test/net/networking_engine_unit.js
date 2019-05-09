@@ -757,7 +757,9 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
     });
 
     it('if throws will stop requests', (done) => {
-      filter.and.callFake(() => { throw error; });
+      filter.and.callFake(() => {
+        throw error;
+      });
       networkingEngine.request(requestType, createRequest('resolve://foo'))
           .promise
           .then(fail)

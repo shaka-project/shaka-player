@@ -101,10 +101,10 @@ describe('Player', () => {
     periodIndex = 0;
 
     abrManager = new shaka.test.FakeAbrManager();
-    abrFactory = function() { return abrManager; };
+    abrFactory = () => abrManager;
 
     textDisplayer = createTextDisplayer();
-    textDisplayFactory = function() { return textDisplayer; };
+    textDisplayFactory = () => textDisplayer;
 
     function dependencyInjector(player) {
       // Create a networking engine that always returns an empty buffer.
@@ -126,11 +126,11 @@ describe('Player', () => {
         ended: jasmine.createSpy('ended').and.returnValue(false),
       };
 
-      player.createDrmEngine = function() { return drmEngine; };
-      player.createNetworkingEngine = function() { return networkingEngine; };
-      player.createPlayhead = function() { return playhead; };
-      player.createMediaSourceEngine = function() { return mediaSourceEngine; };
-      player.createStreamingEngine = function() { return streamingEngine; };
+      player.createDrmEngine = () => drmEngine;
+      player.createNetworkingEngine = () => networkingEngine;
+      player.createPlayhead = () => playhead;
+      player.createMediaSourceEngine = () => mediaSourceEngine;
+      player.createStreamingEngine = () => streamingEngine;
     }
 
     video = new shaka.test.FakeVideo(20);
@@ -164,7 +164,7 @@ describe('Player', () => {
     it('cleans up all dependencies', async () => {
       goog.asserts.assert(manifest, 'Manifest should be non-null');
       const parser = new shaka.test.FakeManifestParser(manifest);
-      const factory = function() { return parser; };
+      const factory = () => parser;
 
       await player.load(fakeManifestUri, 0, factory);
       await player.destroy();
@@ -180,7 +180,7 @@ describe('Player', () => {
     it('destroys mediaSourceEngine before drmEngine', async () => {
       goog.asserts.assert(manifest, 'Manifest should be non-null');
       const parser = new shaka.test.FakeManifestParser(manifest);
-      const factory = function() { return parser; };
+      const factory = () => parser;
 
       mediaSourceEngine.destroy.and.callFake(() => {
         expect(drmEngine.destroy).not.toHaveBeenCalled();
@@ -206,7 +206,7 @@ describe('Player', () => {
         expect(abrManager.stop).not.toHaveBeenCalled();
         expect(networkingEngine.destroy).not.toHaveBeenCalled();
       });
-      const factory = function() { return parser; };
+      const factory = () => parser;
 
       player.load(fakeManifestUri, 0, factory).then(fail).catch(() => {});
       shaka.test.Util.delay(0.1).then(() => {
@@ -230,7 +230,7 @@ describe('Player', () => {
     beforeEach(() => {
       goog.asserts.assert(manifest, 'manifest must be non-null');
       parser1 = new shaka.test.FakeManifestParser(manifest);
-      factory1 = function() { return parser1; };
+      factory1 = () => parser1;
 
       checkError = jasmine.createSpy('checkError');
       checkError.and.callFake((error) => {
@@ -646,7 +646,7 @@ describe('Player', () => {
       /* eslint-enable indent */
       goog.asserts.assert(manifest, 'manifest must be non-null');
       const parser = new shaka.test.FakeManifestParser(manifest);
-      const factory = function() { return parser; };
+      const factory = () => parser;
       await player.load(fakeManifestUri, 0, factory);
       const seekRange = player.seekRange();
       expect(seekRange.start).toBe(5);
@@ -655,7 +655,7 @@ describe('Player', () => {
 
     it('does not switch for plain configuration changes', async () => {
       const parser = new shaka.test.FakeManifestParser(manifest);
-      const factory = function() { return parser; };
+      const factory = () => parser;
 
       const switchVariantSpy = spyOn(player, 'switchVariant_');
 
@@ -782,7 +782,7 @@ describe('Player', () => {
     beforeEach(() => {
       goog.asserts.assert(manifest, 'manifest must be non-null');
       parser = new shaka.test.FakeManifestParser(manifest);
-      parserFactory = function() { return parser; };
+      parserFactory = () => parser;
     });
 
     it('sets through load', async () => {
@@ -906,7 +906,7 @@ describe('Player', () => {
       ];
 
       const parser = new shaka.test.FakeManifestParser(manifest);
-      const parserFactory = function() { return parser; };
+      const parserFactory = () => parser;
       player.load(fakeManifestUri, 0, parserFactory).catch(fail).then(() => {
         // Check the first period's variant tracks.
         const actualVariantTracks1 = player.getVariantTracks();
@@ -1319,7 +1319,7 @@ describe('Player', () => {
 
       goog.asserts.assert(manifest, 'manifest must be non-null');
       const parser = new shaka.test.FakeManifestParser(manifest);
-      const parserFactory = function() { return parser; };
+      const parserFactory = () => parser;
 
       // Language/channel prefs must be set before load.  Used in
       // select*Language() tests.
@@ -1341,7 +1341,7 @@ describe('Player', () => {
 
     it('returns empty arrays before tracks can be determined', async () => {
       const parser = new shaka.test.FakeManifestParser(manifest);
-      const parserFactory = function() { return parser; };
+      const parserFactory = () => parser;
       parser.start.and.callFake((manifestUri, playerInterface) => {
         // The player does not yet have a manifest.
         expect(player.getVariantTracks()).toEqual([]);
@@ -1712,7 +1712,7 @@ describe('Player', () => {
       expect(player.isTextTrackVisible()).toBe(false);
 
       const parser = new shaka.test.FakeManifestParser(manifest);
-      const factory = function() { return parser; };
+      const factory = () => parser;
       await player.load(fakeManifestUri, 0, factory);
 
       // Text was turned on during startup.
@@ -1745,7 +1745,7 @@ describe('Player', () => {
       });
 
       const parser = new shaka.test.FakeManifestParser(manifest);
-      const parserFactory = function() { return parser; };
+      const parserFactory = () => parser;
       await player.load(fakeManifestUri, 0, parserFactory);
 
       expect(abrManager.setVariants).toHaveBeenCalled();
@@ -1786,7 +1786,7 @@ describe('Player', () => {
       });
 
       const parser = new shaka.test.FakeManifestParser(manifest);
-      const factory = function() { return parser; };
+      const factory = () => parser;
       return player.load(fakeManifestUri, 0, factory).then(() => {
         expect(getActiveVariantTrack().id).toBe(expectedIndex);
       });
@@ -1828,7 +1828,7 @@ describe('Player', () => {
       /* eslint-enable indent */
 
       const parser = new shaka.test.FakeManifestParser(manifest);
-      const parserFactory = function() { return parser; };
+      const parserFactory = () => parser;
       await player.load(fakeManifestUri, 0, parserFactory);
 
       // Initialize the fake streams.
@@ -2123,7 +2123,7 @@ describe('Player', () => {
           .build();
       /* eslint-enable indent */
       const parser = new shaka.test.FakeManifestParser(manifest);
-      const factory = function() { return parser; };
+      const factory = () => parser;
       await player.load(fakeManifestUri, 0, factory);
     });
 
@@ -2139,7 +2139,7 @@ describe('Player', () => {
           .build();
       /* eslint-enable indent */
       const parser = new shaka.test.FakeManifestParser(manifest);
-      const factory = function() { return parser; };
+      const factory = () => parser;
       await player.load(fakeManifestUri, 0, factory);
     });
 
@@ -2155,7 +2155,7 @@ describe('Player', () => {
           .build();
       /* eslint-enable indent */
       const parser = new shaka.test.FakeManifestParser(manifest);
-      const factory = function() { return parser; };
+      const factory = () => parser;
       try {
         await player.load(fakeManifestUri, 0, factory);
         fail();
@@ -2177,7 +2177,7 @@ describe('Player', () => {
                   .addVideo(0).mime('video/mp4', 'bad')
               .build();
           const parser = new shaka.test.FakeManifestParser(manifest);
-          const factory = function() { return parser; };
+          const factory = () => parser;
           try {
             await player.load(fakeManifestUri, 0, factory);
             fail();
@@ -2207,7 +2207,7 @@ describe('Player', () => {
           /* eslint-enable indent */
 
           const parser = new shaka.test.FakeManifestParser(manifest);
-          const factory = function() { return parser; };
+          const factory = () => parser;
           try {
             await player.load(fakeManifestUri, 0, factory);
             fail();
@@ -2232,7 +2232,7 @@ describe('Player', () => {
           .build();
       /* eslint-enable indent */
       const parser = new shaka.test.FakeManifestParser(manifest);
-      const factory = function() { return parser; };
+      const factory = () => parser;
       player.load(fakeManifestUri, 0, factory).catch(fail).then(() => {
         /* eslint-disable indent */
         const manifest2 = new shaka.test.ManifestGenerator()
@@ -2765,7 +2765,7 @@ describe('Player', () => {
       /* eslint-enable indent */
 
       const abrManager = new shaka.test.FakeAbrManager();
-      player.configure({abrFactory: function() { return abrManager; }});
+      player.configure({abrFactory: () => abrManager});
       setupPlayer().then(() => {
         expect(player.getVariantTracks().length).toBe(2);
 
@@ -2811,7 +2811,7 @@ describe('Player', () => {
      */
     function setupPlayer() {
       const parser = new shaka.test.FakeManifestParser(manifest);
-      const parserFactory = function() { return parser; };
+      const parserFactory = () => parser;
       return player.load(fakeManifestUri, 0, parserFactory).then(() => {
         // Initialize the fake streams.
         streamingEngine.onCanSwitch();
@@ -2833,7 +2833,7 @@ describe('Player', () => {
       /* eslint-enable indent */
       goog.asserts.assert(manifest, 'manifest must be non-null');
       const parser = new shaka.test.FakeManifestParser(manifest);
-      const factory = function() { return parser; };
+      const factory = () => parser;
       await player.load(fakeManifestUri, 0, factory);
     });
 
@@ -2846,7 +2846,7 @@ describe('Player', () => {
   it('rejects empty manifests', (done) => {
     manifest = new shaka.test.ManifestGenerator().build();
     const emptyParser = new shaka.test.FakeManifestParser(manifest);
-    const emptyFactory = function() { return emptyParser; };
+    const emptyFactory = () => emptyParser;
 
     player.load(fakeManifestUri, 0, emptyFactory).then(fail).catch((error) => {
       shaka.test.Util.expectToEqualError(
@@ -2880,7 +2880,7 @@ describe('Player', () => {
     /* eslint-enable indent */
 
     const parser = new shaka.test.FakeManifestParser(manifest);
-    const parserFactory = function() { return parser; };
+    const parserFactory = () => parser;
 
     await player.load(fakeManifestUri, 0, parserFactory);
     streamingEngine.onCanSwitch();
@@ -2969,7 +2969,7 @@ describe('Player', () => {
       /* eslint-enable indent */
 
       const parser = new shaka.test.FakeManifestParser(manifest);
-      const parserFactory = function() { return parser; };
+      const parserFactory = () => parser;
 
       // Before the fix, load() would fail assertions and throw errors.
       await player.load(fakeManifestUri, 0, parserFactory);
@@ -2995,7 +2995,7 @@ describe('Player', () => {
       /* eslint-enable indent */
 
       const parser = new shaka.test.FakeManifestParser(manifest);
-      const parserFactory = function() { return parser; };
+      const parserFactory = () => parser;
 
       // To ensure that Playhead is correctly created, we must use the original
       // playhead injector.  To inspect the real Playhead instance, though, we
@@ -3188,7 +3188,9 @@ describe('Player', () => {
   }
 
   /** @suppress {accessControls} */
-  function onCanSwitch() { player.canSwitch_(); }
+  function onCanSwitch() {
+    player.canSwitch_();
+  }
 
   /**
    * A Jasmine asymmetric matcher for substring matches.

@@ -67,7 +67,9 @@ class ShakaDemoMain {
       // Exception to the exceptions we catch: ChromeVox (screenreader) always
       // throws an error as of Chrome 73.  Screen these out since they are
       // unrelated to our application and we can't control them.
-      if (event.message.includes('cvox.ApiImplementation')) return;
+      if (event.message.includes('cvox.ApiImplementation')) {
+        return;
+      }
 
       this.onError_(/** @type {!shaka.util.Error} */ (event.error));
     });
@@ -976,10 +978,18 @@ class ShakaDemoMain {
     // if it's different from this default.
     if (shaka.log && shaka.log.currentLevel != shaka.log.MAX_LOG_LEVEL) {
       switch (shaka.log.currentLevel) {
-        case shaka.log.Level.INFO: params.push('info'); break;
-        case shaka.log.Level.DEBUG: params.push('debug'); break;
-        case shaka.log.Level.V2: params.push('vv'); break;
-        case shaka.log.Level.V1: params.push('v'); break;
+        case shaka.log.Level.INFO:
+          params.push('info');
+          break;
+        case shaka.log.Level.DEBUG:
+          params.push('debug');
+          break;
+        case shaka.log.Level.V2:
+          params.push('vv');
+          break;
+        case shaka.log.Level.V1:
+          params.push('v');
+          break;
       }
     }
 

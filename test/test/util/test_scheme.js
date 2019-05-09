@@ -363,17 +363,20 @@ shaka.test.TestScheme.DATA = {
 shaka.test.TestScheme.setupPlayer = function(player, name) {
   const asset = shaka.test.TestScheme.DATA[name];
   goog.asserts.assert(asset, 'Unknown asset');
-  if (!asset) return;
+  if (!asset) {
+    return;
+  }
   if (asset.licenseRequestHeaders) {
     const netEngine = player.getNetworkingEngine();
-    netEngine.registerRequestFilter(
-        (type, request) => {
-          if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) return;
+    netEngine.registerRequestFilter((type, request) => {
+      if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) {
+        return;
+      }
 
-          for (const header in asset.licenseRequestHeaders) {
-            request.headers[header] = asset.licenseRequestHeaders[header];
-          }
-        });
+      for (const header in asset.licenseRequestHeaders) {
+        request.headers[header] = asset.licenseRequestHeaders[header];
+      }
+    });
   }
   if (asset.licenseServers) {
     const config = {drm: {servers: asset.licenseServers}};
@@ -602,7 +605,9 @@ shaka.test.TestScheme.ManifestParser.prototype.start =
 
   const manifest = shaka.test.TestScheme.MANIFESTS[manifestParts[1]];
   expect(manifest).toBeTruthy();
-  if (!manifest) return Promise.reject();
+  if (!manifest) {
+    return Promise.reject();
+  }
 
   // Invoke filtering interfaces similar to how a real parser would.
   // This makes sure the filtering functions are covered implicitly by tests.

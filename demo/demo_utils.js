@@ -86,7 +86,9 @@ ShakaDemoUtils.runThroughHashParams = (callback, config) => {
     for (const key in object) {
       let hashName = key;
       const configName = accumulated + key;
-      if (overridden.includes(configName)) continue;
+      if (overridden.includes(configName)) {
+        continue;
+      }
       if (collisions.includes(key)) {
         hashName = configName;
       }

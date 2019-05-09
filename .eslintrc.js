@@ -128,12 +128,14 @@ module.exports = {
         "block-spacing": ["error", "always"],
         "brace-style": ["error", "1tbs", { "allowSingleLine": true }],
         "lines-between-class-members": "error",
+        "max-statements-per-line": ["error", {"max": 1}],
         "new-parens": "error",
         "no-mixed-operators": ["error", {
           "groups": [["&", "|", "^", "~", "<<", ">>", ">>>", "&&", "||"]],
           "allowSamePrecedence": false,
         }],
         "no-whitespace-before-property": "error",
+        "nonblock-statement-body-position": ["error", "below"],
         "operator-assignment": "error",
         // }}}
 

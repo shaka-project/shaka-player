@@ -204,7 +204,7 @@ jasmine.Fetch.AbortController = function() {
   // TODO: I don't know if this implementation of AbortController is correct,
   // but it works for our tests
   this.aborted_ = false;
-  this.signal = (function() { return this.aborted_; }).bind(this);
+  this.signal = () => this.aborted_;
 };
 
 

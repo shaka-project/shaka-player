@@ -580,15 +580,13 @@ shaka.test.ManifestGenerator.prototype.useSegmentTemplate = function(
   const stream = this.currentStream_();
   const totalDuration = this.manifest_.presentationTimeline.getDuration();
   const segmentCount = totalDuration / segmentDuration;
-  stream.createSegmentIndex = function() { return Promise.resolve(); };
-  stream.findSegmentPosition = function(time) {
-    return Math.floor(time / segmentDuration);
-  };
+  stream.createSegmentIndex = () => Promise.resolve();
+  stream.findSegmentPosition = (time) => Math.floor(time / segmentDuration);
   stream.getSegmentReference = (function(index) {
     if (index < 0 || index >= segmentCount) {
       return null;
     }
-    const getUris = function() { return [sprintf(template, index)]; };
+    const getUris = () => [sprintf(template, index)];
     const start = index * segmentDuration;
     const end = Math.min(totalDuration, (index + 1) * segmentDuration);
     return new this.shaka_.media.SegmentReference(
@@ -608,18 +606,19 @@ shaka.test.ManifestGenerator.prototype.useSegmentTemplate = function(
 shaka.test.ManifestGenerator.prototype.textStream = function(uri) {
   const stream = this.currentStream_();
   const duration = this.manifest_.presentationTimeline.getDuration();
-  const getUris = function() { return [uri]; };
+  const getUris = () => [uri];
 
-  stream.createSegmentIndex = function() { return Promise.resolve(); };
-  stream.findSegmentPosition = function(time) {
-    return (time >= 0 && time < duration ? 1 : null);
-  };
-  stream.getSegmentReference = (function(position) {
-    if (position != 1) return null;
+  stream.createSegmentIndex = () => Promise.resolve();
+  stream.findSegmentPosition = (time) =>
+      (time >= 0 && time < duration ? 1 : null);
+  stream.getSegmentReference = (position) => {
+    if (position != 1) {
+      return null;
+    }
     const startTime = 0;
     return new this.shaka_.media.SegmentReference(
         position, startTime, duration, getUris, 0, null);
-  }.bind(this));
+  };
 
   return this;
 };
@@ -674,7 +673,7 @@ shaka.test.ManifestGenerator.prototype.nullInitSegment = function() {
 shaka.test.ManifestGenerator.prototype.initSegmentReference = function(
     uris, startByte, endByte) {
   const stream = this.currentStream_();
-  const getUris = function() { return uris; };
+  const getUris = () => uris;
   stream.initSegmentReference =
       new this.shaka_.media.InitSegmentReference(getUris, startByte, endByte);
   return this;

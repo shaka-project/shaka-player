@@ -340,7 +340,9 @@ class ShakaDemoConfig {
 
     // shaka.log is not set if logging isn't enabled.
     // I.E. if using the release version of shaka.
-    if (!shaka['log']) return;
+    if (!shaka['log']) {
+      return;
+    }
 
     // Access shaka.log using bracket syntax because shaka.log is not exported.
     // Exporting the logging methods proved to be a bad solution, both in terms
@@ -373,10 +375,18 @@ class ShakaDemoConfig {
     this.addSelectInput_('Log Level', logLevels, onChange);
     const input = this.latestInput_.input();
     switch (shaka['log']['currentLevel']) {
-      case Level['DEBUG']: input.value = 'debug'; break;
-      case Level['V2']: input.value = 'vv'; break;
-      case Level['V1']: input.value = 'v'; break;
-      default: input.value = 'info'; break;
+      case Level['DEBUG']:
+        input.value = 'debug';
+        break;
+      case Level['V2']:
+        input.value = 'vv';
+        break;
+      case Level['V1']:
+        input.value = 'v';
+        break;
+      default:
+        input.value = 'info';
+        break;
     }
   }
 

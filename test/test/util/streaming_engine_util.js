@@ -259,10 +259,15 @@ shaka.test.StreamingEngineUtil.createManifest = function(
       stream.getSegmentReference.and.callFake(get.bind(null, type, i + 1));
 
       const ContentType = shaka.util.ManifestParserUtils.ContentType;
-      if (type == ContentType.TEXT) period.textStreams.push(stream);
-      else if (type == ContentType.AUDIO) variant.audio = stream;
-      else if (type == 'trickvideo') trickModeVideo = stream;
-      else variant.video = stream;
+      if (type == ContentType.TEXT) {
+        period.textStreams.push(stream);
+      } else if (type == ContentType.AUDIO) {
+        variant.audio = stream;
+      } else if (type == 'trickvideo') {
+        trickModeVideo = stream;
+      } else {
+        variant.video = stream;
+      }
     }
 
     variant.video.trickModeVideo = trickModeVideo;

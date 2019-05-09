@@ -132,7 +132,7 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
   onScreenRotation_() {
     if (!this.video ||
         this.video.readyState == 0 ||
-        this.controls.getCastProxy().isCasting()) return;
+        this.controls.getCastProxy().isCasting()) { return; }
 
     if (screen.orientation.type.includes('landscape') &&
         !document.fullscreenElement) {

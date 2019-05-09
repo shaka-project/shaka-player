@@ -23,7 +23,7 @@ describe('PresentationTimeline', () => {
 
   beforeEach(() => {
     baseTime = new Date(2015, 11, 30);
-    Date.now = function() { return baseTime.getTime(); };
+    Date.now = () => baseTime.getTime();
   });
 
   afterEach(() => {
@@ -31,9 +31,7 @@ describe('PresentationTimeline', () => {
   });
 
   function setElapsed(secondsSinceBaseTime) {
-    Date.now = function() {
-      return baseTime.getTime() + (secondsSinceBaseTime * 1000);
-    };
+    Date.now = () => baseTime.getTime() + (secondsSinceBaseTime * 1000);
   }
 
   /**

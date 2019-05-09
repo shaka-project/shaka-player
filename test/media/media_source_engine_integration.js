@@ -200,7 +200,9 @@ describe('MediaSourceEngine', () => {
     function checkOrder(p) {
       const nextIndex = requests.length;
       requests.push(p);
-      p.then(() => { resolutionOrder.push(nextIndex); });
+      p.then(() => {
+        resolutionOrder.push(nextIndex);
+      });
     }
 
     const initObject = new Map();

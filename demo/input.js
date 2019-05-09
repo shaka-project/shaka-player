@@ -35,7 +35,9 @@ class ShakaDemoInput {
 
     /** @private {!Element} */
     this.input_ = document.createElement(inputType);
-    this.input_.onchange = () => { onChange(this.input_); };
+    this.input_.onchange = () => {
+      onChange(this.input_);
+    };
     this.input_.id = ShakaDemoInput.generateNewId_('input');
     this.container_.appendChild(this.input_);
 

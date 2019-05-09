@@ -66,8 +66,12 @@ shaka.test.IndexedDBUtils.deleteDB = function(name) {
   const p = new shaka.util.PublicPromise();
 
   const goaway = window.indexedDB.deleteDatabase(name);
-  goaway.onsuccess = (e) => { p.resolve(); };
-  goaway.onerror = (e) => { p.reject(); };
+  goaway.onsuccess = (e) => {
+    p.resolve();
+  };
+  goaway.onerror = (e) => {
+    p.reject();
+  };
 
   return p;
 };
@@ -88,7 +92,9 @@ shaka.test.IndexedDBUtils.dbOpenNew_ = function(name, version, upgrade) {
   const p = new shaka.util.PublicPromise();
 
   const open = window.indexedDB.open(name, version);
-  open.onerror = (e) => { p.reject(); };
+  open.onerror = (e) => {
+    p.reject();
+  };
   open.onsuccess = (e) => {
     // Make sure that the database actually upgraded when connecting or else
     // we will have an old copy.
@@ -121,8 +127,12 @@ shaka.test.IndexedDBUtils.open = function(name) {
   const p = new shaka.util.PublicPromise();
 
   const open = window.indexedDB.open(name);
-  open.onerror = (e) => { p.reject(); };
-  open.onsuccess = (e) => { p.resolve(open.result); };
+  open.onerror = (e) => {
+    p.reject();
+  };
+  open.onsuccess = (e) => {
+    p.resolve(open.result);
+  };
 
   return p;
 };

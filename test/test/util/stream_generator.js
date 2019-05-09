@@ -212,7 +212,9 @@ shaka.test.Mp4VodStreamGenerator.prototype.getSegment = function(
   goog.asserts.assert(
       this.segmentTemplate_,
       'init() must be called before getSegment().');
-  if (!this.segmentTemplate_) return null;
+  if (!this.segmentTemplate_) {
+    return null;
+  }
 
   // |position| must be an integer and >= 1.
   goog.asserts.assert((position % 1 === 0) && (position >= 1),
@@ -350,7 +352,9 @@ shaka.test.Mp4LiveStreamGenerator.prototype.getSegment = function(
   goog.asserts.assert(
       this.initSegment_,
       'init() must be called before getSegment().');
-  if (!this.initSegment_) return null;
+  if (!this.initSegment_) {
+    return null;
+  }
 
   // |position| must be an integer and >= 1.
   goog.asserts.assert((position % 1 === 0) && (position >= 1),

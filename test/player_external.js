@@ -82,7 +82,9 @@ describe('Player', () => {
   describe('plays', () => {
     /** @param {!ShakaDemoAssetInfo} asset */
     function createAssetTest(asset) {
-      if (asset.disabled) return;
+      if (asset.disabled) {
+        return;
+      }
 
       const testName =
           asset.source + ' / ' + asset.name + ' : ' + asset.manifestUri;
@@ -256,7 +258,9 @@ describe('Player', () => {
    */
   function addLicenseRequestHeaders(headers, requestType, request) {
     const RequestType = compiledShaka.net.NetworkingEngine.RequestType;
-    if (requestType != RequestType.LICENSE) return;
+    if (requestType != RequestType.LICENSE) {
+      return;
+    }
 
     // Add these to the existing headers.  Do not clobber them!
     // For PlayReady, there will already be headers in the request.

@@ -1339,8 +1339,12 @@ describe('Storage', () => {
 
     manifest.periods.forEach((period) => {
       period.variants.forEach((variant) => {
-        if (variant.audio) { streams.push(variant.audio); }
-        if (variant.video) { streams.push(variant.video); }
+        if (variant.audio) {
+          streams.push(variant.audio);
+        }
+        if (variant.video) {
+          streams.push(variant.video);
+        }
       });
       period.textStreams.forEach((stream) => {
         streams.push(stream);

@@ -1179,7 +1179,7 @@ describe('MediaSourceEngine', () => {
 
   function createMockTextEngineCtor() {
     const ctor = jasmine.createSpy('TextEngine');
-    ctor.isTypeSupported = function() { return true; };
+    ctor.isTypeSupported = () => true;
     ctor.and.callFake(() => {
       expect(mockTextEngine).toBeFalsy();
       mockTextEngine = jasmine.createSpyObj('TextEngine', [

@@ -382,10 +382,13 @@ describe('CastProxy', () => {
         mockSender.get.and.callFake((targetName, property) => {
           expect(targetName).toEqual('player');
           const value = cache.player[property];
-          // methods:
-          if (typeof value == 'function') return value;
-          // getters:
-          else return function() { return value; };
+          if (typeof value == 'function') {
+            // methods:
+            return value;
+          } else {
+            // getters:
+            return () => value;
+          }
         });
 
         expect(proxy.getPlayer().getConfiguration()).toEqual(fakeConfig2);
@@ -543,7 +546,7 @@ describe('CastProxy', () => {
       };
       mockSender.get.and.callFake((targetName, property) => {
         if (targetName == 'player') {
-          return function() { return cache[targetName][property]; };
+          return () => cache[targetName][property];
         } else {
           return cache[targetName][property];
         }

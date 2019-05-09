@@ -113,7 +113,9 @@ ShakaReceiver.prototype.init = function() {
  */
 ShakaReceiver.prototype.appDataCallback_ = function(appData) {
   // appData is null if we start the app without any media loaded.
-  if (!appData) return;
+  if (!appData) {
+    return;
+  }
 
   const asset = ShakaDemoAssetInfo.fromJSON(appData['asset']);
   asset.applyFilters(this.player_.getNetworkingEngine());

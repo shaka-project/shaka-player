@@ -46,7 +46,9 @@ describe('Player', () => {
     eventManager = new shaka.util.EventManager();
 
     onErrorSpy = jasmine.createSpy('onError');
-    onErrorSpy.and.callFake((event) => { fail(event.detail); });
+    onErrorSpy.and.callFake((event) => {
+      fail(event.detail);
+    });
     eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
   });
 
@@ -237,7 +239,9 @@ describe('Player', () => {
       displayer.appendSpy.and.callFake((added) => {
         cues = cues.concat(added);
       });
-      displayer.removeSpy.and.callFake(() => { cues = []; });
+      displayer.removeSpy.and.callFake(() => {
+        cues = [];
+      });
       player.configure({textDisplayFactory: () => displayer});
 
       const preferredTextLanguage = 'fa';  // The same as in the content itself
@@ -1462,7 +1466,9 @@ describe('Player Load Path', () => {
 
         whenEnteringState(state, () => {
           // Make sure we don't execute more than once per promise.
-          if (called) { return; }
+          if (called) {
+            return;
+          }
           called = true;
 
           // We need to call doThis in-sync with entering the state so that it

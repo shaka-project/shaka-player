@@ -38,7 +38,9 @@ describe('PlayRateController', () => {
     playRate = 1;
 
     getPlayRateSpy.and.callFake(() => playRate);
-    setPlayRateSpy.and.callFake((rate) => { playRate = rate; });
+    setPlayRateSpy.and.callFake((rate) => {
+      playRate = rate;
+    });
 
     const harness = {
       getRate: shaka.test.Util.spyFunc(getPlayRateSpy),

@@ -438,7 +438,7 @@ describe('DashParser Manifest', () => {
     const originalNow = Date.now;
 
     beforeAll(() => {
-      Date.now = function() { return 10 * 1000; };
+      Date.now = () => 10 * 1000;
     });
 
     afterAll(() => {

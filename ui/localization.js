@@ -320,7 +320,9 @@ shaka.ui.Localization = class {
       // Sort the siblings so that they will always appear in the same order
       // regardless of the order of |localizations|.
       siblings.sort();
-      for (const locale of siblings) { localeOrder.add(locale); }
+      for (const locale of siblings) {
+        localeOrder.add(locale);
+      }
 
       const children = shaka.util.Iterables.filter(
           localizations.keys(),
@@ -329,7 +331,9 @@ shaka.ui.Localization = class {
       // Sort the children so that they will always appear in the same order
       // regardless of the order of |localizations|.
       children.sort();
-      for (const locale of children) { localeOrder.add(locale); }
+      for (const locale of children) {
+        localeOrder.add(locale);
+      }
     }
 
     // Finally we add our fallback (something that should have all expected
@@ -340,7 +344,9 @@ shaka.ui.Localization = class {
     const mergeOrder = [];
     for (const locale of localeOrder) {
       const map = localizations.get(locale);
-      if (map) { mergeOrder.push(map); }
+      if (map) {
+        mergeOrder.push(map);
+      }
     }
 
     // We need to reverse the merge order. We build the order based on most

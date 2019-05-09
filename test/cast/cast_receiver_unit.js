@@ -76,7 +76,9 @@ describe('CastReceiver', () => {
     isChrome = navigator.userAgent.includes('Chrome/') && !isEdge;
 
     // Don't do any more work here if the tests will not end up running.
-    if (!isChromecast && !isChrome) return;
+    if (!isChromecast && !isChrome) {
+      return;
+    }
 
     // In uncompiled mode, there is a UA check for Chromecast in order to make
     // manual testing easier.  For these automated tests, we want to act as if
@@ -143,7 +145,9 @@ describe('CastReceiver', () => {
       mockCanDisplayType.and.callFake((type) => {
         const matches = /height=(\d+)/.exec(type);
         const height = matches[1];
-        if (height && height > 1080) return false;
+        if (height && height > 1080) {
+          return false;
+        }
         return true;
       });
       receiver = new CastReceiver(
@@ -158,7 +162,9 @@ describe('CastReceiver', () => {
       mockCanDisplayType.and.callFake((type) => {
         const matches = /height=(\d+)/.exec(type);
         const height = matches[1];
-        if (height && height > 2160) return false;
+        if (height && height > 2160) {
+          return false;
+        }
         return true;
       });
       receiver = new CastReceiver(

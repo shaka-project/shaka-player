@@ -58,7 +58,9 @@ shaka.ui.Utils.getDescendantIfExists = function(element, className) {
  * @param {HTMLElement} menu
  */
 shaka.ui.Utils.focusOnTheChosenItem = function(menu) {
-  if (!menu) return;
+  if (!menu) {
+    return;
+  }
   const chosenItem = shaka.ui.Utils.getDescendantIfExists(
     menu, 'shaka-chosen-item');
   if (chosenItem) {
@@ -90,7 +92,9 @@ shaka.ui.Utils.checkmarkIcon = function() {
  * @export
  */
 shaka.ui.Utils.setDisplay = function(element, display) {
-  if (!element) return;
+  if (!element) {
+    return;
+  }
 
   // You can't use setDisplay with SVG on IE, because classList isn't on SVG
   // elements on that browser.  It's better to find out on Chrome through an

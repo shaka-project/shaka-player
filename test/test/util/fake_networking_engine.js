@@ -319,7 +319,9 @@ shaka.test.FakeNetworkingEngine = class {
       // No header required.
     } else {
       let range = 'bytes=' + startByte + '-';
-      if (endByte != null) range += endByte;
+      if (endByte != null) {
+        range += endByte;
+      }
       headers['Range'] = range;
     }
 

@@ -201,37 +201,51 @@ describe('DataViewReader', () => {
     it('detects when reading a uint8', () => {
       bigEndianReader.skip(7);
       bigEndianReader.readUint8();
-      runTest(() => { bigEndianReader.readUint8(); });
+      runTest(() => {
+        bigEndianReader.readUint8();
+      });
     });
 
     it('detects when reading a uint16', () => {
       bigEndianReader.skip(7);
-      runTest(() => { bigEndianReader.readUint16(); });
+      runTest(() => {
+        bigEndianReader.readUint16();
+      });
     });
 
     it('detects when reading a uint32', () => {
       bigEndianReader.skip(5);
-      runTest(() => { bigEndianReader.readUint32(); });
+      runTest(() => {
+        bigEndianReader.readUint32();
+      });
     });
 
     it('detects when reading a int32', () => {
       bigEndianReader.skip(5);
-      runTest(() => { bigEndianReader.readInt32(); });
+      runTest(() => {
+        bigEndianReader.readInt32();
+      });
     });
 
     it('detects when reading a uint64', () => {
       bigEndianReader.skip(3);
-      runTest(() => { bigEndianReader.readUint64(); });
+      runTest(() => {
+        bigEndianReader.readUint64();
+      });
     });
 
     it('detects when skipping bytes', () => {
       bigEndianReader.skip(8);
-      runTest(() => { bigEndianReader.skip(1); });
+      runTest(() => {
+        bigEndianReader.skip(1);
+      });
     });
 
     it('detects when reading bytes', () => {
       bigEndianReader.skip(8);
-      runTest(() => { bigEndianReader.readBytes(1); });
+      runTest(() => {
+        bigEndianReader.readBytes(1);
+      });
     });
 
     function runTest(test) {

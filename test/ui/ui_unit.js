@@ -259,7 +259,7 @@ describe('UI', () => {
             .build();
 
         const parser = new shaka.test.FakeManifestParser(manifest);
-        const factory = function() { return parser; };
+        const factory = () => parser;
 
         await player.load(/* uri= */ 'fake', /* startTime= */ 0, factory);
         const pipButtons =
@@ -388,7 +388,7 @@ describe('UI', () => {
         /* eslint-enable indent */
 
         const parser = new shaka.test.FakeManifestParser(manifest);
-        const factory = function() { return parser; };
+        const factory = () => parser;
 
         await player.load(/* uri */ 'fake', /* startTime */ 0, factory);
 

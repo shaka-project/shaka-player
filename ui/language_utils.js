@@ -57,7 +57,9 @@ shaka.ui.LanguageUtils = class {
     // 4. Add new buttons
     languages.forEach((language) => {
       const button = shaka.util.Dom.createHTMLElement('button');
-      button.addEventListener('click', () => { onLanguageSelected(language); });
+      button.addEventListener('click', () => {
+        onLanguageSelected(language);
+      });
 
       const span = shaka.util.Dom.createHTMLElement('span');
       span.textContent =

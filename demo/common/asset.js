@@ -331,7 +331,9 @@ const ShakaDemoAssetInfo = class {
    * @private
    */
   addLicenseRequestHeaders_(headers, requestType, request) {
-    if (requestType != shaka.net.NetworkingEngine.RequestType.LICENSE) return;
+    if (requestType != shaka.net.NetworkingEngine.RequestType.LICENSE) {
+      return;
+    }
 
     // Add these to the existing headers.  Do not clobber them!
     // For PlayReady, there will already be headers in the request.

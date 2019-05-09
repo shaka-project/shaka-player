@@ -263,13 +263,19 @@ describe('Walker', () => {
     });
 
     const route1 = startNewRoute(nodeD, /* interruptible= */ false);
-    route1.onStart = () => { currentRoute = 1; };
+    route1.onStart = () => {
+      currentRoute = 1;
+    };
 
     const route2 = startNewRoute(nodeC, /* interruptible= */ true);
-    route2.onStart = () => { currentRoute = 2; };
+    route2.onStart = () => {
+      currentRoute = 2;
+    };
 
     const route3 = startNewRoute(nodeE, /* interruptible= */ true);
-    route3.onStart = () => { currentRoute = 3; };
+    route3.onStart = () => {
+      currentRoute = 3;
+    };
 
     // Wait until we get to the end of route 3, that should be the end.
     await completesRoute(route3);

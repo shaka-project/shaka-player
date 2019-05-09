@@ -89,7 +89,9 @@ describe('DrmEngine', () => {
 
     networkingEngine = new shaka.net.NetworkingEngine();
     networkingEngine.registerRequestFilter((type, request) => {
-      if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) return;
+      if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) {
+        return;
+      }
 
       request.headers['X-AxDRM-Message'] = [
         'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lk',

@@ -55,7 +55,9 @@ shaka.test.FakeAbrManager = function() {
   ret.init.and.callFake((switchCallback) => {
     ret.switchCallback = switchCallback;
   });
-  ret.setVariants.and.callFake((arg) => { ret.variants = arg; });
+  ret.setVariants.and.callFake((arg) => {
+    ret.variants = arg;
+  });
   ret.chooseVariant.and.callFake(() => {
     return ret.variants[ret.chooseIndex];
   });
@@ -137,9 +139,15 @@ shaka.test.FakeStreamingEngine = function(onChooseStreams, onCanSwitch) {
   ]);
   ret.destroy.and.callFake(resolve);
   ret.getBufferingPeriod.and.returnValue(null);
-  ret.getBufferingAudio.and.callFake(() => { return activeAudio; });
-  ret.getBufferingVideo.and.callFake(() => { return activeVideo; });
-  ret.getBufferingText.and.callFake(() => { return activeText; });
+  ret.getBufferingAudio.and.callFake(() => {
+    return activeAudio;
+  });
+  ret.getBufferingVideo.and.callFake(() => {
+    return activeVideo;
+  });
+  ret.getBufferingText.and.callFake(() => {
+    return activeText;
+  });
   ret.loadNewTextStream.and.callFake((stream) => {
     activeText = stream;
     return Promise.resolve();
@@ -312,14 +320,18 @@ shaka.test.FakeVideo.prototype.setMediaKeys;
  * @return {!TimeRanges}
  */
 function createFakeBuffered(ranges) {
-  return /** @type {!TimeRanges} */({
+  return /** @type {!TimeRanges} */ ({
     length: ranges.length,
     start: function(i) {
-      if (i >= 0 && i < ranges.length) return ranges[i].start;
+      if (i >= 0 && i < ranges.length) {
+        return ranges[i].start;
+      }
       throw new Error('Unexpected index');
     },
     end: function(i) {
-      if (i >= 0 && i < ranges.length) return ranges[i].end;
+      if (i >= 0 && i < ranges.length) {
+        return ranges[i].end;
+      }
       throw new Error('Unexpected index');
     },
   });

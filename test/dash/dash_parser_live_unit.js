@@ -190,7 +190,7 @@ describe('DashParser Live', () => {
           template, {updateTime: updateTime, contents: basicLines.join('\n')});
 
       fakeNetEngine.setResponseText('dummy://foo', text);
-      Date.now = function() { return 0; };
+      Date.now = () => 0;
       parser.start('dummy://foo', playerInterface)
           .then((manifest) => {
             expect(manifest).toBeTruthy();
@@ -206,7 +206,7 @@ describe('DashParser Live', () => {
             // seconds long in all of these cases.  So 11 seconds after the
             // manifest was parsed, the first segment should have fallen out of
             // the availability window.
-            Date.now = function() { return 11 * 1000; };
+            Date.now = () => 11 * 1000;
             delayForUpdatePeriod();
             // The first reference should have been evicted.
             expect(stream.findSegmentPosition(0)).toBe(2);
@@ -244,7 +244,7 @@ describe('DashParser Live', () => {
       const durs = basicRefs.map((r) => {
         return r.endTime - r.startTime;
       });
-      const pStart = durs.reduce((p, d) => { return p + d; }, 0);
+      const pStart = durs.reduce((p, d) => p + d, 0);
       const args = {
         updateTime: updateTime,
         pStart: pStart,
@@ -253,7 +253,7 @@ describe('DashParser Live', () => {
       const text = sprintf(template, args);
 
       fakeNetEngine.setResponseText('dummy://foo', text);
-      Date.now = function() { return 0; };
+      Date.now = () => 0;
       parser.start('dummy://foo', playerInterface)
           .then((manifest) => {
             const stream1 = manifest.periods[0].variants[0].video;
@@ -266,14 +266,14 @@ describe('DashParser Live', () => {
             // seconds long in all of these cases.  So 11 seconds after the
             // manifest was parsed, the first segment should have fallen out of
             // the availability window.
-            Date.now = function() { return 11 * 1000; };
+            Date.now = () => 11 * 1000;
             delayForUpdatePeriod();
             // The first reference should have been evicted.
             ManifestParser.verifySegmentIndex(stream1, basicRefs.slice(1));
             ManifestParser.verifySegmentIndex(stream2, basicRefs);
 
             // Same as above, but 1 period length later
-            Date.now = function() { return (11 + pStart) * 1000; };
+            Date.now = () => (11 + pStart) * 1000;
             delayForUpdatePeriod();
             ManifestParser.verifySegmentIndex(stream1, []);
             ManifestParser.verifySegmentIndex(stream2, basicRefs.slice(1));
@@ -301,7 +301,7 @@ describe('DashParser Live', () => {
           template, {updateTime: updateTime, contents: basicLines.join('\n')});
 
       fakeNetEngine.setResponseText('dummy://foo', text);
-      Date.now = function() { return 0; };
+      Date.now = () => 0;
       parser.start('dummy://foo', playerInterface)
           .then((manifest) => {
             expect(manifest.periods.length).toBe(1);
@@ -339,7 +339,7 @@ describe('DashParser Live', () => {
           template, {updateTime: updateTime, contents: basicLines.join('\n')});
 
       fakeNetEngine.setResponseText('dummy://foo', text);
-      Date.now = function() { return 0; };
+      Date.now = () => 0;
       parser.start('dummy://foo', playerInterface)
           .then((manifest) => {
             expect(manifest.periods.length).toBe(2);
@@ -662,7 +662,7 @@ describe('DashParser Live', () => {
     ].join('\n');
     fakeNetEngine.setResponseText('dummy://foo', manifest);
 
-    Date.now = function() { return 600000; /* 10 minutes */ };
+    Date.now = () => 600000; /* 10 minutes */
     parser.start('dummy://foo', playerInterface)
         .then((manifest) => {
           expect(manifest).toBeTruthy();
@@ -705,7 +705,7 @@ describe('DashParser Live', () => {
       config.availabilityWindowOverride = 4 * 60;
       parser.configure(config);
 
-      Date.now = function() { return 600000; /* 10 minutes */ };
+      Date.now = () => 600000; /* 10 minutes */
       parser.start('dummy://foo', playerInterface)
           .then((manifest) => {
             expect(manifest).toBeTruthy();
@@ -742,7 +742,7 @@ describe('DashParser Live', () => {
       ].join('\n');
       fakeNetEngine.setResponseText('dummy://foo', manifest);
 
-      Date.now = function() { return 600000; /* 10 minutes */ };
+      Date.now = () => 600000; /* 10 minutes */
       parser.start('dummy://foo', playerInterface)
           .then((manifest) => {
             expect(manifest).toBeTruthy();
@@ -817,7 +817,7 @@ describe('DashParser Live', () => {
       const manifest = sprintf(template, {contents: lines.join('\n')});
 
       fakeNetEngine.setResponseText('dummy://foo', manifest);
-      Date.now = function() { return 600000; /* 10 minutes */ };
+      Date.now = () => 600000; /* 10 minutes */
       parser.start('dummy://foo', playerInterface)
           .then((manifest) => {
             expect(manifest).toBeTruthy();
