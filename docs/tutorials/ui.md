@@ -19,8 +19,6 @@ Set up controls with HTML data attributes:
     <script src="dist/shaka-player.ui.js"></script>
     <!-- Shaka Player ui compiled library default CSS: -->
     <link rel="stylesheet" type="text/css" href="dist/controls.css">
-    <!-- Google Material Design Icons: -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <!-- Your application source: -->
     <script src="myapp.js"></script>
   </head>
