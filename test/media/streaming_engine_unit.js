@@ -79,6 +79,8 @@ describe('StreamingEngine', function() {
   let onStartupComplete;
   /** @type {!jasmine.Spy} */
   let onSegmentAppended;
+  /** @type {!jasmine.Spy} */
+  let getBandwidthEstimate;
   /** @type {!shaka.media.StreamingEngine} */
   let streamingEngine;
 
@@ -434,6 +436,8 @@ describe('StreamingEngine', function() {
     onEvent = jasmine.createSpy('onEvent');
     onManifestUpdate = jasmine.createSpy('onManifestUpdate');
     onSegmentAppended = jasmine.createSpy('onSegmentAppended');
+    getBandwidthEstimate = jasmine.createSpy('getBandwidthEstimate');
+    getBandwidthEstimate.and.returnValue(1e3);
 
     if (!config) {
       config = shaka.util.PlayerConfiguration.createDefault().streaming;
@@ -444,6 +448,7 @@ describe('StreamingEngine', function() {
 
     let playerInterface = {
       getPresentationTime: () => presentationTimeInSeconds,
+      getBandwidthEstimate: Util.spyFunc(getBandwidthEstimate),
       mediaSourceEngine: mediaSourceEngine,
       netEngine: /** @type {!shaka.net.NetworkingEngine} */(netEngine),
       onChooseStreams: Util.spyFunc(onChooseStreams),
@@ -2869,9 +2874,11 @@ describe('StreamingEngine', function() {
           (type, time) => time >= 0 && time < bufferEnd[type]);
 
       const config = shaka.util.PlayerConfiguration.createDefault().streaming;
-      config.rebufferingGoal = 30;
+      config.bufferingGoal = 30;
       config.retryParameters.maxAttempts = 1;
       createStreamingEngine(config);
+
+      getBandwidthEstimate.and.returnValue(1);  // very slow by default
 
       onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
       onChooseStreams.and.callFake(() => ({variant: initialVariant}));
@@ -2925,17 +2932,16 @@ describe('StreamingEngine', function() {
       bufferAndCheck(/* didAbort= */ true);
     });
 
-    it('doesn\'t abort if close to finished',
-       /** @suppress {accessControls} */ () => {
-         prepareForAbort();
-         lastResponse.bytesRemaining_.setBytes(3);
-         streamingEngine.switchVariant(
-             newVariant, /* clear_buffer= */ false, /* safe_margin= */ 0);
+    it('doesn\'t abort if close to finished', () => {
+      prepareForAbort();
+      setBytesRemaining(3);
+      streamingEngine.switchVariant(
+          newVariant, /* clear_buffer= */ false, /* safe_margin= */ 0);
 
-         bufferAndCheck(/* didAbort= */ false);
-       });
+      bufferAndCheck(/* didAbort= */ false);
+    });
 
-    it('accounts for init segment size', () => {
+    it('doesn\'t abort if init segment is too large', () => {
       newVariant.video.initSegmentReference =
           new shaka.media.InitSegmentReference(() => ['init-11.mp4'], 0, 500);
 
@@ -2951,6 +2957,22 @@ describe('StreamingEngine', function() {
           new shaka.media.InitSegmentReference(() => ['init-11.mp4'], 0, 5);
 
       prepareForAbort();
+      streamingEngine.switchVariant(
+          newVariant, /* clear_buffer= */ false, /* safe_margin= */ 0);
+
+      bufferAndCheck(/* didAbort= */ true, /* hasInit= */ true);
+    });
+
+    it('aborts if we can finish the new one on time', () => {
+      // Very large init segment
+      newVariant.video.initSegmentReference =
+          new shaka.media.InitSegmentReference(() => ['init-11.mp4'], 0, 5e6);
+
+      prepareForAbort();
+
+      setBytesRemaining(3);  // not much left
+      getBandwidthEstimate.and.returnValue(1e9);  // insanely fast
+
       streamingEngine.switchVariant(
           newVariant, /* clear_buffer= */ false, /* safe_margin= */ 0);
 
@@ -2991,6 +3013,16 @@ describe('StreamingEngine', function() {
       if (didAbort) { expected.push('video-11-1.mp4'); }
       expected.push('video-11-2.mp4');
       expect(requestUris).toEqual(expected);
+    }
+
+    /**
+     * Sets the number of bytes remaining on the pending network request.
+     *
+     * @param {number} bytes
+     * @suppress {accessControls}
+     */
+    function setBytesRemaining(bytes) {
+      lastResponse.bytesRemaining_.setBytes(bytes);
     }
   });
 

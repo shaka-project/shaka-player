@@ -282,6 +282,7 @@ describe('StreamingEngine', () => {
   function createStreamingEngine() {
     let playerInterface = {
       getPresentationTime: () => playhead.getTime(),
+      getBandwidthEstimate: () => 1e6,
       mediaSourceEngine: mediaSourceEngine,
       netEngine: /** @type {!shaka.net.NetworkingEngine} */(netEngine),
       onChooseStreams: Util.spyFunc(onChooseStreams),
