@@ -1398,7 +1398,7 @@ describe('DrmEngine', () => {
           'drm.abc', jasmine.any(Array));
       await drmEngine.destroy();
       p.reject();  // Fail drm.abc.
-      await init;
+      await expectAsync(init).toBeRejected();
       // A second query was not made.
       expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
       expect(drmEngine.initialized()).toBe(false);
@@ -1410,7 +1410,6 @@ describe('DrmEngine', () => {
       const p = new shaka.util.PublicPromise();
       requestMediaKeySystemAccessSpy.and.returnValue(p);
 
-      // This flow should still return "success" when DrmEngine is destroyed.
       const variants = Periods.getAllVariantsFrom(manifest.periods);
       const init = drmEngine.initForPlayback(
           variants, manifest.offlineSessionIds);
@@ -1422,7 +1421,7 @@ describe('DrmEngine', () => {
           'drm.abc', jasmine.any(Array));
       await drmEngine.destroy();
       p.resolve();  // Success for drm.abc.
-      await init;
+      await expectAsync(init).toBeRejected();
       // Due to the interruption, we never created MediaKeys.
       expect(drmEngine.keySystem()).toBe('');
       expect(drmEngine.initialized()).toBe(false);
@@ -1434,7 +1433,6 @@ describe('DrmEngine', () => {
       const p = new shaka.util.PublicPromise();
       mockMediaKeySystemAccess.createMediaKeys.and.returnValue(p);
 
-      // This flow should still return "success" when DrmEngine is destroyed.
       const variants = Periods.getAllVariantsFrom(manifest.periods);
       const init = drmEngine.initForPlayback(
           variants, manifest.offlineSessionIds);
@@ -1444,7 +1442,7 @@ describe('DrmEngine', () => {
       expect(mockMediaKeySystemAccess.createMediaKeys).toHaveBeenCalled();
       await drmEngine.destroy();
       p.resolve();  // Success for createMediaKeys().
-      await init;
+      await expectAsync(init).toBeRejected();
       // Due to the interruption, we never finished initialization.
       expect(drmEngine.initialized()).toBe(false);
     });
@@ -1455,8 +1453,7 @@ describe('DrmEngine', () => {
       const p1 = new shaka.util.PublicPromise();
       mockVideo.setMediaKeys.and.returnValue(p1);
 
-      // This chain should still return "success" when DrmEngine is destroyed.
-      const init = initAndAttach();
+      const init = expectAsync(initAndAttach()).toBeRejected();
 
       await shaka.test.Util.shortDelay();
       // We are now blocked on setMediaKeys:
@@ -1484,8 +1481,7 @@ describe('DrmEngine', () => {
       const p1 = new shaka.util.PublicPromise();
       mockVideo.setMediaKeys.and.returnValue(p1);
 
-      // This chain should still return "success" when DrmEngine is destroyed.
-      const init = initAndAttach();
+      const init = expectAsync(initAndAttach()).toBeRejected();
 
       await shaka.test.Util.shortDelay();
       // We are now blocked on setMediaKeys:
@@ -1520,7 +1516,6 @@ describe('DrmEngine', () => {
       const p = new shaka.util.PublicPromise();
       mockMediaKeys.setServerCertificate.and.returnValue(p);
 
-      // This chain should still return "success" when DrmEngine is destroyed.
       const init = initAndAttach();
 
       await shaka.test.Util.shortDelay();
@@ -1529,7 +1524,7 @@ describe('DrmEngine', () => {
       await drmEngine.destroy();
 
       p.reject();  // Fail setServerCertificate.
-      await init;
+      await expectAsync(init).toBeRejected();
     });
 
     it('interrupts successful calls to setServerCertificate', async () => {
@@ -1551,7 +1546,7 @@ describe('DrmEngine', () => {
       await drmEngine.destroy();
 
       p.resolve();  // Success for setServerCertificate.
-      await init;
+      await expectAsync(init).toBeRejected();
 
       // Due to the interruption, we never listened for 'encrypted' events.
       expect(mockVideo.on['encrypted']).toBe(undefined);
@@ -1572,7 +1567,7 @@ describe('DrmEngine', () => {
 
       await drmEngine.destroy();
 
-      p.reject();  // Fail generateRequest.
+      p.reject(new Error('Fail'));  // Fail generateRequest.
       await Util.shortDelay();  // Wait for any delayed errors.
       // onError is a failure by default.
     });
@@ -1632,7 +1627,10 @@ describe('DrmEngine', () => {
       await drmEngine.destroy();
 
       // Fail the license request.
-      p.reject();
+      p.reject(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.HTTP_ERROR));
       await Util.shortDelay();
     });
 
@@ -1656,7 +1654,7 @@ describe('DrmEngine', () => {
       await drmEngine.destroy();
 
       // Fail the update.
-      p.reject();
+      p.reject(new Error('Fail'));
       await Util.shortDelay();
     });
 
