@@ -71,7 +71,7 @@ const CRITICAL_RESOURCES = [
   '../dist/demo.css',
 
   // These files are required for the demo to include MDL.
-  'https://code.getmdl.io/1.3.0/material.min.js',
+  '../node_modules/material-design-lite/dist/material.min.js',
 
   // MDL modal dialogs are enabled by including these:
   '../node_modules/dialog-polyfill/dialog-polyfill.js',
