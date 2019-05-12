@@ -49,7 +49,6 @@ class ShakaDemoCustom {
     this.assetCards_ = [];
     this.savedList_ = document.createElement('div');
     container.appendChild(this.savedList_);
-    this.remakeSavedList_();
 
     // Add the "new" button, which shows the dialog.
     const addButtonContainer = document.createElement('div');
@@ -66,6 +65,14 @@ class ShakaDemoCustom {
     });
     document.addEventListener('shaka-main-offline-progress', () => {
       this.updateOfflineProgress_();
+    });
+    document.addEventListener('shaka-main-page-changed', () => {
+      if (!this.savedList_.childNodes.length &&
+          !container.classList.contains('hidden')) {
+        // Now that the page is showing, create the contents that we deferred
+        // until now.
+        this.remakeSavedList_();
+      }
     });
   }
 
