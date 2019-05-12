@@ -47,13 +47,20 @@ class ShakaDemoFront {
     this.makeMessage_();
 
     container.appendChild(this.assetCardDiv_);
-    this.remakeAssetCards_();
 
     document.addEventListener('shaka-main-selected-asset-changed', () => {
       this.updateSelected_();
     });
     document.addEventListener('shaka-main-offline-progress', () => {
       this.updateOfflineProgress_();
+    });
+    document.addEventListener('shaka-main-page-changed', () => {
+      if (!this.assetCardDiv_.childNodes.length &&
+          !container.classList.contains('hidden')) {
+        // Now that the page is showing, create the contents that we deferred
+        // until now.
+        this.remakeAssetCards_();
+      }
     });
   }
 

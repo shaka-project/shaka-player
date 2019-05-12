@@ -1073,12 +1073,17 @@ class ShakaDemoMain {
       this.showNode_(container);
       this.remakeHash();
 
+      // Dispatch an event so that a page can load any deferred content.
+      this.dispatchEventWithName_('shaka-main-page-changed');
+
       // Scroll so that the top of the tab is in view.
       container.scrollIntoView({behavior: 'smooth', block: 'start'});
     };
+
     button.addEventListener('click', switchPage);
     if (selected) {
-      switchPage();
+      // Defer this call to switchPage until the container is fully set up.
+      Promise.resolve().then(switchPage);
     }
 
     return /** @type {!HTMLDivElement} */ (container);

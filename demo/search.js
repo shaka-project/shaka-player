@@ -51,13 +51,19 @@ class ShakaDemoSearch {
     this.resultsDiv_ = document.createElement('div');
     container.appendChild(this.resultsDiv_);
 
-    this.remakeResultsDiv_();
-
     document.addEventListener('shaka-main-selected-asset-changed', () => {
       this.updateSelected_();
     });
     document.addEventListener('shaka-main-offline-progress', () => {
       this.updateOfflineProgress_();
+    });
+    document.addEventListener('shaka-main-page-changed', () => {
+      if (!this.resultsDiv_.childNodes.length &&
+          !container.classList.contains('hidden')) {
+        // Now that the page is showing, create the contents that we deferred
+        // until now.
+        this.remakeResultsDiv_();
+      }
     });
   }
 
