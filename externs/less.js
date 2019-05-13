@@ -16,7 +16,7 @@
  */
 
 /**
- * @fileoverview Externs for mux.js library.
+ * @fileoverview Externs for less.js library.
  * @externs
  */
 

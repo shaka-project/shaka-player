@@ -97,8 +97,7 @@ const OPTIONAL_RESOURCES = [
   'https://shaka-player-demo.appspot.com/assets/audioOnly.gif',
 
   // The mux.js transmuxing library for MPEG-2 TS and CEA support.
-  // TODO: Switch back to minified version (videojs/mux.js#173)
-  '../node_modules/mux.js/dist/mux.js',
+  '../node_modules/mux.js/dist/mux.min.js',
 
   // The cast sender SDK.
   'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js',
