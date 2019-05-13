@@ -26,6 +26,9 @@ class ShakaDemoMain {
     /** @private {HTMLMediaElement} */
     this.video_ = null;
 
+    /** @private {HTMLElement} */
+    this.container_ = null;
+
     /** @private {shaka.Player} */
     this.player_ = null;
 
@@ -125,6 +128,9 @@ class ShakaDemoMain {
     this.video_ =
         /** @type {!HTMLVideoElement} */(document.getElementById('video'));
     this.video_.poster = ShakaDemoMain.mainPoster_;
+
+    this.container_ = /** @type {!HTMLElement} */(
+      document.getElementsByClassName('video-container')[0]);
 
     if (navigator.serviceWorker) {
       console.debug('Registering service worker.');
@@ -870,9 +876,6 @@ class ShakaDemoMain {
       await this.drmConfiguration_(asset);
       this.controls_.getCastProxy().setAppData({'asset': asset});
 
-      const manifestUri = (asset.storedContent ?
-                           asset.storedContent.offlineUri :
-                           null) || asset.manifestUri;
       // Enable the correct set of controls before loading.
       if (this.nativeControlsEnabled_) {
         this.controls_.setEnabledShakaControls(false);
@@ -881,6 +884,23 @@ class ShakaDemoMain {
         this.controls_.setEnabledShakaControls(true);
         this.controls_.setEnabledNativeControls(false);
       }
+      // Also set text displayer, as appropriate.
+      // Make an alias for "this" so that it can be captured inside the
+      // non-arrow function below.
+      const self = this;
+      const textDisplayer = function() {
+        if (self.nativeControlsEnabled_) {
+          return new shaka.text.SimpleTextDisplayer(self.video_);
+        } else {
+          return new shaka.ui.TextDisplayer(self.video_, self.container_);
+        }
+      };
+      this.player_.configure('textDisplayFactory', textDisplayer);
+
+      // Finally, the asset can be loaded.
+      const manifestUri = (asset.storedContent ?
+                           asset.storedContent.offlineUri :
+                           null) || asset.manifestUri;
       await this.player_.load(manifestUri);
       if (this.player_.isAudioOnly()) {
         this.video_.poster = ShakaDemoMain.audioOnlyPoster_;
