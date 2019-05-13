@@ -236,12 +236,27 @@ class Less(object):
       return True
 
     lessc = shakaBuildHelpers.get_node_binary('less', 'lessc')
+    less_options = [
+      # Enable the "clean-CSS" plugin to minify the output and strip out comments.
+      '--clean-css',
+      # Output a source map of the original CSS/less files.
+      '--source-map=' + self.output + '.map',
+    ]
 
-    cmd_line = lessc + [self.main_source_file, self.output]
+    cmd_line = lessc + less_options + [self.main_source_file, self.output]
 
     if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
       logging.error('Externs generation failed')
       return False
+
+    # We need to prepend the license header to the compiled CSS.
+    with open(_get_source_path('build/license-header'), 'r') as f:
+      license_header = f.read()
+    with open(self.output, 'r') as f:
+      contents = f.read()
+    with open(self.output, 'w') as f:
+      f.write(license_header)
+      f.write(contents)
 
     return True
 
